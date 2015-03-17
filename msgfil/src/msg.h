@@ -24,10 +24,11 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 #define DEFTREECODE(SYM, NAME, TYPE, LENGTH) SYM,
 
-enum c_tree_code {
-  C_DUMMY_TREE_CODE = LAST_AND_UNUSED_TREE_CODE,
+enum c_tree_code
+{
+    C_DUMMY_TREE_CODE = LAST_AND_UNUSED_TREE_CODE,
 #include "msg.def"
-  LAST_C_TREE_CODE
+    LAST_C_TREE_CODE
 };
 
 #undef DEFTREECODE

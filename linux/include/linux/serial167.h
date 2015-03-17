@@ -6,57 +6,59 @@
  * Based on cyclades.h
  */
 
-struct cyclades_monitor {
-        unsigned long           int_count;
-        unsigned long           char_count;
-        unsigned long           char_max;
-        unsigned long           char_last;
+struct cyclades_monitor
+{
+    unsigned long           int_count;
+    unsigned long           char_count;
+    unsigned long           char_max;
+    unsigned long           char_last;
 };
 
 /*
  * This is our internal structure for each serial port's state.
- * 
+ *
  * Many fields are paralleled by the structure used by the serial_struct
  * structure.
  *
  * For definitions of the flags field, see tty.h
  */
 
-struct cyclades_port {
-	int                     magic;
-	int                     type;
-	int			card;
-	int			line;
-	int			flags; 		/* defined in tty.h */
-	struct tty_struct 	*tty;
-	int			read_status_mask;
-	int			timeout;
-	int			xmit_fifo_size;
-	int                     cor1,cor2,cor3,cor4,cor5,cor6,cor7;
-	int                     tbpr,tco,rbpr,rco;
-	int			ignore_status_mask;
-	int			close_delay;
-	int			IER; 	/* Interrupt Enable Register */
-	int			event;
-	unsigned long		last_active;
-	int			count;	/* # of fd on device */
-	int                     x_char; /* to be pushed out ASAP */
-	int                     x_break;
-	int			blocked_open; /* # of blocked opens */
-	long			session; /* Session of opening process */
-	long			pgrp; /* pgrp of opening process */
-	unsigned char 		*xmit_buf;
-	int			xmit_head;
-	int			xmit_tail;
-	int			xmit_cnt;
-        int                     default_threshold;
-        int                     default_timeout;
-	struct tq_struct	tqueue;
-	struct termios		normal_termios;
-	struct termios		callout_termios;
-	wait_queue_head_t	open_wait;
-	wait_queue_head_t	close_wait;
-        struct cyclades_monitor mon;
+struct cyclades_port
+{
+    int                     magic;
+    int                     type;
+    int			card;
+    int			line;
+    int			flags; 		/* defined in tty.h */
+    struct tty_struct 	*tty;
+    int			read_status_mask;
+    int			timeout;
+    int			xmit_fifo_size;
+    int                     cor1,cor2,cor3,cor4,cor5,cor6,cor7;
+    int                     tbpr,tco,rbpr,rco;
+    int			ignore_status_mask;
+    int			close_delay;
+    int			IER; 	/* Interrupt Enable Register */
+    int			event;
+    unsigned long		last_active;
+    int			count;	/* # of fd on device */
+    int                     x_char; /* to be pushed out ASAP */
+    int                     x_break;
+    int			blocked_open; /* # of blocked opens */
+    long			session; /* Session of opening process */
+    long			pgrp; /* pgrp of opening process */
+    unsigned char 		*xmit_buf;
+    int			xmit_head;
+    int			xmit_tail;
+    int			xmit_cnt;
+    int                     default_threshold;
+    int                     default_timeout;
+    struct tq_struct	tqueue;
+    struct termios		normal_termios;
+    struct termios		callout_termios;
+    wait_queue_head_t	open_wait;
+    wait_queue_head_t	close_wait;
+    struct cyclades_monitor mon;
 };
 
 #define CYCLADES_MAGIC  0x4359

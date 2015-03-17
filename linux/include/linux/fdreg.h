@@ -100,14 +100,14 @@
 #define FD_PARTID		0x18	/* part id ("extended" version cmd) */
 #define FD_SAVE			0x2e	/* save fdc regs for later restore */
 #define FD_DRIVESPEC		0x8e	/* drive specification: Access to the
-					 * 2 Mbps data transfer rate for tape
-					 * drives */
+* 2 Mbps data transfer rate for tape
+* drives */
 
 #define FD_RESTORE		0x4e    /* later restore */
 #define FD_POWERDOWN		0x27	/* configure FDC's powersave features */
 #define FD_FORMAT_N_WRITE	0xef    /* format and write in one go. */
 #define FD_OPTION		0x33	/* ISO format (which is a clean way to
-					 * pack more sectors on a track) */
+* pack more sectors on a track) */
 
 /* DMA commands */
 #define DMA_READ	0x46
@@ -116,7 +116,7 @@
 /* FDC version return types */
 #define FDC_NONE	0x00
 #define FDC_UNKNOWN	0x10	/* DO NOT USE THIS TYPE EXCEPT IF IDENTIFICATION
-				   FAILS EARLY */
+FAILS EARLY */
 #define FDC_8272A	0x20	/* Intel 8272a, NEC 765 */
 #define FDC_765ED	0x30	/* Non-Intel 1MB-compatible FDC, can't detect */
 #define FDC_82072	0x40	/* Intel 82072; 8272a + FIFO + DUMPREGS */
@@ -127,7 +127,7 @@
 #define FDC_82078	0x60	/* 44pin 82078 or 64pin 82078SL */
 #define FDC_82078_1	0x61	/* 82078-1 (2Mbps fdc) */
 #define FDC_S82078B	0x62	/* S82078B (first seen on Adaptec AVA-2825 VLB
-				 * SCSI/EIDE/Floppy controller) */
+* SCSI/EIDE/Floppy controller) */
 #define FDC_87306	0x63	/* National Semiconductor PC 87306 */
 
 /*

@@ -4,21 +4,23 @@
 
 struct seq_operations;
 
-struct seq_file {
-	char *buf;
-	size_t size;
-	size_t from;
-	size_t count;
-	loff_t index;
-	struct semaphore sem;
-	struct seq_operations *op;
+struct seq_file
+{
+    char *buf;
+    size_t size;
+    size_t from;
+    size_t count;
+    loff_t index;
+    struct semaphore sem;
+    struct seq_operations *op;
 };
 
-struct seq_operations {
-	void * (*start) (struct seq_file *m, loff_t *pos);
-	void (*stop) (struct seq_file *m, void *v);
-	void * (*next) (struct seq_file *m, void *v, loff_t *pos);
-	int (*show) (struct seq_file *m, void *v);
+struct seq_operations
+{
+    void * (*start) (struct seq_file *m, loff_t *pos);
+    void (*stop) (struct seq_file *m, void *v);
+    void * (*next) (struct seq_file *m, void *v, loff_t *pos);
+    int (*show) (struct seq_file *m, void *v);
 };
 
 int seq_open(struct file *, struct seq_operations *);
@@ -29,27 +31,29 @@ int seq_escape(struct seq_file *, const char *, const char *);
 
 static inline int seq_putc(struct seq_file *m, char c)
 {
-	if (m->count < m->size) {
-		m->buf[m->count++] = c;
-		return 0;
-	}
-	return -1;
+    if (m->count < m->size)
+    {
+        m->buf[m->count++] = c;
+        return 0;
+    }
+    return -1;
 }
 
 static inline int seq_puts(struct seq_file *m, const char *s)
 {
-	int len = strlen(s);
-	if (m->count + len < m->size) {
-		memcpy(m->buf + m->count, s, len);
-		m->count += len;
-		return 0;
-	}
-	m->count = m->size;
-	return -1;
+    int len = strlen(s);
+    if (m->count + len < m->size)
+    {
+        memcpy(m->buf + m->count, s, len);
+        m->count += len;
+        return 0;
+    }
+    m->count = m->size;
+    return -1;
 }
 
 int seq_printf(struct seq_file *, const char *, ...)
-	__attribute__ ((format (printf,2,3)));
+__attribute__ ((format (printf,2,3)));
 
 #endif
 #endif

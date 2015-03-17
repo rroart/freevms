@@ -28,78 +28,85 @@
 #define IPT_TABLE_MAXNAMELEN 32
 
 /* Yes, Virginia, you have to zero the padding. */
-struct ipt_ip {
-	/* Source and destination IP addr */
-	struct in_addr src, dst;
-	/* Mask for src and dest IP addr */
-	struct in_addr smsk, dmsk;
-	char iniface[IFNAMSIZ], outiface[IFNAMSIZ];
-	unsigned char iniface_mask[IFNAMSIZ], outiface_mask[IFNAMSIZ];
+struct ipt_ip
+{
+    /* Source and destination IP addr */
+    struct in_addr src, dst;
+    /* Mask for src and dest IP addr */
+    struct in_addr smsk, dmsk;
+    char iniface[IFNAMSIZ], outiface[IFNAMSIZ];
+    unsigned char iniface_mask[IFNAMSIZ], outiface_mask[IFNAMSIZ];
 
-	/* Protocol, 0 = ANY */
-	u_int16_t proto;
+    /* Protocol, 0 = ANY */
+    u_int16_t proto;
 
-	/* Flags word */
-	u_int8_t flags;
-	/* Inverse flags */
-	u_int8_t invflags;
+    /* Flags word */
+    u_int8_t flags;
+    /* Inverse flags */
+    u_int8_t invflags;
 };
 
 struct ipt_entry_match
 {
-	union {
-		struct {
-			u_int16_t match_size;
+    union
+    {
+        struct
+        {
+            u_int16_t match_size;
 
-			/* Used by userspace */
-			char name[IPT_FUNCTION_MAXNAMELEN];
-		} user;
-		struct {
-			u_int16_t match_size;
+            /* Used by userspace */
+            char name[IPT_FUNCTION_MAXNAMELEN];
+        } user;
+        struct
+        {
+            u_int16_t match_size;
 
-			/* Used inside the kernel */
-			struct ipt_match *match;
-		} kernel;
+            /* Used inside the kernel */
+            struct ipt_match *match;
+        } kernel;
 
-		/* Total length */
-		u_int16_t match_size;
-	} u;
+        /* Total length */
+        u_int16_t match_size;
+    } u;
 
-	unsigned char data[0];
+    unsigned char data[0];
 };
 
 struct ipt_entry_target
 {
-	union {
-		struct {
-			u_int16_t target_size;
+    union
+    {
+        struct
+        {
+            u_int16_t target_size;
 
-			/* Used by userspace */
-			char name[IPT_FUNCTION_MAXNAMELEN];
-		} user;
-		struct {
-			u_int16_t target_size;
+            /* Used by userspace */
+            char name[IPT_FUNCTION_MAXNAMELEN];
+        } user;
+        struct
+        {
+            u_int16_t target_size;
 
-			/* Used inside the kernel */
-			struct ipt_target *target;
-		} kernel;
+            /* Used inside the kernel */
+            struct ipt_target *target;
+        } kernel;
 
-		/* Total length */
-		u_int16_t target_size;
-	} u;
+        /* Total length */
+        u_int16_t target_size;
+    } u;
 
-	unsigned char data[0];
+    unsigned char data[0];
 };
 
 struct ipt_standard_target
 {
-	struct ipt_entry_target target;
-	int verdict;
+    struct ipt_entry_target target;
+    int verdict;
 };
 
 struct ipt_counters
 {
-	u_int64_t pcnt, bcnt;			/* Packet and byte counters */
+    u_int64_t pcnt, bcnt;			/* Packet and byte counters */
 };
 
 /* Values for "flag" field in struct ipt_ip (general ip structure). */
@@ -121,24 +128,24 @@ struct ipt_counters
    stuff 3) the target to perform if the rule matches */
 struct ipt_entry
 {
-	struct ipt_ip ip;
+    struct ipt_ip ip;
 
-	/* Mark with fields that we care about. */
-	unsigned int nfcache;
+    /* Mark with fields that we care about. */
+    unsigned int nfcache;
 
-	/* Size of ipt_entry + matches */
-	u_int16_t target_offset;
-	/* Size of ipt_entry + matches + target */
-	u_int16_t next_offset;
+    /* Size of ipt_entry + matches */
+    u_int16_t target_offset;
+    /* Size of ipt_entry + matches + target */
+    u_int16_t next_offset;
 
-	/* Back pointer */
-	unsigned int comefrom;
+    /* Back pointer */
+    unsigned int comefrom;
 
-	/* Packet and byte counters. */
-	struct ipt_counters counters;
+    /* Packet and byte counters. */
+    struct ipt_counters counters;
 
-	/* The matches (if any), then the target. */
-	unsigned char elems[0];
+    /* The matches (if any), then the target. */
+    unsigned char elems[0];
 };
 
 /*
@@ -164,12 +171,12 @@ struct ipt_entry
 /* TCP matching stuff */
 struct ipt_tcp
 {
-	u_int16_t spts[2];			/* Source port range. */
-	u_int16_t dpts[2];			/* Destination port range. */
-	u_int8_t option;			/* TCP Option iff non-zero*/
-	u_int8_t flg_mask;			/* TCP flags mask byte */
-	u_int8_t flg_cmp;			/* TCP flags compare byte */
-	u_int8_t invflags;			/* Inverse flags */
+    u_int16_t spts[2];			/* Source port range. */
+    u_int16_t dpts[2];			/* Destination port range. */
+    u_int8_t option;			/* TCP Option iff non-zero*/
+    u_int8_t flg_mask;			/* TCP flags mask byte */
+    u_int8_t flg_cmp;			/* TCP flags compare byte */
+    u_int8_t invflags;			/* Inverse flags */
 };
 
 /* Values for "inv" field in struct ipt_tcp. */
@@ -182,9 +189,9 @@ struct ipt_tcp
 /* UDP matching stuff */
 struct ipt_udp
 {
-	u_int16_t spts[2];			/* Source port range. */
-	u_int16_t dpts[2];			/* Destination port range. */
-	u_int8_t invflags;			/* Inverse flags */
+    u_int16_t spts[2];			/* Source port range. */
+    u_int16_t dpts[2];			/* Destination port range. */
+    u_int8_t invflags;			/* Inverse flags */
 };
 
 /* Values for "invflags" field in struct ipt_udp. */
@@ -195,9 +202,9 @@ struct ipt_udp
 /* ICMP matching stuff */
 struct ipt_icmp
 {
-	u_int8_t type;				/* type to match */
-	u_int8_t code[2];			/* range of code */
-	u_int8_t invflags;			/* Inverse flags */
+    u_int8_t type;				/* type to match */
+    u_int8_t code[2];			/* range of code */
+    u_int8_t invflags;			/* Inverse flags */
 };
 
 /* Values for "inv" field for struct ipt_icmp. */
@@ -206,81 +213,81 @@ struct ipt_icmp
 /* The argument to IPT_SO_GET_INFO */
 struct ipt_getinfo
 {
-	/* Which table: caller fills this in. */
-	char name[IPT_TABLE_MAXNAMELEN];
+    /* Which table: caller fills this in. */
+    char name[IPT_TABLE_MAXNAMELEN];
 
-	/* Kernel fills these in. */
-	/* Which hook entry points are valid: bitmask */
-	unsigned int valid_hooks;
+    /* Kernel fills these in. */
+    /* Which hook entry points are valid: bitmask */
+    unsigned int valid_hooks;
 
-	/* Hook entry points: one per netfilter hook. */
-	unsigned int hook_entry[NF_IP_NUMHOOKS];
+    /* Hook entry points: one per netfilter hook. */
+    unsigned int hook_entry[NF_IP_NUMHOOKS];
 
-	/* Underflow points. */
-	unsigned int underflow[NF_IP_NUMHOOKS];
+    /* Underflow points. */
+    unsigned int underflow[NF_IP_NUMHOOKS];
 
-	/* Number of entries */
-	unsigned int num_entries;
+    /* Number of entries */
+    unsigned int num_entries;
 
-	/* Size of entries. */
-	unsigned int size;
+    /* Size of entries. */
+    unsigned int size;
 };
 
 /* The argument to IPT_SO_SET_REPLACE. */
 struct ipt_replace
 {
-	/* Which table. */
-	char name[IPT_TABLE_MAXNAMELEN];
+    /* Which table. */
+    char name[IPT_TABLE_MAXNAMELEN];
 
-	/* Which hook entry points are valid: bitmask.  You can't
+    /* Which hook entry points are valid: bitmask.  You can't
            change this. */
-	unsigned int valid_hooks;
+    unsigned int valid_hooks;
 
-	/* Number of entries */
-	unsigned int num_entries;
+    /* Number of entries */
+    unsigned int num_entries;
 
-	/* Total size of new entries */
-	unsigned int size;
+    /* Total size of new entries */
+    unsigned int size;
 
-	/* Hook entry points. */
-	unsigned int hook_entry[NF_IP_NUMHOOKS];
+    /* Hook entry points. */
+    unsigned int hook_entry[NF_IP_NUMHOOKS];
 
-	/* Underflow points. */
-	unsigned int underflow[NF_IP_NUMHOOKS];
+    /* Underflow points. */
+    unsigned int underflow[NF_IP_NUMHOOKS];
 
-	/* Information about old entries: */
-	/* Number of counters (must be equal to current number of entries). */
-	unsigned int num_counters;
-	/* The old entries' counters. */
-	struct ipt_counters *counters;
+    /* Information about old entries: */
+    /* Number of counters (must be equal to current number of entries). */
+    unsigned int num_counters;
+    /* The old entries' counters. */
+    struct ipt_counters *counters;
 
-	/* The entries (hang off end: not really an array). */
-	struct ipt_entry entries[0];
+    /* The entries (hang off end: not really an array). */
+    struct ipt_entry entries[0];
 };
 
 /* The argument to IPT_SO_ADD_COUNTERS. */
 struct ipt_counters_info
 {
-	/* Which table. */
-	char name[IPT_TABLE_MAXNAMELEN];
+    /* Which table. */
+    char name[IPT_TABLE_MAXNAMELEN];
 
-	unsigned int num_counters;
+    unsigned int num_counters;
 
-	/* The counters (actually `number' of these). */
-	struct ipt_counters counters[0];
+    /* The counters (actually `number' of these). */
+    struct ipt_counters counters[0];
 };
 
 /* The argument to IPT_SO_GET_ENTRIES. */
 struct ipt_get_entries
 {
-	/* Which table: user fills this in. */
-	char name[IPT_TABLE_MAXNAMELEN];
+    /* Which table: user fills this in. */
+    char name[IPT_TABLE_MAXNAMELEN];
 
-	/* User fills this in: total entry size. */
-	unsigned int size;
+    /* User fills this in: total entry size. */
+    unsigned int size;
 
-	/* The entries. */
-	struct ipt_entry entrytable[0];
+    /* The entries. */
+    struct ipt_entry entrytable[0];
 };
 
 /* Standard return verdict, or do jump. */
@@ -292,7 +299,7 @@ struct ipt_get_entries
 static __inline__ struct ipt_entry_target *
 ipt_get_target(struct ipt_entry *e)
 {
-	return (void *)e + e->target_offset;
+    return (void *)e + e->target_offset;
 }
 
 /* fn returns 0 to continue iteration */
@@ -341,66 +348,66 @@ extern void ipt_init(void) __init;
 
 struct ipt_match
 {
-	struct list_head list;
+    struct list_head list;
 
-	const char name[IPT_FUNCTION_MAXNAMELEN];
+    const char name[IPT_FUNCTION_MAXNAMELEN];
 
-	/* Return true or false: return FALSE and set *hotdrop = 1 to
+    /* Return true or false: return FALSE and set *hotdrop = 1 to
            force immediate packet drop. */
-	int (*match)(const struct sk_buff *skb,
-		     const struct net_device *in,
-		     const struct net_device *out,
-		     const void *matchinfo,
-		     int offset,
-		     const void *hdr,
-		     u_int16_t datalen,
-		     int *hotdrop);
+    int (*match)(const struct sk_buff *skb,
+                 const struct net_device *in,
+                 const struct net_device *out,
+                 const void *matchinfo,
+                 int offset,
+                 const void *hdr,
+                 u_int16_t datalen,
+                 int *hotdrop);
 
-	/* Called when user tries to insert an entry of this type. */
-	/* Should return true or false. */
-	int (*checkentry)(const char *tablename,
-			  const struct ipt_ip *ip,
-			  void *matchinfo,
-			  unsigned int matchinfosize,
-			  unsigned int hook_mask);
+    /* Called when user tries to insert an entry of this type. */
+    /* Should return true or false. */
+    int (*checkentry)(const char *tablename,
+                      const struct ipt_ip *ip,
+                      void *matchinfo,
+                      unsigned int matchinfosize,
+                      unsigned int hook_mask);
 
-	/* Called when entry of this type deleted. */
-	void (*destroy)(void *matchinfo, unsigned int matchinfosize);
+    /* Called when entry of this type deleted. */
+    void (*destroy)(void *matchinfo, unsigned int matchinfosize);
 
-	/* Set this to THIS_MODULE if you are a module, otherwise NULL */
-	struct module *me;
+    /* Set this to THIS_MODULE if you are a module, otherwise NULL */
+    struct module *me;
 };
 
 /* Registration hooks for targets. */
 struct ipt_target
 {
-	struct list_head list;
+    struct list_head list;
 
-	const char name[IPT_FUNCTION_MAXNAMELEN];
+    const char name[IPT_FUNCTION_MAXNAMELEN];
 
-	/* Returns verdict. */
-	unsigned int (*target)(struct sk_buff **pskb,
-			       unsigned int hooknum,
-			       const struct net_device *in,
-			       const struct net_device *out,
-			       const void *targinfo,
-			       void *userdata);
+    /* Returns verdict. */
+    unsigned int (*target)(struct sk_buff **pskb,
+                           unsigned int hooknum,
+                           const struct net_device *in,
+                           const struct net_device *out,
+                           const void *targinfo,
+                           void *userdata);
 
-	/* Called when user tries to insert an entry of this type:
+    /* Called when user tries to insert an entry of this type:
            hook_mask is a bitmask of hooks from which it can be
            called. */
-	/* Should return true or false. */
-	int (*checkentry)(const char *tablename,
-			  const struct ipt_entry *e,
-			  void *targinfo,
-			  unsigned int targinfosize,
-			  unsigned int hook_mask);
+    /* Should return true or false. */
+    int (*checkentry)(const char *tablename,
+                      const struct ipt_entry *e,
+                      void *targinfo,
+                      unsigned int targinfosize,
+                      unsigned int hook_mask);
 
-	/* Called when entry of this type deleted. */
-	void (*destroy)(void *targinfo, unsigned int targinfosize);
+    /* Called when entry of this type deleted. */
+    void (*destroy)(void *targinfo, unsigned int targinfosize);
 
-	/* Set this to THIS_MODULE if you are a module, otherwise NULL */
-	struct module *me;
+    /* Set this to THIS_MODULE if you are a module, otherwise NULL */
+    struct module *me;
 };
 
 extern int ipt_register_target(struct ipt_target *target);
@@ -412,35 +419,35 @@ extern void ipt_unregister_match(struct ipt_match *match);
 /* Furniture shopping... */
 struct ipt_table
 {
-	struct list_head list;
+    struct list_head list;
 
-	/* A unique name... */
-	char name[IPT_TABLE_MAXNAMELEN];
+    /* A unique name... */
+    char name[IPT_TABLE_MAXNAMELEN];
 
-	/* Seed table: copied in register_table */
-	struct ipt_replace *table;
+    /* Seed table: copied in register_table */
+    struct ipt_replace *table;
 
-	/* What hooks you will enter on */
-	unsigned int valid_hooks;
+    /* What hooks you will enter on */
+    unsigned int valid_hooks;
 
-	/* Lock for the curtain */
-	rwlock_t lock;
+    /* Lock for the curtain */
+    rwlock_t lock;
 
-	/* Man behind the curtain... */
-	struct ipt_table_info *private;
+    /* Man behind the curtain... */
+    struct ipt_table_info *private;
 
-	/* Set this to THIS_MODULE if you are a module, otherwise NULL */
-	struct module *me;
+    /* Set this to THIS_MODULE if you are a module, otherwise NULL */
+    struct module *me;
 };
 
 extern int ipt_register_table(struct ipt_table *table);
 extern void ipt_unregister_table(struct ipt_table *table);
 extern unsigned int ipt_do_table(struct sk_buff **pskb,
-				 unsigned int hook,
-				 const struct net_device *in,
-				 const struct net_device *out,
-				 struct ipt_table *table,
-				 void *userdata);
+                                 unsigned int hook,
+                                 const struct net_device *in,
+                                 const struct net_device *out,
+                                 struct ipt_table *table,
+                                 void *userdata);
 
 #define IPT_ALIGN(s) (((s) + (__alignof__(struct ipt_entry)-1)) & ~(__alignof__(struct ipt_entry)-1))
 #endif /*__KERNEL__*/

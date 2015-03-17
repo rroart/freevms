@@ -26,16 +26,17 @@ typedef unsigned short	apm_eventinfo_t;
 #define APM_CS_16	(APM_CS + 8)
 #define APM_DS		(APM_CS_16 + 8)
 
-struct apm_bios_info {
-	unsigned short	version;
-	unsigned short	cseg;
-	unsigned long	offset;
-	unsigned short	cseg_16;
-	unsigned short	dseg;
-	unsigned short	flags;
-	unsigned short	cseg_len;
-	unsigned short	cseg_16_len;
-	unsigned short	dseg_len;
+struct apm_bios_info
+{
+    unsigned short	version;
+    unsigned short	cseg;
+    unsigned long	offset;
+    unsigned short	cseg_16;
+    unsigned short	dseg;
+    unsigned short	flags;
+    unsigned short	cseg_len;
+    unsigned short	cseg_16_len;
+    unsigned short	dseg_len;
 };
 
 /* Results of APM Installation Check */
@@ -48,14 +49,15 @@ struct apm_bios_info {
 /*
  * Data for APM that is persistant across module unload/load
  */
-struct apm_info {
-	struct apm_bios_info	bios;
-	unsigned short		connection_version;
-	int			get_power_status_broken;
-	int			get_power_status_swabinminutes;
-	int			allow_ints;
-	int			realmode_power_off;
-	int			disabled;
+struct apm_info
+{
+    struct apm_bios_info	bios;
+    unsigned short		connection_version;
+    int			get_power_status_broken;
+    int			get_power_status_swabinminutes;
+    int			allow_ints;
+    int			realmode_power_off;
+    int			disabled;
 };
 
 /*

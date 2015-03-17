@@ -27,32 +27,32 @@
 #endif
 
 int   scs_std$accept ( void (*msgadr_p)( unsigned int msg_length, void *msg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
-	void (*dgadr_p)( unsigned int dg_status, unsigned int dg_length, void *dg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
-	void (*erradr_p)( unsigned int err_status, unsigned int reason, struct _cdt *cdt_p, struct _pdt *pdt_p),
-	int initcr,
-	int minscr,
-	int initdg,
-	int blkpri,
-	void *condat_p,
-	void *auxstr_p,
-	void (*badrsp_p)( __unknown_params ),
-	void (*movadr_p)( unsigned int status, unsigned int move_status, struct _cdt *cdt_p, struct _pdt *pdt_p ),
-	int load_rating,
-	void (*complete_p)( unsigned int accept_status, void *unknown_1, void *unknown_2, struct _cdt *cdt_p,
-	                    struct _pdt *pdt_p, int accept_parameter ),
-	struct _cdt *cdt_p,
-	int accept_parameter
-		       );
+                       void (*dgadr_p)( unsigned int dg_status, unsigned int dg_length, void *dg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
+                       void (*erradr_p)( unsigned int err_status, unsigned int reason, struct _cdt *cdt_p, struct _pdt *pdt_p),
+                       int initcr,
+                       int minscr,
+                       int initdg,
+                       int blkpri,
+                       void *condat_p,
+                       void *auxstr_p,
+                       void (*badrsp_p)( __unknown_params ),
+                       void (*movadr_p)( unsigned int status, unsigned int move_status, struct _cdt *cdt_p, struct _pdt *pdt_p ),
+                       int load_rating,
+                       void (*complete_p)( unsigned int accept_status, void *unknown_1, void *unknown_2, struct _cdt *cdt_p,
+                               struct _pdt *pdt_p, int accept_parameter ),
+                       struct _cdt *cdt_p,
+                       int accept_parameter
+                     );
 
 int   scs_std$allocdg ( struct _pdt *pdt_p, struct _cdrp *cdrp_p );
 
 
 int   scs_std$alloc_msgbuf ( struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	      void (*ravail_p)( unsigned int stall_return_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
+                             void (*ravail_p)( unsigned int stall_return_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
 
 
 int   scs_std$alloc_rspid ( struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	     void (*ravail_p)( unsigned int stall_return_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
+                            void (*ravail_p)( unsigned int stall_return_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
 
 
 void  scs_std$cancel_mbx ( struct _sppb *sppb );
@@ -74,28 +74,28 @@ int   scs_std$config_sys ( void *scssystemid_p, struct _sbo *sbo_p, struct _sb *
 
 
 int   scs_std$connect ( void (*msgadr_p)( unsigned int msg_length, void *msg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
-	 void (*dgadr_p)( unsigned int dg_status, unsigned int dg_length, void *dg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
-	 void (*erradr_p)( unsigned int err_status, unsigned int reason, struct _cdt *cdt_p, struct _pdt *pdt_p),
-	 void *rsysid_p,
-	 void *rstadr_p,
-	 void *rprnam_p,
-	 void *lprnam_p,
-	 int initcr,
-	 int minscr,
-	 int initdg,
-	 int blkpri,
-	 void *condat_p,
-	 void *auxstr_p,
-	 void (*badrsp_p)( __unknown_params ),
-	 void (*movadr_p)( unsigned int status, unsigned int move_status, struct _cdt *cdt_p, struct _pdt *pdt_p ),
-	 int load_rating,
-	 int (*req_fast_recvmsg_p)( int msg_length, void *msg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp **cdrp_p ),
-	 void (*fast_recvmsg_pm_p)( void *msg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ),
-	 void (*change_aff_p)( struct _sb *sb_p, struct _pb *pb_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
-	 void (*complete_p)( unsigned int connect_status, unsigned int reject_reason, void *msg_buf_p,
-	                     struct _cdt *cdt_p, struct _pdt *pdt_p, int connect_parameter ),
-	 int connect_parameter
-			);
+                        void (*dgadr_p)( unsigned int dg_status, unsigned int dg_length, void *dg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
+                        void (*erradr_p)( unsigned int err_status, unsigned int reason, struct _cdt *cdt_p, struct _pdt *pdt_p),
+                        void *rsysid_p,
+                        void *rstadr_p,
+                        void *rprnam_p,
+                        void *lprnam_p,
+                        int initcr,
+                        int minscr,
+                        int initdg,
+                        int blkpri,
+                        void *condat_p,
+                        void *auxstr_p,
+                        void (*badrsp_p)( __unknown_params ),
+                        void (*movadr_p)( unsigned int status, unsigned int move_status, struct _cdt *cdt_p, struct _pdt *pdt_p ),
+                        int load_rating,
+                        int (*req_fast_recvmsg_p)( int msg_length, void *msg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp **cdrp_p ),
+                        void (*fast_recvmsg_pm_p)( void *msg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ),
+                        void (*change_aff_p)( struct _sb *sb_p, struct _pb *pb_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
+                        void (*complete_p)( unsigned int connect_status, unsigned int reject_reason, void *msg_buf_p,
+                                struct _cdt *cdt_p, struct _pdt *pdt_p, int connect_parameter ),
+                        int connect_parameter
+                      );
 
 
 void  scs_std$credit_avail( struct _cdt *cdt_p, struct _pdt *pdt_p );
@@ -116,10 +116,10 @@ int   scs_std$deall_rspid ( struct _cdrp *cdrp_p );
 void  scs_std$dealrgmsg ( void *msg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p );
 
 
-int   scs_std$disconnect ( int distyp, struct _cdt *cdt_p, 
-	    void (*complete_p)( unsigned int disconnect_status, void *unknown_1, void *unknown_2, void *unknown_3,
-					       void *unknown_4, int disconnect_parameter ),
-	    int disconnect_param );
+int   scs_std$disconnect ( int distyp, struct _cdt *cdt_p,
+                           void (*complete_p)( unsigned int disconnect_status, void *unknown_1, void *unknown_2, void *unknown_3,
+                                   void *unknown_4, int disconnect_parameter ),
+                           int disconnect_param );
 
 
 int   scs_std$fast_recvmsg_chk_res ( struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p );
@@ -135,7 +135,7 @@ void  scs_std$fast_sendmsg_ass_res_pm ( void *svapte_boff_bcnt_p, struct _pdt *p
 
 
 void  scs_std$fast_sendmsg_pm ( int msg_buf_len, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	         void (*complete)( __unknown_params ) );
+                                void (*complete)( __unknown_params ) );
 
 
 int   scs_std$fast_sendmsg_request ( void *svapte_boff_bcnt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p );
@@ -154,25 +154,25 @@ int   scs_std$initialize_pdt( struct _pdt *pdt_p );
 
 
 int   scs_std$listen ( void (*msgadr_p)(void *msg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
-	void (*erradr_p)( unsigned int err_status, unsigned int reason, struct _cdt *cdt_p, struct _pdt *pdt_p),
-	void *lprnam_p,
-	void *prinfo_p,
-	struct _cdt **cdt_p );
+                       void (*erradr_p)( unsigned int err_status, unsigned int reason, struct _cdt *cdt_p, struct _pdt *pdt_p),
+                       void *lprnam_p,
+                       void *prinfo_p,
+                       struct _cdt **cdt_p );
 
 
 void  scs_std$lkp_msgwait ( void (*action)( void *action_param, struct _cdt *cdt_p, struct _cdrp *cdrp_p ),
-	     void *action_param, struct _cdt *cdt_p );
+                            void *action_param, struct _cdt *cdt_p );
 
 
 void  scs_std$lkp_pb_pdt ( void (*action)( struct _sb *sb_p, struct _pb *pb_p, struct _pdt *pdt_p ), struct _pdt *pdt_p );
 
 
 void  scs_std$lkp_rdtcdrp ( void (*action)( void *action_param, struct _cdt *cdt_p, struct _cdrp *cdrp_p ),
-	     void *action_param, struct _cdt *cdt_p );
+                            void *action_param, struct _cdt *cdt_p );
 
 
 void  scs_std$lkp_rdtwait ( void (*action)( void *action_param, struct _cdt *cdt_p, struct _cdrp *cdrp_p ),
-	     void *action_param, struct _cdt *cdt_p );
+                            void *action_param, struct _cdt *cdt_p );
 
 
 int   scs_std$map ( void *svapte_boff_bcnt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p,
@@ -204,9 +204,9 @@ int   scs_std$poll_mode ( int enable_disable, struct _sppb *sppb_p, void *scssys
 
 
 int   scs_std$poll_proc ( int (*notification_p)( unsigned int context_data, void *sysap_name_p,
-		   void *scssystemid_p, void *process_info_p,
-		   void *node_name_p ),
-	   unsigned int context_data, void *sysap_name_p, struct _sppb **sppb_p );
+                          void *scssystemid_p, void *process_info_p,
+                          void *node_name_p ),
+                          unsigned int context_data, void *sysap_name_p, struct _sppb **sppb_p );
 
 
 void  scs_std$port_init_done( struct _pdt *pdt_p );
@@ -219,31 +219,31 @@ int   scs_std$queuemdgs ( int buffer_count, struct _cdt *cdt_p, struct _pdt *pdt
 
 
 int   scs_std$rchmsgbuf ( struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	   void (*ravail_p)( unsigned int stall_return_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
+                          void (*ravail_p)( unsigned int stall_return_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
 
 
 int   scs_std$rclmsgbuf ( struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	   void (*ravail_p)( unsigned int stall_return_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
+                          void (*ravail_p)( unsigned int stall_return_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
 
 
 void  scs_std$recyl_rspid ( struct _cdrp *cdrp_p );
 
 
 int   scs_std$reject ( int rejtyp, struct _cdt *cdt_p,
-	void (*complete_p)( unsigned int reject_status, void *unknown_1, void *unknown_2, void *unknown_3,
-	                    void *unknown_4, int reject_parameter ),
-	int reject_parameter );
+                       void (*complete_p)( unsigned int reject_status, void *unknown_1, void *unknown_2, void *unknown_3,
+                               void *unknown_4, int reject_parameter ),
+                       int reject_parameter );
 
 
 void  scs_std$repossess_cdrp ( struct _pdt *pdt_p, struct _cdrp *cdrp_p );
 
 
 int   scs_std$reqdata ( struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	 void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
+                        void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
 
 
 int   scs_std$request_data ( struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	      void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
+                             void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
 
 
 void  scs_std$restore_credit ( struct _pdt *pdt_p, struct _cdrp *cdrp_p );
@@ -256,29 +256,29 @@ void  scs_std$resume_thread( unsigned int resume_status, struct _cdrp *cdrp_p );
 
 
 int   scs_std$senddata ( struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	  void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
+                         void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
 
 
 int   scs_std$senddata_wmsg ( struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	       void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
+                              void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
 
 
 int   scs_std$senddg ( int disposition_flag, int dg_msg_length, struct _cdrp *cdrp_p );
 
 
 int   scs_std$sendmsg ( int msg_buf_len, struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	 void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
+                        void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
 
 
 int   scs_std$sendrgdg ( unsigned int disposition_flag, unsigned int dg_msg_length, void *dg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p );
 
 
 int   scs_std$send_data ( struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	   void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
+                          void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
 
 
 int   scs_std$send_data_wmsg ( int msg_buf_len, struct _pdt *pdt_p, struct _cdrp *cdrp_p,
-	        void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
+                               void (*complete)( unsigned int completion_status, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p ) );
 
 
 int   scs_std$set_load_rating ( int rating, struct _cdt *cdt_p );
@@ -302,4 +302,4 @@ void  scs_std$unstallucb ( struct _ucb *ucb_p );
 
 void  scs_std$vc_flush( struct _pb *pb_p, struct _pdt *pdt_p );
 
-#endif 
+#endif

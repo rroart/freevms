@@ -116,48 +116,50 @@
 #define		UAI$M_MIGRATEPWD		0x400000
 #define		UAI$M_VMSAUTH			0x800000
 #define		UAI$M_DISPWDSYNCH		0x1000000
-	
-struct _flags {
-  unsigned uai$v_disctly		: 1;
-  unsigned uai$v_defcli			: 1;
-  unsigned uai$v_lockpwd		: 1;
-  unsigned uai$v_restricted		: 1;
-  unsigned uai$v_disacnt		: 1;
-  unsigned uai$v_diswelcom		: 1;
-  unsigned uai$v_dismail		: 1;
-  unsigned uai$v_nomail			: 1;
-  unsigned uai$v_genpwd			: 1;
-  unsigned uai$v_pwd_expired		: 1;
-  unsigned uai$v_pwd2_expired		: 1;
-  unsigned uai$v_audit			: 1;
-  unsigned uai$v_disreport		: 1;
-  unsigned uai$v_disreconnect		: 1;
-  unsigned uai$v_autologin		: 1;
-  unsigned uai$v_disforce_pwd_change	: 1;
-  unsigned uai$v_captive		: 1;
-  unsigned uai$v_disimage		: 1;
-  unsigned uai$v_dispwddic		: 1;
-  unsigned uai$v_dispwdhis		: 1;
-  unsigned uai$v_defclsval		: 1;
-  unsigned uai$v_extauth		: 1;
-  unsigned uai$v_migratepwd		: 1;
-  unsigned uai$v_vmsauth		: 1;
-  unsigned uai$v_dispwdsynch		: 1;
-  unsigned uai$v_fill_59_		: 7;
+
+struct _flags
+{
+    unsigned uai$v_disctly		: 1;
+    unsigned uai$v_defcli			: 1;
+    unsigned uai$v_lockpwd		: 1;
+    unsigned uai$v_restricted		: 1;
+    unsigned uai$v_disacnt		: 1;
+    unsigned uai$v_diswelcom		: 1;
+    unsigned uai$v_dismail		: 1;
+    unsigned uai$v_nomail			: 1;
+    unsigned uai$v_genpwd			: 1;
+    unsigned uai$v_pwd_expired		: 1;
+    unsigned uai$v_pwd2_expired		: 1;
+    unsigned uai$v_audit			: 1;
+    unsigned uai$v_disreport		: 1;
+    unsigned uai$v_disreconnect		: 1;
+    unsigned uai$v_autologin		: 1;
+    unsigned uai$v_disforce_pwd_change	: 1;
+    unsigned uai$v_captive		: 1;
+    unsigned uai$v_disimage		: 1;
+    unsigned uai$v_dispwddic		: 1;
+    unsigned uai$v_dispwdhis		: 1;
+    unsigned uai$v_defclsval		: 1;
+    unsigned uai$v_extauth		: 1;
+    unsigned uai$v_migratepwd		: 1;
+    unsigned uai$v_vmsauth		: 1;
+    unsigned uai$v_dispwdsynch		: 1;
+    unsigned uai$v_fill_59_		: 7;
 };
 
-struct _primedays {
-  unsigned uai$v_monday		: 1;
-  unsigned uai$v_tuesday	: 1;
-  unsigned uai$v_wednesday	: 1;
-  unsigned uai$v_thursday	: 1;
-  unsigned uai$v_friday		: 1;
-  unsigned uai$v_saturday	: 1;
-  unsigned uai$v_sunday		: 1;
-  unsigned uai$v_fill_60_	: 1;
+struct _primedays
+{
+    unsigned uai$v_monday		: 1;
+    unsigned uai$v_tuesday	: 1;
+    unsigned uai$v_wednesday	: 1;
+    unsigned uai$v_thursday	: 1;
+    unsigned uai$v_friday		: 1;
+    unsigned uai$v_saturday	: 1;
+    unsigned uai$v_sunday		: 1;
+    unsigned uai$v_fill_60_	: 1;
 };
 
-#define		UAI$V_DISCTLY			0	
+#define		UAI$V_DISCTLY			0
 #define		UAI$V_DEFCLI			1
 #define		UAI$V_LOCKPWD			2
 #define		UAI$V_RESTRICTED		3

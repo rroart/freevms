@@ -36,35 +36,37 @@
  *
  * (Would like to call this struct ``if'', but C isn't PL/1.)
  */
-struct ifnet {
-	char	*if_name;		/* name, e.g. ``en'' or ``lo'' */
-	short	if_unit;		/* sub-unit for lower level driver */
-	short	if_mtu;			/* maximum transmission unit */
-	short	if_flags;		/* up/down, broadcast, etc. */
-	short	if_timer;		/* time 'til if_watchdog called */
-	int	if_metric;		/* routing metric (external only) */
-	struct	ifaddr *if_addrlist;	/* linked list of addresses per if */
-	struct	ifqueue {
-		struct	mbuf *ifq_head;
-		struct	mbuf *ifq_tail;
-		int	ifq_len;
-		int	ifq_maxlen;
-		int	ifq_drops;
-	} if_snd;			/* output queue */
-/* procedure handles */
-	int	(*if_init)();		/* init routine */
-	int	(*if_output)();		/* output routine */
-	int	(*if_ioctl)();		/* ioctl routine */
-	int	(*if_reset)();		/* bus reset routine */
-	int	(*if_watchdog)();	/* timer routine */
-/* generic interface statistics */
-	int	if_ipackets;		/* packets received on interface */
-	int	if_ierrors;		/* input errors on interface */
-	int	if_opackets;		/* packets sent on interface */
-	int	if_oerrors;		/* output errors on interface */
-	int	if_collisions;		/* collisions on csma interfaces */
-/* end statistics */
-	struct	ifnet *if_next;
+struct ifnet
+{
+    char	*if_name;		/* name, e.g. ``en'' or ``lo'' */
+    short	if_unit;		/* sub-unit for lower level driver */
+    short	if_mtu;			/* maximum transmission unit */
+    short	if_flags;		/* up/down, broadcast, etc. */
+    short	if_timer;		/* time 'til if_watchdog called */
+    int	if_metric;		/* routing metric (external only) */
+    struct	ifaddr *if_addrlist;	/* linked list of addresses per if */
+    struct	ifqueue
+    {
+        struct	mbuf *ifq_head;
+        struct	mbuf *ifq_tail;
+        int	ifq_len;
+        int	ifq_maxlen;
+        int	ifq_drops;
+    } if_snd;			/* output queue */
+    /* procedure handles */
+    int	(*if_init)();		/* init routine */
+    int	(*if_output)();		/* output routine */
+    int	(*if_ioctl)();		/* ioctl routine */
+    int	(*if_reset)();		/* bus reset routine */
+    int	(*if_watchdog)();	/* timer routine */
+    /* generic interface statistics */
+    int	if_ipackets;		/* packets received on interface */
+    int	if_ierrors;		/* input errors on interface */
+    int	if_opackets;		/* packets sent on interface */
+    int	if_oerrors;		/* output errors on interface */
+    int	if_collisions;		/* collisions on csma interfaces */
+    /* end statistics */
+    struct	ifnet *if_next;
 };
 
 #define	IFF_UP		0x1		/* interface is up */
@@ -150,16 +152,18 @@ struct ifnet {
  * are allocated and attached when an address is set, and are linked
  * together so all addresses for an interface can be located.
  */
-struct ifaddr {
-	struct	sockaddr ifa_addr;	/* address of interface */
-	union {
-		struct	sockaddr ifu_broadaddr;
-		struct	sockaddr ifu_dstaddr;
-	} ifa_ifu;
+struct ifaddr
+{
+    struct	sockaddr ifa_addr;	/* address of interface */
+    union
+    {
+        struct	sockaddr ifu_broadaddr;
+        struct	sockaddr ifu_dstaddr;
+    } ifa_ifu;
 #define	ifa_broadaddr	ifa_ifu.ifu_broadaddr	/* broadcast address */
 #define	ifa_dstaddr	ifa_ifu.ifu_dstaddr	/* other end of p-to-p link */
-	struct	ifnet *ifa_ifp;		/* back-pointer to interface */
-	struct	ifaddr *ifa_next;	/* next address for interface */
+    struct	ifnet *ifa_ifp;		/* back-pointer to interface */
+    struct	ifaddr *ifa_next;	/* next address for interface */
 };
 
 /*
@@ -168,17 +172,19 @@ struct ifaddr {
  * definitions which begin with ifr_name.  The
  * remainder may be interface specific.
  */
-struct	ifreq {
+struct	ifreq
+{
 #define	IFNAMSIZ	16
-	char	ifr_name[IFNAMSIZ];		/* if name, e.g. "en0" */
-	union {
-		struct	sockaddr ifru_addr;
-		struct	sockaddr ifru_dstaddr;
-		struct	sockaddr ifru_broadaddr;
-		short	ifru_flags;
-		int	ifru_metric;
-		caddr_t	ifru_data;
-	} ifr_ifru;
+    char	ifr_name[IFNAMSIZ];		/* if name, e.g. "en0" */
+    union
+    {
+        struct	sockaddr ifru_addr;
+        struct	sockaddr ifru_dstaddr;
+        struct	sockaddr ifru_broadaddr;
+        short	ifru_flags;
+        int	ifru_metric;
+        caddr_t	ifru_data;
+    } ifr_ifru;
 #define	ifr_addr	ifr_ifru.ifru_addr	/* address */
 #define	ifr_dstaddr	ifr_ifru.ifru_dstaddr	/* other end of p-to-p link */
 #define	ifr_broadaddr	ifr_ifru.ifru_broadaddr	/* broadcast address */
@@ -193,12 +199,14 @@ struct	ifreq {
  * for machine (useful for programs which
  * must know all networks accessible).
  */
-struct	ifconf {
-	int	ifc_len;		/* size of associated buffer */
-	union {
-		caddr_t	ifcu_buf;
-		struct	ifreq *ifcu_req;
-	} ifc_ifcu;
+struct	ifconf
+{
+    int	ifc_len;		/* size of associated buffer */
+    union
+    {
+        caddr_t	ifcu_buf;
+        struct	ifreq *ifcu_req;
+    } ifc_ifcu;
 #define	ifc_buf	ifc_ifcu.ifcu_buf	/* buffer address */
 #define	ifc_req	ifc_ifcu.ifcu_req	/* array of structures returned */
 };

@@ -9,7 +9,7 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  */
- 
+
 #ifndef _LINUX_IPSEC_H
 #define _LINUX_IPSEC_H
 
@@ -25,8 +25,8 @@
 
 #define IPSEC_LEVEL_NONE	-1	/* send plaintext, accept any */
 #define IPSEC_LEVEL_DEFAULT	0	/* encrypt/authenticate if possible */
-					/* the default MUST be 0, because a */
-					/* socket is initialized with 0's */
+/* the default MUST be 0, because a */
+/* socket is initialized with 0's */
 #define IPSEC_LEVEL_USE		1	/* use outbound, don't require inbound */
 #define IPSEC_LEVEL_REQUIRE	2	/* require both directions */
 #define IPSEC_LEVEL_UNIQUE	2	/* for compatibility only */
@@ -47,21 +47,21 @@
 /*
  *	FIXME: ignores network encryption for now..
  */
- 
+
 #ifdef CONFIG_NET_SECURITY
 static __inline__ int ipsec_sk_policy(struct sock *sk, struct sk_buff *skb)
 {
-	return ((sk->authentication < IPSEC_LEVEL_REQUIRE) ||
-		(skb->security & RCV_AUTH)) &&
-		((sk->encryption < IPSEC_LEVEL_REQUIRE) ||
-		(skb->security & RCV_CRYPT));
+    return ((sk->authentication < IPSEC_LEVEL_REQUIRE) ||
+            (skb->security & RCV_AUTH)) &&
+           ((sk->encryption < IPSEC_LEVEL_REQUIRE) ||
+            (skb->security & RCV_CRYPT));
 }
 
 #else
 
 static __inline__ int ipsec_sk_policy(struct sock *sk, struct sk_buff *skb)
 {
-	return 1;
+    return 1;
 }
 #endif /* CONFIG */
 

@@ -22,25 +22,26 @@
    \brief reschedule system service - see 5.2 13.4.2
 */
 
-asmlinkage void exe$resched(void) {
-  int ipl=getipl();
-  struct _pcb * p;
-  setipl(IPL$_SCHED);
-  /** acquire sched spinlock */
-  vmslock(&SPIN_SCHED,-1);
+asmlinkage void exe$resched(void)
+{
+    int ipl=getipl();
+    struct _pcb * p;
+    setipl(IPL$_SCHED);
+    /** acquire sched spinlock */
+    vmslock(&SPIN_SCHED,-1);
 
-  /** record onqtime */
-  p=ctl$gl_pcb;
-  p->pcb$l_onqtime=exe$gl_abstim_tics;
+    /** record onqtime */
+    p=ctl$gl_pcb;
+    p->pcb$l_onqtime=exe$gl_abstim_tics;
 
-  /** call change_cur_priority */
-  sch$change_cur_priority(p, p->pcb$b_prib);
+    /** call change_cur_priority */
+    sch$change_cur_priority(p, p->pcb$b_prib);
 
-  /** rescheduling interrupt */
-  SOFTINT_RESCHED_VECTOR;
+    /** rescheduling interrupt */
+    SOFTINT_RESCHED_VECTOR;
 
-  /** release sched spinlock */
-  vmsunlock(&SPIN_SCHED,-1);
-  setipl(ipl);
-  /** return value - MISSING */
+    /** release sched spinlock */
+    vmsunlock(&SPIN_SCHED,-1);
+    setipl(ipl);
+    /** return value - MISSING */
 }

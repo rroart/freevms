@@ -41,7 +41,8 @@
 
 /* sys_bintim() takes ascii time and convert it to a quadword */
 
-struct TIME {
+struct TIME
+{
     unsigned char time[8];
 };
 
@@ -60,7 +61,8 @@ unsigned long sys$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
 
     /* Skip leading spaces... */
 
-    while (length > 0 && *chrptr == ' ') {
+    while (length > 0 && *chrptr == ' ')
+    {
         length--;
         chrptr++;
     }
@@ -68,15 +70,19 @@ unsigned long sys$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
     /* Get the day number... */
 
     num = -1;
-    if (length > 0 && *chrptr >= '0' && *chrptr <= '9') {
+    if (length > 0 && *chrptr >= '0' && *chrptr <= '9')
+    {
         num = 0;
-        do {
+        do
+        {
             num = num * 10 + (*chrptr++ - '0');
-        } while (--length > 0 && *chrptr >= '0' && *chrptr <= '9');
+        }
+        while (--length > 0 && *chrptr >= '0' && *chrptr <= '9');
     }
     /* Check for month separator "-" - if none delta time... */
 
-    if (length > 0 && *chrptr == '-') {
+    if (length > 0 && *chrptr == '-')
+    {
         chrptr++;
 
         /* Get current time for defaults... */
@@ -84,10 +90,12 @@ unsigned long sys$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
         sys$numtim(wrktim,NULL);
         if (num >= 0) wrktim[2] = num;
         num = 0;
-        if (--length >= 3 && *chrptr != '-') {
+        if (--length >= 3 && *chrptr != '-')
+        {
             char *mn = month_names + 1;
             num = 1;
-            while (num <= 12) {
+            while (num <= 12)
+            {
                 if (memcmp(chrptr,mn,3) == 0) break;
                 mn += 4;
                 num++;
@@ -98,18 +106,24 @@ unsigned long sys$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
         }
         /* Now look for year... */
 
-        if (length > 0 && *chrptr == '-') {
+        if (length > 0 && *chrptr == '-')
+        {
             length--;
             chrptr++;
-            if (length > 0 && *chrptr >= '0' && *chrptr <= '9') {
+            if (length > 0 && *chrptr >= '0' && *chrptr <= '9')
+            {
                 num = 0;
-                do {
+                do
+                {
                     num = num * 10 + (*chrptr++ - '0');
-                } while (--length > 0 && *chrptr >= '0' && *chrptr <= '9');
+                }
+                while (--length > 0 && *chrptr >= '0' && *chrptr <= '9');
                 wrktim[0] = num;
             }
         }
-    } else {
+    }
+    else
+    {
 
         /* Delta time then... */
 
@@ -120,53 +134,68 @@ unsigned long sys$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
 
     /* Skip any spaces between date and time... */
 
-    while (length > 0 && *chrptr == ' ') {
+    while (length > 0 && *chrptr == ' ')
+    {
         length--;
         chrptr++;
     }
 
     /* Now wrap up time fields... */
 
-    for (tf = 0; tf < 3; tf++) {
-        if (length > 0 && *chrptr >= '0' && *chrptr <= '9') {
+    for (tf = 0; tf < 3; tf++)
+    {
+        if (length > 0 && *chrptr >= '0' && *chrptr <= '9')
+        {
             num = 0;
-            do {
+            do
+            {
                 num = num * 10 + (*chrptr++ - '0');
-            } while (--length > 0 && *chrptr >= '0' && *chrptr <= '9');
+            }
+            while (--length > 0 && *chrptr >= '0' && *chrptr <= '9');
             wrktim[3 + tf] = num;
             if (num > 59) wrktim[1] = 13;
         }
-        if (length > 0 && *chrptr == time_sep[tf]) {
+        if (length > 0 && *chrptr == time_sep[tf])
+        {
             length--;
             chrptr++;
-        } else {
+        }
+        else
+        {
             break;
         }
     }
 
     /* Hundredths of seconds need special handling... */
 
-    if (length > 0 && *chrptr >= '0' && *chrptr <= '9') {
+    if (length > 0 && *chrptr >= '0' && *chrptr <= '9')
+    {
         tf = 10;
         num = 0;
-        do {
+        do
+        {
             num = num + tf * (*chrptr++ - '0');
             tf = tf / 10;
-        } while (--length > 0 && *chrptr >= '0' && *chrptr <= '9');
+        }
+        while (--length > 0 && *chrptr >= '0' && *chrptr <= '9');
         wrktim[6] = num;
     }
     /* Now skip any trailing spaces... */
 
-    while (length > 0 && *chrptr == ' ') {
+    while (length > 0 && *chrptr == ' ')
+    {
         length--;
         chrptr++;
     }
 
     /* If anything left then we have a problem... */
 
-    if (length == 0) {
+    if (length == 0)
+    {
         return lib$cvt_vectim(wrktim,timadr);
-    } else {
+    }
+    else
+    {
         return SS$_IVTIME;
     }
 }

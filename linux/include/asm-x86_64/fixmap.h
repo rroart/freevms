@@ -34,23 +34,24 @@
  * task switches.
  */
 
-enum fixed_addresses {
-	VSYSCALL_LAST_PAGE,
-	VSYSCALL_FIRST_PAGE = VSYSCALL_LAST_PAGE + ((VSYSCALL_END-VSYSCALL_START) >> PAGE_SHIFT) - 1,
-	VSYSCALL_HPET,
-	FIX_HPET_BASE,
+enum fixed_addresses
+{
+    VSYSCALL_LAST_PAGE,
+    VSYSCALL_FIRST_PAGE = VSYSCALL_LAST_PAGE + ((VSYSCALL_END-VSYSCALL_START) >> PAGE_SHIFT) - 1,
+    VSYSCALL_HPET,
+    FIX_HPET_BASE,
 #ifdef CONFIG_X86_LOCAL_APIC
-	FIX_APIC_BASE,	/* local (CPU) APIC) -- required for SMP or not */
+    FIX_APIC_BASE,	/* local (CPU) APIC) -- required for SMP or not */
 #endif
 #ifdef CONFIG_X86_IO_APIC
-	FIX_IO_APIC_BASE_0,
-	FIX_IO_APIC_BASE_END = FIX_IO_APIC_BASE_0 + MAX_IO_APICS-1,
+    FIX_IO_APIC_BASE_0,
+    FIX_IO_APIC_BASE_END = FIX_IO_APIC_BASE_0 + MAX_IO_APICS-1,
 #endif
-	__end_of_fixed_addresses
+    __end_of_fixed_addresses
 };
 
 extern void __set_fixmap (enum fixed_addresses idx,
-					unsigned long phys, pgprot_t flags);
+                          unsigned long phys, pgprot_t flags);
 
 #define set_fixmap(idx, phys) \
 		__set_fixmap(idx, phys, PAGE_KERNEL)
@@ -75,19 +76,19 @@ extern void __this_fixmap_does_not_exist(void);
  */
 extern inline unsigned long fix_to_virt(const unsigned int idx)
 {
-	/*
-	 * this branch gets completely eliminated after inlining,
-	 * except when someone tries to use fixaddr indices in an
-	 * illegal way. (such as mixing up address types or using
-	 * out-of-range indices).
-	 *
-	 * If it doesn't get removed, the linker will complain
-	 * loudly with a reasonably clear error message..
-	 */
-	if (idx >= __end_of_fixed_addresses)
-		__this_fixmap_does_not_exist();
+    /*
+     * this branch gets completely eliminated after inlining,
+     * except when someone tries to use fixaddr indices in an
+     * illegal way. (such as mixing up address types or using
+     * out-of-range indices).
+     *
+     * If it doesn't get removed, the linker will complain
+     * loudly with a reasonably clear error message..
+     */
+    if (idx >= __end_of_fixed_addresses)
+        __this_fixmap_does_not_exist();
 
-        return __fix_to_virt(idx);
+    return __fix_to_virt(idx);
 }
 
 #endif

@@ -1,32 +1,5 @@
 #!/bin/sh
 
-doedit() {
-ed - linux/arch/um/config << EOF
-5,7s/^/#/
-w
-q
-EOF
-
-ed - linux/arch/i386/config << EOF
-5,7s/^/#/
-w
-q
-EOF
-
-ed - linux/arch/x86_64/config << EOF
-5,7s/^/#/
-w
-q
-EOF
-
-ed - linux/include/linux/autoconf.h << EOF
-5
-d
-w
-q
-EOF
-}
-
 cd ..
 
 unamem=`uname -m`

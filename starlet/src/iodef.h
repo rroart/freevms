@@ -341,502 +341,558 @@
 #define		IO$M_SERIALNUM		0x80
 #define		IO$M_QSRVFILL1		0x40
 #define		IO$M_QSRV_CLIENT_UPDATE	0x80
-	
-union _iodef {
 
-  struct  {
-    unsigned io$v_fcode		        : 6;
-    unsigned io$v_fmodifiers		: 10;
-  };
+union _iodef
+{
 
-  struct  {
-    unsigned io$v_fcode_fill_1		: 6;
-    unsigned io$v_filler_1		: 5;
-    unsigned io$v_inherlog		: 1;
-    unsigned io$v_fill_20_		: 4;
-  };
+    struct
+    {
+        unsigned io$v_fcode		        : 6;
+        unsigned io$v_fmodifiers		: 10;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_2		: 6;
-    unsigned io$v_rsvd_for_devdepend_1	: 4;
-    unsigned io$v_erase		        : 1;
-    unsigned io$v_filler_2		: 1;
-    unsigned io$v_rsvd_for_devdepend_2	: 1;
-    unsigned io$v_exfunc		: 1;
-    unsigned io$v_datacheck		: 1;
-    unsigned io$v_inhretry		: 1;
+    struct
+    {
+        unsigned io$v_fcode_fill_1		: 6;
+        unsigned io$v_filler_1		: 5;
+        unsigned io$v_inherlog		: 1;
+        unsigned io$v_fill_20_		: 4;
+    };
 
-    unsigned io$v_syncsts		: 1;
-    unsigned io$v_novcache		: 1;
-    unsigned io$v_bufobj		: 1;
-    unsigned io$v_trusted		: 1;
-    unsigned io$v_file_flush		: 1;
-    unsigned io$v_barrier		: 1;
-    unsigned io$v_fill_21_		: 2;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_2		: 6;
+        unsigned io$v_rsvd_for_devdepend_1	: 4;
+        unsigned io$v_erase		        : 1;
+        unsigned io$v_filler_2		: 1;
+        unsigned io$v_rsvd_for_devdepend_2	: 1;
+        unsigned io$v_exfunc		: 1;
+        unsigned io$v_datacheck		: 1;
+        unsigned io$v_inhretry		: 1;
 
-  struct  {
-    unsigned io$v_fcode_fill_3		: 6;
-    unsigned io$v_rsvd_for_devdepend_3	: 6;
-    unsigned io$v_inhseek		: 1;
-    unsigned io$v_fill_22_		: 3;
-  };
+        unsigned io$v_syncsts		: 1;
+        unsigned io$v_novcache		: 1;
+        unsigned io$v_bufobj		: 1;
+        unsigned io$v_trusted		: 1;
+        unsigned io$v_file_flush		: 1;
+        unsigned io$v_barrier		: 1;
+        unsigned io$v_fill_21_		: 2;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_4		: 6;
-    unsigned io$v_reverse		: 1;
-    unsigned io$v_nowait		: 1;
-    unsigned io$v_rsvd_for_devdepend_4	: 4;
-    unsigned io$v_inhextgap		: 1;
-    unsigned io$v_retension		: 1;
+    struct
+    {
+        unsigned io$v_fcode_fill_3		: 6;
+        unsigned io$v_rsvd_for_devdepend_3	: 6;
+        unsigned io$v_inhseek		: 1;
+        unsigned io$v_fill_22_		: 3;
+    };
 
-    unsigned io$v_allowfast		: 1;
+    struct
+    {
+        unsigned io$v_fcode_fill_4		: 6;
+        unsigned io$v_reverse		: 1;
+        unsigned io$v_nowait		: 1;
+        unsigned io$v_rsvd_for_devdepend_4	: 4;
+        unsigned io$v_inhextgap		: 1;
+        unsigned io$v_retension		: 1;
 
-    unsigned io$v_mt3_density		: 1;
-  };
+        unsigned io$v_allowfast		: 1;
 
-  struct  {
-    unsigned io$v_fcode_fill_5		: 6;
-    unsigned io$v_dutux_reserved	: 2;
-    unsigned io$v_mscpmodifs		: 1;
-    unsigned io$v_fill_23_		: 7;
-  };
-  struct  {
-    unsigned io$v_fcode_fill_6		: 6;
-    unsigned io$v_shadow		: 1;
-    unsigned io$v_locate		: 1;
-  };
-  struct  {
-    unsigned io$v_fcode_fill_7		: 6;
-    unsigned io$v_mscp_format		: 1;
-    unsigned io$v_fill_24_		: 1;
-  };
-  struct  {
-    unsigned io$v_fcode_fill_8		: 6;
-    unsigned io$v_allhosts		: 1;
-    unsigned io$v_dissolve		: 1;
-    unsigned io$v_nocleanup		: 1;
-    unsigned io$v_fill_25_		: 7;
-  };
-  struct  {
-    unsigned io$v_fcode_fill_9		: 6;
-    unsigned io$v_spindown		: 1;
-    unsigned io$v_fill_26_		: 1;
-  };
-  struct  {
-    unsigned io$v_fcode_fill_11		: 6;
-    unsigned io$v_est_com_path		: 1;
-    unsigned io$v_lcl_src_unit		: 1;
-    unsigned io$v_rtn_com_path		: 1;
-    unsigned io$v_fill_27_		: 7;
-  };
-  struct  {
-    unsigned io$v_fcode_fill_12		: 6;
-    unsigned io$v_dealc_all		: 1;
-    unsigned io$v_dealc_hrn		: 1;
-    unsigned io$v_dealc_entloc		: 1;
-    unsigned io$v_decr_afc		: 1;
-    unsigned io$v_read_all		: 1;
-    unsigned io$v_read_hrn		: 1;
-    unsigned io$v_break_conn		: 1;
-    unsigned io$v_fill_28_		: 3;
-  };
+        unsigned io$v_mt3_density		: 1;
+    };
 
-
-  struct  {
-    unsigned io$v_fcode_fill_13		: 6;
-    unsigned io$v_stepover		: 1;
-    unsigned io$v_cs_fill		: 1;
-    unsigned io$v_copyop		: 1;
-    unsigned io$v_fill_29_		: 7;
-  };
-  struct  {
-    unsigned io$v_fcode_fill_14		: 6;
-    unsigned io$v_exists		: 1;
-    unsigned io$v_cbs		        : 1;
-    unsigned io$v_booting		: 1;
-    unsigned io$v_req_minicopy		: 1;
-    unsigned io$v_opt_minicopy		: 1;
-    unsigned io$v_nominicopy		: 1;
-    unsigned io$v_fill_30_		: 4;
-  };
-  struct  {
-    unsigned io$v_fcode_fill_15		: 9;
-    unsigned io$v_vuex_fc		: 1;
-    unsigned io$v_fill_31_		: 6;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_10		: 6;
-
-    unsigned io$v_forcepath		: 1;
-    unsigned io$v_preferred_cpu		: 1;
-    unsigned io$v_sys_assignable	: 1;
-    unsigned io$v_fill_32_		: 7;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_16		: 6;
-    unsigned io$v_commod		: 1;
-    unsigned io$v_movetrackd		: 1;
-    unsigned io$v_diagnostic		: 1;
-    unsigned io$v_skpsecinh		: 1;
-    unsigned io$v_fill_33_		: 6;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_17		: 6;
-    unsigned io$v_deldata		: 1;
-    unsigned io$v_fill_34_		: 1;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_18		: 6;
-    unsigned io$v_nomrsp		: 1;
-    unsigned io$v_fill_35_		: 1;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_19		: 6;
-    unsigned io$v_rsvd_for_devdepend_5	: 2;
-    unsigned io$v_swap		        : 1;
-    unsigned io$v_opposite		: 1;
-    unsigned io$v_fill_36_		: 6;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_20		: 6;
-    unsigned io$v_rsvd_for_devdepend_6	: 3;
-    unsigned io$v_clserexcp		: 1;
-    unsigned io$v_fill_37_		: 6;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_21		: 6;
-    unsigned io$v_chunkdiag		: 1;
-    unsigned io$v_rsvd_for_devdepend_7	: 3;
-    unsigned io$v_tbc		        : 1;
-    unsigned io$v_fill_38_		: 5;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_22		: 6;
-    unsigned io$v_enarep		: 1;
-    unsigned io$v_fill_39_		: 1;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_5		: 6;
+        unsigned io$v_dutux_reserved	: 2;
+        unsigned io$v_mscpmodifs		: 1;
+        unsigned io$v_fill_23_		: 7;
+    };
+    struct
+    {
+        unsigned io$v_fcode_fill_6		: 6;
+        unsigned io$v_shadow		: 1;
+        unsigned io$v_locate		: 1;
+    };
+    struct
+    {
+        unsigned io$v_fcode_fill_7		: 6;
+        unsigned io$v_mscp_format		: 1;
+        unsigned io$v_fill_24_		: 1;
+    };
+    struct
+    {
+        unsigned io$v_fcode_fill_8		: 6;
+        unsigned io$v_allhosts		: 1;
+        unsigned io$v_dissolve		: 1;
+        unsigned io$v_nocleanup		: 1;
+        unsigned io$v_fill_25_		: 7;
+    };
+    struct
+    {
+        unsigned io$v_fcode_fill_9		: 6;
+        unsigned io$v_spindown		: 1;
+        unsigned io$v_fill_26_		: 1;
+    };
+    struct
+    {
+        unsigned io$v_fcode_fill_11		: 6;
+        unsigned io$v_est_com_path		: 1;
+        unsigned io$v_lcl_src_unit		: 1;
+        unsigned io$v_rtn_com_path		: 1;
+        unsigned io$v_fill_27_		: 7;
+    };
+    struct
+    {
+        unsigned io$v_fcode_fill_12		: 6;
+        unsigned io$v_dealc_all		: 1;
+        unsigned io$v_dealc_hrn		: 1;
+        unsigned io$v_dealc_entloc		: 1;
+        unsigned io$v_decr_afc		: 1;
+        unsigned io$v_read_all		: 1;
+        unsigned io$v_read_hrn		: 1;
+        unsigned io$v_break_conn		: 1;
+        unsigned io$v_fill_28_		: 3;
+    };
 
 
-  struct  {
-    unsigned io$v_fcode_fill_23		: 6;
-    unsigned io$v_access		: 1;
-    unsigned io$v_create		: 1;
-    unsigned io$v_delete		: 1;
-    unsigned io$v_mount		        : 1;
-    unsigned io$v_dmount		: 1;
-    unsigned io$v_remount		: 1;
-    unsigned io$v_movefile		: 1;
-    unsigned io$v_filler_8		: 1;
-    unsigned io$v_rwshelved		: 1;
-    unsigned io$v_setdir		: 1;
+    struct
+    {
+        unsigned io$v_fcode_fill_13		: 6;
+        unsigned io$v_stepover		: 1;
+        unsigned io$v_cs_fill		: 1;
+        unsigned io$v_copyop		: 1;
+        unsigned io$v_fill_29_		: 7;
+    };
+    struct
+    {
+        unsigned io$v_fcode_fill_14		: 6;
+        unsigned io$v_exists		: 1;
+        unsigned io$v_cbs		        : 1;
+        unsigned io$v_booting		: 1;
+        unsigned io$v_req_minicopy		: 1;
+        unsigned io$v_opt_minicopy		: 1;
+        unsigned io$v_nominicopy		: 1;
+        unsigned io$v_fill_30_		: 4;
+    };
+    struct
+    {
+        unsigned io$v_fcode_fill_15		: 9;
+        unsigned io$v_vuex_fc		: 1;
+        unsigned io$v_fill_31_		: 6;
+    };
 
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_10		: 6;
 
-  struct  {
-    unsigned io$v_fcode_fill_24		: 6;
-    unsigned io$v_binary		: 1;
-    unsigned io$v_packed		: 1;
-  };
+        unsigned io$v_forcepath		: 1;
+        unsigned io$v_preferred_cpu		: 1;
+        unsigned io$v_sys_assignable	: 1;
+        unsigned io$v_fill_32_		: 7;
+    };
 
+    struct
+    {
+        unsigned io$v_fcode_fill_16		: 6;
+        unsigned io$v_commod		: 1;
+        unsigned io$v_movetrackd		: 1;
+        unsigned io$v_diagnostic		: 1;
+        unsigned io$v_skpsecinh		: 1;
+        unsigned io$v_fill_33_		: 6;
+    };
 
+    struct
+    {
+        unsigned io$v_fcode_fill_17		: 6;
+        unsigned io$v_deldata		: 1;
+        unsigned io$v_fill_34_		: 1;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_25		: 6;
-    unsigned io$v_now		        : 1;
-    unsigned io$v_stream		: 1;
-    unsigned io$v_readercheck		: 1;
-    unsigned io$v_writercheck		: 1;
-    unsigned io$v_norswait		: 1;
+    struct
+    {
+        unsigned io$v_fcode_fill_18		: 6;
+        unsigned io$v_nomrsp		: 1;
+        unsigned io$v_fill_35_		: 1;
+    };
 
+    struct
+    {
+        unsigned io$v_fcode_fill_19		: 6;
+        unsigned io$v_rsvd_for_devdepend_5	: 2;
+        unsigned io$v_swap		        : 1;
+        unsigned io$v_opposite		: 1;
+        unsigned io$v_fill_36_		: 6;
+    };
 
-    unsigned io$v_fill_40_		: 5;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_20		: 6;
+        unsigned io$v_rsvd_for_devdepend_6	: 3;
+        unsigned io$v_clserexcp		: 1;
+        unsigned io$v_fill_37_		: 6;
+    };
 
+    struct
+    {
+        unsigned io$v_fcode_fill_21		: 6;
+        unsigned io$v_chunkdiag		: 1;
+        unsigned io$v_rsvd_for_devdepend_7	: 3;
+        unsigned io$v_tbc		        : 1;
+        unsigned io$v_fill_38_		: 5;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_26		: 6;
-    unsigned io$v_mb_room_notify	: 1;
-    unsigned io$v_readattn		: 1;
-    unsigned io$v_wrtattn		: 1;
-    unsigned io$v_setprot		: 1;
-    unsigned io$v_readerwait		: 1;
-    unsigned io$v_writerwait		: 1;
-    unsigned io$v_fill_41_		: 4;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_27		: 6;
-    unsigned io$v_noecho		: 1;
-    unsigned io$v_timed		        : 1;
-    unsigned io$v_cvtlow		: 1;
-    unsigned io$v_nofiltr		: 1;
-    unsigned io$v_dsablmbx		: 1;
-    unsigned io$v_purge		        : 1;
-    unsigned io$v_trmnoecho		: 1;
-    unsigned io$v_refresh		: 1;
-    unsigned io$v_escape		: 1;
-    unsigned io$v_extend		: 1;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_28		: 6;
-    unsigned io$v_canctrlo		: 1;
-    unsigned io$v_enablmbx		: 1;
-    unsigned io$v_noformat		: 1;
-    unsigned io$v_breakthru		: 1;
-    unsigned io$v_newline		: 1;
-    unsigned io$v_fill_42_		: 5;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_29		: 6;
-    unsigned io$v_typeahdcnt		: 1;
-    unsigned io$v_reserve_rd_modem	: 1;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_30		: 6;
-    unsigned io$v_maint		        : 1;
-    unsigned io$v_ctrlyast		: 1;
-    unsigned io$v_ctrlcast		: 1;
-    unsigned io$v_hangup		: 1;
-    unsigned io$v_outband		: 1;
-    unsigned io$v_tt_connect		: 1;
-    unsigned io$v_tt_discon		: 1;
-    unsigned io$v_tt_process		: 1;
-    unsigned io$v_brdcst		: 1;
-    unsigned io$v_fill_43_		: 1;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_31		: 6;
-    unsigned io$v_reserve_maint_escape_1 : 1;
-    unsigned io$v_loop		        : 1;
-    unsigned io$v_unloop		: 1;
-    unsigned io$v_line_off		: 1;
-    unsigned io$v_set_modem		: 1;
-    unsigned io$v_line_on		: 1;
-    unsigned io$v_loop_ext		: 1;
-    unsigned io$v_autxof_ena		: 1;
-    unsigned io$v_autxof_dis		: 1;
-    unsigned io$v_reserve_int_disable		: 1;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_32		: 6;
-    unsigned io$v_reserve_maint_escape_2 : 5;
-    unsigned io$v_include		: 1;
-    unsigned io$v_tt_abort		: 1;
-    unsigned io$v_fill_44_		: 3;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_33		: 6;
-    unsigned io$v_posixinit		: 1;
-    unsigned io$v_posixflow		: 1;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_34		: 6;
-    unsigned io$v_reserve_init_escape	: 1;
-    unsigned io$v_set_posix		: 1;
-    unsigned io$v_clear_posix		: 1;
-    unsigned io$v_set_termios		: 1;
-    unsigned io$v_set_ptc		: 1;
-    unsigned io$v_clear_ptc		: 1;
-    unsigned io$v_flush_tab		: 1;
-    unsigned io$v_flush_output		: 1;
-    unsigned io$v_update_ptc		: 1;
-    unsigned io$v_fill_45_		: 1;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_35		: 6;
-    unsigned io$v_reserve_flow_escape	: 2;
-    unsigned io$v_out_xoff		: 1;
-    unsigned io$v_out_xon		: 1;
-    unsigned io$v_in_xoff		: 1;
-    unsigned io$v_in_xon		: 1;
-    unsigned io$v_fill_46_		: 4;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_36		: 6;
-    unsigned io$v_o_nonblock		: 1;
-    unsigned io$v_fill_47_		: 1;
-  };
-
-  struct  {
-    unsigned io$v_fcode_fill_37		: 6;
-    unsigned io$v_interrupt		: 1;
-    unsigned io$v_multiple		: 1;
-    unsigned io$v_lockbuf		: 1;
-    unsigned io$v_noblock		: 1;
+    struct
+    {
+        unsigned io$v_fcode_fill_22		: 6;
+        unsigned io$v_enarep		: 1;
+        unsigned io$v_fill_39_		: 1;
+    };
 
 
-    unsigned io$v_fill_48_		: 6;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_23		: 6;
+        unsigned io$v_access		: 1;
+        unsigned io$v_create		: 1;
+        unsigned io$v_delete		: 1;
+        unsigned io$v_mount		        : 1;
+        unsigned io$v_dmount		: 1;
+        unsigned io$v_remount		: 1;
+        unsigned io$v_movefile		: 1;
+        unsigned io$v_filler_8		: 1;
+        unsigned io$v_rwshelved		: 1;
+        unsigned io$v_setdir		: 1;
 
-  struct  {
-    unsigned io$v_fcode_fill_38		: 6;
-    unsigned io$v_reserved		: 2;
-    unsigned io$v_abort		        : 1;
-    unsigned io$v_synch		        : 1;
-    unsigned io$v_fill_49_		: 6;
-  };
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_39		: 6;
-    unsigned io$v_response		: 1;
-    unsigned io$v_fill_50_		: 1;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_24		: 6;
+        unsigned io$v_binary		: 1;
+        unsigned io$v_packed		: 1;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_40		: 6;
-    unsigned io$v_startup		: 1;
-    unsigned io$v_shutdown		: 1;
-    unsigned io$v_attnast		: 1;
-    unsigned io$v_ctrl		        : 1;
-    unsigned io$v_reserve_set_modem	: 1;
-    unsigned io$v_set_mac		: 1;
-    unsigned io$v_update_map		: 1;
-    unsigned io$v_route		        : 1;
-    unsigned io$v_fill_51_		: 2;
-  };
 
-  struct  {
-    unsigned io$v_fcode_fill_41		: 6;
-    unsigned io$v_rd_mem		: 1;
-    unsigned io$v_rd_modem		: 1;
-    unsigned io$v_rd_count		: 1;
-    unsigned io$v_reserve_ctrl		: 1;
-    unsigned io$v_clr_count		: 1;
-    unsigned io$v_sense_mac		: 1;
-    unsigned io$v_show_map		: 1;
-    unsigned io$v_show_route		: 1;
-    unsigned io$v_fill_52_		: 2;
-  };
-  struct  {
-    unsigned io$v_fcode_fill_42		: 6;
-    unsigned io$v_more		        : 1;
-    unsigned io$v_qualified		: 1;
-  };
 
-  struct  {
-    unsigned io$v_fcode_fill_43		: 6;
-    unsigned io$v_redirect		: 1;
-    unsigned io$v_accept		: 1;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_25		: 6;
+        unsigned io$v_now		        : 1;
+        unsigned io$v_stream		: 1;
+        unsigned io$v_readercheck		: 1;
+        unsigned io$v_writercheck		: 1;
+        unsigned io$v_norswait		: 1;
 
-  struct  {
-    unsigned io$v_fcode_fill_44		: 6;
-    unsigned io$v_setevf		: 1;
-    unsigned io$v_fill_53_		: 1;
-  };
 
-  struct  {
-    unsigned io$v_fcode_fill_45		: 6;
-    unsigned io$v_word		        : 1;
-    unsigned io$v_filler_3		: 1;
-    unsigned io$v_filler_4		: 1;
-    unsigned io$v_setfnct		: 1;
-    unsigned io$v_datapath		: 1;
-    unsigned io$v_filler_5		: 1;
-    unsigned io$v_cycle		        : 1;
-    unsigned io$v_reset		        : 1;
-    unsigned io$v_fill_54_		: 2;
-  };
+        unsigned io$v_fill_40_		: 5;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_46		: 6;
-    unsigned io$v_filler_6		: 2;
-    unsigned io$v_setcuadr		: 1;
-    unsigned io$v_setbsize		: 1;
-    unsigned io$v_setpoolsz		: 1;
-    unsigned io$v_setenqcnt		: 1;
-    unsigned io$v_clear		        : 1;
-    unsigned io$v_lpbext		: 1;
-    unsigned io$v_lpbint		: 1;
-    unsigned io$v_readcsr		: 1;
-  };
 
-  struct  {
-    unsigned io$v_fcode_fill_47		: 6;
-    unsigned io$v_noctswait		: 1;
-    unsigned io$v_slavloop		: 1;
-    unsigned io$v_nodsrwait		: 1;
-    unsigned io$v_maintloop		: 1;
-    unsigned io$v_lastblock		: 1;
-    unsigned io$v_filler_7		: 1;
-    unsigned io$v_intclock		: 1;
-    unsigned io$v_fill_55_		: 3;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_26		: 6;
+        unsigned io$v_mb_room_notify	: 1;
+        unsigned io$v_readattn		: 1;
+        unsigned io$v_wrtattn		: 1;
+        unsigned io$v_setprot		: 1;
+        unsigned io$v_readerwait		: 1;
+        unsigned io$v_writerwait		: 1;
+        unsigned io$v_fill_41_		: 4;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_48		: 6;
-    unsigned io$v_lt_connect		: 1;
-    unsigned io$v_lt_discon		: 1;
-    unsigned io$v_lt_readport		: 1;
-    unsigned io$v_lt_map_port		: 1;
-    unsigned io$v_lt_rating		: 1;
-    unsigned io$v_lt_sol_info		: 1;
-    unsigned io$v_lt_rcv_info		: 1;
-    unsigned io$v_lt_setmode		: 1;
-    unsigned io$v_lt_sensemode		: 1;
-    unsigned io$v_lt_que_chg_notif	: 1;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_27		: 6;
+        unsigned io$v_noecho		: 1;
+        unsigned io$v_timed		        : 1;
+        unsigned io$v_cvtlow		: 1;
+        unsigned io$v_nofiltr		: 1;
+        unsigned io$v_dsablmbx		: 1;
+        unsigned io$v_purge		        : 1;
+        unsigned io$v_trmnoecho		: 1;
+        unsigned io$v_refresh		: 1;
+        unsigned io$v_escape		: 1;
+        unsigned io$v_extend		: 1;
+    };
 
-  struct  {
-    unsigned io$v_lt_map_filler		: 1;
-    unsigned io$v_lt_map_nodnam		: 1;
-    unsigned io$v_lt_map_pornam		: 1;
-    unsigned io$v_lt_map_srvnam		: 1;
-    unsigned io$v_lt_map_lnknam		: 1;
-    unsigned io$v_lt_map_netadr		: 1;
-    unsigned io$v_fill_56_		: 2;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_28		: 6;
+        unsigned io$v_canctrlo		: 1;
+        unsigned io$v_enablmbx		: 1;
+        unsigned io$v_noformat		: 1;
+        unsigned io$v_breakthru		: 1;
+        unsigned io$v_newline		: 1;
+        unsigned io$v_fill_42_		: 5;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_49		: 6;
-    unsigned io$v_flush		        : 1;
-    unsigned io$v_write_barrier		: 1;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_29		: 6;
+        unsigned io$v_typeahdcnt		: 1;
+        unsigned io$v_reserve_rd_modem	: 1;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_50		: 6;
-    unsigned io$v_mkfill1		: 1;
-    unsigned io$v_allowfast_never		: 1;
-    unsigned io$v_allowfast_per_io		: 1;
-    unsigned io$v_allowfast_always		: 1;
-    unsigned io$v_fill_57_		        : 6;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_30		: 6;
+        unsigned io$v_maint		        : 1;
+        unsigned io$v_ctrlyast		: 1;
+        unsigned io$v_ctrlcast		: 1;
+        unsigned io$v_hangup		: 1;
+        unsigned io$v_outband		: 1;
+        unsigned io$v_tt_connect		: 1;
+        unsigned io$v_tt_discon		: 1;
+        unsigned io$v_tt_process		: 1;
+        unsigned io$v_brdcst		: 1;
+        unsigned io$v_fill_43_		: 1;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_51		: 6;
-    unsigned io$v_add		        : 1;
-    unsigned io$v_fill_58_		: 1;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_31		: 6;
+        unsigned io$v_reserve_maint_escape_1 : 1;
+        unsigned io$v_loop		        : 1;
+        unsigned io$v_unloop		: 1;
+        unsigned io$v_line_off		: 1;
+        unsigned io$v_set_modem		: 1;
+        unsigned io$v_line_on		: 1;
+        unsigned io$v_loop_ext		: 1;
+        unsigned io$v_autxof_ena		: 1;
+        unsigned io$v_autxof_dis		: 1;
+        unsigned io$v_reserve_int_disable		: 1;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_52		: 6;
-    unsigned io$v_idstring		: 1;
-    unsigned io$v_serialnum		: 1;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_32		: 6;
+        unsigned io$v_reserve_maint_escape_2 : 5;
+        unsigned io$v_include		: 1;
+        unsigned io$v_tt_abort		: 1;
+        unsigned io$v_fill_44_		: 3;
+    };
 
-  struct  {
-    unsigned io$v_fcode_fill_53		: 6;
-    unsigned io$v_qsrvfill1		: 1;
-    unsigned io$v_qsrv_client_update	: 1;
-  };
+    struct
+    {
+        unsigned io$v_fcode_fill_33		: 6;
+        unsigned io$v_posixinit		: 1;
+        unsigned io$v_posixflow		: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_34		: 6;
+        unsigned io$v_reserve_init_escape	: 1;
+        unsigned io$v_set_posix		: 1;
+        unsigned io$v_clear_posix		: 1;
+        unsigned io$v_set_termios		: 1;
+        unsigned io$v_set_ptc		: 1;
+        unsigned io$v_clear_ptc		: 1;
+        unsigned io$v_flush_tab		: 1;
+        unsigned io$v_flush_output		: 1;
+        unsigned io$v_update_ptc		: 1;
+        unsigned io$v_fill_45_		: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_35		: 6;
+        unsigned io$v_reserve_flow_escape	: 2;
+        unsigned io$v_out_xoff		: 1;
+        unsigned io$v_out_xon		: 1;
+        unsigned io$v_in_xoff		: 1;
+        unsigned io$v_in_xon		: 1;
+        unsigned io$v_fill_46_		: 4;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_36		: 6;
+        unsigned io$v_o_nonblock		: 1;
+        unsigned io$v_fill_47_		: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_37		: 6;
+        unsigned io$v_interrupt		: 1;
+        unsigned io$v_multiple		: 1;
+        unsigned io$v_lockbuf		: 1;
+        unsigned io$v_noblock		: 1;
+
+
+        unsigned io$v_fill_48_		: 6;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_38		: 6;
+        unsigned io$v_reserved		: 2;
+        unsigned io$v_abort		        : 1;
+        unsigned io$v_synch		        : 1;
+        unsigned io$v_fill_49_		: 6;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_39		: 6;
+        unsigned io$v_response		: 1;
+        unsigned io$v_fill_50_		: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_40		: 6;
+        unsigned io$v_startup		: 1;
+        unsigned io$v_shutdown		: 1;
+        unsigned io$v_attnast		: 1;
+        unsigned io$v_ctrl		        : 1;
+        unsigned io$v_reserve_set_modem	: 1;
+        unsigned io$v_set_mac		: 1;
+        unsigned io$v_update_map		: 1;
+        unsigned io$v_route		        : 1;
+        unsigned io$v_fill_51_		: 2;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_41		: 6;
+        unsigned io$v_rd_mem		: 1;
+        unsigned io$v_rd_modem		: 1;
+        unsigned io$v_rd_count		: 1;
+        unsigned io$v_reserve_ctrl		: 1;
+        unsigned io$v_clr_count		: 1;
+        unsigned io$v_sense_mac		: 1;
+        unsigned io$v_show_map		: 1;
+        unsigned io$v_show_route		: 1;
+        unsigned io$v_fill_52_		: 2;
+    };
+    struct
+    {
+        unsigned io$v_fcode_fill_42		: 6;
+        unsigned io$v_more		        : 1;
+        unsigned io$v_qualified		: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_43		: 6;
+        unsigned io$v_redirect		: 1;
+        unsigned io$v_accept		: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_44		: 6;
+        unsigned io$v_setevf		: 1;
+        unsigned io$v_fill_53_		: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_45		: 6;
+        unsigned io$v_word		        : 1;
+        unsigned io$v_filler_3		: 1;
+        unsigned io$v_filler_4		: 1;
+        unsigned io$v_setfnct		: 1;
+        unsigned io$v_datapath		: 1;
+        unsigned io$v_filler_5		: 1;
+        unsigned io$v_cycle		        : 1;
+        unsigned io$v_reset		        : 1;
+        unsigned io$v_fill_54_		: 2;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_46		: 6;
+        unsigned io$v_filler_6		: 2;
+        unsigned io$v_setcuadr		: 1;
+        unsigned io$v_setbsize		: 1;
+        unsigned io$v_setpoolsz		: 1;
+        unsigned io$v_setenqcnt		: 1;
+        unsigned io$v_clear		        : 1;
+        unsigned io$v_lpbext		: 1;
+        unsigned io$v_lpbint		: 1;
+        unsigned io$v_readcsr		: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_47		: 6;
+        unsigned io$v_noctswait		: 1;
+        unsigned io$v_slavloop		: 1;
+        unsigned io$v_nodsrwait		: 1;
+        unsigned io$v_maintloop		: 1;
+        unsigned io$v_lastblock		: 1;
+        unsigned io$v_filler_7		: 1;
+        unsigned io$v_intclock		: 1;
+        unsigned io$v_fill_55_		: 3;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_48		: 6;
+        unsigned io$v_lt_connect		: 1;
+        unsigned io$v_lt_discon		: 1;
+        unsigned io$v_lt_readport		: 1;
+        unsigned io$v_lt_map_port		: 1;
+        unsigned io$v_lt_rating		: 1;
+        unsigned io$v_lt_sol_info		: 1;
+        unsigned io$v_lt_rcv_info		: 1;
+        unsigned io$v_lt_setmode		: 1;
+        unsigned io$v_lt_sensemode		: 1;
+        unsigned io$v_lt_que_chg_notif	: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_lt_map_filler		: 1;
+        unsigned io$v_lt_map_nodnam		: 1;
+        unsigned io$v_lt_map_pornam		: 1;
+        unsigned io$v_lt_map_srvnam		: 1;
+        unsigned io$v_lt_map_lnknam		: 1;
+        unsigned io$v_lt_map_netadr		: 1;
+        unsigned io$v_fill_56_		: 2;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_49		: 6;
+        unsigned io$v_flush		        : 1;
+        unsigned io$v_write_barrier		: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_50		: 6;
+        unsigned io$v_mkfill1		: 1;
+        unsigned io$v_allowfast_never		: 1;
+        unsigned io$v_allowfast_per_io		: 1;
+        unsigned io$v_allowfast_always		: 1;
+        unsigned io$v_fill_57_		        : 6;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_51		: 6;
+        unsigned io$v_add		        : 1;
+        unsigned io$v_fill_58_		: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_52		: 6;
+        unsigned io$v_idstring		: 1;
+        unsigned io$v_serialnum		: 1;
+    };
+
+    struct
+    {
+        unsigned io$v_fcode_fill_53		: 6;
+        unsigned io$v_qsrvfill1		: 1;
+        unsigned io$v_qsrv_client_update	: 1;
+    };
 };
- 
+
 #endif

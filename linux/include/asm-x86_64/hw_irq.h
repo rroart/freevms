@@ -15,7 +15,7 @@
  *	<tomsoft@informatik.tu-chemnitz.de>
  *
  *	hacked by Andi Kleen for x86-64.
- * 
+ *
  *  $Id$
  */
 
@@ -268,32 +268,33 @@ extern unsigned long prof_shift;
  */
 static inline void x86_do_profile (unsigned long eip)
 {
-	if (!prof_buffer)
-		return;
+    if (!prof_buffer)
+        return;
 
-	/*
-	 * Only measure the CPUs specified by /proc/irq/prof_cpu_mask.
-	 * (default is all CPUs.)
-	 */
-	if (!((1<<smp_processor_id()) & prof_cpu_mask))
-		return;
+    /*
+     * Only measure the CPUs specified by /proc/irq/prof_cpu_mask.
+     * (default is all CPUs.)
+     */
+    if (!((1<<smp_processor_id()) & prof_cpu_mask))
+        return;
 
-	eip -= (unsigned long) &_stext;
-	eip >>= prof_shift;
-	/*
-	 * Don't ignore out-of-bounds EIP values silently,
-	 * put them into the last histogram slot, so if
-	 * present, they will show up as a sharp peak.
-	 */
-	if (eip > prof_len-1)
-		eip = prof_len-1;
-	atomic_inc((atomic_t *)&prof_buffer[eip]);
+    eip -= (unsigned long) &_stext;
+    eip >>= prof_shift;
+    /*
+     * Don't ignore out-of-bounds EIP values silently,
+     * put them into the last histogram slot, so if
+     * present, they will show up as a sharp peak.
+     */
+    if (eip > prof_len-1)
+        eip = prof_len-1;
+    atomic_inc((atomic_t *)&prof_buffer[eip]);
 }
 
 #ifdef CONFIG_SMP /*more of this file should probably be ifdefed SMP */
-static inline void hw_resend_irq(struct hw_interrupt_type *h, unsigned int i) {
-	if (IO_APIC_IRQ(i))
-		send_IPI_self(IO_APIC_VECTOR(i));
+static inline void hw_resend_irq(struct hw_interrupt_type *h, unsigned int i)
+{
+    if (IO_APIC_IRQ(i))
+        send_IPI_self(IO_APIC_VECTOR(i));
 }
 #else
 static inline void hw_resend_irq(struct hw_interrupt_type *h, unsigned int i) {}

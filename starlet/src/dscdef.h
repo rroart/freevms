@@ -167,18 +167,18 @@
 #define		DSC$C_J_BLN		8
 #define		DSC$K_VS_BLN		8
 #define		DSC$C_VS_BLN		8
-	
+
 #define		DSC$K_UBS_BLN		12
 #define		DSC$C_UBS_BLN		12
-	
+
 #define		DSC$K_SD_BLN		12
 #define		DSC$C_SD_BLN		12
-	
+
 #define		DSC$K_PI_BLN		12
 #define		DSC$C_PI_BLN		12
 #define		DSC$K_JI_BLN		12
 #define		DSC$C_JI_BLN		12
-	
+
 #define		DSC64$K_Z_BLN		24
 #define		DSC64$C_Z_BLN		24
 #define		DSC64$K_S_BLN		24
@@ -191,159 +191,182 @@
 #define		DSC64$C_J_BLN		24
 #define		DSC64$K_VS_BLN		24
 #define		DSC64$C_VS_BLN		24
-	
+
 #define		DSC64$K_UBS_BLN		32
 #define		DSC64$C_UBS_BLN		32
-	
+
 #define		DSC64$K_SD_BLN		32
 #define		DSC64$C_SD_BLN		32
-	
+
 #define		DSC64$K_PI_BLN		32
 #define		DSC64$C_PI_BLN		32
 #define		DSC64$K_JI_BLN		32
 #define		DSC64$C_JI_BLN		32
 
-struct _dscdef {
-  int dsc$a_handle;
-  unsigned int dsc$l_byteoff;
-  unsigned int dsc$l_logunit;
-  unsigned short int dsc$w_length;
+struct _dscdef
+{
+    int dsc$a_handle;
+    unsigned int dsc$l_byteoff;
+    unsigned int dsc$l_logunit;
+    unsigned short int dsc$w_length;
 };
 
-struct _dscdef1 {
-  unsigned short int dsc$w_maxstrlen;
-  unsigned char dsc$b_dtype;
-  unsigned char dsc$b_class;
-  void *dsc$a_pointer;
+struct _dscdef1
+{
+    unsigned short int dsc$w_maxstrlen;
+    unsigned char dsc$b_dtype;
+    unsigned char dsc$b_class;
+    void *dsc$a_pointer;
 };
 
-struct _dscdef2 {
-  char dscdef$$_fill_3 [4];
-  void *dsc$a_base;
+struct _dscdef2
+{
+    char dscdef$$_fill_3 [4];
+    void *dsc$a_base;
 };
 
-struct _dscdef3 {
-  char dscdef$$_fill_4 [8];
-  int dsc$l_pos;
+struct _dscdef3
+{
+    char dscdef$$_fill_4 [8];
+    int dsc$l_pos;
 };
 
-struct _dscdef4 {
-  char dscdef$$_fill_5 [8];
-  unsigned short int dsc$w_maxlen;
+struct _dscdef4
+{
+    char dscdef$$_fill_5 [8];
+    unsigned short int dsc$w_maxlen;
 
 
-  short int dscdef$$_fill_1;
+    short int dscdef$$_fill_1;
 };
 
-struct _dscdef5 {
-  char dscdef_64$$_fill_6 [8];
-  char dsc$b_scale;
-  unsigned char dsc$b_digits;
-  union  {
-    unsigned char dsc$b_aflags;
-    struct  {
-      unsigned dscdef$$_fill_2		: 4;
-      unsigned dsc$v_fl_redim		: 1;
-      unsigned dsc$v_fl_column		: 1;
-      unsigned dsc$v_fl_coeff		: 1;
-      unsigned dsc$v_fl_bounds		: 1;
+struct _dscdef5
+{
+    char dscdef_64$$_fill_6 [8];
+    char dsc$b_scale;
+    unsigned char dsc$b_digits;
+    union
+    {
+        unsigned char dsc$b_aflags;
+        struct
+        {
+            unsigned dscdef$$_fill_2		: 4;
+            unsigned dsc$v_fl_redim		: 1;
+            unsigned dsc$v_fl_column		: 1;
+            unsigned dsc$v_fl_coeff		: 1;
+            unsigned dsc$v_fl_bounds		: 1;
+        };
     };
-  };
-  unsigned char dsc$b_dimct;
-  unsigned int dsc$l_arsize;
-  void *dsc$a_a0;
-};
- 
-struct _dscdef6 {
-  char dscdef$$_fill_7 [16];
-  int dsc$l_v0;
-  unsigned int dsc$l_s1;
-  unsigned int dsc$l_s2;
+    unsigned char dsc$b_dimct;
+    unsigned int dsc$l_arsize;
+    void *dsc$a_a0;
 };
 
-struct _dscdef7 {
-  char dscdef$$_fill_8 [20];
-  unsigned int dsc$l_m1;
-  unsigned int dsc$l_m2;
+struct _dscdef6
+{
+    char dscdef$$_fill_7 [16];
+    int dsc$l_v0;
+    unsigned int dsc$l_s1;
+    unsigned int dsc$l_s2;
 };
 
-struct _dscdef8 {
-  char dscdef$$_fill_9 [8];
-  void *dsc$a_frame;
-};
-struct _dscdef9 {
-  char dscdef$$_fill_10 [8];
-  int dsc$l_sb_l1;
-  int dsc$l_sb_u1;
-};
-struct _dscdef10 {
-  char dscdef$$_fill_11 [12];
-  int dsc$l_ubsb_l1;
-  int dsc$l_ubsb_u1;
+struct _dscdef7
+{
+    char dscdef$$_fill_8 [20];
+    unsigned int dsc$l_m1;
+    unsigned int dsc$l_m2;
 };
 
-struct _dscdef64 {
-  char dscdef_64$$_fill_1 [8];
-  unsigned long long dsc64$q_length;
+struct _dscdef8
+{
+    char dscdef$$_fill_9 [8];
+    void *dsc$a_frame;
+};
+struct _dscdef9
+{
+    char dscdef$$_fill_10 [8];
+    int dsc$l_sb_l1;
+    int dsc$l_sb_u1;
+};
+struct _dscdef10
+{
+    char dscdef$$_fill_11 [12];
+    int dsc$l_ubsb_l1;
+    int dsc$l_ubsb_u1;
 };
 
-struct _dscdef1_64 {
-  unsigned short int dsc64$w_mbo;
-  unsigned char dsc64$b_dtype;
-  unsigned char dsc64$b_class;
-  int dsc64$l_mbmo;
-  unsigned long long dsc64$q_maxstrlen;
-  void *dsc64$pq_pointer;
+struct _dscdef64
+{
+    char dscdef_64$$_fill_1 [8];
+    unsigned long long dsc64$q_length;
 };
 
-struct _dscdef2_64 {
-  char dscdef_64$$_fill_3 [16];
-  void *dsc64$pq_base;
+struct _dscdef1_64
+{
+    unsigned short int dsc64$w_mbo;
+    unsigned char dsc64$b_dtype;
+    unsigned char dsc64$b_class;
+    int dsc64$l_mbmo;
+    unsigned long long dsc64$q_maxstrlen;
+    void *dsc64$pq_pointer;
 };
 
-struct _dscdef3_64 {
-  char dscdef_64$$_fill_4 [24];
-  long long dsc64$q_pos;
+struct _dscdef2_64
+{
+    char dscdef_64$$_fill_3 [16];
+    void *dsc64$pq_base;
 };
 
-struct _dscdef5_64 {
-  char dscdef_64$$_fill_6 [24];
-  char dsc64$b_scale;
-  unsigned char dsc64$b_digits;
-  union  {
-    unsigned char dsc64$b_aflags;
-    struct  {
-      unsigned dscdef_64$$_fill_2	: 4;
-      unsigned dsc64$v_fl_redim		: 1;
-      unsigned dsc64$v_fl_column	: 1;
-      unsigned dsc64$v_fl_coeff		: 1;
-      unsigned dsc64$v_fl_bounds	: 1;
+struct _dscdef3_64
+{
+    char dscdef_64$$_fill_4 [24];
+    long long dsc64$q_pos;
+};
+
+struct _dscdef5_64
+{
+    char dscdef_64$$_fill_6 [24];
+    char dsc64$b_scale;
+    unsigned char dsc64$b_digits;
+    union
+    {
+        unsigned char dsc64$b_aflags;
+        struct
+        {
+            unsigned dscdef_64$$_fill_2	: 4;
+            unsigned dsc64$v_fl_redim		: 1;
+            unsigned dsc64$v_fl_column	: 1;
+            unsigned dsc64$v_fl_coeff		: 1;
+            unsigned dsc64$v_fl_bounds	: 1;
+        };
     };
-  };
-  unsigned char dsc64$b_dimct;
-  unsigned int dsc64$l_mbz;
-  unsigned long long dsc64$q_arsize;
-  void *dsc64$pq_a0;
-};
- 
-struct _dscdef6_64 {
-  char dscdef_64$$_fill_7 [40];
-  long long dsc64$q_v0;
-  unsigned long long dsc64$q_s1;
-  unsigned long long dsc64$q_s2;
+    unsigned char dsc64$b_dimct;
+    unsigned int dsc64$l_mbz;
+    unsigned long long dsc64$q_arsize;
+    void *dsc64$pq_a0;
 };
 
-struct _dscdef7_64 {
-  char dscdef_64$$_fill_8 [48];
-  unsigned long long dsc64$q_m1;
-  unsigned long long dsc64$q_m2;
+struct _dscdef6_64
+{
+    char dscdef_64$$_fill_7 [40];
+    long long dsc64$q_v0;
+    unsigned long long dsc64$q_s1;
+    unsigned long long dsc64$q_s2;
 };
 
-struct _dscdef10_64 {
-  char dscdef_64$$_fill_11 [32];
-  long long dsc64$q_ubsb_l1;
-  long long dsc64$q_ubsb_u1;
+struct _dscdef7_64
+{
+    char dscdef_64$$_fill_8 [48];
+    unsigned long long dsc64$q_m1;
+    unsigned long long dsc64$q_m2;
 };
-	
+
+struct _dscdef10_64
+{
+    char dscdef_64$$_fill_11 [32];
+    long long dsc64$q_ubsb_l1;
+    long long dsc64$q_ubsb_u1;
+};
+
 #endif
- 
+

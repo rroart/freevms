@@ -39,68 +39,75 @@
 #define EIHD$K_ALPHA 5
 #define EIHD$K_ALIAS_MAXCODE 5
 #define EIHD$S_EIHDDEF 512
-	
-struct _eihd {
-  struct  {
-    unsigned int eihd$l_majorid;
-    unsigned int eihd$l_minorid;
-  };
-  unsigned int eihd$l_size;
-  unsigned int eihd$l_isdoff;
-  unsigned int eihd$l_activoff;
-  unsigned int eihd$l_symdbgoff;
-  unsigned int eihd$l_imgidoff;
-  unsigned int eihd$l_patchoff;
-  union  {
-    void *eihd$l_iafva;
-    long long eihd$q_iafva;
-  };
-  union  {
-    void *eihd$l_symvva;
-    long long eihd$q_symvva;
-  };
-  unsigned int eihd$l_version_array_off;
-  unsigned int eihd$l_imgtype;
-  unsigned int eihd$l_subtype;
-  unsigned int eihd$l_imgiocnt;
-  unsigned int eihd$l_iochancnt;
-  unsigned long long eihd$q_privreqs;
-  unsigned int eihd$l_hdrblkcnt;
-  union  {
-    unsigned int eihd$l_lnkflags;
-    struct  {
-      unsigned eihd$v_lnkdebug		: 1;
-      unsigned eihd$v_lnknotfr		: 1;
-      unsigned eihd$v_nop0bufs		: 1;
-      unsigned eihd$v_picimg		: 1;
-      unsigned eihd$v_p0image		: 1;
-      unsigned eihd$v_dbgdmt		: 1;
-      unsigned eihd$v_inishr		: 1;
-      unsigned eihd$v_xlated		: 1;
-      unsigned eihd$v_bind_code_sec	: 1;
-      unsigned eihd$v_bind_data_sec	: 1;
-      unsigned eihd$v_mkthreads		: 1;
-      unsigned eihd$v_upcalls		: 1;
-      unsigned eihd$v_omv_ready		: 1;
-      unsigned eihd$v_ext_bind_sect	: 1;
-      unsigned eihd$v_fill_0_		: 2;
+
+struct _eihd
+{
+    struct
+    {
+        unsigned int eihd$l_majorid;
+        unsigned int eihd$l_minorid;
     };
-  };
+    unsigned int eihd$l_size;
+    unsigned int eihd$l_isdoff;
+    unsigned int eihd$l_activoff;
+    unsigned int eihd$l_symdbgoff;
+    unsigned int eihd$l_imgidoff;
+    unsigned int eihd$l_patchoff;
+    union
+    {
+        void *eihd$l_iafva;
+        long long eihd$q_iafva;
+    };
+    union
+    {
+        void *eihd$l_symvva;
+        long long eihd$q_symvva;
+    };
+    unsigned int eihd$l_version_array_off;
+    unsigned int eihd$l_imgtype;
+    unsigned int eihd$l_subtype;
+    unsigned int eihd$l_imgiocnt;
+    unsigned int eihd$l_iochancnt;
+    unsigned long long eihd$q_privreqs;
+    unsigned int eihd$l_hdrblkcnt;
+    union
+    {
+        unsigned int eihd$l_lnkflags;
+        struct
+        {
+            unsigned eihd$v_lnkdebug		: 1;
+            unsigned eihd$v_lnknotfr		: 1;
+            unsigned eihd$v_nop0bufs		: 1;
+            unsigned eihd$v_picimg		: 1;
+            unsigned eihd$v_p0image		: 1;
+            unsigned eihd$v_dbgdmt		: 1;
+            unsigned eihd$v_inishr		: 1;
+            unsigned eihd$v_xlated		: 1;
+            unsigned eihd$v_bind_code_sec	: 1;
+            unsigned eihd$v_bind_data_sec	: 1;
+            unsigned eihd$v_mkthreads		: 1;
+            unsigned eihd$v_upcalls		: 1;
+            unsigned eihd$v_omv_ready		: 1;
+            unsigned eihd$v_ext_bind_sect	: 1;
+            unsigned eihd$v_fill_0_		: 2;
+        };
+    };
     unsigned int eihd$l_ident;
     unsigned int eihd$l_sysver;
-    struct  {
+    struct
+    {
         unsigned char eihd$b_matchctl;
         unsigned char eihd$b_fill_1;
         unsigned char eihd$b_fill_2;
         unsigned char eihd$b_fill_3;
         unsigned int eihd$l_symvect_size;
         unsigned int eihd$l_virt_mem_block_size;
-        };
+    };
     unsigned int eihd$l_ext_fixup_off;
     unsigned int eihd$l_noopt_psect_off;
     char eihd$t_skip [398];
     unsigned short int eihd$w_alias;
-    };
- 
+};
+
 #endif
- 
+

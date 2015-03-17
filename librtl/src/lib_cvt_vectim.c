@@ -43,18 +43,19 @@
         OFFSET FROM 1/1/1601 TO 17/11/1858  */
 #define BASE_YEAR       1601
 
-struct TIME {
+struct TIME
+{
     unsigned char time[8];
 };
 
 unsigned long sys$__combine_date_time(int days, const struct TIME *timadr,
-	int day_time);
+                                      int day_time);
 
 /* lib_cvt_vectim() takes individual time fields in seven word buffer and
    munges into a quadword... */
 
 static const unsigned short month_end[] =
-	{0,31,59,90,120,151,181,212,243,273,304,334,365};
+{0,31,59,90,120,151,181,212,243,273,304,334,365};
 
 unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
 {
@@ -67,47 +68,65 @@ unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
 
     /* lib_cvt_vectim packs the seven date/time components into a quadword... */
 
-    if (timbuf[0] == 0 && timbuf[1] == 0) {
+    if (timbuf[0] == 0 && timbuf[1] == 0)
+    {
         delta = 1;
         days = timbuf[2];
-    } else {
+    }
+    else
+    {
         register leap = 0,year = timbuf[0],month = timbuf[1];
-        if (month >= 2) {
-            if ((year % 4) == 0) {
-                if ((year % 100) == 0) {
-                    if ((year % 400) == 0) {
+        if (month >= 2)
+        {
+            if ((year % 4) == 0)
+            {
+                if ((year % 100) == 0)
+                {
+                    if ((year % 400) == 0)
+                    {
                         leap = 1;
                     }
-                } else {
+                }
+                else
+                {
                     leap = 1;
                 }
             }
         }
         days = timbuf[2];
         if (year >= 1858 && year <= 9999 && month >= 1 &&
-            month <= 12 && days >= 1) {
+                month <= 12 && days >= 1)
+        {
             days += month_end[month - 1];
             if (month > 2) days += leap;
-            if (days <= month_end[month] + leap) {
+            if (days <= month_end[month] + leap)
+            {
                 year -= BASE_YEAR;
                 days += year * 365 + year / 4 - year / 100 + year / 400
-                     - OFFSET_DAYS - 1;
-            } else {
+                        - OFFSET_DAYS - 1;
+            }
+            else
+            {
                 sts = SS$_IVTIME;
             }
-        } else {
+        }
+        else
+        {
             sts = SS$_IVTIME;
         }
     }
     if (timbuf[3] > 23 || timbuf[4] > 59 ||
-        timbuf[5] > 59 || timbuf[6] > 99) {
+            timbuf[5] > 59 || timbuf[6] > 99)
+    {
         sts = SS$_IVTIME;
     }
-    if (sts & 1) {
+    if (sts & 1)
+    {
         day_time = timbuf[3] * 360000 + timbuf[4] * 6000 +
-            timbuf[5] * 100 + timbuf[6];
+                   timbuf[5] * 100 + timbuf[6];
         sts = sys$__combine_date_time(days,timadr,day_time);
-        if (delta) {
+        if (delta)
+        {
 
             /* We have to 2's complement delta times - sigh!! */
 
@@ -116,11 +135,13 @@ unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
             count = 8;
             ptr = timadr->time;
             time = 1;
-            do {
+            do
+            {
                 time = time + ((~*ptr) & 0xFF);
                 *ptr++ = time;
                 time = (time >> 8);
-            } while (--count > 0);
+            }
+            while (--count > 0);
         }
     }
     return sts;

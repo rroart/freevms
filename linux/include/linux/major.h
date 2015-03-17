@@ -68,7 +68,7 @@
 #define IDE2_MAJOR	33
 #define IDE3_MAJOR	34
 #define XPRAM_MAJOR     35      /* expanded storage on S/390 = "slow ram" */
-                                /* proposed by Peter                      */
+/* proposed by Peter                      */
 #define NETLINK_MAJOR	36
 #define PS2ESDI_MAJOR	36
 #define IDETAPE_MAJOR	37
@@ -169,13 +169,14 @@
 
 #define SCSI_DISK_MAJOR(M) ((M) == SCSI_DISK0_MAJOR || \
   ((M) >= SCSI_DISK1_MAJOR && (M) <= SCSI_DISK7_MAJOR))
-  
+
 #define SCSI_BLK_MAJOR(M) \
   (SCSI_DISK_MAJOR(M)	\
    || (M) == SCSI_CDROM_MAJOR)
 
-static __inline__ int scsi_blk_major(int m) {
-	return SCSI_BLK_MAJOR(m);
+static __inline__ int scsi_blk_major(int m)
+{
+    return SCSI_BLK_MAJOR(m);
 }
 
 /*
@@ -189,7 +190,7 @@ static __inline__ int scsi_blk_major(int m) {
 
 static __inline__ int ide_blk_major(int m)
 {
-	return IDE_DISK_MAJOR(m);
+    return IDE_DISK_MAJOR(m);
 }
 
 #endif

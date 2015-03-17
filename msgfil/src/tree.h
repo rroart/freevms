@@ -44,10 +44,11 @@ typedef int bool;
 
 #define DEFTREECODE(SYM, STRING, TYPE, NARGS)   SYM,
 
-enum tree_code {
+enum tree_code
+{
 #include "tree.def"
 
-  LAST_AND_UNUSED_TREE_CODE	/* A convenient way to get a value for
+    LAST_AND_UNUSED_TREE_CODE	/* A convenient way to get a value for
 				   NUM_TREE_CODE.  */
 };
 
@@ -89,10 +90,10 @@ extern const char *const tree_code_name[];
    Note that we assume below that this is no more than two bits.  */
 enum built_in_class
 {
-  NOT_BUILT_IN = 0,
-  BUILT_IN_FRONTEND,
-  BUILT_IN_MD,
-  BUILT_IN_NORMAL
+    NOT_BUILT_IN = 0,
+    BUILT_IN_FRONTEND,
+    BUILT_IN_MD,
+    BUILT_IN_NORMAL
 };
 
 /* Names for the above.  */
@@ -108,8 +109,8 @@ enum built_in_function
 #if 0
 #include "builtins.def"
 #endif
-  /* Upper bound on non-language-specific builtins.  */
-  END_BUILTINS
+    /* Upper bound on non-language-specific builtins.  */
+    END_BUILTINS
 };
 #undef DEF_BUILTIN
 #endif
@@ -147,37 +148,37 @@ extern GTY(()) tree implicit_built_in_decls[(int) END_BUILTINS];
 
 struct tree_common GTY(())
 {
-  tree chain;
-  tree type;
+    tree chain;
+    tree type;
 
-  ENUM_BITFIELD(tree_code) code : 8;
+    ENUM_BITFIELD(tree_code) code : 8;
 
-  unsigned side_effects_flag : 1;
-  unsigned constant_flag : 1;
-  unsigned addressable_flag : 1;
-  unsigned volatile_flag : 1;
-  unsigned readonly_flag : 1;
-  unsigned unsigned_flag : 1;
-  unsigned asm_written_flag: 1;
-  unsigned unused_0 : 1;
+    unsigned side_effects_flag : 1;
+    unsigned constant_flag : 1;
+    unsigned addressable_flag : 1;
+    unsigned volatile_flag : 1;
+    unsigned readonly_flag : 1;
+    unsigned unsigned_flag : 1;
+    unsigned asm_written_flag: 1;
+    unsigned unused_0 : 1;
 
-  unsigned used_flag : 1;
-  unsigned nothrow_flag : 1;
-  unsigned static_flag : 1;
-  unsigned public_flag : 1;
-  unsigned private_flag : 1;
-  unsigned protected_flag : 1;
-  unsigned deprecated_flag : 1;
-  unsigned unused_1 : 1;
+    unsigned used_flag : 1;
+    unsigned nothrow_flag : 1;
+    unsigned static_flag : 1;
+    unsigned public_flag : 1;
+    unsigned private_flag : 1;
+    unsigned protected_flag : 1;
+    unsigned deprecated_flag : 1;
+    unsigned unused_1 : 1;
 
-  unsigned lang_flag_0 : 1;
-  unsigned lang_flag_1 : 1;
-  unsigned lang_flag_2 : 1;
-  unsigned lang_flag_3 : 1;
-  unsigned lang_flag_4 : 1;
-  unsigned lang_flag_5 : 1;
-  unsigned lang_flag_6 : 1;
-  unsigned unused_2 : 1;
+    unsigned lang_flag_0 : 1;
+    unsigned lang_flag_1 : 1;
+    unsigned lang_flag_2 : 1;
+    unsigned lang_flag_3 : 1;
+    unsigned lang_flag_4 : 1;
+    unsigned lang_flag_5 : 1;
+    unsigned lang_flag_6 : 1;
+    unsigned unused_2 : 1;
 };
 
 /* The following table lists the uses of each of the above flags and
@@ -230,7 +231,7 @@ struct tree_common GTY(())
            BLOCK
 	   ..._DECL
        CALL_FROM_THUNK_P in
-           CALL_EXPR 
+           CALL_EXPR
 
    side_effects_flag:
 
@@ -365,18 +366,18 @@ struct tree_common GTY(())
     &__t->exp.operands[__i]; }))
 
 extern void tree_check_failed (const tree, enum tree_code,
-			       const char *, int, const char *)
-    ATTRIBUTE_NORETURN;
+                               const char *, int, const char *)
+ATTRIBUTE_NORETURN;
 extern void tree_class_check_failed (const tree, int,
-				     const char *, int, const char *)
-    ATTRIBUTE_NORETURN;
+                                     const char *, int, const char *)
+ATTRIBUTE_NORETURN;
 extern void tree_vec_elt_check_failed (int, int, const char *,
-				       int, const char *)
-    ATTRIBUTE_NORETURN;
+                                       int, const char *)
+ATTRIBUTE_NORETURN;
 
 extern void tree_operand_check_failed (int, enum tree_code,
-				       const char *, int, const char *)
-    ATTRIBUTE_NORETURN;
+                                       const char *, int, const char *)
+ATTRIBUTE_NORETURN;
 
 #else /* not ENABLE_TREE_CHECKING, or not gcc */
 
@@ -700,14 +701,15 @@ extern void tree_operand_check_failed (int, enum tree_code,
 
 struct tree_int_cst GTY(())
 {
-  struct tree_common common;
-  /* A sub-struct is necessary here because the function `const_hash'
-     wants to scan both words as a unit and taking the address of the
-     sub-struct yields the properly inclusive bounded pointer.  */
-  struct tree_int_cst_lowhi {
-    unsigned HOST_WIDE_INT low;
-    HOST_WIDE_INT high;
-  } int_cst;
+    struct tree_common common;
+    /* A sub-struct is necessary here because the function `const_hash'
+       wants to scan both words as a unit and taking the address of the
+       sub-struct yields the properly inclusive bounded pointer.  */
+    struct tree_int_cst_lowhi
+    {
+        unsigned HOST_WIDE_INT low;
+        HOST_WIDE_INT high;
+    } int_cst;
 };
 
 /* In a REAL_CST node.  struct real_value is an opaque entity, with
@@ -720,8 +722,8 @@ struct real_value;
 
 struct tree_real_cst GTY(())
 {
-  struct tree_common common;
-  struct real_value * real_cst_ptr;
+    struct tree_common common;
+    struct real_value * real_cst_ptr;
 };
 
 /* In a STRING_CST */
@@ -730,9 +732,9 @@ struct tree_real_cst GTY(())
 
 struct tree_string GTY(())
 {
-  struct tree_common common;
-  int length;
-  const char *pointer;
+    struct tree_common common;
+    int length;
+    const char *pointer;
 };
 
 /* In a COMPLEX_CST node.  */
@@ -741,9 +743,9 @@ struct tree_string GTY(())
 
 struct tree_complex GTY(())
 {
-  struct tree_common common;
-  tree real;
-  tree imag;
+    struct tree_common common;
+    tree real;
+    tree imag;
 };
 
 /* In a VECTOR_CST node.  */
@@ -751,8 +753,8 @@ struct tree_complex GTY(())
 
 struct tree_vector GTY(())
 {
-  struct tree_common common;
-  tree elements;
+    struct tree_common common;
+    tree elements;
 };
 
 #include "hashtable.h"
@@ -775,8 +777,8 @@ struct tree_vector GTY(())
 
 struct tree_identifier GTY(())
 {
-  struct tree_common common;
-  struct ht_identifier id;
+    struct tree_common common;
+    struct ht_identifier id;
 };
 
 /* In a TREE_LIST node.  */
@@ -785,9 +787,9 @@ struct tree_identifier GTY(())
 
 struct tree_list GTY(())
 {
-  struct tree_common common;
-  tree purpose;
-  tree value;
+    struct tree_common common;
+    tree purpose;
+    tree value;
 };
 
 /* In a TREE_VEC node.  */
@@ -799,9 +801,9 @@ struct tree_list GTY(())
 
 struct tree_vec GTY(())
 {
-  struct tree_common common;
-  int length;
-  tree GTY ((length ("TREE_VEC_LENGTH ((tree)&%h)"))) a[1];
+    struct tree_common common;
+    int length;
+    tree GTY ((length ("TREE_VEC_LENGTH ((tree)&%h)"))) a[1];
 };
 
 /* Define fields and accessors for some nodes that represent expressions.  */
@@ -870,10 +872,10 @@ struct tree_vec GTY(())
 
 struct tree_exp GTY(())
 {
-  struct tree_common common;
-  int complexity;
-  tree GTY ((special ("tree_exp"),
-	     desc ("TREE_CODE ((tree) &%0)")))
+    struct tree_common common;
+    int complexity;
+    tree GTY ((special ("tree_exp"),
+               desc ("TREE_CODE ((tree) &%0)")))
     operands[1];
 };
 
@@ -924,18 +926,18 @@ struct tree_exp GTY(())
 
 struct tree_block GTY(())
 {
-  struct tree_common common;
+    struct tree_common common;
 
-  unsigned handler_block_flag : 1;
-  unsigned abstract_flag : 1;
-  unsigned block_num : 30;
+    unsigned handler_block_flag : 1;
+    unsigned abstract_flag : 1;
+    unsigned block_num : 30;
 
-  tree vars;
-  tree subblocks;
-  tree supercontext;
-  tree abstract_origin;
-  tree fragment_origin;
-  tree fragment_chain;
+    tree vars;
+    tree subblocks;
+    tree supercontext;
+    tree abstract_origin;
+    tree fragment_origin;
+    tree fragment_chain;
 };
 
 /* Define fields and accessors for nodes representing data types.  */
@@ -1084,8 +1086,8 @@ struct tree_block GTY(())
 #define TYPE_VECTOR_SUBPARTS(VECTOR_TYPE) \
   GET_MODE_NUNITS (VECTOR_TYPE_CHECK (VECTOR_TYPE)->type.mode)
 
-  /* Indicates that objects of this type must be initialized by calling a
-   function when they are created.  */
+/* Indicates that objects of this type must be initialized by calling a
+ function when they are created.  */
 #define TYPE_NEEDS_CONSTRUCTING(NODE) \
   (TYPE_CHECK (NODE)->type.needs_constructing_flag)
 
@@ -1107,57 +1109,58 @@ struct die_struct;
 
 struct tree_type GTY(())
 {
-  struct tree_common common;
-  tree values;
-  tree size;
-  tree size_unit;
-  tree attributes;
-  unsigned int uid;
+    struct tree_common common;
+    tree values;
+    tree size;
+    tree size_unit;
+    tree attributes;
+    unsigned int uid;
 
-  unsigned int precision : 9;
-  unsigned int precision2 : 7;
+    unsigned int precision : 9;
+    unsigned int precision2 : 7;
 #if 0
-  ENUM_BITFIELD(machine_mode) mode : 7;
+    ENUM_BITFIELD(machine_mode) mode : 7;
 #else
-  unsigned int mode : 7;
+    unsigned int mode : 7;
 #endif
 
-  unsigned string_flag : 1;
-  unsigned no_force_blk_flag : 1;
-  unsigned needs_constructing_flag : 1;
-  unsigned transparent_union_flag : 1;
-  unsigned packed_flag : 1;
-  unsigned restrict_flag : 1;
-  unsigned spare : 2;
+    unsigned string_flag : 1;
+    unsigned no_force_blk_flag : 1;
+    unsigned needs_constructing_flag : 1;
+    unsigned transparent_union_flag : 1;
+    unsigned packed_flag : 1;
+    unsigned restrict_flag : 1;
+    unsigned spare : 2;
 
-  unsigned lang_flag_0 : 1;
-  unsigned lang_flag_1 : 1;
-  unsigned lang_flag_2 : 1;
-  unsigned lang_flag_3 : 1;
-  unsigned lang_flag_4 : 1;
-  unsigned lang_flag_5 : 1;
-  unsigned lang_flag_6 : 1;
-  unsigned user_align : 1;
+    unsigned lang_flag_0 : 1;
+    unsigned lang_flag_1 : 1;
+    unsigned lang_flag_2 : 1;
+    unsigned lang_flag_3 : 1;
+    unsigned lang_flag_4 : 1;
+    unsigned lang_flag_5 : 1;
+    unsigned lang_flag_6 : 1;
+    unsigned user_align : 1;
 
-  unsigned int align;
-  tree pointer_to;
-  tree reference_to;
-  union tree_type_symtab {
-    int GTY ((tag ("0"))) address;
-    char * GTY ((tag ("1"))) pointer;
-    struct die_struct * GTY ((tag ("2"))) die;
-  } GTY ((desc ("debug_hooks == &sdb_debug_hooks ? 1 : debug_hooks == &dwarf2_debug_hooks ? 2 : 0"),
-	  descbits ("2"))) symtab;
-  tree name;
-  tree minval;
-  tree maxval;
-  tree next_variant;
-  tree main_variant;
-  tree binfo;
-  tree context;
-  HOST_WIDE_INT alias_set;
-  /* Points to a structure whose details depend on the language in use.  */
-  struct lang_type *lang_specific;
+    unsigned int align;
+    tree pointer_to;
+    tree reference_to;
+    union tree_type_symtab
+    {
+        int GTY ((tag ("0"))) address;
+        char * GTY ((tag ("1"))) pointer;
+        struct die_struct * GTY ((tag ("2"))) die;
+    } GTY ((desc ("debug_hooks == &sdb_debug_hooks ? 1 : debug_hooks == &dwarf2_debug_hooks ? 2 : 0"),
+            descbits ("2"))) symtab;
+    tree name;
+    tree minval;
+    tree maxval;
+    tree next_variant;
+    tree main_variant;
+    tree binfo;
+    tree context;
+    HOST_WIDE_INT alias_set;
+    /* Points to a structure whose details depend on the language in use.  */
+    struct lang_type *lang_specific;
 };
 
 /* Define accessor macros for information about type inheritance
@@ -1660,136 +1663,140 @@ struct tree_type GTY(())
 
 enum symbol_visibility
 {
-  VISIBILITY_DEFAULT,
-  VISIBILITY_INTERNAL,
-  VISIBILITY_HIDDEN,
-  VISIBILITY_PROTECTED
+    VISIBILITY_DEFAULT,
+    VISIBILITY_INTERNAL,
+    VISIBILITY_HIDDEN,
+    VISIBILITY_PROTECTED
 };
 
 struct function;
 
 struct tree_decl GTY(())
 {
-  struct tree_common common;
-  location_t locus;
-  unsigned int uid;
-  tree size;
-  unsigned int mode : 8;
+    struct tree_common common;
+    location_t locus;
+    unsigned int uid;
+    tree size;
+    unsigned int mode : 8;
 #if 0
-  ENUM_BITFIELD(machine_mode) mode : 8;
+    ENUM_BITFIELD(machine_mode) mode : 8;
 #endif
 
-  unsigned external_flag : 1;
-  unsigned nonlocal_flag : 1;
-  unsigned regdecl_flag : 1;
-  unsigned inline_flag : 1;
-  unsigned bit_field_flag : 1;
-  unsigned virtual_flag : 1;
-  unsigned ignored_flag : 1;
-  unsigned abstract_flag : 1;
+    unsigned external_flag : 1;
+    unsigned nonlocal_flag : 1;
+    unsigned regdecl_flag : 1;
+    unsigned inline_flag : 1;
+    unsigned bit_field_flag : 1;
+    unsigned virtual_flag : 1;
+    unsigned ignored_flag : 1;
+    unsigned abstract_flag : 1;
 
-  unsigned in_system_header_flag : 1;
-  unsigned common_flag : 1;
-  unsigned defer_output : 1;
-  unsigned transparent_union : 1;
-  unsigned static_ctor_flag : 1;
-  unsigned static_dtor_flag : 1;
-  unsigned artificial_flag : 1;
-  unsigned weak_flag : 1;
+    unsigned in_system_header_flag : 1;
+    unsigned common_flag : 1;
+    unsigned defer_output : 1;
+    unsigned transparent_union : 1;
+    unsigned static_ctor_flag : 1;
+    unsigned static_dtor_flag : 1;
+    unsigned artificial_flag : 1;
+    unsigned weak_flag : 1;
 
-  unsigned non_addr_const_p : 1;
-  unsigned no_instrument_function_entry_exit : 1;
-  unsigned comdat_flag : 1;
-  unsigned malloc_flag : 1;
-  unsigned no_limit_stack : 1;
-  ENUM_BITFIELD(built_in_class) built_in_class : 2;
-  unsigned pure_flag : 1;
+    unsigned non_addr_const_p : 1;
+    unsigned no_instrument_function_entry_exit : 1;
+    unsigned comdat_flag : 1;
+    unsigned malloc_flag : 1;
+    unsigned no_limit_stack : 1;
+    ENUM_BITFIELD(built_in_class) built_in_class : 2;
+    unsigned pure_flag : 1;
 
-  unsigned non_addressable : 1;
-  unsigned user_align : 1;
-  unsigned uninlinable : 1;
-  unsigned thread_local_flag : 1;
-  unsigned declared_inline_flag : 1;
-  ENUM_BITFIELD(symbol_visibility) visibility : 2;
-  unsigned unused : 1;
-  /* one unused bit.  */
+    unsigned non_addressable : 1;
+    unsigned user_align : 1;
+    unsigned uninlinable : 1;
+    unsigned thread_local_flag : 1;
+    unsigned declared_inline_flag : 1;
+    ENUM_BITFIELD(symbol_visibility) visibility : 2;
+    unsigned unused : 1;
+    /* one unused bit.  */
 
-  unsigned lang_flag_0 : 1;
-  unsigned lang_flag_1 : 1;
-  unsigned lang_flag_2 : 1;
-  unsigned lang_flag_3 : 1;
-  unsigned lang_flag_4 : 1;
-  unsigned lang_flag_5 : 1;
-  unsigned lang_flag_6 : 1;
-  unsigned lang_flag_7 : 1;
+    unsigned lang_flag_0 : 1;
+    unsigned lang_flag_1 : 1;
+    unsigned lang_flag_2 : 1;
+    unsigned lang_flag_3 : 1;
+    unsigned lang_flag_4 : 1;
+    unsigned lang_flag_5 : 1;
+    unsigned lang_flag_6 : 1;
+    unsigned lang_flag_7 : 1;
 
-  union tree_decl_u1 {
-    /* In a FUNCTION_DECL for which DECL_BUILT_IN holds, this is
-       DECL_FUNCTION_CODE.  */
-    enum built_in_function f;
-    /* In a FUNCTION_DECL for which DECL_BUILT_IN does not hold, this
-       is used by language-dependent code.  */
-    HOST_WIDE_INT i;
-    /* DECL_ALIGN and DECL_OFFSET_ALIGN.  (These are not used for
-       FUNCTION_DECLs).  */
-    struct tree_decl_u1_a {
-      unsigned int align : 24;
-      unsigned int off_align : 8;
-    } a;
-  } GTY ((skip (""))) u1;
+    union tree_decl_u1
+    {
+        /* In a FUNCTION_DECL for which DECL_BUILT_IN holds, this is
+           DECL_FUNCTION_CODE.  */
+        enum built_in_function f;
+        /* In a FUNCTION_DECL for which DECL_BUILT_IN does not hold, this
+           is used by language-dependent code.  */
+        HOST_WIDE_INT i;
+        /* DECL_ALIGN and DECL_OFFSET_ALIGN.  (These are not used for
+           FUNCTION_DECLs).  */
+        struct tree_decl_u1_a
+        {
+            unsigned int align : 24;
+            unsigned int off_align : 8;
+        } a;
+    } GTY ((skip (""))) u1;
 
-  tree size_unit;
-  tree name;
-  tree context;
-  tree arguments;	/* Also used for DECL_FIELD_OFFSET */
-  tree result;	/* Also used for DECL_BIT_FIELD_TYPE */
-  tree initial;	/* Also used for DECL_QUALIFIER */
-  tree abstract_origin;
-  tree assembler_name;
-  tree section_name;
-  tree attributes;
-  rtx rtl;	/* RTL representation for object.  */
+    tree size_unit;
+    tree name;
+    tree context;
+    tree arguments;	/* Also used for DECL_FIELD_OFFSET */
+    tree result;	/* Also used for DECL_BIT_FIELD_TYPE */
+    tree initial;	/* Also used for DECL_QUALIFIER */
+    tree abstract_origin;
+    tree assembler_name;
+    tree section_name;
+    tree attributes;
+    rtx rtl;	/* RTL representation for object.  */
 
-  /* In FUNCTION_DECL, if it is inline, holds the saved insn chain.
-     In FIELD_DECL, is DECL_FIELD_BIT_OFFSET.
-     In PARM_DECL, holds an RTL for the stack slot
-     of register where the data was actually passed.
-     Used by Chill and Java in LABEL_DECL and by C++ and Java in VAR_DECL.  */
-  union tree_decl_u2 {
-    struct function * GTY ((tag ("FUNCTION_DECL"))) f;
-    rtx GTY ((tag ("PARM_DECL"))) r;
-    tree GTY ((tag ("FIELD_DECL"))) t;
-    int GTY ((tag ("VAR_DECL"))) i;
-  } GTY ((desc ("TREE_CODE((tree) &(%0))"))) u2;
+    /* In FUNCTION_DECL, if it is inline, holds the saved insn chain.
+       In FIELD_DECL, is DECL_FIELD_BIT_OFFSET.
+       In PARM_DECL, holds an RTL for the stack slot
+       of register where the data was actually passed.
+       Used by Chill and Java in LABEL_DECL and by C++ and Java in VAR_DECL.  */
+    union tree_decl_u2
+    {
+        struct function * GTY ((tag ("FUNCTION_DECL"))) f;
+        rtx GTY ((tag ("PARM_DECL"))) r;
+        tree GTY ((tag ("FIELD_DECL"))) t;
+        int GTY ((tag ("VAR_DECL"))) i;
+    } GTY ((desc ("TREE_CODE((tree) &(%0))"))) u2;
 
-  /* In a FUNCTION_DECL, this is DECL_SAVED_TREE.  */
-  tree saved_tree;
+    /* In a FUNCTION_DECL, this is DECL_SAVED_TREE.  */
+    tree saved_tree;
 
-  /* In a FUNCTION_DECL, these are function data which is to be kept
-     as long as FUNCTION_DECL is kept.  */
-  tree inlined_fns;
+    /* In a FUNCTION_DECL, these are function data which is to be kept
+       as long as FUNCTION_DECL is kept.  */
+    tree inlined_fns;
 
-  tree vindex;
-  HOST_WIDE_INT pointer_alias_set;
-  /* Points to a structure whose details depend on the language in use.  */
-  struct lang_decl *lang_specific;
+    tree vindex;
+    HOST_WIDE_INT pointer_alias_set;
+    /* Points to a structure whose details depend on the language in use.  */
+    struct lang_decl *lang_specific;
 };
 
-enum tree_node_structure_enum {
-  TS_COMMON,
-  TS_INT_CST,
-  TS_REAL_CST,
-  TS_VECTOR,
-  TS_STRING,
-  TS_COMPLEX,
-  TS_IDENTIFIER,
-  TS_DECL,
-  TS_TYPE,
-  TS_LIST,
-  TS_VEC,
-  TS_EXP,
-  TS_BLOCK,
-  LAST_TS_ENUM
+enum tree_node_structure_enum
+{
+    TS_COMMON,
+    TS_INT_CST,
+    TS_REAL_CST,
+    TS_VECTOR,
+    TS_STRING,
+    TS_COMPLEX,
+    TS_IDENTIFIER,
+    TS_DECL,
+    TS_TYPE,
+    TS_LIST,
+    TS_VEC,
+    TS_EXP,
+    TS_BLOCK,
+    LAST_TS_ENUM
 };
 
 /* Define the overall contents of a tree node.
@@ -1797,113 +1804,113 @@ enum tree_node_structure_enum {
    for various types of node.  */
 
 union tree_node GTY ((ptr_alias (union lang_tree_node),
-		      desc ("tree_node_structure (&%h)")))
+                              desc ("tree_node_structure (&%h)")))
 {
-  struct tree_common GTY ((tag ("TS_COMMON"))) common;
-  struct tree_int_cst GTY ((tag ("TS_INT_CST"))) int_cst;
-  struct tree_real_cst GTY ((tag ("TS_REAL_CST"))) real_cst;
-  struct tree_vector GTY ((tag ("TS_VECTOR"))) vector;
-  struct tree_string GTY ((tag ("TS_STRING"))) string;
-  struct tree_complex GTY ((tag ("TS_COMPLEX"))) complex;
-  struct tree_identifier GTY ((tag ("TS_IDENTIFIER"))) identifier;
-  struct tree_decl GTY ((tag ("TS_DECL"))) decl;
-  struct tree_type GTY ((tag ("TS_TYPE"))) type;
-  struct tree_list GTY ((tag ("TS_LIST"))) list;
-  struct tree_vec GTY ((tag ("TS_VEC"))) vec;
-  struct tree_exp GTY ((tag ("TS_EXP"))) exp;
-  struct tree_block GTY ((tag ("TS_BLOCK"))) block;
- };
+    struct tree_common GTY ((tag ("TS_COMMON"))) common;
+    struct tree_int_cst GTY ((tag ("TS_INT_CST"))) int_cst;
+    struct tree_real_cst GTY ((tag ("TS_REAL_CST"))) real_cst;
+    struct tree_vector GTY ((tag ("TS_VECTOR"))) vector;
+    struct tree_string GTY ((tag ("TS_STRING"))) string;
+    struct tree_complex GTY ((tag ("TS_COMPLEX"))) complex;
+    struct tree_identifier GTY ((tag ("TS_IDENTIFIER"))) identifier;
+    struct tree_decl GTY ((tag ("TS_DECL"))) decl;
+    struct tree_type GTY ((tag ("TS_TYPE"))) type;
+    struct tree_list GTY ((tag ("TS_LIST"))) list;
+    struct tree_vec GTY ((tag ("TS_VEC"))) vec;
+    struct tree_exp GTY ((tag ("TS_EXP"))) exp;
+    struct tree_block GTY ((tag ("TS_BLOCK"))) block;
+};
 
 /* Standard named or nameless data types of the C compiler.  */
 
 enum tree_index
 {
-  TI_ERROR_MARK,
-  TI_INTQI_TYPE,
-  TI_INTHI_TYPE,
-  TI_INTSI_TYPE,
-  TI_INTDI_TYPE,
-  TI_INTTI_TYPE,
+    TI_ERROR_MARK,
+    TI_INTQI_TYPE,
+    TI_INTHI_TYPE,
+    TI_INTSI_TYPE,
+    TI_INTDI_TYPE,
+    TI_INTTI_TYPE,
 
-  TI_UINTQI_TYPE,
-  TI_UINTHI_TYPE,
-  TI_UINTSI_TYPE,
-  TI_UINTDI_TYPE,
-  TI_UINTTI_TYPE,
+    TI_UINTQI_TYPE,
+    TI_UINTHI_TYPE,
+    TI_UINTSI_TYPE,
+    TI_UINTDI_TYPE,
+    TI_UINTTI_TYPE,
 
-  TI_INTEGER_ZERO,
-  TI_INTEGER_ONE,
-  TI_INTEGER_MINUS_ONE,
-  TI_NULL_POINTER,
+    TI_INTEGER_ZERO,
+    TI_INTEGER_ONE,
+    TI_INTEGER_MINUS_ONE,
+    TI_NULL_POINTER,
 
-  TI_SIZE_ZERO,
-  TI_SIZE_ONE,
+    TI_SIZE_ZERO,
+    TI_SIZE_ONE,
 
-  TI_BITSIZE_ZERO,
-  TI_BITSIZE_ONE,
-  TI_BITSIZE_UNIT,
+    TI_BITSIZE_ZERO,
+    TI_BITSIZE_ONE,
+    TI_BITSIZE_UNIT,
 
-  TI_PUBLIC,
-  TI_PROTECTED,
-  TI_PRIVATE,
+    TI_PUBLIC,
+    TI_PROTECTED,
+    TI_PRIVATE,
 
-  TI_BOOLEAN_FALSE,
-  TI_BOOLEAN_TRUE,
+    TI_BOOLEAN_FALSE,
+    TI_BOOLEAN_TRUE,
 
-  TI_COMPLEX_INTEGER_TYPE,
-  TI_COMPLEX_FLOAT_TYPE,
-  TI_COMPLEX_DOUBLE_TYPE,
-  TI_COMPLEX_LONG_DOUBLE_TYPE,
+    TI_COMPLEX_INTEGER_TYPE,
+    TI_COMPLEX_FLOAT_TYPE,
+    TI_COMPLEX_DOUBLE_TYPE,
+    TI_COMPLEX_LONG_DOUBLE_TYPE,
 
-  TI_FLOAT_TYPE,
-  TI_DOUBLE_TYPE,
-  TI_LONG_DOUBLE_TYPE,
+    TI_FLOAT_TYPE,
+    TI_DOUBLE_TYPE,
+    TI_LONG_DOUBLE_TYPE,
 
-  TI_FLOAT_PTR_TYPE,
-  TI_DOUBLE_PTR_TYPE,
-  TI_LONG_DOUBLE_PTR_TYPE,
-  TI_INTEGER_PTR_TYPE,
+    TI_FLOAT_PTR_TYPE,
+    TI_DOUBLE_PTR_TYPE,
+    TI_LONG_DOUBLE_PTR_TYPE,
+    TI_INTEGER_PTR_TYPE,
 
-  TI_VOID_TYPE,
-  TI_PTR_TYPE,
-  TI_CONST_PTR_TYPE,
-  TI_SIZE_TYPE,
-  TI_PTRDIFF_TYPE,
-  TI_VA_LIST_TYPE,
-  TI_BOOLEAN_TYPE,
+    TI_VOID_TYPE,
+    TI_PTR_TYPE,
+    TI_CONST_PTR_TYPE,
+    TI_SIZE_TYPE,
+    TI_PTRDIFF_TYPE,
+    TI_VA_LIST_TYPE,
+    TI_BOOLEAN_TYPE,
 
-  TI_VOID_LIST_NODE,
+    TI_VOID_LIST_NODE,
 
-  TI_UV4SF_TYPE,
-  TI_UV4SI_TYPE,
-  TI_UV8HI_TYPE,
-  TI_UV8QI_TYPE,
-  TI_UV4HI_TYPE,
-  TI_UV2HI_TYPE,
-  TI_UV2SI_TYPE,
-  TI_UV2SF_TYPE,
-  TI_UV2DI_TYPE,
-  TI_UV1DI_TYPE,
-  TI_UV16QI_TYPE,
+    TI_UV4SF_TYPE,
+    TI_UV4SI_TYPE,
+    TI_UV8HI_TYPE,
+    TI_UV8QI_TYPE,
+    TI_UV4HI_TYPE,
+    TI_UV2HI_TYPE,
+    TI_UV2SI_TYPE,
+    TI_UV2SF_TYPE,
+    TI_UV2DI_TYPE,
+    TI_UV1DI_TYPE,
+    TI_UV16QI_TYPE,
 
-  TI_V4SF_TYPE,
-  TI_V16SF_TYPE,
-  TI_V4SI_TYPE,
-  TI_V8HI_TYPE,
-  TI_V8QI_TYPE,
-  TI_V4HI_TYPE,
-  TI_V2HI_TYPE,
-  TI_V2SI_TYPE,
-  TI_V2SF_TYPE,
-  TI_V2DF_TYPE,
-  TI_V2DI_TYPE,
-  TI_V1DI_TYPE,
-  TI_V16QI_TYPE,
-  TI_V4DF_TYPE,
+    TI_V4SF_TYPE,
+    TI_V16SF_TYPE,
+    TI_V4SI_TYPE,
+    TI_V8HI_TYPE,
+    TI_V8QI_TYPE,
+    TI_V4HI_TYPE,
+    TI_V2HI_TYPE,
+    TI_V2SI_TYPE,
+    TI_V2SF_TYPE,
+    TI_V2DF_TYPE,
+    TI_V2DI_TYPE,
+    TI_V1DI_TYPE,
+    TI_V16QI_TYPE,
+    TI_V4DF_TYPE,
 
-  TI_MAIN_IDENTIFIER,
+    TI_MAIN_IDENTIFIER,
 
-  TI_MAX
+    TI_MAX
 };
 
 extern GTY(()) tree global_trees[TI_MAX];
@@ -2007,18 +2014,18 @@ extern GTY(()) tree global_trees[TI_MAX];
    functioning of interpret_integer() in c-lex.c.  */
 enum integer_type_kind
 {
-  itk_char,
-  itk_signed_char,
-  itk_unsigned_char,
-  itk_short,
-  itk_unsigned_short,
-  itk_int,
-  itk_unsigned_int,
-  itk_long,
-  itk_unsigned_long,
-  itk_long_long,
-  itk_unsigned_long_long,
-  itk_none
+    itk_char,
+    itk_signed_char,
+    itk_unsigned_char,
+    itk_short,
+    itk_unsigned_short,
+    itk_int,
+    itk_unsigned_int,
+    itk_long,
+    itk_unsigned_long,
+    itk_long_long,
+    itk_unsigned_long_long,
+    itk_none
 };
 
 typedef enum integer_type_kind integer_type_kind;
@@ -2041,11 +2048,12 @@ extern GTY(()) tree integer_types[itk_none];
 
 /* Set to the default thread-local storage (tls) model to use.  */
 
-enum tls_model {
-  TLS_MODEL_GLOBAL_DYNAMIC = 1,
-  TLS_MODEL_LOCAL_DYNAMIC,
-  TLS_MODEL_INITIAL_EXEC,
-  TLS_MODEL_LOCAL_EXEC
+enum tls_model
+{
+    TLS_MODEL_GLOBAL_DYNAMIC = 1,
+    TLS_MODEL_LOCAL_DYNAMIC,
+    TLS_MODEL_INITIAL_EXEC,
+    TLS_MODEL_LOCAL_EXEC
 };
 
 extern enum tls_model flag_tls_default;
@@ -2074,8 +2082,8 @@ extern enum tls_model flag_tls_default;
 
 enum ptrmemfunc_vbit_where_t
 {
-  ptrmemfunc_vbit_in_pfn,
-  ptrmemfunc_vbit_in_delta
+    ptrmemfunc_vbit_in_pfn,
+    ptrmemfunc_vbit_in_delta
 };
 
 #define NULL_TREE (tree) NULL
@@ -2207,71 +2215,71 @@ extern tree build_decl_attribute_variant (tree, tree);
 /* Structure describing an attribute and a function to handle it.  */
 struct attribute_spec
 {
-  /* The name of the attribute (without any leading or trailing __),
-     or NULL to mark the end of a table of attributes.  */
-  const char *const name;
-  /* The minimum length of the list of arguments of the attribute.  */
-  const int min_length;
-  /* The maximum length of the list of arguments of the attribute
-     (-1 for no maximum).  */
-  const int max_length;
-  /* Whether this attribute requires a DECL.  If it does, it will be passed
-     from types of DECLs, function return types and array element types to
-     the DECLs, function types and array types respectively; but when
-     applied to a type in any other circumstances, it will be ignored with
-     a warning.  (If greater control is desired for a given attribute,
-     this should be false, and the flags argument to the handler may be
-     used to gain greater control in that case.)  */
-  const bool decl_required;
-  /* Whether this attribute requires a type.  If it does, it will be passed
-     from a DECL to the type of that DECL.  */
-  const bool type_required;
-  /* Whether this attribute requires a function (or method) type.  If it does,
-     it will be passed from a function pointer type to the target type,
-     and from a function return type (which is not itself a function
-     pointer type) to the function type.  */
-  const bool function_type_required;
-  /* Function to handle this attribute.  NODE points to the node to which
-     the attribute is to be applied.  If a DECL, it should be modified in
-     place; if a TYPE, a copy should be created.  NAME is the name of the
-     attribute (possibly with leading or trailing __).  ARGS is the TREE_LIST
-     of the arguments (which may be NULL).  FLAGS gives further information
-     about the context of the attribute.  Afterwards, the attributes will
-     be added to the DECL_ATTRIBUTES or TYPE_ATTRIBUTES, as appropriate,
-     unless *NO_ADD_ATTRS is set to true (which should be done on error,
-     as well as in any other cases when the attributes should not be added
-     to the DECL or TYPE).  Depending on FLAGS, any attributes to be
-     applied to another type or DECL later may be returned;
-     otherwise the return value should be NULL_TREE.  This pointer may be
-     NULL if no special handling is required beyond the checks implied
-     by the rest of this structure.  */
-  tree (*const handler) (tree *node, tree name, tree args,
-				 int flags, bool *no_add_attrs);
+    /* The name of the attribute (without any leading or trailing __),
+       or NULL to mark the end of a table of attributes.  */
+    const char *const name;
+    /* The minimum length of the list of arguments of the attribute.  */
+    const int min_length;
+    /* The maximum length of the list of arguments of the attribute
+       (-1 for no maximum).  */
+    const int max_length;
+    /* Whether this attribute requires a DECL.  If it does, it will be passed
+       from types of DECLs, function return types and array element types to
+       the DECLs, function types and array types respectively; but when
+       applied to a type in any other circumstances, it will be ignored with
+       a warning.  (If greater control is desired for a given attribute,
+       this should be false, and the flags argument to the handler may be
+       used to gain greater control in that case.)  */
+    const bool decl_required;
+    /* Whether this attribute requires a type.  If it does, it will be passed
+       from a DECL to the type of that DECL.  */
+    const bool type_required;
+    /* Whether this attribute requires a function (or method) type.  If it does,
+       it will be passed from a function pointer type to the target type,
+       and from a function return type (which is not itself a function
+       pointer type) to the function type.  */
+    const bool function_type_required;
+    /* Function to handle this attribute.  NODE points to the node to which
+       the attribute is to be applied.  If a DECL, it should be modified in
+       place; if a TYPE, a copy should be created.  NAME is the name of the
+       attribute (possibly with leading or trailing __).  ARGS is the TREE_LIST
+       of the arguments (which may be NULL).  FLAGS gives further information
+       about the context of the attribute.  Afterwards, the attributes will
+       be added to the DECL_ATTRIBUTES or TYPE_ATTRIBUTES, as appropriate,
+       unless *NO_ADD_ATTRS is set to true (which should be done on error,
+       as well as in any other cases when the attributes should not be added
+       to the DECL or TYPE).  Depending on FLAGS, any attributes to be
+       applied to another type or DECL later may be returned;
+       otherwise the return value should be NULL_TREE.  This pointer may be
+       NULL if no special handling is required beyond the checks implied
+       by the rest of this structure.  */
+    tree (*const handler) (tree *node, tree name, tree args,
+                           int flags, bool *no_add_attrs);
 };
 
 /* Flags that may be passed in the third argument of decl_attributes, and
    to handler functions for attributes.  */
 enum attribute_flags
 {
-  /* The type passed in is the type of a DECL, and any attributes that
-     should be passed in again to be applied to the DECL rather than the
-     type should be returned.  */
-  ATTR_FLAG_DECL_NEXT = 1,
-  /* The type passed in is a function return type, and any attributes that
-     should be passed in again to be applied to the function type rather
-     than the return type should be returned.  */
-  ATTR_FLAG_FUNCTION_NEXT = 2,
-  /* The type passed in is an array element type, and any attributes that
-     should be passed in again to be applied to the array type rather
-     than the element type should be returned.  */
-  ATTR_FLAG_ARRAY_NEXT = 4,
-  /* The type passed in is a structure, union or enumeration type being
-     created, and should be modified in place.  */
-  ATTR_FLAG_TYPE_IN_PLACE = 8,
-  /* The attributes are being applied by default to a library function whose
-     name indicates known behavior, and should be silently ignored if they
-     are not in fact compatible with the function type.  */
-  ATTR_FLAG_BUILT_IN = 16
+    /* The type passed in is the type of a DECL, and any attributes that
+       should be passed in again to be applied to the DECL rather than the
+       type should be returned.  */
+    ATTR_FLAG_DECL_NEXT = 1,
+    /* The type passed in is a function return type, and any attributes that
+       should be passed in again to be applied to the function type rather
+       than the return type should be returned.  */
+    ATTR_FLAG_FUNCTION_NEXT = 2,
+    /* The type passed in is an array element type, and any attributes that
+       should be passed in again to be applied to the array type rather
+       than the element type should be returned.  */
+    ATTR_FLAG_ARRAY_NEXT = 4,
+    /* The type passed in is a structure, union or enumeration type being
+       created, and should be modified in place.  */
+    ATTR_FLAG_TYPE_IN_PLACE = 8,
+    /* The attributes are being applied by default to a library function whose
+       name indicates known behavior, and should be silently ignored if they
+       are not in fact compatible with the function type.  */
+    ATTR_FLAG_BUILT_IN = 16
 };
 
 /* Default versions of target-overridable functions.  */
@@ -2341,7 +2349,7 @@ extern tree build_type_copy (tree);
    fields. Optionally specify an alignment, and then lsy it out.  */
 
 extern void finish_builtin_struct (tree, const char *,
-							 tree, tree);
+                                   tree, tree);
 
 /* Given a ..._TYPE node, calculate the TYPE_SIZE, TYPE_SIZE_UNIT,
    TYPE_ALIGN and TYPE_MODE fields.  If called more than once on one
@@ -2358,30 +2366,30 @@ extern void layout_type (tree);
 
 typedef struct record_layout_info_s
 {
-  /* The RECORD_TYPE that we are laying out.  */
-  tree t;
-  /* The offset into the record so far, in bytes, not including bits in
-     BITPOS.  */
-  tree offset;
-  /* The last known alignment of SIZE.  */
-  unsigned int offset_align;
-  /* The bit position within the last OFFSET_ALIGN bits, in bits.  */
-  tree bitpos;
-  /* The alignment of the record so far, in bits.  */
-  unsigned int record_align;
-  /* The alignment of the record so far, ignoring #pragma pack and
-     __attribute__ ((packed)), in bits.  */
-  unsigned int unpacked_align;
-  /* The previous field layed out.  */
-  tree prev_field;
-  /* The static variables (i.e., class variables, as opposed to
-     instance variables) encountered in T.  */
-  tree pending_statics;
-  /* Bits remaining in the current alignment group */
-  int remaining_in_alignment;
-  /* True if we've seen a packed field that didn't have normal
-     alignment anyway.  */
-  int packed_maybe_necessary;
+    /* The RECORD_TYPE that we are laying out.  */
+    tree t;
+    /* The offset into the record so far, in bytes, not including bits in
+       BITPOS.  */
+    tree offset;
+    /* The last known alignment of SIZE.  */
+    unsigned int offset_align;
+    /* The bit position within the last OFFSET_ALIGN bits, in bits.  */
+    tree bitpos;
+    /* The alignment of the record so far, in bits.  */
+    unsigned int record_align;
+    /* The alignment of the record so far, ignoring #pragma pack and
+       __attribute__ ((packed)), in bits.  */
+    unsigned int unpacked_align;
+    /* The previous field layed out.  */
+    tree prev_field;
+    /* The static variables (i.e., class variables, as opposed to
+       instance variables) encountered in T.  */
+    tree pending_statics;
+    /* Bits remaining in the current alignment group */
+    int remaining_in_alignment;
+    /* True if we've seen a packed field that didn't have normal
+       alignment anyway.  */
+    int packed_maybe_necessary;
 } *record_layout_info;
 
 extern void set_lang_adjust_rli (void (*) (record_layout_info));
@@ -2443,13 +2451,14 @@ extern HOST_WIDE_INT int_byte_position (tree);
 
 enum size_type_kind
 {
-  SIZETYPE,		/* Normal representation of sizes in bytes.  */
-  SSIZETYPE,		/* Signed representation of sizes in bytes.  */
-  USIZETYPE,		/* Unsigned representation of sizes in bytes.  */
-  BITSIZETYPE,		/* Normal representation of sizes in bits.  */
-  SBITSIZETYPE,		/* Signed representation of sizes in bits.  */
-  UBITSIZETYPE,	        /* Unsigned representation of sizes in bits.  */
-  TYPE_KIND_LAST};
+    SIZETYPE,		/* Normal representation of sizes in bytes.  */
+    SSIZETYPE,		/* Signed representation of sizes in bytes.  */
+    USIZETYPE,		/* Unsigned representation of sizes in bytes.  */
+    BITSIZETYPE,		/* Normal representation of sizes in bits.  */
+    SBITSIZETYPE,		/* Signed representation of sizes in bits.  */
+    UBITSIZETYPE,	        /* Unsigned representation of sizes in bits.  */
+    TYPE_KIND_LAST
+};
 
 extern GTY(()) tree sizetype_tab[(int) TYPE_KIND_LAST];
 
@@ -2673,7 +2682,7 @@ extern tree get_narrower (tree, int *);
    and find the ultimate containing object, which is returned.  */
 
 extern tree get_inner_reference (tree, HOST_WIDE_INT *, HOST_WIDE_INT *,
-				 tree *, enum machine_mode *, int *, int *);
+                                 tree *, enum machine_mode *, int *, int *);
 
 /* Return 1 if T is an expression that get_inner_reference handles.  */
 
@@ -2732,7 +2741,7 @@ extern tree poplevel (int, int, int);
 /* Declare a predefined function.  Return the declaration.  This function is
    provided by each language frontend.  */
 extern tree builtin_function (const char *, tree, int, enum built_in_class,
-			      const char *, tree);
+                              const char *, tree);
 
 /* In tree.c */
 extern unsigned crc32_string (unsigned, const char *);
@@ -2811,31 +2820,31 @@ extern tree fold_single_bit_test (enum tree_code, tree, tree, tree);
 
 extern int force_fit_type (tree, int);
 extern int add_double (unsigned HOST_WIDE_INT, HOST_WIDE_INT,
-		       unsigned HOST_WIDE_INT, HOST_WIDE_INT,
-		       unsigned HOST_WIDE_INT *, HOST_WIDE_INT *);
+                       unsigned HOST_WIDE_INT, HOST_WIDE_INT,
+                       unsigned HOST_WIDE_INT *, HOST_WIDE_INT *);
 extern int neg_double (unsigned HOST_WIDE_INT, HOST_WIDE_INT,
-		       unsigned HOST_WIDE_INT *, HOST_WIDE_INT *);
+                       unsigned HOST_WIDE_INT *, HOST_WIDE_INT *);
 extern int mul_double (unsigned HOST_WIDE_INT, HOST_WIDE_INT,
-		       unsigned HOST_WIDE_INT, HOST_WIDE_INT,
-		       unsigned HOST_WIDE_INT *, HOST_WIDE_INT *);
+                       unsigned HOST_WIDE_INT, HOST_WIDE_INT,
+                       unsigned HOST_WIDE_INT *, HOST_WIDE_INT *);
 extern void lshift_double (unsigned HOST_WIDE_INT, HOST_WIDE_INT,
-			   HOST_WIDE_INT, unsigned int,
-			   unsigned HOST_WIDE_INT *, HOST_WIDE_INT *, int);
+                           HOST_WIDE_INT, unsigned int,
+                           unsigned HOST_WIDE_INT *, HOST_WIDE_INT *, int);
 extern void rshift_double (unsigned HOST_WIDE_INT, HOST_WIDE_INT,
-			   HOST_WIDE_INT, unsigned int,
-			   unsigned HOST_WIDE_INT *, HOST_WIDE_INT *, int);
+                           HOST_WIDE_INT, unsigned int,
+                           unsigned HOST_WIDE_INT *, HOST_WIDE_INT *, int);
 extern void lrotate_double (unsigned HOST_WIDE_INT, HOST_WIDE_INT,
-			    HOST_WIDE_INT, unsigned int,
-			    unsigned HOST_WIDE_INT *, HOST_WIDE_INT *);
+                            HOST_WIDE_INT, unsigned int,
+                            unsigned HOST_WIDE_INT *, HOST_WIDE_INT *);
 extern void rrotate_double (unsigned HOST_WIDE_INT, HOST_WIDE_INT,
-			    HOST_WIDE_INT, unsigned int,
-			    unsigned HOST_WIDE_INT *, HOST_WIDE_INT *);
+                            HOST_WIDE_INT, unsigned int,
+                            unsigned HOST_WIDE_INT *, HOST_WIDE_INT *);
 
 extern int div_and_round_double (enum tree_code, int, unsigned HOST_WIDE_INT,
-				 HOST_WIDE_INT, unsigned HOST_WIDE_INT,
-				 HOST_WIDE_INT, unsigned HOST_WIDE_INT *,
-				 HOST_WIDE_INT *, unsigned HOST_WIDE_INT *,
-				 HOST_WIDE_INT *);
+                                 HOST_WIDE_INT, unsigned HOST_WIDE_INT,
+                                 HOST_WIDE_INT, unsigned HOST_WIDE_INT *,
+                                 HOST_WIDE_INT *, unsigned HOST_WIDE_INT *,
+                                 HOST_WIDE_INT *);
 
 extern int operand_equal_p (tree, tree, int);
 extern tree omit_one_operand (tree, tree, tree);
@@ -3014,9 +3023,9 @@ extern void notice_global_symbol (tree);
 extern void emit_nop (void);
 extern void expand_computed_goto (tree);
 extern bool parse_output_constraint (const char **, int, int, int,
-				     bool *, bool *, bool *);
+                                     bool *, bool *, bool *);
 extern bool parse_input_constraint (const char **, int, int, int, int,
-				    const char * const *, bool *, bool *);
+                                    const char * const *, bool *, bool *);
 extern void expand_asm_operands (tree, tree, tree, tree, int, location_t);
 extern tree resolve_asm_operand_names (tree, tree, tree);
 extern int any_pending_cleanups (void);
@@ -3079,13 +3088,13 @@ typedef tree (*walk_tree_fn) (tree *, int *, void *);
    extend the DUMP_FILES array in tree-dump.c */
 enum tree_dump_index
 {
-  TDI_all,			/* dump the whole translation unit */
-  TDI_class,			/* dump class hierarchy */
-  TDI_original,			/* dump each function before optimizing it */
-  TDI_optimized,		/* dump each function after optimizing it */
-  TDI_inlined,			/* dump each function after inlining
+    TDI_all,			/* dump the whole translation unit */
+    TDI_class,			/* dump class hierarchy */
+    TDI_original,			/* dump each function before optimizing it */
+    TDI_optimized,		/* dump each function after optimizing it */
+    TDI_inlined,			/* dump each function after inlining
 				   within it.  */
-  TDI_end
+    TDI_end
 };
 
 /* Bit masks to control tree dumping. Not all values are applicable to
@@ -3114,31 +3123,31 @@ extern void set_decl_rtl (tree, rtx);
    system.h gets too many.  */
 
 extern void fancy_abort (const char *, int, const char *)
-    ATTRIBUTE_NORETURN;
+ATTRIBUTE_NORETURN;
 #define abort() fancy_abort (__FILE__, __LINE__, __FUNCTION__)
 
-/* Enum and arrays used for tree allocation stats. 
+/* Enum and arrays used for tree allocation stats.
    Keep in sync with tree.c:tree_node_kind_names.  */
 typedef enum
 {
-  d_kind,
-  t_kind,
-  b_kind,
-  s_kind,
-  r_kind,
-  e_kind,
-  c_kind,
-  id_kind,
-  perm_list_kind,
-  temp_list_kind,
-  vec_kind,
-  x_kind,
-  lang_decl,
-  lang_type,
-  all_kinds
+    d_kind,
+    t_kind,
+    b_kind,
+    s_kind,
+    r_kind,
+    e_kind,
+    c_kind,
+    id_kind,
+    perm_list_kind,
+    temp_list_kind,
+    vec_kind,
+    x_kind,
+    lang_decl,
+    lang_type,
+    all_kinds
 } tree_node_kind;
 
 extern int tree_node_counts[];
 extern int tree_node_sizes[];
-    
+
 #endif  /* GCC_TREE_H  */

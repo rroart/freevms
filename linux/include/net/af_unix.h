@@ -19,16 +19,16 @@ extern atomic_t unix_tot_inflight;
 
 struct unix_address
 {
-	atomic_t	refcnt;
-	int		len;
-	unsigned	hash;
-	struct sockaddr_un name[0];
+    atomic_t	refcnt;
+    int		len;
+    unsigned	hash;
+    struct sockaddr_un name[0];
 };
 
 struct unix_skb_parms
 {
-	struct ucred		creds;		/* Skb credentials	*/
-	struct scm_fp_list	*fp;		/* Passed files		*/
+    struct ucred		creds;		/* Skb credentials	*/
+    struct scm_fp_list	*fp;		/* Passed files		*/
 };
 
 #define UNIXCB(skb) 	(*(struct unix_skb_parms*)&((skb)->cb))

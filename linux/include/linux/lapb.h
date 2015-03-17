@@ -23,25 +23,27 @@
 #define	LAPB_DTE		0x00
 #define	LAPB_DCE		0x04
 
-struct lapb_register_struct {
-	void (*connect_confirmation)(void *token, int reason);
-	void (*connect_indication)(void *token, int reason);
-	void (*disconnect_confirmation)(void *token, int reason);
-	void (*disconnect_indication)(void *token, int reason);
-	int  (*data_indication)(void *token, struct sk_buff *skb);
-	void (*data_transmit)(void *token, struct sk_buff *skb);
+struct lapb_register_struct
+{
+    void (*connect_confirmation)(void *token, int reason);
+    void (*connect_indication)(void *token, int reason);
+    void (*disconnect_confirmation)(void *token, int reason);
+    void (*disconnect_indication)(void *token, int reason);
+    int  (*data_indication)(void *token, struct sk_buff *skb);
+    void (*data_transmit)(void *token, struct sk_buff *skb);
 };
 
-struct lapb_parms_struct {
-	unsigned int t1;
-	unsigned int t1timer;
-	unsigned int t2;
-	unsigned int t2timer;
-	unsigned int n2;
-	unsigned int n2count;
-	unsigned int window;
-	unsigned int state;
-	unsigned int mode;
+struct lapb_parms_struct
+{
+    unsigned int t1;
+    unsigned int t1timer;
+    unsigned int t2;
+    unsigned int t2timer;
+    unsigned int n2;
+    unsigned int n2count;
+    unsigned int window;
+    unsigned int state;
+    unsigned int mode;
 };
 
 extern int lapb_register(void *token, struct lapb_register_struct *callbacks);

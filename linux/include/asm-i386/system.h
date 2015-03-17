@@ -63,16 +63,16 @@ __asm__ __volatile__ ("movw %%dx,%1\n\t" \
 
 static inline unsigned long _get_base(char * addr)
 {
-	unsigned long __base;
-	__asm__("movb %3,%%dh\n\t"
-		"movb %2,%%dl\n\t"
-		"shll $16,%%edx\n\t"
-		"movw %1,%%dx"
-		:"=&d" (__base)
-		:"m" (*((addr)+2)),
-		 "m" (*((addr)+4)),
-		 "m" (*((addr)+7)));
-	return __base;
+    unsigned long __base;
+    __asm__("movb %3,%%dh\n\t"
+            "movb %2,%%dl\n\t"
+            "shll $16,%%edx\n\t"
+            "movw %1,%%dx"
+            :"=&d" (__base)
+            :"m" (*((addr)+2)),
+            "m" (*((addr)+4)),
+            "m" (*((addr)+7)));
+    return __base;
 }
 
 #define get_base(ldt) _get_base( ((char *)&(ldt)) )
@@ -130,10 +130,10 @@ static inline unsigned long _get_base(char * addr)
 
 static inline unsigned long get_limit(unsigned long segment)
 {
-	unsigned long __limit;
-	__asm__("lsll %1,%0"
-		:"=r" (__limit):"r" (segment));
-	return __limit+1;
+    unsigned long __limit;
+    __asm__("lsll %1,%0"
+            :"=r" (__limit):"r" (segment));
+    return __limit+1;
 }
 
 #define nop() __asm__ __volatile__ ("nop")
@@ -142,7 +142,10 @@ static inline unsigned long get_limit(unsigned long segment)
 
 #define tas(ptr) (xchg((ptr),1))
 
-struct __xchg_dummy { unsigned long a[100]; };
+struct __xchg_dummy
+{
+    unsigned long a[100];
+};
 #define __xg(x) ((struct __xchg_dummy *)(x))
 
 
@@ -156,33 +159,33 @@ struct __xchg_dummy { unsigned long a[100]; };
  * clear which path to go.)
  */
 static inline void __set_64bit (unsigned long long * ptr,
-		unsigned int low, unsigned int high)
+                                unsigned int low, unsigned int high)
 {
-	__asm__ __volatile__ (
-		"\n1:\t"
-		"movl (%0), %%eax\n\t"
-		"movl 4(%0), %%edx\n\t"
-		"cmpxchg8b (%0)\n\t"
-		"jnz 1b"
-		: /* no outputs */
-		:	"D"(ptr),
-			"b"(low),
-			"c"(high)
-		:	"ax","dx","memory");
+    __asm__ __volatile__ (
+        "\n1:\t"
+        "movl (%0), %%eax\n\t"
+        "movl 4(%0), %%edx\n\t"
+        "cmpxchg8b (%0)\n\t"
+        "jnz 1b"
+        : /* no outputs */
+        :	"D"(ptr),
+        "b"(low),
+        "c"(high)
+        :	"ax","dx","memory");
 }
 
 static inline void __set_64bit_constant (unsigned long long *ptr,
-						 unsigned long long value)
+        unsigned long long value)
 {
-	__set_64bit(ptr,(unsigned int)(value), (unsigned int)((value)>>32ULL));
+    __set_64bit(ptr,(unsigned int)(value), (unsigned int)((value)>>32ULL));
 }
 #define ll_low(x)	*(((unsigned int*)&(x))+0)
 #define ll_high(x)	*(((unsigned int*)&(x))+1)
 
 static inline void __set_64bit_var (unsigned long long *ptr,
-			 unsigned long long value)
+                                    unsigned long long value)
 {
-	__set_64bit(ptr,ll_low(value), ll_high(value));
+    __set_64bit(ptr,ll_low(value), ll_high(value));
 }
 
 #define set_64bit(ptr,value) \
@@ -202,27 +205,28 @@ static inline void __set_64bit_var (unsigned long long *ptr,
  */
 static inline unsigned long __xchg(unsigned long x, volatile void * ptr, int size)
 {
-	switch (size) {
-		case 1:
-			__asm__ __volatile__("xchgb %b0,%1"
-				:"=q" (x)
-				:"m" (*__xg(ptr)), "0" (x)
-				:"memory");
-			break;
-		case 2:
-			__asm__ __volatile__("xchgw %w0,%1"
-				:"=r" (x)
-				:"m" (*__xg(ptr)), "0" (x)
-				:"memory");
-			break;
-		case 4:
-			__asm__ __volatile__("xchgl %0,%1"
-				:"=r" (x)
-				:"m" (*__xg(ptr)), "0" (x)
-				:"memory");
-			break;
-	}
-	return x;
+    switch (size)
+    {
+    case 1:
+        __asm__ __volatile__("xchgb %b0,%1"
+                             :"=q" (x)
+                             :"m" (*__xg(ptr)), "0" (x)
+                             :"memory");
+        break;
+    case 2:
+        __asm__ __volatile__("xchgw %w0,%1"
+                             :"=r" (x)
+                             :"m" (*__xg(ptr)), "0" (x)
+                             :"memory");
+        break;
+    case 4:
+        __asm__ __volatile__("xchgl %0,%1"
+                             :"=r" (x)
+                             :"m" (*__xg(ptr)), "0" (x)
+                             :"memory");
+        break;
+    }
+    return x;
 }
 
 /*
@@ -235,36 +239,37 @@ static inline unsigned long __xchg(unsigned long x, volatile void * ptr, int siz
 #define __HAVE_ARCH_CMPXCHG 1
 
 static inline unsigned long __cmpxchg(volatile void *ptr, unsigned long old,
-				      unsigned long new, int size)
+                                      unsigned long new, int size)
 {
-	unsigned long prev;
-	switch (size) {
-	case 1:
-		__asm__ __volatile__(LOCK_PREFIX "cmpxchgb %b1,%2"
-				     : "=a"(prev)
-				     : "q"(new), "m"(*__xg(ptr)), "0"(old)
-				     : "memory");
-		return prev;
-	case 2:
-		__asm__ __volatile__(LOCK_PREFIX "cmpxchgw %w1,%2"
-				     : "=a"(prev)
-				     : "q"(new), "m"(*__xg(ptr)), "0"(old)
-				     : "memory");
-		return prev;
-	case 4:
-		__asm__ __volatile__(LOCK_PREFIX "cmpxchgl %1,%2"
-				     : "=a"(prev)
-				     : "q"(new), "m"(*__xg(ptr)), "0"(old)
-				     : "memory");
-		return prev;
-	}
-	return old;
+    unsigned long prev;
+    switch (size)
+    {
+    case 1:
+        __asm__ __volatile__(LOCK_PREFIX "cmpxchgb %b1,%2"
+                             : "=a"(prev)
+                             : "q"(new), "m"(*__xg(ptr)), "0"(old)
+                             : "memory");
+        return prev;
+    case 2:
+        __asm__ __volatile__(LOCK_PREFIX "cmpxchgw %w1,%2"
+                             : "=a"(prev)
+                             : "q"(new), "m"(*__xg(ptr)), "0"(old)
+                             : "memory");
+        return prev;
+    case 4:
+        __asm__ __volatile__(LOCK_PREFIX "cmpxchgl %1,%2"
+                             : "=a"(prev)
+                             : "q"(new), "m"(*__xg(ptr)), "0"(old)
+                             : "memory");
+        return prev;
+    }
+    return old;
 }
 
 #define cmpxchg(ptr,o,n)\
 	((__typeof__(*(ptr)))__cmpxchg((ptr),(unsigned long)(o),\
 					(unsigned long)(n),sizeof(*(ptr))))
-    
+
 #else
 /* Compiling for a 386 proper.	Is it worth implementing via cli/sti?  */
 #endif
@@ -286,7 +291,7 @@ static inline unsigned long __cmpxchg(volatile void *ptr, unsigned long old,
  * Some non intel clones support out of order store. wmb() ceases to be a
  * nop for these.
  */
- 
+
 #define mb() 	__asm__ __volatile__ ("lock; addl $0,0(%%esp)": : :"memory")
 #define rmb()	mb()
 

@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Modified Linux source file, 2001-2004  
+// Modified Linux source file, 2001-2004
 
 /*
  *  linux/fs/open.c
@@ -27,31 +27,32 @@
  */
 struct file ** alloc_fd_array(int num)
 {
-	struct file **new_fds;
-	int size = num * sizeof(struct file *);
+    struct file **new_fds;
+    int size = num * sizeof(struct file *);
 
-	if (size <= PAGE_SIZE)
-		new_fds = (struct file **) kmalloc(size, GFP_KERNEL);
-	else 
-		new_fds = (struct file **) vmalloc(size);
-	return new_fds;
+    if (size <= PAGE_SIZE)
+        new_fds = (struct file **) kmalloc(size, GFP_KERNEL);
+    else
+        new_fds = (struct file **) vmalloc(size);
+    return new_fds;
 }
 
 void free_fd_array(struct file **array, int num)
 {
-	int size = num * sizeof(struct file *);
+    int size = num * sizeof(struct file *);
 
-	if (!array) {
-		printk (KERN_ERR "%s array = 0 (num = %d)\n", __FUNCTION__, num);
-		return;
-	}
+    if (!array)
+    {
+        printk (KERN_ERR "%s array = 0 (num = %d)\n", __FUNCTION__, num);
+        return;
+    }
 
-	if (num <= NR_OPEN_DEFAULT) /* Don't free the embedded fd array! */
-		return;
-	else if (size <= PAGE_SIZE)
-		kfree(array);
-	else
-		vfree(array);
+    if (num <= NR_OPEN_DEFAULT) /* Don't free the embedded fd array! */
+        return;
+    else if (size <= PAGE_SIZE)
+        kfree(array);
+    else
+        vfree(array);
 }
 
 /*
@@ -61,73 +62,80 @@ void free_fd_array(struct file **array, int num)
 
 int expand_fd_array(struct files_struct *files, int nr)
 {
-	struct file **new_fds;
-	int error, nfds;
+    struct file **new_fds;
+    int error, nfds;
 
-	
-	error = -EMFILE;
-	if (files->max_fds >= NR_OPEN || nr >= NR_OPEN)
-		goto out;
 
-	nfds = files->max_fds;
-	write_unlock(&files->file_lock);
+    error = -EMFILE;
+    if (files->max_fds >= NR_OPEN || nr >= NR_OPEN)
+        goto out;
 
-	/* 
-	 * Expand to the max in easy steps, and keep expanding it until
-	 * we have enough for the requested fd array size. 
-	 */
+    nfds = files->max_fds;
+    write_unlock(&files->file_lock);
 
-	do {
+    /*
+     * Expand to the max in easy steps, and keep expanding it until
+     * we have enough for the requested fd array size.
+     */
+
+    do
+    {
 #if NR_OPEN_DEFAULT < 256
-		if (nfds < 256)
-			nfds = 256;
-		else 
+        if (nfds < 256)
+            nfds = 256;
+        else
 #endif
-		if (nfds < (PAGE_SIZE / sizeof(struct file *)))
-			nfds = PAGE_SIZE / sizeof(struct file *);
-		else {
-			nfds = nfds * 2;
-			if (nfds > NR_OPEN)
-				nfds = NR_OPEN;
-		}
-	} while (nfds <= nr);
+            if (nfds < (PAGE_SIZE / sizeof(struct file *)))
+                nfds = PAGE_SIZE / sizeof(struct file *);
+            else
+            {
+                nfds = nfds * 2;
+                if (nfds > NR_OPEN)
+                    nfds = NR_OPEN;
+            }
+    }
+    while (nfds <= nr);
 
-	error = -ENOMEM;
-	new_fds = alloc_fd_array(nfds);
-	write_lock(&files->file_lock);
-	if (!new_fds)
-		goto out;
+    error = -ENOMEM;
+    new_fds = alloc_fd_array(nfds);
+    write_lock(&files->file_lock);
+    if (!new_fds)
+        goto out;
 
-	/* Copy the existing array and install the new pointer */
+    /* Copy the existing array and install the new pointer */
 
-	if (nfds > files->max_fds) {
-		struct file **old_fds;
-		int i;
-		
-		old_fds = xchg(&files->fd, new_fds);
-		i = xchg(&files->max_fds, nfds);
+    if (nfds > files->max_fds)
+    {
+        struct file **old_fds;
+        int i;
 
-		/* Don't copy/clear the array if we are creating a new
-		   fd array for fork() */
-		if (i) {
-			memcpy(new_fds, old_fds, i * sizeof(struct file *));
-			/* clear the remainder of the array */
-			memset(&new_fds[i], 0,
-			       (nfds-i) * sizeof(struct file *)); 
+        old_fds = xchg(&files->fd, new_fds);
+        i = xchg(&files->max_fds, nfds);
 
-			write_unlock(&files->file_lock);
-			free_fd_array(old_fds, i);
-			write_lock(&files->file_lock);
-		}
-	} else {
-		/* Somebody expanded the array while we slept ... */
-		write_unlock(&files->file_lock);
-		free_fd_array(new_fds, nfds);
-		write_lock(&files->file_lock);
-	}
-	error = 0;
+        /* Don't copy/clear the array if we are creating a new
+           fd array for fork() */
+        if (i)
+        {
+            memcpy(new_fds, old_fds, i * sizeof(struct file *));
+            /* clear the remainder of the array */
+            memset(&new_fds[i], 0,
+                   (nfds-i) * sizeof(struct file *));
+
+            write_unlock(&files->file_lock);
+            free_fd_array(old_fds, i);
+            write_lock(&files->file_lock);
+        }
+    }
+    else
+    {
+        /* Somebody expanded the array while we slept ... */
+        write_unlock(&files->file_lock);
+        free_fd_array(new_fds, nfds);
+        write_lock(&files->file_lock);
+    }
+    error = 0;
 out:
-	return error;
+    return error;
 }
 
 /*
@@ -136,31 +144,32 @@ out:
  */
 fd_set * alloc_fdset(int num)
 {
-	fd_set *new_fdset;
-	int size = num / 8;
+    fd_set *new_fdset;
+    int size = num / 8;
 
-	if (size <= PAGE_SIZE)
-		new_fdset = (fd_set *) kmalloc(size, GFP_KERNEL);
-	else
-		new_fdset = (fd_set *) vmalloc(size);
-	return new_fdset;
+    if (size <= PAGE_SIZE)
+        new_fdset = (fd_set *) kmalloc(size, GFP_KERNEL);
+    else
+        new_fdset = (fd_set *) vmalloc(size);
+    return new_fdset;
 }
 
 void free_fdset(fd_set *array, int num)
 {
-	int size = num / 8;
+    int size = num / 8;
 
-	if (!array) {
-		printk (KERN_ERR "%s array = 0 (num = %d)\n", __FUNCTION__, num);
-		return;
-	}
-	
-	if (num <= __FD_SETSIZE) /* Don't free an embedded fdset */
-		return;
-	else if (size <= PAGE_SIZE)
-		kfree(array);
-	else
-		vfree(array);
+    if (!array)
+    {
+        printk (KERN_ERR "%s array = 0 (num = %d)\n", __FUNCTION__, num);
+        return;
+    }
+
+    if (num <= __FD_SETSIZE) /* Don't free an embedded fdset */
+        return;
+    else if (size <= PAGE_SIZE)
+        kfree(array);
+    else
+        vfree(array);
 }
 
 /*
@@ -169,70 +178,75 @@ void free_fdset(fd_set *array, int num)
  */
 int expand_fdset(struct files_struct *files, int nr)
 {
-	fd_set *new_openset = 0, *new_execset = 0;
-	int error, nfds = 0;
+    fd_set *new_openset = 0, *new_execset = 0;
+    int error, nfds = 0;
 
-	error = -EMFILE;
-	if (files->max_fdset >= NR_OPEN || nr >= NR_OPEN)
-		goto out;
+    error = -EMFILE;
+    if (files->max_fdset >= NR_OPEN || nr >= NR_OPEN)
+        goto out;
 
-	nfds = files->max_fdset;
-	write_unlock(&files->file_lock);
+    nfds = files->max_fdset;
+    write_unlock(&files->file_lock);
 
-	/* Expand to the max in easy steps */
-	do {
-		if (nfds < (PAGE_SIZE * 8))
-			nfds = PAGE_SIZE * 8;
-		else {
-			nfds = nfds * 2;
-			if (nfds > NR_OPEN)
-				nfds = NR_OPEN;
-		}
-	} while (nfds <= nr);
+    /* Expand to the max in easy steps */
+    do
+    {
+        if (nfds < (PAGE_SIZE * 8))
+            nfds = PAGE_SIZE * 8;
+        else
+        {
+            nfds = nfds * 2;
+            if (nfds > NR_OPEN)
+                nfds = NR_OPEN;
+        }
+    }
+    while (nfds <= nr);
 
-	error = -ENOMEM;
-	new_openset = alloc_fdset(nfds);
-	new_execset = alloc_fdset(nfds);
-	write_lock(&files->file_lock);
-	if (!new_openset || !new_execset)
-		goto out;
+    error = -ENOMEM;
+    new_openset = alloc_fdset(nfds);
+    new_execset = alloc_fdset(nfds);
+    write_lock(&files->file_lock);
+    if (!new_openset || !new_execset)
+        goto out;
 
-	error = 0;
-	
-	/* Copy the existing tables and install the new pointers */
-	if (nfds > files->max_fdset) {
-		int i = files->max_fdset / (sizeof(unsigned long) * 8);
-		int count = (nfds - files->max_fdset) / 8;
-		
-		/* 
-		 * Don't copy the entire array if the current fdset is
-		 * not yet initialised.  
-		 */
-		if (i) {
-			memcpy (new_openset, files->open_fds, files->max_fdset/8);
-			memcpy (new_execset, files->close_on_exec, files->max_fdset/8);
-			memset (&new_openset->fds_bits[i], 0, count);
-			memset (&new_execset->fds_bits[i], 0, count);
-		}
-		
-		nfds = xchg(&files->max_fdset, nfds);
-		new_openset = xchg(&files->open_fds, new_openset);
-		new_execset = xchg(&files->close_on_exec, new_execset);
-		write_unlock(&files->file_lock);
-		free_fdset (new_openset, nfds);
-		free_fdset (new_execset, nfds);
-		write_lock(&files->file_lock);
-		return 0;
-	} 
-	/* Somebody expanded the array while we slept ... */
+    error = 0;
+
+    /* Copy the existing tables and install the new pointers */
+    if (nfds > files->max_fdset)
+    {
+        int i = files->max_fdset / (sizeof(unsigned long) * 8);
+        int count = (nfds - files->max_fdset) / 8;
+
+        /*
+         * Don't copy the entire array if the current fdset is
+         * not yet initialised.
+         */
+        if (i)
+        {
+            memcpy (new_openset, files->open_fds, files->max_fdset/8);
+            memcpy (new_execset, files->close_on_exec, files->max_fdset/8);
+            memset (&new_openset->fds_bits[i], 0, count);
+            memset (&new_execset->fds_bits[i], 0, count);
+        }
+
+        nfds = xchg(&files->max_fdset, nfds);
+        new_openset = xchg(&files->open_fds, new_openset);
+        new_execset = xchg(&files->close_on_exec, new_execset);
+        write_unlock(&files->file_lock);
+        free_fdset (new_openset, nfds);
+        free_fdset (new_execset, nfds);
+        write_lock(&files->file_lock);
+        return 0;
+    }
+    /* Somebody expanded the array while we slept ... */
 
 out:
-	write_unlock(&files->file_lock);
-	if (new_openset)
-		free_fdset(new_openset, nfds);
-	if (new_execset)
-		free_fdset(new_execset, nfds);
-	write_lock(&files->file_lock);
-	return error;
+    write_unlock(&files->file_lock);
+    if (new_openset)
+        free_fdset(new_openset, nfds);
+    if (new_execset)
+        free_fdset(new_execset, nfds);
+    write_lock(&files->file_lock);
+    return error;
 }
 

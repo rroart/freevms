@@ -34,34 +34,36 @@ static int type_range (void *firstv, Buffer *buffer, Line *line);
 void cmd_type (char *cp)
 
 {
-  int first;
+    int first;
 
-  first = 1;
-  if (range_multiple (cp, &cp, type_range, &first) < 0) return;
-  eoltest (cp);
+    first = 1;
+    if (range_multiple (cp, &cp, type_range, &first) < 0) return;
+    eoltest (cp);
 }
 
 static int type_range (void *firstv, Buffer *buffer, Line *line)
 
 {
-  /* Set current position to beginning of first line typed out */
+    /* Set current position to beginning of first line typed out */
 
-  if (*((int *)firstv)) {
-    *(int *)firstv = 0;
-    if (buffer != cur_position.buffer) {
-      *buffer_savpos (cur_position.buffer) = cur_position;
-      cur_position.buffer = buffer;
+    if (*((int *)firstv))
+    {
+        *(int *)firstv = 0;
+        if (buffer != cur_position.buffer)
+        {
+            *buffer_savpos (cur_position.buffer) = cur_position;
+            cur_position.buffer = buffer;
+        }
+        cur_position.line   = line;
+        cur_position.offset = 0;
     }
-    cur_position.line   = line;
-    cur_position.offset = 0;
-  }
 
-  /* Type out the line */
+    /* Type out the line */
 
-  if (line != NULL) line_print (line);
-  else outfmt (strlen (buffer_name (buffer)), "[EOB=%s]\n", buffer_name (buffer));
+    if (line != NULL) line_print (line);
+    else outfmt (strlen (buffer_name (buffer)), "[EOB=%s]\n", buffer_name (buffer));
 
-  /* Keep going */
+    /* Keep going */
 
-  return (0);
+    return (0);
 }

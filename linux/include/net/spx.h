@@ -4,48 +4,51 @@
 #include <net/ipx.h>
 
 struct spxhdr
-{	__u8	cctl;	
-	__u8	dtype;
+{
+    __u8	cctl;
+    __u8	dtype;
 #define SPX_DTYPE_ECONN	0xFE	/* Finished */
 #define SPX_DTYPE_ECACK	0xFF	/* Ok */
-	__u16	sconn;	/* Connection ID */
-	__u16	dconn;	/* Connection ID */
-	__u16	sequence;
-	__u16	ackseq;
-	__u16	allocseq;
+    __u16	sconn;	/* Connection ID */
+    __u16	dconn;	/* Connection ID */
+    __u16	sequence;
+    __u16	ackseq;
+    __u16	allocseq;
 };
 
 struct ipxspxhdr
-{	struct ipxhdr	ipx;
-	struct spxhdr	spx;
+{
+    struct ipxhdr	ipx;
+    struct spxhdr	spx;
 };
 
 #define	SPX_SYS_PKT_LEN	(sizeof(struct ipxspxhdr))
 
 #ifdef __KERNEL__
 struct spx_opt
-{	int	state;
-	int	sndbuf;
-	int	retries;	/* Number of WD retries */
-	int	retransmits;	/* Number of retransmits */
-	int	max_retries;
-	int	wd_interval;
-	void	*owner;
-	__u16	dest_connid;	/* Net order */
-	__u16	source_connid;	/* Net order */
-	__u16	sequence;	/* Host order - our current pkt # */
-	__u16	alloc;		/* Host order - max seq we can rcv now */
-	__u16	rmt_ack;	/* Host order - last pkt ACKd by remote */
-	__u16	rmt_seq;
-	__u16	acknowledge;
-	__u16	rmt_alloc;	/* Host order - max seq remote can handle now */
-	ipx_address	dest_addr;
-	ipx_address	source_addr;
-	struct timer_list	watchdog;	/* Idle watch */
-	struct timer_list	retransmit;	/* Retransmit timer */
-	struct sk_buff_head     rcv_queue;
-	struct sk_buff_head	transmit_queue;
-	struct sk_buff_head     retransmit_queue;
+{
+    int	state;
+    int	sndbuf;
+    int	retries;	/* Number of WD retries */
+    int	retransmits;	/* Number of retransmits */
+    int	max_retries;
+    int	wd_interval;
+    void	*owner;
+    __u16	dest_connid;	/* Net order */
+    __u16	source_connid;	/* Net order */
+    __u16	sequence;	/* Host order - our current pkt # */
+    __u16	alloc;		/* Host order - max seq we can rcv now */
+    __u16	rmt_ack;	/* Host order - last pkt ACKd by remote */
+    __u16	rmt_seq;
+    __u16	acknowledge;
+    __u16	rmt_alloc;	/* Host order - max seq remote can handle now */
+    ipx_address	dest_addr;
+    ipx_address	source_addr;
+    struct timer_list	watchdog;	/* Idle watch */
+    struct timer_list	retransmit;	/* Retransmit timer */
+    struct sk_buff_head     rcv_queue;
+    struct sk_buff_head	transmit_queue;
+    struct sk_buff_head     retransmit_queue;
 };
 
 /* Packet connectino control defines */

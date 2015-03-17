@@ -90,7 +90,7 @@ static void do_acct_process(long, struct file *);
  */
 static void acct_timeout(unsigned long unused)
 {
-	acct_needcheck = 1;
+    acct_needcheck = 1;
 }
 
 /*
@@ -98,58 +98,64 @@ static void acct_timeout(unsigned long unused)
  */
 static int check_free_space(struct file *file)
 {
-	struct statfs sbuf;
-	int res;
-	int act;
+    struct statfs sbuf;
+    int res;
+    int act;
 
-	lock_kernel();
-	res = acct_active;
-	if (!file || !acct_needcheck)
-		goto out;
-	unlock_kernel();
+    lock_kernel();
+    res = acct_active;
+    if (!file || !acct_needcheck)
+        goto out;
+    unlock_kernel();
 
-	/* May block */
-	if (vfs_statfs(file->f_dentry->d_inode->i_sb, &sbuf))
-		return res;
+    /* May block */
+    if (vfs_statfs(file->f_dentry->d_inode->i_sb, &sbuf))
+        return res;
 
-	if (sbuf.f_bavail <= SUSPEND * sbuf.f_blocks / 100)
-		act = -1;
-	else if (sbuf.f_bavail >= RESUME * sbuf.f_blocks / 100)
-		act = 1;
-	else
-		act = 0;
+    if (sbuf.f_bavail <= SUSPEND * sbuf.f_blocks / 100)
+        act = -1;
+    else if (sbuf.f_bavail >= RESUME * sbuf.f_blocks / 100)
+        act = 1;
+    else
+        act = 0;
 
-	/*
-	 * If some joker switched acct_file under us we'ld better be
-	 * silent and _not_ touch anything.
-	 */
-	lock_kernel();
-	if (file != acct_file) {
-		if (act)
-			res = act>0;
-		goto out;
-	}
+    /*
+     * If some joker switched acct_file under us we'ld better be
+     * silent and _not_ touch anything.
+     */
+    lock_kernel();
+    if (file != acct_file)
+    {
+        if (act)
+            res = act>0;
+        goto out;
+    }
 
-	if (acct_active) {
-		if (act < 0) {
-			acct_active = 0;
-			printk(KERN_INFO "Process accounting paused\n");
-		}
-	} else {
-		if (act > 0) {
-			acct_active = 1;
-			printk(KERN_INFO "Process accounting resumed\n");
-		}
-	}
+    if (acct_active)
+    {
+        if (act < 0)
+        {
+            acct_active = 0;
+            printk(KERN_INFO "Process accounting paused\n");
+        }
+    }
+    else
+    {
+        if (act > 0)
+        {
+            acct_active = 1;
+            printk(KERN_INFO "Process accounting resumed\n");
+        }
+    }
 
-	del_timer(&acct_timer);
-	acct_needcheck = 0;
-	acct_timer.expires = jiffies + ACCT_TIMEOUT*HZ;
-	add_timer(&acct_timer);
-	res = acct_active;
+    del_timer(&acct_timer);
+    acct_needcheck = 0;
+    acct_timer.expires = jiffies + ACCT_TIMEOUT*HZ;
+    add_timer(&acct_timer);
+    res = acct_active;
 out:
-	unlock_kernel();
-	return res;
+    unlock_kernel();
+    return res;
 }
 
 /*
@@ -160,71 +166,76 @@ out:
  */
 asmlinkage long sys_acct(const char *name)
 {
-	struct file *file = NULL, *old_acct = NULL;
-	char *tmp;
-	int error;
+    struct file *file = NULL, *old_acct = NULL;
+    char *tmp;
+    int error;
 
-	if (!capable(CAP_SYS_PACCT))
-		return -EPERM;
+    if (!capable(CAP_SYS_PACCT))
+        return -EPERM;
 
-	if (name) {
-		tmp = getname(name);
-		error = PTR_ERR(tmp);
-		if (IS_ERR(tmp))
-			goto out;
-		/* Difference from BSD - they don't do O_APPEND */
-		file = filp_open(tmp, O_WRONLY|O_APPEND, 0);
-		putname(tmp);
-		if (IS_ERR(file)) {
-			error = PTR_ERR(file);
-			goto out;
-		}
-		error = -EACCES;
-		if (!S_ISREG(file->f_dentry->d_inode->i_mode)) 
-			goto out_err;
+    if (name)
+    {
+        tmp = getname(name);
+        error = PTR_ERR(tmp);
+        if (IS_ERR(tmp))
+            goto out;
+        /* Difference from BSD - they don't do O_APPEND */
+        file = filp_open(tmp, O_WRONLY|O_APPEND, 0);
+        putname(tmp);
+        if (IS_ERR(file))
+        {
+            error = PTR_ERR(file);
+            goto out;
+        }
+        error = -EACCES;
+        if (!S_ISREG(file->f_dentry->d_inode->i_mode))
+            goto out_err;
 
-		error = -EIO;
-		if (!file->f_op->write) 
-			goto out_err;
-	}
+        error = -EIO;
+        if (!file->f_op->write)
+            goto out_err;
+    }
 
-	error = 0;
-	lock_kernel();
-	if (acct_file) {
-		old_acct = acct_file;
-		del_timer(&acct_timer);
-		acct_active = 0;
-		acct_needcheck = 0;
-		acct_file = NULL;
-	}
-	if (name) {
-		acct_file = file;
-		acct_needcheck = 0;
-		acct_active = 1;
-		/* It's been deleted if it was used before so this is safe */
-		init_timer(&acct_timer);
-		acct_timer.function = acct_timeout;
-		acct_timer.expires = jiffies + ACCT_TIMEOUT*HZ;
-		add_timer(&acct_timer);
-	}
-	unlock_kernel();
-	if (old_acct) {
-		do_acct_process(0,old_acct);
-		filp_close(old_acct, NULL);
-	}
+    error = 0;
+    lock_kernel();
+    if (acct_file)
+    {
+        old_acct = acct_file;
+        del_timer(&acct_timer);
+        acct_active = 0;
+        acct_needcheck = 0;
+        acct_file = NULL;
+    }
+    if (name)
+    {
+        acct_file = file;
+        acct_needcheck = 0;
+        acct_active = 1;
+        /* It's been deleted if it was used before so this is safe */
+        init_timer(&acct_timer);
+        acct_timer.function = acct_timeout;
+        acct_timer.expires = jiffies + ACCT_TIMEOUT*HZ;
+        add_timer(&acct_timer);
+    }
+    unlock_kernel();
+    if (old_acct)
+    {
+        do_acct_process(0,old_acct);
+        filp_close(old_acct, NULL);
+    }
 out:
-	return error;
+    return error;
 out_err:
-	filp_close(file, NULL);
-	goto out;
+    filp_close(file, NULL);
+    goto out;
 }
 
 void acct_auto_close(kdev_t dev)
 {
-	lock_kernel();
-	if (acct_file && acct_file->f_dentry->d_inode->i_dev == dev)
-		sys_acct(NULL);
-	unlock_kernel();
+    lock_kernel();
+    if (acct_file && acct_file->f_dentry->d_inode->i_dev == dev)
+        sys_acct(NULL);
+    unlock_kernel();
 }
 
 /*
@@ -241,29 +252,31 @@ void acct_auto_close(kdev_t dev)
 
 static comp_t encode_comp_t(unsigned long value)
 {
-	int exp, rnd;
+    int exp, rnd;
 
-	exp = rnd = 0;
-	while (value > MAXFRACT) {
-		rnd = value & (1 << (EXPSIZE - 1));	/* Round up? */
-		value >>= EXPSIZE;	/* Base 8 exponent == 3 bit shift. */
-		exp++;
-	}
+    exp = rnd = 0;
+    while (value > MAXFRACT)
+    {
+        rnd = value & (1 << (EXPSIZE - 1));	/* Round up? */
+        value >>= EXPSIZE;	/* Base 8 exponent == 3 bit shift. */
+        exp++;
+    }
 
-	/*
+    /*
          * If we need to round up, do it (and handle overflow correctly).
          */
-	if (rnd && (++value > MAXFRACT)) {
-		value >>= EXPSIZE;
-		exp++;
-	}
+    if (rnd && (++value > MAXFRACT))
+    {
+        value >>= EXPSIZE;
+        exp++;
+    }
 
-	/*
+    /*
          * Clean it up and polish it off.
          */
-	exp <<= MANTSIZE;		/* Shift the exponent into place */
-	exp += value;			/* and add on the mantissa. */
-	return exp;
+    exp <<= MANTSIZE;		/* Shift the exponent into place */
+    exp += value;			/* and add on the mantissa. */
+    return exp;
 }
 
 /*
@@ -280,73 +293,75 @@ static comp_t encode_comp_t(unsigned long value)
  */
 static void do_acct_process(long exitcode, struct file *file)
 {
-	struct acct ac;
-	mm_segment_t fs;
-	unsigned long vsize;
+    struct acct ac;
+    mm_segment_t fs;
+    unsigned long vsize;
 
-	/*
-	 * First check to see if there is enough free_space to continue
-	 * the process accounting system.
-	 */
-	if (!check_free_space(file))
-		return;
+    /*
+     * First check to see if there is enough free_space to continue
+     * the process accounting system.
+     */
+    if (!check_free_space(file))
+        return;
 
-	/*
-	 * Fill the accounting struct with the needed info as recorded
-	 * by the different kernel functions.
-	 */
-	memset((caddr_t)&ac, 0, sizeof(struct acct));
+    /*
+     * Fill the accounting struct with the needed info as recorded
+     * by the different kernel functions.
+     */
+    memset((caddr_t)&ac, 0, sizeof(struct acct));
 
-	strncpy(ac.ac_comm, current->pcb$t_lname, ACCT_COMM);
-	ac.ac_comm[ACCT_COMM - 1] = '\0';
+    strncpy(ac.ac_comm, current->pcb$t_lname, ACCT_COMM);
+    ac.ac_comm[ACCT_COMM - 1] = '\0';
 
-	ac.ac_btime = CT_TO_SECS(current->start_time) + (xtime.tv_sec - (jiffies / HZ));
-	ac.ac_etime = encode_comp_t(jiffies - current->start_time);
-	ac.ac_utime = encode_comp_t(current->times.tms_utime);
-	ac.ac_stime = encode_comp_t(current->times.tms_stime);
-	ac.ac_uid = current->uid;
-	ac.ac_gid = current->gid;
-	ac.ac_tty = (current->tty) ? kdev_t_to_nr(current->tty->device) : 0;
+    ac.ac_btime = CT_TO_SECS(current->start_time) + (xtime.tv_sec - (jiffies / HZ));
+    ac.ac_etime = encode_comp_t(jiffies - current->start_time);
+    ac.ac_utime = encode_comp_t(current->times.tms_utime);
+    ac.ac_stime = encode_comp_t(current->times.tms_stime);
+    ac.ac_uid = current->uid;
+    ac.ac_gid = current->gid;
+    ac.ac_tty = (current->tty) ? kdev_t_to_nr(current->tty->device) : 0;
 
-	ac.ac_flag = 0;
-	if (current->flags & PF_FORKNOEXEC)
-		ac.ac_flag |= AFORK;
-	if (current->flags & PF_SUPERPRIV)
-		ac.ac_flag |= ASU;
-	if (current->flags & PF_DUMPCORE)
-		ac.ac_flag |= ACORE;
-	if (current->flags & PF_SIGNALED)
-		ac.ac_flag |= AXSIG;
+    ac.ac_flag = 0;
+    if (current->flags & PF_FORKNOEXEC)
+        ac.ac_flag |= AFORK;
+    if (current->flags & PF_SUPERPRIV)
+        ac.ac_flag |= ASU;
+    if (current->flags & PF_DUMPCORE)
+        ac.ac_flag |= ACORE;
+    if (current->flags & PF_SIGNALED)
+        ac.ac_flag |= AXSIG;
 
-	vsize = 0;
-	if (current->mm) {
-		struct vm_area_struct *vma;
-		down_read(&current->mm->mmap_sem);
-		vma = current->mm->mmap;
-		while (vma) {
-			vsize += vma->rde$q_region_size;
-			vma = vma->rde$ps_va_list_flink;
-		}
-		up_read(&current->mm->mmap_sem);
-	}
-	vsize = vsize / 1024;
-	ac.ac_mem = encode_comp_t(vsize);
-	ac.ac_io = encode_comp_t(0 /* current->io_usage */);	/* %% */
-	ac.ac_rw = encode_comp_t(ac.ac_io / 1024);
-	ac.ac_minflt = encode_comp_t(current->min_flt);
-	ac.ac_majflt = encode_comp_t(current->maj_flt);
-	ac.ac_swaps = encode_comp_t(current->nswap);
-	ac.ac_exitcode = exitcode;
+    vsize = 0;
+    if (current->mm)
+    {
+        struct vm_area_struct *vma;
+        down_read(&current->mm->mmap_sem);
+        vma = current->mm->mmap;
+        while (vma)
+        {
+            vsize += vma->rde$q_region_size;
+            vma = vma->rde$ps_va_list_flink;
+        }
+        up_read(&current->mm->mmap_sem);
+    }
+    vsize = vsize / 1024;
+    ac.ac_mem = encode_comp_t(vsize);
+    ac.ac_io = encode_comp_t(0 /* current->io_usage */);	/* %% */
+    ac.ac_rw = encode_comp_t(ac.ac_io / 1024);
+    ac.ac_minflt = encode_comp_t(current->min_flt);
+    ac.ac_majflt = encode_comp_t(current->maj_flt);
+    ac.ac_swaps = encode_comp_t(current->nswap);
+    ac.ac_exitcode = exitcode;
 
-	/*
+    /*
          * Kernel segment override to datasegment and write it
          * to the accounting file.
          */
-	fs = get_fs();
-	set_fs(KERNEL_DS);
-	file->f_op->write(file, (char *)&ac,
-			       sizeof(struct acct), &file->f_pos);
-	set_fs(fs);
+    fs = get_fs();
+    set_fs(KERNEL_DS);
+    file->f_op->write(file, (char *)&ac,
+                      sizeof(struct acct), &file->f_pos);
+    set_fs(fs);
 }
 
 /*
@@ -354,17 +369,19 @@ static void do_acct_process(long exitcode, struct file *file)
  */
 int acct_process(long exitcode)
 {
-	struct file *file = NULL;
-	lock_kernel();
-	if (acct_file) {
-		file = acct_file;
-		get_file(file);
-		unlock_kernel();
-		do_acct_process(exitcode, acct_file);
-		fput(file);
-	} else
-		unlock_kernel();
-	return 0;
+    struct file *file = NULL;
+    lock_kernel();
+    if (acct_file)
+    {
+        file = acct_file;
+        get_file(file);
+        unlock_kernel();
+        do_acct_process(exitcode, acct_file);
+        fput(file);
+    }
+    else
+        unlock_kernel();
+    return 0;
 }
 
 #else
@@ -375,6 +392,6 @@ int acct_process(long exitcode)
 
 asmlinkage long sys_acct(const char * filename)
 {
-	return -ENOSYS;
+    return -ENOSYS;
 }
 #endif

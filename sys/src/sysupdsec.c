@@ -5,6 +5,7 @@
 
 #include<linux/linkage.h>
 
-asmlinkage void exe$updsec(void) {
+asmlinkage void exe$updsec(void)
+{
 
 }

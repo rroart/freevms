@@ -45,18 +45,23 @@
 
 union _FP_UNION_S
 {
-  float flt;
-  struct {
+    float flt;
+    struct
+    {
 #if __BYTE_ORDER == __BIG_ENDIAN
-    unsigned sign : 1;
-    unsigned exp  : _FP_EXPBITS_S;
-    unsigned frac : _FP_FRACBITS_S - (_FP_IMPLBIT_S != 0);
+        unsigned sign : 1;
+unsigned exp  :
+        _FP_EXPBITS_S;
+unsigned frac :
+        _FP_FRACBITS_S - (_FP_IMPLBIT_S != 0);
 #else
-    unsigned frac : _FP_FRACBITS_S - (_FP_IMPLBIT_S != 0);
-    unsigned exp  : _FP_EXPBITS_S;
-    unsigned sign : 1;
+unsigned frac :
+        _FP_FRACBITS_S - (_FP_IMPLBIT_S != 0);
+unsigned exp  :
+        _FP_EXPBITS_S;
+        unsigned sign : 1;
 #endif
-  } bits __attribute__((packed));
+    } bits __attribute__((packed));
 };
 
 #define FP_DECL_S(X)		_FP_DECL(1,X)

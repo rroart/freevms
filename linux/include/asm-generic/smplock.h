@@ -40,12 +40,12 @@ do { \
  */
 extern __inline__ void lock_kernel(void)
 {
-	if (!++current->lock_depth)
-		spin_lock(&kernel_flag);
+    if (!++current->lock_depth)
+        spin_lock(&kernel_flag);
 }
 
 extern __inline__ void unlock_kernel(void)
 {
-	if (--current->lock_depth < 0)
-		spin_unlock(&kernel_flag);
+    if (--current->lock_depth < 0)
+        spin_unlock(&kernel_flag);
 }

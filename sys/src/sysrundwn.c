@@ -11,77 +11,78 @@
 #include <linux/tqueue.h>
 #include <mmg_routines.h>
 
-asmlinkage int exe$rundwn(int mode) {
+asmlinkage int exe$rundwn(int mode)
+{
 
-  // clear requested powerfail AST
+    // clear requested powerfail AST
 
-  // run rundown routines
+    // run rundown routines
 
-  // setrwm
+    // setrwm
 
-  // more rundown routines
+    // more rundown routines
 
-  // call lmf
+    // call lmf
 
-  // cpu capability
+    // cpu capability
 
-  // account log
+    // account log
 
-  // phd$l_imgcnt++;
+    // phd$l_imgcnt++;
 
-  // put rsb in 4 p1 space vectors for user-written system services, rundown
-  // routines and image-specific message sections
+    // put rsb in 4 p1 space vectors for user-written system services, rundown
+    // routines and image-specific message sections
 
-  // setpfm off
+    // setpfm off
 
-  // do dassigns
+    // do dassigns
 
-  // dealloc rights identifier
+    // dealloc rights identifier
 
-  // cantim
-  // canwak
+    // cantim
+    // canwak
 
-  // $deq
+    // $deq
 
-  mmg$imgreset();
+    mmg$imgreset();
 
-  // another dassgn round
+    // another dassgn round
 
-  // dalloc
+    // dalloc
 
-  // dacefc
+    // dacefc
 
-  // vmslock(&SPIN_SCHED,IPL$_SCHED);
+    // vmslock(&SPIN_SCHED,IPL$_SCHED);
 
-  // check error log mailbox queue EXE$AQ_ERLMBX
+    // check error log mailbox queue EXE$AQ_ERLMBX
 
-  // remove ASTs
+    // remove ASTs
 
-  // eliminate change mode handlers
+    // eliminate change mode handlers
 
-  // cancel exit handlers
+    // cancel exit handlers
 
-  // eliminate exception handlers
+    // eliminate exception handlers
 
-  // fix AST active/enable bits
+    // fix AST active/enable bits
 
-  // disable system service failure exceptions
+    // disable system service failure exceptions
 
-  // cancel compatibility mode handler
+    // cancel compatibility mode handler
 
-  // sch$newlvl
+    // sch$newlvl
 
-  // clear pcb$v_forcepen wakepen
+    // clear pcb$v_forcepen wakepen
 
-  // vmsunlock
+    // vmsunlock
 
-  // reenable ast delivery
+    // reenable ast delivery
 
-  // delete logicals
+    // delete logicals
 
-  // reset P0 extension
+    // reset P0 extension
 
-  // resource wait mode to prev state
+    // resource wait mode to prev state
 
-  return SS$_NORMAL;
+    return SS$_NORMAL;
 }

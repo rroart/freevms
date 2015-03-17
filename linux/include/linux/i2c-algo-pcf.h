@@ -30,18 +30,19 @@
 /* --- Defines for pcf-adapters ---------------------------------------	*/
 #include <linux/i2c.h>
 
-struct i2c_algo_pcf_data {
-	void *data;		/* private data for lolevel routines	*/
-	void (*setpcf) (void *data, int ctl, int val);
-	int  (*getpcf) (void *data, int ctl);
-	int  (*getown) (void *data);
-	int  (*getclock) (void *data);
-	void (*waitforpin) (void);     
+struct i2c_algo_pcf_data
+{
+    void *data;		/* private data for lolevel routines	*/
+    void (*setpcf) (void *data, int ctl, int val);
+    int  (*getpcf) (void *data, int ctl);
+    int  (*getown) (void *data);
+    int  (*getclock) (void *data);
+    void (*waitforpin) (void);
 
-	/* local settings */
-	int udelay;
-	int mdelay;
-	int timeout;
+    /* local settings */
+    int udelay;
+    int mdelay;
+    int timeout;
 };
 
 #define I2C_PCF_ADAP_MAX	16

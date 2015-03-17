@@ -63,7 +63,7 @@ extern int __verify_write(const void *, unsigned long);
 
 static inline int verify_area(int type, const void * addr, unsigned long size)
 {
-	return access_ok(type,addr,size) ? 0 : -EFAULT;
+    return access_ok(type,addr,size) ? 0 : -EFAULT;
 }
 
 
@@ -82,7 +82,7 @@ static inline int verify_area(int type, const void * addr, unsigned long size)
 
 struct exception_table_entry
 {
-	unsigned long insn, fixup;
+    unsigned long insn, fixup;
 };
 
 /* Returns 0 if exception not found and fixup otherwise.  */
@@ -156,7 +156,7 @@ extern void __put_user_bad(void);
 	if (access_ok(VERIFY_WRITE,__pu_addr,size))	\
 		__put_user_size((x),__pu_addr,(size),__pu_err);	\
 	__pu_err;					\
-})							
+})
 
 #define __put_user_u64(x, addr, err)				\
 	__asm__ __volatile__(					\
@@ -187,7 +187,10 @@ do {									\
 	}								\
 } while (0)
 
-struct __large_struct { unsigned long buf[100]; };
+struct __large_struct
+{
+    unsigned long buf[100];
+};
 #define __m(x) (*(struct __large_struct *)(x))
 
 /*
@@ -310,15 +313,15 @@ do {									\
 static inline unsigned long
 __generic_copy_from_user_nocheck(void *to, const void *from, unsigned long n)
 {
-	__copy_user_zeroing(to,from,n);
-	return n;
+    __copy_user_zeroing(to,from,n);
+    return n;
 }
 
 static inline unsigned long
 __generic_copy_to_user_nocheck(void *to, const void *from, unsigned long n)
 {
-	__copy_user(to,from,n);
-	return n;
+    __copy_user(to,from,n);
+    return n;
 }
 
 
@@ -548,34 +551,34 @@ unsigned long __generic_copy_from_user(void *, const void *, unsigned long);
 static inline unsigned long
 __constant_copy_to_user(void *to, const void *from, unsigned long n)
 {
-	prefetch(from);
-	if (access_ok(VERIFY_WRITE, to, n))
-		__constant_copy_user(to,from,n);
-	return n;
+    prefetch(from);
+    if (access_ok(VERIFY_WRITE, to, n))
+        __constant_copy_user(to,from,n);
+    return n;
 }
 
 static inline unsigned long
 __constant_copy_from_user(void *to, const void *from, unsigned long n)
 {
-	if (access_ok(VERIFY_READ, from, n))
-		__constant_copy_user_zeroing(to,from,n);
-	else
-		memset(to, 0, n);
-	return n;
+    if (access_ok(VERIFY_READ, from, n))
+        __constant_copy_user_zeroing(to,from,n);
+    else
+        memset(to, 0, n);
+    return n;
 }
 
 static inline unsigned long
 __constant_copy_to_user_nocheck(void *to, const void *from, unsigned long n)
 {
-	__constant_copy_user(to,from,n);
-	return n;
+    __constant_copy_user(to,from,n);
+    return n;
 }
 
 static inline unsigned long
 __constant_copy_from_user_nocheck(void *to, const void *from, unsigned long n)
 {
-	__constant_copy_user_zeroing(to,from,n);
-	return n;
+    __constant_copy_user_zeroing(to,from,n);
+    return n;
 }
 
 #define copy_to_user(to,from,n)				\

@@ -13,10 +13,11 @@
 
 #define	WATCHDOG_IOCTL_BASE	'W'
 
-struct watchdog_info {
-	__u32 options;		/* Options the card/driver supports */
-	__u32 firmware_version;	/* Firmware version of the card */
-	__u8  identity[32];	/* Identity of the board */
+struct watchdog_info
+{
+    __u32 options;		/* Options the card/driver supports */
+    __u32 firmware_version;	/* Firmware version of the card */
+    __u8  identity[32];	/* Identity of the board */
 };
 
 #define	WDIOC_GETSUPPORT	_IOR(WATCHDOG_IOCTL_BASE, 0, struct watchdog_info)

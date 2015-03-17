@@ -22,7 +22,7 @@
 /*
 !++
 ! NETDEVICES.H	Copyright (c) 1990	Carnegie Mellon University
-! 
+!
 ! Description:
 !
 !	Supporting declarations for IP Transport device modules
@@ -89,131 +89,147 @@
 ! to the device module's IPACP Information Structure.
 */
 
-   /* Conditionally do something according to LOG_STATE flags */
+/* Conditionally do something according to LOG_STATE flags */
 #define $$LOGF SSLOGF
 #define $$LOGF(LOGF) (((*IPACP_Interface->ACPI$LOG_STATE) && (LOGF)) != 0)
 
 extern IPACP_Info_Structure * IPACP_Interface;
 
-    /* Write a message to the IPACP log file. */
-static int inline DRV$LOG_FAO(char *c, ...) {
-  struct dsc$descriptor d;
-  d.dsc$w_length=strlen(c);
-  d.dsc$a_pointer=c;
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,c);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  return IPACP_Interface->ACPI$LOG_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+/* Write a message to the IPACP log file. */
+static int inline DRV$LOG_FAO(char *c, ...)
+{
+    struct dsc$descriptor d;
+    d.dsc$w_length=strlen(c);
+    d.dsc$a_pointer=c;
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,c);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    return IPACP_Interface->ACPI$LOG_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
-static int inline DRV$XLOG_FAO(long i, ...) {
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,i);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  if ($$LOGF(i))
-    return DRV$LOG_FAO(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+static int inline DRV$XLOG_FAO(long i, ...)
+{
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,i);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    if ($$LOGF(i))
+        return DRV$LOG_FAO(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
 /*! Queue a message to the IPACP log file. */
 
-static int inline DRV$QL_FAO(char *c, ...) {
-  struct dsc$descriptor d;
-  d.dsc$w_length=strlen(c);
-  d.dsc$a_pointer=c;
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,c);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  return IPACP_Interface->ACPI$QL_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+static int inline DRV$QL_FAO(char *c, ...)
+{
+    struct dsc$descriptor d;
+    d.dsc$w_length=strlen(c);
+    d.dsc$a_pointer=c;
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,c);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    return IPACP_Interface->ACPI$QL_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
-static int inline DRV$XQL_FAO(long i, ...) {
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,i);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  if ($$LOGF(i))
-    return DRV$QL_FAO(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+static int inline DRV$XQL_FAO(long i, ...)
+{
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,i);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    if ($$LOGF(i))
+        return DRV$QL_FAO(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
 /*    ! Write a message to the console operator */
 
-static int inline DRV$OPR_FAO(char *c, ...) {
-  struct dsc$descriptor d;
-  d.dsc$w_length=strlen(c);
-  d.dsc$a_pointer=c;
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,c);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  return IPACP_Interface->ACPI$OPR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+static int inline DRV$OPR_FAO(char *c, ...)
+{
+    struct dsc$descriptor d;
+    d.dsc$w_length=strlen(c);
+    d.dsc$a_pointer=c;
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,c);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    return IPACP_Interface->ACPI$OPR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
-static int inline DRV$ERROR_FAO(char *c, ...) {
-  struct dsc$descriptor d;
-  d.dsc$w_length=strlen(c);
-  d.dsc$a_pointer=c;
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,c);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  return IPACP_Interface->ACPI$ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+static int inline DRV$ERROR_FAO(char *c, ...)
+{
+    struct dsc$descriptor d;
+    d.dsc$w_length=strlen(c);
+    d.dsc$a_pointer=c;
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,c);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    return IPACP_Interface->ACPI$ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
-static int inline DRV$WARN_FAO(char *c, ...) {
-  struct dsc$descriptor d;
-  d.dsc$w_length=strlen(c);
-  d.dsc$a_pointer=c;
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,c);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  return IPACP_Interface->ACPI$ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+static int inline DRV$WARN_FAO(char *c, ...)
+{
+    struct dsc$descriptor d;
+    d.dsc$w_length=strlen(c);
+    d.dsc$a_pointer=c;
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,c);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    return IPACP_Interface->ACPI$ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
-static int inline DRV$FATAL_FAO(char *c, ...) {
-  struct dsc$descriptor d;
-  d.dsc$w_length=strlen(c);
-  d.dsc$a_pointer=c;
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,c);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  return IPACP_Interface->ACPI$FATAL_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+static int inline DRV$FATAL_FAO(char *c, ...)
+{
+    struct dsc$descriptor d;
+    d.dsc$w_length=strlen(c);
+    d.dsc$a_pointer=c;
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,c);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    return IPACP_Interface->ACPI$FATAL_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
 /*

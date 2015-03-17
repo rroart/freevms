@@ -16,8 +16,8 @@
 #define IOC$M_NOLOCK 0x1000
 #define IOC$M_PAC 0x2000
 #define IOC$M_B4CREATE 0x4000
-#define IOC$S_IOCDEF 2                  
-	
+#define IOC$S_IOCDEF 2
+
 #define IOC$K_BYTE_LANED 1
 #define IOC$K_WORD_LANED 2
 #define IOC$K_LONGWORD 4
@@ -66,25 +66,26 @@
 
 #define IOC$K_DDMA_WIN_SIZE 21
 #define IOC$K_DDMA_BASE_PA 22
- 
-struct _ioc {
-  unsigned ioc$v_phy : 1;             
-  unsigned ioc$v_type : 1;            
-  unsigned ioc$v_class : 1;           
-  unsigned ioc$v_local : 1;           
-  unsigned ioc$v_exists : 1;          
-  unsigned ioc$v_2p : 1;              
-  unsigned ioc$v_any : 1;             
-  unsigned ioc$v_mount : 1;           
-  unsigned ioc$v_alt : 1;             
-  unsigned ioc$v_no_trans : 1;        
-  unsigned ioc$v_alloc : 1;           
-  unsigned ioc$v_dtn : 1;             
-  unsigned ioc$v_nolock : 1;          
-  unsigned ioc$v_pac : 1;             
-  unsigned ioc$v_b4create : 1;        
-  unsigned ioc$v_fill_0_ : 1;
+
+struct _ioc
+{
+    unsigned ioc$v_phy : 1;
+    unsigned ioc$v_type : 1;
+    unsigned ioc$v_class : 1;
+    unsigned ioc$v_local : 1;
+    unsigned ioc$v_exists : 1;
+    unsigned ioc$v_2p : 1;
+    unsigned ioc$v_any : 1;
+    unsigned ioc$v_mount : 1;
+    unsigned ioc$v_alt : 1;
+    unsigned ioc$v_no_trans : 1;
+    unsigned ioc$v_alloc : 1;
+    unsigned ioc$v_dtn : 1;
+    unsigned ioc$v_nolock : 1;
+    unsigned ioc$v_pac : 1;
+    unsigned ioc$v_b4create : 1;
+    unsigned ioc$v_fill_0_ : 1;
 };
 
-#endif 
- 
+#endif
+

@@ -47,10 +47,11 @@
 #define TPAM_MSGAUDIT_LENGTH		60000
 
 /* IOCTL load/save parameter */
-typedef struct tpam_dsp_ioctl {
-	__u32 address;	/* address to load/save data */
-	__u32 data_len;	/* size of data to be loaded/saved */
-	__u8 data[0];	/* data */
+typedef struct tpam_dsp_ioctl
+{
+    __u32 address;	/* address to load/save data */
+    __u32 data_len;	/* size of data to be loaded/saved */
+    __u8 data[0];	/* data */
 } tpam_dsp_ioctl;
 
 #endif /* _TPAM_H_ */

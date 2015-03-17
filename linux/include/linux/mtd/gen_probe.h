@@ -8,13 +8,14 @@
 #define __LINUX_MTD_GEN_PROBE_H__
 
 #include <linux/mtd/flashchip.h>
-#include <linux/mtd/map.h> 
+#include <linux/mtd/map.h>
 #include <linux/mtd/cfi.h>
 
-struct chip_probe {
-	char *name;
-	int (*probe_chip)(struct map_info *map, __u32 base,
-			  struct flchip *chips, struct cfi_private *cfi);
+struct chip_probe
+{
+    char *name;
+    int (*probe_chip)(struct map_info *map, __u32 base,
+                      struct flchip *chips, struct cfi_private *cfi);
 
 };
 

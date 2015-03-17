@@ -32,7 +32,7 @@ void kill_super(struct super_block *sb);
 
 static struct list_head *mount_hashtable;
 static int hash_mask, hash_bits;
-static kmem_cache_t *mnt_cache; 
+static kmem_cache_t *mnt_cache;
 
 static LIST_HEAD(vfsmntlist);
 static DECLARE_MUTEX(mount_sem);
@@ -42,10 +42,10 @@ struct vfsmount *root_vfsmnt;
 
 static inline unsigned long hash(struct vfsmount *mnt, struct dentry *dentry)
 {
-	unsigned long tmp = ((unsigned long) mnt / L1_CACHE_BYTES);
-	tmp += ((unsigned long) dentry / L1_CACHE_BYTES);
-	tmp = tmp + (tmp >> hash_bits);
-	return tmp & hash_mask;
+    unsigned long tmp = ((unsigned long) mnt / L1_CACHE_BYTES);
+    tmp += ((unsigned long) dentry / L1_CACHE_BYTES);
+    tmp = tmp + (tmp >> hash_bits);
+    return tmp & hash_mask;
 }
 
 /*
@@ -58,22 +58,22 @@ static inline unsigned long hash(struct vfsmount *mnt, struct dentry *dentry)
 
 asmlinkage long sys_umount(char * name, int flags)
 {
-	return -EPERM;
+    return -EPERM;
 }
 
 /*
- *	The 2.0 compatible umount. No flags. 
+ *	The 2.0 compatible umount. No flags.
  */
- 
+
 asmlinkage long sys_oldumount(char * name)
 {
-	return sys_umount(name,0);
+    return sys_umount(name,0);
 }
 
 asmlinkage long sys_mount(char * dev_name, char * dir_name, char * type,
-			  unsigned long flags, void * data)
+                          unsigned long flags, void * data)
 {
-	return -EPERM;
+    return -EPERM;
 }
 
 /*
@@ -91,6 +91,6 @@ asmlinkage long sys_mount(char * dev_name, char * dir_name, char * type,
 
 asmlinkage long sys_pivot_root(const char *new_root, const char *put_old)
 {
-	return -EPERM;
+    return -EPERM;
 }
 

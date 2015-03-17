@@ -11,18 +11,20 @@
 #include<va_rangedef.h>
 #include<wsldef.h>
 
-int exe$adjwsl(signed int pagcnt, unsigned int *wsetlm) {
-  struct _pcb * p=ctl$gl_pcb;
-  int newsize;
-  //or ctl$gl_phd?
-  // do all here, have no priv image in setwork
-  p->pcb$l_phd->phd$l_wssize+=pagcnt;
-  p->pcb$l_phd->phd$l_wsquota+=pagcnt;
-  p->pcb$l_phd->phd$l_wsextent+=pagcnt;
-  newsize=p->pcb$l_phd->phd$l_wssize;
-  if (pagcnt>0) {
-    if (newsize>WSMAX) newsize=WSMAX;
-    if (newsize>p->pcb$l_phd->phd$l_wsauthext) newsize=p->pcb$l_phd->phd$l_wsauthext;
-    //check with general mem resources too
-  }
+int exe$adjwsl(signed int pagcnt, unsigned int *wsetlm)
+{
+    struct _pcb * p=ctl$gl_pcb;
+    int newsize;
+    //or ctl$gl_phd?
+    // do all here, have no priv image in setwork
+    p->pcb$l_phd->phd$l_wssize+=pagcnt;
+    p->pcb$l_phd->phd$l_wsquota+=pagcnt;
+    p->pcb$l_phd->phd$l_wsextent+=pagcnt;
+    newsize=p->pcb$l_phd->phd$l_wssize;
+    if (pagcnt>0)
+    {
+        if (newsize>WSMAX) newsize=WSMAX;
+        if (newsize>p->pcb$l_phd->phd$l_wsauthext) newsize=p->pcb$l_phd->phd$l_wsauthext;
+        //check with general mem resources too
+    }
 }

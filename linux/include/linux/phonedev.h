@@ -8,12 +8,13 @@
 
 #include <linux/poll.h>
 
-struct phone_device {
-	struct phone_device *next;
-	struct file_operations *f_op;
-	int (*open) (struct phone_device *, struct file *);
-	int board;		/* Device private index */
-	int minor;
+struct phone_device
+{
+    struct phone_device *next;
+    struct file_operations *f_op;
+    int (*open) (struct phone_device *, struct file *);
+    int board;		/* Device private index */
+    int minor;
 };
 
 extern int phonedev_init(void);

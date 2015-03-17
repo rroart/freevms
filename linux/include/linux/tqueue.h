@@ -35,11 +35,12 @@
  *   the list.
  */
 
-struct tq_struct {
-	struct list_head list;		/* linked list of active bh's */
-	unsigned long sync;		/* must be initialized to zero */
-	void (*routine)(void *);	/* function to call */
-	void *data;			/* argument to function */
+struct tq_struct
+{
+    struct list_head list;		/* linked list of active bh's */
+    unsigned long sync;		/* must be initialized to zero */
+    void (*routine)(void *);	/* function to call */
+    void *data;			/* argument to function */
 };
 
 /*
@@ -99,15 +100,16 @@ extern spinlock_t tqueue_lock;
  */
 static inline int queue_task(struct tq_struct *bh_pointer, task_queue *bh_list)
 {
-	int ret = 0;
-	if (!test_and_set_bit(0,&bh_pointer->sync)) {
-		unsigned long flags;
-		spin_lock_irqsave(&tqueue_lock, flags);
-		list_add_tail(&bh_pointer->list, bh_list);
-		spin_unlock_irqrestore(&tqueue_lock, flags);
-		ret = 1;
-	}
-	return ret;
+    int ret = 0;
+    if (!test_and_set_bit(0,&bh_pointer->sync))
+    {
+        unsigned long flags;
+        spin_lock_irqsave(&tqueue_lock, flags);
+        list_add_tail(&bh_pointer->list, bh_list);
+        spin_unlock_irqrestore(&tqueue_lock, flags);
+        ret = 1;
+    }
+    return ret;
 }
 
 /*
@@ -118,8 +120,8 @@ extern void __run_task_queue(task_queue *list);
 
 static inline void run_task_queue(task_queue *list)
 {
-	if (TQ_ACTIVE(*list))
-		__run_task_queue(list);
+    if (TQ_ACTIVE(*list))
+        __run_task_queue(list);
 }
 
 #endif /* _LINUX_TQUEUE_H */

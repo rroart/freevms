@@ -2,10 +2,10 @@
  * include/linux/serial_reg.h
  *
  * Copyright (C) 1992, 1994 by Theodore Ts'o.
- * 
- * Redistribution of this file is permitted under the terms of the GNU 
+ *
+ * Redistribution of this file is permitted under the terms of the GNU
  * Public License (GPL)
- * 
+ *
  * These are the UART port assignments, expressed as offsets from the base
  * register.  These assignments should hold for any serial port based on
  * a 8250, 16450, or 16550(A).
@@ -18,19 +18,19 @@
 #define UART_TX		0	/* Out: Transmit buffer (DLAB=0) */
 #define UART_DLL	0	/* Out: Divisor Latch Low (DLAB=1) */
 #define UART_TRG	0	/* (LCR=BF) FCTR bit 7 selects Rx or Tx
-				 * In: Fifo count
-				 * Out: Fifo custom trigger levels
-				 * XR16C85x only */
+* In: Fifo count
+* Out: Fifo custom trigger levels
+* XR16C85x only */
 
 #define UART_DLM	1	/* Out: Divisor Latch High (DLAB=1) */
 #define UART_IER	1	/* Out: Interrupt Enable Register */
 #define UART_FCTR	1	/* (LCR=BF) Feature Control Register
-				 * XR16C85x only */
+* XR16C85x only */
 
 #define UART_IIR	2	/* In:  Interrupt ID Register */
 #define UART_FCR	2	/* Out: FIFO Control Register */
 #define UART_EFR	2	/* I/O: Extended Features Register */
-				/* (DLAB=1, 16C660 only) */
+/* (DLAB=1, 16C660 only) */
 
 #define UART_LCR	3	/* Out: Line Control Register */
 #define UART_MCR	4	/* Out: Modem Control Register */
@@ -38,8 +38,8 @@
 #define UART_MSR	6	/* In:  Modem Status Register */
 #define UART_SCR	7	/* I/O: Scratch Register */
 #define UART_EMSR	7	/* (LCR=BF) Extended Mode Select Register 
-				 * FCTR bit 6 selects SCR or EMSR
-				 * XR16c85x only */
+* FCTR bit 6 selects SCR or EMSR
+* XR16c85x only */
 
 /*
  * These are the definitions for the FIFO Control Register
@@ -68,8 +68,8 @@
 
 /*
  * These are the definitions for the Line Control Register
- * 
- * Note: if the word length is 5 bits (UART_LCR_WLEN5), then setting 
+ *
+ * Note: if the word length is 5 bits (UART_LCR_WLEN5), then setting
  * UART_LCR_STOP will select 1.5 stop bits, not 2 stop bits.
  */
 #define UART_LCR_DLAB	0x80	/* Divisor latch access bit */

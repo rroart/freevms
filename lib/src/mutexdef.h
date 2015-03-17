@@ -6,17 +6,19 @@
 #define MUTEX$M_WRT 0x1
 #define MUTEX$M_INTERLOCK 0x1
 #define MUTEX$S_MUTEXDEF 8
-	
-struct _mutex {
-  union  {
-    unsigned short int mutex$w_sts;
-    unsigned mutex$v_wrt : 1;
-    unsigned mutex$v_interlock : 1;
-  };
-  unsigned short int mutex$w_fill_2;
-  unsigned int mutex$l_owncnt;
+
+struct _mutex
+{
+    union
+    {
+        unsigned short int mutex$w_sts;
+        unsigned mutex$v_wrt : 1;
+        unsigned mutex$v_interlock : 1;
+    };
+    unsigned short int mutex$w_fill_2;
+    unsigned int mutex$l_owncnt;
 };
- 
+
 #define MTXDBG$K_REV1 1
 #define MTXDBG$K_REV2 2
 #define MTXDBG$K_REVISION 2
@@ -54,63 +56,68 @@ struct _mutex {
 #define MTXDBG$M_MUTEX_WAIT 0x2
 #define MTXDBG$K_LENGTH 608
 #define MTXDBG$C_LENGTH 608
-	
-struct _mtxdbg {
-  struct _mtxtrh *mtxdbg$q_trace_buffer;
-  unsigned short int mtxdbg$w_mbo;
-  unsigned char mtxdbg$b_type;
-  unsigned char mtxdbg$b_subtype;
-  unsigned int mtxdbg$l_revision;
-  long long mtxdbg$q_size;
-  int (*mtxdbg$l_start_trace)();
-  int (*mtxdbg$l_stop_trace)();
-  void (*mtxdbg$l_trace_mutex)();
-  void (*mtxdbg$l_trace_mutex_wait)();
-  void (*mtxdbg$l_debug_print)();
-  union  {
-    unsigned int mtxdbg$l_trace_flags;
-    struct  {
-      unsigned mtxdbg$v_mutex : 1;
-      unsigned mtxdbg$v_mutex_wait : 1;
-      unsigned mtxdbg$v_fill_0_ : 6;
+
+struct _mtxdbg
+{
+    struct _mtxtrh *mtxdbg$q_trace_buffer;
+    unsigned short int mtxdbg$w_mbo;
+    unsigned char mtxdbg$b_type;
+    unsigned char mtxdbg$b_subtype;
+    unsigned int mtxdbg$l_revision;
+    long long mtxdbg$q_size;
+    int (*mtxdbg$l_start_trace)();
+    int (*mtxdbg$l_stop_trace)();
+    void (*mtxdbg$l_trace_mutex)();
+    void (*mtxdbg$l_trace_mutex_wait)();
+    void (*mtxdbg$l_debug_print)();
+    union
+    {
+        unsigned int mtxdbg$l_trace_flags;
+        struct
+        {
+            unsigned mtxdbg$v_mutex : 1;
+            unsigned mtxdbg$v_mutex_wait : 1;
+            unsigned mtxdbg$v_fill_0_ : 6;
+        };
     };
-  };
-  unsigned int mtxdbg$l_mtx_flags;
-  int mtxdbg$l_cpu_flags;
-  unsigned int mtxdbg$l_trace_run;
-  char mtxdbg$b_fill_1_ [4];
-  unsigned long long mtxdbg$q_reserved1;
-  unsigned long long mtxdbg$q_reserved2;
-  unsigned long long mtxdbg$q_reserved3;
-  unsigned long long mtxdbg$q_reserved4;
-  unsigned long long mtxdbg$q_scc [32];
-  unsigned long long mtxdbg$q_systime [32];
+    unsigned int mtxdbg$l_mtx_flags;
+    int mtxdbg$l_cpu_flags;
+    unsigned int mtxdbg$l_trace_run;
+    char mtxdbg$b_fill_1_ [4];
+    unsigned long long mtxdbg$q_reserved1;
+    unsigned long long mtxdbg$q_reserved2;
+    unsigned long long mtxdbg$q_reserved3;
+    unsigned long long mtxdbg$q_reserved4;
+    unsigned long long mtxdbg$q_scc [32];
+    unsigned long long mtxdbg$q_systime [32];
 };
- 
+
 #define MTXTRE$K_LENGTH 32
-	
-struct _mtxtre {
-  unsigned long long mtxtre$q_timestamp;
-  unsigned int mtxtre$l_pc;
-  unsigned int mtxtre$l_cpuid;
-  unsigned int mtxtre$l_mode;
-  unsigned int mtxtre$l_flag;
-  unsigned int mtxtre$l_mutex;
-  struct _pcb *mtxtre$l_pcb;
+
+struct _mtxtre
+{
+    unsigned long long mtxtre$q_timestamp;
+    unsigned int mtxtre$l_pc;
+    unsigned int mtxtre$l_cpuid;
+    unsigned int mtxtre$l_mode;
+    unsigned int mtxtre$l_flag;
+    unsigned int mtxtre$l_mutex;
+    struct _pcb *mtxtre$l_pcb;
 };
 #define MTXTRH$K_LENGTH 64
-	
-struct _mtxtrh {
-  int mtxtrh$l_idx;
-  unsigned int mtxtrh$l_max_idx;
-  unsigned short int mtxtrh$w_mbo;
-  unsigned char mtxtrh$b_type;
-  unsigned char mtxtrh$b_subtype;
-  unsigned int mtxtrh$l_fill1;
-  long long mtxtrh$q_size;
-  struct _mtxtre *mtxtrh$q_entry_ptr;
-  struct _mtxtre mtxtrh$r_entry [1];
+
+struct _mtxtrh
+{
+    int mtxtrh$l_idx;
+    unsigned int mtxtrh$l_max_idx;
+    unsigned short int mtxtrh$w_mbo;
+    unsigned char mtxtrh$b_type;
+    unsigned char mtxtrh$b_subtype;
+    unsigned int mtxtrh$l_fill1;
+    long long mtxtrh$q_size;
+    struct _mtxtre *mtxtrh$q_entry_ptr;
+    struct _mtxtre mtxtrh$r_entry [1];
 };
- 
+
 #endif
- 
+

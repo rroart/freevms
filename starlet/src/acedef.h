@@ -59,128 +59,156 @@
 #define		ACE$S_OIL_S64I64		32
 #define		ACE$S_OIL_S128			32
 #define		ACE$S_OIL			32
-	
-struct _acedef {
-  unsigned char ace$b_size;
-  unsigned char ace$b_type;
-  union  {
-    unsigned short int ace$w_flags;
-    struct  {
-      unsigned ace$v_info_type	: 4;
-      unsigned ace$v_fill_6_	: 4;
+
+struct _acedef
+{
+    unsigned char ace$b_size;
+    unsigned char ace$b_type;
+    union
+    {
+        unsigned short int ace$w_flags;
+        struct
+        {
+            unsigned ace$v_info_type	: 4;
+            unsigned ace$v_fill_6_	: 4;
+        };
+        struct
+        {
+            unsigned ace$v_reserved	: 4;
+            unsigned ace$v_fill_7_	: 4;
+        };
+        struct
+        {
+            unsigned ace$v_success	: 1;
+            unsigned ace$v_failure	: 1;
+            unsigned ace$v_fill_8_	: 6;
+        };
+        struct
+        {
+            unsigned ace$v_filler_1		: 8;
+            unsigned ace$v_default		: 1;
+            unsigned ace$v_protected		: 1;
+            unsigned ace$v_hidden		: 1;
+            unsigned ace$v_nopropagate	: 1;
+            unsigned ace$v_fill_9_		: 4;
+        };
     };
-    struct  {
-      unsigned ace$v_reserved	: 4;
-      unsigned ace$v_fill_7_	: 4;
+    union
+    {
+        struct
+        {
+            union
+            {
+                unsigned int ace$l_access;
+                struct
+                {
+                    unsigned ace$v_read		: 1;
+                    unsigned ace$v_write		: 1;
+                    unsigned ace$v_execute	: 1;
+                    unsigned ace$v_delete		: 1;
+                    unsigned ace$v_control	: 1;
+                    unsigned ace$v_fill_10_	: 3;
+                };
+            };
+            union
+            {
+                unsigned int ace$l_key;
+                char ace$t_auditname [16];
+            };
+        };
+        struct
+        {
+            union
+            {
+                unsigned int ace$l_info_flags;
+                struct
+                {
+                    unsigned short int ace$w_application_flags;
+                    unsigned short int ace$w_application_facility;
+                };
+            };
+            union
+            {
+                char ace$t_info_start;
+                struct
+                {
+                    unsigned short int ace$w_rmsatr_variant;
+                    unsigned char ace$b_rmsatr_fixlen;
+                    char ace$b_rmsatr_spare1;
+                    unsigned short int ace$w_rmsatr_minor_id;
+                    unsigned short int ace$w_rmsatr_major_id;
+                    union
+                    {
+                        unsigned int ace$l_rms_attribute_flags;
+                        struct
+                        {
+                            unsigned ace$v_statistics	: 1;
+                            unsigned ace$v_xlate_dec	: 1;
+                            unsigned ace$v_fill_11_	: 6;
+                        };
+                    };
+                };
+            };
+        };
+        struct
+        {
+            char ace$t_volnam [12];
+            unsigned char ace$b_volnam_len;
+            unsigned char ace$b_rjrver;
+            union
+            {
+                unsigned short int ace$w_fid [3];
+                struct
+                {
+                    unsigned short int ace$w_fid_num;
+                    unsigned short int ace$w_fid_seq;
+                    union
+                    {
+                        unsigned short int ace$w_fid_rvn;
+                        struct
+                        {
+                            unsigned char ace$b_fid_rvn;
+                            unsigned char ace$b_fid_nmx;
+                        };
+                    };
+                };
+            };
+            union
+            {
+                unsigned short int ace$w_rmsjnl_flags;
+                struct
+                {
+                    unsigned ace$v_journal_disabled	: 1;
+                    unsigned ace$v_backup_done		: 1;
+                    unsigned ace$v_fill_12_		: 6;
+                };
+            };
+            unsigned int ace$l_jnlidx;
+            unsigned long long ace$q_cdate;
+            unsigned int ace$l_backup_seqno;
+            unsigned long long ace$q_modification_time;
+        };
+        struct
+        {
+            unsigned int ace$l_spare1;
+            unsigned int ace$l_sys_prot;
+            unsigned int ace$l_own_prot;
+            unsigned int ace$l_grp_prot;
+            unsigned int ace$l_wor_prot;
+        };
+        struct
+        {
+            unsigned int ace$l_spare2;
+            unsigned long long ace$q_image_ids;
+        };
+        struct
+        {
+            unsigned int ace$l_oil_flags;
+            unsigned int ace$l_brand_name;
+            char ace$r_class_prot;
+        };
     };
-    struct  {
-      unsigned ace$v_success	: 1;
-      unsigned ace$v_failure	: 1;
-      unsigned ace$v_fill_8_	: 6;
-    };
-    struct  {
-      unsigned ace$v_filler_1		: 8;
-      unsigned ace$v_default		: 1;
-      unsigned ace$v_protected		: 1;
-      unsigned ace$v_hidden		: 1;
-      unsigned ace$v_nopropagate	: 1;
-      unsigned ace$v_fill_9_		: 4;
-    };
-  };
-  union  {
-    struct  {
-      union  {
-	unsigned int ace$l_access;
-	struct  {
-	  unsigned ace$v_read		: 1;
-	  unsigned ace$v_write		: 1;
-	  unsigned ace$v_execute	: 1;
-	  unsigned ace$v_delete		: 1;
-	  unsigned ace$v_control	: 1;
-	  unsigned ace$v_fill_10_	: 3;
-	};
-      };
-      union  {
-	unsigned int ace$l_key;
-	char ace$t_auditname [16];
-      };
-    };
-    struct  {
-      union  {
-	unsigned int ace$l_info_flags;
-	struct  {
-	  unsigned short int ace$w_application_flags;
-	  unsigned short int ace$w_application_facility;
-	};
-      };
-      union  {
-	char ace$t_info_start;
-	struct  {
-	  unsigned short int ace$w_rmsatr_variant;
-	  unsigned char ace$b_rmsatr_fixlen;
-	  char ace$b_rmsatr_spare1;
-	  unsigned short int ace$w_rmsatr_minor_id;
-	  unsigned short int ace$w_rmsatr_major_id;
-	  union  {
-	    unsigned int ace$l_rms_attribute_flags;
-	    struct  {
-	      unsigned ace$v_statistics	: 1;
-	      unsigned ace$v_xlate_dec	: 1;
-	      unsigned ace$v_fill_11_	: 6;
-	    };
-	  };
-	};
-      };
-    };
-    struct  {
-      char ace$t_volnam [12];
-      unsigned char ace$b_volnam_len;
-      unsigned char ace$b_rjrver;
-      union  {
-	unsigned short int ace$w_fid [3];
-	struct  {
-	  unsigned short int ace$w_fid_num;
-	  unsigned short int ace$w_fid_seq;
-	  union  {
-	    unsigned short int ace$w_fid_rvn;
-	    struct  {
-	      unsigned char ace$b_fid_rvn;
-	      unsigned char ace$b_fid_nmx;
-	    };
-	  };
-	};
-      };
-      union  {
-	unsigned short int ace$w_rmsjnl_flags;
-	struct  {
-	  unsigned ace$v_journal_disabled	: 1;
-	  unsigned ace$v_backup_done		: 1;
-	  unsigned ace$v_fill_12_		: 6;
-	};
-      };
-      unsigned int ace$l_jnlidx;
-      unsigned long long ace$q_cdate;
-      unsigned int ace$l_backup_seqno;
-      unsigned long long ace$q_modification_time;
-    };
-    struct  {
-      unsigned int ace$l_spare1;
-      unsigned int ace$l_sys_prot;
-      unsigned int ace$l_own_prot;
-      unsigned int ace$l_grp_prot;
-      unsigned int ace$l_wor_prot;
-    };
-    struct  {
-      unsigned int ace$l_spare2;
-      unsigned long long ace$q_image_ids;
-    };
-    struct  {
-      unsigned int ace$l_oil_flags;
-      unsigned int ace$l_brand_name;
-      char ace$r_class_prot;
-    };
-  };
 };
- 
+
 #endif
- 
+

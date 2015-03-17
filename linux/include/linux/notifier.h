@@ -6,16 +6,16 @@
  *
  *				Alan Cox <Alan.Cox@linux.org>
  */
- 
+
 #ifndef _LINUX_NOTIFIER_H
 #define _LINUX_NOTIFIER_H
 #include <linux/errno.h>
 
 struct notifier_block
 {
-	int (*notifier_call)(struct notifier_block *self, unsigned long, void *);
-	struct notifier_block *next;
-	int priority;
+    int (*notifier_call)(struct notifier_block *self, unsigned long, void *);
+    struct notifier_block *next;
+    int priority;
 };
 
 
@@ -32,19 +32,19 @@ extern int notifier_call_chain(struct notifier_block **n, unsigned long val, voi
 
 /*
  *	Declared notifiers so far. I can imagine quite a few more chains
- *	over time (eg laptop power reset chains, reboot chain (to clean 
+ *	over time (eg laptop power reset chains, reboot chain (to clean
  *	device units up), device [un]mount chain, module load/unload chain,
- *	low memory chain, screenblank chain (for plug in modular screenblankers) 
+ *	low memory chain, screenblank chain (for plug in modular screenblankers)
  *	VC switch chains (for loadable kernel svgalib VC switch helpers) etc...
  */
- 
+
 /* netdevice notifier chain */
 #define NETDEV_UP	0x0001	/* For now you can't veto a device up/down */
 #define NETDEV_DOWN	0x0002
 #define NETDEV_REBOOT	0x0003	/* Tell a protocol stack a network interface
-				   detected a hardware crash and restarted
-				   - we can use this eg to kick tcp sessions
-				   once done */
+detected a hardware crash and restarted
+- we can use this eg to kick tcp sessions
+once done */
 #define NETDEV_CHANGE	0x0004	/* Notify device state change */
 #define NETDEV_REGISTER 0x0005
 #define NETDEV_UNREGISTER	0x0006

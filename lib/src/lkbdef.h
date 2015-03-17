@@ -53,45 +53,47 @@
 #define LKB$K_LENGTH 248
 #define LKB$C_LENGTH 248
 #define LKB$S_LKBDEF 248
-	
-struct _lkb {
-  struct _acb *lkb$l_astqfl;
-  struct _acb *lkb$l_astqbl;
-  unsigned short int lkb$w_size;
-  unsigned char lkb$b_type;
-  unsigned char lkb$b_rmod;
-  unsigned long lkb$l_pid;
-  unsigned long lkb$l_ast;
-  unsigned long lkb$l_astprm;
-  unsigned long lkb$l_kast;
-  unsigned long lkb$l_cplastadr;
-  unsigned long lkb$l_blkastadr;
-  unsigned int lkb$l_flags;
-  unsigned int lkb$l_status;
-  unsigned int lkb$l_lkst1;
-  unsigned int lkb$l_lkst2;
-  unsigned char lkb$b_rqmode;
-  unsigned char lkb$b_grmode;
-  unsigned char lkb$b_state;
-  unsigned char lkb$b_efn;
-  void *lkb$l_sqfl;
-  void *lkb$l_sqbl;
-  void *lkb$l_ownqfl;
-  void *lkb$l_ownqbl;
-  struct _lkb *lkb$l_parent;
-  unsigned short lkb$w_refcnt;
-  unsigned char lkb$b_tslt;
-  unsigned char lib$b_res;
-  struct _rsb *lkb$l_rsb;
-  unsigned long lkb$l_lksb;
-  unsigned int lkb$l_remlkid;
-  union {
-    unsigned int lkb$l_csid;
-    unsigned long lkb$l_oldastprm;
-  };
-  int (*lkb$pq_oldblkast)();
-  unsigned int lkb$l_duetime;
+
+struct _lkb
+{
+    struct _acb *lkb$l_astqfl;
+    struct _acb *lkb$l_astqbl;
+    unsigned short int lkb$w_size;
+    unsigned char lkb$b_type;
+    unsigned char lkb$b_rmod;
+    unsigned long lkb$l_pid;
+    unsigned long lkb$l_ast;
+    unsigned long lkb$l_astprm;
+    unsigned long lkb$l_kast;
+    unsigned long lkb$l_cplastadr;
+    unsigned long lkb$l_blkastadr;
+    unsigned int lkb$l_flags;
+    unsigned int lkb$l_status;
+    unsigned int lkb$l_lkst1;
+    unsigned int lkb$l_lkst2;
+    unsigned char lkb$b_rqmode;
+    unsigned char lkb$b_grmode;
+    unsigned char lkb$b_state;
+    unsigned char lkb$b_efn;
+    void *lkb$l_sqfl;
+    void *lkb$l_sqbl;
+    void *lkb$l_ownqfl;
+    void *lkb$l_ownqbl;
+    struct _lkb *lkb$l_parent;
+    unsigned short lkb$w_refcnt;
+    unsigned char lkb$b_tslt;
+    unsigned char lib$b_res;
+    struct _rsb *lkb$l_rsb;
+    unsigned long lkb$l_lksb;
+    unsigned int lkb$l_remlkid;
+    union
+    {
+        unsigned int lkb$l_csid;
+        unsigned long lkb$l_oldastprm;
+    };
+    int (*lkb$pq_oldblkast)();
+    unsigned int lkb$l_duetime;
 };
- 
+
 #endif
- 
+

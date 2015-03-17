@@ -31,7 +31,7 @@
 /************************************************************************
  *			Modification History				*
  *									*
- *	
+ *
  *	15-Jan-88	lp
  *		Merge of final 43BSD changes.
  *
@@ -51,10 +51,11 @@
 /*
  * Structure of a 10Mb/s Ethernet header.
  */
-struct	ether_header {
-	u_char	ether_dhost[6];
-	u_char	ether_shost[6];
-	u_short	ether_type;
+struct	ether_header
+{
+    u_char	ether_dhost[6];
+    u_char	ether_shost[6];
+    u_short	ether_type;
 };
 
 #define	ETHERTYPE_PUP	0x0200		/* PUP protocol */
@@ -81,18 +82,19 @@ struct	ether_header {
  * Ethernet Address Resolution Protocol.
  *
  * See RFC 826 for protocol description.  Structure below is adapted
- * to resolving internet addresses.  Field names used correspond to 
+ * to resolving internet addresses.  Field names used correspond to
  * RFC 826.
  */
-struct	ether_arp {
-	struct arphdr ea_hdr;	/* fixed-size header */
+struct	ether_arp
+{
+    struct arphdr ea_hdr;	/* fixed-size header */
 #define ARPHRD_ETHER 	1	/* ethernet hardware address */
 #define	ARPOP_REQUEST	1	/* request to resolve address */
 #define	ARPOP_REPLY	2	/* response to previous request */
-	u_char	arp_sha[6];	/* sender hardware address */
-	u_char	arp_spa[4];	/* sender protocol address */
-	u_char	arp_tha[6];	/* target hardware address */
-	u_char	arp_tpa[4];	/* target protocol address */
+    u_char	arp_sha[6];	/* sender hardware address */
+    u_char	arp_spa[4];	/* sender protocol address */
+    u_char	arp_tha[6];	/* target hardware address */
+    u_char	arp_tpa[4];	/* target protocol address */
 };
 #define arp_hrd	ea_hdr.ar_hrd
 #define arp_pro ea_hdr.ar_pro
@@ -105,21 +107,23 @@ struct	ether_arp {
  * the address resolution code.  For example, each ec_softc or il_softc
  * begins with this structure.
  */
-struct	arpcom {
-	struct 	ifnet ac_if;		/* network-visible interface */
-	u_char	ac_enaddr[6];		/* ethernet hardware address */
-	struct in_addr ac_ipaddr;	/* copy of ip address- XXX */
+struct	arpcom
+{
+    struct 	ifnet ac_if;		/* network-visible interface */
+    u_char	ac_enaddr[6];		/* ethernet hardware address */
+    struct in_addr ac_ipaddr;	/* copy of ip address- XXX */
 };
 
 /*
  * Internet to ethernet address resolution table.
  */
-struct	arptab {
-	struct	in_addr at_iaddr;	/* internet address */
-	u_char	at_enaddr[6];		/* ethernet address */
-	struct	mbuf *at_hold;		/* last packet until resolved/timeout */
-	u_char	at_timer;		/* minutes since last reference */
-	u_char	at_flags;		/* flags */
+struct	arptab
+{
+    struct	in_addr at_iaddr;	/* internet address */
+    u_char	at_enaddr[6];		/* ethernet address */
+    struct	mbuf *at_hold;		/* last packet until resolved/timeout */
+    u_char	at_timer;		/* minutes since last reference */
+    u_char	at_flags;		/* flags */
 };
 
 #ifdef	KERNEL

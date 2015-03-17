@@ -52,23 +52,31 @@
 
 union _FP_UNION_E
 {
-   long double flt;
-   struct 
-   {
+    long double flt;
+    struct
+    {
 #if __BYTE_ORDER == __BIG_ENDIAN
-      unsigned long pad1 : _FP_W_TYPE_SIZE;
-      unsigned long pad2 : (_FP_W_TYPE_SIZE - 1 - _FP_EXPBITS_E);
-      unsigned long sign : 1;
-      unsigned long exp : _FP_EXPBITS_E;
-      unsigned long frac1 : _FP_W_TYPE_SIZE;
-      unsigned long frac0 : _FP_W_TYPE_SIZE;
+unsigned long pad1 :
+        _FP_W_TYPE_SIZE;
+unsigned long pad2 :
+        (_FP_W_TYPE_SIZE - 1 - _FP_EXPBITS_E);
+        unsigned long sign : 1;
+unsigned long exp :
+        _FP_EXPBITS_E;
+unsigned long frac1 :
+        _FP_W_TYPE_SIZE;
+unsigned long frac0 :
+        _FP_W_TYPE_SIZE;
 #else
-      unsigned long frac0 : _FP_W_TYPE_SIZE;
-      unsigned long frac1 : _FP_W_TYPE_SIZE;
-      unsigned exp : _FP_EXPBITS_E;
-      unsigned sign : 1;
+unsigned long frac0 :
+        _FP_W_TYPE_SIZE;
+unsigned long frac1 :
+        _FP_W_TYPE_SIZE;
+unsigned exp :
+        _FP_EXPBITS_E;
+        unsigned sign : 1;
 #endif /* not bigendian */
-   } bits __attribute__((packed));
+    } bits __attribute__((packed));
 };
 
 
@@ -181,7 +189,7 @@ union _FP_UNION_E
  * anyway, we optimize it by doing most of the calculations
  * in two UWtype registers instead of four.
  */
- 
+
 #define _FP_SQRT_MEAT_E(R, S, T, X, q)			\
   do {							\
     q = (_FP_W_TYPE)1 << (_FP_W_TYPE_SIZE - 1);		\
@@ -239,19 +247,25 @@ union _FP_UNION_E
 #else   /* not _FP_W_TYPE_SIZE < 64 */
 union _FP_UNION_E
 {
-  long double flt /* __attribute__((mode(TF))) */ ;
-  struct {
+    long double flt /* __attribute__((mode(TF))) */ ;
+    struct
+    {
 #if __BYTE_ORDER == __BIG_ENDIAN
-    unsigned long pad : (_FP_W_TYPE_SIZE - 1 - _FP_EXPBITS_E);
-    unsigned sign  : 1;
-    unsigned exp   : _FP_EXPBITS_E;
-    unsigned long frac : _FP_W_TYPE_SIZE;
+unsigned long pad :
+        (_FP_W_TYPE_SIZE - 1 - _FP_EXPBITS_E);
+        unsigned sign  : 1;
+unsigned exp   :
+        _FP_EXPBITS_E;
+unsigned long frac :
+        _FP_W_TYPE_SIZE;
 #else
-    unsigned long frac : _FP_W_TYPE_SIZE;
-    unsigned exp   : _FP_EXPBITS_E;
-    unsigned sign  : 1;
+unsigned long frac :
+        _FP_W_TYPE_SIZE;
+unsigned exp   :
+        _FP_EXPBITS_E;
+        unsigned sign  : 1;
 #endif
-  } bits;
+    } bits;
 };
 
 #define FP_DECL_E(X)		_FP_DECL(2,X)
@@ -380,7 +394,7 @@ union _FP_UNION_E
 	R##_f0 |= _FP_WORK_STICKY;			\
       }							\
   } while (0)
- 
+
 #define FP_CMP_E(r,X,Y,un)	_FP_CMP(E,2,r,X,Y,un)
 #define FP_CMP_EQ_E(r,X,Y)	_FP_CMP_EQ(E,2,r,X,Y)
 

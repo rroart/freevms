@@ -15,38 +15,42 @@
 /*
  *	Fast "hack" user interface
  */
-struct ip6_fw_msg {
-	struct in6_addr		dst;
-	struct in6_addr		src;
-	int			dst_len;
-	int			src_len;
-	int			action;
-	int			policy;
-	int			proto;
-	union {
-		struct {
-			__u16	sport;
-			__u16	dport;
-		} transp;
+struct ip6_fw_msg
+{
+    struct in6_addr		dst;
+    struct in6_addr		src;
+    int			dst_len;
+    int			src_len;
+    int			action;
+    int			policy;
+    int			proto;
+    union
+    {
+        struct
+        {
+            __u16	sport;
+            __u16	dport;
+        } transp;
 
-		unsigned long	data;
+        unsigned long	data;
 
-		int		icmp_type;
-	} u;
+        int		icmp_type;
+    } u;
 
-	int			msg_len;
+    int			msg_len;
 };
 
 #ifdef __KERNEL__
 
 #include <net/flow.h>
 
-struct ip6_fw_rule {
-	struct flow_rule	flowr;
-	struct ip6_fw_rule	*next;
-	struct ip6_fw_rule	*prev;
-	struct flowi		info;
-	unsigned long		policy;
+struct ip6_fw_rule
+{
+    struct flow_rule	flowr;
+    struct ip6_fw_rule	*next;
+    struct ip6_fw_rule	*prev;
+    struct flowi		info;
+    unsigned long		policy;
 };
 
 #endif

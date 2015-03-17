@@ -34,17 +34,18 @@
 
 /*
  * Interrupt controller descriptor. This is all we need
- * to describe about the low-level hardware. 
+ * to describe about the low-level hardware.
  */
-struct hw_interrupt_type {
-	const char * typename;
-	unsigned int (*startup)(unsigned int irq);
-	void (*shutdown)(unsigned int irq);
-	void (*enable)(unsigned int irq);
-	void (*disable)(unsigned int irq);
-	void (*ack)(unsigned int irq);
-	void (*end)(unsigned int irq);
-	void (*set_affinity)(unsigned int irq, unsigned long mask);
+struct hw_interrupt_type
+{
+    const char * typename;
+    unsigned int (*startup)(unsigned int irq);
+    void (*shutdown)(unsigned int irq);
+    void (*enable)(unsigned int irq);
+    void (*disable)(unsigned int irq);
+    void (*ack)(unsigned int irq);
+    void (*end)(unsigned int irq);
+    void (*set_affinity)(unsigned int irq, unsigned long mask);
 };
 
 typedef struct hw_interrupt_type  hw_irq_controller;
@@ -56,12 +57,13 @@ typedef struct hw_interrupt_type  hw_irq_controller;
  *
  * Pad this out to 32 bytes for cache and indexing reasons.
  */
-typedef struct {
-	unsigned int status;		/* IRQ status */
-	hw_irq_controller *handler;
-	struct irqaction *action;	/* IRQ action list */
-	unsigned int depth;		/* nested irq disables */
-	spinlock_t lock;
+typedef struct
+{
+    unsigned int status;		/* IRQ status */
+    hw_irq_controller *handler;
+    struct irqaction *action;	/* IRQ action list */
+    unsigned int depth;		/* nested irq disables */
+    spinlock_t lock;
 } ____cacheline_aligned irq_desc_t;
 
 extern irq_desc_t irq_desc [NR_IRQS];

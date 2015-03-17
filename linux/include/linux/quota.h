@@ -106,15 +106,16 @@
  * (as it appears on disk) - the file is an array of these structures
  * indexed by user or group number.
  */
-struct dqblk {
-	__u32 dqb_bhardlimit;	/* absolute limit on disk blks alloc */
-	__u32 dqb_bsoftlimit;	/* preferred limit on disk blks */
-	__u32 dqb_curblocks;	/* current block count */
-	__u32 dqb_ihardlimit;	/* absolute limit on allocated inodes */
-	__u32 dqb_isoftlimit;	/* preferred inode limit */
-	__u32 dqb_curinodes;	/* current # allocated inodes */
-	time_t dqb_btime;		/* time limit for excessive disk use */
-	time_t dqb_itime;		/* time limit for excessive inode use */
+struct dqblk
+{
+    __u32 dqb_bhardlimit;	/* absolute limit on disk blks alloc */
+    __u32 dqb_bsoftlimit;	/* preferred limit on disk blks */
+    __u32 dqb_curblocks;	/* current block count */
+    __u32 dqb_ihardlimit;	/* absolute limit on allocated inodes */
+    __u32 dqb_isoftlimit;	/* preferred inode limit */
+    __u32 dqb_curinodes;	/* current # allocated inodes */
+    time_t dqb_btime;		/* time limit for excessive disk use */
+    time_t dqb_itime;		/* time limit for excessive inode use */
 };
 
 /*
@@ -131,15 +132,16 @@ struct dqblk {
 
 #define dqoff(UID)      ((loff_t)((UID) * sizeof (struct dqblk)))
 
-struct dqstats {
-	__u32 lookups;
-	__u32 drops;
-	__u32 reads;
-	__u32 writes;
-	__u32 cache_hits;
-	__u32 allocated_dquots;
-	__u32 free_dquots;
-	__u32 syncs;
+struct dqstats
+{
+    __u32 lookups;
+    __u32 drops;
+    __u32 reads;
+    __u32 writes;
+    __u32 cache_hits;
+    __u32 allocated_dquots;
+    __u32 free_dquots;
+    __u32 syncs;
 };
 
 #ifdef __KERNEL__
@@ -156,23 +158,24 @@ extern int dquot_root_squash;
 #define DQ_FAKE       0x40	/* no limits only usage */
 #define DQ_INVAL      0x80	/* dquot is going to be invalidated */
 
-struct dquot {
-	struct list_head dq_hash;	/* Hash list in memory */
-	struct list_head dq_inuse;	/* List of all quotas */
-	struct list_head dq_free;	/* Free list element */
-	wait_queue_head_t dq_wait_lock;	/* Pointer to waitqueue on dquot lock */
-	wait_queue_head_t dq_wait_free;	/* Pointer to waitqueue for quota to be unused */
-	int dq_count;			/* Reference count */
+struct dquot
+{
+    struct list_head dq_hash;	/* Hash list in memory */
+    struct list_head dq_inuse;	/* List of all quotas */
+    struct list_head dq_free;	/* Free list element */
+    wait_queue_head_t dq_wait_lock;	/* Pointer to waitqueue on dquot lock */
+    wait_queue_head_t dq_wait_free;	/* Pointer to waitqueue for quota to be unused */
+    int dq_count;			/* Reference count */
 
-	/* fields after this point are cleared when invalidating */
-	struct super_block *dq_sb;	/* superblock this applies to */
-	unsigned int dq_id;		/* ID this applies to (uid, gid) */
-	kdev_t dq_dev;			/* Device this applies to */
-	short dq_type;			/* Type of quota */
-	short dq_flags;			/* See DQ_* */
-	unsigned long dq_referenced;	/* Number of times this dquot was 
+    /* fields after this point are cleared when invalidating */
+    struct super_block *dq_sb;	/* superblock this applies to */
+    unsigned int dq_id;		/* ID this applies to (uid, gid) */
+    kdev_t dq_dev;			/* Device this applies to */
+    short dq_type;			/* Type of quota */
+    short dq_flags;			/* See DQ_* */
+    unsigned long dq_referenced;	/* Number of times this dquot was
 					   referenced during its lifetime */
-	struct dqblk dq_dqb;		/* Diskquota usage */
+    struct dqblk dq_dqb;		/* Diskquota usage */
 };
 
 #define NODQUOT (struct dquot *)NULL

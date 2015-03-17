@@ -39,7 +39,8 @@
 #include "sys$routines.h"	/* Our header file! */
 #include "ssdef.h"
 
-struct TIME {
+struct TIME
+{
     unsigned char time[8];
 };
 
@@ -48,8 +49,8 @@ const char month_names[] = "-JAN-FEB-MAR-APR-MAY-JUN-JUL-AUG-SEP-OCT-NOV-DEC-";
 /* sys_asctim() converts quadword to ascii... */
 
 unsigned long sys$asctim(unsigned short *timlen,
-    struct dsc$descriptor *timbuf,
-    const void *timadra, unsigned long cvtflg)
+                         struct dsc$descriptor *timbuf,
+                         const void *timadra, unsigned long cvtflg)
 {
     const struct TIME *timadr = (const struct TIME *)timadra;
     long count,timval;
@@ -62,30 +63,38 @@ unsigned long sys$asctim(unsigned short *timlen,
     {
         register unsigned sts;
         sts = sys$numtim(wrktim, timadr);
-        if ((sts & 1) == 0) {
+        if ((sts & 1) == 0)
+        {
             return sts;
         }
     }
 
     /* See if we want delta days or date... */
 
-    if (cvtflg == 0) {
+    if (cvtflg == 0)
+    {
 
         /* Check if date or delta time... */
 
-        if (*wrktim) {
+        if (*wrktim)
+        {
 
             /* Put in days and month... */
 
-            if (length > 0) {
-                if ((timval = wrktim[2]) / 10 == 0) {
+            if (length > 0)
+            {
+                if ((timval = wrktim[2]) / 10 == 0)
+                {
                     *chrptr++ = ' ';
-                } else {
+                }
+                else
+                {
                     *chrptr++ = '0' + timval / 10;
                 }
                 length--;
             }
-            if (length > 0) {
+            if (length > 0)
+            {
                 *chrptr++ = '0' + (timval % 10);
                 length--;
             }
@@ -94,7 +103,9 @@ unsigned long sys$asctim(unsigned short *timlen,
             length -= count;
             chrptr += count;
             timval = *wrktim;
-        } else {
+        }
+        else
+        {
 
             /* Get delta days... */
 
@@ -104,15 +115,18 @@ unsigned long sys$asctim(unsigned short *timlen,
         /* Common code for year number and delta days!! */
 
         count = 10000;
-        if (timval < count) {
+        if (timval < count)
+        {
             count = 1000;
-            while (length > 0 && timval < count && count > 1) {
+            while (length > 0 && timval < count && count > 1)
+            {
                 length--;
                 *chrptr++ = ' ';
                 count /= 10;
             }
         }
-        while (length > 0 && count > 0) {
+        while (length > 0 && count > 0)
+        {
             length--;
             *chrptr++ = '0' + (timval / count);
             timval = timval % count;
@@ -121,7 +135,8 @@ unsigned long sys$asctim(unsigned short *timlen,
 
         /* Space between date and time... */
 
-        if (length > 0) {
+        if (length > 0)
+        {
             *chrptr++ = ' ';
             length--;
         }
@@ -129,24 +144,33 @@ unsigned long sys$asctim(unsigned short *timlen,
     /* Do time... :-) */
 
     count = 3;
-    do {
+    do
+    {
         timval = wrktim[count];
         if (length >= 1) *chrptr++ = '0' + (timval / 10);
-        if (length >= 2) {
+        if (length >= 2)
+        {
             *chrptr++ = '0' + (timval % 10);
             length -= 2;
-        } else {
+        }
+        else
+        {
             length = 0;
         }
-        if (count < 6 && length > 0) {
+        if (count < 6 && length > 0)
+        {
             length--;
-            if (count == 5) {
+            if (count == 5)
+            {
                 *chrptr++ = '.';
-            } else {
+            }
+            else
+            {
                 *chrptr++ = ':';
             }
         }
-    } while (++count < 7);
+    }
+    while (++count < 7);
 
     /* We've done it - time to return length... */
 

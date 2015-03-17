@@ -65,47 +65,50 @@
  * is 'kernel_vm86_regs' (see below).
  */
 
-struct vm86_regs {
-/*
- * normal regs, with special meaning for the segment descriptors..
- */
-	long ebx;
-	long ecx;
-	long edx;
-	long esi;
-	long edi;
-	long ebp;
-	long eax;
-	long __null_ds;
-	long __null_es;
-	long __null_fs;
-	long __null_gs;
-	long orig_eax;
-	long eip;
-	unsigned short cs, __csh;
-	long eflags;
-	long esp;
-	unsigned short ss, __ssh;
-/*
- * these are specific to v86 mode:
- */
-	unsigned short es, __esh;
-	unsigned short ds, __dsh;
-	unsigned short fs, __fsh;
-	unsigned short gs, __gsh;
+struct vm86_regs
+{
+    /*
+     * normal regs, with special meaning for the segment descriptors..
+     */
+    long ebx;
+    long ecx;
+    long edx;
+    long esi;
+    long edi;
+    long ebp;
+    long eax;
+    long __null_ds;
+    long __null_es;
+    long __null_fs;
+    long __null_gs;
+    long orig_eax;
+    long eip;
+    unsigned short cs, __csh;
+    long eflags;
+    long esp;
+    unsigned short ss, __ssh;
+    /*
+     * these are specific to v86 mode:
+     */
+    unsigned short es, __esh;
+    unsigned short ds, __dsh;
+    unsigned short fs, __fsh;
+    unsigned short gs, __gsh;
 };
 
-struct revectored_struct {
-	unsigned long __map[8];			/* 256 bits */
+struct revectored_struct
+{
+    unsigned long __map[8];			/* 256 bits */
 };
 
-struct vm86_struct {
-	struct vm86_regs regs;
-	unsigned long flags;
-	unsigned long screen_bitmap;
-	unsigned long cpu_type;
-	struct revectored_struct int_revectored;
-	struct revectored_struct int21_revectored;
+struct vm86_struct
+{
+    struct vm86_regs regs;
+    unsigned long flags;
+    unsigned long screen_bitmap;
+    unsigned long cpu_type;
+    struct revectored_struct int_revectored;
+    struct revectored_struct int21_revectored;
 };
 
 /*
@@ -113,23 +116,25 @@ struct vm86_struct {
  */
 #define VM86_SCREEN_BITMAP	0x0001
 
-struct vm86plus_info_struct {
-	unsigned long force_return_for_pic:1;
-	unsigned long vm86dbg_active:1;       /* for debugger */
-	unsigned long vm86dbg_TFpendig:1;     /* for debugger */
-	unsigned long unused:28;
-	unsigned long is_vm86pus:1;	      /* for vm86 internal use */
-	unsigned char vm86dbg_intxxtab[32];   /* for debugger */
+struct vm86plus_info_struct
+{
+    unsigned long force_return_for_pic:1;
+    unsigned long vm86dbg_active:1;       /* for debugger */
+    unsigned long vm86dbg_TFpendig:1;     /* for debugger */
+    unsigned long unused:28;
+    unsigned long is_vm86pus:1;	      /* for vm86 internal use */
+    unsigned char vm86dbg_intxxtab[32];   /* for debugger */
 };
 
-struct vm86plus_struct {
-	struct vm86_regs regs;
-	unsigned long flags;
-	unsigned long screen_bitmap;
-	unsigned long cpu_type;
-	struct revectored_struct int_revectored;
-	struct revectored_struct int21_revectored;
-	struct vm86plus_info_struct vm86plus;
+struct vm86plus_struct
+{
+    struct vm86_regs regs;
+    unsigned long flags;
+    unsigned long screen_bitmap;
+    unsigned long cpu_type;
+    struct revectored_struct int_revectored;
+    struct revectored_struct int21_revectored;
+    struct vm86plus_info_struct vm86plus;
 };
 
 #ifdef __KERNEL__
@@ -142,62 +147,64 @@ struct vm86plus_struct {
  * setup. For user space layout see 'struct vm86_regs' above.
  */
 
-struct kernel_vm86_regs {
-/*
- * normal regs, with special meaning for the segment descriptors..
- */
-	long ebx;
-	long ecx;
-	long edx;
-	long esi;
-	long edi;
-	long ebp;
-	long eax;
-	long __null_ds;
-	long __null_es;
-	long orig_eax;
-	long eip;
-	unsigned short cs, __csh;
-	long eflags;
-	long esp;
-	unsigned short ss, __ssh;
-/*
- * these are specific to v86 mode:
- */
-	unsigned short es, __esh;
-	unsigned short ds, __dsh;
-	unsigned short fs, __fsh;
-	unsigned short gs, __gsh;
+struct kernel_vm86_regs
+{
+    /*
+     * normal regs, with special meaning for the segment descriptors..
+     */
+    long ebx;
+    long ecx;
+    long edx;
+    long esi;
+    long edi;
+    long ebp;
+    long eax;
+    long __null_ds;
+    long __null_es;
+    long orig_eax;
+    long eip;
+    unsigned short cs, __csh;
+    long eflags;
+    long esp;
+    unsigned short ss, __ssh;
+    /*
+     * these are specific to v86 mode:
+     */
+    unsigned short es, __esh;
+    unsigned short ds, __dsh;
+    unsigned short fs, __fsh;
+    unsigned short gs, __gsh;
 };
 
-struct kernel_vm86_struct {
-	struct kernel_vm86_regs regs;
-/*
- * the below part remains on the kernel stack while we are in VM86 mode.
- * 'tss.esp0' then contains the address of VM86_TSS_ESP0 below, and when we
- * get forced back from VM86, the CPU and "SAVE_ALL" will restore the above
- * 'struct kernel_vm86_regs' with the then actual values.
- * Therefore, pt_regs in fact points to a complete 'kernel_vm86_struct'
- * in kernelspace, hence we need not reget the data from userspace.
- */
+struct kernel_vm86_struct
+{
+    struct kernel_vm86_regs regs;
+    /*
+     * the below part remains on the kernel stack while we are in VM86 mode.
+     * 'tss.esp0' then contains the address of VM86_TSS_ESP0 below, and when we
+     * get forced back from VM86, the CPU and "SAVE_ALL" will restore the above
+     * 'struct kernel_vm86_regs' with the then actual values.
+     * Therefore, pt_regs in fact points to a complete 'kernel_vm86_struct'
+     * in kernelspace, hence we need not reget the data from userspace.
+     */
 #define VM86_TSS_ESP0 flags
-	unsigned long flags;
-	unsigned long screen_bitmap;
-	unsigned long cpu_type;
-	struct revectored_struct int_revectored;
-	struct revectored_struct int21_revectored;
-	struct vm86plus_info_struct vm86plus;
-	struct pt_regs *regs32;   /* here we save the pointer to the old regs */
-/*
- * The below is not part of the structure, but the stack layout continues
- * this way. In front of 'return-eip' may be some data, depending on
- * compilation, so we don't rely on this and save the pointer to 'oldregs'
- * in 'regs32' above.
- * However, with GCC-2.7.2 and the current CFLAGS you see exactly this:
+    unsigned long flags;
+    unsigned long screen_bitmap;
+    unsigned long cpu_type;
+    struct revectored_struct int_revectored;
+    struct revectored_struct int21_revectored;
+    struct vm86plus_info_struct vm86plus;
+    struct pt_regs *regs32;   /* here we save the pointer to the old regs */
+    /*
+     * The below is not part of the structure, but the stack layout continues
+     * this way. In front of 'return-eip' may be some data, depending on
+     * compilation, so we don't rely on this and save the pointer to 'oldregs'
+     * in 'regs32' above.
+     * However, with GCC-2.7.2 and the current CFLAGS you see exactly this:
 
-	long return-eip;        from call to vm86()
-	struct pt_regs oldregs;  user space registers as saved by syscall
- */
+    	long return-eip;        from call to vm86()
+    	struct pt_regs oldregs;  user space registers as saved by syscall
+     */
 };
 
 void handle_vm86_fault(struct kernel_vm86_regs *, long);

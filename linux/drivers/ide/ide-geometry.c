@@ -44,40 +44,45 @@
 void probe_cmos_for_drives (ide_hwif_t *hwif)
 {
 #ifdef __i386__
-	extern struct drive_info_struct drive_info;
-	byte cmos_disks, *BIOS = (byte *) &drive_info;
-	int unit;
-	unsigned long flags;
+    extern struct drive_info_struct drive_info;
+    byte cmos_disks, *BIOS = (byte *) &drive_info;
+    int unit;
+    unsigned long flags;
 
 #ifdef CONFIG_BLK_DEV_PDC4030
-	if (hwif->chipset == ide_pdc4030 && hwif->channel != 0)
-		return;
+    if (hwif->chipset == ide_pdc4030 && hwif->channel != 0)
+        return;
 #endif /* CONFIG_BLK_DEV_PDC4030 */
-	spin_lock_irqsave(&rtc_lock, flags);
-	cmos_disks = CMOS_READ(0x12);
-	spin_unlock_irqrestore(&rtc_lock, flags);
-	/* Extract drive geometry from CMOS+BIOS if not already setup */
-	for (unit = 0; unit < MAX_DRIVES; ++unit) {
-		ide_drive_t *drive = &hwif->drives[unit];
+    spin_lock_irqsave(&rtc_lock, flags);
+    cmos_disks = CMOS_READ(0x12);
+    spin_unlock_irqrestore(&rtc_lock, flags);
+    /* Extract drive geometry from CMOS+BIOS if not already setup */
+    for (unit = 0; unit < MAX_DRIVES; ++unit)
+    {
+        ide_drive_t *drive = &hwif->drives[unit];
 
-		if ((cmos_disks & (0xf0 >> (unit*4)))
-		   && !drive->present && !drive->nobios) {
-			unsigned short cyl = *(unsigned short *)BIOS;
-			unsigned char head = *(BIOS+2);
-			unsigned char sect = *(BIOS+14);
-			if (cyl > 0 && head > 0 && sect > 0 && sect < 64) {
-				drive->cyl   = drive->bios_cyl  = cyl;
-				drive->head  = drive->bios_head = head;
-				drive->sect  = drive->bios_sect = sect;
-				drive->ctl   = *(BIOS+8);
-			} else {
-				printk("hd%c: C/H/S=%d/%d/%d from BIOS ignored\n",
-				       unit+'a', cyl, head, sect);
-			}
-		}
+        if ((cmos_disks & (0xf0 >> (unit*4)))
+                && !drive->present && !drive->nobios)
+        {
+            unsigned short cyl = *(unsigned short *)BIOS;
+            unsigned char head = *(BIOS+2);
+            unsigned char sect = *(BIOS+14);
+            if (cyl > 0 && head > 0 && sect > 0 && sect < 64)
+            {
+                drive->cyl   = drive->bios_cyl  = cyl;
+                drive->head  = drive->bios_head = head;
+                drive->sect  = drive->bios_sect = sect;
+                drive->ctl   = *(BIOS+8);
+            }
+            else
+            {
+                printk("hd%c: C/H/S=%d/%d/%d from BIOS ignored\n",
+                       unit+'a', cyl, head, sect);
+            }
+        }
 
-		BIOS += 16;
-	}
+        BIOS += 16;
+    }
 #endif
 }
 
@@ -92,33 +97,35 @@ extern unsigned long current_capacity (ide_drive_t *);
  * Otherwise: find out how OnTrack Disk Manager would translate the disk.
  */
 static void
-ontrack(ide_drive_t *drive, int heads, unsigned int *c, int *h, int *s) {
-	static const byte dm_head_vals[] = {4, 8, 16, 32, 64, 128, 255, 0};
-	const byte *headp = dm_head_vals;
-	unsigned long total;
+ontrack(ide_drive_t *drive, int heads, unsigned int *c, int *h, int *s)
+{
+    static const byte dm_head_vals[] = {4, 8, 16, 32, 64, 128, 255, 0};
+    const byte *headp = dm_head_vals;
+    unsigned long total;
 
-	/*
-	 * The specs say: take geometry as obtained from Identify,
-	 * compute total capacity C*H*S from that, and truncate to
-	 * 1024*255*63. Now take S=63, H the first in the sequence
-	 * 4, 8, 16, 32, 64, 128, 255 such that 63*H*1024 >= total.
-	 * [Please tell aeb@cwi.nl in case this computes a
-	 * geometry different from what OnTrack uses.]
-	 */
-	total = DRIVER(drive)->capacity(drive);
+    /*
+     * The specs say: take geometry as obtained from Identify,
+     * compute total capacity C*H*S from that, and truncate to
+     * 1024*255*63. Now take S=63, H the first in the sequence
+     * 4, 8, 16, 32, 64, 128, 255 such that 63*H*1024 >= total.
+     * [Please tell aeb@cwi.nl in case this computes a
+     * geometry different from what OnTrack uses.]
+     */
+    total = DRIVER(drive)->capacity(drive);
 
-	*s = 63;
+    *s = 63;
 
-	if (heads) {
-		*h = heads;
-		*c = total / (63 * heads);
-		return;
-	}
+    if (heads)
+    {
+        *h = heads;
+        *c = total / (63 * heads);
+        return;
+    }
 
-	while (63 * headp[0] * 1024 < total && headp[1] != 0)
-		 headp++;
-	*h = headp[0];
-	*c = total / (63 * headp[0]);
+    while (63 * headp[0] * 1024 < total && headp[1] != 0)
+        headp++;
+    *h = headp[0];
+    *c = total / (63 * headp[0]);
 }
 
 /*
@@ -142,76 +149,84 @@ ontrack(ide_drive_t *drive, int heads, unsigned int *c, int *h, int *s) {
  *	-1 = similar to "0", plus redirect sector 0 to sector 1.
  *	 2 = convert to a CHS geometry with "ptheads" heads.
  *
- * Returns 0 if the translation was not possible, if the device was not 
+ * Returns 0 if the translation was not possible, if the device was not
  * an IDE disk drive, or if a geometry was "forced" on the commandline.
  * Returns 1 if the geometry translation was successful.
  */
 int ide_xlate_1024 (kdev_t i_rdev, int xparm, int ptheads, const char *msg)
 {
-	ide_drive_t *drive;
-	const char *msg1 = "";
-	int heads = 0;
-	int c, h, s;
-	int transl = 1;		/* try translation */
-	int ret = 0;
+    ide_drive_t *drive;
+    const char *msg1 = "";
+    int heads = 0;
+    int c, h, s;
+    int transl = 1;		/* try translation */
+    int ret = 0;
 
-	drive = get_info_ptr(i_rdev);
-	if (!drive)
-		return 0;
+    drive = get_info_ptr(i_rdev);
+    if (!drive)
+        return 0;
 
-	/* remap? */
-	if (drive->remap_0_to_1 != 2) {
-		if (xparm == 1) {		/* DM */
-			drive->sect0 = 63;
-			msg1 = " [remap +63]";
-			ret = 1;
-		} else if (xparm == -1) {	/* EZ-Drive */
-			if (drive->remap_0_to_1 == 0) {
-				drive->remap_0_to_1 = 1;
-				msg1 = " [remap 0->1]";
-				ret = 1;
-			}
-		}
-	}
+    /* remap? */
+    if (drive->remap_0_to_1 != 2)
+    {
+        if (xparm == 1)  		/* DM */
+        {
+            drive->sect0 = 63;
+            msg1 = " [remap +63]";
+            ret = 1;
+        }
+        else if (xparm == -1)  	/* EZ-Drive */
+        {
+            if (drive->remap_0_to_1 == 0)
+            {
+                drive->remap_0_to_1 = 1;
+                msg1 = " [remap 0->1]";
+                ret = 1;
+            }
+        }
+    }
 
-	/* There used to be code here that assigned drive->id->CHS
-	   to drive->CHS and that to drive->bios_CHS. However,
-	   some disks have id->C/H/S = 4092/16/63 but are larger than 2.1 GB.
-	   In such cases that code was wrong.  Moreover,
-	   there seems to be no reason to do any of these things. */
+    /* There used to be code here that assigned drive->id->CHS
+       to drive->CHS and that to drive->bios_CHS. However,
+       some disks have id->C/H/S = 4092/16/63 but are larger than 2.1 GB.
+       In such cases that code was wrong.  Moreover,
+       there seems to be no reason to do any of these things. */
 
-	/* translate? */
-	if (drive->forced_geom)
-		transl = 0;
+    /* translate? */
+    if (drive->forced_geom)
+        transl = 0;
 
-	/* does ptheads look reasonable? */
-	if (ptheads == 32 || ptheads == 64 || ptheads == 128 ||
-	    ptheads == 240 || ptheads == 255)
-		heads = ptheads;
+    /* does ptheads look reasonable? */
+    if (ptheads == 32 || ptheads == 64 || ptheads == 128 ||
+            ptheads == 240 || ptheads == 255)
+        heads = ptheads;
 
-	if (xparm == 2) {
-		if (!heads ||
-		   (drive->bios_head >= heads && drive->bios_sect == 63))
-			transl = 0;
-	}
-	if (xparm == -1) {
-		if (drive->bios_head > 16)
-			transl = 0;     /* we already have a translation */
-	}
+    if (xparm == 2)
+    {
+        if (!heads ||
+                (drive->bios_head >= heads && drive->bios_sect == 63))
+            transl = 0;
+    }
+    if (xparm == -1)
+    {
+        if (drive->bios_head > 16)
+            transl = 0;     /* we already have a translation */
+    }
 
-	if (transl) {
-		ontrack(drive, heads, &c, &h, &s);
-		drive->bios_cyl = c;
-		drive->bios_head = h;
-		drive->bios_sect = s;
-		ret = 1;
-	}
+    if (transl)
+    {
+        ontrack(drive, heads, &c, &h, &s);
+        drive->bios_cyl = c;
+        drive->bios_head = h;
+        drive->bios_sect = s;
+        ret = 1;
+    }
 
-	drive->part[0].nr_sects = current_capacity(drive);
+    drive->part[0].nr_sects = current_capacity(drive);
 
-	if (ret)
-		printk("%s%s [%d/%d/%d]", msg, msg1,
-		       drive->bios_cyl, drive->bios_head, drive->bios_sect);
-	return ret;
+    if (ret)
+        printk("%s%s [%d/%d/%d]", msg, msg1,
+               drive->bios_cyl, drive->bios_head, drive->bios_sect);
+    return ret;
 }
 #endif /* CONFIG_BLK_DEV_IDE */

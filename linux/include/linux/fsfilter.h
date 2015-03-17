@@ -5,41 +5,43 @@
 
 /* cachetype.c */
 
-/* 
+/*
  * it is important that things like inode, super and file operations
  * for intermezzo are not defined statically.  If methods are NULL
  * the VFS takes special action based on that.  Given that different
- * cache types have NULL ops at different slots, we must install opeation 
+ * cache types have NULL ops at different slots, we must install opeation
  * talbes for InterMezzo with NULL's in the same spot
  */
 
-struct filter_ops { 
-        struct super_operations filter_sops;
+struct filter_ops
+{
+    struct super_operations filter_sops;
 
-        struct inode_operations filter_dir_iops;
-        struct inode_operations filter_file_iops;
-        struct inode_operations filter_sym_iops;
+    struct inode_operations filter_dir_iops;
+    struct inode_operations filter_file_iops;
+    struct inode_operations filter_sym_iops;
 
-        struct file_operations filter_dir_fops;
-        struct file_operations filter_file_fops;
-        struct file_operations filter_sym_fops;
+    struct file_operations filter_dir_fops;
+    struct file_operations filter_file_fops;
+    struct file_operations filter_sym_fops;
 
-        struct dentry_operations filter_dentry_ops;
+    struct dentry_operations filter_dentry_ops;
 };
 
-struct cache_ops {
-        /* operations on the file store */
-        struct super_operations *cache_sops;
+struct cache_ops
+{
+    /* operations on the file store */
+    struct super_operations *cache_sops;
 
-        struct inode_operations *cache_dir_iops;
-        struct inode_operations *cache_file_iops;
-        struct inode_operations *cache_sym_iops;
+    struct inode_operations *cache_dir_iops;
+    struct inode_operations *cache_file_iops;
+    struct inode_operations *cache_sym_iops;
 
-        struct file_operations *cache_dir_fops;
-        struct file_operations *cache_file_fops;
-        struct file_operations *cache_sym_fops;
+    struct file_operations *cache_dir_fops;
+    struct file_operations *cache_file_fops;
+    struct file_operations *cache_sym_fops;
 
-        struct dentry_operations *cache_dentry_ops;
+    struct dentry_operations *cache_dentry_ops;
 };
 
 
@@ -51,12 +53,13 @@ struct cache_ops {
 #define FILTER_DID_SYMLINK_OPS 0x20
 #define FILTER_DID_DIR_OPS 0x40
 
-struct filter_fs {
-        int o_flags;
-        struct filter_ops o_fops;
-        struct cache_ops  o_caops;
-        struct journal_ops *o_trops;
-        struct snapshot_ops *o_snops;
+struct filter_fs
+{
+    int o_flags;
+    struct filter_ops o_fops;
+    struct cache_ops  o_caops;
+    struct journal_ops *o_trops;
+    struct snapshot_ops *o_snops;
 };
 
 #define FILTER_FS_TYPES 5

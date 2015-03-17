@@ -174,7 +174,7 @@ void paging_init(void);
 /*
  * _PAGE_PSE set in the page directory entry just means that
  * the page directory entry points directly to a 4MB-aligned block of
- * memory. 
+ * memory.
  */
 #define _PAGE_BIT_PRESENT	0
 #define _PAGE_BIT_RW		1
@@ -206,7 +206,7 @@ void paging_init(void);
 /* If _PAGE_PRESENT is clear, we use these: */
 #define _PAGE_FILE	0x040	/* nonlinear file mapping, saved PTE; unset:swap */
 #define _PAGE_PROTNONE	0x080	/* if the user mapped it with PROT_NONE;
-				   pte_present gives true */
+pte_present gives true */
 #ifdef CONFIG_X86_PAE
 #define _PAGE_NX	(1ULL<<_PAGE_BIT_NX)
 #else
@@ -305,29 +305,94 @@ extern unsigned long pg0[];
  * Undefined behaviour if not..
  */
 #define __LARGE_PTE (_PAGE_PSE | _PAGE_PRESENT)
-static inline int pte_user(pte_t pte)		{ return (pte).pte_low & _PAGE_USER; }
-static inline int pte_read(pte_t pte)		{ return (pte).pte_low & _PAGE_USER; }
-static inline int pte_dirty(pte_t pte)		{ return (pte).pte_low & _PAGE_DIRTY; }
-static inline int pte_young(pte_t pte)		{ return (pte).pte_low & _PAGE_ACCESSED; }
-static inline int pte_write(pte_t pte)		{ return (pte).pte_low & _PAGE_RW; }
-static inline int pte_huge(pte_t pte)		{ return ((pte).pte_low & __LARGE_PTE) == __LARGE_PTE; }
+static inline int pte_user(pte_t pte)
+{
+    return (pte).pte_low & _PAGE_USER;
+}
+static inline int pte_read(pte_t pte)
+{
+    return (pte).pte_low & _PAGE_USER;
+}
+static inline int pte_dirty(pte_t pte)
+{
+    return (pte).pte_low & _PAGE_DIRTY;
+}
+static inline int pte_young(pte_t pte)
+{
+    return (pte).pte_low & _PAGE_ACCESSED;
+}
+static inline int pte_write(pte_t pte)
+{
+    return (pte).pte_low & _PAGE_RW;
+}
+static inline int pte_huge(pte_t pte)
+{
+    return ((pte).pte_low & __LARGE_PTE) == __LARGE_PTE;
+}
 
 /*
  * The following only works if pte_present() is not true.
  */
-static inline int pte_file(pte_t pte)		{ return (pte).pte_low & _PAGE_FILE; }
+static inline int pte_file(pte_t pte)
+{
+    return (pte).pte_low & _PAGE_FILE;
+}
 
-static inline pte_t pte_rdprotect(pte_t pte)	{ (pte).pte_low &= ~_PAGE_USER; return pte; }
-static inline pte_t pte_exprotect(pte_t pte)	{ (pte).pte_low &= ~_PAGE_USER; return pte; }
-static inline pte_t pte_mkclean(pte_t pte)	{ (pte).pte_low &= ~_PAGE_DIRTY; return pte; }
-static inline pte_t pte_mkold(pte_t pte)	{ (pte).pte_low &= ~_PAGE_ACCESSED; return pte; }
-static inline pte_t pte_wrprotect(pte_t pte)	{ (pte).pte_low &= ~_PAGE_RW; return pte; }
-static inline pte_t pte_mkread(pte_t pte)	{ (pte).pte_low |= _PAGE_USER; return pte; }
-static inline pte_t pte_mkexec(pte_t pte)	{ (pte).pte_low |= _PAGE_USER; return pte; }
-static inline pte_t pte_mkdirty(pte_t pte)	{ (pte).pte_low |= _PAGE_DIRTY; return pte; }
-static inline pte_t pte_mkyoung(pte_t pte)	{ (pte).pte_low |= _PAGE_ACCESSED; return pte; }
-static inline pte_t pte_mkwrite(pte_t pte)	{ (pte).pte_low |= _PAGE_RW; return pte; }
-static inline pte_t pte_mkhuge(pte_t pte)	{ (pte).pte_low |= __LARGE_PTE; return pte; }
+static inline pte_t pte_rdprotect(pte_t pte)
+{
+    (pte).pte_low &= ~_PAGE_USER;
+    return pte;
+}
+static inline pte_t pte_exprotect(pte_t pte)
+{
+    (pte).pte_low &= ~_PAGE_USER;
+    return pte;
+}
+static inline pte_t pte_mkclean(pte_t pte)
+{
+    (pte).pte_low &= ~_PAGE_DIRTY;
+    return pte;
+}
+static inline pte_t pte_mkold(pte_t pte)
+{
+    (pte).pte_low &= ~_PAGE_ACCESSED;
+    return pte;
+}
+static inline pte_t pte_wrprotect(pte_t pte)
+{
+    (pte).pte_low &= ~_PAGE_RW;
+    return pte;
+}
+static inline pte_t pte_mkread(pte_t pte)
+{
+    (pte).pte_low |= _PAGE_USER;
+    return pte;
+}
+static inline pte_t pte_mkexec(pte_t pte)
+{
+    (pte).pte_low |= _PAGE_USER;
+    return pte;
+}
+static inline pte_t pte_mkdirty(pte_t pte)
+{
+    (pte).pte_low |= _PAGE_DIRTY;
+    return pte;
+}
+static inline pte_t pte_mkyoung(pte_t pte)
+{
+    (pte).pte_low |= _PAGE_ACCESSED;
+    return pte;
+}
+static inline pte_t pte_mkwrite(pte_t pte)
+{
+    (pte).pte_low |= _PAGE_RW;
+    return pte;
+}
+static inline pte_t pte_mkhuge(pte_t pte)
+{
+    (pte).pte_low |= __LARGE_PTE;
+    return pte;
+}
 
 #ifdef CONFIG_X86_PAE
 # include <asm/pgtable-3level.h>
@@ -337,33 +402,36 @@ static inline pte_t pte_mkhuge(pte_t pte)	{ (pte).pte_low |= __LARGE_PTE; return
 
 static inline int ptep_test_and_clear_dirty(pte_t *ptep)
 {
-	if (!pte_dirty(*ptep))
-		return 0;
-	return test_and_clear_bit(_PAGE_BIT_DIRTY, &ptep->pte_low);
+    if (!pte_dirty(*ptep))
+        return 0;
+    return test_and_clear_bit(_PAGE_BIT_DIRTY, &ptep->pte_low);
 }
 
 static inline int ptep_test_and_clear_young(pte_t *ptep)
 {
-	if (!pte_young(*ptep))
-		return 0;
-	return test_and_clear_bit(_PAGE_BIT_ACCESSED, &ptep->pte_low);
+    if (!pte_young(*ptep))
+        return 0;
+    return test_and_clear_bit(_PAGE_BIT_ACCESSED, &ptep->pte_low);
 }
 
 static inline pte_t ptep_get_and_clear_full(struct mm_struct *mm, unsigned long addr, pte_t *ptep, int full)
 {
-	pte_t pte;
-	if (full) {
-		pte = *ptep;
-		pte_clear(mm, addr, ptep);
-	} else {
-		pte = ptep_get_and_clear(mm, addr, ptep);
-	}
-	return pte;
+    pte_t pte;
+    if (full)
+    {
+        pte = *ptep;
+        pte_clear(mm, addr, ptep);
+    }
+    else
+    {
+        pte = ptep_get_and_clear(mm, addr, ptep);
+    }
+    return pte;
 }
 
 static inline void ptep_set_wrprotect(struct mm_struct *mm, unsigned long addr, pte_t *ptep)
 {
-	clear_bit(_PAGE_BIT_RW, &ptep->pte_low);
+    clear_bit(_PAGE_BIT_RW, &ptep->pte_low);
 }
 
 /*
@@ -378,7 +446,7 @@ static inline void ptep_set_wrprotect(struct mm_struct *mm, unsigned long addr, 
  */
 static inline void clone_pgd_range(pgd_t *dst, pgd_t *src, int count)
 {
-       memcpy(dst, src, count * sizeof(pgd_t));
+    memcpy(dst, src, count * sizeof(pgd_t));
 }
 
 /*
@@ -400,18 +468,18 @@ static inline void clone_pgd_range(pgd_t *dst, pgd_t *src, int count)
 
 static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 {
-	pte.pte_low &= _PAGE_CHG_MASK;
-	pte.pte_low |= pgprot_val(newprot);
+    pte.pte_low &= _PAGE_CHG_MASK;
+    pte.pte_low |= pgprot_val(newprot);
 #ifdef CONFIG_X86_PAE
-	/*
-	 * Chop off the NX bit (if present), and add the NX portion of
-	 * the newprot (if present):
-	 */
-	pte.pte_high &= ~(1 << (_PAGE_BIT_NX - 32));
-	pte.pte_high |= (pgprot_val(newprot) >> 32) & \
-					(__supported_pte_mask >> 32);
+    /*
+     * Chop off the NX bit (if present), and add the NX portion of
+     * the newprot (if present):
+     */
+    pte.pte_high &= ~(1 << (_PAGE_BIT_NX - 32));
+    pte.pte_high |= (pgprot_val(newprot) >> 32) & \
+                    (__supported_pte_mask >> 32);
 #endif
-	return pte;
+    return pte;
 }
 
 #define pmd_large(pmd) \
@@ -478,9 +546,12 @@ extern pte_t *lookup_address(unsigned long address);
  * NOTE: this is an __init function for security reasons.
  */
 #ifdef CONFIG_X86_PAE
- extern int set_kernel_exec(unsigned long vaddr, int enable);
+extern int set_kernel_exec(unsigned long vaddr, int enable);
 #else
- static inline int set_kernel_exec(unsigned long vaddr, int enable) { return 0;}
+static inline int set_kernel_exec(unsigned long vaddr, int enable)
+{
+    return 0;
+}
 #endif
 
 extern void noexec_setup(const char *str);
@@ -502,7 +573,7 @@ extern void noexec_setup(const char *str);
 
 #define page_pte(page) page_pte_prot(page, __pgprot(0))
 
-#define pmd_page(pmd) \
+#define __pmd_page(pmd) \
 ((unsigned long) __va(pmd_val(pmd) & PAGE_MASK))
 
 /* to find an entry in a page-table-directory. */
@@ -520,7 +591,7 @@ extern void noexec_setup(const char *str);
 
 #define __pte_offset(address) \
 		((address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
-#define pte_offset(dir, address) ((pte_t *) pmd_page(*(dir)) + \
+#define pte_offset(dir, address) ((pte_t *) __pmd_page(*(dir)) + \
 			__pte_offset(address))
 
 /*

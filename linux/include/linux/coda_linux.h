@@ -1,6 +1,6 @@
-/* 
+/*
  * Coda File System, Linux Kernel module
- * 
+ *
  * Original version, adapted from cfs_mach.c, (C) Carnegie Mellon University
  * Linux modifications (C) 1996, Peter J. Braam
  * Rewritten for Linux 2.1 (C) 1997 Carnegie Mellon University
@@ -14,11 +14,11 @@
 
 #include <linux/kernel.h>
 #include <linux/param.h>
-#include <linux/sched.h> 
+#include <linux/sched.h>
 #include <linux/mm.h>
 #include <linux/vmalloc.h>
 #include <linux/slab.h>
-#include <linux/wait.h>		
+#include <linux/wait.h>
 #include <linux/types.h>
 #include <linux/fs.h>
 
@@ -72,19 +72,19 @@ void coda_sysctl_clean(void);
 
 
 /* debugging masks */
-#define D_SUPER     1   /* print results returned by Venus */ 
+#define D_SUPER     1   /* print results returned by Venus */
 #define D_INODE     2   /* print entry and exit into procedure */
-#define D_FILE      4   
+#define D_FILE      4
 #define D_CACHE     8   /* cache debugging */
 #define D_MALLOC    16  /* print malloc, de-alloc information */
 #define D_CNODE     32
 #define D_UPCALL    64  /* up and downcall debugging */
-#define D_PSDEV    128  
+#define D_PSDEV    128
 #define D_PIOCTL   256
 #define D_SPECIAL  512
 #define D_TIMING  1024
 #define D_DOWNCALL 2048
- 
+
 #define CDEBUG(mask, format, a...)                                \
   do {                                                            \
   if (coda_debug & mask) {                                        \
@@ -115,18 +115,18 @@ do {                                                                      \
 
 static __inline__ struct ViceFid *coda_i2f(struct inode *inode)
 {
-	return &(ITOC(inode)->c_fid);
+    return &(ITOC(inode)->c_fid);
 }
 
 static __inline__ char *coda_i2s(struct inode *inode)
 {
-	return coda_f2s(&(ITOC(inode)->c_fid));
+    return coda_f2s(&(ITOC(inode)->c_fid));
 }
 
 /* this will not zap the inode away */
 static __inline__ void coda_flag_inode(struct inode *inode, int flag)
 {
-	ITOC(inode)->c_flags |= flag;
-}		
+    ITOC(inode)->c_flags |= flag;
+}
 
 #endif

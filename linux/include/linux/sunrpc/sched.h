@@ -23,66 +23,68 @@
 /*
  * This is the actual RPC procedure call info.
  */
-struct rpc_message {
-	__u32			rpc_proc;	/* Procedure number */
-	void *			rpc_argp;	/* Arguments */
-	void *			rpc_resp;	/* Result */
-	struct rpc_cred *	rpc_cred;	/* Credentials */
+struct rpc_message
+{
+    __u32			rpc_proc;	/* Procedure number */
+    void *			rpc_argp;	/* Arguments */
+    void *			rpc_resp;	/* Result */
+    struct rpc_cred *	rpc_cred;	/* Credentials */
 };
 
 /*
  * This is the RPC task struct
  */
-struct rpc_task {
-	struct rpc_task *	tk_prev;	/* wait queue links */
-	struct rpc_task *	tk_next;
+struct rpc_task
+{
+    struct rpc_task *	tk_prev;	/* wait queue links */
+    struct rpc_task *	tk_next;
 #ifdef RPC_DEBUG
-	unsigned long		tk_magic;	/* 0xf00baa */
+    unsigned long		tk_magic;	/* 0xf00baa */
 #endif
-	struct rpc_task *	tk_next_task;	/* global list of tasks */
-	struct rpc_task *	tk_prev_task;	/* global list of tasks */
-	struct rpc_clnt *	tk_client;	/* RPC client */
-	struct rpc_rqst *	tk_rqstp;	/* RPC request */
-	int			tk_status;	/* result of last operation */
-	struct rpc_wait_queue *	tk_rpcwait;	/* RPC wait queue we're on */
+    struct rpc_task *	tk_next_task;	/* global list of tasks */
+    struct rpc_task *	tk_prev_task;	/* global list of tasks */
+    struct rpc_clnt *	tk_client;	/* RPC client */
+    struct rpc_rqst *	tk_rqstp;	/* RPC request */
+    int			tk_status;	/* result of last operation */
+    struct rpc_wait_queue *	tk_rpcwait;	/* RPC wait queue we're on */
 
-	/*
-	 * RPC call state
-	 */
-	struct rpc_message	tk_msg;		/* RPC call info */
-	__u32 *			tk_buffer;	/* XDR buffer */
-	__u8			tk_garb_retry,
-				tk_cred_retry,
-				tk_suid_retry;
+    /*
+     * RPC call state
+     */
+    struct rpc_message	tk_msg;		/* RPC call info */
+    __u32 *			tk_buffer;	/* XDR buffer */
+    __u8			tk_garb_retry,
+                    tk_cred_retry,
+                    tk_suid_retry;
 
-	/*
-	 * timeout_fn   to be executed by timer bottom half
-	 * callback	to be executed after waking up
-	 * action	next procedure for async tasks
-	 * exit		exit async task and report to caller
-	 */
-	void			(*tk_timeout_fn)(struct rpc_task *);
-	void			(*tk_callback)(struct rpc_task *);
-	void			(*tk_action)(struct rpc_task *);
-	void			(*tk_exit)(struct rpc_task *);
-	void			(*tk_release)(struct rpc_task *);
-	void *			tk_calldata;
+    /*
+     * timeout_fn   to be executed by timer bottom half
+     * callback	to be executed after waking up
+     * action	next procedure for async tasks
+     * exit		exit async task and report to caller
+     */
+    void			(*tk_timeout_fn)(struct rpc_task *);
+    void			(*tk_callback)(struct rpc_task *);
+    void			(*tk_action)(struct rpc_task *);
+    void			(*tk_exit)(struct rpc_task *);
+    void			(*tk_release)(struct rpc_task *);
+    void *			tk_calldata;
 
-	/*
-	 * tk_timer is used for async processing by the RPC scheduling
-	 * primitives. You should not access this directly unless
-	 * you have a pathological interest in kernel oopses.
-	 */
-	struct timer_list	tk_timer;	/* kernel timer */
-	wait_queue_head_t	tk_wait;	/* sync: sleep on this q */
-	unsigned long		tk_timeout;	/* timeout for rpc_sleep() */
-	unsigned short		tk_flags;	/* misc flags */
-	unsigned short		tk_lock;	/* Task lock counter */
-	unsigned char		tk_active   : 1,/* Task has been activated */
-				tk_wakeup   : 1;/* Task waiting to wake up */
-	unsigned long		tk_runstate;	/* Task run status */
+    /*
+     * tk_timer is used for async processing by the RPC scheduling
+     * primitives. You should not access this directly unless
+     * you have a pathological interest in kernel oopses.
+     */
+    struct timer_list	tk_timer;	/* kernel timer */
+    wait_queue_head_t	tk_wait;	/* sync: sleep on this q */
+    unsigned long		tk_timeout;	/* timeout for rpc_sleep() */
+    unsigned short		tk_flags;	/* misc flags */
+    unsigned short		tk_lock;	/* Task lock counter */
+    unsigned char		tk_active   : 1,/* Task has been activated */
+                  tk_wakeup   : 1;/* Task waiting to wake up */
+    unsigned long		tk_runstate;	/* Task run status */
 #ifdef RPC_DEBUG
-	unsigned short		tk_pid;		/* debugging aid */
+    unsigned short		tk_pid;		/* debugging aid */
 #endif
 };
 #define tk_auth			tk_client->cl_auth
@@ -132,10 +134,11 @@ typedef void			(*rpc_action)(struct rpc_task *);
 /*
  * RPC synchronization objects
  */
-struct rpc_wait_queue {
-	struct rpc_task *	task;
+struct rpc_wait_queue
+{
+    struct rpc_task *	task;
 #ifdef RPC_DEBUG
-	char *			name;
+    char *			name;
 #endif
 };
 
@@ -151,18 +154,18 @@ struct rpc_wait_queue {
 struct rpc_task *rpc_new_task(struct rpc_clnt *, rpc_action, int flags);
 struct rpc_task *rpc_new_child(struct rpc_clnt *, struct rpc_task *parent);
 void		rpc_init_task(struct rpc_task *, struct rpc_clnt *,
-					rpc_action exitfunc, int flags);
+                          rpc_action exitfunc, int flags);
 void		rpc_release_task(struct rpc_task *);
 void		rpc_killall_tasks(struct rpc_clnt *);
 int		rpc_execute(struct rpc_task *);
 void		rpc_run_child(struct rpc_task *parent, struct rpc_task *child,
-					rpc_action action);
+                          rpc_action action);
 int		rpc_add_wait_queue(struct rpc_wait_queue *, struct rpc_task *);
 void		rpc_remove_wait_queue(struct rpc_task *);
 void		rpc_sleep_on(struct rpc_wait_queue *, struct rpc_task *,
-					rpc_action action, rpc_action timer);
+                         rpc_action action, rpc_action timer);
 void		rpc_sleep_locked(struct rpc_wait_queue *, struct rpc_task *,
-				 rpc_action action, rpc_action timer);
+                             rpc_action action, rpc_action timer);
 void		rpc_add_timer(struct rpc_task *, rpc_action);
 void		rpc_wake_up_task(struct rpc_task *);
 void		rpc_wake_up(struct rpc_wait_queue *);
@@ -183,21 +186,21 @@ void		rpc_show_tasks(void);
 static __inline__ void *
 rpc_malloc(struct rpc_task *task, unsigned int size)
 {
-	return rpc_allocate(task->tk_flags, size);
+    return rpc_allocate(task->tk_flags, size);
 }
 
 static __inline__ void
 rpc_exit(struct rpc_task *task, int status)
 {
-	task->tk_status = status;
-	task->tk_action = NULL;
+    task->tk_status = status;
+    task->tk_action = NULL;
 }
 
 #ifdef RPC_DEBUG
 static __inline__ char *
 rpc_qname(struct rpc_wait_queue *q)
 {
-	return q->name? q->name : "unknown";
+    return q->name? q->name : "unknown";
 }
 #endif
 

@@ -58,18 +58,18 @@
 	{ 0, BASE_BAUD, 0x2E8, 3, STD_COM4_FLAGS },	/* ttyS3 */
 
 /*
- * HCDP_SERIAL_PORT_DEFNS should be placed in exactly the same slot 
- * in rs_table as defined by HCDP_SERIAL_CONSOLE_PORT in 
+ * HCDP_SERIAL_PORT_DEFNS should be placed in exactly the same slot
+ * in rs_table as defined by HCDP_SERIAL_CONSOLE_PORT in
  * include/linux/serial.h
  */
 #define HCDP_SERIAL_PORT_DEFNS	\
 	{ 0, BASE_BAUD, -1, 0, STD_COM_FLAGS},		/* ttySx device
-							   in comments sucks.
-							   You add an entry
-							   and you get to edit 
-							   boatloads of these 
-							   comments. Not worth
-							   it */
+in comments sucks.
+You add an entry
+and you get to edit
+boatloads of these
+comments. Not worth
+it */
 
 
 #ifdef CONFIG_SERIAL_MANY_PORTS

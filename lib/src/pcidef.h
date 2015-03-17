@@ -1,6 +1,6 @@
 #ifndef pcidef_h
 #define pcidef_h
- 
+
 #define PCI$K_VENDOR_ID 0
 #define PCI$K_DEVICE_ID 2
 #define PCI$K_COMMAND 4
@@ -45,7 +45,7 @@
 #define PCI$K_INTR_PIN 61
 #define PCI$K_MIN_GNT 62
 #define PCI$K_MAX_LAT 63
-#define PCI$S_PCIDEF 64                 
+#define PCI$S_PCIDEF 64
 #define PCI$K_DEVSEL_FAST 0
 #define PCI$K_DEVSEL_MEDIUM 1
 #define PCI$K_DEVSEL_SLOW 2
@@ -89,12 +89,12 @@
 #define PCI$K_INTR_PIN_INTD 4
 #define PCI$K_MAX_DEVICES 32
 #define PCI$K_LENGTH 64
-	
+
 #define PCI$M_BASE_ADDRESS_MEM_IO 0x1
 #define PCI$M_BASE_ADDRESS_TYPE 0x6
 #define PCI$M_BASE_ADDRESS_PREFETCHABLE 0x8
 #define PCI$M_BASE_ADDRESS_BITS_31_4 0xFFFFFFF0
-	
+
 #define BASE_ADDR_32 0
 #define BASE_ADDR_BELOW_1MB 1
 #define BASE_ADDR_64 2
@@ -103,9 +103,9 @@
 #define PCI$M_PCI_NODE_NUMBER_DEVICE 0xF8
 #define PCI$M_PCI_NODE_NUMBER_BUS 0xFF00
 #define PCI$M_PCI_NODE_NUMBER_OFFSET 0xFFFF0000
-	
+
 #define PCIERR$K_LENGTH 72
-	
+
 #define PCIFLAGS$M_FILL1 0xFFFFFF00
 #define PCIFLAGS$M_DATA_PARITY_DETECT 0x1
 #define PCIFLAGS$M_SIGNAL_TARGET_ABORT 0x2
@@ -115,136 +115,157 @@
 #define PCIFLAGS$M_DETECT_PE 0x20
 #define PCIFLAGS$M_FILL2 0xC0
 #define PCIFLAGS$M_FILL3 0xFFFFFF00
-	
+
 #define ERRTAG$K_PCIERR 16
- 
-struct _pci {
-  short int pci$w_vendor_id;
-  short int pci$w_device_id;
-  union  {
-    short int pci$w_command;
-    struct  {
-      unsigned pci$v_io_enable : 1;
-      unsigned pci$v_mem_enable : 1;
-      unsigned pci$v_bus_master_enable : 1;
-      unsigned pci$v_special_cycle_enable : 1;
-      unsigned pci$v_inval_enable : 1;
-      unsigned pci$v_palette_snoop_enable : 1;
-      unsigned pci$v_parity_enable : 1;
-      unsigned pci$v_wait_cycle_enable : 1;
-      unsigned pci$v_serr_enable : 1;
-      unsigned pci$v_back_to_back_enable : 1;
-      unsigned pci$v_command_fill : 6;
+
+struct _pci
+{
+    short int pci$w_vendor_id;
+    short int pci$w_device_id;
+    union
+    {
+        short int pci$w_command;
+        struct
+        {
+            unsigned pci$v_io_enable : 1;
+            unsigned pci$v_mem_enable : 1;
+            unsigned pci$v_bus_master_enable : 1;
+            unsigned pci$v_special_cycle_enable : 1;
+            unsigned pci$v_inval_enable : 1;
+            unsigned pci$v_palette_snoop_enable : 1;
+            unsigned pci$v_parity_enable : 1;
+            unsigned pci$v_wait_cycle_enable : 1;
+            unsigned pci$v_serr_enable : 1;
+            unsigned pci$v_back_to_back_enable : 1;
+            unsigned pci$v_command_fill : 6;
+        };
     };
-  };
-  union  {
-    short int pci$w_status;
-    struct  {
-      unsigned pci$v_status_fill : 7;
-      unsigned pci$v_fast_bb_capable : 1;
-      unsigned pci$v_data_parity_detect : 1;
-      unsigned pci$v_devsel_timing : 2;
-      unsigned pci$v_signal_target_abort : 1;
-      unsigned pci$v_rcv_target_abort : 1;
-      unsigned pci$v_rcv_master_abort : 1;
-      unsigned pci$v_signal_serr : 1;
-      unsigned pci$v_detect_pe : 1;
+    union
+    {
+        short int pci$w_status;
+        struct
+        {
+            unsigned pci$v_status_fill : 7;
+            unsigned pci$v_fast_bb_capable : 1;
+            unsigned pci$v_data_parity_detect : 1;
+            unsigned pci$v_devsel_timing : 2;
+            unsigned pci$v_signal_target_abort : 1;
+            unsigned pci$v_rcv_target_abort : 1;
+            unsigned pci$v_rcv_master_abort : 1;
+            unsigned pci$v_signal_serr : 1;
+            unsigned pci$v_detect_pe : 1;
+        };
     };
-  };
-  char pci$b_revision_id;
-  char pci$b_programming_if;
-  char pci$b_sub_class;
-  char pci$b_base_class;
-  char pci$b_cache_line_size;
-  char pci$b_latency_timer;
-  char pci$b_header_type;
-  char pci$b_bist;
-  int pci$l_base_address_0;
-  int pci$l_base_address_1;
-  int pci$l_base_address_2;
-  int pci$l_base_address_3;
-  int pci$l_base_address_4;
-  int pci$l_base_address_5;
-  int pci$l_cardbus_cis;
-  short int pci$w_sub_vndr;
-  short int pci$w_sub_id;
-  int pci$l_exp_rom_base;
-  int pci$l_reserved_3;
-  int pci$l_reserved_4;
-  char pci$b_intr_line;
-  char pci$b_intr_pin;
-  char pci$b_min_gnt;
-  char pci$b_max_lat;
-};
- 
-struct _base_address {
-  union  {
-    int pci$l_base_address;
-    struct  {
-      unsigned pci$v_base_address_mem_io : 1;
-      unsigned pci$v_base_address_type : 2;
-      unsigned pci$v_base_address_prefetchable : 1;
-      unsigned pci$v_base_address_bits_31_4 : 28;
-    };
-  };
-};
- 
-struct _pci_node_number {
-  union  {
-    int pci$l_pci_node_number;
-    struct  {
-      unsigned pci$v_pci_node_number_function : 3;
-      unsigned pci$v_pci_node_number_device : 5;
-      unsigned pci$v_pci_node_number_bus : 8;
-      unsigned pci$v_pci_node_number_offset : 16;
-    };
-  };
-};
- 
-struct _pci_busarray_hardware_id {
-  union  {
-    long long pci$q_pci_hardware_id;
-    struct  {
-      short int pci$w_pci_hardware_id_vendor;
-      short int pci$w_pci_hardware_id_device;
-      union  {
-	int pci$l_pci_hardware_id_fill;
-	struct  {
-	  short int pci$w_pci_hardware_id_sub_vndr;
-	  short int pci$w_pci_hardware_id_sub_id;
-	};
-      };
-    };
-  };
-};
- 
-struct _pcierr {
-  unsigned pcierr$v_fill1 : 11;
-  unsigned pcierr$v_device_number : 5;
-  unsigned char pcierr$b_bus_number;
-  unsigned char pcierr$b_fill2;
-  unsigned int pcierr$l_frame_size;
-  struct _pci pcierr$r_pci;
+    char pci$b_revision_id;
+    char pci$b_programming_if;
+    char pci$b_sub_class;
+    char pci$b_base_class;
+    char pci$b_cache_line_size;
+    char pci$b_latency_timer;
+    char pci$b_header_type;
+    char pci$b_bist;
+    int pci$l_base_address_0;
+    int pci$l_base_address_1;
+    int pci$l_base_address_2;
+    int pci$l_base_address_3;
+    int pci$l_base_address_4;
+    int pci$l_base_address_5;
+    int pci$l_cardbus_cis;
+    short int pci$w_sub_vndr;
+    short int pci$w_sub_id;
+    int pci$l_exp_rom_base;
+    int pci$l_reserved_3;
+    int pci$l_reserved_4;
+    char pci$b_intr_line;
+    char pci$b_intr_pin;
+    char pci$b_min_gnt;
+    char pci$b_max_lat;
 };
 
-struct _pciflags {
-  union  {
-    struct  {
-      unsigned char pciflags$b_pciflags;
-      unsigned pciflags$v_fill1 : 24;
+struct _base_address
+{
+    union
+    {
+        int pci$l_base_address;
+        struct
+        {
+            unsigned pci$v_base_address_mem_io : 1;
+            unsigned pci$v_base_address_type : 2;
+            unsigned pci$v_base_address_prefetchable : 1;
+            unsigned pci$v_base_address_bits_31_4 : 28;
+        };
     };
-    struct  {
-      unsigned pciflags$v_data_parity_detect : 1; 
-      unsigned pciflags$v_signal_target_abort : 1; 
-      unsigned pciflags$v_rcv_target_abort : 1;
-      unsigned pciflags$v_rcv_master_abort : 1;
-      unsigned pciflags$v_signal_serr : 1;
-      unsigned pciflags$v_detect_pe : 1;
-      unsigned pciflags$v_fill2 : 2;
-      unsigned pciflags$v_fill3 : 24;
-    };
-  };
 };
- 
-#endif 
- 
+
+struct _pci_node_number
+{
+    union
+    {
+        int pci$l_pci_node_number;
+        struct
+        {
+            unsigned pci$v_pci_node_number_function : 3;
+            unsigned pci$v_pci_node_number_device : 5;
+            unsigned pci$v_pci_node_number_bus : 8;
+            unsigned pci$v_pci_node_number_offset : 16;
+        };
+    };
+};
+
+struct _pci_busarray_hardware_id
+{
+    union
+    {
+        long long pci$q_pci_hardware_id;
+        struct
+        {
+            short int pci$w_pci_hardware_id_vendor;
+            short int pci$w_pci_hardware_id_device;
+            union
+            {
+                int pci$l_pci_hardware_id_fill;
+                struct
+                {
+                    short int pci$w_pci_hardware_id_sub_vndr;
+                    short int pci$w_pci_hardware_id_sub_id;
+                };
+            };
+        };
+    };
+};
+
+struct _pcierr
+{
+    unsigned pcierr$v_fill1 : 11;
+    unsigned pcierr$v_device_number : 5;
+    unsigned char pcierr$b_bus_number;
+    unsigned char pcierr$b_fill2;
+    unsigned int pcierr$l_frame_size;
+    struct _pci pcierr$r_pci;
+};
+
+struct _pciflags
+{
+    union
+    {
+        struct
+        {
+            unsigned char pciflags$b_pciflags;
+            unsigned pciflags$v_fill1 : 24;
+        };
+        struct
+        {
+            unsigned pciflags$v_data_parity_detect : 1;
+            unsigned pciflags$v_signal_target_abort : 1;
+            unsigned pciflags$v_rcv_target_abort : 1;
+            unsigned pciflags$v_rcv_master_abort : 1;
+            unsigned pciflags$v_signal_serr : 1;
+            unsigned pciflags$v_detect_pe : 1;
+            unsigned pciflags$v_fill2 : 2;
+            unsigned pciflags$v_fill3 : 24;
+        };
+    };
+};
+
+#endif
+

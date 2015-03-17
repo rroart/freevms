@@ -24,11 +24,12 @@
  * be per-CPU or per-MM as the page table lock is held for the duration of TLB
  * shootdown.
  */
-typedef struct free_pte_ctx {
-	struct mm_struct	*mm;
-	unsigned long		nr;	/* set to ~0UL means fast mode */
-	unsigned long	start_addr, end_addr;
-	pte_t	ptes[FREE_PTE_NR];
+typedef struct free_pte_ctx
+{
+    struct mm_struct	*mm;
+    unsigned long		nr;	/* set to ~0UL means fast mode */
+    unsigned long	start_addr, end_addr;
+    pte_t	ptes[FREE_PTE_NR];
 } mmu_gather_t;
 
 /* Users of the generic TLB shootdown code must declare this storage space. */
@@ -39,12 +40,12 @@ extern mmu_gather_t	mmu_gathers[NR_CPUS];
  */
 static inline mmu_gather_t *tlb_gather_mmu(struct mm_struct *mm)
 {
-	mmu_gather_t *tlb = &mmu_gathers[smp_processor_id()];
+    mmu_gather_t *tlb = &mmu_gathers[smp_processor_id()];
 
-	tlb->mm = mm;
-	/* Use fast mode if there is only one user of this mm (this process) */
-	tlb->nr = (atomic_read(&(mm)->mm_users) == 1) ? ~0UL : 0UL;
-	return tlb;
+    tlb->mm = mm;
+    /* Use fast mode if there is only one user of this mm (this process) */
+    tlb->nr = (atomic_read(&(mm)->mm_users) == 1) ? ~0UL : 0UL;
+    return tlb;
 }
 
 /* void tlb_remove_page(mmu_gather_t *tlb, pte_t *ptep, unsigned long addr)
@@ -73,21 +74,23 @@ static inline mmu_gather_t *tlb_gather_mmu(struct mm_struct *mm)
  */
 static inline void tlb_finish_mmu(struct free_pte_ctx *ctx, unsigned long start, unsigned long end)
 {
-	unsigned long i, nr;
+    unsigned long i, nr;
 
-	/* Handle the fast case first. */
-	if (ctx->nr == ~0UL) {
-		flush_tlb_range(ctx->mm, start, end);
-		return;
-	}
-	nr = ctx->nr;
-	ctx->nr = 0;
-	if (nr)
-		flush_tlb_range(ctx->mm, ctx->start_addr, ctx->end_addr);
-	for (i=0; i < nr; i++) {
-		pte_t pte = ctx->ptes[i];
-		__free_pte(pte);
-	}
+    /* Handle the fast case first. */
+    if (ctx->nr == ~0UL)
+    {
+        flush_tlb_range(ctx->mm, start, end);
+        return;
+    }
+    nr = ctx->nr;
+    ctx->nr = 0;
+    if (nr)
+        flush_tlb_range(ctx->mm, ctx->start_addr, ctx->end_addr);
+    for (i=0; i < nr; i++)
+    {
+        pte_t pte = ctx->ptes[i];
+        __free_pte(pte);
+    }
 }
 
 #else

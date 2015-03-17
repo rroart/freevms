@@ -35,10 +35,11 @@
 
 #include <linux/ioctl.h>
 
-struct ite_gpio_ioctl_data {
-	__u32 device;
-	__u32 mask;
-	__u32 data;
+struct ite_gpio_ioctl_data
+{
+    __u32 device;
+    __u32 mask;
+    __u32 data;
 };
 
 #define ITE_GPIO_IOCTL_BASE	'Z'

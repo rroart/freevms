@@ -30,32 +30,32 @@
 
 /* The main kiobuf struct used for all our IO! */
 
-struct kiobuf 
+struct kiobuf
 {
-	int		nr_pages;	/* Pages actually referenced */
-	int		array_len;	/* Space in the allocated lists */
-	int		offset;		/* Offset to start of valid data */
-	int		length;		/* Number of valid bytes of data */
+    int		nr_pages;	/* Pages actually referenced */
+    int		array_len;	/* Space in the allocated lists */
+    int		offset;		/* Offset to start of valid data */
+    int		length;		/* Number of valid bytes of data */
 
-	/* Keep separate track of the physical addresses and page
-	 * structs involved.  If we do IO to a memory-mapped device
-	 * region, there won't necessarily be page structs defined for
-	 * every address. */
+    /* Keep separate track of the physical addresses and page
+     * structs involved.  If we do IO to a memory-mapped device
+     * region, there won't necessarily be page structs defined for
+     * every address. */
 
-	struct page **	maplist;
+    struct page **	maplist;
 
-	unsigned int	locked : 1;	/* If set, pages has been locked */
-	
-	/* Always embed enough struct pages for atomic IO */
-	struct page *	map_array[KIO_STATIC_PAGES];
-	struct buffer_head * bh[KIO_MAX_SECTORS];
-	unsigned long blocks[KIO_MAX_SECTORS];
+    unsigned int	locked : 1;	/* If set, pages has been locked */
 
-	/* Dynamic state for IO completion: */
-	atomic_t	io_count;	/* IOs still in progress */
-	int		errno;		/* Status of completed IO */
-	void		(*end_io) (struct kiobuf *); /* Completion callback */
-	wait_queue_head_t wait_queue;
+    /* Always embed enough struct pages for atomic IO */
+    struct page *	map_array[KIO_STATIC_PAGES];
+    struct buffer_head * bh[KIO_MAX_SECTORS];
+    unsigned long blocks[KIO_MAX_SECTORS];
+
+    /* Dynamic state for IO completion: */
+    atomic_t	io_count;	/* IOs still in progress */
+    int		errno;		/* Status of completed IO */
+    void		(*end_io) (struct kiobuf *); /* Completion callback */
+    wait_queue_head_t wait_queue;
 };
 
 
@@ -80,7 +80,7 @@ extern void free_kiobuf_bhs(struct kiobuf *);
 
 /* fs/buffer.c */
 
-int	brw_kiovec(int rw, int nr, struct kiobuf *iovec[], 
-		   kdev_t dev, unsigned long b[], int size);
+int	brw_kiovec(int rw, int nr, struct kiobuf *iovec[],
+               kdev_t dev, unsigned long b[], int size);
 
 #endif /* __LINUX_IOBUF_H */

@@ -31,7 +31,7 @@
 /************************************************************************
  *			Modification History				*
  *									*
- *	
+ *
  *	15-Jan-88	lp
  *		Merge of final 43BSD changes.
  *
@@ -39,7 +39,7 @@
  * 		Add 43bsd alpha tape changes for subnet routing		*
  *									*
  *	Larry Cohen  -	01/28/87
- *		Add IP options flag for control routines. 		
+ *		Add IP options flag for control routines.
  *									*
  ************************************************************************/
 
@@ -88,12 +88,20 @@
 /*
  * Internet address (a structure for historical reasons)
  */
-struct in_addr {
-	union {
-		struct { u_char s_b1,s_b2,s_b3,s_b4; } S_un_b;
-		struct { u_short s_w1,s_w2; } S_un_w;
-		u_long S_addr;
-	} S_un;
+struct in_addr
+{
+    union
+    {
+        struct
+        {
+            u_char s_b1,s_b2,s_b3,s_b4;
+        } S_un_b;
+        struct
+        {
+            u_short s_w1,s_w2;
+        } S_un_w;
+        u_long S_addr;
+    } S_un;
 #define	s_addr	S_un.S_addr	/* can be used for most tcp & ip code */
 #define	s_host	S_un.S_un_b.s_b2	/* host on imp */
 #define	s_net	S_un.S_un_b.s_b1	/* network */
@@ -163,11 +171,12 @@ struct in_addr {
 /*
  * Socket address, internet style.
  */
-struct sockaddr_in {
-	short	sin_family;
-	u_short	sin_port;
-	struct	in_addr sin_addr;
-	char	sin_zero[8];
+struct sockaddr_in
+{
+    short	sin_family;
+    u_short	sin_port;
+    struct	in_addr sin_addr;
+    char	sin_zero[8];
 };
 
 /*

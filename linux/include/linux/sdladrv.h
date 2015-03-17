@@ -1,7 +1,7 @@
 /*****************************************************************************
 * sdladrv.h	SDLA Support Module.  Kernel API Definitions.
 *
-* Author: 	Gideon Hack	
+* Author: 	Gideon Hack
 *
 * Copyright:	(c) 1995-2000 Sangoma Technologies Inc.
 *
@@ -22,11 +22,11 @@
 #include <linux/version.h>
 
 #ifndef KERNEL_VERSION
-  #define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
+#define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
 #endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,0)
-#define LINUX_2_4	
+#define LINUX_2_4
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,0)
 #define LINUX_2_1
 #else
@@ -43,27 +43,27 @@
  */
 typedef struct sdlahw
 {
-	unsigned type;			/* adapter type */
-	unsigned fwid;			/* firmware ID */
-	unsigned port;			/* adapter I/O port base */
-	int irq;			/* interrupt request level */
-	char S514_cpu_no[1];		/* PCI CPU Number */
-	unsigned char S514_slot_no;	/* PCI Slot Number */
-	char auto_pci_cfg;		/* Autodetect PCI Slot */
+    unsigned type;			/* adapter type */
+    unsigned fwid;			/* firmware ID */
+    unsigned port;			/* adapter I/O port base */
+    int irq;			/* interrupt request level */
+    char S514_cpu_no[1];		/* PCI CPU Number */
+    unsigned char S514_slot_no;	/* PCI Slot Number */
+    char auto_pci_cfg;		/* Autodetect PCI Slot */
 #if defined(LINUX_2_1) || defined(LINUX_2_4)
-	struct pci_dev *pci_dev;	/* PCI device */
+    struct pci_dev *pci_dev;	/* PCI device */
 #else
-	unsigned char pci_bus;		/* PCI bus number */
-	unsigned char pci_dev_func;	/* PCI device/function number */
+    unsigned char pci_bus;		/* PCI bus number */
+    unsigned char pci_dev_func;	/* PCI device/function number */
 #endif
-	void * dpmbase;			/* dual-port memory base */
-	unsigned dpmsize;		/* dual-port memory size */
-	unsigned pclk;			/* CPU clock rate, kHz */
-	unsigned long memory;		/* memory size */
-	unsigned long vector;		/* local offset of the DPM window */
-	unsigned io_range;		/* I/O port range */
-	unsigned char regs[SDLA_MAXIORANGE]; /* was written to registers */
-	unsigned reserved[5];
+    void * dpmbase;			/* dual-port memory base */
+    unsigned dpmsize;		/* dual-port memory size */
+    unsigned pclk;			/* CPU clock rate, kHz */
+    unsigned long memory;		/* memory size */
+    unsigned long vector;		/* local offset of the DPM window */
+    unsigned io_range;		/* I/O port range */
+    unsigned char regs[SDLA_MAXIORANGE]; /* was written to registers */
+    unsigned reserved[5];
 } sdlahw_t;
 
 /****** Function Prototypes *************************************************/
@@ -78,9 +78,9 @@ extern void read_S514_int_stat (sdlahw_t* hw, u32* int_status);
 extern int sdla_intr	(sdlahw_t* hw);
 extern int sdla_mapmem	(sdlahw_t* hw, unsigned long addr);
 extern int sdla_peek	(sdlahw_t* hw, unsigned long addr, void* buf,
-			 unsigned len);
+                         unsigned len);
 extern int sdla_poke	(sdlahw_t* hw, unsigned long addr, void* buf,
-			 unsigned len);
+                         unsigned len);
 extern int sdla_exec	(void* opflag);
 
 extern unsigned wanpipe_hw_probe(void);

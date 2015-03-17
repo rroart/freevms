@@ -7,32 +7,36 @@
 
 static __inline__ void __ide_mm_insw(unsigned long port, void *addr, u32 count)
 {
-	while (count--) {
-		*(u16 *)addr = readw(port);
-		addr += 2;
-	}
+    while (count--)
+    {
+        *(u16 *)addr = readw(port);
+        addr += 2;
+    }
 }
 
 static __inline__ void __ide_mm_insl(unsigned long port, void *addr, u32 count)
 {
-	while (count--) {
-		*(u32 *)addr = readl(port);
-		addr += 4;
-	}
+    while (count--)
+    {
+        *(u32 *)addr = readl(port);
+        addr += 4;
+    }
 }
 
 static __inline__ void __ide_mm_outsw(unsigned long port, void *addr, u32 count)
 {
-	while (count--) {
-		writew(*(u16 *)addr, port);
-		addr += 2;
-	}
+    while (count--)
+    {
+        writew(*(u16 *)addr, port);
+        addr += 2;
+    }
 }
 
 static __inline__ void __ide_mm_outsl(unsigned long port, void *addr, u32 count)
 {
-	while (count--) {
-		writel(*(u32 *)addr, port);
-		addr += 4;
-	}
+    while (count--)
+    {
+        writel(*(u32 *)addr, port);
+        addr += 4;
+    }
 }

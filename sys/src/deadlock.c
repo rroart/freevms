@@ -16,6 +16,7 @@
 #include<lkbdef.h>
 #include<descrip.h>
 
-void lck$searchdlck(void) {
+void lck$searchdlck(void)
+{
 
 }

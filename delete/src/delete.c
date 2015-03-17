@@ -130,10 +130,11 @@
 struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
 struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
 struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
-				   0, 0, 0, 0,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO};
+           0, 0, 0, 0,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO
+};
 struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
 struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};
 struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
@@ -141,9 +142,10 @@ struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
 
 #define PRINT_ATTR (FAB$M_CR | FAB$M_PRN | FAB$M_FTN)
 
-void main() {
-  printf("main is a dummy\n");
-  return 1;
+void main()
+{
+    printf("main is a dummy\n");
+    return 1;
 }
 
 /* del: you don't want to know! */
@@ -160,7 +162,7 @@ unsigned del(int userarg)
     memset (c, 0, 80);
     sts = cli$present(&p);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     int retlen;
     sts = cli$get_value(&p, &o, &retlen);
 
@@ -174,20 +176,28 @@ unsigned del(int userarg)
     fab.fab$l_fna = c;
     fab.fab$b_fns = strlen(fab.fab$l_fna);
     sts = sys$parse(&fab, 0, 0);
-    if (sts & 1) {
-        if (nam.nam$b_ver < 2) {
+    if (sts & 1)
+    {
+        if (nam.nam$b_ver < 2)
+        {
             printf("%%DELETE-F-NOVER, you must specify a version!!\n");
-        } else {
+        }
+        else
+        {
             nam.nam$l_rsa = rsa;
             nam.nam$b_rss = NAM$C_MAXRSS;
             fab.fab$l_fop = FAB$M_NAM;
-            while ((sts = sys$search(&fab, 0, 0)) & 1) {
-	      sts = sys$open(&fab, 0, 0);
-	      sts = sys$close(&fab, 0, 0);
-	      sts = sys$erase(&fab, 0, 0);
-                if ((sts & 1) == 0) {
+            while ((sts = sys$search(&fab, 0, 0)) & 1)
+            {
+                sts = sys$open(&fab, 0, 0);
+                sts = sys$close(&fab, 0, 0);
+                sts = sys$erase(&fab, 0, 0);
+                if ((sts & 1) == 0)
+                {
                     printf("%%DELETE-F-DELERR, Delete error: %d\n",sts);
-                } else {
+                }
+                else
+                {
                     filecount++;
                     rsa[nam.nam$b_rsl] = '\0';
                     printf("%%DELETE-I-DELETED, Deleted %s\n",rsa);
@@ -195,11 +205,15 @@ unsigned del(int userarg)
             }
             if (sts == RMS$_NMF) sts = 1;
         }
-        if (sts & 1) {
-            if (filecount < 1) {
+        if (sts & 1)
+        {
+            if (filecount < 1)
+            {
                 printf("%%DELETE-W-NOFILES, no files deleted\n");
             }
-        } else {
+        }
+        else
+        {
             printf("%%DELETE-F-ERROR Status: %d\n",sts);
         }
     }

@@ -56,12 +56,12 @@
 
 struct arp_PKT
 {
-  unsigned short     ar$hrd	;	// Hardware address space
-  unsigned short     ar$pro	;	// Protocol address space
-  unsigned char     ar$hln	;	// Byte length of hardware addresses
-  unsigned char     ar$pln	;	// Byte length of protocol addresses
-  unsigned short     ar$op	;	// ARP opcode
-  unsigned char     ar$xtra	[0];// Addresses
+    unsigned short     ar$hrd	;	// Hardware address space
+    unsigned short     ar$pro	;	// Protocol address space
+    unsigned char     ar$hln	;	// Byte length of hardware addresses
+    unsigned char     ar$pln	;	// Byte length of protocol addresses
+    unsigned short     ar$op	;	// ARP opcode
+    unsigned char     ar$xtra	[0];// Addresses
 };
 
 #define     ARP_HLEN   sizeof(struct arp_PKT)
@@ -74,33 +74,35 @@ MACRO ARP_PKT = BLOCK[ARP_LEN] FIELD(ARP_FIELDS) %;
 
 // Header portion of an ARP receive buffer
 
- struct xe_arp_structure 
- {
-   unsigned short     ar_chan ;	// vms channel for arp
-   unsigned short     ar_ios0 ;	// iosb for arp
-   unsigned short     ar_ios1 ;
-   unsigned short     ar_ios2 ;
-   unsigned short     ar_ios3 ;
-   unsigned char     phys$1  [6];	// physical address 1 (destination)
-   union {
-     unsigned char     phys$2  [6];	// physical address 2 (source)
-     struct {
-       unsigned int 	ar_phy_src1 ;
-       unsigned short 	ar_phy_src2 ;
-     };
-   };
-   unsigned short     ar_pro  ;	// hardware protocol number
-   unsigned char     ar_data [0];// Offset of ARP data
- };
+struct xe_arp_structure
+{
+    unsigned short     ar_chan ;	// vms channel for arp
+    unsigned short     ar_ios0 ;	// iosb for arp
+    unsigned short     ar_ios1 ;
+    unsigned short     ar_ios2 ;
+    unsigned short     ar_ios3 ;
+    unsigned char     phys$1  [6];	// physical address 1 (destination)
+    union
+    {
+        unsigned char     phys$2  [6];	// physical address 2 (source)
+        struct
+        {
+            unsigned int 	ar_phy_src1 ;
+            unsigned short 	ar_phy_src2 ;
+        };
+    };
+    unsigned short     ar_pro  ;	// hardware protocol number
+    unsigned char     ar_data [0];// Offset of ARP data
+};
 
 
 #define     XE_ARP_HLEN  sizeof(struct xe_arp_structure)
 #define     XE_ARP_LEN   XE_ARP_HLEN+ARP_MAX_LEN
 #if 0
- MACRO
-   XE_ARP_STRUCTURE = BLOCK[XE_ARP_LEN] FIELD(XE_ARP_FIELDS*/;
+MACRO
+XE_ARP_STRUCTURE = BLOCK[XE_ARP_LEN] FIELD(XE_ARP_FIELDS*/;
 #endif
 
 #define     MAX_RCV_BUF   8
 
-					      
+

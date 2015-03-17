@@ -2,7 +2,7 @@
 #define __I386_UNALIGNED_H
 
 /*
- * The i386 can do unaligned accesses itself. 
+ * The i386 can do unaligned accesses itself.
  *
  * The strange macros are there to make sure these can't
  * be misused in a way that makes them not work on other
@@ -13,8 +13,8 @@
  * get_unaligned - get value from possibly mis-aligned location
  * @ptr: pointer to value
  *
- * This macro should be used for accessing values larger in size than 
- * single bytes at locations that are expected to be improperly aligned, 
+ * This macro should be used for accessing values larger in size than
+ * single bytes at locations that are expected to be improperly aligned,
  * e.g. retrieving a u16 value from a location not u16-aligned.
  *
  * Note that unaligned accesses can be very expensive on some architectures.
@@ -26,8 +26,8 @@
  * @val: value to place
  * @ptr: pointer to location
  *
- * This macro should be used for placing values larger in size than 
- * single bytes at locations that are expected to be improperly aligned, 
+ * This macro should be used for placing values larger in size than
+ * single bytes at locations that are expected to be improperly aligned,
  * e.g. writing a u16 value to a location not u16-aligned.
  *
  * Note that unaligned accesses can be very expensive on some architectures.

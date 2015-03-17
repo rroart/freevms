@@ -1,7 +1,7 @@
 /*
   Red Black Trees
   (C) 1999  Andrea Arcangeli <andrea@suse.de>
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2 of the License, or
@@ -99,18 +99,18 @@ static inline struct page * rb_insert_page_cache(struct inode * inode,
 
 typedef struct rb_node_s
 {
-	struct rb_node_s * rb_parent;
-	int rb_color;
+    struct rb_node_s * rb_parent;
+    int rb_color;
 #define	RB_RED		0
 #define	RB_BLACK	1
-	struct rb_node_s * rb_right;
-	struct rb_node_s * rb_left;
+    struct rb_node_s * rb_right;
+    struct rb_node_s * rb_left;
 }
 rb_node_t;
 
 typedef struct rb_root_s
 {
-	struct rb_node_s * rb_node;
+    struct rb_node_s * rb_node;
 }
 rb_root_t;
 
@@ -123,11 +123,11 @@ extern void rb_erase(rb_node_t *, rb_root_t *);
 
 static inline void rb_link_node(rb_node_t * node, rb_node_t * parent, rb_node_t ** rb_link)
 {
-	node->rb_parent = parent;
-	node->rb_color = RB_RED;
-	node->rb_left = node->rb_right = NULL;
+    node->rb_parent = parent;
+    node->rb_color = RB_RED;
+    node->rb_left = node->rb_right = NULL;
 
-	*rb_link = node;
+    *rb_link = node;
 }
 
 #endif	/* _LINUX_RBTREE_H */

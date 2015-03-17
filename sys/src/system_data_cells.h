@@ -3,13 +3,16 @@
 
 /* cut'n paste and etc from .c */
 
-#include<lnmstrdef.h>
-#include<cpudef.h>
-#include<tqedef.h>
-#include<wqhdef.h>
-#include<rsbdef.h>
-#include<ccbdef.h>
-#include<spldef.h>
+#include <lnmstrdef.h>
+#include <cpudef.h>
+#include <tqedef.h>
+#include <wqhdef.h>
+#include <rsbdef.h>
+#include <ccbdef.h>
+#include <spldef.h>
+
+/* #include <pcbdef.h> */
+struct _pcb;
 
 extern unsigned long acme$gq_mutex;
 extern unsigned long acme$gq_request_queue;
@@ -2025,5 +2028,5 @@ extern struct _spl SPIN_IOPOST;
 #define ctl$gl_iaflnkptr (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 121)))
 #endif
 #endif
- 
+
 unsigned long long inline unix_to_vms_time(unsigned long l);

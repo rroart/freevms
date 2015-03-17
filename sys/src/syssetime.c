@@ -22,18 +22,18 @@
 
 asmlinkage int exe$setime(unsigned long long *timadr)
 {
-  /** test privs - MISSING */
-  long * tmp=(long *)&exe$gq_systime;
-  /** TODO wrong use */
-  /** if zero, recalibrate - MISSING */
-  if (!timadr) return SS$_ACCVIO;
+    /** test privs - MISSING */
+    long * tmp=(long *)&exe$gq_systime;
+    /** TODO wrong use */
+    /** if zero, recalibrate - MISSING */
+    if (!timadr) return SS$_ACCVIO;
 #if 0
-  printk("setime %x %x\n",tmp[0],tmp[1]);
+    printk("setime %x %x\n",tmp[0],tmp[1]);
 #endif
-  /** test capability - MISSING */
-  memcpy(&exe$gq_systime,timadr,8);
+    /** test capability - MISSING */
+    memcpy(&exe$gq_systime,timadr,8);
 #if 0
-  printk("setime %x %x\n",tmp[0],tmp[1]);
+    printk("setime %x %x\n",tmp[0],tmp[1]);
 #endif
-  return SS$_NORMAL;
+    return SS$_NORMAL;
 }

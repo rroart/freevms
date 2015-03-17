@@ -27,32 +27,33 @@
 #define		XAB$M_NOMOVE		0x200000
 #define		XAB$M_NOSHELVABLE	0x400000
 #define		XAB$M_PRESHELVED	0x800000
-	
-struct _uchar_flags {
-  unsigned xab$v_wascontig		: 1;
-  unsigned xab$v_nobackup		: 1;
-  unsigned xab$v_writeback		: 1;
-  unsigned xab$v_readcheck		: 1;
-  unsigned xab$v_writcheck		: 1;
-  unsigned xab$v_contigb		: 1;
-  unsigned xab$v_locked		        : 1;
-  unsigned xab$v_contig		        : 1;
-  unsigned xab$v_reserved1		: 1;
-  unsigned xab$v_reserved2		: 1;
-  unsigned xab$v_reserved3		: 1;
-  unsigned xab$v_badacl		        : 1;
-  unsigned xab$v_spool	        	: 1;
-  unsigned xab$v_directory		: 1;
-  unsigned xab$v_badblock		: 1;
-  unsigned xab$v_markdel		: 1;
-  unsigned xab$v_nocharge		: 1;
-  unsigned xab$v_erase		        : 1;
-  unsigned xab$v_reserved4		: 1;
-  unsigned xab$v_shelved		: 1;
-  unsigned xab$v_reserved6		: 1;
-  unsigned xab$v_nomove		        : 1;
-  unsigned xab$v_noshelvable		: 1;
-  unsigned xab$v_preshelved		: 1;
+
+struct _uchar_flags
+{
+    unsigned xab$v_wascontig		: 1;
+    unsigned xab$v_nobackup		: 1;
+    unsigned xab$v_writeback		: 1;
+    unsigned xab$v_readcheck		: 1;
+    unsigned xab$v_writcheck		: 1;
+    unsigned xab$v_contigb		: 1;
+    unsigned xab$v_locked		        : 1;
+    unsigned xab$v_contig		        : 1;
+    unsigned xab$v_reserved1		: 1;
+    unsigned xab$v_reserved2		: 1;
+    unsigned xab$v_reserved3		: 1;
+    unsigned xab$v_badacl		        : 1;
+    unsigned xab$v_spool	        	: 1;
+    unsigned xab$v_directory		: 1;
+    unsigned xab$v_badblock		: 1;
+    unsigned xab$v_markdel		: 1;
+    unsigned xab$v_nocharge		: 1;
+    unsigned xab$v_erase		        : 1;
+    unsigned xab$v_reserved4		: 1;
+    unsigned xab$v_shelved		: 1;
+    unsigned xab$v_reserved6		: 1;
+    unsigned xab$v_nomove		        : 1;
+    unsigned xab$v_noshelvable		: 1;
+    unsigned xab$v_preshelved		: 1;
 };
 
 #define		XAB$_NET_BUFFER_SIZE		1
@@ -122,16 +123,17 @@ struct _uchar_flags {
 #define		XAB$K_CACHING_OPTIONS_MAX	385
 #define		XAB$K_SENSEMODE		1
 #define		XAB$K_SETMODE		2
-	
-struct _xabitmdef {
-  unsigned char xab$b_cod;
-  unsigned char xab$b_bln;
-  short int xabitmdef$$_fill_1;
-  void *xab$l_nxt;
-  void *xab$l_itemlist;
-  unsigned char xab$b_mode;
-  char xab$b_itm_fill1 [3];
-  unsigned int xab$il_itm_fill2 [4];
+
+struct _xabitmdef
+{
+    unsigned char xab$b_cod;
+    unsigned char xab$b_bln;
+    short int xabitmdef$$_fill_1;
+    void *xab$l_nxt;
+    void *xab$l_itemlist;
+    unsigned char xab$b_mode;
+    char xab$b_itm_fill1 [3];
+    unsigned int xab$il_itm_fill2 [4];
 };
 
 #define		XAB$K_ITMLEN		32
@@ -147,25 +149,27 @@ struct _xabitmdef {
 #define		XAB$K_FLUSH		1
 #define		XAB$K_NOFLUSH		2
 #define		XAB$M_CACHECTL_MBZ	0xFFFFF000
-	
-struct _xab_caching_options_flags {
-  unsigned xab$v_file_attributes	: 4;
-  unsigned xab$v_file_contents		: 4;
-  unsigned xab$v_flush_on_close		: 4;
-  unsigned xab$v_cachectl_mbz		: 20;
+
+struct _xab_caching_options_flags
+{
+    unsigned xab$v_file_attributes	: 4;
+    unsigned xab$v_file_contents		: 4;
+    unsigned xab$v_flush_on_close		: 4;
+    unsigned xab$v_cachectl_mbz		: 20;
 };
 
 #define		XAB$M_RCF_RU		0x1
 #define		XAB$M_RCF_AI		0x2
 #define		XAB$M_RCF_BI		0x4
 #define		XAB$M_RCF_NOPAD		0x8
-	
-struct _xab_rcf_flags {
-  unsigned xab$v_rcf_ru		: 1;
-  unsigned xab$v_rcf_ai		: 1;
-  unsigned xab$v_rcf_bi		: 1;
-  unsigned xab$v_rcf_nopad	: 1;
-  unsigned xab$v_fill_17_	: 4;
+
+struct _xab_rcf_flags
+{
+    unsigned xab$v_rcf_ru		: 1;
+    unsigned xab$v_rcf_ai		: 1;
+    unsigned xab$v_rcf_bi		: 1;
+    unsigned xab$v_rcf_nopad	: 1;
+    unsigned xab$v_fill_17_	: 4;
 };
 
 #define		XAB$K_DISABLE		0
@@ -212,91 +216,96 @@ struct _xab_rcf_flags {
 #define		XAB$M_NET_NOUPDATE	0x40
 #define		XAB$M_NET_NOCHANGE	0x80
 #define		XAB$M_NET_NOEXTEND	0x100
-	
-struct _xabnetextprot {
-  union  {
-    unsigned short int xab$w_system_acc;
-    struct  {
-      unsigned xab$v_net_noread		        : 1;
-      unsigned xab$v_net_nowrite		: 1;
-      unsigned xab$v_net_noexecute		: 1;
-      unsigned xab$v_net_nodelete		: 1;
-      unsigned xab$v_net_noappend		: 1;
-      unsigned xab$v_net_nodirectory		: 1;
-      unsigned xab$v_net_noupdate		: 1;
-      unsigned xab$v_net_nochange		: 1;
-      unsigned xab$v_net_noextend		: 1;
-      unsigned xab$v_fill_20_		        : 7;
+
+struct _xabnetextprot
+{
+    union
+    {
+        unsigned short int xab$w_system_acc;
+        struct
+        {
+            unsigned xab$v_net_noread		        : 1;
+            unsigned xab$v_net_nowrite		: 1;
+            unsigned xab$v_net_noexecute		: 1;
+            unsigned xab$v_net_nodelete		: 1;
+            unsigned xab$v_net_noappend		: 1;
+            unsigned xab$v_net_nodirectory		: 1;
+            unsigned xab$v_net_noupdate		: 1;
+            unsigned xab$v_net_nochange		: 1;
+            unsigned xab$v_net_noextend		: 1;
+            unsigned xab$v_fill_20_		        : 7;
+        };
     };
-  };
-  unsigned short int xab$w_owner_acc;
-  unsigned short int xab$w_group_acc;
-  unsigned short int xab$w_world_acc;
-};
- 
-struct _xabnetdapver {
-  unsigned char xab$b_ver_dap;
-  unsigned char xab$b_ver_eco;
-  unsigned char xab$b_ver_cus;
-  unsigned char xab$b_ver_dsv;
-  unsigned char xab$b_ver_csv;
+    unsigned short int xab$w_owner_acc;
+    unsigned short int xab$w_group_acc;
+    unsigned short int xab$w_world_acc;
 };
 
-struct _xabnetcapdef {
-  unsigned xab$v_cap_filall		: 1;
-  unsigned xab$v_cap_seqorg		: 1;
-  unsigned xab$v_cap_relorg		: 1;
-  unsigned xab$v_cap_fill_21		: 1;
-  unsigned xab$v_cap_extend		: 1;
-  unsigned xab$v_cap_seqfil		: 1;
-  unsigned xab$v_cap_ranrrn		: 1;
-  unsigned xab$v_cap_ranvbn		: 1;
-  unsigned xab$v_cap_rankey		: 1;
-  unsigned xab$v_cap_fill_22		: 1;
-  unsigned xab$v_cap_ranrfa		: 1;
-  unsigned xab$v_cap_idxorg		: 1;
-  unsigned xab$v_cap_swmode		: 1;
-  unsigned xab$v_cap_append		: 1;
-  unsigned xab$v_cap_submit		: 1;
-  unsigned xab$v_cap_fill_23		: 1;
-  unsigned xab$v_cap_mds		: 1;
-  unsigned xab$v_cap_display		: 1;
-  unsigned xab$v_cap_msgblk		: 1;
-  unsigned xab$v_cap_unrblk		: 1;
-  unsigned xab$v_cap_bigblk		: 1;
-  unsigned xab$v_cap_dapcrc		: 1;
-  unsigned xab$v_cap_keyxab		: 1;
-  unsigned xab$v_cap_allxab		: 1;
-  unsigned xab$v_cap_sumxab		: 1;
-  unsigned xab$v_cap_directory		: 1;
-  unsigned xab$v_cap_timxab		: 1;
-  unsigned xab$v_cap_proxab		: 1;
-  unsigned xab$v_cap_fill_24		: 1;
-  unsigned xab$v_cap_fopspl		: 1;
-  unsigned xab$v_cap_fopscf		: 1;
-  unsigned xab$v_cap_fopdlt		: 1;
-  unsigned xab$v_cap_fill_26		: 1;
-  unsigned xab$v_cap_seqrac		: 1;
-  unsigned xab$v_cap_fill_27		: 1;
-  unsigned xab$v_cap_bitopt		: 1;
-  unsigned xab$v_cap_warning		: 1;
-  unsigned xab$v_cap_rename		: 1;
-  unsigned xab$v_cap_wildcard		: 1;
-  unsigned xab$v_cap_gngopt		: 1;
-  unsigned xab$v_cap_nammsg		: 1;
-  unsigned xab$v_cap_segmsg		: 1;
-  unsigned xab$v_cap_chgattcls		: 1;
-  unsigned xab$v_cap_chgtimcls		: 1;
-  unsigned xab$v_cap_chgprocls		: 1;
-  unsigned xab$v_cap_chgnamcls		: 1;
-  unsigned xab$v_cap_modattcre		: 1;
-  unsigned xab$v_cap_nam3part		: 1;
-  unsigned xab$v_cap_chgattren		: 1;
-  unsigned xab$v_cap_chgtimren		: 1;
-  unsigned xab$v_cap_chgproren		: 1;
-  unsigned xab$v_cap_ctlblkcnt		: 1;
-  unsigned xab$v_cap_octalver		: 1;
-  unsigned xab$v_fill_21_		: 3;
+struct _xabnetdapver
+{
+    unsigned char xab$b_ver_dap;
+    unsigned char xab$b_ver_eco;
+    unsigned char xab$b_ver_cus;
+    unsigned char xab$b_ver_dsv;
+    unsigned char xab$b_ver_csv;
+};
+
+struct _xabnetcapdef
+{
+    unsigned xab$v_cap_filall		: 1;
+    unsigned xab$v_cap_seqorg		: 1;
+    unsigned xab$v_cap_relorg		: 1;
+    unsigned xab$v_cap_fill_21		: 1;
+    unsigned xab$v_cap_extend		: 1;
+    unsigned xab$v_cap_seqfil		: 1;
+    unsigned xab$v_cap_ranrrn		: 1;
+    unsigned xab$v_cap_ranvbn		: 1;
+    unsigned xab$v_cap_rankey		: 1;
+    unsigned xab$v_cap_fill_22		: 1;
+    unsigned xab$v_cap_ranrfa		: 1;
+    unsigned xab$v_cap_idxorg		: 1;
+    unsigned xab$v_cap_swmode		: 1;
+    unsigned xab$v_cap_append		: 1;
+    unsigned xab$v_cap_submit		: 1;
+    unsigned xab$v_cap_fill_23		: 1;
+    unsigned xab$v_cap_mds		: 1;
+    unsigned xab$v_cap_display		: 1;
+    unsigned xab$v_cap_msgblk		: 1;
+    unsigned xab$v_cap_unrblk		: 1;
+    unsigned xab$v_cap_bigblk		: 1;
+    unsigned xab$v_cap_dapcrc		: 1;
+    unsigned xab$v_cap_keyxab		: 1;
+    unsigned xab$v_cap_allxab		: 1;
+    unsigned xab$v_cap_sumxab		: 1;
+    unsigned xab$v_cap_directory		: 1;
+    unsigned xab$v_cap_timxab		: 1;
+    unsigned xab$v_cap_proxab		: 1;
+    unsigned xab$v_cap_fill_24		: 1;
+    unsigned xab$v_cap_fopspl		: 1;
+    unsigned xab$v_cap_fopscf		: 1;
+    unsigned xab$v_cap_fopdlt		: 1;
+    unsigned xab$v_cap_fill_26		: 1;
+    unsigned xab$v_cap_seqrac		: 1;
+    unsigned xab$v_cap_fill_27		: 1;
+    unsigned xab$v_cap_bitopt		: 1;
+    unsigned xab$v_cap_warning		: 1;
+    unsigned xab$v_cap_rename		: 1;
+    unsigned xab$v_cap_wildcard		: 1;
+    unsigned xab$v_cap_gngopt		: 1;
+    unsigned xab$v_cap_nammsg		: 1;
+    unsigned xab$v_cap_segmsg		: 1;
+    unsigned xab$v_cap_chgattcls		: 1;
+    unsigned xab$v_cap_chgtimcls		: 1;
+    unsigned xab$v_cap_chgprocls		: 1;
+    unsigned xab$v_cap_chgnamcls		: 1;
+    unsigned xab$v_cap_modattcre		: 1;
+    unsigned xab$v_cap_nam3part		: 1;
+    unsigned xab$v_cap_chgattren		: 1;
+    unsigned xab$v_cap_chgtimren		: 1;
+    unsigned xab$v_cap_chgproren		: 1;
+    unsigned xab$v_cap_ctlblkcnt		: 1;
+    unsigned xab$v_cap_octalver		: 1;
+    unsigned xab$v_fill_21_		: 3;
 };
 
 #define		XAB$S_BUFFER_SIZE		4
@@ -312,6 +321,6 @@ struct _xabnetcapdef {
 #define		XAB$S_CACHE_TMO		        4
 #define		XAB$S_HINT_LENGTH		16
 #define		XAB$S_GBC_LONG_LENGTH		4
-	
+
 #endif
- 
+

@@ -55,7 +55,7 @@
 
 /*
  * Debugging bitflags: each option can be enabled individually.
- * 
+ *
  * Note: only debug flags included in the ARCNET_DEBUG_MAX define will
  *   actually be available.  GCC will (at least, GCC 2.7.0 will) notice
  *   lines using a BUGLVL not in ARCNET_DEBUG_MAX and automatically optimize
@@ -180,24 +180,25 @@ extern int arcnet_debug;
  */
 #define ARC_IS_5MBIT    1   /* card default speed is 5MBit */
 #define ARC_CAN_10MBIT  2   /* card uses COM20022, supporting 10MBit,
-				 but default is 2.5MBit. */
+but default is 2.5MBit. */
 
 
-/* information needed to define an encapsulation driver */
-struct ArcProto {
-	char suffix;		/* a for RFC1201, e for ether-encap, etc. */
-	int mtu;		/* largest possible packet */
+    /* information needed to define an encapsulation driver */
+    struct ArcProto
+    {
+        char suffix;		/* a for RFC1201, e for ether-encap, etc. */
+        int mtu;		/* largest possible packet */
 
-	void (*rx) (struct net_device * dev, int bufnum,
-		    struct archdr * pkthdr, int length);
-	int (*build_header) (struct sk_buff * skb, unsigned short ethproto,
-			     uint8_t daddr);
+        void (*rx) (struct net_device * dev, int bufnum,
+                    struct archdr * pkthdr, int length);
+        int (*build_header) (struct sk_buff * skb, unsigned short ethproto,
+                             uint8_t daddr);
 
-	/* these functions return '1' if the skb can now be freed */
-	int (*prepare_tx) (struct net_device * dev, struct archdr * pkt, int length,
-			   int bufnum);
-	int (*continue_tx) (struct net_device * dev, int bufnum);
-};
+        /* these functions return '1' if the skb can now be freed */
+        int (*prepare_tx) (struct net_device * dev, struct archdr * pkt, int length,
+                           int bufnum);
+        int (*continue_tx) (struct net_device * dev, int bufnum);
+    };
 
 extern struct ArcProto *arc_proto_map[256], *arc_proto_default, *arc_bcast_proto;
 extern struct ArcProto arc_proto_null;
@@ -207,104 +208,109 @@ extern struct ArcProto arc_proto_null;
  * "Incoming" is information needed for each address that could be sending
  * to us.  Mostly for partially-received split packets.
  */
-struct Incoming {
-	struct sk_buff *skb;	/* packet data buffer             */
-	uint16_t sequence;	/* sequence number of assembly    */
-	uint8_t lastpacket,	/* number of last packet (from 1) */
-		numpackets;	/* number of packets in split     */
+struct Incoming
+{
+    struct sk_buff *skb;	/* packet data buffer             */
+    uint16_t sequence;	/* sequence number of assembly    */
+    uint8_t lastpacket,	/* number of last packet (from 1) */
+            numpackets;	/* number of packets in split     */
 };
 
 
 /* only needed for RFC1201 */
-struct Outgoing {
-	struct ArcProto *proto;	/* protocol driver that owns this:
+struct Outgoing
+{
+    struct ArcProto *proto;	/* protocol driver that owns this:
 				 *   if NULL, no packet is pending.
 				 */
-	struct sk_buff *skb;	/* buffer from upper levels */
-	struct archdr *pkt;	/* a pointer into the skb */
-	uint16_t length,	/* bytes total */
-		dataleft,	/* bytes left */
-		segnum,		/* segment being sent */
-		numsegs;	/* number of segments */
+    struct sk_buff *skb;	/* buffer from upper levels */
+    struct archdr *pkt;	/* a pointer into the skb */
+    uint16_t length,	/* bytes total */
+             dataleft,	/* bytes left */
+             segnum,		/* segment being sent */
+             numsegs;	/* number of segments */
 };
 
 
-struct arcnet_local {
-	struct net_device_stats stats;
+struct arcnet_local
+{
+    struct net_device_stats stats;
 
-	uint8_t config,		/* current value of CONFIG register */
-		timeout,	/* Extended timeout for COM20020 */
-		backplane,	/* Backplane flag for COM20020 */
-		clockp,		/* COM20020 clock divider */
-		clockm,		/* COM20020 clock multiplier flag */
-		setup,		/* Contents of setup1 register */
-		setup2,		/* Contents of setup2 register */
-		intmask;	/* current value of INTMASK register */
-	uint8_t default_proto[256];	/* default encap to use for each host */
-	int	cur_tx,		/* buffer used by current transmit, or -1 */
-		next_tx,	/* buffer where a packet is ready to send */
-		cur_rx;		/* current receive buffer */
-	int	lastload_dest,	/* can last loaded packet be acked? */
-		lasttrans_dest;	/* can last TX'd packet be acked? */
-	int	timed_out;	/* need to process TX timeout and drop packet */
-	unsigned long last_timeout;	/* time of last reported timeout */
-	char *card_name;	/* card ident string */
-	int card_flags;		/* special card features */
+    uint8_t config,		/* current value of CONFIG register */
+            timeout,	/* Extended timeout for COM20020 */
+            backplane,	/* Backplane flag for COM20020 */
+            clockp,		/* COM20020 clock divider */
+            clockm,		/* COM20020 clock multiplier flag */
+            setup,		/* Contents of setup1 register */
+            setup2,		/* Contents of setup2 register */
+            intmask;	/* current value of INTMASK register */
+    uint8_t default_proto[256];	/* default encap to use for each host */
+    int	cur_tx,		/* buffer used by current transmit, or -1 */
+        next_tx,	/* buffer where a packet is ready to send */
+        cur_rx;		/* current receive buffer */
+    int	lastload_dest,	/* can last loaded packet be acked? */
+        lasttrans_dest;	/* can last TX'd packet be acked? */
+    int	timed_out;	/* need to process TX timeout and drop packet */
+    unsigned long last_timeout;	/* time of last reported timeout */
+    char *card_name;	/* card ident string */
+    int card_flags;		/* special card features */
 
-	/*
-	 * Buffer management: an ARCnet card has 4 x 512-byte buffers, each of
-	 * which can be used for either sending or receiving.  The new dynamic
-	 * buffer management routines use a simple circular queue of available
-	 * buffers, and take them as they're needed.  This way, we simplify
-	 * situations in which we (for example) want to pre-load a transmit
-	 * buffer, or start receiving while we copy a received packet to
-	 * memory.
-	 * 
-	 * The rules: only the interrupt handler is allowed to _add_ buffers to
-	 * the queue; thus, this doesn't require a lock.  Both the interrupt
-	 * handler and the transmit function will want to _remove_ buffers, so
-	 * we need to handle the situation where they try to do it at the same
-	 * time.
-	 * 
-	 * If next_buf == first_free_buf, the queue is empty.  Since there are
-	 * only four possible buffers, the queue should never be full.
-	 */
-	atomic_t buf_lock;
-	int buf_queue[5];
-	int next_buf, first_free_buf;
+    /*
+     * Buffer management: an ARCnet card has 4 x 512-byte buffers, each of
+     * which can be used for either sending or receiving.  The new dynamic
+     * buffer management routines use a simple circular queue of available
+     * buffers, and take them as they're needed.  This way, we simplify
+     * situations in which we (for example) want to pre-load a transmit
+     * buffer, or start receiving while we copy a received packet to
+     * memory.
+     *
+     * The rules: only the interrupt handler is allowed to _add_ buffers to
+     * the queue; thus, this doesn't require a lock.  Both the interrupt
+     * handler and the transmit function will want to _remove_ buffers, so
+     * we need to handle the situation where they try to do it at the same
+     * time.
+     *
+     * If next_buf == first_free_buf, the queue is empty.  Since there are
+     * only four possible buffers, the queue should never be full.
+     */
+    atomic_t buf_lock;
+    int buf_queue[5];
+    int next_buf, first_free_buf;
 
-	/* network "reconfiguration" handling */
-	time_t first_recon,	/* time of "first" RECON message to count */
-		last_recon;	/* time of most recent RECON */
-	int num_recons;		/* number of RECONs between first and last. */
-	bool network_down;	/* do we think the network is down? */
+    /* network "reconfiguration" handling */
+    time_t first_recon,	/* time of "first" RECON message to count */
+           last_recon;	/* time of most recent RECON */
+    int num_recons;		/* number of RECONs between first and last. */
+    bool network_down;	/* do we think the network is down? */
 
-	struct {
-		uint16_t sequence;	/* sequence number (incs with each packet) */
-		uint16_t aborted_seq;
+    struct
+    {
+        uint16_t sequence;	/* sequence number (incs with each packet) */
+        uint16_t aborted_seq;
 
-		struct Incoming incoming[256];	/* one from each address */
-	} rfc1201;
+        struct Incoming incoming[256];	/* one from each address */
+    } rfc1201;
 
-	/* really only used by rfc1201, but we'll pretend it's not */
-	struct Outgoing outgoing;	/* packet currently being sent */
+    /* really only used by rfc1201, but we'll pretend it's not */
+    struct Outgoing outgoing;	/* packet currently being sent */
 
-	/* hardware-specific functions */
-	struct {
-		void (*command) (struct net_device * dev, int cmd);
-		int (*status) (struct net_device * dev);
-		void (*intmask) (struct net_device * dev, int mask);
-		bool (*reset) (struct net_device * dev, bool really_reset);
-		void (*open_close) (struct net_device * dev, bool open);
-		void (*open_close_ll) (struct net_device * dev, bool open);
+    /* hardware-specific functions */
+    struct
+    {
+        void (*command) (struct net_device * dev, int cmd);
+        int (*status) (struct net_device * dev);
+        void (*intmask) (struct net_device * dev, int mask);
+        bool (*reset) (struct net_device * dev, bool really_reset);
+        void (*open_close) (struct net_device * dev, bool open);
+        void (*open_close_ll) (struct net_device * dev, bool open);
 
-		void (*copy_to_card) (struct net_device * dev, int bufnum, int offset,
-				      void *buf, int count);
-		void (*copy_from_card) (struct net_device * dev, int bufnum, int offset,
-					void *buf, int count);
-	} hw;
+        void (*copy_to_card) (struct net_device * dev, int bufnum, int offset,
+                              void *buf, int count);
+        void (*copy_from_card) (struct net_device * dev, int bufnum, int offset,
+                                void *buf, int count);
+    } hw;
 
-	void *mem_start;	/* pointer to ioremap'ed MMIO */
+    void *mem_start;	/* pointer to ioremap'ed MMIO */
 };
 
 

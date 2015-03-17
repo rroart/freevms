@@ -29,14 +29,15 @@
 void read_file (FILE *input_file, Buffer *buffer, Line *next_line)
 
 {
-  char input_buff[4096], *p, *q;
-  int rc;
-  String *string;
+    char input_buff[4096], *p, *q;
+    int rc;
+    String *string;
 
-  while ((string = readfileline (input_file, NULL)) != NULL) {
-    line_insert (buffer, next_line, string);
-  }
-  fclose (input_file);
+    while ((string = readfileline (input_file, NULL)) != NULL)
+    {
+        line_insert (buffer, next_line, string);
+    }
+    fclose (input_file);
 }
 
 /************************************************************************/
@@ -59,22 +60,25 @@ void read_file (FILE *input_file, Buffer *buffer, Line *next_line)
 String *readfileline (FILE *input_file, String *string)
 
 {
-  char input_buff[4096];
-  int i, rc;
+    char input_buff[4096];
+    int i, rc;
 
-  i = 0;
-  while ((rc = fgetc (input_file)) >= 0) {
-    input_buff[i++] = rc;
-    if (rc == '\n') break;
-    if (i == sizeof input_buff) {
-      if (string == NULL) string = string_create (i, input_buff);
-      else string_concat (string, i, input_buff);
-      i = 0;
+    i = 0;
+    while ((rc = fgetc (input_file)) >= 0)
+    {
+        input_buff[i++] = rc;
+        if (rc == '\n') break;
+        if (i == sizeof input_buff)
+        {
+            if (string == NULL) string = string_create (i, input_buff);
+            else string_concat (string, i, input_buff);
+            i = 0;
+        }
     }
-  }
-  if (i != 0) {
-    if (string == NULL) string = string_create (i, input_buff);
-    else string_concat (string, i, input_buff);
-  }
-  return (string);
+    if (i != 0)
+    {
+        if (string == NULL) string = string_create (i, input_buff);
+        else string_concat (string, i, input_buff);
+    }
+    return (string);
 }

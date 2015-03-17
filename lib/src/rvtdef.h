@@ -11,24 +11,26 @@
 #define		RVT$C_RVTVCB		4
 #define		RVT$C_MINSIZE		18
 #define		RVT$S_RVTDEF		88
-	
-struct _rvt {
-  unsigned int rvt$l_struclkid;
-  unsigned int rvt$l_refc;
-  unsigned short int rvt$w_size;
-  unsigned char rvt$b_type;
-  unsigned char rvt$b_nvols;
-  char rvt$t_strucname [12];
-  char rvt$t_vlslcknam [12];
-  unsigned int rvt$l_blockid;
-  unsigned char rvt$b_acb [36];
-  unsigned int rvt$l_trans;
-  unsigned int rvt$l_activity;
-  union  {
-    struct _ucb *rvt$l_ucblst;
-    void *rvt$a_rvtvcb;
-  };
+
+struct _rvt
+{
+    unsigned int rvt$l_struclkid;
+    unsigned int rvt$l_refc;
+    unsigned short int rvt$w_size;
+    unsigned char rvt$b_type;
+    unsigned char rvt$b_nvols;
+    char rvt$t_strucname [12];
+    char rvt$t_vlslcknam [12];
+    unsigned int rvt$l_blockid;
+    unsigned char rvt$b_acb [36];
+    unsigned int rvt$l_trans;
+    unsigned int rvt$l_activity;
+    union
+    {
+        struct _ucb *rvt$l_ucblst;
+        void *rvt$a_rvtvcb;
+    };
 };
- 
+
 #endif
- 
+

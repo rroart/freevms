@@ -89,12 +89,12 @@ extern int mtrr_del (int reg, __u64 base, __u32 size);
 extern int mtrr_del_page (int reg, __u64 base, __u32 size);
 #else
 static __inline__ int mtrr_add (__u64 base, __u32 size,
-				unsigned int type, char increment)
+                                unsigned int type, char increment)
 {
     return -ENODEV;
 }
 static __inline__ int mtrr_add_page (__u64 base, __u32 size,
-				unsigned int type, char increment)
+                                     unsigned int type, char increment)
 {
     return -ENODEV;
 }

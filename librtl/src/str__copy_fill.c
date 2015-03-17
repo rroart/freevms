@@ -31,36 +31,36 @@
  *	Copies over text from source to dest.
  */
 unsigned long str$$copy_fill_not(char* dest_ptr, unsigned short dest_length,
-	const char* source_ptr, unsigned short source_length, char fill)
+                                 const char* source_ptr, unsigned short source_length, char fill)
 {
-	unsigned short max_copy;
-	int fill_loop;
+    unsigned short max_copy;
+    int fill_loop;
 
-	/*
-	 * Copy over however much can.
-	 */
-	max_copy = min(dest_length, source_length);
-	memcpy(dest_ptr, source_ptr, max_copy);
+    /*
+     * Copy over however much can.
+     */
+    max_copy = min(dest_length, source_length);
+    memcpy(dest_ptr, source_ptr, max_copy);
 
-	/*
-	 * Fill in the rest
-	 */
-	for (fill_loop = max_copy; fill_loop < dest_length; fill_loop++)
-	{
-		dest_ptr[fill_loop] = fill;
-	}
+    /*
+     * Fill in the rest
+     */
+    for (fill_loop = max_copy; fill_loop < dest_length; fill_loop++)
+    {
+        dest_ptr[fill_loop] = fill;
+    }
 
-	/*
-	 * Figure out what to return
-	 */
-	if (source_length > dest_length)
-	{
-		return STR$_TRU;
-	}
-	else
-	{
-		return STR$_NORMAL;
-	}
+    /*
+     * Figure out what to return
+     */
+    if (source_length > dest_length)
+    {
+        return STR$_TRU;
+    }
+    else
+    {
+        return STR$_NORMAL;
+    }
 
 }
 

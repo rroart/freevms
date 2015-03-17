@@ -35,45 +35,48 @@
 
 #define IHD$C_GEN_NEWISD 6
 #define IHD$S_IHDDEF 512
-	
-struct _ihd {
-  unsigned short int ihd$w_size;
-  unsigned short int ihd$w_activoff;
-  unsigned short int ihd$w_symdbgoff;
-  unsigned short int ihd$w_imgidoff;
-  unsigned short int ihd$w_patchoff;
-  unsigned short int ihd$w_version_array_off;
-  unsigned short int ihd$w_majorid;
-  unsigned short int ihd$w_minorid;
-  unsigned char ihd$b_hdrblkcnt;
-  unsigned char ihd$b_imgtype;
-  short int ihddef$$_fill_2;
-  unsigned long long ihd$q_privreqs;
-  unsigned short int ihd$w_iochancnt;
-  unsigned short int ihd$w_imgiocnt;
-  union  {
-    unsigned int ihd$l_lnkflags;
-    struct  {
-      unsigned ihd$v_lnkdebug	: 1;
-      unsigned ihd$v_lnknotfr	: 1;
-      unsigned ihd$v_nop0bufs	: 1;
-      unsigned ihd$v_picimg	: 1;
-      unsigned ihd$v_p0image	: 1;
-      unsigned ihd$v_dbgdmt	: 1;
-      unsigned ihd$v_inishr	: 1;
-      unsigned ihd$v_ihslong	: 1;
-      unsigned ihd$v_upcalls	: 1;
-      unsigned ihddef$$_fill_3	: 15;
-      unsigned ihd$v_matchctl	: 3;
-      unsigned ihd$v_fill_0_	: 5;
+
+struct _ihd
+{
+    unsigned short int ihd$w_size;
+    unsigned short int ihd$w_activoff;
+    unsigned short int ihd$w_symdbgoff;
+    unsigned short int ihd$w_imgidoff;
+    unsigned short int ihd$w_patchoff;
+    unsigned short int ihd$w_version_array_off;
+    unsigned short int ihd$w_majorid;
+    unsigned short int ihd$w_minorid;
+    unsigned char ihd$b_hdrblkcnt;
+    unsigned char ihd$b_imgtype;
+    short int ihddef$$_fill_2;
+    unsigned long long ihd$q_privreqs;
+    unsigned short int ihd$w_iochancnt;
+    unsigned short int ihd$w_imgiocnt;
+    union
+    {
+        unsigned int ihd$l_lnkflags;
+        struct
+        {
+            unsigned ihd$v_lnkdebug	: 1;
+            unsigned ihd$v_lnknotfr	: 1;
+            unsigned ihd$v_nop0bufs	: 1;
+            unsigned ihd$v_picimg	: 1;
+            unsigned ihd$v_p0image	: 1;
+            unsigned ihd$v_dbgdmt	: 1;
+            unsigned ihd$v_inishr	: 1;
+            unsigned ihd$v_ihslong	: 1;
+            unsigned ihd$v_upcalls	: 1;
+            unsigned ihddef$$_fill_3	: 15;
+            unsigned ihd$v_matchctl	: 3;
+            unsigned ihd$v_fill_0_	: 5;
+        };
     };
-  };
-  unsigned int ihd$l_ident;
-  unsigned int ihd$l_sysver;
-  void *ihd$l_iafva;
-  char ihd$t_skip [462];
-  unsigned short int ihd$w_alias;
+    unsigned int ihd$l_ident;
+    unsigned int ihd$l_sysver;
+    void *ihd$l_iafva;
+    char ihd$t_skip [462];
+    unsigned short int ihd$w_alias;
 };
 
 #endif
- 
+

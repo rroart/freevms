@@ -48,6 +48,6 @@
 #define	EXCEPTION(x)	FPU_exception(x)
 #endif
 
-#endif /* __ASSEMBLY__ */ 
+#endif /* __ASSEMBLY__ */
 
 #endif /* _EXCEPTION_H_ */

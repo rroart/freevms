@@ -5,6 +5,7 @@
 
 #include<linux/linkage.h>
 
-asmlinkage void exe$getmsg(void) {
+asmlinkage void exe$getmsg(void)
+{
 
 }

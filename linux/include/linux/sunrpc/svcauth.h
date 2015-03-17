@@ -13,11 +13,12 @@
 
 #include <linux/sunrpc/msg_prot.h>
 
-struct svc_cred {
-	u32			cr_flavor;
-	uid_t			cr_uid;
-	gid_t			cr_gid;
-	gid_t			cr_groups[NGROUPS];
+struct svc_cred
+{
+    u32			cr_flavor;
+    uid_t			cr_uid;
+    gid_t			cr_gid;
+    gid_t			cr_groups[NGROUPS];
 };
 
 struct svc_rqst;		/* forward decl */
@@ -31,12 +32,13 @@ void	svc_auth_unregister(u32 flavor);
  * Decoded AUTH_UNIX data. This is different from what's in the RPC lib.
  */
 #define NGRPS		16
-struct authunix_parms {
-	u32		aup_stamp;
-	u32		aup_uid;
-	u32		aup_gid;
-	u32		aup_len;
-	u32		aup_gids[NGRPS];
+struct authunix_parms
+{
+    u32		aup_stamp;
+    u32		aup_uid;
+    u32		aup_gid;
+    u32		aup_len;
+    u32		aup_gids[NGRPS];
 };
 
 struct svc_authops *	auth_getops(u32 flavor);

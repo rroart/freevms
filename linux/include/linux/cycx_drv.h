@@ -44,12 +44,13 @@
 /* Data Structures */
 /* Adapter hardware configuration. Pointer to this structure is passed to all
  * APIs.  */
-typedef struct cycxhw {
-	u32 fwid;		/* firmware ID */
-	int irq;		/* interrupt request level */
-	u32 dpmbase;		/* dual-port memory base */
-	u32 dpmsize;		/* dual-port memory size */
-	u32 reserved[5];
+typedef struct cycxhw
+{
+    u32 fwid;		/* firmware ID */
+    int irq;		/* interrupt request level */
+    u32 dpmbase;		/* dual-port memory base */
+    u32 dpmsize;		/* dual-port memory size */
+    u32 reserved[5];
 } cycxhw_t;
 
 /* Function Prototypes */

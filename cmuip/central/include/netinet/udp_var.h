@@ -35,9 +35,10 @@ static	char	*sccsid = "@(#)udp_var.h	4.1.1.1	(ULTRIX)	1/20/88";
 /*
  * UDP kernel structures and variables.
  */
-struct	udpiphdr {
-	struct 	ipovly ui_i;		/* overlaid ip structure */
-	struct	udphdr ui_u;		/* udp header */
+struct	udpiphdr
+{
+    struct 	ipovly ui_i;		/* overlaid ip structure */
+    struct	udphdr ui_u;		/* udp header */
 };
 #define	ui_next		ui_i.ih_next
 #define	ui_prev		ui_i.ih_prev
@@ -51,12 +52,13 @@ struct	udpiphdr {
 #define	ui_ulen		ui_u.uh_ulen
 #define	ui_sum		ui_u.uh_sum
 
-struct	udpstat {
-	int	udps_hdrops;
-	int	udps_badsum;
-	int	udps_badlen;
-	int	udps_total;
-	int	udps_nospace;
+struct	udpstat
+{
+    int	udps_hdrops;
+    int	udps_badsum;
+    int	udps_badlen;
+    int	udps_total;
+    int	udps_nospace;
 };
 
 #define UDP_TTL		30		/* time to live for UDP packets */

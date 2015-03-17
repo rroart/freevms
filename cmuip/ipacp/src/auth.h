@@ -27,23 +27,23 @@
  * may copy or modify Sun RPC without charge, but are not authorized
  * to license or distribute it to anyone else except as part of a product or
  * program developed by the user.
- * 
+ *
  * SUN RPC IS PROVIDED AS IS WITH NO WARRANTIES OF ANY KIND INCLUDING THE
  * WARRANTIES OF DESIGN, MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE, OR ARISING FROM A COURSE OF DEALING, USAGE OR TRADE PRACTICE.
- * 
+ *
  * Sun RPC is provided with no support and without any obligation on the
  * part of Sun Microsystems, Inc. to assist in its use, correction,
  * modification or enhancement.
- * 
+ *
  * SUN MICROSYSTEMS, INC. SHALL HAVE NO LIABILITY WITH RESPECT TO THE
  * INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY PATENTS BY SUN RPC
  * OR ANY PART THEREOF.
- * 
+ *
  * In no event will Sun Microsystems, Inc. be liable for any lost revenue
  * or profits or other special, indirect and consequential damages, even if
  * Sun has been advised of the possibility of such damages.
- * 
+ *
  * Sun Microsystems, Inc.
  * 2550 Garcia Avenue
  * Mountain View, California  94043
@@ -66,33 +66,36 @@
 /*
  * Status returned from authentication check
  */
-enum auth_stat {
-	AUTH_OK=0,
-	/*
-	 * failed at remote end
-	 */
-	AUTH_BADCRED=1,			/* bogus credentials (seal broken) */
-	AUTH_REJECTEDCRED=2,		/* client should begin new session */
-	AUTH_BADVERF=3,			/* bogus verifier (seal broken) */
-	AUTH_REJECTEDVERF=4,		/* verifier expired or was replayed */
-	AUTH_TOOWEAK=5,			/* rejected due to security reasons */
-	/*
-	 * failed locally
-	*/
-	AUTH_INVALIDRESP=6,		/* bogus response verifier */
-	AUTH_FAILED=7			/* some unknown reason */
+enum auth_stat
+{
+    AUTH_OK=0,
+    /*
+     * failed at remote end
+     */
+    AUTH_BADCRED=1,			/* bogus credentials (seal broken) */
+    AUTH_REJECTEDCRED=2,		/* client should begin new session */
+    AUTH_BADVERF=3,			/* bogus verifier (seal broken) */
+    AUTH_REJECTEDVERF=4,		/* verifier expired or was replayed */
+    AUTH_TOOWEAK=5,			/* rejected due to security reasons */
+    /*
+     * failed locally
+    */
+    AUTH_INVALIDRESP=6,		/* bogus response verifier */
+    AUTH_FAILED=7			/* some unknown reason */
 };
 
 #if (mc68000 || sparc || vax || i386)
 typedef u_long u_int32;	/* 32-bit unsigned integers */
 #endif
 
-union des_block {
-	struct {
-		u_int32 high;
-		u_int32 low;
-	} key;
-	char c[8];
+union des_block
+{
+    struct
+    {
+        u_int32 high;
+        u_int32 low;
+    } key;
+    char c[8];
 };
 typedef union des_block des_block;
 extern bool_t xdr_des_block();
@@ -100,28 +103,31 @@ extern bool_t xdr_des_block();
 /*
  * Authentication info.  Opaque to client.
  */
-struct opaque_auth {
-	enum_t	oa_flavor;		/* flavor of auth */
-	caddr_t	oa_base;		/* address of more auth stuff */
-	u_int	oa_length;		/* not to exceed MAX_AUTH_BYTES */
+struct opaque_auth
+{
+    enum_t	oa_flavor;		/* flavor of auth */
+    caddr_t	oa_base;		/* address of more auth stuff */
+    u_int	oa_length;		/* not to exceed MAX_AUTH_BYTES */
 };
 
 
 /*
  * Auth handle, interface to client side authenticators.
  */
-typedef struct {
-	struct	opaque_auth	ah_cred;
-	struct	opaque_auth	ah_verf;
-	union	des_block	ah_key;
-	struct auth_ops {
-		void	(*ah_nextverf)();
-		int	(*ah_marshal)();	/* nextverf & serialize */
-		int	(*ah_validate)();	/* validate varifier */
-		int	(*ah_refresh)();	/* refresh credentials */
-		void	(*ah_destroy)();	/* destroy this structure */
-	} *ah_ops;
-	caddr_t ah_private;
+typedef struct
+{
+    struct	opaque_auth	ah_cred;
+    struct	opaque_auth	ah_verf;
+    union	des_block	ah_key;
+    struct auth_ops
+    {
+        void	(*ah_nextverf)();
+        int	(*ah_marshal)();	/* nextverf & serialize */
+        int	(*ah_validate)();	/* validate varifier */
+        int	(*ah_refresh)();	/* refresh credentials */
+        void	(*ah_destroy)();	/* destroy this structure */
+    } *ah_ops;
+    caddr_t ah_private;
 } AUTH;
 
 

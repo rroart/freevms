@@ -2,7 +2,7 @@
 * sdlasfm.h	WANPIPE(tm) Multiprotocol WAN Link Driver.
 *		Definitions for the SDLA Firmware Module (SFM).
 *
-* Author: 	Gideon Hack 	
+* Author: 	Gideon Hack
 *
 * Copyright:	(c) 1995-1999 Sangoma Technologies Inc.
 *
@@ -76,28 +76,28 @@
 
 typedef struct	sfm_info		/* firmware module information */
 {
-	unsigned short	codeid;		/* firmware ID */
-	unsigned short	version;	/* firmaware version number */
-	unsigned short	adapter[SFM_MAX_SDLA]; /* compatible adapter types */
-	unsigned long	memsize;	/* minimum memory size */
-	unsigned short	reserved[2];	/* reserved */
-	unsigned short	startoffs;	/* entry point offset */
-	unsigned short	winoffs;	/* dual-port memory window offset */
-	unsigned short	codeoffs;	/* code load offset */
-	unsigned short	codesize;	/* code size */
-	unsigned short	dataoffs;	/* configuration data load offset */
-	unsigned short	datasize;	/* configuration data size */
+    unsigned short	codeid;		/* firmware ID */
+    unsigned short	version;	/* firmaware version number */
+    unsigned short	adapter[SFM_MAX_SDLA]; /* compatible adapter types */
+    unsigned long	memsize;	/* minimum memory size */
+    unsigned short	reserved[2];	/* reserved */
+    unsigned short	startoffs;	/* entry point offset */
+    unsigned short	winoffs;	/* dual-port memory window offset */
+    unsigned short	codeoffs;	/* code load offset */
+    unsigned short	codesize;	/* code size */
+    unsigned short	dataoffs;	/* configuration data load offset */
+    unsigned short	datasize;	/* configuration data size */
 } sfm_info_t;
 
 typedef struct sfm			/* SDLA firmware file structire */
 {
-	char		signature[80];	/* SFM file signature */
-	unsigned short	version;	/* file format version */
-	unsigned short	checksum;	/* info + image */
-	unsigned short	reserved[6];	/* reserved */
-	char		descr[SFM_DESCR_LEN]; /* description string */
-	sfm_info_t	info;		/* firmware module info */
-	unsigned char	image[1];	/* code image (variable size) */
+    char		signature[80];	/* SFM file signature */
+    unsigned short	version;	/* file format version */
+    unsigned short	checksum;	/* info + image */
+    unsigned short	reserved[6];	/* reserved */
+    char		descr[SFM_DESCR_LEN]; /* description string */
+    sfm_info_t	info;		/* firmware module info */
+    unsigned char	image[1];	/* code image (variable size) */
 } sfm_t;
 
 #endif	/* _SDLASFM_H */

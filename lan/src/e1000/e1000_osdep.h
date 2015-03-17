@@ -62,7 +62,8 @@
 #define PCI_COMMAND_REGISTER   PCI_COMMAND
 #define CMD_MEM_WRT_INVALIDATE PCI_COMMAND_INVALIDATE
 
-typedef enum {
+typedef enum
+{
 #undef FALSE
     FALSE = 0,
 #undef TRUE

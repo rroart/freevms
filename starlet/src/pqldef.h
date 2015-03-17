@@ -17,6 +17,6 @@
 #define	PQL$_WSEXTENT	13
 #define	PQL$_JTQUOTA	14
 #define	PQL$_LENGTH	15
-	
+
 #endif
-	
+

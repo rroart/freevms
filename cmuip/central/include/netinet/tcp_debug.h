@@ -1,13 +1,14 @@
 /*	tcp_debug.h	6.1	83/07/29	*/
 
-struct	tcp_debug {
-	n_time	td_time;
-	short	td_act;
-	short	td_ostate;
-	caddr_t	td_tcb;
-	struct	tcpiphdr td_ti;
-	short	td_req;
-	struct	tcpcb td_cb;
+struct	tcp_debug
+{
+    n_time	td_time;
+    short	td_act;
+    short	td_ostate;
+    caddr_t	td_tcb;
+    struct	tcpiphdr td_ti;
+    short	td_req;
+    struct	tcpcb td_cb;
 };
 
 #define	TA_INPUT 	0
@@ -18,7 +19,7 @@ struct	tcp_debug {
 
 #ifdef TANAMES
 char	*tanames[] =
-    { "input", "output", "user", "respond", "drop" };
+{ "input", "output", "user", "respond", "drop" };
 #endif
 
 #define	TCP_NDEBUG 100

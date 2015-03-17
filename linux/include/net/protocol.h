@@ -20,7 +20,7 @@
  *		Alan Cox	:	Cleaned up, and sorted types.
  *		Pedro Roque	:	inet6 protocols
  */
- 
+
 #ifndef _PROTOCOL_H
 #define _PROTOCOL_H
 
@@ -34,52 +34,53 @@
 
 
 /* This is used to register protocols. */
-struct inet_protocol 
+struct inet_protocol
 {
-	int			(*handler)(struct sk_buff *skb);
-	void			(*err_handler)(struct sk_buff *skb, u32 info);
-	struct inet_protocol	*next;
-	unsigned char		protocol;
-	unsigned char		copy:1;
-	void			*data;
-	const char		*name;
+    int			(*handler)(struct sk_buff *skb);
+    void			(*err_handler)(struct sk_buff *skb, u32 info);
+    struct inet_protocol	*next;
+    unsigned char		protocol;
+    unsigned char		copy:1;
+    void			*data;
+    const char		*name;
 };
 
 #if defined(CONFIG_IPV6) || defined (CONFIG_IPV6_MODULE)
-struct inet6_protocol 
+struct inet6_protocol
 {
-	int	(*handler)(struct sk_buff *skb);
+    int	(*handler)(struct sk_buff *skb);
 
-	void	(*err_handler)(struct sk_buff *skb,
-			       struct inet6_skb_parm *opt,
-			       int type, int code, int offset,
-			       __u32 info);
-	struct inet6_protocol *next;
-	unsigned char	protocol;
-	unsigned char	copy:1;
-	void		*data;
-	const char	*name;
+    void	(*err_handler)(struct sk_buff *skb,
+                           struct inet6_skb_parm *opt,
+                           int type, int code, int offset,
+                           __u32 info);
+    struct inet6_protocol *next;
+    unsigned char	protocol;
+    unsigned char	copy:1;
+    void		*data;
+    const char	*name;
 };
 
 #endif
 
 /* This is used to register socket interfaces for IP protocols.  */
-struct inet_protosw {
-	struct list_head list;
+struct inet_protosw
+{
+    struct list_head list;
 
-        /* These two fields form the lookup key.  */
-	unsigned short	 type;	   /* This is the 2nd argument to socket(2). */
-	int		 protocol; /* This is the L4 protocol number.  */
+    /* These two fields form the lookup key.  */
+    unsigned short	 type;	   /* This is the 2nd argument to socket(2). */
+    int		 protocol; /* This is the L4 protocol number.  */
 
-	struct proto	 *prot;
-	struct proto_ops *ops;
-  
-	int              capability; /* Which (if any) capability do
+    struct proto	 *prot;
+    struct proto_ops *ops;
+
+    int              capability; /* Which (if any) capability do
 				      * we need to use this socket
 				      * interface?
                                       */
-	char             no_check;   /* checksum on rcv/xmit/none? */
-	unsigned char	 flags;      /* See INET_PROTOSW_* below.  */
+    char             no_check;   /* checksum on rcv/xmit/none? */
+    unsigned char	 flags;      /* See INET_PROTOSW_* below.  */
 };
 #define INET_PROTOSW_REUSE 0x01	     /* Are ports automatically reusable? */
 #define INET_PROTOSW_PERMANENT 0x02  /* Permanent protocols are unremovable. */

@@ -44,15 +44,19 @@
 /* combine_date_time() is an internal routine to put date and time into a
    quadword - basically the opposite of lib_day() .... */
 
-struct TIME {
+struct TIME
+{
     unsigned char time[8];
 };
 
 unsigned long sys$__combine_date_time(int days,struct TIME *timadr,int day_time)
 {
-    if (day_time >= TIMESIZE) {
+    if (day_time >= TIMESIZE)
+    {
         return SS$_IVTIME;
-    } else {
+    }
+    else
+    {
 
         /* Put days into quad timbuf... */
 
@@ -62,32 +66,38 @@ unsigned long sys$__combine_date_time(int days,struct TIME *timadr,int day_time)
         count = 8;
         ptr = timadr->time;
         time = days;
-        do {
+        do
+        {
             *ptr++ = time;
             time = (time >> 8);
-        } while (--count > 0);
+        }
+        while (--count > 0);
 
         /* Factor in the time... */
 
         count = 8;
         ptr = timadr->time;
         time = day_time;
-        do {
+        do
+        {
             time += *ptr * TIMESIZE;
             *ptr++ = time;
             time = (time >> 8);
-        } while (--count > 0);
+        }
+        while (--count > 0);
 
         /* Factor by time base... */
 
         count = 8;
         ptr = timadr->time;
         time = 0;
-        do {
+        do
+        {
             time += *ptr * TIMEBASE;
             *ptr++ = time;
             time = (time >> 8);
-        } while (--count > 0);
+        }
+        while (--count > 0);
 
         return SS$_NORMAL;
     }

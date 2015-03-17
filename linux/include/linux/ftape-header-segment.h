@@ -47,11 +47,11 @@
 #define FT_LABEL_SZ   (FT_LABEL_DATE - FT_LABEL)
 #define FT_CMAP_START 78  /* starting segment of compression map             */
 #define FT_FMT_ERROR 128  /* must be set to 0xff if remainder gets lost during
-			   * tape format
-			   */
+* tape format
+*/
 #define FT_SEG_CNT   130  /* number of seg. written, formatted or verified
-			   * through lifetime of tape (why not read?)
-			   */
+* through lifetime of tape (why not read?)
+*/
 #define FT_INIT_DATE 138  /* date and time of initial tape format    */
 #define FT_FMT_CNT   142  /* number of times tape has been formatted */
 #define FT_FSL_CNT   144  /* number of segments in failed sector log */
@@ -64,15 +64,15 @@
 
 #define FT_FSL        256
 #define FT_HEADER_END 256 /* space beyond this point:
-			   * format codes 2, 3 and 5: 
-			   * -  failed sector log until byte 2047
-			   * -  bad sector map in the reamining part of segment
-			   * format codes 4 and 6:
-			   * -  bad sector map  starts hear
-			   */
+* format codes 2, 3 and 5:
+* -  failed sector log until byte 2047
+* -  bad sector map in the reamining part of segment
+* format codes 4 and 6:
+* -  bad sector map  starts hear
+*/
 
 
-/*  value to be stored at the FT_SIGNATURE offset 
+/*  value to be stored at the FT_SIGNATURE offset
  */
 #define FT_HSEG_MAGIC 0xaa55aa55
 #define FT_D2G_MAGIC  0x82288228 /* Ditto 2GB */
@@ -93,12 +93,13 @@
 #define FT_TIME_STAMP(y,mo,d,h,m,s) (FT_YEAR(y) | FT_TIME(mo,d,h,m,s))
 
 /* values for the format code field */
-typedef enum {
-	fmt_normal = 2, /*  QIC-80 post Rev. B 205Ft or 307Ft tape    */
-	fmt_1100ft = 3, /*  QIC-80 post Rev. B 1100Ft tape            */
-	fmt_var    = 4, /*  QIC-80 post Rev. B variabel length format */
-	fmt_425ft  = 5, /*  QIC-80 post Rev. B 425Ft tape             */
-	fmt_big    = 6  /*  QIC-3010/3020 variable length tape with more 
+typedef enum
+{
+    fmt_normal = 2, /*  QIC-80 post Rev. B 205Ft or 307Ft tape    */
+    fmt_1100ft = 3, /*  QIC-80 post Rev. B 1100Ft tape            */
+    fmt_var    = 4, /*  QIC-80 post Rev. B variabel length format */
+    fmt_425ft  = 5, /*  QIC-80 post Rev. B 425Ft tape             */
+    fmt_big    = 6  /*  QIC-3010/3020 variable length tape with more
 			 *  than 2^16 segments per tape
 			 */
 } ft_format_type;
@@ -107,13 +108,14 @@ typedef enum {
 #define FT_FSL_SIZE        (2 * FT_SECTOR_SIZE - FT_HEADER_END)
 #define FT_FSL_MAX_ENTRIES (FT_FSL_SIZE/sizeof(__u32))
 
-typedef struct ft_fsl_entry {
-	__u16 segment;
-	__u16 date;
+typedef struct ft_fsl_entry
+{
+    __u16 segment;
+    __u16 date;
 } __attribute__ ((packed)) ft_fsl_entry;
 
 
-/*  date encoding for the failed sector log 
+/*  date encoding for the failed sector log
  *  month: 1..12, day: 1..31, year: 1970..2097
  */
 #define FT_FSL_TIME_STAMP(y,m,d) \

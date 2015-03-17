@@ -175,7 +175,7 @@
 #define		DVI$_WWID		344
 #define		DVI$M_SECONDARY		0x1
 #define		DVI$M_NOREDIRECT	0x8000
-	
+
 #define		DVI$C_SECONDARY		1
 #define		DVI$C_ACP_F11V1		1
 #define		DVI$C_ACP_F11V2		2
@@ -189,11 +189,12 @@
 #define		DVI$C_ACP_UCX		10
 #define		DVI$C_ACP_F11V5		11
 #define		DVI$C_ACP_F11V6		12
-		
-struct _dvidef {
-  unsigned dvi$v_secondary  : 1;
-  unsigned dvi$v_item_code  : 14;
-  unsigned dvi$v_noredirect : 1;
+
+struct _dvidef
+{
+    unsigned dvi$v_secondary  : 1;
+    unsigned dvi$v_item_code  : 14;
+    unsigned dvi$v_noredirect : 1;
 };
 
 #endif

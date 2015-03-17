@@ -1,6 +1,6 @@
 /***************************************************************************
  * Linux PPP over X - Generic PPP transport layer sockets
- * Linux PPP over Ethernet (PPPoE) Socket Implementation (RFC 2516) 
+ * Linux PPP over Ethernet (PPPoE) Socket Implementation (RFC 2516)
  *
  * This file supplies definitions required by the PPP over Ethernet driver
  * (pppox.c).  All version information wrt this file is located in pppox.c
@@ -37,29 +37,32 @@
 #define PF_PPPOX	AF_PPPOX
 #endif /* !(AF_PPPOX) */
 
-/************************************************************************ 
- * PPPoE addressing definition 
- */ 
-typedef __u16 sid_t; 
-struct pppoe_addr{ 
-       sid_t           sid;                    /* Session identifier */ 
-       unsigned char   remote[ETH_ALEN];       /* Remote address */ 
-       char            dev[IFNAMSIZ];          /* Local device to use */ 
-}; 
- 
-/************************************************************************ 
- * Protocols supported by AF_PPPOX 
- */ 
+/************************************************************************
+ * PPPoE addressing definition
+ */
+typedef __u16 sid_t;
+struct pppoe_addr
+{
+    sid_t           sid;                    /* Session identifier */
+    unsigned char   remote[ETH_ALEN];       /* Remote address */
+    char            dev[IFNAMSIZ];          /* Local device to use */
+};
+
+/************************************************************************
+ * Protocols supported by AF_PPPOX
+ */
 #define PX_PROTO_OE    0 /* Currently just PPPoE */
-#define PX_MAX_PROTO   1	
- 
-struct sockaddr_pppox { 
-       sa_family_t     sa_family;            /* address family, AF_PPPOX */ 
-       unsigned int    sa_protocol;          /* protocol identifier */ 
-       union{ 
-               struct pppoe_addr       pppoe; 
-       }sa_addr; 
-}__attribute__ ((packed)); 
+#define PX_MAX_PROTO   1
+
+struct sockaddr_pppox
+{
+    sa_family_t     sa_family;            /* address family, AF_PPPOX */
+    unsigned int    sa_protocol;          /* protocol identifier */
+    union
+    {
+        struct pppoe_addr       pppoe;
+    } sa_addr;
+} __attribute__ ((packed));
 
 
 /*********************************************************************
@@ -78,10 +81,11 @@ struct sockaddr_pppox {
 #define PADR_CODE	0x19
 #define PADS_CODE	0x65
 #define PADT_CODE	0xa7
-struct pppoe_tag {
-	__u16 tag_type;
-	__u16 tag_len;
-	char tag_data[0];
+struct pppoe_tag
+{
+    __u16 tag_type;
+    __u16 tag_len;
+    char tag_data[0];
 } __attribute ((packed));
 
 /* Tag identifiers */
@@ -96,38 +100,41 @@ struct pppoe_tag {
 #define PTT_SYS_ERR  	__constant_htons(0x0202)
 #define PTT_GEN_ERR  	__constant_htons(0x0203)
 
-struct pppoe_hdr {
+struct pppoe_hdr
+{
 #if defined(__LITTLE_ENDIAN_BITFIELD)
-	__u8 ver : 4;
-	__u8 type : 4;
+    __u8 ver : 4;
+    __u8 type : 4;
 #elif defined(__BIG_ENDIAN_BITFIELD)
-	__u8 type : 4;
-	__u8 ver : 4;
+    __u8 type : 4;
+    __u8 ver : 4;
 #else
 #error	"Please fix <asm/byteorder.h>"
 #endif
-	__u8 code;
-	__u16 sid;
-	__u16 length;
-	struct pppoe_tag tag[0];
+    __u8 code;
+    __u16 sid;
+    __u16 length;
+    struct pppoe_tag tag[0];
 } __attribute__ ((packed));
 
 #ifdef __KERNEL__
 
-struct pppox_proto {
-	int (*create)(struct socket *sock);
-	int (*ioctl)(struct socket *sock, unsigned int cmd,
-		     unsigned long arg);
+struct pppox_proto
+{
+    int (*create)(struct socket *sock);
+    int (*ioctl)(struct socket *sock, unsigned int cmd,
+                 unsigned long arg);
 };
 
 extern int register_pppox_proto(int proto_num, struct pppox_proto *pp);
 extern void unregister_pppox_proto(int proto_num);
 extern void pppox_unbind_sock(struct sock *sk);/* delete ppp-channel binding */
 extern int pppox_channel_ioctl(struct ppp_channel *pc, unsigned int cmd,
-			       unsigned long arg);
+                               unsigned long arg);
 
 /* PPPoE socket states */
-enum {
+enum
+{
     PPPOX_NONE		= 0,  /* initial state */
     PPPOX_CONNECTED	= 1,  /* connection established ==TCP_ESTABLISHED */
     PPPOX_BOUND		= 2,  /* bound to ppp device */

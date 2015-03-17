@@ -32,26 +32,31 @@
 int relposition (Position *p1, Position *p2)
 
 {
-  int firstimethru, p1relp2;
-  Line *linebwd, *linefwd;
+    int firstimethru, p1relp2;
+    Line *linebwd, *linefwd;
 
-  p1relp2 = 0;
-  if ((p1 -> buffer == p2 -> buffer) && ((p1 -> line != p2 -> line) || (p1 -> offset != p2 -> offset))) {
-    if (p1 -> line != p2 -> line) {
-      firstimethru = 1;
-      for (linebwd = linefwd = p2 -> line; (linebwd != p1 -> line) && (linefwd != p1 -> line);) {
-        if (linebwd != NULL) linebwd = line_prev (linebwd);
-        else if (firstimethru) linebwd = buffer_last_line (p2 -> buffer);
-        if (linefwd != NULL) linefwd = line_next (linefwd);
-        if ((linefwd == NULL) && (linebwd == NULL)) break;
-        firstimethru = 0;
-      }
-      if (p1 -> line == linebwd) p1relp2 = -1;
-      if (p1 -> line == linefwd) p1relp2 =  1;
-    } else {
-      p1relp2 = (p1 -> offset > p2 -> offset) * 2 - 1;
+    p1relp2 = 0;
+    if ((p1 -> buffer == p2 -> buffer) && ((p1 -> line != p2 -> line) || (p1 -> offset != p2 -> offset)))
+    {
+        if (p1 -> line != p2 -> line)
+        {
+            firstimethru = 1;
+            for (linebwd = linefwd = p2 -> line; (linebwd != p1 -> line) && (linefwd != p1 -> line);)
+            {
+                if (linebwd != NULL) linebwd = line_prev (linebwd);
+                else if (firstimethru) linebwd = buffer_last_line (p2 -> buffer);
+                if (linefwd != NULL) linefwd = line_next (linefwd);
+                if ((linefwd == NULL) && (linebwd == NULL)) break;
+                firstimethru = 0;
+            }
+            if (p1 -> line == linebwd) p1relp2 = -1;
+            if (p1 -> line == linefwd) p1relp2 =  1;
+        }
+        else
+        {
+            p1relp2 = (p1 -> offset > p2 -> offset) * 2 - 1;
+        }
     }
-  }
 
-  return (p1relp2);
+    return (p1relp2);
 }

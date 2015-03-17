@@ -10,7 +10,7 @@
 #include <linux/config.h>
 #include <linux/compiler.h>
 
-/* These macros are used to mark some functions or 
+/* These macros are used to mark some functions or
  * initialized data (doesn't apply to uninitialized data)
  * as `initialization' functions. The kernel can take this
  * as hint that the function is used only during the initialization
@@ -18,7 +18,7 @@
  *
  * Usage:
  * For functions:
- * 
+ *
  * You should add __init immediately before the function name, like:
  *
  * static void __init initme(int x, int y)
@@ -41,7 +41,7 @@
  * Don't forget to initialize data not at file scope, i.e. within a function,
  * as gcc otherwise puts the data into the bss section and not into the init
  * section.
- * 
+ *
  * Also note, that this data cannot be "const".
  */
 
@@ -65,9 +65,10 @@ extern initcall_t __initcall_start, __initcall_end;
 /*
  * Used for kernel command line parameter setup
  */
-struct kernel_param {
-	const char *str;
-	int (*setup_func)(char *);
+struct kernel_param
+{
+    const char *str;
+    int (*setup_func)(char *);
 };
 
 extern struct kernel_param __setup_start, __setup_end;
@@ -98,7 +99,7 @@ extern struct kernel_param __setup_start, __setup_end;
 /**
  * module_init() - driver initialization entry point
  * @x: function to be run at kernel boot time or module insertion
- * 
+ *
  * module_init() will add the driver initialization routine in
  * the "__initcall.int" code segment if the driver is checked as
  * "y" or static, or else it will wrap the driver initialization
@@ -110,7 +111,7 @@ extern struct kernel_param __setup_start, __setup_end;
 /**
  * module_exit() - driver exit entry point
  * @x: function to be run when driver is removed
- * 
+ *
  * module_exit() will wrap the driver clean-up code
  * with cleanup_module() when used with rmmod when
  * the driver is a module.  If the driver is statically

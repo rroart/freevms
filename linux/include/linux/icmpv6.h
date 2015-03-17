@@ -3,58 +3,63 @@
 
 #include <asm/byteorder.h>
 
-struct icmp6hdr {
+struct icmp6hdr
+{
 
-	__u8		icmp6_type;
-	__u8		icmp6_code;
-	__u16		icmp6_cksum;
+    __u8		icmp6_type;
+    __u8		icmp6_code;
+    __u16		icmp6_cksum;
 
 
-	union {
-		__u32			un_data32[1];
-		__u16			un_data16[2];
-		__u8			un_data8[4];
+    union
+    {
+        __u32			un_data32[1];
+        __u16			un_data16[2];
+        __u8			un_data8[4];
 
-		struct icmpv6_echo {
-			__u16		identifier;
-			__u16		sequence;
-		} u_echo;
+        struct icmpv6_echo
+        {
+            __u16		identifier;
+            __u16		sequence;
+        } u_echo;
 
-                struct icmpv6_nd_advt {
+        struct icmpv6_nd_advt
+        {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
-                        __u32		reserved:5,
-                        		override:1,
-                        		solicited:1,
-                        		router:1,
-					reserved2:24;
+            __u32		reserved:5,
+                        override:1,
+                        solicited:1,
+                        router:1,
+                        reserved2:24;
 #elif defined(__BIG_ENDIAN_BITFIELD)
-                        __u32		router:1,
-					solicited:1,
-                        		override:1,
-                        		reserved:29;
-#else
-#error	"Please fix <asm/byteorder.h>"
-#endif						
-                } u_nd_advt;
-
-                struct icmpv6_nd_ra {
-			__u8		hop_limit;
-#if defined(__LITTLE_ENDIAN_BITFIELD)
-			__u8		reserved:6,
-					other:1,
-					managed:1;
-
-#elif defined(__BIG_ENDIAN_BITFIELD)
-			__u8		managed:1,
-					other:1,
-					reserved:6;
+            __u32		router:1,
+                        solicited:1,
+                        override:1,
+                        reserved:29;
 #else
 #error	"Please fix <asm/byteorder.h>"
 #endif
-			__u16		rt_lifetime;
-                } u_nd_ra;
+        } u_nd_advt;
 
-	} icmp6_dataun;
+        struct icmpv6_nd_ra
+        {
+            __u8		hop_limit;
+#if defined(__LITTLE_ENDIAN_BITFIELD)
+            __u8		reserved:6,
+                        other:1,
+                        managed:1;
+
+#elif defined(__BIG_ENDIAN_BITFIELD)
+            __u8		managed:1,
+                        other:1,
+                        reserved:6;
+#else
+#error	"Please fix <asm/byteorder.h>"
+#endif
+            __u16		rt_lifetime;
+        } u_nd_ra;
+
+    } icmp6_dataun;
 
 #define icmp6_identifier	icmp6_dataun.u_echo.identifier
 #define icmp6_sequence		icmp6_dataun.u_echo.sequence
@@ -123,8 +128,9 @@ struct icmp6hdr {
 #define ICMPV6_FILTER_BLOCKOTHERS	3
 #define ICMPV6_FILTER_PASSONLY		4
 
-struct icmp6_filter {
-	__u32		data[8];
+struct icmp6_filter
+{
+    __u32		data[8];
 };
 
 #ifdef __KERNEL__
@@ -134,16 +140,16 @@ struct icmp6_filter {
 
 
 extern void				icmpv6_send(struct sk_buff *skb,
-						    int type, int code,
-						    __u32 info, 
-						    struct net_device *dev);
+                                    int type, int code,
+                                    __u32 info,
+                                    struct net_device *dev);
 
 extern int				icmpv6_init(struct net_proto_family *ops);
 extern int				icmpv6_err_convert(int type, int code,
-							   int *err);
+        int *err);
 extern void				icmpv6_cleanup(void);
 extern void				icmpv6_param_prob(struct sk_buff *skb,
-							  int code, int pos);
+        int code, int pos);
 #endif
 
 #endif

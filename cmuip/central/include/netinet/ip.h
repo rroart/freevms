@@ -36,7 +36,7 @@
  *									*
  *	Larry Cohen  -  01/28/87
  * 		Offsets to fields in options other than EOL and NOP.
- *		
+ *
  ************************************************************************/
 
 /*
@@ -60,21 +60,22 @@
  * pragmatically since otherwise unsigned comparisons can result
  * against negative integers quite easily, and fail in subtle ways.
  */
-struct ip {
+struct ip
+{
 #ifdef vax
-	u_char	ip_hl:4,		/* header length */
-		ip_v:4;			/* version */
+    u_char	ip_hl:4,		/* header length */
+            ip_v:4;			/* version */
 #endif
-	u_char	ip_tos;			/* type of service */
-	short	ip_len;			/* total length */
-	u_short	ip_id;			/* identification */
-	short	ip_off;			/* fragment offset field */
+    u_char	ip_tos;			/* type of service */
+    short	ip_len;			/* total length */
+    u_short	ip_id;			/* identification */
+    short	ip_off;			/* fragment offset field */
 #define	IP_DF 0x4000			/* dont fragment flag */
 #define	IP_MF 0x2000			/* more fragments flag */
-	u_char	ip_ttl;			/* time to live */
-	u_char	ip_p;			/* protocol */
-	u_short	ip_sum;			/* checksum */
-	struct	in_addr ip_src,ip_dst;	/* source and dest address */
+    u_char	ip_ttl;			/* time to live */
+    u_char	ip_p;			/* protocol */
+    u_short	ip_sum;			/* checksum */
+    struct	in_addr ip_src,ip_dst;	/* source and dest address */
 };
 
 /*
@@ -111,19 +112,22 @@ struct ip {
 /*
  * Time stamp option structure.
  */
-struct	ip_timestamp {
-	u_char	ipt_code;		/* IPOPT_TS */
-	u_char	ipt_len;		/* size of structure (variable) */
-	u_char	ipt_ptr;		/* index of current entry */
-	u_char	ipt_flg:4,		/* flags, see below */
-		ipt_oflw:4;		/* overflow counter */
-	union {
-		n_long	ipt_time[1];
-		struct	ipt_ta {
-			struct in_addr ipt_addr;
-			n_long ipt_time;
-		} ipt_ta[1];
-	};
+struct	ip_timestamp
+{
+    u_char	ipt_code;		/* IPOPT_TS */
+    u_char	ipt_len;		/* size of structure (variable) */
+    u_char	ipt_ptr;		/* index of current entry */
+    u_char	ipt_flg:4,		/* flags, see below */
+            ipt_oflw:4;		/* overflow counter */
+    union
+    {
+        n_long	ipt_time[1];
+        struct	ipt_ta
+        {
+            struct in_addr ipt_addr;
+            n_long ipt_time;
+        } ipt_ta[1];
+    };
 };
 
 /* flag bits for ipt_flg */

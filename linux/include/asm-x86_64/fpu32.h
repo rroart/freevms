@@ -4,7 +4,7 @@
 struct _fpstate_ia32;
 
 int restore_i387_ia32(struct task_struct *tsk, struct _fpstate_ia32 *buf, int fsave);
-int save_i387_ia32(struct task_struct *tsk, struct _fpstate_ia32 *buf, 
-		   struct pt_regs *regs, int fsave);
+int save_i387_ia32(struct task_struct *tsk, struct _fpstate_ia32 *buf,
+                   struct pt_regs *regs, int fsave);
 
 #endif

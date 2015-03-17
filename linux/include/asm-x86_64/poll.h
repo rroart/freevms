@@ -16,10 +16,11 @@
 #define POLLWRBAND	0x0200
 #define POLLMSG		0x0400
 
-struct pollfd {
-	int fd;
-	short events;
-	short revents;
+struct pollfd
+{
+    int fd;
+    short events;
+    short revents;
 };
 
 #endif

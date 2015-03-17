@@ -30,11 +30,12 @@ main()
 {
     unsigned long objtyp, access, acmode, flags;
     struct dsc$descriptor objnam, usrnam;
-    struct {
+    struct
+    {
         unsigned short buflen;
-	unsigned short itmcod;
-	unsigned long bufadr;
-	unsigned long retlenadr;
+        unsigned short itmcod;
+        unsigned long bufadr;
+        unsigned long retlenadr;
     } itmlst[4];
 
     objtyp = ACL$C_FILE;
@@ -62,6 +63,6 @@ main()
     itmlst[1].bufadr = 0;
     itmlst[1].retlenadr = 0;
 
-    printf("SYS$CHECK_ACCESS returns %x\n", 
-        SYS$CHECK_ACCESS(&objtyp, &objnam, &usrnam, &itmlst));
+    printf("SYS$CHECK_ACCESS returns %x\n",
+           SYS$CHECK_ACCESS(&objtyp, &objnam, &usrnam, &itmlst));
 }

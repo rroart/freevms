@@ -4,6 +4,20 @@
 #include <linux/types.h>
 #include <linux/kdev_t.h>
 
+#include <atrdef.h>
+#include <cdtdef.h>
+#include <crbdef.h>
+#include <ddbdef.h>
+#include <ddtdef.h>
+#include <dptdef.h>
+#include <fdtdef.h>
+#include <fh2def.h>
+#include <nisca.h>
+#include <rabdef.h>
+#include <scsdef.h>
+
+#include <descrip.h>
+
 char * do_translate(char * from);
 void * exttwo_search_fcb(struct _vcb * vcb,struct _fiddef * fid);
 void * exttwo_search_fcb2(struct _vcb * vcb,struct _fiddef * fid);
@@ -11,15 +25,15 @@ struct _fcb * e2_search_fcb(void * v);
 inline unsigned long * getefcp(struct _pcb * p, unsigned long efn);
 inline unsigned long * getefc(struct _pcb * p, unsigned long efn);
 inline unsigned long * getefcno(unsigned long efn);
-int alloc_ipid();
+int alloc_ipid(void);
 void init_p1pp_long(unsigned long addr, signed long offset, signed long val);
 void init_p1pp_long_long(unsigned long addr, signed long offset, signed long long val);
 void init_p1pp_data(struct _pcb * pcb, struct _phd * phd,signed long offset);
-void init_sys_p1pp();
+void init_sys_p1pp(void);
 void init_p1pp(struct _pcb * pcb, struct _phd * phd);
 int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, struct _phd * oldphd);
 int shell_init_other(struct _pcb * pcb, struct _pcb * oldpcb, long addr, long oldaddr);
-int user_spaceable();
+int user_spaceable(void);
 int user_spaceable_addr(void * addr);
 int inline insrde(struct _rde * elem, struct _rde * head);
 inline void *find_task_by_pid(int pid);
@@ -58,8 +72,8 @@ void registerdevchan(unsigned long dev,unsigned short chan);
 unsigned short dev2chan(kdev_t dev);
 int path_unix_to_vms(char * new, char * old);
 int convert_soname(char * name);
-unsigned long get_x2p_prim_fcb();
-unsigned long get_xqp_prim_fcb();
+unsigned long get_x2p_prim_fcb(void);
+unsigned long get_xqp_prim_fcb(void);
 int rms_kernel_read(struct file *file, unsigned long offset, char * addr, unsigned long count);
 ssize_t rms_generic_file_read(struct file * filp, char * buf, size_t count, loff_t *ppos);
 void xqp_init2(void);
@@ -86,7 +100,7 @@ int tty_vmsinit(void);
 int con_vmsinit(void);
 int kbd_vmsinit(void);
 void __fl_init(void);
-int is_cluster_on();
+int is_cluster_on(void);
 inline struct task_struct *find_process_by_pid(pid_t pid);
 void lck$searchdlck(void);
 inline void rdtscll_sync(unsigned long *tsc);
@@ -102,7 +116,7 @@ int cwps$forcex(unsigned int *pidadr, void *prcnam, unsigned int code);
 void * find_a_cdt(int a);
 int lck$grant_lock(struct _lkb * lck,struct _rsb * res, signed int curmode, signed int nextmode, int flags, int efn, signed int ggmode);
 int maybe_blkast(struct _rsb * res, struct _lkb * lck);
-int find_highest(struct _lkb * lck, struct _rsb * res);  
+int find_highest(struct _lkb * lck, struct _rsb * res);
 int grant_queued(struct _rsb * res, int ggmode_not, int docvt, int dowt);
 int inline forklock(int i, signed int j);
 void inline forkunlock(int i, signed int j);
@@ -118,7 +132,7 @@ void lnm$lockr(void);
 void lnm$unlockr(void);
 void lnm$lockw(void);
 void lnm$unlockw(void);
-int lnm$check_prot();
+int lnm$check_prot(void);
 int mb$chanunwait(struct _ucb * u, struct _ccb * c);
 int ods2_block_read_full_page3(struct _wcb * wcb,struct page *page, unsigned long pageno);
 inline int copy_fs(unsigned long clone_flags, struct task_struct * tsk);
@@ -140,7 +154,7 @@ int block_commit_write2(struct _fcb * inode, struct page *page, unsigned from, u
 #if 0
 int ext2_sync_inode (struct _vcb * vcb, struct _fcb *inode);
 #endif
-mypfncheckaddr();
+mypfncheckaddr(void);
 void vms_submit_bh(int rw, struct buffer_head * bh);
 signed long e2_map_vbn(struct _fcb * fcb, signed long vbn);
 void myqio(long rw, long data, long size, long blocknr,kdev_t dev, long block_factor);
@@ -150,7 +164,7 @@ unsigned phyio_read(unsigned handle,unsigned block,unsigned length,char *buffer)
 unsigned phyio_write(unsigned handle,unsigned block,unsigned length,char *buffer);
 int du_readblk(struct _irp * i, struct _ucb * u, struct _mscp_basic_pkt * m);
 int du_writeblk(struct _irp * i, struct _ucb * u, struct _mscp_basic_pkt * m);
-int du_rw(struct _irp * i, struct _mscp_ucb * u, struct _transfer_commands * m); 
+int du_rw(struct _irp * i, struct _mscp_ucb * u, struct _transfer_commands * m);
 void * find_mscp_cdt(void);
 insertfillist(struct _ucb *u, char *s);
 inline BLISSIF(int i);
@@ -186,7 +200,7 @@ void scs_msg_fill_more(char * buf,struct _cdt * cdt, struct _cdrp * cdrp, int bu
 void scs_receive ( int i);
 inline void scs_nsp_send2(char * buf, int len);
 scs_startdev ( scs_int2 , setflag , setaddr);
-     //scs_startdev ( long, long, long);
+//scs_startdev ( long, long, long);
 unsigned long inline buffer_offset(unsigned long buffer, unsigned long offset);
 int rms$get_idx(struct _rabdef * rab);
 int search_log_repl(char * name, char ** retname, int * retsize);
@@ -230,12 +244,12 @@ void con$startio(int R3, struct _ucb * u, signed int CC);
 #include <linux/linkage.h>
 asmlinkage int exe$qiow (unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
 asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
-asmlinkage int cmod$astexit();
+asmlinkage int cmod$astexit(void);
 asmlinkage long sys_unlink(const char * pathname);
 asmlinkage long sys_reboot(int magic1, int magic2, unsigned int cmd, void * arg);
 int exe$waitfr(unsigned int efn);
-FORKLOCK();
-FORKUNLOCK();
+FORKLOCK(void);
+FORKUNLOCK(void);
 int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 void myout(int tty, int p1, int p2);
 int kbd$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
@@ -253,13 +267,13 @@ void * lan$alloc_xmit_buf(struct _irp * i, struct _ucbnidef * u, char *dest);
 int er_vmsinit(long dev);
 int ft$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 int ft$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
-inline DEVICELOCK();
-inline DEVICEUNLOCK();
+inline DEVICELOCK(void);
+inline DEVICEUNLOCK(void);
 int SEARCHDEV(struct _ddb ** ddb,char * string, int strlen);
 int SEARCHUNIT(struct _ddb * ddb, int unit, struct _ucb ** ucb);
 void mscp_talk_with(char * node, char * sysap);
 void sig_exit(int sig, int exit_code, struct siginfo *info);
- 
+
 #ifdef __x86_64__
 int new_thread(int nr, unsigned long clone_flags, unsigned long rsp,unsigned long unused,struct task_struct * p, struct pt_regs * regs);
 #else

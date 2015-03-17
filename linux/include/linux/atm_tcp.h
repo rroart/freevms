@@ -19,10 +19,11 @@
  * All values in struct atmtcp_hdr are in network byte order
  */
 
-struct atmtcp_hdr {
-	uint16_t	vpi;
-	uint16_t	vci;
-	uint32_t	length;		/* ... of data part */
+struct atmtcp_hdr
+{
+    uint16_t	vpi;
+    uint16_t	vci;
+    uint32_t	length;		/* ... of data part */
 };
 
 /*
@@ -33,13 +34,14 @@ struct atmtcp_hdr {
 #define ATMTCP_CTRL_OPEN	1	/* request/reply */
 #define ATMTCP_CTRL_CLOSE	2	/* request/reply */
 
-struct atmtcp_control {
-	struct atmtcp_hdr hdr;	/* must be first */
-	int type;		/* message type; both directions */
-	atm_kptr_t vcc;		/* both directions */
-	struct sockaddr_atmpvc addr; /* suggested value from kernel */
-	struct atm_qos	qos;	/* both directions */
-	int result;		/* to kernel only */
+struct atmtcp_control
+{
+    struct atmtcp_hdr hdr;	/* must be first */
+    int type;		/* message type; both directions */
+    atm_kptr_t vcc;		/* both directions */
+    struct sockaddr_atmpvc addr; /* suggested value from kernel */
+    struct atm_qos	qos;	/* both directions */
+    int result;		/* to kernel only */
 } __ATM_API_ALIGN;
 
 /*
@@ -54,18 +56,19 @@ struct atmtcp_control {
 
 #define SIOCSIFATMTCP	_IO('a',ATMIOC_ITF)	/* set ATMTCP mode */
 #define ATMTCP_CREATE	_IO('a',ATMIOC_ITF+14)	/* create persistent ATMTCP
-						   interface */
+interface */
 #define ATMTCP_REMOVE	_IO('a',ATMIOC_ITF+15)	/* destroy persistent ATMTCP
-						   interface */
+interface */
 
 
 #ifdef __KERNEL__
 
-struct atm_tcp_ops {
-	int (*attach)(struct atm_vcc *vcc,int itf);
-	int (*create_persistent)(int itf);
-	int (*remove_persistent)(int itf);
-	struct module *owner;
+struct atm_tcp_ops
+{
+    int (*attach)(struct atm_vcc *vcc,int itf);
+    int (*create_persistent)(int itf);
+    int (*remove_persistent)(int itf);
+    struct module *owner;
 };
 
 extern struct atm_tcp_ops atm_tcp_ops;

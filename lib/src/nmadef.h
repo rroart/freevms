@@ -65,47 +65,56 @@
 #define		NMA$M_CNT_WIL		0x2000
 #define		NMA$M_CNT_WIH		0x4000
 #define		NMA$S_NMADEF		2
-	
-struct _nma {
-  union  {
-    struct  {
-      unsigned nma$v_opt_ent		: 3;
-      unsigned nma$$_fill_1		: 3;
-      unsigned nma$v_opt_cle		: 1;
-      unsigned nma$v_opt_per		: 1;
+
+struct _nma
+{
+    union
+    {
+        struct
+        {
+            unsigned nma$v_opt_ent		: 3;
+            unsigned nma$$_fill_1		: 3;
+            unsigned nma$v_opt_cle		: 1;
+            unsigned nma$v_opt_per		: 1;
+        };
+        struct
+        {
+            unsigned nma$$_fill_2		: 4;
+            unsigned nma$v_opt_inf		: 3;
+            unsigned nma$v_fill_0_		: 1;
+        };
+        struct
+        {
+            unsigned nma$$_fill_3		: 7;
+            unsigned nma$v_opt_acc		: 1;
+        };
+        struct
+        {
+            unsigned nma$$_fill_4		: 7;
+            unsigned nma$v_opt_rea		: 1;
+        };
+        struct
+        {
+            unsigned nma$$_fill_5		: 7;
+            unsigned nma$v_ent_exe		: 1;
+        };
+        struct
+        {
+            unsigned nma$v_cnt_typ		: 12;
+            unsigned nma$v_cnt_map		: 1;
+            unsigned nma$v_cnt_wid		: 2;
+            unsigned nma$v_cnt_cou		: 1;
+        };
+        struct
+        {
+            unsigned nma$$_fill_6		: 13;
+            unsigned nma$v_cnt_wil		: 1;
+            unsigned nma$v_cnt_wih		: 1;
+            unsigned nma$v_fill_1_		: 1;
+        };
     };
-    struct  {
-      unsigned nma$$_fill_2		: 4;
-      unsigned nma$v_opt_inf		: 3;
-      unsigned nma$v_fill_0_		: 1;
-    };
-    struct  {
-      unsigned nma$$_fill_3		: 7;
-      unsigned nma$v_opt_acc		: 1;
-    };
-    struct  {
-      unsigned nma$$_fill_4		: 7;
-      unsigned nma$v_opt_rea		: 1;
-    };
-    struct  {
-      unsigned nma$$_fill_5		: 7;
-      unsigned nma$v_ent_exe		: 1;
-    };
-    struct  {
-      unsigned nma$v_cnt_typ		: 12;
-      unsigned nma$v_cnt_map		: 1;
-      unsigned nma$v_cnt_wid		: 2;
-      unsigned nma$v_cnt_cou		: 1;
-    };
-    struct  {
-      unsigned nma$$_fill_6		: 13;
-      unsigned nma$v_cnt_wil		: 1;
-      unsigned nma$v_cnt_wih		: 1;
-      unsigned nma$v_fill_1_		: 1;
-    };
-  };
 };
- 
+
 #define		NMA$M_PTY_TYP		0x7FFF
 #define		NMA$C_PTY_MAX		15
 #define		NMA$M_PTY_CLE		0x3F
@@ -863,112 +872,134 @@ struct _nma {
 #define		NMA$C_CTLIN_CNC		1204
 
 #define		NMA$S_NMADEF1		2
-	
-struct _nma1 {
-  union  {
-    unsigned short int nma$w_node;
-    struct  {
-      unsigned nma$v_addr		: 10;
-      unsigned nma$v_area		: 6;
+
+struct _nma1
+{
+    union
+    {
+        unsigned short int nma$w_node;
+        struct
+        {
+            unsigned nma$v_addr		: 10;
+            unsigned nma$v_area		: 6;
+        };
+        struct
+        {
+            unsigned nma$v_pty_typ		: 15;
+            unsigned nma$v_fill_2_		: 1;
+        };
+        struct
+        {
+            unsigned nma$v_pty_cle		: 6;
+            unsigned nma$v_pty_mul		: 1;
+            unsigned nma$v_pty_cod		: 1;
+        };
+        struct
+        {
+            unsigned nma$$_fill_7		: 6;
+            unsigned nma$v_pty_cmu		: 2;
+        };
+        struct
+        {
+            unsigned nma$v_pty_nle		: 4;
+            unsigned nma$v_pty_nty		: 2;
+            unsigned nma$v_pty_asc		: 1;
+            unsigned nma$v_fill_3_		: 1;
+        };
     };
-    struct  {
-      unsigned nma$v_pty_typ		: 15;
-      unsigned nma$v_fill_2_		: 1;
-    };
-    struct  {
-      unsigned nma$v_pty_cle		: 6;
-      unsigned nma$v_pty_mul		: 1;
-      unsigned nma$v_pty_cod		: 1;
-    };
-    struct  {
-      unsigned nma$$_fill_7		: 6;
-      unsigned nma$v_pty_cmu		: 2;
-    };
-    struct  {
-      unsigned nma$v_pty_nle		: 4;
-      unsigned nma$v_pty_nty		: 2;
-      unsigned nma$v_pty_asc		: 1;
-      unsigned nma$v_fill_3_		: 1;
-    };
-  };
 };
- 
+
 #define		NMA$M_CTLIN_BTL		0x8
 #define		NMA$M_CTLIN_FCS		0x10
 #define		NMA$M_CTLIN_TRJ		0x20
 #define		NMA$S_NMADEF2		1
-	
-struct _nma2 {
-  union  {
-    char nma$$_fill_8;
-    struct  {
-      unsigned nma$$_fill_9		: 3;
-      unsigned nma$v_ctlin_btl		: 1;
-      unsigned nma$v_ctlin_fcs		: 1;
-      unsigned nma$v_ctlin_trj		: 1;
-      unsigned nma$v_fill_4_		: 2;
+
+struct _nma2
+{
+    union
+    {
+        char nma$$_fill_8;
+        struct
+        {
+            unsigned nma$$_fill_9		: 3;
+            unsigned nma$v_ctlin_btl		: 1;
+            unsigned nma$v_ctlin_fcs		: 1;
+            unsigned nma$v_ctlin_trj		: 1;
+            unsigned nma$v_fill_4_		: 2;
+        };
     };
-  };
 };
- 
+
 #define		NMA$M_CTLIN_RRJ		0x8
 #define		NMA$S_NMADEF3		1
-	
-struct _nma3 {
-  union  {
-    char nma$$_fill_10;
-    struct  {
-      unsigned nma$$_fill_11		: 3;
-      unsigned nma$v_ctlin_rrj		: 1;
-      unsigned nma$v_fill_5_		: 4;
+
+struct _nma3
+{
+    union
+    {
+        char nma$$_fill_10;
+        struct
+        {
+            unsigned nma$$_fill_11		: 3;
+            unsigned nma$v_ctlin_rrj		: 1;
+            unsigned nma$v_fill_5_		: 4;
+        };
     };
-  };
 };
- 
+
 #define		NMA$M_CTLIN_RRN		0x4
 #define		NMA$S_NMADEF4		1
-	
-struct _nma4 {
-  union  {
-    char nma$$_fill_12;
-    struct  {
-      unsigned nma$$_fill_13		: 2;
-      unsigned nma$v_ctlin_rrn		: 1;
-      unsigned nma$v_fill_6_		: 5;
+
+struct _nma4
+{
+    union
+    {
+        char nma$$_fill_12;
+        struct
+        {
+            unsigned nma$$_fill_13		: 2;
+            unsigned nma$v_ctlin_rrn		: 1;
+            unsigned nma$v_fill_6_		: 5;
+        };
     };
-  };
 };
- 
+
 #define		NMA$M_CTLIN_TRN		0x4
 #define		NMA$S_NMADEF5		1
-	
-struct _nma5 {
-  union  {
-    char nma$$_fill_14;
-    struct  {
-      unsigned nma$$_fill_15		: 2;
-      unsigned nma$v_ctlin_trn		: 1;
-      unsigned nma$v_fill_7_		: 5;
+
+struct _nma5
+{
+    union
+    {
+        char nma$$_fill_14;
+        struct
+        {
+            unsigned nma$$_fill_15		: 2;
+            unsigned nma$v_ctlin_trn		: 1;
+            unsigned nma$v_fill_7_		: 5;
+        };
     };
-  };
 };
- 
+
 #define		NMA$M_CTLIN_INR		0x10
 #define		NMA$M_CTLIN_FMS		0x20
 #define		NMA$S_NMADEF6		1
-	
-struct _nma6 {
-  union  {
-    char nma$$_fill_16;
-    struct  {
-      unsigned nma$$_fill_17		: 4;
-      unsigned nma$v_ctlin_inr		: 1;
-      unsigned nma$v_ctlin_fms		: 1;
-      unsigned nma$v_fill_8_		: 2;
+
+struct _nma6
+{
+    union
+    {
+        char nma$$_fill_16;
+        struct
+        {
+            unsigned nma$$_fill_17		: 4;
+            unsigned nma$v_ctlin_inr		: 1;
+            unsigned nma$v_ctlin_fms		: 1;
+            unsigned nma$v_fill_8_		: 2;
+        };
     };
-  };
 };
- 
+
 #define		NMA$M_CTLIN_TUN		0x4
 #define		NMA$M_CTLIN_RUN		0x10
 #define		NMA$M_CTLIN_FMR		0x20
@@ -1687,20 +1718,23 @@ struct _nma6 {
 #define		NMA$C_OPEDTL_TRB		14
 #define		NMA$C_OPEDTL_STA		15
 #define		NMA$S_NMADEF7			1
-	
-struct _nma7 {
-  union  {
-    char nma$$_fill_18;
-    struct  {
-      unsigned nma$$_fill_19		: 2;
-      unsigned nma$v_ctlin_tun		: 1;
-      unsigned nma$$_fill_20		: 1;
-      unsigned nma$v_ctlin_run		: 1;
-      unsigned nma$v_ctlin_fmr		: 1;
-      unsigned nma$v_fill_9_		: 2;
+
+struct _nma7
+{
+    union
+    {
+        char nma$$_fill_18;
+        struct
+        {
+            unsigned nma$$_fill_19		: 2;
+            unsigned nma$v_ctlin_tun		: 1;
+            unsigned nma$$_fill_20		: 1;
+            unsigned nma$v_ctlin_run		: 1;
+            unsigned nma$v_ctlin_fmr		: 1;
+            unsigned nma$v_fill_9_		: 2;
+        };
     };
-  };
 };
- 
+
 #endif
- 
+

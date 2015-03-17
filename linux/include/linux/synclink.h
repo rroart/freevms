@@ -4,8 +4,8 @@
  * $Id$
  *
  * Copyright (C) 1998-2000 by Microgate Corporation
- * 
- * Redistribution of this file is permitted under 
+ *
+ * Redistribution of this file is permitted under
  * the terms of the GNU Public License (GPL)
  */
 
@@ -130,27 +130,27 @@
 
 typedef struct _MGSL_PARAMS
 {
-	/* Common */
+    /* Common */
 
-	unsigned long	mode;		/* Asynchronous or HDLC */
-	unsigned char	loopback;	/* internal loopback mode */
-	
-	/* HDLC Only */
+    unsigned long	mode;		/* Asynchronous or HDLC */
+    unsigned char	loopback;	/* internal loopback mode */
 
-	unsigned short	flags;
-	unsigned char	encoding;	/* NRZ, NRZI, etc. */
-	unsigned long	clock_speed;	/* external clock speed in bits per second */
-	unsigned char	addr_filter;	/* receive HDLC address filter, 0xFF = disable */
-	unsigned short	crc_type;	/* None, CRC16-CCITT, or CRC32-CCITT */
-	unsigned char	preamble_length;
-	unsigned char	preamble;
+    /* HDLC Only */
 
-	/* Async Only */
+    unsigned short	flags;
+    unsigned char	encoding;	/* NRZ, NRZI, etc. */
+    unsigned long	clock_speed;	/* external clock speed in bits per second */
+    unsigned char	addr_filter;	/* receive HDLC address filter, 0xFF = disable */
+    unsigned short	crc_type;	/* None, CRC16-CCITT, or CRC32-CCITT */
+    unsigned char	preamble_length;
+    unsigned char	preamble;
 
-	unsigned long	data_rate;	/* bits per second */
-	unsigned char	data_bits;	/* 7 or 8 data bits */
-	unsigned char	stop_bits;	/* 1 or 2 stop bits */
-	unsigned char	parity;		/* none, even, or odd */
+    /* Async Only */
+
+    unsigned long	data_rate;	/* bits per second */
+    unsigned char	data_bits;	/* 7 or 8 data bits */
+    unsigned char	stop_bits;	/* 1 or 2 stop bits */
+    unsigned char	parity;		/* none, even, or odd */
 
 } MGSL_PARAMS, *PMGSL_PARAMS;
 
@@ -191,22 +191,23 @@ typedef struct _MGSL_PARAMS
 /*
  * Counters of the input lines (CTS, DSR, RI, CD) interrupts
  */
-struct mgsl_icount {
-	__u32	cts, dsr, rng, dcd, tx, rx;
-	__u32	frame, parity, overrun, brk;
-	__u32	buf_overrun;
-	__u32	txok;
-	__u32	txunder;
-	__u32	txabort;
-	__u32	txtimeout;
-	__u32	rxshort;
-	__u32	rxlong;
-	__u32	rxabort;
-	__u32	rxover;
-	__u32	rxcrc;
-	__u32	rxok;
-	__u32	exithunt;
-	__u32	rxidle;
+struct mgsl_icount
+{
+    __u32	cts, dsr, rng, dcd, tx, rx;
+    __u32	frame, parity, overrun, brk;
+    __u32	buf_overrun;
+    __u32	txok;
+    __u32	txunder;
+    __u32	txabort;
+    __u32	txtimeout;
+    __u32	rxshort;
+    __u32	rxlong;
+    __u32	rxabort;
+    __u32	rxover;
+    __u32	rxcrc;
+    __u32	rxok;
+    __u32	exithunt;
+    __u32	rxidle;
 };
 
 

@@ -15,7 +15,8 @@
 
 
 
-struct _dir {
+struct _dir
+{
     vmsword dir$w_size;
     vmsword dir$w_verlimit;
     vmsbyte dir$b_flags;
@@ -23,7 +24,8 @@ struct _dir {
     char dir$t_name[1];
 };
 
-struct _dir1 {
+struct _dir1
+{
     vmsword dir$w_version;
     struct _fiddef dir$fid;
 };

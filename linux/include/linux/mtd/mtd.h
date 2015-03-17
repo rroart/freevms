@@ -15,15 +15,17 @@
 
 #endif /* __KERNEL__ */
 
-struct erase_info_user {
-	u_int32_t start;
-	u_int32_t length;
+struct erase_info_user
+{
+    u_int32_t start;
+    u_int32_t length;
 };
 
-struct mtd_oob_buf {
-	u_int32_t start;
-	u_int32_t length;
-	unsigned char *ptr;
+struct mtd_oob_buf
+{
+    u_int32_t start;
+    u_int32_t length;
+    unsigned char *ptr;
 };
 
 
@@ -66,23 +68,25 @@ struct mtd_oob_buf {
 #define MTD_ECC_RS_DiskOnChip	1	// Automatic ECC on DiskOnChip
 #define MTD_ECC_SW		2	// SW ECC for Toshiba & Samsung devices
 
-struct mtd_info_user {
-	u_char type;
-	u_int32_t flags;
-	u_int32_t size;	 // Total size of the MTD
-	u_int32_t erasesize;
-	u_int32_t oobblock;  // Size of OOB blocks (e.g. 512)
-	u_int32_t oobsize;   // Amount of OOB data per block (e.g. 16)
-	u_int32_t ecctype;
-	u_int32_t eccsize;
+struct mtd_info_user
+{
+    u_char type;
+    u_int32_t flags;
+    u_int32_t size;	 // Total size of the MTD
+    u_int32_t erasesize;
+    u_int32_t oobblock;  // Size of OOB blocks (e.g. 512)
+    u_int32_t oobsize;   // Amount of OOB data per block (e.g. 16)
+    u_int32_t ecctype;
+    u_int32_t eccsize;
 };
 
-struct region_info_user {
-	u_int32_t offset;		/* At which this region starts, 
+struct region_info_user
+{
+    u_int32_t offset;		/* At which this region starts,
 					 * from the beginning of the MTD */
-	u_int32_t erasesize;		/* For this region */
-	u_int32_t numblocks;		/* Number of blocks in this region */
-	u_int32_t regionindex;
+    u_int32_t erasesize;		/* For this region */
+    u_int32_t numblocks;		/* Number of blocks in this region */
+    u_int32_t regionindex;
 };
 
 #define MEMGETINFO              _IOR('M', 1, struct mtd_info_user)
@@ -100,7 +104,7 @@ typedef struct mtd_info_user mtd_info_t;
 typedef struct erase_info_user erase_info_t;
 typedef struct region_info_user region_info_t;
 
-	/* User-space ioctl definitions */
+/* User-space ioctl definitions */
 
 
 #else /* __KERNEL__ */
@@ -112,98 +116,101 @@ typedef struct region_info_user region_info_t;
 #define MTD_ERASE_DONE          0x08
 #define MTD_ERASE_FAILED        0x10
 
-struct erase_info {
-	struct mtd_info *mtd;
-	u_int32_t addr;
-	u_int32_t len;
-	u_long time;
-	u_long retries;
-	u_int dev;
-	u_int cell;
-	void (*callback) (struct erase_info *self);
-	u_long priv;
-	u_char state;
-	struct erase_info *next;
+struct erase_info
+{
+    struct mtd_info *mtd;
+    u_int32_t addr;
+    u_int32_t len;
+    u_long time;
+    u_long retries;
+    u_int dev;
+    u_int cell;
+    void (*callback) (struct erase_info *self);
+    u_long priv;
+    u_char state;
+    struct erase_info *next;
 };
 
-struct mtd_erase_region_info {
-	u_int32_t offset;			/* At which this region starts, from the beginning of the MTD */
-	u_int32_t erasesize;		/* For this region */
-	u_int32_t numblocks;		/* Number of blocks of erasesize in this region */
+struct mtd_erase_region_info
+{
+    u_int32_t offset;			/* At which this region starts, from the beginning of the MTD */
+    u_int32_t erasesize;		/* For this region */
+    u_int32_t numblocks;		/* Number of blocks of erasesize in this region */
 };
 
-struct mtd_info {
-	u_char type;
-	u_int32_t flags;
-	u_int32_t size;	 // Total size of the MTD
+struct mtd_info
+{
+    u_char type;
+    u_int32_t flags;
+    u_int32_t size;	 // Total size of the MTD
 
-	/* "Major" erase size for the device. Naïve users may take this
-	 * to be the only erase size available, or may use the more detailed
-	 * information below if they desire
-	 */
-	u_int32_t erasesize;
+    /* "Major" erase size for the device. Naïve users may take this
+     * to be the only erase size available, or may use the more detailed
+     * information below if they desire
+     */
+    u_int32_t erasesize;
 
-	u_int32_t oobblock;  // Size of OOB blocks (e.g. 512)
-	u_int32_t oobsize;   // Amount of OOB data per block (e.g. 16)
-	u_int32_t ecctype;
-	u_int32_t eccsize;
+    u_int32_t oobblock;  // Size of OOB blocks (e.g. 512)
+    u_int32_t oobsize;   // Amount of OOB data per block (e.g. 16)
+    u_int32_t ecctype;
+    u_int32_t eccsize;
 
-	// Kernel-only stuff starts here.
-	char *name;
-	int index;
+    // Kernel-only stuff starts here.
+    char *name;
+    int index;
 
-	/* Data for variable erase regions. If numeraseregions is zero,
-	 * it means that the whole device has erasesize as given above. 
-	 */
-	int numeraseregions;
-	struct mtd_erase_region_info *eraseregions; 
+    /* Data for variable erase regions. If numeraseregions is zero,
+     * it means that the whole device has erasesize as given above.
+     */
+    int numeraseregions;
+    struct mtd_erase_region_info *eraseregions;
 
-	/* This really shouldn't be here. It can go away in 2.5 */
-	u_int32_t bank_size;
+    /* This really shouldn't be here. It can go away in 2.5 */
+    u_int32_t bank_size;
 
-	struct module *module;
-	int (*erase) (struct mtd_info *mtd, struct erase_info *instr);
+    struct module *module;
+    int (*erase) (struct mtd_info *mtd, struct erase_info *instr);
 
-	/* This stuff for eXecute-In-Place */
-	int (*point) (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char **mtdbuf);
+    /* This stuff for eXecute-In-Place */
+    int (*point) (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char **mtdbuf);
 
-	/* We probably shouldn't allow XIP if the unpoint isn't a NULL */
-	void (*unpoint) (struct mtd_info *mtd, u_char * addr);
+    /* We probably shouldn't allow XIP if the unpoint isn't a NULL */
+    void (*unpoint) (struct mtd_info *mtd, u_char * addr);
 
 
-	int (*read) (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char *buf);
-	int (*write) (struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen, const u_char *buf);
+    int (*read) (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char *buf);
+    int (*write) (struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen, const u_char *buf);
 
-	int (*read_ecc) (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char *buf, u_char *eccbuf);
-	int (*write_ecc) (struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen, const u_char *buf, u_char *eccbuf);
+    int (*read_ecc) (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char *buf, u_char *eccbuf);
+    int (*write_ecc) (struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen, const u_char *buf, u_char *eccbuf);
 
-	int (*read_oob) (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char *buf);
-	int (*write_oob) (struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen, const u_char *buf);
+    int (*read_oob) (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char *buf);
+    int (*write_oob) (struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen, const u_char *buf);
 
-	/* iovec-based read/write methods. We need these especially for NAND flash,
-	   with its limited number of write cycles per erase.
-	   NB: The 'count' parameter is the number of _vectors_, each of 
-	   which contains an (ofs, len) tuple.
-	*/
-	int (*readv) (struct mtd_info *mtd, struct iovec *vecs, unsigned long count, loff_t from, size_t *retlen);
-	int (*writev) (struct mtd_info *mtd, const struct iovec *vecs, unsigned long count, loff_t to, size_t *retlen);
+    /* iovec-based read/write methods. We need these especially for NAND flash,
+       with its limited number of write cycles per erase.
+       NB: The 'count' parameter is the number of _vectors_, each of
+       which contains an (ofs, len) tuple.
+    */
+    int (*readv) (struct mtd_info *mtd, struct iovec *vecs, unsigned long count, loff_t from, size_t *retlen);
+    int (*writev) (struct mtd_info *mtd, const struct iovec *vecs, unsigned long count, loff_t to, size_t *retlen);
 
-	/* Sync */
-	void (*sync) (struct mtd_info *mtd);
+    /* Sync */
+    void (*sync) (struct mtd_info *mtd);
 
-	/* Chip-supported device locking */
-	int (*lock) (struct mtd_info *mtd, loff_t ofs, size_t len);
-	int (*unlock) (struct mtd_info *mtd, loff_t ofs, size_t len);
+    /* Chip-supported device locking */
+    int (*lock) (struct mtd_info *mtd, loff_t ofs, size_t len);
+    int (*unlock) (struct mtd_info *mtd, loff_t ofs, size_t len);
 
-	/* Power Management functions */
-	int (*suspend) (struct mtd_info *mtd);
-	void (*resume) (struct mtd_info *mtd);
+    /* Power Management functions */
+    int (*suspend) (struct mtd_info *mtd);
+    void (*resume) (struct mtd_info *mtd);
 
-	void *priv;
+    void *priv;
 };
 
 
-	/* Kernel-side ioctl definitions */
+/* Kernel-side ioctl definitions */
 
 extern int add_mtd_device(struct mtd_info *mtd);
 extern int del_mtd_device (struct mtd_info *mtd);
@@ -212,27 +219,28 @@ extern struct mtd_info *__get_mtd_device(struct mtd_info *mtd, int num);
 
 static inline struct mtd_info *get_mtd_device(struct mtd_info *mtd, int num)
 {
-	struct mtd_info *ret;
-	
-	ret = __get_mtd_device(mtd, num);
+    struct mtd_info *ret;
 
-	if (ret && ret->module && !try_inc_mod_count(ret->module))
-		return NULL;
+    ret = __get_mtd_device(mtd, num);
 
-	return ret;
+    if (ret && ret->module && !try_inc_mod_count(ret->module))
+        return NULL;
+
+    return ret;
 }
 
 static inline void put_mtd_device(struct mtd_info *mtd)
 {
-       if (mtd->module)
-	       __MOD_DEC_USE_COUNT(mtd->module);
+    if (mtd->module)
+        __MOD_DEC_USE_COUNT(mtd->module);
 }
 
 
-struct mtd_notifier {
-	void (*add)(struct mtd_info *mtd);
-	void (*remove)(struct mtd_info *mtd);
-	struct mtd_notifier *next;
+struct mtd_notifier
+{
+    void (*add)(struct mtd_info *mtd);
+    void (*remove)(struct mtd_info *mtd);
+    struct mtd_notifier *next;
 };
 
 
@@ -252,7 +260,7 @@ extern int unregister_mtd_user (struct mtd_notifier *old);
 #define MTD_WRITEECC(mtd, args...) (*(mtd->write_ecc))(mtd, args)
 #define MTD_READOOB(mtd, args...) (*(mtd->read_oob))(mtd, args)
 #define MTD_WRITEOOB(mtd, args...) (*(mtd->write_oob))(mtd, args)
-#define MTD_SYNC(mtd) do { if (mtd->sync) (*(mtd->sync))(mtd);  } while (0) 
+#define MTD_SYNC(mtd) do { if (mtd->sync) (*(mtd->sync))(mtd);  } while (0)
 #endif /* MTDC */
 
 /*

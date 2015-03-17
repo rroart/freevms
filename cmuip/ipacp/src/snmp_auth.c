@@ -31,13 +31,13 @@
 
                       All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of CMU not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -71,32 +71,36 @@ SOFTWARE.
 
 u_char *
 snmp_auth_parse(data, length, sid, slen, version)
-    u_char	    *data;
-    int		    *length;
-    u_char	    *sid;
-    int		    *slen;
-    long	    *version;
+u_char	    *data;
+int		    *length;
+u_char	    *sid;
+int		    *slen;
+long	    *version;
 {
     u_char    type;
 
     data = asn_parse_header(data, length, &type);
-    if (data == NULL){
-	ERROR("bad header");
-	return NULL;
+    if (data == NULL)
+    {
+        ERROR("bad header");
+        return NULL;
     }
-    if (type != (ASN_SEQUENCE | ASN_CONSTRUCTOR)){
-	ERROR("wrong auth header type");
-	return NULL;
+    if (type != (ASN_SEQUENCE | ASN_CONSTRUCTOR))
+    {
+        ERROR("wrong auth header type");
+        return NULL;
     }
     data = asn_parse_int(data, length, &type, version, sizeof(*version));
-    if (data == NULL){
-	ERROR("bad parse of version");
-	return NULL;
+    if (data == NULL)
+    {
+        ERROR("bad parse of version");
+        return NULL;
     }
     data = asn_parse_string(data, length, &type, sid, slen);
-    if (data == NULL){
-	ERROR("bad parse of community");
-	return NULL;
+    if (data == NULL)
+    {
+        ERROR("bad parse of community");
+        return NULL;
     }
     sid[*slen] = '\0';
     return (u_char *)data;
@@ -104,31 +108,34 @@ snmp_auth_parse(data, length, sid, slen, version)
 
 u_char *
 snmp_auth_build(data, length, sid, slen, version, messagelen)
-    u_char	    *data;
-    int		    *length;
-    u_char	    *sid;
-    int		    *slen;
-    long	    *version;
-    int		    messagelen;
+u_char	    *data;
+int		    *length;
+u_char	    *sid;
+int		    *slen;
+long	    *version;
+int		    messagelen;
 {
     data = asn_build_header(data, length, (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), messagelen + *slen + 5);
-    if (data == NULL){
-	ERROR("buildheader");
-	return NULL;
+    if (data == NULL)
+    {
+        ERROR("buildheader");
+        return NULL;
     }
     data = asn_build_int(data, length,
-	    (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-	    (long *)version, sizeof(*version));
-    if (data == NULL){
-	ERROR("buildint");
-	return NULL;
+                         (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+                         (long *)version, sizeof(*version));
+    if (data == NULL)
+    {
+        ERROR("buildint");
+        return NULL;
     }
     data = asn_build_string(data, length,
-	    (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR), 
-	    sid, *slen);
-    if (data == NULL){
-	ERROR("buildstring");
-	return NULL;
+                            (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+                            sid, *slen);
+    if (data == NULL)
+    {
+        ERROR("buildstring");
+        return NULL;
     }
     return (u_char *)data;
 }

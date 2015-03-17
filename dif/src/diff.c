@@ -130,10 +130,11 @@
 struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
 struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
 struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
-				   0, 0, 0, 0,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO};
+           0, 0, 0, 0,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO
+};
 struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
 struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};
 struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
@@ -141,9 +142,10 @@ struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
 
 #define PRINT_ATTR (FAB$M_CR | FAB$M_PRN | FAB$M_FTN)
 
-void main() {
-  printf("main is a dummy\n");
-  return 1;
+void main()
+{
+    printf("main is a dummy\n");
+    return 1;
 }
 
 #define MAXREC 32767
@@ -168,10 +170,10 @@ unsigned diff(int userarg)
     memset (c2, 0, 80);
     sts = cli$present(&p1);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     sts = cli$present(&p2);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     int retlen;
     sts = cli$get_value(&p1, &o1, &retlen);
     sts = cli$get_value(&p2, &o2, &retlen);
@@ -181,25 +183,34 @@ unsigned diff(int userarg)
     fab.fab$l_fna = c1;
     fab.fab$b_fns = strlen(fab.fab$l_fna);
     tof = fopen(c2,"r");
-    if (tof == NULL) {
+    if (tof == NULL)
+    {
         printf("Could not open file %s\n",c1);
         sts = 0;
-    } else {
-      if ((sts = sys$open(&fab, 0, 0)) & 1) {
+    }
+    else
+    {
+        if ((sts = sys$open(&fab, 0, 0)) & 1)
+        {
             struct _rabdef rab = cc$rms_rab;
             rab.rab$l_fab = &fab;
-            if ((sts = sys$connect(&rab, 0, 0)) & 1) {
+            if ((sts = sys$connect(&rab, 0, 0)) & 1)
+            {
                 char rec[MAXREC + 2],cpy[MAXREC + 1];
                 rab.rab$l_ubf = rec;
                 rab.rab$w_usz = MAXREC;
-                while ((sts = sys$get(&rab, 0, 0)) & 1) {
+                while ((sts = sys$get(&rab, 0, 0)) & 1)
+                {
                     strcpy(rec + rab.rab$w_rsz,"\n");
                     fgets(cpy,MAXREC,tof);
-                    if (strcmp(rec,cpy) != 0) {
+                    if (strcmp(rec,cpy) != 0)
+                    {
                         printf("%%DIFF-F-DIFFERENT Files are different!\n");
                         sts = 4;
                         break;
-                    } else {
+                    }
+                    else
+                    {
                         records++;
                     }
                 }
@@ -210,9 +221,12 @@ unsigned diff(int userarg)
         fclose(tof);
         if (sts == RMS$_EOF) sts = 1;
     }
-    if (sts & 1) {
+    if (sts & 1)
+    {
         printf("%%DIFF-I-Compared %d records\n",records);
-    } else {
+    }
+    else
+    {
         printf("%%DIFF-F-Error %d in difference\n",sts);
     }
     return sts;

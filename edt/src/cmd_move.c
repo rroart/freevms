@@ -36,48 +36,52 @@ static int move_range (void *dummy, Buffer *buffer, Line *line);
 void cmd_move (char *cp)
 
 {
-  char *p;
-  int i;
+    char *p;
+    int i;
 
-  count = 0;
+    count = 0;
 
-  for (i = 0; cp[i] != 0; i ++) {					/* find the ' TO ' in the command string */
-    if ((cp[i] <= ' ') && (cp[i+1] == 't' || cp[i+1] == 'T') && (cp[i+2] == 'o' || cp[i+2] == 'O') && (cp[i+3] <= ' ')) break;
-  }
-  if (cp[i] == 0) {
-    outerr (strlen (cp), "can't find ' TO ' in command string %s\n", cp);
-    return;
-  }
+    for (i = 0; cp[i] != 0; i ++)  					/* find the ' TO ' in the command string */
+    {
+        if ((cp[i] <= ' ') && (cp[i+1] == 't' || cp[i+1] == 'T') && (cp[i+2] == 'o' || cp[i+2] == 'O') && (cp[i+3] <= ' ')) break;
+    }
+    if (cp[i] == 0)
+    {
+        outerr (strlen (cp), "can't find ' TO ' in command string %s\n", cp);
+        return;
+    }
 
-  cp[i] = 0;								/* the range_1 terminates before the 'TO' */
-  i += 4;								/* the range_2 starts after the 'TO' */
-  if (range_single (cp + i, &p, &to_position) < 0) return;		/* decode range_2 as a single line */
-  if (!eoltest (p)) return;
-  to_position.offset = 0;
+    cp[i] = 0;								/* the range_1 terminates before the 'TO' */
+    i += 4;								/* the range_2 starts after the 'TO' */
+    if (range_single (cp + i, &p, &to_position) < 0) return;		/* decode range_2 as a single line */
+    if (!eoltest (p)) return;
+    to_position.offset = 0;
 
-  if (range_multiple (cp, &cp, move_range, NULL) >= 0) eoltest (cp);	/* decode and process range_1 */
+    if (range_multiple (cp, &cp, move_range, NULL) >= 0) eoltest (cp);	/* decode and process range_1 */
 
-  if (count == 0) outerr (0, "no lines moved\n");			/* print results */
-  else outerr (12, "%u line%s moved\n", count, (count == 1) ? "" : "s");
+    if (count == 0) outerr (0, "no lines moved\n");			/* print results */
+    else outerr (12, "%u line%s moved\n", count, (count == 1) ? "" : "s");
 
-  cur_position = to_position;						/* set current position to range_2 position */
+    cur_position = to_position;						/* set current position to range_2 position */
 }
 
 static int move_range (void *dummy, Buffer *buffer, Line *line)
 
 {
-  /* Move the string (don't bother moving the [EOB] line) */
+    /* Move the string (don't bother moving the [EOB] line) */
 
-  if (line != NULL) {
-    if (count == 0) {
-      buffer_dirty (to_position.buffer, 1);
-      buffer_dirty (buffer, 1);
+    if (line != NULL)
+    {
+        if (count == 0)
+        {
+            buffer_dirty (to_position.buffer, 1);
+            buffer_dirty (buffer, 1);
+        }
+        line_insert (to_position.buffer, to_position.line, line_remove (line));
+        count ++;
     }
-    line_insert (to_position.buffer, to_position.line, line_remove (line));
-    count ++;
-  }
 
-  /* Keep going */
+    /* Keep going */
 
-  return (0);
+    return (0);
 }

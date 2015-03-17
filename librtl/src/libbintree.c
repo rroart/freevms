@@ -63,30 +63,32 @@ typedef int (*avl_compare_t)(const void *, const void *);
  */
 typedef void (*avl_freeitem_t)(void *);
 
-typedef struct avl_node_t {
+typedef struct avl_node_t
+{
 #ifdef DO_REST
-	struct avl_node_t *next;
-	struct avl_node_t *prev;
-	struct avl_node_t *parent;
+    struct avl_node_t *next;
+    struct avl_node_t *prev;
+    struct avl_node_t *parent;
 #endif
-	struct avl_node_t *left;
-	struct avl_node_t *right;
+    struct avl_node_t *left;
+    struct avl_node_t *right;
 #ifdef AVL_COUNT
-	unsigned int count;
+    unsigned int count;
 #endif
 #ifdef AVL_DEPTH
-	unsigned short depth;
+    unsigned short depth;
 #endif
-	void *item;
+    void *item;
 } avl_node_t;
 
 #ifdef DO_REST
-typedef struct avl_tree_t {
-	avl_node_t *head;
-	avl_node_t *tail;
-	avl_node_t *top;
-	avl_compare_t cmp;
-	avl_freeitem_t freeitem;
+typedef struct avl_tree_t
+{
+    avl_node_t *head;
+    avl_node_t *tail;
+    avl_node_t *top;
+    avl_compare_t cmp;
+    avl_freeitem_t freeitem;
 } avl_tree_t;
 #endif
 
@@ -259,39 +261,57 @@ static void avl_rebalance(void **, avl_node_t *, avl_node_t *);
 
 #ifndef AVL_DEPTH
 /* Also known as ffs() (from BSD) */
-static int lg(unsigned int u) {
-	int r = 1;
-	if(!u) return 0;
-	if(u & 0xffff0000) { u >>= 16; r += 16; }
-	if(u & 0x0000ff00) { u >>= 8; r += 8; }
-	if(u & 0x000000f0) { u >>= 4; r += 4; }
-	if(u & 0x0000000c) { u >>= 2; r += 2; }
-	if(u & 0x00000002) r++;
-	return r;
+static int lg(unsigned int u)
+{
+    int r = 1;
+    if(!u) return 0;
+    if(u & 0xffff0000)
+    {
+        u >>= 16;
+        r += 16;
+    }
+    if(u & 0x0000ff00)
+    {
+        u >>= 8;
+        r += 8;
+    }
+    if(u & 0x000000f0)
+    {
+        u >>= 4;
+        r += 4;
+    }
+    if(u & 0x0000000c)
+    {
+        u >>= 2;
+        r += 2;
+    }
+    if(u & 0x00000002) r++;
+    return r;
 }
 #endif
 
-static int avl_check_balance(avl_node_t *avlnode) {
+static int avl_check_balance(avl_node_t *avlnode)
+{
 #ifdef AVL_DEPTH
-	int d;
-	d = R_DEPTH(avlnode) - L_DEPTH(avlnode);
-	return d<-1?-1:d>1?1:0;
+    int d;
+    d = R_DEPTH(avlnode) - L_DEPTH(avlnode);
+    return d<-1?-1:d>1?1:0;
 #else
-/*	int d;
- *	d = lg(R_COUNT(avlnode)) - lg(L_COUNT(avlnode));
- *	d = d<-1?-1:d>1?1:0;
- */
+    /*	int d;
+     *	d = lg(R_COUNT(avlnode)) - lg(L_COUNT(avlnode));
+     *	d = d<-1?-1:d>1?1:0;
+     */
 #ifdef AVL_COUNT
-	int pl, r;
+    int pl, r;
 
-	pl = lg(L_COUNT(avlnode));
-	r = R_COUNT(avlnode);
+    pl = lg(L_COUNT(avlnode));
+    r = R_COUNT(avlnode);
 
-	if(r>>pl+1)
-		return 1;
-	if(pl<2 || r>>pl-2)
-		return 0;
-	return -1;
+    if(r>>pl+1)
+        return 1;
+    if(pl<2 || r>>pl-2)
+        return 0;
+    return -1;
 #else
 #error No balancing possible.
 #endif
@@ -299,79 +319,96 @@ static int avl_check_balance(avl_node_t *avlnode) {
 }
 
 #ifdef AVL_COUNT
-unsigned int avl_count(const avl_tree_t *avltree) {
-	return NODE_COUNT(avltree->top);
+unsigned int avl_count(const avl_tree_t *avltree)
+{
+    return NODE_COUNT(avltree->top);
 }
 
-avl_node_t *avl_at(const avl_tree_t *avltree, unsigned int index) {
-	avl_node_t *avlnode;
-	unsigned int c;
+avl_node_t *avl_at(const avl_tree_t *avltree, unsigned int index)
+{
+    avl_node_t *avlnode;
+    unsigned int c;
 
-	avlnode = avltree->top;
+    avlnode = avltree->top;
 
-	while(avlnode) {
-		c = L_COUNT(avlnode);
+    while(avlnode)
+    {
+        c = L_COUNT(avlnode);
 
-		if(index < c) {
-			avlnode = avlnode->left;
-		} else if(index > c) {
-			avlnode = avlnode->right;
-			index -= c+1;
-		} else {
-			return avlnode;
-		}
-	}
-	return NULL;
+        if(index < c)
+        {
+            avlnode = avlnode->left;
+        }
+        else if(index > c)
+        {
+            avlnode = avlnode->right;
+            index -= c+1;
+        }
+        else
+        {
+            return avlnode;
+        }
+    }
+    return NULL;
 }
 
-unsigned int avl_index(const avl_node_t *avlnode) {
-	avl_node_t *next;
-	unsigned int c;
+unsigned int avl_index(const avl_node_t *avlnode)
+{
+    avl_node_t *next;
+    unsigned int c;
 
-	c = L_COUNT(avlnode);
+    c = L_COUNT(avlnode);
 
-	while((next = avlnode->parent)) {
-		if(avlnode == next->right)
-			c += L_COUNT(next) + 1;
-		avlnode = next;
-	}
+    while((next = avlnode->parent))
+    {
+        if(avlnode == next->right)
+            c += L_COUNT(next) + 1;
+        avlnode = next;
+    }
 
-	return c;
+    return c;
 }
 #endif
 
-int avl_search_closest(void **treehead, int (*user_compare_routine)(), const void *item, avl_node_t **avlnode, avl_node_t **parent, void **user_data_address) {
-	avl_node_t *node;
-	int c;
+int avl_search_closest(void **treehead, int (*user_compare_routine)(), const void *item, avl_node_t **avlnode, avl_node_t **parent, void **user_data_address)
+{
+    avl_node_t *node;
+    int c;
 
-	if(!avlnode)
-		avlnode = &node;
+    if(!avlnode)
+        avlnode = &node;
 
-	node = *treehead;
-	*parent = 0;
+    node = *treehead;
+    *parent = 0;
 
-	if(!node)
-		return *avlnode = NULL, 0;
+    if(!node)
+        return *avlnode = NULL, 0;
 
-	for(;;) {
-		c = user_compare_routine(item, node, user_data_address);
+    for(;;)
+    {
+        c = user_compare_routine(item, node, user_data_address);
 
-		if(c < 0) {
-			if(node->left)
-			  *parent = node,
-				node = node->left;
-			else
-				return *avlnode = node, -1;
-		} else if(c > 0) {
-			if(node->right)
-			  *parent = node,
-				node = node->right;
-			else
-				return *avlnode = node, 1;
-		} else {
-			return *avlnode = node, 0;
-		}
-	}
+        if(c < 0)
+        {
+            if(node->left)
+                *parent = node,
+                 node = node->left;
+            else
+                return *avlnode = node, -1;
+        }
+        else if(c > 0)
+        {
+            if(node->right)
+                *parent = node,
+                 node = node->right;
+            else
+                return *avlnode = node, 1;
+        }
+        else
+        {
+            return *avlnode = node, 0;
+        }
+    }
 }
 
 #ifdef DO_REST
@@ -380,44 +417,51 @@ int avl_search_closest(void **treehead, int (*user_compare_routine)(), const voi
  * Return a pointer to a node with the given item in the tree.
  * If no such item is in the tree, then NULL is returned.
  */
-avl_node_t *avl_search(const avl_tree_t *avltree, const void *item) {
-	avl_node_t *node;
-	return avl_search_closest(avltree, item, &node) ? NULL : node;
+avl_node_t *avl_search(const avl_tree_t *avltree, const void *item)
+{
+    avl_node_t *node;
+    return avl_search_closest(avltree, item, &node) ? NULL : node;
 }
 
-avl_tree_t *avl_init_tree(avl_tree_t *rc, avl_compare_t cmp, avl_freeitem_t freeitem) {
-	if(rc) {
-		rc->head = NULL;
-		rc->tail = NULL;
-		rc->top = NULL;
-		rc->cmp = cmp;
-		rc->freeitem = freeitem;
-	}
-	return rc;
+avl_tree_t *avl_init_tree(avl_tree_t *rc, avl_compare_t cmp, avl_freeitem_t freeitem)
+{
+    if(rc)
+    {
+        rc->head = NULL;
+        rc->tail = NULL;
+        rc->top = NULL;
+        rc->cmp = cmp;
+        rc->freeitem = freeitem;
+    }
+    return rc;
 }
 
-avl_tree_t *avl_alloc_tree(avl_compare_t cmp, avl_freeitem_t freeitem) {
-	return avl_init_tree(malloc(sizeof(avl_tree_t)), cmp, freeitem);
+avl_tree_t *avl_alloc_tree(avl_compare_t cmp, avl_freeitem_t freeitem)
+{
+    return avl_init_tree(malloc(sizeof(avl_tree_t)), cmp, freeitem);
 }
 
-void avl_clear_tree(avl_tree_t *avltree) {
-	avltree->top = avltree->head = avltree->tail = NULL;
+void avl_clear_tree(avl_tree_t *avltree)
+{
+    avltree->top = avltree->head = avltree->tail = NULL;
 }
 
-void avl_free_nodes(avl_tree_t *avltree) {
-	avl_node_t *node, *next;
-	avl_freeitem_t freeitem;
+void avl_free_nodes(avl_tree_t *avltree)
+{
+    avl_node_t *node, *next;
+    avl_freeitem_t freeitem;
 
-	freeitem = avltree->freeitem;
+    freeitem = avltree->freeitem;
 
-	for(node = avltree->head; node; node = next) {
-		next = node->next;
-		if(freeitem)
-			freeitem(node->item);
-		free(node);
-	}
+    for(node = avltree->head; node; node = next)
+    {
+        next = node->next;
+        if(freeitem)
+            freeitem(node->item);
+        free(node);
+    }
 
-	return avl_clear_tree(avltree);
+    return avl_clear_tree(avltree);
 }
 
 /*
@@ -426,123 +470,132 @@ void avl_free_nodes(avl_tree_t *avltree) {
  * it is assumed to be a destructor for the items referenced in the avl_
  * tree, and they are deleted as well.
  */
-void avl_free_tree(avl_tree_t *avltree) {
-	avl_free_nodes(avltree);
-	free(avltree);
+void avl_free_tree(avl_tree_t *avltree)
+{
+    avl_free_nodes(avltree);
+    free(avltree);
 }
 #endif
 
-static void avl_clear_node(avl_node_t *newnode) {
-	newnode->left = newnode->right = NULL;
-	#ifdef AVL_COUNT
-	newnode->count = 1;
-	#endif
-	#ifdef AVL_DEPTH
-	newnode->depth = 1;
-	#endif
+static void avl_clear_node(avl_node_t *newnode)
+{
+    newnode->left = newnode->right = NULL;
+#ifdef AVL_COUNT
+    newnode->count = 1;
+#endif
+#ifdef AVL_DEPTH
+    newnode->depth = 1;
+#endif
 }
 
 #ifdef DO_REST
-avl_node_t *avl_init_node(avl_node_t *newnode, void *item) {
-	if(newnode) {
-/*		avl_clear_node(newnode); */
-		newnode->item = item;
-	}
-	return newnode;
+avl_node_t *avl_init_node(avl_node_t *newnode, void *item)
+{
+    if(newnode)
+    {
+        /*		avl_clear_node(newnode); */
+        newnode->item = item;
+    }
+    return newnode;
 }
 #endif
 
-avl_node_t *avl_insert_top(void **treehead, avl_node_t *newnode) {
-  *treehead = newnode;
-  newnode->left = newnode->right = newnode->depth = 0;
-  return LIB$_NORMAL;
-  return newnode;
+avl_node_t *avl_insert_top(void **treehead, avl_node_t *newnode)
+{
+    *treehead = newnode;
+    newnode->left = newnode->right = newnode->depth = 0;
+    return LIB$_NORMAL;
+    return newnode;
 }
 
-avl_node_t *avl_insert_before(void ** treehead, avl_node_t *node, avl_node_t *parent, avl_node_t *newnode) {
+avl_node_t *avl_insert_before(void ** treehead, avl_node_t *node, avl_node_t *parent, avl_node_t *newnode)
+{
 #if 0
-	if(!node)
-		return avltree->tail
-			? avl_insert_after(treehead, avltree->tail, newnode)
-			: avl_insert_top(treehead, newnode);
+    if(!node)
+        return avltree->tail
+               ? avl_insert_after(treehead, avltree->tail, newnode)
+               : avl_insert_top(treehead, newnode);
 #endif
 
 #if 0
-	if(node->left)
-		return avl_insert_after(treehead, node->prev, newnode);
+    if(node->left)
+        return avl_insert_after(treehead, node->prev, newnode);
 #endif
 
 #if 0
-	avl_clear_node(newnode);
+    avl_clear_node(newnode);
 
-	newnode->next = node;
-	newnode->parent = node;
+    newnode->next = node;
+    newnode->parent = node;
 
-	newnode->prev = node->prev;
-	if(node->prev)
-		node->prev->next = newnode;
-	else
-		avltree->head = newnode;
-	node->prev = newnode;
+    newnode->prev = node->prev;
+    if(node->prev)
+        node->prev->next = newnode;
+    else
+        avltree->head = newnode;
+    node->prev = newnode;
 #endif
 
-	node->left = newnode;
-	avl_rebalance(treehead, node, parent);
-	return LIB$_NORMAL;
-	return newnode;
+    node->left = newnode;
+    avl_rebalance(treehead, node, parent);
+    return LIB$_NORMAL;
+    return newnode;
 }
 
-avl_node_t *avl_insert_after(void **treehead, avl_node_t *node, avl_node_t *parent, avl_node_t *newnode) {
+avl_node_t *avl_insert_after(void **treehead, avl_node_t *node, avl_node_t *parent, avl_node_t *newnode)
+{
 #if 0
-	if(!node)
-		return avltree->head
-			? avl_insert_before(treehead, avltree->head, newnode)
-			: avl_insert_top(treehead, newnode);
+    if(!node)
+        return avltree->head
+               ? avl_insert_before(treehead, avltree->head, newnode)
+               : avl_insert_top(treehead, newnode);
 #endif
 
 #if 0
-	if(node->right)
-		return avl_insert_before(treehead, node->next, newnode);
+    if(node->right)
+        return avl_insert_before(treehead, node->next, newnode);
 #endif
 
 #if 0
-	avl_clear_node(newnode);
+    avl_clear_node(newnode);
 
-	newnode->prev = node;
-	newnode->parent = node;
+    newnode->prev = node;
+    newnode->parent = node;
 
-	newnode->next = node->next;
-	if(node->next)
-		node->next->prev = newnode;
-	else
-		avltree->tail = newnode;
-	node->next = newnode;
+    newnode->next = node->next;
+    if(node->next)
+        node->next->prev = newnode;
+    else
+        avltree->tail = newnode;
+    node->next = newnode;
 #endif
 
-	node->right = newnode;
-	avl_rebalance(treehead, node, parent);
-	return LIB$_NORMAL;
-	return newnode;
+    node->right = newnode;
+    avl_rebalance(treehead, node, parent);
+    return LIB$_NORMAL;
+    return newnode;
 }
 
-static int avl_insert_node(void ** treehead, unsigned int * flags, int (*user_compare_routine)(), void ** new_node, void ** user_data_address) {
+static int avl_insert_node(void ** treehead, unsigned int * flags, int (*user_compare_routine)(), void ** new_node, void ** user_data_address)
+{
 //avl_tree_t *avltree, avl_node_t *newnode)
-	avl_node_t *node;
-	avl_node_t *parent;
+    avl_node_t *node;
+    avl_node_t *parent;
 
-	if(*treehead == 0)
-		return avl_insert_top(treehead, new_node);
+    if(*treehead == 0)
+        return avl_insert_top(treehead, new_node);
 
-	switch(avl_search_closest(treehead, user_compare_routine, &((avl_node_t *)new_node)->item, &node, &parent, user_data_address)) {
-		case -1:
-			return avl_insert_before(treehead, node, parent, new_node);
-		case 1:
-			return avl_insert_after(treehead, node, parent, new_node);
-	}
+    switch(avl_search_closest(treehead, user_compare_routine, &((avl_node_t *)new_node)->item, &node, &parent, user_data_address))
+    {
+    case -1:
+        return avl_insert_before(treehead, node, parent, new_node);
+    case 1:
+        return avl_insert_after(treehead, node, parent, new_node);
+    }
 
-	return LIB$_KEYALRINS;
-  return LIB$_NORMAL;
-	return NULL;
+    return LIB$_KEYALRINS;
+    return LIB$_NORMAL;
+    return NULL;
 }
 
 #ifdef DO_REST
@@ -551,16 +604,18 @@ static int avl_insert_node(void ** treehead, unsigned int * flags, int (*user_co
  * Create a new node and insert an item there.
  * Returns the new node on success or NULL if no memory could be allocated.
  */
-avl_node_t *avl_insert(avl_tree_t *avltree, void *item) {
-	avl_node_t *newnode;
-	newnode = avl_init_node(malloc(sizeof(avl_node_t)), item);
-	if(newnode) {
-		if(avl_insert_node(avltree, newnode))
-			return newnode;
-		free(newnode);
-		errno = EEXIST;
-	}
-	return NULL;
+avl_node_t *avl_insert(avl_tree_t *avltree, void *item)
+{
+    avl_node_t *newnode;
+    newnode = avl_init_node(malloc(sizeof(avl_node_t)), item);
+    if(newnode)
+    {
+        if(avl_insert_node(avltree, newnode))
+            return newnode;
+        free(newnode);
+        errno = EEXIST;
+    }
+    return NULL;
 }
 
 /*
@@ -569,110 +624,132 @@ avl_node_t *avl_insert(avl_tree_t *avltree, void *item) {
  * The item of the node may be freed before calling avl_unlink_node.
  * (In other words, it is not referenced by this function.)
  */
-void avl_unlink_node(avl_tree_t *avltree, avl_node_t *avlnode) {
-	avl_node_t *parent;
-	avl_node_t **superparent;
-	avl_node_t *subst, *left, *right;
-	avl_node_t *balnode;
+void avl_unlink_node(avl_tree_t *avltree, avl_node_t *avlnode)
+{
+    avl_node_t *parent;
+    avl_node_t **superparent;
+    avl_node_t *subst, *left, *right;
+    avl_node_t *balnode;
 
-	if(avlnode->prev)
-		avlnode->prev->next = avlnode->next;
-	else
-		avltree->head = avlnode->next;
+    if(avlnode->prev)
+        avlnode->prev->next = avlnode->next;
+    else
+        avltree->head = avlnode->next;
 
-	if(avlnode->next)
-		avlnode->next->prev = avlnode->prev;
-	else
-		avltree->tail = avlnode->prev;
+    if(avlnode->next)
+        avlnode->next->prev = avlnode->prev;
+    else
+        avltree->tail = avlnode->prev;
 
-	parent = avlnode->parent;
+    parent = avlnode->parent;
 
-	superparent = parent
-		? avlnode == parent->left ? &parent->left : &parent->right
-		: &avltree->top;
+    superparent = parent
+                  ? avlnode == parent->left ? &parent->left : &parent->right
+              : &avltree->top;
 
-	left = avlnode->left;
-	right = avlnode->right;
-	if(!left) {
-		*superparent = right;
-		if(right)
-			right->parent = parent;
-		balnode = parent;
-	} else if(!right) {
-		*superparent = left;
-		left->parent = parent;
-		balnode = parent;
-	} else {
-		subst = avlnode->prev;
-		if(subst == left) {
-			balnode = subst;
-		} else {
-			balnode = subst->parent;
-			balnode->right = subst->left;
-			if(balnode->right)
-				balnode->right->parent = balnode;
-			subst->left = left;
-			left->parent = subst;
-		}
-		subst->right = right;
-		subst->parent = parent;
-		right->parent = subst;
-		*superparent = subst;
-	}
+    left = avlnode->left;
+    right = avlnode->right;
+    if(!left)
+    {
+        *superparent = right;
+        if(right)
+            right->parent = parent;
+        balnode = parent;
+    }
+    else if(!right)
+    {
+        *superparent = left;
+        left->parent = parent;
+        balnode = parent;
+    }
+    else
+    {
+        subst = avlnode->prev;
+        if(subst == left)
+        {
+            balnode = subst;
+        }
+        else
+        {
+            balnode = subst->parent;
+            balnode->right = subst->left;
+            if(balnode->right)
+                balnode->right->parent = balnode;
+            subst->left = left;
+            left->parent = subst;
+        }
+        subst->right = right;
+        subst->parent = parent;
+        right->parent = subst;
+        *superparent = subst;
+    }
 
-	avl_rebalance(avltree, balnode);
+    avl_rebalance(avltree, balnode);
 }
 
-void *avl_delete_node(avl_tree_t *avltree, avl_node_t *avlnode) {
-	void *item = NULL;
-	if(avlnode) {
-		item = avlnode->item;
-		avl_unlink_node(avltree, avlnode);
-		if(avltree->freeitem)
-			avltree->freeitem(item);
-		free(avlnode);
-	}
-	return item;
+void *avl_delete_node(avl_tree_t *avltree, avl_node_t *avlnode)
+{
+    void *item = NULL;
+    if(avlnode)
+    {
+        item = avlnode->item;
+        avl_unlink_node(avltree, avlnode);
+        if(avltree->freeitem)
+            avltree->freeitem(item);
+        free(avlnode);
+    }
+    return item;
 }
 
-void *avl_delete(avl_tree_t *avltree, const void *item) {
-	return avl_delete_node(avltree, avl_search(avltree, item));
+void *avl_delete(avl_tree_t *avltree, const void *item)
+{
+    return avl_delete_node(avltree, avl_search(avltree, item));
 }
 
-avl_node_t *avl_fixup_node(avl_tree_t *avltree, avl_node_t *newnode) {
-	avl_node_t *oldnode = NULL, *node;
+avl_node_t *avl_fixup_node(avl_tree_t *avltree, avl_node_t *newnode)
+{
+    avl_node_t *oldnode = NULL, *node;
 
-	if(!avltree || !newnode)
-		return NULL;
+    if(!avltree || !newnode)
+        return NULL;
 
-	node = newnode->prev;
-	if(node) {
-		oldnode = node->next;
-		node->next = newnode;
-	} else {
-		avltree->head = newnode;
-	}
+    node = newnode->prev;
+    if(node)
+    {
+        oldnode = node->next;
+        node->next = newnode;
+    }
+    else
+    {
+        avltree->head = newnode;
+    }
 
-	node = newnode->next;
-	if(node) {
-		oldnode = node->prev;
-		node->prev = newnode;
-	} else {
-		avltree->tail = newnode;
-	}
+    node = newnode->next;
+    if(node)
+    {
+        oldnode = node->prev;
+        node->prev = newnode;
+    }
+    else
+    {
+        avltree->tail = newnode;
+    }
 
-	node = newnode->parent;
-	if(node) {
-		if(node->left == oldnode)
-			node->left = newnode;
-		else
-			node->right = newnode;
-	} else {
-		oldnode = avltree->top;
-		avltree->top = newnode;
-	}
+    node = newnode->parent;
+    if(node)
+    {
+        if(node->left == oldnode)
+            node->left = newnode;
+        else
+            node->right = newnode;
+    }
+    else
+    {
+        oldnode = avltree->top;
+        avltree->top = newnode;
+    }
 
-	return oldnode;
+    return oldnode;
 }
 #endif
 
@@ -686,385 +763,410 @@ avl_node_t *avl_fixup_node(avl_tree_t *avltree, avl_node_t *newnode) {
  * function, if a rebalance takes place, the top of this subtree is no
  * longer going to be the same node.
  */
-void avl_rebalance_not(void **treehead, avl_node_t *avlnode, avl_node_t *orig_parent) {
-	avl_node_t *child;
-	avl_node_t *gchild;
-	avl_node_t *parent;
-	avl_node_t **superparent;
+void avl_rebalance_not(void **treehead, avl_node_t *avlnode, avl_node_t *orig_parent)
+{
+    avl_node_t *child;
+    avl_node_t *gchild;
+    avl_node_t *parent;
+    avl_node_t **superparent;
 
-	parent = avlnode;
+    parent = avlnode;
 
-	while(avlnode) {
-		parent = orig_parent;
+    while(avlnode)
+    {
+        parent = orig_parent;
 
-		superparent = parent
-			? avlnode == parent->left ? &parent->left : &parent->right
-			: treehead;
+        superparent = parent
+                      ? avlnode == parent->left ? &parent->left : &parent->right
+              : treehead;
 
-		switch(avl_check_balance(avlnode)) {
-		case -1:
-			child = avlnode->left;
-			#ifdef AVL_DEPTH
-			if(L_DEPTH(child) >= R_DEPTH(child)) {
-			#else
-			#ifdef AVL_COUNT
-			if(L_COUNT(child) >= R_COUNT(child)) {
-			#else
-			#error No balancing possible.
-			#endif
-			#endif
-				avlnode->left = child->right;
-#if 0
-				if(avlnode->left)
-					avlnode->left->parent = avlnode;
+        switch(avl_check_balance(avlnode))
+        {
+        case -1:
+            child = avlnode->left;
+#ifdef AVL_DEPTH
+            if(L_DEPTH(child) >= R_DEPTH(child))
+            {
+#else
+#ifdef AVL_COUNT
+            if(L_COUNT(child) >= R_COUNT(child))
+            {
+#else
+#error No balancing possible.
 #endif
-				child->right = avlnode;
-#if 0
-				avlnode->parent = child;
 #endif
-				*superparent = child;
+                avlnode->left = child->right;
 #if 0
-				child->parent = parent;
+                if(avlnode->left)
+                    avlnode->left->parent = avlnode;
 #endif
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				#endif
-				#ifdef AVL_DEPTH
-				avlnode->depth = CALC_DEPTH(avlnode);
-				child->depth = CALC_DEPTH(child);
-				#endif
-			} else {
-				gchild = child->right;
-				avlnode->left = gchild->right;
+                child->right = avlnode;
 #if 0
-				if(avlnode->left)
-					avlnode->left->parent = avlnode;
+                avlnode->parent = child;
 #endif
-				child->right = gchild->left;
+                *superparent = child;
 #if 0
-				if(child->right)
-					child->right->parent = child;
+                child->parent = parent;
 #endif
-				gchild->right = avlnode;
+#ifdef AVL_COUNT
+                avlnode->count = CALC_COUNT(avlnode);
+                child->count = CALC_COUNT(child);
+#endif
+#ifdef AVL_DEPTH
+                avlnode->depth = CALC_DEPTH(avlnode);
+                child->depth = CALC_DEPTH(child);
+#endif
+            }
+            else
+            {
+                gchild = child->right;
+                avlnode->left = gchild->right;
 #if 0
-				if(gchild->right)
-					gchild->right->parent = gchild;
+                if(avlnode->left)
+                    avlnode->left->parent = avlnode;
 #endif
-				gchild->left = child;
+                child->right = gchild->left;
 #if 0
-				if(gchild->left)
-					gchild->left->parent = gchild;
+                if(child->right)
+                    child->right->parent = child;
 #endif
-				*superparent = gchild;
+                gchild->right = avlnode;
 #if 0
-				gchild->parent = parent;
+                if(gchild->right)
+                    gchild->right->parent = gchild;
 #endif
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				gchild->count = CALC_COUNT(gchild);
-				#endif
-				#ifdef AVL_DEPTH
-				avlnode->depth = CALC_DEPTH(avlnode);
-				child->depth = CALC_DEPTH(child);
-				gchild->depth = CALC_DEPTH(gchild);
-				#endif
-			}
-		break;
-		case 1:
-			child = avlnode->right;
-			#ifdef AVL_DEPTH
-			if(R_DEPTH(child) >= L_DEPTH(child)) {
-			#else
-			#ifdef AVL_COUNT
-			if(R_COUNT(child) >= L_COUNT(child)) {
-			#else
-			#error No balancing possible.
-			#endif
-			#endif
-				avlnode->right = child->left;
+                gchild->left = child;
 #if 0
-				if(avlnode->right)
-					avlnode->right->parent = avlnode;
+                if(gchild->left)
+                    gchild->left->parent = gchild;
 #endif
-				child->left = avlnode;
+                *superparent = gchild;
 #if 0
-				avlnode->parent = child;
+                gchild->parent = parent;
 #endif
-				*superparent = child;
+#ifdef AVL_COUNT
+                avlnode->count = CALC_COUNT(avlnode);
+                child->count = CALC_COUNT(child);
+                gchild->count = CALC_COUNT(gchild);
+#endif
+#ifdef AVL_DEPTH
+                avlnode->depth = CALC_DEPTH(avlnode);
+                child->depth = CALC_DEPTH(child);
+                gchild->depth = CALC_DEPTH(gchild);
+#endif
+            }
+            break;
+        case 1:
+            child = avlnode->right;
+#ifdef AVL_DEPTH
+            if(R_DEPTH(child) >= L_DEPTH(child))
+            {
+#else
+#ifdef AVL_COUNT
+            if(R_COUNT(child) >= L_COUNT(child))
+            {
+#else
+#error No balancing possible.
+#endif
+#endif
+                avlnode->right = child->left;
 #if 0
-				child->parent = parent;
+                if(avlnode->right)
+                    avlnode->right->parent = avlnode;
 #endif
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				#endif
-				#ifdef AVL_DEPTH
-				avlnode->depth = CALC_DEPTH(avlnode);
-				child->depth = CALC_DEPTH(child);
-				#endif
-			} else {
-				gchild = child->left;
-				avlnode->right = gchild->left;
+                child->left = avlnode;
 #if 0
-				if(avlnode->right)
-					avlnode->right->parent = avlnode;
+                avlnode->parent = child;
 #endif
-				child->left = gchild->right;
+                *superparent = child;
 #if 0
-				if(child->left)
-					child->left->parent = child;
+                child->parent = parent;
 #endif
-				gchild->left = avlnode;
+#ifdef AVL_COUNT
+                avlnode->count = CALC_COUNT(avlnode);
+                child->count = CALC_COUNT(child);
+#endif
+#ifdef AVL_DEPTH
+                avlnode->depth = CALC_DEPTH(avlnode);
+                child->depth = CALC_DEPTH(child);
+#endif
+            }
+            else
+            {
+                gchild = child->left;
+                avlnode->right = gchild->left;
 #if 0
-				if(gchild->left)
-					gchild->left->parent = gchild;
+                if(avlnode->right)
+                    avlnode->right->parent = avlnode;
 #endif
-				gchild->right = child;
+                child->left = gchild->right;
 #if 0
-				if(gchild->right)
-					gchild->right->parent = gchild;
+                if(child->left)
+                    child->left->parent = child;
 #endif
-				*superparent = gchild;
+                gchild->left = avlnode;
 #if 0
-				gchild->parent = parent;
+                if(gchild->left)
+                    gchild->left->parent = gchild;
 #endif
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				gchild->count = CALC_COUNT(gchild);
-				#endif
-				#ifdef AVL_DEPTH
-				avlnode->depth = CALC_DEPTH(avlnode);
-				child->depth = CALC_DEPTH(child);
-				gchild->depth = CALC_DEPTH(gchild);
-				#endif
-			}
-		break;
-		default:
-			#ifdef AVL_COUNT
-			avlnode->count = CALC_COUNT(avlnode);
-			#endif
-			#ifdef AVL_DEPTH
-			avlnode->depth = CALC_DEPTH(avlnode);
-			#endif
-		}
-		avlnode = parent;
-	}
+                gchild->right = child;
+#if 0
+                if(gchild->right)
+                    gchild->right->parent = gchild;
+#endif
+                *superparent = gchild;
+#if 0
+                gchild->parent = parent;
+#endif
+#ifdef AVL_COUNT
+                avlnode->count = CALC_COUNT(avlnode);
+                child->count = CALC_COUNT(child);
+                gchild->count = CALC_COUNT(gchild);
+#endif
+#ifdef AVL_DEPTH
+                avlnode->depth = CALC_DEPTH(avlnode);
+                child->depth = CALC_DEPTH(child);
+                gchild->depth = CALC_DEPTH(gchild);
+#endif
+            }
+            break;
+        default:
+#ifdef AVL_COUNT
+            avlnode->count = CALC_COUNT(avlnode);
+#endif
+#ifdef AVL_DEPTH
+            avlnode->depth = CALC_DEPTH(avlnode);
+#endif
+        }
+        avlnode = parent;
+    }
 }
 
-void avl_rebalance(void **treehead, avl_node_t *avlnode, avl_node_t *orig_parent) {
-	avl_node_t *child;
-	avl_node_t *gchild;
-	avl_node_t *parent;
-	avl_node_t **superparent;
+void avl_rebalance(void **treehead, avl_node_t *avlnode, avl_node_t *orig_parent)
+{
+    avl_node_t *child;
+    avl_node_t *gchild;
+    avl_node_t *parent;
+    avl_node_t **superparent;
 
-	parent = avlnode;
+    parent = avlnode;
 
-	if (avlnode->left)
-	  avl_rebalance(treehead, avlnode->left, avlnode);
+    if (avlnode->left)
+        avl_rebalance(treehead, avlnode->left, avlnode);
 
-	if (avlnode->right)
-	  avl_rebalance(treehead, avlnode->right, avlnode);
+    if (avlnode->right)
+        avl_rebalance(treehead, avlnode->right, avlnode);
 
-	{
-		parent = orig_parent;
+    {
+        parent = orig_parent;
 
-		superparent = parent
-			? avlnode == parent->left ? &parent->left : &parent->right
-			: treehead;
+        superparent = parent
+                      ? avlnode == parent->left ? &parent->left : &parent->right
+              : treehead;
 
-		switch(avl_check_balance(avlnode)) {
-		case -1:
-			child = avlnode->left;
-			#ifdef AVL_DEPTH
-			if(L_DEPTH(child) >= R_DEPTH(child)) {
-			#else
-			#ifdef AVL_COUNT
-			if(L_COUNT(child) >= R_COUNT(child)) {
-			#else
-			#error No balancing possible.
-			#endif
-			#endif
-				avlnode->left = child->right;
-#if 0
-				if(avlnode->left)
-					avlnode->left->parent = avlnode;
+        switch(avl_check_balance(avlnode))
+        {
+        case -1:
+            child = avlnode->left;
+#ifdef AVL_DEPTH
+            if(L_DEPTH(child) >= R_DEPTH(child))
+            {
+#else
+#ifdef AVL_COUNT
+            if(L_COUNT(child) >= R_COUNT(child))
+            {
+#else
+#error No balancing possible.
 #endif
-				child->right = avlnode;
-#if 0
-				avlnode->parent = child;
 #endif
-				*superparent = child;
+                avlnode->left = child->right;
 #if 0
-				child->parent = parent;
+                if(avlnode->left)
+                    avlnode->left->parent = avlnode;
 #endif
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				#endif
-				#ifdef AVL_DEPTH
-				avlnode->depth = CALC_DEPTH(avlnode);
-				child->depth = CALC_DEPTH(child);
-				#endif
-			} else {
-				gchild = child->right;
-				avlnode->left = gchild->right;
+                child->right = avlnode;
 #if 0
-				if(avlnode->left)
-					avlnode->left->parent = avlnode;
+                avlnode->parent = child;
 #endif
-				child->right = gchild->left;
+                *superparent = child;
 #if 0
-				if(child->right)
-					child->right->parent = child;
+                child->parent = parent;
 #endif
-				gchild->right = avlnode;
+#ifdef AVL_COUNT
+                avlnode->count = CALC_COUNT(avlnode);
+                child->count = CALC_COUNT(child);
+#endif
+#ifdef AVL_DEPTH
+                avlnode->depth = CALC_DEPTH(avlnode);
+                child->depth = CALC_DEPTH(child);
+#endif
+            }
+            else
+            {
+                gchild = child->right;
+                avlnode->left = gchild->right;
 #if 0
-				if(gchild->right)
-					gchild->right->parent = gchild;
+                if(avlnode->left)
+                    avlnode->left->parent = avlnode;
 #endif
-				gchild->left = child;
+                child->right = gchild->left;
 #if 0
-				if(gchild->left)
-					gchild->left->parent = gchild;
+                if(child->right)
+                    child->right->parent = child;
 #endif
-				*superparent = gchild;
+                gchild->right = avlnode;
 #if 0
-				gchild->parent = parent;
+                if(gchild->right)
+                    gchild->right->parent = gchild;
 #endif
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				gchild->count = CALC_COUNT(gchild);
-				#endif
-				#ifdef AVL_DEPTH
-				avlnode->depth = CALC_DEPTH(avlnode);
-				child->depth = CALC_DEPTH(child);
-				gchild->depth = CALC_DEPTH(gchild);
-				#endif
-			}
-		break;
-		case 1:
-			child = avlnode->right;
-			#ifdef AVL_DEPTH
-			if(R_DEPTH(child) >= L_DEPTH(child)) {
-			#else
-			#ifdef AVL_COUNT
-			if(R_COUNT(child) >= L_COUNT(child)) {
-			#else
-			#error No balancing possible.
-			#endif
-			#endif
-				avlnode->right = child->left;
+                gchild->left = child;
 #if 0
-				if(avlnode->right)
-					avlnode->right->parent = avlnode;
+                if(gchild->left)
+                    gchild->left->parent = gchild;
 #endif
-				child->left = avlnode;
+                *superparent = gchild;
 #if 0
-				avlnode->parent = child;
+                gchild->parent = parent;
 #endif
-				*superparent = child;
+#ifdef AVL_COUNT
+                avlnode->count = CALC_COUNT(avlnode);
+                child->count = CALC_COUNT(child);
+                gchild->count = CALC_COUNT(gchild);
+#endif
+#ifdef AVL_DEPTH
+                avlnode->depth = CALC_DEPTH(avlnode);
+                child->depth = CALC_DEPTH(child);
+                gchild->depth = CALC_DEPTH(gchild);
+#endif
+            }
+            break;
+        case 1:
+            child = avlnode->right;
+#ifdef AVL_DEPTH
+            if(R_DEPTH(child) >= L_DEPTH(child))
+            {
+#else
+#ifdef AVL_COUNT
+            if(R_COUNT(child) >= L_COUNT(child))
+            {
+#else
+#error No balancing possible.
+#endif
+#endif
+                avlnode->right = child->left;
 #if 0
-				child->parent = parent;
+                if(avlnode->right)
+                    avlnode->right->parent = avlnode;
 #endif
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				#endif
-				#ifdef AVL_DEPTH
-				avlnode->depth = CALC_DEPTH(avlnode);
-				child->depth = CALC_DEPTH(child);
-				#endif
-			} else {
-				gchild = child->left;
-				avlnode->right = gchild->left;
+                child->left = avlnode;
 #if 0
-				if(avlnode->right)
-					avlnode->right->parent = avlnode;
+                avlnode->parent = child;
 #endif
-				child->left = gchild->right;
+                *superparent = child;
 #if 0
-				if(child->left)
-					child->left->parent = child;
+                child->parent = parent;
 #endif
-				gchild->left = avlnode;
+#ifdef AVL_COUNT
+                avlnode->count = CALC_COUNT(avlnode);
+                child->count = CALC_COUNT(child);
+#endif
+#ifdef AVL_DEPTH
+                avlnode->depth = CALC_DEPTH(avlnode);
+                child->depth = CALC_DEPTH(child);
+#endif
+            }
+            else
+            {
+                gchild = child->left;
+                avlnode->right = gchild->left;
 #if 0
-				if(gchild->left)
-					gchild->left->parent = gchild;
+                if(avlnode->right)
+                    avlnode->right->parent = avlnode;
 #endif
-				gchild->right = child;
+                child->left = gchild->right;
 #if 0
-				if(gchild->right)
-					gchild->right->parent = gchild;
+                if(child->left)
+                    child->left->parent = child;
 #endif
-				*superparent = gchild;
+                gchild->left = avlnode;
 #if 0
-				gchild->parent = parent;
+                if(gchild->left)
+                    gchild->left->parent = gchild;
 #endif
-				#ifdef AVL_COUNT
-				avlnode->count = CALC_COUNT(avlnode);
-				child->count = CALC_COUNT(child);
-				gchild->count = CALC_COUNT(gchild);
-				#endif
-				#ifdef AVL_DEPTH
-				avlnode->depth = CALC_DEPTH(avlnode);
-				child->depth = CALC_DEPTH(child);
-				gchild->depth = CALC_DEPTH(gchild);
-				#endif
-			}
-		break;
-		default:
-			#ifdef AVL_COUNT
-			avlnode->count = CALC_COUNT(avlnode);
-			#endif
-			#ifdef AVL_DEPTH
-			avlnode->depth = CALC_DEPTH(avlnode);
-			#endif
-		}
-		avlnode = parent;
-	}
+                gchild->right = child;
+#if 0
+                if(gchild->right)
+                    gchild->right->parent = gchild;
+#endif
+                *superparent = gchild;
+#if 0
+                gchild->parent = parent;
+#endif
+#ifdef AVL_COUNT
+                avlnode->count = CALC_COUNT(avlnode);
+                child->count = CALC_COUNT(child);
+                gchild->count = CALC_COUNT(gchild);
+#endif
+#ifdef AVL_DEPTH
+                avlnode->depth = CALC_DEPTH(avlnode);
+                child->depth = CALC_DEPTH(child);
+                gchild->depth = CALC_DEPTH(gchild);
+#endif
+            }
+            break;
+        default:
+#ifdef AVL_COUNT
+            avlnode->count = CALC_COUNT(avlnode);
+#endif
+#ifdef AVL_DEPTH
+            avlnode->depth = CALC_DEPTH(avlnode);
+#endif
+        }
+        avlnode = parent;
+    }
 }
 
-		// my own part
+// my own part
 
-static int traverse_tree (long * treehead , int (*user_action_procedure)(), void * user_data_address) {
-  int sts;
-  if (treehead == 0)
-    return LIB$_NORMAL;
-  sts = traverse_tree(treehead[0], user_action_procedure, user_data_address);
-  if ((sts & 1) == 0)
+static int traverse_tree (long * treehead , int (*user_action_procedure)(), void * user_data_address)
+{
+    int sts;
+    if (treehead == 0)
+        return LIB$_NORMAL;
+    sts = traverse_tree(treehead[0], user_action_procedure, user_data_address);
+    if ((sts & 1) == 0)
+        return sts;
+    sts = user_action_procedure (treehead, user_data_address);
+    if ((sts & 1) == 0)
+        return sts;
+    return traverse_tree(treehead[1], user_action_procedure, user_data_address);
+}
+// static long Alloc_node(struct Tree_element* Rec,
+// struct Full_node** Ret_addr, void* Dummy)
+
+// static long Compare_node_3(struct Tree_element* Rec, struct Full_node* Node,	void* Dummy)
+
+int lib$insert_tree (void ** treehead, void * symbol, unsigned int * flags, int (*user_compare_routine)(), int (*user_allocation_procedure)(), void ** new_node, void ** user_data)
+{
+    int sts;
+    sts = user_allocation_procedure(symbol, new_node, user_data);
+    if ((sts & 1) == 0)
+        return LIB$_INSVIRMEM;
+    sts = avl_insert_node(treehead, flags, user_compare_routine, *new_node, user_data);
     return sts;
-  sts = user_action_procedure (treehead, user_data_address);
-  if ((sts & 1) == 0)
-    return sts;
-  return traverse_tree(treehead[1], user_action_procedure, user_data_address);
-}
-		// static long Alloc_node(struct Tree_element* Rec,
-		// struct Full_node** Ret_addr, void* Dummy)
-
-		// static long Compare_node_3(struct Tree_element* Rec, struct Full_node* Node,	void* Dummy)
-
-int lib$insert_tree (void ** treehead, void * symbol, unsigned int * flags, int (*user_compare_routine)(), int (*user_allocation_procedure)(), void ** new_node, void ** user_data) {
-  int sts;
-  sts = user_allocation_procedure(symbol, new_node, user_data);
-  if ((sts & 1) == 0)
-    return LIB$_INSVIRMEM;
-  sts = avl_insert_node(treehead, flags, user_compare_routine, *new_node, user_data);
-  return sts;
 }
 
-int lib$lookup_tree (void ** treehead, unsigned int symbol, int (*user_compare_routine)(), void ** new_node) {
-  avl_node_t *parent;
-  if (avl_search_closest(treehead, user_compare_routine, symbol, new_node, &parent, 0))
-    return LIB$_KEYNOTFOU;
-  else
-    return LIB$_NORMAL;
+int lib$lookup_tree (void ** treehead, unsigned int symbol, int (*user_compare_routine)(), void ** new_node)
+{
+    avl_node_t *parent;
+    if (avl_search_closest(treehead, user_compare_routine, symbol, new_node, &parent, 0))
+        return LIB$_KEYNOTFOU;
+    else
+        return LIB$_NORMAL;
 }
 
-int lib$traverse_tree (void ** treehead , int (*user_action_procedure)(), void * user_data_address) {
-  return traverse_tree(*treehead, user_action_procedure, user_data_address);
+int lib$traverse_tree (void ** treehead , int (*user_action_procedure)(), void * user_data_address)
+{
+    return traverse_tree(*treehead, user_action_procedure, user_data_address);
 }
 

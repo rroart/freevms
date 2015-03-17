@@ -44,8 +44,8 @@ TCB_Find(lclport,frnaddr,frnport);
 VTCB_Scan ( ASTRTN , ASTP1 , ASTP2 );
 CH$FILL(long ch, long size, long addr);
 void user$net_connection_info(struct user_info_args * uargs,
-			     long Lcl_Host,long Frn_Host,long Lcl_Port,long Frn_Port,
-			      long Frn_Name,long Frn_Nlen);
+                              long Lcl_Host,long Frn_Host,long Lcl_Port,long Frn_Port,
+                              long Frn_Name,long Frn_Nlen);
 swapbytesiphdr(long x, long y);
 Fatal_Error() ;
 int CH$NEQ(long n1, long ptr1, long n2, long ptr2);
@@ -66,7 +66,7 @@ void icmp$receive(struct user_recv_args * uargs);
 void icmp$send(struct user_send_args * uargs);
 void ipu$close(struct user_close_args * Uargs);
 void ipu$open(struct user_open_args * Uargs);
-void ipu$receive(struct user_recv_args * Uargs); 
+void ipu$receive(struct user_recv_args * Uargs);
 void ipu$send(struct user_send_args * Uargs);
 void ipu$status(struct user_status_args * Uargs);
 void tcp$abort(struct user_abort_args * Uargs);
@@ -114,8 +114,12 @@ int VMS_IO$POST(long IOSB$ADRS, long IRP$ADRS, long UCB$ADRS);
 // from string.h, which inclusion make type overlap. needed due to tcpmacros.h
 #ifdef __x86_64__
 unsigned long strlen(const char *s);
+#ifndef memcpy
 void *memcpy(void *dest, const void *src, unsigned long n);
+#endif
+#ifndef memset
 void *memset(void *s, int c, unsigned long n);
+#endif
 #else
 unsigned int strlen(const char *s);
 #ifndef memcpy

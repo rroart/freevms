@@ -20,7 +20,7 @@
 
 /* Make QIC02_TAPE_IFC expand to something.
  *
- * The only difference between WANGTEK and EVEREX is in the 
+ * The only difference between WANGTEK and EVEREX is in the
  * handling of the DMA channel 3.
  * Note that the driver maps EVEREX to WANGTEK internally for speed
  * reasons. Externally WANGTEK==1, EVEREX==2, ARCHIVE==3.
@@ -28,7 +28,7 @@
  *
  * Support for Mountain controllers was added by Erik Jacobson
  * and severely hacked by me.   -- hhb
- * 
+ *
  * Support for Emerald controllers by Alan Bain <afrb2@chiark.chu.cam.ac.uk>
  * with more hacks by me.   -- hhb
  */
@@ -67,7 +67,7 @@
  *	WANGTEK,
  *	ARCHIVE_SC402, ARCHIVE_SC499.	(both same programming interface)
  *
- * Make sure you have the I/O ports/DMA channels 
+ * Make sure you have the I/O ports/DMA channels
  * and IRQ stuff configured properly!
  * NOTE: There may be other device drivers using the same major
  *       number. This must be avoided. Check for timer.h conflicts too.
@@ -89,7 +89,7 @@
 /* #define QIC02_TAPE_DRIVE	MT_ISARCHIVE_2150L */
 /* #define QIC02_TAPE_DRIVE	MT_ISARCHIVESC499 */
 
-/* Either WANGTEK, ARCHIVE or MOUNTAIN. Not EVEREX. 
+/* Either WANGTEK, ARCHIVE or MOUNTAIN. Not EVEREX.
  * If you have an EVEREX, use WANGTEK and try the DMA3_FIX below.
  */
 #define QIC02_TAPE_IFC		WANGTEK	/* interface card type */
@@ -100,7 +100,7 @@
 #define QIC02_TAPE_IRQ		5	/* For IRQ2, use 9 here, others normal. */
 #define QIC02_TAPE_DMA		1	/* either 1 or 3, because 2 is used by the floppy */
 
-/* If DMA3 doesn't work, but DMA1 does, and you have a 
+/* If DMA3 doesn't work, but DMA1 does, and you have a
  * Wangtek/Everex card, you can try #define-ing the flag
  * below. Note that you should also change the DACK jumper
  * for Wangtek/Everex cards when changing the DMA channel.
@@ -225,7 +225,7 @@
 #define WT_QIC02_CTL_RESET	0x02
 #define WT_QIC02_CTL_REQUEST	0x04
 #define WT_CTL_ONLINE		0x01
-#define WT_CTL_CMDOFF		0xC0 
+#define WT_CTL_CMDOFF		0xC0
 
 #define WT_CTL_DMA3		0x10			  /* enable dma chan3 */
 #define WT_CTL_DMA1		0x08	         /* enable dma chan1 or chan2 */
@@ -251,7 +251,7 @@
 #define EMR_QIC02_CTL_RESET	0x02
 #define EMR_QIC02_CTL_REQUEST	0x04
 #define EMR_CTL_ONLINE		0x01
-#define EMR_CTL_CMDOFF		0xC0 
+#define EMR_CTL_CMDOFF		0xC0
 
 #define EMR_CTL_DMA3		0x10			  /* enable dma chan3 */
 #define EMR_CTL_DMA1		0x08	         /* enable dma chan1 or chan2 */
@@ -284,10 +284,10 @@
 #define AR_QIC02_CTL_REQUEST	0x40	/* notify of new command */
 #define AR_CTL_IEN		0x20	/* interrupt enable */
 #define AR_CTL_DNIEN		0x10	/* done-interrupt enable */
-  /* Note: All of these bits are cleared automatically when writing to
-   * AR_RESET_DMA_PORT. So AR_CTL_IEN and AR_CTL_DNIEN must be
-   * reprogrammed before the write to AR_START_DMA_PORT.
-   */
+/* Note: All of these bits are cleared automatically when writing to
+ * AR_RESET_DMA_PORT. So AR_CTL_IEN and AR_CTL_DNIEN must be
+ * reprogrammed before the write to AR_START_DMA_PORT.
+ */
 
 
 /* MOUNTAIN interface specifics */
@@ -329,7 +329,7 @@
 
 # define QIC02_TAPE_DEBUG	(qic02_tape_debug)
 
-# if QIC02_TAPE_IFC == WANGTEK	
+# if QIC02_TAPE_IFC == WANGTEK
 #  define QIC02_STAT_POLARITY	WT_QIC02_STAT_POLARITY
 #  define QIC02_STAT_PORT	WT_QIC02_STAT_PORT
 #  define QIC02_CTL_PORT	WT_QIC02_CTL_PORT
@@ -430,9 +430,9 @@
 # endif /* QIC02_TAPE_IFC */
 
 
-  /* An ugly hack to make sure WT_CTL_DMA is defined even for the
-   * static, non-Wangtek case. The alternative was even worse.
-   */ 
+/* An ugly hack to make sure WT_CTL_DMA is defined even for the
+ * static, non-Wangtek case. The alternative was even worse.
+ */
 # ifndef WT_CTL_DMA
 #  define WT_CTL_DMA		WT_CTL_DMA1
 # endif
@@ -511,7 +511,7 @@
 #define	QCMD_RD_STAT	0xC0		/* read status */
 
 /* Other (optional/vendor unique) commands */
- /* Density commands are only valid when TP_BOM is set! */
+/* Density commands are only valid when TP_BOM is set! */
 #define QCMD_DENS_11	0x26		/* QIC-11 */
 #define QCMD_DENS_24	0x27		/* QIC-24: 9 track 60MB */
 #define QCMD_DENS_120	0x28		/* QIC-120: 15 track 120MB */
@@ -588,7 +588,7 @@
  */
 
 #define	TP_REWCLOSE(d)	((MINOR(d)&0x01) == 1)	   		/* rewind bit */
-			   /* rewind is only done if data has been transferred */
+/* rewind is only done if data has been transferred */
 #define	TP_DENS(dev)	((MINOR(dev) >> 1) & 0x07) 	      /* tape density */
 #define TP_UNIT(dev)	((MINOR(dev) >> 4) & 0x07)	       /* unit number */
 
@@ -596,10 +596,11 @@
 #define TP_DIAGS(dev)	(QIC02_TAPE_DEBUG & TPQD_DIAGS)
 
 /* status codes returned by a WTS_RDSTAT call */
-struct tpstatus {	/* sizeof(short)==2), LSB first */
-	unsigned short	exs;	/* Drive exception flags */
-	unsigned short	dec;	/* data error count: nr of blocks rewritten/soft read errors */
-	unsigned short	urc;	/* underrun count: nr of times streaming was interrupted */
+struct tpstatus  	/* sizeof(short)==2), LSB first */
+{
+    unsigned short	exs;	/* Drive exception flags */
+    unsigned short	dec;	/* data error count: nr of blocks rewritten/soft read errors */
+    unsigned short	urc;	/* underrun count: nr of times streaming was interrupted */
 };
 #define TPSTATSIZE	sizeof(struct tpstatus)
 
@@ -700,28 +701,29 @@ typedef char flag;
  * by the user. Everex is mapped to Wangtek with a different
  * `dma_enable_value', if dmanr==3.
  */
-struct qic02_ccb {
-	long	ifc_type;
+struct qic02_ccb
+{
+    long	ifc_type;
 
-	unsigned short	port_stat;	/* Status port address */
-	unsigned short	port_ctl;	/* Control port address */
-	unsigned short	port_cmd;	/* Command port address */
-	unsigned short	port_data;	/* Data port address */
+    unsigned short	port_stat;	/* Status port address */
+    unsigned short	port_ctl;	/* Control port address */
+    unsigned short	port_cmd;	/* Command port address */
+    unsigned short	port_data;	/* Data port address */
 
-	/* status register bits */
-	unsigned short	stat_polarity;	/* invert status bits or not */
-	unsigned short	stat_ready;	/* drive ready */
-	unsigned short	stat_exception;	/* drive signals exception */
-	unsigned short	stat_mask;
-	unsigned short	stat_resetmask;
-	unsigned short	stat_resetval;
+    /* status register bits */
+    unsigned short	stat_polarity;	/* invert status bits or not */
+    unsigned short	stat_ready;	/* drive ready */
+    unsigned short	stat_exception;	/* drive signals exception */
+    unsigned short	stat_mask;
+    unsigned short	stat_resetmask;
+    unsigned short	stat_resetval;
 
-	/* control register bits */
-	unsigned short	ctl_reset;	/* reset drive */
-	unsigned short	ctl_request;	/* latch command */
-	
-	/* This is used to change the DMA3 behaviour */
-	unsigned short	dma_enable_value;
+    /* control register bits */
+    unsigned short	ctl_reset;	/* reset drive */
+    unsigned short	ctl_request;	/* latch command */
+
+    /* This is used to change the DMA3 behaviour */
+    unsigned short	dma_enable_value;
 };
 
 #if MODULE

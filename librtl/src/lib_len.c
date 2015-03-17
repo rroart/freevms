@@ -28,16 +28,16 @@
  */
 unsigned short lib$len(const struct dsc$descriptor_s* input_descriptor)
 {
-	short word_integer_length;	/* Length of source string */
-	char* data_address;		/* Address of actual data */
+    short word_integer_length;	/* Length of source string */
+    char* data_address;		/* Address of actual data */
 
-	/*
-	 * use STR$ANALYSE_SDESC instead of LIB$ version, because
-	 * the LIB$ version calls the STR$ version.
-	 */
-	lib$analyze_sdesc(input_descriptor, &word_integer_length,
-		&data_address);
+    /*
+     * use STR$ANALYSE_SDESC instead of LIB$ version, because
+     * the LIB$ version calls the STR$ version.
+     */
+    lib$analyze_sdesc(input_descriptor, &word_integer_length,
+                      &data_address);
 
-	return word_integer_length;
+    return word_integer_length;
 }
 

@@ -56,15 +56,15 @@
 #define NUL       '\0'
 
 struct item_list_3
-    {
-      short buffer_length, item_code;
-      long buffer_address, return_length_address;
-    };
+{
+    short buffer_length, item_code;
+    long buffer_address, return_length_address;
+};
 
 struct io_status_block
-   {
-      unsigned short status;
-      unsigned short bytes_transferred;
-      unsigned int ipacp_status;
-   };
+{
+    unsigned short status;
+    unsigned short bytes_transferred;
+    unsigned int ipacp_status;
+};
 

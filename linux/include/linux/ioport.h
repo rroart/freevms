@@ -12,17 +12,19 @@
  * Resources are tree-like, allowing
  * nesting etc..
  */
-struct resource {
-	const char *name;
-	unsigned long start, end;
-	unsigned long flags;
-	struct resource *parent, *sibling, *child;
+struct resource
+{
+    const char *name;
+    unsigned long start, end;
+    unsigned long flags;
+    struct resource *parent, *sibling, *child;
 };
 
-struct resource_list {
-	struct resource_list *next;
-	struct resource *res;
-	struct pci_dev *dev;
+struct resource_list
+{
+    struct resource_list *next;
+    struct resource *res;
+    struct pci_dev *dev;
 };
 
 /*
@@ -89,11 +91,11 @@ extern int check_resource(struct resource *root, unsigned long, unsigned long);
 extern int request_resource(struct resource *root, struct resource *new);
 extern int release_resource(struct resource *new);
 extern int allocate_resource(struct resource *root, struct resource *new,
-			     unsigned long size,
-			     unsigned long min, unsigned long max,
-			     unsigned long align,
-			     void (*alignf)(void *, struct resource *, unsigned long),
-			     void *alignf_data);
+                             unsigned long size,
+                             unsigned long min, unsigned long max,
+                             unsigned long align,
+                             void (*alignf)(void *, struct resource *, unsigned long),
+                             void *alignf_data);
 
 /* Convenience shorthand with allocation */
 #define request_region(start,n,name)	__request_region(&ioport_resource, (start), (n), (name))

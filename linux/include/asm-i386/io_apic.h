@@ -21,24 +21,27 @@
 /*
  * The structure of the IO-APIC:
  */
-struct IO_APIC_reg_00 {
-	__u32	__reserved_2	: 24,
-		ID		:  4,
-		__reserved_1	:  4;
+struct IO_APIC_reg_00
+{
+    __u32	__reserved_2	: 24,
+               ID		:  4,
+               __reserved_1	:  4;
 } __attribute__ ((packed));
 
-struct IO_APIC_reg_01 {
-	__u32	version		:  8,
-		__reserved_2	:  7,
-		PRQ		:  1,
-		entries		:  8,
-		__reserved_1	:  8;
+struct IO_APIC_reg_01
+{
+    __u32	version		:  8,
+               __reserved_2	:  7,
+               PRQ		:  1,
+               entries		:  8,
+               __reserved_1	:  8;
 } __attribute__ ((packed));
 
-struct IO_APIC_reg_02 {
-	__u32	__reserved_2	: 24,
-		arbitration	:  4,
-		__reserved_1	:  4;
+struct IO_APIC_reg_02
+{
+    __u32	__reserved_2	: 24,
+               arbitration	:  4,
+               __reserved_1	:  4;
 } __attribute__ ((packed));
 
 /*
@@ -47,42 +50,50 @@ struct IO_APIC_reg_02 {
 extern int nr_ioapics;
 extern int nr_ioapic_registers[MAX_IO_APICS];
 
-enum ioapic_irq_destination_types {
-	dest_Fixed = 0,
-	dest_LowestPrio = 1,
-	dest_SMI = 2,
-	dest__reserved_1 = 3,
-	dest_NMI = 4,
-	dest_INIT = 5,
-	dest__reserved_2 = 6,
-	dest_ExtINT = 7
+enum ioapic_irq_destination_types
+{
+    dest_Fixed = 0,
+    dest_LowestPrio = 1,
+    dest_SMI = 2,
+    dest__reserved_1 = 3,
+    dest_NMI = 4,
+    dest_INIT = 5,
+    dest__reserved_2 = 6,
+    dest_ExtINT = 7
 };
 
-struct IO_APIC_route_entry {
-	__u32	vector		:  8,
-		delivery_mode	:  3,	/* 000: FIXED
+struct IO_APIC_route_entry
+{
+    __u32	vector		:  8,
+                delivery_mode	:  3,	/* 000: FIXED
 					 * 001: lowest prio
 					 * 111: ExtINT
 					 */
-		dest_mode	:  1,	/* 0: physical, 1: logical */
-		delivery_status	:  1,
-		polarity	:  1,
-		irr		:  1,
-		trigger		:  1,	/* 0: edge, 1: level */
-		mask		:  1,	/* 0: enabled, 1: disabled */
-		__reserved_2	: 15;
+                dest_mode	:  1,	/* 0: physical, 1: logical */
+                delivery_status	:  1,
+                polarity	:  1,
+                irr		:  1,
+                trigger		:  1,	/* 0: edge, 1: level */
+                mask		:  1,	/* 0: enabled, 1: disabled */
+                __reserved_2	: 15;
 
-	union {		struct { __u32
-					__reserved_1	: 24,
-					physical_dest	:  4,
-					__reserved_2	:  4;
-			} physical;
+    union
+    {
+        struct
+        {
+            __u32
+            __reserved_1	: 24,
+                            physical_dest	:  4,
+                            __reserved_2	:  4;
+        } physical;
 
-			struct { __u32
-					__reserved_1	: 24,
-					logical_dest	:  8;
-			} logical;
-	} dest;
+        struct
+        {
+            __u32
+            __reserved_1	: 24,
+                            logical_dest	:  8;
+        } logical;
+    } dest;
 
 } __attribute__ ((packed));
 
@@ -104,14 +115,14 @@ extern int mpc_default_type;
 
 static inline unsigned int io_apic_read(unsigned int apic, unsigned int reg)
 {
-	*IO_APIC_BASE(apic) = reg;
-	return *(IO_APIC_BASE(apic)+4);
+    *IO_APIC_BASE(apic) = reg;
+    return *(IO_APIC_BASE(apic)+4);
 }
 
 static inline void io_apic_write(unsigned int apic, unsigned int reg, unsigned int value)
 {
-	*IO_APIC_BASE(apic) = reg;
-	*(IO_APIC_BASE(apic)+4) = value;
+    *IO_APIC_BASE(apic) = reg;
+    *(IO_APIC_BASE(apic)+4) = value;
 }
 
 /*
@@ -120,7 +131,7 @@ static inline void io_apic_write(unsigned int apic, unsigned int reg, unsigned i
  */
 static inline void io_apic_modify(unsigned int apic, unsigned int value)
 {
-	*(IO_APIC_BASE(apic)+4) = value;
+    *(IO_APIC_BASE(apic)+4) = value;
 }
 
 /*
@@ -129,7 +140,7 @@ static inline void io_apic_modify(unsigned int apic, unsigned int value)
  */
 static inline void io_apic_sync(unsigned int apic)
 {
-	(void) *(IO_APIC_BASE(apic)+4);
+    (void) *(IO_APIC_BASE(apic)+4);
 }
 
 /* 1 if "noapic" boot option passed */

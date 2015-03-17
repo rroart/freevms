@@ -1961,49 +1961,99 @@ struct _scs_rd rdtl[128]; //[scs$gw_rdtcnt];
 
 /* spinlocks */
 
-struct _spl SPIN_ATOMIC __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ }; /* for atomic operations */
+struct _spl SPIN_ATOMIC __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+}; /* for atomic operations */
 
 /* corresponding to ipls */
 
-struct _spl SPIN_EMB __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_MCHECK __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_MEGA __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_HWCLK __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_VIRTCONS __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_INVALIDATE __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_PERFMON __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_POOL __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_MAILBOX __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_PR_LK11 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_IOLOCK11 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_PR_LK10 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_IOLOCK10 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_PR_LK9 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_IOLOCK9 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_SCHED __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_MMG __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_JIB __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_TIMER __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_PR_LK8 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_IOLOCK8 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_SCS __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
-struct _spl SPIN_IOPOST __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ }; // new in freevms
+struct _spl SPIN_EMB __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_MCHECK __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_MEGA __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_HWCLK __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_VIRTCONS __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_INVALIDATE __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_PERFMON __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_POOL __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_MAILBOX __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_PR_LK11 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_IOLOCK11 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_PR_LK10 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_IOLOCK10 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_PR_LK9 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_IOLOCK9 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_SCHED __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_MMG __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_JIB __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_TIMER __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_PR_LK8 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_IOLOCK8 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_SCS __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
+struct _spl SPIN_IOPOST __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+}; // new in freevms
 
 struct _phd system_phd;
 
 extern void exe$timeout(void);
 
-void qhead_init(void * l) {
-  struct _pcb * tmp=(struct _pcb *)l; /* could be anything */
-  tmp->pcb$l_sqfl=tmp;
-  tmp->pcb$l_sqbl=tmp;
+void qhead_init(void * l)
+{
+    struct _pcb * tmp=(struct _pcb *)l; /* could be anything */
+    tmp->pcb$l_sqfl=tmp;
+    tmp->pcb$l_sqbl=tmp;
 }
 
 int vmstimerconf=0;
 
-struct myq2 {
-  unsigned long flink;
-  unsigned long blink;
+struct myq2
+{
+    unsigned long flink;
+    unsigned long blink;
 };
 
 unsigned long pcbvec[MAXPROCESSCNT];
@@ -2014,198 +2064,209 @@ unsigned long csid; // have to use it like this for  now
 char boot_cpu_stack[0x4000] __cacheline_aligned;
 #endif
 
-void __init vms_init(void) {
-  int i,j;
+void __init vms_init(void)
+{
+    int i,j;
 
-  sch$gl_pixwidth=0;
-  for(i=MAXPROCESSCNT;i;i=i>>1) sch$gl_pixwidth++;
+    sch$gl_pixwidth=0;
+    for(i=MAXPROCESSCNT; i; i=i>>1) sch$gl_pixwidth++;
 
-  for(i=0;i<32;i++) {
-    smp$gl_cpu_data[i]=&vmscpus[i];
-    smp$gl_cpu_data[i]->cpu$l_cpuid_mask=1 << i;
-    for(j=0;j<6;j++) {
-      struct myq2 * q = &smp$gl_cpu_data[i]->cpu$q_swiqfl[j];
-      q->flink=q;
-      q->blink=q;
-    }
-    qhead_init(&smp$gl_cpu_data[i]->cpu$l_psfl);
-    smp$gl_cpu_data[i]->cpu$l_phy_cpuid = i;
-    smp$gl_cpu_data[i]->cpu$l_cpuid_mask = 1 << i;
+    for(i=0; i<32; i++)
+    {
+        smp$gl_cpu_data[i]=&vmscpus[i];
+        smp$gl_cpu_data[i]->cpu$l_cpuid_mask=1 << i;
+        for(j=0; j<6; j++)
+        {
+            struct myq2 * q = &smp$gl_cpu_data[i]->cpu$q_swiqfl[j];
+            q->flink=q;
+            q->blink=q;
+        }
+        qhead_init(&smp$gl_cpu_data[i]->cpu$l_psfl);
+        smp$gl_cpu_data[i]->cpu$l_phy_cpuid = i;
+        smp$gl_cpu_data[i]->cpu$l_cpuid_mask = 1 << i;
 #ifdef __x86_64__
 #include <asm/pda.h>
-    smp$gl_cpu_data[i]->cpu$ps_pda=cpu_pda + i;
+        smp$gl_cpu_data[i]->cpu$ps_pda=cpu_pda + i;
 #endif
-  }
+    }
 
-  smp$gl_cpu_data[0]->cpu$l_curpcb = &init_task_union;
+    smp$gl_cpu_data[0]->cpu$l_curpcb = &init_task_union;
 #if 0
-  smp$gl_cpu_data[0]->cpu$l_capability = CPB$M_RUN | CPB$M_PRIMARY;
+    smp$gl_cpu_data[0]->cpu$l_capability = CPB$M_RUN | CPB$M_PRIMARY;
 #else
-  sch$add_cpu_cap(0, CPB$M_RUN | CPB$M_PRIMARY, 0);
+    sch$add_cpu_cap(0, CPB$M_RUN | CPB$M_PRIMARY, 0);
 #endif
-  sch$al_cpu_cap[0]=smp$gl_cpu_data[0]->cpu$l_capability;
+    sch$al_cpu_cap[0]=smp$gl_cpu_data[0]->cpu$l_capability;
 #ifdef __i386__
-  smp$gl_cpu_data[0]->cpu$l_saved_isp = &boot_cpu_stack[0x4000];
+    smp$gl_cpu_data[0]->cpu$l_saved_isp = &boot_cpu_stack[0x4000];
 #endif
 
-  sch$gl_idle_cpus=0;
+    sch$gl_idle_cpus=0;
 #ifdef __i386__
-  sch$aq_comot=(void *)sch$aq_comoh+4;
-  sch$aq_comt=(void *)sch$aq_comh+4;
+    sch$aq_comot=(void *)sch$aq_comoh+4;
+    sch$aq_comt=(void *)sch$aq_comh+4;
 #else
 #if 0
-  sch$aq_comot=(void *)sch$aq_comoh+8;
-  sch$aq_comt=(void *)sch$aq_comh+8;
+    sch$aq_comot=(void *)sch$aq_comoh+8;
+    sch$aq_comt=(void *)sch$aq_comh+8;
 #endif
 #endif
 
-  for(i=0;i<32;i++) {
-    struct _pcb * tmp;
-    tmp=(struct _pcb *) &sch$aq_comh[i];
+    for(i=0; i<32; i++)
+    {
+        struct _pcb * tmp;
+        tmp=(struct _pcb *) &sch$aq_comh[i];
         tmp->pcb$l_sqfl=tmp;
         tmp->pcb$l_sqbl=tmp;
-  }
+    }
 
-  for(i=0;i<12;i++) {
-    struct _wqh * tmp;
-    tmp=&sch$aq_wqhdr[i];
-    tmp->wqh$l_wqfl=tmp;
-    tmp->wqh$l_wqbl=tmp;
-    tmp->wqh$l_wqcnt=0;
-    tmp->wqh$l_wqstate=i;
-  }
+    for(i=0; i<12; i++)
+    {
+        struct _wqh * tmp;
+        tmp=&sch$aq_wqhdr[i];
+        tmp->wqh$l_wqfl=tmp;
+        tmp->wqh$l_wqbl=tmp;
+        tmp->wqh$l_wqcnt=0;
+        tmp->wqh$l_wqstate=i;
+    }
 
-sch$gq_colpgwq=&sch$aq_wqhdr[1];
-sch$gq_mwait=&sch$aq_wqhdr[2];
+    sch$gq_colpgwq=&sch$aq_wqhdr[1];
+    sch$gq_mwait=&sch$aq_wqhdr[2];
 //sch$gq_cefwq=&sch$aq_wqhdr[3];
-sch$gq_pfwq=&sch$aq_wqhdr[4];
-sch$gq_lefwq=&sch$aq_wqhdr[5];
-sch$gq_lefowq=&sch$aq_wqhdr[6];
-sch$gq_hibwq=&sch$aq_wqhdr[7];
-sch$gq_hibowq=&sch$aq_wqhdr[8];
-sch$gq_susp=&sch$aq_wqhdr[9];
-sch$gq_suspo=&sch$aq_wqhdr[10];
-sch$gq_fpgwq=&sch$aq_wqhdr[11];
+    sch$gq_pfwq=&sch$aq_wqhdr[4];
+    sch$gq_lefwq=&sch$aq_wqhdr[5];
+    sch$gq_lefowq=&sch$aq_wqhdr[6];
+    sch$gq_hibwq=&sch$aq_wqhdr[7];
+    sch$gq_hibowq=&sch$aq_wqhdr[8];
+    sch$gq_susp=&sch$aq_wqhdr[9];
+    sch$gq_suspo=&sch$aq_wqhdr[10];
+    sch$gq_fpgwq=&sch$aq_wqhdr[11];
 
-  exe$gq_systime=40916*864;
-  exe$gq_systime*=100;
-  exe$gq_systime+=xtime.tv_sec;
-  exe$gq_systime*=10000000;
+    exe$gq_systime=40916*864;
+    exe$gq_systime*=100;
+    exe$gq_systime+=xtime.tv_sec;
+    exe$gq_systime*=10000000;
 
-  exe$gq_boottime = exe$gq_systime;
+    exe$gq_boottime = exe$gq_systime;
 
-  exe$gl_tqfl=(void *)&tqehead;
-  exe$gl_tqfl->tqe$l_tqfl=exe$gl_tqfl;
-  exe$gl_tqfl->tqe$l_tqbl=exe$gl_tqfl;
+    exe$gl_tqfl=(void *)&tqehead;
+    exe$gl_tqfl->tqe$l_tqfl=exe$gl_tqfl;
+    exe$gl_tqfl->tqe$l_tqbl=exe$gl_tqfl;
 
-  tqe.tqe$l_tqfl=0;
-  tqe.tqe$l_tqbl=0;
-  tqe.tqe$w_size=0;
-  tqe.tqe$b_type=DYN$C_TQE;
-  tqe.tqe$b_rqtype=TQE$C_TMSNGL|TQE$M_REPEAT; /* ???? */
-  tqe.tqe$l_rqpid=0xffffffff;
-  tqe.tqe$l_cputim=0xffffffff;
-  tqe.tqe$q_time=0x4000000000000000;
-  insque(&tqe,exe$gl_tqfl);
+    tqe.tqe$l_tqfl=0;
+    tqe.tqe$l_tqbl=0;
+    tqe.tqe$w_size=0;
+    tqe.tqe$b_type=DYN$C_TQE;
+    tqe.tqe$b_rqtype=TQE$C_TMSNGL|TQE$M_REPEAT; /* ???? */
+    tqe.tqe$l_rqpid=0xffffffff;
+    tqe.tqe$l_cputim=0xffffffff;
+    tqe.tqe$q_time=0x4000000000000000;
+    insque(&tqe,exe$gl_tqfl);
 
-  tqe2.tqe$l_tqfl=0;
-  tqe2.tqe$l_tqbl=0;
-  tqe2.tqe$w_size=0;
-  tqe2.tqe$b_type=DYN$C_TQE;
-  tqe2.tqe$b_rqtype=TQE$C_SSREPT;
-  tqe2.tqe$l_fpc=&exe$timeout;
-  tqe2.tqe$l_fr3=0; /* something? */
-  tqe2.tqe$l_fr4=0; /* something? */
-  tqe2.tqe$q_time=0;
-  tqe2.tqe$q_delta=10000000;
-  insque(&tqe2,exe$gl_tqfl);
-  //  exe$instimq(&tqe2);
+    tqe2.tqe$l_tqfl=0;
+    tqe2.tqe$l_tqbl=0;
+    tqe2.tqe$w_size=0;
+    tqe2.tqe$b_type=DYN$C_TQE;
+    tqe2.tqe$b_rqtype=TQE$C_SSREPT;
+    tqe2.tqe$l_fpc=&exe$timeout;
+    tqe2.tqe$l_fr3=0; /* something? */
+    tqe2.tqe$l_fr4=0; /* something? */
+    tqe2.tqe$q_time=0;
+    tqe2.tqe$q_delta=10000000;
+    insque(&tqe2,exe$gl_tqfl);
+    //  exe$instimq(&tqe2);
 
-  vmstimerconf=1;
+    vmstimerconf=1;
 
-  //  qhead_init(&ioc$gq_postiq);
+    //  qhead_init(&ioc$gq_postiq);
 
-  qhead_init(&lck$gl_rrsfl);
+    qhead_init(&lck$gl_rrsfl);
 
-  for(i=0;i<RESHASHTBL;i++) {
-    //    reshashtbl[i]=0;
-    qhead_init(&reshashtbl[2*i]);
-  }
-  lck$gl_hashtbl=&reshashtbl;
-  lck$gl_idtbl=&lockidtbl;
-  for(i=0;i<LOCKIDTBL-1;i++)
-    lockidtbl[i]=i+1;
-  lck$gl_nxtid=&locknxtid;
-  lck$gl_maxid=&lockmaxid;
+    for(i=0; i<RESHASHTBL; i++)
+    {
+        //    reshashtbl[i]=0;
+        qhead_init(&reshashtbl[2*i]);
+    }
+    lck$gl_hashtbl=&reshashtbl;
+    lck$gl_idtbl=&lockidtbl;
+    for(i=0; i<LOCKIDTBL-1; i++)
+        lockidtbl[i]=i+1;
+    lck$gl_nxtid=&locknxtid;
+    lck$gl_maxid=&lockmaxid;
 
-  qhead_init(&scs$gq_local_names);
+    qhead_init(&scs$gq_local_names);
 
-  qhead_init(&sch$gq_cebhd);
+    qhead_init(&sch$gq_cebhd);
 
-  qhead_init(&exe$gl_gsdsysfl);
-  qhead_init(&exe$gl_gsdgrpfl);
+    qhead_init(&exe$gl_gsdsysfl);
+    qhead_init(&exe$gl_gsdgrpfl);
 
-  printk("Done system data cells\n");
+    printk("Done system data cells\n");
 }
 
 #define FUDGEFACTOR 40587
 
-void __init vms_init2(void) {
-  //  exe$gq_systime=40916*864;
-  exe$gq_systime=FUDGEFACTOR*864;
-  exe$gq_systime*=100;
-  exe$gq_systime+=xtime.tv_sec;
-  exe$gq_systime*=10000000;
+void __init vms_init2(void)
+{
+    //  exe$gq_systime=40916*864;
+    exe$gq_systime=FUDGEFACTOR*864;
+    exe$gq_systime*=100;
+    exe$gq_systime+=xtime.tv_sec;
+    exe$gq_systime*=10000000;
 
-  exe$gq_boottime = exe$gq_systime;
+    exe$gq_boottime = exe$gq_systime;
 
-  xqp_init2();
-  exttwo_init2(0);
+    xqp_init2();
+    exttwo_init2(0);
 
 #if 0
 #ifdef CONFIG_BLK_DEV_FD_VMS
-  vms_floppy_init();
+    vms_floppy_init();
 #endif
 #endif
 }
 
-void __init vms_init4(void) {
-  __fl_init();
-  //nl_init(); /* first */  
-  //rnd_init();
-  tty_vmsinit();
-  ft_vmsinit();
-  pn_vmsinit();
-  tz_vmsinit();
-  ip4_vmsinit();
-  void exe$reclaim_pool_gentle(void * pool);
-  signed long long time=-10000000*60;
-  exe$setimr(0, &time, exe$reclaim_pool_gentle, exe$gs_npp_npool, 0);
+void __init vms_init4(void)
+{
+    __fl_init();
+    //nl_init(); /* first */
+    //rnd_init();
+    tty_vmsinit();
+    ft_vmsinit();
+    pn_vmsinit();
+    tz_vmsinit();
+    ip4_vmsinit();
+    void exe$reclaim_pool_gentle(void * pool);
+    signed long long time=-10000000*60;
+    exe$setimr(0, &time, exe$reclaim_pool_gentle, exe$gs_npp_npool, 0);
 }
 
-void __init vms_init3(void) {
-  mmg$gq_gpt_base=kmalloc(4096,GFP_KERNEL);
+void __init vms_init3(void)
+{
+    mmg$gq_gpt_base=kmalloc(4096,GFP_KERNEL);
 
-  mmg$gl_sysphd=&system_phd;
-  init_phd(&system_phd);
+    mmg$gl_sysphd=&system_phd;
+    init_phd(&system_phd);
 
-  csid = xtime.tv_sec;
+    csid = xtime.tv_sec;
 }
 
-unsigned long long inline unix_to_vms_time(unsigned long l) {
-  unsigned long long retval=FUDGEFACTOR*864;
-  retval*=100;
-  retval+=l;
-  retval*=10000000;
-  return retval;
+unsigned long long inline unix_to_vms_time(unsigned long l)
+{
+    unsigned long long retval=FUDGEFACTOR*864;
+    retval*=100;
+    retval+=l;
+    retval*=10000000;
+    return retval;
 }
 
-unsigned long inline vms_to_unix_time(unsigned long long l) {
-  unsigned long long retval=FUDGEFACTOR*864;
-  retval*=100;
-  retval=l-retval;
-  //  retval/=10000000;
-  retval>>=23;
-  return retval;
+unsigned long inline vms_to_unix_time(unsigned long long l)
+{
+    unsigned long long retval=FUDGEFACTOR*864;
+    retval*=100;
+    retval=l-retval;
+    //  retval/=10000000;
+    retval>>=23;
+    return retval;
 }
 

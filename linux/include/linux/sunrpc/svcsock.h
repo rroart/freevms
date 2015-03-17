@@ -15,36 +15,37 @@
  * RPC server socket.
  * NOTE: First two items must be prev/next.
  */
-struct svc_sock {
-	struct svc_sock *	sk_prev;	/* list of ready sockets */
-	struct svc_sock *	sk_next;
-	struct svc_sock *	sk_list;	/* list of all sockets */
-	struct socket *		sk_sock;	/* berkeley socket layer */
-	struct sock *		sk_sk;		/* INET layer */
-	spinlock_t		sk_lock;
+struct svc_sock
+{
+    struct svc_sock *	sk_prev;	/* list of ready sockets */
+    struct svc_sock *	sk_next;
+    struct svc_sock *	sk_list;	/* list of all sockets */
+    struct socket *		sk_sock;	/* berkeley socket layer */
+    struct sock *		sk_sk;		/* INET layer */
+    spinlock_t		sk_lock;
 
-	struct svc_serv *	sk_server;	/* service for this socket */
-	unsigned char		sk_inuse;	/* use count */
-	unsigned char		sk_busy;	/* enqueued/receiving */
-	unsigned char		sk_conn;	/* conn pending */
-	unsigned char		sk_close;	/* dead or dying */
-	int			sk_data;	/* data pending */
-	unsigned int		sk_temp : 1,	/* temp socket */
-				sk_qued : 1,	/* on serv->sk_sockets */
-				sk_dead : 1;	/* socket closed */
-	int			(*sk_recvfrom)(struct svc_rqst *rqstp);
-	int			(*sk_sendto)(struct svc_rqst *rqstp);
+    struct svc_serv *	sk_server;	/* service for this socket */
+    unsigned char		sk_inuse;	/* use count */
+    unsigned char		sk_busy;	/* enqueued/receiving */
+    unsigned char		sk_conn;	/* conn pending */
+    unsigned char		sk_close;	/* dead or dying */
+    int			sk_data;	/* data pending */
+    unsigned int		sk_temp : 1,	/* temp socket */
+                   sk_qued : 1,	/* on serv->sk_sockets */
+                   sk_dead : 1;	/* socket closed */
+    int			(*sk_recvfrom)(struct svc_rqst *rqstp);
+    int			(*sk_sendto)(struct svc_rqst *rqstp);
 
-	/* We keep the old state_change and data_ready CB's here */
-	void			(*sk_ostate)(struct sock *);
-	void			(*sk_odata)(struct sock *, int bytes);
+    /* We keep the old state_change and data_ready CB's here */
+    void			(*sk_ostate)(struct sock *);
+    void			(*sk_odata)(struct sock *, int bytes);
 
-	/* private TCP part */
-	int			sk_reclen;	/* length of record */
-	int			sk_tcplen;	/* current read length */
+    /* private TCP part */
+    int			sk_reclen;	/* length of record */
+    int			sk_tcplen;	/* current read length */
 
-	/* Debugging */
-	struct svc_rqst *	sk_rqstp;
+    /* Debugging */
+    struct svc_rqst *	sk_rqstp;
 };
 
 /*

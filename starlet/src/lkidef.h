@@ -3,81 +3,94 @@
 
 #define LKI$K_LENGTH 24
 #define LKI$C_LENGTH 24
-	
-struct _lkidef {
-  union  {
-    unsigned int lki$l_mstlkid;
-    unsigned int lki$l_lockid;
-  };
-  unsigned int lki$l_pid;
-  union  {
-    unsigned int lki$l_mstcsid;
-    unsigned int lki$l_sysid;
-  };
-  unsigned char lki$b_rqmode;
-  unsigned char lki$b_grmode;
-  char lki$b_queue;
-  char lki$$$_spare;
-  union  {
-    unsigned int lki$l_lkid;
-    unsigned int lki$l_remlkid;
-  };
-  union  {
-    unsigned int lki$l_csid;
-    unsigned int lki$l_remsysid;
-  };
+
+struct _lkidef
+{
+    union
+    {
+        unsigned int lki$l_mstlkid;
+        unsigned int lki$l_lockid;
+    };
+    unsigned int lki$l_pid;
+    union
+    {
+        unsigned int lki$l_mstcsid;
+        unsigned int lki$l_sysid;
+    };
+    unsigned char lki$b_rqmode;
+    unsigned char lki$b_grmode;
+    char lki$b_queue;
+    char lki$$$_spare;
+    union
+    {
+        unsigned int lki$l_lkid;
+        unsigned int lki$l_remlkid;
+    };
+    union
+    {
+        unsigned int lki$l_csid;
+        unsigned int lki$l_remsysid;
+    };
 };
 
 #define LKI$K_BR_LENGTH 56
 #define LKI$C_BR_LENGTH 56
-	
-struct _lkidef_br {
-  struct _lkidef lki$r_lki_base;
-  unsigned long long lki$q_rqstart;
-  unsigned long long lki$q_rqlength;
-  unsigned long long lki$q_grstart;
-  unsigned long long lki$q_grlength;
+
+struct _lkidef_br
+{
+    struct _lkidef lki$r_lki_base;
+    unsigned long long lki$q_rqstart;
+    unsigned long long lki$q_rqlength;
+    unsigned long long lki$q_grstart;
+    unsigned long long lki$q_grlength;
 };
 
 #define LKI$M_SYSNAM 0x80000000
-	
-struct _namspace {
-  union  {
-    struct  {
-      unsigned short int lki$w_group;
-      unsigned char lki$b_rmod;
-      unsigned char lki$b_status;
+
+struct _namspace
+{
+    union
+    {
+        struct
+        {
+            unsigned short int lki$w_group;
+            unsigned char lki$b_rmod;
+            unsigned char lki$b_status;
+        };
+        struct
+        {
+            unsigned lki$$_fill	: 31;
+            unsigned lki$v_sysnam	: 1;
+        };
     };
-    struct  {
-      unsigned lki$$_fill	: 31;
-      unsigned lki$v_sysnam	: 1;
-    };
-  };
 };
- 
-struct _statef {
-  unsigned char lki$b_state_rqmode;
-  unsigned char lki$b_state_grmode;
-  char lki$b_state_queue;
+
+struct _statef
+{
+    unsigned char lki$b_state_rqmode;
+    unsigned char lki$b_state_grmode;
+    char lki$b_state_queue;
 };
 
 #define		LKIUSR$K_LENGTH		20
 #define		LKIUSR$C_LENGTH		20
 #define		LKIUSR$K_BLOCKER_START	20
-	
-struct _lkiusrdef {
-  unsigned long long lkiusr$q_start;
-  unsigned long long lkiusr$q_length;
-  unsigned char lkiusr$b_rqmode;
-  unsigned char lkiusr$b_ignore_own;
-  short int lki$$_fill_1;
+
+struct _lkiusrdef
+{
+    unsigned long long lkiusr$q_start;
+    unsigned long long lkiusr$q_length;
+    unsigned char lkiusr$b_rqmode;
+    unsigned char lkiusr$b_ignore_own;
+    short int lki$$_fill_1;
 };
 
-struct _rngdef {
-  unsigned long long lki$_rng_q_rqstart;
-  unsigned long long lki$_rng_q_rqlength;
-  unsigned long long lki$_rng_q_grstart;
-  unsigned long long lki$_rng_q_grlength;
+struct _rngdef
+{
+    unsigned long long lki$_rng_q_rqstart;
+    unsigned long long lki$_rng_q_rqlength;
+    unsigned long long lki$_rng_q_grstart;
+    unsigned long long lki$_rng_q_grlength;
 };
 
 #define		LKI$C_GRANTED		1
@@ -131,18 +144,19 @@ struct _rngdef {
 #define		LKI$_LASTRSB		530
 #define		LKISND$K_HDRLEN		16
 #define		LKISND$C_HDRLEN		16
-	
-struct _lkisnddef {
-  unsigned short int lkisnd$w_retsize;
-  unsigned short int lkisnd$w_status;
-  unsigned short int lkisnd$w_flags;
-  unsigned short int lkisnd$w_seqnum;
-  unsigned short int lkisnd$w_size;
-  unsigned char lkisnd$b_type;
-  unsigned char lkisnd$b_fill_2;
-  unsigned char lkisnd$b_item_length;
-  unsigned char lkisnd$b_fill_3;
-  unsigned short int lkisnd$w_fill_4;
+
+struct _lkisnddef
+{
+    unsigned short int lkisnd$w_retsize;
+    unsigned short int lkisnd$w_status;
+    unsigned short int lkisnd$w_flags;
+    unsigned short int lkisnd$w_seqnum;
+    unsigned short int lkisnd$w_size;
+    unsigned char lkisnd$b_type;
+    unsigned char lkisnd$b_fill_2;
+    unsigned char lkisnd$b_item_length;
+    unsigned char lkisnd$b_fill_3;
+    unsigned short int lkisnd$w_fill_4;
 };
- 
+
 #endif

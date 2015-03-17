@@ -31,29 +31,30 @@
 #define CDU$M_REQUIRED 0x40000
 #define CDU$M_INTERNAL 0x80000 // cliroutine is such
 
-struct _cdu {
-  int cdu$l_cfl;
-  int cdu$l_cbl; 
-  unsigned short int cdu$w_size;
-  unsigned char cdu$b_type;
-  unsigned char cdu$b_rmod;
-  int cdu$l_next;
-  char cdu$t_name[0];
-  int cdu$l_parent;
-  int cdu$l_child;
-  int cdu$l_verb;
-  int cdu$l_image;
-  int cdu$l_routine;
-  int cdu$l_qualifiers;
-  int cdu$l_parameters;
-  int cdu$l_name;
-  int cdu$l_value;
-  int cdu$l_flags;
-  int cdu$l_label;
-  int cdu$l_type;
-  int cdu$l_syntax;
-  int cdu$l_clauses;
-  int cdu$l_keywords;
+struct _cdu
+{
+    int cdu$l_cfl;
+    int cdu$l_cbl;
+    unsigned short int cdu$w_size;
+    unsigned char cdu$b_type;
+    unsigned char cdu$b_rmod;
+    int cdu$l_next;
+    char cdu$t_name[0];
+    int cdu$l_parent;
+    int cdu$l_child;
+    int cdu$l_verb;
+    int cdu$l_image;
+    int cdu$l_routine;
+    int cdu$l_qualifiers;
+    int cdu$l_parameters;
+    int cdu$l_name;
+    int cdu$l_value;
+    int cdu$l_flags;
+    int cdu$l_label;
+    int cdu$l_type;
+    int cdu$l_syntax;
+    int cdu$l_clauses;
+    int cdu$l_keywords;
 };
 
 #if 0
@@ -69,12 +70,12 @@ struct _cdu {
 static struct _cdu ** cur_cdu=0x3f000000;
 static struct _cdu ** my_cdu=0x3f000004;
 static struct _cdu ** root_cdu=0x3f000008;
-static void ** comdsc = 0x3f00000c; 
+static void ** comdsc = 0x3f00000c;
 #else
 static struct _cdu ** cur_cdu=0x3f000000;
 static struct _cdu ** my_cdu=0x3f000008;
 static struct _cdu ** root_cdu=0x3f000010;
-static void ** comdsc = 0x3f000018; 
+static void ** comdsc = 0x3f000018;
 #endif
 
 int mymymyuserfunc(int (*func)(),void * start, long count, int dum0, int dum1);

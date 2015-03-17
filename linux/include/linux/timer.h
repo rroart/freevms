@@ -13,11 +13,12 @@
  * timeouts. You can use this field to distinguish between the different
  * invocations.
  */
-struct timer_list {
-	struct list_head list;
-	unsigned long expires;
-	unsigned long data;
-	void (*function)(unsigned long);
+struct timer_list
+{
+    struct list_head list;
+    unsigned long expires;
+    unsigned long data;
+    void (*function)(unsigned long);
 };
 
 extern void add_timer(struct timer_list * timer);
@@ -44,16 +45,16 @@ extern void it_real_fn(unsigned long);
 
 static inline void init_timer(struct timer_list * timer)
 {
-	timer->list.next = timer->list.prev = NULL;
+    timer->list.next = timer->list.prev = NULL;
 }
 
 static inline int timer_pending (const struct timer_list * timer)
 {
-	return timer->list.next != NULL;
+    return timer->list.next != NULL;
 }
 
 /*
- *	These inlines deal with timer wrapping correctly. You are 
+ *	These inlines deal with timer wrapping correctly. You are
  *	strongly encouraged to use them
  *	1. Because people otherwise forget
  *	2. Because if the timer wrap changes in future you wont have to

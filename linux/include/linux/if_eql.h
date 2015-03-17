@@ -7,7 +7,7 @@
  *
  *	This software may be used and distributed according to the terms
  *	of the GNU General Public License, incorporated herein by reference.
- * 
+ *
  * The author may be reached as simon@ncm.com, or C/O
  *    NCM
  *    Attn: Simon Janes
@@ -35,46 +35,52 @@
 #define EQL_GETMASTRCFG (SIOCDEVPRIVATE + 4)
 #define EQL_SETMASTRCFG (SIOCDEVPRIVATE + 5)
 
-typedef struct slave {
-  struct net_device *dev;
-  long priority;
-  long priority_bps;
-  long priority_Bps;
-  long bytes_queued;
-  struct slave *next;
+typedef struct slave
+{
+    struct net_device *dev;
+    long priority;
+    long priority_bps;
+    long priority_Bps;
+    long bytes_queued;
+    struct slave *next;
 } slave_t;
 
-typedef struct slave_queue {
-  slave_t *head;
-  slave_t *best_slave;
-  int num_slaves;
-  struct net_device *master_dev;
-  char lock;
+typedef struct slave_queue
+{
+    slave_t *head;
+    slave_t *best_slave;
+    int num_slaves;
+    struct net_device *master_dev;
+    char lock;
 } slave_queue_t;
 
-typedef struct equalizer {
-  slave_queue_t *queue;
-  int min_slaves;
-  int max_slaves;
-  struct net_device_stats *stats;
-  struct timer_list timer;
-  char timer_on;
-} equalizer_t;  
+typedef struct equalizer
+{
+    slave_queue_t *queue;
+    int min_slaves;
+    int max_slaves;
+    struct net_device_stats *stats;
+    struct timer_list timer;
+    char timer_on;
+} equalizer_t;
 
-typedef struct master_config {
-  char master_name[16];
-  int max_slaves;
-  int min_slaves;
+typedef struct master_config
+{
+    char master_name[16];
+    int max_slaves;
+    int min_slaves;
 } master_config_t;
 
-typedef struct slave_config {
-  char slave_name[16];
-  long priority;
+typedef struct slave_config
+{
+    char slave_name[16];
+    long priority;
 } slave_config_t;
 
-typedef struct slaving_request {
-  char slave_name[16];
-  long priority;
+typedef struct slaving_request
+{
+    char slave_name[16];
+    long priority;
 } slaving_request_t;
 
 

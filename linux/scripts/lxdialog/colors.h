@@ -152,7 +152,8 @@
  * Global variables
  */
 
-typedef struct {
+typedef struct
+{
     char name[COLOR_NAME_LEN];
     int value;
 } color_names_st;

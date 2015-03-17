@@ -64,7 +64,7 @@ void sch$iounlockw(void);
 void sch$iounlock(void);
 void sch$chsep(struct _pcb * p,unsigned char newpri);
 void sch$chse(struct _pcb * p, unsigned char class);
-void sch$chsep2(struct _pcb * p,unsigned char newpri); 
+void sch$chsep2(struct _pcb * p,unsigned char newpri);
 int sch$calculate_affinity(int mask);
 int sch$acquire_affinity(struct _pcb *pcb, int obsolete, int cpu_id);
 int sch$release_affinity(struct _pcb *pcb);

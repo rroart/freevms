@@ -2,12 +2,13 @@
 #define _LINUX_FS_STRUCT_H
 #ifdef __KERNEL__
 
-struct fs_struct {
-	atomic_t count;
-	rwlock_t lock;
-	int umask;
-	struct dentry * root, * pwd, * altroot;
-	struct vfsmount * rootmnt, * pwdmnt, * altrootmnt;
+struct fs_struct
+{
+    atomic_t count;
+    rwlock_t lock;
+    int umask;
+    struct dentry * root, * pwd, * altroot;
+    struct vfsmount * rootmnt, * pwdmnt, * altrootmnt;
 };
 
 #define INIT_FS { \
@@ -26,21 +27,22 @@ extern void set_fs_altroot(void);
  */
 
 static inline void set_fs_root(struct fs_struct *fs,
-	struct vfsmount *mnt,
-	struct dentry *dentry)
+                               struct vfsmount *mnt,
+                               struct dentry *dentry)
 {
-	struct dentry *old_root;
-	struct vfsmount *old_rootmnt;
-	write_lock(&fs->lock);
-	old_root = fs->root;
-	old_rootmnt = fs->rootmnt;
-	fs->rootmnt = mntget(mnt);
-	fs->root = dget(dentry);
-	write_unlock(&fs->lock);
-	if (old_root) {
-		dput(old_root);
-		mntput(old_rootmnt);
-	}
+    struct dentry *old_root;
+    struct vfsmount *old_rootmnt;
+    write_lock(&fs->lock);
+    old_root = fs->root;
+    old_rootmnt = fs->rootmnt;
+    fs->rootmnt = mntget(mnt);
+    fs->root = dget(dentry);
+    write_unlock(&fs->lock);
+    if (old_root)
+    {
+        dput(old_root);
+        mntput(old_rootmnt);
+    }
 }
 
 /*
@@ -49,21 +51,22 @@ static inline void set_fs_root(struct fs_struct *fs,
  */
 
 static inline void set_fs_pwd(struct fs_struct *fs,
-	struct vfsmount *mnt,
-	struct dentry *dentry)
+                              struct vfsmount *mnt,
+                              struct dentry *dentry)
 {
-	struct dentry *old_pwd;
-	struct vfsmount *old_pwdmnt;
-	write_lock(&fs->lock);
-	old_pwd = fs->pwd;
-	old_pwdmnt = fs->pwdmnt;
-	fs->pwdmnt = mntget(mnt);
-	fs->pwd = dget(dentry);
-	write_unlock(&fs->lock);
-	if (old_pwd) {
-		dput(old_pwd);
-		mntput(old_pwdmnt);
-	}
+    struct dentry *old_pwd;
+    struct vfsmount *old_pwdmnt;
+    write_lock(&fs->lock);
+    old_pwd = fs->pwd;
+    old_pwdmnt = fs->pwdmnt;
+    fs->pwdmnt = mntget(mnt);
+    fs->pwd = dget(dentry);
+    write_unlock(&fs->lock);
+    if (old_pwd)
+    {
+        dput(old_pwd);
+        mntput(old_pwdmnt);
+    }
 }
 
 struct fs_struct *copy_fs_struct(struct fs_struct *old);

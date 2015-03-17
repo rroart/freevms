@@ -12,7 +12,7 @@
  * History
  *
  *	Apr 25, 2005 - Andrew Allison
- *		Intial program creation	
+ *		Intial program creation
  */
 
 #include "ssdef.h"
@@ -34,35 +34,38 @@
  *
  */
 unsigned long lib$ediv(	const	signed long int *divisor,
-			const	signed long long *dividend,
-				signed long int *quotient,
-				signed long int *remainder )
+                        const	signed long long *dividend,
+                        signed long int *quotient,
+                        signed long int *remainder )
 
 {
 
 //	Divide by 0 - a no-no
-	if ( *divisor == 0 )
-	{	*quotient = (long) *dividend;
-		*remainder = 0;
-		return SS$_INTDIV;
-	}
+    if ( *divisor == 0 )
+    {
+        *quotient = (long) *dividend;
+        *remainder = 0;
+        return SS$_INTDIV;
+    }
 
 //	Do the math
-	*quotient  = *dividend / *divisor;
-	*remainder = *dividend % *divisor;
+    *quotient  = *dividend / *divisor;
+    *remainder = *dividend % *divisor;
 
 //	Detect overflow
-	if ((*dividend > 0 ) && (*quotient < 0 ))
-	{	*quotient = 0x00000000FFFFFFFF & *dividend;
-		*remainder = 0;
-		return SS$_INTOVF;
-	}
-	if ((*dividend < 0 ) && (*quotient > 0 ))
-	{	*quotient = 0x00000000FFFFFFFF & *dividend;
-		*remainder = 0;
-		return SS$_INTOVF;
-	}
-	
-	return SS$_NORMAL;
+    if ((*dividend > 0 ) && (*quotient < 0 ))
+    {
+        *quotient = 0x00000000FFFFFFFF & *dividend;
+        *remainder = 0;
+        return SS$_INTOVF;
+    }
+    if ((*dividend < 0 ) && (*quotient > 0 ))
+    {
+        *quotient = 0x00000000FFFFFFFF & *dividend;
+        *remainder = 0;
+        return SS$_INTOVF;
+    }
+
+    return SS$_NORMAL;
 }
 

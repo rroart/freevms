@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Modified Linux source file, 2001-2004  
+// Modified Linux source file, 2001-2004
 
 /*
  *  linux/fs/namei.c
@@ -43,8 +43,8 @@
  * The new code replaces the old recursive symlink resolution with
  * an iterative one (in case of non-nested symlink chains).  It does
  * this with calls to <fs>_follow_link().
- * As a side effect, dir_namei(), _namei() and follow_link() are now 
- * replaced with a single function lookup_dentry() that can handle all 
+ * As a side effect, dir_namei(), _namei() and follow_link() are now
+ * replaced with a single function lookup_dentry() that can handle all
  * the special cases of the former code.
  *
  * With the new dcache, the pathname is stored at each inode, at least as
@@ -109,41 +109,47 @@
  */
 static inline int do_getname(const char *filename, char *page)
 {
-	int retval;
-	unsigned long len = PATH_MAX;
+    int retval;
+    unsigned long len = PATH_MAX;
 
-	if ((unsigned long) filename >= TASK_SIZE) {
-		if (!segment_eq(get_fs(), KERNEL_DS))
-			return -EFAULT;
-	} else if (TASK_SIZE - (unsigned long) filename < PATH_MAX)
-		len = TASK_SIZE - (unsigned long) filename;
+    if ((unsigned long) filename >= TASK_SIZE)
+    {
+        if (!segment_eq(get_fs(), KERNEL_DS))
+            return -EFAULT;
+    }
+    else if (TASK_SIZE - (unsigned long) filename < PATH_MAX)
+        len = TASK_SIZE - (unsigned long) filename;
 
-	retval = strncpy_from_user((char *)page, filename, len);
-	if (retval > 0) {
-		if (retval < len)
-			return 0;
-		return -ENAMETOOLONG;
-	} else if (!retval)
-		retval = -ENOENT;
-	return retval;
+    retval = strncpy_from_user((char *)page, filename, len);
+    if (retval > 0)
+    {
+        if (retval < len)
+            return 0;
+        return -ENAMETOOLONG;
+    }
+    else if (!retval)
+        retval = -ENOENT;
+    return retval;
 }
 
 char * getname(const char * filename)
 {
-	char *tmp, *result;
+    char *tmp, *result;
 
-	result = ERR_PTR(-ENOMEM);
-	tmp = __getname();
-	if (tmp)  {
-		int retval = do_getname(filename, tmp);
+    result = ERR_PTR(-ENOMEM);
+    tmp = __getname();
+    if (tmp)
+    {
+        int retval = do_getname(filename, tmp);
 
-		result = tmp;
-		if (retval < 0) {
-			putname(tmp);
-			result = ERR_PTR(retval);
-		}
-	}
-	return result;
+        result = tmp;
+        if (retval < 0)
+        {
+            putname(tmp);
+            result = ERR_PTR(retval);
+        }
+    }
+    return result;
 }
 
 /*
@@ -167,17 +173,17 @@ char * getname(const char * filename)
 static spinlock_t arbitration_lock = SPIN_LOCK_UNLOCKED;
 int get_write_access(struct inode * inode)
 {
-	return 0;
+    return 0;
 }
 
 asmlinkage long sys_mknod(const char * filename, int mode, dev_t dev)
 {
-	return -EPERM;
+    return -EPERM;
 }
 
 asmlinkage long sys_mkdir(const char * pathname, int mode)
 {
-	return -EPERM;
+    return -EPERM;
 }
 
 /*
@@ -201,17 +207,17 @@ static void d_unhash(struct dentry *dentry)
 
 asmlinkage long sys_rmdir(const char * pathname)
 {
-	return -EPERM;
+    return -EPERM;
 }
 
 asmlinkage long sys_unlink(const char * pathname)
 {
-	return -EPERM;
+    return -EPERM;
 }
 
 asmlinkage long sys_symlink(const char * oldname, const char * newname)
 {
-	return -EPERM;
+    return -EPERM;
 }
 
 /*
@@ -225,33 +231,33 @@ asmlinkage long sys_symlink(const char * oldname, const char * newname)
  */
 asmlinkage long sys_link(const char * oldname, const char * newname)
 {
-	return -EPERM;
+    return -EPERM;
 }
 
 asmlinkage long sys_rename(const char * oldname, const char * newname)
 {
-	return -EPERM;
+    return -EPERM;
 }
 
 /* get the link contents into pagecache */
 static char *page_getlink(struct dentry * dentry, struct page **ppage)
 {
-	struct page * page;
-	struct address_space *mapping = dentry->d_inode->i_mapping;
-	page = alloc_pages(GFP_KERNEL, 0);
+    struct page * page;
+    struct address_space *mapping = dentry->d_inode->i_mapping;
+    page = alloc_pages(GFP_KERNEL, 0);
 
-	block_read_full_page2(dentry->d_inode,page,0);
+    block_read_full_page2(dentry->d_inode,page,0);
 
-	if (IS_ERR(page))
-		goto sync_fail;
-	*ppage = page;
-	return kmap(page);
+    if (IS_ERR(page))
+        goto sync_fail;
+    *ppage = page;
+    return kmap(page);
 
 async_fail:
-	page_cache_release(page);
-	return ERR_PTR(-EIO);
+    page_cache_release(page);
+    return ERR_PTR(-EIO);
 
 sync_fail:
-	return (char*)page;
+    return (char*)page;
 }
 

@@ -49,34 +49,35 @@
 
 typedef struct	cfm_info		/* firmware module information */
 {
-	unsigned short	codeid;		/* firmware ID */
-	unsigned short	version;	/* firmware version number */
-	unsigned short	adapter[CFM_MAX_CYCX]; /* compatible adapter types */
-	unsigned long	memsize;	/* minimum memory size */
-	unsigned short	reserved[2];	/* reserved */
-	unsigned short	startoffs;	/* entry point offset */
-	unsigned short	winoffs;	/* dual-port memory window offset */
-	unsigned short	codeoffs;	/* code load offset */
-	unsigned long	codesize;	/* code size */
-	unsigned short	dataoffs;	/* configuration data load offset */
-	unsigned long	datasize;	/* configuration data size */
+    unsigned short	codeid;		/* firmware ID */
+    unsigned short	version;	/* firmware version number */
+    unsigned short	adapter[CFM_MAX_CYCX]; /* compatible adapter types */
+    unsigned long	memsize;	/* minimum memory size */
+    unsigned short	reserved[2];	/* reserved */
+    unsigned short	startoffs;	/* entry point offset */
+    unsigned short	winoffs;	/* dual-port memory window offset */
+    unsigned short	codeoffs;	/* code load offset */
+    unsigned long	codesize;	/* code size */
+    unsigned short	dataoffs;	/* configuration data load offset */
+    unsigned long	datasize;	/* configuration data size */
 } cfm_info_t;
 
 typedef struct cfm			/* CYCX firmware file structure */
 {
-	char		signature[80];	/* CFM file signature */
-	unsigned short	version;	/* file format version */
-	unsigned short	checksum;	/* info + image */
-	unsigned short	reserved[6];	/* reserved */
-	char		descr[CFM_DESCR_LEN]; /* description string */
-	cfm_info_t	info;		/* firmware module info */
-	unsigned char	image[1];	/* code image (variable size) */
+    char		signature[80];	/* CFM file signature */
+    unsigned short	version;	/* file format version */
+    unsigned short	checksum;	/* info + image */
+    unsigned short	reserved[6];	/* reserved */
+    char		descr[CFM_DESCR_LEN]; /* description string */
+    cfm_info_t	info;		/* firmware module info */
+    unsigned char	image[1];	/* code image (variable size) */
 } cfm_t;
 
-typedef struct cycx_header_s {
-	unsigned long  reset_size;
-	unsigned long  data_size;
-	unsigned long  code_size;
+typedef struct cycx_header_s
+{
+    unsigned long  reset_size;
+    unsigned long  data_size;
+    unsigned long  code_size;
 } cycx_header_t;
 
 #endif	/* _CYCX_CFM_H */

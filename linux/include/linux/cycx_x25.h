@@ -25,7 +25,7 @@
 
 #ifndef PACKED
 #define PACKED __attribute__((packed))
-#endif 
+#endif
 
 /* X.25 shared memory layout. */
 #define	X25_MBOX_OFFS	0x300	/* general mailbox block */
@@ -40,10 +40,10 @@ extern unsigned int cycx_debug;
 /* X.25 Command Block. */
 typedef struct X25Cmd
 {
-	u16 command PACKED;
-	u16 link    PACKED; /* values: 0 or 1 */
-	u16 len     PACKED; /* values: 0 thru 0x205 (517) */
-	u32 buf     PACKED;
+    u16 command PACKED;
+    u16 link    PACKED; /* values: 0 or 1 */
+    u16 len     PACKED; /* values: 0 thru 0x205 (517) */
+    u32 buf     PACKED;
 } TX25Cmd;
 
 /* Defines for the 'command' field. */
@@ -74,35 +74,37 @@ typedef struct X25Cmd
 #define X25_N2TRACEXC                   0x4702
 #define X25_N3TRACEXC                   0x4703
 
-typedef struct X25Config {
-	u8  link	PACKED; /* link number */
-	u8  speed	PACKED; /* line speed */
-	u8  clock	PACKED; /* internal/external */
-	u8  n2		PACKED; /* # of level 2 retransm.(values: 1 thru FF) */
-	u8  n2win	PACKED; /* level 2 window (values: 1 thru 7) */
-	u8  n3win	PACKED; /* level 3 window (values: 1 thru 7) */
-	u8  nvc		PACKED; /* # of logical channels (values: 1 thru 64) */
-	u8  pktlen	PACKED; /* level 3 packet lenght - log base 2 of size */
-	u8  locaddr	PACKED; /* my address */
-	u8  remaddr	PACKED; /* remote address */
-	u16 t1		PACKED;	/* time, in seconds */
-	u16 t2		PACKED;	/* time, in seconds */
-	u8  t21		PACKED;	/* time, in seconds */
-	u8  npvc	PACKED;	/* # of permanent virt. circuits (1 thru nvc) */
-	u8  t23		PACKED;	/* time, in seconds */
-	u8  flags	PACKED;	/* see dosx25.doc, in portuguese, for details */
+typedef struct X25Config
+{
+    u8  link	PACKED; /* link number */
+    u8  speed	PACKED; /* line speed */
+    u8  clock	PACKED; /* internal/external */
+    u8  n2		PACKED; /* # of level 2 retransm.(values: 1 thru FF) */
+    u8  n2win	PACKED; /* level 2 window (values: 1 thru 7) */
+    u8  n3win	PACKED; /* level 3 window (values: 1 thru 7) */
+    u8  nvc		PACKED; /* # of logical channels (values: 1 thru 64) */
+    u8  pktlen	PACKED; /* level 3 packet lenght - log base 2 of size */
+    u8  locaddr	PACKED; /* my address */
+    u8  remaddr	PACKED; /* remote address */
+    u16 t1		PACKED;	/* time, in seconds */
+    u16 t2		PACKED;	/* time, in seconds */
+    u8  t21		PACKED;	/* time, in seconds */
+    u8  npvc	PACKED;	/* # of permanent virt. circuits (1 thru nvc) */
+    u8  t23		PACKED;	/* time, in seconds */
+    u8  flags	PACKED;	/* see dosx25.doc, in portuguese, for details */
 } TX25Config;
 
-typedef struct X25Stats {
-	u16 rx_crc_errors	PACKED;
-	u16 rx_over_errors	PACKED;
-	u16 n2_tx_frames 	PACKED;
-	u16 n2_rx_frames 	PACKED;
-	u16 tx_timeouts 	PACKED;
-	u16 rx_timeouts 	PACKED;
-	u16 n3_tx_packets 	PACKED;
-	u16 n3_rx_packets 	PACKED;
-	u16 tx_aborts	 	PACKED;
-	u16 rx_aborts	 	PACKED;
+typedef struct X25Stats
+{
+    u16 rx_crc_errors	PACKED;
+    u16 rx_over_errors	PACKED;
+    u16 n2_tx_frames 	PACKED;
+    u16 n2_rx_frames 	PACKED;
+    u16 tx_timeouts 	PACKED;
+    u16 rx_timeouts 	PACKED;
+    u16 n3_tx_packets 	PACKED;
+    u16 n3_rx_packets 	PACKED;
+    u16 tx_aborts	 	PACKED;
+    u16 rx_aborts	 	PACKED;
 } TX25Stats;
 #endif	/* _CYCX_X25_H */

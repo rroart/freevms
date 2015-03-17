@@ -46,7 +46,8 @@ unsigned long lib$mult_delta_time(const long *multiple, void *timadr)
 
     /* Check for delta time... */
 
-    if (ptr[7] & 0x80) {
+    if (ptr[7] & 0x80)
+    {
 
         /* Use absolute factor... */
 
@@ -54,14 +55,18 @@ unsigned long lib$mult_delta_time(const long *multiple, void *timadr)
 
         /* Multiply delta time... */
 
-        do {
+        do
+        {
             carry += *ptr * factor;
             *ptr++ = carry;
             carry = (carry >> 8);
-        } while (--count > 0);
+        }
+        while (--count > 0);
 
         return SS$_NORMAL;
-    } else {
+    }
+    else
+    {
         return SS$_IVTIME;
     }
 }

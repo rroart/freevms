@@ -52,77 +52,86 @@ typedef unsigned char hfs_lword_t[4];
 extern long int hfs_alloc;
 #endif
 
-static inline void *hfs_malloc(unsigned int size) {
+static inline void *hfs_malloc(unsigned int size)
+{
 #if defined(DEBUG_ALL) || defined(DEBUG_MEM)
-	hfs_warn("%ld bytes allocation at %s:%u\n",
-		 (hfs_alloc += size), __FILE__, __LINE__);
+    hfs_warn("%ld bytes allocation at %s:%u\n",
+             (hfs_alloc += size), __FILE__, __LINE__);
 #endif
-	return kmalloc(size, GFP_KERNEL);
+    return kmalloc(size, GFP_KERNEL);
 }
 
-static inline void hfs_free(void *ptr, unsigned int size) {
-	kfree(ptr);
+static inline void hfs_free(void *ptr, unsigned int size)
+{
+    kfree(ptr);
 #if defined(DEBUG_ALL) || defined(DEBUG_MEM)
-	hfs_warn("%ld bytes allocation at %s:%u\n",
-		  (hfs_alloc -= ptr ? size : 0), __FILE__, __LINE__);
+    hfs_warn("%ld bytes allocation at %s:%u\n",
+             (hfs_alloc -= ptr ? size : 0), __FILE__, __LINE__);
 #endif
 }
 
 
-/* handle conversion between times. 
+/* handle conversion between times.
  *
  * NOTE: hfs+ doesn't need this. also, we don't use tz_dsttime as that's
  *       not a good thing to do. instead, we depend upon tz_minuteswest
- *       having the correct daylight savings correction. 
+ *       having the correct daylight savings correction.
  */
 static inline hfs_u32 hfs_from_utc(hfs_s32 time)
 {
-	return time - sys_tz.tz_minuteswest*60; 
+    return time - sys_tz.tz_minuteswest*60;
 }
 
 static inline hfs_s32 hfs_to_utc(hfs_u32 time)
 {
-	return time + sys_tz.tz_minuteswest*60;
+    return time + sys_tz.tz_minuteswest*60;
 }
 
-static inline hfs_u32 hfs_time(void) {
-	return htonl(hfs_from_utc(CURRENT_TIME)+2082844800U);
+static inline hfs_u32 hfs_time(void)
+{
+    return htonl(hfs_from_utc(CURRENT_TIME)+2082844800U);
 }
 
 
 /*
- * hfs_wait_queue 
+ * hfs_wait_queue
  */
 typedef wait_queue_head_t hfs_wait_queue;
 
-static inline void hfs_init_waitqueue(hfs_wait_queue *queue) {
-        init_waitqueue_head(queue);
+static inline void hfs_init_waitqueue(hfs_wait_queue *queue)
+{
+    init_waitqueue_head(queue);
 }
 
-static inline void hfs_sleep_on(hfs_wait_queue *queue) {
-	sleep_on(queue);
+static inline void hfs_sleep_on(hfs_wait_queue *queue)
+{
+    sleep_on(queue);
 }
 
-static inline void hfs_wake_up(hfs_wait_queue *queue) {
-	wake_up(queue);
+static inline void hfs_wake_up(hfs_wait_queue *queue)
+{
+    wake_up(queue);
 }
 
-static inline void hfs_relinquish(void) {
-	schedule();
+static inline void hfs_relinquish(void)
+{
+    schedule();
 }
 
 
 /*
- * hfs_sysmdb 
+ * hfs_sysmdb
  */
 typedef struct super_block *hfs_sysmdb;
 
-static inline void hfs_mdb_dirty(hfs_sysmdb sys_mdb) {
-	sys_mdb->s_dirt = 1;
+static inline void hfs_mdb_dirty(hfs_sysmdb sys_mdb)
+{
+    sys_mdb->s_dirt = 1;
 }
 
-static inline const char *hfs_mdb_name(hfs_sysmdb sys_mdb) {
-	return kdevname(sys_mdb->s_dev);
+static inline const char *hfs_mdb_name(hfs_sysmdb sys_mdb)
+{
+    return kdevname(sys_mdb->s_dev);
 }
 
 
@@ -141,30 +150,37 @@ typedef struct buffer_head *hfs_buffer;
 /* In sysdep.c, since it needs HFS_SECTOR_SIZE */
 extern hfs_buffer hfs_buffer_get(hfs_sysmdb, int, int);
 
-static inline int hfs_buffer_ok(hfs_buffer buffer) {
-	return (buffer != NULL);
+static inline int hfs_buffer_ok(hfs_buffer buffer)
+{
+    return (buffer != NULL);
 }
 
-static inline void hfs_buffer_put(hfs_buffer buffer) {
-	brelse(buffer);
+static inline void hfs_buffer_put(hfs_buffer buffer)
+{
+    brelse(buffer);
 }
 
-static inline void hfs_buffer_dirty(hfs_buffer buffer) {
-	mark_buffer_dirty(buffer);
+static inline void hfs_buffer_dirty(hfs_buffer buffer)
+{
+    mark_buffer_dirty(buffer);
 }
 
-static inline void hfs_buffer_sync(hfs_buffer buffer) {
-	while (buffer_locked(buffer)) {
-		wait_on_buffer(buffer);
-	}
-	if (buffer_dirty(buffer)) {
-		ll_rw_block(WRITE, 1, &buffer);
-		wait_on_buffer(buffer);
-	}
+static inline void hfs_buffer_sync(hfs_buffer buffer)
+{
+    while (buffer_locked(buffer))
+    {
+        wait_on_buffer(buffer);
+    }
+    if (buffer_dirty(buffer))
+    {
+        ll_rw_block(WRITE, 1, &buffer);
+        wait_on_buffer(buffer);
+    }
 }
 
-static inline void *hfs_buffer_data(const hfs_buffer buffer) {
-	return buffer->b_data;
+static inline void *hfs_buffer_data(const hfs_buffer buffer)
+{
+    return buffer->b_data;
 }
 
 
@@ -199,17 +215,20 @@ static inline void *hfs_buffer_data(const hfs_buffer buffer) {
 #	error "Don't know if bytes are big- or little-endian!"
 #endif
 
-static inline int hfs_clear_bit(int bitnr, hfs_u32 *lword) {
-	return test_and_clear_bit(BITNR(bitnr), lword);
+static inline int hfs_clear_bit(int bitnr, hfs_u32 *lword)
+{
+    return test_and_clear_bit(BITNR(bitnr), lword);
 }
 
-static inline int hfs_set_bit(int bitnr, hfs_u32 *lword) {
-	return test_and_set_bit(BITNR(bitnr), lword);
+static inline int hfs_set_bit(int bitnr, hfs_u32 *lword)
+{
+    return test_and_set_bit(BITNR(bitnr), lword);
 }
 
-static inline int hfs_test_bit(int bitnr, const hfs_u32 *lword) {
-	/* the kernel should declare the second arg of test_bit as const */
-	return test_bit(BITNR(bitnr), (void *)lword);
+static inline int hfs_test_bit(int bitnr, const hfs_u32 *lword)
+{
+    /* the kernel should declare the second arg of test_bit as const */
+    return test_bit(BITNR(bitnr), (void *)lword);
 }
 
 #undef BITNR

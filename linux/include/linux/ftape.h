@@ -63,20 +63,24 @@
 #define FTAPE_NO_REWIND 4	/* mask for minor nr */
 
 /* the following two may be reported when MTIOCGET is requested ... */
-typedef union {
-	struct {
-		__u8 error;
-		__u8 command;
-	} error;
-	long space;
+typedef union
+{
+    struct
+    {
+        __u8 error;
+        __u8 command;
+    } error;
+    long space;
 } ft_drive_error;
-typedef union {
-	struct {
-		__u8 drive_status;
-		__u8 drive_config;
-		__u8 tape_status;
-	} status;
-	long space;
+typedef union
+{
+    struct
+    {
+        __u8 drive_status;
+        __u8 drive_config;
+        __u8 tape_status;
+    } status;
+    long space;
 } ft_drive_status;
 
 #ifdef __KERNEL__

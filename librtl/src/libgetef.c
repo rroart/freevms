@@ -32,26 +32,30 @@ extern int ffsll(unsigned long long bits);			/* BUG?  should be in string.h */
 #else								/* for testing on real VMS */
 #include <builtins.h>
 int test_and_clear_bit(int pos, volatile void *bits)		/* Atomic test and clear bit */
-    {
+{
     return !__INTERLOCKED_TESTBITCC_QUAD(bits,pos);		/* Returns the complement of the bit!!! */
 //  return !_BBCCI(pos, bits);					/* Also works even if pos > 32 */
-    }
+}
 int test_and_set_bit(int pos, volatile void *bits)		/* Atomic test and set bit */
-    {
+{
     return __INTERLOCKED_TESTBITSS_QUAD(bits,pos);
 //  return _BBSSI(pos, bits);					/* Also works even if pos > 32 */
-   }
+}
 /* Returns the first set bit position+1, or zero if non found in quadward bit mask */
 int ffsll(unsigned long long bits)
-    {
+{
     int pos = 0;
     for (int i = 0; i < 64; i++)
-	{
-	if (bits & 0x01) { pos = i+1; break; }
-	bits = bits >> 1;
-	}
-    return pos;
+    {
+        if (bits & 0x01)
+        {
+            pos = i+1;
+            break;
+        }
+        bits = bits >> 1;
     }
+    return pos;
+}
 #endif
 
 /*
@@ -78,20 +82,21 @@ static volatile unsigned long long efn_flags = 0x00000000ffffffffULL;
 */
 
 unsigned int lib$get_ef(unsigned int *efn)			/* allocate an event flag */
-    {
+{
     *efn = (unsigned int)-1;					/* get_ef return -1 if not allocated */
     int bit;
     int flag;
     do
-	{
-	bit = ffsll(efn_flags);					/* Find the first free (set) event flag */
-	if (bit == 0) return LIB$_INSEF;			/* No more event flags */
-	flag = test_and_clear_bit(bit-1, (volatile void *)&efn_flags);
-								/* Get bit and clear - ATOMIC! */
-	} while (flag == 0);					/* If already clear - another AST or thread beat me here */
+    {
+        bit = ffsll(efn_flags);					/* Find the first free (set) event flag */
+        if (bit == 0) return LIB$_INSEF;			/* No more event flags */
+        flag = test_and_clear_bit(bit-1, (volatile void *)&efn_flags);
+        /* Get bit and clear - ATOMIC! */
+    }
+    while (flag == 0);					/* If already clear - another AST or thread beat me here */
     *efn = 64 - bit;						/* return the event flag allocated */
     return SS$_NORMAL;
-    }
+}
 
 /*
 **  lib$free_ef(const unsigned int *efn) - free an event flag
@@ -108,18 +113,18 @@ unsigned int lib$get_ef(unsigned int *efn)			/* allocate an event flag */
 */
 
 unsigned int lib$free_ef(const unsigned int *efn)		/* Free an event flag */
-    {
+{
     unsigned int status = LIB$_EF_RESSYS;			/* Event flag reserved to system */
     int ef = *efn;
     if ((ef >= 1 && ef <= 23) || (ef >= 32 && ef <= 63))	/* Make sure it's in range */
-	{
-	status = SS$_NORMAL;					/* Assume success */
-	int flag = test_and_set_bit(63-ef, (volatile void *)&efn_flags);
-								/* Get bit and set - ATOMIC! */
-	if (flag) status = LIB$_EF_ALRFRE;			/* If already free */
-	}
-    return status;
+    {
+        status = SS$_NORMAL;					/* Assume success */
+        int flag = test_and_set_bit(63-ef, (volatile void *)&efn_flags);
+        /* Get bit and set - ATOMIC! */
+        if (flag) status = LIB$_EF_ALRFRE;			/* If already free */
     }
+    return status;
+}
 
 /*
 **  lib$reserve_ef() - reserve a specific event flag number
@@ -133,15 +138,15 @@ unsigned int lib$free_ef(const unsigned int *efn)		/* Free an event flag */
 */
 
 unsigned int lib$reserve_ef(const unsigned int *efn)
-    {
+{
     unsigned int status = LIB$_EF_RESSYS;			/* Event flag reserved to system */
     int ef = *efn;
     if ((ef >= 1 && ef <= 23) || (ef >= 32 && ef <= 63))	/* Make sure it's in range */
-	{
-	status = SS$_NORMAL;					/* Assume success */
-	int flag = test_and_clear_bit(63-ef, (volatile void *)&efn_flags);
-								/* Get bit and set - ATOMIC! */
-	if (!flag) status = LIB$_EF_ALRRES;			/* If already reserved */
-	}
-    return status;
+    {
+        status = SS$_NORMAL;					/* Assume success */
+        int flag = test_and_clear_bit(63-ef, (volatile void *)&efn_flags);
+        /* Get bit and set - ATOMIC! */
+        if (!flag) status = LIB$_EF_ALRRES;			/* If already reserved */
     }
+    return status;
+}

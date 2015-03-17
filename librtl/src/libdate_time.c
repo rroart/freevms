@@ -1,6 +1,6 @@
 
 /*
- *	LIB$DATE_TIME	
+ *	LIB$DATE_TIME
  *
  *	Copyright (C) 2004 Andrew Allison
  *
@@ -25,7 +25,7 @@
  *				Andrew Allison
  *				50 Denlaw Road
  *				London, Ont
- *				Canada 
+ *				Canada
  *				N6G 3L4
  *
  *
@@ -40,7 +40,7 @@
  * History
  *
  *	Apr 07, 2004 - Andrew Allison
- * 	 	Initial program creation	
+ * 	 	Initial program creation
  */
 #include "lib$routines.h"
 #include "str$routines.h"
@@ -51,45 +51,45 @@
 
 unsigned long lib$date_time (struct dsc$descriptor_s *date_time_string )
 {
-unsigned long result;
-unsigned short s1_len;
-char	*s1_ptr;
-time_t	time_ptr;
-struct tm *local_time;
-char month[36] = "JANFEBMARAPRJUNJULAUGSEPOCTNOVDEC";
+    unsigned long result;
+    unsigned short s1_len;
+    char	*s1_ptr;
+    time_t	time_ptr;
+    struct tm *local_time;
+    char month[36] = "JANFEBMARAPRJUNJULAUGSEPOCTNOVDEC";
 
-str$analyze_sdesc (date_time_string, &s1_len, &s1_ptr);
+    str$analyze_sdesc (date_time_string, &s1_len, &s1_ptr);
 
 // get date and time to extract day light saving time flag
-time (&time_ptr);
-local_time = localtime (&time_ptr);
+    time (&time_ptr);
+    local_time = localtime (&time_ptr);
 
 // determine if daylight saving time is in effect
-if (local_time->tm_isdst > 0 )			// DST in effect
-	time_ptr += 3600;
-else if ( local_time->tm_isdst == 0 )		// DST not in effect
-	;
-else if ( local_time->tm_isdst < 0 )		// Flag not used
-	;
+    if (local_time->tm_isdst > 0 )			// DST in effect
+        time_ptr += 3600;
+    else if ( local_time->tm_isdst == 0 )		// DST not in effect
+        ;
+    else if ( local_time->tm_isdst < 0 )		// Flag not used
+        ;
 
 // convert time_t to struct tm
-local_time = localtime (&time_ptr);
+    local_time = localtime (&time_ptr);
 
-sprintf (&s1_ptr[ 0],"%.2d",local_time->tm_mday);
-          s1_ptr[ 2] = '-';
-strcpy  (&s1_ptr[ 3],&month[local_time->tm_mon * 3]);
-          s1_ptr[ 6] = '-';
-sprintf (&s1_ptr[ 7],"%.4d",local_time->tm_year + 1900);
-          s1_ptr[11] = ' ';
-sprintf (&s1_ptr[12],"%.2d",local_time->tm_hour);
-          s1_ptr[14] = ':';
-sprintf (&s1_ptr[15],"%.2d",local_time->tm_min);
-          s1_ptr[17] = ':';
-sprintf (&s1_ptr[18],"%.2d",local_time->tm_sec);
-          s1_ptr[20] = '.';
-          s1_ptr[21] = '0';
-          s1_ptr[22] = '0';
+    sprintf (&s1_ptr[ 0],"%.2d",local_time->tm_mday);
+    s1_ptr[ 2] = '-';
+    strcpy  (&s1_ptr[ 3],&month[local_time->tm_mon * 3]);
+    s1_ptr[ 6] = '-';
+    sprintf (&s1_ptr[ 7],"%.4d",local_time->tm_year + 1900);
+    s1_ptr[11] = ' ';
+    sprintf (&s1_ptr[12],"%.2d",local_time->tm_hour);
+    s1_ptr[14] = ':';
+    sprintf (&s1_ptr[15],"%.2d",local_time->tm_min);
+    s1_ptr[17] = ':';
+    sprintf (&s1_ptr[18],"%.2d",local_time->tm_sec);
+    s1_ptr[20] = '.';
+    s1_ptr[21] = '0';
+    s1_ptr[22] = '0';
 
 
-return result;
+    return result;
 }

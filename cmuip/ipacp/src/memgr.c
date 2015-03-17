@@ -140,14 +140,14 @@ Modification History:
 
 #if 0
 MODULE MEMGR(Ident="2.8",LANGUAGE(BLISS32),
-	     ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
-			     NONEXTERNAL=LONG_RELATIVE),
-	     LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
-	     OPTIMIZE,OPTLEVEL=3,ZIP)=
+             ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
+                             NONEXTERNAL=LONG_RELATIVE),
+             LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
+             OPTIMIZE,OPTLEVEL=3,ZIP)=
 #endif
 
 #include <starlet.h>	// Include VMS systems definitions
-  // not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// Include transportablity package
+                 // not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// Include transportablity package
 #include "netvms.h"			// VMS specifics
 #include "tcp.h"			// TCP related definitions
 #include "cmuip.h" // needed before tcpmacros.h
@@ -156,10 +156,10 @@ MODULE MEMGR(Ident="2.8",LANGUAGE(BLISS32),
 
 #include <ssdef.h>
 #include "nettcpip.h" // for some min max defines
-
+                 
 //SBTTL "External: Routines, Literals and data"
 
-extern    LIB$GET_VM();
+                 extern    LIB$GET_VM();
 extern    LIB$FREE_VM();
 extern    LIB$GET_VM_PAGE();
 extern    LIB$FREE_VM_PAGE();
@@ -174,13 +174,13 @@ extern signed long
 //    struct VECTOR * VTCB_ptr[0],	// Vector of Valid TCB pointers.
 //    VTCB_Size,
 //    Max_TCB,
-    ast_in_progress,		// Flag if running at AST level
-    INTDF;			// interrupt deferral count
+ast_in_progress,		// Flag if running at AST level
+INTDF;			// interrupt deferral count
 
-  /* making doubles */
+/* making doubles */
 #if 0
-    MIN_PHYSICAL_BUFSIZE,
-    MAX_PHYSICAL_BUFSIZE;
+MIN_PHYSICAL_BUFSIZE,
+MAX_PHYSICAL_BUFSIZE;
 #endif
 #define    MAX_PHYSICAL_BUFSIZE (DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+OPT$MAX_RECV_DATASIZE)
 #define    MIN_PHYSICAL_BUFSIZE (DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+DEFAULT_DATA_SIZE)
@@ -190,36 +190,38 @@ extern signed long
 
 struct MEM$HDR_STRUCT
 {
-void *   MEM$QNEXT	;	// Next item on queue
-void *   MEM$QPREV	;	// Previous item on queue
+    void *   MEM$QNEXT	;	// Next item on queue
+    void *   MEM$QPREV	;	// Previous item on queue
 #ifdef QDEBUG
-unsigned long   MEM$CURQUEUES	;	// Queues this block is on
-unsigned long   MEM$ALLQUEUES ;	// Queues this block has been on
-void *   MEM$ALLOCRTN	;	// Routine which allocated most recently
-void *   MEM$FREERTN	;	// Routine which freed most recently
-void *   MEM$INSQUERTN	;	// Routine which INSQUE'd most recently
-void *   MEM$INSQUEHDR	;	// Queue header where most recently INSQUE'd
-void *   MEM$INSQUEVAL	;	// Additional value when INSQUE'd
-void *   MEM$REMQUERTN	;	// Routine which REMQUE'd most recently
-void *   MEM$REMQUEHDR	;	// Queue header where most recently REMQUE'd
-void *   MEM$REMQUEVAL	;	// Additional value when REMQUE'd
+    unsigned long   MEM$CURQUEUES	;	// Queues this block is on
+    unsigned long   MEM$ALLQUEUES ;	// Queues this block has been on
+    void *   MEM$ALLOCRTN	;	// Routine which allocated most recently
+    void *   MEM$FREERTN	;	// Routine which freed most recently
+    void *   MEM$INSQUERTN	;	// Routine which INSQUE'd most recently
+    void *   MEM$INSQUEHDR	;	// Queue header where most recently INSQUE'd
+    void *   MEM$INSQUEVAL	;	// Additional value when INSQUE'd
+    void *   MEM$REMQUERTN	;	// Routine which REMQUE'd most recently
+    void *   MEM$REMQUEHDR	;	// Queue header where most recently REMQUE'd
+    void *   MEM$REMQUEVAL	;	// Additional value when REMQUE'd
 #endif
-  union {
-unsigned long   MEM$FLAGS	;	// Flags defining free, prealloc, etc.
-    struct {
+    union
+    {
+        unsigned long   MEM$FLAGS	;	// Flags defining free, prealloc, etc.
+        struct
+        {
 
- unsigned     MEM$ISFREE :1 ;	// This block is free
-unsigned      MEM$ISPERM :1 ; // This block is permanent (preallocated)
+            unsigned     MEM$ISFREE :1 ;	// This block is free
+            unsigned      MEM$ISPERM :1 ; // This block is permanent (preallocated)
+        };
     };
-  };
 };
 
 #define MEM$HDR_SIZE sizeof(struct  MEM$HDR_STRUCT)
 #if 0
 LITERAL
-    MEM$HDR_SIZE = $FIELD_SET_SIZE;
+MEM$HDR_SIZE = $FIELD_SET_SIZE;
 MACRO
-    MEM$HDR_STRUCT = BLOCK->MEM$HDR_SIZE FIELD(MEM$HDR_FIELDS) %;
+MEM$HDR_STRUCT = BLOCK->MEM$HDR_SIZE FIELD(MEM$HDR_FIELDS) %;
 #endif
 
 //Sbttl "Preallocated dynamic data structures."
@@ -233,65 +235,75 @@ A little faster execution is what we are after.
 
 // Define and initialize free lists to "empty".
 
-static struct queue_header_structure(queue_header_fields) FREE_Qblks = 
-  {
-			qhead : &FREE_Qblks,
-			qtail : &FREE_Qblks
-  };
+static struct queue_header_structure(queue_header_fields) FREE_Qblks =
+{
+qhead :
+    &FREE_Qblks,
+qtail :
+    &FREE_Qblks
+};
 static struct queue_header_structure(queue_header_fields) USED_Qblks =
-  {
-			qhead : &USED_Qblks,
-			qtail : &USED_Qblks
-  };
+{
+qhead :
+    &USED_Qblks,
+qtail :
+    &USED_Qblks
+};
 
 static struct queue_header_structure(queue_header_fields) FREE_Uargs =
-  {
-			qhead : &FREE_Uargs,
-			qtail : &FREE_Uargs
-  };
+{
+qhead :
+    &FREE_Uargs,
+qtail :
+    &FREE_Uargs
+};
 
 static struct queue_header_structure(queue_header_fields) Free_Minsize_Segs =
-  {
-				qhead : &Free_Minsize_Segs,
-				qtail : &Free_Minsize_Segs
-  };
+{
+qhead :
+    &Free_Minsize_Segs,
+qtail :
+    &Free_Minsize_Segs
+};
 
 static struct queue_header_structure(queue_header_fields) Free_Maxsize_Segs =
-  {
-				qhead : &Free_Maxsize_Segs,
-				qtail : &Free_Maxsize_Segs
-  };
+{
+qhead :
+    &Free_Maxsize_Segs,
+qtail :
+    &Free_Maxsize_Segs
+};
 
 // "count_base" items are initialized in conifg_acp routine during startup.
 // they provide the base number of items on a free list.
 
 unsigned char
-    qblk_count_base  = 0,	// #Qblks on free list.
-    uarg_count_base  = 0,	// #Uarg blks on free list.
-    min_seg_count_base = 0, // #Min-size segs
-    max_seg_count_base = 0, // #Max-size segs
+qblk_count_base  = 0,	// #Qblks on free list.
+uarg_count_base  = 0,	// #Uarg blks on free list.
+min_seg_count_base = 0, // #Min-size segs
+max_seg_count_base = 0, // #Max-size segs
 
 // Counters for the number of items on a specific queue.
 
-    qblk_count = 0,	// #Qblks on free list.
-    uarg_count = 0,	// #Uarg blks on free list.
-    min_seg_count = 0,	// #Min-size segs
-    max_seg_count = 0;	// #Max-size segs
+qblk_count = 0,	// #Qblks on free list.
+uarg_count = 0,	// #Uarg blks on free list.
+min_seg_count = 0,	// #Min-size segs
+max_seg_count = 0;	// #Max-size segs
 
 /*
-Here we keep track of what kind of data structures are being dynamically 
+Here we keep track of what kind of data structures are being dynamically
 allocated & which should have more reserved during initialization.
 */
 
 signed long
-    qb_gets  = 0,	// Queue Blks dynamically allocated
-    ua_gets  = 0,	// User arg blks.
-    min_gets  = 0,	// Minimum size buffers
-    max_gets  = 0,	// Maximum size buffers
-    qb_max  = 0,	// Queue Blk max queue size
-    ua_max  = 0,	// User arg max queue size
-    min_max  = 0,	// Minimum size buffers max queue size
-    max_max  = 0;	// Maximum seg max queue size
+qb_gets  = 0,	// Queue Blks dynamically allocated
+ua_gets  = 0,	// User arg blks.
+min_gets  = 0,	// Minimum size buffers
+max_gets  = 0,	// Maximum size buffers
+qb_max  = 0,	// Queue Blk max queue size
+ua_max  = 0,	// User arg max queue size
+min_max  = 0,	// Minimum size buffers max queue size
+max_max  = 0;	// Maximum seg max queue size
 
 //Sbttl "Memory Management Fault Handler"
 /*
@@ -319,10 +331,10 @@ Side Effects:
 
 
 void Memgr_Fault_Handler(Caller,Primary_CC,Sec_CC)
-    {
+{
     Signal(Primary_CC);
     Fatal_Error("Memory Mgmt. Fault detected.",Primary_CC);
-    }
+}
 
 
 
@@ -348,26 +360,26 @@ Side Effects:
 */
 
 mm$get_mem (Addr, Size)
-     long * Addr;
-    {
+long * Addr;
+{
     signed long
-	Pages,
-	RC;
+    Pages,
+    RC;
 
     Pages = Size / 512 ;
     Pages = Pages + 1 ;
     NOINT;			// Hold AST's please...
 //    if (! (RC = LIB$GET_VM(Size,Addr)))
     if (BLISSIFNOT(RC = LIB$GET_VM_PAGE(Pages,Addr)))
-	Memgr_Fault_Handler(0,RC,0);
+        Memgr_Fault_Handler(0,RC,0);
     OKINT;
 
-	XLOG$FAO(LOG$MEM,"!%T MM$Get_Mem !XL size !SL!/",0,Addr, Size);
+    XLOG$FAO(LOG$MEM,"!%T MM$Get_Mem !XL size !SL!/",0,Addr, Size);
 
     CH$FILL(0,Size,*Addr);	// clean house.....zero fill.
 
     return RC;
-    }
+}
 
 
 
@@ -389,10 +401,10 @@ Side Effects:
 */
 
 void mm$free_mem(Mem,Size)
-    {
+{
     signed long
-	Pages,
-	RC;
+    Pages,
+    RC;
 
     Pages = Size / 512 ;
     Pages = Pages + 1 ;
@@ -402,9 +414,9 @@ void mm$free_mem(Mem,Size)
     NOINT;			// Hold AST's
 //    if (! ( RC = LIB$FREE_VM ( Size , Mem ) ))
     if (BLISSIFNOT( RC = LIB$FREE_VM_PAGE ( Pages , Mem ) ))
-	    Memgr_Fault_Handler(0,RC,0);
+        Memgr_Fault_Handler(0,RC,0);
     OKINT;
-    }
+}
 
 
 
@@ -436,39 +448,39 @@ Side Effects:
 */
 
 mm$qblk_get (void)
-    {
-      long R0=0;
+{
+    long R0=0;
 #if 0
-      // check
+    // check
     BUILTIN
-	R0;	// standard vax/vms routine return value register.
+    R0;	// standard vax/vms routine return value register.
 #endif
     struct MEM$HDR_STRUCT * Hptr;
     signed long
-	ptr,
+    ptr,
     Pages =0;
 
     if (REMQUE(&FREE_Qblks.qhead,&Hptr) != EMPTY_QUEUE) // check
-	qblk_count = qblk_count - 1; // Say there is 1 less avail.
+        qblk_count = qblk_count - 1; // Say there is 1 less avail.
     else			// allocate a new qb.
-	{
+    {
 
 // Disallow ast during memory allocation.
 
-	NOINT;
+        NOINT;
 
 //	if (! (LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr)))
-	Pages = ((((qb_size + MEM$HDR_SIZE)) / 512) + 1 ) ;
-	if (! (LIB$GET_VM_PAGE(Pages, &Hptr)))
-	    Memgr_Fault_Handler(0,R0,0);
+        Pages = ((((qb_size + MEM$HDR_SIZE)) / 512) + 1 ) ;
+        if (! (LIB$GET_VM_PAGE(Pages, &Hptr)))
+            Memgr_Fault_Handler(0,R0,0);
 
-	OKINT;
-	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE,Hptr);
-	Hptr->MEM$ISPERM = FALSE; // Not a permanent qblk
-	qb_gets = qb_gets + 1;	// track this event.
-	if (qb_gets > qb_max)
-	    qb_max = qb_gets;
-	};
+        OKINT;
+        CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE,Hptr);
+        Hptr->MEM$ISPERM = FALSE; // Not a permanent qblk
+        qb_gets = qb_gets + 1;	// track this event.
+        if (qb_gets > qb_max)
+            qb_max = qb_gets;
+    };
 
     ptr = (long)Hptr + MEM$HDR_SIZE; // Point at data area
     CH$FILL(/*%CHAR*/(0),qb_size*4,ptr);	// fresh qb.
@@ -477,7 +489,7 @@ mm$qblk_get (void)
     Hptr->MEM$ISFREE = FALSE;	// QB is no longer free
     INSQUE(Hptr,USED_Qblks.qtail); // Insert on used queue
     return(ptr);
-    }
+}
 
 /*
 
@@ -505,16 +517,16 @@ Side Effects:
 */
 
 void mm$qblk_free(Ptr)
-    {
-      long R0=0;
+{
+    long R0=0;
 #if 0
-      // check
+    // check
     BUILTIN
-	R0;	// standard vax/vms routine return value register.
+    R0;	// standard vax/vms routine return value register.
 #endif
     struct MEM$HDR_STRUCT * Hptr;
     signed long
-	Pages	 = 0;
+    Pages	 = 0;
 
     Hptr = Ptr - MEM$HDR_SIZE; // Point at header
     XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Free !XL size !SL!/",0,Hptr, Pages);
@@ -522,24 +534,25 @@ void mm$qblk_free(Ptr)
     REMQUE(Hptr,&Hptr);		// Remove from the used queue
     OKINT;
     if (Hptr->MEM$ISPERM)
-	{			// Free a permanent block - just put on free Q
+    {
+        // Free a permanent block - just put on free Q
 //~~~ Record deallocator here ~~~
-	Hptr->MEM$ISFREE = TRUE;
-	INSQUE(Hptr,FREE_Qblks.qtail);
-	qblk_count = qblk_count + 1;
-	}
+        Hptr->MEM$ISFREE = TRUE;
+        INSQUE(Hptr,FREE_Qblks.qtail);
+        qblk_count = qblk_count + 1;
+    }
     else
-	{
-	NOINT;			// Disable AST's
+    {
+        NOINT;			// Disable AST's
 //!!HACK!!// Why?
 //	if (! (LIB$FREE_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr)))
-	Pages = ((((qb_size + MEM$HDR_SIZE)) / 512) + 1) ;
-	if (! (LIB$FREE_VM_PAGE(Pages, Hptr)))
-	    Memgr_Fault_Handler(0,R0,0);
-	OKINT;
-	qb_gets = qb_gets - 1;		// track this event.
-	};
-    }
+        Pages = ((((qb_size + MEM$HDR_SIZE)) / 512) + 1) ;
+        if (! (LIB$FREE_VM_PAGE(Pages, Hptr)))
+            Memgr_Fault_Handler(0,R0,0);
+        OKINT;
+        qb_gets = qb_gets - 1;		// track this event.
+    };
+}
 /*
 
 Function:
@@ -561,26 +574,26 @@ Side Effects:
 */
 
 void QBLK_Init (void)
-    {
-      struct MEM$HDR_STRUCT * Hptr;
-      signed long J,
-	Pages,
-	RC ;
+{
+    struct MEM$HDR_STRUCT * Hptr;
+    signed long J,
+           Pages,
+           RC ;
 
     qblk_count = qblk_count_base;
-    for (J=1;J<=qblk_count;J++)
-	{
+    for (J=1; J<=qblk_count; J++)
+    {
 //	LIB$GET_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr);
-	Pages = ((((qb_size + MEM$HDR_SIZE)) / 512) + 1) ;
-	if (BLISSIFNOT(RC = (LIB$GET_VM_PAGE(Pages, &Hptr))))
-	    Memgr_Fault_Handler(0,RC,0);
-	XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Init !XL size !SL!/",0,Hptr, Pages);
-	CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE,Hptr);
-	Hptr->MEM$ISFREE = TRUE;
-	Hptr->MEM$ISPERM = TRUE;
-	INSQUE(Hptr,FREE_Qblks.qtail);
-	};
-    }
+        Pages = ((((qb_size + MEM$HDR_SIZE)) / 512) + 1) ;
+        if (BLISSIFNOT(RC = (LIB$GET_VM_PAGE(Pages, &Hptr))))
+            Memgr_Fault_Handler(0,RC,0);
+        XLOG$FAO(LOG$MEM,"!%T MM$Qblk_Init !XL size !SL!/",0,Hptr, Pages);
+        CH$FILL(/*%CHAR*/(0),MEM$HDR_SIZE,Hptr);
+        Hptr->MEM$ISFREE = TRUE;
+        Hptr->MEM$ISPERM = TRUE;
+        INSQUE(Hptr,FREE_Qblks.qtail);
+    };
+}
 
 
 
@@ -616,35 +629,35 @@ Side Effects:
 
 
 mm$uarg_get (void)
-    {
-      long R0 = 0;
+{
+    long R0 = 0;
 #if 0
-      // check
+    // check
     BUILTIN
-	R0;	// standard vax/vms routine return value register.
+    R0;	// standard vax/vms routine return value register.
 #endif
     signed long
-	Ptr,
-	Pages ;
+    Ptr,
+    Pages ;
 
     if (REMQUE(&FREE_Uargs.qhead,&Ptr) != EMPTY_QUEUE) // check
-      uarg_count = uarg_count - 1;
+        uarg_count = uarg_count - 1;
     else
-	{
-	NOINT;			// Disable interrupts, do allocation
+    {
+        NOINT;			// Disable interrupts, do allocation
 //	if (! (LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),Ptr)))
-	Pages = (((Max_User_ArgBlk_Size) / 512) + 1) ;
-	if (! (LIB$GET_VM_PAGE(Pages, &Ptr)))
-	    Memgr_Fault_Handler(0,R0,0);
-	OKINT;
-	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Get !XL size !SL!/",0,Ptr, Pages);
-	ua_gets = ua_gets + 1;
-	if (ua_gets > ua_max)
-	    ua_max = ua_gets;
-	};
+        Pages = (((Max_User_ArgBlk_Size) / 512) + 1) ;
+        if (! (LIB$GET_VM_PAGE(Pages, &Ptr)))
+            Memgr_Fault_Handler(0,R0,0);
+        OKINT;
+        XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Get !XL size !SL!/",0,Ptr, Pages);
+        ua_gets = ua_gets + 1;
+        if (ua_gets > ua_max)
+            ua_max = ua_gets;
+    };
     CH$FILL(/*%CHAR*/(0),Max_User_ArgBlk_Size,Ptr);
     return(Ptr);
-    }
+}
 
 /*
 
@@ -668,35 +681,35 @@ Side Effects:
 
 
 void mm$uarg_free(Ptr)
-    {
-      long R0=0;
+{
+    long R0=0;
     signed long
-	queptr,
-	Pages ;
+    queptr,
+    Pages ;
 #if 0
     BUILTIN
-	R0;	// standard vax/vms routine return value register.
+    R0;	// standard vax/vms routine return value register.
 #endif
 
     if (uarg_count < uarg_count_base)
-	{
-//!!HACK!!// can an exception right here cause 
+    {
+//!!HACK!!// can an exception right here cause
 //!!HACK!!// CPU 00 -- DOUBLDEALO, Double deallocation of memory block????
-	INSQUE(Ptr,FREE_Uargs.qtail);
-	uarg_count = uarg_count + 1;
-	}
-    else
-	{
-	NOINT;
-//	if (! (LIB$FREE_VM(%REF(Max_User_ArgBlk_Size*4),ptr)))
-	Pages = (((Max_User_ArgBlk_Size) / 512) + 1) ;
-	if (! (LIB$FREE_VM_PAGE(Pages, Ptr)))
-	    Memgr_Fault_Handler(0,R0,0);
-	OKINT;
-	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Free !XL size !SL!/",0,Ptr, Pages);
-	ua_gets = ua_gets - 1;
-	};
+        INSQUE(Ptr,FREE_Uargs.qtail);
+        uarg_count = uarg_count + 1;
     }
+    else
+    {
+        NOINT;
+//	if (! (LIB$FREE_VM(%REF(Max_User_ArgBlk_Size*4),ptr)))
+        Pages = (((Max_User_ArgBlk_Size) / 512) + 1) ;
+        if (! (LIB$FREE_VM_PAGE(Pages, Ptr)))
+            Memgr_Fault_Handler(0,R0,0);
+        OKINT;
+        XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Free !XL size !SL!/",0,Ptr, Pages);
+        ua_gets = ua_gets - 1;
+    };
+}
 
 /*
 
@@ -719,23 +732,23 @@ Side Effects:
 */
 
 void uarg_init (void)
-    {
-      signed long J,
-	Ptr,
-	Pages,
-	RC ;
+{
+    signed long J,
+           Ptr,
+           Pages,
+           RC ;
 
     uarg_count = uarg_count_base;
-    for (J=1;J<=uarg_count;J++)
-	{
+    for (J=1; J<=uarg_count; J++)
+    {
 //	LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),Ptr);
-	Pages = (((Max_User_ArgBlk_Size) / 512) + 1) ;
-	if (BLISSIFNOT(RC = (LIB$GET_VM_PAGE(Pages, &Ptr))))
-	    Memgr_Fault_Handler(0,RC,0);
-	XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Init !XL size !SL!/",0,Ptr, Pages);
-	INSQUE(Ptr,FREE_Uargs.qtail);
-	};
-    }
+        Pages = (((Max_User_ArgBlk_Size) / 512) + 1) ;
+        if (BLISSIFNOT(RC = (LIB$GET_VM_PAGE(Pages, &Ptr))))
+            Memgr_Fault_Handler(0,RC,0);
+        XLOG$FAO(LOG$MEM,"!%T MM$Uarg_Init !XL size !SL!/",0,Ptr, Pages);
+        INSQUE(Ptr,FREE_Uargs.qtail);
+    };
+}
 
 //SBTTL "Segment Handlers"
 /*
@@ -770,77 +783,77 @@ Side Effects:
 
 
 long mm$seg_get(Size)
-    {
-      long R0=0;
+{
+    long R0=0;
 #if 0
-      // check
+    // check
     BUILTIN
-	R0;	// standard vax/vms routine return value register.
+    R0;	// standard vax/vms routine return value register.
 #endif
     signed long
-	Alloc = FALSE,	// no seg allocation yet.
-	Ptr,
-	Pages ;
+    Alloc = FALSE,	// no seg allocation yet.
+    Ptr,
+    Pages ;
 
 // Respond to various size segments (ie, some may be preallocated.)
 
     switch (Size)
-      {
+    {
 
 // Minimum-sized segment buffer (control segs & small segs)
 
     case MIN_PHYSICAL_BUFSIZE:
-	{
-	  if (REMQUE(&Free_Minsize_Segs.qhead,&Ptr) != EMPTY_QUEUE) // check
-	    {
-	    min_seg_count = min_seg_count - 1;
-	    Alloc = TRUE;
-	    }
-	else
-	    {
-	    min_gets = min_gets + 1;
-	    if (min_gets > min_max)
-		min_max = min_gets;
-	    };
-	};
-	break;
+    {
+        if (REMQUE(&Free_Minsize_Segs.qhead,&Ptr) != EMPTY_QUEUE) // check
+        {
+            min_seg_count = min_seg_count - 1;
+            Alloc = TRUE;
+        }
+        else
+        {
+            min_gets = min_gets + 1;
+            if (min_gets > min_max)
+                min_max = min_gets;
+        };
+    };
+    break;
 
 // Max size segment - big segments to transmit & all receive buffers
 
     case MAX_PHYSICAL_BUFSIZE:
-	{
-	  if (REMQUE(&Free_Maxsize_Segs.qhead,&Ptr) != EMPTY_QUEUE) // check
-	    {
-	    max_seg_count = max_seg_count - 1;
-	    Alloc = TRUE;
-	    }
-	else
-	    {
-	    max_gets = max_gets + 1;
-	    if (max_gets > max_max)
-		max_max = max_gets;
-	    };
-	};
+    {
+        if (REMQUE(&Free_Maxsize_Segs.qhead,&Ptr) != EMPTY_QUEUE) // check
+        {
+            max_seg_count = max_seg_count - 1;
+            Alloc = TRUE;
+        }
+        else
+        {
+            max_gets = max_gets + 1;
+            if (max_gets > max_max)
+                max_max = max_gets;
+        };
+    };
     };
 
 // Did we Allocate a segment yet?  If not then better get one before we leave.
 
     if (! Alloc)
-	{
-	NOINT;
+    {
+        NOINT;
 //	if (! (LIB$GET_VM(size,Ptr)))
-	Pages = ((Size / 512) + 1) ;
-	if (! (LIB$GET_VM_PAGE(Pages, &Ptr)))
-	    {
-	    OKINT ;
-	    Memgr_Fault_Handler(0,R0,0);
-	    } ;
-	OKINT;
-	};
+        Pages = ((Size / 512) + 1) ;
+        if (! (LIB$GET_VM_PAGE(Pages, &Ptr)))
+        {
+            OKINT ;
+            Memgr_Fault_Handler(0,R0,0);
+        } ;
+        OKINT;
+    };
 
     XLOG$FAO(LOG$MEM,"!%T MM$Seg_Get !XL size !SL!/", 0,Ptr, Size);
     return(Ptr);
-    }
+}
 
 /*
 
@@ -869,63 +882,63 @@ Side Effects:
 
 
 void mm$seg_free(Size,Ptr)
-    {
-      long R0=0;
+{
+    long R0=0;
 #if 0
     BUILTIN
-	R0;	// standard vax/vms routine return value register.
+    R0;	// standard vax/vms routine return value register.
 #endif
     signed long
-	Released = FALSE,
-	Pages ;
+    Released = FALSE,
+    Pages ;
 
 // Check if segment is of a preallocated size.
 
     XLOG$FAO(LOG$MEM,"!%T MM$Seg_Free !XL size !SL!/", 0,Ptr, Size);
     switch (Size)
-      {
+    {
 
     case MIN_PHYSICAL_BUFSIZE:
-	{
-	if (min_seg_count < min_seg_count_base)
-	    {
-	    INSQUE(Ptr,Free_Minsize_Segs.qtail);
-	    min_seg_count = min_seg_count + 1;
-	    Released = TRUE;
-	    }
-	else
-	    min_gets = min_gets - 1;
-	};
-	break;
+    {
+        if (min_seg_count < min_seg_count_base)
+        {
+            INSQUE(Ptr,Free_Minsize_Segs.qtail);
+            min_seg_count = min_seg_count + 1;
+            Released = TRUE;
+        }
+        else
+            min_gets = min_gets - 1;
+    };
+    break;
 
     case MAX_PHYSICAL_BUFSIZE:
-	{
-	if (max_seg_count < max_seg_count_base)
-	    {
-	    INSQUE(Ptr,Free_Maxsize_Segs.qtail);
-	    max_seg_count = max_seg_count + 1;
-	    Released = TRUE;
-	    }
-	else
-	    max_gets = max_gets - 1;
-	};
+    {
+        if (max_seg_count < max_seg_count_base)
+        {
+            INSQUE(Ptr,Free_Maxsize_Segs.qtail);
+            max_seg_count = max_seg_count + 1;
+            Released = TRUE;
+        }
+        else
+            max_gets = max_gets - 1;
+    };
     };
 
 // Did we actually release the segment?  If not then do so.
 
     if (! Released)
-	{
-	NOINT;
+    {
+        NOINT;
 //	if (! (LIB$FREE_VM(size,ptr)))
-	Pages = ((Size / 512) + 1) ;
-	if (! (LIB$FREE_VM_PAGE(Pages, Ptr)))
-	    {
-	    OKINT ;
-	    Memgr_Fault_Handler(0,R0,0);
-	    } ;
-	OKINT;
-	};
-    }
+        Pages = ((Size / 512) + 1) ;
+        if (! (LIB$FREE_VM_PAGE(Pages, Ptr)))
+        {
+            OKINT ;
+            Memgr_Fault_Handler(0,R0,0);
+        } ;
+        OKINT;
+    };
+}
 
 
 /*
@@ -949,42 +962,42 @@ Side Effects:
 */
 
 void seg_init (void)
-    {
+{
 #if 0
     BUILTIN
-	R0;	// standard vax/vms routine return value register.
+    R0;	// standard vax/vms routine return value register.
 #endif
     signed long J,
-	Ptr,
-	RC,
-	Pages ;
+           Ptr,
+           RC,
+           Pages ;
 
 // Allocate minimum (default) size segments.
 
     min_seg_count = min_seg_count_base;
-    for (J=0;J<=min_seg_count-1;J++)
-	{
+    for (J=0; J<=min_seg_count-1; J++)
+    {
 //	LIB$GET_VM(MIN_PHYSICAL_BUFSIZE,Ptr);
-	Pages = ((MIN_PHYSICAL_BUFSIZE / 512) + 1) ;
-	if (BLISSIFNOT(RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
-	    Memgr_Fault_Handler(0,RC,0);
-	XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
-	INSQUE(Ptr,Free_Minsize_Segs.qtail);
-	};
+        Pages = ((MIN_PHYSICAL_BUFSIZE / 512) + 1) ;
+        if (BLISSIFNOT(RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
+            Memgr_Fault_Handler(0,RC,0);
+        XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
+        INSQUE(Ptr,Free_Minsize_Segs.qtail);
+    };
 
 // Allocate maximum size segments
 
     max_seg_count = max_seg_count_base;
-    for (J=max_seg_count;J>=1;J--)
-	{
+    for (J=max_seg_count; J>=1; J--)
+    {
 //	LIB$GET_VM(MAX_PHYSICAL_BUFSIZE,ptr);
-	Pages = ((MAX_PHYSICAL_BUFSIZE / 512) + 1) ;
-	if (BLISSIFNOT(RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
-	    Memgr_Fault_Handler(0,RC,0);
-	XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
-	INSQUE(Ptr,Free_Maxsize_Segs.qtail);
-	};
-    }
+        Pages = ((MAX_PHYSICAL_BUFSIZE / 512) + 1) ;
+        if (BLISSIFNOT(RC = LIB$GET_VM_PAGE(Pages, &Ptr)))
+            Memgr_Fault_Handler(0,RC,0);
+        XLOG$FAO(LOG$MEM,"!%T MM$Seg_Init !XL size !SL!/",0,Ptr, Pages);
+        INSQUE(Ptr,Free_Maxsize_Segs.qtail);
+    };
+}
 
 //Sbttl "Memory Management Initialization."
 /*
@@ -1009,11 +1022,11 @@ Side Effects:
 
 
 void mm$init (void)
-    {
+{
     QBLK_Init();
     uarg_init();
     seg_init();
-    }
+}
 
 
 //SBTTL "Debugging routines to simulate INSQUE and REMQUE"
@@ -1031,8 +1044,8 @@ memory to be trashed.
 #ifdef QDEBUG
 
 mm$insque(QBLK,QHDR,QRTN,QID,QVAL)
-    {
-      struct MEM$HDR_STRUCT * HPTR;
+{
+    struct MEM$HDR_STRUCT * HPTR;
     HPTR = QBLK - MEM$HDR_SIZE;
     HPTR->MEM$INSQUERTN = QRTN;
     HPTR->MEM$INSQUEHDR = QHDR;
@@ -1040,24 +1053,24 @@ mm$insque(QBLK,QHDR,QRTN,QID,QVAL)
     HPTR->MEM$CURQUEUES = HPTR->MEM$CURQUEUES || QID;
     HPTR->MEM$ALLQUEUES = HPTR->MEM$ALLQUEUES || QID;
     return INSQUE(QBLK,QHDR);
-    }
+}
 
 mm$remque(QHDR,QBLK,QRTN,QID,QVAL)
-     signed long * QBLK;
-    {
-      struct MEM$HDR_STRUCT * HPTR;
+signed long * QBLK;
+{
+    struct MEM$HDR_STRUCT * HPTR;
     signed long
-	RVAL;
+    RVAL;
     if ((RVAL = REMQUE(QHDR,&QBLK)) != EMPTY_QUEUE) // check
-	{
-	HPTR = *QBLK - MEM$HDR_SIZE;
-	HPTR->MEM$REMQUERTN = QRTN;
-	HPTR->MEM$REMQUEHDR = QHDR;
-	HPTR->MEM$REMQUEVAL = QVAL;
-	HPTR->MEM$CURQUEUES = HPTR->MEM$CURQUEUES && (! QID);
-	};
+    {
+        HPTR = *QBLK - MEM$HDR_SIZE;
+        HPTR->MEM$REMQUERTN = QRTN;
+        HPTR->MEM$REMQUEHDR = QHDR;
+        HPTR->MEM$REMQUEVAL = QVAL;
+        HPTR->MEM$CURQUEUES = HPTR->MEM$CURQUEUES && (! QID);
+    };
     return RVAL;
-    }
+}
 #endif
 
 

@@ -29,17 +29,19 @@
  *      information.
  */
 
-typedef enum {
-	unknown_wake_up = 0,
-	no_wake_up,
-	wake_up_colorado,
-	wake_up_mountain,
-	wake_up_insight,
+typedef enum
+{
+    unknown_wake_up = 0,
+    no_wake_up,
+    wake_up_colorado,
+    wake_up_mountain,
+    wake_up_insight,
 } wake_up_types;
 
-typedef struct {
-	wake_up_types wake_up;	/* see wake_up_types */
-	char *name;		/* Text describing the drive */
+typedef struct
+{
+    wake_up_types wake_up;	/* see wake_up_types */
+    char *name;		/* Text describing the drive */
 } wakeup_method;
 
 /*  Note: order of entries in WAKEUP_METHODS must be so that a variable
@@ -53,11 +55,12 @@ typedef struct {
   { wake_up_insight,    "Motor-on" }, \
 }
 
-typedef struct {
-	unsigned int vendor_id;	/* vendor id from drive */
-	int speed;		/* maximum tape transport speed (ips) */
-	wake_up_types wake_up;	/* see wake_up_types */
-	char *name;		/* Text describing the drive */
+typedef struct
+{
+    unsigned int vendor_id;	/* vendor id from drive */
+    int speed;		/* maximum tape transport speed (ips) */
+    wake_up_types wake_up;	/* see wake_up_types */
+    char *name;		/* Text describing the drive */
 } vendor_struct;
 
 #define UNKNOWN_VENDOR (-1)

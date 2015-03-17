@@ -43,32 +43,35 @@
  * This structure is needed because we handle multiple cards, otherwise
  * static data would do it.
  */
-typedef struct cycx {
-	char devname[WAN_DRVNAME_SZ+1];	/* card name */
-	cycxhw_t hw;			/* hardware configuration */
-	wan_device_t wandev;		/* WAN device data space */
-	u32 open_cnt;			/* number of open interfaces */
-	u32 state_tick;			/* link state timestamp */
-	spinlock_t lock;
-	char in_isr;			/* interrupt-in-service flag */
-	char buff_int_mode_unbusy;      /* flag for carrying out dev_tint */
-	wait_queue_head_t wait_stats;  /* to wait for the STATS indication */
-	u32 mbox;			/* -> mailbox */
-	void (*isr)(struct cycx* card);	/* interrupt service routine */
-	int (*exec)(struct cycx* card, void* u_cmd, void* u_data);
-	union {
+typedef struct cycx
+{
+    char devname[WAN_DRVNAME_SZ+1];	/* card name */
+    cycxhw_t hw;			/* hardware configuration */
+    wan_device_t wandev;		/* WAN device data space */
+    u32 open_cnt;			/* number of open interfaces */
+    u32 state_tick;			/* link state timestamp */
+    spinlock_t lock;
+    char in_isr;			/* interrupt-in-service flag */
+    char buff_int_mode_unbusy;      /* flag for carrying out dev_tint */
+    wait_queue_head_t wait_stats;  /* to wait for the STATS indication */
+    u32 mbox;			/* -> mailbox */
+    void (*isr)(struct cycx* card);	/* interrupt service routine */
+    int (*exec)(struct cycx* card, void* u_cmd, void* u_data);
+    union
+    {
 #ifdef CONFIG_CYCLOMX_X25
-		struct { /* X.25 specific data */
-			u32 lo_pvc;
-			u32 hi_pvc;
-			u32 lo_svc;
-			u32 hi_svc;
-			TX25Stats stats;
-			spinlock_t lock;
-			u32 connection_keys;
-		} x;
+        struct   /* X.25 specific data */
+        {
+            u32 lo_pvc;
+            u32 hi_pvc;
+            u32 lo_svc;
+            u32 hi_svc;
+            TX25Stats stats;
+            spinlock_t lock;
+            u32 connection_keys;
+        } x;
 #endif
-	} u;
+    } u;
 } cycx_t;
 
 /* Public Functions */

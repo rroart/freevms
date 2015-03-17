@@ -1,6 +1,6 @@
 #ifndef scsnetdef_h
 #define scsnetdef_h
-	
+
 #define SCSNET$C_START_LEN 62
 #define SCSNET$C_STACK_LEN 62
 #define SCSNET$C_ACK_LEN 2
@@ -21,16 +21,17 @@
 #define SCSNET$C_MIN_DGSIZ 48
 
 #define SCSNET$S_SCSNETDEF 80
-	
-struct _scsnet {
-  char scsnet$t_swtype [4];
-  char scsnet$t_swvers [4];
-  unsigned long long scsnet$q_swincarn;
-  char scsnet$t_hwtype [4];
-  unsigned char scsnet$b_hwvers [12];
-  unsigned long long scsnet$q_nodename;
-  unsigned long long scsnet$q_curtime;
+
+struct _scsnet
+{
+    char scsnet$t_swtype [4];
+    char scsnet$t_swvers [4];
+    unsigned long long scsnet$q_swincarn;
+    char scsnet$t_hwtype [4];
+    unsigned char scsnet$b_hwvers [12];
+    unsigned long long scsnet$q_nodename;
+    unsigned long long scsnet$q_curtime;
 };
- 
+
 #endif
- 
+

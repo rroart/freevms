@@ -96,15 +96,15 @@
 
 #if 0
 MODULE NMLOOK(IDENT="1.2b",LANGUAGE(BLISS32),
-	      ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
-			      NONEXTERNAL=LONG_RELATIVE),
-	      LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
-	      OPTIMIZE,OPTLEVEL=3,ZIP)
+              ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
+                              NONEXTERNAL=LONG_RELATIVE),
+              LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
+              OPTIMIZE,OPTLEVEL=3,ZIP)
 #endif
 
 #include <starlet.h>
 #include <misc.h>
-     // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";
+// not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";
 #include <cmuip/central/include/netcommon.h>
 #include "netvms.h"
 #include <cmuip/central/include/neterror.h>
@@ -139,7 +139,7 @@ MODULE NMLOOK(IDENT="1.2b",LANGUAGE(BLISS32),
 #define sys$getjpiw exe$getjpiw
 #define sys$setprn exe$setprn
 #define sys$creprc exe$creprc
-     // dont touch dassgn
+// dont touch dassgn
 #endif
 
 //LITERAL
@@ -158,10 +158,10 @@ extern  void    OPR_FAO();
 extern     user$clock_base();
 
 extern signed long
-    myuic,
-    log_state,
-    ast_in_progress,
-    intdf;
+myuic,
+log_state,
+ast_in_progress,
+intdf;
 
 
 //SBTTL "Define name lookup queue entry"
@@ -171,23 +171,25 @@ extern signed long
 
 struct NQENTRY
 {
-void *     NQE$NEXT	;	// Pointer to next item on queue
-void *     NQE$PREV	;	// Pointer to previous item on queue
-unsigned short     NQE$ID	;	// Request ID
-unsigned short     NQE$TYPE	;	// Request type
-unsigned short     NQE$LENGTH	;	// Request buffer length
-  union {
-unsigned short     NQE$FLAGS	;	// Request flags
-    struct{
-      unsigned NQE$F_XMIT:1;	// Request has been successfully transmitted
-};
-};
-  long  NQE$TIME;	// Time request was enqueued
-void (*     NQE$ASTADR)()	;	// Address of routine to call when done
-void *     NQE$ASTPRM	;	// Parameter to AST routine
-long long    NQE$IOSB;	// IOSB for mailbox send
-char    NQE$DATA[0];	// Mailbox message buffer
+    void *     NQE$NEXT	;	// Pointer to next item on queue
+    void *     NQE$PREV	;	// Pointer to previous item on queue
+    unsigned short     NQE$ID	;	// Request ID
+    unsigned short     NQE$TYPE	;	// Request type
+    unsigned short     NQE$LENGTH	;	// Request buffer length
+    union
+    {
+        unsigned short     NQE$FLAGS	;	// Request flags
+        struct
+        {
+            unsigned NQE$F_XMIT:1;	// Request has been successfully transmitted
+        };
     };
+    long  NQE$TIME;	// Time request was enqueued
+    void (*     NQE$ASTADR)()	;	// Address of routine to call when done
+    void *     NQE$ASTPRM	;	// Parameter to AST routine
+    long long    NQE$IOSB;	// IOSB for mailbox send
+    char    NQE$DATA[0];	// Mailbox message buffer
+};
 
 #define    NQENTRY_SIZE sizeof(struct NQENTRY)
 #define    NQENTRY_BLEN NQENTRY_SIZE
@@ -199,17 +201,17 @@ char    NQE$DATA[0];	// Mailbox message buffer
 
 struct MAIL$BUF
 {
-long long    MB$IOSB;	// IOSB for receive
-char    MB$DATA	[0];	// Data area
-    };
+    long long    MB$IOSB;	// IOSB for receive
+    char    MB$DATA	[0];	// Data area
+};
 
 #define    MAIL$BUF_SIZE sizeof(struct MAIL$BUF)
 #define MAX_MAIL$BUF MAIL$BUF_SIZE + (MSGMAX/4)
 
 #if 0
 MACRO
-    MAIL$BUF = BLOCK->MAIL$BUF_SIZE FIELD(MAIL$BUF_FIELDS) %,
-    MAX_MAIL$BUF = BLOCK[MAIL$BUF_SIZE + (MSGMAX/4)] FIELD(MAIL$BUF_FIELDS) %;
+MAIL$BUF = BLOCK->MAIL$BUF_SIZE FIELD(MAIL$BUF_FIELDS) %,
+     MAX_MAIL$BUF = BLOCK[MAIL$BUF_SIZE + (MSGMAX/4)] FIELD(MAIL$BUF_FIELDS) %;
 #endif
 
 //SBTTL "Constants and OWN data"
@@ -229,28 +231,36 @@ long    ACPMBXPRO = 0xFF00;	// Protection: (W:<no>,G:<no>,O:RWLP,S:RWLP)
 #define     SRV$UP   1			// Resolver is up
 
 static struct MAIL$BUF    RCVBUF[MSGMAX];	// Receive buffer
-static struct queue_header_fields    NQE_QUEUE_ = {	// Request queue
-	qhead: &NQE_QUEUE_,
-	qtail:&NQE_QUEUE_}, * NQE_QUEUE = &NQE_QUEUE;
+static struct queue_header_fields    NQE_QUEUE_ =  	// Request queue
+{
+qhead:
+    &NQE_QUEUE_,
+qtail:
+    &NQE_QUEUE_
+}, * NQE_QUEUE = &NQE_QUEUE;
 static signed long
-    SRVSTATE,			// Resolver state
-    SRVMBXCHN,			// I/O channel on nameresolver mailbox
-    SRVPID,			// PID of the nameresolver
-    ACPMBXCHN,			// I/O channel on ACP mailbox
-    MYMBA_BUF[MBAMAX],
-    MYMBA_LEN,
-    MYMBA_ATTR,
-    NQE_COUNT,			// Count of blocks currently allocated
-    CURQID,			// Current request ID
-    SRVPRIOR,			// Name resolver priority
-    SRVSTATUS,			// Name resolver status flags
-    SRVPRIVS[2],	// Name resolver privileges
-     * SRVQUOTAS;	// Name resolver quotas
- struct dsc$descriptor   SRVIMGNAME_ = {	// Name resolver process name
-			dsc$w_length:0,
-			dsc$b_dtype:DSC$K_DTYPE_T,
-			dsc$b_class:DSC$K_CLASS_D,
-			 dsc$a_pointer:0},*SRVIMGNAME=&SRVIMGNAME;
+SRVSTATE,			// Resolver state
+SRVMBXCHN,			// I/O channel on nameresolver mailbox
+SRVPID,			// PID of the nameresolver
+ACPMBXCHN,			// I/O channel on ACP mailbox
+MYMBA_BUF[MBAMAX],
+MYMBA_LEN,
+MYMBA_ATTR,
+NQE_COUNT,			// Count of blocks currently allocated
+CURQID,			// Current request ID
+SRVPRIOR,			// Name resolver priority
+SRVSTATUS,			// Name resolver status flags
+SRVPRIVS[2],	// Name resolver privileges
+* SRVQUOTAS;	// Name resolver quotas
+struct dsc$descriptor   SRVIMGNAME_ =  	// Name resolver process name
+{
+    dsc$w_length:0,
+dsc$b_dtype:
+    DSC$K_DTYPE_T,
+dsc$b_class:
+    DSC$K_CLASS_D,
+    dsc$a_pointer:0
+},*SRVIMGNAME=&SRVIMGNAME;
 
 //SBTTL "NML$CONFIG - Configure name resolver process"
 
@@ -261,25 +271,25 @@ void NML$CONFIG(IMNAME_A,PRIOR,STATUS,PRIVS, QUOTAS)
 //
 long     PRIVS	[2];
 struct dsc$descriptor	* QUOTAS;
-    {
-	long IMNAME	= IMNAME_A;
+{
+    long IMNAME	= IMNAME_A;
     extern STR$COPY_DX();
     signed long
-	RC,
-	STRPTR,
-	QUOPTR;
+    RC,
+    STRPTR,
+    QUOPTR;
 
 // Setup the descriptor of for the image name and allocate the string
 
     RC = STR$COPY_DX (SRVIMGNAME, IMNAME);
     if (BLISSIFNOT(RC))
-	FATAL$FAO("NML$CONFIG - failed to allocate string, RC = !XL",RC);
+        FATAL$FAO("NML$CONFIG - failed to allocate string, RC = !XL",RC);
 
 // Allocate the block for the process quota list
 
     RC = LIB$GET_VM(/*%REF*/(QUOTAS->dsc$w_length),&QUOPTR);
     if (BLISSIFNOT(RC))
-	FATAL$FAO("NML$CONFIG - failed to allocate quolst, RC = !XL",RC);
+        FATAL$FAO("NML$CONFIG - failed to allocate quolst, RC = !XL",RC);
     CH$MOVE(QUOTAS->dsc$w_length,QUOTAS->dsc$a_pointer,QUOPTR);
     SRVQUOTAS = QUOPTR;
 
@@ -289,13 +299,13 @@ struct dsc$descriptor	* QUOTAS;
     SRVSTATUS = STATUS;	// Resolver process status flags
     SRVPRIVS[0] = PRIVS[0];	// Resolver privileges
     SRVPRIVS[1] = PRIVS[1];
-    }
+}
 
 //SBTTL "NML$INIT - Initialize module state"
 
 void    MBX_RECV_AST();
-     CHECK_SERVER();
-     void    SEND_CONTROL();
+CHECK_SERVER();
+void    SEND_CONTROL();
 
 void NML$INIT (void)
 //
@@ -303,9 +313,9 @@ void NML$INIT (void)
 // The name resolver will let us know when it is ready to start accepting
 // requests.
 //
-    {
+{
     signed long
-      RC;
+    RC;
     struct item_list_3 ITMLIST[3];
 
 // Initialize state of service to unavailable
@@ -325,18 +335,18 @@ void NML$INIT (void)
 #if 0
     // not yet
     RC = sys$crembx(0, &ACPMBXCHN,
-		 MSGMAX,
-		 MSGMAX*MSGCNT,
-		 ACPMBXPRO, 0,
-		 MYMBXNAM, 0, 0);
+                    MSGMAX,
+                    MSGMAX*MSGCNT,
+                    ACPMBXPRO, 0,
+                    MYMBXNAM, 0, 0);
 #else
     RC = 1;
 #endif
     if (BLISSIFNOT(RC))
-	{
-	ERROR$FAO("Failed to create ACP mailbox, RC = !XL",RC);
-	return;
-	};
+    {
+        ERROR$FAO("Failed to create ACP mailbox, RC = !XL",RC);
+        return;
+    };
 
 // Get the real name of the mailbox and create a system-wide logical to point
 // to it. We want the name to be accessable to all, but for the mailbox to go
@@ -353,89 +363,89 @@ void NML$INIT (void)
     ITMLIST[2].bufaddr=0;
 
     RC = sys$trnlnm(LNM$M_CASE_BLIND,
-		    0 /* not yet: ASCID("LNM$TEMPORARY_MAILBOX") */,
-		 MYMBXNAM, 0,
-		 ITMLIST);
+                    0 /* not yet: ASCID("LNM$TEMPORARY_MAILBOX") */,
+                    MYMBXNAM, 0,
+                    ITMLIST);
     if (BLISSIFNOT(RC))
-	{
-	ERROR$FAO("$TRNLNM failed for ACP mailbox, RC = !XL",RC);
-	return;
-	};
+    {
+        ERROR$FAO("$TRNLNM failed for ACP mailbox, RC = !XL",RC);
+        return;
+    };
     if ((MYMBA_ATTR & LNM$M_EXISTS) == 0)
-	{
-	ERROR$FAO("$TRNLNM claims mailbox name nonexistant!!");
-	return;
-	};
+    {
+        ERROR$FAO("$TRNLNM claims mailbox name nonexistant!!");
+        return;
+    };
 
 // Now, create the system-wide logical to point at it
 
-ITMLIST[0].item_code=LNM$_STRING;
-ITMLIST[0].bufaddr=MYMBA_BUF;
-ITMLIST[0].buflen=MYMBA_LEN;
-ITMLIST[1].item_code=0;
-ITMLIST[1].buflen=0;
-ITMLIST[1].bufaddr=0;
+    ITMLIST[0].item_code=LNM$_STRING;
+    ITMLIST[0].bufaddr=MYMBA_BUF;
+    ITMLIST[0].buflen=MYMBA_LEN;
+    ITMLIST[1].item_code=0;
+    ITMLIST[1].buflen=0;
+    ITMLIST[1].bufaddr=0;
 
     RC = sys$crelnm(0 , SYSTABNAM,
-		    ACPMBXNAM, 0,
-		 ITMLIST);
+                    ACPMBXNAM, 0,
+                    ITMLIST);
     if (BLISSIFNOT(RC))
-	{
-	ERROR$FAO("$CRELNM failed for ACP mailbox, RC = !XL",RC);
-	return;
-	};
+    {
+        ERROR$FAO("$CRELNM failed for ACP mailbox, RC = !XL",RC);
+        return;
+    };
 
 // Start an initial read on the mailbox
 
     RC = sys$qio(0, ACPMBXCHN, IO$_READVBLK,
-		RCVBUF->MB$IOSB,
-		MBX_RECV_AST,
-		 RCVBUF,
-		 RCVBUF->MB$DATA,
-		 MSGMAX, 0, 0, 0, 0);
+                 RCVBUF->MB$IOSB,
+                 MBX_RECV_AST,
+                 RCVBUF,
+                 RCVBUF->MB$DATA,
+                 MSGMAX, 0, 0, 0, 0);
     if (BLISSIFNOT(RC))
-	{
-	ERROR$FAO("Queued read failed for mailbox, RC = !XL",RC);
-	return;
-	};
+    {
+        ERROR$FAO("Queued read failed for mailbox, RC = !XL",RC);
+        return;
+    };
 
 // Check to see if NAMRES mailbox exists yet. If not, we'll start the resolver.
 
     if (CHECK_SERVER())
-	{
-	SEND_CONTROL(CNRQ$START,0); // Tell it that the network is here
-	SRVSTATE = SRV$UP;	// Resolver should be ready now
-	}
+    {
+        SEND_CONTROL(CNRQ$START,0); // Tell it that the network is here
+        SRVSTATE = SRV$UP;	// Resolver should be ready now
+    }
     else
-	{
+    {
 
 // Make sure the initialization was done properly.
 
-	if (SRVIMGNAME->dsc$w_length == 0)
-	    {
-	    ERROR$FAO("Failed to create NAMRES - configuration info missing");
-	    SRVSTATE = SRV$DOWN;
-	    return;
-	    };
+        if (SRVIMGNAME->dsc$w_length == 0)
+        {
+            ERROR$FAO("Failed to create NAMRES - configuration info missing");
+            SRVSTATE = SRV$DOWN;
+            return;
+        };
 
 // Start the name resolver process - it will notify us when it is ready.
 
-	RC = sys$creprc(SRVPID, SRVIMGNAME,0,0,0,
-		     SRVPRIVS,
-			SRVQUOTAS,
-		     SRVPRCNAM,
-		     SRVPRIOR,
-		     myuic,
-			0, SRVSTATUS/*, 0, 0, 0*/
-		     );
-	if (BLISSIFNOT(RC))
-	    {
-	    ERROR$FAO("$CREPRC for NAMRES failed, RC = !XL",RC);
-	    return;
-	    };
-	SRVSTATE = SRV$INIT;	// Resolver is initializing
-	};
-    }
+        RC = sys$creprc(SRVPID, SRVIMGNAME,0,0,0,
+                        SRVPRIVS,
+                        SRVQUOTAS,
+                        SRVPRCNAM,
+                        SRVPRIOR,
+                        myuic,
+                        0, SRVSTATUS/*, 0, 0, 0*/
+                       );
+        if (BLISSIFNOT(RC))
+        {
+            ERROR$FAO("$CREPRC for NAMRES failed, RC = !XL",RC);
+            return;
+        };
+        SRVSTATE = SRV$INIT;	// Resolver is initializing
+    };
+}
 
 //SBTTL "NML$GETALST - Translate name to address list"
 
@@ -450,15 +460,15 @@ void NML$GETALST(NAMPTR,NAMLEN,ASTADR,ASTPRM)
 // to the name resolver.  Receive decode routine will finish the request when
 // a reply has been received for it.
 //
-     int (*ASTADR)();
-    {
+int (*ASTADR)();
+{
     signed long
-	RC,
-	CPTR,
-      MSLEN;
+    RC,
+    CPTR,
+    MSLEN;
     struct NQENTRY * NQE;
     struct MAIL$MSG * MSBUF;
-	struct RQ$NMLOOK * RQBUF;
+    struct RQ$NMLOOK * RQBUF;
 
 // Log the request
 
@@ -468,10 +478,10 @@ void NML$GETALST(NAMPTR,NAMLEN,ASTADR,ASTPRM)
 
     RC = NQE_ALLOC(&NQE);
     if (BLISSIFNOT(RC))
-	{
-	(ASTADR)(ASTPRM,RC);
-	return;
-	};
+    {
+        (ASTADR)(ASTPRM,RC);
+        return;
+    };
 
 // Build the request in it.
 
@@ -493,7 +503,7 @@ void NML$GETALST(NAMPTR,NAMLEN,ASTADR,ASTPRM)
     NQE->NQE$ASTADR = ASTADR;
     NQE->NQE$ASTPRM = ASTPRM;
     NQE_ENQUEUE(NQE,CURQID,MSLEN,MSBUF);
-    }
+}
 
 //SBTTL "NML$GETNAME - Translate address to name"
 
@@ -503,33 +513,33 @@ void NML$GETNAME(ADDR,ASTADR,ASTPRM)
 // the name resolver.  Receive decode routine will finish the request when the
 // reply comes in.
 //
-     int (*ASTADR)();
-    {
+int (*ASTADR)();
+{
     signed long
-	RC,
-      MSLEN;
+    RC,
+    MSLEN;
     struct NQENTRY * NQE;
     struct MAIL$MSG * MSBUF;
-	struct RQ$ADLOOK * RQBUF;
+    struct RQ$ADLOOK * RQBUF;
 
 // Log the request
 
     if ($$LOGF(LOG$MSG))
-	{
-	signed char * INA;
-	INA = &ADDR;
-	QL$FAO("!%T NML$GETNAME: address is !UB.!UB.!UB.!UB!/",
-	       0,INA[0],INA[1],INA[2],INA[3]);
-	};
+    {
+        signed char * INA;
+        INA = &ADDR;
+        QL$FAO("!%T NML$GETNAME: address is !UB.!UB.!UB.!UB!/",
+               0,INA[0],INA[1],INA[2],INA[3]);
+    };
 
 // Allocate and initialize a request block for us
 
     RC = NQE_ALLOC(&NQE);
     if (BLISSIFNOT(RC))
-	{
-	(ASTADR)(ASTPRM,RC);
-	return;
-	};
+    {
+        (ASTADR)(ASTPRM,RC);
+        return;
+    };
 
 // Build the request in it.
 
@@ -546,7 +556,7 @@ void NML$GETNAME(ADDR,ASTADR,ASTPRM)
     NQE->NQE$ASTADR = ASTADR;
     NQE->NQE$ASTPRM = ASTPRM;
     NQE_ENQUEUE(NQE,CURQID,MSLEN,MSBUF);
-    }
+}
 
 //SBTTL "NML$GETRR - Translate name to resource record"
 
@@ -556,29 +566,29 @@ void NML$GETRR(RRTYPE,NAMPTR,NAMLEN,ASTADR,ASTPRM)
 // to the name resolver.  Receive decode routine will finish the request when
 // a reply has been received for it.
 //
-     int (*ASTADR)();
-    {
+int (*ASTADR)();
+{
     signed long
-	RC,
-	CPTR,
-      MSLEN;
+    RC,
+    CPTR,
+    MSLEN;
     struct NQENTRY * NQE;
     struct MAIL$MSG * MSBUF;
-	struct RQ$RRLOOK * RQBUF;
+    struct RQ$RRLOOK * RQBUF;
 
 // Log the request
 
     XLOG$FAO(LOG$MSG,"!%T NML$GETRR: type is !XL, name is !AD!/",0,
-		RRTYPE, NAMLEN, NAMPTR);
+             RRTYPE, NAMLEN, NAMPTR);
 
 // Allocate and initialize a request block for us
 
     RC = NQE_ALLOC(&NQE);
     if (BLISSIFNOT(RC))
-	{
-	(ASTADR)(ASTPRM,RC);
-	return;
-	};
+    {
+        (ASTADR)(ASTPRM,RC);
+        return;
+    };
 
 // Build the request in it.
 
@@ -601,7 +611,7 @@ void NML$GETRR(RRTYPE,NAMPTR,NAMLEN,ASTADR,ASTPRM)
     NQE->NQE$ASTADR = ASTADR;
     NQE->NQE$ASTPRM = ASTPRM;
     NQE_ENQUEUE(NQE,CURQID,MSLEN,MSBUF);
-    }
+}
 
 //SBTTL "NML$CANCEL - Cancel name lookup request"
 
@@ -610,41 +620,41 @@ NML$CANCEL(ASTPRM,ASTFLG,STATUS)
 // Search the name lookup queue for the specified request and delete it,
 // optionally calling the "done" routine with the specified status.
 //
-    {
-      struct NQENTRY * NQE;
-      struct NQENTRY * NXNQE;
+{
+    struct NQENTRY * NQE;
+    struct NQENTRY * NXNQE;
     signed long
-	RC;
+    RC;
 
 // Search the queue for the request
 
     RC = 0;
     NQE = NQE_QUEUE->qhead;
     while (NQE != NQE_QUEUE)
-	{
-	NXNQE = NQE->NQE$NEXT;
+    {
+        NXNQE = NQE->NQE$NEXT;
 
 // On match, optionally call the AST routine then delete the request.
 
-	if (NQE->NQE$ASTPRM == ASTPRM)
-	    {
-	    XQL$FAO(LOG$MSG,"!%T NML$CANCEL - Deleting NQE !XL!/",0,NQE);
-	    RC = RC + 1;
-	    REMQUE(NQE,&NQE);
-	    if (ASTFLG != 0)
-		(NQE->NQE$ASTADR)(NQE->NQE$ASTPRM,STATUS);
-	    NQE_DEALLOC(NQE);
-	    };
+        if (NQE->NQE$ASTPRM == ASTPRM)
+        {
+            XQL$FAO(LOG$MSG,"!%T NML$CANCEL - Deleting NQE !XL!/",0,NQE);
+            RC = RC + 1;
+            REMQUE(NQE,&NQE);
+            if (ASTFLG != 0)
+                (NQE->NQE$ASTADR)(NQE->NQE$ASTPRM,STATUS);
+            NQE_DEALLOC(NQE);
+        };
 
 // Advance to next request
 
-	NQE = NXNQE;
-	};
+        NQE = NXNQE;
+    };
 
 // Return the count of requests found and deleted
 
     return RC;
-    }
+}
 
 //SBTTL "NML$STEP - Examine the name lookup queue, calling coroutine"
 
@@ -654,119 +664,119 @@ void NML$STEP(COADDR,COVALUE)
 // address and AST parameter of the entry. This makes it easy for the CANCEL
 // handler in the ACP to find any requests belonging to a process.
 //
-     int (*COADDR)();
-    {
-      struct NQENTRY * NQE;
-	struct NQENTRY * NXNQE;
+int (*COADDR)();
+{
+    struct NQENTRY * NQE;
+    struct NQENTRY * NXNQE;
 
 // Walk the queue
 
     NQE = NQE_QUEUE->qhead;
     while (NQE != NQE_QUEUE)
-	{
-	NXNQE = NQE->NQE$NEXT;
-	(COADDR)(COVALUE,NQE->NQE$ASTADR,NQE->NQE$ASTPRM);
-	NQE = NXNQE;
-	};
-    }
+    {
+        NXNQE = NQE->NQE$NEXT;
+        (COADDR)(COVALUE,NQE->NQE$ASTADR,NQE->NQE$ASTPRM);
+        NQE = NXNQE;
+    };
+}
 
 void NML$PURGE(STATUS)
 //
 // Purge the name lookup queue and tell the name resolver to shutdown.
 // Called just before the ACP exits.
 //
-    {
+{
     signed long
-      RC;
+    RC;
     struct NQENTRY * NQE;
-	struct NQENTRY * NXNQE;
+    struct NQENTRY * NXNQE;
 
 // Tell the name resolver that the network is exiting.
 
     if (SRVMBXCHN != 0)
-	SEND_CONTROL(CNRQ$STOP,STATUS);
+        SEND_CONTROL(CNRQ$STOP,STATUS);
 
 // Flush our mailbox logical name
 
     RC = sys$dellnm(SYSTABNAM,
-		 ACPMBXNAM, 0);
+                    ACPMBXNAM, 0);
     if (BLISSIFNOT(RC))
-	ERROR$FAO("$DELLNM failed for !AS, RC = !XL",ACPMBXNAM,RC);
+        ERROR$FAO("$DELLNM failed for !AS, RC = !XL",ACPMBXNAM,RC);
 
 // Delete our mailbox
 
     RC = sys$delmbx(ACPMBXCHN);
     if (BLISSIFNOT(RC))
-	ERROR$FAO("$DELMBX failed for ACP mailbox, RC = !XL",RC);
+        ERROR$FAO("$DELMBX failed for ACP mailbox, RC = !XL",RC);
 
 // Walk the queue, purging all requests
 
     NQE = NQE_QUEUE->qhead;
     while (NQE != NQE_QUEUE)
-	{
-	NXNQE = NQE->NQE$NEXT;
-	REMQUE(NQE,&NQE);
-	(NQE->NQE$ASTADR)(NQE->NQE$ASTPRM,STATUS);
-	NQE_DEALLOC(NQE);
-	NQE = NXNQE;
-	};
-    }
+    {
+        NXNQE = NQE->NQE$NEXT;
+        REMQUE(NQE,&NQE);
+        (NQE->NQE$ASTADR)(NQE->NQE$ASTPRM,STATUS);
+        NQE_DEALLOC(NQE);
+        NQE = NXNQE;
+    };
+}
 
 //SBTTL "Debugging routine to dump out the queue contents"
 
- void    NQE_DUMP();
+void    NQE_DUMP();
 
 void NML$DUMP (void)
 //
 // Walk the queue, dumping out each entry. For debugging purposes only.
 //
-    {
-      struct NQENTRY * NQE;
-      struct NQENTRY * PNQE;
+{
+    struct NQENTRY * NQE;
+    struct NQENTRY * PNQE;
     signed long long
-	NOW;
+    NOW;
 
     NOW = Time_Stamp();
     LOG$FAO("NQE count is !SL, TIME is !XL, QHEAD=!XL, QTAIL=!XL!/",
-	    NQE_COUNT,NOW,NQE_QUEUE->qhead,NQE_QUEUE->qtail);
+            NQE_COUNT,NOW,NQE_QUEUE->qhead,NQE_QUEUE->qtail);
     NQE = NQE_QUEUE->qhead;
     PNQE = NQE_QUEUE;
     while (NQE != NQE_QUEUE)
-	{
-	NQE_DUMP(NQE);
-	if (NQE->NQE$PREV != PNQE)
-	    {
-	    LOG$FAO("** List link error, PREV should be !XL **!/",PNQE);
-	    break;
-	    };
-	PNQE = NQE;
-	NQE = NQE->NQE$NEXT;
-	};
-    }
+    {
+        NQE_DUMP(NQE);
+        if (NQE->NQE$PREV != PNQE)
+        {
+            LOG$FAO("** List link error, PREV should be !XL **!/",PNQE);
+            break;
+        };
+        PNQE = NQE;
+        NQE = NQE->NQE$NEXT;
+    };
+}
 
 
 void NQE_DUMP(struct NQENTRY * NQE)
 //
 // Dump out a single queue entry.
 //
-    {
-      LOG$FAO("NQE at !XL, NEXT=!XL, PREV=!XL!/  TYPE=!UL, LEN=!UL, FLAGS=!XW, TIME=!XL!/  ASTADR=!XL, ASTPRM=!XL!/",
-	    NQE,NQE->NQE$NEXT,NQE->NQE$PREV,
-	    NQE->NQE$TYPE,NQE->NQE$LENGTH,NQE->NQE$FLAGS,NQE->NQE$TIME,
-	    NQE->NQE$ASTADR,NQE->NQE$ASTPRM);
-    }
+{
+    LOG$FAO("NQE at !XL, NEXT=!XL, PREV=!XL!/  TYPE=!UL, LEN=!UL, FLAGS=!XW, TIME=!XL!/  ASTADR=!XL, ASTPRM=!XL!/",
+            NQE,NQE->NQE$NEXT,NQE->NQE$PREV,
+            NQE->NQE$TYPE,NQE->NQE$LENGTH,NQE->NQE$FLAGS,NQE->NQE$TIME,
+            NQE->NQE$ASTADR,NQE->NQE$ASTPRM);
+}
 
 void SEND_CONTROL(CCODE,CVALUE)
 //
 // Build and send a control message to the name resolver.
 //
-    {
+{
 #define	CONTROL_MSGSIZE RQ$CONTROL_BLEN + MAIL$MSG_BLEN
     static
-	struct MAIL$MSG MSBUF[MAIL$BUF_SIZE + (MSGMAX/4)] ;
+    struct MAIL$MSG MSBUF[MAIL$BUF_SIZE + (MSGMAX/4)] ;
     signed long
-      RC;
-	struct RQ$CONTROL * RQBUF;
+    RC;
+    struct RQ$CONTROL * RQBUF;
 
 // Set up the request buffer
 
@@ -783,11 +793,11 @@ void SEND_CONTROL(CCODE,CVALUE)
 // Send the message off to the name resolver
 
     RC = sys$qio(0, SRVMBXCHN,	IO$_WRITEVBLK | IO$M_NOW, 0,
-		MSBUF,
-		CONTROL_MSGSIZE, 0, 0, 0, 0, 0, 0);
+                 MSBUF,
+                 CONTROL_MSGSIZE, 0, 0, 0, 0, 0, 0);
     if (BLISSIFNOT(RC))
-	ERROR$FAO("Failed to send NAMRES control message, RC = !XL",RC);
-    }
+        ERROR$FAO("Failed to send NAMRES control message, RC = !XL",RC);
+}
 
 //SBTTL "Request queue management routines"
 
@@ -799,17 +809,17 @@ NQE_ALLOC(NQE)
 // to the address of the block on success. On failure, returns network error
 // code indicating the failure reason.
 //
-     long * NQE;
-    {
+long * NQE;
+{
     signed long
-	RC;
+    RC;
 
 // Verify that we should do this.
 
     if (SRVSTATE == SRV$DOWN)
-	return NET$_NONS;
+        return NET$_NONS;
     if (NQE_COUNT >= NQE_QLIMIT)
-	return NET$_NSQFULL;
+        return NET$_NSQFULL;
 
 // Allocate the block
 
@@ -818,7 +828,7 @@ NQE_ALLOC(NQE)
     RC = LIB$GET_VM_PAGE(/*%REF*/((NQE_MAXSIZE / 512) + 1),NQE);
     XQL$FAO(LOG$MSG,"!%T NQE_ALLOC, NQE=!XL, RC=!XL!/",0,*NQE,RC);
     return RC;
-    }
+}
 
 
 
@@ -826,24 +836,24 @@ void NQE_DEALLOC(NQE)
 //
 // Deallocate a queue block, decrementing count.
 //
-	struct NQENTRY * NQE;
-    {
+struct NQENTRY * NQE;
+{
     signed long
-	RC;
+    RC;
 
 // Deallocate the memory, using LIB$FREE_VM
 
 //    RC = LIB$FREE_VM(%REF(NQE_MAXSIZE),NQE);
     RC = LIB$FREE_VM_PAGE(/*%REF*/((NQE_MAXSIZE / 512) + 1),NQE);
     if (BLISSIFNOT(RC))
-	FATAL$FAO("NQE_DEALLOC - LIB$FREE_VM failure, RC = !XL",RC);
+        FATAL$FAO("NQE_DEALLOC - LIB$FREE_VM failure, RC = !XL",RC);
     XQL$FAO(LOG$MSG,"!%T NQE_DEALLOC, NQE = !XL!/",0,NQE);
 
 // Decrement count of allocated blocks and return success
 
     NQE_COUNT = NQE_COUNT - 1;
     return SS$_NORMAL;
-    }
+}
 
 void NQE_ENQUEUE(NQE,QRYID,MSLEN,MSBUF)
 //
@@ -851,9 +861,9 @@ void NQE_ENQUEUE(NQE,QRYID,MSLEN,MSBUF)
 // Fills in the message header, puts it on NQE_QUEUE, and calls NQE_XMIT to
 // transmit the query.
 //
-     struct NQENTRY * NQE;
-	struct MAIL$MSG * MSBUF;
-    {
+struct NQENTRY * NQE;
+struct MAIL$MSG * MSBUF;
+{
 
 // First, fill in our return mailbox in the message header.
 
@@ -874,21 +884,21 @@ void NQE_ENQUEUE(NQE,QRYID,MSLEN,MSBUF)
 // Do logging, if necessary
 
     XQL$FAO(LOG$MSG,"!%T NQE_ENQUEUE, NQE=!XL, ID=!XL, LEN=!SL, TIME=!UL!/",
-	    0,NQE,NQE->NQE$ID,MSLEN,NQE->NQE$TIME);
+            0,NQE,NQE->NQE$ID,MSLEN,NQE->NQE$TIME);
 
 // Transmit the request if the resolver is ready to take it.
 
     if (SRVSTATE >= SRV$UP)
-	NQE_XMIT(NQE);
-    }
+        NQE_XMIT(NQE);
+}
 
 void NQE_DELETE(NQE,ASTFLG,STATUS)
 //
 // Delete an entry from the queue, optionally calling the AST routine with the
 // specified status code.
 //
-	struct NQENTRY * NQE;
-    {
+struct NQENTRY * NQE;
+{
 
     XQL$FAO(LOG$MSG,"!%T NQE_DELETE of NQE !XL, ID !XL!/",0,NQE,NQE->NQE$ID);
 
@@ -899,55 +909,55 @@ void NQE_DELETE(NQE,ASTFLG,STATUS)
 // Next, call the AST routine if that is requested
 
     if (ASTFLG != 0)
-	(NQE->NQE$ASTADR)(NQE->NQE$ASTPRM,STATUS);
+        (NQE->NQE$ASTADR)(NQE->NQE$ASTPRM,STATUS);
 
 // Finally, deallocate the queue entry
 
     NQE_DEALLOC(NQE);
-    }
+}
 
 
- void    NQE_XMIT_DONE();
+void    NQE_XMIT_DONE();
 
 NQE_XMIT(NQE)
 //
 // Transmit a request to the name resolver.  Returns SS$_NORMAL on success, or
 // $QIO failure code on failure.
 //
-	struct NQENTRY * NQE;
-    {
+struct NQENTRY * NQE;
+{
     signed long
-	RC;
+    RC;
 
     XQL$FAO(LOG$MSG,"!%T NQE_XMIT of NQE !XL, ID !XL!/",0,NQE,NQE->NQE$ID);
     RC = sys$qio(0, 	SRVMBXCHN,
-		IO$_WRITEVBLK,
-		NQE->NQE$IOSB,
-		 NQE_XMIT_DONE,
-		NQE,
-		NQE->NQE$DATA,
-		NQE->NQE$LENGTH, 0, 0, 0 ,0);
+                 IO$_WRITEVBLK,
+                 NQE->NQE$IOSB,
+                 NQE_XMIT_DONE,
+                 NQE,
+                 NQE->NQE$DATA,
+                 NQE->NQE$LENGTH, 0, 0, 0 ,0);
 
 // Check the state of the send. We should probably do something useful here if
 // it fails (like shutdown the name service and report the error to the opr).
 
     if (BLISSIFNOT(RC))
-	{
-	XQL$FAO(LOG$MSG,"!%T NQE_XMIT failed, RC=!XL, NQE=!XL, ID=!XL!/",
-		0,RC,NQE,NQE->NQE$ID);
-	return RC;
-	};
+    {
+        XQL$FAO(LOG$MSG,"!%T NQE_XMIT failed, RC=!XL, NQE=!XL, ID=!XL!/",
+                0,RC,NQE,NQE->NQE$ID);
+        return RC;
+    };
     return SS$_NORMAL;
-    }
+}
 
 void NQE_XMIT_DONE(NQE)
 //
 // AST routine for mailbox send done.
 //
-	struct NQENTRY * NQE;
-    {
+struct NQENTRY * NQE;
+{
     signed long
-	RC;
+    RC;
     struct MBX$IOSB * IOSB;
 
 // Check the status & set transmit done flag. We should probably do something
@@ -957,32 +967,32 @@ void NQE_XMIT_DONE(NQE)
     RC = IOSB->MI$STATUS;
     XQL$FAO(LOG$MSG,"!%T NQE_XMIT_DONE, NQE=!XL, RC=!XL!/",0,NQE,RC);
     NQE->NQE$F_XMIT = 1;
-    }
+}
 
 void XMIT_REQUESTS (void)
 //
 // Transmit all of the pending requests when the name resolver has come online.
 //
-    {
-      struct NQENTRY * NQE;
-	struct NQENTRY * NXNQE;
+{
+    struct NQENTRY * NQE;
+    struct NQENTRY * NXNQE;
 
 // Loop for the entire queue transmitting any requests which have not been
 // tranmitted successfully yet.
 
     NQE = NQE_QUEUE->qhead;
     while (NQE != NQE_QUEUE)
-	{
-	NXNQE = NQE->NQE$NEXT;
-	if (! (NQE->NQE$F_XMIT))
-	    NQE_XMIT(NQE);
-	NQE = NXNQE;
-	};
-    }
+    {
+        NXNQE = NQE->NQE$NEXT;
+        if (! (NQE->NQE$F_XMIT))
+            NQE_XMIT(NQE);
+        NQE = NXNQE;
+    };
+}
 
 //SBTTL "Mailbox message receiving routines"
 
- void    DECODE_REPLY();
+void    DECODE_REPLY();
 
 void MBX_RECV_AST(MBUF)
 //
@@ -991,14 +1001,14 @@ void MBX_RECV_AST(MBUF)
 // !!!HACK!!!
 // though this code can easily handle dynamic buffers.
 //
-	struct MAIL$BUF * MBUF;
-    {
+struct MAIL$BUF * MBUF;
+{
     signed long
-	RC,
-	RCVLEN,
-      RCVPID;
+    RC,
+    RCVLEN,
+    RCVPID;
     struct MAIL$MSG * RCVMSG;
-	struct MBX$IOSB * RCVIOSB;
+    struct MBX$IOSB * RCVIOSB;
 
 // Get the status of the message
 
@@ -1009,49 +1019,49 @@ void MBX_RECV_AST(MBUF)
 // Check error
 
     if (BLISSIFNOT(RC))
-	{
-	FATAL$FAO("Mailbox read failure, RC = !XL",RC);
-	return;
-	};
+    {
+        FATAL$FAO("Mailbox read failure, RC = !XL",RC);
+        return;
+    };
 
 // Success. Retrieve message length and PID; call decoding routine.
 
     RCVLEN = RCVIOSB->MI$COUNT-MAIL$MSG_BLEN;
     RCVPID = RCVIOSB->MI$PID;
     XQL$FAO(LOG$MSG,"!%T NS msg received, LEN=!SL, PID=!XL!/",
-	    0,RCVIOSB->MI$COUNT,RCVPID);
+            0,RCVIOSB->MI$COUNT,RCVPID);
     if (RCVLEN > 0)
-	DECODE_REPLY(RCVPID,RCVLEN,RCVMSG->MSG$DATA);
+        DECODE_REPLY(RCVPID,RCVLEN,RCVMSG->MSG$DATA);
 
 // Queue up another read
 
     RC = sys$qio(0, ACPMBXCHN,	IO$_READVBLK,
-		RCVIOSB,
-		 MBX_RECV_AST,
-		 MBUF,
-		RCVMSG,
-		 MSGMAX, 0, 0, 0, 0);
+                 RCVIOSB,
+                 MBX_RECV_AST,
+                 MBUF,
+                 RCVMSG,
+                 MSGMAX, 0, 0, 0, 0);
     if (BLISSIFNOT(RC))
-	{
-	ERROR$FAO("Queued read failed for mailbox, RC = !XL",RC);
-	return;
-	};
-    }
+    {
+        ERROR$FAO("Queued read failed for mailbox, RC = !XL",RC);
+        return;
+    };
+}
 
 
- void    CONTROL_MSG();
+void    CONTROL_MSG();
 
 void DECODE_REPLY(PID,RLEN,RBUF)
-	struct RPLY$DEFAULT * RBUF;
-    {
-     int (*ASTADR)();
+struct RPLY$DEFAULT * RBUF;
+{
+    int (*ASTADR)();
     signed long
-	RTYPE,
-	RID,
-	FOUND,
-	NAMLEN,
-	NAMPTR,
-	ASTPRM;
+    RTYPE,
+    RID,
+    FOUND,
+    NAMLEN,
+    NAMPTR,
+    ASTPRM;
     struct NQENTRY * NQE;
     struct NQENTRY * NXNQE;
 
@@ -1059,16 +1069,16 @@ void DECODE_REPLY(PID,RLEN,RBUF)
 
     RTYPE = RBUF->RPLY$TYPE;
     if (RTYPE == NLRP$CONTROL)
-	{
-	CONTROL_MSG(PID,RLEN,RBUF);
-	return;
-	};
+    {
+        CONTROL_MSG(PID,RLEN,RBUF);
+        return;
+    };
     if ((RTYPE < NLRP$MIN) || (RTYPE > NLRP$MAX))
-	{
-	XQL$FAO(LOG$MSG,"!%T Unknown NS msg type !SL received, PID=!XL!/",
-		0,RTYPE,PID);
-	return;
-	};
+    {
+        XQL$FAO(LOG$MSG,"!%T Unknown NS msg type !SL received, PID=!XL!/",
+                0,RTYPE,PID);
+        return;
+    };
 
 // For all others, find the request that this reply is for and handle it.
 
@@ -1076,104 +1086,104 @@ void DECODE_REPLY(PID,RLEN,RBUF)
     RID = RBUF->RPLY$ID;
     NQE = NQE_QUEUE->qhead;
     while (NQE != NQE_QUEUE)
-	{
-	NXNQE = NQE->NQE$NEXT;
+    {
+        NXNQE = NQE->NQE$NEXT;
 
 // Check the ID of the reply against the request ID...
 
-	if (RID == NQE->NQE$ID)
-	    {
+        if (RID == NQE->NQE$ID)
+        {
 
 // Have a match. Dequeue & finish request according to the reply type
 
-	    FOUND = FOUND + 1;
-	    REMQUE(NQE,&NQE);
-	    ASTADR = NQE->NQE$ASTADR;
-	    ASTPRM = NQE->NQE$ASTPRM;
-	    if ( RTYPE >= NLRP$MIN && RTYPE <= NLRP$MAX) 
-	      switch (RTYPE)
-		{
-	    case NLRP$ERROR:	// Error reply - abort request
-		{
-		    struct RPLY$ERROR * RBUF2=RBUF;
+            FOUND = FOUND + 1;
+            REMQUE(NQE,&NQE);
+            ASTADR = NQE->NQE$ASTADR;
+            ASTPRM = NQE->NQE$ASTPRM;
+            if ( RTYPE >= NLRP$MIN && RTYPE <= NLRP$MAX)
+                switch (RTYPE)
+                {
+                case NLRP$ERROR:	// Error reply - abort request
+                {
+                    struct RPLY$ERROR * RBUF2=RBUF;
 
-		XQL$FAO(LOG$MSG,"!%T NS error reply, ID=!XL, ERR=!XL!/",
-			0,RBUF2->RPER$ID,RBUF2->RPER$ECODE);
-		(ASTADR)(ASTPRM,RBUF2->RPER$ECODE);
-		};
-		break;
+                    XQL$FAO(LOG$MSG,"!%T NS error reply, ID=!XL, ERR=!XL!/",
+                            0,RBUF2->RPER$ID,RBUF2->RPER$ECODE);
+                    (ASTADR)(ASTPRM,RBUF2->RPER$ECODE);
+                };
+                break;
 
-	    case NLRP$CONTROL:	// Not possible at this level
-		0;
-		break;
+                case NLRP$CONTROL:	// Not possible at this level
+                    0;
+                    break;
 
-	    case NLRP$NMLOOK:	// Name lookup reply
-		{
-		    struct RPLY$NMLOOK * RBUF2 = RBUF;
-		signed long
-		    ADRCNT,
-		    ADRLST;
+                case NLRP$NMLOOK:	// Name lookup reply
+                {
+                    struct RPLY$NMLOOK * RBUF2 = RBUF;
+                    signed long
+                    ADRCNT,
+                    ADRLST;
 
-		ADRCNT = RBUF2->RPNM$ADRCNT;
-		ADRLST = RBUF2->RPNM$ADRLST;
-		NAMLEN = RBUF2->RPNM$NAMLEN;
-		NAMPTR = RBUF2->RPNM$NAMSTR;
-		XQL$FAO(LOG$MSG,
-			"!%T NS NMLOOK reply, ID=!XL, #ADDR=!SL, NAME=!AD!/",
-			0,RBUF2->RPNM$ID,ADRCNT,NAMLEN,NAMPTR);
-		(ASTADR)(ASTPRM,SS$_NORMAL,ADRCNT,ADRLST,NAMLEN,NAMPTR);
-		};
-		break;
+                    ADRCNT = RBUF2->RPNM$ADRCNT;
+                    ADRLST = RBUF2->RPNM$ADRLST;
+                    NAMLEN = RBUF2->RPNM$NAMLEN;
+                    NAMPTR = RBUF2->RPNM$NAMSTR;
+                    XQL$FAO(LOG$MSG,
+                            "!%T NS NMLOOK reply, ID=!XL, #ADDR=!SL, NAME=!AD!/",
+                            0,RBUF2->RPNM$ID,ADRCNT,NAMLEN,NAMPTR);
+                    (ASTADR)(ASTPRM,SS$_NORMAL,ADRCNT,ADRLST,NAMLEN,NAMPTR);
+                };
+                break;
 
-	    case NLRP$ADLOOK:	// Address lookup reply
-		{
-		    struct RPLY$ADLOOK * RBUF2 = RBUF;
+                case NLRP$ADLOOK:	// Address lookup reply
+                {
+                    struct RPLY$ADLOOK * RBUF2 = RBUF;
 
-		NAMLEN = RBUF2->RPAD$NAMLEN;
-		NAMPTR = RBUF2->RPAD$NAMSTR;
-		XQL$FAO(LOG$MSG,"!%T NS ADLOOK reply, ID=!XL, name=!AD!/",
-			0,RBUF2->RPAD$ID,NAMLEN,NAMPTR);
-		(ASTADR)(ASTPRM,SS$_NORMAL,NAMLEN,NAMPTR);
-		};
-		break;
-	    case NLRP$RRLOOK:	// RR lookup reply
-		{
-		    struct RPLY$RRLOOK * RBUF2=RBUF;
-		signed long
-		    RDLEN,
-		    RDATA;
+                    NAMLEN = RBUF2->RPAD$NAMLEN;
+                    NAMPTR = RBUF2->RPAD$NAMSTR;
+                    XQL$FAO(LOG$MSG,"!%T NS ADLOOK reply, ID=!XL, name=!AD!/",
+                            0,RBUF2->RPAD$ID,NAMLEN,NAMPTR);
+                    (ASTADR)(ASTPRM,SS$_NORMAL,NAMLEN,NAMPTR);
+                };
+                break;
+                case NLRP$RRLOOK:	// RR lookup reply
+                {
+                    struct RPLY$RRLOOK * RBUF2=RBUF;
+                    signed long
+                    RDLEN,
+                    RDATA;
 
-		RDLEN = RBUF2->RPRR$RDLEN;
-		RDATA = RBUF2->RPRR$RDATA;
+                    RDLEN = RBUF2->RPRR$RDLEN;
+                    RDATA = RBUF2->RPRR$RDATA;
 //		NAMLEN = RBUF2->RPRR$NAMLEN;
 //		NAMPTR = RBUF2->RPRR$DATA + RDLEN;
-		XQL$FAO(LOG$MSG,
-			"!%T NS RRLOOK reply, ID=!XL, SIZE=!SL, RDATA=!AD /",
-			0,RBUF2->RPRR$ID,RDLEN,
-			RDLEN,RDATA);
-		(ASTADR)(ASTPRM,SS$_NORMAL,RDLEN,RDATA,NAMLEN,NAMPTR);
-		};
-		break;
-	    default:	// Not possible at this level
-	    0;
-	    };
+                    XQL$FAO(LOG$MSG,
+                            "!%T NS RRLOOK reply, ID=!XL, SIZE=!SL, RDATA=!AD /",
+                            0,RBUF2->RPRR$ID,RDLEN,
+                            RDLEN,RDATA);
+                    (ASTADR)(ASTPRM,SS$_NORMAL,RDLEN,RDATA,NAMLEN,NAMPTR);
+                };
+                break;
+                default:	// Not possible at this level
+                    0;
+                };
 
 // Deallocate the queue entry
 
-	    NQE_DEALLOC(NQE);
-	    };
+            NQE_DEALLOC(NQE);
+        };
 
 // Check next queue entry...
 
-	NQE = NXNQE;
-	};
+        NQE = NXNQE;
+    };
 
 // If the request wasn't found in the queue, report the error
 
     if (FOUND <= 0)
-	XQL$FAO(LOG$MSG,"!%T DECODE_REPLY failed to find RQ !XL, TYPE !SL!/",
-		0,RID,RTYPE);
-    }
+        XQL$FAO(LOG$MSG,"!%T DECODE_REPLY failed to find RQ !XL, TYPE !SL!/",
+                0,RID,RTYPE);
+}
 
 void CONTROL_MSG(PID,RLEN,RBUF)
 //
@@ -1182,44 +1192,44 @@ void CONTROL_MSG(PID,RLEN,RBUF)
 // control messages are generally one-way, so we don't care about control
 // replies.
 //
-	struct RQ$CONTROL * RBUF;
-    {
+struct RQ$CONTROL * RBUF;
+{
     signed long
-	CTYPE;
+    CTYPE;
 
 // Dispatch the control types we handle.
 
     CTYPE = RBUF->RQCN$CCODE;
     switch (CTYPE)
-      {
+    {
     case CNRQ$START:		// Resolver has finished starting
-	{
-	XQL$FAO(LOG$MSG,"!%T NS Control: NS is up, PID=!XL!/",0,PID);
-	if (CHECK_SERVER())
-	    {
-	    SRVSTATE = SRV$UP;	// Indicate that everything is ready
-	    XMIT_REQUESTS();	// And send all queued requests to the resolver
-	    };
-	};
-	break;
+    {
+        XQL$FAO(LOG$MSG,"!%T NS Control: NS is up, PID=!XL!/",0,PID);
+        if (CHECK_SERVER())
+        {
+            SRVSTATE = SRV$UP;	// Indicate that everything is ready
+            XMIT_REQUESTS();	// And send all queued requests to the resolver
+        };
+    };
+    break;
 
     case CNRQ$STOP:		// Resolver is shutting down
-	{
-	XQL$FAO(LOG$MSG,"!%T NS Control: NS shutting down, PID=!XL!/",0,PID);
-	sys$dassgn(SRVMBXCHN);
-	SRVSTATE = SRV$DOWN;	// Service is unavailable
-	SRVMBXCHN = 0;		// No channel defined
-	SRVPID = 0;		// And no PID defined
-	};
-	break;
+    {
+        XQL$FAO(LOG$MSG,"!%T NS Control: NS shutting down, PID=!XL!/",0,PID);
+        sys$dassgn(SRVMBXCHN);
+        SRVSTATE = SRV$DOWN;	// Service is unavailable
+        SRVMBXCHN = 0;		// No channel defined
+        SRVPID = 0;		// And no PID defined
+    };
+    break;
 
     default:
-	{
-	XQL$FAO(LOG$MSG,"!%T Unknown NS control msg, CCODE=!SL, PID=!XL!/",
-		0,CTYPE,PID);
-	};
+    {
+        XQL$FAO(LOG$MSG,"!%T Unknown NS control msg, CCODE=!SL, PID=!XL!/",
+                0,CTYPE,PID);
     };
-    }
+    };
+}
 
 CHECK_SERVER (void)
 //
@@ -1227,19 +1237,19 @@ CHECK_SERVER (void)
 // logical name. If both are found, set SRVMBXCHN and SRVPID accordingly and
 // return TRUE. Else, return FALSE.
 //
-    {
+{
     signed long
-	RC,
-	DEVCHN,
-     PID;
-struct item_list_3 ITMLIST[3];
+    RC,
+    DEVCHN,
+    PID;
+    struct item_list_3 ITMLIST[3];
 
 // First, try to assign a channel on the name resolver mailbox.
 
     RC = sys$assign( SRVMBXNAM,
-		 &DEVCHN, 0, 0, 0);
+                     &DEVCHN, 0, 0, 0);
     if (BLISSIFNOT(RC))
-	return FALSE;
+        return FALSE;
 
 // Now, look for a process with the name "NAMRES"
 // N.B. NAMRES must run with the same group as IPACP for this to work. This is
@@ -1253,12 +1263,12 @@ struct item_list_3 ITMLIST[3];
     ITMLIST[1].bufaddr=0;
 
     RC = sys$getjpiw(0, 0, SRVPRCNAM,
-		  ITMLIST, 0, 0, 0);
+                     ITMLIST, 0, 0, 0);
     if (BLISSIFNOT(RC))
-	{
-	sys$dassgn(DEVCHN);
-	return FALSE;
-	};
+    {
+        sys$dassgn(DEVCHN);
+        return FALSE;
+    };
 
 // Got what we want. Set up the info & return.
 
@@ -1266,4 +1276,4 @@ struct item_list_3 ITMLIST[3];
     SRVMBXCHN = DEVCHN;
     SRVPID = PID;
     return TRUE;
-    }
+}

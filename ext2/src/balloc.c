@@ -50,86 +50,89 @@
 #define in_range(b, first, len)		((b) >= (first) && (b) <= (first) + (len) - 1)
 
 struct ext2_group_desc * ext2_get_group_desc(struct _vcb * vcb,
-					     unsigned int block_group,
-					     struct buffer_head ** bh)
+        unsigned int block_group,
+        struct buffer_head ** bh)
 {
-	unsigned long group_desc;
-	unsigned long desc;
-	struct ext2_group_desc * gdp;
-	struct ext2_super_block * sb = vcb->vcb$l_cache;
-	struct buffer_head * bh2;
+    unsigned long group_desc;
+    unsigned long desc;
+    struct ext2_group_desc * gdp;
+    struct ext2_super_block * sb = vcb->vcb$l_cache;
+    struct buffer_head * bh2;
 
-	if (block_group >= EXT2_GROUPS_COUNT(sb)) {
-		ext2_error (vcb, "ext2_get_group_desc",
-			    "block_group >= groups_count - "
-			    "block_group = %d, groups_count = %lu",
-			    block_group, EXT2_GROUPS_COUNT(sb));
+    if (block_group >= EXT2_GROUPS_COUNT(sb))
+    {
+        ext2_error (vcb, "ext2_get_group_desc",
+                    "block_group >= groups_count - "
+                    "block_group = %d, groups_count = %lu",
+                    block_group, EXT2_GROUPS_COUNT(sb));
 
-		return NULL;
-	}
+        return NULL;
+    }
 
-	group_desc = block_group / EXT2_DESC_PER_BLOCK(sb);
-	desc = block_group % EXT2_DESC_PER_BLOCK(sb);
+    group_desc = block_group / EXT2_DESC_PER_BLOCK(sb);
+    desc = block_group % EXT2_DESC_PER_BLOCK(sb);
 #if 0
-	bh2 = vcb->vcb$l_quocache;
+    bh2 = vcb->vcb$l_quocache;
 #endif
-	struct ext2_group_desc * s_group_desc = ((long)sb) + sizeof(struct ext2_super_block);
-	if (!s_group_desc) {
-		ext2_error (vcb, "ext2_get_group_desc",
-			    "Group descriptor not loaded - "
-			    "block_group = %d, group_desc = %lu, desc = %lu",
-			     block_group, group_desc, desc);
-		return NULL;
-	}
-	
-	gdp = (struct ext2_group_desc *) s_group_desc;
+    struct ext2_group_desc * s_group_desc = ((long)sb) + sizeof(struct ext2_super_block);
+    if (!s_group_desc)
+    {
+        ext2_error (vcb, "ext2_get_group_desc",
+                    "Group descriptor not loaded - "
+                    "block_group = %d, group_desc = %lu, desc = %lu",
+                    block_group, group_desc, desc);
+        return NULL;
+    }
+
+    gdp = (struct ext2_group_desc *) s_group_desc;
 #if 0
-	if (bh)
-	  *bh = bh2;
+    if (bh)
+        *bh = bh2;
 #endif
-	return gdp + desc;
+    return gdp + desc;
 }
 
 /*
- * Read the bitmap for a given block_group, reading into the specified 
+ * Read the bitmap for a given block_group, reading into the specified
  * slot in the superblock's bitmap cache.
  *
  * Return >=0 on success or a -ve error code.
  */
 
 static int read_block_bitmap (struct _vcb * vcb,
-			       unsigned int block_group,
-			       unsigned long bitmap_nr, struct buffer_head ** bhp)
+                              unsigned int block_group,
+                              unsigned long bitmap_nr, struct buffer_head ** bhp)
 {
-	struct ext2_group_desc * gdp;
-	struct buffer_head * bh = NULL;
-	int retval = -EIO;
-	struct ext2_super_block * sb = vcb->vcb$l_cache;
+    struct ext2_group_desc * gdp;
+    struct buffer_head * bh = NULL;
+    int retval = -EIO;
+    struct ext2_super_block * sb = vcb->vcb$l_cache;
 
-	gdp = ext2_get_group_desc (vcb, block_group, NULL);
-	if (!gdp)
-		goto error_out;
-	retval = 0;
-	bh = sb_bread(sb, le32_to_cpu(gdp->bg_block_bitmap)*vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)));
-	if (!bh) {
-		ext2_error (vcb, "read_block_bitmap",
-			    "Cannot read block bitmap - "
-			    "block_group = %d, block_bitmap = %lu",
-			    block_group, (unsigned long) gdp->bg_block_bitmap);
-		retval = -EIO;
-	}
-	/*
-	 * On IO error, just leave a zero in the superblock's block pointer for
-	 * this group.  The IO will be retried next time.
-	 */
+    gdp = ext2_get_group_desc (vcb, block_group, NULL);
+    if (!gdp)
+        goto error_out;
+    retval = 0;
+    bh = sb_bread(sb, le32_to_cpu(gdp->bg_block_bitmap)*vms_block_factor(EXT2_BLOCK_SIZE_BITS(sb)));
+    if (!bh)
+    {
+        ext2_error (vcb, "read_block_bitmap",
+                    "Cannot read block bitmap - "
+                    "block_group = %d, block_bitmap = %lu",
+                    block_group, (unsigned long) gdp->bg_block_bitmap);
+        retval = -EIO;
+    }
+    /*
+     * On IO error, just leave a zero in the superblock's block pointer for
+     * this group.  The IO will be retried next time.
+     */
 error_out:
 #if 0
-	sb->s_block_bitmap_number[bitmap_nr] = block_group;
-	sb->s_block_bitmap[bitmap_nr] = bh;
+    sb->s_block_bitmap_number[bitmap_nr] = block_group;
+    sb->s_block_bitmap[bitmap_nr] = bh;
 #endif
-	if (bhp)
-	  *bhp = bh; 
-	return retval;
+    if (bhp)
+        *bhp = bh;
+    return retval;
 }
 
 /*
@@ -142,80 +145,87 @@ error_out:
  * 1/ There is one cache per mounted file system.
  * 2/ If the file system contains less than EXT2_MAX_GROUP_LOADED groups,
  *    this function reads the bitmap without maintaining a LRU cache.
- * 
+ *
  * Return the slot used to store the bitmap, or a -ve error code.
  */
 static int __load_block_bitmap (struct _vcb * vcb,
-			        unsigned int block_group, struct buffer_head ** bhp)
+                                unsigned int block_group, struct buffer_head ** bhp)
 {
-	struct ext2_super_block * sb = vcb->vcb$l_cache;
-	int i, j, retval = 0;
-	unsigned long block_bitmap_number;
-	struct buffer_head * block_bitmap;
+    struct ext2_super_block * sb = vcb->vcb$l_cache;
+    int i, j, retval = 0;
+    unsigned long block_bitmap_number;
+    struct buffer_head * block_bitmap;
 
-	if (block_group >= EXT2_GROUPS_COUNT(sb))
-		ext2_panic (vcb, "load_block_bitmap",
-			    "block_group >= groups_count - "
-			    "block_group = %d, groups_count = %lu",
-			    block_group, EXT2_GROUPS_COUNT(sb));
+    if (block_group >= EXT2_GROUPS_COUNT(sb))
+        ext2_panic (vcb, "load_block_bitmap",
+                    "block_group >= groups_count - "
+                    "block_group = %d, groups_count = %lu",
+                    block_group, EXT2_GROUPS_COUNT(sb));
 
-	if (EXT2_GROUPS_COUNT(sb) <= EXT2_MAX_GROUP_LOADED) {
+    if (EXT2_GROUPS_COUNT(sb) <= EXT2_MAX_GROUP_LOADED)
+    {
 #if 0
-		if (sb->s_block_bitmap[block_group]) {
-			if (sb->s_block_bitmap_number[block_group] ==
-			    block_group)
-				return block_group;
-			ext2_error (vcb, "__load_block_bitmap",
-				    "block_group != block_bitmap_number");
-		}
+        if (sb->s_block_bitmap[block_group])
+        {
+            if (sb->s_block_bitmap_number[block_group] ==
+                    block_group)
+                return block_group;
+            ext2_error (vcb, "__load_block_bitmap",
+                        "block_group != block_bitmap_number");
+        }
 #endif
-		retval = read_block_bitmap (vcb, block_group, block_group, &block_bitmap);
-		if (retval < 0)
-			return retval;
-		if (bhp)
-		  *bhp = block_bitmap;
-		return block_group;
-	}
+        retval = read_block_bitmap (vcb, block_group, block_group, &block_bitmap);
+        if (retval < 0)
+            return retval;
+        if (bhp)
+            *bhp = block_bitmap;
+        return block_group;
+    }
 
 #if 0
-	for (i = 0; i < sb->s_loaded_block_bitmaps &&
-		    sb->s_block_bitmap_number[i] != block_group; i++)
-		;
-	if (i < sb->s_loaded_block_bitmaps &&
-  	    sb->s_block_bitmap_number[i] == block_group) {
-		block_bitmap_number = sb->s_block_bitmap_number[i];
-		block_bitmap = sb->s_block_bitmap[i];
-		for (j = i; j > 0; j--) {
-			sb->s_block_bitmap_number[j] =
-				sb->s_block_bitmap_number[j - 1];
-			sb->s_block_bitmap[j] =
-				sb->s_block_bitmap[j - 1];
-		}
-		sb->s_block_bitmap_number[0] = block_bitmap_number;
-		sb->s_block_bitmap[0] = block_bitmap;
+    for (i = 0; i < sb->s_loaded_block_bitmaps &&
+            sb->s_block_bitmap_number[i] != block_group; i++)
+        ;
+    if (i < sb->s_loaded_block_bitmaps &&
+            sb->s_block_bitmap_number[i] == block_group)
+    {
+        block_bitmap_number = sb->s_block_bitmap_number[i];
+        block_bitmap = sb->s_block_bitmap[i];
+        for (j = i; j > 0; j--)
+        {
+            sb->s_block_bitmap_number[j] =
+                sb->s_block_bitmap_number[j - 1];
+            sb->s_block_bitmap[j] =
+                sb->s_block_bitmap[j - 1];
+        }
+        sb->s_block_bitmap_number[0] = block_bitmap_number;
+        sb->s_block_bitmap[0] = block_bitmap;
 
-		/*
-		 * There's still one special case here --- if block_bitmap == 0
-		 * then our last attempt to read the bitmap failed and we have
-		 * just ended up caching that failure.  Try again to read it.
-		 */
-		if (!block_bitmap)
-			retval = read_block_bitmap (sb, block_group, 0);
-	} else {
-		if (sb->s_loaded_block_bitmaps < EXT2_MAX_GROUP_LOADED)
-			sb->s_loaded_block_bitmaps++;
-		else
-			brelse (sb->s_block_bitmap[EXT2_MAX_GROUP_LOADED - 1]);
-		for (j = sb->s_loaded_block_bitmaps - 1; j > 0; j--) {
-			sb->s_block_bitmap_number[j] =
-				sb->s_block_bitmap_number[j - 1];
-			sb->s_block_bitmap[j] =
-				sb->s_block_bitmap[j - 1];
-		}
-		retval = read_block_bitmap (sb, block_group, 0);
-	}
+        /*
+         * There's still one special case here --- if block_bitmap == 0
+         * then our last attempt to read the bitmap failed and we have
+         * just ended up caching that failure.  Try again to read it.
+         */
+        if (!block_bitmap)
+            retval = read_block_bitmap (sb, block_group, 0);
+    }
+    else
+    {
+        if (sb->s_loaded_block_bitmaps < EXT2_MAX_GROUP_LOADED)
+            sb->s_loaded_block_bitmaps++;
+        else
+            brelse (sb->s_block_bitmap[EXT2_MAX_GROUP_LOADED - 1]);
+        for (j = sb->s_loaded_block_bitmaps - 1; j > 0; j--)
+        {
+            sb->s_block_bitmap_number[j] =
+                sb->s_block_bitmap_number[j - 1];
+            sb->s_block_bitmap[j] =
+                sb->s_block_bitmap[j - 1];
+        }
+        retval = read_block_bitmap (sb, block_group, 0);
+    }
 #endif
-	return retval;
+    return retval;
 }
 
 /*
@@ -227,533 +237,560 @@ static int __load_block_bitmap (struct _vcb * vcb,
  * success, or a -ve error code.
  *
  * There is still one inconsistency here --- if the number of groups in this
- * filesystems is <= EXT2_MAX_GROUP_LOADED, then we have no way of 
+ * filesystems is <= EXT2_MAX_GROUP_LOADED, then we have no way of
  * differentiating between a group for which we have never performed a bitmap
  * IO request, and a group for which the last bitmap read request failed.
  */
 static inline int load_block_bitmap (struct _vcb * vcb,
-				     unsigned int block_group, struct buffer_head ** bhp)
+                                     unsigned int block_group, struct buffer_head ** bhp)
 {
-	struct ext2_super_block * sb = vcb->vcb$l_cache;
-	int slot;
-	
-	/*
-	 * Do the lookup for the slot.  First of all, check if we're asking
-	 * for the same slot as last time, and did we succeed that last time?
-	 */
-	if (0) {}
-#if 0
-	if (sb->s_loaded_block_bitmaps > 0 &&
-	    sb->s_block_bitmap_number[0] == block_group &&
-	    sb->s_block_bitmap[0]) {
-		return 0;
-	}
-	/*
-	 * Or can we do a fast lookup based on a loaded group on a filesystem
-	 * small enough to be mapped directly into the superblock?
-	 */
-	else if (EXT2_GROUPS_COUNT(sb) <= EXT2_MAX_GROUP_LOADED && 
-		 sb->s_block_bitmap_number[block_group] == block_group &&
-		 sb->s_block_bitmap[block_group]) {
-		slot = block_group;
-	}
-	/*
-	 * If not, then do a full lookup for this block group.
-	 */
-	if (0)
-#endif
-	else {
-		slot = __load_block_bitmap (sb, block_group, bhp);
-	}
+    struct ext2_super_block * sb = vcb->vcb$l_cache;
+    int slot;
 
-	/*
-	 * <0 means we just got an error
-	 */
-	if (slot < 0)
-		return slot;
-	
-	/*
-	 * If it's a valid slot, we may still have cached a previous IO error,
-	 * in which case the bh in the superblock cache will be zero.
-	 */
+    /*
+     * Do the lookup for the slot.  First of all, check if we're asking
+     * for the same slot as last time, and did we succeed that last time?
+     */
+    if (0) {}
 #if 0
-	if (!sb->s_block_bitmap[slot])
-		return -EIO;
+    if (sb->s_loaded_block_bitmaps > 0 &&
+            sb->s_block_bitmap_number[0] == block_group &&
+            sb->s_block_bitmap[0])
+    {
+        return 0;
+    }
+    /*
+     * Or can we do a fast lookup based on a loaded group on a filesystem
+     * small enough to be mapped directly into the superblock?
+     */
+    else if (EXT2_GROUPS_COUNT(sb) <= EXT2_MAX_GROUP_LOADED &&
+             sb->s_block_bitmap_number[block_group] == block_group &&
+             sb->s_block_bitmap[block_group])
+    {
+        slot = block_group;
+    }
+    /*
+     * If not, then do a full lookup for this block group.
+     */
+    if (0)
 #endif
-	
-	/*
-	 * Must have been read in OK to get this far.
-	 */
-	return slot;
+        else
+        {
+            slot = __load_block_bitmap (sb, block_group, bhp);
+        }
+
+    /*
+     * <0 means we just got an error
+     */
+    if (slot < 0)
+        return slot;
+
+    /*
+     * If it's a valid slot, we may still have cached a previous IO error,
+     * in which case the bh in the superblock cache will be zero.
+     */
+#if 0
+    if (!sb->s_block_bitmap[slot])
+        return -EIO;
+#endif
+
+    /*
+     * Must have been read in OK to get this far.
+     */
+    return slot;
 }
 
 /* Free given blocks, update quota and i_blocks field */
 void ext2_free_blocks (struct _vcb * vcb, struct _fcb * inode, unsigned long block,
-		       unsigned long count)
+                       unsigned long count)
 {
-	struct buffer_head * bh;
-	struct buffer_head * bh2;
-	unsigned long block_group;
-	unsigned long bit;
-	unsigned long i;
-	int bitmap_nr;
-	unsigned long overflow;
-	struct ext2_super_block * sb = vcb->vcb$l_cache;
-	struct ext2_group_desc * gdp;
-	struct ext2_super_block * es;
+    struct buffer_head * bh;
+    struct buffer_head * bh2;
+    unsigned long block_group;
+    unsigned long bit;
+    unsigned long i;
+    int bitmap_nr;
+    unsigned long overflow;
+    struct ext2_super_block * sb = vcb->vcb$l_cache;
+    struct ext2_group_desc * gdp;
+    struct ext2_super_block * es;
 
-	if (!sb) {
-		printk ("ext2_free_blocks: nonexistent device");
-		return;
-	}
+    if (!sb)
+    {
+        printk ("ext2_free_blocks: nonexistent device");
+        return;
+    }
 #if 0
-	lock_super (sb);
+    lock_super (sb);
 #endif
-	es = sb;
-	if (block < le32_to_cpu(es->s_first_data_block) || 
-	    (block + count) > le32_to_cpu(es->s_blocks_count)) {
-		ext2_error (vcb, "ext2_free_blocks",
-			    "Freeing blocks not in datazone - "
-			    "block = %lu, count = %lu", block, count);
-		goto error_return;
-	}
+    es = sb;
+    if (block < le32_to_cpu(es->s_first_data_block) ||
+            (block + count) > le32_to_cpu(es->s_blocks_count))
+    {
+        ext2_error (vcb, "ext2_free_blocks",
+                    "Freeing blocks not in datazone - "
+                    "block = %lu, count = %lu", block, count);
+        goto error_return;
+    }
 
-	ext2_debug ("freeing block(s) %lu-%lu\n", block, block + count - 1);
+    ext2_debug ("freeing block(s) %lu-%lu\n", block, block + count - 1);
 
 do_more:
-	overflow = 0;
-	block_group = (block - le32_to_cpu(es->s_first_data_block)) /
-		      EXT2_BLOCKS_PER_GROUP(sb);
-	bit = (block - le32_to_cpu(es->s_first_data_block)) %
-		      EXT2_BLOCKS_PER_GROUP(sb);
-	/*
-	 * Check to see if we are freeing blocks across a group
-	 * boundary.
-	 */
-	if (bit + count > EXT2_BLOCKS_PER_GROUP(sb)) {
-		overflow = bit + count - EXT2_BLOCKS_PER_GROUP(sb);
-		count -= overflow;
-	}
-	bitmap_nr = load_block_bitmap (sb, block_group, &bh);
-	if (bitmap_nr < 0)
-		goto error_return;
-
-#if 0	
-	bh = sb->s_block_bitmap[bitmap_nr];
-#endif
-	gdp = ext2_get_group_desc (vcb, block_group, 0);
-	if (!gdp)
-		goto error_return;
+    overflow = 0;
+    block_group = (block - le32_to_cpu(es->s_first_data_block)) /
+                  EXT2_BLOCKS_PER_GROUP(sb);
+    bit = (block - le32_to_cpu(es->s_first_data_block)) %
+          EXT2_BLOCKS_PER_GROUP(sb);
+    /*
+     * Check to see if we are freeing blocks across a group
+     * boundary.
+     */
+    if (bit + count > EXT2_BLOCKS_PER_GROUP(sb))
+    {
+        overflow = bit + count - EXT2_BLOCKS_PER_GROUP(sb);
+        count -= overflow;
+    }
+    bitmap_nr = load_block_bitmap (sb, block_group, &bh);
+    if (bitmap_nr < 0)
+        goto error_return;
 
 #if 0
-	if (in_range (le32_to_cpu(gdp->bg_block_bitmap), block, count) ||
-	    in_range (le32_to_cpu(gdp->bg_inode_bitmap), block, count) ||
-	    in_range (block, le32_to_cpu(gdp->bg_inode_table),
-		      sb->s_itb_per_group) ||
-	    in_range (block + count - 1, le32_to_cpu(gdp->bg_inode_table),
-		      sb->s_itb_per_group))
-		ext2_error (vcb, "ext2_free_blocks",
-			    "Freeing blocks in system zones - "
-			    "Block = %lu, count = %lu",
-			    block, count);
+    bh = sb->s_block_bitmap[bitmap_nr];
+#endif
+    gdp = ext2_get_group_desc (vcb, block_group, 0);
+    if (!gdp)
+        goto error_return;
+
+#if 0
+    if (in_range (le32_to_cpu(gdp->bg_block_bitmap), block, count) ||
+            in_range (le32_to_cpu(gdp->bg_inode_bitmap), block, count) ||
+            in_range (block, le32_to_cpu(gdp->bg_inode_table),
+                      sb->s_itb_per_group) ||
+            in_range (block + count - 1, le32_to_cpu(gdp->bg_inode_table),
+                      sb->s_itb_per_group))
+        ext2_error (vcb, "ext2_free_blocks",
+                    "Freeing blocks in system zones - "
+                    "Block = %lu, count = %lu",
+                    block, count);
 #endif
 
-	for (i = 0; i < count; i++) {
-		if (!ext2_clear_bit (bit + i, bh->b_data))
-			ext2_error (vcb, "ext2_free_blocks",
-				      "bit already cleared for block %lu",
-				      block + i);
-		else {
-			DQUOT_FREE_BLOCK(inode, 1);
-			gdp->bg_free_blocks_count =
-				cpu_to_le16(le16_to_cpu(gdp->bg_free_blocks_count)+1);
-			es->s_free_blocks_count =
-				cpu_to_le32(le32_to_cpu(es->s_free_blocks_count)+1);
-		}
-	}
-	
+    for (i = 0; i < count; i++)
+    {
+        if (!ext2_clear_bit (bit + i, bh->b_data))
+            ext2_error (vcb, "ext2_free_blocks",
+                        "bit already cleared for block %lu",
+                        block + i);
+        else
+        {
+            DQUOT_FREE_BLOCK(inode, 1);
+            gdp->bg_free_blocks_count =
+                cpu_to_le16(le16_to_cpu(gdp->bg_free_blocks_count)+1);
+            es->s_free_blocks_count =
+                cpu_to_le32(le32_to_cpu(es->s_free_blocks_count)+1);
+        }
+    }
+
 #if 0
-	vms_mark_buffer_dirty(bh2);
+    vms_mark_buffer_dirty(bh2);
 #endif
 #if 0
-	vms_mark_buffer_dirty(sb->s_sbh);
+    vms_mark_buffer_dirty(sb->s_sbh);
 #else
-	ext2_write_super(vcb);
+    ext2_write_super(vcb);
 #endif
 
-	vms_mark_buffer_dirty(bh);
-	goto sync;
-	if (1 /*sb->s_flags & MS_SYNCHRONOUS*/) {
-	sync:
-		vms_ll_rw_block (WRITE, 1, &bh, 0);
-		//wait_on_buffer (bh);
-	}
-	if (overflow) {
-		block += count;
-		count = overflow;
-		goto do_more;
-	}
+    vms_mark_buffer_dirty(bh);
+    goto sync;
+    if (1 /*sb->s_flags & MS_SYNCHRONOUS*/)
+    {
+sync:
+        vms_ll_rw_block (WRITE, 1, &bh, 0);
+        //wait_on_buffer (bh);
+    }
+    if (overflow)
+    {
+        block += count;
+        count = overflow;
+        goto do_more;
+    }
 #if 0
-	sb->s_dirt = 1;
+    sb->s_dirt = 1;
 #endif
 error_return:
 #if 0
-	unlock_super (sb);
+    unlock_super (sb);
 #endif
-	return;
+    return;
 }
 
 /*
  * ext2_new_block uses a goal block to assist allocation.  If the goal is
  * free, or there is a free block within 32 blocks of the goal, that block
- * is allocated.  Otherwise a forward search is made for a free block; within 
+ * is allocated.  Otherwise a forward search is made for a free block; within
  * each block group the search first looks for an entire free byte in the block
  * bitmap, and then for any free bit if that fails.
  * This function also updates quota and i_blocks field.
  */
 int ext2_new_block (struct _vcb * vcb, struct _fcb * inode, unsigned long goal,
-    u32 * prealloc_count, u32 * prealloc_block, int * err)
+                    u32 * prealloc_count, u32 * prealloc_block, int * err)
 {
-	struct buffer_head * bh;
-	char * p, * r;
-	int i, j, k, tmp;
-	int bitmap_nr;
-	struct ext2_super_block * sb = vcb->vcb$l_cache;
-	struct ext2_group_desc * gdp;
-	struct ext2_super_block * es;
+    struct buffer_head * bh;
+    char * p, * r;
+    int i, j, k, tmp;
+    int bitmap_nr;
+    struct ext2_super_block * sb = vcb->vcb$l_cache;
+    struct ext2_group_desc * gdp;
+    struct ext2_super_block * es;
 #ifdef EXT2FS_DEBUG
-	static int goal_hits = 0, goal_attempts = 0;
+    static int goal_hits = 0, goal_attempts = 0;
 #endif
-	*err = -ENOSPC;
-	if (!sb) {
-		printk ("ext2_new_block: nonexistent device");
-		return 0;
-	}
+    *err = -ENOSPC;
+    if (!sb)
+    {
+        printk ("ext2_new_block: nonexistent device");
+        return 0;
+    }
 
 #if 0
-	lock_super (sb);
+    lock_super (sb);
 #endif
-	es = sb;
-	if (le32_to_cpu(es->s_free_blocks_count) <= le32_to_cpu(es->s_r_blocks_count) /* &&
+    es = sb;
+    if (le32_to_cpu(es->s_free_blocks_count) <= le32_to_cpu(es->s_r_blocks_count) /* &&
 	    ((sb->s_resuid != current->fsuid) &&
 	     (sb->s_resgid == 0 ||
-	      !in_group_p (sb->s_resgid)) && 
+	      !in_group_p (sb->s_resgid)) &&
 	      !capable(CAP_SYS_RESOURCE))*/)
-		goto out;
+        goto out;
 
-	ext2_debug ("goal=%lu.\n", goal);
+    ext2_debug ("goal=%lu.\n", goal);
 
 repeat:
-	/*
-	 * First, test whether the goal block is free.
-	 */
-	if (goal < le32_to_cpu(es->s_first_data_block) ||
-	    goal >= le32_to_cpu(es->s_blocks_count))
-		goal = le32_to_cpu(es->s_first_data_block);
-	i = (goal - le32_to_cpu(es->s_first_data_block)) / EXT2_BLOCKS_PER_GROUP(sb);
-	gdp = ext2_get_group_desc (vcb, i, 0);
-	if (!gdp)
-		goto io_error;
+    /*
+     * First, test whether the goal block is free.
+     */
+    if (goal < le32_to_cpu(es->s_first_data_block) ||
+            goal >= le32_to_cpu(es->s_blocks_count))
+        goal = le32_to_cpu(es->s_first_data_block);
+    i = (goal - le32_to_cpu(es->s_first_data_block)) / EXT2_BLOCKS_PER_GROUP(sb);
+    gdp = ext2_get_group_desc (vcb, i, 0);
+    if (!gdp)
+        goto io_error;
 
-	if (le16_to_cpu(gdp->bg_free_blocks_count) > 0) {
-		j = ((goal - le32_to_cpu(es->s_first_data_block)) % EXT2_BLOCKS_PER_GROUP(sb));
+    if (le16_to_cpu(gdp->bg_free_blocks_count) > 0)
+    {
+        j = ((goal - le32_to_cpu(es->s_first_data_block)) % EXT2_BLOCKS_PER_GROUP(sb));
 #ifdef EXT2FS_DEBUG
-		if (j)
-			goal_attempts++;
+        if (j)
+            goal_attempts++;
 #endif
-		bitmap_nr = load_block_bitmap (sb, i, &bh);
-		if (bitmap_nr < 0)
-			goto io_error;
-		
+        bitmap_nr = load_block_bitmap (sb, i, &bh);
+        if (bitmap_nr < 0)
+            goto io_error;
+
 #if 0
-		bh = sb->s_block_bitmap[bitmap_nr];
+        bh = sb->s_block_bitmap[bitmap_nr];
 #endif
 
-		ext2_debug ("goal is at %d:%d.\n", i, j);
+        ext2_debug ("goal is at %d:%d.\n", i, j);
 
-		if (!ext2_test_bit(j, bh->b_data)) {
-			ext2_debug("goal bit allocated, %d hits\n",++goal_hits);
-			goto got_block;
-		}
-		if (j) {
-			/*
-			 * The goal was occupied; search forward for a free 
-			 * block within the next XX blocks.
-			 *
-			 * end_goal is more or less random, but it has to be
-			 * less than EXT2_BLOCKS_PER_GROUP. Aligning up to the
-			 * next 64-bit boundary is simple..
-			 */
-			int end_goal = (j + 63) & ~63;
-			j = ext2_find_next_zero_bit(bh->b_data, end_goal, j);
-			if (j < end_goal)
-				goto got_block;
-		}
-	
-		ext2_debug ("Bit not found near goal\n");
+        if (!ext2_test_bit(j, bh->b_data))
+        {
+            ext2_debug("goal bit allocated, %d hits\n",++goal_hits);
+            goto got_block;
+        }
+        if (j)
+        {
+            /*
+             * The goal was occupied; search forward for a free
+             * block within the next XX blocks.
+             *
+             * end_goal is more or less random, but it has to be
+             * less than EXT2_BLOCKS_PER_GROUP. Aligning up to the
+             * next 64-bit boundary is simple..
+             */
+            int end_goal = (j + 63) & ~63;
+            j = ext2_find_next_zero_bit(bh->b_data, end_goal, j);
+            if (j < end_goal)
+                goto got_block;
+        }
 
-		/*
-		 * There has been no free block found in the near vicinity
-		 * of the goal: do a search forward through the block groups,
-		 * searching in each group first for an entire free byte in
-		 * the bitmap and then for any free bit.
-		 * 
-		 * Search first in the remainder of the current group; then,
-		 * cyclicly search through the rest of the groups.
-		 */
-		p = ((char *) bh->b_data) + (j >> 3);
-		r = memscan(p, 0, (EXT2_BLOCKS_PER_GROUP(sb) - j + 7) >> 3);
-		k = (r - ((char *) bh->b_data)) << 3;
-		if (k < EXT2_BLOCKS_PER_GROUP(sb)) {
-			j = k;
-			goto search_back;
-		}
+        ext2_debug ("Bit not found near goal\n");
 
-		k = ext2_find_next_zero_bit ((unsigned long *) bh->b_data, 
-					EXT2_BLOCKS_PER_GROUP(sb),
-					j);
-		if (k < EXT2_BLOCKS_PER_GROUP(sb)) {
-			j = k;
-			goto got_block;
-		}
-	}
+        /*
+         * There has been no free block found in the near vicinity
+         * of the goal: do a search forward through the block groups,
+         * searching in each group first for an entire free byte in
+         * the bitmap and then for any free bit.
+         *
+         * Search first in the remainder of the current group; then,
+         * cyclicly search through the rest of the groups.
+         */
+        p = ((char *) bh->b_data) + (j >> 3);
+        r = memscan(p, 0, (EXT2_BLOCKS_PER_GROUP(sb) - j + 7) >> 3);
+        k = (r - ((char *) bh->b_data)) << 3;
+        if (k < EXT2_BLOCKS_PER_GROUP(sb))
+        {
+            j = k;
+            goto search_back;
+        }
 
-	ext2_debug ("Bit not found in block group %d.\n", i);
+        k = ext2_find_next_zero_bit ((unsigned long *) bh->b_data,
+                                     EXT2_BLOCKS_PER_GROUP(sb),
+                                     j);
+        if (k < EXT2_BLOCKS_PER_GROUP(sb))
+        {
+            j = k;
+            goto got_block;
+        }
+    }
 
-	/*
-	 * Now search the rest of the groups.  We assume that 
-	 * i and gdp correctly point to the last group visited.
-	 */
-	for (k = 0; k < EXT2_GROUPS_COUNT(sb); k++) {
-		i++;
-		if (i >= EXT2_GROUPS_COUNT(sb))
-			i = 0;
-		gdp = ext2_get_group_desc (vcb, i, 0);
-		if (!gdp)
-			goto io_error;
-		if (le16_to_cpu(gdp->bg_free_blocks_count) > 0)
-			break;
-	}
-	if (k >= EXT2_GROUPS_COUNT(sb))
-		goto out;
-	bitmap_nr = load_block_bitmap (sb, i, &bh);
-	if (bitmap_nr < 0)
-		goto io_error;
-	
-	r = memscan(bh->b_data, 0, EXT2_BLOCKS_PER_GROUP(sb) >> 3);
-	j = (r - bh->b_data) << 3;
-	if (j < EXT2_BLOCKS_PER_GROUP(sb))
-		goto search_back;
-	else
-		j = ext2_find_first_zero_bit ((unsigned long *) bh->b_data,
-					 EXT2_BLOCKS_PER_GROUP(sb));
-	if (j >= EXT2_BLOCKS_PER_GROUP(sb)) {
-		ext2_error (vcb, "ext2_new_block",
-			    "Free blocks count corrupted for block group %d", i);
-		goto out;
-	}
+    ext2_debug ("Bit not found in block group %d.\n", i);
+
+    /*
+     * Now search the rest of the groups.  We assume that
+     * i and gdp correctly point to the last group visited.
+     */
+    for (k = 0; k < EXT2_GROUPS_COUNT(sb); k++)
+    {
+        i++;
+        if (i >= EXT2_GROUPS_COUNT(sb))
+            i = 0;
+        gdp = ext2_get_group_desc (vcb, i, 0);
+        if (!gdp)
+            goto io_error;
+        if (le16_to_cpu(gdp->bg_free_blocks_count) > 0)
+            break;
+    }
+    if (k >= EXT2_GROUPS_COUNT(sb))
+        goto out;
+    bitmap_nr = load_block_bitmap (sb, i, &bh);
+    if (bitmap_nr < 0)
+        goto io_error;
+
+    r = memscan(bh->b_data, 0, EXT2_BLOCKS_PER_GROUP(sb) >> 3);
+    j = (r - bh->b_data) << 3;
+    if (j < EXT2_BLOCKS_PER_GROUP(sb))
+        goto search_back;
+    else
+        j = ext2_find_first_zero_bit ((unsigned long *) bh->b_data,
+                                      EXT2_BLOCKS_PER_GROUP(sb));
+    if (j >= EXT2_BLOCKS_PER_GROUP(sb))
+    {
+        ext2_error (vcb, "ext2_new_block",
+                    "Free blocks count corrupted for block group %d", i);
+        goto out;
+    }
 
 search_back:
-	/* 
-	 * We have succeeded in finding a free byte in the block
-	 * bitmap.  Now search backwards up to 7 bits to find the
-	 * start of this group of free blocks.
-	 */
-	for (k = 0; k < 7 && j > 0 && !ext2_test_bit (j - 1, bh->b_data); k++, j--);
-	
+    /*
+     * We have succeeded in finding a free byte in the block
+     * bitmap.  Now search backwards up to 7 bits to find the
+     * start of this group of free blocks.
+     */
+    for (k = 0; k < 7 && j > 0 && !ext2_test_bit (j - 1, bh->b_data); k++, j--);
+
 got_block:
 
-	ext2_debug ("using block group %d(%d)\n", i, gdp->bg_free_blocks_count);
+    ext2_debug ("using block group %d(%d)\n", i, gdp->bg_free_blocks_count);
 
-	/*
-	 * Check quota for allocation of this block.
-	 */
-	if(DQUOT_ALLOC_BLOCK(inode, 1)) {
-		*err = -EDQUOT;
-		goto out;
-	}
+    /*
+     * Check quota for allocation of this block.
+     */
+    if(DQUOT_ALLOC_BLOCK(inode, 1))
+    {
+        *err = -EDQUOT;
+        goto out;
+    }
 
-	tmp = j + i * EXT2_BLOCKS_PER_GROUP(sb) + le32_to_cpu(es->s_first_data_block);
+    tmp = j + i * EXT2_BLOCKS_PER_GROUP(sb) + le32_to_cpu(es->s_first_data_block);
 
-	if (tmp == le32_to_cpu(gdp->bg_block_bitmap) ||
-	    tmp == le32_to_cpu(gdp->bg_inode_bitmap)/* ||
+    if (tmp == le32_to_cpu(gdp->bg_block_bitmap) ||
+            tmp == le32_to_cpu(gdp->bg_inode_bitmap)/* ||
 	    in_range (tmp, le32_to_cpu(gdp->bg_inode_table),
 	    sb->s_itb_per_group)*/)
-		ext2_error (vcb, "ext2_new_block",
-			    "Allocating block in system zone - "
-			    "block = %u", tmp);
+        ext2_error (vcb, "ext2_new_block",
+                    "Allocating block in system zone - "
+                    "block = %u", tmp);
 
-	if (ext2_set_bit (j, bh->b_data)) {
-		ext2_warning (vcb, "ext2_new_block",
-			      "bit already set for block %d", j);
-		DQUOT_FREE_BLOCK(inode, 1);
-		goto repeat;
-	}
+    if (ext2_set_bit (j, bh->b_data))
+    {
+        ext2_warning (vcb, "ext2_new_block",
+                      "bit already set for block %d", j);
+        DQUOT_FREE_BLOCK(inode, 1);
+        goto repeat;
+    }
 
-	ext2_debug ("found bit %d\n", j);
+    ext2_debug ("found bit %d\n", j);
 
-	/*
-	 * Do block preallocation now if required.
-	 */
+    /*
+     * Do block preallocation now if required.
+     */
 #ifdef EXT2_PREALLOCATE
-	/* Writer: ->i_prealloc* */
-	if (prealloc_count && !*prealloc_count) {
-		int	prealloc_goal;
-		unsigned long next_block = tmp + 1;
+    /* Writer: ->i_prealloc* */
+    if (prealloc_count && !*prealloc_count)
+    {
+        int	prealloc_goal;
+        unsigned long next_block = tmp + 1;
 
-		prealloc_goal = es->s_prealloc_blocks ?
-			es->s_prealloc_blocks : EXT2_DEFAULT_PREALLOC_BLOCKS;
+        prealloc_goal = es->s_prealloc_blocks ?
+                        es->s_prealloc_blocks : EXT2_DEFAULT_PREALLOC_BLOCKS;
 
-		*prealloc_block = next_block;
-		/* Writer: end */
-		for (k = 1;
-		     k < prealloc_goal && (j + k) < EXT2_BLOCKS_PER_GROUP(sb);
-		     k++, next_block++) {
-			if (DQUOT_PREALLOC_BLOCK(inode, 1))
-				break;
-			/* Writer: ->i_prealloc* */
-			if (*prealloc_block + *prealloc_count != next_block ||
-			    ext2_set_bit (j + k, bh->b_data)) {
-				/* Writer: end */
-				DQUOT_FREE_BLOCK(inode, 1);
- 				break;
-			}
-			(*prealloc_count)++;
-			/* Writer: end */
-		}	
-		/*
-		 * As soon as we go for per-group spinlocks we'll need these
-		 * done inside the loop above.
-		 */
-		gdp->bg_free_blocks_count =
-			cpu_to_le16(le16_to_cpu(gdp->bg_free_blocks_count) -
-			       (k - 1));
-		es->s_free_blocks_count =
-			cpu_to_le32(le32_to_cpu(es->s_free_blocks_count) -
-			       (k - 1));
-		ext2_debug ("Preallocated a further %lu bits.\n",
-			       (k - 1));
-	}
+        *prealloc_block = next_block;
+        /* Writer: end */
+        for (k = 1;
+                k < prealloc_goal && (j + k) < EXT2_BLOCKS_PER_GROUP(sb);
+                k++, next_block++)
+        {
+            if (DQUOT_PREALLOC_BLOCK(inode, 1))
+                break;
+            /* Writer: ->i_prealloc* */
+            if (*prealloc_block + *prealloc_count != next_block ||
+                    ext2_set_bit (j + k, bh->b_data))
+            {
+                /* Writer: end */
+                DQUOT_FREE_BLOCK(inode, 1);
+                break;
+            }
+            (*prealloc_count)++;
+            /* Writer: end */
+        }
+        /*
+         * As soon as we go for per-group spinlocks we'll need these
+         * done inside the loop above.
+         */
+        gdp->bg_free_blocks_count =
+            cpu_to_le16(le16_to_cpu(gdp->bg_free_blocks_count) -
+                        (k - 1));
+        es->s_free_blocks_count =
+            cpu_to_le32(le32_to_cpu(es->s_free_blocks_count) -
+                        (k - 1));
+        ext2_debug ("Preallocated a further %lu bits.\n",
+                    (k - 1));
+    }
 #endif
 
-	j = tmp;
-	vms_mark_buffer_dirty(bh);
-	goto sync;
-	if (1 /*sb->s_flags & MS_SYNCHRONOUS*/) {
-	sync:
-		vms_ll_rw_block (WRITE, 1, &bh, 0);
-		//wait_on_buffer (bh);
-	}
+    j = tmp;
+    vms_mark_buffer_dirty(bh);
+    goto sync;
+    if (1 /*sb->s_flags & MS_SYNCHRONOUS*/)
+    {
+sync:
+        vms_ll_rw_block (WRITE, 1, &bh, 0);
+        //wait_on_buffer (bh);
+    }
 
-	if (j >= le32_to_cpu(es->s_blocks_count)) {
-		ext2_error (vcb, "ext2_new_block",
-			    "block(%d) >= blocks count(%d) - "
-			    "block_group = %d, es == %p ",j,
-			le32_to_cpu(es->s_blocks_count), i, es);
-		goto out;
-	}
+    if (j >= le32_to_cpu(es->s_blocks_count))
+    {
+        ext2_error (vcb, "ext2_new_block",
+                    "block(%d) >= blocks count(%d) - "
+                    "block_group = %d, es == %p ",j,
+                    le32_to_cpu(es->s_blocks_count), i, es);
+        goto out;
+    }
 
-	ext2_debug ("allocating block %d. "
-		    "Goal hits %d of %d.\n", j, goal_hits, goal_attempts);
+    ext2_debug ("allocating block %d. "
+                "Goal hits %d of %d.\n", j, goal_hits, goal_attempts);
 
-	gdp->bg_free_blocks_count = cpu_to_le16(le16_to_cpu(gdp->bg_free_blocks_count) - 1);
+    gdp->bg_free_blocks_count = cpu_to_le16(le16_to_cpu(gdp->bg_free_blocks_count) - 1);
 #if 0
-	vms_mark_buffer_dirty(bh2);
+    vms_mark_buffer_dirty(bh2);
 #endif
-	es->s_free_blocks_count = cpu_to_le32(le32_to_cpu(es->s_free_blocks_count) - 1);
+    es->s_free_blocks_count = cpu_to_le32(le32_to_cpu(es->s_free_blocks_count) - 1);
 #if 0
-	vms_mark_buffer_dirty(sb->s_sbh);
+    vms_mark_buffer_dirty(sb->s_sbh);
 #else
-	ext2_write_super(vcb);
+    ext2_write_super(vcb);
 #endif
 #if 0
-	sb->s_dirt = 1;
+    sb->s_dirt = 1;
 #endif
 #if 0
-	unlock_super (sb);
+    unlock_super (sb);
 #endif
-	*err = 0;
-	return j;
-	
+    *err = 0;
+    return j;
+
 io_error:
-	*err = -EIO;
+    *err = -EIO;
 out:
 #if 0
-	unlock_super (sb);
+    unlock_super (sb);
 #endif
-	return 0;
-	
+    return 0;
+
 }
 
 unsigned long ext2_count_free_blocks (struct _vcb * vcb)
 {
-	struct ext2_super_block * sb = vcb->vcb$l_cache;
+    struct ext2_super_block * sb = vcb->vcb$l_cache;
 #ifdef EXT2FS_DEBUG
-	struct ext2_super_block * es;
-	unsigned long desc_count, bitmap_count, x;
-	int bitmap_nr;
-	struct ext2_group_desc * gdp;
-	int i;
-	
+    struct ext2_super_block * es;
+    unsigned long desc_count, bitmap_count, x;
+    int bitmap_nr;
+    struct ext2_group_desc * gdp;
+    int i;
+
 #if 0
-	lock_super (sb);
+    lock_super (sb);
 #endif
-	es = sb;
-	desc_count = 0;
-	bitmap_count = 0;
-	gdp = NULL;
-	for (i = 0; i < EXT2_GROUPS_COUNT(sb); i++) {
-		gdp = ext2_get_group_desc (vcb, i, NULL);
-		if (!gdp)
-			continue;
-		desc_count += le16_to_cpu(gdp->bg_free_blocks_count);
-		bitmap_nr = load_block_bitmap (sb, i);
-		if (bitmap_nr < 0)
-			continue;
-		
-		x = ext2_count_free (sb->s_block_bitmap[bitmap_nr],
-				     sb->s_blocksize);
-		printk ("group %d: stored = %d, counted = %lu\n",
-			i, le16_to_cpu(gdp->bg_free_blocks_count), x);
-		bitmap_count += x;
-	}
-	printk("ext2_count_free_blocks: stored = %lu, computed = %lu, %lu\n",
-	       le32_to_cpu(es->s_free_blocks_count), desc_count, bitmap_count);
+    es = sb;
+    desc_count = 0;
+    bitmap_count = 0;
+    gdp = NULL;
+    for (i = 0; i < EXT2_GROUPS_COUNT(sb); i++)
+    {
+        gdp = ext2_get_group_desc (vcb, i, NULL);
+        if (!gdp)
+            continue;
+        desc_count += le16_to_cpu(gdp->bg_free_blocks_count);
+        bitmap_nr = load_block_bitmap (sb, i);
+        if (bitmap_nr < 0)
+            continue;
+
+        x = ext2_count_free (sb->s_block_bitmap[bitmap_nr],
+                             sb->s_blocksize);
+        printk ("group %d: stored = %d, counted = %lu\n",
+                i, le16_to_cpu(gdp->bg_free_blocks_count), x);
+        bitmap_count += x;
+    }
+    printk("ext2_count_free_blocks: stored = %lu, computed = %lu, %lu\n",
+           le32_to_cpu(es->s_free_blocks_count), desc_count, bitmap_count);
 #if 0
-	unlock_super (sb);
+    unlock_super (sb);
 #endif
-	return bitmap_count;
+    return bitmap_count;
 #else
-	return le32_to_cpu(sb->s_free_blocks_count);
+    return le32_to_cpu(sb->s_free_blocks_count);
 #endif
 }
 
 static inline int block_in_use (unsigned long block,
-				struct _vcb * vcb,
-				unsigned char * map)
+                                struct _vcb * vcb,
+                                unsigned char * map)
 {
-	struct ext2_super_block * sb = vcb->vcb$l_cache;
-	return ext2_test_bit ((block - le32_to_cpu(sb->s_first_data_block)) %
-			 EXT2_BLOCKS_PER_GROUP(sb), map);
+    struct ext2_super_block * sb = vcb->vcb$l_cache;
+    return ext2_test_bit ((block - le32_to_cpu(sb->s_first_data_block)) %
+                          EXT2_BLOCKS_PER_GROUP(sb), map);
 }
 
 static inline int test_root(int a, int b)
 {
-	if (a == 0)
-		return 1;
-	while (1) {
-		if (a == 1)
-			return 1;
-		if (a % b)
-			return 0;
-		a = a / b;
-	}
+    if (a == 0)
+        return 1;
+    while (1)
+    {
+        if (a == 1)
+            return 1;
+        if (a % b)
+            return 0;
+        a = a / b;
+    }
 }
 
 int ext2_group_sparse(int group)
 {
-	return (test_root(group, 3) || test_root(group, 5) ||
-		test_root(group, 7));
+    return (test_root(group, 3) || test_root(group, 5) ||
+            test_root(group, 7));
 }
 
 /**
@@ -766,14 +803,14 @@ int ext2_group_sparse(int group)
  */
 int ext2_bg_has_super(struct _vcb * vcb, int group)
 {
-	struct ext2_super_block * sb = vcb->vcb$l_cache;
+    struct ext2_super_block * sb = vcb->vcb$l_cache;
 #if 0
-	// not yet
-	if (EXT2_HAS_RO_COMPAT_FEATURE(sb,EXT2_FEATURE_RO_COMPAT_SPARSE_SUPER)&&
-	    !ext2_group_sparse(group))
-		return 0;
+    // not yet
+    if (EXT2_HAS_RO_COMPAT_FEATURE(sb,EXT2_FEATURE_RO_COMPAT_SPARSE_SUPER)&&
+            !ext2_group_sparse(group))
+        return 0;
 #endif
-	return 1;
+    return 1;
 }
 
 /**
@@ -787,15 +824,15 @@ int ext2_bg_has_super(struct _vcb * vcb, int group)
  */
 unsigned long ext2_bg_num_gdb(struct _vcb * vcb, int group)
 {
-	struct ext2_super_block * sb = vcb->vcb$l_cache;
+    struct ext2_super_block * sb = vcb->vcb$l_cache;
 #if 0
-	// not yet
-	if (EXT2_HAS_RO_COMPAT_FEATURE(sb,EXT2_FEATURE_RO_COMPAT_SPARSE_SUPER)&&
-	    !ext2_group_sparse(group))
-		return 0;
-	return EXT2_SB(sb)->s_gdb_count;
+    // not yet
+    if (EXT2_HAS_RO_COMPAT_FEATURE(sb,EXT2_FEATURE_RO_COMPAT_SPARSE_SUPER)&&
+            !ext2_group_sparse(group))
+        return 0;
+    return EXT2_SB(sb)->s_gdb_count;
 #else
-	return (EXT2_GROUPS_COUNT(sb) + EXT2_DESC_PER_BLOCK(sb) - 1) / EXT2_DESC_PER_BLOCK(sb);
+    return (EXT2_GROUPS_COUNT(sb) + EXT2_DESC_PER_BLOCK(sb) - 1) / EXT2_DESC_PER_BLOCK(sb);
 #endif
 }
 
@@ -803,69 +840,70 @@ unsigned long ext2_bg_num_gdb(struct _vcb * vcb, int group)
 /* Called at mount-time, super-block is locked */
 void ext2_check_blocks_bitmap (struct _vcb * vcb)
 {
-	struct buffer_head * bh;
-	struct ext2_super_block * es;
-	unsigned long desc_count, bitmap_count, x, j;
-	unsigned long desc_blocks;
-	int bitmap_nr;
-	struct ext2_group_desc * gdp;
-	int i;
-	struct ext2_super_block * sb = vcb->vcb$l_cache;
+    struct buffer_head * bh;
+    struct ext2_super_block * es;
+    unsigned long desc_count, bitmap_count, x, j;
+    unsigned long desc_blocks;
+    int bitmap_nr;
+    struct ext2_group_desc * gdp;
+    int i;
+    struct ext2_super_block * sb = vcb->vcb$l_cache;
 
-	es = sb;
-	desc_count = 0;
-	bitmap_count = 0;
-	gdp = NULL;
-	for (i = 0; i < EXT2_GROUPS_COUNT(sb); i++) {
-		gdp = ext2_get_group_desc (vcb, i, NULL);
-		if (!gdp)
-			continue;
-		desc_count += le16_to_cpu(gdp->bg_free_blocks_count);
-		bitmap_nr = load_block_bitmap (sb, i);
-		if (bitmap_nr < 0)
-			continue;
+    es = sb;
+    desc_count = 0;
+    bitmap_count = 0;
+    gdp = NULL;
+    for (i = 0; i < EXT2_GROUPS_COUNT(sb); i++)
+    {
+        gdp = ext2_get_group_desc (vcb, i, NULL);
+        if (!gdp)
+            continue;
+        desc_count += le16_to_cpu(gdp->bg_free_blocks_count);
+        bitmap_nr = load_block_bitmap (sb, i);
+        if (bitmap_nr < 0)
+            continue;
 
-		bh = EXT2_SB(sb)->s_block_bitmap[bitmap_nr];
+        bh = EXT2_SB(sb)->s_block_bitmap[bitmap_nr];
 
-		if (ext2_bg_has_super(sb, i) && !ext2_test_bit(0, bh->b_data))
-			ext2_error (vcb, __FUNCTION__,
-				   "Superblock in group %d is marked free", i);
+        if (ext2_bg_has_super(sb, i) && !ext2_test_bit(0, bh->b_data))
+            ext2_error (vcb, __FUNCTION__,
+                        "Superblock in group %d is marked free", i);
 
-		desc_blocks = ext2_bg_num_gdb(sb, i);
-		for (j = 0; j < desc_blocks; j++)
-			if (!ext2_test_bit(j + 1, bh->b_data))
-				ext2_error (vcb, __FUNCTION__,
-					   "Descriptor block #%ld in group "
-					   "%d is marked free", j, i);
+        desc_blocks = ext2_bg_num_gdb(sb, i);
+        for (j = 0; j < desc_blocks; j++)
+            if (!ext2_test_bit(j + 1, bh->b_data))
+                ext2_error (vcb, __FUNCTION__,
+                            "Descriptor block #%ld in group "
+                            "%d is marked free", j, i);
 
-		if (!block_in_use (le32_to_cpu(gdp->bg_block_bitmap), sb, bh->b_data))
-			ext2_error (vcb, "ext2_check_blocks_bitmap",
-				    "Block bitmap for group %d is marked free",
-				    i);
+        if (!block_in_use (le32_to_cpu(gdp->bg_block_bitmap), sb, bh->b_data))
+            ext2_error (vcb, "ext2_check_blocks_bitmap",
+                        "Block bitmap for group %d is marked free",
+                        i);
 
-		if (!block_in_use (le32_to_cpu(gdp->bg_inode_bitmap), sb, bh->b_data))
-			ext2_error (vcb, "ext2_check_blocks_bitmap",
-				    "Inode bitmap for group %d is marked free",
-				    i);
+        if (!block_in_use (le32_to_cpu(gdp->bg_inode_bitmap), sb, bh->b_data))
+            ext2_error (vcb, "ext2_check_blocks_bitmap",
+                        "Inode bitmap for group %d is marked free",
+                        i);
 
-		for (j = 0; j < sb->s_itb_per_group; j++)
-			if (!block_in_use (le32_to_cpu(gdp->bg_inode_table) + j, sb, bh->b_data))
-				ext2_error (vcb, "ext2_check_blocks_bitmap",
-					    "Block #%ld of the inode table in "
-					    "group %d is marked free", j, i);
+        for (j = 0; j < sb->s_itb_per_group; j++)
+            if (!block_in_use (le32_to_cpu(gdp->bg_inode_table) + j, sb, bh->b_data))
+                ext2_error (vcb, "ext2_check_blocks_bitmap",
+                            "Block #%ld of the inode table in "
+                            "group %d is marked free", j, i);
 
-		x = ext2_count_free (bh, sb->s_blocksize);
-		if (le16_to_cpu(gdp->bg_free_blocks_count) != x)
-			ext2_error (vcb, "ext2_check_blocks_bitmap",
-				    "Wrong free blocks count for group %d, "
-				    "stored = %d, counted = %lu", i,
-				    le16_to_cpu(gdp->bg_free_blocks_count), x);
-		bitmap_count += x;
-	}
-	if (le32_to_cpu(es->s_free_blocks_count) != bitmap_count)
-		ext2_error (vcb, "ext2_check_blocks_bitmap",
-			    "Wrong free blocks count in super block, "
-			    "stored = %lu, counted = %lu",
-			    (unsigned long) le32_to_cpu(es->s_free_blocks_count), bitmap_count);
+        x = ext2_count_free (bh, sb->s_blocksize);
+        if (le16_to_cpu(gdp->bg_free_blocks_count) != x)
+            ext2_error (vcb, "ext2_check_blocks_bitmap",
+                        "Wrong free blocks count for group %d, "
+                        "stored = %d, counted = %lu", i,
+                        le16_to_cpu(gdp->bg_free_blocks_count), x);
+        bitmap_count += x;
+    }
+    if (le32_to_cpu(es->s_free_blocks_count) != bitmap_count)
+        ext2_error (vcb, "ext2_check_blocks_bitmap",
+                    "Wrong free blocks count in super block, "
+                    "stored = %lu, counted = %lu",
+                    (unsigned long) le32_to_cpu(es->s_free_blocks_count), bitmap_count);
 }
 #endif

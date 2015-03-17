@@ -1,7 +1,7 @@
 /* sonet.h - SONET/SHD physical layer control */
- 
+
 /* Written 1995-2000 by Werner Almesberger, EPFL LRC/ICA */
- 
+
 
 #ifndef LINUX_SONET_H
 #define LINUX_SONET_H
@@ -17,27 +17,28 @@
     __HANDLE_ITEM(tx_cells);		/* cells sent */ \
     __HANDLE_ITEM(rx_cells);		/* cells received */
 
-struct sonet_stats {
+struct sonet_stats
+{
 #define __HANDLE_ITEM(i) int i
-	__SONET_ITEMS
+    __SONET_ITEMS
 #undef __HANDLE_ITEM
 } __attribute__ ((packed));
 
 
 #define SONET_GETSTAT	_IOR('a',ATMIOC_PHYTYP,struct sonet_stats)
-					/* get statistics */
+/* get statistics */
 #define SONET_GETSTATZ	_IOR('a',ATMIOC_PHYTYP+1,struct sonet_stats)
-					/* ... and zero counters */
+/* ... and zero counters */
 #define SONET_SETDIAG	_IOWR('a',ATMIOC_PHYTYP+2,int)
-					/* set error insertion */
+/* set error insertion */
 #define SONET_CLRDIAG	_IOWR('a',ATMIOC_PHYTYP+3,int)
-					/* clear error insertion */
+/* clear error insertion */
 #define SONET_GETDIAG	_IOR('a',ATMIOC_PHYTYP+4,int)
-					/* query error insertion */
+/* query error insertion */
 #define SONET_SETFRAMING _IO('a',ATMIOC_PHYTYP+5)
-					/* set framing mode (SONET/SDH) */
+/* set framing mode (SONET/SDH) */
 #define SONET_GETFRAMING _IOR('a',ATMIOC_PHYTYP+6,int)
-					/* get framing mode */
+/* get framing mode */
 #define SONET_GETFRSENSE _IOR('a',ATMIOC_PHYTYP+7, \
   unsigned char[SONET_FRSENSE_SIZE])	/* get framing sense information */
 
@@ -62,15 +63,16 @@ struct sonet_stats {
 
 #include <asm/atomic.h>
 
-struct k_sonet_stats {
+struct k_sonet_stats
+{
 #define __HANDLE_ITEM(i) atomic_t i
-	__SONET_ITEMS
+    __SONET_ITEMS
 #undef __HANDLE_ITEM
 };
 
 extern void sonet_copy_stats(struct k_sonet_stats *from,struct sonet_stats *to);
 extern void sonet_subtract_stats(struct k_sonet_stats *from,
-    struct sonet_stats *to);
+                                 struct sonet_stats *to);
 
 #endif
 

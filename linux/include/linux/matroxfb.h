@@ -4,12 +4,13 @@
 #include <asm/ioctl.h>
 #include <asm/types.h>
 
-struct matroxioc_output_mode {
-	__u32	output;		/* which output */
+struct matroxioc_output_mode
+{
+    __u32	output;		/* which output */
 #define MATROXFB_OUTPUT_PRIMARY		0x0000
 #define MATROXFB_OUTPUT_SECONDARY	0x0001
 #define MATROXFB_OUTPUT_DFP		0x0002
-	__u32	mode;		/* which mode */
+    __u32	mode;		/* which mode */
 #define MATROXFB_OUTPUT_MODE_PAL	0x0001
 #define MATROXFB_OUTPUT_MODE_NTSC	0x0002
 #define MATROXFB_OUTPUT_MODE_MONITOR	0x0080

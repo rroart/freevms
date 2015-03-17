@@ -75,18 +75,19 @@ extern long timezone;
 
 asmlinkage int exe$gettim(unsigned long long *timadr)
 {
-  long * tmp=(long *)&exe$gq_systime, *tmp2=(long *)timadr;
-  if (!timadr) return SS$_ACCVIO;
-  if (timadr<4096) {
+    long * tmp=(long *)&exe$gq_systime, *tmp2=(long *)timadr;
+    if (!timadr) return SS$_ACCVIO;
+    if (timadr<4096)
+    {
 #if 0
-    printk("gettim got accvio addr\n");
+        printk("gettim got accvio addr\n");
 #endif
-    return SS$_ACCVIO;
-  }
-  memcpy(timadr,&exe$gq_systime,8);
+        return SS$_ACCVIO;
+    }
+    memcpy(timadr,&exe$gq_systime,8);
 #if 0
-  printk("setime %x %x\n",tmp[0],tmp[1]);
-  printk("setime %x %x\n",tmp2[0],tmp2[1]);
+    printk("setime %x %x\n",tmp[0],tmp[1]);
+    printk("setime %x %x\n",tmp2[0],tmp2[1]);
 #endif
-  return SS$_NORMAL;
+    return SS$_NORMAL;
 }

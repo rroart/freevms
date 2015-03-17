@@ -33,13 +33,13 @@ FPU_REG const CONST_LN2  = MAKE_REG(POS, -1, 0xd1cf79ac, 0xb17217f7);
 
 /* Extra bits to take pi/2 to more than 128 bits precision. */
 FPU_REG const CONST_PI2extra = MAKE_REG(NEG, -66,
-					 0xfc8f8cbb, 0xece675d1);
+                                        0xfc8f8cbb, 0xece675d1);
 
 /* Only the sign (and tag) is used in internal zeroes */
 FPU_REG const CONST_Z    = MAKE_REG(POS, EXP_UNDER, 0x0, 0x0);
 
 /* Only the sign and significand (and tag) are used in internal NaNs */
-/* The 80486 never generates one of these 
+/* The 80486 never generates one of these
 FPU_REG const CONST_SNAN = MAKE_REG(POS, EXP_OVER, 0x00000001, 0x80000000);
  */
 /* This is the real indefinite QNaN */
@@ -51,19 +51,19 @@ FPU_REG const CONST_INF  = MAKE_REG(POS, EXP_OVER, 0x00000000, 0x80000000);
 
 static void fld_const(FPU_REG const *c, int adj, u_char tag)
 {
-  FPU_REG *st_new_ptr;
+    FPU_REG *st_new_ptr;
 
-  if ( STACK_OVERFLOW )
+    if ( STACK_OVERFLOW )
     {
-      FPU_stack_overflow();
-      return;
+        FPU_stack_overflow();
+        return;
     }
-  push();
-  reg_copy(c, st_new_ptr);
-  st_new_ptr->sigl += adj;  /* For all our fldxxx constants, we don't need to
+    push();
+    reg_copy(c, st_new_ptr);
+    st_new_ptr->sigl += adj;  /* For all our fldxxx constants, we don't need to
 			       borrow or carry. */
-  FPU_settag0(tag);
-  clear_C1();
+    FPU_settag0(tag);
+    clear_C1();
 }
 
 /* A fast way to find out whether x is one of RC_DOWN or RC_CHOP
@@ -73,46 +73,47 @@ static void fld_const(FPU_REG const *c, int adj, u_char tag)
 
 static void fld1(int rc)
 {
-  fld_const(&CONST_1, 0, TAG_Valid);
+    fld_const(&CONST_1, 0, TAG_Valid);
 }
 
 static void fldl2t(int rc)
 {
-  fld_const(&CONST_L2T, (rc == RC_UP) ? 1 : 0, TAG_Valid);
+    fld_const(&CONST_L2T, (rc == RC_UP) ? 1 : 0, TAG_Valid);
 }
 
 static void fldl2e(int rc)
 {
-  fld_const(&CONST_L2E, DOWN_OR_CHOP(rc) ? -1 : 0, TAG_Valid);
+    fld_const(&CONST_L2E, DOWN_OR_CHOP(rc) ? -1 : 0, TAG_Valid);
 }
 
 static void fldpi(int rc)
 {
-  fld_const(&CONST_PI, DOWN_OR_CHOP(rc) ? -1 : 0, TAG_Valid);
+    fld_const(&CONST_PI, DOWN_OR_CHOP(rc) ? -1 : 0, TAG_Valid);
 }
 
 static void fldlg2(int rc)
 {
-  fld_const(&CONST_LG2, DOWN_OR_CHOP(rc) ? -1 : 0, TAG_Valid);
+    fld_const(&CONST_LG2, DOWN_OR_CHOP(rc) ? -1 : 0, TAG_Valid);
 }
 
 static void fldln2(int rc)
 {
-  fld_const(&CONST_LN2, DOWN_OR_CHOP(rc) ? -1 : 0, TAG_Valid);
+    fld_const(&CONST_LN2, DOWN_OR_CHOP(rc) ? -1 : 0, TAG_Valid);
 }
 
 static void fldz(int rc)
 {
-  fld_const(&CONST_Z, 0, TAG_Zero);
+    fld_const(&CONST_Z, 0, TAG_Zero);
 }
 
 typedef void (*FUNC_RC)(int);
 
-static FUNC_RC constants_table[] = {
-  fld1, fldl2t, fldl2e, fldpi, fldlg2, fldln2, fldz, (FUNC_RC)FPU_illegal
+static FUNC_RC constants_table[] =
+{
+    fld1, fldl2t, fldl2e, fldpi, fldlg2, fldln2, fldz, (FUNC_RC)FPU_illegal
 };
 
 void fconst(void)
 {
-  (constants_table[FPU_rm])(control_word & CW_RC);
+    (constants_table[FPU_rm])(control_word & CW_RC);
 }

@@ -35,35 +35,36 @@
 
 struct kernel_symbol
 {
-	unsigned long value;
-	const char *name;
+    unsigned long value;
+    const char *name;
 };
 
 struct modversion_info
 {
-	unsigned long crc;
-	char name[MODULE_NAME_LEN];
+    unsigned long crc;
+    char name[MODULE_NAME_LEN];
 };
 
 struct module;
 
 #if 0
-struct module_attribute {
-        struct attribute attr;
-        ssize_t (*show)(struct module_attribute *, struct module *, char *);
-        ssize_t (*store)(struct module_attribute *, struct module *,
-			 const char *, size_t count);
-	void (*setup)(struct module *, const char *);
-	int (*test)(struct module *);
-	void (*free)(struct module *);
+struct module_attribute
+{
+    struct attribute attr;
+    ssize_t (*show)(struct module_attribute *, struct module *, char *);
+    ssize_t (*store)(struct module_attribute *, struct module *,
+                     const char *, size_t count);
+    void (*setup)(struct module *, const char *);
+    int (*test)(struct module *);
+    void (*free)(struct module *);
 };
 #endif
 
 #if 0
 struct module_kobject
 {
-	struct kobject kobj;
-	struct module *mod;
+    struct kobject kobj;
+    struct module *mod;
 };
 #endif
 
@@ -76,10 +77,10 @@ struct exception_table_entry;
 
 const struct exception_table_entry *
 search_extable(const struct exception_table_entry *first,
-	       const struct exception_table_entry *last,
-	       unsigned long value);
+               const struct exception_table_entry *last,
+               unsigned long value);
 void sort_extable(struct exception_table_entry *start,
-		  struct exception_table_entry *finish);
+                  struct exception_table_entry *finish);
 void sort_main_extable(void);
 
 extern struct subsystem module_subsys;
@@ -125,7 +126,7 @@ extern struct module __this_module;
  * is a GPL combined work.
  *
  * This exists for several reasons
- * 1.	So modinfo can show license info for users wanting to vet their setup 
+ * 1.	So modinfo can show license info for users wanting to vet their setup
  *	is free
  * 2.	So the community can ignore bug reports including proprietary modules
  * 3.	So vendors can do likewise based on their own policies
@@ -134,7 +135,7 @@ extern struct module __this_module;
 
 /* Author, ideally of form NAME <EMAIL>[, NAME <EMAIL>]*[ and NAME <EMAIL>] */
 #define MODULE_AUTHOR(_author) MODULE_INFO(author, _author)
-  
+
 /* What your module does. */
 #define MODULE_DESCRIPTION(_description) MODULE_INFO(description, _description)
 
@@ -225,15 +226,15 @@ void *__symbol_get_gpl(const char *symbol);
 #if 0
 struct module_ref
 {
-	local_t count;
+    local_t count;
 } ____cacheline_aligned;
 #endif
 
 enum module_state
 {
-	MODULE_STATE_LIVE,
-	MODULE_STATE_COMING,
-	MODULE_STATE_GOING,
+    MODULE_STATE_LIVE,
+    MODULE_STATE_COMING,
+    MODULE_STATE_GOING,
 };
 
 #if 0
@@ -241,17 +242,17 @@ enum module_state
 #define MODULE_SECT_NAME_LEN 32
 struct module_sect_attr
 {
-	struct module_attribute mattr;
-	char name[MODULE_SECT_NAME_LEN];
-	unsigned long address;
+    struct module_attribute mattr;
+    char name[MODULE_SECT_NAME_LEN];
+    unsigned long address;
 };
 #endif
 
 #if 0
 struct module_sect_attrs
 {
-	struct attribute_group grp;
-	struct module_sect_attr attrs[0];
+    struct attribute_group grp;
+    struct module_sect_attr attrs[0];
 };
 #endif
 
@@ -259,110 +260,110 @@ struct module_param_attrs;
 
 struct module
 {
-	enum module_state state;
+    enum module_state state;
 
-	/* Member of list of modules */
-	struct list_head list;
+    /* Member of list of modules */
+    struct list_head list;
 
-	/* Unique handle for this module */
-	char name[MODULE_NAME_LEN];
+    /* Unique handle for this module */
+    char name[MODULE_NAME_LEN];
 
-	/* Sysfs stuff. */
+    /* Sysfs stuff. */
 #if 0
-	struct module_kobject mkobj;
+    struct module_kobject mkobj;
 #endif
-	struct module_param_attrs *param_attrs;
-	struct module_attribute *modinfo_attrs;
-	const char *version;
-	const char *srcversion;
+    struct module_param_attrs *param_attrs;
+    struct module_attribute *modinfo_attrs;
+    const char *version;
+    const char *srcversion;
 
-	/* Exported symbols */
-	const struct kernel_symbol *syms;
-	unsigned int num_syms;
-	const unsigned long *crcs;
+    /* Exported symbols */
+    const struct kernel_symbol *syms;
+    unsigned int num_syms;
+    const unsigned long *crcs;
 
-	/* GPL-only exported symbols. */
-	const struct kernel_symbol *gpl_syms;
-	unsigned int num_gpl_syms;
-	const unsigned long *gpl_crcs;
+    /* GPL-only exported symbols. */
+    const struct kernel_symbol *gpl_syms;
+    unsigned int num_gpl_syms;
+    const unsigned long *gpl_crcs;
 
-	/* unused exported symbols. */
-	const struct kernel_symbol *unused_syms;
-	unsigned int num_unused_syms;
-	const unsigned long *unused_crcs;
-	/* GPL-only, unused exported symbols. */
-	const struct kernel_symbol *unused_gpl_syms;
-	unsigned int num_unused_gpl_syms;
-	const unsigned long *unused_gpl_crcs;
+    /* unused exported symbols. */
+    const struct kernel_symbol *unused_syms;
+    unsigned int num_unused_syms;
+    const unsigned long *unused_crcs;
+    /* GPL-only, unused exported symbols. */
+    const struct kernel_symbol *unused_gpl_syms;
+    unsigned int num_unused_gpl_syms;
+    const unsigned long *unused_gpl_crcs;
 
-	/* symbols that will be GPL-only in the near future. */
-	const struct kernel_symbol *gpl_future_syms;
-	unsigned int num_gpl_future_syms;
-	const unsigned long *gpl_future_crcs;
+    /* symbols that will be GPL-only in the near future. */
+    const struct kernel_symbol *gpl_future_syms;
+    unsigned int num_gpl_future_syms;
+    const unsigned long *gpl_future_crcs;
 
-	/* Exception table */
-	unsigned int num_exentries;
-	const struct exception_table_entry *extable;
+    /* Exception table */
+    unsigned int num_exentries;
+    const struct exception_table_entry *extable;
 
-	/* Startup function. */
-	int (*init)(void);
+    /* Startup function. */
+    int (*init)(void);
 
-	/* If this is non-NULL, vfree after init() returns */
-	void *module_init;
+    /* If this is non-NULL, vfree after init() returns */
+    void *module_init;
 
-	/* Here is the actual code + data, vfree'd on unload. */
-	void *module_core;
+    /* Here is the actual code + data, vfree'd on unload. */
+    void *module_core;
 
-	/* Here are the sizes of the init and core sections */
-	unsigned long init_size, core_size;
+    /* Here are the sizes of the init and core sections */
+    unsigned long init_size, core_size;
 
-	/* The size of the executable code in each section.  */
-	unsigned long init_text_size, core_text_size;
+    /* The size of the executable code in each section.  */
+    unsigned long init_text_size, core_text_size;
 
-	/* The handle returned from unwind_add_table. */
-	void *unwind_info;
+    /* The handle returned from unwind_add_table. */
+    void *unwind_info;
 
 #if 0
-	/* Arch-specific module values */
-	struct mod_arch_specific arch;
+    /* Arch-specific module values */
+    struct mod_arch_specific arch;
 #endif
 
-	/* Am I unsafe to unload? */
-	int unsafe;
+    /* Am I unsafe to unload? */
+    int unsafe;
 
-	/* Am I GPL-compatible */
-	int license_gplok;
+    /* Am I GPL-compatible */
+    int license_gplok;
 
 #ifdef CONFIG_MODULE_UNLOAD
-	/* Reference counts */
-	struct module_ref ref[NR_CPUS];
+    /* Reference counts */
+    struct module_ref ref[NR_CPUS];
 
-	/* What modules depend on me? */
-	struct list_head modules_which_use_me;
+    /* What modules depend on me? */
+    struct list_head modules_which_use_me;
 
-	/* Who is waiting for us to be unloaded */
-	struct task_struct *waiter;
+    /* Who is waiting for us to be unloaded */
+    struct task_struct *waiter;
 
-	/* Destruction function. */
-	void (*exit)(void);
+    /* Destruction function. */
+    void (*exit)(void);
 #endif
 
 #ifdef CONFIG_KALLSYMS
-	/* We keep the symbol and string tables for kallsyms. */
-	Elf_Sym *symtab;
-	unsigned long num_symtab;
-	char *strtab;
+    /* We keep the symbol and string tables for kallsyms. */
+    Elf_Sym *symtab;
+    unsigned long num_symtab;
+    char *strtab;
 
-	/* Section attributes */
-	struct module_sect_attrs *sect_attrs;
+    /* Section attributes */
+    struct module_sect_attrs *sect_attrs;
 #endif
 
-	/* Per-cpu data. */
-	void *percpu;
+    /* Per-cpu data. */
+    void *percpu;
 
-	/* The command line arguments (may be mangled).  People like
-	   keeping pointers to this stuff */
-	char *args;
+    /* The command line arguments (may be mangled).  People like
+       keeping pointers to this stuff */
+    char *args;
 };
 
 /* FIXME: It'd be nice to isolate modules during init, too, so they
@@ -370,7 +371,7 @@ struct module
    (IDE & SCSI) require entry into the module during init.*/
 static inline int module_is_live(struct module *mod)
 {
-	return mod->state != MODULE_STATE_GOING;
+    return mod->state != MODULE_STATE_GOING;
 }
 
 /* Is this address in a module? (second is with no locks, for oops) */
@@ -381,7 +382,7 @@ int is_module_address(unsigned long addr);
 /* Returns module and fills in value, defined and namebuf, or NULL if
    symnum out of range. */
 struct module *module_get_kallsym(unsigned int symnum, unsigned long *value,
-				char *type, char *name, size_t namelen);
+                                  char *type, char *name, size_t namelen);
 
 /* Look for this name: can be of form module:name. */
 unsigned long module_kallsyms_lookup_name(const char *name);
@@ -389,7 +390,7 @@ unsigned long module_kallsyms_lookup_name(const char *name);
 int is_exported(const char *name, const struct module *mod);
 
 extern void __module_put_and_exit(struct module *mod, long code)
-	__attribute__((noreturn));
+__attribute__((noreturn));
 #define module_put_and_exit(code) __module_put_and_exit(THIS_MODULE, code);
 
 #ifdef CONFIG_MODULE_UNLOAD
@@ -402,44 +403,47 @@ void symbol_put_addr(void *addr);
    to handle the error case (which only happens with rmmod --wait). */
 static inline void __module_get(struct module *module)
 {
-	if (module) {
-		BUG_ON(module_refcount(module) == 0);
-		local_inc(&module->ref[get_cpu()].count);
-		put_cpu();
-	}
+    if (module)
+    {
+        BUG_ON(module_refcount(module) == 0);
+        local_inc(&module->ref[get_cpu()].count);
+        put_cpu();
+    }
 }
 
 static inline int try_module_get(struct module *module)
 {
-	int ret = 1;
+    int ret = 1;
 
-	if (module) {
-		unsigned int cpu = get_cpu();
-		if (likely(module_is_live(module)))
-			local_inc(&module->ref[cpu].count);
-		else
-			ret = 0;
-		put_cpu();
-	}
-	return ret;
+    if (module)
+    {
+        unsigned int cpu = get_cpu();
+        if (likely(module_is_live(module)))
+            local_inc(&module->ref[cpu].count);
+        else
+            ret = 0;
+        put_cpu();
+    }
+    return ret;
 }
 
 static inline void module_put(struct module *module)
 {
-	if (module) {
-		unsigned int cpu = get_cpu();
-		local_dec(&module->ref[cpu].count);
-		/* Maybe they're waiting for us to drop reference? */
-		if (unlikely(!module_is_live(module)))
-			wake_up_process(module->waiter);
-		put_cpu();
-	}
+    if (module)
+    {
+        unsigned int cpu = get_cpu();
+        local_dec(&module->ref[cpu].count);
+        /* Maybe they're waiting for us to drop reference? */
+        if (unlikely(!module_is_live(module)))
+            wake_up_process(module->waiter);
+        put_cpu();
+    }
 }
 
 #else /*!CONFIG_MODULE_UNLOAD*/
 static inline int try_module_get(struct module *module)
 {
-	return !module || module_is_live(module);
+    return !module || module_is_live(module);
 }
 static inline void module_put(struct module *module)
 {
@@ -471,9 +475,9 @@ do {									     \
 
 /* For kallsyms to ask for address resolution.  NULL means not found. */
 const char *module_address_lookup(unsigned long addr,
-				  unsigned long *symbolsize,
-				  unsigned long *offset,
-				  char **modname);
+                                  unsigned long *symbolsize,
+                                  unsigned long *offset,
+                                  char **modname);
 
 /* For extable.c to search modules' exception tables. */
 const struct exception_table_entry *search_module_extables(unsigned long addr);
@@ -498,24 +502,24 @@ void module_remove_driver(struct device_driver *);
 static inline const struct exception_table_entry *
 search_module_extables(unsigned long addr)
 {
-	return NULL;
+    return NULL;
 }
 
 /* Is this address in a module? */
 static inline struct module *module_text_address(unsigned long addr)
 {
-	return NULL;
+    return NULL;
 }
 
 /* Is this address in a module? (don't take a lock, we're oopsing) */
 static inline struct module *__module_text_address(unsigned long addr)
 {
-	return NULL;
+    return NULL;
 }
 
 static inline int is_module_address(unsigned long addr)
 {
-	return 0;
+    return 0;
 }
 
 /* Get/put a kernel symbol (calls should be symmetric) */
@@ -529,7 +533,7 @@ static inline void __module_get(struct module *module)
 
 static inline int try_module_get(struct module *module)
 {
-	return 1;
+    return 1;
 }
 
 static inline void module_put(struct module *module)
@@ -542,40 +546,40 @@ static inline void module_put(struct module *module)
 
 /* For kallsyms to ask for address resolution.  NULL means not found. */
 static inline const char *module_address_lookup(unsigned long addr,
-						unsigned long *symbolsize,
-						unsigned long *offset,
-						char **modname)
+        unsigned long *symbolsize,
+        unsigned long *offset,
+        char **modname)
 {
-	return NULL;
+    return NULL;
 }
 
 static inline struct module *module_get_kallsym(unsigned int symnum,
-						unsigned long *value,
-						char *type, char *name,
-						size_t namelen)
+        unsigned long *value,
+        char *type, char *name,
+        size_t namelen)
 {
-	return NULL;
+    return NULL;
 }
 
 static inline unsigned long module_kallsyms_lookup_name(const char *name)
 {
-	return 0;
+    return 0;
 }
 
 static inline int is_exported(const char *name, const struct module *mod)
 {
-	return 0;
+    return 0;
 }
 
 static inline int register_module_notifier(struct notifier_block * nb)
 {
-	/* no events will happen anyway, so this can always succeed */
-	return 0;
+    /* no events will happen anyway, so this can always succeed */
+    return 0;
 }
 
 static inline int unregister_module_notifier(struct notifier_block * nb)
 {
-	return 0;
+    return 0;
 }
 
 #define module_put_and_exit(code) do_exit(code)

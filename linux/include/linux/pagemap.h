@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Modified Linux source file, 2001-2004  
+// Modified Linux source file, 2001-2004
 
 #ifndef _LINUX_PAGEMAP_H
 #define _LINUX_PAGEMAP_H
@@ -39,7 +39,7 @@
 
 static inline struct page *page_cache_alloc(struct address_space *x)
 {
-	return alloc_pages(x->gfp_mask, 0);
+    return alloc_pages(x->gfp_mask, 0);
 }
 
 /*
@@ -69,7 +69,7 @@ static inline unsigned long _page_hashfn(struct address_space * mapping, unsigne
 {
 #define i (((unsigned long) mapping)/(sizeof(struct inode) & ~ (sizeof(struct inode) - 1)))
 #define s(x) ((x)+((x)>>PAGE_HASH_BITS))
-	return s(i+index) & (PAGE_HASH_SIZE-1);
+    return s(i+index) & (PAGE_HASH_SIZE-1);
 #undef i
 #undef s
 }
@@ -77,13 +77,13 @@ static inline unsigned long _page_hashfn(struct address_space * mapping, unsigne
 #define page_hash(mapping,index) (page_hash_table+_page_hashfn(mapping,index))
 
 extern struct page * __find_get_page(struct address_space *mapping,
-				unsigned long index, struct page **hash);
+                                     unsigned long index, struct page **hash);
 #define find_get_page(mapping, index) \
 	__find_get_page(mapping, index, page_hash(mapping, index))
 extern struct page * __find_lock_page (struct address_space * mapping,
-				unsigned long index, struct page **hash);
+                                       unsigned long index, struct page **hash);
 extern struct page * find_or_create_page(struct address_space *mapping,
-				unsigned long index, unsigned int gfp_mask);
+        unsigned long index, unsigned int gfp_mask);
 
 extern void FASTCALL(lock_page(struct page *page));
 extern void FASTCALL(unlock_page(struct page *page));
@@ -99,8 +99,8 @@ extern void ___wait_on_page(struct page *);
 
 static inline void wait_on_page(struct page * page)
 {
-	if (PageLocked(page))
-		___wait_on_page(page);
+    if (PageLocked(page))
+        ___wait_on_page(page);
 }
 
 extern struct page * grab_cache_page (struct address_space *, unsigned long);
@@ -109,5 +109,5 @@ extern struct page * grab_cache_page_nowait (struct address_space *, unsigned lo
 typedef int filler_t(void *, struct page*);
 
 extern struct page *read_cache_page(struct address_space *, unsigned long,
-				filler_t *, void *);
+                                    filler_t *, void *);
 #endif

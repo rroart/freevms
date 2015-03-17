@@ -20,15 +20,15 @@
 //	****************************************************************
 //
 #if 0
-	.TITLE	TZDRIVER - Pseudo terminal driver for Front End and ethernet
-	.IDENT	'V06-003'
+.TITLE	TZDRIVER - Pseudo terminal driver for Front End and ethernet
+.IDENT	'V06-003'
 #endif
 //
 // Comment out the following line if NOT building for VMS V4 (in other
 // words comment out if you want a V5 driver).
 //
 //;;	VMS_V4 = 1
- 
+
 //++
 // FACILITY:
 //
@@ -73,7 +73,7 @@
 //		out for VMS V5.
 //
 //	V05-004	Digital Equipment Corp.	24-May-1988
-//		Add code to delivered ASTs if PORT XON, PORT XOFF, or 
+//		Add code to delivered ASTs if PORT XON, PORT XOFF, or
 //		PORT SET_LINE routines are called.
 //
 //	V05-003	Digital Equipment Corp.	13-May-1988
@@ -160,7 +160,7 @@
 //			  somewhere that caused the terminal to start off
 //			  NOBRDCST when it shouldn't.
 //			- General house-cleaning.  Got rid of commented out
-//			  lines from VMS V3 version.  Fixed up typos in 
+//			  lines from VMS V3 version.  Fixed up typos in
 //			  comments.
 //
 //	Version V04-004 (10-Feb-1986) Kevin Carosso, Hughes Aircraft Co., S&CG
@@ -222,12 +222,12 @@
 //			Supercomputer Center.
 //
 //	Version V05-001 (21-Dec-1987) Digital Equipment Corp.
-//			Add support for Symmetric Multiprocessing. 
+//			Add support for Symmetric Multiprocessing.
 //
 //	Version V05-002 Digital Equipment Corp.
 //			Change TP driver names to TW. (TP driver it turns
 //			out, conflicted with the VAX/PSI terminal driver.)
-//			TWDRIVER and PYDRIVER are now registered with SQM 
+//			TWDRIVER and PYDRIVER are now registered with SQM
 //			so there will be no more conflicts.
 //
 //	Version V05-003 Dale Moore	Carnegie Mellon University
@@ -235,11 +235,12 @@
 //--
 
 #if 0
-	.PAGE
-	.SBTTL	Declarations
- 
-	.LIBRARY	/SYS$LIBRARY:LIB.MLB/
-#endif 
+.PAGE
+.SBTTL	Declarations
+
+.LIBRARY	/SYS$LIBRARY:
+LIB.MLB/
+#endif
 //
 // EXTERNAL DEFINITIONS:
 //
@@ -294,9 +295,9 @@
 #define TTY$GB_DEFSPEED tty$gb_defspeed
 #define TTY$GB_RSPEED tty$gb_rspeed
 #define TTY$GB_PARITY tty$gb_parity
- 
+
 #define BUFFER_SIZE 1024
- 
+
 //
 // LOCAL DEFINITIONS
 //
@@ -306,22 +307,23 @@ static int DT$_TZ = 0xFF;
 // Length of access port buffer in UCB
 //
 #define ACCPOR_SIZE 30
- 
+
 //
 // Definitions that follow the standard UCB fields for TZ driver
 //  This will all probably have to be the same as the standard term
 
-struct _tz_ucb {			// Start of UCB definitions
- 
-  struct _ucb tz$ucb;		// Position at end of UCB
- 
-  long ucb$l_tz_xucb;	// UCB of corresponding
-					//  control/application unit
-  long ucb$l_tz_xon_ast;	// AST list for XON event notification
-  long ucb$l_tz_xoff_ast;	// AST list for XOFF event notification
-  long ucb$l_tz_set_ast;	// AST list for notification of SET_LINE 
+struct _tz_ucb  			// Start of UCB definitions
+{
+
+struct _ucb tz$ucb;		// Position at end of UCB
+
+long ucb$l_tz_xucb;	// UCB of corresponding
+//  control/application unit
+long ucb$l_tz_xon_ast;	// AST list for XON event notification
+long ucb$l_tz_xoff_ast;	// AST list for XOFF event notification
+long ucb$l_tz_set_ast;	// AST list for notification of SET_LINE
 #define	UCB$K_TZ_LEN	(sizeof(struct _ucb)+16);		// Size of UCB
- 
+
 //;;	$DEFEND	UCB			// End of UCB definitions
 //
 // Definitions that follow the standard UCB fields in PZ devices
@@ -330,112 +332,120 @@ struct _tz_ucb {			// Start of UCB definitions
 //;;	$DEFINI UCB			// Start of UCB definitions
 //;;	.=UCB$K_LENGTH			// position at end of UCB
 //;;	.=UCB$K_TZ_LEN			// position at end of UCB
-  long ucb$l_pz_xucb;		// UCB of terminal part of pseudo terminal
-  char ucb$t_pz_buffer[BUFFER_SIZE]; // Buffer to store characters to be transmitted
-char ucb$a_rem_host_len;	// Size of remote host ID string.
-  char ucb$a_rem_host_str[ACCPOR_SIZE]; // Space for remote host ID string.
+long ucb$l_pz_xucb;		// UCB of terminal part of pseudo terminal
+char ucb$t_pz_buffer[BUFFER_SIZE]; // Buffer to store characters to be transmitted
+    char ucb$a_rem_host_len;	// Size of remote host ID string.
+    char ucb$a_rem_host_str[ACCPOR_SIZE]; // Space for remote host ID string.
 
 #define	UCB$K_PZ_LEN (sizeof(struct _tz_ucb))			// Size of UCB
 
 };			// end of UCB definitions
- 
+
 //
 // LOCAL STORAGE
 //
 #if 0
-	.PSECT	$$$105_PROLOGUE
+.PSECT	$$$105_PROLOGUE
 
-	.PAGE
-	.SBTTL	Standard Tables
-#endif 
+.PAGE
+.SBTTL	Standard Tables
+#endif
 //
 // Driver prologue table:
 //
 #if 0
 TZ$DPT::
-	DPTAB	-			// DRIVER PROLOGUE TABLE
-		END=TZ_END,-		// End and offset to INIT's vectors
-		UCBSIZE=UCB$K_TZ_LEN,- 	// SIZE OF UCB
-		FLAGS=DPT$M_NOUNLOAD,-	// Do not allow unload
-		ADAPTER=NULL,-		// ADAPTER TYPE
-		NAME=TZDRIVER,-		// NAME OF DRIVER
-		VECTOR=PORT_VECTOR
-	DPT_STORE INIT
-	DPT_STORE UCB,UCB$W_UNIT_SEED,W,0	// SET UNIT # SEED TO ZERO
+DPTAB	-			// DRIVER PROLOGUE TABLE
+END=TZ_END,-		// End and offset to INIT's vectors
+    UCBSIZE=UCB$K_TZ_LEN,- 	// SIZE OF UCB
+            FLAGS=DPT$M_NOUNLOAD,-	// Do not allow unload
+                  ADAPTER=NULL,-		// ADAPTER TYPE
+                          NAME=TZDRIVER,-		// NAME OF DRIVER
+                               VECTOR=PORT_VECTOR
+                                      DPT_STORE INIT
+                                      DPT_STORE UCB,UCB$W_UNIT_SEED,W,0	// SET UNIT # SEED TO ZERO
 
 #if	defined	VMS_V4
-	DPT_STORE UCB,UCB$B_FIPL,B,8 		// FORK IPL
+                                      DPT_STORE UCB,UCB$B_FIPL,B,8 		// FORK IPL
 #else
-	DPT_STORE UCB,UCB$B_FLCK,B,SPL$C_IOLOCK8 ; FORK LOCK
+                                      DPT_STORE UCB,UCB$B_FLCK,B,SPL$C_IOLOCK8 ;
+FORK LOCK
 #endif
 
-	DPT_STORE UCB,UCB$L_DEVCHAR,L,<-; CHARACTERISTICS
-			DEV$M_REC!-	;
-			DEV$M_IDV!-	;
-			DEV$M_ODV!-	;
-			DEV$M_TRM!-	// Terminal Device
-			DEV$M_CCL>
-	DPT_STORE UCB,UCB$L_DEVCHAR2,L,<-		// Device characteristics
-			DEV$M_RTT!-			// remote terminal
-			DEV$M_NNM>			// prefix with "NODE$"
-	DPT_STORE UCB,UCB$B_DEVCLASS,B,DC$_TERM		;
-	DPT_STORE UCB,UCB$B_TT_DETYPE,B,TT$_UNKNOWN	// TYPE
-	DPT_STORE UCB,UCB$W_TT_DESIZE,@W,TTY$GW_DEFBUF	// BUFFER SIZE
-	DPT_STORE UCB,UCB$L_TT_DECHAR,@L,TTY$GL_DEFCHAR	// DEFAULT CHARACTERS
-	DPT_STORE UCB,ucb$l_tt_decha1,@L,TTY$GL_DEFCHAR2; DEFAULT CHARACTERS
-	DPT_STORE UCB,UCB$W_TT_DESPEE,@B,TTY$GB_DEFSPEED; DEFAULT SPEED
-	DPT_STORE UCB,UCB$W_TT_DESPEE+1,@B,TTY$GB_RSPEED; DEFAULT SPEED
-	DPT_STORE UCB,UCB$B_TT_DEPARI,@B,TTY$GB_PARITY	// DEFAULT PARITY
-	DPT_STORE UCB,UCB$B_TT_PARITY,@B,TTY$GB_PARITY	// DEFAULT PARITY
-	DPT_STORE UCB,UCB$B_DEVTYPE,B,TT$_UNKNOWN	// TYPE
-	DPT_STORE UCB,UCB$W_DEVBUFSIZ,@W,TTY$GW_DEFBUF	// BUFFER SIZE
-	DPT_STORE UCB,UCB$L_DEVDEPEND,@L,TTY$GL_DEFCHAR	// DEFAULT CHARACTERS
-	DPT_STORE UCB,UCB$L_TT_DEVDP1,@L,TTY$GL_DEFCHAR2; Default Characters
-	DPT_STORE UCB,UCB$W_TT_SPEED,@B,TTY$GB_DEFSPEED	// DEFAULT SPEED
-	DPT_STORE UCB,UCB$W_TT_SPEED+1,@B,TTY$GB_RSPEED	// DEFAULT SPEED
-	DPT_STORE UCB,UCB$B_DIPL,B,8			// DEV IPL (no device)
-	DPT_STORE UCB,UCB$L_TT_WFLINK,L,0	// Zero write queue.
-	DPT_STORE UCB,UCB$L_TT_WBLINK,L,0	// Zero write queue.
-	DPT_STORE UCB,UCB$L_TT_RTIMOU,L,0	// Zero read timed out disp.
+                                      DPT_STORE UCB,UCB$L_DEVCHAR,L,<-;
+CHARACTERISTICS
+DEV$M_REC!-	;
+DEV$M_IDV!-	;
+DEV$M_ODV!-	;
+DEV$M_TRM!-	// Terminal Device
+DEV$M_CCL>
+DPT_STORE UCB,UCB$L_DEVCHAR2,L,<-		// Device characteristics
+DEV$M_RTT!-			// remote terminal
+DEV$M_NNM>			// prefix with "NODE$"
+DPT_STORE UCB,UCB$B_DEVCLASS,B,DC$_TERM		;
+DPT_STORE UCB,UCB$B_TT_DETYPE,B,TT$_UNKNOWN	// TYPE
+DPT_STORE UCB,UCB$W_TT_DESIZE,@W,TTY$GW_DEFBUF	// BUFFER SIZE
+DPT_STORE UCB,UCB$L_TT_DECHAR,@L,TTY$GL_DEFCHAR	// DEFAULT CHARACTERS
+DPT_STORE UCB,ucb$l_tt_decha1,@L,TTY$GL_DEFCHAR2;
+DEFAULT CHARACTERS
+DPT_STORE UCB,UCB$W_TT_DESPEE,@B,TTY$GB_DEFSPEED;
+DEFAULT SPEED
+DPT_STORE UCB,UCB$W_TT_DESPEE+1,@B,TTY$GB_RSPEED;
+DEFAULT SPEED
+DPT_STORE UCB,UCB$B_TT_DEPARI,@B,TTY$GB_PARITY	// DEFAULT PARITY
+DPT_STORE UCB,UCB$B_TT_PARITY,@B,TTY$GB_PARITY	// DEFAULT PARITY
+DPT_STORE UCB,UCB$B_DEVTYPE,B,TT$_UNKNOWN	// TYPE
+DPT_STORE UCB,UCB$W_DEVBUFSIZ,@W,TTY$GW_DEFBUF	// BUFFER SIZE
+DPT_STORE UCB,UCB$L_DEVDEPEND,@L,TTY$GL_DEFCHAR	// DEFAULT CHARACTERS
+DPT_STORE UCB,UCB$L_TT_DEVDP1,@L,TTY$GL_DEFCHAR2;
+Default Characters
+DPT_STORE UCB,UCB$W_TT_SPEED,@B,TTY$GB_DEFSPEED	// DEFAULT SPEED
+DPT_STORE UCB,UCB$W_TT_SPEED+1,@B,TTY$GB_RSPEED	// DEFAULT SPEED
+DPT_STORE UCB,UCB$B_DIPL,B,8			// DEV IPL (no device)
+DPT_STORE UCB,UCB$L_TT_WFLINK,L,0	// Zero write queue.
+DPT_STORE UCB,UCB$L_TT_WBLINK,L,0	// Zero write queue.
+DPT_STORE UCB,UCB$L_TT_RTIMOU,L,0	// Zero read timed out disp.
 //
-// Added ORB definitions 
+// Added ORB definitions
 //
 //	DPT_STORE ORB, ORB$B_FLAGS, B, <ORB$M_PROT_16>
 //	DPT_STORE ORB, ORB$W_PROT, @W, TTY$GW_PROT
 //	DPT_STORE ORB, ORB$L_OWNER, @L, TTY$GL_OWNUIC
- 
-	DPT_STORE DDB,DDB$L_DDT,D,TZ$DDT
- 
-	DPT_STORE REINIT
-	DPT_STORE CRB,CRB$L_INTD+VEC$L_INITIAL,D,TZ$INITIAL; CONTROLLER INIT
-	DPT_STORE CRB,CRB$L_INTD+VEC$L_UNITINIT,D,TZ$INITLINE; UNIT INIT
-	DPT_STORE END
- 
-	DDTAB	DEVNAM	= TZ,-		// Dummy TZ port Driver Dispatch table
-		START	= 0,-
-		FUNCTB	= 0
- 
-	.PSECT $$$115_DRIVER,LONG
- 
+
+DPT_STORE DDB,DDB$L_DDT,D,TZ$DDT
+
+DPT_STORE REINIT
+DPT_STORE CRB,CRB$L_INTD+VEC$L_INITIAL,D,TZ$INITIAL;
+CONTROLLER INIT
+DPT_STORE CRB,CRB$L_INTD+VEC$L_UNITINIT,D,TZ$INITLINE;
+UNIT INIT
+DPT_STORE END
+
+DDTAB	DEVNAM	= TZ,-		// Dummy TZ port Driver Dispatch table
+                  START	= 0,-
+                            FUNCTB	= 0
+
+                                      .PSECT $$$115_DRIVER,LONG
+
 // The associated class driver uses this table to command the port driver.
 // The address of the table is contained in the terminal UCB extension area.
 // The offset definitions are defined by the ttydefs.
 #endif
 
-	  void SET_FORCED_CHARS(struct _ucb * ucb);
+                                      void SET_FORCED_CHARS(struct _ucb * ucb);
 
 //
 // TZ specific dispatch table
 //
-	  struct _tt_port port_vector;
+struct _tt_port port_vector;
 
 void TZ$NULL()				// Null port routine
 { }
- 
+
 
 #if 0
-	.PAGE
-	.SBTTL	TZ$INITIAL - Initialize pseudo terminal interface
+.PAGE
+.SBTTL	TZ$INITIAL - Initialize pseudo terminal interface
 #endif
 //++
 // TZ$INITIAL - INITIALIZE INTERFACE
@@ -460,19 +470,19 @@ void TZ$NULL()				// Null port routine
 //	IPL = IPL$_POWER
 //
 //--
-	void TZ$INITIAL(R8)
-     struct _crb * R8;
+void TZ$INITIAL(R8)
+struct _crb * R8;
 {
- 
-  //	CLASS_CTRL_INIT TZ$DPT,PORT_VECTOR // check. do not need relocs?
-  extern struct _dpt tz$dpt;
-  tz$dpt.dpt$ps_vector=&port_vector; // does CLASS... do this? already done?
-  R8->crb$b_tt_type=DT$_TZ;
+
+    //	CLASS_CTRL_INIT TZ$DPT,PORT_VECTOR // check. do not need relocs?
+    extern struct _dpt tz$dpt;
+    tz$dpt.dpt$ps_vector=&port_vector; // does CLASS... do this? already done?
+    R8->crb$b_tt_type=DT$_TZ;
 }
 
 #if 0
-	.PAGE
-	.SBTTL	TZ$INITLINE - RESET INDIVIDUAL LINE
+.PAGE
+.SBTTL	TZ$INITLINE - RESET INDIVIDUAL LINE
 #endif
 //++
 // TZ$INITLINE - RESET pseudo terminal control state
@@ -492,48 +502,48 @@ void TZ$NULL()				// Null port routine
 //--
 void TZ$INITLINE(struct _idb * idb, struct _ucb * ucb)				// RESET SINGLE LINE
 {
-  int R3,R4,R6,R7,R8,R9;
-  struct _tt_class * R0;
-  struct _ucb * R1 = 0;
-  struct _tty_ucb * tty;
-  struct _tt_class * R2;
-  R0=&port_vector; // check TZ$VEC?		// Set TZ port vector table 
-  CLASS_UNIT_INIT(ucb,R0);			
-  if	(ucb->ucb$w_unit==0)	// Skip initialization of TEMPLATE
-    	return;			// Unit #0 = Template: Skip everything!
-  if	(UCB$M_POWER&ucb->ucb$l_sts)	// Skip if powerfail recovery
-    goto l20;
-  R1	 = ((struct _tty_ucb *)ucb)->ucb$l_tt_logucb;		// Look at logical term UCB
-  if (R1 &&				// If none, then has no refs
+    int R3,R4,R6,R7,R8,R9;
+    struct _tt_class * R0;
+    struct _ucb * R1 = 0;
+    struct _tty_ucb * tty;
+    struct _tt_class * R2;
+    R0=&port_vector; // check TZ$VEC?		// Set TZ port vector table
+    CLASS_UNIT_INIT(ucb,R0);
+    if	(ucb->ucb$w_unit==0)	// Skip initialization of TEMPLATE
+        return;			// Unit #0 = Template: Skip everything!
+    if	(UCB$M_POWER&ucb->ucb$l_sts)	// Skip if powerfail recovery
+        goto l20;
+    R1	 = ((struct _tty_ucb *)ucb)->ucb$l_tt_logucb;		// Look at logical term UCB
+    if (R1 &&				// If none, then has no refs
 
-      R1->ucb$l_refc)		// See if TZ has any references
-    goto	l20;				// If so don't reinit ucb
-  SET_FORCED_CHARS(ucb);		// Set required characteristics
-  tty=ucb;
-  tty->ucb$l_tt_decha1|=TT2$M_HANGUP;	// Set default characteristics
-  R1	 = tty->ucb$l_tt_class;		// Address class vector table
+            R1->ucb$l_refc)		// See if TZ has any references
+        goto	l20;				// If so don't reinit ucb
+    SET_FORCED_CHARS(ucb);		// Set required characteristics
+    tty=ucb;
+    tty->ucb$l_tt_decha1|=TT2$M_HANGUP;	// Set default characteristics
+    R1	 = tty->ucb$l_tt_class;		// Address class vector table
 
-  tty=ucb;
-  tty->ucb$w_tt_prtctl|=	TTY$M_PC_NOTIME|// Tell class driver not to time out,
-    TTY$M_PC_NOMODEM|	-	// do not allow modem processing,
-    TTY$M_PC_MULTISESSION;	// and do not count as user 
+    tty=ucb;
+    tty->ucb$w_tt_prtctl|=	TTY$M_PC_NOTIME|// Tell class driver not to time out,
+                            TTY$M_PC_NOMODEM|	-	// do not allow modem processing,
+                            TTY$M_PC_MULTISESSION;	// and do not count as user
 
-  ucb->ucb$l_devdepend &= ~TT$M_MODEM;		// Do not allow modem bit to ever be  
-  tty->ucb$l_tt_dechar &= ~TT$M_MODEM;		// set.
-  ucb->ucb$l_devdepend |= TT$M_HOSTSYNC;		// Always set device to HOSTSYNC
-  tty->ucb$l_tt_dechar |= TT$M_HOSTSYNC;		//
-  R2=R1;
-  R2->class_setup_ucb(tty);		// Init ucb fields
- l20:
-  if	((UCB$M_POWER&ucb->ucb$l_sts)==0) return;	// Powerfail handler
-  R0	 = tty->ucb$l_tt_class;
-  R2=R1;
-  R2->class_powerfail(ucb);
-  
-  return;
+    ucb->ucb$l_devdepend &= ~TT$M_MODEM;		// Do not allow modem bit to ever be
+    tty->ucb$l_tt_dechar &= ~TT$M_MODEM;		// set.
+    ucb->ucb$l_devdepend |= TT$M_HOSTSYNC;		// Always set device to HOSTSYNC
+    tty->ucb$l_tt_dechar |= TT$M_HOSTSYNC;		//
+    R2=R1;
+    R2->class_setup_ucb(tty);		// Init ucb fields
+l20:
+    if	((UCB$M_POWER&ucb->ucb$l_sts)==0) return;	// Powerfail handler
+    R0	 = tty->ucb$l_tt_class;
+    R2=R1;
+    R2->class_powerfail(ucb);
+
+    return;
 }
- 
- 
+
+
 
 //++
 // TZ$SET_LINE - Used to Reset SPEED and UCB
@@ -551,34 +561,36 @@ void TZ$INITLINE(struct _idb * idb, struct _ucb * ucb)				// RESET SINGLE LINE
 //
 //	none
 //--
-void TZ$SET_LINE(struct _ucb * ucb) {
-  unsigned long ** acb_p;
-  struct _tz_ucb * tz = ucb;
-  struct _tty_ucb * tty = ucb;
-  acb_p=&tz->ucb$l_tz_set_ast;		// Get list head address
-  if	(*acb_p)				// See if list is empty
-    			// Empty do not deliver ASTs
-    com_std$delattnast(acb_p, ucb);		// Delliver all ASTs 
-  SET_FORCED_CHARS(ucb);
+void TZ$SET_LINE(struct _ucb * ucb)
+{
+    unsigned long ** acb_p;
+    struct _tz_ucb * tz = ucb;
+    struct _tty_ucb * tty = ucb;
+    acb_p=&tz->ucb$l_tz_set_ast;		// Get list head address
+    if	(*acb_p)				// See if list is empty
+        // Empty do not deliver ASTs
+        com_std$delattnast(acb_p, ucb);		// Delliver all ASTs
+    SET_FORCED_CHARS(ucb);
 }
 
-void SET_FORCED_CHARS(struct _ucb * ucb) {
-  struct _tty_ucb * tty = ucb;
-  //
-  // This little routine sets certain required characteristics.  It is called by
-  // the INITLINE code to set them at the outset and by the SETLINE code to reset
-  // them unconditionally if someone tries to set them.
-  //
-  ucb->ucb$l_devdepnd2 &= ~(TT2$M_DMA | TT2$M_AUTOBAUD);
-  tty->ucb$l_tt_decha1 &= ~(TT2$M_DMA | TT2$M_AUTOBAUD);
-		
-  return;
+void SET_FORCED_CHARS(struct _ucb * ucb)
+{
+    struct _tty_ucb * tty = ucb;
+    //
+    // This little routine sets certain required characteristics.  It is called by
+    // the INITLINE code to set them at the outset and by the SETLINE code to reset
+    // them unconditionally if someone tries to set them.
+    //
+    ucb->ucb$l_devdepnd2 &= ~(TT2$M_DMA | TT2$M_AUTOBAUD);
+    tty->ucb$l_tt_decha1 &= ~(TT2$M_DMA | TT2$M_AUTOBAUD);
+
+    return;
 }
- 
+
 #if 0
 
- 
-	.Page
+
+.Page
 #endif
 //++
 // TZ$DISCONNECT - SHUT OFF UNIT
@@ -605,28 +617,31 @@ void SET_FORCED_CHARS(struct _ucb * ucb) {
 //	R3,R4 ARE USED.
 //--
 
-	static int indent_dummy;
-void TZ$DISCONNECT(struct _ucb * ucb, int r0) {
-  long R3;
-  if (r0) return;			// If no hangup, skip all this.
- 
-  struct _tz_ucb * tz = 0; // check
-  ucb = tz->ucb$l_tz_xucb;		// Get PZ UCB
-  if (ucb) {			// If disconnected, ignore
-    R3 = ucb->ucb$l_amb;		// Load Associated Mailbox of PZ UCB
-    if (R3) {			// If EQL then no mailbox
-      int R4 =	MSG$_TRMHANGUP;	// Load Message Type
-      exe_std$sndevmsg(R3, R4, ucb);		// Send the message
+static int indent_dummy;
+void TZ$DISCONNECT(struct _ucb * ucb, int r0)
+{
+    long R3;
+    if (r0) return;			// If no hangup, skip all this.
+
+    struct _tz_ucb * tz = 0; // check
+    ucb = tz->ucb$l_tz_xucb;		// Get PZ UCB
+    if (ucb)  			// If disconnected, ignore
+    {
+        R3 = ucb->ucb$l_amb;		// Load Associated Mailbox of PZ UCB
+        if (R3)  			// If EQL then no mailbox
+        {
+            int R4 =	MSG$_TRMHANGUP;	// Load Message Type
+            exe_std$sndevmsg(R3, R4, ucb);		// Send the message
+        }
     }
-  }
- return;
+    return;
 }
- 
- 
+
+
 
 #if 0
-	.PAGE
-	.SBTTL	TZ START I/O ROUTINE
+.PAGE
+.SBTTL	TZ START I/O ROUTINE
 #endif
 //++
 // TZ$STARTIO - START I/O OPERATION ON TZ
@@ -647,70 +662,79 @@ void TZ$DISCONNECT(struct _ucb * ucb, int r0) {
 //
 //	R5 = UCB ADDRESS
 //--
-	static int dummy2;
+static int dummy2;
 
-void TZ$STARTIO(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UNIT
-  struct _ucb * ucb = u;
-  struct _tty_ucb * tty=ucb;
-  if (CC==1) {			// Single character
-    tty->tty$b_tank_char = R3;		// Save output character
-    tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal charater in tank
-  } else {
-    tty->ucb$w_tt_hold|=TTY$M_TANK_BURST;	// Signal burst active
-  }
+void TZ$STARTIO(int R3, struct _ucb * u, signed int CC)  				// START I/O ON UNIT
+{
+    struct _ucb * ucb = u;
+    struct _tty_ucb * tty=ucb;
+    if (CC==1)  			// Single character
+    {
+        tty->tty$b_tank_char = R3;		// Save output character
+        tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal charater in tank
+    }
+    else
+    {
+        tty->ucb$w_tt_hold|=TTY$M_TANK_BURST;	// Signal burst active
+    }
 
-  //
-  // Here we must do something to notify our mate device that
-  // there is data to pick up
-  //
-  ucb = ((struct _tz_ucb *)ucb)->ucb$l_tz_xucb;		// Switch to PZ UCB
-  if (ucb) {			// PZ is disconnected: skip
+    //
+    // Here we must do something to notify our mate device that
+    // there is data to pick up
+    //
+    ucb = ((struct _tz_ucb *)ucb)->ucb$l_tz_xucb;		// Switch to PZ UCB
+    if (ucb)  			// PZ is disconnected: skip
+    {
 
-    int savipl = forklock(ucb->ucb$b_flck, ucb->ucb$b_flck);	// Take out PZ device FORK LOCK
+        int savipl = forklock(ucb->ucb$b_flck, ucb->ucb$b_flck);	// Take out PZ device FORK LOCK
 #if 0
-    LOCK=ucb$b_flck(ucb), -	;
-    SAVIPL=-(SP),	-	;
-    PRESERVE=NO
+        LOCK=ucb$b_flck(ucb), -	;
+        SAVIPL=-(SP),	-	;
+        PRESERVE=NO
 #endif
-      if	(UCB$M_BSY&		// If the device isn't busy,
-		 ucb->ucb$l_sts) 	// then dont do i/o
+                 if	(UCB$M_BSY&		// If the device isn't busy,
+                      ucb->ucb$l_sts) 	// then dont do i/o
 
-	ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
+                     ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
 
-    forkunlock(ucb->ucb$b_flck, savipl);			// Release PZ drvice FORK LOCK
+        forkunlock(ucb->ucb$b_flck, savipl);			// Release PZ drvice FORK LOCK
 #if 0
-    LOCK=ucb$b_flck(ucb), -	;
-    NEWIPL=(SP)+,	-	;
-    PRESERVE=NO,	-	;
-    CONDITION=RESTORE	;
+        LOCK=ucb$b_flck(ucb), -	;
+        NEWIPL=(SP)+,	-	;
+        PRESERVE=NO,	-	;
+        CONDITION=RESTORE	;
 #endif
-		
-  return;
-  } else {
-  //
-  // Come here if we have no PZ control device to send stuff to.  Just
-  // suck all the data we can out of the class driver and throw it away.
-  //
-    ucb=u;
-    tty=ucb;
-    tty->ucb$w_tt_hold&= ~(	TTY$M_TANK_HOLD|	// Nothing in progress now
-				TTY$M_TANK_BURST|
-				TTY$M_TANK_PREMPT);
-  }
-  do {
-    ucb->ucb$l_sts&=~UCB$M_INT; 
-    tty=ucb;
-    long chr, cc;
-    tty->ucb$l_tt_getnxt(&chr,&cc,ucb);
-  } while (tty->ucb$b_tt_outype);
 
-  return;
- 
+        return;
+    }
+    else
+    {
+        //
+        // Come here if we have no PZ control device to send stuff to.  Just
+        // suck all the data we can out of the class driver and throw it away.
+        //
+        ucb=u;
+        tty=ucb;
+        tty->ucb$w_tt_hold&= ~(	TTY$M_TANK_HOLD|	// Nothing in progress now
+                                TTY$M_TANK_BURST|
+                                TTY$M_TANK_PREMPT);
+    }
+    do
+    {
+        ucb->ucb$l_sts&=~UCB$M_INT;
+        tty=ucb;
+        long chr, cc;
+        tty->ucb$l_tt_getnxt(&chr,&cc,ucb);
+    }
+    while (tty->ucb$b_tt_outype);
+
+    return;
+
 }
 
 #if 0
-	.PAGE
-	.SBTTL	Port Routines Stop,Resume,XON,XOFF
+.PAGE
+.SBTTL	Port Routines Stop,Resume,XON,XOFF
 #endif
 //++
 // TZ$XOFF -	Send Xoff
@@ -731,168 +755,196 @@ void TZ$STARTIO(int R3, struct _ucb * u, signed int CC) {				// START I/O ON UNI
 //	R5 = UCB Address
 //--
 
-	  void TZ$XON_XOFF_CMN(struct _ucb * ucb, struct _acb ** acb_p, int R3);
+void TZ$XON_XOFF_CMN(struct _ucb * ucb, struct _acb ** acb_p, int R3);
 
-	  static int	TTY$M_TP_XOFF = 8;
+static int	TTY$M_TP_XOFF = 8;
 static int	TTY$V_TP_XOFF = 3;
 #if 0
 ASSUME	TTY$M_TP_XOFF EQ TTY$M_TP_DLLOC+4
 ASSUME  TTY$V_TP_XOFF EQ TTY$V_TP_DLLOC+1
 #endif
 
-void TZ$XOFF(void * vec, int R3, struct _ucb *ucb) {
-  struct _tz_ucb * tz=ucb;
-  struct _acb * acb_p=&tz->ucb$l_tz_xoff_ast ; //Get address of AST list
-  if	(R3!=0x13)		// Is XOFF
-    return TZ$XON_XOFF_CMN(ucb,acb_p,R3);		// NEQ not XONN use common rotuine
-  struct _tpd_ucb * tpd = ucb;
-  tpd->ucb$b_tp_stat|=TTY$M_TP_XOFF;	// Set XOFF bit in UCB
-  TZ$XON_XOFF_CMN(ucb,acb_p,R3);		// Do common processing
+void TZ$XOFF(void * vec, int R3, struct _ucb *ucb)
+{
+    struct _tz_ucb * tz=ucb;
+    struct _acb * acb_p=&tz->ucb$l_tz_xoff_ast ; //Get address of AST list
+    if	(R3!=0x13)		// Is XOFF
+        return TZ$XON_XOFF_CMN(ucb,acb_p,R3);		// NEQ not XONN use common rotuine
+    struct _tpd_ucb * tpd = ucb;
+    tpd->ucb$b_tp_stat|=TTY$M_TP_XOFF;	// Set XOFF bit in UCB
+    TZ$XON_XOFF_CMN(ucb,acb_p,R3);		// Do common processing
 }
 
-void TZ$XON (void * vec, int R3, struct _ucb * ucb) {
-  struct _tz_ucb * tz=ucb;
-  struct _acb ** acb_p=&tz->ucb$l_tz_xon_ast ; //Get address of AST list
-  if (R3!=0x11)		// Is it XON
-    return	TZ$XON_XOFF_CMN(ucb,acb_p,R3);		// NEQ not XONN use common rotuine
-  struct _tpd_ucb * tpd = ucb;
-  tpd->ucb$b_tp_stat&=~TTY$M_TP_XOFF;	// Clear XOFF bit in UCB
-  ;
-  TZ$XON_XOFF_CMN(ucb,acb_p,R3);
+void TZ$XON (void * vec, int R3, struct _ucb * ucb)
+{
+    struct _tz_ucb * tz=ucb;
+    struct _acb ** acb_p=&tz->ucb$l_tz_xon_ast ; //Get address of AST list
+    if (R3!=0x11)		// Is it XON
+        return	TZ$XON_XOFF_CMN(ucb,acb_p,R3);		// NEQ not XONN use common rotuine
+    struct _tpd_ucb * tpd = ucb;
+    tpd->ucb$b_tp_stat&=~TTY$M_TP_XOFF;	// Clear XOFF bit in UCB
+    ;
+    TZ$XON_XOFF_CMN(ucb,acb_p,R3);
 }
 
 void TZ$CONT (struct _ucb * ucb);
 
 //
-// Schedule xon/xoff to be sent, and changed schedule bit mask 
+// Schedule xon/xoff to be sent, and changed schedule bit mask
 //
-void TZ$XON_XOFF_CMN(struct _ucb * ucb, struct _acb ** acb_p, int R3) {			// Common XONN/XOFF code
-  struct _tty_ucb * tty=ucb;
-  long * R0;
-  short * s;
-  if	(*acb_p) {		// See if AST present
-    // EQL no AST to deliver
-    R0		 = acb_p;		// Copy list address
+void TZ$XON_XOFF_CMN(struct _ucb * ucb, struct _acb ** acb_p, int R3)  			// Common XONN/XOFF code
+{
+    struct _tty_ucb * tty=ucb;
+    long * R0;
+    short * s;
+    if	(*acb_p)  		// See if AST present
+    {
+        // EQL no AST to deliver
+        R0		 = acb_p;		// Copy list address
 
-  l10:
-    R0=*R0;			// Get next entry
-    if (R0==0) goto	l20;			// All done so deliver ASTs
-    //	MOVZBW	R3,ACB$L_KAST+4(R0)	// Store new param value
-    s=(short*)R0+3; // check
-    *s=R3;
-    // was: MOVZBW	R3,ACB$L_KAST+6(R0)	// Store new param value
-    goto	l10;			// Look for another entry
-  l20:
-    com_std$delattnast(acb_p, ucb);	// Deliver the ASTs
-  }
-  ucb->ucb$l_sts|=UCB$M_INT;
-  tty->ucb$w_tt_hold|=TTY$M_TANK_PREMPT;	// Schedule xon
-  tty->ucb$b_tt_prempt		 = R3;		// Save character
-  TZ$CONT(ucb);
+l10:
+        R0=*R0;			// Get next entry
+        if (R0==0) goto	l20;			// All done so deliver ASTs
+        //	MOVZBW	R3,ACB$L_KAST+4(R0)	// Store new param value
+        s=(short*)R0+3; // check
+        *s=R3;
+        // was: MOVZBW	R3,ACB$L_KAST+6(R0)	// Store new param value
+        goto	l10;			// Look for another entry
+l20:
+        com_std$delattnast(acb_p, ucb);	// Deliver the ASTs
+    }
+    ucb->ucb$l_sts|=UCB$M_INT;
+    tty->ucb$w_tt_hold|=TTY$M_TANK_PREMPT;	// Schedule xon
+    tty->ucb$b_tt_prempt		 = R3;		// Save character
+    TZ$CONT(ucb);
 }
 
 //
 // Resume any active output
 //
-void TZ$RESUME (struct _ucb * ucb) {
+void TZ$RESUME (struct _ucb * ucb)
+{
 //;;	BISL	#UCB$M_INT,ucb->ucb$l_sts
-  ucb->ucb$l_sts&=~UCB$M_INT;
-  struct _tty_ucb * tty;
-  tty=ucb;
-  tty->ucb$w_tt_hold&=~TTY$M_TANK_STOP;	// No longer stopped
+    ucb->ucb$l_sts&=~UCB$M_INT;
+    struct _tty_ucb * tty;
+    tty=ucb;
+    tty->ucb$w_tt_hold&=~TTY$M_TANK_STOP;	// No longer stopped
 
-  return;				// Go, mon, go.
+    return;				// Go, mon, go.
 }
 
-void TZ$CONT (struct _ucb * ucb) {
-  struct _tt_class * R4; // check
-  // was:	MOVL	R4,-(SP)
-  struct _tty_ucb * tty;
-  tty=ucb;
-  R4=tty->ucb$l_tt_class;
-  R4->class_fork();
-  // was:	MOVL	(SP)+,R4
-  return;
+void TZ$CONT (struct _ucb * ucb)
+{
+    struct _tt_class * R4; // check
+    // was:	MOVL	R4,-(SP)
+    struct _tty_ucb * tty;
+    tty=ucb;
+    R4=tty->ucb$l_tt_class;
+    R4->class_fork();
+    // was:	MOVL	(SP)+,R4
+    return;
 }
 
-void TZ$FORK(struct _ucb * ucb) {
-  struct _tz_ucb * tz;
-  tz=ucb;
-  ucb = tz->ucb$l_tz_xucb;		// Switch to PZ UCB
-  if (ucb==0) return;			// PZ is disconnected: skip
+void TZ$FORK(struct _ucb * ucb)
+{
+    struct _tz_ucb * tz;
+    tz=ucb;
+    ucb = tz->ucb$l_tz_xucb;		// Switch to PZ UCB
+    if (ucb==0) return;			// PZ is disconnected: skip
 
-  int savipl = forklock(ucb->ucb$b_flck, ucb->ucb$b_flck);	// Take out PZ device FORK LOCK
+    int savipl = forklock(ucb->ucb$b_flck, ucb->ucb$b_flck);	// Take out PZ device FORK LOCK
 #if 0
-  LOCK=ucb$b_flck(ucb), -	;
-  SAVIPL=-(SP),	-	;
-  PRESERVE=NO
+    LOCK=ucb$b_flck(ucb), -	;
+    SAVIPL=-(SP),	-	;
+    PRESERVE=NO
 #endif
 
-    if (UCB$M_BSY&		// If the device isn't busy,
-	ucb->ucb$l_sts)	// then dont do i/o
-      // Get IRP address
-      ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
+             if (UCB$M_BSY&		// If the device isn't busy,
+                 ucb->ucb$l_sts)	// then dont do i/o
+                 // Get IRP address
+                 ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
 
-  forkunlock(ucb->ucb$b_flck, savipl);	// Release PZ device FORK LOCK
+    forkunlock(ucb->ucb$b_flck, savipl);	// Release PZ device FORK LOCK
 #if 0
-  LOCK=ucb$b_flck(ucb), -	;
-  NEWIPL=(SP)+,	-	;
-  PRESERVE=NO,	-	;
-  CONDITION=RESTORE	;
+    LOCK=ucb$b_flck(ucb), -	;
+    NEWIPL=(SP)+,	-	;
+    PRESERVE=NO,	-	;
+    CONDITION=RESTORE	;
 #endif
 
-  return;
+    return;
 }
 
 //
 // Stop any currently active output
 //
-void TZ$STOP (struct _tty_ucb * ucb) {
-  ucb->ucb$w_tt_hold|=TTY$M_TANK_STOP;	// Make PZ_OUT_LOOP stop
-  return;
+void TZ$STOP (struct _tty_ucb * ucb)
+{
+    ucb->ucb$w_tt_hold|=TTY$M_TANK_STOP;	// Make PZ_OUT_LOOP stop
+    return;
 }
 
 //
 // Abort any port currently active
 //
-void TZ$ABORT(struct _tty_ucb * ucb) {
-  ucb->ucb$w_tt_hold&=~TTY$M_TANK_BURST;	// reset burst active
- l10:
-  return;
+void TZ$ABORT(struct _tty_ucb * ucb)
+{
+    ucb->ucb$w_tt_hold&=~TTY$M_TANK_BURST;	// reset burst active
+l10:
+    return;
 }
- 
+
 #if 0
 TZ_END:				// End of driver
- 
-	.END
+
+.END
 #endif
 
-	static int dummy3;
-struct _tt_port port_vector = {
-  //
-  // Added port vector table using VEC macros 
-  //
-  //	    $VECINI	TZ:TZ$NULL
-  port_startio:TZ$STARTIO,
-  port_disconnect:TZ$DISCONNECT,
-  port_set_line:TZ$SET_LINE,
-  port_ds_set:TZ$NULL,
-  port_xon:TZ$XON,
-  port_xoff:TZ$XOFF,
-  port_stop:TZ$STOP,
-  port_stop2:TZ$NULL,
-  port_abort:TZ$ABORT,
-  port_resume:TZ$RESUME,
-  port_set_modem:TZ$NULL,
-  port_glyphload:TZ$NULL,
-  port_maint:TZ$NULL,
-  port_forkret:TZ$FORK,
-  port_start_read:TZ$NULL,
-  port_middle_read:TZ$NULL,
-  port_end_read:TZ$NULL,
-  port_cancel:TZ$NULL,
+static int dummy3;
+struct _tt_port port_vector =
+{
+    //
+    // Added port vector table using VEC macros
+    //
+    //	    $VECINI	TZ:TZ$NULL
+port_startio:
+    TZ$STARTIO,
+port_disconnect:
+    TZ$DISCONNECT,
+port_set_line:
+    TZ$SET_LINE,
+port_ds_set:
+    TZ$NULL,
+port_xon:
+    TZ$XON,
+port_xoff:
+    TZ$XOFF,
+port_stop:
+    TZ$STOP,
+port_stop2:
+    TZ$NULL,
+port_abort:
+    TZ$ABORT,
+port_resume:
+    TZ$RESUME,
+port_set_modem:
+    TZ$NULL,
+port_glyphload:
+    TZ$NULL,
+port_maint:
+    TZ$NULL,
+port_forkret:
+    TZ$FORK,
+port_start_read:
+    TZ$NULL,
+port_middle_read:
+    TZ$NULL,
+port_end_read:
+    TZ$NULL,
+port_cancel:
+    TZ$NULL,
 };
- 
+
 #include<crbdef.h>
 #include<cdtdef.h>
 #include<dcdef.h>
@@ -924,41 +976,46 @@ struct _tt_port port_vector = {
 static struct _irp * globali;
 static struct _ucb * globalu;
 
-static void  startio3 (struct _irp * i, struct _ucb * u) { 
-  ioc$reqcom(SS$_NORMAL,0,u);
-  return;
+static void  startio3 (struct _irp * i, struct _ucb * u)
+{
+    ioc$reqcom(SS$_NORMAL,0,u);
+    return;
 };
 
-static void  startio2 (struct _irp * i, struct _ucb * u) { 
-  u->ucb$l_fpc=startio3;
-  exe$iofork(i,u);
-  return;
+static void  startio2 (struct _irp * i, struct _ucb * u)
+{
+    u->ucb$l_fpc=startio3;
+    exe$iofork(i,u);
+    return;
 }
 
 static void ubd_intr2(int irq, void *dev, struct pt_regs *unused)
 {
-  struct _irp * i;
-  struct _ucb * u;
-  void (*func)();
+    struct _irp * i;
+    struct _ucb * u;
+    void (*func)();
 
-  if (intr_blocked(20))
-    return;
-  regtrap(REG_INTR,20);
-  setipl(20);
-  /* have to do this until we get things more in order */
-  i=globali;
-  u=globalu;
+    if (intr_blocked(20))
+        return;
+    regtrap(REG_INTR,20);
+    setipl(20);
+    /* have to do this until we get things more in order */
+    i=globali;
+    u=globalu;
 
-  func=u->ucb$l_fpc;
-  func(i,u);
+    func=u->ucb$l_fpc;
+    func(i,u);
 #if 0
-  myrei();
+    myrei();
 #endif
 }
 
-static struct _fdt tz$fdt = {
-  fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
-  fdt$q_buffered:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
+static struct _fdt tz$fdt =
+{
+fdt$q_valid:
+    IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,
+fdt$q_buffered:
+    IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_DSE|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_FORMAT
 };
 
 /* more yet undefined dummies */
@@ -978,9 +1035,10 @@ static void  mntv_sqd (void) { };
 static void  aux_storage (void) { };
 static void  aux_routine (void) { };
 
-static struct _ddt tz$ddt = { // Dummy TZ port Driver Dispatch table
-  ddt$l_start: 0,
-  ddt$l_fdt: 0,
+static struct _ddt tz$ddt =   // Dummy TZ port Driver Dispatch table
+{
+    ddt$l_start: 0,
+    ddt$l_fdt: 0,
 };
 
 int tz$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
@@ -989,66 +1047,71 @@ int tz$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 
 extern void ini_fdt_act(struct _fdt * f, unsigned long long mask, void * fn, unsigned long type);
 
-struct _spl SPIN_TZ __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt : -1 /*, spl$l_spinlock : 0*/ };
+struct _spl SPIN_TZ __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+    -1 /*, spl$l_spinlock : 0*/
+};
 
-void tz$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
-  ucb->ucb$b_flck=IPL$_IOLOCK8;
-  ucb->ucb$b_dipl=IPL$_IOLOCK8;
-  ucb->ucb$l_dlck=&SPIN_TZ;
+void tz$struc_init (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb)
+{
+    ucb->ucb$b_flck=IPL$_IOLOCK8;
+    ucb->ucb$b_dipl=IPL$_IOLOCK8;
+    ucb->ucb$l_dlck=&SPIN_TZ;
 
-  ucb->ucb$l_devchar = DEV$M_REC | DEV$M_IDV | DEV$M_ODV | DEV$M_TRM | DEV$M_CCL;
+    ucb->ucb$l_devchar = DEV$M_REC | DEV$M_IDV | DEV$M_ODV | DEV$M_TRM | DEV$M_CCL;
 
-  ucb->ucb$l_devchar2 = DEV$M_RTT | DEV$M_NNM;
-  ucb->ucb$b_devclass = DC$_TERM;
+    ucb->ucb$l_devchar2 = DEV$M_RTT | DEV$M_NNM;
+    ucb->ucb$b_devclass = DC$_TERM;
 
-  struct _tty_ucb * tty=ucb;
+    struct _tty_ucb * tty=ucb;
 
-  tty->ucb$b_tt_detype=TT$_UNKNOWN;	// TYPE
-  tty->ucb$w_tt_desize=TTY$GW_DEFBUF;	// BUFFER SIZE
-  tty->ucb$l_tt_dechar=TTY$GL_DEFCHAR;	// DEFAULT CHARACTERS
-  tty->ucb$l_tt_decha1=TTY$GL_DEFCHAR2; // DEFAULT CHARACTERS
-  tty->ucb$w_tt_despee=TTY$GB_DEFSPEED<<8; // DEFAULT SPEED
-  tty->ucb$w_tt_despee|=TTY$GB_RSPEED; //DEFAULT SPEED
-  tty->ucb$b_tt_depari=TTY$GB_PARITY;	// DEFAULT PARITY
-  tty->ucb$b_tt_parity=TTY$GB_PARITY;	// DEFAULT PARITY
+    tty->ucb$b_tt_detype=TT$_UNKNOWN;	// TYPE
+    tty->ucb$w_tt_desize=TTY$GW_DEFBUF;	// BUFFER SIZE
+    tty->ucb$l_tt_dechar=TTY$GL_DEFCHAR;	// DEFAULT CHARACTERS
+    tty->ucb$l_tt_decha1=TTY$GL_DEFCHAR2; // DEFAULT CHARACTERS
+    tty->ucb$w_tt_despee=TTY$GB_DEFSPEED<<8; // DEFAULT SPEED
+    tty->ucb$w_tt_despee|=TTY$GB_RSPEED; //DEFAULT SPEED
+    tty->ucb$b_tt_depari=TTY$GB_PARITY;	// DEFAULT PARITY
+    tty->ucb$b_tt_parity=TTY$GB_PARITY;	// DEFAULT PARITY
 
-  ucb->ucb$b_devtype = DT$_TTYUNKN; // TYPE
-  ucb->ucb$w_devbufsiz = TTY$GW_DEFBUF; // BUFFER SIZE
-  ucb->ucb$l_devdepend = TTY$GL_DEFCHAR; // DEFAULT CHARACTERS
+    ucb->ucb$b_devtype = DT$_TTYUNKN; // TYPE
+    ucb->ucb$w_devbufsiz = TTY$GW_DEFBUF; // BUFFER SIZE
+    ucb->ucb$l_devdepend = TTY$GL_DEFCHAR; // DEFAULT CHARACTERS
 
-  ucb->ucb$l_tt_devdp1=TTY$GL_DEFCHAR2; // Default Characters
-  tty->ucb$w_tt_speed=TTY$GB_DEFSPEED<<8;	// DEFAULT SPEED
-  tty->ucb$w_tt_speed|=TTY$GB_RSPEED;	// DEFAULT SPEED
-  ucb->ucb$b_dipl=8;			// DEV IPL (no device)
-  tty->ucb$l_tt_wflink=0;	// Zero write queue.
-  tty->ucb$l_tt_wblink=0;	// Zero write queue.
-  tty->ucb$l_tt_rtimou=0;	// Zero read timed out disp.
+    ucb->ucb$l_tt_devdp1=TTY$GL_DEFCHAR2; // Default Characters
+    tty->ucb$w_tt_speed=TTY$GB_DEFSPEED<<8;	// DEFAULT SPEED
+    tty->ucb$w_tt_speed|=TTY$GB_RSPEED;	// DEFAULT SPEED
+    ucb->ucb$b_dipl=8;			// DEV IPL (no device)
+    tty->ucb$l_tt_wflink=0;	// Zero write queue.
+    tty->ucb$l_tt_wblink=0;	// Zero write queue.
+    tty->ucb$l_tt_rtimou=0;	// Zero read timed out disp.
 
-  // dropped the mutex stuff
+    // dropped the mutex stuff
 
-  return;
+    return;
 }
 
-void tz$struc_reinit (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb) {
-  ddb->ddb$ps_ddt=&tz$ddt;
-  //dpt_store_isr(crb,nl_isr);
-  return;
+void tz$struc_reinit (struct _crb * crb, struct _ddb * ddb, struct _idb * idb, struct _orb * orb, struct _ucb * ucb)
+{
+    ddb->ddb$ps_ddt=&tz$ddt;
+    //dpt_store_isr(crb,nl_isr);
+    return;
 }
 
-int tz$unit_init (struct _idb * idb, struct _ucb * ucb) {
-  ucb->ucb$v_online = 0;
-  //ucb->ucb$l_lr_msg_tmo = 0 ; // or offline? // where did this go?
+int tz$unit_init (struct _idb * idb, struct _ucb * ucb)
+{
+    ucb->ucb$v_online = 0;
+    //ucb->ucb$l_lr_msg_tmo = 0 ; // or offline? // where did this go?
 
-  // idb->idb$ps_owner=&(ucb->ucb$r_ucb); // this is mailbox?
-  // no adp or cram stuff
+    // idb->idb$ps_owner=&(ucb->ucb$r_ucb); // this is mailbox?
+    // no adp or cram stuff
 
-  // or ints etc
-  
-  ucb->ucb$v_online = 1;
+    // or ints etc
 
-  TZ$INITLINE(0, ucb); // temp  placed
+    ucb->ucb$v_online = 1;
 
-  return SS$_NORMAL;
+    TZ$INITLINE(0, ucb); // temp  placed
+
+    return SS$_NORMAL;
 }
 
 struct _dpt tz$dpt;
@@ -1056,117 +1119,123 @@ struct _ddb tz$ddb;
 struct _ucb tz$ucb;
 struct _crb tz$crb;
 
-int tz$init_tables() {
-  ini_dpt_name(&tz$dpt, "TZDRIVER");
-  ini_dpt_adapt(&tz$dpt, 0);
-  ini_dpt_defunits(&tz$dpt, 1);
-  ini_dpt_ucbsize(&tz$dpt,sizeof(struct _tz_ucb));
-  ini_dpt_struc_init(&tz$dpt, tz$struc_init);
-  ini_dpt_struc_reinit(&tz$dpt, tz$struc_reinit);
-  ini_dpt_ucb_crams(&tz$dpt, 1/*NUMBER_CRAMS*/);
-  ini_dpt_flags(&tz$dpt, DPT$M_NOUNLOAD);
-  ini_dpt_adptype(&tz$dpt, 0);
-  ini_dpt_vector(&tz$dpt, &port_vector);
-  ini_dpt_end(&tz$dpt);
+int tz$init_tables()
+{
+    ini_dpt_name(&tz$dpt, "TZDRIVER");
+    ini_dpt_adapt(&tz$dpt, 0);
+    ini_dpt_defunits(&tz$dpt, 1);
+    ini_dpt_ucbsize(&tz$dpt,sizeof(struct _tz_ucb));
+    ini_dpt_struc_init(&tz$dpt, tz$struc_init);
+    ini_dpt_struc_reinit(&tz$dpt, tz$struc_reinit);
+    ini_dpt_ucb_crams(&tz$dpt, 1/*NUMBER_CRAMS*/);
+    ini_dpt_flags(&tz$dpt, DPT$M_NOUNLOAD);
+    ini_dpt_adptype(&tz$dpt, 0);
+    ini_dpt_vector(&tz$dpt, &port_vector);
+    ini_dpt_end(&tz$dpt);
 
-  ini_ddt_ctrlinit(&tz$ddt, TZ$INITIAL);
-  ini_ddt_unitinit(&tz$ddt, TZ$INITLINE);
-  // check. should be 0?  ini_ddt_start(&tz$ddt, TZ$STARTIO);
-  ini_ddt_cancel(&tz$ddt, ioc_std$cancelio);
-  ini_ddt_end(&tz$ddt);
+    ini_ddt_ctrlinit(&tz$ddt, TZ$INITIAL);
+    ini_ddt_unitinit(&tz$ddt, TZ$INITLINE);
+    // check. should be 0?  ini_ddt_start(&tz$ddt, TZ$STARTIO);
+    ini_ddt_cancel(&tz$ddt, ioc_std$cancelio);
+    ini_ddt_end(&tz$ddt);
 
-  /* for the fdt init part */
-  /* a lot of these? */
-  ini_fdt_act(&tz$fdt,IO$_READLBLK,tz$fdtread,1);
-  ini_fdt_act(&tz$fdt,IO$_READPBLK,tz$fdtread,1);
-  ini_fdt_act(&tz$fdt,IO$_READVBLK,tz$fdtread,1);
-  ini_fdt_act(&tz$fdt,IO$_WRITELBLK,tz$fdtwrite,1);
-  ini_fdt_act(&tz$fdt,IO$_WRITEPBLK,tz$fdtwrite,1);
-  ini_fdt_act(&tz$fdt,IO$_WRITEVBLK,tz$fdtwrite,1);
-  ini_fdt_end(&tz$fdt);
+    /* for the fdt init part */
+    /* a lot of these? */
+    ini_fdt_act(&tz$fdt,IO$_READLBLK,tz$fdtread,1);
+    ini_fdt_act(&tz$fdt,IO$_READPBLK,tz$fdtread,1);
+    ini_fdt_act(&tz$fdt,IO$_READVBLK,tz$fdtread,1);
+    ini_fdt_act(&tz$fdt,IO$_WRITELBLK,tz$fdtwrite,1);
+    ini_fdt_act(&tz$fdt,IO$_WRITEPBLK,tz$fdtwrite,1);
+    ini_fdt_act(&tz$fdt,IO$_WRITEVBLK,tz$fdtwrite,1);
+    ini_fdt_end(&tz$fdt);
 
-  return SS$_NORMAL;
+    return SS$_NORMAL;
 }
 
-long tz_iodb_vmsinit(void) {
+long tz_iodb_vmsinit(void)
+{
 #if 0
-  struct _ucb * ucb=&tz$ucb;
-  struct _ddb * ddb=&tz$ddb;
-  struct _crb * crb=&tz$crb;
-#endif 
-  struct _ucb * ucb=kmalloc(sizeof(struct _tz_ucb),GFP_KERNEL);
-  struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
-  struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
-  unsigned long idb=0,orb=0;
+    struct _ucb * ucb=&tz$ucb;
+    struct _ddb * ddb=&tz$ddb;
+    struct _crb * crb=&tz$crb;
+#endif
+    struct _ucb * ucb=kmalloc(sizeof(struct _tz_ucb),GFP_KERNEL);
+    struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
+    struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
+    unsigned long idb=0,orb=0;
 
-  memset(ucb,0,sizeof(struct _tz_ucb));
-  memset(ddb,0,sizeof(struct _ddb));
-  memset(crb,0,sizeof(struct _crb));
+    memset(ucb,0,sizeof(struct _tz_ucb));
+    memset(ddb,0,sizeof(struct _ddb));
+    memset(crb,0,sizeof(struct _crb));
 
-  init_ddb(ddb,&tz$ddt,ucb,"tza");
-  init_ucb(ucb, ddb, &tz$ddt, crb);
-  init_crb(crb);
+    init_ddb(ddb,&tz$ddt,ucb,"tza");
+    init_ucb(ucb, ddb, &tz$ddt, crb);
+    init_crb(crb);
 
-  ucb -> ucb$w_size = sizeof(struct _tz_ucb); // temp placed
+    ucb -> ucb$w_size = sizeof(struct _tz_ucb); // temp placed
 
-  ucb -> ucb$w_unit_seed = 1; // was: 0 // check // temp placed
-  ucb -> ucb$w_unit = 0; // temp placed
+    ucb -> ucb$w_unit_seed = 1; // was: 0 // check // temp placed
+    ucb -> ucb$w_unit = 0; // temp placed
 
-  ucb -> ucb$l_sts |= UCB$M_TEMPLATE; // temp placed
+    ucb -> ucb$l_sts |= UCB$M_TEMPLATE; // temp placed
 
 //  ioc_std$clone_ucb(&tz$ucb,&ucb);
-  tz$init_tables();
-  tz$struc_init (crb, ddb, idb, orb, ucb);
-  tz$struc_reinit (crb, ddb, idb, orb, ucb);
-  tz$unit_init (idb, ucb);
+    tz$init_tables();
+    tz$struc_init (crb, ddb, idb, orb, ucb);
+    tz$struc_reinit (crb, ddb, idb, orb, ucb);
+    tz$unit_init (idb, ucb);
 
-  insertdevlist(ddb);
+    insertdevlist(ddb);
 
-  return ddb;
-
-}
-
-long tz_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc) {
-  unsigned short int chan;
-  struct _ucb * newucb = 0;
-  // ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&tz$ucb*/,&newucb); // check. skip?
-  exe$assign(dsc,&chan,0,0,0);
-
-
-  return newucb;
-}
-
-int tz_vmsinit(void) {
-  //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
-
-  unsigned short chan0, chan1, chan2;
-  $DESCRIPTOR(dsc,"opa0");
-  unsigned long idb=0,orb=0;
-  struct _ccb * ccb;
-  struct _ucb * newucb0,*newucb1,*newucb2;
-  struct _ddb * ddb;
-
-  printk(KERN_INFO "dev con here pre\n");
-
-  ddb=tz_iodb_vmsinit();
-
-  /* for the fdt init part */
-  /* a lot of these? */
-
-  tz_iodbunit_vmsinit(ddb,1,&dsc);
-
-  printk(KERN_INFO "dev con here\n");
-
-  TZ$INITIAL(&tz$crb); // check
-  // return chan0;
+    return ddb;
 
 }
 
-int tz$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
-  printk("should not be in tz$read\n");
+long tz_iodbunit_vmsinit(struct _ddb * ddb,int unitno,void * dsc)
+{
+    unsigned short int chan;
+    struct _ucb * newucb = 0;
+    // ioc_std$clone_ucb(ddb->ddb$ps_ucb/*&tz$ucb*/,&newucb); // check. skip?
+    exe$assign(dsc,&chan,0,0,0);
+
+
+    return newucb;
 }
 
-int tz$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) {
-  printk("should not be in tz$write\n");
+int tz_vmsinit(void)
+{
+    //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
+
+    unsigned short chan0, chan1, chan2;
+    $DESCRIPTOR(dsc,"opa0");
+    unsigned long idb=0,orb=0;
+    struct _ccb * ccb;
+    struct _ucb * newucb0,*newucb1,*newucb2;
+    struct _ddb * ddb;
+
+    printk(KERN_INFO "dev con here pre\n");
+
+    ddb=tz_iodb_vmsinit();
+
+    /* for the fdt init part */
+    /* a lot of these? */
+
+    tz_iodbunit_vmsinit(ddb,1,&dsc);
+
+    printk(KERN_INFO "dev con here\n");
+
+    TZ$INITIAL(&tz$crb); // check
+    // return chan0;
+
+}
+
+int tz$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
+{
+    printk("should not be in tz$read\n");
+}
+
+int tz$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
+{
+    printk("should not be in tz$write\n");
 }
 

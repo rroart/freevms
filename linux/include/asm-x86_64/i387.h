@@ -49,17 +49,17 @@ extern int save_i387(struct _fpstate *buf);
  * ptrace request handers...
  */
 extern int get_fpregs( struct user_i387_struct *buf,
-		       struct task_struct *tsk );
+                       struct task_struct *tsk );
 extern int set_fpregs( struct task_struct *tsk,
-		       struct user_i387_struct *buf );
+                       struct user_i387_struct *buf );
 
 /*
  * FPU state for core dumps...
  */
 extern int dump_fpu( struct pt_regs *regs,
-		     struct user_i387_struct *fpu );
+                     struct user_i387_struct *fpu );
 
-/* 
+/*
  * i387 state interaction
  */
 #define get_fpu_mxcsr(t) ((t)->thread.i387.fxsave.mxcsr)
@@ -71,72 +71,73 @@ extern int dump_fpu( struct pt_regs *regs,
 #define set_fpu_fxsr_twd(t,val) ((t)->thread.i387.fxsave.twd = (val))
 #define set_fpu_mxcsr(t,val) ((t)->thread.i387.fxsave.mxcsr = (val)&0xffbf)
 
-static inline int restore_fpu_checking(struct i387_fxsave_struct *fx) 
-{ 
-	int err;
-	asm volatile("1:  rex64 ; fxrstor (%[fx])\n\t"
-		     "2:\n"
-		     ".section .fixup,\"ax\"\n"
-		     "3:  movl $-1,%[err]\n"
-		     "    jmp  2b\n"
-		     ".previous\n"
-		     ".section __ex_table,\"a\"\n"
-		     "   .align 8\n"
-		     "   .quad  1b,3b\n"
-		     ".previous"
-		     : [err] "=r" (err)
-		     : [fx] "r" (fx), "0" (0)); 
-	if (unlikely(err))
-		init_fpu(current);
-	return err;
-} 
+static inline int restore_fpu_checking(struct i387_fxsave_struct *fx)
+{
+    int err;
+    asm volatile("1:  rex64 ; fxrstor (%[fx])\n\t"
+                 "2:\n"
+                 ".section .fixup,\"ax\"\n"
+                 "3:  movl $-1,%[err]\n"
+                 "    jmp  2b\n"
+                 ".previous\n"
+                 ".section __ex_table,\"a\"\n"
+                 "   .align 8\n"
+                 "   .quad  1b,3b\n"
+                 ".previous"
+                 : [err] "=r" (err)
+                 : [fx] "r" (fx), "0" (0));
+    if (unlikely(err))
+        init_fpu(current);
+    return err;
+}
 
-static inline int save_i387_checking(struct i387_fxsave_struct *fx) 
-{ 
-	int err;
-	asm volatile("1:  rex64 ; fxsave (%[fx])\n\t"
-		     "2:\n"
-		     ".section .fixup,\"ax\"\n"
-		     "3:  movl $-1,%[err]\n"
-		     "    jmp  2b\n"
-		     ".previous\n"
-		     ".section __ex_table,\"a\"\n"
-		     "   .align 8\n"
-		     "   .quad  1b,3b\n"
-		     ".previous"
-		     : [err] "=r" (err)
-		     : [fx] "r" (fx), "0" (0)); 
-	if (unlikely(err))
-		__clear_user(fx, sizeof(struct i387_fxsave_struct));
-	return err;
-} 
+static inline int save_i387_checking(struct i387_fxsave_struct *fx)
+{
+    int err;
+    asm volatile("1:  rex64 ; fxsave (%[fx])\n\t"
+                 "2:\n"
+                 ".section .fixup,\"ax\"\n"
+                 "3:  movl $-1,%[err]\n"
+                 "    jmp  2b\n"
+                 ".previous\n"
+                 ".section __ex_table,\"a\"\n"
+                 "   .align 8\n"
+                 "   .quad  1b,3b\n"
+                 ".previous"
+                 : [err] "=r" (err)
+                 : [fx] "r" (fx), "0" (0));
+    if (unlikely(err))
+        __clear_user(fx, sizeof(struct i387_fxsave_struct));
+    return err;
+}
 
 static inline void kernel_fpu_begin(void)
 {
-	struct task_struct *tsk = current;
-	if (tsk->flags & PF_USEDFPU) {
-		asm volatile("rex64 ; fxsave %0 ; fnclex"
-			      : "=m" (tsk->thread.i387.fxsave));
-		tsk->flags &= ~PF_USEDFPU;
-		return;
-	}
-	clts();
+    struct task_struct *tsk = current;
+    if (tsk->flags & PF_USEDFPU)
+    {
+        asm volatile("rex64 ; fxsave %0 ; fnclex"
+                     : "=m" (tsk->thread.i387.fxsave));
+        tsk->flags &= ~PF_USEDFPU;
+        return;
+    }
+    clts();
 }
 
 static inline void save_init_fpu( struct task_struct *tsk )
 {
-	asm volatile( "fxsave %0 ; fnclex"
-		      : "=m" (tsk->thread.i387.fxsave));
-	tsk->flags &= ~PF_USEDFPU;
-	stts();
+    asm volatile( "fxsave %0 ; fnclex"
+                  : "=m" (tsk->thread.i387.fxsave));
+    tsk->flags &= ~PF_USEDFPU;
+    stts();
 }
 
-/* 
+/*
  * This restores directly out of user space. Exceptions are handled.
- */ 
+ */
 static inline int restore_i387(struct _fpstate *buf)
 {
-	return restore_fpu_checking((struct i387_fxsave_struct *)buf);
+    return restore_fpu_checking((struct i387_fxsave_struct *)buf);
 }
 
 #endif /* __ASM_X86_64_I387_H */

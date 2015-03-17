@@ -15,31 +15,31 @@ unsigned long lib$add_times(const void *,const void *,void *);
 unsigned long lib$addx(const void *,const void *,void *, const long *);
 
 unsigned long lib$analyze_sdesc(const struct dsc$descriptor_s *,
-	unsigned short *,char **);
+                                unsigned short *,char **);
 
 unsigned long lib$analyze_sdesc_64 (const struct dsc$descriptor_s* descrip,
-                                unsigned short  *word_integer_length,
-                                char            **data_address,
-                                unsigned long   *descriptor_type );
+                                    unsigned short  *word_integer_length,
+                                    char            **data_address,
+                                    unsigned long   *descriptor_type );
 
 unsigned long lib$ascii_to_uid();
 
 int lib$asn_wth_mbx(const void *,const long *,const long *,
-			      unsigned short *,unsigned short *);
+                    unsigned short *,unsigned short *);
 
-int lib$ast_in_prog(void);		
+int lib$ast_in_prog(void);
 
 unsigned long lib$attach(const unsigned long *);
 
-int lib$bbcci(const int *,void *), lib$bbssi(const int *,void *);  
+int lib$bbcci(const int *,void *), lib$bbssi(const int *,void *);
 
 unsigned long lib$build_nodespec(const  struct  dsc$descriptor_s *primary,
-                                        struct  dsc$descriptor_s *nodespec,
+                                 struct  dsc$descriptor_s *nodespec,
                                  const  struct  dsc$descriptor_s *acs,
                                  const  struct  dsc$descriptor_s *secondary,
                                  unsigned short *nodespec_length );
 
-unsigned long lib$callg(const void *,const unsigned long (*)()); 
+unsigned long lib$callg(const void *,const unsigned long (*)());
 
 #if 0
 // not now
@@ -78,8 +78,8 @@ void lib$crf_output(const void *,const long *,const long *,const long *,const lo
 unsigned long lib$currency(void *,...);
 
 unsigned long lib$cvt_dtb(int,const char *,long *),
-	      lib$cvt_htb(int,const char *,long *),
-	      lib$cvt_otb(int,const char *,long *);
+         lib$cvt_htb(int,const char *,long *),
+         lib$cvt_otb(int,const char *,long *);
 
 unsigned long lib$cvt_dx_dx(const void *,void *,...);
 
@@ -129,13 +129,13 @@ unsigned long lib$do_command(const void *);
 
 unsigned long lib$ediv( const   signed long int *divisor,
                         const   signed long long *dividend,
-                                signed long int *quotient,
-                                signed long int *remainder );
+                        signed long int *quotient,
+                        signed long int *remainder );
 
 unsigned long lib$emodd(const double *,const unsigned char *,const double *,long *,double *),
-	      lib$emodf(const float *,const unsigned char *,const float *,long *,float *),
-	      lib$emodg(const double *,const unsigned short *,const double *,long *,double *),
-	      lib$emodh(const void *,const unsigned short *,const void *,long *,void *);
+         lib$emodf(const float *,const unsigned char *,const float *,long *,float *),
+         lib$emodg(const double *,const unsigned short *,const double *,long *,double *),
+         lib$emodh(const void *,const unsigned short *,const void *,long *,void *);
 
 unsigned long lib$emul(const long *,const long *,const long *,void *);
 
@@ -148,13 +148,13 @@ long lib$extv(const int *,const unsigned char *,const void *);
 long lib$extzv(const int *,const unsigned char *,const void *);
 
 unsigned long lib$ffc(const int *,const int *,const void *,int *),
-	      lib$ffs(const int *,const int *,const void *,int *);
+         lib$ffs(const int *,const int *,const void *,int *);
 
 unsigned long lib$fid_to_name(const void *,const void *,void *,...);
 
-struct FAB;	
+struct FAB;
 unsigned long lib$file_scan(const struct FAB *,const unsigned long (*)(struct FAB *),
-			    const unsigned long (*)(struct FAB *),...);
+                            const unsigned long (*)(struct FAB *),...);
 
 unsigned long lib$file_scan_end();
 
@@ -215,7 +215,7 @@ int lib$getdvi(signed int * item_code, unsigned short int * channel, void * devi
 int lib$getjpi(signed int * item_code, unsigned int * process_id, void * process_name, signed int * longword_integer_value, void * resultant_string, unsigned short * resultant_length);
 
 unsigned long lib$getqui(const long *,const long *,const long *,const void *,
-			 const unsigned long *,long *,...);
+                         const unsigned long *,long *,...);
 
 // not now: unsigned long lib$getsyi(const long *,void *,...);
 int lib$getsyi(signed int * item_code, void * resultant_value, void * resultant_string, unsigned short * resultant_length, unsigned int cluster_system_id, void * node_name);
@@ -223,15 +223,15 @@ int lib$getsyi(signed int * item_code, void * resultant_value, void * resultant_
 int lib$ichar(const struct dsc$descriptor_s *);
 
 unsigned long lib$index(const struct dsc$descriptor_s *,
-	const struct dsc$descriptor_s *);
+                        const struct dsc$descriptor_s *);
 
 unsigned long lib$init_date_time_context(unsigned long *,const long *,const void *);
 
 int lib$init_timer(long * context);
 
 long int lib$insert_tree(void *,void *,const unsigned long *,
-			 const int (*)(void *,void *,void *),
-			 const void (*)(void *,void *,void *),...);
+                         const int (*)(void *,void *,void *),
+                         const void (*)(void *,void *,void *),...);
 
 unsigned long lib$insqhi(void *,void *,...);
 
@@ -244,7 +244,7 @@ unsigned long lib$int_over(const unsigned long *);
 unsigned short lib$len(const struct dsc$descriptor_s *);
 
 unsigned long lib$locc (const struct dsc$descriptor_s *char_string,
-			const struct dsc$descriptor_s *source_string);
+                        const struct dsc$descriptor_s *source_string);
 
 unsigned long lib$lookup_key(const void *,const void *,void *,...);
 
@@ -253,14 +253,14 @@ unsigned long lib$lookup_tree(const void *,void *,const int (*)(void *,void *),v
 long lib$lp_lines(void);
 
 unsigned long lib$matchc ( const struct dsc$descriptor_s *sub_string,
-			   const struct dsc$descriptor_s *search_string);
+                           const struct dsc$descriptor_s *search_string);
 
 int lib$match_cond(const unsigned long *,const unsigned long *,...);
 
 void lib$movc3(const unsigned short *,const void *,void *);
 
 void lib$movc5(const unsigned short *,const void *,const char *,
-	       const unsigned short *,void *);
+               const unsigned short *,void *);
 
 unsigned long lib$movtc(const void *,const void *,const void *,void *);
 
@@ -273,9 +273,9 @@ unsigned long lib$multf_delta_time(const float *,void *);
 unsigned long lib$pause(void);
 
 unsigned long lib$polyd(const double *,const short *,const double *,double *),
-	      lib$polyf(const float *,const short *,const float *,float *),
-	      lib$polyg(const double *,const short *,const double *,double *),
-	      lib$polyh(const void *,const short *,const void *,void *);
+         lib$polyf(const float *,const short *,const float *,float *),
+         lib$polyg(const double *,const short *,const double *,double *),
+         lib$polyh(const void *,const short *,const void *,void *);
 
 unsigned long lib$put_common(const void *,...);
 
@@ -372,7 +372,7 @@ unsigned long lib$verify_vm_zone(const unsigned long *);
 
 unsigned long lib$wait(float);
 
-#endif	
+#endif
 
 int lib$$ncompare (char *s1,char *s2);
 

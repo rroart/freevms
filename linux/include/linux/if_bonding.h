@@ -1,7 +1,7 @@
 /*
  * Bond several ethernet interfaces into a Cisco, running 'Etherchannel'.
  *
- * 
+ *
  * Portions are (c) Copyright 1995 Simon "Guru Aleph-Null" Janes
  * NCM: Network and Communications Management, Inc.
  *
@@ -10,7 +10,7 @@
  *
  *	This software may be used and distributed according to the terms
  *	of the GNU Public License, incorporated herein by reference.
- * 
+ *
  */
 
 #ifndef _LINUX_IF_BONDING_H
@@ -38,7 +38,7 @@
 
 #define BOND_MODE_ROUNDROBIN    0
 #define BOND_MODE_ACTIVEBACKUP  1
-#define BOND_MODE_XOR           2 
+#define BOND_MODE_XOR           2
 
 /* each slave's link has 4 states */
 #define BOND_LINK_UP    0           /* link is up and running */
@@ -52,30 +52,32 @@
 
 #define MAX_BONDS               1   /* Maximum number of devices to support */
 
-typedef struct ifbond {
-	__s32 bond_mode;
-	__s32 num_slaves;
-	__s32 miimon;
+typedef struct ifbond
+{
+    __s32 bond_mode;
+    __s32 num_slaves;
+    __s32 miimon;
 } ifbond;
 
 typedef struct ifslave
 {
-	__s32 slave_id; /* Used as an IN param to the BOND_SLAVE_INFO_QUERY ioctl */
-	char slave_name[IFNAMSIZ];
-	char link;
-	char state;
-	__u32  link_failure_count;
+    __s32 slave_id; /* Used as an IN param to the BOND_SLAVE_INFO_QUERY ioctl */
+    char slave_name[IFNAMSIZ];
+    char link;
+    char state;
+    __u32  link_failure_count;
 } ifslave;
 
 #ifdef __KERNEL__
-typedef struct slave {
-	struct slave *next;
-	struct slave *prev;
-	struct net_device *dev;
-	short  delay;
-	char   link;    /* one of BOND_LINK_XXXX */
-	char   state;   /* one of BOND_STATE_XXXX */
-	u32 link_failure_count;
+typedef struct slave
+{
+    struct slave *next;
+    struct slave *prev;
+    struct net_device *dev;
+    short  delay;
+    char   link;    /* one of BOND_LINK_XXXX */
+    char   state;   /* one of BOND_STATE_XXXX */
+    u32 link_failure_count;
 } slave_t;
 
 /*
@@ -87,22 +89,23 @@ typedef struct slave {
  * 3) When we lock with bond->ptrlock, we must lock with bond->lock
  *    beforehand.
  */
-typedef struct bonding {
-	slave_t *next;
-	slave_t *prev;
-	slave_t *current_slave;
-	__s32 slave_cnt;
-	rwlock_t lock;
-	rwlock_t ptrlock;
-	struct timer_list mii_timer;
-	struct timer_list arp_timer;
-	struct net_device_stats *stats;
+typedef struct bonding
+{
+    slave_t *next;
+    slave_t *prev;
+    slave_t *current_slave;
+    __s32 slave_cnt;
+    rwlock_t lock;
+    rwlock_t ptrlock;
+    struct timer_list mii_timer;
+    struct timer_list arp_timer;
+    struct net_device_stats *stats;
 #ifdef CONFIG_PROC_FS
-	struct proc_dir_entry *bond_proc_dir;
-	struct proc_dir_entry *bond_proc_info_file;
+    struct proc_dir_entry *bond_proc_dir;
+    struct proc_dir_entry *bond_proc_info_file;
 #endif /* CONFIG_PROC_FS */
-	struct bonding *next_bond;
-	struct net_device *device;
+    struct bonding *next_bond;
+    struct net_device *device;
 } bonding_t;
 #endif /* __KERNEL__ */
 

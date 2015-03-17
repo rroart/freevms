@@ -21,9 +21,10 @@
  * is used only by lockd.
  */
 #define XDR_MAX_NETOBJ		1024
-struct xdr_netobj {
-	unsigned int		len;
-	u8 *			data;
+struct xdr_netobj
+{
+    unsigned int		len;
+    u8 *			data;
 };
 
 /*
@@ -73,17 +74,17 @@ u32 *	xdr_decode_netobj_fixed(u32 *p, void *obj, unsigned int len);
 static inline u32 *
 xdr_encode_hyper(u32 *p, __u64 val)
 {
-	*p++ = htonl(val >> 32);
-	*p++ = htonl(val & 0xFFFFFFFF);
-	return p;
+    *p++ = htonl(val >> 32);
+    *p++ = htonl(val & 0xFFFFFFFF);
+    return p;
 }
 
 static inline u32 *
 xdr_decode_hyper(u32 *p, __u64 *valp)
 {
-	*valp  = ((__u64) ntohl(*p++)) << 32;
-	*valp |= ntohl(*p++);
-	return p;
+    *valp  = ((__u64) ntohl(*p++)) << 32;
+    *valp |= ntohl(*p++);
+    return p;
 }
 
 /*
@@ -92,7 +93,7 @@ xdr_decode_hyper(u32 *p, __u64 *valp)
 static inline int
 xdr_adjust_iovec(struct iovec *iov, u32 *p)
 {
-	return iov->iov_len = ((u8 *) p - (u8 *) iov->iov_base);
+    return iov->iov_len = ((u8 *) p - (u8 *) iov->iov_base);
 }
 
 void xdr_shift_iovec(struct iovec *, int, size_t);

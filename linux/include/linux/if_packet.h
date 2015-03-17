@@ -3,20 +3,20 @@
 
 struct sockaddr_pkt
 {
-	unsigned short spkt_family;
-	unsigned char spkt_device[14];
-	unsigned short spkt_protocol;
+    unsigned short spkt_family;
+    unsigned char spkt_device[14];
+    unsigned short spkt_protocol;
 };
 
 struct sockaddr_ll
 {
-	unsigned short	sll_family;
-	unsigned short	sll_protocol;
-	int		sll_ifindex;
-	unsigned short	sll_hatype;
-	unsigned char	sll_pkttype;
-	unsigned char	sll_halen;
-	unsigned char	sll_addr[8];
+    unsigned short	sll_family;
+    unsigned short	sll_protocol;
+    int		sll_ifindex;
+    unsigned short	sll_hatype;
+    unsigned char	sll_pkttype;
+    unsigned char	sll_halen;
+    unsigned char	sll_addr[8];
 };
 
 /* Packet types */
@@ -42,24 +42,24 @@ struct sockaddr_ll
 
 struct tpacket_stats
 {
-	unsigned int	tp_packets;
-	unsigned int	tp_drops;
+    unsigned int	tp_packets;
+    unsigned int	tp_drops;
 };
 
 struct tpacket_hdr
 {
-	unsigned long	tp_status;
+    unsigned long	tp_status;
 #define TP_STATUS_KERNEL	0
 #define TP_STATUS_USER		1
 #define TP_STATUS_COPY		2
 #define TP_STATUS_LOSING	4
 #define TP_STATUS_CSUMNOTREADY	8
-	unsigned int	tp_len;
-	unsigned int	tp_snaplen;
-	unsigned short	tp_mac;
-	unsigned short	tp_net;
-	unsigned int	tp_sec;
-	unsigned int	tp_usec;
+    unsigned int	tp_len;
+    unsigned int	tp_snaplen;
+    unsigned short	tp_mac;
+    unsigned short	tp_net;
+    unsigned int	tp_sec;
+    unsigned int	tp_usec;
 };
 
 #define TPACKET_ALIGNMENT	16
@@ -81,18 +81,18 @@ struct tpacket_hdr
 
 struct tpacket_req
 {
-	unsigned int	tp_block_size;	/* Minimal size of contiguous block */
-	unsigned int	tp_block_nr;	/* Number of blocks */
-	unsigned int	tp_frame_size;	/* Size of frame */
-	unsigned int	tp_frame_nr;	/* Total number of frames */
+    unsigned int	tp_block_size;	/* Minimal size of contiguous block */
+    unsigned int	tp_block_nr;	/* Number of blocks */
+    unsigned int	tp_frame_size;	/* Size of frame */
+    unsigned int	tp_frame_nr;	/* Total number of frames */
 };
 
 struct packet_mreq
 {
-	int		mr_ifindex;
-	unsigned short	mr_type;
-	unsigned short	mr_alen;
-	unsigned char	mr_address[8];
+    int		mr_ifindex;
+    unsigned short	mr_type;
+    unsigned short	mr_alen;
+    unsigned char	mr_address[8];
 };
 
 #define PACKET_MR_MULTICAST	0

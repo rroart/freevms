@@ -32,12 +32,12 @@ extern pte_t *pte_alloc_one_kernel(struct mm_struct *, unsigned long);
 
 static inline void pte_free_kernel(pte_t *pte)
 {
-	free_page((unsigned long)pte);
+    free_page((unsigned long)pte);
 }
 
 static inline void pte_free(struct page *pte)
 {
-	__free_page(pte);
+    __free_page(pte);
 }
 
 
@@ -56,112 +56,118 @@ extern void kmem_cache_free(struct kmem_cache_s *, void *);
 
 static inline pgd_t *get_pgd_slow(void)
 {
-	int i;
-	pgd_t *pgd = kmem_cache_alloc(pae_pgd_cachep, GFP_KERNEL);
+    int i;
+    pgd_t *pgd = kmem_cache_alloc(pae_pgd_cachep, GFP_KERNEL);
 
-	if (pgd) {
-		for (i = 0; i < USER_PTRS_PER_PGD; i++) {
-			unsigned long pmd = __get_free_page(GFP_KERNEL);
-			if (!pmd)
-				goto out_oom;
-			clear_page(pmd);
-			set_pgd(pgd + i, __pgd(1 + __pa(pmd)));
-		}
-		memcpy(pgd + USER_PTRS_PER_PGD,
-			swapper_pg_dir + USER_PTRS_PER_PGD,
-			(PTRS_PER_PGD - USER_PTRS_PER_PGD) * sizeof(pgd_t));
-	}
-	return pgd;
+    if (pgd)
+    {
+        for (i = 0; i < USER_PTRS_PER_PGD; i++)
+        {
+            unsigned long pmd = __get_free_page(GFP_KERNEL);
+            if (!pmd)
+                goto out_oom;
+            clear_page(pmd);
+            set_pgd(pgd + i, __pgd(1 + __pa(pmd)));
+        }
+        memcpy(pgd + USER_PTRS_PER_PGD,
+               swapper_pg_dir + USER_PTRS_PER_PGD,
+               (PTRS_PER_PGD - USER_PTRS_PER_PGD) * sizeof(pgd_t));
+    }
+    return pgd;
 out_oom:
-	for (i--; i >= 0; i--)
-		free_page((unsigned long)__va(pgd_val(pgd[i])-1));
-	kmem_cache_free(pae_pgd_cachep, pgd);
-	return NULL;
+    for (i--; i >= 0; i--)
+        free_page((unsigned long)__va(pgd_val(pgd[i])-1));
+    kmem_cache_free(pae_pgd_cachep, pgd);
+    return NULL;
 }
 
 #else
 
 static inline pgd_t *get_pgd_slow(void)
 {
-	pgd_t *pgd = (pgd_t *)__get_free_page(GFP_KERNEL);
+    pgd_t *pgd = (pgd_t *)__get_free_page(GFP_KERNEL);
 
-	if (pgd) {
-		memset(pgd, 0, USER_PTRS_PER_PGD * sizeof(pgd_t));
-		memcpy(pgd + USER_PTRS_PER_PGD,
-			swapper_pg_dir + USER_PTRS_PER_PGD,
-			(PTRS_PER_PGD - USER_PTRS_PER_PGD) * sizeof(pgd_t));
-	}
-	return pgd;
+    if (pgd)
+    {
+        memset(pgd, 0, USER_PTRS_PER_PGD * sizeof(pgd_t));
+        memcpy(pgd + USER_PTRS_PER_PGD,
+               swapper_pg_dir + USER_PTRS_PER_PGD,
+               (PTRS_PER_PGD - USER_PTRS_PER_PGD) * sizeof(pgd_t));
+    }
+    return pgd;
 }
 
 #endif /* CONFIG_X86_PAE */
 
 static inline pgd_t *get_pgd_fast(void)
 {
-	unsigned long *ret;
+    unsigned long *ret;
 
-	if ((ret = pgd_quicklist) != NULL) {
-		pgd_quicklist = (unsigned long *)(*ret);
-		ret[0] = 0;
-		pgtable_cache_size--;
-	} else
-		ret = (unsigned long *)get_pgd_slow();
-	return (pgd_t *)ret;
+    if ((ret = pgd_quicklist) != NULL)
+    {
+        pgd_quicklist = (unsigned long *)(*ret);
+        ret[0] = 0;
+        pgtable_cache_size--;
+    }
+    else
+        ret = (unsigned long *)get_pgd_slow();
+    return (pgd_t *)ret;
 }
 
 static inline void free_pgd_fast(pgd_t *pgd)
 {
-	*(unsigned long *)pgd = (unsigned long) pgd_quicklist;
-	pgd_quicklist = (unsigned long *) pgd;
-	pgtable_cache_size++;
+    *(unsigned long *)pgd = (unsigned long) pgd_quicklist;
+    pgd_quicklist = (unsigned long *) pgd;
+    pgtable_cache_size++;
 }
 
 static inline void free_pgd_slow(pgd_t *pgd)
 {
 #if defined(CONFIG_X86_PAE)
-	int i;
+    int i;
 
-	for (i = 0; i < USER_PTRS_PER_PGD; i++)
-		free_page((unsigned long)__va(pgd_val(pgd[i])-1));
-	kmem_cache_free(pae_pgd_cachep, pgd);
+    for (i = 0; i < USER_PTRS_PER_PGD; i++)
+        free_page((unsigned long)__va(pgd_val(pgd[i])-1));
+    kmem_cache_free(pae_pgd_cachep, pgd);
 #else
-	free_page((unsigned long)pgd);
+    free_page((unsigned long)pgd);
 #endif
 }
 
 static inline pte_t *pte_alloc_one(struct mm_struct *mm, unsigned long address)
 {
-	pte_t *pte;
+    pte_t *pte;
 
-	pte = (pte_t *) __get_free_page(GFP_KERNEL);
-	if (pte)
-		clear_page(pte);
-	return pte;
+    pte = (pte_t *) __get_free_page(GFP_KERNEL);
+    if (pte)
+        clear_page(pte);
+    return pte;
 }
 
 static inline pte_t *pte_alloc_one_fast(struct mm_struct *mm,
-					unsigned long address)
+                                        unsigned long address)
 {
-	unsigned long *ret;
+    unsigned long *ret;
 
-	if ((ret = (unsigned long *)pte_quicklist) != NULL) {
-		pte_quicklist = (unsigned long *)(*ret);
-		ret[0] = ret[1];
-		pgtable_cache_size--;
-	}
-	return (pte_t *)ret;
+    if ((ret = (unsigned long *)pte_quicklist) != NULL)
+    {
+        pte_quicklist = (unsigned long *)(*ret);
+        ret[0] = ret[1];
+        pgtable_cache_size--;
+    }
+    return (pte_t *)ret;
 }
 
 static inline void pte_free_fast(pte_t *pte)
 {
-	*(unsigned long *)pte = (unsigned long) pte_quicklist;
-	pte_quicklist = (unsigned long *) pte;
-	pgtable_cache_size++;
+    *(unsigned long *)pte = (unsigned long) pte_quicklist;
+    pte_quicklist = (unsigned long *) pte;
+    pgtable_cache_size++;
 }
 
 static __inline__ void pte_free_slow(pte_t *pte)
 {
-	free_page((unsigned long)pte);
+    free_page((unsigned long)pte);
 }
 
 #define pte_free(pte)		pte_free_slow(pte)
@@ -205,22 +211,22 @@ extern int do_check_pgt_cache(int, int);
 
 static inline void flush_tlb_mm(struct mm_struct *mm)
 {
-	if (mm == current->active_mm)
-		__flush_tlb();
+    if (mm == current->active_mm)
+        __flush_tlb();
 }
 
 static inline void flush_tlb_page2(struct mm_struct *mm,
-	unsigned long addr)
+                                   unsigned long addr)
 {
-	if (mm == current->active_mm)
-		__flush_tlb_one(addr);
+    if (mm == current->active_mm)
+        __flush_tlb_one(addr);
 }
 
 static inline void flush_tlb_range(struct mm_struct *mm,
-	unsigned long start, unsigned long end)
+                                   unsigned long start, unsigned long end)
 {
-	if (mm == current->active_mm)
-		__flush_tlb();
+    if (mm == current->active_mm)
+        __flush_tlb();
 }
 
 #else
@@ -241,7 +247,7 @@ extern void flush_tlb_page(struct vm_area_struct *, unsigned long);
 
 static inline void flush_tlb_range(struct mm_struct * mm, unsigned long start, unsigned long end)
 {
-	flush_tlb_mm(mm);
+    flush_tlb_mm(mm);
 }
 
 #define TLBSTATE_OK	1
@@ -249,8 +255,8 @@ static inline void flush_tlb_range(struct mm_struct * mm, unsigned long start, u
 
 struct tlb_state
 {
-	struct mm_struct *active_mm;
-	int state;
+    struct mm_struct *active_mm;
+    int state;
 };
 extern struct tlb_state cpu_tlbstate[NR_CPUS];
 
@@ -258,9 +264,9 @@ extern struct tlb_state cpu_tlbstate[NR_CPUS];
 #endif
 
 static inline void flush_tlb_pgtables(struct mm_struct *mm,
-				      unsigned long start, unsigned long end)
+                                      unsigned long start, unsigned long end)
 {
-	/* i386 does not keep any page table caches in TLB */
+    /* i386 does not keep any page table caches in TLB */
 }
 
 #endif /* _I386_PGALLOC_H */

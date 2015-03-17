@@ -31,7 +31,7 @@
 /************************************************************************
  *			Modification History				*
  *									*
- *	
+ *
  *	15-Jan-88	lp
  *		Merge of final 43BSD changes.
  *
@@ -100,7 +100,7 @@ int	tcp_ttl;			/* time to live for TCP segs */
  */
 #define	TCPTV_MSL	( 15*PR_SLOWHZ)		/* max seg lifetime */
 #define	TCPTV_SRTTBASE	0			/* base roundtrip time;
-						   if 0, no idea yet */
+if 0, no idea yet */
 #define	TCPTV_SRTTDFLT	(  3*PR_SLOWHZ)		/* assumed RTT if no info */
 
 #define	TCPTV_PERSMIN	(  5*PR_SLOWHZ)		/* retransmit persistance */
@@ -108,7 +108,7 @@ int	tcp_ttl;			/* time to live for TCP segs */
 
 #define	TCPTV_KEEP	( 75*PR_SLOWHZ)		/* keep alive - 75 secs */
 #define	TCPTV_MAXIDLE	(  8*TCPTV_KEEP)	/* maximum allowable idle
-						   time before drop conn */
+time before drop conn */
 
 #define	TCPTV_MIN	(  1*PR_SLOWHZ)		/* minimum allowable value */
 #define	TCPTV_REXMTMAX	( 64*PR_SLOWHZ)		/* max allowable REXMT value */

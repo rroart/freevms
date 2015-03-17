@@ -23,103 +23,105 @@
 static inline void
 affs_set_blocksize(struct super_block *sb, int size)
 {
-	set_blocksize(sb->s_dev, size);
-	sb->s_blocksize = size;
+    set_blocksize(sb->s_dev, size);
+    sb->s_blocksize = size;
 }
 static inline struct buffer_head *
 affs_bread(struct super_block *sb, int block)
 {
-	pr_debug(KERN_DEBUG "affs_bread: %d\n", block);
-	if (block >= AFFS_SB->s_reserved && block < AFFS_SB->s_partition_size)
-		return sb_bread(sb, block);
-	return NULL;
+    pr_debug(KERN_DEBUG "affs_bread: %d\n", block);
+    if (block >= AFFS_SB->s_reserved && block < AFFS_SB->s_partition_size)
+        return sb_bread(sb, block);
+    return NULL;
 }
 static inline struct buffer_head *
 affs_getblk(struct super_block *sb, int block)
 {
-	pr_debug(KERN_DEBUG "affs_getblk: %d\n", block);
-	if (block >= AFFS_SB->s_reserved && block < AFFS_SB->s_partition_size)
-		return sb_getblk(sb, block);
-	return NULL;
+    pr_debug(KERN_DEBUG "affs_getblk: %d\n", block);
+    if (block >= AFFS_SB->s_reserved && block < AFFS_SB->s_partition_size)
+        return sb_getblk(sb, block);
+    return NULL;
 }
 static inline struct buffer_head *
 affs_getzeroblk(struct super_block *sb, int block)
 {
-	struct buffer_head *bh;
-	pr_debug(KERN_DEBUG "affs_getzeroblk: %d\n", block);
-	if (block >= AFFS_SB->s_reserved && block < AFFS_SB->s_partition_size) {
-		bh = sb_getblk(sb, block);
-		lock_buffer(bh);
-		memset(bh->b_data, 0 , sb->s_blocksize);
-		mark_buffer_uptodate(bh, 1);
-		unlock_buffer(bh);
-		return bh;
-	}
-	return NULL;
+    struct buffer_head *bh;
+    pr_debug(KERN_DEBUG "affs_getzeroblk: %d\n", block);
+    if (block >= AFFS_SB->s_reserved && block < AFFS_SB->s_partition_size)
+    {
+        bh = sb_getblk(sb, block);
+        lock_buffer(bh);
+        memset(bh->b_data, 0 , sb->s_blocksize);
+        mark_buffer_uptodate(bh, 1);
+        unlock_buffer(bh);
+        return bh;
+    }
+    return NULL;
 }
 static inline struct buffer_head *
 affs_getemptyblk(struct super_block *sb, int block)
 {
-	struct buffer_head *bh;
-	pr_debug(KERN_DEBUG "affs_getemptyblk: %d\n", block);
-	if (block >= AFFS_SB->s_reserved && block < AFFS_SB->s_partition_size) {
-		bh = sb_getblk(sb, block);
-		wait_on_buffer(bh);
-		mark_buffer_uptodate(bh, 1);
-		return bh;
-	}
-	return NULL;
+    struct buffer_head *bh;
+    pr_debug(KERN_DEBUG "affs_getemptyblk: %d\n", block);
+    if (block >= AFFS_SB->s_reserved && block < AFFS_SB->s_partition_size)
+    {
+        bh = sb_getblk(sb, block);
+        wait_on_buffer(bh);
+        mark_buffer_uptodate(bh, 1);
+        return bh;
+    }
+    return NULL;
 }
 static inline void
 affs_brelse(struct buffer_head *bh)
 {
-	if (bh)
-		pr_debug(KERN_DEBUG "affs_brelse: %ld\n", bh->b_blocknr);
-	brelse(bh);
+    if (bh)
+        pr_debug(KERN_DEBUG "affs_brelse: %ld\n", bh->b_blocknr);
+    brelse(bh);
 }
 
 static inline void
 affs_adjust_checksum(struct buffer_head *bh, u32 val)
 {
-	u32 tmp = be32_to_cpu(((u32 *)bh->b_data)[5]);
-	((u32 *)bh->b_data)[5] = cpu_to_be32(tmp - val);
+    u32 tmp = be32_to_cpu(((u32 *)bh->b_data)[5]);
+    ((u32 *)bh->b_data)[5] = cpu_to_be32(tmp - val);
 }
 static inline void
 affs_adjust_bitmapchecksum(struct buffer_head *bh, u32 val)
 {
-	u32 tmp = be32_to_cpu(((u32 *)bh->b_data)[0]);
-	((u32 *)bh->b_data)[0] = cpu_to_be32(tmp - val);
+    u32 tmp = be32_to_cpu(((u32 *)bh->b_data)[0]);
+    ((u32 *)bh->b_data)[0] = cpu_to_be32(tmp - val);
 }
 
 static inline void
 affs_lock_link(struct inode *inode)
 {
-	down(&AFFS_INODE->i_link_lock);
+    down(&AFFS_INODE->i_link_lock);
 }
 static inline void
 affs_unlock_link(struct inode *inode)
 {
-	up(&AFFS_INODE->i_link_lock);
+    up(&AFFS_INODE->i_link_lock);
 }
 static inline void
 affs_lock_dir(struct inode *inode)
 {
-	down(&AFFS_INODE->i_hash_lock);
+    down(&AFFS_INODE->i_hash_lock);
 }
 static inline void
 affs_unlock_dir(struct inode *inode)
 {
-	up(&AFFS_INODE->i_hash_lock);
+    up(&AFFS_INODE->i_hash_lock);
 }
 static inline void
 affs_lock_ext(struct inode *inode)
 {
-	down(&AFFS_INODE->i_ext_lock);
+    down(&AFFS_INODE->i_ext_lock);
 }
 static inline void
 affs_unlock_ext(struct inode *inode)
 {
-	up(&AFFS_INODE->i_ext_lock);
+    up(&AFFS_INODE->i_ext_lock);
 }
 
 #ifdef __LITTLE_ENDIAN
@@ -164,91 +166,97 @@ affs_unlock_ext(struct inode *inode)
 #define AFFS_DATA_HEAD(bh)	((struct affs_data_head *)(bh)->b_data)
 #define AFFS_DATA(bh)		(((struct affs_data_head *)(bh)->b_data)->data)
 
-struct affs_date {
-	u32 days;
-	u32 mins;
-	u32 ticks;
+struct affs_date
+{
+    u32 days;
+    u32 mins;
+    u32 ticks;
 };
 
-struct affs_short_date {
-	u16 days;
-	u16 mins;
-	u16 ticks;
+struct affs_short_date
+{
+    u16 days;
+    u16 mins;
+    u16 ticks;
 };
 
-struct affs_root_head {
-	u32 ptype;
-	u32 spare1;
-	u32 spare2;
-	u32 hash_size;
-	u32 spare3;
-	u32 checksum;
-	u32 hashtable[1];
+struct affs_root_head
+{
+    u32 ptype;
+    u32 spare1;
+    u32 spare2;
+    u32 hash_size;
+    u32 spare3;
+    u32 checksum;
+    u32 hashtable[1];
 };
 
-struct affs_root_tail {
-	u32 bm_flag;
-	u32 bm_blk[AFFS_ROOT_BMAPS];
-	u32 bm_ext;
-	struct affs_date root_change;
-	u8 disk_name[32];
-	u32 spare1;
-	u32 spare2;
-	struct affs_date disk_change;
-	struct affs_date disk_create;
-	u32 spare3;
-	u32 spare4;
-	u32 dcache;
-	u32 stype;
+struct affs_root_tail
+{
+    u32 bm_flag;
+    u32 bm_blk[AFFS_ROOT_BMAPS];
+    u32 bm_ext;
+    struct affs_date root_change;
+    u8 disk_name[32];
+    u32 spare1;
+    u32 spare2;
+    struct affs_date disk_change;
+    struct affs_date disk_create;
+    u32 spare3;
+    u32 spare4;
+    u32 dcache;
+    u32 stype;
 };
 
-struct affs_head {
-	u32 ptype;
-	u32 key;
-	u32 block_count;
-	u32 spare1;
-	u32 first_data;
-	u32 checksum;
-	u32 table[1];
+struct affs_head
+{
+    u32 ptype;
+    u32 key;
+    u32 block_count;
+    u32 spare1;
+    u32 first_data;
+    u32 checksum;
+    u32 table[1];
 };
 
-struct affs_tail {
-	u32 spare1;
-	u16 uid;
-	u16 gid;
-	u32 protect;
-	u32 size;
-	u8 comment[92];
-	struct affs_date change;
-	u8 name[32];
-	u32 spare2;
-	u32 original;
-	u32 link_chain;
-	u32 spare[5];
-	u32 hash_chain;
-	u32 parent;
-	u32 extension;
-	u32 stype;
+struct affs_tail
+{
+    u32 spare1;
+    u16 uid;
+    u16 gid;
+    u32 protect;
+    u32 size;
+    u8 comment[92];
+    struct affs_date change;
+    u8 name[32];
+    u32 spare2;
+    u32 original;
+    u32 link_chain;
+    u32 spare[5];
+    u32 hash_chain;
+    u32 parent;
+    u32 extension;
+    u32 stype;
 };
 
 struct slink_front
 {
-	u32 ptype;
-	u32 key;
-	u32 spare1[3];
-	u32 checksum;
-	u8 symname[1];	/* depends on block size */
+    u32 ptype;
+    u32 key;
+    u32 spare1[3];
+    u32 checksum;
+    u8 symname[1];	/* depends on block size */
 };
 
 struct affs_data_head
 {
-	u32 ptype;
-	u32 key;
-	u32 sequence;
-	u32 size;
-	u32 next;
-	u32 checksum;
-	u8 data[1];	/* depends on block size */
+    u32 ptype;
+    u32 key;
+    u32 sequence;
+    u32 size;
+    u32 next;
+    u32 checksum;
+    u8 data[1];	/* depends on block size */
 };
 
 /* Permission bits */

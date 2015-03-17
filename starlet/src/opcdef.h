@@ -1,6 +1,6 @@
 #ifndef opcdef_h
 #define opcdef_h
- 
+
 #define		OPC$_RQ_TERME		1
 #define		OPC$_RQ_LOGI		2
 #define		OPC$_RQ_RQST		3
@@ -34,68 +34,78 @@
 #define		OPC$M_NM_OPER10		0x200000
 #define		OPC$M_NM_OPER11		0x400000
 #define		OPC$M_NM_OPER12		0x800000
-	
-struct _opcdef {
-  unsigned char opc$b_ms_type;
-  union  {
-    struct  {
-      union  {
-	unsigned char opc$b_ms_target;
-	unsigned char opc$b_ms_enab;
-      };
-      unsigned short int opc$w_ms_status;
-    };
-    unsigned char opc$z_ms_target_classes [3];
-    unsigned char opc$z_ms_enab_terminals [3];
-  };
-  union  {
-    unsigned int opc$l_ms_rplyid;
-    union  {
-      unsigned int opc$l_ms_mask;
-      unsigned int opc$l_ms_rqstid;
-    };
-  };
-  union  {
-    unsigned int opc$l_ms_text;
-    struct  {
-      unsigned short int opc$w_ms_ounit;
-      char opc$t_ms_oname;
-    };
-  };
-  short int opcdef$$_fill_1 [7];
-  unsigned int opc$l_ms_otext [32];
-  union  {
-    unsigned int opc$l_ms_maxsz;
 
-    struct  {
-      unsigned opc$v_nm_centrl		: 1;
-      unsigned opc$v_nm_print		: 1;
-      unsigned opc$v_nm_tapes		: 1;
-      unsigned opc$v_nm_disks		: 1;
-      unsigned opc$v_nm_device		: 1;
-      unsigned opc$v_nm_cards		: 1;
-      unsigned opc$v_nm_ntwork		: 1;
-      unsigned opc$v_nm_cluster		: 1;
-      unsigned opc$v_nm_security	: 1;
-      unsigned opc$v_nm_reply		: 1;
-      unsigned opc$v_nm_software	: 1;
-      unsigned opc$v_nm_license		: 1;
-      unsigned opc$v_nm_oper1		: 1;
-      unsigned opc$v_nm_oper2		: 1;
-      unsigned opc$v_nm_oper3		: 1;
-      unsigned opc$v_nm_oper4		: 1;
-      unsigned opc$v_nm_oper5		: 1;
-      unsigned opc$v_nm_oper6		: 1;
-      unsigned opc$v_nm_oper7		: 1;
-      unsigned opc$v_nm_oper8		: 1;
-      unsigned opc$v_nm_oper9		: 1;
-      unsigned opc$v_nm_oper10		: 1;
-      unsigned opc$v_nm_oper11		: 1;
-      unsigned opc$v_nm_oper12		: 1;
+struct _opcdef
+{
+    unsigned char opc$b_ms_type;
+    union
+    {
+        struct
+        {
+            union
+            {
+                unsigned char opc$b_ms_target;
+                unsigned char opc$b_ms_enab;
+            };
+            unsigned short int opc$w_ms_status;
+        };
+        unsigned char opc$z_ms_target_classes [3];
+        unsigned char opc$z_ms_enab_terminals [3];
     };
-  };
+    union
+    {
+        unsigned int opc$l_ms_rplyid;
+        union
+        {
+            unsigned int opc$l_ms_mask;
+            unsigned int opc$l_ms_rqstid;
+        };
+    };
+    union
+    {
+        unsigned int opc$l_ms_text;
+        struct
+        {
+            unsigned short int opc$w_ms_ounit;
+            char opc$t_ms_oname;
+        };
+    };
+    short int opcdef$$_fill_1 [7];
+    unsigned int opc$l_ms_otext [32];
+    union
+    {
+        unsigned int opc$l_ms_maxsz;
+
+        struct
+        {
+            unsigned opc$v_nm_centrl		: 1;
+            unsigned opc$v_nm_print		: 1;
+            unsigned opc$v_nm_tapes		: 1;
+            unsigned opc$v_nm_disks		: 1;
+            unsigned opc$v_nm_device		: 1;
+            unsigned opc$v_nm_cards		: 1;
+            unsigned opc$v_nm_ntwork		: 1;
+            unsigned opc$v_nm_cluster		: 1;
+            unsigned opc$v_nm_security	: 1;
+            unsigned opc$v_nm_reply		: 1;
+            unsigned opc$v_nm_software	: 1;
+            unsigned opc$v_nm_license		: 1;
+            unsigned opc$v_nm_oper1		: 1;
+            unsigned opc$v_nm_oper2		: 1;
+            unsigned opc$v_nm_oper3		: 1;
+            unsigned opc$v_nm_oper4		: 1;
+            unsigned opc$v_nm_oper5		: 1;
+            unsigned opc$v_nm_oper6		: 1;
+            unsigned opc$v_nm_oper7		: 1;
+            unsigned opc$v_nm_oper8		: 1;
+            unsigned opc$v_nm_oper9		: 1;
+            unsigned opc$v_nm_oper10		: 1;
+            unsigned opc$v_nm_oper11		: 1;
+            unsigned opc$v_nm_oper12		: 1;
+        };
+    };
 };
- 
+
 
 #define OPC$M_OPR_CENTRAL 0x1
 #define OPC$M_OPR_PRINTER 0x2
@@ -121,37 +131,39 @@ struct _opcdef {
 #define OPC$M_OPR_USER10 0x200000
 #define OPC$M_OPR_USER11 0x400000
 #define OPC$M_OPR_USER12 0x800000
-	
-union _opc_oprdef {
-  struct  {
-    unsigned opc$v_opr_central		: 1;
-    unsigned opc$v_opr_printer		: 1;
-    unsigned opc$v_opr_tapes		: 1;
-    unsigned opc$v_opr_disks		: 1;
-    unsigned opc$v_opr_devices		: 1;
-    unsigned opc$v_opr_cards		: 1;
-    unsigned opc$v_opr_network		: 1;
-    unsigned opc$v_opr_cluster		: 1;
-    unsigned opc$v_opr_security		: 1;
-    unsigned opc$v_opr_reply		: 1;
-    unsigned opc$v_opr_software		: 1;
-    unsigned opc$v_opr_license		: 1;
-    unsigned opc$v_opr_user1		: 1;
-    unsigned opc$v_opr_user2		: 1;
-    unsigned opc$v_opr_user3		: 1;
-    unsigned opc$v_opr_user4		: 1;
-    unsigned opc$v_opr_user5		: 1;
-    unsigned opc$v_opr_user6		: 1;
-    unsigned opc$v_opr_user7		: 1;
-    unsigned opc$v_opr_user8		: 1;
-    unsigned opc$v_opr_user9		: 1;
-    unsigned opc$v_opr_user10		: 1;
-    unsigned opc$v_opr_user11		: 1;
-    unsigned opc$v_opr_user12		: 1;
-  };
+
+union _opc_oprdef
+{
+    struct
+    {
+        unsigned opc$v_opr_central		: 1;
+        unsigned opc$v_opr_printer		: 1;
+        unsigned opc$v_opr_tapes		: 1;
+        unsigned opc$v_opr_disks		: 1;
+        unsigned opc$v_opr_devices		: 1;
+        unsigned opc$v_opr_cards		: 1;
+        unsigned opc$v_opr_network		: 1;
+        unsigned opc$v_opr_cluster		: 1;
+        unsigned opc$v_opr_security		: 1;
+        unsigned opc$v_opr_reply		: 1;
+        unsigned opc$v_opr_software		: 1;
+        unsigned opc$v_opr_license		: 1;
+        unsigned opc$v_opr_user1		: 1;
+        unsigned opc$v_opr_user2		: 1;
+        unsigned opc$v_opr_user3		: 1;
+        unsigned opc$v_opr_user4		: 1;
+        unsigned opc$v_opr_user5		: 1;
+        unsigned opc$v_opr_user6		: 1;
+        unsigned opc$v_opr_user7		: 1;
+        unsigned opc$v_opr_user8		: 1;
+        unsigned opc$v_opr_user9		: 1;
+        unsigned opc$v_opr_user10		: 1;
+        unsigned opc$v_opr_user11		: 1;
+        unsigned opc$v_opr_user12		: 1;
+    };
 };
- 
-	
+
+
 #define OPC opcdef
 
 #include <opcmsg.h>
@@ -204,60 +216,68 @@ union _opc_oprdef {
 #define		OPC$K_CLMLOGFILE		20
 #define		OPC$K_CLMREQUEST_END_MARK	21
 #define		OPC$K_HDR_SIZE			26
-	
-struct _header_message {
-  unsigned char opc$b_rqstcode;
-  unsigned char opc$b_scope;
-  unsigned int opc$l_options;
-  union  {
-    unsigned int opc$l_rq_options;
-    struct  {
-      unsigned char opc$b_rqopt_code;
-      unsigned char opc$b_rqopt_fillb;
-      unsigned short int opc$w_rqopt_fillw;
+
+struct _header_message
+{
+    unsigned char opc$b_rqstcode;
+    unsigned char opc$b_scope;
+    unsigned int opc$l_options;
+    union
+    {
+        unsigned int opc$l_rq_options;
+        struct
+        {
+            unsigned char opc$b_rqopt_code;
+            unsigned char opc$b_rqopt_fillb;
+            unsigned short int opc$w_rqopt_fillw;
+        };
     };
-  };
-  unsigned int opc$l_attnmask1;
-  unsigned int opc$l_attnmask2;
-  unsigned int opc$l_rqstid;
-  unsigned int opc$l_uic;
+    unsigned int opc$l_attnmask1;
+    unsigned int opc$l_attnmask2;
+    unsigned int opc$l_rqstid;
+    unsigned int opc$l_uic;
 };
- 
+
 #define OPC$M_NOLOG 0x1
 #define OPC$M_NOBRD 0x2
 #define OPC$M_NOCLUSTER 0x4
-	
-union _fill_0_ {
-  unsigned int opc$l_header_options;
-  struct  {
-    unsigned opc$v_nolog		: 1;
-    unsigned opc$v_nobrd		: 1;
-    unsigned opc$v_nocluster		: 1;
-    unsigned opc$v_fill_2_		: 5;
-  };
+
+union _fill_0_
+{
+    unsigned int opc$l_header_options;
+    struct
+    {
+        unsigned opc$v_nolog		: 1;
+        unsigned opc$v_nobrd		: 1;
+        unsigned opc$v_nocluster		: 1;
+        unsigned opc$v_fill_2_		: 5;
+    };
 };
- 
+
 #define OPC$K_OPRENABLE_MIN_SIZE 30
-	
-struct _oprenable_message {
-  char opc$b_oprenable_fill [26];
+
+struct _oprenable_message
+{
+    char opc$b_oprenable_fill [26];
 
 };
 
 #define OPC$M_DISABLE 0x1
 #define OPC$M_PERMOPER 0x2
 #define OPC$M_NOREMIND 0x4
-	
-union _fill_3_ {
-  unsigned int opc$l_oprenable_options;
-  struct  {
-    unsigned opc$v_disable		: 1;
-    unsigned opc$v_permoper		: 1;
-    unsigned opc$v_noremind		: 1;
-    unsigned opc$v_fill_5_		: 5;
-  };
+
+union _fill_3_
+{
+    unsigned int opc$l_oprenable_options;
+    struct
+    {
+        unsigned opc$v_disable		: 1;
+        unsigned opc$v_permoper		: 1;
+        unsigned opc$v_noremind		: 1;
+        unsigned opc$v_fill_5_		: 5;
+    };
 };
- 
+
 #define OPC$K_LOGFILE_MIN_SIZE 30
 #define OPC$K_INITLOG 0
 #define OPC$K_CLOSELOG 1
@@ -266,96 +286,112 @@ union _fill_3_ {
 #define OPC$K_DISABLELOG 3
 
 #define OPC$K_MAX_LOGOPT 4
-	
-struct _logfile_message {
-  char opc$b_logfile_fill [26];
+
+struct _logfile_message
+{
+    char opc$b_logfile_fill [26];
 };
 
 #define OPC$K_REQUEST_MIN_SIZE 28
-	
-struct _request_message {
-  char opc$b_request_fill [26];
-  unsigned short int opc$w_request_length;
+
+struct _request_message
+{
+    char opc$b_request_fill [26];
+    unsigned short int opc$w_request_length;
 };
 
 #define OPC$K_SECURITY_MIN_SIZE 28
-	
-struct _security_message {
-  char opc$b_security_fill [26];
-  unsigned short int opc$w_security_length;
+
+struct _security_message
+{
+    char opc$b_security_fill [26];
+    unsigned short int opc$w_security_length;
 };
 
 #define OPC$K_REPLY_MIN_SIZE 32
-	
-struct _reply_message {
-  char opc$b_reply_fill [26];
+
+struct _reply_message
+{
+    char opc$b_reply_fill [26];
 };
 
 #define OPC$K_STATUS_MIN_SIZE 30
-	
-struct _status_message {
-  char opc$b_status_fill [26];
+
+struct _status_message
+{
+    char opc$b_status_fill [26];
 };
 
 #define OPC$K_TIMESTAMP_MIN_SIZE 26
-	
-struct _timestamp_message {
-  char opc$b_timestamp_fill [26];
+
+struct _timestamp_message
+{
+    char opc$b_timestamp_fill [26];
 };
 
 #define OPC$K_SHUTDOWN_MIN_SIZE 26
-	
-struct _shutdown_message {
-  char opc$b_shutdown_fill [26];
+
+struct _shutdown_message
+{
+    char opc$b_shutdown_fill [26];
 };
 
 #define OPC$M_CLUSTER 0x1
-	
-union _fill_6_ {
-  unsigned int opc$l_shutdown_options;
-  struct  {
-    unsigned opc$v_cluster		: 1;
-    unsigned opc$v_fill_8_		: 7;
-  };
+
+union _fill_6_
+{
+    unsigned int opc$l_shutdown_options;
+    struct
+    {
+        unsigned opc$v_cluster		: 1;
+        unsigned opc$v_fill_8_		: 7;
+    };
 };
 
 #define OPC$K_CANCEL_MIN_SIZE 26
-	
-struct _cancel_message {
-  char opc$b_cancel_fill [26];
+
+struct _cancel_message
+{
+    char opc$b_cancel_fill [26];
 };
 
 #define OPC$M_RQSTDONE 0x1
-	
-union _fill_9_ {
-  unsigned int opc$l_cancel_options;
-  struct  {
-    unsigned opc$v_rqstdone		: 1;
-    unsigned opc$v_fill_11_		: 7;
-  };
+
+union _fill_9_
+{
+    unsigned int opc$l_cancel_options;
+    struct
+    {
+        unsigned opc$v_rqstdone		: 1;
+        unsigned opc$v_fill_11_		: 7;
+    };
 };
- 
-union _opcf_arg {
-  int opcf_arg$l_arg_data;
-  struct  {
-    unsigned short int opcf_arg$w_arg_offset;
-    unsigned short int opcf_arg$w_arg_cntrl;
-  };
+
+union _opcf_arg
+{
+    int opcf_arg$l_arg_data;
+    struct
+    {
+        unsigned short int opcf_arg$w_arg_offset;
+        unsigned short int opcf_arg$w_arg_cntrl;
+    };
 };
- 
-struct _opcfao {
-  unsigned short int opcf$w_msgtype;
-  unsigned short int opcf$w_spare_1;
-  unsigned int opcf$l_opc_msg;
-  unsigned int opcf$l_opc_class_msk;
-  unsigned int opcf$l_arg_count;
-  union  {
-    union _opcf_arg opcf$r_item_arg [60];
-    char opcf$t_item_cd [240];
-    unsigned int opcf$l_item_ld [60];
-  };
+
+struct _opcfao
+{
+    unsigned short int opcf$w_msgtype;
+    unsigned short int opcf$w_spare_1;
+    unsigned int opcf$l_opc_msg;
+    unsigned int opcf$l_opc_class_msk;
+    unsigned int opcf$l_arg_count;
+    union
+    {
+        union _opcf_arg opcf$r_item_arg [60];
+        char opcf$t_item_cd [240];
+        unsigned int opcf$l_item_ld [60];
+    };
 };
- 
+
 #define		OPCF$K_AC		1
 #define		OPCF$K_AD		2
 #define		OPCF$K_AF		3
@@ -411,6 +447,6 @@ struct _opcfao {
 #define		OPCF$K_BY_REF		1
 #define		OPCF$K_BY_VAL		2
 #define		OPCF$K_BY_DESC		3
-		
+
 #endif
-		
+

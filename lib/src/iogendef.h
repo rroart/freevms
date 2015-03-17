@@ -14,24 +14,28 @@
 #define IOGEN$M_SYSDEVICE 0x40000
 #define IOGEN$M_NOINIT 0x80000
 #define IOGEN$S_IOGENDEF 4
-	
-typedef struct _iogen {
-  union  {
-    struct  {
-      unsigned short int iogen$w_fcode;
-      unsigned short int iogen$w_modifiers;
+
+typedef struct _iogen
+{
+    union
+    {
+        struct
+        {
+            unsigned short int iogen$w_fcode;
+            unsigned short int iogen$w_modifiers;
+        };
+        struct
+        {
+            unsigned iogen$v_fcode_fill : 16;
+            unsigned iogen$v_nowait : 1;
+            unsigned iogen$v_lddb : 1;
+            unsigned iogen$v_sysdevice : 1;
+            unsigned iogen$v_noinit : 1;
+            unsigned iogen$v_fill_0_ : 4;
+        };
     };
-    struct  {
-      unsigned iogen$v_fcode_fill : 16;
-      unsigned iogen$v_nowait : 1;
-      unsigned iogen$v_lddb : 1;
-      unsigned iogen$v_sysdevice : 1;
-      unsigned iogen$v_noinit : 1;
-      unsigned iogen$v_fill_0_ : 4;
-    };
-  };
 };
- 
+
 #define IOGEN$_ADAPTER 16
 #define IOGEN$_NOADAPTER 17
 #define IOGEN$_CSR 18
@@ -63,27 +67,31 @@ typedef struct _iogen {
 #define IOGEN$M_AC_LAN 0x4
 #define IOGEN$M_AC_LOG_ALL 0x8
 #define IOGEN$M_AC_VERIFY 0x10
-	
-struct _autocfg {
-  union  {
-    unsigned int iogen$l_autocfg_flags;
-    struct  {
-      unsigned iogen$v_ac_log : 1;
-      unsigned iogen$v_ac_sca : 1;
-      unsigned iogen$v_ac_lan : 1;
-      unsigned iogen$v_ac_log_all : 1;
-      unsigned iogen$v_ac_verify : 1;
-      unsigned iogen$v_fill_1_ : 3;
+
+struct _autocfg
+{
+    union
+    {
+        unsigned int iogen$l_autocfg_flags;
+        struct
+        {
+            unsigned iogen$v_ac_log : 1;
+            unsigned iogen$v_ac_sca : 1;
+            unsigned iogen$v_ac_lan : 1;
+            unsigned iogen$v_ac_log_all : 1;
+            unsigned iogen$v_ac_verify : 1;
+            unsigned iogen$v_fill_1_ : 3;
+        };
     };
-  };
 };
- 
+
 #define IOGEN$S_ABMDEF 8
-	
-struct _abm {
-  int iogen$il_abm_adp;
-  int (*iogen$ps_abm_bsr)();
+
+struct _abm
+{
+    int iogen$il_abm_adp;
+    int (*iogen$ps_abm_bsr)();
 };
- 
+
 #endif
- 
+

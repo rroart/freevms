@@ -1,3 +1,4 @@
-main(){
-printf("hi\n");
+main()
+{
+    printf("hi\n");
 }

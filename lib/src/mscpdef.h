@@ -241,118 +241,137 @@
 #define MSCP$S_MSCP_SUBCODES 12
 
 
-	
-struct _mscp_basic_pkt {
-  /* SSP packages has something here, but we do not need it */
-  unsigned int mscp$l_cmd_ref;
-  unsigned short int mscp$w_unit;
-  unsigned short int mscp$w_seq_num;
-  unsigned char mscp$b_opcode;
-  unsigned char mscp$b_caa;
-  unsigned short int mscp$w_modifier;
-  struct  {
-    union  {
-      union  {
-	unsigned char mscp$b_flags;
-	struct  {
-	  unsigned mscp$v_ef_cpret : 1;
-	  unsigned mscp$v_ef_dls : 1;
-	  unsigned mscp$v_ef_pls : 1;
-	  unsigned mscp$v_ef_eot : 1;
-	  unsigned mscp$v_ef_serex : 1;
-	  unsigned mscp$v_ef_erlog : 1;
-	  unsigned mscp$v_ef_bblku : 1;
-	  unsigned mscp$v_ef_bblkr : 1;
-	};
-      };
-      union  {
-	unsigned char mscp$b_flags1;
-	struct  {
-	  unsigned mscp$v_filler1 : 2;
-	  unsigned mscp$v_ef_hislo : 1;
-	  unsigned mscp$v_ef_allof : 1;
-	  unsigned mscp$v_filler2 : 3;
-	  unsigned mscp$v_ef_fastskip_used : 1;
-	};
-      };
+
+struct _mscp_basic_pkt
+{
+    /* SSP packages has something here, but we do not need it */
+    unsigned int mscp$l_cmd_ref;
+    unsigned short int mscp$w_unit;
+    unsigned short int mscp$w_seq_num;
+    unsigned char mscp$b_opcode;
+    unsigned char mscp$b_caa;
+    unsigned short int mscp$w_modifier;
+    struct
+    {
+        union
+        {
+            union
+            {
+                unsigned char mscp$b_flags;
+                struct
+                {
+                    unsigned mscp$v_ef_cpret : 1;
+                    unsigned mscp$v_ef_dls : 1;
+                    unsigned mscp$v_ef_pls : 1;
+                    unsigned mscp$v_ef_eot : 1;
+                    unsigned mscp$v_ef_serex : 1;
+                    unsigned mscp$v_ef_erlog : 1;
+                    unsigned mscp$v_ef_bblku : 1;
+                    unsigned mscp$v_ef_bblkr : 1;
+                };
+            };
+            union
+            {
+                unsigned char mscp$b_flags1;
+                struct
+                {
+                    unsigned mscp$v_filler1 : 2;
+                    unsigned mscp$v_ef_hislo : 1;
+                    unsigned mscp$v_ef_allof : 1;
+                    unsigned mscp$v_filler2 : 3;
+                    unsigned mscp$v_ef_fastskip_used : 1;
+                };
+            };
+        };
+        union
+        {
+            union
+            {
+                unsigned short int mscp$w_status;
+                struct
+                {
+                    unsigned mscp$v_st_mask : 5;
+                    unsigned mscp$v_st_sbcod : 11;
+                };
+            };
+
+            struct
+            {
+                union
+                {
+                    struct
+                    {
+                        unsigned mscp$v_filler3 : 5;
+                        unsigned mscp$v_sc_sdign : 1;
+                        unsigned mscp$v_sc_stcon : 1;
+                        unsigned mscp$v_sc_dupun : 1;
+                        unsigned mscp$v_sc_alonl : 1;
+                        unsigned mscp$v_sc_stonl : 1;
+                        unsigned mscp$v_sc_eot : 1;
+                        unsigned mscp$v_fill_20_ : 5;
+                    };
+                    struct
+                    {
+                        unsigned mscp$v_filler4 : 10;
+                        unsigned mscp$v_sc_inrep : 1;
+                        unsigned mscp$v_sc_ivrct : 1;
+                        unsigned mscp$v_sc_rdony : 1;
+                        unsigned mscp$v_fill_21_ : 3;
+                    };
+                };
+            };
+
+            struct
+            {
+                unsigned mscp$v_filler5 : 5;
+                unsigned mscp$v_sc_novol : 1;
+                unsigned mscp$v_sc_inopr : 1;
+                unsigned mscp$v_dupun : 1;
+                unsigned mscp$v_sc_udsbl : 1;
+                unsigned mscp$v_sc_exuse : 1;
+                unsigned mscp$v_sc_ldr : 1;
+                unsigned mscp$v_fill_22_ : 5;
+            };
+
+            struct
+            {
+                unsigned mscp$v_filler6 : 5;
+                unsigned mscp$v_reserved1 : 1;
+                unsigned mscp$v_sc_cpyip : 1;
+                unsigned mscp$v_sc_nomem : 1;
+                unsigned mscp$v_reserved2 : 2;
+                unsigned mscp$v_sc_aluse : 1;
+                unsigned mscp$v_fill_23_ : 5;
+            };
+
+            struct
+            {
+                unsigned mscp$v_filler7 : 8;
+                unsigned mscp$v_sc_datal : 1;
+                unsigned mscp$v_filler8 : 3;
+                unsigned mscp$v_sc_softw : 1;
+                unsigned mscp$v_sc_hardw : 1;
+                unsigned mscp$v_fill_24_ : 2;
+            };
+
+            struct
+            {
+                struct
+                {
+                    unsigned mscp$v_filler9 : 1;
+                    unsigned mscp$v_sc_allof : 1;
+                    unsigned mscp$v_sc_tabfu : 1;
+                    unsigned mscp$v_filler10 : 1;
+                    unsigned mscp$v_sc_noent : 1;
+                    unsigned mscp$v_fill_25_ : 3;
+                };
+            };
+
+        };
     };
-    union  {
-      union  {
-	unsigned short int mscp$w_status;
-	struct  {
-	  unsigned mscp$v_st_mask : 5;
-	  unsigned mscp$v_st_sbcod : 11;
-	};
-      };
-
-      struct  {
-	union  {
-	  struct  {
-	    unsigned mscp$v_filler3 : 5;
-	    unsigned mscp$v_sc_sdign : 1;
-	    unsigned mscp$v_sc_stcon : 1;
-	    unsigned mscp$v_sc_dupun : 1;
-	    unsigned mscp$v_sc_alonl : 1;
-	    unsigned mscp$v_sc_stonl : 1;
-	    unsigned mscp$v_sc_eot : 1;
-	    unsigned mscp$v_fill_20_ : 5;
-	  };
-	  struct  {
-	    unsigned mscp$v_filler4 : 10;
-	    unsigned mscp$v_sc_inrep : 1;
-	    unsigned mscp$v_sc_ivrct : 1;
-	    unsigned mscp$v_sc_rdony : 1;
-	    unsigned mscp$v_fill_21_ : 3;
-	  };
-	};
-      };
-
-      struct  {
-	unsigned mscp$v_filler5 : 5;
-	unsigned mscp$v_sc_novol : 1;
-	unsigned mscp$v_sc_inopr : 1;
-	unsigned mscp$v_dupun : 1;
-	unsigned mscp$v_sc_udsbl : 1;
-	unsigned mscp$v_sc_exuse : 1;
-	unsigned mscp$v_sc_ldr : 1;
-	unsigned mscp$v_fill_22_ : 5;
-      };
-
-      struct  {
-	unsigned mscp$v_filler6 : 5;
-	unsigned mscp$v_reserved1 : 1;
-	unsigned mscp$v_sc_cpyip : 1;
-	unsigned mscp$v_sc_nomem : 1;
-	unsigned mscp$v_reserved2 : 2;
-	unsigned mscp$v_sc_aluse : 1;
-	unsigned mscp$v_fill_23_ : 5;
-      };
-
-      struct  {
-	unsigned mscp$v_filler7 : 8;
-	unsigned mscp$v_sc_datal : 1;
-	unsigned mscp$v_filler8 : 3;
-	unsigned mscp$v_sc_softw : 1;
-	unsigned mscp$v_sc_hardw : 1;
-	unsigned mscp$v_fill_24_ : 2;
-      };
-
-      struct  {
-	struct  {
-	  unsigned mscp$v_filler9 : 1;
-	  unsigned mscp$v_sc_allof : 1;
-	  unsigned mscp$v_sc_tabfu : 1;
-	  unsigned mscp$v_filler10 : 1;
-	  unsigned mscp$v_sc_noent : 1;
-	  unsigned mscp$v_fill_25_ : 3;
-	};
-      };
-
-    };
-  };
 };
 
-/* these are numbered like this in NetBSD too */  
+/* these are numbered like this in NetBSD too */
 #define MSCP$K_OP_ABORT 1
 #define MSCP$K_OP_ACCES 16
 #define MSCP$K_OP_ACCNM 5
@@ -390,68 +409,78 @@ struct _mscp_basic_pkt {
 #define MSCP$K_OP_DUPUN 65
 #define MSCP$M_SLUN 0x4000
 #define MSCP$K_SLUN_RSVP 32767
-	
-struct _generic_mscp {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  struct  {
-    unsigned mscp$v_slun_unused : 14;
-    unsigned mscp$v_slun : 1;
-    unsigned mscp$v_fill_26_ : 1;
-  };
+
+struct _generic_mscp
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    struct
+    {
+        unsigned mscp$v_slun_unused : 14;
+        unsigned mscp$v_slun : 1;
+        unsigned mscp$v_fill_26_ : 1;
+    };
 };
- 
+
 #define MSCP$K_FMT_DFLT 0
 #define MSCP$K_FMT_SING 1
 #define MSCP$K_FMT_DOUB 2
 #define MSCP$K_FMT_RX33 282
-	
-struct _transfer_commands {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  unsigned int mscp$l_byte_cnt;
-  unsigned char mscp$b_buffer [12];
-  union  {
-    struct  {
-      union  {
-	unsigned int mscp$l_lbn;
-	unsigned int mscp$l_frst_bad;
-	unsigned int mscp$l_fmt_func;
-      };
-      unsigned int mscp$l_key_id;
-      unsigned int mscp$l_key_lgh;
-      unsigned int mscp$l_key_buf [3];
+
+struct _transfer_commands
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    unsigned int mscp$l_byte_cnt;
+    unsigned char mscp$b_buffer [12];
+    union
+    {
+        struct
+        {
+            union
+            {
+                unsigned int mscp$l_lbn;
+                unsigned int mscp$l_frst_bad;
+                unsigned int mscp$l_fmt_func;
+            };
+            unsigned int mscp$l_key_id;
+            unsigned int mscp$l_key_lgh;
+            unsigned int mscp$l_key_buf [3];
+        };
+        struct
+        {
+            unsigned int mscp$l_position;
+            unsigned int mscp$l_taperec;
+        };
     };
-    struct  {
-      unsigned int mscp$l_position;
-      unsigned int mscp$l_taperec;
-    };
-  };
 };
- 
-struct _abort_gtcmd {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  unsigned int mscp$l_out_ref;
-  unsigned int mscp$l_cmd_sts;
+
+struct _abort_gtcmd
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    unsigned int mscp$l_out_ref;
+    unsigned int mscp$l_cmd_sts;
 };
 
 #define MSCP$K_ANM_READ 0
 #define MSCP$K_ANM_EXCG 1
 #define MSCP$K_ANM_TSST 2
-	
-struct _accnm {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  unsigned int mscp$l_anm_size;
-  unsigned int mscp$l_anm_offs;
-  unsigned short int mscp$w_anm_oper;
-  unsigned short int mscp$w_anm_dlgh;
-  char mscp$t_anm_memd [32];
+
+struct _accnm
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    unsigned int mscp$l_anm_size;
+    unsigned int mscp$l_anm_offs;
+    unsigned short int mscp$w_anm_oper;
+    unsigned short int mscp$w_anm_dlgh;
+    char mscp$t_anm_memd [32];
 };
 
-	
-struct _display_cmd {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  unsigned short int mscp$w_ditem;
-  unsigned short int mscp$w_dmode;
-  char mscp$t_dtext [16];
+
+struct _display_cmd
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    unsigned short int mscp$w_ditem;
+    unsigned short int mscp$w_dmode;
+    char mscp$t_dtext [16];
 };
 
 #define MSCP$M_UF_CMPRD 0x1
@@ -519,173 +548,212 @@ struct _display_cmd {
 #define MSCP$K_TF_CODE 256
 #define MSCP$S_ONLIN_STUNT 44
 
-	
-struct _gtunt {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  unsigned short int mscp$w_mult_unt;
-  unsigned short int mscp$w_unt_flgs;
-  unsigned short int mscp$w_tape_char;
-  short int mscp$w_reserved;
-  union  {
-    union  {
-      unsigned long long mscp$q_unit_id;
-      struct  {
-	void *mscp$l_excl_lba;
-	unsigned int mscp$l_excl_lbc;
-      };
-    };
-    union  {
-      long long mscp$q_slun_overlay;
-      struct  {
-	unsigned int mscp$l_slun_allocls;
-	unsigned short int mscp$w_slun_unit;
-	union  {
-	  unsigned short int mscp$w_slun_devname;
-	  struct  {
-	    unsigned mscp$v_slun_c : 5;
-	    unsigned mscp$v_slun_d1 : 5;
-	    unsigned mscp$v_slun_d0 : 5;
-	    unsigned mscp$v_reserved : 1;
-	  };
-	};
-      };
-    };
-  };
-  union  {
-    unsigned int mscp$l_dev_parm;
-    union  {
-      unsigned int mscp$l_media_id;
-      struct  {
-	unsigned mscp$v_mtyp_n : 7;
-	unsigned mscp$v_mtyp_a2 : 5;
-	unsigned mscp$v_mtyp_a1 : 5;
-	unsigned mscp$v_mtyp_a0 : 5;
-	unsigned mscp$v_mtyp_d1 : 5;
-	unsigned mscp$v_mtyp_d0 : 5;
-      };
-    };
-  };
-  union  {
-    struct  {
-      unsigned short int mscp$w_shdw_unt;
-      union  {
-	unsigned short int mscp$w_copy_mod;
-	unsigned short int mscp$w_shdw_sts;
-      };
-    };
-    struct  {
-      union  {
-	union  {
-	  unsigned short int mscp$w_format;
-	  struct  {
-	    unsigned mscp$v_tf_800 : 1;
-	    unsigned mscp$v_tf_pe : 1;
-	    unsigned mscp$v_tf_gcr : 1;
-	    unsigned mscp$v_tf_blk : 1;
-	    unsigned mscp$v_fill_49_ : 4;
-	  };
-	};
-	union  {
-	  unsigned short int mscp$w_format_ctp;
-	  struct  {
-	    unsigned mscp$v_tf_nor : 1;
-	    unsigned mscp$v_tf_bhd : 1;
-	    unsigned mscp$v_tf_dn2 : 1;
-	    unsigned mscp$v_tf_dn3 : 1;
-	    unsigned mscp$v_tf_t87 : 1;
-	    unsigned mscp$v_tf_t87c : 1;
-	    unsigned mscp$v_fill_50_ : 2;
-	  };
-	};
-	union  {
-	  unsigned short int mscp$w_format_hpc;
-	  struct  {
-	    unsigned mscp$v_fill_10 : 1;
-	    unsigned mscp$v_tf_enh : 1;
-	    unsigned mscp$v_tf_ndc : 1;
-	    unsigned mscp$v_tf_edc : 1;
-	    unsigned mscp$v_fill_51_ : 4;
-	  };
-	};
-	union  {
-	  unsigned short int mscp$w_format_dat;
-	  struct  {
-	    unsigned mscp$v_fill_11 : 1;
-	    unsigned mscp$v_tf_dcp : 1;
-	    unsigned mscp$v_fill_52_ : 6;
-	  };
-	};
-	union  {
-	  unsigned short int mscp$w_format_8mm;
-	  struct  {
-	    unsigned mscp$v_tf_x82 : 1;
-	    unsigned mscp$v_tf_x85 : 1;
-	    unsigned mscp$v_tf_x5c : 1;
-	    unsigned mscp$v_fill_53_ : 5;
-	  };
-	};
-      };
-      unsigned short int mscp$w_speed;
-    };
-  };
-  union  {
-    union  {
-      struct  {
-	unsigned short int mscp$w_track;
-	unsigned short int mscp$w_group;
-	unsigned short int mscp$w_cylinder;
-	unsigned char mscp$b_unit_svr;
-	unsigned char mscp$b_unit_hvr;
-	unsigned short int mscp$w_rct_size;
-	unsigned char mscp$b_rbns;
-	unsigned char mscp$b_rct_cpys;
-	unsigned short int mscp$w_load_avail;
-      };
-      struct  {
-	unsigned short int mscp$w_formenu;
-	unsigned char mscp$b_freecap;
-      };
-    };
 
-    union  {
-      struct  {
-	unsigned int mscp$l_unt_size;
-	unsigned int mscp$l_vol_ser;
-      };
-      struct  {
-	unsigned int mscp$l_maxwtrec;
-	unsigned short int mscp$w_noiserec;
-      };
+struct _gtunt
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    unsigned short int mscp$w_mult_unt;
+    unsigned short int mscp$w_unt_flgs;
+    unsigned short int mscp$w_tape_char;
+    short int mscp$w_reserved;
+    union
+    {
+        union
+        {
+            unsigned long long mscp$q_unit_id;
+            struct
+            {
+                void *mscp$l_excl_lba;
+                unsigned int mscp$l_excl_lbc;
+            };
+        };
+        union
+        {
+            long long mscp$q_slun_overlay;
+            struct
+            {
+                unsigned int mscp$l_slun_allocls;
+                unsigned short int mscp$w_slun_unit;
+                union
+                {
+                    unsigned short int mscp$w_slun_devname;
+                    struct
+                    {
+                        unsigned mscp$v_slun_c : 5;
+                        unsigned mscp$v_slun_d1 : 5;
+                        unsigned mscp$v_slun_d0 : 5;
+                        unsigned mscp$v_reserved : 1;
+                    };
+                };
+            };
+        };
     };
+    union
+    {
+        unsigned int mscp$l_dev_parm;
+        union
+        {
+            unsigned int mscp$l_media_id;
+            struct
+            {
+                unsigned mscp$v_mtyp_n : 7;
+                unsigned mscp$v_mtyp_a2 : 5;
+                unsigned mscp$v_mtyp_a1 : 5;
+                unsigned mscp$v_mtyp_a0 : 5;
+                unsigned mscp$v_mtyp_d1 : 5;
+                unsigned mscp$v_mtyp_d0 : 5;
+            };
+        };
+    };
+    union
+    {
+        struct
+        {
+            unsigned short int mscp$w_shdw_unt;
+            union
+            {
+                unsigned short int mscp$w_copy_mod;
+                unsigned short int mscp$w_shdw_sts;
+            };
+        };
+        struct
+        {
+            union
+            {
+                union
+                {
+                    unsigned short int mscp$w_format;
+                    struct
+                    {
+                        unsigned mscp$v_tf_800 : 1;
+                        unsigned mscp$v_tf_pe : 1;
+                        unsigned mscp$v_tf_gcr : 1;
+                        unsigned mscp$v_tf_blk : 1;
+                        unsigned mscp$v_fill_49_ : 4;
+                    };
+                };
+                union
+                {
+                    unsigned short int mscp$w_format_ctp;
+                    struct
+                    {
+                        unsigned mscp$v_tf_nor : 1;
+                        unsigned mscp$v_tf_bhd : 1;
+                        unsigned mscp$v_tf_dn2 : 1;
+                        unsigned mscp$v_tf_dn3 : 1;
+                        unsigned mscp$v_tf_t87 : 1;
+                        unsigned mscp$v_tf_t87c : 1;
+                        unsigned mscp$v_fill_50_ : 2;
+                    };
+                };
+                union
+                {
+                    unsigned short int mscp$w_format_hpc;
+                    struct
+                    {
+                        unsigned mscp$v_fill_10 : 1;
+                        unsigned mscp$v_tf_enh : 1;
+                        unsigned mscp$v_tf_ndc : 1;
+                        unsigned mscp$v_tf_edc : 1;
+                        unsigned mscp$v_fill_51_ : 4;
+                    };
+                };
+                union
+                {
+                    unsigned short int mscp$w_format_dat;
+                    struct
+                    {
+                        unsigned mscp$v_fill_11 : 1;
+                        unsigned mscp$v_tf_dcp : 1;
+                        unsigned mscp$v_fill_52_ : 6;
+                    };
+                };
+                union
+                {
+                    unsigned short int mscp$w_format_8mm;
+                    struct
+                    {
+                        unsigned mscp$v_tf_x82 : 1;
+                        unsigned mscp$v_tf_x85 : 1;
+                        unsigned mscp$v_tf_x5c : 1;
+                        unsigned mscp$v_fill_53_ : 5;
+                    };
+                };
+            };
+            unsigned short int mscp$w_speed;
+        };
+    };
+    union
+    {
+        union
+        {
+            struct
+            {
+                unsigned short int mscp$w_track;
+                unsigned short int mscp$w_group;
+                unsigned short int mscp$w_cylinder;
+                unsigned char mscp$b_unit_svr;
+                unsigned char mscp$b_unit_hvr;
+                unsigned short int mscp$w_rct_size;
+                unsigned char mscp$b_rbns;
+                unsigned char mscp$b_rct_cpys;
+                unsigned short int mscp$w_load_avail;
+            };
+            struct
+            {
+                unsigned short int mscp$w_formenu;
+                unsigned char mscp$b_freecap;
+            };
+        };
 
-  };
+        union
+        {
+            struct
+            {
+                unsigned int mscp$l_unt_size;
+                unsigned int mscp$l_vol_ser;
+            };
+            struct
+            {
+                unsigned int mscp$l_maxwtrec;
+                unsigned short int mscp$w_noiserec;
+            };
+        };
+
+    };
 };
- 
-struct _rcedc {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  int mscp$l_filler [5];
-  unsigned int mscp$l_code;
+
+struct _rcedc
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    int mscp$l_filler [5];
+    unsigned int mscp$l_code;
 };
 
-	
-struct _replc {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  unsigned int mscp$l_rbn;
+
+struct _replc
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    unsigned int mscp$l_rbn;
 };
 
-	
-struct _repos {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  union  {
-    struct  {
-      unsigned int mscp$l_rec_cnt;
-      unsigned int mscp$l_tmgp_cnt;
+
+struct _repos
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    union
+    {
+        struct
+        {
+            unsigned int mscp$l_rec_cnt;
+            unsigned int mscp$l_tmgp_cnt;
+        };
+        struct
+        {
+            unsigned int mscp$l_rcskiped;
+            unsigned int mscp$l_tmskiped;
+        };
     };
-    struct  {
-      unsigned int mscp$l_rcskiped;
-      unsigned int mscp$l_tmskiped;
-    };
-  };
 };
 
 #define MSCP$M_CF_576 0x1
@@ -776,60 +844,70 @@ struct _repos {
 #define MSCP$K_CM_HSX50 128
 #define MSCP$K_CM_ULTRIX 248
 #define MSCP$K_CM_SVS 249
-	
-struct _stcon {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  unsigned short int mscp$w_version;
-  union  {
-    union  {
-      unsigned short int mscp$w_cnt_flgs;
-      struct  {
-	unsigned mscp$v_cf_576 : 1;
-	unsigned mscp$v_cf_shadw : 1;
-	unsigned mscp$v_cf_mlths : 1;
-	unsigned mscp$v_cf_ldcd : 1;
-	unsigned mscp$v_cf_this : 1;
-	unsigned mscp$v_cf_other : 1;
-	unsigned mscp$v_cf_misc : 1;
-	unsigned mscp$v_cf_attn : 1;
-	unsigned mscp$v_cf_rdcd : 1;
-	unsigned mscp$v_cf_whl : 1;
-	unsigned mscp$v_cf_rdo : 1;
-	unsigned mscp$v_cf_nfesc : 1;
-	unsigned mscp$v_filler : 1;
-	unsigned mscp$v_cf_load : 1;
-	unsigned mscp$v_cf_edcrp : 1;
-	unsigned mscp$v_cf_replc : 1;
-      };
+
+struct _stcon
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    unsigned short int mscp$w_version;
+    union
+    {
+        union
+        {
+            unsigned short int mscp$w_cnt_flgs;
+            struct
+            {
+                unsigned mscp$v_cf_576 : 1;
+                unsigned mscp$v_cf_shadw : 1;
+                unsigned mscp$v_cf_mlths : 1;
+                unsigned mscp$v_cf_ldcd : 1;
+                unsigned mscp$v_cf_this : 1;
+                unsigned mscp$v_cf_other : 1;
+                unsigned mscp$v_cf_misc : 1;
+                unsigned mscp$v_cf_attn : 1;
+                unsigned mscp$v_cf_rdcd : 1;
+                unsigned mscp$v_cf_whl : 1;
+                unsigned mscp$v_cf_rdo : 1;
+                unsigned mscp$v_cf_nfesc : 1;
+                unsigned mscp$v_filler : 1;
+                unsigned mscp$v_cf_load : 1;
+                unsigned mscp$v_cf_edcrp : 1;
+                unsigned mscp$v_cf_replc : 1;
+            };
+        };
+        union
+        {
+            unsigned short int mscp$w_tu_cnt_flgs;
+            struct
+            {
+                unsigned mscp$v_filler1 : 14;
+                unsigned mscp$v_cf_mtden : 1;
+                unsigned mscp$v_cf_srt : 1;
+            };
+        };
     };
-    union  {
-      unsigned short int mscp$w_tu_cnt_flgs;
-      struct  {
-	unsigned mscp$v_filler1 : 14;
-	unsigned mscp$v_cf_mtden : 1;
-	unsigned mscp$v_cf_srt : 1;
-      };
+    union
+    {
+        unsigned short int mscp$w_hst_tmo;
+        struct
+        {
+            unsigned short int mscp$w_cnt_tmo;
+        };
     };
-  };
-  union  {
-    unsigned short int mscp$w_hst_tmo;
-    struct  {
-      unsigned short int mscp$w_cnt_tmo;
+    unsigned char mscp$b_cnt_svr;
+    unsigned char mscp$b_cnt_hvr;
+    union
+    {
+        unsigned long long mscp$q_time;
+        struct
+        {
+            unsigned long long mscp$q_cnt_id;
+        };
     };
-  };
-  unsigned char mscp$b_cnt_svr;
-  unsigned char mscp$b_cnt_hvr;
-  union  {
-    unsigned long long mscp$q_time;
-    struct  {
-      unsigned long long mscp$q_cnt_id;
-    };
-  };
-  unsigned int mscp$l_maxbcnt;
-  unsigned short int mscp$w_conn_ref;
+    unsigned int mscp$l_maxbcnt;
+    unsigned short int mscp$w_conn_ref;
 
 };
- 
+
 
 #define MSCP$K_MIN_SIZ 12
 #define MSCP$C_MIN_SIZ 12
@@ -839,31 +917,35 @@ struct _stcon {
 #define MSCP$C_DCDCMDLEN 60
 #define MSCP$K_LEN 50
 #define MSCP$C_LEN 50
-	
-struct _dcd {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  union  {
-    struct  {
-      unsigned int mscp$l_lbcount;
-      unsigned short int mscp$w_src_unum;
-      short int mscp$w_reserved;
-      unsigned long long mscp$q_src_uid;
-      unsigned int mscp$l_dest_lbn;
-      unsigned short int mscp$w_hrn;
-      unsigned short int mscp$w_ent_id;
-      int mscp$l_reserved;
-      unsigned int mscp$l_src_lbn;
-      unsigned long long mscp$q_port_adr;
-      unsigned long long mscp$q_sys_adr;
+
+struct _dcd
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    union
+    {
+        struct
+        {
+            unsigned int mscp$l_lbcount;
+            unsigned short int mscp$w_src_unum;
+            short int mscp$w_reserved;
+            unsigned long long mscp$q_src_uid;
+            unsigned int mscp$l_dest_lbn;
+            unsigned short int mscp$w_hrn;
+            unsigned short int mscp$w_ent_id;
+            int mscp$l_reserved;
+            unsigned int mscp$l_src_lbn;
+            unsigned long long mscp$q_port_adr;
+            unsigned long long mscp$q_sys_adr;
+        };
+        struct
+        {
+            int mscp$l_filler;
+            unsigned char mscp$z_sbc_sts [16];
+            unsigned short int mscp$w_ent_loc;
+        };
     };
-    struct  {
-      int mscp$l_filler;
-      unsigned char mscp$z_sbc_sts [16];
-      unsigned short int mscp$w_ent_loc;
-    };
-  };
 };
- 
+
 
 #define MSCP$K_WHM_DALL 1
 #define MSCP$K_WHM_DHRN 2
@@ -871,52 +953,60 @@ struct _dcd {
 #define MSCP$K_WHM_RALL 4
 #define MSCP$K_WHM_RHRN 5
 #define MSCP$K_WHM_DAFC 6
-	
-struct _wrhim {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  int mscp$l_reserved;
-  union  {
-    unsigned char mscp$b_wrhis_bd [12];
-    struct  {
-      unsigned short int mscp$w_unit_al;
-      unsigned short int mscp$w_serv_al;
-      unsigned short int mscp$w_serv_unal;
+
+struct _wrhim
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    int mscp$l_reserved;
+    union
+    {
+        unsigned char mscp$b_wrhis_bd [12];
+        struct
+        {
+            unsigned short int mscp$w_unit_al;
+            unsigned short int mscp$w_serv_al;
+            unsigned short int mscp$w_serv_unal;
+        };
     };
-  };
-  union  {
-    unsigned short int mscp$w_oper;
-    unsigned short int mscp$w_count;
-  };
-  unsigned short int mscp$w_offset;
+    union
+    {
+        unsigned short int mscp$w_oper;
+        unsigned short int mscp$w_count;
+    };
+    unsigned short int mscp$w_offset;
 };
- 
+
 
 #define WHIS$M_ET_TLIB 0x4000
 #define WHIS$M_ET_ERR 0x8000
 #define WHIS$K_WRITELOGLEN 16
 #define WHIS$C_WRITELOGLEN 16
-	
-struct _write_log_entry {
-  unsigned short int whis$w_elo;
-  unsigned short int whis$w_unit;
-  unsigned int whis$l_length;
-  unsigned int whis$l_lbn;
-  unsigned short int whis$w_hrn;
-  union  {
-    unsigned short int whis$w_entflgs;
-    struct  {
-      unsigned whis$v_filler : 14;
-      unsigned whis$v_et_tlib : 1;
-      unsigned whis$v_et_err : 1;
+
+struct _write_log_entry
+{
+    unsigned short int whis$w_elo;
+    unsigned short int whis$w_unit;
+    unsigned int whis$l_length;
+    unsigned int whis$l_lbn;
+    unsigned short int whis$w_hrn;
+    union
+    {
+        unsigned short int whis$w_entflgs;
+        struct
+        {
+            unsigned whis$v_filler : 14;
+            unsigned whis$v_et_tlib : 1;
+            unsigned whis$v_et_err : 1;
+        };
     };
-  };
 };
-	
-struct _get_unit_name {
-  struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
-  unsigned int mscp$l_ddr_namelen;
-  char mscp$t_ddr_name [28];
+
+struct _get_unit_name
+{
+    struct _mscp_basic_pkt mscp$r_mscp_basic_pkt;
+    unsigned int mscp$l_ddr_namelen;
+    char mscp$t_ddr_name [28];
 };
- 
+
 #endif
- 
+

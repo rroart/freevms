@@ -31,7 +31,7 @@
 #define EXP_OVER	Const(0x4000)    /* smallest invalid large exponent */
 #define	EXP_UNDER	Const(-0x3fff)   /* largest invalid small exponent */
 #define EXP_WAY_UNDER   Const(-0x6000)   /* Below the smallest denormal, but
-					    still a 16 bit nr. */
+still a 16 bit nr. */
 #define EXP_Infinity    EXP_OVER
 #define EXP_NaN         EXP_OVER
 
@@ -55,11 +55,11 @@
 #define TAG_Valid	Const(0)	/* valid */
 #define TAG_Zero	Const(1)	/* zero */
 #define TAG_Special	Const(2)	/* De-normal, + or - infinity,
-					   or Not a Number */
+or Not a Number */
 #define TAG_Empty	Const(3)	/* empty */
 
 #define LOADED_DATA	Const(10101)	/* Special st() number to identify
-					   loaded data (not on stack). */
+loaded data (not on stack). */
 
 /* A few flags (must be >= 0x10). */
 #define REV             0x10
@@ -110,26 +110,34 @@ extern u_char emulating;
 #define PREFIX_SS_ 6
 #define PREFIX_DEFAULT 7
 
-struct address {
-  unsigned int offset;
-  unsigned int selector:16;
-  unsigned int opcode:11;
-  unsigned int empty:5;
+struct address
+{
+    unsigned int offset;
+    unsigned int selector:16;
+    unsigned int opcode:11;
+    unsigned int empty:5;
 };
-struct fpu__reg {
-  unsigned sigl;
-  unsigned sigh;
-  short exp;
+struct fpu__reg
+{
+    unsigned sigl;
+    unsigned sigh;
+    short exp;
 };
 
 typedef void (*FUNC)(void);
 typedef struct fpu__reg FPU_REG;
 typedef void (*FUNC_ST0)(FPU_REG *st0_ptr, u_char st0_tag);
-typedef struct { u_char address_size, operand_size, segment; }
-        overrides;
+typedef struct
+{
+    u_char address_size, operand_size, segment;
+}
+overrides;
 /* This structure is 32 bits: */
-typedef struct { overrides override;
-		 u_char default_mode; } fpu_addr_modes;
+typedef struct
+{
+    overrides override;
+    u_char default_mode;
+} fpu_addr_modes;
 /* PROTECTED has a restricted meaning in the emulator; it is used
    to signal that the emulator needs to do special things to ensure
    that protection is respected in a segmented model. */
@@ -167,8 +175,8 @@ extern u_char const data_sizes_16[32];
 
 static inline void reg_copy(FPU_REG const *x, FPU_REG *y)
 {
-  *(short *)&(y->exp) = *(const short *)&(x->exp); 
-  *(long long *)&(y->sigl) = *(const long long *)&(x->sigl);
+    *(short *)&(y->exp) = *(const short *)&(x->exp);
+    *(long long *)&(y->sigl) = *(const long long *)&(x->sigl);
 }
 
 #define exponent(x)  (((*(short *)&((x)->exp)) & 0x7fff) - EXTENDED_Ebias)
@@ -190,23 +198,23 @@ static inline void reg_copy(FPU_REG const *x, FPU_REG *y)
 asmlinkage int FPU_normalize(FPU_REG *x);
 asmlinkage int FPU_normalize_nuo(FPU_REG *x);
 asmlinkage int FPU_u_sub(FPU_REG const *arg1, FPU_REG const *arg2,
-			 FPU_REG *answ, unsigned int control_w, u_char sign,
-			 int expa, int expb);
+                         FPU_REG *answ, unsigned int control_w, u_char sign,
+                         int expa, int expb);
 asmlinkage int FPU_u_mul(FPU_REG const *arg1, FPU_REG const *arg2,
-			 FPU_REG *answ, unsigned int control_w, u_char sign,
-			 int expon);
+                         FPU_REG *answ, unsigned int control_w, u_char sign,
+                         int expon);
 asmlinkage int FPU_u_div(FPU_REG const *arg1, FPU_REG const *arg2,
-			 FPU_REG *answ, unsigned int control_w, u_char sign);
+                         FPU_REG *answ, unsigned int control_w, u_char sign);
 asmlinkage int FPU_u_add(FPU_REG const *arg1, FPU_REG const *arg2,
-			 FPU_REG *answ, unsigned int control_w, u_char sign,
-			 int expa, int expb);
+                         FPU_REG *answ, unsigned int control_w, u_char sign,
+                         int expa, int expb);
 asmlinkage int wm_sqrt(FPU_REG *n, int dummy1, int dummy2,
-		       unsigned int control_w, u_char sign);
+                       unsigned int control_w, u_char sign);
 asmlinkage unsigned	FPU_shrx(void *l, unsigned x);
 asmlinkage unsigned	FPU_shrxs(void *v, unsigned x);
 asmlinkage unsigned long FPU_div_small(unsigned long long *x, unsigned long y);
 asmlinkage int FPU_round(FPU_REG *arg, unsigned int extent, int dummy,
-			 unsigned int control_w, u_char sign);
+                         unsigned int control_w, u_char sign);
 
 #ifndef MAKING_PROTO
 #include "fpu_proto.h"

@@ -21,35 +21,37 @@
 #include <linux/types.h>
 
 /* Standard well-defined IP protocols.  */
-enum {
-  IPPROTO_IP = 0,		/* Dummy protocol for TCP		*/
-  IPPROTO_ICMP = 1,		/* Internet Control Message Protocol	*/
-  IPPROTO_IGMP = 2,		/* Internet Group Management Protocol	*/
-  IPPROTO_IPIP = 4,		/* IPIP tunnels (older KA9Q tunnels use 94) */
-  IPPROTO_TCP = 6,		/* Transmission Control Protocol	*/
-  IPPROTO_EGP = 8,		/* Exterior Gateway Protocol		*/
-  IPPROTO_PUP = 12,		/* PUP protocol				*/
-  IPPROTO_UDP = 17,		/* User Datagram Protocol		*/
-  IPPROTO_IDP = 22,		/* XNS IDP protocol			*/
-  IPPROTO_RSVP = 46,		/* RSVP protocol			*/
-  IPPROTO_GRE = 47,		/* Cisco GRE tunnels (rfc 1701,1702)	*/
+enum
+{
+    IPPROTO_IP = 0,		/* Dummy protocol for TCP		*/
+    IPPROTO_ICMP = 1,		/* Internet Control Message Protocol	*/
+    IPPROTO_IGMP = 2,		/* Internet Group Management Protocol	*/
+    IPPROTO_IPIP = 4,		/* IPIP tunnels (older KA9Q tunnels use 94) */
+    IPPROTO_TCP = 6,		/* Transmission Control Protocol	*/
+    IPPROTO_EGP = 8,		/* Exterior Gateway Protocol		*/
+    IPPROTO_PUP = 12,		/* PUP protocol				*/
+    IPPROTO_UDP = 17,		/* User Datagram Protocol		*/
+    IPPROTO_IDP = 22,		/* XNS IDP protocol			*/
+    IPPROTO_RSVP = 46,		/* RSVP protocol			*/
+    IPPROTO_GRE = 47,		/* Cisco GRE tunnels (rfc 1701,1702)	*/
 
-  IPPROTO_IPV6	 = 41,		/* IPv6-in-IPv4 tunnelling		*/
+    IPPROTO_IPV6	 = 41,		/* IPv6-in-IPv4 tunnelling		*/
 
-  IPPROTO_PIM    = 103,		/* Protocol Independent Multicast	*/
+    IPPROTO_PIM    = 103,		/* Protocol Independent Multicast	*/
 
-  IPPROTO_ESP = 50,            /* Encapsulation Security Payload protocol */
-  IPPROTO_AH = 51,             /* Authentication Header protocol       */
-  IPPROTO_COMP   = 108,                /* Compression Header protocol */
+    IPPROTO_ESP = 50,            /* Encapsulation Security Payload protocol */
+    IPPROTO_AH = 51,             /* Authentication Header protocol       */
+    IPPROTO_COMP   = 108,                /* Compression Header protocol */
 
-  IPPROTO_RAW	 = 255,		/* Raw IP packets			*/
-  IPPROTO_MAX
+    IPPROTO_RAW	 = 255,		/* Raw IP packets			*/
+    IPPROTO_MAX
 };
 
 
 /* Internet address. */
-struct in_addr {
-	__u32	s_addr;
+struct in_addr
+{
+    __u32	s_addr;
 };
 
 #define IP_TOS		1
@@ -88,36 +90,37 @@ struct in_addr {
 
 /* Request struct for multicast socket ops */
 
-struct ip_mreq 
+struct ip_mreq
 {
-	struct in_addr imr_multiaddr;	/* IP multicast address of group */
-	struct in_addr imr_interface;	/* local IP address of interface */
+    struct in_addr imr_multiaddr;	/* IP multicast address of group */
+    struct in_addr imr_interface;	/* local IP address of interface */
 };
 
 struct ip_mreqn
 {
-	struct in_addr	imr_multiaddr;		/* IP multicast address of group */
-	struct in_addr	imr_address;		/* local IP address of interface */
-	int		imr_ifindex;		/* Interface index */
+    struct in_addr	imr_multiaddr;		/* IP multicast address of group */
+    struct in_addr	imr_address;		/* local IP address of interface */
+    int		imr_ifindex;		/* Interface index */
 };
 
 struct in_pktinfo
 {
-	int		ipi_ifindex;
-	struct in_addr	ipi_spec_dst;
-	struct in_addr	ipi_addr;
+    int		ipi_ifindex;
+    struct in_addr	ipi_spec_dst;
+    struct in_addr	ipi_addr;
 };
 
 /* Structure describing an Internet (IP) socket address. */
 #define __SOCK_SIZE__	16		/* sizeof(struct sockaddr)	*/
-struct sockaddr_in {
-  sa_family_t		sin_family;	/* Address family		*/
-  unsigned short int	sin_port;	/* Port number			*/
-  struct in_addr	sin_addr;	/* Internet address		*/
+struct sockaddr_in
+{
+    sa_family_t		sin_family;	/* Address family		*/
+    unsigned short int	sin_port;	/* Port number			*/
+    struct in_addr	sin_addr;	/* Internet address		*/
 
-  /* Pad to size of `struct sockaddr'. */
-  unsigned char		__pad[__SOCK_SIZE__ - sizeof(short int) -
-			sizeof(unsigned short int) - sizeof(struct in_addr)];
+    /* Pad to size of `struct sockaddr'. */
+    unsigned char		__pad[__SOCK_SIZE__ - sizeof(short int) -
+                              sizeof(unsigned short int) - sizeof(struct in_addr)];
 };
 #define sin_zero	__pad		/* for BSD UNIX comp. -FvK	*/
 
@@ -175,7 +178,7 @@ struct sockaddr_in {
 
 
 /* <asm/byteorder.h> contains the htonl type stuff.. */
-#include <asm/byteorder.h> 
+#include <asm/byteorder.h>
 
 #ifdef __KERNEL__
 /* Some random defines to make it easier in the kernel.. */

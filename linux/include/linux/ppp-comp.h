@@ -60,59 +60,60 @@
  * Structure giving methods for compression/decompression.
  */
 
-struct compressor {
-	int	compress_proto;	/* CCP compression protocol number */
+struct compressor
+{
+    int	compress_proto;	/* CCP compression protocol number */
 
-	/* Allocate space for a compressor (transmit side) */
-	void	*(*comp_alloc) (unsigned char *options, int opt_len);
+    /* Allocate space for a compressor (transmit side) */
+    void	*(*comp_alloc) (unsigned char *options, int opt_len);
 
-	/* Free space used by a compressor */
-	void	(*comp_free) (void *state);
+    /* Free space used by a compressor */
+    void	(*comp_free) (void *state);
 
-	/* Initialize a compressor */
-	int	(*comp_init) (void *state, unsigned char *options,
-			      int opt_len, int unit, int opthdr, int debug);
+    /* Initialize a compressor */
+    int	(*comp_init) (void *state, unsigned char *options,
+                      int opt_len, int unit, int opthdr, int debug);
 
-	/* Reset a compressor */
-	void	(*comp_reset) (void *state);
+    /* Reset a compressor */
+    void	(*comp_reset) (void *state);
 
-	/* Compress a packet */
-	int     (*compress) (void *state, unsigned char *rptr,
-			      unsigned char *obuf, int isize, int osize);
+    /* Compress a packet */
+    int     (*compress) (void *state, unsigned char *rptr,
+                         unsigned char *obuf, int isize, int osize);
 
-	/* Return compression statistics */
-	void	(*comp_stat) (void *state, struct compstat *stats);
+    /* Return compression statistics */
+    void	(*comp_stat) (void *state, struct compstat *stats);
 
-	/* Allocate space for a decompressor (receive side) */
-	void	*(*decomp_alloc) (unsigned char *options, int opt_len);
+    /* Allocate space for a decompressor (receive side) */
+    void	*(*decomp_alloc) (unsigned char *options, int opt_len);
 
-	/* Free space used by a decompressor */
-	void	(*decomp_free) (void *state);
+    /* Free space used by a decompressor */
+    void	(*decomp_free) (void *state);
 
-	/* Initialize a decompressor */
-	int	(*decomp_init) (void *state, unsigned char *options,
-				int opt_len, int unit, int opthdr, int mru,
-				int debug);
+    /* Initialize a decompressor */
+    int	(*decomp_init) (void *state, unsigned char *options,
+                        int opt_len, int unit, int opthdr, int mru,
+                        int debug);
 
-	/* Reset a decompressor */
-	void	(*decomp_reset) (void *state);
+    /* Reset a decompressor */
+    void	(*decomp_reset) (void *state);
 
-	/* Decompress a packet. */
-	int	(*decompress) (void *state, unsigned char *ibuf, int isize,
-				unsigned char *obuf, int osize);
+    /* Decompress a packet. */
+    int	(*decompress) (void *state, unsigned char *ibuf, int isize,
+                       unsigned char *obuf, int osize);
 
-	/* Update state for an incompressible packet received */
-	void	(*incomp) (void *state, unsigned char *ibuf, int icnt);
+    /* Update state for an incompressible packet received */
+    void	(*incomp) (void *state, unsigned char *ibuf, int icnt);
 
-	/* Return decompression statistics */
-	void	(*decomp_stat) (void *state, struct compstat *stats);
+    /* Return decompression statistics */
+    void	(*decomp_stat) (void *state, struct compstat *stats);
 };
 
 /*
  * The return value from decompress routine is the length of the
  * decompressed packet if successful, otherwise DECOMP_ERROR
  * or DECOMP_FATALERROR if an error occurred.
- * 
+ *
  * We need to make this distinction so that we can disable certain
  * useful functionality, namely sending a CCP reset-request as a result
  * of an error detected after decompression.  This is to avoid infringing

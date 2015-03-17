@@ -47,10 +47,10 @@
 #define		RAB$C_RFA		2
 #define		RAB$C_STM		3
 #define		RAB$C_MAXRAC		2
-	
+
 #define RAB$K_BLN 68
 #define RAB$C_BLN 68
-	
+
 #define RAB$V_PPF_RAT	6
 #define RAB$S_PPF_RAT	8
 #define RAB$V_PPF_IND	14
@@ -141,14 +141,14 @@
 #define		RAB$M_RESERVED29		536870912
 #define		RAB$M_RESERVED30		1073741824
 #define		RAB$M_RESERVED31		-2147483648
-	
+
 #define RAB64$K_BLN64 144
 #define RAB64$C_BLN64 144
 #define RAB$K_BLN64   144
 #define RAB$C_BLN64   144
 #define RAB$K_MAXBLN  144
 #define RAB$C_MAXBLN  144
-	
+
 #define RAB64$V_PPF_RAT	6
 #define RAB64$S_PPF_RAT	8
 #define RAB64$V_PPF_IND	14
@@ -187,303 +187,351 @@
 #define RAB64$V_EQNXT 	21
 #define RAB64$V_NXT  	22
 
-struct _rabdef {
-  unsigned char rab$b_bid;
-  unsigned char rab$b_bln;
-  union  {
-    unsigned short int rab$w_isi;
-    struct  {
-      unsigned rabdef$$_fill_1		: 6;
-      unsigned rab$v_ppf_rat		: 8;
-      unsigned rab$v_ppf_ind		: 1;
-      unsigned rab$v_ppisi		: 1;
+struct _rabdef
+{
+    unsigned char rab$b_bid;
+    unsigned char rab$b_bln;
+    union
+    {
+        unsigned short int rab$w_isi;
+        struct
+        {
+            unsigned rabdef$$_fill_1		: 6;
+            unsigned rab$v_ppf_rat		: 8;
+            unsigned rab$v_ppf_ind		: 1;
+            unsigned rab$v_ppisi		: 1;
+        };
     };
-  };
-  union  {
-    unsigned int rab$l_rop;
-    struct  {
-      unsigned rab$v_asy		: 1;
-      unsigned rab$v_tpt		: 1;
-      unsigned rab$v_rea		: 1;
-      unsigned rab$v_rrl		: 1;
-      unsigned rab$v_uif		: 1;
-      unsigned rab$v_mas		: 1;
-      unsigned rab$v_fdl		: 1;
-      unsigned rab$v_rev		: 1;
-      unsigned rab$v_eof		: 1;
-      unsigned rab$v_rah		: 1;
-      unsigned rab$v_wbh		: 1;
-      unsigned rab$v_bio		: 1;
-      unsigned rab$v_cdk		: 1;
-      unsigned rab$v_loa		: 1;
-      unsigned rab$v_lim		: 1;
-      unsigned rab$v_syncsts		: 1;
-      unsigned rab$v_loc		: 1;
-      unsigned rab$v_wat		: 1;
-      unsigned rab$v_ulk		: 1;
-      unsigned rab$v_rlk		: 1;
-      unsigned rab$v_nlk		: 1;
-      unsigned rab$v_kge		: 1;
-      unsigned rab$v_kgt		: 1;
-      unsigned rab$v_nxr		: 1;
-      unsigned rab$v_rne		: 1;
-      unsigned rab$v_tmo		: 1;
-      unsigned rab$v_cvt		: 1;
-      unsigned rab$v_rnf		: 1;
-      unsigned rab$v_eto		: 1;
-      unsigned rab$v_pta		: 1;
-      unsigned rab$v_pmt		: 1;
-      unsigned rab$v_cco		: 1;
+    union
+    {
+        unsigned int rab$l_rop;
+        struct
+        {
+            unsigned rab$v_asy		: 1;
+            unsigned rab$v_tpt		: 1;
+            unsigned rab$v_rea		: 1;
+            unsigned rab$v_rrl		: 1;
+            unsigned rab$v_uif		: 1;
+            unsigned rab$v_mas		: 1;
+            unsigned rab$v_fdl		: 1;
+            unsigned rab$v_rev		: 1;
+            unsigned rab$v_eof		: 1;
+            unsigned rab$v_rah		: 1;
+            unsigned rab$v_wbh		: 1;
+            unsigned rab$v_bio		: 1;
+            unsigned rab$v_cdk		: 1;
+            unsigned rab$v_loa		: 1;
+            unsigned rab$v_lim		: 1;
+            unsigned rab$v_syncsts		: 1;
+            unsigned rab$v_loc		: 1;
+            unsigned rab$v_wat		: 1;
+            unsigned rab$v_ulk		: 1;
+            unsigned rab$v_rlk		: 1;
+            unsigned rab$v_nlk		: 1;
+            unsigned rab$v_kge		: 1;
+            unsigned rab$v_kgt		: 1;
+            unsigned rab$v_nxr		: 1;
+            unsigned rab$v_rne		: 1;
+            unsigned rab$v_tmo		: 1;
+            unsigned rab$v_cvt		: 1;
+            unsigned rab$v_rnf		: 1;
+            unsigned rab$v_eto		: 1;
+            unsigned rab$v_pta		: 1;
+            unsigned rab$v_pmt		: 1;
+            unsigned rab$v_cco		: 1;
+        };
+        struct
+        {
+            unsigned rabdef$$_fill_6		: 21;
+            unsigned rab$v_eqnxt		: 1;
+            unsigned rab$v_nxt		: 1;
+            unsigned rab$v_fill_3_		: 1;
+        };
+        struct
+        {
+            char rabdef$$_fill_3;
+            unsigned char rab$b_rop1;
+            unsigned char rab$b_rop2;
+            unsigned char rab$b_rop3;
+        };
     };
-    struct  {
-      unsigned rabdef$$_fill_6		: 21;
-      unsigned rab$v_eqnxt		: 1;
-      unsigned rab$v_nxt		: 1;
-      unsigned rab$v_fill_3_		: 1;
+    unsigned int rab$l_sts;
+    union
+    {
+        unsigned int rab$l_stv;
+        struct
+        {
+            unsigned short int rab$w_stv0;
+            unsigned short int rab$w_stv2;
+        };
     };
-    struct  {
-      char rabdef$$_fill_3;
-      unsigned char rab$b_rop1;
-      unsigned char rab$b_rop2;
-      unsigned char rab$b_rop3;
+    union
+    {
+        unsigned short int rab$w_rfa [3];
+        struct
+        {
+            unsigned int rab$l_rfa0;
+            unsigned short int rab$w_rfa4;
+        };
     };
-  };
-  unsigned int rab$l_sts;
-  union  {
-    unsigned int rab$l_stv;
-    struct  {
-      unsigned short int rab$w_stv0;
-      unsigned short int rab$w_stv2;
+    short int rabdef$$_fill_4;
+    unsigned int rab$l_ctx;
+    union
+    {
+        unsigned short int rab$w_rop_2;
+        struct
+        {
+            unsigned rab$v_nql		: 1;
+            unsigned rab$v_nodlckwt		: 1;
+            unsigned rab$v_nodlckblk		: 1;
+            unsigned rabdef$$_fill_5		: 13;
+        };
     };
-  };
-  union  {
-    unsigned short int rab$w_rfa [3];
-    struct  {
-      unsigned int rab$l_rfa0;
-      unsigned short int rab$w_rfa4;
+    unsigned char rab$b_rac;
+    unsigned char rab$b_tmo;
+    unsigned short int rab$w_usz;
+    unsigned short int rab$w_rsz;
+    char *rab$l_ubf;
+    char *rab$l_rbf;
+    char *rab$l_rhb;
+    union
+    {
+        char *rab$l_kbf;
+        char *rab$l_pbf;
     };
-  };
-  short int rabdef$$_fill_4;
-  unsigned int rab$l_ctx;
-  union  {
-    unsigned short int rab$w_rop_2;
-    struct  {
-      unsigned rab$v_nql		: 1;
-      unsigned rab$v_nodlckwt		: 1;
-      unsigned rab$v_nodlckblk		: 1;
-      unsigned rabdef$$_fill_5		: 13;
+    union
+    {
+        unsigned char rab$b_ksz;
+        unsigned char rab$b_psz;
     };
-  };
-  unsigned char rab$b_rac;
-  unsigned char rab$b_tmo;
-  unsigned short int rab$w_usz;
-  unsigned short int rab$w_rsz;
-  char *rab$l_ubf;
-  char *rab$l_rbf;
-  char *rab$l_rhb;
-  union  {
-    char *rab$l_kbf;
-    char *rab$l_pbf;
-  };
-  union  {
-    unsigned char rab$b_ksz;
-    unsigned char rab$b_psz;
-  };
-  unsigned char rab$b_krf;
-  char rab$b_mbf;
-  unsigned char rab$b_mbc;
-  union  {
-    unsigned int rab$l_bkt;
-    unsigned int rab$l_dct;
-  };
-  struct _fabdef *rab$l_fab;
-  void *rab$l_xab;
+    unsigned char rab$b_krf;
+    char rab$b_mbf;
+    unsigned char rab$b_mbc;
+    union
+    {
+        unsigned int rab$l_bkt;
+        unsigned int rab$l_dct;
+    };
+    struct _fabdef *rab$l_fab;
+    void *rab$l_xab;
 };
- 
-struct _rab64def {
-  unsigned char rab64$b_bid;
-  unsigned char rab64$b_bln;
-  union  {
-    unsigned short int rab64$w_isi;
-    struct  {
-      unsigned rab64def$$_fill_1	: 6;
-      unsigned rab64$v_ppf_rat		: 8;
-      unsigned rab64$v_ppf_ind		: 1;
-      unsigned rab64$v_ppisi		: 1;
+
+struct _rab64def
+{
+    unsigned char rab64$b_bid;
+    unsigned char rab64$b_bln;
+    union
+    {
+        unsigned short int rab64$w_isi;
+        struct
+        {
+            unsigned rab64def$$_fill_1	: 6;
+            unsigned rab64$v_ppf_rat		: 8;
+            unsigned rab64$v_ppf_ind		: 1;
+            unsigned rab64$v_ppisi		: 1;
+        };
     };
-  };
-  union  {
-    unsigned int rab64$l_rop;
-    struct  {
-      unsigned rab64$v_asy		: 1;
-      unsigned rab64$v_tpt		: 1;
-      unsigned rab64$v_rea		: 1;
-      unsigned rab64$v_rrl		: 1;
-      unsigned rab64$v_uif		: 1;
-      unsigned rab64$v_mas		: 1;
-      unsigned rab64$v_fdl		: 1;
-      unsigned rab64$v_rev		: 1;
-      unsigned rab64$v_eof		: 1;
-      unsigned rab64$v_rah		: 1;
-      unsigned rab64$v_wbh		: 1;
-      unsigned rab64$v_bio		: 1;
-      unsigned rab64$v_cdk		: 1;
-      unsigned rab64$v_loa		: 1;
-      unsigned rab64$v_lim		: 1;
-      unsigned rab64$v_syncsts		: 1;
-      unsigned rab64$v_loc		: 1;
-      unsigned rab64$v_wat		: 1;
-      unsigned rab64$v_ulk		: 1;
-      unsigned rab64$v_rlk		: 1;
-      unsigned rab64$v_nlk		: 1;
-      unsigned rab64$v_kge		: 1;
-      unsigned rab64$v_kgt		: 1;
-      unsigned rab64$v_nxr		: 1;
-      unsigned rab64$v_rne		: 1;
-      unsigned rab64$v_tmo		: 1;
-      unsigned rab64$v_cvt		: 1;
-      unsigned rab64$v_rnf		: 1;
-      unsigned rab64$v_eto		: 1;
-      unsigned rab64$v_pta		: 1;
-      unsigned rab64$v_pmt		: 1;
-      unsigned rab64$v_cco		: 1;
+    union
+    {
+        unsigned int rab64$l_rop;
+        struct
+        {
+            unsigned rab64$v_asy		: 1;
+            unsigned rab64$v_tpt		: 1;
+            unsigned rab64$v_rea		: 1;
+            unsigned rab64$v_rrl		: 1;
+            unsigned rab64$v_uif		: 1;
+            unsigned rab64$v_mas		: 1;
+            unsigned rab64$v_fdl		: 1;
+            unsigned rab64$v_rev		: 1;
+            unsigned rab64$v_eof		: 1;
+            unsigned rab64$v_rah		: 1;
+            unsigned rab64$v_wbh		: 1;
+            unsigned rab64$v_bio		: 1;
+            unsigned rab64$v_cdk		: 1;
+            unsigned rab64$v_loa		: 1;
+            unsigned rab64$v_lim		: 1;
+            unsigned rab64$v_syncsts		: 1;
+            unsigned rab64$v_loc		: 1;
+            unsigned rab64$v_wat		: 1;
+            unsigned rab64$v_ulk		: 1;
+            unsigned rab64$v_rlk		: 1;
+            unsigned rab64$v_nlk		: 1;
+            unsigned rab64$v_kge		: 1;
+            unsigned rab64$v_kgt		: 1;
+            unsigned rab64$v_nxr		: 1;
+            unsigned rab64$v_rne		: 1;
+            unsigned rab64$v_tmo		: 1;
+            unsigned rab64$v_cvt		: 1;
+            unsigned rab64$v_rnf		: 1;
+            unsigned rab64$v_eto		: 1;
+            unsigned rab64$v_pta		: 1;
+            unsigned rab64$v_pmt		: 1;
+            unsigned rab64$v_cco		: 1;
+        };
+        struct
+        {
+            unsigned rab64def$$_fill_6	: 21;
+            unsigned rab64$v_eqnxt		: 1;
+            unsigned rab64$v_nxt		: 1;
+            unsigned rab64$v_fill_4_		: 1;
+        };
+        struct
+        {
+            char rab64def$$_fill_3;
+            unsigned char rab64$b_rop1;
+            unsigned char rab64$b_rop2;
+            unsigned char rab64$b_rop3;
+        };
     };
-    struct  {
-      unsigned rab64def$$_fill_6	: 21;
-      unsigned rab64$v_eqnxt		: 1;
-      unsigned rab64$v_nxt		: 1;
-      unsigned rab64$v_fill_4_		: 1;
+    unsigned int rab64$l_sts;
+    union
+    {
+        unsigned int rab64$l_stv;
+        struct
+        {
+            unsigned short int rab64$w_stv0;
+            unsigned short int rab64$w_stv2;
+        };
     };
-    struct  {
-      char rab64def$$_fill_3;
-      unsigned char rab64$b_rop1;
-      unsigned char rab64$b_rop2;
-      unsigned char rab64$b_rop3;
+    union
+    {
+        unsigned short int rab64$w_rfa [3];
+        struct
+        {
+            unsigned int rab64$l_rfa0;
+            unsigned short int rab64$w_rfa4;
+        };
     };
-  };
-  unsigned int rab64$l_sts;
-  union  {
-    unsigned int rab64$l_stv;
-    struct  {
-      unsigned short int rab64$w_stv0;
-      unsigned short int rab64$w_stv2;
+    short int rab64def$$_fill_4;
+    unsigned int rab64$l_ctx;
+    union
+    {
+        unsigned short int rab64$w_rop_2;
+        struct
+        {
+            unsigned rab64$v_nql		: 1;
+            unsigned rab64$v_nodlckwt		: 1;
+            unsigned rab64$v_nodlckblk	: 1;
+            unsigned rab64def$$_fill_5	: 13;
+        };
     };
-  };
-  union  {
-    unsigned short int rab64$w_rfa [3];
-    struct  {
-      unsigned int rab64$l_rfa0;
-      unsigned short int rab64$w_rfa4;
+    unsigned char rab64$b_rac;
+    unsigned char rab64$b_tmo;
+    unsigned short int rab64$w_usz;
+    unsigned short int rab64$w_rsz;
+    char *rab64$l_ubf;
+    char *rab64$l_rbf;
+    char *rab64$l_rhb;
+    union
+    {
+        char *rab64$l_kbf;
+        char *rab64$l_pbf;
     };
-  };
-  short int rab64def$$_fill_4;
-  unsigned int rab64$l_ctx;
-  union  {
-    unsigned short int rab64$w_rop_2;
-    struct  {
-      unsigned rab64$v_nql		: 1;
-      unsigned rab64$v_nodlckwt		: 1;
-      unsigned rab64$v_nodlckblk	: 1;
-      unsigned rab64def$$_fill_5	: 13;
+    union
+    {
+        unsigned char rab64$b_ksz;
+        unsigned char rab64$b_psz;
     };
-  };
-  unsigned char rab64$b_rac;
-  unsigned char rab64$b_tmo;
-  unsigned short int rab64$w_usz;
-  unsigned short int rab64$w_rsz;
-  char *rab64$l_ubf;
-  char *rab64$l_rbf;
-  char *rab64$l_rhb;
-  union  {
-    char *rab64$l_kbf;
-    char *rab64$l_pbf;
-  };
-  union  {
-    unsigned char rab64$b_ksz;
-    unsigned char rab64$b_psz;
-  };
-  unsigned char rab64$b_krf;
-  char rab64$b_mbf;
-  unsigned char rab64$b_mbc;
-  union  {
-    unsigned int rab64$l_bkt;
-    unsigned int rab64$l_dct;
-  };
-  struct _fabdef *rab64$l_fab;
-  void *rab64$l_xab;
-  union  {
-    unsigned int rab64$l_version;
-    unsigned int rab$l_version;
-    struct  {
-      unsigned short int rab64$w_verminor;
-      unsigned short int rab64$w_vermajor;
+    unsigned char rab64$b_krf;
+    char rab64$b_mbf;
+    unsigned char rab64$b_mbc;
+    union
+    {
+        unsigned int rab64$l_bkt;
+        unsigned int rab64$l_dct;
     };
-    struct  {
-      unsigned short int rab$w_verminor;
-      unsigned short int rab$w_vermajor;
+    struct _fabdef *rab64$l_fab;
+    void *rab64$l_xab;
+    union
+    {
+        unsigned int rab64$l_version;
+        unsigned int rab$l_version;
+        struct
+        {
+            unsigned short int rab64$w_verminor;
+            unsigned short int rab64$w_vermajor;
+        };
+        struct
+        {
+            unsigned short int rab$w_verminor;
+            unsigned short int rab$w_vermajor;
+        };
     };
-  };
-  union  {
-    void *rab64$pq_ubf;
-    void *rab$pq_ubf;
-  };
-  union  {
-    unsigned long long rab64$q_usz;
-    unsigned long long rab$q_usz;
-  };
-  union  {
-    void *rab64$pq_rbf;
-    void *rab$pq_rbf;
-  };
-  union  {
-    unsigned long long rab64$q_rsz;
-    unsigned long long rab$q_rsz;
-  };
-  union  {
-    void *rab64$pq_kbf;
-    void *rab$pq_kbf;
-  };
-  union  {
-    void *rab64$pq_rhb;
-    void *rab$pq_rhb;
-  };
-  union  {
-    unsigned long long rab64$q_ctx;
-    unsigned long long rab$q_ctx;
-  };
-  union  {
-    unsigned int rab64$l_ropext;
-    unsigned int rab$l_ropext;
-    struct  {
-      unsigned rab64def$$_fill_7_1		: 29;
-      unsigned rab64$v_reserved29		: 1;
-      unsigned rab64$v_reserved30		: 1;
-      unsigned rab64$v_reserved31		: 1;
+    union
+    {
+        void *rab64$pq_ubf;
+        void *rab$pq_ubf;
     };
-    struct  {
-      unsigned rab64def$$_fill_7_2	: 29;
-      unsigned rab$v_reserved29		: 1;
-      unsigned rab$v_reserved30		: 1;
-      unsigned rab$v_reserved31		: 1;
+    union
+    {
+        unsigned long long rab64$q_usz;
+        unsigned long long rab$q_usz;
     };
-  };
-  union  {
-    unsigned int rab64$l_mbf;
-    unsigned int rab$l_mbf;
-  };
-  union  {
-    unsigned int rab64$l_mbc;
-    unsigned int rab$l_mbc;
-  };
-  union  {
-    unsigned int rab64$l_reserved_1;
-    unsigned int rab$l_reserved_1;
-  };
+    union
+    {
+        void *rab64$pq_rbf;
+        void *rab$pq_rbf;
+    };
+    union
+    {
+        unsigned long long rab64$q_rsz;
+        unsigned long long rab$q_rsz;
+    };
+    union
+    {
+        void *rab64$pq_kbf;
+        void *rab$pq_kbf;
+    };
+    union
+    {
+        void *rab64$pq_rhb;
+        void *rab$pq_rhb;
+    };
+    union
+    {
+        unsigned long long rab64$q_ctx;
+        unsigned long long rab$q_ctx;
+    };
+    union
+    {
+        unsigned int rab64$l_ropext;
+        unsigned int rab$l_ropext;
+        struct
+        {
+            unsigned rab64def$$_fill_7_1		: 29;
+            unsigned rab64$v_reserved29		: 1;
+            unsigned rab64$v_reserved30		: 1;
+            unsigned rab64$v_reserved31		: 1;
+        };
+        struct
+        {
+            unsigned rab64def$$_fill_7_2	: 29;
+            unsigned rab$v_reserved29		: 1;
+            unsigned rab$v_reserved30		: 1;
+            unsigned rab$v_reserved31		: 1;
+        };
+    };
+    union
+    {
+        unsigned int rab64$l_mbf;
+        unsigned int rab$l_mbf;
+    };
+    union
+    {
+        unsigned int rab64$l_mbc;
+        unsigned int rab$l_mbc;
+    };
+    union
+    {
+        unsigned int rab64$l_reserved_1;
+        unsigned int rab$l_reserved_1;
+    };
 };
- 
+
 extern struct _rabdef cc$rms_rab;
 
 extern struct _rab64def cc$rms_rab64;
 
 #endif
- 
+

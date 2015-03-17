@@ -5,7 +5,7 @@
  *
  * Copyright 1994,95,96 by Fritz Elfert (fritz@isdn4linux.de)
  * Copyright 1995,96    Thinking Objects Software GmbH Wuerzburg
- * 
+ *
  * This software may be used and distributed according to the terms
  * of the GNU General Public License, incorporated herein by reference.
  *
@@ -59,29 +59,29 @@
 
 /***************************************************************************/
 /* Extensions made by Werner Cornelius (werner@ikt.de)                     */
-/*                                                                         */ 
+/*                                                                         */
 /* The proceed command holds a incoming call in a state to leave processes */
 /* enough time to check whether ist should be accepted.                    */
 /* The PROT_IO Command extends the interface to make protocol dependant    */
 /* features available (call diversion, call waiting...).                   */
-/*                                                                         */ 
+/*                                                                         */
 /* The PROT_IO Command is executed with the desired driver id and the arg  */
 /* parameter coded as follows:                                             */
 /* The lower 8 bits of arg contain the desired protocol from ISDN_PTYPE    */
 /* definitions. The upper 24 bits represent the protocol specific cmd/stat.*/
 /* Any additional data is protocol and command specific.                   */
-/* This mechanism also applies to the statcallb callback STAT_PROT.        */    
+/* This mechanism also applies to the statcallb callback STAT_PROT.        */
 /*                                                                         */
 /* This suggested extension permits an easy expansion of protocol specific */
 /* handling. Extensions may be added at any time without changing the HL   */
 /* driver code and not getting conflicts without certifications.           */
 /* The well known CAPI 2.0 interface handles such extensions in a similar  */
 /* way. Perhaps a protocol specific module may be added and separately     */
-/* loaded and linked to the basic isdn module for handling.                */                    
+/* loaded and linked to the basic isdn module for handling.                */
 /***************************************************************************/
 
 /*****************/
-/* DSS1 commands */ 
+/* DSS1 commands */
 /*****************/
 #define DSS1_CMD_INVOKE       ((0x00 << 8) | ISDN_PTYPE_EURO)   /* invoke a supplementary service */
 #define DSS1_CMD_INVOKE_ABORT ((0x01 << 8) | ISDN_PTYPE_EURO)   /* abort a invoke cmd */
@@ -122,11 +122,11 @@
 /*                                                                   */
 /* Broadcast invoke frames from the network are reported via the     */
 /* STAT_INVOKE_BRD callback. The ll_id is set to 0, the other fields */
-/* are supplied by the network and not by the HL.                    */   
+/* are supplied by the network and not by the HL.                    */
 /*********************************************************************/
 
 /*****************/
-/* NI1 commands */ 
+/* NI1 commands */
 /*****************/
 #define NI1_CMD_INVOKE       ((0x00 << 8) | ISDN_PTYPE_NI1)   /* invoke a supplementary service */
 #define NI1_CMD_INVOKE_ABORT ((0x01 << 8) | ISDN_PTYPE_NI1)   /* abort a invoke cmd */
@@ -139,21 +139,22 @@
 #define NI1_STAT_INVOKE_BRD  ((0x82 << 8) | ISDN_PTYPE_NI1)   /* Deliver invoke broadcast info */
 
 typedef struct
-  { ulong ll_id; /* ID supplied by LL when executing    */
-		 /* a command and returned by HL for    */
-                 /* INVOKE_RES and INVOKE_ERR           */
+{
+    ulong ll_id; /* ID supplied by LL when executing    */
+    /* a command and returned by HL for    */
+    /* INVOKE_RES and INVOKE_ERR           */
     int hl_id;   /* ID supplied by HL when called       */
-                 /* for executing a cmd and delivered   */
-                 /* for results and errors              */
-                 /* must be supplied by LL when aborting*/  
+    /* for executing a cmd and delivered   */
+    /* for results and errors              */
+    /* must be supplied by LL when aborting*/
     int proc;    /* invoke procedure used by CMD_INVOKE */
-                 /* returned by callback and broadcast  */ 
+    /* returned by callback and broadcast  */
     int timeout; /* timeout for INVOKE CMD in ms        */
-                 /* -1  in stat callback when timed out */
-                 /* error value when error callback     */
+    /* -1  in stat callback when timed out */
+    /* error value when error callback     */
     int datalen; /* length of cmd or stat data          */
     u_char *data;/* pointer to data delivered or send   */
-  } isdn_cmd_stat;
+} isdn_cmd_stat;
 
 /*
  * Commands from linklevel to lowlevel
@@ -265,7 +266,8 @@ typedef struct
 #define ISDN_FEATURE_P_MASK     (0x0FF000000) /* Max. 8 Protocols */
 #define ISDN_FEATURE_P_SHIFT    (24)
 
-typedef struct setup_parm {
+typedef struct setup_parm
+{
     unsigned char phone[32];	/* Remote Phone-Number */
     unsigned char eazmsn[32];	/* Local EAZ or MSN    */
     unsigned char si1;      /* Service Indicator 1 */
@@ -280,44 +282,45 @@ typedef struct setup_parm {
 
 #define FAXIDLEN 21
 
-typedef struct T30_s {
-	/* session parameters */
-	__u8 resolution		__attribute__ ((packed));
-	__u8 rate		__attribute__ ((packed));
-	__u8 width		__attribute__ ((packed));
-	__u8 length		__attribute__ ((packed));
-	__u8 compression	__attribute__ ((packed));
-	__u8 ecm		__attribute__ ((packed));
-	__u8 binary		__attribute__ ((packed));
-	__u8 scantime		__attribute__ ((packed));
-	__u8 id[FAXIDLEN]	__attribute__ ((packed));
-	/* additional parameters */
-	__u8 phase		__attribute__ ((packed));
-	__u8 direction		__attribute__ ((packed));
-	__u8 code		__attribute__ ((packed));
-	__u8 badlin		__attribute__ ((packed));
-	__u8 badmul		__attribute__ ((packed));
-	__u8 bor		__attribute__ ((packed));
-	__u8 fet		__attribute__ ((packed));
-	__u8 pollid[FAXIDLEN]	__attribute__ ((packed));
-	__u8 cq			__attribute__ ((packed));
-	__u8 cr			__attribute__ ((packed));
-	__u8 ctcrty		__attribute__ ((packed));
-	__u8 minsp		__attribute__ ((packed));
-	__u8 phcto		__attribute__ ((packed));
-	__u8 rel		__attribute__ ((packed));
-	__u8 nbc		__attribute__ ((packed));
-	/* remote station parameters */
-	__u8 r_resolution	__attribute__ ((packed));
-	__u8 r_rate		__attribute__ ((packed));
-	__u8 r_width		__attribute__ ((packed));
-	__u8 r_length		__attribute__ ((packed));
-	__u8 r_compression	__attribute__ ((packed));
-	__u8 r_ecm		__attribute__ ((packed));
-	__u8 r_binary		__attribute__ ((packed));
-	__u8 r_scantime		__attribute__ ((packed));
-	__u8 r_id[FAXIDLEN]	__attribute__ ((packed));
-	__u8 r_code		__attribute__ ((packed));
+typedef struct T30_s
+{
+    /* session parameters */
+    __u8 resolution		__attribute__ ((packed));
+    __u8 rate		__attribute__ ((packed));
+    __u8 width		__attribute__ ((packed));
+    __u8 length		__attribute__ ((packed));
+    __u8 compression	__attribute__ ((packed));
+    __u8 ecm		__attribute__ ((packed));
+    __u8 binary		__attribute__ ((packed));
+    __u8 scantime		__attribute__ ((packed));
+    __u8 id[FAXIDLEN]	__attribute__ ((packed));
+    /* additional parameters */
+    __u8 phase		__attribute__ ((packed));
+    __u8 direction		__attribute__ ((packed));
+    __u8 code		__attribute__ ((packed));
+    __u8 badlin		__attribute__ ((packed));
+    __u8 badmul		__attribute__ ((packed));
+    __u8 bor		__attribute__ ((packed));
+    __u8 fet		__attribute__ ((packed));
+    __u8 pollid[FAXIDLEN]	__attribute__ ((packed));
+    __u8 cq			__attribute__ ((packed));
+    __u8 cr			__attribute__ ((packed));
+    __u8 ctcrty		__attribute__ ((packed));
+    __u8 minsp		__attribute__ ((packed));
+    __u8 phcto		__attribute__ ((packed));
+    __u8 rel		__attribute__ ((packed));
+    __u8 nbc		__attribute__ ((packed));
+    /* remote station parameters */
+    __u8 r_resolution	__attribute__ ((packed));
+    __u8 r_rate		__attribute__ ((packed));
+    __u8 r_width		__attribute__ ((packed));
+    __u8 r_length		__attribute__ ((packed));
+    __u8 r_compression	__attribute__ ((packed));
+    __u8 r_ecm		__attribute__ ((packed));
+    __u8 r_binary		__attribute__ ((packed));
+    __u8 r_scantime		__attribute__ ((packed));
+    __u8 r_id[FAXIDLEN]	__attribute__ ((packed));
+    __u8 r_code		__attribute__ ((packed));
 } T30_s;
 
 #define ISDN_TTY_FAX_CONN_IN	0
@@ -368,10 +371,11 @@ typedef struct T30_s {
 #define ISDN_FAX_CLASS1_FCERROR	4
 #define ISDN_FAX_CLASS1_QUERY	5
 
-typedef struct {
-	__u8	cmd;
-	__u8	subcmd;
-	__u8	para[50];
+typedef struct
+{
+    __u8	cmd;
+    __u8	subcmd;
+    __u8	para[50];
 } aux_s;
 
 #define AT_COMMAND	0
@@ -384,45 +388,49 @@ typedef struct {
 /* this is compatible to the old union size */
 #define MAX_CAPI_PARA_LEN 50
 
-typedef struct {
-	/* Header */
-	__u16 Length;
-	__u16 ApplId;
-	__u8 Command;
-	__u8 Subcommand;
-	__u16 Messagenumber;
+typedef struct
+{
+    /* Header */
+    __u16 Length;
+    __u16 ApplId;
+    __u8 Command;
+    __u8 Subcommand;
+    __u16 Messagenumber;
 
-	/* Parameter */
-	union {
-		__u32 Controller;
-		__u32 PLCI;
-		__u32 NCCI;
-	} adr;
-	__u8 para[MAX_CAPI_PARA_LEN];
+    /* Parameter */
+    union
+    {
+        __u32 Controller;
+        __u32 PLCI;
+        __u32 NCCI;
+    } adr;
+    __u8 para[MAX_CAPI_PARA_LEN];
 } capi_msg;
 
 /*
  * Structure for exchanging above infos
  *
  */
-typedef struct {
-	int   driver;		/* Lowlevel-Driver-ID            */
-	int   command;		/* Command or Status (see above) */
-	ulong arg;		/* Additional Data               */
-	union {
-		ulong errcode;	/* Type of error with STAT_L1ERR	*/
-		int length;	/* Amount of bytes sent with STAT_BSENT	*/
-		u_char num[50];	/* Additional Data			*/
-		setup_parm setup;/* For SETUP msg			*/
-		capi_msg cmsg;	/* For CAPI like messages		*/
-		char display[85];/* display message data		*/ 
-		isdn_cmd_stat isdn_io; /* ISDN IO-parameter/result	*/
-		aux_s aux;	/* for modem commands/indications	*/
+typedef struct
+{
+    int   driver;		/* Lowlevel-Driver-ID            */
+    int   command;		/* Command or Status (see above) */
+    ulong arg;		/* Additional Data               */
+    union
+    {
+        ulong errcode;	/* Type of error with STAT_L1ERR	*/
+        int length;	/* Amount of bytes sent with STAT_BSENT	*/
+        u_char num[50];	/* Additional Data			*/
+        setup_parm setup;/* For SETUP msg			*/
+        capi_msg cmsg;	/* For CAPI like messages		*/
+        char display[85];/* display message data		*/
+        isdn_cmd_stat isdn_io; /* ISDN IO-parameter/result	*/
+        aux_s aux;	/* for modem commands/indications	*/
 #ifdef CONFIG_ISDN_TTY_FAX
-		T30_s	*fax;	/* Pointer to ttys fax struct		*/
+        T30_s	*fax;	/* Pointer to ttys fax struct		*/
 #endif
-		ulong userdata;	/* User Data */
-	} parm;
+        ulong userdata;	/* User Data */
+    } parm;
 } isdn_ctrl;
 
 #define dss1_io    isdn_io
@@ -435,93 +443,94 @@ typedef struct {
  * between the ISDN subsystem and its drivers is done.
  *
  */
-typedef struct {
-  /* Number of channels supported by this driver
-   */
-  int channels;
+typedef struct
+{
+    /* Number of channels supported by this driver
+     */
+    int channels;
 
-  /* 
-   * Maximum Size of transmit/receive-buffer this driver supports.
-   */
-  int maxbufsize;
+    /*
+     * Maximum Size of transmit/receive-buffer this driver supports.
+     */
+    int maxbufsize;
 
-  /* Feature-Flags for this driver.
-   * See defines ISDN_FEATURE_... for Values
-   */
-  unsigned long features;
+    /* Feature-Flags for this driver.
+     * See defines ISDN_FEATURE_... for Values
+     */
+    unsigned long features;
 
-  /*
-   * Needed for calculating
-   * dev->hard_header_len = linklayer header + hl_hdrlen;
-   * Drivers, not supporting sk_buff's should set this to 0.
-   */
-  unsigned short hl_hdrlen;
+    /*
+     * Needed for calculating
+     * dev->hard_header_len = linklayer header + hl_hdrlen;
+     * Drivers, not supporting sk_buff's should set this to 0.
+     */
+    unsigned short hl_hdrlen;
 
-  /*
-   * Receive-Callback using sk_buff's
-   * Parameters:
-   *             int                    Driver-ID
-   *             int                    local channel-number (0 ...)
-   *             struct sk_buff *skb    received Data
-   */
-  void (*rcvcallb_skb)(int, int, struct sk_buff *);
+    /*
+     * Receive-Callback using sk_buff's
+     * Parameters:
+     *             int                    Driver-ID
+     *             int                    local channel-number (0 ...)
+     *             struct sk_buff *skb    received Data
+     */
+    void (*rcvcallb_skb)(int, int, struct sk_buff *);
 
-  /* Status-Callback
-   * Parameters:
-   *             isdn_ctrl*
-   *                   driver  = Driver ID.
-   *                   command = One of above ISDN_STAT_... constants.
-   *                   arg     = depending on status-type.
-   *                   num     = depending on status-type.
-   */
-  int (*statcallb)(isdn_ctrl*);
+    /* Status-Callback
+     * Parameters:
+     *             isdn_ctrl*
+     *                   driver  = Driver ID.
+     *                   command = One of above ISDN_STAT_... constants.
+     *                   arg     = depending on status-type.
+     *                   num     = depending on status-type.
+     */
+    int (*statcallb)(isdn_ctrl*);
 
-  /* Send command
-   * Parameters:
-   *             isdn_ctrl*
-   *                   driver  = Driver ID.
-   *                   command = One of above ISDN_CMD_... constants.
-   *                   arg     = depending on command.
-   *                   num     = depending on command.
-   */
-  int (*command)(isdn_ctrl*);
+    /* Send command
+     * Parameters:
+     *             isdn_ctrl*
+     *                   driver  = Driver ID.
+     *                   command = One of above ISDN_CMD_... constants.
+     *                   arg     = depending on command.
+     *                   num     = depending on command.
+     */
+    int (*command)(isdn_ctrl*);
 
-  /*
-   * Send data using sk_buff's
-   * Parameters:
-   *             int                    driverId
-   *             int                    local channel-number (0...)
-   *             int                    Flag: Need ACK for this packet.
-   *             struct sk_buff *skb    Data to send
-   */
-  int (*writebuf_skb) (int, int, int, struct sk_buff *);
+    /*
+     * Send data using sk_buff's
+     * Parameters:
+     *             int                    driverId
+     *             int                    local channel-number (0...)
+     *             int                    Flag: Need ACK for this packet.
+     *             struct sk_buff *skb    Data to send
+     */
+    int (*writebuf_skb) (int, int, int, struct sk_buff *);
 
-  /* Send raw D-Channel-Commands
-   * Parameters:
-   *             u_char pointer data
-   *             int    length of data
-   *             int    Flag: 0 = Call form Kernel-Space (use memcpy,
-   *                              no schedule allowed) 
-   *                          1 = Data is in User-Space (use memcpy_fromfs,
-   *                              may schedule)
-   *             int    driverId
-   *             int    local channel-number (0 ...)
-   */
-  int (*writecmd)(const u_char*, int, int, int, int);
+    /* Send raw D-Channel-Commands
+     * Parameters:
+     *             u_char pointer data
+     *             int    length of data
+     *             int    Flag: 0 = Call form Kernel-Space (use memcpy,
+     *                              no schedule allowed)
+     *                          1 = Data is in User-Space (use memcpy_fromfs,
+     *                              may schedule)
+     *             int    driverId
+     *             int    local channel-number (0 ...)
+     */
+    int (*writecmd)(const u_char*, int, int, int, int);
 
-  /* Read raw Status replies
-   *             u_char pointer data (volatile)
-   *             int    length of buffer
-   *             int    Flag: 0 = Call form Kernel-Space (use memcpy,
-   *                              no schedule allowed) 
-   *                          1 = Data is in User-Space (use memcpy_fromfs,
-   *                              may schedule)
-   *             int    driverId
-   *             int    local channel-number (0 ...)
-   */
-  int (*readstat)(u_char*, int, int, int, int);
+    /* Read raw Status replies
+     *             u_char pointer data (volatile)
+     *             int    length of buffer
+     *             int    Flag: 0 = Call form Kernel-Space (use memcpy,
+     *                              no schedule allowed)
+     *                          1 = Data is in User-Space (use memcpy_fromfs,
+     *                              may schedule)
+     *             int    driverId
+     *             int    local channel-number (0 ...)
+     */
+    int (*readstat)(u_char*, int, int, int, int);
 
-  char id[20];
+    char id[20];
 } isdn_if;
 
 /*

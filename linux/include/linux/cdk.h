@@ -54,11 +54,12 @@
  *	way the host system can quickly determine that the board is present
  *	and is operational.
  */
-typedef struct cdkecpsig {
-	unsigned long	magic;
-	unsigned short	romver;
-	unsigned short	cputype;
-	unsigned char	panelid[8];
+typedef struct cdkecpsig
+{
+    unsigned long	magic;
+    unsigned short	romver;
+    unsigned short	cputype;
+    unsigned char	panelid[8];
 } cdkecpsig_t;
 
 #define	ECP_MAGIC	0x21504345
@@ -69,22 +70,23 @@ typedef struct cdkecpsig {
  *	memory. This way the host system can quickly determine that the board
  *	is present and is operational.
  */
-typedef struct cdkonbsig {
-	unsigned short	magic0;
-	unsigned short	magic1;
-	unsigned short	magic2;
-	unsigned short	magic3;
-	unsigned short	romver;
-	unsigned short	memoff;
-	unsigned short	memseg;
-	unsigned short	amask0;
-	unsigned short	pic;
-	unsigned short	status;
-	unsigned short	btype;
-	unsigned short	clkticks;
-	unsigned short	clkspeed;
-	unsigned short	amask1;
-	unsigned short	amask2;
+typedef struct cdkonbsig
+{
+    unsigned short	magic0;
+    unsigned short	magic1;
+    unsigned short	magic2;
+    unsigned short	magic3;
+    unsigned short	romver;
+    unsigned short	memoff;
+    unsigned short	memseg;
+    unsigned short	amask0;
+    unsigned short	pic;
+    unsigned short	status;
+    unsigned short	btype;
+    unsigned short	clkticks;
+    unsigned short	clkspeed;
+    unsigned short	amask1;
+    unsigned short	amask2;
 } cdkonbsig_t;
 
 #define	ONB_MAGIC0	0xf2a7
@@ -97,15 +99,16 @@ typedef struct cdkonbsig {
  *	startup parameters used by the slave image when it starts executing.
  *	They allow for the specification of buffer sizes, debug trace, etc.
  */
-typedef struct cdkfeature {
-	unsigned long	debug;
-	unsigned long	banner;
-	unsigned long	etype;
-	unsigned long	nrdevs;
-	unsigned long	brdspec;
-	unsigned long	txrqsize;
-	unsigned long	rxrqsize;
-	unsigned long	flags;
+typedef struct cdkfeature
+{
+    unsigned long	debug;
+    unsigned long	banner;
+    unsigned long	etype;
+    unsigned long	nrdevs;
+    unsigned long	brdspec;
+    unsigned long	txrqsize;
+    unsigned long	rxrqsize;
+    unsigned long	flags;
 } cdkfeature_t;
 
 #define	ETYP_DDK	0
@@ -116,27 +119,28 @@ typedef struct cdkfeature {
  *	environment sets up after it has been downloaded and started. It
  *	essentially provides a memory map for the shared memory interface.
  */
-typedef struct cdkhdr {
-	unsigned short	command;
-	unsigned short	status;
-	unsigned short	port;
-	unsigned short	mode;
-	unsigned long	cmd_buf[14];
-	unsigned short	alive_cnt;
-	unsigned short	intrpt_mode;
-	unsigned char	intrpt_id[8];
-	unsigned char	ver_release;
-	unsigned char	ver_modification;
-	unsigned char	ver_fix;
-	unsigned char	deadman_restart;
-	unsigned short	deadman;
-	unsigned short	nrdevs;
-	unsigned long	memp;
-	unsigned long	hostp;
-	unsigned long	slavep;
-	unsigned char	hostreq;
-	unsigned char	slavereq;
-	unsigned char	cmd_reserved[30];
+typedef struct cdkhdr
+{
+    unsigned short	command;
+    unsigned short	status;
+    unsigned short	port;
+    unsigned short	mode;
+    unsigned long	cmd_buf[14];
+    unsigned short	alive_cnt;
+    unsigned short	intrpt_mode;
+    unsigned char	intrpt_id[8];
+    unsigned char	ver_release;
+    unsigned char	ver_modification;
+    unsigned char	ver_fix;
+    unsigned char	deadman_restart;
+    unsigned short	deadman;
+    unsigned short	nrdevs;
+    unsigned long	memp;
+    unsigned long	hostp;
+    unsigned long	slavep;
+    unsigned char	hostreq;
+    unsigned char	slavereq;
+    unsigned char	cmd_reserved[30];
 } cdkhdr_t;
 
 #define	MODE_DDK	0
@@ -152,9 +156,10 @@ typedef struct cdkhdr {
  *	as required are layed out in shared memory to define how the rest of
  *	shared memory is divided up. There will be one for each port.
  */
-typedef struct cdkmem {
-	unsigned short	dtype;
-	unsigned long	offset;
+typedef struct cdkmem
+{
+    unsigned short	dtype;
+    unsigned long	offset;
 } cdkmem_t;
 
 #define	TYP_UNDEFINED	0x0
@@ -208,33 +213,34 @@ typedef struct cdkmem {
  *	with it. Basically this structure defines the characteristics of this
  *	port: baud rate, chars, parity, input/output char cooking etc.
  */
-typedef struct asyport {
-	unsigned long	baudout;
-	unsigned long	baudin;
-	unsigned long	iflag;
-	unsigned long	oflag;
-	unsigned long	lflag;
-	unsigned long	pflag;
-	unsigned long	flow;
-	unsigned long	spare1;
-	unsigned short	vtime;
-	unsigned short	vmin;
-	unsigned short	txlo;
-	unsigned short	txhi;
-	unsigned short	rxlo;
-	unsigned short	rxhi;
-	unsigned short	rxhog;
-	unsigned short	spare2;
-	unsigned char	csize;
-	unsigned char	stopbs;
-	unsigned char	parity;
-	unsigned char	stopin;
-	unsigned char	startin;
-	unsigned char	stopout;
-	unsigned char	startout;
-	unsigned char	parmark;
-	unsigned char	brkmark;
-	unsigned char	cc[11];
+typedef struct asyport
+{
+    unsigned long	baudout;
+    unsigned long	baudin;
+    unsigned long	iflag;
+    unsigned long	oflag;
+    unsigned long	lflag;
+    unsigned long	pflag;
+    unsigned long	flow;
+    unsigned long	spare1;
+    unsigned short	vtime;
+    unsigned short	vmin;
+    unsigned short	txlo;
+    unsigned short	txhi;
+    unsigned short	rxlo;
+    unsigned short	rxhi;
+    unsigned short	rxhog;
+    unsigned short	spare2;
+    unsigned char	csize;
+    unsigned char	stopbs;
+    unsigned char	parity;
+    unsigned char	stopin;
+    unsigned char	startin;
+    unsigned char	stopout;
+    unsigned char	startout;
+    unsigned char	parmark;
+    unsigned char	brkmark;
+    unsigned char	cc[11];
 } asyport_t;
 
 #define	PT_STOP1	0x0
@@ -312,10 +318,11 @@ typedef struct asyport {
  *	Define a structure to communicate serial port signal and data state
  *	information.
  */
-typedef struct asysigs {
-	unsigned long	data;
-	unsigned long	signal;
-	unsigned long	sigvalue;
+typedef struct asysigs
+{
+    unsigned long	data;
+    unsigned long	signal;
+    unsigned long	sigvalue;
 } asysigs_t;
 
 #define	DT_TXBUSY	0x1
@@ -348,24 +355,26 @@ typedef struct asysigs {
  *	port what events we want to be informed about. Fields here use the
  *	same defines as for the asysigs structure above.
  */
-typedef struct asynotify {
-	unsigned long	ctrl;
-	unsigned long	data;
-	unsigned long	signal;
-	unsigned long	sigvalue;
+typedef struct asynotify
+{
+    unsigned long	ctrl;
+    unsigned long	data;
+    unsigned long	signal;
+    unsigned long	sigvalue;
 } asynotify_t;
 
 /*
  *	Define the port control structure. It is used to do fine grain
  *	control operations on the port.
  */
-typedef struct {
-	unsigned long	rxctrl;
-	unsigned long	txctrl;
-	char		rximdch;
-	char		tximdch;
-	char		spare1;
-	char		spare2;
+typedef struct
+{
+    unsigned long	rxctrl;
+    unsigned long	txctrl;
+    char		rximdch;
+    char		tximdch;
+    char		spare1;
+    char		spare2;
 } asyctrl_t;
 
 #define	CT_ENABLE	0x1
@@ -381,36 +390,37 @@ typedef struct {
  *	of data collected for each port on the slave. The A_GETSTATS command
  *	is used to retrieve this data from the slave.
  */
-typedef struct asystats {
-	unsigned long	opens;
-	unsigned long	txchars;
-	unsigned long	rxchars;
-	unsigned long	txringq;
-	unsigned long	rxringq;
-	unsigned long	txmsgs;
-	unsigned long	rxmsgs;
-	unsigned long	txflushes;
-	unsigned long	rxflushes;
-	unsigned long	overruns;
-	unsigned long	framing;
-	unsigned long	parity;
-	unsigned long	ringover;
-	unsigned long	lost;
-	unsigned long	rxstart;
-	unsigned long	rxstop;
-	unsigned long	txstart;
-	unsigned long	txstop;
-	unsigned long	dcdcnt;
-	unsigned long	dtrcnt;
-	unsigned long	ctscnt;
-	unsigned long	rtscnt;
-	unsigned long	dsrcnt;
-	unsigned long	ricnt;
-	unsigned long	txbreaks;
-	unsigned long	rxbreaks;
-	unsigned long	signals;
-	unsigned long	state;
-	unsigned long	hwid;
+typedef struct asystats
+{
+    unsigned long	opens;
+    unsigned long	txchars;
+    unsigned long	rxchars;
+    unsigned long	txringq;
+    unsigned long	rxringq;
+    unsigned long	txmsgs;
+    unsigned long	rxmsgs;
+    unsigned long	txflushes;
+    unsigned long	rxflushes;
+    unsigned long	overruns;
+    unsigned long	framing;
+    unsigned long	parity;
+    unsigned long	ringover;
+    unsigned long	lost;
+    unsigned long	rxstart;
+    unsigned long	rxstop;
+    unsigned long	txstart;
+    unsigned long	txstop;
+    unsigned long	dcdcnt;
+    unsigned long	dtrcnt;
+    unsigned long	ctscnt;
+    unsigned long	rtscnt;
+    unsigned long	dsrcnt;
+    unsigned long	ricnt;
+    unsigned long	txbreaks;
+    unsigned long	rxbreaks;
+    unsigned long	signals;
+    unsigned long	state;
+    unsigned long	hwid;
 } asystats_t;
 
 /*****************************************************************************/
@@ -421,14 +431,15 @@ typedef struct asystats {
  *	block, defined by the following structure. The control block allows
  *	the host to open, close and control the device on the slave.
  */
-typedef struct cdkctrl {
-	unsigned char	open;
-	unsigned char	close;
-	unsigned long	openarg;
-	unsigned long	closearg;
-	unsigned long	cmd;
-	unsigned long	status;
-	unsigned long	args[32];
+typedef struct cdkctrl
+{
+    unsigned char	open;
+    unsigned char	close;
+    unsigned long	openarg;
+    unsigned long	closearg;
+    unsigned long	cmd;
+    unsigned long	status;
+    unsigned long	args[32];
 } cdkctrl_t;
 
 /*
@@ -438,11 +449,12 @@ typedef struct cdkctrl {
  *	allocated for each port, one for receive data and one for transmit
  *	data.
  */
-typedef struct cdkasyrq {
-	unsigned long	offset;
-	unsigned short	size;
-	unsigned short	head;
-	unsigned short	tail;
+typedef struct cdkasyrq
+{
+    unsigned long	offset;
+    unsigned short	size;
+    unsigned short	head;
+    unsigned short	tail;
 } cdkasyrq_t;
 
 /*
@@ -450,14 +462,15 @@ typedef struct cdkasyrq {
  *	structure. It contains a control block to command a device, and also
  *	the necessary data channel information as well.
  */
-typedef struct cdkasy {
-	cdkctrl_t	ctrl;
-	unsigned short	notify;
-	asynotify_t	changed;
-	unsigned short	receive;
-	cdkasyrq_t	rxq;
-	unsigned short	transmit;
-	cdkasyrq_t	txq;
+typedef struct cdkasy
+{
+    cdkctrl_t	ctrl;
+    unsigned short	notify;
+    asynotify_t	changed;
+    unsigned short	receive;
+    cdkasyrq_t	rxq;
+    unsigned short	transmit;
+    cdkasyrq_t	txq;
 } cdkasy_t;
 
 #pragma	pack()

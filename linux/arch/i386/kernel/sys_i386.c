@@ -30,40 +30,41 @@
  */
 asmlinkage int sys_pipe(unsigned long * fildes)
 {
-	return -EPERM;
+    return -EPERM;
 }
 
 /* common code for old and new mmaps */
 static inline long do_mmap2(
-	unsigned long addr, unsigned long len,
-	unsigned long prot, unsigned long flags,
-	unsigned long fd, unsigned long pgoff)
+    unsigned long addr, unsigned long len,
+    unsigned long prot, unsigned long flags,
+    unsigned long fd, unsigned long pgoff)
 {
-	int error = -EBADF;
-	struct file * file = NULL;
-	struct vms_fd * vms_fd;
+    int error = -EBADF;
+    struct file * file = NULL;
+    struct vms_fd * vms_fd;
 
-	flags &= ~(MAP_EXECUTABLE | MAP_DENYWRITE);
-	if (!(flags & MAP_ANONYMOUS)) {
-		vms_fd = fget(fd);
-		file = vms_fd->vfd$l_fd_p;
-		if (!file)
-			goto out;
-	}
+    flags &= ~(MAP_EXECUTABLE | MAP_DENYWRITE);
+    if (!(flags & MAP_ANONYMOUS))
+    {
+        vms_fd = fget(fd);
+        file = vms_fd->vfd$l_fd_p;
+        if (!file)
+            goto out;
+    }
 
-	down_write(&current->mm->mmap_sem);
-	error = do_mmap_pgoff(file, addr, len, prot, flags, pgoff);
-	up_write(&current->mm->mmap_sem);
+    down_write(&current->mm->mmap_sem);
+    error = do_mmap_pgoff(file, addr, len, prot, flags, pgoff);
+    up_write(&current->mm->mmap_sem);
 
 out:
-	return error;
+    return error;
 }
 
 asmlinkage long sys_mmap2(unsigned long addr, unsigned long len,
-	unsigned long prot, unsigned long flags,
-	unsigned long fd, unsigned long pgoff)
+                          unsigned long prot, unsigned long flags,
+                          unsigned long fd, unsigned long pgoff)
 {
-	return do_mmap2(addr, len, prot, flags, fd, pgoff);
+    return do_mmap2(addr, len, prot, flags, fd, pgoff);
 }
 
 /*
@@ -73,49 +74,51 @@ asmlinkage long sys_mmap2(unsigned long addr, unsigned long len,
  * block for parameter passing..
  */
 
-struct mmap_arg_struct {
-	unsigned long addr;
-	unsigned long len;
-	unsigned long prot;
-	unsigned long flags;
-	unsigned long fd;
-	unsigned long offset;
+struct mmap_arg_struct
+{
+    unsigned long addr;
+    unsigned long len;
+    unsigned long prot;
+    unsigned long flags;
+    unsigned long fd;
+    unsigned long offset;
 };
 
 asmlinkage int old_mmap(struct mmap_arg_struct *arg)
 {
-	struct mmap_arg_struct a;
-	int err = -EFAULT;
+    struct mmap_arg_struct a;
+    int err = -EFAULT;
 
-	if (copy_from_user(&a, arg, sizeof(a)))
-		goto out;
+    if (copy_from_user(&a, arg, sizeof(a)))
+        goto out;
 
-	err = -EINVAL;
-	if (a.offset & ~PAGE_MASK)
-		goto out;
+    err = -EINVAL;
+    if (a.offset & ~PAGE_MASK)
+        goto out;
 
-	err = do_mmap2(a.addr, a.len, a.prot, a.flags, a.fd, a.offset >> PAGE_SHIFT);
+    err = do_mmap2(a.addr, a.len, a.prot, a.flags, a.fd, a.offset >> PAGE_SHIFT);
 out:
-	return err;
+    return err;
 }
 
 
 extern asmlinkage int sys_select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
 
-struct sel_arg_struct {
-	unsigned long n;
-	fd_set *inp, *outp, *exp;
-	struct timeval *tvp;
+struct sel_arg_struct
+{
+    unsigned long n;
+    fd_set *inp, *outp, *exp;
+    struct timeval *tvp;
 };
 
 asmlinkage int old_select(struct sel_arg_struct *arg)
 {
-	struct sel_arg_struct a;
+    struct sel_arg_struct a;
 
-	if (copy_from_user(&a, arg, sizeof(a)))
-		return -EFAULT;
-	/* sys_select() does the appropriate kernel locking */
-	return sys_select(a.n, a.inp, a.outp, a.exp, a.tvp);
+    if (copy_from_user(&a, arg, sizeof(a)))
+        return -EFAULT;
+    /* sys_select() does the appropriate kernel locking */
+    return sys_select(a.n, a.inp, a.outp, a.exp, a.tvp);
 }
 
 /*
@@ -124,9 +127,9 @@ asmlinkage int old_select(struct sel_arg_struct *arg)
  * This is really horribly ugly.
  */
 asmlinkage int sys_ipc (uint call, int first, int second,
-			int third, void *ptr, long fifth)
+                        int third, void *ptr, long fifth)
 {
-	return -EPERM;
+    return -EPERM;
 }
 
 /*
@@ -134,48 +137,48 @@ asmlinkage int sys_ipc (uint call, int first, int second,
  */
 asmlinkage int sys_uname(struct old_utsname * name)
 {
-	int err;
-	if (!name)
-		return -EFAULT;
-	down_read(&uts_sem);
-	err=copy_to_user(name, &system_utsname, sizeof (*name));
-	up_read(&uts_sem);
-	return err?-EFAULT:0;
+    int err;
+    if (!name)
+        return -EFAULT;
+    down_read(&uts_sem);
+    err=copy_to_user(name, &system_utsname, sizeof (*name));
+    up_read(&uts_sem);
+    return err?-EFAULT:0;
 }
 
 asmlinkage int sys_olduname(struct oldold_utsname * name)
 {
-	int error;
+    int error;
 
-	if (!name)
-		return -EFAULT;
-	if (!access_ok(VERIFY_WRITE,name,sizeof(struct oldold_utsname)))
-		return -EFAULT;
-  
-  	down_read(&uts_sem);
-	
-	error = __copy_to_user(&name->sysname,&system_utsname.sysname,__OLD_UTS_LEN);
-	error |= __put_user(0,name->sysname+__OLD_UTS_LEN);
-	error |= __copy_to_user(&name->nodename,&system_utsname.nodename,__OLD_UTS_LEN);
-	error |= __put_user(0,name->nodename+__OLD_UTS_LEN);
-	error |= __copy_to_user(&name->release,&system_utsname.release,__OLD_UTS_LEN);
-	error |= __put_user(0,name->release+__OLD_UTS_LEN);
-	error |= __copy_to_user(&name->version,&system_utsname.version,__OLD_UTS_LEN);
-	error |= __put_user(0,name->version+__OLD_UTS_LEN);
-	error |= __copy_to_user(&name->machine,&system_utsname.machine,__OLD_UTS_LEN);
-	error |= __put_user(0,name->machine+__OLD_UTS_LEN);
-	
-	up_read(&uts_sem);
-	
-	error = error ? -EFAULT : 0;
+    if (!name)
+        return -EFAULT;
+    if (!access_ok(VERIFY_WRITE,name,sizeof(struct oldold_utsname)))
+        return -EFAULT;
 
-	return error;
+    down_read(&uts_sem);
+
+    error = __copy_to_user(&name->sysname,&system_utsname.sysname,__OLD_UTS_LEN);
+    error |= __put_user(0,name->sysname+__OLD_UTS_LEN);
+    error |= __copy_to_user(&name->nodename,&system_utsname.nodename,__OLD_UTS_LEN);
+    error |= __put_user(0,name->nodename+__OLD_UTS_LEN);
+    error |= __copy_to_user(&name->release,&system_utsname.release,__OLD_UTS_LEN);
+    error |= __put_user(0,name->release+__OLD_UTS_LEN);
+    error |= __copy_to_user(&name->version,&system_utsname.version,__OLD_UTS_LEN);
+    error |= __put_user(0,name->version+__OLD_UTS_LEN);
+    error |= __copy_to_user(&name->machine,&system_utsname.machine,__OLD_UTS_LEN);
+    error |= __put_user(0,name->machine+__OLD_UTS_LEN);
+
+    up_read(&uts_sem);
+
+    error = error ? -EFAULT : 0;
+
+    return error;
 }
 
 asmlinkage int sys_pause(void)
 {
-	current->state = TASK_INTERRUPTIBLE;
-	schedule();
-	return -ERESTARTNOHAND;
+    current->state = TASK_INTERRUPTIBLE;
+    schedule();
+    return -ERESTARTNOHAND;
 }
 

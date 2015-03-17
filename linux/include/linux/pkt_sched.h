@@ -29,24 +29,24 @@
 
 struct tc_stats
 {
-	__u64	bytes;			/* NUmber of enqueues bytes */
-	__u32	packets;		/* Number of enqueued packets	*/
-	__u32	drops;			/* Packets dropped because of lack of resources */
-	__u32	overlimits;		/* Number of throttle events when this
+    __u64	bytes;			/* NUmber of enqueues bytes */
+    __u32	packets;		/* Number of enqueued packets	*/
+    __u32	drops;			/* Packets dropped because of lack of resources */
+    __u32	overlimits;		/* Number of throttle events when this
 					 * flow goes out of allocated bandwidth */
-	__u32	bps;			/* Current flow byte rate */
-	__u32	pps;			/* Current flow packet rate */
-	__u32	qlen;
-	__u32	backlog;
+    __u32	bps;			/* Current flow byte rate */
+    __u32	pps;			/* Current flow packet rate */
+    __u32	qlen;
+    __u32	backlog;
 #ifdef __KERNEL__
-	spinlock_t *lock;
+    spinlock_t *lock;
 #endif
 };
 
 struct tc_estimator
 {
-	char		interval;
-	unsigned char	ewma_log;
+    char		interval;
+    unsigned char	ewma_log;
 };
 
 /* "Handles"
@@ -78,19 +78,19 @@ struct tc_estimator
 
 struct tc_ratespec
 {
-	unsigned char	cell_log;
-	unsigned char	__reserved;
-	unsigned short	feature;
-	short		addend;
-	unsigned short	mpu;
-	__u32		rate;
+    unsigned char	cell_log;
+    unsigned char	__reserved;
+    unsigned short	feature;
+    short		addend;
+    unsigned short	mpu;
+    __u32		rate;
 };
 
 /* FIFO section */
 
 struct tc_fifo_qopt
 {
-	__u32	limit;	/* Queue length: bytes for bfifo, packets for pfifo */
+    __u32	limit;	/* Queue length: bytes for bfifo, packets for pfifo */
 };
 
 /* PRIO section */
@@ -99,55 +99,55 @@ struct tc_fifo_qopt
 
 struct tc_prio_qopt
 {
-	int	bands;			/* Number of bands */
-	__u8	priomap[TC_PRIO_MAX+1];	/* Map: logical priority -> PRIO band */
+    int	bands;			/* Number of bands */
+    __u8	priomap[TC_PRIO_MAX+1];	/* Map: logical priority -> PRIO band */
 };
 
 /* CSZ section */
 
 struct tc_csz_qopt
 {
-	int		flows;		/* Maximal number of guaranteed flows */
-	unsigned char	R_log;		/* Fixed point position for round number */
-	unsigned char	delta_log;	/* Log of maximal managed time interval */
-	__u8		priomap[TC_PRIO_MAX+1];	/* Map: logical priority -> CSZ band */
+    int		flows;		/* Maximal number of guaranteed flows */
+    unsigned char	R_log;		/* Fixed point position for round number */
+    unsigned char	delta_log;	/* Log of maximal managed time interval */
+    __u8		priomap[TC_PRIO_MAX+1];	/* Map: logical priority -> CSZ band */
 };
 
 struct tc_csz_copt
 {
-	struct tc_ratespec slice;
-	struct tc_ratespec rate;
-	struct tc_ratespec peakrate;
-	__u32		limit;
-	__u32		buffer;
-	__u32		mtu;
+    struct tc_ratespec slice;
+    struct tc_ratespec rate;
+    struct tc_ratespec peakrate;
+    __u32		limit;
+    __u32		buffer;
+    __u32		mtu;
 };
 
 enum
 {
-	TCA_CSZ_UNSPEC,
-	TCA_CSZ_PARMS,
-	TCA_CSZ_RTAB,
-	TCA_CSZ_PTAB,
+    TCA_CSZ_UNSPEC,
+    TCA_CSZ_PARMS,
+    TCA_CSZ_RTAB,
+    TCA_CSZ_PTAB,
 };
 
 /* TBF section */
 
 struct tc_tbf_qopt
 {
-	struct tc_ratespec rate;
-	struct tc_ratespec peakrate;
-	__u32		limit;
-	__u32		buffer;
-	__u32		mtu;
+    struct tc_ratespec rate;
+    struct tc_ratespec peakrate;
+    __u32		limit;
+    __u32		buffer;
+    __u32		mtu;
 };
 
 enum
 {
-	TCA_TBF_UNSPEC,
-	TCA_TBF_PARMS,
-	TCA_TBF_RTAB,
-	TCA_TBF_PTAB,
+    TCA_TBF_UNSPEC,
+    TCA_TBF_PARMS,
+    TCA_TBF_RTAB,
+    TCA_TBF_PTAB,
 };
 
 
@@ -159,11 +159,11 @@ enum
 
 struct tc_sfq_qopt
 {
-	unsigned	quantum;	/* Bytes per round allocated to flow */
-	int		perturb_period;	/* Period of hash perturbation */
-	__u32		limit;		/* Maximal packets in queue */
-	unsigned	divisor;	/* Hash divisor  */
-	unsigned	flows;		/* Maximal number of flows  */
+    unsigned	quantum;	/* Bytes per round allocated to flow */
+    int		perturb_period;	/* Period of hash perturbation */
+    __u32		limit;		/* Maximal packets in queue */
+    unsigned	divisor;	/* Hash divisor  */
+    unsigned	flows;		/* Maximal number of flows  */
 };
 
 /*
@@ -179,29 +179,29 @@ struct tc_sfq_qopt
 
 enum
 {
-	TCA_RED_UNSPEC,
-	TCA_RED_PARMS,
-	TCA_RED_STAB,
+    TCA_RED_UNSPEC,
+    TCA_RED_PARMS,
+    TCA_RED_STAB,
 };
 
 struct tc_red_qopt
 {
-	__u32		limit;		/* HARD maximal queue length (bytes)	*/
-	__u32		qth_min;	/* Min average length threshold (bytes) */
-	__u32		qth_max;	/* Max average length threshold (bytes) */
-	unsigned char   Wlog;		/* log(W)		*/
-	unsigned char   Plog;		/* log(P_max/(qth_max-qth_min))	*/
-	unsigned char   Scell_log;	/* cell size for idle damping */
-	unsigned char	flags;
+    __u32		limit;		/* HARD maximal queue length (bytes)	*/
+    __u32		qth_min;	/* Min average length threshold (bytes) */
+    __u32		qth_max;	/* Max average length threshold (bytes) */
+    unsigned char   Wlog;		/* log(W)		*/
+    unsigned char   Plog;		/* log(P_max/(qth_max-qth_min))	*/
+    unsigned char   Scell_log;	/* cell size for idle damping */
+    unsigned char	flags;
 #define TC_RED_ECN	1
 };
 
 struct tc_red_xstats
 {
-	__u32           early;          /* Early drops */
-	__u32           pdrop;          /* Drops due to queue limits */
-	__u32           other;          /* Drops due to drop() calls */
-	__u32           marked;         /* Marked packets */
+    __u32           early;          /* Early drops */
+    __u32           pdrop;          /* Drops due to queue limits */
+    __u32           other;          /* Drops due to drop() calls */
+    __u32           marked;         /* Marked packets */
 };
 
 /* GRED section */
@@ -210,42 +210,42 @@ struct tc_red_xstats
 
 enum
 {
-       TCA_GRED_UNSPEC,
-       TCA_GRED_PARMS,
-       TCA_GRED_STAB,
-       TCA_GRED_DPS,
+    TCA_GRED_UNSPEC,
+    TCA_GRED_PARMS,
+    TCA_GRED_STAB,
+    TCA_GRED_DPS,
 };
 
 #define TCA_SET_OFF TCA_GRED_PARMS
 struct tc_gred_qopt
 {
-       __u32           limit;          /* HARD maximal queue length (bytes)    
+    __u32           limit;          /* HARD maximal queue length (bytes)
 */
-       __u32           qth_min;        /* Min average length threshold (bytes) 
+    __u32           qth_min;        /* Min average length threshold (bytes)
 */
-       __u32           qth_max;        /* Max average length threshold (bytes) 
+    __u32           qth_max;        /* Max average length threshold (bytes)
 */
-       __u32           DP;             /* upto 2^32 DPs */
-       __u32           backlog;        
-       __u32           qave;   
-       __u32           forced; 
-       __u32           early;  
-       __u32           other;  
-       __u32           pdrop;  
+    __u32           DP;             /* upto 2^32 DPs */
+    __u32           backlog;
+    __u32           qave;
+    __u32           forced;
+    __u32           early;
+    __u32           other;
+    __u32           pdrop;
 
-       unsigned char   Wlog;           /* log(W)               */
-       unsigned char   Plog;           /* log(P_max/(qth_max-qth_min)) */
-       unsigned char   Scell_log;      /* cell size for idle damping */
-       __u8            prio;		/* prio of this VQ */
-       __u32	packets;
-       __u32	bytesin;
+    unsigned char   Wlog;           /* log(W)               */
+    unsigned char   Plog;           /* log(P_max/(qth_max-qth_min)) */
+    unsigned char   Scell_log;      /* cell size for idle damping */
+    __u8            prio;		/* prio of this VQ */
+    __u32	packets;
+    __u32	bytesin;
 };
 /* gred setup */
 struct tc_gred_sopt
 {
-       __u32           DPs;
-       __u32           def_DP;
-       __u8            grio;
+    __u32           DPs;
+    __u32           def_DP;
+    __u8            grio;
 };
 
 /* CBQ section */
@@ -256,105 +256,107 @@ struct tc_gred_sopt
 
 struct tc_cbq_lssopt
 {
-	unsigned char	change;
-	unsigned char	flags;
+    unsigned char	change;
+    unsigned char	flags;
 #define TCF_CBQ_LSS_BOUNDED	1
 #define TCF_CBQ_LSS_ISOLATED	2
-	unsigned char  	ewma_log;
-	unsigned char  	level;
+    unsigned char  	ewma_log;
+    unsigned char  	level;
 #define TCF_CBQ_LSS_FLAGS	1
 #define TCF_CBQ_LSS_EWMA	2
 #define TCF_CBQ_LSS_MAXIDLE	4
 #define TCF_CBQ_LSS_MINIDLE	8
 #define TCF_CBQ_LSS_OFFTIME	0x10
 #define TCF_CBQ_LSS_AVPKT	0x20
-	__u32		maxidle;
-	__u32		minidle;
-	__u32		offtime;
-	__u32		avpkt;
+    __u32		maxidle;
+    __u32		minidle;
+    __u32		offtime;
+    __u32		avpkt;
 };
 
 struct tc_cbq_wrropt
 {
-	unsigned char	flags;
-	unsigned char	priority;
-	unsigned char	cpriority;
-	unsigned char	__reserved;
-	__u32		allot;
-	__u32		weight;
+    unsigned char	flags;
+    unsigned char	priority;
+    unsigned char	cpriority;
+    unsigned char	__reserved;
+    __u32		allot;
+    __u32		weight;
 };
 
 struct tc_cbq_ovl
 {
-	unsigned char	strategy;
+    unsigned char	strategy;
 #define	TC_CBQ_OVL_CLASSIC	0
 #define	TC_CBQ_OVL_DELAY	1
 #define	TC_CBQ_OVL_LOWPRIO	2
 #define	TC_CBQ_OVL_DROP		3
 #define	TC_CBQ_OVL_RCLASSIC	4
-	unsigned char	priority2;
-	__u32		penalty;
+    unsigned char	priority2;
+    __u32		penalty;
 };
 
 struct tc_cbq_police
 {
-	unsigned char	police;
-	unsigned char	__res1;
-	unsigned short	__res2;
+    unsigned char	police;
+    unsigned char	__res1;
+    unsigned short	__res2;
 };
 
 struct tc_cbq_fopt
 {
-	__u32		split;
-	__u32		defmap;
-	__u32		defchange;
+    __u32		split;
+    __u32		defmap;
+    __u32		defchange;
 };
 
 struct tc_cbq_xstats
 {
-	__u32		borrows;
-	__u32		overactions;
-	__s32		avgidle;
-	__s32		undertime;
+    __u32		borrows;
+    __u32		overactions;
+    __s32		avgidle;
+    __s32		undertime;
 };
 
 enum
 {
-	TCA_CBQ_UNSPEC,
-	TCA_CBQ_LSSOPT,
-	TCA_CBQ_WRROPT,
-	TCA_CBQ_FOPT,
-	TCA_CBQ_OVL_STRATEGY,
-	TCA_CBQ_RATE,
-	TCA_CBQ_RTAB,
-	TCA_CBQ_POLICE,
+    TCA_CBQ_UNSPEC,
+    TCA_CBQ_LSSOPT,
+    TCA_CBQ_WRROPT,
+    TCA_CBQ_FOPT,
+    TCA_CBQ_OVL_STRATEGY,
+    TCA_CBQ_RATE,
+    TCA_CBQ_RTAB,
+    TCA_CBQ_POLICE,
 };
 
 #define TCA_CBQ_MAX	TCA_CBQ_POLICE
 
 /* dsmark section */
 
-enum {
-	TCA_DSMARK_UNSPEC,
-	TCA_DSMARK_INDICES,
-	TCA_DSMARK_DEFAULT_INDEX,
-	TCA_DSMARK_SET_TC_INDEX,
-	TCA_DSMARK_MASK,
-	TCA_DSMARK_VALUE
+enum
+{
+    TCA_DSMARK_UNSPEC,
+    TCA_DSMARK_INDICES,
+    TCA_DSMARK_DEFAULT_INDEX,
+    TCA_DSMARK_SET_TC_INDEX,
+    TCA_DSMARK_MASK,
+    TCA_DSMARK_VALUE
 };
 
 #define TCA_DSMARK_MAX TCA_DSMARK_VALUE
 
 /* ATM  section */
 
-enum {
-	TCA_ATM_UNSPEC,
-	TCA_ATM_FD,		/* file/socket descriptor */
-	TCA_ATM_PTR,		/* pointer to descriptor - later */
-	TCA_ATM_HDR,		/* LL header */
-	TCA_ATM_EXCESS,		/* excess traffic class (0 for CLP)  */
-	TCA_ATM_ADDR,		/* PVC address (for output only) */
-	TCA_ATM_STATE		/* VC state (ATM_VS_*; for output only) */
+enum
+{
+    TCA_ATM_UNSPEC,
+    TCA_ATM_FD,		/* file/socket descriptor */
+    TCA_ATM_PTR,		/* pointer to descriptor - later */
+    TCA_ATM_HDR,		/* LL header */
+    TCA_ATM_EXCESS,		/* excess traffic class (0 for CLP)  */
+    TCA_ATM_ADDR,		/* PVC address (for output only) */
+    TCA_ATM_STATE		/* VC state (ATM_VS_*; for output only) */
 };
 
 #define TCA_ATM_MAX	TCA_ATM_STATE

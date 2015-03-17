@@ -169,7 +169,7 @@ typedef unsigned char	byte;	/* used everywhere */
 #define WAIT_READY	(3*HZ/100)	/* 30msec - should be instantaneous */
 #endif /* CONFIG_APM || CONFIG_APM_MODULE */
 #define WAIT_PIDENTIFY	(10*HZ)	/* 10sec  - should be less than 3ms (?)
-				            if all ATAPI CD is closed at boot */
+if all ATAPI CD is closed at boot */
 #define WAIT_WORSTCASE	(30*HZ)	/* 30sec  - worst case when spinning up */
 #define WAIT_CMD	(10*HZ)	/* 10sec  - maximum wait for an IRQ to happen */
 #define WAIT_MIN_SLEEP	(2*HZ/100)	/* 20msec - minimum sleep time */
@@ -223,12 +223,13 @@ typedef int (ide_ack_intr_t)(struct hwif_s *);
 /*
  * Structure to hold all information about the location of this port
  */
-typedef struct hw_regs_s {
-	ide_ioreg_t	io_ports[IDE_NR_PORTS];	/* task file registers */
-	int		irq;			/* our irq number */
-	int		dma;			/* our dma entry */
-	ide_ack_intr_t	*ack_intr;		/* acknowledge interrupt */
-	void		*priv;			/* interface specific data */
+typedef struct hw_regs_s
+{
+    ide_ioreg_t	io_ports[IDE_NR_PORTS];	/* task file registers */
+    int		irq;			/* our irq number */
+    int		dma;			/* our dma entry */
+    ide_ack_intr_t	*ack_intr;		/* acknowledge interrupt */
+    void		*priv;			/* interface specific data */
 } hw_regs_t;
 
 /*
@@ -240,12 +241,12 @@ int ide_register_hw(hw_regs_t *hw, struct hwif_s **hwifp);
  * Set up hw_regs_t structure before calling ide_register_hw (optional)
  */
 void ide_setup_ports(	hw_regs_t *hw,
-			ide_ioreg_t base,
-			int *offsets,
-			ide_ioreg_t ctrl,
-			ide_ioreg_t intr,
-			ide_ack_intr_t *ack_intr,
-			int irq);
+                        ide_ioreg_t base,
+                        int *offsets,
+                        ide_ioreg_t ctrl,
+                        ide_ioreg_t intr,
+                        ide_ack_intr_t *ack_intr,
+                        int irq);
 
 #ifdef __x86_64__
 #include <asm/io.h>
@@ -284,93 +285,96 @@ void ide_setup_ports(	hw_regs_t *hw,
 #define ide_tape	0x1
 #define ide_floppy	0x0
 
-typedef union {
-	unsigned all			: 8;	/* all of the bits together */
-	struct {
-		unsigned set_geometry	: 1;	/* respecify drive geometry */
-		unsigned recalibrate	: 1;	/* seek to cyl 0      */
-		unsigned set_multmode	: 1;	/* set multmode count */
-		unsigned set_tune	: 1;	/* tune interface for drive */
-		unsigned reserved	: 4;	/* unused */
-	} b;
+typedef union
+{
+    unsigned all			: 8;	/* all of the bits together */
+    struct
+    {
+        unsigned set_geometry	: 1;	/* respecify drive geometry */
+        unsigned recalibrate	: 1;	/* seek to cyl 0      */
+        unsigned set_multmode	: 1;	/* set multmode count */
+        unsigned set_tune	: 1;	/* tune interface for drive */
+        unsigned reserved	: 4;	/* unused */
+    } b;
 } special_t;
 
-typedef struct ide_drive_s {
-	request_queue_t		 queue;	/* request queue */
-	struct ide_drive_s 	*next;	/* circular list of hwgroup drives */
-	unsigned long sleep;		/* sleep until this time */
-	unsigned long service_start;	/* time we started last request */
-	unsigned long service_time;	/* service time of last request */
-	unsigned long timeout;		/* max time to wait for irq */
-	special_t	special;	/* special action flags */
-	byte     keep_settings;		/* restore settings after drive reset */
-	byte     using_dma;		/* disk is using dma for read/write */
-	byte	 retry_pio;		/* retrying dma capable host in pio */
-	byte	 state;			/* retry state */
-	byte     waiting_for_dma;	/* dma currently in progress */
-	byte     unmask;		/* flag: okay to unmask other irqs */
-	byte     slow;			/* flag: slow data port */
-	byte     bswap;			/* flag: byte swap data */
-	byte     dsc_overlap;		/* flag: DSC overlap */
-	byte     nice1;			/* flag: give potential excess bandwidth */
-	unsigned present	: 1;	/* drive is physically present */
-	unsigned noprobe 	: 1;	/* from:  hdx=noprobe */
-	unsigned busy		: 1;	/* currently doing revalidate_disk() */
-	unsigned removable	: 1;	/* 1 if need to do check_media_change */
-	unsigned forced_geom	: 1;	/* 1 if hdx=c,h,s was given at boot */
-	unsigned no_unmask	: 1;	/* disallow setting unmask bit */
-	unsigned no_io_32bit	: 1;	/* disallow enabling 32bit I/O */
-	unsigned nobios		: 1;	/* flag: do not probe bios for drive */
-	unsigned revalidate	: 1;	/* request revalidation */
-	unsigned atapi_overlap	: 1;	/* flag: ATAPI overlap (not supported) */
-	unsigned nice0		: 1;	/* flag: give obvious excess bandwidth */
-	unsigned nice2		: 1;	/* flag: give a share in our own bandwidth */
-	unsigned doorlocking	: 1;	/* flag: for removable only: door lock/unlock works */
-	unsigned autotune	: 2;	/* 1=autotune, 2=noautotune, 0=default */
-	unsigned remap_0_to_1	: 2;	/* 0=remap if ezdrive, 1=remap, 2=noremap */
-	unsigned ata_flash	: 1;	/* 1=present, 0=default */
-	byte		scsi;		/* 0=default, 1=skip current ide-subdriver for ide-scsi emulation */
-	byte		media;		/* disk, cdrom, tape, floppy, ... */
-	select_t	select;		/* basic drive/head select reg value */
-	byte		ctl;		/* "normal" value for IDE_CONTROL_REG */
-	byte		ready_stat;	/* min status value for drive ready */
-	byte		mult_count;	/* current multiple sector setting */
-	byte 		mult_req;	/* requested multiple sector setting */
-	byte 		tune_req;	/* requested drive tuning setting */
-	byte		io_32bit;	/* 0=16-bit, 1=32-bit, 2/3=32bit+sync */
-	byte		bad_wstat;	/* used for ignoring WRERR_STAT */
-	byte		nowerr;		/* used for ignoring WRERR_STAT */
-	byte		sect0;		/* offset of first sector for DM6:DDO */
-	byte 		usage;		/* current "open()" count for drive */
-	byte 		head;		/* "real" number of heads */
-	byte		sect;		/* "real" sectors per track */
-	byte		bios_head;	/* BIOS/fdisk/LILO number of heads */
-	byte		bios_sect;	/* BIOS/fdisk/LILO sectors per track */
-	unsigned int	bios_cyl;	/* BIOS/fdisk/LILO number of cyls */
-	unsigned int	cyl;		/* "real" number of cyls */
-	unsigned long	capacity;	/* total number of sectors */
-	unsigned int	drive_data;	/* for use by tuneproc/selectproc as needed */
-	void		  *hwif;	/* actually (ide_hwif_t *) */
-	wait_queue_head_t wqueue;	/* used to wait for drive in open() */
-	struct hd_driveid *id;		/* drive model identification info */
-	struct hd_struct  *part;	/* drive partition table */
-	char		name[4];	/* drive name, such as "hda" */
-	void 		*driver;	/* (ide_driver_t *) */
-	void		*driver_data;	/* extra driver data */
-	struct proc_dir_entry *proc;	/* /proc/ide/ directory entry */
-	void		*settings;	/* /proc/ide/ drive settings */
-	char		driver_req[10];	/* requests specific driver */
-	int		last_lun;	/* last logical unit */
-	int		forced_lun;	/* if hdxlun was given at boot */
-	int		lun;		/* logical unit */
-	int		crc_count;	/* crc counter to reduce drive speed */
-	byte		quirk_list;	/* drive is considered quirky if set for a specific host */
-	byte		suspend_reset;	/* drive suspend mode flag, soft-reset recovers */
-	byte		init_speed;	/* transfer rate set at boot */
-	byte		current_speed;	/* current transfer rate set */
-	byte		dn;		/* now wide spread use */
-	unsigned int	failures;	/* current failure count */
-	unsigned int	max_failures;	/* maximum allowed failure count */
+typedef struct ide_drive_s
+{
+    request_queue_t		 queue;	/* request queue */
+    struct ide_drive_s 	*next;	/* circular list of hwgroup drives */
+    unsigned long sleep;		/* sleep until this time */
+    unsigned long service_start;	/* time we started last request */
+    unsigned long service_time;	/* service time of last request */
+    unsigned long timeout;		/* max time to wait for irq */
+    special_t	special;	/* special action flags */
+    byte     keep_settings;		/* restore settings after drive reset */
+    byte     using_dma;		/* disk is using dma for read/write */
+    byte	 retry_pio;		/* retrying dma capable host in pio */
+    byte	 state;			/* retry state */
+    byte     waiting_for_dma;	/* dma currently in progress */
+    byte     unmask;		/* flag: okay to unmask other irqs */
+    byte     slow;			/* flag: slow data port */
+    byte     bswap;			/* flag: byte swap data */
+    byte     dsc_overlap;		/* flag: DSC overlap */
+    byte     nice1;			/* flag: give potential excess bandwidth */
+    unsigned present	: 1;	/* drive is physically present */
+    unsigned noprobe 	: 1;	/* from:  hdx=noprobe */
+    unsigned busy		: 1;	/* currently doing revalidate_disk() */
+    unsigned removable	: 1;	/* 1 if need to do check_media_change */
+    unsigned forced_geom	: 1;	/* 1 if hdx=c,h,s was given at boot */
+    unsigned no_unmask	: 1;	/* disallow setting unmask bit */
+    unsigned no_io_32bit	: 1;	/* disallow enabling 32bit I/O */
+    unsigned nobios		: 1;	/* flag: do not probe bios for drive */
+    unsigned revalidate	: 1;	/* request revalidation */
+    unsigned atapi_overlap	: 1;	/* flag: ATAPI overlap (not supported) */
+    unsigned nice0		: 1;	/* flag: give obvious excess bandwidth */
+    unsigned nice2		: 1;	/* flag: give a share in our own bandwidth */
+    unsigned doorlocking	: 1;	/* flag: for removable only: door lock/unlock works */
+    unsigned autotune	: 2;	/* 1=autotune, 2=noautotune, 0=default */
+    unsigned remap_0_to_1	: 2;	/* 0=remap if ezdrive, 1=remap, 2=noremap */
+    unsigned ata_flash	: 1;	/* 1=present, 0=default */
+    byte		scsi;		/* 0=default, 1=skip current ide-subdriver for ide-scsi emulation */
+    byte		media;		/* disk, cdrom, tape, floppy, ... */
+    select_t	select;		/* basic drive/head select reg value */
+    byte		ctl;		/* "normal" value for IDE_CONTROL_REG */
+    byte		ready_stat;	/* min status value for drive ready */
+    byte		mult_count;	/* current multiple sector setting */
+    byte 		mult_req;	/* requested multiple sector setting */
+    byte 		tune_req;	/* requested drive tuning setting */
+    byte		io_32bit;	/* 0=16-bit, 1=32-bit, 2/3=32bit+sync */
+    byte		bad_wstat;	/* used for ignoring WRERR_STAT */
+    byte		nowerr;		/* used for ignoring WRERR_STAT */
+    byte		sect0;		/* offset of first sector for DM6:DDO */
+    byte 		usage;		/* current "open()" count for drive */
+    byte 		head;		/* "real" number of heads */
+    byte		sect;		/* "real" sectors per track */
+    byte		bios_head;	/* BIOS/fdisk/LILO number of heads */
+    byte		bios_sect;	/* BIOS/fdisk/LILO sectors per track */
+    unsigned int	bios_cyl;	/* BIOS/fdisk/LILO number of cyls */
+    unsigned int	cyl;		/* "real" number of cyls */
+    unsigned long	capacity;	/* total number of sectors */
+    unsigned int	drive_data;	/* for use by tuneproc/selectproc as needed */
+    void		  *hwif;	/* actually (ide_hwif_t *) */
+    wait_queue_head_t wqueue;	/* used to wait for drive in open() */
+    struct hd_driveid *id;		/* drive model identification info */
+    struct hd_struct  *part;	/* drive partition table */
+    char		name[4];	/* drive name, such as "hda" */
+    void 		*driver;	/* (ide_driver_t *) */
+    void		*driver_data;	/* extra driver data */
+    struct proc_dir_entry *proc;	/* /proc/ide/ directory entry */
+    void		*settings;	/* /proc/ide/ drive settings */
+    char		driver_req[10];	/* requests specific driver */
+    int		last_lun;	/* last logical unit */
+    int		forced_lun;	/* if hdxlun was given at boot */
+    int		lun;		/* logical unit */
+    int		crc_count;	/* crc counter to reduce drive speed */
+    byte		quirk_list;	/* drive is considered quirky if set for a specific host */
+    byte		suspend_reset;	/* drive suspend mode flag, soft-reset recovers */
+    byte		init_speed;	/* transfer rate set at boot */
+    byte		current_speed;	/* current transfer rate set */
+    byte		dn;		/* now wide spread use */
+    unsigned int	failures;	/* current failure count */
+    unsigned int	max_failures;	/* maximum allowed failure count */
 } ide_drive_t;
 
 /*
@@ -385,12 +389,12 @@ typedef struct ide_drive_s {
  * should either try again later, or revert to PIO for the current request.
  */
 typedef enum {	ide_dma_read,	ide_dma_write,		ide_dma_begin,
-		ide_dma_end,	ide_dma_check,		ide_dma_on,
-		ide_dma_off,	ide_dma_off_quietly,	ide_dma_test_irq,
-		ide_dma_bad_drive,			ide_dma_good_drive,
-		ide_dma_verbose,			ide_dma_retune,
-		ide_dma_lostirq,			ide_dma_timeout
-} ide_dma_action_t;
+                ide_dma_end,	ide_dma_check,		ide_dma_on,
+                ide_dma_off,	ide_dma_off_quietly,	ide_dma_test_irq,
+                ide_dma_bad_drive,			ide_dma_good_drive,
+                ide_dma_verbose,			ide_dma_retune,
+                ide_dma_lostirq,			ide_dma_timeout
+             } ide_dma_action_t;
 
 typedef int (ide_dmaproc_t)(ide_dma_action_t, ide_drive_t *);
 
@@ -401,13 +405,13 @@ typedef int (ide_dmaproc_t)(ide_dma_action_t, ide_drive_t *);
  *
  * If it is not defined for a controller, standard-code is used from ide.c.
  *
- * Controllers which are not memory-mapped in the standard way need to 
+ * Controllers which are not memory-mapped in the standard way need to
  * override that mechanism using this function to work.
  *
  */
 typedef enum { ideproc_ide_input_data,    ideproc_ide_output_data,
-	       ideproc_atapi_input_bytes, ideproc_atapi_output_bytes
-} ide_ide_action_t;
+               ideproc_atapi_input_bytes, ideproc_atapi_output_bytes
+             } ide_ide_action_t;
 
 typedef void (ide_ideproc_t)(ide_ide_action_t, ide_drive_t *, void *, unsigned int);
 
@@ -445,89 +449,92 @@ typedef int (ide_busproc_t) (struct hwif_s *, int);
  * chipset used by each IDE interface, if known.
  */
 typedef enum {	ide_unknown,	ide_generic,	ide_pci,
-		ide_cmd640,	ide_dtc2278,	ide_ali14xx,
-		ide_qd65xx,	ide_umc8672,	ide_ht6560b,
-		ide_pdc4030,	ide_rz1000,	ide_trm290,
-		ide_cmd646,	ide_cy82c693,	ide_4drives,
-		ide_pmac,       ide_etrax100
-} hwif_chipset_t;
+                ide_cmd640,	ide_dtc2278,	ide_ali14xx,
+                ide_qd65xx,	ide_umc8672,	ide_ht6560b,
+                ide_pdc4030,	ide_rz1000,	ide_trm290,
+                ide_cmd646,	ide_cy82c693,	ide_4drives,
+                ide_pmac,       ide_etrax100
+             } hwif_chipset_t;
 
 #define IDE_CHIPSET_PCI_MASK	\
     ((1<<ide_pci)|(1<<ide_cmd646)|(1<<ide_ali14xx))
 #define IDE_CHIPSET_IS_PCI(c)	((IDE_CHIPSET_PCI_MASK >> (c)) & 1)
 
 #ifdef CONFIG_BLK_DEV_IDEPCI
-typedef struct ide_pci_devid_s {
-	unsigned short	vid;
-	unsigned short	did;
+typedef struct ide_pci_devid_s
+{
+    unsigned short	vid;
+    unsigned short	did;
 } ide_pci_devid_t;
 
 #define IDE_PCI_DEVID_NULL	((ide_pci_devid_t){0,0})
 #define IDE_PCI_DEVID_EQ(a,b)	(a.vid == b.vid && a.did == b.did)
 #endif /* CONFIG_BLK_DEV_IDEPCI */
 
-typedef struct hwif_s {
-	struct hwif_s	*next;		/* for linked-list in ide_hwgroup_t */
-	void		*hwgroup;	/* actually (ide_hwgroup_t *) */
-	ide_ioreg_t	io_ports[IDE_NR_PORTS];	/* task file registers */
-	hw_regs_t	hw;		/* Hardware info */
-	ide_drive_t	drives[MAX_DRIVES];	/* drive info */
-	struct gendisk	*gd;		/* gendisk structure */
-	ide_tuneproc_t	*tuneproc;	/* routine to tune PIO mode for drives */
-	ide_speedproc_t	*speedproc;	/* routine to retune DMA modes for drives */
-	ide_selectproc_t *selectproc;	/* tweaks hardware to select drive */
-	ide_resetproc_t	*resetproc;	/* routine to reset controller after a disk reset */
-	ide_intrproc_t	*intrproc;	/* special interrupt handling for shared pci interrupts */
-	ide_maskproc_t	*maskproc;	/* special host masking for drive selection */
-	ide_quirkproc_t	*quirkproc;	/* check host's drive quirk list */
-	ide_rw_proc_t	*rwproc;	/* adjust timing based upon rq->cmd direction */
-	ide_ideproc_t   *ideproc;       /* CPU-polled transfer routine */
-	ide_dmaproc_t	*dmaproc;	/* dma read/write/abort routine */
-	unsigned int	*dmatable_cpu;	/* dma physical region descriptor table (cpu view) */
-	dma_addr_t	dmatable_dma;	/* dma physical region descriptor table (dma view) */
-	struct scatterlist *sg_table;	/* Scatter-gather list used to build the above */
-	int sg_nents;			/* Current number of entries in it */
-	int sg_dma_direction;		/* dma transfer direction */
-	int sg_dma_active;		/* is it in use */
-	struct hwif_s	*mate;		/* other hwif from same PCI chip */
-	unsigned long	dma_base;	/* base addr for dma ports */
-	unsigned	dma_extra;	/* extra addr for dma ports */
-	unsigned long	config_data;	/* for use by chipset-specific code */
-	unsigned long	select_data;	/* for use by chipset-specific code */
-	struct proc_dir_entry *proc;	/* /proc/ide/ directory entry */
-	int		irq;		/* our irq number */
-	byte		major;		/* our major number */
-	char 		name[6];	/* name of interface, eg. "ide0" */
-	byte		index;		/* 0 for ide0; 1 for ide1; ... */
-	hwif_chipset_t	chipset;	/* sub-module for tuning.. */
-	unsigned	noprobe    : 1;	/* don't probe for this interface */
-	unsigned	present    : 1;	/* this interface exists */
-	unsigned	serialized : 1;	/* serialized operation with mate hwif */
-	unsigned	sharing_irq: 1;	/* 1 = sharing irq with another hwif */
-	unsigned	reset      : 1;	/* reset after probe */
-	unsigned	autodma    : 1;	/* automatically try to enable DMA at boot */
-	unsigned	udma_four  : 1;	/* 1=ATA-66 capable, 0=default */
-	byte		channel;	/* for dual-port chips: 0=primary, 1=secondary */
+typedef struct hwif_s
+{
+    struct hwif_s	*next;		/* for linked-list in ide_hwgroup_t */
+    void		*hwgroup;	/* actually (ide_hwgroup_t *) */
+    ide_ioreg_t	io_ports[IDE_NR_PORTS];	/* task file registers */
+    hw_regs_t	hw;		/* Hardware info */
+    ide_drive_t	drives[MAX_DRIVES];	/* drive info */
+    struct gendisk	*gd;		/* gendisk structure */
+    ide_tuneproc_t	*tuneproc;	/* routine to tune PIO mode for drives */
+    ide_speedproc_t	*speedproc;	/* routine to retune DMA modes for drives */
+    ide_selectproc_t *selectproc;	/* tweaks hardware to select drive */
+    ide_resetproc_t	*resetproc;	/* routine to reset controller after a disk reset */
+    ide_intrproc_t	*intrproc;	/* special interrupt handling for shared pci interrupts */
+    ide_maskproc_t	*maskproc;	/* special host masking for drive selection */
+    ide_quirkproc_t	*quirkproc;	/* check host's drive quirk list */
+    ide_rw_proc_t	*rwproc;	/* adjust timing based upon rq->cmd direction */
+    ide_ideproc_t   *ideproc;       /* CPU-polled transfer routine */
+    ide_dmaproc_t	*dmaproc;	/* dma read/write/abort routine */
+    unsigned int	*dmatable_cpu;	/* dma physical region descriptor table (cpu view) */
+    dma_addr_t	dmatable_dma;	/* dma physical region descriptor table (dma view) */
+    struct scatterlist *sg_table;	/* Scatter-gather list used to build the above */
+    int sg_nents;			/* Current number of entries in it */
+    int sg_dma_direction;		/* dma transfer direction */
+    int sg_dma_active;		/* is it in use */
+    struct hwif_s	*mate;		/* other hwif from same PCI chip */
+    unsigned long	dma_base;	/* base addr for dma ports */
+    unsigned	dma_extra;	/* extra addr for dma ports */
+    unsigned long	config_data;	/* for use by chipset-specific code */
+    unsigned long	select_data;	/* for use by chipset-specific code */
+    struct proc_dir_entry *proc;	/* /proc/ide/ directory entry */
+    int		irq;		/* our irq number */
+    byte		major;		/* our major number */
+    char 		name[6];	/* name of interface, eg. "ide0" */
+    byte		index;		/* 0 for ide0; 1 for ide1; ... */
+    hwif_chipset_t	chipset;	/* sub-module for tuning.. */
+    unsigned	noprobe    : 1;	/* don't probe for this interface */
+    unsigned	present    : 1;	/* this interface exists */
+    unsigned	serialized : 1;	/* serialized operation with mate hwif */
+    unsigned	sharing_irq: 1;	/* 1 = sharing irq with another hwif */
+    unsigned	reset      : 1;	/* reset after probe */
+    unsigned	autodma    : 1;	/* automatically try to enable DMA at boot */
+    unsigned	udma_four  : 1;	/* 1=ATA-66 capable, 0=default */
+    byte		channel;	/* for dual-port chips: 0=primary, 1=secondary */
 #ifdef CONFIG_BLK_DEV_IDEPCI
-	struct pci_dev	*pci_dev;	/* for pci chipsets */
-	ide_pci_devid_t	pci_devid;	/* for pci chipsets: {VID,DID} */
+    struct pci_dev	*pci_dev;	/* for pci chipsets */
+    ide_pci_devid_t	pci_devid;	/* for pci chipsets: {VID,DID} */
 #endif /* CONFIG_BLK_DEV_IDEPCI */
 #if (DISK_RECOVERY_TIME > 0)
-	unsigned long	last_time;	/* time when previous rq was done */
+    unsigned long	last_time;	/* time when previous rq was done */
 #endif
-	byte		straight8;	/* Alan's straight 8 check */
-	void		*hwif_data;	/* extra hwif data */
-	ide_busproc_t	*busproc;	/* driver soft-power interface */
-	byte		bus_state;	/* power state of the IDE bus */
+    byte		straight8;	/* Alan's straight 8 check */
+    void		*hwif_data;	/* extra hwif data */
+    ide_busproc_t	*busproc;	/* driver soft-power interface */
+    byte		bus_state;	/* power state of the IDE bus */
 } ide_hwif_t;
 
 
 /*
  * Status returned from various ide_ functions
  */
-typedef enum {
-	ide_stopped,	/* no drive operation was started */
-	ide_started	/* a drive operation was started, and a handler was set */
+typedef enum
+{
+    ide_stopped,	/* no drive operation was started */
+    ide_started	/* a drive operation was started, and a handler was set */
 } ide_startstop_t;
 
 /*
@@ -541,17 +548,18 @@ typedef ide_startstop_t (ide_handler_t)(ide_drive_t *);
  */
 typedef int (ide_expiry_t)(ide_drive_t *);
 
-typedef struct hwgroup_s {
-	ide_handler_t		*handler;/* irq handler, if active */
-	volatile int		busy;	/* BOOL: protects all fields below */
-	int			sleeping; /* BOOL: wake us up on timer expiry */
-	ide_drive_t		*drive;	/* current drive */
-	ide_hwif_t		*hwif;	/* ptr to current hwif in linked-list */
-	struct request		*rq;	/* current request */
-	struct timer_list	timer;	/* failsafe timer */
-	struct request		wrq;	/* local copy of current write rq */
-	unsigned long		poll_timeout;	/* timeout value during long polls */
-	ide_expiry_t		*expiry;	/* queried upon timeouts */
+typedef struct hwgroup_s
+{
+    ide_handler_t		*handler;/* irq handler, if active */
+    volatile int		busy;	/* BOOL: protects all fields below */
+    int			sleeping; /* BOOL: wake us up on timer expiry */
+    ide_drive_t		*drive;	/* current drive */
+    ide_hwif_t		*hwif;	/* ptr to current hwif in linked-list */
+    struct request		*rq;	/* current request */
+    struct timer_list	timer;	/* failsafe timer */
+    struct request		wrq;	/* local copy of current write rq */
+    unsigned long		poll_timeout;	/* timeout value during long polls */
+    ide_expiry_t		*expiry;	/* queried upon timeouts */
 } ide_hwgroup_t;
 
 /*
@@ -568,20 +576,21 @@ typedef struct hwgroup_s {
 #define SETTING_RW	(SETTING_READ | SETTING_WRITE)
 
 typedef int (ide_procset_t)(ide_drive_t *, int);
-typedef struct ide_settings_s {
-	char			*name;
-	int			rw;
-	int			read_ioctl;
-	int			write_ioctl;
-	int			data_type;
-	int			min;
-	int			max;
-	int			mul_factor;
-	int			div_factor;
-	void			*data;
-	ide_procset_t		*set;
-	int			auto_remove;
-	struct ide_settings_s	*next;
+typedef struct ide_settings_s
+{
+    char			*name;
+    int			rw;
+    int			read_ioctl;
+    int			write_ioctl;
+    int			data_type;
+    int			min;
+    int			max;
+    int			mul_factor;
+    int			div_factor;
+    void			*data;
+    ide_procset_t		*set;
+    int			auto_remove;
+    struct ide_settings_s	*next;
 } ide_settings_t;
 
 void ide_add_setting(ide_drive_t *drive, const char *name, int rw, int read_ioctl, int write_ioctl, int data_type, int min, int max, int mul_factor, int div_factor, void *data, ide_procset_t *set);
@@ -610,25 +619,26 @@ typedef ide_startstop_t	(ide_special_proc)(ide_drive_t *);
 typedef void		(ide_setting_proc)(ide_drive_t *);
 typedef int		(ide_driver_reinit_proc)(ide_drive_t *);
 
-typedef struct ide_driver_s {
-	const char			*name;
-	const char			*version;
-	byte				media;
-	unsigned busy			: 1;
-	unsigned supports_dma		: 1;
-	unsigned supports_dsc_overlap	: 1;
-	ide_cleanup_proc		*cleanup;
-	ide_do_request_proc		*do_request;
-	ide_end_request_proc		*end_request;
-	ide_ioctl_proc			*ioctl;
-	ide_open_proc			*open;
-	ide_release_proc		*release;
-	ide_check_media_change_proc	*media_change;
-	ide_revalidate_proc		*revalidate;
-	ide_pre_reset_proc		*pre_reset;
-	ide_capacity_proc		*capacity;
-	ide_special_proc		*special;
-	ide_driver_reinit_proc		*driver_reinit;
+typedef struct ide_driver_s
+{
+    const char			*name;
+    const char			*version;
+    byte				media;
+    unsigned busy			: 1;
+    unsigned supports_dma		: 1;
+    unsigned supports_dsc_overlap	: 1;
+    ide_cleanup_proc		*cleanup;
+    ide_do_request_proc		*do_request;
+    ide_end_request_proc		*end_request;
+    ide_ioctl_proc			*ioctl;
+    ide_open_proc			*open;
+    ide_release_proc		*release;
+    ide_check_media_change_proc	*media_change;
+    ide_revalidate_proc		*revalidate;
+    ide_pre_reset_proc		*pre_reset;
+    ide_capacity_proc		*capacity;
+    ide_special_proc		*special;
+    ide_driver_reinit_proc		*driver_reinit;
 } ide_driver_t;
 
 #define DRIVER(drive)		((ide_driver_t *)((drive)->driver))
@@ -642,11 +652,12 @@ typedef struct ide_driver_s {
 
 typedef int	(ide_module_init_proc)(void);
 
-typedef struct ide_module_s {
-	int				type;
-	ide_module_init_proc		*init;
-	void				*info;
-	struct ide_module_s		*next;
+typedef struct ide_module_s
+{
+    int				type;
+    ide_module_init_proc		*init;
+    void				*info;
+    struct ide_module_s		*next;
 } ide_module_t;
 
 /*
@@ -766,11 +777,12 @@ void ide_init_drive_cmd (struct request *rq);
 /*
  * "action" parameter type for ide_do_drive_cmd() below.
  */
-typedef enum {
-	ide_wait,	/* insert rq at end of list, and wait for it */
-	ide_next,	/* insert rq immediately after current request */
-	ide_preempt,	/* insert rq in front of current request */
-	ide_end		/* insert rq at end of list, but don't wait for it */
+typedef enum
+{
+    ide_wait,	/* insert rq at end of list, and wait for it */
+    ide_next,	/* insert rq immediately after current request */
+    ide_preempt,	/* insert rq in front of current request */
+    ide_end		/* insert rq at end of list, but don't wait for it */
 } ide_action_t;
 
 /*

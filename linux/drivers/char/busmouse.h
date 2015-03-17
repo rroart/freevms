@@ -8,13 +8,14 @@
 #ifndef BUSMOUSE_H
 #define BUSMOUSE_H
 
-struct busmouse {
-	int minor;
-	const char *name;
-	struct module *owner;
-	int (*open)(struct inode * inode, struct file * file);
-	int (*release)(struct inode * inode, struct file * file);
-	int init_button_state;
+struct busmouse
+{
+    int minor;
+    const char *name;
+    struct module *owner;
+    int (*open)(struct inode * inode, struct file * file);
+    int (*release)(struct inode * inode, struct file * file);
+    int init_button_state;
 };
 
 extern void busmouse_add_movementbuttons(int mousedev, int dx, int dy, int buttons);

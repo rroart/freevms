@@ -52,7 +52,7 @@ extern unsigned char aux_device_present;
 #define KBD_CCMD_KBD_DISABLE	0xAD	/* Keyboard interface disable */
 #define KBD_CCMD_KBD_ENABLE	0xAE	/* Keyboard interface enable */
 #define KBD_CCMD_WRITE_AUX_OBUF	0xD3    /* Write to output buffer as if
-					   initiated by the auxiliary device */
+initiated by the auxiliary device */
 #define KBD_CCMD_WRITE_MOUSE	0xD4	/* Write the following byte to the mouse */
 
 /*
@@ -117,14 +117,15 @@ extern unsigned char aux_device_present;
 #define AUX_ACK			0xFA	/* Command byte ACK. */
 
 #define AUX_BUF_SIZE		2048	/* This might be better divisible by
-					   three to make overruns stay in sync
-					   but then the read function would need
-					   a lock etc - ick */
+three to make overruns stay in sync
+but then the read function would need
+a lock etc - ick */
 
-struct aux_queue {
-	unsigned long head;
-	unsigned long tail;
-	wait_queue_head_t proc_list;
-	struct fasync_struct *fasync;
-	unsigned char buf[AUX_BUF_SIZE];
+struct aux_queue
+{
+    unsigned long head;
+    unsigned long tail;
+    wait_queue_head_t proc_list;
+    struct fasync_struct *fasync;
+    unsigned char buf[AUX_BUF_SIZE];
 };

@@ -37,27 +37,36 @@
 #include <stdlib.h>
 #include "lib$routines.h"	/* Our header file! */
 
-struct TIME {
+struct TIME
+{
     unsigned char time[8];
 };
 
 unsigned long lib$sub_times(const void *time1a, const void *time2a,
-    void *resulta)
+                            void *resulta)
 {
     const struct TIME *time1 = (const struct TIME *)time1a;
     const struct TIME *time2 = (const struct TIME *)time2a;
     struct TIME *result = (struct TIME *)resulta;
 
-    if ((time1->time[7] & 0x80) != (time2->time[7] & 0x80)) {
+    if ((time1->time[7] & 0x80) != (time2->time[7] & 0x80))
+    {
         return lib$addx(time1,time2,result,NULL);
-    } else {
+    }
+    else
+    {
         register cmp,count = 7;
-        do {
+        do
+        {
             if ((cmp = (time1->time[count] - time2->time[count]))) break;
-        } while (--count >= 0);
-        if (cmp < 0) {
+        }
+        while (--count >= 0);
+        if (cmp < 0)
+        {
             return lib$subx(time1,time2,result,NULL);
-        } else {
+        }
+        else
+        {
             return lib$subx(time2,time1,result,NULL);
         }
     }

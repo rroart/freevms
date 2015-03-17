@@ -34,68 +34,70 @@ static int outputlen = 0;
 void outerr (int extra, const char *format, ...)
 
 {
-  char *buff;
-  va_list ap;
+    char *buff;
+    va_list ap;
 
-  buff = malloc (extra + strlen (format) + 1);
-  va_start (ap, format);
-  vsprintf (buff, format, ap);
-  va_end (ap);
-  outstr (buff);
-  free (buff);
+    buff = malloc (extra + strlen (format) + 1);
+    va_start (ap, format);
+    vsprintf (buff, format, ap);
+    va_end (ap);
+    outstr (buff);
+    free (buff);
 
-  output ();
+    output ();
 }
 
 void outfmt (int extra, const char *format, ...)
 
 {
-  char *buff;
-  va_list ap;
+    char *buff;
+    va_list ap;
 
-  buff = malloc (extra + strlen (format) + 1);
-  va_start (ap, format);
-  vsprintf (buff, format, ap);
-  va_end (ap);
-  outstr (buff);
-  free (buff);
+    buff = malloc (extra + strlen (format) + 1);
+    va_start (ap, format);
+    vsprintf (buff, format, ap);
+    va_end (ap);
+    outstr (buff);
+    free (buff);
 }
 
 void outstr (const char *string)
 
 {
-  outbuf (strlen (string), string);
+    outbuf (strlen (string), string);
 }
 
 void outchr (char c)
 
 {
-  outbuf (1, &c);
+    outbuf (1, &c);
 }
 
 void outbuf (int size, const char *buff)
 
 {
-  while (size + outputlen >= sizeof outputbuf) {
-    memcpy (outputbuf + outputlen, buff, sizeof outputbuf - outputlen);
-    size -= sizeof outputbuf - outputlen;
-    buff += sizeof outputbuf - outputlen;
-    outputlen = sizeof outputbuf;
-    output ();
-  }
-  memcpy (outputbuf + outputlen, buff, size);
-  outputlen += size;
+    while (size + outputlen >= sizeof outputbuf)
+    {
+        memcpy (outputbuf + outputlen, buff, sizeof outputbuf - outputlen);
+        size -= sizeof outputbuf - outputlen;
+        buff += sizeof outputbuf - outputlen;
+        outputlen = sizeof outputbuf;
+        output ();
+    }
+    memcpy (outputbuf + outputlen, buff, size);
+    outputlen += size;
 
 #if 00
-  output (); /** ?? debugging ?? **/
+    output (); /** ?? debugging ?? **/
 #endif
 }
 
 void output (void)
 
 {
-  if (outputlen > 0) {
-    os_writebuffer (outputlen, outputbuf);
-    outputlen = 0;
-  }
+    if (outputlen > 0)
+    {
+        os_writebuffer (outputlen, outputbuf);
+        outputlen = 0;
+    }
 }

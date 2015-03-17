@@ -46,7 +46,7 @@
    systems with opposite endian!!! */
 
 unsigned long lib$subx(const void *subant, const void *subee, void *result,
-	const long *lenadd)
+                       const long *lenadd)
 {
     long count;
     unsigned long carry = 0;
@@ -54,13 +54,17 @@ unsigned long lib$subx(const void *subant, const void *subee, void *result,
     const unsigned char *ee = (const unsigned char *) subee;
     unsigned char *res = (unsigned char *) result;
 
-    if (lenadd == NULL) {
+    if (lenadd == NULL)
+    {
         count = 8;
-    } else {
+    }
+    else
+    {
         count = *lenadd * 4;
     }
 
-    while (count-- > 0) {
+    while (count-- > 0)
+    {
         carry = *ant++ - (carry + *ee++);
         *res++ = carry;
         carry = (carry >> 8) & 1;

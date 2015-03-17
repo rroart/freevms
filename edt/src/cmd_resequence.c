@@ -35,40 +35,43 @@ static int resequence_range (void *dummy, Buffer *buffer, Line *line);
 void cmd_resequence (char *cp)
 
 {
-  Line *line;
+    Line *line;
 
-  count = 0;
+    count = 0;
 
-  /* If no range given, resequence the whole current buffer */
+    /* If no range given, resequence the whole current buffer */
 
-  if (*cp == 0) {
-    for (line = buffer_first_line (cur_position.buffer); line != NULL; line = line_next (line)) {
-      line_reseq (line);
-      count ++;
+    if (*cp == 0)
+    {
+        for (line = buffer_first_line (cur_position.buffer); line != NULL; line = line_next (line))
+        {
+            line_reseq (line);
+            count ++;
+        }
     }
-  }
 
-  /* Otherwise, process the requested lines */
+    /* Otherwise, process the requested lines */
 
-  else if (range_multiple (cp, &cp, resequence_range, NULL) >= 0) eoltest (cp);
+    else if (range_multiple (cp, &cp, resequence_range, NULL) >= 0) eoltest (cp);
 
-  /* Either way, print out summary */
+    /* Either way, print out summary */
 
-  if (count == 0) outerr (0, "no lines resequenced\n");
-  else outerr (12, "%u line%s resequenced\n", count, (count == 1) ? "" : "s");
+    if (count == 0) outerr (0, "no lines resequenced\n");
+    else outerr (12, "%u line%s resequenced\n", count, (count == 1) ? "" : "s");
 }
 
 static int resequence_range (void *dummy, Buffer *buffer, Line *line)
 
 {
-  /* Resequence the line */
+    /* Resequence the line */
 
-  if (line != NULL) {
-    line_reseq (line);
-    count ++;
-  }
+    if (line != NULL)
+    {
+        line_reseq (line);
+        count ++;
+    }
 
-  /* Keep going */
+    /* Keep going */
 
-  return (0);
+    return (0);
 }

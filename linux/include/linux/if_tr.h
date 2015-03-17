@@ -39,51 +39,54 @@
 #define UI_CMD       0x03
 
 /* This is an Token-Ring frame header. */
-struct trh_hdr {
-	__u8  ac;			/* access control field */
-	__u8  fc;			/* frame control field */
-	__u8  daddr[TR_ALEN];		/* destination address */
-	__u8  saddr[TR_ALEN];		/* source address */
-	__u16 rcf;			/* route control field */
-	__u16 rseg[8];			/* routing registers */
+struct trh_hdr
+{
+    __u8  ac;			/* access control field */
+    __u8  fc;			/* frame control field */
+    __u8  daddr[TR_ALEN];		/* destination address */
+    __u8  saddr[TR_ALEN];		/* source address */
+    __u16 rcf;			/* route control field */
+    __u16 rseg[8];			/* routing registers */
 };
 
 /* This is an Token-Ring LLC structure */
-struct trllc {
-	__u8  dsap;			/* destination SAP */
-	__u8  ssap;			/* source SAP */
-	__u8  llc;			/* LLC control field */
-	__u8  protid[3];		/* protocol id */
-	__u16 ethertype;		/* ether type field */
+struct trllc
+{
+    __u8  dsap;			/* destination SAP */
+    __u8  ssap;			/* source SAP */
+    __u8  llc;			/* LLC control field */
+    __u8  protid[3];		/* protocol id */
+    __u16 ethertype;		/* ether type field */
 };
 
 /* Token-Ring statistics collection data. */
-struct tr_statistics {
-	unsigned long rx_packets;       /* total packets received	*/
-	unsigned long tx_packets;	/* total packets transmitted	*/
-	unsigned long rx_bytes;		/* total bytes received   	*/
-	unsigned long tx_bytes;		/* total bytes transmitted	*/
-	unsigned long rx_errors;	/* bad packets received		*/
-	unsigned long tx_errors;	/* packet transmit problems	*/
-	unsigned long rx_dropped;	/* no space in linux buffers	*/
-	unsigned long tx_dropped;	/* no space available in linux	*/
-	unsigned long multicast;	/* multicast packets received	*/
-	unsigned long transmit_collision;
+struct tr_statistics
+{
+    unsigned long rx_packets;       /* total packets received	*/
+    unsigned long tx_packets;	/* total packets transmitted	*/
+    unsigned long rx_bytes;		/* total bytes received   	*/
+    unsigned long tx_bytes;		/* total bytes transmitted	*/
+    unsigned long rx_errors;	/* bad packets received		*/
+    unsigned long tx_errors;	/* packet transmit problems	*/
+    unsigned long rx_dropped;	/* no space in linux buffers	*/
+    unsigned long tx_dropped;	/* no space available in linux	*/
+    unsigned long multicast;	/* multicast packets received	*/
+    unsigned long transmit_collision;
 
-	/* detailed Token-Ring errors. See IBM Token-Ring Network
-	   Architecture for more info */
+    /* detailed Token-Ring errors. See IBM Token-Ring Network
+       Architecture for more info */
 
-	unsigned long line_errors;
-	unsigned long internal_errors;
-	unsigned long burst_errors;
-	unsigned long A_C_errors;
-	unsigned long abort_delimiters;
-	unsigned long lost_frames;
-	unsigned long recv_congest_count;
-	unsigned long frame_copied_errors;
-	unsigned long frequency_errors;
-	unsigned long token_errors;
-	unsigned long dummy1;
+    unsigned long line_errors;
+    unsigned long internal_errors;
+    unsigned long burst_errors;
+    unsigned long A_C_errors;
+    unsigned long abort_delimiters;
+    unsigned long lost_frames;
+    unsigned long recv_congest_count;
+    unsigned long frame_copied_errors;
+    unsigned long frequency_errors;
+    unsigned long token_errors;
+    unsigned long dummy1;
 };
 
 /* source routing stuff */

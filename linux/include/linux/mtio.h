@@ -1,4 +1,4 @@
-/* 
+/*
  * linux/mtio.h header file for Linux. Written by H. Bergman
  *
  * Modified for special ioctls provided by zftape in September 1997
@@ -17,16 +17,17 @@
  */
 
 /* structure for MTIOCTOP - mag tape op command */
-struct	mtop {
-	short	mt_op;		/* operations defined below */
-	int	mt_count;	/* how many of them */
+struct	mtop
+{
+    short	mt_op;		/* operations defined below */
+    int	mt_count;	/* how many of them */
 };
 
 /* Magnetic Tape operations [Not all operations supported by all drivers]: */
 #define MTRESET 0	/* +reset drive in case of problems */
 #define MTFSF	1	/* forward space over FileMark,
-			 * position at first record of next file 
-			 */
+* position at first record of next file
+*/
 #define MTBSF	2	/* backward space FileMark (position before FM) */
 #define MTFSR	3	/* forward space record */
 #define MTBSR	4	/* backward space record */
@@ -38,9 +39,9 @@ struct	mtop {
 #define MTBSFM	10	/* +backward space FileMark, position at FM */
 #define MTFSFM  11	/* +forward space FileMark, position at FM */
 #define MTEOM	12	/* goto end of recorded media (for appending files).
-			 * MTEOM positions after the last FM, ready for
-			 * appending another file.
-			 */
+* MTEOM positions after the last FM, ready for
+* appending another file.
+*/
 #define MTERASE 13	/* erase tape -- be careful! */
 
 #define MTRAS1  14	/* run self test 1 (nondestructive) */
@@ -52,7 +53,7 @@ struct	mtop {
 #define MTSEEK	22	/* seek to block (Tandberg, etc.) */
 #define MTTELL	23	/* tell block (Tandberg, etc.) */
 #define MTSETDRVBUFFER 24 /* set the drive buffering according to SCSI-2 */
-			/* ordinary buffered operation with code 1 */
+/* ordinary buffered operation with code 1 */
 #define MTFSS	25	/* space forward over setmarks */
 #define MTBSS	26	/* space backward over setmarks */
 #define MTWSM	27	/* write setmarks */
@@ -67,20 +68,21 @@ struct	mtop {
 
 /* structure for MTIOCGET - mag tape get status command */
 
-struct	mtget {
-	long	mt_type;	/* type of magtape device */
-	long	mt_resid;	/* residual count: (not sure)
+struct	mtget
+{
+    long	mt_type;	/* type of magtape device */
+    long	mt_resid;	/* residual count: (not sure)
 				 *	number of bytes ignored, or
 				 *	number of files not skipped, or
 				 *	number of records not skipped.
 				 */
-	/* the following registers are device dependent */
-	long	mt_dsreg;	/* status register */
-	long	mt_gstat;	/* generic (device independent) status */
-	long	mt_erreg;	/* error register */
-	/* The next two fields are not always used */
-	__kernel_daddr_t mt_fileno;	/* number of current file on tape */
-	__kernel_daddr_t mt_blkno;	/* current block number */
+    /* the following registers are device dependent */
+    long	mt_dsreg;	/* status register */
+    long	mt_gstat;	/* generic (device independent) status */
+    long	mt_erreg;	/* error register */
+    /* The next two fields are not always used */
+    __kernel_daddr_t mt_fileno;	/* number of current file on tape */
+    __kernel_daddr_t mt_blkno;	/* current block number */
 };
 
 
@@ -106,7 +108,7 @@ struct	mtget {
 #define MT_ISDDS1		0x51	/* DDS device without partitions */
 #define MT_ISDDS2		0x52	/* DDS device with partitions */
 #define MT_ISONSTREAM_SC        0x61   /* OnStream SCSI tape drives (SC-x0)
-					  and SCSI emulated (DI, DP, USB) */
+and SCSI emulated (DI, DP, USB) */
 #define MT_ISSCSI1		0x71	/* Generic ANSI SCSI-1 tape unit */
 #define MT_ISSCSI2		0x72	/* Generic ANSI SCSI-2 tape unit */
 
@@ -116,9 +118,10 @@ struct	mtget {
 #define MT_ISFTAPE_UNKNOWN	0x800000 /* obsolete */
 #define MT_ISFTAPE_FLAG	0x800000
 
-struct mt_tape_info {
-	long t_type;		/* device type id (mt_type) */
-	char *t_name;		/* descriptive name */
+struct mt_tape_info
+{
+    long t_type;		/* device type id (mt_type) */
+    char *t_name;		/* descriptive name */
 };
 
 #define MT_TAPE_INFO	{ \
@@ -145,48 +148,51 @@ struct mt_tape_info {
 
 /* structure for MTIOCPOS - mag tape get position command */
 
-struct	mtpos {
-	long 	mt_blkno;	/* current block number */
+struct	mtpos
+{
+    long 	mt_blkno;	/* current block number */
 };
 
 
 /* structure for MTIOCGETCONFIG/MTIOCSETCONFIG primarily intended
  * as an interim solution for QIC-02 until DDI is fully implemented.
  */
-struct mtconfiginfo {
-	long	mt_type;	/* drive type */
-	long	ifc_type;	/* interface card type */
-	unsigned short	irqnr;	/* IRQ number to use */
-	unsigned short	dmanr;	/* DMA channel to use */
-	unsigned short	port;	/* IO port base address */
+struct mtconfiginfo
+{
+    long	mt_type;	/* drive type */
+    long	ifc_type;	/* interface card type */
+    unsigned short	irqnr;	/* IRQ number to use */
+    unsigned short	dmanr;	/* DMA channel to use */
+    unsigned short	port;	/* IO port base address */
 
-	unsigned long	debug;	/* debugging flags */
+    unsigned long	debug;	/* debugging flags */
 
-	unsigned	have_dens:1;
-	unsigned	have_bsf:1;
-	unsigned	have_fsr:1;
-	unsigned	have_bsr:1;
-	unsigned	have_eod:1;
-	unsigned	have_seek:1;
-	unsigned	have_tell:1;
-	unsigned	have_ras1:1;
-	unsigned	have_ras2:1;
-	unsigned	have_ras3:1;
-	unsigned	have_qfa:1;
+    unsigned	have_dens:1;
+    unsigned	have_bsf:1;
+    unsigned	have_fsr:1;
+    unsigned	have_bsr:1;
+    unsigned	have_eod:1;
+    unsigned	have_seek:1;
+    unsigned	have_tell:1;
+    unsigned	have_ras1:1;
+    unsigned	have_ras2:1;
+    unsigned	have_ras3:1;
+    unsigned	have_qfa:1;
 
-	unsigned	pad1:5;
-	char		reserved[10];
+    unsigned	pad1:5;
+    char		reserved[10];
 };
 
 /*  structure for MTIOCVOLINFO, query information about the volume
  *  currently positioned at (zftape)
  */
-struct mtvolinfo {
-	unsigned int mt_volno;   /* vol-number */
-	unsigned int mt_blksz;   /* blocksize used when recording */
-	unsigned int mt_rawsize; /* raw tape space consumed, in kb */
-	unsigned int mt_size;    /* volume size after decompression, in kb */
-	unsigned int mt_cmpr:1;  /* this volume has been compressed */
+struct mtvolinfo
+{
+    unsigned int mt_volno;   /* vol-number */
+    unsigned int mt_blksz;   /* blocksize used when recording */
+    unsigned int mt_rawsize; /* raw tape space consumed, in kb */
+    unsigned int mt_size;    /* volume size after decompression, in kb */
+    unsigned int mt_cmpr:1;  /* this volume has been compressed */
 };
 
 /* raw access to a floppy drive, read and write an arbitrary segment.
@@ -200,20 +206,21 @@ struct mtvolinfo {
 #define MT_FT_WR_DELETE  3 /* write deleted data marks, one segment at time */
 
 struct mtftseg
-{            
-	unsigned mt_segno;   /* the segment to read or write */
-	unsigned mt_mode;    /* modes for read/write (sync/async etc.) */
-	int      mt_result;  /* result of r/w request, not of the ioctl */
-	void    *mt_data;    /* User space buffer: must be 29kb */
+{
+    unsigned mt_segno;   /* the segment to read or write */
+    unsigned mt_mode;    /* modes for read/write (sync/async etc.) */
+    int      mt_result;  /* result of r/w request, not of the ioctl */
+    void    *mt_data;    /* User space buffer: must be 29kb */
 };
 
 /* get tape capacity (ftape/zftape)
  */
-struct mttapesize {
-	unsigned long mt_capacity; /* entire, uncompressed capacity 
+struct mttapesize
+{
+    unsigned long mt_capacity; /* entire, uncompressed capacity
 				    * of a cartridge
 				    */
-	unsigned long mt_used;     /* what has been used so far, raw 
+    unsigned long mt_used;     /* what has been used so far, raw
 				    * uncompressed amount
 				    */
 };
@@ -226,58 +233,65 @@ struct mttapesize {
 #define FTFMT_STATUS		4 /* monitor formatting a tape track */
 #define FTFMT_VERIFY		5 /* verify the given segment        */
 
-struct ftfmtparms {
-	unsigned char  ft_qicstd;   /* QIC-40/QIC-80/QIC-3010/QIC-3020 */
-	unsigned char  ft_fmtcode;  /* Refer to the QIC specs */
-	unsigned char  ft_fhm;      /* floppy head max */
-	unsigned char  ft_ftm;      /* floppy track max */
-	unsigned short ft_spt;      /* segments per track */
-	unsigned short ft_tpc;      /* tracks per cartridge */
+struct ftfmtparms
+{
+    unsigned char  ft_qicstd;   /* QIC-40/QIC-80/QIC-3010/QIC-3020 */
+    unsigned char  ft_fmtcode;  /* Refer to the QIC specs */
+    unsigned char  ft_fhm;      /* floppy head max */
+    unsigned char  ft_ftm;      /* floppy track max */
+    unsigned short ft_spt;      /* segments per track */
+    unsigned short ft_tpc;      /* tracks per cartridge */
 };
 
-struct ftfmttrack {
-	unsigned int  ft_track;   /* track to format */
-	unsigned char ft_gap3;    /* size of gap3, for FORMAT_TRK */
+struct ftfmttrack
+{
+    unsigned int  ft_track;   /* track to format */
+    unsigned char ft_gap3;    /* size of gap3, for FORMAT_TRK */
 };
 
-struct ftfmtstatus {
-	unsigned int  ft_segment;  /* segment currently being formatted */
+struct ftfmtstatus
+{
+    unsigned int  ft_segment;  /* segment currently being formatted */
 };
 
-struct ftfmtverify {
-	unsigned int  ft_segment;   /* segment to verify */
-	unsigned long ft_bsm;       /* bsm as result of VERIFY cmd */
+struct ftfmtverify
+{
+    unsigned int  ft_segment;   /* segment to verify */
+    unsigned long ft_bsm;       /* bsm as result of VERIFY cmd */
 };
 
-struct mtftformat {
-	unsigned int fmt_op;      /* operation to perform */
-	union fmt_arg {
-		struct ftfmtparms  fmt_parms;  /* format parameters */
-		struct ftfmttrack  fmt_track;  /* ctrl while formatting */
-		struct ftfmtstatus fmt_status;
-		struct ftfmtverify fmt_verify; /* for verifying */ 
-	} fmt_arg;
+struct mtftformat
+{
+    unsigned int fmt_op;      /* operation to perform */
+    union fmt_arg
+    {
+        struct ftfmtparms  fmt_parms;  /* format parameters */
+        struct ftfmttrack  fmt_track;  /* ctrl while formatting */
+        struct ftfmtstatus fmt_status;
+        struct ftfmtverify fmt_verify; /* for verifying */
+    } fmt_arg;
 };
 
-struct mtftcmd {
-	unsigned int ft_wait_before; /* timeout to wait for drive to get ready 
+struct mtftcmd
+{
+    unsigned int ft_wait_before; /* timeout to wait for drive to get ready
 				      * before command is sent. Milliseconds
 				      */
-	qic117_cmd_t ft_cmd;         /* command to send */
-	unsigned char ft_parm_cnt;   /* zero: no parm is sent. */
-	unsigned char ft_parms[3];   /* parameter(s) to send to
+    qic117_cmd_t ft_cmd;         /* command to send */
+    unsigned char ft_parm_cnt;   /* zero: no parm is sent. */
+    unsigned char ft_parms[3];   /* parameter(s) to send to
 				      * the drive. The parms are nibbles
 				      * driver sends cmd + 2 step pulses */
-	unsigned int ft_result_bits; /* if non zero, number of bits
+    unsigned int ft_result_bits; /* if non zero, number of bits
 				      *	returned by the tape drive
 				      */
-	unsigned int ft_result;      /* the result returned by the tape drive*/
-	unsigned int ft_wait_after;  /* timeout to wait for drive to get ready
+    unsigned int ft_result;      /* the result returned by the tape drive*/
+    unsigned int ft_wait_after;  /* timeout to wait for drive to get ready
 				      * after command is sent. 0: don't wait */
-	int ft_status;	             /* status returned by ready wait
+    int ft_status;	             /* status returned by ready wait
 				      * undefined if timeout was 0.
 				      */
-	int ft_error;                /* error code if error status was set by 
+    int ft_error;                /* error code if error status was set by
 				      * command
 				      */
 };

@@ -17,7 +17,7 @@
 #include <asm/dma.h>
 #include <asm/system.h>
 
- 
+
 
 /* A note on resource allocation:
  *
@@ -49,63 +49,69 @@ spinlock_t dma_spin_lock = SPIN_LOCK_UNLOCKED;
  * DMA4 is reserved for cascading.
  */
 
-struct dma_chan {
-	int  lock;
-	const char *device_id;
+struct dma_chan
+{
+    int  lock;
+    const char *device_id;
 };
 
-static struct dma_chan dma_chan_busy[MAX_DMA_CHANNELS] = {
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 1, "cascade" },
-	{ 0, 0 },
-	{ 0, 0 },
-	{ 0, 0 }
+static struct dma_chan dma_chan_busy[MAX_DMA_CHANNELS] =
+{
+    { 0, 0 },
+    { 0, 0 },
+    { 0, 0 },
+    { 0, 0 },
+    { 1, "cascade" },
+    { 0, 0 },
+    { 0, 0 },
+    { 0, 0 }
 };
 
 int get_dma_list(char *buf)
 {
-	int i, len = 0;
+    int i, len = 0;
 
-	for (i = 0 ; i < MAX_DMA_CHANNELS ; i++) {
-		if (dma_chan_busy[i].lock) {
-		    len += sprintf(buf+len, "%2d: %s\n",
-				   i,
-				   dma_chan_busy[i].device_id);
-		}
-	}
-	return len;
+    for (i = 0 ; i < MAX_DMA_CHANNELS ; i++)
+    {
+        if (dma_chan_busy[i].lock)
+        {
+            len += sprintf(buf+len, "%2d: %s\n",
+                           i,
+                           dma_chan_busy[i].device_id);
+        }
+    }
+    return len;
 } /* get_dma_list */
 
 
 int request_dma(unsigned int dmanr, const char * device_id)
 {
-	if (dmanr >= MAX_DMA_CHANNELS)
-		return -EINVAL;
+    if (dmanr >= MAX_DMA_CHANNELS)
+        return -EINVAL;
 
-	if (xchg(&dma_chan_busy[dmanr].lock, 1) != 0)
-		return -EBUSY;
+    if (xchg(&dma_chan_busy[dmanr].lock, 1) != 0)
+        return -EBUSY;
 
-	dma_chan_busy[dmanr].device_id = device_id;
+    dma_chan_busy[dmanr].device_id = device_id;
 
-	/* old flag was 0, now contains 1 to indicate busy */
-	return 0;
+    /* old flag was 0, now contains 1 to indicate busy */
+    return 0;
 } /* request_dma */
 
 
 void free_dma(unsigned int dmanr)
 {
-	if (dmanr >= MAX_DMA_CHANNELS) {
-		printk("Trying to free DMA%d\n", dmanr);
-		return;
-	}
+    if (dmanr >= MAX_DMA_CHANNELS)
+    {
+        printk("Trying to free DMA%d\n", dmanr);
+        return;
+    }
 
-	if (xchg(&dma_chan_busy[dmanr].lock, 0) == 0) {
-		printk("Trying to free free DMA%d\n", dmanr);
-		return;
-	}	
+    if (xchg(&dma_chan_busy[dmanr].lock, 0) == 0)
+    {
+        printk("Trying to free free DMA%d\n", dmanr);
+        return;
+    }
 
 } /* free_dma */
 
@@ -113,7 +119,7 @@ void free_dma(unsigned int dmanr)
 
 int request_dma(unsigned int dmanr, const char *device_id)
 {
-	return -EINVAL;
+    return -EINVAL;
 }
 
 void free_dma(unsigned int dmanr)
@@ -121,8 +127,8 @@ void free_dma(unsigned int dmanr)
 }
 
 int get_dma_list(char *buf)
-{	
-	strcpy(buf, "No DMA\n");
-	return 7;
+{
+    strcpy(buf, "No DMA\n");
+    return 7;
 }
 #endif

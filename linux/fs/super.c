@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Modified Linux source file, 2001-2004  
+// Modified Linux source file, 2001-2004
 
 /*
  *  linux/fs/super.c
@@ -57,12 +57,12 @@ spinlock_t sb_lock = SPIN_LOCK_UNLOCKED;
 
 asmlinkage long sys_sysfs(int option, unsigned long arg1, unsigned long arg2)
 {
-	int retval = -EINVAL;
-	return retval;
+    int retval = -EINVAL;
+    return retval;
 }
 
 asmlinkage long sys_ustat(dev_t dev, struct ustat * ubuf)
 {
-	int err = -EINVAL;
-	return err;
+    int err = -EINVAL;
+    return err;
 }

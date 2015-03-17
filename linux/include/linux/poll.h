@@ -12,23 +12,24 @@
 
 struct poll_table_page;
 
-typedef struct poll_table_struct {
-	int error;
-	struct poll_table_page * table;
+typedef struct poll_table_struct
+{
+    int error;
+    struct poll_table_page * table;
 } poll_table;
 
 extern void __pollwait(struct file * filp, wait_queue_head_t * wait_address, poll_table *p);
 
 static inline void poll_wait(struct file * filp, wait_queue_head_t * wait_address, poll_table *p)
 {
-	if (p && wait_address)
-		__pollwait(filp, wait_address, p);
+    if (p && wait_address)
+        __pollwait(filp, wait_address, p);
 }
 
 static inline void poll_initwait(poll_table* pt)
 {
-	pt->error = 0;
-	pt->table = NULL;
+    pt->error = 0;
+    pt->table = NULL;
 }
 extern void poll_freewait(poll_table* pt);
 
@@ -37,9 +38,10 @@ extern void poll_freewait(poll_table* pt);
  * Scaleable version of the fd_set.
  */
 
-typedef struct {
-	unsigned long *in, *out, *ex;
-	unsigned long *res_in, *res_out, *res_ex;
+typedef struct
+{
+    unsigned long *in, *out, *ex;
+    unsigned long *res_in, *res_out, *res_ex;
 } fd_set_bits;
 
 /*
@@ -58,29 +60,30 @@ typedef struct {
 static inline
 int get_fd_set(unsigned long nr, void *ufdset, unsigned long *fdset)
 {
-	nr = FDS_BYTES(nr);
-	if (ufdset) {
-		int error;
-		error = verify_area(VERIFY_WRITE, ufdset, nr);
-		if (!error && __copy_from_user(fdset, ufdset, nr))
-			error = -EFAULT;
-		return error;
-	}
-	memset(fdset, 0, nr);
-	return 0;
+    nr = FDS_BYTES(nr);
+    if (ufdset)
+    {
+        int error;
+        error = verify_area(VERIFY_WRITE, ufdset, nr);
+        if (!error && __copy_from_user(fdset, ufdset, nr))
+            error = -EFAULT;
+        return error;
+    }
+    memset(fdset, 0, nr);
+    return 0;
 }
 
 static inline
 void set_fd_set(unsigned long nr, void *ufdset, unsigned long *fdset)
 {
-	if (ufdset)
-		__copy_to_user(ufdset, fdset, FDS_BYTES(nr));
+    if (ufdset)
+        __copy_to_user(ufdset, fdset, FDS_BYTES(nr));
 }
 
 static inline
 void zero_fd_set(unsigned long nr, unsigned long *fdset)
 {
-	memset(fdset, 0, FDS_BYTES(nr));
+    memset(fdset, 0, FDS_BYTES(nr));
 }
 
 extern int do_select(int n, fd_set_bits *fds, long *timeout);

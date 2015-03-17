@@ -80,168 +80,190 @@
 #define		FAB$M_RCF_RU		0x1
 #define		FAB$M_RCF_AI		0x2
 #define		FAB$M_RCF_BI		0x4
-	
-struct _fabdef {
-  unsigned char fab$b_bid;
-  unsigned char fab$b_bln;
-  union  {
-    unsigned short int fab$w_ifi;
-    struct  {
-      unsigned fabdef$$_fill_1		: 6;
-      unsigned fab$v_ppf_rat		: 8;
-      unsigned fab$v_ppf_ind		: 1;
-      unsigned fab$v_ppifi		: 1;
+
+struct _fabdef
+{
+    unsigned char fab$b_bid;
+    unsigned char fab$b_bln;
+    union
+    {
+        unsigned short int fab$w_ifi;
+        struct
+        {
+            unsigned fabdef$$_fill_1		: 6;
+            unsigned fab$v_ppf_rat		: 8;
+            unsigned fab$v_ppf_ind		: 1;
+            unsigned fab$v_ppifi		: 1;
+        };
     };
-  };
-  union  {
-    unsigned int fab$l_fop;
-    struct  {
-      unsigned fab$v_asy		: 1;
-      unsigned fab$v_mxv		: 1;
-      unsigned fab$v_sup		: 1;
-      unsigned fab$v_tmp		: 1;
-      unsigned fab$v_tmd		: 1;
-      unsigned fab$v_dfw		: 1;
-      unsigned fab$v_sqo		: 1;
-      unsigned fab$v_rwo		: 1;
-      unsigned fab$v_pos		: 1;
-      unsigned fab$v_wck		: 1;
-      unsigned fab$v_nef		: 1;
-      unsigned fab$v_rwc		: 1;
-      unsigned fab$v_dmo		: 1;
-      unsigned fab$v_spl		: 1;
-      unsigned fab$v_scf		: 1;
-      unsigned fab$v_dlt		: 1;
-      unsigned fab$v_nfs		: 1;
-      unsigned fab$v_ufo		: 1;
-      unsigned fab$v_ppf		: 1;
-      unsigned fab$v_inp		: 1;
-      unsigned fab$v_ctg		: 1;
-      unsigned fab$v_cbt		: 1;
-      unsigned fab$v_syncsts		: 1;
-      unsigned fab$v_rck		: 1;
-      unsigned fab$v_nam		: 1;
-      unsigned fab$v_cif		: 1;
-      unsigned fabdef$$_fill_3		: 1;
-      unsigned fab$v_esc		: 1;
-      unsigned fab$v_tef		: 1;
-      unsigned fab$v_ofp		: 1;
-      unsigned fab$v_kfo		: 1;
-      unsigned fabdef$$_fill_4		: 1;
+    union
+    {
+        unsigned int fab$l_fop;
+        struct
+        {
+            unsigned fab$v_asy		: 1;
+            unsigned fab$v_mxv		: 1;
+            unsigned fab$v_sup		: 1;
+            unsigned fab$v_tmp		: 1;
+            unsigned fab$v_tmd		: 1;
+            unsigned fab$v_dfw		: 1;
+            unsigned fab$v_sqo		: 1;
+            unsigned fab$v_rwo		: 1;
+            unsigned fab$v_pos		: 1;
+            unsigned fab$v_wck		: 1;
+            unsigned fab$v_nef		: 1;
+            unsigned fab$v_rwc		: 1;
+            unsigned fab$v_dmo		: 1;
+            unsigned fab$v_spl		: 1;
+            unsigned fab$v_scf		: 1;
+            unsigned fab$v_dlt		: 1;
+            unsigned fab$v_nfs		: 1;
+            unsigned fab$v_ufo		: 1;
+            unsigned fab$v_ppf		: 1;
+            unsigned fab$v_inp		: 1;
+            unsigned fab$v_ctg		: 1;
+            unsigned fab$v_cbt		: 1;
+            unsigned fab$v_syncsts		: 1;
+            unsigned fab$v_rck		: 1;
+            unsigned fab$v_nam		: 1;
+            unsigned fab$v_cif		: 1;
+            unsigned fabdef$$_fill_3		: 1;
+            unsigned fab$v_esc		: 1;
+            unsigned fab$v_tef		: 1;
+            unsigned fab$v_ofp		: 1;
+            unsigned fab$v_kfo		: 1;
+            unsigned fabdef$$_fill_4		: 1;
+        };
     };
-  };
-  unsigned int fab$l_sts;
-  unsigned int fab$l_stv;
-  unsigned int fab$l_alq;
-  unsigned short int fab$w_deq;
-  union  {
-    unsigned char fab$b_fac;
-    struct  {
-      unsigned fab$v_put		: 1;
-      unsigned fab$v_get		: 1;
-      unsigned fab$v_del		: 1;
-      unsigned fab$v_upd		: 1;
-      unsigned fab$v_trn		: 1;
-      unsigned fab$v_bio		: 1;
-      unsigned fab$v_bro		: 1;
-      unsigned fab$v_exe		: 1;
+    unsigned int fab$l_sts;
+    unsigned int fab$l_stv;
+    unsigned int fab$l_alq;
+    unsigned short int fab$w_deq;
+    union
+    {
+        unsigned char fab$b_fac;
+        struct
+        {
+            unsigned fab$v_put		: 1;
+            unsigned fab$v_get		: 1;
+            unsigned fab$v_del		: 1;
+            unsigned fab$v_upd		: 1;
+            unsigned fab$v_trn		: 1;
+            unsigned fab$v_bio		: 1;
+            unsigned fab$v_bro		: 1;
+            unsigned fab$v_exe		: 1;
+        };
     };
-  };
-  union  {
-    unsigned char fab$b_shr;
-    struct  {
-      unsigned fab$v_shrput		: 1;
-      unsigned fab$v_shrget		: 1;
-      unsigned fab$v_shrdel		: 1;
-      unsigned fab$v_shrupd		: 1;
-      unsigned fab$v_mse		: 1;
-      unsigned fab$v_nil		: 1;
-      unsigned fab$v_upi		: 1;
-      unsigned fab$v_nql		: 1;
+    union
+    {
+        unsigned char fab$b_shr;
+        struct
+        {
+            unsigned fab$v_shrput		: 1;
+            unsigned fab$v_shrget		: 1;
+            unsigned fab$v_shrdel		: 1;
+            unsigned fab$v_shrupd		: 1;
+            unsigned fab$v_mse		: 1;
+            unsigned fab$v_nil		: 1;
+            unsigned fab$v_upi		: 1;
+            unsigned fab$v_nql		: 1;
+        };
     };
-  };
-  unsigned int fab$l_ctx;
-  char fab$b_rtv;
-  union  {
-    unsigned char fab$b_org;
-    struct  {
-      unsigned fabdef$$_fill_5		: 4;
-      unsigned fab$v_org		: 4;
+    unsigned int fab$l_ctx;
+    char fab$b_rtv;
+    union
+    {
+        unsigned char fab$b_org;
+        struct
+        {
+            unsigned fabdef$$_fill_5		: 4;
+            unsigned fab$v_org		: 4;
+        };
     };
-  };
-  union  {
-    unsigned char fab$b_rat;
-    struct  {
-      unsigned fab$v_ftn	: 1;
-      unsigned fab$v_cr		: 1;
-      unsigned fab$v_prn	: 1;
-      unsigned fab$v_blk	: 1;
-      unsigned fab$v_msb	: 1;
-      unsigned fab$v_fill_0_	: 3;
+    union
+    {
+        unsigned char fab$b_rat;
+        struct
+        {
+            unsigned fab$v_ftn	: 1;
+            unsigned fab$v_cr		: 1;
+            unsigned fab$v_prn	: 1;
+            unsigned fab$v_blk	: 1;
+            unsigned fab$v_msb	: 1;
+            unsigned fab$v_fill_0_	: 3;
+        };
     };
-  };
-  unsigned char fab$b_rfm;
-  union  {
-    unsigned int fab$l_jnl;
-    struct  {
-      union  {
-	unsigned char fab$b_journal;
-	struct  {
-	  unsigned fab$v_only_ru	: 1;
-	  unsigned fab$v_ru		: 1;
-	  unsigned fab$v_bi		: 1;
-	  unsigned fab$v_ai		: 1;
-	  unsigned fab$v_at		: 1;
-	  unsigned fab$v_never_ru	: 1;
-	  unsigned fab$v_journal_file	: 1;
-	  unsigned fab$v_fill_1_	: 1;
-	};
-      };
-      unsigned char fab$b_ru_facility;
-      short int fabdef$$_fill_7;
+    unsigned char fab$b_rfm;
+    union
+    {
+        unsigned int fab$l_jnl;
+        struct
+        {
+            union
+            {
+                unsigned char fab$b_journal;
+                struct
+                {
+                    unsigned fab$v_only_ru	: 1;
+                    unsigned fab$v_ru		: 1;
+                    unsigned fab$v_bi		: 1;
+                    unsigned fab$v_ai		: 1;
+                    unsigned fab$v_at		: 1;
+                    unsigned fab$v_never_ru	: 1;
+                    unsigned fab$v_journal_file	: 1;
+                    unsigned fab$v_fill_1_	: 1;
+                };
+            };
+            unsigned char fab$b_ru_facility;
+            short int fabdef$$_fill_7;
+        };
     };
-  };
-  void *fab$l_xab;
-  union  {
-    struct _namdef *fab$l_nam;
-    struct _namldef *fab$l_naml;
-  };
-  char *fab$l_fna;
-  char *fab$l_dna;
-  unsigned char fab$b_fns;
-  unsigned char fab$b_dns;
-  unsigned short int fab$w_mrs;
-  int fab$l_mrn;
-  unsigned short int fab$w_bls;
-  unsigned char fab$b_bks;
-  unsigned char fab$b_fsz;
-  unsigned int fab$l_dev;
-  unsigned int fab$l_sdc;
-  unsigned short int fab$w_gbc;
-  union  {
-    unsigned char fab$b_acmodes;
-    struct  {
-      unsigned fab$v_lnm_mode		: 2;
-      unsigned fab$v_chan_mode		: 2;
-      unsigned fab$v_file_mode		: 2;
-      unsigned fab$v_callers_mode	: 2;
+    void *fab$l_xab;
+    union
+    {
+        struct _namdef *fab$l_nam;
+        struct _namldef *fab$l_naml;
     };
-  };
-  union  {
-    unsigned char fab$b_rcf;
-    struct  {
-      unsigned fab$v_rcf_ru		: 1;
-      unsigned fab$v_rcf_ai		: 1;
-      unsigned fab$v_rcf_bi		: 1;
-      unsigned fab$v_fill_2_		: 5;
+    char *fab$l_fna;
+    char *fab$l_dna;
+    unsigned char fab$b_fns;
+    unsigned char fab$b_dns;
+    unsigned short int fab$w_mrs;
+    int fab$l_mrn;
+    unsigned short int fab$w_bls;
+    unsigned char fab$b_bks;
+    unsigned char fab$b_fsz;
+    unsigned int fab$l_dev;
+    unsigned int fab$l_sdc;
+    unsigned short int fab$w_gbc;
+    union
+    {
+        unsigned char fab$b_acmodes;
+        struct
+        {
+            unsigned fab$v_lnm_mode		: 2;
+            unsigned fab$v_chan_mode		: 2;
+            unsigned fab$v_file_mode		: 2;
+            unsigned fab$v_callers_mode	: 2;
+        };
     };
-  };
-  unsigned int fabdef$$_fill_9;
+    union
+    {
+        unsigned char fab$b_rcf;
+        struct
+        {
+            unsigned fab$v_rcf_ru		: 1;
+            unsigned fab$v_rcf_ai		: 1;
+            unsigned fab$v_rcf_bi		: 1;
+            unsigned fab$v_fill_2_		: 5;
+        };
+    };
+    unsigned int fabdef$$_fill_9;
 };
- 
+
 #define FAB$K_BLN 80
 #define FAB$C_BLN 80
-	
+
 #define FAB$V_PPF_RAT	6
 #define FAB$S_PPF_RAT	8
 #define FAB$V_PPF_IND	14
@@ -312,4 +334,4 @@ struct _fabdef {
 extern struct _fabdef cc$rms_fab;
 
 #endif
- 
+

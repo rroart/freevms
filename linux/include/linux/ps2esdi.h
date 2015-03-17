@@ -78,7 +78,7 @@
 
 
 #define MB 1024*1024
-#define SECT_SIZE 512   
+#define SECT_SIZE 512
 
 #define ERROR 1
 #define OK 0
@@ -88,11 +88,12 @@
 #define FALSE 0
 #define TRUE !FALSE
 
-struct ps2esdi_geometry {
-	unsigned char heads;
-	unsigned char sectors;
-	unsigned short cylinders;
-	unsigned long start;
+struct ps2esdi_geometry
+{
+    unsigned char heads;
+    unsigned char sectors;
+    unsigned short cylinders;
+    unsigned long start;
 };
 
 #endif /* _PS2ESDI_H_ */

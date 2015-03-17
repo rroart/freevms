@@ -17,13 +17,13 @@
  *		as published by the Free Software Foundation; either version
  *		2 of the License, or (at your option) any later version.
  */
- 
+
 #ifndef _LINUX_IF_ETHER_H
 #define _LINUX_IF_ETHER_H
 
 /*
  *	IEEE 802.3 Ethernet magic constants.  The frame sizes omit the preamble
- *	and FCS/CRC (frame check sequence). 
+ *	and FCS/CRC (frame check sequence).
  */
 
 #define ETH_ALEN	6		/* Octets in one ethernet addr	 */
@@ -63,13 +63,13 @@
 #define ETH_P_PPP_SES	0x8864		/* PPPoE session messages	*/
 #define ETH_P_ATMMPOA	0x884c		/* MultiProtocol Over ATM	*/
 #define ETH_P_ATMFATE	0x8884		/* Frame-based ATM Transport
-					 * over Ethernet
-					 */
+* over Ethernet
+*/
 
 /*
  *	Non DIX types. Won't clash for 1500 types.
  */
- 
+
 #define ETH_P_802_3	0x0001		/* Dummy type for 802.3 frames  */
 #define ETH_P_AX25	0x0002		/* Dummy protocol id for AX.25  */
 #define ETH_P_ALL	0x0003		/* Every packet (be careful!!!) */
@@ -89,12 +89,12 @@
 /*
  *	This is an Ethernet frame header.
  */
- 
-struct ethhdr 
+
+struct ethhdr
 {
-	unsigned char	h_dest[ETH_ALEN];	/* destination eth addr	*/
-	unsigned char	h_source[ETH_ALEN];	/* source ether addr	*/
-	unsigned short	h_proto;		/* packet type ID field	*/
+    unsigned char	h_dest[ETH_ALEN];	/* destination eth addr	*/
+    unsigned char	h_source[ETH_ALEN];	/* source ether addr	*/
+    unsigned short	h_proto;		/* packet type ID field	*/
 };
 
 #endif	/* _LINUX_IF_ETHER_H */

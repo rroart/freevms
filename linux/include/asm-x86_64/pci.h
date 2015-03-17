@@ -52,7 +52,7 @@ extern int force_mmu;
  * is undefined.
  */
 extern void *pci_alloc_consistent(struct pci_dev *hwdev, size_t size,
-				  dma_addr_t *dma_handle);
+                                  dma_addr_t *dma_handle);
 
 /* Free and unmap a consistent DMA buffer.
  * cpu_addr is what was returned from pci_alloc_consistent,
@@ -63,19 +63,19 @@ extern void *pci_alloc_consistent(struct pci_dev *hwdev, size_t size,
  * past this call are illegal.
  */
 extern void pci_free_consistent(struct pci_dev *hwdev, size_t size,
-				void *vaddr, dma_addr_t dma_handle);
+                                void *vaddr, dma_addr_t dma_handle);
 
-extern int swiotlb; 
+extern int swiotlb;
 
 #ifdef CONFIG_SWIOTLB
-extern dma_addr_t swiotlb_map_single (struct pci_dev *hwdev, void *ptr, size_t size, 
-                                     int dir);
+extern dma_addr_t swiotlb_map_single (struct pci_dev *hwdev, void *ptr, size_t size,
+                                      int dir);
 extern void swiotlb_unmap_single (struct pci_dev *hwdev, dma_addr_t dev_addr,
+                                  size_t size, int dir);
+extern void swiotlb_sync_single (struct pci_dev *hwdev, dma_addr_t dev_addr,
                                  size_t size, int dir);
-extern void swiotlb_sync_single (struct pci_dev *hwdev, dma_addr_t dev_addr, 
-                                size_t size, int dir);
-extern void swiotlb_sync_sg (struct pci_dev *hwdev, struct scatterlist *sg, int nelems, 
-                            int dir);
+extern void swiotlb_sync_sg (struct pci_dev *hwdev, struct scatterlist *sg, int nelems,
+                             int dir);
 #endif
 
 #ifdef CONFIG_GART_IOMMU
@@ -87,11 +87,11 @@ extern void swiotlb_sync_sg (struct pci_dev *hwdev, struct scatterlist *sg, int 
  * until either pci_unmap_single or pci_dma_sync_single is performed.
  */
 extern dma_addr_t pci_map_single(struct pci_dev *hwdev, void *ptr,
-				 size_t size, int direction);
+                                 size_t size, int direction);
 
 
 void pci_unmap_single(struct pci_dev *hwdev, dma_addr_t addr,
-				   size_t size, int direction);
+                      size_t size, int direction);
 
 /*
  * pci_{map,unmap}_single_page maps a kernel page to a dma_addr_t. identical
@@ -99,7 +99,7 @@ void pci_unmap_single(struct pci_dev *hwdev, dma_addr_t addr,
  */
 
 #define pci_map_page(dev,page,offset,size,dir) \
-	pci_map_single((dev), page_address(page)+(offset), (size), (dir)) 
+	pci_map_single((dev), page_address(page)+(offset), (size), (dir))
 
 #define DECLARE_PCI_UNMAP_ADDR(ADDR_NAME)	\
 	dma_addr_t ADDR_NAME;
@@ -114,27 +114,27 @@ void pci_unmap_single(struct pci_dev *hwdev, dma_addr_t addr,
 #define pci_unmap_len_set(PTR, LEN_NAME, VAL)		\
 	(((PTR)->LEN_NAME) = (VAL))
 
-static inline void pci_dma_sync_single(struct pci_dev *hwdev, 
-				       dma_addr_t dma_handle,
-				       size_t size, int direction)
+static inline void pci_dma_sync_single(struct pci_dev *hwdev,
+                                       dma_addr_t dma_handle,
+                                       size_t size, int direction)
 {
 #ifdef CONFIG_SWIOTLB
-       if (swiotlb)
-               return swiotlb_sync_single(hwdev,dma_handle,size,direction);
+    if (swiotlb)
+        return swiotlb_sync_single(hwdev,dma_handle,size,direction);
 #endif
-	BUG_ON(direction == PCI_DMA_NONE); 
-} 
+    BUG_ON(direction == PCI_DMA_NONE);
+}
 
-static inline void pci_dma_sync_sg(struct pci_dev *hwdev, 
-				   struct scatterlist *sg,
-				   int nelems, int direction)
-{ 
-	BUG_ON(direction == PCI_DMA_NONE); 
+static inline void pci_dma_sync_sg(struct pci_dev *hwdev,
+                                   struct scatterlist *sg,
+                                   int nelems, int direction)
+{
+    BUG_ON(direction == PCI_DMA_NONE);
 #ifdef CONFIG_SWIOTLB
-       if (swiotlb)
-               return swiotlb_sync_sg(hwdev,sg,nelems,direction);
+    if (swiotlb)
+        return swiotlb_sync_sg(hwdev,sg,nelems,direction);
 #endif
-} 
+}
 
 /* The PCI address space does equal the physical memory
  * address space.  The networking and block device layers use
@@ -145,41 +145,41 @@ static inline void pci_dma_sync_sg(struct pci_dev *hwdev,
 
 #else
 static inline dma_addr_t pci_map_single(struct pci_dev *hwdev, void *ptr,
-					size_t size, int direction)
+                                        size_t size, int direction)
 {
-	dma_addr_t addr; 
+    dma_addr_t addr;
 
-	if (direction == PCI_DMA_NONE)
-		out_of_line_bug();	
-	addr = virt_to_bus(ptr); 
+    if (direction == PCI_DMA_NONE)
+        out_of_line_bug();
+    addr = virt_to_bus(ptr);
 
-	/* 
-	 * This is gross, but what should I do.
-	 * Unfortunately drivers do not test the return value of this.
-	 */
-	if ((addr+size) & ~hwdev->dma_mask) 
-		out_of_line_bug(); 
-	return addr;
+    /*
+     * This is gross, but what should I do.
+     * Unfortunately drivers do not test the return value of this.
+     */
+    if ((addr+size) & ~hwdev->dma_mask)
+        out_of_line_bug();
+    return addr;
 }
 
 static inline void pci_unmap_single(struct pci_dev *hwdev, dma_addr_t dma_addr,
-				    size_t size, int direction)
+                                    size_t size, int direction)
 {
-	if (direction == PCI_DMA_NONE)
-		out_of_line_bug();
-	/* Nothing to do */
+    if (direction == PCI_DMA_NONE)
+        out_of_line_bug();
+    /* Nothing to do */
 }
 
 static inline dma_addr_t pci_map_page(struct pci_dev *hwdev, struct page *page,
-				      unsigned long offset, size_t size, int direction)
+                                      unsigned long offset, size_t size, int direction)
 {
-	dma_addr_t addr;
-	if (direction == PCI_DMA_NONE)
-		out_of_line_bug();	
- 	addr = page_to_pfn(page) * PAGE_SIZE + offset;
-	if ((addr+size) & ~hwdev->dma_mask) 
-		out_of_line_bug();
-	return addr;
+    dma_addr_t addr;
+    if (direction == PCI_DMA_NONE)
+        out_of_line_bug();
+    addr = page_to_pfn(page) * PAGE_SIZE + offset;
+    if ((addr+size) & ~hwdev->dma_mask)
+        out_of_line_bug();
+    return addr;
 }
 
 /* pci_unmap_{page,single} is a nop so... */
@@ -189,7 +189,7 @@ static inline dma_addr_t pci_map_page(struct pci_dev *hwdev, struct page *page,
 #define pci_unmap_addr_set(PTR, ADDR_NAME, VAL)	do { } while (0)
 #define pci_unmap_len(PTR, LEN_NAME)		(0)
 #define pci_unmap_len_set(PTR, LEN_NAME, VAL)	do { } while (0)
-	
+
 /* Make physical memory consistent for a single
  * streaming mode DMA translation after a transfer.
  *
@@ -200,12 +200,12 @@ static inline dma_addr_t pci_map_page(struct pci_dev *hwdev, struct page *page,
  * device again owns the buffer.
  */
 static inline void pci_dma_sync_single(struct pci_dev *hwdev,
-				       dma_addr_t dma_handle,
-				       size_t size, int direction)
+                                       dma_addr_t dma_handle,
+                                       size_t size, int direction)
 {
-	if (direction == PCI_DMA_NONE)
-		out_of_line_bug();
-	flush_write_buffers();
+    if (direction == PCI_DMA_NONE)
+        out_of_line_bug();
+    flush_write_buffers();
 }
 
 /* Make physical memory consistent for a set of streaming
@@ -215,12 +215,12 @@ static inline void pci_dma_sync_single(struct pci_dev *hwdev,
  * same rules and usage.
  */
 static inline void pci_dma_sync_sg(struct pci_dev *hwdev,
-				   struct scatterlist *sg,
-				   int nelems, int direction)
+                                   struct scatterlist *sg,
+                                   int nelems, int direction)
 {
-	if (direction == PCI_DMA_NONE)
-		out_of_line_bug();
-	flush_write_buffers();
+    if (direction == PCI_DMA_NONE)
+        out_of_line_bug();
+    flush_write_buffers();
 }
 
 #define PCI_DMA_BUS_IS_PHYS	1
@@ -228,9 +228,9 @@ static inline void pci_dma_sync_sg(struct pci_dev *hwdev,
 #endif
 
 extern int pci_map_sg(struct pci_dev *hwdev, struct scatterlist *sg,
-		      int nents, int direction);
+                      int nents, int direction);
 extern void pci_unmap_sg(struct pci_dev *hwdev, struct scatterlist *sg,
-			 int nents, int direction);
+                         int nents, int direction);
 
 #define pci_unmap_page pci_unmap_single
 
@@ -241,15 +241,15 @@ extern void pci_unmap_sg(struct pci_dev *hwdev, struct scatterlist *sg,
  */
 static inline int pci_dma_supported(struct pci_dev *hwdev, u64 mask)
 {
-        /*
-         * we fall back to GFP_DMA when the mask isn't all 1s,
-         * so we can't guarantee allocations that must be
-         * within a tighter range than GFP_DMA..
-         */
-        if(mask < 0x00ffffff)
-                return 0;
+    /*
+     * we fall back to GFP_DMA when the mask isn't all 1s,
+     * so we can't guarantee allocations that must be
+     * within a tighter range than GFP_DMA..
+     */
+    if(mask < 0x00ffffff)
+        return 0;
 
-	return 1;
+    return 1;
 }
 
 /* This is always fine. */
@@ -258,26 +258,26 @@ static inline int pci_dma_supported(struct pci_dev *hwdev, u64 mask)
 static __inline__ dma64_addr_t
 pci_dac_page_to_dma(struct pci_dev *pdev, struct page *page, unsigned long offset, int direction)
 {
-	return ((dma64_addr_t) page_to_bus(page) +
-		(dma64_addr_t) offset);
+    return ((dma64_addr_t) page_to_bus(page) +
+            (dma64_addr_t) offset);
 }
 
 static __inline__ struct page *
 pci_dac_dma_to_page(struct pci_dev *pdev, dma64_addr_t dma_addr)
 {
-	return pfn_to_page(phys_to_pfn(dma_addr)); 
+    return pfn_to_page(phys_to_pfn(dma_addr));
 }
 
 static __inline__ unsigned long
 pci_dac_dma_to_offset(struct pci_dev *pdev, dma64_addr_t dma_addr)
 {
-	return (dma_addr & ~PAGE_MASK);
+    return (dma_addr & ~PAGE_MASK);
 }
 
 static __inline__ void
 pci_dac_dma_sync_single(struct pci_dev *pdev, dma64_addr_t dma_addr, size_t len, int direction)
 {
-	flush_write_buffers();
+    flush_write_buffers();
 }
 
 /* These macros should be used after a pci_map_sg call has been done
@@ -291,12 +291,12 @@ pci_dac_dma_sync_single(struct pci_dev *pdev, dma64_addr_t dma_addr, size_t len,
 /* Return the index of the PCI controller for device. */
 static inline int pci_controller_num(struct pci_dev *dev)
 {
-	return 0;
+    return 0;
 }
 
 #define HAVE_PCI_MMAP
 extern int pci_mmap_page_range(struct pci_dev *dev, struct vm_area_struct *vma,
-			       enum pci_mmap_state mmap_state, int write_combine);
+                               enum pci_mmap_state mmap_state, int write_combine);
 
 #endif /* __KERNEL__ */
 

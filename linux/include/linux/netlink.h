@@ -13,23 +13,23 @@
 #define NETLINK_DNRTMSG		14	/* DECnet routing messages */
 #define NETLINK_TAPBASE		16	/* 16 to 31 are ethertap */
 
-#define MAX_LINKS 32		
+#define MAX_LINKS 32
 
 struct sockaddr_nl
 {
-	sa_family_t	nl_family;	/* AF_NETLINK	*/
-	unsigned short	nl_pad;		/* zero		*/
-	__u32		nl_pid;		/* process pid	*/
-       	__u32		nl_groups;	/* multicast groups mask */
+    sa_family_t	nl_family;	/* AF_NETLINK	*/
+    unsigned short	nl_pad;		/* zero		*/
+    __u32		nl_pid;		/* process pid	*/
+    __u32		nl_groups;	/* multicast groups mask */
 };
 
 struct nlmsghdr
 {
-	__u32		nlmsg_len;	/* Length of message including header */
-	__u16		nlmsg_type;	/* Message content */
-	__u16		nlmsg_flags;	/* Additional flags */
-	__u32		nlmsg_seq;	/* Sequence number */
-	__u32		nlmsg_pid;	/* Sending process PID */
+    __u32		nlmsg_len;	/* Length of message including header */
+    __u16		nlmsg_type;	/* Message content */
+    __u16		nlmsg_flags;	/* Additional flags */
+    __u32		nlmsg_seq;	/* Sequence number */
+    __u32		nlmsg_pid;	/* Sending process PID */
 };
 
 /* Flags values */
@@ -78,8 +78,8 @@ struct nlmsghdr
 
 struct nlmsgerr
 {
-	int		error;
-	struct nlmsghdr msg;
+    int		error;
+    struct nlmsghdr msg;
 };
 
 #define NET_MAJOR 36		/* Major 36 is reserved for networking 						*/
@@ -88,12 +88,12 @@ struct nlmsgerr
 
 struct netlink_skb_parms
 {
-	struct ucred		creds;		/* Skb credentials	*/
-	__u32			pid;
-	__u32			groups;
-	__u32			dst_pid;
-	__u32			dst_groups;
-	kernel_cap_t		eff_cap;
+    struct ucred		creds;		/* Skb credentials	*/
+    __u32			pid;
+    __u32			groups;
+    __u32			dst_pid;
+    __u32			dst_groups;
+    kernel_cap_t		eff_cap;
 };
 
 #define NETLINK_CB(skb)		(*(struct netlink_skb_parms*)&((skb)->cb))
@@ -108,7 +108,7 @@ extern struct sock *netlink_kernel_create(int unit, void (*input)(struct sock *s
 extern void netlink_ack(struct sk_buff *in_skb, struct nlmsghdr *nlh, int err);
 extern int netlink_unicast(struct sock *ssk, struct sk_buff *skb, __u32 pid, int nonblock);
 extern void netlink_broadcast(struct sock *ssk, struct sk_buff *skb, __u32 pid,
-			      __u32 group, int allocation);
+                              __u32 group, int allocation);
 extern void netlink_set_err(struct sock *ssk, __u32 pid, __u32 group, int code);
 
 /*
@@ -121,27 +121,27 @@ extern void netlink_set_err(struct sock *ssk, __u32 pid, __u32 group, int code);
 
 struct netlink_callback
 {
-	struct sk_buff	*skb;
-	struct nlmsghdr	*nlh;
-	int		(*dump)(struct sk_buff * skb, struct netlink_callback *cb);
-	int		(*done)(struct netlink_callback *cb);
-	int		family;
-	long		args[4];
+    struct sk_buff	*skb;
+    struct nlmsghdr	*nlh;
+    int		(*dump)(struct sk_buff * skb, struct netlink_callback *cb);
+    int		(*done)(struct netlink_callback *cb);
+    int		family;
+    long		args[4];
 };
 
 static __inline__ struct nlmsghdr *
 __nlmsg_put(struct sk_buff *skb, u32 pid, u32 seq, int type, int len)
 {
-	struct nlmsghdr *nlh;
-	int size = NLMSG_LENGTH(len);
+    struct nlmsghdr *nlh;
+    int size = NLMSG_LENGTH(len);
 
-	nlh = (struct nlmsghdr*)skb_put(skb, NLMSG_ALIGN(size));
-	nlh->nlmsg_type = type;
-	nlh->nlmsg_len = size;
-	nlh->nlmsg_flags = 0;
-	nlh->nlmsg_pid = pid;
-	nlh->nlmsg_seq = seq;
-	return nlh;
+    nlh = (struct nlmsghdr*)skb_put(skb, NLMSG_ALIGN(size));
+    nlh->nlmsg_type = type;
+    nlh->nlmsg_len = size;
+    nlh->nlmsg_flags = 0;
+    nlh->nlmsg_pid = pid;
+    nlh->nlmsg_seq = seq;
+    return nlh;
 }
 
 #define NLMSG_PUT(skb, pid, seq, type, len) \
@@ -149,9 +149,9 @@ __nlmsg_put(struct sk_buff *skb, u32 pid, u32 seq, int type, int len)
    __nlmsg_put(skb, pid, seq, type, len); })
 
 extern int netlink_dump_start(struct sock *ssk, struct sk_buff *skb,
-			      struct nlmsghdr *nlh,
-			      int (*dump)(struct sk_buff *skb, struct netlink_callback*),
-			      int (*done)(struct netlink_callback*));
+                              struct nlmsghdr *nlh,
+                              int (*dump)(struct sk_buff *skb, struct netlink_callback*),
+                              int (*done)(struct netlink_callback*));
 
 
 #endif /* __KERNEL__ */

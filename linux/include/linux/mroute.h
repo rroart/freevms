@@ -30,7 +30,7 @@
 #define SIOCGETSGCNT	(SIOCPROTOPRIVATE+1)
 #define SIOCGETRPF	(SIOCPROTOPRIVATE+2)
 
-#define MAXVIFS		32	
+#define MAXVIFS		32
 typedef unsigned long vifbitmap_t;	/* User mode code depends on this lot */
 typedef unsigned short vifi_t;
 #define ALL_VIFS	((vifi_t)(-1))
@@ -38,7 +38,7 @@ typedef unsigned short vifi_t;
 /*
  *	Same idea as select
  */
- 
+
 #define VIFM_SET(n,m)	((m)|=(1<<(n)))
 #define VIFM_CLR(n,m)	((m)&=~(1<<(n)))
 #define VIFM_ISSET(n,m)	((m)&(1<<(n)))
@@ -50,14 +50,15 @@ typedef unsigned short vifi_t;
  *	Passed by mrouted for an MRT_ADD_VIF - again we use the
  *	mrouted 3.6 structures for compatibility
  */
- 
-struct vifctl {
-	vifi_t	vifc_vifi;		/* Index of VIF */
-	unsigned char vifc_flags;	/* VIFF_ flags */
-	unsigned char vifc_threshold;	/* ttl limit */
-	unsigned int vifc_rate_limit;	/* Rate limiter values (NI) */
-	struct in_addr vifc_lcl_addr;	/* Our address */
-	struct in_addr vifc_rmt_addr;	/* IPIP tunnel addr */
+
+struct vifctl
+{
+    vifi_t	vifc_vifi;		/* Index of VIF */
+    unsigned char vifc_flags;	/* VIFF_ flags */
+    unsigned char vifc_threshold;	/* ttl limit */
+    unsigned int vifc_rate_limit;	/* Rate limiter values (NI) */
+    struct in_addr vifc_lcl_addr;	/* Our address */
+    struct in_addr vifc_rmt_addr;	/* IPIP tunnel addr */
 };
 
 #define VIFF_TUNNEL	0x1	/* IPIP tunnel */
@@ -67,30 +68,30 @@ struct vifctl {
 /*
  *	Cache manipulation structures for mrouted and PIMd
  */
- 
+
 struct mfcctl
 {
-	struct in_addr mfcc_origin;		/* Origin of mcast	*/
-	struct in_addr mfcc_mcastgrp;		/* Group in question	*/
-	vifi_t	mfcc_parent;			/* Where it arrived	*/
-	unsigned char mfcc_ttls[MAXVIFS];	/* Where it is going	*/
-	unsigned int mfcc_pkt_cnt;		/* pkt count for src-grp */
-	unsigned int mfcc_byte_cnt;
-	unsigned int mfcc_wrong_if;
-	int	     mfcc_expire;
+    struct in_addr mfcc_origin;		/* Origin of mcast	*/
+    struct in_addr mfcc_mcastgrp;		/* Group in question	*/
+    vifi_t	mfcc_parent;			/* Where it arrived	*/
+    unsigned char mfcc_ttls[MAXVIFS];	/* Where it is going	*/
+    unsigned int mfcc_pkt_cnt;		/* pkt count for src-grp */
+    unsigned int mfcc_byte_cnt;
+    unsigned int mfcc_wrong_if;
+    int	     mfcc_expire;
 };
 
-/* 
+/*
  *	Group count retrieval for mrouted
  */
- 
+
 struct sioc_sg_req
 {
-	struct in_addr src;
-	struct in_addr grp;
-	unsigned long pktcnt;
-	unsigned long bytecnt;
-	unsigned long wrong_if;
+    struct in_addr src;
+    struct in_addr grp;
+    unsigned long pktcnt;
+    unsigned long bytecnt;
+    unsigned long wrong_if;
 };
 
 /*
@@ -99,26 +100,26 @@ struct sioc_sg_req
 
 struct sioc_vif_req
 {
-	vifi_t	vifi;		/* Which iface */
-	unsigned long icount;	/* In packets */
-	unsigned long ocount;	/* Out packets */
-	unsigned long ibytes;	/* In bytes */
-	unsigned long obytes;	/* Out bytes */
+    vifi_t	vifi;		/* Which iface */
+    unsigned long icount;	/* In packets */
+    unsigned long ocount;	/* Out packets */
+    unsigned long ibytes;	/* In bytes */
+    unsigned long obytes;	/* Out bytes */
 };
 
 /*
  *	This is the format the mroute daemon expects to see IGMP control
  *	data. Magically happens to be like an IP packet as per the original
  */
- 
+
 struct igmpmsg
 {
-	__u32 unused1,unused2;
-	unsigned char im_msgtype;		/* What is this */
-	unsigned char im_mbz;			/* Must be zero */
-	unsigned char im_vif;			/* Interface (this ought to be a vifi_t!) */
-	unsigned char unused3;
-	struct in_addr im_src,im_dst;
+    __u32 unused1,unused2;
+    unsigned char im_msgtype;		/* What is this */
+    unsigned char im_mbz;			/* Must be zero */
+    unsigned char im_vif;			/* Interface (this ought to be a vifi_t!) */
+    unsigned char unused3;
+    struct in_addr im_src,im_dst;
 };
 
 /*
@@ -134,41 +135,44 @@ extern void ip_mr_init(void);
 
 struct vif_device
 {
-	struct net_device 	*dev;			/* Device we are using */
-	unsigned long	bytes_in,bytes_out;
-	unsigned long	pkt_in,pkt_out;		/* Statistics 			*/
-	unsigned long	rate_limit;		/* Traffic shaping (NI) 	*/
-	unsigned char	threshold;		/* TTL threshold 		*/
-	unsigned short	flags;			/* Control flags 		*/
-	__u32		local,remote;		/* Addresses(remote for tunnels)*/
-	int		link;			/* Physical interface index	*/
+    struct net_device 	*dev;			/* Device we are using */
+    unsigned long	bytes_in,bytes_out;
+    unsigned long	pkt_in,pkt_out;		/* Statistics 			*/
+    unsigned long	rate_limit;		/* Traffic shaping (NI) 	*/
+    unsigned char	threshold;		/* TTL threshold 		*/
+    unsigned short	flags;			/* Control flags 		*/
+    __u32		local,remote;		/* Addresses(remote for tunnels)*/
+    int		link;			/* Physical interface index	*/
 };
 
 #define VIFF_STATIC 0x8000
 
-struct mfc_cache 
+struct mfc_cache
 {
-	struct mfc_cache *next;			/* Next entry on cache line 	*/
-	__u32 mfc_mcastgrp;			/* Group the entry belongs to 	*/
-	__u32 mfc_origin;			/* Source of packet 		*/
-	vifi_t mfc_parent;			/* Source interface		*/
-	int mfc_flags;				/* Flags on line		*/
+    struct mfc_cache *next;			/* Next entry on cache line 	*/
+    __u32 mfc_mcastgrp;			/* Group the entry belongs to 	*/
+    __u32 mfc_origin;			/* Source of packet 		*/
+    vifi_t mfc_parent;			/* Source interface		*/
+    int mfc_flags;				/* Flags on line		*/
 
-	union {
-		struct {
-			unsigned long expires;
-			struct sk_buff_head unresolved;	/* Unresolved buffers		*/
-		} unres;
-		struct {
-			unsigned long last_assert;
-			int minvif;
-			int maxvif;
-			unsigned long bytes;
-			unsigned long pkt;
-			unsigned long wrong_if;
-			unsigned char ttls[MAXVIFS];	/* TTL thresholds		*/
-		} res;
-	} mfc_un;
+    union
+    {
+        struct
+        {
+            unsigned long expires;
+            struct sk_buff_head unresolved;	/* Unresolved buffers		*/
+        } unres;
+        struct
+        {
+            unsigned long last_assert;
+            int minvif;
+            int maxvif;
+            unsigned long bytes;
+            unsigned long pkt;
+            unsigned long wrong_if;
+            unsigned char ttls[MAXVIFS];	/* TTL thresholds		*/
+        } res;
+    } mfc_un;
 };
 
 #define MFC_STATIC		1
@@ -180,7 +184,7 @@ struct mfc_cache
 #define MFC_HASH(a,b)	((((a)>>24)^((b)>>26))&(MFC_LINES-1))
 #else
 #define MFC_HASH(a,b)	(((a)^((b)>>2))&(MFC_LINES-1))
-#endif		
+#endif
 
 #endif
 
@@ -209,10 +213,10 @@ struct mfc_cache
 
 struct pimreghdr
 {
-	__u8	type;
-	__u8	reserved;
-	__u16	csum;
-	__u32	flags;
+    __u8	type;
+    __u8	reserved;
+    __u16	csum;
+    __u32	flags;
 };
 
 extern int pim_rcv(struct sk_buff *);

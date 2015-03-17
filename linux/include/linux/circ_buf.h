@@ -1,10 +1,11 @@
 #ifndef _LINUX_CIRC_BUF_H
 #define _LINUX_CIRC_BUF_H 1
 
-struct circ_buf {
-	char *buf;
-	int head;
-	int tail;
+struct circ_buf
+{
+    char *buf;
+    int head;
+    int tail;
 };
 
 /* Return count in buffer.  */

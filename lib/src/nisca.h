@@ -89,7 +89,7 @@
 
 #define NISCA$C_TIMER                  0x00989680
 
-#define NISCA$C_TR_LNG_HDR             0x09             
+#define NISCA$C_TR_LNG_HDR             0x09
 #define NISCA$C_TR_LNG_HDR_V10         0x06
 #define NISCA$C_TR_LNG_HDR_V13         0x09
 
@@ -128,86 +128,98 @@
 #define NISCA$V_TR_RSVP                0x04
 #define NISCA$V_TR_SEQ                 0x01
 
-struct _nisca_intro {
-  // oops seems this is the dx
-  unsigned short length;
-  unsigned char dst[6];
-  unsigned short group;
-  unsigned char src[6];
+struct _nisca_intro
+{
+    // oops seems this is the dx
+    unsigned short length;
+    unsigned char dst[6];
+    unsigned short group;
+    unsigned char src[6];
 };
 
-struct _nisca {
-  /* and before is: ( I think )
-     unsigned short length excluding this 16 b?
-     unsigned char dst[6] ab000401+word
-     unsigned word scssystemid? fffe?
-     unsigned char src[6] i think
-  */
+struct _nisca
+{
+    /* and before is: ( I think )
+       unsigned short length excluding this 16 b?
+       unsigned char dst[6] ab000401+word
+       unsigned word scssystemid? fffe?
+       unsigned char src[6] i think
+    */
 
-  union {
-    struct {
-      unsigned long nisca$l_dx_dst_lo;
-      unsigned short nisca$w_dx_dst_hi;
-      unsigned short nisca$w_dx_group;
-      unsigned long nisca$l_dx_src_lo;
-      unsigned short nisca$w_dx_src_hi;
+    union
+    {
+        struct
+        {
+            unsigned long nisca$l_dx_dst_lo;
+            unsigned short nisca$w_dx_dst_hi;
+            unsigned short nisca$w_dx_group;
+            unsigned long nisca$l_dx_src_lo;
+            unsigned short nisca$w_dx_src_hi;
+        };
+        struct
+        {
+            union
+            {
+                unsigned char nisca$b_msg;
+                unsigned char nisca$b_msg_flags;
+            };
+            unsigned char nisca$b_reason;
+            unsigned long nisca$l_maint;
+            unsigned char nisca$b_minor;
+            unsigned char nisca$b_major;
+            unsigned short nisca$w_eco;
+            char nisca$t_nodename[8];
+            union
+            {
+                unsigned long nisca$l_port_fcn;
+                unsigned long nisca$l_fcn_bitmasks;
+            };
+            unsigned long nisca$l_sta_info;
+            union
+            {
+                unsigned long nisca$l_sta_info1;
+                struct
+                {
+                    char fill;
+                    unsigned m : 1;
+                    unsigned ps: 2;
+                    unsigned sys_state:21;
+                };
+            };
+            char nisca$t_rst_port[6];
+            unsigned char nisca$b_reserved0;
+            unsigned char nisca$b_pipe_quota;
+            unsigned short nisca$w_p_srv;
+            unsigned short nisca$w_r_srv;
+            unsigned long long nisca$q_authorize;
+            char nisca$t_service[16]; /* obsolete? */
+            unsigned short nisca$w_lcl_chan_seq_num;
+            unsigned short nisca$w_buf_buffer_size;
+            unsigned long long nisca$q_transmit_time;
+            unsigned char nisca$ab_device_name[16];
+            unsigned char nisca$ab_lan_hw_addr[6];
+            unsigned char nisca$b_device_type;
+            unsigned char nisca$b_node_hw_type;
+        };
+        struct
+        {
+            unsigned srv_xchk:1;
+            unsigned srv_rchk:1;
+        };
+        struct
+        {
+            unsigned char nisca$b_tr_flag;
+            unsigned char nisca$b_tr_pad;
+            unsigned short nisca$w_tr_ack;
+            unsigned short nisca$w_tr_seq;
+            unsigned short nisca$w_rmt_chan_seq_num;
+            unsigned char nisca$b_tr_pad_data_len;
+        };
+        struct
+        {
+            unsigned char nisca$b_ppc_opc;
+        };
     };
-    struct {
-      union {
-	unsigned char nisca$b_msg;
-	unsigned char nisca$b_msg_flags;
-      };
-      unsigned char nisca$b_reason;
-      unsigned long nisca$l_maint;
-      unsigned char nisca$b_minor;
-      unsigned char nisca$b_major;
-      unsigned short nisca$w_eco;
-      char nisca$t_nodename[8];
-      union {
-	unsigned long nisca$l_port_fcn;
-	unsigned long nisca$l_fcn_bitmasks;
-      };
-      unsigned long nisca$l_sta_info;
-      union {
-	unsigned long nisca$l_sta_info1;
-	struct {
-	  char fill;
-	  unsigned m : 1;
-	  unsigned ps: 2;
-	  unsigned sys_state:21;
-	};
-      };
-      char nisca$t_rst_port[6];
-      unsigned char nisca$b_reserved0;
-      unsigned char nisca$b_pipe_quota;
-      unsigned short nisca$w_p_srv;
-      unsigned short nisca$w_r_srv;
-      unsigned long long nisca$q_authorize;
-      char nisca$t_service[16]; /* obsolete? */
-      unsigned short nisca$w_lcl_chan_seq_num;
-      unsigned short nisca$w_buf_buffer_size;
-      unsigned long long nisca$q_transmit_time;
-      unsigned char nisca$ab_device_name[16];
-      unsigned char nisca$ab_lan_hw_addr[6];
-      unsigned char nisca$b_device_type;
-      unsigned char nisca$b_node_hw_type;
-    };
-    struct {
-      unsigned srv_xchk:1;
-      unsigned srv_rchk:1;
-    };
-    struct {
-      unsigned char nisca$b_tr_flag;
-      unsigned char nisca$b_tr_pad;
-      unsigned short nisca$w_tr_ack;
-      unsigned short nisca$w_tr_seq;
-      unsigned short nisca$w_rmt_chan_seq_num;
-      unsigned char nisca$b_tr_pad_data_len;
-    };
-    struct {
-      unsigned char nisca$b_ppc_opc;
-    };
-  };
 };
 
 #endif

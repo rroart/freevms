@@ -46,18 +46,19 @@
 /*
  * Callback function for readdir
  */
-struct readdir_cd {
-	struct svc_rqst *	rqstp;
-	struct svc_fh *		dirfh;
-	u32 *			buffer;
-	int			buflen;
-	u32 *			offset;		/* previous dirent->d_next */
-	char			plus;		/* readdirplus */
-	char			eob;		/* end of buffer */
-	char			dotonly;
+struct readdir_cd
+{
+    struct svc_rqst *	rqstp;
+    struct svc_fh *		dirfh;
+    u32 *			buffer;
+    int			buflen;
+    u32 *			offset;		/* previous dirent->d_next */
+    char			plus;		/* readdirplus */
+    char			eob;		/* end of buffer */
+    char			dotonly;
 };
 typedef int		(*encode_dent_fn)(struct readdir_cd *, const char *,
-						int, loff_t, ino_t, unsigned int);
+                                  int, loff_t, ino_t, unsigned int);
 typedef int (*nfsd_dirop_t)(struct inode *, struct dentry *, int, int);
 
 /*
@@ -79,49 +80,49 @@ int		fh_lock_parent(struct svc_fh *, struct dentry *);
 int		nfsd_racache_init(int);
 void		nfsd_racache_shutdown(void);
 int		nfsd_lookup(struct svc_rqst *, struct svc_fh *,
-				const char *, int, struct svc_fh *);
+                    const char *, int, struct svc_fh *);
 int		nfsd_setattr(struct svc_rqst *, struct svc_fh *,
-				struct iattr *, int, time_t);
+                     struct iattr *, int, time_t);
 int		nfsd_create(struct svc_rqst *, struct svc_fh *,
-				char *name, int len, struct iattr *attrs,
-				int type, dev_t rdev, struct svc_fh *res);
+                    char *name, int len, struct iattr *attrs,
+                    int type, dev_t rdev, struct svc_fh *res);
 #ifdef CONFIG_NFSD_V3
 int		nfsd_access(struct svc_rqst *, struct svc_fh *, u32 *);
 int		nfsd_create_v3(struct svc_rqst *, struct svc_fh *,
-				char *name, int len, struct iattr *attrs,
-				struct svc_fh *res, int createmode,
-				u32 *verifier);
+                       char *name, int len, struct iattr *attrs,
+                       struct svc_fh *res, int createmode,
+                       u32 *verifier);
 int		nfsd_commit(struct svc_rqst *, struct svc_fh *,
-				off_t, unsigned long);
+                    off_t, unsigned long);
 #endif /* CONFIG_NFSD_V3 */
 int		nfsd_open(struct svc_rqst *, struct svc_fh *, int,
-				int, struct file *);
+                  int, struct file *);
 void		nfsd_close(struct file *);
 int		nfsd_read(struct svc_rqst *, struct svc_fh *,
-				loff_t, char *, unsigned long *);
+                  loff_t, char *, unsigned long *);
 int		nfsd_write(struct svc_rqst *, struct svc_fh *,
-				loff_t, char *, unsigned long, int *);
+                   loff_t, char *, unsigned long, int *);
 int		nfsd_readlink(struct svc_rqst *, struct svc_fh *,
-				char *, int *);
+                      char *, int *);
 int		nfsd_symlink(struct svc_rqst *, struct svc_fh *,
-				char *name, int len, char *path, int plen,
-				struct svc_fh *res, struct iattr *);
+                     char *name, int len, char *path, int plen,
+                     struct svc_fh *res, struct iattr *);
 int		nfsd_link(struct svc_rqst *, struct svc_fh *,
-				char *, int, struct svc_fh *);
+                  char *, int, struct svc_fh *);
 int		nfsd_rename(struct svc_rqst *,
-				struct svc_fh *, char *, int,
-				struct svc_fh *, char *, int);
+                    struct svc_fh *, char *, int,
+                    struct svc_fh *, char *, int);
 int		nfsd_remove(struct svc_rqst *,
-				struct svc_fh *, char *, int);
+                    struct svc_fh *, char *, int);
 int		nfsd_unlink(struct svc_rqst *, struct svc_fh *, int type,
-				char *name, int len);
+                    char *name, int len);
 int		nfsd_truncate(struct svc_rqst *, struct svc_fh *,
-				unsigned long size);
+                      unsigned long size);
 int		nfsd_readdir(struct svc_rqst *, struct svc_fh *,
-				loff_t, encode_dent_fn,
-				u32 *buffer, int *countp, u32 *verf);
+                     loff_t, encode_dent_fn,
+                     u32 *buffer, int *countp, u32 *verf);
 int		nfsd_statfs(struct svc_rqst *, struct svc_fh *,
-				struct statfs *);
+                    struct statfs *);
 
 int		nfsd_notify_change(struct inode *, struct iattr *);
 int		nfsd_permission(struct svc_export *, struct dentry *, int);

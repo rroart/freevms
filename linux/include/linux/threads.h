@@ -7,7 +7,7 @@
  * The default limit for the nr of threads is now in
  * /proc/sys/kernel/threads-max.
  */
- 
+
 #ifdef CONFIG_SMP
 #define NR_CPUS	32		/* Max processors that can be running in SMP */
 #else

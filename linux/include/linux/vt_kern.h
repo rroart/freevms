@@ -22,13 +22,14 @@
 #define BROKEN_GRAPHICS_PROGRAMS 1
 #endif
 
-extern struct vt_struct {
-	int vc_num;				/* The console number */
-	unsigned char	vc_mode;		/* KD_TEXT, ... */
-	struct vt_mode	vt_mode;
-	int		vt_pid;
-	int		vt_newvt;
-	wait_queue_head_t paste_wait;
+extern struct vt_struct
+{
+    int vc_num;				/* The console number */
+    unsigned char	vc_mode;		/* KD_TEXT, ... */
+    struct vt_mode	vt_mode;
+    int		vt_pid;
+    int		vt_newvt;
+    wait_queue_head_t paste_wait;
 } *vt_cons[MAX_NR_CONSOLES];
 
 extern void (*kd_mksound)(unsigned int hz, unsigned int ticks);
@@ -41,7 +42,7 @@ struct console_font_op;
 int vc_allocate(unsigned int console);
 int vc_cons_allocated(unsigned int console);
 int vc_resize(unsigned int lines, unsigned int cols,
-	      unsigned int first, unsigned int last);
+              unsigned int first, unsigned int last);
 #define vc_resize_all(l, c) vc_resize(l, c, 0, MAX_NR_CONSOLES-1)
 #define vc_resize_con(l, c, x) vc_resize(l, c, x, x)
 void vc_disallocate(unsigned int console);

@@ -61,29 +61,29 @@ struct completion;
 
 extern struct notifier_block *panic_notifier_list;
 NORET_TYPE void panic(const char * fmt, ...)
-	__attribute__ ((NORET_AND format (printf, 1, 2)));
-asmlinkage NORET_TYPE void do_exit(long error_code)
-	ATTRIB_NORET;
+__attribute__ ((NORET_AND format (printf, 1, 2)));
+NORET_TYPE void do_exit(long error_code)
+ATTRIB_NORET;
 NORET_TYPE void complete_and_exit(struct completion *, long)
-	ATTRIB_NORET;
+ATTRIB_NORET;
 extern int abs(int);
 extern unsigned long simple_strtoul(const char *,char **,unsigned int);
 extern long simple_strtol(const char *,char **,unsigned int);
 extern unsigned long long simple_strtoull(const char *,char **,unsigned int);
 extern long long simple_strtoll(const char *,char **,unsigned int);
 extern int sprintf(char * buf, const char * fmt, ...)
-	__attribute__ ((format (printf, 2, 3)));
+__attribute__ ((format (printf, 2, 3)));
 extern int vsprintf(char *buf, const char *, va_list)
-	__attribute__ ((format (printf, 2, 0)));
+__attribute__ ((format (printf, 2, 0)));
 extern int snprintf(char * buf, size_t size, const char * fmt, ...)
-	__attribute__ ((format (printf, 3, 4)));
+__attribute__ ((format (printf, 3, 4)));
 extern int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
-	__attribute__ ((format (printf, 3, 0)));
+__attribute__ ((format (printf, 3, 0)));
 
 extern int sscanf(const char *, const char *, ...)
-	__attribute__ ((format (scanf, 2, 3)));
+__attribute__ ((format (scanf, 2, 3)));
 extern int vsscanf(const char *, const char *, va_list)
-	__attribute__ ((format (scanf, 2, 0)));
+__attribute__ ((format (scanf, 2, 0)));
 
 extern int get_option(char **str, int *pint);
 extern char *get_options(char *str, int nints, int *ints);
@@ -94,17 +94,17 @@ extern void dev_probe_unlock(void);
 extern int session_of_pgrp(int pgrp);
 
 asmlinkage int printk(const char * fmt, ...)
-	__attribute__ ((format (printf, 1, 2)));
+__attribute__ ((format (printf, 1, 2)));
 
 static inline void console_silent(void)
 {
-	console_loglevel = 0;
+    console_loglevel = 0;
 }
 
 static inline void console_verbose(void)
 {
-	if (console_loglevel)
-		console_loglevel = 15;
+    if (console_loglevel)
+        console_loglevel = 15;
 }
 
 extern void bust_spinlocks(int yes);
@@ -184,21 +184,22 @@ extern void __out_of_line_bug(int line) ATTRIB_NORET;
 #endif /* __KERNEL__ */
 
 #define SI_LOAD_SHIFT	16
-struct sysinfo {
-	long uptime;			/* Seconds since boot */
-	unsigned long loads[3];		/* 1, 5, and 15 minute load averages */
-	unsigned long totalram;		/* Total usable main memory size */
-	unsigned long freeram;		/* Available memory size */
-	unsigned long sharedram;	/* Amount of shared memory */
-	unsigned long bufferram;	/* Memory used by buffers */
-	unsigned long totalswap;	/* Total swap space size */
-	unsigned long freeswap;		/* swap space still available */
-	unsigned short procs;		/* Number of current processes */
-	unsigned short pad;		/* explicit padding for m68k */
-	unsigned long totalhigh;	/* Total high memory size */
-	unsigned long freehigh;		/* Available high memory size */
-	unsigned int mem_unit;		/* Memory unit size in bytes */
-	char _f[20-2*sizeof(long)-sizeof(int)];	/* Padding: libc5 uses this.. */
+struct sysinfo
+{
+    long uptime;			/* Seconds since boot */
+    unsigned long loads[3];		/* 1, 5, and 15 minute load averages */
+    unsigned long totalram;		/* Total usable main memory size */
+    unsigned long freeram;		/* Available memory size */
+    unsigned long sharedram;	/* Amount of shared memory */
+    unsigned long bufferram;	/* Memory used by buffers */
+    unsigned long totalswap;	/* Total swap space size */
+    unsigned long freeswap;		/* swap space still available */
+    unsigned short procs;		/* Number of current processes */
+    unsigned short pad;		/* explicit padding for m68k */
+    unsigned long totalhigh;	/* Total high memory size */
+    unsigned long freehigh;		/* Available high memory size */
+    unsigned int mem_unit;		/* Memory unit size in bytes */
+    char _f[20-2*sizeof(long)-sizeof(int)];	/* Padding: libc5 uses this.. */
 };
 
 #define BUG_ON(condition) do { if (unlikely((condition)!=0)) BUG(); } while(0)

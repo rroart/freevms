@@ -7,7 +7,7 @@
  *       Mark Ferrell
  *       Copyright 1999,2000 Nortel Networks
  *
- * License: 
+ * License:
  *	 As part of this driver was derrived from the slram.c driver it falls
  *	 under the same license, which is GNU General Public License v2
  */
@@ -23,14 +23,15 @@
 /*
  * Our personal and private information
  */
-struct mypriv {
-        struct pci_dev *dev;
-        u_char *start;
-        u32    base_map0;
-        u32    curr_map0;
-        u32    asize;
-	struct mtd_info *nextpmc551;
-};                       
+struct mypriv
+{
+    struct pci_dev *dev;
+    u_char *start;
+    u32    base_map0;
+    u32    curr_map0;
+    u32    asize;
+    struct mtd_info *nextpmc551;
+};
 
 /*
  * Function Prototypes
@@ -39,7 +40,7 @@ static int pmc551_erase(struct mtd_info *, struct erase_info *);
 static void pmc551_unpoint(struct mtd_info *, u_char *);
 static int pmc551_point (struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char **mtdbuf);
 static int pmc551_read(struct mtd_info *, loff_t, size_t, size_t *, u_char *);
-static int pmc551_write(struct mtd_info *, loff_t, size_t, size_t *, const u_char *);        
+static int pmc551_write(struct mtd_info *, loff_t, size_t, size_t *, const u_char *);
 
 
 /*
@@ -50,7 +51,7 @@ static int pmc551_write(struct mtd_info *, loff_t, size_t, size_t *, const u_cha
 #endif
 
 #ifndef PCI_DEVICE_ID_V3_SEMI_V370PDC
-#define PCI_DEVICE_ID_V3_SEMI_V370PDC     0x0200  
+#define PCI_DEVICE_ID_V3_SEMI_V370PDC     0x0200
 #endif
 
 

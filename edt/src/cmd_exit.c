@@ -29,82 +29,93 @@
 void cmd_exit (char *cp)
 
 {
-  const char *bn, *fn, *ynanswer;
-  Buffer *buffer;
-  int prompt, saveflag, ynflag;
-  String *ynstring;
+    const char *bn, *fn, *ynanswer;
+    Buffer *buffer;
+    int prompt, saveflag, ynflag;
+    String *ynstring;
 
-  /* Check for -save qualifier - it inhibits deleting the journal file */
+    /* Check for -save qualifier - it inhibits deleting the journal file */
 
-  saveflag = 0;
-  if ((strncasecmp (cp, "-save", 5) == 0) && (cp[5] <= ' ')) {
-    if ((journal_name == NULL) || (journal_name[0] == 0)) {
-      outerr (0, "there is no journal file to save\n");
-      return;
+    saveflag = 0;
+    if ((strncasecmp (cp, "-save", 5) == 0) && (cp[5] <= ' '))
+    {
+        if ((journal_name == NULL) || (journal_name[0] == 0))
+        {
+            outerr (0, "there is no journal file to save\n");
+            return;
+        }
+        saveflag = 1;
+        cp = skipspaces (cp + 5);
     }
-    saveflag = 1;
-    cp = skipspaces (cp + 5);
-  }
 
-  /* Maybe use a different name for main buffer */
+    /* Maybe use a different name for main buffer */
 
-  if (*cp != 0) buffer_setfile (main_buffer, cp);
+    if (*cp != 0) buffer_setfile (main_buffer, cp);
 
-  /* Don't bother if recovery mode, we want them to be able to do more.  They can re-type exit command */
+    /* Don't bother if recovery mode, we want them to be able to do more.  They can re-type exit command */
 
-  if (recover_file != NULL) {
-    outerr (0, "EXIT command ignored in recovery mode\n");
-    return;
-  }
-
-  /* Check for buffers that have filename of "" (opened -readonly) but were modified */
-
-  prompt = 0;
-  for (buffer = NULL; (buffer = buffer_next (buffer)) != NULL;) {
-    fn = buffer_filename (buffer);
-    if (fn == NULL) continue;
-    if (fn[0] != 0) continue;
-    if (buffer_dirty (buffer, -1)) {
-      bn = buffer_name (buffer);
-      if (!prompt) outerr (0, "\n");
-      outerr (strlen (bn), "buffer %s was modified but has no output file\n", bn);
-      prompt = 1;
+    if (recover_file != NULL)
+    {
+        outerr (0, "EXIT command ignored in recovery mode\n");
+        return;
     }
-  }
-  if (prompt) {
-    do {
-      ynstring = jnl_readprompt ("\r\n  do you still want to exit (yes or no)? ");
-      if (ynstring == NULL) return;
-      ynflag   = -1;
-      ynanswer = string_getval (ynstring);
-      if (strcasecmp (ynanswer, "no")  == 0) ynflag = 0;
-      if (strcasecmp (ynanswer, "yes") == 0) ynflag = 1;
-      string_delete (ynstring);
-    } while (ynflag < 0);
-    if (!ynflag) return;
-  }
 
-  /* Write the entire contents of all the buffers that have files and that have been modified to their respective files */
+    /* Check for buffers that have filename of "" (opened -readonly) but were modified */
 
-  for (buffer = NULL; (buffer = buffer_next (buffer)) != NULL;) {
-    fn = buffer_filename (buffer);							/* get output filename */
-    if (fn == NULL) continue;								/* if none, don't try to write */
-    bn = buffer_name (buffer);								/* ok, write it out */
-    if (!buffer_dirty (buffer, -1)) {
-      outerr (strlen (fn) + strlen (bn), "not writing %s from =%s because it is unmodified\n", fn, bn);
-      continue;
+    prompt = 0;
+    for (buffer = NULL; (buffer = buffer_next (buffer)) != NULL;)
+    {
+        fn = buffer_filename (buffer);
+        if (fn == NULL) continue;
+        if (fn[0] != 0) continue;
+        if (buffer_dirty (buffer, -1))
+        {
+            bn = buffer_name (buffer);
+            if (!prompt) outerr (0, "\n");
+            outerr (strlen (bn), "buffer %s was modified but has no output file\n", bn);
+            prompt = 1;
+        }
     }
-    outerr (strlen (fn) + strlen (bn), "writing %s from =%s: ", fn, bn);
-    if (!write_file (fn, buffer_first_line (buffer), buffer_last_line (buffer))) {
-      outerr (strlen (fn), "output file %s not written, not exiting\n", fn);		/* if error, don't exit */
-      return;
+    if (prompt)
+    {
+        do
+        {
+            ynstring = jnl_readprompt ("\r\n  do you still want to exit (yes or no)? ");
+            if (ynstring == NULL) return;
+            ynflag   = -1;
+            ynanswer = string_getval (ynstring);
+            if (strcasecmp (ynanswer, "no")  == 0) ynflag = 0;
+            if (strcasecmp (ynanswer, "yes") == 0) ynflag = 1;
+            string_delete (ynstring);
+        }
+        while (ynflag < 0);
+        if (!ynflag) return;
     }
-    buffer_dirty (buffer, 0);
-  }
 
-  /* Write successful, maybe delete journal file and terminate process */
+    /* Write the entire contents of all the buffers that have files and that have been modified to their respective files */
 
-  jnl_close (!saveflag);
-  output ();
-  exit (0);
+    for (buffer = NULL; (buffer = buffer_next (buffer)) != NULL;)
+    {
+        fn = buffer_filename (buffer);							/* get output filename */
+        if (fn == NULL) continue;								/* if none, don't try to write */
+        bn = buffer_name (buffer);								/* ok, write it out */
+        if (!buffer_dirty (buffer, -1))
+        {
+            outerr (strlen (fn) + strlen (bn), "not writing %s from =%s because it is unmodified\n", fn, bn);
+            continue;
+        }
+        outerr (strlen (fn) + strlen (bn), "writing %s from =%s: ", fn, bn);
+        if (!write_file (fn, buffer_first_line (buffer), buffer_last_line (buffer)))
+        {
+            outerr (strlen (fn), "output file %s not written, not exiting\n", fn);		/* if error, don't exit */
+            return;
+        }
+        buffer_dirty (buffer, 0);
+    }
+
+    /* Write successful, maybe delete journal file and terminate process */
+
+    jnl_close (!saveflag);
+    output ();
+    exit (0);
 }

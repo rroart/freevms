@@ -52,15 +52,15 @@
  *
  *	Add two decimal strings of digits
  */
-unsigned long str$add_not(const unsigned long* asign, const long* aexp, 
-	const struct dsc$descriptor_s* adigits,
-	const unsigned long* bsign, const long*bexp, 
-	const struct dsc$descriptor_s* bdigits,
-	unsigned long* csign, long* cexp, struct dsc$descriptor_s* cdigits)
+unsigned long str$add_not(const unsigned long* asign, const long* aexp,
+                          const struct dsc$descriptor_s* adigits,
+                          const unsigned long* bsign, const long*bexp,
+                          const struct dsc$descriptor_s* bdigits,
+                          unsigned long* csign, long* cexp, struct dsc$descriptor_s* cdigits)
 {
-	/* Not yet coded */
-	assert(0);
-	return STR$_ILLSTRCLA;
+    /* Not yet coded */
+    assert(0);
+    return STR$_ILLSTRCLA;
 }
 
 
@@ -69,14 +69,14 @@ unsigned long str$add_not(const unsigned long* asign, const long* aexp,
  *
  */
 long str$compare_multi_not(
-	const struct dsc$descriptor_s* first_source_string,
-	const struct dsc$descriptor_s* second_source_string,
-	const long* flags_value,
-	const long* foreign_language)
+    const struct dsc$descriptor_s* first_source_string,
+    const struct dsc$descriptor_s* second_source_string,
+    const long* flags_value,
+    const long* foreign_language)
 {
-	/* Not yet coded */
-	assert(0);
-	return STR$_ILLSTRCLA;
+    /* Not yet coded */
+    assert(0);
+    return STR$_ILLSTRCLA;
 }
 
 
@@ -85,14 +85,14 @@ long str$compare_multi_not(
  *
  */
 unsigned long str$divide_not(
-	const unsigned long* asign, const long* aexp, const struct dsc$descriptor_s* a_digits,
-	const unsigned long* bsign, const long* bexp, const struct dsc$descriptor_s* b_digits,
-	const long* total_digits, const long* round_truncate_indicator,
-	unsigned long* csign, long* cexp, struct dsc$descriptor_s* cdigits)
+    const unsigned long* asign, const long* aexp, const struct dsc$descriptor_s* a_digits,
+    const unsigned long* bsign, const long* bexp, const struct dsc$descriptor_s* b_digits,
+    const long* total_digits, const long* round_truncate_indicator,
+    unsigned long* csign, long* cexp, struct dsc$descriptor_s* cdigits)
 {
-	/* Not yet coded */
-	assert(0);
-	return STR$_ILLSTRCLA;
+    /* Not yet coded */
+    assert(0);
+    return STR$_ILLSTRCLA;
 }
 
 
@@ -101,11 +101,11 @@ unsigned long str$divide_not(
  *
  */
 unsigned long str$match_wild_not(const struct dsc$descriptor_s* candidate_string,
-	const struct dsc$descriptor_s* pattern_string)
+                                 const struct dsc$descriptor_s* pattern_string)
 {
-	/* Not yet coded */
-	assert(0);
-	return STR$_ILLSTRCLA;
+    /* Not yet coded */
+    assert(0);
+    return STR$_ILLSTRCLA;
 }
 
 /*************************************************************
@@ -113,15 +113,15 @@ unsigned long str$match_wild_not(const struct dsc$descriptor_s* candidate_string
  *
  */
 unsigned long str$mul_not(const unsigned long* asign, const long aexp,
-	const struct dsc$descriptor_s* adigits,
-	const unsigned long* bsign, const long* bexp,
-	const struct dsc$descriptor_s* bdigits,
-	unsigned long* csign, long* cexp,
-	struct dsc$descriptor_s* cdigits)
+                          const struct dsc$descriptor_s* adigits,
+                          const unsigned long* bsign, const long* bexp,
+                          const struct dsc$descriptor_s* bdigits,
+                          unsigned long* csign, long* cexp,
+                          struct dsc$descriptor_s* cdigits)
 {
-	/* Not yet coded */
-	assert(0);
-	return STR$_ILLSTRCLA;
+    /* Not yet coded */
+    assert(0);
+    return STR$_ILLSTRCLA;
 }
 
 
@@ -130,16 +130,16 @@ unsigned long str$mul_not(const unsigned long* asign, const long aexp,
  *
  */
 unsigned long str$recip_not(
-	const unsigned long* asign, const long* aexp,
-	const struct dsc$descriptor_s* adigits,
-	const unsigned long* bsign, const long* bexp,
-	const struct dsc$descriptor_s* bdigits,
-	unsigned long* csign, long* cexp,
-	struct dsc$descriptor_s* cdigits)
+    const unsigned long* asign, const long* aexp,
+    const struct dsc$descriptor_s* adigits,
+    const unsigned long* bsign, const long* bexp,
+    const struct dsc$descriptor_s* bdigits,
+    unsigned long* csign, long* cexp,
+    struct dsc$descriptor_s* cdigits)
 {
-	/* Not yet coded */
-	assert(0);
-	return STR$_ILLSTRCLA;
+    /* Not yet coded */
+    assert(0);
+    return STR$_ILLSTRCLA;
 }
 
 /*************************************************************
@@ -147,14 +147,14 @@ unsigned long str$recip_not(
  *
  */
 unsigned long str$replace_not(struct dsc$descriptor_s* destinstaion_string,
-	const struct dsc$descriptor_s* source_string,
-	const long* start_position,
-	const long* end_position,
-	const struct dsc$descriptor_s* replacement_string)
+                              const struct dsc$descriptor_s* source_string,
+                              const long* start_position,
+                              const long* end_position,
+                              const struct dsc$descriptor_s* replacement_string)
 {
-	/* Not yet coded */
-	assert(0);
-	return STR$_ILLSTRCLA;
+    /* Not yet coded */
+    assert(0);
+    return STR$_ILLSTRCLA;
 }
 
 /*************************************************************
@@ -162,15 +162,15 @@ unsigned long str$replace_not(struct dsc$descriptor_s* destinstaion_string,
  *
  */
 unsigned long str$round_not(const long* places, unsigned long* flags,
-	const unsigned long* asign, const long* aexp,
-	const struct dsc$descriptor_s* adigits,
-	const unsigned long* bsign, const long* bexp,
-	const struct dsc$descriptor_s* bdigits,
-	unsigned long* csign, long* cexp,
-	struct dsc$descriptor_s* cdigits)
+                            const unsigned long* asign, const long* aexp,
+                            const struct dsc$descriptor_s* adigits,
+                            const unsigned long* bsign, const long* bexp,
+                            const struct dsc$descriptor_s* bdigits,
+                            unsigned long* csign, long* cexp,
+                            struct dsc$descriptor_s* cdigits)
 {
-	/* Not yet coded */
-	assert(0);
-	return STR$_ILLSTRCLA;
+    /* Not yet coded */
+    assert(0);
+    return STR$_ILLSTRCLA;
 }
 

@@ -1,5 +1,5 @@
 #ifndef cpudef_h
-#define cpudef_h 
+#define cpudef_h
 
 #define		CPU$C_MAX_CPUS		32
 #define		CPU$C_RESERVED		0
@@ -63,81 +63,86 @@
 #define		CPU$M_MEMORY_WRITE		0x80000000
 #define		CPU$M_AUTO_START		0x1
 #define		CPU$M_NOBINDINGS		0x2
-	
+
 #define		CPU$K_SCHED_LENGTH		40
-		
+
 #define		CPU$K_LENGTH		2528
 #define		CPU$C_LENGTH		2528
 #define		CPU$M_AGE_DATA		0x1
 
+/*
 #ifndef _pcb
 #define _pcb task_struct
 struct task_struct;
 #endif
+*/
 
-struct _cpu {
-  struct _pcb *cpu$l_curpcb;
-  // struct _ktb *cpu$l_curktb;
-  unsigned char cpu$b_ipl; /* some cpus lack something. what is the connnection to PSL IPL? */  
-  unsigned short cpu$w_sisr; /* some cpus lacks... pending interrupts */
-  unsigned char iplnr;
-  unsigned char previpl[32];
-struct {
-  unsigned char interrupt;
-  unsigned char at_level;
-  void * address;
-} cpu$t_ipending[256];
+struct _cpu
+{
+    struct _pcb *cpu$l_curpcb;
+    // struct _ktb *cpu$l_curktb;
+    unsigned char cpu$b_ipl; /* some cpus lack something. what is the connnection to PSL IPL? */
+    unsigned short cpu$w_sisr; /* some cpus lacks... pending interrupts */
+    unsigned char iplnr;
+    unsigned char previpl[32];
+    struct
+    {
+        unsigned char interrupt;
+        unsigned char at_level;
+        void * address;
+    } cpu$t_ipending[256];
 
-  //  unsigned char cpu$b_astlvl; /* some cpus lack something. pcb stuff. */
-  unsigned char cpu$b_intstk; /* PSL IS. not yet used */
-  unsigned char cpu$b_cur_mod; /* PSL CUR_MOD */
-  unsigned char cpu$b_prv_mod; /* PSL PRV_MOD */
+    //  unsigned char cpu$b_astlvl; /* some cpus lack something. pcb stuff. */
+    unsigned char cpu$b_intstk; /* PSL IS. not yet used */
+    unsigned char cpu$b_cur_mod; /* PSL CUR_MOD */
+    unsigned char cpu$b_prv_mod; /* PSL PRV_MOD */
 
-  unsigned long cpu$l_realstack;
-  unsigned short int cpu$w_size;
-  unsigned char cpu$b_type;
-  unsigned char cpu$b_subtype;
-  unsigned char cpu$b_busywait;
-  unsigned char cpu$b_state;
-  unsigned char cpu$b_cpumtx;
-  unsigned char cpu$b_cur_pri;
-  unsigned long cpu$l_work_req;
-  unsigned long cpu$l_percpuva;
-  unsigned long cpu$l_saved_ap;
-  unsigned long cpu$l_haltpc;
-  unsigned long cpu$l_haltpsl;
-  unsigned long cpu$l_saved_isp;
-  unsigned long cpu$l_pcbb;
-  unsigned long cpu$l_scbb;
-  unsigned long cpu$l_sisr;
-  unsigned long cpu$l_p0br;
-  unsigned long cpu$l_p0lr;
-  unsigned long cpu$l_p1br;
-  unsigned long cpu$l_p1lr;
-  unsigned long cpu$l_bugcode;
-  unsigned long cpu$l_mchk_mask;
-  unsigned long cpu$l_mchk_sp;
-  unsigned long cpu$l_p0pt_page;
-  unsigned long long cpu$q_swiqfl [6];
-  unsigned long cpu$l_psfl;
-  unsigned long cpu$l_psbl;
-  unsigned long cpu$l_boot_time;
-  unsigned long cpu$l_cpuid_mask;
-  unsigned long cpu$l_phy_cpuid;
-  unsigned long cpu$l_capability;
-  unsigned long cpu$l_tenusec;
-  unsigned long cpu$l_ubdelay;
-  unsigned long cpu$l_nullcpu;
-  long cpu$ps_pda;
+    unsigned long cpu$l_realstack;
+    unsigned short int cpu$w_size;
+    unsigned char cpu$b_type;
+    unsigned char cpu$b_subtype;
+    unsigned char cpu$b_busywait;
+    unsigned char cpu$b_state;
+    unsigned char cpu$b_cpumtx;
+    unsigned char cpu$b_cur_pri;
+    unsigned long cpu$l_work_req;
+    unsigned long cpu$l_percpuva;
+    unsigned long cpu$l_saved_ap;
+    unsigned long cpu$l_haltpc;
+    unsigned long cpu$l_haltpsl;
+    unsigned long cpu$l_saved_isp;
+    unsigned long cpu$l_pcbb;
+    unsigned long cpu$l_scbb;
+    unsigned long cpu$l_sisr;
+    unsigned long cpu$l_p0br;
+    unsigned long cpu$l_p0lr;
+    unsigned long cpu$l_p1br;
+    unsigned long cpu$l_p1lr;
+    unsigned long cpu$l_bugcode;
+    unsigned long cpu$l_mchk_mask;
+    unsigned long cpu$l_mchk_sp;
+    unsigned long cpu$l_p0pt_page;
+    unsigned long long cpu$q_swiqfl [6];
+    unsigned long cpu$l_psfl;
+    unsigned long cpu$l_psbl;
+    unsigned long cpu$l_boot_time;
+    unsigned long cpu$l_cpuid_mask;
+    unsigned long cpu$l_phy_cpuid;
+    unsigned long cpu$l_capability;
+    unsigned long cpu$l_tenusec;
+    unsigned long cpu$l_ubdelay;
+    unsigned long cpu$l_nullcpu;
+    long cpu$ps_pda;
 };
- 
-struct _sched_ds {
-  unsigned long long cpu$q_acc_run;
-  unsigned long long cpu$q_proc_count;
-  unsigned long long cpu$q_acc_interrupt;
-  unsigned long long cpu$q_acc_waitime;
-  unsigned long long cpu$q_sched_flags;
+
+struct _sched_ds
+{
+    unsigned long long cpu$q_acc_run;
+    unsigned long long cpu$q_proc_count;
+    unsigned long long cpu$q_acc_interrupt;
+    unsigned long long cpu$q_acc_waitime;
+    unsigned long long cpu$q_sched_flags;
 };
- 
+
 #endif
- 
+

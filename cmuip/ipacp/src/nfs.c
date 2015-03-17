@@ -105,17 +105,17 @@ log_IO_error(int ret1, int ret2, char *oprtn)
     FILE *logtest;
     logtest = fopen("CMUIP_ROOT:[SYSMGR]NFSERR.LOG", "a");
     fprintf(logtest, "NFSERR_IO error (%8x or %8x) at %s\n",
-	    ret1, ret2, oprtn);
+            ret1, ret2, oprtn);
     fclose(logtest);
 }
 
 
 
-    /* The IPACP_Interface tells us all about the IPACP.  It gives us   */
-    /* entry points, literals and global pointers.  See NETDEVICES.REQ  */
-    /* for a complete explaination of this structure.                   */
-    /* Note: This pointer must be named "IPACP_Interface"               */
-    IPACP_Info_Structure *IPACP_Interface;
+/* The IPACP_Interface tells us all about the IPACP.  It gives us   */
+/* entry points, literals and global pointers.  See NETDEVICES.REQ  */
+/* for a complete explaination of this structure.                   */
+/* Note: This pointer must be named "IPACP_Interface"               */
+IPACP_Info_Structure *IPACP_Interface;
 
 
 
@@ -139,18 +139,21 @@ int MAX_CACHE=50;	    /* Default value - changed during NFS$INIT */
 
 /* Basic data types */
 
-typedef struct {
+typedef struct
+{
     struct timer_record *next, *prev;
     char *item;
     int referenced;
-    } timer_record;
+} timer_record;
 
-typedef struct {
+typedef struct
+{
     unsigned long bytestart;
     unsigned short reclen;
 } record_starts;
 
-typedef struct {
+typedef struct
+{
     struct file_record *next,*prev;		/* links for cache */
     fhandle	hand;				/* internal NFS file ID */
     int		ref_count;			/* links to file */
@@ -168,18 +171,20 @@ typedef struct {
 
     timer_record *timerblock;			/* pointer to timer entry */
 
-    } file_record;
+} file_record;
 
 int fr_entry_count = 0;
 
-struct hash_entry {
+struct hash_entry
+{
     char *queue_head,*queue_tail;
     int count;
-    } htab[HTAB_SIZE];
+} htab[HTAB_SIZE];
 
-static struct {
+static struct
+{
     timer_record *head, *tail;
-    } fifo_timer;
+} fifo_timer;
 
 unsigned long one_minute_delta[2] = {0xdc3cba00, 0xffffffff};
 
@@ -187,7 +192,12 @@ unsigned long one_minute_delta[2] = {0xdc3cba00, 0xffffffff};
 
 int ((*(nfs_proc_vector[NPROCS]))());
 
-int nfs_int(int x) { int y; XDR$ntov_int(&x,&y); return(y); }
+int nfs_int(int x)
+{
+    int y;
+    XDR$ntov_int(&x,&y);
+    return(y);
+}
 
 
 
@@ -203,41 +213,41 @@ int VMS_to_NFSERR(int vmscode)
     case RMS$_CREATED:
     case RMS$_SUPERSEDE:
     case RMS$_CONTROLC:
-	return (NFS_OK);
-	break;
+        return (NFS_OK);
+        break;
 
     case RMS$_FNF:
     case RMS$_DNF:
-	return (NFSERR_NOENT);
+        return (NFSERR_NOENT);
 
     case RMS$_DNR:
-	return (NFSERR_NXIO);
+        return (NFSERR_NXIO);
 
     case RMS$_PRV:
     case SS$_NOPRIV:
-	return (NFSERR_ACCES);
+        return (NFSERR_ACCES);
 
     case RMS$_FEX:
-	return (NFSERR_EXIST);
+        return (NFSERR_EXIST);
 
     case SS$_NOSUCHDEV:
-	return (NFSERR_NODEV);
+        return (NFSERR_NODEV);
 
     case SS$_BADIRECTORY:
-	return (NFSERR_NOTDIR);
+        return (NFSERR_NOTDIR);
 
     case RMS$_FUL:
-	return (NFSERR_NOSPC);
+        return (NFSERR_NOSPC);
 
     case RMS$_SYN:
     case RMS$_TYP:
-	return (NFSERR_NAMETOOLONG);
+        return (NFSERR_NAMETOOLONG);
 
     case SS$_EXDISKQUOTA:
-	return (NFSERR_DQUOT);
+        return (NFSERR_DQUOT);
 
     default:
-	return (NFSERR_IO);
+        return (NFSERR_IO);
     }
 }
 
@@ -248,12 +258,12 @@ int VMS_to_NFSERR(int vmscode)
 */
 
 int NFS$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *cbody,*areply;
-    int *len;
-    unsigned int prog,vers,proc;
+unsigned uic;
+char *hname;
+char *username;
+long *cbody,*areply;
+int *len;
+unsigned int prog,vers,proc;
 {
     long flavor;
     int result_len;
@@ -264,27 +274,35 @@ int NFS$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
     *len = 2*BYTES_PER_XDR_UNIT;
 
     /* Is the program available? */
-    if (prog != RPCPROG_NFS) {
-	XDR$vton_int(&PROG_UNAVAIL,areply++);		*len += 4;
-	return(1);
-	}
+    if (prog != RPCPROG_NFS)
+    {
+        XDR$vton_int(&PROG_UNAVAIL,areply++);
+        *len += 4;
+        return(1);
+    }
 
     /* is the procedure number reasonable? */
-    if ((proc >= NPROCS) || (proc <0)) {
-	XDR$vton_int(&PROC_UNAVAIL,areply++);		*len += 4;
-	return(1);
-	}
+    if ((proc >= NPROCS) || (proc <0))
+    {
+        XDR$vton_int(&PROC_UNAVAIL,areply++);
+        *len += 4;
+        return(1);
+    }
 
     /* Is he requesting the right version? */
     /* !!!HACK!!! should this check be a bound instead of inequality? */
-    if (vers != NFS_VERSION) {
-	XDR$vton_int(&PROG_MISMATCH,areply++);		*len += 4;
-	XDR$vton_int(&NFS_VERSION_LOW,areply++);	*len += 4;
-	XDR$vton_int(&NFS_VERSION_HIGH,areply++);	*len += 4;
-	return(1);
-	}
+    if (vers != NFS_VERSION)
+    {
+        XDR$vton_int(&PROG_MISMATCH,areply++);
+        *len += 4;
+        XDR$vton_int(&NFS_VERSION_LOW,areply++);
+        *len += 4;
+        XDR$vton_int(&NFS_VERSION_HIGH,areply++);
+        *len += 4;
+        return(1);
+    }
 
-/* We're good to go */
+    /* We're good to go */
     cbody += 4;		/* jump over rpc_vers,prog,vers, and proc */
 
     /* ignore credentials */
@@ -298,19 +316,22 @@ int NFS$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
     if (uic == -2)		/* No match was found in RPC */
     {
         XDR$vton_int(&NFSERR_ACCES, areply+1);
-	result_len = 1;
+        result_len = 1;
     }
     else
-	result_len = (*nfs_proc_vector[proc])(uic,hname,username,areply+1,cbody);
-    if (result_len < 0) {
-	XDR$vton_int(&GARBAGE_ARGS,areply++);		*len += 4;
-	return(1);
-	}
+        result_len = (*nfs_proc_vector[proc])(uic,hname,username,areply+1,cbody);
+    if (result_len < 0)
+    {
+        XDR$vton_int(&GARBAGE_ARGS,areply++);
+        *len += 4;
+        return(1);
+    }
 
     /* Not realy the reply val, just first long word of results... */
 
     /* it worked! */
-    XDR$vton_int(&SUCCESS,areply++);			*len += 4;
+    XDR$vton_int(&SUCCESS,areply++);
+    *len += 4;
     *len += 4 * result_len;
     return 1;
 }
@@ -324,108 +345,112 @@ int NFS$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
 **************************************************************************/
 
 int fr_key_comp(key1,key2)
-    fhandle key1,key2;
+fhandle key1,key2;
 {
     int i;
 
     for (i=0; i<FHSIZE; i++)
-	if (key1[i] != key2[i]) return FALSE;
+        if (key1[i] != key2[i]) return FALSE;
 
     return TRUE;
 }
 
 int hash_fr(key)
-    fhandle key;
+fhandle key;
 {
-   int i,sum=0;
+    int i,sum=0;
 
-   for (i=0; i<FIDSIZE; i++)
-	sum += key[i];
-   return(sum%HTAB_SIZE);
+    for (i=0; i<FIDSIZE; i++)
+        sum += key[i];
+    return(sum%HTAB_SIZE);
 }
 
 
 file_record *find_fr(key)
-    fhandle key;
+fhandle key;
 {
-   int index;
-   file_record *frp;
+    int index;
+    file_record *frp;
 
-   index = hash_fr(key);
-   frp = htab[index].queue_head;
-   while (frp != &htab[index].queue_head)
-	if (fr_key_comp(key,&frp->hand)) {
-	   frp->timerblock->referenced++;
-	   return(frp);
-	} else frp = frp->next;
+    index = hash_fr(key);
+    frp = htab[index].queue_head;
+    while (frp != &htab[index].queue_head)
+        if (fr_key_comp(key,&frp->hand))
+        {
+            frp->timerblock->referenced++;
+            return(frp);
+        }
+        else frp = frp->next;
 
-   return NULL;
+    return NULL;
 }
 
 void delete_fr(file_record *frp)
 {
-   file_record *delfile;
-   timer_record *deltimer;
-   int index;
-   int RC;
+    file_record *delfile;
+    timer_record *deltimer;
+    int index;
+    int RC;
 
-   RC = SYS$DASSGN(frp->fchan);
-   if (!ERROR(RC))
-      fr_entry_count--;
+    RC = SYS$DASSGN(frp->fchan);
+    if (!ERROR(RC))
+        fr_entry_count--;
 
-   if (_REMQUE(frp, &delfile) < 2) {
-      free(delfile->offsets);
-      if (_REMQUE(delfile->timerblock, &deltimer) < 2)
-         free(deltimer);
-      free(delfile);
-   }
+    if (_REMQUE(frp, &delfile) < 2)
+    {
+        free(delfile->offsets);
+        if (_REMQUE(delfile->timerblock, &deltimer) < 2)
+            free(deltimer);
+        free(delfile);
+    }
 }
 
 int insert_fr(frp)
-   file_record *frp;
+file_record *frp;
 {
-   int index;
-   timer_record *new_timer, *old_timer;
+    int index;
+    timer_record *new_timer, *old_timer;
 
-   index = hash_fr(&frp->hand);
-   _INSQUE(frp,&htab[index].queue_head);
-   htab[index].count++;
+    index = hash_fr(&frp->hand);
+    _INSQUE(frp,&htab[index].queue_head);
+    htab[index].count++;
 
-   new_timer = (timer_record *)malloc(sizeof(timer_record));
-   new_timer->next = new_timer->prev = NULL;
-   new_timer->item = (char *)frp;
-   new_timer->referenced = 2;		    /* Give it two minutes to start */
-   _INSQUE(new_timer, &fifo_timer.head);
+    new_timer = (timer_record *)malloc(sizeof(timer_record));
+    new_timer->next = new_timer->prev = NULL;
+    new_timer->item = (char *)frp;
+    new_timer->referenced = 2;		    /* Give it two minutes to start */
+    _INSQUE(new_timer, &fifo_timer.head);
 
-   frp->timerblock = new_timer;
+    frp->timerblock = new_timer;
 
-   fr_entry_count++;
+    fr_entry_count++;
 
-   if (fr_entry_count >= MAX_CACHE)
-      delete_fr((file_record *)fifo_timer.tail->item);
+    if (fr_entry_count >= MAX_CACHE)
+        delete_fr((file_record *)fifo_timer.tail->item);
 
-   return TRUE;
+    return TRUE;
 }
 
 int clean_frs()
 {
-/* Called via $SETIMR to periodically check the status of the open channels */
+    /* Called via $SETIMR to periodically check the status of the open channels */
 
-   timer_record *checkme, *next;
-   int RC;
+    timer_record *checkme, *next;
+    int RC;
 
-   checkme = fifo_timer.head;
+    checkme = fifo_timer.head;
 
-   while (checkme != &fifo_timer.head) {
-      if (checkme->referenced > 10)
-         checkme->referenced = 10;
-      next = checkme->next;
-      if (--(checkme->referenced) < 0)
-         delete_fr((file_record *)checkme->item);
-      checkme = next;
-   }
+    while (checkme != &fifo_timer.head)
+    {
+        if (checkme->referenced > 10)
+            checkme->referenced = 10;
+        next = checkme->next;
+        if (--(checkme->referenced) < 0)
+            delete_fr((file_record *)checkme->item);
+        checkme = next;
+    }
 
-   RC = SYS$SETIMR(0, &one_minute_delta, clean_frs, 0, 0);
+    RC = SYS$SETIMR(0, &one_minute_delta, clean_frs, 0, 0);
 }
 
 
@@ -436,22 +461,22 @@ int clean_frs()
 **********************************************************************/
 
 rms_to_handle(nam,hand)
-    struct NAM *nam;
-    fhandle hand;
+struct NAM *nam;
+fhandle hand;
 {
     memset(hand,0,FHSIZE);
     memcpy(hand,&nam->nam$t_dvi,FIDSIZE);
 }
 
 handle_to_rms(hand,nam)
-    fhandle hand;
-    struct NAM *nam;
+fhandle hand;
+struct NAM *nam;
 {
     memcpy(&nam->nam$t_dvi,hand,FIDSIZE);
 }
 
 file_record *new_fr(hand)
-    fhandle hand;
+fhandle hand;
 {
     int RC;
     short len;
@@ -481,19 +506,19 @@ file_record *new_fr(hand)
 
     RC = LIB$FID_TO_NAME(&dev_desc,&hand[16],&file_desc,&len,0,0);
     if (ERROR(RC))
-	return NULL;
+        return NULL;
 
     frp->filename[len] = 0;
 
     RC = SYS$ASSIGN(&dev_desc, &frp->fchan, 0, 0);
     if (ERROR(RC))
-	return NULL;
+        return NULL;
 
     frp->atrblock[0].atr$w_size = sizeof(frp->fat);
     frp->atrblock[0].atr$w_type = ATR$C_RECATTR;
     frp->atrblock[0].atr$l_addr = &frp->fat;
     frp->atrblock[1].atr$w_size = frp->atrblock[1].atr$w_type =
-       frp->atrblock[1].atr$l_addr = 0;
+                                      frp->atrblock[1].atr$l_addr = 0;
 
     frp->fib.fib$r_acctl_overlay.fib$l_acctl = FIB$M_WRITE | FIB$M_NOLOCK;
     memcpy(&frp->fib.fib$r_fid_overlay.fib$w_fid, &hand[16], 6);
@@ -501,7 +526,7 @@ file_record *new_fr(hand)
     RC = SYS$QIOW(0, frp->fchan, IO$_ACCESS|IO$M_ACCESS, &QIOSB, 0, 0,
                   &frp->fib_desc, 0, 0, 0, &frp->atrblock, 0);
     if (ERROR(RC) || ERROR(QIOSB[0]))
-	return NULL;
+        return NULL;
 
     frp->filesize = -1;
 
@@ -509,103 +534,104 @@ file_record *new_fr(hand)
     frp->offsets = NULL;
     if (frp->fat.fat$b_rtype.fat$v_rtype == FAT$C_VARIABLE)
     {
-	numblocks = (frp->fat.fat$l_efblk.fat$w_efblkl +
-	    (frp->fat.fat$l_efblk.fat$w_efblkh * 65536));
+        numblocks = (frp->fat.fat$l_efblk.fat$w_efblkl +
+                     (frp->fat.fat$l_efblk.fat$w_efblkh * 65536));
         frp->offsets = (record_starts *)
-	    malloc(sizeof(record_starts) * numblocks);
+                       malloc(sizeof(record_starts) * numblocks);
 
-	curvms = 0;
-	curunix = 0;
-	bytestogo = 0;
-	reclen = 0;
-	nfsblock = 0;
-	numbytes = (frp->fat.fat$l_efblk.fat$w_efblkl +
-		    (frp->fat.fat$l_efblk.fat$w_efblkh * 65536) - 1) * 512 +
-		   frp->fat.fat$w_ffbyte - 1;
+        curvms = 0;
+        curunix = 0;
+        bytestogo = 0;
+        reclen = 0;
+        nfsblock = 0;
+        numbytes = (frp->fat.fat$l_efblk.fat$w_efblkl +
+                    (frp->fat.fat$l_efblk.fat$w_efblkh * 65536) - 1) * 512 +
+                   frp->fat.fat$w_ffbyte - 1;
 
-	for (blockloop=0;
-	     blockloop <= (numblocks / (BLKSIZE / 512));
-	     blockloop++)
-	{
-	    /* Read as many bytes as the buffer will hold */
-	    RC = SYS$QIOW(0, frp->fchan, IO$_READVBLK, &QIOSB, 0, 0,
-	        &blockbuffer, BLKSIZE,
-		blockloop * (BLKSIZE / 512) + 1, 0, 0, 0);
-	    if (!ERROR(RC) &&
-	        ((QIOSB[0] == SS$_ENDOFFILE) || !ERROR(QIOSB[0])))
-	    {
-		blockptr = &blockbuffer + (curvms - blockloop * BLKSIZE);
+        for (blockloop=0;
+                blockloop <= (numblocks / (BLKSIZE / 512));
+                blockloop++)
+        {
+            /* Read as many bytes as the buffer will hold */
+            RC = SYS$QIOW(0, frp->fchan, IO$_READVBLK, &QIOSB, 0, 0,
+                          &blockbuffer, BLKSIZE,
+                          blockloop * (BLKSIZE / 512) + 1, 0, 0, 0);
+            if (!ERROR(RC) &&
+                    ((QIOSB[0] == SS$_ENDOFFILE) || !ERROR(QIOSB[0])))
+            {
+                blockptr = &blockbuffer + (curvms - blockloop * BLKSIZE);
 
-		/*
-		 * Change to 65536 from 256 per mail conversation with
-		 * Marc Shannon.
-		 *
-		 * Tom Allebrandi (Allebrandi@Inland.Com) 12-Jul-1991
-		 */
-		bytecount = QIOSB[1] + QIOSB[2]*65536;
+                /*
+                 * Change to 65536 from 256 per mail conversation with
+                 * Marc Shannon.
+                 *
+                 * Tom Allebrandi (Allebrandi@Inland.Com) 12-Jul-1991
+                 */
+                bytecount = QIOSB[1] + QIOSB[2]*65536;
 
-		/* -1 is in case it ends one byte short of the data block */
-		while (((blockptr - &blockbuffer) < bytecount - 1) &&
-		       (curvms < numbytes - 1))
-		{
-		    if (!reclen) {
-			if (curvms & 1)	    /* Increment to next whole word */
-			{
-			    curvms++;
-			    blockptr++;
-			}
+                /* -1 is in case it ends one byte short of the data block */
+                while (((blockptr - &blockbuffer) < bytecount - 1) &&
+                        (curvms < numbytes - 1))
+                {
+                    if (!reclen)
+                    {
+                        if (curvms & 1)	    /* Increment to next whole word */
+                        {
+                            curvms++;
+                            blockptr++;
+                        }
 
-			memcpy(&reclen, blockptr, 2);
-			reclen &= 0xffff;
-			/* Surprize! It seems that a record length of 0xFFFF
-			 * is interpreted as "skip to end of block"!!!!!  I
-			 * wonder what other demons live near here!
-			 *
-			 * Tom Allebrandi (Allebrandi@Inland.Com) 3-Sep-1991
-			 */
-			if (reclen == 0xFFFF)
-			{
-			    /* Round the block pointer up to the next block
-			     * and skip the rest of the loop. (It is tempting
-			     * to simply round up `blockptr'. That doesn't
-			     * work because the `blockbuffer' is not page
-			     * aligned.
-			     */
-			    tindex = blockptr - blockbuffer;
-			    tindex = tindex - (tindex % 512) + 512;
-			    blockptr = &blockbuffer[tindex];
-			    curvms = curvms - (curvms % 512) + 512;
-			    reclen = 0;
-			    continue;
-			}
-			
-			blockptr += 2;
-			curvms += 2;
-			curunix += reclen +
-			    (frp->fat.fat$b_rattrib & FAT$M_IMPLIEDCC ? 1 : 0);
-		    }
+                        memcpy(&reclen, blockptr, 2);
+                        reclen &= 0xffff;
+                        /* Surprize! It seems that a record length of 0xFFFF
+                         * is interpreted as "skip to end of block"!!!!!  I
+                         * wonder what other demons live near here!
+                         *
+                         * Tom Allebrandi (Allebrandi@Inland.Com) 3-Sep-1991
+                         */
+                        if (reclen == 0xFFFF)
+                        {
+                            /* Round the block pointer up to the next block
+                             * and skip the rest of the loop. (It is tempting
+                             * to simply round up `blockptr'. That doesn't
+                             * work because the `blockbuffer' is not page
+                             * aligned.
+                             */
+                            tindex = blockptr - blockbuffer;
+                            tindex = tindex - (tindex % 512) + 512;
+                            blockptr = &blockbuffer[tindex];
+                            curvms = curvms - (curvms % 512) + 512;
+                            reclen = 0;
+                            continue;
+                        }
 
-		    while (reclen + 1 > bytestogo)
-		    {
-			reclen -= bytestogo;
-			curvms += bytestogo;
-			blockptr += bytestogo;
+                        blockptr += 2;
+                        curvms += 2;
+                        curunix += reclen +
+                                   (frp->fat.fat$b_rattrib & FAT$M_IMPLIEDCC ? 1 : 0);
+                    }
 
-			frp->offsets[nfsblock].reclen = reclen;
-			frp->offsets[nfsblock++].bytestart = curvms;
+                    while (reclen + 1 > bytestogo)
+                    {
+                        reclen -= bytestogo;
+                        curvms += bytestogo;
+                        blockptr += bytestogo;
 
-			bytestogo = 512;
-		    }
+                        frp->offsets[nfsblock].reclen = reclen;
+                        frp->offsets[nfsblock++].bytestart = curvms;
 
-		    curvms += reclen;
-		    bytestogo -= reclen + 1;    /* Add one for \n */
+                        bytestogo = 512;
+                    }
 
-		    blockptr += reclen;
-		    reclen = 0;
-		}
-	    }
-	}
-	frp->filesize = curunix;
+                    curvms += reclen;
+                    bytestogo -= reclen + 1;    /* Add one for \n */
+
+                    blockptr += reclen;
+                    reclen = 0;
+                }
+            }
+        }
+        frp->filesize = curunix;
     }
 
     /* fill in the key */
@@ -617,36 +643,39 @@ file_record *new_fr(hand)
 
 
 file_record *get_fr(hand)
-    fhandle hand;
+fhandle hand;
 {
-   file_record *frp;
-   timer_record *movetohead;
+    file_record *frp;
+    timer_record *movetohead;
 
-   frp = find_fr(hand);
-   if (frp == NULL) {
-	frp = new_fr(hand);
-	if ((frp==NULL) || (!insert_fr(frp))) return(NULL);
-	}
+    frp = find_fr(hand);
+    if (frp == NULL)
+    {
+        frp = new_fr(hand);
+        if ((frp==NULL) || (!insert_fr(frp))) return(NULL);
+    }
 
-/*
- * Check to make sure that the file referenced by the file record
- * exists. If it doesn't, the handle is stale and should be deleted.
- * If we return a valid file record here, downstream is likely to fail
- * for other reasons causing the client to not really know that his
- * handle is no longer valid.
- *
- * Tom Allebrandi (Allebrandi@Inland.Com) 8-Jul-1991
- */
-   else if (access(frp->filename,0) == 0) {
-	_REMQUE(fifo_timer.tail, &movetohead);
-	_INSQUE(movetohead, &fifo_timer.head);
-	}
-   else {
-	delete_fr(frp);
-	frp = NULL;
-	}
+    /*
+     * Check to make sure that the file referenced by the file record
+     * exists. If it doesn't, the handle is stale and should be deleted.
+     * If we return a valid file record here, downstream is likely to fail
+     * for other reasons causing the client to not really know that his
+     * handle is no longer valid.
+     *
+     * Tom Allebrandi (Allebrandi@Inland.Com) 8-Jul-1991
+     */
+    else if (access(frp->filename,0) == 0)
+    {
+        _REMQUE(fifo_timer.tail, &movetohead);
+        _INSQUE(movetohead, &fifo_timer.head);
+    }
+    else
+    {
+        delete_fr(frp);
+        frp = NULL;
+    }
 
-   return frp;
+    return frp;
 }
 
 
@@ -676,11 +705,12 @@ char *updir(char *path)
     if (dot == NULL)
     {
         leftbracket = strrchr(path, '[');
-	strcpy(leftbracket + 8, leftbracket + 1);   /* Move directory name to
+        strcpy(leftbracket + 8, leftbracket + 1);   /* Move directory name to
 						       filename position */
-	strncpy(leftbracket, "[000000]", 8);	    /* Don't null-terminate */
-    } else
-	*dot = ']';
+        strncpy(leftbracket, "[000000]", 8);	    /* Don't null-terminate */
+    }
+    else
+        *dot = ']';
     strcat(path, ".DIR");
     return path;
 }
@@ -688,8 +718,8 @@ char *updir(char *path)
 
 
 make_handle(fname,fid)
-    char *fname;
-    fhandle fid;
+char *fname;
+fhandle fid;
 {
     int status;
     struct FAB fab;
@@ -709,11 +739,11 @@ make_handle(fname,fid)
 
     status = sys$parse (&fab, 0, 0);
     if (status != RMS$_NORMAL)
-	return(VMS_to_NFSERR(status));
+        return(VMS_to_NFSERR(status));
 
     status = sys$search (&fab, 0, 0);
     if (status != RMS$_NORMAL)
-	return(VMS_to_NFSERR(status));
+        return(VMS_to_NFSERR(status));
 
     rms_to_handle(&nam,fid);
 
@@ -722,9 +752,9 @@ make_handle(fname,fid)
 
 
 int get_file_attributes(frp,attribs,hostname)
-    file_record *frp;
-    fattr *attribs;
-    char *hostname;
+file_record *frp;
+fattr *attribs;
+char *hostname;
 {
     int RC;
     stat_t stats;
@@ -740,12 +770,14 @@ int get_file_attributes(frp,attribs,hostname)
     attribs->nlink	= stats.st_nlink;
     attribs->nlink	= 1;
 
-    uid = (short)stats.st_uid;  gid = (short)stats.st_gid;
+    uid = (short)stats.st_uid;
+    gid = (short)stats.st_gid;
     uic = uid + (gid<<16);
-    if (!map_unix(uic,&attribs->uid,&attribs->gid,hostname)) {
-	attribs->uid = -2;
-	attribs->gid = -2;
-	}
+    if (!map_unix(uic,&attribs->uid,&attribs->gid,hostname))
+    {
+        attribs->uid = -2;
+        attribs->gid = -2;
+    }
     attribs->uid &= 0x0000ffff;
     attribs->gid &= 0x0000ffff;
 
@@ -769,9 +801,9 @@ int get_file_attributes(frp,attribs,hostname)
 }
 
 int set_file_attributes(frp,sattribs,hostname)
-    file_record *frp;
-    sattr *sattribs;
-    char *hostname;
+file_record *frp;
+sattr *sattribs;
+char *hostname;
 {
     int RC;
     unsigned short int QIOSB[4];
@@ -783,36 +815,37 @@ int set_file_attributes(frp,sattribs,hostname)
 
     /* We don't care about group information */
     if ((short)nfs_int(sattribs->uid) != -1)
-	if (map_uic(&newuic, nfs_int(sattribs->uid), nfs_int(sattribs->gid),
-	    hostname))
-	    chown(&frp->filename, newuic & 0xffff, newuic>>16);
-	else
-	    return NFSERR_ACCES;
+        if (map_uic(&newuic, nfs_int(sattribs->uid), nfs_int(sattribs->gid),
+                    hostname))
+            chown(&frp->filename, newuic & 0xffff, newuic>>16);
+        else
+            return NFSERR_ACCES;
 
-    if (nfs_int(sattribs->size) != -1) {
-       frp->fib.fib$r_exctl_overlay.fib$w_exctl = FIB$M_TRUNC;
-       frp->fib.fib$l_exsz = 0;
-       frp->fib.fib$l_exvbn = (nfs_int(sattribs->size) + 511) / 512 + 1;
-       frp->fat.fat$l_efblk.fat$w_efblkh =
-	    (((nfs_int(sattribs->size) / 512) + 1) / 65536);
-       frp->fat.fat$l_efblk.fat$w_efblkl =
-	    (((nfs_int(sattribs->size) / 512) + 1) % 65536);
-       frp->fat.fat$w_ffbyte = (nfs_int(sattribs->size) % 512);
-       frp->filesize = nfs_int(sattribs->size);
+    if (nfs_int(sattribs->size) != -1)
+    {
+        frp->fib.fib$r_exctl_overlay.fib$w_exctl = FIB$M_TRUNC;
+        frp->fib.fib$l_exsz = 0;
+        frp->fib.fib$l_exvbn = (nfs_int(sattribs->size) + 511) / 512 + 1;
+        frp->fat.fat$l_efblk.fat$w_efblkh =
+            (((nfs_int(sattribs->size) / 512) + 1) / 65536);
+        frp->fat.fat$l_efblk.fat$w_efblkl =
+            (((nfs_int(sattribs->size) / 512) + 1) % 65536);
+        frp->fat.fat$w_ffbyte = (nfs_int(sattribs->size) % 512);
+        frp->filesize = nfs_int(sattribs->size);
 
-       if (!nfs_int(sattribs->size))
-           frp->fat.fat$b_rtype.fat$v_rtype = FAT$C_STREAMLF;
+        if (!nfs_int(sattribs->size))
+            frp->fat.fat$b_rtype.fat$v_rtype = FAT$C_STREAMLF;
 
-       RC = SYS$QIOW(0, frp->fchan, IO$_MODIFY, &QIOSB, 0, 0,
-                     &frp->fib_desc, 0, 0, 0, &frp->atrblock, 0);
-       if (ERROR(RC) || ERROR(QIOSB[0]))
-          return NFSERR_IO;
+        RC = SYS$QIOW(0, frp->fchan, IO$_MODIFY, &QIOSB, 0, 0,
+                      &frp->fib_desc, 0, 0, 0, &frp->atrblock, 0);
+        if (ERROR(RC) || ERROR(QIOSB[0]))
+            return NFSERR_IO;
     }
 
     if ((short)nfs_int(sattribs->mode) != -1)
         chmod(&frp->filename, nfs_int(sattribs->mode));
 
-/* !!!HACK!!! sattribs->?time : how to change file times??? */
+    /* !!!HACK!!! sattribs->?time : how to change file times??? */
 
     return NFS_OK;
 
@@ -821,16 +854,17 @@ int set_file_attributes(frp,sattribs,hostname)
 int has_access(char *username, char *hname, char *filename, unsigned access)
 {
     struct dsc$descriptor objnam, usrnam;
-    struct {
-	unsigned short buflen, itmcod;
-	unsigned long bufadr, retlenadr, null;
+    struct
+    {
+        unsigned short buflen, itmcod;
+        unsigned long bufadr, retlenadr, null;
     } itmlst;
     unsigned long vmsuic;
     stat_t filestats;
     int RC;
 
     if (stat(filename, &filestats) == -1)
-	return NFSERR_NOENT;
+        return NFSERR_NOENT;
 
     objnam.dsc$b_dtype = usrnam.dsc$b_dtype = DSC$K_DTYPE_T;
     objnam.dsc$b_class = usrnam.dsc$b_class = DSC$K_CLASS_S;
@@ -840,11 +874,12 @@ int has_access(char *username, char *hname, char *filename, unsigned access)
     if (!strcmp(username, "*"))
     {
         usrnam.dsc$a_pointer = NFS_ANONYMOUS;
-	usrnam.dsc$w_length = strlen(NFS_ANONYMOUS);
+        usrnam.dsc$w_length = strlen(NFS_ANONYMOUS);
     }
-    else {
+    else
+    {
         usrnam.dsc$w_length = strlen(username);
-	usrnam.dsc$a_pointer = username;
+        usrnam.dsc$a_pointer = username;
     }
 
     itmlst.buflen = sizeof(access);
@@ -863,9 +898,9 @@ int has_access(char *username, char *hname, char *filename, unsigned access)
      * Tom Allebrandi (Allebrandi@Inland.Com) 8-Jul-1991
      */
     if (RC == RMS$_RNF)
-	return NFSERR_ACCES;
+        return NFSERR_ACCES;
     else
-	return (VMS_to_NFSERR(RC));
+        return (VMS_to_NFSERR(RC));
 }
 
 /*******************************************************************
@@ -877,16 +912,16 @@ int has_access(char *username, char *hname, char *filename, unsigned access)
 ********************************************************************/
 
 int write_XDR_stat(stat,buf)
-    long stat;
-    long **buf;
+long stat;
+long **buf;
 {
     XDR$vton_int(&stat,(*buf)++);
     return 1;
 }
 
 int write_XDR_fhandle(hand,buf)
-    fhandle hand;
-    long **buf;
+fhandle hand;
+long **buf;
 {
     memcpy(*buf,hand,FHSIZE);
     *buf += FHSIZE/4;
@@ -897,8 +932,8 @@ int write_XDR_fhandle(hand,buf)
 
 
 int write_XDR_file_attributes(attribs,buf)
-    fattr *attribs;
-    long **buf;
+fattr *attribs;
+long **buf;
 {
     long *buff_start = *buf;
     XDR$vton_int(&attribs->type,(*buf)++);
@@ -923,26 +958,28 @@ int write_XDR_file_attributes(attribs,buf)
 
     return (*buf - buff_start);
 
-/*    return RNDUP(sizeof(*attribs))/4; */
+    /*    return RNDUP(sizeof(*attribs))/4; */
 }
 
 
 
 file_to_dir(s)
-    char *s;
+char *s;
 {
     /* convert [foo]bar.dir into [foo.bar] */
     while (*s && (*s != ']')) s++;
-    if (!*s) return 0; else *s++ = '.';
+    if (!*s) return 0;
+    else *s++ = '.';
     while (*s && (*s != '.')) s++;
     if (!*s) return 0;
-    *s++ = ']'; *s = 0;
+    *s++ = ']';
+    *s = 0;
 }
 
 file_record *build_fname(dargs,fname,dirp)
-    diropargs *dargs;
-    char *fname;
-    int dirp;
+diropargs *dargs;
+char *fname;
+int dirp;
 {
     file_record *drp;
     int fnlen;
@@ -953,24 +990,26 @@ file_record *build_fname(dargs,fname,dirp)
     /* find_fr the directory */
     drp = get_fr(dargs->dir);
     if (drp == NULL)
-	return NULL;
+        return NULL;
 
     /* convert [foo]bar.dir into [foo.bar] */
-    fnlen = nfs_int(dargs->name.length); dargs->name.data[fnlen] = 0;
-    strcpy(fname,&drp->filename); s = file_to_dir(fname);
+    fnlen = nfs_int(dargs->name.length);
+    dargs->name.data[fnlen] = 0;
+    strcpy(fname,&drp->filename);
+    s = file_to_dir(fname);
 
     /* convert remote name to local name */
     /* Try directory specification first */
     FNAME_NET_TO_VMS(&dargs->name.data, nfs_int(dargs->name.length),
-        newname, 1);
+                     newname, 1);
     strcpy(s, newname);
     strcat(s, "DIR");
     if (!dirp && ((stat(fname, &filestat) == -1) ||
-        (filestat.st_mode & S_IFDIR == 0)))
+                  (filestat.st_mode & S_IFDIR == 0)))
     {
         FNAME_NET_TO_VMS(&dargs->name.data, nfs_int(dargs->name.length),
-	    newname, 0);
-	    strcpy(s, newname);
+                         newname, 0);
+        strcpy(s, newname);
     }
 
     return drp;
@@ -985,10 +1024,10 @@ NFS procedure #0	- Do Nothing
 */
 
 int NFSPROC_NULL(uic,hname,username,reply)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
 {
     return 0;
 }
@@ -1002,11 +1041,11 @@ NFS procedure #1	- Get File Attributes
 */
 
 int NFSPROC_GETATTR(uic,hname,username,reply,hand)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    fhandle hand;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+fhandle hand;
 {
     int RC,len;
     file_record *frp;
@@ -1015,14 +1054,14 @@ int NFSPROC_GETATTR(uic,hname,username,reply,hand)
     /* find_fr the file */
     frp = get_fr(hand);
     if (frp == NULL)
-	return write_XDR_stat(NFSERR_STALE,&reply);
+        return write_XDR_stat(NFSERR_STALE,&reply);
 
     if (!(RC = has_access(username, hname, frp->filename, ARM$M_READ)))
     {
         if (!get_file_attributes(frp, &attribs, hname))
-	    return write_XDR_stat(NFSERR_ACCES, &reply);
-	write_XDR_stat(NFS_OK, &reply);
-	return 1 + write_XDR_file_attributes(&attribs, &reply);
+            return write_XDR_stat(NFSERR_ACCES, &reply);
+        write_XDR_stat(NFS_OK, &reply);
+        return 1 + write_XDR_file_attributes(&attribs, &reply);
     }
     return write_XDR_stat(RC, &reply);
 }
@@ -1036,19 +1075,20 @@ NFS procedure #2	- Set File Attributes
 */
 
 int NFSPROC_SETATTR(uic,hname,username,reply,args)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    char *args;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+char *args;
 {
     int RC,len;
     file_record *frp;
     fattr attribs;
-    struct {
-	fhandle file;
-	sattr attribs;
-	} sat_args;
+    struct
+    {
+        fhandle file;
+        sattr attribs;
+    } sat_args;
 
     /* Load the arguments */
     XDR$ntov_arb(&args, &sat_args.file, sizeof(sat_args.file));
@@ -1057,7 +1097,7 @@ int NFSPROC_SETATTR(uic,hname,username,reply,args)
     /* find_fr the file */
     frp = get_fr(&sat_args.file);
     if (frp == NULL)
-	return write_XDR_stat(NFSERR_STALE,&reply);
+        return write_XDR_stat(NFSERR_STALE,&reply);
 
     /* Check access... */
     if (RC = has_access(username, hname, frp->filename, ARM$M_WRITE))
@@ -1068,7 +1108,7 @@ int NFSPROC_SETATTR(uic,hname,username,reply,args)
         return write_XDR_stat(RC, &reply);
 
     if (!get_file_attributes(frp,&attribs, hname))
-	return write_XDR_stat(NFSERR_ACCES,&reply);
+        return write_XDR_stat(NFSERR_ACCES,&reply);
 
     write_XDR_stat(NFS_OK,&reply);
     return 1 + write_XDR_file_attributes(&attribs,&reply);
@@ -1082,10 +1122,10 @@ NFS procedure #3	- Get Filesystem Root (!!!OBSELETE!!!)
 
 */
 int NFSPROC_ROOT(uic,hname,username,reply)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
 {
     return write_XDR_stat(NFSERR_NXIO, &reply);
 }
@@ -1099,11 +1139,11 @@ NFS procedure #4	- Look Up File Name
 */
 
 NFSPROC_LOOKUP(uic,hname,username,reply,args)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    char *args;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+char *args;
 {
     diropargs dop_args;
     file_record *drp,*frp;
@@ -1122,7 +1162,7 @@ NFSPROC_LOOKUP(uic,hname,username,reply,args)
     /* find the directory */
     drp = build_fname(&dop_args,fname,0);
     if (drp == NULL)
-	return write_XDR_stat(NFSERR_STALE,&reply);
+        return write_XDR_stat(NFSERR_STALE,&reply);
 
     /* Specially handle the "." and ".." directories */
     if (!strcmp(".", dop_args.name.data))
@@ -1140,15 +1180,15 @@ NFSPROC_LOOKUP(uic,hname,username,reply,args)
     updir(dirname);
 
     if (!(RC = has_access(username, hname, dirname, ARM$M_READ)) ||
-	!(RC = has_access(username, hname, dirname, ARM$M_EXECUTE)))
+            !(RC = has_access(username, hname, dirname, ARM$M_EXECUTE)))
     {
-	/* get attributes */
-	RC = get_file_attributes(frp,&attribs, hname);
-	if (!RC) return write_XDR_stat(NFSERR_ACCES,&reply);
+        /* get attributes */
+        RC = get_file_attributes(frp,&attribs, hname);
+        if (!RC) return write_XDR_stat(NFSERR_ACCES,&reply);
 
-	len = write_XDR_stat(NFS_OK,&reply);
-	len += write_XDR_fhandle(hand,&reply);	/* add another handle */
-	len += write_XDR_file_attributes(&attribs,&reply);
+        len = write_XDR_stat(NFS_OK,&reply);
+        len += write_XDR_fhandle(hand,&reply);	/* add another handle */
+        len += write_XDR_file_attributes(&attribs,&reply);
     }
     else len = write_XDR_stat(RC, &reply);
 
@@ -1163,18 +1203,18 @@ NFS procedure #5	- Read From Symbolic Link
 
 */
 NFSPROC_READLINK(uic,hname,username,reply,hand)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    fhandle hand;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+fhandle hand;
 {
     file_record *frp;
 
     /* find_fr the link */
     frp = get_fr(hand);
     if (frp == NULL)
-	return write_XDR_stat(NFSERR_STALE,&reply);
+        return write_XDR_stat(NFSERR_STALE,&reply);
 
     return write_XDR_stat(NFSERR_NOENT,&reply);
 }
@@ -1187,21 +1227,22 @@ NFS procedure #6	- Read From file
 
 */
 NFSPROC_READ(uic,hname,username,reply,rargs)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    struct {
-	fhandle file;
-	unsigned offset;
-	unsigned count;
-	unsigned totalcount;
-	} *rargs;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+struct
+{
+    fhandle file;
+    unsigned offset;
+    unsigned count;
+    unsigned totalcount;
+} *rargs;
 {
     int RC,len,i,nread;
     file_record *frp;
     unsigned offset,count,out_count,total_count,transcount,recordlen,
-        EOFbyte, byteswanted, bytesnotwanted;
+             EOFbyte, byteswanted, bytesnotwanted;
     fattr attribs;
     char buffer[BLKSIZE], transbuffer[BLKSIZE], *tbuff;
     unsigned short QIOSB[4];
@@ -1209,7 +1250,7 @@ NFSPROC_READ(uic,hname,username,reply,rargs)
     /* find_fr the file */
     frp = get_fr(&rargs->file);
     if (frp == NULL)
-	return write_XDR_stat(NFSERR_STALE,&reply);
+        return write_XDR_stat(NFSERR_STALE,&reply);
 
     /* Read data from disk */
     XDR$ntov_uint(&rargs->offset,&offset);
@@ -1220,8 +1261,8 @@ NFSPROC_READ(uic,hname,username,reply,rargs)
 
     /* Check attributes */
     if ((RC = has_access(username, hname, frp->filename, ARM$M_READ)) ||
-	!get_file_attributes(frp,&attribs, hname))
-	return write_XDR_stat(RC,&reply);
+            !get_file_attributes(frp,&attribs, hname))
+        return write_XDR_stat(RC,&reply);
 
     /* Is the file of a "foreign" type which is not handled (anything other
        than FAT$C_SEQUENTIAL)? */
@@ -1230,11 +1271,11 @@ NFSPROC_READ(uic,hname,username,reply,rargs)
 
     if (frp->offsets)
         RC = SYS$QIOW(0, frp->fchan, IO$_READVBLK, &QIOSB, 0, 0,
-	    &buffer, BLKSIZE, (frp->offsets[offset / 512].bytestart / 512) + 1,
-	    0, 0, 0);
+                      &buffer, BLKSIZE, (frp->offsets[offset / 512].bytestart / 512) + 1,
+                      0, 0, 0);
     else
-	RC = SYS$QIOW(0, frp->fchan, IO$_READVBLK, &QIOSB, 0, 0,
-            &buffer, BLKSIZE, (offset / 512) + 1, 0, 0, 0);
+        RC = SYS$QIOW(0, frp->fchan, IO$_READVBLK, &QIOSB, 0, 0,
+                      &buffer, BLKSIZE, (offset / 512) + 1, 0, 0, 0);
     if (ERROR(RC) || ((QIOSB[0] != SS$_ENDOFFILE) && ERROR(QIOSB[0])))
         return write_XDR_stat(NFSERR_IO,&reply);
 
@@ -1243,15 +1284,15 @@ NFSPROC_READ(uic,hname,username,reply,rargs)
        must indicate that there is carriage control for us to insert LF's into
        the stream - if not, we send the data through blindly (since it doesn't
        make any difference).  The translation methods for each type are:
-	FAT$C_FIXED	pure binary
-	FAT$C_VARIABLE	first two bytes represent length of current record
-			round length up to next even value for padded length
-	FAT$C_VFC	not handled yet
-	FAT$C_UNDEFINED	pure binary
-	FAT$C_STREAM	CRLF stream (what this means, I don't know)
-	FAT$C_STREAMLF	LF stream - handled as pure binary data since it's
-			what the other side expects
-	FAT$C_STREAMCR	replace the CR terminators with LF for remote side */
+    FAT$C_FIXED	pure binary
+    FAT$C_VARIABLE	first two bytes represent length of current record
+    		round length up to next even value for padded length
+    FAT$C_VFC	not handled yet
+    FAT$C_UNDEFINED	pure binary
+    FAT$C_STREAM	CRLF stream (what this means, I don't know)
+    FAT$C_STREAMLF	LF stream - handled as pure binary data since it's
+    		what the other side expects
+    FAT$C_STREAMCR	replace the CR terminators with LF for remote side */
 
     /*
      * Change to 65536 from 256 per mail conversation with
@@ -1261,8 +1302,8 @@ NFSPROC_READ(uic,hname,username,reply,rargs)
      */
     count = QIOSB[1] + QIOSB[2]*65536;
     EOFbyte = (frp->fat.fat$l_efblk.fat$w_efblkl +
-	       (frp->fat.fat$l_efblk.fat$w_efblkh * 65536) - 1) * 512 +
-	      frp->fat.fat$w_ffbyte - 1;
+               (frp->fat.fat$l_efblk.fat$w_efblkh * 65536) - 1) * 512 +
+              frp->fat.fat$w_ffbyte - 1;
 
 
     /*
@@ -1270,123 +1311,127 @@ NFSPROC_READ(uic,hname,username,reply,rargs)
      *
      * Tom Allebrandi (Allebrandi@Inland.Com) 12-Jul-1991
      */
-    tbuff = transbuffer; out_count = 0;
+    tbuff = transbuffer;
+    out_count = 0;
     switch (frp->fat.fat$b_rtype.fat$v_rtype)
     {
     case FAT$C_VARIABLE:
-	recordlen = frp->offsets[offset / 512].reclen;
-	bytesnotwanted = offset % 512;
+        recordlen = frp->offsets[offset / 512].reclen;
+        bytesnotwanted = offset % 512;
         for (transcount = frp->offsets[offset / 512].bytestart % 512;
-	     (transcount < count) &&
-	     (transcount +
-	       frp->offsets[offset / 512].bytestart / 512 * 512 < EOFbyte) &&
-	     (out_count < byteswanted);)
-	{
-	    if ((recordlen == 0) || (recordlen == 0xFFFFFFFF))
-	    {
-	        if (recordlen == 0xFFFFFFFF)
-		    ;
-		else if (bytesnotwanted)
-		    bytesnotwanted--;
-		else
-		    if (frp->fat.fat$b_rattrib & FAT$M_IMPLIEDCC) {
-			*tbuff++ = '\n';
-			out_count++;
-		    }
+                (transcount < count) &&
+                (transcount +
+                 frp->offsets[offset / 512].bytestart / 512 * 512 < EOFbyte) &&
+                (out_count < byteswanted);)
+        {
+            if ((recordlen == 0) || (recordlen == 0xFFFFFFFF))
+            {
+                if (recordlen == 0xFFFFFFFF)
+                    ;
+                else if (bytesnotwanted)
+                    bytesnotwanted--;
+                else if (frp->fat.fat$b_rattrib & FAT$M_IMPLIEDCC)
+                {
+                    *tbuff++ = '\n';
+                    out_count++;
+                }
 
-		if (transcount & 1)
-		    transcount++;
+                if (transcount & 1)
+                    transcount++;
 
-		memcpy(&recordlen, &buffer[transcount], 2);
-		recordlen &= 0xffff;
-		/* Surprize! It seems that a record length of 0xFFFF is
-		 * interpreted as "skip to end of block"!!!!!  I wonder what
-		 * other demons live near here!
-		 *
-		 * Tom Allebrandi (Allebrandi@Inland.Com) 3-Sep-1991
-		 */
-		if (recordlen == 0xFFFF)
-		{
-		    /* Round the block pointer up to the next block and skip
-		     * the rest of the loop.
-		     */
-		    transcount = transcount - (transcount % 512) + 512;
-		    recordlen = 0xFFFFFFFF; /* Can't use 0 since that might
+                memcpy(&recordlen, &buffer[transcount], 2);
+                recordlen &= 0xffff;
+                /* Surprize! It seems that a record length of 0xFFFF is
+                 * interpreted as "skip to end of block"!!!!!  I wonder what
+                 * other demons live near here!
+                 *
+                 * Tom Allebrandi (Allebrandi@Inland.Com) 3-Sep-1991
+                 */
+                if (recordlen == 0xFFFF)
+                {
+                    /* Round the block pointer up to the next block and skip
+                     * the rest of the loop.
+                     */
+                    transcount = transcount - (transcount % 512) + 512;
+                    recordlen = 0xFFFFFFFF; /* Can't use 0 since that might
 					       cause a newline on the next
 					       pass */
-		    continue;
-		}
-		
-		transcount += 2;
-	    }
+                    continue;
+                }
 
-	    if (bytesnotwanted && (recordlen > bytesnotwanted))
-	    {
-	        recordlen -= bytesnotwanted;
-		transcount += bytesnotwanted;
-		bytesnotwanted = 0;
-	    }
+                transcount += 2;
+            }
 
-	    if (bytesnotwanted) {
-	        bytesnotwanted -= recordlen;
-		transcount += recordlen;
-		recordlen = 0;
-	    }
-	    else {
-	        if (out_count + recordlen > byteswanted)
-		{
-		    if (byteswanted > out_count) {
-		        memcpy(tbuff, &buffer[transcount],
-			       byteswanted - out_count);
-			out_count += byteswanted - out_count;
-		    }
-		    break;
-		}
+            if (bytesnotwanted && (recordlen > bytesnotwanted))
+            {
+                recordlen -= bytesnotwanted;
+                transcount += bytesnotwanted;
+                bytesnotwanted = 0;
+            }
 
-		if (transcount + recordlen > count)
-		{
-		    memcpy(tbuff, &buffer[transcount], count-transcount);
-		    out_count += count - transcount;
-		    break;
-		}
+            if (bytesnotwanted)
+            {
+                bytesnotwanted -= recordlen;
+                transcount += recordlen;
+                recordlen = 0;
+            }
+            else
+            {
+                if (out_count + recordlen > byteswanted)
+                {
+                    if (byteswanted > out_count)
+                    {
+                        memcpy(tbuff, &buffer[transcount],
+                               byteswanted - out_count);
+                        out_count += byteswanted - out_count;
+                    }
+                    break;
+                }
 
-		memcpy(tbuff, &buffer[transcount], recordlen);
-		tbuff += recordlen;
-		transcount += recordlen;
-		out_count += recordlen;
-		recordlen = 0;
-	    }
-	}
+                if (transcount + recordlen > count)
+                {
+                    memcpy(tbuff, &buffer[transcount], count-transcount);
+                    out_count += count - transcount;
+                    break;
+                }
 
-	/*
-	 * Newline does not get simulated at end of file. Catch it
-	 * here as a special case.
-	 *
-	 * Tom Allebrandi (Allebrandi@Inland.Com) 12-Jul-1991
-	 */
-	if (transcount + frp->offsets[offset / 512].bytestart / 512 * 512
-								>= EOFbyte)
-	    {
-	    *tbuff++ = '\n';
-	    out_count++;
-	    }
+                memcpy(tbuff, &buffer[transcount], recordlen);
+                tbuff += recordlen;
+                transcount += recordlen;
+                out_count += recordlen;
+                recordlen = 0;
+            }
+        }
+
+        /*
+         * Newline does not get simulated at end of file. Catch it
+         * here as a special case.
+         *
+         * Tom Allebrandi (Allebrandi@Inland.Com) 12-Jul-1991
+         */
+        if (transcount + frp->offsets[offset / 512].bytestart / 512 * 512
+                >= EOFbyte)
+        {
+            *tbuff++ = '\n';
+            out_count++;
+        }
         break;
 
     case FAT$C_STREAMCR:
-        for (transcount = 0;transcount < count;transcount++)
-	    if (buffer[transcount] == '\r')
-	        buffer[transcount] = '\n';
+        for (transcount = 0; transcount < count; transcount++)
+            if (buffer[transcount] == '\r')
+                buffer[transcount] = '\n';
     case FAT$C_STREAM:
     case FAT$C_FIXED:
     case FAT$C_STREAMLF:
     case FAT$C_UNDEFINED:
-	count = MIN(byteswanted, MIN(count - (offset % 512),
-		EOFbyte - offset + 1));
+        count = MIN(byteswanted, MIN(count - (offset % 512),
+                                     EOFbyte - offset + 1));
         memcpy(tbuff, buffer + (offset % 512), count);
-	out_count = count;
+        out_count = count;
         break;
     default:
-	return write_XDR_stat(NFSERR_NXIO, &reply);
+        return write_XDR_stat(NFSERR_NXIO, &reply);
         break;
     }
 
@@ -1395,8 +1440,10 @@ NFSPROC_READ(uic,hname,username,reply,rargs)
     /* return it all */
     len = write_XDR_stat(NFS_OK,&reply);
     len += write_XDR_file_attributes(&attribs,&reply);
-    XDR$vton_uint(&out_count,reply++); len++;
-    memcpy(reply,transbuffer,out_count);  len += RNDUP(out_count)/4;
+    XDR$vton_uint(&out_count,reply++);
+    len++;
+    memcpy(reply,transbuffer,out_count);
+    len += RNDUP(out_count)/4;
     return len;
 }
 
@@ -1408,10 +1455,10 @@ NFS procedure #7	- Write to Cache (!!!NYI!!!)
 
 */
 NFSPROC_WRITECACHE(uic,hname,username,reply)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
 {
     return write_XDR_stat(NFSERR_NXIO, &reply);
 }
@@ -1424,17 +1471,18 @@ NFS procedure #8	- Write to File
 
 */
 NFSPROC_WRITE(uic,hname,username,reply,wargs)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    struct {
-	fhandle file;
-	unsigned beginoffset;
-	unsigned offset;
-	unsigned totalcount;
-	nfsdata data;
-	} *wargs;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+struct
+{
+    fhandle file;
+    unsigned beginoffset;
+    unsigned offset;
+    unsigned totalcount;
+    nfsdata data;
+} *wargs;
 {
     int RC,len,nwrote;
     file_record *frp;
@@ -1446,33 +1494,34 @@ NFSPROC_WRITE(uic,hname,username,reply,wargs)
     /* find_fr the file */
     frp = get_fr(&wargs->file);
     if (frp == NULL)
-	return write_XDR_stat(NFSERR_STALE,&reply);
+        return write_XDR_stat(NFSERR_STALE,&reply);
 
     /* write data to disk */
     XDR$ntov_uint(&wargs->offset,&offset);
     XDR$ntov_uint(&wargs->data.length,&count);
 
     /* Implement a file descriptor cache!  NOW BOY! */
-    if (frp->fchan == 0) {
-	return write_XDR_stat(NFSERR_NXIO,&reply);
-	}
+    if (frp->fchan == 0)
+    {
+        return write_XDR_stat(NFSERR_NXIO,&reply);
+    }
 
     /* Check attributes */
     if ((RC = has_access(username, hname, frp->filename, ARM$M_WRITE)) ||
-	!get_file_attributes(frp,&attribs, hname))
-	return write_XDR_stat(RC,&reply);
+            !get_file_attributes(frp,&attribs, hname))
+        return write_XDR_stat(RC,&reply);
 
     /* If it's not a handle-able file type, refuse the write */
     if ((frp->fat.fat$b_rtype.fat$v_fileorg != FAT$C_SEQUENTIAL) ||
-	((frp->fat.fat$b_rtype.fat$v_rtype != FAT$C_STREAMLF) &&
-	 (frp->fat.fat$b_rtype.fat$v_rtype != FAT$C_UNDEFINED)))
+            ((frp->fat.fat$b_rtype.fat$v_rtype != FAT$C_STREAMLF) &&
+             (frp->fat.fat$b_rtype.fat$v_rtype != FAT$C_UNDEFINED)))
         return write_XDR_stat(NFSERR_NXIO, &reply);
 
     RC = SYS$QIOW(0, frp->fchan, IO$_ACCESS, &QIOSB, 0, 0,
                   &frp->fib_desc, 0, 0, 0, &frp->atrblock, 0);
 
     if (ERROR(RC) || ERROR(QIOSB[0]))
-       return write_XDR_stat(NFSERR_IO,&reply);
+        return write_XDR_stat(NFSERR_IO,&reply);
 
     newEOF = offset + count;
 
@@ -1483,80 +1532,87 @@ NFSPROC_WRITE(uic,hname,username,reply,wargs)
     HIEOF = (frp->fat.fat$l_hiblk.fat$w_hiblkh*65536 +
              frp->fat.fat$l_hiblk.fat$w_hiblkl) * 512;
 
-    if (newEOF > HIEOF) {
-       frp->fib.fib$r_exctl_overlay.fib$w_exctl = FIB$M_EXTEND;
-       frp->fib.fib$l_exsz = ((newEOF - HIEOF) + 511) / 512;
-       frp->fib.fib$l_exvbn = 0;
-    } else
-       frp->fib.fib$l_exsz = 0;
+    if (newEOF > HIEOF)
+    {
+        frp->fib.fib$r_exctl_overlay.fib$w_exctl = FIB$M_EXTEND;
+        frp->fib.fib$l_exsz = ((newEOF - HIEOF) + 511) / 512;
+        frp->fib.fib$l_exvbn = 0;
+    }
+    else
+        frp->fib.fib$l_exsz = 0;
 
-    if (newEOF > oldEOF) {
-       frp->fat.fat$l_efblk.fat$w_efblkh = (((newEOF / 512) + 1) / 65536);
-       frp->fat.fat$l_efblk.fat$w_efblkl = (((newEOF / 512) + 1) % 65536);
-       frp->fat.fat$w_ffbyte = (newEOF % 512);
-       frp->filesize = newEOF;
+    if (newEOF > oldEOF)
+    {
+        frp->fat.fat$l_efblk.fat$w_efblkh = (((newEOF / 512) + 1) / 65536);
+        frp->fat.fat$l_efblk.fat$w_efblkl = (((newEOF / 512) + 1) % 65536);
+        frp->fat.fat$w_ffbyte = (newEOF % 512);
+        frp->filesize = newEOF;
     }
 
-    if ((newEOF > oldEOF) || (frp->fib.fib$l_exsz != 0)) {
-       RC = SYS$QIOW(0, frp->fchan, IO$_MODIFY, &QIOSB, 0, 0,
-                     &frp->fib_desc, 0, 0, 0, &frp->atrblock, 0);
+    if ((newEOF > oldEOF) || (frp->fib.fib$l_exsz != 0))
+    {
+        RC = SYS$QIOW(0, frp->fchan, IO$_MODIFY, &QIOSB, 0, 0,
+                      &frp->fib_desc, 0, 0, 0, &frp->atrblock, 0);
 
-       /* Clear out the command bits to prevent them from showing up again */
-       frp->fib.fib$r_exctl_overlay.fib$w_exctl = 0;
+        /* Clear out the command bits to prevent them from showing up again */
+        frp->fib.fib$r_exctl_overlay.fib$w_exctl = 0;
 
-       if (ERROR(RC))
-          return write_XDR_stat(NFSERR_NXIO,&reply);
+        if (ERROR(RC))
+            return write_XDR_stat(NFSERR_NXIO,&reply);
 
-       RC = QIOSB[0];
-       if (ERROR(RC)) {
-	  if (RC == SS$_EXDISKQUOTA)
-	      return write_XDR_stat(NFSERR_DQUOT, &reply);
+        RC = QIOSB[0];
+        if (ERROR(RC))
+        {
+            if (RC == SS$_EXDISKQUOTA)
+                return write_XDR_stat(NFSERR_DQUOT, &reply);
 
-          return write_XDR_stat(NFSERR_NXIO,&reply);
-       }
+            return write_XDR_stat(NFSERR_NXIO,&reply);
+        }
     }
 
     if ((offset % 512) || (count & 1))
     {
         /* Block does not start on an even block boundary.  Read in the
-	   current block and append the data to it.  This will give us the
-	   ability to start writing in the middle of a block.  (Sigh...) */
+        current block and append the data to it.  This will give us the
+        ability to start writing in the middle of a block.  (Sigh...) */
 
-	/* Changed because UDA50 and KDA50 (and the like) controllers require
-	   that data be written with even number of bytes...Therefore, we call
-	   this routine whenever the count is not even. */
+        /* Changed because UDA50 and KDA50 (and the like) controllers require
+           that data be written with even number of bytes...Therefore, we call
+           this routine whenever the count is not even. */
 
-	char *inoutbuf;
-	int bytesneeded;
+        char *inoutbuf;
+        int bytesneeded;
 
-	bytesneeded = (offset % 512) +		/* Pre-block data */
-		      count;			/* Given data */
-	bytesneeded = (bytesneeded + 511) / 512 * 512;	    /* Round up */
+        bytesneeded = (offset % 512) +		/* Pre-block data */
+                      count;			/* Given data */
+        bytesneeded = (bytesneeded + 511) / 512 * 512;	    /* Round up */
 
-	inoutbuf = (char *)malloc(bytesneeded);
+        inoutbuf = (char *)malloc(bytesneeded);
 
-	RC = SYS$QIOW(0, frp->fchan, IO$_READVBLK, &QIOSB, 0, 0,
-		      inoutbuf, bytesneeded, (offset / 512) + 1, 0, 0, 0);
-	if (ERROR(RC) || ERROR(QIOSB[0])) {
-	    free(inoutbuf);
-	    return write_XDR_stat(NFSERR_IO, &reply);
-	}
+        RC = SYS$QIOW(0, frp->fchan, IO$_READVBLK, &QIOSB, 0, 0,
+                      inoutbuf, bytesneeded, (offset / 512) + 1, 0, 0, 0);
+        if (ERROR(RC) || ERROR(QIOSB[0]))
+        {
+            free(inoutbuf);
+            return write_XDR_stat(NFSERR_IO, &reply);
+        }
 
-	memcpy(inoutbuf + (offset % 512), &wargs->data.data, count);
+        memcpy(inoutbuf + (offset % 512), &wargs->data.data, count);
 
-	RC = SYS$QIOW(0, frp->fchan, IO$_WRITEVBLK, &QIOSB, 0, 0,
-		      inoutbuf, bytesneeded, (offset / 512) + 1, 0, 0, 0);
+        RC = SYS$QIOW(0, frp->fchan, IO$_WRITEVBLK, &QIOSB, 0, 0,
+                      inoutbuf, bytesneeded, (offset / 512) + 1, 0, 0, 0);
 
-	free(inoutbuf);
+        free(inoutbuf);
 
-	if (ERROR(RC) || ERROR(QIOSB[0]))
-	    return write_XDR_stat(NFSERR_IO, &reply);
+        if (ERROR(RC) || ERROR(QIOSB[0]))
+            return write_XDR_stat(NFSERR_IO, &reply);
     }
-    else {
-	RC = SYS$QIOW(0, frp->fchan, IO$_WRITEVBLK, &QIOSB, 0, 0,
+    else
+    {
+        RC = SYS$QIOW(0, frp->fchan, IO$_WRITEVBLK, &QIOSB, 0, 0,
                       &wargs->data.data, count, (offset / 512) + 1, 0, 0, 0);
-	if (ERROR(RC) || ERROR(QIOSB[0]))
-	    return write_XDR_stat(NFSERR_IO, &reply);
+        if (ERROR(RC) || ERROR(QIOSB[0]))
+            return write_XDR_stat(NFSERR_IO, &reply);
     }
 
     /* return it all */
@@ -1574,16 +1630,17 @@ NFS procedure #9	- Create File
 
 */
 NFSPROC_CREATE(uic,hname,username,reply,args)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    char *args;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+char *args;
 {
-    struct {
-	diropargs where;
-	sattr attribs;
-	} cargs;
+    struct
+    {
+        diropargs where;
+        sattr attribs;
+    } cargs;
     file_record *drp,*frp;
     int RC,len=0,fd;
     fhandle hand;
@@ -1595,21 +1652,21 @@ NFSPROC_CREATE(uic,hname,username,reply,args)
     /* Load the create arguments */
     XDR$ntov_arb(&args, &cargs.where.dir, sizeof(cargs.where.dir));
     XDR$ntov_arb(&args, &cargs.where.name.length,
-	sizeof(cargs.where.name.length));
+                 sizeof(cargs.where.name.length));
     XDR$ntov_arb(&args, &cargs.where.name.data,
-	nfs_int(cargs.where.name.length));
+                 nfs_int(cargs.where.name.length));
     cargs.where.name.data[nfs_int(cargs.where.name.length)] = 0;
     XDR$ntov_arb(&args, &cargs.attribs, sizeof(cargs.attribs));
 
     /* find_fr the directory */
     drp = build_fname(&cargs.where,fname,0);
     if (drp == NULL)
-	return write_XDR_stat(NFSERR_STALE,&reply);
+        return write_XDR_stat(NFSERR_STALE,&reply);
 
     brkpos = strrchr(fname, ']') + 1;
     dotpos = strrchr(fname, '.');
     if (dotpos < brkpos)
-	dotpos = &fname + strlen(fname);
+        dotpos = &fname + strlen(fname);
 
     if ((dotpos - brkpos > 39) || (strlen(dotpos) > 39))
         return write_XDR_stat(NFSERR_NAMETOOLONG, &reply);
@@ -1623,7 +1680,7 @@ NFSPROC_CREATE(uic,hname,username,reply,args)
 
     fd = creat(fname,0);
     if (fd < 0)
-	write_XDR_stat(errno,&reply);
+        write_XDR_stat(errno,&reply);
 
     close(fd);
     chown(fname, uic & 0xffff, uic>>16);
@@ -1632,7 +1689,7 @@ NFSPROC_CREATE(uic,hname,username,reply,args)
     if (RC != NFS_OK) return write_XDR_stat(RC,&reply);
     frp = get_fr(hand);
     if (frp == NULL)
-	return write_XDR_stat(NFSERR_NOENT,&reply);
+        return write_XDR_stat(NFSERR_NOENT,&reply);
 
     /* Set the new file's attributes */
     RC = set_file_attributes(frp, &cargs.attribs, hname);
@@ -1642,7 +1699,7 @@ NFSPROC_CREATE(uic,hname,username,reply,args)
     /* get attributes */
     RC = get_file_attributes(frp,&attribs, hname);
     if (!RC)
-	return write_XDR_stat(NFSERR_ACCES,&reply);
+        return write_XDR_stat(NFSERR_ACCES,&reply);
 
     len = write_XDR_stat(NFS_OK,&reply);
     len += write_XDR_fhandle(hand,&reply);	/* add another handle */
@@ -1660,11 +1717,11 @@ NFS procedure #10	- Remove File
 */
 
 NFSPROC_REMOVE(uic,hname,username,reply,args)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    char *args;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+char *args;
 {
     diropargs dop_args;
     file_record *drp,*frp;
@@ -1675,19 +1732,19 @@ NFSPROC_REMOVE(uic,hname,username,reply,args)
     /* Load the arguments */
     XDR$ntov_arb(&args, &dop_args.dir, sizeof(dop_args.dir));
     XDR$ntov_arb(&args, &dop_args.name.length,
-	sizeof(dop_args.name.length));
+                 sizeof(dop_args.name.length));
     XDR$ntov_arb(&args, &dop_args.name.data, nfs_int(dop_args.name.length));
     dop_args.name.data[nfs_int(dop_args.name.length)] = 0;
 
     /* find_fr the directory */
     drp = build_fname(&dop_args,fname,0);
     if (drp == NULL)
-	return write_XDR_stat(NFSERR_STALE,&reply);
+        return write_XDR_stat(NFSERR_STALE,&reply);
 
     make_handle(fname, &hand);
     frp = find_fr(hand);
     if (frp == NULL)
-	return write_XDR_stat(NFSERR_NOENT,&reply);
+        return write_XDR_stat(NFSERR_NOENT,&reply);
 
     /* Make sure the user has write access to the directory */
     strcpy(dirname, fname);
@@ -1699,7 +1756,7 @@ NFSPROC_REMOVE(uic,hname,username,reply,args)
 
     RC = delete(fname);
     if (RC < 0)
-	return write_XDR_stat(NFSERR_ACCES,&reply);
+        return write_XDR_stat(NFSERR_ACCES,&reply);
 
     return write_XDR_stat(NFS_OK,&reply);
 }
@@ -1713,19 +1770,20 @@ NFS procedure #11	- Rename File
 */
 
 NFSPROC_RENAME(uic,hname,username,reply,args)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    char *args;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+char *args;
 {
-    struct {
-	diropargs from;
-	diropargs to;
-	} ren_args;
+    struct
+    {
+        diropargs from;
+        diropargs to;
+    } ren_args;
     int RC, fromnamelen, tonamelen;
     char from_name[MAXNAMLEN+1],to_name[MAXNAMLEN+1], from_dir[MAXNAMLEN+1],
-        to_dir[MAXNAMLEN+1];
+         to_dir[MAXNAMLEN+1];
     file_record *sdrp,*ddrp,*frp;
     fhandle fhand;
     struct dsc$descriptor oldfname, newfname;
@@ -1736,15 +1794,15 @@ NFSPROC_RENAME(uic,hname,username,reply,args)
     /* Load up the arguments */
     XDR$ntov_arb(&args, &ren_args.from.dir, sizeof(ren_args.from.dir));
     XDR$ntov_arb(&args, &ren_args.from.name.length,
-	sizeof(ren_args.from.name.length));
+                 sizeof(ren_args.from.name.length));
     XDR$ntov_arb(&args, &ren_args.from.name.data,
-	nfs_int(ren_args.from.name.length));
+                 nfs_int(ren_args.from.name.length));
     ren_args.from.name.data[nfs_int(ren_args.from.name.length)] = 0;
     XDR$ntov_arb(&args, &ren_args.to.dir, sizeof(ren_args.to.dir));
     XDR$ntov_arb(&args, &ren_args.to.name.length,
-	sizeof(ren_args.to.name.length));
+                 sizeof(ren_args.to.name.length));
     XDR$ntov_arb(&args, &ren_args.to.name.data,
-	nfs_int(ren_args.to.name.length));
+                 nfs_int(ren_args.to.name.length));
     ren_args.to.name.data[nfs_int(ren_args.to.name.length)] = 0;
 
     sdrp = build_fname(&ren_args.from,from_name,0);
@@ -1755,10 +1813,10 @@ NFSPROC_RENAME(uic,hname,username,reply,args)
     brkpos = strrchr(to_name, ']') + 1;
     dotpos = strrchr(to_name, '.');
     if (dotpos < brkpos)
-	dotpos = &to_name + strlen(to_name);
+        dotpos = &to_name + strlen(to_name);
 
     if ((dotpos - brkpos > 39) || (strlen(dotpos) > 39))
-	return write_XDR_stat(NFSERR_NAMETOOLONG, &reply);
+        return write_XDR_stat(NFSERR_NAMETOOLONG, &reply);
 
     /* Check appropriate access... */
     strcpy(from_dir, from_name);
@@ -1766,7 +1824,7 @@ NFSPROC_RENAME(uic,hname,username,reply,args)
     strcpy(to_dir, to_name);
     updir(to_dir);
     if ((RC = has_access(username, hname, from_dir, ARM$M_WRITE)) ||
-	(RC = has_access(username, hname, to_dir, ARM$M_WRITE)))
+            (RC = has_access(username, hname, to_dir, ARM$M_WRITE)))
         return write_XDR_stat(RC, &reply);
 
     RC = make_handle(from_name,fhand);
@@ -1780,9 +1838,12 @@ NFSPROC_RENAME(uic,hname,username,reply,args)
     oldFAB = newFAB = cc$rms_fab;
     oldNAM = newNAM = cc$rms_nam;
 
-    oldFAB.fab$l_fna = &from_name;         newFAB.fab$l_fna = &to_name;
-    oldFAB.fab$b_fns = strlen(from_name);  newFAB.fab$b_fns = strlen(to_name);
-    oldFAB.fab$l_nam = &oldNAM;            newFAB.fab$l_nam = &newNAM;
+    oldFAB.fab$l_fna = &from_name;
+    newFAB.fab$l_fna = &to_name;
+    oldFAB.fab$b_fns = strlen(from_name);
+    newFAB.fab$b_fns = strlen(to_name);
+    oldFAB.fab$l_nam = &oldNAM;
+    newFAB.fab$l_nam = &newNAM;
 
     oldNAM.nam$b_ess = newNAM.nam$b_ess = NAM$C_MAXRSS;
     oldNAM.nam$l_esa = (char *)malloc(NAM$C_MAXRSS);
@@ -1790,7 +1851,7 @@ NFSPROC_RENAME(uic,hname,username,reply,args)
 
     RC = SYS$RENAME(&oldFAB, 0, 0, &newFAB);
     if (ERROR(RC))
-	return write_XDR_stat(NFSERR_IO, &reply);
+        return write_XDR_stat(NFSERR_IO, &reply);
 
     free(oldNAM.nam$l_esa);
     free(newNAM.nam$l_esa);
@@ -1805,10 +1866,10 @@ NFS procedure #12	- Create Link to File
 
 */
 NFSPROC_LINK(uic,hname,username,reply)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
 {
     return write_XDR_stat(NFSERR_NXIO, &reply);
 }
@@ -1821,10 +1882,10 @@ NFS procedure #13	- Create Symbolic Link
 
 */
 NFSPROC_SYMLINK(uic,hname,username,reply)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
 {
     return write_XDR_stat(NFSERR_NXIO, &reply);
 }
@@ -1837,51 +1898,54 @@ NFS procedure #14	- Create Directory
 
 */
 NFSPROC_MKDIR(uic,hname,username,reply,args)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    char *args;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+char *args;
 {
-    struct {
-	diropargs where;
-	sattr settribs;
-	} mkdirargs;
+    struct
+    {
+        diropargs where;
+        sattr settribs;
+    } mkdirargs;
     file_record *drp,*frp;
     int RC,len=0,fnlen;
     fhandle hand;
     char *s,fname[MAXNAMLEN+1],nfname[MAXNAMLEN+1],dirname[MAXNAMLEN+1],
-        *dirspot;
+         *dirspot;
     fattr attribs;
 
     /* Load up the arguments */
     XDR$ntov_arb(&args, &mkdirargs.where.dir, sizeof(mkdirargs.where.dir));
     XDR$ntov_arb(&args, &mkdirargs.where.name.length,
-	sizeof(mkdirargs.where.name.length));
+                 sizeof(mkdirargs.where.name.length));
     XDR$ntov_arb(&args, &mkdirargs.where.name.data,
-	nfs_int(mkdirargs.where.name.length));
+                 nfs_int(mkdirargs.where.name.length));
     mkdirargs.where.name.data[nfs_int(mkdirargs.where.name.length)] = 0;
     XDR$ntov_arb(&args, &mkdirargs.settribs, sizeof(mkdirargs.settribs));
 
     /* find_fr the directory */
     drp = get_fr(&mkdirargs.where.dir);
     if (drp == NULL)
-	return write_XDR_stat(NFSERR_STALE,&reply);
+        return write_XDR_stat(NFSERR_STALE,&reply);
 
     /* convert [foo]bar.dir into [foo.bar] */
     strcpy(fname,&drp->filename);
-    s = file_to_dir(fname) - 1;  *s++ = '.';
+    s = file_to_dir(fname) - 1;
+    *s++ = '.';
 
     /* append given file name */
     fnlen = FNAME_NET_TO_VMS(&mkdirargs.where.name.data,
-			     nfs_int(mkdirargs.where.name.length),
-			     nfname,1);
+                             nfs_int(mkdirargs.where.name.length),
+                             nfname,1);
 
     if (nfname[fnlen - 1] == '.')
         fnlen--;		/* Remove trailing dot from dir name */
 
     memcpy(s,nfname,fnlen);
-    s[fnlen++] = ']';     s[fnlen] = 0;
+    s[fnlen++] = ']';
+    s[fnlen] = 0;
 
     strcpy(dirname, fname);
     updir(updir(dirname));	    /* Get parent directory name as file */
@@ -1890,7 +1954,7 @@ NFSPROC_MKDIR(uic,hname,username,reply,args)
 
     RC = mkdir(fname,0777);
     if (RC < 0)
-	write_XDR_stat(errno,&reply);
+        write_XDR_stat(errno,&reply);
 
     dirspot = strrchr(fname, '.');
     *dirspot = ']';
@@ -1898,10 +1962,10 @@ NFSPROC_MKDIR(uic,hname,username,reply,args)
     strcpy(dirspot, ".DIR");
     RC = make_handle(fname, hand);
     if (RC != NFS_OK)
-	return write_XDR_stat(RC,&reply);
+        return write_XDR_stat(RC,&reply);
     frp = get_fr(hand);
     if (frp == NULL)
-	return write_XDR_stat(NFSERR_NOENT,&reply);
+        return write_XDR_stat(NFSERR_NOENT,&reply);
 
     /* Set the new directory's attributes */
     RC = set_file_attributes(frp, &mkdirargs.settribs, hname);
@@ -1910,7 +1974,7 @@ NFSPROC_MKDIR(uic,hname,username,reply,args)
 
     RC = get_file_attributes(frp, &attribs, hname);
     if (!RC)
-	return write_XDR_stat(NFSERR_ACCES,&reply);
+        return write_XDR_stat(NFSERR_ACCES,&reply);
 
     len = write_XDR_stat(NFS_OK,&reply);
     len += write_XDR_fhandle(hand,&reply);
@@ -1927,11 +1991,11 @@ NFS procedure #15	- Remove Directory
 
 */
 NFSPROC_RMDIR(uic,hname,username,reply,args)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    char *args;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+char *args;
 {
     diropargs dop_args;
     file_record *drp,*frp;
@@ -1949,17 +2013,17 @@ NFSPROC_RMDIR(uic,hname,username,reply,args)
     /* find_fr the directory */
     drp = build_fname(&dop_args,fname,1);
     if (drp == NULL)
-	return write_XDR_stat(NFSERR_STALE,&reply);
+        return write_XDR_stat(NFSERR_STALE,&reply);
 
     strcpy(dirname, fname);
     updir(dirname);
     if (has_access(username, hname, fname, ARM$M_DELETE) ||
-        has_access(username, hname, dirname, ARM$M_WRITE))
+            has_access(username, hname, dirname, ARM$M_WRITE))
         return write_XDR_stat(NFSERR_ACCES, &reply);
 
     RC = delete(fname);
     if (RC < 0)
-	write_XDR_stat(errno,&reply);
+        write_XDR_stat(errno,&reply);
 
     return write_XDR_stat(NFS_OK,&reply);
 }
@@ -1973,11 +2037,11 @@ NFS procedure #16	- Read From Directory
 */
 
 NFSPROC_READDIR(uic,hname,username,reply,rd_args)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    readdirargs *rd_args;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+readdirargs *rd_args;
 {
     int RC,len=0,nfiles;
     unsigned cookie,count,EOdir;
@@ -1999,12 +2063,15 @@ NFSPROC_READDIR(uic,hname,username,reply,rd_args)
     XDR$ntov_uint(&rd_args->count,&count);
 
     /* convert [foo]bar.dir into [foo.bar] */
-    strcpy(fname_str,&frp->filename); s = fname_str;
+    strcpy(fname_str,&frp->filename);
+    s = fname_str;
     while (*s && (*s != ']')) s++;
-    if (!*s) return 0; else *s++ = '.';
+    if (!*s) return 0;
+    else *s++ = '.';
     while (*s && (*s != '.')) s++;
     if (!*s) return 0;
-    *s++ = ']'; *s = 0;
+    *s++ = ']';
+    *s = 0;
 
     /* Setup for the RMS directory search */
     fab = cc$rms_fab;
@@ -2020,7 +2087,7 @@ NFSPROC_READDIR(uic,hname,username,reply,rd_args)
 
     RC = sys$parse(&fab,0,0);
     if (ERROR(RC))
-	return 0;
+        return 0;
 
     esbuff[nam.nam$b_esl] = 0;
 
@@ -2028,86 +2095,110 @@ NFSPROC_READDIR(uic,hname,username,reply,rd_args)
     nfiles = 2;		/* Count the "." and ".." entries */
     if (!cookie)
     {
-	char dirname[MAX_FNAME];
-	fhandle dirhand;
+        char dirname[MAX_FNAME];
+        fhandle dirhand;
 
         /* We're starting off a new directory listing.  Include here, and this
-	   is bad since we don't really know whether or not the packet is big
-	   enough, but we assume that it is for 32 bytes, the directories "."
-	   and ".." for this directory. */
-	XDR$vton_int(&1, reply++);  len++;	    /* Data here - "." */
-	XDR$vton_int(&frp->fib.fib$r_fid_overlay, reply++);	len++;
-	XDR$vton_int(&1, reply++);  len++;	    /* Length of "." */
-	memset(reply, 0, RNDUP(1));
-	strncpy(reply, ".", 1);
-	reply += (1 + RNDUP(1))/4;  len += (1 + RNDUP(1))/4;
-	cookie++;
-	XDR$vton_int(&cookie, reply++);  len++;	    /* Cookie number 1 */
+        is bad since we don't really know whether or not the packet is big
+        enough, but we assume that it is for 32 bytes, the directories "."
+        and ".." for this directory. */
+        XDR$vton_int(&1, reply++);
+        len++;	    /* Data here - "." */
+        XDR$vton_int(&frp->fib.fib$r_fid_overlay, reply++);
+        len++;
+        XDR$vton_int(&1, reply++);
+        len++;	    /* Length of "." */
+        memset(reply, 0, RNDUP(1));
+        strncpy(reply, ".", 1);
+        reply += (1 + RNDUP(1))/4;
+        len += (1 + RNDUP(1))/4;
+        cookie++;
+        XDR$vton_int(&cookie, reply++);
+        len++;	    /* Cookie number 1 */
 
-	strcpy(dirname, frp->filename);
-	updir(dirname);
-	RC = make_handle(dirname, dirhand);
-	if (RC == NFS_OK)
-	{
-	    /* Now write out the parent's directory information */
-	    XDR$vton_int(&1, reply++);  len++;	    /* More data - ".." */
-	    XDR$vton_int(&dirhand[16], reply++);    len++;
-	    XDR$vton_int(&2, reply++);  len++;	    /* Length of ".." */
-	    memset(reply, 0, RNDUP(2));
-	    strncpy(reply, "..", 2);
-	    reply += (1 + RNDUP(2))/4;  len += (1 + RNDUP(2))/4;
-	    cookie++;
-	    XDR$vton_int(&cookie, reply++);  len++;	/* Cookie number 2 */
-	}
+        strcpy(dirname, frp->filename);
+        updir(dirname);
+        RC = make_handle(dirname, dirhand);
+        if (RC == NFS_OK)
+        {
+            /* Now write out the parent's directory information */
+            XDR$vton_int(&1, reply++);
+            len++;	    /* More data - ".." */
+            XDR$vton_int(&dirhand[16], reply++);
+            len++;
+            XDR$vton_int(&2, reply++);
+            len++;	    /* Length of ".." */
+            memset(reply, 0, RNDUP(2));
+            strncpy(reply, "..", 2);
+            reply += (1 + RNDUP(2))/4;
+            len += (1 + RNDUP(2))/4;
+            cookie++;
+            XDR$vton_int(&cookie, reply++);
+            len++;	/* Cookie number 2 */
+        }
     }
 
     /* All done with directory faking, now do the real directory... */
-    while (TRUE) {
-        char *nstr; int nlen=0;
+    while (TRUE)
+    {
+        char *nstr;
+        int nlen=0;
 
-	RC = sys$search(&fab,0,0);
-	if ((RC == RMS$_NMF) || (RC == RMS$_FNF)) break;
-	if (ERROR(RC))
-	    return write_XDR_stat(NFSERR_IO,&repbuf);
+        RC = sys$search(&fab,0,0);
+        if ((RC == RMS$_NMF) || (RC == RMS$_FNF)) break;
+        if (ERROR(RC))
+            return write_XDR_stat(NFSERR_IO,&repbuf);
 
-	if (nfiles++ < cookie) continue;
-	cookie++;
+        if (nfiles++ < cookie) continue;
+        cookie++;
 
-	rsbuff[nam.nam$b_rsl] = 0;
+        rsbuff[nam.nam$b_rsl] = 0;
         s=rsbuff;
-	while (*s && (*s++ != ']'));  nstr = s;  /* nstr=start of fname */
-	while (*s && (*s++ != ';')) nlen++;	/* size of it */
+        while (*s && (*s++ != ']'));
+        nstr = s;  /* nstr=start of fname */
+        while (*s && (*s++ != ';')) nlen++;	/* size of it */
 
-	stat(rsbuff, &fstats);
-	inode = (fstats.st_ino[0] * 65536) + fstats.st_ino[1];
+        stat(rsbuff, &fstats);
+        inode = (fstats.st_ino[0] * 65536) + fstats.st_ino[1];
 
-	/* Pretty it up a bit */
-	nlen = FNAME_VMS_TO_NET(nstr,nlen,fname_str,0,0);
+        /* Pretty it up a bit */
+        nlen = FNAME_VMS_TO_NET(nstr,nlen,fname_str,0,0);
 
-	/* too much data? */
-	if (  (4*(len-1) + 4*4 + RNDUP(nlen)/4)   >   count )
-	    { RC = SS$_NORMAL; break; }
+        /* too much data? */
+        if (  (4*(len-1) + 4*4 + RNDUP(nlen)/4)   >   count )
+        {
+            RC = SS$_NORMAL;
+            break;
+        }
 
-	/* write this entry into the reply buffer */
-	XDR$vton_int(&1,reply++); len++;	     /* optional data: yes */
-	XDR$vton_int(&inode,reply++); len++;			    /* fid */
+        /* write this entry into the reply buffer */
+        XDR$vton_int(&1,reply++);
+        len++;	     /* optional data: yes */
+        XDR$vton_int(&inode,reply++);
+        len++;			    /* fid */
 
-	/* filename */
-	XDR$vton_int(&nlen,reply++); len++;		/* filename length */
-	memset(reply,0,RNDUP(nlen)); strncpy(reply,fname_str,nlen);
+        /* filename */
+        XDR$vton_int(&nlen,reply++);
+        len++;		/* filename length */
+        memset(reply,0,RNDUP(nlen));
+        strncpy(reply,fname_str,nlen);
 
-	reply += (1 + RNDUP(nlen))/4; len += (1 + RNDUP(nlen))/4;
-	XDR$vton_int(&cookie,reply++); len++;/* WANT COOOOOOOKIE!!! */
-	}
+        reply += (1 + RNDUP(nlen))/4;
+        len += (1 + RNDUP(nlen))/4;
+        XDR$vton_int(&cookie,reply++);
+        len++;/* WANT COOOOOOOKIE!!! */
+    }
 
-/*    if (RC != SS$_NORMAL) {
-	get_file_attributes(frp,&attribs, hname);
-	XDR$vton_int(&attribs.size,reply-1);
-	}
-*/
-    XDR$vton_int(&0,reply++); len++;		/* optional data: no */
+    /*    if (RC != SS$_NORMAL) {
+    	get_file_attributes(frp,&attribs, hname);
+    	XDR$vton_int(&attribs.size,reply-1);
+    	}
+    */
+    XDR$vton_int(&0,reply++);
+    len++;		/* optional data: no */
     EOdir = (RC != SS$_NORMAL);
-    XDR$vton_int(&EOdir, reply++); len++;
+    XDR$vton_int(&EOdir, reply++);
+    len++;
     return len;
 }
 
@@ -2119,21 +2210,22 @@ NFS procedure #17	- Get Filesystem Statistics
 
 */
 
-struct item {
+struct item
+{
     short buff_len;
     short item_code;
     long buff_addr;
     long ret_len_addr;
-    };
+};
 
 NFSPROC_STATFS(uic,hname,username,reply,hand)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *reply;
-    fhandle hand;
+unsigned uic;
+char *hname;
+char *username;
+long *reply;
+fhandle hand;
 {
-/*!!!HACK!!! don't hardwire this stuff! */
+    /*!!!HACK!!! don't hardwire this stuff! */
 
     int RC,length;
     struct dsc$descriptor desc;
@@ -2160,12 +2252,13 @@ NFSPROC_STATFS(uic,hname,username,reply,hand)
     items[2].item_code	= 0;
 
     RC = sys$getdviw(0,0,&desc,items,0,0,0,0);
-    if (ERROR(RC)) {
-	if (RC == SS$_NOSUCHDEV)
-	    XDR$vton_int(&NFSERR_NODEV,reply);
-	else XDR$vton_int(&NFSERR_ACCES,reply);
-	return 4;
-	}
+    if (ERROR(RC))
+    {
+        if (RC == SS$_NOSUCHDEV)
+            XDR$vton_int(&NFSERR_NODEV,reply);
+        else XDR$vton_int(&NFSERR_ACCES,reply);
+        return 4;
+    }
 
     write_XDR_stat(NFS_OK,&reply);
 
@@ -2185,23 +2278,25 @@ NFSPROC_STATFS(uic,hname,username,reply,hand)
 /* Initialize the module.  This should be an entry point. */
 
 int NFS$INIT(IPACP_Int)
-    void *IPACP_Int;
+void *IPACP_Int;
 {
     int i;
-    struct {
+    struct
+    {
         unsigned short buflen, itmcod;
-	unsigned long bufadr, retlenadr;
-	unsigned long null;
+        unsigned long bufadr, retlenadr;
+        unsigned long null;
     } itemlist;
     unsigned long remfiles, maxchannels;
 
     IPACP_Interface = IPACP_Int;
 
-    for (i=0; i<HTAB_SIZE; i++) {
-	htab[i].queue_head = &htab[i].queue_head;
-	htab[i].queue_tail = &htab[i].queue_head;
-	htab[i].count = 0;
-	}
+    for (i=0; i<HTAB_SIZE; i++)
+    {
+        htab[i].queue_head = &htab[i].queue_head;
+        htab[i].queue_tail = &htab[i].queue_head;
+        htab[i].count = 0;
+    }
 
     fifo_timer.head = fifo_timer.tail = &fifo_timer.head;
 

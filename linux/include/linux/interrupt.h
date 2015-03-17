@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Modified Linux source file, 2001-2004  
+// Modified Linux source file, 2001-2004
 
 /* interrupt.h */
 #ifndef _LINUX_INTERRUPT_H
@@ -17,37 +17,39 @@
 #include <asm/atomic.h>
 #include <asm/ptrace.h>
 
-struct irqaction {
-	void (*handler)(int, void *, struct pt_regs *);
-	unsigned long flags;
-	unsigned long mask;
-	const char *name;
-	void *dev_id;
-	struct irqaction *next;
-        unsigned char * vms_interrupt;
-        struct _idb *idb;
+struct irqaction
+{
+    void (*handler)(int, void *, struct pt_regs *);
+    unsigned long flags;
+    unsigned long mask;
+    const char *name;
+    void *dev_id;
+    struct irqaction *next;
+    unsigned char * vms_interrupt;
+    struct _idb *idb;
 };
 
 
 /* Who gets which entry in bh_base.  Things which will occur most often
    should come first */
-   
-enum {
-	TIMER_BH = 0,
-	TQUEUE_BH,
-	DIGI_BH,
-	SERIAL_BH,
-	RISCOM8_BH,
-	SPECIALIX_BH,
-	AURORA_BH,
-	ESP_BH,
-	SCSI_BH,
-	IMMEDIATE_BH,
-	CYCLADES_BH,
-	CM206_BH,
-	JS_BH,
-	MACSERIAL_BH,
-	ISICOM_BH
+
+enum
+{
+    TIMER_BH = 0,
+    TQUEUE_BH,
+    DIGI_BH,
+    SERIAL_BH,
+    RISCOM8_BH,
+    SPECIALIX_BH,
+    AURORA_BH,
+    ESP_BH,
+    SCSI_BH,
+    IMMEDIATE_BH,
+    CYCLADES_BH,
+    CM206_BH,
+    JS_BH,
+    MACSERIAL_BH,
+    ISICOM_BH
 };
 
 #include <asm/hardirq.h>
@@ -63,10 +65,10 @@ enum {
 
 enum
 {
-	HI_SOFTIRQ=0,
-	NET_TX_SOFTIRQ,
-	NET_RX_SOFTIRQ,
-	TASKLET_SOFTIRQ
+    HI_SOFTIRQ=0,
+    NET_TX_SOFTIRQ,
+    NET_RX_SOFTIRQ,
+    TASKLET_SOFTIRQ
 };
 
 /* softirq mask and active fields moved to irq_cpustat_t in
@@ -75,8 +77,8 @@ enum
 
 struct softirq_action
 {
-	void	(*action)(struct softirq_action *);
-	void	*data;
+    void	(*action)(struct softirq_action *);
+    void	*data;
 };
 
 asmlinkage void do_softirq(void);
@@ -110,11 +112,11 @@ extern void FASTCALL(raise_softirq(unsigned int nr));
 
 struct tasklet_struct
 {
-	struct tasklet_struct *next;
-	unsigned long state;
-	atomic_t count;
-	void (*func)(unsigned long);
-	unsigned long data;
+    struct tasklet_struct *next;
+    unsigned long state;
+    atomic_t count;
+    void (*func)(unsigned long);
+    unsigned long data;
 };
 
 #define DECLARE_TASKLET(name, func, data) \
@@ -126,13 +128,13 @@ struct tasklet_struct name = { NULL, 0, ATOMIC_INIT(1), func, data }
 
 enum
 {
-	TASKLET_STATE_SCHED,	/* Tasklet is scheduled for execution */
-	TASKLET_STATE_RUN	/* Tasklet is running (SMP only) */
+    TASKLET_STATE_SCHED,	/* Tasklet is scheduled for execution */
+    TASKLET_STATE_RUN	/* Tasklet is running (SMP only) */
 };
 
 struct tasklet_head
 {
-	struct tasklet_struct *list;
+    struct tasklet_struct *list;
 } __attribute__ ((__aligned__(SMP_CACHE_BYTES)));
 
 extern struct tasklet_head tasklet_vec[NR_CPUS];
@@ -141,18 +143,21 @@ extern struct tasklet_head tasklet_hi_vec[NR_CPUS];
 #ifdef CONFIG_SMP
 static inline int tasklet_trylock(struct tasklet_struct *t)
 {
-	return !test_and_set_bit(TASKLET_STATE_RUN, &(t)->state);
+    return !test_and_set_bit(TASKLET_STATE_RUN, &(t)->state);
 }
 
 static inline void tasklet_unlock(struct tasklet_struct *t)
 {
-	smp_mb__before_clear_bit(); 
-	clear_bit(TASKLET_STATE_RUN, &(t)->state);
+    smp_mb__before_clear_bit();
+    clear_bit(TASKLET_STATE_RUN, &(t)->state);
 }
 
 static inline void tasklet_unlock_wait(struct tasklet_struct *t)
 {
-	while (test_bit(TASKLET_STATE_RUN, &(t)->state)) { barrier(); }
+    while (test_bit(TASKLET_STATE_RUN, &(t)->state))
+    {
+        barrier();
+    }
 }
 #else
 #define tasklet_trylock(t) 1
@@ -164,47 +169,47 @@ extern void FASTCALL(__tasklet_schedule(struct tasklet_struct *t));
 
 static inline void tasklet_schedule(struct tasklet_struct *t)
 {
-	if (!test_and_set_bit(TASKLET_STATE_SCHED, &t->state))
-		__tasklet_schedule(t);
+    if (!test_and_set_bit(TASKLET_STATE_SCHED, &t->state))
+        __tasklet_schedule(t);
 }
 
 extern void FASTCALL(__tasklet_hi_schedule(struct tasklet_struct *t));
 
 static inline void tasklet_hi_schedule(struct tasklet_struct *t)
 {
-	if (!test_and_set_bit(TASKLET_STATE_SCHED, &t->state))
-		__tasklet_hi_schedule(t);
+    if (!test_and_set_bit(TASKLET_STATE_SCHED, &t->state))
+        __tasklet_hi_schedule(t);
 }
 
 
 static inline void tasklet_disable_nosync(struct tasklet_struct *t)
 {
-	atomic_inc(&t->count);
-	smp_mb__after_atomic_inc();
+    atomic_inc(&t->count);
+    smp_mb__after_atomic_inc();
 }
 
 static inline void tasklet_disable(struct tasklet_struct *t)
 {
-	tasklet_disable_nosync(t);
-	tasklet_unlock_wait(t);
-	smp_mb();
+    tasklet_disable_nosync(t);
+    tasklet_unlock_wait(t);
+    smp_mb();
 }
 
 static inline void tasklet_enable(struct tasklet_struct *t)
 {
-	smp_mb__before_atomic_dec();
-	atomic_dec(&t->count);
+    smp_mb__before_atomic_dec();
+    atomic_dec(&t->count);
 }
 
 static inline void tasklet_hi_enable(struct tasklet_struct *t)
 {
-	smp_mb__before_atomic_dec();
-	atomic_dec(&t->count);
+    smp_mb__before_atomic_dec();
+    atomic_dec(&t->count);
 }
 
 extern void tasklet_kill(struct tasklet_struct *t);
 extern void tasklet_init(struct tasklet_struct *t,
-			 void (*func)(unsigned long), unsigned long data);
+                         void (*func)(unsigned long), unsigned long data);
 
 #ifdef CONFIG_SMP
 
@@ -234,7 +239,7 @@ extern spinlock_t global_bh_lock;
 
 static inline void mark_bh(int nr)
 {
-	tasklet_hi_schedule(bh_task_vec+nr);
+    tasklet_hi_schedule(bh_task_vec+nr);
 }
 
 extern void init_bh(int nr, void (*routine)(void));

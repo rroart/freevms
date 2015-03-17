@@ -11,39 +11,44 @@
 #define STS$M_CUST_DEF 0x8000000
 #define STS$M_INHIB_MSG 0x10000000
 #define STS$M_FAC_NO 0xFFF0000
-#define STS$K_WARNING 0                 
-#define STS$K_SUCCESS 1                 
-#define STS$K_ERROR 2                   
-#define STS$K_INFO 3                    
-#define STS$K_SEVERE 4                  
-	
-union _stsdef {
-  struct  {
-    unsigned sts$v_severity : 3;    
-    unsigned sts$v_cond_id : 25;    
-    unsigned sts$v_control : 4;     
-  };
-  struct  {
-    unsigned sts$v_success : 1;     
-    unsigned stsdef$$_fill_1 : 2;   
-    unsigned sts$v_msg_no : 13;     
-  };
-  struct  {
-    unsigned stsdef$$_fill_2 : 3;   
-    unsigned sts$v_code : 12;       
-    unsigned sts$v_fac_sp : 1;      
-    unsigned stsdef$$_fill_3 : 11;
-    unsigned sts$v_cust_def : 1;    
-    unsigned sts$v_inhib_msg : 1;   
-    unsigned stsdef$$_fill_4 : 3;   
-  };
-  struct  {
-    unsigned stsdef$$_fill_5 : 16;  
-    unsigned sts$v_fac_no : 12;     
-    unsigned stsdef$$_fill_6 : 4;   
-  };
+#define STS$K_WARNING 0
+#define STS$K_SUCCESS 1
+#define STS$K_ERROR 2
+#define STS$K_INFO 3
+#define STS$K_SEVERE 4
+
+union _stsdef
+{
+    struct
+    {
+        unsigned sts$v_severity : 3;
+        unsigned sts$v_cond_id : 25;
+        unsigned sts$v_control : 4;
+    };
+    struct
+    {
+        unsigned sts$v_success : 1;
+        unsigned stsdef$$_fill_1 : 2;
+        unsigned sts$v_msg_no : 13;
+    };
+    struct
+    {
+        unsigned stsdef$$_fill_2 : 3;
+        unsigned sts$v_code : 12;
+        unsigned sts$v_fac_sp : 1;
+        unsigned stsdef$$_fill_3 : 11;
+        unsigned sts$v_cust_def : 1;
+        unsigned sts$v_inhib_msg : 1;
+        unsigned stsdef$$_fill_4 : 3;
+    };
+    struct
+    {
+        unsigned stsdef$$_fill_5 : 16;
+        unsigned sts$v_fac_no : 12;
+        unsigned stsdef$$_fill_6 : 4;
+    };
 };
- 
+
 #define STS$S_CODE       0x0C
 #define STS$S_COND_ID    0x19
 #define STS$S_CONTROL    0x04
@@ -71,6 +76,6 @@ union _stsdef {
 #define $VMS_STATUS_MSG_NO(code) 	( ( (code) & STS$M_MSG_NO ) 	>> STS$V_MSG_NO )
 #define $VMS_STATUS_SEVERITY(code) 	( ( (code) & STS$M_SEVERITY ) 	>> STS$V_SEVERITY )
 #define $VMS_STATUS_SUCCESS(code) 	( ( (code) & STS$M_SUCCESS ) 	>> STS$V_SUCCESS )
- 
-#endif 
- 
+
+#endif
+

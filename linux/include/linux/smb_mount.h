@@ -13,13 +13,14 @@
 
 #define SMB_MOUNT_VERSION	6
 
-struct smb_mount_data {
-	int version;
-	__kernel_uid_t mounted_uid; /* Who may umount() this filesystem? */
-	__kernel_uid_t uid;
-	__kernel_gid_t gid;
-	__kernel_mode_t file_mode;
-	__kernel_mode_t dir_mode;
+struct smb_mount_data
+{
+    int version;
+    __kernel_uid_t mounted_uid; /* Who may umount() this filesystem? */
+    __kernel_uid_t uid;
+    __kernel_gid_t gid;
+    __kernel_mode_t file_mode;
+    __kernel_mode_t dir_mode;
 };
 
 
@@ -39,21 +40,22 @@ struct smb_mount_data {
 #define SMB_MOUNT_CASE		0x0008	/* Be case sensitive */
 
 
-struct smb_mount_data_kernel {
-	int version;
+struct smb_mount_data_kernel
+{
+    int version;
 
-	__kernel_uid_t mounted_uid;	/* Who may umount() this filesystem? */
-	__kernel_uid_t uid;
-	__kernel_gid_t gid;
-	__kernel_mode_t file_mode;
-	__kernel_mode_t dir_mode;
+    __kernel_uid_t mounted_uid;	/* Who may umount() this filesystem? */
+    __kernel_uid_t uid;
+    __kernel_gid_t gid;
+    __kernel_mode_t file_mode;
+    __kernel_mode_t dir_mode;
 
-	u32 flags;
+    u32 flags;
 
-        /* maximum age in jiffies (inode, dentry and dircache) */
-	int ttl;
+    /* maximum age in jiffies (inode, dentry and dircache) */
+    int ttl;
 
-	struct smb_nls_codepage codepage;
+    struct smb_nls_codepage codepage;
 };
 
 #endif

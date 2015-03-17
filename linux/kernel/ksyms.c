@@ -69,8 +69,9 @@ extern spinlock_t dma_spin_lock;
 
 #ifdef CONFIG_MODVERSIONS
 const struct module_symbol __export_Using_Versions
-__attribute__((section("__ksymtab"))) = {
-	1 /* Version version */, "Using_Versions"
+__attribute__((section("__ksymtab"))) =
+{
+    1 /* Version version */, "Using_Versions"
 };
 #endif
 

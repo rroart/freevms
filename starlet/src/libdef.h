@@ -72,7 +72,7 @@
 #define LIB$_INVSYMNAM		0x0015838C	/* 1409932 lib$cli_callback */
 #define LIB$_ATTREQREF		0x00158394	/* 1409940 lib$attach */
 #define LIB$_INVFILSPE		0x0015839C	/* 1409948 lib$fid_to_name, lib$extract_concealed, */
-					/* lib$set_file_prot, lib$unlock_file, lib$create_dir */
+/* lib$set_file_prot, lib$unlock_file, lib$create_dir */
 #define LIB$_INVXAB		0x001583A4	/* 1409956 lib$qual_file_parse */
 #define LIB$_NO_STRACT		0x001583AC	/* 1409964 scr package */
 #define LIB$_BADTAGVAL		0x001583B4	/* 1409972 lib$vm */
@@ -81,8 +81,8 @@
 #define LIB$_NOTIMP		0x001583CC	/* 1409996 lib$not_implemented */
 #define LIB$_BADZONE		0x001583D4	/* 1410004 lib$verify_vm_zone, lib$show_vm_zone, lib$stat_vm_zone, lib$find_vm_zone */
 #define LIB$_IVTIME		0x001583DC	/* 1410012 lib$add_times, lib$sub_times, lib$muliply_delta_time */
-					/* lib$multiply_delta_time_f, lib$cvt_to_internal_time */
-					/* lib$cvt_from_internal_time, lib$convert_date_string */
+/* lib$multiply_delta_time_f, lib$cvt_to_internal_time */
+/* lib$cvt_from_internal_time, lib$convert_date_string */
 #define LIB$_ONEDELTIM		0x001583E4	/* 1410020 lib$add_times */
 #define LIB$_NEGTIM		0x001583EC	/* 1410028 lib$sub_times */
 #define LIB$_INVARGORD		0x001583F4	/* 1410036 lib$sub_times */
@@ -90,7 +90,7 @@
 #define LIB$_DELTIMREQ		0x00158404	/* 1410052 lib$cvt_from_internal_time */
 #define LIB$_INVOPER		0x0015840C	/* 1410060 lib$cvt_xxx_internal_time */
 #define LIB$_REENTRANCY		0x00158414	/* 1410068 lib$format_date_time, lib$init_date_time_context, */
-					/* lib$convert_date_string, lib$get_date_format */
+/* lib$convert_date_string, lib$get_date_format */
 #define LIB$_UNRFORCOD		0x0015841C	/* 1410076 lib$format_date_time, lib$convert_date_string, lib$get_date_format */
 #define LIB$_ILLINISTR		0x00158424	/* 1410084 lib$init_date_time_context */
 #define LIB$_NUMELEMENTS	0x0015842C	/* 1410092 lib$init_date_time_context */

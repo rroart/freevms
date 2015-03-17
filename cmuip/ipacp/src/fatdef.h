@@ -24,29 +24,33 @@
 
 /* Definitions for file (record) attributes */
 
-struct fatdef {
-	struct {
-		unsigned fat$v_rtype : 4;
-		unsigned fat$v_fileorg : 4;
-	} fat$b_rtype;
-	unsigned char fat$b_rattrib;
-	unsigned short int fat$w_rsize;
-	struct {
-		unsigned short int fat$w_hiblkh;
-		unsigned short int fat$w_hiblkl;
-	} fat$l_hiblk;
-	struct {
-		unsigned short int fat$w_efblkh;
-		unsigned short int fat$w_efblkl;
-	} fat$l_efblk;
-	unsigned short int fat$w_ffbyte;
-	unsigned char fat$b_bktsize;
-	unsigned char fat$b_vfcsize;
-	unsigned short int fat$w_maxrec;
-	unsigned short int fat$w_defext;
-	unsigned short int fat$w_gbc;
-	char unused_1[8];
-	unsigned short int fat$w_versions;
+struct fatdef
+{
+    struct
+    {
+        unsigned fat$v_rtype : 4;
+        unsigned fat$v_fileorg : 4;
+    } fat$b_rtype;
+    unsigned char fat$b_rattrib;
+    unsigned short int fat$w_rsize;
+    struct
+    {
+        unsigned short int fat$w_hiblkh;
+        unsigned short int fat$w_hiblkl;
+    } fat$l_hiblk;
+    struct
+    {
+        unsigned short int fat$w_efblkh;
+        unsigned short int fat$w_efblkl;
+    } fat$l_efblk;
+    unsigned short int fat$w_ffbyte;
+    unsigned char fat$b_bktsize;
+    unsigned char fat$b_vfcsize;
+    unsigned short int fat$w_maxrec;
+    unsigned short int fat$w_defext;
+    unsigned short int fat$w_gbc;
+    char unused_1[8];
+    unsigned short int fat$w_versions;
 };
 
 #define FAT$C_UNDEFINED	0

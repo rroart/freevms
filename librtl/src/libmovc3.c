@@ -19,8 +19,8 @@
 void lib$movc3(const unsigned short *size,const void *source,void *destination)
 {
 //	use memmove allows source and destination to overlap
-	memmove (destination, source, *size);
+    memmove (destination, source, *size);
 
-	return;
+    return;
 }
 

@@ -253,12 +253,12 @@ extern char _stext, _etext;
 #define PUSHPSL \
         PUSHR_ALL \
         "call pushpsl\n\t" \
-        POPR_ALL 
+        POPR_ALL
 
 #define PUSHPSLI \
         PUSHR_ALL \
         "call pushpsli\n\t" \
-        POPR_ALL 
+        POPR_ALL
 
 #define REGTRAP \
 	"pushl %eax\n\t" \
@@ -305,7 +305,7 @@ extern char _stext, _etext;
 	"popl %edx; \n\t" \
 	"popl %edi; \n\t" \
 	"popl %eax; \n\t"
-	
+
 #define IO_APIC_IRQ(x) (((x) >= 16) || ((1<<(x)) & io_apic_irqs))
 
 #define __STR(x) #x
@@ -336,8 +336,8 @@ extern char _stext, _etext;
  *	SMP has a few special interrupts for IPI messages
  */
 
-	/* there is a second layer of macro just to get the symbolic
-	   name for the vector evaluated. This change is for RTLinux */
+/* there is a second layer of macro just to get the symbolic
+   name for the vector evaluated. This change is for RTLinux */
 #define BUILD_SMP_INTERRUPT(x,v) XBUILD_SMP_INTERRUPT(x,v)
 #define XBUILD_SMP_INTERRUPT(x,v)\
 asmlinkage void x(void); \
@@ -383,7 +383,7 @@ __asm__( \
 	"call " SYMBOL_NAME_STR(do_IRQ) "\n\t" \
 	"jmp ret_from_intr\n");
 
-/* 
+/*
  * subtle. orig_eax is used by the signal code to distinct between
  * system calls and interrupted 'random user-space'. Thus we have
  * to put a negative value into orig_eax here. (the problem is that
@@ -412,32 +412,33 @@ extern unsigned long prof_shift;
  */
 static inline void x86_do_profile (unsigned long eip)
 {
-	if (!prof_buffer)
-		return;
+    if (!prof_buffer)
+        return;
 
-	/*
-	 * Only measure the CPUs specified by /proc/irq/prof_cpu_mask.
-	 * (default is all CPUs.)
-	 */
-	if (!((1<<smp_processor_id()) & prof_cpu_mask))
-		return;
+    /*
+     * Only measure the CPUs specified by /proc/irq/prof_cpu_mask.
+     * (default is all CPUs.)
+     */
+    if (!((1<<smp_processor_id()) & prof_cpu_mask))
+        return;
 
-	eip -= (unsigned long) &_stext;
-	eip >>= prof_shift;
-	/*
-	 * Don't ignore out-of-bounds EIP values silently,
-	 * put them into the last histogram slot, so if
-	 * present, they will show up as a sharp peak.
-	 */
-	if (eip > prof_len-1)
-		eip = prof_len-1;
-	atomic_inc((atomic_t *)&prof_buffer[eip]);
+    eip -= (unsigned long) &_stext;
+    eip >>= prof_shift;
+    /*
+     * Don't ignore out-of-bounds EIP values silently,
+     * put them into the last histogram slot, so if
+     * present, they will show up as a sharp peak.
+     */
+    if (eip > prof_len-1)
+        eip = prof_len-1;
+    atomic_inc((atomic_t *)&prof_buffer[eip]);
 }
 
 #ifdef CONFIG_SMP /*more of this file should probably be ifdefed SMP */
-static inline void hw_resend_irq(struct hw_interrupt_type *h, unsigned int i) {
-	if (IO_APIC_IRQ(i))
-		send_IPI_self(IO_APIC_VECTOR(i));
+static inline void hw_resend_irq(struct hw_interrupt_type *h, unsigned int i)
+{
+    if (IO_APIC_IRQ(i))
+        send_IPI_self(IO_APIC_VECTOR(i));
 }
 #else
 static inline void hw_resend_irq(struct hw_interrupt_type *h, unsigned int i) {}

@@ -7,7 +7,8 @@
 #define IPT_OWNER_PID	0x04
 #define IPT_OWNER_SID	0x08
 
-struct ipt_owner_info {
+struct ipt_owner_info
+{
     uid_t uid;
     gid_t gid;
     pid_t pid;

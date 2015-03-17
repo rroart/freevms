@@ -33,17 +33,17 @@ int pm_active;
  *	change must be protected so that an unlink of an entry doesnt clash
  *	with a pm send - which is permitted to sleep in the current architecture
  *
- *	Module unloads clashing with pm events now work out safely, the module 
+ *	Module unloads clashing with pm events now work out safely, the module
  *	unload path will block until the event has been sent. It may well block
  *	until a resume but that will be fine.
  */
- 
+
 static DECLARE_MUTEX(pm_devs_lock);
 static LIST_HEAD(pm_devs);
 
 /**
  *	pm_register - register a device with power management
- *	@type: device type 
+ *	@type: device type
  *	@id: device ID
  *	@callback: callback function
  *
@@ -54,23 +54,24 @@ static LIST_HEAD(pm_devs);
  *      The callback function will be called in process context and
  *      it may sleep.
  */
- 
-struct pm_dev *pm_register(pm_dev_t type,
-			   unsigned long id,
-			   pm_callback callback)
-{
-	struct pm_dev *dev = kmalloc(sizeof(struct pm_dev), GFP_KERNEL);
-	if (dev) {
-		memset(dev, 0, sizeof(*dev));
-		dev->type = type;
-		dev->id = id;
-		dev->callback = callback;
 
-		down(&pm_devs_lock);
-		list_add(&dev->entry, &pm_devs);
-		up(&pm_devs_lock);
-	}
-	return dev;
+struct pm_dev *pm_register(pm_dev_t type,
+                           unsigned long id,
+                           pm_callback callback)
+{
+    struct pm_dev *dev = kmalloc(sizeof(struct pm_dev), GFP_KERNEL);
+    if (dev)
+    {
+        memset(dev, 0, sizeof(*dev));
+        dev->type = type;
+        dev->id = id;
+        dev->callback = callback;
+
+        down(&pm_devs_lock);
+        list_add(&dev->entry, &pm_devs);
+        up(&pm_devs_lock);
+    }
+    return dev;
 }
 
 /**
@@ -80,24 +81,26 @@ struct pm_dev *pm_register(pm_dev_t type,
  *	Remove a device from the power management notification lists. The
  *	dev passed must be a handle previously returned by pm_register.
  */
- 
+
 void pm_unregister(struct pm_dev *dev)
 {
-	if (dev) {
-		down(&pm_devs_lock);
-		list_del(&dev->entry);
-		up(&pm_devs_lock);
+    if (dev)
+    {
+        down(&pm_devs_lock);
+        list_del(&dev->entry);
+        up(&pm_devs_lock);
 
-		kfree(dev);
-	}
+        kfree(dev);
+    }
 }
 
 static void __pm_unregister(struct pm_dev *dev)
 {
-	if (dev) {
-		list_del(&dev->entry);
-		kfree(dev);
-	}
+    if (dev)
+    {
+        list_del(&dev->entry);
+        kfree(dev);
+    }
 }
 
 /**
@@ -109,23 +112,24 @@ static void __pm_unregister(struct pm_dev *dev)
  *	enables a module to give up all its managed devices without keeping
  *	its own private list.
  */
- 
+
 void pm_unregister_all(pm_callback callback)
 {
-	struct list_head *entry;
+    struct list_head *entry;
 
-	if (!callback)
-		return;
+    if (!callback)
+        return;
 
-	down(&pm_devs_lock);
-	entry = pm_devs.next;
-	while (entry != &pm_devs) {
-		struct pm_dev *dev = list_entry(entry, struct pm_dev, entry);
-		entry = entry->next;
-		if (dev->callback == callback)
-			__pm_unregister(dev);
-	}
-	up(&pm_devs_lock);
+    down(&pm_devs_lock);
+    entry = pm_devs.next;
+    while (entry != &pm_devs)
+    {
+        struct pm_dev *dev = list_entry(entry, struct pm_dev, entry);
+        entry = entry->next;
+        if (dev->callback == callback)
+            __pm_unregister(dev);
+    }
+    up(&pm_devs_lock);
 }
 
 /**
@@ -134,7 +138,7 @@ void pm_unregister_all(pm_callback callback)
  *	@rqst: power management request
  *	@data: data for the callback
  *
- *	Issue a power management request to a given device. The 
+ *	Issue a power management request to a given device. The
  *	%PM_SUSPEND and %PM_RESUME events are handled specially. The
  *	data field must hold the intended next state. No call is made
  *	if the state matches.
@@ -149,38 +153,42 @@ void pm_unregister_all(pm_callback callback)
  *	pm_unregister. This means that you must handle SMP races on callback
  *	execution and unload yourself.
  */
- 
+
 int pm_send(struct pm_dev *dev, pm_request_t rqst, void *data)
 {
-	int status = 0;
-	int prev_state, next_state;
+    int status = 0;
+    int prev_state, next_state;
 
-	if (in_interrupt())
-		BUG();
+    if (in_interrupt())
+        BUG();
 
-	switch (rqst) {
-	case PM_SUSPEND:
-	case PM_RESUME:
-		prev_state = dev->state;
-		next_state = (int) data;
-		if (prev_state != next_state) {
-			if (dev->callback)
-				status = (*dev->callback)(dev, rqst, data);
-			if (!status) {
-				dev->state = next_state;
-				dev->prev_state = prev_state;
-			}
-		}
-		else {
-			dev->prev_state = prev_state;
-		}
-		break;
-	default:
-		if (dev->callback)
-			status = (*dev->callback)(dev, rqst, data);
-		break;
-	}
-	return status;
+    switch (rqst)
+    {
+    case PM_SUSPEND:
+    case PM_RESUME:
+        prev_state = dev->state;
+        next_state = (int) data;
+        if (prev_state != next_state)
+        {
+            if (dev->callback)
+                status = (*dev->callback)(dev, rqst, data);
+            if (!status)
+            {
+                dev->state = next_state;
+                dev->prev_state = prev_state;
+            }
+        }
+        else
+        {
+            dev->prev_state = prev_state;
+        }
+        break;
+    default:
+        if (dev->callback)
+            status = (*dev->callback)(dev, rqst, data);
+        break;
+    }
+    return status;
 }
 
 /*
@@ -188,19 +196,21 @@ int pm_send(struct pm_dev *dev, pm_request_t rqst, void *data)
  */
 static void pm_undo_all(struct pm_dev *last)
 {
-	struct list_head *entry = last->entry.prev;
-	while (entry != &pm_devs) {
-		struct pm_dev *dev = list_entry(entry, struct pm_dev, entry);
-		if (dev->state != dev->prev_state) {
-			/* previous state was zero (running) resume or
-			 * previous state was non-zero (suspended) suspend
-			 */
-			pm_request_t undo = (dev->prev_state
-					     ? PM_SUSPEND:PM_RESUME);
-			pm_send(dev, undo, (void*) dev->prev_state);
-		}
-		entry = entry->prev;
-	}
+    struct list_head *entry = last->entry.prev;
+    while (entry != &pm_devs)
+    {
+        struct pm_dev *dev = list_entry(entry, struct pm_dev, entry);
+        if (dev->state != dev->prev_state)
+        {
+            /* previous state was zero (running) resume or
+             * previous state was non-zero (suspended) suspend
+             */
+            pm_request_t undo = (dev->prev_state
+                                 ? PM_SUSPEND:PM_RESUME);
+            pm_send(dev, undo, (void*) dev->prev_state);
+        }
+        entry = entry->prev;
+    }
 }
 
 /**
@@ -208,11 +218,11 @@ static void pm_undo_all(struct pm_dev *last)
  *	@rqst: power management request
  *	@data: data for the callback
  *
- *	Issue a power management request to a all devices. The 
- *	%PM_SUSPEND events are handled specially. Any device is 
+ *	Issue a power management request to a all devices. The
+ *	%PM_SUSPEND events are handled specially. Any device is
  *	permitted to fail a suspend by returning a non zero (error)
- *	value from its callback function. If any device vetoes a 
- *	suspend request then all other devices that have suspended 
+ *	value from its callback function. If any device vetoes a
+ *	suspend request then all other devices that have suspended
  *	during the processing of this request are restored to their
  *	previous state.
  *
@@ -228,31 +238,34 @@ static void pm_undo_all(struct pm_dev *last)
  *	BUGS: what stops two power management requests occuring in parallel
  *	and conflicting.
  */
- 
+
 int pm_send_all(pm_request_t rqst, void *data)
 {
-	struct list_head *entry;
-	
-	down(&pm_devs_lock);
-	entry = pm_devs.next;
-	while (entry != &pm_devs) {
-		struct pm_dev *dev = list_entry(entry, struct pm_dev, entry);
-		if (dev->callback) {
-			int status = pm_send(dev, rqst, data);
-			if (status) {
-				/* return devices to previous state on
-				 * failed suspend request
-				 */
-				if (rqst == PM_SUSPEND)
-					pm_undo_all(dev);
-				up(&pm_devs_lock);
-				return status;
-			}
-		}
-		entry = entry->next;
-	}
-	up(&pm_devs_lock);
-	return 0;
+    struct list_head *entry;
+
+    down(&pm_devs_lock);
+    entry = pm_devs.next;
+    while (entry != &pm_devs)
+    {
+        struct pm_dev *dev = list_entry(entry, struct pm_dev, entry);
+        if (dev->callback)
+        {
+            int status = pm_send(dev, rqst, data);
+            if (status)
+            {
+                /* return devices to previous state on
+                 * failed suspend request
+                 */
+                if (rqst == PM_SUSPEND)
+                    pm_undo_all(dev);
+                up(&pm_devs_lock);
+                return status;
+            }
+        }
+        entry = entry->next;
+    }
+    up(&pm_devs_lock);
+    return 0;
 }
 
 /**
@@ -263,25 +276,26 @@ int pm_send_all(pm_request_t rqst, void *data)
  *	Scan the power management list for devices of a specific type. The
  *	return value for a matching device may be passed to further calls
  *	to this function to find further matches. A %NULL indicates the end
- *	of the list. 
+ *	of the list.
  *
  *	To search from the beginning pass %NULL as the @from value.
  *
- *	The caller MUST hold the pm_devs_lock lock when calling this 
+ *	The caller MUST hold the pm_devs_lock lock when calling this
  *	function. The instant that the lock is dropped all pointers returned
  *	may become invalid.
  */
- 
+
 struct pm_dev *pm_find(pm_dev_t type, struct pm_dev *from)
 {
-	struct list_head *entry = from ? from->entry.next:pm_devs.next;
-	while (entry != &pm_devs) {
-		struct pm_dev *dev = list_entry(entry, struct pm_dev, entry);
-		if (type == PM_UNKNOWN_DEV || dev->type == type)
-			return dev;
-		entry = entry->next;
-	}
-	return 0;
+    struct list_head *entry = from ? from->entry.next:pm_devs.next;
+    while (entry != &pm_devs)
+    {
+        struct pm_dev *dev = list_entry(entry, struct pm_dev, entry);
+        if (type == PM_UNKNOWN_DEV || dev->type == type)
+            return dev;
+        entry = entry->next;
+    }
+    return 0;
 }
 
 EXPORT_SYMBOL(pm_register);

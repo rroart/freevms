@@ -6,10 +6,11 @@
 #define IP6T_LOG_IPOPT		0x04	/* Log IP options */
 #define IP6T_LOG_MASK		0x07
 
-struct ip6t_log_info {
-	unsigned char level;
-	unsigned char logflags;
-	char prefix[30];
+struct ip6t_log_info
+{
+    unsigned char level;
+    unsigned char logflags;
+    char prefix[30];
 };
 
 #endif /*_IPT_LOG_H*/

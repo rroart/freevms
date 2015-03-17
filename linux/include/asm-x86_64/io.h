@@ -27,14 +27,14 @@
  *		Linus
  */
 
- /*
-  *  Bit simplified and optimized by Jan Hubicka
-  *  Support of BIGMEM added by Gerhard Wichert, Siemens AG, July 1999.
-  *
-  *  isa_memset_io, isa_memcpy_fromio, isa_memcpy_toio added,
-  *  isa_read[wl] and isa_write[wl] fixed
-  *  - Arnaldo Carvalho de Melo <acme@conectiva.com.br>
-  */
+/*
+ *  Bit simplified and optimized by Jan Hubicka
+ *  Support of BIGMEM added by Gerhard Wichert, Siemens AG, July 1999.
+ *
+ *  isa_memset_io, isa_memcpy_fromio, isa_memcpy_toio added,
+ *  isa_read[wl] and isa_write[wl] fixed
+ *  - Arnaldo Carvalho de Melo <acme@conectiva.com.br>
+ */
 
 #ifdef SLOW_IO_BY_JUMPING
 #define __SLOW_DOWN_IO "\njmp 1f\n1:\tjmp 1f\n1:"
@@ -60,7 +60,7 @@ __asm__ __volatile__ ("out" #s " %" s1 "0,%" s2 "1"
 #define __OUT(s,s1,x) \
 __OUT1(s,x) __OUT2(s,s1,"w") : : "a" (value), "Nd" (port)); } \
 __OUT1(s##_p,x) __OUT2(s,s1,"w") __FULL_SLOW_DOWN_IO : : "a" (value), "Nd" (port));} \
-
+ 
 #define __IN1(s) \
 extern inline RETURN_TYPE in##s(unsigned short port) { RETURN_TYPE _v;
 
@@ -70,7 +70,7 @@ __asm__ __volatile__ ("in" #s " %" s2 "1,%" s1 "0"
 #define __IN(s,s1,i...) \
 __IN1(s) __IN2(s,s1,"w") : "=a" (_v) : "Nd" (port) ,##i ); return _v; } \
 __IN1(s##_p) __IN2(s,s1,"w") __FULL_SLOW_DOWN_IO : "=a" (_v) : "Nd" (port) ,##i ); return _v; } \
-
+ 
 #define __INS(s) \
 extern inline void ins##s(unsigned short port, void * addr, unsigned long count) \
 { __asm__ __volatile__ ("rep ; ins" #s \
@@ -114,12 +114,12 @@ __OUTS(l)
  * unmapped ISA addresses. Will be removed in 2.4.
  */
 #ifdef CONFIG_IO_DEBUG
-  extern void *__io_virt_debug(unsigned long x, const char *file, int line);
-  extern unsigned long __io_phys_debug(unsigned long x, const char *file, int line);
-  #define __io_virt(x) __io_virt_debug((unsigned long)(x), __FILE__, __LINE__)
+extern void *__io_virt_debug(unsigned long x, const char *file, int line);
+extern unsigned long __io_phys_debug(unsigned long x, const char *file, int line);
+#define __io_virt(x) __io_virt_debug((unsigned long)(x), __FILE__, __LINE__)
 //#define __io_phys(x) __io_phys_debug((unsigned long)(x), __FILE__, __LINE__)
 #else
-  #define __io_virt(x) ((void *)(x))
+#define __io_virt(x) ((void *)(x))
 //#define __io_phys(x) __pa(x)
 #endif
 
@@ -129,12 +129,12 @@ __OUTS(l)
  */
 extern inline unsigned long virt_to_phys(volatile void * address)
 {
-	return __pa(address);
+    return __pa(address);
 }
 
 extern inline void * phys_to_virt(unsigned long address)
 {
-	return __va(address);
+    return __va(address);
 }
 
 /*
@@ -150,7 +150,7 @@ extern void * __ioremap(unsigned long offset, unsigned long size, unsigned long 
 
 extern inline void * ioremap (unsigned long offset, unsigned long size)
 {
-	return __ioremap(offset, size, 0);
+    return __ioremap(offset, size, 0);
 }
 
 /*
@@ -160,7 +160,7 @@ extern inline void * ioremap (unsigned long offset, unsigned long size)
  */
 extern inline void * ioremap_nocache (unsigned long offset, unsigned long size)
 {
-        return __ioremap(offset, size, _PAGE_PCD);
+    return __ioremap(offset, size, _PAGE_PCD);
 }
 
 extern void iounmap(void *addr);
@@ -197,8 +197,8 @@ extern void iounmap(void *addr);
 #define __raw_writel writel
 #define __raw_writeq writeq
 
-void *memcpy_fromio(void*,const void*,unsigned); 
-void *memcpy_toio(void*,const void*,unsigned); 
+void *memcpy_fromio(void*,const void*,unsigned);
+void *memcpy_toio(void*,const void*,unsigned);
 
 #define memset_io(a,b,c)	memset(__io_virt(a),(b),(c))
 
@@ -231,35 +231,39 @@ void *memcpy_toio(void*,const void*,unsigned);
 #define isa_eth_io_copy_and_sum(a,b,c,d)	eth_copy_and_sum((a),__io_virt(__ISA_IO_base + (b)),(c),(d))
 
 static inline int check_signature(unsigned long io_addr,
-	const unsigned char *signature, int length)
+                                  const unsigned char *signature, int length)
 {
-	int retval = 0;
-	do {
-		if (readb(io_addr) != *signature)
-			goto out;
-		io_addr++;
-		signature++;
-		length--;
-	} while (length);
-	retval = 1;
+    int retval = 0;
+    do
+    {
+        if (readb(io_addr) != *signature)
+            goto out;
+        io_addr++;
+        signature++;
+        length--;
+    }
+    while (length);
+    retval = 1;
 out:
-	return retval;
+    return retval;
 }
 
 static inline int isa_check_signature(unsigned long io_addr,
-	const unsigned char *signature, int length)
+                                      const unsigned char *signature, int length)
 {
-	int retval = 0;
-	do {
-		if (isa_readb(io_addr) != *signature)
-			goto out;
-		io_addr++;
-		signature++;
-		length--;
-	} while (length);
-	retval = 1;
+    int retval = 0;
+    do
+    {
+        if (isa_readb(io_addr) != *signature)
+            goto out;
+        io_addr++;
+        signature++;
+        length--;
+    }
+    while (length);
+    retval = 1;
 out:
-	return retval;
+    return retval;
 }
 
 /* Nothing to do */
@@ -268,7 +272,7 @@ out:
 #define dma_cache_wback(_start,_size)		do { } while (0)
 #define dma_cache_wback_inv(_start,_size)	do { } while (0)
 
-#define flush_write_buffers() 
+#define flush_write_buffers()
 
 #endif /* __KERNEL__ */
 

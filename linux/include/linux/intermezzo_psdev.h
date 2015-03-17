@@ -19,7 +19,7 @@
 #define wait_queue_head_t  struct wait_queue *
 #define DECLARE_WAITQUEUE(name,task) \
         struct wait_queue name = { task, NULL }
-#define init_waitqueue_head(arg) 
+#define init_waitqueue_head(arg)
 #else
 #ifndef __initfunc
 #define __initfunc(arg) arg
@@ -29,21 +29,22 @@
 
 /* represents state of a /dev/presto */
 /* communication pending & processing queues */
-struct upc_comm {
-        unsigned int         uc_seq;
-        wait_queue_head_t    uc_waitq;     /* Lento wait queue */
-        struct list_head    uc_pending;
-        struct list_head    uc_processing;
-        int                  uc_pid;       /* Lento's pid */
-        int                  uc_hard; /* allows signals during upcalls */
-        int                  uc_no_filter;
-        int                  uc_no_journal;
-        int                  uc_no_upcall;
-        int                  uc_timeout; /* . sec: signals will dequeue upc */
-        long                 uc_errorval; /* for testing I/O failures */
-        struct list_head     uc_cache_list;
-        int                   uc_minor;
-        char *                uc_devname;
+struct upc_comm
+{
+    unsigned int         uc_seq;
+    wait_queue_head_t    uc_waitq;     /* Lento wait queue */
+    struct list_head    uc_pending;
+    struct list_head    uc_processing;
+    int                  uc_pid;       /* Lento's pid */
+    int                  uc_hard; /* allows signals during upcalls */
+    int                  uc_no_filter;
+    int                  uc_no_journal;
+    int                  uc_no_upcall;
+    int                  uc_timeout; /* . sec: signals will dequeue upc */
+    long                 uc_errorval; /* for testing I/O failures */
+    struct list_head     uc_cache_list;
+    int                   uc_minor;
+    char *                uc_devname;
 };
 
 #define ISLENTO(minor) (current->pid == upc_comms[minor].uc_pid \
@@ -57,16 +58,17 @@ extern struct upc_comm upc_comms[MAX_PRESTODEV];
 #define REQ_ASYNC  4
 #define REQ_DEAD   8
 
-struct upc_req {
-        struct list_head   rq_chain;
-        caddr_t            rq_data;
-        u_short            rq_flags;
-        u_short            rq_bufsize;
-        u_short            rq_rep_size;
-        u_short            rq_opcode;  /* copied from data to save lookup */
-        int                rq_unique;
-        wait_queue_head_t  rq_sleep;   /* process' wait queue */
-        unsigned long      rq_posttime;
+struct upc_req
+{
+    struct list_head   rq_chain;
+    caddr_t            rq_data;
+    u_short            rq_flags;
+    u_short            rq_bufsize;
+    u_short            rq_rep_size;
+    u_short            rq_opcode;  /* copied from data to save lookup */
+    int                rq_unique;
+    wait_queue_head_t  rq_sleep;   /* process' wait queue */
+    unsigned long      rq_posttime;
 };
 
 #endif

@@ -22,7 +22,7 @@
 /*
 !++
 ! NETCONFIG.H	Copyright (c) 1990	Carnegie Mellon University
-! 
+!
 ! Description:
 !
 !	Supporting declarations for IP Transport device modules
@@ -37,17 +37,28 @@
 #ifndef _CMU_TYPES
 #define _CMU_TYPES
 
-typedef union {
-    struct {short int w1,w2,w3,w4; } w;
-    struct {int l1,l2; } l;
-    } quadword;
+typedef union
+{
+    struct
+    {
+        short int w1,w2,w3,w4;
+    } w;
+    struct
+    {
+        int l1,l2;
+    } l;
+} quadword;
 
-typedef union {
-    struct {int l1,l2,l3,l4; } l;
-    } octaword;
+typedef union
+{
+    struct
+    {
+        int l1,l2,l3,l4;
+    } l;
+} octaword;
 
 #define word short
-#define uword unsigned short	
+#define uword unsigned short
 #define ushort unsigned short
 #define ulong unsigned long
 #define uchar unsigned char
@@ -55,7 +66,7 @@ typedef union {
 #endif _CMU_TYPES
 
 #define word short
-#define uword unsigned short	
+#define uword unsigned short
 #define ushort unsigned short
 #define ulong unsigned long
 #define uchar unsigned char
@@ -72,8 +83,9 @@ devconfig.bli) at compile time and from the file devconfig.txt during acp initia
 !!!HACK!!! fix this comment to mention the run-time loadable images.
 */
 
-typedef struct {
-  unsigned char dc_begin[0];
+typedef struct
+{
+    unsigned char dc_begin[0];
 #ifdef __i386__
     quadword	dc_devname;
     quadword	dc_devspec;
@@ -92,19 +104,19 @@ typedef struct {
     ulong	*dc_Send_Qhead;
     ulong	*dc_send_Qtail;
 
-  ulong  dc_flags;
+    ulong  dc_flags;
     unsigned	dc_valid_device:1;
     unsigned	dc_online:1;
     unsigned	dc_is_clone:1;
 
-  unsigned long int dc_clone_dev;
+    unsigned long int dc_clone_dev;
 
     /* MIB data */
     uint	dcmib_ifIndex;		/* Interface index number */
 #ifdef __i386__
-  quadword	dcmib_ifDescr;		/* Interface description string */
+    quadword	dcmib_ifDescr;		/* Interface description string */
 #else
-  octaword	dcmib_ifDescr;		/* Interface description string */
+    octaword	dcmib_ifDescr;		/* Interface description string */
 #endif
     uint	dcmib_ifType;		/* device type */
     uint	dcmib_ifMTU;		/* Max Transfer Unit */
@@ -126,7 +138,7 @@ typedef struct {
     uint	dcmib_ifOutDiscards;	/*  */
     uint	dcmib_ifOutErrors;	/*  */
     uint	dcmib_ifOutQLen;
-    } Device_Configuration_Entry;
+} Device_Configuration_Entry;
 
 #define DC_ENTRY_SIZE sizeof(Device_Configuration_Entry)
 
@@ -180,7 +192,8 @@ The Net_Send routine is called to empty the Net_Send_Queue.
 
  ****************************************************************************/
 
-typedef struct {
+typedef struct
+{
     ulong	*NSQ$Next;
     ulong	*NSQ$Last;
     ulong	*NSQ$Driver;
@@ -192,37 +205,40 @@ typedef struct {
     ushort	NSQ$Type;
     uchar	NSQ$Retry;
     uchar	NSQ$Delete;
-    } Net_Send_Queue_Element;
+} Net_Send_Queue_Element;
 
 /* Q head structure definition */
 
-typedef struct {
+typedef struct
+{
     char	*NS$Qhead;
     char	*NS$Qtail;
-    } QH_Net_send;
+} QH_Net_send;
 
 
 
 /*!!!HACK!!! Why are there no comments here? (besides this one?)*/
 
-typedef struct {
+typedef struct
+{
     int		(*DI$Init)();
     int		(*DI$Xmit)();
     int		(*DI$Dump)();
     int		(*DI$Check)();
     int		(*DI$ARP_Dump)();
-    } Device_Info_Structure;
+} Device_Info_Structure;
 
 
 
-	/*
-	Here we describe the IPACP Information block.  This structure
-	is assembled by the IPACP to describe itself to other modules
-	who wish to interact with it.  It consists of entry points,
-	literals, and pointers to global parameters.
-	*/
+/*
+Here we describe the IPACP Information block.  This structure
+is assembled by the IPACP to describe itself to other modules
+who wish to interact with it.  It consists of entry points,
+literals, and pointers to global parameters.
+*/
 
-typedef struct {
+typedef struct
+{
     /* IAPCP receive callback. */
     int		(*ACPI$IP_Receive)();
 
@@ -257,10 +273,10 @@ typedef struct {
 
     /* IPACP max physical buffer size */
     ushort	ACPI$MPBS;
-    } IPACP_Info_Structure;
+} IPACP_Info_Structure;
 
 #undef word short
-#undef uword unsigned short	
+#undef uword unsigned short
 #undef ushort unsigned short
 #undef ulong unsigned long
 #undef uchar unsigned char

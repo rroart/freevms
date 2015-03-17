@@ -33,26 +33,28 @@
 void cmd_insert (char *cp)
 
 {
-  Line *line;
-  String *string;
+    Line *line;
+    String *string;
 
-  if (range_single (cp, &cp, &cur_position) < 0) return;		/* see where to insert */
-  if (*cp == ';') {							/* if ;, insert the remaining string before current line */
+    if (range_single (cp, &cp, &cur_position) < 0) return;		/* see where to insert */
+    if (*cp == ';')  							/* if ;, insert the remaining string before current line */
+    {
+        cur_position.offset = 0;
+        string = string_create (strlen (cp + 1), cp + 1);
+        string_concat (string, 1, "\n");
+        buffer_dirty (cur_position.buffer, 1);
+        line_insert (cur_position.buffer, cur_position.line, string);
+        return;
+    }
+    if (!eoltest (cp)) return;						/* otherwise, that's all there should be */
+
+    /* Read tty input until eof into the current buffer just before the current line */
+
     cur_position.offset = 0;
-    string = string_create (strlen (cp + 1), cp + 1);
-    string_concat (string, 1, "\n");
-    buffer_dirty (cur_position.buffer, 1);
-    line_insert (cur_position.buffer, cur_position.line, string);
-    return;
-  }
-  if (!eoltest (cp)) return;						/* otherwise, that's all there should be */
-
-  /* Read tty input until eof into the current buffer just before the current line */
-
-  cur_position.offset = 0;
-  while ((string = jnl_readprompt ("\r\n               >")) != NULL) {
-    string_concat (string, 1, "\n");					/* put line terminator on string */
-    buffer_dirty (cur_position.buffer, 1);
-    line_insert (cur_position.buffer, cur_position.line, string);	/* insert line just before current line */
-  }
+    while ((string = jnl_readprompt ("\r\n               >")) != NULL)
+    {
+        string_concat (string, 1, "\n");					/* put line terminator on string */
+        buffer_dirty (cur_position.buffer, 1);
+        line_insert (cur_position.buffer, cur_position.line, string);	/* insert line just before current line */
+    }
 }

@@ -27,14 +27,14 @@
  *		Linus
  */
 
- /*
-  *  Bit simplified and optimized by Jan Hubicka
-  *  Support of BIGMEM added by Gerhard Wichert, Siemens AG, July 1999.
-  *
-  *  isa_memset_io, isa_memcpy_fromio, isa_memcpy_toio added,
-  *  isa_read[wl] and isa_write[wl] fixed
-  *  - Arnaldo Carvalho de Melo <acme@conectiva.com.br>
-  */
+/*
+ *  Bit simplified and optimized by Jan Hubicka
+ *  Support of BIGMEM added by Gerhard Wichert, Siemens AG, July 1999.
+ *
+ *  isa_memset_io, isa_memcpy_fromio, isa_memcpy_toio added,
+ *  isa_read[wl] and isa_write[wl] fixed
+ *  - Arnaldo Carvalho de Melo <acme@conectiva.com.br>
+ */
 
 #define IO_SPACE_LIMIT 0xffff
 
@@ -50,12 +50,12 @@
  * unmapped ISA addresses. Will be removed in 2.4.
  */
 #if CONFIG_DEBUG_IOVIRT
-  extern void *__io_virt_debug(unsigned long x, const char *file, int line);
-  extern unsigned long __io_phys_debug(unsigned long x, const char *file, int line);
-  #define __io_virt(x) __io_virt_debug((unsigned long)(x), __FILE__, __LINE__)
+extern void *__io_virt_debug(unsigned long x, const char *file, int line);
+extern unsigned long __io_phys_debug(unsigned long x, const char *file, int line);
+#define __io_virt(x) __io_virt_debug((unsigned long)(x), __FILE__, __LINE__)
 //#define __io_phys(x) __io_phys_debug((unsigned long)(x), __FILE__, __LINE__)
 #else
-  #define __io_virt(x) ((void *)(x))
+#define __io_virt(x) ((void *)(x))
 //#define __io_phys(x) __pa(x)
 #endif
 
@@ -65,12 +65,12 @@
  */
 static inline unsigned long virt_to_phys(volatile void * address)
 {
-	return __pa(address);
+    return __pa(address);
 }
 
 static inline void * phys_to_virt(unsigned long address)
 {
-	return __va(address);
+    return __va(address);
 }
 
 /*
@@ -82,7 +82,7 @@ extern void * __ioremap(unsigned long offset, unsigned long size, unsigned long 
 
 static inline void * ioremap (unsigned long offset, unsigned long size)
 {
-	return __ioremap(offset, size, 0);
+    return __ioremap(offset, size, 0);
 }
 
 /*
@@ -92,7 +92,7 @@ static inline void * ioremap (unsigned long offset, unsigned long size)
  */
 static inline void * ioremap_nocache (unsigned long offset, unsigned long size)
 {
-        return __ioremap(offset, size, _PAGE_PCD);
+    return __ioremap(offset, size, _PAGE_PCD);
 }
 
 extern void iounmap(void *addr);
@@ -158,35 +158,39 @@ extern void iounmap(void *addr);
 #define isa_eth_io_copy_and_sum(a,b,c,d)	eth_copy_and_sum((a),__io_virt(__ISA_IO_base + (b)),(c),(d))
 
 static inline int check_signature(unsigned long io_addr,
-	const unsigned char *signature, int length)
+                                  const unsigned char *signature, int length)
 {
-	int retval = 0;
-	do {
-		if (readb(io_addr) != *signature)
-			goto out;
-		io_addr++;
-		signature++;
-		length--;
-	} while (length);
-	retval = 1;
+    int retval = 0;
+    do
+    {
+        if (readb(io_addr) != *signature)
+            goto out;
+        io_addr++;
+        signature++;
+        length--;
+    }
+    while (length);
+    retval = 1;
 out:
-	return retval;
+    return retval;
 }
 
 static inline int isa_check_signature(unsigned long io_addr,
-	const unsigned char *signature, int length)
+                                      const unsigned char *signature, int length)
 {
-	int retval = 0;
-	do {
-		if (isa_readb(io_addr) != *signature)
-			goto out;
-		io_addr++;
-		signature++;
-		length--;
-	} while (length);
-	retval = 1;
+    int retval = 0;
+    do
+    {
+        if (isa_readb(io_addr) != *signature)
+            goto out;
+        io_addr++;
+        signature++;
+        length--;
+    }
+    while (length);
+    retval = 1;
 out:
-	return retval;
+    return retval;
 }
 
 /*
@@ -196,12 +200,12 @@ out:
  *	1. Out of order aware processors
  *	2. Accidentally out of order processors (PPro errata #51)
  */
- 
+
 #if defined(CONFIG_X86_OOSTORE) || defined(CONFIG_X86_PPRO_FENCE)
 
 static inline void flush_write_buffers(void)
 {
-	__asm__ __volatile__ ("lock; addl $0,0(%%esp)": : :"memory");
+    __asm__ __volatile__ ("lock; addl $0,0(%%esp)": : :"memory");
 }
 
 #define dma_cache_inv(_start,_size)		flush_write_buffers()
@@ -252,11 +256,11 @@ __asm__ __volatile__ ("out" #s " %" s1 "0,%" s2 "1"
 __OUT1(s##_local,x) __OUT2(s,s1,"w") : : "a" (value), "Nd" (port)); } \
 __OUT1(s##_p_local,x) __OUT2(s,s1,"w") __FULL_SLOW_DOWN_IO : : "a" (value), "Nd" (port));} \
 __OUTQ0(s,s,x) \
-__OUTQ0(s,s##_p,x) 
+__OUTQ0(s,s##_p,x)
 #else
 #define __OUT(s,s1,x) \
 __OUT1(s,x) __OUT2(s,s1,"w") : : "a" (value), "Nd" (port)); } \
-__OUT1(s##_p,x) __OUT2(s,s1,"w") __FULL_SLOW_DOWN_IO : : "a" (value), "Nd" (port));} 
+__OUT1(s##_p,x) __OUT2(s,s1,"w") __FULL_SLOW_DOWN_IO : : "a" (value), "Nd" (port));}
 #endif /* CONFIG_MULTIQUAD */
 
 #ifdef CONFIG_MULTIQUAD
@@ -266,7 +270,7 @@ static inline void out##ss(unsigned x value, unsigned short port) { \
 		write##s(value, (unsigned long) xquad_portio + port); \
 	else               /* We're still in early boot, running on quad 0 */ \
 		out##ss##_local(value, port); \
-} 
+}
 
 #define __INQ0(s,ss)       /* Do the equivalent of the portio op on quad 0 */ \
 static inline RETURN_TYPE in##ss(unsigned short port) { \
@@ -288,11 +292,11 @@ __asm__ __volatile__ ("in" #s " %" s2 "1,%" s1 "0"
 __IN1(s##_local) __IN2(s,s1,"w") : "=a" (_v) : "Nd" (port) ,##i ); return _v; } \
 __IN1(s##_p_local) __IN2(s,s1,"w") __FULL_SLOW_DOWN_IO : "=a" (_v) : "Nd" (port) ,##i ); return _v; } \
 __INQ0(s,s) \
-__INQ0(s,s##_p) 
+__INQ0(s,s##_p)
 #else
 #define __IN(s,s1,i...) \
 __IN1(s) __IN2(s,s1,"w") : "=a" (_v) : "Nd" (port) ,##i ); return _v; } \
-__IN1(s##_p) __IN2(s,s1,"w") __FULL_SLOW_DOWN_IO : "=a" (_v) : "Nd" (port) ,##i ); return _v; } 
+__IN1(s##_p) __IN2(s,s1,"w") __FULL_SLOW_DOWN_IO : "=a" (_v) : "Nd" (port) ,##i ); return _v; }
 #endif /* CONFIG_MULTIQUAD */
 
 #define __INS(s) \

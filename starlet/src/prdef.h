@@ -198,120 +198,134 @@
 #define PR$M_IEEE_UNFD 0x2000000000000000
 #define PR$M_IEEE_INED 0x4000000000000000
 #define PR$M_IEEE_SUMMARY 0x8000000000000000
-	
-union _prdef {
-  unsigned long long pr$q_quad_access;
-  unsigned int pr$l_long_access [2];
-  struct  {
-    unsigned pr$v_sid_sn : 12;
-    unsigned pr$v_sid_pl : 3;
-    unsigned pr$v_sid_eco : 9;
-    unsigned pr$v_sid_type : 8;
-  };
-  struct  {
-    unsigned pr$v_fill_xsid_bits : 24;
-    unsigned pr$v_xsid_type : 8;
-  };
-  union  {
-    unsigned pr$v_asten : 4;
-    struct  {
-      unsigned pr$v_asten_ken : 1;
-      unsigned pr$v_asten_een : 1;
-      unsigned pr$v_asten_sen : 1;
-      unsigned pr$v_asten_uen : 1;
-      unsigned pr$v_fill_65_ : 4;
-    };
-  };
-  union  {
-    unsigned pr$v_astsr : 4;
-    struct  {
-      unsigned pr$v_astsr_kpd : 1;
-      unsigned pr$v_astsr_epd : 1;
-      unsigned pr$v_astsr_spd : 1;
-      unsigned pr$v_astsr_upd : 1;
-      unsigned pr$v_fill_66_ : 4;
-    };
-  };
-  unsigned pr$v_fen_fen : 1;
-  unsigned pr$v_datfx_datfx : 1;
-  unsigned pr$v_ipl_ipl : 5;
-  struct  {
-    unsigned pr$v_mces_mck : 1;
-    unsigned pr$v_mces_sce : 1;
-    unsigned pr$v_mces_pce : 1;
-    unsigned pr$v_mces_dpc : 1;
-    unsigned pr$v_mces_dsc : 1;
-    unsigned pr$v_fill_67_ : 3;
-  };
 
-  struct  {
-    unsigned pr$v_ps_sw : 2;
-    unsigned pr$v_fill_68_ : 6;
-  };
-  struct  {
-    unsigned pr$v_ps_prvmod : 2;
-    unsigned pr$v_ps_sysstate : 1;
-    unsigned pr$v_ps_curmod : 2;
-    unsigned psdef$$_ps_fill_1 : 2;
-    unsigned pr$v_ps_vmm : 1;
-    unsigned pr$v_ps_ipl : 5;
-    unsigned psdef$$_ps_fill_2 : 20;
-    unsigned psdef$$_ps_fill_3 : 23;
-    unsigned pr$v_ps_sp_align : 6;
-    unsigned pr$v_ps_mbz_62 : 1;
-    unsigned pr$v_ps_mbz_63 : 1;
-  };
-  unsigned pr$v_ptbr_pfn : 32;
-  unsigned pr$v_scbb_pfn : 32;
-  unsigned pr$v_sirr_lvl : 4;
-  union  {
-    unsigned pr$v_sisr_summary : 16;
-    struct  {
-      unsigned pr$v_sisr_raz : 1;
-      unsigned pr$v_sisr_ir1 : 1;
-      unsigned pr$v_sisr_ir2 : 1;
-      unsigned pr$v_sisr_ir3 : 1;
-      unsigned pr$v_sisr_ir4 : 1;
-      unsigned pr$v_sisr_ir5 : 1;
-      unsigned pr$v_sisr_ir6 : 1;
-      unsigned pr$v_sisr_ir7 : 1;
-      unsigned pr$v_sisr_ir8 : 1;
-      unsigned pr$v_sisr_ir9 : 1;
-      unsigned pr$v_sisr_ir10 : 1;
-      unsigned pr$v_sisr_ir11 : 1;
-      unsigned pr$v_sisr_ir12 : 1;
-      unsigned pr$v_sisr_ir13 : 1;
-      unsigned pr$v_sisr_ir14 : 1;
-      unsigned pr$v_sisr_ir15 : 1;
+union _prdef
+{
+    unsigned long long pr$q_quad_access;
+    unsigned int pr$l_long_access [2];
+    struct
+    {
+        unsigned pr$v_sid_sn : 12;
+        unsigned pr$v_sid_pl : 3;
+        unsigned pr$v_sid_eco : 9;
+        unsigned pr$v_sid_type : 8;
     };
-  };
-  struct  {
-    unsigned pr$v_tbchk_va_present : 1;
-    unsigned pr$v_fill_1 : 31;
-    unsigned pr$v_fill_2 : 31;
-    unsigned pr$v_tbchk_no_tbchk : 1;
-  };
-  struct  {
-    unsigned pr$v_fpcr_fill_1 : 32;
-    unsigned pr$v_fpcr_fill_2 : 15;
-    unsigned pr$v_ieee_dnod : 1;
-    unsigned pr$v_ieee_dnz : 1;
-    unsigned pr$v_ieee_invd : 1;
-    unsigned pr$v_ieee_dzed : 1;
-    unsigned pr$v_ieee_ovfd : 1;
-    unsigned pr$v_ieee_inv : 1;
-    unsigned pr$v_ieee_dze : 1;
-    unsigned pr$v_ieee_ovf : 1;
-    unsigned pr$v_ieee_unf : 1;
-    unsigned pr$v_ieee_ine : 1;
-    unsigned pr$v_ieee_iov : 1;
-    unsigned pr$v_ieee_dyn_rnd : 2;
-    unsigned pr$v_ieee_undz : 1;
-    unsigned pr$v_ieee_unfd : 1;
-    unsigned pr$v_ieee_ined : 1;
-    unsigned pr$v_ieee_summary : 1;
-  };
+    struct
+    {
+        unsigned pr$v_fill_xsid_bits : 24;
+        unsigned pr$v_xsid_type : 8;
+    };
+    union
+    {
+        unsigned pr$v_asten : 4;
+        struct
+        {
+            unsigned pr$v_asten_ken : 1;
+            unsigned pr$v_asten_een : 1;
+            unsigned pr$v_asten_sen : 1;
+            unsigned pr$v_asten_uen : 1;
+            unsigned pr$v_fill_65_ : 4;
+        };
+    };
+    union
+    {
+        unsigned pr$v_astsr : 4;
+        struct
+        {
+            unsigned pr$v_astsr_kpd : 1;
+            unsigned pr$v_astsr_epd : 1;
+            unsigned pr$v_astsr_spd : 1;
+            unsigned pr$v_astsr_upd : 1;
+            unsigned pr$v_fill_66_ : 4;
+        };
+    };
+    unsigned pr$v_fen_fen : 1;
+    unsigned pr$v_datfx_datfx : 1;
+    unsigned pr$v_ipl_ipl : 5;
+    struct
+    {
+        unsigned pr$v_mces_mck : 1;
+        unsigned pr$v_mces_sce : 1;
+        unsigned pr$v_mces_pce : 1;
+        unsigned pr$v_mces_dpc : 1;
+        unsigned pr$v_mces_dsc : 1;
+        unsigned pr$v_fill_67_ : 3;
+    };
+
+    struct
+    {
+        unsigned pr$v_ps_sw : 2;
+        unsigned pr$v_fill_68_ : 6;
+    };
+    struct
+    {
+        unsigned pr$v_ps_prvmod : 2;
+        unsigned pr$v_ps_sysstate : 1;
+        unsigned pr$v_ps_curmod : 2;
+        unsigned psdef$$_ps_fill_1 : 2;
+        unsigned pr$v_ps_vmm : 1;
+        unsigned pr$v_ps_ipl : 5;
+        unsigned psdef$$_ps_fill_2 : 20;
+        unsigned psdef$$_ps_fill_3 : 23;
+        unsigned pr$v_ps_sp_align : 6;
+        unsigned pr$v_ps_mbz_62 : 1;
+        unsigned pr$v_ps_mbz_63 : 1;
+    };
+    unsigned pr$v_ptbr_pfn : 32;
+    unsigned pr$v_scbb_pfn : 32;
+    unsigned pr$v_sirr_lvl : 4;
+    union
+    {
+        unsigned pr$v_sisr_summary : 16;
+        struct
+        {
+            unsigned pr$v_sisr_raz : 1;
+            unsigned pr$v_sisr_ir1 : 1;
+            unsigned pr$v_sisr_ir2 : 1;
+            unsigned pr$v_sisr_ir3 : 1;
+            unsigned pr$v_sisr_ir4 : 1;
+            unsigned pr$v_sisr_ir5 : 1;
+            unsigned pr$v_sisr_ir6 : 1;
+            unsigned pr$v_sisr_ir7 : 1;
+            unsigned pr$v_sisr_ir8 : 1;
+            unsigned pr$v_sisr_ir9 : 1;
+            unsigned pr$v_sisr_ir10 : 1;
+            unsigned pr$v_sisr_ir11 : 1;
+            unsigned pr$v_sisr_ir12 : 1;
+            unsigned pr$v_sisr_ir13 : 1;
+            unsigned pr$v_sisr_ir14 : 1;
+            unsigned pr$v_sisr_ir15 : 1;
+        };
+    };
+    struct
+    {
+        unsigned pr$v_tbchk_va_present : 1;
+        unsigned pr$v_fill_1 : 31;
+        unsigned pr$v_fill_2 : 31;
+        unsigned pr$v_tbchk_no_tbchk : 1;
+    };
+    struct
+    {
+        unsigned pr$v_fpcr_fill_1 : 32;
+        unsigned pr$v_fpcr_fill_2 : 15;
+        unsigned pr$v_ieee_dnod : 1;
+        unsigned pr$v_ieee_dnz : 1;
+        unsigned pr$v_ieee_invd : 1;
+        unsigned pr$v_ieee_dzed : 1;
+        unsigned pr$v_ieee_ovfd : 1;
+        unsigned pr$v_ieee_inv : 1;
+        unsigned pr$v_ieee_dze : 1;
+        unsigned pr$v_ieee_ovf : 1;
+        unsigned pr$v_ieee_unf : 1;
+        unsigned pr$v_ieee_ine : 1;
+        unsigned pr$v_ieee_iov : 1;
+        unsigned pr$v_ieee_dyn_rnd : 2;
+        unsigned pr$v_ieee_undz : 1;
+        unsigned pr$v_ieee_unfd : 1;
+        unsigned pr$v_ieee_ined : 1;
+        unsigned pr$v_ieee_summary : 1;
+    };
 };
- 
+
 #endif
- 
+

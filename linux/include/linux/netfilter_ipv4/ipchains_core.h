@@ -34,25 +34,25 @@ typedef char ip_chainlabel[IP_FW_MAX_LABEL_LENGTH+1];
 
 struct ip_fw
 {
-	struct in_addr fw_src, fw_dst;		/* Source and destination IP addr */
-	struct in_addr fw_smsk, fw_dmsk;	/* Mask for src and dest IP addr */
-	__u32 fw_mark;                          /* ID to stamp on packet */
-	__u16 fw_proto;                         /* Protocol, 0 = ANY */
-	__u16 fw_flg;			        /* Flags word */
-        __u16 fw_invflg;                        /* Inverse flags */
-	__u16 fw_spts[2];                       /* Source port range. */
-        __u16 fw_dpts[2];                       /* Destination port range. */
-	__u16 fw_redirpt;                       /* Port to redirect to. */
-	__u16 fw_outputsize;                    /* Max amount to output to
+    struct in_addr fw_src, fw_dst;		/* Source and destination IP addr */
+    struct in_addr fw_smsk, fw_dmsk;	/* Mask for src and dest IP addr */
+    __u32 fw_mark;                          /* ID to stamp on packet */
+    __u16 fw_proto;                         /* Protocol, 0 = ANY */
+    __u16 fw_flg;			        /* Flags word */
+    __u16 fw_invflg;                        /* Inverse flags */
+    __u16 fw_spts[2];                       /* Source port range. */
+    __u16 fw_dpts[2];                       /* Destination port range. */
+    __u16 fw_redirpt;                       /* Port to redirect to. */
+    __u16 fw_outputsize;                    /* Max amount to output to
 						   NETLINK */
-	char           fw_vianame[IFNAMSIZ];	/* name of interface "via" */
-	__u8           fw_tosand, fw_tosxor;	/* Revised packet priority */
+    char           fw_vianame[IFNAMSIZ];	/* name of interface "via" */
+    __u8           fw_tosand, fw_tosxor;	/* Revised packet priority */
 };
 
 struct ip_fwuser
 {
-	struct ip_fw ipfw;
-	ip_chainlabel label;
+    struct ip_fw ipfw;
+    ip_chainlabel label;
 };
 
 /* Values for "fw_flg" field .  */
@@ -118,50 +118,51 @@ struct ip_fwuser
 
 struct ip_fwpkt
 {
-	struct iphdr fwp_iph;			/* IP header */
-	union {
-		struct tcphdr fwp_tcph;		/* TCP header or */
-		struct udphdr fwp_udph;		/* UDP header */
-		struct icmphdr fwp_icmph;	/* ICMP header */
-	} fwp_protoh;
-	struct in_addr fwp_via;			/* interface address */
-	char           fwp_vianame[IFNAMSIZ];	/* interface name */
+    struct iphdr fwp_iph;			/* IP header */
+    union
+    {
+        struct tcphdr fwp_tcph;		/* TCP header or */
+        struct udphdr fwp_udph;		/* UDP header */
+        struct icmphdr fwp_icmph;	/* ICMP header */
+    } fwp_protoh;
+    struct in_addr fwp_via;			/* interface address */
+    char           fwp_vianame[IFNAMSIZ];	/* interface name */
 };
 
 /* The argument to IP_FW_DELETE and IP_FW_APPEND */
 struct ip_fwchange
 {
-	struct ip_fwuser fwc_rule;
-	ip_chainlabel fwc_label;
-};	
+    struct ip_fwuser fwc_rule;
+    ip_chainlabel fwc_label;
+};
 
 /* The argument to IP_FW_CHECK. */
 struct ip_fwtest
 {
-	struct ip_fwpkt fwt_packet; /* Packet to be tested */
-	ip_chainlabel fwt_label;   /* Block to start test in */
+    struct ip_fwpkt fwt_packet; /* Packet to be tested */
+    ip_chainlabel fwt_label;   /* Block to start test in */
 };
-						
+
 /* The argument to IP_FW_DELETE_NUM */
 struct ip_fwdelnum
 {
-	__u32 fwd_rulenum;
-	ip_chainlabel fwd_label;
+    __u32 fwd_rulenum;
+    ip_chainlabel fwd_label;
 };
 
 /* The argument to IP_FW_REPLACE and IP_FW_INSERT */
 struct ip_fwnew
 {
-	__u32 fwn_rulenum;
-	struct ip_fwuser fwn_rule;
-	ip_chainlabel fwn_label;
+    __u32 fwn_rulenum;
+    struct ip_fwuser fwn_rule;
+    ip_chainlabel fwn_label;
 };
 
 /* The argument to IP_FW_POLICY */
 struct ip_fwpolicy
 {
-	ip_chainlabel fwp_policy;
-	ip_chainlabel fwp_label;
+    ip_chainlabel fwp_policy;
+    ip_chainlabel fwp_label;
 };
 /*
  * timeouts for ip masquerading

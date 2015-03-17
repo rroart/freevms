@@ -1,5 +1,5 @@
 #ifndef _LAPB_H
-#define _LAPB_H 
+#define _LAPB_H
 #include <linux/lapb.h>
 
 #define	LAPB_HEADER_LEN	20		/* LAPB over Ethernet + a bit more */
@@ -47,12 +47,13 @@
 #define	LAPB_ADDR_D	0x07
 
 /* Define Link State constants. */
-enum {
-	LAPB_STATE_0,	/* Disconnected State		*/
-	LAPB_STATE_1,	/* Awaiting Connection State	*/
-	LAPB_STATE_2,	/* Awaiting Disconnection State	*/
-	LAPB_STATE_3,	/* Data Transfer State		*/
-	LAPB_STATE_4	/* Frame Reject State		*/
+enum
+{
+    LAPB_STATE_0,	/* Disconnected State		*/
+    LAPB_STATE_1,	/* Awaiting Connection State	*/
+    LAPB_STATE_2,	/* Awaiting Disconnection State	*/
+    LAPB_STATE_3,	/* Data Transfer State		*/
+    LAPB_STATE_4	/* Frame Reject State		*/
 };
 
 #define	LAPB_DEFAULT_MODE		(LAPB_STANDARD | LAPB_SLP | LAPB_DTE)
@@ -67,39 +68,41 @@ enum {
 /*
  *	Information about the current frame.
  */
-struct lapb_frame {
-	unsigned short		type;		/* Parsed type		*/
-	unsigned short		nr, ns;		/* N(R), N(S)		*/
-	unsigned char		cr;		/* Command/Response	*/
-	unsigned char		pf;		/* Poll/Final		*/
-	unsigned char		control[2];	/* Original control data*/
+struct lapb_frame
+{
+    unsigned short		type;		/* Parsed type		*/
+    unsigned short		nr, ns;		/* N(R), N(S)		*/
+    unsigned char		cr;		/* Command/Response	*/
+    unsigned char		pf;		/* Poll/Final		*/
+    unsigned char		control[2];	/* Original control data*/
 };
 
 /*
  *	The per LAPB connection control structure.
  */
-typedef struct lapb_cb {
-	struct lapb_cb		*next;
-	void			*token;
+typedef struct lapb_cb
+{
+    struct lapb_cb		*next;
+    void			*token;
 
-	/* Link status fields */
-	unsigned int		mode;
-	unsigned char		state;
-	unsigned short		vs, vr, va;
-	unsigned char		condition;
-	unsigned short		n2, n2count;
-	unsigned short		t1, t2;
-	struct timer_list	t1timer, t2timer;
+    /* Link status fields */
+    unsigned int		mode;
+    unsigned char		state;
+    unsigned short		vs, vr, va;
+    unsigned char		condition;
+    unsigned short		n2, n2count;
+    unsigned short		t1, t2;
+    struct timer_list	t1timer, t2timer;
 
-	/* Internal control information */
-	struct sk_buff_head	write_queue;
-	struct sk_buff_head	ack_queue;
-	unsigned char		window;
-	struct lapb_register_struct callbacks;
+    /* Internal control information */
+    struct sk_buff_head	write_queue;
+    struct sk_buff_head	ack_queue;
+    unsigned char		window;
+    struct lapb_register_struct callbacks;
 
-	/* FRMR control information */
-	struct lapb_frame	frmr_data;
-	unsigned char		frmr_type;
+    /* FRMR control information */
+    struct lapb_frame	frmr_data;
+    unsigned char		frmr_type;
 } lapb_cb;
 
 /* lapb_iface.c */

@@ -83,35 +83,44 @@ register char *pattern;
     register BOOLEAN ismatch;
 
     ismatch = FALSE;
-    switch (*pattern) {
-	case ASTERISK:
-	    pattern++;
-	    do {
-		ismatch = match (string, pattern);
-	    } while (!ismatch && *string++ != EOS);
-	    break;
-	case QUESTION:
-	    if (*string != EOS) {
-		ismatch = match (++string, ++pattern);
-	    }
-	    break;
-	case EOS:
-	    if (*string == EOS) {
-		ismatch = TRUE;
-	    }
-	    break;
-	case LEFT_BRACKET:
-	    if (*string != EOS) {
-		ismatch = do_list (string, pattern);
-	    }
-	    break;
-	default:
-	    if (*string++ == *pattern++) {
-		ismatch = match (string, pattern);
-	    } else {
-		ismatch = FALSE;
-	    }
-	    break;
+    switch (*pattern)
+    {
+    case ASTERISK:
+        pattern++;
+        do
+        {
+            ismatch = match (string, pattern);
+        }
+        while (!ismatch && *string++ != EOS);
+        break;
+    case QUESTION:
+        if (*string != EOS)
+        {
+            ismatch = match (++string, ++pattern);
+        }
+        break;
+    case EOS:
+        if (*string == EOS)
+        {
+            ismatch = TRUE;
+        }
+        break;
+    case LEFT_BRACKET:
+        if (*string != EOS)
+        {
+            ismatch = do_list (string, pattern);
+        }
+        break;
+    default:
+        if (*string++ == *pattern++)
+        {
+            ismatch = match (string, pattern);
+        }
+        else
+        {
+            ismatch = FALSE;
+        }
+        break;
     }
     return (ismatch);
 }
@@ -204,28 +213,40 @@ char *pattern;
     auto char upper;
 
     pattern++;
-    if (*pattern == '!') {
-	if_found = FALSE;
-	if_not_found = TRUE;
-	pattern++;
-    } else {
-	if_found = TRUE;
-	if_not_found = FALSE;
+    if (*pattern == '!')
+    {
+        if_found = FALSE;
+        if_not_found = TRUE;
+        pattern++;
+    }
+    else
+    {
+        if_found = TRUE;
+        if_not_found = FALSE;
     }
     ismatch = if_not_found;
-    while (*pattern != ']' && *pattern != EOS) {
-	list_parse (&pattern, &lower, &upper);
-	if (*string >= lower && *string <= upper) {
-	    ismatch = if_found;
-	    while (*pattern != ']' && *pattern != EOS) {pattern++;}
-	}
+    while (*pattern != ']' && *pattern != EOS)
+    {
+        list_parse (&pattern, &lower, &upper);
+        if (*string >= lower && *string <= upper)
+        {
+            ismatch = if_found;
+            while (*pattern != ']' && *pattern != EOS)
+            {
+                pattern++;
+            }
+        }
     }
-    if (*pattern++ != ']') {
-	fprintf (stderr, "warning - character class error\n");
-    } else {
-	if (ismatch) {
-	    ismatch = match (++string, pattern);
-	}
+    if (*pattern++ != ']')
+    {
+        fprintf (stderr, "warning - character class error\n");
+    }
+    else
+    {
+        if (ismatch)
+        {
+            ismatch = match (++string, pattern);
+        }
     }
     return (ismatch);
 }
@@ -261,11 +282,14 @@ char *lowp;
 char *highp;
 {
     *lowp = nextch (patp);
-    if (**patp == '-') {
-	(*patp)++;
-	*highp = nextch (patp);
-    } else {
-	*highp = *lowp;
+    if (**patp == '-')
+    {
+        (*patp)++;
+        *highp = nextch (patp);
+    }
+    else
+    {
+        *highp = *lowp;
     }
 }
 
@@ -300,18 +324,21 @@ char **patp;
     register int count;
 
     ch = *(*patp)++;
-    if (ch == '\\') {
-	ch = *(*patp)++;
-	if (IS_OCTAL (ch)) {
-	    chsum = 0;
-	    for (count = 0; count < 3 && IS_OCTAL (ch); count++) {
-		chsum *= 8;
-		chsum += ch - '0';
-		ch = *(*patp)++;
-	    }
-	    (*patp)--;
-	    ch = chsum;
-	}
+    if (ch == '\\')
+    {
+        ch = *(*patp)++;
+        if (IS_OCTAL (ch))
+        {
+            chsum = 0;
+            for (count = 0; count < 3 && IS_OCTAL (ch); count++)
+            {
+                chsum *= 8;
+                chsum += ch - '0';
+                ch = *(*patp)++;
+            }
+            (*patp)--;
+            ch = chsum;
+        }
     }
     return (ch);
 }
@@ -320,12 +347,14 @@ char *
 strlocase(str)
 char *str;
 {
-	int  i;
+    int  i;
 
-	for (i = 0; i < strlen(str); i++) {
-		if (IS_UC (str[i])) {
-			str[i] = str[i] - 'A' + 'a';
-		}
-	}
-	return (str);
+    for (i = 0; i < strlen(str); i++)
+    {
+        if (IS_UC (str[i]))
+        {
+            str[i] = str[i] - 'A' + 'a';
+        }
+    }
+    return (str);
 }

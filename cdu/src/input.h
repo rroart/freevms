@@ -26,18 +26,18 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 /* Long-term, we want to get rid of this and typedef fileline location_t.  */
 struct location_s GTY (())
 {
-  /* The name of the source file involved.  */
-  const char *file;
+    /* The name of the source file involved.  */
+    const char *file;
 
-  /* The line-location in the source file.  */
-  int line;
+    /* The line-location in the source file.  */
+    int line;
 };
 typedef struct location_s location_t;
 
 struct file_stack
 {
-  struct file_stack *next;
-  location_t location;
+    struct file_stack *next;
+    location_t location;
 };
 
 /* Top-level source file.  */

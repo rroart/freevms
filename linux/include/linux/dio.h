@@ -13,9 +13,9 @@
 #ifndef _LINUX_DIO_H
 #define _LINUX_DIO_H
 
-/* The DIO boards in a system are distinguished by 'select codes' which 
- * range from 0-63 (DIO) and 132-255 (DIO-II). 
- * The DIO board with select code sc is located at physical address 
+/* The DIO boards in a system are distinguished by 'select codes' which
+ * range from 0-63 (DIO) and 132-255 (DIO-II).
+ * The DIO board with select code sc is located at physical address
  *     0x600000 + sc * 0x10000
  * So DIO cards cover [0x600000-0x800000); the areas [0x200000-0x400000) and
  * [0x800000-0x1000000) are for additional space required by things
@@ -24,7 +24,7 @@
  * at 0xf0000000 on bootup.
  * DIO-II boards are at 0x1000000 + (sc - 132) * 0x400000
  * which is address range [0x1000000-0x20000000) -- too big to map completely,
- * so currently we just don't handle DIO-II boards.  It wouldn't be hard to 
+ * so currently we just don't handle DIO-II boards.  It wouldn't be hard to
  * do with ioremap() though.
  */
 #ifdef __KERNEL__
@@ -36,7 +36,7 @@
 #define DIO_SECIDOFF  0x15                        /* secondary device ID */
 #define DIOII_SIZEOFF 0x101                       /* device size, DIO-II only */
 
-/* The internal HPIB device is special; this is its physaddr; its select code is 7. 
+/* The internal HPIB device is special; this is its physaddr; its select code is 7.
  * The reason why we have to treat it specially is because apparently it's broken:
  * the device ID isn't consistent/reliable. *sigh*
  */
@@ -67,7 +67,7 @@
 /* Highest valid select code. If we add DIO-II support this should become
  * 256 for everything except HP320, which only has DIO.
  */
-#define DIO_SCMAX 32                             
+#define DIO_SCMAX 32
 #define DIOII_SCBASE 132 /* lowest DIO-II select code */
 #define DIO_SCINHOLE(scode) (((scode) >= 32) && ((scode) < DIOII_SCBASE))
 

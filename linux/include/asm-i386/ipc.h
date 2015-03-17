@@ -1,14 +1,15 @@
 #ifndef __i386_IPC_H__
 #define __i386_IPC_H__
 
-/* 
+/*
  * These are used to wrap system calls on x86.
  *
  * See arch/i386/kernel/sys_i386.c for ugly details..
  */
-struct ipc_kludge {
-	struct msgbuf *msgp;
-	long msgtyp;
+struct ipc_kludge
+{
+    struct msgbuf *msgp;
+    long msgtyp;
 };
 
 #define SEMOP		 1

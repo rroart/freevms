@@ -32,7 +32,7 @@
 *
 * ABSTRACT:
 *
-*   C header file defining some of the CMU-OpenVMS/IP data types needed for 
+*   C header file defining some of the CMU-OpenVMS/IP data types needed for
 *   using CMU-OpenVMS/IP from VAX C
 *
 * ENVIRONMENT:
@@ -52,7 +52,8 @@
 #include <descrip.h>
 #define NUL       '\0'
 
-struct cmu$text {
-        struct cmu$text *txt$a_flink, *txt$a_blink;
-        struct dsc$descriptor *txt$q_desc;
+struct cmu$text
+{
+    struct cmu$text *txt$a_flink, *txt$a_blink;
+    struct dsc$descriptor *txt$q_desc;
 };

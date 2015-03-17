@@ -52,7 +52,7 @@ extern unsigned int		nlm_debug;
 #define dprintk(args...)	dfprintk(FACILITY, ## args)
 
 #undef ifdebug
-#ifdef RPC_DEBUG			
+#ifdef RPC_DEBUG
 # define ifdebug(fac)		if (rpc_debug & RPCDBG_##fac)
 # define dfprintk(fac, args...)	do { ifdebug(fac) printk(args); } while(0)
 # define RPC_IFDEBUG(x)		x
@@ -85,11 +85,12 @@ void		rpc_unregister_sysctl(void);
  */
 #define CTL_SUNRPC	7249	/* arbitrary and hopefully unused */
 
-enum {
-	CTL_RPCDEBUG = 1,
-	CTL_NFSDEBUG,
-	CTL_NFSDDEBUG,
-	CTL_NLMDEBUG,
+enum
+{
+    CTL_RPCDEBUG = 1,
+    CTL_NFSDEBUG,
+    CTL_NFSDDEBUG,
+    CTL_NLMDEBUG,
 };
 
 #endif /* _LINUX_SUNRPC_DEBUG_H_ */

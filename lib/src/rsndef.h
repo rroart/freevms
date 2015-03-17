@@ -22,5 +22,5 @@
 #define		RSN$_INNER_MODE		19
 #define		RSN$_EXH		20
 #define		RSN$_MAX		21
-		
+
 #endif

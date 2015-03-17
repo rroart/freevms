@@ -27,9 +27,9 @@
 /*
  * This file is part of the i2c-bus package and contains the identifier
  * values for drivers, adapters and other folk populating these serial
- * worlds. 
+ * worlds.
  *
- * These will change often (i.e. additions) , therefore this has been 
+ * These will change often (i.e. additions) , therefore this has been
  * separated from the functional interface definitions of the i2c api.
  *
  */
@@ -38,10 +38,10 @@
  * ---- Driver types -----------------------------------------------------
  *       device id name + number        function description, i2c address(es)
  *
- *  Range 1000-1999 range is defined in sensors/sensors.h 
- *  Range 0x100 - 0x1ff is for V4L2 Common Components 
+ *  Range 1000-1999 range is defined in sensors/sensors.h
+ *  Range 0x100 - 0x1ff is for V4L2 Common Components
  *  Range 0xf000 - 0xffff is reserved for local experimentation, and should
- *        never be used in official drivers 
+ *        never be used in official drivers
  */
 
 #define I2C_DRIVERID_MSP3400	 1
@@ -99,7 +99,7 @@
 #define I2C_DRIVERID_I2CDEV	900
 #define I2C_DRIVERID_I2CPROC	901
 
-/* IDs --   Use DRIVERIDs 1000-1999 for sensors. 
+/* IDs --   Use DRIVERIDs 1000-1999 for sensors.
    These were originally in sensors.h in the lm_sensors package */
 #define I2C_DRIVERID_LM78 1002
 #define I2C_DRIVERID_LM75 1003
@@ -154,7 +154,7 @@
 #define I2C_ALGO_SHIFT	0x10	/* right shift to get index values 	*/
 
 #define I2C_HW_ADAPS	0x10000		/* # adapter types		*/
-#define I2C_HW_MASK	0xffff		
+#define I2C_HW_MASK	0xffff
 
 
 /* hw specific modules that are defined per algorithm layer

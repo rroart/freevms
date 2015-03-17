@@ -87,169 +87,172 @@ static long ro_bits[MAX_BLKDEV][8];
 
 int is_read_only(kdev_t dev)
 {
-	int minor,major;
+    int minor,major;
 
-	major = MAJOR(dev);
-	minor = MINOR(dev);
-	if (major < 0 || major >= MAX_BLKDEV) return 0;
-	return ro_bits[major][minor >> 5] & (1 << (minor & 31));
+    major = MAJOR(dev);
+    minor = MINOR(dev);
+    if (major < 0 || major >= MAX_BLKDEV) return 0;
+    return ro_bits[major][minor >> 5] & (1 << (minor & 31));
 }
 
 void set_device_ro(kdev_t dev,int flag)
 {
-	int minor,major;
+    int minor,major;
 
-	major = MAJOR(dev);
-	minor = MINOR(dev);
-	if (major < 0 || major >= MAX_BLKDEV) return;
-	if (flag) ro_bits[major][minor >> 5] |= 1 << (minor & 31);
-	else ro_bits[major][minor >> 5] &= ~(1 << (minor & 31));
+    major = MAJOR(dev);
+    minor = MINOR(dev);
+    if (major < 0 || major >= MAX_BLKDEV) return;
+    if (flag) ro_bits[major][minor >> 5] |= 1 << (minor & 31);
+    else ro_bits[major][minor >> 5] &= ~(1 << (minor & 31));
 }
 
 #define MB(kb)	((kb) << 10)
 
 int __init blk_dev_init(void)
 {
-	struct blk_dev_struct *dev;
-	int total_ram;
+    struct blk_dev_struct *dev;
+    int total_ram;
 
-	request_cachep = kmem_cache_create("blkdev_requests",
-					   sizeof(struct request),
-					   0, SLAB_HWCACHE_ALIGN, NULL, NULL);
+    request_cachep = kmem_cache_create("blkdev_requests",
+                                       sizeof(struct request),
+                                       0, SLAB_HWCACHE_ALIGN, NULL, NULL);
 
-	if (!request_cachep)
-		panic("Can't create request pool slab cache\n");
+    if (!request_cachep)
+        panic("Can't create request pool slab cache\n");
 
-	for (dev = blk_dev + MAX_BLKDEV; dev-- != blk_dev;)
-		dev->queue = NULL;
+    for (dev = blk_dev + MAX_BLKDEV; dev-- != blk_dev;)
+        dev->queue = NULL;
 
-	memset(ro_bits,0,sizeof(ro_bits));
-	memset(max_readahead, 0, sizeof(max_readahead));
-	memset(max_sectors, 0, sizeof(max_sectors));
+    memset(ro_bits,0,sizeof(ro_bits));
+    memset(max_readahead, 0, sizeof(max_readahead));
+    memset(max_sectors, 0, sizeof(max_sectors));
 
-	extern unsigned int nr_free_pages(void);
-	total_ram = nr_free_pages() << (PAGE_SHIFT - 10);
+    extern unsigned int nr_free_pages(void);
+    total_ram = nr_free_pages() << (PAGE_SHIFT - 10);
 
-	/*
-	 * Free request slots per queue.
-	 * (Half for reads, half for writes)
-	 */
-	queue_nr_requests = 64;
-	if (total_ram > MB(32))
-		queue_nr_requests = 128;
+    /*
+     * Free request slots per queue.
+     * (Half for reads, half for writes)
+     */
+    queue_nr_requests = 64;
+    if (total_ram > MB(32))
+        queue_nr_requests = 128;
 
-	/*
-	 * Batch frees according to queue length
-	 */
-	batch_requests = queue_nr_requests/4;
-	printk("block: %d slots per queue, batch=%d\n", queue_nr_requests, batch_requests);
+    /*
+     * Batch frees according to queue length
+     */
+    batch_requests = queue_nr_requests/4;
+    printk("block: %d slots per queue, batch=%d\n", queue_nr_requests, batch_requests);
 
 #ifdef CONFIG_AMIGA_Z2RAM
-	z2_init();
+    z2_init();
 #endif
 #ifdef CONFIG_STRAM_SWAP
-	stram_device_init();
+    stram_device_init();
 #endif
 #ifdef CONFIG_BLK_DEV_RAM
-	rd_init();
+    rd_init();
 #endif
 #ifdef CONFIG_ISP16_CDI
-	isp16_init();
+    isp16_init();
 #endif
 #if defined(CONFIG_IDE) && defined(CONFIG_BLK_DEV_IDE)
-	ide_init();		/* this MUST precede hd_init */
+    ide_init();		/* this MUST precede hd_init */
 #endif
 #if defined(CONFIG_IDE) && defined(CONFIG_BLK_DEV_HD)
-	hd_init();
+    hd_init();
 #endif
 #ifdef CONFIG_BLK_DEV_PS2
-	ps2esdi_init();
+    ps2esdi_init();
 #endif
 #ifdef CONFIG_BLK_DEV_XD
-	xd_init();
+    xd_init();
 #endif
 #ifdef CONFIG_BLK_DEV_MFM
-	mfm_init();
+    mfm_init();
 #endif
 #ifdef CONFIG_PARIDE
-	{ extern void paride_init(void); paride_init(); };
+    {
+        extern void paride_init(void);
+        paride_init();
+    };
 #endif
 #ifdef CONFIG_MAC_FLOPPY
-	swim3_init();
+    swim3_init();
 #endif
 #ifdef CONFIG_BLK_DEV_SWIM_IOP
-	swimiop_init();
+    swimiop_init();
 #endif
 #ifdef CONFIG_AMIGA_FLOPPY
-	amiga_floppy_init();
+    amiga_floppy_init();
 #endif
 #ifdef CONFIG_ATARI_FLOPPY
-	atari_floppy_init();
+    atari_floppy_init();
 #endif
 #ifdef CONFIG_BLK_DEV_FD_VMS
-	vms_floppy_init();
+    vms_floppy_init();
 #endif
 #ifdef CONFIG_BLK_DEV_FD
-	floppy_init();
+    floppy_init();
 #else
 #if defined(__i386__)	/* Do we even need this? */
-	outb_p(0xc, 0x3f2);
+    outb_p(0xc, 0x3f2);
 #endif
 #endif
 #ifdef CONFIG_CDU31A
-	cdu31a_init();
+    cdu31a_init();
 #endif
 #ifdef CONFIG_ATARI_ACSI
-	acsi_init();
+    acsi_init();
 #endif
 #ifdef CONFIG_MCD
-	mcd_init();
+    mcd_init();
 #endif
 #ifdef CONFIG_MCDX
-	mcdx_init();
+    mcdx_init();
 #endif
 #ifdef CONFIG_SBPCD
-	sbpcd_init();
+    sbpcd_init();
 #endif
 #ifdef CONFIG_AZTCD
-	aztcd_init();
+    aztcd_init();
 #endif
 #ifdef CONFIG_CDU535
-	sony535_init();
+    sony535_init();
 #endif
 #ifdef CONFIG_GSCD
-	gscd_init();
+    gscd_init();
 #endif
 #ifdef CONFIG_CM206
-	cm206_init();
+    cm206_init();
 #endif
 #ifdef CONFIG_OPTCD
-	optcd_init();
+    optcd_init();
 #endif
 #ifdef CONFIG_SJCD
-	sjcd_init();
+    sjcd_init();
 #endif
 #ifdef CONFIG_APBLOCK
-	ap_init();
+    ap_init();
 #endif
 #ifdef CONFIG_DDV
-	ddv_init();
+    ddv_init();
 #endif
 #ifdef CONFIG_MDISK
-	mdisk_init();
+    mdisk_init();
 #endif
 #ifdef CONFIG_DASD
-	dasd_init();
+    dasd_init();
 #endif
 #if defined(CONFIG_S390_TAPE) && defined(CONFIG_S390_TAPE_BLOCK)
-	tapeblock_init();
+    tapeblock_init();
 #endif
 #ifdef CONFIG_BLK_DEV_XPRAM
-        xpram_init();
+    xpram_init();
 #endif
 
 #ifdef CONFIG_SUN_JSFLASH
-	jsfd_init();
+    jsfd_init();
 #endif
-	return 0;
+    return 0;
 };

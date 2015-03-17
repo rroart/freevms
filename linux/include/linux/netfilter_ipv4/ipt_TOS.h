@@ -5,8 +5,9 @@
 #define IPTOS_NORMALSVC 0
 #endif
 
-struct ipt_tos_target_info {
-	u_int8_t tos;
+struct ipt_tos_target_info
+{
+    u_int8_t tos;
 };
 
 #endif /*_IPT_TOS_H_target*/

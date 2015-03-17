@@ -65,21 +65,21 @@
 
 struct ip_fw
 {
-	struct ip_fw  *fw_next;			/* Next firewall on chain */
-	struct in_addr fw_src, fw_dst;		/* Source and destination IP addr */
-	struct in_addr fw_smsk, fw_dmsk;	/* Mask for src and dest IP addr */
-	struct in_addr fw_via;			/* IP address of interface "via" */
-	struct net_device *fw_viadev;		/* device of interface "via" */
-	__u16	fw_flg;				/* Flags word */
-	__u16 	fw_nsp, fw_ndp;			/* N'of src ports and # of dst ports */
-						/* in ports array (dst ports follow */
-    						/* src ports; max of 10 ports in all; */
-    						/* count of 0 means match all ports) */
+    struct ip_fw  *fw_next;			/* Next firewall on chain */
+    struct in_addr fw_src, fw_dst;		/* Source and destination IP addr */
+    struct in_addr fw_smsk, fw_dmsk;	/* Mask for src and dest IP addr */
+    struct in_addr fw_via;			/* IP address of interface "via" */
+    struct net_device *fw_viadev;		/* device of interface "via" */
+    __u16	fw_flg;				/* Flags word */
+    __u16 	fw_nsp, fw_ndp;			/* N'of src ports and # of dst ports */
+    /* in ports array (dst ports follow */
+    /* src ports; max of 10 ports in all; */
+    /* count of 0 means match all ports) */
 #define IP_FW_MAX_PORTS	10      		/* A reasonable maximum */
-	__u16	fw_pts[IP_FW_MAX_PORTS];	/* Array of port numbers to match */
-	unsigned long  fw_pcnt,fw_bcnt;		/* Packet and byte counters */
-	__u8	fw_tosand, fw_tosxor;		/* Revised packet priority */
-	char           fw_vianame[IFNAMSIZ];	/* name of interface "via" */
+    __u16	fw_pts[IP_FW_MAX_PORTS];	/* Array of port numbers to match */
+    unsigned long  fw_pcnt,fw_bcnt;		/* Packet and byte counters */
+    __u8	fw_tosand, fw_tosxor;		/* Revised packet priority */
+    char           fw_vianame[IFNAMSIZ];	/* name of interface "via" */
 };
 
 /*
@@ -92,17 +92,17 @@ struct ip_fw
 #define IP_FW_F_ICMP	0x0003	/* This is a ICMP packet firewall     */
 #define IP_FW_F_KIND	0x0003	/* Mask to isolate firewall kind      */
 #define IP_FW_F_ACCEPT	0x0004	/* This is an accept firewall (as     *
-				 *         opposed to a deny firewall)*
-				 *                                    */
+*         opposed to a deny firewall)*
+*                                    */
 #define IP_FW_F_SRNG	0x0008	/* The first two src ports are a min  *
-				 * and max range (stored in host byte *
-				 * order).                            *
-				 *                                    */
+* and max range (stored in host byte *
+                 * order).                            *
+*                                    */
 #define IP_FW_F_DRNG	0x0010	/* The first two dst ports are a min  *
-				 * and max range (stored in host byte *
-				 * order).                            *
-				 * (ports[0] <= port <= ports[1])     *
-				 *                                    */
+* and max range (stored in host byte *
+                 * order).                            *
+* (ports[0] <= port <= ports[1])     *
+*                                    */
 #define IP_FW_F_PRN	0x0020	/* In verbose mode print this firewall*/
 #define IP_FW_F_BIDIR	0x0040	/* For bidirectional firewalls        */
 #define IP_FW_F_TCPSYN	0x0080	/* For tcp packets-check SYN only     */
@@ -185,14 +185,15 @@ struct ip_fw
 
 struct ip_fwpkt
 {
-	struct iphdr fwp_iph;			/* IP header */
-	union {
-		struct tcphdr fwp_tcph;		/* TCP header or */
-		struct udphdr fwp_udph;		/* UDP header */
-		struct icmphdr fwp_icmph;	/* ICMP header */
-	} fwp_protoh;
-	struct in_addr fwp_via;			/* interface address */
-	char           fwp_vianame[IFNAMSIZ];	/* interface name */
+    struct iphdr fwp_iph;			/* IP header */
+    union
+    {
+        struct tcphdr fwp_tcph;		/* TCP header or */
+        struct udphdr fwp_udph;		/* UDP header */
+        struct icmphdr fwp_icmph;	/* ICMP header */
+    } fwp_protoh;
+    struct in_addr fwp_via;			/* interface address */
+    char           fwp_vianame[IFNAMSIZ];	/* interface name */
 };
 
 #define IP_FW_MASQCTL_MAX 256
@@ -200,13 +201,15 @@ struct ip_fwpkt
 
 struct ip_fw_masqctl
 {
-	int mctl_action;
-	union {
-		struct {
-			char name[IP_MASQ_MOD_NMAX];
-			char data[1];
-		} mod;
-	} u;
+    int mctl_action;
+    union
+    {
+        struct
+        {
+            char name[IP_MASQ_MOD_NMAX];
+            char data[1];
+        } mod;
+    } u;
 };
 
 /*
@@ -229,28 +232,28 @@ struct ip_fw_masq;
 
 #include <linux/config.h>
 #ifdef CONFIG_IP_FIREWALL
-extern struct ip_fw *ip_fw_in_chain;
-extern struct ip_fw *ip_fw_out_chain;
-extern struct ip_fw *ip_fw_fwd_chain;
-extern int ip_fw_in_policy;
-extern int ip_fw_out_policy;
-extern int ip_fw_fwd_policy;
-extern int ip_fw_ctl(int, void *, int);
+        extern struct ip_fw *ip_fw_in_chain;
+            extern struct ip_fw *ip_fw_out_chain;
+                extern struct ip_fw *ip_fw_fwd_chain;
+                    extern int ip_fw_in_policy;
+                    extern int ip_fw_out_policy;
+                    extern int ip_fw_fwd_policy;
+            extern int ip_fw_ctl(int, void *, int);
 #endif
 #ifdef CONFIG_IP_ACCT
-extern struct ip_fw *ip_acct_chain;
-extern int ip_acct_ctl(int, void *, int);
+            extern struct ip_fw *ip_acct_chain;
+            extern int ip_acct_ctl(int, void *, int);
 #endif
 #ifdef CONFIG_IP_MASQUERADE
-extern int ip_masq_ctl(int, void *, int);
+            extern int ip_masq_ctl(int, void *, int);
 #endif
 #ifdef CONFIG_IP_MASQUERADE
-extern int ip_masq_ctl(int, void *, int);
+            extern int ip_masq_ctl(int, void *, int);
 #endif
 
-extern int ip_fw_masq_timeouts(void *user, int len);
+            extern int ip_fw_masq_timeouts(void *user, int len);
 
-extern int ip_fw_chk(struct iphdr *, struct net_device *, __u16 *,
-		     struct ip_fw *, int, int);
+            extern int ip_fw_chk(struct iphdr *, struct net_device *, __u16 *,
+                                             struct ip_fw *, int, int);
 #endif /* KERNEL */
 #endif /* _IP_FW_H */

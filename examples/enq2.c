@@ -15,72 +15,75 @@ signed long long time15=-150000000;
 signed long long time20=-200000000;
 signed long long time30=-300000000;
 
-void blkast(int par) {
-  printf("blkast %x %x\n",getpid(),par);
+void blkast(int par)
+{
+    printf("blkast %x %x\n",getpid(),par);
 }
 
-void ast(int par) {
-  printf("ast %x %x\n",getpid(),par);
+void ast(int par)
+{
+    printf("ast %x %x\n",getpid(),par);
 }
 
-main(){
-  struct _lksb lksb;
-  unsigned int status, lkmode, flags;
+main()
+{
+    struct _lksb lksb;
+    unsigned int status, lkmode, flags;
 
-  lkmode = LCK$K_NLMODE;
+    lkmode = LCK$K_NLMODE;
 
-  flags = 0;//LCK$M_SYSTEM;
+    flags = 0;//LCK$M_SYSTEM;
 
-  status = sys$enqw(0,
-		    lkmode,
-		    &lksb,
-		    flags,
-		    &resource,
-		    0, ast, 42, blkast, 0, 0);
+    status = sys$enqw(0,
+                      lkmode,
+                      &lksb,
+                      flags,
+                      &resource,
+                      0, ast, 42, blkast, 0, 0);
 
-  printf("main %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid);
+    printf("main %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid);
 
-  sleep (10);
+    sleep (10);
 
-  lkmode = LCK$K_PWMODE;
-  flags = LCK$M_CONVERT;
+    lkmode = LCK$K_PWMODE;
+    flags = LCK$M_CONVERT;
 
-  printf("a %x\n",getpid());
+    printf("a %x\n",getpid());
 
-  status = sys$enqw(0,
-		    lkmode,
-		    &lksb,
-		    flags,
-		    0, 0, ast, 43, blkast, 0, 0);
+    status = sys$enqw(0,
+                      lkmode,
+                      &lksb,
+                      flags,
+                      0, 0, ast, 43, blkast, 0, 0);
 
-  printf("a %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid)\
+    printf("a %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid)\
     ;
 
-  sleep (10);
+    sleep (10);
 
-  lkmode = LCK$K_PRMODE;
+    lkmode = LCK$K_PRMODE;
 
-  lkmode = LCK$K_PRMODE;
-  flags = LCK$M_CONVERT;
+    lkmode = LCK$K_PRMODE;
+    flags = LCK$M_CONVERT;
 
-  printf("b %x\n",getpid());
+    printf("b %x\n",getpid());
 
-  status = sys$enqw(0,
-		    lkmode,
-		    &lksb,
-		    flags,
-		    0, 0, ast, 44, blkast, 0, 0);
+    status = sys$enqw(0,
+                      lkmode,
+                      &lksb,
+                      flags,
+                      0, 0, ast, 44, blkast, 0, 0);
 
-  printf("b %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid)\
+    printf("b %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid)\
     ;
 
-  sleep (10);
+    sleep (10);
 
-  status = sys$deq(lksb.lksb$l_lkid,0,0,0);
+    status = sys$deq(lksb.lksb$l_lkid,0,0,0);
 
-  printf("c %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid)\
+    printf("c %x %x %x %x\n",getpid(),status,lksb.lksb$w_status,lksb.lksb$l_lkid)\
     ;
 
-  sleep(20);
+    sleep(20);
 
 }

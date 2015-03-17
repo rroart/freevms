@@ -308,16 +308,17 @@
 #define SMG$M_IGNORE 0x20
 #define SMG$M_RELEASE_PBD 0x40
 #define SMG$M_SPARE15 0xFFFFFF80
-	
-struct _smgmode_bits {
-  unsigned smg$v_buf_enabled	: 1;
-  unsigned smg$v_minupd		: 1;
-  unsigned smg$v_clear_screen	: 1;
-  unsigned smg$v_notabs		: 1;
-  unsigned smg$v_protect	: 1;
-  unsigned smg$v_ignore		: 1;
-  unsigned smg$v_release_pbd	: 1;
-  unsigned smg$v_spare15	: 25;
+
+struct _smgmode_bits
+{
+    unsigned smg$v_buf_enabled	: 1;
+    unsigned smg$v_minupd		: 1;
+    unsigned smg$v_clear_screen	: 1;
+    unsigned smg$v_notabs		: 1;
+    unsigned smg$v_protect	: 1;
+    unsigned smg$v_ignore		: 1;
+    unsigned smg$v_release_pbd	: 1;
+    unsigned smg$v_spare15	: 25;
 };
 
 #define SMG$M_KEY_NOECHO 0x1
@@ -326,14 +327,15 @@ struct _smgmode_bits {
 #define SMG$M_KEY_PROTECTED 0x8
 #define SMG$M_KEY_SETSTATE 0x10
 #define SMG$M_SPARE18 0xFFFFFFE0
-	
-struct _smg$r_key_def_attr {
-  unsigned smg$v_key_noecho		: 1;
-  unsigned smg$v_key_terminate		: 1;
-  unsigned smg$v_key_lock		: 1;
-  unsigned smg$v_key_protected		: 1;
-  unsigned smg$v_key_setstate		: 1;
-  unsigned smg$v_spare18		: 27;
+
+struct _smg$r_key_def_attr
+{
+    unsigned smg$v_key_noecho		: 1;
+    unsigned smg$v_key_terminate		: 1;
+    unsigned smg$v_key_lock		: 1;
+    unsigned smg$v_key_protected		: 1;
+    unsigned smg$v_key_setstate		: 1;
+    unsigned smg$v_spare18		: 27;
 };
 
 #define SMG$M_BOLD 0x1
@@ -350,23 +352,24 @@ struct _smg$r_key_def_attr {
 #define SMG$M_USER7 0x4000
 #define SMG$M_USER8 0x8000
 #define SMG$M_SPARE14 0xFFFF0000
-	
-struct _smgdef_bits {
-  unsigned smg$v_bold		: 1;
-  unsigned smg$v_reverse	: 1;
-  unsigned smg$v_blink		: 1;
-  unsigned smg$v_underline	: 1;
-  unsigned smg$v_invisible	: 1;
-  unsigned smg$v_fill1		: 3;
-  unsigned smg$v_user1		: 1;
-  unsigned smg$v_user2		: 1;
-  unsigned smg$v_user3		: 1;
-  unsigned smg$v_user4		: 1;
-  unsigned smg$v_user5		: 1;
-  unsigned smg$v_user6		: 1;
-  unsigned smg$v_user7		: 1;
-  unsigned smg$v_user8		: 1;
-  unsigned smg$v_spare14	: 16;
+
+struct _smgdef_bits
+{
+    unsigned smg$v_bold		: 1;
+    unsigned smg$v_reverse	: 1;
+    unsigned smg$v_blink		: 1;
+    unsigned smg$v_underline	: 1;
+    unsigned smg$v_invisible	: 1;
+    unsigned smg$v_fill1		: 3;
+    unsigned smg$v_user1		: 1;
+    unsigned smg$v_user2		: 1;
+    unsigned smg$v_user3		: 1;
+    unsigned smg$v_user4		: 1;
+    unsigned smg$v_user5		: 1;
+    unsigned smg$v_user6		: 1;
+    unsigned smg$v_user7		: 1;
+    unsigned smg$v_user8		: 1;
+    unsigned smg$v_spare14	: 16;
 };
 
 #define SMG$M_BORDER 0x1
@@ -376,71 +379,77 @@ struct _smgdef_bits {
 #define SMG$M_BLOCK_BORDER 0x10
 #define SMG$M_PROTECT_DISPLAY 0x20
 #define SMG$M_SPARE12 0xFFFFFFC0
-	
-struct _display_attributes {
-  unsigned smg$v_border			: 1;
-  unsigned smg$v_trunc_icon		: 1;
-  unsigned smg$v_display_controls	: 1;
-  unsigned smg$v_user_display		: 1;
-  unsigned smg$v_block_border		: 1;
-  unsigned smg$v_protect_display	: 1;
-  unsigned smg$v_spare12		: 26;
+
+struct _display_attributes
+{
+    unsigned smg$v_border			: 1;
+    unsigned smg$v_trunc_icon		: 1;
+    unsigned smg$v_display_controls	: 1;
+    unsigned smg$v_user_display		: 1;
+    unsigned smg$v_block_border		: 1;
+    unsigned smg$v_protect_display	: 1;
+    unsigned smg$v_spare12		: 26;
 };
 
 #define SMG$M_TRUSTED 0x1
 #define SMG$M_AUTHPRIV 0x2
 #define SMG$M_SUBSYSTEM 0x4
 #define SMG$M_SPARE20 0xFFFFFFF8
-	
-struct _smg$r_create_subprocess_flags {
-  unsigned smg$v_trusted		: 1;
-  unsigned smg$v_authpriv		: 1;
-  unsigned smg$v_subsystem		: 1;
-  unsigned smg$v_spare20		: 29;
+
+struct _smg$r_create_subprocess_flags
+{
+    unsigned smg$v_trusted		: 1;
+    unsigned smg$v_authpriv		: 1;
+    unsigned smg$v_subsystem		: 1;
+    unsigned smg$v_spare20		: 29;
 };
 
 #define SMG$M_DATA_FOLLOWS 0x1
 #define SMG$M_SEND_EOF 0x2
 #define SMG$M_NO_PRINT 0x4
 #define SMG$M_SPARE11 0xFFFFFFF8
-	
-struct _smg$r_subprocess_flags {
-  unsigned smg$v_data_follows		: 1;
-  unsigned smg$v_send_eof		: 1;
-  unsigned smg$v_no_print		: 1;
-  unsigned smg$v_spare11		: 29;
+
+struct _smg$r_subprocess_flags
+{
+    unsigned smg$v_data_follows		: 1;
+    unsigned smg$v_send_eof		: 1;
+    unsigned smg$v_no_print		: 1;
+    unsigned smg$v_spare11		: 29;
 };
 
 #define SMG$M_ERASE_PBD 0x1
 #define SMG$M_IGNORE_BATCHED 0x2
 #define SMG$M_SPARE10 0xFFFFFFFC
-	
-struct _smg$r_delete_pbd_flags {
-  unsigned smg$v_erase_pbd		: 1;
-  unsigned smg$v_ignore_batched		: 1;
-  unsigned smg$v_spare10		: 30;
+
+struct _smg$r_delete_pbd_flags
+{
+    unsigned smg$v_erase_pbd		: 1;
+    unsigned smg$v_ignore_batched		: 1;
+    unsigned smg$v_spare10		: 30;
 };
 
 #define SMG$M_KEEP_CONTENTS 0x1
 #define SMG$M_WORKSTATION 0x2
 #define SMG$M_SPARE9 0xFFFFFFFC
-	
-struct _smg$r_create_pbd_flags {
-  unsigned smg$v_keep_contents		: 1;
-  unsigned smg$v_workstation		: 1;
-  unsigned smg$v_spare9			: 30;
+
+struct _smg$r_create_pbd_flags
+{
+    unsigned smg$v_keep_contents		: 1;
+    unsigned smg$v_workstation		: 1;
+    unsigned smg$v_spare9			: 30;
 };
 
 #define SMG$M_FUNC_KEYS 0x1
 #define SMG$M_NOKEEP 0x2
 #define SMG$M_NORECALL 0x4
 #define SMG$M_SPARE8 0xFFFFFFF8
-	
-struct _smg$r_read_flags {
-  unsigned smg$v_func_keys		: 1;
-  unsigned smg$v_nokeep			: 1;
-  unsigned smg$v_norecall		: 1;
-  unsigned smg$v_spare8			: 29;
+
+struct _smg$r_read_flags
+{
+    unsigned smg$v_func_keys		: 1;
+    unsigned smg$v_nokeep			: 1;
+    unsigned smg$v_norecall		: 1;
+    unsigned smg$v_spare8			: 29;
 };
 
 #define SMG$M_CURSOR_OFF 0x1
@@ -448,81 +457,89 @@ struct _smg$r_read_flags {
 #define SMG$M_SCROLL_JUMP 0x4
 #define SMG$M_SCROLL_SMOOTH 0x8
 #define SMG$M_SPARE16 0xFFFFFFF0
-	
-struct _smg$r_set_cursor_flags {
-  unsigned smg$v_cursor_off		: 1;
-  unsigned smg$v_cursor_on		: 1;
-  unsigned smg$v_scroll_jump		: 1;
-  unsigned smg$v_scroll_smooth		: 1;
-  unsigned smg$v_spare16		: 28;
+
+struct _smg$r_set_cursor_flags
+{
+    unsigned smg$v_cursor_off		: 1;
+    unsigned smg$v_cursor_on		: 1;
+    unsigned smg$v_scroll_jump		: 1;
+    unsigned smg$v_scroll_smooth		: 1;
+    unsigned smg$v_spare16		: 28;
 };
 
 #define SMG$M_VIEWPORT 0x1
 #define SMG$M_SUBPROCESS 0x2
 #define SMG$M_MENU 0x4
 #define SMG$M_SPARE7 0xFFFFFFF8
-	
-struct _smg$r_get_display_flags {
-  unsigned smg$v_viewport		: 1;
-  unsigned smg$v_subprocess		: 1;
-  unsigned smg$v_menu			: 1;
-  unsigned smg$v_spare7			: 29;
+
+struct _smg$r_get_display_flags
+{
+    unsigned smg$v_viewport		: 1;
+    unsigned smg$v_subprocess		: 1;
+    unsigned smg$v_menu			: 1;
+    unsigned smg$v_spare7			: 29;
 };
 
 #define SMG$M_ERASE_LINE 0x1
 #define SMG$M_ERASE_TO_EOL 0x2
 #define SMG$M_SPARE6 0xFFFFFFFC
-	
-struct _smg$r_put_chars_flags {
-  unsigned smg$v_erase_line		: 1;
-  unsigned smg$v_erase_to_eol		: 1;
-  unsigned smg$v_spare6			: 30;
+
+struct _smg$r_put_chars_flags
+{
+    unsigned smg$v_erase_line		: 1;
+    unsigned smg$v_erase_to_eol		: 1;
+    unsigned smg$v_spare6			: 30;
 };
 
 #define SMG$M_TEXT_SAVE 0x1
 #define SMG$M_TEXT_ONLY 0x2
 #define SMG$M_SPARE17 0xFFFFFFFC
-	
-struct _smg$r_move_text_flags {
-  unsigned smg$v_text_save		: 1;
-  unsigned smg$v_text_only		: 1;
-  unsigned smg$v_spare17		: 30;
+
+struct _smg$r_move_text_flags
+{
+    unsigned smg$v_text_save		: 1;
+    unsigned smg$v_text_only		: 1;
+    unsigned smg$v_spare17		: 30;
 };
 
 #define SMG$M_FORM_FEED 0x1
 #define SMG$M_SPARE5 0xFFFFFFFE
-	
-struct _smg$r_snapshot_flags {
-  unsigned smg$v_form_feed		: 1;
-  unsigned smg$v_spare5			: 31;
+
+struct _smg$r_snapshot_flags
+{
+    unsigned smg$v_form_feed		: 1;
+    unsigned smg$v_spare5			: 31;
 };
 
 #define SMG$M_WRAP_CHAR 0x1
 #define SMG$M_WRAP_WORD 0x2
 #define SMG$M_SPARE4 0xFFFFFFFC
-	
-struct _smg$r_put_line_flags {
-  unsigned smg$v_wrap_char		: 1;
-  unsigned smg$v_wrap_word		: 1;
-  unsigned smg$v_spare4			: 30;
+
+struct _smg$r_put_line_flags
+{
+    unsigned smg$v_wrap_char		: 1;
+    unsigned smg$v_wrap_word		: 1;
+    unsigned smg$v_spare4			: 30;
 };
 
 #define SMG$M_KEYPAD_APPLICATION 0x1
 #define SMG$M_KEYPAD_NUMERIC 0x2
 #define SMG$M_SPARE3 0xFFFFFFFC
-	
-struct _smg$r_keypad_modes {
-  unsigned smg$v_keypad_application		: 1;
-  unsigned smg$v_keypad_numeric			: 1;
-  unsigned smg$v_spare3				: 30;
+
+struct _smg$r_keypad_modes
+{
+    unsigned smg$v_keypad_application		: 1;
+    unsigned smg$v_keypad_numeric			: 1;
+    unsigned smg$v_spare3				: 30;
 };
 
 #define SMG$M_DISPLAY_PASTED 0x1
 #define SMG$M_SPARE19 0xFFFFFFFE
-	
-struct _smg$r_pasting_info_flags {
-  unsigned smg$v_display_pasted		: 1;
-  unsigned smg$v_spare19		: 31;
+
+struct _smg$r_pasting_info_flags
+{
+    unsigned smg$v_display_pasted		: 1;
+    unsigned smg$v_spare19		: 31;
 };
 
 #define SMG$M_REMOVE_ITEM 0x1
@@ -534,17 +551,18 @@ struct _smg$r_pasting_info_flags {
 #define SMG$M_WRAP_MENU 0x40
 #define SMG$M_FULL_FIELD 0x80
 #define SMG$M_SPARE2 0xFFFFFF00
-	
-struct _smg$r_menu_flags {
-  unsigned smg$v_remove_item	: 1;
-  unsigned smg$v_fixed_format	: 1;
-  unsigned smg$v_double_space	: 1;
-  unsigned smg$v_return_immed	: 1;
-  unsigned smg$v_erase_menu	: 1;
-  unsigned smg$v_wide_menu	: 1;
-  unsigned smg$v_wrap_menu	: 1;
-  unsigned smg$v_full_field	: 1;
-  unsigned smg$v_spare2		: 24;
+
+struct _smg$r_menu_flags
+{
+    unsigned smg$v_remove_item	: 1;
+    unsigned smg$v_fixed_format	: 1;
+    unsigned smg$v_double_space	: 1;
+    unsigned smg$v_return_immed	: 1;
+    unsigned smg$v_erase_menu	: 1;
+    unsigned smg$v_wide_menu	: 1;
+    unsigned smg$v_wrap_menu	: 1;
+    unsigned smg$v_full_field	: 1;
+    unsigned smg$v_spare2		: 24;
 };
 
 #define SMG$M_UP 0x1
@@ -552,13 +570,14 @@ struct _smg$r_menu_flags {
 #define SMG$M_RIGHT 0x4
 #define SMG$M_LEFT 0x8
 #define SMG$M_SPARE1 0xFFFFFFF0
-	
-struct _scroll_dirs {
-  unsigned smg$v_up		: 1;
-  unsigned smg$v_down		: 1;
-  unsigned smg$v_right		: 1;
-  unsigned smg$v_left		: 1;
-  unsigned smg$v_spare1		: 28;
+
+struct _scroll_dirs
+{
+    unsigned smg$v_up		: 1;
+    unsigned smg$v_down		: 1;
+    unsigned smg$v_right		: 1;
+    unsigned smg$v_left		: 1;
+    unsigned smg$v_spare1		: 28;
 };
 
 #define SMG$C_BAND_INFORMATION_TABLE 12
@@ -566,99 +585,112 @@ struct _scroll_dirs {
 #define SMG$C_PASTEBOARD_INFO_BLOCK 36
 
 #define SMG$C_KEYBOARD_INFO_BLOCK 36
-	
-union _smgdef {
-  struct  {
-    unsigned int smg$l_pasteboard_id;
-    unsigned int smg$l_arg;
-    union  {
-      unsigned char smg$b_character;
-      unsigned int smg$l_character;
+
+union _smgdef
+{
+    struct
+    {
+        unsigned int smg$l_pasteboard_id;
+        unsigned int smg$l_arg;
+        union
+        {
+            unsigned char smg$b_character;
+            unsigned int smg$l_character;
+        };
     };
-  };
-  struct  {
-    unsigned int smg$l_devchar;
-    unsigned int smg$l_devdepend;
-    unsigned int smg$l_devdepend2;
-    unsigned char smg$b_devclass;
-    unsigned char smg$b_smg_devtype;
-    unsigned char smg$b_phy_devtype;
-    unsigned char smg$b_rows;
-    unsigned short int smg$w_width;
-    unsigned char smg$b_color;
-    unsigned char smg$b_parity;
-    unsigned short int smg$w_speed;
-    unsigned short int smg$w_fill;
-    unsigned short int smg$w_cursor_row;
-    unsigned short int smg$w_cursor_col;
-    unsigned int smg$l_cursor_did;
-    unsigned int smg$l_devdepend3;
-  };
-  struct  {
-    unsigned int smg$l_fill1;
-    unsigned int smg$l_fill2;
-    unsigned int smg$l_fill3;
-    unsigned char smg$b_fill4;
-    unsigned char smg$b_recall_size;
-    unsigned char smg$b_fill5;
-    unsigned char smg$b_typeahead_char;
-    unsigned short int smg$w_fill6;
-    unsigned short int smg$w_typeahead_count;
-    unsigned int smg$l_fill7;
-    unsigned int smg$l_fill8;
-    unsigned int smg$l_fill9;
-    unsigned int smg$l_fill10;
-  };
+    struct
+    {
+        unsigned int smg$l_devchar;
+        unsigned int smg$l_devdepend;
+        unsigned int smg$l_devdepend2;
+        unsigned char smg$b_devclass;
+        unsigned char smg$b_smg_devtype;
+        unsigned char smg$b_phy_devtype;
+        unsigned char smg$b_rows;
+        unsigned short int smg$w_width;
+        unsigned char smg$b_color;
+        unsigned char smg$b_parity;
+        unsigned short int smg$w_speed;
+        unsigned short int smg$w_fill;
+        unsigned short int smg$w_cursor_row;
+        unsigned short int smg$w_cursor_col;
+        unsigned int smg$l_cursor_did;
+        unsigned int smg$l_devdepend3;
+    };
+    struct
+    {
+        unsigned int smg$l_fill1;
+        unsigned int smg$l_fill2;
+        unsigned int smg$l_fill3;
+        unsigned char smg$b_fill4;
+        unsigned char smg$b_recall_size;
+        unsigned char smg$b_fill5;
+        unsigned char smg$b_typeahead_char;
+        unsigned short int smg$w_fill6;
+        unsigned short int smg$w_typeahead_count;
+        unsigned int smg$l_fill7;
+        unsigned int smg$l_fill8;
+        unsigned int smg$l_fill9;
+        unsigned int smg$l_fill10;
+    };
 };
- 
-struct _smg$r_out_of_band_table {
-  unsigned int smg$l_pbd_id;
-  unsigned int smg$l_user_arg;
-  union  {
-    unsigned char smg$b_char;
-    unsigned int smg$l_char;
-  };
+
+struct _smg$r_out_of_band_table
+{
+    unsigned int smg$l_pbd_id;
+    unsigned int smg$l_user_arg;
+    union
+    {
+        unsigned char smg$b_char;
+        unsigned int smg$l_char;
+    };
 };
 
 #define SMG$C_OUT_OF_BAND_TABLE 12
-	
-struct _smg$r_subprocess_info_table {
-  unsigned int smg$l_disp_id;
-  unsigned int smg$l_usr_arg;
-  unsigned int smg$l_status;
+
+struct _smg$r_subprocess_info_table
+{
+    unsigned int smg$l_disp_id;
+    unsigned int smg$l_usr_arg;
+    unsigned int smg$l_status;
 };
 
 #define SMG$C_SUBPROCESS_INFO_TABLE 12
 
-struct _smg$r_attribute_info_block {
-  unsigned int smg$l_dev_char;
-  unsigned int smg$l_dev_depend;
-  unsigned int smg$l_dev_depend2;
-  unsigned char smg$b_dev_class;
-  union  {
-    unsigned char smg$b_pbd_type;
-    unsigned char smg$b_recall_num;
-  };
-  unsigned char smg$b_dev_type;
-  union  {
-    unsigned char smg$b_num_rows;
-    unsigned char smg$b_typeahd_char;
-  };
-  unsigned short int smg$w_num_columns;
-  union  {
-    unsigned short int smg$w_typeahd_cnt;
-    struct  {
-      unsigned char smg$b_pbd_color;
-      unsigned char smg$b_dev_parity;
+struct _smg$r_attribute_info_block
+{
+    unsigned int smg$l_dev_char;
+    unsigned int smg$l_dev_depend;
+    unsigned int smg$l_dev_depend2;
+    unsigned char smg$b_dev_class;
+    union
+    {
+        unsigned char smg$b_pbd_type;
+        unsigned char smg$b_recall_num;
     };
-  };
-  unsigned short int smg$w_dev_speed;
-  unsigned short int smg$w_dev_fill;
-  unsigned short int smg$w_phys_cursor_row;
-  unsigned short int smg$w_phys_cursor_col;
-  unsigned int smg$l_display_id;
-  unsigned int smg$l_dev_depend3;
+    unsigned char smg$b_dev_type;
+    union
+    {
+        unsigned char smg$b_num_rows;
+        unsigned char smg$b_typeahd_char;
+    };
+    unsigned short int smg$w_num_columns;
+    union
+    {
+        unsigned short int smg$w_typeahd_cnt;
+        struct
+        {
+            unsigned char smg$b_pbd_color;
+            unsigned char smg$b_dev_parity;
+        };
+    };
+    unsigned short int smg$w_dev_speed;
+    unsigned short int smg$w_dev_fill;
+    unsigned short int smg$w_phys_cursor_row;
+    unsigned short int smg$w_phys_cursor_col;
+    unsigned int smg$l_display_id;
+    unsigned int smg$l_dev_depend3;
 };
- 
+
 #endif
- 
+

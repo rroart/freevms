@@ -1,6 +1,6 @@
 #ifndef evtdef_h
 #define evtdef_h
- 
+
 #define EVT$_AST 0
 #define EVT$_COLPGA 0
 #define EVT$_EVENT 1
@@ -16,6 +16,6 @@
 #define EVT$_SWPIN 11
 #define EVT$_SWPINC 12
 #define EVT$_MAXEVT 13
- 
+
 #endif
- 
+

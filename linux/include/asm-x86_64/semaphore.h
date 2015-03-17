@@ -43,12 +43,13 @@
 #include <linux/rwsem.h>
 #include <linux/stringify.h>
 
-struct semaphore {
-	atomic_t count;
-	int sleepers;
-	wait_queue_head_t wait;
+struct semaphore
+{
+    atomic_t count;
+    int sleepers;
+    wait_queue_head_t wait;
 #if WAITQUEUE_DEBUG
-	long __magic;
+    long __magic;
 #endif
 };
 
@@ -74,39 +75,39 @@ struct semaphore {
 
 static inline void sema_init (struct semaphore *sem, int val)
 {
-/*
- *	*sem = (struct semaphore)__SEMAPHORE_INITIALIZER((*sem),val);
- *
- * i'd rather use the more flexible initialization above, but sadly
- * GCC 2.7.2.3 emits a bogus warning. EGCS doesnt. Oh well.
- */
-	atomic_set(&sem->count, val);
-	sem->sleepers = 0;
-	init_waitqueue_head(&sem->wait);
+    /*
+     *	*sem = (struct semaphore)__SEMAPHORE_INITIALIZER((*sem),val);
+     *
+     * i'd rather use the more flexible initialization above, but sadly
+     * GCC 2.7.2.3 emits a bogus warning. EGCS doesnt. Oh well.
+     */
+    atomic_set(&sem->count, val);
+    sem->sleepers = 0;
+    init_waitqueue_head(&sem->wait);
 #if WAITQUEUE_DEBUG
-	sem->__magic = (int)&sem->__magic;
+    sem->__magic = (int)&sem->__magic;
 #endif
 }
 
 static inline void init_MUTEX (struct semaphore *sem)
 {
-	sema_init(sem, 1);
+    sema_init(sem, 1);
 }
 
 static inline void init_MUTEX_LOCKED (struct semaphore *sem)
 {
-	sema_init(sem, 0);
+    sema_init(sem, 0);
 }
 
-asmlinkage void __down_failed(void /* special register calling convention */);
-asmlinkage int  __down_failed_interruptible(void  /* params in registers */);
-asmlinkage int  __down_failed_trylock(void  /* params in registers */);
-asmlinkage void __up_wakeup(void /* special register calling convention */);
+void __down_failed(void /* special register calling convention */);
+int  __down_failed_interruptible(void  /* params in registers */);
+int  __down_failed_trylock(void  /* params in registers */);
+void __up_wakeup(void /* special register calling convention */);
 
-asmlinkage void __down(struct semaphore * sem);
-asmlinkage int  __down_interruptible(struct semaphore * sem);
-asmlinkage int  __down_trylock(struct semaphore * sem);
-asmlinkage void __up(struct semaphore * sem);
+void __down(struct semaphore * sem);
+int  __down_interruptible(struct semaphore * sem);
+int  __down_trylock(struct semaphore * sem);
+void __up(struct semaphore * sem);
 
 /*
  * This is ugly, but we want the default case to fall through.
@@ -116,21 +117,21 @@ asmlinkage void __up(struct semaphore * sem);
 static inline void down(struct semaphore * sem)
 {
 #if WAITQUEUE_DEBUG
-	CHECK_MAGIC(sem->__magic);
+    CHECK_MAGIC(sem->__magic);
 #endif
 
-	__asm__ __volatile__(
-		"# atomic down operation\n\t"
-		LOCK "decl %0\n\t"     /* --sem->count */
-		"js 2f\n"
-		"1:\n"
-		LOCK_SECTION_START("")
-		"2:\tcall __down_failed\n\t"
-		"jmp 1b\n"
-		LOCK_SECTION_END
-		:"=m" (sem->count)
-		:"D" (sem)
-		:"memory");
+    __asm__ __volatile__(
+        "# atomic down operation\n\t"
+        LOCK "decl %0\n\t"     /* --sem->count */
+        "js 2f\n"
+        "1:\n"
+        LOCK_SECTION_START("")
+        "2:\tcall __down_failed\n\t"
+        "jmp 1b\n"
+        LOCK_SECTION_END
+        :"=m" (sem->count)
+        :"D" (sem)
+        :"memory");
 }
 
 /*
@@ -139,26 +140,26 @@ static inline void down(struct semaphore * sem)
  */
 static inline int down_interruptible(struct semaphore * sem)
 {
-	int result;
+    int result;
 
 #if WAITQUEUE_DEBUG
-	CHECK_MAGIC(sem->__magic);
+    CHECK_MAGIC(sem->__magic);
 #endif
 
-	__asm__ __volatile__(
-		"# atomic interruptible down operation\n\t"
-		LOCK "decl %1\n\t"     /* --sem->count */
-		"js 2f\n\t"
-		"xorl %0,%0\n"
-		"1:\n"
-		LOCK_SECTION_START("")
-		"2:\tcall __down_failed_interruptible\n\t"
-		"jmp 1b\n"
-		LOCK_SECTION_END
-		:"=a" (result), "=m" (sem->count)
-		:"D" (sem)
-		:"memory");
-	return result;
+    __asm__ __volatile__(
+        "# atomic interruptible down operation\n\t"
+        LOCK "decl %1\n\t"     /* --sem->count */
+        "js 2f\n\t"
+        "xorl %0,%0\n"
+        "1:\n"
+        LOCK_SECTION_START("")
+        "2:\tcall __down_failed_interruptible\n\t"
+        "jmp 1b\n"
+        LOCK_SECTION_END
+        :"=a" (result), "=m" (sem->count)
+        :"D" (sem)
+        :"memory");
+    return result;
 }
 
 /*
@@ -167,26 +168,26 @@ static inline int down_interruptible(struct semaphore * sem)
  */
 static inline int down_trylock(struct semaphore * sem)
 {
-	int result;
+    int result;
 
 #if WAITQUEUE_DEBUG
-	CHECK_MAGIC(sem->__magic);
+    CHECK_MAGIC(sem->__magic);
 #endif
 
-	__asm__ __volatile__(
-		"# atomic interruptible down operation\n\t"
-		LOCK "decl %1\n\t"     /* --sem->count */
-		"js 2f\n\t"
-		"xorl %0,%0\n"
-		"1:\n"
-		LOCK_SECTION_START("")
-		"2:\tcall __down_failed_trylock\n\t"
-		"jmp 1b\n"
-		LOCK_SECTION_END
-		:"=a" (result), "=m" (sem->count)
-		:"D" (sem)
-		:"memory","cc");
-	return result;
+    __asm__ __volatile__(
+        "# atomic interruptible down operation\n\t"
+        LOCK "decl %1\n\t"     /* --sem->count */
+        "js 2f\n\t"
+        "xorl %0,%0\n"
+        "1:\n"
+        LOCK_SECTION_START("")
+        "2:\tcall __down_failed_trylock\n\t"
+        "jmp 1b\n"
+        LOCK_SECTION_END
+        :"=a" (result), "=m" (sem->count)
+        :"D" (sem)
+        :"memory","cc");
+    return result;
 }
 
 /*
@@ -198,25 +199,25 @@ static inline int down_trylock(struct semaphore * sem)
 static inline void up(struct semaphore * sem)
 {
 #if WAITQUEUE_DEBUG
-	CHECK_MAGIC(sem->__magic);
+    CHECK_MAGIC(sem->__magic);
 #endif
-	__asm__ __volatile__(
-		"# atomic up operation\n\t"
-		LOCK "incl %0\n\t"     /* ++sem->count */
-		"jle 2f\n"
-		"1:\n"
-		LOCK_SECTION_START("")
-		"2:\tcall __up_wakeup\n\t"
-		"jmp 1b\n"
-		LOCK_SECTION_END
-		:"=m" (sem->count)
-		:"D" (sem)
-		:"memory");
+    __asm__ __volatile__(
+        "# atomic up operation\n\t"
+        LOCK "incl %0\n\t"     /* ++sem->count */
+        "jle 2f\n"
+        "1:\n"
+        LOCK_SECTION_START("")
+        "2:\tcall __up_wakeup\n\t"
+        "jmp 1b\n"
+        LOCK_SECTION_END
+        :"=m" (sem->count)
+        :"D" (sem)
+        :"memory");
 }
 
 static inline int sem_getcount(struct semaphore *sem)
 {
-	return atomic_read(&sem->count);
+    return atomic_read(&sem->count);
 }
 
 #endif /* __KERNEL__ */

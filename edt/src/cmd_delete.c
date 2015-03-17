@@ -37,43 +37,45 @@ void cmd_delete (char *cp)
 
 {
 
-  first = 1;
-  count = 0;
-  if (range_multiple (cp, &cp, delete_range, &first) >= 0) eoltest (cp);
-  if (count == 0) outerr (0, "no lines deleted\n");
-  else outerr (12, "%u line%s deleted\n", count, (count == 1) ? "" : "s");
-  if (cur_position.line != NULL) line_print (cur_position.line);
-  else outfmt (strlen (buffer_name (cur_position.buffer)), "[EOB=%s]\n", buffer_name (cur_position.buffer));
+    first = 1;
+    count = 0;
+    if (range_multiple (cp, &cp, delete_range, &first) >= 0) eoltest (cp);
+    if (count == 0) outerr (0, "no lines deleted\n");
+    else outerr (12, "%u line%s deleted\n", count, (count == 1) ? "" : "s");
+    if (cur_position.line != NULL) line_print (cur_position.line);
+    else outfmt (strlen (buffer_name (cur_position.buffer)), "[EOB=%s]\n", buffer_name (cur_position.buffer));
 }
 
 static int delete_range (void *dummy, Buffer *buffer, Line *line)
 
 {
-  /* Don't even try to delete the [EOB] line */
+    /* Don't even try to delete the [EOB] line */
 
-  if (line == NULL) return (0);
+    if (line == NULL) return (0);
 
-  /* Set current position to beginning of next line after first line deleted */
+    /* Set current position to beginning of next line after first line deleted */
 
-  if (first) {
-    first = 0;
-    if (buffer != cur_position.buffer) {
-      *buffer_savpos (cur_position.buffer) = cur_position;
-      cur_position.buffer = buffer;
+    if (first)
+    {
+        first = 0;
+        if (buffer != cur_position.buffer)
+        {
+            *buffer_savpos (cur_position.buffer) = cur_position;
+            cur_position.buffer = buffer;
+        }
+        cur_position.line   = line;
+        cur_position.offset = 0;
+        buffer_dirty (buffer, 1);
     }
-    cur_position.line   = line;
-    cur_position.offset = 0;
-    buffer_dirty (buffer, 1);
-  }
 
-  if (cur_position.line == line) cur_position.line = line_next (line);
+    if (cur_position.line == line) cur_position.line = line_next (line);
 
-  /* Delete the line (and your little string, too!) */
+    /* Delete the line (and your little string, too!) */
 
-  string_delete (line_remove (line));
-  count ++;
+    string_delete (line_remove (line));
+    count ++;
 
-  /* Keep going */
+    /* Keep going */
 
-  return (0);
+    return (0);
 }

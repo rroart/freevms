@@ -8,7 +8,7 @@
  *		      Gerhard.Wichert@pdb.siemens.de
  *
  *
- * Redesigned the x86 32-bit VM architecture to deal with 
+ * Redesigned the x86 32-bit VM architecture to deal with
  * up to 16 Terabyte physical memory. With current x86 CPUs
  * we now support up to 64 Gigabytes physical RAM.
  *
@@ -61,20 +61,20 @@ extern void FASTCALL(kunmap_high(struct page *page));
 
 static inline void *kmap(struct page *page)
 {
-	if (in_interrupt())
-		BUG();
-	if (page < highmem_start_page)
-		return page_address(page);
-	return kmap_high(page);
+    if (in_interrupt())
+        BUG();
+    if (page < highmem_start_page)
+        return page_address(page);
+    return kmap_high(page);
 }
 
 static inline void kunmap(struct page *page)
 {
-	if (in_interrupt())
-		BUG();
-	if (page < highmem_start_page)
-		return;
-	kunmap_high(page);
+    if (in_interrupt())
+        BUG();
+    if (page < highmem_start_page)
+        return;
+    kunmap_high(page);
 }
 
 /*
@@ -85,42 +85,42 @@ static inline void kunmap(struct page *page)
  */
 static inline void *kmap_atomic(struct page *page, enum km_type type)
 {
-	enum fixed_addresses idx;
-	unsigned long vaddr;
+    enum fixed_addresses idx;
+    unsigned long vaddr;
 
-	if (page < highmem_start_page)
-		return page_address(page);
+    if (page < highmem_start_page)
+        return page_address(page);
 
-	idx = type + KM_TYPE_NR*smp_processor_id();
-	vaddr = __fix_to_virt(FIX_KMAP_BEGIN + idx);
+    idx = type + KM_TYPE_NR*smp_processor_id();
+    vaddr = __fix_to_virt(FIX_KMAP_BEGIN + idx);
 #if HIGHMEM_DEBUG
-	if (!pte_none(*(kmap_pte-idx)))
-		BUG();
+    if (!pte_none(*(kmap_pte-idx)))
+        BUG();
 #endif
-	set_pte(kmap_pte-idx, mk_pte(page, kmap_prot));
-	__flush_tlb_one(vaddr);
+    set_pte(kmap_pte-idx, mk_pte(page, kmap_prot));
+    __flush_tlb_one(vaddr);
 
-	return (void*) vaddr;
+    return (void*) vaddr;
 }
 
 static inline void kunmap_atomic(void *kvaddr, enum km_type type)
 {
 #if HIGHMEM_DEBUG
-	unsigned long vaddr = (unsigned long) kvaddr;
-	enum fixed_addresses idx = type + KM_TYPE_NR*smp_processor_id();
+    unsigned long vaddr = (unsigned long) kvaddr;
+    enum fixed_addresses idx = type + KM_TYPE_NR*smp_processor_id();
 
-	if (vaddr < FIXADDR_START) // FIXME
-		return;
+    if (vaddr < FIXADDR_START) // FIXME
+        return;
 
-	if (vaddr != __fix_to_virt(FIX_KMAP_BEGIN+idx))
-		BUG();
+    if (vaddr != __fix_to_virt(FIX_KMAP_BEGIN+idx))
+        BUG();
 
-	/*
-	 * force other mappings to Oops if they'll try to access
-	 * this pte without first remap it
-	 */
-	pte_clear(kmap_pte-idx);
-	__flush_tlb_one(vaddr);
+    /*
+     * force other mappings to Oops if they'll try to access
+     * this pte without first remap it
+     */
+    pte_clear(kmap_pte-idx);
+    __flush_tlb_one(vaddr);
 #endif
 }
 

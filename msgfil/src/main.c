@@ -26,31 +26,34 @@ genwrite();
 
 char * module_name;
 
-main(int argc, char ** argv) {
-  char * name = 0;
-  if (argc==2) 
-    name = argv[1];
-  extern int yydebug;
-  yydebug=1;
-  extern FILE *yyin;
-  init_stringpool();
-  yyin=fopen(name, "r");
-  if (yyin==0) {
-    printf("could not fopen %s\n",name);
-    return 1;
-  }
-  name = basename(name);
-  int newlen = (long)strchr(name,'.')-(long)name;
-  module_name = strndup(name, newlen);
-  genwrite();
-  yyparse();
-  extern int out;
-  fclose(out);
-  extern tree root_tree;
-  //  gencode(root_tree);
-  return 0;
+main(int argc, char ** argv)
+{
+    char * name = 0;
+    if (argc==2)
+        name = argv[1];
+    extern int yydebug;
+    yydebug=1;
+    extern FILE *yyin;
+    init_stringpool();
+    yyin=fopen(name, "r");
+    if (yyin==0)
+    {
+        printf("could not fopen %s\n",name);
+        return 1;
+    }
+    name = basename(name);
+    int newlen = (long)strchr(name,'.')-(long)name;
+    module_name = strndup(name, newlen);
+    genwrite();
+    yyparse();
+    extern int out;
+    fclose(out);
+    extern tree root_tree;
+    //  gencode(root_tree);
+    return 0;
 }
 
-void * get_cli_int(char * c) {
-  return 0;
+void * get_cli_int(char * c)
+{
+    return 0;
 }

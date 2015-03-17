@@ -7,45 +7,46 @@
 
 #include <linux/config.h>
 
-typedef struct plat_pglist_data {
-	pg_data_t	gendata;
-	unsigned long   start_pfn, end_pfn;
+typedef struct plat_pglist_data
+{
+    pg_data_t	gendata;
+    unsigned long   start_pfn, end_pfn;
 } plat_pg_data_t;
 
 struct bootmem_data_t;
 
 /*
  * Following are macros that are specific to this numa platform.
- * 
+ *
  * XXX check what the compiler generates for all this
  */
 
 extern plat_pg_data_t *plat_node_data[];
 
-#define MAXNODE 8 
+#define MAXNODE 8
 #define MAX_NUMNODES MAXNODE
 #define NODEMAPSIZE 0xff
 
 /* Simple perfect hash to map physical addresses to node numbers */
-extern int memnode_shift; 
-extern u8  memnodemap[NODEMAPSIZE]; 
+extern int memnode_shift;
+extern u8  memnodemap[NODEMAPSIZE];
 extern int maxnode;
 
 #if 0
 #define VIRTUAL_BUG_ON(x) do { if (x) out_of_line_bug(); } while(0)
 #else
-#define VIRTUAL_BUG_ON(x) do {} while (0) 
+#define VIRTUAL_BUG_ON(x) do {} while (0)
 #endif
 
 /* VALID_PAGE below hardcodes the same algorithm*/
-static inline int phys_to_nid(unsigned long addr) 
-{ 
-	int nid; 
-	VIRTUAL_BUG_ON((addr >> memnode_shift) >= NODEMAPSIZE);
-	nid = memnodemap[addr >> memnode_shift]; 
-	VIRTUAL_BUG_ON(nid > maxnode); 
-	return nid; 
-} 
+static inline int phys_to_nid(unsigned long addr)
+{
+    int nid;
+    VIRTUAL_BUG_ON((addr >> memnode_shift) >= NODEMAPSIZE);
+    nid = memnodemap[addr >> memnode_shift];
+    VIRTUAL_BUG_ON(nid > maxnode);
+    return nid;
+}
 
 #define PLAT_NODE_DATA(n)		(plat_node_data[(n)])
 #define PLAT_NODE_DATA_STARTNR(n)	\
@@ -96,27 +97,31 @@ static inline int phys_to_nid(unsigned long addr)
 #define BAD_PAGE 0xffffffffffff
 
 /* this really should be optimized a bit */
-static inline unsigned long 
-paddr_to_local_pfn(unsigned long phys_addr, struct page **mem_map, int check) 
-{ 
-	unsigned long nid;
-	if (check) { /* we rely on gcc optimizing this way for most cases */ 
-		unsigned long index = phys_addr >> memnode_shift; 
-		if (index >= NODEMAPSIZE || memnodemap[index] == 0xff) { 
-			*mem_map = NULL;
-			return BAD_PAGE;
-		} 
-		nid = memnodemap[index];
-	} else { 
-		nid = phys_to_nid(phys_addr); 
-	} 			   
-	plat_pg_data_t *plat_pgdat = plat_node_data[nid]; 
-	unsigned long pfn = phys_addr >> PAGE_SHIFT; 
-	VIRTUAL_BUG_ON(pfn >= plat_pgdat->end_pfn);
-	VIRTUAL_BUG_ON(pfn < plat_pgdat->start_pfn);
-	*mem_map = plat_pgdat->gendata.node_mem_map; 
-	return pfn - plat_pgdat->start_pfn;
-} 
+static inline unsigned long
+paddr_to_local_pfn(unsigned long phys_addr, struct page **mem_map, int check)
+{
+    unsigned long nid;
+    if (check)   /* we rely on gcc optimizing this way for most cases */
+    {
+        unsigned long index = phys_addr >> memnode_shift;
+        if (index >= NODEMAPSIZE || memnodemap[index] == 0xff)
+        {
+            *mem_map = NULL;
+            return BAD_PAGE;
+        }
+        nid = memnodemap[index];
+    }
+    else
+    {
+        nid = phys_to_nid(phys_addr);
+    }
+    plat_pg_data_t *plat_pgdat = plat_node_data[nid];
+    unsigned long pfn = phys_addr >> PAGE_SHIFT;
+    VIRTUAL_BUG_ON(pfn >= plat_pgdat->end_pfn);
+    VIRTUAL_BUG_ON(pfn < plat_pgdat->start_pfn);
+    *mem_map = plat_pgdat->gendata.node_mem_map;
+    return pfn - plat_pgdat->start_pfn;
+}
 #define virt_to_page(kaddr) \
 	({ struct page *lmemmap; \
 	   unsigned long lpfn = paddr_to_local_pfn(__pa(kaddr),&lmemmap,0); \

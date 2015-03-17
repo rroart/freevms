@@ -27,13 +27,13 @@
 
                       All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of CMU not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -44,18 +44,21 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
-struct	mib_system {
+struct	mib_system
+{
     char    sysDescr[32];   /* textual description */
     u_char  sysObjectID[16];/* OBJECT IDENTIFIER of system */
     u_char  ObjIDLen;	    /* length of sysObjectID */
-    u_long  sysUpTime;	    /* Uptime in 100/s of a second */    
+    u_long  sysUpTime;	    /* Uptime in 100/s of a second */
 };
 
-struct mib_interface {
+struct mib_interface
+{
     long    ifNumber;	    /* number of interfaces */
 };
 
-struct mib_ifEntry {
+struct mib_ifEntry
+{
     long    ifIndex;	    /* index of this interface	*/
     char    ifDescr[32];    /* english description of interface	*/
     long    ifType;	    /* network type of device	*/
@@ -80,14 +83,16 @@ struct mib_ifEntry {
     u_long  ifOutQLen;	    /* number of packets in output queue */
 };
 
-struct mib_atEntry {
+struct mib_atEntry
+{
     long    atIfIndex;	    /* interface on which this entry maps */
     u_char  atPhysAddress[11]; /* physical address of destination */
     u_char  PhysAddressLen; /* length of atPhysAddress */
     u_long  atNetAddress;   /* IP address of physical address */
 };
 
-struct mib_ip {
+struct mib_ip
+{
     long    ipForwarding;   /* 1 if gateway, 2 if host */
     long    ipDefaultTTL;   /* default TTL for pkts originating here */
     u_long  ipInReceives;   /* no. of IP packets received from interfaces */
@@ -109,14 +114,16 @@ struct mib_ip {
     u_long  ipFragCreates;  /* number of IP fragments created here */
 };
 
-struct mib_ipAddrEntry {
+struct mib_ipAddrEntry
+{
     u_long  ipAdEntAddr;    /* IP address of this entry */
     long    ipAdEntIfIndex; /* IF for this entry */
     u_long  ipAdEntNetMask; /* subnet mask of this entry */
     long    ipAdEntBcastAddr;/* read the MIB for this one */
 };
 
-struct mib_ipRouteEntry {
+struct mib_ipRouteEntry
+{
     u_long  ipRouteDest;    /* destination IP addr for this route */
     long    ipRouteIfIndex; /* index of local IF for this route */
     long    ipRouteMetric1; /* Primary routing metric */
@@ -129,7 +136,8 @@ struct mib_ipRouteEntry {
     long    ipRouteAge;	    /* No. of seconds since updating this route */
 };
 
-struct mib_icmp {
+struct mib_icmp
+{
     u_long  icmpInMsgs;	    /* Total of ICMP msgs received */
     u_long  icmpInErrors;   /* Total of ICMP msgs received with errors */
     u_long  icmpInDestUnreachs;
@@ -158,10 +166,11 @@ struct mib_icmp {
     u_long  icmpOutAddrMaskReps;
 };
 
-struct	mib_tcp {
+struct	mib_tcp
+{
     long    tcpRtoAlgorithm;	/* retransmission timeout algorithm */
     long    tcpRtoMin;		/* minimum retransmission timeout (mS) */
-    long    tcpRtoMax;		/* maximum retransmission timeout (mS) */ 
+    long    tcpRtoMax;		/* maximum retransmission timeout (mS) */
     long    tcpMaxConn;		/* maximum tcp connections possible */
     u_long  tcpActiveOpens;	/* number of SYN-SENT -> CLOSED transitions */
     u_long  tcpPassiveOpens;	/* number of SYN-RCVD -> LISTEN transitions */
@@ -173,7 +182,8 @@ struct	mib_tcp {
     u_long  tcpRetransSegs;	/* number of retransmitted segments */
 };
 
-struct mib_tcpConnEntry {
+struct mib_tcpConnEntry
+{
     long    tcpConnState;	/* State of this connection */
     u_long  tcpConnLocalAddress;/* local IP address for this connection */
     long    tcpConnLocalPort;	/* local port for this connection */
@@ -181,21 +191,24 @@ struct mib_tcpConnEntry {
     long    tcpConnRemPort;	/* remote port for this connection */
 };
 
-struct mib_udp {
+struct mib_udp
+{
     u_long  udpInDatagrams; /* No. of UDP datagrams delivered to users */
     u_long  udpNoPorts;	    /* No. of UDP datagrams to port with no listener */
     u_long  udpInErrors;    /* No. of UDP datagrams unable to be delivered */
     u_long  udpOutDatagrams;/* No. of UDP datagrams sent from this entity */
 };
 
-struct	mib_egp {
+struct	mib_egp
+{
     u_long  egpInMsgs;	/* No. of EGP msgs received without error */
     u_long  egpInErrors;/* No. of EGP msgs received with error */
     u_long  egpOutMsgs;	/* No. of EGP msgs sent */
     u_long  egpOutErrors;/* No. of (outgoing) EGP msgs dropped due to error */
 };
 
-struct	mib_egpNeighEntry {
+struct	mib_egpNeighEntry
+{
     long    egpNeighState;  /* local EGP state with this entry's neighbor */
     u_long  egpNeighAddr;   /* IP address of this entry's neighbor */
 };

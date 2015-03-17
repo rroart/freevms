@@ -1,6 +1,6 @@
 #ifndef pridef_h
 #define pridef_h
- 
+
 #define PRI$_NULL 0
 #define PRI$_IOCOM 1
 #define PRI$_RESAVL 2
@@ -17,5 +17,5 @@
 #define PRI$C_MAX_VMS_PRIO 31
 #define PRI$C_MIN_PSXRT_PRIO 16
 #define PRI$C_MAX_PSXRT_PRIO 31
- 
+
 #endif

@@ -56,27 +56,30 @@
 
 #define YAM_FPGA_SIZE	5302
 
-struct yamcfg {
-	unsigned int mask;		/* Mask of commands */
-	unsigned int iobase;	/* IO Base of COM port */
-	unsigned int irq;		/* IRQ of COM port */
-	unsigned int bitrate;	/* Bit rate of radio port */
-	unsigned int baudrate;	/* Baud rate of the RS232 port */
-	unsigned int txdelay;	/* TxDelay */
-	unsigned int txtail;	/* TxTail */
-	unsigned int persist;	/* Persistence */
-	unsigned int slottime;	/* Slottime */
-	unsigned int mode;		/* mode 0 (simp), 1(Dupl), 2(Dupl+delay) */
-	unsigned int holddly;	/* PTT delay in FullDuplex 2 mode */
+struct yamcfg
+{
+    unsigned int mask;		/* Mask of commands */
+    unsigned int iobase;	/* IO Base of COM port */
+    unsigned int irq;		/* IRQ of COM port */
+    unsigned int bitrate;	/* Bit rate of radio port */
+    unsigned int baudrate;	/* Baud rate of the RS232 port */
+    unsigned int txdelay;	/* TxDelay */
+    unsigned int txtail;	/* TxTail */
+    unsigned int persist;	/* Persistence */
+    unsigned int slottime;	/* Slottime */
+    unsigned int mode;		/* mode 0 (simp), 1(Dupl), 2(Dupl+delay) */
+    unsigned int holddly;	/* PTT delay in FullDuplex 2 mode */
 };
 
-struct yamdrv_ioctl_cfg {
-	int cmd;
-	struct yamcfg cfg;
+struct yamdrv_ioctl_cfg
+{
+    int cmd;
+    struct yamcfg cfg;
 };
 
-struct yamdrv_ioctl_mcs {
-	int cmd;
-	int bitrate;
-	unsigned char bits[YAM_FPGA_SIZE];
+struct yamdrv_ioctl_mcs
+{
+    int cmd;
+    int bitrate;
+    unsigned char bits[YAM_FPGA_SIZE];
 };

@@ -81,57 +81,57 @@ Modification history:
 
 // TCB Connection States
 
-    #define CS$CLOSED 0	// fictious, TCB does NOT exist.
-    #define CS$LISTEN 1
-    #define CS$SYN_SENT 2
-    #define CS$SYN_RECV 3
-    #define CS$ESTABLISHED 4
-    #define CS$FIN_WAIT_1 5
-    #define CS$FIN_WAIT_2 6
-    #define CS$TIME_WAIT 7
-    #define CS$CLOSE_WAIT 8
-    #define CS$CLOSING 9
-    #define CS$LAST_ACK 10
-    #define CS$RESET 11
-    #define CS$INACTIVE 12
-    #define CS$NAMELOOK 13
+#define CS$CLOSED 0	// fictious, TCB does NOT exist.
+#define CS$LISTEN 1
+#define CS$SYN_SENT 2
+#define CS$SYN_RECV 3
+#define CS$ESTABLISHED 4
+#define CS$FIN_WAIT_1 5
+#define CS$FIN_WAIT_2 6
+#define CS$TIME_WAIT 7
+#define CS$CLOSE_WAIT 8
+#define CS$CLOSING 9
+#define CS$LAST_ACK 10
+#define CS$RESET 11
+#define CS$INACTIVE 12
+#define CS$NAMELOOK 13
 
 // Control Segment type identifiers
 
-    #define M$SYN 1	// Send a SYN control segment
-    #define M$FIN 2
-    #define M$ACK 3
-    #define M$RST 4
-    #define M$SYN_ACK 5	// SYN & ack together.
+#define M$SYN 1	// Send a SYN control segment
+#define M$FIN 2
+#define M$ACK 3
+#define M$RST 4
+#define M$SYN_ACK 5	// SYN & ack together.
 
 // Misc.
 
-    #define TCPTOS 0			// IP Service type: Datagram,Highest Reliablity
-				// Reliability over speed, Speed: High.
-    #define TCPDF FALSE		// OK to fragment datagrams
-    #define SND_Q_MAX 8		// Max number of buffered user sends.
+#define TCPTOS 0			// IP Service type: Datagram,Highest Reliablity
+// Reliability over speed, Speed: High.
+#define TCPDF FALSE		// OK to fragment datagrams
+#define SND_Q_MAX 8		// Max number of buffered user sends.
 
 // Misc Time Values in Hundredths seconds.
 
-    #define MAX_SEG_LIFETIME 2*MINUTE	// seconds.
-    #define MIN_RT_TIMEOUT 1*CSEC	// Min allowable retransmission time
-    #define MAX_RT_TIMEOUT 4*MINUTE	// Max allowable Retransmission time.
-    #define BASE_RT_TIMEOUT 3*CSEC	// Base (initial) Round Trip timer.
-    #define PROBE_IVAL MINUTE	// Inactivity probe timer
-    #define ACK_INTERVAL MINUTE	// spontaneous ack interval timer.
-    #define DELAYED_ACK_INTERVAL 20	// Delayed ACK interval, 200ms
-    #define SQUENCH_INTERVAL 2*CSEC	// Source Quench Interval, 2 Seconds
-    #define FUNCTION_TIMEOUT 10*CSEC	// User function.
-    #define ACTIVE_OPEN_TIMEOUT 30*CSEC// Amount of time for active open to happen
-    #define PASSIVE_OPEN_TIMEOUT DAYSEC // Amount of time for passive open
-    #define NAMELOOK_TIMEOUT 2*MINUTE// How long to wait for name lookup
-    #define CLOSE_TIMEOUT 2*MINUTE	// How long to wait for connection to close
-    #define CONN_TIMEOUT 10*MINUTE	// How long before connection is dead
-    #define RX_TIMEVAL 4*MINUTE	// Retransmit queue time limit
-    #define INACTIVE_TCB_TIMEOUT 5*CSEC // Time which a TCB will remain inactive
-				// before being deleted.
-    #define DEFAULT_SEND_TIMEOUT 300*CSEC// Time allowed for a user's buffer
-				// to be sent.
+#define MAX_SEG_LIFETIME 2*MINUTE	// seconds.
+#define MIN_RT_TIMEOUT 1*CSEC	// Min allowable retransmission time
+#define MAX_RT_TIMEOUT 4*MINUTE	// Max allowable Retransmission time.
+#define BASE_RT_TIMEOUT 3*CSEC	// Base (initial) Round Trip timer.
+#define PROBE_IVAL MINUTE	// Inactivity probe timer
+#define ACK_INTERVAL MINUTE	// spontaneous ack interval timer.
+#define DELAYED_ACK_INTERVAL 20	// Delayed ACK interval, 200ms
+#define SQUENCH_INTERVAL 2*CSEC	// Source Quench Interval, 2 Seconds
+#define FUNCTION_TIMEOUT 10*CSEC	// User function.
+#define ACTIVE_OPEN_TIMEOUT 30*CSEC// Amount of time for active open to happen
+#define PASSIVE_OPEN_TIMEOUT DAYSEC // Amount of time for passive open
+#define NAMELOOK_TIMEOUT 2*MINUTE// How long to wait for name lookup
+#define CLOSE_TIMEOUT 2*MINUTE	// How long to wait for connection to close
+#define CONN_TIMEOUT 10*MINUTE	// How long before connection is dead
+#define RX_TIMEVAL 4*MINUTE	// Retransmit queue time limit
+#define INACTIVE_TCB_TIMEOUT 5*CSEC // Time which a TCB will remain inactive
+// before being deleted.
+#define DEFAULT_SEND_TIMEOUT 300*CSEC// Time allowed for a user's buffer
+// to be sent.
 
 
 //SBTTL 'Define a TCB: (Transmission Control Block) data structure.'
@@ -141,7 +141,7 @@ Define a TCB: (Transmission Control Block) data structure.
 
 The basic requirements of a TCB are derived from the DOD TCP document, page 19.
 The TCB is the data structure which TCP uses to control a specific connection.
-All active connections (e.g., NOT closed) have an associated TCB.  
+All active connections (e.g., NOT closed) have an associated TCB.
 Each TCB can be located two ways:
 1) Local_Connection_ID is the address of the TCB
 2) Each local port has associated a linked-list of TCB's which use that local
@@ -150,7 +150,8 @@ When the TCB is on the free TCB list (Free_TCB_List, Queue header) the
 fields LP_Next & LP_Back are used as forward & backwards queue pointers.
 */
 
-struct  tcb_structure {
+struct  tcb_structure
+{
     void * lp_next;	// LP queue Forward Link pointer.
     void * lp_back;	// LP queue, Backwards Link.
     unsigned int foreign_host;	// Foreign host address
@@ -225,10 +226,11 @@ struct  tcb_structure {
     unsigned int rx_seq;	// Retransmission sequence start
     unsigned int rx_ctl;	// Control segment type
     unsigned long long xmit_start_time;	// Time first item queued on RX timer
-  union {
-    unsigned long long time_wait_timer;	// Time_Wait Counter.
-    unsigned long long ack_timer;	// spontaneous ack timer.
-  };
+    union
+    {
+        unsigned long long time_wait_timer;	// Time_Wait Counter.
+        unsigned long long ack_timer;	// spontaneous ack timer.
+    };
     unsigned long long delayed_ack_timer;	// Delayed ACK timer.
     unsigned long long squench_timer;	// Source Quench timer.
     unsigned int user_timeval;	// Amount of time before idle
@@ -255,37 +257,39 @@ struct  tcb_structure {
     unsigned int ack_size;	// # of data bytes to be ack'ed.
     unsigned int snd_ack_threshold;	// Number of bytes before window update
     unsigned long long snd_delay_timer;	// Time to wait before forcing send
-  union {
-    unsigned int tcb$flags;	// Reserve some space for flags
-    struct {
-	unsigned active_open : 1;	// Active open performed.
-	unsigned open_nowait : 1;	// Wait-mode of OPEN in progress
-	unsigned close_nowait : 1;	// Wait-mode of CLOSE in progress
-	unsigned pending_close : 1;	// FIN segment needs to be sent.
-	unsigned pending_ack : 1;	// ACK segment needs to be sent.
-	unsigned pending_io : 1;	// ARGBLK pts at an user IO request.
-	unsigned data_2_send : 1;	// User data needs to be sent.
-	unsigned eof : 1;	// TCB Closing, All data delivered.
-	unsigned is_aborted : 1;	// TCB is aborted - drop incoming data
-	unsigned snd_push_flag : 1;	// Push pending on SEND
-	unsigned rcv_push_flag : 1;	// Push seen on receive
-	unsigned nmlook_flag : 1;	// Name or address lookup in progress
-	unsigned is_synched : 1;	// OK to send ACKs, connection synched
-	unsigned fin_rcvd : 1;	// Valid FIN received in FIN-WAIT-2
-	unsigned is_tvt : 1;	// TCB is a TVT (virtual terminal)
-	unsigned de_nagle : 1;	// Turn off Nagle algorithim
-	unsigned squench : 1;	// Source Quench received
-	unsigned nbwrite : 1;	// Network Buffer busy
-	unsigned tcp_df : 1;	// Don't Fragment bit
+    union
+    {
+        unsigned int tcb$flags;	// Reserve some space for flags
+        struct
+        {
+            unsigned active_open : 1;	// Active open performed.
+            unsigned open_nowait : 1;	// Wait-mode of OPEN in progress
+            unsigned close_nowait : 1;	// Wait-mode of CLOSE in progress
+            unsigned pending_close : 1;	// FIN segment needs to be sent.
+            unsigned pending_ack : 1;	// ACK segment needs to be sent.
+            unsigned pending_io : 1;	// ARGBLK pts at an user IO request.
+            unsigned data_2_send : 1;	// User data needs to be sent.
+            unsigned eof : 1;	// TCB Closing, All data delivered.
+            unsigned is_aborted : 1;	// TCB is aborted - drop incoming data
+            unsigned snd_push_flag : 1;	// Push pending on SEND
+            unsigned rcv_push_flag : 1;	// Push seen on receive
+            unsigned nmlook_flag : 1;	// Name or address lookup in progress
+            unsigned is_synched : 1;	// OK to send ACKs, connection synched
+            unsigned fin_rcvd : 1;	// Valid FIN received in FIN-WAIT-2
+            unsigned is_tvt : 1;	// TCB is a TVT (virtual terminal)
+            unsigned de_nagle : 1;	// Turn off Nagle algorithim
+            unsigned squench : 1;	// Source Quench received
+            unsigned nbwrite : 1;	// Network Buffer busy
+            unsigned tcp_df : 1;	// Don't Fragment bit
+        };
     };
-  };
     signed short int foreign_hnlen;	// Length of foreign host name
     unsigned char foreign_hname[MAX_HNAME];	// Foreign host name
 };
 
 // Set the size of one TCB
 
-    #define TCB_SIZE sizeof(struct tcb_structure)		// in BLISS Fullwords.
+#define TCB_SIZE sizeof(struct tcb_structure)		// in BLISS Fullwords.
 
 //MESSAGE(%NUMBER(tcb_size),' longwords per tcb')
 
@@ -309,16 +313,17 @@ declaration is in TCP.BLI.
 */
 
 
-struct connection_table_structure {
+struct connection_table_structure
+{
     void * CN$TCB_List;	// This port's TCB list. Queue head prt.
     void * CN$TCB_Tail;	// Queue tail ptr.
     int CN$Local_Port;	// Local Port #.
 };
 
-    #define CONECT_TBL_SIZE 4		// # of blocks in connection blockvector
-    #define INITIAL_TCBS 2			// Initial size of Valid TCB table
-    #define CN$BLK_SIZE sizeof(struct connection_table_structure)	// Size in longs
-    #define CN$BLK_BLEN 10			// Size in bytes
+#define CONECT_TBL_SIZE 4		// # of blocks in connection blockvector
+#define INITIAL_TCBS 2			// Initial size of Valid TCB table
+#define CN$BLK_SIZE sizeof(struct connection_table_structure)	// Size in longs
+#define CN$BLK_BLEN 10			// Size in bytes
 
 //ASSIGN(tblsize,%NUMBER(conect_tbl_size)*%NUMBER(cn$blk_size))
 //MESSAGE(%NUMBER(tblsize),' Longwords allocated to Connection Table')
@@ -326,11 +331,12 @@ struct connection_table_structure {
 
 //SBTTL 'Definition of structure for WKS server process table & SYN-wait list'
 
-struct  wks_structure {
+struct  wks_structure
+{
     int WKS$Port;
     struct dsc$descriptor WKS$Process;		// ASCID descriptor.
     struct dsc$descriptor WKS$IMAGE;
-      int WKS$Stat;
+    int WKS$Stat;
     struct dsc$descriptor WKS$Priv;
     void * WKS$Quotas;
     struct dsc$descriptor WKS$Input;		// ASCID descriptor.
@@ -340,7 +346,7 @@ struct  wks_structure {
     int WKS$MaxSrv;
     int WKS$SYN_Qcount;
     void * WKS$SYN_Qhead;
-  void * WKS$SYN_Qtail;
+    void * WKS$SYN_Qtail;
 };
 
 #define WKS_BLOCK_SIZE sizeof(struct  wks_structure)

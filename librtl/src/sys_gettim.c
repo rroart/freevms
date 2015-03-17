@@ -76,5 +76,5 @@ unsigned long sys$gettim(void *timadr)
      * Calculate value
      */
     return sys$__combine_date_time(FUDGEFACTOR + curtim / SECINDAY, timadr,
-        (curtim % SECINDAY) * 100);
+                                   (curtim % SECINDAY) * 100);
 }

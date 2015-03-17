@@ -50,7 +50,7 @@ struct pci_dev;
  * is undefined.
  */
 extern void *pci_alloc_consistent(struct pci_dev *hwdev, size_t size,
-				  dma_addr_t *dma_handle);
+                                  dma_addr_t *dma_handle);
 
 /* Free and unmap a consistent DMA buffer.
  * cpu_addr is what was returned from pci_alloc_consistent,
@@ -61,7 +61,7 @@ extern void *pci_alloc_consistent(struct pci_dev *hwdev, size_t size,
  * past this call are illegal.
  */
 extern void pci_free_consistent(struct pci_dev *hwdev, size_t size,
-				void *vaddr, dma_addr_t dma_handle);
+                                void *vaddr, dma_addr_t dma_handle);
 
 /* Map a single buffer of the indicated size for DMA in streaming mode.
  * The 32-bit bus address to use is returned.
@@ -70,12 +70,12 @@ extern void pci_free_consistent(struct pci_dev *hwdev, size_t size,
  * until either pci_unmap_single or pci_dma_sync_single is performed.
  */
 static inline dma_addr_t pci_map_single(struct pci_dev *hwdev, void *ptr,
-					size_t size, int direction)
+                                        size_t size, int direction)
 {
-	if (direction == PCI_DMA_NONE)
-		BUG();
-	flush_write_buffers();
-	return virt_to_bus(ptr);
+    if (direction == PCI_DMA_NONE)
+        BUG();
+    flush_write_buffers();
+    return virt_to_bus(ptr);
 }
 
 /* Unmap a single streaming mode DMA translation.  The dma_addr and size
@@ -86,11 +86,11 @@ static inline dma_addr_t pci_map_single(struct pci_dev *hwdev, void *ptr,
  * whatever the device wrote there.
  */
 static inline void pci_unmap_single(struct pci_dev *hwdev, dma_addr_t dma_addr,
-				    size_t size, int direction)
+                                    size_t size, int direction)
 {
-	if (direction == PCI_DMA_NONE)
-		BUG();
-	/* Nothing to do */
+    if (direction == PCI_DMA_NONE)
+        BUG();
+    /* Nothing to do */
 }
 
 /*
@@ -98,20 +98,20 @@ static inline void pci_unmap_single(struct pci_dev *hwdev, dma_addr_t dma_addr,
  * to pci_map_single, but takes a struct page instead of a virtual address
  */
 static inline dma_addr_t pci_map_page(struct pci_dev *hwdev, struct page *page,
-				      unsigned long offset, size_t size, int direction)
+                                      unsigned long offset, size_t size, int direction)
 {
-	if (direction == PCI_DMA_NONE)
-		BUG();
+    if (direction == PCI_DMA_NONE)
+        BUG();
 
-	return (page - mem_map) * PAGE_SIZE + offset;
+    return (page - mem_map) * PAGE_SIZE + offset;
 }
 
 static inline void pci_unmap_page(struct pci_dev *hwdev, dma_addr_t dma_address,
-				  size_t size, int direction)
+                                  size_t size, int direction)
 {
-	if (direction == PCI_DMA_NONE)
-		BUG();
-	/* Nothing to do */
+    if (direction == PCI_DMA_NONE)
+        BUG();
+    /* Nothing to do */
 }
 
 /* pci_unmap_{page,single} is a nop so... */
@@ -138,30 +138,31 @@ static inline void pci_unmap_page(struct pci_dev *hwdev, dma_addr_t dma_address,
  * the same here.
  */
 static inline int pci_map_sg(struct pci_dev *hwdev, struct scatterlist *sg,
-			     int nents, int direction)
+                             int nents, int direction)
 {
-	int i;
+    int i;
 
-	if (direction == PCI_DMA_NONE)
-		BUG();
- 
- 	/*
- 	 * temporary 2.4 hack
- 	 */
- 	for (i = 0; i < nents; i++ ) {
- 		if (sg[i].address && sg[i].page)
- 			BUG();
- 		else if (!sg[i].address && !sg[i].page)
- 			BUG();
- 
- 		if (sg[i].address)
- 			sg[i].dma_address = virt_to_bus(sg[i].address);
- 		else
- 			sg[i].dma_address = page_to_bus(sg[i].page) + sg[i].offset;
- 	}
- 
-	flush_write_buffers();
-	return nents;
+    if (direction == PCI_DMA_NONE)
+        BUG();
+
+    /*
+     * temporary 2.4 hack
+     */
+    for (i = 0; i < nents; i++ )
+    {
+        if (sg[i].address && sg[i].page)
+            BUG();
+        else if (!sg[i].address && !sg[i].page)
+            BUG();
+
+        if (sg[i].address)
+            sg[i].dma_address = virt_to_bus(sg[i].address);
+        else
+            sg[i].dma_address = page_to_bus(sg[i].page) + sg[i].offset;
+    }
+
+    flush_write_buffers();
+    return nents;
 }
 
 /* Unmap a set of streaming mode DMA translations.
@@ -169,11 +170,11 @@ static inline int pci_map_sg(struct pci_dev *hwdev, struct scatterlist *sg,
  * pci_unmap_single() above.
  */
 static inline void pci_unmap_sg(struct pci_dev *hwdev, struct scatterlist *sg,
-				int nents, int direction)
+                                int nents, int direction)
 {
-	if (direction == PCI_DMA_NONE)
-		BUG();
-	/* Nothing to do */
+    if (direction == PCI_DMA_NONE)
+        BUG();
+    /* Nothing to do */
 }
 
 /* Make physical memory consistent for a single
@@ -186,12 +187,12 @@ static inline void pci_unmap_sg(struct pci_dev *hwdev, struct scatterlist *sg,
  * device again owns the buffer.
  */
 static inline void pci_dma_sync_single(struct pci_dev *hwdev,
-				       dma_addr_t dma_handle,
-				       size_t size, int direction)
+                                       dma_addr_t dma_handle,
+                                       size_t size, int direction)
 {
-	if (direction == PCI_DMA_NONE)
-		BUG();
-	flush_write_buffers();
+    if (direction == PCI_DMA_NONE)
+        BUG();
+    flush_write_buffers();
 }
 
 /* Make physical memory consistent for a set of streaming
@@ -201,12 +202,12 @@ static inline void pci_dma_sync_single(struct pci_dev *hwdev,
  * same rules and usage.
  */
 static inline void pci_dma_sync_sg(struct pci_dev *hwdev,
-				   struct scatterlist *sg,
-				   int nelems, int direction)
+                                   struct scatterlist *sg,
+                                   int nelems, int direction)
 {
-	if (direction == PCI_DMA_NONE)
-		BUG();
-	flush_write_buffers();
+    if (direction == PCI_DMA_NONE)
+        BUG();
+    flush_write_buffers();
 }
 
 /* Return whether the given PCI device DMA address mask can
@@ -216,15 +217,15 @@ static inline void pci_dma_sync_sg(struct pci_dev *hwdev,
  */
 static inline int pci_dma_supported(struct pci_dev *hwdev, u64 mask)
 {
-        /*
-         * we fall back to GFP_DMA when the mask isn't all 1s,
-         * so we can't guarantee allocations that must be
-         * within a tighter range than GFP_DMA..
-         */
-        if(mask < 0x00ffffff)
-                return 0;
+    /*
+     * we fall back to GFP_DMA when the mask isn't all 1s,
+     * so we can't guarantee allocations that must be
+     * within a tighter range than GFP_DMA..
+     */
+    if(mask < 0x00ffffff)
+        return 0;
 
-	return 1;
+    return 1;
 }
 
 /* This is always fine. */
@@ -233,28 +234,28 @@ static inline int pci_dma_supported(struct pci_dev *hwdev, u64 mask)
 static __inline__ dma64_addr_t
 pci_dac_page_to_dma(struct pci_dev *pdev, struct page *page, unsigned long offset, int direction)
 {
-	return ((dma64_addr_t) page_to_bus(page) +
-		(dma64_addr_t) offset);
+    return ((dma64_addr_t) page_to_bus(page) +
+            (dma64_addr_t) offset);
 }
 
 static __inline__ struct page *
 pci_dac_dma_to_page(struct pci_dev *pdev, dma64_addr_t dma_addr)
 {
-	unsigned long poff = (dma_addr >> PAGE_SHIFT);
+    unsigned long poff = (dma_addr >> PAGE_SHIFT);
 
-	return mem_map + poff;
+    return mem_map + poff;
 }
 
 static __inline__ unsigned long
 pci_dac_dma_to_offset(struct pci_dev *pdev, dma64_addr_t dma_addr)
 {
-	return (dma_addr & ~PAGE_MASK);
+    return (dma_addr & ~PAGE_MASK);
 }
 
 static __inline__ void
 pci_dac_dma_sync_single(struct pci_dev *pdev, dma64_addr_t dma_addr, size_t len, int direction)
 {
-	flush_write_buffers();
+    flush_write_buffers();
 }
 
 /* These macros should be used after a pci_map_sg call has been done
@@ -268,12 +269,12 @@ pci_dac_dma_sync_single(struct pci_dev *pdev, dma64_addr_t dma_addr, size_t len,
 /* Return the index of the PCI controller for device. */
 static inline int pci_controller_num(struct pci_dev *dev)
 {
-	return 0;
+    return 0;
 }
 
 #define HAVE_PCI_MMAP
 extern int pci_mmap_page_range(struct pci_dev *dev, struct vm_area_struct *vma,
-			       enum pci_mmap_state mmap_state, int write_combine);
+                               enum pci_mmap_state mmap_state, int write_combine);
 
 #endif /* __KERNEL__ */
 

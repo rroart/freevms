@@ -5,61 +5,70 @@
 
 /* XXX: This structure was copied from the Alpha; is there an iBCS version?  */
 
-typedef union sigval {
-	int sival_int;
-	void *sival_ptr;
+typedef union sigval
+{
+    int sival_int;
+    void *sival_ptr;
 } sigval_t;
 
 #define SI_MAX_SIZE	128
 #define SI_PAD_SIZE	((SI_MAX_SIZE/sizeof(int)) - 3)
 
-typedef struct siginfo {
-	int si_signo;
-	int si_errno;
-	int si_code;
+typedef struct siginfo
+{
+    int si_signo;
+    int si_errno;
+    int si_code;
 
-	union {
-		int _pad[SI_PAD_SIZE];
+    union
+    {
+        int _pad[SI_PAD_SIZE];
 
-		/* kill() */
-		struct {
-			pid_t _pid;		/* sender's pid */
-			uid_t _uid;		/* sender's uid */
-		} _kill;
+        /* kill() */
+        struct
+        {
+            pid_t _pid;		/* sender's pid */
+            uid_t _uid;		/* sender's uid */
+        } _kill;
 
-		/* POSIX.1b timers */
-		struct {
-			unsigned int _timer1;
-			unsigned int _timer2;
-		} _timer;
+        /* POSIX.1b timers */
+        struct
+        {
+            unsigned int _timer1;
+            unsigned int _timer2;
+        } _timer;
 
-		/* POSIX.1b signals */
-		struct {
-			pid_t _pid;		/* sender's pid */
-			uid_t _uid;		/* sender's uid */
-			sigval_t _sigval;
-		} _rt;
+        /* POSIX.1b signals */
+        struct
+        {
+            pid_t _pid;		/* sender's pid */
+            uid_t _uid;		/* sender's uid */
+            sigval_t _sigval;
+        } _rt;
 
-		/* SIGCHLD */
-		struct {
-			pid_t _pid;		/* which child */
-			uid_t _uid;		/* sender's uid */
-			int _status;		/* exit code */
-			clock_t _utime;
-			clock_t _stime;
-		} _sigchld;
+        /* SIGCHLD */
+        struct
+        {
+            pid_t _pid;		/* which child */
+            uid_t _uid;		/* sender's uid */
+            int _status;		/* exit code */
+            clock_t _utime;
+            clock_t _stime;
+        } _sigchld;
 
-		/* SIGILL, SIGFPE, SIGSEGV, SIGBUS */
-		struct {
-			void *_addr; /* faulting insn/memory ref. */
-		} _sigfault;
+        /* SIGILL, SIGFPE, SIGSEGV, SIGBUS */
+        struct
+        {
+            void *_addr; /* faulting insn/memory ref. */
+        } _sigfault;
 
-		/* SIGPOLL */
-		struct {
-			int _band;	/* POLL_IN, POLL_OUT, POLL_MSG */
-			int _fd;
-		} _sigpoll;
-	} _sifields;
+        /* SIGPOLL */
+        struct
+        {
+            int _band;	/* POLL_IN, POLL_OUT, POLL_MSG */
+            int _fd;
+        } _sigpoll;
+    } _sifields;
 } siginfo_t;
 
 /*
@@ -183,8 +192,8 @@ typedef struct siginfo {
 
 /*
  * sigevent definitions
- * 
- * It seems likely that SIGEV_THREAD will have to be handled from 
+ *
+ * It seems likely that SIGEV_THREAD will have to be handled from
  * userspace, libpthread transmuting it to SIGEV_SIGNAL, which the
  * thread manager then catches and does the appropriate nonsense.
  * However, everything is written out here so as to not get lost.
@@ -196,18 +205,21 @@ typedef struct siginfo {
 #define SIGEV_MAX_SIZE	64
 #define SIGEV_PAD_SIZE	((SIGEV_MAX_SIZE/sizeof(int)) - 3)
 
-typedef struct sigevent {
-	sigval_t sigev_value;
-	int sigev_signo;
-	int sigev_notify;
-	union {
-		int _pad[SIGEV_PAD_SIZE];
+typedef struct sigevent
+{
+    sigval_t sigev_value;
+    int sigev_signo;
+    int sigev_notify;
+    union
+    {
+        int _pad[SIGEV_PAD_SIZE];
 
-		struct {
-			void (*_function)(sigval_t);
-			void *_attribute;	/* really pthread_attr_t */
-		} _sigev_thread;
-	} _sigev_un;
+        struct
+        {
+            void (*_function)(sigval_t);
+            void *_attribute;	/* really pthread_attr_t */
+        } _sigev_thread;
+    } _sigev_un;
 } sigevent_t;
 
 #define sigev_notify_function	_sigev_un._sigev_thread._function
@@ -218,11 +230,11 @@ typedef struct sigevent {
 
 static inline void copy_siginfo(siginfo_t *to, siginfo_t *from)
 {
-	if (from->si_code < 0)
-		memcpy(to, from, sizeof(siginfo_t));
-	else
-		/* _sigchld is currently the largest know union member */
-		memcpy(to, from, 3*sizeof(int) + sizeof(from->_sifields._sigchld));
+    if (from->si_code < 0)
+        memcpy(to, from, sizeof(siginfo_t));
+    else
+        /* _sigchld is currently the largest know union member */
+        memcpy(to, from, 3*sizeof(int) + sizeof(from->_sifields._sigchld));
 }
 
 extern int copy_siginfo_to_user(siginfo_t *to, siginfo_t *from);

@@ -3,9 +3,9 @@
  *
  *	Alan Cox (GW4PTS) 	10/11/93
  */
- 
+
 #ifndef _AX25_H
-#define _AX25_H 
+#define _AX25_H
 #include <linux/config.h>
 #include <linux/ax25.h>
 
@@ -81,40 +81,43 @@
 
 /* Define Link State constants. */
 
-enum { 
-	AX25_STATE_0,
-	AX25_STATE_1,
-	AX25_STATE_2,
-	AX25_STATE_3,
-	AX25_STATE_4
+enum
+{
+    AX25_STATE_0,
+    AX25_STATE_1,
+    AX25_STATE_2,
+    AX25_STATE_3,
+    AX25_STATE_4
 };
 
 #define AX25_MODULUS 		8	/*  Standard AX.25 modulus */
 #define	AX25_EMODULUS		128	/*  Extended AX.25 modulus */
 
-enum {
-	AX25_PROTO_STD_SIMPLEX,
-	AX25_PROTO_STD_DUPLEX,
-	AX25_PROTO_DAMA_SLAVE,
-	AX25_PROTO_DAMA_MASTER
+enum
+{
+    AX25_PROTO_STD_SIMPLEX,
+    AX25_PROTO_STD_DUPLEX,
+    AX25_PROTO_DAMA_SLAVE,
+    AX25_PROTO_DAMA_MASTER
 };
 
-enum {
-	AX25_VALUES_IPDEFMODE,	/* 0=DG 1=VC */
-	AX25_VALUES_AXDEFMODE,	/* 0=Normal 1=Extended Seq Nos */
-	AX25_VALUES_BACKOFF,	/* 0=None 1=Linear 2=Exponential */
-	AX25_VALUES_CONMODE,	/* Allow connected modes - 0=No 1=no "PID text" 2=all PIDs */
-	AX25_VALUES_WINDOW,	/* Default window size for standard AX.25 */
-	AX25_VALUES_EWINDOW,	/* Default window size for extended AX.25 */
-	AX25_VALUES_T1,		/* Default T1 timeout value */
-	AX25_VALUES_T2,		/* Default T2 timeout value */
-	AX25_VALUES_T3,		/* Default T3 timeout value */
-	AX25_VALUES_IDLE,	/* Connected mode idle timer */
-	AX25_VALUES_N2,		/* Default N2 value */
-	AX25_VALUES_PACLEN,	/* AX.25 MTU */
-	AX25_VALUES_PROTOCOL,	/* Std AX.25, DAMA Slave, DAMA Master */
-	AX25_VALUES_DS_TIMEOUT,	/* DAMA Slave timeout */
-	AX25_MAX_VALUES		/* THIS MUST REMAIN THE LAST ENTRY OF THIS LIST */
+enum
+{
+    AX25_VALUES_IPDEFMODE,	/* 0=DG 1=VC */
+    AX25_VALUES_AXDEFMODE,	/* 0=Normal 1=Extended Seq Nos */
+    AX25_VALUES_BACKOFF,	/* 0=None 1=Linear 2=Exponential */
+    AX25_VALUES_CONMODE,	/* Allow connected modes - 0=No 1=no "PID text" 2=all PIDs */
+    AX25_VALUES_WINDOW,	/* Default window size for standard AX.25 */
+    AX25_VALUES_EWINDOW,	/* Default window size for extended AX.25 */
+    AX25_VALUES_T1,		/* Default T1 timeout value */
+    AX25_VALUES_T2,		/* Default T2 timeout value */
+    AX25_VALUES_T3,		/* Default T3 timeout value */
+    AX25_VALUES_IDLE,	/* Connected mode idle timer */
+    AX25_VALUES_N2,		/* Default N2 value */
+    AX25_VALUES_PACLEN,	/* AX.25 MTU */
+    AX25_VALUES_PROTOCOL,	/* Std AX.25, DAMA Slave, DAMA Master */
+    AX25_VALUES_DS_TIMEOUT,	/* DAMA Slave timeout */
+    AX25_MAX_VALUES		/* THIS MUST REMAIN THE LAST ENTRY OF THIS LIST */
 };
 
 #define	AX25_DEF_IPDEFMODE	0			/* Datagram */
@@ -132,66 +135,72 @@ enum {
 #define	AX25_DEF_PROTOCOL	AX25_PROTO_STD_SIMPLEX	/* Standard AX.25 */
 #define AX25_DEF_DS_TIMEOUT	(3 * 60 * HZ)		/* DAMA timeout 3 minutes */
 
-typedef struct ax25_uid_assoc {
-	struct ax25_uid_assoc	*next;
-	uid_t			uid;
-	ax25_address		call;
+typedef struct ax25_uid_assoc
+{
+    struct ax25_uid_assoc	*next;
+    uid_t			uid;
+    ax25_address		call;
 } ax25_uid_assoc;
 
-typedef struct {
-	ax25_address		calls[AX25_MAX_DIGIS];
-	unsigned char		repeated[AX25_MAX_DIGIS];
-	unsigned char		ndigi;
-	char			lastrepeat;
+typedef struct
+{
+    ax25_address		calls[AX25_MAX_DIGIS];
+    unsigned char		repeated[AX25_MAX_DIGIS];
+    unsigned char		ndigi;
+    char			lastrepeat;
 } ax25_digi;
 
-typedef struct ax25_route {
-	struct ax25_route	*next;
-	ax25_address		callsign;
-	struct net_device		*dev;
-	ax25_digi		*digipeat;
-	char			ip_mode;
+typedef struct ax25_route
+{
+    struct ax25_route	*next;
+    ax25_address		callsign;
+    struct net_device		*dev;
+    ax25_digi		*digipeat;
+    char			ip_mode;
 } ax25_route;
 
-typedef struct {
-	char			slave;			/* slave_mode?   */
-	struct timer_list	slave_timer;		/* timeout timer */
-	unsigned short		slave_timeout;		/* when? */
+typedef struct
+{
+    char			slave;			/* slave_mode?   */
+    struct timer_list	slave_timer;		/* timeout timer */
+    unsigned short		slave_timeout;		/* when? */
 } ax25_dama_info;
 
 struct ctl_table;
 
-typedef struct ax25_dev {
-	struct ax25_dev		*next;
-	struct net_device	*dev;
-	struct net_device	*forward;
-	struct ctl_table	*systable;
-	int			values[AX25_MAX_VALUES];
+typedef struct ax25_dev
+{
+    struct ax25_dev		*next;
+    struct net_device	*dev;
+    struct net_device	*forward;
+    struct ctl_table	*systable;
+    int			values[AX25_MAX_VALUES];
 #if defined(CONFIG_AX25_DAMA_SLAVE) || defined(CONFIG_AX25_DAMA_MASTER)
-	ax25_dama_info		dama;
+    ax25_dama_info		dama;
 #endif
 } ax25_dev;
 
-typedef struct ax25_cb {
-	struct ax25_cb		*next;
-	ax25_address		source_addr, dest_addr;
-	ax25_digi		*digipeat;
-	ax25_dev		*ax25_dev;
-	unsigned char		iamdigi;
-	unsigned char		state, modulus, pidincl;
-	unsigned short		vs, vr, va;
-	unsigned char		condition, backoff;
-	unsigned char		n2, n2count;
-	struct timer_list	t1timer, t2timer, t3timer, idletimer;
-	unsigned long		t1, t2, t3, idle, rtt;
-	unsigned short		paclen, fragno, fraglen;
-	struct sk_buff_head	write_queue;
-	struct sk_buff_head	reseq_queue;
-	struct sk_buff_head	ack_queue;
-	struct sk_buff_head	frag_queue;
-	unsigned char		window;
-	struct timer_list	timer;
-	struct sock		*sk;		/* Backlink to socket */
+typedef struct ax25_cb
+{
+    struct ax25_cb		*next;
+    ax25_address		source_addr, dest_addr;
+    ax25_digi		*digipeat;
+    ax25_dev		*ax25_dev;
+    unsigned char		iamdigi;
+    unsigned char		state, modulus, pidincl;
+    unsigned short		vs, vr, va;
+    unsigned char		condition, backoff;
+    unsigned char		n2, n2count;
+    struct timer_list	t1timer, t2timer, t3timer, idletimer;
+    unsigned long		t1, t2, t3, idle, rtt;
+    unsigned short		paclen, fragno, fraglen;
+    struct sk_buff_head	write_queue;
+    struct sk_buff_head	reseq_queue;
+    struct sk_buff_head	ack_queue;
+    struct sk_buff_head	frag_queue;
+    unsigned char		window;
+    struct timer_list	timer;
+    struct sock		*sk;		/* Backlink to socket */
 } ax25_cb;
 
 /* af_ax25.c */

@@ -2,18 +2,20 @@ typedef int bool;
 
 typedef struct struct_tree tree;
 
-struct struct_tree {
-  int is_integer;
-  long p1;
-  char string[128];
+struct struct_tree
+{
+    int is_integer;
+    long p1;
+    char string[128];
 };
 
-typedef struct yystype {
-  tree type_node_p;
+typedef struct yystype
+{
+    tree type_node_p;
 #if 0
-  long long value;
-  int stringlen;
-  char string[128];
+    long long value;
+    int stringlen;
+    char string[128];
 #endif
 } YYSTYPE;
 
@@ -35,16 +37,16 @@ typedef int location_t;
 
 struct c_expr
 {
-  /* The value of the expression.  */
-  tree value;
-  /* Record the original binary operator of an expression, which may
-     have been changed by fold, STRING_CST for unparenthesized string
-     constants, or ERROR_MARK for other expressions (including
-     parenthesized expressions).  */
+    /* The value of the expression.  */
+    tree value;
+    /* Record the original binary operator of an expression, which may
+       have been changed by fold, STRING_CST for unparenthesized string
+       constants, or ERROR_MARK for other expressions (including
+       parenthesized expressions).  */
 #if 0
-  enum tree_code original_code;
+    enum tree_code original_code;
 #else
-  int original_code;
+    int original_code;
 #endif
 };
 
@@ -52,9 +54,10 @@ struct c_expr
 #define NULL 0
 #define CPP_NAME 0
 
-enum rid {
-  RID_NULL = 0,
-  RID_MAX
+enum rid
+{
+    RID_NULL = 0,
+    RID_MAX
 };
 
 #define TTYPE_TABLE                                                     \
@@ -121,20 +124,20 @@ enum rid {
   OP(DEREF_STAR,        "->*")                                          \
   OP(DOT_STAR,          ".*")                                           \
   OP(ATSIGN,            "@")  /* used in Objective-C */                 \
-
+ 
 #define OP(e, s) CPP_ ## e,
 #define TK(e, s) CPP_ ## e,
 enum cpp_ttype
-  {
-  TTYPE_TABLE
-  N_TTYPES,
+{
+    TTYPE_TABLE
+    N_TTYPES,
 
-  /* Positions in the table.  */
-  CPP_LAST_EQ        = CPP_MAX,
-  CPP_FIRST_DIGRAPH  = CPP_HASH,
-  CPP_LAST_PUNCTUATOR= CPP_DOT_STAR,
-  CPP_LAST_CPP_OP    = CPP_LESS_EQ
-  };
+    /* Positions in the table.  */
+    CPP_LAST_EQ        = CPP_MAX,
+    CPP_FIRST_DIGRAPH  = CPP_HASH,
+    CPP_LAST_PUNCTUATOR= CPP_DOT_STAR,
+    CPP_LAST_CPP_OP    = CPP_LESS_EQ
+};
 #undef OP
 #undef TK
 
@@ -144,35 +147,36 @@ enum cpp_ttype
 #define true 1
 
 /* More information about the type of a CPP_NAME token.  */
-typedef enum c_id_kind {
-  /* An ordinary identifier.  */
-  C_ID_ID,
-  /* An identifier declared as a typedef name.  */
-  C_ID_TYPENAME,
-  /* An identifier declared as an Objective-C class name.  */
-  C_ID_CLASSNAME,
-  /* Not an identifier.  */
-  C_ID_NONE
+typedef enum c_id_kind
+{
+    /* An ordinary identifier.  */
+    C_ID_ID,
+    /* An identifier declared as a typedef name.  */
+    C_ID_TYPENAME,
+    /* An identifier declared as an Objective-C class name.  */
+    C_ID_CLASSNAME,
+    /* Not an identifier.  */
+    C_ID_NONE
 } c_id_kind;
 
 /* A single C token after string literal concatenation and conversion
    of preprocessing tokens to tokens.  */
 typedef struct c_token GTY (())
 {
-  /* The kind of token.  */
-  ENUM_BITFIELD (cpp_ttype) type : 8;
-  /* If this token is a CPP_NAME, this value indicates whether also
-     declared as some kind of type.  Otherwise, it is C_ID_NONE.  */
-  ENUM_BITFIELD (c_id_kind) id_kind : 8;
-  /* If this token is a keyword, this value indicates which keyword.
-     Otherwise, this value is RID_MAX.  */
-  ENUM_BITFIELD (rid) keyword : 8;
-  /* True if this token is from a system header.  */
-  BOOL_BITFIELD in_system_header : 1;
-  /* The value associated with this token, if any.  */
-  tree value;
-  /* The location at which this token was found.  */
-  location_t location;
+    /* The kind of token.  */
+    ENUM_BITFIELD (cpp_ttype) type : 8;
+    /* If this token is a CPP_NAME, this value indicates whether also
+       declared as some kind of type.  Otherwise, it is C_ID_NONE.  */
+    ENUM_BITFIELD (c_id_kind) id_kind : 8;
+    /* If this token is a keyword, this value indicates which keyword.
+       Otherwise, this value is RID_MAX.  */
+    ENUM_BITFIELD (rid) keyword : 8;
+    /* True if this token is from a system header.  */
+    BOOL_BITFIELD in_system_header : 1;
+    /* The value associated with this token, if any.  */
+    tree value;
+    /* The location at which this token was found.  */
+    location_t location;
 } c_token;
 
 /* A parser structure recording information about the state and
@@ -180,22 +184,23 @@ typedef struct c_token GTY (())
    tokens of look-ahead; more are not needed for C.  */
 typedef struct c_parser GTY(())
 {
-  /* The look-ahead tokens.  */
-  c_token tokens[2];
-  /* How many look-ahead tokens are available (0, 1 or 2).  */
-  short tokens_avail;
-  /* True if a syntax error is being recovered from; false otherwise.
-     c_parser_error sets this flag.  It should clear this flag when
-     enough tokens have been consumed to recover from the error.  */
-  BOOL_BITFIELD error : 1;
+    /* The look-ahead tokens.  */
+    c_token tokens[2];
+    /* How many look-ahead tokens are available (0, 1 or 2).  */
+    short tokens_avail;
+    /* True if a syntax error is being recovered from; false otherwise.
+       c_parser_error sets this flag.  It should clear this flag when
+       enough tokens have been consumed to recover from the error.  */
+    BOOL_BITFIELD error : 1;
 } c_parser;
 
 #if 0
-static inline tree build_not (int is_integer, long p1, long p2) {
-  tree t = malloc (sizeof (struct struct_tree));
-  t->is_integer = is_integer;
-  t->p1 = p1;
-  t->p2 = p2;
-  return t;
+static inline tree build_not (int is_integer, long p1, long p2)
+{
+    tree t = malloc (sizeof (struct struct_tree));
+    t->is_integer = is_integer;
+    t->p1 = p1;
+    t->p2 = p2;
+    return t;
 }
 #endif

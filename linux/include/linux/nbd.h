@@ -31,17 +31,18 @@
 
 #define MAX_NBD 128
 
-struct nbd_device {
-	int refcnt;	
-	int flags;
-	int harderror;		/* Code of hard error			*/
+struct nbd_device
+{
+    int refcnt;
+    int flags;
+    int harderror;		/* Code of hard error			*/
 #define NBD_READ_ONLY 0x0001
 #define NBD_WRITE_NOCHK 0x0002
-	struct socket * sock;
-	struct file * file; 		/* If == NULL, device is not ready, yet	*/
-	int magic;			/* FIXME: not if debugging is off	*/
-	struct list_head queue_head;	/* Requests are added here...			*/
-	struct semaphore queue_lock;
+    struct socket * sock;
+    struct file * file; 		/* If == NULL, device is not ready, yet	*/
+    int magic;			/* FIXME: not if debugging is off	*/
+    struct list_head queue_head;	/* Requests are added here...			*/
+    struct semaphore queue_lock;
 };
 #endif
 
@@ -57,21 +58,23 @@ struct nbd_device {
  * This is packet used for communication between client and
  * server. All data are in network byte order.
  */
-struct nbd_request {
-	u32 magic;
-	u32 type;	/* == READ || == WRITE 	*/
-	char handle[8];
-	u64 from;
-	u32 len;
+struct nbd_request
+{
+    u32 magic;
+    u32 type;	/* == READ || == WRITE 	*/
+    char handle[8];
+    u64 from;
+    u32 len;
 }
 #ifdef __GNUC__
-	__attribute__ ((packed))
+__attribute__ ((packed))
 #endif
 ;
 
-struct nbd_reply {
-	u32 magic;
-	u32 error;		/* 0 = ok, else error	*/
-	char handle[8];		/* handle you got from request	*/
+struct nbd_reply
+{
+    u32 magic;
+    u32 error;		/* 0 = ok, else error	*/
+    char handle[8];		/* handle you got from request	*/
 };
 #endif

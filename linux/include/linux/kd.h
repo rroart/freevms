@@ -9,10 +9,11 @@
 
 #define GIO_FONTX	0x4B6B	/* get font using struct consolefontdesc */
 #define PIO_FONTX	0x4B6C	/* set font using struct consolefontdesc */
-struct consolefontdesc {
-	unsigned short charcount;	/* characters in font (256 or 512) */
-	unsigned short charheight;	/* scan lines per character (1-32) */
-	char *chardata;			/* font data in expanded form */
+struct consolefontdesc
+{
+    unsigned short charcount;	/* characters in font (256 or 512) */
+    unsigned short charheight;	/* scan lines per character (1-32) */
+    char *chardata;			/* font data in expanded form */
 };
 
 #define PIO_FONTRESET   0x4B6D	/* reset to default font */
@@ -57,20 +58,23 @@ typedef char scrnmap_t;
 #define PIO_UNISCRNMAP  0x4B6A  /* set full Unicode screen mapping */
 
 #define GIO_UNIMAP	0x4B66	/* get unicode-to-font mapping from kernel */
-struct unipair {
-	unsigned short unicode;
-	unsigned short fontpos;
+struct unipair
+{
+    unsigned short unicode;
+    unsigned short fontpos;
 };
-struct unimapdesc {
-	unsigned short entry_ct;
-	struct unipair *entries;
+struct unimapdesc
+{
+    unsigned short entry_ct;
+    struct unipair *entries;
 };
 #define PIO_UNIMAP	0x4B67	/* put unicode-to-font mapping in kernel */
 #define PIO_UNIMAPCLR	0x4B68	/* clear table, possibly advise hash algorithm */
-struct unimapinit {
-	unsigned short advised_hashsize;  /* 0 if no opinion */
-	unsigned short advised_hashstep;  /* 0 if no opinion */
-	unsigned short advised_hashlevel; /* 0 if no opinion */
+struct unimapinit
+{
+    unsigned short advised_hashsize;  /* 0 if no opinion */
+    unsigned short advised_hashstep;  /* 0 if no opinion */
+    unsigned short advised_hashlevel; /* 0 if no opinion */
 };
 
 #define UNI_DIRECT_BASE 0xF000	/* start of Direct Font Region */
@@ -94,10 +98,11 @@ struct unimapinit {
 #define	KDGKBLED	0x4B64	/* get led flags (not lights) */
 #define KDSKBLED	0x4B65	/* set led flags (not lights) */
 
-struct kbentry {
-	unsigned char kb_table;
-	unsigned char kb_index;
-	unsigned short kb_value;
+struct kbentry
+{
+    unsigned char kb_table;
+    unsigned char kb_index;
+    unsigned short kb_value;
 };
 #define		K_NORMTAB	0x00
 #define		K_SHIFTTAB	0x01
@@ -107,60 +112,67 @@ struct kbentry {
 #define KDGKBENT	0x4B46	/* gets one entry in translation table */
 #define KDSKBENT	0x4B47	/* sets one entry in translation table */
 
-struct kbsentry {
-	unsigned char kb_func;
-	unsigned char kb_string[512];
+struct kbsentry
+{
+    unsigned char kb_func;
+    unsigned char kb_string[512];
 };
 #define KDGKBSENT	0x4B48	/* gets one function key string entry */
 #define KDSKBSENT	0x4B49	/* sets one function key string entry */
 
-struct kbdiacr {
-        unsigned char diacr, base, result;
+struct kbdiacr
+{
+    unsigned char diacr, base, result;
 };
-struct kbdiacrs {
-        unsigned int kb_cnt;    /* number of entries in following array */
-	struct kbdiacr kbdiacr[256];    /* MAX_DIACR from keyboard.h */
+struct kbdiacrs
+{
+    unsigned int kb_cnt;    /* number of entries in following array */
+    struct kbdiacr kbdiacr[256];    /* MAX_DIACR from keyboard.h */
 };
 #define KDGKBDIACR      0x4B4A  /* read kernel accent table */
 #define KDSKBDIACR      0x4B4B  /* write kernel accent table */
 
-struct kbkeycode {
-	unsigned int scancode, keycode;
+struct kbkeycode
+{
+    unsigned int scancode, keycode;
 };
 #define KDGETKEYCODE	0x4B4C	/* read kernel keycode table entry */
 #define KDSETKEYCODE	0x4B4D	/* write kernel keycode table entry */
 
 #define KDSIGACCEPT	0x4B4E	/* accept kbd generated signals */
 
-struct hwclk_time {
-	unsigned	sec;	/* 0..59 */
-	unsigned	min;	/* 0..59 */
-	unsigned	hour;	/* 0..23 */
-	unsigned	day;	/* 1..31 */
-	unsigned	mon;	/* 0..11 */
-	unsigned	year;	/* 70... */
-	int		wday;	/* 0..6, 0 is Sunday, -1 means unknown/don't set */
+struct hwclk_time
+{
+    unsigned	sec;	/* 0..59 */
+    unsigned	min;	/* 0..59 */
+    unsigned	hour;	/* 0..23 */
+    unsigned	day;	/* 1..31 */
+    unsigned	mon;	/* 0..11 */
+    unsigned	year;	/* 70... */
+    int		wday;	/* 0..6, 0 is Sunday, -1 means unknown/don't set */
 };
 
 #define KDGHWCLK        0x4B50	/* get hardware clock */
 #define KDSHWCLK        0x4B51  /* set hardware clock */
 
-struct kbd_repeat {
-	int delay;	/* in msec; <= 0: don't change */
-	int rate;	/* in msec; <= 0: don't change */
+struct kbd_repeat
+{
+    int delay;	/* in msec; <= 0: don't change */
+    int rate;	/* in msec; <= 0: don't change */
 };
 
 #define KDKBDREP        0x4B52  /* set keyboard delay/repeat rate;
-				 * actually used values are returned */
+* actually used values are returned */
 
 #define KDFONTOP	0x4B72	/* font operations */
 
-struct console_font_op {
-	unsigned int op;	/* operation code KD_FONT_OP_* */
-	unsigned int flags;	/* KD_FONT_FLAG_* */
-	unsigned int width, height;	/* font size */
-	unsigned int charcount;
-	unsigned char *data;	/* font data with height fixed to 32 */
+struct console_font_op
+{
+    unsigned int op;	/* operation code KD_FONT_OP_* */
+    unsigned int flags;	/* KD_FONT_FLAG_* */
+    unsigned int width, height;	/* font size */
+    unsigned int charcount;
+    unsigned char *data;	/* font data with height fixed to 32 */
 };
 
 #define KD_FONT_OP_SET		0	/* Set font */

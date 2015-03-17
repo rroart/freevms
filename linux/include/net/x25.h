@@ -2,13 +2,13 @@
  *	Declarations of X.25 Packet Layer type objects.
  *
  * 	History
- *	nov/17/96	Jonathan Naylor	  Initial version.		
- *	mar/20/00	Daniela Squassoni Disabling/enabling of facilities 
+ *	nov/17/96	Jonathan Naylor	  Initial version.
+ *	mar/20/00	Daniela Squassoni Disabling/enabling of facilities
  *					  negotiation.
  */
 
 #ifndef _X25_H
-#define _X25_H 
+#define _X25_H
 #include <linux/x25.h>
 
 #define	X25_ADDR_LEN			16
@@ -53,19 +53,21 @@
 #define	X25_COND_PEER_RX_BUSY	0x04
 
 /* Define Link State constants. */
-enum {
-	X25_STATE_0,		/* Ready */
-	X25_STATE_1,		/* Awaiting Call Accepted */
-	X25_STATE_2,		/* Awaiting Clear Confirmation */
-	X25_STATE_3,		/* Data Transfer */
-	X25_STATE_4		/* Awaiting Reset Confirmation */
+enum
+{
+    X25_STATE_0,		/* Ready */
+    X25_STATE_1,		/* Awaiting Call Accepted */
+    X25_STATE_2,		/* Awaiting Clear Confirmation */
+    X25_STATE_3,		/* Data Transfer */
+    X25_STATE_4		/* Awaiting Reset Confirmation */
 };
 
-enum {
-	X25_LINK_STATE_0,
-	X25_LINK_STATE_1,
-	X25_LINK_STATE_2,
-	X25_LINK_STATE_3
+enum
+{
+    X25_LINK_STATE_0,
+    X25_LINK_STATE_1,
+    X25_LINK_STATE_2,
+    X25_LINK_STATE_3
 };
 
 #define X25_DEFAULT_T20		(180 * HZ)		/* Default T20 value */
@@ -101,42 +103,45 @@ enum {
 #define	X25_MAX_FAC_LEN		20		/* Plenty to spare */
 #define	X25_MAX_CUD_LEN		128
 
-struct x25_route {
-	struct x25_route	*next;
-	x25_address		address;	/* Start of address range */
-	unsigned int		sigdigits;	/* Number of sig digits */
-	struct net_device		*dev;		/* More than one for MLP */
+struct x25_route
+{
+    struct x25_route	*next;
+    x25_address		address;	/* Start of address range */
+    unsigned int		sigdigits;	/* Number of sig digits */
+    struct net_device		*dev;		/* More than one for MLP */
 };
 
-struct x25_neigh {
-	struct x25_neigh	*next;
-	struct net_device		*dev;
-	unsigned int		state;
-	unsigned int		extended;
-	struct sk_buff_head	queue;
-	unsigned long		t20;
-	struct timer_list	t20timer;
-	unsigned long		global_facil_mask;
+struct x25_neigh
+{
+    struct x25_neigh	*next;
+    struct net_device		*dev;
+    unsigned int		state;
+    unsigned int		extended;
+    struct sk_buff_head	queue;
+    unsigned long		t20;
+    struct timer_list	t20timer;
+    unsigned long		global_facil_mask;
 };
 
-typedef struct {
-	x25_address		source_addr, dest_addr;
-	struct x25_neigh	*neighbour;
-	unsigned int		lci;
-	unsigned char		state, condition, qbitincl, intflag;
-	unsigned short		vs, vr, va, vl;
-	unsigned long		t2, t21, t22, t23;
-	unsigned short		fraglen;
-	struct sk_buff_head	ack_queue;
-	struct sk_buff_head	fragment_queue;
-	struct sk_buff_head	interrupt_in_queue;
-	struct sk_buff_head	interrupt_out_queue;
-	struct sock		*sk;		/* Backlink to socket */
-	struct timer_list	timer;
-	struct x25_causediag	causediag;
-	struct x25_facilities	facilities;
-	struct x25_calluserdata	calluserdata;
-	unsigned long 		vc_facil_mask;	/* inc_call facilities mask */
+typedef struct
+{
+    x25_address		source_addr, dest_addr;
+    struct x25_neigh	*neighbour;
+    unsigned int		lci;
+    unsigned char		state, condition, qbitincl, intflag;
+    unsigned short		vs, vr, va, vl;
+    unsigned long		t2, t21, t22, t23;
+    unsigned short		fraglen;
+    struct sk_buff_head	ack_queue;
+    struct sk_buff_head	fragment_queue;
+    struct sk_buff_head	interrupt_in_queue;
+    struct sk_buff_head	interrupt_out_queue;
+    struct sock		*sk;		/* Backlink to socket */
+    struct timer_list	timer;
+    struct x25_causediag	causediag;
+    struct x25_facilities	facilities;
+    struct x25_calluserdata	calluserdata;
+    unsigned long 		vc_facil_mask;	/* inc_call facilities mask */
 } x25_cb;
 
 /* af_x25.c */
@@ -222,8 +227,9 @@ extern void x25_check_rbuf(struct sock *);
 /* sysctl_net_x25.c */
 extern void x25_register_sysctl(void);
 extern void x25_unregister_sysctl(void);
-struct x25_skb_cb {
-	unsigned flags;
+struct x25_skb_cb
+{
+    unsigned flags;
 };
 #define X25_SKB_CB(s) ((struct x25_skb_cb *) ((s)->cb))
 #endif

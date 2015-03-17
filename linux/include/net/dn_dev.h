@@ -4,13 +4,14 @@
 
 struct dn_dev;
 
-struct dn_ifaddr {
-	struct dn_ifaddr *ifa_next;
-	struct dn_dev    *ifa_dev;
-	dn_address       ifa_local;
-	unsigned char    ifa_flags;
-	unsigned char    ifa_scope;
-	char             ifa_label[IFNAMSIZ];
+struct dn_ifaddr
+{
+    struct dn_ifaddr *ifa_next;
+    struct dn_dev    *ifa_dev;
+    dn_address       ifa_local;
+    unsigned char    ifa_flags;
+    unsigned char    ifa_scope;
+    char             ifa_label[IFNAMSIZ];
 };
 
 #define DN_DEV_S_RU  0 /* Run - working normally   */
@@ -58,97 +59,99 @@ struct dn_ifaddr {
  *        device with DECnet.
  * down() - Called to turn device off when it goes down
  * timer3() - Called when timer 3 goes off
- * 
+ *
  * sysctl - Hook for sysctl things
  *
  */
-struct dn_dev_parms {
-	int type;	          /* ARPHRD_xxx                         */
-	int mode;	          /* Broadcast, Unicast, Mulitpoint     */
+struct dn_dev_parms
+{
+    int type;	          /* ARPHRD_xxx                         */
+    int mode;	          /* Broadcast, Unicast, Mulitpoint     */
 #define DN_DEV_BCAST  1
 #define DN_DEV_UCAST  2
 #define DN_DEV_MPOINT 4
-	int state;                /* Initial state                      */
-	int forwarding;	          /* 0=EndNode, 1=L1Router, 2=L2Router  */
-	unsigned short blksize;   /* Block Size                         */
-	unsigned long t2;         /* Default value of t2                */
-	unsigned long t3;         /* Default value of t3                */
-	int priority;             /* Priority to be a router            */
-	char *name;               /* Name for sysctl                    */
-	int ctl_name;             /* Index for sysctl                   */
-	int  (*up)(struct net_device *);
-	void (*down)(struct net_device *);
-	void (*timer3)(struct net_device *);
-	void *sysctl;
+    int state;                /* Initial state                      */
+    int forwarding;	          /* 0=EndNode, 1=L1Router, 2=L2Router  */
+    unsigned short blksize;   /* Block Size                         */
+    unsigned long t2;         /* Default value of t2                */
+    unsigned long t3;         /* Default value of t3                */
+    int priority;             /* Priority to be a router            */
+    char *name;               /* Name for sysctl                    */
+    int ctl_name;             /* Index for sysctl                   */
+    int  (*up)(struct net_device *);
+    void (*down)(struct net_device *);
+    void (*timer3)(struct net_device *);
+    void *sysctl;
 };
 
 
-struct dn_dev {
-	struct dn_ifaddr *ifa_list;
-	struct net_device *dev;
-	struct dn_dev_parms parms;
-	char use_long;
-        struct timer_list timer;
-        unsigned long t3;
-	struct neigh_parms *neigh_parms;
-	unsigned char addr[ETH_ALEN];
-	struct neighbour *router; /* Default router on circuit */
-	struct neighbour *peer;   /* Peer on pointopoint links */
-	unsigned long uptime;     /* Time device went up in jiffies */
+struct dn_dev
+{
+    struct dn_ifaddr *ifa_list;
+    struct net_device *dev;
+    struct dn_dev_parms parms;
+    char use_long;
+    struct timer_list timer;
+    unsigned long t3;
+    struct neigh_parms *neigh_parms;
+    unsigned char addr[ETH_ALEN];
+    struct neighbour *router; /* Default router on circuit */
+    struct neighbour *peer;   /* Peer on pointopoint links */
+    unsigned long uptime;     /* Time device went up in jiffies */
 };
 
 struct dn_short_packet
 {
-	unsigned char   msgflg          __attribute__((packed));
-        unsigned short  dstnode         __attribute__((packed));
-        unsigned short  srcnode         __attribute__((packed));
-        unsigned char   forward         __attribute__((packed));
+    unsigned char   msgflg          __attribute__((packed));
+    unsigned short  dstnode         __attribute__((packed));
+    unsigned short  srcnode         __attribute__((packed));
+    unsigned char   forward         __attribute__((packed));
 };
 
 struct dn_long_packet
 {
-	unsigned char   msgflg          __attribute__((packed));
-        unsigned char   d_area          __attribute__((packed));
-        unsigned char   d_subarea       __attribute__((packed));
-        unsigned char   d_id[6]         __attribute__((packed));
-        unsigned char   s_area          __attribute__((packed));
-        unsigned char   s_subarea       __attribute__((packed));
-        unsigned char   s_id[6]         __attribute__((packed));
-        unsigned char   nl2             __attribute__((packed));
-        unsigned char   visit_ct        __attribute__((packed));
-        unsigned char   s_class         __attribute__((packed));
-        unsigned char   pt              __attribute__((packed));
+    unsigned char   msgflg          __attribute__((packed));
+    unsigned char   d_area          __attribute__((packed));
+    unsigned char   d_subarea       __attribute__((packed));
+    unsigned char   d_id[6]         __attribute__((packed));
+    unsigned char   s_area          __attribute__((packed));
+    unsigned char   s_subarea       __attribute__((packed));
+    unsigned char   s_id[6]         __attribute__((packed));
+    unsigned char   nl2             __attribute__((packed));
+    unsigned char   visit_ct        __attribute__((packed));
+    unsigned char   s_class         __attribute__((packed));
+    unsigned char   pt              __attribute__((packed));
 };
 
 /*------------------------- DRP - Routing messages ---------------------*/
 
 struct endnode_hello_message
 {
-	unsigned char   msgflg          __attribute__((packed));
-        unsigned char   tiver[3]        __attribute__((packed));
-        unsigned char   id[6]           __attribute__((packed));
-        unsigned char   iinfo           __attribute__((packed));
-        unsigned short  blksize         __attribute__((packed));
-        unsigned char   area            __attribute__((packed));
-        unsigned char   seed[8]         __attribute__((packed));
-        unsigned char   neighbor[6]     __attribute__((packed));
-        unsigned short  timer           __attribute__((packed));
-        unsigned char   mpd             __attribute__((packed));
-        unsigned char   datalen         __attribute__((packed));
-        unsigned char   data[2]         __attribute__((packed));
+    unsigned char   msgflg          __attribute__((packed));
+    unsigned char   tiver[3]        __attribute__((packed));
+    unsigned char   id[6]           __attribute__((packed));
+    unsigned char   iinfo           __attribute__((packed));
+    unsigned short  blksize         __attribute__((packed));
+    unsigned char   area            __attribute__((packed));
+    unsigned char   seed[8]         __attribute__((packed));
+    unsigned char   neighbor[6]     __attribute__((packed));
+    unsigned short  timer           __attribute__((packed));
+    unsigned char   mpd             __attribute__((packed));
+    unsigned char   datalen         __attribute__((packed));
+    unsigned char   data[2]         __attribute__((packed));
 };
 
 struct rtnode_hello_message
 {
-	unsigned char   msgflg          __attribute__((packed));
-        unsigned char   tiver[3]        __attribute__((packed));
-        unsigned char   id[6]           __attribute__((packed));
-        unsigned char   iinfo           __attribute__((packed));
-        unsigned short  blksize         __attribute__((packed));
-        unsigned char   priority        __attribute__((packed));
-        unsigned char   area            __attribute__((packed));
-        unsigned short  timer           __attribute__((packed));
-        unsigned char   mpd             __attribute__((packed));
+    unsigned char   msgflg          __attribute__((packed));
+    unsigned char   tiver[3]        __attribute__((packed));
+    unsigned char   id[6]           __attribute__((packed));
+    unsigned char   iinfo           __attribute__((packed));
+    unsigned short  blksize         __attribute__((packed));
+    unsigned char   priority        __attribute__((packed));
+    unsigned char   area            __attribute__((packed));
+    unsigned short  timer           __attribute__((packed));
+    unsigned char   mpd             __attribute__((packed));
 };
 
 
@@ -171,19 +174,20 @@ extern struct net_device *decnet_default_device;
 
 static __inline__ int dn_dev_islocal(struct net_device *dev, dn_address addr)
 {
-	struct dn_dev *dn_db = dev->dn_ptr;
-	struct dn_ifaddr *ifa;
+    struct dn_dev *dn_db = dev->dn_ptr;
+    struct dn_ifaddr *ifa;
 
-	if (dn_db == NULL) {
-		printk(KERN_DEBUG "dn_dev_islocal: Called for non DECnet device\n");
-		return 0;
-	}
+    if (dn_db == NULL)
+    {
+        printk(KERN_DEBUG "dn_dev_islocal: Called for non DECnet device\n");
+        return 0;
+    }
 
-	for(ifa = dn_db->ifa_list; ifa; ifa = ifa->ifa_next)
-		if ((addr ^ ifa->ifa_local) == 0)
-			return 1;
+    for(ifa = dn_db->ifa_list; ifa; ifa = ifa->ifa_next)
+        if ((addr ^ ifa->ifa_local) == 0)
+            return 1;
 
-	return 0;
+    return 0;
 }
 
 #endif /* _NET_DN_DEV_H */

@@ -34,28 +34,31 @@
 #define		CPB$M_RAD_6		0x1000
 #define		CPB$M_RAD_7		0x2000
 #define		CPB$S_CPBDEF		4
-	
-struct _cpb {
-  union  {
-    unsigned int cpb$l_cpb;
-    struct  {
-      unsigned cpb$v_primary		: 1;
-      unsigned cpb$v_vector		: 1;
-      unsigned cpb$v_quorum		: 1;
-      unsigned cpb$v_run		: 1;
-      unsigned cpb$v_implicit_affinity	: 1;
-      unsigned cpb$v_soft_rad_affinity	: 1;
-      unsigned cpb$v_rad_0		: 1;
-      unsigned cpb$v_rad_1		: 1;
-      unsigned cpb$v_rad_2		: 1;
-      unsigned cpb$v_rad_3		: 1;
-      unsigned cpb$v_rad_4		: 1;
-      unsigned cpb$v_rad_5		: 1;
-      unsigned cpb$v_rad_6		: 1;
-      unsigned cpb$v_rad_7		: 1;
-      unsigned cpb$v_fill_1		: 18;
+
+struct _cpb
+{
+    union
+    {
+        unsigned int cpb$l_cpb;
+        struct
+        {
+            unsigned cpb$v_primary		: 1;
+            unsigned cpb$v_vector		: 1;
+            unsigned cpb$v_quorum		: 1;
+            unsigned cpb$v_run		: 1;
+            unsigned cpb$v_implicit_affinity	: 1;
+            unsigned cpb$v_soft_rad_affinity	: 1;
+            unsigned cpb$v_rad_0		: 1;
+            unsigned cpb$v_rad_1		: 1;
+            unsigned cpb$v_rad_2		: 1;
+            unsigned cpb$v_rad_3		: 1;
+            unsigned cpb$v_rad_4		: 1;
+            unsigned cpb$v_rad_5		: 1;
+            unsigned cpb$v_rad_6		: 1;
+            unsigned cpb$v_rad_7		: 1;
+            unsigned cpb$v_fill_1		: 18;
+        };
     };
-  };
 };
 
 #define		CPB$M_FLAG_CHECK_CPU		0x1
@@ -63,16 +66,18 @@ struct _cpb {
 #define		CPB$M_FLAG_PRIMARY		0x4
 #define		CPB$M_FLAG_CHECK_CPU_ACTIVE	0x8
 #define		CPB$S_CPB_FLAGSDEF		1
-	
-struct _cpb_flags {
-  struct  {
-    unsigned cpb$v_flag_check_cpu	: 1;
-    unsigned cpb$v_flag_permanent	: 1;
-    unsigned cpb$v_flag_primary		: 1;
-    unsigned cpb$v_flag_check_cpu_active: 1;
-    unsigned cpb$v_flag_filler		: 4;
-  };
+
+struct _cpb_flags
+{
+    struct
+    {
+        unsigned cpb$v_flag_check_cpu	: 1;
+        unsigned cpb$v_flag_permanent	: 1;
+        unsigned cpb$v_flag_primary		: 1;
+        unsigned cpb$v_flag_check_cpu_active: 1;
+        unsigned cpb$v_flag_filler		: 4;
+    };
 };
- 
+
 #endif
- 
+

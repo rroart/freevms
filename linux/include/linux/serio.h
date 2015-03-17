@@ -12,18 +12,18 @@
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or 
+ * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- * 
+ *
  * Should you need to contact me, the author, you can do so either by
  * e-mail - mail your message to <vojtech@ucw.cz>, or by paper mail:
  * Vojtech Pavlik, Ucitelska 1576, Prague 8, 182 00 Czech Republic
@@ -38,32 +38,34 @@
 
 struct serio;
 
-struct serio {
+struct serio
+{
 
-	void *private;
-	void *driver;
+    void *private;
+    void *driver;
 
-	unsigned long type;
-	int number;
+    unsigned long type;
+    int number;
 
-	int (*write)(struct serio *, unsigned char);
-	int (*open)(struct serio *);
-	void (*close)(struct serio *);
+    int (*write)(struct serio *, unsigned char);
+    int (*open)(struct serio *);
+    void (*close)(struct serio *);
 
-	struct serio_dev *dev;
+    struct serio_dev *dev;
 
-	struct serio *next;
+    struct serio *next;
 };
 
-struct serio_dev {
+struct serio_dev
+{
 
-	void *private;
+    void *private;
 
-	void (*interrupt)(struct serio *, unsigned char, unsigned int);
-	void (*connect)(struct serio *, struct serio_dev *dev);
-	void (*disconnect)(struct serio *);
+    void (*interrupt)(struct serio *, unsigned char, unsigned int);
+    void (*connect)(struct serio *, struct serio_dev *dev);
+    void (*disconnect)(struct serio *);
 
-	struct serio_dev *next;
+    struct serio_dev *next;
 };
 
 int serio_open(struct serio *serio, struct serio_dev *dev);
@@ -77,7 +79,7 @@ void serio_unregister_device(struct serio_dev *dev);
 
 static __inline__ int serio_write(struct serio *serio, unsigned char data)
 {
-	return serio->write(serio, data);
+    return serio->write(serio, data);
 }
 
 #define SERIO_TIMEOUT	1

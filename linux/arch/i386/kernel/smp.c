@@ -117,172 +117,183 @@ struct tlb_state cpu_tlbstate[NR_CPUS] = {[0 ... NR_CPUS-1] = { &init_mm, 0 }};
 
 static inline int __prepare_ICR (unsigned int shortcut, int vector)
 {
-	return APIC_DM_FIXED | shortcut | vector | APIC_DEST_LOGICAL;
+    return APIC_DM_FIXED | shortcut | vector | APIC_DEST_LOGICAL;
 }
 
 static inline int __prepare_ICR2 (unsigned int mask)
 {
-	return SET_APIC_DEST_FIELD(mask);
+    return SET_APIC_DEST_FIELD(mask);
 }
 
 static inline void __send_IPI_shortcut(unsigned int shortcut, int vector)
 {
-	/*
-	 * Subtle. In the case of the 'never do double writes' workaround
-	 * we have to lock out interrupts to be safe.  As we don't care
-	 * of the value read we use an atomic rmw access to avoid costly
-	 * cli/sti.  Otherwise we use an even cheaper single atomic write
-	 * to the APIC.
-	 */
-	unsigned int cfg;
+    /*
+     * Subtle. In the case of the 'never do double writes' workaround
+     * we have to lock out interrupts to be safe.  As we don't care
+     * of the value read we use an atomic rmw access to avoid costly
+     * cli/sti.  Otherwise we use an even cheaper single atomic write
+     * to the APIC.
+     */
+    unsigned int cfg;
 
-	/*
-	 * Wait for idle.
-	 */
-	apic_wait_icr_idle();
+    /*
+     * Wait for idle.
+     */
+    apic_wait_icr_idle();
 
-	/*
-	 * No need to touch the target chip field
-	 */
-	cfg = __prepare_ICR(shortcut, vector);
+    /*
+     * No need to touch the target chip field
+     */
+    cfg = __prepare_ICR(shortcut, vector);
 
-	/*
-	 * Send the IPI. The write to APIC_ICR fires this off.
-	 */
-	apic_write_around(APIC_ICR, cfg);
+    /*
+     * Send the IPI. The write to APIC_ICR fires this off.
+     */
+    apic_write_around(APIC_ICR, cfg);
 }
 
 void send_IPI_self(int vector)
 {
-	__send_IPI_shortcut(APIC_DEST_SELF, vector);
+    __send_IPI_shortcut(APIC_DEST_SELF, vector);
 }
 
 static inline void send_IPI_mask_bitmask(int mask, int vector)
 {
-	unsigned long cfg;
-	unsigned long flags;
+    unsigned long cfg;
+    unsigned long flags;
 
-	__save_flags(flags);
-	__cli();
+    __save_flags(flags);
+    __cli();
 
-		
-	/*
-	 * Wait for idle.
-	 */
-	apic_wait_icr_idle();
-		
-	/*
-	 * prepare target chip field
-	 */
-	cfg = __prepare_ICR2(mask);
-	apic_write_around(APIC_ICR2, cfg);
-		
-	/*
-	 * program the ICR 
-	 */
-	cfg = __prepare_ICR(0, vector);
-			
-	/*
-	 * Send the IPI. The write to APIC_ICR fires this off.
-	 */
-	apic_write_around(APIC_ICR, cfg);
 
-	__restore_flags(flags);
+    /*
+     * Wait for idle.
+     */
+    apic_wait_icr_idle();
+
+    /*
+     * prepare target chip field
+     */
+    cfg = __prepare_ICR2(mask);
+    apic_write_around(APIC_ICR2, cfg);
+
+    /*
+     * program the ICR
+     */
+    cfg = __prepare_ICR(0, vector);
+
+    /*
+     * Send the IPI. The write to APIC_ICR fires this off.
+     */
+    apic_write_around(APIC_ICR, cfg);
+
+    __restore_flags(flags);
 }
 
 static inline void send_IPI_mask_sequence(int mask, int vector)
 {
-	unsigned long cfg, flags;
-	unsigned int query_cpu, query_mask;
+    unsigned long cfg, flags;
+    unsigned int query_cpu, query_mask;
 
-	/*
-	 * Hack. The clustered APIC addressing mode doesn't allow us to send 
-	 * to an arbitrary mask, so I do a unicasts to each CPU instead. This 
-	 * should be modified to do 1 message per cluster ID - mbligh
-	 */ 
+    /*
+     * Hack. The clustered APIC addressing mode doesn't allow us to send
+     * to an arbitrary mask, so I do a unicasts to each CPU instead. This
+     * should be modified to do 1 message per cluster ID - mbligh
+     */
 
-	__save_flags(flags);
-	__cli();
+    __save_flags(flags);
+    __cli();
 
-	for (query_cpu = 0; query_cpu < NR_CPUS; ++query_cpu) {
-		query_mask = 1 << query_cpu;
-		if (query_mask & mask) {
-		
-			/*
-			 * Wait for idle.
-			 */
-			apic_wait_icr_idle();
-		
-			/*
-			 * prepare target chip field
-			 */
-			cfg = __prepare_ICR2(cpu_to_logical_apicid(query_cpu));
-			apic_write_around(APIC_ICR2, cfg);
-		
-			/*
-			 * program the ICR 
-			 */
-			cfg = __prepare_ICR(0, vector);
-			
-			/*
-			 * Send the IPI. The write to APIC_ICR fires this off.
-			 */
-			apic_write_around(APIC_ICR, cfg);
-		}
-	}
-	__restore_flags(flags);
+    for (query_cpu = 0; query_cpu < NR_CPUS; ++query_cpu)
+    {
+        query_mask = 1 << query_cpu;
+        if (query_mask & mask)
+        {
+
+            /*
+             * Wait for idle.
+             */
+            apic_wait_icr_idle();
+
+            /*
+             * prepare target chip field
+             */
+            cfg = __prepare_ICR2(cpu_to_logical_apicid(query_cpu));
+            apic_write_around(APIC_ICR2, cfg);
+
+            /*
+             * program the ICR
+             */
+            cfg = __prepare_ICR(0, vector);
+
+            /*
+             * Send the IPI. The write to APIC_ICR fires this off.
+             */
+            apic_write_around(APIC_ICR, cfg);
+        }
+    }
+    __restore_flags(flags);
 }
 
 static inline void send_IPI_mask(int mask, int vector)
 {
-	if (clustered_apic_mode) 
-		send_IPI_mask_sequence(mask, vector);
-	else
-		send_IPI_mask_bitmask(mask, vector);
+    if (clustered_apic_mode)
+        send_IPI_mask_sequence(mask, vector);
+    else
+        send_IPI_mask_bitmask(mask, vector);
 }
 
 static inline void send_IPI_allbutself(int vector)
 {
-	/*
-	 * if there are no other CPUs in the system then
-	 * we get an APIC send error if we try to broadcast.
-	 * thus we have to avoid sending IPIs in this case.
-	 */
-	if (!(smp_num_cpus > 1))
-		return;
+    /*
+     * if there are no other CPUs in the system then
+     * we get an APIC send error if we try to broadcast.
+     * thus we have to avoid sending IPIs in this case.
+     */
+    if (!(smp_num_cpus > 1))
+        return;
 
-	if (clustered_apic_mode) {
-		// Pointless. Use send_IPI_mask to do this instead
-		int cpu;
+    if (clustered_apic_mode)
+    {
+        // Pointless. Use send_IPI_mask to do this instead
+        int cpu;
 
-		if (smp_num_cpus > 1) {
-			for (cpu = 0; cpu < smp_num_cpus; ++cpu) {
-				if (cpu != smp_processor_id())
-					send_IPI_mask(1 << cpu, vector);
-			}
-		}
-	} else {
-		__send_IPI_shortcut(APIC_DEST_ALLBUT, vector);
-		return;
-	}
+        if (smp_num_cpus > 1)
+        {
+            for (cpu = 0; cpu < smp_num_cpus; ++cpu)
+            {
+                if (cpu != smp_processor_id())
+                    send_IPI_mask(1 << cpu, vector);
+            }
+        }
+    }
+    else
+    {
+        __send_IPI_shortcut(APIC_DEST_ALLBUT, vector);
+        return;
+    }
 }
 
 static inline void send_IPI_all(int vector)
 {
-	if (clustered_apic_mode) {
-		// Pointless. Use send_IPI_mask to do this instead
-		int cpu;
+    if (clustered_apic_mode)
+    {
+        // Pointless. Use send_IPI_mask to do this instead
+        int cpu;
 
-		for (cpu = 0; cpu < smp_num_cpus; ++cpu) {
-			send_IPI_mask(1 << cpu, vector);
-		}
-	} else {
-		__send_IPI_shortcut(APIC_DEST_ALLINC, vector);
-	}
+        for (cpu = 0; cpu < smp_num_cpus; ++cpu)
+        {
+            send_IPI_mask(1 << cpu, vector);
+        }
+    }
+    else
+    {
+        __send_IPI_shortcut(APIC_DEST_ALLINC, vector);
+    }
 }
 
 /*
- *	Smarter SMP flushing macros. 
+ *	Smarter SMP flushing macros.
  *		c/o Linus Torvalds.
  *
  *	These mean you can really definitely utterly forget about
@@ -298,14 +309,14 @@ static spinlock_t tlbstate_lock = SPIN_LOCK_UNLOCKED;
 #define FLUSH_ALL	0xffffffff
 
 /*
- * We cannot call mmdrop() because we are in interrupt context, 
+ * We cannot call mmdrop() because we are in interrupt context,
  * instead update mm->cpu_vm_mask.
  */
 static void inline leave_mm (unsigned long cpu)
 {
-	if (cpu_tlbstate[cpu].state == TLBSTATE_OK)
-		BUG();
-	clear_bit(cpu, &cpu_tlbstate[cpu].active_mm->cpu_vm_mask);
+    if (cpu_tlbstate[cpu].state == TLBSTATE_OK)
+        BUG();
+    clear_bit(cpu, &cpu_tlbstate[cpu].active_mm->cpu_vm_mask);
 }
 
 /*
@@ -356,134 +367,139 @@ static void inline leave_mm (unsigned long cpu)
 
 asmlinkage void smp_invalidate_interrupt (void)
 {
-	unsigned long cpu = smp_processor_id();
+    unsigned long cpu = smp_processor_id();
 
-	if (!test_bit(cpu, &flush_cpumask))
-		return;
-		/* 
-		 * This was a BUG() but until someone can quote me the
-		 * line from the intel manual that guarantees an IPI to
-		 * multiple CPUs is retried _only_ on the erroring CPUs
-		 * its staying as a return
-		 *
-		 * BUG();
-		 */
-		 
-	if (flush_mm == cpu_tlbstate[cpu].active_mm) {
-		if (cpu_tlbstate[cpu].state == TLBSTATE_OK) {
-			if (flush_va == FLUSH_ALL)
-				local_flush_tlb();
-			else
-				__flush_tlb_one(flush_va);
-		} else
-			leave_mm(cpu);
-	}
-	ack_APIC_irq();
-	clear_bit(cpu, &flush_cpumask);
+    if (!test_bit(cpu, &flush_cpumask))
+        return;
+    /*
+     * This was a BUG() but until someone can quote me the
+     * line from the intel manual that guarantees an IPI to
+     * multiple CPUs is retried _only_ on the erroring CPUs
+     * its staying as a return
+     *
+     * BUG();
+     */
+
+    if (flush_mm == cpu_tlbstate[cpu].active_mm)
+    {
+        if (cpu_tlbstate[cpu].state == TLBSTATE_OK)
+        {
+            if (flush_va == FLUSH_ALL)
+                local_flush_tlb();
+            else
+                __flush_tlb_one(flush_va);
+        }
+        else
+            leave_mm(cpu);
+    }
+    ack_APIC_irq();
+    clear_bit(cpu, &flush_cpumask);
 }
 
 static void flush_tlb_others (unsigned long cpumask, struct mm_struct *mm,
-						unsigned long va)
+                              unsigned long va)
 {
-	/*
-	 * A couple of (to be removed) sanity checks:
-	 *
-	 * - we do not send IPIs to not-yet booted CPUs.
-	 * - current CPU must not be in mask
-	 * - mask must exist :)
-	 */
-	if (!cpumask)
-		BUG();
-	if ((cpumask & cpu_online_map) != cpumask)
-		BUG();
-	if (cpumask & (1 << smp_processor_id()))
-		BUG();
-	if (!mm)
-		BUG();
+    /*
+     * A couple of (to be removed) sanity checks:
+     *
+     * - we do not send IPIs to not-yet booted CPUs.
+     * - current CPU must not be in mask
+     * - mask must exist :)
+     */
+    if (!cpumask)
+        BUG();
+    if ((cpumask & cpu_online_map) != cpumask)
+        BUG();
+    if (cpumask & (1 << smp_processor_id()))
+        BUG();
+    if (!mm)
+        BUG();
 
-	/*
-	 * i'm not happy about this global shared spinlock in the
-	 * MM hot path, but we'll see how contended it is.
-	 * Temporarily this turns IRQs off, so that lockups are
-	 * detected by the NMI watchdog.
-	 */
-	spin_lock(&tlbstate_lock);
-	
-	flush_mm = mm;
-	flush_va = va;
-	atomic_set_mask(cpumask, &flush_cpumask);
-	/*
-	 * We have to send the IPI only to
-	 * CPUs affected.
-	 */
-	send_IPI_mask(cpumask, INVALIDATE_TLB_VECTOR);
+    /*
+     * i'm not happy about this global shared spinlock in the
+     * MM hot path, but we'll see how contended it is.
+     * Temporarily this turns IRQs off, so that lockups are
+     * detected by the NMI watchdog.
+     */
+    spin_lock(&tlbstate_lock);
 
-	while (flush_cpumask)
-		/* nothing. lockup detection does not belong here */;
+    flush_mm = mm;
+    flush_va = va;
+    atomic_set_mask(cpumask, &flush_cpumask);
+    /*
+     * We have to send the IPI only to
+     * CPUs affected.
+     */
+    send_IPI_mask(cpumask, INVALIDATE_TLB_VECTOR);
 
-	flush_mm = NULL;
-	flush_va = 0;
-	spin_unlock(&tlbstate_lock);
+    while (flush_cpumask)
+        /* nothing. lockup detection does not belong here */;
+
+    flush_mm = NULL;
+    flush_va = 0;
+    spin_unlock(&tlbstate_lock);
 }
-	
+
 void flush_tlb_current_task(void)
 {
-	struct mm_struct *mm = current->mm;
-	unsigned long cpu_mask = mm->cpu_vm_mask & ~(1 << smp_processor_id());
+    struct mm_struct *mm = current->mm;
+    unsigned long cpu_mask = mm->cpu_vm_mask & ~(1 << smp_processor_id());
 
-	local_flush_tlb();
-	if (cpu_mask)
-		flush_tlb_others(cpu_mask, mm, FLUSH_ALL);
+    local_flush_tlb();
+    if (cpu_mask)
+        flush_tlb_others(cpu_mask, mm, FLUSH_ALL);
 }
 
 void flush_tlb_mm (struct mm_struct * mm)
 {
-	unsigned long cpu_mask = mm->cpu_vm_mask & ~(1 << smp_processor_id());
+    unsigned long cpu_mask = mm->cpu_vm_mask & ~(1 << smp_processor_id());
 
-	if (current->active_mm == mm) {
-		if (current->mm)
-			local_flush_tlb();
-		else
-			leave_mm(smp_processor_id());
-	}
-	if (cpu_mask)
-		flush_tlb_others(cpu_mask, mm, FLUSH_ALL);
+    if (current->active_mm == mm)
+    {
+        if (current->mm)
+            local_flush_tlb();
+        else
+            leave_mm(smp_processor_id());
+    }
+    if (cpu_mask)
+        flush_tlb_others(cpu_mask, mm, FLUSH_ALL);
 }
 
 void flush_tlb_page2(struct mm_struct * mm, unsigned long va)
 {
-	unsigned long cpu_mask = mm->cpu_vm_mask & ~(1 << smp_processor_id());
+    unsigned long cpu_mask = mm->cpu_vm_mask & ~(1 << smp_processor_id());
 
-	if (current->active_mm == mm) {
-		if(current->mm)
-			__flush_tlb_one(va);
-		 else
-		 	leave_mm(smp_processor_id());
-	}
+    if (current->active_mm == mm)
+    {
+        if(current->mm)
+            __flush_tlb_one(va);
+        else
+            leave_mm(smp_processor_id());
+    }
 
-	if (cpu_mask)
-		flush_tlb_others(cpu_mask, mm, va);
+    if (cpu_mask)
+        flush_tlb_others(cpu_mask, mm, va);
 }
 
 static inline void do_flush_tlb_all_local(void)
 {
-	unsigned long cpu = smp_processor_id();
+    unsigned long cpu = smp_processor_id();
 
-	__flush_tlb_all();
-	if (cpu_tlbstate[cpu].state == TLBSTATE_LAZY)
-		leave_mm(cpu);
+    __flush_tlb_all();
+    if (cpu_tlbstate[cpu].state == TLBSTATE_LAZY)
+        leave_mm(cpu);
 }
 
 static void flush_tlb_all_ipi(void* info)
 {
-	do_flush_tlb_all_local();
+    do_flush_tlb_all_local();
 }
 
 void flush_tlb_all(void)
 {
-	smp_call_function (flush_tlb_all_ipi,0,1,1);
+    smp_call_function (flush_tlb_all_ipi,0,1,1);
 
-	do_flush_tlb_all_local();
+    do_flush_tlb_all_local();
 }
 
 /*
@@ -494,7 +510,7 @@ void flush_tlb_all(void)
 
 void smp_send_reschedule(int cpu)
 {
-	send_IPI_mask(1 << cpu, RESCHEDULE_VECTOR);
+    send_IPI_mask(1 << cpu, RESCHEDULE_VECTOR);
 }
 
 /*
@@ -503,12 +519,13 @@ void smp_send_reschedule(int cpu)
  */
 static spinlock_t call_lock = SPIN_LOCK_UNLOCKED;
 
-struct call_data_struct {
-	void (*func) (void *info);
-	void *info;
-	atomic_t started;
-	atomic_t finished;
-	int wait;
+struct call_data_struct
+{
+    void (*func) (void *info);
+    void *info;
+    atomic_t started;
+    atomic_t finished;
+    int wait;
 };
 
 static struct call_data_struct data;
@@ -520,7 +537,7 @@ static struct call_data_struct * call_data;
  */
 
 int smp_call_function (void (*func) (void *info), void *info, int nonatomic,
-			int wait)
+                       int wait)
 /*
  * [SUMMARY] Run a function on all other CPUs.
  * <func> The function to run. This must be fast and non-blocking.
@@ -534,45 +551,45 @@ int smp_call_function (void (*func) (void *info), void *info, int nonatomic,
  * hardware interrupt handler, you may call it from a bottom half handler.
  */
 {
-	int cpus = smp_num_cpus-1;
+    int cpus = smp_num_cpus-1;
 
-	if (!cpus)
-		return 0;
+    if (!cpus)
+        return 0;
 
-	data.func = func;
-	data.info = info;
-	atomic_set(&data.started, 0);
-	data.wait = wait;
-	if (wait)
-		atomic_set(&data.finished, 0);
+    data.func = func;
+    data.info = info;
+    atomic_set(&data.started, 0);
+    data.wait = wait;
+    if (wait)
+        atomic_set(&data.finished, 0);
 
-	call_data = &data;
-	wmb();
-	/* Send a message to all other CPUs and wait for them to respond */
-	send_IPI_allbutself(CALL_FUNCTION_VECTOR);
+    call_data = &data;
+    wmb();
+    /* Send a message to all other CPUs and wait for them to respond */
+    send_IPI_allbutself(CALL_FUNCTION_VECTOR);
 
-	/* Wait for response */
-	while (atomic_read(&data.started) != cpus)
-		barrier();
+    /* Wait for response */
+    while (atomic_read(&data.started) != cpus)
+        barrier();
 
-	if (wait)
-		while (atomic_read(&data.finished) != cpus)
-			barrier();
+    if (wait)
+        while (atomic_read(&data.finished) != cpus)
+            barrier();
 
-	return 0;
+    return 0;
 }
 
 static void stop_this_cpu (void * dummy)
 {
-	/*
-	 * Remove this CPU:
-	 */
-	clear_bit(smp_processor_id(), &cpu_online_map);
-	__cli();
-	disable_local_APIC();
-	if (cpu_data[smp_processor_id()].hlt_works_ok)
-		for(;;) __asm__("hlt");
-	for (;;);
+    /*
+     * Remove this CPU:
+     */
+    clear_bit(smp_processor_id(), &cpu_online_map);
+    __cli();
+    disable_local_APIC();
+    if (cpu_data[smp_processor_id()].hlt_works_ok)
+        for(;;) __asm__("hlt");
+    for (;;);
 }
 
 /*
@@ -581,12 +598,12 @@ static void stop_this_cpu (void * dummy)
 
 void smp_send_stop(void)
 {
-	smp_call_function(stop_this_cpu, NULL, 1, 0);
-	smp_num_cpus = 1;
+    smp_call_function(stop_this_cpu, NULL, 1, 0);
+    smp_num_cpus = 1;
 
-	__cli();
-	disable_local_APIC();
-	__sti();
+    __cli();
+    disable_local_APIC();
+    __sti();
 }
 
 /*
@@ -596,41 +613,42 @@ void smp_send_stop(void)
  */
 asmlinkage void smp_reschedule_interrupt(void)
 {
-	ack_APIC_irq();
+    ack_APIC_irq();
 }
 
 asmlinkage void smp_call_function_interrupt(void)
 {
-	void (*func) (void *info) = call_data->func;
-	void *info = call_data->info;
-	int wait = call_data->wait;
+    void (*func) (void *info) = call_data->func;
+    void *info = call_data->info;
+    int wait = call_data->wait;
 
-	ack_APIC_irq();
-	/*
-	 * Notify initiating CPU that I've grabbed the data and am
-	 * about to execute the function
-	 */
-	mb();
-	atomic_inc(&call_data->started);
-	/*
-	 * At this point the info structure may be out of scope unless wait==1
-	 */
-	(*func)(info);
-	if (wait) {
-		mb();
-		atomic_inc(&call_data->finished);
-	}
+    ack_APIC_irq();
+    /*
+     * Notify initiating CPU that I've grabbed the data and am
+     * about to execute the function
+     */
+    mb();
+    atomic_inc(&call_data->started);
+    /*
+     * At this point the info structure may be out of scope unless wait==1
+     */
+    (*func)(info);
+    if (wait)
+    {
+        mb();
+        atomic_inc(&call_data->finished);
+    }
 }
 
 void smp_send_work(int work, int cpu)
 {
-  struct _cpu * c = smp$gl_cpu_data[cpu];
-  c->cpu$l_work_req |= work; // check. smp
-  send_IPI_mask(1 << cpu, IPINT_VECTOR); 
+    struct _cpu * c = smp$gl_cpu_data[cpu];
+    c->cpu$l_work_req |= work; // check. smp
+    send_IPI_mask(1 << cpu, IPINT_VECTOR);
 }
 
 asmlinkage void smp_ipint_interrupt(void)
 {
-  ack_APIC_irq();
-  smp_work();
+    ack_APIC_irq();
+    smp_work();
 }

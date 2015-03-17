@@ -1,6 +1,6 @@
 #ifndef pcbdef_h
 #define pcbdef_h
-	
+
 #define PCB$M_RES 0x1
 #define PCB$M_DELPEN 0x2
 #define PCB$M_FORCPEN 0x4
@@ -63,7 +63,7 @@
 #define PCB$K_ALL_THREADS -2147483648
 #define PCB$K_MAX_KT_COUNT 256
 #define PCB$M_EVENT_NO_FLAG 0x1
-	
+
 #define PCB$K_LENGTH 952
 #define PCB$C_LENGTH 952
 #define PCB$S_PCBDEF 952
@@ -125,14 +125,17 @@
 #define KTB$M_SINGLE_THREAD_ACT 0x3C
 #define KTB$M_TOLERANT 0x40
 #define KTB$M_SOFT_RAD_AFFINITY 0x80
-	
+
 #define KTB$K_LENGTH 952
 #define KTB$C_LENGTH 952
 #define KTB$S_KTBDEF 952
- 
-/* Do not use this struct now */
 
-struct pcb {
+#include <linux/sched.h>
+
+/* Do not use this struct now */
+/* Redefined as task_struct in linux/sched.h */
+/*
+struct _pcb {
   struct _pcb *pcb$l_sqfl;
   struct _pcb *pcb$l_sqbl;
   unsigned short int pcb$w_size;
@@ -263,9 +266,6 @@ struct pcb {
   };
   unsigned int pcb$l_pid;
 
-
-
-
   union  {
     unsigned int pcb$l_epid;
     struct  {
@@ -361,14 +361,14 @@ struct pcb {
       unsigned pcb$v_psx_flags_fill : 31;
     };
   };
-  void (*pcb$l_psx_actrtn)();
+  void (*pcb$l_psx_actrtn)(void);
   unsigned long long pcb$q_psx_actprm;
   unsigned int pcb$l_kernel_counter;
   unsigned int pcb$l_exec_counter;
   unsigned int pcb$l_super_counter;
   unsigned int pcb$l_user_counter;
   unsigned int pcb$l_sched_policy;
-  int (*pcb$a_frewsle_callout)();
+  int (*pcb$a_frewsle_callout)(void);
   union  {
     unsigned int pcb$l_frewsle_param;
     int pcb$l_pqb;
@@ -440,7 +440,11 @@ struct pcb {
   unsigned int pcb$l_lckrq;
   char pcb$b_fill_21_ [4];
 };
- 
+*/
+
+/* Do not use this struct now */
+/* Redefined as task_struct in linux/sched.h */
+/*
 struct ktb {
   struct _ktb *ktb$l_sqfl;
   struct _ktb *ktb$l_sqbl;
@@ -543,9 +547,6 @@ struct ktb {
   unsigned int ktb$l_efwm;
   char ktb$b_pcb_padding_5 [16];
   unsigned int ktb$l_pid;
-
-
-
 
   union  {
     unsigned int ktb$l_epid;
@@ -650,6 +651,7 @@ struct ktb {
   unsigned int ktb$l_lckrq;
   char ktb$b_fill_37_ [4];
 };
- 
+*/
+
 #endif
- 
+

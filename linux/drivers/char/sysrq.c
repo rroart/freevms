@@ -52,55 +52,75 @@ void (*sysrq_power_off)(void);
 
 /* Loglevel sysrq handler */
 static void sysrq_handle_loglevel(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
-	int i;
-	i = key - '0';
-	console_loglevel = 7;
-	printk("Loglevel set to %d\n", i);
-	console_loglevel = i;
-}	
-static struct sysrq_key_op sysrq_loglevel_op = {
-	handler:	sysrq_handle_loglevel,
-	help_msg:	"loglevel0-8",
-	action_msg:	"Changing Loglevel",
+                                  struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    int i;
+    i = key - '0';
+    console_loglevel = 7;
+    printk("Loglevel set to %d\n", i);
+    console_loglevel = i;
+}
+static struct sysrq_key_op sysrq_loglevel_op =
+{
+handler:
+    sysrq_handle_loglevel,
+help_msg:	"loglevel0-8"
+    ,
+action_msg:	"Changing Loglevel"
+    ,
 };
 
 
 /* SAK sysrq handler */
 #ifdef CONFIG_VT
 static void sysrq_handle_SAK(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
+                             struct kbd_struct *kbd, struct tty_struct *tty)
+{
 }
-static struct sysrq_key_op sysrq_SAK_op = {
-	handler:	sysrq_handle_SAK,
-	help_msg:	"saK",
-	action_msg:	"SAK",
+static struct sysrq_key_op sysrq_SAK_op =
+{
+handler:
+    sysrq_handle_SAK,
+help_msg:	"saK"
+    ,
+action_msg:	"SAK"
+    ,
 };
 #endif
 
 
 /* unraw sysrq handler */
 static void sysrq_handle_unraw(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
-	if (kbd)
-		kbd->kbdmode = VC_XLATE;
+                               struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    if (kbd)
+        kbd->kbdmode = VC_XLATE;
 }
-static struct sysrq_key_op sysrq_unraw_op = {
-	handler:	sysrq_handle_unraw,
-	help_msg:	"unRaw",
-	action_msg:	"Keyboard mode set to XLATE",
+static struct sysrq_key_op sysrq_unraw_op =
+{
+handler:
+    sysrq_handle_unraw,
+help_msg:	"unRaw"
+    ,
+action_msg:	"Keyboard mode set to XLATE"
+    ,
 };
 
 
 /* reboot sysrq handler */
 static void sysrq_handle_reboot(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
-	machine_restart(NULL);
+                                struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    machine_restart(NULL);
 }
-static struct sysrq_key_op sysrq_reboot_op = {
-	handler:	sysrq_handle_reboot,
-	help_msg:	"reBoot",
-	action_msg:	"Resetting",
+static struct sysrq_key_op sysrq_reboot_op =
+{
+handler:
+    sysrq_handle_reboot,
+help_msg:	"reBoot"
+    ,
+action_msg:	"Resetting"
+    ,
 };
 
 
@@ -109,81 +129,91 @@ static struct sysrq_key_op sysrq_reboot_op = {
 
 /* do_emergency_sync helper function */
 /* Guesses if the device is a local hard drive */
-static int is_local_disk(kdev_t dev) {
-	unsigned int major;
-	major = MAJOR(dev);
+static int is_local_disk(kdev_t dev)
+{
+    unsigned int major;
+    major = MAJOR(dev);
 
-	switch (major) {
-	case IDE0_MAJOR:
-	case IDE1_MAJOR:
-	case IDE2_MAJOR:
-	case IDE3_MAJOR:
-	case IDE4_MAJOR:
-	case IDE5_MAJOR:
-	case IDE6_MAJOR:
-	case IDE7_MAJOR:
-	case IDE8_MAJOR:
-	case IDE9_MAJOR:
-	case SCSI_DISK0_MAJOR:
-	case SCSI_DISK1_MAJOR:
-	case SCSI_DISK2_MAJOR:
-	case SCSI_DISK3_MAJOR:
-	case SCSI_DISK4_MAJOR:
-	case SCSI_DISK5_MAJOR:
-	case SCSI_DISK6_MAJOR:
-	case SCSI_DISK7_MAJOR:
-	case XT_DISK_MAJOR:
-		return 1;
-	default:
-		return 0;
-	}
+    switch (major)
+    {
+    case IDE0_MAJOR:
+    case IDE1_MAJOR:
+    case IDE2_MAJOR:
+    case IDE3_MAJOR:
+    case IDE4_MAJOR:
+    case IDE5_MAJOR:
+    case IDE6_MAJOR:
+    case IDE7_MAJOR:
+    case IDE8_MAJOR:
+    case IDE9_MAJOR:
+    case SCSI_DISK0_MAJOR:
+    case SCSI_DISK1_MAJOR:
+    case SCSI_DISK2_MAJOR:
+    case SCSI_DISK3_MAJOR:
+    case SCSI_DISK4_MAJOR:
+    case SCSI_DISK5_MAJOR:
+    case SCSI_DISK6_MAJOR:
+    case SCSI_DISK7_MAJOR:
+    case XT_DISK_MAJOR:
+        return 1;
+    default:
+        return 0;
+    }
 }
 
 /* do_emergency_sync helper function */
 static void go_sync(struct super_block *sb, int remount_flag)
 {
-	int orig_loglevel;
-	orig_loglevel = console_loglevel;
-	console_loglevel = 7;
-	printk(KERN_INFO "%sing device %x ... ",
-	       remount_flag ? "Remount" : "Sync",
-	       sb->s_dev);
+    int orig_loglevel;
+    orig_loglevel = console_loglevel;
+    console_loglevel = 7;
+    printk(KERN_INFO "%sing device %x ... ",
+           remount_flag ? "Remount" : "Sync",
+           sb->s_dev);
 
-	if (remount_flag) { /* Remount R/O */
-		int ret, flags;
-		struct list_head *p;
+    if (remount_flag)   /* Remount R/O */
+    {
+        int ret, flags;
+        struct list_head *p;
 
-		if (sb->s_flags & MS_RDONLY) {
-			printk("R/O\n");
-			return;
-		}
+        if (sb->s_flags & MS_RDONLY)
+        {
+            printk("R/O\n");
+            return;
+        }
 
-		file_list_lock();
-		for (p = sb->s_files.next; p != &sb->s_files; p = p->next) {
-			struct file *file = list_entry(p, struct file, f_list);
-			if (file->f_dentry && file_count(file)
-				&& S_ISREG(file->f_dentry->d_inode->i_mode))
-				file->f_mode &= ~2;
-		}
-		file_list_unlock();
-		DQUOT_OFF(sb);
-		fsync_dev(sb->s_dev);
-		flags = MS_RDONLY;
-		if (sb->s_op && sb->s_op->remount_fs) {
-			ret = sb->s_op->remount_fs(sb, &flags, NULL);
-			if (ret)
-				printk("error %d\n", ret);
-			else {
-				sb->s_flags = (sb->s_flags & ~MS_RMT_MASK) | (flags & MS_RMT_MASK);
-				printk("OK\n");
-			}
-		} else
-			printk("nothing to do\n");
-	} else { /* Sync only */
-		fsync_dev(sb->s_dev);
-		printk("OK\n");
-	}
-	console_loglevel = orig_loglevel;
+        file_list_lock();
+        for (p = sb->s_files.next; p != &sb->s_files; p = p->next)
+        {
+            struct file *file = list_entry(p, struct file, f_list);
+            if (file->f_dentry && file_count(file)
+                    && S_ISREG(file->f_dentry->d_inode->i_mode))
+                file->f_mode &= ~2;
+        }
+        file_list_unlock();
+        DQUOT_OFF(sb);
+        fsync_dev(sb->s_dev);
+        flags = MS_RDONLY;
+        if (sb->s_op && sb->s_op->remount_fs)
+        {
+            ret = sb->s_op->remount_fs(sb, &flags, NULL);
+            if (ret)
+                printk("error %d\n", ret);
+            else
+            {
+                sb->s_flags = (sb->s_flags & ~MS_RMT_MASK) | (flags & MS_RMT_MASK);
+                printk("OK\n");
+            }
+        }
+        else
+            printk("nothing to do\n");
+    }
+    else     /* Sync only */
+    {
+        fsync_dev(sb->s_dev);
+        printk("OK\n");
+    }
+    console_loglevel = orig_loglevel;
 }
 /*
  * Emergency Sync or Unmount. We cannot do it directly, so we set a special
@@ -194,53 +224,64 @@ static void go_sync(struct super_block *sb, int remount_flag)
 
 int emergency_sync_scheduled;
 
-void do_emergency_sync(void) {
-	struct super_block *sb;
-	int remount_flag;
-	int orig_loglevel;
+void do_emergency_sync(void)
+{
+    struct super_block *sb;
+    int remount_flag;
+    int orig_loglevel;
 
-	lock_kernel();
-	remount_flag = (emergency_sync_scheduled == EMERG_REMOUNT);
-	emergency_sync_scheduled = 0;
+    lock_kernel();
+    remount_flag = (emergency_sync_scheduled == EMERG_REMOUNT);
+    emergency_sync_scheduled = 0;
 
-	for (sb = sb_entry(super_blocks.next);
-	     sb != sb_entry(&super_blocks); 
-	     sb = sb_entry(sb->s_list.next))
-		if (is_local_disk(sb->s_dev))
-			go_sync(sb, remount_flag);
+    for (sb = sb_entry(super_blocks.next);
+            sb != sb_entry(&super_blocks);
+            sb = sb_entry(sb->s_list.next))
+        if (is_local_disk(sb->s_dev))
+            go_sync(sb, remount_flag);
 
-	for (sb = sb_entry(super_blocks.next);
-	     sb != sb_entry(&super_blocks); 
-	     sb = sb_entry(sb->s_list.next))
-		if (!is_local_disk(sb->s_dev) && MAJOR(sb->s_dev))
-			go_sync(sb, remount_flag);
+    for (sb = sb_entry(super_blocks.next);
+            sb != sb_entry(&super_blocks);
+            sb = sb_entry(sb->s_list.next))
+        if (!is_local_disk(sb->s_dev) && MAJOR(sb->s_dev))
+            go_sync(sb, remount_flag);
 
-	unlock_kernel();
+    unlock_kernel();
 
-	orig_loglevel = console_loglevel;
-	console_loglevel = 7;
-	printk(KERN_INFO "Done.\n");
-	console_loglevel = orig_loglevel;
+    orig_loglevel = console_loglevel;
+    console_loglevel = 7;
+    printk(KERN_INFO "Done.\n");
+    console_loglevel = orig_loglevel;
 }
 
 static void sysrq_handle_sync(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
-	emergency_sync_scheduled = EMERG_SYNC;
+                              struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    emergency_sync_scheduled = EMERG_SYNC;
 }
-static struct sysrq_key_op sysrq_sync_op = {
-	handler:	sysrq_handle_sync,
-	help_msg:	"Sync",
-	action_msg:	"Emergency Sync",
+static struct sysrq_key_op sysrq_sync_op =
+{
+handler:
+    sysrq_handle_sync,
+help_msg:	"Sync"
+    ,
+action_msg:	"Emergency Sync"
+    ,
 };
 
 static void sysrq_handle_mountro(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
-	emergency_sync_scheduled = EMERG_REMOUNT;
+                                 struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    emergency_sync_scheduled = EMERG_REMOUNT;
 }
-static struct sysrq_key_op sysrq_mountro_op = {
-	handler:	sysrq_handle_mountro,
-	help_msg:	"Unmount",
-	action_msg:	"Emergency Remount R/O",
+static struct sysrq_key_op sysrq_mountro_op =
+{
+handler:
+    sysrq_handle_mountro,
+help_msg:	"Unmount"
+    ,
+action_msg:	"Emergency Remount R/O"
+    ,
 };
 
 /* END SYNC SYSRQ HANDLERS BLOCK */
@@ -249,36 +290,51 @@ static struct sysrq_key_op sysrq_mountro_op = {
 /* SHOW SYSRQ HANDLERS BLOCK */
 
 static void sysrq_handle_showregs(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
-	if (pt_regs)
-		show_regs(pt_regs);
+                                  struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    if (pt_regs)
+        show_regs(pt_regs);
 }
-static struct sysrq_key_op sysrq_showregs_op = {
-	handler:	sysrq_handle_showregs,
-	help_msg:	"showPc",
-	action_msg:	"Show Regs",
+static struct sysrq_key_op sysrq_showregs_op =
+{
+handler:
+    sysrq_handle_showregs,
+help_msg:	"showPc"
+    ,
+action_msg:	"Show Regs"
+    ,
 };
 
 
 static void sysrq_handle_showstate(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
-	show_state();
+                                   struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    show_state();
 }
-static struct sysrq_key_op sysrq_showstate_op = {
-	handler:	sysrq_handle_showstate,
-	help_msg:	"showTasks",
-	action_msg:	"Show State",
+static struct sysrq_key_op sysrq_showstate_op =
+{
+handler:
+    sysrq_handle_showstate,
+help_msg:	"showTasks"
+    ,
+action_msg:	"Show State"
+    ,
 };
 
 
 static void sysrq_handle_showmem(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
-	show_mem();
+                                 struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    show_mem();
 }
-static struct sysrq_key_op sysrq_showmem_op = {
-	handler:	sysrq_handle_showmem,
-	help_msg:	"showMem",
-	action_msg:	"Show Memory",
+static struct sysrq_key_op sysrq_showmem_op =
+{
+handler:
+    sysrq_handle_showmem,
+help_msg:	"showMem"
+    ,
+action_msg:	"Show Memory"
+    ,
 };
 
 /* SHOW SYSRQ HANDLERS BLOCK */
@@ -290,51 +346,68 @@ static struct sysrq_key_op sysrq_showmem_op = {
  * Sends a signal to all user processes */
 static void send_sig_all(int sig, int even_init)
 {
-	struct task_struct *p;
+    struct task_struct *p;
 
-	for_each_task_pre1(p) {
-		if (p->mm) { /* Not swapper nor kernel thread */
-			if (p->pcb$l_pid == INIT_PID && even_init)
-				/* Ugly hack to kill init */
-				p->pcb$l_pid = 0x8000;
-			if (p->pcb$l_pid != INIT_PID)
-				force_sig(sig, p);
-		}
-	}
-	for_each_task_post1(p);
+    for_each_task_pre1(p)
+    {
+        if (p->mm)   /* Not swapper nor kernel thread */
+        {
+            if (p->pcb$l_pid == INIT_PID && even_init)
+                /* Ugly hack to kill init */
+                p->pcb$l_pid = 0x8000;
+            if (p->pcb$l_pid != INIT_PID)
+                force_sig(sig, p);
+        }
+    }
+    for_each_task_post1(p);
 }
 
 static void sysrq_handle_term(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
-	send_sig_all(SIGTERM, 0);
-	console_loglevel = 8;
+                              struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    send_sig_all(SIGTERM, 0);
+    console_loglevel = 8;
 }
-static struct sysrq_key_op sysrq_term_op = {
-	handler:	sysrq_handle_term,
-	help_msg:	"tErm",
-	action_msg:	"Terminate All Tasks",
+static struct sysrq_key_op sysrq_term_op =
+{
+handler:
+    sysrq_handle_term,
+help_msg:	"tErm"
+    ,
+action_msg:	"Terminate All Tasks"
+    ,
 };
 
 static void sysrq_handle_kill(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
-	send_sig_all(SIGKILL, 0);
-	console_loglevel = 8;
+                              struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    send_sig_all(SIGKILL, 0);
+    console_loglevel = 8;
 }
-static struct sysrq_key_op sysrq_kill_op = {
-	handler:	sysrq_handle_kill,
-	help_msg:	"kIll",
-	action_msg:	"Kill All Tasks",
+static struct sysrq_key_op sysrq_kill_op =
+{
+handler:
+    sysrq_handle_kill,
+help_msg:	"kIll"
+    ,
+action_msg:	"Kill All Tasks"
+    ,
 };
 
 static void sysrq_handle_killall(int key, struct pt_regs *pt_regs,
-		struct kbd_struct *kbd, struct tty_struct *tty) {
-	send_sig_all(SIGKILL, 1);
-	console_loglevel = 8;
+                                 struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    send_sig_all(SIGKILL, 1);
+    console_loglevel = 8;
 }
-static struct sysrq_key_op sysrq_killall_op = {
-	handler:	sysrq_handle_killall,
-	help_msg:	"killalL",
-	action_msg:	"Kill All Tasks (even init)",
+static struct sysrq_key_op sysrq_killall_op =
+{
+handler:
+    sysrq_handle_killall,
+help_msg:	"killalL"
+    ,
+action_msg:	"Kill All Tasks (even init)"
+    ,
 };
 
 /* END SIGNAL SYSRQ HANDLERS BLOCK */
@@ -343,92 +416,107 @@ static struct sysrq_key_op sysrq_killall_op = {
 /* Key Operations table and lock */
 static spinlock_t sysrq_key_table_lock = SPIN_LOCK_UNLOCKED;
 #define SYSRQ_KEY_TABLE_LENGTH 36
-static struct sysrq_key_op *sysrq_key_table[SYSRQ_KEY_TABLE_LENGTH] = {
-/* 0 */	&sysrq_loglevel_op,
-/* 1 */	&sysrq_loglevel_op,
-/* 2 */	&sysrq_loglevel_op,
-/* 3 */	&sysrq_loglevel_op,
-/* 4 */	&sysrq_loglevel_op,
-/* 5 */	&sysrq_loglevel_op,
-/* 6 */	&sysrq_loglevel_op,
-/* 7 */	&sysrq_loglevel_op,
-/* 8 */	&sysrq_loglevel_op,
-/* 9 */	&sysrq_loglevel_op,
-/* a */	NULL, /* Don't use for system provided sysrqs,
-		 it is handled specially on the spark
-		 and will never arive */
-/* b */	&sysrq_reboot_op,
-/* c */	NULL,
-/* d */	NULL,
-/* e */	&sysrq_term_op,
-/* f */	NULL,
-/* g */	NULL,
-/* h */	NULL,
-/* i */	&sysrq_kill_op,
-/* j */	NULL,
+static struct sysrq_key_op *sysrq_key_table[SYSRQ_KEY_TABLE_LENGTH] =
+{
+    /* 0 */	&sysrq_loglevel_op,
+    /* 1 */	&sysrq_loglevel_op,
+    /* 2 */	&sysrq_loglevel_op,
+    /* 3 */	&sysrq_loglevel_op,
+    /* 4 */	&sysrq_loglevel_op,
+    /* 5 */	&sysrq_loglevel_op,
+    /* 6 */	&sysrq_loglevel_op,
+    /* 7 */	&sysrq_loglevel_op,
+    /* 8 */	&sysrq_loglevel_op,
+    /* 9 */	&sysrq_loglevel_op,
+    /* a */	NULL, /* Don't use for system provided sysrqs,
+    		 it is handled specially on the spark
+    		 and will never arive */
+    /* b */	&sysrq_reboot_op,
+    /* c */	NULL,
+    /* d */	NULL,
+    /* e */	&sysrq_term_op,
+    /* f */	NULL,
+    /* g */	NULL,
+    /* h */	NULL,
+    /* i */	&sysrq_kill_op,
+    /* j */	NULL,
 #ifdef CONFIG_VT
-/* k */	&sysrq_SAK_op,
+    /* k */	&sysrq_SAK_op,
 #else
-/* k */	NULL,
+    /* k */	NULL,
 #endif
-/* l */	&sysrq_killall_op,
-/* m */	&sysrq_showmem_op,
-/* n */	NULL,
-/* o */	NULL, /* This will often be registered
-		 as 'Off' at init time */
-/* p */	&sysrq_showregs_op,
-/* q */	NULL,
-/* r */	&sysrq_unraw_op,
-/* s */	&sysrq_sync_op,
-/* t */	&sysrq_showstate_op,
-/* u */	&sysrq_mountro_op,
-/* v */	NULL,
-/* w */	NULL,
-/* x */	NULL,
-/* w */	NULL,
-/* z */	NULL
+    /* l */	&sysrq_killall_op,
+    /* m */	&sysrq_showmem_op,
+    /* n */	NULL,
+    /* o */	NULL, /* This will often be registered
+    		 as 'Off' at init time */
+    /* p */	&sysrq_showregs_op,
+    /* q */	NULL,
+    /* r */	&sysrq_unraw_op,
+    /* s */	&sysrq_sync_op,
+    /* t */	&sysrq_showstate_op,
+    /* u */	&sysrq_mountro_op,
+    /* v */	NULL,
+    /* w */	NULL,
+    /* x */	NULL,
+    /* w */	NULL,
+    /* z */	NULL
 };
 
 /* key2index calculation, -1 on invalid index */
-static __inline__ int sysrq_key_table_key2index(int key) {
-	int retval;
-	if ((key >= '0') & (key <= '9')) {
-		retval = key - '0';
-	} else if ((key >= 'a') & (key <= 'z')) {
-		retval = key + 10 - 'a';
-	} else {
-		retval = -1;
-	}
-	return retval;
+static __inline__ int sysrq_key_table_key2index(int key)
+{
+    int retval;
+    if ((key >= '0') & (key <= '9'))
+    {
+        retval = key - '0';
+    }
+    else if ((key >= 'a') & (key <= 'z'))
+    {
+        retval = key + 10 - 'a';
+    }
+    else
+    {
+        retval = -1;
+    }
+    return retval;
 }
 
 /*
  * table lock and unlocking functions, exposed to modules
  */
 
-void __sysrq_lock_table (void) { spin_lock(&sysrq_key_table_lock); }
+void __sysrq_lock_table (void)
+{
+    spin_lock(&sysrq_key_table_lock);
+}
 
-void __sysrq_unlock_table (void) { spin_unlock(&sysrq_key_table_lock); }
+void __sysrq_unlock_table (void)
+{
+    spin_unlock(&sysrq_key_table_lock);
+}
 
 /*
  * get and put functions for the table, exposed to modules.
  */
 
-struct sysrq_key_op *__sysrq_get_key_op (int key) {
-        struct sysrq_key_op *op_p;
-        int i;
-	
-	i = sysrq_key_table_key2index(key);
-        op_p = (i == -1) ? NULL : sysrq_key_table[i];
-        return op_p;
+struct sysrq_key_op *__sysrq_get_key_op (int key)
+{
+    struct sysrq_key_op *op_p;
+    int i;
+
+    i = sysrq_key_table_key2index(key);
+    op_p = (i == -1) ? NULL : sysrq_key_table[i];
+    return op_p;
 }
 
-void __sysrq_put_key_op (int key, struct sysrq_key_op *op_p) {
-        int i;
+void __sysrq_put_key_op (int key, struct sysrq_key_op *op_p)
+{
+    int i;
 
-	i = sysrq_key_table_key2index(key);
-        if (i != -1)
-                sysrq_key_table[i] = op_p;
+    i = sysrq_key_table_key2index(key);
+    if (i != -1)
+        sysrq_key_table[i] = op_p;
 }
 
 /*
@@ -437,13 +525,14 @@ void __sysrq_put_key_op (int key, struct sysrq_key_op *op_p) {
  */
 
 void handle_sysrq(int key, struct pt_regs *pt_regs,
-		  struct kbd_struct *kbd, struct tty_struct *tty) {
-	if (!sysrq_enabled)
-		return;
+                  struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    if (!sysrq_enabled)
+        return;
 
-	__sysrq_lock_table();
-	__handle_sysrq_nolock(key, pt_regs, kbd, tty);
-	__sysrq_unlock_table();
+    __sysrq_lock_table();
+    __handle_sysrq_nolock(key, pt_regs, kbd, tty);
+    __sysrq_unlock_table();
 }
 
 /*
@@ -458,77 +547,92 @@ extern unsigned long round_and_round;
 extern void printcom(void);
 
 void __handle_sysrq_nolock(int key, struct pt_regs *pt_regs,
-		  struct kbd_struct *kbd, struct tty_struct *tty) {
-	struct sysrq_key_op *op_p;
-	int orig_log_level;
-	int i, j;
-	
-	if (!sysrq_enabled)
-		return;
+                           struct kbd_struct *kbd, struct tty_struct *tty)
+{
+    struct sysrq_key_op *op_p;
+    int orig_log_level;
+    int i, j;
 
-	orig_log_level = console_loglevel;
-	console_loglevel = 7;
-	printk(KERN_INFO "Cur %x pid %x pri %x prib %x stat %x while %x\n",current,current->pcb$l_pid,current->pcb$b_pri,current->pcb$b_prib,current->state,in_idle_while);
-	printk(KERN_INFO "Round %x %x\n",round_and_round,nr_running);
-	if (mydebug6) {
-		switch (mydebug5) {
-			case 0:
-				mydebug5=1;
-				break;
-			case 1:
-				mydebug5=0;
-				break;
-		}
+    if (!sysrq_enabled)
+        return;
+
+    orig_log_level = console_loglevel;
+    console_loglevel = 7;
+    printk(KERN_INFO "Cur %x pid %x pri %x prib %x stat %x while %x\n",current,current->pcb$l_pid,current->pcb$b_pri,current->pcb$b_prib,current->state,in_idle_while);
+    printk(KERN_INFO "Round %x %x\n",round_and_round,nr_running);
+    if (mydebug6)
+    {
+        switch (mydebug5)
+        {
+        case 0:
+            mydebug5=1;
+            break;
+        case 1:
+            mydebug5=0;
+            break;
+        }
 #if 0
-		current->need_resched=1;
+        current->need_resched=1;
 #endif
-	}
-	if (mydebug6) printcom();
-	
-  if (mydebug5==2) {
-    int i;
-    struct _pcb  *tmp2;
-    unsigned long tmp;
-    printk("cpusch %x\n",sch$gl_comqs);
-    for(i=16;i<32;i++) {
-      tmp=sch$aq_comh[i];
-//      if(*(unsigned long *)tmp == tmp) {; } else {
-      {
-	tmp2=tmp;
-	printk("com %x ",i);
-	do {
-	  printk("%x %x %x | ",tmp2,tmp2->pcb$l_pid,tmp2->pcb$b_pri);
-	  //	    if (prev->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
-	  //	    if (prev->pcb$l_pid==2 && tmp2==0xc03e2340) { int i; for(i=0;i<2000000000;i++) ; }
-	  tmp2=tmp2->pcb$l_sqfl;
-	} while (tmp2!=tmp);
-	printk("\n");
-      }
     }
-    printk("\n");
-    if (mydebug4) printk("loop end\n");
-    if (mydebug4) { int j; for(j=0;j<100000000;j++) ; }
-  }
+    if (mydebug6) printcom();
 
-	printk(KERN_INFO "SysRq : ");
+    if (mydebug5==2)
+    {
+        int i;
+        struct _pcb  *tmp2;
+        unsigned long tmp;
+        printk("cpusch %x\n",sch$gl_comqs);
+        for(i=16; i<32; i++)
+        {
+            tmp=sch$aq_comh[i];
+//      if(*(unsigned long *)tmp == tmp) {; } else {
+            {
+                tmp2=tmp;
+                printk("com %x ",i);
+                do
+                {
+                    printk("%x %x %x | ",tmp2,tmp2->pcb$l_pid,tmp2->pcb$b_pri);
+                    //	    if (prev->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
+                    //	    if (prev->pcb$l_pid==2 && tmp2==0xc03e2340) { int i; for(i=0;i<2000000000;i++) ; }
+                    tmp2=tmp2->pcb$l_sqfl;
+                }
+                while (tmp2!=tmp);
+                printk("\n");
+            }
+        }
+        printk("\n");
+        if (mydebug4) printk("loop end\n");
+        if (mydebug4)
+        {
+            int j;
+            for(j=0; j<100000000; j++) ;
+        }
+    }
 
-        op_p = __sysrq_get_key_op(key);
-        if (op_p) {
-		printk ("%s\n", op_p->action_msg);
-		console_loglevel = orig_log_level;
-		op_p->handler(key, pt_regs, kbd, tty);
-	} else {
-		printk("HELP : ");
-		/* Only print the help msg once per handler */
-		for (i=0; i<SYSRQ_KEY_TABLE_LENGTH; i++) 
-		if (sysrq_key_table[i]) {
-			for (j=0; sysrq_key_table[i] != sysrq_key_table[j]; j++);
-			if (j == i)
-				printk ("%s ", sysrq_key_table[i]->help_msg);
-		}
-		printk ("\n");
-		console_loglevel = orig_log_level;
-	}
+    printk(KERN_INFO "SysRq : ");
+
+    op_p = __sysrq_get_key_op(key);
+    if (op_p)
+    {
+        printk ("%s\n", op_p->action_msg);
+        console_loglevel = orig_log_level;
+        op_p->handler(key, pt_regs, kbd, tty);
+    }
+    else
+    {
+        printk("HELP : ");
+        /* Only print the help msg once per handler */
+        for (i=0; i<SYSRQ_KEY_TABLE_LENGTH; i++)
+            if (sysrq_key_table[i])
+            {
+                for (j=0; sysrq_key_table[i] != sysrq_key_table[j]; j++);
+                if (j == i)
+                    printk ("%s ", sysrq_key_table[i]->help_msg);
+            }
+        printk ("\n");
+        console_loglevel = orig_log_level;
+    }
 }
 
 EXPORT_SYMBOL(handle_sysrq);

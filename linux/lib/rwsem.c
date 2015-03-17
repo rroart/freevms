@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Modified Linux source file, 2001-2004  
+// Modified Linux source file, 2001-2004
 
 /* rwsem.c: R/W semaphores: contention handling functions
  *
@@ -13,10 +13,11 @@
 #include <linux/sched.h>
 #include <linux/module.h>
 
-struct rwsem_waiter {
-	struct list_head	list;
-	struct task_struct	*task;
-	unsigned int		flags;
+struct rwsem_waiter
+{
+    struct list_head	list;
+    struct task_struct	*task;
+    unsigned int		flags;
 #define RWSEM_WAITING_FOR_READ	0x00000001
 #define RWSEM_WAITING_FOR_WRITE	0x00000002
 };
@@ -25,10 +26,10 @@ struct rwsem_waiter {
 #undef rwsemtrace
 void rwsemtrace(struct rw_semaphore *sem, const char *str)
 {
-	printk("sem=%p\n",sem);
-	printk("(sem)=%08lx\n",sem->count);
-	if (sem->debug)
-		printk("[%d] %s({%08lx})\n",current->pid,str,sem->count);
+    printk("sem=%p\n",sem);
+    printk("(sem)=%08lx\n",sem->count);
+    if (sem->debug)
+        printk("[%d] %s({%08lx})\n",current->pid,str,sem->count);
 }
 #endif
 
@@ -43,116 +44,120 @@ void rwsemtrace(struct rw_semaphore *sem, const char *str)
  */
 static inline struct rw_semaphore *__rwsem_do_wake(struct rw_semaphore *sem)
 {
-	struct rwsem_waiter *waiter;
-	struct list_head *next;
-	signed long oldcount;
-	int woken, loop;
+    struct rwsem_waiter *waiter;
+    struct list_head *next;
+    signed long oldcount;
+    int woken, loop;
 
-	rwsemtrace(sem,"Entering __rwsem_do_wake");
+    rwsemtrace(sem,"Entering __rwsem_do_wake");
 
-	/* only wake someone up if we can transition the active part of the count from 0 -> 1 */
- try_again:
-	oldcount = rwsem_atomic_update(RWSEM_ACTIVE_BIAS,sem) - RWSEM_ACTIVE_BIAS;
-	if (oldcount & RWSEM_ACTIVE_MASK)
-		goto undo;
+    /* only wake someone up if we can transition the active part of the count from 0 -> 1 */
+try_again:
+    oldcount = rwsem_atomic_update(RWSEM_ACTIVE_BIAS,sem) - RWSEM_ACTIVE_BIAS;
+    if (oldcount & RWSEM_ACTIVE_MASK)
+        goto undo;
 
-	waiter = list_entry(sem->wait_list.next,struct rwsem_waiter,list);
+    waiter = list_entry(sem->wait_list.next,struct rwsem_waiter,list);
 
-	/* try to grant a single write lock if there's a writer at the front of the queue
-	 * - note we leave the 'active part' of the count incremented by 1 and the waiting part
-	 *   incremented by 0x00010000
-	 */
-	if (!(waiter->flags & RWSEM_WAITING_FOR_WRITE))
-		goto readers_only;
+    /* try to grant a single write lock if there's a writer at the front of the queue
+     * - note we leave the 'active part' of the count incremented by 1 and the waiting part
+     *   incremented by 0x00010000
+     */
+    if (!(waiter->flags & RWSEM_WAITING_FOR_WRITE))
+        goto readers_only;
 
-	list_del(&waiter->list);
-	waiter->flags = 0;
-	wake_up_process(waiter->task);
-	goto out;
+    list_del(&waiter->list);
+    waiter->flags = 0;
+    wake_up_process(waiter->task);
+    goto out;
 
-	/* grant an infinite number of read locks to the readers at the front of the queue
-	 * - note we increment the 'active part' of the count by the number of readers (less one
-	 *   for the activity decrement we've already done) before waking any processes up
-	 */
- readers_only:
-	woken = 0;
-	do {
-		woken++;
+    /* grant an infinite number of read locks to the readers at the front of the queue
+     * - note we increment the 'active part' of the count by the number of readers (less one
+     *   for the activity decrement we've already done) before waking any processes up
+     */
+readers_only:
+    woken = 0;
+    do
+    {
+        woken++;
 
-		if (waiter->list.next==&sem->wait_list)
-			break;
+        if (waiter->list.next==&sem->wait_list)
+            break;
 
-		waiter = list_entry(waiter->list.next,struct rwsem_waiter,list);
+        waiter = list_entry(waiter->list.next,struct rwsem_waiter,list);
 
-	} while (waiter->flags & RWSEM_WAITING_FOR_READ);
+    }
+    while (waiter->flags & RWSEM_WAITING_FOR_READ);
 
-	loop = woken;
-	woken *= RWSEM_ACTIVE_BIAS-RWSEM_WAITING_BIAS;
-	woken -= RWSEM_ACTIVE_BIAS;
-	rwsem_atomic_add(woken,sem);
+    loop = woken;
+    woken *= RWSEM_ACTIVE_BIAS-RWSEM_WAITING_BIAS;
+    woken -= RWSEM_ACTIVE_BIAS;
+    rwsem_atomic_add(woken,sem);
 
-	next = sem->wait_list.next;
-	for (; loop>0; loop--) {
-		waiter = list_entry(next,struct rwsem_waiter,list);
-		next = waiter->list.next;
-		waiter->flags = 0;
-		wake_up_process(waiter->task);
-	}
+    next = sem->wait_list.next;
+    for (; loop>0; loop--)
+    {
+        waiter = list_entry(next,struct rwsem_waiter,list);
+        next = waiter->list.next;
+        waiter->flags = 0;
+        wake_up_process(waiter->task);
+    }
 
-	sem->wait_list.next = next;
-	next->prev = &sem->wait_list;
+    sem->wait_list.next = next;
+    next->prev = &sem->wait_list;
 
- out:
-	rwsemtrace(sem,"Leaving __rwsem_do_wake");
-	return sem;
+out:
+    rwsemtrace(sem,"Leaving __rwsem_do_wake");
+    return sem;
 
-	/* undo the change to count, but check for a transition 1->0 */
- undo:
-	if (rwsem_atomic_update(-RWSEM_ACTIVE_BIAS,sem)!=0)
-		goto out;
-	goto try_again;
+    /* undo the change to count, but check for a transition 1->0 */
+undo:
+    if (rwsem_atomic_update(-RWSEM_ACTIVE_BIAS,sem)!=0)
+        goto out;
+    goto try_again;
 }
 
 /*
  * wait for a lock to be granted
  */
 static inline struct rw_semaphore *rwsem_down_failed_common(struct rw_semaphore *sem,
-								 struct rwsem_waiter *waiter,
-								 signed long adjustment)
+        struct rwsem_waiter *waiter,
+        signed long adjustment)
 {
-	struct task_struct *tsk = current;
-	signed long count;
+    struct task_struct *tsk = current;
+    signed long count;
 
-	set_task_state(tsk,TASK_UNINTERRUPTIBLE);
+    set_task_state(tsk,TASK_UNINTERRUPTIBLE);
 
-	/* set up my own style of waitqueue */
-	spin_lock(&sem->wait_lock);
-	waiter->task = tsk;
+    /* set up my own style of waitqueue */
+    spin_lock(&sem->wait_lock);
+    waiter->task = tsk;
 
-	list_add_tail(&waiter->list,&sem->wait_list);
+    list_add_tail(&waiter->list,&sem->wait_list);
 
-	/* note that we're now waiting on the lock, but no longer actively read-locking */
-	count = rwsem_atomic_update(adjustment,sem);
+    /* note that we're now waiting on the lock, but no longer actively read-locking */
+    count = rwsem_atomic_update(adjustment,sem);
 
-	/* if there are no longer active locks, wake the front queued process(es) up
-	 * - it might even be this process, since the waker takes a more active part
-	 */
-	if (!(count & RWSEM_ACTIVE_MASK))
-		sem = __rwsem_do_wake(sem);
+    /* if there are no longer active locks, wake the front queued process(es) up
+     * - it might even be this process, since the waker takes a more active part
+     */
+    if (!(count & RWSEM_ACTIVE_MASK))
+        sem = __rwsem_do_wake(sem);
 
-	spin_unlock(&sem->wait_lock);
+    spin_unlock(&sem->wait_lock);
 
-	/* wait to be given the lock */
-	for (;;) {
-		if (!waiter->flags)
-			break;
-		schedule();
-		set_task_state(tsk, TASK_UNINTERRUPTIBLE);
-	}
+    /* wait to be given the lock */
+    for (;;)
+    {
+        if (!waiter->flags)
+            break;
+        schedule();
+        set_task_state(tsk, TASK_UNINTERRUPTIBLE);
+    }
 
-	tsk->state = TASK_RUNNING;
+    tsk->state = TASK_RUNNING;
 
-	return sem;
+    return sem;
 }
 
 /*
@@ -160,15 +165,15 @@ static inline struct rw_semaphore *rwsem_down_failed_common(struct rw_semaphore 
  */
 struct rw_semaphore * fastcall rwsem_down_read_failed(struct rw_semaphore *sem)
 {
-	struct rwsem_waiter waiter;
+    struct rwsem_waiter waiter;
 
-	rwsemtrace(sem,"Entering rwsem_down_read_failed");
+    rwsemtrace(sem,"Entering rwsem_down_read_failed");
 
-	waiter.flags = RWSEM_WAITING_FOR_READ;
-	rwsem_down_failed_common(sem,&waiter,RWSEM_WAITING_BIAS-RWSEM_ACTIVE_BIAS);
+    waiter.flags = RWSEM_WAITING_FOR_READ;
+    rwsem_down_failed_common(sem,&waiter,RWSEM_WAITING_BIAS-RWSEM_ACTIVE_BIAS);
 
-	rwsemtrace(sem,"Leaving rwsem_down_read_failed");
-	return sem;
+    rwsemtrace(sem,"Leaving rwsem_down_read_failed");
+    return sem;
 }
 
 /*
@@ -176,15 +181,15 @@ struct rw_semaphore * fastcall rwsem_down_read_failed(struct rw_semaphore *sem)
  */
 struct rw_semaphore * fastcall rwsem_down_write_failed(struct rw_semaphore *sem)
 {
-	struct rwsem_waiter waiter;
+    struct rwsem_waiter waiter;
 
-	rwsemtrace(sem,"Entering rwsem_down_write_failed");
+    rwsemtrace(sem,"Entering rwsem_down_write_failed");
 
-	waiter.flags = RWSEM_WAITING_FOR_WRITE;
-	rwsem_down_failed_common(sem,&waiter,-RWSEM_ACTIVE_BIAS);
+    waiter.flags = RWSEM_WAITING_FOR_WRITE;
+    rwsem_down_failed_common(sem,&waiter,-RWSEM_ACTIVE_BIAS);
 
-	rwsemtrace(sem,"Leaving rwsem_down_write_failed");
-	return sem;
+    rwsemtrace(sem,"Leaving rwsem_down_write_failed");
+    return sem;
 }
 
 /*
@@ -193,19 +198,19 @@ struct rw_semaphore * fastcall rwsem_down_write_failed(struct rw_semaphore *sem)
  */
 struct rw_semaphore * fastcall rwsem_wake(struct rw_semaphore *sem)
 {
-	rwsemtrace(sem,"Entering rwsem_wake");
+    rwsemtrace(sem,"Entering rwsem_wake");
 
-	spin_lock(&sem->wait_lock);
+    spin_lock(&sem->wait_lock);
 
-	/* do nothing if list empty */
-	if (!list_empty(&sem->wait_list))
-		sem = __rwsem_do_wake(sem);
+    /* do nothing if list empty */
+    if (!list_empty(&sem->wait_list))
+        sem = __rwsem_do_wake(sem);
 
-	spin_unlock(&sem->wait_lock);
+    spin_unlock(&sem->wait_lock);
 
-	rwsemtrace(sem,"Leaving rwsem_wake");
+    rwsemtrace(sem,"Leaving rwsem_wake");
 
-	return sem;
+    return sem;
 }
 
 EXPORT_SYMBOL_NOVERS(rwsem_down_read_failed);

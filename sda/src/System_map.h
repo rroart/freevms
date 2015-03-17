@@ -1,4 +1,5 @@
-struct System_map {
-  long addr;
-  char * name;
+struct System_map
+{
+    long addr;
+    char * name;
 };

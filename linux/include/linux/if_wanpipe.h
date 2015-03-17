@@ -1,7 +1,7 @@
 /*****************************************************************************
-* if_wanpipe.h	Header file for the Sangoma AF_WANPIPE Socket 	
+* if_wanpipe.h	Header file for the Sangoma AF_WANPIPE Socket
 *
-* Author: 	Nenad Corbic 	
+* Author: 	Nenad Corbic
 *
 * Copyright:	(c) 2000 Sangoma Technologies Inc.
 *
@@ -20,47 +20,47 @@
 
 struct wan_sockaddr_ll
 {
-	unsigned short	sll_family;
-	unsigned short	sll_protocol;
-	int		sll_ifindex;
-	unsigned short	sll_hatype;
-	unsigned char	sll_pkttype;
-	unsigned char	sll_halen;
-	unsigned char	sll_addr[8];
-	unsigned char   sll_device[14];
-	unsigned char 	sll_card[14];
+    unsigned short	sll_family;
+    unsigned short	sll_protocol;
+    int		sll_ifindex;
+    unsigned short	sll_hatype;
+    unsigned char	sll_pkttype;
+    unsigned char	sll_halen;
+    unsigned char	sll_addr[8];
+    unsigned char   sll_device[14];
+    unsigned char 	sll_card[14];
 };
 
-typedef struct 
+typedef struct
 {
-	unsigned char free;
-	unsigned char sk_state;
-	int rcvbuf;
-	int sndbuf;
-	int rmem;
-	int wmem;
-	int sk_count;
-	unsigned char bound;
-	char name[14];
-	unsigned char d_state;
-	unsigned char svc;
-	unsigned short lcn;
-	unsigned char mbox;
-	unsigned char cmd_busy;
-	unsigned char command;
-	unsigned poll;
-	unsigned poll_cnt;
-	int rblock;	
+    unsigned char free;
+    unsigned char sk_state;
+    int rcvbuf;
+    int sndbuf;
+    int rmem;
+    int wmem;
+    int sk_count;
+    unsigned char bound;
+    char name[14];
+    unsigned char d_state;
+    unsigned char svc;
+    unsigned short lcn;
+    unsigned char mbox;
+    unsigned char cmd_busy;
+    unsigned char command;
+    unsigned poll;
+    unsigned poll_cnt;
+    int rblock;
 } wan_debug_hdr_t;
 
 #define MAX_NUM_DEBUG  10
 #define X25_PROT       0x16
-#define PVC_PROT       0x17	
+#define PVC_PROT       0x17
 
 typedef struct
 {
-	wan_debug_hdr_t debug[MAX_NUM_DEBUG];
-}wan_debug_t;
+    wan_debug_hdr_t debug[MAX_NUM_DEBUG];
+} wan_debug_t;
 
 #define	SIOC_WANPIPE_GET_CALL_DATA	(SIOCPROTOPRIVATE + 0)
 #define	SIOC_WANPIPE_SET_CALL_DATA	(SIOCPROTOPRIVATE + 1)
@@ -103,25 +103,25 @@ typedef struct
 #ifndef netdevice_t
 #include <linux/version.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,0)
- #define netdevice_t struct net_device
+#define netdevice_t struct net_device
 #else
- #define netdevice_t struct device
+#define netdevice_t struct device
 #endif
 #endif
 
 /* Private wanpipe socket structures. */
 struct wanpipe_opt
 {
-	void   *mbox;		/* Mail box  */
-	void   *card; 		/* Card bouded to */
-	netdevice_t *dev;	/* Bounded device */
-	unsigned short lcn;	/* Binded LCN */
-	unsigned char  svc;	/* 0=pvc, 1=svc */
-	unsigned char  timer;   /* flag for delayed transmit*/	
-	struct timer_list tx_timer;
-	unsigned poll_cnt;
-	unsigned char force;	/* Used to force sock release */
-	atomic_t packet_sent;   
+    void   *mbox;		/* Mail box  */
+    void   *card; 		/* Card bouded to */
+    netdevice_t *dev;	/* Bounded device */
+    unsigned short lcn;	/* Binded LCN */
+    unsigned char  svc;	/* 0=pvc, 1=svc */
+    unsigned char  timer;   /* flag for delayed transmit*/
+    struct timer_list tx_timer;
+    unsigned poll_cnt;
+    unsigned char force;	/* Used to force sock release */
+    atomic_t packet_sent;
 };
 #endif
 

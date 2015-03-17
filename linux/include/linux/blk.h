@@ -76,7 +76,7 @@ void initrd_init(void);
 
 #endif
 
-		 
+
 /*
  * end_request() and friends. Must be called with the request queue spinlock
  * acquired. All functions called within end_request() _must_be_ atomic.
@@ -89,7 +89,7 @@ void initrd_init(void);
 
 static inline void blkdev_dequeue_request(struct request * req)
 {
-	list_del(&req->queue);
+    list_del(&req->queue);
 }
 
 int end_that_request_first(struct request *req, int uptodate, char *name);
@@ -158,16 +158,16 @@ static void floppy_off(unsigned int nr);
 #elif (MAJOR_NR == SCSI_TAPE_MAJOR)
 
 #define DEVICE_NAME "scsitape"
-#define DEVICE_INTR do_st  
+#define DEVICE_INTR do_st
 #define DEVICE_NR(device) (MINOR(device) & 0x7f)
 
 #elif (MAJOR_NR == OSST_MAJOR)
 
-#define DEVICE_NAME "onstream" 
+#define DEVICE_NAME "onstream"
 #define DEVICE_INTR do_osst
-#define DEVICE_NR(device) (MINOR(device) & 0x7f) 
-#define DEVICE_ON(device) 
-#define DEVICE_OFF(device) 
+#define DEVICE_NR(device) (MINOR(device) & 0x7f)
+#define DEVICE_ON(device)
+#define DEVICE_OFF(device)
 
 #elif (MAJOR_NR == SCSI_CDROM_MAJOR)
 
@@ -367,8 +367,8 @@ static void (*DEVICE_INTR)(void) = NULL;
 
 #ifdef DEVICE_REQUEST
 static void (DEVICE_REQUEST)(request_queue_t *);
-#endif 
-  
+#endif
+
 #ifdef DEVICE_INTR
 #define CLEAR_INTR SET_INTR(NULL)
 #else
@@ -394,18 +394,19 @@ static void (DEVICE_REQUEST)(request_queue_t *);
 
 #if ! SCSI_BLK_MAJOR(MAJOR_NR) && (MAJOR_NR != COMPAQ_SMART2_MAJOR)
 
-static inline void end_request(int uptodate) {
-	struct request *req = CURRENT;
+static inline void end_request(int uptodate)
+{
+    struct request *req = CURRENT;
 
-	if (end_that_request_first(req, uptodate, DEVICE_NAME))
-		return;
+    if (end_that_request_first(req, uptodate, DEVICE_NAME))
+        return;
 
 #ifndef DEVICE_NO_RANDOM
-	add_blkdev_randomness(MAJOR(req->rq_dev));
+    add_blkdev_randomness(MAJOR(req->rq_dev));
 #endif
-	DEVICE_OFF(req->rq_dev);
-	blkdev_dequeue_request(req);
-	end_that_request_last(req);
+    DEVICE_OFF(req->rq_dev);
+    blkdev_dequeue_request(req);
+    end_that_request_last(req);
 }
 
 #endif /* ! SCSI_BLK_MAJOR(MAJOR_NR) */

@@ -8,18 +8,19 @@
 #endif
 
 _INLINE_ void tty_insert_flip_char(struct tty_struct *tty,
-				   unsigned char ch, char flag)
+                                   unsigned char ch, char flag)
 {
-	if (tty->flip.count < TTY_FLIPBUF_SIZE) {
-		tty->flip.count++;
-		*tty->flip.flag_buf_ptr++ = flag;
-		*tty->flip.char_buf_ptr++ = ch;
-	}
+    if (tty->flip.count < TTY_FLIPBUF_SIZE)
+    {
+        tty->flip.count++;
+        *tty->flip.flag_buf_ptr++ = flag;
+        *tty->flip.char_buf_ptr++ = ch;
+    }
 }
 
 _INLINE_ void tty_schedule_flip(struct tty_struct *tty)
 {
-	queue_task(&tty->flip.tqueue, &tq_timer);
+    queue_task(&tty->flip.tqueue, &tq_timer);
 }
 
 #undef _INLINE_

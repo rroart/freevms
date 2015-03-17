@@ -39,20 +39,23 @@
 
 extern struct neigh_table nd_tbl;
 
-struct nd_msg {
-        struct icmp6hdr	icmph;
-        struct in6_addr	target;
-        struct {
-                __u8	opt_type;
-                __u8	opt_len;
-                __u8	link_addr[MAX_ADDR_LEN];
-        } opt;
+struct nd_msg
+{
+    struct icmp6hdr	icmph;
+    struct in6_addr	target;
+    struct
+    {
+        __u8	opt_type;
+        __u8	opt_len;
+        __u8	link_addr[MAX_ADDR_LEN];
+    } opt;
 };
 
-struct ra_msg {
-        struct icmp6hdr		icmph;
-	__u32			reachable_time;
-	__u32			retrans_timer;
+struct ra_msg
+{
+    struct icmp6hdr		icmph;
+    __u32			reachable_time;
+    __u32			retrans_timer;
 };
 
 
@@ -63,21 +66,21 @@ extern void			ndisc_cleanup(void);
 extern int			ndisc_rcv(struct sk_buff *skb);
 
 extern void			ndisc_send_ns(struct net_device *dev,
-					      struct neighbour *neigh,
-					      struct in6_addr *solicit,
-					      struct in6_addr *daddr,
-					      struct in6_addr *saddr);
+                                  struct neighbour *neigh,
+                                  struct in6_addr *solicit,
+                                  struct in6_addr *daddr,
+                                  struct in6_addr *saddr);
 
 extern void			ndisc_send_rs(struct net_device *dev,
-					      struct in6_addr *saddr,
-					      struct in6_addr *daddr);
+                                  struct in6_addr *saddr,
+                                  struct in6_addr *daddr);
 
 extern void			ndisc_forwarding_on(void);
 extern void			ndisc_forwarding_off(void);
 
 extern void			ndisc_send_redirect(struct sk_buff *skb,
-						    struct neighbour *neigh,
-						    struct in6_addr *target);
+                                        struct neighbour *neigh,
+                                        struct in6_addr *target);
 
 extern int			ndisc_mc_map(struct in6_addr *addr, char *buf, struct net_device *dev, int dir);
 
@@ -100,10 +103,10 @@ extern void			igmp6_cleanup(void);
 static inline struct neighbour * ndisc_get_neigh(struct net_device *dev, struct in6_addr *addr)
 {
 
-	if (dev)
-		return __neigh_lookup(&nd_tbl, addr, dev, 1);
+    if (dev)
+        return __neigh_lookup(&nd_tbl, addr, dev, 1);
 
-	return NULL;
+    return NULL;
 }
 
 

@@ -20,7 +20,7 @@
 /* Get the contents of the entropy pool.  (Superuser only.) */
 #define RNDGETPOOL	_IOR( 'R', 0x02, int [2] )
 
-/* 
+/*
  * Write bytes into the entropy pool and add to the entropy count.
  * (Superuser only.)
  */
@@ -32,10 +32,11 @@
 /* Clear the entropy pool and associated counters.  (Superuser only.) */
 #define RNDCLEARPOOL	_IO( 'R', 0x06 )
 
-struct rand_pool_info {
-	int	entropy_count;
-	int	buf_size;
-	__u32	buf[0];
+struct rand_pool_info
+{
+    int	entropy_count;
+    int	buf_size;
+    __u32	buf[0];
 };
 
 /* Exported functions */
@@ -58,17 +59,17 @@ void generate_random_uuid(unsigned char uuid_out[16]);
 
 extern __u32 secure_ip_id(__u32 daddr);
 extern __u32 secure_tcp_sequence_number(__u32 saddr, __u32 daddr,
-					__u16 sport, __u16 dport);
+                                        __u16 sport, __u16 dport);
 extern __u32 secure_tcp_syn_cookie(__u32 saddr, __u32 daddr,
-				   __u16 sport, __u16 dport,
-				   __u32 sseq, __u32 count,
-				   __u32 data);
+                                   __u16 sport, __u16 dport,
+                                   __u32 sseq, __u32 count,
+                                   __u32 data);
 extern __u32 check_tcp_syn_cookie(__u32 cookie, __u32 saddr,
-				  __u32 daddr, __u16 sport,
-				  __u16 dport, __u32 sseq,
-				  __u32 count, __u32 maxdiff);
+                                  __u32 daddr, __u16 sport,
+                                  __u16 dport, __u32 sseq,
+                                  __u32 count, __u32 maxdiff);
 extern __u32 secure_tcpv6_sequence_number(__u32 *saddr, __u32 *daddr,
-					  __u16 sport, __u16 dport);
+        __u16 sport, __u16 dport);
 
 extern __u32 secure_ipv6_id(__u32 *daddr);
 

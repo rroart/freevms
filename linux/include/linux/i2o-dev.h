@@ -1,13 +1,13 @@
 /*
  * I2O user space accessible structures/APIs
- * 
+ *
  * (c) Copyright 1999, 2000 Red Hat Software
  *
- * This program is free software; you can redistribute it and/or 
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 
- * 2 of the License, or (at your option) any later version.  
- * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version
+ * 2 of the License, or (at your option) any later version.
+ *
  *************************************************************************
  *
  * This header file defines the I2O APIs that are available to both
@@ -44,51 +44,51 @@
 
 struct i2o_cmd_hrtlct
 {
-	unsigned int iop;	/* IOP unit number */
-	void *resbuf;		/* Buffer for result */
-	unsigned int *reslen;	/* Buffer length in bytes */
+    unsigned int iop;	/* IOP unit number */
+    void *resbuf;		/* Buffer for result */
+    unsigned int *reslen;	/* Buffer length in bytes */
 };
 
 struct i2o_cmd_psetget
 {
-	unsigned int iop;	/* IOP unit number */
-	unsigned int tid;	/* Target device TID */
-	void *opbuf;		/* Operation List buffer */
-	unsigned int oplen;	/* Operation List buffer length in bytes */
-	void *resbuf;		/* Result List buffer */
-	unsigned int *reslen;	/* Result List buffer length in bytes */
+    unsigned int iop;	/* IOP unit number */
+    unsigned int tid;	/* Target device TID */
+    void *opbuf;		/* Operation List buffer */
+    unsigned int oplen;	/* Operation List buffer length in bytes */
+    void *resbuf;		/* Result List buffer */
+    unsigned int *reslen;	/* Result List buffer length in bytes */
 };
 
 struct i2o_sw_xfer
 {
-	unsigned int iop;	/* IOP unit number */
-	unsigned char flags;	/* Flags field */
-	unsigned char sw_type;	/* Software type */
-	unsigned int sw_id;	/* Software ID */
-	void *buf;		/* Pointer to software buffer */
-	unsigned int *swlen;	/* Length of software data */
-	unsigned int *maxfrag;	/* Maximum fragment count */
-	unsigned int *curfrag;	/* Current fragment count */
+    unsigned int iop;	/* IOP unit number */
+    unsigned char flags;	/* Flags field */
+    unsigned char sw_type;	/* Software type */
+    unsigned int sw_id;	/* Software ID */
+    void *buf;		/* Pointer to software buffer */
+    unsigned int *swlen;	/* Length of software data */
+    unsigned int *maxfrag;	/* Maximum fragment count */
+    unsigned int *curfrag;	/* Current fragment count */
 };
 
 struct i2o_html
 {
-	unsigned int iop;	/* IOP unit number */
-	unsigned int tid;	/* Target device ID */
-	unsigned int page;	/* HTML page */
-	void *resbuf;		/* Buffer for reply HTML page */
-	unsigned int *reslen;	/* Length in bytes of reply buffer */
-	void *qbuf;		/* Pointer to HTTP query string */
-	unsigned int qlen;	/* Length in bytes of query string buffer */
+    unsigned int iop;	/* IOP unit number */
+    unsigned int tid;	/* Target device ID */
+    unsigned int page;	/* HTML page */
+    void *resbuf;		/* Buffer for reply HTML page */
+    unsigned int *reslen;	/* Length in bytes of reply buffer */
+    void *qbuf;		/* Pointer to HTTP query string */
+    unsigned int qlen;	/* Length in bytes of query string buffer */
 };
 
 #define I2O_EVT_Q_LEN 32
 
 struct i2o_evt_id
 {
-	unsigned int iop;
-	unsigned int tid;
-	unsigned int evt_mask;
+    unsigned int iop;
+    unsigned int tid;
+    unsigned int evt_mask;
 };
 
 /* Event data size = frame size - message header + evt indicator */
@@ -96,16 +96,16 @@ struct i2o_evt_id
 
 struct i2o_evt_info
 {
-	struct i2o_evt_id id;
-	unsigned char evt_data[I2O_EVT_DATA_SIZE];
-	unsigned int data_size;
+    struct i2o_evt_id id;
+    unsigned char evt_data[I2O_EVT_DATA_SIZE];
+    unsigned int data_size;
 };
 
 struct i2o_evt_get
 {
-	struct i2o_evt_info info;
-	int pending;
-	int lost;
+    struct i2o_evt_info info;
+    int pending;
+    int lost;
 };
 
 
@@ -132,135 +132,135 @@ typedef unsigned int u32;
 
 typedef struct _i2o_pci_bus
 {
-	u8	PciFunctionNumber;
-	u8	PciDeviceNumber;
-	u8	PciBusNumber;
-	u8	reserved;
-	u16	PciVendorID;
-	u16	PciDeviceID;
+    u8	PciFunctionNumber;
+    u8	PciDeviceNumber;
+    u8	PciBusNumber;
+    u8	reserved;
+    u16	PciVendorID;
+    u16	PciDeviceID;
 } i2o_pci_bus;
 
 typedef struct _i2o_local_bus
 {
-	u16	LbBaseIOPort;
-	u16	reserved;
-	u32	LbBaseMemoryAddress;
+    u16	LbBaseIOPort;
+    u16	reserved;
+    u32	LbBaseMemoryAddress;
 } i2o_local_bus;
 
 typedef struct _i2o_isa_bus
 {
-	u16	IsaBaseIOPort;
-	u8	CSN;
-	u8	reserved;
-	u32	IsaBaseMemoryAddress;
+    u16	IsaBaseIOPort;
+    u8	CSN;
+    u8	reserved;
+    u32	IsaBaseMemoryAddress;
 } i2o_isa_bus;
 
 typedef struct _i2o_eisa_bus_info
 {
-	u16	EisaBaseIOPort;
-	u8	reserved;
-	u8	EisaSlotNumber;
-	u32	EisaBaseMemoryAddress;
+    u16	EisaBaseIOPort;
+    u8	reserved;
+    u8	EisaSlotNumber;
+    u32	EisaBaseMemoryAddress;
 } i2o_eisa_bus;
 
 typedef struct _i2o_mca_bus
 {
-	u16	McaBaseIOPort;
-	u8	reserved;
-	u8	McaSlotNumber;
-	u32	McaBaseMemoryAddress;
+    u16	McaBaseIOPort;
+    u8	reserved;
+    u8	McaSlotNumber;
+    u32	McaBaseMemoryAddress;
 } i2o_mca_bus;
 
 typedef struct _i2o_other_bus
 {
-	u16 BaseIOPort;
-	u16 reserved;
-	u32 BaseMemoryAddress;
+    u16 BaseIOPort;
+    u16 reserved;
+    u32 BaseMemoryAddress;
 } i2o_other_bus;
 
 typedef struct _i2o_hrt_entry
 {
-	u32	adapter_id;
-	u32	parent_tid:12;
-	u32 	tate:4;
-	u32	bus_num:8;
-	u32	bus_type:8;
-	union
-	{
-		i2o_pci_bus	pci_bus;
-		i2o_local_bus	local_bus;
-		i2o_isa_bus	isa_bus;
-		i2o_eisa_bus	eisa_bus;
-		i2o_mca_bus	mca_bus;
-		i2o_other_bus	other_bus;
-	} bus;
+    u32	adapter_id;
+    u32	parent_tid:12;
+    u32 	tate:4;
+    u32	bus_num:8;
+    u32	bus_type:8;
+    union
+    {
+        i2o_pci_bus	pci_bus;
+        i2o_local_bus	local_bus;
+        i2o_isa_bus	isa_bus;
+        i2o_eisa_bus	eisa_bus;
+        i2o_mca_bus	mca_bus;
+        i2o_other_bus	other_bus;
+    } bus;
 } i2o_hrt_entry;
 
 typedef struct _i2o_hrt
 {
-	u16	num_entries;
-	u8	entry_len;
-	u8	hrt_version;
-	u32	change_ind;
-	i2o_hrt_entry hrt_entry[1];
+    u16	num_entries;
+    u8	entry_len;
+    u8	hrt_version;
+    u32	change_ind;
+    i2o_hrt_entry hrt_entry[1];
 } i2o_hrt;
 
 typedef struct _i2o_lct_entry
 {
-	u32	entry_size:16;
-	u32	tid:12;
-	u32	reserved:4;
-	u32	change_ind;
-	u32	device_flags;
-	u32	class_id:12;
-	u32	version:4;
-	u32	vendor_id:16;
-	u32	sub_class;
-	u32	user_tid:12;
-	u32	parent_tid:12;
-	u32	bios_info:8;
-	u8	identity_tag[8];
-	u32	event_capabilities;
+    u32	entry_size:16;
+    u32	tid:12;
+    u32	reserved:4;
+    u32	change_ind;
+    u32	device_flags;
+    u32	class_id:12;
+    u32	version:4;
+    u32	vendor_id:16;
+    u32	sub_class;
+    u32	user_tid:12;
+    u32	parent_tid:12;
+    u32	bios_info:8;
+    u8	identity_tag[8];
+    u32	event_capabilities;
 } i2o_lct_entry;
 
 typedef struct _i2o_lct
 {
-	u32	table_size:16;
-	u32	boot_tid:12;
-	u32	lct_ver:4;
-	u32	iop_flags;
-	u32	change_ind;
-	i2o_lct_entry lct_entry[1];
+    u32	table_size:16;
+    u32	boot_tid:12;
+    u32	lct_ver:4;
+    u32	iop_flags;
+    u32	change_ind;
+    i2o_lct_entry lct_entry[1];
 } i2o_lct;
 
 typedef struct _i2o_status_block
 {
-	u16	org_id;
-	u16	reserved;
-	u16	iop_id:12;
-	u16	reserved1:4;
-	u16	host_unit_id;
-	u16	segment_number:12;
-	u16	i2o_version:4;
-	u8	iop_state;
-	u8	msg_type;
-	u16	inbound_frame_size;
-	u8	init_code;
-	u8	reserved2;
-	u32	max_inbound_frames;
-	u32	cur_inbound_frames;
-	u32	max_outbound_frames;
-	char	product_id[24];
-	u32	expected_lct_size;
-	u32	iop_capabilities;
-	u32	desired_mem_size;
-	u32	current_mem_size;
-	u32	current_mem_base;
-	u32	desired_io_size;
-	u32	current_io_size;
-	u32	current_io_base;
-	u32	reserved3:24;
-	u32	cmd_status:8;
+    u16	org_id;
+    u16	reserved;
+    u16	iop_id:12;
+    u16	reserved1:4;
+    u16	host_unit_id;
+    u16	segment_number:12;
+    u16	i2o_version:4;
+    u8	iop_state;
+    u8	msg_type;
+    u16	inbound_frame_size;
+    u8	init_code;
+    u8	reserved2;
+    u32	max_inbound_frames;
+    u32	cur_inbound_frames;
+    u32	max_outbound_frames;
+    char	product_id[24];
+    u32	expected_lct_size;
+    u32	iop_capabilities;
+    u32	desired_mem_size;
+    u32	current_mem_size;
+    u32	current_mem_base;
+    u32	desired_io_size;
+    u32	current_io_size;
+    u32	current_io_base;
+    u32	reserved3:24;
+    u32	cmd_status:8;
 } i2o_status_block;
 
 /* Event indicator mask flags */
@@ -345,13 +345,13 @@ typedef struct _i2o_status_block
 #define I2O_CLASS_PEER_TRANSPORT_AGENT		0x090
 #define I2O_CLASS_PEER_TRANSPORT		0x091
 
-/* 
+/*
  *  Rest of 0x092 - 0x09f reserved for peer-to-peer classes
  */
 
 #define I2O_CLASS_MATCH_ANYCLASS		0xffffffff
 
-/* 
+/*
  *  Subclasses
  */
 
@@ -373,7 +373,7 @@ typedef struct _i2o_status_block
 #define I2O_PARAMS_TABLE_CLEAR			0x000A
 
 /*
- * I2O serial number conventions / formats 
+ * I2O serial number conventions / formats
  * (circa v1.5)
  */
 
@@ -384,7 +384,7 @@ typedef struct _i2o_status_block
 #define I2O_SNFORMAT_LAN48_MAC			4
 #define I2O_SNFORMAT_WAN			5
 
-/* 
+/*
  * Plus new in v2.0 (Yellowstone pdf doc)
  */
 
@@ -395,7 +395,7 @@ typedef struct _i2o_status_block
 #define I2O_SNFORMAT_UNKNOWN2			0xff
 
 /*
- *	I2O Get Status State values 
+ *	I2O Get Status State values
  */
 
 #define ADAPTER_STATE_INITIALIZING		0x01

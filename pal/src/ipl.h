@@ -14,7 +14,7 @@
 
    Forget:
    *spl*: bsd-ish
-*/   
+*/
 
 /* For things done to PSL etc on exception or interrupt */
 

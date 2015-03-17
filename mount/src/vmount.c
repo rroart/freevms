@@ -132,10 +132,11 @@
 struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
 struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
 struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
-				   0, 0, 0, 0,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO};
+           0, 0, 0, 0,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO
+};
 struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
 struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};
 struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
@@ -149,12 +150,16 @@ struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
 unsigned dodismount(int argc,char *argv[],int qualc,char *qualv[])
 {
     struct DEV *dev;
-    // note that device lookup interface has changed, fix later 
+    // note that device lookup interface has changed, fix later
     register int sts = device_lookup(strlen(argv[1]),argv[1],0,&dev);
-    if (sts & 1) {
-        if (dev->vcb != NULL) {
+    if (sts & 1)
+    {
+        if (dev->vcb != NULL)
+        {
             sts = dismount(dev->vcb);
-        } else {
+        }
+        else
+        {
             sts = SS$_DEVNOTMOUNT;
         }
     }
@@ -163,9 +168,10 @@ unsigned dodismount(int argc,char *argv[],int qualc,char *qualv[])
 }
 #endif
 
-void main() {
-  printf("main is a dummy\n");
-  return 1;
+void main()
+{
+    printf("main is a dummy\n");
+    return 1;
 }
 
 unsigned domount(int userarg)
@@ -181,7 +187,7 @@ unsigned domount(int userarg)
     memset (c, 0, 80);
     sts = cli$present(&p);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     int retlen;
 
     char bindnam[80];
@@ -190,9 +196,10 @@ unsigned domount(int userarg)
     binddes.dsc$w_length=80;
     memset (bindnam, 0, 80);
     int bind_sts = cli$present(&bind);
-    if (bind_sts&1) {
-      sts = cli$get_value(&bind, &binddes, &retlen);
-      binddes.dsc$w_length = retlen;
+    if (bind_sts&1)
+    {
+        sts = cli$get_value(&bind, &binddes, &retlen);
+        binddes.dsc$w_length = retlen;
     }
 
     char *dev = c;
@@ -200,74 +207,88 @@ unsigned domount(int userarg)
     int devices = 0;
     char *devs[100],*labs[100];
 #if 0
-    while (*lab != '\0') {
+    while (*lab != '\0')
+    {
         labs[devices++] = lab;
         while (*lab != ',' && *lab != '\0') lab++;
-        if (*lab != '\0') {
+        if (*lab != '\0')
+        {
             *lab++ = '\0';
-        } else {
+        }
+        else
+        {
             break;
         }
     }
 #endif
 #if 0
     // amd64 not happy with this?
-    while (cli$get_value(&p, &o, &retlen)&1) {
-      devs[devices++] = strdup(c);
+    while (cli$get_value(&p, &o, &retlen)&1)
+    {
+        devs[devices++] = strdup(c);
     }
 #else
     cli$get_value(&p, &o, &retlen);
     devs[devices++] = strdup(c);
 #endif
-    if (bind_sts&1) {
-      for (dev = 0; dev < devices; dev ++) {
-	short int chan;
-	char buf[512];
-	struct _hm2 * hm2 = buf;
-	struct dsc$descriptor dsc;
-	dsc.dsc$w_length = strlen(devices[dev]);
-	dsc.dsc$a_pointer = devices[dev];
-	sts=sys$assign(&dsc,&chan,0,0,0);
-	char * nam = devices[dev];
-	int part = nam[3] - '1';
-	struct _iosb iosb;
-	sts = sys$qiow(0, chan, IO$_READPBLK, &iosb, 0, 0, buf , 512, 1, part, 0, 0);
-	hm2->hm2$w_rvn = dev + 1;
-	memcpy(hm2->hm2$t_strucname, binddes.dsc$a_pointer, binddes.dsc$w_length);
-	sts = sys$qiow(0, chan, IO$_WRITEPBLK, &iosb, 0, 0, buf , 512, 1, part, 0, 0);
-	sys$dassgn(chan);
-      }
-      return 1;
+    if (bind_sts&1)
+    {
+        for (dev = 0; dev < devices; dev ++)
+        {
+            short int chan;
+            char buf[512];
+            struct _hm2 * hm2 = buf;
+            struct dsc$descriptor dsc;
+            dsc.dsc$w_length = strlen(devices[dev]);
+            dsc.dsc$a_pointer = devices[dev];
+            sts=sys$assign(&dsc,&chan,0,0,0);
+            char * nam = devices[dev];
+            int part = nam[3] - '1';
+            struct _iosb iosb;
+            sts = sys$qiow(0, chan, IO$_READPBLK, &iosb, 0, 0, buf , 512, 1, part, 0, 0);
+            hm2->hm2$w_rvn = dev + 1;
+            memcpy(hm2->hm2$t_strucname, binddes.dsc$a_pointer, binddes.dsc$w_length);
+            sts = sys$qiow(0, chan, IO$_WRITEPBLK, &iosb, 0, 0, buf , 512, 1, part, 0, 0);
+            sys$dassgn(chan);
+        }
+        return 1;
     }
 #if 0
     devices = 0;
-    while (*dev != '\0') {
+    while (*dev != '\0')
+    {
         devs[devices++] = dev;
         while (*dev != ',' && *dev != '\0') dev++;
-        if (*dev != '\0') {
+        if (*dev != '\0')
+        {
             *dev++ = '\0';
-        } else {
+        }
+        else
+        {
             break;
         }
     }
 #endif
-    if (devices > 0) {
+    if (devices > 0)
+    {
         unsigned i;
         struct VCB *vcb;
-	struct item_list_3 it[2];
-	it[0].item_code=1; /*not yet */
-	it[0].buflen=strlen(devs[0]);
-	it[0].bufaddr=devs[0];
-	it[1].item_code=0;
-	//        sts = mount(options,devices,devs,labs,&vcb);
+        struct item_list_3 it[2];
+        it[0].item_code=1; /*not yet */
+        it[0].buflen=strlen(devs[0]);
+        it[0].bufaddr=devs[0];
+        it[1].item_code=0;
+        //        sts = mount(options,devices,devs,labs,&vcb);
         sts = sys$mount(it);
 #if 0
-        if (sts & 1) {
+        if (sts & 1)
+        {
             for (i = 0; i < vcb->devices; i++)
                 if (vcb->vcbdev[i].dev != NULL)
                     printf("%%MOUNT-I-MOUNTED, Volume %12.12s mounted on %s\n",
                            vcb->vcbdev[i].home.hm2$t_volname,vcb->vcbdev[i].dev->devnam);
-            if (setdef_count == 0) {
+            if (setdef_count == 0)
+            {
                 char *colon,defdir[256];
                 strcpy(defdir,vcb->vcbdev[0].dev->devnam);
                 colon = strchr(defdir,':');
@@ -276,7 +297,9 @@ unsigned domount(int userarg)
                 setdef(defdir);
                 test_vcb = vcb;
             }
-        } else {
+        }
+        else
+        {
             printf("Mount failed with %d\n",sts);
         }
 #endif

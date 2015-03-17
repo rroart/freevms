@@ -19,19 +19,20 @@
 #define CNCT$M_MEMBER                  0x02
 #define CNCT$M_REMOVED                 0x04
 
-struct _cnct {
+struct _cnct
+{
 
-unsigned char cnct$b_ecolvl;
-unsigned char cnct$b_vernum;
-unsigned char cnct$b_type;
-unsigned char cnct$b_acklim;
-unsigned short cnct$w_quorum;
-unsigned short cnct$w_votes;
-unsigned short cnct$w_nodes;
-unsigned char cnct$b_clssts;
-unsigned char cnct$b_cnxsts;
-unsigned short cnct$w_rcvdseqnm;
-unsigned char cnct$b_cluver;
+    unsigned char cnct$b_ecolvl;
+    unsigned char cnct$b_vernum;
+    unsigned char cnct$b_type;
+    unsigned char cnct$b_acklim;
+    unsigned short cnct$w_quorum;
+    unsigned short cnct$w_votes;
+    unsigned short cnct$w_nodes;
+    unsigned char cnct$b_clssts;
+    unsigned char cnct$b_cnxsts;
+    unsigned short cnct$w_rcvdseqnm;
+    unsigned char cnct$b_cluver;
 
 }
 

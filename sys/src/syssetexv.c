@@ -5,6 +5,7 @@
 
 #include<linux/linkage.h>
 
-asmlinkage void exe$setexv(void) {
+asmlinkage void exe$setexv(void)
+{
 
 }

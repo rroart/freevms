@@ -8,12 +8,12 @@
 #define _ASM_X86_64_UNISTD_H_
 
 #ifndef __SYSCALL
-#define __SYSCALL(a,b) 
+#define __SYSCALL(a,b)
 #endif
 
 /*
  * This file contains the system call numbers.
- * 
+ *
  * Note: holes are not allowed.
  */
 
@@ -140,7 +140,7 @@ __SYSCALL(__NR_getsockopt, sys_getsockopt)
 #define __NR_clone                              56
 __SYSCALL(__NR_clone, stub_clone)
 #define __NR_fork                               57
-__SYSCALL(__NR_fork, stub_fork) 
+__SYSCALL(__NR_fork, stub_fork)
 #define __NR_vfork                              58
 __SYSCALL(__NR_vfork, stub_vfork)
 #define __NR_execve                             59
@@ -361,7 +361,7 @@ __SYSCALL(__NR__sysctl, sys_sysctl)
 #define __NR_prctl                             157
 __SYSCALL(__NR_prctl, sys_prctl)
 #define __NR_arch_prctl                        158
-__SYSCALL(__NR_arch_prctl,	sys_arch_prctl) 
+__SYSCALL(__NR_arch_prctl,	sys_arch_prctl)
 
 #define __NR_adjtimex                          159
 __SYSCALL(__NR_adjtimex, sys_adjtimex)
@@ -452,21 +452,21 @@ __SYSCALL(__NR_getxattr, sys_ni_syscall)
 #define __NR_lgetxattr		192
 __SYSCALL(__NR_lgetxattr, sys_ni_syscall)
 #define __NR_fgetxattr		193
-__SYSCALL(__NR_fgetxattr, sys_ni_syscall) 
+__SYSCALL(__NR_fgetxattr, sys_ni_syscall)
 #define __NR_listxattr		194
-__SYSCALL(__NR_listxattr, sys_ni_syscall) 
+__SYSCALL(__NR_listxattr, sys_ni_syscall)
 #define __NR_llistxattr		195
-__SYSCALL(__NR_llistxattr, sys_ni_syscall) 
+__SYSCALL(__NR_llistxattr, sys_ni_syscall)
 #define __NR_flistxattr		196
-__SYSCALL(__NR_flistxattr, sys_ni_syscall) 
+__SYSCALL(__NR_flistxattr, sys_ni_syscall)
 #define __NR_removexattr	197
-__SYSCALL(__NR_removexattr, sys_ni_syscall) 
+__SYSCALL(__NR_removexattr, sys_ni_syscall)
 #define __NR_lremovexattr	198
-__SYSCALL(__NR_lremovexattr, sys_ni_syscall) 
+__SYSCALL(__NR_lremovexattr, sys_ni_syscall)
 #define __NR_fremovexattr	199
-__SYSCALL(__NR_fremovexattr, sys_ni_syscall) 
+__SYSCALL(__NR_fremovexattr, sys_ni_syscall)
 #define __NR_tkill	200	/* 2.5 only */
-__SYSCALL(__NR_tkill, sys_ni_syscall) 
+__SYSCALL(__NR_tkill, sys_ni_syscall)
 #define __NR_time		201
 __SYSCALL(__NR_time, sys_time64)
 #define __NR_futex		202 /* 2.5 only */
@@ -530,7 +530,7 @@ __SYSCALL(__NR_semtimedop, sys_semtimedop)
 #define __NR_$suspnd           19
 #define __NR_$resume           20
 #define __NR_$exit             21
-#define __NR_$forcex           22 
+#define __NR_$forcex           22
 #define __NR_$setrwm           23
 #define __NR_$delprc           24
 #define __NR_$readef           25
@@ -664,7 +664,7 @@ __SYSCALL(__NR_semtimedop, sys_semtimedop)
 
 #ifndef __NO_STUBS
 
-#define __syscall_clobber "r11","rcx","memory" 
+#define __syscall_clobber "r11","rcx","memory"
 
 #define __syscall_return(type, res) \
 do { \
@@ -730,7 +730,7 @@ __asm__ volatile ("movq %[a3],%%r10 ;" __syscall \
 	: "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
 	  "d" ((long)(arg3)), [a3] "g" ((long)(arg4)) : __syscall_clobber,"r10" ); \
 __syscall_return(type,__res); \
-} 
+}
 
 #define _syscall5(type,name,type1,arg1,type2,arg2,type3,arg3,type4,arg4, \
 	  type5,arg5) \
@@ -778,43 +778,43 @@ __syscall_return(type,__res); \
 extern long sys_pause(void);
 static inline long pause(void)
 {
-	return sys_pause();
+    return sys_pause();
 }
 
 extern long sys_sync(void);
 static inline long sync(void)
 {
-	return sys_sync();
+    return sys_sync();
 }
 
 extern pid_t sys_setsid(void);
 static inline pid_t setsid(void)
 {
-	return sys_setsid();
+    return sys_setsid();
 }
 
 extern ssize_t sys_write(unsigned int, char *, size_t);
 static inline ssize_t write(unsigned int fd, char * buf, size_t count)
 {
-	return sys_write(fd, buf, count);
+    return sys_write(fd, buf, count);
 }
 
 extern ssize_t sys_read(unsigned int, char *, size_t);
 static inline ssize_t read(unsigned int fd, char * buf, size_t count)
 {
-	return sys_read(fd, buf, count);
+    return sys_read(fd, buf, count);
 }
 
 extern off_t sys_lseek(unsigned int, off_t, unsigned int);
 static inline off_t lseek(unsigned int fd, off_t offset, unsigned int origin)
 {
-	return sys_lseek(fd, offset, origin);
+    return sys_lseek(fd, offset, origin);
 }
 
 extern long sys_dup(unsigned int);
 static inline long dup(unsigned int fd)
 {
-	return sys_dup(fd);
+    return sys_dup(fd);
 }
 
 /* implemented in asm in arch/x86_64/kernel/entry.S */
@@ -823,36 +823,36 @@ extern long execve(char *, char **, char **);
 extern long sys_open(const char *, int, int);
 static inline long open(const char * filename, int flags, int mode)
 {
-	return sys_open(filename, flags, mode);
+    return sys_open(filename, flags, mode);
 }
 
 extern long sys_close(unsigned int);
 static inline long close(unsigned int fd)
 {
-	return sys_close(fd);
+    return sys_close(fd);
 }
 
 extern long sys_exit(int) __attribute__((noreturn));
 extern inline void exit(int error_code)
 {
-	sys_exit(error_code);
+    sys_exit(error_code);
 }
 
 extern long sys_delete_module(const char *);
 static inline long delete_module(const char *name_user)
 {
-	return sys_delete_module(name_user);
+    return sys_delete_module(name_user);
 }
 
 extern long sys_wait4(pid_t, unsigned int *, int, struct rusage *);
 static inline pid_t waitpid(int pid, int * wait_stat, int flags)
 {
-	return sys_wait4(pid, wait_stat, flags, NULL);
+    return sys_wait4(pid, wait_stat, flags, NULL);
 }
 
 static inline pid_t wait(int * wait_stat)
 {
-	return waitpid(-1,wait_stat,0);
+    return waitpid(-1,wait_stat,0);
 }
 
 #endif /* __KERNEL_SYSCALLS__ */

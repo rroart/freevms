@@ -9,7 +9,7 @@
  * value of the register spacing.
  *
  * Data came from MFC-31-Developer Kit (from Ralph Seidel,
- * zodiac@darkness.gun.de) and Motorola Data Sheet (from 
+ * zodiac@darkness.gun.de) and Motorola Data Sheet (from
  * Richard Hirst, srh@gpt.co.uk)
  *
  * 6.11.95 copyright Joerg Dorchain (dorchain@mpi-sb.mpg.de)
@@ -20,21 +20,24 @@
 #define PIA_REG_PADWIDTH 255
 #endif
 
-struct pia {
-	union {
-		volatile u_char pra;
-		volatile u_char ddra;
-	} ua;
-	u_char pad1[PIA_REG_PADWIDTH];
-	volatile u_char cra;
-	u_char pad2[PIA_REG_PADWIDTH];
-	union {
-		volatile u_char prb;
-		volatile u_char ddrb;
-	} ub;
-	u_char pad3[PIA_REG_PADWIDTH];
-	volatile u_char crb;
-	u_char pad4[PIA_REG_PADWIDTH];
+struct pia
+{
+    union
+    {
+        volatile u_char pra;
+        volatile u_char ddra;
+    } ua;
+    u_char pad1[PIA_REG_PADWIDTH];
+    volatile u_char cra;
+    u_char pad2[PIA_REG_PADWIDTH];
+    union
+    {
+        volatile u_char prb;
+        volatile u_char ddrb;
+    } ub;
+    u_char pad3[PIA_REG_PADWIDTH];
+    volatile u_char crb;
+    u_char pad4[PIA_REG_PADWIDTH];
 };
 
 #define ppra ua.pra

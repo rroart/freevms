@@ -53,46 +53,54 @@ int cluster_not_started = 1;
 
 short int cf_mbxchan = 0;
 
-void configure_init(void) {
-  int promsk=0;
-  int sts = exe$crembx(1,&cf_mbxchan,0,0,promsk,0,0,0);
+void configure_init(void)
+{
+    int promsk=0;
+    int sts = exe$crembx(1,&cf_mbxchan,0,0,promsk,0,0,0);
 }
 
-void someone_wrote(void) {
-  int sts;
-  struct _iosb iosb;
-  printk("someone wrote\n");
-  struct _prcpol prcpol_, *prcpol=&prcpol_;
-  memset(prcpol, 0, sizeof(struct _prcpol));
-  sts = sys$qiow(0, cf_mbxchan, /*IO$M_NOW|*/IO$_READVBLK, &iosb, 0, 0, prcpol, sizeof(struct _prcpol), 0, 0, 0, 0);
-  if (0==strncmp("mscp$disk",&prcpol->prcpol$b_prcnam[0],9)) {
-    mscp_talk_with(&prcpol->prcpol$t_nodnam,"mscp$disk");
-  } else {
-    printk("prcnam not recognized: %s\n",&prcpol->prcpol$b_prcnam[0]);
-  }
-  sts = sys$qiow(0, cf_mbxchan, IO$_SETMODE|IO$M_WRTATTN, &iosb, 0, 0, someone_wrote, 0, 0, 0, 0, 0);
+void someone_wrote(void)
+{
+    int sts;
+    struct _iosb iosb;
+    printk("someone wrote\n");
+    struct _prcpol prcpol_, *prcpol=&prcpol_;
+    memset(prcpol, 0, sizeof(struct _prcpol));
+    sts = sys$qiow(0, cf_mbxchan, /*IO$M_NOW|*/IO$_READVBLK, &iosb, 0, 0, prcpol, sizeof(struct _prcpol), 0, 0, 0, 0);
+    if (0==strncmp("mscp$disk",&prcpol->prcpol$b_prcnam[0],9))
+    {
+        mscp_talk_with(&prcpol->prcpol$t_nodnam,"mscp$disk");
+    }
+    else
+    {
+        printk("prcnam not recognized: %s\n",&prcpol->prcpol$b_prcnam[0]);
+    }
+    sts = sys$qiow(0, cf_mbxchan, IO$_SETMODE|IO$M_WRTATTN, &iosb, 0, 0, someone_wrote, 0, 0, 0, 0, 0);
 }
 
-void configure(void) {
+void configure(void)
+{
 
-  struct _iosb iosb;
-  signed long long sec=-10000000;
-  signed long long tensec=-100000000;
+    struct _iosb iosb;
+    signed long long sec=-10000000;
+    signed long long tensec=-100000000;
 
-  $DESCRIPTOR(process_name_,"CONFIGURE");
-  struct dsc$descriptor * process_name = &process_name_;
-  exe$setprn(process_name);
+    $DESCRIPTOR(process_name_,"CONFIGURE");
+    struct dsc$descriptor * process_name = &process_name_;
+    exe$setprn(process_name);
 
 #if 0
-    if (cluster_not_started) {
-      exe$schdwk(0,0,&sec,0);
-      sys$hiber();
+    if (cluster_not_started)
+    {
+        exe$schdwk(0,0,&sec,0);
+        sys$hiber();
     }
 #endif
     int sts = sys$qiow(0, cf_mbxchan, IO$_SETMODE|IO$M_WRTATTN, &iosb, 0, 0, someone_wrote, 0, 0, 0, 0, 0);
 
-  while (1) {
-    sys$hiber();
-  }
+    while (1)
+    {
+        sys$hiber();
+    }
 }
 

@@ -29,7 +29,7 @@
 
 static __inline__ int irq_cannonicalize(int irq)
 {
-	return ((irq == 2) ? 9 : irq);
+    return ((irq == 2) ? 9 : irq);
 }
 
 extern void disable_irq(unsigned int);

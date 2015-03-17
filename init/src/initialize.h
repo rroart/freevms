@@ -18,7 +18,8 @@
 #define VMSSWAP(l) ((l & 0xffff) << 16 | l >> 16)
 #endif
 
-struct FM2_C_FORMAT2 {
-unsigned short int fm2$w_word0;
-unsigned short int fm2$v_count2;
+struct FM2_C_FORMAT2
+{
+    unsigned short int fm2$w_word0;
+    unsigned short int fm2$v_count2;
 };

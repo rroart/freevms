@@ -5,35 +5,35 @@
 
 struct ipv4_devconf
 {
-	int	accept_redirects;
-	int	send_redirects;
-	int	secure_redirects;
-	int	shared_media;
-	int	accept_source_route;
-	int	rp_filter;
-	int	proxy_arp;
-	int	bootp_relay;
-	int	log_martians;
-	int	forwarding;
-	int	mc_forwarding;
-	int	tag;
-	int     arp_filter;
-	void	*sysctl;
+    int	accept_redirects;
+    int	send_redirects;
+    int	secure_redirects;
+    int	shared_media;
+    int	accept_source_route;
+    int	rp_filter;
+    int	proxy_arp;
+    int	bootp_relay;
+    int	log_martians;
+    int	forwarding;
+    int	mc_forwarding;
+    int	tag;
+    int     arp_filter;
+    void	*sysctl;
 };
 
 extern struct ipv4_devconf ipv4_devconf;
 
 struct in_device
 {
-	struct net_device		*dev;
-	atomic_t		refcnt;
-	rwlock_t		lock;
-	int			dead;
-	struct in_ifaddr	*ifa_list;	/* IP ifaddr chain		*/
-	struct ip_mc_list	*mc_list;	/* IP multicast filter chain    */
-	unsigned long		mr_v1_seen;
-	struct neigh_parms	*arp_parms;
-	struct ipv4_devconf	cnf;
+    struct net_device		*dev;
+    atomic_t		refcnt;
+    rwlock_t		lock;
+    int			dead;
+    struct in_ifaddr	*ifa_list;	/* IP ifaddr chain		*/
+    struct ip_mc_list	*mc_list;	/* IP multicast filter chain    */
+    unsigned long		mr_v1_seen;
+    struct neigh_parms	*arp_parms;
+    struct ipv4_devconf	cnf;
 };
 
 #define IN_DEV_FORWARD(in_dev)		((in_dev)->cnf.forwarding)
@@ -59,17 +59,17 @@ struct in_device
 
 struct in_ifaddr
 {
-	struct in_ifaddr	*ifa_next;
-	struct in_device	*ifa_dev;
-	u32			ifa_local;
-	u32			ifa_address;
-	u32			ifa_mask;
-	u32			ifa_broadcast;
-	u32			ifa_anycast;
-	unsigned char		ifa_scope;
-	unsigned char		ifa_flags;
-	unsigned char		ifa_prefixlen;
-	char			ifa_label[IFNAMSIZ];
+    struct in_ifaddr	*ifa_next;
+    struct in_device	*ifa_dev;
+    u32			ifa_local;
+    u32			ifa_address;
+    u32			ifa_mask;
+    u32			ifa_broadcast;
+    u32			ifa_anycast;
+    unsigned char		ifa_scope;
+    unsigned char		ifa_flags;
+    unsigned char		ifa_prefixlen;
+    char			ifa_label[IFNAMSIZ];
 };
 
 extern int register_inetaddr_notifier(struct notifier_block *nb);
@@ -87,21 +87,21 @@ extern void		inet_forward_change(void);
 
 static __inline__ int inet_ifa_match(u32 addr, struct in_ifaddr *ifa)
 {
-	return !((addr^ifa->ifa_address)&ifa->ifa_mask);
+    return !((addr^ifa->ifa_address)&ifa->ifa_mask);
 }
 
 /*
  *	Check if a mask is acceptable.
  */
- 
+
 static __inline__ int bad_mask(u32 mask, u32 addr)
 {
-	if (addr & (mask = ~mask))
-		return 1;
-	mask = ntohl(mask);
-	if (mask & (mask+1))
-		return 1;
-	return 0;
+    if (addr & (mask = ~mask))
+        return 1;
+    mask = ntohl(mask);
+    if (mask & (mask+1))
+        return 1;
+    return 0;
 }
 
 #define for_primary_ifa(in_dev)	{ struct in_ifaddr *ifa; \
@@ -119,20 +119,20 @@ extern rwlock_t inetdev_lock;
 static __inline__ struct in_device *
 in_dev_get(const struct net_device *dev)
 {
-	struct in_device *in_dev;
+    struct in_device *in_dev;
 
-	read_lock(&inetdev_lock);
-	in_dev = dev->ip_ptr;
-	if (in_dev)
-		atomic_inc(&in_dev->refcnt);
-	read_unlock(&inetdev_lock);
-	return in_dev;
+    read_lock(&inetdev_lock);
+    in_dev = dev->ip_ptr;
+    if (in_dev)
+        atomic_inc(&in_dev->refcnt);
+    read_unlock(&inetdev_lock);
+    return in_dev;
 }
 
 static __inline__ struct in_device *
 __in_dev_get(const struct net_device *dev)
 {
-	return (struct in_device*)dev->ip_ptr;
+    return (struct in_device*)dev->ip_ptr;
 }
 
 extern void in_dev_finish_destroy(struct in_device *idev);
@@ -140,8 +140,8 @@ extern void in_dev_finish_destroy(struct in_device *idev);
 static __inline__ void
 in_dev_put(struct in_device *idev)
 {
-	if (atomic_dec_and_test(&idev->refcnt))
-		in_dev_finish_destroy(idev);
+    if (atomic_dec_and_test(&idev->refcnt))
+        in_dev_finish_destroy(idev);
 }
 
 #define __in_dev_put(idev)  atomic_dec(&(idev)->refcnt)
@@ -151,16 +151,16 @@ in_dev_put(struct in_device *idev)
 
 static __inline__ __u32 inet_make_mask(int logmask)
 {
-	if (logmask)
-		return htonl(~((1<<(32-logmask))-1));
-	return 0;
+    if (logmask)
+        return htonl(~((1<<(32-logmask))-1));
+    return 0;
 }
 
 static __inline__ int inet_mask_len(__u32 mask)
 {
-	if (!(mask = ntohl(mask)))
-		return 0;
-	return 32 - ffz(~mask);
+    if (!(mask = ntohl(mask)))
+        return 0;
+    return 32 - ffz(~mask);
 }
 
 

@@ -3,9 +3,9 @@
  *
  * Changes:
  * 		06/09/2000	BL:	initial version
- * 
+ *
  */
- 
+
 #ifndef _LINUX_DIVERT_H
 #define _LINUX_DIVERT_H
 
@@ -25,12 +25,12 @@
  */
 struct divert_blk
 {
-	int		divert;  /* are we active */
-	unsigned int protos;	/* protocols */
-	u16		tcp_dst[MAX_DIVERT_PORTS]; /* specific tcp dst ports to divert */
-	u16		tcp_src[MAX_DIVERT_PORTS]; /* specific tcp src ports to divert */
-	u16		udp_dst[MAX_DIVERT_PORTS]; /* specific udp dst ports to divert */
-	u16		udp_src[MAX_DIVERT_PORTS]; /* specific udp src ports to divert */
+    int		divert;  /* are we active */
+    unsigned int protos;	/* protocols */
+    u16		tcp_dst[MAX_DIVERT_PORTS]; /* specific tcp dst ports to divert */
+    u16		tcp_src[MAX_DIVERT_PORTS]; /* specific tcp src ports to divert */
+    u16		udp_dst[MAX_DIVERT_PORTS]; /* specific udp dst ports to divert */
+    u16		udp_src[MAX_DIVERT_PORTS]; /* specific udp src ports to divert */
 };
 
 /*
@@ -40,23 +40,23 @@ struct divert_blk
 
 typedef union _divert_cf_arg
 {
-	s16		int16;
-	u16		uint16;
-	s32		int32;
-	u32		uint32;
-	s64		int64;
-	u64		uint64;
-	void	*ptr;
+    s16		int16;
+    u16		uint16;
+    s32		int32;
+    u32		uint32;
+    s64		int64;
+    u64		uint64;
+    void	*ptr;
 } divert_cf_arg;
 
 
 struct divert_cf
 {
-	int	cmd;				/* Command */
-	divert_cf_arg 	arg1,
-					arg2,
-					arg3;
-	int	dev_index;	/* device index (eth0=0, etc...) */
+    int	cmd;				/* Command */
+    divert_cf_arg 	arg1,
+                    arg2,
+                    arg3;
+    int	dev_index;	/* device index (eth0=0, etc...) */
 };
 
 
@@ -75,9 +75,9 @@ struct divert_cf
 #define DIVCMD_GETVERSION		12 /* Retrieve the diverter code version (char[32]) */
 
 /* General syntax of the commands:
- * 
+ *
  * DIVCMD_xxxxxx(arg1, arg2, arg3, dev_index)
- * 
+ *
  * SIOCSIFDIVERT:
  *   DIVCMD_DIVERT(DIVARG1_ENABLE|DIVARG1_DISABLE, , ,ifindex)
  *   DIVCMD_IP(DIVARG1_ENABLE|DIVARG1_DISABLE, , , ifindex)
@@ -89,7 +89,7 @@ struct divert_cf
  *   DIVCMD_UDPSRC(DIVARG1_ADD|DIVARG1_REMOVE, port, , ifindex)
  *   DIVCMD_ICMP(DIVARG1_ENABLE|DIVARG1_DISABLE, , , ifindex)
  *   DIVCMD_RESET(, , , ifindex)
- *   
+ *
  * SIOGIFDIVERT:
  *   DIVCMD_GETSTATUS(divert_blk, , , ifindex)
  *   DIVCMD_GETVERSION(string[3])
@@ -112,6 +112,6 @@ void free_divert_blk(struct net_device *);
 int divert_ioctl(unsigned int cmd, struct divert_cf *arg);
 void divert_frame(struct sk_buff *skb);
 
-#endif 
+#endif
 
 #endif	/* _LINUX_DIVERT_H */

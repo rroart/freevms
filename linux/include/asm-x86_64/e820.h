@@ -26,27 +26,29 @@
 
 #define LOWMEMSIZE()	(0x9f000)
 
-#define MAXMEM		(120UL * 1024 * 1024 * 1024 * 1024)  /* 120TB */ 
+#define MAXMEM		(120UL * 1024 * 1024 * 1024 * 1024)  /* 120TB */
 
 
 #ifndef __ASSEMBLY__
-struct e820entry {
-	u64 addr;	/* start of memory segment */
-	u64 size;	/* size of memory segment */
-	u32 type;	/* type of memory segment */
+struct e820entry
+{
+    u64 addr;	/* start of memory segment */
+    u64 size;	/* size of memory segment */
+    u32 type;	/* type of memory segment */
 } __attribute__((packed));
 
-struct e820map {
-	int nr_map;
-	struct e820entry map[E820MAX];
+struct e820map
+{
+    int nr_map;
+    struct e820entry map[E820MAX];
 };
 
-extern unsigned long find_e820_area(unsigned long start, unsigned long end, 
-				    unsigned size);
-extern void add_memory_region(unsigned long start, unsigned long size, 
-			      int type);
+extern unsigned long find_e820_area(unsigned long start, unsigned long end,
+                                    unsigned size);
+extern void add_memory_region(unsigned long start, unsigned long size,
+                              int type);
 extern void setup_memory_region(void);
-extern void contig_e820_setup(void); 
+extern void contig_e820_setup(void);
 extern void e820_end_of_ram(void);
 extern void e820_reserve_resources(void);
 extern void e820_print_map(char *who);

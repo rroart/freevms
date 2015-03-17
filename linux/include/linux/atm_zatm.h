@@ -16,31 +16,34 @@
 #include <linux/atmioc.h>
 
 #define ZATM_GETPOOL	_IOW('a',ATMIOC_SARPRV+1,struct atmif_sioc)
-						/* get pool statistics */
+/* get pool statistics */
 #define ZATM_GETPOOLZ	_IOW('a',ATMIOC_SARPRV+2,struct atmif_sioc)
-						/* get statistics and zero */
+/* get statistics and zero */
 #define ZATM_SETPOOL	_IOW('a',ATMIOC_SARPRV+3,struct atmif_sioc)
-						/* set pool parameters */
+/* set pool parameters */
 #define ZATM_GETTHIST	_IOW('a',ATMIOC_SARPRV+4,struct atmif_sioc)
-						/* get a history of timer
-						   differences */
+/* get a history of timer
+   differences */
 
-struct zatm_pool_info {
-	int ref_count;			/* free buffer pool usage counters */
-	int low_water,high_water;	/* refill parameters */
-	int rqa_count,rqu_count;	/* queue condition counters */
-	int offset,next_off;		/* alignment optimizations: offset */
-	int next_cnt,next_thres;	/* repetition counter and threshold */
+struct zatm_pool_info
+{
+    int ref_count;			/* free buffer pool usage counters */
+    int low_water,high_water;	/* refill parameters */
+    int rqa_count,rqu_count;	/* queue condition counters */
+    int offset,next_off;		/* alignment optimizations: offset */
+    int next_cnt,next_thres;	/* repetition counter and threshold */
 };
 
-struct zatm_pool_req {
-	int pool_num;			/* pool number */
-	struct zatm_pool_info info;	/* actual information */
+struct zatm_pool_req
+{
+    int pool_num;			/* pool number */
+    struct zatm_pool_info info;	/* actual information */
 };
 
-struct zatm_t_hist {
-	struct timeval real;		/* real (wall-clock) time */
-	struct timeval expected;	/* expected real time */
+struct zatm_t_hist
+{
+    struct timeval real;		/* real (wall-clock) time */
+    struct timeval expected;	/* expected real time */
 };
 
 
@@ -50,6 +53,6 @@ struct zatm_t_hist {
 #define ZATM_LAST_POOL	ZATM_AAL5_POOL_BASE+10 /* max. 64 kB */
 
 #define ZATM_TIMER_HISTORY_SIZE	16	/* number of timer adjustments to
-					   record; must be 2^n */
+record; must be 2^n */
 
 #endif

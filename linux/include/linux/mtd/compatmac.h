@@ -5,15 +5,15 @@
  * $Id$
  *
  * Extensions and omissions from the normal 'linux/compatmac.h'
- * files. hopefully this will end up empty as the 'real' one 
+ * files. hopefully this will end up empty as the 'real' one
  * becomes fully-featured.
  */
 
 
-/* First, include the parts which the kernel is good enough to provide 
- * to us 
+/* First, include the parts which the kernel is good enough to provide
+ * to us
  */
-   
+
 #ifndef __LINUX_MTD_COMPATMAC_H__
 #define __LINUX_MTD_COMPATMAC_H__
 
@@ -121,9 +121,9 @@
 
 static inline int try_inc_mod_count(struct module *mod)
 {
-	if (mod)
-		__MOD_INC_USE_COUNT(mod);
-	return 1;
+    if (mod)
+        __MOD_INC_USE_COUNT(mod);
+    return 1;
 }
 #endif
 
@@ -173,11 +173,11 @@ static inline int try_inc_mod_count(struct module *mod)
 #endif /* ifndef __constant_cpu_to_le16 */
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,3,0)
-  #define mod_init_t int  __init
-  #define mod_exit_t void  
+#define mod_init_t int  __init
+#define mod_exit_t void
 #else
-  #define mod_init_t static int __init
-  #define mod_exit_t static void __exit
+#define mod_init_t static int __init
+#define mod_exit_t static void __exit
 #endif
 
 #ifndef THIS_MODULE

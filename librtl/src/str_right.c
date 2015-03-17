@@ -24,7 +24,7 @@
  *				Andrew Allison
  *				50 Denlaw Road
  *				London, Ont
- *				Canada 
+ *				Canada
  *				N6G 3L4
  *
  */
@@ -64,67 +64,67 @@
  *
  */
 unsigned long str$right(struct dsc$descriptor_s* destination_string,
-	const struct dsc$descriptor_s* source_string,
-	const long* start_position)
+                        const struct dsc$descriptor_s* source_string,
+                        const long* start_position)
 {
-	char* s2_ptr;				/* Pointer to second string */
-	unsigned short s2_length;		/* Length of second string */
-	int final_length;			/* Signed final length */
-	unsigned short real_final_length;	/* Usable final length */
-	unsigned long result;			/* Result */
-	unsigned long second_result = STR$_NORMAL; /* Another possible result */
-	int start_offset = *start_position - 1;	/* Real start character */
+    char* s2_ptr;				/* Pointer to second string */
+    unsigned short s2_length;		/* Length of second string */
+    int final_length;			/* Signed final length */
+    unsigned short real_final_length;	/* Usable final length */
+    unsigned long result;			/* Result */
+    unsigned long second_result = STR$_NORMAL; /* Another possible result */
+    int start_offset = *start_position - 1;	/* Real start character */
 
-	/*
-	 * Validate input
-	 */
-	if (start_offset <= 0)
-	{
-		start_offset = 0;
-		second_result = STR$_STRTOOLON;
-	}
+    /*
+     * Validate input
+     */
+    if (start_offset <= 0)
+    {
+        start_offset = 0;
+        second_result = STR$_STRTOOLON;
+    }
 
-	/*
-	 * Determine how much we can use
-	 */
-        str$analyze_sdesc(source_string, &s2_length, &s2_ptr);
+    /*
+     * Determine how much we can use
+     */
+    str$analyze_sdesc(source_string, &s2_length, &s2_ptr);
 
 //	Is start position past end of source string
-	if ( *start_position > s2_length )
-	{
-		str$free1_dx (destination_string);
-		return STR$_ILLSTRPOS;
-	}
+    if ( *start_position > s2_length )
+    {
+        str$free1_dx (destination_string);
+        return STR$_ILLSTRPOS;
+    }
 
 //	Calculate our offsets
-	final_length = s2_length - start_offset;
+    final_length = s2_length - start_offset;
 
-	if (final_length < 0)
-	{
-		real_final_length = 0;
-		second_result = STR$_STRTOOLON;
-	}
-	else
-	{
-		real_final_length = (unsigned short) final_length;
-	}
+    if (final_length < 0)
+    {
+        real_final_length = 0;
+        second_result = STR$_STRTOOLON;
+    }
+    else
+    {
+        real_final_length = (unsigned short) final_length;
+    }
 
-	/*
-	 * Move over the left part of the string
-	 */
-	s2_ptr += start_offset;
-	result = str$copy_r(destination_string, &real_final_length, s2_ptr);
-	destination_string->dsc$w_length = final_length;
-	/*
-	 * Done
-	 */
-	if (result == STR$_NORMAL)
-	{
-		return second_result;
-	}
-	else
-	{
-		return result;
-	}
+    /*
+     * Move over the left part of the string
+     */
+    s2_ptr += start_offset;
+    result = str$copy_r(destination_string, &real_final_length, s2_ptr);
+    destination_string->dsc$w_length = final_length;
+    /*
+     * Done
+     */
+    if (result == STR$_NORMAL)
+    {
+        return second_result;
+    }
+    else
+    {
+        return result;
+    }
 }
 

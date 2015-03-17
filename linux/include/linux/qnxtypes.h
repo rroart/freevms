@@ -15,9 +15,10 @@
 typedef __u16 qnx4_nxtnt_t;
 typedef __u8  qnx4_ftype_t;
 
-typedef struct {
-	__u32 xtnt_blk;
-	__u32 xtnt_size;
+typedef struct
+{
+    __u32 xtnt_blk;
+    __u32 xtnt_size;
 } qnx4_xtnt_t;
 
 typedef __u16 qnx4_mode_t;
