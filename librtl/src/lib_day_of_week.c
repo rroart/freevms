@@ -35,7 +35,7 @@
 */
 
 #include <stddef.h>
-#include "lib$routines.h"	/* Our header file! */
+#include "lib$routines.h"   /* Our header file! */
 
 struct TIME
 {

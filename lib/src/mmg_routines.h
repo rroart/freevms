@@ -1,5 +1,5 @@
-#ifndef mmg_routines_h
-#define mmg_routines_h
+#ifndef MMG_ROUTINES_H
+#define MMG_ROUTINES_H
 
 typedef unsigned long long uint64;
 
@@ -36,7 +36,7 @@ int   mmg_std$allo_contig_pfn (uint32 pfn_count, uint32 max_pfn);
 
 int   mmg_std$allo_contig_a (uint32 pfn_count, uint32 byte_align);
 int   mmg_std$allo_contig_pfn_a (uint32 pfn_count, uint32 byte_align, uint32 max_pfn);
-#ifndef	MMG_STD$ALLOC_CTG_PFN_MAP_SVA_SRC
+#ifndef MMG_STD$ALLOC_CTG_PFN_MAP_SVA_SRC
 int   mmg_std$alloc_ctg_pfn_map_sva (
     const int proto_pte,
     const int page_count,
@@ -143,7 +143,7 @@ int mmg$alloc_sva_map (int proto_pte, int page_count, int refcnt,
 int mmg$alloc_pfn_map_sva (int proto_pte, int page_count, int refcnt,
                            struct _pte * svapte, void ** ret_sva, int *ret_pfn);
 
-#ifndef	MMG_STD$ALLOC_SYSTEM_VA_MAP_SRC
+#ifndef MMG_STD$ALLOC_SYSTEM_VA_MAP_SRC
 int mmg_std$alloc_system_va_map (const int proto_pte, const int page_count,
                                  const uint32 refcnt, const uint32 system_region, VOID_PPQ sva, ...);
 #endif
@@ -206,7 +206,7 @@ int mmg$allocpagfil1(int size, int * page);
 int mmg$dallocpagfil1(int page);
 int mmg$delpag(int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte);
 int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte);
-int mmg$credel(int acmode, void * first, void * last, void (* pagesubr)(), struct _va_range *inadr, struct _va_range *retadr, unsigned int acmodeagain, struct _pcb * p, int numpages);
+int mmg$credel(int acmode, void * first, void * last, void (* pagesubr)(void), struct _va_range *inadr, struct _va_range *retadr, unsigned int acmodeagain, struct _pcb * p, int numpages);
 int mmg$crepag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte);
 int mmg$fast_create(struct _pcb * p, struct _rde *rde, void * start_va, void * end_va, unsigned long pages, unsigned long prot_pte);
 int mmg$fast_create_gptx(struct _pcb * p, struct _rde *rde, void * start_va, void * end_va, unsigned long pages, unsigned long prot_pte);
@@ -223,7 +223,7 @@ mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index,unsigned long pte);
 mmg$delpfnlst(int type, int pfn);
 mmg$dalcstxscn(void);
 mmg$gsdscn(void * input_gsnam, unsigned long long * input_ident, int section_flags, char *return_gsnam, unsigned long long  *return_ident, struct _gsd **gsd);
-mmg$imgreset();
+mmg$imgreset(void);
 void mmg$purgempl(unsigned long command);
 void mmg$wrtmfypag(void);
 signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _mypte * pte);

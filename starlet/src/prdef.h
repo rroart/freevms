@@ -1,5 +1,5 @@
-#ifndef prdef_h
-#define prdef_h
+#ifndef PRDEF_H
+#define PRDEF_H
 
 #define PR$_ESP 1
 #define PR$_SSP 2

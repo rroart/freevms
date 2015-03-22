@@ -1,8 +1,8 @@
 
 /*
- *	LIB$DATE_TIME
+ *  LIB$DATE_TIME
  *
- *	Copyright (C) 2004 Andrew Allison
+ *  Copyright (C) 2004 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,27 +20,27 @@
  *
  *The author(s) may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  *
  *
  * Description:
- *	The date and time returned as a string routine returns the FreeVMS
- *	system date and time in the semantics of a user provided string.
+ *  The date and time returned as a string routine returns the FreeVMS
+ *  system date and time in the semantics of a user provided string.
  *
  * Bugs:
  *
  *
  * History
  *
- *	Apr 07, 2004 - Andrew Allison
- * 	 	Initial program creation
+ *  Apr 07, 2004 - Andrew Allison
+ *      Initial program creation
  */
 #include "lib$routines.h"
 #include "str$routines.h"
@@ -53,8 +53,8 @@ unsigned long lib$date_time (struct dsc$descriptor_s *date_time_string )
 {
     unsigned long result;
     unsigned short s1_len;
-    char	*s1_ptr;
-    time_t	time_ptr;
+    char    *s1_ptr;
+    time_t  time_ptr;
     struct tm *local_time;
     char month[36] = "JANFEBMARAPRJUNJULAUGSEPOCTNOVDEC";
 
@@ -65,11 +65,11 @@ unsigned long lib$date_time (struct dsc$descriptor_s *date_time_string )
     local_time = localtime (&time_ptr);
 
 // determine if daylight saving time is in effect
-    if (local_time->tm_isdst > 0 )			// DST in effect
+    if (local_time->tm_isdst > 0 )          // DST in effect
         time_ptr += 3600;
-    else if ( local_time->tm_isdst == 0 )		// DST not in effect
+    else if ( local_time->tm_isdst == 0 )       // DST not in effect
         ;
-    else if ( local_time->tm_isdst < 0 )		// Flag not used
+    else if ( local_time->tm_isdst < 0 )        // Flag not used
         ;
 
 // convert time_t to struct tm

@@ -5,7 +5,7 @@
 // Modified Linux source file, 2001-2004. Based on mlock.c.
 
 /*
- *	linux/mm/mlock.c
+ *  linux/mm/mlock.c
  *
  *  (C) Copyright 1995 Linus Torvalds
  */

@@ -1,45 +1,45 @@
-#ifndef dptdef_h
-#define dptdef_h
+#ifndef DPTDEF_H
+#define DPTDEF_H
 
 #define DPT$S_DPTDEF 160
 
-#define		DPT$K_STEP_1		1
-#define		DPT$K_STEP_2		2
-#define		DPT$K_STEP1_V1		1
-#define		DPT$K_STEP1_V2		2
-#define		DPT$K_STEP2_V1		1
-#define		DPT$K_STEP2_V2		2
-#define		DPT$K_STEP2_V3		3
-#define		DPT$K_STEP2_V4		4
-#define		DPT$K_STEP2_V5		5
-#define		DPT$K_IOGEN_REQ_STEP2VER		5
-#define		DPT$M_SUBCNTRL		0x1
-#define		DPT$M_SVP		0x2
-#define		DPT$M_NOUNLOAD		0x4
-#define		DPT$M_SCS		0x8
-#define		DPT$M_DUSHADOW		0x10
-#define		DPT$M_SCSCI		0x20
-#define		DPT$M_BVPSUBS		0x40
-#define		DPT$M_UCODE		0x80
-#define		DPT$M_SMPMOD		0x100
-#define		DPT$M_DECW_DECODE		0x200
-#define		DPT$M_TPALLOC		0x400
-#define		DPT$M_SNAPSHOT		0x800
-#define		DPT$M_NO_IDB_DISPATCH		0x1000
-#define		DPT$M_SCSI_PORT		0x2000
-#define		DPT$M_ATM		0x4000
-#define		DPT$M_CSMACD		0x8000
-#define		DPT$M_FDDI		0x10000
-#define		DPT$M_TR		0x20000
-#define		DPT$M_SHARED_INT		0x40000
-#define		DPT$M_DEVPATH_SUP		0x80000
-#define		DPT$M_MULTIPATH_SUP		0x100000
-#define		DPT$M_QSVR		0x200000
-#define		DPT$M_ATM_FORE		0x400000
-#define		DPT$M_USB_SUP		0x800000
-#define		DPT$M_HOTSWAP_SUP		0x1000000
-#define		DPT$K_BASE_LEN		152
-#define		DPT$C_BASE_LEN		152
+#define     DPT$K_STEP_1        1
+#define     DPT$K_STEP_2        2
+#define     DPT$K_STEP1_V1      1
+#define     DPT$K_STEP1_V2      2
+#define     DPT$K_STEP2_V1      1
+#define     DPT$K_STEP2_V2      2
+#define     DPT$K_STEP2_V3      3
+#define     DPT$K_STEP2_V4      4
+#define     DPT$K_STEP2_V5      5
+#define     DPT$K_IOGEN_REQ_STEP2VER        5
+#define     DPT$M_SUBCNTRL      0x1
+#define     DPT$M_SVP       0x2
+#define     DPT$M_NOUNLOAD      0x4
+#define     DPT$M_SCS       0x8
+#define     DPT$M_DUSHADOW      0x10
+#define     DPT$M_SCSCI     0x20
+#define     DPT$M_BVPSUBS       0x40
+#define     DPT$M_UCODE     0x80
+#define     DPT$M_SMPMOD        0x100
+#define     DPT$M_DECW_DECODE       0x200
+#define     DPT$M_TPALLOC       0x400
+#define     DPT$M_SNAPSHOT      0x800
+#define     DPT$M_NO_IDB_DISPATCH       0x1000
+#define     DPT$M_SCSI_PORT     0x2000
+#define     DPT$M_ATM       0x4000
+#define     DPT$M_CSMACD        0x8000
+#define     DPT$M_FDDI      0x10000
+#define     DPT$M_TR        0x20000
+#define     DPT$M_SHARED_INT        0x40000
+#define     DPT$M_DEVPATH_SUP       0x80000
+#define     DPT$M_MULTIPATH_SUP     0x100000
+#define     DPT$M_QSVR      0x200000
+#define     DPT$M_ATM_FORE      0x400000
+#define     DPT$M_USB_SUP       0x800000
+#define     DPT$M_HOTSWAP_SUP       0x1000000
+#define     DPT$K_BASE_LEN      152
+#define     DPT$C_BASE_LEN      152
 
 struct _dpt
 {

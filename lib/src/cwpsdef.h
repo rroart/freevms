@@ -1,50 +1,50 @@
-#ifndef cwpsdef_h
-#define cwpsdef_h
+#ifndef CWPSDEF_H
+#define CWPSDEF_H
 
-#define		CWPSSRV$M_BTX_DONE		0x1
-#define		CWPSSRV$M_SEC_CLASS		0x1
-#define		CWPSSRV$M_JPIBUF		0x2
-#define		CWPSSRV$M_NOQUOTA		0x4
-#define		CWPSSRV$M_GROUP_PRIV		0x8
-#define		CWPSSRV$M_WORLD_PRIV		0x10
-#define		CWPSSRV$M_SECAUDIT		0x20
-#define		CWPSSRV$M_NOAUDIT		0x40
-#define		CWPSSRV$M_OPER_PRIV		0x80
-#define		CWPSSRV$K_RETRY_CNT		5
+#define     CWPSSRV$M_BTX_DONE      0x1
+#define     CWPSSRV$M_SEC_CLASS     0x1
+#define     CWPSSRV$M_JPIBUF        0x2
+#define     CWPSSRV$M_NOQUOTA       0x4
+#define     CWPSSRV$M_GROUP_PRIV        0x8
+#define     CWPSSRV$M_WORLD_PRIV        0x10
+#define     CWPSSRV$M_SECAUDIT      0x20
+#define     CWPSSRV$M_NOAUDIT       0x40
+#define     CWPSSRV$M_OPER_PRIV     0x80
+#define     CWPSSRV$K_RETRY_CNT     5
 
-#define		CWPSSRV$K_LENGTH		112
-#define		CWPSSRV$K_SRVCODE_BEGIN		0
-#define		CWPSSRV$K_CANWAK		1
-#define		CWPSSRV$K_DELPRC		2
-#define		CWPSSRV$K_FORCEX		3
-#define		CWPSSRV$K_RESUME		4
-#define		CWPSSRV$K_SCHDWK		5
-#define		CWPSSRV$K_SETPRI		6
-#define		CWPSSRV$K_SUSPND		7
-#define		CWPSSRV$K_WAKE		        8
-#define		CWPSSRV$K_SRVCODE_END		9
+#define     CWPSSRV$K_LENGTH        112
+#define     CWPSSRV$K_SRVCODE_BEGIN     0
+#define     CWPSSRV$K_CANWAK        1
+#define     CWPSSRV$K_DELPRC        2
+#define     CWPSSRV$K_FORCEX        3
+#define     CWPSSRV$K_RESUME        4
+#define     CWPSSRV$K_SCHDWK        5
+#define     CWPSSRV$K_SETPRI        6
+#define     CWPSSRV$K_SUSPND        7
+#define     CWPSSRV$K_WAKE              8
+#define     CWPSSRV$K_SRVCODE_END       9
 
-#define		CWPSSRV$K_GETJPI		20
-#define		CWPSSRV$K_CREPRC		21
-#define		CWPSSRV$K_TERMIN		22
+#define     CWPSSRV$K_GETJPI        20
+#define     CWPSSRV$K_CREPRC        21
+#define     CWPSSRV$K_TERMIN        22
 
-#define		CWPSSRV$K_GRANTID		28
-#define		CWPSSRV$K_REVOKID		29
-#define		CWPSSRV$K_VERSION_1		1
-#define		CWPSSRV$K_VERSION_2		2
-#define		CWPSSRV$K_VERSION_3		3
-#define		CWPSSRV$K_VERSION_4		4
-#define		CWPSSRV$K_VERSION_5		5
-#define		CWPSSRV$K_VERSION_6		6
-#define		CWPSSRV$K_VERSION_7		7
-#define		CWPSSRV$K_VERSION_8		8
-#define		CWPSSRV$K_VERSION_9		9
-#define		CWPSSRV$K_VERSION_10		10
-#define		CWPSSRV$K_VERSION_11		11
-#define		CWPSSRV$K_VERSION_12		12
-#define		CWPSSRV$K_INITIAL_MAJ_VERS	1
-#define		CWPSSRV$K_INITIAL_MIN_VERS	1
-#define		CWPSSRV$S_$CWPSSRVDEF		112
+#define     CWPSSRV$K_GRANTID       28
+#define     CWPSSRV$K_REVOKID       29
+#define     CWPSSRV$K_VERSION_1     1
+#define     CWPSSRV$K_VERSION_2     2
+#define     CWPSSRV$K_VERSION_3     3
+#define     CWPSSRV$K_VERSION_4     4
+#define     CWPSSRV$K_VERSION_5     5
+#define     CWPSSRV$K_VERSION_6     6
+#define     CWPSSRV$K_VERSION_7     7
+#define     CWPSSRV$K_VERSION_8     8
+#define     CWPSSRV$K_VERSION_9     9
+#define     CWPSSRV$K_VERSION_10        10
+#define     CWPSSRV$K_VERSION_11        11
+#define     CWPSSRV$K_VERSION_12        12
+#define     CWPSSRV$K_INITIAL_MAJ_VERS  1
+#define     CWPSSRV$K_INITIAL_MIN_VERS  1
+#define     CWPSSRV$S_$CWPSSRVDEF       112
 
 struct _cwpssrv
 {
@@ -59,8 +59,8 @@ struct _cwpssrv
         unsigned char cwpssrv$b_btx_flags;
         struct
         {
-            unsigned cwpssrv$v_btx_done		: 1;
-            unsigned cwpssrv$v_fill_4_		: 7;
+            unsigned cwpssrv$v_btx_done     : 1;
+            unsigned cwpssrv$v_fill_4_      : 7;
         };
     };
     unsigned char cwpssrv$b_func;
@@ -76,14 +76,14 @@ struct _cwpssrv
         unsigned int cwpssrv$l_flags;
         struct
         {
-            unsigned cwpssrv$v_sec_class		: 1;
-            unsigned cwpssrv$v_jpibuf		        : 1;
-            unsigned cwpssrv$v_noquota		: 1;
-            unsigned cwpssrv$v_group_priv		: 1;
-            unsigned cwpssrv$v_world_priv		: 1;
-            unsigned cwpssrv$v_secaudit		: 1;
-            unsigned cwpssrv$v_noaudit		: 1;
-            unsigned cwpssrv$v_oper_priv		: 1;
+            unsigned cwpssrv$v_sec_class        : 1;
+            unsigned cwpssrv$v_jpibuf               : 1;
+            unsigned cwpssrv$v_noquota      : 1;
+            unsigned cwpssrv$v_group_priv       : 1;
+            unsigned cwpssrv$v_world_priv       : 1;
+            unsigned cwpssrv$v_secaudit     : 1;
+            unsigned cwpssrv$v_noaudit      : 1;
+            unsigned cwpssrv$v_oper_priv        : 1;
         };
     };
     unsigned int cwpssrv$l_ext_offset;
@@ -108,27 +108,27 @@ struct _cwpssrv
     unsigned long long cwpssrv$q_time;
 };
 
-#define		CWPS$_ENABLED		1
-#define		CWPS$_NERVOUS		0
-#define		CWPS$_SCARED		0
-#define		CWPS$_PARANOID		0
-#define		CWPS$_STATISTICS	1
-#define		CWPSCAN$K_LENGTH	0
-#define		CWPSDEL$K_LENGTH	0
-#define		CWPSRES$K_LENGTH	0
-#define		CWPSSUS$K_LENGTH	0
-#define		CWPSWAK$K_LENGTH	0
-#define		CWPSFEX$K_LENGTH	4
-#define		CWPSFEX$S_$CWPSFEXDEF	4
+#define     CWPS$_ENABLED       1
+#define     CWPS$_NERVOUS       0
+#define     CWPS$_SCARED        0
+#define     CWPS$_PARANOID      0
+#define     CWPS$_STATISTICS    1
+#define     CWPSCAN$K_LENGTH    0
+#define     CWPSDEL$K_LENGTH    0
+#define     CWPSRES$K_LENGTH    0
+#define     CWPSSUS$K_LENGTH    0
+#define     CWPSWAK$K_LENGTH    0
+#define     CWPSFEX$K_LENGTH    4
+#define     CWPSFEX$S_$CWPSFEXDEF   4
 
 struct _cwpsfex
 {
     unsigned int cwpsfex$l_code;
 };
 
-#define		CWPSSRV$K_SETPRI_MIN_VERS2	2
-#define		CWPSPRI$K_LENGTH		24
-#define		CWPSPRI$S_$CWPSPRIDEF		24
+#define     CWPSSRV$K_SETPRI_MIN_VERS2  2
+#define     CWPSPRI$K_LENGTH        24
+#define     CWPSPRI$S_$CWPSPRIDEF       24
 
 struct _cwpspri
 {
@@ -140,8 +140,8 @@ struct _cwpspri
     unsigned int cwpspri$l_prvpol;
 };
 
-#define		CWPSSWK$K_LENGTH		16
-#define		CWPSSWK$S_$CWPSSWKDEF		16
+#define     CWPSSWK$K_LENGTH        16
+#define     CWPSSWK$S_$CWPSSWKDEF       16
 
 struct _cwpsswk
 {
@@ -149,8 +149,8 @@ struct _cwpsswk
     unsigned long long cwpsswk$q_reptim;
 };
 
-#define		CWPSJPI$K_LENGTH		60
-#define		CWPSJPI$S_$CWPSJPIDEF		60
+#define     CWPSJPI$K_LENGTH        60
+#define     CWPSJPI$S_$CWPSJPIDEF       60
 
 struct _cwpsjpi
 {
@@ -163,7 +163,7 @@ struct _cwpsjpi
     unsigned int cwpsjpi$l_buflen;
     void *cwpsjpi$l_iosbadr;
     unsigned long long cwpsjpi$q_iosb;
-    void (*cwpsjpi$l_astadr)();
+    void (*cwpsjpi$l_astadr)(void);
     unsigned int cwpsjpi$l_astprm;
     void *cwpsjpi$l_pscanctx_addr;
     unsigned short int cwpsjpi$w_pscan_seqnum;
@@ -184,12 +184,12 @@ struct _cwpsjpi_64
     void *cwpsjpi_64$pq_astprm;
 };
 
-#define		CWPSCRE$M_IMGDMP		0x1
-#define		CWPSCRE$M_DEBUG		        0x2
-#define		CWPSCRE$M_DBGTRU		0x4
-#define		CWPSCRE$M_PARSE_EXTENDED	0x8
-#define		CWPSCRE$K_LENGTH		2100
-#define		CWPSCRE$S_$CWPSCREDEF		2100
+#define     CWPSCRE$M_IMGDMP        0x1
+#define     CWPSCRE$M_DEBUG             0x2
+#define     CWPSCRE$M_DBGTRU        0x4
+#define     CWPSCRE$M_PARSE_EXTENDED    0x8
+#define     CWPSCRE$K_LENGTH        2100
+#define     CWPSCRE$S_$CWPSCREDEF       2100
 
 struct _cwpscreprc
 {
@@ -232,11 +232,11 @@ struct _cwpscreprc
         unsigned int cwpscre$l_flags;
         struct
         {
-            unsigned cwpscre$v_imgdmp		: 1;
-            unsigned cwpscre$v_debug		: 1;
-            unsigned cwpscre$v_dbgtru		: 1;
-            unsigned cwpscre$v_parse_extended	: 1;
-            unsigned cwpscre$v_fill_7_	: 4;
+            unsigned cwpscre$v_imgdmp       : 1;
+            unsigned cwpscre$v_debug        : 1;
+            unsigned cwpscre$v_dbgtru       : 1;
+            unsigned cwpscre$v_parse_extended   : 1;
+            unsigned cwpscre$v_fill_7_  : 4;
         };
     };
     char cwpscre$t_input [256];
@@ -288,16 +288,16 @@ struct _cwpsvec
         unsigned int cwpsvec$l_flags;
         struct
         {
-            unsigned cwpsvec$v_64_bit_ile		: 1;
-            unsigned cwpsvec$v_fill_10_		: 7;
+            unsigned cwpsvec$v_64_bit_ile       : 1;
+            unsigned cwpsvec$v_fill_10_     : 7;
         };
     };
     int cwpsvec$l_fill_1;
 };
 
-#define		CWPSACB$K_ACB_LENGTH		36
-#define		CWPSACB$K_LENGTH		80
-#define		CWPSACB$S_$CWPSACBDEF		81
+#define     CWPSACB$K_ACB_LENGTH        36
+#define     CWPSACB$K_LENGTH        80
+#define     CWPSACB$S_$CWPSACBDEF       81
 
 struct _cwpsacb
 {
@@ -307,10 +307,10 @@ struct _cwpsacb
     unsigned char cwpsacb$b_type;
     unsigned char cwpsacb$b_rmod;
     unsigned int cwpsacb$l_pid;
-    void (*cwpsacb$l_ast)();
+    void (*cwpsacb$l_ast)(void);
     unsigned int cwpsacb$l_astprm;
     int cwpsacb$l_fkb_fill [2];
-    void (*cwpsacb$l_kast)();
+    void (*cwpsacb$l_kast)(void);
     void *cwpsacb$l_bufadr;
     unsigned int cwpsacb$l_buflen;
     void *cwpsacb$l_msgbuf;

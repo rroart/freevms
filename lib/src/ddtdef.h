@@ -1,5 +1,5 @@
-#ifndef ddtdef_h
-#define ddtdef_h
+#ifndef DDTDEF_H
+#define DDTDEF_H
 
 #define DDT$M_DIAGBUF64 32768
 #define DDT$K_ITCLVL_DRVR 0

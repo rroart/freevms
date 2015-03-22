@@ -7,10 +7,10 @@
 
 /* Simple VGA output */
 
-#define VGABASE		0xffffffff800b8000UL
+#define VGABASE     0xffffffff800b8000UL
 
-#define MAX_YPOS	25
-#define MAX_XPOS	80
+#define MAX_YPOS    25
+#define MAX_XPOS    80
 
 static int current_ypos = 1, current_xpos = 0;
 
@@ -58,7 +58,7 @@ static void early_vga_write(struct console *con, const char *str, unsigned n)
 
 static struct console early_vga_console =
 {
-name:		"earlyvga"
+name:       "earlyvga"
     ,
 write:
     early_vga_write,
@@ -74,7 +74,7 @@ int early_serial_base = 0x3f8;  /* ttyS0 */
 
 #define XMTRDY          0x20
 
-#define DLAB		0x80
+#define DLAB        0x80
 
 #define TXR             0       /*  Transmit register (WRITE) */
 #define RXR             0       /*  Receive register  (READ)  */
@@ -158,7 +158,7 @@ static __init void early_serial_init(char *opt)
 
 static struct console early_serial_console =
 {
-name:		"earlyser"
+name:       "earlyser"
     ,
 write:
     early_serial_write,

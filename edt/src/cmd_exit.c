@@ -16,9 +16,9 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*	exit [-save] [<filename>]					*/
-/*									*/
+/*                                  */
+/*  exit [-save] [<filename>]                   */
+/*                                  */
 /************************************************************************/
 
 #include <stdlib.h>
@@ -96,9 +96,9 @@ void cmd_exit (char *cp)
 
     for (buffer = NULL; (buffer = buffer_next (buffer)) != NULL;)
     {
-        fn = buffer_filename (buffer);							/* get output filename */
-        if (fn == NULL) continue;								/* if none, don't try to write */
-        bn = buffer_name (buffer);								/* ok, write it out */
+        fn = buffer_filename (buffer);                          /* get output filename */
+        if (fn == NULL) continue;                               /* if none, don't try to write */
+        bn = buffer_name (buffer);                              /* ok, write it out */
         if (!buffer_dirty (buffer, -1))
         {
             outerr (strlen (fn) + strlen (bn), "not writing %s from =%s because it is unmodified\n", fn, bn);
@@ -107,7 +107,7 @@ void cmd_exit (char *cp)
         outerr (strlen (fn) + strlen (bn), "writing %s from =%s: ", fn, bn);
         if (!write_file (fn, buffer_first_line (buffer), buffer_last_line (buffer)))
         {
-            outerr (strlen (fn), "output file %s not written, not exiting\n", fn);		/* if error, don't exit */
+            outerr (strlen (fn), "output file %s not written, not exiting\n", fn);      /* if error, don't exit */
             return;
         }
         buffer_dirty (buffer, 0);

@@ -1,7 +1,7 @@
 /*
- *	lib$matchc
+ *  lib$matchc
  *
- *	Copyright (C) 2005 Andrew Allison
+ *  Copyright (C) 2005 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,37 +19,37 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
 /*
 *
-*	Code for VAX LIB$MATCHC routine
+*   Code for VAX LIB$MATCHC routine
 *
 * Description:
-*	Search a source string for a specified substring and returns an index
-*	which is the relative position of the first occurrence of a substring
-*	in the source string.
+*   Search a source string for a specified substring and returns an index
+*   which is the relative position of the first occurrence of a substring
+*   in the source string.
 *
-*	Returns 1,...,n for found string
-*		0 if not found
-*	If the substring has zero length return 1
-*	If the source string has zero length and the substring has a non-zero
-*	length - Zero is returned
+*   Returns 1,...,n for found string
+*       0 if not found
+*   If the substring has zero length return 1
+*   If the source string has zero length and the substring has a non-zero
+*   length - Zero is returned
 *
 * Bugs:
 *
 * History
 *
-*	Mar 25, 2005 - Andrew Allison
-*		Initial program creation - mainly copied from str$position
+*   Mar 25, 2005 - Andrew Allison
+*       Initial program creation - mainly copied from str$position
 */
 
 #include <stdio.h>
@@ -62,11 +62,11 @@
 unsigned long lib$matchc(const struct dsc$descriptor_s* search_string,
                          const struct dsc$descriptor_s *source_string)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
-    char* s2_ptr;			/* Pointer to second string */
-    unsigned short s2_length;	/* Length of second string */
-    long loop;			/* Outer loop */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
+    char* s2_ptr;           /* Pointer to second string */
+    unsigned short s2_length;   /* Length of second string */
+    long loop;          /* Outer loop */
 
     /*
      * Analyze source strings
@@ -74,10 +74,10 @@ unsigned long lib$matchc(const struct dsc$descriptor_s* search_string,
     str$analyze_sdesc(search_string, &s1_length, &s1_ptr);
     str$analyze_sdesc(source_string, &s2_length, &s2_ptr);
 
-//	Specical case search string is 0 and substring is non-zero
+//  Specical case search string is 0 and substring is non-zero
     if (( s2_length == 0 ) && ( s1_length != 0 ))
         return 0;
-//	Special case if substring is NULL return 1
+//  Special case if substring is NULL return 1
     if ( s1_length == 0 )
         return 1;
 

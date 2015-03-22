@@ -1,5 +1,5 @@
-#ifndef xabtrmdef_h
-#define xabtrmdef_h
+#ifndef XABTRMDEF_H
+#define XABTRMDEF_H
 
 #define XAB$C_TRM 31
 

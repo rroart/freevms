@@ -79,10 +79,10 @@ enum ip_conntrack_dir
 
 #ifdef __KERNEL__
 
-#define DUMP_TUPLE(tp)						\
-DEBUGP("tuple %p: %u %u.%u.%u.%u:%hu -> %u.%u.%u.%u:%hu\n",	\
-       (tp), (tp)->dst.protonum,				\
-       NIPQUAD((tp)->src.ip), ntohs((tp)->src.u.all),		\
+#define DUMP_TUPLE(tp)                      \
+DEBUGP("tuple %p: %u %u.%u.%u.%u:%hu -> %u.%u.%u.%u:%hu\n", \
+       (tp), (tp)->dst.protonum,                \
+       NIPQUAD((tp)->src.ip), ntohs((tp)->src.u.all),       \
        NIPQUAD((tp)->dst.ip), ntohs((tp)->dst.u.all))
 
 #define CTINFO2DIR(ctinfo) ((ctinfo) >= IP_CT_IS_REPLY ? IP_CT_DIR_REPLY : IP_CT_DIR_ORIGINAL)

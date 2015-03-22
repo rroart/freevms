@@ -61,12 +61,12 @@ typedef enum
 #define ACPI_DSDT_SIG  0x54445344 /* 'DSDT' */
 #define ACPI_FACS_SIG  0x53434146 /* 'FACS' */
 
-#define ACPI_SIG_LEN		4
-#define ACPI_FADT_SIGNATURE	"FACP"
+#define ACPI_SIG_LEN        4
+#define ACPI_FADT_SIGNATURE "FACP"
 
 /* PM1_STS/EN flags */
 #define ACPI_TMR    0x0001
-#define ACPI_BM	    0x0010
+#define ACPI_BM     0x0010
 #define ACPI_GBL    0x0020
 #define ACPI_PWRBTN 0x0100
 #define ACPI_SLPBTN 0x0200
@@ -87,9 +87,9 @@ typedef enum
 
 /* PM_TMR masks */
 #define ACPI_TMR_VAL_EXT 0x00000100
-#define ACPI_TMR_MASK	 0x00ffffff
-#define ACPI_TMR_HZ	 3579545 /* 3.58 MHz */
-#define ACPI_TMR_KHZ	 (ACPI_TMR_HZ / 1000)
+#define ACPI_TMR_MASK    0x00ffffff
+#define ACPI_TMR_HZ  3579545 /* 3.58 MHz */
+#define ACPI_TMR_KHZ     (ACPI_TMR_HZ / 1000)
 
 #define ACPI_MICROSEC_TO_TMR_TICKS(val) \
   (((val) * (ACPI_TMR_KHZ)) / 1000)
@@ -98,28 +98,28 @@ typedef enum
 #define ACPI_ARB_DIS 0x01
 
 /* FADT flags */
-#define ACPI_WBINVD	  0x00000001
+#define ACPI_WBINVD   0x00000001
 #define ACPI_WBINVD_FLUSH 0x00000002
-#define ACPI_PROC_C1	  0x00000004
-#define ACPI_P_LVL2_UP	  0x00000008
-#define ACPI_PWR_BUTTON	  0x00000010
-#define ACPI_SLP_BUTTON	  0x00000020
-#define ACPI_FIX_RTC	  0x00000040
-#define ACPI_RTC_64	  0x00000080
+#define ACPI_PROC_C1      0x00000004
+#define ACPI_P_LVL2_UP    0x00000008
+#define ACPI_PWR_BUTTON   0x00000010
+#define ACPI_SLP_BUTTON   0x00000020
+#define ACPI_FIX_RTC      0x00000040
+#define ACPI_RTC_64   0x00000080
 #define ACPI_TMR_VAL_EXT  0x00000100
-#define ACPI_DCK_CAP	  0x00000200
+#define ACPI_DCK_CAP      0x00000200
 
 /* FADT BOOT_ARCH flags */
-#define FADT_BOOT_ARCH_LEGACY_DEVICES	0x0001
-#define FADT_BOOT_ARCH_KBD_CONTROLLER	0x0002
+#define FADT_BOOT_ARCH_LEGACY_DEVICES   0x0001
+#define FADT_BOOT_ARCH_KBD_CONTROLLER   0x0002
 
 /* FACS flags */
-#define ACPI_S4BIOS	  0x00000001
+#define ACPI_S4BIOS   0x00000001
 
 /* processor block offsets */
-#define ACPI_P_CNT	  0x00000000
-#define ACPI_P_LVL2	  0x00000004
-#define ACPI_P_LVL3	  0x00000005
+#define ACPI_P_CNT    0x00000000
+#define ACPI_P_LVL2   0x00000004
+#define ACPI_P_LVL3   0x00000005
 
 /* C-state latencies (microseconds) */
 #define ACPI_MAX_P_LVL2_LAT 100
@@ -164,7 +164,7 @@ enum
     ACPI_BATT,
 };
 
-#define ACPI_SLP_TYP_DISABLED	(~0UL)
+#define ACPI_SLP_TYP_DISABLED   (~0UL)
 
 #ifdef __KERNEL__
 

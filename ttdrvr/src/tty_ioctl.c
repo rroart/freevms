@@ -27,14 +27,14 @@
 
 #undef TTY_DEBUG_WAIT_UNTIL_SENT
 
-#undef	DEBUG
+#undef  DEBUG
 
 /*
  * Internal flag options for termios setting behavior
  */
-#define TERMIOS_FLUSH	1
-#define TERMIOS_WAIT	2
-#define TERMIOS_TERMIO	4
+#define TERMIOS_FLUSH   1
+#define TERMIOS_WAIT    2
+#define TERMIOS_TERMIO  4
 
 void tty_wait_until_sent(struct tty_struct * tty, long timeout)
 {
@@ -75,7 +75,7 @@ static void unset_locked_termios(struct termios *termios,
                                  struct termios *old,
                                  struct termios *locked)
 {
-    int	i;
+    int i;
 
 #define NOSET_MASK(x,y,z) (x = ((x) & ~(z)) | ((y) & (z)))
 
@@ -220,15 +220,15 @@ static int get_sgflags(struct tty_struct * tty)
     if (!(tty->termios->c_lflag & ICANON))
     {
         if (tty->termios->c_lflag & ISIG)
-            flags |= 0x02;		/* cbreak */
+            flags |= 0x02;      /* cbreak */
         else
-            flags |= 0x20;		/* raw */
+            flags |= 0x20;      /* raw */
     }
     if (tty->termios->c_lflag & ECHO)
-        flags |= 0x08;			/* echo */
+        flags |= 0x08;          /* echo */
     if (tty->termios->c_oflag & OPOST)
         if (tty->termios->c_oflag & ONLCR)
-            flags |= 0x10;		/* crmod */
+            flags |= 0x10;      /* crmod */
     return flags;
 }
 
@@ -249,21 +249,21 @@ static void set_sgflags(struct termios * termios, int flags)
     termios->c_iflag = ICRNL | IXON;
     termios->c_oflag = 0;
     termios->c_lflag = ISIG | ICANON;
-    if (flags & 0x02)  	/* cbreak */
+    if (flags & 0x02)   /* cbreak */
     {
         termios->c_iflag = 0;
         termios->c_lflag &= ~ICANON;
     }
-    if (flags & 0x08)  		/* echo */
+    if (flags & 0x08)       /* echo */
     {
         termios->c_lflag |= ECHO | ECHOE | ECHOK |
                             ECHOCTL | ECHOKE | IEXTEN;
     }
-    if (flags & 0x10)  		/* crmod */
+    if (flags & 0x10)       /* crmod */
     {
         termios->c_oflag |= OPOST | ONLCR;
     }
-    if (flags & 0x20)  	/* raw */
+    if (flags & 0x20)   /* raw */
     {
         termios->c_iflag = 0;
         termios->c_lflag &= ~(ISIG | ICANON);
@@ -305,7 +305,7 @@ static int get_tchars(struct tty_struct * tty, struct tchars * tchars)
     tmp.t_startc = tty->termios->c_cc[VSTART];
     tmp.t_stopc = tty->termios->c_cc[VSTOP];
     tmp.t_eofc = tty->termios->c_cc[VEOF];
-    tmp.t_brkc = tty->termios->c_cc[VEOL2];	/* what is brkc anyway? */
+    tmp.t_brkc = tty->termios->c_cc[VEOL2]; /* what is brkc anyway? */
     return copy_to_user(tchars, &tmp, sizeof(tmp)) ? -EFAULT : 0;
 }
 
@@ -320,7 +320,7 @@ static int set_tchars(struct tty_struct * tty, struct tchars * tchars)
     tty->termios->c_cc[VSTART] = tmp.t_startc;
     tty->termios->c_cc[VSTOP] = tmp.t_stopc;
     tty->termios->c_cc[VEOF] = tmp.t_eofc;
-    tty->termios->c_cc[VEOL2] = tmp.t_brkc;	/* what is brkc anyway? */
+    tty->termios->c_cc[VEOL2] = tmp.t_brkc; /* what is brkc anyway? */
     return 0;
 }
 #endif
@@ -331,9 +331,9 @@ static int get_ltchars(struct tty_struct * tty, struct ltchars * ltchars)
     struct ltchars tmp;
 
     tmp.t_suspc = tty->termios->c_cc[VSUSP];
-    tmp.t_dsuspc = tty->termios->c_cc[VSUSP];	/* what is dsuspc anyway? */
+    tmp.t_dsuspc = tty->termios->c_cc[VSUSP];   /* what is dsuspc anyway? */
     tmp.t_rprntc = tty->termios->c_cc[VREPRINT];
-    tmp.t_flushc = tty->termios->c_cc[VEOL2];	/* what is flushc anyway? */
+    tmp.t_flushc = tty->termios->c_cc[VEOL2];   /* what is flushc anyway? */
     tmp.t_werasc = tty->termios->c_cc[VWERASE];
     tmp.t_lnextc = tty->termios->c_cc[VLNEXT];
     return copy_to_user(ltchars, &tmp, sizeof(tmp)) ? -EFAULT : 0;
@@ -347,9 +347,9 @@ static int set_ltchars(struct tty_struct * tty, struct ltchars * ltchars)
         return -EFAULT;
 
     tty->termios->c_cc[VSUSP] = tmp.t_suspc;
-    tty->termios->c_cc[VEOL2] = tmp.t_dsuspc;	/* what is dsuspc anyway? */
+    tty->termios->c_cc[VEOL2] = tmp.t_dsuspc;   /* what is dsuspc anyway? */
     tty->termios->c_cc[VREPRINT] = tmp.t_rprntc;
-    tty->termios->c_cc[VEOL2] = tmp.t_flushc;	/* what is flushc anyway? */
+    tty->termios->c_cc[VEOL2] = tmp.t_flushc;   /* what is flushc anyway? */
     tty->termios->c_cc[VWERASE] = tmp.t_werasc;
     tty->termios->c_cc[VLNEXT] = tmp.t_lnextc;
     return 0;
@@ -361,7 +361,7 @@ static int set_ltchars(struct tty_struct * tty, struct ltchars * ltchars)
  */
 void send_prio_char(struct tty_struct *tty, char ch)
 {
-    int	was_stopped = tty->stopped;
+    int was_stopped = tty->stopped;
 
     if (tty->driver.send_xchar)
     {

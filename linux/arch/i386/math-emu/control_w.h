@@ -11,27 +11,27 @@
 #define _CONTROLW_H_
 
 #ifdef __ASSEMBLY__
-#define	_Const_(x)	$##x
+#define _Const_(x)  $##x
 #else
-#define	_Const_(x)	x
+#define _Const_(x)  x
 #endif
 
-#define CW_RC		_Const_(0x0C00)	/* rounding control */
-#define CW_PC		_Const_(0x0300)	/* precision control */
+#define CW_RC       _Const_(0x0C00) /* rounding control */
+#define CW_PC       _Const_(0x0300) /* precision control */
 
-#define CW_Precision	Const_(0x0020)	/* loss of precision mask */
-#define CW_Underflow	Const_(0x0010)	/* underflow mask */
-#define CW_Overflow	Const_(0x0008)	/* overflow mask */
-#define CW_ZeroDiv	Const_(0x0004)	/* divide by zero mask */
-#define CW_Denormal	Const_(0x0002)	/* denormalized operand mask */
-#define CW_Invalid	Const_(0x0001)	/* invalid operation mask */
+#define CW_Precision    Const_(0x0020)  /* loss of precision mask */
+#define CW_Underflow    Const_(0x0010)  /* underflow mask */
+#define CW_Overflow Const_(0x0008)  /* overflow mask */
+#define CW_ZeroDiv  Const_(0x0004)  /* divide by zero mask */
+#define CW_Denormal Const_(0x0002)  /* denormalized operand mask */
+#define CW_Invalid  Const_(0x0001)  /* invalid operation mask */
 
-#define CW_Exceptions  	_Const_(0x003f)	/* all masks */
+#define CW_Exceptions   _Const_(0x003f) /* all masks */
 
-#define RC_RND		_Const_(0x0000)
-#define RC_DOWN		_Const_(0x0400)
-#define RC_UP		_Const_(0x0800)
-#define RC_CHOP		_Const_(0x0C00)
+#define RC_RND      _Const_(0x0000)
+#define RC_DOWN     _Const_(0x0400)
+#define RC_UP       _Const_(0x0800)
+#define RC_CHOP     _Const_(0x0C00)
 
 /* p 15-5: Precision control bits affect only the following:
    ADD, SUB(R), MUL, DIV(R), and SQRT */

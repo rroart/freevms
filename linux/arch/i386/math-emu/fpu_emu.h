@@ -22,14 +22,14 @@
 
 #ifdef __ASSEMBLY__
 #include "fpu_asm.h"
-#define	Const(x)	$##x
+#define Const(x)    $##x
 #else
-#define	Const(x)	x
+#define Const(x)    x
 #endif
 
-#define EXP_BIAS	Const(0)
-#define EXP_OVER	Const(0x4000)    /* smallest invalid large exponent */
-#define	EXP_UNDER	Const(-0x3fff)   /* largest invalid small exponent */
+#define EXP_BIAS    Const(0)
+#define EXP_OVER    Const(0x4000)    /* smallest invalid large exponent */
+#define EXP_UNDER   Const(-0x3fff)   /* largest invalid small exponent */
 #define EXP_WAY_UNDER   Const(-0x6000)   /* Below the smallest denormal, but
 still a 16 bit nr. */
 #define EXP_Infinity    EXP_OVER
@@ -38,27 +38,27 @@ still a 16 bit nr. */
 #define EXTENDED_Ebias Const(0x3fff)
 #define EXTENDED_Emin (-0x3ffe)  /* smallest valid exponent */
 
-#define SIGN_POS	Const(0)
-#define SIGN_NEG	Const(0x80)
+#define SIGN_POS    Const(0)
+#define SIGN_NEG    Const(0x80)
 
-#define SIGN_Positive	Const(0)
-#define SIGN_Negative	Const(0x8000)
+#define SIGN_Positive   Const(0)
+#define SIGN_Negative   Const(0x8000)
 
 
 /* Keep the order TAG_Valid, TAG_Zero, TW_Denormal */
 /* The following fold to 2 (Special) in the Tag Word */
 #define TW_Denormal     Const(4)        /* De-normal */
-#define TW_Infinity	Const(5)	/* + or - infinity */
-#define	TW_NaN		Const(6)	/* Not a Number */
-#define	TW_Unsupported	Const(7)	/* Not supported by an 80486 */
+#define TW_Infinity Const(5)    /* + or - infinity */
+#define TW_NaN      Const(6)    /* Not a Number */
+#define TW_Unsupported  Const(7)    /* Not supported by an 80486 */
 
-#define TAG_Valid	Const(0)	/* valid */
-#define TAG_Zero	Const(1)	/* zero */
-#define TAG_Special	Const(2)	/* De-normal, + or - infinity,
+#define TAG_Valid   Const(0)    /* valid */
+#define TAG_Zero    Const(1)    /* zero */
+#define TAG_Special Const(2)    /* De-normal, + or - infinity,
 or Not a Number */
-#define TAG_Empty	Const(3)	/* empty */
+#define TAG_Empty   Const(3)    /* empty */
 
-#define LOADED_DATA	Const(10101)	/* Special st() number to identify
+#define LOADED_DATA Const(10101)    /* Special st() number to identify
 loaded data (not on stack). */
 
 /* A few flags (must be >= 0x10). */
@@ -150,17 +150,17 @@ extern u_char const data_sizes_16[32];
 
 #define register_base ((u_char *) registers )
 #define fpu_register(x)  ( * ((FPU_REG *)( register_base + 10 * (x & 7) )) )
-#define	st(x)      ( * ((FPU_REG *)( register_base + 10 * ((top+x) & 7) )) )
+#define st(x)      ( * ((FPU_REG *)( register_base + 10 * ((top+x) & 7) )) )
 
-#define	STACK_OVERFLOW	(FPU_stackoverflow(&st_new_ptr))
-#define	NOT_EMPTY(i)	(!FPU_empty_i(i))
+#define STACK_OVERFLOW  (FPU_stackoverflow(&st_new_ptr))
+#define NOT_EMPTY(i)    (!FPU_empty_i(i))
 
-#define	NOT_EMPTY_ST0	(st0_tag ^ TAG_Empty)
+#define NOT_EMPTY_ST0   (st0_tag ^ TAG_Empty)
 
 #define poppop() { FPU_pop(); FPU_pop(); }
 
 /* push() does not affect the tags */
-#define push()	{ top--; }
+#define push()  { top--; }
 
 #define signbyte(a) (((u_char *)(a))[9])
 #define getsign(a) (signbyte(a) & 0x80)
@@ -210,8 +210,8 @@ asmlinkage int FPU_u_add(FPU_REG const *arg1, FPU_REG const *arg2,
                          int expa, int expb);
 asmlinkage int wm_sqrt(FPU_REG *n, int dummy1, int dummy2,
                        unsigned int control_w, u_char sign);
-asmlinkage unsigned	FPU_shrx(void *l, unsigned x);
-asmlinkage unsigned	FPU_shrxs(void *v, unsigned x);
+asmlinkage unsigned FPU_shrx(void *l, unsigned x);
+asmlinkage unsigned FPU_shrxs(void *v, unsigned x);
 asmlinkage unsigned long FPU_div_small(unsigned long long *x, unsigned long y);
 asmlinkage int FPU_round(FPU_REG *arg, unsigned int extent, int dummy,
                          unsigned int control_w, u_char sign);

@@ -4,20 +4,20 @@
  *  Copyright (C) 1994  Linus Torvalds
  *
  *  Cyrix stuff, June 1998 by:
- *	- Rafael R. Reilova (moved everything from head.S),
+ *  - Rafael R. Reilova (moved everything from head.S),
  *        <rreilova@ececs.uc.edu>
- *	- Channing Corn (tests & fixes),
- *	- Andrew D. Balsa (code cleanup).
+ *  - Channing Corn (tests & fixes),
+ *  - Andrew D. Balsa (code cleanup).
  *
  *  Pentium III FXSR, SSE support
- *	Gareth Hughes <gareth@valinux.com>, May 2000
+ *  Gareth Hughes <gareth@valinux.com>, May 2000
  */
 
 /*
  * This is included by init/main.c to check for architecture-dependent bugs.
  *
  * Needs:
- *	void check_bugs(void);
+ *  void check_bugs(void);
  */
 
 #include <linux/config.h>
@@ -127,8 +127,8 @@ static void __init check_hlt(void)
 }
 
 /*
- *	Most 386 processors have a bug where a POPAD can lock the
- *	machine even from user space.
+ *  Most 386 processors have a bug where a POPAD can lock the
+ *  machine even from user space.
  */
 
 static void __init check_popad(void)

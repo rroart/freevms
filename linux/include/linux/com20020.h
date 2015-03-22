@@ -35,52 +35,52 @@ void com20020_remove(struct net_device *dev);
 #define ARCNET_TOTAL_SIZE 9
 
 /* various register addresses */
-#define _INTMASK  (ioaddr+0)	/* writable */
-#define _STATUS   (ioaddr+0)	/* readable */
-#define _COMMAND  (ioaddr+1)	/* standard arcnet commands */
-#define _DIAGSTAT (ioaddr+1)	/* diagnostic status register */
-#define _ADDR_HI  (ioaddr+2)	/* control registers for IO-mapped memory */
+#define _INTMASK  (ioaddr+0)    /* writable */
+#define _STATUS   (ioaddr+0)    /* readable */
+#define _COMMAND  (ioaddr+1)    /* standard arcnet commands */
+#define _DIAGSTAT (ioaddr+1)    /* diagnostic status register */
+#define _ADDR_HI  (ioaddr+2)    /* control registers for IO-mapped memory */
 #define _ADDR_LO  (ioaddr+3)
-#define _MEMDATA  (ioaddr+4)	/* data port for IO-mapped memory */
-#define _SUBADR   (ioaddr+5)	/* the extended port _XREG refers to */
-#define _CONFIG   (ioaddr+6)	/* configuration register */
-#define _XREG     (ioaddr+7)	/* extra registers (indexed by _CONFIG 
+#define _MEMDATA  (ioaddr+4)    /* data port for IO-mapped memory */
+#define _SUBADR   (ioaddr+5)    /* the extended port _XREG refers to */
+#define _CONFIG   (ioaddr+6)    /* configuration register */
+#define _XREG     (ioaddr+7)    /* extra registers (indexed by _CONFIG 
 or _SUBADR) */
 
 /* in the ADDR_HI register */
-#define RDDATAflag	0x80	/* next access is a read (not a write) */
+#define RDDATAflag  0x80    /* next access is a read (not a write) */
 
 /* in the DIAGSTAT register */
-#define NEWNXTIDflag	0x02	/* ID to which token is passed has changed */
+#define NEWNXTIDflag    0x02    /* ID to which token is passed has changed */
 
 /* in the CONFIG register */
-#define RESETcfg	0x80	/* put card in reset state */
-#define TXENcfg		0x20	/* enable TX */
+#define RESETcfg    0x80    /* put card in reset state */
+#define TXENcfg     0x20    /* enable TX */
 
 /* in SETUP register */
-#define PROMISCset	0x10	/* enable RCV_ALL */
+#define PROMISCset  0x10    /* enable RCV_ALL */
 
 /* COM2002x */
-#define SUB_TENTATIVE	0	/* tentative node ID */
-#define SUB_NODE	1	/* node ID */
-#define SUB_SETUP1	2	/* various options */
-#define SUB_TEST	3	/* test/diag register */
+#define SUB_TENTATIVE   0   /* tentative node ID */
+#define SUB_NODE    1   /* node ID */
+#define SUB_SETUP1  2   /* various options */
+#define SUB_TEST    3   /* test/diag register */
 
 /* COM20022 only */
-#define SUB_SETUP2	4	/* sundry options */
-#define SUB_BUSCTL	5	/* bus control options */
-#define SUB_DMACOUNT	6	/* DMA count options */
+#define SUB_SETUP2  4   /* sundry options */
+#define SUB_BUSCTL  5   /* bus control options */
+#define SUB_DMACOUNT    6   /* DMA count options */
 
 #define SET_SUBADR(x) do { \
-	if ((x) < 4) \
-	{ \
-		lp->config = (lp->config & ~0x03) | (x); \
-		SETCONF; \
-	} \
-	else \
-	{ \
-		outb(x, _SUBADR); \
-	} \
+    if ((x) < 4) \
+    { \
+        lp->config = (lp->config & ~0x03) | (x); \
+        SETCONF; \
+    } \
+    else \
+    { \
+        outb(x, _SUBADR); \
+    } \
 } while (0)
 
 #undef ARCRESET
@@ -89,18 +89,18 @@ or _SUBADR) */
 #undef AINTMASK
 
 #define ARCRESET { outb(lp->config | 0x80, _CONFIG); \
-		    udelay(5);                        \
-		    outb(lp->config , _CONFIG);       \
+            udelay(5);                        \
+            outb(lp->config , _CONFIG);       \
                   }
 #define ARCRESET0 { outb(0x18 | 0x80, _CONFIG);   \
-		    udelay(5);                       \
-		    outb(0x18 , _CONFIG);            \
+            udelay(5);                       \
+            outb(0x18 , _CONFIG);            \
                   }
 
-#define ASTATUS()	inb(_STATUS)
-#define ACOMMAND(cmd)	outb((cmd),_COMMAND)
-#define AINTMASK(msk)	outb((msk),_INTMASK)
+#define ASTATUS()   inb(_STATUS)
+#define ACOMMAND(cmd)   outb((cmd),_COMMAND)
+#define AINTMASK(msk)   outb((msk),_INTMASK)
 
-#define SETCONF		outb(lp->config, _CONFIG)
+#define SETCONF     outb(lp->config, _CONFIG)
 
 #endif /* __COM20020_H */

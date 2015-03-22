@@ -1,56 +1,56 @@
 /*
- *	Intel CPU Microcode Update driver for Linux
+ *  Intel CPU Microcode Update driver for Linux
  *
- *	Copyright (C) 2000 Tigran Aivazian
+ *  Copyright (C) 2000 Tigran Aivazian
  *
- *	This driver allows to upgrade microcode on Intel processors
- *	belonging to IA-32 family - PentiumPro, Pentium II,
- *	Pentium III, Xeon, Pentium 4, etc.
+ *  This driver allows to upgrade microcode on Intel processors
+ *  belonging to IA-32 family - PentiumPro, Pentium II,
+ *  Pentium III, Xeon, Pentium 4, etc.
  *
- *	Reference: Section 8.10 of Volume III, Intel Pentium 4 Manual,
- *	Order Number 245472 or free download from:
+ *  Reference: Section 8.10 of Volume III, Intel Pentium 4 Manual,
+ *  Order Number 245472 or free download from:
  *
- *	http://developer.intel.com/design/pentium4/manuals/245472.htm
+ *  http://developer.intel.com/design/pentium4/manuals/245472.htm
  *
- *	For more information, go to http://www.urbanmyth.org/microcode
+ *  For more information, go to http://www.urbanmyth.org/microcode
  *
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
  *
- *	1.0	16 Feb 2000, Tigran Aivazian <tigran@sco.com>
- *		Initial release.
- *	1.01	18 Feb 2000, Tigran Aivazian <tigran@sco.com>
- *		Added read() support + cleanups.
- *	1.02	21 Feb 2000, Tigran Aivazian <tigran@sco.com>
- *		Added 'device trimming' support. open(O_WRONLY) zeroes
- *		and frees the saved copy of applied microcode.
- *	1.03	29 Feb 2000, Tigran Aivazian <tigran@sco.com>
- *		Made to use devfs (/dev/cpu/microcode) + cleanups.
- *	1.04	06 Jun 2000, Simon Trimmer <simon@veritas.com>
- *		Added misc device support (now uses both devfs and misc).
- *		Added MICROCODE_IOCFREE ioctl to clear memory.
- *	1.05	09 Jun 2000, Simon Trimmer <simon@veritas.com>
- *		Messages for error cases (non intel & no suitable microcode).
- *	1.06	03 Aug 2000, Tigran Aivazian <tigran@veritas.com>
- *		Removed ->release(). Removed exclusive open and status bitmap.
- *		Added microcode_rwsem to serialize read()/write()/ioctl().
- *		Removed global kernel lock usage.
- *	1.07	07 Sep 2000, Tigran Aivazian <tigran@veritas.com>
- *		Write 0 to 0x8B msr and then cpuid before reading revision,
- *		so that it works even if there were no update done by the
- *		BIOS. Otherwise, reading from 0x8B gives junk (which happened
- *		to be 0 on my machine which is why it worked even when I
- *		disabled update by the BIOS)
- *		Thanks to Eric W. Biederman <ebiederman@lnxi.com> for the fix.
- *	1.08	11 Dec 2000, Richard Schaal <richard.schaal@intel.com> and
- *			     Tigran Aivazian <tigran@veritas.com>
- *		Intel Pentium 4 processor support and bugfixes.
- *	1.09	30 Oct 2001, Tigran Aivazian <tigran@veritas.com>
- *		Bugfix for HT (Hyper-Threading) enabled processors
- *		whereby processor resources are shared by all logical processors
- *		in a single CPU package.
+ *  1.0 16 Feb 2000, Tigran Aivazian <tigran@sco.com>
+ *      Initial release.
+ *  1.01    18 Feb 2000, Tigran Aivazian <tigran@sco.com>
+ *      Added read() support + cleanups.
+ *  1.02    21 Feb 2000, Tigran Aivazian <tigran@sco.com>
+ *      Added 'device trimming' support. open(O_WRONLY) zeroes
+ *      and frees the saved copy of applied microcode.
+ *  1.03    29 Feb 2000, Tigran Aivazian <tigran@sco.com>
+ *      Made to use devfs (/dev/cpu/microcode) + cleanups.
+ *  1.04    06 Jun 2000, Simon Trimmer <simon@veritas.com>
+ *      Added misc device support (now uses both devfs and misc).
+ *      Added MICROCODE_IOCFREE ioctl to clear memory.
+ *  1.05    09 Jun 2000, Simon Trimmer <simon@veritas.com>
+ *      Messages for error cases (non intel & no suitable microcode).
+ *  1.06    03 Aug 2000, Tigran Aivazian <tigran@veritas.com>
+ *      Removed ->release(). Removed exclusive open and status bitmap.
+ *      Added microcode_rwsem to serialize read()/write()/ioctl().
+ *      Removed global kernel lock usage.
+ *  1.07    07 Sep 2000, Tigran Aivazian <tigran@veritas.com>
+ *      Write 0 to 0x8B msr and then cpuid before reading revision,
+ *      so that it works even if there were no update done by the
+ *      BIOS. Otherwise, reading from 0x8B gives junk (which happened
+ *      to be 0 on my machine which is why it worked even when I
+ *      disabled update by the BIOS)
+ *      Thanks to Eric W. Biederman <ebiederman@lnxi.com> for the fix.
+ *  1.08    11 Dec 2000, Richard Schaal <richard.schaal@intel.com> and
+ *               Tigran Aivazian <tigran@veritas.com>
+ *      Intel Pentium 4 processor support and bugfixes.
+ *  1.09    30 Oct 2001, Tigran Aivazian <tigran@veritas.com>
+ *      Bugfix for HT (Hyper-Threading) enabled processors
+ *      whereby processor resources are shared by all logical processors
+ *      in a single CPU package.
  */
 
 #include <linux/init.h>
@@ -65,7 +65,7 @@
 #include <asm/uaccess.h>
 #include <asm/processor.h>
 
-#define MICROCODE_VERSION 	"1.09"
+#define MICROCODE_VERSION   "1.09"
 
 MODULE_DESCRIPTION("Intel CPU (IA-32) microcode update driver");
 MODULE_AUTHOR("Tigran Aivazian <tigran@veritas.com>");
@@ -116,7 +116,7 @@ static struct miscdevice microcode_dev =
 {
 minor:
     MICROCODE_MINOR,
-name:	"microcode"
+name:   "microcode"
     ,
 fops:
     &microcode_fops,

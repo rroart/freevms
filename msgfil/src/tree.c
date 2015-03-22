@@ -4732,10 +4732,10 @@ clean_symbol_name (char *p)
 {
     for (; *p; p++)
         if (! (ISALNUM (*p)
-#ifndef NO_DOLLAR_IN_LABEL	/* this for `$'; unlikely, but... -- kr */
+#ifndef NO_DOLLAR_IN_LABEL  /* this for `$'; unlikely, but... -- kr */
                 || *p == '$'
 #endif
-#ifndef NO_DOT_IN_LABEL		/* this for `.'; unlikely, but...  */
+#ifndef NO_DOT_IN_LABEL     /* this for `.'; unlikely, but...  */
                 || *p == '.'
 #endif
               ))

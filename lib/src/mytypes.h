@@ -1,5 +1,5 @@
-#ifndef mytypes_h
-#define mytypes_h
+#ifndef MYTYPES_H
+#define MYTYPES_H
 
 
 /* Access.h v1.3    Definitions for file access routines */
@@ -13,7 +13,7 @@
         must maintain comments in their source to acknowledge
         the contibution of the original author.
 
-	Originally a part of access.h
+    Originally a part of access.h
 */
 
 #define NO_DOLLAR

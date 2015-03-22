@@ -201,13 +201,13 @@ CH$RCHAR()
 int swapbytes(long WrdCnt, long Start)
 {
     int *R0,*R2,*R3,*R4,*R5,*R6,*R7,*R8,*R9;
-    unsigned char * R1 = Start;			// starting word address.
+    unsigned char * R1 = Start;         // starting word address.
 Swp_Loop:
-    R0 = *R1;				// low ==> temp
-    *R1 = R1[1];			// high ==> low
+    R0 = *R1;               // low ==> temp
+    *R1 = R1[1];            // high ==> low
     R1++;
-    *R1++ = R0;			// temp ==> High
-    if	(--WrdCnt) goto Swp_Loop;		// decr word's left to do
+    *R1++ = R0;         // temp ==> High
+    if  (--WrdCnt) goto Swp_Loop;       // decr word's left to do
     return R0;
 }
 

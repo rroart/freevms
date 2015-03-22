@@ -5,7 +5,7 @@
  * are not addressable by direct kernel virtual addresses.
  *
  * Copyright (C) 1999 Gerhard Wichert, Siemens AG
- *		      Gerhard.Wichert@pdb.siemens.de
+ *            Gerhard.Wichert@pdb.siemens.de
  *
  *
  * Redesigned the x86 32-bit VM architecture to deal with

@@ -34,7 +34,7 @@
 #include <linux/blk.h>
 
 #ifdef CONFIG_BLK_DEV_IDE
-#include <linux/ide.h>	/* IDE xlate */
+#include <linux/ide.h>  /* IDE xlate */
 #endif /* CONFIG_BLK_DEV_IDE */
 
 #include <asm/system.h>
@@ -53,16 +53,16 @@ extern void md_autodetect_dev(kdev_t dev);
  */
 #include <asm/unaligned.h>
 
-#define SYS_IND(p)	(get_unaligned(&p->sys_ind))
-#define NR_SECTS(p)	({ __typeof__(p->nr_sects) __a =	\
-				get_unaligned(&p->nr_sects);	\
-				le32_to_cpu(__a); \
-			})
+#define SYS_IND(p)  (get_unaligned(&p->sys_ind))
+#define NR_SECTS(p) ({ __typeof__(p->nr_sects) __a =    \
+                get_unaligned(&p->nr_sects);    \
+                le32_to_cpu(__a); \
+            })
 
-#define START_SECT(p)	({ __typeof__(p->start_sect) __a =	\
-				get_unaligned(&p->start_sect);	\
-				le32_to_cpu(__a); \
-			})
+#define START_SECT(p)   ({ __typeof__(p->start_sect) __a =  \
+                get_unaligned(&p->start_sect);  \
+                le32_to_cpu(__a); \
+            })
 
 static inline int is_extended_partition(struct partition *p)
 {
@@ -88,8 +88,8 @@ static char __attribute__ ((unused))
 #endif
 }
 
-#define MSDOS_LABEL_MAGIC1	0x55
-#define MSDOS_LABEL_MAGIC2	0xAA
+#define MSDOS_LABEL_MAGIC1  0x55
+#define MSDOS_LABEL_MAGIC2  0xAA
 
 static inline int
 msdos_magic_present(unsigned char *p)
@@ -117,8 +117,8 @@ static void extended_partition(struct gendisk *hd, struct block_device *bdev,
     unsigned long first_sector, this_sector, this_size;
     int mask = (1 << hd->minor_shift) - 1;
     int sector_size = get_hardsect_size(to_kdev_t(bdev->bd_dev)) / 512;
-    int loopct = 0;		/* number of links followed
-				   without finding a data partition */
+    int loopct = 0;     /* number of links followed
+                   without finding a data partition */
     int i;
 
     this_sector = first_sector = hd->part[minor].start_sect;
@@ -200,7 +200,7 @@ static void extended_partition(struct gendisk *hd, struct block_device *bdev,
             if (NR_SECTS(p) && is_extended_partition(p))
                 break;
         if (i == 4)
-            goto done;	 /* nothing left to do */
+            goto done;   /* nothing left to do */
 
         this_sector = first_sector + START_SECT(p) * sector_size;
         this_size = NR_SECTS(p) * sector_size;
@@ -284,10 +284,10 @@ check_and_add_bsd_partition(struct gendisk *hd, struct bsd_partition *bsd_p,
         int size = hd->part[i].nr_sects;
 
         if (start+size <= bsd_start || start >= bsd_start+bsd_size)
-            continue;	/* no overlap */
+            continue;   /* no overlap */
 
         if (start == bsd_start && size == bsd_size)
-            return;		/* equal -> no need to add */
+            return;     /* equal -> no need to add */
 
         if (start <= bsd_start && start+size >= bsd_start+bsd_size)
         {
@@ -296,7 +296,7 @@ check_and_add_bsd_partition(struct gendisk *hd, struct bsd_partition *bsd_p,
             printk("w: %d %ld+%ld,%d+%d",
                    i, start, size, bsd_start, bsd_size);
 #endif
-            break;		/* ok */
+            break;      /* ok */
         }
 
         /* ouch: bsd and linux overlap */

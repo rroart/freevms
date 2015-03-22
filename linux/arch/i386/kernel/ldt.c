@@ -113,11 +113,11 @@ static int write_ldt(void * ptr, unsigned long bytecount, int oldmode)
     if (ldt_info.base_addr == 0 && ldt_info.limit == 0)
     {
         if (oldmode ||
-                (ldt_info.contents == 0		&&
-                 ldt_info.read_exec_only == 1	&&
-                 ldt_info.seg_32bit == 0		&&
-                 ldt_info.limit_in_pages == 0	&&
-                 ldt_info.seg_not_present == 1	&&
+                (ldt_info.contents == 0     &&
+                 ldt_info.read_exec_only == 1   &&
+                 ldt_info.seg_32bit == 0        &&
+                 ldt_info.limit_in_pages == 0   &&
+                 ldt_info.seg_not_present == 1  &&
                  ldt_info.useable == 0 ))
         {
             entry_1 = 0;
@@ -142,8 +142,8 @@ static int write_ldt(void * ptr, unsigned long bytecount, int oldmode)
 
     /* Install the new entry ...  */
 install:
-    *lp	= entry_1;
-    *(lp+1)	= entry_2;
+    *lp = entry_1;
+    *(lp+1) = entry_2;
     error = 0;
 
 out_unlock:

@@ -1,5 +1,5 @@
-#ifndef clsmsgdef_h
-#define clsmsgdef_h
+#ifndef CLSMSGDEF_H
+#define CLSMSGDEF_H
 
 #define CLMCNX$K_DATA                  0x30
 #define CLMCNX$K_FNC_DESC              0x05
@@ -57,7 +57,7 @@
 #define CLSMSG$K_FAC_BLK 0x07
 #define CLSMSG$K_FAC_CWPS 0x09
 #define CLSMSG$M_RESPMSG 0x80
-#define CLSMSG$K_MAXMSG	0x84
+#define CLSMSG$K_MAXMSG 0x84
 
 struct _clsmsgdef
 {

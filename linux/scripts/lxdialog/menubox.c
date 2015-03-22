@@ -421,7 +421,7 @@ dialog_menu (const char *title, const char *prompt, int height, int width,
             wnoutrefresh (dialog);
             wrefresh (menu);
 
-            continue;		/* wait for another key press */
+            continue;       /* wait for another key press */
         }
 
         switch (key)
@@ -487,5 +487,5 @@ dialog_menu (const char *title, const char *prompt, int height, int width,
 
     delwin (dialog);
     remove("lxdialog.scrltmp");
-    return -1;			/* ESC pressed */
+    return -1;          /* ESC pressed */
 }

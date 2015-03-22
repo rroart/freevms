@@ -1,5 +1,5 @@
-#ifndef qssysdef_h
-#define qssysdef_h
+#ifndef QSSYSDEF_H
+#define QSSYSDEF_H
 
 #include <dtndef.h>
 

@@ -25,8 +25,8 @@
  * set, making the functions fast and clean. String instructions have been
  * used through-out, making for "slightly" unclear code :-)
  *
- *		NO Copyright (C) 1991, 1992 Linus Torvalds,
- *		consider these trivial functions to be PD.
+ *      NO Copyright (C) 1991, 1992 Linus Torvalds,
+ *      consider these trivial functions to be PD.
  */
 
 #define __HAVE_ARCH_STRCPY
@@ -237,7 +237,7 @@ static inline void * __constant_memcpy(void * to, const void * from, size_t n)
     case 4:
         *(unsigned long *)to = *(const unsigned long *)from;
         return to;
-    case 6:	/* for Ethernet addresses */
+    case 6: /* for Ethernet addresses */
         *(unsigned long *)to = *(const unsigned long *)from;
         *(2+(unsigned short *)to) = *(2+(const unsigned short *)from);
         return to;
@@ -266,11 +266,11 @@ static inline void * __constant_memcpy(void * to, const void * from, size_t n)
     }
 #define COMMON(x) \
 __asm__ __volatile__( \
-	"rep ; movsl" \
-	x \
-	: "=&c" (d0), "=&D" (d1), "=&S" (d2) \
-	: "0" (n/4),"1" ((long) to),"2" ((long) from) \
-	: "memory");
+    "rep ; movsl" \
+    x \
+    : "=&c" (d0), "=&D" (d1), "=&S" (d2) \
+    : "0" (n/4),"1" ((long) to),"2" ((long) from) \
+    : "memory");
     {
         int d0, d1, d2;
         switch (n % 4)
@@ -300,7 +300,7 @@ __asm__ __volatile__( \
 #include <asm/mmx.h>
 
 /*
- *	This CPU favours 3DNow strongly (eg AMD Athlon)
+ *  This CPU favours 3DNow strongly (eg AMD Athlon)
  */
 
 static inline void * __constant_memcpy3d(void * to, const void * from, size_t len)
@@ -325,7 +325,7 @@ static __inline__ void *__memcpy3d(void *to, const void *from, size_t len)
 #else
 
 /*
- *	No 3D Now!
+ *  No 3D Now!
  */
 
 #define memcpy(t, f, n) \
@@ -344,11 +344,11 @@ static __inline__ void *__memcpy3d(void *to, const void *from, size_t len)
  */
 extern void __struct_cpy_bug (void);
 
-#define struct_cpy(x,y) 			\
-({						\
-	if (sizeof(*(x)) != sizeof(*(y))) 	\
-		__struct_cpy_bug();		\
-	memcpy(x, y, sizeof(*(x)));		\
+#define struct_cpy(x,y)             \
+({                      \
+    if (sizeof(*(x)) != sizeof(*(y)))   \
+        __struct_cpy_bug();     \
+    memcpy(x, y, sizeof(*(x)));     \
 })
 
 #define __HAVE_ARCH_MEMMOVE
@@ -485,11 +485,11 @@ static inline void * __constant_c_and_count_memset(void * s, unsigned long patte
     }
 #define COMMON(x) \
 __asm__  __volatile__( \
-	"rep ; stosl" \
-	x \
-	: "=&c" (d0), "=&D" (d1) \
-	: "a" (pattern),"0" (count/4),"1" ((long) s) \
-	: "memory")
+    "rep ; stosl" \
+    x \
+    : "=&c" (d0), "=&D" (d1) \
+    : "a" (pattern),"0" (count/4),"1" ((long) s) \
+    : "memory")
     {
         int d0, d1;
         switch (count % 4)

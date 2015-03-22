@@ -1,5 +1,5 @@
-#ifndef phddef_h
-#define phddef_h
+#ifndef PHDDEF_H
+#define PHDDEF_H
 
 #define PHD$M_ASTEN 0xF
 #define PHD$M_ASTSR 0xF0

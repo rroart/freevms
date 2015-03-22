@@ -91,10 +91,10 @@ extern int check_nmi_watchdog (void);
 extern void enable_NMI_through_LVT0 (void * dummy);
 
 extern unsigned int nmi_watchdog;
-#define NMI_NONE	0
-#define NMI_IO_APIC	1
-#define NMI_LOCAL_APIC	2
-#define NMI_INVALID	3
+#define NMI_NONE    0
+#define NMI_IO_APIC 1
+#define NMI_LOCAL_APIC  2
+#define NMI_INVALID 3
 
 #endif /* CONFIG_X86_LOCAL_APIC */
 

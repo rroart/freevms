@@ -12,43 +12,43 @@
 extern void setup_serial_acpi(void *);
 
 /* ACPI table signatures */
-#define ACPI_SPCRT_SIGNATURE	"SPCR"
-#define ACPI_DBGPT_SIGNATURE	"DBGP"
+#define ACPI_SPCRT_SIGNATURE    "SPCR"
+#define ACPI_DBGPT_SIGNATURE    "DBGP"
 
 /* Interface type as defined in ACPI serial port tables */
-#define ACPI_SERIAL_INTFC_16550	0
-#define ACPI_SERIAL_INTFC_16450	1
+#define ACPI_SERIAL_INTFC_16550 0
+#define ACPI_SERIAL_INTFC_16450 1
 
 /* Interrupt types for ACPI serial port tables */
-#define ACPI_SERIAL_INT_PCAT	0x01
-#define ACPI_SERIAL_INT_APIC	0x02
-#define ACPI_SERIAL_INT_SAPIC	0x04
+#define ACPI_SERIAL_INT_PCAT    0x01
+#define ACPI_SERIAL_INT_APIC    0x02
+#define ACPI_SERIAL_INT_SAPIC   0x04
 
 /* Baud rates as defined in ACPI serial port tables */
-#define ACPI_SERIAL_BAUD_9600		3
-#define ACPI_SERIAL_BAUD_19200		4
-#define ACPI_SERIAL_BAUD_57600		6
-#define ACPI_SERIAL_BAUD_115200		7
+#define ACPI_SERIAL_BAUD_9600       3
+#define ACPI_SERIAL_BAUD_19200      4
+#define ACPI_SERIAL_BAUD_57600      6
+#define ACPI_SERIAL_BAUD_115200     7
 
 /* Parity as defined in ACPI serial port tables */
-#define ACPI_SERIAL_PARITY_NONE		0
+#define ACPI_SERIAL_PARITY_NONE     0
 
 /* Flow control methods as defined in ACPI serial port tables */
-#define ACPI_SERIAL_FLOW_DCD	0x01
-#define ACPI_SERIAL_FLOW_RTS	0x02
-#define ACPI_SERIAL_FLOW_XON	0x04
+#define ACPI_SERIAL_FLOW_DCD    0x01
+#define ACPI_SERIAL_FLOW_RTS    0x02
+#define ACPI_SERIAL_FLOW_XON    0x04
 
 /* Terminal types as defined in ACPI serial port tables */
-#define ACPI_SERIAL_TERM_VT100		0
-#define ACPI_SERIAL_TERM_VT100X	1
+#define ACPI_SERIAL_TERM_VT100      0
+#define ACPI_SERIAL_TERM_VT100X 1
 
 /* PCI Flags as defined by SPCR table */
-#define ACPI_SERIAL_PCIFLAG_PNP	0x00000001
+#define ACPI_SERIAL_PCIFLAG_PNP 0x00000001
 
 /* Space ID as defined in base address structure in ACPI serial port tables */
-#define ACPI_SERIAL_MEM_SPACE		0
-#define ACPI_SERIAL_IO_SPACE		1
-#define ACPI_SERIAL_PCICONF_SPACE	2
+#define ACPI_SERIAL_MEM_SPACE       0
+#define ACPI_SERIAL_IO_SPACE        1
+#define ACPI_SERIAL_PCICONF_SPACE   2
 
 /*
  * Generic Register Address Structure - as defined by Microsoft
@@ -66,9 +66,9 @@ typedef struct
 } gen_regaddr;
 
 /* Space ID for generic register address structure */
-#define REGADDR_SPACE_SYSMEM	0
-#define REGADDR_SPACE_SYSIO	1
-#define REGADDR_SPACE_PCICONFIG	2
+#define REGADDR_SPACE_SYSMEM    0
+#define REGADDR_SPACE_SYSIO 1
+#define REGADDR_SPACE_PCICONFIG 2
 
 /* Serial Port Console Redirection and Debug Port Table formats */
 typedef struct

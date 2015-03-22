@@ -15,33 +15,33 @@
 #define APIC_MISMATCH_DEBUG
 
 #define IO_APIC_BASE(idx) \
-		((volatile int *)(__fix_to_virt(FIX_IO_APIC_BASE_0 + idx) \
-		+ (mp_ioapics[idx].mpc_apicaddr & ~PAGE_MASK)))
+        ((volatile int *)(__fix_to_virt(FIX_IO_APIC_BASE_0 + idx) \
+        + (mp_ioapics[idx].mpc_apicaddr & ~PAGE_MASK)))
 
 /*
  * The structure of the IO-APIC:
  */
 struct IO_APIC_reg_00
 {
-    __u32	__reserved_2	: 24,
-               ID		:  4,
-               __reserved_1	:  4;
+    __u32   __reserved_2    : 24,
+            ID       :  4,
+            __reserved_1 :  4;
 } __attribute__ ((packed));
 
 struct IO_APIC_reg_01
 {
-    __u32	version		:  8,
-               __reserved_2	:  7,
-               PRQ		:  1,
-               entries		:  8,
-               __reserved_1	:  8;
+    __u32   version     :  8,
+            __reserved_2 :  7,
+            PRQ      :  1,
+            entries      :  8,
+            __reserved_1 :  8;
 } __attribute__ ((packed));
 
 struct IO_APIC_reg_02
 {
-    __u32	__reserved_2	: 24,
-               arbitration	:  4,
-               __reserved_1	:  4;
+    __u32   __reserved_2    : 24,
+            arbitration  :  4,
+            __reserved_1 :  4;
 } __attribute__ ((packed));
 
 /*
@@ -64,34 +64,34 @@ enum ioapic_irq_destination_types
 
 struct IO_APIC_route_entry
 {
-    __u32	vector		:  8,
-                delivery_mode	:  3,	/* 000: FIXED
-					 * 001: lowest prio
-					 * 111: ExtINT
-					 */
-                dest_mode	:  1,	/* 0: physical, 1: logical */
-                delivery_status	:  1,
-                polarity	:  1,
-                irr		:  1,
-                trigger		:  1,	/* 0: edge, 1: level */
-                mask		:  1,	/* 0: enabled, 1: disabled */
-                __reserved_2	: 15;
+    __u32   vector      :  8,
+            delivery_mode   :  3,   /* 000: FIXED
+                     * 001: lowest prio
+                     * 111: ExtINT
+                     */
+            dest_mode   :  1,   /* 0: physical, 1: logical */
+            delivery_status :  1,
+            polarity    :  1,
+            irr     :  1,
+            trigger     :  1,   /* 0: edge, 1: level */
+            mask        :  1,   /* 0: enabled, 1: disabled */
+            __reserved_2    : 15;
 
     union
     {
         struct
         {
             __u32
-            __reserved_1	: 24,
-                            physical_dest	:  4,
-                            __reserved_2	:  4;
+            __reserved_1    : 24,
+                            physical_dest   :  4,
+                            __reserved_2    :  4;
         } physical;
 
         struct
         {
             __u32
-            __reserved_1	: 24,
-                            logical_dest	:  8;
+            __reserved_1    : 24,
+                            logical_dest    :  8;
         } logical;
     } dest;
 
@@ -152,7 +152,7 @@ extern int skip_ioapic_setup;
  */
 #define io_apic_assign_pci_irqs (mp_irq_entries && !skip_ioapic_setup)
 
-extern int skip_ioapic_setup;	/* 1 for "noapic" */
+extern int skip_ioapic_setup;   /* 1 for "noapic" */
 
 static inline void disable_ioapic_setup(void)
 {
@@ -164,14 +164,14 @@ static inline int ioapic_setup_disabled(void)
     return skip_ioapic_setup;
 }
 
-#else	/* !CONFIG_X86_IO_APIC */
+#else   /* !CONFIG_X86_IO_APIC */
 
 #define io_apic_assign_pci_irqs 0
 
 static inline void disable_ioapic_setup(void)
 { }
 
-#endif	/* !CONFIG_X86_IO_APIC */
+#endif  /* !CONFIG_X86_IO_APIC */
 
 extern int io_apic_get_unique_id (int ioapic, int apic_id);
 extern int io_apic_get_version (int ioapic);

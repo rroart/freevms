@@ -16,7 +16,7 @@ c_lex_one_token (c_token *token)
 #endif
 }
 
-cli_token(char * str, int * retlen)
+int cli_token(char * str, int * retlen)
 {
     c_token token;
     c_lex_one_token(&token);
@@ -45,7 +45,7 @@ cli_token(char * str, int * retlen)
 
 c_parser dcl_parser;
 
-void initparser()
+void initparser(void)
 {
     memset(&dcl_parser, 0, sizeof(c_parser));
     extern signed int include_stack_ptr;
@@ -54,7 +54,7 @@ void initparser()
     get_symbol_value = 0;
 }
 
-void * getparser()
+void * getparser(void)
 {
     return &dcl_parser;
 }

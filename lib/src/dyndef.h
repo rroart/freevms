@@ -1,5 +1,5 @@
-#ifndef dyndef_h
-#define dyndef_h
+#ifndef DYNDEF_H
+#define DYNDEF_H
 
 /* Author: Roar Thronæs */
 

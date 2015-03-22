@@ -1,19 +1,19 @@
 /*
  * lib_len.c
  *
- *	Code for VAX LIB$LEN routine
+ *  Code for VAX LIB$LEN routine
  *
  * Description:
  *
- *	Return length of a string as a longword
+ *  Return length of a string as a longword
  *
  * Bugs:
  *
  *
  * History
  *
- *	March 30, 1997 - Kevin Handy
- *		Preliminary design.
+ *  March 30, 1997 - Kevin Handy
+ *      Preliminary design.
  */
 
 #include <stdio.h>
@@ -28,8 +28,8 @@
  */
 unsigned short lib$len(const struct dsc$descriptor_s* input_descriptor)
 {
-    short word_integer_length;	/* Length of source string */
-    char* data_address;		/* Address of actual data */
+    short word_integer_length;  /* Length of source string */
+    char* data_address;     /* Address of actual data */
 
     /*
      * use STR$ANALYSE_SDESC instead of LIB$ version, because

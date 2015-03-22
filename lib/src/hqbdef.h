@@ -1,14 +1,14 @@
-#ifndef hqbdef_h
-#define hqbdef_h
+#ifndef HQBDEF_H
+#define HQBDEF_H
 
-#define		HQB$M_VC_FAILED		0x1
-#define		HQB$M_DISCON_INIT	0x2
-#define		HQB$M_PATHMOVE		0x4
-#define		HQB$M_UNIT_ONLINE	0x1
-#define		HQB$M_V5CL		0x2
-#define		HQB$M_HUNN		0x4
-#define		HQB$K_LENGTH		72
-#define		HQB$S_HQBDEF		72
+#define     HQB$M_VC_FAILED     0x1
+#define     HQB$M_DISCON_INIT   0x2
+#define     HQB$M_PATHMOVE      0x4
+#define     HQB$M_UNIT_ONLINE   0x1
+#define     HQB$M_V5CL      0x2
+#define     HQB$M_HUNN      0x4
+#define     HQB$K_LENGTH        72
+#define     HQB$S_HQBDEF        72
 
 struct _hqb
 {

@@ -1,19 +1,19 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified DFU source file, 2004.
 
 /*
-	DFU V2.2
+    DFU V2.2
 
-	DFU_IFSCAN.C
+    DFU_IFSCAN.C
 
-	This file contains all routines needed
-	for scanning and parsing the Index File
+    This file contains all routines needed
+    for scanning and parsing the Index File
 
-	Called by SEARCH, REPORT , VERIFY ,UNDELETE,
-	and several DIRECTORY options
+    Called by SEARCH, REPORT , VERIFY ,UNDELETE,
+    and several DIRECTORY options
 
 */
 
@@ -34,9 +34,6 @@
 #include <starlet.h>
 #include <clidef.h>
 #include <climsgdef.h>
-#if 0
-#include <lib$routines.h>
-#endif
 #include <libdef.h>
 #include <sor$routines.h>
 #include <str$routines.h>
@@ -128,7 +125,7 @@ globalvalue DFU_NOPRIV, DFU_EXPREG, DFU_ASSIGN, DFU_INDEXERR,
 
 const int iocnt=2;
 
-char block[512]; 	/* One page/block */
+char block[512];    /* One page/block */
 
 #if 0
 extern _align(PAGE) struct _hdr
@@ -149,9 +146,9 @@ static struct _ibmap
     char block[512];
 } bitmap[257]; /* Space for index file bitmap */
 
-static struct HM2_Struct home[33];	/* 32 home blocks */
+static struct HM2_Struct home[33];  /* 32 home blocks */
 
-static struct _vol  	/* Structure for relative volume table */
+static struct _vol      /* Structure for relative volume table */
 {
     char devnam[64], fulldevnam[64];
     unsigned int devnam_len, fulldevnam_len,
@@ -239,8 +236,8 @@ void do_abort(void)
 int search_command (int mask)
 
 /*
-	Search through INDEXF.SYS for files with certain
-	attributes specified on the command line
+    Search through INDEXF.SYS for files with certain
+    attributes specified on the command line
 
 */
 
@@ -961,7 +958,7 @@ nexti:
     {
         sprintf(outbuf,"%%DFU-I-SORT, Sorting ... \n");
         put_disp();
-        status = sor$sort_merge();
+        status = sor$sort_merge(0);
         if ((status & 1 ) != 1)
         {
             sprintf(outbuf,"%%DFU-E-SORTERR, Error sorting output,\n");
@@ -1478,12 +1475,12 @@ next_rep:
 
 int undel_command(int mask)
 /*
-	Undelete a file on a disk
-	After write locking the disk
-	the INDEXF.SYS and BITMAP files are updated
-	unless the blocks or file headers have been reused.
-	Undeleted files are entered in the original directory
-	May also be used to produce a listing of recoverable files
+    Undelete a file on a disk
+    After write locking the disk
+    the INDEXF.SYS and BITMAP files are updated
+    unless the blocks or file headers have been reused.
+    Undeleted files are entered in the original directory
+    May also be used to produce a listing of recoverable files
 */
 
 {
@@ -1498,7 +1495,7 @@ int undel_command(int mask)
     {
         int pagecnt;
     } bmap[33];
-    static struct fibdef fib;	/* File information block */
+    static struct fibdef fib;   /* File information block */
     struct
     {
         int fiblen;
@@ -1861,15 +1858,15 @@ int undel_command(int mask)
                 {
                     /* Actual recovery starts here as follows (loop for all extension headers) :
                             - Reenter retrieval pointers in BITMAP
-                    	- If oke then
-                    	    - Rewrite all BITMAP.SYS
-                    	    - Rewrite all Headers
-                    	    - Rewrite index file bitmap bit. At this point recovery is oke
-                    	    - Update QUOTA.SYS
-                    	    - Setup entry for enter file routine
-                    	- After all undeletes are done ...
-                    	    - Unlock volume
-                    	    - Reenter files in directory
+                        - If oke then
+                            - Rewrite all BITMAP.SYS
+                            - Rewrite all Headers
+                            - Rewrite index file bitmap bit. At this point recovery is oke
+                            - Update QUOTA.SYS
+                            - Setup entry for enter file routine
+                        - After all undeletes are done ...
+                            - Unlock volume
+                            - Reenter files in directory
 
                     Save size and uic for possible quota processing */
 
@@ -2318,7 +2315,7 @@ int verify_command(int mask)
         int own_uic, flag, rsize, asize, hdr;
     } usage_table[750];
     struct f_id lost_fid;
-    static struct fibdef fib;	/* File information block */
+    static struct fibdef fib;   /* File information block */
     struct
     {
         int fiblen;
@@ -3123,7 +3120,7 @@ skip: ; /* Next header */
 int build_dir_table(char *dev_str, Boolean matoutput)
 /*
     Build directory table needed for DIR/VERSION. DIR/CHECK, DIR/EMPTY
-	and DIR/ALIAS
+    and DIR/ALIAS
     V2.2 : Also save the file size for DIR/VERSION
 */
 
@@ -3338,7 +3335,7 @@ Outputs :
 
     strcpy(item,inp);
     item_descr.dsc$w_length = strlen(item);
-    *flag = FALSE;	/* Assume item not present */
+    *flag = FALSE;  /* Assume item not present */
 
     stat = CLI$PRESENT(&item_descr);
     if ((stat == CLI$_PRESENT ) || (stat == CLI$_NEGATED))
@@ -3475,7 +3472,7 @@ void fid_to_name(char * ret_dir)
     Boolean error;
     struct header_area_struct *hdr;
     struct ident_area_struct *id;
-    static struct fibdef fib;	/* File information block */
+    static struct fibdef fib;   /* File information block */
     struct
     {
         int fiblen;
@@ -3541,14 +3538,14 @@ void fid_to_name(char * ret_dir)
 int open_device(struct dsc$descriptor *device_descr, int flag)
 /* Open the device or volume set.
    Outputs :
-	All fields in RVT (relative volume table)
-	Flags : 0 -> process volume set
-		1 -> process volume set and lock the volumes on LOCK_CHAN
+    All fields in RVT (relative volume table)
+    Flags : 0 -> process volume set
+        1 -> process volume set and lock the volumes on LOCK_CHAN
 */
 
 {
     register int i;
-    static struct fibdef if_fib;	/* File information block */
+    static struct fibdef if_fib;    /* File information block */
     struct
     {
         int fiblen;
@@ -3739,7 +3736,7 @@ int open_device(struct dsc$descriptor *device_descr, int flag)
         efblk += hdr_area->efblk_overlay.efblk_fields.efblkl;
         rvt[i].if_size = efblk - rvt[i].vbn_file_1;
         i++;
-        if (i <= maxvol) 	/*Next volume in set */
+        if (i <= maxvol)    /*Next volume in set */
         {
             add_item(&item_list[0].buflen, 64, DVI$_NEXTDEVNAM,
                      &rvt[0].devnam, &rvt[0].devnam_len);
@@ -3788,7 +3785,7 @@ void read_indexf_bitmap(int *free_hdr)
    Read in Indexf.Sys Bitmap.
    Return: Free Headers in this bitmap
            Highest bit set in this bitmap. This functions as
-	   a kind of logical EOF for the INDEXF.SYS.
+       a kind of logical EOF for the INDEXF.SYS.
 */
 {
     register int i, j;
@@ -3872,7 +3869,7 @@ int read_indexf_multi()
     int i,stat;
 
     vbn = rvt[curvol].vbn_file_1; /* First file header is here */
-    for (i=1; i<=iocnt; i++)	    /* Fire off 2 QIO's */
+    for (i=1; i<=iocnt; i++)        /* Fire off 2 QIO's */
     {
         stat = lib$get_ef(&efn[i-1]);
         if ((stat & 1) != 1)
@@ -4024,7 +4021,7 @@ void cleanup()
 #if 1
     if (clean_flags.sort == 1)
     {
-        stat = sor$end_sort();
+        stat = sor$end_sort(0);
     }
 #endif
 
@@ -4186,7 +4183,7 @@ void disass_map_ptr(struct header_area_struct *hdr, int *j)
                    + head->block[i+1] + 1;
         lbnstart = (head->block[i+3] << 16) + head->block[i+2];
         break;
-    }	/* End switch */
+    }   /* End switch */
     *j = *j + format + 1;
 }
 
@@ -4234,7 +4231,7 @@ void dfu_handler()
 /* Exit handler to unlock volume */
 
 {
-    static struct fibdef i_fib;	/* File information block */
+    static struct fibdef i_fib; /* File information block */
     struct
     {
         int fiblen;

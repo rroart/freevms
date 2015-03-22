@@ -1,5 +1,5 @@
-#ifndef lnmsub_h
-#define lnmsub_h
+#ifndef LNMSUB_H
+#define LNMSUB_H
 
 #include <lnmstrdef.h>
 
@@ -14,6 +14,6 @@ int lnm$table(struct struct_lnm_ret * r,struct struct_rt * rt, struct struct_nt 
 int lnm$lookup(struct struct_lnm_ret * r,struct struct_rt * rt, int loglen, char * lognam, struct struct_nt * nt) ;
 int lnm$table_srch(struct struct_lnm_ret * r,struct struct_rt *rt, struct struct_nt * nt) ;
 int lnm$inslogtab(struct struct_lnm_ret * r, struct _lnmb * mylnmb);
-int lnm$delete_lnmb();
+int lnm$delete_lnmb(void);
 
 #endif

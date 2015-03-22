@@ -1,5 +1,5 @@
-#ifndef chdef_h
-#define chdef_h
+#ifndef CHDEF_H
+#define CHDEF_H
 
 #define ch$c_rexmt_penalty 500
 #define ch$c_xmtfail_penalty 10000

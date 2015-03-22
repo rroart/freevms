@@ -1,5 +1,5 @@
-#ifndef exe_routines_h
-#define exe_routines_h
+#ifndef EXE_ROUTINES_H
+#define EXE_ROUTINES_H
 
 #include <adpdef.h>
 #include <arbdef.h>
@@ -44,8 +44,8 @@ int   exe_std$alophycntg_s2 (int npages, VOID_PPQ sva_p);
 int   exe_std$alophycntg_color (int npages, int rad, int byte_align, void **sva_p);
 int   exe_std$alophycntg_color_s2 (int npages, int rad, int byte_align, VOID_PPQ sva_p);
 void  exe_std$altquepkt (struct _irp *irp, struct _ucb *ucb);
-int	  exe$bugchk_cancel_remove_va (VOID_PQ start_va, unsigned long long size_in_bytes);
-int	  exe$bugchk_remove_va (VOID_PQ start_va, unsigned long long size_in_bytes);
+int   exe$bugchk_cancel_remove_va (VOID_PQ start_va, unsigned long long size_in_bytes);
+int   exe$bugchk_remove_va (VOID_PQ start_va, unsigned long long size_in_bytes);
 int       exe$bus_delay (struct _adp *adp);
 int       exe$delay (long long *delay_nanos);
 void  exe_std$carriage (struct _irp *irp);
@@ -54,14 +54,14 @@ int       exe$cbb_clear_bit (int flags, int bitpos, CBB_PQ src, CBB_PQ dst, INT_
 int       exe$cbb_empty (CBB_PQ cbb, int flags, INT_PQ state);
 int       exe$cbb_find_first_clear (CBB_PQ cbb, int start, int flags, INT_PQ bitpos, INT_PQ ccode);
 int       exe$cbb_find_first_set (CBB_PQ cbb, int start, int flags, INT_PQ bitpos, INT_PQ ccode);
-int	  exe$cbb_get_size (int unitsize, int bits, INT_PQ resultsize);
+int   exe$cbb_get_size (int unitsize, int bits, INT_PQ resultsize);
 int       exe$cbb_initialize (CBB_PQ cbb, int blksiz, int unitsize, int bits, int ipl, unsigned long long flags, int timeout_value);
 int       exe$cbb_lock (CBB_PQ cbb);
 int       exe$cbb_rebuild (CBB_PQ cbb, int flags);
 int       exe$cbb_set_bit (int flags, int bitpos, CBB_PQ src, CBB_PQ dst);
 int       exe$cbb_test_bit (CBB_PQ cbb, int bitpos, int flags);
 int       exe$cbb_unlock (CBB_PQ cbb);
-int	  exe$cbb_copy( CBB_PQ src, CBB_PQ dst, int length, int flags);
+int   exe$cbb_copy( CBB_PQ src, CBB_PQ dst, int length, int flags);
 int   exe$cbb_extract_bitmask( CBB_PQ src, int start, int length, int flags, VOID_PQ bitmask_addr);
 int   exe$cbb_insert_bitmask( int start, int length, int flags, VOID_PQ bitmask_addr, CBB_PQ cbb);
 int   exe$cbb_validate (CBB_PQ cbb, int unitsize, int bits, int ipl, unsigned long long flags, int timeout_value, UINT64_PQ ret_flags);
@@ -119,7 +119,7 @@ int   exe_std$maxacmode (int acmode);
 void      exe$lal_insert_first(void *packet,void *listhead);
 void     *exe$lal_remove_first(void *listhead);
 
-void  exe_std$mntversio (void (*rout)(), struct _irp *irp, struct _ucb *ucb);
+void  exe_std$mntversio (void (*rout)(void), struct _irp *irp, struct _ucb *ucb);
 int   exe_std$modify (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
 
 #ifdef  __INITIAL_POINTER_SIZE
@@ -165,8 +165,8 @@ int   exe_std$qioacppkt (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb);
 int   exe_std$qiodrvpkt (struct _irp *irp, struct _ucb *ucb);
 int   exe_std$qioserver_new_unit (struct _ucb *ucb);
 void  exe_std$queue_fork (struct _fkb *fkb);
-int 	  exe$psx_resume_and_wait (struct _pcb *child_pcb);
-void	  exe$psx_set_fork_status (struct _pcb *child_pcb, int status);
+int       exe$psx_resume_and_wait (struct _pcb *child_pcb);
+void      exe$psx_set_fork_status (struct _pcb *child_pcb, int status);
 int   exe_std$read (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
 
 #ifdef  __INITIAL_POINTER_SIZE
@@ -228,14 +228,14 @@ int exe$allocate_pool(int requestSize, MMG$POOL_TYPE poolType, int alignment,
 void exe$deallocate_pool(VOID_PQ returnBlock, MMG$POOL_TYPE poolType, int size,...);
 int exe$trim_pool_list(int reqSize, MMG$POOL_TYPE poolType, int percent,...);
 
-int exe$register_pool_info(int (*need_memory_callback)(), MMG$POOL_TYPE poolType, unsigned long long userParam, int maxSize, int minSize,
+int exe$register_pool_info(int (*need_memory_callback)(void), MMG$POOL_TYPE poolType, unsigned long long userParam, int maxSize, int minSize,
                            unsigned long long extra_param_1,unsigned long long extra_param_2);
 
 #endif
 #endif
 
-int	exe$lock_pkta(void);
-int	exe$unlock_pkta(void);
+int exe$lock_pkta(void);
+int exe$unlock_pkta(void);
 
 void exe$check_for_mem_error(struct _cpu *cpudb);
 int exe$primitive_mcheck(int vec);
@@ -280,8 +280,8 @@ int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf, const void
 int exe$imgact_elf(void * name, void * hdrbuf);
 int exe$pscan_next_id(struct _pcb ** p);
 int exe$alophycntg(unsigned long * va, unsigned long num);
-int exe$alononpaged();
-int exe$deanonpaged();
+int exe$alononpaged(void);
+int exe$deanonpaged(void);
 int exe$allocate(int requestsize, void ** poolhead, int alignment, unsigned int * allocatedsize, void ** returnblock);
 int exe$deallocate(void * returnblock, void ** poolhead, int size);
 int exe_std$allocxyz(int *alosize_p, struct _tqe **tqe_p, int type, int size);

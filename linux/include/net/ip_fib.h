@@ -1,16 +1,16 @@
 /*
- * INET		An implementation of the TCP/IP protocol suite for the LINUX
- *		operating system.  INET  is implemented using the  BSD Socket
- *		interface as the means of communication with the user level.
+ * INET     An implementation of the TCP/IP protocol suite for the LINUX
+ *      operating system.  INET  is implemented using the  BSD Socket
+ *      interface as the means of communication with the user level.
  *
- *		Definitions for the Forwarding Information Base.
+ *      Definitions for the Forwarding Information Base.
  *
- * Authors:	A.N.Kuznetsov, <kuznet@ms2.inr.ac.ru>
+ * Authors: A.N.Kuznetsov, <kuznet@ms2.inr.ac.ru>
  *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
+ *      This program is free software; you can redistribute it and/or
+ *      modify it under the terms of the GNU General Public License
+ *      as published by the Free Software Foundation; either version
+ *      2 of the License, or (at your option) any later version.
  */
 
 #ifndef _NET_IP_FIB_H
@@ -20,34 +20,34 @@
 
 struct kern_rta
 {
-    void		*rta_dst;
-    void		*rta_src;
-    int		*rta_iif;
-    int		*rta_oif;
-    void		*rta_gw;
-    u32		*rta_priority;
-    void		*rta_prefsrc;
-    struct rtattr	*rta_mx;
-    struct rtattr	*rta_mp;
-    unsigned char	*rta_protoinfo;
-    unsigned char	*rta_flow;
+    void        *rta_dst;
+    void        *rta_src;
+    int     *rta_iif;
+    int     *rta_oif;
+    void        *rta_gw;
+    u32     *rta_priority;
+    void        *rta_prefsrc;
+    struct rtattr   *rta_mx;
+    struct rtattr   *rta_mp;
+    unsigned char   *rta_protoinfo;
+    unsigned char   *rta_flow;
     struct rta_cacheinfo *rta_ci;
 };
 
 struct fib_nh
 {
-    struct net_device		*nh_dev;
-    unsigned		nh_flags;
-    unsigned char		nh_scope;
+    struct net_device       *nh_dev;
+    unsigned        nh_flags;
+    unsigned char       nh_scope;
 #ifdef CONFIG_IP_ROUTE_MULTIPATH
-    int			nh_weight;
-    int			nh_power;
+    int         nh_weight;
+    int         nh_power;
 #endif
 #ifdef CONFIG_NET_CLS_ROUTE
-    __u32			nh_tclassid;
+    __u32           nh_tclassid;
 #endif
-    int			nh_oif;
-    u32			nh_gw;
+    int         nh_oif;
+    u32         nh_gw;
 };
 
 /*
@@ -56,26 +56,26 @@ struct fib_nh
 
 struct fib_info
 {
-    struct fib_info		*fib_next;
-    struct fib_info		*fib_prev;
-    int			fib_treeref;
-    atomic_t		fib_clntref;
-    int			fib_dead;
-    unsigned		fib_flags;
-    int			fib_protocol;
-    u32			fib_prefsrc;
-    u32			fib_priority;
-    unsigned		fib_metrics[RTAX_MAX];
+    struct fib_info     *fib_next;
+    struct fib_info     *fib_prev;
+    int         fib_treeref;
+    atomic_t        fib_clntref;
+    int         fib_dead;
+    unsigned        fib_flags;
+    int         fib_protocol;
+    u32         fib_prefsrc;
+    u32         fib_priority;
+    unsigned        fib_metrics[RTAX_MAX];
 #define fib_mtu fib_metrics[RTAX_MTU-1]
 #define fib_window fib_metrics[RTAX_WINDOW-1]
 #define fib_rtt fib_metrics[RTAX_RTT-1]
 #define fib_advmss fib_metrics[RTAX_ADVMSS-1]
-    int			fib_nhs;
+    int         fib_nhs;
 #ifdef CONFIG_IP_ROUTE_MULTIPATH
-    int			fib_power;
+    int         fib_power;
 #endif
-    struct fib_nh		fib_nh[0];
-#define fib_dev		fib_nh[0].nh_dev
+    struct fib_nh       fib_nh[0];
+#define fib_dev     fib_nh[0].nh_dev
 };
 
 
@@ -85,54 +85,54 @@ struct fib_rule;
 
 struct fib_result
 {
-    unsigned char	prefixlen;
-    unsigned char	nh_sel;
-    unsigned char	type;
-    unsigned char	scope;
+    unsigned char   prefixlen;
+    unsigned char   nh_sel;
+    unsigned char   type;
+    unsigned char   scope;
     struct fib_info *fi;
 #ifdef CONFIG_IP_MULTIPLE_TABLES
-    struct fib_rule	*r;
+    struct fib_rule *r;
 #endif
 };
 
 
 #ifdef CONFIG_IP_ROUTE_MULTIPATH
 
-#define FIB_RES_NH(res)		((res).fi->fib_nh[(res).nh_sel])
-#define FIB_RES_RESET(res)	((res).nh_sel = 0)
+#define FIB_RES_NH(res)     ((res).fi->fib_nh[(res).nh_sel])
+#define FIB_RES_RESET(res)  ((res).nh_sel = 0)
 
 #else /* CONFIG_IP_ROUTE_MULTIPATH */
 
-#define FIB_RES_NH(res)		((res).fi->fib_nh[0])
+#define FIB_RES_NH(res)     ((res).fi->fib_nh[0])
 #define FIB_RES_RESET(res)
 
 #endif /* CONFIG_IP_ROUTE_MULTIPATH */
 
-#define FIB_RES_PREFSRC(res)		((res).fi->fib_prefsrc ? : __fib_res_prefsrc(&res))
-#define FIB_RES_GW(res)			(FIB_RES_NH(res).nh_gw)
-#define FIB_RES_DEV(res)		(FIB_RES_NH(res).nh_dev)
-#define FIB_RES_OIF(res)		(FIB_RES_NH(res).nh_oif)
+#define FIB_RES_PREFSRC(res)        ((res).fi->fib_prefsrc ? : __fib_res_prefsrc(&res))
+#define FIB_RES_GW(res)         (FIB_RES_NH(res).nh_gw)
+#define FIB_RES_DEV(res)        (FIB_RES_NH(res).nh_dev)
+#define FIB_RES_OIF(res)        (FIB_RES_NH(res).nh_oif)
 
 struct fib_table
 {
-    unsigned char	tb_id;
-    unsigned	tb_stamp;
-    int		(*tb_lookup)(struct fib_table *tb, const struct rt_key *key, struct fib_result *res);
-    int		(*tb_insert)(struct fib_table *table, struct rtmsg *r,
+    unsigned char   tb_id;
+    unsigned    tb_stamp;
+    int     (*tb_lookup)(struct fib_table *tb, const struct rt_key *key, struct fib_result *res);
+    int     (*tb_insert)(struct fib_table *table, struct rtmsg *r,
                          struct kern_rta *rta, struct nlmsghdr *n,
                          struct netlink_skb_parms *req);
-    int		(*tb_delete)(struct fib_table *table, struct rtmsg *r,
+    int     (*tb_delete)(struct fib_table *table, struct rtmsg *r,
                          struct kern_rta *rta, struct nlmsghdr *n,
                          struct netlink_skb_parms *req);
-    int		(*tb_dump)(struct fib_table *table, struct sk_buff *skb,
+    int     (*tb_dump)(struct fib_table *table, struct sk_buff *skb,
                        struct netlink_callback *cb);
-    int		(*tb_flush)(struct fib_table *table);
-    int		(*tb_get_info)(struct fib_table *table, char *buf,
+    int     (*tb_flush)(struct fib_table *table);
+    int     (*tb_get_info)(struct fib_table *table, char *buf,
                            int first, int count);
-    void		(*tb_select_default)(struct fib_table *table,
+    void        (*tb_select_default)(struct fib_table *table,
                                      const struct rt_key *key, struct fib_result *res);
 
-    unsigned char	tb_data[0];
+    unsigned char   tb_data[0];
 };
 
 #ifndef CONFIG_IP_MULTIPLE_TABLES
@@ -196,8 +196,8 @@ extern void fib_select_default(const struct rt_key *key, struct fib_result *res)
 #endif /* CONFIG_IP_MULTIPLE_TABLES */
 
 /* Exported by fib_frontend.c */
-extern void		ip_fib_init(void);
-extern void		fib_flush(void);
+extern void     ip_fib_init(void);
+extern void     fib_flush(void);
 extern int inet_rtm_delroute(struct sk_buff *skb, struct nlmsghdr* nlh, void *arg);
 extern int inet_rtm_newroute(struct sk_buff *skb, struct nlmsghdr* nlh, void *arg);
 extern int inet_rtm_getroute(struct sk_buff *skb, struct nlmsghdr* nlh, void *arg);
@@ -207,11 +207,11 @@ extern int fib_validate_source(u32 src, u32 dst, u8 tos, int oif,
 extern void fib_select_multipath(const struct rt_key *key, struct fib_result *res);
 
 /* Exported by fib_semantics.c */
-extern int 		ip_fib_check_default(u32 gw, struct net_device *dev);
-extern void		fib_release_info(struct fib_info *);
-extern int		fib_semantic_match(int type, struct fib_info *,
+extern int      ip_fib_check_default(u32 gw, struct net_device *dev);
+extern void     fib_release_info(struct fib_info *);
+extern int      fib_semantic_match(int type, struct fib_info *,
                                    const struct rt_key *, struct fib_result*);
-extern struct fib_info	*fib_create_info(const struct rtmsg *r, struct kern_rta *rta,
+extern struct fib_info  *fib_create_info(const struct rtmsg *r, struct kern_rta *rta,
         const struct nlmsghdr *, int *err);
 extern int fib_nh_match(struct rtmsg *r, struct nlmsghdr *, struct kern_rta *rta, struct fib_info *fi);
 extern int fib_dump_info(struct sk_buff *skb, u32 pid, u32 seq, int event,

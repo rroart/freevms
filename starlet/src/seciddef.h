@@ -1,5 +1,5 @@
-#ifndef seciddef_h
-#define seciddef_h
+#ifndef SECIDDEF_H
+#define SECIDDEF_H
 
 #define SECID$M_MINOR_ID 0xFFFFFF
 #define SECID$M_MAJOR_ID 0xFF000000

@@ -1,25 +1,25 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
-/* @(#)rpc_msg.h	2.1 88/07/29 4.0 RPCSRC */
+/* @(#)rpc_msg.h    2.1 88/07/29 4.0 RPCSRC */
 /*
  * Sun RPC is a product of Sun Microsystems, Inc. and is provided for
  * unrestricted use provided that this legend is included on all tape
@@ -57,8 +57,8 @@
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
-#define RPC_MSG_VERSION		((u_long) 2)
-#define RPC_SERVICE_PORT	((u_short) 2048)
+#define RPC_MSG_VERSION     ((u_long) 2)
+#define RPC_SERVICE_PORT    ((u_short) 2048)
 
 /*
  * Bottom up definition of an rpc message.
@@ -105,24 +105,24 @@ enum reject_stat
  */
 struct accepted_reply
 {
-    struct opaque_auth	ar_verf;
-    enum accept_stat	ar_stat;
+    struct opaque_auth  ar_verf;
+    enum accept_stat    ar_stat;
     union
     {
         struct
         {
-            u_long	low;
-            u_long	high;
+            u_long  low;
+            u_long  high;
         } AR_versions;
         struct
         {
-            caddr_t	where;
+            caddr_t where;
             xdrproc_t proc;
         } AR_results;
         /* and many other null cases */
     } ru;
-#define	ar_results	ru.AR_results
-#define	ar_vers		ru.AR_versions
+#define ar_results  ru.AR_results
+#define ar_vers     ru.AR_versions
 };
 
 /*
@@ -140,8 +140,8 @@ struct rejected_reply
         } RJ_versions;
         enum auth_stat RJ_why;  /* why authentication did not work */
     } ru;
-#define	rj_vers	ru.RJ_versions
-#define	rj_why	ru.RJ_why
+#define rj_vers ru.RJ_versions
+#define rj_why  ru.RJ_why
 };
 
 /*
@@ -155,8 +155,8 @@ struct reply_body
         struct accepted_reply RP_ar;
         struct rejected_reply RP_dr;
     } ru;
-#define	rp_acpt	ru.RP_ar
-#define	rp_rjct	ru.RP_dr
+#define rp_acpt ru.RP_ar
+#define rp_rjct ru.RP_dr
 };
 
 /*
@@ -164,7 +164,7 @@ struct reply_body
  */
 struct call_body
 {
-    u_long cb_rpcvers;	/* must be equal to two */
+    u_long cb_rpcvers;  /* must be equal to two */
     u_long cb_prog;
     u_long cb_vers;
     u_long cb_proc;
@@ -177,48 +177,48 @@ struct call_body
  */
 struct rpc_msg
 {
-    u_long			rm_xid;
-    enum msg_type		rm_direction;
+    u_long          rm_xid;
+    enum msg_type       rm_direction;
     union
     {
         struct call_body RM_cmb;
         struct reply_body RM_rmb;
     } ru;
-#define	rm_call		ru.RM_cmb
-#define	rm_reply	ru.RM_rmb
+#define rm_call     ru.RM_cmb
+#define rm_reply    ru.RM_rmb
 };
-#define	acpted_rply	ru.RM_rmb.ru.RP_ar
-#define	rjcted_rply	ru.RM_rmb.ru.RP_dr
+#define acpted_rply ru.RM_rmb.ru.RP_ar
+#define rjcted_rply ru.RM_rmb.ru.RP_dr
 
 
 /*
  * XDR routine to handle a rpc message.
  * xdr_callmsg(xdrs, cmsg)
- * 	XDR *xdrs;
- * 	struct rpc_msg *cmsg;
+ *  XDR *xdrs;
+ *  struct rpc_msg *cmsg;
  */
-extern bool_t	xdr_callmsg();
+extern bool_t   xdr_callmsg();
 
 /*
  * XDR routine to pre-serialize the static part of a rpc message.
  * xdr_callhdr(xdrs, cmsg)
- * 	XDR *xdrs;
- * 	struct rpc_msg *cmsg;
+ *  XDR *xdrs;
+ *  struct rpc_msg *cmsg;
  */
-extern bool_t	xdr_callhdr();
+extern bool_t   xdr_callhdr();
 
 /*
  * XDR routine to handle a rpc reply.
  * xdr_replymsg(xdrs, rmsg)
- * 	XDR *xdrs;
- * 	struct rpc_msg *rmsg;
+ *  XDR *xdrs;
+ *  struct rpc_msg *rmsg;
  */
-extern bool_t	xdr_replymsg();
+extern bool_t   xdr_replymsg();
 
 /*
  * Fills in the error part of a reply message.
  * _seterr_reply(msg, error)
- * 	struct rpc_msg *msg;
- * 	struct rpc_err *error;
+ *  struct rpc_msg *msg;
+ *  struct rpc_err *error;
  */
-extern void	_seterr_reply();
+extern void _seterr_reply();

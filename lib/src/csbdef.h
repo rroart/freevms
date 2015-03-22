@@ -1,5 +1,5 @@
-#ifndef csbdef_h
-#define csbdef_h
+#ifndef CSBDEF_H
+#define CSBDEF_H
 
 #include <fkbdef.h>
 

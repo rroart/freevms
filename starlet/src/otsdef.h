@@ -1,5 +1,5 @@
-#ifndef otsdef_h
-#define otsdef_h
+#ifndef OTSDEF_H
+#define OTSDEF_H
 
 #define OTS$_FACILITY 23
 #define OTS$_INVSTRDES 1540108

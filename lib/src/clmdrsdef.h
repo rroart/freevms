@@ -1,5 +1,5 @@
-#ifndef clmdrsdef_h
-#define clmdrsdef_h
+#ifndef CLMDRSDEF_H
+#define CLMDRSDEF_H
 
 CLMDRS$C_PROTOCOL 0x04
 CLMDRS$C_VERSION 0x06

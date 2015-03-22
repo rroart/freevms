@@ -50,41 +50,41 @@ extern struct list_head inactive_list;
 /*
  * vm_flags..
  */
-#define VM_READ		0x00000100	/* currently active flags */
-#define VM_WRITE	0x00000200
-#define VM_EXEC		0x00000400
-#define VM_SHARED	0x00000800
+#define VM_READ     0x00000100  /* currently active flags */
+#define VM_WRITE    0x00000200
+#define VM_EXEC     0x00000400
+#define VM_SHARED   0x00000800
 
-#define VM_MAYREAD	0x00001000	/* limits for mprotect() etc */
-#define VM_MAYWRITE	0x00002000
-#define VM_MAYEXEC	0x00004000
-#define VM_MAYSHARE	0x00008000
+#define VM_MAYREAD  0x00001000  /* limits for mprotect() etc */
+#define VM_MAYWRITE 0x00002000
+#define VM_MAYEXEC  0x00004000
+#define VM_MAYSHARE 0x00008000
 
-#define VM_GROWSDOWN	0x00010000	/* general info on the segment */
-#define VM_GROWSUP	0x00020000
-#define VM_SHM		0x00000000	/* shared memory area, don't swap out */
-#define VM_PFNMAP	0x00040000	/* Page-ranges managed without "struct page", just pure PFN */
-#define VM_DENYWRITE	0x00080000	/* ETXTBSY on write attempts.. */
+#define VM_GROWSDOWN    0x00010000  /* general info on the segment */
+#define VM_GROWSUP  0x00020000
+#define VM_SHM      0x00000000  /* shared memory area, don't swap out */
+#define VM_PFNMAP   0x00040000  /* Page-ranges managed without "struct page", just pure PFN */
+#define VM_DENYWRITE    0x00080000  /* ETXTBSY on write attempts.. */
 
-#define VM_EXECUTABLE	0x00100000
-#define VM_LOCKED	0x00200000
-#define VM_IO           0x00400000	/* Memory mapped I/O or similar */
+#define VM_EXECUTABLE   0x00100000
+#define VM_LOCKED   0x00200000
+#define VM_IO           0x00400000  /* Memory mapped I/O or similar */
 
 /* Used by sys_madvise() */
-#define VM_SEQ_READ	0x00800000	/* App will access data sequentially */
-#define VM_RAND_READ	0x01000000	/* App will not benefit from clustered reads */
+#define VM_SEQ_READ 0x00800000  /* App will access data sequentially */
+#define VM_RAND_READ    0x01000000  /* App will not benefit from clustered reads */
 
-#define VM_DONTCOPY	0x02000000      /* Do not copy this vma on fork */
-#define VM_DONTEXPAND	0x04000000	/* Cannot expand with mremap() */
-#define VM_RESERVED	0x08000000	/* Don't unmap it from swap_out */
+#define VM_DONTCOPY 0x02000000      /* Do not copy this vma on fork */
+#define VM_DONTEXPAND   0x04000000  /* Cannot expand with mremap() */
+#define VM_RESERVED 0x08000000  /* Don't unmap it from swap_out */
 
-#define VM_STACK_FLAGS	0x00017700
+#define VM_STACK_FLAGS  0x00017700
 
-#define VM_READHINTMASK			(VM_SEQ_READ | VM_RAND_READ)
-#define VM_ClearReadHint(v)		(v)->rde$l_flags &= ~VM_READHINTMASK
-#define VM_NormalReadHint(v)		(!((v)->rde$l_flags & VM_READHINTMASK))
-#define VM_SequentialReadHint(v)	((v)->rde$l_flags & VM_SEQ_READ)
-#define VM_RandomReadHint(v)		((v)->rde$l_flags & VM_RAND_READ)
+#define VM_READHINTMASK         (VM_SEQ_READ | VM_RAND_READ)
+#define VM_ClearReadHint(v)     (v)->rde$l_flags &= ~VM_READHINTMASK
+#define VM_NormalReadHint(v)        (!((v)->rde$l_flags & VM_READHINTMASK))
+#define VM_SequentialReadHint(v)    ((v)->rde$l_flags & VM_SEQ_READ)
+#define VM_RandomReadHint(v)        ((v)->rde$l_flags & VM_RAND_READ)
 
 /* read ahead limits */
 extern int vm_min_readahead;
@@ -121,11 +121,11 @@ struct vm_operations_struct
  * Also, many kernel routines increase the page count before a critical
  * routine so they can be sure the page doesn't go away from under them.
  */
-#define get_page(p)		atomic_inc(&(p)->count)
-#define put_page(p)		__free_page(p)
-#define put_page_testzero(p) 	atomic_dec_and_test(&(p)->count)
-#define page_count(p)		atomic_read(&(p)->count)
-#define set_page_count(p,v) 	atomic_set(&(p)->count, v)
+#define get_page(p)     atomic_inc(&(p)->count)
+#define put_page(p)     __free_page(p)
+#define put_page_testzero(p)    atomic_dec_and_test(&(p)->count)
+#define page_count(p)       atomic_read(&(p)->count)
+#define set_page_count(p,v)     atomic_set(&(p)->count, v)
 
 /*
  * Various page->flags bits:
@@ -213,41 +213,41 @@ struct vm_operations_struct
  * mapped into kernel address space...
  */
 #if 0
-#define PG_locked		 3	/* Page is locked. Don't touch. */
-#define PG_error		20
-#define PG_referenced		21
-#define PG_uptodate		22
-#define PG_dirty		13
-#define PG_unused		23
-#define PG_lru			24
-#define PG_active		25
+#define PG_locked        3  /* Page is locked. Don't touch. */
+#define PG_error        20
+#define PG_referenced       21
+#define PG_uptodate     22
+#define PG_dirty        13
+#define PG_unused       23
+#define PG_lru          24
+#define PG_active       25
 #endif
-#define PG_slab			26
+#define PG_slab         26
 #if 0
-#define PG_skip			27
-//#define PG_highmem		11
-#define PG_checked		28	/* kill me in 2.5.<early>. */
-#define PG_arch_1		29
+#define PG_skip         27
+//#define PG_highmem        11
+#define PG_checked      28  /* kill me in 2.5.<early>. */
+#define PG_arch_1       29
 #endif
-#define PG_reserved		30
+#define PG_reserved     30
 #if 0
-#define PG_launder		31	/* written out by VM pressure.. */
+#define PG_launder      31  /* written out by VM pressure.. */
 
 /* Make it prettier to test the above... */
-#define UnlockPage(page)	unlock_page(page)
-#define Page_Uptodate(page)	test_bit(PG_uptodate, &(page)->pfn$l_page_state)
-#define SetPageUptodate(page)	set_bit(PG_uptodate, &(page)->pfn$l_page_state)
-#define ClearPageUptodate(page)	clear_bit(PG_uptodate, &(page)->pfn$l_page_state)
-#define PageDirty(page)		test_bit(PG_dirty, &(page)->pfn$l_page_state)
-#define SetPageDirty(page)	set_bit(PG_dirty, &(page)->pfn$l_page_state)
-#define ClearPageDirty(page)	clear_bit(PG_dirty, &(page)->pfn$l_page_state)
-#define PageLocked(page)	test_bit(PG_locked, &(page)->pfn$l_page_state)
-#define LockPage(page)		set_bit(PG_locked, &(page)->pfn$l_page_state)
-#define TryLockPage(page)	test_and_set_bit(PG_locked, &(page)->pfn$l_page_state)
-#define PageChecked(page)	test_bit(PG_checked, &(page)->pfn$l_page_state)
-#define SetPageChecked(page)	set_bit(PG_checked, &(page)->pfn$l_page_state)
-#define PageLaunder(page)	test_bit(PG_launder, &(page)->pfn$l_page_state)
-#define SetPageLaunder(page)	set_bit(PG_launder, &(page)->pfn$l_page_state)
+#define UnlockPage(page)    unlock_page(page)
+#define Page_Uptodate(page) test_bit(PG_uptodate, &(page)->pfn$l_page_state)
+#define SetPageUptodate(page)   set_bit(PG_uptodate, &(page)->pfn$l_page_state)
+#define ClearPageUptodate(page) clear_bit(PG_uptodate, &(page)->pfn$l_page_state)
+#define PageDirty(page)     test_bit(PG_dirty, &(page)->pfn$l_page_state)
+#define SetPageDirty(page)  set_bit(PG_dirty, &(page)->pfn$l_page_state)
+#define ClearPageDirty(page)    clear_bit(PG_dirty, &(page)->pfn$l_page_state)
+#define PageLocked(page)    test_bit(PG_locked, &(page)->pfn$l_page_state)
+#define LockPage(page)      set_bit(PG_locked, &(page)->pfn$l_page_state)
+#define TryLockPage(page)   test_and_set_bit(PG_locked, &(page)->pfn$l_page_state)
+#define PageChecked(page)   test_bit(PG_checked, &(page)->pfn$l_page_state)
+#define SetPageChecked(page)    set_bit(PG_checked, &(page)->pfn$l_page_state)
+#define PageLaunder(page)   test_bit(PG_launder, &(page)->pfn$l_page_state)
+#define SetPageLaunder(page)    set_bit(PG_launder, &(page)->pfn$l_page_state)
 
 extern void FASTCALL(set_page_dirty(struct page *));
 
@@ -257,45 +257,45 @@ extern void FASTCALL(set_page_dirty(struct page *));
  * the clear_bit and the read of the waitqueue (to avoid SMP races with a
  * parallel wait_on_page).
  */
-#define PageError(page)		test_bit(PG_error, &(page)->pfn$l_page_state)
-#define SetPageError(page)	set_bit(PG_error, &(page)->pfn$l_page_state)
-#define ClearPageError(page)	clear_bit(PG_error, &(page)->pfn$l_page_state)
-#define PageReferenced(page)	test_bit(PG_referenced, &(page)->pfn$l_page_state)
-#define SetPageReferenced(page)	set_bit(PG_referenced, &(page)->pfn$l_page_state)
-#define ClearPageReferenced(page)	clear_bit(PG_referenced, &(page)->pfn$l_page_state)
-#define PageTestandClearReferenced(page)	test_and_clear_bit(PG_referenced, &(page)->pfn$l_page_state)
+#define PageError(page)     test_bit(PG_error, &(page)->pfn$l_page_state)
+#define SetPageError(page)  set_bit(PG_error, &(page)->pfn$l_page_state)
+#define ClearPageError(page)    clear_bit(PG_error, &(page)->pfn$l_page_state)
+#define PageReferenced(page)    test_bit(PG_referenced, &(page)->pfn$l_page_state)
+#define SetPageReferenced(page) set_bit(PG_referenced, &(page)->pfn$l_page_state)
+#define ClearPageReferenced(page)   clear_bit(PG_referenced, &(page)->pfn$l_page_state)
+#define PageTestandClearReferenced(page)    test_and_clear_bit(PG_referenced, &(page)->pfn$l_page_state)
 #else
 #define PageLocked(x) (0)
 #endif
-#define PageSlab(page)		test_bit(PG_slab, &(page)->pfn$l_page_state)
-#define PageSetSlab(page)	set_bit(PG_slab, &(page)->pfn$l_page_state)
-#define PageClearSlab(page)	clear_bit(PG_slab, &(page)->pfn$l_page_state)
-#define PageReserved(page)	test_bit(PG_reserved, &(page)->pfn$l_page_state)
+#define PageSlab(page)      test_bit(PG_slab, &(page)->pfn$l_page_state)
+#define PageSetSlab(page)   set_bit(PG_slab, &(page)->pfn$l_page_state)
+#define PageClearSlab(page) clear_bit(PG_slab, &(page)->pfn$l_page_state)
+#define PageReserved(page)  test_bit(PG_reserved, &(page)->pfn$l_page_state)
 #if 0
 
-#define PageActive(page)	test_bit(PG_active, &(page)->pfn$l_page_state)
-#define SetPageActive(page)	set_bit(PG_active, &(page)->pfn$l_page_state)
-#define ClearPageActive(page)	clear_bit(PG_active, &(page)->pfn$l_page_state)
+#define PageActive(page)    test_bit(PG_active, &(page)->pfn$l_page_state)
+#define SetPageActive(page) set_bit(PG_active, &(page)->pfn$l_page_state)
+#define ClearPageActive(page)   clear_bit(PG_active, &(page)->pfn$l_page_state)
 
-#define PageLRU(page)		test_bit(PG_lru, &(page)->pfn$l_page_state)
-#define TestSetPageLRU(page)	test_and_set_bit(PG_lru, &(page)->pfn$l_page_state)
-#define TestClearPageLRU(page)	test_and_clear_bit(PG_lru, &(page)->pfn$l_page_state)
+#define PageLRU(page)       test_bit(PG_lru, &(page)->pfn$l_page_state)
+#define TestSetPageLRU(page)    test_and_set_bit(PG_lru, &(page)->pfn$l_page_state)
+#define TestClearPageLRU(page)  test_and_clear_bit(PG_lru, &(page)->pfn$l_page_state)
 
 #ifdef CONFIG_HIGHMEM
-#define PageHighMem(page)		test_bit(PG_highmem, &(page)->pfn$l_page_state)
+#define PageHighMem(page)       test_bit(PG_highmem, &(page)->pfn$l_page_state)
 #else
-#define PageHighMem(page)		0 /* needed to optimize away at compile time */
+#define PageHighMem(page)       0 /* needed to optimize away at compile time */
 #endif
 
 #endif
-#define SetPageReserved(page)		set_bit(PG_reserved, &(page)->pfn$l_page_state)
-#define ClearPageReserved(page)		clear_bit(PG_reserved, &(page)->pfn$l_page_state)
+#define SetPageReserved(page)       set_bit(PG_reserved, &(page)->pfn$l_page_state)
+#define ClearPageReserved(page)     clear_bit(PG_reserved, &(page)->pfn$l_page_state)
 
 /*
  * Error return values for the *_nopage functions
  */
-#define NOPAGE_SIGBUS	(NULL)
-#define NOPAGE_OOM	((struct page *) (-1))
+#define NOPAGE_SIGBUS   (NULL)
+#define NOPAGE_OOM  ((struct page *) (-1))
 
 /* The array of struct pages */
 extern mem_map_t * mem_map;
@@ -329,10 +329,10 @@ extern unsigned long FASTCALL(__get_free_pages(unsigned int gfp_mask, unsigned i
 extern unsigned long FASTCALL(get_zeroed_page(unsigned int gfp_mask));
 
 #define __get_free_page(gfp_mask) \
-		__get_free_pages((gfp_mask),0)
+        __get_free_pages((gfp_mask),0)
 
 #define __get_dma_pages(gfp_mask, order) \
-		__get_free_pages((gfp_mask) | GFP_DMA,(order))
+        __get_free_pages((gfp_mask) | GFP_DMA,(order))
 
 /*
  * The old interface name will be removed in 2.5:
@@ -412,35 +412,35 @@ extern int check_pgt_cache(void);
 /*
  * We use mm->page_table_lock to guard all pagetable pages of the mm.
  */
-#define pte_lock_init(page)	do {} while (0)
-#define pte_lock_deinit(page)	do {} while (0)
-#define pte_lockptr(mm, pmd)	({(void)(pmd); &(mm)->page_table_lock;})
+#define pte_lock_init(page) do {} while (0)
+#define pte_lock_deinit(page)   do {} while (0)
+#define pte_lockptr(mm, pmd)    ({(void)(pmd); &(mm)->page_table_lock;})
 
-#define pte_offset_map_lock(mm, pmd, address, ptlp)	\
-({							\
-	spinlock_t *__ptl = pte_lockptr(mm, pmd);	\
-	pte_t *__pte = pte_offset_map(pmd, address);	\
-	*(ptlp) = __ptl;				\
-	spin_lock(__ptl);				\
-	__pte;						\
+#define pte_offset_map_lock(mm, pmd, address, ptlp) \
+({                          \
+    spinlock_t *__ptl = pte_lockptr(mm, pmd);   \
+    pte_t *__pte = pte_offset_map(pmd, address);    \
+    *(ptlp) = __ptl;                \
+    spin_lock(__ptl);               \
+    __pte;                      \
 })
 
-#define pte_unmap_unlock(pte, ptl)	do {		\
-	spin_unlock(ptl);				\
-	pte_unmap(pte);					\
+#define pte_unmap_unlock(pte, ptl)  do {        \
+    spin_unlock(ptl);               \
+    pte_unmap(pte);                 \
 } while (0)
 
-#define pte_alloc_map(mm, pmd, address)			\
-	((unlikely(!pmd_present(*(pmd))) && __pte_alloc(mm, pmd, address))? \
-		NULL: pte_offset_map(pmd, address))
+#define pte_alloc_map(mm, pmd, address)         \
+    ((unlikely(!pmd_present(*(pmd))) && __pte_alloc(mm, pmd, address))? \
+        NULL: pte_offset_map(pmd, address))
 
-#define pte_alloc_map_lock(mm, pmd, address, ptlp)	\
-	((unlikely(!pmd_present(*(pmd))) && __pte_alloc(mm, pmd, address))? \
-		NULL: pte_offset_map_lock(mm, pmd, address, ptlp))
+#define pte_alloc_map_lock(mm, pmd, address, ptlp)  \
+    ((unlikely(!pmd_present(*(pmd))) && __pte_alloc(mm, pmd, address))? \
+        NULL: pte_offset_map_lock(mm, pmd, address, ptlp))
 
-#define pte_alloc_kernel(pmd, address)			\
-	((unlikely(!pmd_present(*(pmd))) && __pte_alloc_kernel(pmd, address))? \
-		NULL: pte_offset_kernel(pmd, address))
+#define pte_alloc_kernel(pmd, address)          \
+    ((unlikely(!pmd_present(*(pmd))) && __pte_alloc_kernel(pmd, address))? \
+        NULL: pte_offset_kernel(pmd, address))
 
 extern void free_area_init(unsigned long * zones_size);
 extern void free_area_init_node(int nid, pg_data_t *pgdat, struct page *pmap,
@@ -523,37 +523,37 @@ extern unsigned long page_unuse(struct page *);
 extern void truncate_inode_pages(struct address_space *, loff_t);
 
 /* generic vm_area_ops exported for stackable file systems */
-extern int filemap_sync(struct _rde *, unsigned long,	size_t, unsigned int);
+extern int filemap_sync(struct _rde *, unsigned long,   size_t, unsigned int);
 extern struct page *filemap_nopage(struct _rde *, unsigned long, int);
 
 /*
  * GFP bitmasks..
  */
 /* Zone modifiers in GFP_ZONEMASK (see linux/mmzone.h - low four bits) */
-#define __GFP_DMA	0x01
-#define __GFP_HIGHMEM	0x02
+#define __GFP_DMA   0x01
+#define __GFP_HIGHMEM   0x02
 
 /* Action modifiers - doesn't change the zoning */
-#define __GFP_WAIT	0x10	/* Can wait and reschedule? */
-#define __GFP_HIGH	0x20	/* Should access emergency pools? */
-#define __GFP_IO	0x40	/* Can start low memory physical IO? */
-#define __GFP_HIGHIO	0x80	/* Can start high mem physical IO? */
-#define __GFP_FS	0x100	/* Can call down to low-level FS? */
+#define __GFP_WAIT  0x10    /* Can wait and reschedule? */
+#define __GFP_HIGH  0x20    /* Should access emergency pools? */
+#define __GFP_IO    0x40    /* Can start low memory physical IO? */
+#define __GFP_HIGHIO    0x80    /* Can start high mem physical IO? */
+#define __GFP_FS    0x100   /* Can call down to low-level FS? */
 
-#define GFP_NOHIGHIO	(__GFP_HIGH | __GFP_WAIT | __GFP_IO)
-#define GFP_NOIO	(__GFP_HIGH | __GFP_WAIT)
-#define GFP_NOFS	(__GFP_HIGH | __GFP_WAIT | __GFP_IO | __GFP_HIGHIO)
-#define GFP_ATOMIC	(__GFP_HIGH)
-#define GFP_USER	(             __GFP_WAIT | __GFP_IO | __GFP_HIGHIO | __GFP_FS)
-#define GFP_HIGHUSER	(             __GFP_WAIT | __GFP_IO | __GFP_HIGHIO | __GFP_FS | __GFP_HIGHMEM)
-#define GFP_KERNEL	(__GFP_HIGH | __GFP_WAIT | __GFP_IO | __GFP_HIGHIO | __GFP_FS)
-#define GFP_NFS		(__GFP_HIGH | __GFP_WAIT | __GFP_IO | __GFP_HIGHIO | __GFP_FS)
-#define GFP_KSWAPD	(             __GFP_WAIT | __GFP_IO | __GFP_HIGHIO | __GFP_FS)
+#define GFP_NOHIGHIO    (__GFP_HIGH | __GFP_WAIT | __GFP_IO)
+#define GFP_NOIO    (__GFP_HIGH | __GFP_WAIT)
+#define GFP_NOFS    (__GFP_HIGH | __GFP_WAIT | __GFP_IO | __GFP_HIGHIO)
+#define GFP_ATOMIC  (__GFP_HIGH)
+#define GFP_USER    (             __GFP_WAIT | __GFP_IO | __GFP_HIGHIO | __GFP_FS)
+#define GFP_HIGHUSER    (             __GFP_WAIT | __GFP_IO | __GFP_HIGHIO | __GFP_FS | __GFP_HIGHMEM)
+#define GFP_KERNEL  (__GFP_HIGH | __GFP_WAIT | __GFP_IO | __GFP_HIGHIO | __GFP_FS)
+#define GFP_NFS     (__GFP_HIGH | __GFP_WAIT | __GFP_IO | __GFP_HIGHIO | __GFP_FS)
+#define GFP_KSWAPD  (             __GFP_WAIT | __GFP_IO | __GFP_HIGHIO | __GFP_FS)
 
 /* Flag - indicates that the buffer will be suitable for DMA.  Ignored on some
    platforms, used as appropriate on others */
 
-#define GFP_DMA		__GFP_DMA
+#define GFP_DMA     __GFP_DMA
 
 static inline unsigned int pf_gfp_mask(unsigned int gfp_mask)
 {
@@ -579,7 +579,7 @@ static inline int expand_stack(struct _rde * vma, unsigned long address)
     //spin_lock(&vma->vm_mm->page_table_lock);
     grow = (unsigned long)(vma->rde$pq_start_va - address) >> PAGE_SHIFT;
     if ((vma->rde$pq_start_va + vma->rde$q_region_size) - address > current->rlim[RLIMIT_STACK].rlim_cur /* ||
-														((vma->vm_mm->total_vm + grow) << PAGE_SHIFT) > current->rlim[RLIMIT_AS].rlim_cur*/)
+                                                        ((vma->vm_mm->total_vm + grow) << PAGE_SHIFT) > current->rlim[RLIMIT_AS].rlim_cur*/)
     {
         //spin_unlock(&vma->vm_mm->page_table_lock);
         return -ENOMEM;

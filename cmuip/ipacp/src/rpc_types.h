@@ -1,25 +1,25 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
-/* @(#)types.h	2.3 88/08/15 4.0 RPCSRC */
+/* @(#)types.h  2.3 88/08/15 4.0 RPCSRC */
 /*
  * Sun RPC is a product of Sun Microsystems, Inc. and is provided for
  * unrestricted use provided that this legend is included on all tape
@@ -56,20 +56,20 @@
 #ifndef __TYPES_RPC_HEADER__
 #define __TYPES_RPC_HEADER__
 
-#define	bool_t	int
-#define	enum_t	int
-#define	FALSE	(0)
-#define	TRUE	(1)
-#define __dontcare__	-1
+#define bool_t  int
+#define enum_t  int
+#define FALSE   (0)
+#define TRUE    (1)
+#define __dontcare__    -1
 #ifndef NULL
-#	define NULL 0
+#   define NULL 0
 #endif
 
 #ifndef __STDLIB_LOADED
 /*extern char *malloc();*/
 #endif
-#define mem_alloc(bsize)	malloc(bsize)
-#define mem_free(ptr, bsize)	free(ptr)
+#define mem_alloc(bsize)    malloc(bsize)
+#define mem_free(ptr, bsize)    free(ptr)
 
 /* ie, we haven't already included it */
 /*

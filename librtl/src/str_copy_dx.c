@@ -1,7 +1,7 @@
 /*
  * str.c
  *
- *	Code for VAX STR$COPY_DX routine
+ *  Code for VAX STR$COPY_DX routine
  *
  * Description:
  *
@@ -10,11 +10,11 @@
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  */
 
 #include <stdio.h>
@@ -30,9 +30,9 @@
 unsigned long str$copy_dx(struct dsc$descriptor_s* destination_string,
                           const struct dsc$descriptor_s* source_string)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
-    unsigned long result = STR$_NORMAL;	/* Working result */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
+    unsigned long result = STR$_NORMAL; /* Working result */
 
     /*
      * Get information about source string

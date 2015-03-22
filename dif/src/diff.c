@@ -1,5 +1,5 @@
-#define MODULE_NAME	ODS2
-#define MODULE_IDENT	"V1.3"
+#define MODULE_NAME ODS2
+#define MODULE_IDENT    "V1.3"
 
 /*     Ods2.c v1.3   Mainline ODS2 program   */
 
@@ -37,10 +37,10 @@
 
 /* Modified by:
  *
- *   31-AUG-2001 01:04	Hunter Goatley <goathunter@goatley.com>
+ *   31-AUG-2001 01:04  Hunter Goatley <goathunter@goatley.com>
  *
- *	For VMS, added routine getcmd() to read commands with full
- *	command recall capabilities.
+ *  For VMS, added routine getcmd() to read commands with full
+ *  command recall capabilities.
  *
  */
 

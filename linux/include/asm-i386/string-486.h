@@ -9,17 +9,17 @@
  * very easy to understand. Everything is done entirely within the register
  * set, making the functions fast and clean.
  *
- *		Copyright (C) 1991, 1992 Linus Torvalds
- *		Revised and optimized for i486/pentium
- *		1994/03/15 by Alberto Vignani/Davide Parodi @crf.it
+ *      Copyright (C) 1991, 1992 Linus Torvalds
+ *      Revised and optimized for i486/pentium
+ *      1994/03/15 by Alberto Vignani/Davide Parodi @crf.it
  *
- *	Split into 2 CPU specific files by Alan Cox to keep #ifdef noise down.
+ *  Split into 2 CPU specific files by Alan Cox to keep #ifdef noise down.
  *
- *	1999/10/5	Proper register args for newer GCCs and minor bugs
- *			fixed - Petko Manolov (petkan@spct.net)
- *	1999/10/14	3DNow memscpy() added - Petkan
- *	2000/05/09	extern changed to static in function definitions
- *			and a few cleanups - Petkan
+ *  1999/10/5   Proper register args for newer GCCs and minor bugs
+ *          fixed - Petko Manolov (petkan@spct.net)
+ *  1999/10/14  3DNow memscpy() added - Petkan
+ *  2000/05/09  extern changed to static in function definitions
+ *          and a few cleanups - Petkan
  */
 
 #define __HAVE_ARCH_STRCPY
@@ -187,7 +187,7 @@ static inline char * strchr(const char * s, int c)
 #define __HAVE_ARCH_STRRCHR
 static inline char * strrchr(const char * s, int c)
 {
-    int	d0, d1;
+    int d0, d1;
     register char * __res;
     __asm__ __volatile__(
         "movb %%al,%%ah\n"
@@ -206,7 +206,7 @@ static inline char * strrchr(const char * s, int c)
 #define __HAVE_ARCH_STRCSPN
 static inline size_t strcspn(const char * cs, const char * ct)
 {
-    int	d0, d1;
+    int d0, d1;
     register char * __res;
     __asm__ __volatile__(
         "movl %6,%%edi\n\t"
@@ -255,7 +255,7 @@ static inline size_t strlen(const char * s)
 #define __HAVE_ARCH_STRNLEN
 static inline size_t strnlen(const char * s, size_t count)
 {
-    int	d0;
+    int d0;
     register int __res;
     __asm__ __volatile__(
         "movl %3,%0\n\t"
@@ -275,7 +275,7 @@ static inline size_t strnlen(const char * s, size_t count)
 
 
 /*
- *	These ought to get tweaked to do some cache priming.
+ *  These ought to get tweaked to do some cache priming.
  */
 
 static inline void * __memcpy_by4(void * to, const void * from, size_t n)
@@ -318,7 +318,7 @@ static inline void * __memcpy_by2(void * to, const void * from, size_t n)
 
 static inline void * __memcpy_g(void * to, const void * from, size_t n)
 {
-    int	d0, d1, d2;
+    int d0, d1, d2;
     register void *tmp = (void *)to;
     __asm__ __volatile__ (
         "shrl $1,%%ecx\n\t"
@@ -381,7 +381,7 @@ static inline void *__memcpy3d(void *to, const void *from, size_t len)
 #else /* CONFIG_X86_USE_3DNOW */
 
 /*
-**	Generic routines
+**  Generic routines
 */
 
 
@@ -392,18 +392,18 @@ static inline void *__memcpy3d(void *to, const void *from, size_t len)
 
 extern void __struct_cpy_bug( void );
 
-#define struct_cpy(x,y)				\
-({						\
-	if (sizeof(*(x)) != sizeof(*(y)))	\
-		__struct_cpy_bug;		\
-	memcpy(x, y, sizeof(*(x)));		\
+#define struct_cpy(x,y)             \
+({                      \
+    if (sizeof(*(x)) != sizeof(*(y)))   \
+        __struct_cpy_bug;       \
+    memcpy(x, y, sizeof(*(x)));     \
 })
 
 
 #define __HAVE_ARCH_MEMMOVE
 static inline void * memmove(void * dest,const void * src, size_t n)
 {
-    int	d0, d1, d2;
+    int d0, d1, d2;
     register void *tmp = (void *)dest;
     if (dest<src)
         __asm__ __volatile__ (
@@ -425,10 +425,10 @@ static inline void * memmove(void * dest,const void * src, size_t n)
 }
 
 
-#define	__HAVE_ARCH_MEMCMP
+#define __HAVE_ARCH_MEMCMP
 static inline int memcmp(const void * cs,const void * ct,size_t count)
 {
-    int	d0, d1, d2;
+    int d0, d1, d2;
     register int __res;
     __asm__ __volatile__(
         "repe\n\t"
@@ -446,7 +446,7 @@ static inline int memcmp(const void * cs,const void * ct,size_t count)
 #define __HAVE_ARCH_MEMCHR
 static inline void * memchr(const void * cs,int c,size_t count)
 {
-    int	d0;
+    int d0;
     register void * __res;
     if (!count)
         return NULL;
@@ -564,7 +564,7 @@ static inline void * __memset_gc_by2(void * s, char c, size_t count)
 
 static inline void * __memset_cg(void * s, char c, size_t count)
 {
-    int	d0, d1;
+    int d0, d1;
     register void *tmp = (void *)s;
     __asm__ __volatile__ (
         "shrl $1,%%ecx\n\t"
@@ -581,7 +581,7 @@ static inline void * __memset_cg(void * s, char c, size_t count)
 
 static inline void * __memset_gg(void * s,char c,size_t count)
 {
-    int	d0, d1, d2;
+    int d0, d1, d2;
     register void *tmp = (void *)s;
     __asm__ __volatile__ (
         "movb %%al,%%ah\n\t"

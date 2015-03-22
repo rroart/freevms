@@ -1,5 +1,5 @@
-#ifndef aqbdef_h
-#define aqbdef_h
+#ifndef AQBDEF_H
+#define AQBDEF_H
 
 #define AQB$M_UNIQUE 0x1
 #define AQB$M_DEFCLASS 0x2
@@ -52,7 +52,7 @@ struct _aqb
     void *aqb$l_bufcache;
     unsigned int aqb$l_mount_count;
     struct _vcb *aqb$l_orphaned_vcb;
-    void (*aqb$l_astadr)();
+    void (*aqb$l_astadr)(void);
 };
 
 #endif

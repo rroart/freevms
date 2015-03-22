@@ -9,7 +9,7 @@
 #include <linux/mmzone.h>
 #include <linux/spinlock.h>
 
-int numnodes = 1;	/* Initialized for UMA platforms */
+int numnodes = 1;   /* Initialized for UMA platforms */
 
 static bootmem_data_t contig_bootmem_data;
 pg_data_t contig_page_data = { bdata:

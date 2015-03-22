@@ -1,7 +1,7 @@
 /*
- *	strget1_dx_64
+ *  strget1_dx_64
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,18 +19,18 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
 /*
-*	Code for VAX STR$GET1_DX routine
+*   Code for VAX STR$GET1_DX routine
 *
 * Description:
 *
@@ -40,14 +40,14 @@
 *
 * History
 *
-*	Oct 10, 1996 - Kevin Handy
-*		Preliminary design.
+*   Oct 10, 1996 - Kevin Handy
+*       Preliminary design.
 *
-*	Feb 4, 1997 - Kevin Handy
-*		Include "stdlib.h" to lose warnings with '-Wall'.
+*   Feb 4, 1997 - Kevin Handy
+*       Include "stdlib.h" to lose warnings with '-Wall'.
 *
-*	Feb 26, 2004 - Andrew Allison
-*		Added GNU License
+*   Feb 26, 2004 - Andrew Allison
+*       Added GNU License
 */
 
 #include <stdio.h>
@@ -61,14 +61,14 @@
 /*************************************************************
  * str$get1_dx_64
  *
- *	Allocates a specified number of bytes of virtual memory
- *	to a specified string descriptor. The descriptor must
- *	be dynamic.
+ *  Allocates a specified number of bytes of virtual memory
+ *  to a specified string descriptor. The descriptor must
+ *  be dynamic.
  *
- *	If the string descriptor already has dynamic memory
- *	allocated to it, but the amount is less than what is
- *	asked for, the space will be deallocated before it
- *	allocates new space.
+ *  If the string descriptor already has dynamic memory
+ *  allocated to it, but the amount is less than what is
+ *  asked for, the space will be deallocated before it
+ *  allocates new space.
  */
 unsigned long str$get1_dx_64 (unsigned short* word_integer_length,
                               struct dsc$descriptor_s* character_string)
@@ -92,11 +92,11 @@ unsigned long str$get1_dx_64 (unsigned short* word_integer_length,
          */
         if (character_string->dsc$w_length != *word_integer_length)
         {
-            int	i;
+            int i;
             /*
              * Reallocate old memory
              */
-//			new_memory = (char*)realloc(character_string->dsc$a_pointer, *word_integer_length);
+//          new_memory = (char*)realloc(character_string->dsc$a_pointer, *word_integer_length);
             *word_integer_length++;
             new_memory = (char*)calloc(1,*word_integer_length);
             *word_integer_length--;

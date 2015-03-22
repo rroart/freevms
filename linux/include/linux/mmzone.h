@@ -20,8 +20,8 @@
 
 typedef struct free_area_struct
 {
-    struct list_head	free_list;
-    unsigned long		*map;
+    struct list_head    free_list;
+    unsigned long       *map;
 } free_area_t;
 
 struct pglist_data;
@@ -30,44 +30,44 @@ struct pglist_data;
  * On machines where it is needed (eg PCs) we divide physical memory
  * into multiple physical zones. On a PC we have 3 zones:
  *
- * ZONE_DMA	  < 16 MB	ISA DMA capable memory
- * ZONE_NORMAL	16-896 MB	direct mapped by the kernel
- * ZONE_HIGHMEM	 > 896 MB	only page cache and user processes
+ * ZONE_DMA   < 16 MB   ISA DMA capable memory
+ * ZONE_NORMAL  16-896 MB   direct mapped by the kernel
+ * ZONE_HIGHMEM  > 896 MB   only page cache and user processes
  */
 typedef struct zone_struct
 {
     /*
      * Commonly accessed fields:
      */
-    spinlock_t		lock;
-    unsigned long		free_pages;
-    unsigned long		pages_min, pages_low, pages_high;
-    int			need_balance;
+    spinlock_t      lock;
+    unsigned long       free_pages;
+    unsigned long       pages_min, pages_low, pages_high;
+    int         need_balance;
 
     /*
      * free areas of different sizes
      */
-    free_area_t		free_area[MAX_ORDER];
+    free_area_t     free_area[MAX_ORDER];
 
     /*
      * Discontig memory support fields.
      */
-    struct pglist_data	*zone_pgdat;
-    struct page		*zone_mem_map;
-    unsigned long		zone_start_paddr;
-    unsigned long		zone_start_mapnr;
+    struct pglist_data  *zone_pgdat;
+    struct page     *zone_mem_map;
+    unsigned long       zone_start_paddr;
+    unsigned long       zone_start_mapnr;
 
     /*
      * rarely used fields:
      */
-    char			*name;
-    unsigned long		size;
+    char            *name;
+    unsigned long       size;
 } zone_t;
 
-#define ZONE_DMA		0
-#define ZONE_NORMAL		1
-#define ZONE_HIGHMEM		2
-#define MAX_NR_ZONES		3
+#define ZONE_DMA        0
+#define ZONE_NORMAL     1
+#define ZONE_HIGHMEM        2
+#define MAX_NR_ZONES        3
 
 /*
  * One allocation request operates on a zonelist. A zonelist
@@ -85,7 +85,7 @@ typedef struct zonelist_struct
     zone_t * zones [MAX_NR_ZONES+1]; // NULL delimited
 } zonelist_t;
 
-#define GFP_ZONEMASK	0x0f
+#define GFP_ZONEMASK    0x0f
 
 /*
  * The pg_data_t structure is used in machines with CONFIG_DISCONTIGMEM
@@ -117,8 +117,8 @@ typedef struct pglist_data
 extern int numnodes;
 extern pg_data_t *pgdat_list;
 
-#define memclass(pgzone, classzone)	(((pgzone)->zone_pgdat == (classzone)->zone_pgdat) \
-			&& ((pgzone) <= (classzone)))
+#define memclass(pgzone, classzone) (((pgzone)->zone_pgdat == (classzone)->zone_pgdat) \
+            && ((pgzone) <= (classzone)))
 
 /*
  * The following two are not meant for general usage. They are here as
@@ -134,8 +134,8 @@ extern pg_data_t contig_page_data;
 
 #ifndef CONFIG_DISCONTIGMEM
 
-#define NODE_DATA(nid)		(&contig_page_data)
-#define NODE_MEM_MAP(nid)	mem_map
+#define NODE_DATA(nid)      (&contig_page_data)
+#define NODE_MEM_MAP(nid)   mem_map
 
 #else /* !CONFIG_DISCONTIGMEM */
 
@@ -143,8 +143,8 @@ extern pg_data_t contig_page_data;
 
 #endif /* !CONFIG_DISCONTIGMEM */
 
-#define MAP_ALIGN(x)	((((x) % sizeof(mem_map_t)) == 0) ? (x) : ((x) + \
-		sizeof(mem_map_t) - ((x) % sizeof(mem_map_t))))
+#define MAP_ALIGN(x)    ((((x) % sizeof(mem_map_t)) == 0) ? (x) : ((x) + \
+        sizeof(mem_map_t) - ((x) % sizeof(mem_map_t))))
 
 #endif /* !__ASSEMBLY__ */
 #endif /* __KERNEL__ */

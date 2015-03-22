@@ -13,11 +13,11 @@
 #endif
 
 #ifndef UTS_NODENAME
-#define UTS_NODENAME "(none)"	/* set by sethostname() */
+#define UTS_NODENAME "(none)"   /* set by sethostname() */
 #endif
 
 #ifndef UTS_DOMAINNAME
-#define UTS_DOMAINNAME "(none)"	/* set by setdomainname() */
+#define UTS_DOMAINNAME "(none)" /* set by setdomainname() */
 #endif
 
 #endif

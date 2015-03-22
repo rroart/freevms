@@ -22,22 +22,22 @@
  * CAPI_REGISTER
  */
 
-typedef struct capi_register_params  	/* CAPI_REGISTER */
+typedef struct capi_register_params     /* CAPI_REGISTER */
 {
-    __u32 level3cnt;	/* No. of simulatneous user data connections */
-    __u32 datablkcnt;	/* No. of buffered data messages */
-    __u32 datablklen;	/* Size of buffered data messages */
+    __u32 level3cnt;    /* No. of simulatneous user data connections */
+    __u32 datablkcnt;   /* No. of buffered data messages */
+    __u32 datablklen;   /* Size of buffered data messages */
 } capi_register_params;
 
-#define	CAPI_REGISTER	_IOW('C',0x01,struct capi_register_params)
+#define CAPI_REGISTER   _IOW('C',0x01,struct capi_register_params)
 
 /*
  * CAPI_GET_MANUFACTURER
  */
 
-#define CAPI_MANUFACTURER_LEN		64
+#define CAPI_MANUFACTURER_LEN       64
 
-#define	CAPI_GET_MANUFACTURER	_IOWR('C',0x06,CAPI_MANUFACTURER_LEN)
+#define CAPI_GET_MANUFACTURER   _IOWR('C',0x06,CAPI_MANUFACTURER_LEN)
 
 /*
  * CAPI_GET_VERSION
@@ -51,14 +51,14 @@ typedef struct capi_version
     __u32 minormanuversion;
 } capi_version;
 
-#define CAPI_GET_VERSION	_IOWR('C',0x07,struct capi_version)
+#define CAPI_GET_VERSION    _IOWR('C',0x07,struct capi_version)
 
 /*
  * CAPI_GET_SERIAL
  */
 
-#define CAPI_SERIAL_LEN		8
-#define CAPI_GET_SERIAL		_IOWR('C',0x08, CAPI_SERIAL_LEN)
+#define CAPI_SERIAL_LEN     8
+#define CAPI_GET_SERIAL     _IOWR('C',0x08, CAPI_SERIAL_LEN)
 
 /*
  * CAPI_GET_PROFILE
@@ -66,17 +66,17 @@ typedef struct capi_version
 
 typedef struct capi_profile
 {
-    __u16 ncontroller;	/* number of installed controller */
-    __u16 nbchannel;	/* number of B-Channels */
-    __u32 goptions;		/* global options */
-    __u32 support1;		/* B1 protocols support */
-    __u32 support2;		/* B2 protocols support */
-    __u32 support3;		/* B3 protocols support */
-    __u32 reserved[6];	/* reserved */
-    __u32 manu[5];		/* manufacturer specific information */
+    __u16 ncontroller;  /* number of installed controller */
+    __u16 nbchannel;    /* number of B-Channels */
+    __u32 goptions;     /* global options */
+    __u32 support1;     /* B1 protocols support */
+    __u32 support2;     /* B2 protocols support */
+    __u32 support3;     /* B3 protocols support */
+    __u32 reserved[6];  /* reserved */
+    __u32 manu[5];      /* manufacturer specific information */
 } capi_profile;
 
-#define CAPI_GET_PROFILE	_IOWR('C',0x09,struct capi_profile)
+#define CAPI_GET_PROFILE    _IOWR('C',0x09,struct capi_profile)
 
 typedef struct capi_manufacturer_cmd
 {
@@ -88,7 +88,7 @@ typedef struct capi_manufacturer_cmd
  * CAPI_MANUFACTURER_CMD
  */
 
-#define CAPI_MANUFACTURER_CMD	_IOWR('C',0x20, struct capi_manufacturer_cmd)
+#define CAPI_MANUFACTURER_CMD   _IOWR('C',0x20, struct capi_manufacturer_cmd)
 
 /*
  * CAPI_GET_ERRCODE
@@ -96,12 +96,12 @@ typedef struct capi_manufacturer_cmd
  * ioctl returns errcode directly, and in arg, if != 0
  */
 
-#define CAPI_GET_ERRCODE	_IOR('C',0x21, __u16)
+#define CAPI_GET_ERRCODE    _IOR('C',0x21, __u16)
 
 /*
  * CAPI_INSTALLED
  */
-#define CAPI_INSTALLED		_IOR('C',0x22, __u16)
+#define CAPI_INSTALLED      _IOR('C',0x22, __u16)
 
 
 /*
@@ -125,14 +125,14 @@ typedef union capi_ioctl_struct
  * Middleware extension
  */
 
-#define CAPIFLAG_HIGHJACKING	0x0001
+#define CAPIFLAG_HIGHJACKING    0x0001
 
-#define CAPI_GET_FLAGS		_IOR('C',0x23, unsigned)
-#define CAPI_SET_FLAGS		_IOR('C',0x24, unsigned)
-#define CAPI_CLR_FLAGS		_IOR('C',0x25, unsigned)
+#define CAPI_GET_FLAGS      _IOR('C',0x23, unsigned)
+#define CAPI_SET_FLAGS      _IOR('C',0x24, unsigned)
+#define CAPI_CLR_FLAGS      _IOR('C',0x25, unsigned)
 
-#define CAPI_NCCI_OPENCOUNT	_IOR('C',0x26, unsigned)
+#define CAPI_NCCI_OPENCOUNT _IOR('C',0x26, unsigned)
 
-#define CAPI_NCCI_GETUNIT	_IOR('C',0x27, unsigned)
+#define CAPI_NCCI_GETUNIT   _IOR('C',0x27, unsigned)
 
-#endif				/* __LINUX_CAPI_H__ */
+#endif              /* __LINUX_CAPI_H__ */

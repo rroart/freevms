@@ -199,8 +199,8 @@ static int __block_fsync(struct inode * inode)
 }
 
 /*
- *	Filp may be NULL when we are called by an msync of a vma
- *	since the vma has no handle.
+ *  Filp may be NULL when we are called by an msync of a vma
+ *  since the vma has no handle.
  */
 
 static int block_fsync(struct file *filp, struct dentry *dentry, int datasync)
@@ -228,9 +228,9 @@ static struct vfsmount *bd_mnt;
  * We use smaller hashtable, though.
  */
 
-#define HASH_BITS	6
-#define HASH_SIZE	(1UL << HASH_BITS)
-#define HASH_MASK	(HASH_SIZE-1)
+#define HASH_BITS   6
+#define HASH_SIZE   (1UL << HASH_BITS)
+#define HASH_MASK   (HASH_SIZE-1)
 static struct list_head bdev_hashtable[HASH_SIZE];
 static spinlock_t bdev_lock __cacheline_aligned_in_smp = SPIN_LOCK_UNLOCKED;
 static kmem_cache_t * bdev_cachep;
@@ -361,8 +361,8 @@ int get_blkdev_list(char * p)
 }
 
 /*
-	Return the function table of a device.
-	Load the driver if needed.
+    Return the function table of a device.
+    Load the driver if needed.
 */
 const struct block_device_operations * get_blkfops(unsigned int major)
 {

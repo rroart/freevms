@@ -31,16 +31,16 @@
 #define CSW fd_routine[can_use_virtual_dma & 1]
 
 
-#define fd_inb(port)			inb_p(port)
-#define fd_outb(port,value)		outb_p(port,value)
+#define fd_inb(port)            inb_p(port)
+#define fd_outb(port,value)     outb_p(port,value)
 
 #define fd_request_dma()        CSW._request_dma(FLOPPY_DMA,"floppy")
 #define fd_free_dma()           CSW._free_dma(FLOPPY_DMA)
 #define fd_enable_irq()         enable_irq(FLOPPY_IRQ)
 #define fd_disable_irq()        disable_irq(FLOPPY_IRQ)
-#define fd_free_irq()		free_irq(FLOPPY_IRQ, NULL)
+#define fd_free_irq()       free_irq(FLOPPY_IRQ, NULL)
 #define fd_get_dma_residue()    SW._get_dma_residue(FLOPPY_DMA)
-#define fd_dma_mem_alloc(size)	SW._dma_mem_alloc(size)
+#define fd_dma_mem_alloc(size)  SW._dma_mem_alloc(size)
 #define fd_dma_setup(addr, size, mode, io) SW._dma_setup(addr, size, mode, io)
 
 #define FLOPPY_CAN_FALLBACK_ON_NODMA
@@ -263,24 +263,24 @@ static int FDC2 = -1;
 /*
  * Floppy types are stored in the rtc's CMOS RAM and so rtc_lock
  * is needed to prevent corrupted CMOS RAM in case "insmod floppy"
- * coincides with another rtc CMOS user.		Paul G.
+ * coincides with another rtc CMOS user.        Paul G.
  */
-#define FLOPPY0_TYPE	({				\
-	unsigned long flags;				\
-	unsigned char val;				\
-	spin_lock_irqsave(&rtc_lock, flags);		\
-	val = (CMOS_READ(0x10) >> 4) & 15;		\
-	spin_unlock_irqrestore(&rtc_lock, flags);	\
-	val;						\
+#define FLOPPY0_TYPE    ({              \
+    unsigned long flags;                \
+    unsigned char val;              \
+    spin_lock_irqsave(&rtc_lock, flags);        \
+    val = (CMOS_READ(0x10) >> 4) & 15;      \
+    spin_unlock_irqrestore(&rtc_lock, flags);   \
+    val;                        \
 })
 
-#define FLOPPY1_TYPE	({				\
-	unsigned long flags;				\
-	unsigned char val;				\
-	spin_lock_irqsave(&rtc_lock, flags);		\
-	val = CMOS_READ(0x10) & 15;			\
-	spin_unlock_irqrestore(&rtc_lock, flags);	\
-	val;						\
+#define FLOPPY1_TYPE    ({              \
+    unsigned long flags;                \
+    unsigned char val;              \
+    spin_lock_irqsave(&rtc_lock, flags);        \
+    val = CMOS_READ(0x10) & 15;         \
+    spin_unlock_irqrestore(&rtc_lock, flags);   \
+    val;                        \
 })
 
 #define N_FDC 2

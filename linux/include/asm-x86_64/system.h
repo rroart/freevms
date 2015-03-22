@@ -41,36 +41,36 @@ struct save_context_frame
 
 /* frame pointer must be last for get_wchan */
 #define SAVE_CONTEXT \
-	__PUSH(rsi) __PUSH(rdi) \
+    __PUSH(rsi) __PUSH(rdi) \
     __PUSH(r12) __PUSH(r13) __PUSH(r14) __PUSH(r15)  \
-	__PUSH(rdx) __PUSH(rcx) __PUSH(r8) __PUSH(r9) __PUSH(r10) __PUSH(r11)  \
-	__PUSH(rbx) __PUSH(rbp)
+    __PUSH(rdx) __PUSH(rcx) __PUSH(r8) __PUSH(r9) __PUSH(r10) __PUSH(r11)  \
+    __PUSH(rbx) __PUSH(rbp)
 #define RESTORE_CONTEXT \
-	__POP(rbp) __POP(rbx) \
-	__POP(r11) __POP(r10) __POP(r9) __POP(r8) __POP(rcx) __POP(rdx) \
-	__POP(r15) __POP(r14) __POP(r13) __POP(r12) \
-	__POP(rdi) __POP(rsi)
+    __POP(rbp) __POP(rbx) \
+    __POP(r11) __POP(r10) __POP(r9) __POP(r8) __POP(rcx) __POP(rdx) \
+    __POP(r15) __POP(r14) __POP(r13) __POP(r12) \
+    __POP(rdi) __POP(rsi)
 
 #define switch_to(prev,next,last,pgtp,pgt) do { void *l; \
-	asm volatile(SAVE_CONTEXT					\
-		     "movq %%rsp,%0\n\t"	/* save RSP */		\
-		     "cli\n\t"						\
-		     "movq %%rdx, %%cr3\n\t"				\
-		     "movq %3,%%rsp\n\t"	/* restore RSP */	\
-		     "sti\n\t"						\
-		     "leaq thread_return(%%rip),%%rax\n\t"		\
-		     "movq %%rax,%1\n\t"	/* save RIP */		\
-		     "pushq %4\n\t"		/* setup new RIP */	\
-		     "jmp __switch_to\n\t"				\
-		     ".globl thread_return\n"				\
-		     "thread_return:\n\t"				\
-		     RESTORE_CONTEXT					\
-		     :"=m" (prev->thread.rsp),"=m" (prev->thread.rip), "=a" (l) \
-		     :"m" (next->thread.rsp),"m" (next->thread.rip),	\
+    asm volatile(SAVE_CONTEXT                   \
+             "movq %%rsp,%0\n\t"    /* save RSP */      \
+             "cli\n\t"                      \
+             "movq %%rdx, %%cr3\n\t"                \
+             "movq %3,%%rsp\n\t"    /* restore RSP */   \
+             "sti\n\t"                      \
+             "leaq thread_return(%%rip),%%rax\n\t"      \
+             "movq %%rax,%1\n\t"    /* save RIP */      \
+             "pushq %4\n\t"     /* setup new RIP */ \
+             "jmp __switch_to\n\t"              \
+             ".globl thread_return\n"               \
+             "thread_return:\n\t"               \
+             RESTORE_CONTEXT                    \
+             :"=m" (prev->thread.rsp),"=m" (prev->thread.rip), "=a" (l) \
+             :"m" (next->thread.rsp),"m" (next->thread.rip),    \
 "c" (pgtp),"d" (pgt), \
-		      "S" (next), "D" (prev)				\
-		     :"memory","cc");					\
-	last = l; 							\
+              "S" (next), "D" (prev)                \
+             :"memory","cc");                   \
+    last = l;                           \
 } while(0)
 
 extern void load_gs_index(unsigned);
@@ -79,26 +79,26 @@ extern void load_gs_index(unsigned);
  * Load a segment. Fall back on loading the zero
  * segment if something goes wrong..
  */
-#define loadsegment(seg,value)	\
-	asm volatile("\n"			\
-		"1:\t"				\
-		"movl %0,%%" #seg "\n"		\
-		"2:\n"				\
-		".section .fixup,\"ax\"\n"	\
-		"3:\t"				\
-		"movl %1,%%" #seg "\n\t" \
-		"jmp 2b\n"			\
-		".previous\n"			\
-		".section __ex_table,\"a\"\n\t"	\
-		".align 4\n\t"			\
-		".quad 1b,3b\n"			\
-		".previous"			\
-		: :"r" ((int)(value)), "r" (0))
+#define loadsegment(seg,value)  \
+    asm volatile("\n"           \
+        "1:\t"              \
+        "movl %0,%%" #seg "\n"      \
+        "2:\n"              \
+        ".section .fixup,\"ax\"\n"  \
+        "3:\t"              \
+        "movl %1,%%" #seg "\n\t" \
+        "jmp 2b\n"          \
+        ".previous\n"           \
+        ".section __ex_table,\"a\"\n\t" \
+        ".align 4\n\t"          \
+        ".quad 1b,3b\n"         \
+        ".previous"         \
+        : :"r" ((int)(value)), "r" (0))
 
 #define set_debug(value,register) \
                 __asm__("movq %0,%%db" #register  \
-		: /* no output */ \
-		:"r" ((unsigned long) value))
+        : /* no output */ \
+        :"r" ((unsigned long) value))
 
 
 /*
@@ -106,30 +106,30 @@ extern void load_gs_index(unsigned);
  */
 #define clts() __asm__ __volatile__ ("clts")
 #define read_cr0() ({ \
-	unsigned long __dummy; \
-	__asm__( \
-		"movq %%cr0,%0\n\t" \
-		:"=r" (__dummy)); \
-	__dummy; \
+    unsigned long __dummy; \
+    __asm__( \
+        "movq %%cr0,%0\n\t" \
+        :"=r" (__dummy)); \
+    __dummy; \
 })
 #define write_cr0(x) \
-	__asm__("movq %0,%%cr0": :"r" (x));
+    __asm__("movq %0,%%cr0": :"r" (x));
 
 #define read_cr4() ({ \
-	unsigned long __dummy; \
-	__asm__( \
-		"movq %%cr4,%0\n\t" \
-		:"=r" (__dummy)); \
-	__dummy; \
+    unsigned long __dummy; \
+    __asm__( \
+        "movq %%cr4,%0\n\t" \
+        :"=r" (__dummy)); \
+    __dummy; \
 })
 #define write_cr4(x) \
-	__asm__("movq %0,%%cr4": :"r" (x));
+    __asm__("movq %0,%%cr4": :"r" (x));
 #define stts() write_cr0(8 | read_cr0())
 
 #define wbinvd() \
-	__asm__ __volatile__ ("wbinvd": : :"memory");
+    __asm__ __volatile__ ("wbinvd": : :"memory");
 
-#endif	/* __KERNEL__ */
+#endif  /* __KERNEL__ */
 
 #define nop() __asm__ __volatile__ ("nop")
 
@@ -149,7 +149,7 @@ extern inline void set_64bit(volatile unsigned long *ptr, unsigned long val)
 /*
  * Note: no "lock" prefix even on SMP: xchg always implies lock anyway
  * Note 2: xchg has side effect, so that attribute volatile is necessary,
- *	  but generally the primitive is invalid, *ptr is output argument. --ANK
+ *    but generally the primitive is invalid, *ptr is output argument. --ANK
  */
 static inline unsigned long __xchg(unsigned long x, volatile void * ptr, int size)
 {
@@ -226,18 +226,18 @@ static inline unsigned long __cmpxchg(volatile void *ptr, unsigned long old,
 }
 
 #define cmpxchg(ptr,o,n)\
-	((__typeof__(*(ptr)))__cmpxchg((ptr),(unsigned long)(o),\
-					(unsigned long)(n),sizeof(*(ptr))))
+    ((__typeof__(*(ptr)))__cmpxchg((ptr),(unsigned long)(o),\
+                    (unsigned long)(n),sizeof(*(ptr))))
 
 
 #ifdef CONFIG_SMP
-#define smp_mb()	mb()
-#define smp_rmb()	rmb()
-#define smp_wmb()	wmb()
+#define smp_mb()    mb()
+#define smp_rmb()   rmb()
+#define smp_wmb()   wmb()
 #else
-#define smp_mb()	barrier()
-#define smp_rmb()	barrier()
-#define smp_wmb()	barrier()
+#define smp_mb()    barrier()
+#define smp_rmb()   barrier()
+#define smp_wmb()   barrier()
 #endif
 
 
@@ -255,31 +255,31 @@ static inline unsigned long __cmpxchg(volatile void *ptr, unsigned long old,
  * but I'd also expect them to finally get their act together
  * and add some real memory barriers if so.
  */
-#define mb() 	asm volatile("mfence":::"memory")
-#define rmb()	asm volatile("lfence":::"memory")
-#define wmb()	asm volatile("sfence":::"memory")
+#define mb()    asm volatile("mfence":::"memory")
+#define rmb()   asm volatile("lfence":::"memory")
+#define wmb()   asm volatile("sfence":::"memory")
 #define set_mb(var, value) do { (void) xchg(&var, value); } while (0)
 #define set_wmb(var, value) do { var = value; wmb(); } while (0)
 
 #define warn_if_not_ulong(x) do { unsigned long foo; (void) (&(x) == &foo); } while (0)
 
 /* interrupt control.. */
-#define __save_flags(x)		do { warn_if_not_ulong(x); __asm__ __volatile__("# save_flags \n\t pushfq ; popq %q0":"=g" (x): /* no input */ :"memory"); } while (0)
-#define __restore_flags(x) 	__asm__ __volatile__("# restore_flags \n\t pushq %0 ; popfq": /* no output */ :"g" (x):"memory", "cc")
-#define __cli() 		__asm__ __volatile__("cli": : :"memory")
-#define __sti()			__asm__ __volatile__("sti": : :"memory")
+#define __save_flags(x)     do { warn_if_not_ulong(x); __asm__ __volatile__("# save_flags \n\t pushfq ; popq %q0":"=g" (x): /* no input */ :"memory"); } while (0)
+#define __restore_flags(x)  __asm__ __volatile__("# restore_flags \n\t pushq %0 ; popfq": /* no output */ :"g" (x):"memory", "cc")
+#define __cli()         __asm__ __volatile__("cli": : :"memory")
+#define __sti()         __asm__ __volatile__("sti": : :"memory")
 /* used in the idle loop; sti takes one instruction cycle to complete */
-#define safe_halt()		__asm__ __volatile__("sti; hlt": : :"memory")
+#define safe_halt()     __asm__ __volatile__("sti; hlt": : :"memory")
 
 #define __save_and_cli(x)      do { __save_flags(x); __cli(); } while(0)
 #define __save_and_sti(x)      do { __save_flags(x); __sti(); } while(0)
 
 /* For spinlocks etc */
-#define local_irq_save(x) 	do { warn_if_not_ulong(x); __asm__ __volatile__("# local_irq_save \n\t pushfq ; popq %0 ; cli":"=g" (x): /* no input */ :"memory"); } while (0)
-#define local_irq_set(x) 	do { warn_if_not_ulong(x); __asm__ __volatile__("# local_irq_set \n\t pushfq ; popq %0 ; sti":"=g" (x): /* no input */ :"memory"); } while (0)
-#define local_irq_restore(x)	__asm__ __volatile__("# local_irq_restore \n\t pushq %0 ; popfq": /* no output */ :"g" (x):"memory")
-#define local_irq_disable()	__cli()
-#define local_irq_enable()	__sti()
+#define local_irq_save(x)   do { warn_if_not_ulong(x); __asm__ __volatile__("# local_irq_save \n\t pushfq ; popq %0 ; cli":"=g" (x): /* no input */ :"memory"); } while (0)
+#define local_irq_set(x)    do { warn_if_not_ulong(x); __asm__ __volatile__("# local_irq_set \n\t pushfq ; popq %0 ; sti":"=g" (x): /* no input */ :"memory"); } while (0)
+#define local_irq_restore(x)    __asm__ __volatile__("# local_irq_restore \n\t pushq %0 ; popfq": /* no output */ :"g" (x):"memory")
+#define local_irq_disable() __cli()
+#define local_irq_enable()  __sti()
 
 #ifdef CONFIG_SMP
 

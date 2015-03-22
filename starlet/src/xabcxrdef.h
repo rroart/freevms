@@ -1,5 +1,5 @@
-#ifndef xabcxrdef_h
-#define xabcxrdef_h
+#ifndef XABCXRDEF_H
+#define XABCXRDEF_H
 
 #define XAB$C_CXR 33
 #define XAB$M_CXRRST 0x1

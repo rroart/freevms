@@ -1,5 +1,5 @@
-#ifndef cbbdef_h
-#define cbbdef_h
+#ifndef CBBDEF_H
+#define CBBDEF_H
 
 #define CBB$M_LOCK_BIT 0x1
 #define CBB$M_AUTO_LOCK 0x2

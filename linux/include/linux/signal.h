@@ -62,57 +62,57 @@ static inline int sigfindinword(unsigned long word)
     return ffz(~word);
 }
 
-#define sigmask(sig)	(1UL << ((sig) - 1))
+#define sigmask(sig)    (1UL << ((sig) - 1))
 
 #endif /* __HAVE_ARCH_SIG_BITOPS */
 
 #ifndef __HAVE_ARCH_SIG_SETOPS
 #include <linux/string.h>
 
-#define _SIG_SET_BINOP(name, op)					\
+#define _SIG_SET_BINOP(name, op)                    \
 static inline void name(sigset_t *r, const sigset_t *a, const sigset_t *b) \
-{									\
-	unsigned long a0, a1, a2, a3, b0, b1, b2, b3;			\
-	unsigned long i;						\
-									\
-	for (i = 0; i < _NSIG_WORDS/4; ++i) {				\
-		a0 = a->sig[4*i+0]; a1 = a->sig[4*i+1];			\
-		a2 = a->sig[4*i+2]; a3 = a->sig[4*i+3];			\
-		b0 = b->sig[4*i+0]; b1 = b->sig[4*i+1];			\
-		b2 = b->sig[4*i+2]; b3 = b->sig[4*i+3];			\
-		r->sig[4*i+0] = op(a0, b0);				\
-		r->sig[4*i+1] = op(a1, b1);				\
-		r->sig[4*i+2] = op(a2, b2);				\
-		r->sig[4*i+3] = op(a3, b3);				\
-	}								\
-	switch (_NSIG_WORDS % 4) {					\
-	    case 3:							\
-		a0 = a->sig[4*i+0]; a1 = a->sig[4*i+1]; a2 = a->sig[4*i+2]; \
-		b0 = b->sig[4*i+0]; b1 = b->sig[4*i+1]; b2 = b->sig[4*i+2]; \
-		r->sig[4*i+0] = op(a0, b0);				\
-		r->sig[4*i+1] = op(a1, b1);				\
-		r->sig[4*i+2] = op(a2, b2);				\
-		break;							\
-	    case 2:							\
-		a0 = a->sig[4*i+0]; a1 = a->sig[4*i+1];			\
-		b0 = b->sig[4*i+0]; b1 = b->sig[4*i+1];			\
-		r->sig[4*i+0] = op(a0, b0);				\
-		r->sig[4*i+1] = op(a1, b1);				\
-		break;							\
-	    case 1:							\
-		a0 = a->sig[4*i+0]; b0 = b->sig[4*i+0];			\
-		r->sig[4*i+0] = op(a0, b0);				\
-		break;							\
-	}								\
+{                                   \
+    unsigned long a0, a1, a2, a3, b0, b1, b2, b3;           \
+    unsigned long i;                        \
+                                    \
+    for (i = 0; i < _NSIG_WORDS/4; ++i) {               \
+        a0 = a->sig[4*i+0]; a1 = a->sig[4*i+1];         \
+        a2 = a->sig[4*i+2]; a3 = a->sig[4*i+3];         \
+        b0 = b->sig[4*i+0]; b1 = b->sig[4*i+1];         \
+        b2 = b->sig[4*i+2]; b3 = b->sig[4*i+3];         \
+        r->sig[4*i+0] = op(a0, b0);             \
+        r->sig[4*i+1] = op(a1, b1);             \
+        r->sig[4*i+2] = op(a2, b2);             \
+        r->sig[4*i+3] = op(a3, b3);             \
+    }                               \
+    switch (_NSIG_WORDS % 4) {                  \
+        case 3:                         \
+        a0 = a->sig[4*i+0]; a1 = a->sig[4*i+1]; a2 = a->sig[4*i+2]; \
+        b0 = b->sig[4*i+0]; b1 = b->sig[4*i+1]; b2 = b->sig[4*i+2]; \
+        r->sig[4*i+0] = op(a0, b0);             \
+        r->sig[4*i+1] = op(a1, b1);             \
+        r->sig[4*i+2] = op(a2, b2);             \
+        break;                          \
+        case 2:                         \
+        a0 = a->sig[4*i+0]; a1 = a->sig[4*i+1];         \
+        b0 = b->sig[4*i+0]; b1 = b->sig[4*i+1];         \
+        r->sig[4*i+0] = op(a0, b0);             \
+        r->sig[4*i+1] = op(a1, b1);             \
+        break;                          \
+        case 1:                         \
+        a0 = a->sig[4*i+0]; b0 = b->sig[4*i+0];         \
+        r->sig[4*i+0] = op(a0, b0);             \
+        break;                          \
+    }                               \
 }
 
-#define _sig_or(x,y)	((x) | (y))
+#define _sig_or(x,y)    ((x) | (y))
 _SIG_SET_BINOP(sigorsets, _sig_or)
 
-#define _sig_and(x,y)	((x) & (y))
+#define _sig_and(x,y)   ((x) & (y))
 _SIG_SET_BINOP(sigandsets, _sig_and)
 
-#define _sig_nand(x,y)	((x) & ~(y))
+#define _sig_nand(x,y)  ((x) & ~(y))
 _SIG_SET_BINOP(signandsets, _sig_nand)
 
 #undef _SIG_SET_BINOP
@@ -120,25 +120,25 @@ _SIG_SET_BINOP(signandsets, _sig_nand)
 #undef _sig_and
 #undef _sig_nand
 
-#define _SIG_SET_OP(name, op)						\
-static inline void name(sigset_t *set)					\
-{									\
-	unsigned long i;						\
-									\
-	for (i = 0; i < _NSIG_WORDS/4; ++i) {				\
-		set->sig[4*i+0] = op(set->sig[4*i+0]);			\
-		set->sig[4*i+1] = op(set->sig[4*i+1]);			\
-		set->sig[4*i+2] = op(set->sig[4*i+2]);			\
-		set->sig[4*i+3] = op(set->sig[4*i+3]);			\
-	}								\
-	switch (_NSIG_WORDS % 4) {					\
-	    case 3: set->sig[4*i+2] = op(set->sig[4*i+2]);		\
-	    case 2: set->sig[4*i+1] = op(set->sig[4*i+1]);		\
-	    case 1: set->sig[4*i+0] = op(set->sig[4*i+0]);		\
-	}								\
+#define _SIG_SET_OP(name, op)                       \
+static inline void name(sigset_t *set)                  \
+{                                   \
+    unsigned long i;                        \
+                                    \
+    for (i = 0; i < _NSIG_WORDS/4; ++i) {               \
+        set->sig[4*i+0] = op(set->sig[4*i+0]);          \
+        set->sig[4*i+1] = op(set->sig[4*i+1]);          \
+        set->sig[4*i+2] = op(set->sig[4*i+2]);          \
+        set->sig[4*i+3] = op(set->sig[4*i+3]);          \
+    }                               \
+    switch (_NSIG_WORDS % 4) {                  \
+        case 3: set->sig[4*i+2] = op(set->sig[4*i+2]);      \
+        case 2: set->sig[4*i+1] = op(set->sig[4*i+1]);      \
+        case 1: set->sig[4*i+0] = op(set->sig[4*i+0]);      \
+    }                               \
 }
 
-#define _sig_not(x)	(~(x))
+#define _sig_not(x) (~(x))
 _SIG_SET_OP(signotset, _sig_not)
 
 #undef _SIG_SET_OP

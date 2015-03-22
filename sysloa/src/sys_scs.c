@@ -479,7 +479,7 @@ static struct packet_type scs_dix_packet_type =
 type:
     __constant_htons(ETH_P_MYSCS),
 dev:
-    NULL,		/* All devices */
+    NULL,       /* All devices */
 func:
     scs_rcv,
 data:
@@ -488,11 +488,11 @@ data:
 
 #define IS_NOT_PRINTABLE(x) ((x) < 32 || (x) > 126)
 
-static struct net_proto_family	scs_family_ops =
+static struct net_proto_family  scs_family_ops =
 {
 family:
     AF_DECnet,
-    create:		0,
+    create:     0,
 };
 
 static char banner[] __initdata = KERN_INFO "%%KERNEL-I-STARTUP, NET5: MYSCS, based on DECnet for Linux: V.2.4.15-pre5s (C) 1995-2001 Linux DECnet Project Team\n";
@@ -734,7 +734,7 @@ int startconnect(int none)
     ddb_transfer(conf_cdt);
     {
         signed long long time=-100000000;
-        //	    $DESCRIPTOR(tensec,"0 00:00:10.00");
+        //      $DESCRIPTOR(tensec,"0 00:00:10.00");
         //exe$bintim(&tensec,&time);
         //time=-time;
         exe$setimr(0,&time,ddb_transfer,conf_cdt,0);

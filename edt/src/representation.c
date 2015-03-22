@@ -16,19 +16,19 @@
 //---2004-05-02
 
 /************************************************************************/
-/*									*/
-/*  Convert character to its representation on the screen		*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	c    = character to convert					*/
-/*	temp = 16-byte temp buffer					*/
-/*	col  = column number char will be displayed in (zero based)	*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	representation = pointer to null-terminated string		*/
-/*									*/
+/*                                  */
+/*  Convert character to its representation on the screen       */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  c    = character to convert                 */
+/*  temp = 16-byte temp buffer                  */
+/*  col  = column number char will be displayed in (zero based) */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  representation = pointer to null-terminated string      */
+/*                                  */
 /************************************************************************/
 
 #include <stdarg.h>
@@ -51,17 +51,17 @@ const char *representation (char c, char temp[16], int col)
 
     strp = temp;
 
-    if (c & 0x80) sprintf (temp, "<x%2.2x>", c & 0xff);	/* chars with <7> set get displayed in hexadecimal */
-    else if (c == 127) strp = "<DEL>";			/* rubouts get displayed as <DEL> */
-    else if (c == 9)  					/* tabs ... */
+    if (c & 0x80) sprintf (temp, "<x%2.2x>", c & 0xff); /* chars with <7> set get displayed in hexadecimal */
+    else if (c == 127) strp = "<DEL>";          /* rubouts get displayed as <DEL> */
+    else if (c == 9)                    /* tabs ... */
     {
-        memset (temp, ' ', 8);				/* ... get displayed as a number of spaces */
-        temp[8-(col&7)] = 0;				/* ... depending on what column we're in */
+        memset (temp, ' ', 8);              /* ... get displayed as a number of spaces */
+        temp[8-(col&7)] = 0;                /* ... depending on what column we're in */
     }
-    else if (c < 32) strp = chartable[c];			/* control chars are a string from the table */
+    else if (c < 32) strp = chartable[c];           /* control chars are a string from the table */
     else
     {
-        temp[0] = c;					/* everything else gets displayed as is */
+        temp[0] = c;                    /* everything else gets displayed as is */
         temp[1] = 0;
     }
 

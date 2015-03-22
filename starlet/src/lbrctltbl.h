@@ -1,5 +1,5 @@
-#ifndef lbrctltbl_h
-#define lbrctltbl_h
+#ifndef LBRCTLTBL_H
+#define LBRCTLTBL_H
 
 #define LBR$C_CTLTBLID 203
 #define LBR$M_LOCATE 0x1

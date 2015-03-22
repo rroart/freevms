@@ -1,34 +1,34 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 /*
 !++
-! NETCONFIG.H	Copyright (c) 1990	Carnegie Mellon University
+! NETCONFIG.H   Copyright (c) 1990  Carnegie Mellon University
 !
 ! Description:
 !
-!	Supporting declarations for IP Transport device modules
+!   Supporting declarations for IP Transport device modules
 !
-! Written By:	Bruce R. Miller		CMU Network Development
-! Date:		09-Aug-1990 (Thursday)
+! Written By:   Bruce R. Miller     CMU Network Development
+! Date:     09-Aug-1990 (Thursday)
 !
 ! Modifications:
 !--
@@ -87,57 +87,57 @@ typedef struct
 {
     unsigned char dc_begin[0];
 #ifdef __i386__
-    quadword	dc_devname;
-    quadword	dc_devspec;
+    quadword    dc_devname;
+    quadword    dc_devspec;
 #else
-    octaword	dc_devname;
-    octaword	dc_devspec;
+    octaword    dc_devname;
+    octaword    dc_devspec;
 #endif
-    int		*dc_dev_interface;
-    uint	dc_ip_address;		/* Device IP address */
-    uint	dc_ip_netmask;		/* Device IP network mask */
-    uint	dc_ip_network;		/* Device IP network value */
-    int		(*dc_rtn_Init)();
-    int		(*dc_rtn_Xmit)();
-    int		(*dc_rtn_Dump)();
-    int		(*dc_rtn_check)();
-    ulong	*dc_Send_Qhead;
-    ulong	*dc_send_Qtail;
+    int     *dc_dev_interface;
+    uint    dc_ip_address;      /* Device IP address */
+    uint    dc_ip_netmask;      /* Device IP network mask */
+    uint    dc_ip_network;      /* Device IP network value */
+    int     (*dc_rtn_Init)();
+    int     (*dc_rtn_Xmit)();
+    int     (*dc_rtn_Dump)();
+    int     (*dc_rtn_check)();
+    ulong   *dc_Send_Qhead;
+    ulong   *dc_send_Qtail;
 
     ulong  dc_flags;
-    unsigned	dc_valid_device:1;
-    unsigned	dc_online:1;
-    unsigned	dc_is_clone:1;
+    unsigned    dc_valid_device:1;
+    unsigned    dc_online:1;
+    unsigned    dc_is_clone:1;
 
     unsigned long int dc_clone_dev;
 
     /* MIB data */
-    uint	dcmib_ifIndex;		/* Interface index number */
+    uint    dcmib_ifIndex;      /* Interface index number */
 #ifdef __i386__
-    quadword	dcmib_ifDescr;		/* Interface description string */
+    quadword    dcmib_ifDescr;      /* Interface description string */
 #else
-    octaword	dcmib_ifDescr;		/* Interface description string */
+    octaword    dcmib_ifDescr;      /* Interface description string */
 #endif
-    uint	dcmib_ifType;		/* device type */
-    uint	dcmib_ifMTU;		/* Max Transfer Unit */
-    uint	dcmib_ifSpeed;		/* Bandwidth (bits/second) */
-    uint	dcmib_ifPAsize;		/* size of Physical Addr */
-    ulong	*dcmib_ifPhysAddress;	/* pntr to Physical Addr */
-    uint	dcmib_ifAdminStatus;	/* Desired status of interface */
-    uint	dcmib_ifOperStatus;	/* Current status of interface */
-    uint	dcmib_ifLastState;	/* time of last state change */
-    uint	dcmib_ifInOctets;	/* Octets received */
-    uint	dcmib_ifInUcastPkts;	/* Unicasts delivered */
-    uint	dcmib_ifInNUcastPkt;	/* non-Unicasts delivered */
-    uint	dcmib_ifInDiscards;	/* good but discarded pckts */
-    uint	dcmib_ifInErrors;	/* bad and discarded */
-    uint	dcmib_ifInUnknownProtos;/* Unknown protocol fields */
-    uint	dcmib_ifOutOctets;	/*  */
-    uint	dcmib_ifOutUcastPkts;	/*  */
-    uint	dcmib_ifOutNUcastPkts;	/*  */
-    uint	dcmib_ifOutDiscards;	/*  */
-    uint	dcmib_ifOutErrors;	/*  */
-    uint	dcmib_ifOutQLen;
+    uint    dcmib_ifType;       /* device type */
+    uint    dcmib_ifMTU;        /* Max Transfer Unit */
+    uint    dcmib_ifSpeed;      /* Bandwidth (bits/second) */
+    uint    dcmib_ifPAsize;     /* size of Physical Addr */
+    ulong   *dcmib_ifPhysAddress;   /* pntr to Physical Addr */
+    uint    dcmib_ifAdminStatus;    /* Desired status of interface */
+    uint    dcmib_ifOperStatus; /* Current status of interface */
+    uint    dcmib_ifLastState;  /* time of last state change */
+    uint    dcmib_ifInOctets;   /* Octets received */
+    uint    dcmib_ifInUcastPkts;    /* Unicasts delivered */
+    uint    dcmib_ifInNUcastPkt;    /* non-Unicasts delivered */
+    uint    dcmib_ifInDiscards; /* good but discarded pckts */
+    uint    dcmib_ifInErrors;   /* bad and discarded */
+    uint    dcmib_ifInUnknownProtos;/* Unknown protocol fields */
+    uint    dcmib_ifOutOctets;  /*  */
+    uint    dcmib_ifOutUcastPkts;   /*  */
+    uint    dcmib_ifOutNUcastPkts;  /*  */
+    uint    dcmib_ifOutDiscards;    /*  */
+    uint    dcmib_ifOutErrors;  /*  */
+    uint    dcmib_ifOutQLen;
 } Device_Configuration_Entry;
 
 #define DC_ENTRY_SIZE sizeof(Device_Configuration_Entry)
@@ -145,39 +145,39 @@ typedef struct
 /*
 Where:
 !!!HACK!!! Update this table!
-dc_devname	= String descriptor for the device name.
-dc_phy_addr	= Physical device address (bytestream)
-dc_ip_address	= IP address for this interface
-dc_ip_netmask	= IP network mask for this interface
+dc_devname  = String descriptor for the device name.
+dc_phy_addr = Physical device address (bytestream)
+dc_ip_address   = IP address for this interface
+dc_ip_netmask   = IP network mask for this interface
 dc_dev_interface= address of the controller-specific info block
-dc_init_rtn	= Address of routine to initialize the device.
-dc_Xmit_rtn	= Address of routine to transmit packets.
-dc_dump_rtn	= Address of routine to do dump specific functions.
-dc_send_qhead	= Transmit queue head
-dc_send_qtail	= Transmit queue tail.
-dc_recv_qhead	= Receive queue head(Ethernet only).
-dc_recv_qtail	=   "       "   tail    "       "
-dc_restart_time	= How long to leave the ether card shutdown.
+dc_init_rtn = Address of routine to initialize the device.
+dc_Xmit_rtn = Address of routine to transmit packets.
+dc_dump_rtn = Address of routine to do dump specific functions.
+dc_send_qhead   = Transmit queue head
+dc_send_qtail   = Transmit queue tail.
+dc_recv_qhead   = Receive queue head(Ethernet only).
+dc_recv_qtail   =   "       "   tail    "       "
+dc_restart_time = How long to leave the ether card shutdown.
 dc_restart_count= Number of times the card has been restarted.
-dc_retry_count	= Current number of consecutive errors from card.
+dc_retry_count  = Current number of consecutive errors from card.
 dc_ARP_buffer   = Pointer to buffer for ARP processing
-dc_io_chan	= VMS IO channel assigned to this device.
-dc_ARP_chan	= VMS IO channel assigned for ARP on this device.
-dc_ARP_block	= Pointer to ARP information block for device.
-dc_phy_size	= Length of physical addresses on device.
-dc_clone_dev	= Device index of real device (for "cloned" devices only).
+dc_io_chan  = VMS IO channel assigned to this device.
+dc_ARP_chan = VMS IO channel assigned for ARP on this device.
+dc_ARP_block    = Pointer to ARP information block for device.
+dc_phy_size = Length of physical addresses on device.
+dc_clone_dev    = Device index of real device (for "cloned" devices only).
 dc_valid_device = On if valid dev_config table entry set up during runtime by
-		  device initialization routine.
-dc_online	= On if device was initialized correctly by it's own device
-		  init routine (and is currently available).
-dc_doswap	= On if ARP protocol requires byteswap of multi-byte values.
-dc_need_2_free	= On if buffer free pending during restart (DEUNA/DEQNA only).
-dc_IO_queued	= On if I/O in progress during restart (DEUNA/DEQNA only).
-dc_XE_started	= On if device successfully started (DEUNA/DEQNA only).
-dc_is_clone	= On if device is a clone (multiple IP address).
+          device initialization routine.
+dc_online   = On if device was initialized correctly by it's own device
+          init routine (and is currently available).
+dc_doswap   = On if ARP protocol requires byteswap of multi-byte values.
+dc_need_2_free  = On if buffer free pending during restart (DEUNA/DEQNA only).
+dc_IO_queued    = On if I/O in progress during restart (DEUNA/DEQNA only).
+dc_XE_started   = On if device successfully started (DEUNA/DEQNA only).
+dc_is_clone = On if device is a clone (multiple IP address).
 */
 
-#define DC_Max_Num_Net_Devices 4	/* size of table. */
+#define DC_Max_Num_Net_Devices 4    /* size of table. */
 
 
 
@@ -194,25 +194,25 @@ The Net_Send routine is called to empty the Net_Send_Queue.
 
 typedef struct
 {
-    ulong	*NSQ$Next;
-    ulong	*NSQ$Last;
-    ulong	*NSQ$Driver;
-    ulong	*NSQ$Data;
-    ushort	NSQ$Datasize;
-    uint	NSQ$IP_Dest;
-    char	*NSQ$Del_Buf;
-    ushort	NSQ$Del_buf_size;
-    ushort	NSQ$Type;
-    uchar	NSQ$Retry;
-    uchar	NSQ$Delete;
+    ulong   *NSQ$Next;
+    ulong   *NSQ$Last;
+    ulong   *NSQ$Driver;
+    ulong   *NSQ$Data;
+    ushort  NSQ$Datasize;
+    uint    NSQ$IP_Dest;
+    char    *NSQ$Del_Buf;
+    ushort  NSQ$Del_buf_size;
+    ushort  NSQ$Type;
+    uchar   NSQ$Retry;
+    uchar   NSQ$Delete;
 } Net_Send_Queue_Element;
 
 /* Q head structure definition */
 
 typedef struct
 {
-    char	*NS$Qhead;
-    char	*NS$Qtail;
+    char    *NS$Qhead;
+    char    *NS$Qtail;
 } QH_Net_send;
 
 
@@ -221,11 +221,11 @@ typedef struct
 
 typedef struct
 {
-    int		(*DI$Init)();
-    int		(*DI$Xmit)();
-    int		(*DI$Dump)();
-    int		(*DI$Check)();
-    int		(*DI$ARP_Dump)();
+    int     (*DI$Init)();
+    int     (*DI$Xmit)();
+    int     (*DI$Dump)();
+    int     (*DI$Check)();
+    int     (*DI$ARP_Dump)();
 } Device_Info_Structure;
 
 
@@ -240,39 +240,39 @@ literals, and pointers to global parameters.
 typedef struct
 {
     /* IAPCP receive callback. */
-    int		(*ACPI$IP_Receive)();
+    int     (*ACPI$IP_Receive)();
 
     /* pointer to IPACP AST flag */
-    int		*ACPI$AST_in_progress;
+    int     *ACPI$AST_in_progress;
 
     /* pointer to IPACP nap control flag */
-    int		*ACPI$Sleeping;
+    int     *ACPI$Sleeping;
 
     /* Interrupt blocking routines */
-    int		(*ACPI$NOINT)();
-    int		(*ACPI$OKINT)();
+    int     (*ACPI$NOINT)();
+    int     (*ACPI$OKINT)();
 
     /* Error reporting routine */
-    int		(*ACPI$Device_Error)();
+    int     (*ACPI$Device_Error)();
 
     /* IPACP self-address recognition */
-    int		(*ACPI$IP_ISME)();
+    int     (*ACPI$IP_ISME)();
 
     /* Memory allocation routines */
-    long	(*ACPI$Seg_Get)();
-    int		(*ACPI$Seg_Free)();
-    int		(*ACPI$QBlk_Free)();
+    long    (*ACPI$Seg_Get)();
+    int     (*ACPI$Seg_Free)();
+    int     (*ACPI$QBlk_Free)();
 
     /* Formatted event logging routines */
-    int		(*ACPI$LOG_STATE)();
-    int		(*ACPI$QL_FAO)();
-    int		(*ACPI$LOG_FAO)();
-    int		(*ACPI$OPR_FAO)();
-    int		(*ACPI$ERROR_FAO)();
-    int		(*ACPI$FATAL_FAO)();
+    int     (*ACPI$LOG_STATE)();
+    int     (*ACPI$QL_FAO)();
+    int     (*ACPI$LOG_FAO)();
+    int     (*ACPI$OPR_FAO)();
+    int     (*ACPI$ERROR_FAO)();
+    int     (*ACPI$FATAL_FAO)();
 
     /* IPACP max physical buffer size */
-    ushort	ACPI$MPBS;
+    ushort  ACPI$MPBS;
 } IPACP_Info_Structure;
 
 #undef word short

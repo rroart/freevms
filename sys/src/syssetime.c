@@ -10,9 +10,9 @@
 
 #include<linux/linkage.h>
 #include <linux/string.h>
-#include <system_data_cells.h>	/* SYS$ header file */
-#include <sys$routines.h>	/* SYS$ header file */
-#include <ssdef.h>	/* SYS$ header file */
+#include <system_data_cells.h>  /* SYS$ header file */
+#include <sys$routines.h>   /* SYS$ header file */
+#include <ssdef.h>  /* SYS$ header file */
 
 /* Author: Roar Thronæs */
 

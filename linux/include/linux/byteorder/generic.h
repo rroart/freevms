@@ -42,10 +42,10 @@
  * The following macros are to be defined by <asm/byteorder.h>:
  *
  * Conversion of long and short int between network and host format
- *	ntohl(__u32 x)
- *	ntohs(__u16 x)
- *	htonl(__u32 x)
- *	htons(__u16 x)
+ *  ntohl(__u32 x)
+ *  ntohs(__u16 x)
+ *  htonl(__u32 x)
+ *  htons(__u16 x)
  * It seems that some programs (which? where? or perhaps a standard? POSIX?)
  * might like the above to be functions, not macros (why?).
  * if that's true, then detect them, and take measures.
@@ -54,24 +54,24 @@
  * unsigned long inline ntohl(x){return ___ntohl(x);}
  *
  * The same for constant arguments
- *	__constant_ntohl(__u32 x)
- *	__constant_ntohs(__u16 x)
- *	__constant_htonl(__u32 x)
- *	__constant_htons(__u16 x)
+ *  __constant_ntohl(__u32 x)
+ *  __constant_ntohs(__u16 x)
+ *  __constant_htonl(__u32 x)
+ *  __constant_htons(__u16 x)
  *
  * Conversion of XX-bit integers (16- 32- or 64-)
  * between native CPU format and little/big endian format
  * 64-bit stuff only defined for proper architectures
- *	cpu_to_[bl]eXX(__uXX x)
- *	[bl]eXX_to_cpu(__uXX x)
+ *  cpu_to_[bl]eXX(__uXX x)
+ *  [bl]eXX_to_cpu(__uXX x)
  *
  * The same, but takes a pointer to the value to convert
- *	cpu_to_[bl]eXXp(__uXX x)
- *	[bl]eXX_to_cpup(__uXX x)
+ *  cpu_to_[bl]eXXp(__uXX x)
+ *  [bl]eXX_to_cpup(__uXX x)
  *
  * The same, but change in situ
- *	cpu_to_[bl]eXXs(__uXX x)
- *	[bl]eXX_to_cpus(__uXX x)
+ *  cpu_to_[bl]eXXs(__uXX x)
+ *  [bl]eXX_to_cpus(__uXX x)
  *
  * See asm-foo/byteorder.h for examples of how to provide
  * architecture-optimized versions
@@ -147,14 +147,14 @@
  * address or some such sick thing..
  */
 #if defined(__KERNEL__) || (defined (__GLIBC__) && __GLIBC__ >= 2)
-extern __u32			ntohl(__u32);
-extern __u32			htonl(__u32);
+extern __u32            ntohl(__u32);
+extern __u32            htonl(__u32);
 #else
-extern unsigned long int	ntohl(unsigned long int);
-extern unsigned long int	htonl(unsigned long int);
+extern unsigned long int    ntohl(unsigned long int);
+extern unsigned long int    htonl(unsigned long int);
 #endif
-extern unsigned short int	ntohs(unsigned short int);
-extern unsigned short int	htons(unsigned short int);
+extern unsigned short int   ntohs(unsigned short int);
+extern unsigned short int   htons(unsigned short int);
 
 
 #if defined(__GNUC__) && (__GNUC__ >= 2) && defined(__OPTIMIZE__)

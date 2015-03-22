@@ -125,18 +125,18 @@ const struct consw *conswitchp;
  * glyph unless the disp_ctrl mode is explicitly enabled.
  */
 #define CTRL_ACTION 0x0d00ff81
-#define CTRL_ALWAYS 0x0800f501	/* Cannot be overridden by disp_ctrl */
+#define CTRL_ALWAYS 0x0800f501  /* Cannot be overridden by disp_ctrl */
 
 /*
  * Here is the default bell parameters: 750HZ, 1/8th of a second
  */
-#define DEFAULT_BELL_PITCH	750
-#define DEFAULT_BELL_DURATION	(HZ/8)
+#define DEFAULT_BELL_PITCH  750
+#define DEFAULT_BELL_DURATION   (HZ/8)
 
 extern void vcs_make_devfs (unsigned int index, int unregister);
 
 #ifndef MIN
-#define MIN(a,b)	((a) < (b) ? (a) : (b))
+#define MIN(a,b)    ((a) < (b) ? (a) : (b))
 #endif
 
 static struct _tty_ucb *console_table[MAX_NR_CONSOLES];
@@ -162,7 +162,7 @@ static void hide_cursor(int currcons);
 static void unblank_screen_t(unsigned long dummy);
 static void console_callback(void *ignored);
 
-static int printable;		/* Is console ready for printing? */
+static int printable;       /* Is console ready for printing? */
 
 int do_poke_blanked_console;
 int console_blanked;
@@ -219,7 +219,7 @@ int (*console_blank_hook)(int);
 static struct timer_list console_timer;
 
 /*
- *	Low-Level Functions
+ *  Low-Level Functions
  */
 
 #define IS_FG (currcons == fg_console)
@@ -262,7 +262,7 @@ void schedule_console_callback(void)
     //ndef CONFIG_VMS
     schedule_task(&console_callback_tq);
 #else
-    //	console_callback(0);
+    //  console_callback(0);
 #endif
 }
 #endif
@@ -614,7 +614,7 @@ static inline void save_screen(int currcons)
 }
 
 /*
- *	Redrawing of screen
+ *  Redrawing of screen
  */
 
 void redraw_screen(int new_console, int is_switch)
@@ -676,7 +676,7 @@ void redraw_screen(int new_console, int is_switch)
 }
 
 /*
- *	Allocation, freeing and resizing of VTs.
+ *  Allocation, freeing and resizing of VTs.
  */
 
 int vc_cons_allocated(unsigned int i)
@@ -707,7 +707,7 @@ static void visual_init(int currcons, int init)
     screenbuf_size = video_num_lines*video_size_row;
 }
 
-int vc_allocate(unsigned int currcons)	/* return 0 on success */
+int vc_allocate(unsigned int currcons)  /* return 0 on success */
 {
     if (currcons >= MAX_NR_CONSOLES)
         return -ENXIO;
@@ -885,17 +885,17 @@ void vc_disallocate(unsigned int currcons)
 }
 
 /*
- *	VT102 emulator
+ *  VT102 emulator
  */
 
 #define set_kbd(x) set_vc_kbd_mode(kbd_table+currcons,x)
 #define clr_kbd(x) clr_vc_kbd_mode(kbd_table+currcons,x)
 #define is_kbd(x) vc_kbd_mode(kbd_table+currcons,x)
 
-#define decarm		VC_REPEAT
-#define decckm		VC_CKMODE
-#define kbdapplic	VC_APPLIC
-#define lnm		VC_CRLF
+#define decarm      VC_REPEAT
+#define decckm      VC_CKMODE
+#define kbdapplic   VC_APPLIC
+#define lnm     VC_CRLF
 
 /*
  * this is what the terminal answers to a ESC-Z or csi0c query.
@@ -1035,7 +1035,7 @@ static void csi_J(int currcons, int vpar)
 
     switch (vpar)
     {
-    case 0:	/* erase from cursor to end of display */
+    case 0: /* erase from cursor to end of display */
         count = (scr_end-pos)>>1;
         start = (unsigned short *) pos;
         if (DO_UPDATE)
@@ -1048,7 +1048,7 @@ static void csi_J(int currcons, int vpar)
                           video_num_columns);
         }
         break;
-    case 1:	/* erase from start to cursor */
+    case 1: /* erase from start to cursor */
         count = ((pos-origin)>>1)+1;
         start = (unsigned short *) origin;
         if (DO_UPDATE)
@@ -1082,14 +1082,14 @@ static void csi_K(int currcons, int vpar)
 
     switch (vpar)
     {
-    case 0:	/* erase from cursor to end of line */
+    case 0: /* erase from cursor to end of line */
         count = video_num_columns-x;
         start = (unsigned short *) pos;
         if (DO_UPDATE)
             sw->con_clear(vc_cons[currcons].d, y, x, 1,
                           video_num_columns-x);
         break;
-    case 1:	/* erase from start of line to cursor */
+    case 1: /* erase from start of line to cursor */
         start = (unsigned short *) (pos - (x<<1));
         count = x+1;
         if (DO_UPDATE)
@@ -1142,7 +1142,7 @@ static void csi_m(int currcons)
     for (i=0; i<=npar; i++)
         switch (par[i])
         {
-        case 0:	/* all attributes off */
+        case 0: /* all attributes off */
             default_attr(currcons);
             break;
         case 1:
@@ -1161,10 +1161,10 @@ static void csi_m(int currcons)
             reverse = 1;
             break;
         case 10: /* ANSI X3.64-1979 (SCO-ish?)
-				  * Select primary font, don't display
-				  * control chars if defined, don't set
-				  * bit 8 on output.
-				  */
+                  * Select primary font, don't display
+                  * control chars if defined, don't set
+                  * bit 8 on output.
+                  */
             translate = set_translate(charset == 0
                                       ? G0_charset
                                       : G1_charset,currcons);
@@ -1172,17 +1172,17 @@ static void csi_m(int currcons)
             toggle_meta = 0;
             break;
         case 11: /* ANSI X3.64-1979 (SCO-ish?)
-				  * Select first alternate font, lets
-				  * chars < 32 be displayed as ROM chars.
-				  */
+                  * Select first alternate font, lets
+                  * chars < 32 be displayed as ROM chars.
+                  */
             translate = set_translate(IBMPC_MAP,currcons);
             disp_ctrl = 1;
             toggle_meta = 0;
             break;
         case 12: /* ANSI X3.64-1979 (SCO-ish?)
-				  * Select second alternate font, toggle
-				  * high bit before displaying as ROM char.
-				  */
+                  * Select second alternate font, toggle
+                  * high bit before displaying as ROM char.
+                  */
             translate = set_translate(IBMPC_MAP,currcons);
             disp_ctrl = 1;
             toggle_meta = 1;
@@ -1201,18 +1201,18 @@ static void csi_m(int currcons)
             reverse = 0;
             break;
         case 38: /* ANSI X3.64-1979 (SCO-ish?)
-				  * Enables underscore, white foreground
-				  * with white underscore (Linux - use
-				  * default foreground).
-				  */
+                  * Enables underscore, white foreground
+                  * with white underscore (Linux - use
+                  * default foreground).
+                  */
             color = (def_color & 0x0f) | background;
             underline = 1;
             break;
         case 39: /* ANSI X3.64-1979 (SCO-ish?)
-				  * Disable underline option.
-				  * Reset colour to default? It did this
-				  * before...
-				  */
+                  * Disable underline option.
+                  * Reset colour to default? It did this
+                  * before...
+                  */
             color = (def_color & 0x0f) | background;
             underline = 0;
             break;
@@ -1258,7 +1258,7 @@ static void cursor_report(int currcons, struct _ucb * tty)
 
 static inline void status_report(struct _ucb * tty)
 {
-    respond_string("\033[0n", tty);	/* Terminal ok */
+    respond_string("\033[0n", tty); /* Terminal ok */
 }
 
 static inline void respond_ID(struct _ucb * tty)
@@ -1289,15 +1289,15 @@ static void set_mode(int currcons, int on_off)
     int i;
 
     for (i=0; i<=npar; i++)
-        if (ques) switch(par[i])  	/* DEC private modes set/reset */
+        if (ques) switch(par[i])    /* DEC private modes set/reset */
             {
-            case 1:			/* Cursor keys send ^[Ox/^[[x */
+            case 1:         /* Cursor keys send ^[Ox/^[[x */
                 if (on_off)
                     set_kbd(decckm);
                 else
                     clr_kbd(decckm);
                 break;
-            case 3:	/* 80/132 mode switch unimplemented */
+            case 3: /* 80/132 mode switch unimplemented */
                 deccolm = on_off;
 #if 0
                 (void) vc_resize(video_num_lines, deccolm ? 132 : 80);
@@ -1305,7 +1305,7 @@ static void set_mode(int currcons, int on_off)
                    utility has to change the hardware regs */
 #endif
                 break;
-            case 5:			/* Inverted screen on/off */
+            case 5:         /* Inverted screen on/off */
                 if (decscnm != on_off)
                 {
                     decscnm = on_off;
@@ -1313,14 +1313,14 @@ static void set_mode(int currcons, int on_off)
                     update_attr(currcons);
                 }
                 break;
-            case 6:			/* Origin relative/absolute */
+            case 6:         /* Origin relative/absolute */
                 decom = on_off;
                 gotoxay(currcons,0,0);
                 break;
-            case 7:			/* Autowrap on/off */
+            case 7:         /* Autowrap on/off */
                 decawm = on_off;
                 break;
-            case 8:			/* Autorepeat on/off */
+            case 8:         /* Autorepeat on/off */
                 if (on_off)
                     set_kbd(decarm);
                 else
@@ -1329,22 +1329,22 @@ static void set_mode(int currcons, int on_off)
             case 9:
                 report_mouse = on_off ? 1 : 0;
                 break;
-            case 25:		/* Cursor on/off */
+            case 25:        /* Cursor on/off */
                 deccm = on_off;
                 break;
             case 1000:
                 report_mouse = on_off ? 2 : 0;
                 break;
             }
-        else switch(par[i])  		/* ANSI modes set/reset */
+        else switch(par[i])         /* ANSI modes set/reset */
             {
-            case 3:			/* Monitor (display ctrls) */
+            case 3:         /* Monitor (display ctrls) */
                 disp_ctrl = on_off;
                 break;
-            case 4:			/* Insert Mode on/off */
+            case 4:         /* Insert Mode on/off */
                 decim = on_off;
                 break;
-            case 20:		/* Lf, Enter == CrLf/Lf */
+            case 20:        /* Lf, Enter == CrLf/Lf */
                 if (on_off)
                     set_kbd(lnm);
                 else
@@ -1358,7 +1358,7 @@ static void setterm_command(int currcons)
 {
     switch(par[0])
     {
-    case 1:	/* set color for underline mode */
+    case 1: /* set color for underline mode */
         if (can_do_color && par[1] < 16)
         {
             ulcolor = color_table[par[1]];
@@ -1366,7 +1366,7 @@ static void setterm_command(int currcons)
                 update_attr(currcons);
         }
         break;
-    case 2:	/* set color for half intensity mode */
+    case 2: /* set color for half intensity mode */
         if (can_do_color && par[1] < 16)
         {
             halfcolor = color_table[par[1]];
@@ -1374,14 +1374,14 @@ static void setterm_command(int currcons)
                 update_attr(currcons);
         }
         break;
-    case 8:	/* store colors as defaults */
+    case 8: /* store colors as defaults */
         def_color = attr;
         if (hi_font_mask == 0x100)
             def_color >>= 1;
         default_attr(currcons);
         update_attr(currcons);
         break;
-    case 9:	/* set blanking interval */
+    case 9: /* set blanking interval */
         blankinterval = ((par[1] < 60) ? par[1] : 60) * 60 * HZ;
         poke_blanked_console();
         break;
@@ -1456,31 +1456,31 @@ static void csi_M(int currcons, unsigned int nr)
 /* console_sem is held (except via vc_init->reset_terminal */
 static void save_cur(int currcons)
 {
-    saved_x		= x;
-    saved_y		= y;
-    s_intensity	= intensity;
-    s_underline	= underline;
-    s_blink		= blink;
-    s_reverse	= reverse;
-    s_charset	= charset;
-    s_color		= color;
-    saved_G0	= G0_charset;
-    saved_G1	= G1_charset;
+    saved_x     = x;
+    saved_y     = y;
+    s_intensity = intensity;
+    s_underline = underline;
+    s_blink     = blink;
+    s_reverse   = reverse;
+    s_charset   = charset;
+    s_color     = color;
+    saved_G0    = G0_charset;
+    saved_G1    = G1_charset;
 }
 
 /* console_sem is held */
 static void restore_cur(int currcons)
 {
     gotoxy(currcons,saved_x,saved_y);
-    intensity	= s_intensity;
-    underline	= s_underline;
-    blink		= s_blink;
-    reverse		= s_reverse;
-    charset		= s_charset;
-    color		= s_color;
-    G0_charset	= saved_G0;
-    G1_charset	= saved_G1;
-    translate	= set_translate(charset ? G1_charset : G0_charset,currcons);
+    intensity   = s_intensity;
+    underline   = s_underline;
+    blink       = s_blink;
+    reverse     = s_reverse;
+    charset     = s_charset;
+    color       = s_color;
+    G0_charset  = saved_G0;
+    G1_charset  = saved_G1;
+    translate   = set_translate(charset ? G1_charset : G0_charset,currcons);
     update_attr(currcons);
     need_wrap = 0;
 }
@@ -1493,27 +1493,27 @@ enum { ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
 /* console_sem is held (except via vc_init()) */
 static void reset_terminal(int currcons, int do_clear)
 {
-    top		= 0;
-    bottom		= video_num_lines;
-    vc_state	= ESnormal;
-    ques		= 0;
-    translate	= set_translate(LAT1_MAP,currcons);
-    G0_charset	= LAT1_MAP;
-    G1_charset	= GRAF_MAP;
-    charset		= 0;
-    need_wrap	= 0;
-    report_mouse	= 0;
+    top     = 0;
+    bottom      = video_num_lines;
+    vc_state    = ESnormal;
+    ques        = 0;
+    translate   = set_translate(LAT1_MAP,currcons);
+    G0_charset  = LAT1_MAP;
+    G1_charset  = GRAF_MAP;
+    charset     = 0;
+    need_wrap   = 0;
+    report_mouse    = 0;
     utf             = 0;
     utf_count       = 0;
 
-    disp_ctrl	= 0;
-    toggle_meta	= 0;
+    disp_ctrl   = 0;
+    toggle_meta = 0;
 
-    decscnm		= 0;
-    decom		= 0;
-    decawm		= 1;
-    deccm		= 1;
-    decim		= 0;
+    decscnm     = 0;
+    decom       = 0;
+    decawm      = 1;
+    deccm       = 1;
+    decim       = 0;
 
     set_kbd(decarm);
     clr_kbd(decckm);
@@ -1533,11 +1533,11 @@ static void reset_terminal(int currcons, int do_clear)
     default_attr(currcons);
     update_attr(currcons);
 
-    tab_stop[0]	= 0x01010100;
-    tab_stop[1]	=
-        tab_stop[2]	=
-            tab_stop[3]	=
-                tab_stop[4]	= 0x01010101;
+    tab_stop[0] = 0x01010100;
+    tab_stop[1] =
+        tab_stop[2] =
+            tab_stop[3] =
+                tab_stop[4] = 0x01010101;
 
     bell_pitch = DEFAULT_BELL_PITCH;
     bell_duration = DEFAULT_BELL_DURATION;
@@ -1963,7 +1963,7 @@ static void do_con_trol(struct _ucb *tty, unsigned int currcons, int c)
  * kernel memory allocation is available.
  */
 char con_buf[PAGE_SIZE];
-#define CON_BUF_SIZE	PAGE_SIZE
+#define CON_BUF_SIZE    PAGE_SIZE
 DECLARE_MUTEX(con_buf_sem);
 
 /* acquires console_sem */
@@ -1979,9 +1979,9 @@ static int do_con_write(struct _irp * i, struct _pcb * p, struct _ucb * u, struc
 #define FLUSH do { } while(0);
 #else
 #define FLUSH if (draw_x >= 0) { \
-	sw->con_putcs(vc_cons[currcons].d, (u16 *)draw_from, (u16 *)draw_to-(u16 *)draw_from, y, draw_x); \
-	draw_x = -1; \
-	}
+    sw->con_putcs(vc_cons[currcons].d, (u16 *)draw_from, (u16 *)draw_to-(u16 *)draw_from, y, draw_x); \
+    draw_x = -1; \
+    }
 #endif
 
     int c, tc, ok, n = 0, draw_x = -1;
@@ -2105,7 +2105,7 @@ again:
                 utf_count = 0;
             }
         }
-        else  	/* no utf */
+        else    /* no utf */
         {
             tc = translate[toggle_meta ? (c|0x80) : c];
         }
@@ -2267,7 +2267,7 @@ void set_console(int nr)
 #ifdef CONFIG_VT_CONSOLE
 
 /*
- *	Console on virtual terminal
+ *  Console on virtual terminal
  *
  * The console must be locked when we get here.
  */
@@ -2326,7 +2326,7 @@ void vt_console_print(struct console *co, const char * b, unsigned count)
                     x--;
                 cnt = 0;
             }
-            if (c == 8)  		/* backspace */
+            if (c == 8)         /* backspace */
             {
                 bs(currcons);
                 start = (ushort *)pos;
@@ -2378,7 +2378,7 @@ static kdev_t vt_console_device(struct console *c)
 
 struct console vt_console_driver =
 {
-name:		"tty"
+name:       "tty"
     ,
 write:
     vt_console_print,
@@ -2396,7 +2396,7 @@ index:
 #endif
 
 /*
- *	Handling of Linux-specific VC ioctls
+ *  Handling of Linux-specific VC ioctls
  */
 
 /*
@@ -2456,7 +2456,7 @@ int tioclinux(struct tty_struct *tty, unsigned long arg)
     case 10:
         set_vesa_blanking(arg);
         break;;
-    case 11:	/* set kmsg redirect */
+    case 11:    /* set kmsg redirect */
         if (!capable(CAP_SYS_ADMIN))
         {
             ret = -EPERM;
@@ -2469,7 +2469,7 @@ int tioclinux(struct tty_struct *tty, unsigned long arg)
                 kmsg_redirect = data;
         }
         break;
-    case 12:	/* get fg_console */
+    case 12:    /* get fg_console */
         ret = fg_console;
         break;
     default:
@@ -2483,12 +2483,12 @@ int tioclinux(struct tty_struct *tty, unsigned long arg)
 }
 
 /*
- *	/dev/ttyN handling
+ *  /dev/ttyN handling
  */
 
 static int con_write(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
 {
-    int	retval;
+    int retval;
 
     pm_access(pm_con);
     retval = do_con_write(i,p,u,c);
@@ -2500,7 +2500,7 @@ static int con_write(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _
 static void con_put_char(struct _ucb *tty, unsigned char ch)
 {
     if (in_interrupt())
-        return;		/* n_r3964 calls put_char() from interrupt context */
+        return;     /* n_r3964 calls put_char() from interrupt context */
     pm_access(pm_con);
     do_con_write(tty, 0, &ch, 1);
 }
@@ -2511,12 +2511,12 @@ static int con_write_room(struct _ucb *tty)
     if (tty->stopped)
         return 0;
 #endif
-    return 4096;		/* No limit, really; we're not buffering */
+    return 4096;        /* No limit, really; we're not buffering */
 }
 
 static int con_chars_in_buffer(struct _ucb *tty)
 {
-    return 0;		/* we're not buffering */
+    return 0;       /* we're not buffering */
 }
 
 /*
@@ -2580,7 +2580,7 @@ static void con_flush_chars(struct _ucb *tty)
     struct vt_struct *vt;
 
 #if 0
-    if (in_interrupt())	/* from flush_to_ldisc */
+    if (in_interrupt()) /* from flush_to_ldisc */
         return;
 #endif
 
@@ -2602,7 +2602,7 @@ static void con_flush_chars(struct _ucb *tty)
  */
 static int con_open(struct _tty_ucb *tty, struct file * filp)
 {
-    unsigned int	currcons;
+    unsigned int    currcons;
     int i;
 
     currcons = 0; // was: MINOR(tty->device) - tty->driver.minor_start;
@@ -2670,7 +2670,7 @@ static void vc_init(unsigned int currcons, unsigned int rows, unsigned int cols,
         vc_cons[currcons].d->vc_palette[k++] = default_blu[j] ;
     }
     def_color       = 0x07;   /* white */
-    ulcolor		= 0x0f;   /* bold white */
+    ulcolor     = 0x0f;   /* bold white */
     halfcolor       = 0x08;   /* grey */
     init_waitqueue_head(&vt_cons[currcons]->paste_wait);
     reset_terminal(currcons, do_clear);
@@ -2791,9 +2791,9 @@ static void clear_buffer_attributes(int currcons)
 }
 
 /*
- *	If we support more console drivers, this function is used
- *	when a driver wants to take over some existing consoles
- *	and become default driver for newly opened ones.
+ *  If we support more console drivers, this function is used
+ *  when a driver wants to take over some existing consoles
+ *  and become default driver for newly opened ones.
  */
 
 void take_over_console(const struct consw *csw, int first, int last, int deflt)
@@ -2857,7 +2857,7 @@ void give_up_console(const struct consw *csw)
 #endif
 
 /*
- *	Screen blanking
+ *  Screen blanking
  */
 
 static void set_vesa_blanking(unsigned long arg)
@@ -3035,7 +3035,7 @@ void poke_blanked_console(void)
     if (console_blanked)
     {
         console_timer.function = unblank_screen_t;
-        mod_timer(&console_timer, jiffies);	/* Now */
+        mod_timer(&console_timer, jiffies); /* Now */
     }
     else if (blankinterval)
     {
@@ -3044,7 +3044,7 @@ void poke_blanked_console(void)
 }
 
 /*
- *	Palettes
+ *  Palettes
  */
 
 void set_palette(int currcons)
@@ -3145,7 +3145,7 @@ int con_font_op(int currcons, struct console_font_op *op)
             return -EINVAL;
         if (op->charcount > 512)
             goto quit;
-        if (!op->height)  		/* Need to guess font height [compat] */
+        if (!op->height)        /* Need to guess font height [compat] */
         {
             int h, i;
             u8 *charmap = op->data, tmp;
@@ -3228,7 +3228,7 @@ quit:
 }
 
 /*
- *	Interface exported to selection and vcs.
+ *  Interface exported to selection and vcs.
  */
 
 /* used by selection */
@@ -3307,9 +3307,9 @@ void myout(int tty, int p1, int p2)
 #define FLUSH do { } while(0);
 #else
 #define FLUSH if (draw_x >= 0) { \
-	sw->con_putcs(vc_cons[currcons].d, (u16 *)draw_from, (u16 *)draw_to-(u16 *)draw_from, y, draw_x); \
-	draw_x = -1; \
-	}
+    sw->con_putcs(vc_cons[currcons].d, (u16 *)draw_from, (u16 *)draw_to-(u16 *)draw_from, y, draw_x); \
+    draw_x = -1; \
+    }
 #endif
 
     acquire_console_sem();
@@ -3413,7 +3413,7 @@ void myout(int tty, int p1, int p2)
 }
 
 /*
- *	Visible symbols for modules
+ *  Visible symbols for modules
  */
 
 EXPORT_SYMBOL(color_table);

@@ -1,104 +1,104 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "Input/Output Utilities"
 //++
 //
 // Module:
 //
-//	IOUTIL
+//  IOUTIL
 //
 // Facility:
 //
-//	Input and Output utility routines
+//  Input and Output utility routines
 //
 // Abstract:
 //
-//	Provides a standard library of routines for input and output of
-//	addresses as decimal and hexidecimal strings.
+//  Provides a standard library of routines for input and output of
+//  addresses as decimal and hexidecimal strings.
 //
 // Author:
 //
-//	Vince Fuller, CMU-CSD, April 1986
-//	Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
+//  Vince Fuller, CMU-CSD, April 1986
+//  Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
 //
 // Modification history:
 //
-// 2.2	7-Jan-1992	John Clement
-//	Added LOG$Flush for immediate output
+// 2.2  7-Jan-1992  John Clement
+//  Added LOG$Flush for immediate output
 //
-// 2.1	24-Dec-1991	Henry W. Miller		USBR
-//	In LOG_OUTPUT and ACT_OUTPUT, use configurable variables LOG_THRESHOLD
-//	and ACT_THRESHOLD to decide when to $FLUSH.  After all, we are
-//	having a drought.
+// 2.1  24-Dec-1991 Henry W. Miller     USBR
+//  In LOG_OUTPUT and ACT_OUTPUT, use configurable variables LOG_THRESHOLD
+//  and ACT_THRESHOLD to decide when to $FLUSH.  After all, we are
+//  having a drought.
 //
-// 2.0D	05-Aug-1991	Henry W. Miller		USBR
-//	In LOG_OUTPUT and ACT_OUTPUT, only $FLUSH() when a threshold of
-//	2048 bytes has been hit.  Should speed up logging considerably.
-//	Please excuse disgusting imagery.
+// 2.0D 05-Aug-1991 Henry W. Miller     USBR
+//  In LOG_OUTPUT and ACT_OUTPUT, only $FLUSH() when a threshold of
+//  2048 bytes has been hit.  Should speed up logging considerably.
+//  Please excuse disgusting imagery.
 //
-// 2.0C	09-Jul-1991	Henry W. Miller		USBR
-//	Added LIB for VMS 5.4.
+// 2.0C 09-Jul-1991 Henry W. Miller     USBR
+//  Added LIB for VMS 5.4.
 //
-// 2.0B	25-Mar-1991	Henry W. Miller		USBR
-//	In LOG_OPEN(), print out FAB or RAB STV if error.
-//	Define INIT_DYNDESC macro locally - $INIT_DYNDESC not working for
-//	some reason!!
+// 2.0B 25-Mar-1991 Henry W. Miller     USBR
+//  In LOG_OPEN(), print out FAB or RAB STV if error.
+//  Define INIT_DYNDESC macro locally - $INIT_DYNDESC not working for
+//  some reason!!
 //
-// 2.0  20-Oct-1989	Bruce R. Miller		CMU NetDev
-//	Added code for doing activity file logging by basically
-//	duplicating the LOG file code.
+// 2.0  20-Oct-1989 Bruce R. Miller     CMU NetDev
+//  Added code for doing activity file logging by basically
+//  duplicating the LOG file code.
 //
 // 1.9  19-Nov-87, Edit by VAF
-//	Use new $ACPWAKE macro.
+//  Use new $ACPWAKE macro.
 //
 // 1.8  24-Mar-87, Edit by VAF
-//	Call RESET_PROCNAME to reset process name in exit handler.
+//  Call RESET_PROCNAME to reset process name in exit handler.
 //
 // 1.7  24-Feb-87, Edit by VAF
-//	Move QL_FAO and message queue management routines in here.
-//	Fix a couple of misuses of LOG_STATE.
+//  Move QL_FAO and message queue management routines in here.
+//  Fix a couple of misuses of LOG_STATE.
 //
 // 1.6  17-Feb-87, Edit by VAF
-//	Fix a bunch of problems with error logging.
+//  Fix a bunch of problems with error logging.
 //
 // 1.5  16-Feb-87, Edit by VAF
-//	Fix ERROR_FAO/FATAL_FAO to add time+date and EOL before writing to
-//	the log file.
+//  Fix ERROR_FAO/FATAL_FAO to add time+date and EOL before writing to
+//  the log file.
 //
 // 1.4   9-Feb-87, Edit by VAF
-//	Flush Error_Processor. New error handling routines are ERROR_FAO and
-//	FATAL_FAO. TCPMACROS updated to use these for references to old macros.
+//  Flush Error_Processor. New error handling routines are ERROR_FAO and
+//  FATAL_FAO. TCPMACROS updated to use these for references to old macros.
 //
 // 1.3   6-Feb-87, Edit by VAF
-//	Change exiting message.
+//  Change exiting message.
 //
 // 1.2  30-Sep-86, Edit by VAF
-//	Have exception handler send message to opr in addition to logging it
-//	to the log file.
-//	Have error handler always append message to log file.
-//	Have exit handler close log file if it is open.
+//  Have exception handler send message to opr in addition to logging it
+//  to the log file.
+//  Have error handler always append message to log file.
+//  Have exit handler close log file if it is open.
 //
 // 1.1  30-May-86, Edit by VAF
-//	Get rid of PRINT_MSG routine - make synonymous with OPR_FAO.
+//  Get rid of PRINT_MSG routine - make synonymous with OPR_FAO.
 //
 //--
 
@@ -111,12 +111,12 @@ MODULE IOUTIL(IDENT="2.2",LANGUAGE(BLISS32),
               OPTIMIZE,OPTLEVEL=3,ZIP)=
 #endif
 
-                  extern 	void OPR_FAO(long, ...);
-extern 	void ERROR_FAO(long, ...);
-extern 	void FATAL_FAO(long, ...);
+                  extern    void OPR_FAO(long, ...);
+extern  void ERROR_FAO(long, ...);
+extern  void FATAL_FAO(long, ...);
 
 #include <starlet.h>
-//LIBRARY "SYS$LIBRARY:LIB";			// JC
+//LIBRARY "SYS$LIBRARY:LIB";            // JC
 //not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";
 #include <cmuip/central/include/netcommon.h>
 #include "cmuip.h" // needed before tcpmacros.h
@@ -161,22 +161,22 @@ extern 	void FATAL_FAO(long, ...);
 
 #define APPCHR(CHR,DPTR,DCNT,OCNT) \
     if ((DCNT=DCNT-1) > 0) \
-	{ \
-	OCNT = OCNT+1; \
-	CH$WCHAR_A(CHR,DPTR); \
-	}
+    { \
+    OCNT = OCNT+1; \
+    CH$WCHAR_A(CHR,DPTR); \
+    }
 
 #define    INIT_DYNDESC(D) \
-	{\
-	D->dsc$w_length	= 0;\
-	D->dsc$b_dtype	= DSC$K_DTYPE_T;\
-	D->dsc$b_class	= DSC$K_CLASS_D;\
-	D->dsc$a_pointer	= 0;\
-	};
+    {\
+    D->dsc$w_length = 0;\
+    D->dsc$b_dtype  = DSC$K_DTYPE_T;\
+    D->dsc$b_class  = DSC$K_CLASS_D;\
+    D->dsc$a_pointer    = 0;\
+    };
 
 signed long
-act_threshold	 = 512,
-  log_threshold	 = 512 ;
+act_threshold    = 512,
+log_threshold  = 512 ;
 
 
 void APPEND_DEC(DPTR,DCNT,NUM,OUTCNT)
@@ -198,7 +198,7 @@ long * DCNT;
         APPCHR('0',(*DPTR),*DCNT,*OUTCNT);
         return;
     };
-    DIV = 1000000000;			// Highest pwr of 10 in 32 bits
+    DIV = 1000000000;           // Highest pwr of 10 in 32 bits
     VAL = NUM;
     if (VAL < 0)
     {
@@ -257,8 +257,8 @@ long * OUTCNT;
     VAL = ROT(NUM,(8-SIZE)*4); // Position first digit
     for (I=(SIZE-1); I>=0; I--)
     {
-        VAL = ROT(VAL,4);	// Rotate highest order 4 bits to lowest
-        DIG = VAL&0xf;	// Get the digit
+        VAL = ROT(VAL,4);   // Rotate highest order 4 bits to lowest
+        DIG = VAL&0xf;  // Get the digit
         if (DIG <= 9)
             DIG = '0'+DIG;
         else
@@ -434,11 +434,11 @@ long * VAL;
 
 struct _fabdef    LOGFAB_ = {   fab$l_fna : "INET$LOG:"
     ,
-    // not yet ; buggy gcc 		fab$b_fac : FAB$M_PUT,
-    // not yet	fab$b_shr : FAB$M_GET,
-    // not yet	fab$l_fop : (FAB$M_SQO),
+    // not yet ; buggy gcc      fab$b_fac : FAB$M_PUT,
+    // not yet  fab$b_shr : FAB$M_GET,
+    // not yet  fab$l_fop : (FAB$M_SQO),
 fab$b_rfm :
-    FAB$C_STMLF,			// JC
+    FAB$C_STMLF,            // JC
     /* not yet fab$b_org : FAB$C_SEQ */
 }, *LOGFAB=&LOGFAB_;
 struct _rabdef    LOGRAB_ = { rab$l_fab:
@@ -520,7 +520,7 @@ void LOG_CHANGE(STATE)
             // It's open - close it now
             LOG$FAO("!%T Logging disabled!/",0);
             LOG_CLOSE();
-            log_state = STATE;	// Set new log state
+            log_state = STATE;  // Set new log state
         };
     };
 }
@@ -549,8 +549,8 @@ struct dsc$descriptor * OUTDESC;
         // not yet. no write support, and rms don't work here
         RC = sys$put( LOGRAB);
 //!!HACK!!// Take out this Flush!
-        if (( 	(logcount > log_threshold)
-                ||	(log_state & LOG$FLUSH) ))	// JC
+        if ((   (logcount > log_threshold)
+                ||  (log_state & LOG$FLUSH) ))  // JC
         {
             RC = sys$flush(LOGRAB);
             logcount = 0 ;
@@ -583,7 +583,7 @@ void LOG_Time_Stamp (void)
 // Output to the LOG device/file the current time.  Char string ends
 // in a space (no crlf).
 // VMS specific code.
-// Exit:	none
+// Exit:    none
 
 {
     LOG$FAO("!%T ",0);
@@ -674,7 +674,7 @@ void ACT_CHANGE(STATE)
             // It's open - close it now
             ACT$FAO("!%T Logging disabled!/",0);
             ACT_CLOSE();
-            act_state = STATE;	// Set new log state
+            act_state = STATE;  // Set new log state
         };
     };
 }
@@ -687,7 +687,7 @@ void ACT_OUTPUT(OUTDESC)
 struct dsc$descriptor * OUTDESC;
 {
     static
-    ACTCOUNT	 = 0 ;
+    ACTCOUNT     = 0 ;
     if (act_state != 0)
     {
         signed long
@@ -732,7 +732,7 @@ void ACT_Time_Stamp (void)
 // Output to the activity log device/file the current time.  Char string ends
 // in a space (no crlf).
 // VMS specific code.
-// Exit:	none
+// Exit:    none
 
 {
     ACT$FAO("!%T ",0);
@@ -743,38 +743,38 @@ void ACT_Time_Stamp (void)
 
 Function:
 
-	Send messages to the operators console & those terminals defined
-	as operators.  used by network device interface code to tell the
-	world about devices going offline etc.  Message sent to operator
-	is prefixed with network name as derrived from "tcp$network_name"
-	logical name.
+    Send messages to the operators console & those terminals defined
+    as operators.  used by network device interface code to tell the
+    world about devices going offline etc.  Message sent to operator
+    is prefixed with network name as derrived from "tcp$network_name"
+    logical name.
 
 Inputs:
 
-	Text = address of mesage descriptor(vms string descriptor).
+    Text = address of mesage descriptor(vms string descriptor).
 
 Implicit Inputs:
 
-	MYname = initialized string-desc for network name.
+    MYname = initialized string-desc for network name.
 Outputs:
 
-	lbc (low bit clear) = success
-	otherwise $sndopr error return.
+    lbc (low bit clear) = success
+    otherwise $sndopr error return.
 
 Side Effects:
 
-	operator terminals will receive the xmitted messages.
-	if message_length > 128-size(tcp$network_name) then message will
-	be truncated.
+    operator terminals will receive the xmitted messages.
+    if message_length > 128-size(tcp$network_name) then message will
+    be truncated.
 */
 
 send_2_operator(TEXT)
 struct dsc$descriptor * TEXT;
 {
-    extern struct dsc$descriptor *	myname;
+    extern struct dsc$descriptor *  myname;
     static
     Request_ID = 0;
-#define	MAXCHR 1024
+#define MAXCHR 1024
     signed long
     MSGLEN,
     PTR;
@@ -845,7 +845,7 @@ void OPR_FAO(long CSTR, ...)
 }
 
 signed long
-PRINT_MSG = OPR_FAO;	// Synonym for host table module to use
+PRINT_MSG = OPR_FAO;    // Synonym for host table module to use
 
 //SBTTL "Error processing routines - ERROR_FAO, FATAL_FAO"
 
@@ -993,9 +993,9 @@ void FATAL_FAO(long CSTR, ...)
 
 struct QB$ERRMSG
 {
-    void *     EMQ$NEXT	;	// Next item on queue
-    void *     EMQ$LAST	;	// Previous item on queue
-    long long    EMQ$MDSC	;	// Message descriptor
+    void *     EMQ$NEXT ;   // Next item on queue
+    void *     EMQ$LAST ;   // Previous item on queue
+    long long    EMQ$MDSC   ;   // Message descriptor
 };
 
 #define    QB$ERRMSG_SIZE sizeof(struct QB$ERRMSG)
@@ -1006,7 +1006,7 @@ QB$ERRMSG = BLOCK->QB$ERRMSG_SIZE FIELD(QB$ERRMSG_FIELDS) %;
 
 struct QH$ERRHDR
 {
-    void *     EM$QHEAD	;
+    void *     EM$QHEAD ;
     void *    EM$QTAIL;
 };
 
@@ -1031,9 +1031,9 @@ va_list args;
 {
     extern
     sleeping;
-    extern	mm$qblk_get();
-    extern void	mm$qblk_free ();
-    extern	LIB$SYS_FAOL ();
+    extern  mm$qblk_get();
+    extern void mm$qblk_free ();
+    extern  LIB$SYS_FAOL ();
     signed long
     RC;
     struct dsc$descriptor * MDSC;
@@ -1083,8 +1083,8 @@ void CHECK_ERRMSG_Q (void)
 // Called from main TCP processing loop after all useful work has been done.
 //
 {
-    extern      void	mm$qblk_free ();
-    extern	STR$FREE1_DX ();
+    extern      void    mm$qblk_free ();
+    extern  STR$FREE1_DX ();
     struct queue_blk_structure(QB$ERRMSG) * QB;
     struct dsc$descriptor * MDSC;
 
@@ -1104,27 +1104,27 @@ void CHECK_ERRMSG_Q (void)
 
 Function:
 
-	Double check that all user IO has been posted otherwise user process
-	will hang in MWAIT waiting for the outstanding IO to complete.  Catch
-	is the system dynamic memory used in the user's IO request (IRP).
+    Double check that all user IO has been posted otherwise user process
+    will hang in MWAIT waiting for the outstanding IO to complete.  Catch
+    is the system dynamic memory used in the user's IO request (IRP).
 
 Inputs:
 
-	None.
+    None.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	All user IO is posted with the TCP error "TCP is Exiting".
+    All user IO is posted with the TCP error "TCP is Exiting".
 */
 
 void Exit_Handler (void)
 {
-    extern      void	user$purge_all_io ();
-    extern void	RESET_PROCNAME() ;
+    extern      void    user$purge_all_io ();
+    extern void RESET_PROCNAME() ;
 
     ERROR$FAO("Exit handler: Exit requested, cleaning up...");
 
@@ -1147,27 +1147,27 @@ void Exit_Handler (void)
 
 Function:
 
-	Catch those nasty Exceptions which might might cause TCP to crash
-	& forget about user IO requests thus leaving the user jobs stuck
-	in MWAIT state waiting for their IO to complete.
+    Catch those nasty Exceptions which might might cause TCP to crash
+    & forget about user IO requests thus leaving the user jobs stuck
+    in MWAIT state waiting for their IO to complete.
 
 Inputs:
 
-	None.
+    None.
 
 Outputs:
 
-	SS$_Resignal, indicate we want to bomb.
+    SS$_Resignal, indicate we want to bomb.
 
 Side Effects:
 
-	All user IO is posted with the TCP error "TCP is Exiting".
+    All user IO is posted with the TCP error "TCP is Exiting".
 */
 
 Exception_Handler(SIG,MECH)
 struct  _chfdef1 * SIG;
 {
-    extern void	user$purge_all_io ();
+    extern void user$purge_all_io ();
 
     ERROR$FAO("Exception handler: signal name !XL",SIG->chf$l_sig_name);
     user$purge_all_io();

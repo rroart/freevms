@@ -1,5 +1,5 @@
-#ifndef cspdef_h
-#define cspdef_h
+#ifndef CSPDEF_H
+#define CSPDEF_H
 
 CSP$K_MAX_FLWCTL               = 00000008
                                  CSP$K_MAX_WAITING              = 00000032

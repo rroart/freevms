@@ -12,9 +12,9 @@
  * Remember to turn this off in 2.4. -ben
  */
 #if defined(CONFIG_DEBUG_SPINLOCK)
-#define SPINLOCK_DEBUG	1
+#define SPINLOCK_DEBUG  1
 #else
-#define SPINLOCK_DEBUG	0
+#define SPINLOCK_DEBUG  0
 #endif
 
 /*
@@ -29,17 +29,17 @@ typedef struct
 #endif
 } spinlock_t;
 
-#define SPINLOCK_MAGIC	0xdead4ead
+#define SPINLOCK_MAGIC  0xdead4ead
 
 #if SPINLOCK_DEBUG
-#define SPINLOCK_MAGIC_INIT	, SPINLOCK_MAGIC
+#define SPINLOCK_MAGIC_INIT , SPINLOCK_MAGIC
 #else
-#define SPINLOCK_MAGIC_INIT	/* */
+#define SPINLOCK_MAGIC_INIT /* */
 #endif
 
 #define SPIN_LOCK_UNLOCKED (spinlock_t) { 1 SPINLOCK_MAGIC_INIT }
 
-#define spin_lock_init(x)	do { *(x) = SPIN_LOCK_UNLOCKED; } while(0)
+#define spin_lock_init(x)   do { *(x) = SPIN_LOCK_UNLOCKED; } while(0)
 
 /*
  * Simple spin lock operations.  There are two variants, one clears IRQ's
@@ -48,26 +48,26 @@ typedef struct
  * We make no fairness assumptions. They have a cost.
  */
 
-#define spin_is_locked(x)	(*(volatile signed char *)(&(x)->lock) <= 0)
-#define spin_unlock_wait(x)	do { barrier(); } while(spin_is_locked(x))
+#define spin_is_locked(x)   (*(volatile signed char *)(&(x)->lock) <= 0)
+#define spin_unlock_wait(x) do { barrier(); } while(spin_is_locked(x))
 
 #define spin_lock_string \
-	"\n1:\t" \
-	"lock ; decb %0\n\t" \
-	"js 2f\n" \
-	LOCK_SECTION_START("") \
-	"2:\t" \
-	"cmpb $0,%0\n\t" \
-	"rep;nop\n\t" \
-	"jle 2b\n\t" \
-	"jmp 1b\n" \
-	LOCK_SECTION_END
+    "\n1:\t" \
+    "lock ; decb %0\n\t" \
+    "js 2f\n" \
+    LOCK_SECTION_START("") \
+    "2:\t" \
+    "cmpb $0,%0\n\t" \
+    "rep;nop\n\t" \
+    "jle 2b\n\t" \
+    "jmp 1b\n" \
+    LOCK_SECTION_END
 
 /*
  * This works. Despite all the confusion.
  */
 #define spin_unlock_string \
-	"movb $1,%0"
+    "movb $1,%0"
 
 static inline int spin_trylock(spinlock_t *lock)
 {
@@ -126,17 +126,17 @@ typedef struct
 #endif
 } rwlock_t;
 
-#define RWLOCK_MAGIC	0xdeaf1eed
+#define RWLOCK_MAGIC    0xdeaf1eed
 
 #if SPINLOCK_DEBUG
-#define RWLOCK_MAGIC_INIT	, RWLOCK_MAGIC
+#define RWLOCK_MAGIC_INIT   , RWLOCK_MAGIC
 #else
-#define RWLOCK_MAGIC_INIT	/* */
+#define RWLOCK_MAGIC_INIT   /* */
 #endif
 
 #define RW_LOCK_UNLOCKED (rwlock_t) { RW_LOCK_BIAS RWLOCK_MAGIC_INIT }
 
-#define rwlock_init(x)	do { *(x) = RW_LOCK_UNLOCKED; } while(0)
+#define rwlock_init(x)  do { *(x) = RW_LOCK_UNLOCKED; } while(0)
 
 /*
  * On x86, we implement read-write locks as a 32-bit counter
@@ -167,8 +167,8 @@ static inline void write_lock(rwlock_t *rw)
     __build_write_lock(rw, "__write_lock_failed");
 }
 
-#define read_unlock(rw)		asm volatile("lock ; incl %0" :"=m" ((rw)->lock) : : "memory")
-#define write_unlock(rw)	asm volatile("lock ; addl $" RW_LOCK_BIAS_STR ",%0":"=m" ((rw)->lock) : : "memory")
+#define read_unlock(rw)     asm volatile("lock ; incl %0" :"=m" ((rw)->lock) : : "memory")
+#define write_unlock(rw)    asm volatile("lock ; addl $" RW_LOCK_BIAS_STR ",%0":"=m" ((rw)->lock) : : "memory")
 
 static inline int write_trylock(rwlock_t *lock)
 {

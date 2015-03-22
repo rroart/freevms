@@ -12,31 +12,31 @@
 #define DoC_Sig1 0
 #define DoC_Sig2 1
 
-#define DoC_ChipID		0x1000
-#define DoC_DOCStatus		0x1001
-#define DoC_DOCControl		0x1002
-#define DoC_FloorSelect		0x1003
-#define DoC_CDSNControl		0x1004
-#define DoC_CDSNDeviceSelect 	0x1005
-#define DoC_ECCConf 		0x1006
-#define DoC_2k_ECCStatus	0x1007
+#define DoC_ChipID      0x1000
+#define DoC_DOCStatus       0x1001
+#define DoC_DOCControl      0x1002
+#define DoC_FloorSelect     0x1003
+#define DoC_CDSNControl     0x1004
+#define DoC_CDSNDeviceSelect    0x1005
+#define DoC_ECCConf         0x1006
+#define DoC_2k_ECCStatus    0x1007
 
-#define DoC_CDSNSlowIO		0x100d
-#define DoC_ECCSyndrome0	0x1010
-#define DoC_ECCSyndrome1	0x1011
-#define DoC_ECCSyndrome2	0x1012
-#define DoC_ECCSyndrome3	0x1013
-#define DoC_ECCSyndrome4	0x1014
-#define DoC_ECCSyndrome5	0x1015
-#define DoC_AliasResolution 	0x101b
-#define DoC_ConfigInput		0x101c
-#define DoC_ReadPipeInit 	0x101d
-#define DoC_WritePipeTerm 	0x101e
-#define DoC_LastDataRead 	0x101f
-#define DoC_NOP 		0x1020
+#define DoC_CDSNSlowIO      0x100d
+#define DoC_ECCSyndrome0    0x1010
+#define DoC_ECCSyndrome1    0x1011
+#define DoC_ECCSyndrome2    0x1012
+#define DoC_ECCSyndrome3    0x1013
+#define DoC_ECCSyndrome4    0x1014
+#define DoC_ECCSyndrome5    0x1015
+#define DoC_AliasResolution     0x101b
+#define DoC_ConfigInput     0x101c
+#define DoC_ReadPipeInit    0x101d
+#define DoC_WritePipeTerm   0x101e
+#define DoC_LastDataRead    0x101f
+#define DoC_NOP         0x1020
 
-#define DoC_Mil_CDSN_IO 	0x0800
-#define DoC_2k_CDSN_IO 		0x1800
+#define DoC_Mil_CDSN_IO     0x0800
+#define DoC_2k_CDSN_IO      0x1800
 
 /* How to access the device?
  * On ARM, it'll be mmap'd directly with 32-bit wide accesses.
@@ -66,32 +66,32 @@
 #define ReadDOC(adr, reg)      ReadDOC_(adr,DoC_##reg)
 #define WriteDOC(d, adr, reg)  WriteDOC_(d,adr,DoC_##reg)
 
-#define DOC_MODE_RESET 		0
-#define DOC_MODE_NORMAL 	1
-#define DOC_MODE_RESERVED1 	2
-#define DOC_MODE_RESERVED2 	3
+#define DOC_MODE_RESET      0
+#define DOC_MODE_NORMAL     1
+#define DOC_MODE_RESERVED1  2
+#define DOC_MODE_RESERVED2  3
 
-#define DOC_MODE_MDWREN 	4
-#define DOC_MODE_CLR_ERR 	0x80
+#define DOC_MODE_MDWREN     4
+#define DOC_MODE_CLR_ERR    0x80
 
-#define DOC_ChipID_Doc2k 	0x20
-#define DOC_ChipID_DocMil 	0x30
+#define DOC_ChipID_Doc2k    0x20
+#define DOC_ChipID_DocMil   0x30
 
-#define CDSN_CTRL_FR_B 		0x80
-#define CDSN_CTRL_ECC_IO 	0x20
-#define CDSN_CTRL_FLASH_IO 	0x10
-#define CDSN_CTRL_WP 		0x08
-#define CDSN_CTRL_ALE 		0x04
-#define CDSN_CTRL_CLE 		0x02
-#define CDSN_CTRL_CE 		0x01
+#define CDSN_CTRL_FR_B      0x80
+#define CDSN_CTRL_ECC_IO    0x20
+#define CDSN_CTRL_FLASH_IO  0x10
+#define CDSN_CTRL_WP        0x08
+#define CDSN_CTRL_ALE       0x04
+#define CDSN_CTRL_CLE       0x02
+#define CDSN_CTRL_CE        0x01
 
-#define DOC_ECC_RESET 		0
-#define DOC_ECC_ERROR 		0x80
-#define DOC_ECC_RW 		0x20
-#define DOC_ECC__EN 		0x08
-#define DOC_TOGGLE_BIT 		0x04
-#define DOC_ECC_RESV 		0x02
-#define DOC_ECC_IGNORE		0x01
+#define DOC_ECC_RESET       0
+#define DOC_ECC_ERROR       0x80
+#define DOC_ECC_RW      0x20
+#define DOC_ECC__EN         0x08
+#define DOC_TOGGLE_BIT      0x04
+#define DOC_ECC_RESV        0x02
+#define DOC_ECC_IGNORE      0x01
 
 /* We have to also set the reserved bit 1 for enable */
 #define DOC_ECC_EN (DOC_ECC__EN | DOC_ECC_RESV)

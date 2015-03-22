@@ -1,43 +1,43 @@
 /*****************************************************************************
-* wanpipe.h	WANPIPE(tm) Multiprotocol WAN Link Driver.
-*		User-level API definitions.
+* wanpipe.h WANPIPE(tm) Multiprotocol WAN Link Driver.
+*       User-level API definitions.
 *
-* Author: 	Nenad Corbic <ncorbic@sangoma.com>
-*		Gideon Hack
+* Author:   Nenad Corbic <ncorbic@sangoma.com>
+*       Gideon Hack
 *
-* Copyright:	(c) 1995-2000 Sangoma Technologies Inc.
+* Copyright:    (c) 1995-2000 Sangoma Technologies Inc.
 *
-*		This program is free software; you can redistribute it and/or
-*		modify it under the terms of the GNU General Public License
-*		as published by the Free Software Foundation; either version
-*		2 of the License, or (at your option) any later version.
+*       This program is free software; you can redistribute it and/or
+*       modify it under the terms of the GNU General Public License
+*       as published by the Free Software Foundation; either version
+*       2 of the License, or (at your option) any later version.
 * ============================================================================
 * Nov 3,  2000  Nenad Corbic    Added config_id to sdla_t structure.
 *                               Used to determine the protocol running.
-* Jul 13, 2000  Nenad Corbic	Added SyncPPP Support
+* Jul 13, 2000  Nenad Corbic    Added SyncPPP Support
 * Feb 24, 2000  Nenad Corbic    Added support for x25api driver
 * Oct 04, 1999  Nenad Corbic    New CHDLC and FRAME RELAY code, SMP support
-* Jun 02, 1999  Gideon Hack	Added 'update_call_count' for Cisco HDLC
-*				support
-* Jun 26, 1998	David Fong	Added 'ip_mode' in sdla_t.u.p for dynamic IP
-*				routing mode configuration
-* Jun 12, 1998	David Fong	Added Cisco HDLC union member in sdla_t
-* Dec 08, 1997	Jaspreet Singh  Added 'authenticator' in union of 'sdla_t'
-* Nov 26, 1997	Jaspreet Singh	Added 'load_sharing' structure.  Also added
-*				'devs_struct','dev_to_devtint_next' to 'sdla_t'
-* Nov 24, 1997	Jaspreet Singh	Added 'irq_dis_if_send_count',
-*				'irq_dis_poll_count' to 'sdla_t'.
-* Nov 06, 1997	Jaspreet Singh	Added a define called 'INTR_TEST_MODE'
-* Oct 20, 1997	Jaspreet Singh	Added 'buff_intr_mode_unbusy' and
-*				'dlci_intr_mode_unbusy' to 'sdla_t'
-* Oct 18, 1997	Jaspreet Singh	Added structure to maintain global driver
-*				statistics.
-* Jan 15, 1997	Gene Kozin	Version 3.1.0
-*				 o added UDP management stuff
-* Jan 02, 1997	Gene Kozin	Version 3.0.0
+* Jun 02, 1999  Gideon Hack Added 'update_call_count' for Cisco HDLC
+*               support
+* Jun 26, 1998  David Fong  Added 'ip_mode' in sdla_t.u.p for dynamic IP
+*               routing mode configuration
+* Jun 12, 1998  David Fong  Added Cisco HDLC union member in sdla_t
+* Dec 08, 1997  Jaspreet Singh  Added 'authenticator' in union of 'sdla_t'
+* Nov 26, 1997  Jaspreet Singh  Added 'load_sharing' structure.  Also added
+*               'devs_struct','dev_to_devtint_next' to 'sdla_t'
+* Nov 24, 1997  Jaspreet Singh  Added 'irq_dis_if_send_count',
+*               'irq_dis_poll_count' to 'sdla_t'.
+* Nov 06, 1997  Jaspreet Singh  Added a define called 'INTR_TEST_MODE'
+* Oct 20, 1997  Jaspreet Singh  Added 'buff_intr_mode_unbusy' and
+*               'dlci_intr_mode_unbusy' to 'sdla_t'
+* Oct 18, 1997  Jaspreet Singh  Added structure to maintain global driver
+*               statistics.
+* Jan 15, 1997  Gene Kozin  Version 3.1.0
+*                o added UDP management stuff
+* Jan 02, 1997  Gene Kozin  Version 3.0.0
 *****************************************************************************/
-#ifndef	_WANPIPE_H
-#define	_WANPIPE_H
+#ifndef _WANPIPE_H
+#define _WANPIPE_H
 
 #include <linux/version.h>
 
@@ -53,12 +53,12 @@
 #define FREE_READ 1
 #define FREE_WRITE 0
 
-#define stop_net_queue(a) 	netif_stop_queue(a)
-#define start_net_queue(a) 	netif_start_queue(a)
-#define is_queue_stopped(a)	netif_queue_stopped(a)
-#define wake_net_dev(a)	netif_wake_queue(a)
-#define is_dev_running(a)	netif_running(a)
-#define wan_dev_kfree_skb(a,b)	dev_kfree_skb_any(a)
+#define stop_net_queue(a)   netif_stop_queue(a)
+#define start_net_queue(a)  netif_start_queue(a)
+#define is_queue_stopped(a) netif_queue_stopped(a)
+#define wake_net_dev(a) netif_wake_queue(a)
+#define is_dev_running(a)   netif_running(a)
+#define wan_dev_kfree_skb(a,b)  dev_kfree_skb_any(a)
 
 
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,0)
@@ -68,12 +68,12 @@
 #define FREE_READ 1
 #define FREE_WRITE 0
 
-#define stop_net_queue(a) 	(set_bit(0, &##a->tbusy))
-#define start_net_queue(a) 	(clear_bit(0,&##a->tbusy))
-#define is_queue_stopped(a)	(##a->tbusy)
-#define wake_net_dev(a)	{clear_bit(0,&##a->tbusy);mark_bh(NET_BH);}
-#define is_dev_running(a)	(test_bit(0,&##a->start))
-#define wan_dev_kfree_skb(a,b)	dev_kfree_skb(a)
+#define stop_net_queue(a)   (set_bit(0, &##a->tbusy))
+#define start_net_queue(a)  (clear_bit(0,&##a->tbusy))
+#define is_queue_stopped(a) (##a->tbusy)
+#define wake_net_dev(a) {clear_bit(0,&##a->tbusy);mark_bh(NET_BH);}
+#define is_dev_running(a)   (test_bit(0,&##a->start))
+#define wan_dev_kfree_skb(a,b)  dev_kfree_skb(a)
 
 #else
 #define LINUX_2_0
@@ -82,11 +82,11 @@
 #define test_and_set_bit set_bit
 #define net_ratelimit() 1
 
-#define stop_net_queue(a) 	(set_bit(0, &##a->tbusy))
-#define start_net_queue(a) 	(clear_bit(0,&##a->tbusy))
-#define is_queue_stopped(a)	(##a->tbusy)
-#define wake_net_dev(a)	{clear_bit(0,&##a->tbusy);mark_bh(NET_BH);}
-#define is_dev_running(a)	(test_bit(0,(void*)&##a->start))
+#define stop_net_queue(a)   (set_bit(0, &##a->tbusy))
+#define start_net_queue(a)  (clear_bit(0,&##a->tbusy))
+#define is_queue_stopped(a) (##a->tbusy)
+#define wake_net_dev(a) {clear_bit(0,&##a->tbusy);mark_bh(NET_BH);}
+#define is_dev_running(a)   (test_bit(0,(void*)&##a->start))
 #define wan_dev_kfree_skb(a,b) dev_kfree_skb(a,b)
 #define spin_lock_init(a)
 #define spin_lock(a)
@@ -97,29 +97,29 @@
 
 /* Defines */
 
-#ifndef	PACKED
-#define	PACKED	__attribute__((packed))
+#ifndef PACKED
+#define PACKED  __attribute__((packed))
 #endif
 
-#define	WANPIPE_MAGIC	0x414C4453L	/* signature: 'SDLA' reversed */
+#define WANPIPE_MAGIC   0x414C4453L /* signature: 'SDLA' reversed */
 
 /* IOCTL numbers (up to 16) */
-#define	WANPIPE_DUMP	(ROUTER_USER+0)	/* dump adapter's memory */
-#define	WANPIPE_EXEC	(ROUTER_USER+1)	/* execute firmware command */
+#define WANPIPE_DUMP    (ROUTER_USER+0) /* dump adapter's memory */
+#define WANPIPE_EXEC    (ROUTER_USER+1) /* execute firmware command */
 
 #define TRACE_ALL                       0x00
-#define TRACE_PROT			0x01
-#define TRACE_DATA			0x02
+#define TRACE_PROT          0x01
+#define TRACE_DATA          0x02
 
 /* values for request/reply byte */
-#define UDPMGMT_REQUEST	0x01
-#define UDPMGMT_REPLY	0x02
-#define UDP_OFFSET	12
+#define UDPMGMT_REQUEST 0x01
+#define UDPMGMT_REPLY   0x02
+#define UDP_OFFSET  12
 
-#define MAX_CMD_BUFF 	10
-#define MAX_X25_LCN 	255	/* Maximum number of x25 channels */
-#define MAX_LCN_NUM	4095	/* Maximum lcn number */
-#define MAX_FT1_RETRY 	100
+#define MAX_CMD_BUFF    10
+#define MAX_X25_LCN     255 /* Maximum number of x25 channels */
+#define MAX_LCN_NUM 4095    /* Maximum lcn number */
+#define MAX_FT1_RETRY   100
 
 #ifdef LINUX_2_4
 #ifndef AF_WANPIPE
@@ -142,53 +142,53 @@
 #define TX_TIMEOUT 5*HZ
 
 /* General Critical Flags */
-#define SEND_CRIT	0x00
-#define PERI_CRIT	0x01
+#define SEND_CRIT   0x00
+#define PERI_CRIT   0x01
 
 /* Chdlc and PPP polling critical flag */
-#define POLL_CRIT	0x03
+#define POLL_CRIT   0x03
 
 /* Frame Relay Tx IRQ send critical flag */
 #define SEND_TXIRQ_CRIT 0x02
 
 /* Frame Relay ARP critical flag */
-#define ARP_CRIT	0x03
+#define ARP_CRIT    0x03
 
 /* Bit maps for dynamic interface configuration
  * DYN_OPT_ON : turns this option on/off
  * DEV_DOWN   : device was shutdown by the driver not
  *              by user
  */
-#define DYN_OPT_ON	0x00
-#define DEV_DOWN	0x01
+#define DYN_OPT_ON  0x00
+#define DEV_DOWN    0x01
 
 /*
  * Data structures for IOCTL calls.
  */
 
-typedef struct sdla_dump	/* WANPIPE_DUMP */
+typedef struct sdla_dump    /* WANPIPE_DUMP */
 {
-    unsigned long magic;	/* for verification */
-    unsigned long offset;	/* absolute adapter memory address */
-    unsigned long length;	/* block length */
-    void* ptr;		/* -> buffer */
+    unsigned long magic;    /* for verification */
+    unsigned long offset;   /* absolute adapter memory address */
+    unsigned long length;   /* block length */
+    void* ptr;      /* -> buffer */
 } sdla_dump_t;
 
-typedef struct sdla_exec	/* WANPIPE_EXEC */
+typedef struct sdla_exec    /* WANPIPE_EXEC */
 {
-    unsigned long magic;	/* for verification */
-    void* cmd;		/* -> command structure */
-    void* data;		/* -> data buffer */
+    unsigned long magic;    /* for verification */
+    void* cmd;      /* -> command structure */
+    void* data;     /* -> data buffer */
 } sdla_exec_t;
 
 /* UDP management stuff */
 
 typedef struct wum_header
 {
-    unsigned char signature[8];	/* 00h: signature */
-    unsigned char type;		/* 08h: request/reply */
-    unsigned char command;		/* 09h: commnand */
-    unsigned char reserved[6];	/* 0Ah: reserved */
+    unsigned char signature[8]; /* 00h: signature */
+    unsigned char type;     /* 08h: request/reply */
+    unsigned char command;      /* 09h: commnand */
+    unsigned char reserved[6];  /* 0Ah: reserved */
 } wum_header_t;
 
 /*************************************************************************
@@ -220,25 +220,25 @@ typedef struct global_stats
 
 typedef struct
 {
-    unsigned short	udp_src_port		PACKED;
-    unsigned short	udp_dst_port		PACKED;
-    unsigned short	udp_length		PACKED;
-    unsigned short	udp_checksum		PACKED;
+    unsigned short  udp_src_port        PACKED;
+    unsigned short  udp_dst_port        PACKED;
+    unsigned short  udp_length      PACKED;
+    unsigned short  udp_checksum        PACKED;
 } udp_pkt_t;
 
 
 typedef struct
 {
-    unsigned char	ver_inet_hdr_length	PACKED;
-    unsigned char	service_type		PACKED;
-    unsigned short	total_length		PACKED;
-    unsigned short	identifier		PACKED;
-    unsigned short	flags_frag_offset	PACKED;
-    unsigned char	ttl			PACKED;
-    unsigned char	protocol		PACKED;
-    unsigned short	hdr_checksum		PACKED;
-    unsigned long	ip_src_address		PACKED;
-    unsigned long	ip_dst_address		PACKED;
+    unsigned char   ver_inet_hdr_length PACKED;
+    unsigned char   service_type        PACKED;
+    unsigned short  total_length        PACKED;
+    unsigned short  identifier      PACKED;
+    unsigned short  flags_frag_offset   PACKED;
+    unsigned char   ttl         PACKED;
+    unsigned char   protocol        PACKED;
+    unsigned short  hdr_checksum        PACKED;
+    unsigned long   ip_src_address      PACKED;
+    unsigned long   ip_dst_address      PACKED;
 } ip_pkt_t;
 
 
@@ -309,24 +309,24 @@ typedef struct
 
 
 /* This is used for interrupt testing */
-#define INTR_TEST_MODE	0x02
+#define INTR_TEST_MODE  0x02
 
-#define	WUM_SIGNATURE_L	0x50495046
-#define	WUM_SIGNATURE_H	0x444E3845
+#define WUM_SIGNATURE_L 0x50495046
+#define WUM_SIGNATURE_H 0x444E3845
 
-#define	WUM_KILL	0x50
-#define	WUM_EXEC	0x51
+#define WUM_KILL    0x50
+#define WUM_EXEC    0x51
 
-#define WANPIPE		0x00
-#define API		0x01
-#define BRIDGE		0x02
-#define BRIDGE_NODE	0x03
+#define WANPIPE     0x00
+#define API     0x01
+#define BRIDGE      0x02
+#define BRIDGE_NODE 0x03
 
-#ifdef	__KERNEL__
+#ifdef  __KERNEL__
 /****** Kernel Interface ****************************************************/
 
-#include <linux/sdladrv.h>	/* SDLA support module API definitions */
-#include <linux/sdlasfm.h>	/* SDLA firmware module definitions */
+#include <linux/sdladrv.h>  /* SDLA support module API definitions */
+#include <linux/sdlasfm.h>  /* SDLA firmware module definitions */
 #include <linux/tqueue.h>
 #ifdef LINUX_2_4
 #include <linux/serial.h>
@@ -339,12 +339,12 @@ typedef struct
 #include <linux/tty_flip.h>
 
 
-#define	is_digit(ch) (((ch)>=(unsigned)'0'&&(ch)<=(unsigned)'9')?1:0)
-#define	is_alpha(ch) ((((ch)>=(unsigned)'a'&&(ch)<=(unsigned)'z')||\
-	 	  ((ch)>=(unsigned)'A'&&(ch)<=(unsigned)'Z'))?1:0)
-#define	is_hex_digit(ch) ((((ch)>=(unsigned)'0'&&(ch)<=(unsigned)'9')||\
-	 	  ((ch)>=(unsigned)'a'&&(ch)<=(unsigned)'f')||\
-	 	  ((ch)>=(unsigned)'A'&&(ch)<=(unsigned)'F'))?1:0)
+#define is_digit(ch) (((ch)>=(unsigned)'0'&&(ch)<=(unsigned)'9')?1:0)
+#define is_alpha(ch) ((((ch)>=(unsigned)'a'&&(ch)<=(unsigned)'z')||\
+          ((ch)>=(unsigned)'A'&&(ch)<=(unsigned)'Z'))?1:0)
+#define is_hex_digit(ch) ((((ch)>=(unsigned)'0'&&(ch)<=(unsigned)'9')||\
+          ((ch)>=(unsigned)'a'&&(ch)<=(unsigned)'f')||\
+          ((ch)>=(unsigned)'A'&&(ch)<=(unsigned)'F'))?1:0)
 
 
 /****** Data Structures *****************************************************/
@@ -355,27 +355,27 @@ typedef struct
  */
 typedef struct sdla
 {
-    char devname[WAN_DRVNAME_SZ+1];	/* card name */
-    sdlahw_t hw;			/* hardware configuration */
-    wan_device_t wandev;		/* WAN device data space */
+    char devname[WAN_DRVNAME_SZ+1]; /* card name */
+    sdlahw_t hw;            /* hardware configuration */
+    wan_device_t wandev;        /* WAN device data space */
 
-    unsigned open_cnt;		/* number of open interfaces */
-    unsigned long state_tick;	/* link state timestamp */
-    unsigned intr_mode;		/* Type of Interrupt Mode */
-    char in_isr;			/* interrupt-in-service flag */
-    char buff_int_mode_unbusy;	/* flag for carrying out dev_tint */
-    char dlci_int_mode_unbusy;	/* flag for carrying out dev_tint */
-    char configured;		/* flag for previous configurations */
+    unsigned open_cnt;      /* number of open interfaces */
+    unsigned long state_tick;   /* link state timestamp */
+    unsigned intr_mode;     /* Type of Interrupt Mode */
+    char in_isr;            /* interrupt-in-service flag */
+    char buff_int_mode_unbusy;  /* flag for carrying out dev_tint */
+    char dlci_int_mode_unbusy;  /* flag for carrying out dev_tint */
+    char configured;        /* flag for previous configurations */
 
     unsigned short irq_dis_if_send_count; /* Disabling irqs in if_send*/
     unsigned short irq_dis_poll_count;   /* Disabling irqs in poll routine*/
     unsigned short force_enable_irq;
-    char TracingEnabled;		/* flag for enabling trace */
-    global_stats_t statistics;	/* global statistics */
-    void* mbox;			/* -> mailbox */
-    void* rxmb;			/* -> receive mailbox */
-    void* flags;			/* -> adapter status flags */
-    void (*isr)(struct sdla* card);	/* interrupt service routine */
+    char TracingEnabled;        /* flag for enabling trace */
+    global_stats_t statistics;  /* global statistics */
+    void* mbox;         /* -> mailbox */
+    void* rxmb;         /* -> receive mailbox */
+    void* flags;            /* -> adapter status flags */
+    void (*isr)(struct sdla* card); /* interrupt service routine */
     void (*poll)(struct sdla* card); /* polling routine */
     int (*exec)(struct sdla* card, void* u_cmd, void* u_data);
     /* Used by the listen() system call */
@@ -425,10 +425,10 @@ typedef struct sdla
             netdevice_t * udp_dev;
             s8 udp_pkt_data[MAX_LGTH_UDP_MGNT_PKT];
 
-            u8 LAPB_hdlc;		/* Option to turn off X25 and run only LAPB */
-            u8 logging;		/* Option to log call messages */
-            u8 oob_on_modem;	/* Option to send modem status to the api */
-            u16 num_of_ch;		/* Number of channels configured by the user */
+            u8 LAPB_hdlc;       /* Option to turn off X25 and run only LAPB */
+            u8 logging;     /* Option to log call messages */
+            u8 oob_on_modem;    /* Option to send modem status to the api */
+            u16 num_of_ch;      /* Number of channels configured by the user */
 
             struct tq_struct x25_poll_task;
             struct timer_list x25_timer;
@@ -436,10 +436,10 @@ typedef struct sdla
         struct
         {
             /****** frame relay specific data ***/
-            void* rxmb_base;	/* -> first Rx buffer */
-            void* rxmb_last;	/* -> last Rx buffer */
-            unsigned rx_base;	/* S508 receive buffer base */
-            unsigned rx_top;	/* S508 receive buffer end */
+            void* rxmb_base;    /* -> first Rx buffer */
+            void* rxmb_last;    /* -> last Rx buffer */
+            unsigned rx_base;   /* S508 receive buffer base */
+            unsigned rx_top;    /* S508 receive buffer end */
             unsigned short node_dlci[100];
             unsigned short dlci_num;
             netdevice_t *dlci_to_dev_map[991 + 1];
@@ -450,57 +450,57 @@ typedef struct sdla
             char udp_pkt_src;
             unsigned udp_dlci;
             char udp_pkt_data[MAX_LGTH_UDP_MGNT_PKT];
-            void* trc_el_base;      		/* first trace element */
-            void* trc_el_last;      		/* last trace element */
-            void *curr_trc_el;      		/* current trace element */
-            unsigned short trc_bfr_space; 		/* trace buffer space */
+            void* trc_el_base;              /* first trace element */
+            void* trc_el_last;              /* last trace element */
+            void *curr_trc_el;              /* current trace element */
+            unsigned short trc_bfr_space;       /* trace buffer space */
             unsigned char  update_comms_stats;
             netdevice_t *arp_dev;
             spinlock_t if_send_lock;
         } f;
-        struct			/****** PPP-specific data ***********/
+        struct          /****** PPP-specific data ***********/
         {
-            char if_name[WAN_IFNAME_SZ+1];	/* interface name */
-            void* txbuf;		/* -> current Tx buffer */
-            void* txbuf_base;	/* -> first Tx buffer */
-            void* txbuf_last;	/* -> last Tx buffer */
-            void* rxbuf_base;	/* -> first Rx buffer */
-            void* rxbuf_last;	/* -> last Rx buffer */
-            unsigned rx_base;	/* S508 receive buffer base */
-            unsigned rx_top;	/* S508 receive buffer end */
-            char ip_mode;		/* STATIC/HOST/PEER IP Mode */
-            char authenticator;	/* Authenticator for PAP/CHAP */
+            char if_name[WAN_IFNAME_SZ+1];  /* interface name */
+            void* txbuf;        /* -> current Tx buffer */
+            void* txbuf_base;   /* -> first Tx buffer */
+            void* txbuf_last;   /* -> last Tx buffer */
+            void* rxbuf_base;   /* -> first Rx buffer */
+            void* rxbuf_last;   /* -> last Rx buffer */
+            unsigned rx_base;   /* S508 receive buffer base */
+            unsigned rx_top;    /* S508 receive buffer end */
+            char ip_mode;       /* STATIC/HOST/PEER IP Mode */
+            char authenticator; /* Authenticator for PAP/CHAP */
             unsigned char comm_enabled; /* Is comm enabled or not */
             unsigned char peer_route;   /* Process Peer Route */
             unsigned long *txbuf_next;  /* Next Tx buffer to use */
             unsigned long *rxbuf_next;  /* Next Rx buffer to use */
         } p;
-        struct			/* Cisco HDLC-specific data */
+        struct          /* Cisco HDLC-specific data */
         {
-            char if_name[WAN_IFNAME_SZ+1];	/* interface name */
+            char if_name[WAN_IFNAME_SZ+1];  /* interface name */
             unsigned char comm_port;/* Communication Port O or 1 */
             unsigned char usedby;  /* Used by WANPIPE or API */
-            void* rxmb;		/* Receive mail box */
-            void* flags;		/* flags */
-            void* tx_status;	/* Tx status element */
-            void* rx_status;	/* Rx status element */
-            void* txbuf;		/* -> current Tx buffer */
-            void* txbuf_base;	/* -> first Tx buffer */
-            void* txbuf_last;	/* -> last Tx buffer */
-            void* rxbuf_base;	/* -> first Rx buffer */
-            void* rxbuf_last;	/* -> last Rx buffer */
-            unsigned rx_base;	/* S508 receive buffer base */
-            unsigned rx_top;	/* S508 receive buffer end */
+            void* rxmb;     /* Receive mail box */
+            void* flags;        /* flags */
+            void* tx_status;    /* Tx status element */
+            void* rx_status;    /* Rx status element */
+            void* txbuf;        /* -> current Tx buffer */
+            void* txbuf_base;   /* -> first Tx buffer */
+            void* txbuf_last;   /* -> last Tx buffer */
+            void* rxbuf_base;   /* -> first Rx buffer */
+            void* rxbuf_last;   /* -> last Rx buffer */
+            unsigned rx_base;   /* S508 receive buffer base */
+            unsigned rx_top;    /* S508 receive buffer end */
             unsigned char receive_only; /* high speed receivers */
             unsigned short protocol_options;
-            unsigned short kpalv_tx;	/* Tx kpalv timer */
-            unsigned short kpalv_rx;	/* Rx kpalv timer */
-            unsigned short kpalv_err;	/* Error tolerance */
-            unsigned short slarp_timer;	/* SLARP req timer */
-            unsigned state;			/* state of the link */
+            unsigned short kpalv_tx;    /* Tx kpalv timer */
+            unsigned short kpalv_rx;    /* Rx kpalv timer */
+            unsigned short kpalv_err;   /* Error tolerance */
+            unsigned short slarp_timer; /* SLARP req timer */
+            unsigned state;         /* state of the link */
             unsigned char api_status;
             unsigned char update_call_count;
-            unsigned short api_options;	/* for async config */
+            unsigned short api_options; /* for async config */
             unsigned char  async_mode;
             unsigned short tx_bits_per_char;
             unsigned short rx_bits_per_char;
@@ -516,21 +516,21 @@ typedef struct sdla
         } c;
         struct
         {
-            void* tx_status;	/* Tx status element */
-            void* rx_status;	/* Rx status element */
-            void* trace_status;	/* Trace status element */
-            void* txbuf;		/* -> current Tx buffer */
-            void* txbuf_base;	/* -> first Tx buffer */
-            void* txbuf_last;	/* -> last Tx buffer */
-            void* rxbuf_base;	/* -> first Rx buffer */
-            void* rxbuf_last;	/* -> last Rx buffer */
-            void* tracebuf;		/* -> current Trace buffer */
-            void* tracebuf_base;	/* -> current Trace buffer */
-            void* tracebuf_last;	/* -> current Trace buffer */
-            unsigned rx_base;	/* receive buffer base */
-            unsigned rx_end;	/* receive buffer end */
-            unsigned trace_base;	/* trace buffer base */
-            unsigned trace_end;	/* trace buffer end */
+            void* tx_status;    /* Tx status element */
+            void* rx_status;    /* Rx status element */
+            void* trace_status; /* Trace status element */
+            void* txbuf;        /* -> current Tx buffer */
+            void* txbuf_base;   /* -> first Tx buffer */
+            void* txbuf_last;   /* -> last Tx buffer */
+            void* rxbuf_base;   /* -> first Rx buffer */
+            void* rxbuf_last;   /* -> last Rx buffer */
+            void* tracebuf;     /* -> current Trace buffer */
+            void* tracebuf_base;    /* -> current Trace buffer */
+            void* tracebuf_last;    /* -> current Trace buffer */
+            unsigned rx_base;   /* receive buffer base */
+            unsigned rx_end;    /* receive buffer end */
+            unsigned trace_base;    /* trace buffer base */
+            unsigned trace_end; /* trace buffer end */
 
         } h;
     } u;
@@ -538,18 +538,18 @@ typedef struct sdla
 
 /****** Public Functions ****************************************************/
 
-void wanpipe_open      (sdla_t* card);			/* wpmain.c */
-void wanpipe_close     (sdla_t* card);			/* wpmain.c */
-void wanpipe_set_state (sdla_t* card, int state);	/* wpmain.c */
+void wanpipe_open      (sdla_t* card);          /* wpmain.c */
+void wanpipe_close     (sdla_t* card);          /* wpmain.c */
+void wanpipe_set_state (sdla_t* card, int state);   /* wpmain.c */
 
-int wpx_init (sdla_t* card, wandev_conf_t* conf);	/* wpx.c */
-int wpf_init (sdla_t* card, wandev_conf_t* conf);	/* wpf.c */
-int wpp_init (sdla_t* card, wandev_conf_t* conf);	/* wpp.c */
+int wpx_init (sdla_t* card, wandev_conf_t* conf);   /* wpx.c */
+int wpf_init (sdla_t* card, wandev_conf_t* conf);   /* wpf.c */
+int wpp_init (sdla_t* card, wandev_conf_t* conf);   /* wpp.c */
 int wpc_init (sdla_t* card, wandev_conf_t* conf); /* Cisco HDLC */
-int bsc_init (sdla_t* card, wandev_conf_t* conf);	/* BSC streaming */
-int hdlc_init(sdla_t* card, wandev_conf_t* conf);	/* HDLC support */
+int bsc_init (sdla_t* card, wandev_conf_t* conf);   /* BSC streaming */
+int hdlc_init(sdla_t* card, wandev_conf_t* conf);   /* HDLC support */
 int wpft1_init (sdla_t* card, wandev_conf_t* conf);     /* FT1 Config support */
-int wsppp_init (sdla_t* card, wandev_conf_t* conf);	/* Sync PPP on top of RAW CHDLC */
+int wsppp_init (sdla_t* card, wandev_conf_t* conf); /* Sync PPP on top of RAW CHDLC */
 
 extern sdla_t * wanpipe_find_card(char *);
 extern sdla_t * wanpipe_find_card_num (int);
@@ -562,6 +562,6 @@ extern unsigned long get_ip_address (netdevice_t *dev, int option);
 extern void add_gateway(sdla_t *, netdevice_t *);
 
 
-#endif	/* __KERNEL__ */
-#endif	/* _WANPIPE_H */
+#endif  /* __KERNEL__ */
+#endif  /* _WANPIPE_H */
 

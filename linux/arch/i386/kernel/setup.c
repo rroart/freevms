@@ -22,7 +22,7 @@
  *  Intel Mobile Pentium II detection fix. Sean Gilley, June 1999.
  *
  *  IDT Winchip tweaks, misc clean ups.
- *	Dave Jones <davej@suse.de>, August 1999
+ *  Dave Jones <davej@suse.de>, August 1999
  *
  *  Support of BIGMEM added by Gerhard Wichert, Siemens AG, July 1999
  *
@@ -30,17 +30,17 @@
  *      Bart Hartgers <bart@etpmod.phys.tue.nl>, August 1999.
  *
  *  Memory region support
- *	David Parsons <orc@pell.chi.il.us>, July-August 1999
+ *  David Parsons <orc@pell.chi.il.us>, July-August 1999
  *
  *  Cleaned up cache-detection code
- *	Dave Jones <davej@suse.de>, October 1999
+ *  Dave Jones <davej@suse.de>, October 1999
  *
- *	Added proper L2 cache detection for Coppermine
- *	Dragan Stancevic <visitor@valinux.com>, October 1999
+ *  Added proper L2 cache detection for Coppermine
+ *  Dragan Stancevic <visitor@valinux.com>, October 1999
  *
  *  Added the original array for capability flags but forgot to credit
  *  myself :) (~1998) Fixed/cleaned up some cpu_model_info and other stuff
- *  	Jauder Ho <jauderho@carumba.com>, January 2000
+ *      Jauder Ho <jauderho@carumba.com>, January 2000
  *
  *  Detection for Celeron coppermine, identify_cpu() overhauled,
  *  and a few other clean ups.
@@ -48,7 +48,7 @@
  *
  *  Pentium III FXSR, SSE support
  *  General FPU state handling cleanups
- *	Gareth Hughes <gareth@valinux.com>, May 2000
+ *  Gareth Hughes <gareth@valinux.com>, May 2000
  *
  *  Added proper Cascades CPU and L2 cache detection for Cascades
  *  and 8-way type cache happy bunch from Intel:^)
@@ -127,7 +127,7 @@
  * Machine setup..
  */
 
-char ignore_irq13;		/* set if exception 16 works */
+char ignore_irq13;      /* set if exception 16 works */
 struct cpuinfo_x86 boot_cpu_data = { 0, 0, 0, 0, -1, 1, 0, 0, -1 };
 
 unsigned long mmu_cr4_features;
@@ -180,7 +180,7 @@ int enable_acpi_smp_table;
 /*
  * This is set up by the setup-routine at boot-time
  */
-#define PARAM	((unsigned char *)empty_zero_page)
+#define PARAM   ((unsigned char *)empty_zero_page)
 #define SCREEN_INFO (*(struct screen_info *) (PARAM+0))
 #define EXT_MEM_K (*(unsigned short *) (PARAM+2))
 #define ALT_MEM_K (*(unsigned long *) (PARAM+0x1e0))
@@ -200,55 +200,55 @@ int enable_acpi_smp_table;
 #define COMMAND_LINE ((char *) (PARAM+2048))
 #define COMMAND_LINE_SIZE 256
 
-#define RAMDISK_IMAGE_START_MASK  	0x07FF
-#define RAMDISK_PROMPT_FLAG		0x8000
-#define RAMDISK_LOAD_FLAG		0x4000
+#define RAMDISK_IMAGE_START_MASK    0x07FF
+#define RAMDISK_PROMPT_FLAG     0x8000
+#define RAMDISK_LOAD_FLAG       0x4000
 
-#ifdef	CONFIG_VISWS
+#ifdef  CONFIG_VISWS
 char visws_board_type = -1;
 char visws_board_rev = -1;
 
-#define	PIIX_PM_START		0x0F80
+#define PIIX_PM_START       0x0F80
 
-#define	SIO_GPIO_START		0x0FC0
+#define SIO_GPIO_START      0x0FC0
 
-#define	SIO_PM_START		0x0FC8
+#define SIO_PM_START        0x0FC8
 
-#define	PMBASE			PIIX_PM_START
-#define	GPIREG0			(PMBASE+0x30)
-#define	GPIREG(x)		(GPIREG0+((x)/8))
-#define	PIIX_GPI_BD_ID1		18
-#define	PIIX_GPI_BD_REG		GPIREG(PIIX_GPI_BD_ID1)
+#define PMBASE          PIIX_PM_START
+#define GPIREG0         (PMBASE+0x30)
+#define GPIREG(x)       (GPIREG0+((x)/8))
+#define PIIX_GPI_BD_ID1     18
+#define PIIX_GPI_BD_REG     GPIREG(PIIX_GPI_BD_ID1)
 
-#define	PIIX_GPI_BD_SHIFT	(PIIX_GPI_BD_ID1 % 8)
+#define PIIX_GPI_BD_SHIFT   (PIIX_GPI_BD_ID1 % 8)
 
-#define	SIO_INDEX	0x2e
-#define	SIO_DATA	0x2f
+#define SIO_INDEX   0x2e
+#define SIO_DATA    0x2f
 
-#define	SIO_DEV_SEL	0x7
-#define	SIO_DEV_ENB	0x30
-#define	SIO_DEV_MSB	0x60
-#define	SIO_DEV_LSB	0x61
+#define SIO_DEV_SEL 0x7
+#define SIO_DEV_ENB 0x30
+#define SIO_DEV_MSB 0x60
+#define SIO_DEV_LSB 0x61
 
-#define	SIO_GP_DEV	0x7
+#define SIO_GP_DEV  0x7
 
-#define	SIO_GP_BASE	SIO_GPIO_START
-#define	SIO_GP_MSB	(SIO_GP_BASE>>8)
-#define	SIO_GP_LSB	(SIO_GP_BASE&0xff)
+#define SIO_GP_BASE SIO_GPIO_START
+#define SIO_GP_MSB  (SIO_GP_BASE>>8)
+#define SIO_GP_LSB  (SIO_GP_BASE&0xff)
 
-#define	SIO_GP_DATA1	(SIO_GP_BASE+0)
+#define SIO_GP_DATA1    (SIO_GP_BASE+0)
 
-#define	SIO_PM_DEV	0x8
+#define SIO_PM_DEV  0x8
 
-#define	SIO_PM_BASE	SIO_PM_START
-#define	SIO_PM_MSB	(SIO_PM_BASE>>8)
-#define	SIO_PM_LSB	(SIO_PM_BASE&0xff)
-#define	SIO_PM_INDEX	(SIO_PM_BASE+0)
-#define	SIO_PM_DATA	(SIO_PM_BASE+1)
+#define SIO_PM_BASE SIO_PM_START
+#define SIO_PM_MSB  (SIO_PM_BASE>>8)
+#define SIO_PM_LSB  (SIO_PM_BASE&0xff)
+#define SIO_PM_INDEX    (SIO_PM_BASE+0)
+#define SIO_PM_DATA (SIO_PM_BASE+1)
 
-#define	SIO_PM_FER2	0x1
+#define SIO_PM_FER2 0x1
 
-#define	SIO_PM_GP_EN	0x80
+#define SIO_PM_GP_EN    0x80
 
 static void __init visws_get_board_type_and_rev(void)
 {
@@ -263,16 +263,16 @@ static void __init visws_get_board_type_and_rev(void)
      * after the PIIX4 PM section.
      */
     outb_p(SIO_DEV_SEL, SIO_INDEX);
-    outb_p(SIO_GP_DEV, SIO_DATA);	/* Talk to GPIO regs. */
+    outb_p(SIO_GP_DEV, SIO_DATA);   /* Talk to GPIO regs. */
 
     outb_p(SIO_DEV_MSB, SIO_INDEX);
-    outb_p(SIO_GP_MSB, SIO_DATA);	/* MSB of GPIO base address */
+    outb_p(SIO_GP_MSB, SIO_DATA);   /* MSB of GPIO base address */
 
     outb_p(SIO_DEV_LSB, SIO_INDEX);
-    outb_p(SIO_GP_LSB, SIO_DATA);	/* LSB of GPIO base address */
+    outb_p(SIO_GP_LSB, SIO_DATA);   /* LSB of GPIO base address */
 
     outb_p(SIO_DEV_ENB, SIO_INDEX);
-    outb_p(1, SIO_DATA);		/* Enable GPIO registers. */
+    outb_p(1, SIO_DATA);        /* Enable GPIO registers. */
 
     /*
      * Now, we have to map the power management section to write
@@ -280,16 +280,16 @@ static void __init visws_get_board_type_and_rev(void)
      * What lunatic came up with this shit?
      */
     outb_p(SIO_DEV_SEL, SIO_INDEX);
-    outb_p(SIO_PM_DEV, SIO_DATA);	/* Talk to GPIO regs. */
+    outb_p(SIO_PM_DEV, SIO_DATA);   /* Talk to GPIO regs. */
 
     outb_p(SIO_DEV_MSB, SIO_INDEX);
-    outb_p(SIO_PM_MSB, SIO_DATA);	/* MSB of PM base address */
+    outb_p(SIO_PM_MSB, SIO_DATA);   /* MSB of PM base address */
 
     outb_p(SIO_DEV_LSB, SIO_INDEX);
-    outb_p(SIO_PM_LSB, SIO_DATA);	/* LSB of PM base address */
+    outb_p(SIO_PM_LSB, SIO_DATA);   /* LSB of PM base address */
 
     outb_p(SIO_DEV_ENB, SIO_INDEX);
-    outb_p(1, SIO_DATA);		/* Enable PM registers. */
+    outb_p(1, SIO_DATA);        /* Enable PM registers. */
 
     /*
      * Now, write the PM register which enables the GPIO registers.
@@ -304,7 +304,7 @@ static void __init visws_get_board_type_and_rev(void)
      * So, let's just read the board rev!
      */
     raw = inb_p(SIO_GP_DATA1);
-    raw &= 0x7f;	/* 7 bits of valid board revision ID. */
+    raw &= 0x7f;    /* 7 bits of valid board revision ID. */
 
     if (visws_board_type == VISWS_320)
     {
@@ -456,7 +456,7 @@ static void __init add_memory_region(unsigned long long start,
     e820.nr_map++;
 } /* add_memory_region */
 
-#define E820_DEBUG	1
+#define E820_DEBUG  1
 
 static void __init print_memory_map(char *who)
 {
@@ -516,39 +516,39 @@ static int __init sanitize_e820_map(struct e820entry * biosmap, char * pnr_map)
     int i;
 
     /*
-    	Visually we're performing the following (1,2,3,4 = memory types)...
+        Visually we're performing the following (1,2,3,4 = memory types)...
 
-    	Sample memory map (w/overlaps):
-    	   ____22__________________
-    	   ______________________4_
-    	   ____1111________________
-    	   _44_____________________
-    	   11111111________________
-    	   ____________________33__
-    	   ___________44___________
-    	   __________33333_________
-    	   ______________22________
-    	   ___________________2222_
-    	   _________111111111______
-    	   _____________________11_
-    	   _________________4______
+        Sample memory map (w/overlaps):
+           ____22__________________
+           ______________________4_
+           ____1111________________
+           _44_____________________
+           11111111________________
+           ____________________33__
+           ___________44___________
+           __________33333_________
+           ______________22________
+           ___________________2222_
+           _________111111111______
+           _____________________11_
+           _________________4______
 
-    	Sanitized equivalent (no overlap):
-    	   1_______________________
-    	   _44_____________________
-    	   ___1____________________
-    	   ____22__________________
-    	   ______11________________
-    	   _________1______________
-    	   __________3_____________
-    	   ___________44___________
-    	   _____________33_________
-    	   _______________2________
-    	   ________________1_______
-    	   _________________4______
-    	   ___________________2____
-    	   ____________________33__
-    	   ______________________4_
+        Sanitized equivalent (no overlap):
+           1_______________________
+           _44_____________________
+           ___1____________________
+           ____22__________________
+           ______11________________
+           _________1______________
+           __________3_____________
+           ___________44___________
+           _____________33_________
+           _______________2________
+           ________________1_______
+           _________________4______
+           ___________________2____
+           ____________________33__
+           ______________________4_
     */
 
     /* if there's only one memory region, don't bother */
@@ -600,10 +600,10 @@ static int __init sanitize_e820_map(struct e820entry * biosmap, char * pnr_map)
     }
 
     /* create a new bios memory map, removing overlaps */
-    overlap_entries=0;	 /* number of entries in the overlap table */
-    new_bios_entry=0;	 /* index for creating new bios map entries */
-    last_type = 0;		 /* start with undefined memory type */
-    last_addr = 0;		 /* start with 0 as last starting address */
+    overlap_entries=0;   /* number of entries in the overlap table */
+    new_bios_entry=0;    /* index for creating new bios map entries */
+    last_type = 0;       /* start with undefined memory type */
+    last_addr = 0;       /* start with 0 as last starting address */
     /* loop through change-points, determining affect on the new bios map */
     for (chgidx=0; chgidx < 2*old_nr; chgidx++)
     {
@@ -639,7 +639,7 @@ static int __init sanitize_e820_map(struct e820entry * biosmap, char * pnr_map)
                 /* move forward only if the new size was non-zero */
                 if (new_bios[new_bios_entry].size != 0)
                     if (++new_bios_entry >= E820MAX)
-                        break; 	/* no more space left for new bios entries */
+                        break;  /* no more space left for new bios entries */
             }
             if (current_type != 0)
             {
@@ -718,7 +718,7 @@ static int __init copy_e820_map(struct e820entry * biosmap, int nr_map)
  * Do NOT EVER look at the BIOS memory size location.
  * It does not work on many machines.
  */
-#define LOWMEMSIZE()	(0x9f000)
+#define LOWMEMSIZE()    (0x9f000)
 
 static void __init setup_memory_region(void)
 {
@@ -884,15 +884,15 @@ void __init setup_arch(char **cmdline_p)
 
     parse_mem_cmdline(cmdline_p);
 
-#define PFN_UP(x)	(((x) + PAGE_SIZE-1) >> PAGE_SHIFT)
-#define PFN_DOWN(x)	((x) >> PAGE_SHIFT)
-#define PFN_PHYS(x)	((x) << PAGE_SHIFT)
+#define PFN_UP(x)   (((x) + PAGE_SIZE-1) >> PAGE_SHIFT)
+#define PFN_DOWN(x) ((x) >> PAGE_SHIFT)
+#define PFN_PHYS(x) ((x) << PAGE_SHIFT)
 
     /*
      * Reserved space for vmalloc and iomap - defined in asm/page.h
      */
-#define MAXMEM_PFN	PFN_DOWN(MAXMEM)
-#define MAX_NONPAE_PFN	(1 << 20)
+#define MAXMEM_PFN  PFN_DOWN(MAXMEM)
+#define MAX_NONPAE_PFN  (1 << 20)
 
     /*
      * partially used pages are not usable - thus
@@ -1169,7 +1169,7 @@ static int __init get_model_name(struct cpuinfo_x86 *c)
         while ( *p )
             *q++ = *p++;
         while ( q <= &c->x86_model_id[48] )
-            *q++ = '\0';	/* Zero-pad the rest */
+            *q++ = '\0';    /* Zero-pad the rest */
     }
 
     return 1;
@@ -1190,7 +1190,7 @@ static void __init display_cacheinfo(struct cpuinfo_x86 *c)
         c->x86_cache_size=(ecx>>24)+(edx>>24);
     }
 
-    if (n < 0x80000006)	/* Some chips just has a large L1. */
+    if (n < 0x80000006) /* Some chips just has a large L1. */
         return;
 
     ecx = cpuid_ecx(0x80000006);
@@ -1199,10 +1199,10 @@ static void __init display_cacheinfo(struct cpuinfo_x86 *c)
     /* AMD errata T13 (order #21922) */
     if ((c->x86_vendor == X86_VENDOR_AMD) && (c->x86 == 6))
     {
-        if (c->x86_model == 3 && c->x86_mask == 0)	/* Duron Rev A0 */
+        if (c->x86_model == 3 && c->x86_mask == 0)  /* Duron Rev A0 */
             l2size = 64;
         if (c->x86_model == 4 &&
-                (c->x86_mask==0 || c->x86_mask==1))	/* Tbird rev A1/A2 */
+                (c->x86_mask==0 || c->x86_mask==1)) /* Tbird rev A1/A2 */
             l2size = 256;
     }
 
@@ -1227,7 +1227,7 @@ static void __init display_cacheinfo(struct cpuinfo_x86 *c)
         l2size = cachesize_override;
 
     if ( l2size == 0 )
-        return;		/* Again, no L2 cache is possible */
+        return;     /* Again, no L2 cache is possible */
 
     c->x86_cache_size = l2size;
 
@@ -1236,16 +1236,16 @@ static void __init display_cacheinfo(struct cpuinfo_x86 *c)
 }
 
 /*
- *	B step AMD K6 before B 9730xxxx have hardware bugs that can cause
- *	misexecution of code under Linux. Owners of such processors should
- *	contact AMD for precise details and a CPU swap.
+ *  B step AMD K6 before B 9730xxxx have hardware bugs that can cause
+ *  misexecution of code under Linux. Owners of such processors should
+ *  contact AMD for precise details and a CPU swap.
  *
- *	See	http://www.multimania.com/poulot/k6bug.html
- *		http://www.amd.com/K6/k6docs/revgd.html
+ *  See http://www.multimania.com/poulot/k6bug.html
+ *      http://www.amd.com/K6/k6docs/revgd.html
  *
- *	The following test is erm.. interesting. AMD neglected to up
- *	the chip setting when fixing the bug but they also tweaked some
- *	performance at the same time..
+ *  The following test is erm.. interesting. AMD neglected to up
+ *  the chip setting when fixing the bug but they also tweaked some
+ *  performance at the same time..
  */
 
 extern void vide(void);
@@ -1258,9 +1258,9 @@ static int __init init_amd(struct cpuinfo_x86 *c)
     int r;
 
     /*
-     *	FIXME: We should handle the K5 here. Set up the write
-     *	range and also turn on MSR 83 bits 4 and 31 (write alloc,
-     *	no bus pipeline)
+     *  FIXME: We should handle the K5 here. Set up the write
+     *  range and also turn on MSR 83 bits 4 and 31 (write alloc,
+     *  no bus pipeline)
      */
 
     /* Bit 31 in normal CPUID used for nonstandard 3DNow ID;
@@ -1574,8 +1574,8 @@ static void __init init_cyrix(struct cpuinfo_x86 *c)
 
     case 4: /* MediaGX/GXm */
         /*
-         *	Life sometimes gets weiiiiiiiird if we use this
-         *	on the MediaGX. So we turn it off for now.
+         *  Life sometimes gets weiiiiiiiird if we use this
+         *  on the MediaGX. So we turn it off for now.
          */
 
 #ifdef CONFIG_PCI
@@ -1594,7 +1594,7 @@ static void __init init_cyrix(struct cpuinfo_x86 *c)
         printk(KERN_INFO "Working around Cyrix MediaGX virtual DMA bugs.\n");
         isa_dma_bridge_buggy = 2;
 #endif
-        c->x86_cache_size=16;	/* Yep 16K integrated cache thats it */
+        c->x86_cache_size=16;   /* Yep 16K integrated cache thats it */
 
         /* GXm supports extended cpuid levels 'ala' AMD */
         if (c->cpuid_level == 2)
@@ -1667,7 +1667,7 @@ static u32 __init power2(u32 x)
 }
 
 /*
- *	Set up an actual MCR
+ *  Set up an actual MCR
  */
 
 static void __init winchip_mcr_insert(int reg, u32 base, u32 size, int key)
@@ -1675,20 +1675,20 @@ static void __init winchip_mcr_insert(int reg, u32 base, u32 size, int key)
     u32 lo, hi;
 
     hi = base & ~0xFFF;
-    lo = ~(size-1);		/* Size is a power of 2 so this makes a mask */
-    lo &= ~0xFFF;		/* Remove the ctrl value bits */
-    lo |= key;		/* Attribute we wish to set */
+    lo = ~(size-1);     /* Size is a power of 2 so this makes a mask */
+    lo &= ~0xFFF;       /* Remove the ctrl value bits */
+    lo |= key;      /* Attribute we wish to set */
     wrmsr(reg+MSR_IDT_MCR0, lo, hi);
-    mtrr_centaur_report_mcr(reg, lo, hi);	/* Tell the mtrr driver */
+    mtrr_centaur_report_mcr(reg, lo, hi);   /* Tell the mtrr driver */
 }
 
 /*
- *	Figure what we can cover with MCR's
+ *  Figure what we can cover with MCR's
  *
- *	Shortcut: We know you can't put 4Gig of RAM on a winchip
+ *  Shortcut: We know you can't put 4Gig of RAM on a winchip
  */
 
-static u32 __init ramtop(void)		/* 16388 */
+static u32 __init ramtop(void)      /* 16388 */
 {
     int i;
     u32 top = 0;
@@ -1701,8 +1701,8 @@ static u32 __init ramtop(void)		/* 16388 */
         if (e820.map[i].addr > 0xFFFFFFFFUL)
             continue;
         /*
-         *	Don't MCR over reserved space. Ignore the ISA hole
-         *	we frob around that catastrophy already
+         *  Don't MCR over reserved space. Ignore the ISA hole
+         *  we frob around that catastrophy already
          */
 
         if (e820.map[i].type == E820_RESERVED)
@@ -1737,7 +1737,7 @@ static u32 __init ramtop(void)		/* 16388 */
 }
 
 /*
- *	Compute a set of MCR's to give maximum coverage
+ *  Compute a set of MCR's to give maximum coverage
  */
 
 static int __init winchip_mcr_compute(int nr, int key)
@@ -1754,28 +1754,28 @@ static int __init winchip_mcr_compute(int nr, int key)
         u32 fspace = 0;
 
         /*
-         *	Find the largest block we will fill going upwards
+         *  Find the largest block we will fill going upwards
          */
 
         u32 high = power2(mem-top);
 
         /*
-         *	Find the largest block we will fill going downwards
+         *  Find the largest block we will fill going downwards
          */
 
         u32 low = base/2;
 
         /*
-         *	Don't fill below 1Mb going downwards as there
-         *	is an ISA hole in the way.
+         *  Don't fill below 1Mb going downwards as there
+         *  is an ISA hole in the way.
          */
 
         if(base <= 1024*1024)
             low = 0;
 
         /*
-         *	See how much space we could cover by filling below
-         *	the ISA hole
+         *  See how much space we could cover by filling below
+         *  the ISA hole
          */
 
         if(floor == 0)
@@ -1786,7 +1786,7 @@ static int __init winchip_mcr_compute(int nr, int key)
         /* And forget ROM space */
 
         /*
-         *	Now install the largest coverage we get
+         *  Now install the largest coverage we get
          */
 
         if(fspace > high && fspace > low)
@@ -1808,8 +1808,8 @@ static int __init winchip_mcr_compute(int nr, int key)
         ct++;
     }
     /*
-     *	We loaded ct values. We now need to set the mask. The caller
-     *	must do this bit.
+     *  We loaded ct values. We now need to set the mask. The caller
+     *  must do this bit.
      */
 
     return ct;
@@ -1819,19 +1819,19 @@ static void __init winchip_create_optimal_mcr(void)
 {
     int i;
     /*
-     *	Allocate up to 6 mcrs to mark as much of ram as possible
-     *	as write combining and weak write ordered.
+     *  Allocate up to 6 mcrs to mark as much of ram as possible
+     *  as write combining and weak write ordered.
      *
-     *	To experiment with: Linux never uses stack operations for
-     *	mmio spaces so we could globally enable stack operation wc
+     *  To experiment with: Linux never uses stack operations for
+     *  mmio spaces so we could globally enable stack operation wc
      *
-     *	Load the registers with type 31 - full write combining, all
-     *	writes weakly ordered.
+     *  Load the registers with type 31 - full write combining, all
+     *  writes weakly ordered.
      */
     int used = winchip_mcr_compute(6, 31);
 
     /*
-     *	Wipe unused MCRs
+     *  Wipe unused MCRs
      */
 
     for(i=used; i<8; i++)
@@ -1844,19 +1844,19 @@ static void __init winchip2_create_optimal_mcr(void)
     int i;
 
     /*
-     *	Allocate up to 6 mcrs to mark as much of ram as possible
-     *	as write combining, weak store ordered.
+     *  Allocate up to 6 mcrs to mark as much of ram as possible
+     *  as write combining, weak store ordered.
      *
-     *	Load the registers with type 25
-     *		8	-	weak write ordering
-     *		16	-	weak read ordering
-     *		1	-	write combining
+     *  Load the registers with type 25
+     *      8   -   weak write ordering
+     *      16  -   weak read ordering
+     *      1   -   write combining
      */
 
     int used = winchip_mcr_compute(6, 25);
 
     /*
-     *	Mark the registers we are using.
+     *  Mark the registers we are using.
      */
 
     rdmsr(MSR_IDT_MCR_CTRL, lo, hi);
@@ -1865,7 +1865,7 @@ static void __init winchip2_create_optimal_mcr(void)
     wrmsr(MSR_IDT_MCR_CTRL, lo, hi);
 
     /*
-     *	Wipe unused MCRs
+     *  Wipe unused MCRs
      */
 
     for(i=used; i<8; i++)
@@ -1873,7 +1873,7 @@ static void __init winchip2_create_optimal_mcr(void)
 }
 
 /*
- *	Handle the MCR key on the Winchip 2.
+ *  Handle the MCR key on the Winchip 2.
  */
 
 static void __init winchip2_unprotect_mcr(void)
@@ -1882,9 +1882,9 @@ static void __init winchip2_unprotect_mcr(void)
     u32 key;
 
     rdmsr(MSR_IDT_MCR_CTRL, lo, hi);
-    lo&=~0x1C0;	/* blank bits 8-6 */
+    lo&=~0x1C0; /* blank bits 8-6 */
     key = (lo>>17) & 7;
-    lo |= key<<6;	/* replace with unlock key */
+    lo |= key<<6;   /* replace with unlock key */
     wrmsr(MSR_IDT_MCR_CTRL, lo, hi);
 }
 
@@ -1893,7 +1893,7 @@ static void __init winchip2_protect_mcr(void)
     u32 lo, hi;
 
     rdmsr(MSR_IDT_MCR_CTRL, lo, hi);
-    lo&=~0x1C0;	/* blank bits 8-6 */
+    lo&=~0x1C0; /* blank bits 8-6 */
     wrmsr(MSR_IDT_MCR_CTRL, lo, hi);
 }
 
@@ -1948,9 +1948,9 @@ static void __init init_centaur(struct cpuinfo_x86 *c)
 #ifdef CONFIG_X86_OOSTORE
             winchip_create_optimal_mcr();
             /* Enable
-            	write combining on non-stack, non-string
-            	write combining on string, all types
-            	weak write ordering
+                write combining on non-stack, non-string
+                write combining on string, all types
+                weak write ordering
 
                The C6 original lacks weak read order
 
@@ -1979,9 +1979,9 @@ static void __init init_centaur(struct cpuinfo_x86 *c)
             winchip2_create_optimal_mcr();
             rdmsr(MSR_IDT_MCR_CTRL, lo, hi);
             /* Enable
-            	write combining on non-stack, non-string
-            	write combining on string, all types
-            	weak write ordering
+                write combining on non-stack, non-string
+                write combining on string, all types
+                weak write ordering
             */
             lo|=31;
             wrmsr(MSR_IDT_MCR_CTRL, lo, hi);
@@ -1997,9 +1997,9 @@ static void __init init_centaur(struct cpuinfo_x86 *c)
             winchip2_create_optimal_mcr();
             rdmsr(MSR_IDT_MCR_CTRL, lo, hi);
             /* Enable
-            	write combining on non-stack, non-string
-            	write combining on string, all types
-            	weak write ordering
+                write combining on non-stack, non-string
+                write combining on string, all types
+                weak write ordering
             */
             lo|=31;
             wrmsr(MSR_IDT_MCR_CTRL, lo, hi);
@@ -2047,9 +2047,9 @@ static void __init init_centaur(struct cpuinfo_x86 *c)
     case 6:
         switch (c->x86_model)
         {
-        case 6 ... 8:		/* Cyrix III family */
+        case 6 ... 8:       /* Cyrix III family */
             rdmsr (MSR_VIA_FCR, lo, hi);
-            lo |= (1<<1 | 1<<7);	/* Report CX8 & enable PGE */
+            lo |= (1<<1 | 1<<7);    /* Report CX8 & enable PGE */
             wrmsr (MSR_VIA_FCR, lo, hi);
 
             set_bit(X86_FEATURE_CX8, &c->x86_capability);
@@ -2071,7 +2071,7 @@ static void __init init_transmeta(struct cpuinfo_x86 *c)
     unsigned int cpu_rev, cpu_freq, cpu_flags;
     char cpu_info[65];
 
-    get_model_name(c);	/* Same as AMD/Cyrix */
+    get_model_name(c);  /* Same as AMD/Cyrix */
     display_cacheinfo(c);
 
     /* Print CMS and CPU revision */
@@ -2349,12 +2349,12 @@ static void __init init_intel(struct cpuinfo_x86 *c)
 #ifdef CONFIG_SMP
     if (test_bit(X86_FEATURE_HT, &c->x86_capability))
     {
-        extern	int phys_proc_id[NR_CPUS];
+        extern  int phys_proc_id[NR_CPUS];
 
-        u32 	eax, ebx, ecx, edx;
-        int 	index_lsb, index_msb, tmp;
-        int	initial_apic_id;
-        int 	cpu = smp_processor_id();
+        u32     eax, ebx, ecx, edx;
+        int     index_lsb, index_msb, tmp;
+        int initial_apic_id;
+        int     cpu = smp_processor_id();
 
         cpuid(1, &eax, &ebx, &ecx, &edx);
         smp_num_siblings = (ebx & 0xff0000) >> 16;
@@ -2371,7 +2371,7 @@ static void __init init_intel(struct cpuinfo_x86 *c)
              * At this point we only support two siblings per
              * processor package.
              */
-#define NR_SIBLINGS	2
+#define NR_SIBLINGS 2
             if (smp_num_siblings != NR_SIBLINGS)
             {
                 printk(KERN_WARNING "CPU: Unsupported number of the siblings %d", smp_num_siblings);
@@ -2443,7 +2443,7 @@ struct cpu_model_info
 static struct cpu_model_info cpu_models[] __initdata =
 {
     {
-        X86_VENDOR_INTEL,	4,
+        X86_VENDOR_INTEL,   4,
         {
             "486 DX-25/33", "486 DX-50", "486 SX", "486 DX/2", "486 SL",
             "486 SX/2", NULL, "486 DX/2-WB", "486 DX/4", "486 DX/4-WB", NULL,
@@ -2451,7 +2451,7 @@ static struct cpu_model_info cpu_models[] __initdata =
         }
     },
     {
-        X86_VENDOR_INTEL,	5,
+        X86_VENDOR_INTEL,   5,
         {
             "Pentium 60/66 A-step", "Pentium 60/66", "Pentium 75 - 200",
             "OverDrive PODP5V83", "Pentium MMX", NULL, NULL,
@@ -2460,7 +2460,7 @@ static struct cpu_model_info cpu_models[] __initdata =
         }
     },
     {
-        X86_VENDOR_INTEL,	6,
+        X86_VENDOR_INTEL,   6,
         {
             "Pentium Pro A-step", "Pentium Pro", NULL, "Pentium II (Klamath)",
             NULL, "Pentium II (Deschutes)", "Mobile Pentium II",
@@ -2469,7 +2469,7 @@ static struct cpu_model_info cpu_models[] __initdata =
         }
     },
     {
-        X86_VENDOR_AMD,	4,
+        X86_VENDOR_AMD, 4,
         {
             NULL, NULL, NULL, "486 DX/2", NULL, NULL, NULL, "486 DX/2-WB",
             "486 DX/4", "486 DX/4-WB", NULL, NULL, NULL, NULL, "Am5x86-WT",
@@ -2477,7 +2477,7 @@ static struct cpu_model_info cpu_models[] __initdata =
         }
     },
     {
-        X86_VENDOR_AMD,	5, /* Is this this really necessary?? */
+        X86_VENDOR_AMD, 5, /* Is this this really necessary?? */
         {
             "K5/SSA5", "K5",
             "K5", "K5", NULL, NULL,
@@ -2486,7 +2486,7 @@ static struct cpu_model_info cpu_models[] __initdata =
         }
     },
     {
-        X86_VENDOR_AMD,	6, /* Is this this really necessary?? */
+        X86_VENDOR_AMD, 6, /* Is this this really necessary?? */
         {
             "Athlon", "Athlon",
             "Athlon", NULL, "Athlon", NULL,
@@ -2495,21 +2495,21 @@ static struct cpu_model_info cpu_models[] __initdata =
         }
     },
     {
-        X86_VENDOR_UMC,	4,
+        X86_VENDOR_UMC, 4,
         {
             NULL, "U5D", "U5S", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
             NULL, NULL, NULL, NULL, NULL, NULL
         }
     },
     {
-        X86_VENDOR_NEXGEN,	5,
+        X86_VENDOR_NEXGEN,  5,
         {
             "Nx586", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL
         }
     },
     {
-        X86_VENDOR_RISE,	5,
+        X86_VENDOR_RISE,    5,
         {
             "iDragon", NULL, "iDragon", NULL, NULL, NULL, NULL,
             NULL, "iDragon II", "iDragon II", NULL, NULL, NULL, NULL, NULL, NULL
@@ -2524,7 +2524,7 @@ static char __init *table_lookup_model(struct cpuinfo_x86 *c)
     int i;
 
     if ( c->x86_model >= 16 )
-        return NULL;	/* Range check */
+        return NULL;    /* Range check */
 
     for ( i = 0 ; i < sizeof(cpu_models)/sizeof(struct cpu_model_info) ; i++ )
     {
@@ -2535,12 +2535,12 @@ static char __init *table_lookup_model(struct cpuinfo_x86 *c)
         }
         info++;
     }
-    return NULL;		/* Not found */
+    return NULL;        /* Not found */
 }
 
 /*
- *	Detect a NexGen CPU running without BIOS hypercode new enough
- *	to have CPUID. (Thanks to Herbert Oppmann)
+ *  Detect a NexGen CPU running without BIOS hypercode new enough
+ *  to have CPUID. (Thanks to Herbert Oppmann)
  */
 
 static int __init deep_magic_nexgen_probe(void)
@@ -2637,9 +2637,9 @@ static inline int test_cyrix_52div(void)
     unsigned int test;
 
     __asm__ __volatile__(
-        "sahf\n\t"		/* clear flags (%eax = 0x0005) */
-        "div %b2\n\t"	/* divide 5 by 2 */
-        "lahf"		/* store flags into %ah */
+        "sahf\n\t"      /* clear flags (%eax = 0x0005) */
+        "div %b2\n\t"   /* divide 5 by 2 */
+        "lahf"      /* store flags into %ah */
         : "=a" (test)
         : "0" (5), "q" (2)
         : "cc");
@@ -2700,7 +2700,7 @@ static int __init id_and_try_enable_cpuid(struct cpuinfo_x86 *c)
             strcpy(c->x86_vendor_id, "NexGenDriven");
         }
 
-    return have_cpuid_p();	/* Check to see if CPUID now enabled? */
+    return have_cpuid_p();  /* Check to see if CPUID now enabled? */
 }
 
 /*
@@ -2714,8 +2714,8 @@ void __init identify_cpu(struct cpuinfo_x86 *c)
     c->loops_per_jiffy = loops_per_jiffy;
     c->x86_cache_size = -1;
     c->x86_vendor = X86_VENDOR_UNKNOWN;
-    c->cpuid_level = -1;	/* CPUID not detected */
-    c->x86_model = c->x86_mask = 0;	/* So far unknown... */
+    c->cpuid_level = -1;    /* CPUID not detected */
+    c->x86_model = c->x86_mask = 0; /* So far unknown... */
     c->x86_vendor_id[0] = '\0'; /* Unset */
     c->x86_model_id[0] = '\0';  /* Unset */
     memset(&c->x86_capability, 0, sizeof c->x86_capability);
@@ -2907,7 +2907,7 @@ void __init identify_cpu(struct cpuinfo_x86 *c)
            boot_cpu_data.x86_capability[3]);
 }
 /*
- *	Perform early boot up checks for a valid TSC. See arch/i386/kernel/time.c
+ *  Perform early boot up checks for a valid TSC. See arch/i386/kernel/time.c
  */
 
 void __init dodgy_tsc(void)
@@ -2950,7 +2950,7 @@ void __init print_cpu_info(struct cpuinfo_x86 *c)
 }
 
 /*
- *	Get CPU information for use by the procfs.
+ *  Get CPU information for use by the procfs.
  */
 static int show_cpuinfo(struct seq_file *m, void *v)
 {
@@ -3174,9 +3174,9 @@ void __init cpu_init (void)
 }
 
 /*
- *	Early probe support logic for ppro memory erratum #50
+ *  Early probe support logic for ppro memory erratum #50
  *
- *	This is called before we do cpu ident work
+ *  This is called before we do cpu ident work
  */
 
 int __init ppro_with_ram_bug(void)

@@ -8,8 +8,8 @@
  *       Copyright 1999,2000 Nortel Networks
  *
  * License:
- *	 As part of this driver was derrived from the slram.c driver it falls
- *	 under the same license, which is GNU General Public License v2
+ *   As part of this driver was derrived from the slram.c driver it falls
+ *   under the same license, which is GNU General Public License v2
  */
 
 #ifndef __MTD_PMC551_H__
@@ -55,22 +55,22 @@ static int pmc551_write(struct mtd_info *, loff_t, size_t, size_t *, const u_cha
 #endif
 
 
-#define PMC551_PCI_MEM_MAP0	0x50
-#define PMC551_PCI_MEM_MAP1	0x54
-#define PMC551_PCI_MEM_MAP_MAP_ADDR_MASK	0x3ff00000
-#define PMC551_PCI_MEM_MAP_APERTURE_MASK	0x000000f0
-#define PMC551_PCI_MEM_MAP_REG_EN		0x00000002
-#define PMC551_PCI_MEM_MAP_ENABLE		0x00000001
+#define PMC551_PCI_MEM_MAP0 0x50
+#define PMC551_PCI_MEM_MAP1 0x54
+#define PMC551_PCI_MEM_MAP_MAP_ADDR_MASK    0x3ff00000
+#define PMC551_PCI_MEM_MAP_APERTURE_MASK    0x000000f0
+#define PMC551_PCI_MEM_MAP_REG_EN       0x00000002
+#define PMC551_PCI_MEM_MAP_ENABLE       0x00000001
 
-#define PMC551_SDRAM_MA		0x60
-#define PMC551_SDRAM_CMD	0x62
-#define PMC551_DRAM_CFG		0x64
-#define PMC551_SYS_CTRL_REG	0x78
+#define PMC551_SDRAM_MA     0x60
+#define PMC551_SDRAM_CMD    0x62
+#define PMC551_DRAM_CFG     0x64
+#define PMC551_SYS_CTRL_REG 0x78
 
-#define PMC551_DRAM_BLK0	0x68
-#define PMC551_DRAM_BLK1	0x6c
-#define PMC551_DRAM_BLK2	0x70
-#define PMC551_DRAM_BLK3	0x74
+#define PMC551_DRAM_BLK0    0x68
+#define PMC551_DRAM_BLK1    0x6c
+#define PMC551_DRAM_BLK2    0x70
+#define PMC551_DRAM_BLK3    0x74
 #define PMC551_DRAM_BLK_GET_SIZE(x) (524288<<((x>>4)&0x0f))
 #define PMC551_DRAM_BLK_SET_COL_MUX(x,v) (((x) & ~0x00007000) | (((v) & 0x7) << 12))
 #define PMC551_DRAM_BLK_SET_ROW_MUX(x,v) (((x) & ~0x00000f00) | (((v) & 0xf) << 8))

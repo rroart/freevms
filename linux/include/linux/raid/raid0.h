@@ -5,10 +5,10 @@
 
 struct strip_zone
 {
-    unsigned long zone_offset;	/* Zone offset in md_dev */
-    unsigned long dev_offset;	/* Zone offset in real dev */
-    unsigned long size;		/* Zone size */
-    int nb_dev;			/* # of devices attached to the zone */
+    unsigned long zone_offset;  /* Zone offset in md_dev */
+    unsigned long dev_offset;   /* Zone offset in real dev */
+    unsigned long size;     /* Zone size */
+    int nb_dev;         /* # of devices attached to the zone */
     mdk_rdev_t *dev[MD_SB_DISKS]; /* Devices attached to the zone */
 };
 

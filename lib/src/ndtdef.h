@@ -1,5 +1,5 @@
-#ifndef ndtdef_h
-#define ndtdef_h
+#ifndef NDTDEF_H
+#define NDTDEF_H
 
 /* Author: Roar Thronæs */
 

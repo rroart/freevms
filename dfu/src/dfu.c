@@ -1,17 +1,17 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified DFU source file, 2004.
 
 /******************************************************
-*
-*	(C)opyright Digital Equipment Corp. 1995
-*	FREEWARE VERSION
-*
-*	Version : V2.2
-*
-*******************************************************/
+ *
+ *   (C)opyright Digital Equipment Corp. 1995
+ *   FREEWARE VERSION
+ *
+ *   Version : V2.2
+ *
+ *******************************************************/
 
 #ifndef VAXC
 #pragma message disable(GLOBALEXT)
@@ -85,16 +85,16 @@ int SOR$GK_RECORD;
 int check_vms_mm()
 {
     int retlenaddr;
-    int mem=0;
+    int mem = 0;
     struct item_list_3 lst[14], syilst[2];
-    syilst[0].buflen=4;
-    syilst[0].item_code=SYI$_LASTFLD;
-    syilst[0].bufaddr=&mem;
-    syilst[0].retlenaddr=&retlenaddr;
-    syilst[1].buflen=0;
-    syilst[1].item_code=0;
+    syilst[0].buflen = 4;
+    syilst[0].item_code = SYI$_LASTFLD;
+    syilst[0].bufaddr = &mem;
+    syilst[0].retlenaddr = &retlenaddr;
+    syilst[1].buflen = 0;
+    syilst[1].item_code = 0;
 
-    int sts=sys$getsyi(0,0,0,syilst,0,0,0);
+    int sts = sys$getsyi(0, 0, 0, syilst, 0, 0, 0);
 
     return mem;
 }
@@ -104,19 +104,19 @@ int vms_mm;
 int SYS$EXPREG(int pagcnt, long ret[2], int a, int b)
 {
     if (vms_mm)
-        return sys$expreg(pagcnt,ret,a,b);
-    int size=pagcnt*4096; // check
-    ret[0]=malloc(size);
-    ret[1]=ret[0]+size;
+        return sys$expreg(pagcnt, ret, a, b);
+    int size = pagcnt * 4096; // check
+    ret[0] = malloc(size);
+    ret[1] = ret[0] + size;
     return SS$_NORMAL;
 }
 int SYS$DELTVA(long in[2], long ret[2], int a)
 {
     if (vms_mm)
-        return sys$deltva(in,ret,a);
+        return sys$deltva(in, ret, a);
     free(in[0]);
-    ret[0]=in[0];
-    ret[1]=in[1];
+    ret[0] = in[0];
+    ret[1] = in[1];
     return SS$_NORMAL;
 }
 
@@ -129,19 +129,21 @@ struct cli_struct
     void (*fn)();
 };
 
-struct cli_struct cliroutines[]=
+struct cli_struct cliroutines[] =
 {
-    {  "report",          report_command,           },
-    {  "verify",          verify_command,           },
-    { 0, 0 , },
+    { "report", report_command, },
+    { "verify", verify_command, },
+    { 0, 0, },
 };
 
 void * get_cli_int(char * c)
 {
     int i;
-    for (i=0; cliroutines[i].cliroutine; i++)
+    for (i = 0; cliroutines[i].cliroutine; i++)
     {
-        if (0==strncmp(c,cliroutines[i].cliroutine,strlen(cliroutines[i].cliroutine)))
+        if (0
+                == strncmp(c, cliroutines[i].cliroutine,
+                           strlen(cliroutines[i].cliroutine)))
             return cliroutines[i].fn;
     }
     return 0;
@@ -160,56 +162,57 @@ extern unsigned int ctrlc, tchan, disp_id, disp1_id, rows, colls,
 extern Boolean smg$enable;
 #else
 char outbuf[255];
-unsigned int ctrlc, tchan, disp_id, disp1_id, rows, colls,
-         disp2_id, status_id, paste_id, help_id, keyb_id;
+unsigned int ctrlc, tchan, disp_id, disp1_id, rows, colls, disp2_id, status_id,
+         paste_id, help_id, keyb_id;
 Boolean smg$enable;
 #endif
 
 static FILE *xp;
-int astrtn(), refresh() ; /* Ast routines called by CTRLC,Y and W */
-unsigned int prim_hand(), brdcst_ast();
-void singlemsg(),put_disp(), put_status();
+int astrtn(void);
+int refresh(void); /* Ast routines called by CTRLC,Y and W */
+unsigned int prim_hand(int signal[], int mech[]);
+unsigned int brdcst_ast(void);
 
 main(int argc, char *argv[])
 
-/*	MAIN
+/*  MAIN
 
-	Purpose : 1 Get privilege mask
-		  2 Setup SMG environment unless no VT or DFU$NOSMG is set
-		  3 Get and Parse command (syntax only)
-		  4 Dispatch to correct subroutine
+ Purpose : 1 Get privilege mask
+ 2 Setup SMG environment unless no VT or DFU$NOSMG is set
+ 3 Get and Parse command (syntax only)
+ 4 Dispatch to correct subroutine
 
-	Inputs  : Command line (if specified through foreign command)
+ Inputs  : Command line (if specified through foreign command)
 
-	Outputs : returns last status code to DCL in  case
-		  of single command processing. In interactive mode
-		  always returns SS$_NORMAL.
-*/
+ Outputs : returns last status code to DCL in  case
+ of single command processing. In interactive mode
+ always returns SS$_NORMAL.
+ */
 {
-    const rms_eof=98938,smg$_eof=1213442;
+    const rms_eof = 98938, smg$_eof = 1213442;
     struct
     {
         short status, count;
-        int extra ;
+        int extra;
     } iosb;
     static char command_line[255], *e;
-    unsigned int out_len,ret_len,prvmask;
-    void reset_ctrl(), clean_ctrlc(),
-         prev_screen(), next_screen(), dump_screen(), toggle_width() ;
+    unsigned int out_len, ret_len, prvmask;
+    void reset_ctrl(), clean_ctrlc(), prev_screen(), next_screen(),
+         dump_screen(), toggle_width();
     int smg_flag, x, y, i, ttype;
     int cursor_on = SMG$M_CURSOR_ON;
-    $DESCRIPTOR(input_line , command_line);
-    $DESCRIPTOR(prompt,"DFU> ");
-    $DESCRIPTOR(terminal,"SYS$COMMAND");
-    $DESCRIPTOR(top_txt,"< DFU V2.2 (Freeware) >");
-    $DESCRIPTOR(status_txt,"Statistics");
-    $DESCRIPTOR(do_key,"DO");
-    $DESCRIPTOR(pf2,"PF2");
-    $DESCRIPTOR(pf4,"PF4");
-    $DESCRIPTOR(prev,"PREV_SCREEN");
-    $DESCRIPTOR(next,"NEXT_SCREEN");
-    $DESCRIPTOR(select,"SELECT");
-    $DESCRIPTOR(help,"HELP");
+    $DESCRIPTOR(input_line, command_line);
+    $DESCRIPTOR(prompt, "DFU> ");
+    $DESCRIPTOR(terminal, "SYS$COMMAND");
+    $DESCRIPTOR(top_txt, "< DFU V2.2 (Freeware) >");
+    $DESCRIPTOR(status_txt, "Statistics");
+    $DESCRIPTOR(do_key, "DO");
+    $DESCRIPTOR(pf2, "PF2");
+    $DESCRIPTOR(pf4, "PF4");
+    $DESCRIPTOR(prev, "PREV_SCREEN");
+    $DESCRIPTOR(next, "NEXT_SCREEN");
+    $DESCRIPTOR(select, "SELECT");
+    $DESCRIPTOR(help, "HELP");
 
     /* First find out how we got called ( by RUN, or a foreign command */
     ret_len = 0;
@@ -235,116 +238,126 @@ main(int argc, char *argv[])
 #else
     /* Now create the SMG environment */
 
-    colls=80;
-    rows=24;
-    SMG$CREATE_PASTEBOARD(&paste_id, 0, &rows,
-                          &colls,&SMG$M_KEEP_CONTENTS,&ttype,0);
-    if ((e = (char *) getenv("DFU$NOSMG")) && *e) smg$enable = FALSE;
+    colls = 80;
+    rows = 24;
+    SMG$CREATE_PASTEBOARD(&paste_id, 0, &rows, &colls, &SMG$M_KEEP_CONTENTS,
+                          &ttype, 0);
+    if ((e = (char *) getenv("DFU$NOSMG")) && *e)
+        smg$enable = FALSE;
     else
     {
-        if (ttype != SMG$K_VTTERMTABLE) smg$enable = FALSE;
-        if (ttype != SMG$K_VTTERMTABLE) SMG$DELETE_PASTEBOARD(&paste_id,&i0);
+        if (ttype != SMG$K_VTTERMTABLE)
+            smg$enable = FALSE;
+        if (ttype != SMG$K_VTTERMTABLE)
+            SMG$DELETE_PASTEBOARD(&paste_id, &i0);
     }
 
-    SMG$CREATE_VIRTUAL_KEYBOARD(&keyb_id,0,0,0,0);
+    SMG$CREATE_VIRTUAL_KEYBOARD(&keyb_id, 0, 0, 0, 0);
     if (smg$enable)
         /* Setup key table */
     {
         SMG$ERASE_PASTEBOARD(&paste_id, 0, 0, 0, 0, 0, 0);
         SMG$CREATE_KEY_TABLE(&key_tab);
-        colls -=2;
+        colls -= 2;
         orig_colls = colls;
         smg_flag = SMG$M_KEY_NOECHO + SMG$M_KEY_TERMINATE;
-        SMG$ADD_KEY_DEF(&key_tab,&do_key,0, &smg_flag, &do_key,0);
-        SMG$ADD_KEY_DEF(&key_tab,&pf4,0, &smg_flag,&pf4,0);
-        SMG$ADD_KEY_DEF(&key_tab,&prev,0, &smg_flag, &prev,0);
-        SMG$ADD_KEY_DEF(&key_tab,&next,0, &smg_flag, &next,0);
-        SMG$ADD_KEY_DEF(&key_tab,&pf2,0, &smg_flag, &help,0);
-        SMG$ADD_KEY_DEF(&key_tab,&help,0, &smg_flag, &help,0);
-        SMG$ADD_KEY_DEF(&key_tab,&select,0, &smg_flag, &select,0);
-        SMG$CREATE_VIRTUAL_DISPLAY(&i500, &colls , &disp1_id, &SMG$M_BORDER,
-                                   0, 0);
+        SMG$ADD_KEY_DEF(&key_tab, &do_key, 0, &smg_flag, &do_key, 0);
+        SMG$ADD_KEY_DEF(&key_tab, &pf4, 0, &smg_flag, &pf4, 0);
+        SMG$ADD_KEY_DEF(&key_tab, &prev, 0, &smg_flag, &prev, 0);
+        SMG$ADD_KEY_DEF(&key_tab, &next, 0, &smg_flag, &next, 0);
+        SMG$ADD_KEY_DEF(&key_tab, &pf2, 0, &smg_flag, &help, 0);
+        SMG$ADD_KEY_DEF(&key_tab, &help, 0, &smg_flag, &help, 0);
+        SMG$ADD_KEY_DEF(&key_tab, &select, 0, &smg_flag, &select, 0);
+        SMG$CREATE_VIRTUAL_DISPLAY(&i500, &colls, &disp1_id, &SMG$M_BORDER, 0,
+                                   0);
         x = 508 - rows;
         y = rows - 7;
-        SMG$CREATE_VIEWPORT(&disp1_id,&x,&i1,&y,&colls);
-        SMG$CREATE_VIRTUAL_DISPLAY(&i2, &colls, &status_id, 0 , 0, 0);
-        SMG$CREATE_VIRTUAL_DISPLAY(&i2, &colls, &disp2_id, 0 , 0, 0);
-        SMG$SET_BROADCAST_TRAPPING(&paste_id,brdcst_ast,0);
-        SMG$LABEL_BORDER(&disp1_id, &top_txt, 0, 0,&SMG$M_BOLD, 0, 0);
-        SMG$LABEL_BORDER(&status_id, &status_txt, 0, 0,&SMG$M_BOLD, 0, 0);
-        SMG$PASTE_VIRTUAL_DISPLAY(&disp1_id, &paste_id, &i2,&i2,0);
+        SMG$CREATE_VIEWPORT(&disp1_id, &x, &i1, &y, &colls);
+        SMG$CREATE_VIRTUAL_DISPLAY(&i2, &colls, &status_id, 0, 0, 0);
+        SMG$CREATE_VIRTUAL_DISPLAY(&i2, &colls, &disp2_id, 0, 0, 0);
+        SMG$SET_BROADCAST_TRAPPING(&paste_id, brdcst_ast, 0);
+        SMG$LABEL_BORDER(&disp1_id, &top_txt, 0, 0, &SMG$M_BOLD, 0, 0);
+        SMG$LABEL_BORDER(&status_id, &status_txt, 0, 0, &SMG$M_BOLD, 0, 0);
+        SMG$PASTE_VIRTUAL_DISPLAY(&disp1_id, &paste_id, &i2, &i2, 0);
         x = rows - 4;
-        SMG$PASTE_VIRTUAL_DISPLAY(&status_id, &paste_id, &x,&i2,0);
+        SMG$PASTE_VIRTUAL_DISPLAY(&status_id, &paste_id, &x, &i2, 0);
         x = rows - 1;
-        SMG$PASTE_VIRTUAL_DISPLAY(&disp2_id, &paste_id, &x,&i2,0);
+        SMG$PASTE_VIRTUAL_DISPLAY(&disp2_id, &paste_id, &x, &i2, 0);
         x = 508 - rows;
-        SMG$SET_CURSOR_ABS(&disp1_id,&x,&i1);
-        SMG$SET_CURSOR_ABS(&disp2_id,&i1,&i1);
+        SMG$SET_CURSOR_ABS(&disp1_id, &x, &i1);
+        SMG$SET_CURSOR_ABS(&disp2_id, &i1, &i1);
         SMG$BEGIN_PASTEBOARD_UPDATE(&paste_id);
     }
 #endif
 
-    sprintf(outbuf,"\n     Disk and File Utilities for OpenVMS DFU V2.2");
+    sprintf(outbuf, "\n     Disk and File Utilities for OpenVMS DFU V2.2");
     put_disp();
-    sprintf(outbuf,"     Freeware version");
+    sprintf(outbuf, "     Freeware version");
     put_disp();
-    sprintf(outbuf,"     Copyright © 1995 Digital Equipment Corporation\n");
+    sprintf(outbuf, "     Copyright ï¿½ 1995 Digital Equipment Corporation\n");
     put_disp();
 
     if (smg$enable)
     {
         /* Enter additional info */
-        sprintf(outbuf,"     DFU functions are : \n");
+        sprintf(outbuf, "     DFU functions are : \n");
         put_disp();
-        sprintf(outbuf,"     DEFRAGMENT : Defragment files");
+        sprintf(outbuf, "     DEFRAGMENT : Defragment files");
         put_disp();
-        sprintf(outbuf,"     DELETE     : Delete files by File-ID; delete directory (trees)");
+        sprintf(outbuf,
+                "     DELETE     : Delete files by File-ID; delete directory (trees)");
         put_disp();
-        sprintf(outbuf,"     DIRECTORY  : Manipulate directories");
+        sprintf(outbuf, "     DIRECTORY  : Manipulate directories");
         put_disp();
-        sprintf(outbuf,"     REPORT     : Generate a complete disk report");
+        sprintf(outbuf, "     REPORT     : Generate a complete disk report");
         put_disp();
-        sprintf(outbuf,"     SEARCH     : Fast file search");
+        sprintf(outbuf, "     SEARCH     : Fast file search");
         put_disp();
-        sprintf(outbuf,"     SET        : Modify file attributes");
+        sprintf(outbuf, "     SET        : Modify file attributes");
         put_disp();
-        sprintf(outbuf,"     UNDELETE   : Recover deleted files");
+        sprintf(outbuf, "     UNDELETE   : Recover deleted files");
         put_disp();
-        sprintf(outbuf,"     VERIFY     : Check and repair disk structure");
+        sprintf(outbuf, "     VERIFY     : Check and repair disk structure");
         put_disp();
         SMG$END_PASTEBOARD_UPDATE(&paste_id);
     }
 
     prvmask = 0;
-    status = dfu_check_access(&prvmask);  /*Get the privilege mask */
+    status = dfu_check_access(&prvmask); /*Get the privilege mask */
 
     /* Setup terminal channel for control purposes; get the terminal chars */
     status = SYS$ASSIGN(&terminal, &tchan, 0,0);
-    status = SYS$QIOW(0,tchan, IO$_SENSEMODE,0,0,0,&orgttchar,12,0,0,0,0);
-    for (i = 0; i < 3; i++) ttchar[i] = orgttchar[i];
+    status = SYS$QIOW(0, tchan, IO$_SENSEMODE, 0, 0, 0, &orgttchar, 12, 0, 0, 0,
+                      0);
+    for (i = 0; i < 3; i++)
+        ttchar[i] = orgttchar[i];
     ttchar[2] &= ~TT2$M_EDITING; /* Clear line edit bit */
     clean_ctrlc(); /* Enable CTRL/W if needed */
 
-    if (ret_len==0)
+    if (ret_len == 0)
     {
         if (smg$enable)
-            status = SMG$READ_COMPOSED_LINE(&keyb_id,&key_tab,&input_line,&prompt,
-                                            &out_len,&disp2_id,0,0,0,0,0);
+            status =
+                SMG$READ_COMPOSED_LINE(&keyb_id,&key_tab,&input_line,&prompt,
+                                       &out_len,&disp2_id,0,0,0,0,0);
         else
             status = SMG$READ_COMPOSED_LINE(&keyb_id,0,&input_line,&prompt,
                                             &out_len,0,0,0,0,0,0);
     }
 
-    memcpy (command_line, input_line.dsc$a_pointer, input_line.dsc$w_length);
+    memcpy(command_line, input_line.dsc$a_pointer, input_line.dsc$w_length);
     cip = 1;
 
     /* Main loop starts here. Get a command and pasre it*/
     for (;;)
     {
         /* loop forever until EXIT is entered */
-        if(status==smg$_eof) status = exit_command(prvmask);
-        if ((status&1) != 1) goto endfor;
-        if (out_len == 0) goto endfor;
+        if (status == smg$_eof)
+            status = exit_command(prvmask);
+        if ((status & 1) != 1)
+            goto endfor;
+        if (out_len == 0)
+            goto endfor;
 
         /* First catch special screen commands */
         if (smg$enable)
@@ -355,13 +368,13 @@ main(int argc, char *argv[])
                 prev_screen();
                 goto endfor;
             }
-            status = strncmp(command_line, "DO",2);
+            status = strncmp(command_line, "DO", 2);
             if (status == 0)
             {
                 status = spawn_command(prvmask);
                 goto endfor;
             }
-            status = strncmp(command_line, "PF4",3);
+            status = strncmp(command_line, "PF4", 3);
             if (status == 0)
             {
                 dump_screen();
@@ -383,19 +396,22 @@ main(int argc, char *argv[])
             SMG$ERASE_DISPLAY(&disp1_id, 0, 0, 0, 0);
             SMG$ERASE_DISPLAY(&status_id, 0, 0, 0, 0);
             SMG$CHANGE_VIEWPORT(&disp1_id,&x,&i1,&y,&colls);
-            SMG$SET_CURSOR_ABS(&disp1_id,&x,&i1);
+            SMG$SET_CURSOR_ABS(&disp1_id, &x, &i1);
         }
 
         /* Catch the CLI errors do avoid disrupting the SMG screen... */
 #if 0
         VAXC$ESTABLISH(prim_hand);
 #endif
-        status = CLI$DCL_PARSE(&input_line,&dfu_tables,0 /* not yet lib$get_input*/,0,&prompt); // check added & before dfu_tables
+        status = CLI$DCL_PARSE(&input_line, &dfu_tables,
+                               0 /* not yet lib$get_input*/, 0, &prompt); // check added & before dfu_tables
 #if 0
         VAXC$ESTABLISH(NULL);
 #endif
-        if (status == CLI$_NOCOMD) singlemsg(0,status);
-        if ((status & 1 ) != 1) goto endfor;
+        if (status == CLI$_NOCOMD)
+            singlemsg(0, status);
+        if ((status & 1) != 1)
+            goto endfor;
         else
             /* Now dispatch if no errors */
         {
@@ -404,17 +420,19 @@ main(int argc, char *argv[])
             clean_ctrlc();
             cip = 0;
             status = brdcst_ast();
-            if (smg$enable) SMG$SET_CURSOR_MODE(&paste_id, &cursor_on);
+            if (smg$enable)
+                SMG$SET_CURSOR_MODE(&paste_id, &cursor_on);
         }
 endfor:
-        if (ret_len !=0)
+        if (ret_len != 0)
         {
             /* Single command processing , so exit here */
             status += 0x10000000; /* Do not echo the error on DCL level */
             if (smg$enable)
             {
-                if (colls != orig_colls) toggle_width();
-                SMG$SET_CURSOR_ABS(&disp2_id,&i2,&i1);
+                if (colls != orig_colls)
+                    toggle_width();
+                SMG$SET_CURSOR_ABS(&disp2_id, &i2, &i1);
             }
             exit(status);
         }
@@ -424,7 +442,7 @@ endfor:
         if (smg$enable)
         {
             SMG$ERASE_LINE(&disp2_id, &i1, &i1);
-            SMG$SET_CURSOR_ABS(&disp2_id,&i1,&i1);
+            SMG$SET_CURSOR_ABS(&disp2_id, &i1, &i1);
             status = SMG$READ_COMPOSED_LINE(&keyb_id,&key_tab,&input_line,
                                             &prompt,&out_len,&disp2_id,0,0,0,0,0); /*Get next command */
             cip = 1;
@@ -441,15 +459,15 @@ endfor:
             return 0;
 #endif
     }
-}  /* END of MAIN */
+} /* END of MAIN */
 int help_command(int mask)
-/*	HELP
+/*  HELP
 
-	Purpose : call on-line help
-	Output  : contents of DFUHLP helplib.
-*/
+ Purpose : call on-line help
+ Output  : contents of DFUHLP helplib.
+ */
 {
-    unsigned int x,flag=1,tmp=0;
+    unsigned int x, flag = 1, tmp = 0;
 #if 0
     static char help[80];
     $DESCRIPTOR(help_key ,help);
@@ -489,16 +507,16 @@ int help_command(int mask)
         singlemsg(0,status);
     }
 #endif
-    return(1);
+    return (1);
 } /*END help_command */
 
 int exit_command(int mask)
 /*  EXIT
 
-	Purpose : Exit Program with SS$_NORMAL
-	Output  : Return to DCL
+ Purpose : Exit Program with SS$_NORMAL
+ Output  : Return to DCL
 
-*/
+ */
 {
     void clean_ctrlc(), toggle_width();
 
@@ -506,12 +524,13 @@ int exit_command(int mask)
     if (smg$enable)
     {
         SMG$DISABLE_BROADCAST_TRAPPING(&paste_id);
-        if (colls != orig_colls) toggle_width();
-        SMG$SET_CURSOR_ABS(&disp2_id,&i2,&i1);
+        if (colls != orig_colls)
+            toggle_width();
+        SMG$SET_CURSOR_ABS(&disp2_id, &i2, &i1);
         SMG$DELETE_PASTEBOARD(&paste_id, &i0);
     }
     exit(1);
-    return(1);
+    return (1);
 } /*END exit_command */
 
 int spawn_command(int mask)
@@ -530,7 +549,7 @@ int spawn_command(int mask)
     printf("%%DFU-I-SPAWN, Creating subprocess...\n");
     status = lib$spawn(0,0,0,0,0,0,0,0,0,0,&prompt,0,0);
     /* Next call is a workaround for a bug in TTdriver which may inadvertently
-       reset the terminal width */
+     reset the terminal width */
     if (colls > 80) printf("\x1b[?3h");
     else printf("\x1b[?3l");
     if (smg$enable)
@@ -583,28 +602,29 @@ void next_screen(void)
 
 int dump_actn(struct dsc$descriptor *out_str, int user_arg)
 {
-    fprintf(xp,"%.*s\n",out_str->dsc$w_length, out_str->dsc$a_pointer);
-    return(1);
+    fprintf(xp, "%.*s\n", out_str->dsc$w_length, out_str->dsc$a_pointer);
+    return (1);
 }
 
 void dump_screen(void)
 /* Routine to dump the screen contents to a file */
 {
-    char fname[]="DFU_SCREEN.TXT";
+    char fname[] = "DFU_SCREEN.TXT";
 
 #if 0
     xp = fopen(fname,"w","mrs=132","rfm=var","ctx=rec","rat=cr","rop=WBH");
 #endif
-    status = SMG$PUT_PASTEBOARD(&paste_id, dump_actn, 0 , 0);
-    if ((status & 1) !=1)
+    status = SMG$PUT_PASTEBOARD(&paste_id, dump_actn, 0, 0);
+    if ((status & 1) != 1)
     {
-        sprintf(outbuf,"%%DFU-E-DUMPERR, Error dumping screen contents,");
+        sprintf(outbuf, "%%DFU-E-DUMPERR, Error dumping screen contents,");
         put_disp();
         singlemsg(0, status);
     }
     else
     {
-        sprintf(outbuf,"%%DFU-I-DUMPDONE, Screen contents saved in DFU_SCREEN.TXT");
+        sprintf(outbuf,
+                "%%DFU-I-DUMPDONE, Screen contents saved in DFU_SCREEN.TXT");
         put_disp();
     }
     fclose(xp);
@@ -617,20 +637,20 @@ void toggle_width(void)
         SMG$CHANGE_PBD_CHARACTERISTICS(&paste_id, &i80, &colls, 0, 0, 0, 0);
     else
         SMG$CHANGE_PBD_CHARACTERISTICS(&paste_id, &i132, &colls, 0, 0, 0, 0);
-    colls -=2;
-    SMG$CHANGE_VIRTUAL_DISPLAY(&disp1_id,0,&colls, 0, 0, 0);
+    colls -= 2;
+    SMG$CHANGE_VIRTUAL_DISPLAY(&disp1_id, 0, &colls, 0, 0, 0);
     SMG$CHANGE_VIEWPORT(&disp1_id,0,0,0,&colls);
-    SMG$CHANGE_VIRTUAL_DISPLAY(&status_id,0,&colls, 0, 0, 0);
-    SMG$CHANGE_VIRTUAL_DISPLAY(&disp2_id,0,&colls, 0, 0, 0);
+    SMG$CHANGE_VIRTUAL_DISPLAY(&status_id, 0, &colls, 0, 0, 0);
+    SMG$CHANGE_VIRTUAL_DISPLAY(&disp2_id, 0, &colls, 0, 0, 0);
 }
 
 int dfu_check_access(int *mask)
 /*
-    Check if the user has DFU_ALLPRIV identifier granted.
-*/
+ Check if the user has DFU_ALLPRIV identifier granted.
+ */
 
 {
-    int i,j, rights_size, ret_addr, pages;
+    int i, j, rights_size, ret_addr, pages;
 #if 0
     unsigned short len;
     int jpi$_rights_size , jpi$_process_rights;
@@ -642,7 +662,7 @@ int dfu_check_access(int *mask)
     struct _rt
     {
         int rights[2];
-    } *rights_list;
+    }*rights_list;
     static char ascii_id[255];
     $DESCRIPTOR(ascii_descr , ascii_id);
     Boolean found;
@@ -664,14 +684,14 @@ int dfu_check_access(int *mask)
         return(status);
     }
     /* Rightssize is returned in bytes, so rightssize/8 -1 is
-       number of rights. Now allocate enough dynamic space to get
-       all the rights in. */
+     number of rights. Now allocate enough dynamic space to get
+     all the rights in. */
 
     j = (rights_size/8) + 1;
     ret_addr = malloc(j*8);
     rights_list = (struct _rt *) ret_addr;
 
-    item_list[0].buflen = j*8 ;
+    item_list[0].buflen = j*8;
     item_list[0].itemcode = jpi$_process_rights;
     item_list[0].bufadr = (int *) rights_list;
     item_list[0].retlen = 0;
@@ -705,7 +725,7 @@ int dfu_check_access(int *mask)
     }
     free(ret_addr);
 #endif
-    return(1);
+    return (1);
 }
 
 void reset_ctrl(void)
@@ -717,7 +737,7 @@ void reset_ctrl(void)
     struct
     {
         short status, count;
-        int extra ;
+        int extra;
     } iosb;
     unsigned int t_mask[2];
 
@@ -733,25 +753,25 @@ void reset_ctrl(void)
 #endif
 }
 
-int astrtn()
+int astrtn(void)
 /* Ast routine called by CTRLC/Y
-   Set CTRLC to 1 and reset the Trapping */
+ Set CTRLC to 1 and reset the Trapping */
 
 {
     ctrlc = 1;
-    sprintf(outbuf,"     Current command ABORTING...");
+    sprintf(outbuf, "     Current command ABORTING...");
     put_status(2);
-    return(1);
+    return (1);
 }
 
-void clean_ctrlc()
+void clean_ctrlc(void)
 /* Cleanup CTRLC channel */
 
 {
     struct
     {
         short status, count;
-        int extra ;
+        int extra;
     } iosb;
     unsigned int t_mask[2];
 #if 0
@@ -771,26 +791,27 @@ void clean_ctrlc()
     status = 1;
 }
 
-int refresh()
+int refresh(void)
 {
 #if 0
     status = SMG$CANCEL_INPUT(&keyb_id);
 #endif
     status = SMG$REPAINT_SCREEN(&paste_id);
-    return(1);
+    return (1);
 }
 
 int strindex(char *input_string, char *symbol, int len)
 /*
-   Give the location of the SYMBOL in INPUT_STRING
-*/
+ Give the location of the SYMBOL in INPUT_STRING
+ */
 
 {
-    int i ;
+    int i;
 
-    i=0;
-    while ((i < len) && (input_string[i] != *symbol)) i++;
-    return(i < len ) ? i : -1;
+    i = 0;
+    while ((i < len) && (input_string[i] != *symbol))
+        i++;
+    return (i < len) ? i : -1;
 }
 
 void put_status(int x)
@@ -801,7 +822,8 @@ void put_status(int x)
     if (smg$enable)
     {
         stat_descr.dsc$w_length = strlen(outbuf);
-        SMG$PUT_CHARS(&status_id, &stat_descr, &x, &i2, &SMG$M_ERASE_LINE, 0, 0, 0);
+        SMG$PUT_CHARS(&status_id, &stat_descr, &x, &i2, &SMG$M_ERASE_LINE, 0, 0,
+                      0);
     }
 }
 
@@ -812,16 +834,17 @@ void put_disp(void)
     if (smg$enable)
     {
         to_disp.dsc$w_length = strlen(outbuf);
-        SMG$PUT_LINE(&disp1_id, &to_disp,0,0,0,&SMG$M_WRAP_CHAR,0);
+        SMG$PUT_LINE(&disp1_id, &to_disp, 0, 0, 0, &SMG$M_WRAP_CHAR, 0);
     }
-    else printf("%s\n",outbuf);
+    else
+        printf("%s\n", outbuf);
 }
 
 void singlemsg(int stat1, int stat)
 /* Gets a system message and displays it.
-   Unlike LIB$SIGNAL it will not terminate the
-   program on fatal errors
-*/
+ Unlike LIB$SIGNAL it will not terminate the
+ program on fatal errors
+ */
 {
 #if 0
     int len;
@@ -844,18 +867,17 @@ void singlemsg(int stat1, int stat)
 int actrtn(struct dsc$descriptor *out_str, int user_arg)
 /* user action routine to catch SYS$PUTMSG */
 {
-    sprintf(outbuf,"%.*s",out_str->dsc$w_length, out_str->dsc$a_pointer);
+    sprintf(outbuf, "%.*s", out_str->dsc$w_length, out_str->dsc$a_pointer);
     put_disp();
-    return(0);
+    return (0);
 }
 
-unsigned int prim_hand(signal, mech)
-int signal[], mech[];
+unsigned int prim_hand(int signal[], int mech[])
 {
     /* Use the signal array to pass the error to PUTMSG
-       PUTMSG in turn will call ACTRTN which will use SMG output
-       in stead of just dumping SYS$OUTPUT/ERROR
-    */
+     PUTMSG in turn will call ACTRTN which will use SMG output
+     in stead of just dumping SYS$OUTPUT/ERROR
+     */
 
     int params;
     signal[0] -= 2;
@@ -865,19 +887,20 @@ int signal[], mech[];
     return SS$_CONTINUE;
 }
 
-unsigned int brdcst_ast()
+unsigned int brdcst_ast(void)
 /* Displays the broadcast messages */
 {
     static char msg[160];
     int len;
-    $DESCRIPTOR(brdcst_msg,msg);
+    $DESCRIPTOR(brdcst_msg, msg);
 
-    if (cip == 1) return(1); /* exit if DFU is busy */
+    if (cip == 1)
+        return (1); /* exit if DFU is busy */
 #if 0
     status = SMG$CANCEL_INPUT(&keyb_id);
 #endif
-    SMG$SET_CURSOR_ABS(&status_id,&i2,&i2);
-    status = SMG$GET_BROADCAST_MESSAGE(&paste_id, &brdcst_msg, &len,0);
+    SMG$SET_CURSOR_ABS(&status_id, &i2, &i2);
+    status = SMG$GET_BROADCAST_MESSAGE(&paste_id, &brdcst_msg, &len, 0);
 #if 0
     while (status == SS$_NORMAL)
     {
@@ -887,5 +910,5 @@ unsigned int brdcst_ast()
         status = SMG$GET_BROADCAST_MESSAGE(&paste_id, &brdcst_msg, &len,0);
     }
 #endif
-    return(1);
+    return (1);
 }

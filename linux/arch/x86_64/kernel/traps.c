@@ -11,7 +11,7 @@
  *  Copyright (C) 2000, 2001, 2002 Andi Kleen, SuSE Labs
  *
  *  Pentium III FXSR, SSE support
- *	Gareth Hughes <gareth@valinux.com>, May 2000
+ *  Gareth Hughes <gareth@valinux.com>, May 2000
  *
  *  $Id$
  */
@@ -420,7 +420,7 @@ void exit_die(unsigned long flags)
 {
     die_owner = -1;
     spin_unlock_irqrestore(&die_lock, flags);
-    __sti();	/* back scroll should work */
+    __sti();    /* back scroll should work */
     bust_spinlocks(0);
 }
 
@@ -503,22 +503,22 @@ static void do_trap(int trapnr, int signr, char *str,
 #define DO_ERROR(trapnr, signr, str, name) \
 asmlinkage void do_##name(struct pt_regs * regs, long error_code) \
 { \
-	if (notify_die(DIE_TRAP, str, regs, error_code, trapnr, signr) == NOTIFY_BAD) \
-		return; \
-	do_trap(trapnr, signr, str, regs, error_code, NULL); \
+    if (notify_die(DIE_TRAP, str, regs, error_code, trapnr, signr) == NOTIFY_BAD) \
+        return; \
+    do_trap(trapnr, signr, str, regs, error_code, NULL); \
 }
 
 #define DO_ERROR_INFO(trapnr, signr, str, name, sicode, siaddr) \
 asmlinkage void do_##name(struct pt_regs * regs, long error_code) \
 { \
-	siginfo_t info; \
-	info.si_signo = signr; \
-	info.si_errno = 0; \
-	info.si_code = sicode; \
-	info.si_addr = (void *)siaddr; \
-	if (notify_die(DIE_TRAP, str, regs, error_code, trapnr, signr)==NOTIFY_BAD) \
-		return; \
-	do_trap(trapnr, signr, str, regs, error_code, &info); \
+    siginfo_t info; \
+    info.si_signo = signr; \
+    info.si_errno = 0; \
+    info.si_code = sicode; \
+    info.si_addr = (void *)siaddr; \
+    if (notify_die(DIE_TRAP, str, regs, error_code, trapnr, signr)==NOTIFY_BAD) \
+        return; \
+    do_trap(trapnr, signr, str, regs, error_code, &info); \
 }
 
 DO_ERROR_INFO( 0, SIGFPE,  "divide error", divide_error, FPE_INTDIV, regs->rip)
@@ -655,9 +655,9 @@ asmlinkage void do_nmi(struct pt_regs * regs)
      * as it's edge-triggered.
      */
     outb(0x8f, 0x70);
-    inb(0x71);		/* dummy */
+    inb(0x71);      /* dummy */
     outb(0x0f, 0x70);
-    inb(0x71);		/* dummy */
+    inb(0x71);      /* dummy */
 }
 
 asmlinkage void do_debug(struct pt_regs * regs, long error_code)
@@ -878,12 +878,12 @@ asmlinkage void do_spurious_interrupt_bug(struct pt_regs * regs)
 asmlinkage void math_state_restore(void)
 {
     struct task_struct *me = current;
-    clts();			/* Allow maths ops (or we recurse) */
+    clts();         /* Allow maths ops (or we recurse) */
 
     if (!me->used_math)
         init_fpu(me);
     restore_fpu_checking(&me->thread.i387.fxsave);
-    me->flags |= PF_USEDFPU;	/* So we fxsave on switch_to() */
+    me->flags |= PF_USEDFPU;    /* So we fxsave on switch_to() */
 }
 
 asmlinkage void math_emulate(void)
@@ -908,7 +908,7 @@ void __init trap_init(void)
     set_intr_gate(0,&divide_error);
     set_intr_gate(1,&debug);
     set_intr_gate_ist(2,&nmi,NMI_STACK);
-    set_system_gate(3,&int3);	/* int3-5 can be called from all */
+    set_system_gate(3,&int3);   /* int3-5 can be called from all */
     set_system_gate(4,&overflow);
     set_system_gate(5,&bounds);
     set_intr_gate(6,&invalid_op);

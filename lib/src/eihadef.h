@@ -1,5 +1,5 @@
-#ifndef eihadef_h
-#define eihadef_h
+#ifndef EIHADEF_H
+#define EIHADEF_H
 
 #define EIHA$K_LENGTH 48
 #define EIHA$C_LENGTH 48

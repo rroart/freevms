@@ -33,14 +33,14 @@ extern rwlock_t xtime_lock;
 spinlock_t rtc_lock = SPIN_LOCK_UNLOCKED;
 spinlock_t i8253_lock = SPIN_LOCK_UNLOCKED;
 
-unsigned int cpu_khz;					/* TSC clocks / usec, not used here */
+unsigned int cpu_khz;                   /* TSC clocks / usec, not used here */
 unsigned long hpet_address;
-unsigned long hpet_period;				/* fsecs / HPET clock */
-unsigned int hpet_tick;					/* HPET clocks / interrupt */
+unsigned long hpet_period;              /* fsecs / HPET clock */
+unsigned int hpet_tick;                 /* HPET clocks / interrupt */
 unsigned long vxtime_hz = 1193182;
-int report_lost_ticks;					/* command line option */
+int report_lost_ticks;                  /* command line option */
 
-struct vxtime_data __vxtime __section_vxtime;		/* data for vsyscall */
+struct vxtime_data __vxtime __section_vxtime;       /* data for vsyscall */
 
 volatile unsigned long __jiffies __section_jiffies;
 unsigned long __wall_jiffies __section_wall_jiffies;
@@ -130,7 +130,7 @@ void do_settimeofday(struct timeval *tv)
     xtime = *tv;
     vxtime_unlock();
 
-    time_adjust = 0;		/* stop active adjtime() */
+    time_adjust = 0;        /* stop active adjtime() */
     time_status |= STA_UNSYNC;
     time_maxerror = NTP_PHASE_LIMIT;
     time_esterror = NTP_PHASE_LIMIT;
@@ -181,7 +181,7 @@ void do_settimeofday(struct timeval *tv)
     real_seconds = nowtime % 60;
     real_minutes = nowtime / 60;
     if (((abs(real_minutes - cmos_minutes) + 15) / 30) & 1)
-        real_minutes += 30;	/* correct for half hour time zone */
+        real_minutes += 30; /* correct for half hour time zone */
     real_minutes %= 60;
 
     if (abs(real_minutes - cmos_minutes) < 30)
@@ -486,9 +486,9 @@ static int hpet_init(void)
 void __init pit_init(void)
 {
     spin_lock_irq(&i8253_lock);
-    outb_p(0x34, 0x43);		/* binary, mode 2, LSB/MSB, ch 0 */
-    outb_p(LATCH & 0xff, 0x40);	/* LSB */
-    outb_p(LATCH >> 8, 0x40);	/* MSB */
+    outb_p(0x34, 0x43);     /* binary, mode 2, LSB/MSB, ch 0 */
+    outb_p(LATCH & 0xff, 0x40); /* LSB */
+    outb_p(LATCH >> 8, 0x40);   /* MSB */
     spin_unlock_irq(&i8253_lock);
 }
 

@@ -126,41 +126,41 @@
  */
 struct stripe_head
 {
-    struct stripe_head	*hash_next, **hash_pprev; /* hash pointers */
-    struct list_head	lru;			/* inactive_list or handle_list */
-    struct raid5_private_data	*raid_conf;
-    struct buffer_head	*bh_cache[MD_SB_DISKS];	/* buffered copy */
-    struct buffer_head	*bh_read[MD_SB_DISKS];	/* read request buffers of the MD device */
-    struct buffer_head	*bh_write[MD_SB_DISKS];	/* write request buffers of the MD device */
-    struct buffer_head	*bh_written[MD_SB_DISKS]; /* write request buffers of the MD device that have been scheduled for write */
-    struct page		*bh_page[MD_SB_DISKS];	/* saved bh_cache[n]->b_page when reading around the cache */
-    unsigned long		sector;			/* sector of this row */
-    int			size;			/* buffers size */
-    int			pd_idx;			/* parity disk index */
-    unsigned long		state;			/* state flags */
-    atomic_t		count;			/* nr of active thread/requests */
-    spinlock_t		lock;
-    int			sync_redone;
+    struct stripe_head  *hash_next, **hash_pprev; /* hash pointers */
+    struct list_head    lru;            /* inactive_list or handle_list */
+    struct raid5_private_data   *raid_conf;
+    struct buffer_head  *bh_cache[MD_SB_DISKS]; /* buffered copy */
+    struct buffer_head  *bh_read[MD_SB_DISKS];  /* read request buffers of the MD device */
+    struct buffer_head  *bh_write[MD_SB_DISKS]; /* write request buffers of the MD device */
+    struct buffer_head  *bh_written[MD_SB_DISKS]; /* write request buffers of the MD device that have been scheduled for write */
+    struct page     *bh_page[MD_SB_DISKS];  /* saved bh_cache[n]->b_page when reading around the cache */
+    unsigned long       sector;         /* sector of this row */
+    int         size;           /* buffers size */
+    int         pd_idx;         /* parity disk index */
+    unsigned long       state;          /* state flags */
+    atomic_t        count;          /* nr of active thread/requests */
+    spinlock_t      lock;
+    int         sync_redone;
 };
 
 
 /*
  * Write method
  */
-#define RECONSTRUCT_WRITE	1
-#define READ_MODIFY_WRITE	2
+#define RECONSTRUCT_WRITE   1
+#define READ_MODIFY_WRITE   2
 /* not a write method, but a compute_parity mode */
-#define	CHECK_PARITY		3
+#define CHECK_PARITY        3
 
 /*
  * Stripe state
  */
-#define STRIPE_ERROR		1
-#define STRIPE_HANDLE		2
-#define	STRIPE_SYNCING		3
-#define	STRIPE_INSYNC		4
-#define	STRIPE_PREREAD_ACTIVE	5
-#define	STRIPE_DELAYED		6
+#define STRIPE_ERROR        1
+#define STRIPE_HANDLE       2
+#define STRIPE_SYNCING      3
+#define STRIPE_INSYNC       4
+#define STRIPE_PREREAD_ACTIVE   5
+#define STRIPE_DELAYED      6
 
 /*
  * Plugging:
@@ -188,44 +188,44 @@ struct stripe_head
 
 struct disk_info
 {
-    kdev_t	dev;
-    int	operational;
-    int	number;
-    int	raid_disk;
-    int	write_only;
-    int	spare;
-    int	used_slot;
+    kdev_t  dev;
+    int operational;
+    int number;
+    int raid_disk;
+    int write_only;
+    int spare;
+    int used_slot;
 };
 
 struct raid5_private_data
 {
-    struct stripe_head	**stripe_hashtbl;
-    mddev_t			*mddev;
-    mdk_thread_t		*thread, *resync_thread;
-    struct disk_info	disks[MD_SB_DISKS];
-    struct disk_info	*spare;
-    int			buffer_size;
-    int			chunk_size, level, algorithm;
-    int			raid_disks, working_disks, failed_disks;
-    int			resync_parity;
-    int			max_nr_stripes;
+    struct stripe_head  **stripe_hashtbl;
+    mddev_t         *mddev;
+    mdk_thread_t        *thread, *resync_thread;
+    struct disk_info    disks[MD_SB_DISKS];
+    struct disk_info    *spare;
+    int         buffer_size;
+    int         chunk_size, level, algorithm;
+    int         raid_disks, working_disks, failed_disks;
+    int         resync_parity;
+    int         max_nr_stripes;
 
-    struct list_head	handle_list; /* stripes needing handling */
-    struct list_head	delayed_list; /* stripes that have plugged requests */
-    atomic_t		preread_active_stripes; /* stripes with scheduled io */
+    struct list_head    handle_list; /* stripes needing handling */
+    struct list_head    delayed_list; /* stripes that have plugged requests */
+    atomic_t        preread_active_stripes; /* stripes with scheduled io */
     /*
      * Free stripes pool
      */
-    atomic_t		active_stripes;
-    struct list_head	inactive_list;
-    md_wait_queue_head_t	wait_for_stripe;
-    int			inactive_blocked;	/* release of inactive stripes blocked,
-							 * waiting for 25% to be free
-							 */
-    md_spinlock_t		device_lock;
+    atomic_t        active_stripes;
+    struct list_head    inactive_list;
+    md_wait_queue_head_t    wait_for_stripe;
+    int         inactive_blocked;   /* release of inactive stripes blocked,
+                             * waiting for 25% to be free
+                             */
+    md_spinlock_t       device_lock;
 
-    int			plugged;
-    struct tq_struct	plug_tq;
+    int         plugged;
+    struct tq_struct    plug_tq;
 };
 
 typedef struct raid5_private_data raid5_conf_t;
@@ -235,9 +235,9 @@ typedef struct raid5_private_data raid5_conf_t;
 /*
  * Our supported algorithms
  */
-#define ALGORITHM_LEFT_ASYMMETRIC	0
-#define ALGORITHM_RIGHT_ASYMMETRIC	1
-#define ALGORITHM_LEFT_SYMMETRIC	2
-#define ALGORITHM_RIGHT_SYMMETRIC	3
+#define ALGORITHM_LEFT_ASYMMETRIC   0
+#define ALGORITHM_RIGHT_ASYMMETRIC  1
+#define ALGORITHM_LEFT_SYMMETRIC    2
+#define ALGORITHM_RIGHT_SYMMETRIC   3
 
 #endif

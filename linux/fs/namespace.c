@@ -8,7 +8,7 @@
  *  linux/fs/namespace.c
  *
  * (C) Copyright Al Viro 2000, 2001
- *	Released under GPL v2.
+ *  Released under GPL v2.
  *
  * Based on code from fs/super.c, copyright Linus Torvalds and others.
  * Heavily rewritten.
@@ -62,7 +62,7 @@ asmlinkage long sys_umount(char * name, int flags)
 }
 
 /*
- *	The 2.0 compatible umount. No flags.
+ *  The 2.0 compatible umount. No flags.
  */
 
 asmlinkage long sys_oldumount(char * name)

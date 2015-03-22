@@ -12,7 +12,7 @@
 /*
  * possibly do the LDT unload here?
  */
-#define destroy_context(mm)	    do { } while(0)
+#define destroy_context(mm)     do { } while(0)
 #define init_new_context(tsk,mm)    ({ rwlock_init(&(mm)->context.ldtlock); 0; })
 
 #ifdef CONFIG_SMP
@@ -29,7 +29,7 @@ static inline void enter_lazy_tlb(struct mm_struct *mm, struct task_struct *tsk,
 #endif
 
 #define activate_mm(prev, next) \
-	switch_mm((prev),(next),NULL,smp_processor_id())
+    switch_mm((prev),(next),NULL,smp_processor_id())
 
 
 static inline void switch_mm(struct mm_struct *prev, struct mm_struct *next,

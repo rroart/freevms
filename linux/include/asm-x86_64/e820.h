@@ -13,28 +13,28 @@
 
 #include <linux/mmzone.h>
 
-#define E820MAP	0x2d0		/* our map */
-#define E820MAX	32		/* number of entries in E820MAP */
-#define E820NR	0x1e8		/* # entries in E820MAP */
+#define E820MAP 0x2d0       /* our map */
+#define E820MAX 32      /* number of entries in E820MAP */
+#define E820NR  0x1e8       /* # entries in E820MAP */
 
-#define E820_RAM	1
-#define E820_RESERVED	2
-#define E820_ACPI	3 /* usable as RAM once ACPI tables have been read */
-#define E820_NVS	4
+#define E820_RAM    1
+#define E820_RESERVED   2
+#define E820_ACPI   3 /* usable as RAM once ACPI tables have been read */
+#define E820_NVS    4
 
-#define HIGH_MEMORY	(1024*1024)
+#define HIGH_MEMORY (1024*1024)
 
-#define LOWMEMSIZE()	(0x9f000)
+#define LOWMEMSIZE()    (0x9f000)
 
-#define MAXMEM		(120UL * 1024 * 1024 * 1024 * 1024)  /* 120TB */
+#define MAXMEM      (120UL * 1024 * 1024 * 1024 * 1024)  /* 120TB */
 
 
 #ifndef __ASSEMBLY__
 struct e820entry
 {
-    u64 addr;	/* start of memory segment */
-    u64 size;	/* size of memory segment */
-    u32 type;	/* type of memory segment */
+    u64 addr;   /* start of memory segment */
+    u64 size;   /* size of memory segment */
+    u32 type;   /* type of memory segment */
 } __attribute__((packed));
 
 struct e820map

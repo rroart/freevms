@@ -40,29 +40,29 @@
  */
 
 
-#define KVM86	((struct kernel_vm86_struct *)regs)
-#define VMPI 	KVM86->vm86plus
+#define KVM86   ((struct kernel_vm86_struct *)regs)
+#define VMPI    KVM86->vm86plus
 
 
 /*
  * 8- and 16-bit register defines..
  */
-#define AL(regs)	(((unsigned char *)&((regs)->eax))[0])
-#define AH(regs)	(((unsigned char *)&((regs)->eax))[1])
-#define IP(regs)	(*(unsigned short *)&((regs)->eip))
-#define SP(regs)	(*(unsigned short *)&((regs)->esp))
+#define AL(regs)    (((unsigned char *)&((regs)->eax))[0])
+#define AH(regs)    (((unsigned char *)&((regs)->eax))[1])
+#define IP(regs)    (*(unsigned short *)&((regs)->eip))
+#define SP(regs)    (*(unsigned short *)&((regs)->esp))
 
 /*
  * virtual flags (16 and 32-bit versions)
  */
-#define VFLAGS	(*(unsigned short *)&(current->thread.v86flags))
-#define VEFLAGS	(current->thread.v86flags)
+#define VFLAGS  (*(unsigned short *)&(current->thread.v86flags))
+#define VEFLAGS (current->thread.v86flags)
 
 #define set_flags(X,new,mask) \
 ((X) = ((X) & ~(mask)) | ((new) & (mask)))
 
-#define SAFE_MASK	(0xDD5)
-#define RETURN_MASK	(0xDFF)
+#define SAFE_MASK   (0xDD5)
+#define RETURN_MASK (0xDFF)
 
 #define VM86_REGS_PART2 orig_eax
 #define VM86_REGS_SIZE1 \
@@ -141,10 +141,10 @@ static void do_sys_vm86(struct kernel_vm86_struct *info, struct task_struct *tsk
 asmlinkage int sys_vm86old(struct vm86_struct * v86)
 {
     struct kernel_vm86_struct info; /* declare this _on top_,
-					 * this avoids wasting of stack space.
-					 * This remains on the stack until we
-					 * return to 32 bit user space.
-					 */
+                     * this avoids wasting of stack space.
+                     * This remains on the stack until we
+                     * return to 32 bit user space.
+                     */
     struct task_struct *tsk;
     int tmp, ret = -EPERM;
 
@@ -161,7 +161,7 @@ asmlinkage int sys_vm86old(struct vm86_struct * v86)
     info.regs32 = (struct pt_regs *) &v86;
     tsk->thread.vm86_info = v86;
     do_sys_vm86(&info, tsk);
-    ret = 0;	/* we never return here */
+    ret = 0;    /* we never return here */
 out:
     return ret;
 }
@@ -170,10 +170,10 @@ out:
 asmlinkage int sys_vm86(unsigned long subfunction, struct vm86plus_struct * v86)
 {
     struct kernel_vm86_struct info; /* declare this _on top_,
-					 * this avoids wasting of stack space.
-					 * This remains on the stack until we
-					 * return to 32 bit user space.
-					 */
+                     * this avoids wasting of stack space.
+                     * This remains on the stack until we
+                     * return to 32 bit user space.
+                     */
     struct task_struct *tsk;
     int tmp, ret;
 
@@ -210,7 +210,7 @@ asmlinkage int sys_vm86(unsigned long subfunction, struct vm86plus_struct * v86)
     info.vm86plus.is_vm86pus = 1;
     tsk->thread.vm86_info = (struct vm86_struct *)v86;
     do_sys_vm86(&info, tsk);
-    ret = 0;	/* we never return here */
+    ret = 0;    /* we never return here */
 out:
     return ret;
 }
@@ -343,70 +343,70 @@ static inline int is_revectored(int nr, struct revectored_struct * bitmap)
  */
 #define pushb(base, ptr, val) \
 __asm__ __volatile__( \
-	"decw %w0\n\t" \
-	"movb %2,0(%1,%0)" \
-	: "=r" (ptr) \
-	: "r" (base), "q" (val), "0" (ptr))
+    "decw %w0\n\t" \
+    "movb %2,0(%1,%0)" \
+    : "=r" (ptr) \
+    : "r" (base), "q" (val), "0" (ptr))
 
 #define pushw(base, ptr, val) \
 __asm__ __volatile__( \
-	"decw %w0\n\t" \
-	"movb %h2,0(%1,%0)\n\t" \
-	"decw %w0\n\t" \
-	"movb %b2,0(%1,%0)" \
-	: "=r" (ptr) \
-	: "r" (base), "q" (val), "0" (ptr))
+    "decw %w0\n\t" \
+    "movb %h2,0(%1,%0)\n\t" \
+    "decw %w0\n\t" \
+    "movb %b2,0(%1,%0)" \
+    : "=r" (ptr) \
+    : "r" (base), "q" (val), "0" (ptr))
 
 #define pushl(base, ptr, val) \
 __asm__ __volatile__( \
-	"decw %w0\n\t" \
-	"rorl $16,%2\n\t" \
-	"movb %h2,0(%1,%0)\n\t" \
-	"decw %w0\n\t" \
-	"movb %b2,0(%1,%0)\n\t" \
-	"decw %w0\n\t" \
-	"rorl $16,%2\n\t" \
-	"movb %h2,0(%1,%0)\n\t" \
-	"decw %w0\n\t" \
-	"movb %b2,0(%1,%0)" \
-	: "=r" (ptr) \
-	: "r" (base), "q" (val), "0" (ptr))
+    "decw %w0\n\t" \
+    "rorl $16,%2\n\t" \
+    "movb %h2,0(%1,%0)\n\t" \
+    "decw %w0\n\t" \
+    "movb %b2,0(%1,%0)\n\t" \
+    "decw %w0\n\t" \
+    "rorl $16,%2\n\t" \
+    "movb %h2,0(%1,%0)\n\t" \
+    "decw %w0\n\t" \
+    "movb %b2,0(%1,%0)" \
+    : "=r" (ptr) \
+    : "r" (base), "q" (val), "0" (ptr))
 
 #define popb(base, ptr) \
 ({ unsigned long __res; \
 __asm__ __volatile__( \
-	"movb 0(%1,%0),%b2\n\t" \
-	"incw %w0" \
-	: "=r" (ptr), "=r" (base), "=q" (__res) \
-	: "0" (ptr), "1" (base), "2" (0)); \
+    "movb 0(%1,%0),%b2\n\t" \
+    "incw %w0" \
+    : "=r" (ptr), "=r" (base), "=q" (__res) \
+    : "0" (ptr), "1" (base), "2" (0)); \
 __res; })
 
 #define popw(base, ptr) \
 ({ unsigned long __res; \
 __asm__ __volatile__( \
-	"movb 0(%1,%0),%b2\n\t" \
-	"incw %w0\n\t" \
-	"movb 0(%1,%0),%h2\n\t" \
-	"incw %w0" \
-	: "=r" (ptr), "=r" (base), "=q" (__res) \
-	: "0" (ptr), "1" (base), "2" (0)); \
+    "movb 0(%1,%0),%b2\n\t" \
+    "incw %w0\n\t" \
+    "movb 0(%1,%0),%h2\n\t" \
+    "incw %w0" \
+    : "=r" (ptr), "=r" (base), "=q" (__res) \
+    : "0" (ptr), "1" (base), "2" (0)); \
 __res; })
 
 #define popl(base, ptr) \
 ({ unsigned long __res; \
 __asm__ __volatile__( \
-	"movb 0(%1,%0),%b2\n\t" \
-	"incw %w0\n\t" \
-	"movb 0(%1,%0),%h2\n\t" \
-	"incw %w0\n\t" \
-	"rorl $16,%2\n\t" \
-	"movb 0(%1,%0),%b2\n\t" \
-	"incw %w0\n\t" \
-	"movb 0(%1,%0),%h2\n\t" \
-	"incw %w0\n\t" \
-	"rorl $16,%2" \
-	: "=r" (ptr), "=r" (base), "=q" (__res) \
-	: "0" (ptr), "1" (base)); \
+    "movb 0(%1,%0),%b2\n\t" \
+    "incw %w0\n\t" \
+    "movb 0(%1,%0),%h2\n\t" \
+    "incw %w0\n\t" \
+    "rorl $16,%2\n\t" \
+    "movb 0(%1,%0),%b2\n\t" \
+    "incw %w0\n\t" \
+    "movb 0(%1,%0),%h2\n\t" \
+    "incw %w0\n\t" \
+    "rorl $16,%2" \
+    : "=r" (ptr), "=r" (base), "=q" (__res) \
+    : "0" (ptr), "1" (base)); \
 __res; })
 
 static void do_int(struct kernel_vm86_regs *regs, int i, unsigned char * ssp, unsigned long sp)
@@ -469,12 +469,12 @@ void handle_vm86_fault(struct kernel_vm86_regs * regs, long error_code)
     unsigned long ip, sp;
 
 #define CHECK_IF_IN_TRAP \
-	if (VMPI.vm86dbg_active && VMPI.vm86dbg_TFpendig) \
-		pushw(ssp,sp,popw(ssp,sp) | TF_MASK);
+    if (VMPI.vm86dbg_active && VMPI.vm86dbg_TFpendig) \
+        pushw(ssp,sp,popw(ssp,sp) | TF_MASK);
 #define VM86_FAULT_RETURN \
-	if (VMPI.force_return_for_pic  && (VEFLAGS & (IF_MASK | VIF_MASK))) \
-		return_to_32bit(regs, VM86_PICRETURN); \
-	return;
+    if (VMPI.force_return_for_pic  && (VEFLAGS & (IF_MASK | VIF_MASK))) \
+        return_to_32bit(regs, VM86_PICRETURN); \
+    return;
 
     csp = (unsigned char *) (regs->cs << 4);
     ssp = (unsigned char *) (regs->ss << 4);
@@ -580,7 +580,7 @@ void handle_vm86_fault(struct kernel_vm86_regs * regs, long error_code)
 
 /* ---------------- vm86 special IRQ passing stuff ----------------- */
 
-#define VM86_IRQNAME		"vm86irq"
+#define VM86_IRQNAME        "vm86irq"
 
 static struct vm86_irqs
 {
@@ -590,8 +590,8 @@ static struct vm86_irqs
 static int irqbits;
 
 #define ALLOWED_SIGS ( 1 /* 0 = don't send a signal */ \
-	| (1 << SIGUSR1) | (1 << SIGUSR2) | (1 << SIGIO)  | (1 << SIGURG) \
-	| (1 << SIGUNUSED) )
+    | (1 << SIGUSR1) | (1 << SIGUSR2) | (1 << SIGIO)  | (1 << SIGURG) \
+    | (1 << SIGUNUSED) )
 
 static void irq_handler(int intno, void *dev_id, struct pt_regs * regs)
 {

@@ -1,5 +1,5 @@
-#ifndef trmdef_h
-#define trmdef_h
+#ifndef TRMDEF_H
+#define TRMDEF_H
 
 #define TRM$_MODIFIERS 0
 #define TRM$_EDITMODE 1
@@ -68,43 +68,43 @@ union _trmdef
 {
     struct
     {
-        unsigned trmdef$$_fill_1		: 6;
-        unsigned trm$v_tm_noecho		: 1;
-        unsigned trm$v_tm_timed		: 1;
-        unsigned trm$v_tm_cvtlow		: 1;
-        unsigned trm$v_tm_nofiltr		: 1;
-        unsigned trm$v_tm_dsablmbx		: 1;
-        unsigned trm$v_tm_purge		: 1;
-        unsigned trm$v_tm_trmnoecho		: 1;
-        unsigned trm$v_tm_refresh		: 1;
-        unsigned trm$v_tm_escape		: 1;
-        unsigned trm$v_tm_noedit		: 1;
-        unsigned trm$v_tm_norecall		: 1;
-        unsigned trm$v_tm_r_just		: 1;
-        unsigned trm$v_tm_auto_tab		: 1;
-        unsigned trm$v_tm_arrows		: 1;
-        unsigned trm$v_tm_term_arrow	: 1;
-        unsigned trm$v_tm_term_del		: 1;
-        unsigned trm$v_tm_toggle		: 1;
-        unsigned trm$v_tm_otherway		: 1;
-        unsigned trm$v_tm_noclear		: 1;
-        unsigned trm$v_fill_40_		: 7;
+        unsigned trmdef$$_fill_1        : 6;
+        unsigned trm$v_tm_noecho        : 1;
+        unsigned trm$v_tm_timed     : 1;
+        unsigned trm$v_tm_cvtlow        : 1;
+        unsigned trm$v_tm_nofiltr       : 1;
+        unsigned trm$v_tm_dsablmbx      : 1;
+        unsigned trm$v_tm_purge     : 1;
+        unsigned trm$v_tm_trmnoecho     : 1;
+        unsigned trm$v_tm_refresh       : 1;
+        unsigned trm$v_tm_escape        : 1;
+        unsigned trm$v_tm_noedit        : 1;
+        unsigned trm$v_tm_norecall      : 1;
+        unsigned trm$v_tm_r_just        : 1;
+        unsigned trm$v_tm_auto_tab      : 1;
+        unsigned trm$v_tm_arrows        : 1;
+        unsigned trm$v_tm_term_arrow    : 1;
+        unsigned trm$v_tm_term_del      : 1;
+        unsigned trm$v_tm_toggle        : 1;
+        unsigned trm$v_tm_otherway      : 1;
+        unsigned trm$v_tm_noclear       : 1;
+        unsigned trm$v_fill_40_     : 7;
     };
     struct
     {
-        unsigned trm$v_cv_upper		: 1;
-        unsigned trm$v_cv_lower		: 1;
-        unsigned trm$v_cv_numeric		: 1;
-        unsigned trm$v_cv_numpunc		: 1;
-        unsigned trm$v_cv_printable		: 1;
-        unsigned trm$v_cv_any		: 1;
-        unsigned trm$v_fill_41_		: 2;
+        unsigned trm$v_cv_upper     : 1;
+        unsigned trm$v_cv_lower     : 1;
+        unsigned trm$v_cv_numeric       : 1;
+        unsigned trm$v_cv_numpunc       : 1;
+        unsigned trm$v_cv_printable     : 1;
+        unsigned trm$v_cv_any       : 1;
+        unsigned trm$v_fill_41_     : 2;
     };
     struct
     {
-        unsigned trm$v_st_field_full	: 1;
-        unsigned trm$v_st_otherway		: 1;
-        unsigned trm$v_fill_42_		: 6;
+        unsigned trm$v_st_field_full    : 1;
+        unsigned trm$v_st_otherway      : 1;
+        unsigned trm$v_fill_42_     : 6;
     };
 };
 

@@ -8,13 +8,13 @@
 #define _IPT_ULOG_H
 
 #ifndef NETLINK_NFLOG
-#define NETLINK_NFLOG 	5
+#define NETLINK_NFLOG   5
 #endif
 
-#define ULOG_MAC_LEN	80
-#define ULOG_PREFIX_LEN	32
+#define ULOG_MAC_LEN    80
+#define ULOG_PREFIX_LEN 32
 
-#define ULOG_MAX_QLEN	50
+#define ULOG_MAX_QLEN   50
 /* Why 50? Well... there is a limit imposed by the slab cache 131000
  * bytes. So the multipart netlink-message has to be < 131000 bytes.
  * Assuming a standard ethernet-mtu of 1500, we could define this up

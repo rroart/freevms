@@ -19,28 +19,28 @@
  */
 struct svc_cacherep
 {
-    struct svc_cacherep *	c_hash_next;
-    struct svc_cacherep *	c_hash_prev;
-    struct svc_cacherep *	c_lru_next;
-    struct svc_cacherep *	c_lru_prev;
-    unsigned char		c_state,	/* unused, inprog, done */
-                  c_type,		/* status, buffer */
-                  c_secure : 1;	/* req came from port < 1024 */
-    struct sockaddr_in	c_addr;
-    u32			c_xid;
-    u32			c_prot;
-    u32			c_proc;
-    u32			c_vers;
-    unsigned long		c_timestamp;
+    struct svc_cacherep *   c_hash_next;
+    struct svc_cacherep *   c_hash_prev;
+    struct svc_cacherep *   c_lru_next;
+    struct svc_cacherep *   c_lru_prev;
+    unsigned char       c_state,    /* unused, inprog, done */
+             c_type,       /* status, buffer */
+             c_secure : 1; /* req came from port < 1024 */
+    struct sockaddr_in  c_addr;
+    u32         c_xid;
+    u32         c_prot;
+    u32         c_proc;
+    u32         c_vers;
+    unsigned long       c_timestamp;
     union
     {
-        struct svc_buf	u_buffer;
-        u32		u_status;
-    }			c_u;
+        struct svc_buf  u_buffer;
+        u32     u_status;
+    }           c_u;
 };
 
-#define c_replbuf		c_u.u_buffer
-#define c_replstat		c_u.u_status
+#define c_replbuf       c_u.u_buffer
+#define c_replstat      c_u.u_status
 
 /* cache entry states */
 enum
@@ -75,12 +75,12 @@ enum
 /*
  * If requests are retransmitted within this interval, they're dropped.
  */
-#define RC_DELAY		(HZ/5)
+#define RC_DELAY        (HZ/5)
 
-void	nfsd_cache_init(void);
-void	nfsd_cache_shutdown(void);
-int	nfsd_cache_lookup(struct svc_rqst *, int);
-void	nfsd_cache_update(struct svc_rqst *, int, u32 *);
+void    nfsd_cache_init(void);
+void    nfsd_cache_shutdown(void);
+int nfsd_cache_lookup(struct svc_rqst *, int);
+void    nfsd_cache_update(struct svc_rqst *, int, u32 *);
 
 #endif /* __KERNEL__ */
 #endif /* NFSCACHE_H */

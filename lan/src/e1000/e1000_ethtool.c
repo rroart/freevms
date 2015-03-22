@@ -30,7 +30,7 @@
 
 #include "e1000.h"
 
-#ifdef	SIOCETHTOOL
+#ifdef  SIOCETHTOOL
 #include <asm/uaccess.h>
 
 extern char e1000_driver_name[];
@@ -56,7 +56,7 @@ struct e1000_stats
 };
 
 #define E1000_STAT(m) sizeof(((struct e1000_adapter *)0)->m), \
-		      offsetof(struct e1000_adapter, m)
+              offsetof(struct e1000_adapter, m)
 static const struct e1000_stats e1000_gstrings_stats[] =
 {
     { "rx_packets", E1000_STAT(stats.gprc) },
@@ -121,8 +121,8 @@ static const struct e1000_stats e1000_gstrings_stats[] =
 };
 
 #define E1000_QUEUE_STATS_LEN 0
-#define E1000_GLOBAL_STATS_LEN	\
-	sizeof(e1000_gstrings_stats) / sizeof(struct e1000_stats)
+#define E1000_GLOBAL_STATS_LEN  \
+    sizeof(e1000_gstrings_stats) / sizeof(struct e1000_stats)
 #define E1000_STATS_LEN (E1000_GLOBAL_STATS_LEN + E1000_QUEUE_STATS_LEN)
 #endif /* ETHTOOL_GSTATS */
 #ifdef ETHTOOL_TEST
@@ -762,35 +762,35 @@ err_setup:
 
 #define REG_PATTERN_TEST(R, M, W)                                              \
 {                                                                              \
-	uint32_t pat, value;                                                   \
-	uint32_t test[] =                                                      \
-		{0x5A5A5A5A, 0xA5A5A5A5, 0x00000000, 0xFFFFFFFF};              \
-	for (pat = 0; pat < sizeof(test)/sizeof(test[0]); pat++) {              \
-		E1000_WRITE_REG(&adapter->hw, R, (test[pat] & W));             \
-		value = E1000_READ_REG(&adapter->hw, R);                       \
-		if (value != (test[pat] & W & M)) {                             \
-			DPRINTK(DRV, ERR, "pattern test reg %04X failed: got " \
-			        "0x%08X expected 0x%08X\n",                    \
-			        E1000_##R, value, (test[pat] & W & M));        \
-			*data = (adapter->hw.mac_type < e1000_82543) ?         \
-				E1000_82542_##R : E1000_##R;                   \
-			return 1;                                              \
-		}                                                              \
-	}                                                                      \
+    uint32_t pat, value;                                                   \
+    uint32_t test[] =                                                      \
+        {0x5A5A5A5A, 0xA5A5A5A5, 0x00000000, 0xFFFFFFFF};              \
+    for (pat = 0; pat < sizeof(test)/sizeof(test[0]); pat++) {              \
+        E1000_WRITE_REG(&adapter->hw, R, (test[pat] & W));             \
+        value = E1000_READ_REG(&adapter->hw, R);                       \
+        if (value != (test[pat] & W & M)) {                             \
+            DPRINTK(DRV, ERR, "pattern test reg %04X failed: got " \
+                    "0x%08X expected 0x%08X\n",                    \
+                    E1000_##R, value, (test[pat] & W & M));        \
+            *data = (adapter->hw.mac_type < e1000_82543) ?         \
+                E1000_82542_##R : E1000_##R;                   \
+            return 1;                                              \
+        }                                                              \
+    }                                                                      \
 }
 
 #define REG_SET_AND_CHECK(R, M, W)                                             \
 {                                                                              \
-	uint32_t value;                                                        \
-	E1000_WRITE_REG(&adapter->hw, R, W & M);                               \
-	value = E1000_READ_REG(&adapter->hw, R);                               \
-	if ((W & M) != (value & M)) {                                          \
-		DPRINTK(DRV, ERR, "set/check reg %04X test failed: got 0x%08X "\
-		        "expected 0x%08X\n", E1000_##R, (value & M), (W & M)); \
-		*data = (adapter->hw.mac_type < e1000_82543) ?                 \
-			E1000_82542_##R : E1000_##R;                           \
-		return 1;                                                      \
-	}                                                                      \
+    uint32_t value;                                                        \
+    E1000_WRITE_REG(&adapter->hw, R, W & M);                               \
+    value = E1000_READ_REG(&adapter->hw, R);                               \
+    if ((W & M) != (value & M)) {                                          \
+        DPRINTK(DRV, ERR, "set/check reg %04X test failed: got 0x%08X "\
+                "expected 0x%08X\n", E1000_##R, (value & M), (W & M)); \
+        *data = (adapter->hw.mac_type < e1000_82543) ?                 \
+            E1000_82542_##R : E1000_##R;                           \
+        return 1;                                                      \
+    }                                                                      \
 }
 
 static int
@@ -1266,11 +1266,11 @@ e1000_nonintegrated_phy_loopback(struct e1000_adapter *adapter)
     /* Setup the Device Control Register for PHY loopback test. */
 
     ctrl_reg = E1000_READ_REG(&adapter->hw, CTRL);
-    ctrl_reg |= (E1000_CTRL_ILOS |		/* Invert Loss-Of-Signal */
-                 E1000_CTRL_FRCSPD |	/* Set the Force Speed Bit */
-                 E1000_CTRL_FRCDPX |	/* Set the Force Duplex Bit */
-                 E1000_CTRL_SPD_1000 |	/* Force Speed to 1000 */
-                 E1000_CTRL_FD);		/* Force Duplex to FULL */
+    ctrl_reg |= (E1000_CTRL_ILOS |      /* Invert Loss-Of-Signal */
+                 E1000_CTRL_FRCSPD |    /* Set the Force Speed Bit */
+                 E1000_CTRL_FRCDPX |    /* Set the Force Duplex Bit */
+                 E1000_CTRL_SPD_1000 |  /* Force Speed to 1000 */
+                 E1000_CTRL_FD);        /* Force Duplex to FULL */
 
     E1000_WRITE_REG(&adapter->hw, CTRL, ctrl_reg);
 
@@ -1359,7 +1359,7 @@ e1000_integrated_phy_loopback(struct e1000_adapter *adapter)
         ctrl_reg |= (E1000_CTRL_FRCSPD | /* Set the Force Speed Bit */
                      E1000_CTRL_FRCDPX | /* Set the Force Duplex Bit */
                      E1000_CTRL_SPD_100 |/* Force Speed to 100 */
-                     E1000_CTRL_FD);	 /* Force Duplex to FULL */
+                     E1000_CTRL_FD);     /* Force Duplex to FULL */
     }
     else
     {
@@ -1372,7 +1372,7 @@ e1000_integrated_phy_loopback(struct e1000_adapter *adapter)
         ctrl_reg |= (E1000_CTRL_FRCSPD | /* Set the Force Speed Bit */
                      E1000_CTRL_FRCDPX | /* Set the Force Duplex Bit */
                      E1000_CTRL_SPD_1000 |/* Force Speed to 1000 */
-                     E1000_CTRL_FD);	 /* Force Duplex to FULL */
+                     E1000_CTRL_FD);     /* Force Duplex to FULL */
     }
 
     if (adapter->hw.media_type == e1000_media_type_copper &&
@@ -1923,10 +1923,10 @@ e1000_set_wol(struct net_device *netdev, struct ethtool_wolinfo *wol)
 }
 
 /* toggle LED 4 times per second = 2 "blinks" per second */
-#define E1000_ID_INTERVAL	(HZ/4)
+#define E1000_ID_INTERVAL   (HZ/4)
 
 /* bit defines for adapter->led_status */
-#define E1000_LED_ON		0
+#define E1000_LED_ON        0
 
 static void
 e1000_led_blink_callback(unsigned long data)
@@ -2017,7 +2017,7 @@ e1000_get_ethtool_stats(struct net_device *netdev,
         data[i] = (e1000_gstrings_stats[i].sizeof_stat ==
                    sizeof(uint64_t)) ? *(uint64_t *)p : *(uint32_t *)p;
     }
-    /*	BUG_ON(i != E1000_STATS_LEN); */
+    /*  BUG_ON(i != E1000_STATS_LEN); */
 }
 
 static void
@@ -2039,7 +2039,7 @@ e1000_get_strings(struct net_device *netdev, uint32_t stringset, uint8_t *data)
                    ETH_GSTRING_LEN);
             p += ETH_GSTRING_LEN;
         }
-        /*		BUG_ON(p - data != E1000_STATS_LEN * ETH_GSTRING_LEN); */
+        /*      BUG_ON(p - data != E1000_STATS_LEN * ETH_GSTRING_LEN); */
         break;
     }
 }
@@ -2085,4 +2085,4 @@ void e1000_set_ethtool_ops(struct net_device *netdev)
 {
     SET_ETHTOOL_OPS(netdev, &e1000_ethtool_ops);
 }
-#endif	/* SIOCETHTOOL */
+#endif  /* SIOCETHTOOL */

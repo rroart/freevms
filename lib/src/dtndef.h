@@ -1,5 +1,5 @@
-#ifndef dtndef_h
-#define dtndef_h
+#ifndef DTNDEF_H
+#define DTNDEF_H
 
 #define DTN$K_BASE_LENGTH 24
 #define DTN$K_LENGTH 52

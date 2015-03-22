@@ -49,25 +49,25 @@ int eoltest (char *s);
 
 /* ch_screen_*.c */
 
-int ch_screen_init (void);		/* initiate screen mode */
-String *ch_screen_read (void);		/* update screen / read command string */
-void ch_screen_refresh (void);		/* refresh (redraw) screen */
-void ch_screen_term (void);		/* terminate screen mode */
-void ch_screen_prompt (String *prompt);	/* display prompt string */
+int ch_screen_init (void);      /* initiate screen mode */
+String *ch_screen_read (void);      /* update screen / read command string */
+void ch_screen_refresh (void);      /* refresh (redraw) screen */
+void ch_screen_term (void);     /* terminate screen mode */
+void ch_screen_prompt (String *prompt); /* display prompt string */
 void ch_screen_message (const char *message); /* display (error) message */
 uLong ch_screen_chr2col (uLong linesz, const char *linebf); /* convert character count to column count */
 uLong ch_screen_col2chr (uLong linesz, const char *linebf, uLong ncols); /* convert column count to character count */
-String *ch_screen_rdkpad (void);	/* read keypad codes from keyboard */
+String *ch_screen_rdkpad (void);    /* read keypad codes from keyboard */
 
 /* cmd_change.c */
 
-extern Line *ch_screen_top_line;	/* pointer to what we want for top line on screen */
-extern int ch_screen_shiftleft;		/* number of characters to leave off beg of line */
-extern int ch_screen_num_lines;		/* total number of lines on the screen */
-extern int ch_screen_tmar_lines;	/* number of lines to reserve for top margin */
-extern int ch_screen_bmar_lines;	/* number of lines to reserve for bottom margin */
-extern int ch_screen_width;		/* number of columns on the screen, including any being used for 'set number show' */
-extern int ch_screen_numofs;		/* number of columns on left currently being used for 'set number show' */
+extern Line *ch_screen_top_line;    /* pointer to what we want for top line on screen */
+extern int ch_screen_shiftleft;     /* number of characters to leave off beg of line */
+extern int ch_screen_num_lines;     /* total number of lines on the screen */
+extern int ch_screen_tmar_lines;    /* number of lines to reserve for top margin */
+extern int ch_screen_bmar_lines;    /* number of lines to reserve for bottom margin */
+extern int ch_screen_width;     /* number of columns on the screen, including any being used for 'set number show' */
+extern int ch_screen_numofs;        /* number of columns on left currently being used for 'set number show' */
 extern int autoshift;
 extern char *searchstr;
 extern uLong searchlen;
@@ -79,8 +79,8 @@ void cmd_help (char *cp);
 
 /* cmd_set.c */
 
-extern char *(*xstrstr) ();
-extern int  (*xstrncmp) ();
+extern char *(*xstrstr) (const char * s1, const char * s2);
+extern int  (*xstrncmp) (const char * cs, const char * ct, size_t count);
 
 /* crash.c */
 

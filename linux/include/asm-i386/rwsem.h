@@ -53,17 +53,17 @@ extern struct rw_semaphore *FASTCALL(rwsem_wake(struct rw_semaphore *));
  */
 struct rw_semaphore
 {
-    signed long		count;
-#define RWSEM_UNLOCKED_VALUE		0x00000000
-#define RWSEM_ACTIVE_BIAS		0x00000001
-#define RWSEM_ACTIVE_MASK		0x0000ffff
-#define RWSEM_WAITING_BIAS		(-0x00010000)
-#define RWSEM_ACTIVE_READ_BIAS		RWSEM_ACTIVE_BIAS
-#define RWSEM_ACTIVE_WRITE_BIAS		(RWSEM_WAITING_BIAS + RWSEM_ACTIVE_BIAS)
-    spinlock_t		wait_lock;
-    struct list_head	wait_list;
+    signed long     count;
+#define RWSEM_UNLOCKED_VALUE        0x00000000
+#define RWSEM_ACTIVE_BIAS       0x00000001
+#define RWSEM_ACTIVE_MASK       0x0000ffff
+#define RWSEM_WAITING_BIAS      (-0x00010000)
+#define RWSEM_ACTIVE_READ_BIAS      RWSEM_ACTIVE_BIAS
+#define RWSEM_ACTIVE_WRITE_BIAS     (RWSEM_WAITING_BIAS + RWSEM_ACTIVE_BIAS)
+    spinlock_t      wait_lock;
+    struct list_head    wait_list;
 #if RWSEM_DEBUG
-    int			debug;
+    int         debug;
 #endif
 };
 
@@ -73,15 +73,15 @@ struct rw_semaphore
 #if RWSEM_DEBUG
 #define __RWSEM_DEBUG_INIT      , 0
 #else
-#define __RWSEM_DEBUG_INIT	/* */
+#define __RWSEM_DEBUG_INIT  /* */
 #endif
 
 #define __RWSEM_INITIALIZER(name) \
 { RWSEM_UNLOCKED_VALUE, SPIN_LOCK_UNLOCKED, LIST_HEAD_INIT((name).wait_list) \
-	__RWSEM_DEBUG_INIT }
+    __RWSEM_DEBUG_INIT }
 
 #define DECLARE_RWSEM(name) \
-	struct rw_semaphore name = __RWSEM_INITIALIZER(name)
+    struct rw_semaphore name = __RWSEM_INITIALIZER(name)
 
 static inline void init_rwsem(struct rw_semaphore *sem)
 {
@@ -100,7 +100,7 @@ static inline void __down_read(struct rw_semaphore *sem)
 {
     __asm__ __volatile__(
         "# beginning down_read\n\t"
-        LOCK_PREFIX	"  incl      (%%eax)\n\t" /* adds 0x00000001, returns the old value */
+        LOCK_PREFIX "  incl      (%%eax)\n\t" /* adds 0x00000001, returns the old value */
         "  js        2f\n\t" /* jump if we weren't granted the lock */
         "1:\n\t"
         ".subsection 1\n"
@@ -131,7 +131,7 @@ static inline void __down_write(struct rw_semaphore *sem)
     tmp = RWSEM_ACTIVE_WRITE_BIAS;
     __asm__ __volatile__(
         "# beginning down_write\n\t"
-        LOCK_PREFIX	"  xadd      %0,(%%eax)\n\t" /* subtract 0x0000ffff, returns the old value */
+        LOCK_PREFIX "  xadd      %0,(%%eax)\n\t" /* subtract 0x0000ffff, returns the old value */
         "  testl     %0,%0\n\t" /* was the count 0 before? */
         "  jnz       2f\n\t" /* jump if we weren't granted the lock */
         "1:\n\t"
@@ -159,7 +159,7 @@ static inline void __up_read(struct rw_semaphore *sem)
     __s32 tmp = -RWSEM_ACTIVE_READ_BIAS;
     __asm__ __volatile__(
         "# beginning __up_read\n\t"
-        LOCK_PREFIX	"  xadd      %%edx,(%%eax)\n\t" /* subtracts 1, returns the old value */
+        LOCK_PREFIX "  xadd      %%edx,(%%eax)\n\t" /* subtracts 1, returns the old value */
         "  js        2f\n\t" /* jump if the lock is being waited upon */
         "1:\n\t"
         ".subsection 1\n"
@@ -188,7 +188,7 @@ static inline void __up_write(struct rw_semaphore *sem)
     __asm__ __volatile__(
         "# beginning __up_write\n\t"
         "  movl      %2,%%edx\n\t"
-        LOCK_PREFIX	"  xaddl     %%edx,(%%eax)\n\t" /* tries to transition 0xffff0001 -> 0x00000000 */
+        LOCK_PREFIX "  xaddl     %%edx,(%%eax)\n\t" /* tries to transition 0xffff0001 -> 0x00000000 */
         "  jnz       2f\n\t" /* jump if the lock is being waited upon */
         "1:\n\t"
         ".subsection 1\n"
@@ -215,7 +215,7 @@ static inline void __up_write(struct rw_semaphore *sem)
 static inline void rwsem_atomic_add(int delta, struct rw_semaphore *sem)
 {
     __asm__ __volatile__(
-        LOCK_PREFIX	"addl %1,%0"
+        LOCK_PREFIX "addl %1,%0"
         :"=m"(sem->count)
         :"ir"(delta), "m"(sem->count));
 }
@@ -228,7 +228,7 @@ static inline int rwsem_atomic_update(int delta, struct rw_semaphore *sem)
     int tmp = delta;
 
     __asm__ __volatile__(
-        LOCK_PREFIX	"xadd %0,(%2)"
+        LOCK_PREFIX "xadd %0,(%2)"
         : "+r"(tmp), "=m"(sem->count)
         : "r"(sem), "m"(sem->count)
         : "memory");

@@ -9,7 +9,7 @@
  */
 
 #ifdef CONFIG_SMP
-#define NR_CPUS	32		/* Max processors that can be running in SMP */
+#define NR_CPUS 32      /* Max processors that can be running in SMP */
 #else
 #define NR_CPUS 1
 #endif

@@ -5,21 +5,21 @@
 // Modified Linux source file, 2001-2004.
 
 /*
-	kmod, the new module loader (replaces kerneld)
-	Kirk Petersen
+    kmod, the new module loader (replaces kerneld)
+    Kirk Petersen
 
-	Reorganized not to be a daemon by Adam Richter, with guidance
-	from Greg Zornetzer.
+    Reorganized not to be a daemon by Adam Richter, with guidance
+    from Greg Zornetzer.
 
-	Modified to avoid chroot and file sharing problems.
-	Mikael Pettersson
+    Modified to avoid chroot and file sharing problems.
+    Mikael Pettersson
 
-	Limit the concurrent number of kmod modprobes to catch loops from
-	"modprobe needs a service that is in a module".
-	Keith Owens <kaos@ocs.com.au> December 1999
+    Limit the concurrent number of kmod modprobes to catch loops from
+    "modprobe needs a service that is in a module".
+    Keith Owens <kaos@ocs.com.au> December 1999
 
-	Unblock all signals when we exec a usermode process.
-	Shuu Yamaguchi <shuu@wondernetworkresources.com> December 2000
+    Unblock all signals when we exec a usermode process.
+    Shuu Yamaguchi <shuu@wondernetworkresources.com> December 2000
 */
 
 #ifdef __x86_64__
@@ -50,7 +50,7 @@ int exec_usermodehelper(char *program_path, char *argv[], char *envp[])
 #ifdef CONFIG_KMOD
 
 /*
-	modprobe_path is set via /proc/sys.
+    modprobe_path is set via /proc/sys.
 */
 char modprobe_path[256] = "/sbin/modprobe";
 
@@ -90,7 +90,7 @@ int request_module(const char * module_name)
     sigset_t tmpsig;
     int i;
     static atomic_t kmod_concurrent = ATOMIC_INIT(0);
-#define MAX_KMOD_CONCURRENT 50	/* Completely arbitrary value - KAO */
+#define MAX_KMOD_CONCURRENT 50  /* Completely arbitrary value - KAO */
     static int kmod_loop_msg;
 
     /* Don't allow request_module() before the root fs is mounted!  */
@@ -159,20 +159,20 @@ int request_module(const char * module_name)
 
 #ifdef CONFIG_HOTPLUG
 /*
-	hotplug path is set via /proc/sys
-	invoked by hotplug-aware bus drivers,
-	with exec_usermodehelper and some thread-spawner
+    hotplug path is set via /proc/sys
+    invoked by hotplug-aware bus drivers,
+    with exec_usermodehelper and some thread-spawner
 
-	argv [0] = hotplug_path;
-	argv [1] = "usb", "scsi", "pci", "network", etc;
-	... plus optional type-specific parameters
-	argv [n] = 0;
+    argv [0] = hotplug_path;
+    argv [1] = "usb", "scsi", "pci", "network", etc;
+    ... plus optional type-specific parameters
+    argv [n] = 0;
 
-	envp [*] = HOME, PATH; optional type-specific parameters
+    envp [*] = HOME, PATH; optional type-specific parameters
 
-	a hotplug bus should invoke this for device add/remove
-	events.  the command is expected to load drivers when
-	necessary, and may perform additional system setup.
+    a hotplug bus should invoke this for device add/remove
+    events.  the command is expected to load drivers when
+    necessary, and may perform additional system setup.
 */
 char hotplug_path[256] = "/sbin/hotplug";
 
@@ -250,7 +250,7 @@ argv:
         argv,
 envp:
         envp,
-        retval:		0,
+        retval:     0,
     };
     struct tq_struct tqs =
     {

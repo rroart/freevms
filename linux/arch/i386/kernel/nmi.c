@@ -6,8 +6,8 @@
  *  Started by Ingo Molnar <mingo@redhat.com>
  *
  *  Fixes:
- *  Mikael Pettersson	: AMD K7 support for local APIC NMI watchdog.
- *  Mikael Pettersson	: Power Management for local APIC NMI watchdog.
+ *  Mikael Pettersson   : AMD K7 support for local APIC NMI watchdog.
+ *  Mikael Pettersson   : Power Management for local APIC NMI watchdog.
  */
 
 #include <linux/config.h>
@@ -27,22 +27,22 @@
 
 unsigned int nmi_watchdog = NMI_NONE;
 static unsigned int nmi_hz = HZ;
-unsigned int nmi_perfctr_msr;	/* the MSR to reset in NMI handler */
+unsigned int nmi_perfctr_msr;   /* the MSR to reset in NMI handler */
 extern void show_registers(struct pt_regs *regs);
 
-#define K7_EVNTSEL_ENABLE	(1 << 22)
-#define K7_EVNTSEL_INT		(1 << 20)
-#define K7_EVNTSEL_OS		(1 << 17)
-#define K7_EVNTSEL_USR		(1 << 16)
-#define K7_EVENT_CYCLES_PROCESSOR_IS_RUNNING	0x76
-#define K7_NMI_EVENT		K7_EVENT_CYCLES_PROCESSOR_IS_RUNNING
+#define K7_EVNTSEL_ENABLE   (1 << 22)
+#define K7_EVNTSEL_INT      (1 << 20)
+#define K7_EVNTSEL_OS       (1 << 17)
+#define K7_EVNTSEL_USR      (1 << 16)
+#define K7_EVENT_CYCLES_PROCESSOR_IS_RUNNING    0x76
+#define K7_NMI_EVENT        K7_EVENT_CYCLES_PROCESSOR_IS_RUNNING
 
-#define P6_EVNTSEL0_ENABLE	(1 << 22)
-#define P6_EVNTSEL_INT		(1 << 20)
-#define P6_EVNTSEL_OS		(1 << 17)
-#define P6_EVNTSEL_USR		(1 << 16)
-#define P6_EVENT_CPU_CLOCKS_NOT_HALTED	0x79
-#define P6_NMI_EVENT		P6_EVENT_CPU_CLOCKS_NOT_HALTED
+#define P6_EVNTSEL0_ENABLE  (1 << 22)
+#define P6_EVNTSEL_INT      (1 << 20)
+#define P6_EVNTSEL_OS       (1 << 17)
+#define P6_EVNTSEL_USR      (1 << 16)
+#define P6_EVENT_CPU_CLOCKS_NOT_HALTED  0x79
+#define P6_NMI_EVENT        P6_EVENT_CPU_CLOCKS_NOT_HALTED
 
 int __init check_nmi_watchdog (void)
 {
@@ -147,15 +147,15 @@ static void nmi_pm_init(void)
         nmi_pmdev = apic_pm_register(PM_SYS_DEV, 0, nmi_pm_callback);
 }
 
-#define __pminit	/*empty*/
+#define __pminit    /*empty*/
 
-#else	/* CONFIG_PM */
+#else   /* CONFIG_PM */
 
 static inline void nmi_pm_init(void) { }
 
-#define __pminit	__init
+#define __pminit    __init
 
-#endif	/* CONFIG_PM */
+#endif  /* CONFIG_PM */
 
 /*
  * Activate the NMI watchdog via the local APIC.

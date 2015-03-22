@@ -1,5 +1,5 @@
-#ifndef cdldef_h
-#define cdldef_h
+#ifndef CDLDEF_H
+#define CDLDEF_H
 
 #define CDL$C_LENGTH 16
 #define CDL$S_CDLDEF 20

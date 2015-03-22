@@ -47,7 +47,7 @@
  */
 
 
-#define in_range(b, first, len)		((b) >= (first) && (b) <= (first) + (len) - 1)
+#define in_range(b, first, len)     ((b) >= (first) && (b) <= (first) + (len) - 1)
 
 struct ext2_group_desc * ext2_get_group_desc(struct _vcb * vcb,
         unsigned int block_group,
@@ -456,10 +456,10 @@ int ext2_new_block (struct _vcb * vcb, struct _fcb * inode, unsigned long goal,
 #endif
     es = sb;
     if (le32_to_cpu(es->s_free_blocks_count) <= le32_to_cpu(es->s_r_blocks_count) /* &&
-	    ((sb->s_resuid != current->fsuid) &&
-	     (sb->s_resgid == 0 ||
-	      !in_group_p (sb->s_resgid)) &&
-	      !capable(CAP_SYS_RESOURCE))*/)
+        ((sb->s_resuid != current->fsuid) &&
+         (sb->s_resgid == 0 ||
+          !in_group_p (sb->s_resgid)) &&
+          !capable(CAP_SYS_RESOURCE))*/)
         goto out;
 
     ext2_debug ("goal=%lu.\n", goal);
@@ -606,8 +606,8 @@ got_block:
 
     if (tmp == le32_to_cpu(gdp->bg_block_bitmap) ||
             tmp == le32_to_cpu(gdp->bg_inode_bitmap)/* ||
-	    in_range (tmp, le32_to_cpu(gdp->bg_inode_table),
-	    sb->s_itb_per_group)*/)
+        in_range (tmp, le32_to_cpu(gdp->bg_inode_table),
+        sb->s_itb_per_group)*/)
         ext2_error (vcb, "ext2_new_block",
                     "Allocating block in system zone - "
                     "block = %u", tmp);
@@ -629,7 +629,7 @@ got_block:
     /* Writer: ->i_prealloc* */
     if (prealloc_count && !*prealloc_count)
     {
-        int	prealloc_goal;
+        int prealloc_goal;
         unsigned long next_block = tmp + 1;
 
         prealloc_goal = es->s_prealloc_blocks ?
@@ -794,12 +794,12 @@ int ext2_group_sparse(int group)
 }
 
 /**
- *	ext2_bg_has_super - number of blocks used by the superblock in group
- *	@sb: superblock for filesystem
- *	@group: group number to check
+ *  ext2_bg_has_super - number of blocks used by the superblock in group
+ *  @sb: superblock for filesystem
+ *  @group: group number to check
  *
- *	Return the number of blocks used by the superblock (primary or backup)
- *	in this group.  Currently this will be only 0 or 1.
+ *  Return the number of blocks used by the superblock (primary or backup)
+ *  in this group.  Currently this will be only 0 or 1.
  */
 int ext2_bg_has_super(struct _vcb * vcb, int group)
 {
@@ -814,13 +814,13 @@ int ext2_bg_has_super(struct _vcb * vcb, int group)
 }
 
 /**
- *	ext2_bg_num_gdb - number of blocks used by the group table in group
- *	@sb: superblock for filesystem
- *	@group: group number to check
+ *  ext2_bg_num_gdb - number of blocks used by the group table in group
+ *  @sb: superblock for filesystem
+ *  @group: group number to check
  *
- *	Return the number of blocks used by the group descriptor table
- *	(primary or backup) in this group.  In the future there may be a
- *	different number of descriptor blocks in each group.
+ *  Return the number of blocks used by the group descriptor table
+ *  (primary or backup) in this group.  In the future there may be a
+ *  different number of descriptor blocks in each group.
  */
 unsigned long ext2_bg_num_gdb(struct _vcb * vcb, int group)
 {

@@ -16,9 +16,9 @@
 //---2004-06-10
 
 /************************************************************************/
-/*									*/
-/*  Editor main program							*/
-/*									*/
+/*                                  */
+/*  Editor main program                         */
+/*                                  */
 /************************************************************************/
 
 #include <errno.h>
@@ -36,12 +36,12 @@ void cmd_write (char *cmdpnt);
 
 Buffer *main_buffer;
 char *input_name, *recover_name;
-char *journal_name;			/* journal filename */
-const char *pn = "edt";			/* the program name (for error messages) */
-FILE *journal_file, *recover_file;	/* journal file and recovery file */
-Position cur_position;			/* current position */
-int showlfs = 0;			/* 0: LF's are silent; 1: show LF's as <LF> */
-int shownums = -1;			/* -1: on for linemode, off for changemode; 0: always off; 1: always on */
+char *journal_name;         /* journal filename */
+const char *pn = "edt";         /* the program name (for error messages) */
+FILE *journal_file, *recover_file;  /* journal file and recovery file */
+Position cur_position;          /* current position */
+int showlfs = 0;            /* 0: LF's are silent; 1: show LF's as <LF> */
+int shownums = -1;          /* -1: on for linemode, off for changemode; 0: always off; 1: always on */
 
 int main (int argc, char *argv[])
 
@@ -223,30 +223,30 @@ int main (int argc, char *argv[])
 
     /* Process initialization file */
 
-    if (init_name == NULL) init_name = os_defaultinitname ();	/* if no -noinit or -init, get default name */
+    if (init_name == NULL) init_name = os_defaultinitname ();   /* if no -noinit or -init, get default name */
     if ((init_name != NULL) && (init_name[0] != 0))
     {
-        init_file = fopen (init_name, "r");				/* try to open init file */
+        init_file = fopen (init_name, "r");             /* try to open init file */
         if (init_file != NULL)
         {
-            siz = 256;						/* start with 256 byte buffer */
+            siz = 256;                      /* start with 256 byte buffer */
             buf = malloc (siz);
-            len = 0;							/* don't have anything in it */
-            while (fgets (buf + len, siz - len, init_file) != NULL)  	/* read onto end of what's there */
+            len = 0;                            /* don't have anything in it */
+            while (fgets (buf + len, siz - len, init_file) != NULL)     /* read onto end of what's there */
             {
-                len += strlen (buf + len);				/* get total length */
-                if (len == 0) break;					/* stop if nothing there (eof?) */
-                if (buf[len-1] != '\n')  				/* check for line terminator */
+                len += strlen (buf + len);              /* get total length */
+                if (len == 0) break;                    /* stop if nothing there (eof?) */
+                if (buf[len-1] != '\n')                 /* check for line terminator */
                 {
-                    siz += 256;						/* didn't get the whole thing, increase buffer */
-                    buf  = realloc (buf, siz);				/* ... then loop to read more of the line */
+                    siz += 256;                     /* didn't get the whole thing, increase buffer */
+                    buf  = realloc (buf, siz);              /* ... then loop to read more of the line */
                 }
                 else
                 {
-                    buf[--len] = 0;					/* got terminator, remove it from buffer */
-                    cmdpnt = skipspaces (buf);				/* skip leading spaces */
-                    if (*cmdpnt != 0) ln_command (cmdpnt);		/* process command line */
-                    len = 0;						/* empty line buffer for next read */
+                    buf[--len] = 0;                 /* got terminator, remove it from buffer */
+                    cmdpnt = skipspaces (buf);              /* skip leading spaces */
+                    if (*cmdpnt != 0) ln_command (cmdpnt);      /* process command line */
+                    len = 0;                        /* empty line buffer for next read */
                 }
             }
             fclose (init_file);
@@ -269,7 +269,7 @@ int main (int argc, char *argv[])
     while (1)
     {
         cmdstr = jnl_readprompt ("\r\n*");
-        if (cmdstr == NULL)  						/* prompt then read command line */
+        if (cmdstr == NULL)                         /* prompt then read command line */
         {
             if (++ i < 3) outerr (0, "use either EXIT or QUIT to terminate\n");
             else
@@ -282,9 +282,9 @@ int main (int argc, char *argv[])
         }
         i = 0;
         for (cmdpnt = string_getval (cmdstr); *cmdpnt != 0; cmdpnt ++) if (*cmdpnt > ' ') break;
-        if (*cmdpnt == 0) cmd_type (".+1");					/* blank line means 'type .+1' */
-        else ln_command (cmdpnt);						/* process command */
-        string_delete (cmdstr);						/* free the command string off */
+        if (*cmdpnt == 0) cmd_type (".+1");                 /* blank line means 'type .+1' */
+        else ln_command (cmdpnt);                       /* process command */
+        string_delete (cmdstr);                     /* free the command string off */
     }
 
     /* Bad command line parameter */

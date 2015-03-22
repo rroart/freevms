@@ -88,7 +88,7 @@
 #define FT_TIME_MASK    0x01FFFFFF
 #define FT_TIME_MAX     0x01ea6dff /* last second of a year */
 #define FT_TIME(mo,d,h,m,s) \
-	((((s)+60*((m)+60*((h)+24*((d)+31*(mo))))) & FT_TIME_MASK))
+    ((((s)+60*((m)+60*((h)+24*((d)+31*(mo))))) & FT_TIME_MASK))
 
 #define FT_TIME_STAMP(y,mo,d,h,m,s) (FT_YEAR(y) | FT_TIME(mo,d,h,m,s))
 
@@ -100,8 +100,8 @@ typedef enum
     fmt_var    = 4, /*  QIC-80 post Rev. B variabel length format */
     fmt_425ft  = 5, /*  QIC-80 post Rev. B 425Ft tape             */
     fmt_big    = 6  /*  QIC-3010/3020 variable length tape with more
-			 *  than 2^16 segments per tape
-			 */
+             *  than 2^16 segments per tape
+             */
 } ft_format_type;
 
 /* definitions for the failed sector log */
@@ -119,6 +119,6 @@ typedef struct ft_fsl_entry
  *  month: 1..12, day: 1..31, year: 1970..2097
  */
 #define FT_FSL_TIME_STAMP(y,m,d) \
-	(((((y) - FT_YEAR_0)<<9)&0xfe00) | (((m)<<5)&0x01e0) | ((d)&0x001f))
+    (((((y) - FT_YEAR_0)<<9)&0xfe00) | (((m)<<5)&0x01e0) | ((d)&0x001f))
 
 #endif /* _FTAPE_HEADER_SEGMENT_H */

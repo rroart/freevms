@@ -74,7 +74,7 @@ int sch$qend(struct _pcb * p)
         {
             if (p->pcb$b_pri != p->pcb$b_prib)
                 sch$change_cur_priority(p,p->pcb$b_pri+1);
-            //	 sch$resched(); /*no interrupt yet*/ /*did not work*/
+            //   sch$resched(); /*no interrupt yet*/ /*did not work*/
             //SOFTINT_RESCHED_VECTOR;
             // p->need_resched = 1;
             /* lacks some sch stuff */

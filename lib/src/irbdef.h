@@ -11,21 +11,21 @@ struct _irbdef
     struct
     {
         unsigned irb$v_busy : 1; // stream is busy
-        unsigned irb$v_iop 	: 1; // i/o pending on stream (seq org only)
-        unsigned irb$v_dup 	: 1; // duplicate records seen
+        unsigned irb$v_iop  : 1; // i/o pending on stream (seq org only)
+        unsigned irb$v_dup  : 1; // duplicate records seen
         union
         {
-            unsigned irb$v_ssk 	: 1; // segmented search key
-            unsigned irb$v_eof 	: 1; // file at eof (seq org only)
+            unsigned irb$v_ssk  : 1; // segmented search key
+            unsigned irb$v_eof  : 1; // file at eof (seq org only)
         };
-        unsigned irb$v_seq 	: 1; // last op was a put or finid seq etc
-        unsigned irb$v_blk 	: 1; // connected for block i/o
+        unsigned irb$v_seq  : 1; // last op was a put or finid seq etc
+        unsigned irb$v_blk  : 1; // connected for block i/o
         union
         {
-            unsigned irb$v_idx 	: 1; // index update error occured
-            unsigned irb$v_find 	: 1; // last op was a find
+            unsigned irb$v_idx  : 1; // index update error occured
+            unsigned irb$v_find     : 1; // last op was a find
         };
-        unsigned irb$v_asy 	: 1; // async i/o stream
+        unsigned irb$v_asy  : 1; // async i/o stream
     };
     unsigned long irb$l_irab_lnk ;
     unsigned long irb$l_ifab_lnk ;

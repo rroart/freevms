@@ -29,7 +29,7 @@ struct linux_binprm
     int e_uid, e_gid;
     kernel_cap_t cap_inheritable, cap_permitted, cap_effective;
     int argc, envc;
-    char * filename;	/* Name of binary */
+    char * filename;    /* Name of binary */
     unsigned long loader, exec;
 };
 
@@ -44,7 +44,7 @@ struct linux_binfmt
     int (*load_binary)(struct linux_binprm *, struct  pt_regs * regs);
     int (*load_shlib)(struct file *);
     int (*core_dump)(long signr, struct pt_regs * regs, struct file * file);
-    unsigned long min_coredump;	/* minimal dump size */
+    unsigned long min_coredump; /* minimal dump size */
 };
 
 extern int register_binfmt(struct linux_binfmt *);

@@ -27,29 +27,29 @@
 int pm_active;
 
 /*
- *	Locking notes:
- *		pm_devs_lock can be a semaphore providing pm ops are not called
- *	from an interrupt handler (already a bad idea so no change here). Each
- *	change must be protected so that an unlink of an entry doesnt clash
- *	with a pm send - which is permitted to sleep in the current architecture
+ *  Locking notes:
+ *      pm_devs_lock can be a semaphore providing pm ops are not called
+ *  from an interrupt handler (already a bad idea so no change here). Each
+ *  change must be protected so that an unlink of an entry doesnt clash
+ *  with a pm send - which is permitted to sleep in the current architecture
  *
- *	Module unloads clashing with pm events now work out safely, the module
- *	unload path will block until the event has been sent. It may well block
- *	until a resume but that will be fine.
+ *  Module unloads clashing with pm events now work out safely, the module
+ *  unload path will block until the event has been sent. It may well block
+ *  until a resume but that will be fine.
  */
 
 static DECLARE_MUTEX(pm_devs_lock);
 static LIST_HEAD(pm_devs);
 
 /**
- *	pm_register - register a device with power management
- *	@type: device type
- *	@id: device ID
- *	@callback: callback function
+ *  pm_register - register a device with power management
+ *  @type: device type
+ *  @id: device ID
+ *  @callback: callback function
  *
- *	Add a device to the list of devices that wish to be notified about
- *	power management events. A &pm_dev structure is returned on success,
- *	on failure the return is %NULL.
+ *  Add a device to the list of devices that wish to be notified about
+ *  power management events. A &pm_dev structure is returned on success,
+ *  on failure the return is %NULL.
  *
  *      The callback function will be called in process context and
  *      it may sleep.
@@ -75,11 +75,11 @@ struct pm_dev *pm_register(pm_dev_t type,
 }
 
 /**
- *	pm_unregister -  unregister a device with power management
- *	@dev: device to unregister
+ *  pm_unregister -  unregister a device with power management
+ *  @dev: device to unregister
  *
- *	Remove a device from the power management notification lists. The
- *	dev passed must be a handle previously returned by pm_register.
+ *  Remove a device from the power management notification lists. The
+ *  dev passed must be a handle previously returned by pm_register.
  */
 
 void pm_unregister(struct pm_dev *dev)
@@ -104,13 +104,13 @@ static void __pm_unregister(struct pm_dev *dev)
 }
 
 /**
- *	pm_unregister_all - unregister all devices with matching callback
- *	@callback: callback function pointer
+ *  pm_unregister_all - unregister all devices with matching callback
+ *  @callback: callback function pointer
  *
- *	Unregister every device that would call the callback passed. This
- *	is primarily meant as a helper function for loadable modules. It
- *	enables a module to give up all its managed devices without keeping
- *	its own private list.
+ *  Unregister every device that would call the callback passed. This
+ *  is primarily meant as a helper function for loadable modules. It
+ *  enables a module to give up all its managed devices without keeping
+ *  its own private list.
  */
 
 void pm_unregister_all(pm_callback callback)
@@ -133,25 +133,25 @@ void pm_unregister_all(pm_callback callback)
 }
 
 /**
- *	pm_send - send request to a single device
- *	@dev: device to send to
- *	@rqst: power management request
- *	@data: data for the callback
+ *  pm_send - send request to a single device
+ *  @dev: device to send to
+ *  @rqst: power management request
+ *  @data: data for the callback
  *
- *	Issue a power management request to a given device. The
- *	%PM_SUSPEND and %PM_RESUME events are handled specially. The
- *	data field must hold the intended next state. No call is made
- *	if the state matches.
+ *  Issue a power management request to a given device. The
+ *  %PM_SUSPEND and %PM_RESUME events are handled specially. The
+ *  data field must hold the intended next state. No call is made
+ *  if the state matches.
  *
- *	BUGS: what stops two power management requests occuring in parallel
- *	and conflicting.
+ *  BUGS: what stops two power management requests occuring in parallel
+ *  and conflicting.
  *
- *	WARNING: Calling pm_send directly is not generally recommended, in
- *	paticular there is no locking against the pm_dev going away. The
- *	caller must maintain all needed locking or have 'inside knowledge'
- *	on the safety. Also remember that this function is not locked against
- *	pm_unregister. This means that you must handle SMP races on callback
- *	execution and unload yourself.
+ *  WARNING: Calling pm_send directly is not generally recommended, in
+ *  paticular there is no locking against the pm_dev going away. The
+ *  caller must maintain all needed locking or have 'inside knowledge'
+ *  on the safety. Also remember that this function is not locked against
+ *  pm_unregister. This means that you must handle SMP races on callback
+ *  execution and unload yourself.
  */
 
 int pm_send(struct pm_dev *dev, pm_request_t rqst, void *data)
@@ -214,29 +214,29 @@ static void pm_undo_all(struct pm_dev *last)
 }
 
 /**
- *	pm_send_all - send request to all managed devices
- *	@rqst: power management request
- *	@data: data for the callback
+ *  pm_send_all - send request to all managed devices
+ *  @rqst: power management request
+ *  @data: data for the callback
  *
- *	Issue a power management request to a all devices. The
- *	%PM_SUSPEND events are handled specially. Any device is
- *	permitted to fail a suspend by returning a non zero (error)
- *	value from its callback function. If any device vetoes a
- *	suspend request then all other devices that have suspended
- *	during the processing of this request are restored to their
- *	previous state.
+ *  Issue a power management request to a all devices. The
+ *  %PM_SUSPEND events are handled specially. Any device is
+ *  permitted to fail a suspend by returning a non zero (error)
+ *  value from its callback function. If any device vetoes a
+ *  suspend request then all other devices that have suspended
+ *  during the processing of this request are restored to their
+ *  previous state.
  *
- *	WARNING:  This function takes the pm_devs_lock. The lock is not dropped until
- *	the callbacks have completed. This prevents races against pm locking
- *	functions, races against module unload pm_unregister code. It does
- *	mean however that you must not issue pm_ functions within the callback
- *	or you will deadlock and users will hate you.
+ *  WARNING:  This function takes the pm_devs_lock. The lock is not dropped until
+ *  the callbacks have completed. This prevents races against pm locking
+ *  functions, races against module unload pm_unregister code. It does
+ *  mean however that you must not issue pm_ functions within the callback
+ *  or you will deadlock and users will hate you.
  *
- *	Zero is returned on success. If a suspend fails then the status
- *	from the device that vetoes the suspend is returned.
+ *  Zero is returned on success. If a suspend fails then the status
+ *  from the device that vetoes the suspend is returned.
  *
- *	BUGS: what stops two power management requests occuring in parallel
- *	and conflicting.
+ *  BUGS: what stops two power management requests occuring in parallel
+ *  and conflicting.
  */
 
 int pm_send_all(pm_request_t rqst, void *data)
@@ -269,20 +269,20 @@ int pm_send_all(pm_request_t rqst, void *data)
 }
 
 /**
- *	pm_find  - find a device
- *	@type: type of device
- *	@from: where to start looking
+ *  pm_find  - find a device
+ *  @type: type of device
+ *  @from: where to start looking
  *
- *	Scan the power management list for devices of a specific type. The
- *	return value for a matching device may be passed to further calls
- *	to this function to find further matches. A %NULL indicates the end
- *	of the list.
+ *  Scan the power management list for devices of a specific type. The
+ *  return value for a matching device may be passed to further calls
+ *  to this function to find further matches. A %NULL indicates the end
+ *  of the list.
  *
- *	To search from the beginning pass %NULL as the @from value.
+ *  To search from the beginning pass %NULL as the @from value.
  *
- *	The caller MUST hold the pm_devs_lock lock when calling this
- *	function. The instant that the lock is dropped all pointers returned
- *	may become invalid.
+ *  The caller MUST hold the pm_devs_lock lock when calling this
+ *  function. The instant that the lock is dropped all pointers returned
+ *  may become invalid.
  */
 
 struct pm_dev *pm_find(pm_dev_t type, struct pm_dev *from)

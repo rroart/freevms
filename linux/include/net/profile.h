@@ -20,9 +20,9 @@ struct net_profile_slot
     struct timeval entered;
     struct timeval accumulator;
     struct timeval irq;
-    int    	hits;
-    int    	active;
-    int	underflow;
+    int     hits;
+    int     active;
+    int underflow;
 };
 
 extern atomic_t net_profile_active;

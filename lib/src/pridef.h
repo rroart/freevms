@@ -1,5 +1,5 @@
-#ifndef pridef_h
-#define pridef_h
+#ifndef PRIDEF_H
+#define PRIDEF_H
 
 #define PRI$_NULL 0
 #define PRI$_IOCOM 1

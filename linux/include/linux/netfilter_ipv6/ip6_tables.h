@@ -5,11 +5,11 @@
  */
 
 /*
- * 	Format of an IP6 firewall descriptor
+ *  Format of an IP6 firewall descriptor
  *
- * 	src, dst, src_mask, dst_mask are always stored in network byte order.
- * 	flags are stored in host byte order (of course).
- * 	Port numbers are stored in HOST byte order.
+ *  src, dst, src_mask, dst_mask are always stored in network byte order.
+ *  flags are stored in host byte order (of course).
+ *  Port numbers are stored in HOST byte order.
  */
 
 #ifndef _IP6_TABLES_H
@@ -110,24 +110,24 @@ struct ip6t_standard_target
 
 struct ip6t_counters
 {
-    u_int64_t pcnt, bcnt;			/* Packet and byte counters */
+    u_int64_t pcnt, bcnt;           /* Packet and byte counters */
 };
 
 /* Values for "flag" field in struct ip6t_ip6 (general ip6 structure). */
-#define IP6T_F_PROTO		0x01	/* Set if rule cares about upper 
+#define IP6T_F_PROTO        0x01    /* Set if rule cares about upper 
 protocols */
-#define IP6T_F_TOS		0x02	/* Match the TOS. */
-#define IP6T_F_MASK		0x03	/* All possible flag bits mask. */
+#define IP6T_F_TOS      0x02    /* Match the TOS. */
+#define IP6T_F_MASK     0x03    /* All possible flag bits mask. */
 
 /* Values for "inv" field in struct ip6t_ip6. */
-#define IP6T_INV_VIA_IN		0x01	/* Invert the sense of IN IFACE. */
-#define IP6T_INV_VIA_OUT		0x02	/* Invert the sense of OUT IFACE */
-#define IP6T_INV_TOS		0x04	/* Invert the sense of TOS. */
-#define IP6T_INV_SRCIP		0x08	/* Invert the sense of SRC IP. */
-#define IP6T_INV_DSTIP		0x10	/* Invert the sense of DST OP. */
-#define IP6T_INV_FRAG		0x20	/* Invert the sense of FRAG. */
-#define IP6T_INV_PROTO		0x40	/* Invert the sense of PROTO. */
-#define IP6T_INV_MASK		0x7F	/* All possible flag bits mask. */
+#define IP6T_INV_VIA_IN     0x01    /* Invert the sense of IN IFACE. */
+#define IP6T_INV_VIA_OUT        0x02    /* Invert the sense of OUT IFACE */
+#define IP6T_INV_TOS        0x04    /* Invert the sense of TOS. */
+#define IP6T_INV_SRCIP      0x08    /* Invert the sense of SRC IP. */
+#define IP6T_INV_DSTIP      0x10    /* Invert the sense of DST OP. */
+#define IP6T_INV_FRAG       0x20    /* Invert the sense of FRAG. */
+#define IP6T_INV_PROTO      0x40    /* Invert the sense of PROTO. */
+#define IP6T_INV_MASK       0x7F    /* All possible flag bits mask. */
 
 /* This structure defines each of the firewall rules.  Consists of 3
    parts which are 1) general IP header stuff 2) match specific
@@ -158,15 +158,15 @@ struct ip6t_entry
  * New IP firewall options for [gs]etsockopt at the RAW IP level.
  * Unlike BSD Linux inherits IP options so you don't have to use
  * a raw socket for this. Instead we check rights in the calls. */
-#define IP6T_BASE_CTL			64	/* base for firewall socket options */
+#define IP6T_BASE_CTL           64  /* base for firewall socket options */
 
-#define IP6T_SO_SET_REPLACE		(IP6T_BASE_CTL)
-#define IP6T_SO_SET_ADD_COUNTERS	(IP6T_BASE_CTL + 1)
-#define IP6T_SO_SET_MAX			IP6T_SO_SET_ADD_COUNTERS
+#define IP6T_SO_SET_REPLACE     (IP6T_BASE_CTL)
+#define IP6T_SO_SET_ADD_COUNTERS    (IP6T_BASE_CTL + 1)
+#define IP6T_SO_SET_MAX         IP6T_SO_SET_ADD_COUNTERS
 
-#define IP6T_SO_GET_INFO		(IP6T_BASE_CTL)
-#define IP6T_SO_GET_ENTRIES		(IP6T_BASE_CTL + 1)
-#define IP6T_SO_GET_MAX			IP6T_SO_GET_ENTRIES
+#define IP6T_SO_GET_INFO        (IP6T_BASE_CTL)
+#define IP6T_SO_GET_ENTRIES     (IP6T_BASE_CTL + 1)
+#define IP6T_SO_GET_MAX         IP6T_SO_GET_ENTRIES
 
 /* CONTINUE verdict for targets */
 #define IP6T_CONTINUE 0xFFFFFFFF
@@ -177,44 +177,44 @@ struct ip6t_entry
 /* TCP matching stuff */
 struct ip6t_tcp
 {
-    u_int16_t spts[2];			/* Source port range. */
-    u_int16_t dpts[2];			/* Destination port range. */
-    u_int8_t option;			/* TCP Option iff non-zero*/
-    u_int8_t flg_mask;			/* TCP flags mask byte */
-    u_int8_t flg_cmp;			/* TCP flags compare byte */
-    u_int8_t invflags;			/* Inverse flags */
+    u_int16_t spts[2];          /* Source port range. */
+    u_int16_t dpts[2];          /* Destination port range. */
+    u_int8_t option;            /* TCP Option iff non-zero*/
+    u_int8_t flg_mask;          /* TCP flags mask byte */
+    u_int8_t flg_cmp;           /* TCP flags compare byte */
+    u_int8_t invflags;          /* Inverse flags */
 };
 
 /* Values for "inv" field in struct ipt_tcp. */
-#define IP6T_TCP_INV_SRCPT	0x01	/* Invert the sense of source ports. */
-#define IP6T_TCP_INV_DSTPT	0x02	/* Invert the sense of dest ports. */
-#define IP6T_TCP_INV_FLAGS	0x04	/* Invert the sense of TCP flags. */
-#define IP6T_TCP_INV_OPTION	0x08	/* Invert the sense of option test. */
-#define IP6T_TCP_INV_MASK	0x0F	/* All possible flags. */
+#define IP6T_TCP_INV_SRCPT  0x01    /* Invert the sense of source ports. */
+#define IP6T_TCP_INV_DSTPT  0x02    /* Invert the sense of dest ports. */
+#define IP6T_TCP_INV_FLAGS  0x04    /* Invert the sense of TCP flags. */
+#define IP6T_TCP_INV_OPTION 0x08    /* Invert the sense of option test. */
+#define IP6T_TCP_INV_MASK   0x0F    /* All possible flags. */
 
 /* UDP matching stuff */
 struct ip6t_udp
 {
-    u_int16_t spts[2];			/* Source port range. */
-    u_int16_t dpts[2];			/* Destination port range. */
-    u_int8_t invflags;			/* Inverse flags */
+    u_int16_t spts[2];          /* Source port range. */
+    u_int16_t dpts[2];          /* Destination port range. */
+    u_int8_t invflags;          /* Inverse flags */
 };
 
 /* Values for "invflags" field in struct ipt_udp. */
-#define IP6T_UDP_INV_SRCPT	0x01	/* Invert the sense of source ports. */
-#define IP6T_UDP_INV_DSTPT	0x02	/* Invert the sense of dest ports. */
-#define IP6T_UDP_INV_MASK	0x03	/* All possible flags. */
+#define IP6T_UDP_INV_SRCPT  0x01    /* Invert the sense of source ports. */
+#define IP6T_UDP_INV_DSTPT  0x02    /* Invert the sense of dest ports. */
+#define IP6T_UDP_INV_MASK   0x03    /* All possible flags. */
 
 /* ICMP matching stuff */
 struct ip6t_icmp
 {
-    u_int8_t type;				/* type to match */
-    u_int8_t code[2];			/* range of code */
-    u_int8_t invflags;			/* Inverse flags */
+    u_int8_t type;              /* type to match */
+    u_int8_t code[2];           /* range of code */
+    u_int8_t invflags;          /* Inverse flags */
 };
 
 /* Values for "inv" field for struct ipt_icmp. */
-#define IP6T_ICMP_INV	0x01	/* Invert the sense of type/code test */
+#define IP6T_ICMP_INV   0x01    /* Invert the sense of type/code test */
 
 /* The argument to IP6T_SO_GET_INFO */
 struct ip6t_getinfo
@@ -309,43 +309,43 @@ ip6t_get_target(struct ip6t_entry *e)
 }
 
 /* fn returns 0 to continue iteration */
-#define IP6T_MATCH_ITERATE(e, fn, args...)	\
-({						\
-	unsigned int __i;			\
-	int __ret = 0;				\
-	struct ip6t_entry_match *__m;		\
-						\
-	for (__i = sizeof(struct ip6t_entry);	\
-	     __i < (e)->target_offset;		\
-	     __i += __m->u.match_size) {	\
-		__m = (void *)(e) + __i;	\
-						\
-		__ret = fn(__m , ## args);	\
-		if (__ret != 0)			\
-			break;			\
-	}					\
-	__ret;					\
+#define IP6T_MATCH_ITERATE(e, fn, args...)  \
+({                      \
+    unsigned int __i;           \
+    int __ret = 0;              \
+    struct ip6t_entry_match *__m;       \
+                        \
+    for (__i = sizeof(struct ip6t_entry);   \
+         __i < (e)->target_offset;      \
+         __i += __m->u.match_size) {    \
+        __m = (void *)(e) + __i;    \
+                        \
+        __ret = fn(__m , ## args);  \
+        if (__ret != 0)         \
+            break;          \
+    }                   \
+    __ret;                  \
 })
 
 /* fn returns 0 to continue iteration */
-#define IP6T_ENTRY_ITERATE(entries, size, fn, args...)		\
-({								\
-	unsigned int __i;					\
-	int __ret = 0;						\
-	struct ip6t_entry *__e;					\
-								\
-	for (__i = 0; __i < (size); __i += __e->next_offset) {	\
-		__e = (void *)(entries) + __i;			\
-								\
-		__ret = fn(__e , ## args);			\
-		if (__ret != 0)					\
-			break;					\
-	}							\
-	__ret;							\
+#define IP6T_ENTRY_ITERATE(entries, size, fn, args...)      \
+({                              \
+    unsigned int __i;                   \
+    int __ret = 0;                      \
+    struct ip6t_entry *__e;                 \
+                                \
+    for (__i = 0; __i < (size); __i += __e->next_offset) {  \
+        __e = (void *)(entries) + __i;          \
+                                \
+        __ret = fn(__e , ## args);          \
+        if (__ret != 0)                 \
+            break;                  \
+    }                           \
+    __ret;                          \
 })
 
 /*
- *	Main firewall chains definitions and global var's definitions.
+ *  Main firewall chains definitions and global var's definitions.
  */
 
 #ifdef __KERNEL__

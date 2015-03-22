@@ -20,7 +20,7 @@
 
 #include <linux/netfilter_ipv4/lockhelp.h>
 
-#define IP_CONNTR_IRC	2
+#define IP_CONNTR_IRC   2
 
 struct dccproto
 {

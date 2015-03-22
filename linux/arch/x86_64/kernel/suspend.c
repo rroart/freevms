@@ -139,7 +139,7 @@ void restore_processor_state(void)
 }
 
 #define loaddebug(thread,register) \
-		set_debug((thread)->debugreg[register], register)
+        set_debug((thread)->debugreg[register], register)
 
 void fix_processor_context(void)
 {
@@ -152,8 +152,8 @@ void fix_processor_context(void)
     gdt_cpu_table[cpu].tss.type = 9;
 
     syscall_init();                      /* This sets MSR_*STAR and related */
-    load_TR(cpu);				/* This does ltr */
-    load_LDT(current->active_mm);		/* This does lldt */
+    load_TR(cpu);               /* This does ltr */
+    load_LDT(current->active_mm);       /* This does lldt */
 
     /*
      * Now maybe reload the debug registers

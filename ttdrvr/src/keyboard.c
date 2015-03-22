@@ -109,9 +109,9 @@ static int dead_key_next;
  * return the value. I chose the former way.
  */
 int shift_state;
-static int npadch = -1;			/* -1 or number assembled on pad */
+static int npadch = -1;         /* -1 or number assembled on pad */
 static unsigned char diacr;
-static char rep;			/* flag telling character repeat */
+static char rep;            /* flag telling character repeat */
 struct kbd_struct kbd_table[MAX_NR_CONSOLES];
 static struct tty_struct **ttytab;
 static struct kbd_struct * kbd = kbd_table;
@@ -147,11 +147,11 @@ static void_fn do_null, enter, show_ptregs, send_intr, lastcons, caps_toggle,
 
 static void_fnp spec_fn_table[] =
 {
-    do_null,	enter,		show_ptregs,	show_mem,
-    show_state,	send_intr,	lastcons,	caps_toggle,
-    num,		hold,		scroll_forw,	scroll_back,
-    boot_it,	caps_on,	compose,	SAK,
-    decr_console,	incr_console,	spawn_console,	bare_num
+    do_null,    enter,      show_ptregs,    show_mem,
+    show_state, send_intr,  lastcons,   caps_toggle,
+    num,        hold,       scroll_forw,    scroll_back,
+    boot_it,    caps_on,    compose,    SAK,
+    decr_console,   incr_console,   spawn_console,  bare_num
 };
 
 #define SPECIALS_ALLOWED_IN_RAW_MODE (1 << KVAL(K_SAK))
@@ -189,15 +189,15 @@ static struct pm_dev *pm_kbd;
 void to_utf8(ushort c)
 {
     if (c < 0x80)
-        put_queue(c);			/*  0*******  */
+        put_queue(c);           /*  0*******  */
     else if (c < 0x800)
     {
-        put_queue(0xc0 | (c >> 6)); 	/*  110***** 10******  */
+        put_queue(0xc0 | (c >> 6));     /*  110***** 10******  */
         put_queue(0x80 | (c & 0x3f));
     }
     else
     {
-        put_queue(0xe0 | (c >> 12)); 	/*  1110**** 10****** 10******  */
+        put_queue(0xe0 | (c >> 12));    /*  1110**** 10****** 10******  */
         put_queue(0x80 | ((c >> 6) & 0x3f));
         put_queue(0x80 | (c & 0x3f));
     }
@@ -274,7 +274,7 @@ void handle_scancode(unsigned char scancode, int down)
     else
         rep = test_and_set_bit(keycode, key_down);
 
-#ifdef CONFIG_MAGIC_SYSRQ		/* Handle the SysRq Hack */
+#ifdef CONFIG_MAGIC_SYSRQ       /* Handle the SysRq Hack */
     if (keycode == SYSRQ_KEY)
     {
         sysrq_pressed = !up_flag;
@@ -294,13 +294,13 @@ void handle_scancode(unsigned char scancode, int down)
     {
         /* soon keycodes will require more than one byte */
         put_queue(keycode + up_flag);
-        raw_mode = 1;	/* Most key classes will be ignored */
+        raw_mode = 1;   /* Most key classes will be ignored */
     }
 
     /*
      * Small change in philosophy: earlier we defined repetition by
-     *	 rep = keycode == prev_keycode;
-     *	 prev_keycode = keycode;
+     *   rep = keycode == prev_keycode;
+     *   prev_keycode = keycode;
      * but now by the fact that the depressed key was down already.
      * Does this ever make a difference? Yes.
      */
@@ -357,7 +357,7 @@ void handle_scancode(unsigned char scancode, int down)
         {
             /* maybe beep? */
             /* we have at least to update shift_state */
-#if 1			/* how? two almost equivalent choices follow */
+#if 1           /* how? two almost equivalent choices follow */
             compute_shiftstate();
             kbd->slockstate = 0; /* play it safe */
 #else
@@ -590,7 +590,7 @@ static void SAK(void)
     reset_vc(fg_console);
 #endif
 #if 0
-    do_unblank_screen();	/* not in interrupt routine? */
+    do_unblank_screen();    /* not in interrupt routine? */
 #endif
 }
 
@@ -623,7 +623,7 @@ static void do_lowercase(unsigned char value, char up_flag)
 static void do_self(unsigned char value, char up_flag)
 {
     if (up_flag)
-        return;		/* no action, if this is a key release */
+        return;     /* no action, if this is a key release */
 
     if (diacr)
         value = handle_diacr(value);
@@ -721,7 +721,7 @@ static void do_pad(unsigned char value, char up_flag)
     static const char *app_map = "pqrstuvwxylSRQMnnmPQ";
 
     if (up_flag)
-        return;		/* no action, if this is a key release */
+        return;     /* no action, if this is a key release */
 
     /* kludge... shift forces cursor/number keys */
     if (vc_kbd_mode(kbd,VC_APPLIC) && !k_down[KG_SHIFT])
@@ -837,7 +837,7 @@ void compute_shiftstate(void)
         k_down[i] = 0;
 
     for(i=0; i < SIZE(key_down); i++)
-        if(key_down[i])  	/* skip this word if not a single bit on */
+        if(key_down[i])     /* skip this word if not a single bit on */
         {
             k = i*BITS_PER_LONG;
             for(j=0; j<BITS_PER_LONG; j++,k++)

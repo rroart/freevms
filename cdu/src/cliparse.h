@@ -21,7 +21,67 @@ typedef struct yystype
 
 extern YYSTYPE yylval;
 
-enum { UNONE = 0, UPLUS = 128, UMINUS, T_DIGITS, T_NAME, K_IF, K_THEN, K_ELSE, K_ENDIF, T_STRING, T_QUALIFIER, END_EXPR, END_BUILTIN, K_WRITE, U_ABSOLUTE, REALLY_MAX, MULT_EXPR, PLUS_EXPR, MINUS_EXPR, LT_EXPR, GT_EXPR, LE_EXPR, GE_EXPR, EQ_EXPR, NE_EXPR, BIT_AND_EXPR, BIT_XOR_EXPR, BIT_IOR_EXPR, TRUTH_ANDIF_EXPR, TRUTH_ORIF_EXPR, CONVERT_EXPR, NEGATE_EXPR, BIT_NOT_EXPR, TRUTH_NOT_EXPR, CPP_NUMBER, CPP_CHAR, ERROR_MARK, CPP_STRING, CPP_WCHAR, CPP_WSTRING, STRING_CST, MODIFY_EXPR, K_AND, K_OR, K_NOT, K_EQ, K_NE, K_GE, K_GT, K_LE, K_LT, K_EQS, K_NES, K_GES, K_GTS, K_LES, K_LTS, TRUNC_DIV_EXPR };
+enum
+{
+    UNONE = 0,
+    UPLUS = 128,
+    UMINUS,
+    T_DIGITS,
+    T_NAME,
+    K_IF,
+    K_THEN,
+    K_ELSE,
+    K_ENDIF,
+    T_STRING,
+    T_QUALIFIER,
+    END_EXPR,
+    END_BUILTIN,
+    K_WRITE,
+    U_ABSOLUTE,
+    REALLY_MAX,
+    MULT_EXPR,
+    PLUS_EXPR,
+    MINUS_EXPR,
+    LT_EXPR,
+    GT_EXPR,
+    LE_EXPR,
+    GE_EXPR,
+    EQ_EXPR,
+    NE_EXPR,
+    BIT_AND_EXPR,
+    BIT_XOR_EXPR,
+    BIT_IOR_EXPR,
+    TRUTH_ANDIF_EXPR,
+    TRUTH_ORIF_EXPR,
+    CONVERT_EXPR,
+    NEGATE_EXPR,
+    BIT_NOT_EXPR,
+    TRUTH_NOT_EXPR,
+    CPP_NUMBER,
+    CPP_CHAR,
+    ERROR_MARK,
+    CPP_STRING,
+    CPP_WCHAR,
+    CPP_WSTRING,
+    STRING_CST,
+    MODIFY_EXPR,
+    K_AND,
+    K_OR,
+    K_NOT,
+    K_EQ,
+    K_NE,
+    K_GE,
+    K_GT,
+    K_LE,
+    K_LT,
+    K_EQS,
+    K_NES,
+    K_GES,
+    K_GTS,
+    K_LES,
+    K_LTS,
+    TRUNC_DIV_EXPR
+};
 
 #define NULL_TREE 0
 
@@ -40,9 +100,9 @@ struct c_expr
     /* The value of the expression.  */
     tree value;
     /* Record the original binary operator of an expression, which may
-       have been changed by fold, STRING_CST for unparenthesized string
-       constants, or ERROR_MARK for other expressions (including
-       parenthesized expressions).  */
+     have been changed by fold, STRING_CST for unparenthesized string
+     constants, or ERROR_MARK for other expressions (including
+     parenthesized expressions).  */
 #if 0
     enum tree_code original_code;
 #else
@@ -56,8 +116,7 @@ struct c_expr
 
 enum rid
 {
-    RID_NULL = 0,
-    RID_MAX
+    RID_NULL = 0, RID_MAX
 };
 
 #define TTYPE_TABLE                                                     \
@@ -129,14 +188,13 @@ enum rid
 #define TK(e, s) CPP_ ## e,
 enum cpp_ttype
 {
-    TTYPE_TABLE
-    N_TTYPES,
+    TTYPE_TABLE N_TTYPES,
 
     /* Positions in the table.  */
-    CPP_LAST_EQ        = CPP_MAX,
-    CPP_FIRST_DIGRAPH  = CPP_HASH,
-    CPP_LAST_PUNCTUATOR= CPP_DOT_STAR,
-    CPP_LAST_CPP_OP    = CPP_LESS_EQ
+    CPP_LAST_EQ = CPP_MAX,
+    CPP_FIRST_DIGRAPH = CPP_HASH,
+    CPP_LAST_PUNCTUATOR = CPP_DOT_STAR,
+    CPP_LAST_CPP_OP = CPP_LESS_EQ
 };
 #undef OP
 #undef TK
@@ -160,19 +218,19 @@ typedef enum c_id_kind
 } c_id_kind;
 
 /* A single C token after string literal concatenation and conversion
-   of preprocessing tokens to tokens.  */
-typedef struct c_token GTY (())
+ of preprocessing tokens to tokens.  */
+typedef struct c_token
+GTY (())
 {
-    /* The kind of token.  */
-    ENUM_BITFIELD (cpp_ttype) type : 8;
+    /* The kind of token.  */ENUM_BITFIELD (cpp_ttype) type :8;
     /* If this token is a CPP_NAME, this value indicates whether also
-       declared as some kind of type.  Otherwise, it is C_ID_NONE.  */
-    ENUM_BITFIELD (c_id_kind) id_kind : 8;
+     declared as some kind of type.  Otherwise, it is C_ID_NONE.  */
+    ENUM_BITFIELD (c_id_kind) id_kind :8;
     /* If this token is a keyword, this value indicates which keyword.
-       Otherwise, this value is RID_MAX.  */
-    ENUM_BITFIELD (rid) keyword : 8;
+     Otherwise, this value is RID_MAX.  */
+    ENUM_BITFIELD (rid) keyword :8;
     /* True if this token is from a system header.  */
-    BOOL_BITFIELD in_system_header : 1;
+    BOOL_BITFIELD in_system_header :1;
     /* The value associated with this token, if any.  */
     tree value;
     /* The location at which this token was found.  */
@@ -180,18 +238,19 @@ typedef struct c_token GTY (())
 } c_token;
 
 /* A parser structure recording information about the state and
-   context of parsing.  Includes lexer information with up to two
-   tokens of look-ahead; more are not needed for C.  */
-typedef struct c_parser GTY(())
+ context of parsing.  Includes lexer information with up to two
+ tokens of look-ahead; more are not needed for C.  */
+typedef struct c_parser
+GTY(())
 {
     /* The look-ahead tokens.  */
     c_token tokens[2];
     /* How many look-ahead tokens are available (0, 1 or 2).  */
     short tokens_avail;
     /* True if a syntax error is being recovered from; false otherwise.
-       c_parser_error sets this flag.  It should clear this flag when
-       enough tokens have been consumed to recover from the error.  */
-    BOOL_BITFIELD error : 1;
+     c_parser_error sets this flag.  It should clear this flag when
+     enough tokens have been consumed to recover from the error.  */
+    BOOL_BITFIELD error :1;
 } c_parser;
 
 #if 0

@@ -16,12 +16,12 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*	resequence [<range>]						*/
-/*									*/
-/*  resequences the range of lines					*/
-/*  does not move current position					*/
-/*									*/
+/*                                  */
+/*  resequence [<range>]                        */
+/*                                  */
+/*  resequences the range of lines                  */
+/*  does not move current position                  */
+/*                                  */
 /************************************************************************/
 
 #include <stdio.h>

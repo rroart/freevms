@@ -1,5 +1,5 @@
-#ifndef xabdatdef_h
-#define xabdatdef_h
+#ifndef XABDATDEF_H
+#define XABDATDEF_H
 
 #define XAB$C_DAT 18
 

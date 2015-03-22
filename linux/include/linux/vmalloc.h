@@ -8,8 +8,8 @@
 #include <asm/pgtable.h>
 
 /* bits in vm_struct->flags */
-#define VM_IOREMAP	0x00000001	/* ioremap() and friends */
-#define VM_ALLOC	0x00000002	/* vmalloc() */
+#define VM_IOREMAP  0x00000001  /* ioremap() and friends */
+#define VM_ALLOC    0x00000002  /* vmalloc() */
 
 struct vm_struct
 {
@@ -28,7 +28,7 @@ extern int vmalloc_area_pages(unsigned long address, unsigned long size,
                               int gfp_mask, pgprot_t prot);
 
 /*
- *	Allocate any pages
+ *  Allocate any pages
  */
 
 static inline void * vmalloc (unsigned long size)
@@ -37,7 +37,7 @@ static inline void * vmalloc (unsigned long size)
 }
 
 /*
- *	Allocate ISA addressable pages for broke crap
+ *  Allocate ISA addressable pages for broke crap
  */
 
 static inline void * vmalloc_dma (unsigned long size)
@@ -46,7 +46,7 @@ static inline void * vmalloc_dma (unsigned long size)
 }
 
 /*
- *	vmalloc 32bit PA addressable pages - eg for PCI 32bit devices
+ *  vmalloc 32bit PA addressable pages - eg for PCI 32bit devices
  */
 
 static inline void * vmalloc_32(unsigned long size)

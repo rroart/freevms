@@ -1,20 +1,20 @@
-#ifndef fcbdef_h
-#define fcbdef_h
+#ifndef FCBDEF_H
+#define FCBDEF_H
 
-#define		FCB$M_FILE_ATTRIBUTES		0xF
-#define		FCB$M_FILE_CONTENTS		0xF0
-#define		FCB$M_FLUSH_ON_CLOSE		0xF00
-#define		FCB$M_CACHING_OPTIONS_MBZ	0xFFFFF000
-#define		FCB$C_DEFAULT		0
-#define		FCB$C_WRITETHROUGH	1
-#define		FCB$C_WRITEBEHIND	2
-#define		FCB$C_NOCACHING		3
-#define		FCB$C_FLUSH		1
-#define		FCB$C_NOFLUSH		2
-#define		FCB$M_VCC_STATE		0x7
-#define		FCB$K_LENGTH		320
-#define		FCB$C_LENGTH		320
-#define		FCB$S_FCBDEF		320
+#define     FCB$M_FILE_ATTRIBUTES       0xF
+#define     FCB$M_FILE_CONTENTS     0xF0
+#define     FCB$M_FLUSH_ON_CLOSE        0xF00
+#define     FCB$M_CACHING_OPTIONS_MBZ   0xFFFFF000
+#define     FCB$C_DEFAULT       0
+#define     FCB$C_WRITETHROUGH  1
+#define     FCB$C_WRITEBEHIND   2
+#define     FCB$C_NOCACHING     3
+#define     FCB$C_FLUSH     1
+#define     FCB$C_NOFLUSH       2
+#define     FCB$M_VCC_STATE     0x7
+#define     FCB$K_LENGTH        320
+#define     FCB$C_LENGTH        320
+#define     FCB$S_FCBDEF        320
 
 struct _fcb
 {

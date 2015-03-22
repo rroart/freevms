@@ -1,17 +1,17 @@
 /*
- *	drivers/pci/setup-bus.c
+ *  drivers/pci/setup-bus.c
  *
  * Extruded from code written by
  *      Dave Rusling (david.rusling@reo.mts.dec.com)
  *      David Mosberger (davidm@cs.arizona.edu)
- *	David Miller (davem@redhat.com)
+ *  David Miller (davem@redhat.com)
  *
  * Support routines for initializing a PCI subsystem.
  */
 
 /*
  * Nov 2000, Ivan Kokshaysky <ink@jurassic.park.msu.ru>
- *	     PCI-PCI bridges cleanup, sorted resource allocation
+ *       PCI-PCI bridges cleanup, sorted resource allocation
  */
 
 #include <linux/init.h>
@@ -30,7 +30,7 @@
 # define DBGC(args)
 #endif
 
-#define ROUND_UP(x, a)		(((x) + (a) - 1) & ~((a) - 1))
+#define ROUND_UP(x, a)      (((x) + (a) - 1) & ~((a) - 1))
 
 static int __init
 pbus_assign_resources_sorted(struct pci_bus *bus,

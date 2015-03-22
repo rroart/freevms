@@ -1,5 +1,5 @@
-#ifndef lbrdef_h
-#define lbrdef_h
+#ifndef LBRDEF_H
+#define LBRDEF_H
 
 #define LBR$C_TYP_UNK 0
 #define LBR$C_TYP_OBJ 1

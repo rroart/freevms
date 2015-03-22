@@ -65,13 +65,13 @@ struct dn_ifaddr
  */
 struct dn_dev_parms
 {
-    int type;	          /* ARPHRD_xxx                         */
-    int mode;	          /* Broadcast, Unicast, Mulitpoint     */
+    int type;             /* ARPHRD_xxx                         */
+    int mode;             /* Broadcast, Unicast, Mulitpoint     */
 #define DN_DEV_BCAST  1
 #define DN_DEV_UCAST  2
 #define DN_DEV_MPOINT 4
     int state;                /* Initial state                      */
-    int forwarding;	          /* 0=EndNode, 1=L1Router, 2=L2Router  */
+    int forwarding;           /* 0=EndNode, 1=L1Router, 2=L2Router  */
     unsigned short blksize;   /* Block Size                         */
     unsigned long t2;         /* Default value of t2                */
     unsigned long t3;         /* Default value of t3                */

@@ -4,7 +4,7 @@
 /*
  * linux/byteorder/swabb.h
  * SWAp Bytes Bizarrely
- *	swaHHXX[ps]?(foo)
+ *  swaHHXX[ps]?(foo)
  *
  * Support for obNUXIous pdp-endian and other bizarre architectures.
  * Will Linux ever run on such ancient beasts? if not, this file
@@ -15,8 +15,8 @@
 
 /*
  * Meaning of the names I chose (vaxlinux people feel free to correct them):
- * swahw32	swap 16-bit half-words in a 32-bit word
- * swahb32	swap 8-bit halves of each 16-bit half-word in a 32-bit word
+ * swahw32  swap 16-bit half-words in a 32-bit word
+ * swahb32  swap 8-bit halves of each 16-bit half-word in a 32-bit word
  *
  * No 64-bit support yet. I don't know NUXI conventions for long longs.
  * I guarantee it will be a mess when it's there, though :->
@@ -27,27 +27,27 @@
 
 #define ___swahw32(x) \
 ({ \
-	__u32 __x = (x); \
-	((__u32)( \
-		(((__u32)(__x) & (__u32)0x0000ffffUL) << 16) | \
-		(((__u32)(__x) & (__u32)0xffff0000UL) >> 16) )); \
+    __u32 __x = (x); \
+    ((__u32)( \
+        (((__u32)(__x) & (__u32)0x0000ffffUL) << 16) | \
+        (((__u32)(__x) & (__u32)0xffff0000UL) >> 16) )); \
 })
 #define ___swahb32(x) \
 ({ \
-	__u32 __x = (x); \
-	((__u32)( \
-		(((__u32)(__x) & (__u32)0x00ff00ffUL) << 8) | \
-		(((__u32)(__x) & (__u32)0xff00ff00UL) >> 8) )); \
+    __u32 __x = (x); \
+    ((__u32)( \
+        (((__u32)(__x) & (__u32)0x00ff00ffUL) << 8) | \
+        (((__u32)(__x) & (__u32)0xff00ff00UL) >> 8) )); \
 })
 
 #define ___constant_swahw32(x) \
-	((__u32)( \
-		(((__u32)(x) & (__u32)0x0000ffffUL) << 16) | \
-		(((__u32)(x) & (__u32)0xffff0000UL) >> 16) ))
+    ((__u32)( \
+        (((__u32)(x) & (__u32)0x0000ffffUL) << 16) | \
+        (((__u32)(x) & (__u32)0xffff0000UL) >> 16) ))
 #define ___constant_swahb32(x) \
-	((__u32)( \
-		(((__u32)(x) & (__u32)0x00ff00ffUL) << 8) | \
-		(((__u32)(x) & (__u32)0xff00ff00UL) >> 8) ))
+    ((__u32)( \
+        (((__u32)(x) & (__u32)0x00ff00ffUL) << 8) | \
+        (((__u32)(x) & (__u32)0xff00ff00UL) >> 8) ))
 
 /*
  * provide defaults when no architecture-specific optimization is detected

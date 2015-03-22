@@ -24,12 +24,12 @@
 #include <linux/lockd/lockd.h>
 #include <linux/smp_lock.h>
 
-#define NLMDBG_FACILITY		NLMDBG_CLIENT
+#define NLMDBG_FACILITY     NLMDBG_CLIENT
 
 /*
  * Local function prototypes
  */
-static int			reclaimer(void *ptr);
+static int          reclaimer(void *ptr);
 
 /*
  * The following functions handle blocking and granting from the
@@ -41,15 +41,15 @@ static int			reclaimer(void *ptr);
  */
 struct nlm_wait
 {
-    struct nlm_wait *	b_next;		/* linked list */
-    wait_queue_head_t	b_wait;		/* where to wait on */
-    struct nlm_host *	b_host;
-    struct file_lock *	b_lock;		/* local file lock */
-    unsigned short		b_reclaim;	/* got to reclaim lock */
-    u32			b_status;	/* grant callback status */
+    struct nlm_wait *   b_next;     /* linked list */
+    wait_queue_head_t   b_wait;     /* where to wait on */
+    struct nlm_host *   b_host;
+    struct file_lock *  b_lock;     /* local file lock */
+    unsigned short      b_reclaim;  /* got to reclaim lock */
+    u32         b_status;   /* grant callback status */
 };
 
-static struct nlm_wait *	nlm_blocked;
+static struct nlm_wait *    nlm_blocked;
 
 /*
  * Block on a lock
@@ -57,9 +57,9 @@ static struct nlm_wait *	nlm_blocked;
 int
 nlmclnt_block(struct nlm_host *host, struct file_lock *fl, u32 *statp)
 {
-    struct nlm_wait	block, **head;
-    int		err;
-    u32		pstate;
+    struct nlm_wait block, **head;
+    int     err;
+    u32     pstate;
 
     block.b_host   = host;
     block.b_lock   = fl;
@@ -112,7 +112,7 @@ nlmclnt_block(struct nlm_host *host, struct file_lock *fl, u32 *statp)
 u32
 nlmclnt_grant(struct nlm_lock *lock)
 {
-    struct nlm_wait	*block;
+    struct nlm_wait *block;
 
     /*
      * Look up blocked request based on arguments.
@@ -210,8 +210,8 @@ nlmclnt_recovery(struct nlm_host *host, u32 newstate)
 static int
 reclaimer(void *ptr)
 {
-    struct nlm_host	  *host = (struct nlm_host *) ptr;
-    struct nlm_wait	  *block;
+    struct nlm_host   *host = (struct nlm_host *) ptr;
+    struct nlm_wait   *block;
     struct list_head *tmp;
     struct file_lock *fl;
     struct inode *inode;

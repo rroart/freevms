@@ -1,7 +1,7 @@
 /*
- *	rtl_lib_test
+ *  rtl_lib_test
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,35 +17,35 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *	The authors may be contacted at:
+ *  The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
- * 	Kevin Handy		Unknown
+ *  Kevin Handy     Unknown
  *
- *	Christof Zeile		Unknown
+ *  Christof Zeile      Unknown
  *
  * rtltest.c
  *
- *	Test program for run time libraries functions
+ *  Test program for run time libraries functions
  *
  * Notes:
  *
- *	This program should be run using the Free-VMS packages
- *	'str$' functions, Vax/VMS's, and Alpha/VMS's to make
- *	sure they all happily work the same.
+ *  This program should be run using the Free-VMS packages
+ *  'str$' functions, Vax/VMS's, and Alpha/VMS's to make
+ *  sure they all happily work the same.
  *
  * History:
  *
  *
- *	Mar 16, 2004 - Andrew Allison
- *		Initial program creation
+ *  Mar 16, 2004 - Andrew Allison
+ *      Initial program creation
  *
  */
 #include <ctype.h>
@@ -67,67 +67,67 @@
  * Prototypes
  */
 
-void	print_result_code(char *presult, unsigned long result_code,char *cont);
-void 	print_desc_compare(	char *title,
+void    print_result_code(char *presult, unsigned long result_code,char *cont);
+void    print_desc_compare( char *title,
                             struct dsc$descriptor_s *s1,
                             struct dsc$descriptor_s *s2,
                             char *cont);
 void print_lu_compare(char*title,unsigned long v1,unsigned long v2,char *cont);
-void print_ls_compare	(char *title,long v1,long v2,char *cont);
-void print_int_compare	(char *title,int v1,int v2,char *cont);
+void print_ls_compare   (char *title,long v1,long v2,char *cont);
+void print_int_compare  (char *title,int v1,int v2,char *cont);
 
 /*************************************************************/
 /*
- *	local test function prototypes
+ *  local test function prototypes
  */
 
-int testlibadawi       		(FILE *fptr, int *fstatus, char *cont);
-int testlibaddx 		(FILE *fptr, int *fstatus, char *cont);
-int testlibadd_times		(FILE *fptr, int *fstatus, char *cont);
-int testlibanalyze_sdesc	(FILE *fptr, int *fstatus, char *cont);
-int testlibanalyze_sdesc_64	(FILE *fptr, int *fstatus, char *cont);
-int testlibasn_wth_mbx		(FILE *fptr, int *fstatus, char *cont);
-int testlibast_in_prog		(FILE *fptr, int *fstatus, char *cont);
-int testlibattach		(FILE *fptr, int *fstatus, char *cont);
-int testlibbuild_nodespec	(FILE *fptr, int *fstatus, char *cont);
-int testlibcallg		(FILE *fptr, int *fstatus, char *cont);
-int testlibcallg_64		(FILE *fptr, int *fstatus, char *cont);
-int testlibchar			(FILE *fptr, int *fstatus, char *cont);
-int testlibcompare_nodename	(FILE *fptr, int *fstatus, char *cont);
-int testlibcompress_nodename	(FILE *fptr, int *fstatus, char *cont);
-int testlibconvert_date_string	(FILE *fptr, int *fstatus, char *cont);
-int testlibcrc			(FILE *fptr, int *fstatus, char *cont);
-int testlibcrc_table		(FILE *fptr, int *fstatus, char *cont);
-int testlibcreate_dir		(FILE *fptr, int *fstatus, char *cont);
-int testlibcreate_user_vm_zone	(FILE *fptr, int *fstatus, char *cont);
-int testlibcreate_user_vm_zone_64	(FILE *fptr, int *fstatus, char *cont);
-int testlibcreate_vm_zone	(FILE *fptr, int *fstatus, char *cont);
-int testlibdate_time     	(FILE *fptr, int *fstatus, char *cont);
-int testlibdelete_file         	(FILE *fptr, int *fstatus, char *cont);
-int testlibdelete_logical      	(FILE *fptr, int *fstatus, char *cont);
-int testlibdelete_symbol	(FILE *fptr, int *fstatus, char *cont);
-int testlibdelete_vm_zone	(FILE *fptr, int *fstatus, char *cont);
-int testlibdelete_vm_zone_64	(FILE *fptr, int *fstatus, char *cont);
-int testlibdigit_sep		(FILE *fptr, int *fstatus, char *cont);
-int testlibdisable_ctrl		(FILE *fptr, int *fstatus, char *cont);
-int testlibdo_command		(FILE *fptr, int *fstatus, char *cont);
-int testlibenable_ctrl		(FILE *fptr, int *fstatus, char *cont);
-int testlibediv			(FILE *fptr, int *fstatus, char *cont);
-int testlibestablish  		(FILE *fptr, int *fstatus, char *cont);
-int testlibexpand_nodename	(FILE *fptr, int *fstatus, char *cont);
-int testlibfid_to_name		(FILE *fptr, int *fstatus, char *cont);
-int testlibfile_scan  		(FILE *fptr, int *fstatus, char *cont);
-int testlibfile_scan_end	(FILE *fptr, int *fstatus, char *cont);
-int testlibfind_file    	(FILE *fptr, int *fstatus, char *cont);
-int testlibfind_file_end    	(FILE *fptr, int *fstatus, char *cont);
-int testliblocc			(FILE *fptr, int *fstatus, char *cont);
-int testlibmatchc		(FILE *fptr, int *fstatus, char *cont);
-int testlibmovc3 		(FILE *fptr, int *fstatus, char *cont);
-int testlibwait			(FILE *fptr, int *fstatus, char *cont);
+int testlibadawi            (FILE *fptr, int *fstatus, char *cont);
+int testlibaddx         (FILE *fptr, int *fstatus, char *cont);
+int testlibadd_times        (FILE *fptr, int *fstatus, char *cont);
+int testlibanalyze_sdesc    (FILE *fptr, int *fstatus, char *cont);
+int testlibanalyze_sdesc_64 (FILE *fptr, int *fstatus, char *cont);
+int testlibasn_wth_mbx      (FILE *fptr, int *fstatus, char *cont);
+int testlibast_in_prog      (FILE *fptr, int *fstatus, char *cont);
+int testlibattach       (FILE *fptr, int *fstatus, char *cont);
+int testlibbuild_nodespec   (FILE *fptr, int *fstatus, char *cont);
+int testlibcallg        (FILE *fptr, int *fstatus, char *cont);
+int testlibcallg_64     (FILE *fptr, int *fstatus, char *cont);
+int testlibchar         (FILE *fptr, int *fstatus, char *cont);
+int testlibcompare_nodename (FILE *fptr, int *fstatus, char *cont);
+int testlibcompress_nodename    (FILE *fptr, int *fstatus, char *cont);
+int testlibconvert_date_string  (FILE *fptr, int *fstatus, char *cont);
+int testlibcrc          (FILE *fptr, int *fstatus, char *cont);
+int testlibcrc_table        (FILE *fptr, int *fstatus, char *cont);
+int testlibcreate_dir       (FILE *fptr, int *fstatus, char *cont);
+int testlibcreate_user_vm_zone  (FILE *fptr, int *fstatus, char *cont);
+int testlibcreate_user_vm_zone_64   (FILE *fptr, int *fstatus, char *cont);
+int testlibcreate_vm_zone   (FILE *fptr, int *fstatus, char *cont);
+int testlibdate_time        (FILE *fptr, int *fstatus, char *cont);
+int testlibdelete_file          (FILE *fptr, int *fstatus, char *cont);
+int testlibdelete_logical       (FILE *fptr, int *fstatus, char *cont);
+int testlibdelete_symbol    (FILE *fptr, int *fstatus, char *cont);
+int testlibdelete_vm_zone   (FILE *fptr, int *fstatus, char *cont);
+int testlibdelete_vm_zone_64    (FILE *fptr, int *fstatus, char *cont);
+int testlibdigit_sep        (FILE *fptr, int *fstatus, char *cont);
+int testlibdisable_ctrl     (FILE *fptr, int *fstatus, char *cont);
+int testlibdo_command       (FILE *fptr, int *fstatus, char *cont);
+int testlibenable_ctrl      (FILE *fptr, int *fstatus, char *cont);
+int testlibediv         (FILE *fptr, int *fstatus, char *cont);
+int testlibestablish        (FILE *fptr, int *fstatus, char *cont);
+int testlibexpand_nodename  (FILE *fptr, int *fstatus, char *cont);
+int testlibfid_to_name      (FILE *fptr, int *fstatus, char *cont);
+int testlibfile_scan        (FILE *fptr, int *fstatus, char *cont);
+int testlibfile_scan_end    (FILE *fptr, int *fstatus, char *cont);
+int testlibfind_file        (FILE *fptr, int *fstatus, char *cont);
+int testlibfind_file_end        (FILE *fptr, int *fstatus, char *cont);
+int testliblocc         (FILE *fptr, int *fstatus, char *cont);
+int testlibmatchc       (FILE *fptr, int *fstatus, char *cont);
+int testlibmovc3        (FILE *fptr, int *fstatus, char *cont);
+int testlibwait         (FILE *fptr, int *fstatus, char *cont);
 
 
-int	get_fun_num (char *functionname);
-void	call_test_function (int which_fun,char *fname, FILE *fptr,char *cont);
+int get_fun_num (char *functionname);
+void    call_test_function (int which_fun,char *fname, FILE *fptr,char *cont);
 
 /*
  * Some local constants
@@ -156,8 +156,8 @@ int flistsize;
 
 
 /*
- *	This structure matches a character string
- *	to it's corresponding test function
+ *  This structure matches a character string
+ *  to it's corresponding test function
  *
  */
 struct fliststruct
@@ -167,63 +167,63 @@ struct fliststruct
 }
 flist[]=
 {
-    {"lib$adawi",  			&testlibadawi},
-    {"lib$addx",			&testlibaddx},
-    {"lib$add_times",		&testlibadd_times},
-    {"lib$analyze_sdesc",		&testlibanalyze_sdesc},
-    {"lib$analyze_sdesc_64",	&testlibanalyze_sdesc_64},
+    {"lib$adawi",           &testlibadawi},
+    {"lib$addx",            &testlibaddx},
+    {"lib$add_times",       &testlibadd_times},
+    {"lib$analyze_sdesc",       &testlibanalyze_sdesc},
+    {"lib$analyze_sdesc_64",    &testlibanalyze_sdesc_64},
 #if 0
-    {"lib$asn_wth_mbx",		&testlibasn_wth_mbx},
-    {"lib$ast_in_prog",		&testlibast_in_prog},
-    {"lib$attach",			&testlibattach},
+    {"lib$asn_wth_mbx",     &testlibasn_wth_mbx},
+    {"lib$ast_in_prog",     &testlibast_in_prog},
+    {"lib$attach",          &testlibattach},
 #endif
-    {"lib$build_nodespec",		&testlibbuild_nodespec},
+    {"lib$build_nodespec",      &testlibbuild_nodespec},
 #if 0
-    {"lib$callg",			&testlibcallg},
-    {"lib$callg_64",		&testlibcallg_64},
+    {"lib$callg",           &testlibcallg},
+    {"lib$callg_64",        &testlibcallg_64},
 #endif
-    {"lib$char",			&testlibchar},
+    {"lib$char",            &testlibchar},
 #if 0
-    {"lib$compare_nodename",	&testlibcompare_nodename},
-    {"lib$compress_nodename",	&testlibcompress_nodename},
+    {"lib$compare_nodename",    &testlibcompare_nodename},
+    {"lib$compress_nodename",   &testlibcompress_nodename},
 #endif
-    {"lib$convert_date_string",	&testlibconvert_date_string},
+    {"lib$convert_date_string", &testlibconvert_date_string},
 #if 0
-    {"lib$crc",			&testlibcrc},
-    {"lib$crc_table",		&testlibcrc_table},
-    {"lib$create_dir",		&testlibcreate_dir},
-    {"lib$create_user_vm_zone",	&testlibcreate_user_vm_zone},
-    {"lib$create_user_vm_zone_64",	&testlibcreate_user_vm_zone_64},
-    {"lib$create_vm_zone",		&testlibcreate_vm_zone},
+    {"lib$crc",         &testlibcrc},
+    {"lib$crc_table",       &testlibcrc_table},
+    {"lib$create_dir",      &testlibcreate_dir},
+    {"lib$create_user_vm_zone", &testlibcreate_user_vm_zone},
+    {"lib$create_user_vm_zone_64",  &testlibcreate_user_vm_zone_64},
+    {"lib$create_vm_zone",      &testlibcreate_vm_zone},
 #endif
-    {"lib$date_time",		&testlibdate_time},
+    {"lib$date_time",       &testlibdate_time},
 #if 0
-    {"lib$delete_file",		&testlibdelete_file},
-    {"lib$delete_logical",		&testlibdelete_logical},
-    {"lib$delete_symbol",		&testlibdelete_symbol},
-    {"lib$delete_vm_zone",		&testlibdelete_vm_zone},
-    {"lib$delete_vm_zone_64",	&testlibdelete_vm_zone_64},
+    {"lib$delete_file",     &testlibdelete_file},
+    {"lib$delete_logical",      &testlibdelete_logical},
+    {"lib$delete_symbol",       &testlibdelete_symbol},
+    {"lib$delete_vm_zone",      &testlibdelete_vm_zone},
+    {"lib$delete_vm_zone_64",   &testlibdelete_vm_zone_64},
 #endif
-    {"lib$digit_sep",		&testlibdigit_sep},
+    {"lib$digit_sep",       &testlibdigit_sep},
 #if 0
-    {"lib$disable_ctrl",		&testlibdisable_ctrl},
-    {"lib$do_command",		&testlibdo_command},
+    {"lib$disable_ctrl",        &testlibdisable_ctrl},
+    {"lib$do_command",      &testlibdo_command},
 #endif
-    {"lib$ediv",			&testlibediv},
+    {"lib$ediv",            &testlibediv},
 #if 0
-    {"lib$enable_ctrl",		&testlibenable_ctrl},
-    {"lib$establish",		&testlibestablish},
-    {"lib$expand_nodename",		&testlibexpand_nodename},
-    {"lib$fid_to_name",		&testlibfid_to_name},
-    {"lib$file_scan",		&testlibfile_scan},
-    {"lib$file_scan_end",		&testlibfile_scan_end},
-    {"lib$find_file",		&testlibfind_file},
-    {"lib$find_file_end",		&testlibfind_file},
+    {"lib$enable_ctrl",     &testlibenable_ctrl},
+    {"lib$establish",       &testlibestablish},
+    {"lib$expand_nodename",     &testlibexpand_nodename},
+    {"lib$fid_to_name",     &testlibfid_to_name},
+    {"lib$file_scan",       &testlibfile_scan},
+    {"lib$file_scan_end",       &testlibfile_scan_end},
+    {"lib$find_file",       &testlibfind_file},
+    {"lib$find_file_end",       &testlibfind_file},
 #endif
-    {"lib$locc",			&testliblocc},
-    {"lib$matchc",			&testlibmatchc},
-    {"lib$movc3",			&testlibmovc3},
-    {"lib$wait",			&testlibwait}
+    {"lib$locc",            &testliblocc},
+    {"lib$matchc",          &testlibmatchc},
+    {"lib$movc3",           &testlibmovc3},
+    {"lib$wait",            &testlibwait}
 };
 
 
@@ -232,10 +232,10 @@ flist[]=
 int main(void)
 {
 
-    int	line_ctr;
-    int	which_fun,i,j;
-    char  	functionname[FNameSize],junk[10],cont;
-    FILE 	*fptr;
+    int line_ctr;
+    int which_fun,i,j;
+    char    functionname[FNameSize],junk[10],cont;
+    FILE    *fptr;
 
     cont = 'P';
 #if i386
@@ -256,10 +256,10 @@ int main(void)
     printf ("Enter Function Name :");
     scanf  ("%s",functionname);
 
-//	get rid of <CR>  some garbage left when changing input modes
+//  get rid of <CR>  some garbage left when changing input modes
     fgets(junk,2,stdin);
 
-//	lower case input
+//  lower case input
     for (i=0; i < strlen(functionname); i++ )
     {
         functionname[i] = tolower(functionname[i]);
@@ -298,9 +298,9 @@ int main(void)
 
 /********************************************/
 
-int	get_fun_num (char *functionname)
+int get_fun_num (char *functionname)
 {
-    int	i,result;
+    int i,result;
 
     result = 9999;
 
@@ -319,15 +319,15 @@ int	get_fun_num (char *functionname)
 /********************/
 void call_test_function (int which_fun,char *fname, FILE *fptr, char *cont)
 {
-    char	fbuffer[FBUFSIZE];
-    char	*fstatus;
+    char    fbuffer[FBUFSIZE];
+    char    *fstatus;
 
 
     fstatus = fbuffer; // kluge are way into while statment
     rewind (fptr);
     while ( fstatus != NULL )
     {
-//	read in routine name
+//  read in routine name
         fstatus = fgets (fbuffer,FBUFSIZE,fptr);
         if ( fstatus != NULL )
         {
@@ -337,7 +337,7 @@ void call_test_function (int which_fun,char *fname, FILE *fptr, char *cont)
 #if i386
                 system ("clear");
 #endif
-// 			read in comment
+//          read in comment
                 fstatus = fgets (fbuffer,FBUFSIZE,fptr);
                 printf ("Comment %s \n",fbuffer);
                 flist[which_fun].ptr_fun(fptr,&*fstatus, cont) ;
@@ -356,8 +356,8 @@ void call_test_function (int which_fun,char *fname, FILE *fptr, char *cont)
                 fstatus = fgets(fbuffer,FBUFSIZE,fptr);
                 fstatus = fgets(fbuffer,FBUFSIZE,fptr);
             }
-        } 		// if not NULL
-    } 	/* end while */
+        }       // if not NULL
+    }   /* end while */
 
     return;
 }
@@ -367,9 +367,9 @@ void call_test_function (int which_fun,char *fname, FILE *fptr, char *cont)
 
 void print_result_code (char *presult, unsigned long result_code,char *cont)
 {
-    char	errmsg[80];
-    unsigned short int	errmsglen;
-    unsigned int	flags = 3;
+    char    errmsg[80];
+    unsigned short int  errmsglen;
+    unsigned int    flags = 3;
 
     if ( sys$$geterrno(presult) != result_code)
     {
@@ -389,7 +389,7 @@ void print_result_code (char *presult, unsigned long result_code,char *cont)
 
 /********************************************/
 
-void print_desc_compare (	char *title,
+void print_desc_compare (   char *title,
                             struct dsc$descriptor_s *s1,
                             struct dsc$descriptor_s *s2,
                             char *cont)
@@ -418,7 +418,7 @@ void print_lu_compare(char *title,unsigned long v1,unsigned long v2,char *cont)
 }
 /********************************************/
 
-void print_ls_compare (	char *title, long v1, long v2, char *cont)
+void print_ls_compare ( char *title, long v1, long v2, char *cont)
 {
     if ( v1 != v2 )
     {
@@ -446,7 +446,7 @@ void print_int_compare ( char *title, int v1, int v2, char *cont)
 
 /********************************************/
 
-int	testlibadawi(FILE *fptr,int *fstatus, char *cont)
+int testlibadawi(FILE *fptr,int *fstatus, char *cont)
 {
 
     printf ("Add with interlock not implemented \n");
@@ -458,38 +458,38 @@ int	testlibadawi(FILE *fptr,int *fstatus, char *cont)
 
 /********************************************/
 
-int	testlibaddx (FILE *fptr, int *fstatus, char *cont)
+int testlibaddx (FILE *fptr, int *fstatus, char *cont)
 {
 
-    int	i;
-    unsigned long	result_code;
-    signed   long	array1_size, array2_size, array3_size, array_length;
-    unsigned long	array1[50], array2[50], array3[50];
-    char		pt1[10], pv1[10], presult[30];
+    int i;
+    unsigned long   result_code;
+    signed   long   array1_size, array2_size, array3_size, array_length;
+    unsigned long   array1[50], array2[50], array3[50];
+    char        pt1[10], pv1[10], presult[30];
 
-//	First array of numbers
+//  First array of numbers
     *fstatus = fscanf (fptr,scan1,pv1);
     array1_size = atol (pv1);
     for ( i = array1_size-1; i >= 0; i-- )
         *fstatus = fscanf (fptr,"%lX",&array1[i]);
 
-//	Second array of numbers
+//  Second array of numbers
     *fstatus = fscanf (fptr,scan1,pv1);
     array2_size = atol (pv1);
     for ( i = array2_size-1; i >= 0; i-- )
         *fstatus = fscanf (fptr,"%lX",&array2[i]);
 
-//	Array of sums
+//  Array of sums
     *fstatus = fscanf (fptr,scan1,pv1);
     array3_size = atol (pv1);
     for ( i = array3_size-1; i >= 0; i-- )
         *fstatus = fscanf (fptr,"%lX",&array3[i]);
 
-//	Size of array
+//  Size of array
     *fstatus = fscanf (fptr,scan2,pt1,pv1);
     array_length = atol (pv1);
 
-//	Expected return status
+//  Expected return status
     *fstatus = fscanf (fptr,scan1,presult);
 
 
@@ -540,13 +540,13 @@ int	testlibaddx (FILE *fptr, int *fstatus, char *cont)
 
 /******************************************************/
 
-int	testlibadd_times(FILE *fptr,int *fstatus, char *cont)
+int testlibadd_times(FILE *fptr,int *fstatus, char *cont)
 
 {
     unsigned long result_code;
-    char 	pt1[10], pv1[10];
-    char 	pt2[10], pv2[10],presult[50];
-    char	time1[8], time2[8], time_result[8];
+    char    pt1[10], pv1[10];
+    char    pt2[10], pv2[10],presult[50];
+    char    time1[8], time2[8], time_result[8];
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
 
@@ -571,20 +571,20 @@ int	testlibadd_times(FILE *fptr,int *fstatus, char *cont)
 
 /********************************************/
 
-int	testlibanalyze_sdesc (FILE *fptr, int *fstatus, char *cont)
+int testlibanalyze_sdesc (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long result_code;
-    char 	*s1_ptr;			/* Pointer to first string */
-    char 	pt1[10], pv1[10];
-    char	presult [20];
-    struct	dsc$descriptor_s s1,sr;
-    unsigned short s1_length;		/* Length of first string */
-    int	in_length;
+    char    *s1_ptr;            /* Pointer to first string */
+    char    pt1[10], pv1[10];
+    char    presult [20];
+    struct  dsc$descriptor_s s1,sr;
+    unsigned short s1_length;       /* Length of first string */
+    int in_length;
 
     *fstatus = fscanf (fptr,scan3,pt1,pv1,presult);
 
-    if (strncmp (pt1,"cd",2) == 0)	str$$malloc_sd (&s1,pv1);
-    if (strncmp (pt1,"cd",2) == 0)	str$$malloc_sd (&sr,pv1);
+    if (strncmp (pt1,"cd",2) == 0)  str$$malloc_sd (&s1,pv1);
+    if (strncmp (pt1,"cd",2) == 0)  str$$malloc_sd (&sr,pv1);
 
     if ( strncmp ("NULL",pv1,4) == 0 )
         in_length = 0;
@@ -628,21 +628,21 @@ int	testlibanalyze_sdesc (FILE *fptr, int *fstatus, char *cont)
 
 /*************************************************/
 
-int	testlibanalyze_sdesc_64 (FILE *fptr, int *fstatus, char *cont)
+int testlibanalyze_sdesc_64 (FILE *fptr, int *fstatus, char *cont)
 {
-    int	input_length;
-    unsigned long type;		/* Length of first string */
+    int input_length;
+    unsigned long type;     /* Length of first string */
     unsigned long result_code;
     unsigned short s1_len;
-    char 	*s1_ptr;			/* Pointer to first string */
-    char 	pt1[10], pv1[10];
-    char 	pt2[10], pv2[10];
-    char	presult [20];
-    struct	dsc$descriptor_s s1,sr;
+    char    *s1_ptr;            /* Pointer to first string */
+    char    pt1[10], pv1[10];
+    char    pt2[10], pv2[10];
+    char    presult [20];
+    struct  dsc$descriptor_s s1,sr;
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
-    if (strncmp (pt1,"cd",2) == 0)	str$$malloc_sd (&s1,pv1);
-    if (strncmp (pt1,"cd",2) == 0)	str$$malloc_sd (&sr,pv1);
+    if (strncmp (pt1,"cd",2) == 0)  str$$malloc_sd (&s1,pv1);
+    if (strncmp (pt1,"cd",2) == 0)  str$$malloc_sd (&sr,pv1);
     type = atol (pv2);
 
     if ( strncmp (pv1,"NULL",4) == 0 )
@@ -685,9 +685,9 @@ int	testlibanalyze_sdesc_64 (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 #if 0
-int	testlibasn_wth_mbx (FILE *fptr, int *fstatus, char *cont)
+int testlibasn_wth_mbx (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
+    int result_code;
     struct dsc$descriptor_s device_name;
     signed long message_size, buffer_quota;
     unsigned short device_channel, mailbox_channel;
@@ -703,9 +703,9 @@ int	testlibasn_wth_mbx (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 #if 0
-int	testlibast_in_prog (FILE *fptr, int *fstatus, char *cont)
+int testlibast_in_prog (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
+    int result_code;
 
     printf ("LIB$AST_IN_PROG Not coded \n");
     *cont = 'P';
@@ -716,9 +716,9 @@ int	testlibast_in_prog (FILE *fptr, int *fstatus, char *cont)
 }
 /************************************************/
 
-int	testlibattach (FILE *fptr, int *fstatus, char *cont)
+int testlibattach (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
+    int result_code;
     unsigned long process_id;
 
     printf ("LIB$ATTACH Not coded \n");
@@ -732,13 +732,13 @@ int	testlibattach (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 
-int	testlibchar (FILE *fptr, int *fstatus, char *cont)
+int testlibchar (FILE *fptr, int *fstatus, char *cont)
 {
-    unsigned long	result_code;
-    unsigned short	s1_len;
-    char		character, *s1_ptr;
-    char		pt1[30],pv1[30],presult[30];
-    struct	dsc$descriptor_s sd1;
+    unsigned long   result_code;
+    unsigned short  s1_len;
+    char        character, *s1_ptr;
+    char        pt1[30],pv1[30],presult[30];
+    struct  dsc$descriptor_s sd1;
 
     *fstatus = fscanf (fptr,scan3,pt1,pv1,presult);
 
@@ -768,16 +768,16 @@ int	testlibchar (FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int	testlibbuild_nodespec (FILE *fptr, int *fstatus, char *cont)
+int testlibbuild_nodespec (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long result_code;
     unsigned short len;
     struct dsc$descriptor_s primary,nodespec,acs,second;
-    char	pt1[30],pv1[30],presult[30];
-    char	pt2[30],pv2[30];
-    char	pt3[30],pv3[30];
-    char	pt4[30],pv4[30];
-    char	pt5[30],pv5[30];
+    char    pt1[30],pv1[30],presult[30];
+    char    pt2[30],pv2[30];
+    char    pt3[30],pv3[30];
+    char    pt4[30],pv4[30];
+    char    pt5[30],pv5[30];
 
     *fstatus = fscanf (fptr,scan11,pt1,pv1,pt2,pv2,pt3,pv3,pt4,pv4,pt5,pv5,presult);
 
@@ -870,11 +870,11 @@ int	testlibbuild_nodespec (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 #if 0
-int	testlibcompress_nodename (FILE *fptr, int *fstatus, char *cont)
+int testlibcompress_nodename (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
-    struct	dsc$descriptor_s name, compressed_name;
-    unsigned short	name_len;
+    int result_code;
+    struct  dsc$descriptor_s name, compressed_name;
+    unsigned short  name_len;
 
     printf ("Test LIB$COMPRESS_NODENAME Not Implemented \n");
     *cont = 'P';
@@ -896,11 +896,11 @@ int	testlibcompress_nodename (FILE *fptr, int *fstatus, char *cont)
 
 
 #if 0
-int	testlibcompare_nodename (FILE *fptr, int *fstatus, char *cont)
+int testlibcompare_nodename (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
-    struct	dsc$descriptor_s name1, name2;
-    unsigned long	name_len;
+    int result_code;
+    struct  dsc$descriptor_s name1, name2;
+    unsigned long   name_len;
 
     printf ("Test LIB$COMPRESS_NODENAME Not Implemented \n");
     *cont = 'P';
@@ -920,10 +920,10 @@ int	testlibcompare_nodename (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 
-int	testlibcallg (FILE *fptr, int *fstatus, char *cont)
+int testlibcallg (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
-    char	arglist[255];
+    int result_code;
+    char    arglist[255];
 
     strcpy (arglist,"ls -l");
 
@@ -935,14 +935,14 @@ int	testlibcallg (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 
-int	testlibcallg_64 (FILE *fptr, int *fstatus, char *cont)
+int testlibcallg_64 (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
+    int result_code;
 
     printf ("Test LIB$CALLG_64 Not Implemented \n");
     *cont = 'P';
 
-//	result_code = lib$callg_64 ();
+//  result_code = lib$callg_64 ();
 
 
     return result_code;
@@ -951,14 +951,14 @@ int	testlibcallg_64 (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 
-int	testlibconvert_date_string (FILE *fptr, int *fstatus, char *cont)
+int testlibconvert_date_string (FILE *fptr, int *fstatus, char *cont)
 {
-    char	pv1[10],pv2[10],pv3[10],pv4[10],pv5[10],pv6[10],presult[30];
-    unsigned long	result_code;
+    char    pv1[10],pv2[10],pv3[10],pv4[10],pv5[10],pv6[10],presult[30];
+    unsigned long   result_code;
     unsigned long long date_time;
     struct dsc$descriptor_s date_string;
-    unsigned long 	user_context, flags, defaulted_fields;
-    unsigned short	defaults;
+    unsigned long   user_context, flags, defaulted_fields;
+    unsigned short  defaults;
 
     printf ("Testing lib$convert_date_string \n");
     printf ("\n\n");
@@ -999,14 +999,14 @@ int	testlibconvert_date_string (FILE *fptr, int *fstatus, char *cont)
 
 
 #if 0
-int	testlibcrc (FILE *fptr, int *fstatus, char *cont)
+int testlibcrc (FILE *fptr, int *fstatus, char *cont)
 {
-    char	pv1[50], pv2[50], presult[30];
-    signed	long crc_table[16], initial_crc;
+    char    pv1[50], pv2[50], presult[30];
+    signed  long crc_table[16], initial_crc;
     char *stream;
     unsigned long result_code;
-    unsigned long polynomial;		// bitmask indicating which polynomial
-    int	i;
+    unsigned long polynomial;       // bitmask indicating which polynomial
+    int i;
 
     polynomial = 0xFFFF;
 
@@ -1047,12 +1047,12 @@ int	testlibcrc (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 
-int	testlibcrc_table (FILE *fptr, int *fstatus, char *cont)
+int testlibcrc_table (FILE *fptr, int *fstatus, char *cont)
 {
-    char	pv1[50], presult[30];
-    signed	long crc_table[16];
-    unsigned long polynomial;		// bitmask indicating which polynomial
-    int	i;
+    char    pv1[50], presult[30];
+    signed  long crc_table[16];
+    unsigned long polynomial;       // bitmask indicating which polynomial
+    int i;
 
     polynomial = 0xFFFF;
 
@@ -1085,7 +1085,7 @@ int	testlibcrc_table (FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int	testlibcreate_dir (FILE *fptr, int *fstatus, char *cont)
+int testlibcreate_dir (FILE *fptr, int *fstatus, char *cont)
 {
     char pv1[10],pv2[10],pv3[10],pv4[10],pv5[10],pv6[10],pv7[10],presult[30];
     unsigned long result;
@@ -1133,7 +1133,7 @@ int	testlibcreate_dir (FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int testlibcreate_user_vm_zone	(FILE *fptr, int *fstatus, char *cont)
+int testlibcreate_user_vm_zone  (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long result;
     unsigned long id;
@@ -1193,7 +1193,7 @@ int testlibcreate_vm_zone (FILE *fptr, int *fstatus, char *cont)
 #endif
 /************************************************/
 
-int	testlibwait (FILE *fptr, int *fstatus, char *cont)
+int testlibwait (FILE *fptr, int *fstatus, char *cont)
 {
 
     printf ("Test LIB$WAIT Not Implemented \n");
@@ -1205,12 +1205,12 @@ int	testlibwait (FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int	testlibdate_time (FILE *fptr, int *fstatus, char *cont)
+int testlibdate_time (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned short date_time_size = 23;
     unsigned long  result;
     struct dsc$descriptor_s date_time_desc;
-    char	presult[30];
+    char    presult[30];
 
     printf ("Test LIB$DATE_TIME \n");
 
@@ -1238,11 +1238,11 @@ int	testlibdate_time (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 #if 0
-int	testlibdelete_file (FILE *fptr, int *fstatus, char *cont)
+int testlibdelete_file (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long  result;
-    struct	dsc$descriptor_s file_name;
-    char	temp_file_name[255], presult[30];
+    struct  dsc$descriptor_s file_name;
+    char    temp_file_name[255], presult[30];
 
 
     printf ("Test LIB$DELETE_FILE \n");
@@ -1271,10 +1271,10 @@ int	testlibdelete_file (FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int	testlibdelete_logical (FILE *fptr, int *fstatus, char *cont)
+int testlibdelete_logical (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long  result;
-    struct	dsc$descriptor_s logical_name, table_name;
+    struct  dsc$descriptor_s logical_name, table_name;
     char    temp_logical_name[256], temp_table_name[256], presult[30];
 
     printf ("Test LIB$DELETE_LOGICAL \n");
@@ -1313,11 +1313,11 @@ int	testlibdelete_logical (FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int	testlibdelete_symbol (FILE *fptr, int *fstatus, char *cont)
+int testlibdelete_symbol (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long  result;
-    struct	dsc$descriptor_s symbol_name;
-    char	pv1[256],presult[30];
+    struct  dsc$descriptor_s symbol_name;
+    char    pv1[256],presult[30];
 
     printf ("Test LIB$DELETE_LOGICAL \n");
     printf ("\n\n");
@@ -1344,10 +1344,10 @@ int	testlibdelete_symbol (FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int	testlibdelete_vm_zone (FILE *fptr, int *fstatus, char *cont)
+int testlibdelete_vm_zone (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long  result, zone_id;
-    char	pv1[256],presult[30];
+    char    pv1[256],presult[30];
 
     printf ("Test LIB$DELETE_VM_ZONE \n");
     printf ("\n\n");
@@ -1372,10 +1372,10 @@ int	testlibdelete_vm_zone (FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int	testlibdelete_vm_zone_64 (FILE *fptr, int *fstatus, char *cont)
+int testlibdelete_vm_zone_64 (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long  result, zone_id;
-    char	pv1[256],presult[30];
+    char    pv1[256],presult[30];
 
     printf ("Test LIB$DELETE_VM_ZONE_64 \n");
     printf ("\n\n");
@@ -1402,11 +1402,11 @@ int	testlibdelete_vm_zone_64 (FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int	testlibdigit_sep (FILE *fptr, int *fstatus, char *cont)
+int testlibdigit_sep (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long  result;
-    unsigned short	length;
-    char	pv1[256],pv2[255],presult[30];
+    unsigned short  length;
+    char    pv1[256],pv2[255],presult[30];
     struct dsc$descriptor_s digit_sep;
 
     printf ("Test LIB$DIGIT_SEP \n");
@@ -1441,10 +1441,10 @@ int	testlibdigit_sep (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 #if 0
-int	testlibdisable_ctrl (FILE *fptr, int *fstatus, char *cont)
+int testlibdisable_ctrl (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long  result,mask,oldmask;
-    char	pv1[256],pv2[255],presult[30];
+    char    pv1[256],pv2[255],presult[30];
 
     printf ("Test LIB$DISABLE_CTRL \n");
     printf ("\n\n");
@@ -1475,10 +1475,10 @@ int	testlibdisable_ctrl (FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int	testlibdo_command (FILE *fptr, int *fstatus, char *cont)
+int testlibdo_command (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long  result;
-    char	pv1[256],presult[30];
+    char    pv1[256],presult[30];
     struct dsc$descriptor_s command;
 
     printf ("Test LIB$DO_COMMAND \n");
@@ -1505,11 +1505,11 @@ int	testlibdo_command (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 #endif
 
-int	testlibediv (FILE *fptr, int *fstatus, char *cont)
+int testlibediv (FILE *fptr, int *fstatus, char *cont)
 {
-    char	pv1[256],pv2[255],pv3[255],pv4[255],presult[30];
+    char    pv1[256],pv2[255],pv3[255],pv4[255],presult[30];
     unsigned long result_code;
-    long 	divisor, quotient, remainder;
+    long    divisor, quotient, remainder;
     long long dividend;
 
     printf ("Test LIB$EDIV \n");
@@ -1544,10 +1544,10 @@ int	testlibediv (FILE *fptr, int *fstatus, char *cont)
     return 0;
 }
 #if 0
-int	testlibenable_ctrl (FILE *fptr, int *fstatus, char *cont)
+int testlibenable_ctrl (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long  result,mask,oldmask;
-    char	pv1[256],pv2[255],presult[30];
+    char    pv1[256],pv2[255],presult[30];
 
     printf ("Test LIB$ENABLE_CTRL \n");
     printf ("\n\n");
@@ -1578,10 +1578,10 @@ int	testlibenable_ctrl (FILE *fptr, int *fstatus, char *cont)
 
 /**************************************/
 
-int	testlibestablish (FILE *fptr, int *fstatus, char *cont)
+int testlibestablish (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long  result;
-    char	presult[30];
+    char    presult[30];
 
     printf ("Test LIB$ESTABLISH \n");
     printf ("\n\n");
@@ -1591,7 +1591,7 @@ int	testlibestablish (FILE *fptr, int *fstatus, char *cont)
     printf ("Input        \n");
     printf ("\n\n");
 
-//	result = lib$establish (void);
+//  result = lib$establish (void);
 
     print_result_code (presult,result,cont);
     printf ("\n\n");
@@ -1606,11 +1606,11 @@ int	testlibestablish (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 #if 0
-int	testlibexpand_nodename (FILE *fptr, int *fstatus, char *cont)
+int testlibexpand_nodename (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
-    struct	dsc$descriptor_s name, expanded_name;
-    unsigned short	name_len;
+    int result_code;
+    struct  dsc$descriptor_s name, expanded_name;
+    unsigned short  name_len;
 
     printf ("Test LIB$EXPAND_NODENAME Not Implemented \n");
     *cont = 'P';
@@ -1625,12 +1625,12 @@ int	testlibexpand_nodename (FILE *fptr, int *fstatus, char *cont)
 
 
 #if 0
-int	testlibfid_to_name (FILE *fptr, int *fstatus, char *cont)
+int testlibfid_to_name (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
-    struct	dsc$descriptor_s device_name, filespec;
-    unsigned short	file_id, filespec_length, directory_id;
-    unsigned long	acp_status;
+    int result_code;
+    struct  dsc$descriptor_s device_name, filespec;
+    unsigned short  file_id, filespec_length, directory_id;
+    unsigned long   acp_status;
 
     printf ("Test LIB$FID_TO_NAME   \n");
     *cont = 'P';
@@ -1646,9 +1646,9 @@ int	testlibfid_to_name (FILE *fptr, int *fstatus, char *cont)
 
 #define FAB _fabdef
 
-int	testlibfile_scan (FILE *fptr, int *fstatus, char *cont)
+int testlibfile_scan (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
+    int result_code;
     struct FAB nam_block;
     unsigned long context;
 
@@ -1665,9 +1665,9 @@ int	testlibfile_scan (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 
-int	testlibfile_scan_end (FILE *fptr, int *fstatus, char *cont)
+int testlibfile_scan_end (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
+    int result_code;
     struct FAB nam_block;
     unsigned long context;
 
@@ -1684,11 +1684,11 @@ int	testlibfile_scan_end (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 
-int	testlibfind_file (FILE *fptr, int *fstatus, char *cont)
+int testlibfind_file (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
+    int result_code;
     unsigned long context, status, flags;
-    struct dsc$descriptor_s	file_spec, result_file_spec, default_file_spec;
+    struct dsc$descriptor_s file_spec, result_file_spec, default_file_spec;
     struct dsc$descriptor_s related_file_spec;
 
     printf ("Test LIB$FIND_FILE   \n");
@@ -1707,9 +1707,9 @@ int	testlibfind_file (FILE *fptr, int *fstatus, char *cont)
 /************************************************/
 
 
-int	testlibfind_file_end (FILE *fptr, int *fstatus, char *cont)
+int testlibfind_file_end (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
+    int result_code;
     unsigned long context;
 
     printf ("Test LIB$FIND_FILE_END   \n");
@@ -1723,12 +1723,12 @@ int	testlibfind_file_end (FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int testliblocc			(FILE *fptr, int *fstatus, char *cont)
+int testliblocc         (FILE *fptr, int *fstatus, char *cont)
 {
-    int	result_code;
-    struct	dsc$descriptor_s char_string, source_string;
-    char	pt1[10],pt2[10];
-    char	pv1[10],pv2[10],presult[30];
+    int result_code;
+    struct  dsc$descriptor_s char_string, source_string;
+    char    pt1[10],pt2[10];
+    char    pv1[10],pv2[10],presult[30];
 
     printf ("Testing LIB$LOCC \n");
     printf ("\n\n");
@@ -1768,12 +1768,12 @@ int testliblocc			(FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int testlibmatchc		(FILE *fptr, int *fstatus, char *cont)
+int testlibmatchc       (FILE *fptr, int *fstatus, char *cont)
 {
-    unsigned long	result_code;
-    struct	dsc$descriptor_s char_string, source_string;
-    char	pt1[10],pt2[10];
-    char	pv1[10],pv2[10],presult[30];
+    unsigned long   result_code;
+    struct  dsc$descriptor_s char_string, source_string;
+    char    pt1[10],pt2[10];
+    char    pv1[10],pv2[10],presult[30];
 
     printf ("Testing LIB$MATCHC \n");
     printf ("\n\n");
@@ -1817,10 +1817,10 @@ int testlibmatchc		(FILE *fptr, int *fstatus, char *cont)
 
 /************************************************/
 
-int	testlibmovc3 		(FILE *fptr, int *fstatus, char *cont)
+int testlibmovc3        (FILE *fptr, int *fstatus, char *cont)
 {
-    char	pt1[10],pt2[10], pt3[10];
-    char	pv1[30],pv2[30], pv3[30];
+    char    pt1[10],pt2[10], pt3[10];
+    char    pv1[30],pv2[30], pv3[30];
     unsigned short length;
 
     printf ("Testing LIB$MOVC3 \n");

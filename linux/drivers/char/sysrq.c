@@ -6,16 +6,16 @@
 
 /* -*- linux-c -*-
  *
- *	$Id$
+ *  $Id$
  *
- *	Linux Magic System Request Key Hacks
+ *  Linux Magic System Request Key Hacks
  *
- *	(c) 1997 Martin Mares <mj@atrey.karlin.mff.cuni.cz>
- *	based on ideas by Pavel Machek <pavel@atrey.karlin.mff.cuni.cz>
+ *  (c) 1997 Martin Mares <mj@atrey.karlin.mff.cuni.cz>
+ *  based on ideas by Pavel Machek <pavel@atrey.karlin.mff.cuni.cz>
  *
- *	(c) 2000 Crutcher Dunnavant <crutcher+kernel@datastacks.com>
- *	overhauled to use key registration
- *	based upon discusions in irc://irc.openprojects.net/#kernelnewbies
+ *  (c) 2000 Crutcher Dunnavant <crutcher+kernel@datastacks.com>
+ *  overhauled to use key registration
+ *  based upon discusions in irc://irc.openprojects.net/#kernelnewbies
  */
 
 #include <linux/config.h>
@@ -64,9 +64,9 @@ static struct sysrq_key_op sysrq_loglevel_op =
 {
 handler:
     sysrq_handle_loglevel,
-help_msg:	"loglevel0-8"
+help_msg:   "loglevel0-8"
     ,
-action_msg:	"Changing Loglevel"
+action_msg: "Changing Loglevel"
     ,
 };
 
@@ -81,9 +81,9 @@ static struct sysrq_key_op sysrq_SAK_op =
 {
 handler:
     sysrq_handle_SAK,
-help_msg:	"saK"
+help_msg:   "saK"
     ,
-action_msg:	"SAK"
+action_msg: "SAK"
     ,
 };
 #endif
@@ -100,9 +100,9 @@ static struct sysrq_key_op sysrq_unraw_op =
 {
 handler:
     sysrq_handle_unraw,
-help_msg:	"unRaw"
+help_msg:   "unRaw"
     ,
-action_msg:	"Keyboard mode set to XLATE"
+action_msg: "Keyboard mode set to XLATE"
     ,
 };
 
@@ -117,9 +117,9 @@ static struct sysrq_key_op sysrq_reboot_op =
 {
 handler:
     sysrq_handle_reboot,
-help_msg:	"reBoot"
+help_msg:   "reBoot"
     ,
-action_msg:	"Resetting"
+action_msg: "Resetting"
     ,
 };
 
@@ -263,9 +263,9 @@ static struct sysrq_key_op sysrq_sync_op =
 {
 handler:
     sysrq_handle_sync,
-help_msg:	"Sync"
+help_msg:   "Sync"
     ,
-action_msg:	"Emergency Sync"
+action_msg: "Emergency Sync"
     ,
 };
 
@@ -278,9 +278,9 @@ static struct sysrq_key_op sysrq_mountro_op =
 {
 handler:
     sysrq_handle_mountro,
-help_msg:	"Unmount"
+help_msg:   "Unmount"
     ,
-action_msg:	"Emergency Remount R/O"
+action_msg: "Emergency Remount R/O"
     ,
 };
 
@@ -299,9 +299,9 @@ static struct sysrq_key_op sysrq_showregs_op =
 {
 handler:
     sysrq_handle_showregs,
-help_msg:	"showPc"
+help_msg:   "showPc"
     ,
-action_msg:	"Show Regs"
+action_msg: "Show Regs"
     ,
 };
 
@@ -315,9 +315,9 @@ static struct sysrq_key_op sysrq_showstate_op =
 {
 handler:
     sysrq_handle_showstate,
-help_msg:	"showTasks"
+help_msg:   "showTasks"
     ,
-action_msg:	"Show State"
+action_msg: "Show State"
     ,
 };
 
@@ -331,9 +331,9 @@ static struct sysrq_key_op sysrq_showmem_op =
 {
 handler:
     sysrq_handle_showmem,
-help_msg:	"showMem"
+help_msg:   "showMem"
     ,
-action_msg:	"Show Memory"
+action_msg: "Show Memory"
     ,
 };
 
@@ -372,9 +372,9 @@ static struct sysrq_key_op sysrq_term_op =
 {
 handler:
     sysrq_handle_term,
-help_msg:	"tErm"
+help_msg:   "tErm"
     ,
-action_msg:	"Terminate All Tasks"
+action_msg: "Terminate All Tasks"
     ,
 };
 
@@ -388,9 +388,9 @@ static struct sysrq_key_op sysrq_kill_op =
 {
 handler:
     sysrq_handle_kill,
-help_msg:	"kIll"
+help_msg:   "kIll"
     ,
-action_msg:	"Kill All Tasks"
+action_msg: "Kill All Tasks"
     ,
 };
 
@@ -404,9 +404,9 @@ static struct sysrq_key_op sysrq_killall_op =
 {
 handler:
     sysrq_handle_killall,
-help_msg:	"killalL"
+help_msg:   "killalL"
     ,
-action_msg:	"Kill All Tasks (even init)"
+action_msg: "Kill All Tasks (even init)"
     ,
 };
 
@@ -418,49 +418,49 @@ static spinlock_t sysrq_key_table_lock = SPIN_LOCK_UNLOCKED;
 #define SYSRQ_KEY_TABLE_LENGTH 36
 static struct sysrq_key_op *sysrq_key_table[SYSRQ_KEY_TABLE_LENGTH] =
 {
-    /* 0 */	&sysrq_loglevel_op,
-    /* 1 */	&sysrq_loglevel_op,
-    /* 2 */	&sysrq_loglevel_op,
-    /* 3 */	&sysrq_loglevel_op,
-    /* 4 */	&sysrq_loglevel_op,
-    /* 5 */	&sysrq_loglevel_op,
-    /* 6 */	&sysrq_loglevel_op,
-    /* 7 */	&sysrq_loglevel_op,
-    /* 8 */	&sysrq_loglevel_op,
-    /* 9 */	&sysrq_loglevel_op,
-    /* a */	NULL, /* Don't use for system provided sysrqs,
-    		 it is handled specially on the spark
-    		 and will never arive */
-    /* b */	&sysrq_reboot_op,
-    /* c */	NULL,
-    /* d */	NULL,
-    /* e */	&sysrq_term_op,
-    /* f */	NULL,
-    /* g */	NULL,
-    /* h */	NULL,
-    /* i */	&sysrq_kill_op,
-    /* j */	NULL,
+    /* 0 */ &sysrq_loglevel_op,
+    /* 1 */ &sysrq_loglevel_op,
+    /* 2 */ &sysrq_loglevel_op,
+    /* 3 */ &sysrq_loglevel_op,
+    /* 4 */ &sysrq_loglevel_op,
+    /* 5 */ &sysrq_loglevel_op,
+    /* 6 */ &sysrq_loglevel_op,
+    /* 7 */ &sysrq_loglevel_op,
+    /* 8 */ &sysrq_loglevel_op,
+    /* 9 */ &sysrq_loglevel_op,
+    /* a */ NULL, /* Don't use for system provided sysrqs,
+             it is handled specially on the spark
+             and will never arive */
+    /* b */ &sysrq_reboot_op,
+    /* c */ NULL,
+    /* d */ NULL,
+    /* e */ &sysrq_term_op,
+    /* f */ NULL,
+    /* g */ NULL,
+    /* h */ NULL,
+    /* i */ &sysrq_kill_op,
+    /* j */ NULL,
 #ifdef CONFIG_VT
-    /* k */	&sysrq_SAK_op,
+    /* k */ &sysrq_SAK_op,
 #else
-    /* k */	NULL,
+    /* k */ NULL,
 #endif
-    /* l */	&sysrq_killall_op,
-    /* m */	&sysrq_showmem_op,
-    /* n */	NULL,
-    /* o */	NULL, /* This will often be registered
-    		 as 'Off' at init time */
-    /* p */	&sysrq_showregs_op,
-    /* q */	NULL,
-    /* r */	&sysrq_unraw_op,
-    /* s */	&sysrq_sync_op,
-    /* t */	&sysrq_showstate_op,
-    /* u */	&sysrq_mountro_op,
-    /* v */	NULL,
-    /* w */	NULL,
-    /* x */	NULL,
-    /* w */	NULL,
-    /* z */	NULL
+    /* l */ &sysrq_killall_op,
+    /* m */ &sysrq_showmem_op,
+    /* n */ NULL,
+    /* o */ NULL, /* This will often be registered
+             as 'Off' at init time */
+    /* p */ &sysrq_showregs_op,
+    /* q */ NULL,
+    /* r */ &sysrq_unraw_op,
+    /* s */ &sysrq_sync_op,
+    /* t */ &sysrq_showstate_op,
+    /* u */ &sysrq_mountro_op,
+    /* v */ NULL,
+    /* w */ NULL,
+    /* x */ NULL,
+    /* w */ NULL,
+    /* z */ NULL
 };
 
 /* key2index calculation, -1 on invalid index */
@@ -593,8 +593,8 @@ void __handle_sysrq_nolock(int key, struct pt_regs *pt_regs,
                 do
                 {
                     printk("%x %x %x | ",tmp2,tmp2->pcb$l_pid,tmp2->pcb$b_pri);
-                    //	    if (prev->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
-                    //	    if (prev->pcb$l_pid==2 && tmp2==0xc03e2340) { int i; for(i=0;i<2000000000;i++) ; }
+                    //      if (prev->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
+                    //      if (prev->pcb$l_pid==2 && tmp2==0xc03e2340) { int i; for(i=0;i<2000000000;i++) ; }
                     tmp2=tmp2->pcb$l_sqfl;
                 }
                 while (tmp2!=tmp);

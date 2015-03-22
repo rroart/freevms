@@ -1,5 +1,5 @@
-#ifndef fibdef_h
-#define fibdef_h
+#ifndef FIBDEF_H
+#define FIBDEF_H
 
 /* Fibdef.h v1.3    Definition of 'struct _fibdef' */
 

@@ -1,5 +1,5 @@
-#ifndef arbdef_h
-#define arbdef_h
+#ifndef ARBDEF_H
+#define ARBDEF_H
 
 #define ARB$C_HEADER 52
 #define ARB$K_HEADER 52

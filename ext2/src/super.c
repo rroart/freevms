@@ -802,7 +802,7 @@ static void ext2_sync_super(struct _vcb * vcb, struct ext2_super_block *es2)
 #else
     ext2_write_super(vcb);
 #endif
-    //	wait_on_buffer(EXT2_SB(sb)->s_sbh);
+    //  wait_on_buffer(EXT2_SB(sb)->s_sbh);
 #if 0
     sb->s_dirt = 0;
 #endif

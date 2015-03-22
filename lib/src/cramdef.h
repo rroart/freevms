@@ -1,5 +1,5 @@
-#ifndef cramdef_h
-#define cramdef_h
+#ifndef CRAMDEF_H
+#define CRAMDEF_H
 
 #define CRAM$M_IN_USE 0x1
 #define CRAM$M_DER 0x2

@@ -1,35 +1,35 @@
 #ifndef _ADDRCONF_H
 #define _ADDRCONF_H
 
-#define RETRANS_TIMER	HZ
+#define RETRANS_TIMER   HZ
 
-#define MAX_RTR_SOLICITATIONS		3
-#define RTR_SOLICITATION_INTERVAL	(4*HZ)
+#define MAX_RTR_SOLICITATIONS       3
+#define RTR_SOLICITATION_INTERVAL   (4*HZ)
 
-#define ADDR_CHECK_FREQUENCY		(120*HZ)
+#define ADDR_CHECK_FREQUENCY        (120*HZ)
 
 struct prefix_info
 {
-    __u8			type;
-    __u8			length;
-    __u8			prefix_len;
+    __u8            type;
+    __u8            length;
+    __u8            prefix_len;
 
 #if defined(__BIG_ENDIAN_BITFIELD)
-    __u8			onlink : 1,
+    __u8            onlink : 1,
                     autoconf : 1,
                     reserved : 6;
 #elif defined(__LITTLE_ENDIAN_BITFIELD)
-    __u8			reserved : 6,
+    __u8            reserved : 6,
                     autoconf : 1,
                     onlink : 1;
 #else
 #error "Please fix <asm/byteorder.h>"
 #endif
-    __u32			valid;
-    __u32			prefered;
-    __u32			reserved2;
+    __u32           valid;
+    __u32           prefered;
+    __u32           reserved2;
 
-    struct in6_addr		prefix;
+    struct in6_addr     prefix;
 };
 
 
@@ -39,54 +39,54 @@ struct prefix_info
 #include <linux/netdevice.h>
 #include <net/if_inet6.h>
 
-#define IN6_ADDR_HSIZE		16
+#define IN6_ADDR_HSIZE      16
 
-extern void			addrconf_init(void);
-extern void			addrconf_cleanup(void);
+extern void         addrconf_init(void);
+extern void         addrconf_cleanup(void);
 
-extern int		        addrconf_notify(struct notifier_block *this,
+extern int              addrconf_notify(struct notifier_block *this,
                                         unsigned long event,
                                         void * data);
 
-extern int			addrconf_add_ifaddr(void *arg);
-extern int			addrconf_del_ifaddr(void *arg);
-extern int			addrconf_set_dstaddr(void *arg);
+extern int          addrconf_add_ifaddr(void *arg);
+extern int          addrconf_del_ifaddr(void *arg);
+extern int          addrconf_set_dstaddr(void *arg);
 
-extern int			ipv6_chk_addr(struct in6_addr *addr,
+extern int          ipv6_chk_addr(struct in6_addr *addr,
                                   struct net_device *dev);
-extern struct inet6_ifaddr *	ipv6_get_ifaddr(struct in6_addr *addr,
+extern struct inet6_ifaddr *    ipv6_get_ifaddr(struct in6_addr *addr,
         struct net_device *dev);
-extern int			ipv6_get_saddr(struct dst_entry *dst,
+extern int          ipv6_get_saddr(struct dst_entry *dst,
                                    struct in6_addr *daddr,
                                    struct in6_addr *saddr);
-extern int			ipv6_get_lladdr(struct net_device *dev, struct in6_addr *);
+extern int          ipv6_get_lladdr(struct net_device *dev, struct in6_addr *);
 
 /*
- *	multicast prototypes (mcast.c)
+ *  multicast prototypes (mcast.c)
  */
-extern int			ipv6_sock_mc_join(struct sock *sk,
+extern int          ipv6_sock_mc_join(struct sock *sk,
                                       int ifindex,
                                       struct in6_addr *addr);
-extern int			ipv6_sock_mc_drop(struct sock *sk,
+extern int          ipv6_sock_mc_drop(struct sock *sk,
                                       int ifindex,
                                       struct in6_addr *addr);
-extern void			ipv6_sock_mc_close(struct sock *sk);
-extern int			inet6_mc_check(struct sock *sk, struct in6_addr *addr);
+extern void         ipv6_sock_mc_close(struct sock *sk);
+extern int          inet6_mc_check(struct sock *sk, struct in6_addr *addr);
 
-extern int			ipv6_dev_mc_inc(struct net_device *dev,
+extern int          ipv6_dev_mc_inc(struct net_device *dev,
                                     struct in6_addr *addr);
-extern int			ipv6_dev_mc_dec(struct net_device *dev,
+extern int          ipv6_dev_mc_dec(struct net_device *dev,
                                     struct in6_addr *addr);
-extern void			ipv6_mc_up(struct inet6_dev *idev);
-extern void			ipv6_mc_down(struct inet6_dev *idev);
-extern void			ipv6_mc_init_dev(struct inet6_dev *idev);
-extern void			ipv6_mc_destroy_dev(struct inet6_dev *idev);
-extern void			addrconf_dad_failure(struct inet6_ifaddr *ifp);
+extern void         ipv6_mc_up(struct inet6_dev *idev);
+extern void         ipv6_mc_down(struct inet6_dev *idev);
+extern void         ipv6_mc_init_dev(struct inet6_dev *idev);
+extern void         ipv6_mc_destroy_dev(struct inet6_dev *idev);
+extern void         addrconf_dad_failure(struct inet6_ifaddr *ifp);
 
-extern int			ipv6_chk_mcast_addr(struct net_device *dev,
+extern int          ipv6_chk_mcast_addr(struct net_device *dev,
                                         struct in6_addr *addr);
 
-extern void			addrconf_prefix_rcv(struct net_device *dev,
+extern void         addrconf_prefix_rcv(struct net_device *dev,
                                         u8 *opt, int len);
 
 /* Device notifier */
@@ -138,9 +138,9 @@ static inline void in6_ifa_put(struct inet6_ifaddr *ifp)
 #define in6_ifa_hold(idev)   atomic_inc(&(idev)->refcnt)
 
 
-extern void			addrconf_forwarding_on(void);
+extern void         addrconf_forwarding_on(void);
 /*
- *	Hash function taken from net_alias.c
+ *  Hash function taken from net_alias.c
  */
 
 static __inline__ u8 ipv6_addr_hash(struct in6_addr *addr)
@@ -160,7 +160,7 @@ static __inline__ u8 ipv6_addr_hash(struct in6_addr *addr)
 }
 
 /*
- *	compute link-local solicited-node multicast address
+ *  compute link-local solicited-node multicast address
  */
 
 static inline void addrconf_addr_solict_mult(struct in6_addr *addr,

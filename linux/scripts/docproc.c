@@ -6,7 +6,7 @@
 #include <sys/wait.h>
 
 /*
- *	A simple filter for the templates
+ *  A simple filter for the templates
  */
 
 int main(int argc, char *argv[])
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     }
 
     /*
-     *	Build the exec array ahead of time.
+     *  Build the exec array ahead of time.
      */
     vec[0]="kernel-doc";
     vec[1]="-docbook";
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     vec[vp++]=NULL;
 
     /*
-     *	Now process the template
+     *  Now process the template
      */
 
     while(fgets(buf, 1024, stdin))

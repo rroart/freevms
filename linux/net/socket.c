@@ -5,61 +5,61 @@
 // Modified Linux source file, 2001-2004.
 
 /*
- * NET		An implementation of the SOCKET network access protocol.
+ * NET      An implementation of the SOCKET network access protocol.
  *
- * Version:	@(#)socket.c	1.1.93	18/02/95
+ * Version: @(#)socket.c    1.1.93  18/02/95
  *
- * Authors:	Orest Zborowski, <obz@Kodak.COM>
- *		Ross Biro, <bir7@leland.Stanford.Edu>
- *		Fred N. van Kempen, <waltje@uWalt.NL.Mugnet.ORG>
+ * Authors: Orest Zborowski, <obz@Kodak.COM>
+ *      Ross Biro, <bir7@leland.Stanford.Edu>
+ *      Fred N. van Kempen, <waltje@uWalt.NL.Mugnet.ORG>
  *
  * Fixes:
- *		Anonymous	:	NOTSOCK/BADF cleanup. Error fix in
- *					shutdown()
- *		Alan Cox	:	verify_area() fixes
- *		Alan Cox	:	Removed DDI
- *		Jonathan Kamens	:	SOCK_DGRAM reconnect bug
- *		Alan Cox	:	Moved a load of checks to the very
- *					top level.
- *		Alan Cox	:	Move address structures to/from user
- *					mode above the protocol layers.
- *		Rob Janssen	:	Allow 0 length sends.
- *		Alan Cox	:	Asynchronous I/O support (cribbed from the
- *					tty drivers).
- *		Niibe Yutaka	:	Asynchronous I/O for writes (4.4BSD style)
- *		Jeff Uphoff	:	Made max number of sockets command-line
- *					configurable.
- *		Matti Aarnio	:	Made the number of sockets dynamic,
- *					to be allocated when needed, and mr.
- *					Uphoff's max is used as max to be
- *					allowed to allocate.
- *		Linus		:	Argh. removed all the socket allocation
- *					altogether: it's in the inode now.
- *		Alan Cox	:	Made sock_alloc()/sock_release() public
- *					for NetROM and future kernel nfsd type
- *					stuff.
- *		Alan Cox	:	sendmsg/recvmsg basics.
- *		Tom Dyas	:	Export net symbols.
- *		Marcin Dalecki	:	Fixed problems with CONFIG_NET="n".
- *		Alan Cox	:	Added thread locking to sys_* calls
- *					for sockets. May have errors at the
- *					moment.
- *		Kevin Buhr	:	Fixed the dumb errors in the above.
- *		Andi Kleen	:	Some small cleanups, optimizations,
- *					and fixed a copy_from_user() bug.
- *		Tigran Aivazian	:	sys_send(args) calls sys_sendto(args, NULL, 0)
- *		Tigran Aivazian	:	Made listen(2) backlog sanity checks
- *					protocol-independent
+ *      Anonymous   :   NOTSOCK/BADF cleanup. Error fix in
+ *                  shutdown()
+ *      Alan Cox    :   verify_area() fixes
+ *      Alan Cox    :   Removed DDI
+ *      Jonathan Kamens :   SOCK_DGRAM reconnect bug
+ *      Alan Cox    :   Moved a load of checks to the very
+ *                  top level.
+ *      Alan Cox    :   Move address structures to/from user
+ *                  mode above the protocol layers.
+ *      Rob Janssen :   Allow 0 length sends.
+ *      Alan Cox    :   Asynchronous I/O support (cribbed from the
+ *                  tty drivers).
+ *      Niibe Yutaka    :   Asynchronous I/O for writes (4.4BSD style)
+ *      Jeff Uphoff :   Made max number of sockets command-line
+ *                  configurable.
+ *      Matti Aarnio    :   Made the number of sockets dynamic,
+ *                  to be allocated when needed, and mr.
+ *                  Uphoff's max is used as max to be
+ *                  allowed to allocate.
+ *      Linus       :   Argh. removed all the socket allocation
+ *                  altogether: it's in the inode now.
+ *      Alan Cox    :   Made sock_alloc()/sock_release() public
+ *                  for NetROM and future kernel nfsd type
+ *                  stuff.
+ *      Alan Cox    :   sendmsg/recvmsg basics.
+ *      Tom Dyas    :   Export net symbols.
+ *      Marcin Dalecki  :   Fixed problems with CONFIG_NET="n".
+ *      Alan Cox    :   Added thread locking to sys_* calls
+ *                  for sockets. May have errors at the
+ *                  moment.
+ *      Kevin Buhr  :   Fixed the dumb errors in the above.
+ *      Andi Kleen  :   Some small cleanups, optimizations,
+ *                  and fixed a copy_from_user() bug.
+ *      Tigran Aivazian :   sys_send(args) calls sys_sendto(args, NULL, 0)
+ *      Tigran Aivazian :   Made listen(2) backlog sanity checks
+ *                  protocol-independent
  *
  *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
+ *      This program is free software; you can redistribute it and/or
+ *      modify it under the terms of the GNU General Public License
+ *      as published by the Free Software Foundation; either version
+ *      2 of the License, or (at your option) any later version.
  *
  *
- *	This module is effectively the top level interface to the BSD socket
- *	paradigm.
+ *  This module is effectively the top level interface to the BSD socket
+ *  paradigm.
  *
  */
 
@@ -112,7 +112,7 @@ static ssize_t sock_sendpage(struct file *file, struct page *page,
 
 
 /*
- *	The protocol list. Each protocol is registered in here.
+ *  The protocol list. Each protocol is registered in here.
  */
 
 static struct net_proto_family *net_families[NPROTO];
@@ -133,9 +133,9 @@ static void net_family_write_lock(void)
     {
         spin_unlock(&net_family_lock);
 
-        //		current->policy |= SCHED_YIELD;
-        //		current->need_resched=1;
-        //		schedule();
+        //      current->policy |= SCHED_YIELD;
+        //      current->need_resched=1;
+        //      schedule();
         SOFTINT_RESCHED_VECTOR;
 
         spin_lock(&net_family_lock);
@@ -167,21 +167,21 @@ static __inline__ void net_family_read_unlock(void)
 
 
 /*
- *	Statistics counters of the socket lists
+ *  Statistics counters of the socket lists
  */
 
 static union
 {
-    int	counter;
-    char	__pad[SMP_CACHE_BYTES];
+    int counter;
+    char    __pad[SMP_CACHE_BYTES];
 } sockets_in_use[NR_CPUS] __cacheline_aligned = {{0}};
 
 /*
- *	Support routines. Move socket addresses back and forth across the kernel/user
- *	divide and look after the messy bits.
+ *  Support routines. Move socket addresses back and forth across the kernel/user
+ *  divide and look after the messy bits.
  */
 
-#define MAX_SOCK_ADDR	128		/* 108 for Unix domain - 
+#define MAX_SOCK_ADDR   128     /* 108 for Unix domain - 
 16 for IP, 16 for IPX,
        24 for IPv6,
               about 80 for AX.25
@@ -191,14 +191,14 @@ static union
                       */
 
                       /**
-                       *	move_addr_to_kernel	-	copy a socket address into kernel space
-                       *	@uaddr: Address in user space
-                       *	@kaddr: Address in kernel space
-                       *	@ulen: Length in user space
+                       *    move_addr_to_kernel -   copy a socket address into kernel space
+                       *    @uaddr: Address in user space
+                       *    @kaddr: Address in kernel space
+                       *    @ulen: Length in user space
                        *
-                       *	The address is copied into kernel space. If the provided address is
-                       *	too long an error code of -EINVAL is returned. If the copy gives
-                       *	invalid addresses -EFAULT is returned. On a success 0 is returned.
+                       *    The address is copied into kernel space. If the provided address is
+                       *    too long an error code of -EINVAL is returned. If the copy gives
+                       *    invalid addresses -EFAULT is returned. On a success 0 is returned.
                        */
 
                       int move_addr_to_kernel(void *uaddr, int ulen, void *kaddr)
@@ -213,20 +213,20 @@ static union
             }
 
 /**
- *	move_addr_to_user	-	copy an address to user space
- *	@kaddr: kernel space address
- *	@klen: length of address in kernel
- *	@uaddr: user space address
- *	@ulen: pointer to user length field
+ *  move_addr_to_user   -   copy an address to user space
+ *  @kaddr: kernel space address
+ *  @klen: length of address in kernel
+ *  @uaddr: user space address
+ *  @ulen: pointer to user length field
  *
- *	The value pointed to by ulen on entry is the buffer length available.
- *	This is overwritten with the buffer space used. -EINVAL is returned
- *	if an overlong buffer is specified or a negative buffer size. -EFAULT
- *	is returned if either the buffer or the length field are not
- *	accessible.
- *	After copying the data up to the limit the user specifies, the true
- *	length of the data is written over the length limit the user
- *	specified. Zero is returned for a success.
+ *  The value pointed to by ulen on entry is the buffer length available.
+ *  This is overwritten with the buffer space used. -EINVAL is returned
+ *  if an overlong buffer is specified or a negative buffer size. -EFAULT
+ *  is returned if either the buffer or the length field are not
+ *  accessible.
+ *  After copying the data up to the limit the user specifies, the true
+ *  length of the data is written over the length limit the user
+ *  specified. Zero is returned for a success.
  */
 
 int move_addr_to_user(void *kaddr, int klen, void *uaddr, int *ulen)
@@ -246,8 +246,8 @@ int move_addr_to_user(void *kaddr, int klen, void *uaddr, int *ulen)
             return -EFAULT;
     }
     /*
-     *	"fromlen shall refer to the value before truncation.."
-     *			1003.1g
+     *  "fromlen shall refer to the value before truncation.."
+     *          1003.1g
      */
     return __put_user(klen, ulen);
 }
@@ -263,7 +263,7 @@ int sock_recvmsg(struct socket *sock, struct msghdr *msg, int size, int flags)
 
 
 /*
- *	Create a pair of connected sockets.
+ *  Create a pair of connected sockets.
  */
 
 asmlinkage long sys_socketpair(int family, int type, int protocol, int usockvec[2])
@@ -281,9 +281,9 @@ static unsigned char nargs[18]= {AL(0),AL(3),AL(3),AL(3),AL(2),AL(3),
 #undef AL
 
 /*
- *	System call vectors.
+ *  System call vectors.
  *
- *	Argument checking cleaned up. Saved 20% in size.
+ *  Argument checking cleaned up. Saved 20% in size.
  *  This function doesn't need to set the kernel lock because
  *  it is set by the callees.
  */

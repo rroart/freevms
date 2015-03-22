@@ -143,11 +143,11 @@ ontrack(ide_drive_t *drive, int heads, unsigned int *c, int *h, int *s)
  * If this is either 16, 32, 64, 128, 240 or 255 we'll believe it.
  *
  * The xparm parameter has the following meaning:
- *	 0 = convert to CHS with fewer than 1024 cyls
- *	     using the same method as Ontrack DiskManager.
- *	 1 = same as "0", plus offset everything by 63 sectors.
- *	-1 = similar to "0", plus redirect sector 0 to sector 1.
- *	 2 = convert to a CHS geometry with "ptheads" heads.
+ *   0 = convert to CHS with fewer than 1024 cyls
+ *       using the same method as Ontrack DiskManager.
+ *   1 = same as "0", plus offset everything by 63 sectors.
+ *  -1 = similar to "0", plus redirect sector 0 to sector 1.
+ *   2 = convert to a CHS geometry with "ptheads" heads.
  *
  * Returns 0 if the translation was not possible, if the device was not
  * an IDE disk drive, or if a geometry was "forced" on the commandline.
@@ -159,7 +159,7 @@ int ide_xlate_1024 (kdev_t i_rdev, int xparm, int ptheads, const char *msg)
     const char *msg1 = "";
     int heads = 0;
     int c, h, s;
-    int transl = 1;		/* try translation */
+    int transl = 1;     /* try translation */
     int ret = 0;
 
     drive = get_info_ptr(i_rdev);
@@ -169,13 +169,13 @@ int ide_xlate_1024 (kdev_t i_rdev, int xparm, int ptheads, const char *msg)
     /* remap? */
     if (drive->remap_0_to_1 != 2)
     {
-        if (xparm == 1)  		/* DM */
+        if (xparm == 1)         /* DM */
         {
             drive->sect0 = 63;
             msg1 = " [remap +63]";
             ret = 1;
         }
-        else if (xparm == -1)  	/* EZ-Drive */
+        else if (xparm == -1)   /* EZ-Drive */
         {
             if (drive->remap_0_to_1 == 0)
             {

@@ -24,16 +24,16 @@ static inline __u8 INET_ECN_encapsulate(__u8 outer, __u8 inner)
     return outer;
 }
 
-#define	INET_ECN_xmit(sk) do { (sk)->protinfo.af_inet.tos |= 2; } while (0)
-#define	INET_ECN_dontxmit(sk) do { (sk)->protinfo.af_inet.tos &= ~3; } while (0)
+#define INET_ECN_xmit(sk) do { (sk)->protinfo.af_inet.tos |= 2; } while (0)
+#define INET_ECN_dontxmit(sk) do { (sk)->protinfo.af_inet.tos &= ~3; } while (0)
 
-#define IP6_ECN_flow_init(label) do {	\
-      (label) &= ~htonl(3<<20);		\
+#define IP6_ECN_flow_init(label) do {   \
+      (label) &= ~htonl(3<<20);     \
     } while (0)
 
-#define	IP6_ECN_flow_xmit(sk, label) do {			\
-	if (INET_ECN_is_capable((sk)->protinfo.af_inet.tos))	\
-		(label) |= __constant_htons(2 << 4);		\
+#define IP6_ECN_flow_xmit(sk, label) do {           \
+    if (INET_ECN_is_capable((sk)->protinfo.af_inet.tos))    \
+        (label) |= __constant_htons(2 << 4);        \
     } while (0)
 
 static inline void IP_ECN_set_ce(struct iphdr *iph)

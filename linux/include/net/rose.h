@@ -1,146 +1,146 @@
 /*
- *	Declarations of Rose type objects.
+ *  Declarations of Rose type objects.
  *
- *	Jonathan Naylor G4KLX	25/8/96
+ *  Jonathan Naylor G4KLX   25/8/96
  */
 
 #ifndef _ROSE_H
 #define _ROSE_H
 #include <linux/rose.h>
 
-#define	ROSE_ADDR_LEN			5
+#define ROSE_ADDR_LEN           5
 
-#define	ROSE_MIN_LEN			3
+#define ROSE_MIN_LEN            3
 
-#define	ROSE_GFI			0x10
-#define	ROSE_Q_BIT			0x80
-#define	ROSE_D_BIT			0x40
-#define	ROSE_M_BIT			0x10
+#define ROSE_GFI            0x10
+#define ROSE_Q_BIT          0x80
+#define ROSE_D_BIT          0x40
+#define ROSE_M_BIT          0x10
 
-#define	ROSE_CALL_REQUEST		0x0B
-#define	ROSE_CALL_ACCEPTED		0x0F
-#define	ROSE_CLEAR_REQUEST		0x13
-#define	ROSE_CLEAR_CONFIRMATION		0x17
-#define	ROSE_DATA			0x00
-#define	ROSE_INTERRUPT			0x23
-#define	ROSE_INTERRUPT_CONFIRMATION	0x27
-#define	ROSE_RR				0x01
-#define	ROSE_RNR			0x05
-#define	ROSE_REJ			0x09
-#define	ROSE_RESET_REQUEST		0x1B
-#define	ROSE_RESET_CONFIRMATION		0x1F
-#define	ROSE_REGISTRATION_REQUEST	0xF3
-#define	ROSE_REGISTRATION_CONFIRMATION	0xF7
-#define	ROSE_RESTART_REQUEST		0xFB
-#define	ROSE_RESTART_CONFIRMATION	0xFF
-#define	ROSE_DIAGNOSTIC			0xF1
-#define	ROSE_ILLEGAL			0xFD
+#define ROSE_CALL_REQUEST       0x0B
+#define ROSE_CALL_ACCEPTED      0x0F
+#define ROSE_CLEAR_REQUEST      0x13
+#define ROSE_CLEAR_CONFIRMATION     0x17
+#define ROSE_DATA           0x00
+#define ROSE_INTERRUPT          0x23
+#define ROSE_INTERRUPT_CONFIRMATION 0x27
+#define ROSE_RR             0x01
+#define ROSE_RNR            0x05
+#define ROSE_REJ            0x09
+#define ROSE_RESET_REQUEST      0x1B
+#define ROSE_RESET_CONFIRMATION     0x1F
+#define ROSE_REGISTRATION_REQUEST   0xF3
+#define ROSE_REGISTRATION_CONFIRMATION  0xF7
+#define ROSE_RESTART_REQUEST        0xFB
+#define ROSE_RESTART_CONFIRMATION   0xFF
+#define ROSE_DIAGNOSTIC         0xF1
+#define ROSE_ILLEGAL            0xFD
 
 /* Define Link State constants. */
 
 enum
 {
-    ROSE_STATE_0,			/* Ready */
-    ROSE_STATE_1,			/* Awaiting Call Accepted */
-    ROSE_STATE_2,			/* Awaiting Clear Confirmation */
-    ROSE_STATE_3,			/* Data Transfer */
-    ROSE_STATE_4,			/* Awaiting Reset Confirmation */
-    ROSE_STATE_5			/* Deferred Call Acceptance */
+    ROSE_STATE_0,           /* Ready */
+    ROSE_STATE_1,           /* Awaiting Call Accepted */
+    ROSE_STATE_2,           /* Awaiting Clear Confirmation */
+    ROSE_STATE_3,           /* Data Transfer */
+    ROSE_STATE_4,           /* Awaiting Reset Confirmation */
+    ROSE_STATE_5            /* Deferred Call Acceptance */
 };
 
-#define ROSE_DEFAULT_T0			(180 * HZ)	/* Default T10 T20 value */
-#define ROSE_DEFAULT_T1			(200 * HZ)	/* Default T11 T21 value */
-#define ROSE_DEFAULT_T2			(180 * HZ)	/* Default T12 T22 value */
-#define	ROSE_DEFAULT_T3			(180 * HZ)	/* Default T13 T23 value */
-#define	ROSE_DEFAULT_HB			(5 * HZ)	/* Default Holdback value */
-#define	ROSE_DEFAULT_IDLE		(0 * 60 * HZ)	/* No Activity Timeout - none */
-#define	ROSE_DEFAULT_ROUTING		1		/* Default routing flag */
-#define	ROSE_DEFAULT_FAIL_TIMEOUT	(120 * HZ)	/* Time until link considered usable */
-#define	ROSE_DEFAULT_MAXVC		50		/* Maximum number of VCs per neighbour */
-#define	ROSE_DEFAULT_WINDOW_SIZE	7		/* Default window size */
+#define ROSE_DEFAULT_T0         (180 * HZ)  /* Default T10 T20 value */
+#define ROSE_DEFAULT_T1         (200 * HZ)  /* Default T11 T21 value */
+#define ROSE_DEFAULT_T2         (180 * HZ)  /* Default T12 T22 value */
+#define ROSE_DEFAULT_T3         (180 * HZ)  /* Default T13 T23 value */
+#define ROSE_DEFAULT_HB         (5 * HZ)    /* Default Holdback value */
+#define ROSE_DEFAULT_IDLE       (0 * 60 * HZ)   /* No Activity Timeout - none */
+#define ROSE_DEFAULT_ROUTING        1       /* Default routing flag */
+#define ROSE_DEFAULT_FAIL_TIMEOUT   (120 * HZ)  /* Time until link considered usable */
+#define ROSE_DEFAULT_MAXVC      50      /* Maximum number of VCs per neighbour */
+#define ROSE_DEFAULT_WINDOW_SIZE    7       /* Default window size */
 
-#define ROSE_MODULUS 			8
-#define	ROSE_MAX_PACKET_SIZE		251		/* Maximum packet size */
+#define ROSE_MODULUS            8
+#define ROSE_MAX_PACKET_SIZE        251     /* Maximum packet size */
 
-#define	ROSE_COND_ACK_PENDING		0x01
-#define	ROSE_COND_PEER_RX_BUSY		0x02
-#define	ROSE_COND_OWN_RX_BUSY		0x04
+#define ROSE_COND_ACK_PENDING       0x01
+#define ROSE_COND_PEER_RX_BUSY      0x02
+#define ROSE_COND_OWN_RX_BUSY       0x04
 
-#define	FAC_NATIONAL			0x00
-#define	FAC_CCITT			0x0F
+#define FAC_NATIONAL            0x00
+#define FAC_CCITT           0x0F
 
-#define	FAC_NATIONAL_RAND		0x7F
-#define	FAC_NATIONAL_FLAGS		0x3F
-#define	FAC_NATIONAL_DEST_DIGI		0xE9
-#define	FAC_NATIONAL_SRC_DIGI		0xEB
-#define	FAC_NATIONAL_FAIL_CALL		0xED
-#define	FAC_NATIONAL_FAIL_ADD		0xEE
-#define	FAC_NATIONAL_DIGIS			0xEF
+#define FAC_NATIONAL_RAND       0x7F
+#define FAC_NATIONAL_FLAGS      0x3F
+#define FAC_NATIONAL_DEST_DIGI      0xE9
+#define FAC_NATIONAL_SRC_DIGI       0xEB
+#define FAC_NATIONAL_FAIL_CALL      0xED
+#define FAC_NATIONAL_FAIL_ADD       0xEE
+#define FAC_NATIONAL_DIGIS          0xEF
 
-#define	FAC_CCITT_DEST_NSAP		0xC9
-#define	FAC_CCITT_SRC_NSAP		0xCB
+#define FAC_CCITT_DEST_NSAP     0xC9
+#define FAC_CCITT_SRC_NSAP      0xCB
 
 struct rose_neigh
 {
-    struct rose_neigh	*next;
-    ax25_address		callsign;
-    ax25_digi		*digipeat;
-    ax25_cb			*ax25;
-    struct net_device		*dev;
-    unsigned short		count;
-    unsigned short		use;
-    unsigned int		number;
-    char			restarted;
-    char			dce_mode;
-    char			loopback;
-    struct sk_buff_head	queue;
-    struct timer_list	t0timer;
-    struct timer_list	ftimer;
+    struct rose_neigh   *next;
+    ax25_address        callsign;
+    ax25_digi       *digipeat;
+    ax25_cb         *ax25;
+    struct net_device       *dev;
+    unsigned short      count;
+    unsigned short      use;
+    unsigned int        number;
+    char            restarted;
+    char            dce_mode;
+    char            loopback;
+    struct sk_buff_head queue;
+    struct timer_list   t0timer;
+    struct timer_list   ftimer;
 };
 
 struct rose_node
 {
-    struct rose_node	*next;
-    rose_address		address;
-    unsigned short		mask;
-    unsigned char		count;
-    char			loopback;
-    struct rose_neigh	*neighbour[3];
+    struct rose_node    *next;
+    rose_address        address;
+    unsigned short      mask;
+    unsigned char       count;
+    char            loopback;
+    struct rose_neigh   *neighbour[3];
 };
 
 struct rose_route
 {
-    struct rose_route	*next;
-    unsigned int		lci1, lci2;
-    rose_address		src_addr, dest_addr;
-    ax25_address		src_call, dest_call;
-    struct rose_neigh 	*neigh1, *neigh2;
-    unsigned int		rand;
+    struct rose_route   *next;
+    unsigned int        lci1, lci2;
+    rose_address        src_addr, dest_addr;
+    ax25_address        src_call, dest_call;
+    struct rose_neigh   *neigh1, *neigh2;
+    unsigned int        rand;
 };
 
 typedef struct
 {
-    rose_address		source_addr,   dest_addr;
-    ax25_address		source_call,   dest_call;
-    unsigned char		source_ndigis, dest_ndigis;
-    ax25_address		source_digis[ROSE_MAX_DIGIS];
-    ax25_address		dest_digis[ROSE_MAX_DIGIS];
-    struct rose_neigh	*neighbour;
-    struct net_device		*device;
-    unsigned int		lci, rand;
-    unsigned char		state, condition, qbitincl, defer;
-    unsigned char		cause, diagnostic;
-    unsigned short		vs, vr, va, vl;
-    unsigned long		t1, t2, t3, hb, idle;
+    rose_address        source_addr,   dest_addr;
+    ax25_address        source_call,   dest_call;
+    unsigned char       source_ndigis, dest_ndigis;
+    ax25_address        source_digis[ROSE_MAX_DIGIS];
+    ax25_address        dest_digis[ROSE_MAX_DIGIS];
+    struct rose_neigh   *neighbour;
+    struct net_device       *device;
+    unsigned int        lci, rand;
+    unsigned char       state, condition, qbitincl, defer;
+    unsigned char       cause, diagnostic;
+    unsigned short      vs, vr, va, vl;
+    unsigned long       t1, t2, t3, hb, idle;
 #ifdef M_BIT
-    unsigned short		fraglen;
-    struct sk_buff_head	frag_queue;
+    unsigned short      fraglen;
+    struct sk_buff_head frag_queue;
 #endif
-    struct sk_buff_head	ack_queue;
+    struct sk_buff_head ack_queue;
     struct rose_facilities_struct facilities;
-    struct timer_list	timer;
-    struct timer_list	idletimer;
-    struct sock		*sk;		/* Backlink to socket */
+    struct timer_list   timer;
+    struct timer_list   idletimer;
+    struct sock     *sk;        /* Backlink to socket */
 } rose_cb;
 
 /* af_rose.c */

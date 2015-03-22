@@ -1,5 +1,5 @@
-#ifndef cmbdef_h
-#define cmbdef_h
+#ifndef CMBDEF_H
+#define CMBDEF_H
 
 #define CMB$M_READONLY  0x1
 #define CMB$M_WRITEONLY 0x2

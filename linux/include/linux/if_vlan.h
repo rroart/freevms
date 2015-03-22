@@ -1,12 +1,12 @@
 /*
- * VLAN		An implementation of 802.1Q VLAN tagging.
+ * VLAN     An implementation of 802.1Q VLAN tagging.
  *
- * Authors:	Ben Greear <greearb@candelatech.com>
+ * Authors: Ben Greear <greearb@candelatech.com>
  *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
+ *      This program is free software; you can redistribute it and/or
+ *      modify it under the terms of the GNU General Public License
+ *      as published by the Free Software Foundation; either version
+ *      2 of the License, or (at your option) any later version.
  *
  */
 
@@ -26,26 +26,26 @@ struct vlan_dev_info;
 #include <linux/proc_fs.h> /* for proc_dir_entry */
 #include <linux/netdevice.h>
 
-#define VLAN_HLEN	4		/* The additional bytes (on top of the Ethernet header)
+#define VLAN_HLEN   4       /* The additional bytes (on top of the Ethernet header)
 * that VLAN requires.
 */
-#define VLAN_ETH_ALEN	6		/* Octets in one ethernet addr	 */
-#define VLAN_ETH_HLEN	18		/* Total octets in header.	 */
-#define VLAN_ETH_ZLEN	64		/* Min. octets in frame sans FCS */
+#define VLAN_ETH_ALEN   6       /* Octets in one ethernet addr   */
+#define VLAN_ETH_HLEN   18      /* Total octets in header.   */
+#define VLAN_ETH_ZLEN   64      /* Min. octets in frame sans FCS */
 
 /*
  * According to 802.3ac, the packet can be 4 bytes longer. --Klika Jan
  */
-#define VLAN_ETH_DATA_LEN	1500	/* Max. octets in payload	 */
-#define VLAN_ETH_FRAME_LEN	1518	/* Max. octets in frame sans FCS */
+#define VLAN_ETH_DATA_LEN   1500    /* Max. octets in payload    */
+#define VLAN_ETH_FRAME_LEN  1518    /* Max. octets in frame sans FCS */
 
 struct vlan_ethhdr
 {
-    unsigned char	h_dest[ETH_ALEN];	   /* destination eth addr	*/
-    unsigned char	h_source[ETH_ALEN];	   /* source ether addr	*/
+    unsigned char   h_dest[ETH_ALEN];      /* destination eth addr  */
+    unsigned char   h_source[ETH_ALEN];    /* source ether addr */
     unsigned short       h_vlan_proto;              /* Should always be 0x8100 */
     unsigned short       h_vlan_TCI;                /* Encapsulates priority and VLAN ID */
-    unsigned short	h_vlan_encapsulated_proto; /* packet type ID field (or len) */
+    unsigned short  h_vlan_encapsulated_proto; /* packet type ID field (or len) */
 };
 
 struct vlan_hdr
@@ -133,9 +133,9 @@ struct vlan_priority_tci_mapping
 {
     unsigned long priority;
     unsigned short vlan_qos; /* This should be shifted when first set, so we only do it
-				  * at provisioning time.
-				  * ((skb->priority << 13) & 0xE000)
-				  */
+                  * at provisioning time.
+                  * ((skb->priority << 13) & 0xE000)
+                  */
     struct vlan_priority_tci_mapping *next;
 };
 
@@ -204,8 +204,8 @@ static inline unsigned short vlan_dev_get_egress_qos_mask(struct net_device* dev
         if (mp->priority == skb->priority)
         {
             return mp->vlan_qos; /* This should already be shifted to mask
-					      * correctly with the VLAN's TCI
-					      */
+                          * correctly with the VLAN's TCI
+                          */
         }
         mp = mp->next;
     }

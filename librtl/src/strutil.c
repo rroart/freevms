@@ -1,9 +1,9 @@
 
 /*
- *	strutil.c
- *	Miscellaneous string routines
+ *  strutil.c
+ *  Miscellaneous string routines
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -21,20 +21,20 @@
  *
  *The author(s) may be contacted at:
  *
- *	Andrew Allison  	freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
- *	Kevin Handy		Unknown
+ *  Kevin Handy     Unknown
  *
- *	Christof Zeile		Unknown
+ *  Christof Zeile      Unknown
  *
- *	Feb 18, 2004 - Andrew Allison
- *		Change malloc to calloc to initialize memory
+ *  Feb 18, 2004 - Andrew Allison
+ *      Change malloc to calloc to initialize memory
  */
 
 #include <ctype.h>
@@ -48,30 +48,30 @@
 #include "str$routines.h"
 //#include "stdint.h"
 
-#define MAXSTR 		132000
-#define MAXUINT16	65536
-#define MAXCSTR16	65535
-#define TRUE		1
-#define FALSE		0
+#define MAXSTR      132000
+#define MAXUINT16   65536
+#define MAXCSTR16   65535
+#define TRUE        1
+#define FALSE       0
 
 
 /************************************************/
 /*
  * str.c
  *
- *	Code for VAX STR$ routines
+ *  Code for VAX STR$ routines
  *
  * Description:
  *
- *	This file contains various constants that are externally
- *	accessable from STR$ routines.
+ *  This file contains various constants that are externally
+ *  accessable from STR$ routines.
  *
  * Bugs:
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  */
 
 /************************************************/
@@ -98,25 +98,25 @@ const unsigned long str$_tru = STR$_TRU;
 const unsigned long str$_wronumarg = STR$_WRONUMARG;
 /************************************************/
 /************************************************/
-/*	str$$iszero
+/*  str$$iszero
  *
  * Description:
  *
- *	Boolean function to determine if a string is equal to zero
+ *  Boolean function to determine if a string is equal to zero
  *
- *	Returns True if string is equal to zero
- *		False if string is not equal to zero
+ *  Returns True if string is equal to zero
+ *      False if string is not equal to zero
  *
  * Bugs:
  *
  * History
- *	2004	Jan 	Andrew Allison	Initial write
+ *  2004    Jan     Andrew Allison  Initial write
  */
 
-int	str$$iszero (const struct dsc$descriptor_s *sd1)
+int str$$iszero (const struct dsc$descriptor_s *sd1)
 {
-    int	i, c_not_zero;
-    char	*s1_ptr;
+    int i, c_not_zero;
+    char    *s1_ptr;
     unsigned short s1_len;
 
     str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
@@ -129,33 +129,33 @@ int	str$$iszero (const struct dsc$descriptor_s *sd1)
 }
 
 /************************************************/
-/*	str$$lzerotrim
+/*  str$$lzerotrim
  *
  * Description:
- *	Remove leading 0's from a descriptor
+ *  Remove leading 0's from a descriptor
  *
- *	When passed a string descriptor remove all leading
- *	zeros from the string
+ *  When passed a string descriptor remove all leading
+ *  zeros from the string
  *
  * Bugs:
  *
  * History
- *	2004	Jan 	Andrew Allison	Initial write
+ *  2004    Jan     Andrew Allison  Initial write
  */
 
-int	str$$lzerotrim (struct dsc$descriptor_s *sd1)
+int str$$lzerotrim (struct dsc$descriptor_s *sd1)
 {
-    int	i,j,count;
-    char	*s1_ptr;
+    int i,j,count;
+    char    *s1_ptr;
     unsigned short s1_len;
 
     str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
     i = 0;
     while ( (s1_ptr[i] == '0') && ( i < s1_len-1 ) ) // while leading zero
     {
-        if (s1_ptr[i] == '0' )			// have leading zero
+        if (s1_ptr[i] == '0' )          // have leading zero
         {
-            for (j = i; j < s1_len; j++)	// shuffle string
+            for (j = i; j < s1_len; j++)    // shuffle string
             {
                 s1_ptr[j] = s1_ptr[j+1];
             }
@@ -169,27 +169,27 @@ int	str$$lzerotrim (struct dsc$descriptor_s *sd1)
         }
     }
 
-//	Resize descriptor if needed
+//  Resize descriptor if needed
     str$get1_dx (&s1_len, &*sd1);
     return count;
 }
 
 /***********************************************/
-/*	str$$iszerotrim
+/*  str$$iszerotrim
  *
  * Description:
- *	If the string is zero set exponent to zero
+ *  If the string is zero set exponent to zero
  *
  * Bugs:
  *
  * History:
- *	2004	Jan 	Andrew Allison	Initial program creation
+ *  2004    Jan     Andrew Allison  Initial program creation
  */
 
-int	str$$iszerotrim (struct dsc$descriptor_s *sd1, long *exp)
+int str$$iszerotrim (struct dsc$descriptor_s *sd1, long *exp)
 {
-    int	i, status, is_zero;
-    char	*s1_ptr;
+    int i, status, is_zero;
+    char    *s1_ptr;
     unsigned short s1_len;
 
     is_zero = TRUE;
@@ -214,24 +214,24 @@ int	str$$iszerotrim (struct dsc$descriptor_s *sd1, long *exp)
 
 
 /***********************************************/
-/*	str$$rzerotrim
+/*  str$$rzerotrim
  *
  * Description:
- *	When passed a string descriptor remove
- *	trailing 0 and incerement exponent
- *	i.e. Normallize the number
+ *  When passed a string descriptor remove
+ *  trailing 0 and incerement exponent
+ *  i.e. Normallize the number
  *
  * Bugs:
  *
  * History:
- *	2004	Jan 	Andrew Allison	Initial program Creation
+ *  2004    Jan     Andrew Allison  Initial program Creation
  *
  */
 
-int	str$$rzerotrim (struct dsc$descriptor_s *sd1, long *exp)
+int str$$rzerotrim (struct dsc$descriptor_s *sd1, long *exp)
 {
-    int	i, status;
-    char	*s1_ptr;
+    int i, status;
+    char    *s1_ptr;
     unsigned short s1_len;
 
     status = str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
@@ -247,7 +247,7 @@ int	str$$rzerotrim (struct dsc$descriptor_s *sd1, long *exp)
         i--;
     }
 
-//	Resize descriptor
+//  Resize descriptor
     status = str$get1_dx (&s1_len, sd1);
     str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
     return status;
@@ -255,28 +255,28 @@ int	str$$rzerotrim (struct dsc$descriptor_s *sd1, long *exp)
 
 
 /************************************************/
-/*	str$$ncompare
+/*  str$$ncompare
  *
  * Description:
- *	Compare two numeric strings
+ *  Compare two numeric strings
  *
- *	Return -1	String 1 < String 2
- *		0	String 1 = String 2
- *		1	String 1 > String 2
+ *  Return -1   String 1 < String 2
+ *      0   String 1 = String 2
+ *      1   String 1 > String 2
  *
  * Bugs:
  *
  * History
- *	2004	Jan	Andrew Allison
+ *  2004    Jan Andrew Allison
  *
  */
 
-int str$$ncompare (	struct dsc$descriptor_s *sd1,
+int str$$ncompare ( struct dsc$descriptor_s *sd1,
                     struct dsc$descriptor_s *sd2)
 {
-    unsigned short	s1_len,  s2_len;
-    char		*s1_ptr, *s2_ptr;
-    int	 	min_len, max_len, i;
+    unsigned short  s1_len,  s2_len;
+    char        *s1_ptr, *s2_ptr;
+    int     min_len, max_len, i;
 
     str$$lzerotrim (sd1);
     str$$lzerotrim (sd2);
@@ -292,7 +292,7 @@ int str$$ncompare (	struct dsc$descriptor_s *sd1,
     if ( s1_len < s2_len )
         return -1;
 
-//	The string are of equal length
+//  The string are of equal length
     for (i = 0; i < max_len; i++)
     {
         if ( s1_ptr[i] > s2_ptr[i] )
@@ -305,24 +305,24 @@ int str$$ncompare (	struct dsc$descriptor_s *sd1,
 }
 
 /************************************************/
-/*	str$$print_sd
+/*  str$$print_sd
  *
  * Description:
- *	Print out a string descriptor
+ *  Print out a string descriptor
  *
  *
  * Bugs:
  *
  * History
- *	2004	Jan	Andrew Allison	Initial program creation
+ *  2004    Jan Andrew Allison  Initial program creation
  *
  */
 
-void	str$$print_sd (const struct dsc$descriptor_s *sd1 )
+void    str$$print_sd (const struct dsc$descriptor_s *sd1 )
 {
-    unsigned short	s1_len;
-    char		*s1_ptr;
-    int		i, qmark;
+    unsigned short  s1_len;
+    char        *s1_ptr;
+    int     i, qmark;
 
     qmark = '?';
     str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
@@ -352,16 +352,16 @@ void	str$$print_sd (const struct dsc$descriptor_s *sd1 )
 
 
 /************************************************/
-/*	str$$malloc_sd
+/*  str$$malloc_sd
  *
  * Description:
- *	Allocate space for a string descriptor and
- *	return a pointer to the structure
+ *  Allocate space for a string descriptor and
+ *  return a pointer to the structure
  *
  * Bugs:
  *
  * History
- *	2004	Jan	Andrew Allison	Initial Program Creation
+ *  2004    Jan Andrew Allison  Initial Program Creation
  *
  */
 
@@ -370,7 +370,7 @@ void str$$malloc_sd(struct dsc$descriptor_s *temp_sd, char *string)
 {
     int i;
     unsigned short temp_len;
-    char	maxstring [MAXCSTR16], temp_string[5];
+    char    maxstring [MAXCSTR16], temp_string[5];
 
     if ( strcmp(string,"NULL") == 0 )
     {
@@ -420,7 +420,7 @@ void str$$malloc_sd(struct dsc$descriptor_s *temp_sd, char *string)
     }
     else
     {
-        /*	default action copy string value in */
+        /*  default action copy string value in */
         temp_sd->dsc$w_length  = 0;
         temp_sd->dsc$b_class   = DSC$K_CLASS_D;
         temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
@@ -435,22 +435,22 @@ void str$$malloc_sd(struct dsc$descriptor_s *temp_sd, char *string)
 }
 
 /***********************************************/
-/*	str$$copy_fill
+/*  str$$copy_fill
  *
  * Description:
- *	Copies over text from source to dest.
+ *  Copies over text from source to dest.
  *
  * Bugs:
  *
  * History
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  *
- *	Mar 10, 2004 - Andrew Allison
- *		Added code to skip memcopy if source was NULL
+ *  Mar 10, 2004 - Andrew Allison
+ *      Added code to skip memcopy if source was NULL
  */
 unsigned long str$$copy_fill(char *dest_ptr, unsigned short dest_length,
                              const char *source_ptr, unsigned short source_length, char fill)
@@ -491,30 +491,30 @@ unsigned long str$$copy_fill(char *dest_ptr, unsigned short dest_length,
 }
 
 /***********************************************/
-/*	str$$resize
+/*  str$$resize
  *
  * Description:
- *	Try to resize the destination, giving as close to the
- *	desired final size as possible.
+ *  Try to resize the destination, giving as close to the
+ *  desired final size as possible.
  *
  * Bugs:
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Ziele
- *		Changed 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Ziele
+ *      Changed 'short' to 'unsigned short' in several places.
  *
- *	Jan 15, 2004 - Andrew Allison
- *		Changed unsigned short to int to quiet compiler complaints
+ *  Jan 15, 2004 - Andrew Allison
+ *      Changed unsigned short to int to quiet compiler complaints
  */
 
 unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
 {
     unsigned long result = STR$_NORMAL;
-    unsigned short	usize;
+    unsigned short  usize;
     int resize;
 
     usize = (unsigned short) size;
@@ -570,13 +570,13 @@ unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
 
 
 /************************************************/
-/*	str$$is_string_class
+/*  str$$is_string_class
  *
- *	This function is used to determine if the descriptor
- *	passed in is actually a viable string for this set of
- *	functions.
+ *  This function is used to determine if the descriptor
+ *  passed in is actually a viable string for this set of
+ *  functions.
  *
- *	Code for VAX STR$$IS_STRING_CLASS routine
+ *  Code for VAX STR$$IS_STRING_CLASS routine
  *
  * Description:
  *
@@ -584,7 +584,7 @@ unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy	Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy  Preliminary design.
  *
  */
 unsigned long str$$is_string_class(const struct dsc$descriptor_s* test_string)

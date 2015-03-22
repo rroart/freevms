@@ -1,5 +1,5 @@
-#ifndef dcdef_h
-#define dcdef_h
+#ifndef DCDEF_H
+#define DCDEF_H
 
 /* most of these are not available */
 /* we are regrettably stuck with isa and pci */

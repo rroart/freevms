@@ -1,5 +1,5 @@
-#ifndef pflmapdef_h
-#define pflmapdef_h
+#ifndef PFLMAPDEF_H
+#define PFLMAPDEF_H
 
 #define PFLMAP$M_PGFLPAG 0xFFFFFF
 #define PFLMAP$M_PGFLX 0xFF000000

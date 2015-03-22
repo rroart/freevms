@@ -35,7 +35,7 @@
 */
 
 #include <stdlib.h>
-#include "lib$routines.h"	/* Our header file! */
+#include "lib$routines.h"   /* Our header file! */
 #include "ssdef.h"
 
 /* addx & subx COULD use 32 bit arithmetic to do a word at a time. But

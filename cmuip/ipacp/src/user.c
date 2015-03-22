@@ -1,23 +1,23 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "USER - ACP user interface module"
 //SBTTL "User Interface Overview"
@@ -25,267 +25,267 @@
 
 Module:
 
-	USER
+    USER
 
 Facility:
 
-	Top-level processing of user I/O requests.
+    Top-level processing of user I/O requests.
 
 Abstract:
 
-	Here we process the ACP input queue. Basic operation is to Dequeue a
-	user IO request, process it & loop until there are no more requests.
-	User requests cover the basic network functions user: Connection open,
-	close abort, info, status, name lookup, data transmit, data receive.
-	There are also a number of privileged maintenance functions which are
-	require the PHY_IO (physical I/O capability) to execute. Maintenance
-	functions include:  Shutting down the ACP, dumping out of internal
-	structures (such as connection blocks, the ARP cache, etc.).
+    Here we process the ACP input queue. Basic operation is to Dequeue a
+    user IO request, process it & loop until there are no more requests.
+    User requests cover the basic network functions user: Connection open,
+    close abort, info, status, name lookup, data transmit, data receive.
+    There are also a number of privileged maintenance functions which are
+    require the PHY_IO (physical I/O capability) to execute. Maintenance
+    functions include:  Shutting down the ACP, dumping out of internal
+    structures (such as connection blocks, the ARP cache, etc.).
 
-	Note:  the routine Process_User_Requests() is the point in this
-	module where IRPs enter the IPACP.
+    Note:  the routine Process_User_Requests() is the point in this
+    module where IRPs enter the IPACP.
 
 Author:
 
-	Orignal version by Stan C. Smith, Fall 1981
-	This version by	Vince Fuller, CMU-CSD, Spring/Summer, 1986
-	Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
+    Orignal version by Stan C. Smith, Fall 1981
+    This version by Vince Fuller, CMU-CSD, Spring/Summer, 1986
+    Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
 
 Modification History:
 
-6.7a	09-Jul-1991	Henry W. Miller		USBR
-	Added STARLET for VMS 5.4.
+6.7a    09-Jul-1991 Henry W. Miller     USBR
+    Added STARLET for VMS 5.4.
 
 *** Begin CMU change log ***
 
-6.7  16-Jan-1991, Bruce R. Miller	CMU Network Development
-	Added the idea of logging flag "groups" in order to handle
-	new clusters of logging flags.  We were running out of
-	flags, plus we need to handle ACTIVITY logging.
+6.7  16-Jan-1991, Bruce R. Miller   CMU Network Development
+    Added the idea of logging flag "groups" in order to handle
+    new clusters of logging flags.  We were running out of
+    flags, plus we need to handle ACTIVITY logging.
 
-6.7  06-Feb-1990, Bruce R. Miller	CMU Network Development
-	Changed interface to transport device-specific structures.
+6.7  06-Feb-1990, Bruce R. Miller   CMU Network Development
+    Changed interface to transport device-specific structures.
 
-6.7  27-Nov-1989, Bruce R. Miller	CMU Network Development
-	Added equal support for TCP, UDP, ICMP, and IP.
-	This module now looks at the ACP Arg Blk to determain
-	a request's protocol.  Removed all u$udp$xxxx functions
-	calls.  Now all function requests are sent with a protocol
-	field in the arg blk and use the u$xxxx function code.
+6.7  27-Nov-1989, Bruce R. Miller   CMU Network Development
+    Added equal support for TCP, UDP, ICMP, and IP.
+    This module now looks at the ACP Arg Blk to determain
+    a request's protocol.  Removed all u$udp$xxxx functions
+    calls.  Now all function requests are sent with a protocol
+    field in the arg blk and use the u$xxxx function code.
 
-6.7  20-Oct-1989, Bruce R. Miller	CMU Network Development
-	Added Net$Event function to allow IP clients to log significant
-	activities in a centrally located log file.
+6.7  20-Oct-1989, Bruce R. Miller   CMU Network Development
+    Added Net$Event function to allow IP clients to log significant
+    activities in a centrally located log file.
 
 6.6   8-Sep-87, Edit by VAF
-	Change definition of M$INTERNAL from dangerous 0 value to 25.
+    Change definition of M$INTERNAL from dangerous 0 value to 25.
 
 6.5  30-Jul-87, Edit by VAF
-	Use $$KCALL macro for calling $CMKRNL routines.
+    Use $$KCALL macro for calling $CMKRNL routines.
 
 6.4  10-Jun-87, Edit by VAF
-	In USER$CHECK_ACCESS, check that local port is GEQ Well_Known_LP_Start
-	(so that wildcarded local ports are OK).
+    In USER$CHECK_ACCESS, check that local port is GEQ Well_Known_LP_Start
+    (so that wildcarded local ports are OK).
 
 6.3  23-Mar-87, Edit by VAF
-	Use two standard-sized packet buffers instead of three.
+    Use two standard-sized packet buffers instead of three.
 
 6.2   3-Mar-87, Edit by VAF
-	Flush obsolete junk from IOSB format. Rename IOSB fields.
+    Flush obsolete junk from IOSB format. Rename IOSB fields.
 
 6.1   2-Mar-87, Edit by VAF
-	Add new GTHST function for obtaining local host info.
+    Add new GTHST function for obtaining local host info.
 
 6.0  19-Feb-87, Edit by VAF
-	Rewrite GTHST to use the new name lookup functions. Flush the GTHST
-	request queue since we no longer need it (thanks to NML$STEP).
+    Rewrite GTHST to use the new name lookup functions. Flush the GTHST
+    request queue since we no longer need it (thanks to NML$STEP).
 
 5.9  18-Feb-87, Edit by VAF
-	Move UCB extension literals from TCP_USER.BLI.
-	Fix bug in connection STATUS code - was returning the foreign port
-	instead of the local port.
+    Move UCB extension literals from TCP_USER.BLI.
+    Fix bug in connection STATUS code - was returning the foreign port
+    instead of the local port.
 
 5.8  12-Feb-87, Edit by VAF
-	Modifications for domain service. Fix bug in privilege checking - open
-	of WKS local port is only privileged if foreign port is wild.
+    Modifications for domain service. Fix bug in privilege checking - open
+    of WKS local port is only privileged if foreign port is wild.
 
 5.7   5-Feb-87, Edit by VAF
-	Add code for network access checking.
+    Add code for network access checking.
 
 5.6  28-Aug-86, Edit by VAF
-	Add dump functions for reading ARP cache.
+    Add dump functions for reading ARP cache.
 
 5.5  13-Aug-86, Edit by VAF
-	Add dump functions for listing UDP connections.
-	Move TCB dump functions into TCB_User where they belong.
+    Add dump functions for listing UDP connections.
+    Move TCB dump functions into TCB_User where they belong.
 
 5.4  10-Aug-86, Edit by VAF
-	Convert GTHST routines to use green protocol routines.
+    Convert GTHST routines to use green protocol routines.
 
 5.3   9-Aug-86, Edit by VAF
-	Remove SET_HOSTS from here - it is more complicated with name servers.
-	Get local host name from LOCAL_NAME global, don't do address to name
-	translation.
+    Remove SET_HOSTS from here - it is more complicated with name servers.
+    Get local host name from LOCAL_NAME global, don't do address to name
+    translation.
 
 5.2  31-Jul-86, Edit by VAF
-	Add Net_Connection_Info UDP/TCP common routine.
+    Add Net_Connection_Info UDP/TCP common routine.
 
 5.1  29-Jul-86, Edit by VAF
-	Move a couple of routines back in here that will be used by both
-	TCP and UDP (SET_HOSTS and GET_USER_LP).
+    Move a couple of routines back in here that will be used by both
+    TCP and UDP (SET_HOSTS and GET_USER_LP).
 
 5.0  23-Jul-86, Edit by VAF
-	Split-off all TCP specific functions into TCP_USER module.
-	Add hooks for UDP implementation.
+    Split-off all TCP specific functions into TCP_USER module.
+    Add hooks for UDP implementation.
 
 4.9  17-Jul-86, Edit by VAF
-	Debugging code for tracking input segments.
+    Debugging code for tracking input segments.
 
 4.8  17-Jul-86, Edit by VAF
-	Make CLOSE_TCB take reference to TCB pointer so it can clear it.
-	Log foreign ports in NET$OPEN, log TCB address and conn idx.
-	Log TCB address in all user functions.
+    Make CLOSE_TCB take reference to TCB pointer so it can clear it.
+    Log foreign ports in NET$OPEN, log TCB address and conn idx.
+    Log TCB address in all user functions.
 
 4.7  16-Jul-86, Edit by VAF
-	Separate hair for setting host addresses out from INIT_TCB.
+    Separate hair for setting host addresses out from INIT_TCB.
 
 4.6  15-Jul-86, Edit by VAF
-	Return TS$BADSEQ in stats dump.
-	Return future queue count in TCB dump.
+    Return TS$BADSEQ in stats dump.
+    Return future queue count in TCB dump.
 
 4.5  11-Jul-86, Edit by VAF
-	Return more memory manager counters.
+    Return more memory manager counters.
 
 4.4   9-Jul-86, Edit by VAF
-	Return TS$Future_dups now.
-	Change local port generation algorithm to start at clock base and
-	go incrementally from there.
-	Change initial sequence number generation to use clock base in
-	upper 16-bits of sequence number.
+    Return TS$Future_dups now.
+    Change local port generation algorithm to start at clock base and
+    go incrementally from there.
+    Change initial sequence number generation to use clock base in
+    upper 16-bits of sequence number.
 
 4.3   7-Jul-86, Edit by VAF
-	Fix two bugs - in TCB_OK, check for legal value in VALID_TCB table.
-	In NET$RECEIVE - handle LAST-ACK state (give connection closing error).
+    Fix two bugs - in TCB_OK, check for legal value in VALID_TCB table.
+    In NET$RECEIVE - handle LAST-ACK state (give connection closing error).
 
 4.2   1-Jul-86, Edit by VAF
-	Add support for "future" segments queue in INIT_TCB and
-	TCP$KILL_PENDING_REQUESTS.
-	Add new counters, make available to dump function.
+    Add support for "future" segments queue in INIT_TCB and
+    TCP$KILL_PENDING_REQUESTS.
+    Add new counters, make available to dump function.
 
 4.1  25-Jun-86, Edit by VAF
-	Make the UCB hold a TCB "index" (index into VALID_TCB table) and don't
-	ever let the user look at real TCB addresses.
-	Change and simplify "local conn id" validation in all user routines.
-	Don't use index 0 of VALID_TCB table.
+    Make the UCB hold a TCB "index" (index into VALID_TCB table) and don't
+    ever let the user look at real TCB addresses.
+    Change and simplify "local conn id" validation in all user routines.
+    Don't use index 0 of VALID_TCB table.
 
 4.0  23-Jun-86, Edit by VAF
-	Start adding support for UCB extension to hold TCB pointer.
+    Start adding support for UCB extension to hold TCB pointer.
 
 3.9  12-Jun-86, Edit by VAF
-	Do buffering of user sends here not in SEND_DATA routine. It may cost
-	a little extra buffer copying, but it will probably speed things up.
+    Do buffering of user sends here not in SEND_DATA routine. It may cost
+    a little extra buffer copying, but it will probably speed things up.
 
 3.8  11-Jun-86, Edit by VAF
-	In USER$Purge_All_IO call TCP$KILL_PENDING_REQUESTS - don't duplicate
-	all of that effort.
+    In USER$Purge_All_IO call TCP$KILL_PENDING_REQUESTS - don't duplicate
+    all of that effort.
 
 3.7  10-Jun-86, Edit by VAF
-	Know about new TCB cells for keeping track of segments and data on
-	network/user queues.
-	Make TCP$Purge_Send_Queue know about buffered Qblocks.
+    Know about new TCB cells for keeping track of segments and data on
+    network/user queues.
+    Make TCP$Purge_Send_Queue know about buffered Qblocks.
 
 3.6   6-Jun-86, Edit by VAF
-	Add some debugging code.
+    Add some debugging code.
 
 3.5  22-May-86, Edit by VAF
-	Use VMS error message facility.
+    Use VMS error message facility.
 
 3.4   8-May-86, Edit by VAF
-	Make CLOSE function block user until we get to Time-Wait state.
-	User may request immediate-close mode by specifying CL$NOWAIT.
-	Add Last_ACK state.
-	Make VMS$CANCEL routine initiate a close, not reset connection.
+    Make CLOSE function block user until we get to Time-Wait state.
+    User may request immediate-close mode by specifying CL$NOWAIT.
+    Add Last_ACK state.
+    Make VMS$CANCEL routine initiate a close, not reset connection.
 
 3.3   2-May-86, Edit by VAF
-	In NET$SEND, don't call SEND_DATA - it will be done soon enough.
+    In NET$SEND, don't call SEND_DATA - it will be done soon enough.
 
 3.2  22-Apr-86, Edit by VAF
-	Phase II of flushing XPORT - use $FAO for doing output formatting.
+    Phase II of flushing XPORT - use $FAO for doing output formatting.
 
 3.1  21-Apr-86, Edit by VAF
-	Make all connections wait for open by default.
-	Add a new bit to the open call - OP$NoWait - for immediate return
+    Make all connections wait for open by default.
+    Add a new bit to the open call - OP$NoWait - for immediate return
 
 3.0  19-Apr-86, Edit by VAF
-	Flush call to SEND_DATA in main user processing routine.
-	A lot of code in this module needs work - it shouldn't be diddling tcb
-	states and such.
+    Flush call to SEND_DATA in main user processing routine.
+    A lot of code in this module needs work - it shouldn't be diddling tcb
+    states and such.
 
 2.9  18-Apr-86, Edit by VAF
-	New GET_IP_ADDR routine.
+    New GET_IP_ADDR routine.
 
 2.8   7-Apr-86, Edit by VAF
-	New logging stuff.
+    New logging stuff.
 
 2.7   4-Apr-86, Edit by VAF
-	GTHST user function - get host information.
+    GTHST user function - get host information.
 
 2.6   3-Apr-86, Edit by VAF
-	Flush all of the UDP stuff. We have to think about how to do it right.
+    Flush all of the UDP stuff. We have to think about how to do it right.
 
 2.5   2-Apr-86, Edit by VAF
-	Move some code that belongs here out of SEGIN and TCP.
+    Move some code that belongs here out of SEGIN and TCP.
 
 2.4  31-Mar-86, Edit by VAF
-	Add UDP open and UDP close stubs.
+    Add UDP open and UDP close stubs.
 
 2.3  17-Mar-86, Edit by VAF
-	Redo connection timeout stuff.
-	Fix bug in checksum algorithm.
-	Move a bunch of code out of this module (more to be done).
+    Redo connection timeout stuff.
+    Fix bug in checksum algorithm.
+    Move a bunch of code out of this module (more to be done).
 
 2.2  10-Mar-86, Edit by VAF
-	Changs to handle overlapping segments.
-	**N.B. the TCB[Dasm_*] crap should be flushed.
+    Changs to handle overlapping segments.
+    **N.B. the TCB[Dasm_*] crap should be flushed.
 
 2.1   7-Mar-86, Edit by VAF
-	New log file handling stuff.
+    New log file handling stuff.
 
 2.0  21-Feb-86, Edit by VAF
-	Flush "known_hosts" crud, replace with hostname module.
-	Flush "myinternetaddrs" crud, replace with dev_config entries.
-	Add Local_Host to TCB - it is determined at connect-open time and
-	speficies which interface is used for a connection.
-	Other miscellaneous changes in an effort to bring this code into the
-	real Internet world.
-	Allow open by IP host number ("a.b.c.d" as host name)
+    Flush "known_hosts" crud, replace with hostname module.
+    Flush "myinternetaddrs" crud, replace with dev_config entries.
+    Add Local_Host to TCB - it is determined at connect-open time and
+    speficies which interface is used for a connection.
+    Other miscellaneous changes in an effort to bring this code into the
+    real Internet world.
+    Allow open by IP host number ("a.b.c.d" as host name)
 
 *** End CMU change log ***
 
 1.1  [10-1-81] stan smith
-	original version.
+    original version.
 
 1.2  [7-15-83] stan
-	force byte-size on some external literals.
+    force byte-size on some external literals.
 
 1.3  [7-28-83] stan
-	new net$dump function: one converts a host name to a known_hosts table
-	index, other uses the known_hosts index to retreive stats for the
-	specified host.
+    new net$dump function: one converts a host name to a known_hosts table
+    index, other uses the known_hosts index to retreive stats for the
+    specified host.
 1.4  [9-14-83] stan
-	"decode_network_host" now scans host_alias table attempting to match
-	host name specified in net$open call.
+    "decode_network_host" now scans host_alias table attempting to match
+    host name specified in net$open call.
 
 1.5  [1-24-84] stan
-	rtn: retrans_enqueue, place an upper bound on the retransmission timeout
-	value.  Round-trip time can become very large, prevent lengthy delays.
+    rtn: retrans_enqueue, place an upper bound on the retransmission timeout
+    value.  Round-trip time can become very large, prevent lengthy delays.
 
 1.6  [5-30-85] noelan olson
-	Modified to use the table of internet addresses.  Must use the proper
-	one to calculate checksum when gatewaying between networks.
+    Modified to use the table of internet addresses.  Must use the proper
+    one to calculate checksum when gatewaying between networks.
 
 1.61  Rick Watson U.Texas
-	Find available port for user.
+    Find available port for user.
 */
 
 
@@ -299,17 +299,17 @@ MODULE USER(IDENT="6.7a",LANGUAGE(BLISS32),
             OPTIMIZE,OPTLEVEL=3,ZIP)=
 #endif
 
-// not yet #include <cmuip/central/include/netxport.h"	// BLISS transportablity package
-//LIBRARY <starlet.h>	// VMS system definitions ** Not STARLET **
+// not yet #include <cmuip/central/include/netxport.h"  // BLISS transportablity package
+//LIBRARY <starlet.h>   // VMS system definitions ** Not STARLET **
 #include <starlet.h>
-// not yet #include "SYS$LIBRARY:LIB";	// VMS system definitions ** Not STARLET **
-#include <cmuip/central/include/neterror.h>	// Network error messages
-#include <cmuip/central/include/netcommon.h>	// Various VMS specifics
-#include "netvms.h"		// Various VMS specifics
-#include "structure.h"		// TCB & Segment Structure definitions
-//LIBRARY "tcp.h"			// TCP related definitions
+// not yet #include "SYS$LIBRARY:LIB";  // VMS system definitions ** Not STARLET **
+#include <cmuip/central/include/neterror.h> // Network error messages
+#include <cmuip/central/include/netcommon.h>    // Various VMS specifics
+#include "netvms.h"     // Various VMS specifics
+#include "structure.h"      // TCB & Segment Structure definitions
+//LIBRARY "tcp.h"           // TCP related definitions
 #include "cmuip.h" // needed before tcpmacros.h
-#include "tcpmacros.h"		// Include local macros
+#include "tcpmacros.h"      // Include local macros
 #include <cmuip/central/include/netconfig.h> // Transport devices interface
 
 #include <ssdef.h>
@@ -326,19 +326,19 @@ MODULE USER(IDENT="6.7a",LANGUAGE(BLISS32),
 //#define sys$finish_rdb exe$finish_rdb
 #endif
 
-//*** N.B. Special UCB extensions used by IP device driver	***
-//*** Take care to always match definitions in IPDRIVER.MAR	***
-//*** Referenced by: TCP_USER.BLI, UDP.BLI, ICMP.BLI		***
+//*** N.B. Special UCB extensions used by IP device driver  ***
+//*** Take care to always match definitions in IPDRIVER.MAR ***
+//*** Referenced by: TCP_USER.BLI, UDP.BLI, ICMP.BLI        ***
 
 
-#define    UCB$Q_DDP	ucb$q_devdepend // check
-#define    UCB$L_CBID	ucb$l_devdepnd2	// Control Block associated with UCB
-#define    UCB$L_EXTRA	ucb$l_devdepnd3	// Extra longword for later expansion
+#define    UCB$Q_DDP    ucb$q_devdepend // check
+#define    UCB$L_CBID   ucb$l_devdepnd2 // Control Block associated with UCB
+#define    UCB$L_EXTRA  ucb$l_devdepnd3 // Extra longword for later expansion
 
                 extern signed long
                 log_state,
                 Time_2_Exit,
-                mypid;			// maclib.mar
+                mypid;          // maclib.mar
 extern struct dsc$descriptor  Local_Name;
 extern Device_Configuration_Entry dev_config_tab[];
 
@@ -421,44 +421,44 @@ extern     ip_islocal();
 // also change the corresponding definitions in the IPDRIVER as well as
 // m$cancel in maclib.mar.
 
-#define     M$UNUSED	  0
+#define     M$UNUSED      0
 
-#define     U$OPEN	  1
-#define     U$SEND	  2
-#define     U$RECV	  3
-#define     U$CLOSE	  4
-#define     U$STATUS	  5
-#define     U$ABORT	  6
-#define     U$INFO	  7
+#define     U$OPEN    1
+#define     U$SEND    2
+#define     U$RECV    3
+#define     U$CLOSE   4
+#define     U$STATUS      5
+#define     U$ABORT   6
+#define     U$INFO    7
 
-#define     U$MAX_TCP_FUNCTION   7	// for case limit
+#define     U$MAX_TCP_FUNCTION   7  // for case limit
 
 // GTHST (Get host info) function
 
-#define       U$GTHST	  8
-#define 	GTH_LCLHST   0
-#define 	GTH_NMLOOK   1
-#define 	GTH_ADLOOK   2
-#define 	GTH_RRECLK   3
-#define 	GTH_MIN	  GTH_LCLHST
-#define 	GTH_MAX	  GTH_RRECLK
+#define       U$GTHST     8
+#define     GTH_LCLHST   0
+#define     GTH_NMLOOK   1
+#define     GTH_ADLOOK   2
+#define     GTH_RRECLK   3
+#define     GTH_MIN   GTH_LCLHST
+#define     GTH_MAX   GTH_RRECLK
 
-#define     U$MAX_USER_FUNCTION   8	// for case limit
+#define     U$MAX_USER_FUNCTION   8 // for case limit
 
 // Privileged ACP Maintenance Functions.
 
-#define     M$DUMP	  9
-#define     M$EXIT	  10
+#define     M$DUMP    9
+#define     M$EXIT    10
 // extra, obsolete function.
-#define     M$DEBUG	  11
-#define     M$EVENT	  12
-#define     M$SNMP	  13
+#define     M$DEBUG   11
+#define     M$EVENT   12
+#define     M$SNMP    13
 
-#define     M$CANCEL	  14
+#define     M$CANCEL      14
 
 // Special, internal routine function (for TVT processing)
 
-#define     M$INTERNAL	  15
+#define     M$INTERNAL    15
 
 
 
@@ -479,23 +479,23 @@ ACCESS_SIZE = $FIELD_SET_SIZE,
 MACRO
 ACCESS_LIST = BLOCKVECTOR[ACCESS_MAX,ACCESS_SIZE] FIELD(ACCESS_FIELDS) %;
 
-#define    ACF$PRIVPORT = 0,1,0 %,	// Check for privileged ports
-#define    ACF$ARPAHOST = 1,1,0 %,	// Check ARPANET_ACCESS for nonlocal hosts
-#define    ACF$ALLOPENS = 2,1,0 %;	// Check INTERNET_ACCESS for any open
+#define    ACF$PRIVPORT = 0,1,0 %,  // Check for privileged ports
+#define    ACF$ARPAHOST = 1,1,0 %,  // Check ARPANET_ACCESS for nonlocal hosts
+#define    ACF$ALLOPENS = 2,1,0 %;  // Check INTERNET_ACCESS for any open
 #endif
 
-#define     ACF_PRIVPORT   1		// Bitmask for above...
-#define     ACF_ARPAHOST   2		// "
-#define     ACF_ALLOPENS   4		// "
+#define     ACF_PRIVPORT   1        // Bitmask for above...
+#define     ACF_ARPAHOST   2        // "
+#define     ACF_ALLOPENS   4        // "
 
 signed long
 access_flags  = ACF_PRIVPORT; // Flags for access checks to do
 
 static signed long
-ACHOST_COUNT  = 0,	// Count of hosts
-ARPANET_ID  = 0,	// Identifier for ARPANET_ACCESS
-INTERNET_ID  = 0;	// Identifier for INTERNET_ACCESS
-struct ACCESS_LIST * ACHOSTS ;	// List of local hosts
+ACHOST_COUNT  = 0,  // Count of hosts
+ARPANET_ID  = 0,    // Identifier for ARPANET_ACCESS
+INTERNET_ID  = 0;   // Identifier for INTERNET_ACCESS
+struct ACCESS_LIST * ACHOSTS ;  // List of local hosts
 
 #define    ARPANET_STRING ASCID2(14, "ARPANET_ACCESS")
 #define    INTERNET_STRING ASCID2(15, "INTERNET_ACCESS")
@@ -505,24 +505,24 @@ struct ACCESS_LIST * ACHOSTS ;	// List of local hosts
 
 Function:
 
-	Request VMS to post the user's IO function thus completing the
-	VMS IO request.  We need to change mode to Kernel to access some
-	of the VMS IO data strctures.
+    Request VMS to post the user's IO function thus completing the
+    VMS IO request.  We need to change mode to Kernel to access some
+    of the VMS IO data strctures.
 
 Inputs:
 
-	IOSB	IO Status Block Address.
-	IRP	IRP address
-	UCB	UCB address
+    IOSB    IO Status Block Address.
+    IRP IRP address
+    UCB UCB address
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	Process access mode is changed to KERNEL & back to user before
-	this routine exits.
+    Process access mode is changed to KERNEL & back to user before
+    this routine exits.
 
 */
 
@@ -556,28 +556,28 @@ void IO$POST (long long * IOSB, struct user_default_args * UArg)
 
 Function:
 
-	Return I/O Status to the user processes.  Used for TCP functions
-	which actually transfer data between user & TCP (SEND, Receieive
-	status, dump).
+    Return I/O Status to the user processes.  Used for TCP functions
+    which actually transfer data between user & TCP (SEND, Receieive
+    status, dump).
 
 Inputs:
 
-	IRP = Address of User's IO Request Packet (VMS structure).
-	UCB = Address of Unit Control Blk (VMS Structure).
-	VMS_Return_Code = SS$_NORMAL etc.
-	TCP_Err, When VMS_Return_Code != SS$_NORMAL this is the error feild
-	Bytes_Xfered = # of bytes read/written
-	IO_Tag = IO request identifier (receive only)
-	URG = Urgent data present (send only)
-	EOL = End Of Letter (send only).
+    IRP = Address of User's IO Request Packet (VMS structure).
+    UCB = Address of Unit Control Blk (VMS Structure).
+    VMS_Return_Code = SS$_NORMAL etc.
+    TCP_Err, When VMS_Return_Code != SS$_NORMAL this is the error feild
+    Bytes_Xfered = # of bytes read/written
+    IO_Tag = IO request identifier (receive only)
+    URG = Urgent data present (send only)
+    EOL = End Of Letter (send only).
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	User's IRP is queued to VMS IO post-processing rtns.
+    User's IRP is queued to VMS IO post-processing rtns.
 
 */
 
@@ -615,24 +615,24 @@ void user$post_io_status (UARG,STATUS,NBYTES,
 
 Function:
 
-	Return IPACP related errors to the user's process.  A network
-	I/O status block is filled out.  Status block is similar to
-	the VMS IO status block (surprize).
+    Return IPACP related errors to the user's process.  A network
+    I/O status block is filled out.  Status block is similar to
+    the VMS IO status block (surprize).
 
 Inputs:
 
-	Arg = Address of argument block.  Actually is the system
-	      buffer (IRP$L_SVAPTE) pointed at by IRP.
-	Err = Error code to be returned to user.
+    Arg = Address of argument block.  Actually is the system
+          buffer (IRP$L_SVAPTE) pointed at by IRP.
+    Err = Error code to be returned to user.
 
 Outputs:
 
-	Always TRUE.
+    Always TRUE.
 
 Side Effects:
 
-	IRP is queued to VMS IO post-processing.
-	User argblk (ARG) is released to memory manager.
+    IRP is queued to VMS IO post-processing.
+    User argblk (ARG) is released to memory manager.
 
 */
 
@@ -658,7 +658,7 @@ USER$Err (struct user_default_args * Arg, long Err)
 // Queue IRP to VMS I/O post-processor
 
     IO$POST(IOSB, Arg);
-    mm$uarg_free(Arg);			// Release user TCP arg block.
+    mm$uarg_free(Arg);          // Release user TCP arg block.
 
 // If logging is enabled then output the user error message to the log file.
 
@@ -674,21 +674,21 @@ USER$Err (struct user_default_args * Arg, long Err)
 
 Function:
 
-	Return to the requesting user a sucessful status on the
-	requested IP function.  Returns a network IO status blk
-	to the user.
+    Return to the requesting user a sucessful status on the
+    requested IP function.  Returns a network IO status blk
+    to the user.
 
 Inputs:
 
-	Arg = IPACP argument block.
+    Arg = IPACP argument block.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	IRP is queued to VMS IO posting routines.
+    IRP is queued to VMS IO posting routines.
 
 */
 
@@ -707,7 +707,7 @@ void user$post_function_ok(struct user_default_args * Arg)
 // Queue IRP to IO post-processor
 
     IO$POST(IOSB,Arg);
-    mm$uarg_free(Arg);		// Release user arg block.
+    mm$uarg_free(Arg);      // Release user arg block.
 }
 
 //SBTTL "Give info about a connection"
@@ -763,7 +763,7 @@ void user$net_connection_info(struct user_info_args * uargs,
 // Return the Connection Status to the user by posting the IO request.
 
     user$post_io_status(uargs,SS$_NORMAL,CONNECTION_INFO_BYTESIZE,0,0);
-    mm$uarg_free(uargs);		// relese user arg block.
+    mm$uarg_free(uargs);        // relese user arg block.
 }
 
 //SBTTL "Derive an integer Clock base"
@@ -771,9 +771,9 @@ void user$net_connection_info(struct user_info_args * uargs,
 // get a portion of the 64-bit time to use as a clock based factor in
 // time based calculations.
 
-//Entry:	none
+//Entry:    none
 
-//Exit:	returns clock based integer.
+//Exit: returns clock based integer.
 
 user$clock_base (void)
 {
@@ -789,20 +789,20 @@ user$clock_base (void)
 
 Function:
 
-	Allocate a user local port for a connection.  Port is clock-based.
+    Allocate a user local port for a connection.  Port is clock-based.
 
 Inputs:
 
-	None.
+    None.
 
 Outputs:
 
-	Valid user local port.
+    Valid user local port.
 
 Side Effects:
 
-	If new local port is > local-port space end then wrap it around
-	& start at the beginning.
+    If new local port is > local-port space end then wrap it around
+    & start at the beginning.
 */
 
 
@@ -839,22 +839,22 @@ void user$init_routines (void)
 /*
 Function:
 
-	Maintenance level user call.  Sets the IPACP system wide debug level.
-	Used to control volume of trace infor placed into IPACP log file.
-	IF Global "LOG_State" > 0 then the log file is open & logging enabled.
-	Otherwise the LOG file is closed.
+    Maintenance level user call.  Sets the IPACP system wide debug level.
+    Used to control volume of trace infor placed into IPACP log file.
+    IF Global "LOG_State" > 0 then the log file is open & logging enabled.
+    Otherwise the LOG file is closed.
 
 Inputs:
 
-	uargs = IPACP user argument block.
+    uargs = IPACP user argument block.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	Debug level is reset.
+    Debug level is reset.
 
 */
 
@@ -879,23 +879,23 @@ void Net$Debug(struct debug_args * uargs)
 
 /*
 Function:
-	Maintenance level user call.  Used to append messages to the end
-	of the INET$ACTIVITY log file.
+    Maintenance level user call.  Used to append messages to the end
+    of the INET$ACTIVITY log file.
 
 Inputs:
-	uargs = IPACP user argument block.
+    uargs = IPACP user argument block.
 
 Outputs:
-	None.
+    None.
 
 Side Effects:
-	Activity file is updated
+    Activity file is updated
 
 */
 
 void Net$Event(struct event_args * uargs)
 {
-    extern	mm$get_mem(), mm$free_mem();
+    extern  mm$get_mem(), mm$free_mem();
     signed long
     RC,
     Buffer;
@@ -921,16 +921,16 @@ void Net$Event(struct event_args * uargs)
 
 /*
 Function:
-	Maintenance level user call.  Used to manipulate the IPACP
+    Maintenance level user call.  Used to manipulate the IPACP
 
 Inputs:
-	uargs = IPACP user argument block.
+    uargs = IPACP user argument block.
 
 Outputs:
-	None.
+    None.
 
 Side Effects:
-	System is, um, manipulated
+    System is, um, manipulated
 
 */
 
@@ -940,37 +940,37 @@ Side Effects:
 
 Function:
 
-	Used to debug TCP by allowing a privileged user to examine TCP during
-	execution.  The Dump directive indicates which/what type of a dump we
-	will take.  (Please excuse the disgusting imagery).
+    Used to debug TCP by allowing a privileged user to examine TCP during
+    execution.  The Dump directive indicates which/what type of a dump we
+    will take.  (Please excuse the disgusting imagery).
 
 Inputs:
 
-	User argument blk formated according to Debug_Dump_args field definition.
+    User argument blk formated according to Debug_Dump_args field definition.
 
 
 Implicit Inputs:
 
-	User must be privileged.
+    User must be privileged.
 
 Output:
 
-	User"s IO is posted back to the user.  If no errors then the user"s
-	buffer is filled with requested dump data.
+    User"s IO is posted back to the user.  If no errors then the user"s
+    buffer is filled with requested dump data.
 */
 
 void net$snmp(struct snmp_args * uargs)
 {
-    extern	SNMP$USER_INPUT(),
+    extern  SNMP$USER_INPUT(),
             mm$get_mem(), mm$free_mem();
-#define	RBBYTES D$User_Return_Blk_Max_Size
-#define	RBSIZE (RBBYTES+3)/4		// Largest dump block, in alloc units
+#define RBBYTES D$User_Return_Blk_Max_Size
+#define RBSIZE (RBBYTES+3)/4        // Largest dump block, in alloc units
     char * In_Buff;
     signed long
     RC,
     Error = FALSE,
-    Now[2],			// time as in now.
-    One[2] = {1,0},	// QuadWord of val 1.
+    Now[2],         // time as in now.
+    One[2] = {1,0}, // QuadWord of val 1.
              bufsize  = 0,
              RB[RBSIZE];
 
@@ -997,19 +997,19 @@ void net$snmp(struct snmp_args * uargs)
         case SNMP$C_Get;
         case SNMP$C_GetNext:
         case SNMP$C_Store:
-    	{
-    	bufsize = uargs->snmp$rbuf_size;
-    	Error = SNMP$USER_INPUT(In_Buff,uargs->snmp$wbuf_size,
-    			       RB+4,bufsize)
-    	};
-    	break;
+        {
+        bufsize = uargs->snmp$rbuf_size;
+        Error = SNMP$USER_INPUT(In_Buff,uargs->snmp$wbuf_size,
+                       RB+4,bufsize)
+        };
+        break;
 
         case SNMP$C_Kill:
     */
 
     if ((uargs->snmp$function == 4))
     {
-        extern	    tcp$kill();
+        extern      tcp$kill();
 
         XLOG$FAO(LOG$USER,"!%T Kill !XL (bsize=!XL)!/",0,
                  In_Buff[0],uargs->snmp$wbuf_size);
@@ -1023,7 +1023,7 @@ void net$snmp(struct snmp_args * uargs)
 
     /*
         default:
-    	Error = USER$Err(uargs,NET$_IFC); // Illegal Function code.
+        Error = USER$Err(uargs,NET$_IFC); // Illegal Function code.
         };
 
     */
@@ -1041,7 +1041,7 @@ void net$snmp(struct snmp_args * uargs)
 // If not return error: Buffer TOO small.
 
         if (uargs->snmp$rbuf_size < (bufsize + 4))
-            USER$Err(uargs,NET$_BTS);	// user's buffer is TOO small.
+            USER$Err(uargs,NET$_BTS);   // user's buffer is TOO small.
         else
         {
 
@@ -1053,7 +1053,7 @@ void net$snmp(struct snmp_args * uargs)
 // Post the user's IO request back to the user.
 
             user$post_io_status(uargs,SS$_NORMAL,bufsize+4,0,0);
-            mm$uarg_free(uargs);	// Release user arg block.
+            mm$uarg_free(uargs);    // Release user arg block.
         };
     };
 }
@@ -1065,25 +1065,25 @@ void net$snmp(struct snmp_args * uargs)
 
 Function:
 
-	Post all remaining user IO requests back to the respective users.
-	Routine is generally called before IPACP exits, idea is NOT to hang
-	any user processes.  Virtual device "IP" is set to the offline state.
+    Post all remaining user IO requests back to the respective users.
+    Routine is generally called before IPACP exits, idea is NOT to hang
+    any user processes.  Virtual device "IP" is set to the offline state.
 
 Inputs:
 
-	None.
+    None.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	Take IP device offline and call protocol-specific routines to kill
-	requests associated with all connections. Purge anything that remains
-	on the user request queue. In any case, since the ACP is going to die
-	soon don't bother to delete dynamic data structures, can end up calling
-	the memory-mangler recursively. oops.
+    Take IP device offline and call protocol-specific routines to kill
+    requests associated with all connections. Purge anything that remains
+    on the user request queue. In any case, since the ACP is going to die
+    soon don't bother to delete dynamic data structures, can end up calling
+    the memory-mangler recursively. oops.
 
 */
 
@@ -1091,10 +1091,10 @@ void    gthst_purge();
 
 void user$purge_all_io (void)
 {
-    extern 	void tcp$purge_all_io();
-    extern 	void udp$purge_all_io();
-    extern 	void icmp$purge_all_io();
-    extern 	void ipu$purge_all_io();
+    extern  void tcp$purge_all_io();
+    extern  void udp$purge_all_io();
+    extern  void icmp$purge_all_io();
+    extern  void ipu$purge_all_io();
     register
     qb;
     signed long
@@ -1117,10 +1117,10 @@ void user$purge_all_io (void)
 
 // check the user request queue again just to be safe.
 
-    expr[0] = 5*TIMER_DELTA;	// 5 seconds in Delta time format.
+    expr[0] = 5*TIMER_DELTA;    // 5 seconds in Delta time format.
     expr[1] = -1;
     sys$schdwk(0,0,expr,0);
-    sys$hiber();	// check		// Make sure ALL IO has been queued.
+    sys$hiber();    // check        // Make sure ALL IO has been queued.
 
 // Purge User request queue.
 // Special case M$Cancel as the IRP came from the IP: driver cancel routine
@@ -1145,34 +1145,34 @@ void user$purge_all_io (void)
 
 Function:
 
-	Cancel(ABORT) connection associated with a given PID & IO channel #.
-	Action is initiated by "IP" driver cancel IO routine.  Driver sends
-	the ACP a "FAKE" IRP which communicates the process PID & channel #
-	for which the IO is being cancelled.  See side effects below.
+    Cancel(ABORT) connection associated with a given PID & IO channel #.
+    Action is initiated by "IP" driver cancel IO routine.  Driver sends
+    the ACP a "FAKE" IRP which communicates the process PID & channel #
+    for which the IO is being cancelled.  See side effects below.
 
 Inputs:
 
-	VMS cancel request arg block (VMS$Cancel_args)
-	Arg block contains requesting process PID & channel #.
+    VMS cancel request arg block (VMS$Cancel_args)
+    Arg block contains requesting process PID & channel #.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	All pending IO requests are returned to the user process with the
-	VMS return code of SS$_ABORT & the TCP Error code ER$CCAN (Connection
-	canceled).  Generally this routine is called in response to VMS image
-	run-down routines doing a $CANCEL system service on an open I/O
-	chanel.  Virtual device driver builds a TCP arg block with the
-	"M$CANCEL" function code.
-	***** Warning *****
-	Do NOT post the IO on this I/O request as it did NOT come from a user
-	process but instead came from the IP: driver cancel IO routine.
-	Maclib.mar(user-requests-avail) routine takes care of the VMS dynamic
-	memory management, all we have to worry about is the User-argument
-	block.
+    All pending IO requests are returned to the user process with the
+    VMS return code of SS$_ABORT & the TCP Error code ER$CCAN (Connection
+    canceled).  Generally this routine is called in response to VMS image
+    run-down routines doing a $CANCEL system service on an open I/O
+    chanel.  Virtual device driver builds a TCP arg block with the
+    "M$CANCEL" function code.
+    ***** Warning *****
+    Do NOT post the IO on this I/O request as it did NOT come from a user
+    process but instead came from the IP: driver cancel IO routine.
+    Maclib.mar(user-requests-avail) routine takes care of the VMS dynamic
+    memory management, all we have to worry about is the User-argument
+    block.
 
 */
 
@@ -1185,10 +1185,10 @@ user$brk (void)
 
 void VMS$Cancel(struct vms$cancel_args * uargs)
 {
-    extern 	tcp$cancel();
-    extern 	udp$cancel();
-    extern 	icmp$cancel();
-    extern 	ipu$cancel();
+    extern  tcp$cancel();
+    extern  udp$cancel();
+    extern  icmp$cancel();
+    extern  ipu$cancel();
     signed long
     ucbptr,
     proto,
@@ -1224,7 +1224,7 @@ void VMS$Cancel(struct vms$cancel_args * uargs)
     };
 
     GTHST_CANCEL(uargs);
-    mm$uarg_free(uargs);		// Release IPACP argument block
+    mm$uarg_free(uargs);        // Release IPACP argument block
 }
 
 //Sbttl "NET$Dump - Dump the TCB blocks to a user process"
@@ -1233,33 +1233,33 @@ void VMS$Cancel(struct vms$cancel_args * uargs)
 
 Function:
 
-	Used to debug TCP by allowing a privileged user to examine TCP during
-	execution.  The Dump directive indicates which/what type of a dump we
-	will take.  (Please excuse the disgusting imagery).
+    Used to debug TCP by allowing a privileged user to examine TCP during
+    execution.  The Dump directive indicates which/what type of a dump we
+    will take.  (Please excuse the disgusting imagery).
 
 Inputs:
 
-	User argument blk formated according to Debug_Dump_args field definition.
+    User argument blk formated according to Debug_Dump_args field definition.
 
 
 Implicit Inputs:
 
-	User must be privileged.
+    User must be privileged.
 
 Output:
 
-	User"s IO is posted back to the user.  If no errors then the user"s
-	buffer is filled with requested dump data.
+    User"s IO is posted back to the user.  If no errors then the user"s
+    buffer is filled with requested dump data.
 */
 
 void net$dump(struct debug_dump_args * uargs)
 {
-    extern	CALCULATE_UPTIME();
-    extern	TEK$sys_uptime;
+    extern  CALCULATE_UPTIME();
+    extern  TEK$sys_uptime;
     register
-    struct queue_blk_structure(qb_ur_fields) * QB;	// queue block pointer.
-#define	RBBYTES D$User_Return_Blk_Max_Size
-#define	RBSIZE (RBBYTES+3)/4		// Largest dump block, in alloc units
+    struct queue_blk_structure(qb_ur_fields) * QB;  // queue block pointer.
+#define RBBYTES D$User_Return_Blk_Max_Size
+#define RBSIZE (RBBYTES+3)/4        // Largest dump block, in alloc units
     signed long
     rc,
     Error = FALSE,
@@ -1289,16 +1289,16 @@ void net$dump(struct debug_dump_args * uargs)
         min_seg_count,
         max_seg_count;
 
-        rb->dm$qb = qb_gets;	// queue blocks
-        rb->dm$ua = ua_gets;	// User net io argument blks.
-        rb->dm$cs = 0;		//~~~ OBSOLETE
-        rb->dm$dms = min_gets;	// Minimum (default) size packet buffers
-        rb->dm$nm = max_gets;	// Maximum size packet buffers
-        rb->dm$qbmx = qb_max;	// queue blocks
-        rb->dm$uamx= ua_max;	// User net io argument blks.
-        rb->dm$csmx = 0;	//~~~ OBSOLETE
+        rb->dm$qb = qb_gets;    // queue blocks
+        rb->dm$ua = ua_gets;    // User net io argument blks.
+        rb->dm$cs = 0;      //~~~ OBSOLETE
+        rb->dm$dms = min_gets;  // Minimum (default) size packet buffers
+        rb->dm$nm = max_gets;   // Maximum size packet buffers
+        rb->dm$qbmx = qb_max;   // queue blocks
+        rb->dm$uamx= ua_max;    // User net io argument blks.
+        rb->dm$csmx = 0;    //~~~ OBSOLETE
         rb->dm$dmsmx = min_max;// Minimum (default) size buffers.
-        rb->dm$nmmx = max_max;	// Maximum size buffer.
+        rb->dm$nmmx = max_max;  // Maximum size buffer.
         rb->dm$qbal = qblk_count_base;
         rb->dm$uaal = uarg_count_base;
         rb->dm$csal = 0;
@@ -1309,40 +1309,40 @@ void net$dump(struct debug_dump_args * uargs)
         rb->dm$csfr = 0;
         rb->dm$dmsfr = min_seg_count;
         rb->dm$nmfr = max_seg_count;
-        bufsize	= D$MA_BLKSIZE;
+        bufsize = D$MA_BLKSIZE;
     };
 
     case DU$TCP_STATS:
     {
         d$tcp_stats_return_blk * rb = RB;
 
-        rb->dm$tcpacp_pid		= mypid;
-        rb->dm$user_io_requests		= ts$uir;
+        rb->dm$tcpacp_pid       = mypid;
+        rb->dm$user_io_requests     = ts$uir;
 //!!HACK!!//  // storeForward does not belong here...
-        rb->dm$storeforward		= 0;
-        rb->dm$active_conects_opened	= ts$aco;
-        rb->dm$passive_conects_opened	= ts$pco;
-        rb->dm$data_bytes_xmitted	= ts$dbx;
-        rb->dm$data_bytes_recved	= ts$dbr;
-        rb->dm$segs_xmitted		= ts$sx;
-        rb->dm$segs_recved		= ts$sr;
-        rb->dm$seg_bad_chksum		= ts$seg_bad_cksum;
-        rb->dm$badseq			= ts$badseq;
-        rb->dm$duplicate_segs		= ts$duplicate_segs;
-        rb->dm$retrans_segs		= ts$retrans_segs;
-        rb->dm$rpz_rxq			= ts$rpz_rxq;
-        rb->dm$oorw_segs		= ts$oorw_segs;
-        rb->dm$future_rcvd		= ts$future_rcvd;
-        rb->dm$future_used		= ts$future_used;
-        rb->dm$future_dropped		= ts$future_dropped;
-        rb->dm$future_dups		= ts$future_dups;
-        rb->dm$servers_forked		= ts$servers_forked;
+        rb->dm$storeforward     = 0;
+        rb->dm$active_conects_opened    = ts$aco;
+        rb->dm$passive_conects_opened   = ts$pco;
+        rb->dm$data_bytes_xmitted   = ts$dbx;
+        rb->dm$data_bytes_recved    = ts$dbr;
+        rb->dm$segs_xmitted     = ts$sx;
+        rb->dm$segs_recved      = ts$sr;
+        rb->dm$seg_bad_chksum       = ts$seg_bad_cksum;
+        rb->dm$badseq           = ts$badseq;
+        rb->dm$duplicate_segs       = ts$duplicate_segs;
+        rb->dm$retrans_segs     = ts$retrans_segs;
+        rb->dm$rpz_rxq          = ts$rpz_rxq;
+        rb->dm$oorw_segs        = ts$oorw_segs;
+        rb->dm$future_rcvd      = ts$future_rcvd;
+        rb->dm$future_used      = ts$future_used;
+        rb->dm$future_dropped       = ts$future_dropped;
+        rb->dm$future_dups      = ts$future_dups;
+        rb->dm$servers_forked       = ts$servers_forked;
 
 // Compute TCP uptime.
         CALCULATE_UPTIME();
         ch$move(8,TEK$sys_uptime,rb->dm$uptime);
 
-        bufsize = D$TS_BLKSIZE;	// byte size of return blk.
+        bufsize = D$TS_BLKSIZE; // byte size of return blk.
     };
 
 // Return all active local-connection-id's otherwise known as the address of the
@@ -1352,7 +1352,7 @@ void net$dump(struct debug_dump_args * uargs)
 
     case DU$LOCAL_CONNECTION_ID:
     {
-        void 	    tcp$connection_list();
+        void        tcp$connection_list();
         tcp$connection_list(RB);
         bufsize = D$LC_ID_BLKSIZE;
     };
@@ -1361,7 +1361,7 @@ void net$dump(struct debug_dump_args * uargs)
 
     case DU$TCB_DUMP:
     {
-        extern	   tcp$tcb_dump();
+        extern     tcp$tcb_dump();
         if (tcp$tcb_dump(uargs->du$arg0,RB))
             bufsize = D$TCB_DUMP_BLKSIZE;
         else
@@ -1372,7 +1372,7 @@ void net$dump(struct debug_dump_args * uargs)
 
     case DU$UDP_CONNECTIONS:
     {
-        void 	    udp$connection_list();
+        void        udp$connection_list();
         udp$connection_list(RB);
         bufsize = D$UDP_LIST_BLKSIZE;
     };
@@ -1381,7 +1381,7 @@ void net$dump(struct debug_dump_args * uargs)
 
     case DU$UDPCB_DUMP:
     {
-        extern	    udp$udpcb_dump();
+        extern      udp$udpcb_dump();
         if (udp$udpcb_dump(uargs->du$local_conn_id,RB))
             bufsize = D$UDPCB_DUMP_BLKSIZE;
         else
@@ -1392,7 +1392,7 @@ void net$dump(struct debug_dump_args * uargs)
 
     case DU$ICMP_CONNECTIONS:
     {
-        extern void 	    icmp$connection_list();
+        extern void         icmp$connection_list();
         icmp$connection_list(RB);
         bufsize = D$ICMP_LIST_BLKSIZE;
     };
@@ -1401,7 +1401,7 @@ void net$dump(struct debug_dump_args * uargs)
 
     case DU$ICMPCB_DUMP:
     {
-        extern	   icmp$icmpcb_dump();
+        extern     icmp$icmpcb_dump();
         if (icmp$icmpcb_dump (uargs->du$local_conn_id,RB))
             bufsize = D$ICMPCB_DUMP_BLKSIZE;
         else
@@ -1437,39 +1437,39 @@ void net$dump(struct debug_dump_args * uargs)
         signed long
         USIZE,
         RMOD;
-//	externAL ROUTINE
-//	    ARP_DUMP;
+//  externAL ROUTINE
+//      ARP_DUMP;
 
         Error = USER$Err(uargs,NET$_IFC); // Illegal Function code.
 
 // Compute size of return block - make multiple of dump block size
 
-//	USIZE = uargs->du$buf_size;
-//	if (USIZE > RBBYTES)
-//	    USIZE = RBBYTES;
-//	RMOD = USIZE MOD D$ARP_Dump_Blksize;
-//	USIZE = USIZE - RMOD;
-//	if (USIZE <= 0)
-//	    Error = USER$Err(uargs,NET$_BTS)
-//	else
-//	    {
-//	    bufsize = ARP_DUMP(uargs->du$start_index,RB,USIZE);
-//	    if (bufsize < 0)
-//		Error = USER$Err(uargs,NET$_DAE);
-//	    };
+//  USIZE = uargs->du$buf_size;
+//  if (USIZE > RBBYTES)
+//      USIZE = RBBYTES;
+//  RMOD = USIZE MOD D$ARP_Dump_Blksize;
+//  USIZE = USIZE - RMOD;
+//  if (USIZE <= 0)
+//      Error = USER$Err(uargs,NET$_BTS)
+//  else
+//      {
+//      bufsize = ARP_DUMP(uargs->du$start_index,RB,USIZE);
+//      if (bufsize < 0)
+//      Error = USER$Err(uargs,NET$_DAE);
+//      };
     };
 
 // Get list of device indexes.
 
     case DU$DEVICE_LIST:
     {
-        extern	    cnf$device_list();
+        extern      cnf$device_list();
         bufsize = cnf$device_list(RB);
     };
 
     case DU$DEVICE_STAT:
     {
-        extern	    cnf$device_stat();
+        extern      cnf$device_stat();
         if (uargs->du$buf_size < DC_ENTRY_SIZE)
             Error = USER$Err(uargs,NET$_BTS);
         else if (cnf$device_stat ( uargs->du$arg0, RB ) == -1)
@@ -1493,7 +1493,7 @@ void net$dump(struct debug_dump_args * uargs)
 // If not return error: Buffer TOO small.
 
         if (uargs->du$buf_size < bufsize)
-            USER$Err(uargs,NET$_BTS);	// user's buffer is TOO small.
+            USER$Err(uargs,NET$_BTS);   // user's buffer is TOO small.
         else
         {
 
@@ -1504,7 +1504,7 @@ void net$dump(struct debug_dump_args * uargs)
 // Post the user's IO request back to the user.
 
             user$post_io_status(uargs,SS$_NORMAL,bufsize,0,0);
-            mm$uarg_free(uargs);	// Release user arg block.
+            mm$uarg_free(uargs);    // Release user arg block.
         };
     };
 }
@@ -1513,20 +1513,20 @@ void net$dump(struct debug_dump_args * uargs)
 /*
 Function:
 
-	Used as a privileged call to force an orderly shutdown of the ACP.
+    Used as a privileged call to force an orderly shutdown of the ACP.
 
 Inputs:
 
-	User must have vms (phy_io) privilege.
+    User must have vms (phy_io) privilege.
 
 Outputs:
 
-	None
+    None
 
 Side Effects:
 
-	global "time_2_exit" set true, seen in tcp.bli mainline.
-	IP: device and all clones are set offline.
+    global "time_2_exit" set true, seen in tcp.bli mainline.
+    IP: device and all clones are set offline.
 */
 
 void Net$EXIT(struct debug_exit_args * uargs)
@@ -1535,7 +1535,7 @@ void Net$EXIT(struct debug_exit_args * uargs)
     XLOG$FAO(LOG$USER,"!%T EXIT requested, User PID: !XL!/",0,uargs->ex$pid);
 
     user$post_function_ok(uargs);
-    Time_2_Exit = TRUE;		// Set global for exit, rtn: start_network.
+    Time_2_Exit = TRUE;     // Set global for exit, rtn: start_network.
     $$KCALL(set_ip_device_offline); // mark network device(s) offline.
 }
 
@@ -1633,7 +1633,7 @@ check_id(PID,ID)
 }
 
 
-#define WKS$SMTP 25		// Well known port number for SMTP
+#define WKS$SMTP 25     // Well known port number for SMTP
 
 user$check_access(PID,LCLHST,LCLPRT,FRNHST,FRNPRT)
 //
@@ -1697,7 +1697,7 @@ void user$access_config(HOSTNUM,HOSTMASK)
     if (ACHOST_COUNT >= ACCESS_MAX)
     {
         DESC$STR_ALLOC(HSTSTR,20);
-        extern void 	    ASCII_DEC_BYTES();
+        extern void         ASCII_DEC_BYTES();
 
         ASCII_DEC_BYTES(HSTSTR,4,HOSTNUM,HSTSTR->dsc$w_length);
         OPR$FAO("Local hosts list full - not adding entry for !AS",HSTSTR);
@@ -1767,7 +1767,7 @@ Outputs:
 
 Side effects:
 
-	Results of query may be cached in the Name Server.
+    Results of query may be cached in the Name Server.
 */
 
 void    GTHST_NMLOOK_DONE();
@@ -2088,37 +2088,37 @@ void GTHST_PURGE_ONE(COVALUE,ASTADR,UARGS)
 
 Function:
 
-	Process user IP function requests.  User requests are read from the
-	ACP input queue.  All request processing is handled by the appro rtn.
-	Requests maybe queued for later processing as in the case of a receive
-	requests & no data-bearing segments have arrived for that connection.
-	If user is waiting for a local event flag to be set, then he is still
-	waiting until the IO request has been posted via IO$POST rtn.
-	VMS access mode MUST be KERNAL to touch VMS IO data structures.
+    Process user IP function requests.  User requests are read from the
+    ACP input queue.  All request processing is handled by the appro rtn.
+    Requests maybe queued for later processing as in the case of a receive
+    requests & no data-bearing segments have arrived for that connection.
+    If user is waiting for a local event flag to be set, then he is still
+    waiting until the IO request has been posted via IO$POST rtn.
+    VMS access mode MUST be KERNAL to touch VMS IO data structures.
 
 Inputs:
 
-	None.
+    None.
 
 Implicit Inputs:
 
-	VMS pseudo-device has been mounted so an ACP queue block exists.
-	See module: MACLIB.MAR for device mounts.
+    VMS pseudo-device has been mounted so an ACP queue block exists.
+    See module: MACLIB.MAR for device mounts.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	User requests are processed & returned to the user.
+    User requests are processed & returned to the user.
 
 IMPORTANT NOTE// :
 
-	When adding new functions to the IPACP, remember to change
-	and recompile the function codes in *all* modules.  Don't
-	forget about changing m$cancel in maclib.mar//  It's defined
-	both there and in user.bli.
+    When adding new functions to the IPACP, remember to change
+    and recompile the function codes in *all* modules.  Don't
+    forget about changing m$cancel in maclib.mar//  It's defined
+    both there and in user.bli.
 
 */
 
@@ -2127,40 +2127,40 @@ void user$process_user_requests (void)
 {
 
 // TCP functions:
-    extern 	void TCP$OPEN();
-    extern 	void TCP$CLOSE();
-    extern 	void TCP$ABORT();
-    extern void	TCP$SEND ();
-    extern 	void TCP$RECEIVE();
-    extern 	void TCP$INFO();
-    extern 	void TCP$STATUS();
+    extern  void TCP$OPEN();
+    extern  void TCP$CLOSE();
+    extern  void TCP$ABORT();
+    extern void TCP$SEND ();
+    extern  void TCP$RECEIVE();
+    extern  void TCP$INFO();
+    extern  void TCP$STATUS();
 
 // UDP functions:
-    extern 	void UDP$OPEN();
-    extern 	void UDP$CLOSE();
-    extern 	void udp$abort();
-    extern void 	UDP$SEND ();
-    extern 	void UDP$RECEIVE();
-    extern 	void udp$info();
-    extern 	void udp$status();
+    extern  void UDP$OPEN();
+    extern  void UDP$CLOSE();
+    extern  void udp$abort();
+    extern void     UDP$SEND ();
+    extern  void UDP$RECEIVE();
+    extern  void udp$info();
+    extern  void udp$status();
 
 // ICMP functions:
-    extern 	void ICMP$OPEN();
-    extern 	void ICMP$CLOSE();
-    extern 	void icmp$abort();
-    extern void 	ICMP$SEND ();
-    extern 	void ICMP$RECEIVE();
-    extern 	void icmp$info();
-    extern 	void icmp$status();
+    extern  void ICMP$OPEN();
+    extern  void ICMP$CLOSE();
+    extern  void icmp$abort();
+    extern void     ICMP$SEND ();
+    extern  void ICMP$RECEIVE();
+    extern  void icmp$info();
+    extern  void icmp$status();
 
 // IP functions:
-    extern 	void IPU$OPEN();
-    extern 	void IPU$CLOSE();
-    extern 	void ipu$abort();
-    extern 	void IPU$SEND ();
-    extern 	void IPU$RECEIVE();
-    extern 	void ipu$info();
-    extern 	void IPU$STATUS();
+    extern  void IPU$OPEN();
+    extern  void IPU$CLOSE();
+    extern  void ipu$abort();
+    extern  void IPU$SEND ();
+    extern  void IPU$RECEIVE();
+    extern  void ipu$info();
+    extern  void IPU$STATUS();
     register
     struct user_default_args * argblk;
 
@@ -2228,7 +2228,7 @@ void user$process_user_requests (void)
                 func = *funcstr;
             };
             };
-            LOG$FAO("!%T !AS (Proto:!XB), uargs=!XL,VMSID=!XL,IRP=!XL,UCB=!XL!/",		    0, &func, argblk->ud$protocol,
+            LOG$FAO("!%T !AS (Proto:!XB), uargs=!XL,VMSID=!XL,IRP=!XL,UCB=!XL!/",           0, &func, argblk->ud$protocol,
                     argblk, argblk->ud$vms_blk_id,
                     argblk->ud$irp_adrs, argblk->ud$ucb_adrs,
                     argblk->ud$pid);
@@ -2410,7 +2410,7 @@ void user$process_user_requests (void)
                     case M$SNMP:
                         net$snmp(argblk);
                         break;
-//	    case M$Cancel:	VMS$Cancel(argblk);
+//      case M$Cancel:  VMS$Cancel(argblk);
                     case M$CANCEL:
                         SS$_NORMAL;
                     default :

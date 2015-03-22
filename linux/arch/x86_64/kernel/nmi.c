@@ -6,9 +6,9 @@
  *  Started by Ingo Molnar <mingo@redhat.com>
  *
  *  Fixes:
- *  Mikael Pettersson	: AMD K7 support for local APIC NMI watchdog.
- *  Mikael Pettersson	: Power Management for local APIC NMI watchdog.
- *  Mikael Pettersson	: Pentium 4 support for local APIC NMI watchdog.
+ *  Mikael Pettersson   : AMD K7 support for local APIC NMI watchdog.
+ *  Mikael Pettersson   : Power Management for local APIC NMI watchdog.
+ *  Mikael Pettersson   : Pentium 4 support for local APIC NMI watchdog.
  */
 
 #include <linux/config.h>
@@ -30,7 +30,7 @@
 
 unsigned int nmi_watchdog = NMI_LOCAL_APIC;
 static unsigned int nmi_hz = HZ;
-unsigned int nmi_perfctr_msr;	/* the MSR to reset in NMI handler */
+unsigned int nmi_perfctr_msr;   /* the MSR to reset in NMI handler */
 int panic_on_timeout;
 
 int nmi_watchdog_disabled;
@@ -42,45 +42,45 @@ int nmi_watchdog_disabled;
    I doubt it can be fixed because it's unlikely that the CPU does
    performance counters while being in C* states. -AK */
 
-#define K7_EVNTSEL_ENABLE	(1 << 22)
-#define K7_EVNTSEL_INT		(1 << 20)
-#define K7_EVNTSEL_OS		(1 << 17)
-#define K7_EVNTSEL_USR		(1 << 16)
-#define K7_EVENT_CYCLES_PROCESSOR_IS_RUNNING	0x76
-#define K7_NMI_EVENT		K7_EVENT_CYCLES_PROCESSOR_IS_RUNNING
+#define K7_EVNTSEL_ENABLE   (1 << 22)
+#define K7_EVNTSEL_INT      (1 << 20)
+#define K7_EVNTSEL_OS       (1 << 17)
+#define K7_EVNTSEL_USR      (1 << 16)
+#define K7_EVENT_CYCLES_PROCESSOR_IS_RUNNING    0x76
+#define K7_NMI_EVENT        K7_EVENT_CYCLES_PROCESSOR_IS_RUNNING
 
-#define P6_EVNTSEL0_ENABLE	(1 << 22)
-#define P6_EVNTSEL_INT		(1 << 20)
-#define P6_EVNTSEL_OS		(1 << 17)
-#define P6_EVNTSEL_USR		(1 << 16)
-#define P6_EVENT_CPU_CLOCKS_NOT_HALTED	0x79
-#define P6_NMI_EVENT		P6_EVENT_CPU_CLOCKS_NOT_HALTED
+#define P6_EVNTSEL0_ENABLE  (1 << 22)
+#define P6_EVNTSEL_INT      (1 << 20)
+#define P6_EVNTSEL_OS       (1 << 17)
+#define P6_EVNTSEL_USR      (1 << 16)
+#define P6_EVENT_CPU_CLOCKS_NOT_HALTED  0x79
+#define P6_NMI_EVENT        P6_EVENT_CPU_CLOCKS_NOT_HALTED
 
-#define MSR_P4_MISC_ENABLE	0x1A0
-#define MSR_P4_MISC_ENABLE_PERF_AVAIL	(1<<7)
-#define MSR_P4_MISC_ENABLE_PEBS_UNAVAIL	(1<<12)
-#define MSR_P4_PERFCTR0		0x300
-#define MSR_P4_CCCR0		0x360
-#define P4_ESCR_EVENT_SELECT(N)	((N)<<25)
-#define P4_ESCR_OS		(1<<3)
-#define P4_ESCR_USR		(1<<2)
-#define P4_CCCR_OVF_PMI		(1<<26)
-#define P4_CCCR_THRESHOLD(N)	((N)<<20)
-#define P4_CCCR_COMPLEMENT	(1<<19)
-#define P4_CCCR_COMPARE		(1<<18)
-#define P4_CCCR_REQUIRED	(3<<16)
-#define P4_CCCR_ESCR_SELECT(N)	((N)<<13)
-#define P4_CCCR_ENABLE		(1<<12)
+#define MSR_P4_MISC_ENABLE  0x1A0
+#define MSR_P4_MISC_ENABLE_PERF_AVAIL   (1<<7)
+#define MSR_P4_MISC_ENABLE_PEBS_UNAVAIL (1<<12)
+#define MSR_P4_PERFCTR0     0x300
+#define MSR_P4_CCCR0        0x360
+#define P4_ESCR_EVENT_SELECT(N) ((N)<<25)
+#define P4_ESCR_OS      (1<<3)
+#define P4_ESCR_USR     (1<<2)
+#define P4_CCCR_OVF_PMI     (1<<26)
+#define P4_CCCR_THRESHOLD(N)    ((N)<<20)
+#define P4_CCCR_COMPLEMENT  (1<<19)
+#define P4_CCCR_COMPARE     (1<<18)
+#define P4_CCCR_REQUIRED    (3<<16)
+#define P4_CCCR_ESCR_SELECT(N)  ((N)<<13)
+#define P4_CCCR_ENABLE      (1<<12)
 /* Set up IQ_COUNTER0 to behave like a clock, by having IQ_CCCR0 filter
    CRU_ESCR0 (with any non-null event selector) through a complemented
    max threshold. [IA32-Vol3, Section 14.9.9] */
-#define MSR_P4_IQ_COUNTER0	0x30C
-#define MSR_P4_IQ_CCCR0		0x36C
-#define MSR_P4_CRU_ESCR0	0x3B8
-#define P4_NMI_CRU_ESCR0	(P4_ESCR_EVENT_SELECT(0x3F)|P4_ESCR_OS|P4_ESCR_USR)
-#define P4_NMI_IQ_CCCR0	\
-	(P4_CCCR_OVF_PMI|P4_CCCR_THRESHOLD(15)|P4_CCCR_COMPLEMENT|	\
-	 P4_CCCR_COMPARE|P4_CCCR_REQUIRED|P4_CCCR_ESCR_SELECT(4)|P4_CCCR_ENABLE)
+#define MSR_P4_IQ_COUNTER0  0x30C
+#define MSR_P4_IQ_CCCR0     0x36C
+#define MSR_P4_CRU_ESCR0    0x3B8
+#define P4_NMI_CRU_ESCR0    (P4_ESCR_EVENT_SELECT(0x3F)|P4_ESCR_OS|P4_ESCR_USR)
+#define P4_NMI_IQ_CCCR0 \
+    (P4_CCCR_OVF_PMI|P4_CCCR_THRESHOLD(15)|P4_CCCR_COMPLEMENT|  \
+     P4_CCCR_COMPARE|P4_CCCR_REQUIRED|P4_CCCR_ESCR_SELECT(4)|P4_CCCR_ENABLE)
 
 /* Why is there no CPUID flag for this? */
 static __init int cpu_has_lapic(void)
@@ -203,15 +203,15 @@ static void nmi_pm_init(void)
         nmi_pmdev = apic_pm_register(PM_SYS_DEV, 0, nmi_pm_callback);
 }
 
-#define __pminit	/*empty*/
+#define __pminit    /*empty*/
 
-#else	/* CONFIG_PM */
+#else   /* CONFIG_PM */
 
 static inline void nmi_pm_init(void) { }
 
-#define __pminit	__init
+#define __pminit    __init
 
-#endif	/* CONFIG_PM */
+#endif  /* CONFIG_PM */
 
 /*
  * Activate the NMI watchdog via the local APIC.

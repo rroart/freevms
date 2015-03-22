@@ -12,17 +12,17 @@
 #include <asm/uaccess.h>
 
 /**
- *	seq_open -	initialize sequential file
- *	@file: file we initialize
- *	@op: method table describing the sequence
+ *  seq_open -  initialize sequential file
+ *  @file: file we initialize
+ *  @op: method table describing the sequence
  *
- *	seq_open() sets @file, associating it with a sequence described
- *	by @op.  @op->start() sets the iterator up and returns the first
- *	element of sequence. @op->stop() shuts it down.  @op->next()
- *	returns the next element of sequence.  @op->show() prints element
- *	into the buffer.  In case of error ->start() and ->next() return
- *	ERR_PTR(error).  In the end of sequence they return %NULL. ->show()
- *	returns 0 in case of success and negative number in case of error.
+ *  seq_open() sets @file, associating it with a sequence described
+ *  by @op.  @op->start() sets the iterator up and returns the first
+ *  element of sequence. @op->stop() shuts it down.  @op->next()
+ *  returns the next element of sequence.  @op->show() prints element
+ *  into the buffer.  In case of error ->start() and ->next() return
+ *  ERR_PTR(error).  In the end of sequence they return %NULL. ->show()
+ *  returns 0 in case of success and negative number in case of error.
  */
 int seq_open(struct file *file, struct seq_operations *op)
 {
@@ -37,10 +37,10 @@ int seq_open(struct file *file, struct seq_operations *op)
 }
 
 /**
- *	seq_read -	->read() method for sequential files.
- *	@file, @buf, @size, @ppos: see file_operations method
+ *  seq_read -  ->read() method for sequential files.
+ *  @file, @buf, @size, @ppos: see file_operations method
  *
- *	Ready-made ->f_op->read()
+ *  Ready-made ->f_op->read()
  */
 ssize_t seq_read(struct file *file, char *buf, size_t size, loff_t *ppos)
 {
@@ -200,10 +200,10 @@ Eoverflow:
 }
 
 /**
- *	seq_lseek -	->llseek() method for sequential files.
- *	@file, @offset, @origin: see file_operations method
+ *  seq_lseek - ->llseek() method for sequential files.
+ *  @file, @offset, @origin: see file_operations method
  *
- *	Ready-made ->f_op->llseek()
+ *  Ready-made ->f_op->llseek()
  */
 loff_t seq_lseek(struct file *file, loff_t offset, int origin)
 {
@@ -241,12 +241,12 @@ loff_t seq_lseek(struct file *file, loff_t offset, int origin)
 }
 
 /**
- *	seq_release -	free the structures associated with sequential file.
- *	@file: file in question
- *	@inode: file->f_dentry->d_inode
+ *  seq_release -   free the structures associated with sequential file.
+ *  @file: file in question
+ *  @inode: file->f_dentry->d_inode
  *
- *	Frees the structures associated with sequential file; can be used
- *	as ->f_op->release() if you don't have private data to destroy.
+ *  Frees the structures associated with sequential file; can be used
+ *  as ->f_op->release() if you don't have private data to destroy.
  */
 int seq_release(struct inode *inode, struct file *file)
 {
@@ -257,14 +257,14 @@ int seq_release(struct inode *inode, struct file *file)
 }
 
 /**
- *	seq_escape -	print string into buffer, escaping some characters
- *	@m:	target buffer
- *	@s:	string
- *	@esc:	set of characters that need escaping
+ *  seq_escape -    print string into buffer, escaping some characters
+ *  @m: target buffer
+ *  @s: string
+ *  @esc:   set of characters that need escaping
  *
- *	Puts string into buffer, replacing each occurence of character from
- *	@esc with usual octal escape.  Returns 0 in case of success, -1 - in
- *	case of overflow.
+ *  Puts string into buffer, replacing each occurence of character from
+ *  @esc with usual octal escape.  Returns 0 in case of success, -1 - in
+ *  case of overflow.
  */
 int seq_escape(struct seq_file *m, const char *s, const char *esc)
 {

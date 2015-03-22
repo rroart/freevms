@@ -1,22 +1,22 @@
-#ifndef dsrvdef_h
-#define dsrvdef_h
+#ifndef DSRVDEF_H
+#define DSRVDEF_H
 
-#define		DSRV$M_LOG_ENABLD	0x1
-#define		DSRV$M_LOG_PRESENT	0x2
-#define		DSRV$M_PKT_LOGGED	0x4
-#define		DSRV$M_PKT_LOST		0x8
-#define		DSRV$M_LBSTEP1		0x10
-#define		DSRV$M_LBSTEP2		0x20
-#define		DSRV$M_LBEVENT		0x40
-#define		DSRV$M_HULB_DEL		0x80
-#define		DSRV$M_MON_ACTIVE	0x100
-#define		DSRV$M_LB_REQ		0x200
-#define		DSRV$M_CONFIG_WAIT	0x400
-#define		DSRV$C_LENGTH		2968
-#define		DSRV$K_LENGTH		2968
-#define		DSRV$K_AR_ADD		2
-#define		DSRV$K_MAX_UNITS	512
-#define		DSRV$S_DSRVDEF		2968
+#define     DSRV$M_LOG_ENABLD   0x1
+#define     DSRV$M_LOG_PRESENT  0x2
+#define     DSRV$M_PKT_LOGGED   0x4
+#define     DSRV$M_PKT_LOST     0x8
+#define     DSRV$M_LBSTEP1      0x10
+#define     DSRV$M_LBSTEP2      0x20
+#define     DSRV$M_LBEVENT      0x40
+#define     DSRV$M_HULB_DEL     0x80
+#define     DSRV$M_MON_ACTIVE   0x100
+#define     DSRV$M_LB_REQ       0x200
+#define     DSRV$M_CONFIG_WAIT  0x400
+#define     DSRV$C_LENGTH       2968
+#define     DSRV$K_LENGTH       2968
+#define     DSRV$K_AR_ADD       2
+#define     DSRV$K_MAX_UNITS    512
+#define     DSRV$S_DSRVDEF      2968
 
 struct _dsrv
 {

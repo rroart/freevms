@@ -142,7 +142,7 @@ asmlinkage void math_emulate(long arg)
     int unmasked;
     FPU_REG loaded_data;
     FPU_REG *st0_ptr;
-    u_char	  loaded_tag, st0_tag;
+    u_char    loaded_tag, st0_tag;
     void *data_address;
     struct address data_sel_off;
     struct address entry_sel_off;
@@ -275,7 +275,7 @@ do_another_FPU_instruction:
         code = (FPU_modrm << 8) | byte1;
         if ( ! ( (((code & 0xf803) == 0xe003) ||    /* fnclex, fninit, fnstsw */
                   (((code & 0x3003) == 0x3001) &&   /* fnsave, fnstcw, fnstenv,
-						     fnstsw */
+                             fnstsw */
                    ((code & 0xc000) != 0xc000))) ) )
         {
             /*
@@ -284,7 +284,7 @@ do_another_FPU_instruction:
              */
 do_the_FPU_interrupt:
 
-            FPU_EIP = FPU_ORIG_EIP;	/* Point to current FPU instruction. */
+            FPU_EIP = FPU_ORIG_EIP; /* Point to current FPU instruction. */
 
             RE_ENTRANT_CHECK_OFF;
             current->thread.trap_no = 16;
@@ -459,7 +459,7 @@ do_the_FPU_interrupt:
                     clear_C1();
                     if ( st0_tag == TAG_Zero )
                         partial_status = status1;  /* Undo any denorm tag,
-						  zero-divide has priority. */
+                          zero-divide has priority. */
                     FPU_div(REV|LOADED|loaded_tag, (int)&loaded_data, control_word);
                     break;
                 }
@@ -631,7 +631,7 @@ static int valid_prefix(u_char *Byte, u_char **fpu_eip,
 
             /* lock is not a valid prefix for FPU instructions,
                let the cpu handle it to generate a SIGILL. */
-            /*	case PREFIX_LOCK: */
+            /*  case PREFIX_LOCK: */
 
             /* rep.. prefixes have no meaning for FPU instructions */
         case PREFIX_REPE:

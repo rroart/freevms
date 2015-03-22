@@ -73,40 +73,40 @@ struct ncp_volume_info
 #define NW_NS_OS2     4
 
 /*  Defines for ReturnInformationMask */
-#define RIM_NAME	      (ntohl(0x01000000L))
+#define RIM_NAME          (ntohl(0x01000000L))
 #define RIM_SPACE_ALLOCATED   (ntohl(0x02000000L))
-#define RIM_ATTRIBUTES	      (ntohl(0x04000000L))
-#define RIM_DATA_SIZE	      (ntohl(0x08000000L))
-#define RIM_TOTAL_SIZE	      (ntohl(0x10000000L))
+#define RIM_ATTRIBUTES        (ntohl(0x04000000L))
+#define RIM_DATA_SIZE         (ntohl(0x08000000L))
+#define RIM_TOTAL_SIZE        (ntohl(0x10000000L))
 #define RIM_EXT_ATTR_INFO     (ntohl(0x20000000L))
-#define RIM_ARCHIVE	      (ntohl(0x40000000L))
-#define RIM_MODIFY	      (ntohl(0x80000000L))
-#define RIM_CREATION	      (ntohl(0x00010000L))
+#define RIM_ARCHIVE       (ntohl(0x40000000L))
+#define RIM_MODIFY        (ntohl(0x80000000L))
+#define RIM_CREATION          (ntohl(0x00010000L))
 #define RIM_OWNING_NAMESPACE  (ntohl(0x00020000L))
-#define RIM_DIRECTORY	      (ntohl(0x00040000L))
-#define RIM_RIGHTS	      (ntohl(0x00080000L))
-#define RIM_ALL 	      (ntohl(0xFF0F0000L))
+#define RIM_DIRECTORY         (ntohl(0x00040000L))
+#define RIM_RIGHTS        (ntohl(0x00080000L))
+#define RIM_ALL           (ntohl(0xFF0F0000L))
 #define RIM_COMPRESSED_INFO   (ntohl(0x00000080L))
 
 /* open/create modes */
-#define OC_MODE_OPEN	  0x01
+#define OC_MODE_OPEN      0x01
 #define OC_MODE_TRUNCATE  0x02
 #define OC_MODE_REPLACE   0x02
-#define OC_MODE_CREATE	  0x08
+#define OC_MODE_CREATE    0x08
 
 /* open/create results */
-#define OC_ACTION_NONE	   0x00
-#define OC_ACTION_OPEN	   0x01
+#define OC_ACTION_NONE     0x00
+#define OC_ACTION_OPEN     0x01
 #define OC_ACTION_CREATE   0x02
 #define OC_ACTION_TRUNCATE 0x04
 #define OC_ACTION_REPLACE  0x04
 
 /* access rights attributes */
 #ifndef AR_READ_ONLY
-#define AR_READ_ONLY	   0x0001
-#define AR_WRITE_ONLY	   0x0002
-#define AR_DENY_READ	   0x0004
-#define AR_DENY_WRITE	   0x0008
+#define AR_READ_ONLY       0x0001
+#define AR_WRITE_ONLY      0x0002
+#define AR_DENY_READ       0x0004
+#define AR_DENY_WRITE      0x0008
 #define AR_COMPATIBILITY   0x0010
 #define AR_WRITE_THROUGH   0x0040
 #define AR_OPEN_COMPRESSED 0x0100
@@ -143,19 +143,19 @@ struct nw_info_struct
 } __attribute__((packed));
 
 /* modify mask - use with MODIFY_DOS_INFO structure */
-#define DM_ATTRIBUTES		  (ntohl(0x02000000L))
-#define DM_CREATE_DATE		  (ntohl(0x04000000L))
-#define DM_CREATE_TIME		  (ntohl(0x08000000L))
-#define DM_CREATOR_ID		  (ntohl(0x10000000L))
-#define DM_ARCHIVE_DATE 	  (ntohl(0x20000000L))
-#define DM_ARCHIVE_TIME 	  (ntohl(0x40000000L))
-#define DM_ARCHIVER_ID		  (ntohl(0x80000000L))
-#define DM_MODIFY_DATE		  (ntohl(0x00010000L))
-#define DM_MODIFY_TIME		  (ntohl(0x00020000L))
-#define DM_MODIFIER_ID		  (ntohl(0x00040000L))
-#define DM_LAST_ACCESS_DATE	  (ntohl(0x00080000L))
+#define DM_ATTRIBUTES         (ntohl(0x02000000L))
+#define DM_CREATE_DATE        (ntohl(0x04000000L))
+#define DM_CREATE_TIME        (ntohl(0x08000000L))
+#define DM_CREATOR_ID         (ntohl(0x10000000L))
+#define DM_ARCHIVE_DATE       (ntohl(0x20000000L))
+#define DM_ARCHIVE_TIME       (ntohl(0x40000000L))
+#define DM_ARCHIVER_ID        (ntohl(0x80000000L))
+#define DM_MODIFY_DATE        (ntohl(0x00010000L))
+#define DM_MODIFY_TIME        (ntohl(0x00020000L))
+#define DM_MODIFIER_ID        (ntohl(0x00040000L))
+#define DM_LAST_ACCESS_DATE   (ntohl(0x00080000L))
 #define DM_INHERITED_RIGHTS_MASK  (ntohl(0x00100000L))
-#define DM_MAXIMUM_SPACE	  (ntohl(0x00200000L))
+#define DM_MAXIMUM_SPACE      (ntohl(0x00200000L))
 
 struct nw_modify_dos_info
 {
@@ -182,4 +182,4 @@ struct nw_search_sequence
     __u32 sequence;
 } __attribute__((packed));
 
-#endif				/* _LINUX_NCP_H */
+#endif              /* _LINUX_NCP_H */

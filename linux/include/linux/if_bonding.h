@@ -8,8 +8,8 @@
  * BUT, I'm the one who modified it for ethernet, so:
  * (c) Copyright 1999, Thomas Davis, tadavis@lbl.gov
  *
- *	This software may be used and distributed according to the terms
- *	of the GNU Public License, incorporated herein by reference.
+ *  This software may be used and distributed according to the terms
+ *  of the GNU Public License, incorporated herein by reference.
  *
  */
 
@@ -27,14 +27,14 @@
  * We can remove these ioctl definitions in 2.5.  People should use the
  * SIOC*** versions of them instead
  */
-#define BOND_ENSLAVE_OLD		(SIOCDEVPRIVATE)
-#define BOND_RELEASE_OLD		(SIOCDEVPRIVATE + 1)
-#define BOND_SETHWADDR_OLD		(SIOCDEVPRIVATE + 2)
-#define BOND_SLAVE_INFO_QUERY_OLD	(SIOCDEVPRIVATE + 11)
-#define BOND_INFO_QUERY_OLD		(SIOCDEVPRIVATE + 12)
-#define BOND_CHANGE_ACTIVE_OLD		(SIOCDEVPRIVATE + 13)
+#define BOND_ENSLAVE_OLD        (SIOCDEVPRIVATE)
+#define BOND_RELEASE_OLD        (SIOCDEVPRIVATE + 1)
+#define BOND_SETHWADDR_OLD      (SIOCDEVPRIVATE + 2)
+#define BOND_SLAVE_INFO_QUERY_OLD   (SIOCDEVPRIVATE + 11)
+#define BOND_INFO_QUERY_OLD     (SIOCDEVPRIVATE + 12)
+#define BOND_CHANGE_ACTIVE_OLD      (SIOCDEVPRIVATE + 13)
 
-#define BOND_CHECK_MII_STATUS	(SIOCGMIIPHY)
+#define BOND_CHECK_MII_STATUS   (SIOCGMIIPHY)
 
 #define BOND_MODE_ROUNDROBIN    0
 #define BOND_MODE_ACTIVEBACKUP  1

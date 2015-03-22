@@ -1,5 +1,5 @@
-#ifndef splcoddef_h
-#define splcoddef_h
+#ifndef SPLCODDEF_H
+#define SPLCODDEF_H
 
 #define SPL$C_EMB 32
 #define SPL$C_MCHECK 33

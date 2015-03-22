@@ -361,7 +361,7 @@ __SYSCALL(__NR__sysctl, sys_sysctl)
 #define __NR_prctl                             157
 __SYSCALL(__NR_prctl, sys_prctl)
 #define __NR_arch_prctl                        158
-__SYSCALL(__NR_arch_prctl,	sys_arch_prctl)
+__SYSCALL(__NR_arch_prctl,  sys_arch_prctl)
 
 #define __NR_adjtimex                          159
 __SYSCALL(__NR_adjtimex, sys_adjtimex)
@@ -429,65 +429,65 @@ __SYSCALL(__NR_putpmsg, sys_ni_syscall)
 #define __NR_afs_syscall                       183
 __SYSCALL(__NR_afs_syscall, sys_ni_syscall)
 
-#define __NR_tuxcall      		184 /* reserved for tux */
+#define __NR_tuxcall            184 /* reserved for tux */
 __SYSCALL(__NR_tuxcall, sys_ni_syscall)
 
-#define __NR_security			185 /* reserved for security */
+#define __NR_security           185 /* reserved for security */
 __SYSCALL(__NR_security, sys_ni_syscall)
 
-#define __NR_gettid		186
+#define __NR_gettid     186
 __SYSCALL(__NR_gettid, sys_gettid)
 
-#define __NR_readahead		187
+#define __NR_readahead      187
 __SYSCALL(__NR_readahead, sys_readahead)
 
-#define __NR_setxattr		188
+#define __NR_setxattr       188
 __SYSCALL(__NR_setxattr, sys_ni_syscall)
-#define __NR_lsetxattr		189
+#define __NR_lsetxattr      189
 __SYSCALL(__NR_lsetxattr, sys_ni_syscall)
-#define __NR_fsetxattr		190
+#define __NR_fsetxattr      190
 __SYSCALL(__NR_fsetxattr, sys_ni_syscall)
-#define __NR_getxattr		191
+#define __NR_getxattr       191
 __SYSCALL(__NR_getxattr, sys_ni_syscall)
-#define __NR_lgetxattr		192
+#define __NR_lgetxattr      192
 __SYSCALL(__NR_lgetxattr, sys_ni_syscall)
-#define __NR_fgetxattr		193
+#define __NR_fgetxattr      193
 __SYSCALL(__NR_fgetxattr, sys_ni_syscall)
-#define __NR_listxattr		194
+#define __NR_listxattr      194
 __SYSCALL(__NR_listxattr, sys_ni_syscall)
-#define __NR_llistxattr		195
+#define __NR_llistxattr     195
 __SYSCALL(__NR_llistxattr, sys_ni_syscall)
-#define __NR_flistxattr		196
+#define __NR_flistxattr     196
 __SYSCALL(__NR_flistxattr, sys_ni_syscall)
-#define __NR_removexattr	197
+#define __NR_removexattr    197
 __SYSCALL(__NR_removexattr, sys_ni_syscall)
-#define __NR_lremovexattr	198
+#define __NR_lremovexattr   198
 __SYSCALL(__NR_lremovexattr, sys_ni_syscall)
-#define __NR_fremovexattr	199
+#define __NR_fremovexattr   199
 __SYSCALL(__NR_fremovexattr, sys_ni_syscall)
-#define __NR_tkill	200	/* 2.5 only */
+#define __NR_tkill  200 /* 2.5 only */
 __SYSCALL(__NR_tkill, sys_ni_syscall)
-#define __NR_time		201
+#define __NR_time       201
 __SYSCALL(__NR_time, sys_time64)
-#define __NR_futex		202 /* 2.5 only */
+#define __NR_futex      202 /* 2.5 only */
 __SYSCALL(__NR_futex, sys_ni_syscall)
 #define __NR_sched_setaffinity    203
 __SYSCALL(__NR_sched_setaffinity, sys_ni_syscall)
 #define __NR_sched_getaffinity     204
 __SYSCALL(__NR_sched_getaffinity, sys_ni_syscall)
-#define __NR_set_thread_area	205
+#define __NR_set_thread_area    205
 __SYSCALL(__NR_set_thread_area, sys_ni_syscall)
-#define __NR_io_setup	206
+#define __NR_io_setup   206
 __SYSCALL(__NR_io_setup, sys_ni_syscall)
-#define __NR_io_destroy	207
+#define __NR_io_destroy 207
 __SYSCALL(__NR_io_destroy, sys_ni_syscall)
-#define __NR_io_getevents	208
+#define __NR_io_getevents   208
 __SYSCALL(__NR_io_getevents, sys_ni_syscall)
-#define __NR_io_submit	209
+#define __NR_io_submit  209
 __SYSCALL(__NR_io_submit, sys_ni_syscall)
-#define __NR_io_cancel	210
+#define __NR_io_cancel  210
 __SYSCALL(__NR_io_cancel, sys_ni_syscall)
-#define __NR_get_thread_area	211
+#define __NR_get_thread_area    211
 __SYSCALL(__NR_get_thread_area, sys_ni_syscall)
 #define __NR_lookup_dcookie     212
 __SYSCALL(__NR_lookup_dcookie, sys_ni_syscall)
@@ -501,16 +501,16 @@ __SYSCALL(__NR_epoll_wait, sys_ni_syscall)
 __SYSCALL(__NR_remap_file_pages, sys_ni_syscall)
 #define __NR_getdents64 217
 __SYSCALL(__NR_getdents64, sys_getdents64)
-#define __NR_restart_syscall	219
+#define __NR_restart_syscall    219
 __SYSCALL(__NR_restart_syscall, sys_ni_syscall)
-#define __NR_semtimedop		220
+#define __NR_semtimedop     220
 __SYSCALL(__NR_semtimedop, sys_semtimedop)
 
 #define __NR_syscall_max __NR_semtimedop
 
 /* vms kernel mode */
 #define __NR_$testtest          1
-#define __NR_$setpri		2
+#define __NR_$setpri        2
 #define __NR_$crelnt            3
 #define __NR_$setprn            4
 #define __NR_$dclast            5
@@ -668,11 +668,11 @@ __SYSCALL(__NR_semtimedop, sys_semtimedop)
 
 #define __syscall_return(type, res) \
 do { \
-	if ((unsigned long)(res) >= (unsigned long)(-127)) { \
-		errno = -(res); \
-		res = -1; \
-	} \
-	return (type) (res); \
+    if ((unsigned long)(res) >= (unsigned long)(-127)) { \
+        errno = -(res); \
+        res = -1; \
+    } \
+    return (type) (res); \
 } while (0)
 
 #ifndef __KERNEL_SYSCALLS__
@@ -685,8 +685,8 @@ type name(void) \
 { \
 long __res; \
 __asm__ volatile (__syscall \
-	: "=a" (__res) \
-	: "0" (__NR_##name) : __syscall_clobber ); \
+    : "=a" (__res) \
+    : "0" (__NR_##name) : __syscall_clobber ); \
 __syscall_return(type,__res); \
 }
 
@@ -695,8 +695,8 @@ type name(type1 arg1) \
 { \
 long __res; \
 __asm__ volatile (__syscall \
-	: "=a" (__res) \
-	: "0" (__NR_##name),"D" ((long)(arg1)) : __syscall_clobber ); \
+    : "=a" (__res) \
+    : "0" (__NR_##name),"D" ((long)(arg1)) : __syscall_clobber ); \
 __syscall_return(type,__res); \
 }
 
@@ -705,8 +705,8 @@ type name(type1 arg1,type2 arg2) \
 { \
 long __res; \
 __asm__ volatile (__syscall \
-	: "=a" (__res) \
-	: "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)) : __syscall_clobber ); \
+    : "=a" (__res) \
+    : "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)) : __syscall_clobber ); \
 __syscall_return(type,__res); \
 }
 
@@ -715,9 +715,9 @@ type name(type1 arg1,type2 arg2,type3 arg3) \
 { \
 long __res; \
 __asm__ volatile (__syscall \
-	: "=a" (__res) \
-	: "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
-		  "d" ((long)(arg3)) : __syscall_clobber); \
+    : "=a" (__res) \
+    : "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
+          "d" ((long)(arg3)) : __syscall_clobber); \
 __syscall_return(type,__res); \
 }
 
@@ -726,36 +726,36 @@ type name (type1 arg1, type2 arg2, type3 arg3, type4 arg4) \
 { \
 long __res; \
 __asm__ volatile ("movq %[a3],%%r10 ;" __syscall \
-	: "=a" (__res) \
-	: "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
-	  "d" ((long)(arg3)), [a3] "g" ((long)(arg4)) : __syscall_clobber,"r10" ); \
+    : "=a" (__res) \
+    : "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
+      "d" ((long)(arg3)), [a3] "g" ((long)(arg4)) : __syscall_clobber,"r10" ); \
 __syscall_return(type,__res); \
 }
 
 #define _syscall5(type,name,type1,arg1,type2,arg2,type3,arg3,type4,arg4, \
-	  type5,arg5) \
+      type5,arg5) \
 type name (type1 arg1,type2 arg2,type3 arg3,type4 arg4,type5 arg5) \
 { \
 long __res; \
 __asm__ volatile ("movq %[a3],%%r10 ; movq %[a4],%%r8 ; " __syscall \
-	: "=a" (__res) \
-	: "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
-	  "d" ((long)(arg3)), [a3] "g" ((long)(arg4)), [a4] "g" ((long)(arg5)) : \
-	__syscall_clobber,"r8","r10" ); \
+    : "=a" (__res) \
+    : "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
+      "d" ((long)(arg3)), [a3] "g" ((long)(arg4)), [a4] "g" ((long)(arg5)) : \
+    __syscall_clobber,"r8","r10" ); \
 __syscall_return(type,__res); \
 }
 
 #define _syscall6(type,name,type1,arg1,type2,arg2,type3,arg3,type4,arg4, \
-	  type5,arg5,type6,arg6) \
+      type5,arg5,type6,arg6) \
 type name (type1 arg1,type2 arg2,type3 arg3,type4 arg4,type5 arg5,type6 arg6) \
 { \
 long __res; \
 __asm__ volatile ("movq %[a3],%%r10 ; movq %[a4],%%r8 ; movq %[a5],%%r9 ; " __syscall \
-	: "=a" (__res) \
-	: "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
-	  "d" ((long)(arg3)), [a3] "g" ((long)(arg4)), [a4] "g" ((long)(arg5)), \
-	  [a5] "g" ((long)(arg6)) : \
-	__syscall_clobber,"r8","r10","r9" ); \
+    : "=a" (__res) \
+    : "0" (__NR_##name),"D" ((long)(arg1)),"S" ((long)(arg2)), \
+      "d" ((long)(arg3)), [a3] "g" ((long)(arg4)), [a4] "g" ((long)(arg5)), \
+      [a5] "g" ((long)(arg6)) : \
+    __syscall_clobber,"r8","r10","r9" ); \
 __syscall_return(type,__res); \
 }
 

@@ -10,10 +10,10 @@
  *  Copyright (C) 1995  Linus Torvalds
  *
  *  Pentium III FXSR, SSE support
- *	Gareth Hughes <gareth@valinux.com>, May 2000
+ *  Gareth Hughes <gareth@valinux.com>, May 2000
  *
  *  X86-64 port
- *	Andi Kleen.
+ *  Andi Kleen.
  *
  *  $Id$
  */
@@ -269,7 +269,7 @@ static enum
 static int reboot_mode = 0;
 
 /* reboot=b[ios] | t[riple] | k[bd] [, [w]arm | [c]old]
-   bios	  Use the CPU reboot vector for warm reset
+   bios   Use the CPU reboot vector for warm reset
    warm   Don't set the cold reboot flag
    cold   Set the cold reboto flag
    triple Force a triple fault (init)
@@ -323,9 +323,9 @@ static void reboot_warm(void)
 
     memcpy(__va(WARMBOOT_TRAMP), warm_reboot, warm_reboot_end - warm_reboot);
 
-    asm volatile( "   pushq $0\n" 		/* ss */
-                  "   pushq $0x2000\n" 	/* rsp */
-                  "   pushfq\n"		/* eflags */
+    asm volatile( "   pushq $0\n"       /* ss */
+                  "   pushq $0x2000\n"  /* rsp */
+                  "   pushfq\n"     /* eflags */
                   "   pushq %[cs]\n"
                   "   pushq %[target]\n"
                   "   iretq" ::
@@ -688,10 +688,10 @@ int new_thread(int nr, unsigned long clone_flags, unsigned long rsp,
  * This special macro can be used to load a debugging register
  */
 #define loaddebug(thread,register) \
-		set_debug(thread->debugreg[register], register)
+        set_debug(thread->debugreg[register], register)
 
 /*
- *	switch_to(x,y) should switch tasks from x to y.
+ *  switch_to(x,y) should switch tasks from x to y.
  *
  * This could still be optimized:
  * - fold all the options into a flag word and test it with a single test.
@@ -886,8 +886,8 @@ asmlinkage long sys_vfork(struct pt_regs regs)
  */
 extern void scheduling_functions_start_here(void);
 extern void scheduling_functions_end_here(void);
-#define first_sched	((unsigned long) scheduling_functions_start_here)
-#define last_sched	((unsigned long) scheduling_functions_end_here)
+#define first_sched ((unsigned long) scheduling_functions_start_here)
+#define last_sched  ((unsigned long) scheduling_functions_end_here)
 
 unsigned long get_wchan(struct task_struct *p)
 {

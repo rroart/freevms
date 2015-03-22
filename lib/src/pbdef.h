@@ -1,5 +1,5 @@
-#ifndef pbdef_h
-#define pbdef_h
+#ifndef PBDEF_H
+#define PBDEF_H
 
 #define PB$C_CLOSED 0
 #define PB$C_ST_SENT 1

@@ -259,7 +259,7 @@ size_t strnlen(const char * s, size_t count)
 #ifndef __HAVE_ARCH_STRSPN
 /**
  * strspn - Calculate the length of the initial substring of @s which only
- * 	contain letters in @accept
+ *  contain letters in @accept
  * @s: The string to be searched
  * @accept: The string to search for
  */

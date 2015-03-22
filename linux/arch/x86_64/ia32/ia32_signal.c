@@ -32,7 +32,7 @@
 #include <asm/sigcontext32.h>
 #include <asm/fpu32.h>
 
-#define ptr_to_u32(x) ((u32)(u64)(x))	/* avoid gcc warning */
+#define ptr_to_u32(x) ((u32)(u64)(x))   /* avoid gcc warning */
 #define u32_to_ptr(x) ((void *)(u64)(x))
 
 #define DEBUG_SIG 0
@@ -182,19 +182,19 @@ ia32_restore_sigcontext(struct pt_regs *regs, struct sigcontext_ia32 *sc, unsign
     printk("SIG restore_sigcontext: sc=%p err(%x) eip(%x) cs(%x) flg(%x)\n",
            sc, sc->err, sc->eip, sc->cs, sc->eflags);
 #endif
-#define COPY(x)		{ \
-	unsigned int reg;	\
-	err |= __get_user(reg, &sc->e ##x);	\
-	regs->r ## x = reg;			\
+#define COPY(x)     { \
+    unsigned int reg;   \
+    err |= __get_user(reg, &sc->e ##x); \
+    regs->r ## x = reg;         \
 }
 
-#define RELOAD_SEG(seg,mask)						\
-	{ unsigned int cur; 				\
-	  unsigned short pre;				\
-	  err |= __get_user(pre, &sc->seg);				\
-    	  asm volatile("movl %%" #seg ",%0" : "=r" (cur));		\
-	  pre |= mask; 							\
-	  if (pre != cur) loadsegment(seg,pre); }
+#define RELOAD_SEG(seg,mask)                        \
+    { unsigned int cur;                 \
+      unsigned short pre;               \
+      err |= __get_user(pre, &sc->seg);             \
+          asm volatile("movl %%" #seg ",%0" : "=r" (cur));      \
+      pre |= mask;                          \
+      if (pre != cur) loadsegment(seg,pre); }
 
     /* Reload fs and gs if they have changed in the signal handler.
        This does not handle long gs base changes in the handler, but
@@ -231,7 +231,7 @@ ia32_restore_sigcontext(struct pt_regs *regs, struct sigcontext_ia32 *sc, unsign
         unsigned int tmpflags;
         err |= __get_user(tmpflags, &sc->eflags);
         regs->eflags = (regs->eflags & ~0x40DD5) | (tmpflags & 0x40DD5);
-        regs->orig_rax = -1;		/* disable syscall checks */
+        regs->orig_rax = -1;        /* disable syscall checks */
     }
 
     {

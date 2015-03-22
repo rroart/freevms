@@ -77,7 +77,7 @@ static inline long do_sys_truncate(const char * path, loff_t length)
     int error;
 
     error = -EINVAL;
-    if (length < 0)	/* sorry, but loff_t says... */
+    if (length < 0) /* sorry, but loff_t says... */
         goto out;
 
     error = user_path_walk(path, &nd);
@@ -241,7 +241,7 @@ asmlinkage long sys_access(const char * filename, int mode)
     struct _fabdef fab = cc$rms_fab;
     int sts;
 
-    if (mode & ~S_IRWXO)	/* where's F_OK, X_OK, W_OK, R_OK? */
+    if (mode & ~S_IRWXO)    /* where's F_OK, X_OK, W_OK, R_OK? */
         return -EINVAL;
 
     char vms_filename[256];

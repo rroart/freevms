@@ -32,9 +32,9 @@ struct vxtime_data
     int mode;
 };
 
-#define VXTIME_STUPID	0
-#define VXTIME_TSC	1
-#define	VXTIME_HPET	2
+#define VXTIME_STUPID   0
+#define VXTIME_TSC  1
+#define VXTIME_HPET 2
 
 #define hpet_readl(a)           readl(fix_to_virt(FIX_HPET_BASE) + a)
 #define hpet_writel(d,a)        writel(d, fix_to_virt(FIX_HPET_BASE) + a)

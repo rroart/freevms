@@ -16,9 +16,9 @@ static __inline__ __attribute_const__ __u32 ___arch__swab32(__u32 x)
 #ifdef CONFIG_X86_BSWAP
     __asm__("bswap %0" : "=r" (x) : "0" (x));
 #else
-    __asm__("xchgb %b0,%h0\n\t"	/* swap lower bytes	*/
-            "rorl $16,%0\n\t"	/* swap words		*/
-            "xchgb %b0,%h0"		/* swap higher bytes	*/
+    __asm__("xchgb %b0,%h0\n\t" /* swap lower bytes */
+            "rorl $16,%0\n\t"   /* swap words       */
+            "xchgb %b0,%h0"     /* swap higher bytes    */
             :"=q" (x)
             : "0" (x));
 #endif
@@ -27,7 +27,7 @@ static __inline__ __attribute_const__ __u32 ___arch__swab32(__u32 x)
 
 static __inline__ __attribute_const__ __u16 ___arch__swab16(__u16 x)
 {
-    __asm__("xchgb %b0,%h0"		/* swap bytes		*/ \
+    __asm__("xchgb %b0,%h0"     /* swap bytes       */ \
             : "=q" (x) \
             :  "0" (x));
     \

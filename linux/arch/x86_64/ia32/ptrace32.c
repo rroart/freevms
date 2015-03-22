@@ -37,7 +37,7 @@
 #define FLAG_MASK 0x44dd5UL
 
 #define R32(l,q) \
-	case offsetof(struct user32, regs.l): stack[offsetof(struct pt_regs, q)/8] = val; break
+    case offsetof(struct user32, regs.l): stack[offsetof(struct pt_regs, q)/8] = val; break
 
 static int putreg32(struct task_struct *child, unsigned regno, u32 val)
 {
@@ -123,7 +123,7 @@ static int putreg32(struct task_struct *child, unsigned regno, u32 val)
 #undef R32
 
 #define R32(l,q) \
-	case offsetof(struct user32, regs.l): *val = stack[offsetof(struct pt_regs, q)/8]; break
+    case offsetof(struct user32, regs.l): *val = stack[offsetof(struct pt_regs, q)/8]; break
 
 static int getreg32(struct task_struct *child, unsigned regno, u32 *val)
 {

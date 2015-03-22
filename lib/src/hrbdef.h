@@ -1,5 +1,5 @@
-#ifndef hrbdef_h
-#define hrbdef_h
+#ifndef HRBDEF_H
+#define HRBDEF_H
 
 #define HRB$M_STATE_INVALID 0x8000
 #define HRB$M_ABORT 0x1
@@ -36,8 +36,8 @@ struct _hrb
     unsigned short int hrb$w_size;
     unsigned char hrb$b_type;
     unsigned char hrb$b_subtype;
-    int (*hrb$l_respc)();
-    int (*hrb$l_savd_rtn)();
+    int (*hrb$l_respc)(void);
+    int (*hrb$l_savd_rtn)(void);
     union
     {
         unsigned short int hrb$w_state;

@@ -1,7 +1,7 @@
 /*
- *	rtltest
+ *  rtltest
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,46 +17,46 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *	The authors may be contacted at:
+ *  The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
- * 	Kevin Handy		Unknown
+ *  Kevin Handy     Unknown
  *
- *	Christof Zeile		Unknown
+ *  Christof Zeile      Unknown
  *
  * rtltest.c
  *
- *	Test program for run time libraries functions
+ *  Test program for run time libraries functions
  *
  * Notes:
  *
- *	This program should be run using the Free-VMS packages
- *	'str$' functions, Vax/VMS's, and Alpha/VMS's to make
- *	sure they all happily work the same.
+ *  This program should be run using the Free-VMS packages
+ *  'str$' functions, Vax/VMS's, and Alpha/VMS's to make
+ *  sure they all happily work the same.
  *
  * History:
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Initial version
+ *  Oct 10, 1996 - Kevin Handy
+ *      Initial version
  *
- *	Feb 4, 1997 - Kevin Handy
- *		Lose variable 'Tets2', change '%d' to '%ld' in several
- *		places to lose '-Wall' messages.
- *		Include 'stdlib.h'
+ *  Feb 4, 1997 - Kevin Handy
+ *      Lose variable 'Tets2', change '%d' to '%ld' in several
+ *      places to lose '-Wall' messages.
+ *      Include 'stdlib.h'
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
- *		Add 'include <strdef.h>'
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
+ *      Add 'include <strdef.h>'
  *
- *	Sep 13, 2002 - Andrew Allison
- *		Added a crude menu system for selecting tests
+ *  Sep 13, 2002 - Andrew Allison
+ *      Added a crude menu system for selecting tests
  *
  */
 #include <ctype.h>
@@ -76,74 +76,74 @@
  * Prototypes
  */
 
-void 	testanal	(char* Title, struct dsc$descriptor_s* strptr);
-int  	testsysasctim	(void);
-int  	test_array	(void);
-void 	test_compare	(void);
-void 	test_analyze	(void);
-int  	test_analyze2	(void);
-void	print_result_code (char *presult, unsigned long result_code,char *cont);
-void 	print_desc_compare (	char *title,
+void    testanal    (char* Title, struct dsc$descriptor_s* strptr);
+int     testsysasctim   (void);
+int     test_array  (void);
+void    test_compare    (void);
+void    test_analyze    (void);
+int     test_analyze2   (void);
+void    print_result_code (char *presult, unsigned long result_code,char *cont);
+void    print_desc_compare (    char *title,
                                 struct dsc$descriptor_s *s1,
                                 struct dsc$descriptor_s *s2,
                                 char *cont);
 void print_lu_compare(char *title,unsigned long v1,unsigned long v2,char *cont);
-void print_ls_compare	(char *title,long v1,long v2,char *cont);
-void print_int_compare	(char *title,int v1,int v2,char *cont);
+void print_ls_compare   (char *title,long v1,long v2,char *cont);
+void print_int_compare  (char *title,int v1,int v2,char *cont);
 
 /*************************************************************/
 /*
- *	local test function prototypes
+ *  local test function prototypes
  */
 
-int teststradd        		(FILE *fptr,int *fstatus, char *cont);
-int teststranalyze 		(FILE *fptr,int *fstatus, char *cont);
-int teststranalyze_64 		(FILE *fptr,int *fstatus, char *cont);
-int teststrappend     		(FILE *fptr,int *fstatus, char *cont);
-int teststrcase_blind_compare	(FILE *fptr,int *fstatus, char *cont);
-int teststrcompare	  	(FILE *fptr,int *fstatus, char *cont);
-int teststrcompare_eql		(FILE *fptr,int *fstatus, char *cont);
-int teststrcompare_multi	(FILE *fptr,int *fstatus, char *cont);
-int teststrconcat		(FILE *fptr,int *fstatus, char *cont);
-int teststrcopy_dx		(FILE *fptr,int *fstatus, char *cont);
-int teststrcopy_fill 		(FILE *fptr,int *fstatus, char *cont);
-int teststrcopy_r		(FILE *fptr,int *fstatus, char *cont);
-int teststrcopy_r_64		(FILE *fptr,int *fstatus, char *cont);
-int teststrdiv		  	(FILE *fptr,int *fstatus, char *cont);
-int teststrdupl_char		(FILE *fptr,int *fstatus, char *cont);
-int teststrelement		(FILE *fptr,int *fstatus, char *cont);
-int teststrfind_first_in_set	(FILE *fptr,int *fstatus, char *cont);
+int teststradd              (FILE *fptr,int *fstatus, char *cont);
+int teststranalyze      (FILE *fptr,int *fstatus, char *cont);
+int teststranalyze_64       (FILE *fptr,int *fstatus, char *cont);
+int teststrappend           (FILE *fptr,int *fstatus, char *cont);
+int teststrcase_blind_compare   (FILE *fptr,int *fstatus, char *cont);
+int teststrcompare      (FILE *fptr,int *fstatus, char *cont);
+int teststrcompare_eql      (FILE *fptr,int *fstatus, char *cont);
+int teststrcompare_multi    (FILE *fptr,int *fstatus, char *cont);
+int teststrconcat       (FILE *fptr,int *fstatus, char *cont);
+int teststrcopy_dx      (FILE *fptr,int *fstatus, char *cont);
+int teststrcopy_fill        (FILE *fptr,int *fstatus, char *cont);
+int teststrcopy_r       (FILE *fptr,int *fstatus, char *cont);
+int teststrcopy_r_64        (FILE *fptr,int *fstatus, char *cont);
+int teststrdiv          (FILE *fptr,int *fstatus, char *cont);
+int teststrdupl_char        (FILE *fptr,int *fstatus, char *cont);
+int teststrelement      (FILE *fptr,int *fstatus, char *cont);
+int teststrfind_first_in_set    (FILE *fptr,int *fstatus, char *cont);
 int teststrfind_first_not_in_set(FILE *fptr,int *fstatus, char *cont);
-int teststrfind_first_substring	(FILE *fptr,int *fstatus, char *cont);
-int teststrfree1_dx     	(FILE *fptr,int *fstatus, char *cont);
-int teststrget1_dx     		(FILE *fptr,int *fstatus, char *cont);
-int teststrget1_dx_64  		(FILE *fptr,int *fstatus, char *cont);
-int teststrleft		  	(FILE *fptr,int *fstatus, char *cont);
-int teststrlen_extr	  	(FILE *fptr,int *fstatus, char *cont);
-int teststrmatch_wild		(FILE *fptr,int *fstatus, char *cont);
-int teststrmul        		(FILE *fptr,int *fstatus, char *cont);
-int teststrposition		(FILE *fptr,int *fstatus, char *cont);
-int teststrpos_extr		(FILE *fptr,int *fstatus, char *cont);
-int teststrprefix		(FILE *fptr,int *fstatus, char *cont);
-int teststrrecip 		(FILE *fptr,int *fstatus, char *cont);
-int teststrreplace 		(FILE *fptr,int *fstatus, char *cont);
-int teststrright	  	(FILE *fptr,int *fstatus, char *cont);
-int teststrround	  	(FILE *fptr,int *fstatus, char *cont);
-int teststrsub        		(FILE *fptr,int *fstatus, char *cont);
-int teststrtranslate   		(FILE *fptr,int *fstatus, char *cont);
-int teststrtrim   		(FILE *fptr,int *fstatus, char *cont);
-int teststrupcase   		(FILE *fptr,int *fstatus, char *cont);
+int teststrfind_first_substring (FILE *fptr,int *fstatus, char *cont);
+int teststrfree1_dx         (FILE *fptr,int *fstatus, char *cont);
+int teststrget1_dx          (FILE *fptr,int *fstatus, char *cont);
+int teststrget1_dx_64       (FILE *fptr,int *fstatus, char *cont);
+int teststrleft         (FILE *fptr,int *fstatus, char *cont);
+int teststrlen_extr     (FILE *fptr,int *fstatus, char *cont);
+int teststrmatch_wild       (FILE *fptr,int *fstatus, char *cont);
+int teststrmul              (FILE *fptr,int *fstatus, char *cont);
+int teststrposition     (FILE *fptr,int *fstatus, char *cont);
+int teststrpos_extr     (FILE *fptr,int *fstatus, char *cont);
+int teststrprefix       (FILE *fptr,int *fstatus, char *cont);
+int teststrrecip        (FILE *fptr,int *fstatus, char *cont);
+int teststrreplace      (FILE *fptr,int *fstatus, char *cont);
+int teststrright        (FILE *fptr,int *fstatus, char *cont);
+int teststrround        (FILE *fptr,int *fstatus, char *cont);
+int teststrsub              (FILE *fptr,int *fstatus, char *cont);
+int teststrtranslate        (FILE *fptr,int *fstatus, char *cont);
+int teststrtrim         (FILE *fptr,int *fstatus, char *cont);
+int teststrupcase           (FILE *fptr,int *fstatus, char *cont);
 
-int teststriszero		(FILE *fptr,int *fstatus, char *cont);
-int teststriszerotrim 		(FILE *fptr,int *fstatus, char *cont);
-int teststrlzerotrim  		(FILE *fptr,int *fstatus, char *cont);
-int teststrrzerotrim  		(FILE *fptr,int *fstatus, char *cont);
-int teststrncompare		(FILE *fptr,int *fstatus, char *cont);
+int teststriszero       (FILE *fptr,int *fstatus, char *cont);
+int teststriszerotrim       (FILE *fptr,int *fstatus, char *cont);
+int teststrlzerotrim        (FILE *fptr,int *fstatus, char *cont);
+int teststrrzerotrim        (FILE *fptr,int *fstatus, char *cont);
+int teststrncompare     (FILE *fptr,int *fstatus, char *cont);
 
 void testdate(void);
 int tempf (void);
 
-int	get_fun_num (char *functionname);
+int get_fun_num (char *functionname);
 void call_test_function (int which_fun,char *fname,char *cont, FILE *fptr);
 
 /*
@@ -173,8 +173,8 @@ int flistsize;
 
 
 /*
- *	This structure matches a character string
- *	to it's corresponding test function
+ *  This structure matches a character string
+ *  to it's corresponding test function
  *
  */
 struct fliststruct
@@ -184,50 +184,50 @@ struct fliststruct
 }
 flist[]=
 {
-    {"str$add",   			&teststradd},
-    {"str$analyze_sdesc",		&teststranalyze},
-    {"str$analyze_sdesc_64",	&teststranalyze_64},
-    {"str$append",			&teststrappend},
-    {"str$case_blind_compare",	&teststrcase_blind_compare},
-    {"str$compare",			&teststrcompare},
-    {"str$compare_eql",		&teststrcompare_eql},
-    {"str$compare_multi",		&teststrcompare_multi},
-    {"str$concat",			&teststrconcat},
-    {"str$copy_dx",			&teststrcopy_dx},
-    {"str$$copy_fill",		&teststrcopy_fill},
-    {"str$copy_r",			&teststrcopy_r},
-    {"str$copy_r_64",		&teststrcopy_r_64},
-    {"str$divide",			&teststrdiv},
-    {"str$dupl_char",		&teststrdupl_char},
-    {"str$element",			&teststrelement},
-    {"str$find_first_in_set",	&teststrfind_first_in_set},
-    {"str$find_first_not_in_set",	&teststrfind_first_not_in_set},
-    {"str$find_first_substring",	&teststrfind_first_substring},
-    {"str$free1_dx",		&teststrfree1_dx},
-    {"str$get1_dx",			&teststrget1_dx},
-    {"str$get1_dx_64",		&teststrget1_dx_64},
-    {"str$iszero",    		&teststriszero},
-    {"str$iszerotrim",    		&teststriszerotrim},
-    {"str$left",			&teststrleft},
-    {"str$len_extr",		&teststrlen_extr},
-    {"str$$lzerotrim", 		&teststrlzerotrim},
-    {"str$match_wild",		&teststrmatch_wild},
-    {"str$mul",			&teststrmul},
-    {"str$ncompare",		&teststrncompare},
-    {"str$pos_extr",		&teststrpos_extr},
-    {"str$position",		&teststrposition},
-    {"str$prefix",			&teststrprefix},
-    {"str$recip",			&teststrrecip},
-    {"str$replace",			&teststrreplace},
-    {"str$right",			&teststrright},
-    {"str$round",			&teststrround},
-    {"str$$rzerotrim", 		&teststrrzerotrim},
-    {"str$sub",			&teststrsub},
-    {"str$translate",		&teststrtranslate},
-    {"str$trim",			&teststrtrim},
-    {"str$upcase",			&teststrupcase},
+    {"str$add",             &teststradd},
+    {"str$analyze_sdesc",       &teststranalyze},
+    {"str$analyze_sdesc_64",    &teststranalyze_64},
+    {"str$append",          &teststrappend},
+    {"str$case_blind_compare",  &teststrcase_blind_compare},
+    {"str$compare",         &teststrcompare},
+    {"str$compare_eql",     &teststrcompare_eql},
+    {"str$compare_multi",       &teststrcompare_multi},
+    {"str$concat",          &teststrconcat},
+    {"str$copy_dx",         &teststrcopy_dx},
+    {"str$$copy_fill",      &teststrcopy_fill},
+    {"str$copy_r",          &teststrcopy_r},
+    {"str$copy_r_64",       &teststrcopy_r_64},
+    {"str$divide",          &teststrdiv},
+    {"str$dupl_char",       &teststrdupl_char},
+    {"str$element",         &teststrelement},
+    {"str$find_first_in_set",   &teststrfind_first_in_set},
+    {"str$find_first_not_in_set",   &teststrfind_first_not_in_set},
+    {"str$find_first_substring",    &teststrfind_first_substring},
+    {"str$free1_dx",        &teststrfree1_dx},
+    {"str$get1_dx",         &teststrget1_dx},
+    {"str$get1_dx_64",      &teststrget1_dx_64},
+    {"str$iszero",          &teststriszero},
+    {"str$iszerotrim",          &teststriszerotrim},
+    {"str$left",            &teststrleft},
+    {"str$len_extr",        &teststrlen_extr},
+    {"str$$lzerotrim",      &teststrlzerotrim},
+    {"str$match_wild",      &teststrmatch_wild},
+    {"str$mul",         &teststrmul},
+    {"str$ncompare",        &teststrncompare},
+    {"str$pos_extr",        &teststrpos_extr},
+    {"str$position",        &teststrposition},
+    {"str$prefix",          &teststrprefix},
+    {"str$recip",           &teststrrecip},
+    {"str$replace",         &teststrreplace},
+    {"str$right",           &teststrright},
+    {"str$round",           &teststrround},
+    {"str$$rzerotrim",      &teststrrzerotrim},
+    {"str$sub",         &teststrsub},
+    {"str$translate",       &teststrtranslate},
+    {"str$trim",            &teststrtrim},
+    {"str$upcase",          &teststrupcase},
 #if 0
-    {"sys$asctim",			&testsysasctim}
+    {"sys$asctim",          &testsysasctim}
 #endif
 };
 
@@ -237,11 +237,11 @@ flist[]=
 int main(void)
 {
 
-    int	line_ctr;
-    int	which_fun,i,j;
-    char  	functionname[FNameSize];
-    FILE 	*fptr;
-    char	cont[5];
+    int line_ctr;
+    int which_fun,i,j;
+    char    functionname[FNameSize];
+    FILE    *fptr;
+    char    cont[5];
 
 #if i386
     system ("clear");
@@ -262,11 +262,11 @@ int main(void)
     printf ("Enter Function Name :");
     scanf  ("%s",functionname);
 
-//	get rid of <CR>  some garbage left when changing input modes
+//  get rid of <CR>  some garbage left when changing input modes
     fgets(cont,2,stdin);
     strcpy (cont,"P");
 
-//	lower case input
+//  lower case input
     for (i=0; i < strlen(functionname); i++ )
     {
         functionname[i] = tolower(functionname[i]);
@@ -305,9 +305,9 @@ int main(void)
 
 /********************************************/
 
-int	get_fun_num (char *functionname)
+int get_fun_num (char *functionname)
 {
-    int	i,result;
+    int i,result;
 
     result = 9999;
 
@@ -326,14 +326,14 @@ int	get_fun_num (char *functionname)
 /********************/
 void call_test_function (int which_fun,char *fname,char *cont, FILE *fptr)
 {
-    char	fbuffer[FBUFSIZE];
-    char	*fstatus;
+    char    fbuffer[FBUFSIZE];
+    char    *fstatus;
 
     fstatus = fbuffer; // kluge are way into while statment
     rewind (fptr);
     while ( fstatus != NULL )
     {
-//	read in routine name
+//  read in routine name
         fstatus = fgets (fbuffer,FBUFSIZE,fptr);
         if ( fstatus != NULL )
         {
@@ -343,7 +343,7 @@ void call_test_function (int which_fun,char *fname,char *cont, FILE *fptr)
 #if i386
                 system ("clear");
 #endif
-// 			read in comment
+//          read in comment
                 fstatus = fgets (fbuffer,FBUFSIZE,fptr);
                 printf ("Comment %s \n",fbuffer);
                 flist[which_fun].ptr_fun(fptr,&*fstatus, cont) ;
@@ -365,8 +365,8 @@ void call_test_function (int which_fun,char *fname,char *cont, FILE *fptr)
                 fstatus = fgets(fbuffer,FBUFSIZE,fptr);
                 fstatus = fgets(fbuffer,FBUFSIZE,fptr);
             }
-        } 		// if not NULL
-    } 	/* end while */
+        }       // if not NULL
+    }   /* end while */
 
     return;
 }
@@ -376,9 +376,9 @@ void call_test_function (int which_fun,char *fname,char *cont, FILE *fptr)
 
 void print_result_code (char *presult, unsigned long result_code,char *cont)
 {
-    char	errmsg[80];
-    unsigned short int	errmsglen;
-    unsigned int	flags = 3;
+    char    errmsg[80];
+    unsigned short int  errmsglen;
+    unsigned int    flags = 3;
 
     if ( sys$$geterrno(presult) != result_code)
     {
@@ -398,7 +398,7 @@ void print_result_code (char *presult, unsigned long result_code,char *cont)
 
 /********************************************/
 
-void print_desc_compare (	char *title,
+void print_desc_compare (   char *title,
                             struct dsc$descriptor_s *s1,
                             struct dsc$descriptor_s *s2,
                             char *cont)
@@ -427,7 +427,7 @@ void print_lu_compare (char *title,unsigned long v1,unsigned long v2,char *cont)
 }
 /********************************************/
 
-void print_ls_compare (	char *title, long v1, long v2, char *cont)
+void print_ls_compare ( char *title, long v1, long v2, char *cont)
 {
     if ( v1 != v2 )
     {
@@ -455,22 +455,22 @@ void print_int_compare ( char *title, int v1, int v2, char *cont)
 
 /********************************************/
 
-int	teststradd(FILE *fptr,int *fstatus, char *cont)
+int teststradd(FILE *fptr,int *fstatus, char *cont)
 {
     unsigned long result_code;
     struct dsc$descriptor_s s1,s2,s3,s4;
     unsigned long asign,bsign,csign,rsign;
-    signed long	aexp,bexp,cexp,rexp;
-    char 	pt1[10], pv1[50];
-    char 	pt2[10], pv2[50];
-    char 	pt3[10], pv3[50];
-    char 	pt4[10], pv4[50];
-    char 	pt5[10], pv5[50];
-    char 	pt6[10], pv6[50];
-    char 	pt7[10], pv7[50];
-    char 	pt8[10], pv8[50];
-    char 	pt9[10], pv9[50];
-    char	presult [30];
+    signed long aexp,bexp,cexp,rexp;
+    char    pt1[10], pv1[50];
+    char    pt2[10], pv2[50];
+    char    pt3[10], pv3[50];
+    char    pt4[10], pv4[50];
+    char    pt5[10], pv5[50];
+    char    pt6[10], pv6[50];
+    char    pt7[10], pv7[50];
+    char    pt8[10], pv8[50];
+    char    pt9[10], pv9[50];
+    char    presult [30];
 
     strcpy (pv3,"\n");
     strcpy (pv6,"\n");
@@ -535,20 +535,20 @@ int	teststradd(FILE *fptr,int *fstatus, char *cont)
 
 /********************************************/
 
-int	teststranalyze (FILE *fptr, int *fstatus, char *cont)
+int teststranalyze (FILE *fptr, int *fstatus, char *cont)
 {
     unsigned long result_code;
-    char 	*s1_ptr;			/* Pointer to first string */
-    char 	pt1[10], pv1[10];
-    char	presult [20];
-    struct	dsc$descriptor_s s1,sr;
-    unsigned short s1_length;		/* Length of first string */
-    int	in_length;
+    char    *s1_ptr;            /* Pointer to first string */
+    char    pt1[10], pv1[10];
+    char    presult [20];
+    struct  dsc$descriptor_s s1,sr;
+    unsigned short s1_length;       /* Length of first string */
+    int in_length;
 
     *fstatus = fscanf (fptr,scan3,pt1,pv1,presult);
 
-    if (strncmp (pt1,"cd",2) == 0)	str$$malloc_sd (&s1,pv1);
-    if (strncmp (pt1,"cd",2) == 0)	str$$malloc_sd (&sr,pv1);
+    if (strncmp (pt1,"cd",2) == 0)  str$$malloc_sd (&s1,pv1);
+    if (strncmp (pt1,"cd",2) == 0)  str$$malloc_sd (&sr,pv1);
 
 #define MAXCSTR16     65535
     if ( strncmp ("NULL",pv1,4) == 0 )
@@ -593,22 +593,22 @@ int	teststranalyze (FILE *fptr, int *fstatus, char *cont)
 
 /********************************************/
 
-int	teststranalyze_64 (FILE *fptr, int *fstatus, char *cont)
+int teststranalyze_64 (FILE *fptr, int *fstatus, char *cont)
 {
-    int	input_length;
-    unsigned short type;		/* Length of first string */
+    int input_length;
+    unsigned short type;        /* Length of first string */
     unsigned long result_code;
     unsigned short s1_len;
     unsigned long long s1_long_len;
-    char 	*s1_ptr;			/* Pointer to first string */
-    char 	pt1[10], pv1[10];
-    char 	pt2[10], pv2[10];
-    char	presult [20];
-    struct	dsc$descriptor_s s1,sr;
+    char    *s1_ptr;            /* Pointer to first string */
+    char    pt1[10], pv1[10];
+    char    pt2[10], pv2[10];
+    char    presult [20];
+    struct  dsc$descriptor_s s1,sr;
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
-    if (strncmp (pt1,"cd",2) == 0)	str$$malloc_sd (&s1,pv1);
-    if (strncmp (pt1,"cd",2) == 0)	str$$malloc_sd (&sr,pv1);
+    if (strncmp (pt1,"cd",2) == 0)  str$$malloc_sd (&s1,pv1);
+    if (strncmp (pt1,"cd",2) == 0)  str$$malloc_sd (&sr,pv1);
     type = atol (pv2);
 
     if ( strncmp (pv1,"NULL",4) == 0 )
@@ -651,17 +651,17 @@ int	teststranalyze_64 (FILE *fptr, int *fstatus, char *cont)
 
 /******************************************************/
 
-int	teststrappend(FILE *fptr,int *fstatus, char *cont)
+int teststrappend(FILE *fptr,int *fstatus, char *cont)
 
 {
     unsigned long result_code;
     unsigned short s1_len;
     struct dsc$descriptor_s s1,s2, sr1,sr2;
-    char 	pt1[10], pv1[10];
-    char 	pt2[10], pv2[10];
-    char	presult [MAXSTRING];
-    char	combo[MAXCSTR16], *s1_ptr;
-    int	combo_length, i;
+    char    pt1[10], pv1[10];
+    char    pt2[10], pv2[10];
+    char    presult [MAXSTRING];
+    char    combo[MAXCSTR16], *s1_ptr;
+    int combo_length, i;
 
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
@@ -694,7 +694,7 @@ int	teststrappend(FILE *fptr,int *fstatus, char *cont)
     if (strncmp ( pt1,"cd",2) == 0) str$$malloc_sd (&sr1,combo);
     if (strncmp ( pt2,"cd",2) == 0) str$$malloc_sd (&sr2,pv2);
 
-//	add up the lengths of the inputs
+//  add up the lengths of the inputs
     if ( strncmp (pv1,"NULL",4) == 0 )
         combo_length = 0;
     else if ( strncmp (pv1,"MAXCSTR16",9) == 0 )
@@ -745,13 +745,13 @@ int	teststrappend(FILE *fptr,int *fstatus, char *cont)
 
 /*************************************************/
 
-int	teststrcase_blind_compare(FILE *fptr, int *fstatus, char *cont)
+int teststrcase_blind_compare(FILE *fptr, int *fstatus, char *cont)
 {
-    char 	pt1[MAXSTRING],pv1[MAXSTRING];
-    char	pt2[MAXSTRING],pv2[MAXSTRING];
-    char	presult[MAXSTRING];
-    struct	dsc$descriptor_s sd1,sd2,sr1,sr2;
-    signed long	expect_result,result_code;
+    char    pt1[MAXSTRING],pv1[MAXSTRING];
+    char    pt2[MAXSTRING],pv2[MAXSTRING];
+    char    presult[MAXSTRING];
+    struct  dsc$descriptor_s sd1,sd2,sr1,sr2;
+    signed long expect_result,result_code;
 
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
@@ -794,12 +794,12 @@ int	teststrcase_blind_compare(FILE *fptr, int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrcompare(FILE *fptr,int *fstatus, char *cont)
+int teststrcompare(FILE *fptr,int *fstatus, char *cont)
 {
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char			presult [30];
-    signed long		expect_result,result_code;
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            presult [30];
+    signed long     expect_result,result_code;
     struct dsc$descriptor_s s1,s2,sr1,sr2;
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
@@ -843,13 +843,13 @@ int	teststrcompare(FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrcompare_eql(FILE *fptr,int *fstatus, char *cont)
+int teststrcompare_eql(FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 		expect_result, result_code;
+    unsigned long       expect_result, result_code;
     struct dsc$descriptor_s s1,s2,sr1,sr2;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char			presult [30];
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            presult [30];
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
 
@@ -893,18 +893,18 @@ int	teststrcompare_eql(FILE *fptr,int *fstatus, char *cont)
 /*********************************************************/
 
 
-int	teststrcompare_multi(FILE *fptr,int *fstatus, char *cont)
+int teststrcompare_multi(FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[MAXSTRING], pv1[MAXSTRING];
-    char 		pt2[MAXSTRING], pv2[MAXSTRING];
-    char 		pt3[MAXSTRING], pv3[MAXSTRING];
-    char 		pt4[MAXSTRING], pv4[MAXSTRING];
-    char		presult[MAXSTRING];
-    struct		dsc$descriptor_s sd1,sd2;
-    struct		dsc$descriptor_s sr1,sr2;	// saved result
-    unsigned long	flags, language,result;
-    char		*s1_ptr, *s2_ptr;		/* Pointer to strings */
-    unsigned short	s1_len, s2_len;			/* Length of strings */
+    char        pt1[MAXSTRING], pv1[MAXSTRING];
+    char        pt2[MAXSTRING], pv2[MAXSTRING];
+    char        pt3[MAXSTRING], pv3[MAXSTRING];
+    char        pt4[MAXSTRING], pv4[MAXSTRING];
+    char        presult[MAXSTRING];
+    struct      dsc$descriptor_s sd1,sd2;
+    struct      dsc$descriptor_s sr1,sr2;   // saved result
+    unsigned long   flags, language,result;
+    char        *s1_ptr, *s2_ptr;       /* Pointer to strings */
+    unsigned short  s1_len, s2_len;         /* Length of strings */
 
     flags = 0;
     language = 0;
@@ -995,15 +995,15 @@ int	teststrcompare_multi(FILE *fptr,int *fstatus, char *cont)
 
 /******************************************************/
 
-int	teststrconcat(FILE *fptr,int *fstatus, char *cont)
+int teststrconcat(FILE *fptr,int *fstatus, char *cont)
 
 {
-    char 		pt[MAX_ARRAY][20],pv[MAX_ARRAY][20],presult[MAX_ARRAY];
-    struct		dsc$descriptor_s sd[MAX_ARRAY];
-    int		i, num;
-    unsigned long	result;
-    char		*sptr[MAX_ARRAY];		/* Pointer to first string */
-    unsigned short	slen[MAX_ARRAY];		/* Length of first string */
+    char        pt[MAX_ARRAY][20],pv[MAX_ARRAY][20],presult[MAX_ARRAY];
+    struct      dsc$descriptor_s sd[MAX_ARRAY];
+    int     i, num;
+    unsigned long   result;
+    char        *sptr[MAX_ARRAY];       /* Pointer to first string */
+    unsigned short  slen[MAX_ARRAY];        /* Length of first string */
 
 
 
@@ -1013,7 +1013,7 @@ int	teststrconcat(FILE *fptr,int *fstatus, char *cont)
         strcpy (pt[i],"");
     }
 
-    *fstatus = fscanf (fptr,"%d",&num);	// number of arguments to read
+    *fstatus = fscanf (fptr,"%d",&num); // number of arguments to read
 
     for (i =0; i < num; i++)
     {
@@ -1112,13 +1112,13 @@ int	teststrconcat(FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrcopy_dx (FILE *fptr,int *fstatus, char *cont)
+int teststrcopy_dx (FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 		result_code;
+    unsigned long       result_code;
     struct dsc$descriptor_s s1,s2, sr;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char			presult [30];
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            presult [30];
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
 
@@ -1154,18 +1154,18 @@ int	teststrcopy_dx (FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrcopy_fill (FILE *fptr,int *fstatus, char *cont)
+int teststrcopy_fill (FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 		result_code;
-    char			*source, *destin;
-    unsigned int		slen,dlen;
-    int			fillchar;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char 			pt3[10], pv3[10];
-    char 			pt4[10], pv4[10];
-    char 			pt5[10], pv5[10];
-    char			presult [30];
+    unsigned long       result_code;
+    char            *source, *destin;
+    unsigned int        slen,dlen;
+    int         fillchar;
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            pt3[10], pv3[10];
+    char            pt4[10], pv4[10];
+    char            pt5[10], pv5[10];
+    char            presult [30];
 
     source = calloc (100,1);
     destin = calloc (100,1);
@@ -1228,16 +1228,16 @@ int	teststrcopy_fill (FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrcopy_r (FILE *fptr,int *fstatus, char *cont)
+int teststrcopy_r (FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 	result_code;
-    unsigned short	len,s1_len;
+    unsigned long   result_code;
+    unsigned short  len,s1_len;
     struct dsc$descriptor_s s1;
-    char			string[30],*s1_ptr;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char 			pt3[10], pv3[10];
-    char			presult [30];
+    char            string[30],*s1_ptr;
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            pt3[10], pv3[10];
+    char            presult [30];
 
     *fstatus = fscanf (fptr,scan7,pt1,pv1,pt2,pv2,pt3,pv3,presult);
 
@@ -1284,16 +1284,16 @@ int	teststrcopy_r (FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrcopy_r_64 (FILE *fptr,int *fstatus, char *cont)
+int teststrcopy_r_64 (FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 	result_code;
-    unsigned short	len,s1_len;
+    unsigned long   result_code;
+    unsigned short  len,s1_len;
     struct dsc$descriptor_s s1;
-    char			string[30], *s1_ptr;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char 			pt3[10], pv3[10];
-    char			presult [30];
+    char            string[30], *s1_ptr;
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            pt3[10], pv3[10];
+    char            presult [30];
 
     *fstatus = fscanf (fptr,scan7,pt1,pv1,pt2,pv2,pt3,pv3,presult);
 
@@ -1339,24 +1339,24 @@ int	teststrcopy_r_64 (FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrdiv(FILE *fptr,int *fstatus, char *cont)
+int teststrdiv(FILE *fptr,int *fstatus, char *cont)
 {
     unsigned long result_code;
     struct dsc$descriptor_s s1,s2,s3,s4;
     unsigned long asign,bsign,csign,rsign,rt;
-    signed long	aexp,bexp,cexp,rexp,td;
-    char 	pt1[10], pv1[10];
-    char 	pt2[10], pv2[10];
-    char 	pt3[10], pv3[10];
-    char 	pt4[10], pv4[10];
-    char 	pt5[10], pv5[10];
-    char 	pt6[10], pv6[10];
-    char 	pt7[10], pv7[10];
-    char 	pt8[10], pv8[10];
-    char 	pt9[10], pv9[10];
-    char 	pt10[10], pv10[10];
-    char 	pt11[10], pv11[10];
-    char	presult [30];
+    signed long aexp,bexp,cexp,rexp,td;
+    char    pt1[10], pv1[10];
+    char    pt2[10], pv2[10];
+    char    pt3[10], pv3[10];
+    char    pt4[10], pv4[10];
+    char    pt5[10], pv5[10];
+    char    pt6[10], pv6[10];
+    char    pt7[10], pv7[10];
+    char    pt8[10], pv8[10];
+    char    pt9[10], pv9[10];
+    char    pt10[10], pv10[10];
+    char    pt11[10], pv11[10];
+    char    presult [30];
 
     strcpy (pv3,"\n");
     strcpy (pv6,"\n");
@@ -1397,10 +1397,10 @@ int	teststrdiv(FILE *fptr,int *fstatus, char *cont)
     printf ("Total digits  %ld Mask  %lu ",td,rt);
     switch (rt)
     {
-    case	0:
+    case    0:
         printf ("Truncate \n");
         break;
-    case	1:
+    case    1:
         printf ("Round \n");
         break;
     default:
@@ -1438,15 +1438,15 @@ int	teststrdiv(FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrdupl_char (FILE *fptr,int *fstatus, char *cont)
+int teststrdupl_char (FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[20],pv1[20],presult[30];
-    char 		pt2[20],pv2[20];
-    char 		pt3[20],pv3[20];
-    struct		dsc$descriptor_s sd1;
-    unsigned long	result;
-    signed long	rep;
-    char		dupchar;
+    char        pt1[20],pv1[20],presult[30];
+    char        pt2[20],pv2[20];
+    char        pt3[20],pv3[20];
+    struct      dsc$descriptor_s sd1;
+    unsigned long   result;
+    signed long rep;
+    char        dupchar;
 
 
     *fstatus = fscanf (fptr,scan7,pt1,pv1,pt2,pv2,pt3,pv3,presult);
@@ -1462,7 +1462,7 @@ int	teststrdupl_char (FILE *fptr,int *fstatus, char *cont)
     if ( pv2[0] == '0' )
         rep = 1;
     else
-        rep	= atol (pv2);
+        rep = atol (pv2);
 
     printf ("Testing  str$dupl_char \n");
     printf ("Duplcicat char n times \n\n\n");
@@ -1495,15 +1495,15 @@ int	teststrdupl_char (FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrelement (FILE *fptr,int *fstatus, char *cont)
+int teststrelement (FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[20],pv1[20],presult[30];
-    char 		pt2[20],pv2[20];
-    char 		pt3[20],pv3[20];
-    char 		pt4[20],pv4[20];
-    long		element_number;
-    unsigned long	result_code;
-    struct dsc$descriptor_s		destin, delimiter, source;
+    char        pt1[20],pv1[20],presult[30];
+    char        pt2[20],pv2[20];
+    char        pt3[20],pv3[20];
+    char        pt4[20],pv4[20];
+    long        element_number;
+    unsigned long   result_code;
+    struct dsc$descriptor_s     destin, delimiter, source;
 
     *fstatus = fscanf (fptr,scan9,pt1,pv1,pt2,pv2,pt3,pv3,pt4,pv4,presult);
 
@@ -1553,13 +1553,13 @@ int	teststrelement (FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrfind_first_in_set (FILE *fptr,int *fstatus, char *cont)
+int teststrfind_first_in_set (FILE *fptr,int *fstatus, char *cont)
 {
-    long	 		expect_result,result_position;
+    long            expect_result,result_position;
     struct dsc$descriptor_s s1,s2;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char			result [10];
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            result [10];
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,result);
 
     if (strncmp ( pt1,"cd",2) == 0) str$$malloc_sd (&s1,pv1);
@@ -1596,13 +1596,13 @@ int	teststrfind_first_in_set (FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrfind_first_not_in_set (FILE *fptr,int *fstatus, char *cont)
+int teststrfind_first_not_in_set (FILE *fptr,int *fstatus, char *cont)
 {
-    long	 		expect_result,result_position;
+    long            expect_result,result_position;
     struct dsc$descriptor_s s1,s2;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char			result [10];
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            result [10];
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,result);
 
     if (strncmp ( pt1,"cd",2) == 0) str$$malloc_sd (&s1,pv1);
@@ -1644,13 +1644,13 @@ int	teststrfind_first_not_in_set (FILE *fptr,int *fstatus, char *cont)
 
 int teststrfind_first_substring (FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt[MAX_ARRAY][20],pv[MAX_ARRAY][20],presult[MAX_ARRAY];
-    struct		dsc$descriptor_s sd[MAX_ARRAY];
-    int		i, num;
-    unsigned long	result, expect_result;
-    signed long	index, subindex, saveindex, savesubindex;
-    char		*sptr[MAX_ARRAY];		/* Pointer to first string */
-    unsigned short	slen[MAX_ARRAY];		/* Length of first string */
+    char        pt[MAX_ARRAY][20],pv[MAX_ARRAY][20],presult[MAX_ARRAY];
+    struct      dsc$descriptor_s sd[MAX_ARRAY];
+    int     i, num;
+    unsigned long   result, expect_result;
+    signed long index, subindex, saveindex, savesubindex;
+    char        *sptr[MAX_ARRAY];       /* Pointer to first string */
+    unsigned short  slen[MAX_ARRAY];        /* Length of first string */
 
 
     for (i=0; i< MAX_ARRAY; i++)
@@ -1659,7 +1659,7 @@ int teststrfind_first_substring (FILE *fptr,int *fstatus, char *cont)
         strcpy (pt[i],"");
     }
 
-    *fstatus = fscanf (fptr,"%d",&num);	// number of arguments to read
+    *fstatus = fscanf (fptr,"%d",&num); // number of arguments to read
 
     for (i =0; i < num; i++)
     {
@@ -1793,10 +1793,10 @@ int teststrfind_first_substring (FILE *fptr,int *fstatus, char *cont)
 
 int teststrfree1_dx     (FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[6],pv1[50],presult[50], *s1_ptr;
-    unsigned short 	s1_len;
-    struct		dsc$descriptor_s sd1;
-    unsigned long	result_code;
+    char        pt1[6],pv1[50],presult[50], *s1_ptr;
+    unsigned short  s1_len;
+    struct      dsc$descriptor_s sd1;
+    unsigned long   result_code;
 
 
     *fstatus = fscanf (fptr,scan3,pt1,pv1,presult);
@@ -1832,10 +1832,10 @@ int teststrfree1_dx     (FILE *fptr,int *fstatus, char *cont)
 
 int teststrget1_dx (FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[6],pv1[6],pt2[50],pv2[50],presult[50], *s1_ptr;
-    struct		dsc$descriptor_s sd1;
-    unsigned short	len, s1_len;
-    unsigned long	result_code;
+    char        pt1[6],pv1[6],pt2[50],pv2[50],presult[50], *s1_ptr;
+    struct      dsc$descriptor_s sd1;
+    unsigned short  len, s1_len;
+    unsigned long   result_code;
 
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
@@ -1882,10 +1882,10 @@ int teststrget1_dx (FILE *fptr,int *fstatus, char *cont)
 
 int teststrget1_dx_64     (FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[6],pv1[6],pt2[50],pv2[50],presult[50], *s1_ptr;
-    struct		dsc$descriptor_s sd1;
-    unsigned short	len, s1_len;
-    unsigned long	result_code;
+    char        pt1[6],pv1[6],pt2[50],pv2[50],presult[50], *s1_ptr;
+    struct      dsc$descriptor_s sd1;
+    unsigned short  len, s1_len;
+    unsigned long   result_code;
 
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
@@ -1931,9 +1931,9 @@ int teststrget1_dx_64     (FILE *fptr,int *fstatus, char *cont)
 
 int teststriszero     (FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[6],pv1[6],presult[50];
-    struct		dsc$descriptor_s sd1;
-    unsigned long	result_code;
+    char        pt1[6],pv1[6],presult[50];
+    struct      dsc$descriptor_s sd1;
+    unsigned long   result_code;
 
 
     *fstatus = fscanf (fptr,scan3,pt1,pv1,presult);
@@ -1964,11 +1964,11 @@ int teststriszero     (FILE *fptr,int *fstatus, char *cont)
 
 int teststriszerotrim     (FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[6],pv1[6],presult[50];
-    char 		pt2[6],pv2[6];
-    struct		dsc$descriptor_s sd1;
-    unsigned long	result_code;
-    long		exponent;
+    char        pt1[6],pv1[6],presult[50];
+    char        pt2[6],pv2[6];
+    struct      dsc$descriptor_s sd1;
+    unsigned long   result_code;
+    long        exponent;
 
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
@@ -2000,16 +2000,16 @@ int teststriszerotrim     (FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrleft(FILE *fptr,int *fstatus, char *cont)
+int teststrleft(FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 		result_code;
+    unsigned long       result_code;
     struct dsc$descriptor_s s1,s2,sr;
-    signed long		endpos;
-    unsigned short		s1_len;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char 			pt3[10], pv3[10];
-    char			presult [30], *s1_ptr;
+    signed long     endpos;
+    unsigned short      s1_len;
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            pt3[10], pv3[10];
+    char            presult [30], *s1_ptr;
 
     *fstatus = fscanf (fptr,scan7,pt1,pv1,pt2,pv2,pt3,pv3,presult);
 
@@ -2051,16 +2051,16 @@ int	teststrleft(FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrlen_extr (FILE *fptr,int *fstatus, char *cont)
+int teststrlen_extr (FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 		result_code;
+    unsigned long       result_code;
     struct dsc$descriptor_s s1,s2,sr;
-    signed long		startpos,len;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char 			pt3[10], pv3[10];
-    char 			pt4[10], pv4[10];
-    char			presult [30];
+    signed long     startpos,len;
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            pt3[10], pv3[10];
+    char            pt4[10], pv4[10];
+    char            presult [30];
 
     *fstatus = fscanf (fptr,scan9,pt1,pv1,pt2,pv2,pt3,pv3,pt4,pv4,presult);
 
@@ -2068,7 +2068,7 @@ int	teststrlen_extr (FILE *fptr,int *fstatus, char *cont)
     if (strncmp ( pt2,"cd",2) == 0) str$$malloc_sd (&s2,pv2);
     if (strncmp ( pt1,"cd",2) == 0) str$$malloc_sd (&sr,pv1);
     startpos = atol (pv3);
-    len	= atol (pv4);
+    len = atol (pv4);
 
     printf ("Testing str$len_extr \n");
     printf ("Extract a substring by length \n\n\n");
@@ -2107,9 +2107,9 @@ int	teststrlen_extr (FILE *fptr,int *fstatus, char *cont)
 
 int teststrlzerotrim  (FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[6],pv1[6],presult[50];
-    struct		dsc$descriptor_s sd1;
-    unsigned long	result_code;
+    char        pt1[6],pv1[6],presult[50];
+    struct      dsc$descriptor_s sd1;
+    unsigned long   result_code;
 
 
     *fstatus = fscanf (fptr,scan3,pt1,pv1,presult);
@@ -2138,11 +2138,11 @@ int teststrlzerotrim  (FILE *fptr,int *fstatus, char *cont)
 
 /********************************************/
 
-int	teststrmatch_wild (FILE *fptr,int *fstatus, char *cont)
+int teststrmatch_wild (FILE *fptr,int *fstatus, char *cont)
 {
-    char 	pt1[10], pv1[10];
-    char 	pt2[10], pv2[10];
-    char	presult[30];
+    char    pt1[10], pv1[10];
+    char    pt2[10], pv2[10];
+    char    presult[30];
     unsigned long result_code;
     struct dsc$descriptor_s s1,s2;
 
@@ -2179,22 +2179,22 @@ int	teststrmatch_wild (FILE *fptr,int *fstatus, char *cont)
 
 /********************************************/
 
-int	teststrmul(FILE *fptr,int *fstatus, char *cont)
+int teststrmul(FILE *fptr,int *fstatus, char *cont)
 {
     unsigned long result_code;
     struct dsc$descriptor_s s1,s2,s3,sr;
     unsigned long asign,bsign,csign,rsign;
-    signed long	aexp,bexp,cexp,rexp;
-    char 	pt1[10], pv1[10];
-    char 	pt2[10], pv2[10];
-    char 	pt3[10], pv3[10];
-    char 	pt4[10], pv4[10];
-    char 	pt5[10], pv5[10];
-    char 	pt6[10], pv6[10];
-    char 	pt7[10], pv7[10];
-    char 	pt8[10], pv8[10];
-    char 	pt9[10], pv9[10];
-    char	presult [30];
+    signed long aexp,bexp,cexp,rexp;
+    char    pt1[10], pv1[10];
+    char    pt2[10], pv2[10];
+    char    pt3[10], pv3[10];
+    char    pt4[10], pv4[10];
+    char    pt5[10], pv5[10];
+    char    pt6[10], pv6[10];
+    char    pt7[10], pv7[10];
+    char    pt8[10], pv8[10];
+    char    pt9[10], pv9[10];
+    char    presult [30];
 
     strcpy (pv3,"\n");
     strcpy (pv6,"\n");
@@ -2259,13 +2259,13 @@ int	teststrmul(FILE *fptr,int *fstatus, char *cont)
 
 /*************************************************/
 
-int	teststrncompare(FILE *fptr,int *fstatus, char *cont)
+int teststrncompare(FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 		result_code;
+    unsigned long       result_code;
     struct dsc$descriptor_s s1,s2;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char			presult [30];
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            presult [30];
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
 
@@ -2298,16 +2298,16 @@ int	teststrncompare(FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrpos_extr (FILE *fptr,int *fstatus, char *cont)
+int teststrpos_extr (FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 		result;
+    unsigned long       result;
     struct dsc$descriptor_s s1,s2,sr;
-    signed long		startpos,endpos;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char 			pt3[10], pv3[10];
-    char 			pt4[10], pv4[10];
-    char			presult [30];
+    signed long     startpos,endpos;
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            pt3[10], pv3[10];
+    char            pt4[10], pv4[10];
+    char            presult [30];
 
     *fstatus = fscanf (fptr,scan9,pt1,pv1,pt2,pv2,pt3,pv3,pt4,pv4,presult);
 
@@ -2350,14 +2350,14 @@ int	teststrpos_extr (FILE *fptr,int *fstatus, char *cont)
 /*********************************************************/
 
 
-int	teststrposition(FILE *fptr,int *fstatus, char *cont)
+int teststrposition(FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[20],pv1[20],presult[MAX_ARRAY];
-    char 		pt2[20],pv2[20];
-    char 		pt3[20],pv3[20];
-    struct		dsc$descriptor_s sd1, sd2;
-    unsigned long	result, expected_result;
-    signed long	startpos;
+    char        pt1[20],pv1[20],presult[MAX_ARRAY];
+    char        pt2[20],pv2[20];
+    char        pt3[20],pv3[20];
+    struct      dsc$descriptor_s sd1, sd2;
+    unsigned long   result, expected_result;
+    signed long startpos;
 
 
     *fstatus = fscanf (fptr,scan7,pt1,pv1,pt2,pv2,pt3,pv3,presult);
@@ -2405,14 +2405,14 @@ int	teststrposition(FILE *fptr,int *fstatus, char *cont)
 
 /******************************************************/
 
-int	teststrprefix(FILE *fptr,int *fstatus, char *cont)
+int teststrprefix(FILE *fptr,int *fstatus, char *cont)
 
 {
     unsigned long result_code;
     struct dsc$descriptor_s s1,s2;
-    char 	pt1[10], pv1[10];
-    char 	pt2[10], pv2[10];
-    char	presult [30];
+    char    pt1[10], pv1[10];
+    char    pt2[10], pv2[10];
+    char    presult [30];
 
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
@@ -2449,22 +2449,22 @@ int	teststrprefix(FILE *fptr,int *fstatus, char *cont)
 /********************************************/
 
 
-int	teststrrecip (FILE *fptr,int *fstatus, char *cont)
+int teststrrecip (FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 	result_code;
+    unsigned long   result_code;
     struct dsc$descriptor_s s1,s2,s3, sr;
-    unsigned long 	asign,bsign,csign, rsign;
-    signed   long	aexp,bexp,cexp, rexp;
-    char		presult [30];
-    char 		pt1[10], pv1[10];
-    char 		pt2[10], pv2[10];
-    char 		pt3[10], pv3[10];
-    char 		pt4[10], pv4[10];
-    char 		pt5[10], pv5[10];
-    char 		pt6[10], pv6[10];
-    char 		pt7[10], pv7[10];
-    char 		pt8[10], pv8[10];
-    char 		pt9[10], pv9[10];
+    unsigned long   asign,bsign,csign, rsign;
+    signed   long   aexp,bexp,cexp, rexp;
+    char        presult [30];
+    char        pt1[10], pv1[10];
+    char        pt2[10], pv2[10];
+    char        pt3[10], pv3[10];
+    char        pt4[10], pv4[10];
+    char        pt5[10], pv5[10];
+    char        pt6[10], pv6[10];
+    char        pt7[10], pv7[10];
+    char        pt8[10], pv8[10];
+    char        pt9[10], pv9[10];
 
     printf ("Testing str$recip \n");
 
@@ -2483,8 +2483,8 @@ int	teststrrecip (FILE *fptr,int *fstatus, char *cont)
     bexp = atol(pv5);
     cexp = atol(pv8);
 
-    rexp  = cexp;		// Save expected return exponent
-    rsign = csign;		// Save expected return sign
+    rexp  = cexp;       // Save expected return exponent
+    rsign = csign;      // Save expected return sign
 
     printf ("Testing str$recip \n");
     printf ("C = 1 / A \n\n\n");
@@ -2529,17 +2529,17 @@ int	teststrrecip (FILE *fptr,int *fstatus, char *cont)
 
 /******************************************************/
 
-int	teststrreplace (FILE *fptr,int *fstatus, char *cont)
+int teststrreplace (FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 	result_code;
+    unsigned long   result_code;
     struct dsc$descriptor_s s1,s2,s3, sr;
-    signed   long	start, end;
-    char		presult [30];
-    char 		pt1[50], pv1[50];
-    char 		pt2[50], pv2[50];
-    char 		pt3[50], pv3[50];
-    char 		pt4[50], pv4[50];
-    char 		pt5[50], pv5[50];
+    signed   long   start, end;
+    char        presult [30];
+    char        pt1[50], pv1[50];
+    char        pt2[50], pv2[50];
+    char        pt3[50], pv3[50];
+    char        pt4[50], pv4[50];
+    char        pt5[50], pv5[50];
 
 
     *fstatus = fscanf (fptr,scan11,pt1,pv1,pt2,pv2,pt3,pv3,pt4,pv4,pt5,pv5,presult);
@@ -2591,16 +2591,16 @@ int	teststrreplace (FILE *fptr,int *fstatus, char *cont)
 
 /******************************************************/
 
-int	teststrright(FILE *fptr,int *fstatus, char *cont)
+int teststrright(FILE *fptr,int *fstatus, char *cont)
 
 {
     unsigned long result_code;
-    long	startpos;
+    long    startpos;
     struct dsc$descriptor_s s1,s2, sr;
-    char 	pt1[10], pv1[10];
-    char 	pt2[10], pv2[10];
-    char 	pt3[10], pv3[10];
-    char	presult [30];
+    char    pt1[10], pv1[10];
+    char    pt2[10], pv2[10];
+    char    pt3[10], pv3[10];
+    char    presult [30];
 
 
     *fstatus = fscanf (fptr,scan7,pt1,pv1,pt2,pv2,pt3,pv3,presult);
@@ -2637,34 +2637,34 @@ int	teststrright(FILE *fptr,int *fstatus, char *cont)
 
 /******************************************************/
 
-int	teststrround (FILE *fptr,int *fstatus, char *cont)
+int teststrround (FILE *fptr,int *fstatus, char *cont)
 {
 
-    char 	pt1[10], pv1[10];
-    char 	pt2[10], pv2[10];
-    char 	pt3[10], pv3[10];
-    char 	pt4[10], pv4[10];
-    char 	pt5[10], pv5[10];
-    char 	pt6[10], pv6[10];
-    char 	pt7[10], pv7[10];
-    char 	pt8[10], pv8[10];
-    char	presult [30];
+    char    pt1[10], pv1[10];
+    char    pt2[10], pv2[10];
+    char    pt3[10], pv3[10];
+    char    pt4[10], pv4[10];
+    char    pt5[10], pv5[10];
+    char    pt6[10], pv6[10];
+    char    pt7[10], pv7[10];
+    char    pt8[10], pv8[10];
+    char    presult [30];
     unsigned long asign,csign;
     unsigned long result_code, flags;
-    signed	 long aexp, cexp, places;
+    signed   long aexp, cexp, places;
     struct dsc$descriptor_s adigits,cdigits, sr;
 
 
     *fstatus = fscanf (fptr,scan17,pt1,pv1,pt2,pv2,pt3,pv3,pt4,pv4,pt5,pv5,pt6,pv6,pt7,pv7,pt8,pv8,presult);
 
-    places=	atol (pv1);
-    flags =	atol (pv2);
+    places= atol (pv1);
+    flags = atol (pv2);
     asign = atol (pv3);
-    aexp = 	atol (pv4);
+    aexp =  atol (pv4);
     if (strncmp ( pt5,"cd",2) == 0) str$$malloc_sd (&adigits,pv5);
     if (strncmp ( pt5,"cd",2) == 0) str$$malloc_sd (&sr,pv5);
-    csign =	atol (pv6);
-    cexp =	atol (pv7);
+    csign = atol (pv6);
+    cexp =  atol (pv7);
     if (strncmp ( pt8,"cd",2) == 0) str$$malloc_sd (&cdigits,pv8);
 
     printf ("Testing str$round \n");
@@ -2692,7 +2692,7 @@ int	teststrround (FILE *fptr,int *fstatus, char *cont)
     }
     printf ("\n");
 
-    result_code = 	str$round (&places,&flags,&asign,&aexp,&adigits,&csign,&cexp,&cdigits);
+    result_code =   str$round (&places,&flags,&asign,&aexp,&adigits,&csign,&cexp,&cdigits);
 
     print_result_code (presult, result_code,cont);
     print_desc_compare ("Digits",&sr,&adigits,cont);
@@ -2737,10 +2737,10 @@ int	teststrround (FILE *fptr,int *fstatus, char *cont)
 
 int teststrrzerotrim (FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[6],pv1[6],pt2[255],pv2[255],presult[50];
-    struct		dsc$descriptor_s sd1;
-    unsigned long	result;
-    signed long	exp;
+    char        pt1[6],pv1[6],pt2[255],pv2[255],presult[50];
+    struct      dsc$descriptor_s sd1;
+    unsigned long   result;
+    signed long exp;
 
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
@@ -2754,7 +2754,7 @@ int teststrrzerotrim (FILE *fptr,int *fstatus, char *cont)
     printf ("Input String   %s \n",pv1);
     printf ("Input Exponent %s \n",pv2);
 
-    result	= str$$rzerotrim (&sd1, &exp);
+    result  = str$$rzerotrim (&sd1, &exp);
 
     print_result_code (presult,result,cont);
 
@@ -2771,22 +2771,22 @@ int teststrrzerotrim (FILE *fptr,int *fstatus, char *cont)
 
 /********************************************/
 
-int	teststrsub(FILE *fptr,int *fstatus, char *cont)
+int teststrsub(FILE *fptr,int *fstatus, char *cont)
 {
     unsigned long result_code;
     struct dsc$descriptor_s s1,s2,s3,sr;
     unsigned long asign,bsign,csign,rsign;
-    signed long	aexp,bexp,cexp,rexp;
-    char 	pt1[10], pv1[10];
-    char 	pt2[10], pv2[10];
-    char 	pt3[10], pv3[10];
-    char 	pt4[10], pv4[10];
-    char 	pt5[10], pv5[10];
-    char 	pt6[10], pv6[10];
-    char 	pt7[10], pv7[10];
-    char 	pt8[10], pv8[10];
-    char 	pt9[10], pv9[10];
-    char	presult [30];
+    signed long aexp,bexp,cexp,rexp;
+    char    pt1[10], pv1[10];
+    char    pt2[10], pv2[10];
+    char    pt3[10], pv3[10];
+    char    pt4[10], pv4[10];
+    char    pt5[10], pv5[10];
+    char    pt6[10], pv6[10];
+    char    pt7[10], pv7[10];
+    char    pt8[10], pv8[10];
+    char    pt9[10], pv9[10];
+    char    presult [30];
 
     strcpy (pv3,"\n");
     strcpy (pv6,"\n");
@@ -2851,15 +2851,15 @@ int	teststrsub(FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrtranslate (FILE *fptr,int *fstatus, char *cont)
+int teststrtranslate (FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 		result_code;
+    unsigned long       result_code;
     struct dsc$descriptor_s s1,s2,s3,s4,sr;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char 			pt3[10], pv3[10];
-    char 			pt4[10], pv4[10];
-    char			presult [30];
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            pt3[10], pv3[10];
+    char            pt4[10], pv4[10];
+    char            presult [30];
 
     *fstatus = fscanf (fptr,scan9,pt1,pv1,pt2,pv2,pt3,pv3,pt4,pv4,presult);
 
@@ -2910,15 +2910,15 @@ int	teststrtranslate (FILE *fptr,int *fstatus, char *cont)
 /*********************************************************/
 
 
-int	teststrtrim (FILE *fptr,int *fstatus, char *cont)
+int teststrtrim (FILE *fptr,int *fstatus, char *cont)
 {
-    char 		pt1[MAX_ARRAY],pv1[MAX_ARRAY];
-    char 		pt2[MAX_ARRAY],pv2[MAX_ARRAY];
-    char 		pt3[MAX_ARRAY],pv3[MAX_ARRAY],presult[MAX_ARRAY];
-    struct		dsc$descriptor_s sd1, sd2, sd_blank, sd_tab, sr1;
-    unsigned long	result;
-    char		*sptr1;		/* Pointer to first string */
-    unsigned short	slen1, length;
+    char        pt1[MAX_ARRAY],pv1[MAX_ARRAY];
+    char        pt2[MAX_ARRAY],pv2[MAX_ARRAY];
+    char        pt3[MAX_ARRAY],pv3[MAX_ARRAY],presult[MAX_ARRAY];
+    struct      dsc$descriptor_s sd1, sd2, sd_blank, sd_tab, sr1;
+    unsigned long   result;
+    char        *sptr1;     /* Pointer to first string */
+    unsigned short  slen1, length;
 
 
     *fstatus = fscanf (fptr,scan7,pt1,pv1,pt2,pv2,pt3,pv3,presult);
@@ -2975,13 +2975,13 @@ int	teststrtrim (FILE *fptr,int *fstatus, char *cont)
 
 /*********************************************************/
 
-int	teststrupcase (FILE *fptr,int *fstatus, char *cont)
+int teststrupcase (FILE *fptr,int *fstatus, char *cont)
 {
-    unsigned long 		result_code;
+    unsigned long       result_code;
     struct dsc$descriptor_s s1,s2;
-    char 			pt1[10], pv1[10];
-    char 			pt2[10], pv2[10];
-    char			presult [30];
+    char            pt1[10], pv1[10];
+    char            pt2[10], pv2[10];
+    char            presult [30];
 
     *fstatus = fscanf (fptr,scan5,pt1,pv1,pt2,pv2,presult);
 

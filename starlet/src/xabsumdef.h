@@ -1,5 +1,5 @@
-#ifndef xabsumdef_h
-#define xabsumdef_h
+#ifndef XABSUMDEF_H
+#define XABSUMDEF_H
 
 #define XAB$C_SUM 22
 

@@ -16,11 +16,11 @@
 //---2004-06-10
 
 /************************************************************************/
-/*									*/
-/*	change <range>							*/
-/*									*/
-/*  Enters change mode							*/
-/*									*/
+/*                                  */
+/*  change <range>                          */
+/*                                  */
+/*  Enters change mode                          */
+/*                                  */
 /************************************************************************/
 
 #include <stdarg.h>
@@ -38,33 +38,33 @@ struct Delbuff
 };
 
 /* set by these routines and is input to ch_screen_read: */
-Line *ch_screen_top_line;	/* - pointer to what we want for top line on screen */
-int ch_screen_shiftleft = 0;	/* - how many chars to leave off of beg of line */
+Line *ch_screen_top_line;   /* - pointer to what we want for top line on screen */
+int ch_screen_shiftleft = 0;    /* - how many chars to leave off of beg of line */
 
 /* these are set by ch_screen_init: */
-int ch_screen_num_lines;	/* - total number of lines on the screen */
-int ch_screen_tmar_lines;	/* - number of lines to reserve for top margin */
-int ch_screen_bmar_lines;	/* - number of lines to reserve for bottom margin */
-int ch_screen_width;		/* - number of columns on screen, incl any used by 'set number show' */
-int ch_screen_numofs;		/* - number of columns being used by 'set number show' (varies command to command) */
+int ch_screen_num_lines;    /* - total number of lines on the screen */
+int ch_screen_tmar_lines;   /* - number of lines to reserve for top margin */
+int ch_screen_bmar_lines;   /* - number of lines to reserve for bottom margin */
+int ch_screen_width;        /* - number of columns on screen, incl any used by 'set number show' */
+int ch_screen_numofs;       /* - number of columns being used by 'set number show' (varies command to command) */
 
-int autoshift;			/* zero : no autoshifting */
+int autoshift;          /* zero : no autoshifting */
 /* else : number of 8's to shift by */
 
 static const char worddelims[] = { 9, 10, 11, 12, 13, ' ' };
 
-char *searchstr = "";		/* search string (set by " or ') */
+char *searchstr = "";       /* search string (set by " or ') */
 uLong searchlen;
 
-static int ch_exited;		/* set by 'EX' command to indicate exiting */
-static int ch_defdir = 1;	/* 1: ADV mode; -1: BACK mode */
+static int ch_exited;       /* set by 'EX' command to indicate exiting */
+static int ch_defdir = 1;   /* 1: ADV mode; -1: BACK mode */
 
-Position sel_position;		/* sel_position.buffer == NULL : no select range active */
+Position sel_position;      /* sel_position.buffer == NULL : no select range active */
 /* else, screen routines use this to highlight select range */
 
-static int scroll_hint;		/* net scroll backward (<0) or forward (>0) done by command execution */
-static Line *page_skip_line;	/* NULL: no page skip done, else: the line that had the <FF> */
-static int vert_skip_coln = 0;	/* zero: not skipping vertically, up/down arrows will pick up column from where cursor is */
+static int scroll_hint;     /* net scroll backward (<0) or forward (>0) done by command execution */
+static Line *page_skip_line;    /* NULL: no page skip done, else: the line that had the <FF> */
+static int vert_skip_coln = 0;  /* zero: not skipping vertically, up/down arrows will pick up column from where cursor is */
 /* else: screen column number (1..n) we started skipping vertically from, cursor will stay in this column */
 
 static Delbuff *delbuffs = NULL; /* list of "DEL_<entity>" buffers and what direction they were deleted from */
@@ -144,33 +144,33 @@ void cmd_change (char *cp)
 
     /* Perform screen initialization */
 
-    ch_screen_init ();				/* it fills in ch_screen_num_lines, _tmar_lines, _bmar_lines */
+    ch_screen_init ();              /* it fills in ch_screen_num_lines, _tmar_lines, _bmar_lines */
 
     /* Determine which line goes on the very top of screen */
 
-    calc_top_line ();				/* this fills in ch_screen_top_line */
+    calc_top_line ();               /* this fills in ch_screen_top_line */
 
     /* Loop until we exit change mode */
 
-    ch_exited = 0;				/* we haven't exited change mode yet */
-    while (!ch_exited)  				/* repeat until we exit change mode */
+    ch_exited = 0;              /* we haven't exited change mode yet */
+    while (!ch_exited)                  /* repeat until we exit change mode */
     {
-        check_top_line ();				/* make sure ch_screen_top_line is ok */
-        if ((autoshift != 0) && (cur_position.line != NULL))  							/* see if auto-shift enabled */
+        check_top_line ();              /* make sure ch_screen_top_line is ok */
+        if ((autoshift != 0) && (cur_position.line != NULL))                            /* see if auto-shift enabled */
         {
-            columnumber = ch_screen_chr2col (cur_position.offset, string_getval (line_string (cur_position.line)));	/* if so, see what column cursor is in */
-            while (ch_screen_shiftleft > columnumber)  								/* see if it's shifted left off screen */
+            columnumber = ch_screen_chr2col (cur_position.offset, string_getval (line_string (cur_position.line))); /* if so, see what column cursor is in */
+            while (ch_screen_shiftleft > columnumber)                               /* see if it's shifted left off screen */
             {
-                ch_screen_shiftleft -= autoshift * 8;									/* if so, shift screen right */
-                if (ch_screen_shiftleft < 0) ch_screen_shiftleft = 0;							/*        but not too far right */
+                ch_screen_shiftleft -= autoshift * 8;                                   /* if so, shift screen right */
+                if (ch_screen_shiftleft < 0) ch_screen_shiftleft = 0;                           /*        but not too far right */
             }
             while (ch_screen_shiftleft + ch_screen_width - ch_screen_numofs <= columnumber) ch_screen_shiftleft += autoshift * 8; /* shift left if off right end */
         }
-        cmdstring = ch_screen_read ();		/* update screen if needed and read in a command or commands */
-        if (cmdstring == NULL) break;		/* stop if hit eof on input */
-        scroll_hint = 0;				/* reset the scrolling hint */
-        ch_process (string_getval (cmdstring));	/* process command(s) */
-        string_delete (cmdstring);			/* free off command string */
+        cmdstring = ch_screen_read ();      /* update screen if needed and read in a command or commands */
+        if (cmdstring == NULL) break;       /* stop if hit eof on input */
+        scroll_hint = 0;                /* reset the scrolling hint */
+        ch_process (string_getval (cmdstring)); /* process command(s) */
+        string_delete (cmdstring);          /* free off command string */
     }
 
     /* Terminate screen routines */
@@ -185,24 +185,24 @@ void cmd_change (char *cp)
 }
 
 /************************************************************************/
-/*									*/
-/*  This routine checks to make sure the current line is visible given 	*/
-/*  the top line on the screen, and if not, it adjusts the top line.  	*/
-/*  This is basically how we communicate to the terminal driver 	*/
-/*  routines to scroll.							*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	ch_screen_top_line = currently at top of screen			*/
-/*	cur_position.line  = what line we have to make sure is visible	*/
-/*	page_skip_line = line skipped to by page entity (or NULL)	*/
-/*	scroll_hint > 0 : cur_position was moved forward		*/
-/*	            < 0 : cur_position was moved backward		*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	ch_screen_top_line = possibly modified				*/
-/*									*/
+/*                                  */
+/*  This routine checks to make sure the current line is visible given  */
+/*  the top line on the screen, and if not, it adjusts the top line.    */
+/*  This is basically how we communicate to the terminal driver     */
+/*  routines to scroll.                         */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  ch_screen_top_line = currently at top of screen         */
+/*  cur_position.line  = what line we have to make sure is visible  */
+/*  page_skip_line = line skipped to by page entity (or NULL)   */
+/*  scroll_hint > 0 : cur_position was moved forward        */
+/*              < 0 : cur_position was moved backward       */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  ch_screen_top_line = possibly modified              */
+/*                                  */
 /************************************************************************/
 
 static void check_top_line (void)
@@ -232,12 +232,12 @@ static void check_top_line (void)
     /* If within the existing middle section, just leave screen alone               */
     /* If within existing bottom margin, scroll screen up                           */
 
-    line = ch_screen_top_line;						/* get line we had on top last time through */
+    line = ch_screen_top_line;                      /* get line we had on top last time through */
     if (line != NULL)
     {
-        for (lineno = 0; lineno < ch_screen_num_lines; lineno ++)  		/* count lines on the screen */
+        for (lineno = 0; lineno < ch_screen_num_lines; lineno ++)       /* count lines on the screen */
         {
-            if (line == cur_position.line)  					/* see if we found current line */
+            if (line == cur_position.line)                      /* see if we found current line */
             {
 
                 /* If current line is in bottom margin, scroll screen up to get it out */
@@ -259,8 +259,8 @@ static void check_top_line (void)
                 }
                 return;
             }
-            if (line == NULL) break;						/* not current line, stop if hit [EOB] */
-            line = line_next (line);						/* not [EOB], on to next line in buffer */
+            if (line == NULL) break;                        /* not current line, stop if hit [EOB] */
+            line = line_next (line);                        /* not [EOB], on to next line in buffer */
         }
     }
 
@@ -269,18 +269,18 @@ static void check_top_line (void)
     /* the current line on line just above bottom margin, but we do it funny so if the [EOB] would show, it will */
     /* be on the very last line (and the cursor will be in the margin).                                          */
 
-    ch_screen_top_line = cur_position.line;				/* start with current line on top of screen */
-    lineno = ch_screen_tmar_lines;					/* assume it says net scroll backward */
+    ch_screen_top_line = cur_position.line;             /* start with current line on top of screen */
+    lineno = ch_screen_tmar_lines;                  /* assume it says net scroll backward */
     if (scroll_hint >= 0)
     {
-        for (lineno = ch_screen_bmar_lines; lineno != 0; -- lineno)  	/* forward, scroll up bmar lines */
+        for (lineno = ch_screen_bmar_lines; lineno != 0; -- lineno)     /* forward, scroll up bmar lines */
         {
-            if (ch_screen_top_line == NULL) break;				/* (but not past [EOB]) */
+            if (ch_screen_top_line == NULL) break;              /* (but not past [EOB]) */
             ch_screen_top_line = line_next (ch_screen_top_line);
         }
-        lineno = ch_screen_num_lines - 1;					/* ... then down num -1 lines */
+        lineno = ch_screen_num_lines - 1;                   /* ... then down num -1 lines */
     }
-    for (; lineno != 0; -- lineno)  					/* scroll down lineno lines */
+    for (; lineno != 0; -- lineno)                      /* scroll down lineno lines */
     {
         if (ch_screen_top_line != NULL) line = line_prev (ch_screen_top_line);
         else line = buffer_last_line (cur_position.buffer);
@@ -290,19 +290,19 @@ static void check_top_line (void)
 }
 
 /************************************************************************/
-/*									*/
-/*  Calculate what line should be on the top of the screen when we 	*/
-/*  start								*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	cur_position = current position					*/
-/*	ch_screen_num_lines = number of lines on screen			*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	ch_screen_top_line = line that should be on top of screen	*/
-/*									*/
+/*                                  */
+/*  Calculate what line should be on the top of the screen when we  */
+/*  start                               */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  cur_position = current position                 */
+/*  ch_screen_num_lines = number of lines on screen         */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  ch_screen_top_line = line that should be on top of screen   */
+/*                                  */
 /************************************************************************/
 
 static void calc_top_line (void)
@@ -319,8 +319,8 @@ static void calc_top_line (void)
     for (ch_screen_top_line = line = buffer_first_line (cur_position.buffer); line != NULL; line = line_next (line))
     {
         if (line == cur_position.line) break;
-        lineno ++;						/* count lines in file before current line */
-        if (lineno > ch_screen_num_lines / 2) break;	/* but don't bother counting too far */
+        lineno ++;                      /* count lines in file before current line */
+        if (lineno > ch_screen_num_lines / 2) break;    /* but don't bother counting too far */
     }
     if (lineno <= ch_screen_num_lines / 2) return;
 
@@ -330,13 +330,13 @@ static void calc_top_line (void)
     for (line = buffer_last_line (cur_position.buffer); line != NULL; line = line_prev (line))
     {
         if (line == cur_position.line) break;
-        lineno ++;						/* count lines in file after current line */
-        if (lineno > ch_screen_num_lines / 2) break;	/* but don't bother counting too far */
-        ch_screen_top_line = line;				/* (assume this line will end up on top of screen though probably not) */
+        lineno ++;                      /* count lines in file after current line */
+        if (lineno > ch_screen_num_lines / 2) break;    /* but don't bother counting too far */
+        ch_screen_top_line = line;              /* (assume this line will end up on top of screen though probably not) */
     }
     if (lineno <= ch_screen_num_lines / 2)
     {
-        while (lineno < ch_screen_num_lines)  		/* it fits that way, see what line would be on top of screen */
+        while (lineno < ch_screen_num_lines)        /* it fits that way, see what line would be on top of screen */
         {
             line = line_prev (ch_screen_top_line);
             if (line == NULL) break;
@@ -416,27 +416,27 @@ static int ch_process (const char *s)
     char c;
     int i, j, n;
 
-    while ((c = *s) != 0)  				/* repeat while there's stuff to do */
+    while ((c = *s) != 0)               /* repeat while there's stuff to do */
     {
-        if (c <= ' ')  					/* skip any leading spaces */
+        if (c <= ' ')                   /* skip any leading spaces */
         {
             s ++;
             continue;
         }
-        n = getcount (&s);					/* process any leading +/-count */
-        i = decodekw (&s);					/* decode keyword, it may be a command or an entity */
-        if (i < 0) return (0);				/* stop if unknown */
-        if (kwtabl[i].flags & KW_FLAG_ISENTITY)  		/* see if it is an entity */
+        n = getcount (&s);                  /* process any leading +/-count */
+        i = decodekw (&s);                  /* decode keyword, it may be a command or an entity */
+        if (i < 0) return (0);              /* stop if unknown */
+        if (kwtabl[i].flags & KW_FLAG_ISENTITY)         /* see if it is an entity */
         {
-            if (!ch_cmd_move (n, i, &s)) return (0);		/* perform move */
+            if (!ch_cmd_move (n, i, &s)) return (0);        /* perform move */
             continue;
         }
-        j = -1;						/* command, assume no entity index */
-        if (kwtabl[i].flags & KW_FLAG_NEEDSENT)  		/* see if the command requires an entity */
+        j = -1;                     /* command, assume no entity index */
+        if (kwtabl[i].flags & KW_FLAG_NEEDSENT)         /* see if the command requires an entity */
         {
-            j = decodekw (&s);				/* decode entity keyword */
-            if (j < 0) return (0);				/* stop if unknown */
-            if (!(kwtabl[j].flags & KW_FLAG_ISENTITY))  	/* error if entity missing */
+            j = decodekw (&s);              /* decode entity keyword */
+            if (j < 0) return (0);              /* stop if unknown */
+            if (!(kwtabl[j].flags & KW_FLAG_ISENTITY))      /* error if entity missing */
             {
                 message (strlen (kwtabl[i].name), "subcommand %s requires entity", kwtabl[i].name);
                 return (0);
@@ -496,38 +496,38 @@ static int decodekw (const char **s_r)
 
     while (((c = *s) != 0) && (c <= ' ')) s ++;
 
-    for (i = 0; kwtabl[i].name != NULL; i ++)  			/* scan through the table */
+    for (i = 0; kwtabl[i].name != NULL; i ++)           /* scan through the table */
     {
-        if (strncasecmp (s, kwtabl[i].name, kwtabl[i].nlen) == 0)  	/* see if we found a match */
+        if (strncasecmp (s, kwtabl[i].name, kwtabl[i].nlen) == 0)   /* see if we found a match */
         {
-            s += kwtabl[i].nlen;					/* ok, skip over the keyword */
-            *s_r = s;							/* update pointer to next item in line */
-            return (i);						/* return index of table entry that was found */
+            s += kwtabl[i].nlen;                    /* ok, skip over the keyword */
+            *s_r = s;                           /* update pointer to next item in line */
+            return (i);                     /* return index of table entry that was found */
         }
     }
     message (strlen (s), "unknown subcommand or entity %s", s);
-    return (-1);							/* couldn't find it */
+    return (-1);                            /* couldn't find it */
 }
 
 /************************************************************************/
-/*									*/
-/*  Command processing routines						*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	crpt = command repeat count					*/
-/*	cidx = command kwtabl index					*/
-/*	erpt = entity repeat count					*/
-/*	eidx = entity kwtabl index					*/
-/*	*s_r = command line pointer					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	ch_cmd_* = 0 : command failed					*/
-/*	           1 : success						*/
-/*	*s_r = possibly updated						*/
-/*	buffer updated							*/
-/*									*/
+/*                                  */
+/*  Command processing routines                     */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  crpt = command repeat count                 */
+/*  cidx = command kwtabl index                 */
+/*  erpt = entity repeat count                  */
+/*  eidx = entity kwtabl index                  */
+/*  *s_r = command line pointer                 */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  ch_cmd_* = 0 : command failed                   */
+/*             1 : success                      */
+/*  *s_r = possibly updated                     */
+/*  buffer updated                          */
+/*                                  */
 /************************************************************************/
 
 /************************************/
@@ -552,12 +552,12 @@ static int ch_cmd_append (int crpt, int cidx, int eidx, const char **s_r)
     int rc;
     Position bpos, epos;
 
-    bufname = getpastebufname (s_r);				/* get PASTE or buffer name from command string */
-    bpos = epos = cur_position;					/* start at current position */
-    rc = (*(kwtabl[eidx].entry)) (crpt, &epos, s_r);		/* move end position to entity */
+    bufname = getpastebufname (s_r);                /* get PASTE or buffer name from command string */
+    bpos = epos = cur_position;                 /* start at current position */
+    rc = (*(kwtabl[eidx].entry)) (crpt, &epos, s_r);        /* move end position to entity */
     if (rc && ((bpos.buffer == NULL) || (epos.buffer == NULL))) rc = 0;
-    if (rc) rc = cutitout (&bpos, &epos, bufname);		/* cut out the range of stuff */
-    if (rc) cur_position = bpos;					/* position to the cut */
+    if (rc) rc = cutitout (&bpos, &epos, bufname);      /* cut out the range of stuff */
+    if (rc) cur_position = bpos;                    /* position to the cut */
     free (bufname);
     return (rc);
 }
@@ -569,9 +569,9 @@ static int ch_cmd_append (int crpt, int cidx, int eidx, const char **s_r)
 static int ch_cmd_asc (int crpt, int cidx, int eidx, const char **s_r)
 
 {
-    if (crpt < 0) crpt = - crpt;	/* in case we're set to BACK mode */
-    insertchar (crpt);		/* insert the character */
-    return (1);			/* always successful */
+    if (crpt < 0) crpt = - crpt;    /* in case we're set to BACK mode */
+    insertchar (crpt);      /* insert the character */
+    return (1);         /* always successful */
 }
 
 /*************************************/
@@ -598,7 +598,7 @@ static int ch_cmd_chgcsr (int crpt, int cidx, int eidx, const char **s_r)
     Position bpos, epos, *xpos;
     uLong linesz;
 
-    bpos = epos = cur_position;							/* start at current position */
+    bpos = epos = cur_position;                         /* start at current position */
 
     /* If select position defined in current buffer, use that */
 
@@ -625,10 +625,10 @@ static int ch_cmd_chgcsr (int crpt, int cidx, int eidx, const char **s_r)
 
         else
         {
-            xpos = &epos;					/* if skip forward, modify end position */
-            if (crpt < 0) xpos = &bpos;			/* otherwise, mod begin position */
+            xpos = &epos;                   /* if skip forward, modify end position */
+            if (crpt < 0) xpos = &bpos;         /* otherwise, mod begin position */
             if (!skip_char (crpt, xpos, s_r)) return (0);
-            cur_position = *xpos;				/* put cursor at skip point */
+            cur_position = *xpos;               /* put cursor at skip point */
         }
     }
 
@@ -646,9 +646,9 @@ static int ch_cmd_chgc (int crpt, int cidx, int eidx, const char **s_r)
     Position bpos, epos;
     uLong linesz;
 
-    bpos = epos = cur_position;							/* start at current position */
+    bpos = epos = cur_position;                         /* start at current position */
 
-    if (!(*(kwtabl[eidx].entry)) (crpt, &epos, s_r)) return (0);			/* move end position to entity */
+    if (!(*(kwtabl[eidx].entry)) (crpt, &epos, s_r)) return (0);            /* move end position to entity */
     return (changecase (&bpos, &epos));
 }
 
@@ -660,7 +660,7 @@ static int changecase (Position *bpos, Position *epos)
     Position xpos;
     uLong linesz;
 
-    rp = relposition (bpos, epos);						/* make sure bpos is before epos */
+    rp = relposition (bpos, epos);                      /* make sure bpos is before epos */
     if (rp == 0) return (1);
     if (rp < 0)
     {
@@ -669,29 +669,29 @@ static int changecase (Position *bpos, Position *epos)
         *epos =  xpos;
     }
 
-    linesz = string_getlen (line_string (bpos -> line)) - bpos -> offset;		/* get size of beginning line */
-    linebf = (char *)string_getval (line_string (bpos -> line)) + bpos -> offset;	/* get address of beginning line */
-    buffer_dirty (epos -> buffer, 1);						/* assume we will dirty it */
+    linesz = string_getlen (line_string (bpos -> line)) - bpos -> offset;       /* get size of beginning line */
+    linebf = (char *)string_getval (line_string (bpos -> line)) + bpos -> offset;   /* get address of beginning line */
+    buffer_dirty (epos -> buffer, 1);                       /* assume we will dirty it */
     while ((bpos -> line != epos -> line) || (bpos -> offset < epos -> offset))   /* repeat until we are all done */
     {
-        if (linesz == 0)  								/* maybe we hit end of this line */
+        if (linesz == 0)                                /* maybe we hit end of this line */
         {
-            bpos -> line   = line_next (bpos -> line);				/* if so, go on to next line */
+            bpos -> line   = line_next (bpos -> line);              /* if so, go on to next line */
             bpos -> offset = 0;
             if (bpos -> line != NULL)
             {
-                linesz = string_getlen (line_string (bpos -> line));			/* get its size */
-                linebf = (char *)string_getval (line_string (bpos -> line));		/* and its address */
+                linesz = string_getlen (line_string (bpos -> line));            /* get its size */
+                linebf = (char *)string_getval (line_string (bpos -> line));        /* and its address */
             }
         }
         else
         {
-            c = *linebf;								/* get a character */
-            if ((c >= 'A') && (c <= 'Z')) *linebf = c - 'A' + 'a';			/* change upper to lower case */
-            if ((c >= 'a') && (c <= 'z')) *linebf = c - 'a' + 'A';			/* change lower to upper case */
-            -- linesz;								/* one less character on line to process */
-            linebf ++;								/* point to next character on line */
-            bpos -> offset ++;							/* increment offset in line */
+            c = *linebf;                                /* get a character */
+            if ((c >= 'A') && (c <= 'Z')) *linebf = c - 'A' + 'a';          /* change upper to lower case */
+            if ((c >= 'a') && (c <= 'z')) *linebf = c - 'a' + 'A';          /* change lower to upper case */
+            -- linesz;                              /* one less character on line to process */
+            linebf ++;                              /* point to next character on line */
+            bpos -> offset ++;                          /* increment offset in line */
         }
     }
 
@@ -705,13 +705,13 @@ static int changecase (Position *bpos, Position *epos)
 static int ch_cmd_clss (int crpt, int cidx, int eidx, const char **s_r)
 
 {
-    if (searchstr[0] != 0)  	/* see if anything in it now */
+    if (searchstr[0] != 0)      /* see if anything in it now */
     {
-        free (searchstr);		/* ok, free it off */
-        searchlen = 0;		/* it now has the null string */
+        free (searchstr);       /* ok, free it off */
+        searchlen = 0;      /* it now has the null string */
         searchstr = "";
     }
-    return (1);			/* successful */
+    return (1);         /* successful */
 }
 
 /****************************************************************************/
@@ -725,13 +725,13 @@ static int ch_cmd_cut (int crpt, int cidx, int eidx, const char **s_r)
     int rc;
     Position bpos, epos;
 
-    bufname = getpastebufname (s_r);				/* get PASTE or buffer name from command string */
-    bpos = epos = cur_position;					/* start at current position */
-    rc = (*(kwtabl[eidx].entry)) (crpt, &epos, s_r);		/* move end position to entity */
+    bufname = getpastebufname (s_r);                /* get PASTE or buffer name from command string */
+    bpos = epos = cur_position;                 /* start at current position */
+    rc = (*(kwtabl[eidx].entry)) (crpt, &epos, s_r);        /* move end position to entity */
     if (rc && ((bpos.buffer == NULL) || (epos.buffer == NULL))) rc = 0;
-    if (rc) emptybuffer (bufname);				/* clear out any old paste buffer contents */
-    if (rc) rc = cutitout (&bpos, &epos, bufname);		/* cut out the range of stuff */
-    if (rc) cur_position = bpos;					/* position to the cut */
+    if (rc) emptybuffer (bufname);              /* clear out any old paste buffer contents */
+    if (rc) rc = cutitout (&bpos, &epos, bufname);      /* cut out the range of stuff */
+    if (rc) cur_position = bpos;                    /* position to the cut */
     free (bufname);
     return (rc);
 }
@@ -748,14 +748,14 @@ static int ch_cmd_d (int crpt, int cidx, int eidx, const char **s_r)
     Delbuff *delbuff;
     Position bpos, epos;
 
-    strcpy (bufname, "DEL_");					/* this is where deleted data will go */
+    strcpy (bufname, "DEL_");                   /* this is where deleted data will go */
     p = kwtabl[eidx].name;
     if (strcmp (p, "el") == 0) p ++;
     strcat (bufname, p);
 
-    bpos = epos = cur_position;					/* start at current position */
-    if (!(*(kwtabl[eidx].entry)) (crpt, &epos, s_r)) return (0);	/* move end position to entity */
-    emptybuffer (bufname);					/* empty out what's in there now */
+    bpos = epos = cur_position;                 /* start at current position */
+    if (!(*(kwtabl[eidx].entry)) (crpt, &epos, s_r)) return (0);    /* move end position to entity */
+    emptybuffer (bufname);                  /* empty out what's in there now */
 
     for (delbuff = delbuffs; delbuff != NULL; delbuff = delbuff -> next)
     {
@@ -768,10 +768,10 @@ static int ch_cmd_d (int crpt, int cidx, int eidx, const char **s_r)
         strcpy (delbuff -> name, bufname);
         delbuffs = delbuff;
     }
-    delbuff -> direction = crpt;					/* save direction stuff is deleted from */
+    delbuff -> direction = crpt;                    /* save direction stuff is deleted from */
 
-    if (!cutitout (&bpos, &epos, bufname)) return (0);		/* cut out the range of stuff */
-    cur_position = epos;						/* position to the cut */
+    if (!cutitout (&bpos, &epos, bufname)) return (0);      /* cut out the range of stuff */
+    cur_position = epos;                        /* position to the cut */
     return (1);
 }
 
@@ -793,20 +793,20 @@ static int ch_cmd_defk (int crpt, int cidx, int eidx, const char **s_r)
     cmdstring = string_create (0, NULL);
     keystring = string_create (0, NULL);
     pmtstring = string_create (37, "Key to define (GOLD-DEL to cancel): ");
-    ch_screen_prompt (pmtstring);						/* display prompt */
-    do if (!jnl_readkeyseq (keystring)) goto abandon;			/* read a keystroke */
+    ch_screen_prompt (pmtstring);                       /* display prompt */
+    do if (!jnl_readkeyseq (keystring)) goto abandon;           /* read a keystroke */
     while ((rc = keypad_getname (string_getval (keystring), keyname)) == 0); /* convert to key name */
-    if (rc < 0) goto abandon;						/* abandon if unknown key */
+    if (rc < 0) goto abandon;                       /* abandon if unknown key */
 
     /* Now read the key's definition */
 
     string_setval (pmtstring,  8, "Define '");
-    string_concat (pmtstring, strlen (keyname), keyname);			/* prompt has the keyname at the beginning */
-    string_concat (pmtstring, 25, "' (GOLD-DEL to cancel): ");		/* followed by a friendly reminder */
-    defofs = string_getlen (pmtstring);					/* save offset where definition starts */
-    cmdval = keypad_getdef (keyname);					/* get current definition */
-    if (cmdval == NULL) goto abandon;					/* they are trying to define GOLD-DEL */
-    string_concat (pmtstring, strlen (cmdval), cmdval);			/* followed by current definition */
+    string_concat (pmtstring, strlen (keyname), keyname);           /* prompt has the keyname at the beginning */
+    string_concat (pmtstring, 25, "' (GOLD-DEL to cancel): ");      /* followed by a friendly reminder */
+    defofs = string_getlen (pmtstring);                 /* save offset where definition starts */
+    cmdval = keypad_getdef (keyname);                   /* get current definition */
+    if (cmdval == NULL) goto abandon;                   /* they are trying to define GOLD-DEL */
+    string_concat (pmtstring, strlen (cmdval), cmdval);         /* followed by current definition */
     while (1)
     {
 
@@ -831,8 +831,8 @@ static int ch_cmd_defk (int crpt, int cidx, int eidx, const char **s_r)
 
         while (cmdlen != 0)
         {
-            if (cmdval[0] == '.') goto defineit;				/* dot (ie, KP-Enter), done */
-            if ((cmdval[0] == 'i') || (cmdval[0] == 'I'))  			/* I<chars>^Z, add chars to definition */
+            if (cmdval[0] == '.') goto defineit;                /* dot (ie, KP-Enter), done */
+            if ((cmdval[0] == 'i') || (cmdval[0] == 'I'))           /* I<chars>^Z, add chars to definition */
             {
                 cmdlen --;
                 cmdval ++;
@@ -844,34 +844,34 @@ static int ch_cmd_defk (int crpt, int cidx, int eidx, const char **s_r)
                 if (cmdlen != 0) cmdlen --;
                 continue;
             }
-            if (strncasecmp (cmdval, "EX", 2) == 0)  				/* EX, means they pressed ^Z, so enter it */
+            if (strncasecmp (cmdval, "EX", 2) == 0)                 /* EX, means they pressed ^Z, so enter it */
             {
                 string_concat (pmtstring, 1, "");
                 cmdlen -= 2;
                 cmdval += 2;
                 continue;
             }
-            if (strncasecmp (cmdval, "(-DC)", 5) == 0)  			/* (-DC), means they pressed DEL key, */
+            if (strncasecmp (cmdval, "(-DC)", 5) == 0)              /* (-DC), means they pressed DEL key, */
             {
-                l = string_getlen (pmtstring);					/* so wipe a character from definitio */
+                l = string_getlen (pmtstring);                  /* so wipe a character from definitio */
                 if (l > defofs) string_remove (pmtstring, 1, l - 1);
                 cmdlen -= 5;
                 cmdval += 5;
                 continue;
             }
-            if (cmdval[0] == '(')  						/* check for (nnnASC) */
+            if (cmdval[0] == '(')                       /* check for (nnnASC) */
             {
                 c = strtol (cmdval + 1, &p, 10);
                 if (strncasecmp (p, "ASC)", 4) == 0)
                 {
-                    string_concat (pmtstring, 1, &c);				/* if so, insert corresponding character */
+                    string_concat (pmtstring, 1, &c);               /* if so, insert corresponding character */
                     p += 4;
                     cmdlen -= (const char *)p - cmdval;
                     cmdval  = (const char *)p;
                     continue;
                 }
             }
-            string_concat (pmtstring, cmdlen, cmdval);			/* all others get copied as is */
+            string_concat (pmtstring, cmdlen, cmdval);          /* all others get copied as is */
             break;
         }
     }
@@ -879,8 +879,8 @@ static int ch_cmd_defk (int crpt, int cidx, int eidx, const char **s_r)
     /* Store key's new definition */
 
 defineit:
-    cmdval = string_getval (pmtstring) + defofs;				/* point to new command string */
-    keypad_setdef (keyname, cmdval);					/* store the definition */
+    cmdval = string_getval (pmtstring) + defofs;                /* point to new command string */
+    keypad_setdef (keyname, cmdval);                    /* store the definition */
     rc = 1;
     goto cleanup;
 
@@ -888,9 +888,9 @@ abandon:
     rc = 0;
 
 cleanup:
-    string_setval (pmtstring, 1, "");					/* get prompt off screen */
+    string_setval (pmtstring, 1, "");                   /* get prompt off screen */
     ch_screen_prompt (pmtstring);
-    string_delete (cmdstring);						/* delete temp strings */
+    string_delete (cmdstring);                      /* delete temp strings */
     string_delete (keystring);
     string_delete (pmtstring);
     return (rc);
@@ -940,39 +940,39 @@ static int ch_cmd_ext (int crpt, int cidx, int eidx, const char **s_r)
 
     /* Prompt for the command to be executed */
 
-    c = *(s ++);						/* get the " or ' that starts the prompt */
+    c = *(s ++);                        /* get the " or ' that starts the prompt */
     if ((c != '\'') && (c != '"'))
     {
         message (0, "external ? must be followed by '<prompt>' or \"<prompt>\"");
         return (0);
     }
-    while (((d = *s) != 0) && (d != c)) s ++;		/* scan to end of prompt string */
-    pmtstring = string_create (s - *s_r - 2, *s_r + 2);	/* create prompt string for screen */
-    string_concat (pmtstring, 1, "");			/* append a null to end prompt portion */
-    pmtsize   = string_getlen (pmtstring);		/* get prompt size including the null */
+    while (((d = *s) != 0) && (d != c)) s ++;       /* scan to end of prompt string */
+    pmtstring = string_create (s - *s_r - 2, *s_r + 2); /* create prompt string for screen */
+    string_concat (pmtstring, 1, "");           /* append a null to end prompt portion */
+    pmtsize   = string_getlen (pmtstring);      /* get prompt size including the null */
     keystring = string_create (0, NULL);
     cmdstring = string_create (0, NULL);
     do
     {
-        ch_screen_prompt (pmtstring);			/* display it on screen */
-        if (!jnl_readkeyseq (keystring)) goto abandon;	/* read key sequence from keyboard */
-        done = keypad_decode (keystring, cmdstring);	/* convert key sequence to changemode commands */
-        if (!done) continue;				/* repeat if partial escape sequence received */
+        ch_screen_prompt (pmtstring);           /* display it on screen */
+        if (!jnl_readkeyseq (keystring)) goto abandon;  /* read key sequence from keyboard */
+        done = keypad_decode (keystring, cmdstring);    /* convert key sequence to changemode commands */
+        if (!done) continue;                /* repeat if partial escape sequence received */
         string_remove (pmtstring, string_getlen (pmtstring) - pmtsize, pmtsize); /* reset the prompt string to original */
-        linebf = string_getval (cmdstring);			/* point to changemode commands */
-        while (*linebf != 0)  				/* process them */
+        linebf = string_getval (cmdstring);         /* point to changemode commands */
+        while (*linebf != 0)                /* process them */
         {
             if (*linebf <= ' ')
             {
                 linebf ++;
                 continue;
             }
-            if (linebf[0] == '.')  				/* . - terminates string, uses current direction */
+            if (linebf[0] == '.')               /* . - terminates string, uses current direction */
             {
                 done = 1;
                 break;
             }
-            if (strncasecmp (linebf, "(-DC)", 5) == 0)  	/* (-DC) - delete last search character */
+            if (strncasecmp (linebf, "(-DC)", 5) == 0)      /* (-DC) - delete last search character */
             {
                 i = string_getlen (pmtstring);
                 if (i > pmtsize) string_remove (pmtstring, 1, -- i);
@@ -980,13 +980,13 @@ static int ch_cmd_ext (int crpt, int cidx, int eidx, const char **s_r)
                 done = 0;
                 continue;
             }
-            if (strncasecmp (linebf, "(-DL)", 5) == 0)  	/* (-DL) - abandon operation */
+            if (strncasecmp (linebf, "(-DL)", 5) == 0)      /* (-DL) - abandon operation */
             {
                 string_setval (pmtstring, 2, "\000");
                 ch_screen_prompt (pmtstring);
                 goto abandon;
             }
-            if ((linebf[0] == 'I') || (linebf[0] == 'i'))  	/* I - supplies characters for the command */
+            if ((linebf[0] == 'I') || (linebf[0] == 'i'))   /* I - supplies characters for the command */
             {
                 while (((c = *(++ linebf)) != 0) && (c != 26))
                 {
@@ -996,7 +996,7 @@ static int ch_cmd_ext (int crpt, int cidx, int eidx, const char **s_r)
                 done = 0;
                 continue;
             }
-            if (linebf[0] == '(')  				/* (nnnASC) - supplies a control char for the command */
+            if (linebf[0] == '(')               /* (nnnASC) - supplies a control char for the command */
             {
                 c = strtol (linebf + 1, &p, 10);
                 while ((*p != 0) && (*p <= ' ')) p ++;
@@ -1025,22 +1025,22 @@ noprompt:
         message (0, "external must be followed by '<command>' or \"<command>\" or ?<prompt>");
         return (0);
     }
-    while (((d = *s) != 0) && (d != c)) s ++;		/* scan to end of command string */
-    pmtstring = string_create (s - *s_r - 1, *s_r + 1);	/* store in a string so we get null terminator */
+    while (((d = *s) != 0) && (d != c)) s ++;       /* scan to end of command string */
+    pmtstring = string_create (s - *s_r - 1, *s_r + 1); /* store in a string so we get null terminator */
     linebf = string_getval (pmtstring);
 
     /* Execute command pointed to by linebf */
 
 executeit:
-    message (0, "");					/* newline after the prompt string */
-    message (0, "");					/* force a "Press RETURN to continue" prompt */
-    output ();						/* turn off screen mode */
+    message (0, "");                    /* newline after the prompt string */
+    message (0, "");                    /* force a "Press RETURN to continue" prompt */
+    output ();                      /* turn off screen mode */
     os_screenmode (0);
-    done = ln_command (linebf);				/* execute command */
-    output ();						/* turn screen mode back on */
+    done = ln_command (linebf);             /* execute command */
+    output ();                      /* turn screen mode back on */
     os_screenmode (1);
-    string_delete (pmtstring);				/* free off prompt/command string */
-    if (d != 0) s ++;					/* skip over terminating " or ' */
+    string_delete (pmtstring);              /* free off prompt/command string */
+    if (d != 0) s ++;                   /* skip over terminating " or ' */
     *s_r = s;
     return (done);
 
@@ -1069,16 +1069,16 @@ static int ch_cmd_help (int crpt, int cidx, int eidx, const char **s_r)
 
     while (1)
     {
-        output ();						/* turn off screen mode */
+        output ();                      /* turn off screen mode */
         os_screenmode (0);
-        cmd_help (command);					/* display help message */
-        output ();						/* turn screen mode back on */
+        cmd_help (command);                 /* display help message */
+        output ();                      /* turn screen mode back on */
         os_screenmode (1);
 
         string_setval (keystring, 0, NULL);
-        do if (!jnl_readkeyseq (keystring)) goto abandon;	/* read a keystroke */
+        do if (!jnl_readkeyseq (keystring)) goto abandon;   /* read a keystroke */
         while ((rc = keypad_getname (string_getval (keystring), keyname)) == 0); /* convert to key name */
-        if (rc < 0) goto abandon;				/* abandon if unknown key */
+        if (rc < 0) goto abandon;               /* abandon if unknown key */
 
         strcpy (command, "-nomoreinfo KEYPAD VT100 ");
         strcat (command, keyname);
@@ -1202,19 +1202,19 @@ static int ch_cmd_und (int crpt, int cidx, int eidx, const char **s_r)
     Delbuff *delbuff;
     Position original;
 
-    strcpy (bufname, "DEL_");					/* make DEL_<entity> buffer name */
+    strcpy (bufname, "DEL_");                   /* make DEL_<entity> buffer name */
     p = kwtabl[eidx].name;
     if (strcmp (p, "el") == 0) p ++;
     strcat (bufname, p);
 
-    original = cur_position;					/* save current position at beg of insertion */
-    if (!pasteitin (crpt, bufname)) return (0);			/* copy in the DEL_<entity> buffer */
+    original = cur_position;                    /* save current position at beg of insertion */
+    if (!pasteitin (crpt, bufname)) return (0);         /* copy in the DEL_<entity> buffer */
 
     for (delbuff = delbuffs; delbuff != NULL; delbuff = delbuff -> next)
     {
         if (strcmp (delbuff -> name, bufname) == 0)
         {
-            if (delbuff -> direction > 0) cur_position = original;	/* if delete was in forward direction, position to beg of insert */
+            if (delbuff -> direction > 0) cur_position = original;  /* if delete was in forward direction, position to beg of insert */
             break;
         }
     }
@@ -1232,14 +1232,14 @@ static int ch_cmd_repeat (int crpt, int cidx, int eidx, const char **s_r)
     char *p;
     int rc;
 
-    if (crpt < 0) crpt = - crpt;				/* (in case we're set to BACK mode) */
-    p = strchr (*s_r, ')');				/* find terminating ) */
-    if (p != NULL) *p = 0;				/* if one present, temporarily replace with a null */
+    if (crpt < 0) crpt = - crpt;                /* (in case we're set to BACK mode) */
+    p = strchr (*s_r, ')');             /* find terminating ) */
+    if (p != NULL) *p = 0;              /* if one present, temporarily replace with a null */
     rc = 1;
-    while (rc && (-- crpt >= 0)) rc = ch_process (*s_r);	/* repeat command until error or repeat count runs out */
-    if (p != NULL) *(p ++) = ')';				/* restore terminating ) */
-    if (rc) *s_r = (const char *)p;			/* update pointer */
-    return (rc);						/* return status */
+    while (rc && (-- crpt >= 0)) rc = ch_process (*s_r);    /* repeat command until error or repeat count runs out */
+    if (p != NULL) *(p ++) = ')';               /* restore terminating ) */
+    if (rc) *s_r = (const char *)p;         /* update pointer */
+    return (rc);                        /* return status */
 }
 
 /******************************/
@@ -1252,13 +1252,13 @@ static int ch_cmd_buffer (int crpt, int cidx, int eidx, const char **s_r)
     char c;
     const char *p, *s;
 
-    p = s = *s_r;							/* point just past the = in command string */
+    p = s = *s_r;                           /* point just past the = in command string */
     while (((c = *p) != 0) && (strchr (bufnamechars, c) != NULL)) p ++; /* find the end of valid buffer name chars */
-    *buffer_savpos (cur_position.buffer) = cur_position;		/* save old current position */
-    cur_position = *buffer_savpos (buffer_create (p - s, s));	/* set up new current position */
-    ch_screen_top_line = NULL;					/* forget all about what's on screen now */
-    *s_r = p;							/* return pointer to terminating character */
-    return (1);  							/* all done */
+    *buffer_savpos (cur_position.buffer) = cur_position;        /* save old current position */
+    cur_position = *buffer_savpos (buffer_create (p - s, s));   /* set up new current position */
+    ch_screen_top_line = NULL;                  /* forget all about what's on screen now */
+    *s_r = p;                           /* return pointer to terminating character */
+    return (1);                             /* all done */
 }
 
 /************************************************/
@@ -1270,31 +1270,31 @@ static int ch_cmd_move (int erpt, int eidx, const char **s_r)
 {
     Position pos;
 
-    pos = cur_position;						/* start at current position */
-    if (!(*(kwtabl[eidx].entry)) (erpt, &pos, s_r)) return (0);	/* get position of specified entity */
-    cur_position = pos;						/* set current position to specified entity */
-    if (kwtabl[eidx].entry == skip_page)  			/* see if just skipped to page marker */
+    pos = cur_position;                     /* start at current position */
+    if (!(*(kwtabl[eidx].entry)) (erpt, &pos, s_r)) return (0); /* get position of specified entity */
+    cur_position = pos;                     /* set current position to specified entity */
+    if (kwtabl[eidx].entry == skip_page)            /* see if just skipped to page marker */
     {
-        page_skip_line = cur_position.line;				/* ok, put the <FF> at the top of screen */
+        page_skip_line = cur_position.line;             /* ok, put the <FF> at the top of screen */
     }
     return (1);
 }
 
 /************************************************************************/
-/*									*/
-/*  Skip position forward or backward the number of entities		*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	erpt = number of entities to skip				*/
-/*	*pos = starting position					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	skip_* = 0 : failed (beg/end of buf)				*/
-/*	         1 : success						*/
-/*	*pos = new position (normalised/normalized)			*/
-/*									*/
+/*                                  */
+/*  Skip position forward or backward the number of entities        */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  erpt = number of entities to skip               */
+/*  *pos = starting position                    */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  skip_* = 0 : failed (beg/end of buf)                */
+/*           1 : success                        */
+/*  *pos = new position (normalised/normalized)         */
+/*                                  */
 /************************************************************************/
 
 /* Skip forward/backward the number of characters */
@@ -1430,10 +1430,10 @@ static int skip_word (int erpt, Position *pos, const char **s_r)
                 }
                 scroll_hint ++;
             }
-            if (offset == 0) break;								/* stop at beginning of line */
-            if (linebf[offset] == ' ') continue;						/* skip over spaces */
-            if (memchr (worddelims, linebf[offset], sizeof worddelims) != NULL) break;	/* stop if other delimeter */
-            if (memchr (worddelims, linebf[offset-1], sizeof worddelims) != NULL) break;	/* stop on printable if preceded by delim */
+            if (offset == 0) break;                             /* stop at beginning of line */
+            if (linebf[offset] == ' ') continue;                        /* skip over spaces */
+            if (memchr (worddelims, linebf[offset], sizeof worddelims) != NULL) break;  /* stop if other delimeter */
+            if (memchr (worddelims, linebf[offset-1], sizeof worddelims) != NULL) break;    /* stop on printable if preceded by delim */
         }
     }
 
@@ -1613,11 +1613,11 @@ static int skip_vert (int erpt, Position *pos, const char **s_r)
 
     pos -> line = line;
 
-    if (line == NULL) pos -> offset = 0;				/* if [EOB], position to beginning of the [EOB] */
+    if (line == NULL) pos -> offset = 0;                /* if [EOB], position to beginning of the [EOB] */
     else
     {
-        linesz = string_getlen (line_string (line));		/* otherwise, get the length of the line */
-        if (linesz > 0) linesz --;					/* (don't include the last character) */
+        linesz = string_getlen (line_string (line));        /* otherwise, get the length of the line */
+        if (linesz > 0) linesz --;                  /* (don't include the last character) */
         pos -> offset = ch_screen_col2chr (linesz, string_getval (line_string (line)), vert_skip_coln - 1);
     }
     normalize (&(pos -> line), &(pos -> offset));
@@ -1635,7 +1635,7 @@ static int skip_page (int erpt, Position *pos, const char **s_r)
     Line *line;
     uLong firstimethru, linesz, offset;
 
-    vert_skip_coln = 1;		/* reset up/down arrows to first column */
+    vert_skip_coln = 1;     /* reset up/down arrows to first column */
 
     line   = pos -> line;
     offset = pos -> offset;
@@ -1645,12 +1645,12 @@ static int skip_page (int erpt, Position *pos, const char **s_r)
     while (erpt < 0)
     {
         erpt ++;
-        firstimethru = 1;					/* we must decrement pointer once for each erpt */
+        firstimethru = 1;                   /* we must decrement pointer once for each erpt */
         do
         {
-            if (offset == 0)  				/* see if at beginning of line */
+            if (offset == 0)                /* see if at beginning of line */
             {
-                normalise (pos -> buffer, &line, &offset);	/* if so, move to end of previous line */
+                normalise (pos -> buffer, &line, &offset);  /* if so, move to end of previous line */
                 if ((offset == 0) && firstimethru)
                 {
                     message (0, "backup before beginning of buffer");
@@ -1658,9 +1658,9 @@ static int skip_page (int erpt, Position *pos, const char **s_r)
                 }
                 scroll_hint --;
             }
-            if (offset == 0) break;				/* stop if at beginning of buffer */
-            offset -= firstimethru;				/* always back up one character first time through */
-            firstimethru = 0;					/* ... to skip over the <FF> we started out just after */
+            if (offset == 0) break;             /* stop if at beginning of buffer */
+            offset -= firstimethru;             /* always back up one character first time through */
+            firstimethru = 0;                   /* ... to skip over the <FF> we started out just after */
             linebf = string_getval (line_string (line));
             while ((offset > 0) && (linebf[offset-1] != 12)) offset --;
         }
@@ -1679,11 +1679,11 @@ static int skip_page (int erpt, Position *pos, const char **s_r)
         {
             if (offset >= linesz)
             {
-                normalize (&line, &offset);			/* make sure we have a char to compare */
+                normalize (&line, &offset);         /* make sure we have a char to compare */
                 if (line == NULL)
                 {
-                    linesz = 0;					/* stop if end-of-buffer */
-                    if (!firstimethru) break;			/* (but we have to have moved at least one char) */
+                    linesz = 0;                 /* stop if end-of-buffer */
+                    if (!firstimethru) break;           /* (but we have to have moved at least one char) */
                     message (0, "advance beyond end of buffer");
                     return (0);
                 }
@@ -1693,7 +1693,7 @@ static int skip_page (int erpt, Position *pos, const char **s_r)
             firstimethru = 0;
             linebf = string_getval (line_string (line));
         }
-        while (linebf[offset++] != 12);			/* repeat until we find a <FF> */
+        while (linebf[offset++] != 12);         /* repeat until we find a <FF> */
     }
 
     /* All done moving */
@@ -1716,45 +1716,45 @@ static int skip_find_prompt (int erpt, Position *pos, const char **s_r)
     String *cmdstring, *keystring, *pmtstring;
     uLong i, pmtsize;
 
-    s = *s_r;						/* get beginning of prompt string */
-    c = *(s ++);						/* get the " or ' that starts the prompt */
+    s = *s_r;                       /* get beginning of prompt string */
+    c = *(s ++);                        /* get the " or ' that starts the prompt */
     if ((c != '\'') && (c != '"'))
     {
         message (0, "search ? must be followed by '<prompt>' or \"<prompt>\"");
         return (0);
     }
-    while (((d = *s) != 0) && (d != c)) s ++;		/* scan to end of prompt string */
-    pmtstring = string_create (s - *s_r - 1, *s_r + 1);	/* create prompt string for screen */
-    string_concat (pmtstring, 1, "");			/* append a null to end prompt portion */
-    pmtsize   = string_getlen (pmtstring);		/* get prompt size including the null */
+    while (((d = *s) != 0) && (d != c)) s ++;       /* scan to end of prompt string */
+    pmtstring = string_create (s - *s_r - 1, *s_r + 1); /* create prompt string for screen */
+    string_concat (pmtstring, 1, "");           /* append a null to end prompt portion */
+    pmtsize   = string_getlen (pmtstring);      /* get prompt size including the null */
     keystring = string_create (0, NULL);
     cmdstring = string_create (0, NULL);
-    if (d != 0) s ++;					/* point to anything there might be in typeahead */
+    if (d != 0) s ++;                   /* point to anything there might be in typeahead */
     do
     {
-        ch_screen_prompt (pmtstring);			/* display prompt on screen */
+        ch_screen_prompt (pmtstring);           /* display prompt on screen */
         string_remove (pmtstring, string_getlen (pmtstring) - pmtsize, pmtsize); /* reset the prompt string to original */
         done = search_prompt (pmtstring, pmtsize, s, &erpt); /* process any readahead that came in command string */
-        if (done) break;					/* if done, don't bother reading keyboard */
-        if (!jnl_readkeyseq (keystring)) goto abandon;	/* read key sequence from keyboard */
-        done = keypad_decode (keystring, cmdstring);	/* convert key sequence to changemode commands */
-        if (!done) continue;				/* repeat if partial escape sequence received */
-        linebf = string_getval (cmdstring);			/* point to changemode commands */
+        if (done) break;                    /* if done, don't bother reading keyboard */
+        if (!jnl_readkeyseq (keystring)) goto abandon;  /* read key sequence from keyboard */
+        done = keypad_decode (keystring, cmdstring);    /* convert key sequence to changemode commands */
+        if (!done) continue;                /* repeat if partial escape sequence received */
+        linebf = string_getval (cmdstring);         /* point to changemode commands */
         done = search_prompt (pmtstring, pmtsize, linebf, &erpt); /* append to prompt */
     }
     while (!done);
     if (done < 0) goto abandon;
-    ch_screen_prompt (pmtstring);				/* display final search string on screen */
-    if (searchlen != 0) free (searchstr);			/* free off old search string */
-    searchlen = string_getlen (pmtstring) - pmtsize;	/* copy it to current search string buffer */
+    ch_screen_prompt (pmtstring);               /* display final search string on screen */
+    if (searchlen != 0) free (searchstr);           /* free off old search string */
+    searchlen = string_getlen (pmtstring) - pmtsize;    /* copy it to current search string buffer */
     searchstr = malloc (searchlen + 1);
     memcpy (searchstr, string_getval (pmtstring) + pmtsize, searchlen);
     searchstr[searchlen] = 0;
-    string_delete (pmtstring);				/* free off temp strings */
+    string_delete (pmtstring);              /* free off temp strings */
     string_delete (keystring);
     string_delete (cmdstring);
-    *s_r = strlen (s) + s;				/* wipe out anything that is left in typeahead string */
-    s = "''" + 1;						/* now that searchstr is filled in, call normal search routine */
+    *s_r = strlen (s) + s;              /* wipe out anything that is left in typeahead string */
+    s = "''" + 1;                       /* now that searchstr is filled in, call normal search routine */
     return (skip_find (erpt, pos, &s));
 
     /* Some error - abandon search */
@@ -1772,41 +1772,41 @@ static int search_prompt (String *pmtstring, uLong pmtsize, const char *linebf, 
     char c, *p;
     int i;
 
-    while (*linebf != 0)  				/* process command string characters */
+    while (*linebf != 0)                /* process command string characters */
     {
-        if (*linebf <= ' ')  				/* skip leading spaces */
+        if (*linebf <= ' ')                 /* skip leading spaces */
         {
             linebf ++;
             continue;
         }
-        if (strncasecmp (linebf, "ADV", 3) == 0)  		/* ADV - terminates string, searches forward */
+        if (strncasecmp (linebf, "ADV", 3) == 0)        /* ADV - terminates string, searches forward */
         {
             *erpt_r = ch_defdir = 1;
             return (1);
         }
-        if (strncasecmp (linebf, "BACK", 4) == 0)  		/* BACK - terminates string, searches backward */
+        if (strncasecmp (linebf, "BACK", 4) == 0)       /* BACK - terminates string, searches backward */
         {
             *erpt_r = ch_defdir = -1;
             return (1);
         }
-        if (linebf[0] == '.')  				/* . - terminates string, uses current direction */
+        if (linebf[0] == '.')               /* . - terminates string, uses current direction */
         {
             return (1);
         }
-        if (strncasecmp (linebf, "(-DL)", 5) == 0)  	/* (-DL) - abandon operation */
+        if (strncasecmp (linebf, "(-DL)", 5) == 0)      /* (-DL) - abandon operation */
         {
             string_setval (pmtstring, 2, "\000");
             ch_screen_prompt (pmtstring);
             return (-1);
         }
-        if (strncasecmp (linebf, "(-DC)", 5) == 0)  	/* (-DC) - delete last search character */
+        if (strncasecmp (linebf, "(-DC)", 5) == 0)      /* (-DC) - delete last search character */
         {
             i = string_getlen (pmtstring);
             if (i > pmtsize) string_remove (pmtstring, 1, -- i);
             linebf += 5;
             continue;
         }
-        if ((linebf[0] == 'I') || (linebf[i] == 'i'))  	/* I - supplies characters for the search */
+        if ((linebf[0] == 'I') || (linebf[i] == 'i'))   /* I - supplies characters for the search */
         {
             while (((c = *(++ linebf)) != 0) && (c != 26) && (c != 4))
             {
@@ -1815,7 +1815,7 @@ static int search_prompt (String *pmtstring, uLong pmtsize, const char *linebf, 
             if (c != 0) linebf ++;
             continue;
         }
-        if (linebf[0] == '(')  				/* (nnnASC) - supplies a control char for the search */
+        if (linebf[0] == '(')               /* (nnnASC) - supplies a control char for the search */
         {
             c = strtol (linebf + 1, &p, 10);
             while ((*p != 0) && (*p <= ' ')) p ++;
@@ -1845,20 +1845,20 @@ static int skip_find (int erpt, Position *pos, const char **s_r)
 
     /* Get search string - use current searchstr if null */
 
-    s = *s_r;						/* get beginning of search string */
-    c = s[-1];						/* get character that started it (" or ') */
+    s = *s_r;                       /* get beginning of search string */
+    c = s[-1];                      /* get character that started it (" or ') */
 
-    while (((d = *s) != 0) && (d != c)) s ++;		/* scan to end of search string */
-    if (s > *s_r)  					/* see if non-null string */
+    while (((d = *s) != 0) && (d != c)) s ++;       /* scan to end of search string */
+    if (s > *s_r)                   /* see if non-null string */
     {
-        if (searchlen != 0) free (searchstr);		/* if so, free off old one */
+        if (searchlen != 0) free (searchstr);       /* if so, free off old one */
         searchlen = s - *s_r;
-        searchstr = malloc (searchlen + 1);			/* allocate a new one */
-        memcpy (searchstr, *s_r, searchlen);		/* fill it in */
-        searchstr[searchlen] = 0;				/* null terminate it */
+        searchstr = malloc (searchlen + 1);         /* allocate a new one */
+        memcpy (searchstr, *s_r, searchlen);        /* fill it in */
+        searchstr[searchlen] = 0;               /* null terminate it */
     }
 
-    if (d != 0) s ++;					/* any way, skip over terminating " or ' */
+    if (d != 0) s ++;                   /* any way, skip over terminating " or ' */
     *s_r = s;
 
     /* Point to buffer to start searching at */
@@ -1881,19 +1881,19 @@ static int skip_find (int erpt, Position *pos, const char **s_r)
         erpt ++;
         do
         {
-            if (offset == 0)  				/* see if we're at beginning of a line */
+            if (offset == 0)                /* see if we're at beginning of a line */
             {
-                normalise (pos -> buffer, &line, &offset);	/* ok, get previous line */
+                normalise (pos -> buffer, &line, &offset);  /* ok, get previous line */
                 if (offset == 0)
                 {
                     message (0, "string not found in reverse direction");
                     return (0);
                 }
-                linesz = offset;				/* point to end of previous line */
+                linesz = offset;                /* point to end of previous line */
                 linebf = string_getval (line_string (line));
                 scroll_hint --;
             }
-            offset --;					/* back up a character */
+            offset --;                  /* back up a character */
         }
         while (!matchstr (line, linesz - offset, linebf + offset));   /* repeat if no match yet */
     }
@@ -1905,19 +1905,19 @@ static int skip_find (int erpt, Position *pos, const char **s_r)
         erpt --;
         do
         {
-            if (offset == linesz)  				/* see if we are at the very end of a line */
+            if (offset == linesz)               /* see if we are at the very end of a line */
             {
-                normalize (&line, &offset);			/* ok, point to very beginning of next line */
-                if (line == NULL)  				/* stop if we are at the end-of-buffer now */
+                normalize (&line, &offset);         /* ok, point to very beginning of next line */
+                if (line == NULL)               /* stop if we are at the end-of-buffer now */
                 {
                     message (0, "string not found in forward direction");
                     return (0);
                 }
-                linesz = string_getlen (line_string (line));	/* ok, get next line */
+                linesz = string_getlen (line_string (line));    /* ok, get next line */
                 linebf = string_getval (line_string (line));
                 scroll_hint ++;
             }
-            else offset ++;					/* skip over a character */
+            else offset ++;                 /* skip over a character */
         }
         while ((offset == linesz) || !matchstr (line, linesz - offset, linebf + offset));   /* repeat if no match yet */
     }
@@ -1971,8 +1971,8 @@ static int skip_sel (int erpt, Position *pos, const char **s_r)
         return (0);
     }
 
-    *pos = sel_position;			/* return select position */
-    sel_position.buffer = NULL;		/* deactivate select range */
+    *pos = sel_position;            /* return select position */
+    sel_position.buffer = NULL;     /* deactivate select range */
     return (1);
 }
 
@@ -1981,7 +1981,7 @@ static int skip_sel (int erpt, Position *pos, const char **s_r)
 static int skip_buff (int erpt, Position *pos, const char **s_r)
 
 {
-    vert_skip_coln = 1;		/* reset up/down arrows to first column */
+    vert_skip_coln = 1;     /* reset up/down arrows to first column */
 
     page_skip_line = NULL;
     if (erpt < 0)
@@ -1999,19 +1999,19 @@ static int skip_buff (int erpt, Position *pos, const char **s_r)
 }
 
 /************************************************************************/
-/*									*/
-/*  Insert char at current position and increment			*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	c = character to be inserted					*/
-/*	cur_position = current position					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	cur_position = incremented to point past char just inserted	*/
-/*	               (it points at same char as it did on input)	*/
-/*									*/
+/*                                  */
+/*  Insert char at current position and increment           */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  c = character to be inserted                    */
+/*  cur_position = current position                 */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  cur_position = incremented to point past char just inserted */
+/*                 (it points at same char as it did on input)  */
+/*                                  */
 /************************************************************************/
 
 static void insertchar (char c)
@@ -2032,16 +2032,16 @@ static void insertchar (char c)
 
     if (cur_position.line == NULL)
     {
-        newline = buffer_last_line (cur_position.buffer);					/* point to last line in buffer */
+        newline = buffer_last_line (cur_position.buffer);                   /* point to last line in buffer */
         if (newline != NULL)
         {
-            linesz = string_getlen (line_string (newline));					/* get last line's length */
-            linebf = string_getval (line_string (newline));					/* get last line's address */
-            if ((linesz != 0) && (linebf[linesz-1] == '\n')) newline = NULL;			/* if it has \n, pretend it's not there */
+            linesz = string_getlen (line_string (newline));                 /* get last line's length */
+            linebf = string_getval (line_string (newline));                 /* get last line's address */
+            if ((linesz != 0) && (linebf[linesz-1] == '\n')) newline = NULL;            /* if it has \n, pretend it's not there */
         }
-        if (newline == NULL)  								/* see if we can append to last line */
+        if (newline == NULL)                                /* see if we can append to last line */
         {
-            newline = line_insert (cur_position.buffer, NULL, string_create (0, NULL));	/* if not, create a new one */
+            newline = line_insert (cur_position.buffer, NULL, string_create (0, NULL)); /* if not, create a new one */
             linesz  = 0;
         }
         cur_position.line   = newline;
@@ -2074,19 +2074,19 @@ static void insertchar (char c)
 }
 
 /************************************************************************/
-/*									*/
-/*  Get paste buffer name from command string				*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	*s_r = points past entity name in APPEND or CUT command		*/
-/*	       ie, to optional =BUFFER name				*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	getpastebufname = buffer name (defaults to "PASTE")		*/
-/*	*s_r = updated past the =BUFFER name string			*/
-/*									*/
+/*                                  */
+/*  Get paste buffer name from command string               */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  *s_r = points past entity name in APPEND or CUT command     */
+/*         ie, to optional =BUFFER name             */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  getpastebufname = buffer name (defaults to "PASTE")     */
+/*  *s_r = updated past the =BUFFER name string         */
+/*                                  */
 /************************************************************************/
 
 static char *getpastebufname (const char **s_r)
@@ -2095,40 +2095,40 @@ static char *getpastebufname (const char **s_r)
     char *bufname;
     const char *s, *t;
 
-    s = *s_r;								/* point to command string */
-    if (*s != '=') bufname = strdup ("PASTE");				/* if no =, use default PASTE */
+    s = *s_r;                               /* point to command string */
+    if (*s != '=') bufname = strdup ("PASTE");              /* if no =, use default PASTE */
     else
     {
-        t = ++ s;								/* save pointer to first char of name */
-        while ((*s != 0) && (strchr (bufnamechars, *s) != NULL)) s ++;	/* skip past last char of name */
-        bufname = malloc (s - t + 1);					/* malloc a buffer to copy name */
-        memcpy (bufname, t, s - t);						/* copy name */
-        bufname[s-t] = 0;							/* null terminate it */
-        *s_r = s;								/* update command string pointer */
+        t = ++ s;                               /* save pointer to first char of name */
+        while ((*s != 0) && (strchr (bufnamechars, *s) != NULL)) s ++;  /* skip past last char of name */
+        bufname = malloc (s - t + 1);                   /* malloc a buffer to copy name */
+        memcpy (bufname, t, s - t);                     /* copy name */
+        bufname[s-t] = 0;                           /* null terminate it */
+        *s_r = s;                               /* update command string pointer */
     }
     return (bufname);
 }
 
 /************************************************************************/
-/*									*/
-/*  Cut out a block of text and save in a buffer			*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	bpos = position to start cutting at (inclusive)			*/
-/*	epos = position to stop cutting at (exclusive)			*/
-/*	bufname = name of buffer to append cut contents to		*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	*bpos = *epos = position of cut					*/
-/*	cut text appended to buffer					*/
-/*									*/
-/*    Note:								*/
-/*									*/
-/*	This routine will swap bpos<->epos if necessary to make epos 	*/
-/*	come after bpos.						*/
-/*									*/
+/*                                  */
+/*  Cut out a block of text and save in a buffer            */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  bpos = position to start cutting at (inclusive)         */
+/*  epos = position to stop cutting at (exclusive)          */
+/*  bufname = name of buffer to append cut contents to      */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  *bpos = *epos = position of cut                 */
+/*  cut text appended to buffer                 */
+/*                                  */
+/*    Note:                             */
+/*                                  */
+/*  This routine will swap bpos<->epos if necessary to make epos    */
+/*  come after bpos.                        */
+/*                                  */
 /************************************************************************/
 
 static int cutitout (Position *bpos, Position *epos, const char *bufname)
@@ -2272,9 +2272,9 @@ repeat:
 }
 
 /************************************************************************/
-/*									*/
-/*  Paste a buffer back in						*/
-/*									*/
+/*                                  */
+/*  Paste a buffer back in                      */
+/*                                  */
 /************************************************************************/
 
 static int pasteitin (int crpt, const char *bufname)
@@ -2297,12 +2297,12 @@ static int pasteitin (int crpt, const char *bufname)
 
     /* If inserting in a backwards direction, save starting position  */
 
-    startpos.buffer = NULL;						/* assume we're going forward */
-    if (crpt < 0)  							/* see if we're going backward */
+    startpos.buffer = NULL;                     /* assume we're going forward */
+    if (crpt < 0)                           /* see if we're going backward */
     {
-        startpos = cur_position;						/* save current position */
-        normalise (startpos.buffer, &startpos.line, &startpos.offset);	/* normalise back in case it is [EOB] */
-        crpt = - crpt;							/* fix repeat count */
+        startpos = cur_position;                        /* save current position */
+        normalise (startpos.buffer, &startpos.line, &startpos.offset);  /* normalise back in case it is [EOB] */
+        crpt = - crpt;                          /* fix repeat count */
     }
 
     /* Perform insertions, a character at a time */
@@ -2323,14 +2323,14 @@ static int pasteitin (int crpt, const char *bufname)
 
     /* If inserting in a backward direction, restore position to beginning of string */
 
-    if (startpos.buffer != NULL)  					/* see if we are inserting backwards */
+    if (startpos.buffer != NULL)                    /* see if we are inserting backwards */
     {
-        if (startpos.line == NULL)  					/* ok, see if target buffer was completely empty */
+        if (startpos.line == NULL)                      /* ok, see if target buffer was completely empty */
         {
-            startpos.line   = buffer_first_line (startpos.buffer);		/* it was, so point to beginning of first (new) line */
+            startpos.line   = buffer_first_line (startpos.buffer);      /* it was, so point to beginning of first (new) line */
             startpos.offset = 0;
         }
-        cur_position = startpos;						/* ... then put current position there */
+        cur_position = startpos;                        /* ... then put current position there */
         normalize (&cur_position.line, &cur_position.offset);
     }
 
@@ -2338,10 +2338,10 @@ static int pasteitin (int crpt, const char *bufname)
 }
 
 /************************************************************************/
-/*									*/
-/*  Normalize position (ie, if at very end of line, point to very 	*/
-/*  beginning of next line)						*/
-/*									*/
+/*                                  */
+/*  Normalize position (ie, if at very end of line, point to very   */
+/*  beginning of next line)                     */
+/*                                  */
 /************************************************************************/
 
 static void normalize (Line **line_r, uLong *offset_r)
@@ -2367,9 +2367,9 @@ static void normalize (Line **line_r, uLong *offset_r)
 }
 
 /************************************************************************/
-/*									*/
-/*  The British version normalises backward				*/
-/*									*/
+/*                                  */
+/*  The British version normalises backward             */
+/*                                  */
 /************************************************************************/
 
 static void normalise (Buffer *buffer, Line **line_r, uLong *offset_r)
@@ -2394,20 +2394,20 @@ static void normalise (Buffer *buffer, Line **line_r, uLong *offset_r)
 }
 
 /************************************************************************/
-/*									*/
-/*  See if the 'searchstr' matches at 'line[offset]'			*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	line = line being searched					*/
-/*	linesz = length remaining at 'offset' in line			*/
-/*	linebf = first character at 'offset' in line			*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	matchstr = 0 : doesn't match					*/
-/*	           1 : matches						*/
-/*									*/
+/*                                  */
+/*  See if the 'searchstr' matches at 'line[offset]'            */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  line = line being searched                  */
+/*  linesz = length remaining at 'offset' in line           */
+/*  linebf = first character at 'offset' in line            */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  matchstr = 0 : doesn't match                    */
+/*             1 : matches                      */
+/*                                  */
 /************************************************************************/
 
 static int matchstr (Line *line, uLong linesz, const char *linebf)
@@ -2417,12 +2417,12 @@ static int matchstr (Line *line, uLong linesz, const char *linebf)
 
     for (i = 0;;)
     {
-        j = searchlen - i;				/* see how much of searchstr is left to do */
-        if (j > linesz) j = linesz;			/* but only do as much as is left in line buffer */
+        j = searchlen - i;              /* see how much of searchstr is left to do */
+        if (j > linesz) j = linesz;         /* but only do as much as is left in line buffer */
         if ((*xstrncmp) (linebf, searchstr + i, j) != 0) return (0); /* stop if doesn't match */
-        i += j;					/* ok, offset past the matched part in searchstr */
-        if (i == searchlen) return (1);		/* we're successful if the whole thing matched */
-        line = line_next (line);			/* try to match the rest with the next line */
+        i += j;                 /* ok, offset past the matched part in searchstr */
+        if (i == searchlen) return (1);     /* we're successful if the whole thing matched */
+        line = line_next (line);            /* try to match the rest with the next line */
         if (line == NULL) return (0);
         linesz = string_getlen (line_string (line));
         linebf = string_getval (line_string (line));
@@ -2430,9 +2430,9 @@ static int matchstr (Line *line, uLong linesz, const char *linebf)
 }
 
 /************************************************************************/
-/*									*/
-/*  Free all lines of a buffer						*/
-/*									*/
+/*                                  */
+/*  Free all lines of a buffer                      */
+/*                                  */
 /************************************************************************/
 
 static void emptybuffer (const char *name)
@@ -2450,10 +2450,10 @@ static void emptybuffer (const char *name)
 }
 
 /************************************************************************/
-/*									*/
-/*  Remove line from buffer (just line line_remove), but if it is the 	*/
-/*  top or select line, advance to next in buffer			*/
-/*									*/
+/*                                  */
+/*  Remove line from buffer (just line line_remove), but if it is the   */
+/*  top or select line, advance to next in buffer           */
+/*                                  */
 /************************************************************************/
 
 static String *removeline (Line *line)
@@ -2470,15 +2470,15 @@ static String *removeline (Line *line)
 }
 
 /************************************************************************/
-/*									*/
-/*  Output (error) message to screen					*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	extra = number of extra chars required for formatting		*/
-/*	format = format string						*/
-/*	... = parameters						*/
-/*									*/
+/*                                  */
+/*  Output (error) message to screen                    */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  extra = number of extra chars required for formatting       */
+/*  format = format string                      */
+/*  ... = parameters                        */
+/*                                  */
 /************************************************************************/
 
 static void message (int extra, const char *format, ...)
@@ -2487,10 +2487,10 @@ static void message (int extra, const char *format, ...)
     char *buf;
     va_list ap;
 
-    buf = malloc (extra + strlen (format) + 1);	/* allocate room for format and all parameter strings */
-    va_start (ap, format);			/* point to parameters */
-    vsprintf (buf, format, ap);			/* format the string */
+    buf = malloc (extra + strlen (format) + 1); /* allocate room for format and all parameter strings */
+    va_start (ap, format);          /* point to parameters */
+    vsprintf (buf, format, ap);         /* format the string */
     va_end (ap);
-    ch_screen_message (buf);			/* output message to screen */
-    free (buf);					/* free off buffer */
+    ch_screen_message (buf);            /* output message to screen */
+    free (buf);                 /* free off buffer */
 }

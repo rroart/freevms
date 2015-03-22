@@ -1,43 +1,43 @@
-/* @(#)tcp_timer.h	4.1.1.2	(ULTRIX)	7/19/88	 */
+/* @(#)tcp_timer.h  4.1.1.2 (ULTRIX)    7/19/88  */
 
 /************************************************************************
- *									*
- *			Copyright (c) 1985 by				*
- *		Digital Equipment Corporation, Maynard, MA		*
- *			All rights reserved.				*
- *									*
- *   This software is furnished under a license and may be used and	*
- *   copied  only  in accordance with the terms of such license and	*
- *   with the  inclusion  of  the  above  copyright  notice.   This	*
- *   software  or  any  other copies thereof may not be provided or	*
- *   otherwise made available to any other person.  No title to and	*
- *   ownership of the software is hereby transferred.			*
- *									*
- *   This software is  derived  from  software  received  from  the	*
- *   University    of   California,   Berkeley,   and   from   Bell	*
- *   Laboratories.  Use, duplication, or disclosure is  subject  to	*
- *   restrictions  under  license  agreements  with  University  of	*
- *   California and with AT&T.						*
- *									*
- *   The information in this software is subject to change  without	*
- *   notice  and should not be construed as a commitment by Digital	*
- *   Equipment Corporation.						*
- *									*
- *   Digital assumes no responsibility for the use  or  reliability	*
- *   of its software on equipment which is not supplied by Digital.	*
- *									*
+ *                                  *
+ *          Copyright (c) 1985 by               *
+ *      Digital Equipment Corporation, Maynard, MA      *
+ *          All rights reserved.                *
+ *                                  *
+ *   This software is furnished under a license and may be used and *
+ *   copied  only  in accordance with the terms of such license and *
+ *   with the  inclusion  of  the  above  copyright  notice.   This *
+ *   software  or  any  other copies thereof may not be provided or *
+ *   otherwise made available to any other person.  No title to and *
+ *   ownership of the software is hereby transferred.           *
+ *                                  *
+ *   This software is  derived  from  software  received  from  the *
+ *   University    of   California,   Berkeley,   and   from   Bell *
+ *   Laboratories.  Use, duplication, or disclosure is  subject  to *
+ *   restrictions  under  license  agreements  with  University  of *
+ *   California and with AT&T.                      *
+ *                                  *
+ *   The information in this software is subject to change  without *
+ *   notice  and should not be construed as a commitment by Digital *
+ *   Equipment Corporation.                     *
+ *                                  *
+ *   Digital assumes no responsibility for the use  or  reliability *
+ *   of its software on equipment which is not supplied by Digital. *
+ *                                  *
  ************************************************************************/
 
 /************************************************************************
- *			Modification History				*
- *									*
+ *          Modification History                *
+ *                                  *
  *
- *	15-Jan-88	lp
- *		Merge of final 43BSD changes.
+ *  15-Jan-88   lp
+ *      Merge of final 43BSD changes.
  *
- *	Larry Cohen  -	09/16/85					*
- * 		Add 43bsd alpha tape changes for subnet routing		*
- *									*
+ *  Larry Cohen  -  09/16/85                    *
+ *      Add 43bsd alpha tape changes for subnet routing     *
+ *                                  *
  ************************************************************************/
 
 /*
@@ -45,19 +45,19 @@
  * All rights reserved.  The Berkeley software License Agreement
  * specifies the terms and conditions for redistribution.
  *
- *	tcp_timer.h	7.3 (Berkeley) 6/30/87
+ *  tcp_timer.h 7.3 (Berkeley) 6/30/87
  */
 
 /*
  * Definitions of the TCP timers.  These timers are counted
  * down PR_SLOWHZ times a second.
  */
-#define	TCPT_NTIMERS	4
+#define TCPT_NTIMERS    4
 
-#define	TCPT_REXMT	0		/* retransmit */
-#define	TCPT_PERSIST	1		/* retransmit persistance */
-#define	TCPT_KEEP	2		/* keep alive */
-#define	TCPT_2MSL	3		/* 2*msl quiet time timer */
+#define TCPT_REXMT  0       /* retransmit */
+#define TCPT_PERSIST    1       /* retransmit persistance */
+#define TCPT_KEEP   2       /* keep alive */
+#define TCPT_2MSL   3       /* 2*msl quiet time timer */
 
 /*
  * The TCPT_REXMT timer is used to force retransmissions.
@@ -86,38 +86,38 @@
  * connection is idle (no segments received) for TCPTV_KEEP amount of time,
  * but not yet established, then we drop the connection.  If the connection
  * is established, then we force the peer to send us a segment by sending:
- *	<SEQ=SND.UNA-1><ACK=RCV.NXT><CTL=ACK>
+ *  <SEQ=SND.UNA-1><ACK=RCV.NXT><CTL=ACK>
  * This segment is (deliberately) outside the window, and should elicit
  * an ack segment in response from the peer.  If, despite the TCPT_KEEP
  * initiated segments we cannot elicit a response from a peer in TCPT_MAXIDLE
  * amount of time, then we drop the connection.
  */
 
-#define	TCP_TTL		60		/* default time to live for TCP segs */
-int	tcp_ttl;			/* time to live for TCP segs */
+#define TCP_TTL     60      /* default time to live for TCP segs */
+int tcp_ttl;            /* time to live for TCP segs */
 /*
  * Time constants.
  */
-#define	TCPTV_MSL	( 15*PR_SLOWHZ)		/* max seg lifetime */
-#define	TCPTV_SRTTBASE	0			/* base roundtrip time;
+#define TCPTV_MSL   ( 15*PR_SLOWHZ)     /* max seg lifetime */
+#define TCPTV_SRTTBASE  0           /* base roundtrip time;
 if 0, no idea yet */
-#define	TCPTV_SRTTDFLT	(  3*PR_SLOWHZ)		/* assumed RTT if no info */
+#define TCPTV_SRTTDFLT  (  3*PR_SLOWHZ)     /* assumed RTT if no info */
 
-#define	TCPTV_PERSMIN	(  5*PR_SLOWHZ)		/* retransmit persistance */
+#define TCPTV_PERSMIN   (  5*PR_SLOWHZ)     /* retransmit persistance */
 #define TCPTV_PERSMAX   ( 60*PR_SLOWHZ)         /* maximum persist interval */
 
-#define	TCPTV_KEEP	( 75*PR_SLOWHZ)		/* keep alive - 75 secs */
-#define	TCPTV_MAXIDLE	(  8*TCPTV_KEEP)	/* maximum allowable idle
+#define TCPTV_KEEP  ( 75*PR_SLOWHZ)     /* keep alive - 75 secs */
+#define TCPTV_MAXIDLE   (  8*TCPTV_KEEP)    /* maximum allowable idle
 time before drop conn */
 
-#define	TCPTV_MIN	(  1*PR_SLOWHZ)		/* minimum allowable value */
-#define	TCPTV_REXMTMAX	( 64*PR_SLOWHZ)		/* max allowable REXMT value */
+#define TCPTV_MIN   (  1*PR_SLOWHZ)     /* minimum allowable value */
+#define TCPTV_REXMTMAX  ( 64*PR_SLOWHZ)     /* max allowable REXMT value */
 
-#define	TCP_LINGERTIME	120			/* linger at most 2 minutes */
+#define TCP_LINGERTIME  120         /* linger at most 2 minutes */
 
-#define	TCP_MAXRXTSHIFT	12			/* maximum retransmits */
+#define TCP_MAXRXTSHIFT 12          /* maximum retransmits */
 
-#ifdef	TCPTIMERS
+#ifdef  TCPTIMERS
 char *tcptimers[] =
     { "REXMT", "PERSIST", "KEEP", "2MSL" };
 #endif
@@ -125,12 +125,12 @@ char *tcptimers[] =
 /*
  * Force a time value to be in a certain range.
  */
-#define	TCPT_RANGESET(tv, value, tvmin, tvmax) { \
-	(tv) = (value); \
-	if ((tv) < (tvmin)) \
-		(tv) = (tvmin); \
-	else if ((tv) > (tvmax)) \
-		(tv) = (tvmax); \
+#define TCPT_RANGESET(tv, value, tvmin, tvmax) { \
+    (tv) = (value); \
+    if ((tv) < (tvmin)) \
+        (tv) = (tvmin); \
+    else if ((tv) > (tvmax)) \
+        (tv) = (tvmax); \
 }
 
 #ifdef KERNEL

@@ -1,5 +1,5 @@
-#ifndef ttyvecdef_h
-#define ttyvecdef_h
+#ifndef TTYVECDEF_H
+#define TTYVECDEF_H
 
 #define CLASS_LENGTH 40
 #define CLASSS_CLASS_DEF 40

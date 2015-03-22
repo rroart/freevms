@@ -43,8 +43,8 @@ struct i2c_smbus_ioctl_data
 /* This is the structure as used in the I2C_RDWR ioctl call */
 struct i2c_rdwr_ioctl_data
 {
-    struct i2c_msg *msgs;	/* pointers to i2c_msgs */
-    int nmsgs;		/* number of i2c_msgs */
+    struct i2c_msg *msgs;   /* pointers to i2c_msgs */
+    int nmsgs;      /* number of i2c_msgs */
 };
 
 #ifndef __KERNEL__

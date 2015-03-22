@@ -123,12 +123,12 @@ struct timespec
 
 #ifndef __BIT_TYPES_DEFINED__
 #define __BIT_TYPES_DEFINED__
-typedef signed char	      int8_t;
-typedef unsigned char	    u_int8_t;
-typedef short		     int16_t;
-typedef unsigned short	   u_int16_t;
-typedef int		     int32_t;
-typedef unsigned int	   u_int32_t;
+typedef signed char       int8_t;
+typedef unsigned char       u_int8_t;
+typedef short            int16_t;
+typedef unsigned short     u_int16_t;
+typedef int          int32_t;
+typedef unsigned int       u_int32_t;
 #endif
 
 
@@ -142,11 +142,11 @@ typedef unsigned int	   u_int32_t;
 /* these are Coda's version of O_RDONLY etc combinations
  * to deal with VFS open modes
  */
-#define	C_O_READ	0x001
-#define	C_O_WRITE       0x002
+#define C_O_READ    0x001
+#define C_O_WRITE       0x002
 #define C_O_TRUNC       0x010
-#define C_O_EXCL	0x100
-#define C_O_CREAT	0x200
+#define C_O_EXCL    0x100
+#define C_O_CREAT   0x200
 
 /* these are to find mode bits in Venus */
 #define C_M_READ  00400
@@ -165,11 +165,11 @@ typedef unsigned int	   u_int32_t;
 #define _VENUS_DIRENT_T_ 1
 struct venus_dirent
 {
-    unsigned long	d_fileno;		/* file number of entry */
-    unsigned short	d_reclen;		/* length of this record */
-    unsigned char 	d_type;			/* file type, see below */
-    unsigned char	d_namlen;		/* length of string in d_name */
-    char		d_name[CODA_MAXNAMLEN + 1];/* name must be no longer than this */
+    unsigned long   d_fileno;       /* file number of entry */
+    unsigned short  d_reclen;       /* length of this record */
+    unsigned char   d_type;         /* file type, see below */
+    unsigned char   d_namlen;       /* length of string in d_name */
+    char        d_name[CODA_MAXNAMLEN + 1];/* name must be no longer than this */
 };
 #undef DIRSIZ
 #define DIRSIZ(dp)      ((sizeof (struct venus_dirent) - (CODA_MAXNAMLEN+1)) + \
@@ -178,41 +178,41 @@ struct venus_dirent
 /*
  * File types
  */
-#define	CDT_UNKNOWN	 0
-#define	CDT_FIFO	 1
-#define	CDT_CHR		 2
-#define	CDT_DIR		 4
-#define	CDT_BLK		 6
-#define	CDT_REG		 8
-#define	CDT_LNK		10
-#define	CDT_SOCK	12
-#define	CDT_WHT		14
+#define CDT_UNKNOWN  0
+#define CDT_FIFO     1
+#define CDT_CHR      2
+#define CDT_DIR      4
+#define CDT_BLK      6
+#define CDT_REG      8
+#define CDT_LNK     10
+#define CDT_SOCK    12
+#define CDT_WHT     14
 
 /*
  * Convert between stat structure types and directory types.
  */
-#define	IFTOCDT(mode)	(((mode) & 0170000) >> 12)
-#define	CDTTOIF(dirtype)	((dirtype) << 12)
+#define IFTOCDT(mode)   (((mode) & 0170000) >> 12)
+#define CDTTOIF(dirtype)    ((dirtype) << 12)
 
 #endif
 
-#ifndef	_FID_T_
-#define _FID_T_	1
+#ifndef _FID_T_
+#define _FID_T_ 1
 typedef u_long VolumeId;
 typedef u_long VnodeId;
 typedef u_long Unique_t;
 typedef u_long FileVersion;
 #endif
 
-#ifndef	_VICEFID_T_
-#define _VICEFID_T_	1
+#ifndef _VICEFID_T_
+#define _VICEFID_T_ 1
 typedef struct ViceFid
 {
     VolumeId Volume;
     VnodeId Vnode;
     Unique_t Unique;
 } ViceFid;
-#endif	/* VICEFID */
+#endif  /* VICEFID */
 
 
 #ifdef __linux__
@@ -228,7 +228,7 @@ static __inline__ ino_t  coda_f2i(struct ViceFid *fid)
 
 #else
 #define coda_f2i(fid)\
-	((fid) ? ((fid)->Unique + ((fid)->Vnode<<10) + ((fid)->Volume<<20)) : 0)
+    ((fid) ? ((fid)->Unique + ((fid)->Vnode<<10) + ((fid)->Volume<<20)) : 0)
 #endif
 
 
@@ -252,26 +252,26 @@ struct coda_cred
 /*
  * Vnode types.  VNON means no type.
  */
-enum coda_vtype	{ C_VNON, C_VREG, C_VDIR, C_VBLK, C_VCHR, C_VLNK, C_VSOCK, C_VFIFO, C_VBAD };
+enum coda_vtype { C_VNON, C_VREG, C_VDIR, C_VBLK, C_VCHR, C_VLNK, C_VSOCK, C_VFIFO, C_VBAD };
 
 struct coda_vattr
 {
-    long     	va_type;	/* vnode type (for create) */
-    u_short		va_mode;	/* files access mode and type */
-    short		va_nlink;	/* number of references to file */
-    vuid_t		va_uid;		/* owner user id */
-    vgid_t		va_gid;		/* owner group id */
-    long		va_fileid;	/* file id */
-    u_quad_t	va_size;	/* file size in bytes */
-    long		va_blocksize;	/* blocksize preferred for i/o */
-    struct timespec	va_atime;	/* time of last access */
-    struct timespec	va_mtime;	/* time of last modification */
-    struct timespec	va_ctime;	/* time file changed */
-    u_long		va_gen;		/* generation number of file */
-    u_long		va_flags;	/* flags defined for file */
-    cdev_t	        va_rdev;	/* device special file represents */
-    u_quad_t	va_bytes;	/* bytes of disk space held by file */
-    u_quad_t	va_filerev;	/* file modification number */
+    long        va_type;    /* vnode type (for create) */
+    u_short     va_mode;    /* files access mode and type */
+    short       va_nlink;   /* number of references to file */
+    vuid_t      va_uid;     /* owner user id */
+    vgid_t      va_gid;     /* owner group id */
+    long        va_fileid;  /* file id */
+    u_quad_t    va_size;    /* file size in bytes */
+    long        va_blocksize;   /* blocksize preferred for i/o */
+    struct timespec va_atime;   /* time of last access */
+    struct timespec va_mtime;   /* time of last modification */
+    struct timespec va_ctime;   /* time file changed */
+    u_long      va_gen;     /* generation number of file */
+    u_long      va_flags;   /* flags defined for file */
+    cdev_t          va_rdev;    /* device special file represents */
+    u_quad_t    va_bytes;   /* bytes of disk space held by file */
+    u_quad_t    va_filerev; /* file modification number */
 };
 
 #endif
@@ -290,27 +290,27 @@ struct coda_statfs
  * Kernel <--> Venus communications.
  */
 
-#define CODA_ROOT	2
-#define CODA_OPEN_BY_FD	3
-#define CODA_OPEN	4
-#define CODA_CLOSE	5
-#define CODA_IOCTL	6
-#define CODA_GETATTR	7
-#define CODA_SETATTR	8
-#define CODA_ACCESS	9
-#define CODA_LOOKUP	10
-#define CODA_CREATE	11
-#define CODA_REMOVE	12
-#define CODA_LINK	13
-#define CODA_RENAME	14
-#define CODA_MKDIR	15
-#define CODA_RMDIR	16
-#define CODA_SYMLINK	18
-#define CODA_READLINK	19
-#define CODA_FSYNC	20
-#define CODA_VGET	22
-#define CODA_SIGNAL	23
-#define CODA_REPLACE	 24 /* DOWNCALL */
+#define CODA_ROOT   2
+#define CODA_OPEN_BY_FD 3
+#define CODA_OPEN   4
+#define CODA_CLOSE  5
+#define CODA_IOCTL  6
+#define CODA_GETATTR    7
+#define CODA_SETATTR    8
+#define CODA_ACCESS 9
+#define CODA_LOOKUP 10
+#define CODA_CREATE 11
+#define CODA_REMOVE 12
+#define CODA_LINK   13
+#define CODA_RENAME 14
+#define CODA_MKDIR  15
+#define CODA_RMDIR  16
+#define CODA_SYMLINK    18
+#define CODA_READLINK   19
+#define CODA_FSYNC  20
+#define CODA_VGET   22
+#define CODA_SIGNAL 23
+#define CODA_REPLACE     24 /* DOWNCALL */
 #define CODA_FLUSH       25 /* DOWNCALL */
 #define CODA_PURGEUSER   26 /* DOWNCALL */
 #define CODA_ZAPFILE     27 /* DOWNCALL */
@@ -319,14 +319,14 @@ struct coda_statfs
 #define CODA_OPEN_BY_PATH 31
 #define CODA_RESOLVE     32
 #define CODA_REINTEGRATE 33
-#define CODA_STATFS	 34
-#define CODA_STORE	 35
-#define CODA_RELEASE	 36
+#define CODA_STATFS  34
+#define CODA_STORE   35
+#define CODA_RELEASE     36
 #define CODA_NCALLS 37
 
 #define DOWNCALL(opcode) (opcode >= CODA_REPLACE && opcode <= CODA_PURGEFID)
 
-#define VC_MAXDATASIZE	    8192
+#define VC_MAXDATASIZE      8192
 #define VC_MAXMSGSIZE      sizeof(union inputArgs)+sizeof(union outputArgs) +\
                             VC_MAXDATASIZE
 
@@ -344,11 +344,11 @@ struct coda_statfs
 struct coda_in_hdr
 {
     unsigned long opcode;
-    unsigned long unique;	    /* Keep multiple outstanding msgs distinct */
-    u_short pid;		    /* Common to all */
-    u_short pgid;		    /* Common to all */
+    unsigned long unique;       /* Keep multiple outstanding msgs distinct */
+    u_short pid;            /* Common to all */
+    u_short pgid;           /* Common to all */
     u_short sid;                    /* Common to all */
-    struct coda_cred cred;	    /* Common to all */
+    struct coda_cred cred;      /* Common to all */
 };
 
 /* Really important that opcode and unique are 1st two fields! */
@@ -375,15 +375,15 @@ struct coda_root_in
 struct coda_open_in
 {
     struct coda_in_hdr ih;
-    ViceFid	VFid;
-    int	flags;
+    ViceFid VFid;
+    int flags;
 };
 
 struct coda_open_out
 {
     struct coda_out_hdr oh;
-    cdev_t	dev;
-    ino_t	inode;
+    cdev_t  dev;
+    ino_t   inode;
 };
 
 
@@ -391,8 +391,8 @@ struct coda_open_out
 struct coda_store_in
 {
     struct coda_in_hdr ih;
-    ViceFid	VFid;
-    int	flags;
+    ViceFid VFid;
+    int flags;
 };
 
 struct coda_store_out
@@ -404,8 +404,8 @@ struct coda_store_out
 struct coda_release_in
 {
     struct coda_in_hdr ih;
-    ViceFid	VFid;
-    int	flags;
+    ViceFid VFid;
+    int flags;
 };
 
 struct coda_release_out
@@ -417,8 +417,8 @@ struct coda_release_out
 struct coda_close_in
 {
     struct coda_in_hdr ih;
-    ViceFid	VFid;
-    int	flags;
+    ViceFid VFid;
+    int flags;
 };
 
 struct coda_close_out
@@ -431,17 +431,17 @@ struct coda_ioctl_in
 {
     struct coda_in_hdr ih;
     ViceFid VFid;
-    int	cmd;
-    int	len;
-    int	rwflag;
-    char *data;			/* Place holder for data. */
+    int cmd;
+    int len;
+    int rwflag;
+    char *data;         /* Place holder for data. */
 };
 
 struct coda_ioctl_out
 {
     struct coda_out_hdr oh;
-    int	len;
-    caddr_t	data;		/* Place holder for data. */
+    int len;
+    caddr_t data;       /* Place holder for data. */
 };
 
 
@@ -476,8 +476,8 @@ struct coda_setattr_out
 struct coda_access_in
 {
     struct coda_in_hdr ih;
-    ViceFid	VFid;
-    int	flags;
+    ViceFid VFid;
+    int flags;
 };
 
 struct coda_access_out
@@ -494,8 +494,8 @@ struct coda_access_out
 struct  coda_lookup_in
 {
     struct coda_in_hdr ih;
-    ViceFid	VFid;
-    int         name;		/* Place holder for data. */
+    ViceFid VFid;
+    int         name;       /* Place holder for data. */
     int         flags;
 };
 
@@ -503,7 +503,7 @@ struct coda_lookup_out
 {
     struct coda_out_hdr oh;
     ViceFid VFid;
-    int	vtype;
+    int vtype;
 };
 
 
@@ -515,7 +515,7 @@ struct coda_create_in
     struct coda_vattr attr;
     int excl;
     int mode;
-    int 	name;		/* Place holder for data. */
+    int     name;       /* Place holder for data. */
 };
 
 struct coda_create_out
@@ -530,8 +530,8 @@ struct coda_create_out
 struct coda_remove_in
 {
     struct coda_in_hdr ih;
-    ViceFid	VFid;
-    int name;		/* Place holder for data. */
+    ViceFid VFid;
+    int name;       /* Place holder for data. */
 };
 
 struct coda_remove_out
@@ -545,7 +545,7 @@ struct coda_link_in
     struct coda_in_hdr ih;
     ViceFid sourceFid;          /* cnode to link *to* */
     ViceFid destFid;            /* Directory in which to place link */
-    int tname;		/* Place holder for data. */
+    int tname;      /* Place holder for data. */
 };
 
 struct coda_link_out
@@ -558,10 +558,10 @@ struct coda_link_out
 struct coda_rename_in
 {
     struct coda_in_hdr ih;
-    ViceFid	sourceFid;
-    int 	srcname;
+    ViceFid sourceFid;
+    int     srcname;
     ViceFid destFid;
-    int 	destname;
+    int     destname;
 };
 
 struct coda_rename_out
@@ -573,9 +573,9 @@ struct coda_rename_out
 struct coda_mkdir_in
 {
     struct coda_in_hdr ih;
-    ViceFid	VFid;
+    ViceFid VFid;
     struct coda_vattr attr;
-    int	   name;		/* Place holder for data. */
+    int    name;        /* Place holder for data. */
 };
 
 struct coda_mkdir_out
@@ -590,8 +590,8 @@ struct coda_mkdir_out
 struct coda_rmdir_in
 {
     struct coda_in_hdr ih;
-    ViceFid	VFid;
-    int name;		/* Place holder for data. */
+    ViceFid VFid;
+    int name;       /* Place holder for data. */
 };
 
 struct coda_rmdir_out
@@ -603,7 +603,7 @@ struct coda_rmdir_out
 struct coda_symlink_in
 {
     struct coda_in_hdr ih;
-    ViceFid	VFid;          /* Directory to put symlink in */
+    ViceFid VFid;          /* Directory to put symlink in */
     int srcname;
     struct coda_vattr attr;
     int tname;
@@ -624,8 +624,8 @@ struct coda_readlink_in
 struct coda_readlink_out
 {
     struct coda_out_hdr oh;
-    int	count;
-    caddr_t	data;		/* Place holder for data. */
+    int count;
+    caddr_t data;       /* Place holder for data. */
 };
 
 
@@ -652,7 +652,7 @@ struct coda_vget_out
 {
     struct coda_out_hdr oh;
     ViceFid VFid;
-    int	vtype;
+    int vtype;
 };
 
 
@@ -732,8 +732,8 @@ struct coda_open_by_fd_out
 struct coda_open_by_path_in
 {
     struct coda_in_hdr ih;
-    ViceFid	VFid;
-    int	flags;
+    ViceFid VFid;
+    int flags;
 };
 
 struct coda_open_by_path_out
@@ -763,7 +763,7 @@ struct coda_statfs_out
 
 union inputArgs
 {
-    struct coda_in_hdr ih;		/* NB: every struct below begins with an ih */
+    struct coda_in_hdr ih;      /* NB: every struct below begins with an ih */
     struct coda_open_in coda_open;
     struct coda_store_in coda_store;
     struct coda_release_in coda_release;
@@ -790,7 +790,7 @@ union inputArgs
 
 union outputArgs
 {
-    struct coda_out_hdr oh;		/* NB: every struct below begins with an oh */
+    struct coda_out_hdr oh;     /* NB: every struct below begins with an oh */
     struct coda_root_out coda_root;
     struct coda_open_out coda_open;
     struct coda_ioctl_out coda_ioctl;
@@ -843,18 +843,18 @@ struct PioctlData
     struct ViceIoctl vi;
 };
 
-#define	CODA_CONTROL		".CONTROL"
+#define CODA_CONTROL        ".CONTROL"
 #define CODA_CONTROLLEN           8
-#define	CTL_VOL			-1
-#define	CTL_VNO			-1
-#define	CTL_UNI			-1
+#define CTL_VOL         -1
+#define CTL_VNO         -1
+#define CTL_UNI         -1
 #define CTL_INO                 -1
-#define	CTL_FILE		"/coda/.CONTROL"
+#define CTL_FILE        "/coda/.CONTROL"
 
 
-#define	IS_CTL_FID(fidp)	((fidp)->Volume == CTL_VOL &&\
-				 (fidp)->Vnode == CTL_VNO &&\
-				 (fidp)->Unique == CTL_UNI)
+#define IS_CTL_FID(fidp)    ((fidp)->Volume == CTL_VOL &&\
+                 (fidp)->Vnode == CTL_VNO &&\
+                 (fidp)->Unique == CTL_UNI)
 
 /* Data passed to mount */
 
@@ -862,8 +862,8 @@ struct PioctlData
 
 struct coda_mount_data
 {
-    int		version;
-    int		fd;       /* Opened device */
+    int     version;
+    int     fd;       /* Opened device */
 };
 
 #endif

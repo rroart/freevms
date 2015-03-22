@@ -1,5 +1,5 @@
-#ifndef wsldef_h
-#define wsldef_h
+#ifndef WSLDEF_H
+#define WSLDEF_H
 
 #define WSL$M_VALID   0x1
 #define WSL$M_PAGTYP  0xE

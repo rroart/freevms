@@ -159,7 +159,7 @@ extern void softirq_init(void);
 int rows, cols;
 
 #ifdef CONFIG_BLK_DEV_INITRD
-unsigned int real_root_dev;	/* do_proc_dointvec cannot handle kdev_t */
+unsigned int real_root_dev; /* do_proc_dointvec cannot handle kdev_t */
 #endif
 
 int root_mountflags = MS_RDONLY;
@@ -244,12 +244,12 @@ static struct dev_name_struct
     { "sbpcd",   0x1900 },
     { "eda",     0x2400 },
     { "edb",     0x2440 },
-    { "pda",	0x2d00 },
-    { "pdb",	0x2d10 },
-    { "pdc",	0x2d20 },
-    { "pdd",	0x2d30 },
-    { "pcd",	0x2e00 },
-    { "pf",		0x2f00 },
+    { "pda",    0x2d00 },
+    { "pdb",    0x2d10 },
+    { "pdc",    0x2d20 },
+    { "pdd",    0x2d30 },
+    { "pcd",    0x2e00 },
+    { "pf",     0x2f00 },
     { "apblock", APBLOCK_MAJOR << 8},
     { "ddv", DDV_MAJOR << 8},
     { "ubd", UBD_MAJOR << 8 },
@@ -416,7 +416,7 @@ void __init calibrate_delay(void)
         while (ticks == jiffies);
         ticks = jiffies;
         __delay(loops_per_jiffy);
-        if (jiffies != ticks)	/* longer than 1 tick */
+        if (jiffies != ticks)   /* longer than 1 tick */
             loops_per_jiffy &= ~loopbit;
     }
 
@@ -494,7 +494,7 @@ static void __init parse_options(char *line)
     if (!*line)
         return;
     args = 0;
-    envs = 1;	/* TERM is set to 'linux' by default */
+    envs = 1;   /* TERM is set to 'linux' by default */
     next = line;
     while ((line = next) != NULL)
     {
@@ -571,7 +571,7 @@ static void __init smp_init(void)
     APIC_init_uniprocessor();
 }
 #else
-#define smp_init()	do { } while (0)
+#define smp_init()  do { } while (0)
 #endif
 
 #else
@@ -627,7 +627,7 @@ void vms_init(void) __init;
 void vms_init2(void) __init;
 
 /*
- *	Activate the first processor.
+ *  Activate the first processor.
  */
 
 asmlinkage void __init start_kernel(void)
@@ -737,9 +737,9 @@ asmlinkage void __init start_kernel(void)
     printk("Popular Organization for the Suppression of Individual eXpression\n");
 
     /*
-     *	We count on the initial thread going ok
-     *	Like idlers init is an unlocked kernel thread, which will
-     *	make syscalls (and thus be locked).
+     *  We count on the initial thread going ok
+     *  Like idlers init is an unlocked kernel thread, which will
+     *  make syscalls (and thus be locked).
      */
 
     mb_vmsinit();
@@ -808,7 +808,7 @@ static void __init do_basic_setup(void)
      */
     child_reaper = current;
 
-#if defined(CONFIG_MTRR)	/* Do this after SMP initialization */
+#if defined(CONFIG_MTRR)    /* Do this after SMP initialization */
     /*
      * We should probably create some architecture-dependent "fixup after
      * everything is up" style function where this would belong better
@@ -868,7 +868,7 @@ static void __init do_basic_setup(void)
     irda_device_init(); /* Must be done after protocol initialization */
 #endif
 #ifdef CONFIG_PCMCIA
-    init_pcmcia_ds();		/* Do this last */
+    init_pcmcia_ds();       /* Do this last */
 #endif
 }
 
@@ -909,8 +909,8 @@ static int init(void * unused)
     free_initmem();
     printk("%%KERNEL-I-DEBUG, After free_initmem\n");
     unlock_kernel();
-    //	mydebug5=1;
-    //	mydebug6=1;
+    //  mydebug5=1;
+    //  mydebug6=1;
     printk("%%KERNEL-I-DEBUG, After unlock_kernel\n");
 #if 0
     open_tty();

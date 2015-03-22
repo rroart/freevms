@@ -1,30 +1,30 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 /*
  * Simple Network Management Protocol (RFC 1067).
  *
  */
 /***********************************************************
-	Copyright 1988, 1989 by Carnegie Mellon University
+    Copyright 1988, 1989 by Carnegie Mellon University
 
                       All Rights Reserved
 
@@ -77,16 +77,16 @@ SOFTWARE.
 u_char *
 snmp_parse_var_op(data, var_name, var_name_len, var_val_type, var_val_len, var_val, listlength)
 register u_char *data;  /* IN - pointer to the start of object */
-oid	    *var_name;	    /* OUT - object id of variable */
-int	    *var_name_len;  /* IN/OUT - length of variable name */
+oid     *var_name;      /* OUT - object id of variable */
+int     *var_name_len;  /* IN/OUT - length of variable name */
 u_char  *var_val_type;  /* OUT - type of variable (int or octet string) (one byte) */
-int	    *var_val_len;   /* OUT - length of variable */
-u_char  **var_val;	    /* OUT - pointer to ASN1 encoded value of variable */
-int	    *listlength;    /* IN/OUT - number of valid bytes left in var_op_list */
+int     *var_val_len;   /* OUT - length of variable */
+u_char  **var_val;      /* OUT - pointer to ASN1 encoded value of variable */
+int     *listlength;    /* IN/OUT - number of valid bytes left in var_op_list */
 {
-    u_char	    var_op_type;
-    int		    var_op_len = *listlength;
-    u_char	    *var_op_start = data;
+    u_char      var_op_type;
+    int         var_op_len = *listlength;
+    u_char      *var_op_start = data;
 
     data = asn_parse_header(data, &var_op_len, &var_op_type);
     if (data == NULL)
@@ -104,7 +104,7 @@ int	    *listlength;    /* IN/OUT - number of valid bytes left in var_op_list */
     }
     if (var_op_type != (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID))
         return NULL;
-    *var_val = data;	/* save pointer to this object */
+    *var_val = data;    /* save pointer to this object */
     /* find out what type of object this is */
     data = asn_parse_header(data, &var_op_len, var_val_type);
     if (data == NULL)
@@ -119,11 +119,11 @@ int	    *listlength;    /* IN/OUT - number of valid bytes left in var_op_list */
 }
 
 shift_array(begin, length, shift_amount)
-u_char	    *begin;
+u_char      *begin;
 register int    length;
-int		    shift_amount;
+int         shift_amount;
 {
-    register u_char	*old, *new;
+    register u_char *old, *new;
 
     if (shift_amount >= 0)
     {
@@ -145,16 +145,16 @@ int		    shift_amount;
 
 u_char *
 snmp_build_var_op(data, var_name, var_name_len, var_val_type, var_val_len, var_val, listlength)
-register u_char *data;	/* IN - pointer to the beginning of the output buffer */
-oid		*var_name;	/* IN - object id of variable */
-int		*var_name_len;	/* IN - length of object id */
-u_char	var_val_type;	/* IN - type of variable */
-int		var_val_len;	/* IN - length of variable */
-u_char	*var_val;	/* IN - value of variable */
+register u_char *data;  /* IN - pointer to the beginning of the output buffer */
+oid     *var_name;  /* IN - object id of variable */
+int     *var_name_len;  /* IN - length of object id */
+u_char  var_val_type;   /* IN - type of variable */
+int     var_val_len;    /* IN - length of variable */
+u_char  *var_val;   /* IN - value of variable */
 register int *listlength;    /* IN/OUT - number of valid bytes left in output buffer */
 {
-    int		    dummyLen, headerLen, header_shift;
-    u_char	    *dataPtr;
+    int         dummyLen, headerLen, header_shift;
+    u_char      *dataPtr;
 
     dummyLen = *listlength;
     dataPtr = data;
@@ -238,24 +238,24 @@ register int *listlength;    /* IN/OUT - number of valid bytes left in output bu
 int
 snmp_build_trap(out_data, length, sysOid, sysOidLen, myAddr, trapType, specificType, time, varName, varNameLen, varType, varLen, varVal)
 register u_char  *out_data;
-int	    *length;
-oid	    *sysOid;
-int	    sysOidLen;
+int     *length;
+oid     *sysOid;
+int     sysOidLen;
 u_long  myAddr;
-int	    trapType;
-int	    specificType;
+int     trapType;
+int     specificType;
 u_long  time;
-oid	    *varName;
-int	    varNameLen;
+oid     *varName;
+int     varNameLen;
 u_char  varType;
-int	    varLen;
+int     varLen;
 u_char  *varVal;
 {
     long    version = SNMP_VERSION_1;
-    int	    sidLen = strlen("public");
-    int	    dummyLen;
+    int     sidLen = strlen("public");
+    int     dummyLen;
     u_char  *out_auth, *out_header, *out_pdu, *out_varHeader, *out_varlist, *out_end;
-    int	    auth_shift, pdu_shift, list_shift;
+    int     auth_shift, pdu_shift, list_shift;
 
 
 

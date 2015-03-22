@@ -28,8 +28,8 @@
 extern unsigned long table_start, table_end;
 extern char _end[];
 
-#ifdef	CONFIG_ACPI_BOOT
-extern acpi_interrupt_flags	acpi_sci_flags;
+#ifdef  CONFIG_ACPI_BOOT
+extern acpi_interrupt_flags acpi_sci_flags;
 #endif
 
 extern struct resource code_resource, data_resource, vram_resource;
@@ -315,39 +315,39 @@ static int __init sanitize_e820_map(struct e820entry * biosmap, char * pnr_map)
     int i;
 
     /*
-    	Visually we're performing the following (1,2,3,4 = memory types)...
+        Visually we're performing the following (1,2,3,4 = memory types)...
 
-    	Sample memory map (w/overlaps):
-    	   ____22__________________
-    	   ______________________4_
-    	   ____1111________________
-    	   _44_____________________
-    	   11111111________________
-    	   ____________________33__
-    	   ___________44___________
-    	   __________33333_________
-    	   ______________22________
-    	   ___________________2222_
-    	   _________111111111______
-    	   _____________________11_
-    	   _________________4______
+        Sample memory map (w/overlaps):
+           ____22__________________
+           ______________________4_
+           ____1111________________
+           _44_____________________
+           11111111________________
+           ____________________33__
+           ___________44___________
+           __________33333_________
+           ______________22________
+           ___________________2222_
+           _________111111111______
+           _____________________11_
+           _________________4______
 
-    	Sanitized equivalent (no overlap):
-    	   1_______________________
-    	   _44_____________________
-    	   ___1____________________
-    	   ____22__________________
-    	   ______11________________
-    	   _________1______________
-    	   __________3_____________
-    	   ___________44___________
-    	   _____________33_________
-    	   _______________2________
-    	   ________________1_______
-    	   _________________4______
-    	   ___________________2____
-    	   ____________________33__
-    	   ______________________4_
+        Sanitized equivalent (no overlap):
+           1_______________________
+           _44_____________________
+           ___1____________________
+           ____22__________________
+           ______11________________
+           _________1______________
+           __________3_____________
+           ___________44___________
+           _____________33_________
+           _______________2________
+           ________________1_______
+           _________________4______
+           ___________________2____
+           ____________________33__
+           ______________________4_
     */
 
     /* if there's only one memory region, don't bother */
@@ -399,10 +399,10 @@ static int __init sanitize_e820_map(struct e820entry * biosmap, char * pnr_map)
     }
 
     /* create a new bios memory map, removing overlaps */
-    overlap_entries=0;	 /* number of entries in the overlap table */
-    new_bios_entry=0;	 /* index for creating new bios map entries */
-    last_type = 0;		 /* start with undefined memory type */
-    last_addr = 0;		 /* start with 0 as last starting address */
+    overlap_entries=0;   /* number of entries in the overlap table */
+    new_bios_entry=0;    /* index for creating new bios map entries */
+    last_type = 0;       /* start with undefined memory type */
+    last_addr = 0;       /* start with 0 as last starting address */
     /* loop through change-points, determining affect on the new bios map */
     for (chgidx=0; chgidx < 2*old_nr; chgidx++)
     {
@@ -438,7 +438,7 @@ static int __init sanitize_e820_map(struct e820entry * biosmap, char * pnr_map)
                 /* move forward only if the new size was non-zero */
                 if (new_bios[new_bios_entry].size != 0)
                     if (++new_bios_entry >= E820MAX)
-                        break; 	/* no more space left for new bios entries */
+                        break;  /* no more space left for new bios entries */
             }
             if (current_type != 0)
             {
@@ -586,7 +586,7 @@ void __init parse_mem_cmdline (char ** cmdline_p)
              * Also on x86-64 there should be always a good e820
              * map. This is only an upper limit, you cannot force
              * usage of memory not in e820.
-            		 */
+                     */
             end_user_pfn = memparse(from+4, &from) + HIGH_MEMORY;
             end_user_pfn >>= PAGE_SHIFT;
         }
@@ -596,7 +596,7 @@ void __init parse_mem_cmdline (char ** cmdline_p)
             iommu_setup(from+6);
         }
 #endif
-#ifdef	CONFIG_SMP
+#ifdef  CONFIG_SMP
         /*
          * If the BIOS enumerates physical processors before logical,
          * maxcpus=N at enumeration-time can be used to disable HT.
@@ -609,7 +609,7 @@ void __init parse_mem_cmdline (char ** cmdline_p)
         }
 #endif
 
-#ifdef	CONFIG_ACPI_BOOT
+#ifdef  CONFIG_ACPI_BOOT
         else if (!memcmp(from, "acpi=off", 8))
             disable_acpi();
 

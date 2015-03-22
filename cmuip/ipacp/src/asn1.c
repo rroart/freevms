@@ -1,23 +1,23 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 /*
  * Abstract Syntax Notation One, ASN.1
@@ -29,7 +29,7 @@
  *
  */
 /***********************************************************
-	Copyright 1988, 1989 by Carnegie Mellon University
+    Copyright 1988, 1989 by Carnegie Mellon University
 
                       All Rights Reserved
 
@@ -69,7 +69,7 @@ SOFTWARE.
 #include <strings.h>
 
 #ifndef NULL
-#define NULL	0
+#define NULL    0
 #endif
 #define ERROR(string)
 
@@ -86,17 +86,17 @@ SOFTWARE.
  */
 u_char *
 asn_parse_int(data, datalength, type, intp, intsize)
-register u_char	    *data;	/* IN - pointer to start of object */
-register int	    *datalength;/* IN/OUT - number of valid bytes left in buffer */
-u_char		    *type;	/* OUT - asn type of object */
-long		    *intp;	/* IN/OUT - pointer to start of output buffer */
-int			    intsize;    /* IN - size of output buffer */
+register u_char     *data;  /* IN - pointer to start of object */
+register int        *datalength;/* IN/OUT - number of valid bytes left in buffer */
+u_char          *type;  /* OUT - asn type of object */
+long            *intp;  /* IN/OUT - pointer to start of output buffer */
+int             intsize;    /* IN - size of output buffer */
 {
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
      */
     register u_char *bufp = data;
-    u_long	    asn_length;
+    u_long      asn_length;
     register long   value = 0;
 
     if (intsize != sizeof (long))
@@ -143,17 +143,17 @@ int			    intsize;    /* IN - size of output buffer */
  */
 u_char *
 asn_parse_unsigned_int(data, datalength, type, intp, intsize)
-register u_char	    *data;	/* IN - pointer to start of object */
-register int	    *datalength;/* IN/OUT - number of valid bytes left in buffer */
-u_char		    *type;	/* OUT - asn type of object */
-u_long		    *intp;	/* IN/OUT - pointer to start of output buffer */
-int			    intsize;    /* IN - size of output buffer */
+register u_char     *data;  /* IN - pointer to start of object */
+register int        *datalength;/* IN/OUT - number of valid bytes left in buffer */
+u_char          *type;  /* OUT - asn type of object */
+u_long          *intp;  /* IN/OUT - pointer to start of output buffer */
+int             intsize;    /* IN - size of output buffer */
 {
     /*
      * ASN.1 integer ::= 0x02 asnlength byte {byte}*
      */
     register u_char *bufp = data;
-    u_long	    asn_length;
+    u_long      asn_length;
     register u_long value = 0;
 
     if (intsize != sizeof (long))
@@ -201,10 +201,10 @@ int			    intsize;    /* IN - size of output buffer */
  */
 u_char *
 asn_build_int(data, datalength, type, intp, intsize)
-register u_char *data;	/* IN - pointer to start of output buffer */
+register u_char *data;  /* IN - pointer to start of output buffer */
 register int    *datalength;/* IN/OUT - number of valid bytes left in buffer */
-u_char	    type;	/* IN - asn type of object */
-register long   *intp;	/* IN - pointer to start of long integer */
+u_char      type;   /* IN - asn type of object */
+register long   *intp;  /* IN - pointer to start of long integer */
 register int    intsize;    /* IN - size of *intp */
 {
     /*
@@ -258,10 +258,10 @@ register int    intsize;    /* IN - size of *intp */
  */
 u_char *
 asn_build_unsigned_int(data, datalength, type, intp, intsize)
-register u_char *data;	/* IN - pointer to start of output buffer */
+register u_char *data;  /* IN - pointer to start of output buffer */
 register int    *datalength;/* IN/OUT - number of valid bytes left in buffer */
-u_char	    type;	/* IN - asn type of object */
-register u_long *intp;	/* IN - pointer to start of long integer */
+u_char      type;   /* IN - asn type of object */
+register u_long *intp;  /* IN - pointer to start of long integer */
 register int    intsize;    /* IN - size of *intp */
 {
     /*
@@ -331,10 +331,10 @@ register int    intsize;    /* IN - size of *intp */
  */
 u_char *
 asn_parse_string(data, datalength, type, string, strlength)
-u_char	    *data;	    /* IN - pointer to start of object */
+u_char      *data;      /* IN - pointer to start of object */
 register int    *datalength;    /* IN/OUT - number of valid bytes left in buffer */
-u_char	    *type;	    /* OUT - asn type of object */
-u_char	    *string;	    /* IN/OUT - pointer to start of output buffer */
+u_char      *type;      /* OUT - asn type of object */
+u_char      *string;        /* IN/OUT - pointer to start of output buffer */
 register int    *strlength;     /* IN/OUT - size of output buffer */
 {
     /*
@@ -344,7 +344,7 @@ register int    *strlength;     /* IN/OUT - size of output buffer */
      * This doesn't yet support the compound string.
      */
     register u_char *bufp = data;
-    u_long	    asn_length;
+    u_long      asn_length;
 
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
@@ -379,11 +379,11 @@ register int    *strlength;     /* IN/OUT - size of output buffer */
  */
 u_char *
 asn_build_string(data, datalength, type, string, strlength)
-u_char	    *data;	    /* IN - pointer to start of object */
+u_char      *data;      /* IN - pointer to start of object */
 register int    *datalength;    /* IN/OUT - number of valid bytes left in buffer */
-u_char	    type;	    /* IN - ASN type of string */
-u_char	    *string;	    /* IN - pointer to start of input buffer */
-register int    strlength;	    /* IN - size of input buffer */
+u_char      type;       /* IN - ASN type of string */
+u_char      *string;        /* IN - pointer to start of input buffer */
+register int    strlength;      /* IN - size of input buffer */
 {
     /*
      * ASN.1 octet string ::= primstring | cmpdstring
@@ -413,13 +413,13 @@ register int    strlength;	    /* IN - size of input buffer */
  */
 u_char *
 asn_parse_header(data, datalength, type)
-u_char	    *data;	/* IN - pointer to start of object */
-int		    *datalength;/* IN/OUT - number of valid bytes left in buffer */
-u_char	    *type;	/* OUT - ASN type of object */
+u_char      *data;  /* IN - pointer to start of object */
+int         *datalength;/* IN/OUT - number of valid bytes left in buffer */
+u_char      *type;  /* OUT - ASN type of object */
 {
     register u_char *bufp = data;
-    register	    header_len;
-    u_long	    asn_length;
+    register        header_len;
+    u_long      asn_length;
 
     /* this only works on data types < 30, i.e. no extension octets */
     if (IS_EXTENSION_ID(*bufp))
@@ -456,10 +456,10 @@ u_char	    *type;	/* OUT - ASN type of object */
  */
 u_char *
 asn_build_header(data, datalength, type, length)
-register u_char *data;	/* IN - pointer to start of object */
-int		    *datalength;/* IN/OUT - number of valid bytes left in buffer */
-u_char	    type;	/* IN - ASN type of object */
-int		    length;	/* IN - length of object */
+register u_char *data;  /* IN - pointer to start of object */
+int         *datalength;/* IN/OUT - number of valid bytes left in buffer */
+u_char      type;   /* IN - ASN type of object */
+int         length; /* IN - length of object */
 {
     if (*datalength < 1)
         return NULL;
@@ -479,14 +479,14 @@ int		    length;	/* IN - length of object */
  */
 u_char *
 asn_parse_length(data, length)
-u_char  *data;	/* IN - pointer to start of length field */
-u_long  *length;	/* OUT - value of length field */
+u_char  *data;  /* IN - pointer to start of length field */
+u_long  *length;    /* OUT - value of length field */
 {
     register u_char lengthbyte = *data;
 
     if (lengthbyte & ASN_LONG_LEN)
     {
-        lengthbyte &= ~ASN_LONG_LEN;	/* turn MSb off */
+        lengthbyte &= ~ASN_LONG_LEN;    /* turn MSb off */
         if (lengthbyte == 0)
         {
             ERROR("We don't support indefinite lengths");
@@ -511,9 +511,9 @@ u_long  *length;	/* OUT - value of length field */
 
 u_char *
 asn_build_length(data, datalength, length)
-register u_char *data;	/* IN - pointer to start of object */
-int		    *datalength;/* IN/OUT - number of valid bytes left in buffer */
-register int    length;	/* IN - length of object */
+register u_char *data;  /* IN - pointer to start of object */
+int         *datalength;/* IN/OUT - number of valid bytes left in buffer */
+register int    length; /* IN - length of object */
 {
     u_char    *start_data = data;
 
@@ -557,11 +557,11 @@ register int    length;	/* IN - length of object */
  */
 u_char *
 asn_parse_objid(data, datalength, type, objid, objidlength)
-u_char	    *data;	    /* IN - pointer to start of object */
-int		    *datalength;    /* IN/OUT - number of valid bytes left in buffer */
-u_char	    *type;	    /* OUT - ASN type of object */
-oid		    *objid;	    /* IN/OUT - pointer to start of output buffer */
-int		    *objidlength;     /* IN/OUT - number of sub-id's in objid */
+u_char      *data;      /* IN - pointer to start of object */
+int         *datalength;    /* IN/OUT - number of valid bytes left in buffer */
+u_char      *type;      /* OUT - ASN type of object */
+oid         *objid;     /* IN/OUT - pointer to start of output buffer */
+int         *objidlength;     /* IN/OUT - number of sub-id's in objid */
 {
     /*
      * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
@@ -573,7 +573,7 @@ int		    *objidlength;     /* IN/OUT - number of sub-id's in objid */
     register oid *oidp = objid + 1;
     register u_long subidentifier;
     register long   length;
-    u_long	    asn_length;
+    u_long      asn_length;
 
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
@@ -587,16 +587,16 @@ int		    *objidlength;     /* IN/OUT - number of sub-id's in objid */
     *datalength -= (int)asn_length + (bufp - data);
 
     length = asn_length;
-    (*objidlength)--;	/* account for expansion of first byte */
+    (*objidlength)--;   /* account for expansion of first byte */
     while (length > 0 && (*objidlength)-- > 0)
     {
         subidentifier = 0;
-        do  	/* shift and add in low order 7 bits */
+        do      /* shift and add in low order 7 bits */
         {
             subidentifier = (subidentifier << 7) + (*(u_char *)bufp & ~ASN_BIT8);
             length--;
         }
-        while (*(u_char *)bufp++ & ASN_BIT8);	/* last byte has high bit clear */
+        while (*(u_char *)bufp++ & ASN_BIT8);   /* last byte has high bit clear */
         if (subidentifier > (u_long)MAX_SUBID)
         {
             ERROR("subidentifier too long");
@@ -608,7 +608,7 @@ int		    *objidlength;     /* IN/OUT - number of sub-id's in objid */
     /*
      * The first two subidentifiers are encoded into the first component
      * with the value (X * 40) + Y, where:
-     *	X is the value of the first subidentifier.
+     *  X is the value of the first subidentifier.
      *  Y is the value of the second subidentifier.
      */
     subidentifier = (u_long)objid[1];
@@ -631,11 +631,11 @@ int		    *objidlength;     /* IN/OUT - number of sub-id's in objid */
  */
 u_char *
 asn_build_objid(data, datalength, type, objid, objidlength)
-register u_char *data;	    /* IN - pointer to start of object */
-int		    *datalength;    /* IN/OUT - number of valid bytes left in buffer */
-u_char	    type;	    /* IN - ASN type of object */
-oid		    *objid;	    /* IN - pointer to start of input buffer */
-int		    objidlength;    /* IN - number of sub-id's in objid */
+register u_char *data;      /* IN - pointer to start of object */
+int         *datalength;    /* IN/OUT - number of valid bytes left in buffer */
+u_char      type;       /* IN - ASN type of object */
+oid         *objid;     /* IN - pointer to start of input buffer */
+int         objidlength;    /* IN - number of sub-id's in objid */
 {
     /*
      * ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
@@ -645,7 +645,7 @@ int		    objidlength;    /* IN - number of sub-id's in objid */
      */
     u_char buf[MAX_OID_LEN];
     u_char *bp = buf;
-    oid	objbuf[MAX_OID_LEN];
+    oid objbuf[MAX_OID_LEN];
     oid *op = objbuf;
     register int    asnlength;
     register u_long subid, mask, testmask;
@@ -666,7 +666,7 @@ int		    objidlength;    /* IN - number of sub-id's in objid */
         /* testmask *MUST* !!!! be of an unsigned type */
         for(testmask = 0x7F, testbits = 0; testmask != 0; testmask <<= 7, testbits += 7)
         {
-            if (subid & testmask) 	/* if any bits set */
+            if (subid & testmask)   /* if any bits set */
             {
                 mask = testmask;
                 bits = testbits;
@@ -704,15 +704,15 @@ int		    objidlength;    /* IN - number of sub-id's in objid */
  */
 u_char *
 asn_parse_null(data, datalength, type)
-u_char	    *data;	    /* IN - pointer to start of object */
-int		    *datalength;    /* IN/OUT - number of valid bytes left in buffer */
-u_char	    *type;	    /* OUT - ASN type of object */
+u_char      *data;      /* IN - pointer to start of object */
+int         *datalength;    /* IN/OUT - number of valid bytes left in buffer */
+u_char      *type;      /* OUT - ASN type of object */
 {
     /*
      * ASN.1 null ::= 0x05 0x00
      */
     register u_char   *bufp = data;
-    u_long	    asn_length;
+    u_long      asn_length;
 
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
@@ -740,9 +740,9 @@ u_char	    *type;	    /* OUT - ASN type of object */
  */
 u_char *
 asn_build_null(data, datalength, type)
-u_char	    *data;	    /* IN - pointer to start of object */
-int		    *datalength;    /* IN/OUT - number of valid bytes left in buffer */
-u_char	    type;	    /* IN - ASN type of object */
+u_char      *data;      /* IN - pointer to start of object */
+int         *datalength;    /* IN/OUT - number of valid bytes left in buffer */
+u_char      type;       /* IN - ASN type of object */
 {
     /*
      * ASN.1 null ::= 0x05 0x00

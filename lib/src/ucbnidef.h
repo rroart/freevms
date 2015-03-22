@@ -1,5 +1,5 @@
-#ifndef ucbnidef_h
-#define ucbnidef_h
+#ifndef UCBNIDEF_H
+#define UCBNIDEF_H
 
 #define UCB$C_NI_NUMGSP 4
 #define UCB$C_NI_ALLPRM 416
@@ -134,15 +134,15 @@ struct _ucbnists
         unsigned int ucb$l_ni_sts;
         struct
         {
-            unsigned ucb$v_ni_start_begun	: 1;
-            unsigned ucb$v_lan_length		: 1;
-            unsigned ucb$v_lan_uniqid		: 1;
-            unsigned ucb$v_ni_share		: 1;
-            unsigned ucb$v_ni_started		: 1;
-            unsigned ucb$v_ni_restart_inuse	: 1;
-            unsigned ucb$v_ni_pass		: 1;
-            unsigned ucb$v_ni_share_def	: 1;
-            unsigned ucb$v_ni_filler		: 24;
+            unsigned ucb$v_ni_start_begun   : 1;
+            unsigned ucb$v_lan_length       : 1;
+            unsigned ucb$v_lan_uniqid       : 1;
+            unsigned ucb$v_ni_share     : 1;
+            unsigned ucb$v_ni_started       : 1;
+            unsigned ucb$v_ni_restart_inuse : 1;
+            unsigned ucb$v_ni_pass      : 1;
+            unsigned ucb$v_ni_share_def : 1;
+            unsigned ucb$v_ni_filler        : 24;
         };
     };
 };
@@ -186,38 +186,38 @@ struct _ucbniprm
         unsigned int ucb$l_ni_prm_str;
         struct
         {
-            unsigned ucb$v_ni_prm_acc		: 1;
-            unsigned ucb$v_ni_prm_apc		: 1;
-            unsigned ucb$v_ni_prm_bfn		: 1;
-            unsigned ucb$v_ni_prm_bsz		: 1;
-            unsigned ucb$v_ni_prm_bus		: 1;
-            unsigned ucb$v_ni_prm_cca		: 1;
-            unsigned ucb$v_ni_prm_cnm		: 1;
-            unsigned ucb$v_ni_prm_con		: 1;
-            unsigned ucb$v_ni_prm_ilp		: 1;
-            unsigned ucb$v_ni_prm_crc		: 1;
-            unsigned ucb$v_ni_prm_dch		: 1;
-            unsigned ucb$v_ni_prm_des		: 1;
-            unsigned ucb$v_ni_prm_fmt		: 1;
-            unsigned ucb$v_ni_prm_gsp		: 1;
-            unsigned ucb$v_ni_prm_hwa		: 1;
-            unsigned ucb$v_ni_prm_mca		: 1;
-            unsigned ucb$v_ni_prm_med		: 1;
-            unsigned ucb$v_ni_prm_mlt		: 1;
-            unsigned ucb$v_ni_prm_mrb		: 1;
-            unsigned ucb$v_ni_prm_pad		: 1;
-            unsigned ucb$v_ni_prm_pha		: 1;
-            unsigned ucb$v_ni_prm_pid		: 1;
-            unsigned ucb$v_ni_prm_prm		: 1;
-            unsigned ucb$v_ni_prm_pty		: 1;
-            unsigned ucb$v_ni_prm_res		: 1;
-            unsigned ucb$v_ni_prm_sap		: 1;
-            unsigned ucb$v_ni_prm_srv		: 1;
-            unsigned ucb$v_ni_prm_mbs		: 1;
-            unsigned ucb$v_ni_prm_rfc		: 1;
-            unsigned ucb$v_ni_prm_xfc		: 1;
-            unsigned ucb$v_ni_prm_src		: 1;
-            unsigned ucb$v_ni_prm_filler	: 1;
+            unsigned ucb$v_ni_prm_acc       : 1;
+            unsigned ucb$v_ni_prm_apc       : 1;
+            unsigned ucb$v_ni_prm_bfn       : 1;
+            unsigned ucb$v_ni_prm_bsz       : 1;
+            unsigned ucb$v_ni_prm_bus       : 1;
+            unsigned ucb$v_ni_prm_cca       : 1;
+            unsigned ucb$v_ni_prm_cnm       : 1;
+            unsigned ucb$v_ni_prm_con       : 1;
+            unsigned ucb$v_ni_prm_ilp       : 1;
+            unsigned ucb$v_ni_prm_crc       : 1;
+            unsigned ucb$v_ni_prm_dch       : 1;
+            unsigned ucb$v_ni_prm_des       : 1;
+            unsigned ucb$v_ni_prm_fmt       : 1;
+            unsigned ucb$v_ni_prm_gsp       : 1;
+            unsigned ucb$v_ni_prm_hwa       : 1;
+            unsigned ucb$v_ni_prm_mca       : 1;
+            unsigned ucb$v_ni_prm_med       : 1;
+            unsigned ucb$v_ni_prm_mlt       : 1;
+            unsigned ucb$v_ni_prm_mrb       : 1;
+            unsigned ucb$v_ni_prm_pad       : 1;
+            unsigned ucb$v_ni_prm_pha       : 1;
+            unsigned ucb$v_ni_prm_pid       : 1;
+            unsigned ucb$v_ni_prm_prm       : 1;
+            unsigned ucb$v_ni_prm_pty       : 1;
+            unsigned ucb$v_ni_prm_res       : 1;
+            unsigned ucb$v_ni_prm_sap       : 1;
+            unsigned ucb$v_ni_prm_srv       : 1;
+            unsigned ucb$v_ni_prm_mbs       : 1;
+            unsigned ucb$v_ni_prm_rfc       : 1;
+            unsigned ucb$v_ni_prm_xfc       : 1;
+            unsigned ucb$v_ni_prm_src       : 1;
+            unsigned ucb$v_ni_prm_filler    : 1;
         };
     };
 };

@@ -19,7 +19,7 @@
  * Fixed SMP synchronization, 08/08/99, Manfred Spraul
  *     manfreds@colorfullife.com
  * Rewrote bits to get rid of console_lock
- *	01Mar01 Andrew Morton <andrewm@uow.edu.au>
+ *  01Mar01 Andrew Morton <andrewm@uow.edu.au>
  */
 
 #include <linux/kernel.h>
@@ -30,22 +30,22 @@
 #include <linux/console.h>
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/interrupt.h>			/* For in_interrupt() */
+#include <linux/interrupt.h>            /* For in_interrupt() */
 #include <linux/config.h>
 
 #include <asm/uaccess.h>
 
 #ifdef CONFIG_MULTIQUAD
-#define LOG_BUF_LEN	(65536)
+#define LOG_BUF_LEN (65536)
 #elif defined(CONFIG_ARCH_S390)
-#define LOG_BUF_LEN	(131072)
+#define LOG_BUF_LEN (131072)
 #elif defined(CONFIG_SMP)
-#define LOG_BUF_LEN	(32768)
+#define LOG_BUF_LEN (32768)
 #else
-#define LOG_BUF_LEN	(16384)			/* This must be a power of two */
+#define LOG_BUF_LEN (16384)         /* This must be a power of two */
 #endif
 
-#define LOG_BUF_MASK	(LOG_BUF_LEN-1)
+#define LOG_BUF_MASK    (LOG_BUF_LEN-1)
 
 #ifndef arch_consoles_callable
 #define arch_consoles_callable() (1)
@@ -62,10 +62,10 @@ DECLARE_WAIT_QUEUE_HEAD(log_wait);
 
 int console_printk[4] =
 {
-    DEFAULT_CONSOLE_LOGLEVEL,	/* console_loglevel */
-    DEFAULT_MESSAGE_LOGLEVEL,	/* default_message_loglevel */
-    MINIMUM_CONSOLE_LOGLEVEL,	/* minimum_console_loglevel */
-    DEFAULT_CONSOLE_LOGLEVEL,	/* default_console_loglevel */
+    DEFAULT_CONSOLE_LOGLEVEL,   /* console_loglevel */
+    DEFAULT_MESSAGE_LOGLEVEL,   /* default_message_loglevel */
+    MINIMUM_CONSOLE_LOGLEVEL,   /* minimum_console_loglevel */
+    DEFAULT_CONSOLE_LOGLEVEL,   /* default_console_loglevel */
 };
 
 int oops_in_progress;
@@ -92,10 +92,10 @@ static char log_buf[LOG_BUF_LEN];
  * The indices into log_buf are not constrained to LOG_BUF_LEN - they
  * must be masked before subscripting
  */
-static unsigned long log_start;			/* Index into log_buf: next char to be read by syslog() */
-static unsigned long con_start;			/* Index into log_buf: next char to be sent to consoles */
-static unsigned long log_end;			/* Index into log_buf: most-recently-written-char + 1 */
-static unsigned long logged_chars;		/* Number of chars produced since last read+clear operation */
+static unsigned long log_start;         /* Index into log_buf: next char to be read by syslog() */
+static unsigned long con_start;         /* Index into log_buf: next char to be sent to consoles */
+static unsigned long log_end;           /* Index into log_buf: most-recently-written-char + 1 */
+static unsigned long logged_chars;      /* Number of chars produced since last read+clear operation */
 
 struct console_cmdline console_cmdline[MAX_CMDLINECONSOLES];
 static int preferred_console = -1;
@@ -104,7 +104,7 @@ static int preferred_console = -1;
 static int console_may_schedule;
 
 /*
- *	Setup a list of consoles. Called from init/main.c
+ *  Setup a list of consoles. Called from init/main.c
  */
 static int __init console_setup(char *str)
 {
@@ -114,7 +114,7 @@ static int __init console_setup(char *str)
     int i, idx;
 
     /*
-     *	Decode str into name, index, options.
+     *  Decode str into name, index, options.
      */
     if (str[0] >= '0' && str[0] <= '9')
     {
@@ -139,8 +139,8 @@ static int __init console_setup(char *str)
     *s = 0;
 
     /*
-     *	See if this tty is not yet registered, and
-     *	if we have a slot free.
+     *  See if this tty is not yet registered, and
+     *  if we have a slot free.
      */
     for(i = 0; i < MAX_CMDLINECONSOLES && console_cmdline[i].name[0]; i++)
         if (strcmp(console_cmdline[i].name, name) == 0 &&
@@ -164,16 +164,16 @@ __setup("console=", console_setup);
 /*
  * Commands to do_syslog:
  *
- * 	0 -- Close the log.  Currently a NOP.
- * 	1 -- Open the log. Currently a NOP.
- * 	2 -- Read from the log.
- * 	3 -- Read all messages remaining in the ring buffer.
- * 	4 -- Read and clear all messages remaining in the ring buffer
- * 	5 -- Clear ring buffer.
- * 	6 -- Disable printk's to console
- * 	7 -- Enable printk's to console
- *	8 -- Set level of messages printed to console
- *	9 -- Return number of unread characters in the log buffer
+ *  0 -- Close the log.  Currently a NOP.
+ *  1 -- Open the log. Currently a NOP.
+ *  2 -- Read from the log.
+ *  3 -- Read all messages remaining in the ring buffer.
+ *  4 -- Read and clear all messages remaining in the ring buffer
+ *  5 -- Clear ring buffer.
+ *  6 -- Disable printk's to console
+ *  7 -- Enable printk's to console
+ *  8 -- Set level of messages printed to console
+ *  9 -- Return number of unread characters in the log buffer
  */
 int do_syslog(int type, char * buf, int len)
 {
@@ -184,11 +184,11 @@ int do_syslog(int type, char * buf, int len)
 
     switch (type)
     {
-    case 0:		/* Close log */
+    case 0:     /* Close log */
         break;
-    case 1:		/* Open log */
+    case 1:     /* Open log */
         break;
-    case 2:		/* Read from log */
+    case 2:     /* Read from log */
         error = -EINVAL;
         if (!buf || len < 0)
             goto out;
@@ -216,10 +216,10 @@ int do_syslog(int type, char * buf, int len)
         spin_unlock_irq(&logbuf_lock);
         error = i;
         break;
-    case 4:		/* Read/clear last kernel messages */
+    case 4:     /* Read/clear last kernel messages */
         do_clear = 1;
         /* FALL THRU */
-    case 3:		/* Read last kernel messages */
+    case 3:     /* Read last kernel messages */
         error = -EINVAL;
         if (!buf || len < 0)
             goto out;
@@ -268,22 +268,22 @@ int do_syslog(int type, char * buf, int len)
         }
 
         break;
-    case 5:		/* Clear ring buffer */
+    case 5:     /* Clear ring buffer */
         spin_lock_irq(&logbuf_lock);
         logged_chars = 0;
         spin_unlock_irq(&logbuf_lock);
         break;
-    case 6:		/* Disable logging to console */
+    case 6:     /* Disable logging to console */
         spin_lock_irq(&logbuf_lock);
         console_loglevel = minimum_console_loglevel;
         spin_unlock_irq(&logbuf_lock);
         break;
-    case 7:		/* Enable logging to console */
+    case 7:     /* Enable logging to console */
         spin_lock_irq(&logbuf_lock);
         console_loglevel = default_console_loglevel;
         spin_unlock_irq(&logbuf_lock);
         break;
-    case 8:		/* Set level of messages printed to console */
+    case 8:     /* Set level of messages printed to console */
         error = -EINVAL;
         if (len < 1 || len > 8)
             goto out;
@@ -294,7 +294,7 @@ int do_syslog(int type, char * buf, int len)
         spin_unlock_irq(&logbuf_lock);
         error = 0;
         break;
-    case 9:		/* Number of chars in the log buffer */
+    case 9:     /* Number of chars in the log buffer */
         spin_lock_irq(&logbuf_lock);
         error = log_end - log_start;
         spin_unlock_irq(&logbuf_lock);
@@ -365,7 +365,7 @@ static void call_console_drivers(unsigned long start, unsigned long end)
     start_print = start;
     while (cur_index != end)
     {
-        if (	msg_level < 0 &&
+        if (    msg_level < 0 &&
                 ((end - cur_index) > 2) &&
                 LOG_BUF(cur_index + 0) == '<' &&
                 LOG_BUF(cur_index + 1) >= '0' &&
@@ -517,8 +517,8 @@ EXPORT_SYMBOL(printk);
  */
 void acquire_console_sem(void)
 {
-//	if (in_interrupt())
-//		BUG();
+//  if (in_interrupt())
+//      BUG();
     down(&console_sem);
     console_may_schedule = 1;
 }
@@ -549,10 +549,10 @@ void release_console_sem(void)
         spin_lock_irqsave(&logbuf_lock, flags);
         must_wake_klogd |= log_start - log_end;
         if (con_start == log_end)
-            break;			/* Nothing to print */
+            break;          /* Nothing to print */
         _con_start = con_start;
         _log_end = log_end;
-        con_start = log_end;		/* Flush */
+        con_start = log_end;        /* Flush */
         spin_unlock_irqrestore(&logbuf_lock, flags);
         call_console_drivers(_con_start, _log_end);
     }
@@ -612,9 +612,9 @@ void register_console(struct console * console)
     unsigned long flags;
 
     /*
-     *	See if we want to use this console driver. If we
-     *	didn't select a console we take the first one
-     *	that registers here.
+     *  See if we want to use this console driver. If we
+     *  didn't select a console we take the first one
+     *  that registers here.
      */
     if (preferred_console < 0)
     {
@@ -629,8 +629,8 @@ void register_console(struct console * console)
     }
 
     /*
-     *	See if this console matches one we selected on
-     *	the command line.
+     *  See if this console matches one we selected on
+     *  the command line.
      */
     for(i = 0; i < MAX_CMDLINECONSOLES && console_cmdline[i].name[0]; i++)
     {
@@ -655,8 +655,8 @@ void register_console(struct console * console)
         return;
 
     /*
-     *	Put this console in the list - keep the
-     *	preferred driver at the head of the list.
+     *  Put this console in the list - keep the
+     *  preferred driver at the head of the list.
      */
     acquire_console_sem();
     if ((console->flags & CON_CONSDEV) || console_drivers == NULL)

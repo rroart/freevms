@@ -10,7 +10,7 @@
  * We group personalities into execution domains which have their
  * own handlers for kernel entry points, signal mapping, etc...
  *
- * 2001-05-06	Complete rewrite,  Christoph Hellwig (hch@infradead.org)
+ * 2001-05-06   Complete rewrite,  Christoph Hellwig (hch@infradead.org)
  */
 
 #include <linux/config.h>
@@ -32,26 +32,26 @@ static rwlock_t exec_domains_lock = RW_LOCK_UNLOCKED;
 
 static u_long ident_map[32] =
 {
-    0,	1,	2,	3,	4,	5,	6,	7,
-    8,	9,	10,	11,	12,	13,	14,	15,
-    16,	17,	18,	19,	20,	21,	22,	23,
-    24,	25,	26,	27,	28,	29,	30,	31
+    0,  1,  2,  3,  4,  5,  6,  7,
+    8,  9,  10, 11, 12, 13, 14, 15,
+    16, 17, 18, 19, 20, 21, 22, 23,
+    24, 25, 26, 27, 28, 29, 30, 31
 };
 
 struct exec_domain default_exec_domain =
 {
-    "Linux",		/* name */
-    default_handler,	/* lcall7 causes a seg fault. */
-    0, 0,			/* PER_LINUX personality. */
-    ident_map,		/* Identity map signals. */
-    ident_map,		/*  - both ways. */
+    "Linux",        /* name */
+    default_handler,    /* lcall7 causes a seg fault. */
+    0, 0,           /* PER_LINUX personality. */
+    ident_map,      /* Identity map signals. */
+    ident_map,      /*  - both ways. */
 };
 
 
 static void
 default_handler(int segment, struct pt_regs *regp)
 {
-    u_long			pers = 0;
+    u_long          pers = 0;
 
     /*
      * This may have been a static linked SVr4 binary, so we would
@@ -85,8 +85,8 @@ default_handler(int segment, struct pt_regs *regp)
 static struct exec_domain *
 lookup_exec_domain(u_long personality)
 {
-    struct exec_domain *	ep;
-    u_long			pers = personality(personality);
+    struct exec_domain *    ep;
+    u_long          pers = personality(personality);
 
     read_lock(&exec_domains_lock);
     for (ep = exec_domains; ep; ep = ep->next)
@@ -122,8 +122,8 @@ out:
 int
 register_exec_domain(struct exec_domain *ep)
 {
-    struct exec_domain	*tmp;
-    int			err = -EBUSY;
+    struct exec_domain  *tmp;
+    int         err = -EBUSY;
 
     if (ep == NULL)
         return -EINVAL;
@@ -150,7 +150,7 @@ out:
 int
 unregister_exec_domain(struct exec_domain *ep)
 {
-    struct exec_domain	**epp;
+    struct exec_domain  **epp;
 
     epp = &exec_domains;
     write_lock(&exec_domains_lock);
@@ -172,7 +172,7 @@ unregister:
 int
 __set_personality(u_long personality)
 {
-    struct exec_domain	*ep, *oep;
+    struct exec_domain  *ep, *oep;
 
     ep = lookup_exec_domain(personality);
     if (ep == current->exec_domain)
@@ -219,8 +219,8 @@ __set_personality(u_long personality)
 int
 get_exec_domain_list(char *page)
 {
-    struct exec_domain	*ep;
-    int			len = 0;
+    struct exec_domain  *ep;
+    int         len = 0;
 
     read_lock(&exec_domains_lock);
     for (ep = exec_domains; ep && len < PAGE_SIZE - 80; ep = ep->next)
@@ -259,7 +259,7 @@ EXPORT_SYMBOL(__set_personality);
  * I hope the new sysctl schemes discussed for future versions
  * will obsolete this.
  *
- * 				--hch
+ *              --hch
  */
 
 u_long abi_defhandler_coff = PER_SCOSVR3;

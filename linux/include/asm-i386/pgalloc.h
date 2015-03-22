@@ -18,10 +18,10 @@
 #define pgtable_cache_size (current_cpu_data.pgtable_cache_sz)
 
 #define pmd_populate_kernel(mm, pmd, pte) \
-		set_pmd(pmd, __pmd(_PAGE_TABLE + __pa(pte)))
+        set_pmd(pmd, __pmd(_PAGE_TABLE + __pa(pte)))
 
 #define pmd_populate(mm, pmd, pte) \
-		set_pmd(pmd, __pmd(_PAGE_TABLE + __pa(pte)))
+        set_pmd(pmd, __pmd(_PAGE_TABLE + __pa(pte)))
 
 /*
  * Allocate and free page tables.
@@ -170,9 +170,9 @@ static __inline__ void pte_free_slow(pte_t *pte)
     free_page((unsigned long)pte);
 }
 
-#define pte_free(pte)		pte_free_slow(pte)
-#define pgd_free(pgd)		free_pgd_slow(pgd)
-#define pgd_alloc(mm)		get_pgd_fast()
+#define pte_free(pte)       pte_free_slow(pte)
+#define pgd_free(pgd)       free_pgd_slow(pgd)
+#define pgd_alloc(mm)       get_pgd_fast()
 
 /*
  * allocating and freeing a pmd is trivial: the 1-entry pmd is
@@ -180,12 +180,12 @@ static __inline__ void pte_free_slow(pte_t *pte)
  * (In the PAE case we free the pmds as part of the pgd.)
  */
 
-#define pmd_alloc_one_fast(mm, addr)	({ BUG(); ((pmd_t *)1); })
-#define pmd_alloc_one(mm, addr)		({ BUG(); ((pmd_t *)2); })
-#define pmd_free_slow(x)		do { } while (0)
-#define pmd_free_fast(x)		do { } while (0)
-#define pmd_free(x)			do { } while (0)
-#define pgd_populate(mm, pmd, pte)	BUG()
+#define pmd_alloc_one_fast(mm, addr)    ({ BUG(); ((pmd_t *)1); })
+#define pmd_alloc_one(mm, addr)     ({ BUG(); ((pmd_t *)2); })
+#define pmd_free_slow(x)        do { } while (0)
+#define pmd_free_fast(x)        do { } while (0)
+#define pmd_free(x)         do { } while (0)
+#define pgd_populate(mm, pmd, pte)  BUG()
 
 extern int do_check_pgt_cache(int, int);
 
@@ -236,22 +236,22 @@ static inline void flush_tlb_range(struct mm_struct *mm,
 extern void flush_tlb_page2(struct mm_struct *, unsigned long);
 
 #define local_flush_tlb() \
-	__flush_tlb()
+    __flush_tlb()
 
 extern void flush_tlb_all(void);
 extern void flush_tlb_current_task(void);
 extern void flush_tlb_mm(struct mm_struct *);
 extern void flush_tlb_page(struct vm_area_struct *, unsigned long);
 
-#define flush_tlb()	flush_tlb_current_task()
+#define flush_tlb() flush_tlb_current_task()
 
 static inline void flush_tlb_range(struct mm_struct * mm, unsigned long start, unsigned long end)
 {
     flush_tlb_mm(mm);
 }
 
-#define TLBSTATE_OK	1
-#define TLBSTATE_LAZY	2
+#define TLBSTATE_OK 1
+#define TLBSTATE_LAZY   2
 
 struct tlb_state
 {

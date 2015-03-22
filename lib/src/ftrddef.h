@@ -1,5 +1,5 @@
-#ifndef ftrddef_h
-#define ftrddef_h
+#ifndef FTRDDEF_H
+#define FTRDDEF_H
 
 #define FTRD$K_LENGTH 40
 #define FTRD$C_LENGTH 40
@@ -13,7 +13,7 @@ struct _ftrd
     unsigned char ftrd$b_type;
     unsigned char ftrd$b_rmod;
     unsigned int ftrd$l_pid;
-    int (*ftrd$l_ast)();
+    int (*ftrd$l_ast)(void);
     unsigned int ftrd$l_astprm;
     unsigned char ftrd$b_efn;
     unsigned char ftrd$b_unused;

@@ -126,9 +126,9 @@ int kswapd(void *unused)
         int bitmapsiz=pages>>3;
         struct _pfl * pfl=kmalloc(sizeof(struct _pfl)+bitmapsiz,GFP_KERNEL);
         memset(pfl,0,sizeof(struct _pfl)+bitmapsiz);
-        //	  memset((long)pfl+bitmapsiz,0xff,bitmapsiz);
+        //    memset((long)pfl+bitmapsiz,0xff,bitmapsiz);
         extern struct _pfl swap_info_pfl[];
-        //	  swap_info_pfl[0]=pfl;
+        //    swap_info_pfl[0]=pfl;
         myswapfile=pfl;
         pfl->pfl$b_type=DYN$C_PFL;
         pfl->pfl$w_size=sizeof(struct _pfl)+bitmapsiz;
@@ -178,8 +178,8 @@ out:
         add_wait_queue(&kswapd_wait, &wait);
 
         mb();
-        //		if (kswapd_can_sleep())
-        //			schedule();
+        //      if (kswapd_can_sleep())
+        //          schedule();
         if ((current->pcb$l_sts&PCB$M_WAKEPEN)==0)
             schedule();
 
@@ -197,7 +197,7 @@ out:
 
         /* powerfail stuff */
 
-        //		run_task_queue(&tq_disk);
+        //      run_task_queue(&tq_disk);
     }
 }
 

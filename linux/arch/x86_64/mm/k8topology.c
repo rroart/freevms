@@ -55,7 +55,7 @@ struct node
 };
 
 #define for_all_nodes(n) \
-	for (n=0; n<MAXNODE;n++) if (nodes[n].start!=nodes[n].end)
+    for (n=0; n<MAXNODE;n++) if (nodes[n].start!=nodes[n].end)
 
 static __init int compute_hash_shift(struct node *nodes, int numnodes, u64 maxmem)
 {
@@ -125,7 +125,7 @@ int __init k8_scan_nodes(unsigned long start, unsigned long end)
         }
         if (!limit)
         {
-            printk(KERN_INFO "Skipping node entry %d (base %lx)\n", i,			       base);
+            printk(KERN_INFO "Skipping node entry %d (base %lx)\n", i,                 base);
             continue;
         }
         if ((base >> 8) & 3 || (limit >> 8) & 3)

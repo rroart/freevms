@@ -217,7 +217,7 @@ EXPORT_SYMBOL(sys_dup);
 EXPORT_SYMBOL(sys_delete_module);
 EXPORT_SYMBOL(sys_sync);
 EXPORT_SYMBOL(sys_pause);
-EXPORT_SYMBOL(sys_setsid);	/* Rather dubious */
+EXPORT_SYMBOL(sys_setsid);  /* Rather dubious */
 
 
 EXPORT_SYMBOL(memcpy_fromio);

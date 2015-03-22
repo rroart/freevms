@@ -7,7 +7,7 @@
 /*
  * linux/ipc/shm.c
  * Copyright (C) 1992, 1993 Krishna Balasubramanian
- *	 Many improvements/fixes by Bruno Haible.
+ *   Many improvements/fixes by Bruno Haible.
  * Replaced `struct shm_desc' by `struct vm_area_struct', July 1994.
  * Fixed the shm swap deallocation (shm_unuse()), August 1998 Andrea Arcangeli.
  *
@@ -36,32 +36,32 @@
 
 struct shmid_kernel /* private to the kernel */
 {
-    struct kern_ipc_perm	shm_perm;
-    struct file *		shm_file;
-    int			id;
-    unsigned long		shm_nattch;
-    unsigned long		shm_segsz;
-    time_t			shm_atim;
-    time_t			shm_dtim;
-    time_t			shm_ctim;
-    pid_t			shm_cprid;
-    pid_t			shm_lprid;
+    struct kern_ipc_perm    shm_perm;
+    struct file *       shm_file;
+    int         id;
+    unsigned long       shm_nattch;
+    unsigned long       shm_segsz;
+    time_t          shm_atim;
+    time_t          shm_dtim;
+    time_t          shm_ctim;
+    pid_t           shm_cprid;
+    pid_t           shm_lprid;
 };
 
-#define shm_flags	shm_perm.mode
+#define shm_flags   shm_perm.mode
 
 static struct file_operations shm_file_operations;
 static struct vm_operations_struct shm_vm_ops;
 
 static struct ipc_ids shm_ids;
 
-#define shm_lock(id)	((struct shmid_kernel*)ipc_lock(&shm_ids,id))
-#define shm_unlock(id)	ipc_unlock(&shm_ids,id)
-#define shm_lockall()	ipc_lockall(&shm_ids)
-#define shm_unlockall()	ipc_unlockall(&shm_ids)
-#define shm_get(id)	((struct shmid_kernel*)ipc_get(&shm_ids,id))
+#define shm_lock(id)    ((struct shmid_kernel*)ipc_lock(&shm_ids,id))
+#define shm_unlock(id)  ipc_unlock(&shm_ids,id)
+#define shm_lockall()   ipc_lockall(&shm_ids)
+#define shm_unlockall() ipc_unlockall(&shm_ids)
+#define shm_get(id) ((struct shmid_kernel*)ipc_get(&shm_ids,id))
 #define shm_buildid(id, seq) \
-	ipc_buildid(&shm_ids, id, seq)
+    ipc_buildid(&shm_ids, id, seq)
 
 static int newseg (key_t key, int shmflg, size_t size);
 static void shm_open (struct vm_area_struct *shmd);
@@ -196,13 +196,13 @@ static inline unsigned long copy_shmid_to_user(void *buf, struct shmid64_ds *in,
         struct shmid_ds out;
 
         ipc64_perm_to_ipc_perm(&in->shm_perm, &out.shm_perm);
-        out.shm_segsz	= in->shm_segsz;
-        out.shm_atime	= in->shm_atime;
-        out.shm_dtime	= in->shm_dtime;
-        out.shm_ctime	= in->shm_ctime;
-        out.shm_cpid	= in->shm_cpid;
-        out.shm_lpid	= in->shm_lpid;
-        out.shm_nattch	= in->shm_nattch;
+        out.shm_segsz   = in->shm_segsz;
+        out.shm_atime   = in->shm_atime;
+        out.shm_dtime   = in->shm_dtime;
+        out.shm_ctime   = in->shm_ctime;
+        out.shm_cpid    = in->shm_cpid;
+        out.shm_lpid    = in->shm_lpid;
+        out.shm_nattch  = in->shm_nattch;
 
         return copy_to_user(buf, &out, sizeof(out));
     }
@@ -213,9 +213,9 @@ static inline unsigned long copy_shmid_to_user(void *buf, struct shmid64_ds *in,
 
 struct shm_setbuf
 {
-    uid_t	uid;
-    gid_t	gid;
-    mode_t	mode;
+    uid_t   uid;
+    gid_t   gid;
+    mode_t  mode;
 };
 
 static inline unsigned long copy_shmid_from_user(struct shm_setbuf *out, void *buf, int version)

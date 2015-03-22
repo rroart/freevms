@@ -9,7 +9,7 @@
 
 typedef struct plat_pglist_data
 {
-    pg_data_t	gendata;
+    pg_data_t   gendata;
     unsigned long   start_pfn, end_pfn;
 } plat_pg_data_t;
 
@@ -48,13 +48,13 @@ static inline int phys_to_nid(unsigned long addr)
     return nid;
 }
 
-#define PLAT_NODE_DATA(n)		(plat_node_data[(n)])
-#define PLAT_NODE_DATA_STARTNR(n)	\
-	(PLAT_NODE_DATA(n)->gendata.node_start_mapnr)
-#define PLAT_NODE_DATA_SIZE(n)		(PLAT_NODE_DATA(n)->gendata.node_size)
+#define PLAT_NODE_DATA(n)       (plat_node_data[(n)])
+#define PLAT_NODE_DATA_STARTNR(n)   \
+    (PLAT_NODE_DATA(n)->gendata.node_start_mapnr)
+#define PLAT_NODE_DATA_SIZE(n)      (PLAT_NODE_DATA(n)->gendata.node_size)
 
-#define PLAT_NODE_DATA_LOCALNR(p, n)	\
-	(((p) - PLAT_NODE_DATA(n)->gendata.node_start_paddr) >> PAGE_SHIFT)
+#define PLAT_NODE_DATA_LOCALNR(p, n)    \
+    (((p) - PLAT_NODE_DATA(n)->gendata.node_start_paddr) >> PAGE_SHIFT)
 
 #ifdef CONFIG_DISCONTIGMEM
 
@@ -65,34 +65,34 @@ static inline int phys_to_nid(unsigned long addr)
 /*
  * Given a kernel address, find the home node of the underlying memory.
  */
-#define KVADDR_TO_NID(kaddr)	phys_to_nid(__pa(kaddr))
+#define KVADDR_TO_NID(kaddr)    phys_to_nid(__pa(kaddr))
 
 /*
  * Return a pointer to the node data for node n.
  */
-#define NODE_DATA(n)	(&((PLAT_NODE_DATA(n))->gendata))
+#define NODE_DATA(n)    (&((PLAT_NODE_DATA(n))->gendata))
 
 /*
  * NODE_MEM_MAP gives the kaddr for the mem_map of the node.
  */
-#define NODE_MEM_MAP(nid)	(NODE_DATA(nid)->node_mem_map)
+#define NODE_MEM_MAP(nid)   (NODE_DATA(nid)->node_mem_map)
 
 /*
  * Given a kaddr, ADDR_TO_MAPBASE finds the owning node of the memory
  * and returns the the mem_map of that node.
  */
 #define ADDR_TO_MAPBASE(kaddr) \
-			NODE_MEM_MAP(KVADDR_TO_NID((unsigned long)(kaddr)))
+            NODE_MEM_MAP(KVADDR_TO_NID((unsigned long)(kaddr)))
 
 /*
  * Given a kaddr, LOCAL_BASE_ADDR finds the owning node of the memory
  * and returns the kaddr corresponding to first physical page in the
  * node's mem_map.
  */
-#define LOCAL_BASE_ADDR(kaddr)	((unsigned long)__va(NODE_DATA(KVADDR_TO_NID(kaddr))->node_start_paddr))
+#define LOCAL_BASE_ADDR(kaddr)  ((unsigned long)__va(NODE_DATA(KVADDR_TO_NID(kaddr))->node_start_paddr))
 
 #define LOCAL_MAP_NR(kvaddr) \
-	(((unsigned long)(kvaddr)-LOCAL_BASE_ADDR(kvaddr)) >> PAGE_SHIFT)
+    (((unsigned long)(kvaddr)-LOCAL_BASE_ADDR(kvaddr)) >> PAGE_SHIFT)
 
 #define BAD_PAGE 0xffffffffffff
 
@@ -123,36 +123,36 @@ paddr_to_local_pfn(unsigned long phys_addr, struct page **mem_map, int check)
     return pfn - plat_pgdat->start_pfn;
 }
 #define virt_to_page(kaddr) \
-	({ struct page *lmemmap; \
-	   unsigned long lpfn = paddr_to_local_pfn(__pa(kaddr),&lmemmap,0); \
-	   lmemmap + lpfn;  })
+    ({ struct page *lmemmap; \
+       unsigned long lpfn = paddr_to_local_pfn(__pa(kaddr),&lmemmap,0); \
+       lmemmap + lpfn;  })
 
 /* needs to handle bad addresses too */
 #define pte_page(pte) \
-	({ struct page *lmemmap; \
-	   unsigned long addr = pte_val(pte) & PHYSICAL_PAGE_MASK; \
-	   unsigned long lpfn = paddr_to_local_pfn(addr,&lmemmap,1); \
-	   lmemmap + lpfn;  })
+    ({ struct page *lmemmap; \
+       unsigned long addr = pte_val(pte) & PHYSICAL_PAGE_MASK; \
+       unsigned long lpfn = paddr_to_local_pfn(addr,&lmemmap,1); \
+       lmemmap + lpfn;  })
 
-#define pfn_to_page(pfn)	virt_to_page(__va((unsigned long)(pfn) << PAGE_SHIFT))
-#define page_to_pfn(page)	({ \
-	int nodeid = phys_to_nid(__pa(page));  \
-	plat_pg_data_t *nd = PLAT_NODE_DATA(nodeid); \
-	(page - nd->gendata.node_mem_map) + nd->start_pfn; \
+#define pfn_to_page(pfn)    virt_to_page(__va((unsigned long)(pfn) << PAGE_SHIFT))
+#define page_to_pfn(page)   ({ \
+    int nodeid = phys_to_nid(__pa(page));  \
+    plat_pg_data_t *nd = PLAT_NODE_DATA(nodeid); \
+    (page - nd->gendata.node_mem_map) + nd->start_pfn; \
 })
 
 #define VALID_PAGE(page_ptr) ({ \
-	int ok = 0; 						\
-	unsigned long phys = __pa(page_ptr); 			\
-        unsigned long index = phys >> memnode_shift; 		\
-	if (index <= NODEMAPSIZE) { 					  \
-		unsigned nodeid = memnodemap[index]; 			  \
-		pg_data_t *nd = NODE_DATA(nodeid); 			  \
-		struct page *lmemmap = nd->node_mem_map;		  \
-		ok = (nodeid != 0xff) && \
-		     (page_ptr >= lmemmap && page_ptr < lmemmap + nd->node_size); \
-	} 			\
-	ok; 			\
+    int ok = 0;                         \
+    unsigned long phys = __pa(page_ptr);            \
+        unsigned long index = phys >> memnode_shift;        \
+    if (index <= NODEMAPSIZE) {                       \
+        unsigned nodeid = memnodemap[index];              \
+        pg_data_t *nd = NODE_DATA(nodeid);            \
+        struct page *lmemmap = nd->node_mem_map;          \
+        ok = (nodeid != 0xff) && \
+             (page_ptr >= lmemmap && page_ptr < lmemmap + nd->node_size); \
+    }           \
+    ok;             \
 })
 
 #define page_to_phys(page) (page_to_pfn(page) << PAGE_SHIFT)
@@ -165,7 +165,7 @@ extern void setup_node_bootmem(int nodeid, unsigned long start_, unsigned long e
 #ifdef CONFIG_NUMA
 extern int fake_node;
 #define cputonode(cpu) (fake_node ? 0 : (cpu))
-#define numa_node_id()	cputonode(smp_processor_id())
+#define numa_node_id()  cputonode(smp_processor_id())
 #endif /* CONFIG_NUMA */
 
 #define MAX_NR_NODES 8

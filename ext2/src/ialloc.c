@@ -475,7 +475,7 @@ sync:
 
     SET_FCB_FID_FROM_INO(inode, ino);
 #if 0
-    inode->i_blksize = PAGE_SIZE;	/* This is the optimal IO size (for stat), not the fs block size */
+    inode->i_blksize = PAGE_SIZE;   /* This is the optimal IO size (for stat), not the fs block size */
 #endif
     inode->fcb$l_efblk = 0; // check
 #if 0

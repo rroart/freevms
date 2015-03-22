@@ -1,5 +1,5 @@
-#ifndef pfldef_h
-#define pfldef_h
+#ifndef PFLDEF_H
+#define PFLDEF_H
 
 #define PFL$M_INITED 0x1
 #define PFL$M_PAGFILFUL 0x2

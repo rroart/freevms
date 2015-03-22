@@ -1,5 +1,5 @@
-#ifndef fh2def_h
-#define fh2def_h
+#ifndef FH2DEF_H
+#define FH2DEF_H
 
 /* Access.h v1.3    Definitions for file access routines */
 
@@ -12,7 +12,7 @@
         must maintain comments in their source to acknowledge
         the contibution of the original author.
 
-	Originally part of access.h
+    Originally part of access.h
 */
 
 #define NO_DOLLAR

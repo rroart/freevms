@@ -1,7 +1,7 @@
 /*
  * str.c
  *
- *	Code for VAX STR$ANALYSE_SDESC routine
+ *  Code for VAX STR$ANALYSE_SDESC routine
  *
  * Description:
  *
@@ -11,11 +11,11 @@
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Mar 23, 2005 - Andrew Allison
- *		Added lib$routines.h for lib$stop prototype
+ *  Mar 23, 2005 - Andrew Allison
+ *      Added lib$routines.h for lib$stop prototype
  *
  */
 
@@ -29,9 +29,9 @@
 /*************************************************************
  * str$analyze_sdesc
  *
- *	Analyze String Descriptor extracts the length and
- *	starting address of the data for a variety of
- *	string descriptor classes
+ *  Analyze String Descriptor extracts the length and
+ *  starting address of the data for a variety of
+ *  string descriptor classes
  */
 short int str$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
                             unsigned short* word_integer_length, char** data_address)

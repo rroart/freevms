@@ -1,5 +1,5 @@
-#ifndef crbdef_h
-#define crbdef_h
+#ifndef CRBDEF_H
+#define CRBDEF_H
 
 #define CRB$M_XZA_CHAN0 0x1
 #define CRB$M_XZA_CHAN1 0x2

@@ -1,21 +1,21 @@
-#ifndef wcbdef_h
-#define wcbdef_h
+#ifndef WCBDEF_H
+#define WCBDEF_H
 
-#define		WCB$M_READ		0x1
-#define		WCB$M_WRITE		0x2
-#define		WCB$M_NOTFCP		0x4
-#define		WCB$M_SHRWCB		0x8
-#define		WCB$M_OVERDRAWN		0x10
-#define		WCB$M_COMPLETE		0x20
-#define		WCB$M_CATHEDRAL		0x40
-#define		WCB$M_EXPIRE		0x80
-#define		WCB$M_CONTROL		0x1000
-#define		WCB$M_NO_READ_DATA	0x2000
-#define		WCB$K_MAP		56
-#define		WCB$C_MAP		56
-#define		WCB$K_LENGTH		56
-#define		WCB$C_LENGTH		56
-#define		WCB$S_WCBDEF		80
+#define     WCB$M_READ      0x1
+#define     WCB$M_WRITE     0x2
+#define     WCB$M_NOTFCP        0x4
+#define     WCB$M_SHRWCB        0x8
+#define     WCB$M_OVERDRAWN     0x10
+#define     WCB$M_COMPLETE      0x20
+#define     WCB$M_CATHEDRAL     0x40
+#define     WCB$M_EXPIRE        0x80
+#define     WCB$M_CONTROL       0x1000
+#define     WCB$M_NO_READ_DATA  0x2000
+#define     WCB$K_MAP       56
+#define     WCB$C_MAP       56
+#define     WCB$K_LENGTH        56
+#define     WCB$C_LENGTH        56
+#define     WCB$S_WCBDEF        80
 
 struct _wcb
 {

@@ -16,18 +16,18 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*  Call an arbitrary routine in kernel mode				*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	entry = routine entrypoint					*/
-/*	param = routine parameter					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	oz_sys_callknl = status as returned by routine			*/
-/*									*/
+/*                                  */
+/*  Call an arbitrary routine in kernel mode                */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  entry = routine entrypoint                  */
+/*  param = routine parameter                   */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  oz_sys_callknl = status as returned by routine          */
+/*                                  */
 /************************************************************************/
 
 #include "ozone.h"

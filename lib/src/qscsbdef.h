@@ -1,5 +1,5 @@
-#ifndef qscsbdef_h
-#define qscsbdef_h
+#ifndef QSCSBDEF_H
+#define QSCSBDEF_H
 
 #include <cdrpdef.h>
 #include <irpdef.h>

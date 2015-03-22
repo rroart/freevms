@@ -32,13 +32,13 @@ static inline void * __inline_memcpy(void * to, const void * from, size_t n)
 #define __HAVE_ARCH_MEMCPY 1
 extern void *__memcpy(void *to, const void *from, size_t len);
 #define memcpy(dst,src,len) \
-	({ size_t __len = (len);				\
-	   void *__ret;						\
-	   if (__builtin_constant_p(len) && __len >= 64)	\
-		 __ret = __memcpy((dst),(src),__len);		\
-	   else							\
-		 __ret = __builtin_memcpy((dst),(src),__len);	\
-	   __ret; })
+    ({ size_t __len = (len);                \
+       void *__ret;                     \
+       if (__builtin_constant_p(len) && __len >= 64)    \
+         __ret = __memcpy((dst),(src),__len);       \
+       else                         \
+         __ret = __builtin_memcpy((dst),(src),__len);   \
+       __ret; })
 
 
 #define __HAVE_ARCH_MEMSET

@@ -1,9 +1,9 @@
 /*
 
-	mii.c: MII interface library
+    mii.c: MII interface library
 
-	Maintained by Jeff Garzik <jgarzik@mandrakesoft.com>
-	Copyright 2001 Jeff Garzik
+    Maintained by Jeff Garzik <jgarzik@mandrakesoft.com>
+    Copyright 2001 Jeff Garzik
 
  */
 

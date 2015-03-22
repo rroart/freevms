@@ -1,5 +1,5 @@
-#ifndef rdtdef_h
-#define rdtdef_h
+#ifndef RDTDEF_H
+#define RDTDEF_H
 
 #define RDT$S_RDTDEF 24
 

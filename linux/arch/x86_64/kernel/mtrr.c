@@ -1,33 +1,33 @@
 /*  x86-64 MTRR (Memory Type Range Register) driver.
-	Based largely upon arch/i386/kernel/mtrr.c
+    Based largely upon arch/i386/kernel/mtrr.c
 
-	Copyright (C) 1997-2000  Richard Gooch
-	Copyright (C) 2002 Dave Jones.
+    Copyright (C) 1997-2000  Richard Gooch
+    Copyright (C) 2002 Dave Jones.
 
-	This library is free software; you can redistribute it and/or
-	modify it under the terms of the GNU Library General Public
-	License as published by the Free Software Foundation; either
-	version 2 of the License, or (at your option) any later version.
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Library General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
 
-	This library is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-	Library General Public License for more details.
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Library General Public License for more details.
 
-	You should have received a copy of the GNU Library General Public
-	License along with this library; if not, write to the Free
-	Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    You should have received a copy of the GNU Library General Public
+    License along with this library; if not, write to the Free
+    Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-	(For earlier history, see arch/i386/kernel/mtrr.c)
-	v2.00	September 2001	Dave Jones <davej@suse.de>
-	  Initial rewrite for x86-64.
-	  Removal of non-Intel style MTRR code.
-	v2.01  June 2002  Dave Jones <davej@suse.de>
-	  Removal of redundant abstraction layer.
-	  64-bit fixes.
-	v2.02  July 2002  Dave Jones <davej@suse.de>
-	  Fix gentry inconsistencies between kernel/userspace.
-	  More casts to clean up warnings.
+    (For earlier history, see arch/i386/kernel/mtrr.c)
+    v2.00   September 2001  Dave Jones <davej@suse.de>
+      Initial rewrite for x86-64.
+      Removal of non-Intel style MTRR code.
+    v2.01  June 2002  Dave Jones <davej@suse.de>
+      Removal of redundant abstraction layer.
+      64-bit fixes.
+    v2.02  July 2002  Dave Jones <davej@suse.de>
+      Fix gentry inconsistencies between kernel/userspace.
+      More casts to clean up warnings.
 */
 
 #include <linux/types.h>
@@ -569,7 +569,7 @@ static void __init mtrr_state_warn (u32 mask)
     printk (KERN_INFO "mtrr: probably your BIOS does not setup all CPUs\n");
 }
 
-#endif	/*  CONFIG_SMP  */
+#endif  /*  CONFIG_SMP  */
 
 
 static inline char * attrib_to_str (int x)
@@ -627,35 +627,35 @@ static int get_free_region(void)
 
 
 /**
- *	mtrr_add_page - Add a memory type region
- *	@base: Physical base address of region in pages (4 KB)
- *	@size: Physical size of region in pages (4 KB)
- *	@type: Type of MTRR desired
- *	@increment: If this is true do usage counting on the region
- *	Returns The MTRR register on success, else a negative number
- *	indicating the error code.
+ *  mtrr_add_page - Add a memory type region
+ *  @base: Physical base address of region in pages (4 KB)
+ *  @size: Physical size of region in pages (4 KB)
+ *  @type: Type of MTRR desired
+ *  @increment: If this is true do usage counting on the region
+ *  Returns The MTRR register on success, else a negative number
+ *  indicating the error code.
  *
- *	Memory type region registers control the caching on newer
- *	processors. This function allows drivers to request an MTRR is added.
- *	The caller should expect to need to provide a power of two size on
- *	an equivalent power of two boundary.
+ *  Memory type region registers control the caching on newer
+ *  processors. This function allows drivers to request an MTRR is added.
+ *  The caller should expect to need to provide a power of two size on
+ *  an equivalent power of two boundary.
  *
- *	If the region cannot be added either because all regions are in use
- *	or the CPU cannot support it a negative value is returned. On success
- *	the register number for this entry is returned, but should be treated
- *	as a cookie only.
+ *  If the region cannot be added either because all regions are in use
+ *  or the CPU cannot support it a negative value is returned. On success
+ *  the register number for this entry is returned, but should be treated
+ *  as a cookie only.
  *
- *	On a multiprocessor machine the changes are made to all processors.
+ *  On a multiprocessor machine the changes are made to all processors.
  *
- *	The available types are
+ *  The available types are
  *
- *	%MTRR_TYPE_UNCACHABLE	-	No caching
- *	%MTRR_TYPE_WRBACK	-	Write data back in bursts whenever
- *	%MTRR_TYPE_WRCOMB	-	Write data back soon but allow bursts
- *	%MTRR_TYPE_WRTHROUGH	-	Cache reads but not writes
+ *  %MTRR_TYPE_UNCACHABLE   -   No caching
+ *  %MTRR_TYPE_WRBACK   -   Write data back in bursts whenever
+ *  %MTRR_TYPE_WRCOMB   -   Write data back soon but allow bursts
+ *  %MTRR_TYPE_WRTHROUGH    -   Cache reads but not writes
  *
- *	BUGS: Needs a quiet flag for the cases where drivers do not mind
- *	failures and do not wish system log messages to be sent.
+ *  BUGS: Needs a quiet flag for the cases where drivers do not mind
+ *  failures and do not wish system log messages to be sent.
  */
 
 int mtrr_add_page (u64 base, u32 size, unsigned int type, char increment)
@@ -782,36 +782,36 @@ int mtrr_add_page (u64 base, u32 size, unsigned int type, char increment)
 
 
 /**
- *	mtrr_add - Add a memory type region
- *	@base: Physical base address of region
- *	@size: Physical size of region
- *	@type: Type of MTRR desired
- *	@increment: If this is true do usage counting on the region
- *	Return the MTRR register on success, else a negative numbe
- *	indicating the error code.
+ *  mtrr_add - Add a memory type region
+ *  @base: Physical base address of region
+ *  @size: Physical size of region
+ *  @type: Type of MTRR desired
+ *  @increment: If this is true do usage counting on the region
+ *  Return the MTRR register on success, else a negative numbe
+ *  indicating the error code.
  *
- *	Memory type region registers control the caching on newer processors.
- *	This function allows drivers to request an MTRR is added.
- *	The caller should expect to need to provide a power of two size on
- *	an equivalent power of two boundary.
+ *  Memory type region registers control the caching on newer processors.
+ *  This function allows drivers to request an MTRR is added.
+ *  The caller should expect to need to provide a power of two size on
+ *  an equivalent power of two boundary.
  *
- *	If the region cannot be added either because all regions are in use
- *	or the CPU cannot support it a negative value is returned. On success
- *	the register number for this entry is returned, but should be treated
- *	as a cookie only.
+ *  If the region cannot be added either because all regions are in use
+ *  or the CPU cannot support it a negative value is returned. On success
+ *  the register number for this entry is returned, but should be treated
+ *  as a cookie only.
  *
- *	On a multiprocessor machine the changes are made to all processors.
- *	This is required on x86 by the Intel processors.
+ *  On a multiprocessor machine the changes are made to all processors.
+ *  This is required on x86 by the Intel processors.
  *
- *	The available types are
+ *  The available types are
  *
- *	%MTRR_TYPE_UNCACHABLE	-	No caching
- *	%MTRR_TYPE_WRBACK	-	Write data back in bursts whenever
- *	%MTRR_TYPE_WRCOMB	-	Write data back soon but allow bursts
- *	%MTRR_TYPE_WRTHROUGH	-	Cache reads but not writes
+ *  %MTRR_TYPE_UNCACHABLE   -   No caching
+ *  %MTRR_TYPE_WRBACK   -   Write data back in bursts whenever
+ *  %MTRR_TYPE_WRCOMB   -   Write data back soon but allow bursts
+ *  %MTRR_TYPE_WRTHROUGH    -   Cache reads but not writes
  *
- *	BUGS: Needs a quiet flag for the cases where drivers do not mind
- *	failures and do not wish system log messages to be sent.
+ *  BUGS: Needs a quiet flag for the cases where drivers do not mind
+ *  failures and do not wish system log messages to be sent.
  */
 
 int mtrr_add (u64 base, u32 size, unsigned int type, char increment)
@@ -828,18 +828,18 @@ int mtrr_add (u64 base, u32 size, unsigned int type, char increment)
 
 
 /**
- *	mtrr_del_page - delete a memory type region
- *	@reg: Register returned by mtrr_add
- *	@base: Physical base address
- *	@size: Size of region
+ *  mtrr_del_page - delete a memory type region
+ *  @reg: Register returned by mtrr_add
+ *  @base: Physical base address
+ *  @size: Size of region
  *
- *	If register is supplied then base and size are ignored. This is
- *	how drivers should call it.
+ *  If register is supplied then base and size are ignored. This is
+ *  how drivers should call it.
  *
- *	Releases an MTRR region. If the usage count drops to zero the
- *	register is freed and the region returns to default state.
- *	On success the register is returned, on failure a negative error
- *	code.
+ *  Releases an MTRR region. If the usage count drops to zero the
+ *  register is freed and the region returns to default state.
+ *  On success the register is returned, on failure a negative error
+ *  code.
  */
 
 int mtrr_del_page (int reg, u64 base, u32 size)
@@ -902,18 +902,18 @@ int mtrr_del_page (int reg, u64 base, u32 size)
 
 
 /**
- *	mtrr_del - delete a memory type region
- *	@reg: Register returned by mtrr_add
- *	@base: Physical base address
- *	@size: Size of region
+ *  mtrr_del - delete a memory type region
+ *  @reg: Register returned by mtrr_add
+ *  @base: Physical base address
+ *  @size: Size of region
  *
- *	If register is supplied then base and size are ignored. This is
- *	how drivers should call it.
+ *  If register is supplied then base and size are ignored. This is
+ *  how drivers should call it.
  *
- *	Releases an MTRR region. If the usage count drops to zero the
- *	register is freed and the region returns to default state.
- *	On success the register is returned, on failure a negative error
- *	code.
+ *  Releases an MTRR region. If the usage count drops to zero the
+ *  register is freed and the region returns to default state.
+ *  On success the register is returned, on failure a negative error
+ *  code.
  */
 
 int mtrr_del (int reg, u64 base, u32 size)
@@ -1332,7 +1332,7 @@ static void compute_ascii (void)
 #endif
 }
 
-#endif	/*  USERSPACE_INTERFACE  */
+#endif  /*  USERSPACE_INTERFACE  */
 
 EXPORT_SYMBOL (mtrr_add);
 EXPORT_SYMBOL (mtrr_del);
@@ -1403,7 +1403,7 @@ void __init mtrr_init_secondary_cpu (void)
     }
 }
 
-#endif	/*  CONFIG_SMP  */
+#endif  /*  CONFIG_SMP  */
 
 
 int __init mtrr_init (void)

@@ -16,9 +16,9 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*  Dumb terminal screen routines					*/
-/*									*/
+/*                                  */
+/*  Dumb terminal screen routines                   */
+/*                                  */
 /************************************************************************/
 
 #include <stdarg.h>
@@ -52,10 +52,10 @@ static const char *const chartable[32] = { "<NUL>", "^A",  "^B",   "^C",    "^D"
         "^X", "^Y",  "^Z",   "<ESC>", "^\\",  "^]",   "^^", "^_"
                                          };
 
-static int screenlength;	/* number of lines on a page */
-static int screenwidth;		/* number of columns in a line */
-static int columnumber;		/* in range 0..screenwidth-1 */
-static int linenumber;		/* in range 1..screenlength */
+static int screenlength;    /* number of lines on a page */
+static int screenwidth;     /* number of columns in a line */
+static int columnumber;     /* in range 0..screenwidth-1 */
+static int linenumber;      /* in range 1..screenlength */
 
 static void printchar (char c);
 
@@ -69,15 +69,15 @@ int ch_screen_init (void)
     screenwidth  = MAXWIDTH;
     screenlength = MAXLENGTH;
     ch_screen_num_lines  = screenlength;
-    ch_screen_tmar_lines = 1;			/* keep cursor away from top 7 lines */
-    ch_screen_bmar_lines = 1;			/* keep cursor away from bottom 7 lines */
+    ch_screen_tmar_lines = 1;           /* keep cursor away from top 7 lines */
+    ch_screen_bmar_lines = 1;           /* keep cursor away from bottom 7 lines */
     if (ch_screen_num_lines < 4)
     {
         ch_screen_tmar_lines = ch_screen_num_lines / 3;
         ch_screen_bmar_lines = ch_screen_num_lines / 3;
     }
 
-    return (1);						/* always successful */
+    return (1);                     /* always successful */
 }
 
 /* Termination of screen mode */
@@ -85,7 +85,7 @@ int ch_screen_init (void)
 void ch_screen_term (void)
 
 {
-    output ();						/* flush output buffer to screen */
+    output ();                      /* flush output buffer to screen */
 }
 
 /* Refresh screen */
@@ -103,11 +103,11 @@ void ch_screen_prompt (String *prompt)
     char c;
     const char *s;
 
-    s = string_getval (prompt);			/* get prompt string pointer */
-    columnumber = strlen (s);			/* get what column we will be in after 1st half displayed */
-    outfmt ("\r\n%s", screenlength, s);		/* display 1st half */
-    s += columnumber;				/* point to null before second half */
-    while ((c = *(++ s)) != 0) printchar (c);	/* display second half but format any control chars */
+    s = string_getval (prompt);         /* get prompt string pointer */
+    columnumber = strlen (s);           /* get what column we will be in after 1st half displayed */
+    outfmt ("\r\n%s", screenlength, s);     /* display 1st half */
+    s += columnumber;               /* point to null before second half */
+    while ((c = *(++ s)) != 0) printchar (c);   /* display second half but format any control chars */
 }
 
 /* Display (error) message */
@@ -166,26 +166,26 @@ String *ch_screen_read (void)
 
     /* Generate new screen contents */
 
-    line2 = ch_screen_top_line;						/* point to next line to display */
-    linenumber  = 1;							/* set up starting position on screen */
+    line2 = ch_screen_top_line;                     /* point to next line to display */
+    linenumber  = 1;                            /* set up starting position on screen */
     columnumber = - ch_screen_shiftleft;
 genloop:
-    if (line2 == NULL)  							/* check for [EOB] */
+    if (line2 == NULL)                              /* check for [EOB] */
     {
-        bufname = buffer_name (cur_position.buffer);			/* output it */
+        bufname = buffer_name (cur_position.buffer);            /* output it */
         outfmt (strlen (bufname), "[EOB=%s]\r\n", bufname);
-        goto gendone;							/* all done */
+        goto gendone;                           /* all done */
     }
-    line  = line2;							/* point to new line */
-    l = string_getlen (line_string (line));				/* get data length */
-    s = string_getval (line_string (line));				/* get data address */
-    line2 = line_next (line);						/* point to line following new line */
-    spo = l + 1;								/* assume select position not on this line */
-    cpo = l + 1;								/* assume current position not on this line */
-    if (line == sel_position.line) spo = sel_position.offset;		/* get select position offset if in this line */
-    if (line == cur_position.line) cpo = cur_position.offset;		/* get current position offset if in this line */
+    line  = line2;                          /* point to new line */
+    l = string_getlen (line_string (line));             /* get data length */
+    s = string_getval (line_string (line));             /* get data address */
+    line2 = line_next (line);                       /* point to line following new line */
+    spo = l + 1;                                /* assume select position not on this line */
+    cpo = l + 1;                                /* assume current position not on this line */
+    if (line == sel_position.line) spo = sel_position.offset;       /* get select position offset if in this line */
+    if (line == cur_position.line) cpo = cur_position.offset;       /* get current position offset if in this line */
 
-    for (i = 0; i < l; i ++)  						/* loop until whole line has been output */
+    for (i = 0; i < l; i ++)                        /* loop until whole line has been output */
     {
         if (i == spo)
         {
@@ -197,8 +197,8 @@ genloop:
             outchr ('[');    /* if we are at the current position output a [ */
             columnumber ++;
         }
-        c = s[i];								/* get the char to be displayed */
-        if ((c != '\n') || showlfs) printchar (c);				/* see if we want to display it & output it */
+        c = s[i];                               /* get the char to be displayed */
+        if ((c != '\n') || showlfs) printchar (c);              /* see if we want to display it & output it */
         if (i == cpo)
         {
             outchr (']');    /* if we are at the current position output a ] */
@@ -208,13 +208,13 @@ genloop:
         {
             outchr ('}');
             columnumber ++;
-        }			/* if we are at the select position output a } */
-        if (s[i] == '\n')  							/* see if we just ended a screen line */
+        }           /* if we are at the select position output a } */
+        if (s[i] == '\n')                           /* see if we just ended a screen line */
         {
-            outstr ('\r\n');							/* if so, end the line on the terminal */
-            if (linenumber == screenlength) goto gendone;			/* stop if we're at bottom of screen */
-            linenumber ++;							/* not at bottom, increment to next line */
-            columnumber = - ch_screen_shiftleft;				/* start in left column */
+            outstr ('\r\n');                            /* if so, end the line on the terminal */
+            if (linenumber == screenlength) goto gendone;           /* stop if we're at bottom of screen */
+            linenumber ++;                          /* not at bottom, increment to next line */
+            columnumber = - ch_screen_shiftleft;                /* start in left column */
         }
     }
     goto genloop;
@@ -226,22 +226,22 @@ gendone:
 }
 
 /************************************************************************/
-/*									*/
-/*  Display a character on the screen					*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	c = character to be displayed					*/
-/*	columnumber = column to display it in (zero based)		*/
-/*	              (negative if still in 'shiftleft' area)		*/
-/*	linenumber  = line number to display it on (one based)		*/
-/*	screenwidth = max chars to output on a single line		*/
-/*	screen positioned to (columnumber,linenumber)			*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	columnumber = incremented by number of chars written to screen	*/
-/*									*/
+/*                                  */
+/*  Display a character on the screen                   */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  c = character to be displayed                   */
+/*  columnumber = column to display it in (zero based)      */
+/*                (negative if still in 'shiftleft' area)       */
+/*  linenumber  = line number to display it on (one based)      */
+/*  screenwidth = max chars to output on a single line      */
+/*  screen positioned to (columnumber,linenumber)           */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  columnumber = incremented by number of chars written to screen  */
+/*                                  */
 /************************************************************************/
 
 static void printchar (char c)
@@ -257,8 +257,8 @@ static void printchar (char c)
 
     /* Determine what the new column will be and output it */
 
-    newcol = columnumber + strlen (strp);					/* get what column would be after outputting */
-    if (columnumber >= 0) outstr (strp);					/* do the whole thing if not shifted left */
-    else if (newcol > 0) outstr (strp + strlen (strp) - newcol);		/* do what we can if shifted left */
-    columnumber = newcol;							/* anyway, remember where cursor is now */
+    newcol = columnumber + strlen (strp);                   /* get what column would be after outputting */
+    if (columnumber >= 0) outstr (strp);                    /* do the whole thing if not shifted left */
+    else if (newcol > 0) outstr (strp + strlen (strp) - newcol);        /* do what we can if shifted left */
+    columnumber = newcol;                           /* anyway, remember where cursor is now */
 }

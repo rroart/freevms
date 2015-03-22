@@ -45,7 +45,7 @@
 #include <asm/proto.h>
 
 
-#define PREFIX			"ACPI: "
+#define PREFIX          "ACPI: "
 
 int acpi_lapic;
 int acpi_ioapic;
@@ -58,12 +58,12 @@ int acpi_skip_timer_override __initdata;
                               Boot-time Configuration
    -------------------------------------------------------------------------- */
 #ifdef CONFIG_ACPI_PCI
-int acpi_noirq __initdata;	/* skip ACPI IRQ initialization */
+int acpi_noirq __initdata;  /* skip ACPI IRQ initialization */
 int acpi_pci_disabled __initdata; /* skip ACPI PCI scan and IRQ initialization */
 #endif
-int acpi_ht __initdata = 1;	/* enable HT */
+int acpi_ht __initdata = 1; /* enable HT */
 
-enum acpi_irq_model_id		acpi_irq_model;
+enum acpi_irq_model_id      acpi_irq_model;
 
 
 /*
@@ -76,16 +76,16 @@ extern unsigned long end_pfn;
 
 char *
 __acpi_map_table (
-    unsigned long	phys_addr,
-    unsigned long	size)
+    unsigned long   phys_addr,
+    unsigned long   size)
 {
 #if 0
-    unsigned long	base = 0;
-    unsigned long	mapped_phys = phys_addr;
-    unsigned long	offset = phys_addr & (PAGE_SIZE - 1);
-    unsigned long	mapped_size = PAGE_SIZE - offset;
-    unsigned long	avail_size = mapped_size + (PAGE_SIZE * FIX_ACPI_PAGES);
-    int		idx = FIX_ACPI_BEGIN;
+    unsigned long   base = 0;
+    unsigned long   mapped_phys = phys_addr;
+    unsigned long   offset = phys_addr & (PAGE_SIZE - 1);
+    unsigned long   mapped_size = PAGE_SIZE - offset;
+    unsigned long   avail_size = mapped_size + (PAGE_SIZE * FIX_ACPI_PAGES);
+    int     idx = FIX_ACPI_BEGIN;
 #endif
 
     //printk("__acpi_map_table at %lx size %lu\n", phys_addr, size);
@@ -164,10 +164,10 @@ static u64 acpi_lapic_addr __initdata = APIC_DEFAULT_PHYS_BASE;
 
 static int __init
 acpi_parse_madt (
-    unsigned long		phys_addr,
-    unsigned long		size)
+    unsigned long       phys_addr,
+    unsigned long       size)
 {
-    struct acpi_table_madt	*madt = NULL;
+    struct acpi_table_madt  *madt = NULL;
 
     if (!phys_addr || !size)
         return -EINVAL;
@@ -193,7 +193,7 @@ static int __init
 acpi_parse_lapic (
     acpi_table_entry_header *header)
 {
-    struct acpi_table_lapic	*processor = NULL;
+    struct acpi_table_lapic *processor = NULL;
 
     processor = (struct acpi_table_lapic*) header;
     if (!processor)
@@ -202,8 +202,8 @@ acpi_parse_lapic (
     acpi_table_print_madt_entry(header);
 
     mp_register_lapic (
-        processor->id,					   /* APIC ID */
-        processor->flags.enabled);			  /* Enabled? */
+        processor->id,                     /* APIC ID */
+        processor->flags.enabled);            /* Enabled? */
 
     return 0;
 }
@@ -274,10 +274,10 @@ acpi_parse_ioapic (
 static void
 acpi_sci_ioapic_setup(u32 gsi, u16 polarity, u16 trigger)
 {
-    if (trigger == 0)	/* compatible SCI trigger is level */
+    if (trigger == 0)   /* compatible SCI trigger is level */
         trigger = 3;
 
-    if (polarity == 0)	/* compatible SCI polarity is low */
+    if (polarity == 0)  /* compatible SCI polarity is low */
         polarity = 3;
 
     /* Command-line over-ride via acpi_sci= */
@@ -314,7 +314,7 @@ acpi_parse_fadt(unsigned long phys, unsigned long size)
         return 0;
     }
 
-#ifdef	CONFIG_ACPI_INTERPRETER
+#ifdef  CONFIG_ACPI_INTERPRETER
     /* initialize sci_int early for INT_SRC_OVR MADT parsing */
     acpi_fadt.sci_int = fadt->sci_int;
 #endif
@@ -381,8 +381,8 @@ acpi_parse_nmi_src (
 #ifdef CONFIG_HPET_TIMER
 static int __init
 acpi_parse_hpet (
-    unsigned long		phys_addr,
-    unsigned long		size)
+    unsigned long       phys_addr,
+    unsigned long       size)
 {
     struct acpi_table_hpet *hpet_tbl;
 
@@ -400,7 +400,7 @@ acpi_parse_hpet (
 
     return 0;
 }
-#endif	/* CONFIG_HPET_TIMER */
+#endif  /* CONFIG_HPET_TIMER */
 
 #ifdef CONFIG_ACPI_BUS
 /*
@@ -452,11 +452,11 @@ acpi_pic_sci_set_trigger(unsigned int irq, u16 trigger)
 
 static unsigned long __init
 acpi_scan_rsdp (
-    unsigned long		start,
-    unsigned long		length)
+    unsigned long       start,
+    unsigned long       length)
 {
-    unsigned long		offset = 0;
-    unsigned long		sig_len = sizeof("RSD PTR ") - 1;
+    unsigned long       offset = 0;
+    unsigned long       sig_len = sizeof("RSD PTR ") - 1;
 
     /*
      * Scan all 16-byte boundaries of the physical memory region for the
@@ -476,7 +476,7 @@ acpi_scan_rsdp (
 unsigned long __init
 acpi_find_rsdp (void)
 {
-    unsigned long		rsdp_phys = 0;
+    unsigned long       rsdp_phys = 0;
 
     /*
      * Scan memory looking for the RSDP signature. First search EBDA (low
@@ -493,7 +493,7 @@ acpi_find_rsdp (void)
 int __init
 acpi_boot_init (void)
 {
-    int			result = 0;
+    int         result = 0;
 
     if (acpi_disabled)
         return(1);

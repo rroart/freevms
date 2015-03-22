@@ -1,5 +1,5 @@
-#ifndef scs_routines_h
-#define scs_routines_h
+#ifndef SCS_ROUTINES_H
+#define SCS_ROUTINES_H
 
 #if 0
 #include <ints.h>
@@ -284,7 +284,7 @@ int   scs_std$send_data_wmsg ( int msg_buf_len, struct _pdt *pdt_p, struct _cdrp
 int   scs_std$set_load_rating ( int rating, struct _cdt *cdt_p );
 
 
-void  scs_std$shutdown ();
+void  scs_std$shutdown ( void );
 
 
 int   scs_std$stall ( int stall_condition_code, struct _cdt *cdt_p, struct _pdt *pdt_p, struct _cdrp *cdrp_p,

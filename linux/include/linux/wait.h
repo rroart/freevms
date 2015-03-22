@@ -1,12 +1,12 @@
 #ifndef _LINUX_WAIT_H
 #define _LINUX_WAIT_H
 
-#define WNOHANG		0x00000001
-#define WUNTRACED	0x00000002
+#define WNOHANG     0x00000001
+#define WUNTRACED   0x00000002
 
-#define __WNOTHREAD	0x20000000	/* Don't wait on children of other threads in this group */
-#define __WALL		0x40000000	/* Wait on all children, regardless of type */
-#define __WCLONE	0x80000000	/* Wait only on non-SIGCHLD children */
+#define __WNOTHREAD 0x20000000  /* Don't wait on children of other threads in this group */
+#define __WALL      0x40000000  /* Wait on all children, regardless of type */
+#define __WCLONE    0x80000000  /* Wait only on non-SIGCHLD children */
 
 #ifdef __KERNEL__
 
@@ -31,7 +31,7 @@
 struct __wait_queue
 {
     unsigned int flags;
-#define WQ_FLAG_EXCLUSIVE	0x01
+#define WQ_FLAG_EXCLUSIVE   0x01
     struct task_struct * task;
     struct list_head task_list;
 #if WAITQUEUE_DEBUG
@@ -92,32 +92,32 @@ typedef struct __wait_queue_head wait_queue_head_t;
  * spurious .aligns.
  */
 #if WAITQUEUE_DEBUG
-#define WQ_BUG()	BUG()
-#define CHECK_MAGIC(x)							\
-	do {									\
-		if ((x) != (long)&(x)) {					\
-			printk("bad magic %lx (should be %lx), ",		\
-				(long)x, (long)&(x));				\
-			WQ_BUG();						\
-		}								\
-	} while (0)
-#define CHECK_MAGIC_WQHEAD(x)							\
-	do {									\
-		if ((x)->__magic != (long)&((x)->__magic)) {			\
-			printk("bad magic %lx (should be %lx, creator %lx), ",	\
-			(x)->__magic, (long)&((x)->__magic), (x)->__creator);	\
-			WQ_BUG();						\
-		}								\
-	} while (0)
-#define WQ_CHECK_LIST_HEAD(list) 						\
-	do {									\
-		if (!(list)->next || !(list)->prev)				\
-			WQ_BUG();						\
-	} while(0)
-#define WQ_NOTE_WAKER(tsk)							\
-	do {									\
-		(tsk)->__waker = (long)__builtin_return_address(0);		\
-	} while (0)
+#define WQ_BUG()    BUG()
+#define CHECK_MAGIC(x)                          \
+    do {                                    \
+        if ((x) != (long)&(x)) {                    \
+            printk("bad magic %lx (should be %lx), ",       \
+                (long)x, (long)&(x));               \
+            WQ_BUG();                       \
+        }                               \
+    } while (0)
+#define CHECK_MAGIC_WQHEAD(x)                           \
+    do {                                    \
+        if ((x)->__magic != (long)&((x)->__magic)) {            \
+            printk("bad magic %lx (should be %lx, creator %lx), ",  \
+            (x)->__magic, (long)&((x)->__magic), (x)->__creator);   \
+            WQ_BUG();                       \
+        }                               \
+    } while (0)
+#define WQ_CHECK_LIST_HEAD(list)                        \
+    do {                                    \
+        if (!(list)->next || !(list)->prev)             \
+            WQ_BUG();                       \
+    } while(0)
+#define WQ_NOTE_WAKER(tsk)                          \
+    do {                                    \
+        (tsk)->__waker = (long)__builtin_return_address(0);     \
+    } while (0)
 #else
 #define WQ_BUG()
 #define CHECK_MAGIC(x)
@@ -138,21 +138,21 @@ typedef struct __wait_queue_head wait_queue_head_t;
 # define __WAITQUEUE_HEAD_DEBUG_INIT(name)
 #endif
 
-#define __WAITQUEUE_INITIALIZER(name, tsk) {				\
-	task:		tsk,						\
-	task_list:	{ NULL, NULL },					\
-			 __WAITQUEUE_DEBUG_INIT(name)}
+#define __WAITQUEUE_INITIALIZER(name, tsk) {                \
+    task:       tsk,                        \
+    task_list:  { NULL, NULL },                 \
+             __WAITQUEUE_DEBUG_INIT(name)}
 
-#define DECLARE_WAITQUEUE(name, tsk)					\
-	wait_queue_t name = __WAITQUEUE_INITIALIZER(name, tsk)
+#define DECLARE_WAITQUEUE(name, tsk)                    \
+    wait_queue_t name = __WAITQUEUE_INITIALIZER(name, tsk)
 
-#define __WAIT_QUEUE_HEAD_INITIALIZER(name) {				\
-	lock:		WAITQUEUE_RW_LOCK_UNLOCKED,			\
-	task_list:	{ &(name).task_list, &(name).task_list },	\
-			__WAITQUEUE_HEAD_DEBUG_INIT(name)}
+#define __WAIT_QUEUE_HEAD_INITIALIZER(name) {               \
+    lock:       WAITQUEUE_RW_LOCK_UNLOCKED,         \
+    task_list:  { &(name).task_list, &(name).task_list },   \
+            __WAITQUEUE_HEAD_DEBUG_INIT(name)}
 
 #define DECLARE_WAIT_QUEUE_HEAD(name) \
-	wait_queue_head_t name = __WAIT_QUEUE_HEAD_INITIALIZER(name)
+    wait_queue_head_t name = __WAIT_QUEUE_HEAD_INITIALIZER(name)
 
 static inline void init_waitqueue_head(wait_queue_head_t *q)
 {

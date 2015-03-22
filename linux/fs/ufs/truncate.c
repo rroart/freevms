@@ -63,14 +63,14 @@
  * done separately in "release()" before calling the truncate routines
  * that will release the actual file blocks.
  *
- *		Linus
+ *      Linus
  */
 
 #define DIRECT_BLOCK ((inode->i_size + uspi->s_bsize - 1) >> uspi->s_bshift)
 #define DIRECT_FRAGMENT ((inode->i_size + uspi->s_fsize - 1) >> uspi->s_fshift)
 
 #define DATA_BUFFER_USED(bh) \
-	(atomic_read(&bh->b_count)>1 || buffer_locked(bh))
+    (atomic_read(&bh->b_count)>1 || buffer_locked(bh))
 
 static int ufs_trunc_direct (struct inode * inode)
 {

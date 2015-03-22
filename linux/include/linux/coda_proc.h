@@ -22,17 +22,17 @@ void coda_upcall_stats(int opcode, unsigned long jiffies);
 
 /* these four files are presented to show the result of the statistics:
  *
- *	/proc/fs/coda/vfs_stats
- *		      upcall_stats
- *		      permission_stats
- *		      cache_inv_stats
+ *  /proc/fs/coda/vfs_stats
+ *            upcall_stats
+ *            permission_stats
+ *            cache_inv_stats
  *
  * these four files are presented to reset the statistics to 0:
  *
- *	/proc/sys/coda/vfs_stats
- *		       upcall_stats
- *		       permission_stats
- *		       cache_inv_stats
+ *  /proc/sys/coda/vfs_stats
+ *             upcall_stats
+ *             permission_stats
+ *             cache_inv_stats
  */
 
 /* VFS operation statistics */
@@ -92,10 +92,10 @@ struct coda_cache_inv_stats
 };
 
 /* these global variables hold the actual statistics data */
-extern struct coda_vfs_stats		coda_vfs_stat;
-extern struct coda_permission_stats	coda_permission_stat;
-extern struct coda_cache_inv_stats	coda_cache_inv_stat;
-extern int				coda_upcall_timestamping;
+extern struct coda_vfs_stats        coda_vfs_stat;
+extern struct coda_permission_stats coda_permission_stat;
+extern struct coda_cache_inv_stats  coda_cache_inv_stat;
+extern int              coda_upcall_timestamping;
 
 /* reset statistics to 0 */
 void reset_coda_vfs_stats( void );

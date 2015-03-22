@@ -687,7 +687,7 @@ int prepare_binprm(struct linux_binprm *bprm)
      * Check execute perms again - if the caller has CAP_DAC_OVERRIDE,
      * vfs_permission lets a non-executable through
      */
-    if (!(mode & 0111))	/* with at least _one_ execute bit set */
+    if (!(mode & 0111)) /* with at least _one_ execute bit set */
         return -EACCES;
     if (bprm->file->f_op == NULL)
         return -EACCES;
@@ -755,7 +755,7 @@ int rms_prepare_binprm(struct linux_binprm *bprm)
      * Check execute perms again - if the caller has CAP_DAC_OVERRIDE,
      * vfs_permission lets a non-executable through
      */
-    if (!(mode & 0111))	/* with at least _one_ execute bit set */
+    if (!(mode & 0111)) /* with at least _one_ execute bit set */
         return -EACCES;
 
     bprm->e_uid = current->euid;
@@ -1041,7 +1041,7 @@ int do_execve(char * filename, char ** argv, char ** envp, struct pt_regs * regs
     }
 
     //printk("execve %s\n",filename);
-    //	mydebug=1;
+    //  mydebug=1;
 
     //printk("before lnm_init_prc\n");
 #if 0

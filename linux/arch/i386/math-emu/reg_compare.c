@@ -24,10 +24,10 @@
 static int compare(FPU_REG const *b, int tagb)
 {
     int diff, exp0, expb;
-    u_char	  	st0_tag;
-    FPU_REG  	*st0_ptr;
-    FPU_REG	x, y;
-    u_char		st0_sign, signb = getsign(b);
+    u_char      st0_tag;
+    FPU_REG     *st0_ptr;
+    FPU_REG x, y;
+    u_char      st0_sign, signb = getsign(b);
 
     st0_ptr = &st(0);
     st0_tag = FPU_gettag0();
@@ -142,7 +142,7 @@ static int compare(FPU_REG const *b, int tagb)
     if ( diff == 0 )
     {
         diff = st0_ptr->sigh - b->sigh;  /* Works only if ms bits are
-					      identical */
+                          identical */
         if ( diff == 0 )
         {
             diff = st0_ptr->sigl > b->sigl;
@@ -285,7 +285,7 @@ static int compare_u_st_st(int nr)
     {
         setcc(SW_C3 | SW_C2 | SW_C0);
         if (c & COMP_SNaN)       /* This is the only difference between
-				  un-ordered and ordinary comparisons */
+                  un-ordered and ordinary comparisons */
         {
             EXCEPTION(EX_Invalid);
             return !(control_word & CW_Invalid);

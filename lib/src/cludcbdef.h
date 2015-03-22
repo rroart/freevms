@@ -1,5 +1,5 @@
-#ifndef cludcbdef_h
-#define cludcbdef_h
+#ifndef CLUDCBDEF_H
+#define CLUDCBDEF_H
 
 /* as if this will be used in ages... */
 

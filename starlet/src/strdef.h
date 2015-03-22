@@ -1,27 +1,27 @@
 /*
  * strdef.h
  *
- *	Code for VAX STR$ routines
+ *  Code for VAX STR$ routines
  *
  * Description:
  *
- *	This file contains various 'str$' functions equivalent
- *	to those available in Vax/VMS string library.
+ *  This file contains various 'str$' functions equivalent
+ *  to those available in Vax/VMS string library.
  *
  * Bugs:
  *
- *	Not compatible at the binary level.
+ *  Not compatible at the binary level.
  *
- *	No seperate "string zone" to allocate memory from,
- *	uses malloc/free instead.
+ *  No seperate "string zone" to allocate memory from,
+ *  uses malloc/free instead.
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  */
 
 

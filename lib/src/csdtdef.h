@@ -1,5 +1,5 @@
-#ifndef csdtdef_h
-#define csdtdef_h
+#ifndef CSDTDEF_H
+#define CSDTDEF_H
 
 #define CSDTE$C_LENGTH   64
 #define CSDTE$K_LENGTH   64

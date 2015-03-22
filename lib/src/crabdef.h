@@ -1,5 +1,5 @@
-#ifndef crabdef_h
-#define crabdef_h
+#ifndef CRABDEF_H
+#define CRABDEF_H
 
 #define CRAB$K_LENGTH 88
 
@@ -19,7 +19,7 @@ struct _crab
     unsigned int crab$l_total_items;
     unsigned int crab$l_alloc_gran_mask;
     struct _spl *crab$l_nosync_spinlock;
-    void (*crab$ps_dealloc_cb)();
+    void (*crab$ps_dealloc_cb)(void);
     void *crab$ps_ringbuffer;
 
     unsigned int crab$l_base_item;
@@ -29,7 +29,7 @@ struct _crab
     unsigned short int crab$w_fsize;
     unsigned char crab$b_ftype;
     unsigned char crab$b_flck;
-    void (*crab$l_fpc)();
+    void (*crab$l_fpc)(void);
     long long crab$q_fr3;
     long long crab$q_fr4;
     unsigned int crab$l_alloc_array;

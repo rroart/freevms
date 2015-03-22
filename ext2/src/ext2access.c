@@ -99,7 +99,7 @@ void exttwo_vms2_mount(void)
 
 unsigned long get_x2p_prim_fcb()
 {
-    return 	  x2p->primary_fcb;
+    return    x2p->primary_fcb;
 }
 
 #if 0
@@ -1543,7 +1543,7 @@ unsigned mounte2(unsigned flags,unsigned devices,char *devnam[],char *label[],st
                 struct _fcb * idxfcb;
                 struct ext2_inode * idxhd;
                 struct _fcb * mapfcb;
-                //	  vcb->vcb$ibmaplbn = idxfcb->stlbn;
+                //    vcb->vcb$ibmaplbn = idxfcb->stlbn;
                 vcb->vcb$l_homelbn = home.s_first_data_block;
                 vcb->vcb$l_ibmaplbn = 0;//home.hm2$l_ibmaplbn;
                 vcb->vcb$l_ibmapvbn = 0;//home.hm2$w_ibmapvbn;
@@ -1561,7 +1561,7 @@ unsigned mounte2(unsigned flags,unsigned devices,char *devnam[],char *label[],st
                 long groupsize = groups * sizeof(struct ext2_group_desc);
                 struct ext2_super_block * homep = kmalloc(sizeof(struct ext2_super_block) + groupsize, GFP_KERNEL);
                 sts = sys$qiow(EXT2_EF,chan,IO$_READLBLK,&iosb,0,0,(char *) homep, sizeof(struct ext2_super_block) + groupsize , hba, ucb->ucb$w_fill_0,0,0);
-                //	memcpy(homep, &home, 1024);
+                //  memcpy(homep, &home, 1024);
                 vcb->vcb$l_cache = homep;
                 if (!(iosb.iosb$w_status & 1))
                 {

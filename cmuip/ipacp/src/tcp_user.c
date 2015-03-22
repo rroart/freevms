@@ -1,23 +1,23 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "TCP_USER - TCP user interface routines"
 //SBTTL "TCP user request overview"
@@ -25,152 +25,152 @@
 
 Module:
 
-	TCP_USER
+    TCP_USER
 
 Facility:
 
-	Process user TCP I/O requests.
+    Process user TCP I/O requests.
 
 Abstract:
 
-	This module is called by the main user IRP processing loop in the
-	USER.BLI module to handle all TCP requests.
+    This module is called by the main user IRP processing loop in the
+    USER.BLI module to handle all TCP requests.
 
 Author:
 
-	(originally extracted from USER.BLI)
-	This version by Vince Fuller, CMU-CSD, Summer/Fall, 1986
-	Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
+    (originally extracted from USER.BLI)
+    This version by Vince Fuller, CMU-CSD, Summer/Fall, 1986
+    Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
 
 
 Modification History:
 
-3.7	14-Nov-1991	Henry W. Miller		USBR
-	Use TCB->SND_ACK_THRESHOLD instead of ACK_THRESHOLD.
-	In TCP$TCB_Init(), init TCB->SND_ACK_THRESHOLD from ACK_THRESHOLD.
+3.7 14-Nov-1991 Henry W. Miller     USBR
+    Use TCB->SND_ACK_THRESHOLD instead of ACK_THRESHOLD.
+    In TCP$TCB_Init(), init TCB->SND_ACK_THRESHOLD from ACK_THRESHOLD.
 
-3.6	14-Nov-1991	Henry W. Miller		USBR
-	Change timer arithmetic from signed to unsigned.
-	Call TCP$Enqueue_ACK() rather than TCP$Send_ACK().
+3.6 14-Nov-1991 Henry W. Miller     USBR
+    Change timer arithmetic from signed to unsigned.
+    Call TCP$Enqueue_ACK() rather than TCP$Send_ACK().
 
-3.5e	7-Aug-1991	Henry W. Miller		USBR
-	In TCB$TCB_DUMP(), set up retransmit timeout variable properly.
+3.5e    7-Aug-1991  Henry W. Miller     USBR
+    In TCB$TCB_DUMP(), set up retransmit timeout variable properly.
 
-3.5d	13-Mar-1991	Henry W. Miller		USBR
-	Fix port comparison logic.
+3.5d    13-Mar-1991 Henry W. Miller     USBR
+    Fix port comparison logic.
 
-3.5c	25-Jan-1991	Henry W. Miller		USBR
-	Make WINDOW_DEFAULT and ACK_THRESHOLD configurable variables.
+3.5c    25-Jan-1991 Henry W. Miller     USBR
+    Make WINDOW_DEFAULT and ACK_THRESHOLD configurable variables.
 
-3.5b	24-Jan-1991	Henry W. Miller		USBR
-	In TCP$TCB_Init(), initialize ACK_SIZE to zero.
+3.5b    24-Jan-1991 Henry W. Miller     USBR
+    In TCP$TCB_Init(), initialize ACK_SIZE to zero.
 
-3.5a	15-Jan-1991	Henry W. Miller		USBR
-	Changed SND_WND, RCV_WND, Old_RCV_WND and RCV_PPTR to unsigned long
-	values as recommended by RFC1122.
-	Updated IDENT.
+3.5a    15-Jan-1991 Henry W. Miller     USBR
+    Changed SND_WND, RCV_WND, Old_RCV_WND and RCV_PPTR to unsigned long
+    values as recommended by RFC1122.
+    Updated IDENT.
 
 3.5  18-Aug-89, Edit by BRM (CMU NetDev)
-	Changed all occurances of the hardwired Conect table and the literal
-	Conect_Table_Size to use instead a reference to the table
-	(ConectPtr) and a variable table size (ConectSize).  I did this
-	in order to facilitate the move to completely dynamic IPACP
-	structures.
+    Changed all occurances of the hardwired Conect table and the literal
+    Conect_Table_Size to use instead a reference to the table
+    (ConectPtr) and a variable table size (ConectSize).  I did this
+    in order to facilitate the move to completely dynamic IPACP
+    structures.
 
 3.4  18-Nov-87, Edit by VAF
-	Know about SEND_SYN (SEND_CTL) returning routing failure.
+    Know about SEND_SYN (SEND_CTL) returning routing failure.
 
 3.3   8-Sep-87, Edit by VAF
-	Be sure to set current user function in TCB when doing name lookup in
-	TCP$OPEN.
+    Be sure to set current user function in TCB when doing name lookup in
+    TCP$OPEN.
 
 3.2  30-Jul-87, Edit by VAF
-	Start using $$KCALL macro to call $CMKRNL routines.
-	Set "no update" flag for retransmit queue.
+    Start using $$KCALL macro to call $CMKRNL routines.
+    Set "no update" flag for retransmit queue.
 
 3.1  24-Jul-87, Edit by VAF
-	Modify TCP$TCB_Init to not deal with user arguments, only initialize the
-	"common" parts of the TCB (so TVT TCB's can use it).
-	Make TCP$Conect_Insert and FIND_FREE_CONECT_ENTRY global for TVT code's
-	use (they should be moved into TCP_MAIN module).
+    Modify TCP$TCB_Init to not deal with user arguments, only initialize the
+    "common" parts of the TCB (so TVT TCB's can use it).
+    Make TCP$Conect_Insert and FIND_FREE_CONECT_ENTRY global for TVT code's
+    use (they should be moved into TCP_MAIN module).
 
 3.0  20-Jul-87, Edit by VAF
-	Clean up handling of circular queues a bit.
+    Clean up handling of circular queues a bit.
 
 2.9  10-Jun-87, Edit by VAF
-	In NET$OPEN, call USER$CHECK_ACCESS earlier, particularly, before doing
-	anything to the CONECT table.
+    In NET$OPEN, call USER$CHECK_ACCESS earlier, particularly, before doing
+    anything to the CONECT table.
 
 2.8   3-Mar-87, Edit by VAF
-	Flush the I/O request tag crud. Change format of IOSB and change
-	calling sequence of user$post_io_status.
+    Flush the I/O request tag crud. Change format of IOSB and change
+    calling sequence of user$post_io_status.
 
 2.7  27-Feb-87, Edit by VAF
-    	Know about FIN_RCVD flag (FIN-WAIT-2 and FIN received) flag when
-	delivering pending user data.
+        Know about FIN_RCVD flag (FIN-WAIT-2 and FIN received) flag when
+    delivering pending user data.
 
 2.6  19-Feb-87, Edit by VAF
-	Use new name lookup routines.
+    Use new name lookup routines.
 
 2.5  18-Feb-87, Edit by VAF
-	Move UCB extension definitions to USER.BLI.
-	Add support for user open with IP address instead of host name.
+    Move UCB extension definitions to USER.BLI.
+    Add support for user open with IP address instead of host name.
 
 2.4  12-Feb-87, Edit by VAF
-	Modifications to support domain service for name/address lookups.
+    Modifications to support domain service for name/address lookups.
 
 2.3   5-Feb-87, Edit by VAF
-	Rewrite TCP$OPEN to add general network access check facility and to
-	clean the code up a bit.
+    Rewrite TCP$OPEN to add general network access check facility and to
+    clean the code up a bit.
 
 2.2  14-Nov-86, Edit by VAF
-	Set calculated_RTO field in TCB.
+    Set calculated_RTO field in TCB.
 
 2.1   1-Oct-86, Edit by VAF
-	In TCP$Adlook_Done, make sure the TCB hasn't gone away.
+    In TCP$Adlook_Done, make sure the TCB hasn't gone away.
 
 2.0  30-Sep-86, Edit by VAF
-	In CANCEL processing, only purge user request queue - don't clean out
-	send and retransmit internal queues. This involves splitting part of
-	TCP$KILL_PENDING_REQUESTS off into a new routine, PURGE_USER_REQUESTS,
-	which does only this.
+    In CANCEL processing, only purge user request queue - don't clean out
+    send and retransmit internal queues. This involves splitting part of
+    TCP$KILL_PENDING_REQUESTS off into a new routine, PURGE_USER_REQUESTS,
+    which does only this.
 
 1.9  12-Sep-86, Edit by VAF
-	In second part of open (TCP_NMLOOK_DONE), don't set host numbers if
-	the foreign host was unspecified.
-	Also, call Check_Syn_Wait_List at end of passive open.
+    In second part of open (TCP_NMLOOK_DONE), don't set host numbers if
+    the foreign host was unspecified.
+    Also, call Check_Syn_Wait_List at end of passive open.
 
 1.8  14-Aug-86, Edit by VAF
-	Fix problem with passive open.
-	Make things that check TCB->NMLook_Flag and TCB->ARGBLK be NOINT.
-	Make TCP$CANCEL use TCP$KILL_PENDING_REQUESTS.
+    Fix problem with passive open.
+    Make things that check TCB->NMLook_Flag and TCB->ARGBLK be NOINT.
+    Make TCP$CANCEL use TCP$KILL_PENDING_REQUESTS.
 
 1.7  13-Aug-86, Edit by VAF
-	Move TCB dumping routines in here.
+    Move TCB dumping routines in here.
 
 1.6  11-Aug-86, Edit by VAF
-	Make TCP$OPEN use green protocol name-lookup function.
+    Make TCP$OPEN use green protocol name-lookup function.
 
 1.5   6-Aug-86, Edit by VAF
-	Add circular queue buffering for send side.
+    Add circular queue buffering for send side.
 
 1.4   6-Aug-86, Edit by VAF
-	Allow TCP$RECEIVE to succede in CLOSE_WAIT state if data available.
+    Allow TCP$RECEIVE to succede in CLOSE_WAIT state if data available.
 
 1.3   5-Aug-86, Edit by VAF
-	Modify receive side processing to use circular byte queue.
+    Modify receive side processing to use circular byte queue.
 
 1.2  31-Jul-86, Edit by VAF
-	Remove meat of TCP$INFO routine into USER$Net_Connection_Info routine,
-	used by both TCP and UDP.
+    Remove meat of TCP$INFO routine into USER$Net_Connection_Info routine,
+    used by both TCP and UDP.
 
 1.1  29-Jul-86, Edit by VAF
-	Move some routines that UDP wants to use back into USER.BLI (in
-	particular, SET_HOSTS and USER$GET_LOCAL_PORT)
+    Move some routines that UDP wants to use back into USER.BLI (in
+    particular, SET_HOSTS and USER$GET_LOCAL_PORT)
 
 1.0  23-Jul-86, Edit by VAF
-	Split this module off from USER.BLI.
-	Change routine names from NET$... to TCP$...
+    Split this module off from USER.BLI.
+    Change routine names from NET$... to TCP$...
 */
 
 
@@ -184,28 +184,28 @@ MODULE TCP_USER(IDENT="3.7",LANGUAGE(BLISS32),
                 OPTIMIZE,OPTLEVEL=3,ZIP)
 #endif
 
-#include <starlet.h>	// VMS system definitions
-// not yet #include <cmuip/central/include/netxport.h>	// XPORT data structure definitions
-#include <cmuip/central/include/neterror.h>	// Network error message definitions
-#include "netvms.h"	// Special VMS definitions
+#include <starlet.h>    // VMS system definitions
+// not yet #include <cmuip/central/include/netxport.h>  // XPORT data structure definitions
+#include <cmuip/central/include/neterror.h> // Network error message definitions
+#include "netvms.h" // Special VMS definitions
 #include <cmuip/central/include/netcommon.h>// Network common defs
-#include <cmuip/central/include/nettcpip.h>	// TCP/IP protocols
-#include "structure.h"		// TCP system data structure definitions
+#include <cmuip/central/include/nettcpip.h> // TCP/IP protocols
+#include "structure.h"      // TCP system data structure definitions
 #include "cmuip.h" // needed before tcpmacros.h
-#include "tcpmacros.h"		// System macro definitions
-#include "tcp.h"			// TCP related definitions
+#include "tcpmacros.h"      // System macro definitions
+#include "tcp.h"            // TCP related definitions
 
 #include <ssdef.h>
 #include <descrip.h>
 #include <ucbdef.h>
 
 #if 0
-XQDEFINE			// (maybe) define queue debugging externals
+XQDEFINE            // (maybe) define queue debugging externals
 #endif
 
 //*** Special literals from USER.BLI ***
 
-#define    UCB$L_CBID	ucb$l_devdepend	// Control Block associated with UCB
+#define    UCB$L_CBID   ucb$l_devdepend // Control Block associated with UCB
 
 extern signed long /* LITERAL*/
 UCB$Q_DDP,
@@ -213,9 +213,9 @@ UCB$Q_DDP,
 
 // User function codes
 
-#define     U$OPEN	  1
-#define     U$CLOSE	  4
-#define     M$CANCEL	  14
+#define     U$OPEN    1
+#define     U$CLOSE   4
+#define     M$CANCEL      14
 
 extern signed long
 default_mss,
@@ -300,16 +300,16 @@ void tcp$kill_pending_requests();
 Verify a user has privs to use the specified connection.  Check is made
 aginst the User_ID in the TCB & the user_id specified in the call args.
 
-Entry:	Args = Default user args structure (function & user_ID).
-	TCB = points at TCB for this connection
+Entry:  Args = Default user args structure (function & user_ID).
+    TCB = points at TCB for this connection
 
 Returns:
-	True = User has priv's to use connection.
-	False - No priv's.
+    True = User has priv's to use connection.
+    False - No priv's.
 
 Deficiencies:
 
-	Need to design a more secure/comprehensive check
+    Need to design a more secure/comprehensive check
 */
 
 USER_OK(struct user_default_args * args,struct tcb_structure * tcb)
@@ -325,22 +325,22 @@ USER_OK(struct user_default_args * args,struct tcb_structure * tcb)
 
 Function:
 
-	Kill any pending user sends, Return the user's IO request status &
-	delete the send queue element.
+    Kill any pending user sends, Return the user's IO request status &
+    delete the send queue element.
 
 Inputs:
 
-	TCB = address of TCB
-	ERR = User error code.
+    TCB = address of TCB
+    ERR = User error code.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	User send request queue is purged.  Send requests are returned back
-	to the user with the appro. error code.
+    User send request queue is purged.  Send requests are returned back
+    to the user with the appro. error code.
 
 */
 
@@ -350,14 +350,14 @@ void tcp$purge_send_queue(struct tcb_structure * TCB,signed long RC)
     register
 #endif
     struct queue_blk_structure(qb_send_fields) * QB;
-    register	struct user_send_args * Uargs;
+    register    struct user_send_args * Uargs;
 
     while (REMQUE(TCB->snd_qhead,&QB) != EMPTY_QUEUE) // check
     {
-        Uargs = QB->sn$uargs;	// point at user argblk.
+        Uargs = QB->sn$uargs;   // point at user argblk.
         user$post_io_status(Uargs,RC,0,0,0);
-        mm$uarg_free(Uargs);	// release user arg blk.
-        mm$qblk_free(QB);		// release queue block
+        mm$uarg_free(Uargs);    // release user arg blk.
+        mm$qblk_free(QB);       // release queue block
     };
 }
 
@@ -366,28 +366,28 @@ void tcp$purge_send_queue(struct tcb_structure * TCB,signed long RC)
 
 Function:
 
-	Purge the user network receive request queue.  Something has happened
-	which forces ALL receive requests to be aborted.  VMS return code
-	is SS$_ABORT.  TCP Error code varies.
+    Purge the user network receive request queue.  Something has happened
+    which forces ALL receive requests to be aborted.  VMS return code
+    is SS$_ABORT.  TCP Error code varies.
 
 Inputs:
 
-	TCB = TCB pointer.
-	Err = TCP Error code which is returned to the user.
+    TCB = TCB pointer.
+    Err = TCP Error code which is returned to the user.
 
 Implicit Inputs:
 
-	TCB->UR_Qhead - User receive requests for this connection.
-	TCB->UR_Qtail - Both fields comprize the queue header.
+    TCB->UR_Qhead - User receive requests for this connection.
+    TCB->UR_Qtail - Both fields comprize the queue header.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	This TCB's user receive request queue is emptied.
-	User argument blocks are released.
+    This TCB's user receive request queue is emptied.
+    User argument blocks are released.
 
 */
 
@@ -411,13 +411,13 @@ void tcp$purge_receive_queue(struct tcb_structure * TCB, signed long RC)
 
 Function:
 
-	Get rid of all TCB queue items for all TCBs. Called just before the
-	ACP exits by USER$Purge_All_IO in the USER module.
+    Get rid of all TCB queue items for all TCBs. Called just before the
+    ACP exits by USER$Purge_All_IO in the USER module.
 
 Side Effects:
 
-	All TCB's are scanned searching for user IO requests to POST.  When
-	a particular TCB has been examined then we delete it.
+    All TCB's are scanned searching for user IO requests to POST.  When
+    a particular TCB has been examined then we delete it.
 */
 
 Purge_TCB ( TCB , IDX , P1 , P2 )
@@ -434,13 +434,13 @@ Purge_TCB ( TCB , IDX , P1 , P2 )
 
 Function:
 
-	Get rid of all TCB queue items for all TCBs. Called just before the
-	ACP exits by USER$Purge_All_IO in the USER module.
+    Get rid of all TCB queue items for all TCBs. Called just before the
+    ACP exits by USER$Purge_All_IO in the USER module.
 
 Side Effects:
 
-	All TCB's are scanned searching for user IO requests to POST.  When
-	a particular TCB has been examined then we delete it.
+    All TCB's are scanned searching for user IO requests to POST.  When
+    a particular TCB has been examined then we delete it.
 */
 
 void tcp$purge_all_io  (void)
@@ -497,23 +497,23 @@ void Purge_User_Requests(struct tcb_structure * TCB, signed long ERcode)
 
 Function:
 
-	Purge all user requests (call Purge_User_Requests above) and flush
-	all queues prior to deleting a TCB.
+    Purge all user requests (call Purge_User_Requests above) and flush
+    all queues prior to deleting a TCB.
 
 Inputs:
 
-	TCB = pointer to currect TCB.
-	ErCode = TCP Error Code to be returned to user.
+    TCB = pointer to currect TCB.
+    ErCode = TCP Error Code to be returned to user.
 
 Outputs:
 
-	none
+    none
 
 Side Effects:
 
-	ALL TCB queues are flushed.  All queue elements which represent
-	a user IO request are returned with the VMS error code "ABORT"
-	& the TCP Error Code Specified in the rtn call.
+    ALL TCB queues are flushed.  All queue elements which represent
+    a user IO request are returned with the VMS error code "ABORT"
+    & the TCP Error Code Specified in the rtn call.
 
 */
 
@@ -528,7 +528,7 @@ void tcp$kill_pending_requests(struct tcb_structure * TCB,signed long ERcode)
 // Kill anything on the future queue
 
 //~~~WHILE XREMQUE(TCB->RF_Qhead,QBR,tcp$kill_pending_requests,
-//~~~		  Q$TCBFQ,TCB->RF_Qhead) != Empty_Queue DO
+//~~~         Q$TCBFQ,TCB->RF_Qhead) != Empty_Queue DO
     while (REMQUE(TCB->rf_qhead,&QBR) != EMPTY_QUEUE) // check
     {
         mm$seg_free(QBR->nr$buf_size,QBR->nr$buf);
@@ -545,20 +545,20 @@ void tcp$kill_pending_requests(struct tcb_structure * TCB,signed long ERcode)
 
 Function:
 
-	Called by main VMS$Cancel routine in TCP_USER module when a $CANCEL
-	request is initiated by VMS.  Called through VTCB_Scan.
+    Called by main VMS$Cancel routine in TCP_USER module when a $CANCEL
+    request is initiated by VMS.  Called through VTCB_Scan.
 
 Inputs:
 
-	VMS cancel request arg block (VMS$Cancel_Args)
+    VMS cancel request arg block (VMS$Cancel_Args)
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	All I/O for the TCB is aborted, close is initiated on the connection.
+    All I/O for the TCB is aborted, close is initiated on the connection.
 */
 
 void Cancel_TCB( TCB , Idx , Uargs , P2)
@@ -617,20 +617,20 @@ struct vms$cancel_args * Uargs;
 
 Function:
 
-	Called by main VMS$Cancel routine in USER module when a $CANCEL
-	request is initiated by VMS.
+    Called by main VMS$Cancel routine in USER module when a $CANCEL
+    request is initiated by VMS.
 
 Inputs:
 
-	VMS cancel request arg block (VMS$Cancel_Args)
+    VMS cancel request arg block (VMS$Cancel_Args)
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	All I/O for the TCB is aborted, close is initiated on the connection.
+    All I/O for the TCB is aborted, close is initiated on the connection.
 */
 
 void tcp$cancel(struct vms$cancel_args * Uargs)
@@ -652,20 +652,20 @@ void tcp$cancel(struct vms$cancel_args * Uargs)
 
 Function:
 
-	Return to the user the status of a specified connection
+    Return to the user the status of a specified connection
 
 Inputs:
 
-	Uargs = TCP user argument block.
+    Uargs = TCP user argument block.
 
 Outputs:
-	none
+    none
 
 Side Effects:
 
-	Status of specified connection is returned to the user in the
-	user specified buffer.  IRP is queued to VMS IO post-processing
-	rtns.
+    Status of specified connection is returned to the user in the
+    user specified buffer.  IRP is queued to VMS IO post-processing
+    rtns.
 
 */
 
@@ -680,7 +680,7 @@ void tcp$status(struct user_status_args * Uargs)
 
     if ((TCB=tcb_ok(Uargs->st$local_conn_id,&RC,Uargs)) == 0)
     {
-        USER$Err(Uargs,RC);	// Connection Doesn't Exist
+        USER$Err(Uargs,RC); // Connection Doesn't Exist
         return;
     };
 
@@ -719,7 +719,7 @@ void tcp$status(struct user_status_args * Uargs)
 // Return the Connection Status to the user by posting the IO request.
 
     user$post_io_status(Uargs,SS$_NORMAL,SR_BLK_SIZE,0,0);
-    mm$uarg_free(Uargs);		// release user arg block.
+    mm$uarg_free(Uargs);        // release user arg block.
 }
 
 //SBTTL "User call: TCP$INFO - Return Connection Information."
@@ -727,21 +727,21 @@ void tcp$status(struct user_status_args * Uargs)
 
 Function:
 
-	Return to the requesting user information about the connection.
-	Foreign-Host,Local-Host & Node-Description strings are returned.
+    Return to the requesting user information about the connection.
+    Foreign-Host,Local-Host & Node-Description strings are returned.
 
 Inputs:
 
-	Uargs = TCP user argument block.
+    Uargs = TCP user argument block.
 
 Outputs:
-	none
+    none
 
 Side Effects:
 
-	Information about a specified connection is returned to the user in the
-	user specified buffer.  IRP is queued to VMS IO post-processing
-	rtns.
+    Information about a specified connection is returned to the user in the
+    user specified buffer.  IRP is queued to VMS IO post-processing
+    rtns.
 
 */
 
@@ -755,7 +755,7 @@ void tcp$info(struct user_info_args * Uargs)
 
     if ((TCB=tcb_ok(Uargs->if$local_conn_id,&RC,Uargs)) == 0)
         {
-            USER$Err(Uargs,RC);	// Connection Doesn't Exist
+            USER$Err(Uargs,RC); // Connection Doesn't Exist
             return;
         };
 
@@ -777,7 +777,7 @@ d$tcb_dump_return_blk * RB;
     unsigned long Now;
 
     if (! VTCB_Indx_OK (LCID))
-        return FALSE;		// Give failure (error) return
+        return FALSE;       // Give failure (error) return
 
     TCB = vtcb_ptr[LCID];
     RB->dm$tcb_addr = TCB;
@@ -792,7 +792,7 @@ d$tcb_dump_return_blk * RB;
     Now = Time_Stamp() ;
 //    RB->dm$Conn_TimeOut = TCB->connection_timeout - Now ;
 //    if (RB->dm$Conn_TimeOut LSS 0)
-//	RB->dm$Conn_TimeOut = 0;
+//  RB->dm$Conn_TimeOut = 0;
     if ((TCB->connection_timeout > Now))
         RB->dm$conn_timeout = TCB->connection_timeout - Now;
     else
@@ -800,7 +800,7 @@ d$tcb_dump_return_blk * RB;
 
 //    RB->dm$RT_TimeOut = TCB->rx_timeout - Now ;
 //    if (RB->dm$RT_TimeOut LSS 0)
-//	RB->dm$RT_TimeOut = 0;
+//  RB->dm$RT_TimeOut = 0;
     if ((TCB->rx_timeout > Now))
         RB->dm$rt_timeout = TCB->rx_timeout - Now;
     else
@@ -874,31 +874,31 @@ d$tcb_dump_return_blk * RB;
 
 Function:
 
-	User request to "ABORT" a connection.  Clear ALL TCB queues &
-	finially delete the TCB thus making the connection non-existant.
+    User request to "ABORT" a connection.  Clear ALL TCB queues &
+    finially delete the TCB thus making the connection non-existant.
 
 Inputs:
 
-	Uargs = Address of TCP argument block, "ABORT" format.
+    Uargs = Address of TCP argument block, "ABORT" format.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	All TCB queues are flushed.  All IO requests are returned to the
-	user with VMS code of SS$_ABORT & the TCP Error code "Connection
-	RESET".  TCB is finially deleted.  Connection no longer exists.
+    All TCB queues are flushed.  All IO requests are returned to the
+    user with VMS code of SS$_ABORT & the TCP Error code "Connection
+    RESET".  TCB is finially deleted.  Connection no longer exists.
 
 Notes:
-	We make this a seperate function from TCP$ABORT because we
-	sometimes want to kill a connection without posting IO.
+    We make this a seperate function from TCP$ABORT because we
+    sometimes want to kill a connection without posting IO.
 */
 
 tcp$kill(TCBidx)
 {
-    extern	GET_TCB();
+    extern  GET_TCB();
     struct tcb_structure * TCB=0;
     signed long
     RC;
@@ -916,7 +916,7 @@ tcp$kill(TCBidx)
     case CS$INACTIVE:
     {
         tcp$kill_pending_requests(TCB,NET$_KILL); // Error: connection Reset
-        tcb$delete(TCB);	// Connection RESET.
+        tcb$delete(TCB);    // Connection RESET.
     }; // 1
     break;
 
@@ -940,21 +940,21 @@ tcp$kill(TCBidx)
 
 Function:
 
-	User request to "ABORT" a connection.  Call TCP$Kill the post IO.
+    User request to "ABORT" a connection.  Call TCP$Kill the post IO.
 
 Inputs:
 
-	Uargs = Address of TCP argument block, "ABORT" format.
+    Uargs = Address of TCP argument block, "ABORT" format.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	All TCB queues are flushed.  All IO requests are returned to the
-	user with VMS code of SS$_ABORT & the TCP Error code "Connection
-	RESET".  TCB is finially deleted.  Connection no longer exists.
+    All TCB queues are flushed.  All IO requests are returned to the
+    user with VMS code of SS$_ABORT & the TCP Error code "Connection
+    RESET".  TCB is finially deleted.  Connection no longer exists.
 
 */
 
@@ -967,7 +967,7 @@ void tcp$abort(struct user_abort_args * Uargs)
 
     if ((TCB=tcb_ok(Uargs->ab$local_conn_id,&RC,Uargs)) == 0)
     {
-        USER$Err(Uargs,RC);	// Connection Doesn't Exist (probably...)
+        USER$Err(Uargs,RC); // Connection Doesn't Exist (probably...)
         return;
     };
 
@@ -980,7 +980,7 @@ void tcp$abort(struct user_abort_args * Uargs)
     case CS$LAST_ACK:
     {
         tcp$kill_pending_requests(TCB,NET$_CR); // Error: connection Reset
-        tcb$delete(TCB);	// Connection RESET.
+        tcb$delete(TCB);    // Connection RESET.
     };
     break;
 
@@ -996,7 +996,7 @@ void tcp$abort(struct user_abort_args * Uargs)
     };
     }
 
-    user$post_function_ok(Uargs);	// okay
+    user$post_function_ok(Uargs);   // okay
 }
 
 
@@ -1005,33 +1005,33 @@ void tcp$abort(struct user_abort_args * Uargs)
 
 Function:
 
-	Return data received by this TCB to the user specified buffer.
-	Return as much data as possible within the user specified buffer size.
+    Return data received by this TCB to the user specified buffer.
+    Return as much data as possible within the user specified buffer size.
 
 Inputs:
 
-	TCB - points at current TCB.
+    TCB - points at current TCB.
 
 Implicit Inputs:
 
-	UR_Qhead - Points at list of User receive request Qblks.
-	NR_Qhead - points at list of segments received from the network.
-	TCB->Dasm_ptr = Points @ data in 1st queue element.
-	TCB->Dasm_BC = # of data bytes available from 1st segment in NR_Qhead.
+    UR_Qhead - Points at list of User receive request Qblks.
+    NR_Qhead - points at list of segments received from the network.
+    TCB->Dasm_ptr = Points @ data in 1st queue element.
+    TCB->Dasm_BC = # of data bytes available from 1st segment in NR_Qhead.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	User's Network receive request is satisfied with as much data as
-	available or exactly what the user asked for.  The Network I/O
-	status block is returned with a VMS code of SS$_NORMAL & a count
-	of bytes transfered.  If any errors the VMS code = "ABORT" & the
-	TCP error field is valid.  The IO request tag field is always
-	valid.  May request a window update "ACK" be sent if user data was
-	delivered (TCB->Pending_ACK = true).
+    User's Network receive request is satisfied with as much data as
+    available or exactly what the user asked for.  The Network I/O
+    status block is returned with a VMS code of SS$_NORMAL & a count
+    of bytes transfered.  If any errors the VMS code = "ABORT" & the
+    TCP error field is valid.  The IO request tag field is always
+    valid.  May request a window update "ACK" be sent if user data was
+    delivered (TCB->Pending_ACK = true).
 
 
 */
@@ -1043,14 +1043,14 @@ void tcp$deliver_user_data(struct tcb_structure * TCB)
 #endif
     struct queue_blk_structure(qb_ur_fields) * UQB; // User rcv request queue.
     register
-    datasize,		// Size of data written to users VAS.
-    Usize,			// Size requested by user.
-    Uadrs;			// Address of user's system buffer.
+    datasize,       // Size of data written to users VAS.
+    Usize,          // Size requested by user.
+    Uadrs;          // Address of user's system buffer.
     signed long
-    Uflags,			// Flag bits to return to user
-    Args[4];	// CMKRNL arg blk.
+    Uflags,         // Flag bits to return to user
+    Args[4];    // CMKRNL arg blk.
 
-    UQB = TCB->ur_qhead;	// Point at User receive request list.
+    UQB = TCB->ur_qhead;    // Point at User receive request list.
 
 // Process User receive requests (UR_Qhead) until all have been processed
 // or all the user-data bearing network segments have been exhausted.
@@ -1060,8 +1060,8 @@ void tcp$deliver_user_data(struct tcb_structure * TCB)
         Uflags = 0;
         if (TCB->rcv_push_flag)
             Uflags = Uflags | NSB$PUSHBIT;
-        Usize = UQB->ur$size;	// Size of data requested.
-        Uadrs = UQB->ur$data;	// User's System buffer address.
+        Usize = UQB->ur$size;   // Size of data requested.
+        Uadrs = UQB->ur$data;   // User's System buffer address.
         datasize = MIN(Usize,TCB->rcv_q_count);
 
 // Indicate that we are doing this
@@ -1069,8 +1069,8 @@ void tcp$deliver_user_data(struct tcb_structure * TCB)
         if ($$LOGF(LOG$USER))
         {
             extern void ASCII_HEX_BYTES();
-#define		maxhex 20
-#define		maxasc 50
+#define     maxhex 20
+#define     maxasc 50
             signed long
             nhex,nasc;
             nhex = MIN(datasize,maxhex);
@@ -1138,11 +1138,11 @@ maxhex*3,dsc$a_pointer:
 
         if ((TCB->old_rcv_nxt != TCB->rcv_nxt) ||
                 (TCB->old_rcv_wnd != TCB->rcv_wnd))
-//	    tcb->pending_ack = True; // Indicate we need an ack sent.
-            tcp$enqueue_ack(TCB) ;	// Indicate we need an ack sent.
-        mm$qblk_free(UQB);	// Release Queue blk.
-        UQB = TCB->ur_qhead;	// point at next user request blk.
-    };	// End of "OUTER" While.
+//      tcb->pending_ack = True; // Indicate we need an ack sent.
+            tcp$enqueue_ack(TCB) ;  // Indicate we need an ack sent.
+        mm$qblk_free(UQB);  // Release Queue blk.
+        UQB = TCB->ur_qhead;    // point at next user request blk.
+    };  // End of "OUTER" While.
 }
 
 //SBTTL "Queue User Receive Request"
@@ -1150,29 +1150,29 @@ maxhex*3,dsc$a_pointer:
 
 Function:
 
-	User has requested a receive function but there is no data available
-	 or connection "STATE" is not correct so we must queue the receive
-	request & wait for data to arrive.  Request is placed on this TCB's
-	User Receive request list (UR_Qhead).
+    User has requested a receive function but there is no data available
+     or connection "STATE" is not correct so we must queue the receive
+    request & wait for data to arrive.  Request is placed on this TCB's
+    User Receive request list (UR_Qhead).
 
 Inputs:
 
-	TCB = TCB pointer.
-	Uargs = TCP user receive request argument blk pointer.
+    TCB = TCB pointer.
+    Uargs = TCP user receive request argument blk pointer.
 
 Implicit Inputs:
 
-	No data available from the network for this user.
+    No data available from the network for this user.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	Request is placed on User receive request list (UR_Qhead).
-	User IO request has not been satisfied (ie, if waiting for Event
-	flag, then ther're still waiting!).
+    Request is placed on User receive request list (UR_Qhead).
+    User IO request has not been satisfied (ie, if waiting for Event
+    flag, then ther're still waiting!).
 */
 
 void Queue_Receive_Request(TCB,Uargs)
@@ -1184,12 +1184,12 @@ struct user_recv_args * Uargs;
 
 // Fill in Queue Blk from user argument blk.
 
-    QB = mm$qblk_get();		// Get a Queue block structure.
+    QB = mm$qblk_get();     // Get a Queue block structure.
     QB->ur$size = Uargs->re$buf_size; // # of data bytes requested.
     QB->ur$data = Uargs->re$data_start; // Adrs of system buffer data start.
     QB->ur$irp_adrs = Uargs->re$irp_adrs; // IO request Packet address.
     QB->ur$ucb_adrs = Uargs->re$ucb_adrs; // Unit Control Blk address.
-    QB->ur$uargs = Uargs;	// point at process-local user argblk.
+    QB->ur$uargs = Uargs;   // point at process-local user argblk.
 
 // Add to end of user receive request list
 
@@ -1201,27 +1201,27 @@ struct user_recv_args * Uargs;
 
 Function:
 
-	User has requested some data.  If data is available then fill the
-	specified buffer OTHERWISE queue the receive request & process it
-	when data becomes available.  Multiple TCP segments maybe returned
-	to the requesting user in one receive request.
+    User has requested some data.  If data is available then fill the
+    specified buffer OTHERWISE queue the receive request & process it
+    when data becomes available.  Multiple TCP segments maybe returned
+    to the requesting user in one receive request.
 
 Inputs:
 
-	Uargs = User receive argument block pointer.
+    Uargs = User receive argument block pointer.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	IF User data available
-	THEN
-	User has data placed in specified buffer with NetIO Status block
-	filled out to reflect the status of the receive (ie, which receive
-	request, # of bytes, EOL, Urgent flags, & status code).
-	else The USER request is queue & processed when data becomes available.
+    IF User data available
+    THEN
+    User has data placed in specified buffer with NetIO Status block
+    filled out to reflect the status of the receive (ie, which receive
+    request, # of bytes, EOL, Urgent flags, & status code).
+    else The USER request is queue & processed when data becomes available.
 */
 
 void    tcp$post_user_close_io_status();
@@ -1235,7 +1235,7 @@ void tcp$receive(struct user_recv_args * Uargs)
 
     if ((TCB=tcb_ok(Uargs->re$local_conn_id,&RC,Uargs)) == 0)
     {
-        USER$Err(Uargs,RC);	// Connection doesn't exist.
+        USER$Err(Uargs,RC); // Connection doesn't exist.
         return;
     };
 
@@ -1321,7 +1321,7 @@ void tcp$receive(struct user_recv_args * Uargs)
 
     case CS$CLOSING:
     case CS$LAST_ACK:
-        USER$Err(Uargs,NET$_CC);	// Error: Connection Closing.
+        USER$Err(Uargs,NET$_CC);    // Error: Connection Closing.
     }
 }
 
@@ -1330,25 +1330,25 @@ void tcp$receive(struct user_recv_args * Uargs)
 
 Function:
 
-	Generate an initial sequence number which is tied to today's clock
-	to prevent duplicate segment numbers from being generated for a
-	given connection.  covers the case of a connection being open'ed
-	& closed in rapid succession with segments still floating around
-	the network.  Possible pathological case.
+    Generate an initial sequence number which is tied to today's clock
+    to prevent duplicate segment numbers from being generated for a
+    given connection.  covers the case of a connection being open'ed
+    & closed in rapid succession with segments still floating around
+    the network.  Possible pathological case.
 
 Inputs:
 
-	None.
+    None.
 
 Outputs:
 
-	Unsigned integer which represents a sequence number.  Up to a full
-	32-bits worth can be provided.
+    Unsigned integer which represents a sequence number.  Up to a full
+    32-bits worth can be provided.
 
 Side Effects:
 
-	Sequence numbers are incremental in that a clock base is added to
-	the last generated sequence number.
+    Sequence numbers are incremental in that a clock base is added to
+    the last generated sequence number.
 */
 
 
@@ -1358,7 +1358,7 @@ ISN_GEN(void)
     static unsigned long isn;
     signed long
     RVAL;
-    extern	user$clock_base();
+    extern  user$clock_base();
 
     isn = isn+1;
     RVAL = (user$clock_base()+isn)<<16; // check
@@ -1370,21 +1370,21 @@ ISN_GEN(void)
 
 Function:
 
-	Place a user's send request on the send queue.  Queue Block contains
-	pointers to users buffer & send call arguments.  See field definition
-	"QB_Send_Fields" for Queue Block structure.
+    Place a user's send request on the send queue.  Queue Block contains
+    pointers to users buffer & send call arguments.  See field definition
+    "QB_Send_Fields" for Queue Block structure.
 
 Inputs:
 
-	Uargs = user SEND call argument block
-	TCB = Current TCB
+    Uargs = user SEND call argument block
+    TCB = Current TCB
 Outputs:
 
-	none.
+    none.
 
 Side Effects:
 
-	Queue block is placed at the end of the send queue.
+    Queue block is placed at the end of the send queue.
 */
 
 void Queue_Send_Data(Uargs,TCB)
@@ -1425,11 +1425,11 @@ struct tcb_structure * TCB;
         register
         struct queue_blk_structure(qb_send_fields) * QB;
         QB = mm$qblk_get();
-        QB->sn$size = Ucount;	// user's buffer length
-        QB->sn$data = Uaddr;	// Point at start of data
+        QB->sn$size = Ucount;   // user's buffer length
+        QB->sn$data = Uaddr;    // Point at start of data
         QB->sn$eol = Uargs->se$eol;
         QB->sn$urg = Uargs->se$urg;
-        QB->sn$uargs = Uargs;	// point at TCP user argument blk.
+        QB->sn$uargs = Uargs;   // point at TCP user argument blk.
 
 //~~~ This may not be used any more - check
 
@@ -1451,39 +1451,39 @@ struct tcb_structure * TCB;
 
 Function:
 
-	User has requested that the data be transmitted over the network via
-	the connection represented by the local-connection-id.  Verify
-	user has privileges to use connection.
-	Queue the send request to the TCB & then if correct connection
-	"STATE" then segmentize the data & send it over the network.
-	Amount of data sent is controlled by the Send window (Snd_wnd).
-	Multiple send requests will be collected in to the fewest #
-	of TCP segments needed.  If the connection is "CLOSED" while there
-	is still user data to be sent the TCB flag "Pending_Close" is set.
-	The send_Data routine is aware of this flag & when the send queue
-	is empty the fin will be sent.  If there is an error, the user's IO
-	request is posted to VMS IO post-processing rtns thus completing
-	the users IO request.  Otherwise the IO request is queued & maybe
-	completed/posted by the Send_Data rtn.
+    User has requested that the data be transmitted over the network via
+    the connection represented by the local-connection-id.  Verify
+    user has privileges to use connection.
+    Queue the send request to the TCB & then if correct connection
+    "STATE" then segmentize the data & send it over the network.
+    Amount of data sent is controlled by the Send window (Snd_wnd).
+    Multiple send requests will be collected in to the fewest #
+    of TCP segments needed.  If the connection is "CLOSED" while there
+    is still user data to be sent the TCB flag "Pending_Close" is set.
+    The send_Data routine is aware of this flag & when the send queue
+    is empty the fin will be sent.  If there is an error, the user's IO
+    request is posted to VMS IO post-processing rtns thus completing
+    the users IO request.  Otherwise the IO request is queued & maybe
+    completed/posted by the Send_Data rtn.
 
 Inputs:
 
-	Uargs = User "SEND" call argument block
+    Uargs = User "SEND" call argument block
 
 Implicit Inputs:
 
-	Send request are ALWAYS for at least one data byte.  Virtual device
-	"IP:" does not pass zero length send or receive requests.
+    Send request are ALWAYS for at least one data byte.  Virtual device
+    "IP:" does not pass zero length send or receive requests.
 
 Outputs:
 
-	None
+    None
 
 Side Effects:
 
-	User TCP argument block & data are queued to the TCB send queue.
-	If connection state & send window permits then data will be
-	segmentized & send over the network (via: IP).
+    User TCP argument block & data are queued to the TCB send queue.
+    If connection state & send window permits then data will be
+    segmentized & send over the network (via: IP).
 */
 
 void tcp$send(struct user_send_args * Uargs)
@@ -1495,7 +1495,7 @@ void tcp$send(struct user_send_args * Uargs)
 
     if ((TCB=tcb_ok(Uargs->se$local_conn_id,&RC,Uargs)) == 0)
     {
-        USER$Err(Uargs,RC);	// Connection does not exist.
+        USER$Err(Uargs,RC); // Connection does not exist.
         return;
     };
 
@@ -1537,14 +1537,14 @@ void tcp$send(struct user_send_args * Uargs)
         break;
         /*~~~~~ Don't do SEND_DATA here - main processing loop can handle it
             case CS$CLOSE_WAIT: case CS$ESTABLISHED:
-        	{
+            {
 
         // Queue the SEND request to maintain the FIFO ordering.
 
-        	Queue_Send_Data(Uargs,TCB);
-        	Send_Data(TCB);
-        	};
-        	break;
+            Queue_Send_Data(Uargs,TCB);
+            Send_Data(TCB);
+            };
+            break;
         ~~~~~*/
 
     case CS$FIN_WAIT_1:
@@ -1552,7 +1552,7 @@ void tcp$send(struct user_send_args * Uargs)
     case CS$TIME_WAIT:
     case CS$CLOSING:
     case CS$LAST_ACK:
-        USER$Err(Uargs,NET$_CC);	// Connection Closed.
+        USER$Err(Uargs,NET$_CC);    // Connection Closed.
         break;
     }
 }
@@ -1562,21 +1562,21 @@ void tcp$send(struct user_send_args * Uargs)
 
 Function:
 
-	User has requested TCP to close this connection.
+    User has requested TCP to close this connection.
 
 Inputs:
 
-	UARGS - points at the user's close arg blk
+    UARGS - points at the user's close arg blk
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	Connection maybe closed if no errors.  Closed implies that a "FIN"
-	has been sent to the foreign_host or that it will be as soon as
-	all the data has been segmentized & sent.
+    Connection maybe closed if no errors.  Closed implies that a "FIN"
+    has been sent to the foreign_host or that it will be as soon as
+    all the data has been segmentized & sent.
 */
 
 
@@ -1590,7 +1590,7 @@ void tcp$close(struct user_close_args * Uargs)
 
     if ((TCB=tcb_ok(Uargs->cl$local_conn_id,&RC,Uargs)) == 0)
     {
-        USER$Err(Uargs,RC);	// Connection Does NOT exist.
+        USER$Err(Uargs,RC); // Connection Does NOT exist.
         return;
     };
 
@@ -1606,7 +1606,7 @@ void tcp$close(struct user_close_args * Uargs)
     XTCB = TCB;
     if ((RC=tcp$tcb_close(&XTCB)) != 0)
     {
-        USER$Err(Uargs,RC);	// Connection Closing.
+        USER$Err(Uargs,RC); // Connection Closing.
         return;
     };
 
@@ -1629,36 +1629,36 @@ void tcp$close(struct user_close_args * Uargs)
 
 Function:
 
-	Some user network functions (OPEN, Close) do not post user IO
-	completion until a network event has happened (eg, open: connection
-	established). Here we take care of that posting. The TCB field ArgBlk
-	points to the TCP argument block used in the TCP$OPEN/TCP$CLOSE
-	routines (ie, used to be refernced by UARGS).  A function
-	timer is running (TCB->Function_Timer) & if it times out then the
-	IO will be posted as failure & we won't see it here. Magic TCB flag bit
-	Pending_IO says that IO still needs to be posted.
+    Some user network functions (OPEN, Close) do not post user IO
+    completion until a network event has happened (eg, open: connection
+    established). Here we take care of that posting. The TCB field ArgBlk
+    points to the TCP argument block used in the TCP$OPEN/TCP$CLOSE
+    routines (ie, used to be refernced by UARGS).  A function
+    timer is running (TCB->Function_Timer) & if it times out then the
+    IO will be posted as failure & we won't see it here. Magic TCB flag bit
+    Pending_IO says that IO still needs to be posted.
 
 Inputs:
 
-	TCB = TCB pointer.
-	VMS_RC = VMS return code (SS$_Normal etc.)
-	TCP_RC = TCP Error code if NOT (VMS_RC = SS$_Normal).
+    TCB = TCB pointer.
+    VMS_RC = VMS return code (SS$_Normal etc.)
+    TCP_RC = TCP Error code if NOT (VMS_RC = SS$_Normal).
 
 Implicit Inputs:
 
-	Assumed this was an wait-mode CLOSE
-	TCB->pending_io - indicates IO needs to be posted.
-	TCB->Function_Timer - handler function timeout.
-	TCB->ArgBlk - points at user's TCP argument block.
+    Assumed this was an wait-mode CLOSE
+    TCB->pending_io - indicates IO needs to be posted.
+    TCB->Function_Timer - handler function timeout.
+    TCB->ArgBlk - points at user's TCP argument block.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	User's IO is posted to VMS IO posting routines.  Pending_IO bit is
-	cleared.  User argument block is deallocated.
+    User's IO is posted to VMS IO posting routines.  Pending_IO bit is
+    cleared.  User argument block is deallocated.
 */
 
 
@@ -1679,9 +1679,9 @@ void tcp$post_user_close_io_status(struct tcb_structure * TCB,
         IOSB->nsb$byte_count = 0;
         IOSB->nsb$status = VMS_RC;
         IOSB->net_status.nsb$xstatus = 0;
-        Uargs = TCB->argblk;	// point at user's TCP arg block.
+        Uargs = TCB->argblk;    // point at user's TCP arg block.
         IO$POST(IOSB,Uargs);
-        mm$uarg_free(Uargs);	// Free user arg blk memory.
+        mm$uarg_free(Uargs);    // Free user arg blk memory.
     };
 }
 
@@ -1691,23 +1691,23 @@ void tcp$post_user_close_io_status(struct tcb_structure * TCB,
 
 Function:
 
-	Fill in the required TCB slots as the specified TCB is newly created
-	& unintialized although it has all longwords set to zero.
+    Fill in the required TCB slots as the specified TCB is newly created
+    & unintialized although it has all longwords set to zero.
 
 Inputs:
 
-	TCB - points at a TCB structure
+    TCB - points at a TCB structure
 
 Outputs:
 
-	True for success.
-	False for error in user OPEN arg(network-node-name) is invalid.
+    True for success.
+    False for error in user OPEN arg(network-node-name) is invalid.
 
 Side Effects:
 
-	TCB fields are initialized.  Queue headers point at themselves (Empty
-	condition, as defined by VMS queue instructions). Sequence #'s are
-	generated, Foreign_Host & port are setup.
+    TCB fields are initialized.  Queue headers point at themselves (Empty
+    condition, as defined by VMS queue instructions). Sequence #'s are
+    generated, Foreign_Host & port are setup.
 */
 
 void tcp$tcb_init(TCB)
@@ -1720,7 +1720,7 @@ struct tcb_structure * TCB;
     TCB->snd_nxt = TCB->snd_una = TCB->iss = ISN_GEN();
     TCB->snd_wnd = TCB->rcv_wnd = window_default;
     TCB->snd_ack_threshold = ack_threshold ;
-    TCB->tcb$flags = FALSE;	// clear all flags
+    TCB->tcb$flags = FALSE; // clear all flags
 //    TCB->max_seg_data_size = Default_Data_Size; // default: max data per seg
 //   TCB->max_eff_data_size = Default_Data_Size; // default: max data per seg
     TCB->max_seg_data_size = default_mss ; // default: max data per seg
@@ -1760,8 +1760,8 @@ struct tcb_structure * TCB;
     TCB->connection_timeout = CONN_TIMEVAL + Time_Stamp();
     TCB->round_trip_time = BASE_RT_TIMEOUT; // base for round trip timer.
     TCB->calculated_rto = BASE_RT_TIMEOUT; // Initial retransmission timer
-    TCB->snd_delay_timer	=	BASE_RT_TIMEOUT + Time_Stamp() ;
-    TCB->delayed_ack_timer	=	BASE_RT_TIMEOUT + Time_Stamp() ;
+    TCB->snd_delay_timer    =   BASE_RT_TIMEOUT + Time_Stamp() ;
+    TCB->delayed_ack_timer  =   BASE_RT_TIMEOUT + Time_Stamp() ;
     XLOG$FAO(LOG$TCP,"!%T TCB_INIT TCB !XL!/",0,TCB);
 }
 
@@ -1770,25 +1770,25 @@ struct tcb_structure * TCB;
 
 Function:
 
-	"ABBRA KaDabbra Kadiddle Kazam......OPEN a connection while we can."
-	User call to open a network connection.  Verify user has privileges to use
-	local port if one was specified.  AOUS (Active OPEN User Specified)
-	Local-Port situation is special cased so users can not screw-up TCP/FTP.
+    "ABBRA KaDabbra Kadiddle Kazam......OPEN a connection while we can."
+    User call to open a network connection.  Verify user has privileges to use
+    local port if one was specified.  AOUS (Active OPEN User Specified)
+    Local-Port situation is special cased so users can not screw-up TCP/FTP.
 
 Inputs:
 
-	UARGS - points at user open arg blk
+    UARGS - points at user open arg blk
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	User's OPEN request is posted to IO post-processing rtns.
-	If No error then a TCB has been created & initialized.  If the
-	user specified an ACTIVE open then a "SYN" control-segment has been
-	sent to the specified foreign-host.
+    User's OPEN request is posted to IO post-processing rtns.
+    If No error then a TCB has been created & initialized.  If the
+    user specified an ACTIVE open then a "SYN" control-segment has been
+    sent to the specified foreign-host.
 */
 
 void    TCP_NMLOOK_DONE();
@@ -1850,7 +1850,7 @@ void tcp$open(struct user_open_args * Uargs)
     if ((TCB = tcb$create()) == ERROR)
     {
         USER$Err(Uargs,NET$_UCT);// Error: Unable to create TCB.
-        return;			// punt
+        return;         // punt
     };
 
 // Initialize the TCB
@@ -1875,10 +1875,10 @@ void tcp$open(struct user_open_args * Uargs)
 
 // Set user specified connection time-out in seconds.
 // TCB->User_timeout is a timeout for idle connections at the user level.
-//	It is updated whenever the user touches the connection or whenever
-//	user data is received. If op$timeout is unspecified, no user timeout
-//	handling is performed, otherwise this value is saved in the cell
-//	TCB->user_timeval and is used to compute this idle timeout.
+//  It is updated whenever the user touches the connection or whenever
+//  user data is received. If op$timeout is unspecified, no user timeout
+//  handling is performed, otherwise this value is saved in the cell
+//  TCB->user_timeval and is used to compute this idle timeout.
 
     TCB->user_timeval = Uargs->op$timeout*CSEC;
     if (TCB->user_timeval != 0)
@@ -1907,7 +1907,7 @@ void tcp$open(struct user_open_args * Uargs)
     if (HostWild)
     {
         TCB->foreign_host = WILD;
-//	TCB->local_host = WILD;
+//  TCB->local_host = WILD;
         TCB->pending_io = TRUE;                 //[VU] Satisfy new validity test
         TCP_NMLOOK_DONE(TCB,SS$_NORMAL,0,0,0,0);
         return;
@@ -1915,7 +1915,7 @@ void tcp$open(struct user_open_args * Uargs)
 
 // Check for user open with IP address.
 
-X:   			// *** Block X ***
+X:              // *** Block X ***
     {
         if (Uargs->op$addr_flag)
             IPADDR = Uargs->op$foreign_address;
@@ -1936,7 +1936,7 @@ X:   			// *** Block X ***
         TCB->nmlook_flag = TRUE;
         NML$GETNAME(IPADDR,tcp$adlook_done,TCB);
         return;
-    }			// *** Block X ***
+    }           // *** Block X ***
 leave:
 
 // Have a host name. Start name lookup which will finish the open when done.
@@ -2118,7 +2118,7 @@ struct tcb_structure * TCB;
         TCB->function_timer = Time_Stamp() + ACTIVE_OPEN_TIMEOUT;
         ts$aco = ts$aco + 1;
     }
-    else			// Passive Open
+    else            // Passive Open
     {
         XLOG$FAO(LOG$USER,
                  "!%T Passive open on LP=!XL (!UL), FP=!XL (!UL)!/",
@@ -2187,7 +2187,7 @@ struct tcb_structure * TCB;
         IOSB->nsb$byte_count = 0;
         IOSB->net_status.nsb$xstatus = 0;
         IO$POST(IOSB,Uargs); // Tell em.
-        mm$uarg_free(Uargs);	// Release user arg blk.
+        mm$uarg_free(Uargs);    // Release user arg blk.
     }
     else
     {
@@ -2195,8 +2195,8 @@ struct tcb_structure * TCB;
 // He wants to wait. Set up for I/O posting in SEGIN when connection becomes
 // established.
 
-        TCB->pending_io = TRUE;	// indicate we have IO to post later.
-        TCB->argblk = Uargs;	// save pointer to user argument blk.
+        TCB->pending_io = TRUE; // indicate we have IO to post later.
+        TCB->argblk = Uargs;    // save pointer to user argument blk.
     };
 
 // Check SYN wait list for passive connection.
@@ -2248,36 +2248,36 @@ struct tcb_structure * TCB;
 
 Function:
 
-	Some user network functions (OPEN, Close) do not post user IO
-	completion until a network event has happened (eg, open: connection
-	established). Here we take care of that posting. The TCB field ArgBlk
-	points to the TCP argument block used in the TCP$OPEN/TCP$CLOSE
-	routines (ie, used to be refernced by UARGS).  A function
-	timer is running (TCB->Function_Timer) & if it times out then the
-	IO will be posted as failure & we won't see it here. Magic TCB flag bit
-	Pending_IO says that IO still needs to be posted.
+    Some user network functions (OPEN, Close) do not post user IO
+    completion until a network event has happened (eg, open: connection
+    established). Here we take care of that posting. The TCB field ArgBlk
+    points to the TCP argument block used in the TCP$OPEN/TCP$CLOSE
+    routines (ie, used to be refernced by UARGS).  A function
+    timer is running (TCB->Function_Timer) & if it times out then the
+    IO will be posted as failure & we won't see it here. Magic TCB flag bit
+    Pending_IO says that IO still needs to be posted.
 
 Inputs:
 
-	TCB = TCB pointer.
-	VMS_RC = VMS return code (SS$_Normal etc.)
-	TCP_RC = TCP Error code if ! (VMS_RC = SS$_Normal).
+    TCB = TCB pointer.
+    VMS_RC = VMS return code (SS$_Normal etc.)
+    TCP_RC = TCP Error code if ! (VMS_RC = SS$_Normal).
 
 Implicit Inputs:
 
-	Assumed this was an ACTIVE open (ie, TCB->Active_OPEN = True).
-	TCB->pending_io - indicates IO needs to be posted.
-	TCB->function_timer - handler function timeout.
-	TCB->argblk - points at user's TCP argument block.
+    Assumed this was an ACTIVE open (ie, TCB->Active_OPEN = True).
+    TCB->pending_io - indicates IO needs to be posted.
+    TCB->function_timer - handler function timeout.
+    TCB->argblk - points at user's TCP argument block.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	User's IO is posted to VMS IO posting routines.  Pending_IO bit is
-	cleared.  User argument block is deallocated.
+    User's IO is posted to VMS IO posting routines.  Pending_IO bit is
+    cleared.  User argument block is deallocated.
 */
 
 
@@ -2298,7 +2298,7 @@ void tcp$post_active_open_io_status(struct tcb_structure * TCB,
             IOSB->net_status.nsb$xstatus = 0;
             Uargs = TCB->argblk; // point at user's TCP arg block.
             IO$POST(IOSB,Uargs);
-            mm$uarg_free(Uargs);	// Free user arg blk memory.
+            mm$uarg_free(Uargs);    // Free user arg blk memory.
         };
     };
 }

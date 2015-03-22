@@ -26,9 +26,9 @@
  */
 typedef struct ide_pio_timings_s
 {
-    int	setup_time;	/* Address setup (ns) minimum */
-    int	active_time;	/* Active pulse (ns) minimum */
-    int	cycle_time;	/* Cycle time (ns) minimum = (setup + active + recovery) */
+    int setup_time; /* Address setup (ns) minimum */
+    int active_time;    /* Active pulse (ns) minimum */
+    int cycle_time; /* Cycle time (ns) minimum = (setup + active + recovery) */
 } ide_pio_timings_t;
 
 typedef struct ide_pio_data_s
@@ -50,12 +50,12 @@ extern const ide_pio_timings_t ide_pio_timings[6];
 
 const ide_pio_timings_t ide_pio_timings[6] =
 {
-    { 70,	165,	600 },	/* PIO Mode 0 */
-    { 50,	125,	383 },	/* PIO Mode 1 */
-    { 30,	100,	240 },	/* PIO Mode 2 */
-    { 30,	80,	180 },	/* PIO Mode 3 with IORDY */
-    { 25,	70,	120 },	/* PIO Mode 4 with IORDY */
-    { 20,	50,	100 }	/* PIO Mode 5 with IORDY (nonstandard) */
+    { 70,   165,    600 },  /* PIO Mode 0 */
+    { 50,   125,    383 },  /* PIO Mode 1 */
+    { 30,   100,    240 },  /* PIO Mode 2 */
+    { 30,   80, 180 },  /* PIO Mode 3 with IORDY */
+    { 25,   70, 120 },  /* PIO Mode 4 with IORDY */
+    { 20,   50, 100 }   /* PIO Mode 5 with IORDY (nonstandard) */
 };
 
 /*
@@ -64,11 +64,11 @@ const ide_pio_timings_t ide_pio_timings[6] =
  */
 static struct ide_pio_info
 {
-    const char	*name;
-    int		pio;
+    const char  *name;
+    int     pio;
 } ide_pio_blacklist [] =
 {
-    /*	{ "Conner Peripherals 1275MB - CFS1275A", 4 }, */
+    /*  { "Conner Peripherals 1275MB - CFS1275A", 4 }, */
     { "Conner Peripherals 540MB - CFS540A", 3 },
 
     { "WDC AC2700",  3 },
@@ -84,10 +84,10 @@ static struct ide_pio_info
     { "WDC AC1170",  1 },
     { "WDC AC1210",  1 },
     { "WDC AC280",   0 },
-    /*	{ "WDC AC21000", 4 }, */
+    /*  { "WDC AC21000", 4 }, */
     { "WDC AC31000", 3 },
     { "WDC AC31200", 3 },
-    /*	{ "WDC AC31600", 4 }, */
+    /*  { "WDC AC31600", 4 }, */
 
     { "Maxtor 7131 AT", 1 },
     { "Maxtor 7171 AT", 1 },
@@ -101,12 +101,12 @@ static struct ide_pio_info
     { "SAMSUNG SHD-3122A", 1 },
     { "SAMSUNG SHD-3172A", 1 },
 
-    /*	{ "ST51080A", 4 },
-     *	{ "ST51270A", 4 },
-     *	{ "ST31220A", 4 },
-     *	{ "ST31640A", 4 },
-     *	{ "ST32140A", 4 },
-     *	{ "ST3780A",  4 },
+    /*  { "ST51080A", 4 },
+     *  { "ST51270A", 4 },
+     *  { "ST31220A", 4 },
+     *  { "ST31640A", 4 },
+     *  { "ST32140A", 4 },
+     *  { "ST3780A",  4 },
      */
     { "ST5660A",  3 },
     { "ST3660A",  3 },
@@ -117,7 +117,7 @@ static struct ide_pio_info
     { "ST3600A",  1 },
     { "ST3290A",  0 },
     { "ST3144A",  0 },
-    { "ST3491A",  1 },	/* reports 3, should be 1 or 2 (depending on */
+    { "ST3491A",  1 },  /* reports 3, should be 1 or 2 (depending on */
     /* drive) according to Seagates FIND-ATA program */
 
     { "QUANTUM ELS127A", 0 },
@@ -134,7 +134,7 @@ static struct ide_pio_info
     { "QUANTUM FIREBALL_640", 3 },
     { "QUANTUM FIREBALL_1080", 3 },
     { "QUANTUM FIREBALL_1280", 3 },
-    { NULL,	0 }
+    { NULL, 0 }
 };
 
 /*
@@ -191,12 +191,12 @@ byte ide_get_best_pio_mode (ide_drive_t *drive, byte mode_wanted, byte max_mode,
     else
     {
         pio_mode = id->tPIO;
-        if (pio_mode > 2)  	/* 2 is maximum allowed tPIO value */
+        if (pio_mode > 2)   /* 2 is maximum allowed tPIO value */
         {
             pio_mode = 2;
             overridden = 1;
         }
-        if (id->field_valid & 2)  	  /* drive implements ATA2? */
+        if (id->field_valid & 2)      /* drive implements ATA2? */
         {
             if (id->capability & 8)   /* drive supports use_iordy? */
             {

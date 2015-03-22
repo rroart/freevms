@@ -40,11 +40,11 @@ static inline void *kmap(struct page *page)
 
 #define kunmap(page) do { } while (0)
 
-#define kmap_atomic(page,idx)		kmap(page)
-#define kunmap_atomic(page,idx)		kunmap(page)
+#define kmap_atomic(page,idx)       kmap(page)
+#define kunmap_atomic(page,idx)     kunmap(page)
 
-#define bh_kmap(bh)	((bh)->b_data)
-#define bh_kunmap(bh)	do { } while (0)
+#define bh_kmap(bh) ((bh)->b_data)
+#define bh_kunmap(bh)   do { } while (0)
 
 #endif /* CONFIG_HIGHMEM */
 

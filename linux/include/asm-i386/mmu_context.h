@@ -9,8 +9,8 @@
 /*
  * possibly do the LDT unload here?
  */
-#define destroy_context(mm)		do { } while(0)
-#define init_new_context(tsk,mm)	0
+#define destroy_context(mm)     do { } while(0)
+#define init_new_context(tsk,mm)    0
 
 #ifdef CONFIG_SMP
 
@@ -65,6 +65,6 @@ static inline void switch_mm(struct mm_struct *prev, struct mm_struct *next, str
 }
 
 #define activate_mm(prev, next) \
-	switch_mm((prev),(next),NULL,smp_processor_id())
+    switch_mm((prev),(next),NULL,smp_processor_id())
 
 #endif

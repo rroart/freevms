@@ -16,21 +16,21 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*  Parse range spec from command line					*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	cp = command line pointer					*/
-/*	entry = called back for each matching line			*/
-/*	param = parameter to pass to entry routine			*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	range = -1 : syntax error, error message already output		*/
-/*	         0 : successful						*/
-/*	      else : non-zero status returned by entry routine		*/
-/*									*/
+/*                                  */
+/*  Parse range spec from command line                  */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  cp = command line pointer                   */
+/*  entry = called back for each matching line          */
+/*  param = parameter to pass to entry routine          */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  range = -1 : syntax error, error message already output     */
+/*           0 : successful                     */
+/*        else : non-zero status returned by entry routine      */
+/*                                  */
 /************************************************************************/
 
 #include <stdlib.h>
@@ -43,20 +43,20 @@ static int range_mult_run (char *cp, char **cp_r, int (*entry) (void *param, Buf
 static int getline2 (char *cp, char **cp_r, Position *position);
 
 /************************************************************************/
-/*									*/
-/*  Parse range spec from command line for a single line		*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	cp = command line pointer					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	range_single = -1 : syntax error, error message already output	*/
-/*	                0 : successful					*/
-/*	*cp_r = points to terminating character				*/
-/*	*position_r = points to located line				*/
-/*									*/
+/*                                  */
+/*  Parse range spec from command line for a single line        */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  cp = command line pointer                   */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  range_single = -1 : syntax error, error message already output  */
+/*                  0 : successful                  */
+/*  *cp_r = points to terminating character             */
+/*  *position_r = points to located line                */
+/*                                  */
 /************************************************************************/
 
 int range_single (char *cp, char **cp_r, Position *position_r)
@@ -91,16 +91,16 @@ int range_single (char *cp, char **cp_r, Position *position_r)
         else p = skipspaces (cp + i);
         for (cp = p; (c = *cp) != 0; cp ++) if (strchr (bufnamechars, c) == NULL) break;
         if (cp == p) goto badrange;
-        position.buffer = buffer_create (cp - p, p);	/* point to the buffer (creating it if necessary) */
+        position.buffer = buffer_create (cp - p, p);    /* point to the buffer (creating it if necessary) */
         position.line   = buffer_first_line (position.buffer); /* point to beginning of first line in buffer */
         position.offset = 0;
-        valid = 1;						/* we found something legitimate */
+        valid = 1;                      /* we found something legitimate */
     }
 
     /* Get line */
 
-    rc = getline2 (cp, &cp, &position);			/* process line spec */
-    if (rc < 0) return (-1);				/* fatal syntax error */
+    rc = getline2 (cp, &cp, &position);         /* process line spec */
+    if (rc < 0) return (-1);                /* fatal syntax error */
 
     /* Nothing more to do, return pointer to terminator */
 
@@ -116,21 +116,21 @@ badrange:
 }
 
 /************************************************************************/
-/*									*/
-/*  Parse range spec from command line for multiple lines		*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	cp = command line pointer					*/
-/*	entry = called back for each matching line			*/
-/*	param = parameter to pass to entry routine			*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	range = -1 : syntax error, error message already output		*/
-/*	         0 : successful						*/
-/*	      else : non-zero status returned by entry routine		*/
-/*									*/
+/*                                  */
+/*  Parse range spec from command line for multiple lines       */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  cp = command line pointer                   */
+/*  entry = called back for each matching line          */
+/*  param = parameter to pass to entry routine          */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  range = -1 : syntax error, error message already output     */
+/*           0 : successful                     */
+/*        else : non-zero status returned by entry routine      */
+/*                                  */
 /************************************************************************/
 
 int range_multiple (char *cp, char **cp_r, int (*entry) (void *param, Buffer *buffer, Line *line), void *param)
@@ -138,9 +138,9 @@ int range_multiple (char *cp, char **cp_r, int (*entry) (void *param, Buffer *bu
 {
     int rc;
 
-    rc = range_mult_run (cp, cp_r, NULL, NULL);			/* do syntax check first */
-    if (rc == 0) rc = range_mult_run (cp, cp_r, entry, param);	/* if ok, do it for real */
-    return (rc);							/* return final status */
+    rc = range_mult_run (cp, cp_r, NULL, NULL);         /* do syntax check first */
+    if (rc == 0) rc = range_mult_run (cp, cp_r, entry, param);  /* if ok, do it for real */
+    return (rc);                            /* return final status */
 }
 
 static int range_mult_run (char *cp, char **cp_r, int (*entry) (void *param, Buffer *buffer, Line *line), void *param)
@@ -183,10 +183,10 @@ loop:
         else p = skipspaces (cp + i);
         for (cp = p; (c = *cp) != 0; cp ++) if (strchr (bufnamechars, c) == NULL) break;
         if (cp == p) goto badrange;
-        buffer    = buffer_create (cp - p, p);		/* point to the buffer (creating it if necessary) */
-        firstline = buffer_first_line (buffer);		/* default range is the whole thing */
+        buffer    = buffer_create (cp - p, p);      /* point to the buffer (creating it if necessary) */
+        firstline = buffer_first_line (buffer);     /* default range is the whole thing */
         lastline  = NULL;
-        valid = 1;						/* we found something legitimate */
+        valid = 1;                      /* we found something legitimate */
     }
 
     /* If WHOLE, use the whole buffer */
@@ -215,7 +215,7 @@ loop:
         lastline  = cur_position.line;
         if ((cur_position.offset == 0) && (firstline != lastline))   /* if it ends on first char of a line ... */
         {
-            if (lastline != NULL) lastline = line_prev (lastline);	/* ... back up to previous line */
+            if (lastline != NULL) lastline = line_prev (lastline);  /* ... back up to previous line */
             else lastline = buffer_last_line (cur_position.buffer);
         }
         cp = skipspaces (cp + i);
@@ -249,25 +249,25 @@ loop:
             outerr (0, "SELECT only valid for current buffer\n");
             return (-1);
         }
-        valid = 1;							/* we found something legit to process */
-        firstline   = sel_position.line;				/* assume select line is before current line */
+        valid = 1;                          /* we found something legit to process */
+        firstline   = sel_position.line;                /* assume select line is before current line */
         firstoffset = sel_position.offset;
         lastline    = cur_position.line;
         lastoffset  = cur_position.offset;
-        if (relposition (&cur_position, &sel_position) < 0)  	/* see if that is the case */
+        if (relposition (&cur_position, &sel_position) < 0)     /* see if that is the case */
         {
-            firstline   = cur_position.line;				/* if not, put the current line first */
+            firstline   = cur_position.line;                /* if not, put the current line first */
             firstoffset = cur_position.offset;
             lastline    = sel_position.line;
             lastoffset  = sel_position.offset;
         }
-        if ((lastoffset == 0) && (firstline != lastline))  		/* if it ends on first char of a line ... */
+        if ((lastoffset == 0) && (firstline != lastline))       /* if it ends on first char of a line ... */
         {
-            if (lastline != NULL) lastline = line_prev (lastline);	/* ... back up to previous line */
+            if (lastline != NULL) lastline = line_prev (lastline);  /* ... back up to previous line */
             else lastline = buffer_last_line (cur_position.buffer);
         }
-        if (entry != NULL) sel_position.buffer = NULL;		/* if this is for real, deactivate select range */
-        cp = skipspaces (cp + i);					/* point to next item in command string */
+        if (entry != NULL) sel_position.buffer = NULL;      /* if this is for real, deactivate select range */
+        cp = skipspaces (cp + i);                   /* point to next item in command string */
     }
 
     /* Get basic first:last, first#count lines of the range - */
@@ -279,34 +279,34 @@ loop:
         pos.buffer = buffer;
         pos.line   = firstline;
         pos.offset = 0;
-        rc = getline2 (cp, &cp, &pos);						/* process first line number */
-        if (rc < 0) return (-1);							/* fatal syntax error */
+        rc = getline2 (cp, &cp, &pos);                      /* process first line number */
+        if (rc < 0) return (-1);                            /* fatal syntax error */
         if (rc > 0)
         {
-            valid = 1;								/* we found something legitimate */
+            valid = 1;                              /* we found something legitimate */
             lastline = firstline = pos.line;
         }
-        cp = skipspaces (cp);							/* see if followed by : */
+        cp = skipspaces (cp);                           /* see if followed by : */
         if (*cp == ':')
         {
-            valid = 1;								/* if so, we found something legitimate */
+            valid = 1;                              /* if so, we found something legitimate */
             pos.line = lastline;
             pos.offset = 0;
-            rc = getline2 (cp + 1, &cp, &pos);						/* get last line number */
-            if (rc < 0) return (-1);							/* fatal syntax error */
-            if (rc == 0) lastline = NULL;						/* if missing, use end of buffer */
+            rc = getline2 (cp + 1, &cp, &pos);                      /* get last line number */
+            if (rc < 0) return (-1);                            /* fatal syntax error */
+            if (rc == 0) lastline = NULL;                       /* if missing, use end of buffer */
             else lastline = pos.line;
             if (rc == 2)
             {
-                if (lastline != NULL) lastline = line_prev (lastline);			/* next after last found, back up one line */
+                if (lastline != NULL) lastline = line_prev (lastline);          /* next after last found, back up one line */
                 else lastline = buffer_last_line (buffer);
             }
         }
-        else if (*cp == '#')  							/* check for # */
+        else if (*cp == '#')                            /* check for # */
         {
-            n = strtol (cp + 1, &p, 0);						/* ok, decode the number */
-            if (n <= 0) goto badrange;						/* must have something! */
-            valid = 1;								/* ok, its valid */
+            n = strtol (cp + 1, &p, 0);                     /* ok, decode the number */
+            if (n <= 0) goto badrange;                      /* must have something! */
+            valid = 1;                              /* ok, its valid */
             lastline = firstline;
             while ((-- n > 0) && (lastline != NULL))
             {
@@ -330,19 +330,19 @@ loop:
         if (entry != NULL)
         {
             *cp = 0;
-            for (line = firstline; line != NULL; line = nline)  		/* start with the first line */
+            for (line = firstline; line != NULL; line = nline)          /* start with the first line */
             {
-                if (line != NULL) nline = line_next (line);			/* get what next line will be */
+                if (line != NULL) nline = line_next (line);         /* get what next line will be */
                 if ((*xstrstr) (string_getval (line_string (line)), p + 1) != NULL)
                 {
-                    rc = (*entry) (param, buffer, line);				/* ... in case this routine deletes line */
-                    if (rc != 0)  						/* abort if routine says to */
+                    rc = (*entry) (param, buffer, line);                /* ... in case this routine deletes line */
+                    if (rc != 0)                        /* abort if routine says to */
                     {
                         *cp = c;
                         return (rc);
                     }
                 }
-                if (line == lastline) break;					/* stop if just did the last line */
+                if (line == lastline) break;                    /* stop if just did the last line */
             }
             *cp = c;
         }
@@ -358,12 +358,12 @@ loop:
 
     else if (entry != NULL)
     {
-        for (line = firstline;; line = nline)  		/* start with the first line */
+        for (line = firstline;; line = nline)       /* start with the first line */
         {
-            if (line != NULL) nline = line_next (line);	/* get what next line will be */
-            rc = (*entry) (param, buffer, line);		/* ... in case this routine deletes line */
-            if (rc != 0) return (rc);				/* abort if routine says to */
-            if ((line == NULL) || (line == lastline)) break;	/* stop if just did the last line */
+            if (line != NULL) nline = line_next (line); /* get what next line will be */
+            rc = (*entry) (param, buffer, line);        /* ... in case this routine deletes line */
+            if (rc != 0) return (rc);               /* abort if routine says to */
+            if ((line == NULL) || (line == lastline)) break;    /* stop if just did the last line */
         }
     }
 
@@ -394,24 +394,24 @@ badrange:
 }
 
 /************************************************************************/
-/*									*/
-/*  Try to get line number						*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	cp = points to line number string				*/
-/*	buffer = points to buffer the line is in			*/
-/*	*line_r = line in buffer to start at for relative searches	*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	getline = -1 : syntax error (error message already output)	*/
-/*	           0 : no line number found in command line		*/
-/*	           1 : exact match found				*/
-/*	           2 : next line > requested found			*/
-/*	**cp_r  = terminating character					*/
-/*	*line_r = requested line (NULL for end of buffer)		*/
-/*									*/
+/*                                  */
+/*  Try to get line number                      */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  cp = points to line number string               */
+/*  buffer = points to buffer the line is in            */
+/*  *line_r = line in buffer to start at for relative searches  */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  getline = -1 : syntax error (error message already output)  */
+/*             0 : no line number found in command line     */
+/*             1 : exact match found                */
+/*             2 : next line > requested found          */
+/*  **cp_r  = terminating character                 */
+/*  *line_r = requested line (NULL for end of buffer)       */
+/*                                  */
 /************************************************************************/
 
 static int search_setup (char *cp, char **cp_r, const char **p_r, char *c_r);
@@ -457,7 +457,7 @@ static int getline2 (char *cp, char **cp_r, Position *position)
             outerr (0, "dot reference only allowed in current buffer\n");
             return (-1);
         }
-        line   = cur_position.line;				/* point to beginning of current line */
+        line   = cur_position.line;             /* point to beginning of current line */
         offset = 0;
         cp ++;
         rc     = 1;
@@ -466,37 +466,37 @@ static int getline2 (char *cp, char **cp_r, Position *position)
 
     /* Process absolute line numbers */
 
-    if ((c >= '0') && (c <= '9'))  			/* starts with a string of digits */
+    if ((c >= '0') && (c <= '9'))           /* starts with a string of digits */
     {
         for (p = cp; (c = *p) != 0; p ++) if ((c < '0')  || (c > '9')) break;
-        if (c == '.')  					/* ... then optional . followed by digits */
+        if (c == '.')                   /* ... then optional . followed by digits */
         {
             while ((c = *(++ p)) != 0) if ((c < '0')  || (c > '9')) break;
         }
-        *p = 0;						/* ok, put a temp null terminator at end */
-        line = position -> line;				/* start with default line */
+        *p = 0;                     /* ok, put a temp null terminator at end */
+        line = position -> line;                /* start with default line */
         if (line == NULL) line = buffer_last_line (position -> buffer);
-        rc = 1;						/* assume we will find exact match */
-        while (line != NULL)  				/* repeat until we hit end of buffer */
+        rc = 1;                     /* assume we will find exact match */
+        while (line != NULL)                /* repeat until we hit end of buffer */
         {
-            n = line_numcmp (line, cp);			/* compare line's number with desired number */
-            if (n == 0) break;				/* stop if exact match */
-            if (n < 0) line = line_next (line);		/* if line is too low, check next in buffer */
+            n = line_numcmp (line, cp);         /* compare line's number with desired number */
+            if (n == 0) break;              /* stop if exact match */
+            if (n < 0) line = line_next (line);     /* if line is too low, check next in buffer */
             if (n > 0)
             {
-                nline = line_prev (line);			/* if line is too high, see if there is a previous in buffer */
+                nline = line_prev (line);           /* if line is too high, see if there is a previous in buffer */
                 if ((nline == NULL) || (line_numcmp (nline, cp) < 0))
                 {
-                    rc = 2;					/* this one too high, one before it is too low, stop now */
+                    rc = 2;                 /* this one too high, one before it is too low, stop now */
                     break;
                 }
                 line = nline;
             }
         }
-        if (line == NULL) rc = 2;				/* if we ran off end, say approximate match */
-        offset = 0;						/* always point to beginning of matched line */
-        *p = c;						/* restore terminating character */
-        cp = p;						/* return pointer to terminating character */
+        if (line == NULL) rc = 2;               /* if we ran off end, say approximate match */
+        offset = 0;                     /* always point to beginning of matched line */
+        *p = c;                     /* restore terminating character */
+        cp = p;                     /* return pointer to terminating character */
         goto checkpm;
     }
 
@@ -510,48 +510,48 @@ static int getline2 (char *cp, char **cp_r, Position *position)
     /* Check for [+/-[n]] */
 
 checkpm:
-    cp = skipspaces (cp);					/* see what follows what we found */
-    n  = 0;						/* assume there isn't */
-    if (*cp == '+')  					/* check for '+ n' */
+    cp = skipspaces (cp);                   /* see what follows what we found */
+    n  = 0;                     /* assume there isn't */
+    if (*cp == '+')                     /* check for '+ n' */
     {
-        cp = skipspaces (cp + 1);				/* ok, skip over the '+' */
+        cp = skipspaces (cp + 1);               /* ok, skip over the '+' */
         if ((*cp == '\'') || (*cp == '"')) goto search_forward;
-        n  = strtol (cp, &p, 0);				/* decode the 'n', leave it positive */
+        n  = strtol (cp, &p, 0);                /* decode the 'n', leave it positive */
         if ((n == 0) && (cp == *cp_r)) n = 1;
     }
-    else if (*cp == '-')  				/* check for '- n' */
+    else if (*cp == '-')                /* check for '- n' */
     {
-        cp = skipspaces (cp + 1);				/* ok, skip over the '-' */
+        cp = skipspaces (cp + 1);               /* ok, skip over the '-' */
         if ((*cp == '\'') || (*cp == '"')) goto search_backward;
-        n  = - strtol (cp, &p, 0);				/* decode the 'n', make it negative */
+        n  = - strtol (cp, &p, 0);              /* decode the 'n', make it negative */
         if ((n == 0) && (cp == *cp_r)) n = -1;
     }
     else
     {
-        *cp_r = cp;						/* no + or -, string ends here */
-        position -> line = line;				/* return pointer to line found */
+        *cp_r = cp;                     /* no + or -, string ends here */
+        position -> line = line;                /* return pointer to line found */
         position -> offset = 0;
-        return (rc);					/* all done */
+        return (rc);                    /* all done */
     }
     cp = p;
     *cp_r = p;
-    position -> offset = 0;				/* these searches all end at beginning of line */
-    if (rc == 0) rc = 1;					/* we did find something after all */
-    while (n < 0)  					/* if negative, skip backwards that number */
+    position -> offset = 0;             /* these searches all end at beginning of line */
+    if (rc == 0) rc = 1;                    /* we did find something after all */
+    while (n < 0)                   /* if negative, skip backwards that number */
     {
-        position -> line = line;				/* just in case we run off top, return pointer to current line */
-        if (line != NULL) line = line_prev (line);		/* link to previous line in buffer */
+        position -> line = line;                /* just in case we run off top, return pointer to current line */
+        if (line != NULL) line = line_prev (line);      /* link to previous line in buffer */
         else line = buffer_last_line (cur_position.buffer); /* (first time through only, point to last line in buffer if started at end)  */
-        if (line == NULL) return (2);			/* if ran off top, return 'line found > requested' status */
-        n ++;						/* one less line to skip over */
+        if (line == NULL) return (2);           /* if ran off top, return 'line found > requested' status */
+        n ++;                       /* one less line to skip over */
     }
-    while (n > 0)  					/* if positive, skip forwards that number */
+    while (n > 0)                   /* if positive, skip forwards that number */
     {
-        if (line == NULL) break;				/* if ran off end, we're done */
-        line = line_next (line);				/* point to next line in buffer */
-        n --;						/* one less line to skip over */
+        if (line == NULL) break;                /* if ran off end, we're done */
+        line = line_next (line);                /* point to next line in buffer */
+        n --;                       /* one less line to skip over */
     }
-    goto checkpm;						/* check for another +/- garbo (like a search) */
+    goto checkpm;                       /* check for another +/- garbo (like a search) */
 
     /* +'string' or +"string" - search forward */
 
@@ -617,47 +617,47 @@ static int search_setup (char *cp, char **cp_r, const char **p_r, char *c_r)
     char c;
     const char *p;
 
-    c = *(cp ++);						/* get the ' or " */
-    p = cp;						/* point to beginning of search string */
-    while (*cp != 0)  					/* find end of search string */
+    c = *(cp ++);                       /* get the ' or " */
+    p = cp;                     /* point to beginning of search string */
+    while (*cp != 0)                    /* find end of search string */
     {
         if (*cp == c) break;
         cp ++;
     }
-    c   = *cp;						/* get the ', " or null */
-    *cp = 0;						/* make sure there's a null terminator */
-    if (*p == 0)  					/* check for null search string */
+    c   = *cp;                      /* get the ', " or null */
+    *cp = 0;                        /* make sure there's a null terminator */
+    if (*p == 0)                    /* check for null search string */
     {
-        p = searchstr;					/* if so, use same as last time */
+        p = searchstr;                  /* if so, use same as last time */
     }
     else
     {
-        if (searchlen != 0) free (searchstr);		/* else, save the string for next time */
+        if (searchlen != 0) free (searchstr);       /* else, save the string for next time */
         searchlen = strlen (p);
         searchstr = strdup (p);
     }
 
-    *cp_r = cp;						/* return pointer to search string terminator */
-    *p_r  = p;						/* return pointer to search string */
-    *c_r  = c;						/* return search string terminator */
-    return (1);						/* success */
+    *cp_r = cp;                     /* return pointer to search string terminator */
+    *p_r  = p;                      /* return pointer to search string */
+    *c_r  = c;                      /* return search string terminator */
+    return (1);                     /* success */
 }
 
 /************************************************************************/
-/*									*/
-/*  Match keyword in string						*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	cp = pointer to command string					*/
-/*	kw = pointer to keyword string					*/
-/*	min = minimum number of chars that must match			*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	matchkeyword = 0 : no match					*/
-/*	            else : number of chars that matched			*/
-/*									*/
+/*                                  */
+/*  Match keyword in string                     */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  cp = pointer to command string                  */
+/*  kw = pointer to keyword string                  */
+/*  min = minimum number of chars that must match           */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  matchkeyword = 0 : no match                 */
+/*              else : number of chars that matched         */
+/*                                  */
 /************************************************************************/
 
 int matchkeyword (const char *cp, const char *kw, int min)

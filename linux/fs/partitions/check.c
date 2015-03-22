@@ -44,7 +44,7 @@ static int (*check_part[])(struct gendisk *hd, struct block_device *bdev, unsign
     acorn_partition,
 #endif
 #ifdef CONFIG_LDM_PARTITION
-    ldm_partition,		/* this must come before msdos */
+    ldm_partition,      /* this must come before msdos */
 #endif
 #ifdef CONFIG_MSDOS_PARTITION
     msdos_partition,
@@ -77,9 +77,9 @@ static int (*check_part[])(struct gendisk *hd, struct block_device *bdev, unsign
 };
 
 /*
- *	This is ucking fugly but its probably the best thing for 2.4.x
- *	Take it as a clear reminder than we should put the device name
- *	generation in the object kdev_t points to in 2.5.
+ *  This is ucking fugly but its probably the best thing for 2.4.x
+ *  Take it as a clear reminder than we should put the device name
+ *  generation in the object kdev_t points to in 2.5.
  */
 
 #ifdef CONFIG_ARCH_S390
@@ -286,8 +286,8 @@ void register_disk(struct gendisk *gdev, kdev_t dev, unsigned minors,
 void grok_partitions(struct gendisk *dev, int drive, unsigned minors, long size)
 {
     int i;
-    int first_minor	= drive << dev->minor_shift;
-    int end_minor	= first_minor + dev->max_p;
+    int first_minor = drive << dev->minor_shift;
+    int end_minor   = first_minor + dev->max_p;
 
     if(!dev->sizes)
         blk_size[dev->major] = NULL;
@@ -310,7 +310,7 @@ void grok_partitions(struct gendisk *dev, int drive, unsigned minors, long size)
      * We need to set the sizes array before we will be able to access
      * any of the partitions on this device.
      */
-    if (dev->sizes != NULL)  	/* optional safeguard in ll_rw_blk.c */
+    if (dev->sizes != NULL)     /* optional safeguard in ll_rw_blk.c */
     {
         for (i = first_minor; i < end_minor; i++)
             dev->sizes[i] = dev->part[i].nr_sects >> (BLOCK_SIZE_BITS - 9);

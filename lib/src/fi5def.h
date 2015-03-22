@@ -1,5 +1,5 @@
-#ifndef fi5def_h
-#define fi5def_h
+#ifndef FI5DEF_H
+#define FI5DEF_H
 
 #define FI5$C_ODS2 0
 #define FI5$C_ISL1 1
@@ -45,11 +45,11 @@ struct _fi5
     char fi5$t_filenamext [204];
 };
 
-#define		fi5$b_control		fi5$r_control_overlay.fi5$b_control
-#define		fi5$q_hint_hi_qw	fi5$r_length_hint.fi5$q_hint_hi_qw
-#define		fi5$q_hint_lo_qw	fi5$r_length_hint.fi5$q_hint_lo_qw
-#define		fi5$v_fixed_length	fi5$r_control_overlay.fi5$r_control_fields.fi5$v_fixed_length
-#define		fi5$v_nametype		fi5$r_control_overlay.fi5$r_control_fields.fi5$v_nametype
+#define     fi5$b_control       fi5$r_control_overlay.fi5$b_control
+#define     fi5$q_hint_hi_qw    fi5$r_length_hint.fi5$q_hint_hi_qw
+#define     fi5$q_hint_lo_qw    fi5$r_length_hint.fi5$q_hint_lo_qw
+#define     fi5$v_fixed_length  fi5$r_control_overlay.fi5$r_control_fields.fi5$v_fixed_length
+#define     fi5$v_nametype      fi5$r_control_overlay.fi5$r_control_fields.fi5$v_nametype
 
 #endif
 

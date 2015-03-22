@@ -1,5 +1,5 @@
-#ifndef ihddef_h
-#define ihddef_h
+#ifndef IHDDEF_H
+#define IHDDEF_H
 
 #define IHD$K_MAJORID 12848
 #define IHD$K_MINORID 13616
@@ -57,18 +57,18 @@ struct _ihd
         unsigned int ihd$l_lnkflags;
         struct
         {
-            unsigned ihd$v_lnkdebug	: 1;
-            unsigned ihd$v_lnknotfr	: 1;
-            unsigned ihd$v_nop0bufs	: 1;
-            unsigned ihd$v_picimg	: 1;
-            unsigned ihd$v_p0image	: 1;
-            unsigned ihd$v_dbgdmt	: 1;
-            unsigned ihd$v_inishr	: 1;
-            unsigned ihd$v_ihslong	: 1;
-            unsigned ihd$v_upcalls	: 1;
-            unsigned ihddef$$_fill_3	: 15;
-            unsigned ihd$v_matchctl	: 3;
-            unsigned ihd$v_fill_0_	: 5;
+            unsigned ihd$v_lnkdebug : 1;
+            unsigned ihd$v_lnknotfr : 1;
+            unsigned ihd$v_nop0bufs : 1;
+            unsigned ihd$v_picimg   : 1;
+            unsigned ihd$v_p0image  : 1;
+            unsigned ihd$v_dbgdmt   : 1;
+            unsigned ihd$v_inishr   : 1;
+            unsigned ihd$v_ihslong  : 1;
+            unsigned ihd$v_upcalls  : 1;
+            unsigned ihddef$$_fill_3    : 15;
+            unsigned ihd$v_matchctl : 3;
+            unsigned ihd$v_fill_0_  : 5;
         };
     };
     unsigned int ihd$l_ident;

@@ -35,8 +35,8 @@
 */
 
 #include <stdlib.h>
-#include "sys$routines.h"	/* SYS$ header file */
-#include "lib$routines.h"	/* LIB$ header file */
+#include "sys$routines.h"   /* SYS$ header file */
+#include "lib$routines.h"   /* LIB$ header file */
 #include "ssdef.h"
 
 /* sys_bintim() takes ascii time and convert it to a quadword */

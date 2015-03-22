@@ -42,7 +42,7 @@ dialog_textbox (const char *title, const char *file, int height, int width)
     char search_term[MAX_LEN + 1];
     WINDOW *dialog, *text;
 
-    search_term[0] = '\0';	/* no search term entered yet */
+    search_term[0] = '\0';  /* no search term entered yet */
 
     /* Open input file for reading */
     if ((fd = open (file, O_RDONLY)) == -1)
@@ -80,8 +80,8 @@ dialog_textbox (const char *title, const char *file, int height, int width)
         fprintf (stderr, "\nError reading file in dialog_textbox().\n");
         exit (-1);
     }
-    buf[bytes_read] = '\0';	/* mark end of valid data */
-    page = buf;			/* page is pointer to start of page to be displayed */
+    buf[bytes_read] = '\0'; /* mark end of valid data */
+    page = buf;         /* page is pointer to start of page to be displayed */
 
     /* center dialog box on screen */
     x = (COLS - width) / 2;
@@ -129,13 +129,13 @@ dialog_textbox (const char *title, const char *file, int height, int width)
     }
     print_button (dialog, " Exit ", height - 2, width / 2 - 4, TRUE);
     wnoutrefresh (dialog);
-    getyx (dialog, cur_y, cur_x);	/* Save cursor position */
+    getyx (dialog, cur_y, cur_x);   /* Save cursor position */
 
     /* Print first page of text */
     attr_clear (text, height - 4, width - 2, dialog_attr);
     print_page (text, height - 4, width - 2);
     print_position (dialog, height, width);
-    wmove (dialog, cur_y, cur_x);	/* Restore cursor position */
+    wmove (dialog, cur_y, cur_x);   /* Restore cursor position */
     wrefresh (dialog);
 
     while ((key != ESC) && (key != '\n'))
@@ -143,7 +143,7 @@ dialog_textbox (const char *title, const char *file, int height, int width)
         key = wgetch (dialog);
         switch (key)
         {
-        case 'E':		/* Exit */
+        case 'E':       /* Exit */
         case 'e':
         case 'X':
         case 'x':
@@ -151,7 +151,7 @@ dialog_textbox (const char *title, const char *file, int height, int width)
             free (buf);
             close (fd);
             return 0;
-        case 'g':		/* First page */
+        case 'g':       /* First page */
         case KEY_HOME:
             if (!begin_reached)
             {
@@ -164,7 +164,7 @@ dialog_textbox (const char *title, const char *file, int height, int width)
                              "\nError moving file pointer in dialog_textbox().\n");
                     exit (-1);
                 }
-                if (fpos > bytes_read)  	/* Yes, we have to read it in */
+                if (fpos > bytes_read)      /* Yes, we have to read it in */
                 {
                     if (lseek (fd, 0, SEEK_SET) == -1)
                     {
@@ -185,11 +185,11 @@ dialog_textbox (const char *title, const char *file, int height, int width)
                 page = buf;
                 print_page (text, height - 4, width - 2);
                 print_position (dialog, height, width);
-                wmove (dialog, cur_y, cur_x);	/* Restore cursor position */
+                wmove (dialog, cur_y, cur_x);   /* Restore cursor position */
                 wrefresh (dialog);
             }
             break;
-        case 'G':		/* Last page */
+        case 'G':       /* Last page */
         case KEY_END:
 
             end_reached = 1;
@@ -201,7 +201,7 @@ dialog_textbox (const char *title, const char *file, int height, int width)
                          "\nError moving file pointer in dialog_textbox().\n");
                 exit (-1);
             }
-            if (fpos < file_size)  	/* Yes, we have to read it in */
+            if (fpos < file_size)   /* Yes, we have to read it in */
             {
                 if (lseek (fd, -BUF_SIZE, SEEK_END) == -1)
                 {
@@ -223,10 +223,10 @@ dialog_textbox (const char *title, const char *file, int height, int width)
             back_lines (height - 4);
             print_page (text, height - 4, width - 2);
             print_position (dialog, height, width);
-            wmove (dialog, cur_y, cur_x);	/* Restore cursor position */
+            wmove (dialog, cur_y, cur_x);   /* Restore cursor position */
             wrefresh (dialog);
             break;
-        case 'K':		/* Previous line */
+        case 'K':       /* Previous line */
         case 'k':
         case KEY_UP:
             if (!begin_reached)
@@ -239,7 +239,7 @@ dialog_textbox (const char *title, const char *file, int height, int width)
                    point to start of next page. This is done by calling
                    get_line() in the following 'for' loop. */
                 scrollok (text, TRUE);
-                wscrl (text, -1);	/* Scroll text region down one line */
+                wscrl (text, -1);   /* Scroll text region down one line */
                 scrollok (text, FALSE);
                 page_length = 0;
                 passed_end = 0;
@@ -261,11 +261,11 @@ dialog_textbox (const char *title, const char *file, int height, int width)
                 }
 
                 print_position (dialog, height, width);
-                wmove (dialog, cur_y, cur_x);	/* Restore cursor position */
+                wmove (dialog, cur_y, cur_x);   /* Restore cursor position */
                 wrefresh (dialog);
             }
             break;
-        case 'B':		/* Previous page */
+        case 'B':       /* Previous page */
         case 'b':
         case KEY_PPAGE:
             if (begin_reached)
@@ -276,23 +276,23 @@ dialog_textbox (const char *title, const char *file, int height, int width)
             wmove (dialog, cur_y, cur_x);
             wrefresh (dialog);
             break;
-        case 'J':		/* Next line */
+        case 'J':       /* Next line */
         case 'j':
         case KEY_DOWN:
             if (!end_reached)
             {
                 begin_reached = 0;
                 scrollok (text, TRUE);
-                scroll (text);	/* Scroll text region up one line */
+                scroll (text);  /* Scroll text region up one line */
                 scrollok (text, FALSE);
                 print_line (text, height - 5, width - 2);
                 wnoutrefresh (text);
                 print_position (dialog, height, width);
-                wmove (dialog, cur_y, cur_x);	/* Restore cursor position */
+                wmove (dialog, cur_y, cur_x);   /* Restore cursor position */
                 wrefresh (dialog);
             }
             break;
-        case KEY_NPAGE:		/* Next page */
+        case KEY_NPAGE:     /* Next page */
         case ' ':
             if (end_reached)
                 break;
@@ -303,8 +303,8 @@ dialog_textbox (const char *title, const char *file, int height, int width)
             wmove (dialog, cur_y, cur_x);
             wrefresh (dialog);
             break;
-        case '0':		/* Beginning of line */
-        case 'H':		/* Scroll left */
+        case '0':       /* Beginning of line */
+        case 'H':       /* Scroll left */
         case 'h':
         case KEY_LEFT:
             if (hscroll <= 0)
@@ -320,7 +320,7 @@ dialog_textbox (const char *title, const char *file, int height, int width)
             wmove (dialog, cur_y, cur_x);
             wrefresh (dialog);
             break;
-        case 'L':		/* Scroll right */
+        case 'L':       /* Scroll right */
         case 'l':
         case KEY_RIGHT:
             if (hscroll >= MAX_LEN)
@@ -340,7 +340,7 @@ dialog_textbox (const char *title, const char *file, int height, int width)
     delwin (dialog);
     free (buf);
     close (fd);
-    return -1;			/* ESC pressed */
+    return -1;          /* ESC pressed */
 }
 
 /*
@@ -369,7 +369,7 @@ back_lines (int n)
                          "back_lines().\n");
                 exit (-1);
             }
-            if (fpos > bytes_read)  	/* Not beginning of file yet */
+            if (fpos > bytes_read)      /* Not beginning of file yet */
             {
                 /* We've reached beginning of buffer, but not beginning of
                    file yet, so read previous part of file into buffer.
@@ -389,7 +389,7 @@ back_lines (int n)
                     }
                     page = buf + fpos - bytes_read;
                 }
-                else  	/* Move backward BUF_SIZE/2 bytes */
+                else    /* Move backward BUF_SIZE/2 bytes */
                 {
                     if (lseek (fd, -(BUF_SIZE / 2 + bytes_read), SEEK_CUR)
                             == -1)
@@ -409,13 +409,13 @@ back_lines (int n)
                 }
                 buf[bytes_read] = '\0';
             }
-            else  		/* Beginning of file reached */
+            else        /* Beginning of file reached */
             {
                 begin_reached = 1;
                 return;
             }
         }
-        if (*(--page) != '\n')  	/* '--page' here */
+        if (*(--page) != '\n')      /* '--page' here */
         {
             /* Something's wrong... */
             endwin ();
@@ -451,7 +451,7 @@ back_lines (int n)
                         }
                         page = buf + fpos - bytes_read;
                     }
-                    else  	/* Move backward BUF_SIZE/2 bytes */
+                    else    /* Move backward BUF_SIZE/2 bytes */
                     {
                         if (lseek (fd, -(BUF_SIZE / 2 + bytes_read),
                                    SEEK_CUR) == -1)
@@ -472,7 +472,7 @@ back_lines (int n)
                     }
                     buf[bytes_read] = '\0';
                 }
-                else  	/* Beginning of file reached */
+                else    /* Beginning of file reached */
                 {
                     begin_reached = 1;
                     return;
@@ -513,8 +513,8 @@ print_line (WINDOW * win, int row, int width)
     char *line;
 
     line = get_line ();
-    line += MIN (strlen (line), hscroll);	/* Scroll horizontally */
-    wmove (win, row, 0);	/* move cursor to correct line */
+    line += MIN (strlen (line), hscroll);   /* Scroll horizontally */
+    wmove (win, row, 0);    /* move cursor to correct line */
     waddch (win, ' ');
     waddnstr (win, line, MIN (strlen (line), width - 2));
 
@@ -555,7 +555,7 @@ get_line (void)
                          "get_line().\n");
                 exit (-1);
             }
-            if (fpos < file_size)  	/* Not end of file yet */
+            if (fpos < file_size)   /* Not end of file yet */
             {
                 /* We've reached end of buffer, but not end of file yet,
                    so read next part of file into buffer */
@@ -588,7 +588,7 @@ get_line (void)
     if (i <= MAX_LEN)
         line[i] = '\0';
     if (!end_reached)
-        page++;			/* move pass '\n' */
+        page++;         /* move pass '\n' */
 
     return line;
 }

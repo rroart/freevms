@@ -1,5 +1,5 @@
-#ifndef eihidef_h
-#define eihidef_h
+#ifndef EIHIDEF_H
+#define EIHIDEF_H
 
 #define EIHI$K_MAJORID 1
 #define EIHI$K_MINORID 2

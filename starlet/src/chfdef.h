@@ -1,4 +1,4 @@
-#ifndef chfdef_h
+#ifndef CHFDEF_H
 #define chddef_h
 
 struct _chfdef

@@ -1,7 +1,7 @@
 /*
- *	Low-Level PCI Support for PC
+ *  Low-Level PCI Support for PC
  *
- *	(c) 1999--2000 Martin Mares <mj@ucw.cz>
+ *  (c) 1999--2000 Martin Mares <mj@ucw.cz>
  */
 
 #include <linux/config.h>
@@ -40,7 +40,7 @@ static spinlock_t pci_config_lock = SPIN_LOCK_UNLOCKED;
 #ifdef CONFIG_PCI_DIRECT
 
 #define PCI_CONF1_ADDRESS(bus, dev, fn, reg) \
-	(0x80000000 | (bus << 16) | (dev << 11) | (fn << 8) | (reg & ~3))
+    (0x80000000 | (bus << 16) | (dev << 11) | (fn << 8) | (reg & ~3))
 
 static int pci_conf1_read (int seg, int bus, int dev, int fn, int reg, int len, u32 *value)
 {
@@ -176,7 +176,7 @@ static struct pci_ops pci_direct_conf1 =
  * Functions for accessing PCI configuration space with type 2 accesses
  */
 
-#define PCI_CONF2_ADDRESS(dev, reg)	(u16)(0xC000 | (dev << 8) | reg)
+#define PCI_CONF2_ADDRESS(dev, reg) (u16)(0xC000 | (dev << 8) | reg)
 
 static int pci_conf2_read (int seg, int bus, int dev, int fn, int reg, int len, u32 *value)
 {
@@ -318,7 +318,7 @@ static struct pci_ops pci_direct_conf2 =
 static int __devinit pci_sanity_check(struct pci_ops *o)
 {
     u16 x;
-    struct pci_bus bus;		/* Fake bus and device */
+    struct pci_bus bus;     /* Fake bus and device */
     struct pci_dev dev;
 
     if (pci_probe & PCI_NO_CHECKS)
@@ -393,42 +393,42 @@ static struct pci_ops * __devinit pci_check_direct(void)
 
 #ifdef CONFIG_PCI_BIOS
 
-#define PCIBIOS_PCI_FUNCTION_ID 	0xb1XX
-#define PCIBIOS_PCI_BIOS_PRESENT 	0xb101
-#define PCIBIOS_FIND_PCI_DEVICE		0xb102
-#define PCIBIOS_FIND_PCI_CLASS_CODE	0xb103
-#define PCIBIOS_GENERATE_SPECIAL_CYCLE	0xb106
-#define PCIBIOS_READ_CONFIG_BYTE	0xb108
-#define PCIBIOS_READ_CONFIG_WORD	0xb109
-#define PCIBIOS_READ_CONFIG_DWORD	0xb10a
-#define PCIBIOS_WRITE_CONFIG_BYTE	0xb10b
-#define PCIBIOS_WRITE_CONFIG_WORD	0xb10c
-#define PCIBIOS_WRITE_CONFIG_DWORD	0xb10d
-#define PCIBIOS_GET_ROUTING_OPTIONS	0xb10e
-#define PCIBIOS_SET_PCI_HW_INT		0xb10f
+#define PCIBIOS_PCI_FUNCTION_ID     0xb1XX
+#define PCIBIOS_PCI_BIOS_PRESENT    0xb101
+#define PCIBIOS_FIND_PCI_DEVICE     0xb102
+#define PCIBIOS_FIND_PCI_CLASS_CODE 0xb103
+#define PCIBIOS_GENERATE_SPECIAL_CYCLE  0xb106
+#define PCIBIOS_READ_CONFIG_BYTE    0xb108
+#define PCIBIOS_READ_CONFIG_WORD    0xb109
+#define PCIBIOS_READ_CONFIG_DWORD   0xb10a
+#define PCIBIOS_WRITE_CONFIG_BYTE   0xb10b
+#define PCIBIOS_WRITE_CONFIG_WORD   0xb10c
+#define PCIBIOS_WRITE_CONFIG_DWORD  0xb10d
+#define PCIBIOS_GET_ROUTING_OPTIONS 0xb10e
+#define PCIBIOS_SET_PCI_HW_INT      0xb10f
 
 /* BIOS32 signature: "_32_" */
-#define BIOS32_SIGNATURE	(('_' << 0) + ('3' << 8) + ('2' << 16) + ('_' << 24))
+#define BIOS32_SIGNATURE    (('_' << 0) + ('3' << 8) + ('2' << 16) + ('_' << 24))
 
 /* PCI signature: "PCI " */
-#define PCI_SIGNATURE		(('P' << 0) + ('C' << 8) + ('I' << 16) + (' ' << 24))
+#define PCI_SIGNATURE       (('P' << 0) + ('C' << 8) + ('I' << 16) + (' ' << 24))
 
 /* PCI service signature: "$PCI" */
-#define PCI_SERVICE		(('$' << 0) + ('P' << 8) + ('C' << 16) + ('I' << 24))
+#define PCI_SERVICE     (('$' << 0) + ('P' << 8) + ('C' << 16) + ('I' << 24))
 
 /* PCI BIOS hardware mechanism flags */
-#define PCIBIOS_HW_TYPE1		0x01
-#define PCIBIOS_HW_TYPE2		0x02
-#define PCIBIOS_HW_TYPE1_SPEC		0x10
-#define PCIBIOS_HW_TYPE2_SPEC		0x20
+#define PCIBIOS_HW_TYPE1        0x01
+#define PCIBIOS_HW_TYPE2        0x02
+#define PCIBIOS_HW_TYPE1_SPEC       0x10
+#define PCIBIOS_HW_TYPE2_SPEC       0x20
 
 /*
  * This is the standard structure used to identify the entry point
  * to the BIOS32 Service Directory, as documented in
- * 	Standard BIOS 32-bit Service Directory Proposal
- * 	Revision 0.4 May 24, 1993
- * 	Phoenix Technologies Ltd.
- *	Norwood, MA
+ *  Standard BIOS 32-bit Service Directory Proposal
+ *  Revision 0.4 May 24, 1993
+ *  Phoenix Technologies Ltd.
+ *  Norwood, MA
  * and the PCI BIOS specification.
  */
 
@@ -436,12 +436,12 @@ union bios32
 {
     struct
     {
-        unsigned long signature;	/* _32_ */
-        unsigned long entry;		/* 32 bit physical address */
-        unsigned char revision;		/* Revision level, 0 */
-        unsigned char length;		/* Length in paragraphs should be 01 */
-        unsigned char checksum;		/* All bytes must add up to zero */
-        unsigned char reserved[5]; 	/* Must be zero */
+        unsigned long signature;    /* _32_ */
+        unsigned long entry;        /* 32 bit physical address */
+        unsigned char revision;     /* Revision level, 0 */
+        unsigned char length;       /* Length in paragraphs should be 01 */
+        unsigned char checksum;     /* All bytes must add up to zero */
+        unsigned char reserved[5];  /* Must be zero */
     } fields;
     char chars[16];
 };
@@ -465,10 +465,10 @@ static struct
 
 static unsigned long bios32_service(unsigned long service)
 {
-    unsigned char return_code;	/* %al */
-    unsigned long address;		/* %ebx */
-    unsigned long length;		/* %ecx */
-    unsigned long entry;		/* %edx */
+    unsigned char return_code;  /* %al */
+    unsigned long address;      /* %ebx */
+    unsigned long length;       /* %ecx */
+    unsigned long entry;        /* %edx */
     unsigned long flags;
 
     __save_flags(flags);
@@ -487,7 +487,7 @@ static unsigned long bios32_service(unsigned long service)
     {
     case 0:
         return address + entry;
-    case 0x80:	/* Not present */
+    case 0x80:  /* Not present */
         printk("bios32_service(0x%lx): not present\n", service);
         return 0;
     default: /* Shouldn't happen */
@@ -816,7 +816,7 @@ static struct pci_ops * __devinit pci_find_bios(void)
             if (check_pcibios())
                 return &pci_bios_access;
         }
-        break;	/* Hopefully more than one BIOS32 cannot happen... */
+        break;  /* Hopefully more than one BIOS32 cannot happen... */
     }
 
     return NULL;
@@ -1070,9 +1070,9 @@ static void __devinit pci_fixup_i450nx(struct pci_dev *d)
         pci_read_config_byte(d, reg++, &subb);
         DBG("i450NX PXB %d: %02x/%02x/%02x\n", pxb, busno, suba, subb);
         if (busno)
-            pci_scan_bus(busno, pci_root_ops, NULL);	/* Bus A */
+            pci_scan_bus(busno, pci_root_ops, NULL);    /* Bus A */
         if (suba < subb)
-            pci_scan_bus(suba+1, pci_root_ops, NULL);	/* Bus B */
+            pci_scan_bus(suba+1, pci_root_ops, NULL);   /* Bus B */
     }
     pcibios_last_bus = -1;
 }
@@ -1172,7 +1172,7 @@ static void __init pci_fixup_via_northbridge_bug(struct pci_dev *d)
     if (d->device == PCI_DEVICE_ID_VIA_8367_0)
     {
         where = 0x95; /* the memory write queue timer register is
-				 different for the kt266x's: 0x95 not 0x55 */
+                 different for the kt266x's: 0x95 not 0x55 */
     }
 
     pci_read_config_byte(d, where, &v);
@@ -1186,18 +1186,18 @@ static void __init pci_fixup_via_northbridge_bug(struct pci_dev *d)
 
 struct pci_fixup pcibios_fixups[] =
 {
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_82451NX,	pci_fixup_i450nx },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_82454GX,	pci_fixup_i450gx },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_UMC,	PCI_DEVICE_ID_UMC_UM8886BF,	pci_fixup_umc_ide },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_SI,	PCI_DEVICE_ID_SI_5513,		pci_fixup_ide_trash },
-    { PCI_FIXUP_HEADER,	PCI_ANY_ID,		PCI_ANY_ID,			pci_fixup_ide_bases },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_SI,	PCI_DEVICE_ID_SI_5597,		pci_fixup_latency },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_SI,	PCI_DEVICE_ID_SI_5598,		pci_fixup_latency },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_82371AB_3,	pci_fixup_piix4_acpi },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_8363_0,	pci_fixup_via_northbridge_bug },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_8622,	        pci_fixup_via_northbridge_bug },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_8361,	        pci_fixup_via_northbridge_bug },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_8367_0,	pci_fixup_via_northbridge_bug },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82451NX,    pci_fixup_i450nx },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82454GX,    pci_fixup_i450gx },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_UMC,  PCI_DEVICE_ID_UMC_UM8886BF, pci_fixup_umc_ide },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_SI,   PCI_DEVICE_ID_SI_5513,      pci_fixup_ide_trash },
+    { PCI_FIXUP_HEADER, PCI_ANY_ID,     PCI_ANY_ID,         pci_fixup_ide_bases },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_SI,   PCI_DEVICE_ID_SI_5597,      pci_fixup_latency },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_SI,   PCI_DEVICE_ID_SI_5598,      pci_fixup_latency },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82371AB_3,  pci_fixup_piix4_acpi },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_8363_0,   pci_fixup_via_northbridge_bug },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_8622,         pci_fixup_via_northbridge_bug },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_8361,         pci_fixup_via_northbridge_bug },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_8367_0,   pci_fixup_via_northbridge_bug },
     { 0 }
 };
 

@@ -29,29 +29,29 @@
 #include <linux/pci.h>
 
 /* IOCTL commands */
-#define TPAM_CMD_DSPLOAD	0x0001
-#define TPAM_CMD_DSPSAVE	0x0002
-#define TPAM_CMD_DSPRUN		0x0003
-#define TPAM_CMD_LOOPMODEON	0x0004
-#define TPAM_CMD_LOOPMODEOFF	0x0005
+#define TPAM_CMD_DSPLOAD    0x0001
+#define TPAM_CMD_DSPSAVE    0x0002
+#define TPAM_CMD_DSPRUN     0x0003
+#define TPAM_CMD_LOOPMODEON 0x0004
+#define TPAM_CMD_LOOPMODEOFF    0x0005
 
 /* addresses of debug information zones on board */
-#define TPAM_TRAPAUDIT_REGISTER		0x005493e4
-#define TPAM_NCOAUDIT_REGISTER		0x00500000
-#define TPAM_MSGAUDIT_REGISTER		0x008E30F0
+#define TPAM_TRAPAUDIT_REGISTER     0x005493e4
+#define TPAM_NCOAUDIT_REGISTER      0x00500000
+#define TPAM_MSGAUDIT_REGISTER      0x008E30F0
 
 /* length of debug information zones on board */
-#define TPAM_TRAPAUDIT_LENGTH		10000
-#define TPAM_NCOAUDIT_LENGTH		300000
-#define TPAM_NCOAUDIT_COUNT		30
-#define TPAM_MSGAUDIT_LENGTH		60000
+#define TPAM_TRAPAUDIT_LENGTH       10000
+#define TPAM_NCOAUDIT_LENGTH        300000
+#define TPAM_NCOAUDIT_COUNT     30
+#define TPAM_MSGAUDIT_LENGTH        60000
 
 /* IOCTL load/save parameter */
 typedef struct tpam_dsp_ioctl
 {
-    __u32 address;	/* address to load/save data */
-    __u32 data_len;	/* size of data to be loaded/saved */
-    __u8 data[0];	/* data */
+    __u32 address;  /* address to load/save data */
+    __u32 data_len; /* size of data to be loaded/saved */
+    __u8 data[0];   /* data */
 } tpam_dsp_ioctl;
 
 #endif /* _TPAM_H_ */

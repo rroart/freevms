@@ -1,7 +1,7 @@
 /*
  * lib_index.c
  *
- *	Code for VAX LIB$INDEX routine
+ *  Code for VAX LIB$INDEX routine
  *
  * Description:
  *
@@ -10,8 +10,8 @@
  *
  * History
  *
- *	March 30, 1997 - Kevin Handy
- *		Preliminary design based on STR$POSITION.
+ *  March 30, 1997 - Kevin Handy
+ *      Preliminary design based on STR$POSITION.
  */
 
 #include <stdio.h>
@@ -25,23 +25,23 @@
 /*************************************************************
  * lib$index
  *
- *	Searches for the first position of a substring within
- *	a source string. If LIB$INDEX finds the substring,
- *	it returns the relative position of the substring.
+ *  Searches for the first position of a substring within
+ *  a source string. If LIB$INDEX finds the substring,
+ *  it returns the relative position of the substring.
  *
- *	returns:
- *		0 if not found, otherwise returns the
- *		relative position.
+ *  returns:
+ *      0 if not found, otherwise returns the
+ *      relative position.
  */
 unsigned long lib$index(
     const struct dsc$descriptor_s* first_source_string,
     const struct dsc$descriptor_s* second_source_string)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
-    char* s2_ptr;			/* Pointer to second string */
-    unsigned short s2_length;	/* Length of second string */
-    unsigned long loop;			/* Outer loopp */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
+    char* s2_ptr;           /* Pointer to second string */
+    unsigned short s2_length;   /* Length of second string */
+    unsigned long loop;         /* Outer loopp */
 
     /*
      * Analyze source strings

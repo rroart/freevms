@@ -1,5 +1,5 @@
-#ifndef system_service_setup_h
-#define system_service_setup_h
+#ifndef SYSTEM_SERVICE_SETUP_H
+#define SYSTEM_SERVICE_SETUP_H
 
 /* Author: Roar Thronæs */
 

@@ -14,36 +14,36 @@
  *
  * Version: $Id$
  *
- * Author:	Marco van Wieringen <mvw@planets.elm.net>
+ * Author:  Marco van Wieringen <mvw@planets.elm.net>
  *
  * Fixes:   Dmitry Gorodchanin <pgmdsg@ibi.com>, 11 Feb 96
  *
- *		Revised list management to avoid races
- *		-- Bill Hawes, <whawes@star.net>, 9/98
+ *      Revised list management to avoid races
+ *      -- Bill Hawes, <whawes@star.net>, 9/98
  *
- *		Fixed races in dquot_transfer(), dqget() and dquot_alloc_...().
- *		As the consequence the locking was moved from dquot_decr_...(),
- *		dquot_incr_...() to calling functions.
- *		invalidate_dquots() now writes modified dquots.
- *		Serialized quota_off() and quota_on() for mount point.
- *		Fixed a few bugs in grow_dquots().
- *		Fixed deadlock in write_dquot() - we no longer account quotas on
- *		quota files
- *		remove_dquot_ref() moved to inode.c - it now traverses through inodes
- *		add_dquot_ref() restarts after blocking
- *		Added check for bogus uid and fixed check for group in quotactl.
- *		Jan Kara, <jack@suse.cz>, sponsored by SuSE CR, 10-11/99
+ *      Fixed races in dquot_transfer(), dqget() and dquot_alloc_...().
+ *      As the consequence the locking was moved from dquot_decr_...(),
+ *      dquot_incr_...() to calling functions.
+ *      invalidate_dquots() now writes modified dquots.
+ *      Serialized quota_off() and quota_on() for mount point.
+ *      Fixed a few bugs in grow_dquots().
+ *      Fixed deadlock in write_dquot() - we no longer account quotas on
+ *      quota files
+ *      remove_dquot_ref() moved to inode.c - it now traverses through inodes
+ *      add_dquot_ref() restarts after blocking
+ *      Added check for bogus uid and fixed check for group in quotactl.
+ *      Jan Kara, <jack@suse.cz>, sponsored by SuSE CR, 10-11/99
  *
- *		Used struct list_head instead of own list struct
- *		Invalidation of dquots with dq_count > 0 no longer possible
- *		Improved free_dquots list management
- *		Quota and i_blocks are now updated in one place to avoid races
- *		Warnings are now delayed so we won't block in critical section
- *		Write updated not to require dquot lock
- *		Jan Kara, <jack@suse.cz>, 9/2000
+ *      Used struct list_head instead of own list struct
+ *      Invalidation of dquots with dq_count > 0 no longer possible
+ *      Improved free_dquots list management
+ *      Quota and i_blocks are now updated in one place to avoid races
+ *      Warnings are now delayed so we won't block in critical section
+ *      Write updated not to require dquot lock
+ *      Jan Kara, <jack@suse.cz>, 9/2000
  *
- *		Added dynamic quota structure allocation
- *		Jan Kara <jack@suse.cz> 12/2000
+ *      Added dynamic quota structure allocation
+ *      Jan Kara <jack@suse.cz> 12/2000
  *
  * (C) Copyright 1994 - 1997 Marco van Wieringen
  */
@@ -64,7 +64,7 @@
 
 #include <asm/uaccess.h>
 
-#define __DQUOT_VERSION__	"dquot_6.4.0"
+#define __DQUOT_VERSION__   "dquot_6.4.0"
 
 int nr_dquots, nr_free_dquots;
 
@@ -263,7 +263,7 @@ repeat:
 }
 
 /*
- *	We don't have to be afraid of deadlocks as we never have quotas on quota files...
+ *  We don't have to be afraid of deadlocks as we never have quotas on quota files...
  */
 static void write_dquot(struct dquot *dquot)
 {
@@ -312,7 +312,7 @@ static void read_dquot(struct dquot *dquot)
         return;
 
     lock_dquot(dquot);
-    if (!dquot->dq_sb)	/* Invalidated quota? */
+    if (!dquot->dq_sb)  /* Invalidated quota? */
         goto out_lock;
     /* Now we are sure filp is valid - the dquot isn't invalidated */
     down(&dquot->dq_sb->s_dquot.dqio_sem);
@@ -378,7 +378,7 @@ restart:
             continue;
         if (type != -1 && dquot->dq_type != type)
             continue;
-        if (!dquot->dq_sb)	/* Invalidated? */
+        if (!dquot->dq_sb)  /* Invalidated? */
             continue;
         if (!(dquot->dq_flags & (DQ_MOD | DQ_LOCKED)))
             continue;
@@ -456,13 +456,13 @@ we_slept:
     if (!list_empty(&dquot->dq_free))
     {
         printk(KERN_ERR "dqput: dquot already on free list??\n");
-        dquot->dq_count--;	/* J.K. Just decrementing use count seems safer... */
+        dquot->dq_count--;  /* J.K. Just decrementing use count seems safer... */
         return;
     }
     dquot->dq_count--;
     /* If dquot is going to be invalidated invalidate_dquots() is going to free it so */
     if (!(dquot->dq_flags & DQ_INVAL))
-        put_dquot_last(dquot);	/* Place at end of LRU free queue */
+        put_dquot_last(dquot);  /* Place at end of LRU free queue */
     wake_up(&dquot->dq_wait_free);
 }
 
@@ -506,7 +506,7 @@ we_slept:
         if (empty == NODQUOT)
         {
             if ((empty = get_empty_dquot()) == NODQUOT)
-                schedule();	/* Try to wait for a moment... */
+                schedule(); /* Try to wait for a moment... */
             goto we_slept;
         }
         dquot = empty;
@@ -528,7 +528,7 @@ we_slept:
             dqput(empty);
     }
 
-    if (!dquot->dq_sb)  	/* Has somebody invalidated entry under us? */
+    if (!dquot->dq_sb)      /* Has somebody invalidated entry under us? */
     {
         printk(KERN_ERR "VFS: dqget(): Quota invalidated in dqget()!\n");
         dqput(dquot);
@@ -577,7 +577,7 @@ static void add_dquot_ref(struct super_block *sb, short type)
     struct list_head *p;
 
     if (!sb->dq_op)
-        return;	/* nothing to do */
+        return; /* nothing to do */
 
 restart:
     file_list_lock();
@@ -629,7 +629,7 @@ put_it:
         {
             if (dquot->dq_count != 1)
                 printk(KERN_WARNING "VFS: Adding dquot with dq_count %d to dispose list.\n", dquot->dq_count);
-            list_add(&dquot->dq_free, tofree_head);	/* As dquot must have currently users it can't be on the free list... */
+            list_add(&dquot->dq_free, tofree_head); /* As dquot must have currently users it can't be on the free list... */
             return 1;
         }
         else
@@ -651,7 +651,7 @@ void put_dquot_list(struct list_head *tofree_head)
     {
         dquot = list_entry(act_head, struct dquot, dq_free);
         act_head = act_head->next;
-        list_del(&dquot->dq_free);	/* Remove dquot from the list so we won't have problems... */
+        list_del(&dquot->dq_free);  /* Remove dquot from the list so we won't have problems... */
         INIT_LIST_HEAD(&dquot->dq_free);
         dqput(dquot);
     }
@@ -960,7 +960,7 @@ static int quota_root_squash(struct super_block *sb, short type, int *addr)
     return error;
 }
 
-#if 0	/* We are not going to support filesystems without i_blocks... */
+#if 0   /* We are not going to support filesystems without i_blocks... */
 /*
  * This is a simple algorithm that calculates the size of a file in blocks.
  * This is only used on filesystems that do not have an i_blocks count.
@@ -1229,7 +1229,7 @@ int dquot_transfer(struct inode *inode, struct iattr *iattr)
         if (transfer_to[cnt] == NODQUOT || !sb_has_quota_enabled(inode->i_sb, cnt))
             continue;
         transfer_from[cnt] = dqduplicate(inode->i_dquot[cnt]);
-        if (transfer_from[cnt] == NODQUOT)	/* Can happen on quotafiles (quota isn't initialized on them)... */
+        if (transfer_from[cnt] == NODQUOT)  /* Can happen on quotafiles (quota isn't initialized on them)... */
             continue;
         if (check_idq(transfer_to[cnt], 1, warntype+cnt) == NO_QUOTA ||
                 check_bdq(transfer_to[cnt], blocks, 0, warntype+cnt) == NO_QUOTA)
@@ -1292,8 +1292,8 @@ __initcall(dquot_init);
  */
 struct dquot_operations dquot_operations =
 {
-    dquot_initialize,		/* mandatory */
-    dquot_drop,			/* mandatory */
+    dquot_initialize,       /* mandatory */
+    dquot_drop,         /* mandatory */
     dquot_alloc_block,
     dquot_alloc_inode,
     dquot_free_block,

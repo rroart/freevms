@@ -15,20 +15,20 @@
  *                     interruptible so that processes waiting on
  *                     semaphores can be killed.
  * Modified 1999-02-14 by Andrea Arcangeli, split the sched.c helper
- *		       functions in asm/sempahore-helper.h while fixing a
- *		       potential and subtle race discovered by Ulrich Schmid
- *		       in down_interruptible(). Since I started to play here I
- *		       also implemented the `trylock' semaphore operation.
+ *             functions in asm/sempahore-helper.h while fixing a
+ *             potential and subtle race discovered by Ulrich Schmid
+ *             in down_interruptible(). Since I started to play here I
+ *             also implemented the `trylock' semaphore operation.
  *          1999-07-02 Artur Skawina <skawina@geocities.com>
  *                     Optimized "0(ecx)" -> "(ecx)" (the assembler does not
  *                     do this). Changed calling sequences from push/jmp to
  *                     traditional call/ret.
  * Modified 2001-01-01 Andreas Franck <afranck@gmx.de>
- *		       Some hacks to ensure compatibility with recent
- *		       GCC snapshots, to avoid stack corruption when compiling
- *		       with -fomit-frame-pointer. It's not sure if this will
- *		       be fixed in GCC, as our previous implementation was a
- *		       bit dubious.
+ *             Some hacks to ensure compatibility with recent
+ *             GCC snapshots, to avoid stack corruption when compiling
+ *             with -fomit-frame-pointer. It's not sure if this will
+ *             be fixed in GCC, as our previous implementation was a
+ *             bit dubious.
  *
  * If you would like to see an analysis of this implementation, please
  * ftp to gcom.com and download the file
@@ -54,20 +54,20 @@ struct semaphore
 
 #if WAITQUEUE_DEBUG
 # define __SEM_DEBUG_INIT(name) \
-		, (int)&(name).__magic
+        , (int)&(name).__magic
 #else
 # define __SEM_DEBUG_INIT(name)
 #endif
 
 #define __SEMAPHORE_INITIALIZER(name,count) \
 { ATOMIC_INIT(count), 0, __WAIT_QUEUE_HEAD_INITIALIZER((name).wait) \
-	__SEM_DEBUG_INIT(name) }
+    __SEM_DEBUG_INIT(name) }
 
 #define __MUTEX_INITIALIZER(name) \
-	__SEMAPHORE_INITIALIZER(name,1)
+    __SEMAPHORE_INITIALIZER(name,1)
 
 #define __DECLARE_SEMAPHORE_GENERIC(name,count) \
-	struct semaphore name = __SEMAPHORE_INITIALIZER(name,count)
+    struct semaphore name = __SEMAPHORE_INITIALIZER(name,count)
 
 #define DECLARE_MUTEX(name) __DECLARE_SEMAPHORE_GENERIC(name,1)
 #define DECLARE_MUTEX_LOCKED(name) __DECLARE_SEMAPHORE_GENERIC(name,0)
@@ -75,7 +75,7 @@ struct semaphore
 static inline void sema_init (struct semaphore *sem, int val)
 {
     /*
-     *	*sem = (struct semaphore)__SEMAPHORE_INITIALIZER((*sem),val);
+     *  *sem = (struct semaphore)__SEMAPHORE_INITIALIZER((*sem),val);
      *
      * i'd rather use the more flexible initialization above, but sadly
      * GCC 2.7.2.3 emits a bogus warning. EGCS doesnt. Oh well.

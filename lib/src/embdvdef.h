@@ -1,5 +1,5 @@
-#ifndef embdvdef_h
-#define embdvdef_h
+#ifndef EMBDVDEF_H
+#define EMBDVDEF_H
 
 #include <embhddef.h>
 

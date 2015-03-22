@@ -20,7 +20,7 @@
 #define STATUS_STAT_AVAIL 0x08
 #define STATUS_INTR       0x01
 #define STATUS_RESET_FAIL 0xea
-#define STATUS_CMD_INF	  0x04
+#define STATUS_CMD_INF    0x04
 
 #define CTRL_SOFT_RESET   0xe4
 #define CTRL_HARD_RESET   0x80

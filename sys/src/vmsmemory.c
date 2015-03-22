@@ -30,16 +30,16 @@
  * Real VM (paging to/from disk) started 18.12.91. Much more work and
  * thought has to go into this. Oh, well..
  * 19.12.91  -  works, somewhat. Sometimes I get faults, don't know why.
- *		Found it. Everything seems to work now.
+ *      Found it. Everything seems to work now.
  * 20.12.91  -  Ok, making the swap-device changeable like the root.
  */
 
 /*
  * 05.04.94  -  Multi-page memory management added for v1.1.
- * 		Idea by Alex Bligh (alex@cconcepts.co.uk)
+ *      Idea by Alex Bligh (alex@cconcepts.co.uk)
  *
  * 16.07.99  -  Support of BIGMEM added by Gerhard Wichert, Siemens AG
- *		(Gerhard.Wichert@pdb.siemens.de)
+ *      (Gerhard.Wichert@pdb.siemens.de)
  */
 
 #include <linux/config.h>
@@ -332,7 +332,7 @@ int __pte_alloc(struct mm_struct *mm, pmd_t *pmd, unsigned long address)
 
     pte_lock_init(new);
     spin_lock(&mm->page_table_lock);
-    if (pmd_present(*pmd))  	/* Another has populated it */
+    if (pmd_present(*pmd))      /* Another has populated it */
     {
         pte_lock_deinit(new);
         pte_free(new);
@@ -360,7 +360,7 @@ int __pte_alloc_kernel(pmd_t *pmd, unsigned long address)
         return -ENOMEM;
 
     spin_lock(&init_mm.page_table_lock);
-    if (pmd_present(*pmd))		/* Another has populated it */
+    if (pmd_present(*pmd))      /* Another has populated it */
         pte_free_kernel(new);
     else
         pmd_populate_kernel(&init_mm, pmd, new);
@@ -379,7 +379,7 @@ void __free_pte(pte_t pte)
     void fastcall set_page_dirty(struct page *page);
     if (pte_dirty(pte))
         set_page_dirty(page);
-    //	free_page_and_swap_cache(page);
+    //  free_page_and_swap_cache(page);
 }
 
 
@@ -478,9 +478,9 @@ void clear_page_tables(struct mm_struct *mm, unsigned long first, int nr)
     check_pgt_cache();
 }
 
-#define PTE_TABLE_MASK	((PTRS_PER_PTE-1) * sizeof(pte_t))
-#define PMD_TABLE_MASK	((PTRS_PER_PMD-1) * sizeof(pmd_t))
-#define PUD_TABLE_MASK	((PTRS_PER_PUD-1) * sizeof(pud_t))
+#define PTE_TABLE_MASK  ((PTRS_PER_PTE-1) * sizeof(pte_t))
+#define PMD_TABLE_MASK  ((PTRS_PER_PMD-1) * sizeof(pmd_t))
+#define PUD_TABLE_MASK  ((PTRS_PER_PUD-1) * sizeof(pud_t))
 
 static inline int is_cow_mapping(unsigned int flags)
 {
@@ -501,7 +501,7 @@ static inline int is_cow_mapping(unsigned int flags)
  * and the vm_pgoff will point to the first PFN mapped: thus every
  * page that is a raw mapping will always honor the rule
  *
- *	pfn_of_page == vma->vm_pgoff + ((addr - vma->rde$pq_start_va) >> PAGE_SHIFT)
+ *  pfn_of_page == vma->vm_pgoff + ((addr - vma->rde$pq_start_va) >> PAGE_SHIFT)
  *
  * and if that isn't true, the page has been COW'ed (in which case it
  * _does_ have a "struct page" associated with it even if it is in a
@@ -1165,7 +1165,7 @@ void zap_page_range(struct mm_struct *mm, unsigned long address, unsigned long s
         BUG();
     spin_lock(&mm->page_table_lock);
     exe$deltva(&inadr,0,0);
-    //	exe$purgws(&inadr);
+    //  exe$purgws(&inadr);
     flush_cache_range(mm, address, end);
     tlb = tlb_gather_mmu(mm);
 
@@ -1251,7 +1251,7 @@ static inline struct page * get_page_map(struct page *page)
 int map_user_kiobuf(int rw, struct kiobuf *iobuf, unsigned long va, size_t len)
 {
     int pgcount, err;
-    struct mm_struct *	mm;
+    struct mm_struct *  mm;
 
     /* Make sure the iobuf is not already mapped somewhere. */
     if (iobuf->nr_pages)
@@ -1736,7 +1736,7 @@ static inline void break_cow(struct _rde * vma, struct page * new_page, unsigned
             flush_cache_page(vma, address);
             establish_pte(vma, address, page_table, pte_mkyoung(pte_mkdirty(pte_mkwrite(pte))));
             spin_unlock(&mm->page_table_lock);
-            return 1;	/* Minor fault */
+            return 1;   /* Minor fault */
         }
     }
 
@@ -1775,7 +1775,7 @@ static inline void break_cow(struct _rde * vma, struct page * new_page, unsigned
     spin_unlock(&mm->page_table_lock);
     page_cache_release(new_page);
     page_cache_release(old_page);
-    return 1;	/* Minor fault */
+    return 1;   /* Minor fault */
 
 bad_wp_page:
     spin_unlock(&mm->page_table_lock);
@@ -1993,7 +1993,7 @@ int make_pages_present(unsigned long addr, unsigned long end)
     int ret = 0, len, write;
     struct _rde * vma;
 
-    //	vma = find_vma(current->mm, addr);
+    //  vma = find_vma(current->mm, addr);
     vma = find_vma(current->pcb$l_phd,addr);
     write = (((struct _rde *) vma)->rde$l_flags & VM_WRITE) != 0;
     if (addr >= end)

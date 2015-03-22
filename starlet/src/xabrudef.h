@@ -1,5 +1,5 @@
-#ifndef xabrudef_h
-#define xabrudef_h
+#ifndef XABRUDEF_H
+#define XABRUDEF_H
 
 #define XAB$C_RU 35
 #define XAB$M_NOJOIN 0x1

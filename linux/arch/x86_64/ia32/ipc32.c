@@ -180,23 +180,23 @@ struct ipc_kludge
 };
 
 
-#define A(__x)		((unsigned long)(__x))
-#define AA(__x)		((unsigned long)(__x))
+#define A(__x)      ((unsigned long)(__x))
+#define AA(__x)     ((unsigned long)(__x))
 
-#define SEMOP		 1
-#define SEMGET		 2
-#define SEMCTL		 3
+#define SEMOP        1
+#define SEMGET       2
+#define SEMCTL       3
 #define SEMTIMEDOP       4
-#define MSGSND		11
-#define MSGRCV		12
-#define MSGGET		13
-#define MSGCTL		14
-#define SHMAT		21
-#define SHMDT		22
-#define SHMGET		23
-#define SHMCTL		24
+#define MSGSND      11
+#define MSGRCV      12
+#define MSGGET      13
+#define MSGCTL      14
+#define SHMAT       21
+#define SHMDT       22
+#define SHMGET      23
+#define SHMCTL      24
 
-#define IPCOP_MASK(__x)	(1UL << (__x))
+#define IPCOP_MASK(__x) (1UL << (__x))
 
 #if 1
 // temp
@@ -507,7 +507,7 @@ shmat32 (int first, int second, int third, int version, void *uptr)
     int err;
 
     if (version == 1)
-        return -EINVAL;	/* iBCS2 emulator entry point: unsupported */
+        return -EINVAL; /* iBCS2 emulator entry point: unsupported */
     err = sys_shmat(first, uptr, second, &raddr);
     if (err)
         return err;

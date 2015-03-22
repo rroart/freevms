@@ -1,8 +1,8 @@
 
 /*
- *	libconvert_date_string
+ *  libconvert_date_string
  *
- *	Copyright (C) 2004 Andrew Allison
+ *  Copyright (C) 2004 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,21 +20,21 @@
  *
  *The author(s) may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  *
  *
  * Description:
- *	The convert date string to quadword routine converts an absolute date
- *	string into an VMS internal format date-time quadword. That is given
- *	an input date/time string of a specified format.lib$convert_date_string
- *	coverts this string toan VMS internal format time.
+ *  The convert date string to quadword routine converts an absolute date
+ *  string into an VMS internal format date-time quadword. That is given
+ *  an input date/time string of a specified format.lib$convert_date_string
+ *  coverts this string toan VMS internal format time.
  *
  * Relative Date since Nov 17 1858
  * number of 100 nanoseconds units
@@ -45,8 +45,8 @@
  *
  * History
  *
- *	Mar 21, 2004 - Andrew Allison
- * 	 	Initial program creation
+ *  Mar 21, 2004 - Andrew Allison
+ *      Initial program creation
  */
 
 #include "lib$routines.h"
@@ -103,20 +103,20 @@ unsigned long lib$convert_date_string (const struct dsc$descriptor_s *time_name,
 void load_default_values (unsigned long flag, unsigned char date[8] )
 {
 
-// bit 0 	year
-    if ( flag & 0x0001 )	date[0] = 4;
-// bit 1 	month
-    if ( flag & 0x0002 )	date[1] = 3;
-// bit 2	day of month
-    if ( flag & 0x0004 )	date[2] = 22;
-// bit 3	hours
-    if ( flag & 0x0008 ) 	date[3] = 15;
-// bit 4	minutes
-    if ( flag & 0x0010 )	date[4] = 1;
-// bit 5	seconds
-    if ( flag & 0x0020 )	date[5] = 55;
-// bit 6	fractional seconds
-    if ( flag & 0x0040 ) 	date[6] = 50;
+// bit 0    year
+    if ( flag & 0x0001 )    date[0] = 4;
+// bit 1    month
+    if ( flag & 0x0002 )    date[1] = 3;
+// bit 2    day of month
+    if ( flag & 0x0004 )    date[2] = 22;
+// bit 3    hours
+    if ( flag & 0x0008 )    date[3] = 15;
+// bit 4    minutes
+    if ( flag & 0x0010 )    date[4] = 1;
+// bit 5    seconds
+    if ( flag & 0x0020 )    date[5] = 55;
+// bit 6    fractional seconds
+    if ( flag & 0x0040 )    date[6] = 50;
 
 }
 

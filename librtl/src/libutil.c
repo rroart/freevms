@@ -1,8 +1,8 @@
 
 /*
- *	libutil.c
+ *  libutil.c
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,13 +20,13 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
@@ -41,10 +41,10 @@
 #include "str$routines.h"
 //#include "stdint.h"
 
-#define MAXSTR 		132000
-#define MAXUINT16	65536
-#define TRUE		1
-#define FALSE		0
+#define MAXSTR      132000
+#define MAXUINT16   65536
+#define TRUE        1
+#define FALSE       0
 
 int lib$$ncompare (char *s1,char *s2);
 
@@ -55,8 +55,8 @@ int lib$$ncompare (char *s1,char *s2);
 int lib$$ncompare (char *s1,char *s2)
 
 {
-    unsigned short	s1_len,  s2_len;
-    int	 	min_len, max_len, i;
+    unsigned short  s1_len,  s2_len;
+    int     min_len, max_len, i;
 
     s1_len = strlen (s1);
     s2_len = strlen (s2);
@@ -69,7 +69,7 @@ int lib$$ncompare (char *s1,char *s2)
     if ( s1_len < s2_len )
         return -1;
 
-//	The string are of equal length
+//  The string are of equal length
     for (i = 0; i < max_len; i++)
     {
         if ( s1[i] > s2[i] )

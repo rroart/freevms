@@ -1,5 +1,5 @@
-#ifndef fdtdef_h
-#define fdtdef_h
+#ifndef FDTDEF_H
+#define FDTDEF_H
 
 #define FDT$K_LENGTH 528
 

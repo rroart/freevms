@@ -35,7 +35,7 @@ struct elf_phdr;
 #define ELF_NAME "elf/i386"
 
 #define IA32_STACK_TOP IA32_PAGE_OFFSET
-#define ELF_ET_DYN_BASE		(IA32_PAGE_OFFSET/3 + 0x1000000)
+#define ELF_ET_DYN_BASE     (IA32_PAGE_OFFSET/3 + 0x1000000)
 
 #undef ELF_ARCH
 #define ELF_ARCH EM_386
@@ -43,7 +43,7 @@ struct elf_phdr;
 #undef ELF_CLASS
 #define ELF_CLASS ELFCLASS32
 
-#define ELF_DATA	ELFDATA2LSB
+#define ELF_DATA    ELFDATA2LSB
 
 #define USE_ELF_CORE_DUMP 1
 
@@ -56,9 +56,9 @@ typedef elf_greg_t elf_gregset_t[ELF_NGREG];
 
 struct elf_siginfo
 {
-    int	si_signo;			/* signal number */
-    int	si_code;			/* extra code */
-    int	si_errno;			/* errno */
+    int si_signo;           /* signal number */
+    int si_code;            /* extra code */
+    int si_errno;           /* errno */
 };
 
 struct timeval32
@@ -68,64 +68,64 @@ struct timeval32
 
 struct elf_prstatus
 {
-    struct elf_siginfo pr_info;	/* Info associated with signal */
-    short	pr_cursig;		/* Current signal */
-    unsigned int pr_sigpend;	/* Set of pending signals */
-    unsigned int pr_sighold;	/* Set of held signals */
-    pid_t	pr_pid;
-    pid_t	pr_ppid;
-    pid_t	pr_pgrp;
-    pid_t	pr_sid;
-    struct timeval32 pr_utime;	/* User time */
-    struct timeval32 pr_stime;	/* System time */
-    struct timeval32 pr_cutime;	/* Cumulative user time */
-    struct timeval32 pr_cstime;	/* Cumulative system time */
-    elf_gregset_t pr_reg;	/* GP registers */
-    int pr_fpvalid;		/* True if math co-processor being used.  */
+    struct elf_siginfo pr_info; /* Info associated with signal */
+    short   pr_cursig;      /* Current signal */
+    unsigned int pr_sigpend;    /* Set of pending signals */
+    unsigned int pr_sighold;    /* Set of held signals */
+    pid_t   pr_pid;
+    pid_t   pr_ppid;
+    pid_t   pr_pgrp;
+    pid_t   pr_sid;
+    struct timeval32 pr_utime;  /* User time */
+    struct timeval32 pr_stime;  /* System time */
+    struct timeval32 pr_cutime; /* Cumulative user time */
+    struct timeval32 pr_cstime; /* Cumulative system time */
+    elf_gregset_t pr_reg;   /* GP registers */
+    int pr_fpvalid;     /* True if math co-processor being used.  */
 };
 
-#define ELF_PRARGSZ	(80)	/* Number of chars for args */
+#define ELF_PRARGSZ (80)    /* Number of chars for args */
 
 struct elf_prpsinfo
 {
-    char	pr_state;	/* numeric process state */
-    char	pr_sname;	/* char for pr_state */
-    char	pr_zomb;	/* zombie */
-    char	pr_nice;	/* nice val */
-    unsigned int pr_flag;	/* flags */
-    __u16	pr_uid;
-    __u16	pr_gid;
-    pid_t	pr_pid, pr_ppid, pr_pgrp, pr_sid;
+    char    pr_state;   /* numeric process state */
+    char    pr_sname;   /* char for pr_state */
+    char    pr_zomb;    /* zombie */
+    char    pr_nice;    /* nice val */
+    unsigned int pr_flag;   /* flags */
+    __u16   pr_uid;
+    __u16   pr_gid;
+    pid_t   pr_pid, pr_ppid, pr_pgrp, pr_sid;
     /* Lots missing */
-    char	pr_fname[16];	/* filename of executable */
-    char	pr_psargs[ELF_PRARGSZ];	/* initial part of arg list */
+    char    pr_fname[16];   /* filename of executable */
+    char    pr_psargs[ELF_PRARGSZ]; /* initial part of arg list */
 };
 
 #define __STR(x) #x
 #define STR(x) __STR(x)
 
 #define _GET_SEG(x) \
-	({ __u32 seg; asm("movl %%" STR(x) ",%0" : "=r"(seg)); seg; })
+    ({ __u32 seg; asm("movl %%" STR(x) ",%0" : "=r"(seg)); seg; })
 
 /* Assumes current==process to be dumped */
-#define ELF_CORE_COPY_REGS(pr_reg, regs)       		\
-	pr_reg[0] = regs->rbx;				\
-	pr_reg[1] = regs->rcx;				\
-	pr_reg[2] = regs->rdx;				\
-	pr_reg[3] = regs->rsi;				\
-	pr_reg[4] = regs->rdi;				\
-	pr_reg[5] = regs->rbp;				\
-	pr_reg[6] = regs->rax;				\
-	pr_reg[7] = _GET_SEG(ds);   			\
-	pr_reg[8] = _GET_SEG(es);			\
-	pr_reg[9] = _GET_SEG(fs);			\
-	pr_reg[10] = _GET_SEG(gs);			\
-	pr_reg[11] = regs->orig_rax;			\
-	pr_reg[12] = regs->rip;				\
-	pr_reg[13] = regs->cs;				\
-	pr_reg[14] = regs->eflags;			\
-	pr_reg[15] = regs->rsp;				\
-	pr_reg[16] = regs->ss;
+#define ELF_CORE_COPY_REGS(pr_reg, regs)            \
+    pr_reg[0] = regs->rbx;              \
+    pr_reg[1] = regs->rcx;              \
+    pr_reg[2] = regs->rdx;              \
+    pr_reg[3] = regs->rsi;              \
+    pr_reg[4] = regs->rdi;              \
+    pr_reg[5] = regs->rbp;              \
+    pr_reg[6] = regs->rax;              \
+    pr_reg[7] = _GET_SEG(ds);               \
+    pr_reg[8] = _GET_SEG(es);           \
+    pr_reg[9] = _GET_SEG(fs);           \
+    pr_reg[10] = _GET_SEG(gs);          \
+    pr_reg[11] = regs->orig_rax;            \
+    pr_reg[12] = regs->rip;             \
+    pr_reg[13] = regs->cs;              \
+    pr_reg[14] = regs->eflags;          \
+    pr_reg[15] = regs->rsp;             \
+    pr_reg[16] = regs->ss;
 
 #define user user32
 
@@ -140,50 +140,50 @@ typedef struct user32_fxsr_struct elf_fpxregset_t;
 
 #undef elf_check_arch
 #define elf_check_arch(x) \
-	((x)->e_machine == EM_386)
+    ((x)->e_machine == EM_386)
 
 #define ELF_EXEC_PAGESIZE PAGE_SIZE
 #define ELF_HWCAP (boot_cpu_data.x86_capability[0])
 #define ELF_PLATFORM  ("i686")
-#define SET_PERSONALITY(ex, ibcs2)			\
-do {							\
-	set_personality((ibcs2)?PER_SVR4:current->personality);	\
+#define SET_PERSONALITY(ex, ibcs2)          \
+do {                            \
+    set_personality((ibcs2)?PER_SVR4:current->personality); \
 } while (0)
 
 /* Override some function names */
-#define elf_format			elf32_format
+#define elf_format          elf32_format
 
-#define init_elf_binfmt			init_elf32_binfmt
-#define exit_elf_binfmt			exit_elf32_binfmt
+#define init_elf_binfmt         init_elf32_binfmt
+#define exit_elf_binfmt         exit_elf32_binfmt
 
 #define load_elf_binary load_elf32_binary
 
 #undef CONFIG_BINFMT_ELF
 #ifdef CONFIG_BINFMT_ELF32
-# define CONFIG_BINFMT_ELF		CONFIG_BINFMT_ELF32
+# define CONFIG_BINFMT_ELF      CONFIG_BINFMT_ELF32
 #endif
 
 #undef CONFIG_BINFMT_ELF_MODULE
 #ifdef CONFIG_BINFMT_ELF32_MODULE
-# define CONFIG_BINFMT_ELF_MODULE	CONFIG_BINFMT_ELF32_MODULE
+# define CONFIG_BINFMT_ELF_MODULE   CONFIG_BINFMT_ELF32_MODULE
 #endif
 
-#define ELF_PLAT_INIT(r, load_addr)	elf32_init(r)
-#define setup_arg_pages(bprm)		ia32_setup_arg_pages(bprm)
+#define ELF_PLAT_INIT(r, load_addr) elf32_init(r)
+#define setup_arg_pages(bprm)       ia32_setup_arg_pages(bprm)
 
 extern void load_gs_index(unsigned);
 
 #undef start_thread
 #define start_thread(regs,new_rip,new_rsp) do { \
-	asm volatile("movl %0,%%fs": :"r" (0)); \
-	load_gs_index(0);	\
-	asm volatile("movl %0,%%es; movl %0,%%ds": :"r" (__USER32_DS)); \
-	(regs)->rip = (new_rip); \
-	(regs)->rsp = (new_rsp); \
-	(regs)->eflags = 0x200; \
-	(regs)->cs = __USER32_CS; \
-	(regs)->ss = __USER32_DS; \
-	set_fs(USER_DS); \
+    asm volatile("movl %0,%%fs": :"r" (0)); \
+    load_gs_index(0);   \
+    asm volatile("movl %0,%%es; movl %0,%%ds": :"r" (__USER32_DS)); \
+    (regs)->rip = (new_rip); \
+    (regs)->rsp = (new_rsp); \
+    (regs)->eflags = 0x200; \
+    (regs)->cs = __USER32_CS; \
+    (regs)->ss = __USER32_DS; \
+    set_fs(USER_DS); \
 } while(0)
 
 

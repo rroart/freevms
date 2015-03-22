@@ -246,11 +246,11 @@ int lan$eth_type_trans(struct _ucb * u, void * data )
     }
 
     /*
-     *	This ALLMULTI check should be redundant by 1.4
-     *	so don't forget to remove it.
+     *  This ALLMULTI check should be redundant by 1.4
+     *  so don't forget to remove it.
      *
-     *	Seems, you forgot to remove it. All silly devices
-     *	seems to set IFF_PROMISC.
+     *  Seems, you forgot to remove it. All silly devices
+     *  seems to set IFF_PROMISC.
      */
 
     else if(1 /*dev->flags&IFF_PROMISC*/)
@@ -271,16 +271,16 @@ int lan$eth_type_trans(struct _ucb * u, void * data )
 #endif
 
     /*
-     *	This is a magic hack to spot IPX packets. Older Novell breaks
-     *	the protocol design and runs IPX over 802.3 without an 802.2 LLC
-     *	layer. We look for FFFF which isn't a used 802.2 SSAP/DSAP. This
-     *	won't work for fault tolerant netware but does for the rest.
+     *  This is a magic hack to spot IPX packets. Older Novell breaks
+     *  the protocol design and runs IPX over 802.3 without an 802.2 LLC
+     *  layer. We look for FFFF which isn't a used 802.2 SSAP/DSAP. This
+     *  won't work for fault tolerant netware but does for the rest.
      */
     if (*(unsigned short *)rawp == 0xFFFF)
         return htons(ETH_P_802_3);
 
     /*
-     *	Real 802.2 LLC
+     *  Real 802.2 LLC
      */
     return htons(ETH_P_802_2);
 }
@@ -462,7 +462,7 @@ int __init net_dev_init(void)
 #endif /* CONFIG_NET_DIVERT */
 
     /*
-     *	Initialise the packet receive queues.
+     *  Initialise the packet receive queues.
      */
 
     for (i = 0; i < NR_CPUS; i++)
@@ -489,13 +489,13 @@ int __init net_dev_init(void)
 #endif
 
     /*
-     *	Add the devices.
-     *	If the call to dev->init fails, the dev is removed
-     *	from the chain disconnecting the device until the
-     *	next reboot.
+     *  Add the devices.
+     *  If the call to dev->init fails, the dev is removed
+     *  from the chain disconnecting the device until the
+     *  next reboot.
      *
-     *	NB At boot phase networking is dead. No locking is required.
-     *	But we still preserve dev_base_lock for sanity.
+     *  NB At boot phase networking is dead. No locking is required.
+     *  But we still preserve dev_base_lock for sanity.
      */
 
     dp = &dev_base;
@@ -575,8 +575,8 @@ int __init net_dev_init(void)
     create_proc_read_entry("net/softnet_stat", 0, 0, dev_proc_stats, NULL);
 #ifdef WIRELESS_EXT
     proc_net_create("wireless", 0, dev_get_wireless_info);
-#endif	/* WIRELESS_EXT */
-#endif	/* CONFIG_PROC_FS */
+#endif  /* WIRELESS_EXT */
+#endif  /* CONFIG_PROC_FS */
 
     dev_boot_phase = 0;
 #endif
@@ -596,7 +596,7 @@ int __init net_dev_init(void)
 #endif
 
     /*
-     *	Initialise network devices
+     *  Initialise network devices
      */
 
     void __init net_device_init(void);
@@ -608,9 +608,9 @@ int __init net_dev_init(void)
 /**
  * init_etherdev - Register ethernet device
  * @dev: An ethernet device structure to be filled in, or %NULL if a new
- *	struct should be allocated.
+ *  struct should be allocated.
  * @sizeof_priv: Size of additional driver-private structure to be allocated
- *	for this ethernet device
+ *  for this ethernet device
  *
  * Fill in the fields of the device structure with ethernet-generic values.
  *
@@ -628,8 +628,8 @@ struct net_device *init_etherdev(struct net_device *dev, int sizeof_priv)
 }
 
 /*
- *	Create and name a device from a prototype, then perform any needed
- *	setup.
+ *  Create and name a device from a prototype, then perform any needed
+ *  setup.
  */
 
 static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv,
@@ -638,7 +638,7 @@ static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv,
     int new_device = 0;
 
     /*
-     *	Allocate a device if one is not provided.
+     *  Allocate a device if one is not provided.
      */
 
     if (dev == NULL)
@@ -650,7 +650,7 @@ static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv,
     }
 
     /*
-     *	Allocate a name
+     *  Allocate a name
      */
 
 #if 0
@@ -669,8 +669,8 @@ static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv,
     netdev_boot_setup_check(dev);
 
     /*
-     *	Configure via the caller provided setup function then
-     *	register if needed.
+     *  Configure via the caller provided setup function then
+     *  register if needed.
      */
 
     setup(dev);
@@ -725,27 +725,27 @@ void ether_setup(struct net_device *dev)
        This should be in a common file instead of per-driver.  */
 
 #if 0
-    dev->change_mtu		= eth_change_mtu;
-    dev->hard_header	= eth_header;
-    dev->rebuild_header 	= eth_rebuild_header;
-    dev->set_mac_address 	= eth_mac_addr;
-    dev->hard_header_cache	= eth_header_cache;
+    dev->change_mtu     = eth_change_mtu;
+    dev->hard_header    = eth_header;
+    dev->rebuild_header     = eth_rebuild_header;
+    dev->set_mac_address    = eth_mac_addr;
+    dev->hard_header_cache  = eth_header_cache;
     dev->header_cache_update= eth_header_cache_update;
-    dev->hard_header_parse	= eth_header_parse;
+    dev->hard_header_parse  = eth_header_parse;
 #endif
 
 #define ARPHRD_ETHER       1
 
-    dev->type		= ARPHRD_ETHER;
-    dev->hard_header_len 	= ETH_HLEN;
-    dev->mtu		= 1500; /* eth_mtu */
-    dev->addr_len		= ETH_ALEN;
-    dev->tx_queue_len	= 100;	/* Ethernet wants good queues */
+    dev->type       = ARPHRD_ETHER;
+    dev->hard_header_len    = ETH_HLEN;
+    dev->mtu        = 1500; /* eth_mtu */
+    dev->addr_len       = ETH_ALEN;
+    dev->tx_queue_len   = 100;  /* Ethernet wants good queues */
 
     memset(dev->broadcast,0xFF, ETH_ALEN);
 
     /* New-style flags. */
-    dev->flags		= IFF_BROADCAST|IFF_MULTICAST;
+    dev->flags      = IFF_BROADCAST|IFF_MULTICAST;
 }
 EXPORT_SYMBOL(ether_setup);
 
@@ -753,13 +753,13 @@ EXPORT_SYMBOL(ether_setup);
 static struct netdev_boot_setup dev_boot_setup[NETDEV_BOOT_SETUP_MAX];
 
 /**
- *	netdev_boot_setup_check	- check boot time settings
- *	@dev: the netdevice
+ *  netdev_boot_setup_check - check boot time settings
+ *  @dev: the netdevice
  *
- * 	Check boot time settings for the device.
- *	The found settings are set for the device to be used
- *	later in the device probing.
- *	Returns 0 if no settings found, 1 if they are.
+ *  Check boot time settings for the device.
+ *  The found settings are set for the device to be used
+ *  later in the device probing.
+ *  Returns 0 if no settings found, 1 if they are.
  */
 int netdev_boot_setup_check(struct net_device *dev)
 {
@@ -772,10 +772,10 @@ int netdev_boot_setup_check(struct net_device *dev)
         if (s[i].name[0] != '\0' && s[i].name[0] != ' ' &&
                 !strncmp(dev->name, s[i].name, strlen(s[i].name)))
         {
-            dev->irq 	= s[i].map.irq;
-            dev->base_addr 	= s[i].map.base_addr;
-            dev->mem_start 	= s[i].map.mem_start;
-            dev->mem_end 	= s[i].map.mem_end;
+            dev->irq    = s[i].map.irq;
+            dev->base_addr  = s[i].map.base_addr;
+            dev->mem_start  = s[i].map.mem_start;
+            dev->mem_end    = s[i].map.mem_end;
             return 1;
         }
     }
@@ -869,8 +869,8 @@ static void __dev_mc_upload(struct net_device *dev)
         return;
 
     /*
-     *	Devices with no set multicast or which have been
-     *	detached don't get set.
+     *  Devices with no set multicast or which have been
+     *  detached don't get set.
      */
 
     if (dev->set_multicast_list == NULL ||
@@ -882,9 +882,9 @@ static void __dev_mc_upload(struct net_device *dev)
 
 void dev_mc_upload(struct net_device *dev)
 {
-    //	spin_lock_bh(&dev->xmit_lock);
+    //  spin_lock_bh(&dev->xmit_lock);
     __dev_mc_upload(dev);
-    //	spin_unlock_bh(&dev->xmit_lock);
+    //  spin_unlock_bh(&dev->xmit_lock);
 }
 
 // maybe the wrong place, but temporary

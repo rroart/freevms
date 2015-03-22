@@ -1,5 +1,5 @@
-#ifdef hwprtdef_h
-#define hwprtdef_h
+#ifdef HWPRTDEF_H
+#define HWPRTDEF_H
 
 // really axp stuff
 

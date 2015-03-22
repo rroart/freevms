@@ -16,11 +16,11 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*	include <file> [<range>]					*/
-/*									*/
-/*  Reads the <file> and inserts it just before the <range>		*/
-/*									*/
+/*                                  */
+/*  include <file> [<range>]                    */
+/*                                  */
+/*  Reads the <file> and inserts it just before the <range>     */
+/*                                  */
 /************************************************************************/
 
 #include <errno.h>
@@ -36,14 +36,14 @@ void cmd_include (char *cp)
     Line *line;
     String *string;
 
-    if (*cp == 0)  						/* make sure there's a filename there */
+    if (*cp == 0)                       /* make sure there's a filename there */
     {
         outerr (0, "no filename specified\n");
         return;
     }
-    input_name = cp;						/* get input filename */
-    cp = uptospace (cp);						/* it goes up to next space or eol */
-    if (range_single (cp, &cp, &cur_position) < 0) return;	/* decode the range to get what line to insert before */
+    input_name = cp;                        /* get input filename */
+    cp = uptospace (cp);                        /* it goes up to next space or eol */
+    if (range_single (cp, &cp, &cur_position) < 0) return;  /* decode the range to get what line to insert before */
     if (!eoltest (cp)) return;
 
     /* Open the file */
@@ -57,7 +57,7 @@ void cmd_include (char *cp)
 
     /* Read it into the current buffer just before the current line */
 
-    buffer_dirty (cur_position.buffer, 1);				/* it will soon be dirty */
-    cur_position.offset = 0;						/* insert before beginning of current line */
-    read_file (input_file, cur_position.buffer, cur_position.line);	/* read file in */
+    buffer_dirty (cur_position.buffer, 1);              /* it will soon be dirty */
+    cur_position.offset = 0;                        /* insert before beginning of current line */
+    read_file (input_file, cur_position.buffer, cur_position.line); /* read file in */
 }

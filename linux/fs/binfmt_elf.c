@@ -77,13 +77,13 @@ extern void dump_thread(struct pt_regs *, struct user *);
 #ifdef USE_ELF_CORE_DUMP
 static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file);
 #else
-#define elf_core_dump	NULL
+#define elf_core_dump   NULL
 #endif
 
 #if ELF_EXEC_PAGESIZE > PAGE_SIZE
-# define ELF_MIN_ALIGN	ELF_EXEC_PAGESIZE
+# define ELF_MIN_ALIGN  ELF_EXEC_PAGESIZE
 #else
-# define ELF_MIN_ALIGN	PAGE_SIZE
+# define ELF_MIN_ALIGN  PAGE_SIZE
 #endif
 
 #define ELF_PAGESTART(_v) ((_v) & ~(unsigned long)(ELF_MIN_ALIGN-1))
@@ -95,7 +95,7 @@ static struct linux_binfmt elf_format =
     NULL, THIS_MODULE, load_elf_binary, load_elf_library, elf_core_dump, ELF_EXEC_PAGESIZE
 };
 
-#define BAD_ADDR(x)	((unsigned long)(x) > TASK_SIZE)
+#define BAD_ADDR(x) ((unsigned long)(x) > TASK_SIZE)
 
 static void set_brk(unsigned long start, unsigned long end)
 {
@@ -186,7 +186,7 @@ create_elf_tables(char *p, int argc, int envc,
 #endif
     csp -= envc+1;
     csp -= argc+1;
-    csp -= (!ibcs ? 3 : 1);	/* argc itself */
+    csp -= (!ibcs ? 3 : 1); /* argc itself */
     if ((unsigned long)csp & 15UL)
         sp -= ((unsigned long)csp & 15UL) / sizeof(*sp);
 
@@ -194,8 +194,8 @@ create_elf_tables(char *p, int argc, int envc,
      * Put the ELF interpreter info on the stack
      */
 #define NEW_AUX_ENT(nr, id, val) \
-	  __put_user ((id), sp+(nr*2)); \
-	  __put_user ((val), sp+(nr*2+1)); \
+      __put_user ((id), sp+(nr*2)); \
+      __put_user ((val), sp+(nr*2+1)); \
  
     sp -= 2;
     NEW_AUX_ENT(0, AT_NULL, 0);
@@ -383,7 +383,7 @@ static unsigned long load_elf_interp(struct elfhdr * interp_elf_ex,
      * last bss page.
      */
     padzero(elf_bss);
-    elf_bss = ELF_PAGESTART(elf_bss + ELF_MIN_ALIGN - 1);	/* What we have mapped so far */
+    elf_bss = ELF_PAGESTART(elf_bss + ELF_MIN_ALIGN - 1);   /* What we have mapped so far */
 
     /* Map the last of the bss segment */
     if (last_bss > elf_bss)
@@ -1038,10 +1038,10 @@ static void dump_regs(const char *str, elf_greg_t *r)
 }
 #endif
 
-#define DUMP_WRITE(addr, nr)	\
-	do { if (!dump_write(file, (addr), (nr))) return 0; } while(0)
-#define DUMP_SEEK(off)	\
-	do { if (!dump_seek(file, (off))) return 0; } while(0)
+#define DUMP_WRITE(addr, nr)    \
+    do { if (!dump_write(file, (addr), (nr))) return 0; } while(0)
+#define DUMP_SEEK(off)  \
+    do { if (!dump_seek(file, (off))) return 0; } while(0)
 
 static int writenote(struct memelfnote *men, struct file *file)
 {
@@ -1056,12 +1056,12 @@ static int writenote(struct memelfnote *men, struct file *file)
 #undef DUMP_WRITE
 #undef DUMP_SEEK
 
-#define DUMP_WRITE(addr, nr)	\
-	if ((size += (nr)) > limit || !dump_write(file, (addr), (nr))) \
-		goto end_coredump;
-#define DUMP_SEEK(off)	\
-	if (!dump_seek(file, (off))) \
-		goto end_coredump;
+#define DUMP_WRITE(addr, nr)    \
+    if ((size += (nr)) > limit || !dump_write(file, (addr), (nr))) \
+        goto end_coredump;
+#define DUMP_SEEK(off)  \
+    if (!dump_seek(file, (off))) \
+        goto end_coredump;
 /*
  * Actual dumper
  *
@@ -1082,9 +1082,9 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
     unsigned long limit = current->rlim[RLIMIT_CORE].rlim_cur;
     int numnote = 4;
     struct memelfnote notes[4];
-    struct elf_prstatus prstatus;	/* NT_PRSTATUS */
-    elf_fpregset_t fpu;		/* NT_PRFPREG */
-    struct elf_prpsinfo psinfo;	/* NT_PRPSINFO */
+    struct elf_prstatus prstatus;   /* NT_PRSTATUS */
+    elf_fpregset_t fpu;     /* NT_PRFPREG */
+    struct elf_prpsinfo psinfo; /* NT_PRPSINFO */
 
     /* first copy the parameters from user space */
     memset(&psinfo, 0, sizeof(psinfo));
@@ -1144,7 +1144,7 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
     elf.e_flags = 0;
     elf.e_ehsize = sizeof(elf);
     elf.e_phentsize = sizeof(struct elf_phdr);
-    elf.e_phnum = segs+1;		/* Include notes */
+    elf.e_phnum = segs+1;       /* Include notes */
     elf.e_shentsize = 0;
     elf.e_shnum = 0;
     elf.e_shstrndx = 0;
@@ -1156,8 +1156,8 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
     current->flags |= PF_DUMPCORE;
 
     DUMP_WRITE(&elf, sizeof(elf));
-    offset += sizeof(elf);				/* Elf header */
-    offset += (segs+1) * sizeof(struct elf_phdr);	/* Program headers */
+    offset += sizeof(elf);              /* Elf header */
+    offset += (segs+1) * sizeof(struct elf_phdr);   /* Program headers */
 
     /*
      * Set up the notes in similar form to SVR4 core dumps made
@@ -1308,7 +1308,7 @@ end_coredump:
     up_write(&current->mm->mmap_sem);
     return has_dumped;
 }
-#endif		/* USE_ELF_CORE_DUMP */
+#endif      /* USE_ELF_CORE_DUMP */
 
 static int __init init_elf_binfmt(void)
 {

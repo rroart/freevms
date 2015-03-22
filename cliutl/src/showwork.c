@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -13,7 +13,7 @@
 #include <starlet.h>
 #include <misc.h>
 
-show_working_set()
+void show_working_set(void)
 {
     int i;
     struct item_list_3 lst[14];

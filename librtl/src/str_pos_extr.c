@@ -1,7 +1,7 @@
 /*
- *	strpos_extr
+ *  strpos_extr
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,19 +19,19 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
 /* str_right.c
 *
-*	Code for VAX STR$POS_EXTR routine
+*   Code for VAX STR$POS_EXTR routine
 *
 * Description:
 *
@@ -40,14 +40,14 @@
 *
 * History
 *
-*	Oct 15, 1996 - Kevin Handy
-*		Preliminary design.
+*   Oct 15, 1996 - Kevin Handy
+*       Preliminary design.
 *
-*	Feb 7, 1997 - Christof Zeile
-*		Change 'short' to 'unsigned short' in several places
+*   Feb 7, 1997 - Christof Zeile
+*       Change 'short' to 'unsigned short' in several places
 *
-*	Feb 26, 2004 - Andrew Allison
-*		Added GNU License
+*   Feb 26, 2004 - Andrew Allison
+*       Added GNU License
 */
 
 #include <stdio.h>
@@ -65,13 +65,13 @@ unsigned long str$pos_extr(struct dsc$descriptor_s* destination_string,
                            const long* start_position,
                            const long* end_position)
 {
-    char* s2_ptr;				/* Pointer to second string */
-    unsigned short s2_length;		/* Length of second string */
-    int final_length;			/* Signed final length */
-    unsigned short real_final_length;	/* Usable final length */
-    unsigned long result;			/* Result */
+    char* s2_ptr;               /* Pointer to second string */
+    unsigned short s2_length;       /* Length of second string */
+    int final_length;           /* Signed final length */
+    unsigned short real_final_length;   /* Usable final length */
+    unsigned long result;           /* Result */
     unsigned long second_result = STR$_NORMAL; /* Another possible result */
-    int start_offset = *start_position;	/* Real start character */
+    int start_offset = *start_position; /* Real start character */
 
     /*
      * Validate input

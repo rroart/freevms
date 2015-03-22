@@ -8,7 +8,7 @@
 #include <linux/netfilter.h>
 
 /* IPX Hooks */
-#define NF_IPX_INPUT	0
-#define NF_IPX_FORWARD	1
-#define NF_IPX_OUTPUT	2
+#define NF_IPX_INPUT    0
+#define NF_IPX_FORWARD  1
+#define NF_IPX_OUTPUT   2
 #endif /*__LINUX_IPX_NETFILTER_H*/

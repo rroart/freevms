@@ -12,9 +12,12 @@
 #include <dptdef.h>
 #include <fdtdef.h>
 #include <fh2def.h>
+#include <iosbdef.h>
+#include <mscpdef.h>
 #include <nisca.h>
 #include <rabdef.h>
 #include <scsdef.h>
+#include <ucbdef.h>
 
 #include <descrip.h>
 

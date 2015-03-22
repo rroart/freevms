@@ -19,46 +19,46 @@
 /*
  * Valid flags for a dirty buffer
  */
-#define PG_BUSY			0
+#define PG_BUSY         0
 
 struct nfs_page
 {
-    struct list_head	wb_hash,	/* Inode */
-            wb_lru,		/* superblock lru list */
-            wb_list,	/* Defines state of page: */
-            *wb_list_head;	/*      read/write/commit */
-    struct file		*wb_file;
-    struct inode		*wb_inode;
-    struct rpc_cred		*wb_cred;
-    struct page		*wb_page;	/* page to read in/write out */
-    wait_queue_head_t	wb_wait;	/* wait queue */
-    unsigned long		wb_timeout;	/* when to read/write/commit */
-    unsigned int		wb_offset,	/* Offset of read/write */
-                   wb_bytes,	/* Length of request */
-                   wb_count;	/* reference count */
-    unsigned long		wb_flags;
-    struct nfs_writeverf	wb_verf;	/* Commit cookie */
+    struct list_head    wb_hash,    /* Inode */
+            wb_lru,     /* superblock lru list */
+            wb_list,    /* Defines state of page: */
+            *wb_list_head;  /*      read/write/commit */
+    struct file     *wb_file;
+    struct inode        *wb_inode;
+    struct rpc_cred     *wb_cred;
+    struct page     *wb_page;   /* page to read in/write out */
+    wait_queue_head_t   wb_wait;    /* wait queue */
+    unsigned long       wb_timeout; /* when to read/write/commit */
+    unsigned int        wb_offset,  /* Offset of read/write */
+             wb_bytes,    /* Length of request */
+             wb_count;    /* reference count */
+    unsigned long       wb_flags;
+    struct nfs_writeverf    wb_verf;    /* Commit cookie */
 };
 
-#define NFS_WBACK_BUSY(req)	(test_bit(PG_BUSY,&(req)->wb_flags))
+#define NFS_WBACK_BUSY(req) (test_bit(PG_BUSY,&(req)->wb_flags))
 
-extern	struct nfs_page *nfs_create_request(struct file *, struct inode *,
+extern  struct nfs_page *nfs_create_request(struct file *, struct inode *,
         struct page *,
         unsigned int, unsigned int);
-extern	void nfs_release_request(struct nfs_page *req);
+extern  void nfs_release_request(struct nfs_page *req);
 
 
-extern	void nfs_list_add_request(struct nfs_page *, struct list_head *);
+extern  void nfs_list_add_request(struct nfs_page *, struct list_head *);
 
-extern	int nfs_scan_lru(struct list_head *, struct list_head *, int);
-extern	int nfs_scan_lru_timeout(struct list_head *, struct list_head *, int);
-extern	int nfs_scan_list(struct list_head *, struct list_head *,
+extern  int nfs_scan_lru(struct list_head *, struct list_head *, int);
+extern  int nfs_scan_lru_timeout(struct list_head *, struct list_head *, int);
+extern  int nfs_scan_list(struct list_head *, struct list_head *,
                           struct file *, unsigned long, unsigned int);
-extern	int nfs_coalesce_requests(struct list_head *, struct list_head *,
+extern  int nfs_coalesce_requests(struct list_head *, struct list_head *,
                                   unsigned int);
 extern  int nfs_wait_on_request(struct nfs_page *);
 
-extern	spinlock_t nfs_wreq_lock;
+extern  spinlock_t nfs_wreq_lock;
 
 /*
  * Lock the page of an asynchronous request without incrementing the wb_count

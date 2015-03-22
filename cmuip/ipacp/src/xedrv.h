@@ -1,46 +1,46 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //!!HACK!!// I need a header here!
 
-// not yet LIBRARY 'CMUIP_SRC:[central]NETXPORT';		// VMS specifics
+// not yet LIBRARY 'CMUIP_SRC:[central]NETXPORT';       // VMS specifics
 
 //Sbttl   'XE Driver Literals'
 
 
-#define     XE_IP_type	  0x800	//Ethernet IP packet type
-#define     XE_ARP_type   0x806	//Ethernet ARP packet type
-#define     XE_hdr_len	  14		//Byte len of Ethernet xmit header
-#define     XE_MINSIZE	  46		//Minimum length of an Ethernet packet
-#define     XE_hdr_offset   0		//Allow this much space before rcv pkts
-#define     XE_max_retries   5		//Maximum retries on send errors
-#define     XE_FFFF	  0xFFFF	//HIgh values
-#define     IOS_len	  8		//Byte length of standard QIO IOSB
-#define     ASTEFN	  3		//Value of event flag for AST routines
-#define     ARPEFN	  5		//Value of event flag for ARP routine
-#define     Qhead_len	  8		//Byte length of standard VMS Q header
-#define     XE_ADR_SIZE   6		// Byte length of an Ethernet address
+#define     XE_IP_type    0x800 //Ethernet IP packet type
+#define     XE_ARP_type   0x806 //Ethernet ARP packet type
+#define     XE_hdr_len    14        //Byte len of Ethernet xmit header
+#define     XE_MINSIZE    46        //Minimum length of an Ethernet packet
+#define     XE_hdr_offset   0       //Allow this much space before rcv pkts
+#define     XE_max_retries   5      //Maximum retries on send errors
+#define     XE_FFFF   0xFFFF    //HIgh values
+#define     IOS_len   8     //Byte length of standard QIO IOSB
+#define     ASTEFN    3     //Value of event flag for AST routines
+#define     ARPEFN    5     //Value of event flag for ARP routine
+#define     Qhead_len     8     //Byte length of standard VMS Q header
+#define     XE_ADR_SIZE   6     // Byte length of an Ethernet address
 
 
-#define     XEDMP$ARP_Entry	  1	// Get an ARP cache entry.
+#define     XEDMP$ARP_Entry   1 // Get an ARP cache entry.
 
 
 
@@ -50,31 +50,31 @@
 
 struct  XE_Interface_Structure
 {
-    void *     xei$dev_config		;
-    unsigned int     xei$io_chan			;
-    unsigned int     xei$arp_io_chan		;
-    void *     XEI$rcvhdrs			;
-    void *     XEI$recv_Qhead		;
-    void *     XEI$recv_Qtail		;
-    void *     xei$arp_buffer		;
-    void *     XEI$ARP_Block		;
-    unsigned short     XEI$Phy_Size		;
-    unsigned char     xei$phy_addr		[6];
-    unsigned long long     XEI$restart_time		;
-    unsigned short     XEI$restart_count		;
-    unsigned short     XEI$retry_count		;
-    unsigned short     XEI$max_retry		;
-    unsigned short     XEI$MPBS			;
-    unsigned short     XEI$curhdr			;
+    void *     xei$dev_config       ;
+    unsigned int     xei$io_chan            ;
+    unsigned int     xei$arp_io_chan        ;
+    void *     XEI$rcvhdrs          ;
+    void *     XEI$recv_Qhead       ;
+    void *     XEI$recv_Qtail       ;
+    void *     xei$arp_buffer       ;
+    void *     XEI$ARP_Block        ;
+    unsigned short     XEI$Phy_Size     ;
+    unsigned char     xei$phy_addr      [6];
+    unsigned long long     XEI$restart_time     ;
+    unsigned short     XEI$restart_count        ;
+    unsigned short     XEI$retry_count      ;
+    unsigned short     XEI$max_retry        ;
+    unsigned short     XEI$MPBS         ;
+    unsigned short     XEI$curhdr           ;
     union
     {
-        unsigned short     XEI$Flags			;
+        unsigned short     XEI$Flags            ;
         struct
         {
-            unsigned 	XEI$need_2_free	 : 1;	// XEshutdown buf free pending
-            unsigned 	XEI$IO_queued	 : 1;	// XE I/O has been started
-            unsigned 	XEI$XE_decnet	 : 1;	// XE DECNET address seen
-            unsigned 	XEI$XE_started	 : 1;// XE started at least once
+            unsigned    XEI$need_2_free  : 1;   // XEshutdown buf free pending
+            unsigned    XEI$IO_queued    : 1;   // XE I/O has been started
+            unsigned    XEI$XE_decnet    : 1;   // XE DECNET address seen
+            unsigned    XEI$XE_started   : 1;// XE started at least once
         };
     };
 };
@@ -216,19 +216,19 @@ unsigned char //    XE$sense_end       ;
 
 struct XE_Sense // check
 {
-    unsigned     XE_Sense_Param:12;//	= [0,  0, 12, 0],
-    unsigned XE_Sense_Type:1; // 	= [0, 12,  1, 0],
-    unsigned XE_Sense_NotUsed:2;// //	= [0, 13,  2, 0],
-    unsigned XE_Sense_Zero:1;//	= [0, 15,  1, 0],
+    unsigned     XE_Sense_Param:12;//   = [0,  0, 12, 0],
+    unsigned XE_Sense_Type:1; //    = [0, 12,  1, 0],
+    unsigned XE_Sense_NotUsed:2;// //   = [0, 13,  2, 0],
+    unsigned XE_Sense_Zero:1;// = [0, 15,  1, 0],
     union
     {
         // If the Type bit EQL 0
-        int XE_Sense_Value; //	= [2,  0, 32, 0],
+        int XE_Sense_Value; //  = [2,  0, 32, 0],
         // If the Type bit EQL 1
         struct
         {
-            short XE_Sense_Length; //	= [2,  0, 16, 0],
-            unsigned char XE_Sense_String[0]; //	= [4,  0,  0, 0]
+            short XE_Sense_Length; //   = [2,  0, 16, 0],
+            unsigned char XE_Sense_String[0]; //    = [4,  0,  0, 0]
         };
     };
 };
@@ -255,14 +255,14 @@ static    XE_Param_Size (struct XE_Sense*  Buffer)
 
 struct XERCV_QB_structure
 {
-    void *     XERCV$next		;
-    void *     XERCV$last		;
-    unsigned short int     XERCV$vms_code	;
-    unsigned short int     XERCV$tran_size	;
-    unsigned short     XERCV$cmd_status	;
-    unsigned char     XERCV$error_summary	;
-    unsigned char     XERCV$iosb_unused2	;
-    unsigned char     XERCV$data		;
+    void *     XERCV$next       ;
+    void *     XERCV$last       ;
+    unsigned short int     XERCV$vms_code   ;
+    unsigned short int     XERCV$tran_size  ;
+    unsigned short     XERCV$cmd_status ;
+    unsigned char     XERCV$error_summary   ;
+    unsigned char     XERCV$iosb_unused2    ;
+    unsigned char     XERCV$data        ;
 };
 
 #define  XERCV_QB_len   $Field_set_size
@@ -276,11 +276,11 @@ struct XESND_structure
 {
     union
     {
-        unsigned char     XESND$dest	       [6];
+        unsigned char     XESND$dest           [6];
         struct
         {
-            unsigned int 	XESND$dst1     ;
-            unsigned short 	XESND$dst2     ;
+            unsigned int    XESND$dst1     ;
+            unsigned short  XESND$dst2     ;
         };
     };
     unsigned short    XESND$type;
@@ -297,13 +297,13 @@ struct XERCV_structure
 {
     union
     {
-        unsigned char     XERCV$buf		[16];	// Entire buffer
+        unsigned char     XERCV$buf     [16];   // Entire buffer
         struct
         {
-            unsigned char 	XERCV$dst	[6];
-            unsigned char 	XERCV$src	[6];
-            unsigned short 	XERCV$type	;
-            unsigned short 	XERCV$fill	;
+            unsigned char   XERCV$dst   [6];
+            unsigned char   XERCV$src   [6];
+            unsigned short  XERCV$type  ;
+            unsigned short  XERCV$fill  ;
         };
     };
 };

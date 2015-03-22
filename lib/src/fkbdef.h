@@ -1,5 +1,5 @@
-#ifndef fkbdef_h
-#define fkbdef_h
+#ifndef FKBDEF_H
+#define FKBDEF_H
 
 #define FKB$K_LENGTH 32
 #define FKB$C_LENGTH 32

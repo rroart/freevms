@@ -329,7 +329,7 @@ ioctl:
     ubd_ioctl,
 };
 
-static struct hd_struct	ubd_part[MAX_DEV] =
+static struct hd_struct ubd_part[MAX_DEV] =
     { [ 0 ... MAX_DEV - 1 ] = { 0, 0, 0 } };
 
 static request_queue_t *ubd_queue;
@@ -375,36 +375,36 @@ struct ubd
 };
 
 #define DEFAULT_COW { \
-	file:			NULL, \
-        fd:			-1, \
-        bitmap:			NULL, \
-	bitmap_offset:		0, \
-        data_offset:		0, \
+    file:           NULL, \
+        fd:         -1, \
+        bitmap:         NULL, \
+    bitmap_offset:      0, \
+        data_offset:        0, \
 }
 
 #define DEFAULT_UBD { \
-	file: 			NULL, \
-	is_dir:			0, \
-	count:			0, \
-	fd:			-1, \
-	size:			-1, \
-	boot_openflags:		OPEN_FLAGS, \
-	openflags:		OPEN_FLAGS, \
-	real:			NULL, \
-	fake:			NULL, \
-        cow:			DEFAULT_COW, \
+    file:           NULL, \
+    is_dir:         0, \
+    count:          0, \
+    fd:         -1, \
+    size:           -1, \
+    boot_openflags:     OPEN_FLAGS, \
+    openflags:      OPEN_FLAGS, \
+    real:           NULL, \
+    fake:           NULL, \
+        cow:            DEFAULT_COW, \
 }
 
 struct ubd ubd_dev[MAX_DEV] =
 {
     {
-file: 			"root_fs"
+file:           "root_fs"
         ,
-        is_dir:			0,
-        count:			0,
+        is_dir:         0,
+        count:          0,
 fd:
         -1,
-        size:			0,
+        size:           0,
 boot_openflags:
         OPEN_FLAGS,
 openflags:
@@ -421,9 +421,9 @@ cow:
 
 static struct hd_driveid ubd_id =
 {
-    cyls:		0,
-    heads:		128,
-    sectors:	32,
+    cyls:       0,
+    heads:      128,
+    sectors:    32,
 };
 
 static int fake_ide = 0;
@@ -727,7 +727,7 @@ static int ubd_remove(char *str)
 
 static struct mc_device ubd_mc =
 {
-name:		"ubd"
+name:       "ubd"
     ,
 config:
     ubd_config,
@@ -831,7 +831,7 @@ int ubd_init(void)
     INIT_QUEUE(ubd_queue, DEVICE_REQUEST, &ubd_lock);
     INIT_ELV(ubd_queue, &ubd_queue->elevator);
 #endif
-    read_ahead[MAJOR_NR] = 8;		/* 8 sector (4kB) read-ahead */
+    read_ahead[MAJOR_NR] = 8;       /* 8 sector (4kB) read-ahead */
     blksize_size[MAJOR_NR] = blk_sizes;
     blk_size[MAJOR_NR] = sizes;
     INIT_HARDSECT(hardsect_size, MAJOR_NR, hardsect_sizes);
@@ -849,7 +849,7 @@ int ubd_init(void)
             return -1;
         }
         blk_dev[fake_major].queue = ubd_get_queue;
-        read_ahead[fake_major] = 8;	/* 8 sector (4kB) read-ahead */
+        read_ahead[fake_major] = 8; /* 8 sector (4kB) read-ahead */
         blksize_size[fake_major] = blk_sizes;
         INIT_HARDSECT(hardsect_size, fake_major, hardsect_sizes);
         add_gendisk(&fake_gendisk);

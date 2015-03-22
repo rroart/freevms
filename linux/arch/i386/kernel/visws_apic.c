@@ -1,7 +1,7 @@
 /*
- *	linux/arch/i386/kernel/visws_apic.c
+ *  linux/arch/i386/kernel/visws_apic.c
  *
- *	Copyright (C) 1999 Bent Hagemark, Ingo Molnar
+ *  Copyright (C) 1999 Bent Hagemark, Ingo Molnar
  *
  *  SGI Visual Workstation interrupt controller
  *
@@ -50,7 +50,7 @@
  * controller. Device drivers only see the virtual interrupt sources.
  */
 
-#define	CO_IRQ_BASE	0x20	/* This is the 0x20 in init_IRQ()! */
+#define CO_IRQ_BASE 0x20    /* This is the 0x20 in init_IRQ()! */
 
 static void startup_piix4_master_irq(unsigned int irq);
 static void shutdown_piix4_master_irq(unsigned int irq);
@@ -246,10 +246,10 @@ static void do_cobalt_IRQ(unsigned int irq, struct pt_regs * regs)
 /*
  * PIIX4-8259 master/virtual functions to handle:
  *
- *	floppy
- *	parallel
- *	serial
- *	audio (?)
+ *  floppy
+ *  parallel
+ *  serial
+ *  audio (?)
  *
  * None of these get Cobalt APIC entries, neither do they have IDT
  * entries. These interrupts are purely virtual and distributed from
@@ -304,7 +304,7 @@ static void do_piix4_master_IRQ(unsigned int irq, struct pt_regs * regs)
     /* Find out what's interrupting in the PIIX4 8259 */
 
     spin_lock(&irq_controller_lock);
-    outb(0x0c, 0x20);		/* OCW3 Poll command */
+    outb(0x0c, 0x20);       /* OCW3 Poll command */
     realirq = inb(0x20);
 
     if (!(realirq & 0x80))

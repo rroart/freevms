@@ -27,13 +27,13 @@
     ChangeLog
 
     Prehistory Martin Tischhäuser <martin@ikcbarka.fzk.de>
-	       Initial register-setting code (from proform-1.0).
+           Initial register-setting code (from proform-1.0).
     19971216   Richard Gooch <rgooch@atnf.csiro.au>
                Original version for /proc/mtrr interface, SMP-safe.
   v1.0
     19971217   Richard Gooch <rgooch@atnf.csiro.au>
                Bug fix for ioctls()'s.
-	       Added sample code in Documentation/mtrr.txt
+           Added sample code in Documentation/mtrr.txt
   v1.1
     19971218   Richard Gooch <rgooch@atnf.csiro.au>
                Disallow overlapping regions.
@@ -75,87 +75,87 @@
                Bug fix for non-SMP compilation.
     19980418   David Wragg <dpw@doc.ic.ac.uk>
                Fixed-MTRR synchronisation for SMP and use atomic operations
-	       instead of spinlocks.
+           instead of spinlocks.
     19980418   Richard Gooch <rgooch@atnf.csiro.au>
-	       Differentiate different MTRR register classes for BIOS fixup.
+           Differentiate different MTRR register classes for BIOS fixup.
   v1.10
     19980419   David Wragg <dpw@doc.ic.ac.uk>
-	       Bug fix in variable MTRR synchronisation.
+           Bug fix in variable MTRR synchronisation.
   v1.11
     19980419   Richard Gooch <rgooch@atnf.csiro.au>
-	       Fixups for kernel 2.1.97.
+           Fixups for kernel 2.1.97.
   v1.12
     19980421   Richard Gooch <rgooch@atnf.csiro.au>
-	       Safer synchronisation across CPUs when changing MTRRs.
+           Safer synchronisation across CPUs when changing MTRRs.
   v1.13
     19980423   Richard Gooch <rgooch@atnf.csiro.au>
-	       Bugfix for SMP systems without MTRR support.
+           Bugfix for SMP systems without MTRR support.
   v1.14
     19980427   Richard Gooch <rgooch@atnf.csiro.au>
-	       Trap calls to <mtrr_add> and <mtrr_del> on non-MTRR machines.
+           Trap calls to <mtrr_add> and <mtrr_del> on non-MTRR machines.
   v1.15
     19980427   Richard Gooch <rgooch@atnf.csiro.au>
-	       Use atomic bitops for setting SMP change mask.
+           Use atomic bitops for setting SMP change mask.
   v1.16
     19980428   Richard Gooch <rgooch@atnf.csiro.au>
-	       Removed spurious diagnostic message.
+           Removed spurious diagnostic message.
   v1.17
     19980429   Richard Gooch <rgooch@atnf.csiro.au>
-	       Moved register-setting macros into this file.
-	       Moved setup code from init/main.c to i386-specific areas.
+           Moved register-setting macros into this file.
+           Moved setup code from init/main.c to i386-specific areas.
   v1.18
     19980502   Richard Gooch <rgooch@atnf.csiro.au>
-	       Moved MTRR detection outside conditionals in <mtrr_init>.
+           Moved MTRR detection outside conditionals in <mtrr_init>.
   v1.19
     19980502   Richard Gooch <rgooch@atnf.csiro.au>
-	       Documentation improvement: mention Pentium II and AGP.
+           Documentation improvement: mention Pentium II and AGP.
   v1.20
     19980521   Richard Gooch <rgooch@atnf.csiro.au>
-	       Only manipulate interrupt enable flag on local CPU.
-	       Allow enclosed uncachable regions.
+           Only manipulate interrupt enable flag on local CPU.
+           Allow enclosed uncachable regions.
   v1.21
     19980611   Richard Gooch <rgooch@atnf.csiro.au>
-	       Always define <main_lock>.
+           Always define <main_lock>.
   v1.22
     19980901   Richard Gooch <rgooch@atnf.csiro.au>
-	       Removed module support in order to tidy up code.
-	       Added sanity check for <mtrr_add>/<mtrr_del> before <mtrr_init>.
-	       Created addition queue for prior to SMP commence.
+           Removed module support in order to tidy up code.
+           Added sanity check for <mtrr_add>/<mtrr_del> before <mtrr_init>.
+           Created addition queue for prior to SMP commence.
   v1.23
     19980902   Richard Gooch <rgooch@atnf.csiro.au>
-	       Ported patch to kernel 2.1.120-pre3.
+           Ported patch to kernel 2.1.120-pre3.
   v1.24
     19980910   Richard Gooch <rgooch@atnf.csiro.au>
-	       Removed sanity checks and addition queue: Linus prefers an OOPS.
+           Removed sanity checks and addition queue: Linus prefers an OOPS.
   v1.25
     19981001   Richard Gooch <rgooch@atnf.csiro.au>
-	       Fixed harmless compiler warning in include/asm-i386/mtrr.h
-	       Fixed version numbering and history for v1.23 -> v1.24.
+           Fixed harmless compiler warning in include/asm-i386/mtrr.h
+           Fixed version numbering and history for v1.23 -> v1.24.
   v1.26
     19990118   Richard Gooch <rgooch@atnf.csiro.au>
-	       Added devfs support.
+           Added devfs support.
   v1.27
     19990123   Richard Gooch <rgooch@atnf.csiro.au>
-	       Changed locking to spin with reschedule.
-	       Made use of new <smp_call_function>.
+           Changed locking to spin with reschedule.
+           Made use of new <smp_call_function>.
   v1.28
     19990201   Zoltán Böszörményi <zboszor@mail.externet.hu>
-	       Extended the driver to be able to use Cyrix style ARRs.
+           Extended the driver to be able to use Cyrix style ARRs.
     19990204   Richard Gooch <rgooch@atnf.csiro.au>
-	       Restructured Cyrix support.
+           Restructured Cyrix support.
   v1.29
     19990204   Zoltán Böszörményi <zboszor@mail.externet.hu>
-	       Refined ARR support: enable MAPEN in set_mtrr_prepare()
-	       and disable MAPEN in set_mtrr_done().
+           Refined ARR support: enable MAPEN in set_mtrr_prepare()
+           and disable MAPEN in set_mtrr_done().
     19990205   Richard Gooch <rgooch@atnf.csiro.au>
-	       Minor cleanups.
+           Minor cleanups.
   v1.30
     19990208   Zoltán Böszörményi <zboszor@mail.externet.hu>
                Protect plain 6x86s (and other processors without the
                Page Global Enable feature) against accessing CR4 in
                set_mtrr_prepare() and set_mtrr_done().
     19990210   Richard Gooch <rgooch@atnf.csiro.au>
-	       Turned <set_mtrr_up> and <get_mtrr> into function pointers.
+           Turned <set_mtrr_up> and <get_mtrr> into function pointers.
   v1.31
     19990212   Zoltán Böszörményi <zboszor@mail.externet.hu>
                Major rewrite of cyrix_arr_init(): do not touch ARRs,
@@ -178,27 +178,27 @@
                Moved to linux/arch/i386/kernel/setup.c and
                linux/include/asm-i386/bugs.h
     19990228   Richard Gooch <rgooch@atnf.csiro.au>
-	       Added MTRRIOC_KILL_ENTRY ioctl(2)
-	       Trap for counter underflow in <mtrr_file_del>.
-	       Trap for 4 MiB aligned regions for PPro, stepping <= 7.
+           Added MTRRIOC_KILL_ENTRY ioctl(2)
+           Trap for counter underflow in <mtrr_file_del>.
+           Trap for 4 MiB aligned regions for PPro, stepping <= 7.
     19990301   Richard Gooch <rgooch@atnf.csiro.au>
-	       Created <get_free_region> hook.
+           Created <get_free_region> hook.
     19990305   Richard Gooch <rgooch@atnf.csiro.au>
-	       Temporarily disable AMD support now MTRR capability flag is set.
+           Temporarily disable AMD support now MTRR capability flag is set.
   v1.32
     19990308   Zoltán Böszörményi <zboszor@mail.externet.hu>
-	       Adjust my changes (19990212-19990218) to Richard Gooch's
-	       latest changes. (19990228-19990305)
+           Adjust my changes (19990212-19990218) to Richard Gooch's
+           latest changes. (19990228-19990305)
   v1.33
     19990309   Richard Gooch <rgooch@atnf.csiro.au>
-	       Fixed typo in <printk> message.
+           Fixed typo in <printk> message.
     19990310   Richard Gooch <rgooch@atnf.csiro.au>
-	       Support K6-II/III based on Alan Cox's <alan@redhat.com> patches.
+           Support K6-II/III based on Alan Cox's <alan@redhat.com> patches.
   v1.34
     19990511   Bart Hartgers <bart@etpmod.phys.tue.nl>
-	       Support Centaur C6 MCR's.
+           Support Centaur C6 MCR's.
     19990512   Richard Gooch <rgooch@atnf.csiro.au>
-	       Minor cleanups.
+           Minor cleanups.
   v1.35
     19990707   Zoltán Böszörményi <zboszor@mail.externet.hu>
                Check whether ARR3 is protected in cyrix_get_free_region()
@@ -217,33 +217,33 @@
                the fact that the AMD Athlon handles its MTRRs the same way
                as Intel does.
     19990814   Zoltán Böszörményi <zboszor@mail.externet.hu>
-	       Double check for Intel in mtrr_add()'s big switch() because
-	       that revision check is only valid for Intel CPUs.
+           Double check for Intel in mtrr_add()'s big switch() because
+           that revision check is only valid for Intel CPUs.
     19990819   Alan Cox <alan@redhat.com>
                Tested Zoltan's changes on a pre production Athlon - 100%
                success.
     19991008   Manfred Spraul <manfreds@colorfullife.com>
-    	       replaced spin_lock_reschedule() with a normal semaphore.
+               replaced spin_lock_reschedule() with a normal semaphore.
   v1.36
     20000221   Richard Gooch <rgooch@atnf.csiro.au>
                Compile fix if procfs and devfs not enabled.
-	       Formatting changes.
+           Formatting changes.
   v1.37
     20001109   H. Peter Anvin <hpa@zytor.com>
-	       Use the new centralized CPU feature detects.
+           Use the new centralized CPU feature detects.
 
   v1.38
     20010309   Dave Jones <davej@suse.de>
-	       Add support for Cyrix III.
+           Add support for Cyrix III.
 
   v1.39
     20010312   Dave Jones <davej@suse.de>
                Ugh, I broke AMD support.
-	       Reworked fix by Troels Walsted Hansen <troels@thule.no>
+           Reworked fix by Troels Walsted Hansen <troels@thule.no>
 
   v1.40
     20010327   Dave Jones <davej@suse.de>
-	       Adapted Cyrix III support to include VIA C3.
+           Adapted Cyrix III support to include VIA C3.
 
 */
 #include <linux/types.h>
@@ -296,11 +296,11 @@
  */
 enum mtrr_if_type
 {
-    MTRR_IF_NONE,		/* No MTRRs supported */
-    MTRR_IF_INTEL,		/* Intel (P6) standard MTRRs */
-    MTRR_IF_AMD_K6,		/* AMD pre-Athlon MTRRs */
-    MTRR_IF_CYRIX_ARR,		/* Cyrix ARRs */
-    MTRR_IF_CENTAUR_MCR,	/* Centaur MCRs */
+    MTRR_IF_NONE,       /* No MTRRs supported */
+    MTRR_IF_INTEL,      /* Intel (P6) standard MTRRs */
+    MTRR_IF_AMD_K6,     /* AMD pre-Athlon MTRRs */
+    MTRR_IF_CYRIX_ARR,      /* Cyrix ARRs */
+    MTRR_IF_CENTAUR_MCR,    /* Centaur MCRs */
 } mtrr_if = MTRR_IF_NONE;
 
 static __initdata char *mtrr_if_name[] =
@@ -344,7 +344,7 @@ typedef u8 mtrr_type;
 #  define set_mtrr(reg,base,size,type) set_mtrr_smp (reg, base, size, type)
 #else
 #  define set_mtrr(reg,base,size,type) (*set_mtrr_up) (reg, base, size, type, \
-						       TRUE)
+                               TRUE)
 #endif
 
 #if defined(CONFIG_PROC_FS) || defined(CONFIG_DEVFS_FS)
@@ -555,12 +555,12 @@ static void cyrix_get_arr (unsigned int reg, unsigned long *base,
     __cli ();
 
     ccr3 = getCx86 (CX86_CCR3);
-    setCx86 (CX86_CCR3, (ccr3 & 0x0f) | 0x10);		/* enable MAPEN */
+    setCx86 (CX86_CCR3, (ccr3 & 0x0f) | 0x10);      /* enable MAPEN */
     ((unsigned char *) base)[3]  = getCx86 (arr);
     ((unsigned char *) base)[2]  = getCx86 (arr+1);
     ((unsigned char *) base)[1]  = getCx86 (arr+2);
     rcr = getCx86(CX86_RCR_BASE + reg);
-    setCx86 (CX86_CCR3, ccr3);				/* disable MAPEN */
+    setCx86 (CX86_CCR3, ccr3);              /* disable MAPEN */
 
     /* Enable interrupts if it was enabled previously */
     __restore_flags (flags);
@@ -635,19 +635,19 @@ static void amd_get_mtrr (unsigned int reg, unsigned long *base,
         return;
     }
     /*
-     *	This needs a little explaining. The size is stored as an
-     *	inverted mask of bits of 128K granularity 15 bits long offset
-     *	2 bits
+     *  This needs a little explaining. The size is stored as an
+     *  inverted mask of bits of 128K granularity 15 bits long offset
+     *  2 bits
      *
-     *	So to get a size we do invert the mask and add 1 to the lowest
-     *	mask bit (4 as its 2 bits in). This gives us a size we then shift
-     *	to turn into 128K blocks
+     *  So to get a size we do invert the mask and add 1 to the lowest
+     *  mask bit (4 as its 2 bits in). This gives us a size we then shift
+     *  to turn into 128K blocks
      *
-     *	eg		111 1111 1111 1100      is 512K
+     *  eg      111 1111 1111 1100      is 512K
      *
-     *	invert		000 0000 0000 0011
-     *	+1		000 0000 0000 0100
-     *	*128K	...
+     *  invert      000 0000 0000 0011
+     *  +1      000 0000 0000 0100
+     *  *128K   ...
      */
     low = (~low) & 0x1FFFC;
     *size = (low + 4) << (15 - PAGE_SHIFT);
@@ -661,10 +661,10 @@ static struct
 } centaur_mcr[8];
 
 static u8 centaur_mcr_reserved;
-static u8 centaur_mcr_type;		/* 0 for winchip, 1 for winchip2 */
+static u8 centaur_mcr_type;     /* 0 for winchip, 1 for winchip2 */
 
 /*
- *	Report boot time MCR setups
+ *  Report boot time MCR setups
  */
 
 void mtrr_centaur_report_mcr(int mcr, u32 lo, u32 hi)
@@ -678,7 +678,7 @@ static void centaur_get_mcr (unsigned int reg, unsigned long *base,
 {
     *base = centaur_mcr[reg].high >> PAGE_SHIFT;
     *size = -(centaur_mcr[reg].low & 0xfffff000) >> PAGE_SHIFT;
-    *type = MTRR_TYPE_WRCOMB;	/*  If it is there, it is write-combining  */
+    *type = MTRR_TYPE_WRCOMB;   /*  If it is there, it is write-combining  */
     if(centaur_mcr_type==1 && ((centaur_mcr[reg].low&31)&2))
         *type = MTRR_TYPE_UNCACHABLE;
     if(centaur_mcr_type==1 && (centaur_mcr[reg].low&31)==25)
@@ -800,11 +800,11 @@ static void amd_set_mtrr_up (unsigned int reg, unsigned long base,
 
     if (do_safe) set_mtrr_prepare (&ctxt);
     /*
-     *	Low is MTRR0 , High MTRR 1
+     *  Low is MTRR0 , High MTRR 1
      */
     rdmsr (MSR_K6_UWCCR, regs[0], regs[1]);
     /*
-     *	Blank to disable
+     *  Blank to disable
      */
     if (size == 0)
         regs[reg] = 0;
@@ -820,8 +820,8 @@ static void amd_set_mtrr_up (unsigned int reg, unsigned long base,
                     | (base<<PAGE_SHIFT) | (type+1);
 
     /*
-     *	The writeback rule is quite specific. See the manual. Its
-     *	disable local interrupts, write back the cache, set the mtrr
+     *  The writeback rule is quite specific. See the manual. Its
+     *  disable local interrupts, write back the cache, set the mtrr
      */
     wbinvd();
     wrmsr (MSR_K6_UWCCR, regs[0], regs[1]);
@@ -850,9 +850,9 @@ static void centaur_set_mcr_up (unsigned int reg, unsigned long base,
         else
         {
             if(type == MTRR_TYPE_UNCACHABLE)
-                low = -size << PAGE_SHIFT | 0x02;	/* NC */
+                low = -size << PAGE_SHIFT | 0x02;   /* NC */
             else
-                low = -size << PAGE_SHIFT | 0x09;	/* WWO,WC */
+                low = -size << PAGE_SHIFT | 0x09;   /* WWO,WC */
         }
     }
     centaur_mcr[reg].high = high;
@@ -1222,39 +1222,39 @@ static int (*get_free_region) (unsigned long base,
                                unsigned long size) = generic_get_free_region;
 
 /**
- *	mtrr_add_page - Add a memory type region
- *	@base: Physical base address of region in pages (4 KB)
- *	@size: Physical size of region in pages (4 KB)
- *	@type: Type of MTRR desired
- *	@increment: If this is true do usage counting on the region
+ *  mtrr_add_page - Add a memory type region
+ *  @base: Physical base address of region in pages (4 KB)
+ *  @size: Physical size of region in pages (4 KB)
+ *  @type: Type of MTRR desired
+ *  @increment: If this is true do usage counting on the region
  *
- *	Memory type region registers control the caching on newer Intel and
- *	non Intel processors. This function allows drivers to request an
- *	MTRR is added. The details and hardware specifics of each processor's
- *	implementation are hidden from the caller, but nevertheless the
- *	caller should expect to need to provide a power of two size on an
- *	equivalent power of two boundary.
+ *  Memory type region registers control the caching on newer Intel and
+ *  non Intel processors. This function allows drivers to request an
+ *  MTRR is added. The details and hardware specifics of each processor's
+ *  implementation are hidden from the caller, but nevertheless the
+ *  caller should expect to need to provide a power of two size on an
+ *  equivalent power of two boundary.
  *
- *	If the region cannot be added either because all regions are in use
- *	or the CPU cannot support it a negative value is returned. On success
- *	the register number for this entry is returned, but should be treated
- *	as a cookie only.
+ *  If the region cannot be added either because all regions are in use
+ *  or the CPU cannot support it a negative value is returned. On success
+ *  the register number for this entry is returned, but should be treated
+ *  as a cookie only.
  *
- *	On a multiprocessor machine the changes are made to all processors.
- *	This is required on x86 by the Intel processors.
+ *  On a multiprocessor machine the changes are made to all processors.
+ *  This is required on x86 by the Intel processors.
  *
- *	The available types are
+ *  The available types are
  *
- *	%MTRR_TYPE_UNCACHABLE	-	No caching
+ *  %MTRR_TYPE_UNCACHABLE   -   No caching
  *
- *	%MTRR_TYPE_WRBACK	-	Write data back in bursts whenever
+ *  %MTRR_TYPE_WRBACK   -   Write data back in bursts whenever
  *
- *	%MTRR_TYPE_WRCOMB	-	Write data back soon but allow bursts
+ *  %MTRR_TYPE_WRCOMB   -   Write data back soon but allow bursts
  *
- *	%MTRR_TYPE_WRTHROUGH	-	Cache reads but not writes
+ *  %MTRR_TYPE_WRTHROUGH    -   Cache reads but not writes
  *
- *	BUGS: Needs a quiet flag for the cases where drivers do not mind
- *	failures and do not wish system log messages to be sent.
+ *  BUGS: Needs a quiet flag for the cases where drivers do not mind
+ *  failures and do not wish system log messages to be sent.
  */
 
 int mtrr_add_page(unsigned long base, unsigned long size, unsigned int type, char increment)
@@ -1276,7 +1276,7 @@ int mtrr_add_page(unsigned long base, unsigned long size, unsigned int type, cha
     switch ( mtrr_if )
     {
     case MTRR_IF_NONE:
-        return -ENXIO;		/* No MTRRs whatsoever */
+        return -ENXIO;      /* No MTRRs whatsoever */
 
     case MTRR_IF_AMD_K6:
         /* Apply the K6 block alignment and size rules
@@ -1318,7 +1318,7 @@ int mtrr_add_page(unsigned long base, unsigned long size, unsigned int type, cha
         if ( mtrr_if == MTRR_IF_CENTAUR_MCR )
         {
             /*
-             *	FIXME: Winchip2 supports uncached
+             *  FIXME: Winchip2 supports uncached
              */
             if (type != MTRR_TYPE_WRCOMB && (centaur_mcr_type == 0 || type != MTRR_TYPE_UNCACHABLE))
             {
@@ -1417,39 +1417,39 @@ int mtrr_add_page(unsigned long base, unsigned long size, unsigned int type, cha
 }   /*  End Function mtrr_add_page  */
 
 /**
- *	mtrr_add - Add a memory type region
- *	@base: Physical base address of region
- *	@size: Physical size of region
- *	@type: Type of MTRR desired
- *	@increment: If this is true do usage counting on the region
+ *  mtrr_add - Add a memory type region
+ *  @base: Physical base address of region
+ *  @size: Physical size of region
+ *  @type: Type of MTRR desired
+ *  @increment: If this is true do usage counting on the region
  *
- *	Memory type region registers control the caching on newer Intel and
- *	non Intel processors. This function allows drivers to request an
- *	MTRR is added. The details and hardware specifics of each processor's
- *	implementation are hidden from the caller, but nevertheless the
- *	caller should expect to need to provide a power of two size on an
- *	equivalent power of two boundary.
+ *  Memory type region registers control the caching on newer Intel and
+ *  non Intel processors. This function allows drivers to request an
+ *  MTRR is added. The details and hardware specifics of each processor's
+ *  implementation are hidden from the caller, but nevertheless the
+ *  caller should expect to need to provide a power of two size on an
+ *  equivalent power of two boundary.
  *
- *	If the region cannot be added either because all regions are in use
- *	or the CPU cannot support it a negative value is returned. On success
- *	the register number for this entry is returned, but should be treated
- *	as a cookie only.
+ *  If the region cannot be added either because all regions are in use
+ *  or the CPU cannot support it a negative value is returned. On success
+ *  the register number for this entry is returned, but should be treated
+ *  as a cookie only.
  *
- *	On a multiprocessor machine the changes are made to all processors.
- *	This is required on x86 by the Intel processors.
+ *  On a multiprocessor machine the changes are made to all processors.
+ *  This is required on x86 by the Intel processors.
  *
- *	The available types are
+ *  The available types are
  *
- *	%MTRR_TYPE_UNCACHABLE	-	No caching
+ *  %MTRR_TYPE_UNCACHABLE   -   No caching
  *
- *	%MTRR_TYPE_WRBACK	-	Write data back in bursts whenever
+ *  %MTRR_TYPE_WRBACK   -   Write data back in bursts whenever
  *
- *	%MTRR_TYPE_WRCOMB	-	Write data back soon but allow bursts
+ *  %MTRR_TYPE_WRCOMB   -   Write data back soon but allow bursts
  *
- *	%MTRR_TYPE_WRTHROUGH	-	Cache reads but not writes
+ *  %MTRR_TYPE_WRTHROUGH    -   Cache reads but not writes
  *
- *	BUGS: Needs a quiet flag for the cases where drivers do not mind
- *	failures and do not wish system log messages to be sent.
+ *  BUGS: Needs a quiet flag for the cases where drivers do not mind
+ *  failures and do not wish system log messages to be sent.
  */
 
 int mtrr_add(unsigned long base, unsigned long size, unsigned int type, char increment)
@@ -1474,18 +1474,18 @@ int mtrr_add(unsigned long base, unsigned long size, unsigned int type, char inc
 }   /*  End Function mtrr_add  */
 
 /**
- *	mtrr_del_page - delete a memory type region
- *	@reg: Register returned by mtrr_add
- *	@base: Physical base address
- *	@size: Size of region
+ *  mtrr_del_page - delete a memory type region
+ *  @reg: Register returned by mtrr_add
+ *  @base: Physical base address
+ *  @size: Size of region
  *
- *	If register is supplied then base and size are ignored. This is
- *	how drivers should call it.
+ *  If register is supplied then base and size are ignored. This is
+ *  how drivers should call it.
  *
- *	Releases an MTRR region. If the usage count drops to zero the
- *	register is freed and the region returns to default state.
- *	On success the register is returned, on failure a negative error
- *	code.
+ *  Releases an MTRR region. If the usage count drops to zero the
+ *  register is freed and the region returns to default state.
+ *  On success the register is returned, on failure a negative error
+ *  code.
  */
 
 int mtrr_del_page (int reg, unsigned long base, unsigned long size)
@@ -1561,18 +1561,18 @@ int mtrr_del_page (int reg, unsigned long base, unsigned long size)
 }   /*  End Function mtrr_del_page  */
 
 /**
- *	mtrr_del - delete a memory type region
- *	@reg: Register returned by mtrr_add
- *	@base: Physical base address
- *	@size: Size of region
+ *  mtrr_del - delete a memory type region
+ *  @reg: Register returned by mtrr_add
+ *  @base: Physical base address
+ *  @size: Size of region
  *
- *	If register is supplied then base and size are ignored. This is
- *	how drivers should call it.
+ *  If register is supplied then base and size are ignored. This is
+ *  how drivers should call it.
  *
- *	Releases an MTRR region. If the usage count drops to zero the
- *	register is freed and the region returns to default state.
- *	On success the register is returned, on failure a negative error
- *	code.
+ *  Releases an MTRR region. If the usage count drops to zero the
+ *  register is freed and the region returns to default state.
+ *  On success the register is returned, on failure a negative error
+ *  code.
  */
 
 int mtrr_del (int reg, unsigned long base, unsigned long size)
@@ -2059,9 +2059,9 @@ static void __init cyrix_arr_init(void)
 }   /*  End Function cyrix_arr_init  */
 
 /*
- *	Initialise the later (saner) Winchip MCR variant. In this version
- *	the BIOS can pass us the registers it has used (but not their values)
- *	and the control register is read/write
+ *  Initialise the later (saner) Winchip MCR variant. In this version
+ *  the BIOS can pass us the registers it has used (but not their values)
+ *  and the control register is read/write
  */
 
 static void __init centaur_mcr1_init(void)
@@ -2074,17 +2074,17 @@ static void __init centaur_mcr1_init(void)
      */
 
     rdmsr(MSR_IDT_MCR_CTRL, lo, hi);
-    if(((lo>>17)&7)==1)		/* Type 1 Winchip2 MCR */
+    if(((lo>>17)&7)==1)     /* Type 1 Winchip2 MCR */
     {
-        lo&= ~0x1C0;		/* clear key */
-        lo|= 0x040;		/* set key to 1 */
-        wrmsr(MSR_IDT_MCR_CTRL, lo, hi);	/* unlock MCR */
+        lo&= ~0x1C0;        /* clear key */
+        lo|= 0x040;     /* set key to 1 */
+        wrmsr(MSR_IDT_MCR_CTRL, lo, hi);    /* unlock MCR */
     }
 
     centaur_mcr_type = 1;
 
     /*
-     *	Clear any unconfigured MCR's.
+     *  Clear any unconfigured MCR's.
      */
 
     for (i = 0; i < 8; ++i)
@@ -2095,25 +2095,25 @@ static void __init centaur_mcr1_init(void)
                 wrmsr (MSR_IDT_MCR0 + i , 0, 0);
             else
                 /*
-                 *	If the BIOS set up an MCR we cannot see it
-                 *	but we don't wish to obliterate it
+                 *  If the BIOS set up an MCR we cannot see it
+                 *  but we don't wish to obliterate it
                  */
                 centaur_mcr_reserved |= (1<<i);
         }
     }
     /*
-     *	Throw the main write-combining switch...
-     *	However if OOSTORE is enabled then people have already done far
+     *  Throw the main write-combining switch...
+     *  However if OOSTORE is enabled then people have already done far
      *  cleverer things and we should behave.
      */
 
-    lo |= 15;			/* Write combine enables */
+    lo |= 15;           /* Write combine enables */
     wrmsr(MSR_IDT_MCR_CTRL, lo, hi);
 }   /*  End Function centaur_mcr1_init  */
 
 /*
- *	Initialise the original winchip with read only MCR registers
- *	no used bitmask for the BIOS to pass on and write only control
+ *  Initialise the original winchip with read only MCR registers
+ *  no used bitmask for the BIOS to pass on and write only control
  */
 
 static void __init centaur_mcr0_init(void)
@@ -2135,11 +2135,11 @@ static void __init centaur_mcr0_init(void)
             wrmsr (MSR_IDT_MCR0 + i , 0, 0);
     }
 
-    wrmsr(MSR_IDT_MCR_CTRL, 0x01F0001F, 0);	/* Write only */
+    wrmsr(MSR_IDT_MCR_CTRL, 0x01F0001F, 0); /* Write only */
 }   /*  End Function centaur_mcr0_init  */
 
 /*
- *	Initialise Winchip series MCR registers
+ *  Initialise Winchip series MCR registers
  */
 
 static void __init centaur_mcr_init(void)
@@ -2180,7 +2180,7 @@ static int __init mtrr_setup(void)
              */
             if (boot_cpu_data.x86 == 7 && (cpuid_eax(0x80000000) >= 0x80000008))
             {
-                u32	phys_addr;
+                u32 phys_addr;
                 phys_addr = cpuid_eax(0x80000008) & 0xff ;
                 size_or_mask = ~((1 << (phys_addr - PAGE_SHIFT)) - 1);
                 size_and_mask = ~size_or_mask & 0xfff00000;
@@ -2325,7 +2325,7 @@ int __init mtrr_init(void)
     }
 #else
     if ( !mtrr_setup() )
-        return 0;		/* MTRRs not supported? */
+        return 0;       /* MTRRs not supported? */
 #endif
 
 #ifdef CONFIG_PROC_FS

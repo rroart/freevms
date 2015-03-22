@@ -1,23 +1,23 @@
 /*
- * INET		An implementation of the TCP/IP protocol suite for the LINUX
- *		operating system.  INET is implemented using the  BSD Socket
- *		interface as the means of communication with the user level.
+ * INET     An implementation of the TCP/IP protocol suite for the LINUX
+ *      operating system.  INET is implemented using the  BSD Socket
+ *      interface as the means of communication with the user level.
  *
- *		Definitions for the IP module.
+ *      Definitions for the IP module.
  *
- * Version:	@(#)ip.h	1.0.2	05/07/93
+ * Version: @(#)ip.h    1.0.2   05/07/93
  *
- * Authors:	Ross Biro, <bir7@leland.Stanford.Edu>
- *		Fred N. van Kempen, <waltje@uWalt.NL.Mugnet.ORG>
- *		Alan Cox, <gw4pts@gw4pts.ampr.org>
+ * Authors: Ross Biro, <bir7@leland.Stanford.Edu>
+ *      Fred N. van Kempen, <waltje@uWalt.NL.Mugnet.ORG>
+ *      Alan Cox, <gw4pts@gw4pts.ampr.org>
  *
  * Changes:
- *		Mike McLagan    :       Routing by source
+ *      Mike McLagan    :       Routing by source
  *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
+ *      This program is free software; you can redistribute it and/or
+ *      modify it under the terms of the GNU General Public License
+ *      as published by the Free Software Foundation; either version
+ *      2 of the License, or (at your option) any later version.
  */
 #ifndef _IP_H
 #define _IP_H
@@ -36,68 +36,68 @@
 #include <net/snmp.h>
 #endif
 
-#include <net/sock.h>	/* struct sock */
+#include <net/sock.h>   /* struct sock */
 
 struct inet_skb_parm
 {
-    struct ip_options	opt;		/* Compiled IP options		*/
-    unsigned char		flags;
+    struct ip_options   opt;        /* Compiled IP options      */
+    unsigned char       flags;
 
-#define IPSKB_MASQUERADED	1
-#define IPSKB_TRANSLATED	2
-#define IPSKB_FORWARDED		4
+#define IPSKB_MASQUERADED   1
+#define IPSKB_TRANSLATED    2
+#define IPSKB_FORWARDED     4
 };
 
 struct ipcm_cookie
 {
-    u32			addr;
-    int			oif;
-    struct ip_options	*opt;
+    u32         addr;
+    int         oif;
+    struct ip_options   *opt;
 };
 
 #define IPCB(skb) ((struct inet_skb_parm*)((skb)->cb))
 
 struct ip_ra_chain
 {
-    struct ip_ra_chain	*next;
-    struct sock		*sk;
-    void			(*destructor)(struct sock *);
+    struct ip_ra_chain  *next;
+    struct sock     *sk;
+    void            (*destructor)(struct sock *);
 };
 
 extern struct ip_ra_chain *ip_ra_chain;
 extern rwlock_t ip_ra_lock;
 
 /* IP flags. */
-#define IP_CE		0x8000		/* Flag: "Congestion"		*/
-#define IP_DF		0x4000		/* Flag: "Don't Fragment"	*/
-#define IP_MF		0x2000		/* Flag: "More Fragments"	*/
-#define IP_OFFSET	0x1FFF		/* "Fragment Offset" part	*/
+#define IP_CE       0x8000      /* Flag: "Congestion"       */
+#define IP_DF       0x4000      /* Flag: "Don't Fragment"   */
+#define IP_MF       0x2000      /* Flag: "More Fragments"   */
+#define IP_OFFSET   0x1FFF      /* "Fragment Offset" part   */
 
-#define IP_FRAG_TIME	(30 * HZ)		/* fragment lifetime	*/
+#define IP_FRAG_TIME    (30 * HZ)       /* fragment lifetime    */
 
-extern void		ip_mc_dropsocket(struct sock *);
-extern void		ip_mc_dropdevice(struct net_device *dev);
-extern int		ip_mc_procinfo(char *, char **, off_t, int);
+extern void     ip_mc_dropsocket(struct sock *);
+extern void     ip_mc_dropdevice(struct net_device *dev);
+extern int      ip_mc_procinfo(char *, char **, off_t, int);
 
 /*
- *	Functions provided by ip.c
+ *  Functions provided by ip.c
  */
 
-extern int		ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
+extern int      ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
                                       u32 saddr, u32 daddr,
                                       struct ip_options *opt);
-extern int		ip_rcv(struct sk_buff *skb, struct net_device *dev,
+extern int      ip_rcv(struct sk_buff *skb, struct net_device *dev,
                        struct packet_type *pt);
-extern int		ip_local_deliver(struct sk_buff *skb);
-extern int		ip_mr_input(struct sk_buff *skb);
-extern int		ip_output(struct sk_buff *skb);
-extern int		ip_mc_output(struct sk_buff *skb);
-extern int		ip_fragment(struct sk_buff *skb, int (*out)(struct sk_buff*));
-extern int		ip_do_nat(struct sk_buff *skb);
-extern void		ip_send_check(struct iphdr *ip);
-extern int		ip_queue_xmit(struct sk_buff *skb);
-extern void		ip_init(void);
-extern int		ip_build_xmit(struct sock *sk,
+extern int      ip_local_deliver(struct sk_buff *skb);
+extern int      ip_mr_input(struct sk_buff *skb);
+extern int      ip_output(struct sk_buff *skb);
+extern int      ip_mc_output(struct sk_buff *skb);
+extern int      ip_fragment(struct sk_buff *skb, int (*out)(struct sk_buff*));
+extern int      ip_do_nat(struct sk_buff *skb);
+extern void     ip_send_check(struct iphdr *ip);
+extern int      ip_queue_xmit(struct sk_buff *skb);
+extern void     ip_init(void);
+extern int      ip_build_xmit(struct sock *sk,
                               int getfrag (const void *,
                                       char *,
                                       unsigned int,
@@ -109,7 +109,7 @@ extern int		ip_build_xmit(struct sock *sk,
                               int flags);
 
 /*
- *	Map a multicast IP onto multicast MAC for type Token Ring.
+ *  Map a multicast IP onto multicast MAC for type Token Ring.
  *      This conforms to RFC1469 Option 2 Multicasting i.e.
  *      using a functional address to transmit / receive
  *      multicast packets.
@@ -129,8 +129,8 @@ struct ip_reply_arg
 {
     struct iovec iov[2];
     int          n_iov;    /* redundant */
-    u32 	     csum;
-    int	     csumoffset; /* u16 offset of csum in iov[0].iov_base */
+    u32          csum;
+    int      csumoffset; /* u16 offset of csum in iov[0].iov_base */
     /* -1 if not needed */
 };
 
@@ -141,20 +141,20 @@ extern __inline__ int ip_finish_output(struct sk_buff *skb);
 
 struct ipv4_config
 {
-    int	log_martians;
-    int	autoconfig;
-    int	no_pmtu_disc;
+    int log_martians;
+    int autoconfig;
+    int no_pmtu_disc;
 };
 
 extern struct ipv4_config ipv4_config;
-extern struct ip_mib	ip_statistics[NR_CPUS*2];
-#define IP_INC_STATS(field)		SNMP_INC_STATS(ip_statistics, field)
-#define IP_INC_STATS_BH(field)		SNMP_INC_STATS_BH(ip_statistics, field)
-#define IP_INC_STATS_USER(field) 	SNMP_INC_STATS_USER(ip_statistics, field)
-extern struct linux_mib	net_statistics[NR_CPUS*2];
-#define NET_INC_STATS(field)		SNMP_INC_STATS(net_statistics, field)
-#define NET_INC_STATS_BH(field)		SNMP_INC_STATS_BH(net_statistics, field)
-#define NET_INC_STATS_USER(field) 	SNMP_INC_STATS_USER(net_statistics, field)
+extern struct ip_mib    ip_statistics[NR_CPUS*2];
+#define IP_INC_STATS(field)     SNMP_INC_STATS(ip_statistics, field)
+#define IP_INC_STATS_BH(field)      SNMP_INC_STATS_BH(ip_statistics, field)
+#define IP_INC_STATS_USER(field)    SNMP_INC_STATS_USER(ip_statistics, field)
+extern struct linux_mib net_statistics[NR_CPUS*2];
+#define NET_INC_STATS(field)        SNMP_INC_STATS(net_statistics, field)
+#define NET_INC_STATS_BH(field)     SNMP_INC_STATS_BH(net_statistics, field)
+#define NET_INC_STATS_USER(field)   SNMP_INC_STATS_USER(net_statistics, field)
 
 extern int sysctl_local_port_range[2];
 extern int sysctl_ip_default_ttl;
@@ -205,7 +205,7 @@ static inline void ip_select_ident(struct iphdr *iph, struct dst_entry *dst, str
 }
 
 /*
- *	Map a multicast IP onto multicast MAC for type ethernet.
+ *  Map a multicast IP onto multicast MAC for type ethernet.
  */
 
 static inline void ip_eth_mc_map(u32 addr, char *buf)
@@ -223,10 +223,10 @@ static inline void ip_eth_mc_map(u32 addr, char *buf)
 
 #endif
 
-extern int	ip_call_ra_chain(struct sk_buff *skb);
+extern int  ip_call_ra_chain(struct sk_buff *skb);
 
 /*
- *	Functions provided by ip_fragment.o
+ *  Functions provided by ip_fragment.o
  */
 
 struct sk_buff *ip_defrag(struct sk_buff *skb);
@@ -234,14 +234,14 @@ extern int ip_frag_nqueues;
 extern atomic_t ip_frag_mem;
 
 /*
- *	Functions provided by ip_forward.c
+ *  Functions provided by ip_forward.c
  */
 
 extern int ip_forward(struct sk_buff *skb);
 extern int ip_net_unreachable(struct sk_buff *skb);
 
 /*
- *	Functions provided by ip_options.c
+ *  Functions provided by ip_options.c
  */
 
 extern void ip_options_build(struct sk_buff *skb, struct ip_options *opt, u32 daddr, struct rtable *rt, int is_frag);
@@ -254,19 +254,19 @@ extern void ip_forward_options(struct sk_buff *skb);
 extern int ip_options_rcv_srr(struct sk_buff *skb);
 
 /*
- *	Functions provided by ip_sockglue.c
+ *  Functions provided by ip_sockglue.c
  */
 
-extern void	ip_cmsg_recv(struct msghdr *msg, struct sk_buff *skb);
-extern int	ip_cmsg_send(struct msghdr *msg, struct ipcm_cookie *ipc);
-extern int	ip_setsockopt(struct sock *sk, int level, int optname, char *optval, int optlen);
-extern int	ip_getsockopt(struct sock *sk, int level, int optname, char *optval, int *optlen);
-extern int	ip_ra_control(struct sock *sk, unsigned char on, void (*destructor)(struct sock *));
+extern void ip_cmsg_recv(struct msghdr *msg, struct sk_buff *skb);
+extern int  ip_cmsg_send(struct msghdr *msg, struct ipcm_cookie *ipc);
+extern int  ip_setsockopt(struct sock *sk, int level, int optname, char *optval, int optlen);
+extern int  ip_getsockopt(struct sock *sk, int level, int optname, char *optval, int *optlen);
+extern int  ip_ra_control(struct sock *sk, unsigned char on, void (*destructor)(struct sock *));
 
-extern int 	ip_recv_error(struct sock *sk, struct msghdr *msg, int len);
-extern void	ip_icmp_error(struct sock *sk, struct sk_buff *skb, int err,
+extern int  ip_recv_error(struct sock *sk, struct msghdr *msg, int len);
+extern void ip_icmp_error(struct sock *sk, struct sk_buff *skb, int err,
                           u16 port, u32 info, u8 *payload);
-extern void	ip_local_error(struct sock *sk, int err, u32 daddr, u16 dport,
+extern void ip_local_error(struct sock *sk, int err, u32 daddr, u16 dport,
                            u32 info);
 
-#endif	/* _IP_H */
+#endif  /* _IP_H */

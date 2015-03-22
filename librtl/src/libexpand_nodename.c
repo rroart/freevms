@@ -1,8 +1,8 @@
 
 /*
- *	LIB$EXPAND_NODENAME
+ *  LIB$EXPAND_NODENAME
  *
- *	Copyright (C) 2004 Andrew Allison
+ *  Copyright (C) 2004 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,13 +20,13 @@
  *
  *The author(s) may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  *
  *
@@ -38,8 +38,8 @@
  *
  * History
  *
- *	Mar 20, 2004 - Andrew Allison
- * 	 	Initial program creation
+ *  Mar 20, 2004 - Andrew Allison
+ *      Initial program creation
  */
 #include "descrip.h"
 #include "lib$routines.h"

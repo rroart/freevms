@@ -58,11 +58,11 @@ enum rpc_auth_stat
     RPC_AUTH_TOOWEAK = 5
 };
 
-#define RPC_PMAP_PROGRAM	100000
-#define RPC_PMAP_VERSION	2
-#define RPC_PMAP_PORT		111
+#define RPC_PMAP_PROGRAM    100000
+#define RPC_PMAP_VERSION    2
+#define RPC_PMAP_PORT       111
 
-#define RPC_MAXNETNAMELEN	256
+#define RPC_MAXNETNAMELEN   256
 
 #endif /* __KERNEL__ */
 #endif /* _LINUX_SUNRPC_MSGPROT_H_ */

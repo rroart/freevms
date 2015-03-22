@@ -1,5 +1,5 @@
-#ifndef libclidef_h
-#define libclidef_h
+#ifndef LIBCLIDEF_H
+#define LIBCLIDEF_H
 
 #define LIB$K_CLI_LOCAL_SYM 1
 #define LIB$K_CLI_GLOBAL_SYM 2

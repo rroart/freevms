@@ -13,216 +13,216 @@
 
 struct nfsd3_sattrargs
 {
-    struct svc_fh		fh;
-    struct iattr		attrs;
-    int			check_guard;
-    time_t			guardtime;
+    struct svc_fh       fh;
+    struct iattr        attrs;
+    int         check_guard;
+    time_t          guardtime;
 };
 
 struct nfsd3_diropargs
 {
-    struct svc_fh		fh;
-    char *			name;
-    int			len;
+    struct svc_fh       fh;
+    char *          name;
+    int         len;
 };
 
 struct nfsd3_accessargs
 {
-    struct svc_fh		fh;
-    unsigned int		access;
+    struct svc_fh       fh;
+    unsigned int        access;
 };
 
 struct nfsd3_readargs
 {
-    struct svc_fh		fh;
-    __u64			offset;
-    __u32			count;
+    struct svc_fh       fh;
+    __u64           offset;
+    __u32           count;
 };
 
 struct nfsd3_writeargs
 {
-    svc_fh			fh;
-    __u64			offset;
-    __u32			count;
-    int			stable;
-    __u8 *			data;
-    int			len;
+    svc_fh          fh;
+    __u64           offset;
+    __u32           count;
+    int         stable;
+    __u8 *          data;
+    int         len;
 };
 
 struct nfsd3_createargs
 {
-    struct svc_fh		fh;
-    char *			name;
-    int			len;
-    int			createmode;
-    struct iattr		attrs;
-    __u32 *			verf;
+    struct svc_fh       fh;
+    char *          name;
+    int         len;
+    int         createmode;
+    struct iattr        attrs;
+    __u32 *         verf;
 };
 
 struct nfsd3_mknodargs
 {
-    struct svc_fh		fh;
-    char *			name;
-    int			len;
-    __u32			ftype;
-    __u32			major, minor;
-    struct iattr		attrs;
+    struct svc_fh       fh;
+    char *          name;
+    int         len;
+    __u32           ftype;
+    __u32           major, minor;
+    struct iattr        attrs;
 };
 
 struct nfsd3_renameargs
 {
-    struct svc_fh		ffh;
-    char *			fname;
-    int			flen;
-    struct svc_fh		tfh;
-    char *			tname;
-    int			tlen;
+    struct svc_fh       ffh;
+    char *          fname;
+    int         flen;
+    struct svc_fh       tfh;
+    char *          tname;
+    int         tlen;
 };
 
 struct nfsd3_linkargs
 {
-    struct svc_fh		ffh;
-    struct svc_fh		tfh;
-    char *			tname;
-    int			tlen;
+    struct svc_fh       ffh;
+    struct svc_fh       tfh;
+    char *          tname;
+    int         tlen;
 };
 
 struct nfsd3_symlinkargs
 {
-    struct svc_fh		ffh;
-    char *			fname;
-    int			flen;
-    char *			tname;
-    int			tlen;
-    struct iattr		attrs;
+    struct svc_fh       ffh;
+    char *          fname;
+    int         flen;
+    char *          tname;
+    int         tlen;
+    struct iattr        attrs;
 };
 
 struct nfsd3_readdirargs
 {
-    struct svc_fh		fh;
-    __u64			cookie;
-    __u32			dircount;
-    __u32			count;
-    __u32 *			verf;
+    struct svc_fh       fh;
+    __u64           cookie;
+    __u32           dircount;
+    __u32           count;
+    __u32 *         verf;
 };
 
 struct nfsd3_commitargs
 {
-    struct svc_fh		fh;
-    __u64			offset;
-    __u32			count;
+    struct svc_fh       fh;
+    __u64           offset;
+    __u32           count;
 };
 
 struct nfsd3_attrstat
 {
-    __u32			status;
-    struct svc_fh		fh;
+    __u32           status;
+    struct svc_fh       fh;
 };
 
 /* LOOKUP, CREATE, MKDIR, SYMLINK, MKNOD */
 struct nfsd3_diropres
 {
-    __u32			status;
-    struct svc_fh		dirfh;
-    struct svc_fh		fh;
+    __u32           status;
+    struct svc_fh       dirfh;
+    struct svc_fh       fh;
 };
 
 struct nfsd3_accessres
 {
-    __u32			status;
-    struct svc_fh		fh;
-    __u32			access;
+    __u32           status;
+    struct svc_fh       fh;
+    __u32           access;
 };
 
 struct nfsd3_readlinkres
 {
-    __u32			status;
-    struct svc_fh		fh;
-    __u32			len;
+    __u32           status;
+    struct svc_fh       fh;
+    __u32           len;
 };
 
 struct nfsd3_readres
 {
-    __u32			status;
-    struct svc_fh		fh;
-    unsigned long		count;
-    int			eof;
+    __u32           status;
+    struct svc_fh       fh;
+    unsigned long       count;
+    int         eof;
 };
 
 struct nfsd3_writeres
 {
-    __u32			status;
-    struct svc_fh		fh;
-    unsigned long		count;
-    int			committed;
+    __u32           status;
+    struct svc_fh       fh;
+    unsigned long       count;
+    int         committed;
 };
 
 struct nfsd3_renameres
 {
-    __u32			status;
-    struct svc_fh		ffh;
-    struct svc_fh		tfh;
+    __u32           status;
+    struct svc_fh       ffh;
+    struct svc_fh       tfh;
 };
 
 struct nfsd3_linkres
 {
-    __u32			status;
-    struct svc_fh		tfh;
-    struct svc_fh		fh;
+    __u32           status;
+    struct svc_fh       tfh;
+    struct svc_fh       fh;
 };
 
 struct nfsd3_readdirres
 {
-    __u32			status;
-    struct svc_fh		fh;
-    int			count;
-    __u32			verf[2];
+    __u32           status;
+    struct svc_fh       fh;
+    int         count;
+    __u32           verf[2];
 };
 
 struct nfsd3_fsstatres
 {
-    __u32			status;
-    struct statfs		stats;
-    __u32			invarsec;
+    __u32           status;
+    struct statfs       stats;
+    __u32           invarsec;
 };
 
 struct nfsd3_fsinfores
 {
-    __u32			status;
-    __u32			f_rtmax;
-    __u32			f_rtpref;
-    __u32			f_rtmult;
-    __u32			f_wtmax;
-    __u32			f_wtpref;
-    __u32			f_wtmult;
-    __u32			f_dtpref;
-    __u64			f_maxfilesize;
-    __u32			f_properties;
+    __u32           status;
+    __u32           f_rtmax;
+    __u32           f_rtpref;
+    __u32           f_rtmult;
+    __u32           f_wtmax;
+    __u32           f_wtpref;
+    __u32           f_wtmult;
+    __u32           f_dtpref;
+    __u64           f_maxfilesize;
+    __u32           f_properties;
 };
 
 struct nfsd3_pathconfres
 {
-    __u32			status;
-    __u32			p_link_max;
-    __u32			p_name_max;
-    __u32			p_no_trunc;
-    __u32			p_chown_restricted;
-    __u32			p_case_insensitive;
-    __u32			p_case_preserving;
+    __u32           status;
+    __u32           p_link_max;
+    __u32           p_name_max;
+    __u32           p_no_trunc;
+    __u32           p_chown_restricted;
+    __u32           p_case_insensitive;
+    __u32           p_case_preserving;
 };
 
 struct nfsd3_commitres
 {
-    __u32			status;
-    struct svc_fh		fh;
+    __u32           status;
+    struct svc_fh       fh;
 };
 
 /* dummy type for release */
 struct nfsd3_fhandle_pair
 {
-    __u32			dummy;
-    struct svc_fh		fh1;
-    struct svc_fh		fh2;
+    __u32           dummy;
+    struct svc_fh       fh1;
+    struct svc_fh       fh2;
 };
 
 /*
@@ -230,30 +230,30 @@ struct nfsd3_fhandle_pair
  */
 union nfsd3_xdrstore
 {
-    struct nfsd3_sattrargs		sattrargs;
-    struct nfsd3_diropargs		diropargs;
-    struct nfsd3_readargs		readargs;
-    struct nfsd3_writeargs		writeargs;
-    struct nfsd3_createargs		createargs;
-    struct nfsd3_renameargs		renameargs;
-    struct nfsd3_linkargs		linkargs;
-    struct nfsd3_symlinkargs	symlinkargs;
-    struct nfsd3_readdirargs	readdirargs;
-    struct nfsd3_diropres 		diropres;
-    struct nfsd3_accessres		accessres;
-    struct nfsd3_readlinkres	readlinkres;
-    struct nfsd3_readres		readres;
-    struct nfsd3_writeres		writeres;
-    struct nfsd3_renameres		renameres;
-    struct nfsd3_linkres		linkres;
-    struct nfsd3_readdirres		readdirres;
-    struct nfsd3_fsstatres		fsstatres;
-    struct nfsd3_fsinfores		fsinfores;
-    struct nfsd3_pathconfres	pathconfres;
-    struct nfsd3_commitres		commitres;
+    struct nfsd3_sattrargs      sattrargs;
+    struct nfsd3_diropargs      diropargs;
+    struct nfsd3_readargs       readargs;
+    struct nfsd3_writeargs      writeargs;
+    struct nfsd3_createargs     createargs;
+    struct nfsd3_renameargs     renameargs;
+    struct nfsd3_linkargs       linkargs;
+    struct nfsd3_symlinkargs    symlinkargs;
+    struct nfsd3_readdirargs    readdirargs;
+    struct nfsd3_diropres       diropres;
+    struct nfsd3_accessres      accessres;
+    struct nfsd3_readlinkres    readlinkres;
+    struct nfsd3_readres        readres;
+    struct nfsd3_writeres       writeres;
+    struct nfsd3_renameres      renameres;
+    struct nfsd3_linkres        linkres;
+    struct nfsd3_readdirres     readdirres;
+    struct nfsd3_fsstatres      fsstatres;
+    struct nfsd3_fsinfores      fsinfores;
+    struct nfsd3_pathconfres    pathconfres;
+    struct nfsd3_commitres      commitres;
 };
 
-#define NFS3_SVC_XDRSIZE		sizeof(union nfsd3_xdrstore)
+#define NFS3_SVC_XDRSIZE        sizeof(union nfsd3_xdrstore)
 
 int nfs3svc_decode_fhandle(struct svc_rqst *, u32 *, struct svc_fh *);
 int nfs3svc_decode_sattrargs(struct svc_rqst *, u32 *,

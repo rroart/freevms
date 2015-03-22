@@ -5,7 +5,7 @@
 // Modified Linux source file, 2001-2004. Based on filemap.c.
 
 /*
- *	linux/mm/filemap.c
+ *  linux/mm/filemap.c
  *
  * Copyright (C) 1994-1999  Linus Torvalds
  */
@@ -111,7 +111,7 @@ int generic_buffer_fdatasync(struct _fcb *inode, unsigned long start_idx, unsign
 
 /**
  *      filemap_fdatasync - walk the list of dirty pages of the given address space
- *     	and writepage() all of them.
+ *      and writepage() all of them.
  *
  *      @mapping: address space structure to write
  *
@@ -127,7 +127,7 @@ int filemap_fdatasync(struct address_space * mapping)
 
 /**
  *      filemap_fdatawait - walk the list of locked pages of the given address space
- *     	and wait for all of them.
+ *      and wait for all of them.
  *
  *      @mapping: address space structure to wait for
  *
@@ -410,7 +410,7 @@ static ssize_t generic_file_direct_IO(int rw, struct file * filp, char * buf, si
         retval = fsync_inode_data_buffers(inode);
 #endif
     //if (retval == 0)
-    //	retval = filemap_fdatawait();
+    //  retval = filemap_fdatawait();
     if (retval < 0)
         goto out_free;
 
@@ -1312,25 +1312,25 @@ static long madvise_vma(struct _rde * vma, unsigned long start,
  *
  * behavior values:
  *  MADV_NORMAL - the default behavior is to read clusters.  This
- *		results in some read-ahead and read-behind.
+ *      results in some read-ahead and read-behind.
  *  MADV_RANDOM - the system should read the minimum amount of data
- *		on any access, since it is unlikely that the appli-
- *		cation will need more than what it asks for.
+ *      on any access, since it is unlikely that the appli-
+ *      cation will need more than what it asks for.
  *  MADV_SEQUENTIAL - pages in the given range will probably be accessed
- *		once, so they can be aggressively read ahead, and
- *		can be freed soon after they are accessed.
+ *      once, so they can be aggressively read ahead, and
+ *      can be freed soon after they are accessed.
  *  MADV_WILLNEED - the application is notifying the system to read
- *		some pages ahead.
+ *      some pages ahead.
  *  MADV_DONTNEED - the application is finished with the given range,
- *		so the kernel can free resources associated with it.
+ *      so the kernel can free resources associated with it.
  *
  * return values:
  *  zero    - success
  *  -EINVAL - start + len < 0, start is not page-aligned,
- *		"behavior" is not a valid value, or application
- *		is attempting to release locked or shared pages.
+ *      "behavior" is not a valid value, or application
+ *      is attempting to release locked or shared pages.
  *  -ENOMEM - addresses in the specified range are not currently
- *		mapped, or are outside the AS of the process.
+ *      mapped, or are outside the AS of the process.
  *  -EIO    - an I/O error occurred while paging in data.
  *  -EBADF  - map exists, but area maps something that isn't a file.
  *  -EAGAIN - a kernel resource was temporarily unavailable.
@@ -1488,11 +1488,11 @@ static long mincore_vma(struct _rde * vma,
  *  zero    - success
  *  -EFAULT - vec points to an illegal address
  *  -EINVAL - addr is not a multiple of PAGE_CACHE_SIZE,
- *		or len has a nonpositive value
+ *      or len has a nonpositive value
  *  -ENOMEM - Addresses in the range [addr, addr + len] are
- *		invalid for the address space of this process, or
- *		specify one or more pages which are not currently
- *		mapped
+ *      invalid for the address space of this process, or
+ *      specify one or more pages which are not currently
+ *      mapped
  *  -EAGAIN - A kernel resource was temporarily unavailable.
  */
 asmlinkage long sys_mincore(unsigned long start, size_t len,
@@ -1596,19 +1596,19 @@ inline void remove_suid(struct _fcb *inode)
  *
  * Note that this routine doesn't try to keep track of dirty pages. Each
  * file system has to do this all by itself, unfortunately.
- *							okir@monad.swb.de
+ *                          okir@monad.swb.de
  */
 ssize_t
 generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
 {
-    struct _fcb	*inode = file->f_dentry->d_inode;
-    unsigned long	limit = current->rlim[RLIMIT_FSIZE].rlim_cur;
-    loff_t		pos;
-    struct page	*page, *cached_page;
-    ssize_t		written;
-    long		status = 0;
-    int		err;
-    unsigned	bytes;
+    struct _fcb *inode = file->f_dentry->d_inode;
+    unsigned long   limit = current->rlim[RLIMIT_FSIZE].rlim_cur;
+    loff_t      pos;
+    struct page *page, *cached_page;
+    ssize_t     written;
+    long        status = 0;
+    int     err;
+    unsigned    bytes;
 
     if ((ssize_t) count < 0)
         return -EINVAL;
@@ -1660,7 +1660,7 @@ generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
     }
 
     /*
-     *	LFS rule
+     *  LFS rule
      */
     if ( pos + count > MAX_NON_LFS && !(file->f_flags&O_LARGEFILE))
     {
@@ -1677,13 +1677,13 @@ generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
     }
 
     /*
-     *	Are we about to exceed the fs block limit ?
+     *  Are we about to exceed the fs block limit ?
      *
-     *	If we have written data it becomes a short write
-     *	If we have exceeded without writing data we send
-     *	a signal and give them an EFBIG.
+     *  If we have written data it becomes a short write
+     *  If we have exceeded without writing data we send
+     *  a signal and give them an EFBIG.
      *
-     *	Linus frestrict idea will clean these up nicely..
+     *  Linus frestrict idea will clean these up nicely..
      */
 
     if (1/*!S_ISBLK(inode->i_mode)*/)
@@ -1769,7 +1769,7 @@ generic_file_write(struct file *file,const char *buf,size_t count, loff_t *ppos)
             __get_user(dummy, buf+bytes-1);
         }
 
-        status = -ENOMEM;	/* we'll assign it later anyway */
+        status = -ENOMEM;   /* we'll assign it later anyway */
         page = alloc_page(0);
         if (!page)
             break;

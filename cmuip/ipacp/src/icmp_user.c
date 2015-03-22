@@ -1,23 +1,23 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "Internet Control Message Protocol User Interface"
 //SBTTL "Internet Control Message Protocol User Interface Overview"
@@ -25,34 +25,34 @@
 
 Module:
 
-	ICMP_User
+    ICMP_User
 
 Facility:
 
-	Internet Control Message Protocol (ICMP) User Interface
+    Internet Control Message Protocol (ICMP) User Interface
 
 Abstract:
 
-	ICMP provides the user with a access to ICMP service
-	via the Internet Protocol (IP). This module handles the
-	ICMP interface between the user and the IP layer.
+    ICMP provides the user with a access to ICMP service
+    via the Internet Protocol (IP). This module handles the
+    ICMP interface between the user and the IP layer.
 
 Author:
 
-	Bruce R. Miller, CMU Network Development, Nov. 1989
-	Copyright (c) 1989, Carnegie-Mellon University
+    Bruce R. Miller, CMU Network Development, Nov. 1989
+    Copyright (c) 1989, Carnegie-Mellon University
 
 Modification History:
 
-1.0c	18-Jul-1991	Henry W. Miller		USBR
-	Use LIB$GET_VM_PAGE and LIB$FREE_VM_PAGE rather then LIB$GET_VM
-	and LIB$FREE_VM, and check return status.
+1.0c    18-Jul-1991 Henry W. Miller     USBR
+    Use LIB$GET_VM_PAGE and LIB$FREE_VM_PAGE rather then LIB$GET_VM
+    and LIB$FREE_VM, and check return status.
 
-1.0b	09-Jul-1991	Henry W. Miller		USBR
-	Added STARLET for VMS 5.4.
+1.0b    09-Jul-1991 Henry W. Miller     USBR
+    Added STARLET for VMS 5.4.
 
-1.0a	13-Jan-1991	Henry W. Miller		USBR
-	Make ICMPTTL a configurable variable.
+1.0a    13-Jan-1991 Henry W. Miller     USBR
+    Make ICMPTTL a configurable variable.
 
 */
 
@@ -76,7 +76,7 @@ MODULE ICMP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 //not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";
 #include "netvms.h"
 #include <cmuip/central/include/netcommon.h>
-#include <cmuip/central/include/nettcpip.h>	// IP & ICMP definitions
+#include <cmuip/central/include/nettcpip.h> // IP & ICMP definitions
 #include "structure.h"
 #include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"
@@ -88,7 +88,7 @@ MODULE ICMP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 
 //*** Special literals from USER.BLI ***
 
-#define    UCB$L_CBID	ucb$l_devdepend	// Control Block associated with UCB
+#define    UCB$L_CBID   ucb$l_devdepend // Control Block associated with UCB
 
 // External data items
 
@@ -99,7 +99,7 @@ MODULE ICMP_User (IDENT="1.0c",LANGUAGE(BLISS32),
                       min_physical_bufsize,
                       max_physical_bufsize;
 
-extern  struct  ICMP_MIB_struct * icmp_mib ;	// ICMP Management Information Block
+extern  struct  ICMP_MIB_struct * icmp_mib ;    // ICMP Management Information Block
 
 // External routines
 
@@ -150,32 +150,32 @@ extern  void    QL_FAO();
 
 struct  ICMPCB_Structure
 {
-    unsigned int     ICMPCB$Foreign_Host	;	// ICMP foreign host number
-    unsigned int     ICMPCB$Local_Host	;	//     local host
+    unsigned int     ICMPCB$Foreign_Host    ;   // ICMP foreign host number
+    unsigned int     ICMPCB$Local_Host  ;   //     local host
     char    ICMPCB$Foreign_Hname[MAX_HNAME];
     short    ICMPCB$Foreign_Hnlen;
-    void *     ICMPCB$USR_Qhead	;	// User receive request queue
-    void *     ICMPCB$USR_Qtail	;
-    void *     ICMPCB$NR_Qhead	;	// Net receive queue
-    void *     ICMPCB$NR_Qtail	;
+    void *     ICMPCB$USR_Qhead ;   // User receive request queue
+    void *     ICMPCB$USR_Qtail ;
+    void *     ICMPCB$NR_Qhead  ;   // Net receive queue
+    void *     ICMPCB$NR_Qtail  ;
     short    ICMPCB$NR_Qcount;
     union
     {
         short    ICMPCB$Flags;
         struct
         {
-            unsigned 	ICMPCB$Wildcard	 : 1;	// ICMPCB opened with wild FH/FP/LH
-            //unsigned 	ICMPCB$Addr_Mode	 : 1;	// User wants IP addresses
-            unsigned 	ICMPCB$Aborting	 : 1;	// ICMPCB is closing
-            unsigned 	icmpcb$nmlook	 : 1;	// ICMPCB has an outstanding name lookup
-            unsigned 	ICMPCB$Internal	 : 1;	// ICMPCB is open by ACP not user
+            unsigned    ICMPCB$Wildcard  : 1;   // ICMPCB opened with wild FH/FP/LH
+            //unsigned  ICMPCB$Addr_Mode     : 1;   // User wants IP addresses
+            unsigned    ICMPCB$Aborting  : 1;   // ICMPCB is closing
+            unsigned    icmpcb$nmlook    : 1;   // ICMPCB has an outstanding name lookup
+            unsigned    ICMPCB$Internal  : 1;   // ICMPCB is open by ACP not user
         };
     };
-    void *     icmpcb$icmpcbid		;	// ICMPCB_Table index for this connection
-    void *     ICMPCB$UCB_ADRS	;	// Connection UCB address
-    void *     icmpcb$uargs	;	// Uarg block in pending open
-    int    ICMPCB$User_ID	;	// Process ID of owner
-    short    ICMPCB$PIOchan	;	// Process IO channel
+    void *     icmpcb$icmpcbid      ;   // ICMPCB_Table index for this connection
+    void *     ICMPCB$UCB_ADRS  ;   // Connection UCB address
+    void *     icmpcb$uargs ;   // Uarg block in pending open
+    int    ICMPCB$User_ID   ;   // Process ID of owner
+    short    ICMPCB$PIOchan ;   // Process IO channel
 };
 
 
@@ -196,11 +196,11 @@ ICMPCB_Structure = BLOCK->ICMPCB_Size FIELD(ICMPCB_Fields) %;
 //SBTTL "ICMP data storage"
 
 signed long
-icmpttl	 = 32;	// TTL for ICMP
+icmpttl  = 32;  // TTL for ICMP
 
 static signed long
-ICMPIPID  = 1,	// Current IP packet ID
-ICMPCB_Count  = 0,	// Count of active ICMPCBs
+ICMPIPID  = 1,  // Current IP packet ID
+ICMPCB_Count  = 0,  // Count of active ICMPCBs
 icmpcb_table[MAX_ICMPCB+1];// Table of ICMPCBs
 
 
@@ -219,12 +219,12 @@ struct icmp_header * Seg;
     struct icmp_header segcopy_ , * segcopy = &segcopy_;
     struct icmp_header * seghdr;
 
-    seghdr = Seg;		// Point at segment header
+    seghdr = Seg;       // Point at segment header
     segdata = (long)Seg + ICMP_HEADER_SIZE;
-    if (SwapFlag)		// Need to byteswap header?
+    if (SwapFlag)       // Need to byteswap header?
     {
         CH$MOVE(ICMP_HEADER_SIZE,CH$PTR(Seg,0),CH$PTR(segcopy,0)); // Make a copy
-        seghdr = segcopy;	// Point at this version...
+        seghdr = segcopy;   // Point at this version...
         swapbytesicmphdr(ICMP_HEADER_SIZE/2,seghdr); // Swap header bytes
     };
 
@@ -327,7 +327,7 @@ X:
             goto leave_x;
         };
 
-        Buf2 = mm$seg_get(bufsize);	// Get a buffer
+        Buf2 = mm$seg_get(bufsize); // Get a buffer
         Seg = Buf2 + ((long)Seg - Buf);
 //!!HACK!!// There's no need to copy the whole buffer, only usize worth...
         MOVBYT(bufsize,Buf,Buf2);
@@ -381,9 +381,9 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 {
     signed long
     QBR;
-    extern	mm$qblk_get();
+    extern  mm$qblk_get();
 
-#define	ICMPCB$NR_Qmax 5	// Max input packets permitted on input queue
+#define ICMPCB$NR_Qmax 5    // Max input packets permitted on input queue
 
 // See if the input queue is full for this ICMPCB
 
@@ -391,17 +391,17 @@ struct queue_blk_structure(qb_nr_fields) * QB;
     {
         if ($$LOGF(LOG$ICMP))
             QL$FAO("!%T ICMP at !XL dropped - ICMPCB NR queue full!/",0,Uptr);
-        return TRUE;		// Drop the packet - no room
+        return TRUE;        // Drop the packet - no room
     };
 
 // Allocate a queue block and insert onto user receive queue
 
     if (QB == 0)
         QB = mm$qblk_get();
-    QB->nr$buf_size = bufsize;	// Total size of network buffer
-    QB->nr$buf = Buf;		// Pointer to network buffer
-    QB->nr$ucount = usize;	// Length of the data
-    QB->nr$uptr = Uptr;	// Pointer to the data
+    QB->nr$buf_size = bufsize;  // Total size of network buffer
+    QB->nr$buf = Buf;       // Pointer to network buffer
+    QB->nr$ucount = usize;  // Length of the data
+    QB->nr$uptr = Uptr; // Pointer to the data
 
 // If there is a user read outstanding, deliver data, else queue for later
 
@@ -409,7 +409,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
         Deliver_ICMP_Data(ICMPCB,QB,QBR);
     else
         INSQUE(QB,ICMPCB->ICMPCB$NR_Qtail);
-    return FALSE;		// Don't deallocate this segment...
+    return FALSE;       // Don't deallocate this segment...
 }
 
 //SBTTL "Deliver_ICMP_Data - Deliver ICMP data to user"
@@ -480,25 +480,25 @@ ICMPCB_OK(long Conn_ID,long *RCaddr,struct user_default_args * uargs)
 {
     struct ICMPCB_Structure * ICMPCB;
 
-#define	ICMPCBERR(EC) { *RCaddr = EC; return 0;}
+#define ICMPCBERR(EC) { *RCaddr = EC; return 0;}
 
 // Range check the connection id. This should never fail, since the user should
 // not be fondling connection IDs.
 
     if ((Conn_ID <= 0) || (Conn_ID > MAX_ICMPCB))
-        ICMPCBERR(NET$_CDE);	// Nonexistant connection ID
+        ICMPCBERR(NET$_CDE);    // Nonexistant connection ID
     ICMPCB = icmpcb_table[Conn_ID];
 
 // Make sure the table had something reasonable for this connection ID
 
     if (ICMPCB <= 0)
-        ICMPCBERR(NET$_CDE);	// ICMPCB has been deleted (possible)
+        ICMPCBERR(NET$_CDE);    // ICMPCB has been deleted (possible)
 
 // Check consistancy of ICMPCB back-pointer into table
 
     if ((ICMPCB->icmpcb$icmpcbid != Conn_ID) ||
             (ICMPCB->ICMPCB$UCB_ADRS != uargs->ud$ucb_adrs))
-        ICMPCBERR(NET$_CDE);	// Confusion (can this happen?)
+        ICMPCBERR(NET$_CDE);    // Confusion (can this happen?)
 
 // Everything is good - return the ICMPCB address
 
@@ -510,8 +510,8 @@ ICMPCB_OK(long Conn_ID,long *RCaddr,struct user_default_args * uargs)
 ICMPCB_Get(IDX)
 long * IDX;
 {
-    extern	LIB$GET_VM();
-    extern	LIB$GET_VM_PAGE();
+    extern  LIB$GET_VM();
+    extern  LIB$GET_VM_PAGE();
     struct ICMPCB_Structure * ICMPCB;
     signed long I,
            ICMPCBIDX,
@@ -520,7 +520,7 @@ long * IDX;
 
 // Find a free slot in the ICMPCB table
 
-X:   			// ** Block X **
+X:              // ** Block X **
     {
         ICMPCBIDX = 0;
         for (I=1; I<=MAX_ICMPCB; I++)
@@ -529,8 +529,8 @@ X:   			// ** Block X **
                 ICMPCBIDX = I;
                 goto leave_x;
             }
-        return 0;			// Failed to allocate a ICMPCB
-    }			// ** Block X **
+        return 0;           // Failed to allocate a ICMPCB
+    }           // ** Block X **
 leave_x:
 
 // Allocate some space for the ICMPCB
@@ -566,8 +566,8 @@ leave_x:
 
 void ICMPCB_Free(long ICMPCBIX,struct ICMPCB_Structure * ICMPCB)
 {
-    extern	LIB$FREE_VM();
-    extern	LIB$FREE_VM_PAGE();
+    extern  LIB$FREE_VM();
+    extern  LIB$FREE_VM_PAGE();
 
     signed long
     RC,
@@ -597,7 +597,7 @@ void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,long RC)
 // Make sure we aren't doing this more than once
 //
 //   if (ICMPCB->ICMPCB$Aborting)
-//	return;
+//  return;
 
 // Say that this connection is aborting (prevent future requests)
 
@@ -749,7 +749,7 @@ void icmp$open(struct user_open_args * uargs)
 
 // Check for supplied IP address instead of name
 
-X:   			// *** Block X ***
+X:              // *** Block X ***
     {
         if (uargs->op$addr_flag)
             IPADDR = uargs->op$foreign_address;
@@ -761,7 +761,7 @@ X:   			// *** Block X ***
         ICMPCB->icmpcb$nmlook = TRUE;
         NML$GETNAME(IPADDR,ICMP_ADLOOK_DONE,ICMPCB);
         return;
-    }			// *** Block X ***
+    }           // *** Block X ***
 leave_x:
 
 // "standard" case, host name is supplied - start name lookup for it
@@ -788,12 +788,12 @@ struct ICMPCB_Structure * ICMPCB;
     struct user_open_args * uargs;
     netio_status_block IOSB_, * IOSB = &IOSB_;
 
-#define	UOP_ERROR(EC) \
-	    { \
-	    USER$Err(uargs,EC); \
-	    ICMPCB_Free(ICMPCB->icmpcb$icmpcbid,ICMPCB); \
-	    return; \
-	    }
+#define UOP_ERROR(EC) \
+        { \
+        USER$Err(uargs,EC); \
+        ICMPCB_Free(ICMPCB->icmpcb$icmpcbid,ICMPCB); \
+        return; \
+        }
 
 // Clear name lookup flag and get uargs
 
@@ -818,9 +818,9 @@ struct ICMPCB_Structure * ICMPCB;
 
 //!!HACK!!// Should we do this or not??
 //    RC = USER$CHECK_ACCESS(ICMPCB->ICMPCB$USER_ID,ICMPCB->ICMPCB$Local_Host,
-//		      0,ICMPCB->ICMPCB$Foreign_Host,0);
+//            0,ICMPCB->ICMPCB$Foreign_Host,0);
 //    if (BLISSIFNOT(RC))
-//	UOP_ERROR(RC);
+//  UOP_ERROR(RC);
 
 // Set the foreign host name in the ICMPCB
 
@@ -960,7 +960,7 @@ void icmp$send(struct user_send_args * uargs)
 
     if ((ICMPCB = ICMPCB_OK(uargs->se$local_conn_id,&RC,uargs)) == 0)
     {
-        USER$Err(uargs,RC);	// No such connection
+        USER$Err(uargs,RC); // No such connection
         icmp_mib->MIB$icmpOutErrors =
             icmp_mib->MIB$icmpOutErrors + 1;
         return;
@@ -1021,7 +1021,7 @@ void icmp$send(struct user_send_args * uargs)
         bufsize = min_physical_bufsize;
     else if (bufsize <= max_physical_bufsize)
         bufsize = max_physical_bufsize;
-    Buf = mm$seg_get(bufsize);	// Get a buffer
+    Buf = mm$seg_get(bufsize);  // Get a buffer
     Seg = Buf + DEVICE_HEADER + IP_HDR_BYTE_SIZE; // Point at ICMP segment
     Segsize = usize+ICMP_HEADER_SIZE; // Length of segment + ICMP header
 
@@ -1049,7 +1049,7 @@ void icmp$send(struct user_send_args * uargs)
 
 // Send the segment to IP (it will deallocate it)
 
-    ICMPIPID = ICMPIPID+1;	// Increment packet ID
+    ICMPIPID = ICMPIPID+1;  // Increment packet ID
     RC = SS$_NORMAL;
     if ((ip$send(LocalAddr,ForeignAddr,ICMPTOS,icmpttl,
                  Seg,Segsize,ICMPIPID,ICMPDF,TRUE,ICMP_Protocol,
@@ -1137,7 +1137,7 @@ void icmp$receive(struct user_recv_args * uargs)
 
     if ((ICMPCB = ICMPCB_OK(uargs->re$local_conn_id,&RC,uargs)) == 0)
     {
-        USER$Err(uargs,RC);	// No such connection
+        USER$Err(uargs,RC); // No such connection
         return;
     };
     XLOG$FAO(LOG$USER,"!%T ICMP$RECEIVE: Conn=!XL, ICMPCB=!XL, Size=!SL!/",
@@ -1162,12 +1162,12 @@ void icmp$receive(struct user_recv_args * uargs)
 
 // Make a request block for the receive
 
-    URQ = mm$qblk_get();		// Get a queue block
+    URQ = mm$qblk_get();        // Get a queue block
     URQ->ur$size = uargs->re$buf_size; // # of bytes this rq can take
     URQ->ur$data = uargs->re$data_start; // Address of system buffer
     URQ->ur$irp_adrs = uargs->re$irp_adrs; // IO request packet address
     URQ->ur$ucb_adrs = uargs->re$ucb_adrs; // Unit Control Block address
-    URQ->ur$uargs = uargs;	// User argument block address
+    URQ->ur$uargs = uargs;  // User argument block address
 
 // If anything is available on the queue, deliver it now, else queue for later
 
@@ -1188,7 +1188,7 @@ void icmp$receive(struct user_recv_args * uargs)
 
 void icmp$info(struct user_info_args * uargs)
 {
-    extern	void user$net_connection_info();
+    extern  void user$net_connection_info();
     struct ICMPCB_Structure * ICMPCB;
     signed long
     RC;
@@ -1197,7 +1197,7 @@ void icmp$info(struct user_info_args * uargs)
 
     if ((ICMPCB = ICMPCB_OK(uargs->if$local_conn_id,&RC,uargs)) == 0)
         {
-            USER$Err(uargs,RC);	// Bad connection ID
+            USER$Err(uargs,RC); // Bad connection ID
             return;
         };
 

@@ -1,5 +1,5 @@
-#ifndef atrdef_h
-#define atrdef_h
+#ifndef ATRDEF_H
+#define ATRDEF_H
 
 #define ATR$C_UCHAR 3
 #define ATR$C_RECATTR 4

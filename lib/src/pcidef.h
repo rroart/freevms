@@ -1,5 +1,5 @@
-#ifndef pcidef_h
-#define pcidef_h
+#ifndef PCIDEF_H
+#define PCIDEF_H
 
 #define PCI$K_VENDOR_ID 0
 #define PCI$K_DEVICE_ID 2

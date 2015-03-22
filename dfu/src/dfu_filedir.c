@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified DFU source file, 2004.
 
 /*
@@ -613,8 +613,8 @@ end_del:
 int remove_file(unsigned short id[3], unsigned short did[3],
                 unsigned short dchan)
 /*
-	Remove a file entry for a non-existent file
-	Assumes channel is open
+    Remove a file entry for a non-existent file
+    Assumes channel is open
 */
 
 {
@@ -921,7 +921,7 @@ int parse_tree(short int dchan, char *r_str, Boolean nolog)
             sprintf(outbuf,"%%DFU-W-NOSUBDIR, no subdirectories found in this tree");
             put_disp();
 #if 1
-            sor$end_sort();
+            sor$end_sort(0);
             return(1);
 #else
             return(1);
@@ -939,10 +939,10 @@ int parse_tree(short int dchan, char *r_str, Boolean nolog)
     }
     /* Now sort the results */
 #if 1
-    status = sor$sort_merge();
+    status = sor$sort_merge(0);
     if ((status & 1) !=1)
     {
-        sor$end_sort();
+        sor$end_sort(0);
         return(status);
     }
     status = sor$return_rec(&sort_descr);
@@ -964,7 +964,7 @@ int parse_tree(short int dchan, char *r_str, Boolean nolog)
         else status = SS$_ENDOFFILE; /* Stop at CTRL/C */
     }
 #if 1
-    sor$end_sort();
+    sor$end_sort(0);
 #endif
     return(1);
 }
@@ -1360,7 +1360,7 @@ int movefile(char *defr_file, int flag)
    First $PARSE and $SEARCH the input file to get the full
    file spec and the File id for the move file function.
    We need to parse and search because wildcards are allowed.
-	V2.2 : if LBN specified then call move_to_lbn
+    V2.2 : if LBN specified then call move_to_lbn
 */
 
 {
@@ -1482,11 +1482,11 @@ int directory_command(mask)
 /*
    Performs the directory command
    There are 3 major functions :
-	- compress /dump a directory
+    - compress /dump a directory
         - create a directory with a specific preallocation
-	- search all directories of the disk for either files with many
-	    versions , files with aliases or empty directories,
-	    or even corrupted directories (/check).
+    - search all directories of the disk for either files with many
+        versions , files with aliases or empty directories,
+        or even corrupted directories (/check).
    Although called by the same command (DIRECTORY) the actual command
    processing is quite different.
 */
@@ -1572,7 +1572,7 @@ int directory_command(mask)
     {
         fname[file_descr.dsc$w_length] = '\0';
     }
-    fp = fopen(fname,"w");	/* Open output file */
+    fp = fopen(fname,"w");  /* Open output file */
 
     if (matcompress)
         /* Check the privileges */

@@ -1,5 +1,5 @@
-#ifndef mscpdef_h
-#define mscpdef_h
+#ifndef MSCPDEF_H
+#define MSCPDEF_H
 
 #define MSCP$M_EU_NO 0xFF
 #define MSCP$M_EU_SUBU 0x7

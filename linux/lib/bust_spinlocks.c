@@ -35,7 +35,7 @@ void bust_spinlocks(int yes)
          * without oops_in_progress set so that printk() will give klogd
          * and the blanked console a poke.  Hold onto your hats...
          */
-        console_loglevel = 15;		/* NMI oopser may have shut the console up */
+        console_loglevel = 15;      /* NMI oopser may have shut the console up */
         printk(" ");
         console_loglevel = loglevel_save;
     }

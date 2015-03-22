@@ -16,11 +16,11 @@
  *  Changelog:
  *   01-31-2000 DMW     Created
  *   09-18-2000 SJH     Moved structure out of the Disk-On-Chip drivers
- *			so it can be used by other NAND flash device
- *			drivers. I also changed the copyright since none
- *			of the original contents of this file are specific
- *			to DoC devices. David can whack me with a baseball
- *			bat later if I did something naughty.
+ *          so it can be used by other NAND flash device
+ *          drivers. I also changed the copyright since none
+ *          of the original contents of this file are specific
+ *          to DoC devices. David can whack me with a baseball
+ *          bat later if I did something naughty.
  *   10-11-2000 SJH     Added private NAND flash structure for driver
  *   2000-10-13 BE      Moved out of 'nand.h' - avoids duplication.
  */

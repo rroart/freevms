@@ -1,32 +1,32 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 
-#define FIDSIZE		(16+6)
+#define FIDSIZE     (16+6)
 
-#define MAXDATA		8192
-#define MAXPATHLEN	1024
-#define MAXNAMLEN	 255
-#define COOKIESIZE	   4
-#define FHSIZE		  32
+#define MAXDATA     8192
+#define MAXPATHLEN  1024
+#define MAXNAMLEN    255
+#define COOKIESIZE     4
+#define FHSIZE        32
 
 
 
@@ -42,30 +42,30 @@
 
 typedef enum
 {
-    NFS_OK 			=  0,
-    NFSERR_PERM		=  1,
-    NFSERR_NOENT		=  2,
-    NFSERR_IO		=  5,
-    NFSERR_NXIO		=  6,
-    NFSERR_ACCES		= 13,
-    NFSERR_EXIST		= 17,
-    NFSERR_NODEV		= 19,
-    NFSERR_NOTDIR		= 20,
-    NFSERR_ISDIR		= 21,
-    NFSERR_FBIG		= 27,
-    NFSERR_NOSPC		= 28,
-    NFSERR_ROFS		= 30,
-    NFSERR_NAMETOOLONG	= 63,
-    NFSERR_NOTEMPTY		= 66,
-    NFSERR_DQUOT		= 69,
-    NFSERR_STALE		= 70,
-    NFSERR_WFLUSH		= 99
+    NFS_OK          =  0,
+    NFSERR_PERM     =  1,
+    NFSERR_NOENT        =  2,
+    NFSERR_IO       =  5,
+    NFSERR_NXIO     =  6,
+    NFSERR_ACCES        = 13,
+    NFSERR_EXIST        = 17,
+    NFSERR_NODEV        = 19,
+    NFSERR_NOTDIR       = 20,
+    NFSERR_ISDIR        = 21,
+    NFSERR_FBIG     = 27,
+    NFSERR_NOSPC        = 28,
+    NFSERR_ROFS     = 30,
+    NFSERR_NAMETOOLONG  = 63,
+    NFSERR_NOTEMPTY     = 66,
+    NFSERR_DQUOT        = 69,
+    NFSERR_STALE        = 70,
+    NFSERR_WFLUSH       = 99
 } nfs_stat;
 
 
 
 /*
-	2.3.2.  ftype
+    2.3.2.  ftype
 
       The enumeration "ftype" gives the type of a file.  The type NFNON
       indicates a non-file, NFREG is a regular file, NFDIR is a
@@ -87,7 +87,7 @@ typedef enum
 
 
 /*
-	2.3.3.  fhandle
+    2.3.3.  fhandle
 
       The "fhandle" is the file handle passed between the server and the
       client.  All file operations are done using file handles to refer
@@ -118,7 +118,7 @@ typedef struct
 
 
 /*
-	2.3.5.  fattr
+    2.3.5.  fattr
 
       The "fattr" structure contains the attributes of a file; "type" is
       the type of the file; "nlink" is the number of hard links to the
@@ -159,7 +159,7 @@ typedef struct
 
 
 /*
-	2.3.6.	sattr
+    2.3.6.  sattr
 
       The "sattr" structure contains the file attributes which can be
       set from the client.  The fields are the same as for "fattr"
@@ -180,7 +180,7 @@ typedef struct
 
 
 /*
-	2.3.7.  filename
+    2.3.7.  filename
 
       The type "filename" is used for passing file names or pathname
       components.
@@ -195,11 +195,11 @@ typedef struct
 
 
 /*
-	2.3.8.  path
+    2.3.8.  path
 
-	The type "path" is a pathname.  The server considers it as a
-	string with no internal structure, but to the client it is the
-	name of a node in a filesystem tree.
+    The type "path" is a pathname.  The server considers it as a
+    string with no internal structure, but to the client it is the
+    name of a node in a filesystem tree.
 */
 
 typedef struct
@@ -211,7 +211,7 @@ typedef struct
 
 
 /*
-	2.3.9.  attrstat
+    2.3.9.  attrstat
 
       The "attrstat" structure is a common procedure result.  It
       contains a "status" and, if the call succeeded, it also contains
@@ -227,7 +227,7 @@ typedef struct
 
 
 /*
-	2.3.10.  diropargs
+    2.3.10.  diropargs
 
       The "diropargs" structure is used in directory operations.  The
       "fhandle" "dir" is the directory in which to find the file "name".
@@ -243,7 +243,7 @@ typedef struct
 
 
 /*
-	2.3.11.  diropres
+    2.3.11.  diropres
 
       The results of a directory operation are returned in a "diropres"
       structure.  If the call succeeded, a new file handle "file" and

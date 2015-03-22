@@ -5,16 +5,16 @@
 
 #ifndef __ASSEMBLY__
 /*
- *	linux/include/asm/hw_irq.h
+ *  linux/include/asm/hw_irq.h
  *
- *	(C) 1992, 1993 Linus Torvalds, (C) 1997 Ingo Molnar
+ *  (C) 1992, 1993 Linus Torvalds, (C) 1997 Ingo Molnar
  *
- *	moved some of the old arch/i386/kernel/irq.h to here. VY
+ *  moved some of the old arch/i386/kernel/irq.h to here. VY
  *
- *	IRQ/IPI changes taken from work by Thomas Radke
- *	<tomsoft@informatik.tu-chemnitz.de>
+ *  IRQ/IPI changes taken from work by Thomas Radke
+ *  <tomsoft@informatik.tu-chemnitz.de>
  *
- *	hacked by Andi Kleen for x86-64.
+ *  hacked by Andi Kleen for x86-64.
  *
  *  $Id$
  */
@@ -33,9 +33,9 @@
  * IDT vectors usable for external interrupt sources start
  * at 0x20:
  */
-#define FIRST_EXTERNAL_VECTOR	0x20
+#define FIRST_EXTERNAL_VECTOR   0x20
 
-#define IA32_SYSCALL_VECTOR	0x80
+#define IA32_SYSCALL_VECTOR 0x80
 #define IA32_VMSSYSCALL_VECTOR       0x81
 #define IA32_VMSSYSCALL_VECTOR1       0x82
 #define IA32_VMSSYSCALL_VECTOR2       0x83
@@ -178,32 +178,32 @@ do { __asm__ __volatile__ ( \
  *
  *  Vectors 0xf0-0xf9 are free (reserved for future Linux use).
  */
-#define SPURIOUS_APIC_VECTOR	0xff
-#define ERROR_APIC_VECTOR	0xfe
-#define INVALIDATE_TLB_VECTOR	0xfd
-#define RESCHEDULE_VECTOR	0xfc
+#define SPURIOUS_APIC_VECTOR    0xff
+#define ERROR_APIC_VECTOR   0xfe
+#define INVALIDATE_TLB_VECTOR   0xfd
+#define RESCHEDULE_VECTOR   0xfc
 /* 0xfa free */
-#define CALL_FUNCTION_VECTOR	0xfb
-#define IPINT_VECTOR		0xfa
+#define CALL_FUNCTION_VECTOR    0xfb
+#define IPINT_VECTOR        0xfa
 
 /*
  * Local APIC timer IRQ vector is on a different priority level,
  * to work around the 'lost local interrupt if more than 2 IRQ
  * sources per level' errata.
  */
-#define LOCAL_TIMER_VECTOR	0xef
+#define LOCAL_TIMER_VECTOR  0xef
 
 /*
  * First APIC vector available to drivers: (vectors 0x30-0xee)
  * we start at 0x31 to spread out vectors evenly between priority
  * levels. (0x80 is the syscall vector)
  */
-#define FIRST_DEVICE_VECTOR	0x31
-#define FIRST_SYSTEM_VECTOR	0xef
+#define FIRST_DEVICE_VECTOR 0x31
+#define FIRST_SYSTEM_VECTOR 0xef
 
 #ifndef __ASSEMBLY__
 extern int irq_vector[NR_IRQS];
-#define IO_APIC_VECTOR(irq)	irq_vector[irq]
+#define IO_APIC_VECTOR(irq) irq_vector[irq]
 
 /*
  * Various low-level irq details needed by irq.c, process.c,
@@ -254,8 +254,8 @@ asmlinkage void IRQ_NAME(nr); \
 __asm__( \
 "\n"__ALIGN_STR "\n" \
 SYMBOL_NAME_STR(IRQ) #nr "_interrupt:\n\t" \
-	"push $" #nr "-256 ; " \
-	"jmp common_interrupt");
+    "push $" #nr "-256 ; " \
+    "jmp common_interrupt");
 
 extern unsigned long prof_cpu_mask;
 extern unsigned int * prof_buffer;

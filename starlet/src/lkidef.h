@@ -1,5 +1,5 @@
-#ifndef lkidef_h
-#define lkidef_h
+#ifndef LKIDEF_H
+#define LKIDEF_H
 
 #define LKI$K_LENGTH 24
 #define LKI$C_LENGTH 24
@@ -59,8 +59,8 @@ struct _namspace
         };
         struct
         {
-            unsigned lki$$_fill	: 31;
-            unsigned lki$v_sysnam	: 1;
+            unsigned lki$$_fill : 31;
+            unsigned lki$v_sysnam   : 1;
         };
     };
 };
@@ -72,9 +72,9 @@ struct _statef
     char lki$b_state_queue;
 };
 
-#define		LKIUSR$K_LENGTH		20
-#define		LKIUSR$C_LENGTH		20
-#define		LKIUSR$K_BLOCKER_START	20
+#define     LKIUSR$K_LENGTH     20
+#define     LKIUSR$C_LENGTH     20
+#define     LKIUSR$K_BLOCKER_START  20
 
 struct _lkiusrdef
 {
@@ -93,57 +93,57 @@ struct _rngdef
     unsigned long long lki$_rng_q_grlength;
 };
 
-#define		LKI$C_GRANTED		1
-#define		LKI$C_CONVERT		0
-#define		LKI$C_WAITING		-1
-#define		LKI$C_RETRY		-2
-#define		LKI$C_SCSWAIT		-3
-#define		LKI$C_RSPNOTQED		-4
-#define		LKI$C_RSPQUEUED		-5
-#define		LKI$C_RSPGRANTD		-6
-#define		LKI$C_RSPDOLOCL		-7
-#define		LKI$C_RSPRESEND		-8
+#define     LKI$C_GRANTED       1
+#define     LKI$C_CONVERT       0
+#define     LKI$C_WAITING       -1
+#define     LKI$C_RETRY     -2
+#define     LKI$C_SCSWAIT       -3
+#define     LKI$C_RSPNOTQED     -4
+#define     LKI$C_RSPQUEUED     -5
+#define     LKI$C_RSPGRANTD     -6
+#define     LKI$C_RSPDOLOCL     -7
+#define     LKI$C_RSPRESEND     -8
 
-#define		LKI$C_LKBTYPE		1
-#define		LKI$C_RSBTYPE		2
-#define		LKI$C_LISTEND		0
+#define     LKI$C_LKBTYPE       1
+#define     LKI$C_RSBTYPE       2
+#define     LKI$C_LISTEND       0
 
-#define		LKI$_PID		256
-#define		LKI$_STATE		257
-#define		LKI$_PARENT		258
-#define		LKI$_LCKREFCNT		259
-#define		LKI$_LOCKID		260
-#define		LKI$_REMLKID		261
-#define		LKI$_MSTLKID		262
-#define		LKI$_LKID		263
-#define		LKI$_CSID		264
-#define		LKI$_BRL		265
+#define     LKI$_PID        256
+#define     LKI$_STATE      257
+#define     LKI$_PARENT     258
+#define     LKI$_LCKREFCNT      259
+#define     LKI$_LOCKID     260
+#define     LKI$_REMLKID        261
+#define     LKI$_MSTLKID        262
+#define     LKI$_LKID       263
+#define     LKI$_CSID       264
+#define     LKI$_BRL        265
 
-#define		LKI$_RANGE		266
-#define		LKI$_LASTLKB		267
+#define     LKI$_RANGE      266
+#define     LKI$_LASTLKB        267
 
-#define		LKI$_NAMSPACE		512
-#define		LKI$_RESNAM		513
-#define		LKI$_RSBREFCNT		514
-#define		LKI$_VALBLK		515
-#define		LKI$_SYSTEM		516
-#define		LKI$_LCKCOUNT		517
-#define		LKI$_BLOCKEDBY		518
-#define		LKI$_BLOCKING		519
-#define		LKI$_LOCKS		520
-#define		LKI$_CVTCOUNT		521
-#define		LKI$_WAITCOUNT		522
-#define		LKI$_GRANTCOUNT		523
-#define		LKI$_MSTCSID		524
-#define		LKI$_VALBLKST		525
-#define		LKI$_BLOCKEDBY_BR	526
-#define		LKI$_BLOCKING_BR	527
-#define		LKI$_LOCKS_BR		528
-#define		LKI$_BLOCKER_BR		529
+#define     LKI$_NAMSPACE       512
+#define     LKI$_RESNAM     513
+#define     LKI$_RSBREFCNT      514
+#define     LKI$_VALBLK     515
+#define     LKI$_SYSTEM     516
+#define     LKI$_LCKCOUNT       517
+#define     LKI$_BLOCKEDBY      518
+#define     LKI$_BLOCKING       519
+#define     LKI$_LOCKS      520
+#define     LKI$_CVTCOUNT       521
+#define     LKI$_WAITCOUNT      522
+#define     LKI$_GRANTCOUNT     523
+#define     LKI$_MSTCSID        524
+#define     LKI$_VALBLKST       525
+#define     LKI$_BLOCKEDBY_BR   526
+#define     LKI$_BLOCKING_BR    527
+#define     LKI$_LOCKS_BR       528
+#define     LKI$_BLOCKER_BR     529
 
-#define		LKI$_LASTRSB		530
-#define		LKISND$K_HDRLEN		16
-#define		LKISND$C_HDRLEN		16
+#define     LKI$_LASTRSB        530
+#define     LKISND$K_HDRLEN     16
+#define     LKISND$C_HDRLEN     16
 
 struct _lkisnddef
 {

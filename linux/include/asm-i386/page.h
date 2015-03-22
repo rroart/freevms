@@ -8,9 +8,9 @@
 #define _I386_PAGE_H
 
 /* PAGE_SHIFT determines the page size */
-#define PAGE_SHIFT	12
-#define PAGE_SIZE	(1UL << PAGE_SHIFT)
-#define PAGE_MASK	(~(PAGE_SIZE-1))
+#define PAGE_SHIFT  12
+#define PAGE_SIZE   (1UL << PAGE_SHIFT)
+#define PAGE_MASK   (~(PAGE_SIZE-1))
 
 #ifdef __KERNEL__
 #ifndef __ASSEMBLY__
@@ -21,23 +21,23 @@
 
 #include <asm/mmx.h>
 
-#define clear_page(page)	mmx_clear_page((void *)(page))
-#define copy_page(to,from)	mmx_copy_page(to,from)
+#define clear_page(page)    mmx_clear_page((void *)(page))
+#define copy_page(to,from)  mmx_copy_page(to,from)
 
 #else
 
 /*
- *	On older X86 processors its not a win to use MMX here it seems.
- *	Maybe the K6-III ?
+ *  On older X86 processors its not a win to use MMX here it seems.
+ *  Maybe the K6-III ?
  */
 
-#define clear_page(page)	memset((void *)(page), 0, PAGE_SIZE)
-#define copy_page(to,from)	memcpy((void *)(to), (void *)(from), PAGE_SIZE)
+#define clear_page(page)    memset((void *)(page), 0, PAGE_SIZE)
+#define copy_page(to,from)  memcpy((void *)(to), (void *)(from), PAGE_SIZE)
 
 #endif
 
-#define clear_user_page(page, vaddr)	clear_page(page)
-#define copy_user_page(to, from, vaddr)	copy_page(to, from)
+#define clear_user_page(page, vaddr)    clear_page(page)
+#define copy_user_page(to, from, vaddr) copy_page(to, from)
 
 /*
  * These are used to make use of C type-checking..
@@ -55,7 +55,7 @@ typedef struct
 {
     unsigned long long pgd;
 } pgd_t;
-#define pte_val(x)	((x).pte_low | ((unsigned long long)(x).pte_high << 32))
+#define pte_val(x)  ((x).pte_low | ((unsigned long long)(x).pte_high << 32))
 #else
 typedef struct
 {
@@ -65,28 +65,28 @@ typedef struct
 {
     unsigned long pgd;
 } pgd_t;
-#define pte_val(x)	((x).pte_low)
+#define pte_val(x)  ((x).pte_low)
 #endif
-#define PTE_MASK	PAGE_MASK
+#define PTE_MASK    PAGE_MASK
 
 typedef struct
 {
     unsigned long pgprot;
 } pgprot_t;
 
-#define pmd_val(x)	((x).pmd)
-#define pgd_val(x)	((x).pgd)
-#define pgprot_val(x)	((x).pgprot)
+#define pmd_val(x)  ((x).pmd)
+#define pgd_val(x)  ((x).pgd)
+#define pgprot_val(x)   ((x).pgprot)
 
 #define __pte(x) ((pte_t) { (x) } )
 #define __pmd(x) ((pmd_t) { (x) } )
 #define __pgd(x) ((pgd_t) { (x) } )
-#define __pgprot(x)	((pgprot_t) { (x) } )
+#define __pgprot(x) ((pgprot_t) { (x) } )
 
 #endif /* !__ASSEMBLY__ */
 
 /* to align the pointer to the (next) page boundary */
-#define PAGE_ALIGN(addr)	(((addr)+PAGE_SIZE-1)&PAGE_MASK)
+#define PAGE_ALIGN(addr)    (((addr)+PAGE_SIZE-1)&PAGE_MASK)
 
 /*
  * This handles the memory map.. We could make this a config
@@ -101,13 +101,13 @@ typedef struct
  * and CONFIG_HIGHMEM64G options in the kernel configuration.
  */
 
-#define __PAGE_OFFSET		(0x80000000)
+#define __PAGE_OFFSET       (0x80000000)
 
 /*
  * This much address space is reserved for vmalloc() and iomap()
  * as well as fixmap mappings.
  */
-#define __VMALLOC_RESERVE	(128 << 20)
+#define __VMALLOC_RESERVE   (128 << 20)
 
 #ifndef __ASSEMBLY__
 
@@ -118,16 +118,16 @@ typedef struct
 
 #ifdef CONFIG_DEBUG_BUGVERBOSE
 extern void do_BUG(const char *file, int line);
-#define BUG() do {					\
-	do_BUG(__FILE__, __LINE__);			\
-	__asm__ __volatile__("ud2");			\
+#define BUG() do {                  \
+    do_BUG(__FILE__, __LINE__);         \
+    __asm__ __volatile__("ud2");            \
 } while (0)
 #else
 #define BUG() __asm__ __volatile__(".byte 0x0f,0x0b")
 #endif
 
 #define PAGE_BUG(page) do { \
-	BUG(); \
+    BUG(); \
 } while (0)
 
 /* Pure 2^n version of get_order */
@@ -148,16 +148,16 @@ static __inline__ int get_order(unsigned long size)
 
 #endif /* __ASSEMBLY__ */
 
-#define PAGE_OFFSET		((unsigned long)__PAGE_OFFSET)
-#define VMALLOC_RESERVE		((unsigned long)__VMALLOC_RESERVE)
-#define __MAXMEM		(-__PAGE_OFFSET-__VMALLOC_RESERVE)
-#define MAXMEM			((unsigned long)(-PAGE_OFFSET-VMALLOC_RESERVE))
-#define __pa(x)			((unsigned long)(x)-PAGE_OFFSET)
-#define __va(x)			((void *)((unsigned long)(x)+PAGE_OFFSET))
-#define virt_to_page(kaddr)	(mem_map + (__pa(kaddr) >> PAGE_SHIFT))
-#define pfn_to_page(pfn)	(mem_map + (pfn))
+#define PAGE_OFFSET     ((unsigned long)__PAGE_OFFSET)
+#define VMALLOC_RESERVE     ((unsigned long)__VMALLOC_RESERVE)
+#define __MAXMEM        (-__PAGE_OFFSET-__VMALLOC_RESERVE)
+#define MAXMEM          ((unsigned long)(-PAGE_OFFSET-VMALLOC_RESERVE))
+#define __pa(x)         ((unsigned long)(x)-PAGE_OFFSET)
+#define __va(x)         ((void *)((unsigned long)(x)+PAGE_OFFSET))
+#define virt_to_page(kaddr) (mem_map + (__pa(kaddr) >> PAGE_SHIFT))
+#define pfn_to_page(pfn)    (mem_map + (pfn))
 #define page_to_pfn(page)   ((page) - mem_map)
-#define VALID_PAGE(page)	((page - mem_map) < max_mapnr)
+#define VALID_PAGE(page)    ((page - mem_map) < max_mapnr)
 
 #endif /* __KERNEL__ */
 

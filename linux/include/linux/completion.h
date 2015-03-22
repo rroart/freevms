@@ -17,10 +17,10 @@ struct completion
 };
 
 #define COMPLETION_INITIALIZER(work) \
-	{ 0, __WAIT_QUEUE_HEAD_INITIALIZER((work).wait) }
+    { 0, __WAIT_QUEUE_HEAD_INITIALIZER((work).wait) }
 
 #define DECLARE_COMPLETION(work) \
-	struct completion work = COMPLETION_INITIALIZER(work)
+    struct completion work = COMPLETION_INITIALIZER(work)
 
 static inline void init_completion(struct completion *x)
 {
@@ -31,6 +31,6 @@ static inline void init_completion(struct completion *x)
 extern void FASTCALL(wait_for_completion(struct completion *));
 extern void FASTCALL(complete(struct completion *));
 
-#define INIT_COMPLETION(x)	((x).done = 0)
+#define INIT_COMPLETION(x)  ((x).done = 0)
 
 #endif

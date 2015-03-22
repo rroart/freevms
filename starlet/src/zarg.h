@@ -1,5 +1,5 @@
-#ifndef zarg_h
-#define zarg_h
+#ifndef ZARG_H
+#define ZARG_H
 
 #undef _buildz
 #define _buildz(...) __VA_ARGS__, 0

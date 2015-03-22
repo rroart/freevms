@@ -16,9 +16,9 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*  Read file into buffer						*/
-/*									*/
+/*                                  */
+/*  Read file into buffer                       */
+/*                                  */
 /************************************************************************/
 
 #include <stdio.h>
@@ -41,20 +41,20 @@ void read_file (FILE *input_file, Buffer *buffer, Line *next_line)
 }
 
 /************************************************************************/
-/*									*/
-/*  Read line from a file						*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	input_file = file to read from					*/
-/*	string     = NULL : start a new string				*/
-/*	             else : concat onto this string			*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	readfileline = NULL : end-of-file				*/
-/*	               else : pointer to string				*/
-/*									*/
+/*                                  */
+/*  Read line from a file                       */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  input_file = file to read from                  */
+/*  string     = NULL : start a new string              */
+/*               else : concat onto this string         */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  readfileline = NULL : end-of-file               */
+/*                 else : pointer to string             */
+/*                                  */
 /************************************************************************/
 
 String *readfileline (FILE *input_file, String *string)

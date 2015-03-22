@@ -8,14 +8,14 @@
 #define _ASM_HW_IRQ_H
 
 /*
- *	linux/include/asm/hw_irq.h
+ *  linux/include/asm/hw_irq.h
  *
- *	(C) 1992, 1993 Linus Torvalds, (C) 1997 Ingo Molnar
+ *  (C) 1992, 1993 Linus Torvalds, (C) 1997 Ingo Molnar
  *
- *	moved some of the old arch/i386/kernel/irq.h to here. VY
+ *  moved some of the old arch/i386/kernel/irq.h to here. VY
  *
- *	IRQ/IPI changes taken from work by Thomas Radke
- *	<tomsoft@informatik.tu-chemnitz.de>
+ *  IRQ/IPI changes taken from work by Thomas Radke
+ *  <tomsoft@informatik.tu-chemnitz.de>
  */
 
 #include <linux/config.h>
@@ -28,9 +28,9 @@
  * IDT vectors usable for external interrupt sources start
  * at 0x20:
  */
-#define FIRST_EXTERNAL_VECTOR	0x20
+#define FIRST_EXTERNAL_VECTOR   0x20
 
-#define SYSCALL_VECTOR		0x80
+#define SYSCALL_VECTOR      0x80
 #define VMSSYSCALL_VECTOR       0x81
 #define VMSSYSCALL_VECTOR1       0x82
 #define VMSSYSCALL_VECTOR2       0x83
@@ -167,30 +167,30 @@ do { __asm__ __volatile__ ( \
  *
  *  Vectors 0xf0-0xfa are free (reserved for future Linux use).
  */
-#define SPURIOUS_APIC_VECTOR	0xff
-#define ERROR_APIC_VECTOR	0xfe
-#define INVALIDATE_TLB_VECTOR	0xfd
-#define RESCHEDULE_VECTOR	0xfc
-#define CALL_FUNCTION_VECTOR	0xfb
-#define IPINT_VECTOR		0xfa
+#define SPURIOUS_APIC_VECTOR    0xff
+#define ERROR_APIC_VECTOR   0xfe
+#define INVALIDATE_TLB_VECTOR   0xfd
+#define RESCHEDULE_VECTOR   0xfc
+#define CALL_FUNCTION_VECTOR    0xfb
+#define IPINT_VECTOR        0xfa
 
 /*
  * Local APIC timer IRQ vector is on a different priority level,
  * to work around the 'lost local interrupt if more than 2 IRQ
  * sources per level' errata.
  */
-#define LOCAL_TIMER_VECTOR	0xef
+#define LOCAL_TIMER_VECTOR  0xef
 
 /*
  * First APIC vector available to drivers: (vectors 0x30-0xee)
  * we start at 0x31 to spread out vectors evenly between priority
  * levels. (0x80 is the syscall vector)
  */
-#define FIRST_DEVICE_VECTOR	0x31
-#define FIRST_SYSTEM_VECTOR	0xef
+#define FIRST_DEVICE_VECTOR 0x31
+#define FIRST_SYSTEM_VECTOR 0xef
 
 extern int irq_vector[NR_IRQS];
-#define IO_APIC_VECTOR(irq)	irq_vector[irq]
+#define IO_APIC_VECTOR(irq) irq_vector[irq]
 
 /*
  * Various low-level irq details needed by irq.c, process.c,
@@ -228,27 +228,27 @@ extern char _stext, _etext;
 /* PUSHR_ALL to PUSHPSL corresponds to stuff in entry.S */
 
 #define PUSHR_ALL \
-	"cld\n\t" \
-	"pushl %es\n\t" \
-	"pushl %ds\n\t" \
-	"pushl %eax\n\t" \
-	"pushl %ebp\n\t" \
-	"pushl %edi\n\t" \
-	"pushl %esi\n\t" \
-	"pushl %edx\n\t" \
-	"pushl %ecx\n\t" \
-	"pushl %ebx\n\t"
+    "cld\n\t" \
+    "pushl %es\n\t" \
+    "pushl %ds\n\t" \
+    "pushl %eax\n\t" \
+    "pushl %ebp\n\t" \
+    "pushl %edi\n\t" \
+    "pushl %esi\n\t" \
+    "pushl %edx\n\t" \
+    "pushl %ecx\n\t" \
+    "pushl %ebx\n\t"
 
-#define POPR_ALL	\
-	"popl %ebx\n\t"	\
-	"popl %ecx\n\t"	\
-	"popl %edx\n\t"	\
-	"popl %esi\n\t"	\
-	"popl %edi\n\t"	\
-	"popl %ebp\n\t"	\
-	"popl %eax\n\t"	\
-	"popl %ds\n\t"	\
-	"popl %es\n\t"
+#define POPR_ALL    \
+    "popl %ebx\n\t" \
+    "popl %ecx\n\t" \
+    "popl %edx\n\t" \
+    "popl %esi\n\t" \
+    "popl %edi\n\t" \
+    "popl %ebp\n\t" \
+    "popl %eax\n\t" \
+    "popl %ds\n\t"  \
+    "popl %es\n\t"
 
 #define PUSHPSL \
         PUSHR_ALL \
@@ -261,50 +261,50 @@ extern char _stext, _etext;
         POPR_ALL
 
 #define REGTRAP \
-	"pushl %eax\n\t" \
-	"pushl $0x10\n\t" \
-	"pushl $0x0\n\t" \
-	"call regtrap\n\t" \
-	"call setpsli\n\t" \
-	"popl %eax\n\t" \
-	"popl %eax\n\t" \
-	"popl %eax\n\t"
+    "pushl %eax\n\t" \
+    "pushl $0x10\n\t" \
+    "pushl $0x0\n\t" \
+    "call regtrap\n\t" \
+    "call setpsli\n\t" \
+    "popl %eax\n\t" \
+    "popl %eax\n\t" \
+    "popl %eax\n\t"
 
 #define INTEXC_FIX_SP(x) \
-	"pushl %eax; \n\t" \
-	"pushl %edi; \n\t" \
-	"pushl %edx; \n\t" \
-	"movl ctl$gl_pcb, %edi	; \n\t" \
-	"movl 0x7a0(%edi), %edx ; \n\t" /* tsk_pcbl_cpu_id */ \
-	"shl $0x8, %edx; \n\t" \
-	"addl $init_tss, %edx	; \n\t" \
-	"addl $0x4, %edx	; \n\t" \
-	"addl $2112, %edi; \n\t" /* ipr_sp */ \
-	"movl 0x4+0x10(%esp), %eax; \n\t" /* check. manual 4 */ \
-	"andl $0x3, %eax; \n\t" \
-	"je 2f			; \n\t" \
-	/*"movl %esp, (%edi); \n\t"*/ /* check ekstra */ \
-	/*"movl %esp, (%edx); \n\t"*/ /* check ekstra */ \
-	/*"addl $0xc, (%edi); \n\t"*/ /* check ekstra */ \
-	/*"addl $0xc, (%edx); \n\t"*/ /* check ekstra */ \
-	"salw $2,%ax; \n\t" \
-	"addl %eax, %edi; \n\t" \
-	"addl %eax, %edx; \n\t" \
-	"addl %eax, %edx; \n\t" \
-	"cmpl $0xc, %eax; \n\t" \
-	"movl 0x4+0x18(%esp),%eax; \n\t" /* check. manual 4 */ \
-	"je 4f			; \n\t" \
-	"jmp 3f			; \n\t" \
+    "pushl %eax; \n\t" \
+    "pushl %edi; \n\t" \
+    "pushl %edx; \n\t" \
+    "movl ctl$gl_pcb, %edi	; \n\t" \
+    "movl 0x7a0(%edi), %edx ; \n\t" /* tsk_pcbl_cpu_id */ \
+    "shl $0x8, %edx; \n\t" \
+    "addl $init_tss, %edx	; \n\t" \
+    "addl $0x4, %edx	; \n\t" \
+    "addl $2112, %edi; \n\t" /* ipr_sp */ \
+    "movl 0x4+0x10(%esp), %eax; \n\t" /* check. manual 4 */ \
+    "andl $0x3, %eax; \n\t" \
+    "je 2f			; \n\t" \
+    /*"movl %esp, (%edi); \n\t"*/ /* check ekstra */ \
+    /*"movl %esp, (%edx); \n\t"*/ /* check ekstra */ \
+    /*"addl $0xc, (%edi); \n\t"*/ /* check ekstra */ \
+    /*"addl $0xc, (%edx); \n\t"*/ /* check ekstra */ \
+    "salw $2,%ax; \n\t" \
+    "addl %eax, %edi; \n\t" \
+    "addl %eax, %edx; \n\t" \
+    "addl %eax, %edx; \n\t" \
+    "cmpl $0xc, %eax; \n\t" \
+    "movl 0x4+0x18(%esp),%eax; \n\t" /* check. manual 4 */ \
+    "je 4f			; \n\t" \
+    "jmp 3f			; \n\t" \
 "2:				; \n\t" \
-	"movl %esp, %eax	; \n\t" \
-	"addl $0xc, %eax	; \n\t" \
+    "movl %esp, %eax	; \n\t" \
+    "addl $0xc, %eax	; \n\t" \
 "3:				; \n\t" \
-	"movl %eax, (%edx)	; \n\t" \
+    "movl %eax, (%edx)	; \n\t" \
 "4:				; \n\t" \
-	"movl %eax, (%edi); \n\t" \
-	"popl %edx; \n\t" \
-	"popl %edi; \n\t" \
-	"popl %eax; \n\t"
+    "movl %eax, (%edi); \n\t" \
+    "popl %edx; \n\t" \
+    "popl %edi; \n\t" \
+    "popl %eax; \n\t"
 
 #define IO_APIC_IRQ(x) (((x) >= 16) || ((1<<(x)) & io_apic_irqs))
 
@@ -312,28 +312,28 @@ extern char _stext, _etext;
 #define STR(x) __STR(x)
 
 #define SAVE_ALL \
-	"cld\n\t" \
-	"pushl %es\n\t" \
-	"pushl %ds\n\t" \
-	"pushl %eax\n\t" \
-	"pushl %ebp\n\t" \
-	"pushl %edi\n\t" \
-	"pushl %esi\n\t" \
-	"pushl %edx\n\t" \
-	"pushl %ecx\n\t" \
-	"pushl %ebx\n\t" \
-	"movl $" STR(__KERNEL_DS) ",%edx\n\t" \
-	"movl %edx,%ds\n\t" \
-	"movl %edx,%es\n\t"
+    "cld\n\t" \
+    "pushl %es\n\t" \
+    "pushl %ds\n\t" \
+    "pushl %eax\n\t" \
+    "pushl %ebp\n\t" \
+    "pushl %edi\n\t" \
+    "pushl %esi\n\t" \
+    "pushl %edx\n\t" \
+    "pushl %ecx\n\t" \
+    "pushl %ebx\n\t" \
+    "movl $" STR(__KERNEL_DS) ",%edx\n\t" \
+    "movl %edx,%ds\n\t" \
+    "movl %edx,%es\n\t"
 
 #define IRQ_NAME2(nr) nr##_interrupt(void)
 #define IRQ_NAME(nr) IRQ_NAME2(IRQ##nr)
 
 #define GET_CURRENT \
-	"movl ctl$gl_pcb, %ebx\n\t"
+    "movl ctl$gl_pcb, %ebx\n\t"
 
 /*
- *	SMP has a few special interrupts for IPI messages
+ *  SMP has a few special interrupts for IPI messages
  */
 
 /* there is a second layer of macro just to get the symbolic
@@ -345,13 +345,13 @@ asmlinkage void call_##x(void); \
 __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(x) ":\n\t" \
-	"pushl $"#v"-256\n\t" \
-	INTEXC_FIX_SP(0x4) \
-	SAVE_ALL \
+    "pushl $"#v"-256\n\t" \
+    INTEXC_FIX_SP(0x4) \
+    SAVE_ALL \
         REGTRAP \
-	SYMBOL_NAME_STR(call_##x)":\n\t" \
-	"call "SYMBOL_NAME_STR(smp_##x)"\n\t" \
-	"jmp ret_from_intr\n");
+    SYMBOL_NAME_STR(call_##x)":\n\t" \
+    "call "SYMBOL_NAME_STR(smp_##x)"\n\t" \
+    "jmp ret_from_intr\n");
 
 #define BUILD_SMP_TIMER_INTERRUPT(x,v) XBUILD_SMP_TIMER_INTERRUPT(x,v)
 #define XBUILD_SMP_TIMER_INTERRUPT(x,v) \
@@ -360,28 +360,28 @@ asmlinkage void call_##x(void); \
 __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(x) ":\n\t" \
-	"pushl $"#v"-256\n\t" \
-	INTEXC_FIX_SP(0x4) \
-	SAVE_ALL \
+    "pushl $"#v"-256\n\t" \
+    INTEXC_FIX_SP(0x4) \
+    SAVE_ALL \
         REGTRAP \
-	"movl %esp,%eax\n\t" \
-	"pushl %eax\n\t" \
-	SYMBOL_NAME_STR(call_##x)":\n\t" \
-	"call "SYMBOL_NAME_STR(smp_##x)"\n\t" \
-	"addl $4,%esp\n\t" \
-	"jmp ret_from_intr\n");
+    "movl %esp,%eax\n\t" \
+    "pushl %eax\n\t" \
+    SYMBOL_NAME_STR(call_##x)":\n\t" \
+    "call "SYMBOL_NAME_STR(smp_##x)"\n\t" \
+    "addl $4,%esp\n\t" \
+    "jmp ret_from_intr\n");
 
 #define BUILD_COMMON_IRQ() \
 asmlinkage void call_do_IRQ(void); \
 __asm__( \
-	"\n" __ALIGN_STR"\n" \
-	"common_interrupt:\n\t" \
-	INTEXC_FIX_SP(0x4) \
-	SAVE_ALL \
+    "\n" __ALIGN_STR"\n" \
+    "common_interrupt:\n\t" \
+    INTEXC_FIX_SP(0x4) \
+    SAVE_ALL \
         REGTRAP \
-	SYMBOL_NAME_STR(call_do_IRQ)":\n\t" \
-	"call " SYMBOL_NAME_STR(do_IRQ) "\n\t" \
-	"jmp ret_from_intr\n");
+    SYMBOL_NAME_STR(call_do_IRQ)":\n\t" \
+    "call " SYMBOL_NAME_STR(do_IRQ) "\n\t" \
+    "jmp ret_from_intr\n");
 
 /*
  * subtle. orig_eax is used by the signal code to distinct between
@@ -398,8 +398,8 @@ asmlinkage void IRQ_NAME(nr); \
 __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(IRQ) #nr "_interrupt:\n\t" \
-	"pushl $"#nr"-256\n\t" \
-	"jmp common_interrupt");
+    "pushl $"#nr"-256\n\t" \
+    "jmp common_interrupt");
 
 extern unsigned long prof_cpu_mask;
 extern unsigned int * prof_buffer;

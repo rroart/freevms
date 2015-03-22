@@ -28,7 +28,7 @@
 
 #include <linux/i2c.h>
 
-/* --- Defines for bit-adapters ---------------------------------------	*/
+/* --- Defines for bit-adapters --------------------------------------- */
 /*
  * This struct contains the hw-dependent functions of bit-style adapters to
  * manipulate the line states, and to init any hw-specific features. This is
@@ -36,7 +36,7 @@
  */
 struct i2c_algo_bit_data
 {
-    void *data;		/* private data for lowlevel routines */
+    void *data;     /* private data for lowlevel routines */
     void (*setsda) (void *data, int state);
     void (*setscl) (void *data, int state);
     int  (*getsda) (void *data);
@@ -48,7 +48,7 @@ struct i2c_algo_bit_data
     int timeout;
 };
 
-#define I2C_BIT_ADAP_MAX	16
+#define I2C_BIT_ADAP_MAX    16
 
 int i2c_bit_add_bus(struct i2c_adapter *);
 int i2c_bit_del_bus(struct i2c_adapter *);

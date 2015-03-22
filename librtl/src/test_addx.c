@@ -14,7 +14,7 @@ int main()
     unsigned char array1[8] = {100,200, 80, 90,125,215, 10,  2};
     unsigned char array2[8] = { 50,100,250, 10, 10, 88, 10,  1};
     unsigned char array3[8] = {  0,  0,  0,  0,  0,  0,  0,  0};
-    const long arraysize = 2;		/* Array size in longwords */
+    const long arraysize = 2;       /* Array size in longwords */
     unsigned long status;
 
     printf("Array1: ");

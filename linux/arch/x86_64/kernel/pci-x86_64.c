@@ -5,7 +5,7 @@
 // Modified Linux source file, 2001-2006
 
 /*
- *	Low-Level PCI Access for x86-64 machines
+ *  Low-Level PCI Access for x86-64 machines
  *
  * Copyright 1993, 1994 Drew Eckhardt
  *      Visionary Computing
@@ -14,9 +14,9 @@
  *      +1 (303) 786-7975
  *
  * Drew's work was sponsored by:
- *	iX Multiuser Multitasking Magazine
- *	Hannover, Germany
- *	hm@ix.de
+ *  iX Multiuser Multitasking Magazine
+ *  Hannover, Germany
+ *  hm@ix.de
  *
  * Copyright 1997--2000 Martin Mares <mj@ucw.cz>
  *
@@ -31,7 +31,7 @@
  *
  * CHANGELOG :
  * Jun 17, 1994 : Modified to accommodate the broken pre-PCI BIOS SPECIFICATION
- *	Revision 2.0 present on <thys@dennis.ee.up.ac.za>'s ASUS mainboard.
+ *  Revision 2.0 present on <thys@dennis.ee.up.ac.za>'s ASUS mainboard.
  *
  * Jan 5,  1995 : Modified to probe PCI hardware at boot time by Frederic
  *     Potter, potter@cao-vlsi.ibp.fr
@@ -41,19 +41,19 @@
  *      Curtis Varner, cvarner@cs.ucr.edu
  *
  * Jan 12, 1995 : CPU-PCI bridge optimization support by Frederic Potter.
- *	Alpha version. Intel & UMC chipset support only.
+ *  Alpha version. Intel & UMC chipset support only.
  *
  * Apr 16, 1995 : Source merge with the DEC Alpha PCI support. Most of the code
- *	moved to drivers/pci/pci.c.
+ *  moved to drivers/pci/pci.c.
  *
  * Dec 7, 1996  : Added support for direct configuration access of boards
  *      with Intel compatible access schemes (tsbogend@alpha.franken.de)
  *
  * Feb 3, 1997  : Set internal functions to static, save/restore flags
- *	avoid dead locks reading broken PCI BIOS, werner@suse.de
+ *  avoid dead locks reading broken PCI BIOS, werner@suse.de
  *
  * Apr 26, 1997 : Fixed case when there is BIOS32, but not PCI BIOS
- *	(mj@atrey.karlin.mff.cuni.cz)
+ *  (mj@atrey.karlin.mff.cuni.cz)
  *
  * May 7,  1997 : Added some missing cli()'s. [mj]
  *
@@ -61,20 +61,20 @@
  *      (paubert@iram.es)
  *
  * Aug 2,  1997 : Split to PCI BIOS handling and direct PCI access parts
- *	and cleaned it up...     Martin Mares <mj@atrey.karlin.mff.cuni.cz>
+ *  and cleaned it up...     Martin Mares <mj@atrey.karlin.mff.cuni.cz>
  *
  * Feb 6,  1998 : No longer using BIOS to find devices and device classes. [mj]
  *
  * May 1,  1998 : Support for peer host bridges. [mj]
  *
  * Jun 19, 1998 : Changed to use spinlocks, so that PCI configuration space
- *	can be accessed from interrupts even on SMP systems. [mj]
+ *  can be accessed from interrupts even on SMP systems. [mj]
  *
  * August  1998 : Better support for peer host bridges and more paranoid
- *	checks for direct hardware access. Ugh, this file starts to look as
- *	a large gallery of common hardware bug workarounds (watch the comments)
- *	-- the PCI specs themselves are sane, but most implementors should be
- *	hit hard with \hammer scaled \magstep5. [mj]
+ *  checks for direct hardware access. Ugh, this file starts to look as
+ *  a large gallery of common hardware bug workarounds (watch the comments)
+ *  -- the PCI specs themselves are sane, but most implementors should be
+ *  hit hard with \hammer scaled \magstep5. [mj]
  *
  * Jan 23, 1999 : More improvements to peer host bridge logic. i450NX fixup. [mj]
  *
@@ -83,10 +83,10 @@
  * August  1999 : New resource management and configuration access stuff. [mj]
  *
  * Sep 19, 1999 : Use PCI IRQ routing tables for detection of peer host bridges.
- *		  Based on ideas by Chris Frantz and David Hinds. [mj]
+ *        Based on ideas by Chris Frantz and David Hinds. [mj]
  *
  * Sep 28, 1999 : Handle unreported/unassigned IRQs. Thanks to Shuu Yamaguchi
- *		  for a lot of patience during testing. [mj]
+ *        for a lot of patience during testing. [mj]
  *
  * Oct  8, 1999 : Split to pci-i386.c, pci-pc.c and pci-visws.c. [mj]
  */
@@ -172,28 +172,28 @@ pcibios_align_resource(void *data, struct resource *res, unsigned long size /* n
  *  when it's found to be wrong.
  *
  *  Known BIOS problems we have to work around:
- *	- I/O or memory regions not configured
- *	- regions configured, but not enabled in the command register
- *	- bogus I/O addresses above 64K used
- *	- expansion ROMs left enabled (this may sound harmless, but given
- *	  the fact the PCI specs explicitly allow address decoders to be
- *	  shared between expansion ROMs and other resource regions, it's
- *	  at least dangerous)
+ *  - I/O or memory regions not configured
+ *  - regions configured, but not enabled in the command register
+ *  - bogus I/O addresses above 64K used
+ *  - expansion ROMs left enabled (this may sound harmless, but given
+ *    the fact the PCI specs explicitly allow address decoders to be
+ *    shared between expansion ROMs and other resource regions, it's
+ *    at least dangerous)
  *
  *  Our solution:
- *	(1) Allocate resources for all buses behind PCI-to-PCI bridges.
- *	    This gives us fixed barriers on where we can allocate.
- *	(2) Allocate resources for all enabled devices.  If there is
- *	    a collision, just mark the resource as unallocated. Also
- *	    disable expansion ROMs during this step.
- *	(3) Try to allocate resources for disabled devices.  If the
- *	    resources were assigned correctly, everything goes well,
- *	    if they weren't, they won't disturb allocation of other
- *	    resources.
- *	(4) Assign new addresses to resources which were either
- *	    not configured at all or misconfigured.  If explicitly
- *	    requested by the user, configure expansion ROM address
- *	    as well.
+ *  (1) Allocate resources for all buses behind PCI-to-PCI bridges.
+ *      This gives us fixed barriers on where we can allocate.
+ *  (2) Allocate resources for all enabled devices.  If there is
+ *      a collision, just mark the resource as unallocated. Also
+ *      disable expansion ROMs during this step.
+ *  (3) Try to allocate resources for disabled devices.  If the
+ *      resources were assigned correctly, everything goes well,
+ *      if they weren't, they won't disturb allocation of other
+ *      resources.
+ *  (4) Assign new addresses to resources which were either
+ *      not configured at all or misconfigured.  If explicitly
+ *      requested by the user, configure expansion ROM address
+ *      as well.
  */
 
 static void __init pcibios_allocate_bus_resources(struct list_head *bus_list)
@@ -237,9 +237,9 @@ static void __init pcibios_allocate_resources(int pass)
         for(idx = 0; idx < 6; idx++)
         {
             r = &dev->resource[idx];
-            if (r->parent)		/* Already allocated */
+            if (r->parent)      /* Already allocated */
                 continue;
-            if (!r->start)		/* Address not assigned at all */
+            if (!r->start)      /* Address not assigned at all */
                 continue;
             if (r->flags & IORESOURCE_IO)
                 disabled = !(command & PCI_COMMAND_IO);
@@ -329,9 +329,9 @@ void __init pcibios_set_cacheline_size(void)
 
     pci_cache_line_size = 32 >> 2;
     if (c->x86 >= 6 && c->x86_vendor == X86_VENDOR_AMD)
-        pci_cache_line_size = 64 >> 2;	/* K7 & K8 */
+        pci_cache_line_size = 64 >> 2;  /* K7 & K8 */
     else if (c->x86 > 6 && c->x86_vendor == X86_VENDOR_INTEL)
-        pci_cache_line_size = 128 >> 2;	/* P4 */
+        pci_cache_line_size = 128 >> 2; /* P4 */
 }
 
 void __init pcibios_resource_survey(void)

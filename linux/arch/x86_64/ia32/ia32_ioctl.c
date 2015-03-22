@@ -120,7 +120,7 @@
 #include <asm/mtrr.h>
 
 #define A(__x) ((void *)(unsigned long)(__x))
-#define AA(__x)	A(__x)
+#define AA(__x) A(__x)
 
 /* Allocate memory on the user stack */
 static __inline__ void *compat_alloc_user_space(long len)
@@ -352,14 +352,14 @@ static int put_video_window32(struct video_window *kp, struct video_window32 *up
     return 0;
 }
 
-#define VIDIOCGTUNER32		_IOWR('v',4, struct video_tuner32)
-#define VIDIOCSTUNER32		_IOW('v',5, struct video_tuner32)
-#define VIDIOCGWIN32		_IOR('v',9, struct video_window32)
-#define VIDIOCSWIN32		_IOW('v',10, struct video_window32)
-#define VIDIOCGFBUF32		_IOR('v',11, struct video_buffer32)
-#define VIDIOCSFBUF32		_IOW('v',12, struct video_buffer32)
-#define VIDIOCGFREQ32		_IOR('v',14, u32)
-#define VIDIOCSFREQ32		_IOW('v',15, u32)
+#define VIDIOCGTUNER32      _IOWR('v',4, struct video_tuner32)
+#define VIDIOCSTUNER32      _IOW('v',5, struct video_tuner32)
+#define VIDIOCGWIN32        _IOR('v',9, struct video_window32)
+#define VIDIOCSWIN32        _IOW('v',10, struct video_window32)
+#define VIDIOCGFBUF32       _IOR('v',11, struct video_buffer32)
+#define VIDIOCSFBUF32       _IOW('v',12, struct video_buffer32)
+#define VIDIOCGFREQ32       _IOR('v',14, u32)
+#define VIDIOCSFREQ32       _IOW('v',15, u32)
 
 static int do_video_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
@@ -511,7 +511,7 @@ struct ifreq32
         int     ifru_mtu;
         struct  ifmap32 ifru_map;
         char    ifru_slave[IFNAMSIZ];   /* Just fits the size */
-        char	ifru_newname[IFNAMSIZ];
+        char    ifru_newname[IFNAMSIZ];
         __kernel_caddr_t32 ifru_data;
     } ifr_ifru;
 };
@@ -849,37 +849,37 @@ static int dev_ifsioc(unsigned int fd, unsigned int cmd, unsigned long arg)
 
 struct rtentry32
 {
-    u32   		rt_pad1;
+    u32         rt_pad1;
     struct sockaddr rt_dst;         /* target address               */
     struct sockaddr rt_gateway;     /* gateway addr (RTF_GATEWAY)   */
     struct sockaddr rt_genmask;     /* target network mask (IP)     */
     unsigned short  rt_flags;
     short           rt_pad2;
-    u32   		rt_pad3;
+    u32         rt_pad3;
     unsigned char   rt_tos;
     unsigned char   rt_class;
     short           rt_pad4;
     short           rt_metric;      /* +1 for binary compatibility! */
     /* char * */
     u32 rt_dev;        /* forcing the device at add    */
-    u32   		rt_mtu;         /* per route MTU/Window         */
-    u32   		rt_window;      /* Window clamping              */
+    u32         rt_mtu;         /* per route MTU/Window         */
+    u32         rt_window;      /* Window clamping              */
     unsigned short  rt_irtt;        /* Initial RTT                  */
 
 };
 
 struct in6_rtmsg32
 {
-    struct in6_addr		rtmsg_dst;
-    struct in6_addr		rtmsg_src;
-    struct in6_addr		rtmsg_gateway;
-    u32			rtmsg_type;
-    u16			rtmsg_dst_len;
-    u16			rtmsg_src_len;
-    u32			rtmsg_metric;
-    u32			rtmsg_info;
-    u32			rtmsg_flags;
-    s32			rtmsg_ifindex;
+    struct in6_addr     rtmsg_dst;
+    struct in6_addr     rtmsg_src;
+    struct in6_addr     rtmsg_gateway;
+    u32         rtmsg_type;
+    u16         rtmsg_dst_len;
+    u16         rtmsg_src_len;
+    u32         rtmsg_metric;
+    u32         rtmsg_info;
+    u32         rtmsg_flags;
+    s32         rtmsg_ifindex;
 };
 
 extern struct socket *sockfd_lookup(int fd, int *err);
@@ -921,30 +921,30 @@ static int hdio_getgeo(unsigned int fd, unsigned int cmd, unsigned long arg)
 
 struct fb_fix_screeninfo32
 {
-    char			id[16];
-    __kernel_caddr_t32	smem_start;
-    __u32			smem_len;
-    __u32			type;
-    __u32			type_aux;
-    __u32			visual;
-    __u16			xpanstep;
-    __u16			ypanstep;
-    __u16			ywrapstep;
-    __u32			line_length;
-    __kernel_caddr_t32	mmio_start;
-    __u32			mmio_len;
-    __u32			accel;
-    __u16			reserved[3];
+    char            id[16];
+    __kernel_caddr_t32  smem_start;
+    __u32           smem_len;
+    __u32           type;
+    __u32           type_aux;
+    __u32           visual;
+    __u16           xpanstep;
+    __u16           ypanstep;
+    __u16           ywrapstep;
+    __u32           line_length;
+    __kernel_caddr_t32  mmio_start;
+    __u32           mmio_len;
+    __u32           accel;
+    __u16           reserved[3];
 };
 
 struct fb_cmap32
 {
-    __u32			start;
-    __u32			len;
-    __kernel_caddr_t32	red;
-    __kernel_caddr_t32	green;
-    __kernel_caddr_t32	blue;
-    __kernel_caddr_t32	transp;
+    __u32           start;
+    __u32           len;
+    __kernel_caddr_t32  red;
+    __kernel_caddr_t32  green;
+    __kernel_caddr_t32  blue;
+    __kernel_caddr_t32  transp;
 };
 
 static int fb_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
@@ -1089,85 +1089,85 @@ static int hdio_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg
 
 struct floppy_struct32
 {
-    unsigned int	size;
-    unsigned int	sect;
-    unsigned int	head;
-    unsigned int	track;
-    unsigned int	stretch;
-    unsigned char	gap;
-    unsigned char	rate;
-    unsigned char	spec1;
-    unsigned char	fmt_gap;
+    unsigned int    size;
+    unsigned int    sect;
+    unsigned int    head;
+    unsigned int    track;
+    unsigned int    stretch;
+    unsigned char   gap;
+    unsigned char   rate;
+    unsigned char   spec1;
+    unsigned char   fmt_gap;
     const __kernel_caddr_t32 name;
 };
 
 struct floppy_drive_params32
 {
-    char		cmos;
-    u32		max_dtr;
-    u32		hlt;
-    u32		hut;
-    u32		srt;
-    u32		spinup;
-    u32		spindown;
-    unsigned char	spindown_offset;
-    unsigned char	select_delay;
-    unsigned char	rps;
-    unsigned char	tracks;
-    u32		timeout;
-    unsigned char	interleave_sect;
+    char        cmos;
+    u32     max_dtr;
+    u32     hlt;
+    u32     hut;
+    u32     srt;
+    u32     spinup;
+    u32     spindown;
+    unsigned char   spindown_offset;
+    unsigned char   select_delay;
+    unsigned char   rps;
+    unsigned char   tracks;
+    u32     timeout;
+    unsigned char   interleave_sect;
     struct floppy_max_errors max_errors;
-    char		flags;
-    char		read_track;
-    short		autodetect[8];
-    int		checkfreq;
-    int		native_format;
+    char        flags;
+    char        read_track;
+    short       autodetect[8];
+    int     checkfreq;
+    int     native_format;
 };
 
 struct floppy_drive_struct32
 {
-    signed char	flags;
-    u32		spinup_date;
-    u32		select_date;
-    u32		first_read_date;
-    short		probed_format;
-    short		track;
-    short		maxblock;
-    short		maxtrack;
-    int		generation;
-    int		keep_data;
-    int		fd_ref;
-    int		fd_device;
-    int		last_checked;
+    signed char flags;
+    u32     spinup_date;
+    u32     select_date;
+    u32     first_read_date;
+    short       probed_format;
+    short       track;
+    short       maxblock;
+    short       maxtrack;
+    int     generation;
+    int     keep_data;
+    int     fd_ref;
+    int     fd_device;
+    int     last_checked;
     __kernel_caddr_t32 dmabuf;
-    int		bufblocks;
+    int     bufblocks;
 };
 
 struct floppy_fdc_state32
 {
-    int		spec1;
-    int		spec2;
-    int		dtr;
-    unsigned char	version;
-    unsigned char	dor;
-    u32		address;
-    unsigned int	rawcmd:2;
-    unsigned int	reset:1;
-    unsigned int	need_configure:1;
-    unsigned int	perp_mode:2;
-    unsigned int	has_fifo:1;
-    unsigned int	driver_version;
-    unsigned char	track[4];
+    int     spec1;
+    int     spec2;
+    int     dtr;
+    unsigned char   version;
+    unsigned char   dor;
+    u32     address;
+    unsigned int    rawcmd:2;
+    unsigned int    reset:1;
+    unsigned int    need_configure:1;
+    unsigned int    perp_mode:2;
+    unsigned int    has_fifo:1;
+    unsigned int    driver_version;
+    unsigned char   track[4];
 };
 
 struct floppy_write_errors32
 {
-    unsigned int	write_errors;
-    u32		first_error_sector;
-    int		first_error_generation;
-    u32		last_error_sector;
-    int		last_error_generation;
-    unsigned int	badness;
+    unsigned int    write_errors;
+    u32     first_error_sector;
+    int     first_error_generation;
+    u32     last_error_sector;
+    int     last_error_generation;
+    unsigned int    badness;
 };
 
 #define FDSETPRM32 _IOW(2, 0x42, struct floppy_struct32)
@@ -1182,8 +1182,8 @@ struct floppy_write_errors32
 
 static struct
 {
-    unsigned int	cmd32;
-    unsigned int	cmd;
+    unsigned int    cmd32;
+    unsigned int    cmd;
 } fd_ioctl_trans_table[] =
 {
     { FDSETPRM32, FDSETPRM },
@@ -1415,29 +1415,29 @@ out:
 
 typedef struct sg_io_hdr32
 {
-    s32 interface_id;	/* [i] 'S' for SCSI generic (required) */
-    s32 dxfer_direction;	/* [i] data transfer direction  */
-    u8  cmd_len;		/* [i] SCSI command length ( <= 16 bytes) */
-    u8  mx_sb_len;		/* [i] max length to write to sbp */
-    u16 iovec_count;	/* [i] 0 implies no scatter gather */
-    u32 dxfer_len;		/* [i] byte count of data transfer */
-    u32 dxferp;		/* [i], [*io] points to data transfer memory
-					      or scatter gather list */
-    u32 cmdp;		/* [i], [*i] points to command to perform */
-    u32 sbp;		/* [i], [*o] points to sense_buffer memory */
-    u32 timeout;		/* [i] MAX_UINT->no timeout (unit: millisec) */
-    u32 flags;		/* [i] 0 -> default, see SG_FLAG... */
-    s32 pack_id;		/* [i->o] unused internally (normally) */
-    u32 usr_ptr;		/* [i->o] unused internally */
-    u8  status;		/* [o] scsi status */
-    u8  masked_status;	/* [o] shifted, masked scsi status */
-    u8  msg_status;		/* [o] messaging level data (optional) */
-    u8  sb_len_wr;		/* [o] byte count actually written to sbp */
-    u16 host_status;	/* [o] errors from host adapter */
-    u16 driver_status;	/* [o] errors from software driver */
-    s32 resid;		/* [o] dxfer_len - actual_transferred */
-    u32 duration;		/* [o] time taken by cmd (unit: millisec) */
-    u32 info;		/* [o] auxiliary information */
+    s32 interface_id;   /* [i] 'S' for SCSI generic (required) */
+    s32 dxfer_direction;    /* [i] data transfer direction  */
+    u8  cmd_len;        /* [i] SCSI command length ( <= 16 bytes) */
+    u8  mx_sb_len;      /* [i] max length to write to sbp */
+    u16 iovec_count;    /* [i] 0 implies no scatter gather */
+    u32 dxfer_len;      /* [i] byte count of data transfer */
+    u32 dxferp;     /* [i], [*io] points to data transfer memory
+                          or scatter gather list */
+    u32 cmdp;       /* [i], [*i] points to command to perform */
+    u32 sbp;        /* [i], [*o] points to sense_buffer memory */
+    u32 timeout;        /* [i] MAX_UINT->no timeout (unit: millisec) */
+    u32 flags;      /* [i] 0 -> default, see SG_FLAG... */
+    s32 pack_id;        /* [i->o] unused internally (normally) */
+    u32 usr_ptr;        /* [i->o] unused internally */
+    u8  status;     /* [o] scsi status */
+    u8  masked_status;  /* [o] shifted, masked scsi status */
+    u8  msg_status;     /* [o] messaging level data (optional) */
+    u8  sb_len_wr;      /* [o] byte count actually written to sbp */
+    u16 host_status;    /* [o] errors from host adapter */
+    u16 driver_status;  /* [o] errors from software driver */
+    s32 resid;      /* [o] dxfer_len - actual_transferred */
+    u32 duration;       /* [o] time taken by cmd (unit: millisec) */
+    u32 info;       /* [o] auxiliary information */
 } sg_io_hdr32_t;  /* 64 bytes long (on sparc32) */
 
 typedef struct sg_iovec32
@@ -1600,12 +1600,12 @@ out:
 
 struct sock_fprog32
 {
-    __u16	len;
-    __u32	filter;
+    __u16   len;
+    __u32   filter;
 };
 
-#define PPPIOCSPASS32	_IOW('t', 71, struct sock_fprog32)
-#define PPPIOCSACTIVE32	_IOW('t', 70, struct sock_fprog32)
+#define PPPIOCSPASS32   _IOW('t', 71, struct sock_fprog32)
+#define PPPIOCSACTIVE32 _IOW('t', 70, struct sock_fprog32)
 
 static int ppp_sock_fprog_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
@@ -1635,18 +1635,18 @@ static int ppp_sock_fprog_ioctl_trans(unsigned int fd, unsigned int cmd, unsigne
 
 struct ppp_option_data32
 {
-    __kernel_caddr_t32	ptr;
-    __u32			length;
-    int			transmit;
+    __kernel_caddr_t32  ptr;
+    __u32           length;
+    int         transmit;
 };
-#define PPPIOCSCOMPRESS32	_IOW('t', 77, struct ppp_option_data32)
+#define PPPIOCSCOMPRESS32   _IOW('t', 77, struct ppp_option_data32)
 
 struct ppp_idle32
 {
     __kernel_time_t32 xmit_idle;
     __kernel_time_t32 recv_idle;
 };
-#define PPPIOCGIDLE32		_IOR('t', 63, struct ppp_idle32)
+#define PPPIOCGIDLE32       _IOR('t', 63, struct ppp_idle32)
 
 static int ppp_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
@@ -1720,46 +1720,46 @@ static int ppp_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
 
 struct mtget32
 {
-    __u32	mt_type;
-    __u32	mt_resid;
-    __u32	mt_dsreg;
-    __u32	mt_gstat;
-    __u32	mt_erreg;
-    __kernel_daddr_t32	mt_fileno;
-    __kernel_daddr_t32	mt_blkno;
+    __u32   mt_type;
+    __u32   mt_resid;
+    __u32   mt_dsreg;
+    __u32   mt_gstat;
+    __u32   mt_erreg;
+    __kernel_daddr_t32  mt_fileno;
+    __kernel_daddr_t32  mt_blkno;
 };
-#define MTIOCGET32	_IOR('m', 2, struct mtget32)
+#define MTIOCGET32  _IOR('m', 2, struct mtget32)
 
 struct mtpos32
 {
-    __u32	mt_blkno;
+    __u32   mt_blkno;
 };
-#define MTIOCPOS32	_IOR('m', 3, struct mtpos32)
+#define MTIOCPOS32  _IOR('m', 3, struct mtpos32)
 
 struct mtconfiginfo32
 {
-    __u32	mt_type;
-    __u32	ifc_type;
-    __u16	irqnr;
-    __u16	dmanr;
-    __u16	port;
-    __u32	debug;
-    __u32	have_dens:1;
-    __u32	have_bsf:1;
-    __u32	have_fsr:1;
-    __u32	have_bsr:1;
-    __u32	have_eod:1;
-    __u32	have_seek:1;
-    __u32	have_tell:1;
-    __u32	have_ras1:1;
-    __u32	have_ras2:1;
-    __u32	have_ras3:1;
-    __u32	have_qfa:1;
-    __u32	pad1:5;
-    char	reserved[10];
+    __u32   mt_type;
+    __u32   ifc_type;
+    __u16   irqnr;
+    __u16   dmanr;
+    __u16   port;
+    __u32   debug;
+    __u32   have_dens:1;
+    __u32   have_bsf:1;
+    __u32   have_fsr:1;
+    __u32   have_bsr:1;
+    __u32   have_eod:1;
+    __u32   have_seek:1;
+    __u32   have_tell:1;
+    __u32   have_ras1:1;
+    __u32   have_ras2:1;
+    __u32   have_ras3:1;
+    __u32   have_qfa:1;
+    __u32   pad1:5;
+    char    reserved[10];
 };
-#define	MTIOCGETCONFIG32	_IOR('m', 4, struct mtconfiginfo32)
-#define	MTIOCSETCONFIG32	_IOW('m', 5, struct mtconfiginfo32)
+#define MTIOCGETCONFIG32    _IOR('m', 4, struct mtconfiginfo32)
+#define MTIOCSETCONFIG32    _IOW('m', 5, struct mtconfiginfo32)
 
 static int mt_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
@@ -1850,30 +1850,30 @@ static int mt_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
 
 struct cdrom_read32
 {
-    int			cdread_lba;
-    __kernel_caddr_t32	cdread_bufaddr;
-    int			cdread_buflen;
+    int         cdread_lba;
+    __kernel_caddr_t32  cdread_bufaddr;
+    int         cdread_buflen;
 };
 
 struct cdrom_read_audio32
 {
-    union cdrom_addr	addr;
-    u_char			addr_format;
-    int			nframes;
-    __kernel_caddr_t32	buf;
+    union cdrom_addr    addr;
+    u_char          addr_format;
+    int         nframes;
+    __kernel_caddr_t32  buf;
 };
 
 struct cdrom_generic_command32
 {
-    unsigned char		cmd[CDROM_PACKET_SIZE];
-    __kernel_caddr_t32	buffer;
-    unsigned int		buflen;
-    int			stat;
-    __kernel_caddr_t32	sense;
-    unsigned char		data_direction;
-    int			quiet;
-    int			timeout;
-    __kernel_caddr_t32	reserved[1];
+    unsigned char       cmd[CDROM_PACKET_SIZE];
+    __kernel_caddr_t32  buffer;
+    unsigned int        buflen;
+    int         stat;
+    __kernel_caddr_t32  sense;
+    unsigned char       data_direction;
+    int         quiet;
+    int         timeout;
+    __kernel_caddr_t32  reserved[1];
 };
 
 static int cdrom_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long arg)
@@ -1956,18 +1956,18 @@ static int cdrom_ioctl_trans(unsigned int fd, unsigned int cmd, unsigned long ar
 
 struct loop_info32
 {
-    int			lo_number;      /* ioctl r/o */
-    __kernel_dev_t32	lo_device;      /* ioctl r/o */
-    unsigned int		lo_inode;       /* ioctl r/o */
-    __kernel_dev_t32	lo_rdevice;     /* ioctl r/o */
-    int			lo_offset;
-    int			lo_encrypt_type;
-    int			lo_encrypt_key_size;    /* ioctl w/o */
-    int			lo_flags;       /* ioctl r/o */
-    char			lo_name[LO_NAME_SIZE];
-    unsigned char		lo_encrypt_key[LO_KEY_SIZE]; /* ioctl w/o */
-    unsigned int		lo_init[2];
-    char			reserved[4];
+    int         lo_number;      /* ioctl r/o */
+    __kernel_dev_t32    lo_device;      /* ioctl r/o */
+    unsigned int        lo_inode;       /* ioctl r/o */
+    __kernel_dev_t32    lo_rdevice;     /* ioctl r/o */
+    int         lo_offset;
+    int         lo_encrypt_type;
+    int         lo_encrypt_key_size;    /* ioctl w/o */
+    int         lo_flags;       /* ioctl r/o */
+    char            lo_name[LO_NAME_SIZE];
+    unsigned char       lo_encrypt_key[LO_KEY_SIZE]; /* ioctl w/o */
+    unsigned int        lo_init[2];
+    char            reserved[4];
 };
 
 static int loop_status(unsigned int fd, unsigned int cmd, unsigned long arg)
@@ -2035,7 +2035,7 @@ struct consolefontdesc32
 {
     unsigned short charcount;       /* characters in font (256 or 512) */
     unsigned short charheight;      /* scan lines per character (1-32) */
-    u32 chardata;			/* font data in expanded form */
+    u32 chardata;           /* font data in expanded form */
 };
 
 static int do_fontx_ioctl(unsigned int fd, int cmd, struct consolefontdesc32 *user_cfd, struct file *file)
@@ -2078,7 +2078,7 @@ static int do_fontx_ioctl(unsigned int fd, int cmd, struct consolefontdesc32 *us
             return i;
         cfdarg.charheight = op.height;
         cfdarg.charcount = op.charcount;
-        ((struct consolefontdesc32 *)&cfdarg)->chardata	= (unsigned long)cfdarg.chardata;
+        ((struct consolefontdesc32 *)&cfdarg)->chardata = (unsigned long)cfdarg.chardata;
         if (copy_to_user(user_cfd, &cfdarg, sizeof(struct consolefontdesc32)))
             return -EFAULT;
         return 0;
@@ -2159,20 +2159,20 @@ struct atm_iobuf32
 #define ATM_GETLINKRATE32 _IOW('a', ATMIOC_ITF+1, struct atmif_sioc32)
 #define ATM_GETNAMES32    _IOW('a', ATMIOC_ITF+3, struct atm_iobuf32)
 #define ATM_GETTYPE32     _IOW('a', ATMIOC_ITF+4, struct atmif_sioc32)
-#define ATM_GETESI32	  _IOW('a', ATMIOC_ITF+5, struct atmif_sioc32)
-#define ATM_GETADDR32	  _IOW('a', ATMIOC_ITF+6, struct atmif_sioc32)
-#define ATM_RSTADDR32	  _IOW('a', ATMIOC_ITF+7, struct atmif_sioc32)
-#define ATM_ADDADDR32	  _IOW('a', ATMIOC_ITF+8, struct atmif_sioc32)
-#define ATM_DELADDR32	  _IOW('a', ATMIOC_ITF+9, struct atmif_sioc32)
+#define ATM_GETESI32      _IOW('a', ATMIOC_ITF+5, struct atmif_sioc32)
+#define ATM_GETADDR32     _IOW('a', ATMIOC_ITF+6, struct atmif_sioc32)
+#define ATM_RSTADDR32     _IOW('a', ATMIOC_ITF+7, struct atmif_sioc32)
+#define ATM_ADDADDR32     _IOW('a', ATMIOC_ITF+8, struct atmif_sioc32)
+#define ATM_DELADDR32     _IOW('a', ATMIOC_ITF+9, struct atmif_sioc32)
 #define ATM_GETCIRANGE32  _IOW('a', ATMIOC_ITF+10, struct atmif_sioc32)
 #define ATM_SETCIRANGE32  _IOW('a', ATMIOC_ITF+11, struct atmif_sioc32)
 #define ATM_SETESI32      _IOW('a', ATMIOC_ITF+12, struct atmif_sioc32)
 #define ATM_SETESIF32     _IOW('a', ATMIOC_ITF+13, struct atmif_sioc32)
 #define ATM_GETSTAT32     _IOW('a', ATMIOC_SARCOM+0, struct atmif_sioc32)
 #define ATM_GETSTATZ32    _IOW('a', ATMIOC_SARCOM+1, struct atmif_sioc32)
-#define ATM_GETLOOP32	  _IOW('a', ATMIOC_SARCOM+2, struct atmif_sioc32)
-#define ATM_SETLOOP32	  _IOW('a', ATMIOC_SARCOM+3, struct atmif_sioc32)
-#define ATM_QUERYLOOP32	  _IOW('a', ATMIOC_SARCOM+4, struct atmif_sioc32)
+#define ATM_GETLOOP32     _IOW('a', ATMIOC_SARCOM+2, struct atmif_sioc32)
+#define ATM_SETLOOP32     _IOW('a', ATMIOC_SARCOM+3, struct atmif_sioc32)
+#define ATM_QUERYLOOP32   _IOW('a', ATMIOC_SARCOM+4, struct atmif_sioc32)
 
 static struct
 {
@@ -2355,7 +2355,7 @@ typedef struct
     u32 proc;
     u32 pv[ABS_MAX_PV + 1];
     u32 lv[ABS_MAX_LV + 1];
-    uint8_t vg_uuid[UUID_LEN+1];	/* volume group UUID */
+    uint8_t vg_uuid[UUID_LEN+1];    /* volume group UUID */
     uint8_t dummy1[200];
 } vg32_t;
 
@@ -2906,9 +2906,9 @@ out:
 
 struct raw32_config_request
 {
-    int	raw_minor;
-    __u64	block_major;
-    __u64	block_minor;
+    int raw_minor;
+    __u64   block_major;
+    __u64   block_minor;
 } __attribute__((packed));
 
 static int raw_ioctl(unsigned fd, unsigned cmd,  void *ptr)
@@ -2941,24 +2941,24 @@ static int raw_ioctl(unsigned fd, unsigned cmd,  void *ptr)
 
 struct serial_struct32
 {
-    int	type;
-    int	line;
-    unsigned int	port;
-    int	irq;
-    int	flags;
-    int	xmit_fifo_size;
-    int	custom_divisor;
-    int	baud_base;
-    unsigned short	close_delay;
-    char	io_type;
-    char	reserved_char[1];
-    int	hub6;
-    unsigned short	closing_wait; /* time to wait before closing */
-    unsigned short	closing_wait2; /* no longer used... */
+    int type;
+    int line;
+    unsigned int    port;
+    int irq;
+    int flags;
+    int xmit_fifo_size;
+    int custom_divisor;
+    int baud_base;
+    unsigned short  close_delay;
+    char    io_type;
+    char    reserved_char[1];
+    int hub6;
+    unsigned short  closing_wait; /* time to wait before closing */
+    unsigned short  closing_wait2; /* no longer used... */
     __u32 iomem_base;
-    unsigned short	iomem_reg_shift;
-    unsigned int	port_high;
-    int	reserved[1];
+    unsigned short  iomem_reg_shift;
+    unsigned int    port_high;
+    int reserved[1];
 };
 
 static int serial_struct_ioctl(unsigned fd, unsigned cmd,  void *ptr)
@@ -3012,14 +3012,14 @@ static int reiserfs_ioctl32(unsigned fd, unsigned cmd, unsigned long ptr)
 
 struct dirent32
 {
-    unsigned int		d_ino;
-    __kernel_off_t32	d_off;
-    unsigned short	d_reclen;
-    char		d_name[256]; /* We must not include limits.h! */
+    unsigned int        d_ino;
+    __kernel_off_t32    d_off;
+    unsigned short  d_reclen;
+    char        d_name[256]; /* We must not include limits.h! */
 };
 
-#define	VFAT_IOCTL_READDIR_BOTH32	_IOR('r', 1, struct dirent32 [2])
-#define	VFAT_IOCTL_READDIR_SHORT32	_IOR('r', 2, struct dirent32 [2])
+#define VFAT_IOCTL_READDIR_BOTH32   _IOR('r', 1, struct dirent32 [2])
+#define VFAT_IOCTL_READDIR_SHORT32  _IOR('r', 2, struct dirent32 [2])
 
 static int put_dirent32(struct dirent *src, struct dirent32 *dst)
 {
@@ -3049,10 +3049,10 @@ static int vfat_ioctl32(unsigned fd, unsigned cmd,  void *ptr)
     return ret;
 }
 
-#define RTC_IRQP_READ32	_IOR('p', 0x0b, unsigned int)	 /* Read IRQ rate   */
-#define RTC_IRQP_SET32	_IOW('p', 0x0c, unsigned int)	 /* Set IRQ rate    */
-#define RTC_EPOCH_READ32	_IOR('p', 0x0d, unsigned)	 /* Read epoch      */
-#define RTC_EPOCH_SET32		_IOW('p', 0x0e, unsigned)	 /* Set epoch       */
+#define RTC_IRQP_READ32 _IOR('p', 0x0b, unsigned int)    /* Read IRQ rate   */
+#define RTC_IRQP_SET32  _IOW('p', 0x0c, unsigned int)    /* Set IRQ rate    */
+#define RTC_EPOCH_READ32    _IOR('p', 0x0d, unsigned)    /* Read epoch      */
+#define RTC_EPOCH_SET32     _IOW('p', 0x0e, unsigned)    /* Set epoch       */
 
 static int rtc32_ioctl(unsigned fd, unsigned cmd, unsigned long arg)
 {
@@ -3214,36 +3214,36 @@ out:
  *
  * The issue is:
  *
- *	When an URB is submitted via usbdevicefs it is put onto an
- *	asynchronous queue.  When the URB completes, it may be reaped
- *	via another ioctl.  During this reaping the status is written
- *	back to userspace along with the length of the transfer.
+ *  When an URB is submitted via usbdevicefs it is put onto an
+ *  asynchronous queue.  When the URB completes, it may be reaped
+ *  via another ioctl.  During this reaping the status is written
+ *  back to userspace along with the length of the transfer.
  *
- *	We must translate into 64-bit kernel types so we pass in a kernel
- *	space copy of the usbdevfs_urb structure.  This would mean that we
- *	must do something to deal with the async entry reaping.  First we
- *	have to deal somehow with this transitory memory we've allocated.
- *	This is problematic since there are many call sites from which the
- *	async entries can be destroyed (and thus when we'd need to free up
- *	this kernel memory).  One of which is the close() op of usbdevicefs.
- *	To handle that we'd need to make our own file_operations struct which
- *	overrides usbdevicefs's release op with our own which runs usbdevicefs's
- *	real release op then frees up the kernel memory.
+ *  We must translate into 64-bit kernel types so we pass in a kernel
+ *  space copy of the usbdevfs_urb structure.  This would mean that we
+ *  must do something to deal with the async entry reaping.  First we
+ *  have to deal somehow with this transitory memory we've allocated.
+ *  This is problematic since there are many call sites from which the
+ *  async entries can be destroyed (and thus when we'd need to free up
+ *  this kernel memory).  One of which is the close() op of usbdevicefs.
+ *  To handle that we'd need to make our own file_operations struct which
+ *  overrides usbdevicefs's release op with our own which runs usbdevicefs's
+ *  real release op then frees up the kernel memory.
  *
- *	But how to keep track of these kernel buffers?  We'd need to either
- *	keep track of them in some table _or_ know about usbdevicefs internals
- *	(ie. the exact layout of it's file private, which is actually defined
- *	in linux/usbdevice_fs.h, the layout of the async queues are private to
- *	devio.c)
+ *  But how to keep track of these kernel buffers?  We'd need to either
+ *  keep track of them in some table _or_ know about usbdevicefs internals
+ *  (ie. the exact layout of it's file private, which is actually defined
+ *  in linux/usbdevice_fs.h, the layout of the async queues are private to
+ *  devio.c)
  *
  * There is one possible other solution I considered, also involving knowledge
  * of usbdevicefs internals:
  *
- *	After an URB is submitted, we "fix up" the address back to the user
- *	space one.  This would work if the status/length fields written back
- *	by the async URB completion lines up perfectly in the 32-bit type with
- *	the 64-bit kernel type.  Unfortunately, it does not because the iso
- *	frame descriptors, at the end of the struct, can be written back.
+ *  After an URB is submitted, we "fix up" the address back to the user
+ *  space one.  This would work if the status/length fields written back
+ *  by the async URB completion lines up perfectly in the 32-bit type with
+ *  the 64-bit kernel type.  Unfortunately, it does not because the iso
+ *  frame descriptors, at the end of the struct, can be written back.
  *
  * I think we'll just need to simply duplicate the devio URB engine here.
  */
@@ -3474,22 +3474,22 @@ struct mtd_oob_buf32
 {
     u32 start;
     u32 length;
-    u32 ptr;	/* unsigned char* */
+    u32 ptr;    /* unsigned char* */
 };
 
-#define MEMWRITEOOB32 	_IOWR('M',3,struct mtd_oob_buf32)
-#define MEMREADOOB32 	_IOWR('M',4,struct mtd_oob_buf32)
+#define MEMWRITEOOB32   _IOWR('M',3,struct mtd_oob_buf32)
+#define MEMREADOOB32    _IOWR('M',4,struct mtd_oob_buf32)
 
 static int mtd_rw_oob(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
-    mm_segment_t 			old_fs 	= get_fs();
-    struct mtd_oob_buf32	*uarg 	= (struct mtd_oob_buf32 *)arg;
-    struct mtd_oob_buf		karg;
+    mm_segment_t            old_fs  = get_fs();
+    struct mtd_oob_buf32    *uarg   = (struct mtd_oob_buf32 *)arg;
+    struct mtd_oob_buf      karg;
     u32 tmp;
     int ret;
 
-    if (get_user(karg.start, &uarg->start) 		||
-            get_user(karg.length, &uarg->length)	||
+    if (get_user(karg.start, &uarg->start)      ||
+            get_user(karg.length, &uarg->length)    ||
             get_user(tmp, &uarg->ptr))
         return -EFAULT;
 
@@ -3533,7 +3533,7 @@ struct mtrr_gentry32
     unsigned int type;     /*  Type of region   */
 };
 
-#define	MTRR_IOCTL_BASE	'M'
+#define MTRR_IOCTL_BASE 'M'
 
 #define MTRRIOC32_ADD_ENTRY        _IOW(MTRR_IOCTL_BASE,  0, struct mtrr_sentry32)
 #define MTRRIOC32_SET_ENTRY        _IOW(MTRR_IOCTL_BASE,  1, struct mtrr_sentry32)
@@ -4322,8 +4322,8 @@ COMPATIBLE_IOCTL(BNEPGETCONNLIST)
 COMPATIBLE_IOCTL(BNEPGETCONNINFO)
 #endif
 /* Misc. */
-COMPATIBLE_IOCTL(0x41545900)		/* ATYIO_CLKR */
-COMPATIBLE_IOCTL(0x41545901)		/* ATYIO_CLKW */
+COMPATIBLE_IOCTL(0x41545900)        /* ATYIO_CLKR */
+COMPATIBLE_IOCTL(0x41545901)        /* ATYIO_CLKW */
 COMPATIBLE_IOCTL(PCIIOC_CONTROLLER)
 COMPATIBLE_IOCTL(PCIIOC_MMAP_IS_IO)
 COMPATIBLE_IOCTL(PCIIOC_MMAP_IS_MEM)

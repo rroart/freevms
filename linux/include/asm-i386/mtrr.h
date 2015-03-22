@@ -26,7 +26,7 @@
 #include <linux/config.h>
 #include <linux/ioctl.h>
 
-#define	MTRR_IOCTL_BASE	'M'
+#define MTRR_IOCTL_BASE 'M'
 
 struct mtrr_sentry
 {

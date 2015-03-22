@@ -104,13 +104,13 @@ struct NFTLrecord
     __u16 numvunits;
     __u16 lastEUN;                  /* should be suppressed */
     __u16 numfreeEUNs;
-    __u16 LastFreeEUN; 		/* To speed up finding a free EUN */
+    __u16 LastFreeEUN;      /* To speed up finding a free EUN */
     __u32 long nr_sects;
     int head,sect,cyl;
-    __u16 *EUNtable; 		/* [numvunits]: First EUN for each virtual unit  */
-    __u16 *ReplUnitTable; 		/* [numEUNs]: ReplUnitNumber for each */
-    unsigned int nb_blocks;		/* number of physical blocks */
-    unsigned int nb_boot_blocks;	/* number of blocks used by the bios */
+    __u16 *EUNtable;        /* [numvunits]: First EUN for each virtual unit  */
+    __u16 *ReplUnitTable;       /* [numEUNs]: ReplUnitNumber for each */
+    unsigned int nb_blocks;     /* number of physical blocks */
+    unsigned int nb_boot_blocks;    /* number of blocks used by the bios */
     struct erase_info instr;
 };
 

@@ -1,14 +1,14 @@
 /* -*- linux-c -*-
  *
- *	$Id$
+ *  $Id$
  *
- *	Linux Magic System Request Key Hacks
+ *  Linux Magic System Request Key Hacks
  *
- *	(c) 1997 Martin Mares <mj@atrey.karlin.mff.cuni.cz>
+ *  (c) 1997 Martin Mares <mj@atrey.karlin.mff.cuni.cz>
  *
- *	(c) 2000 Crutcher Dunnavant <crutcher+kernel@datastacks.com>
- *	overhauled to use key registration
- *	based upon discusions in irc://irc.openprojects.net/#kernelnewbies
+ *  (c) 2000 Crutcher Dunnavant <crutcher+kernel@datastacks.com>
+ *  overhauled to use key registration
+ *  based upon discusions in irc://irc.openprojects.net/#kernelnewbies
  */
 #ifndef __LINUX_SYSRQ_H__
 #define __LINUX_SYSRQ_H__
@@ -118,9 +118,9 @@ extern int emergency_sync_scheduled;
 void do_emergency_sync(void);
 
 #ifdef CONFIG_MAGIC_SYSRQ
-#define CHECK_EMERGENCY_SYNC			\
-	if (emergency_sync_scheduled)		\
-		do_emergency_sync();
+#define CHECK_EMERGENCY_SYNC            \
+    if (emergency_sync_scheduled)       \
+        do_emergency_sync();
 #else
 #define CHECK_EMERGENCY_SYNC
 #endif

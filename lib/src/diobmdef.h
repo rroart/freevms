@@ -1,5 +1,5 @@
-#ifndef diobmdef_h
-#define diobmdef_h
+#ifndef DIOBMDEF_H
+#define DIOBMDEF_H
 
 #include <ptedef.h>
 

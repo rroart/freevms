@@ -1,13 +1,13 @@
 /*
- *	Precise Delay Loops for i386
+ *  Precise Delay Loops for i386
  *
- *	Copyright (C) 1993 Linus Torvalds
- *	Copyright (C) 1997 Martin Mares <mj@atrey.karlin.mff.cuni.cz>
+ *  Copyright (C) 1993 Linus Torvalds
+ *  Copyright (C) 1997 Martin Mares <mj@atrey.karlin.mff.cuni.cz>
  *
- *	The __delay function must _NOT_ be inlined as its execution time
- *	depends wildly on alignment on many x86 processors. The additional
- *	jump magic is needed to get the timing stable on all the CPU's
- *	we have to worry about.
+ *  The __delay function must _NOT_ be inlined as its execution time
+ *  depends wildly on alignment on many x86 processors. The additional
+ *  jump magic is needed to get the timing stable on all the CPU's
+ *  we have to worry about.
  */
 
 #include <linux/config.h>
@@ -21,12 +21,12 @@
 #include <asm/smp.h>
 #endif
 
-int x86_udelay_tsc = 0;		/* Delay via TSC */
+int x86_udelay_tsc = 0;     /* Delay via TSC */
 
 
 /*
- *	Do a udelay using the TSC for any CPU that happens
- *	to have one that we trust.
+ *  Do a udelay using the TSC for any CPU that happens
+ *  to have one that we trust.
  */
 
 static void __rdtsc_delay(unsigned long loops)
@@ -43,7 +43,7 @@ static void __rdtsc_delay(unsigned long loops)
 }
 
 /*
- *	Non TSC based delay loop for 386, 486, MediaGX
+ *  Non TSC based delay loop for 386, 486, MediaGX
  */
 
 static void __loop_delay(unsigned long loops)

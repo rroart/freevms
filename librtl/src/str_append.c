@@ -2,7 +2,7 @@
 /*
  * str_append.c
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,20 +20,20 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
 /*
  * str_append.c
  *
- *	Code for VAX STR$APPEND routine
+ *  Code for VAX STR$APPEND routine
  *
  * Description:
  *
@@ -43,18 +43,18 @@
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  *
- *	Feb 24, 2004 - Andrew Allison
- * 		Inserted GNU Licence
+ *  Feb 24, 2004 - Andrew Allison
+ *      Inserted GNU Licence
  *
- *	Mar 1, 2004 - Andrew Allison
- *		Changed return status from STR$_NORMAL to SS$_NORMAL
- *		Added code to handle destination string being NULL
+ *  Mar 1, 2004 - Andrew Allison
+ *      Changed return status from STR$_NORMAL to SS$_NORMAL
+ *      Added code to handle destination string being NULL
  *
  *
  */
@@ -75,13 +75,13 @@
 unsigned long str$append(struct dsc$descriptor_s* destination_string,
                          const struct dsc$descriptor_s* source_string)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
-    char* s2_ptr;			/* Pointer to second string */
-    unsigned short s2_length;	/* Length of second string */
-    unsigned short final_length;	/* Final string length */
-    unsigned long result = SS$_NORMAL;	/* Result */
-    unsigned long	size_check;	// check that haven't gone over
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
+    char* s2_ptr;           /* Pointer to second string */
+    unsigned short s2_length;   /* Length of second string */
+    unsigned short final_length;    /* Final string length */
+    unsigned long result = SS$_NORMAL;  /* Result */
+    unsigned long   size_check; // check that haven't gone over
 
     /*
      * Destination MUST be a dynamic string

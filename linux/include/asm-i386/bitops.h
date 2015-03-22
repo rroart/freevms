@@ -75,8 +75,8 @@ static __inline__ void clear_bit(int nr, volatile void * addr)
                           :"=m" (ADDR)
                           :"Ir" (nr));
 }
-#define smp_mb__before_clear_bit()	barrier()
-#define smp_mb__after_clear_bit()	barrier()
+#define smp_mb__before_clear_bit()  barrier()
+#define smp_mb__after_clear_bit()   barrier()
 
 /**
  * __change_bit - Toggle a bit in memory

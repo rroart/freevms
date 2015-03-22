@@ -35,8 +35,8 @@
 
 
 /*
- *	File may be NULL when we are called. Perhaps we shouldn't
- *	even pass file to fsync ?
+ *  File may be NULL when we are called. Perhaps we shouldn't
+ *  even pass file to fsync ?
  */
 
 #if 0

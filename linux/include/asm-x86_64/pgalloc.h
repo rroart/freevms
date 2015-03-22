@@ -13,13 +13,13 @@
 #define dec_pgcache_size() sub_pda(pgtable_cache_sz,1UL)
 
 #define pmd_populate_kernel(mm, pmd, pte) \
-		set_pmd(pmd, __pmd(_PAGE_TABLE | __pa(pte)))
+        set_pmd(pmd, __pmd(_PAGE_TABLE | __pa(pte)))
 #define pud_populate(mm, pud, pmd) \
-		set_pud(pud, __pud(_PAGE_TABLE | __pa(pmd)))
+        set_pud(pud, __pud(_PAGE_TABLE | __pa(pmd)))
 #define pmd_populate(mm, pmd, pte) \
-		set_pmd(pmd, __pmd(_PAGE_TABLE | __pa(pte)))
+        set_pmd(pmd, __pmd(_PAGE_TABLE | __pa(pte)))
 #define pgd_populate(mm, pgd, pud) \
-		set_pgd(pgd, __pgd(_PAGE_TABLE | __pa(pud)))
+        set_pgd(pgd, __pgd(_PAGE_TABLE | __pa(pud)))
 
 extern __inline__ pmd_t *get_pmd_slow(void)
 {
@@ -249,7 +249,7 @@ static inline void flush_tlb_range(struct mm_struct *mm,
 #include <asm/smp.h>
 
 #define local_flush_tlb() \
-	__flush_tlb()
+    __flush_tlb()
 
 extern void flush_tlb_all(void);
 extern void flush_tlb_current_task(void);
@@ -257,15 +257,15 @@ extern void flush_tlb_mm(struct mm_struct *);
 extern void flush_tlb_page(struct vm_area_struct *, unsigned long);
 extern void flush_tlb_page2(struct mm_struct *, unsigned long);
 
-#define flush_tlb()	flush_tlb_current_task()
+#define flush_tlb() flush_tlb_current_task()
 
 static inline void flush_tlb_range(struct mm_struct * mm, unsigned long start, unsigned long end)
 {
     flush_tlb_mm(mm);
 }
 
-#define TLBSTATE_OK	1
-#define TLBSTATE_LAZY	2
+#define TLBSTATE_OK 1
+#define TLBSTATE_LAZY   2
 
 struct tlb_state
 {

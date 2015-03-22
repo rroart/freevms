@@ -151,7 +151,7 @@ static int will_become_orphaned_pgrp(int pgrp, struct task_struct * ignored_task
     }
     for_each_task_post1(p);
     read_unlock(&tasklist_lock);
-    return 1;	/* (sighing) "Often!" */
+    return 1;   /* (sighing) "Often!" */
 }
 
 int is_orphaned_pgrp(int pgrp)
@@ -424,8 +424,8 @@ static void exit_notify(void)
      *
      * A.  Make init inherit all the child processes
      * B.  Check to see if any process groups have become orphaned
-     *	as a result of our exiting, and if they have any stopped
-     *	jobs, send them a SIGHUP and then a SIGCONT.  (POSIX 3.2.2.2)
+     *  as a result of our exiting, and if they have any stopped
+     *  jobs, send them a SIGHUP and then a SIGCONT.  (POSIX 3.2.2.2)
      */
 
     write_lock_irq(&tasklist_lock);
@@ -474,8 +474,8 @@ NORET_TYPE void do_exit(long code)
     int cpuid = smp_processor_id();
     struct _cpu * cpu=smp$gl_cpu_data[cpuid];
 
-    //	if (in_interrupt())
-    //		panic("Aiee, killing interrupt handler!");
+    //  if (in_interrupt())
+    //      panic("Aiee, killing interrupt handler!");
     if (!tsk->pcb$l_pid)
         panic("Attempted to kill the idle task!");
     if (tsk->pcb$l_pid == INIT_PID)
@@ -525,7 +525,7 @@ fake_volatile:
 
     tsk->exit_code = code;
     exit_notify();
-    //	schedule();
+    //  schedule();
 #if 0
     setipl(0); // probably illegal semantic?
     cpu->cpu$b_cur_pri=31; // cheat a bit more?
@@ -535,7 +535,7 @@ fake_volatile:
         if (task_on_comqueue(tsk))
             remque(tsk,dum);
 #endif
-    //	SOFTINT_RESCHED_VECTOR; // maybe not, instead:
+    //  SOFTINT_RESCHED_VECTOR; // maybe not, instead:
     vmslock(&SPIN_SCHED,IPL$_SCHED);
     sch$sched(0);
     //sch$resched();

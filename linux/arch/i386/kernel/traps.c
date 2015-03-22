@@ -10,7 +10,7 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  *
  *  Pentium III FXSR, SSE support
- *	Gareth Hughes <gareth@valinux.com>, May 2000
+ *  Gareth Hughes <gareth@valinux.com>, May 2000
  */
 
 /*
@@ -363,35 +363,35 @@ vm86_trap:
 #define DO_ERROR(trapnr, signr, str, name) \
 asmlinkage void do_##name(struct pt_regs * regs, long error_code) \
 { \
-	do_trap(trapnr, signr, str, 0, regs, error_code, NULL); \
+    do_trap(trapnr, signr, str, 0, regs, error_code, NULL); \
 }
 
 #define DO_ERROR_INFO(trapnr, signr, str, name, sicode, siaddr) \
 asmlinkage void do_##name(struct pt_regs * regs, long error_code) \
 { \
-	siginfo_t info; \
-	info.si_signo = signr; \
-	info.si_errno = 0; \
-	info.si_code = sicode; \
-	info.si_addr = (void *)siaddr; \
-	do_trap(trapnr, signr, str, 0, regs, error_code, &info); \
+    siginfo_t info; \
+    info.si_signo = signr; \
+    info.si_errno = 0; \
+    info.si_code = sicode; \
+    info.si_addr = (void *)siaddr; \
+    do_trap(trapnr, signr, str, 0, regs, error_code, &info); \
 }
 
 #define DO_VM86_ERROR(trapnr, signr, str, name) \
 asmlinkage void do_##name(struct pt_regs * regs, long error_code) \
 { \
-	do_trap(trapnr, signr, str, 1, regs, error_code, NULL); \
+    do_trap(trapnr, signr, str, 1, regs, error_code, NULL); \
 }
 
 #define DO_VM86_ERROR_INFO(trapnr, signr, str, name, sicode, siaddr) \
 asmlinkage void do_##name(struct pt_regs * regs, long error_code) \
 { \
-	siginfo_t info; \
-	info.si_signo = signr; \
-	info.si_errno = 0; \
-	info.si_code = sicode; \
-	info.si_addr = (void *)siaddr; \
-	do_trap(trapnr, signr, str, 1, regs, error_code, &info); \
+    siginfo_t info; \
+    info.si_signo = signr; \
+    info.si_errno = 0; \
+    info.si_code = sicode; \
+    info.si_addr = (void *)siaddr; \
+    do_trap(trapnr, signr, str, 1, regs, error_code, &info); \
 }
 
 DO_VM86_ERROR_INFO( 0, SIGFPE,  "divide error", divide_error, FPE_INTDIV, regs->eip)
@@ -510,9 +510,9 @@ asmlinkage void do_nmi(struct pt_regs * regs, long error_code)
      * as it's edge-triggered.
      */
     outb(0x8f, 0x70);
-    inb(0x71);		/* dummy */
+    inb(0x71);      /* dummy */
     outb(0x0f, 0x70);
-    inb(0x71);		/* dummy */
+    inb(0x71);      /* dummy */
 }
 
 /*
@@ -768,7 +768,7 @@ asmlinkage void do_spurious_interrupt_bug(struct pt_regs * regs,
  */
 asmlinkage void math_state_restore(struct pt_regs regs)
 {
-    __asm__ __volatile__("clts");		/* Allow maths ops (or we recurse) */
+    __asm__ __volatile__("clts");       /* Allow maths ops (or we recurse) */
 
     if (current->used_math)
     {
@@ -778,7 +778,7 @@ asmlinkage void math_state_restore(struct pt_regs regs)
     {
         init_fpu();
     }
-    current->flags |= PF_USEDFPU;	/* So we fnsave on switch_to() */
+    current->flags |= PF_USEDFPU;   /* So we fnsave on switch_to() */
 }
 
 #ifndef CONFIG_MATH_EMULATION
@@ -830,13 +830,13 @@ void __init trap_init_f00f_bug(void)
 do { \
   int __d0, __d1; \
   __asm__ __volatile__ ("movw %%dx,%%ax\n\t" \
-	"movw %4,%%dx\n\t" \
-	"movl %%eax,%0\n\t" \
-	"movl %%edx,%1" \
-	:"=m" (*((long *) (gate_addr))), \
-	 "=m" (*(1+(long *) (gate_addr))), "=&a" (__d0), "=&d" (__d1) \
-	:"i" ((short) (0x8000+(dpl<<13)+(type<<8))), \
-	 "3" ((char *) (addr)),"2" (__KERNEL_CS << 16)); \
+    "movw %4,%%dx\n\t" \
+    "movl %%eax,%0\n\t" \
+    "movl %%edx,%1" \
+    :"=m" (*((long *) (gate_addr))), \
+     "=m" (*(1+(long *) (gate_addr))), "=&a" (__d0), "=&d" (__d1) \
+    :"i" ((short) (0x8000+(dpl<<13)+(type<<8))), \
+     "3" ((char *) (addr)),"2" (__KERNEL_CS << 16)); \
 } while (0)
 
 
@@ -844,13 +844,13 @@ do { \
 do { \
   int __d0, __d1; \
   __asm__ __volatile__ ("movw %%dx,%%ax\n\t" \
-	"movw %4,%%dx\n\t" \
-	"movl %%eax,%0\n\t" \
-	"movl %%edx,%1" \
-	:"=m" (*((long *) (gate_addr))), \
-	 "=m" (*(1+(long *) (gate_addr))), "=&a" (__d0), "=&d" (__d1) \
-	:"i" ((short) (0x8000+(dpl<<13)+(type<<8))), \
-	 "3" ((char *) (addr)),"2" (__EXECUTIVE_CS << 16)); \
+    "movw %4,%%dx\n\t" \
+    "movl %%eax,%0\n\t" \
+    "movl %%edx,%1" \
+    :"=m" (*((long *) (gate_addr))), \
+     "=m" (*(1+(long *) (gate_addr))), "=&a" (__d0), "=&d" (__d1) \
+    :"i" ((short) (0x8000+(dpl<<13)+(type<<8))), \
+     "3" ((char *) (addr)),"2" (__EXECUTIVE_CS << 16)); \
 } while (0)
 
 
@@ -858,13 +858,13 @@ do { \
 do { \
   int __d0, __d1; \
   __asm__ __volatile__ ("movw %%dx,%%ax\n\t" \
-	"movw %4,%%dx\n\t" \
-	"movl %%eax,%0\n\t" \
-	"movl %%edx,%1" \
-	:"=m" (*((long *) (gate_addr))), \
-	 "=m" (*(1+(long *) (gate_addr))), "=&a" (__d0), "=&d" (__d1) \
-	:"i" ((short) (0x8000+(dpl<<13)+(type<<8))), \
-	 "3" ((char *) (addr)),"2" (__SUPERVISOR_CS << 16)); \
+    "movw %4,%%dx\n\t" \
+    "movl %%eax,%0\n\t" \
+    "movl %%edx,%1" \
+    :"=m" (*((long *) (gate_addr))), \
+     "=m" (*(1+(long *) (gate_addr))), "=&a" (__d0), "=&d" (__d1) \
+    :"i" ((short) (0x8000+(dpl<<13)+(type<<8))), \
+     "3" ((char *) (addr)),"2" (__SUPERVISOR_CS << 16)); \
 } while (0)
 
 
@@ -895,25 +895,25 @@ static void __init set_call_gate(void *a, void *addr)
 }
 
 #define _set_seg_desc(gate_addr,type,dpl,base,limit) {\
-	*((gate_addr)+1) = ((base) & 0xff000000) | \
-		(((base) & 0x00ff0000)>>16) | \
-		((limit) & 0xf0000) | \
-		((dpl)<<13) | \
-		(0x00408000) | \
-		((type)<<8); \
-	*(gate_addr) = (((base) & 0x0000ffff)<<16) | \
-		((limit) & 0x0ffff); }
+    *((gate_addr)+1) = ((base) & 0xff000000) | \
+        (((base) & 0x00ff0000)>>16) | \
+        ((limit) & 0xf0000) | \
+        ((dpl)<<13) | \
+        (0x00408000) | \
+        ((type)<<8); \
+    *(gate_addr) = (((base) & 0x0000ffff)<<16) | \
+        ((limit) & 0x0ffff); }
 
 #define _set_tssldt_desc(n,addr,limit,type) \
 __asm__ __volatile__ ("movw %w3,0(%2)\n\t" \
-	"movw %%ax,2(%2)\n\t" \
-	"rorl $16,%%eax\n\t" \
-	"movb %%al,4(%2)\n\t" \
-	"movb %4,5(%2)\n\t" \
-	"movb $0,6(%2)\n\t" \
-	"movb %%ah,7(%2)\n\t" \
-	"rorl $16,%%eax" \
-	: "=m"(*(n)) : "a" (addr), "r"(n), "ir"(limit), "i"(type))
+    "movw %%ax,2(%2)\n\t" \
+    "rorl $16,%%eax\n\t" \
+    "movb %%al,4(%2)\n\t" \
+    "movb %4,5(%2)\n\t" \
+    "movb $0,6(%2)\n\t" \
+    "movb %%ah,7(%2)\n\t" \
+    "rorl $16,%%eax" \
+    : "=m"(*(n)) : "a" (addr), "r"(n), "ir"(limit), "i"(type))
 
 void set_tss_desc(unsigned int n, void *addr)
 {
@@ -935,9 +935,9 @@ void set_ldt_desc(unsigned int n, void *addr, unsigned int size)
  * level triggered, active lo as required by Lithium.
  */
 
-#define	REG	0x2e	/* The register to read/write */
-#define	DEV	0x07	/* Register: Logical device select */
-#define	VAL	0x2f	/* The value to read/write */
+#define REG 0x2e    /* The register to read/write */
+#define DEV 0x07    /* Register: Logical device select */
+#define VAL 0x2f    /* The value to read/write */
 
 static void
 superio_outb(int dev, int reg, int val)
@@ -957,23 +957,23 @@ superio_inb(int dev, int reg)
     return inb(VAL);
 }
 
-#define	FLOP	3	/* floppy logical device */
-#define	PPORT	4	/* parallel logical device */
-#define	UART5	5	/* uart2 logical device (not wired up) */
-#define	UART6	6	/* uart1 logical device (THIS is the serial port!) */
-#define	IDEST	0x70	/* int. destination (which 307 IRQ line) reg. */
-#define	ITYPE	0x71	/* interrupt type register */
+#define FLOP    3   /* floppy logical device */
+#define PPORT   4   /* parallel logical device */
+#define UART5   5   /* uart2 logical device (not wired up) */
+#define UART6   6   /* uart1 logical device (THIS is the serial port!) */
+#define IDEST   0x70    /* int. destination (which 307 IRQ line) reg. */
+#define ITYPE   0x71    /* interrupt type register */
 
 /* interrupt type bits */
-#define	LEVEL	0x01	/* bit 0, 0 == edge triggered */
-#define	ACTHI	0x02	/* bit 1, 0 == active lo */
+#define LEVEL   0x01    /* bit 0, 0 == edge triggered */
+#define ACTHI   0x02    /* bit 1, 0 == active lo */
 
 static void
 superio_init(void)
 {
     if (visws_board_type == VISWS_320 && visws_board_rev == 5)
     {
-        superio_outb(UART6, IDEST, 0);	/* 0 means no intr propagated */
+        superio_outb(UART6, IDEST, 0);  /* 0 means no intr propagated */
         printk("SGI 320 rev 5: disabling 307 uart1 interrupt\n");
     }
 }
@@ -1031,7 +1031,7 @@ void __init trap_init(void)
     kernel_puts("puts 6.3\n");
     set_intr_gate(2,&nmi);
     kernel_puts("puts 6.4\n");
-    set_system_gate(3,&int3);	/* int3-5 can be called from all */
+    set_system_gate(3,&int3);   /* int3-5 can be called from all */
     kernel_puts("puts 6.5\n");
     set_system_gate(4,&overflow);
     kernel_puts("puts 6.6\n");
@@ -1075,7 +1075,7 @@ void __init trap_init(void)
 #endif
     set_system_gate(VMSSYSCALL_VECTOR3,&vmssystem_call3); /* will need to figure out where the user mode setup is */
 
-    //		set_intr_gate(TEST_VECTOR,&test_code);
+    //      set_intr_gate(TEST_VECTOR,&test_code);
     set_intr_gate(ASTDEL_VECTOR,&astdel_vector);
     set_intr_gate(RESCHED_VECTOR,&resched_vector);
     set_intr_gate(IOPOST_VECTOR,&iopost_vector);
@@ -1089,7 +1089,7 @@ void __init trap_init(void)
     set_intr_gate(IOLOCK11_VECTOR,&iolock11_vector);
     kernel_puts("puts 6.22\n");
 
-    //	set_intr_gate(0xb0,&iolock11_vector);
+    //  set_intr_gate(0xb0,&iolock11_vector);
     extern sys_$ni_syscall4(void), test_sup(), test_exe();
 #if 0
     _set_gate_exe(idt_table+0xb0,15,3,test_exe);

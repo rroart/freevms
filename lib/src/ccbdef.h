@@ -1,5 +1,5 @@
-#ifndef ccbdef_h
-#define ccbdef_h
+#ifndef CCBDEF_H
+#define CCBDEF_H
 
 #define CCB$M_AMB        0x1
 #define CCB$M_IMGTMP     0x2

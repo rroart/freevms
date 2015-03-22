@@ -1,5 +1,5 @@
-#ifndef syidef_h
-#define syidef_h
+#ifndef SYIDEF_H
+#define SYIDEF_H
 
 #define SYI$C_EXETYPE 1
 #define SYI$C_FLDTYPE 2

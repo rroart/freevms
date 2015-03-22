@@ -5,9 +5,9 @@
 
 #define TCP_HP_BITS (~(TCP_RESERVED_BITS|TCP_FLAG_PSH))
 
-#define	TCP_ECN_OK		1
-#define TCP_ECN_QUEUE_CWR	2
-#define TCP_ECN_DEMAND_CWR	4
+#define TCP_ECN_OK      1
+#define TCP_ECN_QUEUE_CWR   2
+#define TCP_ECN_DEMAND_CWR  4
 
 static __inline__ void
 TCP_ECN_queue_cwr(struct tcp_opt *tp)

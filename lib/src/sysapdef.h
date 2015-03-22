@@ -1,5 +1,5 @@
-#ifndef sysapdef_h
-#define sysapdef_h
+#ifndef SYSAPDEF_H
+#define SYSAPDEF_H
 
 #define SYSAP$C_DISPQ 0
 #define SYSAP$C_DISPRET 1

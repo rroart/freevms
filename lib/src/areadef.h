@@ -1,5 +1,5 @@
-#ifndef areadef_h
-#define areadef_h
+#ifndef AREADEF_H
+#define AREADEF_H
 
 #define AREA$C_CYL 1
 #define AREA$C_LBN 2

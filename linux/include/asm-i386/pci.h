@@ -12,12 +12,12 @@
 #ifdef CONFIG_PCI
 extern unsigned int pcibios_assign_all_busses(void);
 #else
-#define pcibios_assign_all_busses()	0
+#define pcibios_assign_all_busses() 0
 #endif
 
 extern unsigned long pci_mem_start;
-#define PCIBIOS_MIN_IO		0x1000
-#define PCIBIOS_MIN_MEM		(pci_mem_start)
+#define PCIBIOS_MIN_IO      0x1000
+#define PCIBIOS_MIN_MEM     (pci_mem_start)
 
 void pcibios_set_master(struct pci_dev *dev);
 void pcibios_penalize_isa_irq(int irq);
@@ -40,7 +40,7 @@ struct pci_dev;
  * address space.  The networking and block device layers use
  * this boolean for bounce buffer decisions.
  */
-#define PCI_DMA_BUS_IS_PHYS	(1)
+#define PCI_DMA_BUS_IS_PHYS (1)
 
 /* Allocate and map kernel buffer using consistent mode DMA for a device.
  * hwdev should be valid struct pci_dev pointer for PCI devices,
@@ -117,10 +117,10 @@ static inline void pci_unmap_page(struct pci_dev *hwdev, dma_addr_t dma_address,
 /* pci_unmap_{page,single} is a nop so... */
 #define DECLARE_PCI_UNMAP_ADDR(ADDR_NAME)
 #define DECLARE_PCI_UNMAP_LEN(LEN_NAME)
-#define pci_unmap_addr(PTR, ADDR_NAME)		(0)
-#define pci_unmap_addr_set(PTR, ADDR_NAME, VAL)	do { } while (0)
-#define pci_unmap_len(PTR, LEN_NAME)		(0)
-#define pci_unmap_len_set(PTR, LEN_NAME, VAL)	do { } while (0)
+#define pci_unmap_addr(PTR, ADDR_NAME)      (0)
+#define pci_unmap_addr_set(PTR, ADDR_NAME, VAL) do { } while (0)
+#define pci_unmap_len(PTR, LEN_NAME)        (0)
+#define pci_unmap_len_set(PTR, LEN_NAME, VAL)   do { } while (0)
 
 /* Map a set of buffers described by scatterlist in streaming
  * mode for DMA.  This is the scather-gather version of the
@@ -229,7 +229,7 @@ static inline int pci_dma_supported(struct pci_dev *hwdev, u64 mask)
 }
 
 /* This is always fine. */
-#define pci_dac_dma_supported(pci_dev, mask)	(1)
+#define pci_dac_dma_supported(pci_dev, mask)    (1)
 
 static __inline__ dma64_addr_t
 pci_dac_page_to_dma(struct pci_dev *pdev, struct page *page, unsigned long offset, int direction)
@@ -263,8 +263,8 @@ pci_dac_dma_sync_single(struct pci_dev *pdev, dma64_addr_t dma_addr, size_t len,
  * You should only work with the number of sg entries pci_map_sg
  * returns.
  */
-#define sg_dma_address(sg)	((sg)->dma_address)
-#define sg_dma_len(sg)		((sg)->length)
+#define sg_dma_address(sg)  ((sg)->dma_address)
+#define sg_dma_len(sg)      ((sg)->length)
 
 /* Return the index of the PCI controller for device. */
 static inline int pci_controller_num(struct pci_dev *dev)

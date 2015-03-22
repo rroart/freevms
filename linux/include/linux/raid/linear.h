@@ -5,9 +5,9 @@
 
 struct dev_info
 {
-    kdev_t		dev;
-    unsigned long	size;
-    unsigned long	offset;
+    kdev_t      dev;
+    unsigned long   size;
+    unsigned long   offset;
 };
 
 typedef struct dev_info dev_info_t;
@@ -19,10 +19,10 @@ struct linear_hash
 
 struct linear_private_data
 {
-    struct linear_hash	*hash_table;
-    dev_info_t		disks[MD_SB_DISKS];
-    dev_info_t		*smallest;
-    int			nr_zones;
+    struct linear_hash  *hash_table;
+    dev_info_t      disks[MD_SB_DISKS];
+    dev_info_t      *smallest;
+    int         nr_zones;
 };
 
 

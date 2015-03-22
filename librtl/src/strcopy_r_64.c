@@ -1,7 +1,7 @@
 /*
  * strcopy_r_64.c
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,40 +19,40 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
 /*
- *	Code for VAX STR$COPY_R routine
+ *  Code for VAX STR$COPY_R routine
  *
  * Description:
  *
- *	This file contains various 'str$' functions equivalent
- *	to those available in Vax/VMS string library.
+ *  This file contains various 'str$' functions equivalent
+ *  to those available in Vax/VMS string library.
  *
  * Bugs:
  *
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 4, 1997 - Kevin Handy
- *		Change '=' to '==' in if statement. (Found with '-Wall');
+ *  Feb 4, 1997 - Kevin Handy
+ *      Change '=' to '==' in if statement. (Found with '-Wall');
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  *
- *	Feb 26, 2004 - Andrew Allison
- * 		Added GNU License
+ *  Feb 26, 2004 - Andrew Allison
+ *      Added GNU License
  */
 
 #include <stdio.h>
@@ -72,10 +72,10 @@ unsigned long str$copy_r_64(struct dsc$descriptor_s* destination_string,
                             const void *source_string_address)
 {
     unsigned short s1_length;
-    unsigned long length;	/* Length of first string */
-    int	s2_length;
-    unsigned long result = STR$_NORMAL;	/* Working result */
-    char* s1_ptr;			/* Pointer to first string */
+    unsigned long length;   /* Length of first string */
+    int s2_length;
+    unsigned long result = STR$_NORMAL; /* Working result */
+    char* s1_ptr;           /* Pointer to first string */
 
     s2_length = strlen(source_string_address);
     /*

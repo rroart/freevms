@@ -11,30 +11,30 @@
 
 /* IP Cache bits. */
 /* Src IP address. */
-#define NFC_DN_SRC		0x0001
+#define NFC_DN_SRC      0x0001
 /* Dest IP address. */
-#define NFC_DN_DST		0x0002
+#define NFC_DN_DST      0x0002
 /* Input device. */
-#define NFC_DN_IF_IN		0x0004
+#define NFC_DN_IF_IN        0x0004
 /* Output device. */
-#define NFC_DN_IF_OUT		0x0008
+#define NFC_DN_IF_OUT       0x0008
 
 /* DECnet Hooks */
 /* After promisc drops, checksum checks. */
-#define NF_DN_PRE_ROUTING	0
+#define NF_DN_PRE_ROUTING   0
 /* If the packet is destined for this box. */
-#define NF_DN_LOCAL_IN		1
+#define NF_DN_LOCAL_IN      1
 /* If the packet is destined for another interface. */
-#define NF_DN_FORWARD		2
+#define NF_DN_FORWARD       2
 /* Packets coming from a local process. */
-#define NF_DN_LOCAL_OUT		3
+#define NF_DN_LOCAL_OUT     3
 /* Packets about to hit the wire. */
-#define NF_DN_POST_ROUTING	4
+#define NF_DN_POST_ROUTING  4
 /* Input Hello Packets */
-#define NF_DN_HELLO		5
+#define NF_DN_HELLO     5
 /* Input Routing Packets */
-#define NF_DN_ROUTE		6
-#define NF_DN_NUMHOOKS		7
+#define NF_DN_ROUTE     6
+#define NF_DN_NUMHOOKS      7
 
 enum nf_dn_hook_priorities
 {

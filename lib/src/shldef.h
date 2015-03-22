@@ -1,5 +1,5 @@
-#ifndef shldef_h
-#define shldef_h
+#ifndef SHLDEF_H
+#define SHLDEF_H
 
 #define SHL$M_FIXUP 0x1
 #define SHL$C_OLD_SHL_SIZE 56
@@ -22,8 +22,8 @@ struct _shl
         unsigned char shl$b_flags;
         struct
         {
-            unsigned shl$v_fixup	: 1;
-            unsigned shl$v_fill_2_	: 7;
+            unsigned shl$v_fixup    : 1;
+            unsigned shl$v_fill_2_  : 7;
         };
     };
     void *shl$l_icb;

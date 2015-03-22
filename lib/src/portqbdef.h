@@ -1,5 +1,5 @@
-#ifndef portqbdef_h
-#define portqbdef_h
+#ifndef PORTQBDEF_H
+#define PORTQBDEF_H
 
 struct _portqb
 {

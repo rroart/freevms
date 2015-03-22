@@ -1,5 +1,5 @@
-#ifndef rms_h
-#define rms_h
+#ifndef RMS_H
+#define RMS_H
 
 # include <namdef.h>
 # include <fabdef.h>

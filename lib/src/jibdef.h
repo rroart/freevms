@@ -1,5 +1,5 @@
-#ifndef jibdef_h
-#define jibdef_h
+#ifndef JIBDEF_H
+#define JIBDEF_H
 
 #define JIB$C_DETACHED 0
 #define JIB$C_NETWORK 1

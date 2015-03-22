@@ -1,5 +1,5 @@
-#ifndef ucbdef_h
-#define ucbdef_h
+#ifndef UCBDEF_H
+#define UCBDEF_H
 
 #include <acbdef.h>
 #include <crbdef.h>

@@ -1,116 +1,116 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "XEDrv Address Resolution Protocol handler"
 //++
 // Module:
 //
-//	XEDrv_ARP - Handle common portions of Address Resolution Protocol
+//  XEDrv_ARP - Handle common portions of Address Resolution Protocol
 //
 // Facility:
 //
-//	Provides a common mechanism for building ARP packets and for
-//	maintaining a cache of ARP responses for doing IP to hardware
-//	address translation on Digital's EtherNet devices.
+//  Provides a common mechanism for building ARP packets and for
+//  maintaining a cache of ARP responses for doing IP to hardware
+//  address translation on Digital's EtherNet devices.
 //
 // Abstract:
 //
-//	Exports the following routines for use by the device drivers:
-//void !	    ARP_INIT
-//		Initialize the ARP package.
-//void !	    ARP_DEV_INIT(DEVIDX,HWTYPE,IPTYPE,HWADDR,HDRLEN)
-//		Initialize the ARP parameters for a device.
-//void !	    ARP_INPUT(DEVIDX)
-//		Handle reception of an ARP packet by the device driver.
-//		Adds ARP information to the cache or generates a reply.
-//	    ARP_CHECK(DEVIDX, IPADDR)
-//		Perform address resolution on specified IP address.
-//		If the address exists in the cache, the corresponding
-//		physical address is returned. Otherwise, an ARP request
-//		packet is generated and transmitted.
-//	    ARP_DUMP(ACIDX,RBLOCK,RBSIZE)
-//		Dump out part of the ARP cache.
+//  Exports the following routines for use by the device drivers:
+//void !        ARP_INIT
+//      Initialize the ARP package.
+//void !        ARP_DEV_INIT(DEVIDX,HWTYPE,IPTYPE,HWADDR,HDRLEN)
+//      Initialize the ARP parameters for a device.
+//void !        ARP_INPUT(DEVIDX)
+//      Handle reception of an ARP packet by the device driver.
+//      Adds ARP information to the cache or generates a reply.
+//      ARP_CHECK(DEVIDX, IPADDR)
+//      Perform address resolution on specified IP address.
+//      If the address exists in the cache, the corresponding
+//      physical address is returned. Otherwise, an ARP request
+//      packet is generated and transmitted.
+//      ARP_DUMP(ACIDX,RBLOCK,RBSIZE)
+//      Dump out part of the ARP cache.
 //
 // Author:
 //
-//	Vince Fuller, CMU-CSD, April 1986
-//	Copyright (c) 1986, 1987, Vince Fuller and Carnegie-Mellon University
+//  Vince Fuller, CMU-CSD, April 1986
+//  Copyright (c) 1986, 1987, Vince Fuller and Carnegie-Mellon University
 //
 // Change log:
 //
-//1.9A	07-Aug-1991	Henry W. Miller		USBR
-//	Numerous changes:
+//1.9A  07-Aug-1991 Henry W. Miller     USBR
+//  Numerous changes:
 //
-//	Use LIB$GET_VM_PAGE/LIB$FREE_VM_PAGE rather than LIB$GET_VM/
-//	LIB$FREE_VM.
-//	Check error returns from memory allocation routines and handle
-//	properly.
-//	Handle error returns properly in XE$ARP_CHECK() and other places.
+//  Use LIB$GET_VM_PAGE/LIB$FREE_VM_PAGE rather than LIB$GET_VM/
+//  LIB$FREE_VM.
+//  Check error returns from memory allocation routines and handle
+//  properly.
+//  Handle error returns properly in XE$ARP_CHECK() and other places.
 //
-//     06-Feb-90, Bruce R. Miller	CMU Network Development
-//	Made the module EtherNet specific since it practically was anyways.
-//	Moved it from the IPACP into the XEDrv.EXE image.
+//     06-Feb-90, Bruce R. Miller   CMU Network Development
+//  Made the module EtherNet specific since it practically was anyways.
+//  Moved it from the IPACP into the XEDrv.EXE image.
 //
 //     03-Jan-89, Edit bu DHP
-//	Add patches by Charles Lane (lane@duphy4.drexel.edu) to allow
-//	reading of broadcasts
-//	Fixed them so that we wouldn't respond with an ARP for the broadcast
-//	address
+//  Add patches by Charles Lane (lane@duphy4.drexel.edu) to allow
+//  reading of broadcasts
+//  Fixed them so that we wouldn't respond with an ARP for the broadcast
+//  address
 //
-//	06-SEP-1988	Dale Moore	CMU-Computer Science
-//	Was using a local variable before initialization.
-//	The variable was the source IP address of the incoming
-//	ARP request.
+//  06-SEP-1988 Dale Moore  CMU-Computer Science
+//  Was using a local variable before initialization.
+//  The variable was the source IP address of the incoming
+//  ARP request.
 //
 // 1.9  16-Sep-87, Edit by VAF
-//	Fix longstanding bug - ARP_UPDATE was not passing hardware length to
-//	ARP_CNEW as it expected. It's a wonder the code ever worked.
+//  Fix longstanding bug - ARP_UPDATE was not passing hardware length to
+//  ARP_CNEW as it expected. It's a wonder the code ever worked.
 //
 // 1.8  24-Feb-87, Edit by VAF
-//	Flush reference to Q_MESSAGE.
+//  Flush reference to Q_MESSAGE.
 //
 // 1.7  28-Oct-86, Edit by VAF
-//	Try to keep the IP packet around in ARP_CHECK and retransmit it when
-//	we get a reply (in ARP_UPDATE).
+//  Try to keep the IP packet around in ARP_CHECK and retransmit it when
+//  we get a reply (in ARP_UPDATE).
 //
 // 1.6  12-Aug-86, Edit by VAF
-//	Teach ARP_INPUT about "cloned" devices.
+//  Teach ARP_INPUT about "cloned" devices.
 //
 // 1.5  29-Aug-86, Edit by VAF
-//	Add code to do cache sweeping every 2 minutes.
-//	Add code to try and refresh cache entries when ARP_CHECK detects that
-//	an entry is getting near expiration.
+//  Add code to do cache sweeping every 2 minutes.
+//  Add code to try and refresh cache entries when ARP_CHECK detects that
+//  an entry is getting near expiration.
 //
 // 1.4  28-Aug-86, Edit by VAF
-//	Add ARP_DUMP routine - dump out cache blocks.
+//  Add ARP_DUMP routine - dump out cache blocks.
 //
 // 1.3  29-May-86, Edit by VAF
-//	Check for nonexistant ARP block in ARP_INPUT, ARP_CHECK
-//	Allow device ARP block to be reinitialized
+//  Check for nonexistant ARP block in ARP_INPUT, ARP_CHECK
+//  Allow device ARP block to be reinitialized
 //
 // 1.2  20-May-86, Edit by VAF
-//	New AST locking scheme (NOINT/OKINT macros)
+//  New AST locking scheme (NOINT/OKINT macros)
 //
 // 1.1  21-Apr-86, Edit by VAF
-//	Phase II of flushing XPORT - use $FAO instead of XPORT string stuff.
+//  Phase II of flushing XPORT - use $FAO instead of XPORT string stuff.
 //--
 
 #if 0
@@ -174,31 +174,31 @@ extern long log_state;
 
 struct ARP_BLK
 {
-    unsigned short     AB_HWSIZE		;	// Size of hardware address
-    unsigned short     AB_HDRLEN		;	// ARP buffer header length
+    unsigned short     AB_HWSIZE        ;   // Size of hardware address
+    unsigned short     AB_HDRLEN        ;   // ARP buffer header length
     union
     {
-        unsigned short     AB_FLAGS		;  // ARP flags
+        unsigned short     AB_FLAGS     ;  // ARP flags
         struct
         {
-            unsigned  	AB_SWAP_PAR	 : 1;	// If HWTYPE, etc need to be swapped
-            unsigned  	AB_SWAP_16       : 1;	// If 3MB-style word swapping needed
+            unsigned    AB_SWAP_PAR  : 1;   // If HWTYPE, etc need to be swapped
+            unsigned    AB_SWAP_16       : 1;   // If 3MB-style word swapping needed
         };
     };
     unsigned char    AB_HWADDR[ARP_HDW_LEN]; // Hardware address
-    unsigned int     AB_IPADDR		;	// ARP IP address
+    unsigned int     AB_IPADDR      ;   // ARP IP address
 #if 0
     $ALIGN(FULLWORD)
 #endif
-    unsigned char     AB_SWP_START	[0];	// Start of items to be swapped...
-    unsigned short     AB_HWTYPE		;	// ARP hardware type code
-    unsigned short     AB_IPTYPE		;	// ARP/IP hardware protocol code
-    unsigned short     AB_RQUEST		;	// Code for ARP REQUEST
-    unsigned short     AB_REPLY		;	// Code for ARP REPLY
+    unsigned char     AB_SWP_START  [0];    // Start of items to be swapped...
+    unsigned short     AB_HWTYPE        ;   // ARP hardware type code
+    unsigned short     AB_IPTYPE        ;   // ARP/IP hardware protocol code
+    unsigned short     AB_RQUEST        ;   // Code for ARP REQUEST
+    unsigned short     AB_REPLY     ;   // Code for ARP REPLY
 #if 0
-    $ALIGN(FULLWORD)			// Don't let SWAPBYTES get carried away
+    $ALIGN(FULLWORD)            // Don't let SWAPBYTES get carried away
 #endif
-    unsigned char     AB_SWP_END		[0];// End of items to be swapped...
+    unsigned char     AB_SWP_END        [0];// End of items to be swapped...
 };
 
 #define ARP_BLK_LEN sizeof(struct ARP_BLK)
@@ -208,30 +208,30 @@ MACRO ARP_BLK = BLOCK->ARP_BLK_LEN FIELD(ARP_BLK_FIELDS) %;
 
 // Expiration time for ARP cache entries
 
-#define     ARP_INI_TIME   1*60*100	// 1 minute for unresolved cache entries
-#define     ARP_EXP_TIME   10*60*100	// 10 minutes for cache timeout
+#define     ARP_INI_TIME   1*60*100 // 1 minute for unresolved cache entries
+#define     ARP_EXP_TIME   10*60*100    // 10 minutes for cache timeout
 #define     ARP_EXP_HALF   ARP_EXP_TIME/2 // 5 minutes to refresh cache entry
-#define     ARP_RFTIME   30*100	// Minimum interval between refresh attempts
+#define     ARP_RFTIME   30*100 // Minimum interval between refresh attempts
 
 // Structure of an ARP cache entry
 
 struct ACACHE_BLK
 {
-    void  *   AC$NEXT	;	// Next entry on hash chain
-    unsigned long long     AC$EXPIRE	; // Expiration time of this entry
-    unsigned int     AC$RFTIME	; // Next time to try refresh
-    void *     AC$DEVICE	;	// pntr to dev_config entry of this address
-    unsigned int     AC$IPADDR	;	// IP address
-    void *     AC$SAVEQB	;	// Pointer to saved IP packet if nonzero
+    void  *   AC$NEXT   ;   // Next entry on hash chain
+    unsigned long long     AC$EXPIRE    ; // Expiration time of this entry
+    unsigned int     AC$RFTIME  ; // Next time to try refresh
+    void *     AC$DEVICE    ;   // pntr to dev_config entry of this address
+    unsigned int     AC$IPADDR  ;   // IP address
+    void *     AC$SAVEQB    ;   // Pointer to saved IP packet if nonzero
     union
     {
-        unsigned short     AC$FLAGS	;	// Status flags
+        unsigned short     AC$FLAGS ;   // Status flags
         struct
         {
-            unsigned        AC$VALID	 : 1;	// Nonzero if this entry valid
+            unsigned        AC$VALID     : 1;   // Nonzero if this entry valid
         };
     };
-    unsigned short     AC$HWSIZE	;	// Length of this address
+    unsigned short     AC$HWSIZE    ;   // Length of this address
     unsigned char    AC$HWADDR[ARP_HDW_LEN]; // Physical address
 };
 #define ACACHE_LEN sizeof(struct ACACHE_BLK)
@@ -241,10 +241,10 @@ MACRO ACACHE_BLK = BLOCK->ACACHE_LEN FIELD(ACACHE_FIELDS) %;
 
 // Hash table for hashing IP addresses
 
-#define     ARP_HSHLEN   128		// Length of hash table
-#define     ARP_HSHAND   ARP_HSHLEN-1	// && value for forming hash values
+#define     ARP_HSHLEN   128        // Length of hash table
+#define     ARP_HSHAND   ARP_HSHLEN-1   // && value for forming hash values
 static signed long
-ARP_SWP_TIME[2],	// Delta time to sweep cache
+ARP_SWP_TIME[2],    // Delta time to sweep cache
              ARPHTB [ARP_HSHLEN];
 
 #define    ARP_SWP_TTXT_STR "0000 00:02:00.00" // Every 2 minutes...
@@ -305,7 +305,7 @@ void xearp$init (void)
 }
 
 
-#define     MAX_HDR_SIZE   100		// Max size of device header on ARP packet
+#define     MAX_HDR_SIZE   100      // Max size of device header on ARP packet
 
 void xearp$dev_init(XE_Int,HWTYPE,IPTYPE,HWADDR,HDRSIZ,
                     SWAPPF,SWAP16F)
@@ -344,7 +344,7 @@ struct XE_Interface_Structure * XE_Int;
     if (XE_Int->XEI$ARP_Block != 0)
         ARBLK = XE_Int->XEI$ARP_Block;
     else
-//	LIB$GET_VM(%REF(ARP_BLK_LEN*4),ARBLK);
+//  LIB$GET_VM(%REF(ARP_BLK_LEN*4),ARBLK);
         RC = LIB$GET_VM_PAGE(/*%REF*/(((ARP_BLK_LEN) / 512) + 1), &ARBLK);
     if (BLISSIFNOT(RC))
     {
@@ -402,7 +402,7 @@ struct XE_Interface_Structure * XE_Int;
     struct ACACHE_BLK * ACPTR;
     struct ARP_BLK * ARBLK;
 
-#define	XE_PREFRIX_STR "XE:"
+#define XE_PREFRIX_STR "XE:"
 
     XE_DESC[0] = sizeof( XE_PREFRIX_STR );
     XE_DESC[1] = ( XE_PREFRIX_STR );
@@ -419,9 +419,9 @@ struct XE_Interface_Structure * XE_Int;
 // See if this address is in the cache. Must run NOINT between ARP_FIND and
 // references to ACPTR to prevent cache from being modified.
 
-    RFLAG = 0;			// Clear retransmit flag
-    FOUND = 0;			// and return status
-    DRV$NOINT;			// Disable AST's through here
+    RFLAG = 0;          // Clear retransmit flag
+    FOUND = 0;          // and return status
+    DRV$NOINT;          // Disable AST's through here
     ACPTR = ARP_FIND(IPADDR,XE_Int);
 
     if (ACPTR == 0)
@@ -429,7 +429,7 @@ struct XE_Interface_Structure * XE_Int;
         ACPTR = ARP_CNEW(IPADDR,XE_Int,ARBLK->AB_HWSIZE);
         if (ACPTR == -1)
         {
-            DRV$OKINT;			// Re-allow AST now
+            DRV$OKINT;          // Re-allow AST now
             return FOUND ;
         } ;
         if (QB->NSQ$Delete)
@@ -469,7 +469,7 @@ struct XE_Interface_Structure * XE_Int;
                         (NOW > ACPTR->AC$RFTIME))
                 {
                     ACPTR->AC$RFTIME = NOW + ARP_RFTIME;
-//		    RFLAG = -1;
+//          RFLAG = -1;
                 };
             }
             else if (QB->NSQ$Delete)
@@ -480,7 +480,7 @@ struct XE_Interface_Structure * XE_Int;
         };
     };
 
-    DRV$OKINT;			// Re-allow AST now
+    DRV$OKINT;          // Re-allow AST now
 
 // Now, we'll send an ARP if one of the following is true:
 //   - The IP address was not found in the cache (FOUND = 0)
@@ -587,10 +587,10 @@ void xearp$input ( XE_Int , ARBUF )
 //   none.
 // Side effects:
 //   If the ARP packet is for this host then
-//	If it is an ARP reply, the ARP cache is updated
+//  If it is an ARP reply, the ARP cache is updated
 //       Else
-//	    If it is an ARP request, a reply is generated and transmitted
-//	    Else drop packet
+//      If it is an ARP request, a reply is generated and transmitted
+//      Else drop packet
 //   Else drop packet
 
 struct arp_PKT * ARBUF;
@@ -650,7 +650,7 @@ struct XE_Interface_Structure * XE_Int;
 // Yes - select on packet type
 
         {
-            //	    switch (ARBUF->ar$op)
+            //      switch (ARBUF->ar$op)
             {
                 if (ARBUF->ar$op == ARBLK->AB_RQUEST)
                 {
@@ -846,7 +846,7 @@ struct XE_Interface_Structure * XE_Int;
 // Retransmit the saved packet, if we have one
 
 //    if ($$LOGF(LOG$ARP))
-//	DRV$OPR_FAO("Saved QB=!XL!",ACPTR->AC$SAVEQB);
+//  DRV$OPR_FAO("Saved QB=!XL!",ACPTR->AC$SAVEQB);
     if (ACPTR->AC$SAVEQB != 0)
     {
         Device_Configuration_Entry * dev_config = XE_Int->xei$dev_config;
@@ -905,7 +905,7 @@ void ARP_SWEEP(void)
 
                 // Free up the cache entry's memory.
 
-//		LIB$FREE_VM(/*%REF*/(ACACHE_LEN*4),ACPTR);
+//      LIB$FREE_VM(/*%REF*/(ACACHE_LEN*4),ACPTR);
                 LIB$FREE_VM_PAGE(/*%REF*/(((ACACHE_LEN) / 512) + 1), ACPTR);
                 ACPTR = *APREV; // check ..aprev
             }
@@ -947,8 +947,8 @@ d$arp_dump_return_blk_entry * RBLOCK;
     NOW = Time_Stamp();
     LRSIZE = RBSIZE;
     CIDX = 0;
-    DRV$NOINT;			// Don't allow anything to change
-X:   			// Labelled block X
+    DRV$NOINT;          // Don't allow anything to change
+X:              // Labelled block X
     {
         for (HTIDX=0; HTIDX<=ARP_HSHLEN-1; HTIDX++)
         {
@@ -991,7 +991,7 @@ X:   			// Labelled block X
                 CIDX = CIDX + 1;
             };
         };
-    }			// Labelled block X
+    }           // Labelled block X
 leave_x:
 
 // Return length of block

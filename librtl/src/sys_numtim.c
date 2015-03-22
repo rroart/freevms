@@ -34,8 +34,8 @@
 
 */
 
-#include "sys$routines.h"	/* Our header file */
-#include "lib$routines.h"	/* LIB$ Header File */
+#include "sys$routines.h"   /* Our header file */
+#include "lib$routines.h"   /* LIB$ Header File */
 #include "ssdef.h"
 
 struct TIME

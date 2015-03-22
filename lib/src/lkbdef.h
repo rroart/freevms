@@ -1,5 +1,5 @@
-#ifndef lkbdef_h
-#define lkbdef_h
+#ifndef LKBDEF_H
+#define LKBDEF_H
 
 #define LKB$M_FLAGS_VALID 0x4
 #define LKB$M_PKAST 0x10
@@ -91,7 +91,7 @@ struct _lkb
         unsigned int lkb$l_csid;
         unsigned long lkb$l_oldastprm;
     };
-    int (*lkb$pq_oldblkast)();
+    int (*lkb$pq_oldblkast)(void);
     unsigned int lkb$l_duetime;
 };
 

@@ -31,9 +31,9 @@
 #define DEBUG_SIG 0
 
 #if DEBUG_SIG
-#define SIG_SLAB_DEBUG	(SLAB_DEBUG_FREE | SLAB_RED_ZONE /* | SLAB_POISON */)
+#define SIG_SLAB_DEBUG  (SLAB_DEBUG_FREE | SLAB_RED_ZONE /* | SLAB_POISON */)
 #else
-#define SIG_SLAB_DEBUG	0
+#define SIG_SLAB_DEBUG  0
 #endif
 
 static kmem_cache_t *sigqueue_cachep;
@@ -843,7 +843,7 @@ void do_notify_parent(struct task_struct *tsk, int sig)
     info.si_stime = tsk->times.tms_stime;
 
     status = tsk->exit_code & 0x7f;
-    why = SI_KERNEL;	/* shouldn't happen */
+    why = SI_KERNEL;    /* shouldn't happen */
     switch (tsk->state)
     {
     case TASK_STOPPED:
@@ -1245,10 +1245,10 @@ do_sigaltstack (const stack_t *uss, stack_t *uoss, unsigned long sp)
         /*
          *
          * Note - this code used to test ss_flags incorrectly
-         *  	  old code may have been written using ss_flags==0
-         *	  to mean ss_flags==SS_ONSTACK (as this was the only
-         *	  way that worked) - this fix preserves that older
-         *	  mechanism
+         *        old code may have been written using ss_flags==0
+         *    to mean ss_flags==SS_ONSTACK (as this was the only
+         *    way that worked) - this fix preserves that older
+         *    mechanism
          */
         if (ss_flags != SS_DISABLE && ss_flags != SS_ONSTACK && ss_flags != 0)
             goto out;

@@ -6,15 +6,15 @@
 
 struct dnotify_struct
 {
-    struct dnotify_struct *	dn_next;
-    int			dn_magic;
-    unsigned long		dn_mask;	/* Events to be notified
-						   see linux/fcntl.h */
-    int			dn_fd;
-    struct file *		dn_filp;
+    struct dnotify_struct * dn_next;
+    int         dn_magic;
+    unsigned long       dn_mask;    /* Events to be notified
+                           see linux/fcntl.h */
+    int         dn_fd;
+    struct file *       dn_filp;
 };
 
-#define DNOTIFY_MAGIC	0x444E4F54
+#define DNOTIFY_MAGIC   0x444E4F54
 
 extern void __inode_dir_notify(struct inode *, unsigned long);
 extern int fcntl_dirnotify(int, struct file *, unsigned long);

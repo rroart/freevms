@@ -18,17 +18,17 @@
 
 
 /**
- *	get_option - Parse integer from an option string
- *	@str: option string
- *	@pint: (output) integer value parsed from @str
+ *  get_option - Parse integer from an option string
+ *  @str: option string
+ *  @pint: (output) integer value parsed from @str
  *
- *	Read an int from an option string; if available accept a subsequent
- *	comma as well.
+ *  Read an int from an option string; if available accept a subsequent
+ *  comma as well.
  *
- *	Return values:
- *	0 : no int in string
- *	1 : int found, no subsequent comma
- *	2 : int found including a subsequent comma
+ *  Return values:
+ *  0 : no int in string
+ *  1 : int found, no subsequent comma
+ *  2 : int found including a subsequent comma
  */
 
 int get_option (char **str, int *pint)
@@ -50,19 +50,19 @@ int get_option (char **str, int *pint)
 }
 
 /**
- *	get_options - Parse a string into a list of integers
- *	@str: String to be parsed
- *	@nints: size of integer array
- *	@ints: integer array
+ *  get_options - Parse a string into a list of integers
+ *  @str: String to be parsed
+ *  @nints: size of integer array
+ *  @ints: integer array
  *
- *	This function parses a string containing a comma-separated
- *	list of integers.  The parse halts when the array is
- *	full, or when no more numbers can be retrieved from the
- *	string.
+ *  This function parses a string containing a comma-separated
+ *  list of integers.  The parse halts when the array is
+ *  full, or when no more numbers can be retrieved from the
+ *  string.
  *
- *	Return value is the character in the string which caused
- *	the parse to end (typically a null terminator, if @str is
- *	completely parseable).
+ *  Return value is the character in the string which caused
+ *  the parse to end (typically a null terminator, if @str is
+ *  completely parseable).
  */
 
 char *get_options (char *str, int nints, int *ints)
@@ -83,16 +83,16 @@ char *get_options (char *str, int nints, int *ints)
 }
 
 /**
- *	memparse - parse a string with mem suffixes into a number
- *	@ptr: Where parse begins
- *	@retptr: (output) Pointer to next char after parse completes
+ *  memparse - parse a string with mem suffixes into a number
+ *  @ptr: Where parse begins
+ *  @retptr: (output) Pointer to next char after parse completes
  *
- *	Parses a string into a number.  The number stored at @ptr is
- *	potentially suffixed with %K (for kilobytes, or 1024 bytes),
- *	%M (for megabytes, or 1048576 bytes), or %G (for gigabytes, or
- *	1073741824).  If the number is suffixed with K, M, or G, then
- *	the return value is the number multiplied by one kilobyte, one
- *	megabyte, or one gigabyte, respectively.
+ *  Parses a string into a number.  The number stored at @ptr is
+ *  potentially suffixed with %K (for kilobytes, or 1024 bytes),
+ *  %M (for megabytes, or 1048576 bytes), or %G (for gigabytes, or
+ *  1073741824).  If the number is suffixed with K, M, or G, then
+ *  the return value is the number multiplied by one kilobyte, one
+ *  megabyte, or one gigabyte, respectively.
  */
 
 unsigned long long memparse (char *ptr, char **retptr)

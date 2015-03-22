@@ -1,5 +1,5 @@
-#ifndef x2p_h
-#define x2p_h
+#ifndef X2P_H
+#define X2P_H
 
 struct __exttwo
 {

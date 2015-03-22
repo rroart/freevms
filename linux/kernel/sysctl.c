@@ -819,8 +819,8 @@ int proc_dostring(ctl_table *table, int write, struct file *filp,
 }
 
 /*
- *	Special case of dostring for the UTS structure. This has locks
- *	to observe. Should this be in kernel/sys.c ????
+ *  Special case of dostring for the UTS structure. This has locks
+ *  to observe. Should this be in kernel/sys.c ????
  */
 
 static int proc_doutsstring(ctl_table *table, int write, struct file *filp,
@@ -843,11 +843,11 @@ static int proc_doutsstring(ctl_table *table, int write, struct file *filp,
     return r;
 }
 
-#define OP_SET	0
-#define OP_AND	1
-#define OP_OR	2
-#define OP_MAX	3
-#define OP_MIN	4
+#define OP_SET  0
+#define OP_AND  1
+#define OP_OR   2
+#define OP_MAX  3
+#define OP_MIN  4
 
 static int do_proc_dointvec(ctl_table *table, int write, struct file *filp,
                             void *buffer, size_t *lenp, int conv, int op)
@@ -991,7 +991,7 @@ int proc_dointvec(ctl_table *table, int write, struct file *filp,
 }
 
 /*
- *	init may raise the set.
+ *  init may raise the set.
  */
 
 int proc_dointvec_bset(ctl_table *table, int write, struct file *filp,

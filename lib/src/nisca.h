@@ -1,5 +1,5 @@
-#ifndef nisca_h
-#define nisca_h
+#ifndef NISCA_H
+#define NISCA_H
 
 #define NISCA$M_SRSNTDATWM    0x80
 #define NISCA$M_SRLB          0x100

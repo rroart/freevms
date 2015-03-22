@@ -16,15 +16,15 @@
 //---2002-08-17
 
 /************************************************************************/
-/*									*/
-/*  See how p1 is positioned relative to p2				*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	relposition = 0 : p1 is same as p2 or not related to p2		*/
-/*	              1 : p1 comes after p2				*/
-/*	             -1 : p1 comes before p2				*/
-/*									*/
+/*                                  */
+/*  See how p1 is positioned relative to p2             */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  relposition = 0 : p1 is same as p2 or not related to p2     */
+/*                1 : p1 comes after p2             */
+/*               -1 : p1 comes before p2                */
+/*                                  */
 /************************************************************************/
 
 #include "edt.h"

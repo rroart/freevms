@@ -9,34 +9,34 @@
 
 /* Return pointer to first true entry, if any, or NULL.  A macro
    required to allow inlining of cmpfn. */
-#define LIST_FIND(head, cmpfn, type, args...)		\
-({							\
-	const struct list_head *__i = (head);		\
-							\
-	ASSERT_READ_LOCK(head);				\
-	do {						\
-		__i = __i->next;			\
-		if (__i == (head)) {			\
-			__i = NULL;			\
-			break;				\
-		}					\
-	} while (!cmpfn((const type)__i , ## args));	\
-	(type)__i;					\
+#define LIST_FIND(head, cmpfn, type, args...)       \
+({                          \
+    const struct list_head *__i = (head);       \
+                            \
+    ASSERT_READ_LOCK(head);             \
+    do {                        \
+        __i = __i->next;            \
+        if (__i == (head)) {            \
+            __i = NULL;         \
+            break;              \
+        }                   \
+    } while (!cmpfn((const type)__i , ## args));    \
+    (type)__i;                  \
 })
 
-#define LIST_FIND_W(head, cmpfn, type, args...)	\
-({						\
-	const struct list_head *__i = (head);	\
-						\
-	ASSERT_WRITE_LOCK(head);		\
-	do {					\
-		__i = __i->next;		\
-		if (__i == (head)) {		\
-			__i = NULL;		\
-			break;			\
-		}				\
-	} while (!cmpfn((type)__i , ## args));	\
-	(type)__i;				\
+#define LIST_FIND_W(head, cmpfn, type, args...) \
+({                      \
+    const struct list_head *__i = (head);   \
+                        \
+    ASSERT_WRITE_LOCK(head);        \
+    do {                    \
+        __i = __i->next;        \
+        if (__i == (head)) {        \
+            __i = NULL;     \
+            break;          \
+        }               \
+    } while (!cmpfn((type)__i , ## args));  \
+    (type)__i;              \
 })
 
 static inline int
@@ -54,13 +54,13 @@ list_inlist(struct list_head *head, const void *entry)
 
 /* Delete from list. */
 #ifdef CONFIG_NETFILTER_DEBUG
-#define LIST_DELETE(head, oldentry)					\
-do {									\
-	ASSERT_WRITE_LOCK(head);					\
-	if (!list_inlist(head, oldentry))				\
-		printk("LIST_DELETE: %s:%u `%s'(%p) not in %s.\n",	\
-		       __FILE__, __LINE__, #oldentry, oldentry, #head);	\
-        else list_del((struct list_head *)oldentry);			\
+#define LIST_DELETE(head, oldentry)                 \
+do {                                    \
+    ASSERT_WRITE_LOCK(head);                    \
+    if (!list_inlist(head, oldentry))               \
+        printk("LIST_DELETE: %s:%u `%s'(%p) not in %s.\n",  \
+               __FILE__, __LINE__, #oldentry, oldentry, #head); \
+        else list_del((struct list_head *)oldentry);            \
 } while(0)
 #else
 #define LIST_DELETE(head, oldentry) list_del((struct list_head *)oldentry)
@@ -83,14 +83,14 @@ list_prepend(struct list_head *head, void *new)
 }
 
 /* Insert according to ordering function; insert before first true. */
-#define LIST_INSERT(head, new, cmpfn)				\
-do {								\
-	struct list_head *__i;					\
-	ASSERT_WRITE_LOCK(head);				\
-	for (__i = (head)->next;				\
-	     !cmpfn((new), (typeof (new))__i) && __i != (head);	\
-	     __i = __i->next);					\
-	list_add((struct list_head *)(new), __i->prev);		\
+#define LIST_INSERT(head, new, cmpfn)               \
+do {                                \
+    struct list_head *__i;                  \
+    ASSERT_WRITE_LOCK(head);                \
+    for (__i = (head)->next;                \
+         !cmpfn((new), (typeof (new))__i) && __i != (head); \
+         __i = __i->next);                  \
+    list_add((struct list_head *)(new), __i->prev);     \
 } while(0)
 
 /* If the field after the list_head is a nul-terminated string, you
@@ -112,7 +112,7 @@ list_named_insert(struct list_head *head, void *new)
 }
 
 /* Find this named element in the list. */
-#define list_named_find(head, name)			\
+#define list_named_find(head, name)         \
 LIST_FIND(head, __list_cmp_name, void *, name)
 
 #endif /*_LISTHELP_H*/

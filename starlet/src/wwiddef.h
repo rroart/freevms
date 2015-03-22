@@ -1,5 +1,5 @@
-#ifndef wwiddef_h
-#define wwiddef_h
+#ifndef WWIDDEF_H
+#define WWIDDEF_H
 
 #define WWIDHDR$M_WWID_LENGTH 0xFFFFF
 #define WWIDHDR$M_ASCII_DATA 0x100000

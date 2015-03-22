@@ -3,7 +3,7 @@
 
 /*
 
-	DECnet Data Structures and Constants
+    DECnet Data Structures and Constants
 
 */
 
@@ -19,14 +19,14 @@
 #define DNPROTO_NSPT    7                       /* NSP trace protocol number */
 
 
-#define DN_ADDL		2
-#define DN_MAXADDL	2 /* ULTRIX headers have 20 here, but pathworks has 2 */
-#define DN_MAXOPTL	16
-#define DN_MAXOBJL	16
-#define DN_MAXACCL	40
-#define DN_MAXALIASL	128
-#define DN_MAXNODEL	256
-#define DNBUFSIZE	65023
+#define DN_ADDL     2
+#define DN_MAXADDL  2 /* ULTRIX headers have 20 here, but pathworks has 2 */
+#define DN_MAXOPTL  16
+#define DN_MAXOBJL  16
+#define DN_MAXACCL  40
+#define DN_MAXALIASL    128
+#define DN_MAXNODEL 256
+#define DNBUFSIZE   65023
 
 /*
  * SET/GET Socket options  - must match the DSO_ numbers below
@@ -46,17 +46,17 @@
 #define DSO_STREAM      8        /* Set socket type to stream           */
 #define DSO_SEQPACKET   9        /* Set socket type to sequenced packet */
 #define DSO_MAXWINDOW   11       /* Maximum window size allowed         */
-#define DSO_NODELAY	12       /* Turn off nagle                      */
+#define DSO_NODELAY 12       /* Turn off nagle                      */
 #define DSO_CORK        13       /* Wait for more data!                 */
-#define DSO_SERVICES	14       /* NSP Services field                  */
-#define DSO_INFO	15       /* NSP Info field                      */
+#define DSO_SERVICES    14       /* NSP Services field                  */
+#define DSO_INFO    15       /* NSP Info field                      */
 #define DSO_MAX         15       /* Maximum option number               */
 
 
 /* LINK States */
-#define LL_INACTIVE	0
-#define LL_CONNECTING	1
-#define LL_RUNNING	2
+#define LL_INACTIVE 0
+#define LL_CONNECTING   1
+#define LL_RUNNING  2
 #define LL_DISCONNECTING 3
 
 #define ACC_IMMED 0
@@ -71,18 +71,18 @@
 
 struct dn_naddr
 {
-    unsigned short		a_len;
+    unsigned short      a_len;
     unsigned char a_addr[DN_MAXADDL];
 };
 
 struct sockaddr_dn
 {
-    unsigned short		sdn_family;
-    unsigned char		sdn_flags;
-    unsigned char		sdn_objnum;
-    unsigned short		sdn_objnamel;
-    unsigned char		sdn_objname[DN_MAXOBJL];
-    struct   dn_naddr	sdn_add;
+    unsigned short      sdn_family;
+    unsigned char       sdn_flags;
+    unsigned char       sdn_objnum;
+    unsigned short      sdn_objnamel;
+    unsigned char       sdn_objname[DN_MAXOBJL];
+    struct   dn_naddr   sdn_add;
 };
 #define sdn_nodeaddrl   sdn_add.a_len   /* Node address length  */
 #define sdn_nodeaddr    sdn_add.a_addr  /* Node address         */
@@ -102,12 +102,12 @@ struct optdata_dn
 
 struct accessdata_dn
 {
-    unsigned char		acc_accl;
-    unsigned char		acc_acc[DN_MAXACCL];
-    unsigned char 		acc_passl;
-    unsigned char		acc_pass[DN_MAXACCL];
-    unsigned char 		acc_userl;
-    unsigned char		acc_user[DN_MAXACCL];
+    unsigned char       acc_accl;
+    unsigned char       acc_acc[DN_MAXACCL];
+    unsigned char       acc_passl;
+    unsigned char       acc_pass[DN_MAXACCL];
+    unsigned char       acc_userl;
+    unsigned char       acc_user[DN_MAXACCL];
 };
 
 /*

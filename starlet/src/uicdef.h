@@ -1,5 +1,5 @@
-#ifndef uicdef_h
-#define uicdef_h
+#ifndef UICDEF_H
+#define UICDEF_H
 
 /* Access.h v1.3    Definitions for file access routines */
 
@@ -12,7 +12,7 @@
         must maintain comments in their source to acknowledge
         the contibution of the original author.
 
-	Originally part of access.h
+    Originally part of access.h
 */
 
 #define NO_DOLLAR

@@ -2,7 +2,7 @@
  *
  * libanalyze_sdesc_64.c
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,20 +20,20 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
 /*
  * libanalyze_sdesc_64.c
  *
- *	Code for VAX STR$ANALYSE_SDESC_64 routine
+ *  Code for VAX STR$ANALYSE_SDESC_64 routine
  *
  * Description:
  *
@@ -43,8 +43,8 @@
  *
  * History
  *
- *	Mar 19, 2004 - Andrew Allison
- *		Copied code from str$analyze_sdesc_64
+ *  Mar 19, 2004 - Andrew Allison
+ *      Copied code from str$analyze_sdesc_64
  */
 
 #include <stdio.h>
@@ -60,19 +60,19 @@
 /*************************************************************
  * str$analyze_sdesc_64
  *
- *	Analyze String Descriptor extracts the length and
- *	starting address of the data for a variety of
- *	string descriptor classes
- *	type 0 = 32 bit  1 = 64 bit
+ *  Analyze String Descriptor extracts the length and
+ *  starting address of the data for a variety of
+ *  string descriptor classes
+ *  type 0 = 32 bit  1 = 64 bit
  */
 unsigned long lib$analyze_sdesc_64 (const struct dsc$descriptor_s* descrip,
-                                    unsigned short	*word_integer_length,
-                                    char 		**data_address,
-                                    unsigned long	*descriptor_type )
+                                    unsigned short  *word_integer_length,
+                                    char        **data_address,
+                                    unsigned long   *descriptor_type )
 {
 
 
-    *descriptor_type = 0;		// 0 = 32 bit     1 = 64 bit
+    *descriptor_type = 0;       // 0 = 32 bit     1 = 64 bit
 
     /*
      * Only allow for strings
@@ -90,7 +90,7 @@ unsigned long lib$analyze_sdesc_64 (const struct dsc$descriptor_s* descrip,
      */
     if (descrip->dsc$a_pointer == NULL)
     {
-//		assert(input_descriptor->dsc$w_length == 0);
+//      assert(input_descriptor->dsc$w_length == 0);
         *word_integer_length = 0;
         *data_address = NULL;
     }

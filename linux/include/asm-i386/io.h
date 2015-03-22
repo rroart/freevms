@@ -24,7 +24,7 @@
  * On the other hand, I'd like to be sure of a non-existent port:
  * I feel a bit unsafe about using 0x80 (should be safe, though)
  *
- *		Linus
+ *      Linus
  */
 
 /*
@@ -76,7 +76,7 @@ static inline void * phys_to_virt(unsigned long address)
 /*
  * Change "struct page" to physical address.
  */
-#define page_to_phys(page)	((page - mem_map) << PAGE_SHIFT)
+#define page_to_phys(page)  ((page - mem_map) << PAGE_SHIFT)
 
 extern void * __ioremap(unsigned long offset, unsigned long size, unsigned long flags);
 
@@ -125,9 +125,9 @@ extern void iounmap(void *addr);
 #define __raw_writew writew
 #define __raw_writel writel
 
-#define memset_io(a,b,c)	memset(__io_virt(a),(b),(c))
-#define memcpy_fromio(a,b,c)	memcpy((a),__io_virt(b),(c))
-#define memcpy_toio(a,b,c)	memcpy(__io_virt(a),(b),(c))
+#define memset_io(a,b,c)    memset(__io_virt(a),(b),(c))
+#define memcpy_fromio(a,b,c)    memcpy((a),__io_virt(b),(c))
+#define memcpy_toio(a,b,c)  memcpy(__io_virt(a),(b),(c))
 
 /*
  * ISA space is 'always mapped' on a typical x86 system, no need to
@@ -145,17 +145,17 @@ extern void iounmap(void *addr);
 #define isa_writeb(b,a) writeb(b,__ISA_IO_base + (a))
 #define isa_writew(w,a) writew(w,__ISA_IO_base + (a))
 #define isa_writel(l,a) writel(l,__ISA_IO_base + (a))
-#define isa_memset_io(a,b,c)		memset_io(__ISA_IO_base + (a),(b),(c))
-#define isa_memcpy_fromio(a,b,c)	memcpy_fromio((a),__ISA_IO_base + (b),(c))
-#define isa_memcpy_toio(a,b,c)		memcpy_toio(__ISA_IO_base + (a),(b),(c))
+#define isa_memset_io(a,b,c)        memset_io(__ISA_IO_base + (a),(b),(c))
+#define isa_memcpy_fromio(a,b,c)    memcpy_fromio((a),__ISA_IO_base + (b),(c))
+#define isa_memcpy_toio(a,b,c)      memcpy_toio(__ISA_IO_base + (a),(b),(c))
 
 
 /*
  * Again, i386 does not require mem IO specific function.
  */
 
-#define eth_io_copy_and_sum(a,b,c,d)		eth_copy_and_sum((a),__io_virt(b),(c),(d))
-#define isa_eth_io_copy_and_sum(a,b,c,d)	eth_copy_and_sum((a),__io_virt(__ISA_IO_base + (b)),(c),(d))
+#define eth_io_copy_and_sum(a,b,c,d)        eth_copy_and_sum((a),__io_virt(b),(c),(d))
+#define isa_eth_io_copy_and_sum(a,b,c,d)    eth_copy_and_sum((a),__io_virt(__ISA_IO_base + (b)),(c),(d))
 
 static inline int check_signature(unsigned long io_addr,
                                   const unsigned char *signature, int length)
@@ -194,11 +194,11 @@ out:
 }
 
 /*
- *	Cache management
+ *  Cache management
  *
- *	This needed for two cases
- *	1. Out of order aware processors
- *	2. Accidentally out of order processors (PPro errata #51)
+ *  This needed for two cases
+ *  1. Out of order aware processors
+ *  2. Accidentally out of order processors (PPro errata #51)
  */
 
 #if defined(CONFIG_X86_OOSTORE) || defined(CONFIG_X86_PPRO_FENCE)
@@ -208,17 +208,17 @@ static inline void flush_write_buffers(void)
     __asm__ __volatile__ ("lock; addl $0,0(%%esp)": : :"memory");
 }
 
-#define dma_cache_inv(_start,_size)		flush_write_buffers()
-#define dma_cache_wback(_start,_size)		flush_write_buffers()
-#define dma_cache_wback_inv(_start,_size)	flush_write_buffers()
+#define dma_cache_inv(_start,_size)     flush_write_buffers()
+#define dma_cache_wback(_start,_size)       flush_write_buffers()
+#define dma_cache_wback_inv(_start,_size)   flush_write_buffers()
 
 #else
 
 /* Nothing to do */
 
-#define dma_cache_inv(_start,_size)		do { } while (0)
-#define dma_cache_wback(_start,_size)		do { } while (0)
-#define dma_cache_wback_inv(_start,_size)	do { } while (0)
+#define dma_cache_inv(_start,_size)     do { } while (0)
+#define dma_cache_wback(_start,_size)       do { } while (0)
+#define dma_cache_wback_inv(_start,_size)   do { } while (0)
 #define flush_write_buffers()
 
 #endif
@@ -266,18 +266,18 @@ __OUT1(s##_p,x) __OUT2(s,s1,"w") __FULL_SLOW_DOWN_IO : : "a" (value), "Nd" (port
 #ifdef CONFIG_MULTIQUAD
 #define __OUTQ0(s,ss,x)    /* Do the equivalent of the portio op on quad 0 */ \
 static inline void out##ss(unsigned x value, unsigned short port) { \
-	if (xquad_portio) \
-		write##s(value, (unsigned long) xquad_portio + port); \
-	else               /* We're still in early boot, running on quad 0 */ \
-		out##ss##_local(value, port); \
+    if (xquad_portio) \
+        write##s(value, (unsigned long) xquad_portio + port); \
+    else               /* We're still in early boot, running on quad 0 */ \
+        out##ss##_local(value, port); \
 }
 
 #define __INQ0(s,ss)       /* Do the equivalent of the portio op on quad 0 */ \
 static inline RETURN_TYPE in##ss(unsigned short port) { \
-	if (xquad_portio) \
-		return read##s((unsigned long) xquad_portio + port); \
-	else               /* We're still in early boot, running on quad 0 */ \
-		return in##ss##_local(port); \
+    if (xquad_portio) \
+        return read##s((unsigned long) xquad_portio + port); \
+    else               /* We're still in early boot, running on quad 0 */ \
+        return in##ss##_local(port); \
 }
 #endif /* CONFIG_MULTIQUAD */
 

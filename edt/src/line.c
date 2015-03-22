@@ -16,9 +16,9 @@
 //---2004-05-02
 
 /************************************************************************/
-/*									*/
-/*  Maintain lines in a buffer						*/
-/*									*/
+/*                                  */
+/*  Maintain lines in a buffer                      */
+/*                                  */
 /************************************************************************/
 
 #include <stdio.h>
@@ -27,31 +27,31 @@
 
 #include "edt.h"
 
-#define LOG10FRAC 6			/* number of digits allowed after '.' in a line number */
+#define LOG10FRAC 6         /* number of digits allowed after '.' in a line number */
 #define FRAC 1000000
 
 struct Buffer
 {
-    Buffer *next;		/* next in 'buffers' list */
-    Line *first_line;	/* first line in the buffer (NULL if empty) */
-    Line *last_line;	/* last line in the buffer (NULL if empty) */
-    uLong linecount;	/* number of lines in the buffer (0 if empty) */
-    Position savpos;	/* 'saved' position */
-    char *filename;		/* associated filename - gets written on exit */
-    int dirty;		/* 0: buffer is clean */
+    Buffer *next;       /* next in 'buffers' list */
+    Line *first_line;   /* first line in the buffer (NULL if empty) */
+    Line *last_line;    /* last line in the buffer (NULL if empty) */
+    uLong linecount;    /* number of lines in the buffer (0 if empty) */
+    Position savpos;    /* 'saved' position */
+    char *filename;     /* associated filename - gets written on exit */
+    int dirty;      /* 0: buffer is clean */
     /* 1: buffer is dirty */
-    FILE *readfile;		/* read more lines from this file */
-    char name[1];		/* buffer's name */
+    FILE *readfile;     /* read more lines from this file */
+    char name[1];       /* buffer's name */
 };
 
 struct Line
 {
-    Line *next;		/* next line in the buffer */
-    Line *prev;		/* previous line in the buffer */
-    Buffer *buffer;		/* buffer this line belongs to */
-    String *string;		/* string associated with the line */
-    uQuad number;		/* the line's number (binary), 0 if not yet assigned */
-    char print[16];		/* printable line number (null if not yet assigned) */
+    Line *next;     /* next line in the buffer */
+    Line *prev;     /* previous line in the buffer */
+    Buffer *buffer;     /* buffer this line belongs to */
+    String *string;     /* string associated with the line */
+    uQuad number;       /* the line's number (binary), 0 if not yet assigned */
+    char print[16];     /* printable line number (null if not yet assigned) */
 };
 
 static Buffer *buffers = NULL;
@@ -60,9 +60,9 @@ static Line *line_alloc (Buffer *buffer, String *string);
 static void getprint (char *print, uQuad number);
 
 /************************************************************************/
-/*									*/
-/*  Create a new buffer							*/
-/*									*/
+/*                                  */
+/*  Create a new buffer                         */
+/*                                  */
 /************************************************************************/
 
 Buffer *buffer_create (int namel, const char *name)
@@ -74,24 +74,24 @@ Buffer *buffer_create (int namel, const char *name)
 
     for (lbuffer = &buffers; (nbuffer = *lbuffer) != NULL; lbuffer = &(nbuffer -> next))
     {
-        if (nbuffer -> name[namel] != 0) continue;			/* see if this name matches ... */
+        if (nbuffer -> name[namel] != 0) continue;          /* see if this name matches ... */
         if (strncasecmp (name, nbuffer -> name, namel) == 0) return (nbuffer); /* if so, return pointer */
     }
 
-    buffer = malloc (sizeof *buffer + namel);			/* not already there, create new struct */
-    memset (buffer, 0, sizeof *buffer);				/* clear out fixed portion */
-    buffer -> next = nbuffer;					/* set up link to next in buffers list */
-    buffer -> savpos.buffer = buffer;				/* set up buffer pointer in saved position */
-    memcpy (buffer -> name, name, namel);				/* copy in the name string */
-    buffer -> name[namel] = 0;					/* null terminate it */
-    *lbuffer = buffer;						/* link previous one to me */
-    return (buffer);						/* return pointer to new buffer */
+    buffer = malloc (sizeof *buffer + namel);           /* not already there, create new struct */
+    memset (buffer, 0, sizeof *buffer);             /* clear out fixed portion */
+    buffer -> next = nbuffer;                   /* set up link to next in buffers list */
+    buffer -> savpos.buffer = buffer;               /* set up buffer pointer in saved position */
+    memcpy (buffer -> name, name, namel);               /* copy in the name string */
+    buffer -> name[namel] = 0;                  /* null terminate it */
+    *lbuffer = buffer;                      /* link previous one to me */
+    return (buffer);                        /* return pointer to new buffer */
 }
 
 /************************************************************************/
-/*									*/
-/*  Delete buffer							*/
-/*									*/
+/*                                  */
+/*  Delete buffer                           */
+/*                                  */
 /************************************************************************/
 
 void buffer_delete (Buffer *buffer)
@@ -107,9 +107,9 @@ void buffer_delete (Buffer *buffer)
 }
 
 /************************************************************************/
-/*									*/
-/*  Get various things about a buffer					*/
-/*									*/
+/*                                  */
+/*  Get various things about a buffer                   */
+/*                                  */
 /************************************************************************/
 
 Buffer *buffer_next (Buffer *buffer)
@@ -214,19 +214,19 @@ int buffer_dirty (Buffer *buffer, int newdirty)
 }
 
 /************************************************************************/
-/*									*/
-/*  Insert new line into buffer						*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	buffer = buffer the line goes into				*/
-/*	next   = next line in list (NULL to insert at the end)		*/
-/*	string = string to be inserted					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	line_insert = new line that was inserted			*/
-/*									*/
+/*                                  */
+/*  Insert new line into buffer                     */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  buffer = buffer the line goes into              */
+/*  next   = next line in list (NULL to insert at the end)      */
+/*  string = string to be inserted                  */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  line_insert = new line that was inserted            */
+/*                                  */
 /************************************************************************/
 
 Line *line_insert (Buffer *buffer, Line *next, String *string)
@@ -239,20 +239,20 @@ Line *line_insert (Buffer *buffer, Line *next, String *string)
     /* We are given who follows this new one in the list */
     /* Determine who comes before the new one            */
 
-    if (next != NULL) prev = next -> prev;	/* find out who is before me */
+    if (next != NULL) prev = next -> prev;  /* find out who is before me */
     else prev = buffer_last_line (buffer);
 
     /* Link the new one to point to predecessor and successor */
 
-    line -> next = next;				/* link me to the next in the list */
-    line -> prev = prev;				/* link me to the previous in the list */
+    line -> next = next;                /* link me to the next in the list */
+    line -> prev = prev;                /* link me to the previous in the list */
 
     /* Link the predecessor and successor to point to the new one */
 
-    if (next != NULL) next -> prev = line;	/* if there is a next, link it to me */
-    else buffer -> last_line  = line;		/* else, i'm the last in the list */
-    if (prev != NULL) prev -> next = line;	/* if there is a prev, link it to me */
-    else buffer -> first_line = line;		/* else, i'm the first in the list */
+    if (next != NULL) next -> prev = line;  /* if there is a next, link it to me */
+    else buffer -> last_line  = line;       /* else, i'm the last in the list */
+    if (prev != NULL) prev -> next = line;  /* if there is a prev, link it to me */
+    else buffer -> first_line = line;       /* else, i'm the first in the list */
 
     /* Note that a line number doesn't exist until someone wants to see it.  Woo-Woo! */
 
@@ -264,10 +264,10 @@ static Line *line_alloc (Buffer *buffer, String *string)
 {
     Line *line;
 
-    line = malloc (sizeof *line);			/* allocate struct */
-    line -> buffer = buffer;			/* save the buffer it belongs to */
-    line -> string = string;			/* save string pointer */
-    line -> number = 0;				/* it hasn't been assigned a number yet */
+    line = malloc (sizeof *line);           /* allocate struct */
+    line -> buffer = buffer;            /* save the buffer it belongs to */
+    line -> string = string;            /* save string pointer */
+    line -> number = 0;             /* it hasn't been assigned a number yet */
     line -> print[0] = 0;
     buffer -> linecount ++;
 
@@ -275,17 +275,17 @@ static Line *line_alloc (Buffer *buffer, String *string)
 }
 
 /************************************************************************/
-/*									*/
-/*  Remove line from list						*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	line = line to be removed					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	line_remove = string associated with line that was removed	*/
-/*									*/
+/*                                  */
+/*  Remove line from list                       */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  line = line to be removed                   */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  line_remove = string associated with line that was removed  */
+/*                                  */
 /************************************************************************/
 
 String *line_remove (Line *line)
@@ -327,17 +327,17 @@ String *line_remove (Line *line)
 }
 
 /************************************************************************/
-/*									*/
-/*  Get printable line number						*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	line = line to get the printable line of			*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	line_number = points to null-terminated printable line number	*/
-/*									*/
+/*                                  */
+/*  Get printable line number                       */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  line = line to get the printable line of            */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  line_number = points to null-terminated printable line number   */
+/*                                  */
 /************************************************************************/
 
 const char *line_number (Line *line)
@@ -413,9 +413,9 @@ const char *line_number (Line *line)
 }
 
 /************************************************************************/
-/*									*/
-/*  Compare the given line's number to the given arbitrary number	*/
-/*									*/
+/*                                  */
+/*  Compare the given line's number to the given arbitrary number   */
+/*                                  */
 /************************************************************************/
 
 int line_numcmp (Line *line, const char *number)
@@ -426,36 +426,36 @@ int line_numcmp (Line *line, const char *number)
     int dp;
     uQuad accum;
 
-    line_number (line);				/* make sure line has a number assigned */
-    cp = number;					/* point to given number */
-    while ((*cp != 0) && (*cp <= ' ')) cp ++;	/* skip leading spaces */
-    accum = 0;					/* clear accumulator */
-    dp = -1;					/* no decimal point seen yet */
-    while ((c = *(cp ++)) != 0)  			/* get a character */
+    line_number (line);             /* make sure line has a number assigned */
+    cp = number;                    /* point to given number */
+    while ((*cp != 0) && (*cp <= ' ')) cp ++;   /* skip leading spaces */
+    accum = 0;                  /* clear accumulator */
+    dp = -1;                    /* no decimal point seen yet */
+    while ((c = *(cp ++)) != 0)             /* get a character */
     {
-        if (c == '.') dp = 0;			/* if decimal point, initialise counter */
+        if (c == '.') dp = 0;           /* if decimal point, initialise counter */
         else
         {
-            accum = accum * 10 + c - '0';		/* digit, stuff in accumulator */
-            if (dp >= 0) dp ++;			/* maybe increment decimal digit counter */
-            if (dp >= LOG10FRAC) break;		/* stop if reached max decimal digits */
+            accum = accum * 10 + c - '0';       /* digit, stuff in accumulator */
+            if (dp >= 0) dp ++;         /* maybe increment decimal digit counter */
+            if (dp >= LOG10FRAC) break;     /* stop if reached max decimal digits */
         }
     }
-    if (dp <= 0) accum *= FRAC;			/* if no decimal digits, just multiply by 1000000 */
-    else while (dp < LOG10FRAC)  			/* else multiply by 10**(6-dp) */
+    if (dp <= 0) accum *= FRAC;         /* if no decimal digits, just multiply by 1000000 */
+    else while (dp < LOG10FRAC)             /* else multiply by 10**(6-dp) */
         {
             accum *= 10;
             dp ++;
         }
-    if (line -> number > accum) return (1);	/* finally compare numbers */
+    if (line -> number > accum) return (1); /* finally compare numbers */
     if (line -> number < accum) return (-1);
     return (0);
 }
 
 /************************************************************************/
-/*									*/
-/*  Get other various things about the line				*/
-/*									*/
+/*                                  */
+/*  Get other various things about the line             */
+/*                                  */
 /************************************************************************/
 
 Line *line_next (Line *line)
@@ -499,17 +499,17 @@ String *line_string (Line *line)
 }
 
 /************************************************************************/
-/*									*/
-/*  Flag a line for resequencing					*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	line = line to be resequenced					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	line tagged for renumbering					*/
-/*									*/
+/*                                  */
+/*  Flag a line for resequencing                    */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  line = line to be resequenced                   */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  line tagged for renumbering                 */
+/*                                  */
 /************************************************************************/
 
 void line_reseq (Line *line)
@@ -520,9 +520,9 @@ void line_reseq (Line *line)
 }
 
 /************************************************************************/
-/*									*/
-/*  Print out line on terminal						*/
-/*									*/
+/*                                  */
+/*  Print out line on terminal                      */
+/*                                  */
 /************************************************************************/
 
 void line_print (Line *line)
@@ -564,12 +564,12 @@ void line_print (Line *line)
 }
 
 /************************************************************************/
-/*									*/
-/*  Generates printable number string from internal binary		*/
-/*  The string generated must be comparable with strcmp			*/
-/*  The string generated must be at least 8 chars long and less than 	*/
-/*  16 chars long							*/
-/*									*/
+/*                                  */
+/*  Generates printable number string from internal binary      */
+/*  The string generated must be comparable with strcmp         */
+/*  The string generated must be at least 8 chars long and less than    */
+/*  16 chars long                           */
+/*                                  */
 /************************************************************************/
 
 static void getprint (char *print, uQuad number)

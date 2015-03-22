@@ -18,7 +18,7 @@
 
 extern __inline__ int set_bit(int nr,long * addr)
 {
-    int	mask, retval;
+    int mask, retval;
 
     addr += nr >> 5;
     mask = 1 << (nr & 0x1f);
@@ -31,7 +31,7 @@ extern __inline__ int set_bit(int nr,long * addr)
 
 extern __inline__ int clear_bit(int nr, long * addr)
 {
-    int	mask, retval;
+    int mask, retval;
 
     addr += nr >> 5;
     mask = 1 << (nr & 0x1f);
@@ -44,7 +44,7 @@ extern __inline__ int clear_bit(int nr, long * addr)
 
 extern __inline__ int test_bit(int nr, long * addr)
 {
-    int	mask;
+    int mask;
 
     addr += nr >> 5;
     mask = 1 << (nr & 0x1f);

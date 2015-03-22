@@ -1,5 +1,5 @@
-#ifndef cliverbdef_h
-#define cliverbdef_h
+#ifndef CLIVERBDEF_H
+#define CLIVERBDEF_H
 
 #define CLI$K_VERB_ALLO 1
 #define CLI$K_VERB_ANAL 2

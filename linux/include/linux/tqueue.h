@@ -37,35 +37,35 @@
 
 struct tq_struct
 {
-    struct list_head list;		/* linked list of active bh's */
-    unsigned long sync;		/* must be initialized to zero */
-    void (*routine)(void *);	/* function to call */
-    void *data;			/* argument to function */
+    struct list_head list;      /* linked list of active bh's */
+    unsigned long sync;     /* must be initialized to zero */
+    void (*routine)(void *);    /* function to call */
+    void *data;         /* argument to function */
 };
 
 /*
  * Emit code to initialise a tq_struct's routine and data pointers
  */
-#define PREPARE_TQUEUE(_tq, _routine, _data)			\
-	do {							\
-		(_tq)->routine = _routine;			\
-		(_tq)->data = _data;				\
-	} while (0)
+#define PREPARE_TQUEUE(_tq, _routine, _data)            \
+    do {                            \
+        (_tq)->routine = _routine;          \
+        (_tq)->data = _data;                \
+    } while (0)
 
 /*
  * Emit code to initialise all of a tq_struct
  */
-#define INIT_TQUEUE(_tq, _routine, _data)			\
-	do {							\
-		INIT_LIST_HEAD(&(_tq)->list);			\
-		(_tq)->sync = 0;				\
-		PREPARE_TQUEUE((_tq), (_routine), (_data));	\
-	} while (0)
+#define INIT_TQUEUE(_tq, _routine, _data)           \
+    do {                            \
+        INIT_LIST_HEAD(&(_tq)->list);           \
+        (_tq)->sync = 0;                \
+        PREPARE_TQUEUE((_tq), (_routine), (_data)); \
+    } while (0)
 
 typedef struct list_head task_queue;
 
-#define DECLARE_TASK_QUEUE(q)	LIST_HEAD(q)
-#define TQ_ACTIVE(q)		(!list_empty(&q))
+#define DECLARE_TASK_QUEUE(q)   LIST_HEAD(q)
+#define TQ_ACTIVE(q)        (!list_empty(&q))
 
 extern task_queue tq_timer, tq_immediate, tq_disk;
 
@@ -75,17 +75,17 @@ extern task_queue tq_timer, tq_immediate, tq_disk;
  *
  * DECLARE_TASK_QUEUE(my_tqueue);
  * struct tq_struct my_task = {
- * 	routine: (void (*)(void *)) my_routine,
- *	data: &my_data
+ *  routine: (void (*)(void *)) my_routine,
+ *  data: &my_data
  * };
  *
  * To activate a bottom half on a list, use:
  *
- *	queue_task(&my_task, &my_tqueue);
+ *  queue_task(&my_task, &my_tqueue);
  *
  * To later run the queued tasks use
  *
- *	run_task_queue(&my_tqueue);
+ *  run_task_queue(&my_tqueue);
  *
  * This allows you to do deferred processing.  For example, you could
  * have a task queue called tq_timer, which is executed within the timer

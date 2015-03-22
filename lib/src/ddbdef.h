@@ -1,5 +1,5 @@
-#ifndef ddbdef_h
-#define ddbdef_h
+#ifndef DDBDEF_H
+#define DDBDEF_H
 
 #define DDB$M_NO_TIMEOUT 0x1
 #define DDB$M_PAC 0x2

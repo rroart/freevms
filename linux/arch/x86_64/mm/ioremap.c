@@ -178,9 +178,9 @@ ioremap_change_attr(unsigned long phys_addr, unsigned long size,
          */
 // skip this 16/17-part
         /*
-        		err = change_page_attr_addr(vaddr,npages,__pgprot(__PAGE_KERNEL|flags));
-        		if (!err)
-        			global_flush_tlb();
+                err = change_page_attr_addr(vaddr,npages,__pgprot(__PAGE_KERNEL|flags));
+                if (!err)
+                    global_flush_tlb();
         */
     }
     return err;
@@ -260,9 +260,9 @@ void __iomem * __ioremap(unsigned long phys_addr, unsigned long size, unsigned l
     // skip this 16/17-part
     /*
     if (flags && ioremap_change_attr(phys_addr, size, flags) < 0) {
-    	area->flags &= 0xffffff;
-    	vunmap(addr);
-    	return NULL;
+        area->flags &= 0xffffff;
+        vunmap(addr);
+        return NULL;
     }
     */
     return (__force void __iomem *) (offset + (char *)addr);

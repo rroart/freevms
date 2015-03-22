@@ -1,5 +1,5 @@
-#ifndef ctddef_h
-#define ctddef_h
+#ifndef CTDDEF_H
+#define CTDDEF_H
 
 struct _ctd
 {

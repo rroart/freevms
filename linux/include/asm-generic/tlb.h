@@ -1,6 +1,6 @@
 /* asm-generic/tlb.h
  *
- *	Generic TLB shootdown code
+ *  Generic TLB shootdown code
  *
  * Copyright 2001 Red Hat, Inc.
  * Based on code from mm/memory.c Copyright Linus Torvalds and others.
@@ -17,7 +17,7 @@
 
 #ifdef CONFIG_SMP
 /* aim for something that fits in the L1 cache */
-#define FREE_PTE_NR	508
+#define FREE_PTE_NR 508
 
 /* mmu_gather_t is an opaque type used by the mm code for passing around any
  * data needed by arch specific code for tlb_remove_page.  This structure can
@@ -26,17 +26,17 @@
  */
 typedef struct free_pte_ctx
 {
-    struct mm_struct	*mm;
-    unsigned long		nr;	/* set to ~0UL means fast mode */
-    unsigned long	start_addr, end_addr;
-    pte_t	ptes[FREE_PTE_NR];
+    struct mm_struct    *mm;
+    unsigned long       nr; /* set to ~0UL means fast mode */
+    unsigned long   start_addr, end_addr;
+    pte_t   ptes[FREE_PTE_NR];
 } mmu_gather_t;
 
 /* Users of the generic TLB shootdown code must declare this storage space. */
-extern mmu_gather_t	mmu_gathers[NR_CPUS];
+extern mmu_gather_t mmu_gathers[NR_CPUS];
 
 /* tlb_gather_mmu
- *	Return a pointer to an initialized mmu_gather_t.
+ *  Return a pointer to an initialized mmu_gather_t.
  */
 static inline mmu_gather_t *tlb_gather_mmu(struct mm_struct *mm)
 {
@@ -49,28 +49,28 @@ static inline mmu_gather_t *tlb_gather_mmu(struct mm_struct *mm)
 }
 
 /* void tlb_remove_page(mmu_gather_t *tlb, pte_t *ptep, unsigned long addr)
- *	Must perform the equivalent to __free_pte(pte_get_and_clear(ptep)), while
- *	handling the additional races in SMP caused by other CPUs caching valid
- *	mappings in their TLBs.
+ *  Must perform the equivalent to __free_pte(pte_get_and_clear(ptep)), while
+ *  handling the additional races in SMP caused by other CPUs caching valid
+ *  mappings in their TLBs.
  */
 #define tlb_remove_page(ctxp, pte, addr) do {\
-		/* Handle the common case fast, first. */\
-		if ((ctxp)->nr == ~0UL) {\
-			__free_pte(*(pte));\
-			pte_clear(42, 42, (pte)); /* check */\
-			break;\
-		}\
-		if (!(ctxp)->nr) \
-			(ctxp)->start_addr = (addr);\
-		(ctxp)->ptes[(ctxp)->nr++] = ptep_get_and_clear(42, 42, pte); /* check */\
-		(ctxp)->end_addr = (addr) + PAGE_SIZE;\
-		if ((ctxp)->nr >= FREE_PTE_NR)\
-			tlb_finish_mmu((ctxp), 0, 0);\
-	} while (0)
+        /* Handle the common case fast, first. */\
+        if ((ctxp)->nr == ~0UL) {\
+            __free_pte(*(pte));\
+            pte_clear(42, 42, (pte)); /* check */\
+            break;\
+        }\
+        if (!(ctxp)->nr) \
+            (ctxp)->start_addr = (addr);\
+        (ctxp)->ptes[(ctxp)->nr++] = ptep_get_and_clear(42, 42, pte); /* check */\
+        (ctxp)->end_addr = (addr) + PAGE_SIZE;\
+        if ((ctxp)->nr >= FREE_PTE_NR)\
+            tlb_finish_mmu((ctxp), 0, 0);\
+    } while (0)
 
 /* tlb_finish_mmu
- *	Called at the end of the shootdown operation to free up any resources
- *	that were required.  The page talbe lock is still held at this point.
+ *  Called at the end of the shootdown operation to free up any resources
+ *  that were required.  The page talbe lock is still held at this point.
  */
 static inline void tlb_finish_mmu(struct free_pte_ctx *ctx, unsigned long start, unsigned long end)
 {
@@ -101,13 +101,13 @@ static inline void tlb_finish_mmu(struct free_pte_ctx *ctx, unsigned long start,
  */
 typedef struct mm_struct mmu_gather_t;
 
-#define tlb_gather_mmu(mm)	(mm)
-#define tlb_finish_mmu(tlb, start, end)	flush_tlb_range(tlb, start, end)
-#define tlb_remove_page(tlb, ptep, addr)	do {\
-		pte_t __pte = *(ptep);\
-		pte_clear(42, 42, ptep);/* check */\
-		__free_pte(__pte);\
-	} while (0)
+#define tlb_gather_mmu(mm)  (mm)
+#define tlb_finish_mmu(tlb, start, end) flush_tlb_range(tlb, start, end)
+#define tlb_remove_page(tlb, ptep, addr)    do {\
+        pte_t __pte = *(ptep);\
+        pte_clear(42, 42, ptep);/* check */\
+        __free_pte(__pte);\
+    } while (0)
 
 #endif
 

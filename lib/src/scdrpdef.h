@@ -1,5 +1,5 @@
-#ifndef scdrpdef_h
-#define scdrpdef_h
+#ifndef SCDRPDEF_H
+#define SCDRPDEF_H
 
 #define SCDRP$C_VERSION 6
 #define SCDRP$K_SCDRPBASE 0
@@ -96,7 +96,7 @@ struct _scdrp
     unsigned short int scdrp$w_scdrpsize;
     unsigned char scdrp$b_cd_type;
     unsigned char scdrp$b_flck;
-    void (*scdrp$l_fpc)();
+    void (*scdrp$l_fpc)(void);
     unsigned long scdrp$l_fr3;
     unsigned long scdrp$l_fr4;
     struct _ucb *scdrp$l_port_ucb;
@@ -108,7 +108,7 @@ struct _scdrp
     unsigned int scdrp$l_bcnt;
     void *scdrp$l_media;
     unsigned int scdrp$l_abcnt;
-    int (*scdrp$l_savd_rtn)();
+    int (*scdrp$l_savd_rtn)(void);
     void *scdrp$l_msg_buf;
     unsigned int scdrp$l_rspid;
     struct _cdt *scdrp$l_cdt;

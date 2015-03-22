@@ -246,10 +246,10 @@ ht_dump_statistics (hash_table *table)
     hashnode *p, *limit;
 
 #define SCALE(x) ((unsigned long) ((x) < 1024*10 \
-		  ? (x) \
-		  : ((x) < 1024*1024*10 \
-		     ? (x) / 1024 \
-		     : (x) / (1024*1024))))
+          ? (x) \
+          : ((x) < 1024*1024*10 \
+             ? (x) / 1024 \
+             : (x) / (1024*1024))))
 #define LABEL(x) ((x) < 1024*10 ? ' ' : ((x) < 1024*1024*10 ? 'k' : 'M'))
 
     total_bytes = longest = sum_of_squares = nids = 0;

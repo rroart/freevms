@@ -32,27 +32,27 @@
 #include <linux/i2c.h>
 
 /* Example of a sequential read request:
-	struct i2c_iic_msg s_msg;
+    struct i2c_iic_msg s_msg;
 
-	s_msg.addr=device_address;
-	s_msg.len=length;
-	s_msg.buf=buffer;
-	s_msg.waddr=word_address;
-	ioctl(file,I2C_SREAD, &s_msg);
+    s_msg.addr=device_address;
+    s_msg.len=length;
+    s_msg.buf=buffer;
+    s_msg.waddr=word_address;
+    ioctl(file,I2C_SREAD, &s_msg);
  */
-#define I2C_SREAD	0x780	/* SREAD ioctl command */
+#define I2C_SREAD   0x780   /* SREAD ioctl command */
 
 struct i2c_iic_msg
 {
-    __u16 addr;	/* device address */
-    __u16 waddr;	/* word address */
-    short len;	/* msg length */
-    char *buf;	/* pointer to msg data */
+    __u16 addr; /* device address */
+    __u16 waddr;    /* word address */
+    short len;  /* msg length */
+    char *buf;  /* pointer to msg data */
 };
 
 struct i2c_algo_iic_data
 {
-    void *data;		/* private data for lolevel routines	*/
+    void *data;     /* private data for lolevel routines    */
     void (*setiic) (void *data, int ctl, int val);
     int  (*getiic) (void *data, int ctl);
     int  (*getown) (void *data);

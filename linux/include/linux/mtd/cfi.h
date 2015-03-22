@@ -234,8 +234,8 @@ struct cfi_bri_query
 #define P_ID_RESERVED 65535
 
 
-#define CFI_MODE_CFI	0
-#define CFI_MODE_JEDEC	1
+#define CFI_MODE_CFI    0
+#define CFI_MODE_JEDEC  1
 
 struct cfi_private
 {
@@ -243,17 +243,17 @@ struct cfi_private
     void *cmdset_priv;
     int interleave;
     int device_type;
-    int cfi_mode;		/* Are we a JEDEC device pretending to be CFI? */
+    int cfi_mode;       /* Are we a JEDEC device pretending to be CFI? */
     int addr_unlock1;
     int addr_unlock2;
     int fast_prog;
     struct mtd_info *(*cmdset_setup)(struct map_info *);
     struct cfi_ident *cfiq; /* For now only one. We insist that all devs
-				  must be of the same type. */
+                  must be of the same type. */
     int mfr, id;
     int numchips;
     unsigned long chipshift; /* Because they're of the same type */
-    const char *im_name;	 /* inter_module name for cmdset_setup */
+    const char *im_name;     /* inter_module name for cmdset_setup */
     struct flchip chips[0];  /* per-chip data structure for each chip */
 };
 

@@ -31,7 +31,7 @@
  */
 
 /* compile-time options */
-#define INCLUDE_FS_TESTS	/* include cramfs checking and extraction */
+#define INCLUDE_FS_TESTS    /* include cramfs checking and extraction */
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -55,28 +55,28 @@
 
 static const char *progname = "cramfsck";
 
-static int fd;			/* ROM image file descriptor */
-static char *filename;		/* ROM image filename */
-struct cramfs_super *super;	/* just find the cramfs superblock once */
-static int opt_verbose = 0;	/* 1 = verbose (-v), 2+ = very verbose (-vv) */
+static int fd;          /* ROM image file descriptor */
+static char *filename;      /* ROM image filename */
+struct cramfs_super *super; /* just find the cramfs superblock once */
+static int opt_verbose = 0; /* 1 = verbose (-v), 2+ = very verbose (-vv) */
 #ifdef INCLUDE_FS_TESTS
-static int opt_extract = 0;	/* extract cramfs (-x) */
-char *extract_dir = NULL;	/* extraction directory (-x) */
+static int opt_extract = 0; /* extract cramfs (-x) */
+char *extract_dir = NULL;   /* extraction directory (-x) */
 
-unsigned long start_inode = 1 << 28;	/* start of first non-root inode */
-unsigned long end_inode = 0;		/* end of the directory structure */
-unsigned long start_data = 1 << 28;	/* start of the data (256 MB = max) */
-unsigned long end_data = 0;		/* end of the data */
+unsigned long start_inode = 1 << 28;    /* start of first non-root inode */
+unsigned long end_inode = 0;        /* end of the directory structure */
+unsigned long start_data = 1 << 28; /* start of the data (256 MB = max) */
+unsigned long end_data = 0;     /* end of the data */
 /* true?  cramfs_super < start_inode < end_inode <= start_data <= end_data */
-static uid_t euid;			/* effective UID */
+static uid_t euid;          /* effective UID */
 
 #define PAD_SIZE 512
 #define PAGE_CACHE_SIZE (4096)
 
 /* Guarantee access to at least 8kB at a time */
-#define ROMBUFFER_BITS	13
-#define ROMBUFFERSIZE	(1 << ROMBUFFER_BITS)
-#define ROMBUFFERMASK	(ROMBUFFERSIZE-1)
+#define ROMBUFFER_BITS  13
+#define ROMBUFFERSIZE   (1 << ROMBUFFER_BITS)
+#define ROMBUFFERMASK   (ROMBUFFERSIZE-1)
 static char read_buffer[ROMBUFFERSIZE * 2];
 static unsigned long read_buffer_block = ~0UL;
 
@@ -475,7 +475,7 @@ int main(int argc, char **argv)
 #ifdef INCLUDE_FS_TESTS
     struct cramfs_inode *root;
 #endif /* INCLUDE_FS_TESTS */
-    int c;			/* for getopt */
+    int c;          /* for getopt */
     int start = 0;
 
     if (argc)

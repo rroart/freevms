@@ -1,8 +1,8 @@
 
 /*
- *	strmul.c
+ *  strmul.c
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,62 +20,62 @@
  *
  *The author may be contacted at freevms@sympatico.ca
  *
- *	Andrew Allison
- *	50 Denlaw Road
- *	London, Ont
- *	Canada
- *	N6G 3L4
+ *  Andrew Allison
+ *  50 Denlaw Road
+ *  London, Ont
+ *  Canada
+ *  N6G 3L4
  *
  */
 
 /*
  * str.c
  *
- *	Code for VAX STR$ routines
+ *  Code for VAX STR$ routines
  *
  * Description:
  *
- *	This file contains various 'str$' functions equivalent
- *	to those available in Vax/VMS string library.
+ *  This file contains various 'str$' functions equivalent
+ *  to those available in Vax/VMS string library.
  *
  * Bugs:
  *
- *	Not compatible at the binary level.
+ *  Not compatible at the binary level.
  *
- *	No seperate "string zone" to allocate memory from,
- *	uses malloc/free instead.
+ *  No seperate "string zone" to allocate memory from,
+ *  uses malloc/free instead.
  *
- *	Some versions of realloc are broken! Some don't like to be
- *	called hundreds of times.  The program may
- *	crash with a segmentation fault in such a case.
+ *  Some versions of realloc are broken! Some don't like to be
+ *  called hundreds of times.  The program may
+ *  crash with a segmentation fault in such a case.
  *
- *	I probibly should be using dsc$descriptor instead of
- *	dsc$descriptor_s, but I prefer to have the type 'char*'
- *	instead of 'void*' which is the only difference.
+ *  I probibly should be using dsc$descriptor instead of
+ *  dsc$descriptor_s, but I prefer to have the type 'char*'
+ *  instead of 'void*' which is the only difference.
  *
- *	Not worrying about the dsc$b_dtype field yet. Assumes it
- *	will always be type DSC$K_DTYPE_T (character coded text).
- *	Type V should mean size is in bits, and P means size is in
- *	digits (4 bit nibbles).
+ *  Not worrying about the dsc$b_dtype field yet. Assumes it
+ *  will always be type DSC$K_DTYPE_T (character coded text).
+ *  Type V should mean size is in bits, and P means size is in
+ *  digits (4 bit nibbles).
  *
- *	Should we abort if input string c is not null?
+ *  Should we abort if input string c is not null?
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design. Spelling errors are
- *		not my fault! Someone must have snuck them in
- *		there when I wasn't looking.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design. Spelling errors are
+ *      not my fault! Someone must have snuck them in
+ *      there when I wasn't looking.
  *
- *	Feb 4, 1997 - Kevin Handy
- *		Added a 'return STR$_ILLSTRCLA' so that compiling
- *		with '-Wall' won't display errors.
+ *  Feb 4, 1997 - Kevin Handy
+ *      Added a 'return STR$_ILLSTRCLA' so that compiling
+ *      with '-Wall' won't display errors.
  *
- *	Oct 1, 2003 - Andrew Allison
+ *  Oct 1, 2003 - Andrew Allison
  *              Wrote str$mul code
  *
- *	Feb 19, 2004 - Andrew Allison
- * 		Changed malloc to calloc to initialize memory
+ *  Feb 19, 2004 - Andrew Allison
+ *      Changed malloc to calloc to initialize memory
  */
 
 #include <stdio.h>
@@ -92,7 +92,7 @@
 /*************************************************************
  * str$mul
  *
- *	Multiply two decimal strings of digits
+ *  Multiply two decimal strings of digits
  *
  *      Fixed length output string results are blank padded or truncated
  *      Varying length output length is set or truncated
@@ -103,27 +103,27 @@
  *
  *       1,   23, +12345,  0,   -34,5432112, out,out,out
  *
- * 	Input
- *		digits	       65,536 	string portion of number
- *		exp	2,147,483,648	power of 10 to obtain value of number
- *		sign			sign of number 0 pos 1 neg
- *		Total   2,147,549,184
+ *  Input
+ *      digits         65,536   string portion of number
+ *      exp 2,147,483,648   power of 10 to obtain value of number
+ *      sign            sign of number 0 pos 1 neg
+ *      Total   2,147,549,184
  *
- *		value = sign digits * 10 ^^ exp
- *	Returns
- * 		STR$_NORMAL
- *		STR_TRU		Truncation
- *	Signal
- *		LIB$_INVARG	Invalid Argument
- *		STR$_FATINTERR  Internal Error
- * 		STR$_ILLSTRCLA	Illegal string Class
- *		STR$_INSVIRMEM	Insufficient virtual memory
- *		STR$_WRONUMARG	Wrong number of arguments
+ *      value = sign digits * 10 ^^ exp
+ *  Returns
+ *      STR$_NORMAL
+ *      STR_TRU     Truncation
+ *  Signal
+ *      LIB$_INVARG Invalid Argument
+ *      STR$_FATINTERR  Internal Error
+ *      STR$_ILLSTRCLA  Illegal string Class
+ *      STR$_INSVIRMEM  Insufficient virtual memory
+ *      STR$_WRONUMARG  Wrong number of arguments
  */
-#define MAXSTR 		132000
-#define MAXUINT16	65536
-#define TRUE		1
-#define FALSE		0
+#define MAXSTR      132000
+#define MAXUINT16   65536
+#define TRUE        1
+#define FALSE       0
 
 
 /***********************************************/
@@ -138,13 +138,13 @@ unsigned long str$mul (const unsigned long *asign,
                        long *cexp,
                        struct dsc$descriptor_s *cdigits)
 {
-    unsigned short	s1_len,  s2_len,  s3_len, temp_len;
-    char		*s1_ptr, *s2_ptr, *s3_ptr;
-    unsigned long  	index, max_len, min_len;
-    int		i,j,k;
-    unsigned long	status;
-    int		sum,carry;
-    char		*a,*b,*c;
+    unsigned short  s1_len,  s2_len,  s3_len, temp_len;
+    char        *s1_ptr, *s2_ptr, *s3_ptr;
+    unsigned long   index, max_len, min_len;
+    int     i,j,k;
+    unsigned long   status;
+    int     sum,carry;
+    char        *a,*b,*c;
 
     status = STR$_NORMAL;
     index = 0;
@@ -166,7 +166,7 @@ unsigned long str$mul (const unsigned long *asign,
         status = STR$_INSVIRMEM;
     }
 
-//	Check the sign field is 1 or 0
+//  Check the sign field is 1 or 0
     if ( *asign == 1 || *asign == 0 )
         ;
     else
@@ -182,19 +182,19 @@ unsigned long str$mul (const unsigned long *asign,
     if (( *asign == 1 ) && ( *bsign == 0 )) *csign = 1;
     if (( *asign == 1 ) && ( *bsign == 1 )) *csign = 0;
 
-//	Get the length of the input strings and how much room for the output
+//  Get the length of the input strings and how much room for the output
     str$analyze_sdesc (adigits, &s1_len, &s1_ptr);
     str$analyze_sdesc (bdigits, &s2_len, &s2_ptr);
     str$analyze_sdesc (cdigits, &s3_len, &s3_ptr);
     strcpy (s3_ptr,"0");
 
-// 	Quick abort
+//  Quick abort
     if (status != STR$_NORMAL)
     {
         return status;
     }
 
-//	zero out the accumulator
+//  zero out the accumulator
     for (i=0; i < MAXSTR; i++ )
     {
         a[i] = '0';
@@ -202,13 +202,13 @@ unsigned long str$mul (const unsigned long *asign,
         c[i] = 0;
     }
 
-//	Move in the largest number - we need to keep the alignment correct
-//	char string is "right to left" alignment
-//	start at location specified by the exponent
+//  Move in the largest number - we need to keep the alignment correct
+//  char string is "right to left" alignment
+//  start at location specified by the exponent
     max_len = ( s1_len > s2_len ) ? s1_len : s2_len;
     min_len = ( s1_len > s2_len) ? s2_len : s1_len;
 
-//	Copy input strings to working storage
+//  Copy input strings to working storage
     for (i = 0; i < s1_len; i++ )
     {
         a[i] = s1_ptr[i];
@@ -218,7 +218,7 @@ unsigned long str$mul (const unsigned long *asign,
         b[i] = s2_ptr[i];
     }
 
-//	Set the output exponent
+//  Set the output exponent
     *cexp = *aexp + *bexp;
 
     max_len = s1_len + s2_len;
@@ -247,14 +247,14 @@ unsigned long str$mul (const unsigned long *asign,
     }
     c[k] = carry;
 
-//	Truncate output sum string to 65536 MAXUINT16
+//  Truncate output sum string to 65536 MAXUINT16
     if ( max_len > MAXUINT16 )
     {
         status = STR$_TRU;
         max_len = MAXUINT16;
     }
 
-//	Free any memory that is passed into us.
+//  Free any memory that is passed into us.
     str$free1_dx (cdigits);
     temp_len = (unsigned short) max_len + 1;
     str$get1_dx(&temp_len, cdigits);

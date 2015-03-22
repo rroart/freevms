@@ -1,5 +1,5 @@
-#ifndef mtxdef_h
-#define mtxdef_h
+#ifndef MTXDEF_H
+#define MTXDEF_H
 
 #define MTX$S_MTXDEF 4
 

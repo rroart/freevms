@@ -83,7 +83,7 @@
 #endif
 
 #ifndef HAVE_FREE_NETDEV
-#define free_netdev(x)	kfree(x)
+#define free_netdev(x)  kfree(x)
 #endif
 
 #ifdef HAVE_POLL_CONTROLLER
@@ -126,30 +126,30 @@
 #define HAVE_NETIF_MSG 1
 enum
 {
-    NETIF_MSG_DRV		= 0x0001,
-    NETIF_MSG_PROBE		= 0x0002,
-    NETIF_MSG_LINK		= 0x0004,
-    NETIF_MSG_TIMER		= 0x0008,
-    NETIF_MSG_IFDOWN	= 0x0010,
-    NETIF_MSG_IFUP		= 0x0020,
-    NETIF_MSG_RX_ERR	= 0x0040,
-    NETIF_MSG_TX_ERR	= 0x0080,
-    NETIF_MSG_TX_QUEUED	= 0x0100,
-    NETIF_MSG_INTR		= 0x0200,
-    NETIF_MSG_TX_DONE	= 0x0400,
-    NETIF_MSG_RX_STATUS	= 0x0800,
-    NETIF_MSG_PKTDATA	= 0x1000,
-    NETIF_MSG_HW		= 0x2000,
-    NETIF_MSG_WOL		= 0x4000,
+    NETIF_MSG_DRV       = 0x0001,
+    NETIF_MSG_PROBE     = 0x0002,
+    NETIF_MSG_LINK      = 0x0004,
+    NETIF_MSG_TIMER     = 0x0008,
+    NETIF_MSG_IFDOWN    = 0x0010,
+    NETIF_MSG_IFUP      = 0x0020,
+    NETIF_MSG_RX_ERR    = 0x0040,
+    NETIF_MSG_TX_ERR    = 0x0080,
+    NETIF_MSG_TX_QUEUED = 0x0100,
+    NETIF_MSG_INTR      = 0x0200,
+    NETIF_MSG_TX_DONE   = 0x0400,
+    NETIF_MSG_RX_STATUS = 0x0800,
+    NETIF_MSG_PKTDATA   = 0x1000,
+    NETIF_MSG_HW        = 0x2000,
+    NETIF_MSG_WOL       = 0x4000,
 };
 
 #else
-#define NETIF_MSG_HW	0x2000
-#define NETIF_MSG_WOL	0x4000
+#define NETIF_MSG_HW    0x2000
+#define NETIF_MSG_WOL   0x4000
 #endif /* HAVE_NETIF_MSG */
 
 #ifndef MII_RESV1
-#define MII_RESV1		0x17		/* Reserved...		*/
+#define MII_RESV1       0x17        /* Reserved...      */
 #endif
 
 #ifndef unlikely
@@ -163,8 +163,8 @@ enum
 
 #ifndef PCI_DEVICE
 #define PCI_DEVICE(vend,dev) \
-	.vendor = (vend), .device = (dev), \
-	.subvendor = PCI_ANY_ID, .subdevice = PCI_ANY_ID
+    .vendor = (vend), .device = (dev), \
+    .subvendor = PCI_ANY_ID, .subdevice = PCI_ANY_ID
 #endif
 
 /*****************************************************************************/
@@ -220,8 +220,8 @@ static inline int _kc_pci_dma_mapping_error(dma_addr_t dma_addr)
 /*****************************************************************************/
 /* 2.6.5 => 2.6.0 */
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,5) )
-#define pci_dma_sync_single_for_cpu	pci_dma_sync_single
-#define pci_dma_sync_single_for_device	pci_dma_sync_single_for_cpu
+#define pci_dma_sync_single_for_cpu pci_dma_sync_single
+#define pci_dma_sync_single_for_device  pci_dma_sync_single_for_cpu
 #endif /* 2.6.5 => 2.6.0 */
 
 /*****************************************************************************/
@@ -236,9 +236,9 @@ static inline struct mii_ioctl_data *_kc_if_mii(struct ifreq *rq)
 
 /*****************************************************************************/
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,8) )
-#define msleep(x)	do { set_current_state(TASK_UNINTERRUPTIBLE); \
-				schedule_timeout((x * HZ)/1000 + 2); \
-			} while (0)
+#define msleep(x)   do { set_current_state(TASK_UNINTERRUPTIBLE); \
+                schedule_timeout((x * HZ)/1000 + 2); \
+            } while (0)
 #endif
 
 /*****************************************************************************/
@@ -326,11 +326,11 @@ static unsigned inline long _kc_msleep_interruptible(unsigned int msecs)
 #ifdef module_param_array_named
 #undef module_param_array_named
 #define module_param_array_named(name, array, type, nump, perm)          \
-	static struct kparam_array __param_arr_##name                    \
-	= { ARRAY_SIZE(array), nump, param_set_##type, param_get_##type, \
-	    sizeof(array[0]), array };                                   \
-	module_param_call(name, param_array_set, param_array_get,        \
-			  &__param_arr_##name, perm)
+    static struct kparam_array __param_arr_##name                    \
+    = { ARRAY_SIZE(array), nump, param_set_##type, param_get_##type, \
+        sizeof(array[0]), array };                                   \
+    module_param_call(name, param_array_set, param_array_get,        \
+              &__param_arr_##name, perm)
 #endif /* module_param_array_named */
 #endif /* < 2.6.10 */
 

@@ -10,11 +10,11 @@
  *
  * NOTE NOTE NOTE! This is _not_ equivalent to
  *
- *	if (atomic_dec_and_test(&atomic)) {
- *		spin_lock(&lock);
- *		return 1;
- *	}
- *	return 0;
+ *  if (atomic_dec_and_test(&atomic)) {
+ *      spin_lock(&lock);
+ *      return 1;
+ *  }
+ *  return 0;
  *
  * because the spin-lock and the decrement must be
  * "atomic".

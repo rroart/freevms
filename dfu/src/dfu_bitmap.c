@@ -277,7 +277,7 @@ void new_bitmap(int *addr, struct header_area_struct *hdr, int cluster,
      2) Build up new bitmap into the dynamic area
      3) Report multiple allocated blocks.
      If pass =1 the multiple allocated blocks are saved in a dynmic
-	linked list pointed to by *lis (and *flag is set to true).
+    linked list pointed to by *lis (and *flag is set to true).
      The VERIFY_COMMAND procedure will call us a second time with pass=2
      to report the multiple allocated blocks to the user. This
      is done to ensure that all involved files will be reported
@@ -431,11 +431,11 @@ void new_bitmap(int *addr, struct header_area_struct *hdr, int cluster,
 void set_bitmap(int * addr, int cluster, int lbn_start,
                 int lbn_count, Boolean mbs)
 /*
-	Set the multiple allocated blocks in the new bitmap
+    Set the multiple allocated blocks in the new bitmap
         They were found in new_bitmap and entered in m_list
 
-	V1.6 modify this routine so that we can set/clr bits
-	in BITMAP.SYS in memory during a VERIFY/REBUILD
+    V1.6 modify this routine so that we can set/clr bits
+    in BITMAP.SYS in memory during a VERIFY/REBUILD
 */
 
 {

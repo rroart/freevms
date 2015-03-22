@@ -1,16 +1,16 @@
-#ifndef rvtdef_h
-#define rvtdef_h
+#ifndef RVTDEF_H
+#define RVTDEF_H
 
-#define		RVT$K_LENGTH		88
-#define		RVT$C_LENGTH		88
-#define		RVT$C_UCB_POINTER	0
-#define		RVT$C_PHYSICAL_VOLUME	1
-#define		RVT$C_VOLUME_LOCK_ID	2
-#define		RVT$C_VOLUME_IDENTIFIER	3
+#define     RVT$K_LENGTH        88
+#define     RVT$C_LENGTH        88
+#define     RVT$C_UCB_POINTER   0
+#define     RVT$C_PHYSICAL_VOLUME   1
+#define     RVT$C_VOLUME_LOCK_ID    2
+#define     RVT$C_VOLUME_IDENTIFIER 3
 
-#define		RVT$C_RVTVCB		4
-#define		RVT$C_MINSIZE		18
-#define		RVT$S_RVTDEF		88
+#define     RVT$C_RVTVCB        4
+#define     RVT$C_MINSIZE       18
+#define     RVT$S_RVTDEF        88
 
 struct _rvt
 {

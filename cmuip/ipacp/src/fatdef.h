@@ -1,23 +1,23 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 #ifndef _FATDEF_H_
 #define _FATDEF_H_ 1
@@ -53,24 +53,24 @@ struct fatdef
     unsigned short int fat$w_versions;
 };
 
-#define FAT$C_UNDEFINED	0
-#define FAT$C_FIXED	1
-#define FAT$C_VARIABLE	2
-#define FAT$C_VFC	3
-#define FAT$C_STREAM	4
-#define FAT$C_STREAMLF	5
-#define FAT$C_STREAMCR	6
-#define FAT$C_SEQUENTIAL	0
-#define FAT$C_RELATIVE	1
-#define FAT$C_INDEXED	2
-#define FAT$C_DIRECT	3
-#define FAT$M_FORTRANCC	1
-#define FAT$M_IMPLIEDCC	2
-#define FAT$M_PRINTCC	4
-#define FAT$M_NOSPAN	4
-#define FAT$K_LENGTH	32
-#define FAT$C_LENGTH	32
-#define FAT$S_LENGTH	32
+#define FAT$C_UNDEFINED 0
+#define FAT$C_FIXED 1
+#define FAT$C_VARIABLE  2
+#define FAT$C_VFC   3
+#define FAT$C_STREAM    4
+#define FAT$C_STREAMLF  5
+#define FAT$C_STREAMCR  6
+#define FAT$C_SEQUENTIAL    0
+#define FAT$C_RELATIVE  1
+#define FAT$C_INDEXED   2
+#define FAT$C_DIRECT    3
+#define FAT$M_FORTRANCC 1
+#define FAT$M_IMPLIEDCC 2
+#define FAT$M_PRINTCC   4
+#define FAT$M_NOSPAN    4
+#define FAT$K_LENGTH    32
+#define FAT$C_LENGTH    32
+#define FAT$S_LENGTH    32
 
 #endif _FATDEF_H_
 

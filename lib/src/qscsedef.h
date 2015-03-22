@@ -1,5 +1,5 @@
-#ifndef qscsedef_h
-#define qscsedef_h
+#ifndef QSCSEDEF_H
+#define QSCSEDEF_H
 
 #define QSCSE$M_SYNCH_PENDING 0x1
 #define QSCSE$M_REBUILD 0x2

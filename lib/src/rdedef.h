@@ -1,5 +1,5 @@
-#ifndef rdedef_h
-#define rdedef_h
+#ifndef RDEDEF_H
+#define RDEDEF_H
 
 #define REGPRT$M_OWNER_MODE         0xF
 #define REGPRT$M_CREATE_MODE        0xF0

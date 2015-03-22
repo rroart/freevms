@@ -1,5 +1,5 @@
-#ifndef mbxdef_h
-#define mbxdef_h
+#ifndef MBXDEF_H
+#define MBXDEF_H
 
 #define MBX$M_ALLOC 0x1
 #define MBX$M_VALID 0x2

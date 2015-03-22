@@ -1,12 +1,12 @@
 /*
- *	Intel SMP support routines.
+ *  Intel SMP support routines.
  *
- *	(c) 1995 Alan Cox, Building #3 <alan@redhat.com>
- *	(c) 1998-99, 2000 Ingo Molnar <mingo@redhat.com>
- *	(c) 2002,2003 Andi Kleen, SuSE Labs.
+ *  (c) 1995 Alan Cox, Building #3 <alan@redhat.com>
+ *  (c) 1998-99, 2000 Ingo Molnar <mingo@redhat.com>
+ *  (c) 2002,2003 Andi Kleen, SuSE Labs.
  *
- *	This code is released under the GNU General Public License version 2 or
- *	later.
+ *  This code is released under the GNU General Public License version 2 or
+ *  later.
  */
 
 #include <linux/init.h>
@@ -25,82 +25,82 @@
 #include <smp_routines.h>
 
 /*
- *	Some notes on x86 processor bugs affecting SMP operation:
+ *  Some notes on x86 processor bugs affecting SMP operation:
  *
- *	Pentium, Pentium Pro, II, III (and all CPUs) have bugs.
- *	The Linux implications for SMP are handled as follows:
+ *  Pentium, Pentium Pro, II, III (and all CPUs) have bugs.
+ *  The Linux implications for SMP are handled as follows:
  *
- *	Pentium III / [Xeon]
- *		None of the E1AP-E3AP errata are visible to the user.
+ *  Pentium III / [Xeon]
+ *      None of the E1AP-E3AP errata are visible to the user.
  *
- *	E1AP.	see PII A1AP
- *	E2AP.	see PII A2AP
- *	E3AP.	see PII A3AP
+ *  E1AP.   see PII A1AP
+ *  E2AP.   see PII A2AP
+ *  E3AP.   see PII A3AP
  *
- *	Pentium II / [Xeon]
- *		None of the A1AP-A3AP errata are visible to the user.
+ *  Pentium II / [Xeon]
+ *      None of the A1AP-A3AP errata are visible to the user.
  *
- *	A1AP.	see PPro 1AP
- *	A2AP.	see PPro 2AP
- *	A3AP.	see PPro 7AP
+ *  A1AP.   see PPro 1AP
+ *  A2AP.   see PPro 2AP
+ *  A3AP.   see PPro 7AP
  *
- *	Pentium Pro
- *		None of 1AP-9AP errata are visible to the normal user,
- *	except occasional delivery of 'spurious interrupt' as trap #15.
- *	This is very rare and a non-problem.
+ *  Pentium Pro
+ *      None of 1AP-9AP errata are visible to the normal user,
+ *  except occasional delivery of 'spurious interrupt' as trap #15.
+ *  This is very rare and a non-problem.
  *
- *	1AP.	Linux maps APIC as non-cacheable
- *	2AP.	worked around in hardware
- *	3AP.	fixed in C0 and above steppings microcode update.
- *		Linux does not use excessive STARTUP_IPIs.
- *	4AP.	worked around in hardware
- *	5AP.	symmetric IO mode (normal Linux operation) not affected.
- *		'noapic' mode has vector 0xf filled out properly.
- *	6AP.	'noapic' mode might be affected - fixed in later steppings
- *	7AP.	We do not assume writes to the LVT deassering IRQs
- *	8AP.	We do not enable low power mode (deep sleep) during MP bootup
- *	9AP.	We do not use mixed mode
+ *  1AP.    Linux maps APIC as non-cacheable
+ *  2AP.    worked around in hardware
+ *  3AP.    fixed in C0 and above steppings microcode update.
+ *      Linux does not use excessive STARTUP_IPIs.
+ *  4AP.    worked around in hardware
+ *  5AP.    symmetric IO mode (normal Linux operation) not affected.
+ *      'noapic' mode has vector 0xf filled out properly.
+ *  6AP.    'noapic' mode might be affected - fixed in later steppings
+ *  7AP.    We do not assume writes to the LVT deassering IRQs
+ *  8AP.    We do not enable low power mode (deep sleep) during MP bootup
+ *  9AP.    We do not use mixed mode
  *
- *	Pentium
- *		There is a marginal case where REP MOVS on 100MHz SMP
- *	machines with B stepping processors can fail. XXX should provide
- *	an L1cache=Writethrough or L1cache=off option.
+ *  Pentium
+ *      There is a marginal case where REP MOVS on 100MHz SMP
+ *  machines with B stepping processors can fail. XXX should provide
+ *  an L1cache=Writethrough or L1cache=off option.
  *
- *		B stepping CPUs may hang. There are hardware work arounds
- *	for this. We warn about it in case your board doesnt have the work
- *	arounds. Basically thats so I can tell anyone with a B stepping
- *	CPU and SMP problems "tough".
+ *      B stepping CPUs may hang. There are hardware work arounds
+ *  for this. We warn about it in case your board doesnt have the work
+ *  arounds. Basically thats so I can tell anyone with a B stepping
+ *  CPU and SMP problems "tough".
  *
- *	Specific items [From Pentium Processor Specification Update]
+ *  Specific items [From Pentium Processor Specification Update]
  *
- *	1AP.	Linux doesn't use remote read
- *	2AP.	Linux doesn't trust APIC errors
- *	3AP.	We work around this
- *	4AP.	Linux never generated 3 interrupts of the same priority
- *		to cause a lost local interrupt.
- *	5AP.	Remote read is never used
- *	6AP.	not affected - worked around in hardware
- *	7AP.	not affected - worked around in hardware
- *	8AP.	worked around in hardware - we get explicit CS errors if not
- *	9AP.	only 'noapic' mode affected. Might generate spurious
- *		interrupts, we log only the first one and count the
- *		rest silently.
- *	10AP.	not affected - worked around in hardware
- *	11AP.	Linux reads the APIC between writes to avoid this, as per
- *		the documentation. Make sure you preserve this as it affects
- *		the C stepping chips too.
- *	12AP.	not affected - worked around in hardware
- *	13AP.	not affected - worked around in hardware
- *	14AP.	we always deassert INIT during bootup
- *	15AP.	not affected - worked around in hardware
- *	16AP.	not affected - worked around in hardware
- *	17AP.	not affected - worked around in hardware
- *	18AP.	not affected - worked around in hardware
- *	19AP.	not affected - worked around in BIOS
+ *  1AP.    Linux doesn't use remote read
+ *  2AP.    Linux doesn't trust APIC errors
+ *  3AP.    We work around this
+ *  4AP.    Linux never generated 3 interrupts of the same priority
+ *      to cause a lost local interrupt.
+ *  5AP.    Remote read is never used
+ *  6AP.    not affected - worked around in hardware
+ *  7AP.    not affected - worked around in hardware
+ *  8AP.    worked around in hardware - we get explicit CS errors if not
+ *  9AP.    only 'noapic' mode affected. Might generate spurious
+ *      interrupts, we log only the first one and count the
+ *      rest silently.
+ *  10AP.   not affected - worked around in hardware
+ *  11AP.   Linux reads the APIC between writes to avoid this, as per
+ *      the documentation. Make sure you preserve this as it affects
+ *      the C stepping chips too.
+ *  12AP.   not affected - worked around in hardware
+ *  13AP.   not affected - worked around in hardware
+ *  14AP.   we always deassert INIT during bootup
+ *  15AP.   not affected - worked around in hardware
+ *  16AP.   not affected - worked around in hardware
+ *  17AP.   not affected - worked around in hardware
+ *  18AP.   not affected - worked around in hardware
+ *  19AP.   not affected - worked around in BIOS
  *
- *	If this sounds worrying believe me these bugs are either ___RARE___,
- *	or are signal timing bugs worked around in hardware and there's
- *	about nothing of note with C stepping upwards.
+ *  If this sounds worrying believe me these bugs are either ___RARE___,
+ *  or are signal timing bugs worked around in hardware and there's
+ *  about nothing of note with C stepping upwards.
  */
 
 /* The 'big kernel lock' */
@@ -205,20 +205,20 @@ static inline void send_IPI_mask(int mask, int vector)
 }
 
 /*
- *	Smarter SMP flushing macros.
- *		c/o Linus Torvalds.
+ *  Smarter SMP flushing macros.
+ *      c/o Linus Torvalds.
  *
- *	These mean you can really definitely utterly forget about
- *	writing to user space from interrupts. (Its not allowed anyway).
+ *  These mean you can really definitely utterly forget about
+ *  writing to user space from interrupts. (Its not allowed anyway).
  *
- *	Optimizations Manfred Spraul <manfred@colorfullife.com>
+ *  Optimizations Manfred Spraul <manfred@colorfullife.com>
  */
 
 static volatile unsigned long flush_cpumask;
 static struct mm_struct * flush_mm;
 static unsigned long flush_va;
 static spinlock_t tlbstate_lock = SPIN_LOCK_UNLOCKED;
-#define FLUSH_ALL	0xffffffff
+#define FLUSH_ALL   0xffffffff
 
 /*
  * We cannot call mmdrop() because we are in interrupt context,
@@ -240,25 +240,25 @@ static void inline leave_mm (unsigned long cpu)
  * 1) switch_mm() either 1a) or 1b)
  * 1a) thread switch to a different mm
  * 1a1) clear_bit(cpu, &old_mm->cpu_vm_mask);
- * 	Stop ipi delivery for the old mm. This is not synchronized with
- * 	the other cpus, but smp_invalidate_interrupt ignore flush ipis
- * 	for the wrong mm, and in the worst case we perform a superflous
- * 	tlb flush.
+ *  Stop ipi delivery for the old mm. This is not synchronized with
+ *  the other cpus, but smp_invalidate_interrupt ignore flush ipis
+ *  for the wrong mm, and in the worst case we perform a superflous
+ *  tlb flush.
  * 1a2) set cpu_tlbstate to TLBSTATE_OK
- * 	Now the smp_invalidate_interrupt won't call leave_mm if cpu0
- *	was in lazy tlb mode.
+ *  Now the smp_invalidate_interrupt won't call leave_mm if cpu0
+ *  was in lazy tlb mode.
  * 1a3) update cpu_tlbstate[].active_mm
- * 	Now cpu0 accepts tlb flushes for the new mm.
+ *  Now cpu0 accepts tlb flushes for the new mm.
  * 1a4) set_bit(cpu, &new_mm->cpu_vm_mask);
- * 	Now the other cpus will send tlb flush ipis.
+ *  Now the other cpus will send tlb flush ipis.
  * 1a4) change cr3.
  * 1b) thread switch without mm change
- *	cpu_tlbstate[].active_mm is correct, cpu0 already handles
- *	flush ipis.
+ *  cpu_tlbstate[].active_mm is correct, cpu0 already handles
+ *  flush ipis.
  * 1b1) set cpu_tlbstate to TLBSTATE_OK
  * 1b2) test_and_set the cpu bit in cpu_vm_mask.
- * 	Atomically set the bit [other cpus will start sending flush ipis],
- * 	and test the bit.
+ *  Atomically set the bit [other cpus will start sending flush ipis],
+ *  and test the bit.
  * 1b3) if the bit was 0: leave_mm was called, flush the tlb.
  * 2) switch %%esp, ie current
  *

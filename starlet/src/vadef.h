@@ -1,5 +1,5 @@
-#ifndef vadef_h
-#define vadef_h
+#ifndef VADEF_H
+#define VADEF_H
 
 #define VA$M_P1 0x40000000
 #define VA$M_SYSTEM 0x80000000

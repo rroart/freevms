@@ -10,8 +10,8 @@
  * resizing).
  */
 #define MIN_NR_CONSOLES 1       /* must be at least 1 */
-#define MAX_NR_CONSOLES	63	/* serial lines start at 64 */
-#define MAX_NR_USER_CONSOLES 63	/* must be root to allocate above this */
+#define MAX_NR_CONSOLES 63  /* serial lines start at 64 */
+#define MAX_NR_USER_CONSOLES 63 /* must be root to allocate above this */
 /* Note: the ioctl VT_GETSTATE does not work for
    consoles 16 and higher (since it returns a short) */
 
@@ -33,8 +33,8 @@
  * (Note: the *_driver.minor_start values 1, 64, 128, 192 are
  * hardcoded at present.)
  */
-#define NR_PTYS		256	/* ptys/major */
-#define NR_LDISCS	16
+#define NR_PTYS     256 /* ptys/major */
+#define NR_LDISCS   16
 
 /*
  * Unix98 PTY's can be defined as any multiple of NR_PTYS up to
@@ -58,70 +58,70 @@
 
 struct screen_info
 {
-    unsigned char  orig_x;			/* 0x00 */
-    unsigned char  orig_y;			/* 0x01 */
-    unsigned short dontuse1;		/* 0x02 -- EXT_MEM_K sits here */
-    unsigned short orig_video_page;		/* 0x04 */
-    unsigned char  orig_video_mode;		/* 0x06 */
-    unsigned char  orig_video_cols;		/* 0x07 */
-    unsigned short unused2;			/* 0x08 */
-    unsigned short orig_video_ega_bx;	/* 0x0a */
-    unsigned short unused3;			/* 0x0c */
-    unsigned char  orig_video_lines;	/* 0x0e */
-    unsigned char  orig_video_isVGA;	/* 0x0f */
-    unsigned short orig_video_points;	/* 0x10 */
+    unsigned char  orig_x;          /* 0x00 */
+    unsigned char  orig_y;          /* 0x01 */
+    unsigned short dontuse1;        /* 0x02 -- EXT_MEM_K sits here */
+    unsigned short orig_video_page;     /* 0x04 */
+    unsigned char  orig_video_mode;     /* 0x06 */
+    unsigned char  orig_video_cols;     /* 0x07 */
+    unsigned short unused2;         /* 0x08 */
+    unsigned short orig_video_ega_bx;   /* 0x0a */
+    unsigned short unused3;         /* 0x0c */
+    unsigned char  orig_video_lines;    /* 0x0e */
+    unsigned char  orig_video_isVGA;    /* 0x0f */
+    unsigned short orig_video_points;   /* 0x10 */
 
     /* VESA graphic mode -- linear frame buffer */
-    unsigned short lfb_width;		/* 0x12 */
-    unsigned short lfb_height;		/* 0x14 */
-    unsigned short lfb_depth;		/* 0x16 */
-    unsigned long  lfb_base;		/* 0x18 */
-    unsigned long  lfb_size;		/* 0x1c */
-    unsigned short dontuse2, dontuse3;	/* 0x20 -- CL_MAGIC and CL_OFFSET here */
-    unsigned short lfb_linelength;		/* 0x24 */
-    unsigned char  red_size;		/* 0x26 */
-    unsigned char  red_pos;			/* 0x27 */
-    unsigned char  green_size;		/* 0x28 */
-    unsigned char  green_pos;		/* 0x29 */
-    unsigned char  blue_size;		/* 0x2a */
-    unsigned char  blue_pos;		/* 0x2b */
-    unsigned char  rsvd_size;		/* 0x2c */
-    unsigned char  rsvd_pos;		/* 0x2d */
-    unsigned short vesapm_seg;		/* 0x2e */
-    unsigned short vesapm_off;		/* 0x30 */
-    unsigned short pages;			/* 0x32 */
+    unsigned short lfb_width;       /* 0x12 */
+    unsigned short lfb_height;      /* 0x14 */
+    unsigned short lfb_depth;       /* 0x16 */
+    unsigned long  lfb_base;        /* 0x18 */
+    unsigned long  lfb_size;        /* 0x1c */
+    unsigned short dontuse2, dontuse3;  /* 0x20 -- CL_MAGIC and CL_OFFSET here */
+    unsigned short lfb_linelength;      /* 0x24 */
+    unsigned char  red_size;        /* 0x26 */
+    unsigned char  red_pos;         /* 0x27 */
+    unsigned char  green_size;      /* 0x28 */
+    unsigned char  green_pos;       /* 0x29 */
+    unsigned char  blue_size;       /* 0x2a */
+    unsigned char  blue_pos;        /* 0x2b */
+    unsigned char  rsvd_size;       /* 0x2c */
+    unsigned char  rsvd_pos;        /* 0x2d */
+    unsigned short vesapm_seg;      /* 0x2e */
+    unsigned short vesapm_off;      /* 0x30 */
+    unsigned short pages;           /* 0x32 */
     /* 0x34 -- 0x3f reserved for future expansion */
 };
 
 extern struct screen_info screen_info;
 
-#define ORIG_X			(screen_info.orig_x)
-#define ORIG_Y			(screen_info.orig_y)
-#define ORIG_VIDEO_MODE		(screen_info.orig_video_mode)
-#define ORIG_VIDEO_COLS 	(screen_info.orig_video_cols)
-#define ORIG_VIDEO_EGA_BX	(screen_info.orig_video_ega_bx)
-#define ORIG_VIDEO_LINES	(screen_info.orig_video_lines)
-#define ORIG_VIDEO_ISVGA	(screen_info.orig_video_isVGA)
+#define ORIG_X          (screen_info.orig_x)
+#define ORIG_Y          (screen_info.orig_y)
+#define ORIG_VIDEO_MODE     (screen_info.orig_video_mode)
+#define ORIG_VIDEO_COLS     (screen_info.orig_video_cols)
+#define ORIG_VIDEO_EGA_BX   (screen_info.orig_video_ega_bx)
+#define ORIG_VIDEO_LINES    (screen_info.orig_video_lines)
+#define ORIG_VIDEO_ISVGA    (screen_info.orig_video_isVGA)
 #define ORIG_VIDEO_POINTS       (screen_info.orig_video_points)
 
-#define VIDEO_TYPE_MDA		0x10	/* Monochrome Text Display	*/
-#define VIDEO_TYPE_CGA		0x11	/* CGA Display 			*/
-#define VIDEO_TYPE_EGAM		0x20	/* EGA/VGA in Monochrome Mode	*/
-#define VIDEO_TYPE_EGAC		0x21	/* EGA in Color Mode		*/
-#define VIDEO_TYPE_VGAC		0x22	/* VGA+ in Color Mode		*/
-#define VIDEO_TYPE_VLFB		0x23	/* VESA VGA in graphic mode	*/
+#define VIDEO_TYPE_MDA      0x10    /* Monochrome Text Display  */
+#define VIDEO_TYPE_CGA      0x11    /* CGA Display          */
+#define VIDEO_TYPE_EGAM     0x20    /* EGA/VGA in Monochrome Mode   */
+#define VIDEO_TYPE_EGAC     0x21    /* EGA in Color Mode        */
+#define VIDEO_TYPE_VGAC     0x22    /* VGA+ in Color Mode       */
+#define VIDEO_TYPE_VLFB     0x23    /* VESA VGA in graphic mode */
 
-#define VIDEO_TYPE_PICA_S3	0x30	/* ACER PICA-61 local S3 video	*/
-#define VIDEO_TYPE_MIPS_G364	0x31    /* MIPS Magnum 4000 G364 video  */
-#define VIDEO_TYPE_SNI_RM	0x32    /* SNI RM200 PCI video          */
+#define VIDEO_TYPE_PICA_S3  0x30    /* ACER PICA-61 local S3 video  */
+#define VIDEO_TYPE_MIPS_G364    0x31    /* MIPS Magnum 4000 G364 video  */
+#define VIDEO_TYPE_SNI_RM   0x32    /* SNI RM200 PCI video          */
 #define VIDEO_TYPE_SGI          0x33    /* Various SGI graphics hardware */
 
-#define VIDEO_TYPE_TGAC		0x40	/* DEC TGA */
+#define VIDEO_TYPE_TGAC     0x40    /* DEC TGA */
 
 #define VIDEO_TYPE_SUN          0x50    /* Sun frame buffer. */
 #define VIDEO_TYPE_SUNPCI       0x51    /* Sun PCI based frame buffer. */
 
-#define VIDEO_TYPE_PMAC		0x60	/* PowerMacintosh frame buffer. */
+#define VIDEO_TYPE_PMAC     0x60    /* PowerMacintosh frame buffer. */
 
 /*
  * This character is the same as _POSIX_VDISABLE: it cannot be used as
@@ -141,28 +141,28 @@ struct tty_flip_buffer
 {
     struct tq_struct tqueue;
     struct semaphore pty_sem;
-    char		*char_buf_ptr;
-    unsigned char	*flag_buf_ptr;
-    int		count;
-    int		buf_num;
-    unsigned char	char_buf[2*TTY_FLIPBUF_SIZE];
-    char		flag_buf[2*TTY_FLIPBUF_SIZE];
-    unsigned char	slop[4]; /* N.B. bug overwrites buffer by 1 */
+    char        *char_buf_ptr;
+    unsigned char   *flag_buf_ptr;
+    int     count;
+    int     buf_num;
+    unsigned char   char_buf[2*TTY_FLIPBUF_SIZE];
+    char        flag_buf[2*TTY_FLIPBUF_SIZE];
+    unsigned char   slop[4]; /* N.B. bug overwrites buffer by 1 */
 };
 /*
  * The pty uses char_buf and flag_buf as a contiguous buffer
  */
-#define PTY_BUF_SIZE	4*TTY_FLIPBUF_SIZE
+#define PTY_BUF_SIZE    4*TTY_FLIPBUF_SIZE
 
 /*
  * When a break, frame error, or parity error happens, these codes are
  * stuffed into the flags buffer.
  */
-#define TTY_NORMAL	0
-#define TTY_BREAK	1
-#define TTY_FRAME	2
-#define TTY_PARITY	3
-#define TTY_OVERRUN	4
+#define TTY_NORMAL  0
+#define TTY_BREAK   1
+#define TTY_FRAME   2
+#define TTY_PARITY  3
+#define TTY_OVERRUN 4
 
 #define INTR_CHAR(tty) ((tty)->termios->c_cc[VINTR])
 #define QUIT_CHAR(tty) ((tty)->termios->c_cc[VQUIT])
@@ -179,70 +179,70 @@ struct tty_flip_buffer
 #define REPRINT_CHAR(tty) ((tty)->termios->c_cc[VREPRINT])
 #define DISCARD_CHAR(tty) ((tty)->termios->c_cc[VDISCARD])
 #define WERASE_CHAR(tty) ((tty)->termios->c_cc[VWERASE])
-#define LNEXT_CHAR(tty)	((tty)->termios->c_cc[VLNEXT])
+#define LNEXT_CHAR(tty) ((tty)->termios->c_cc[VLNEXT])
 #define EOL2_CHAR(tty) ((tty)->termios->c_cc[VEOL2])
 
-#define _I_FLAG(tty,f)	((tty)->termios->c_iflag & (f))
-#define _O_FLAG(tty,f)	((tty)->termios->c_oflag & (f))
-#define _C_FLAG(tty,f)	((tty)->termios->c_cflag & (f))
-#define _L_FLAG(tty,f)	((tty)->termios->c_lflag & (f))
+#define _I_FLAG(tty,f)  ((tty)->termios->c_iflag & (f))
+#define _O_FLAG(tty,f)  ((tty)->termios->c_oflag & (f))
+#define _C_FLAG(tty,f)  ((tty)->termios->c_cflag & (f))
+#define _L_FLAG(tty,f)  ((tty)->termios->c_lflag & (f))
 
-#define I_IGNBRK(tty)	_I_FLAG((tty),IGNBRK)
-#define I_BRKINT(tty)	_I_FLAG((tty),BRKINT)
-#define I_IGNPAR(tty)	_I_FLAG((tty),IGNPAR)
-#define I_PARMRK(tty)	_I_FLAG((tty),PARMRK)
-#define I_INPCK(tty)	_I_FLAG((tty),INPCK)
-#define I_ISTRIP(tty)	_I_FLAG((tty),ISTRIP)
-#define I_INLCR(tty)	_I_FLAG((tty),INLCR)
-#define I_IGNCR(tty)	_I_FLAG((tty),IGNCR)
-#define I_ICRNL(tty)	_I_FLAG((tty),ICRNL)
-#define I_IUCLC(tty)	_I_FLAG((tty),IUCLC)
-#define I_IXON(tty)	_I_FLAG((tty),IXON)
-#define I_IXANY(tty)	_I_FLAG((tty),IXANY)
-#define I_IXOFF(tty)	_I_FLAG((tty),IXOFF)
-#define I_IMAXBEL(tty)	_I_FLAG((tty),IMAXBEL)
+#define I_IGNBRK(tty)   _I_FLAG((tty),IGNBRK)
+#define I_BRKINT(tty)   _I_FLAG((tty),BRKINT)
+#define I_IGNPAR(tty)   _I_FLAG((tty),IGNPAR)
+#define I_PARMRK(tty)   _I_FLAG((tty),PARMRK)
+#define I_INPCK(tty)    _I_FLAG((tty),INPCK)
+#define I_ISTRIP(tty)   _I_FLAG((tty),ISTRIP)
+#define I_INLCR(tty)    _I_FLAG((tty),INLCR)
+#define I_IGNCR(tty)    _I_FLAG((tty),IGNCR)
+#define I_ICRNL(tty)    _I_FLAG((tty),ICRNL)
+#define I_IUCLC(tty)    _I_FLAG((tty),IUCLC)
+#define I_IXON(tty) _I_FLAG((tty),IXON)
+#define I_IXANY(tty)    _I_FLAG((tty),IXANY)
+#define I_IXOFF(tty)    _I_FLAG((tty),IXOFF)
+#define I_IMAXBEL(tty)  _I_FLAG((tty),IMAXBEL)
 
-#define O_OPOST(tty)	_O_FLAG((tty),OPOST)
-#define O_OLCUC(tty)	_O_FLAG((tty),OLCUC)
-#define O_ONLCR(tty)	_O_FLAG((tty),ONLCR)
-#define O_OCRNL(tty)	_O_FLAG((tty),OCRNL)
-#define O_ONOCR(tty)	_O_FLAG((tty),ONOCR)
-#define O_ONLRET(tty)	_O_FLAG((tty),ONLRET)
-#define O_OFILL(tty)	_O_FLAG((tty),OFILL)
-#define O_OFDEL(tty)	_O_FLAG((tty),OFDEL)
-#define O_NLDLY(tty)	_O_FLAG((tty),NLDLY)
-#define O_CRDLY(tty)	_O_FLAG((tty),CRDLY)
-#define O_TABDLY(tty)	_O_FLAG((tty),TABDLY)
-#define O_BSDLY(tty)	_O_FLAG((tty),BSDLY)
-#define O_VTDLY(tty)	_O_FLAG((tty),VTDLY)
-#define O_FFDLY(tty)	_O_FLAG((tty),FFDLY)
+#define O_OPOST(tty)    _O_FLAG((tty),OPOST)
+#define O_OLCUC(tty)    _O_FLAG((tty),OLCUC)
+#define O_ONLCR(tty)    _O_FLAG((tty),ONLCR)
+#define O_OCRNL(tty)    _O_FLAG((tty),OCRNL)
+#define O_ONOCR(tty)    _O_FLAG((tty),ONOCR)
+#define O_ONLRET(tty)   _O_FLAG((tty),ONLRET)
+#define O_OFILL(tty)    _O_FLAG((tty),OFILL)
+#define O_OFDEL(tty)    _O_FLAG((tty),OFDEL)
+#define O_NLDLY(tty)    _O_FLAG((tty),NLDLY)
+#define O_CRDLY(tty)    _O_FLAG((tty),CRDLY)
+#define O_TABDLY(tty)   _O_FLAG((tty),TABDLY)
+#define O_BSDLY(tty)    _O_FLAG((tty),BSDLY)
+#define O_VTDLY(tty)    _O_FLAG((tty),VTDLY)
+#define O_FFDLY(tty)    _O_FLAG((tty),FFDLY)
 
-#define C_BAUD(tty)	_C_FLAG((tty),CBAUD)
-#define C_CSIZE(tty)	_C_FLAG((tty),CSIZE)
-#define C_CSTOPB(tty)	_C_FLAG((tty),CSTOPB)
-#define C_CREAD(tty)	_C_FLAG((tty),CREAD)
-#define C_PARENB(tty)	_C_FLAG((tty),PARENB)
-#define C_PARODD(tty)	_C_FLAG((tty),PARODD)
-#define C_HUPCL(tty)	_C_FLAG((tty),HUPCL)
-#define C_CLOCAL(tty)	_C_FLAG((tty),CLOCAL)
-#define C_CIBAUD(tty)	_C_FLAG((tty),CIBAUD)
-#define C_CRTSCTS(tty)	_C_FLAG((tty),CRTSCTS)
+#define C_BAUD(tty) _C_FLAG((tty),CBAUD)
+#define C_CSIZE(tty)    _C_FLAG((tty),CSIZE)
+#define C_CSTOPB(tty)   _C_FLAG((tty),CSTOPB)
+#define C_CREAD(tty)    _C_FLAG((tty),CREAD)
+#define C_PARENB(tty)   _C_FLAG((tty),PARENB)
+#define C_PARODD(tty)   _C_FLAG((tty),PARODD)
+#define C_HUPCL(tty)    _C_FLAG((tty),HUPCL)
+#define C_CLOCAL(tty)   _C_FLAG((tty),CLOCAL)
+#define C_CIBAUD(tty)   _C_FLAG((tty),CIBAUD)
+#define C_CRTSCTS(tty)  _C_FLAG((tty),CRTSCTS)
 
-#define L_ISIG(tty)	_L_FLAG((tty),ISIG)
-#define L_ICANON(tty)	_L_FLAG((tty),ICANON)
-#define L_XCASE(tty)	_L_FLAG((tty),XCASE)
-#define L_ECHO(tty)	_L_FLAG((tty),ECHO)
-#define L_ECHOE(tty)	_L_FLAG((tty),ECHOE)
-#define L_ECHOK(tty)	_L_FLAG((tty),ECHOK)
-#define L_ECHONL(tty)	_L_FLAG((tty),ECHONL)
-#define L_NOFLSH(tty)	_L_FLAG((tty),NOFLSH)
-#define L_TOSTOP(tty)	_L_FLAG((tty),TOSTOP)
-#define L_ECHOCTL(tty)	_L_FLAG((tty),ECHOCTL)
-#define L_ECHOPRT(tty)	_L_FLAG((tty),ECHOPRT)
-#define L_ECHOKE(tty)	_L_FLAG((tty),ECHOKE)
-#define L_FLUSHO(tty)	_L_FLAG((tty),FLUSHO)
-#define L_PENDIN(tty)	_L_FLAG((tty),PENDIN)
-#define L_IEXTEN(tty)	_L_FLAG((tty),IEXTEN)
+#define L_ISIG(tty) _L_FLAG((tty),ISIG)
+#define L_ICANON(tty)   _L_FLAG((tty),ICANON)
+#define L_XCASE(tty)    _L_FLAG((tty),XCASE)
+#define L_ECHO(tty) _L_FLAG((tty),ECHO)
+#define L_ECHOE(tty)    _L_FLAG((tty),ECHOE)
+#define L_ECHOK(tty)    _L_FLAG((tty),ECHOK)
+#define L_ECHONL(tty)   _L_FLAG((tty),ECHONL)
+#define L_NOFLSH(tty)   _L_FLAG((tty),NOFLSH)
+#define L_TOSTOP(tty)   _L_FLAG((tty),TOSTOP)
+#define L_ECHOCTL(tty)  _L_FLAG((tty),ECHOCTL)
+#define L_ECHOPRT(tty)  _L_FLAG((tty),ECHOPRT)
+#define L_ECHOKE(tty)   _L_FLAG((tty),ECHOKE)
+#define L_FLUSHO(tty)   _L_FLAG((tty),FLUSHO)
+#define L_PENDIN(tty)   _L_FLAG((tty),PENDIN)
+#define L_IEXTEN(tty)   _L_FLAG((tty),IEXTEN)
 
 /*
  * Where all of the state associated with a tty is kept while the tty
@@ -256,17 +256,17 @@ struct tty_flip_buffer
  * IMPORTANT: since this structure is dynamically allocated, it must
  * be no larger than 4096 bytes.  Changing TTY_FLIPBUF_SIZE will change
  * the size of this structure, and it needs to be done with care.
- * 						- TYT, 9/14/92
+ *                      - TYT, 9/14/92
  */
 struct tty_struct
 {
-    int	magic;
+    int magic;
     struct tty_driver driver;
     struct tty_ldisc ldisc;
     struct termios *termios, *termios_locked;
     int pgrp;
     int session;
-    kdev_t	device;
+    kdev_t  device;
     unsigned long flags;
     int count;
     struct winsize winsize;
@@ -278,7 +278,7 @@ struct tty_struct
     struct fasync_struct *fasync;
     struct tty_flip_buffer flip;
     int max_flip_cnt;
-    int alt_speed;		/* For magic substitution of 38400 bps */
+    int alt_speed;      /* For magic substitution of 38400 bps */
     wait_queue_head_t write_wait;
     wait_queue_head_t read_wait;
     struct tq_struct tq_hangup;
@@ -315,7 +315,7 @@ struct tty_struct
 };
 
 /* tty magic number */
-#define TTY_MAGIC		0x5401
+#define TTY_MAGIC       0x5401
 
 /*
  * These bits are used in the flags field of the tty structure.

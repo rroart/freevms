@@ -1,5 +1,5 @@
-#ifndef ioc_routines_h
-#define ioc_routines_h
+#ifndef IOC_ROUTINES_H
+#define IOC_ROUTINES_H
 
 //#include <ints.h>
 #include <acbdef.h>
@@ -216,7 +216,7 @@ int       ioc$write_io (struct _adp *adp, unsigned long long *iohandle, int offs
                         int length, void *data_p);
 int       ioc$write_pci_config (struct _adp *adp, int pci_node, int offset,
                                 int length, int wdata);
-int	  ioc_std$getsyi_cpu_specific (int getsyi_code, unsigned char *buffer,
+int   ioc_std$getsyi_cpu_specific (int getsyi_code, unsigned char *buffer,
                                    int *buffer_length);
 
 void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u);
@@ -229,7 +229,7 @@ int ioc$verify_chan(unsigned short int chan, struct _ccb ** ccbp);
 int ioc$scan_iodb_usrctx(struct _ddb **d);
 void ioc$wfikpch(void * nextfunc, void * timeoutfunc, struct _irp * i, unsigned long fr4, struct _ucb * u, int timeout, int oldipl);
 int ioc_std$clone_mscp_ucb (struct _ucb *tmpl_ucb, struct _ucb **new_ucb);
-int ioc$delete_ucb();
+int ioc$delete_ucb(void);
 
 #endif
 

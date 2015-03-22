@@ -36,7 +36,7 @@ static rwlock_t gendisk_lock;
  * Global kernel list of partitioning information.
  *
  * XXX: you should _never_ access this directly.
- *	the only reason this is exported is source compatiblity.
+ *  the only reason this is exported is source compatiblity.
  */
 /*static*/
 struct gendisk *gendisk_head;
@@ -60,16 +60,16 @@ add_gendisk(struct gendisk *gp)
     write_lock(&gendisk_lock);
 
     /*
-     *	In 2.5 this will go away. Fix the drivers who rely on
-     *	old behaviour.
+     *  In 2.5 this will go away. Fix the drivers who rely on
+     *  old behaviour.
      */
 
     for (sgp = gendisk_head; sgp; sgp = sgp->next)
     {
         if (sgp == gp)
         {
-//			printk(KERN_ERR "add_gendisk: device major %d is buggy and added a live gendisk!\n",
-//				sgp->major)
+//          printk(KERN_ERR "add_gendisk: device major %d is buggy and added a live gendisk!\n",
+//              sgp->major)
             goto out;
         }
     }

@@ -133,7 +133,7 @@ int __init numa_initmem_init(unsigned long start_pfn, unsigned long end_pfn)
 }
 
 #define for_all_nodes(x) for ((x) = 0; (x) <= maxnode; (x)++) \
-				if ((1UL << (x)) & nodes_present)
+                if ((1UL << (x)) & nodes_present)
 
 unsigned long __init numa_free_all_bootmem(void)
 {

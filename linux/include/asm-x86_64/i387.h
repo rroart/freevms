@@ -5,7 +5,7 @@
  *
  * Pentium III FXSR, SSE support
  * General FPU state handling cleanups
- *	Gareth Hughes <gareth@valinux.com>, May 2000
+ *  Gareth Hughes <gareth@valinux.com>, May 2000
  * x86-64 work by Andi Kleen 2002
  */
 
@@ -28,21 +28,21 @@ extern int save_i387(struct _fpstate *buf);
 #define kernel_fpu_end() stts()
 
 #define unlazy_fpu( tsk ) do { \
-	if ( tsk->flags & PF_USEDFPU ) \
-		save_init_fpu( tsk ); \
+    if ( tsk->flags & PF_USEDFPU ) \
+        save_init_fpu( tsk ); \
 } while (0)
 
 #define clear_fpu( tsk ) do { \
-	if ( tsk->flags & PF_USEDFPU ) { \
-		asm volatile("fnclex ; fwait"); \
-		tsk->flags &= ~PF_USEDFPU; \
-		stts(); \
-	} \
+    if ( tsk->flags & PF_USEDFPU ) { \
+        asm volatile("fnclex ; fwait"); \
+        tsk->flags &= ~PF_USEDFPU; \
+        stts(); \
+    } \
 } while (0)
 
 #define load_mxcsr( val ) do { \
-		unsigned long __mxcsr = ((unsigned long)(val) & 0xffbf); \
-		asm volatile( "ldmxcsr %0" : : "m" (__mxcsr) ); \
+        unsigned long __mxcsr = ((unsigned long)(val) & 0xffbf); \
+        asm volatile( "ldmxcsr %0" : : "m" (__mxcsr) ); \
 } while (0)
 
 /*

@@ -33,15 +33,15 @@
                                        Paul Nankervis
 
 History:
-	02/12/1998 - Kevin Handy
-		This funtion returns a time based upon GMT, and
-		is thus off if you are in the wrong area.
-		Added use of localtime()/timezone to adjust date
-		(Probibly did it wrong, but ...).
+    02/12/1998 - Kevin Handy
+        This funtion returns a time based upon GMT, and
+        is thus off if you are in the wrong area.
+        Added use of localtime()/timezone to adjust date
+        (Probibly did it wrong, but ...).
 */
 
-#include "sys$routines.h"	/* SYS$ header file */
-#include <time.h>		/* C header for $GETTIM to find time */
+#include "sys$routines.h"   /* SYS$ header file */
+#include <time.h>       /* C header for $GETTIM to find time */
 
 /*
  * Special function that is not really part of SYS$ library

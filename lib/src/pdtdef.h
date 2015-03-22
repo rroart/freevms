@@ -1,5 +1,5 @@
-#ifndef pdtdef_h
-#define pdtdef_h
+#ifndef PDTDEF_H
+#define PDTDEF_H
 
 #define PDT$M_SNGLHOST 0x1
 #define PDT$C_PA 1

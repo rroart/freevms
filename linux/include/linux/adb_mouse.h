@@ -12,11 +12,11 @@
 
 struct mouse_status
 {
-    char		buttons;
-    short		dx;
-    short		dy;
-    int		ready;
-    int		active;
+    char        buttons;
+    short       dx;
+    short       dy;
+    int     ready;
+    int     active;
     struct wait_queue *wait;
     struct fasync_struct *fasyncptr;
 };

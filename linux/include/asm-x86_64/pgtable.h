@@ -28,45 +28,45 @@ extern void clear_kernel_mapping(unsigned long addr, unsigned long size);
 extern unsigned long pgkern_mask;
 
 /* Caches aren't brain-dead on the intel. */
-#define flush_cache_all()			do { } while (0)
-#define flush_cache_mm(mm)			do { } while (0)
-#define flush_cache_range(mm, start, end)	do { } while (0)
-#define flush_cache_page(vma, vmaddr)		do { } while (0)
-#define flush_page_to_ram(page)			do { } while (0)
-#define flush_dcache_page(page)			do { } while (0)
-#define flush_icache_range(start, end)		do { } while (0)
-#define flush_icache_page(vma,pg)		do { } while (0)
-#define flush_icache_user_range(vma,pg,adr,len)	do { } while (0)
+#define flush_cache_all()           do { } while (0)
+#define flush_cache_mm(mm)          do { } while (0)
+#define flush_cache_range(mm, start, end)   do { } while (0)
+#define flush_cache_page(vma, vmaddr)       do { } while (0)
+#define flush_page_to_ram(page)         do { } while (0)
+#define flush_dcache_page(page)         do { } while (0)
+#define flush_icache_range(start, end)      do { } while (0)
+#define flush_icache_page(vma,pg)       do { } while (0)
+#define flush_icache_user_range(vma,pg,adr,len) do { } while (0)
 
-#define __flush_tlb()							\
-	do {								\
-		unsigned long tmpreg;					\
-									\
-		__asm__ __volatile__(					\
-			"movq %%cr3, %0;  # flush TLB \n"		\
-			"movq %0, %%cr3;              \n"		\
-			: "=r" (tmpreg)					\
-			:: "memory");					\
-	} while (0)
+#define __flush_tlb()                           \
+    do {                                \
+        unsigned long tmpreg;                   \
+                                    \
+        __asm__ __volatile__(                   \
+            "movq %%cr3, %0;  # flush TLB \n"       \
+            "movq %0, %%cr3;              \n"       \
+            : "=r" (tmpreg)                 \
+            :: "memory");                   \
+    } while (0)
 
 /*
  * Global pages have to be flushed a bit differently. Not a real
  * performance problem because this does not happen often.
  */
-#define __flush_tlb_global()						\
-	do {								\
-		unsigned long tmpreg;					\
-									\
-		__asm__ __volatile__(					\
-			"movq %1, %%cr4;  # turn off PGE     \n"	\
-			"movq %%cr3, %0;  # flush TLB        \n"	\
-			"movq %0, %%cr3;                     \n"	\
-			"movq %2, %%cr4;  # turn PGE back on \n"	\
-			: "=&r" (tmpreg)				\
-			: "r" (mmu_cr4_features & ~(u64)X86_CR4_PGE),	\
-			  "r" (mmu_cr4_features)			\
-			: "memory");					\
-	} while (0)
+#define __flush_tlb_global()                        \
+    do {                                \
+        unsigned long tmpreg;                   \
+                                    \
+        __asm__ __volatile__(                   \
+            "movq %1, %%cr4;  # turn off PGE     \n"    \
+            "movq %%cr3, %0;  # flush TLB        \n"    \
+            "movq %0, %%cr3;                     \n"    \
+            "movq %2, %%cr4;  # turn PGE back on \n"    \
+            : "=&r" (tmpreg)                \
+            : "r" (mmu_cr4_features & ~(u64)X86_CR4_PGE),   \
+              "r" (mmu_cr4_features)            \
+            : "memory");                    \
+    } while (0)
 
 #define __flush_tlb_all() __flush_tlb_global()
 
@@ -82,38 +82,38 @@ extern unsigned long empty_zero_page[PAGE_SIZE/sizeof(unsigned long)];
 /*
  * PGDIR_SHIFT determines what a top-level page table entry can map
  */
-#define PGDIR_SHIFT	39
-#define PTRS_PER_PGD	512
+#define PGDIR_SHIFT 39
+#define PTRS_PER_PGD    512
 
 /*
  * 3rd level page
  */
-#define PUD_SHIFT	30
-#define PTRS_PER_PUD	512
+#define PUD_SHIFT   30
+#define PTRS_PER_PUD    512
 
 /*
  * PMD_SHIFT determines the size of the area a middle-level
  * page table can map
  */
-#define PMD_SHIFT	21
-#define PTRS_PER_PMD	512
+#define PMD_SHIFT   21
+#define PTRS_PER_PMD    512
 
 /*
  * entries per page directory level
  */
-#define PTRS_PER_PTE	512
+#define PTRS_PER_PTE    512
 
 #define pte_ERROR(e) \
-	printk("%s:%d: bad pte %p(%016lx).\n", __FILE__, __LINE__, &(e), pte_val(e))
+    printk("%s:%d: bad pte %p(%016lx).\n", __FILE__, __LINE__, &(e), pte_val(e))
 #define pmd_ERROR(e) \
-	printk("%s:%d: bad pmd %p(%016lx).\n", __FILE__, __LINE__, &(e), pmd_val(e))
+    printk("%s:%d: bad pmd %p(%016lx).\n", __FILE__, __LINE__, &(e), pmd_val(e))
 #define pud_ERROR(e) \
-	printk("%s:%d: bad pud %p(%016lx).\n", __FILE__, __LINE__, &(e), pud_val(e))
+    printk("%s:%d: bad pud %p(%016lx).\n", __FILE__, __LINE__, &(e), pud_val(e))
 #define pgd_ERROR(e) \
-	printk("%s:%d: bad pgd %p(%016lx).\n", __FILE__, __LINE__, &(e), pgd_val(e))
+    printk("%s:%d: bad pgd %p(%016lx).\n", __FILE__, __LINE__, &(e), pgd_val(e))
 
-#define pgd_none(x)	(!pgd_val(x))
-#define pud_none(x)	(!pud_val(x))
+#define pgd_none(x) (!pgd_val(x))
+#define pud_none(x) (!pud_val(x))
 
 static inline void set_pte(pte_t *dst, pte_t val)
 {
@@ -149,7 +149,7 @@ static inline void pgd_clear (pgd_t * pgd)
 #define pud_page(pud) \
 ((unsigned long) __va(pud_val(pud) & PHYSICAL_PAGE_MASK))
 
-#define ptep_get_and_clear(mm,addr,xp)	__pte(xchg(&(xp)->pte, 0))
+#define ptep_get_and_clear(mm,addr,xp)  __pte(xchg(&(xp)->pte, 0))
 
 struct mm_struct;
 
@@ -168,24 +168,24 @@ static inline pte_t ptep_get_and_clear_full(struct mm_struct *mm, unsigned long 
     return pte;
 }
 
-#define pte_same(a, b)		((a).pte == (b).pte)
+#define pte_same(a, b)      ((a).pte == (b).pte)
 
-#define pte_pgprot(a)	(__pgprot((a).pte & ~PHYSICAL_PAGE_MASK))
+#define pte_pgprot(a)   (__pgprot((a).pte & ~PHYSICAL_PAGE_MASK))
 
-#define PMD_SIZE	(1UL << PMD_SHIFT)
-#define PMD_MASK	(~(PMD_SIZE-1))
-#define PUD_SIZE	(1UL << PUD_SHIFT)
-#define PUD_MASK	(~(PUD_SIZE-1))
-#define PGDIR_SIZE	(1UL << PGDIR_SHIFT)
-#define PGDIR_MASK	(~(PGDIR_SIZE-1))
+#define PMD_SIZE    (1UL << PMD_SHIFT)
+#define PMD_MASK    (~(PMD_SIZE-1))
+#define PUD_SIZE    (1UL << PUD_SHIFT)
+#define PUD_MASK    (~(PUD_SIZE-1))
+#define PGDIR_SIZE  (1UL << PGDIR_SHIFT)
+#define PGDIR_MASK  (~(PGDIR_SIZE-1))
 
-#define USER_PTRS_PER_PGD	((TASK_SIZE-1)/PGDIR_SIZE+1)
-#define FIRST_USER_PGD_NR	0
-#define FIRST_USER_ADDRESS	0
+#define USER_PTRS_PER_PGD   ((TASK_SIZE-1)/PGDIR_SIZE+1)
+#define FIRST_USER_PGD_NR   0
+#define FIRST_USER_ADDRESS  0
 
 #ifndef __ASSEMBLY__
 #define IOMAP_START      0xfffffe8000000000
-#define MAXMEM		 0x3fffffffffffUL
+#define MAXMEM       0x3fffffffffffUL
 #define VMALLOC_START    0xffffc20000000000UL
 #define VMALLOC_END      0xffffe1ffffffffffUL
 #define VMALLOC_VMADDR(x) ((unsigned long)(x))
@@ -193,60 +193,60 @@ static inline pte_t ptep_get_and_clear_full(struct mm_struct *mm, unsigned long 
 #define MODULES_END      0xfffffffffff00000UL
 #define MODULES_LEN   (MODULES_END - MODULES_VADDR)
 
-#define _PAGE_BIT_PRESENT	0
-#define _PAGE_BIT_RW		1
-#define _PAGE_BIT_USER		2
-#define _PAGE_BIT_PWT		3
-#define _PAGE_BIT_PCD		4
-#define _PAGE_BIT_ACCESSED	5
-#define _PAGE_BIT_DIRTY		6
-#define _PAGE_BIT_PSE		7	/* 4 MB (or 2MB) page */
-#define _PAGE_BIT_GLOBAL	8	/* Global TLB entry PPro+ */
+#define _PAGE_BIT_PRESENT   0
+#define _PAGE_BIT_RW        1
+#define _PAGE_BIT_USER      2
+#define _PAGE_BIT_PWT       3
+#define _PAGE_BIT_PCD       4
+#define _PAGE_BIT_ACCESSED  5
+#define _PAGE_BIT_DIRTY     6
+#define _PAGE_BIT_PSE       7   /* 4 MB (or 2MB) page */
+#define _PAGE_BIT_GLOBAL    8   /* Global TLB entry PPro+ */
 #define _PAGE_BIT_NX           63       /* No execute: only valid after cpuid check */
 
-#define _PAGE_PRESENT	0x001
-#define _PAGE_RW	0x002
-#define _PAGE_USER	0x004
-#define _PAGE_PWT	0x008
-#define _PAGE_PCD	0x010
-#define _PAGE_ACCESSED	0x020
-#define _PAGE_DIRTY	0x040
-#define _PAGE_PSE	0x080	/* 2MB page */
-#define _PAGE_FILE	0x040	/* nonlinear file mapping, saved PTE; unset:swap */
-#define _PAGE_GLOBAL	0x100	/* Global TLB entry */
+#define _PAGE_PRESENT   0x001
+#define _PAGE_RW    0x002
+#define _PAGE_USER  0x004
+#define _PAGE_PWT   0x008
+#define _PAGE_PCD   0x010
+#define _PAGE_ACCESSED  0x020
+#define _PAGE_DIRTY 0x040
+#define _PAGE_PSE   0x080   /* 2MB page */
+#define _PAGE_FILE  0x040   /* nonlinear file mapping, saved PTE; unset:swap */
+#define _PAGE_GLOBAL    0x100   /* Global TLB entry */
 
-#define _PAGE_PROTNONE	0x080	/* If not present */
+#define _PAGE_PROTNONE  0x080   /* If not present */
 #define _PAGE_NX        (1UL<<_PAGE_BIT_NX)
 
-#define _PAGE_TABLE	(_PAGE_PRESENT | _PAGE_RW | _PAGE_USER | _PAGE_ACCESSED | _PAGE_DIRTY)
-#define _KERNPG_TABLE	(_PAGE_PRESENT | _PAGE_RW | _PAGE_ACCESSED | _PAGE_DIRTY)
+#define _PAGE_TABLE (_PAGE_PRESENT | _PAGE_RW | _PAGE_USER | _PAGE_ACCESSED | _PAGE_DIRTY)
+#define _KERNPG_TABLE   (_PAGE_PRESENT | _PAGE_RW | _PAGE_ACCESSED | _PAGE_DIRTY)
 
-#define _PAGE_CHG_MASK	(PTE_MASK | _PAGE_ACCESSED | _PAGE_DIRTY)
+#define _PAGE_CHG_MASK  (PTE_MASK | _PAGE_ACCESSED | _PAGE_DIRTY)
 
-#define PAGE_NONE	__pgprot(_PAGE_PROTNONE | _PAGE_ACCESSED)
-#define PAGE_SHARED	__pgprot(_PAGE_PRESENT | _PAGE_RW | _PAGE_USER | _PAGE_ACCESSED | _PAGE_NX)
+#define PAGE_NONE   __pgprot(_PAGE_PROTNONE | _PAGE_ACCESSED)
+#define PAGE_SHARED __pgprot(_PAGE_PRESENT | _PAGE_RW | _PAGE_USER | _PAGE_ACCESSED | _PAGE_NX)
 #define PAGE_SHARED_EXEC __pgprot(_PAGE_PRESENT | _PAGE_RW | _PAGE_USER | _PAGE_ACCESSED)
 #define PAGE_COPY_NOEXEC __pgprot(_PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED | _PAGE_NX)
 #define PAGE_COPY PAGE_COPY_NOEXEC
 #define PAGE_COPY_EXEC __pgprot(_PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED)
-#define PAGE_READONLY	__pgprot(_PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED | _PAGE_NX)
+#define PAGE_READONLY   __pgprot(_PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED | _PAGE_NX)
 #define PAGE_READONLY_EXEC __pgprot(_PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED)
 #define __PAGE_KERNEL \
-	(_PAGE_PRESENT | _PAGE_RW | _PAGE_DIRTY | _PAGE_ACCESSED | _PAGE_NX)
+    (_PAGE_PRESENT | _PAGE_RW | _PAGE_DIRTY | _PAGE_ACCESSED | _PAGE_NX)
 #define __PAGE_KERNEL_EXEC \
-	(_PAGE_PRESENT | _PAGE_RW | _PAGE_DIRTY | _PAGE_ACCESSED)
+    (_PAGE_PRESENT | _PAGE_RW | _PAGE_DIRTY | _PAGE_ACCESSED)
 #define __PAGE_KERNEL_NOCACHE \
-	(_PAGE_PRESENT | _PAGE_RW | _PAGE_DIRTY | _PAGE_PCD | _PAGE_ACCESSED | _PAGE_NX)
+    (_PAGE_PRESENT | _PAGE_RW | _PAGE_DIRTY | _PAGE_PCD | _PAGE_ACCESSED | _PAGE_NX)
 #define __PAGE_KERNEL_RO \
-	(_PAGE_PRESENT | _PAGE_DIRTY | _PAGE_ACCESSED | _PAGE_NX)
+    (_PAGE_PRESENT | _PAGE_DIRTY | _PAGE_ACCESSED | _PAGE_NX)
 #define __PAGE_KERNEL_VSYSCALL \
-	(_PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED)
+    (_PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED)
 #define __PAGE_KERNEL_VSYSCALL_NOCACHE \
-	(_PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED | _PAGE_PCD)
+    (_PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED | _PAGE_PCD)
 #define __PAGE_KERNEL_LARGE \
-	(__PAGE_KERNEL | _PAGE_PSE)
+    (__PAGE_KERNEL | _PAGE_PSE)
 #define __PAGE_KERNEL_LARGE_EXEC \
-	(__PAGE_KERNEL_EXEC | _PAGE_PSE)
+    (__PAGE_KERNEL_EXEC | _PAGE_PSE)
 
 #define MAKE_GLOBAL(x) __pgprot((x) | _PAGE_GLOBAL)
 
@@ -260,23 +260,23 @@ static inline pte_t ptep_get_and_clear_full(struct mm_struct *mm, unsigned long 
 #define PAGE_KERNEL_VSYSCALL_NOCACHE MAKE_GLOBAL(__PAGE_KERNEL_VSYSCALL_NOCACHE)
 
 /*         xwr */
-#define __P000	PAGE_NONE
-#define __P001	PAGE_READONLY
-#define __P010	PAGE_COPY
-#define __P011	PAGE_COPY
-#define __P100	PAGE_READONLY_EXEC
-#define __P101	PAGE_READONLY_EXEC
-#define __P110	PAGE_COPY_EXEC
-#define __P111	PAGE_COPY_EXEC
+#define __P000  PAGE_NONE
+#define __P001  PAGE_READONLY
+#define __P010  PAGE_COPY
+#define __P011  PAGE_COPY
+#define __P100  PAGE_READONLY_EXEC
+#define __P101  PAGE_READONLY_EXEC
+#define __P110  PAGE_COPY_EXEC
+#define __P111  PAGE_COPY_EXEC
 
-#define __S000	PAGE_NONE
-#define __S001	PAGE_READONLY
-#define __S010	PAGE_SHARED
-#define __S011	PAGE_SHARED
-#define __S100	PAGE_READONLY_EXEC
-#define __S101	PAGE_READONLY_EXEC
-#define __S110	PAGE_SHARED_EXEC
-#define __S111	PAGE_SHARED_EXEC
+#define __S000  PAGE_NONE
+#define __S001  PAGE_READONLY
+#define __S010  PAGE_SHARED
+#define __S011  PAGE_SHARED
+#define __S100  PAGE_READONLY_EXEC
+#define __S101  PAGE_READONLY_EXEC
+#define __S110  PAGE_SHARED_EXEC
+#define __S111  PAGE_SHARED_EXEC
 
 static inline unsigned long pgd_bad(pgd_t pgd)
 {
@@ -294,13 +294,13 @@ static inline unsigned long pud_bad(pud_t pud)
     return val & ~(_PAGE_PRESENT | _PAGE_RW | _PAGE_ACCESSED);
 }
 
-#define pte_none(x)	(!pte_val(x))
-#define pte_present(x)	(pte_val(x) & (_PAGE_PRESENT | _PAGE_PROTNONE))
-#define pte_clear(mm,addr,xp)	do { set_pte_at(mm, addr, xp, __pte(0)); } while (0)
+#define pte_none(x) (!pte_val(x))
+#define pte_present(x)  (pte_val(x) & (_PAGE_PRESENT | _PAGE_PROTNONE))
+#define pte_clear(mm,addr,xp)   do { set_pte_at(mm, addr, xp, __pte(0)); } while (0)
 
-#define pages_to_mb(x) ((x) >> (20-PAGE_SHIFT))	/* FIXME: is this
+#define pages_to_mb(x) ((x) >> (20-PAGE_SHIFT)) /* FIXME: is this
 right? */
-#define pte_page(x)	pfn_to_page(pte_pfn(x))
+#define pte_page(x) pfn_to_page(pte_pfn(x))
 #define pte_pfn(x)  ((pte_val(x) & __PHYSICAL_MASK) >> PAGE_SHIFT)
 
 static inline pte_t pfn_pte(unsigned long page_nr, pgprot_t pgprot)
@@ -430,7 +430,7 @@ static inline void ptep_set_wrprotect(struct mm_struct *mm, unsigned long addr, 
 /*
  * Macro to mark a page protection value as "uncacheable".
  */
-#define pgprot_noncached(prot)	(__pgprot(pgprot_val(prot) | _PAGE_PCD | _PAGE_PWT))
+#define pgprot_noncached(prot)  (__pgprot(pgprot_val(prot) | _PAGE_PCD | _PAGE_PWT))
 
 static inline int pmd_large(pmd_t pte)
 {
@@ -467,15 +467,15 @@ static inline pud_t *__pud_offset_k(pud_t *pud, unsigned long address)
 
 /* PMD  - Level 2 access */
 #define pmd_page_kernel(pmd) ((unsigned long) __va(pmd_val(pmd) & PTE_MASK))
-#define pmd_page(pmd)		(pfn_to_page(pmd_val(pmd) >> PAGE_SHIFT))
+#define pmd_page(pmd)       (pfn_to_page(pmd_val(pmd) >> PAGE_SHIFT))
 
 #define pmd_index(address) (((address) >> PMD_SHIFT) & (PTRS_PER_PMD-1))
 #define pmd_offset(dir, address) ((pmd_t *) pud_page(*(dir)) + \
-			pmd_index(address))
-#define pmd_none(x)	(!pmd_val(x))
-#define pmd_present(x)	(pmd_val(x) & _PAGE_PRESENT)
-#define pmd_clear(xp)	do { set_pmd(xp, __pmd(0)); } while (0)
-#define	pmd_bad(x)	((pmd_val(x) & (~PTE_MASK & ~_PAGE_USER)) != _KERNPG_TABLE )
+            pmd_index(address))
+#define pmd_none(x) (!pmd_val(x))
+#define pmd_present(x)  (pmd_val(x) & _PAGE_PRESENT)
+#define pmd_clear(xp)   do { set_pmd(xp, __pmd(0)); } while (0)
+#define pmd_bad(x)  ((pmd_val(x) & (~PTE_MASK & ~_PAGE_USER)) != _KERNPG_TABLE )
 #define pfn_pmd(nr,prot) (__pmd(((nr) << PAGE_SHIFT) | pgprot_val(prot)))
 #define pmd_pfn(x)  ((pmd_val(x) & __PHYSICAL_MASK) >> PAGE_SHIFT)
 
@@ -486,7 +486,7 @@ static inline pud_t *__pud_offset_k(pud_t *pud, unsigned long address)
 /* PTE - Level 1 access. */
 
 /* page, protection -> pte */
-#define mk_pte(page, pgprot)	pfn_pte(page_to_pfn(page), (pgprot))
+#define mk_pte(page, pgprot)    pfn_pte(page_to_pfn(page), (pgprot))
 #define mk_pte_huge(entry) (pte_val(entry) |= _PAGE_PRESENT | _PAGE_PSE)
 
 /* physical address -> PTE */
@@ -507,9 +507,9 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 }
 
 #define pte_index(address) \
-		(((address) >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
+        (((address) >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
 #define pte_offset_kernel(dir, address) ((pte_t *) pmd_page_kernel(*(dir)) + \
-			pte_index(address))
+            pte_index(address))
 
 /* x86-64 always has all page tables mapped. */
 #define pte_offset_map(dir,address) pte_offset_kernel(dir,address)
@@ -528,28 +528,28 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 
 #if 0
 #define current_pgd_offset_k(address) \
-	__pgd_offset_k((pgd_t *)read_pda(level4_pgt), address)
+    __pgd_offset_k((pgd_t *)read_pda(level4_pgt), address)
 #endif
 
 /* This accesses the reference page table of the boot cpu.
    Other CPUs get synced lazily via the page fault handler. */
 #define __pmd_offset(address) \
-		(((address) >> PMD_SHIFT) & (PTRS_PER_PMD-1))
+        (((address) >> PMD_SHIFT) & (PTRS_PER_PMD-1))
 
 /* Find an entry in the third-level page table.. */
 #define __pte_offset(address) \
-		((address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
+        ((address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
 #define pte_offset(dir, address) ((pte_t *) __pmd_page(*(dir)) + \
-			__pte_offset(address))
+            __pte_offset(address))
 
 #define update_mmu_cache(vma,address,pte) do { } while (0)
 
 /* Encode and de-code a swap entry */
-#define SWP_TYPE(x)			(((x).val >> 1) & 0x3f)
-#define SWP_OFFSET(x)			((x).val >> 8)
-#define SWP_ENTRY(type, offset)		((swp_entry_t) { ((type) << 1) | ((offset) << 8) })
-#define pte_to_swp_entry(pte)		((swp_entry_t) { pte_val(pte) })
-#define swp_entry_to_pte(x)		((pte_t) { (x).val })
+#define SWP_TYPE(x)         (((x).val >> 1) & 0x3f)
+#define SWP_OFFSET(x)           ((x).val >> 8)
+#define SWP_ENTRY(type, offset)     ((swp_entry_t) { ((type) << 1) | ((offset) << 8) })
+#define pte_to_swp_entry(pte)       ((swp_entry_t) { pte_val(pte) })
+#define swp_entry_to_pte(x)     ((pte_t) { (x).val })
 
 /* We only update the dirty/accessed state if we set
  * the dirty bit by hand in the kernel, since the hardware
@@ -558,30 +558,30 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
  * bit at the same time. */
 #define  __HAVE_ARCH_PTEP_SET_ACCESS_FLAGS
 #define ptep_set_access_flags(__vma, __address, __ptep, __entry, __dirty) \
-	do {								  \
-		if (__dirty) {						  \
-			set_pte(__ptep, __entry);			  \
-			flush_tlb_page(__vma, __address);		  \
-		}							  \
-	} while (0)
+    do {                                  \
+        if (__dirty) {                        \
+            set_pte(__ptep, __entry);             \
+            flush_tlb_page(__vma, __address);         \
+        }                             \
+    } while (0)
 
 /* Encode and de-code a swap entry */
-#define __swp_type(x)			(((x).val >> 1) & 0x3f)
-#define __swp_offset(x)			((x).val >> 8)
-#define __swp_entry(type, offset)	((swp_entry_t) { ((type) << 1) | ((offset) << 8) })
-#define __pte_to_swp_entry(pte)		((swp_entry_t) { pte_val(pte) })
-#define __swp_entry_to_pte(x)		((pte_t) { (x).val })
+#define __swp_type(x)           (((x).val >> 1) & 0x3f)
+#define __swp_offset(x)         ((x).val >> 8)
+#define __swp_entry(type, offset)   ((swp_entry_t) { ((type) << 1) | ((offset) << 8) })
+#define __pte_to_swp_entry(pte)     ((swp_entry_t) { pte_val(pte) })
+#define __swp_entry_to_pte(x)       ((pte_t) { (x).val })
 
 #endif /* !__ASSEMBLY__ */
 
 extern int kern_addr_valid(unsigned long addr);
 
-#define io_remap_pfn_range(vma, vaddr, pfn, size, prot)		\
-		remap_pfn_range(vma, vaddr, pfn, size, prot)
+#define io_remap_pfn_range(vma, vaddr, pfn, size, prot)     \
+        remap_pfn_range(vma, vaddr, pfn, size, prot)
 
-#define MK_IOSPACE_PFN(space, pfn)	(pfn)
-#define GET_IOSPACE(pfn)		0
-#define GET_PFN(pfn)			(pfn)
+#define MK_IOSPACE_PFN(space, pfn)  (pfn)
+#define GET_IOSPACE(pfn)        0
+#define GET_PFN(pfn)            (pfn)
 
 #define HAVE_ARCH_UNMAPPED_AREA
 
@@ -592,8 +592,8 @@ extern int kern_addr_valid(unsigned long addr);
 #define HAVE_PAGE_AGP 1
 
 /* fs/proc/kcore.c */
-#define	kc_vaddr_to_offset(v) ((v) & __VIRTUAL_MASK)
-#define	kc_offset_to_vaddr(o) \
+#define kc_vaddr_to_offset(v) ((v) & __VIRTUAL_MASK)
+#define kc_offset_to_vaddr(o) \
    (((o) & (1UL << (__VIRTUAL_MASK_SHIFT-1))) ? ((o) | (~__VIRTUAL_MASK)) : (o))
 
 #define __HAVE_ARCH_PTEP_TEST_AND_CLEAR_YOUNG

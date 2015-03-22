@@ -26,7 +26,7 @@ typedef struct
     volatile int counter;
 } atomic_t;
 
-#define ATOMIC_INIT(i)	{ (i) }
+#define ATOMIC_INIT(i)  { (i) }
 
 /**
  * atomic_read - read atomic variable
@@ -35,7 +35,7 @@ typedef struct
  * Atomically reads the value of @v.  Note that the guaranteed
  * useful range of an atomic_t is only 24 bits.
  */
-#define atomic_read(v)		((v)->counter)
+#define atomic_read(v)      ((v)->counter)
 
 /**
  * atomic_set - set atomic variable
@@ -45,7 +45,7 @@ typedef struct
  * Atomically sets the value of @v to @i.  Note that the guaranteed
  * useful range of an atomic_t is only 24 bits.
  */
-#define atomic_set(v,i)		(((v)->counter) = (i))
+#define atomic_set(v,i)     (((v)->counter) = (i))
 
 /**
  * atomic_add - add integer to atomic variable
@@ -201,9 +201,9 @@ __asm__ __volatile__(LOCK "orl %0,%1" \
 : : "r" ((unsigned)mask),"m" (*addr) : "memory")
 
 /* Atomic operations are already serializing on x86 */
-#define smp_mb__before_atomic_dec()	barrier()
-#define smp_mb__after_atomic_dec()	barrier()
-#define smp_mb__before_atomic_inc()	barrier()
-#define smp_mb__after_atomic_inc()	barrier()
+#define smp_mb__before_atomic_dec() barrier()
+#define smp_mb__after_atomic_dec()  barrier()
+#define smp_mb__before_atomic_inc() barrier()
+#define smp_mb__after_atomic_inc()  barrier()
 
 #endif

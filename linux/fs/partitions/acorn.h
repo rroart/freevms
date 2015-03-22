@@ -8,9 +8,9 @@
 /*
  * Partition types. (Oh for reusability)
  */
-#define PARTITION_RISCIX_MFM	1
-#define PARTITION_RISCIX_SCSI	2
-#define PARTITION_LINUX		9
+#define PARTITION_RISCIX_MFM    1
+#define PARTITION_RISCIX_SCSI   2
+#define PARTITION_LINUX     9
 
 struct riscix_part
 {
@@ -23,7 +23,7 @@ struct riscix_part
 struct riscix_record
 {
     __u32  magic;
-#define RISCIX_MAGIC	(0x4a657320)
+#define RISCIX_MAGIC    (0x4a657320)
     __u32  date;
     struct riscix_part part[8];
 };

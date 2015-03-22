@@ -16,9 +16,9 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*  Print out help							*/
-/*									*/
+/*                                  */
+/*  Print out help                          */
+/*                                  */
 /************************************************************************/
 
 #include <errno.h>
@@ -64,39 +64,39 @@ void cmd_help (char *cp)
         return;
     }
 
-    argm  = 0;								/* none of argv has matched up */
-    level = 0;								/* lines are at level 0 to start */
+    argm  = 0;                              /* none of argv has matched up */
+    level = 0;                              /* lines are at level 0 to start */
     needmimsg = 1;
-    while (fgets (help_line, sizeof help_line, help_file) != NULL)  	/* read help record */
+    while (fgets (help_line, sizeof help_line, help_file) != NULL)      /* read help record */
     {
-        if (help_line[0] == '#') continue;					/* skip over commented-out lines */
-        if (help_line[0] > ' ')  						/* see if there is a number at the beginning */
+        if (help_line[0] == '#') continue;                  /* skip over commented-out lines */
+        if (help_line[0] > ' ')                         /* see if there is a number at the beginning */
         {
-            l = strtol (help_line, &p, 10);					/* see if there is a number there */
+            l = strtol (help_line, &p, 10);                 /* see if there is a number there */
             if ((*p <= ' ') && (l > 0))
             {
-                level = l;							/* there is, go to the new level */
-                if (level <= argm)  						/* reset level if we've matched it before */
+                level = l;                          /* there is, go to the new level */
+                if (level <= argm)                          /* reset level if we've matched it before */
                 {
                     argm = level - 1;
                     outchr ('\n');
                 }
-                p  = skipspaces (p);						/* point to the level's keyword */
+                p  = skipspaces (p);                        /* point to the level's keyword */
                 q  = uptospace  (p);
-                *q = 0;								/* null terminate it */
-                if (level == argm + 1)  					/* see if this is the next level to match */
+                *q = 0;                             /* null terminate it */
+                if (level == argm + 1)                      /* see if this is the next level to match */
                 {
                     if (argm < argc)
                     {
-                        if (strncasecmp (p, argv[argm], argl[argm]) != 0) continue;	/* skip if the name doesn't match the arg */
+                        if (strncasecmp (p, argv[argm], argl[argm]) != 0) continue; /* skip if the name doesn't match the arg */
                         if (!needmimsg)
                         {
                             outchr ('\n');
                             needmimsg = 1;
                         }
                         outfmt (strlen (p) + argm * 2, "%*.*s%s\n", argm * 2, argm * 2, "", p);
-                        argm ++;							/* it matches */
-                        continue;							/* don't need to print it again */
+                        argm ++;                            /* it matches */
+                        continue;                           /* don't need to print it again */
                     }
                     if (!nomoreinfo)
                     {
@@ -111,7 +111,7 @@ void cmd_help (char *cp)
                 }
             }
         }
-        if ((argm == argc) && (level <= argc))  				/* ouput line if levels satisfied */
+        if ((argm == argc) && (level <= argc))                  /* ouput line if levels satisfied */
         {
             if (!needmimsg)
             {

@@ -26,15 +26,15 @@
 //#include <bp-asm.h>
 
 /* For Linux we can use the system call table in the header file
-	/usr/include/asm/unistd.h
+    /usr/include/asm/unistd.h
    of the kernel.  But these symbols do not follow the SYS_* syntax
    so we have to redefine the `SYS_ify' macro here.  */
 #undef SYS_ify
-#define SYS_ify(syscall_name)	__NR_##syscall_name
+#define SYS_ify(syscall_name)   __NR_##syscall_name
 
 /* ELF-like local names start with `.L'.  */
 #undef L
-#define L(name)	.L##name
+#define L(name) .L##name
 
 #ifdef __ASSEMBLER__
 
@@ -57,74 +57,74 @@
 # define SYSCALL_ERROR_LABEL syscall_error
 #endif
 
-#undef	PSEUDO
-#define	PSEUDO(name, syscall_name, args)				      \
-  .text;								      \
-  ENTRY (name)								      \
-    DO_CALL (args, syscall_name);					      \
-    cmpl $-4095, %eax;							      \
-    jae SYSCALL_ERROR_LABEL;						      \
+#undef  PSEUDO
+#define PSEUDO(name, syscall_name, args)                      \
+  .text;                                      \
+  ENTRY (name)                                    \
+    DO_CALL (args, syscall_name);                         \
+    cmpl $-4095, %eax;                                \
+    jae SYSCALL_ERROR_LABEL;                              \
   L(pseudo_end):
 
-#undef	PSEUDO_END
-#define	PSEUDO_END(name)						      \
-  SYSCALL_ERROR_HANDLER							      \
+#undef  PSEUDO_END
+#define PSEUDO_END(name)                              \
+  SYSCALL_ERROR_HANDLER                               \
   END (name)
 
 #ifndef PIC
-#define SYSCALL_ERROR_HANDLER	/* Nothing here; code in sysdep.S is used.  */
+#define SYSCALL_ERROR_HANDLER   /* Nothing here; code in sysdep.S is used.  */
 #else
 /* Store (- %eax) into errno through the GOT.  */
 #ifdef _LIBC_REENTRANT
-#define SYSCALL_ERROR_HANDLER						      \
-0:pushl %ebx;								      \
-  call 1f;								      \
-1:popl %ebx;								      \
-  xorl %edx, %edx;							      \
-  addl $_GLOBAL_OFFSET_TABLE_+[.-1b], %ebx;				      \
-  subl %eax, %edx;							      \
-  pushl %edx;								      \
-  PUSH_ERRNO_LOCATION_RETURN;						      \
-  call BP_SYM (__errno_location)@PLT;					      \
-  POP_ERRNO_LOCATION_RETURN;						      \
-  popl %ecx;								      \
-  popl %ebx;								      \
-  movl %ecx, (%eax);							      \
-  orl $-1, %eax;							      \
+#define SYSCALL_ERROR_HANDLER                             \
+0:pushl %ebx;                                     \
+  call 1f;                                    \
+1:popl %ebx;                                      \
+  xorl %edx, %edx;                                \
+  addl $_GLOBAL_OFFSET_TABLE_+[.-1b], %ebx;                   \
+  subl %eax, %edx;                                \
+  pushl %edx;                                     \
+  PUSH_ERRNO_LOCATION_RETURN;                             \
+  call BP_SYM (__errno_location)@PLT;                         \
+  POP_ERRNO_LOCATION_RETURN;                              \
+  popl %ecx;                                      \
+  popl %ebx;                                      \
+  movl %ecx, (%eax);                                  \
+  orl $-1, %eax;                                  \
   jmp L(pseudo_end);
 /* A quick note: it is assumed that the call to `__errno_location' does
    not modify the stack!  */
 #else
-#define SYSCALL_ERROR_HANDLER						      \
-0:call 1f;								      \
-1:popl %ecx;								      \
-  xorl %edx, %edx;							      \
-  addl $_GLOBAL_OFFSET_TABLE_+[.-1b], %ecx;				      \
-  subl %eax, %edx;							      \
-  movl errno@GOT(%ecx), %ecx;						      \
-  movl %edx, (%ecx);							      \
-  orl $-1, %eax;							      \
+#define SYSCALL_ERROR_HANDLER                             \
+0:call 1f;                                    \
+1:popl %ecx;                                      \
+  xorl %edx, %edx;                                \
+  addl $_GLOBAL_OFFSET_TABLE_+[.-1b], %ecx;                   \
+  subl %eax, %edx;                                \
+  movl errno@GOT(%ecx), %ecx;                             \
+  movl %edx, (%ecx);                                  \
+  orl $-1, %eax;                                  \
   jmp L(pseudo_end);
-#endif	/* _LIBC_REENTRANT */
-#endif	/* PIC */
+#endif  /* _LIBC_REENTRANT */
+#endif  /* PIC */
 
 /* Linux takes system call arguments in registers:
 
-	syscall number	%eax	     call-clobbered
-	arg 1		%ebx	     call-saved
-	arg 2		%ecx	     call-clobbered
-	arg 3		%edx	     call-clobbered
-	arg 4		%esi	     call-saved
-	arg 5		%edi	     call-saved
+    syscall number  %eax         call-clobbered
+    arg 1       %ebx         call-saved
+    arg 2       %ecx         call-clobbered
+    arg 3       %edx         call-clobbered
+    arg 4       %esi         call-saved
+    arg 5       %edi         call-saved
 
    The stack layout upon entering the function is:
 
-	20(%esp)	Arg# 5
-	16(%esp)	Arg# 4
-	12(%esp)	Arg# 3
-	 8(%esp)	Arg# 2
-	 4(%esp)	Arg# 1
-	  (%esp)	Return address
+    20(%esp)    Arg# 5
+    16(%esp)    Arg# 4
+    12(%esp)    Arg# 3
+     8(%esp)    Arg# 2
+     4(%esp)    Arg# 1
+      (%esp)    Return address
 
    (Of course a function with say 3 arguments does not have entries for
    arguments 4 and 5.)
@@ -132,7 +132,7 @@
    The following code tries hard to be optimal.  A general assumption
    (which is true according to the data books I have) is that
 
-	2 * xchg	is more expensive than	pushl + movl + popl
+    2 * xchg    is more expensive than  pushl + movl + popl
 
    Beside this a neat trick is used.  The calling conventions for Linux
    tell that among the registers used for parameters %ecx and %edx need
@@ -152,57 +152,57 @@
    two consecutive of these instruction.  This gives no penalty on
    other processors though.  */
 
-#undef	DO_CALL
-#define DO_CALL(args, syscall_name)			      		      \
-    PUSHARGS_##args							      \
-    DOARGS_##args							      \
-    movl $SYS_ify (syscall_name), %eax;					      \
-    int $0x80								      \
+#undef  DO_CALL
+#define DO_CALL(args, syscall_name)                           \
+    PUSHARGS_##args                               \
+    DOARGS_##args                                 \
+    movl $SYS_ify (syscall_name), %eax;                       \
+    int $0x80                                     \
     POPARGS_##args
 
-#define PUSHARGS_0	/* No arguments to push.  */
-#define	DOARGS_0	/* No arguments to frob.  */
-#define	POPARGS_0	/* No arguments to pop.  */
-#define	_PUSHARGS_0	/* No arguments to push.  */
-#define _DOARGS_0(n)	/* No arguments to frob.  */
-#define	_POPARGS_0	/* No arguments to pop.  */
+#define PUSHARGS_0  /* No arguments to push.  */
+#define DOARGS_0    /* No arguments to frob.  */
+#define POPARGS_0   /* No arguments to pop.  */
+#define _PUSHARGS_0 /* No arguments to push.  */
+#define _DOARGS_0(n)    /* No arguments to frob.  */
+#define _POPARGS_0  /* No arguments to pop.  */
 
-#define PUSHARGS_1	movl %ebx, %edx; PUSHARGS_0
-#define	DOARGS_1	_DOARGS_1 (4)
-#define	POPARGS_1	POPARGS_0; movl %edx, %ebx
-#define	_PUSHARGS_1	pushl %ebx; _PUSHARGS_0
-#define _DOARGS_1(n)	movl n(%esp), %ebx; _DOARGS_0(n-4)
-#define	_POPARGS_1	_POPARGS_0; popl %ebx
+#define PUSHARGS_1  movl %ebx, %edx; PUSHARGS_0
+#define DOARGS_1    _DOARGS_1 (4)
+#define POPARGS_1   POPARGS_0; movl %edx, %ebx
+#define _PUSHARGS_1 pushl %ebx; _PUSHARGS_0
+#define _DOARGS_1(n)    movl n(%esp), %ebx; _DOARGS_0(n-4)
+#define _POPARGS_1  _POPARGS_0; popl %ebx
 
-#define PUSHARGS_2	PUSHARGS_1
-#define	DOARGS_2	_DOARGS_2 (8)
-#define	POPARGS_2	POPARGS_1
-#define _PUSHARGS_2	_PUSHARGS_1
-#define	_DOARGS_2(n)	movl n(%esp), %ecx; _DOARGS_1 (n-4)
-#define	_POPARGS_2	_POPARGS_1
+#define PUSHARGS_2  PUSHARGS_1
+#define DOARGS_2    _DOARGS_2 (8)
+#define POPARGS_2   POPARGS_1
+#define _PUSHARGS_2 _PUSHARGS_1
+#define _DOARGS_2(n)    movl n(%esp), %ecx; _DOARGS_1 (n-4)
+#define _POPARGS_2  _POPARGS_1
 
-#define PUSHARGS_3	_PUSHARGS_2
-#define DOARGS_3	_DOARGS_3 (16)
-#define POPARGS_3	_POPARGS_3
-#define _PUSHARGS_3	_PUSHARGS_2
-#define _DOARGS_3(n)	movl n(%esp), %edx; _DOARGS_2 (n-4)
-#define _POPARGS_3	_POPARGS_2
+#define PUSHARGS_3  _PUSHARGS_2
+#define DOARGS_3    _DOARGS_3 (16)
+#define POPARGS_3   _POPARGS_3
+#define _PUSHARGS_3 _PUSHARGS_2
+#define _DOARGS_3(n)    movl n(%esp), %edx; _DOARGS_2 (n-4)
+#define _POPARGS_3  _POPARGS_2
 
-#define PUSHARGS_4	_PUSHARGS_4
-#define DOARGS_4	_DOARGS_4 (24)
-#define POPARGS_4	_POPARGS_4
-#define _PUSHARGS_4	pushl %esi; _PUSHARGS_3
-#define _DOARGS_4(n)	movl n(%esp), %esi; _DOARGS_3 (n-4)
-#define _POPARGS_4	_POPARGS_3; popl %esi
+#define PUSHARGS_4  _PUSHARGS_4
+#define DOARGS_4    _DOARGS_4 (24)
+#define POPARGS_4   _POPARGS_4
+#define _PUSHARGS_4 pushl %esi; _PUSHARGS_3
+#define _DOARGS_4(n)    movl n(%esp), %esi; _DOARGS_3 (n-4)
+#define _POPARGS_4  _POPARGS_3; popl %esi
 
-#define PUSHARGS_5	_PUSHARGS_5
-#define DOARGS_5	_DOARGS_5 (32)
-#define POPARGS_5	_POPARGS_5
-#define _PUSHARGS_5	pushl %edi; _PUSHARGS_4
-#define _DOARGS_5(n)	movl n(%esp), %edi; _DOARGS_4 (n-4)
-#define _POPARGS_5	_POPARGS_4; popl %edi
+#define PUSHARGS_5  _PUSHARGS_5
+#define DOARGS_5    _DOARGS_5 (32)
+#define POPARGS_5   _POPARGS_5
+#define _PUSHARGS_5 pushl %edi; _PUSHARGS_4
+#define _DOARGS_5(n)    movl n(%esp), %edi; _DOARGS_4 (n-4)
+#define _POPARGS_5  _POPARGS_4; popl %edi
 
-#else	/* !__ASSEMBLER__ */
+#else   /* !__ASSEMBLER__ */
 
 /* We need some help from the assembler to generate optimal code.  We
    define some macros here which later will be used.  */
@@ -246,105 +246,105 @@ extern int errno;
    call.  */
 #undef INLINE_SYSCALL
 #define INLINE_SYSCALL(name, nr, args...) \
-  ({									      \
-    unsigned int resultvar;						      \
-    asm volatile (							      \
-    LOADARGS_##nr							      \
-    "movl %1, %%eax\n\t"						      \
-    "int $0x80\n\t"							      \
-    RESTOREARGS_##nr							      \
-    : "=a" (resultvar)							      \
-    : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");		      \
-    if (resultvar >= 0xfffff001)					      \
-      {									      \
-	errno= (-resultvar);					      \
-	resultvar = 0xffffffff;						      \
-      }									      \
+  ({                                          \
+    unsigned int resultvar;                           \
+    asm volatile (                                \
+    LOADARGS_##nr                                 \
+    "movl %1, %%eax\n\t"                              \
+    "int $0x80\n\t"                               \
+    RESTOREARGS_##nr                                  \
+    : "=a" (resultvar)                                \
+    : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");              \
+    if (resultvar >= 0xfffff001)                          \
+      {                                       \
+    errno= (-resultvar);                          \
+    resultvar = 0xffffffff;                           \
+      }                                       \
     (int) resultvar; })
 
 #undef INLINE_SYSCALL1
 #define INLINE_SYSCALL1(name, nr, args...) \
-  ({									      \
-    unsigned int resultvar;						      \
-    asm volatile (							      \
-    LOADARGS_##nr							      \
-    "movl %1, %%eax\n\t"						      \
-    "int $0x80\n\t"							      \
-    RESTOREARGS_##nr							      \
-    : "=a" (resultvar)							      \
-    : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");		      \
-    if (resultvar >= 0xfffff001)					      \
-      {									      \
-	errno= (-resultvar);					      \
-	resultvar = 0xffffffff;						      \
-      }									      \
+  ({                                          \
+    unsigned int resultvar;                           \
+    asm volatile (                                \
+    LOADARGS_##nr                                 \
+    "movl %1, %%eax\n\t"                              \
+    "int $0x80\n\t"                               \
+    RESTOREARGS_##nr                                  \
+    : "=a" (resultvar)                                \
+    : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");              \
+    if (resultvar >= 0xfffff001)                          \
+      {                                       \
+    errno= (-resultvar);                          \
+    resultvar = 0xffffffff;                           \
+      }                                       \
     (int) resultvar; })
 
 #undef INLINE_SYSCALL3
 #define INLINE_SYSCALL3(name, nr, args...) \
-  ({									      \
-    unsigned int resultvar;						      \
-    asm volatile (							      \
-    LOADARGS_##nr							      \
-    "movl %1, %%eax\n\t"						      \
-    "int $0x80\n\t"							      \
-    RESTOREARGS_##nr							      \
-    : "=a" (resultvar)							      \
-    : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");		      \
-    if (resultvar >= 0xfffff001)					      \
-      {									      \
-	errno= (-resultvar);					      \
-	resultvar = 0xffffffff;						      \
-      }									      \
+  ({                                          \
+    unsigned int resultvar;                           \
+    asm volatile (                                \
+    LOADARGS_##nr                                 \
+    "movl %1, %%eax\n\t"                              \
+    "int $0x80\n\t"                               \
+    RESTOREARGS_##nr                                  \
+    : "=a" (resultvar)                                \
+    : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");              \
+    if (resultvar >= 0xfffff001)                          \
+      {                                       \
+    errno= (-resultvar);                          \
+    resultvar = 0xffffffff;                           \
+      }                                       \
     (int) resultvar; })
 
 #undef INLINE_SYSCALLTEST
 #define INLINE_SYSCALLTEST(name, nr, args...) \
-  ({									      \
-    unsigned int resultvar;						      \
-    asm volatile (							      \
-    LOADARGS_##nr							      \
-    "movl %1, %%eax\n\t"						      \
-    "call 0xc0100010\n\t"						      \
-    RESTOREARGS_##nr							      \
-    : "=a" (resultvar)							      \
-    : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");		      \
-    if (resultvar >= 0xfffff001)					      \
-      {									      \
-	errno= (-resultvar);					      \
-	resultvar = 0xffffffff;						      \
-      }									      \
+  ({                                          \
+    unsigned int resultvar;                           \
+    asm volatile (                                \
+    LOADARGS_##nr                                 \
+    "movl %1, %%eax\n\t"                              \
+    "call 0xc0100010\n\t"                             \
+    RESTOREARGS_##nr                                  \
+    : "=a" (resultvar)                                \
+    : "i" (__NR_##name) ASMFMT_##nr(args) : "memory", "cc");              \
+    if (resultvar >= 0xfffff001)                          \
+      {                                       \
+    errno= (-resultvar);                          \
+    resultvar = 0xffffffff;                           \
+      }                                       \
     (int) resultvar; })
 
 #define LOADARGS_0
 #define LOADARGS_1 \
-    "bpushl .L__X'%k2, %k2\n\t"						      \
+    "bpushl .L__X'%k2, %k2\n\t"                           \
     "bmovl .L__X'%k2, %k2\n\t"
-#define LOADARGS_2	LOADARGS_1
-#define LOADARGS_3	LOADARGS_1
-#define LOADARGS_4	LOADARGS_1
-#define LOADARGS_5	LOADARGS_1
+#define LOADARGS_2  LOADARGS_1
+#define LOADARGS_3  LOADARGS_1
+#define LOADARGS_4  LOADARGS_1
+#define LOADARGS_5  LOADARGS_1
 
 #define RESTOREARGS_0
 #define RESTOREARGS_1 \
     "bpopl .L__X'%k2, %k2\n\t"
-#define RESTOREARGS_2	RESTOREARGS_1
-#define RESTOREARGS_3	RESTOREARGS_1
-#define RESTOREARGS_4	RESTOREARGS_1
-#define RESTOREARGS_5	RESTOREARGS_1
+#define RESTOREARGS_2   RESTOREARGS_1
+#define RESTOREARGS_3   RESTOREARGS_1
+#define RESTOREARGS_4   RESTOREARGS_1
+#define RESTOREARGS_5   RESTOREARGS_1
 
 #define ASMFMT_0()
 #define ASMFMT_1(arg1) \
-	, "acdSD" (arg1)
+    , "acdSD" (arg1)
 #define ASMFMT_2(arg1, arg2) \
-	, "adCD" (arg1), "c" (arg2)
+    , "adCD" (arg1), "c" (arg2)
 #define ASMFMT_3(arg1, arg2, arg3) \
-	, "aCD" (arg1), "c" (arg2), "d" (arg3)
+    , "aCD" (arg1), "c" (arg2), "d" (arg3)
 #define ASMFMT_4(arg1, arg2, arg3, arg4) \
-	, "aD" (arg1), "c" (arg2), "d" (arg3), "S" (arg4)
+    , "aD" (arg1), "c" (arg2), "d" (arg3), "S" (arg4)
 #define ASMFMT_5(arg1, arg2, arg3, arg4, arg5) \
-	, "a" (arg1), "c" (arg2), "d" (arg3), "S" (arg4), "D" (arg5)
+    , "a" (arg1), "c" (arg2), "d" (arg3), "S" (arg4), "D" (arg5)
 
-#endif	/* __ASSEMBLER__ */
+#endif  /* __ASSEMBLER__ */
 
 #endif /* linux/i386/sysdep.h */

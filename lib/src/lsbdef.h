@@ -1,153 +1,153 @@
-#ifndef lsbdef_h
-#define lsbdef_h
+#ifndef LSBDEF_H
+#define LSBDEF_H
 
-#define		LSB$M_CREATED		0x1
-#define		LSB$M_ENABLED		0x2
-#define		LSB$M_BENABLED		0x4
-#define		LSB$M_NMDIS		0x8
-#define		LSB$M_ELAN		0x10
-#define		LSB$M_CLIP		0x20
-#define		LSB$M_NM_MAC_ADDR	0x1
-#define		LSB$C_TIMUSB		60
+#define     LSB$M_CREATED       0x1
+#define     LSB$M_ENABLED       0x2
+#define     LSB$M_BENABLED      0x4
+#define     LSB$M_NMDIS     0x8
+#define     LSB$M_ELAN      0x10
+#define     LSB$M_CLIP      0x20
+#define     LSB$M_NM_MAC_ADDR   0x1
+#define     LSB$C_TIMUSB        60
 
-#define		LSB$C_MIN_RCV_MIN	32
-#define		LSB$C_DEF_RCV_MIN	64
-#define		LSB$C_MAX_RCV_MIN	512
-#define		LSB$C_MIN_RCV_MAX	64
-#define		LSB$C_DEF_RCV_MAX	128
-#define		LSB$C_MAX_RCV_MAX	768
-#define		LSB$C_RCV_INC		4
-#define		LSB$C_RCV_DEC		1
-#define		LSB$C_RCV_ADD		32
+#define     LSB$C_MIN_RCV_MIN   32
+#define     LSB$C_DEF_RCV_MIN   64
+#define     LSB$C_MAX_RCV_MIN   512
+#define     LSB$C_MIN_RCV_MAX   64
+#define     LSB$C_DEF_RCV_MAX   128
+#define     LSB$C_MAX_RCV_MAX   768
+#define     LSB$C_RCV_INC       4
+#define     LSB$C_RCV_DEC       1
+#define     LSB$C_RCV_ADD       32
 
-#define		LSB$C_QUEUES		936
-#define		LSB$C_ABORT_QS		1
+#define     LSB$C_QUEUES        936
+#define     LSB$C_ABORT_QS      1
 
-#define		LSB$C_QS_CLEAN_ACT	7
+#define     LSB$C_QS_CLEAN_ACT  7
 
-#define		LSB$C_QS_CLEAN_INACT	8
+#define     LSB$C_QS_CLEAN_INACT    8
 
-#define		LSB$C_INIT_QS		10
+#define     LSB$C_INIT_QS       10
 
-#define		LSB$G_V4_CTRSECT	1072
-#define		LSB$G_END_V4_CTRSECT	1256
+#define     LSB$G_V4_CTRSECT    1072
+#define     LSB$G_END_V4_CTRSECT    1256
 
-#define		LSB$G_PIVCLR		1616
-#define		LSB$C_PIVSIZ		552
+#define     LSB$G_PIVCLR        1616
+#define     LSB$C_PIVSIZ        552
 
-#define		LSB$G_CTRSECT		2170
-#define		LSB$M_SFL_EXC		0x1
-#define		LSB$M_SFL_CCF		0x2
-#define		LSB$M_SFL_SHC		0x4
-#define		LSB$M_SFL_OPC		0x8
-#define		LSB$M_SFL_FTL		0x10
-#define		LSB$M_SFL_RFD		0x20
-#define		LSB$M_SFL_TUR		0x40
-#define		LSB$M_SFL_TFL		0x80
-#define		LSB$M_RFL_BCE		0x1
-#define		LSB$M_RFL_FME		0x2
-#define		LSB$M_RFL_FTL		0x4
-#define		LSB$M_RFL_RSE		0x8
-#define		LSB$M_RFL_RLE		0x10
-#define		LSB$G_END_CTRSECT	2224
-#define		LSB$M_TRSFL_TUR		0x1
-#define		LSB$M_TRSFL_LE		0x2
-#define		LSB$M_TRSFL_ABS		0x4
-#define		LSB$M_TRSFL_LF		0x8
-#define		LSB$M_TRSFL_TE		0x10
-#define		LSB$M_TRSFL_UF		0x20
-#define		LSB$M_TRSFL_RC		0x40
-#define		LSB$M_TRRFL_RC		0x1
-#define		LSB$M_TRRFL_FCE		0x2
-#define		LSB$M_TRIFL_LWF		0x1
-#define		LSB$M_TRIFL_SLE		0x2
-#define		LSB$M_TRIFL_TMO		0x4
-#define		LSB$M_TRIFL_RPT		0x8
-#define		LSB$M_TRIFL_BCN		0x10
-#define		LSB$M_TRIFL_DAD		0x20
-#define		LSB$M_TRIFL_PSF		0x40
-#define		LSB$M_TRIFL_RR		0x80
-#define		LSB$M_TRTFL_LWF		0x1
-#define		LSB$M_TRTFL_SSD		0x2
-#define		LSB$M_TRTFL_ARF		0x4
-#define		LSB$M_TRTFL_RR		0x8
-#define		LSB$C_CTRSIZE		262
+#define     LSB$G_CTRSECT       2170
+#define     LSB$M_SFL_EXC       0x1
+#define     LSB$M_SFL_CCF       0x2
+#define     LSB$M_SFL_SHC       0x4
+#define     LSB$M_SFL_OPC       0x8
+#define     LSB$M_SFL_FTL       0x10
+#define     LSB$M_SFL_RFD       0x20
+#define     LSB$M_SFL_TUR       0x40
+#define     LSB$M_SFL_TFL       0x80
+#define     LSB$M_RFL_BCE       0x1
+#define     LSB$M_RFL_FME       0x2
+#define     LSB$M_RFL_FTL       0x4
+#define     LSB$M_RFL_RSE       0x8
+#define     LSB$M_RFL_RLE       0x10
+#define     LSB$G_END_CTRSECT   2224
+#define     LSB$M_TRSFL_TUR     0x1
+#define     LSB$M_TRSFL_LE      0x2
+#define     LSB$M_TRSFL_ABS     0x4
+#define     LSB$M_TRSFL_LF      0x8
+#define     LSB$M_TRSFL_TE      0x10
+#define     LSB$M_TRSFL_UF      0x20
+#define     LSB$M_TRSFL_RC      0x40
+#define     LSB$M_TRRFL_RC      0x1
+#define     LSB$M_TRRFL_FCE     0x2
+#define     LSB$M_TRIFL_LWF     0x1
+#define     LSB$M_TRIFL_SLE     0x2
+#define     LSB$M_TRIFL_TMO     0x4
+#define     LSB$M_TRIFL_RPT     0x8
+#define     LSB$M_TRIFL_BCN     0x10
+#define     LSB$M_TRIFL_DAD     0x20
+#define     LSB$M_TRIFL_PSF     0x40
+#define     LSB$M_TRIFL_RR      0x80
+#define     LSB$M_TRTFL_LWF     0x1
+#define     LSB$M_TRTFL_SSD     0x2
+#define     LSB$M_TRTFL_ARF     0x4
+#define     LSB$M_TRTFL_RR      0x8
+#define     LSB$C_CTRSIZE       262
 
-#define		LSB$M_DEVCTR		0x1
-#define		LSB$M_DEVXIDTEST	0x2
-#define		LSB$M_MULSEG		0x4
-#define		LSB$M_RCVMGT		0x8
-#define		LSB$M_RUN		0x1
-#define		LSB$M_INITED		0x2
-#define		LSB$M_MCA_OVF		0x4
-#define		LSB$M_FAT_ERR		0x8
-#define		LSB$M_BLKCTL		0x10
-#define		LSB$M_PCHACT		0x20
-#define		LSB$M_NEED_DAT_LOCK	0x40
-#define		LSB$M_GOT_DAT_LOCK	0x80
-#define		LSB$M_RING_AVAIL	0x100
-#define		LSB$M_FULL_DUPLEX	0x200
-#define		LSB$C_ALLPRM		2464
-#define		LSB$C_ALLPRMSIZ		12
+#define     LSB$M_DEVCTR        0x1
+#define     LSB$M_DEVXIDTEST    0x2
+#define     LSB$M_MULSEG        0x4
+#define     LSB$M_RCVMGT        0x8
+#define     LSB$M_RUN       0x1
+#define     LSB$M_INITED        0x2
+#define     LSB$M_MCA_OVF       0x4
+#define     LSB$M_FAT_ERR       0x8
+#define     LSB$M_BLKCTL        0x10
+#define     LSB$M_PCHACT        0x20
+#define     LSB$M_NEED_DAT_LOCK 0x40
+#define     LSB$M_GOT_DAT_LOCK  0x80
+#define     LSB$M_RING_AVAIL    0x100
+#define     LSB$M_FULL_DUPLEX   0x200
+#define     LSB$C_ALLPRM        2464
+#define     LSB$C_ALLPRMSIZ     12
 
-#define		LSB$C_CPYPRMSIZ		24
+#define     LSB$C_CPYPRMSIZ     24
 
-#define		LSB$C_MBX_MAX		12
-#define		LSB$C_FIXED_LENGTH		2880
+#define     LSB$C_MBX_MAX       12
+#define     LSB$C_FIXED_LENGTH      2880
 
-#define		LSB$M_CSMACD_ELAN_ACTIVE	0x1
-#define		LSB$M_CSMACD_ELAN_START		0x2
-#define		LSB$M_CSMACD_ELAN_SHUT		0x4
-#define		LSB$M_CSMACD_ELAN_UNAVAILABLE	0x8
-#define		LSB$M_CSMACD_LIS_ACTIVE		0x1
-#define		LSB$M_CSMACD_LIS_START		0x2
-#define		LSB$M_CSMACD_LIS_SHUT		0x4
-#define		LSB$M_CSMACD_LIS_UNAVAILABLE	0x8
-#define		LSB$C_CSMACD_LENGTH		3328
-#define		LSB$M_FDDI_BOO			0x1
-#define		LSB$M_FDDI_CTY			0x2
-#define		LSB$M_FDDI_UNTO			0x4
-#define		LSB$C_FDDI_LENGTH		3040
+#define     LSB$M_CSMACD_ELAN_ACTIVE    0x1
+#define     LSB$M_CSMACD_ELAN_START     0x2
+#define     LSB$M_CSMACD_ELAN_SHUT      0x4
+#define     LSB$M_CSMACD_ELAN_UNAVAILABLE   0x8
+#define     LSB$M_CSMACD_LIS_ACTIVE     0x1
+#define     LSB$M_CSMACD_LIS_START      0x2
+#define     LSB$M_CSMACD_LIS_SHUT       0x4
+#define     LSB$M_CSMACD_LIS_UNAVAILABLE    0x8
+#define     LSB$C_CSMACD_LENGTH     3328
+#define     LSB$M_FDDI_BOO          0x1
+#define     LSB$M_FDDI_CTY          0x2
+#define     LSB$M_FDDI_UNTO         0x4
+#define     LSB$C_FDDI_LENGTH       3040
 
-#define		LSB$C_FDDI_OFF_INIT		0
-#define		LSB$C_FDDI_OFF_READY		1
-#define		LSB$C_FDDI_OFF_FAULT_REC	2
-#define		LSB$C_FDDI_ON_RING_INIT		3
-#define		LSB$C_FDDI_ON_RING_RUN		4
-#define		LSB$C_FDDI_BROKEN		5
+#define     LSB$C_FDDI_OFF_INIT     0
+#define     LSB$C_FDDI_OFF_READY        1
+#define     LSB$C_FDDI_OFF_FAULT_REC    2
+#define     LSB$C_FDDI_ON_RING_INIT     3
+#define     LSB$C_FDDI_ON_RING_RUN      4
+#define     LSB$C_FDDI_BROKEN       5
 
-#define		LSB$C_FDDI_OFF			0
-#define		LSB$C_FDDI_CAND_PURGER		1
-#define		LSB$C_FDDI_NON_PURGER		2
-#define		LSB$C_FDDI_PURGER		3
+#define     LSB$C_FDDI_OFF          0
+#define     LSB$C_FDDI_CAND_PURGER      1
+#define     LSB$C_FDDI_NON_PURGER       2
+#define     LSB$C_FDDI_PURGER       3
 
-#define		LSB$C_FDDI_UNK		0
-#define		LSB$C_FDDI_SUC		1
-#define		LSB$C_FDDI_FAIL		2
+#define     LSB$C_FDDI_UNK      0
+#define     LSB$C_FDDI_SUC      1
+#define     LSB$C_FDDI_FAIL     2
 
-#define		LSB$C_FDDI_INT_LOOP		0
-#define		LSB$C_FDDI_PHY_BROKEN		1
-#define		LSB$C_FDDI_PHY_OFF_READY	2
-#define		LSB$C_FDDI_WAITING		3
-#define		LSB$C_FDDI_STARTING		4
-#define		LSB$C_FDDI_FAILED		5
-#define		LSB$C_FDDI_WATCH		6
-#define		LSB$C_FDDI_IN_USE		7
+#define     LSB$C_FDDI_INT_LOOP     0
+#define     LSB$C_FDDI_PHY_BROKEN       1
+#define     LSB$C_FDDI_PHY_OFF_READY    2
+#define     LSB$C_FDDI_WAITING      3
+#define     LSB$C_FDDI_STARTING     4
+#define     LSB$C_FDDI_FAILED       5
+#define     LSB$C_FDDI_WATCH        6
+#define     LSB$C_FDDI_IN_USE       7
 
-#define		LSB$C_FDDI_T_REQ_DFLT		100000
-#define		LSB$C_FDDI_TVX_DFLT		32768
-#define		LSB$C_FDDI_RTTO_DFLT		12500000
-#define		LSB$C_MAX_XPLOR_BUF		6
-#define		LSB$C_TR_LENGTH			3008
-#define		LSB$C_TR_SPEED_4		0
-#define		LSB$C_TR_SPEED_16		1
-#define		LSB$C_TR_LNK_OFF		1
-#define		LSB$C_TR_LNK_INI		2
-#define		LSB$C_TR_LNK_RUN		3
-#define		LSB$C_TR_LNK_RCY		4
-#define		LSB$C_TR_LNK_CNT		5
-#define		LSB$C_TR_LNK_BRK		2
-#define		LSB$C_ATM_LENGTH		3000
+#define     LSB$C_FDDI_T_REQ_DFLT       100000
+#define     LSB$C_FDDI_TVX_DFLT     32768
+#define     LSB$C_FDDI_RTTO_DFLT        12500000
+#define     LSB$C_MAX_XPLOR_BUF     6
+#define     LSB$C_TR_LENGTH         3008
+#define     LSB$C_TR_SPEED_4        0
+#define     LSB$C_TR_SPEED_16       1
+#define     LSB$C_TR_LNK_OFF        1
+#define     LSB$C_TR_LNK_INI        2
+#define     LSB$C_TR_LNK_RUN        3
+#define     LSB$C_TR_LNK_RCY        4
+#define     LSB$C_TR_LNK_CNT        5
+#define     LSB$C_TR_LNK_BRK        2
+#define     LSB$C_ATM_LENGTH        3000
 
 struct _lsbdef
 {
@@ -214,13 +214,13 @@ struct _lsbdef
         unsigned int lsb$l_flags;
         struct
         {
-            unsigned lsb$v_created		: 1;
-            unsigned lsb$v_enabled		: 1;
-            unsigned lsb$v_benabled		: 1;
-            unsigned lsb$v_nmdis		: 1;
-            unsigned lsb$v_elan		: 1;
-            unsigned lsb$v_clip		: 1;
-            unsigned lsb$v_fill_44_		: 2;
+            unsigned lsb$v_created      : 1;
+            unsigned lsb$v_enabled      : 1;
+            unsigned lsb$v_benabled     : 1;
+            unsigned lsb$v_nmdis        : 1;
+            unsigned lsb$v_elan     : 1;
+            unsigned lsb$v_clip     : 1;
+            unsigned lsb$v_fill_44_     : 2;
         };
     };
     unsigned int lsb$l_adp;
@@ -239,8 +239,8 @@ struct _lsbdef
         unsigned int lsb$l_nm_flags;
         struct
         {
-            unsigned lsb$v_nm_mac_addr	: 1;
-            unsigned lsb$v_fill_45_		: 7;
+            unsigned lsb$v_nm_mac_addr  : 1;
+            unsigned lsb$v_fill_45_     : 7;
         };
     };
     unsigned int lsb$l_nm_min_tid;
@@ -517,14 +517,14 @@ struct _lsbdef
         unsigned short int lsb$w_sflmap;
         struct
         {
-            unsigned lsb$v_sfl_exc		: 1;
-            unsigned lsb$v_sfl_ccf		: 1;
-            unsigned lsb$v_sfl_shc		: 1;
-            unsigned lsb$v_sfl_opc		: 1;
-            unsigned lsb$v_sfl_ftl		: 1;
-            unsigned lsb$v_sfl_rfd		: 1;
-            unsigned lsb$v_sfl_tur		: 1;
-            unsigned lsb$v_sfl_tfl		: 1;
+            unsigned lsb$v_sfl_exc      : 1;
+            unsigned lsb$v_sfl_ccf      : 1;
+            unsigned lsb$v_sfl_shc      : 1;
+            unsigned lsb$v_sfl_opc      : 1;
+            unsigned lsb$v_sfl_ftl      : 1;
+            unsigned lsb$v_sfl_rfd      : 1;
+            unsigned lsb$v_sfl_tur      : 1;
+            unsigned lsb$v_sfl_tfl      : 1;
         };
     };
     unsigned short int lsb$w_rflctr;
@@ -533,12 +533,12 @@ struct _lsbdef
         unsigned short int lsb$w_rflmap;
         struct
         {
-            unsigned lsb$v_rfl_bce		: 1;
-            unsigned lsb$v_rfl_fme		: 1;
-            unsigned lsb$v_rfl_ftl		: 1;
-            unsigned lsb$v_rfl_rse		: 1;
-            unsigned lsb$v_rfl_rle		: 1;
-            unsigned lsb$v_fill_46_		: 3;
+            unsigned lsb$v_rfl_bce      : 1;
+            unsigned lsb$v_rfl_fme      : 1;
+            unsigned lsb$v_rfl_ftl      : 1;
+            unsigned lsb$v_rfl_rse      : 1;
+            unsigned lsb$v_rfl_rle      : 1;
+            unsigned lsb$v_fill_46_     : 3;
         };
     };
     unsigned short int lsb$w_ufdctr;
@@ -571,14 +571,14 @@ struct _lsbdef
         unsigned int lsb$l_trsflmap;
         struct
         {
-            unsigned lsb$v_trsfl_tur		: 1;
-            unsigned lsb$v_trsfl_le		: 1;
-            unsigned lsb$v_trsfl_abs		: 1;
-            unsigned lsb$v_trsfl_lf		: 1;
-            unsigned lsb$v_trsfl_te		: 1;
-            unsigned lsb$v_trsfl_uf		: 1;
-            unsigned lsb$v_trsfl_rc		: 1;
-            unsigned lsb$v_fill_47_		: 1;
+            unsigned lsb$v_trsfl_tur        : 1;
+            unsigned lsb$v_trsfl_le     : 1;
+            unsigned lsb$v_trsfl_abs        : 1;
+            unsigned lsb$v_trsfl_lf     : 1;
+            unsigned lsb$v_trsfl_te     : 1;
+            unsigned lsb$v_trsfl_uf     : 1;
+            unsigned lsb$v_trsfl_rc     : 1;
+            unsigned lsb$v_fill_47_     : 1;
         };
     };
     unsigned int lsb$l_rfrctr;
@@ -587,9 +587,9 @@ struct _lsbdef
         unsigned int lsb$l_trrflmap;
         struct
         {
-            unsigned lsb$v_trrfl_rc		: 1;
-            unsigned lsb$v_trrfl_fce		: 1;
-            unsigned lsb$v_fill_48_		: 6;
+            unsigned lsb$v_trrfl_rc     : 1;
+            unsigned lsb$v_trrfl_fce        : 1;
+            unsigned lsb$v_fill_48_     : 6;
         };
     };
     unsigned int lsb$l_ifrctr;
@@ -598,14 +598,14 @@ struct _lsbdef
         unsigned int lsb$l_triflmap;
         struct
         {
-            unsigned lsb$v_trifl_lwf		: 1;
-            unsigned lsb$v_trifl_sle		: 1;
-            unsigned lsb$v_trifl_tmo		: 1;
-            unsigned lsb$v_trifl_rpt		: 1;
-            unsigned lsb$v_trifl_bcn		: 1;
-            unsigned lsb$v_trifl_dad		: 1;
-            unsigned lsb$v_trifl_psf		: 1;
-            unsigned lsb$v_trifl_rr		: 1;
+            unsigned lsb$v_trifl_lwf        : 1;
+            unsigned lsb$v_trifl_sle        : 1;
+            unsigned lsb$v_trifl_tmo        : 1;
+            unsigned lsb$v_trifl_rpt        : 1;
+            unsigned lsb$v_trifl_bcn        : 1;
+            unsigned lsb$v_trifl_dad        : 1;
+            unsigned lsb$v_trifl_psf        : 1;
+            unsigned lsb$v_trifl_rr     : 1;
         };
     };
     unsigned int lsb$l_rgfctr;
@@ -614,11 +614,11 @@ struct _lsbdef
         unsigned int lsb$l_trtflmap;
         struct
         {
-            unsigned lsb$v_trtfl_lwf		: 1;
-            unsigned lsb$v_trtfl_ssd		: 1;
-            unsigned lsb$v_trtfl_arf		: 1;
-            unsigned lsb$v_trtfl_rr		: 1;
-            unsigned lsb$v_fill_49_		: 4;
+            unsigned lsb$v_trtfl_lwf        : 1;
+            unsigned lsb$v_trtfl_ssd        : 1;
+            unsigned lsb$v_trtfl_arf        : 1;
+            unsigned lsb$v_trtfl_rr     : 1;
+            unsigned lsb$v_fill_49_     : 4;
         };
     };
     unsigned int lsb$l_rpgctr;
@@ -651,11 +651,11 @@ struct _lsbdef
         unsigned int lsb$l_char;
         struct
         {
-            unsigned lsb$v_devctr		: 1;
-            unsigned lsb$v_devxidtest		: 1;
-            unsigned lsb$v_mulseg		: 1;
-            unsigned lsb$v_rcvmgt		: 1;
-            unsigned lsb$v_fill_50_		: 4;
+            unsigned lsb$v_devctr       : 1;
+            unsigned lsb$v_devxidtest       : 1;
+            unsigned lsb$v_mulseg       : 1;
+            unsigned lsb$v_rcvmgt       : 1;
+            unsigned lsb$v_fill_50_     : 4;
         };
     };
     union
@@ -663,17 +663,17 @@ struct _lsbdef
         unsigned int lsb$l_sts;
         struct
         {
-            unsigned lsb$v_run		: 1;
-            unsigned lsb$v_inited		: 1;
-            unsigned lsb$v_mca_ovf		: 1;
-            unsigned lsb$v_fat_err		: 1;
-            unsigned lsb$v_blkctl		: 1;
-            unsigned lsb$v_pchact		: 1;
-            unsigned lsb$v_need_dat_lock	: 1;
-            unsigned lsb$v_got_dat_lock	: 1;
-            unsigned lsb$v_ring_avail		: 1;
-            unsigned lsb$v_full_duplex	: 1;
-            unsigned lsb$v_sts_filler		: 22;
+            unsigned lsb$v_run      : 1;
+            unsigned lsb$v_inited       : 1;
+            unsigned lsb$v_mca_ovf      : 1;
+            unsigned lsb$v_fat_err      : 1;
+            unsigned lsb$v_blkctl       : 1;
+            unsigned lsb$v_pchact       : 1;
+            unsigned lsb$v_need_dat_lock    : 1;
+            unsigned lsb$v_got_dat_lock : 1;
+            unsigned lsb$v_ring_avail       : 1;
+            unsigned lsb$v_full_duplex  : 1;
+            unsigned lsb$v_sts_filler       : 22;
         };
     };
     unsigned int lsb$l_mlt;
@@ -727,24 +727,24 @@ struct _lsbdef
     unsigned int lsb$l_process_ctl;
     unsigned int lsb$l_dev_transmit;
     unsigned int lsb$l_sho_lnk;
-    void (*lsb$a_fork_proc)();
-    void (*lsb$a_chngpro)();
-    void (*lsb$a_counter)();
-    void (*lsb$a_diag)();
-    void (*lsb$a_init)();
-    void (*lsb$a_port)();
-    void (*lsb$a_power_fail)();
-    void (*lsb$a_receive)();
-    void (*lsb$a_sense_mac)();
-    void (*lsb$a_set_mac)();
-    void (*lsb$a_stop)();
-    void (*lsb$a_stoppro)();
-    void (*lsb$a_strtpro)();
-    void (*lsb$a_strtpropha)();
-    void (*lsb$a_timer)();
-    int (*lsb$a_transmit)();
-    void (*lsb$a_unit_init)();
-    void (*lsb$a_mask)();
+    void (*lsb$a_fork_proc)(void);
+    void (*lsb$a_chngpro)(void);
+    void (*lsb$a_counter)(void);
+    void (*lsb$a_diag)(void);
+    void (*lsb$a_init)(void);
+    void (*lsb$a_port)(void);
+    void (*lsb$a_power_fail)(void);
+    void (*lsb$a_receive)(void);
+    void (*lsb$a_sense_mac)(void);
+    void (*lsb$a_set_mac)(void);
+    void (*lsb$a_stop)(void);
+    void (*lsb$a_stoppro)(void);
+    void (*lsb$a_strtpro)(void);
+    void (*lsb$a_strtpropha)(void);
+    void (*lsb$a_timer)(void);
+    int (*lsb$a_transmit)(void);
+    void (*lsb$a_unit_init)(void);
+    void (*lsb$a_mask)(void);
     union
     {
         void *lsb$a_elan_lsbs;
@@ -785,11 +785,11 @@ struct _lsbdef
                 unsigned int lsb$l_csmacd_elan_state;
                 struct
                 {
-                    unsigned lsb$v_csmacd_elan_active		: 1;
-                    unsigned lsb$v_csmacd_elan_start		: 1;
-                    unsigned lsb$v_csmacd_elan_shut		: 1;
-                    unsigned lsb$v_csmacd_elan_unavailable	: 1;
-                    unsigned lsb$v_fill_51_			: 4;
+                    unsigned lsb$v_csmacd_elan_active       : 1;
+                    unsigned lsb$v_csmacd_elan_start        : 1;
+                    unsigned lsb$v_csmacd_elan_shut     : 1;
+                    unsigned lsb$v_csmacd_elan_unavailable  : 1;
+                    unsigned lsb$v_fill_51_         : 4;
                 };
             };
             unsigned int lsb$l_csmacd_event_mask_req;
@@ -818,11 +818,11 @@ struct _lsbdef
                 unsigned int lsb$l_csmacd_clip_state;
                 struct
                 {
-                    unsigned lsb$v_csmacd_lis_active	: 1;
-                    unsigned lsb$v_csmacd_lis_start	: 1;
-                    unsigned lsb$v_csmacd_lis_shut	: 1;
-                    unsigned lsb$v_csmacd_lis_unavailable	: 1;
-                    unsigned lsb$v_fill_52_		: 4;
+                    unsigned lsb$v_csmacd_lis_active    : 1;
+                    unsigned lsb$v_csmacd_lis_start : 1;
+                    unsigned lsb$v_csmacd_lis_shut  : 1;
+                    unsigned lsb$v_csmacd_lis_unavailable   : 1;
+                    unsigned lsb$v_fill_52_     : 4;
                 };
             };
             void *lsb$a_csmacd_clip_attr;
@@ -906,10 +906,10 @@ struct _lsbdef
                 unsigned int lsb$l_fddi_flags;
                 struct
                 {
-                    unsigned lsb$v_fddi_boo		: 1;
-                    unsigned lsb$v_fddi_cty		: 1;
-                    unsigned lsb$v_fddi_unto		: 1;
-                    unsigned lsb$v_fill_53_		: 5;
+                    unsigned lsb$v_fddi_boo     : 1;
+                    unsigned lsb$v_fddi_cty     : 1;
+                    unsigned lsb$v_fddi_unto        : 1;
+                    unsigned lsb$v_fill_53_     : 5;
                 };
             };
             unsigned int lsb$l_fddi_smt;
@@ -985,14 +985,14 @@ struct _lsbdef
     };
 };
 
-#define		SR$C_LOCAL		0
-#define		SR$C_UNKNOWN		2
-#define		SR$C_KNOWN		4
-#define		SR$C_STALE		1
-#define		SR$C_DELETED		3
-#define		SR$C_EXPLORING		5
-#define		SR$C_SR_SIZE		64
-#define		SR$C_SR_SHIFT		6
+#define     SR$C_LOCAL      0
+#define     SR$C_UNKNOWN        2
+#define     SR$C_KNOWN      4
+#define     SR$C_STALE      1
+#define     SR$C_DELETED        3
+#define     SR$C_EXPLORING      5
+#define     SR$C_SR_SIZE        64
+#define     SR$C_SR_SHIFT       6
 
 struct _sr
 {
@@ -1006,8 +1006,8 @@ struct _sr
     unsigned int sr$l_discvtim;
 };
 
-#define		FCA$C_FCA_ENTRIES	200
-#define		FCA$C_FCA_SIZE		16
+#define     FCA$C_FCA_ENTRIES   200
+#define     FCA$C_FCA_SIZE      16
 
 struct _fca
 {
@@ -1016,47 +1016,47 @@ struct _fca
     unsigned int fca$l_fc_fill;
 };
 
-#define		TRC$Q_PK_DATA		0
-#define		TRC$G_PK_DATA		12
-#define		TRC$C_INIT_ENTRIES	256
-#define		TRC$C_DEF_ENTRIES	2048
-#define		TRC$C_NUM_INT		8
-#define		TRC$C_LENGTH		32
+#define     TRC$Q_PK_DATA       0
+#define     TRC$G_PK_DATA       12
+#define     TRC$C_INIT_ENTRIES  256
+#define     TRC$C_DEF_ENTRIES   2048
+#define     TRC$C_NUM_INT       8
+#define     TRC$C_LENGTH        32
 
-#define		TRC$C_EXTENSION		128
+#define     TRC$C_EXTENSION     128
 
-#define		TRC$C_TIMER		1
-#define		TRC$C_INTR		2
-#define		TRC$C_FRK_START		3
-#define		TRC$C_FRK_DONE		4
-#define		TRC$C_FRK_ERROR		5
-#define		TRC$C_FRK_SOFT		6
-#define		TRC$C_STATE		7
-#define		TRC$C_INIT		8
-#define		TRC$C_CHNGPRO		9
-#define		TRC$C_STOP		10
-#define		TRC$C_SHUTDOWN		11
-#define		TRC$C_RCV_ISS		12
-#define		TRC$C_RCV_DONE		13
-#define		TRC$C_RCV_ERR		14
-#define		TRC$C_RCV_PKT		15
-#define		TRC$C_XMT_ISS		16
-#define		TRC$C_XMT_QUE		17
-#define		TRC$C_XMT_DONE		18
-#define		TRC$C_XMT_ERR		19
-#define		TRC$C_XMT_PKT		20
-#define		TRC$C_SEGMENT		21
-#define		TRC$C_SR_ENTRY		22
-#define		TRC$C_VCI_ACTION	23
-#define		TRC$C_LAN24		24
-#define		TRC$C_LAN25		25
-#define		TRC$C_LAN26		26
-#define		TRC$C_LAN27		27
-#define		TRC$C_LAN28		28
-#define		TRC$C_LAN29		29
-#define		TRC$C_LAN30		30
-#define		TRC$C_LAN31		31
-#define		TRC$C_LAN32		32
+#define     TRC$C_TIMER     1
+#define     TRC$C_INTR      2
+#define     TRC$C_FRK_START     3
+#define     TRC$C_FRK_DONE      4
+#define     TRC$C_FRK_ERROR     5
+#define     TRC$C_FRK_SOFT      6
+#define     TRC$C_STATE     7
+#define     TRC$C_INIT      8
+#define     TRC$C_CHNGPRO       9
+#define     TRC$C_STOP      10
+#define     TRC$C_SHUTDOWN      11
+#define     TRC$C_RCV_ISS       12
+#define     TRC$C_RCV_DONE      13
+#define     TRC$C_RCV_ERR       14
+#define     TRC$C_RCV_PKT       15
+#define     TRC$C_XMT_ISS       16
+#define     TRC$C_XMT_QUE       17
+#define     TRC$C_XMT_DONE      18
+#define     TRC$C_XMT_ERR       19
+#define     TRC$C_XMT_PKT       20
+#define     TRC$C_SEGMENT       21
+#define     TRC$C_SR_ENTRY      22
+#define     TRC$C_VCI_ACTION    23
+#define     TRC$C_LAN24     24
+#define     TRC$C_LAN25     25
+#define     TRC$C_LAN26     26
+#define     TRC$C_LAN27     27
+#define     TRC$C_LAN28     28
+#define     TRC$C_LAN29     29
+#define     TRC$C_LAN30     30
+#define     TRC$C_LAN31     31
+#define     TRC$C_LAN32     32
 
 struct _trc
 {

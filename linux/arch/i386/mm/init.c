@@ -90,8 +90,8 @@ int do_check_pgt_cache(int low, int high)
 pte_t *kmap_pte;
 pgprot_t kmap_prot;
 
-#define kmap_get_fixmap_pte(vaddr)					\
-	pte_offset(pmd_offset(pgd_offset_k(vaddr), (vaddr)), (vaddr))
+#define kmap_get_fixmap_pte(vaddr)                  \
+    pte_offset(pmd_offset(pgd_offset_k(vaddr), (vaddr)), (vaddr))
 
 void __init kmap_init(void)
 {
@@ -454,12 +454,12 @@ static inline int page_is_ram (unsigned long pagenr)
     {
         unsigned long addr, end;
 
-        if (e820.map[i].type != E820_RAM)	/* not usable memory */
+        if (e820.map[i].type != E820_RAM)   /* not usable memory */
             continue;
         /*
-         *	!!!FIXME!!! Some BIOSen report areas as RAM that
-         *	are not. Notably the 640->1Mb area. We need a sanity
-         *	check here.
+         *  !!!FIXME!!! Some BIOSen report areas as RAM that
+         *  are not. Notably the 640->1Mb area. We need a sanity
+         *  check here.
          */
         addr = (e820.map[i].addr+PAGE_SIZE-1) >> PAGE_SHIFT;
         end = (e820.map[i].addr+e820.map[i].size) >> PAGE_SHIFT;

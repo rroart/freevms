@@ -20,27 +20,27 @@
  * The following is not needed anymore since the descriptors buffer
  * heads are now dynamically allocated
  */
-/* #define EXT2_MAX_GROUP_DESC	8 */
+/* #define EXT2_MAX_GROUP_DESC  8 */
 
-#define EXT2_MAX_GROUP_LOADED	8
+#define EXT2_MAX_GROUP_LOADED   8
 
 /*
  * second extended-fs super-block data in memory
  */
 struct ext2_sb_info
 {
-    unsigned long s_frag_size;	/* Size of a fragment in bytes */
+    unsigned long s_frag_size;  /* Size of a fragment in bytes */
     unsigned long s_frags_per_block;/* Number of fragments per block */
     unsigned long s_inodes_per_block;/* Number of inodes per block */
     unsigned long s_frags_per_group;/* Number of fragments in a group */
     unsigned long s_blocks_per_group;/* Number of blocks in a group */
     unsigned long s_inodes_per_group;/* Number of inodes in a group */
-    unsigned long s_itb_per_group;	/* Number of inode table blocks per group */
-    unsigned long s_gdb_count;	/* Number of group descriptor blocks */
-    unsigned long s_desc_per_block;	/* Number of group descriptors per block */
-    unsigned long s_groups_count;	/* Number of groups in the fs */
-    struct buffer_head * s_sbh;	/* Buffer containing the super block */
-    struct ext2_super_block * s_es;	/* Pointer to the super block in the buffer */
+    unsigned long s_itb_per_group;  /* Number of inode table blocks per group */
+    unsigned long s_gdb_count;  /* Number of group descriptor blocks */
+    unsigned long s_desc_per_block; /* Number of group descriptors per block */
+    unsigned long s_groups_count;   /* Number of groups in the fs */
+    struct buffer_head * s_sbh; /* Buffer containing the super block */
+    struct ext2_super_block * s_es; /* Pointer to the super block in the buffer */
     struct buffer_head ** s_group_desc;
     unsigned short s_loaded_inode_bitmaps;
     unsigned short s_loaded_block_bitmaps;
@@ -59,4 +59,4 @@ struct ext2_sb_info
     int s_first_ino;
 };
 
-#endif	/* _LINUX_EXT2_FS_SB */
+#endif  /* _LINUX_EXT2_FS_SB */

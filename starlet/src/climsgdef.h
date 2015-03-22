@@ -1,5 +1,5 @@
-#ifndef climsgdef_h
-#define climsgdef_h
+#ifndef CLIMSGDEF_H
+#define CLIMSGDEF_H
 
 /* we should make hex of this */
 

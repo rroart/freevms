@@ -1,33 +1,33 @@
-#ifndef cxbdef_h
-#define cxbdef_h
+#ifndef CXBDEF_H
+#define CXBDEF_H
 
-#define		CXB$M_RESP		0x1
-#define		CXB$L_NI_ALTXMT		28
-#define		CXB$C_AGENT_SCRATCH_LEN	52
+#define     CXB$M_RESP      0x1
+#define     CXB$L_NI_ALTXMT     28
+#define     CXB$C_AGENT_SCRATCH_LEN 52
 
-#define		CXB$K_LENGTH		92
-#define		CXB$C_LENGTH		92
+#define     CXB$K_LENGTH        92
+#define     CXB$C_LENGTH        92
 
-#define		CXB$M_FLTR_MCA		0x1
-#define		CXB$M_FLTR_CTL		0x2
-#define		CXB$M_FLTR_SRC		0x4
-#define		CXB$M_FLTR_STARTUP	0x1
-#define		CXB$M_FLTR_INTXMIT	0x2
-#define		CXB$T_R_DATA		128
-#define		CXB$W_R_LEN_802		140
-#define		CXB$T_R_USER_ETH	142
-#define		CXB$W_R_SIZE		142
-#define		CXB$X_R_CTL		144
-#define		CXB$G_R_PID		145
-#define		CXB$T_R_USER_802E	150
-#define		CXB$C_DLL		52
-#define		CXB$C_DLL_SCRATCH_LEN	52
+#define     CXB$M_FLTR_MCA      0x1
+#define     CXB$M_FLTR_CTL      0x2
+#define     CXB$M_FLTR_SRC      0x4
+#define     CXB$M_FLTR_STARTUP  0x1
+#define     CXB$M_FLTR_INTXMIT  0x2
+#define     CXB$T_R_DATA        128
+#define     CXB$W_R_LEN_802     140
+#define     CXB$T_R_USER_ETH    142
+#define     CXB$W_R_SIZE        142
+#define     CXB$X_R_CTL     144
+#define     CXB$G_R_PID     145
+#define     CXB$T_R_USER_802E   150
+#define     CXB$C_DLL       52
+#define     CXB$C_DLL_SCRATCH_LEN   52
 
-#define		CXB$K_HEADER		144
-#define		CXB$C_HEADER		144
-#define		CXB$C_TRAILER		4
-#define		CXB$K_OVERHEAD		148
-#define		CXB$C_OVERHEAD		148
+#define     CXB$K_HEADER        144
+#define     CXB$C_HEADER        144
+#define     CXB$C_TRAILER       4
+#define     CXB$K_OVERHEAD      148
+#define     CXB$C_OVERHEAD      148
 
 struct _cxb
 {
@@ -78,7 +78,7 @@ struct _cxb
                 unsigned short int cxb$w_channel;
                 void *cxb$l_link;
                 struct _irp *cxb$l_irp;
-                int (*cxb$l_end_action)();
+                int (*cxb$l_end_action)(void);
                 void *cxb$l_r_nsp_msg;
                 unsigned int cxb$l_r_data_size;
                 unsigned short int cxb$w_r_seg_num;

@@ -1,8 +1,8 @@
 
 /*
- *	LIB$DIGIT_SEP
+ *  LIB$DIGIT_SEP
  *
- *	Copyright (C) 2004 Andrew Allison
+ *  Copyright (C) 2004 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,26 +20,26 @@
  *
  *The author(s) may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  *
  *
  * Description:
- *	Returns the system's digit separator symbol
+ *  Returns the system's digit separator symbol
  *
  * Bugs:
  *
  *
  * History
  *
- *	Apr 12, 2004 - Andrew Allison
- * 	 	Initial program creation
+ *  Apr 12, 2004 - Andrew Allison
+ *      Initial program creation
  */
 
 #include "lib$routines.h"
@@ -49,7 +49,7 @@
 unsigned long lib$digit_sep (struct dsc$descriptor_s *digit_sep,
                              unsigned short *result_length)
 {
-    char	*s1_ptr;
+    char    *s1_ptr;
     unsigned long result;
     unsigned short s1_len;
 

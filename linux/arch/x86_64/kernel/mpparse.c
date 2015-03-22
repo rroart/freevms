@@ -1,16 +1,16 @@
 /*
- *	Intel Multiprocessor Specificiation 1.1 and 1.4
- *	compliant MP-table parsing routines.
+ *  Intel Multiprocessor Specificiation 1.1 and 1.4
+ *  compliant MP-table parsing routines.
  *
- *	(c) 1995 Alan Cox, Building #3 <alan@redhat.com>
- *	(c) 1998, 1999, 2000 Ingo Molnar <mingo@redhat.com>
+ *  (c) 1995 Alan Cox, Building #3 <alan@redhat.com>
+ *  (c) 1998, 1999, 2000 Ingo Molnar <mingo@redhat.com>
  *
- *	Fixes
- *		Erich Boleyn	:	MP v1.4 and additional changes.
- *		Alan Cox	:	Added EBDA scanning
- *		Ingo Molnar	:	various cleanups and rewrites
- *		Maciej W. Rozycki:	Bits for default MP configurations
- *		Paul Diefenbaugh:	Added full ACPI support
+ *  Fixes
+ *      Erich Boleyn    :   MP v1.4 and additional changes.
+ *      Alan Cox    :   Added EBDA scanning
+ *      Ingo Molnar :   various cleanups and rewrites
+ *      Maciej W. Rozycki:  Bits for default MP configurations
+ *      Paul Diefenbaugh:   Added full ACPI support
  */
 
 #include <linux/mm.h>
@@ -35,7 +35,7 @@
 
 /* Have we found an MP table */
 int smp_found_config = 0;
-#ifdef	CONFIG_SMP
+#ifdef  CONFIG_SMP
 extern unsigned int max_cpus;
 #endif
 
@@ -116,7 +116,7 @@ static void __init MP_processor_info (struct mpc_config_processor *m)
         boot_cpu_id = m->mpc_apicid;
     }
 
-#ifdef	CONFIG_SMP
+#ifdef  CONFIG_SMP
     if (num_processors >= NR_CPUS)
     {
         printk(KERN_WARNING "WARNING: NR_CPUS limit of %i reached."
@@ -303,7 +303,7 @@ static int __init smp_read_mpc(struct mp_config_table *mpc)
         mp_lapic_addr = mpc->mpc_lapic;
 
     /*
-     *	Now process the configuration blocks.
+     *  Now process the configuration blocks.
      */
     while (count < mpc->mpc_length)
     {
@@ -379,7 +379,7 @@ static void __init construct_default_ioirq_mptable(int mpc_default_type)
     int ELCR_fallback = 0;
 
     intsrc.mpc_type = MP_INTSRC;
-    intsrc.mpc_irqflag = 0;			/* conforming */
+    intsrc.mpc_irqflag = 0;         /* conforming */
     intsrc.mpc_srcbus = 0;
     intsrc.mpc_dstapic = mp_ioapics[0].mpc_apicid;
 
@@ -412,11 +412,11 @@ static void __init construct_default_ioirq_mptable(int mpc_default_type)
         {
         case 2:
             if (i == 0 || i == 13)
-                continue;	/* IRQ0 & IRQ13 not connected */
+                continue;   /* IRQ0 & IRQ13 not connected */
             /* fall through */
         default:
             if (i == 2)
-                continue;	/* IRQ2 is never connected */
+                continue;   /* IRQ2 is never connected */
         }
 
         if (ELCR_fallback)
@@ -433,13 +433,13 @@ static void __init construct_default_ioirq_mptable(int mpc_default_type)
         }
 
         intsrc.mpc_srcbusirq = i;
-        intsrc.mpc_dstirq = i ? i : 2;		/* IRQ0 to INTIN2 */
+        intsrc.mpc_dstirq = i ? i : 2;      /* IRQ0 to INTIN2 */
         MP_intsrc_info(&intsrc);
     }
 
     intsrc.mpc_irqtype = mp_ExtINT;
     intsrc.mpc_srcbusirq = 0;
-    intsrc.mpc_dstirq = 0;				/* 8259A to INTIN0 */
+    intsrc.mpc_dstirq = 0;              /* 8259A to INTIN0 */
     MP_intsrc_info(&intsrc);
 }
 
@@ -518,7 +518,7 @@ static inline void __init construct_default_ISA_mptable(int mpc_default_type)
     construct_default_ioirq_mptable(mpc_default_type);
 
     lintsrc.mpc_type = MP_LINTSRC;
-    lintsrc.mpc_irqflag = 0;		/* conforming */
+    lintsrc.mpc_irqflag = 0;        /* conforming */
     lintsrc.mpc_srcbusid = 0;
     lintsrc.mpc_srcbusirq = 0;
     lintsrc.mpc_destapic = MP_APIC_ALL;
@@ -710,7 +710,7 @@ void __init find_smp_config (void)
 #ifdef CONFIG_ACPI_BOOT
 
 void __init mp_register_lapic_address (
-    u64			address)
+    u64         address)
 {
     mp_lapic_addr = (unsigned long) address;
 
@@ -724,11 +724,11 @@ void __init mp_register_lapic_address (
 
 
 void __init mp_register_lapic (
-    u8			id,
-    u8			enabled)
+    u8          id,
+    u8          enabled)
 {
     struct mpc_config_processor processor;
-    int			boot_cpu = 0;
+    int         boot_cpu = 0;
 
     if (id >= MAX_APICS)
     {
@@ -756,22 +756,22 @@ void __init mp_register_lapic (
 
 #if defined(CONFIG_X86_IO_APIC) && defined(CONFIG_ACPI_INTERPRETER)
 
-#define MP_ISA_BUS		0
-#define MP_MAX_IOAPIC_PIN	127
+#define MP_ISA_BUS      0
+#define MP_MAX_IOAPIC_PIN   127
 
 struct mp_ioapic_routing
 {
-    int			apic_id;
-    int			irq_start;
-    int			irq_end;
-    u32			pin_programmed[4];
+    int         apic_id;
+    int         irq_start;
+    int         irq_end;
+    u32         pin_programmed[4];
 } mp_ioapic_routing[MAX_IO_APICS];
 
 
 static int __init mp_find_ioapic (
-    int			irq)
+    int         irq)
 {
-    int			i = 0;
+    int         i = 0;
 
     /* Find the IOAPIC that manages this IRQ. */
     for (i = 0; i < nr_ioapics; i++)
@@ -788,11 +788,11 @@ static int __init mp_find_ioapic (
 
 
 void __init mp_register_ioapic (
-    u8			id,
-    u32			address,
-    u32			irq_base)
+    u8          id,
+    u32         address,
+    u32         irq_base)
 {
-    int			idx = 0;
+    int         idx = 0;
 
     if (nr_ioapics >= MAX_IO_APICS)
     {
@@ -837,14 +837,14 @@ void __init mp_register_ioapic (
 
 
 void __init mp_override_legacy_irq (
-    u8			bus_irq,
-    u8			polarity,
-    u8			trigger,
-    u32			global_irq)
+    u8          bus_irq,
+    u8          polarity,
+    u8          trigger,
+    u32         global_irq)
 {
     struct mpc_config_intsrc intsrc;
-    int			ioapic = -1;
-    int			pin = -1;
+    int         ioapic = -1;
+    int         pin = -1;
 
     /*
      * Convert 'global_irq' to 'ioapic.pin'.
@@ -866,9 +866,9 @@ void __init mp_override_legacy_irq (
     intsrc.mpc_irqtype = mp_INT;
     intsrc.mpc_irqflag = (trigger << 2) | polarity;
     intsrc.mpc_srcbus = MP_ISA_BUS;
-    intsrc.mpc_srcbusirq = bus_irq;				       /* IRQ */
-    intsrc.mpc_dstapic = mp_ioapics[ioapic].mpc_apicid;	   /* APIC ID */
-    intsrc.mpc_dstirq = pin;				    /* INTIN# */
+    intsrc.mpc_srcbusirq = bus_irq;                    /* IRQ */
+    intsrc.mpc_dstapic = mp_ioapics[ioapic].mpc_apicid;    /* APIC ID */
+    intsrc.mpc_dstirq = pin;                    /* INTIN# */
 
     Dprintk("Int: type %d, pol %d, trig %d, bus %d, irq %d, %d-%d\n",
             intsrc.mpc_irqtype, intsrc.mpc_irqflag & 3,
@@ -886,8 +886,8 @@ void __init mp_override_legacy_irq (
 void __init mp_config_acpi_legacy_irqs (void)
 {
     struct mpc_config_intsrc intsrc;
-    int			i = 0;
-    int			ioapic = -1;
+    int         i = 0;
+    int         ioapic = -1;
 
     /*
      * Fabricate the legacy ISA bus (bus #31).
@@ -903,7 +903,7 @@ void __init mp_config_acpi_legacy_irqs (void)
         return;
 
     intsrc.mpc_type = MP_INTSRC;
-    intsrc.mpc_irqflag = 0;					/* Conforming */
+    intsrc.mpc_irqflag = 0;                 /* Conforming */
     intsrc.mpc_srcbus = MP_ISA_BUS;
     intsrc.mpc_dstapic = mp_ioapics[ioapic].mpc_apicid;
 
@@ -925,11 +925,11 @@ void __init mp_config_acpi_legacy_irqs (void)
         if (idx != mp_irq_entries)
         {
             printk(KERN_DEBUG "ACPI: IRQ%d used by override.\n", i);
-            continue;			  /* IRQ already used */
+            continue;             /* IRQ already used */
         }
 
         intsrc.mpc_irqtype = mp_INT;
-        intsrc.mpc_srcbusirq = i;		   /* Identity mapped */
+        intsrc.mpc_srcbusirq = i;          /* Identity mapped */
         intsrc.mpc_dstirq = i;
 
         Dprintk("Int: type %d, pol %d, trig %d, bus %d, irq %d, "
@@ -960,15 +960,15 @@ int acpi_tolerant;
 
 void __init mp_parse_prt (void)
 {
-    struct list_head	*node = NULL;
-    struct acpi_prt_entry	*entry = NULL;
-    int			vector = 0;
-    int			ioapic = -1;
-    int			ioapic_pin = 0;
-    int			irq = 0;
-    int			idx, bit = 0;
-    int			edge_level = 0;
-    int			active_high_low = 0;
+    struct list_head    *node = NULL;
+    struct acpi_prt_entry   *entry = NULL;
+    int         vector = 0;
+    int         ioapic = -1;
+    int         ioapic_pin = 0;
+    int         irq = 0;
+    int         idx, bit = 0;
+    int         edge_level = 0;
+    int         active_high_low = 0;
 
     /*
      * Parsing through the PCI Interrupt Routing Table (PRT) and program

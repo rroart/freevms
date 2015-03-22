@@ -36,12 +36,12 @@ typedef struct
     atomic_t driver_busy;
     unsigned char common_critical;
     struct timer_list *tx_timer;
-    struct sock *sk;		/* Wanpipe Sock bind's here */
+    struct sock *sk;        /* Wanpipe Sock bind's here */
     int   (*func) (struct sk_buff *, netdevice_t *,
                    struct sock *);
 
     struct tq_struct wanpipe_task;    /* Immediate BH handler task */
-    unsigned char rw_bind;			  /* Sock bind state */
+    unsigned char rw_bind;            /* Sock bind state */
     unsigned char usedby;
     unsigned char state;
     unsigned char svc;
@@ -52,12 +52,12 @@ typedef struct
 
 enum
 {
-    WANSOCK_UNCONFIGURED,	/* link/channel is not configured */
-    WANSOCK_DISCONNECTED,	/* link/channel is disconnected */
-    WANSOCK_CONNECTING,		/* connection is in progress */
-    WANSOCK_CONNECTED,		/* link/channel is operational */
-    WANSOCK_LIMIT,		/* for verification only */
-    WANSOCK_DUALPORT,		/* for Dual Port cards */
+    WANSOCK_UNCONFIGURED,   /* link/channel is not configured */
+    WANSOCK_DISCONNECTED,   /* link/channel is disconnected */
+    WANSOCK_CONNECTING,     /* connection is in progress */
+    WANSOCK_CONNECTED,      /* link/channel is operational */
+    WANSOCK_LIMIT,      /* for verification only */
+    WANSOCK_DUALPORT,       /* for Dual Port cards */
     WANSOCK_DISCONNECTING,
     WANSOCK_BINDED,
     WANSOCK_BIND_LISTEN,

@@ -112,7 +112,7 @@ bad:
 int ptrace_detach(struct task_struct *child, unsigned int data)
 {
     if ((unsigned long) data > _NSIG)
-        return	-EIO;
+        return  -EIO;
 
     /* Architecture-specific hardware disable .. */
     ptrace_disable(child);

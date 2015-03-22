@@ -1,5 +1,5 @@
-#ifndef erl_routines_h
-#define erl_routines_h
+#ifndef ERL_ROUTINES_H
+#define ERL_ROUTINES_H
 
 //#include <ints.h>
 #include <embdvdef.h>

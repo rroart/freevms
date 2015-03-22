@@ -1,604 +1,440 @@
 /* <sys$routines.h>
  *
- *	System Service routines from Starlet.
+ *  System Service routines from Starlet.
  */
 #ifndef _SYS$ROUTINES_H
 #define _SYS$ROUTINES_H
 # ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 # endif
 
+    unsigned long sys$abort_trans(void);
+    unsigned long sys$abort_transw(void);
 
+    unsigned long sys$ack_event(void);
 
+    unsigned long sys$add_branch(void);
+    unsigned long sys$add_branchw(void);
 
+    unsigned long sys$add_holder(void);
 
-    unsigned long sys$abort_trans(), sys$abort_transw();
+    unsigned long sys$add_ident(void);
 
+    unsigned long sys$adjstk(void);
 
+    unsigned long sys$adjwsl(void);
 
-    unsigned long sys$ack_event();
+    unsigned long sys$alloc(void);
 
+    unsigned long sys$ascefc(void);
 
-    unsigned long sys$add_branch(), sys$add_branchw();
+    unsigned long sys$asctim(void);
 
+    unsigned long sys$asctoid(void);
 
-    unsigned long sys$add_holder();
+    unsigned long sys$ascutc(void);
 
+    unsigned long sys$assign(void);
 
-    unsigned long sys$add_ident();
+    unsigned long sys$bintim(void);
 
+    unsigned long sys$binutc(void);
 
-    unsigned long sys$adjstk();
+    unsigned long sys$brdcst(void);
 
+    unsigned long sys$brkthru(void);
+    unsigned long sys$brkthruw(void);
 
-    unsigned long sys$adjwsl();
+    unsigned long sys$cancel(void);
 
+    unsigned long sys$cancel_selective(void);
 
-    unsigned long sys$alloc();
+    unsigned long sys$canevtast(void);
 
+    unsigned long sys$canexh(void);
 
-    unsigned long sys$ascefc();
+    unsigned long sys$canrnh(void);
 
+    unsigned long sys$cantim(void);
 
-    unsigned long sys$asctim();
+    unsigned long sys$canwak(void);
 
+    unsigned long sys$change_acl(void);
 
-    unsigned long sys$asctoid();
+    unsigned long sys$change_class(void);
 
+    unsigned long sys$check_access(void);
 
-    unsigned long sys$ascutc();
+    unsigned long sys$chkpro(void);
 
+    unsigned long sys$clref(void);
 
-    unsigned long sys$assign();
+    unsigned long sys$cmexec(void);
 
+    unsigned long sys$cmkrnl(void);
 
-    unsigned long sys$bintim();
+    unsigned long sys$cntreg(void);
 
+    unsigned long sys$create_branch(void);
+    unsigned long sys$create_branchw(void);
 
-    unsigned long sys$binutc();
+    unsigned long sys$create_bufobj(void);
 
+    unsigned long sys$create_rdb(void);
 
-    unsigned long sys$brdcst();
+    unsigned long sys$create_uid(void);
 
+    unsigned long sys$crelnm(void);
 
+    unsigned long sys$crelnt(void);
 
-    unsigned long sys$brkthru(), sys$brkthruw();
+    unsigned long sys$crelog(void);
 
+    unsigned long sys$crembx(void);
 
-    unsigned long sys$cancel();
+    unsigned long sys$creprc(void);
 
+    unsigned long sys$cretva(void);
 
-    unsigned long sys$cancel_selective();
+    unsigned long sys$crmpsc(void);
 
+    unsigned long sys$dacefc(void);
 
-    unsigned long sys$canevtast();
+    unsigned long sys$dalloc(void);
 
+    unsigned long sys$dassgn(void);
 
-    unsigned long sys$canexh();
+    unsigned long sys$declare_rm(void);
+    unsigned long sys$declare_rmw(void);
 
+    unsigned long sys$dclast(void);
 
-    unsigned long sys$canrnh();
+    unsigned long sys$dclcmh(void);
 
+    unsigned long sys$dclevt(void);
 
-    unsigned long sys$cantim();
+    unsigned long sys$dclexh(void);
 
+    unsigned long sys$dclrnh(void);
 
-    unsigned long sys$canwak();
+    unsigned long sys$declare_rm(void);
+    unsigned long sys$declare_rmw(void);
 
+    unsigned long sys$delete_bufobj(void);
 
+    unsigned long sys$dellnm(void);
 
-    unsigned long sys$change_acl();
+    unsigned long sys$dellog(void);
 
+    unsigned long sys$delmbx(void);
 
-    unsigned long sys$change_class();
+    unsigned long sys$delprc(void);
 
+    unsigned long sys$deltva(void);
 
-    unsigned long sys$check_access();
+    unsigned long sys$deq(unsigned int lkid, void *valblk, unsigned int acmode,
+                          unsigned int flags);
 
+    unsigned long sys$device_scan(void);
 
-    unsigned long sys$chkpro();
+    unsigned long sys$dgblsc(void);
 
+    unsigned long sys$diagnose(void);
 
-    unsigned long sys$clref();
+    unsigned long sys$disable_vp_use(void);
+    unsigned long sys$disable_vp_use_int(void);
 
+    unsigned long sys$dismou(void);
 
-    unsigned long sys$cmexec();
+    unsigned long sys$dlcefc(void);
 
+    unsigned long sys$dns(void);
+    unsigned long sys$dnsw(void);
 
-    unsigned long sys$cmkrnl();
+    unsigned long sys$emaa(void);
 
+    unsigned long sys$enable_vp_use(void);
+    unsigned long sys$enable_vp_use_int(void);
 
-    unsigned long sys$cntreg();
+    unsigned long sys$end_branch(void);
+    unsigned long sys$end_branchw(void);
 
+    unsigned long sys$end_trans(void);
+    unsigned long sys$end_transw(void);
 
+    unsigned long sys$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb,
+                          unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(),
+                          unsigned long astprm, void (*blkastadr)(), unsigned int acmode,
+                          unsigned int rsdm_id);
+    unsigned long sys$enqw(unsigned int efn, unsigned int lkmode,
+                           struct _lksb *lksb, unsigned int flags, void *resnam,
+                           unsigned int parid, void (*astadr)(), unsigned long astprm,
+                           void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id);
 
-    unsigned long sys$create_branch(), sys$create_branchw();
+    unsigned long sys$erapat(void);
 
+    unsigned long sys$evdpostevent(void);
 
-    unsigned long sys$create_bufobj();
+    unsigned long sys$exit(void);
 
+    unsigned long sys$expreg(void);
 
-    unsigned long sys$create_rdb();
+    unsigned long sys$fao(void);
 
+    unsigned long sys$faol(void);
 
-    unsigned long sys$create_uid();
+    unsigned long sys$filescan(void);
 
+    unsigned long sys$find_held(void);
 
-    unsigned long sys$crelnm();
+    unsigned long sys$find_holder(void);
 
+    unsigned long sys$finish_rdb(void);
 
-    unsigned long sys$crelnt();
+    unsigned long sys$finish_rmop(void);
+    unsigned long sys$finish_rmopw(void);
 
+    unsigned long sys$forcex(void);
 
-    unsigned long sys$crelog();
+    unsigned long sys$forget_rm(void);
+    unsigned long sys$forget_rmw(void);
 
+    unsigned long sys$format_acl(void);
 
-    unsigned long sys$crembx();
+    unsigned long sys$format_audit(void);
 
+    unsigned long sys$format_class(void);
 
+    unsigned long sys$get_default_trans(void);
 
-    unsigned long sys$creprc();
+    unsigned long sys$getchn(void);
 
+    unsigned long sys$getdev(void);
 
-    unsigned long sys$cretva();
+    unsigned long sys$getdti(void);
+    unsigned long sys$getdtiw(void);
 
+    unsigned long sys$getdvi(void);
+    unsigned long sys$getdviw(void);
 
+    unsigned long sys$getevi(void);
 
-    unsigned long sys$crmpsc();
+    unsigned long sys$getjpi(void);
+    unsigned long sys$getjpiw(void);
 
+    unsigned long sys$getlki(void);
+    unsigned long sys$getlkiw(void);
 
-    unsigned long sys$dacefc();
+    unsigned long sys$getmsg(void);
 
+    unsigned long sys$getpti(void);
 
-    unsigned long sys$dalloc();
+    unsigned long sys$getqui(void);
+    unsigned long sys$getquiw(void);
 
+    unsigned long sys$getsyi(void);
+    unsigned long sys$getsyiw(void);
 
-    unsigned long sys$dassgn();
+    unsigned long sys$gettim(unsigned long long * timadr);
 
+    unsigned long sys$getuai(void);
 
+    unsigned long sys$getutc(void);
 
-    unsigned long sys$declare_rm(), sys$declare_rmw();
+    unsigned long sys$grantid(void);
 
+    unsigned long sys$grant_license(void);
 
-    unsigned long sys$dclast();
+    unsigned long sys$hash_password(void);
 
+    unsigned long sys$hiber(void);
 
-    unsigned long sys$dclcmh();
+    unsigned long sys$idtoasc(void);
 
+    unsigned long sys$imgact(void);
 
+    unsigned long sys$imgfix(void);
 
-    unsigned long sys$dclevt();
+    unsigned long sys$init_vol(void);
 
+    unsigned long sys$ipc(void);
+    unsigned long sys$ipcw(void);
 
-    unsigned long sys$dclexh();
+    unsigned long sys$join_rm(void);
+    unsigned long sys$join_rmw(void);
 
+    unsigned long sys$lckpag(void);
 
-    unsigned long sys$dclrnh();
+    unsigned long sys$lkwset(void);
 
+    unsigned long sys$mgblsc(void);
 
+    unsigned long sys$mod_holder(void);
 
-    unsigned long sys$declare_rm(), sys$declare_rmw();
+    unsigned long sys$mod_ident(void);
 
+    unsigned long sys$mount(void);
 
-    unsigned long sys$delete_bufobj();
+    unsigned long sys$mtaccess(void);
 
+    unsigned long sys$numtim(void);
 
-    unsigned long sys$dellnm();
+    unsigned long sys$numutc(void);
 
+    unsigned long sys$parse_acl(void);
 
-    unsigned long sys$dellog();
+    unsigned long sys$parse_class(void);
 
+    unsigned long sys$posix_fork_control(void);
 
-    unsigned long sys$delmbx();
+    unsigned long sys$process_scan(void);
 
+    unsigned long sys$purgws(void);
 
-    unsigned long sys$delprc();
+    unsigned long sys$putmsg(void);
 
+    unsigned long sys$qio(unsigned int efn, unsigned short int chan,
+                          unsigned int func, struct _iosb *iosb, void (*astadr)(__unknown_params),
+                          long astprm, void*p1, long p2, long p3, long p4, long p5, long p6);
+    unsigned long sys$qiow(unsigned int efn, unsigned short int chan,
+                           unsigned int func, struct _iosb *iosb, void (*astadr)(__unknown_params),
+                           long astprm, void*p1, long p2, long p3, long p4, long p5, long p6);
 
-    unsigned long sys$deltva();
+    unsigned long sys$readef(void);
 
+    unsigned long sys$recover(void);
+    unsigned long sys$recoverw(void);
 
-    unsigned long sys$deq();
+    unsigned long sys$release_license(void);
 
+    unsigned long sys$release_vp(void);
+    unsigned long sys$release_vp_int(void);
 
-    unsigned long sys$device_scan();
+    unsigned long sys$rem_holder(void);
 
+    unsigned long sys$rem_ident(void);
 
-    unsigned long sys$dgblsc();
+    unsigned long sys$restore_vp_exception(void);
+    unsigned long sys$restore_vp_exc_int(void);
 
+    unsigned long sys$restore_vp_state(void);
 
-    unsigned long sys$diagnose();
+    unsigned long sys$resume(void);
 
+    unsigned long sys$revokid(void);
 
-    unsigned long sys$disable_vp_use(), sys$disable_vp_use_int();
+    unsigned long sys$rmsrundwn(void *, int);
 
+    unsigned long sys$save_vp_exception(void);
+    unsigned long sys$save_vp_exc_int(void);
 
-    unsigned long sys$dismou();
+    unsigned long sys$schdwk(void);
 
+    unsigned long sys$set_default_trans(void);
+    unsigned long sys$set_default_transw(void);
 
-    unsigned long sys$dlcefc();
+    unsigned long sys$setast(void);
 
+    unsigned long sys$setddir(const void *, unsigned short *, void *);
 
-    unsigned long sys$dns(), sys$dnsw();
+    unsigned long sys$setdfprot(const unsigned short *, unsigned short *);
 
+    unsigned long sys$setdti(void);
+    unsigned long sys$setdtiw(void);
 
-    unsigned long sys$emaa();
+    unsigned long sys$setef(void);
 
+    unsigned long sys$setevtast(void);
+    unsigned long sys$setevtastw(void);
 
-    unsigned long sys$enable_vp_use(), sys$enable_vp_use_int();
+    unsigned long sys$setexv(void);
 
+    unsigned long sys$setime(void);
 
-    unsigned long sys$end_branch(), sys$end_branchw();
+    unsigned long sys$setimr(void);
 
+    unsigned long sys$setpfm(void);
 
-    unsigned long sys$end_trans(), sys$end_transw();
+    unsigned long sys$setpra(void);
 
+    unsigned long sys$setpri(void);
 
+    unsigned long sys$setprn(void);
 
-    unsigned long sys$enq(), sys$enqw();
+    unsigned long sys$setprt(void);
 
+    unsigned long sys$setprv(void);
 
-    unsigned long sys$erapat();
+    unsigned long sys$setrwm(void);
 
+    unsigned long sys$setsfm(void);
 
-    unsigned long sys$evdpostevent();
+    unsigned long sys$setssf(void);
 
+    unsigned long sys$setstk(void);
 
-    unsigned long sys$exit();
+    unsigned long sys$setswm(void);
 
+    unsigned long sys$setuai(void);
 
-    unsigned long sys$expreg();
+    unsigned long sys$sndacc(void);
 
+    unsigned long sys$snderr(void);
 
-    unsigned long sys$fao();
+    unsigned long sys$sndjbc(void);
+    unsigned long sys$sndjbcw(void);
 
+    unsigned long sys$sndopr(void);
 
-    unsigned long sys$faol();
+    unsigned long sys$sndsmb(void);
 
+    unsigned long sys$start_branch(void);
+    unsigned long sys$start_branchw(void);
 
-    unsigned long sys$filescan();
+    unsigned long sys$start_trans(void);
+    unsigned long sys$start_transw(void);
 
+    unsigned long sys$subsystem(void);
 
-    unsigned long sys$find_held();
+    unsigned long sys$suspnd(void);
 
+    unsigned long sys$synch(void);
 
-    unsigned long sys$find_holder();
+    unsigned long sys$timcon(void);
 
+    unsigned long sys$trans_event(void);
+    unsigned long sys$trans_eventw(void);
 
-    unsigned long sys$finish_rdb();
+    unsigned long sys$trnlnm(void);
 
+    unsigned long sys$trnlog(void);
 
+    unsigned long sys$ulkpag(void);
 
-    unsigned long sys$finish_rmop(), sys$finish_rmopw();
+    unsigned long sys$ulwset(void);
 
+    unsigned long sys$unwind(void);
 
-    unsigned long sys$forcex();
+    unsigned long sys$updsec(void);
+    unsigned long sys$updsecw(void);
 
+    unsigned long sys$waitfr(void);
 
-    unsigned long sys$forget_rm(), sys$forget_rmw();
+    unsigned long sys$wake(void);
 
+    unsigned long sys$wfland(void);
 
-
-    unsigned long sys$format_acl();
-
-
-
-    unsigned long sys$format_audit();
-
-
-    unsigned long sys$format_class();
-
-
-    unsigned long sys$get_default_trans();
-
-
-    unsigned long sys$getchn();
-
-
-    unsigned long sys$getdev();
-
-
-
-    unsigned long sys$getdti(), sys$getdtiw();
-
-
-
-    unsigned long sys$getdvi(), sys$getdviw();
-
-
-    unsigned long sys$getevi();
-
-
-    unsigned long sys$getjpi(), sys$getjpiw();
-
-
-    unsigned long sys$getlki(), sys$getlkiw();
-
-
-    unsigned long sys$getmsg();
-
-
-    unsigned long sys$getpti();
-
-
-    unsigned long sys$getqui(), sys$getquiw();
-
-
-    unsigned long sys$getsyi(), sys$getsyiw();
-
-
-    unsigned long sys$gettim();
-
-
-    unsigned long sys$getuai();
-
-
-    unsigned long sys$getutc();
-
-
-    unsigned long sys$grantid();
-
-
-    unsigned long sys$grant_license();
-
-
-    unsigned long sys$hash_password();
-
-
-    unsigned long sys$hiber();
-
-
-    unsigned long sys$idtoasc();
-
-
-    unsigned long sys$imgact();
-
-
-    unsigned long sys$imgfix();
-
-
-    unsigned long sys$init_vol();
-
-
-    unsigned long sys$ipc(), sys$ipcw();
-
-
-
-    unsigned long sys$join_rm(), sys$join_rmw();
-
-
-    unsigned long sys$lckpag();
-
-
-    unsigned long sys$lkwset();
-
-
-    unsigned long sys$mgblsc();
-
-
-    unsigned long sys$mod_holder();
-
-
-    unsigned long sys$mod_ident();
-
-
-    unsigned long sys$mount();
-
-
-    unsigned long sys$mtaccess();
-
-
-    unsigned long sys$numtim();
-
-
-    unsigned long sys$numutc();
-
-
-    unsigned long sys$parse_acl();
-
-
-    unsigned long sys$parse_class();
-
-
-    unsigned long sys$posix_fork_control();
-
-
-    unsigned long sys$process_scan();
-
-
-    unsigned long sys$purgws();
-
-
-    unsigned long sys$putmsg();
-
-
-
-    unsigned long sys$qio(), sys$qiow();
-
-
-    unsigned long sys$readef();
-
-
-
-    unsigned long sys$recover(), sys$recoverw();
-
-
-    unsigned long sys$release_license();
-
-
-    unsigned long sys$release_vp(), sys$release_vp_int();
-
-
-    unsigned long sys$rem_holder();
-
-
-    unsigned long sys$rem_ident();
-
-
-    unsigned long sys$restore_vp_exception(), sys$restore_vp_exc_int();
-
-
-    unsigned long sys$restore_vp_state();
-
-
-    unsigned long sys$resume();
-
-
-    unsigned long sys$revokid();
-
-
-    unsigned long sys$rmsrundwn(void *,int);
-
-
-    unsigned long sys$save_vp_exception(), sys$save_vp_exc_int();
-
-
-    unsigned long sys$schdwk();
-
-
-    unsigned long sys$set_default_trans(), sys$set_default_transw();
-
-
-    unsigned long sys$setast();
-
-
-    unsigned long sys$setddir(const void *,unsigned short *,void *);
-
-
-    unsigned long sys$setdfprot(const unsigned short *,unsigned short *);
-
-
-    unsigned long sys$setdti(), sys$setdtiw();
-
-
-    unsigned long sys$setef();
-
-
-
-    unsigned long sys$setevtast(), sys$setevtastw();
-
-
-    unsigned long sys$setexv();
-
-
-    unsigned long sys$setime();
-
-
-    unsigned long sys$setimr();
-
-
-    unsigned long sys$setpfm();
-
-
-    unsigned long sys$setpra();
-
-
-    unsigned long sys$setpri();
-
-
-    unsigned long sys$setprn();
-
-
-    unsigned long sys$setprt();
-
-
-    unsigned long sys$setprv();
-
-
-    unsigned long sys$setrwm();
-
-
-    unsigned long sys$setsfm();
-
-
-    unsigned long sys$setssf();
-
-
-    unsigned long sys$setstk();
-
-
-    unsigned long sys$setswm();
-
-
-    unsigned long sys$setuai();
-
-
-    unsigned long sys$sndacc();
-
-
-    unsigned long sys$snderr();
-
-
-    unsigned long sys$sndjbc(), sys$sndjbcw();
-
-
-    unsigned long sys$sndopr();
-
-
-    unsigned long sys$sndsmb();
-
-
-
-    unsigned long sys$start_branch(), sys$start_branchw();
-
-
-
-    unsigned long sys$start_trans(), sys$start_transw();
-
-
-    unsigned long sys$subsystem();
-
-
-    unsigned long sys$suspnd();
-
-
-    unsigned long sys$synch();
-
-
-    unsigned long sys$timcon();
-
-
-
-    unsigned long sys$trans_event(), sys$trans_eventw();
-
-
-    unsigned long sys$trnlnm();
-
-
-    unsigned long sys$trnlog();
-
-
-    unsigned long sys$ulkpag();
-
-
-    unsigned long sys$ulwset();
-
-
-    unsigned long sys$unwind();
-
-
-    unsigned long sys$updsec(), sys$updsecw();
-
-
-    unsigned long sys$waitfr();
-
-
-    unsigned long sys$wake();
-
-
-    unsigned long sys$wfland();
-
-
-    unsigned long sys$wflor();
+    unsigned long sys$wflor(void);
 
 # ifdef __cplusplus
 }
 # endif
 
-//	Utility Functions
+//  Utility Functions
 
 int sys$$geterrno(char *errmsg);
 
-int sys$$getmsg (unsigned int msgid, unsigned short int *msglen, char *fmt,...);
+int sys$$getmsg(unsigned int msgid, unsigned short int *msglen, char *fmt, ...);
 
 #endif

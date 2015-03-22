@@ -1,5 +1,5 @@
-#ifndef system_data_cells_h
-#define system_data_cells_h
+#ifndef SYSTEM_DATA_CELLS_H
+#define SYSTEM_DATA_CELLS_H
 
 /* cut'n paste and etc from .c */
 

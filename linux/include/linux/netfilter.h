@@ -119,9 +119,9 @@ extern struct list_head nf_hooks[NPROTO][NF_MAX_HOOKS];
 #ifdef CONFIG_NETFILTER_DEBUG
 #define NF_HOOK nf_hook_slow
 #else
-#define NF_HOOK(pf, hook, skb, indev, outdev, okfn)			\
-(list_empty(&nf_hooks[(pf)][(hook)])					\
- ? (okfn)(skb)								\
+#define NF_HOOK(pf, hook, skb, indev, outdev, okfn)         \
+(list_empty(&nf_hooks[(pf)][(hook)])                    \
+ ? (okfn)(skb)                              \
  : nf_hook_slow((pf), (hook), (skb), (indev), (outdev), (okfn)))
 #endif
 
@@ -160,11 +160,11 @@ extern void nf_invalidate_cache(int pf);
 
 /* From arch/i386/kernel/smp.c:
  *
- *	Why isn't this somewhere standard ??
+ *  Why isn't this somewhere standard ??
  *
  * Maybe because this procedure is horribly buggy, and does
  * not deserve to live.  Think about signedness issues for five
- * seconds to see why.		- Linus
+ * seconds to see why.      - Linus
  */
 
 /* Two signed, return a signed. */

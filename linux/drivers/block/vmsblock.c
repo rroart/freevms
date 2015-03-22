@@ -29,8 +29,8 @@ static kmem_cache_t *request_cachep;
 int read_ahead[MAX_BLKDEV];
 
 /* blk_dev_struct is:
- *	*request_fn
- *	*current_request
+ *  *request_fn
+ *  *current_request
  */
 struct blk_dev_struct blk_dev[MAX_BLKDEV]; /* initialized by blk_dev_init() */
 
@@ -59,9 +59,9 @@ int * blksize_size[MAX_BLKDEV];
  * hardsect_size[MAJOR][MINOR]
  *
  * if (!hardsect_size[MAJOR])
- *		then 512 bytes is assumed.
+ *      then 512 bytes is assumed.
  * else
- *		sector_size is hardsect_size[MAJOR][MINOR]
+ *      sector_size is hardsect_size[MAJOR][MINOR]
  * This is currently set by some scsi devices and read by the msdos fs driver.
  * Other uses may appear later.
  */
@@ -106,7 +106,7 @@ void set_device_ro(kdev_t dev,int flag)
     else ro_bits[major][minor >> 5] &= ~(1 << (minor & 31));
 }
 
-#define MB(kb)	((kb) << 10)
+#define MB(kb)  ((kb) << 10)
 
 int __init blk_dev_init(void)
 {
@@ -157,7 +157,7 @@ int __init blk_dev_init(void)
     isp16_init();
 #endif
 #if defined(CONFIG_IDE) && defined(CONFIG_BLK_DEV_IDE)
-    ide_init();		/* this MUST precede hd_init */
+    ide_init();     /* this MUST precede hd_init */
 #endif
 #if defined(CONFIG_IDE) && defined(CONFIG_BLK_DEV_HD)
     hd_init();
@@ -195,7 +195,7 @@ int __init blk_dev_init(void)
 #ifdef CONFIG_BLK_DEV_FD
     floppy_init();
 #else
-#if defined(__i386__)	/* Do we even need this? */
+#if defined(__i386__)   /* Do we even need this? */
     outb_p(0xc, 0x3f2);
 #endif
 #endif

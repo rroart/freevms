@@ -29,24 +29,24 @@
  *  Configuration registers (TODO: change by specification)
  */
 
-#define ISAPNP_CFG_ACTIVATE		0x30	/* byte */
-#define ISAPNP_CFG_MEM			0x40	/* 4 * dword */
-#define ISAPNP_CFG_PORT			0x60	/* 8 * word */
-#define ISAPNP_CFG_IRQ			0x70	/* 2 * word */
-#define ISAPNP_CFG_DMA			0x74	/* 2 * byte */
+#define ISAPNP_CFG_ACTIVATE     0x30    /* byte */
+#define ISAPNP_CFG_MEM          0x40    /* 4 * dword */
+#define ISAPNP_CFG_PORT         0x60    /* 8 * word */
+#define ISAPNP_CFG_IRQ          0x70    /* 2 * word */
+#define ISAPNP_CFG_DMA          0x74    /* 2 * byte */
 
 /*
  *
  */
 
-#define ISAPNP_VENDOR(a,b,c)	(((((a)-'A'+1)&0x3f)<<2)|\
-				((((b)-'A'+1)&0x18)>>3)|((((b)-'A'+1)&7)<<13)|\
-				((((c)-'A'+1)&0x1f)<<8))
-#define ISAPNP_DEVICE(x)	((((x)&0xf000)>>8)|\
-				 (((x)&0x0f00)>>8)|\
-				 (((x)&0x00f0)<<8)|\
-				 (((x)&0x000f)<<8))
-#define ISAPNP_FUNCTION(x)	ISAPNP_DEVICE(x)
+#define ISAPNP_VENDOR(a,b,c)    (((((a)-'A'+1)&0x3f)<<2)|\
+                ((((b)-'A'+1)&0x18)>>3)|((((b)-'A'+1)&7)<<13)|\
+                ((((c)-'A'+1)&0x1f)<<8))
+#define ISAPNP_DEVICE(x)    ((((x)&0xf000)>>8)|\
+                 (((x)&0x0f00)>>8)|\
+                 (((x)&0x00f0)<<8)|\
+                 (((x)&0x000f)<<8))
+#define ISAPNP_FUNCTION(x)  ISAPNP_DEVICE(x)
 
 /*
  *
@@ -56,129 +56,129 @@
 
 #include <linux/pci.h>
 
-#define ISAPNP_PORT_FLAG_16BITADDR	(1<<0)
-#define ISAPNP_PORT_FLAG_FIXED		(1<<1)
+#define ISAPNP_PORT_FLAG_16BITADDR  (1<<0)
+#define ISAPNP_PORT_FLAG_FIXED      (1<<1)
 
 struct isapnp_port
 {
-    unsigned short min;		/* min base number */
-    unsigned short max;		/* max base number */
-    unsigned char align;		/* align boundary */
-    unsigned char size;		/* size of range */
-    unsigned char flags;		/* port flags */
-    unsigned char pad;		/* pad */
-    struct isapnp_resources *res;	/* parent */
-    struct isapnp_port *next;	/* next port */
+    unsigned short min;     /* min base number */
+    unsigned short max;     /* max base number */
+    unsigned char align;        /* align boundary */
+    unsigned char size;     /* size of range */
+    unsigned char flags;        /* port flags */
+    unsigned char pad;      /* pad */
+    struct isapnp_resources *res;   /* parent */
+    struct isapnp_port *next;   /* next port */
 };
 
 struct isapnp_irq
 {
-    unsigned short map;		/* bitmaks for IRQ lines */
-    unsigned char flags;		/* IRQ flags */
-    unsigned char pad;		/* pad */
-    struct isapnp_resources *res;	/* parent */
-    struct isapnp_irq *next;	/* next IRQ */
+    unsigned short map;     /* bitmaks for IRQ lines */
+    unsigned char flags;        /* IRQ flags */
+    unsigned char pad;      /* pad */
+    struct isapnp_resources *res;   /* parent */
+    struct isapnp_irq *next;    /* next IRQ */
 };
 
 struct isapnp_dma
 {
-    unsigned char map;		/* bitmask for DMA channels */
-    unsigned char flags;		/* DMA flags */
-    struct isapnp_resources *res;	/* parent */
-    struct isapnp_dma *next;	/* next port */
+    unsigned char map;      /* bitmask for DMA channels */
+    unsigned char flags;        /* DMA flags */
+    struct isapnp_resources *res;   /* parent */
+    struct isapnp_dma *next;    /* next port */
 };
 
 struct isapnp_mem
 {
-    unsigned int min;		/* min base number */
-    unsigned int max;		/* max base number */
-    unsigned int align;		/* align boundary */
-    unsigned int size;		/* size of range */
-    unsigned char flags;		/* memory flags */
-    unsigned char pad;		/* pad */
-    struct isapnp_resources *res;	/* parent */
-    struct isapnp_mem *next;	/* next memory resource */
+    unsigned int min;       /* min base number */
+    unsigned int max;       /* max base number */
+    unsigned int align;     /* align boundary */
+    unsigned int size;      /* size of range */
+    unsigned char flags;        /* memory flags */
+    unsigned char pad;      /* pad */
+    struct isapnp_resources *res;   /* parent */
+    struct isapnp_mem *next;    /* next memory resource */
 };
 
 struct isapnp_mem32
 {
     /* TODO */
     unsigned char data[17];
-    struct isapnp_resources *res;	/* parent */
-    struct isapnp_mem32 *next;	/* next 32-bit memory resource */
+    struct isapnp_resources *res;   /* parent */
+    struct isapnp_mem32 *next;  /* next 32-bit memory resource */
 };
 
 struct isapnp_fixup
 {
-    unsigned short vendor;		/* matching vendor */
-    unsigned short device;		/* matching device */
-    void (*quirk_function)(struct pci_dev *dev);	/* fixup function */
+    unsigned short vendor;      /* matching vendor */
+    unsigned short device;      /* matching device */
+    void (*quirk_function)(struct pci_dev *dev);    /* fixup function */
 };
 
 
-#define ISAPNP_RES_PRIORITY_PREFERRED	0
-#define ISAPNP_RES_PRIORITY_ACCEPTABLE	1
-#define ISAPNP_RES_PRIORITY_FUNCTIONAL	2
-#define ISAPNP_RES_PRIORITY_INVALID	65535
+#define ISAPNP_RES_PRIORITY_PREFERRED   0
+#define ISAPNP_RES_PRIORITY_ACCEPTABLE  1
+#define ISAPNP_RES_PRIORITY_FUNCTIONAL  2
+#define ISAPNP_RES_PRIORITY_INVALID 65535
 
 struct isapnp_resources
 {
-    unsigned short priority;	/* priority */
-    unsigned short dependent;	/* dependent resources */
-    struct isapnp_port *port;	/* first port */
-    struct isapnp_irq *irq;		/* first IRQ */
-    struct isapnp_dma *dma;		/* first DMA */
-    struct isapnp_mem *mem;		/* first memory resource */
-    struct isapnp_mem32 *mem32;	/* first 32-bit memory */
-    struct pci_dev *dev;		/* parent */
-    struct isapnp_resources *alt;	/* alternative resource (aka dependent resources) */
-    struct isapnp_resources *next;	/* next resource */
+    unsigned short priority;    /* priority */
+    unsigned short dependent;   /* dependent resources */
+    struct isapnp_port *port;   /* first port */
+    struct isapnp_irq *irq;     /* first IRQ */
+    struct isapnp_dma *dma;     /* first DMA */
+    struct isapnp_mem *mem;     /* first memory resource */
+    struct isapnp_mem32 *mem32; /* first 32-bit memory */
+    struct pci_dev *dev;        /* parent */
+    struct isapnp_resources *alt;   /* alternative resource (aka dependent resources) */
+    struct isapnp_resources *next;  /* next resource */
 };
 
-#define ISAPNP_ANY_ID		0xffff
-#define ISAPNP_CARD_DEVS	8
+#define ISAPNP_ANY_ID       0xffff
+#define ISAPNP_CARD_DEVS    8
 
 #define ISAPNP_CARD_ID(_va, _vb, _vc, _device) \
-		card_vendor: ISAPNP_VENDOR(_va, _vb, _vc), card_device: ISAPNP_DEVICE(_device)
+        card_vendor: ISAPNP_VENDOR(_va, _vb, _vc), card_device: ISAPNP_DEVICE(_device)
 #define ISAPNP_CARD_END \
-		card_vendor: 0, card_device: 0
+        card_vendor: 0, card_device: 0
 #define ISAPNP_DEVICE_ID(_va, _vb, _vc, _function) \
-		{ vendor: ISAPNP_VENDOR(_va, _vb, _vc), function: ISAPNP_FUNCTION(_function) }
+        { vendor: ISAPNP_VENDOR(_va, _vb, _vc), function: ISAPNP_FUNCTION(_function) }
 
 /* export used IDs outside module */
 #define ISAPNP_CARD_TABLE(name) \
-		MODULE_GENERIC_TABLE(isapnp_card, name)
+        MODULE_GENERIC_TABLE(isapnp_card, name)
 
 struct isapnp_card_id
 {
-    unsigned long driver_data;	/* data private to the driver */
+    unsigned long driver_data;  /* data private to the driver */
     unsigned short card_vendor, card_device;
     struct
     {
         unsigned short vendor, function;
-    } devs[ISAPNP_CARD_DEVS];	/* logical devices */
+    } devs[ISAPNP_CARD_DEVS];   /* logical devices */
 };
 
 #define ISAPNP_DEVICE_SINGLE(_cva, _cvb, _cvc, _cdevice, _dva, _dvb, _dvc, _dfunction) \
-		card_vendor: ISAPNP_VENDOR(_cva, _cvb, _cvc), card_device: ISAPNP_DEVICE(_cdevice), \
-		vendor: ISAPNP_VENDOR(_dva, _dvb, _dvc), function: ISAPNP_FUNCTION(_dfunction)
+        card_vendor: ISAPNP_VENDOR(_cva, _cvb, _cvc), card_device: ISAPNP_DEVICE(_cdevice), \
+        vendor: ISAPNP_VENDOR(_dva, _dvb, _dvc), function: ISAPNP_FUNCTION(_dfunction)
 #define ISAPNP_DEVICE_SINGLE_END \
-		card_vendor: 0, card_device: 0
+        card_vendor: 0, card_device: 0
 
 struct isapnp_device_id
 {
     unsigned short card_vendor, card_device;
     unsigned short vendor, function;
-    unsigned long driver_data;	/* data private to the driver */
+    unsigned long driver_data;  /* data private to the driver */
 };
 
 struct isapnp_driver
 {
     struct list_head node;
     char *name;
-    const struct isapnp_device_id *id_table;	/* NULL if wants all devices */
-    int  (*probe)  (struct pci_dev *dev, const struct isapnp_device_id *id);	/* New device inserted */
-    void (*remove) (struct pci_dev *dev);	/* Device removed (NULL if not a hot-plug capable driver) */
+    const struct isapnp_device_id *id_table;    /* NULL if wants all devices */
+    int  (*probe)  (struct pci_dev *dev, const struct isapnp_device_id *id);    /* New device inserted */
+    void (*remove) (struct pci_dev *dev);   /* Device removed (NULL if not a hot-plug capable driver) */
 };
 
 #if defined(CONFIG_ISAPNP) || (defined(CONFIG_ISAPNP_MODULE) && defined(MODULE))
@@ -229,9 +229,9 @@ extern struct list_head isapnp_cards;
 extern struct list_head isapnp_devices;
 
 #define isapnp_for_each_card(card) \
-	for(card = pci_bus_b(isapnp_cards.next); card != pci_bus_b(&isapnp_cards); card = pci_bus_b(card->node.next))
+    for(card = pci_bus_b(isapnp_cards.next); card != pci_bus_b(&isapnp_cards); card = pci_bus_b(card->node.next))
 #define isapnp_for_each_dev(dev) \
-	for(dev = pci_dev_g(isapnp_devices.next); dev != pci_dev_g(&isapnp_devices); dev = pci_dev_g(dev->global_list.next))
+    for(dev = pci_dev_g(isapnp_devices.next); dev != pci_dev_g(&isapnp_devices); dev = pci_dev_g(dev->global_list.next))
 
 int isapnp_register_driver(struct isapnp_driver *drv);
 void isapnp_unregister_driver(struct isapnp_driver *drv);

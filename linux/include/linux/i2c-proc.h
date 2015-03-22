@@ -374,7 +374,7 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
         return value;
 }
 
-#endif				/* def __KERNEL__ */
+#endif              /* def __KERNEL__ */
 
 
 /* The maximum length of the prefix */
@@ -383,10 +383,10 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
 /* Sysctl IDs */
 #ifdef DEV_HWMON
 #define DEV_SENSORS DEV_HWMON
-#else				/* ndef DEV_HWMOM */
-#define DEV_SENSORS 2		/* The id of the lm_sensors directory within the
+#else               /* ndef DEV_HWMOM */
+#define DEV_SENSORS 2       /* The id of the lm_sensors directory within the
 dev table */
-#endif				/* def DEV_HWMON */
+#endif              /* def DEV_HWMON */
 
 #define SENSORS_CHIPS 1
 struct i2c_chips_data
@@ -395,5 +395,5 @@ struct i2c_chips_data
     char name[SENSORS_PREFIX_MAX + 13];
 };
 
-#endif				/* def SENSORS_SENSORS_H */
+#endif              /* def SENSORS_SENSORS_H */
 

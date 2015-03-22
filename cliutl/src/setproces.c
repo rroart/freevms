@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include<starlet.h>
 //#include"../../starlet/src/vmsopt.h"
@@ -11,11 +11,11 @@
 #include<ssdef.h>
 #include<cli$routines.h>
 
-/* Author: Roar Thronæs */
+/* Author: Roar Thronï¿½s */
 
 /* Don't know anywhere else to put this */
 
-set_process(int argc, char**argv)
+int set_process(int argc, char**argv)
 {
     $DESCRIPTOR(p, "p1");
     $DESCRIPTOR(id, "identification");

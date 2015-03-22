@@ -297,9 +297,9 @@ static int avl_check_balance(avl_node_t *avlnode)
     d = R_DEPTH(avlnode) - L_DEPTH(avlnode);
     return d<-1?-1:d>1?1:0;
 #else
-    /*	int d;
-     *	d = lg(R_COUNT(avlnode)) - lg(L_COUNT(avlnode));
-     *	d = d<-1?-1:d>1?1:0;
+    /*  int d;
+     *  d = lg(R_COUNT(avlnode)) - lg(L_COUNT(avlnode));
+     *  d = d<-1?-1:d>1?1:0;
      */
 #ifdef AVL_COUNT
     int pl, r;
@@ -493,7 +493,7 @@ avl_node_t *avl_init_node(avl_node_t *newnode, void *item)
 {
     if(newnode)
     {
-        /*		avl_clear_node(newnode); */
+        /*      avl_clear_node(newnode); */
         newnode->item = item;
     }
     return newnode;
@@ -1144,7 +1144,7 @@ static int traverse_tree (long * treehead , int (*user_action_procedure)(), void
 // static long Alloc_node(struct Tree_element* Rec,
 // struct Full_node** Ret_addr, void* Dummy)
 
-// static long Compare_node_3(struct Tree_element* Rec, struct Full_node* Node,	void* Dummy)
+// static long Compare_node_3(struct Tree_element* Rec, struct Full_node* Node, void* Dummy)
 
 int lib$insert_tree (void ** treehead, void * symbol, unsigned int * flags, int (*user_compare_routine)(), int (*user_allocation_procedure)(), void ** new_node, void ** user_data)
 {

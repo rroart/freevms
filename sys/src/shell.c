@@ -419,7 +419,7 @@ int init_fork_p1pp(struct _pcb * pcb, struct _phd * phd, struct _pcb * oldpcb, s
         int retval=0;
         struct _pcb * tsk = pcb;
         mm=&init_mm;
-#define allocate_mm()	(kmem_cache_alloc(mm_cachep, SLAB_KERNEL))
+#define allocate_mm()   (kmem_cache_alloc(mm_cachep, SLAB_KERNEL))
         mm = allocate_mm();
         if (!mm)
             panic("goto fail_nomem\n");// was: goto fail_nomem;

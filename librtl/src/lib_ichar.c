@@ -1,19 +1,19 @@
 /*
  * lib_ichar.c
  *
- *	Code for VAX LIB$ICHAR routine
+ *  Code for VAX LIB$ICHAR routine
  *
  * Description:
  *
- *	Convert first character of a string to an integer.
+ *  Convert first character of a string to an integer.
  *
  * Bugs:
  *
  *
  * History
  *
- *	March 30, 1997 - Kevin Handy
- *		Preliminary design.
+ *  March 30, 1997 - Kevin Handy
+ *      Preliminary design.
  */
 
 #include <stdio.h>
@@ -28,9 +28,9 @@
  */
 int lib$ichar(const struct dsc$descriptor_s* input_descriptor)
 {
-    short word_integer_length;	/* Length of source string */
-    char* data_address;		/* Address of actual data */
-    long result = 0;		/* Result to return */
+    short word_integer_length;  /* Length of source string */
+    char* data_address;     /* Address of actual data */
+    long result = 0;        /* Result to return */
     unsigned long status;
 
     /*

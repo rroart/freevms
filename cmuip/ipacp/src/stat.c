@@ -1,127 +1,127 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "MEMGR - Dynamic Memory allocaion / deallocation rtns."
 /*
 
 Module:
 
-	MEMGR
+    MEMGR
 
 Facility:
 
-	Provide dynamic memory allocation & deallocation for various
-	TCP/IP data structures.
+    Provide dynamic memory allocation & deallocation for various
+    TCP/IP data structures.
 
 Abstract:
 
-	Many of the data structures used by TCP/IP are dynamically allocated
-	& deallocated (TCB's,Queue block, etc.).
-	Some of the dynamically allocated data structures are preallocated and
-	placed on free-lists.  The globals "xxx_xxx_count_base" are initialized
-	during startup routine: "configure_acp" in module: config.bli.  These
-	byte-size integers represent the number of elements on their respective
-	free list.
+    Many of the data structures used by TCP/IP are dynamically allocated
+    & deallocated (TCB's,Queue block, etc.).
+    Some of the dynamically allocated data structures are preallocated and
+    placed on free-lists.  The globals "xxx_xxx_count_base" are initialized
+    during startup routine: "configure_acp" in module: config.bli.  These
+    byte-size integers represent the number of elements on their respective
+    free list.
 
 Author:
 
-	Stan C. Smith	Fall 1981
-	This version by Vince Fuller, CMU-CSD, Summer, 1986
+    Stan C. Smith   Fall 1981
+    This version by Vince Fuller, CMU-CSD, Summer, 1986
 
 Modification History:
 
 *** Begin CMU change log ***
 
 2.7  18-Aug-89, Edit by BRM (CMU NetDev)
-	AddedMM$Get_Mem and MM$Free_Mem generic memory allocation routines.
-	Changed Conect reference to a pointer.
+    AddedMM$Get_Mem and MM$Free_Mem generic memory allocation routines.
+    Changed Conect reference to a pointer.
 
 2.6-1 03-APR-1989, M. Madison, RPI/ECS
         Turn off AST's when doing interruptible REMQUE in routine MM$QBLK_FREE.
 
 2.6  23-Jul-87, Edit by VAF
-	Know to flush any TVT data when deleting TCB's.
+    Know to flush any TVT data when deleting TCB's.
 
 2.5  20-Jul-87, Edit by VAF
-	Minor cleanup of circular queue stuff.
+    Minor cleanup of circular queue stuff.
 
 2.4  23-Mar-87, Edit by VAF
-	Replace the three standard-sized packet buffers with two - minimum
-	size and maximum sized.
+    Replace the three standard-sized packet buffers with two - minimum
+    size and maximum sized.
 
 2.3   5-Aug-86, Edit by VAF
-	Modify TCB$Create/TCB_Delete to also allocate/deallocate the
-	the send/receive circular queues for the TCB.
+    Modify TCB$Create/TCB_Delete to also allocate/deallocate the
+    the send/receive circular queues for the TCB.
 
 2.2  22-Jul-86, Edit by VAF
-	Add code to track allocation, deallocation and queue movement of
-	QBlks. Queue movement is under the QDEBUG conditional.
+    Add code to track allocation, deallocation and queue movement of
+    QBlks. Queue movement is under the QDEBUG conditional.
 
 2.1  11-Jul-86, Edit by VAF
-	Make all counters global.
+    Make all counters global.
 
 2.0  25-Jun-86, Edit by VAF
-	Make TCB$Create set VTCB_INDEX field in TCB.
-	TCB_DELETE doesn't search VALID_TCB anymore - just uses VTCB_INDEX.
-	Don't use index 0 of VALID_TCB table.
+    Make TCB$Create set VTCB_INDEX field in TCB.
+    TCB_DELETE doesn't search VALID_TCB anymore - just uses VTCB_INDEX.
+    Don't use index 0 of VALID_TCB table.
 
 1.9  22-May-86, Edit by VAF
-	In TCB$Delete - remove TCB from UCB hash queue.
+    In TCB$Delete - remove TCB from UCB hash queue.
 
 1.8  20-May-86, Edit by VAF
-	Use new AST locking scheme - respect previous AST state.
+    Use new AST locking scheme - respect previous AST state.
 
 *** End CMU change log ***
 
 1.1 [9-10-81]
 
-	Original version.
+    Original version.
 
 1.2 [6-5-82]
 
-	Free-lists implemented for frequently accessed data structures.
+    Free-lists implemented for frequently accessed data structures.
 
 1.3 [4-28-83]
 
-	Number of elements on the free-lists is configurable from the config.txt
-	file.  This file is processed during acp initialization phase.
+    Number of elements on the free-lists is configurable from the config.txt
+    file.  This file is processed during acp initialization phase.
 
 1.4 [5-16-83] stan
 
-	removed "max_seg" references (free_list, count, init) as they are no
-	longer different from max_network_size_mesg.
+    removed "max_seg" references (free_list, count, init) as they are no
+    longer different from max_network_size_mesg.
 
 1.5 [5-23-83] stan
 
-	replaced xport memory manager calls with direct calls to vms runtime
-	library.  Xport routines eventually used the RTL calls anyway,
-	attempt was to increase memory mgmt speed.  Effect was dramatic.
+    replaced xport memory manager calls with direct calls to vms runtime
+    library.  Xport routines eventually used the RTL calls anyway,
+    attempt was to increase memory mgmt speed.  Effect was dramatic.
 
 1.6 [7-15-83] stan
 
-	force byte-size for some external literals, explicit var's in register
-	declarations.
+    force byte-size for some external literals, explicit var's in register
+    declarations.
 
 1.7 [5-30-85] noelan olson
-	Track current overflow and maximum size of preallocated queues.
+    Track current overflow and maximum size of preallocated queues.
 
 */
 
@@ -134,11 +134,11 @@ MODULE MEMGR(Ident="2.7",LANGUAGE(BLISS32),
              OPTIMIZE,OPTLEVEL=3,ZIP)=
 {
 
-#include "SYS$LIBRARY:STARLET";	// Include VMS systems definitions
-#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// Include transportablity package
-#include "CMUIP_SRC:[CENTRAL]NETVMS";			// VMS specifics
-#include "TCPMACROS";		// Local Macros
-#include "STRUCTURE";		// Structure & Field definitions
+#include "SYS$LIBRARY:STARLET"; // Include VMS systems definitions
+#include "CMUIP_SRC:[CENTRAL]NETXPORT"; // Include transportablity package
+#include "CMUIP_SRC:[CENTRAL]NETVMS";           // VMS specifics
+#include "TCPMACROS";       // Local Macros
+#include "STRUCTURE";       // Structure & Field definitions
     
 //SBTTL "External: Routines, Literals and data"
 
@@ -147,9 +147,9 @@ LIB$GET_VM :
     ADDRESSING_MODE(GENERAL),
 LIB$FREE_VM :
     ADDRESSING_MODE(GENERAL),
-    TCP$Find_Local_Port,	// USER.BLI
-    VOID    TELNET_CLOSE,	// TCP_TELNET.BLI
-    MovByt;			// MACLIB.MAR
+    TCP$Find_Local_Port,    // USER.BLI
+    VOID    TELNET_CLOSE,   // TCP_TELNET.BLI
+    MovByt;         // MACLIB.MAR
 
 // External Literals from tcp.bli
     extern signed long LITERAL
@@ -164,12 +164,12 @@ Queue_Empty_Now :
 
     extern signed long
     struct Connection_Table_Structure * ConectPtr,
-            struct VECTOR * VTCB_ptr[0],	// Vector of Valid TCB pointers.
+            struct VECTOR * VTCB_ptr[0],    // Vector of Valid TCB pointers.
                 VTCB_Size,
                 Max_TCB,
-                ast_in_progress,		// Flag if running at AST level
-                INTDF,			// interrupt deferral count
-                TCB_Count,			// # of "valid_TCB" table entries.
+                ast_in_progress,        // Flag if running at AST level
+                INTDF,          // interrupt deferral count
+                TCB_Count,          // # of "valid_TCB" table entries.
                 MIN_PHYSICAL_BUFSIZE,
                 MAX_PHYSICAL_BUFSIZE;
     
@@ -177,24 +177,24 @@ Queue_Empty_Now :
 
     $FIELD MEM$HDR_FIELDS (void)
     SET
-    MEM$QNEXT	= [$Address],	// Next item on queue
-    MEM$QPREV	= [$Address],	// Previous item on queue
+    MEM$QNEXT   = [$Address],   // Next item on queue
+    MEM$QPREV   = [$Address],   // Previous item on queue
 //IF QDEBUG %THEN
-    MEM$CURQUEUES	= [$Ulong],	// Queues this block is on
-    MEM$ALLQUEUES = [$Ulong],	// Queues this block has been on
-    MEM$ALLOCRTN	= [$Address],	// Routine which allocated most recently
-    MEM$FREERTN	= [$Address],	// Routine which freed most recently
-    MEM$INSQUERTN	= [$Address],	// Routine which INSQUE'd most recently
-    MEM$INSQUEHDR	= [$Address],	// Queue header where most recently INSQUE'd
-    MEM$INSQUEVAL	= [$Address],	// Additional value when INSQUE'd
-    MEM$REMQUERTN	= [$Address],	// Routine which REMQUE'd most recently
-    MEM$REMQUEHDR	= [$Address],	// Queue header where most recently REMQUE'd
-    MEM$REMQUEVAL	= [$Address],	// Additional value when REMQUE'd
+    MEM$CURQUEUES   = [$Ulong], // Queues this block is on
+    MEM$ALLQUEUES = [$Ulong],   // Queues this block has been on
+    MEM$ALLOCRTN    = [$Address],   // Routine which allocated most recently
+    MEM$FREERTN = [$Address],   // Routine which freed most recently
+    MEM$INSQUERTN   = [$Address],   // Routine which INSQUE'd most recently
+    MEM$INSQUEHDR   = [$Address],   // Queue header where most recently INSQUE'd
+    MEM$INSQUEVAL   = [$Address],   // Additional value when INSQUE'd
+    MEM$REMQUERTN   = [$Address],   // Routine which REMQUE'd most recently
+    MEM$REMQUEHDR   = [$Address],   // Queue header where most recently REMQUE'd
+    MEM$REMQUEVAL   = [$Address],   // Additional value when REMQUE'd
 //FI
-    MEM$FLAGS	= [$Ulong],	// Flags defining free, prealloc, etc.
+    MEM$FLAGS   = [$Ulong], // Flags defining free, prealloc, etc.
     $OVERLAY(MEM$FLAGS)
-    MEM$ISFREE = [$BIT],	// This block is free
-    MEM$ISPERM = [$BIT]	// This block is permanent (preallocated)
+    MEM$ISFREE = [$BIT],    // This block is free
+    MEM$ISPERM = [$BIT] // This block is permanent (preallocated)
     $CONTINUE
     TES;
 
@@ -219,7 +219,7 @@ FREE_Qblks :
     Queue_Header_Structure(Queue_Header_Fields)
     PRESET(
         [Qhead] = Free_Qblks,
-        [Qtail]	= Free_Qblks
+        [Qtail] = Free_Qblks
     ),
 USED_Qblks :
     Queue_Header_Structure(Queue_Header_Fields)
@@ -231,15 +231,15 @@ USED_Qblks :
 FREE_Uargs :
     Queue_Header_Structure(Queue_Header_Fields)
     PRESET(
-        [Qhead]	= Free_Uargs,
-        [Qtail]	= Free_Uargs
+        [Qhead] = Free_Uargs,
+        [Qtail] = Free_Uargs
     ),
 
 Free_Minsize_Segs :
     Queue_Header_Structure(Queue_Header_Fields)
     PRESET (
-        [Qhead]	= Free_Minsize_Segs,
-        [Qtail]	= Free_Minsize_Segs
+        [Qhead] = Free_Minsize_Segs,
+        [Qtail] = Free_Minsize_Segs
     ),
 
 Free_Maxsize_Segs :
@@ -255,9 +255,9 @@ Free_Maxsize_Segs :
     signed long
     !!// HACK !!// I don't like the looks of this next comment.
 QBLK_Count_base :
-    UNSIGNED BYTE INITIAL(0),	// #Qblks on free list.
+    UNSIGNED BYTE INITIAL(0),   // #Qblks on free list.
 Uarg_Count_base :
-    UNSIGNED BYTE INITIAL(0),	// #Uarg blks on free list.
+    UNSIGNED BYTE INITIAL(0),   // #Uarg blks on free list.
 Min_Seg_Count_base:
     UNSIGNED BYTE INITIAL(0), // #Min-size segs
 Max_Seg_Count_base:
@@ -266,13 +266,13 @@ Max_Seg_Count_base:
 // Counters for the number of items on a specific queue.
 
 QBLK_Count:
-    UNSIGNED BYTE INITIAL(0),	// #Qblks on free list.
+    UNSIGNED BYTE INITIAL(0),   // #Qblks on free list.
 Uarg_Count:
-    UNSIGNED BYTE INITIAL(0),	// #Uarg blks on free list.
+    UNSIGNED BYTE INITIAL(0),   // #Uarg blks on free list.
 Min_Seg_Count:
-    UNSIGNED BYTE INITIAL(0),	// #Min-size segs
+    UNSIGNED BYTE INITIAL(0),   // #Min-size segs
 Max_Seg_Count:
-    UNSIGNED BYTE INITIAL(0);	// #Max-size segs
+    UNSIGNED BYTE INITIAL(0);   // #Max-size segs
 
     /*
     Here we keep track of what kind of data structures are being dynamically
@@ -280,37 +280,37 @@ Max_Seg_Count:
     */
 
     signed long
-    QB_gets  = 0,	// Queue Blks dynamically allocated
-    UA_gets  = 0,	// User arg blks.
-    MIN_gets  = 0,	// Minimum size buffers
-    MAX_gets  = 0,	// Maximum size buffers
-    QB_max  = 0,	// Queue Blk max queue size
-    UA_max  = 0,	// User arg max queue size
-    MIN_max  = 0,	// Minimum size buffers max queue size
-    MAX_max  = 0;	// Maximum seg max queue size
+    QB_gets  = 0,   // Queue Blks dynamically allocated
+    UA_gets  = 0,   // User arg blks.
+    MIN_gets  = 0,  // Minimum size buffers
+    MAX_gets  = 0,  // Maximum size buffers
+    QB_max  = 0,    // Queue Blk max queue size
+    UA_max  = 0,    // User arg max queue size
+    MIN_max  = 0,   // Minimum size buffers max queue size
+    MAX_max  = 0;   // Maximum seg max queue size
     
 //Sbttl "Memory Management Fault Handler"
     /*
 
     Function:
 
-    	Die gracefully on memory allocation/deallocation errors.  Idea is to
-    	NOT hang user processes by making sure all user IO is posted to VMS
-    	to users don't end up in MWAIT.
+        Die gracefully on memory allocation/deallocation errors.  Idea is to
+        NOT hang user processes by making sure all user IO is posted to VMS
+        to users don't end up in MWAIT.
 
     Inputs:
 
-    	None
+        None
 
     Outputs:
 
-    	None
+        None
 
     Side Effects:
 
-    	Post all remaining user IO back to VMS & die gracefully here.
-    	leave some tracks by sending the network operator a mesage with the
-    	hex error code in it.
+        Post all remaining user IO back to VMS & die gracefully here.
+        leave some tracks by sending the network operator a mesage with the
+        hex error code in it.
     */
 
 
@@ -325,21 +325,21 @@ Max_Seg_Count:
 //SBTTL "Get_Mem: Allocate memory."
     /*
     Function:
-    	Allocate a new block of memory.
+        Allocate a new block of memory.
 
     Calling Convention:
-    	CALLS, standard BLISS linkage.
+        CALLS, standard BLISS linkage.
 
     Inputs:
-    	Addr: pointer to longword to receive allocated memory's address
-    	Size: Amount of memory desired, in bytes.
+        Addr: pointer to longword to receive allocated memory's address
+        Size: Amount of memory desired, in bytes.
 
     Outputs:
-    	Address of newly allocated zeroed memory block.
-    	Error(0) for no memory available.
+        Address of newly allocated zeroed memory block.
+        Error(0) for no memory available.
 
     Side Effects:
-    	None
+        None
 
     */
 
@@ -348,12 +348,12 @@ Max_Seg_Count:
         signed long
         RC;
 
-        NOINT;			// Hold AST's please...
+        NOINT;          // Hold AST's please...
         if (NOT (RC = LIB$GET_VM(Size,Addr)))
             Memgr_Fault_Handler(0,RC,0);
         OKINT;
 
-        CH$FILL(0,Size,..Addr);	// clean house.....zero fill.
+        CH$FILL(0,Size,..Addr); // clean house.....zero fill.
 
         RC
     }
@@ -364,16 +364,16 @@ Max_Seg_Count:
     /*
 
     Function:
-    	Free the memory allocated by MM$Get_Mem.
+        Free the memory allocated by MM$Get_Mem.
 
     Inputs:
-    	Mem = address of memory block.
+        Mem = address of memory block.
 
     Outputs:
-    	None.
+        None.
 
     Side Effects:
-    	None.
+        None.
 
     */
 
@@ -382,7 +382,7 @@ Max_Seg_Count:
         signed long
         RC;
 
-        NOINT;			// Hold AST's
+        NOINT;          // Hold AST's
         if (NOT ( RC = LIB$FREE_VM ( Size , Mem ) ))
             Memgr_Fault_Handler(0,RC,0);
         OKINT;
@@ -395,39 +395,39 @@ Max_Seg_Count:
 
     Function:
 
-    	Acquire one queue block.  See TCP Segment definition for Queue block
-    	structure definition (SEG.DEF).
+        Acquire one queue block.  See TCP Segment definition for Queue block
+        structure definition (SEG.DEF).
 
     Calling Conventions:
 
-    	CALLS, standard BLISS linkage.
+        CALLS, standard BLISS linkage.
 
     Inputs:
 
-    	none
+        none
 
     Outputs:
 
-    	Pointer to Queue block is returned.
+        Pointer to Queue block is returned.
 
     Side Effects:
 
-    	Get Queue Block from queue-block free list or dynamically allocate
-    	one.  If no memory is available then we die here.
+        Get Queue Block from queue-block free list or dynamically allocate
+        one.  If no memory is available then we die here.
 
     */
 
     MM$QBLK_GET=
     {
         BUILTIN
-        R0;	// standard vax/vms routine return value register.
+        R0; // standard vax/vms routine return value register.
         signed long
         Ptr,
         struct MEM$HDR_STRUCT * Hptr;
 
         if (REMQUE(Free_QBlks->QHead,Hptr) != Empty_Queue)
             QBlk_Count = QBlk_Count - 1 // Say there is 1 less avail.
-            else			// allocate a new qb.
+            else            // allocate a new qb.
             {
 
 // Disallow ast during memory allocation.
@@ -440,15 +440,15 @@ Max_Seg_Count:
                 OKINT;
                 CH$FILL(%CHAR(0),MEM$HDR_SIZE*4,Hptr);
                 Hptr->MEM$ISPERM = FALSE; // Not a permanent qblk
-                QB_Gets = QB_gets + 1;	// track this event.
+                QB_Gets = QB_gets + 1;  // track this event.
                 if (QB_gets > QB_max)
                     QB_max = QB_gets;
             };
 
         ptr = Hptr + MEM$HDR_SIZE*4; // Point at data area
-        CH$FILL(%CHAR(0),qb_size*4,ptr);	// fresh qb.
+        CH$FILL(%CHAR(0),qb_size*4,ptr);    // fresh qb.
         !!!HACK!!!~~~ Should record allocator here ~~~
-        Hptr->MEM$ISFREE = FALSE;	// QB is no longer free
+        Hptr->MEM$ISFREE = FALSE;   // QB is no longer free
         INSQUE(Hptr,USED_Qblks->QTail); // Insert on used queue
         RETURN(Ptr);
     }
@@ -457,37 +457,37 @@ Max_Seg_Count:
 
     Function:
 
-    	Deallocate one queue block.
+        Deallocate one queue block.
 
     Calling Conventions:
 
-    	CALLS, standard BLISS-32 linkage.
+        CALLS, standard BLISS-32 linkage.
 
     Inputs:
 
-    	Address of Queue block structure.
+        Address of Queue block structure.
 
     Outputs:
 
-    	None.
+        None.
 
     Side Effects:
 
-    	If count of queue-blocks on the free list is < max allowed on list
-    	then queue the QB otherwise delete the memory.
+        If count of queue-blocks on the free list is < max allowed on list
+        then queue the QB otherwise delete the memory.
 
     */
 
     MM$QBLK_Free(Ptr): NOVALUE (void)
     {
         BUILTIN
-        R0;	// standard vax/vms routine return value register.
+        R0; // standard vax/vms routine return value register.
         signed long
         struct MEM$HDR_STRUCT * Hptr;
 
         Hptr = Ptr - MEM$HDR_SIZE*4; // Point at header
         NOINT;
-        REMQUE(Hptr,Hptr);		// Remove from the used queue
+        REMQUE(Hptr,Hptr);      // Remove from the used queue
         OKINT;
         if (Hptr->MEM$ISPERM)
         {
@@ -499,31 +499,31 @@ Max_Seg_Count:
         }
         else
         {
-            NOINT;			// Disable AST's
+            NOINT;          // Disable AST's
             !!!HACK!!// Why?
             if (NOT (LIB$FREE_VM(%REF((qb_size+MEM$HDR_SIZE)*4),Hptr)))
                 Memgr_Fault_Handler(0,R0,0);
             OKINT;
-            QB_Gets = QB_gets - 1;		// track this event.
+            QB_Gets = QB_gets - 1;      // track this event.
         };
     }
     /*
 
     Function:
 
-    	Preallocate blocks & queue them	on the free list "Free_QBlks".
+        Preallocate blocks & queue them on the free list "Free_QBlks".
 
     Inputs:
 
-    	None.
+        None.
 
     Outputs:
 
-    	None.
+        None.
 
     Side Effects:
 
-    	Could die here if no avail memory.
+        Could die here if no avail memory.
 
     */
 
@@ -549,42 +549,42 @@ QBLK_Init:
 
     Function:
 
-    	Create one TCB (transmission Control Block) & place it's address in
-    	the valid TCB table.
+        Create one TCB (transmission Control Block) & place it's address in
+        the valid TCB table.
 
     Calling Convention:
 
-    	CALLS, standard BLISS linkage.
+        CALLS, standard BLISS linkage.
 
     Inputs:
 
-    	none
+        none
 
     Outputs:
 
-    	Address of newly allocated uninitialized TCB.
-    	Error(-1) for Valid TCB table full
+        Address of newly allocated uninitialized TCB.
+        Error(-1) for Valid TCB table full
 
     Side Effects:
 
-    	Address of newly allocated TCB is placed in first free entry
-    	in the Valid TCB table.
+        Address of newly allocated TCB is placed in first free entry
+        in the Valid TCB table.
 
     */
 
     TCB$Create (void)
     {
         signed long
-        struct tcb_structure * tcb,	// New TCB
-                Indx,	// location of new TCB in Valid TCB table.
-                Old,	// remember the old value of VTCB_ptr when resizing...
+        struct tcb_structure * tcb, // New TCB
+                Indx,   // location of new TCB in Valid TCB table.
+                Old,    // remember the old value of VTCB_ptr when resizing...
                 S
             }
-    Q,	// Send Queue
-    RECVQ,	// Receive Queue
-    RC;	// return code
+    Q,  // Send Queue
+    RECVQ,  // Receive Queue
+    RC; // return code
 
-    NOINT;			// Hold AST's please...
+    NOINT;          // Hold AST's please...
     !!!HACK!!// Why are we holding AST's???
     if (NOT (RC = LIB$GET_VM(%REF(tcb_Size*4),TCB)))
         Memgr_Fault_Handler(0,RC,0);
@@ -595,7 +595,7 @@ if (NOT (RC = LIB$GET_VM(%REF(Window_Default),RECVQ)))
     Memgr_Fault_Handler(0,RC,0);
     OKINT;
 
-    CH$FILL(%CHAR(0),tcb_size*4,TCB);	// clean house.....zero fill.
+    CH$FILL(%CHAR(0),tcb_size*4,TCB);   // clean house.....zero fill.
 
 // Set pointers and sizes of send and receive queues
 
@@ -639,7 +639,7 @@ if (Indx > Max_TCB) Max_TCB = Indx;
                                       TCB_Count = TCB_Count + 1; // Keep track of active TCB's.
                                               TCB->VTCB_INDEX = Indx; // Remember index into Valid TCB Table
 
-                                                      OKINT;	// Carry on...
+                                                      OKINT;    // Carry on...
 
                                                       TCB
 }
@@ -649,22 +649,22 @@ if (Indx > Max_TCB) Max_TCB = Indx;
 
                                                       Function:
 
-                                                      	Free the memory associated with a specified TCB.  If this happens
-                                                      	to be the last TCB in a Local_Port TCB list then free the Local_port
-                                                      	slot from the Connection table (CONECT).
+                                                        Free the memory associated with a specified TCB.  If this happens
+                                                        to be the last TCB in a Local_Port TCB list then free the Local_port
+                                                        slot from the Connection table (CONECT).
 
                                                       Inputs:
 
-                                                      	TCB_Ptr = address of TCB data structure.
+                                                        TCB_Ptr = address of TCB data structure.
 
                                                       Outputs:
 
-                                                      	None.
+                                                        None.
 
                                                       Side Effects:
 
-                                                      	Connection table (CONECT) entry maybe cleared if last TCB for specified
-                                                      	local_port.
+                                                        Connection table (CONECT) entry maybe cleared if last TCB for specified
+                                                        local_port.
 
                                                       */
 
@@ -693,9 +693,9 @@ if (TCB->TVTDATA != 0)
         LABEL
         X;
 
-        NOINT;			// Hold AST's
+        NOINT;          // Hold AST's
 
-        VTCB_ptr[IDX] = 0;	// Clean out entry
+        VTCB_ptr[IDX] = 0;  // Clean out entry
         TCB_Count = TCB_Count-1; // Account for this TCB going away.
         if (Max_TCB <= Idx)
 X :
@@ -745,28 +745,28 @@ X :
 
 Function:
 
-	Allocate one user argument block from process virtual space.
-	User-requests-avail (maclib.mar) calls this routine to allocate
-	a user arg block when copying TCP user request arguments from the
-	system buffer to this buffer.  Called from user_requests_avail routine
-	in MACLIB.mar in "KERNEL" mode.
+    Allocate one user argument block from process virtual space.
+    User-requests-avail (maclib.mar) calls this routine to allocate
+    a user arg block when copying TCP user request arguments from the
+    system buffer to this buffer.  Called from user_requests_avail routine
+    in MACLIB.mar in "KERNEL" mode.
 
 Calling Sequence:
 
-	CALLS  #0,Uarg_Get
+    CALLS  #0,Uarg_Get
 
 Inputs:
 
-	None.
+    None.
 
 Outputs:
 
-	Address of process-local space user argument block.
+    Address of process-local space user argument block.
 
 Side Effects:
 
-	Routine executes in Kernel mode.
-	Uarg block could be removed from free list "FREE_UARGS".
+    Routine executes in Kernel mode.
+    Uarg block could be removed from free list "FREE_UARGS".
 
 */
 
@@ -774,7 +774,7 @@ Side Effects:
 MM$UARG_GET=
 {
     BUILTIN
-    R0;	// standard vax/vms routine return value register.
+    R0; // standard vax/vms routine return value register.
     signed long
     Ptr;
 
@@ -782,7 +782,7 @@ MM$UARG_GET=
         Uarg_Count = Uarg_Count - 1
         else
         {
-            NOINT;			// Disable interrupts, do allocation
+            NOINT;          // Disable interrupts, do allocation
             if (NOT (LIB$GET_VM(%REF(Max_User_ArgBlk_Size*4),ptr)))
                 Memgr_Fault_Handler(0,R0,0);
             OKINT;
@@ -798,19 +798,19 @@ MM$UARG_GET=
 
 Function:
 
-	Deallocate one process-local user arg block.
+    Deallocate one process-local user arg block.
 
 Inputs:
 
-	Ptr = address of block to deallocate.
+    Ptr = address of block to deallocate.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	None.
+    None.
 
 */
 
@@ -820,7 +820,7 @@ MM$UARG_Free(Ptr): NOVALUE (void)
     signed long
     queptr;
     BUILTIN
-    R0;	// standard vax/vms routine return value register.
+    R0; // standard vax/vms routine return value register.
 
 
     !!!HACK!!// This should be a conditional statement
@@ -852,19 +852,19 @@ MM$UARG_Free(Ptr): NOVALUE (void)
 
 Function:
 
-	Preallocate Uarg blocks & queue them on the free list "Free_Uargs".
+    Preallocate Uarg blocks & queue them on the free list "Free_Uargs".
 
 Inputs:
 
-	None.
+    None.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	Could die here if no avail memory.
+    Could die here if no avail memory.
 
 */
 
@@ -887,39 +887,39 @@ NOVALUE (void)
 
 Function:
 
-	Allocate one segment of specified size.  Used to construct a TCP
-	network segment.
-	Allocation is always in BLISS Fullwords, size argument is rounded to
-e	next bliss fullword.
-	Routine is called from both user & AST modes of operation.  Because of
-	this fact we cannot allow AST's to be delivered when in this routine.
+    Allocate one segment of specified size.  Used to construct a TCP
+    network segment.
+    Allocation is always in BLISS Fullwords, size argument is rounded to
+e   next bliss fullword.
+    Routine is called from both user & AST modes of operation.  Because of
+    this fact we cannot allow AST's to be delivered when in this routine.
 
 Calling Conventions:
 
-	CALLS, Default BLISS-32 linkage.
+    CALLS, Default BLISS-32 linkage.
 
 Inputs:
 
-	Size = Segment size in bytes
+    Size = Segment size in bytes
 
 Outputs:
 
-	Address of segment
+    Address of segment
 
 Side Effects:
 
-	AST delivery is disabled for the duration of this routine.  This
-	prevents the routine from being called & then called again from an
-	AST service routine.
+    AST delivery is disabled for the duration of this routine.  This
+    prevents the routine from being called & then called again from an
+    AST service routine.
 */
 
 
 MM$SEG_GET(Size)
 {
     BUILTIN
-    R0;	// standard vax/vms routine return value register.
+    R0; // standard vax/vms routine return value register.
     signed long
-    Alloc = False,	// no seg allocation yet.
+    Alloc = False,  // no seg allocation yet.
     Ptr;
 
 // Respond to various size segments (ie, some may be preallocated.)
@@ -979,24 +979,24 @@ MM$SEG_GET(Size)
 
 Function:
 
-	Deallocate one Segment.
-	Size is specified in bytes BUT it is assumed that the actual allocation
-	was done in bliss fullwords (ala MM$Seg_Get rtn).
+    Deallocate one Segment.
+    Size is specified in bytes BUT it is assumed that the actual allocation
+    was done in bliss fullwords (ala MM$Seg_Get rtn).
 
 Inputs:
 
-	Size = size of segment in bytes
-	Ptr = address of segement.
+    Size = size of segment in bytes
+    Ptr = address of segement.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	AST delivery is disabled for the duration of this routine.
-	Prevents user mode & AST service routines from stepping on each
-	others toes.
+    AST delivery is disabled for the duration of this routine.
+    Prevents user mode & AST service routines from stepping on each
+    others toes.
 
 */
 
@@ -1004,7 +1004,7 @@ Side Effects:
 MM$SEG_FREE(Size,Ptr) : NOVALUE (void)
 {
     BUILTIN
-    R0;	// standard vax/vms routine return value register.
+    R0; // standard vax/vms routine return value register.
     signed long
     Released = False;
 
@@ -1054,19 +1054,19 @@ MM$SEG_FREE(Size,Ptr) : NOVALUE (void)
 
 Function:
 
-	Initialize the free control segment list.
+    Initialize the free control segment list.
 
 Inputs:
 
-	None.
+    None.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	Can die if no memory.
+    Can die if no memory.
 
 */
 
@@ -1100,19 +1100,19 @@ NOVALUE (void)
 
 Function:
 
-	Initialize various aspects of dynamic memory preallocation.
+    Initialize various aspects of dynamic memory preallocation.
 
 Inputs:
 
-	None.
+    None.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	Specific dynamically allocated data structures are preallocated.
+    Specific dynamically allocated data structures are preallocated.
 
 */
 

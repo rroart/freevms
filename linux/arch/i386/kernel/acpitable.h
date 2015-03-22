@@ -42,18 +42,18 @@
 #define dprintk printk
 typedef unsigned int ACPI_TBLPTR;
 
-typedef struct  		/* ACPI common table header */
+typedef struct          /* ACPI common table header */
 {
-    char signature[4];	/* identifies type of table */
-    u32 length;		/* length of table,
-				   in bytes, * including header */
-    u8 revision;		/* specification minor version # */
-    u8 checksum;		/* to make sum of entire table == 0 */
-    char oem_id[6];		/* OEM identification */
-    char oem_table_id[8];	/* OEM table identification */
-    u32 oem_revision;	/* OEM revision number */
-    char asl_compiler_id[4];	/* ASL compiler vendor ID */
-    u32 asl_compiler_revision;	/* ASL compiler revision number */
+    char signature[4];  /* identifies type of table */
+    u32 length;     /* length of table,
+                   in bytes, * including header */
+    u8 revision;        /* specification minor version # */
+    u8 checksum;        /* to make sum of entire table == 0 */
+    char oem_id[6];     /* OEM identification */
+    char oem_table_id[8];   /* OEM table identification */
+    u32 oem_revision;   /* OEM revision number */
+    char asl_compiler_id[4];    /* ASL compiler vendor ID */
+    u32 asl_compiler_revision;  /* ASL compiler revision number */
 } acpi_table_header __attribute__ ((packed));;
 
 enum
@@ -124,8 +124,8 @@ enum
     ACPI_MADT_ENTRY_COUNT
 };
 
-#define RSDP_SIG			"RSD PTR "
-#define RSDT_SIG 			"RSDT"
+#define RSDP_SIG            "RSD PTR "
+#define RSDT_SIG            "RSDT"
 
 #define ACPI_DEBUG_PRINT(pl)
 
@@ -133,12 +133,12 @@ enum
 #define ACPI_LOGICAL_ADDRESSING         0x00
 #define ACPI_PHYSICAL_ADDRESSING        0x01
 
-#define LO_RSDP_WINDOW_BASE         	0	/* Physical Address */
-#define HI_RSDP_WINDOW_BASE         	0xE0000	/* Physical Address */
-#define LO_RSDP_WINDOW_SIZE         	0x400
-#define HI_RSDP_WINDOW_SIZE         	0x20000
-#define RSDP_SCAN_STEP			16
-#define RSDP_CHECKSUM_LENGTH		20
+#define LO_RSDP_WINDOW_BASE             0   /* Physical Address */
+#define HI_RSDP_WINDOW_BASE             0xE0000 /* Physical Address */
+#define LO_RSDP_WINDOW_SIZE             0x400
+#define HI_RSDP_WINDOW_SIZE             0x20000
+#define RSDP_SCAN_STEP          16
+#define RSDP_CHECKSUM_LENGTH        20
 
 typedef int (*acpi_table_handler) (acpi_table_header * header, unsigned long);
 

@@ -29,13 +29,13 @@
  *
  * Or rather, it _will_ be done in larger chunks.
  */
-#define PAGE_CACHE_SHIFT	PAGE_SHIFT
-#define PAGE_CACHE_SIZE		PAGE_SIZE
-#define PAGE_CACHE_MASK		PAGE_MASK
-#define PAGE_CACHE_ALIGN(addr)	(((addr)+PAGE_CACHE_SIZE-1)&PAGE_CACHE_MASK)
+#define PAGE_CACHE_SHIFT    PAGE_SHIFT
+#define PAGE_CACHE_SIZE     PAGE_SIZE
+#define PAGE_CACHE_MASK     PAGE_MASK
+#define PAGE_CACHE_ALIGN(addr)  (((addr)+PAGE_CACHE_SIZE-1)&PAGE_CACHE_MASK)
 
-#define page_cache_get(x)	get_page(x)
-#define page_cache_release(x)	__free_page(x)
+#define page_cache_get(x)   get_page(x)
+#define page_cache_release(x)   __free_page(x)
 
 static inline struct page *page_cache_alloc(struct address_space *x)
 {
@@ -45,7 +45,7 @@ static inline struct page *page_cache_alloc(struct address_space *x)
 /*
  * From a kernel address, get the "struct page *"
  */
-#define page_cache_entry(x)	virt_to_page(x)
+#define page_cache_entry(x) virt_to_page(x)
 
 extern unsigned int page_hash_bits;
 #define PAGE_HASH_BITS (page_hash_bits)
@@ -79,7 +79,7 @@ static inline unsigned long _page_hashfn(struct address_space * mapping, unsigne
 extern struct page * __find_get_page(struct address_space *mapping,
                                      unsigned long index, struct page **hash);
 #define find_get_page(mapping, index) \
-	__find_get_page(mapping, index, page_hash(mapping, index))
+    __find_get_page(mapping, index, page_hash(mapping, index))
 extern struct page * __find_lock_page (struct address_space * mapping,
                                        unsigned long index, struct page **hash);
 extern struct page * find_or_create_page(struct address_space *mapping,
@@ -88,7 +88,7 @@ extern struct page * find_or_create_page(struct address_space *mapping,
 extern void FASTCALL(lock_page(struct page *page));
 extern void FASTCALL(unlock_page(struct page *page));
 #define find_lock_page(mapping, index) \
-	__find_lock_page(mapping, index, page_hash(mapping, index))
+    __find_lock_page(mapping, index, page_hash(mapping, index))
 extern struct page *find_trylock_page(struct address_space *, unsigned long);
 
 extern void add_to_page_cache(struct page * page, struct address_space *mapping, unsigned long index);

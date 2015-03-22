@@ -20,8 +20,8 @@
 #include "poly.h"
 
 
-#define	N_COEFF_P	4
-#define	N_COEFF_N	4
+#define N_COEFF_P   4
+#define N_COEFF_N   4
 
 static const unsigned long long pos_terms_l[N_COEFF_P] =
 {
@@ -41,8 +41,8 @@ static const unsigned long long neg_terms_l[N_COEFF_N] =
 
 
 
-#define	N_COEFF_PH	4
-#define	N_COEFF_NH	4
+#define N_COEFF_PH  4
+#define N_COEFF_NH  4
 static const unsigned long long pos_terms_h[N_COEFF_PH] =
 {
     0x0000000000000000LL,
@@ -63,13 +63,13 @@ static const unsigned long long neg_terms_h[N_COEFF_NH] =
 /*--- poly_sine() -----------------------------------------------------------+
  |                                                                           |
  +---------------------------------------------------------------------------*/
-void	poly_sine(FPU_REG *st0_ptr)
+void    poly_sine(FPU_REG *st0_ptr)
 {
     int                 exponent, echange;
     Xsig                accumulator, argSqrd, argTo4;
     unsigned long       fix_up, adj;
     unsigned long long  fixed_arg;
-    FPU_REG	      result;
+    FPU_REG       result;
 
     exponent = exponent(st0_ptr);
 
@@ -213,9 +213,9 @@ void	poly_sine(FPU_REG *st0_ptr)
 /*--- poly_cos() ------------------------------------------------------------+
  |                                                                           |
  +---------------------------------------------------------------------------*/
-void	poly_cos(FPU_REG *st0_ptr)
+void    poly_cos(FPU_REG *st0_ptr)
 {
-    FPU_REG	      result;
+    FPU_REG       result;
     long int            exponent, exp2, echange;
     Xsig                accumulator, argSqrd, fix_up, argTo4;
     unsigned long long  fixed_arg;

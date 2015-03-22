@@ -24,7 +24,7 @@
  * On the other hand, I'd like to be sure of a non-existent port:
  * I feel a bit unsafe about using 0x80 (should be safe, though)
  *
- *		Linus
+ *      Linus
  */
 
 /*
@@ -143,7 +143,7 @@ extern inline void * phys_to_virt(unsigned long address)
 #ifdef CONFIG_DISCONTIGMEM
 #include <asm/mmzone.h>
 #else
-#define page_to_phys(page)	(((page) - mem_map) << PAGE_SHIFT)
+#define page_to_phys(page)  (((page) - mem_map) << PAGE_SHIFT)
 #endif
 
 extern void * __ioremap(unsigned long offset, unsigned long size, unsigned long flags);
@@ -200,7 +200,7 @@ extern void iounmap(void *addr);
 void *memcpy_fromio(void*,const void*,unsigned);
 void *memcpy_toio(void*,const void*,unsigned);
 
-#define memset_io(a,b,c)	memset(__io_virt(a),(b),(c))
+#define memset_io(a,b,c)    memset(__io_virt(a),(b),(c))
 
 /*
  * ISA space is 'always mapped' on a typical x86 system, no need to
@@ -218,17 +218,17 @@ void *memcpy_toio(void*,const void*,unsigned);
 #define isa_writeb(b,a) writeb(b,__ISA_IO_base + (a))
 #define isa_writew(w,a) writew(w,__ISA_IO_base + (a))
 #define isa_writel(l,a) writel(l,__ISA_IO_base + (a))
-#define isa_memset_io(a,b,c)		memset_io(__ISA_IO_base + (a),(b),(c))
-#define isa_memcpy_fromio(a,b,c)	memcpy_fromio((a),__ISA_IO_base + (b),(c))
-#define isa_memcpy_toio(a,b,c)		memcpy_toio(__ISA_IO_base + (a),(b),(c))
+#define isa_memset_io(a,b,c)        memset_io(__ISA_IO_base + (a),(b),(c))
+#define isa_memcpy_fromio(a,b,c)    memcpy_fromio((a),__ISA_IO_base + (b),(c))
+#define isa_memcpy_toio(a,b,c)      memcpy_toio(__ISA_IO_base + (a),(b),(c))
 
 
 /*
  * Again, x86-64 does not require mem IO specific function.
  */
 
-#define eth_io_copy_and_sum(a,b,c,d)		eth_copy_and_sum((a),__io_virt(b),(c),(d))
-#define isa_eth_io_copy_and_sum(a,b,c,d)	eth_copy_and_sum((a),__io_virt(__ISA_IO_base + (b)),(c),(d))
+#define eth_io_copy_and_sum(a,b,c,d)        eth_copy_and_sum((a),__io_virt(b),(c),(d))
+#define isa_eth_io_copy_and_sum(a,b,c,d)    eth_copy_and_sum((a),__io_virt(__ISA_IO_base + (b)),(c),(d))
 
 static inline int check_signature(unsigned long io_addr,
                                   const unsigned char *signature, int length)
@@ -268,9 +268,9 @@ out:
 
 /* Nothing to do */
 
-#define dma_cache_inv(_start,_size)		do { } while (0)
-#define dma_cache_wback(_start,_size)		do { } while (0)
-#define dma_cache_wback_inv(_start,_size)	do { } while (0)
+#define dma_cache_inv(_start,_size)     do { } while (0)
+#define dma_cache_wback(_start,_size)       do { } while (0)
+#define dma_cache_wback_inv(_start,_size)   do { } while (0)
 
 #define flush_write_buffers()
 

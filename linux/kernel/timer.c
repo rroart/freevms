@@ -41,13 +41,13 @@
  * Timekeeping variables
  */
 
-long tick = (1000000 + HZ/2) / HZ;	/* timer interrupt period */
+long tick = (1000000 + HZ/2) / HZ;  /* timer interrupt period */
 
 /* The current time */
 struct timeval xtime __attribute__ ((aligned (16)));
 
 /* Don't completely fail for HZ > 500.  */
-int tickadj = 500/HZ ? : 1;		/* microsecs */
+int tickadj = 500/HZ ? : 1;     /* microsecs */
 
 DECLARE_TASK_QUEUE(tq_timer);
 DECLARE_TASK_QUEUE(tq_immediate);
@@ -56,19 +56,19 @@ DECLARE_TASK_QUEUE(tq_immediate);
  * phase-lock loop variables
  */
 /* TIME_ERROR prevents overwriting the CMOS clock */
-int time_state = TIME_OK;		/* clock synchronization status	*/
-int time_status = STA_UNSYNC;		/* clock status bits		*/
-long time_offset;			/* time adjustment (us)		*/
-long time_constant = 2;			/* pll time constant		*/
-long time_tolerance = MAXFREQ;		/* frequency tolerance (ppm)	*/
-long time_precision = 1;		/* clock precision (us)		*/
-long time_maxerror = NTP_PHASE_LIMIT;	/* maximum error (us)		*/
-long time_esterror = NTP_PHASE_LIMIT;	/* estimated error (us)		*/
-long time_phase;			/* phase offset (scaled us)	*/
+int time_state = TIME_OK;       /* clock synchronization status */
+int time_status = STA_UNSYNC;       /* clock status bits        */
+long time_offset;           /* time adjustment (us)     */
+long time_constant = 2;         /* pll time constant        */
+long time_tolerance = MAXFREQ;      /* frequency tolerance (ppm)    */
+long time_precision = 1;        /* clock precision (us)     */
+long time_maxerror = NTP_PHASE_LIMIT;   /* maximum error (us)       */
+long time_esterror = NTP_PHASE_LIMIT;   /* estimated error (us)     */
+long time_phase;            /* phase offset (scaled us) */
 long time_freq = ((1000000 + HZ/2) % HZ - HZ/2) << SHIFT_USEC;
 /* frequency offset (scaled ppm)*/
-long time_adj;				/* tick adjust (scaled 1 / HZ)	*/
-long time_reftime;			/* time at last adjustment (s)	*/
+long time_adj;              /* tick adjust (scaled 1 / HZ)  */
+long time_reftime;          /* time at last adjustment (s)  */
 
 long time_adjust;
 long time_adjust_step;
@@ -198,8 +198,8 @@ volatile struct timer_list * volatile running_timer;
 #define timer_is_running(t) (running_timer == t)
 #define timer_synchronize(t) while (timer_is_running(t)) barrier()
 #else
-#define timer_enter(t)		do { } while (0)
-#define timer_exit()		do { } while (0)
+#define timer_enter(t)      do { } while (0)
+#define timer_exit()        do { } while (0)
 #endif
 
 void add_timer(struct timer_list *timer)
@@ -464,7 +464,7 @@ static void second_overflow(void)
      * the pll and the PPS signal.
      */
     pps_valid++;
-    if (pps_valid == PPS_VALID)  	/* PPS signal lost */
+    if (pps_valid == PPS_VALID)     /* PPS signal lost */
     {
         pps_jitter = MAXTIME;
         pps_stabil = MAXFREQ;
@@ -631,7 +631,7 @@ void update_process_times(int user_tick)
 {
     struct task_struct *p = current;
     int cpu = smp_processor_id(), system = user_tick ^ 1;
-    //	if (mydebug6 && in_idle_while)
+    //  if (mydebug6 && in_idle_while)
     //  printk(".");
     if (mydebug5 && !countme2--)
     {
@@ -640,7 +640,7 @@ void update_process_times(int user_tick)
         printk("timer %x %x %x\n",p->pcb$l_pid,p->pcb$w_quant,p->pcb$b_pri);
     }
     //  printk(":");
-    //	if (p->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
+    //  if (p->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
     // { int i; for (i=0; i<1000000; i++ ) ; }}
     update_one_process(p, user_tick, system, cpu);
     if (p->pcb$l_pid==0)
@@ -665,7 +665,7 @@ void update_process_times(int user_tick)
             if (p->pcb$w_quant<128)
             {
                 SOFTINT_TIMERFORK_VECTOR;
-                //		    sch$resched();
+                //          sch$resched();
             }
         }
         if (p->pcb$b_prib == 31)

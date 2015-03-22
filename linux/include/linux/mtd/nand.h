@@ -16,11 +16,11 @@
  *  Changelog:
  *   01-31-2000 DMW     Created
  *   09-18-2000 SJH     Moved structure out of the Disk-On-Chip drivers
- *			so it can be used by other NAND flash device
- *			drivers. I also changed the copyright since none
- *			of the original contents of this file are specific
- *			to DoC devices. David can whack me with a baseball
- *			bat later if I did something naughty.
+ *          so it can be used by other NAND flash device
+ *          drivers. I also changed the copyright since none
+ *          of the original contents of this file are specific
+ *          to DoC devices. David can whack me with a baseball
+ *          bat later if I did something naughty.
  *   10-11-2000 SJH     Added private NAND flash structure for driver
  *   10-24-2000 SJH     Added prototype for 'nand_scan' function
  */
@@ -38,16 +38,16 @@ extern int nand_scan (struct mtd_info *mtd);
 /*
  * Standard NAND flash commands
  */
-#define NAND_CMD_READ0		0
-#define NAND_CMD_READ1		1
-#define NAND_CMD_PAGEPROG	0x10
-#define NAND_CMD_READOOB	0x50
-#define NAND_CMD_ERASE1		0x60
-#define NAND_CMD_STATUS		0x70
-#define NAND_CMD_SEQIN		0x80
-#define NAND_CMD_READID		0x90
-#define NAND_CMD_ERASE2		0xd0
-#define NAND_CMD_RESET		0xff
+#define NAND_CMD_READ0      0
+#define NAND_CMD_READ1      1
+#define NAND_CMD_PAGEPROG   0x10
+#define NAND_CMD_READOOB    0x50
+#define NAND_CMD_ERASE1     0x60
+#define NAND_CMD_STATUS     0x70
+#define NAND_CMD_SEQIN      0x80
+#define NAND_CMD_READID     0x90
+#define NAND_CMD_ERASE2     0xd0
+#define NAND_CMD_RESET      0xff
 
 /*
  * Enumeration for NAND flash chip state
@@ -113,8 +113,8 @@ struct nand_chip
 /*
  * NAND Flash Manufacturer ID Codes
  */
-#define NAND_MFR_TOSHIBA	0x98
-#define NAND_MFR_SAMSUNG	0xec
+#define NAND_MFR_TOSHIBA    0x98
+#define NAND_MFR_SAMSUNG    0xec
 
 /*
  * NAND Flash Device ID Structure

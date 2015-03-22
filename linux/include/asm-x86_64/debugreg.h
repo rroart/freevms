@@ -14,13 +14,13 @@
    which debugging register was responsible for the trap.  The other bits
    are either reserved or not of interest to us. */
 
-#define DR_TRAP0	(0x1)		/* db0 */
-#define DR_TRAP1	(0x2)		/* db1 */
-#define DR_TRAP2	(0x4)		/* db2 */
-#define DR_TRAP3	(0x8)		/* db3 */
+#define DR_TRAP0    (0x1)       /* db0 */
+#define DR_TRAP1    (0x2)       /* db1 */
+#define DR_TRAP2    (0x4)       /* db2 */
+#define DR_TRAP3    (0x8)       /* db3 */
 
-#define DR_STEP		(0x4000)	/* single-step */
-#define DR_SWITCH	(0x8000)	/* task switch */
+#define DR_STEP     (0x4000)    /* single-step */
+#define DR_SWITCH   (0x8000)    /* task switch */
 
 /* Now define a bunch of things for manipulating the control register.
    The top two bytes of the control register consist of 4 fields of 4

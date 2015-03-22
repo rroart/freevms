@@ -30,13 +30,13 @@
 #include <string.h>
 #include <unistd.h>
 
-#define ERROR_EXIT(strExit)						\
-    {									\
-	const int errnoSave = errno;					\
-	fprintf(stderr, "%s: ", str_my_name);				\
-	errno = errnoSave;						\
-	perror((strExit));						\
-	exit(1);							\
+#define ERROR_EXIT(strExit)                     \
+    {                                   \
+    const int errnoSave = errno;                    \
+    fprintf(stderr, "%s: ", str_my_name);               \
+    errno = errnoSave;                      \
+    perror((strExit));                      \
+    exit(1);                            \
     }
 
 

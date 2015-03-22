@@ -1,29 +1,29 @@
-#ifndef kfedef_h
+#ifndef KFEDEF_H
 #define kfedef_H
 
-#define		KFE$M_PROTECT		0x1
-#define		KFE$M_LIM		0x2
-#define		KFE$M_PROCPRIV		0x4
-#define		KFE$M_OPEN		0x8
-#define		KFE$M_HDRRES		0x10
-#define		KFE$M_SHARED		0x20
-#define		KFE$M_KFE_NAMING	0x40
-#define		KFE$M_COMPRESS		0x80
-#define		KFE$M_NOPURGE		0x100
-#define		KFE$M_ACCOUNT		0x200
-#define		KFE$M_WRITEABLE		0x400
-#define		KFE$M_EXEONLY		0x800
-#define		KFE$M_DISCONTIGUOUS	0x1000
-#define		KFE$M_DELETE_PEND	0x2000
-#define		KFE$M_VERSION_SAFE	0x4000
-#define		KFE$M_DATA_RESIDENT	0x8000
-#define		KFE$M_AUTHPRIV		0x1
-#define		KFE$M_ARB_SUPPORT	0x2
-#define		KFE$K_LENGTH		112
-#define		KFE$C_LENGTH		112
+#define     KFE$M_PROTECT       0x1
+#define     KFE$M_LIM       0x2
+#define     KFE$M_PROCPRIV      0x4
+#define     KFE$M_OPEN      0x8
+#define     KFE$M_HDRRES        0x10
+#define     KFE$M_SHARED        0x20
+#define     KFE$M_KFE_NAMING    0x40
+#define     KFE$M_COMPRESS      0x80
+#define     KFE$M_NOPURGE       0x100
+#define     KFE$M_ACCOUNT       0x200
+#define     KFE$M_WRITEABLE     0x400
+#define     KFE$M_EXEONLY       0x800
+#define     KFE$M_DISCONTIGUOUS 0x1000
+#define     KFE$M_DELETE_PEND   0x2000
+#define     KFE$M_VERSION_SAFE  0x4000
+#define     KFE$M_DATA_RESIDENT 0x8000
+#define     KFE$M_AUTHPRIV      0x1
+#define     KFE$M_ARB_SUPPORT   0x2
+#define     KFE$K_LENGTH        112
+#define     KFE$C_LENGTH        112
 
-#define		KFE$K_NUMBER_OF_FLAGS	18
-#define		KFE$S_KFEDEF		112
+#define     KFE$K_NUMBER_OF_FLAGS   18
+#define     KFE$S_KFEDEF        112
 
 struct _kfe
 {
@@ -38,22 +38,22 @@ struct _kfe
         unsigned short int kfe$w_flags;
         struct
         {
-            unsigned kfe$v_protect		: 1;
-            unsigned kfe$v_lim		: 1;
-            unsigned kfe$v_procpriv		: 1;
-            unsigned kfe$v_open		: 1;
-            unsigned kfe$v_hdrres		: 1;
-            unsigned kfe$v_shared		: 1;
-            unsigned kfe$v_kfe_naming		: 1;
-            unsigned kfe$v_compress		: 1;
-            unsigned kfe$v_nopurge		: 1;
-            unsigned kfe$v_account		: 1;
-            unsigned kfe$v_writeable		: 1;
-            unsigned kfe$v_exeonly		: 1;
-            unsigned kfe$v_discontiguous	: 1;
-            unsigned kfe$v_delete_pend	: 1;
-            unsigned kfe$v_version_safe	: 1;
-            unsigned kfe$v_data_resident	: 1;
+            unsigned kfe$v_protect      : 1;
+            unsigned kfe$v_lim      : 1;
+            unsigned kfe$v_procpriv     : 1;
+            unsigned kfe$v_open     : 1;
+            unsigned kfe$v_hdrres       : 1;
+            unsigned kfe$v_shared       : 1;
+            unsigned kfe$v_kfe_naming       : 1;
+            unsigned kfe$v_compress     : 1;
+            unsigned kfe$v_nopurge      : 1;
+            unsigned kfe$v_account      : 1;
+            unsigned kfe$v_writeable        : 1;
+            unsigned kfe$v_exeonly      : 1;
+            unsigned kfe$v_discontiguous    : 1;
+            unsigned kfe$v_delete_pend  : 1;
+            unsigned kfe$v_version_safe : 1;
+            unsigned kfe$v_data_resident    : 1;
         };
     };
     unsigned short int kfe$w_gblseccnt;
@@ -95,9 +95,9 @@ struct _kfe
         unsigned int kfe$l_flags2;
         struct
         {
-            unsigned kfe$v_authpriv		: 1;
-            unsigned kfe$v_arb_support	: 1;
-            unsigned kfe$v_fill_0_		: 6;
+            unsigned kfe$v_authpriv     : 1;
+            unsigned kfe$v_arb_support  : 1;
+            unsigned kfe$v_fill_0_      : 6;
         };
     };
     void *kfe$ar_authrights;

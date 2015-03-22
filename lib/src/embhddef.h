@@ -1,5 +1,5 @@
-#ifndef embhddef_h
-#define embhddef_h
+#ifndef EMBHDDEF_H
+#define EMBHDDEF_H
 
 #define EMB$K_HD_REV_V50 2
 #define EMB$K_HD_REV_V51 3

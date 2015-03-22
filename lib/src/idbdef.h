@@ -1,19 +1,19 @@
-#ifndef idbdef_h
-#define idbdef_h
+#ifndef IDBDEF_H
+#define IDBDEF_H
 
-#define		IDB$M_CRAM_ALLOC	0x1
-#define		IDB$M_VLE		0x2
-#define		IDB$M_NORESIZE		0x4
-#define		IDB$M_MCJ		0x8
-#define		IDB$M_SHARED_INT	0x10
-#define		IDB$M_DISTRIBUTED_INT	0x20
-#define		IDB$M_ISR_CALLABLE	0x40
-#define		IDB$K_BASE_LENGTH	56
-#define		IDB$C_BASE_LENGTH	56
+#define     IDB$M_CRAM_ALLOC    0x1
+#define     IDB$M_VLE       0x2
+#define     IDB$M_NORESIZE      0x4
+#define     IDB$M_MCJ       0x8
+#define     IDB$M_SHARED_INT    0x10
+#define     IDB$M_DISTRIBUTED_INT   0x20
+#define     IDB$M_ISR_CALLABLE  0x40
+#define     IDB$K_BASE_LENGTH   56
+#define     IDB$C_BASE_LENGTH   56
 
-#define		IDB$K_LENGTH		88
-#define		IDB$C_LENGTH		88
-#define		IDB$S_IDBDEF		88
+#define     IDB$K_LENGTH        88
+#define     IDB$C_LENGTH        88
+#define     IDB$S_IDBDEF        88
 
 struct _idb
 {

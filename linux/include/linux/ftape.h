@@ -42,11 +42,11 @@
 #include <linux/config.h>
 #include <linux/mtio.h>
 
-#define FT_SECTOR(x)		(x+1)	/* sector offset into real sector */
-#define FT_SECTOR_SIZE		1024
-#define FT_SECTORS_PER_SEGMENT	  32
-#define FT_ECC_SECTORS		   3
-#define FT_SEGMENT_SIZE		((FT_SECTORS_PER_SEGMENT - FT_ECC_SECTORS) * FT_SECTOR_SIZE)
+#define FT_SECTOR(x)        (x+1)   /* sector offset into real sector */
+#define FT_SECTOR_SIZE      1024
+#define FT_SECTORS_PER_SEGMENT    32
+#define FT_ECC_SECTORS         3
+#define FT_SEGMENT_SIZE     ((FT_SECTORS_PER_SEGMENT - FT_ECC_SECTORS) * FT_SECTOR_SIZE)
 #define FT_BUFF_SIZE    (FT_SECTORS_PER_SEGMENT * FT_SECTOR_SIZE)
 
 /*
@@ -60,7 +60,7 @@
 #define FTAPE_SEL_D     3
 #define FTAPE_SEL_MASK     3
 #define FTAPE_SEL(unit) ((unit) & FTAPE_SEL_MASK)
-#define FTAPE_NO_REWIND 4	/* mask for minor nr */
+#define FTAPE_NO_REWIND 4   /* mask for minor nr */
 
 /* the following two may be reported when MTIOCGET is requested ... */
 typedef union
@@ -98,10 +98,10 @@ typedef union
  * before giving up (and letting a higher level handle the error).
  */
 #ifdef TESTING
-#define FT_SOFT_RETRIES 1	   /* number of low level retries */
+#define FT_SOFT_RETRIES 1      /* number of low level retries */
 #define FT_RETRIES_ON_ECC_ERROR 3  /* ecc error when correcting segment */
 #else
-#define FT_SOFT_RETRIES 6	   /* number of low level retries (triple) */
+#define FT_SOFT_RETRIES 6      /* number of low level retries (triple) */
 #define FT_RETRIES_ON_ECC_ERROR 3  /* ecc error when correcting segment */
 #endif
 

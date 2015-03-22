@@ -10,10 +10,10 @@
  * This is the central lockd service.
  *
  * FIXME: Separate the lockd NFS server functionality from the lockd NFS
- * 	  client functionality. Oh why didn't Sun create two separate
- *	  services in the first place?
+ *    client functionality. Oh why didn't Sun create two separate
+ *    services in the first place?
  *
- * Authors:	Olaf Kirch (okir@monad.swb.de)
+ * Authors: Olaf Kirch (okir@monad.swb.de)
  *
  * Copyright (C) 1995, 1996 Olaf Kirch <okir@monad.swb.de>
  */
@@ -41,17 +41,17 @@
 #include <linux/lockd/lockd.h>
 #include <linux/nfs.h>
 
-#define NLMDBG_FACILITY		NLMDBG_SVC
-#define LOCKD_BUFSIZE		(1024 + NLMSSVC_XDRSIZE)
-#define ALLOWED_SIGS		(sigmask(SIGKILL))
+#define NLMDBG_FACILITY     NLMDBG_SVC
+#define LOCKD_BUFSIZE       (1024 + NLMSSVC_XDRSIZE)
+#define ALLOWED_SIGS        (sigmask(SIGKILL))
 
-extern struct svc_program	nlmsvc_program;
-struct nlmsvc_binding *		nlmsvc_ops;
+extern struct svc_program   nlmsvc_program;
+struct nlmsvc_binding *     nlmsvc_ops;
 static DECLARE_MUTEX(nlmsvc_sema);
-static unsigned int		nlmsvc_users;
-static pid_t			nlmsvc_pid;
-int				nlmsvc_grace_period;
-unsigned long			nlmsvc_timeout;
+static unsigned int     nlmsvc_users;
+static pid_t            nlmsvc_pid;
+int             nlmsvc_grace_period;
+unsigned long           nlmsvc_timeout;
 
 static DECLARE_MUTEX_LOCKED(lockd_start);
 static DECLARE_WAIT_QUEUE_HEAD(lockd_exit);
@@ -60,9 +60,9 @@ static DECLARE_WAIT_QUEUE_HEAD(lockd_exit);
  * Currently the following can be set only at insmod time.
  * Ideally, they would be accessible through the sysctl interface.
  */
-unsigned long			nlm_grace_period;
-unsigned long			nlm_timeout = LOCKD_DFLT_TIMEO;
-unsigned long			nlm_udpport, nlm_tcpport;
+unsigned long           nlm_grace_period;
+unsigned long           nlm_timeout = LOCKD_DFLT_TIMEO;
+unsigned long           nlm_udpport, nlm_tcpport;
 
 static unsigned long set_grace_period(void)
 {
@@ -89,8 +89,8 @@ static inline void clear_grace_period(void)
 static void
 lockd(struct svc_rqst *rqstp)
 {
-    struct svc_serv	*serv = rqstp->rq_server;
-    int		err = 0;
+    struct svc_serv *serv = rqstp->rq_server;
+    int     err = 0;
     unsigned long grace_period_expire;
 
     /* Lock module and set up kernel thread */
@@ -226,9 +226,9 @@ lockd(struct svc_rqst *rqstp)
 int
 lockd_up(void)
 {
-    static int		warned = 0;
-    struct svc_serv *	serv;
-    int			error = 0;
+    static int      warned = 0;
+    struct svc_serv *   serv;
+    int         error = 0;
 
     down(&nlmsvc_sema);
     /*
@@ -389,21 +389,21 @@ __setup("lockd.tcpport=", tcpport_set);
 /*
  * Define NLM program and procedures
  */
-static struct svc_version	nlmsvc_version1 =
+static struct svc_version   nlmsvc_version1 =
 {
     1, 17, nlmsvc_procedures, NULL
 };
-static struct svc_version	nlmsvc_version3 =
+static struct svc_version   nlmsvc_version3 =
 {
     3, 24, nlmsvc_procedures, NULL
 };
 #ifdef CONFIG_LOCKD_V4
-static struct svc_version	nlmsvc_version4 =
+static struct svc_version   nlmsvc_version4 =
 {
     4, 24, nlmsvc_procedures4, NULL
 };
 #endif
-static struct svc_version *	nlmsvc_version[] =
+static struct svc_version * nlmsvc_version[] =
 {
     NULL,
     &nlmsvc_version1,
@@ -414,15 +414,15 @@ static struct svc_version *	nlmsvc_version[] =
 #endif
 };
 
-static struct svc_stat		nlmsvc_stats;
+static struct svc_stat      nlmsvc_stats;
 
-#define NLM_NRVERS	(sizeof(nlmsvc_version)/sizeof(nlmsvc_version[0]))
-struct svc_program		nlmsvc_program =
+#define NLM_NRVERS  (sizeof(nlmsvc_version)/sizeof(nlmsvc_version[0]))
+struct svc_program      nlmsvc_program =
 {
-    NLM_PROGRAM,		/* program number */
-    1, NLM_NRVERS-1,	/* version range */
-    NLM_NRVERS,		/* number of entries in nlmsvc_version */
-    nlmsvc_version,		/* version table */
-    "lockd",		/* service name */
-    &nlmsvc_stats,		/* stats table */
+    NLM_PROGRAM,        /* program number */
+    1, NLM_NRVERS-1,    /* version range */
+    NLM_NRVERS,     /* number of entries in nlmsvc_version */
+    nlmsvc_version,     /* version table */
+    "lockd",        /* service name */
+    &nlmsvc_stats,      /* stats table */
 };

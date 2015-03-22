@@ -10,13 +10,13 @@
 #include <linux/atmioc.h>
 
 
-#define RFC1483LLC_LEN	8		/* LLC+OUI+PID = 8 */
-#define RFC1626_MTU	9180		/* RFC1626 default MTU */
+#define RFC1483LLC_LEN  8       /* LLC+OUI+PID = 8 */
+#define RFC1626_MTU 9180        /* RFC1626 default MTU */
 
-#define CLIP_DEFAULT_IDLETIMER 1200	/* 20 minutes, see RFC1755 */
-#define CLIP_CHECK_INTERVAL	 10	/* check every ten seconds */
+#define CLIP_DEFAULT_IDLETIMER 1200 /* 20 minutes, see RFC1755 */
+#define CLIP_CHECK_INTERVAL  10 /* check every ten seconds */
 
-#define	SIOCMKCLIP	_IO('a',ATMIOC_CLIP)	/* create IP interface */
+#define SIOCMKCLIP  _IO('a',ATMIOC_CLIP)    /* create IP interface */
 
 #ifdef __KERNEL__
 extern const unsigned char llc_oui[6];

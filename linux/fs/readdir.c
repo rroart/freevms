@@ -39,10 +39,10 @@ int vfs_readdir(struct file *file, filldir_t filler, void *buf)
 
 struct old_linux_dirent
 {
-    unsigned long	d_ino;
-    unsigned long	d_offset;
-    unsigned short	d_namlen;
-    char		d_name[1];
+    unsigned long   d_ino;
+    unsigned long   d_offset;
+    unsigned short  d_namlen;
+    char        d_name[1];
 };
 
 struct readdir_callback
@@ -100,10 +100,10 @@ out:
  */
 struct linux_dirent
 {
-    unsigned long	d_ino;
-    unsigned long	d_off;
-    unsigned short	d_reclen;
-    char		d_name[1];
+    unsigned long   d_ino;
+    unsigned long   d_off;
+    unsigned short  d_reclen;
+    char        d_name[1];
 };
 
 struct getdents_callback
@@ -121,7 +121,7 @@ static int filldir(void * __buf, const char * name, int namlen, loff_t offset,
     struct getdents_callback * buf = (struct getdents_callback *) __buf;
     int reclen = ROUND_UP(NAME_OFFSET(dirent) + namlen + 1);
 
-    buf->error = -EINVAL;	/* only used if we fail.. */
+    buf->error = -EINVAL;   /* only used if we fail.. */
     if (reclen > buf->count)
         return -EINVAL;
     dirent = buf->previous;
@@ -178,11 +178,11 @@ out:
  */
 struct linux_dirent64
 {
-    u64		d_ino;
-    s64		d_off;
-    unsigned short	d_reclen;
-    unsigned char	d_type;
-    char		d_name[0];
+    u64     d_ino;
+    s64     d_off;
+    unsigned short  d_reclen;
+    unsigned char   d_type;
+    char        d_name[0];
 };
 
 #define ROUND_UP64(x) (((x)+sizeof(u64)-1) & ~(sizeof(u64)-1))
@@ -202,7 +202,7 @@ static int filldir64(void * __buf, const char * name, int namlen, loff_t offset,
     struct getdents_callback64 * buf = (struct getdents_callback64 *) __buf;
     int reclen = ROUND_UP64(NAME_OFFSET(dirent) + namlen + 1);
 
-    buf->error = -EINVAL;	/* only used if we fail.. */
+    buf->error = -EINVAL;   /* only used if we fail.. */
     if (reclen > buf->count)
         return -EINVAL;
     dirent = buf->previous;

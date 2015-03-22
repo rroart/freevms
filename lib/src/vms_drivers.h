@@ -1,5 +1,5 @@
-#ifndef vms_drivers_h
-#define vms_drivers_h
+#ifndef VMS_DRIVERS_H
+#define VMS_DRIVERS_H
 
 //#include <builtins.h>
 
@@ -17,12 +17,12 @@
 #include <ioc_routines.h>
 #include <smp_routines.h>
 
-#define fork(fork_routine, fr3, fr4, fkb)			\
-          {							\
-            ((struct _fkb *) fkb)->fkb$l_fpc = fork_routine;	\
-            ((struct _fkb *) fkb)->fkb$l_fr3 = (long) fr3;	\
-            ((struct _fkb *) fkb)->fkb$l_fr4 = (long) fr4;	\
-            exe_std$queue_fork( (struct _fkb *) fkb );		\
+#define fork(fork_routine, fr3, fr4, fkb)           \
+          {                         \
+            ((struct _fkb *) fkb)->fkb$l_fpc = fork_routine;    \
+            ((struct _fkb *) fkb)->fkb$l_fr3 = (long) fr3;  \
+            ((struct _fkb *) fkb)->fkb$l_fr4 = (long) fr4;  \
+            exe_std$queue_fork( (struct _fkb *) fkb );      \
           }
 
 #endif

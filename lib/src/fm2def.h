@@ -1,5 +1,5 @@
-#ifndef fm2def_h
-#define fm2def_h
+#ifndef FM2DEF_H
+#define FM2DEF_H
 
 #define FM2$C_PLACEMENT 0
 #define FM2$C_FORMAT1 1

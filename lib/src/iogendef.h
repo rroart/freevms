@@ -1,5 +1,5 @@
-#ifndef iogendef_h
-#define iogendef_h
+#ifndef IOGENDEF_H
+#define IOGENDEF_H
 
 #define IOGEN$_LOAD 1
 #define IOGEN$_RELOAD 2
@@ -90,7 +90,7 @@ struct _autocfg
 struct _abm
 {
     int iogen$il_abm_adp;
-    int (*iogen$ps_abm_bsr)();
+    int (*iogen$ps_abm_bsr)(void);
 };
 
 #endif

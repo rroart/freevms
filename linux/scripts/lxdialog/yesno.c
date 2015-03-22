@@ -118,5 +118,5 @@ dialog_yesno (const char *title, const char *prompt, int height, int width)
     }
 
     delwin (dialog);
-    return -1;			/* ESC pressed */
+    return -1;          /* ESC pressed */
 }

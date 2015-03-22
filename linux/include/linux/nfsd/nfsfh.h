@@ -32,13 +32,13 @@
  */
 struct nfs_fhbase_old
 {
-    __u32		fb_dcookie;	/* dentry cookie - always 0xfeebbaca */
-    __u32		fb_ino;		/* our inode number */
-    __u32		fb_dirino;	/* dir inode number, 0 for directories */
-    __u32		fb_dev;		/* our device */
-    __u32		fb_xdev;
-    __u32		fb_xino;
-    __u32		fb_generation;
+    __u32       fb_dcookie; /* dentry cookie - always 0xfeebbaca */
+    __u32       fb_ino;     /* our inode number */
+    __u32       fb_dirino;  /* dir inode number, 0 for directories */
+    __u32       fb_dev;     /* our device */
+    __u32       fb_xdev;
+    __u32       fb_xino;
+    __u32       fb_generation;
 };
 
 /*
@@ -82,42 +82,42 @@ struct nfs_fhbase_old
  */
 struct nfs_fhbase_new
 {
-    __u8		fb_version;	/* == 1, even => nfs_fhbase_old */
-    __u8		fb_auth_type;
-    __u8		fb_fsid_type;
-    __u8		fb_fileid_type;
-    __u32		fb_auth[1];
-    /*	__u32		fb_fsid[0]; floating */
-    /*	__u32		fb_fileid[0]; floating */
+    __u8        fb_version; /* == 1, even => nfs_fhbase_old */
+    __u8        fb_auth_type;
+    __u8        fb_fsid_type;
+    __u8        fb_fileid_type;
+    __u32       fb_auth[1];
+    /*  __u32       fb_fsid[0]; floating */
+    /*  __u32       fb_fileid[0]; floating */
 };
 
 struct knfsd_fh
 {
-    unsigned int	fh_size;	/* significant for NFSv3.
-					 * Points to the current size while building
-					 * a new file handle
-					 */
+    unsigned int    fh_size;    /* significant for NFSv3.
+                     * Points to the current size while building
+                     * a new file handle
+                     */
     union
     {
-        struct nfs_fhbase_old	fh_old;
-        __u32			fh_pad[NFS3_FHSIZE/4];
-        struct nfs_fhbase_new	fh_new;
+        struct nfs_fhbase_old   fh_old;
+        __u32           fh_pad[NFS3_FHSIZE/4];
+        struct nfs_fhbase_new   fh_new;
     } fh_base;
 };
 
-#define ofh_dcookie		fh_base.fh_old.fb_dcookie
-#define ofh_ino			fh_base.fh_old.fb_ino
-#define ofh_dirino		fh_base.fh_old.fb_dirino
-#define ofh_dev			fh_base.fh_old.fb_dev
-#define ofh_xdev		fh_base.fh_old.fb_xdev
-#define ofh_xino		fh_base.fh_old.fb_xino
-#define ofh_generation		fh_base.fh_old.fb_generation
+#define ofh_dcookie     fh_base.fh_old.fb_dcookie
+#define ofh_ino         fh_base.fh_old.fb_ino
+#define ofh_dirino      fh_base.fh_old.fb_dirino
+#define ofh_dev         fh_base.fh_old.fb_dev
+#define ofh_xdev        fh_base.fh_old.fb_xdev
+#define ofh_xino        fh_base.fh_old.fb_xino
+#define ofh_generation      fh_base.fh_old.fb_generation
 
-#define	fh_version		fh_base.fh_new.fb_version
-#define	fh_fsid_type		fh_base.fh_new.fb_fsid_type
-#define	fh_auth_type		fh_base.fh_new.fb_auth_type
-#define	fh_fileid_type		fh_base.fh_new.fb_fileid_type
-#define	fh_auth			fh_base.fh_new.fb_auth
+#define fh_version      fh_base.fh_new.fb_version
+#define fh_fsid_type        fh_base.fh_new.fb_fsid_type
+#define fh_auth_type        fh_base.fh_new.fb_auth_type
+#define fh_fileid_type      fh_base.fh_new.fb_fileid_type
+#define fh_auth         fh_base.fh_new.fb_auth
 
 #ifdef __KERNEL__
 
@@ -150,34 +150,34 @@ static inline ino_t u32_to_ino_t(__u32 uino)
  */
 typedef struct svc_fh
 {
-    struct knfsd_fh		fh_handle;	/* FH data */
-    struct dentry *		fh_dentry;	/* validated dentry */
-    struct svc_export *	fh_export;	/* export pointer */
-    int			fh_maxsize;	/* max size for fh_handle */
+    struct knfsd_fh     fh_handle;  /* FH data */
+    struct dentry *     fh_dentry;  /* validated dentry */
+    struct svc_export * fh_export;  /* export pointer */
+    int         fh_maxsize; /* max size for fh_handle */
 
-    unsigned char		fh_locked;	/* inode locked by us */
+    unsigned char       fh_locked;  /* inode locked by us */
 
 #ifdef CONFIG_NFSD_V3
-    unsigned char		fh_post_saved;	/* post-op attrs saved */
-    unsigned char		fh_pre_saved;	/* pre-op attrs saved */
+    unsigned char       fh_post_saved;  /* post-op attrs saved */
+    unsigned char       fh_pre_saved;   /* pre-op attrs saved */
 
     /* Pre-op attributes saved during fh_lock */
-    __u64			fh_pre_size;	/* size before operation */
-    time_t			fh_pre_mtime;	/* mtime before oper */
-    time_t			fh_pre_ctime;	/* ctime before oper */
+    __u64           fh_pre_size;    /* size before operation */
+    time_t          fh_pre_mtime;   /* mtime before oper */
+    time_t          fh_pre_ctime;   /* ctime before oper */
 
     /* Post-op attributes saved in fh_unlock */
-    umode_t			fh_post_mode;	/* i_mode */
-    nlink_t			fh_post_nlink;	/* i_nlink */
-    uid_t			fh_post_uid;	/* i_uid */
-    gid_t			fh_post_gid;	/* i_gid */
-    __u64			fh_post_size;	/* i_size */
-    unsigned long		fh_post_blocks; /* i_blocks */
-    unsigned long		fh_post_blksize;/* i_blksize */
-    kdev_t			fh_post_rdev;	/* i_rdev */
-    time_t			fh_post_atime;	/* i_atime */
-    time_t			fh_post_mtime;	/* i_mtime */
-    time_t			fh_post_ctime;	/* i_ctime */
+    umode_t         fh_post_mode;   /* i_mode */
+    nlink_t         fh_post_nlink;  /* i_nlink */
+    uid_t           fh_post_uid;    /* i_uid */
+    gid_t           fh_post_gid;    /* i_gid */
+    __u64           fh_post_size;   /* i_size */
+    unsigned long       fh_post_blocks; /* i_blocks */
+    unsigned long       fh_post_blksize;/* i_blksize */
+    kdev_t          fh_post_rdev;   /* i_rdev */
+    time_t          fh_post_atime;  /* i_atime */
+    time_t          fh_post_mtime;  /* i_mtime */
+    time_t          fh_post_ctime;  /* i_ctime */
 #endif /* CONFIG_NFSD_V3 */
 
 } svc_fh;
@@ -203,10 +203,10 @@ inline static char * SVCFH_fmt(struct svc_fh *fhp)
 /*
  * Function prototypes
  */
-u32	fh_verify(struct svc_rqst *, struct svc_fh *, int, int);
-int	fh_compose(struct svc_fh *, struct svc_export *, struct dentry *, struct svc_fh *);
-int	fh_update(struct svc_fh *);
-void	fh_put(struct svc_fh *);
+u32 fh_verify(struct svc_rqst *, struct svc_fh *, int, int);
+int fh_compose(struct svc_fh *, struct svc_export *, struct dentry *, struct svc_fh *);
+int fh_update(struct svc_fh *);
+void    fh_put(struct svc_fh *);
 
 static __inline__ struct svc_fh *
 fh_copy(struct svc_fh *dst, struct svc_fh *src)
@@ -262,8 +262,8 @@ fill_post_wcc(struct svc_fh *fhp)
 
     fhp->fh_post_mode       = inode->i_mode;
     fhp->fh_post_nlink      = inode->i_nlink;
-    fhp->fh_post_uid	= inode->i_uid;
-    fhp->fh_post_gid	= inode->i_gid;
+    fhp->fh_post_uid    = inode->i_uid;
+    fhp->fh_post_gid    = inode->i_gid;
     fhp->fh_post_size       = inode->i_size;
     if (inode->i_blksize)
     {
@@ -283,7 +283,7 @@ fill_post_wcc(struct svc_fh *fhp)
     fhp->fh_post_saved      = 1;
 }
 #else
-#define	fill_pre_wcc(ignored)
+#define fill_pre_wcc(ignored)
 #define fill_post_wcc(notused)
 #endif /* CONFIG_NFSD_V3 */
 
@@ -297,8 +297,8 @@ fill_post_wcc(struct svc_fh *fhp)
 static inline void
 fh_lock(struct svc_fh *fhp)
 {
-    struct dentry	*dentry = fhp->fh_dentry;
-    struct inode	*inode;
+    struct dentry   *dentry = fhp->fh_dentry;
+    struct inode    *inode;
 
     dfprintk(FILEOP, "nfsd: fh_lock(%s) locked = %d\n",
              SVCFH_fmt(fhp), fhp->fh_locked);

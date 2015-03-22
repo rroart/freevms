@@ -190,29 +190,29 @@ static inline void *hfs_buffer_data(const hfs_buffer buffer)
 
 #undef BITNR
 #if defined(__BIG_ENDIAN)
-#	define BITNR(X)	((X)^31)
-#	if !defined(__constant_htonl)
-#		define __constant_htonl(x) (x)
-#	endif
-#	if !defined(__constant_htons)
-#		define __constant_htons(x) (x)
-#	endif
+#   define BITNR(X) ((X)^31)
+#   if !defined(__constant_htonl)
+#       define __constant_htonl(x) (x)
+#   endif
+#   if !defined(__constant_htons)
+#       define __constant_htons(x) (x)
+#   endif
 #elif defined(__LITTLE_ENDIAN)
-#	define BITNR(X)	((X)^7)
-#	if !defined(__constant_htonl)
-#		define __constant_htonl(x) \
+#   define BITNR(X) ((X)^7)
+#   if !defined(__constant_htonl)
+#       define __constant_htonl(x) \
         ((unsigned long int)((((unsigned long int)(x) & 0x000000ffU) << 24) | \
                              (((unsigned long int)(x) & 0x0000ff00U) <<  8) | \
                              (((unsigned long int)(x) & 0x00ff0000U) >>  8) | \
                              (((unsigned long int)(x) & 0xff000000U) >> 24)))
-#	endif
-#	if !defined(__constant_htons)
-#		define __constant_htons(x) \
+#   endif
+#   if !defined(__constant_htons)
+#       define __constant_htons(x) \
         ((unsigned short int)((((unsigned short int)(x) & 0x00ff) << 8) | \
                               (((unsigned short int)(x) & 0xff00) >> 8)))
-#	endif
+#   endif
 #else
-#	error "Don't know if bytes are big- or little-endian!"
+#   error "Don't know if bytes are big- or little-endian!"
 #endif
 
 static inline int hfs_clear_bit(int bitnr, hfs_u32 *lword)
@@ -239,26 +239,26 @@ static inline int hfs_test_bit(int bitnr, const hfs_u32 *lword)
  * some care on architectures like the DEC Alpha.
  *
  * In what follows:
- *	ns  = 16-bit integer in network byte-order w/ 16-bit alignment
- *	hs  = 16-bit integer in host byte-order w/ 16-bit alignment
- *	nl  = 32-bit integer in network byte-order w/ unknown alignment
- *	hl  = 32-bit integer in host byte-order w/ unknown alignment
- *	anl = 32-bit integer in network byte-order w/ 32-bit alignment
- *	ahl = 32-bit integer in host byte-order w/ 32-bit alignment
+ *  ns  = 16-bit integer in network byte-order w/ 16-bit alignment
+ *  hs  = 16-bit integer in host byte-order w/ 16-bit alignment
+ *  nl  = 32-bit integer in network byte-order w/ unknown alignment
+ *  hl  = 32-bit integer in host byte-order w/ unknown alignment
+ *  anl = 32-bit integer in network byte-order w/ 32-bit alignment
+ *  ahl = 32-bit integer in host byte-order w/ 32-bit alignment
  * Example: hfs_get_hl() gets an unaligned 32-bit integer converting
- *	it to host byte-order.
+ *  it to host byte-order.
  */
-#define hfs_get_hs(addr)	ntohs(*((hfs_u16 *)(addr)))
-#define hfs_get_ns(addr)	(*((hfs_u16 *)(addr)))
-#define hfs_get_hl(addr)	ntohl(get_unaligned((hfs_u32 *)(addr)))
-#define hfs_get_nl(addr)	get_unaligned((hfs_u32 *)(addr))
-#define hfs_get_ahl(addr)	ntohl(*((hfs_u32 *)(addr)))
-#define hfs_get_anl(addr)	(*((hfs_u32 *)(addr)))
-#define hfs_put_hs(val, addr) 	((void)(*((hfs_u16 *)(addr)) = ntohs(val)))
-#define hfs_put_ns(val, addr) 	((void)(*((hfs_u16 *)(addr)) = (val)))
-#define hfs_put_hl(val, addr) 	put_unaligned(htonl(val), (hfs_u32 *)(addr))
-#define hfs_put_nl(val, addr) 	put_unaligned((val), (hfs_u32 *)(addr))
-#define hfs_put_ahl(val, addr) 	((void)(*((hfs_u32 *)(addr)) = ntohl(val)))
-#define hfs_put_anl(val, addr) 	((void)(*((hfs_u32 *)(addr)) = (val)))
+#define hfs_get_hs(addr)    ntohs(*((hfs_u16 *)(addr)))
+#define hfs_get_ns(addr)    (*((hfs_u16 *)(addr)))
+#define hfs_get_hl(addr)    ntohl(get_unaligned((hfs_u32 *)(addr)))
+#define hfs_get_nl(addr)    get_unaligned((hfs_u32 *)(addr))
+#define hfs_get_ahl(addr)   ntohl(*((hfs_u32 *)(addr)))
+#define hfs_get_anl(addr)   (*((hfs_u32 *)(addr)))
+#define hfs_put_hs(val, addr)   ((void)(*((hfs_u16 *)(addr)) = ntohs(val)))
+#define hfs_put_ns(val, addr)   ((void)(*((hfs_u16 *)(addr)) = (val)))
+#define hfs_put_hl(val, addr)   put_unaligned(htonl(val), (hfs_u32 *)(addr))
+#define hfs_put_nl(val, addr)   put_unaligned((val), (hfs_u32 *)(addr))
+#define hfs_put_ahl(val, addr)  ((void)(*((hfs_u32 *)(addr)) = ntohl(val)))
+#define hfs_put_anl(val, addr)  ((void)(*((hfs_u32 *)(addr)) = (val)))
 
 #endif

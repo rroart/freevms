@@ -7,7 +7,7 @@ extern char x86_boot_params[2048];
 /*
  * This is set up by the setup-routine at boot-time
  */
-#define PARAM	((unsigned char *)x86_boot_params)
+#define PARAM   ((unsigned char *)x86_boot_params)
 #define SCREEN_INFO (*(struct screen_info *) (PARAM+0))
 #define EXT_MEM_K (*(unsigned short *) (PARAM+2))
 #define ALT_MEM_K (*(unsigned int *) (PARAM+0x1e0))
@@ -26,8 +26,8 @@ extern char x86_boot_params[2048];
 #define COMMAND_LINE saved_command_line
 #define COMMAND_LINE_SIZE 256
 
-#define RAMDISK_IMAGE_START_MASK  	0x07FF
-#define RAMDISK_PROMPT_FLAG		0x8000
-#define RAMDISK_LOAD_FLAG		0x4000
+#define RAMDISK_IMAGE_START_MASK    0x07FF
+#define RAMDISK_PROMPT_FLAG     0x8000
+#define RAMDISK_LOAD_FLAG       0x4000
 
 #endif

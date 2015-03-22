@@ -78,7 +78,7 @@
 number of unused buffer heads */
 
 /* Anti-deadlock ordering:
- *	lru_list_lock > hash_table_lock > unused_list_lock
+ *  lru_list_lock > hash_table_lock > unused_list_lock
  */
 
 #define BH_ENTRY(list) list_entry((list), struct buffer_head, b_inode_buffers)
@@ -123,17 +123,17 @@ union bdflush_param
 {
     struct
     {
-        int nfract;	/* Percentage of buffer cache dirty to
-				   activate bdflush */
-        int dummy1;	/* old "ndirty" */
-        int dummy2;	/* old "nrefill" */
-        int dummy3;	/* unused */
-        int interval;	/* jiffies delay between kupdate flushes */
-        int age_buffer;	/* Time for normal buffer to age before we flush it */
+        int nfract; /* Percentage of buffer cache dirty to
+                   activate bdflush */
+        int dummy1; /* old "ndirty" */
+        int dummy2; /* old "nrefill" */
+        int dummy3; /* unused */
+        int interval;   /* jiffies delay between kupdate flushes */
+        int age_buffer; /* Time for normal buffer to age before we flush it */
         int nfract_sync;/* Percentage of buffer cache dirty to
-				   activate bdflush synchronously */
-        int dummy4;	/* unused */
-        int dummy5;	/* unused */
+                   activate bdflush synchronously */
+        int dummy4; /* unused */
+        int dummy5; /* unused */
     } b_un;
     unsigned int data[N_PARAM];
 } bdf_prm = {{40, 0, 0, 0, 5*HZ, 30*HZ, 60, 0, 0}};
@@ -150,7 +150,7 @@ void fastcall unlock_buffer(struct buffer_head *bh)
     smp_mb__after_clear_bit();
     if (waitqueue_active(&bh->b_wait))
         wake_up(&bh->b_wait);
-    //		wake_up2(&bh->b_wait,PRI$_IOCOM);
+    //      wake_up2(&bh->b_wait,PRI$_IOCOM);
 }
 
 /*
@@ -286,7 +286,7 @@ asmlinkage long sys_sync(void)
 }
 
 /*
- *	filp may be NULL if called via the msync of a vma.
+ *  filp may be NULL if called via the msync of a vma.
  */
 
 int file_fsync(struct file *filp, struct dentry *dentry, int datasync)
@@ -522,12 +522,12 @@ void __bforget(struct buffer_head * buf)
 }
 
 /**
- *	bread() - reads a specified block and returns the bh
- *	@block: number of block
- *	@size: size (in bytes) to read
+ *  bread() - reads a specified block and returns the bh
+ *  @block: number of block
+ *  @size: size (in bytes) to read
  *
- *	Reads a specified block, and returns buffer head that
- *	contains it. It returns NULL if the block was unreadable.
+ *  Reads a specified block, and returns buffer head that
+ *  contains it. It returns NULL if the block was unreadable.
  */
 
 struct buffer_head * bread(kdev_t dev, int block, int size)
@@ -868,7 +868,7 @@ int block_read_full_page2(struct _fcb *inode,struct page *page, unsigned long pa
 
 #if 0
     SetPageUptodate(page);
-    //	 UnlockPage(page);
+    //   UnlockPage(page);
 #endif
 
     return 0;
@@ -951,7 +951,7 @@ int block_read_full_page3(struct _fcb * fcb,struct page *page, unsigned long pag
 
 #if 0
     SetPageUptodate(page);
-    //	 UnlockPage(page);
+    //   UnlockPage(page);
 #endif
 
     return 0;
@@ -1401,12 +1401,12 @@ int generic_direct_IO(int rw, struct _fcb * inode, struct kiobuf * iobuf, unsign
             ucb = vcb->vcb$l_rvt;
         sts = exe$qiow(EXT2_EF,(unsigned short)x2p->io_channel,type,&iosb,0,0,
                        bh.b_data,blocksize, bh.b_blocknr*vms_block_factor(i_blkbits),ucb->ucb$w_fill_0,0,0);
-        //		blocks[i] = bh.b_blocknr;
+        //      blocks[i] = bh.b_blocknr;
     }
 
     /* patch length to handle short I/O */
     iobuf->length = i * blocksize;
-    //	retval = brw_kiovec(rw, 1, &iobuf, FCB_DEV(inode), iobuf->blocks, blocksize);
+    //  retval = brw_kiovec(rw, 1, &iobuf, FCB_DEV(inode), iobuf->blocks, blocksize);
     /* restore orig length */
     iobuf->length = length;
 out:
@@ -1483,17 +1483,17 @@ static int wait_kio(int rw, int nr, struct buffer_head *bh[], int size)
 int brw_kiovec(int rw, int nr, struct kiobuf *iovec[],
                kdev_t dev, unsigned long b[], int size)
 {
-    int		err;
-    int		length;
-    int		transferred;
-    int		i;
-    int		bufind;
-    int		pageind;
-    int		bhind;
-    int		offset;
-    unsigned long	blocknr;
-    struct kiobuf *	iobuf = NULL;
-    struct page *	map;
+    int     err;
+    int     length;
+    int     transferred;
+    int     i;
+    int     bufind;
+    int     pageind;
+    int     bhind;
+    int     offset;
+    unsigned long   blocknr;
+    struct kiobuf * iobuf = NULL;
+    struct page *   map;
     struct buffer_head *tmp, **bhs = NULL;
 
     if (!nr)
@@ -1659,7 +1659,7 @@ int block_symlink(struct _fcb *inode, const char *symname, int len)
      * OTOH it's obviously correct and should make the page up-to-date.
      */
     err = block_read_full_page2(inode, page, 0);
-    //	wait_on_page(page);
+    //  wait_on_page(page);
     page_cache_release(page);
     if (err < 0)
         goto fail;
@@ -1678,8 +1678,8 @@ fail:
 /*
  * Can the buffer be thrown out?
  */
-#define BUFFER_BUSY_BITS	((1<<BH_Dirty) | (1<<BH_Lock))
-#define buffer_busy(bh)		(atomic_read(&(bh)->b_count) | ((bh)->b_state & BUFFER_BUSY_BITS))
+#define BUFFER_BUSY_BITS    ((1<<BH_Dirty) | (1<<BH_Lock))
+#define buffer_busy(bh)     (atomic_read(&(bh)->b_count) | ((bh)->b_state & BUFFER_BUSY_BITS))
 
 /* ================== Debugging =================== */
 

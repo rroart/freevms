@@ -1,5 +1,5 @@
-#ifndef cli_h
-#define cli_h
+#ifndef CLI_H
+#define CLI_H
 
 #define CDU$C_VERB 1
 #define CDU$C_TYPE 2
@@ -30,7 +30,6 @@
 #define CDU$M_LIST 0x20000
 #define CDU$M_REQUIRED 0x40000
 #define CDU$M_INTERNAL 0x80000 // cliroutine is such
-
 struct _cdu
 {
     int cdu$l_cfl;
@@ -72,37 +71,37 @@ static struct _cdu ** my_cdu=0x3f000004;
 static struct _cdu ** root_cdu=0x3f000008;
 static void ** comdsc = 0x3f00000c;
 #else
-static struct _cdu ** cur_cdu=0x3f000000;
-static struct _cdu ** my_cdu=0x3f000008;
-static struct _cdu ** root_cdu=0x3f000010;
+static struct _cdu ** cur_cdu = 0x3f000000;
+static struct _cdu ** my_cdu = 0x3f000008;
+static struct _cdu ** root_cdu = 0x3f000010;
 static void ** comdsc = 0x3f000018;
 #endif
 
-int mymymyuserfunc(int (*func)(),void * start, long count, int dum0, int dum1);
+int mymymyuserfunc(int (*func)(void), void * start, long count, int dum0, int dum1);
 cli_scan_bytes( char *bytes, int len );
 int load_elf(char * filename);
 long elf_get_symbol(char * filename, char * name);
 void * get_cli_int(char * c);
-cli_token(char * str, int * retlen);
-void initparser();
+int cli_token(char * str, int * retlen);
+void initparser(void);
 void push_cond_stack(int);
 void pop_cond_stack(void);
-get_prev_cond_stack(void);
-get_cond_stack(void);
-set_process(int argc, char**argv);
-show_device();
-show_logical(int argc, char**argv);
-set_working_set(int argc, char**argv);
-show_working_set();
-posix_spawn();
-void init_stringpool (void);
-char * cli_scan_string( const char * yy_str );
-int yylex ( void );
-int clilex ( void );
-int yyparse ();
+int get_prev_cond_stack(void);
+int get_cond_stack(void);
+int set_process(int argc, char**argv);
+void show_device(void);
+int show_logical(int argc, char**argv);
+int set_working_set(int argc, char**argv);
+int show_working_set(int argc, char**argv);
+void posix_spawn(void);
+void init_stringpool(void);
+char * cli_scan_string(const char * yy_str);
+int yylex(void);
+int clilex(void);
+int yyparse(void);
 int cliconditional(int key);
 int set_symbol(char * symstr, char * valstr);
-int is_user_mode();
-void * getparser();
+int is_user_mode(void);
+void * getparser(void);
 
 #endif

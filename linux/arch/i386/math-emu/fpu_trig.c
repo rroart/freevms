@@ -53,7 +53,7 @@ static int trig_arg(FPU_REG *st0_ptr, int even)
                     SIGN_POS);
 
     FPU_round_to_int(&tmp, tag);  /* Fortunately, this can't overflow
-				   to 2^64 */
+                   to 2^64 */
     q = significand(&tmp);
     if ( q )
     {
@@ -921,7 +921,7 @@ fprem_valid:
                 if ( exponent(&tmp) >= 0 )
                 {
                     FPU_round_to_int(&tmp, tag);  /* Fortunately, this can't
-						   overflow to 2^64 */
+                           overflow to 2^64 */
                     q = significand(&tmp);
 
                     rem_kernel(significand(&st0),
@@ -984,7 +984,7 @@ fprem_valid:
             reg_copy(&st0, &tmp);
             tmptag = st0_tag;
             N = (expdif & 0x0000001f) + 32;  /* This choice gives results
-					      identical to an AMD 486 */
+                          identical to an AMD 486 */
             setexponent16(&tmp, N);
             exp_1 = exponent16(&st1);
             setexponent16(&st1, 0);
@@ -996,7 +996,7 @@ fprem_valid:
             setsign(&tmp, sign);
 
             FPU_round_to_int(&tmp, tag);  /* Fortunately, this can't
-					   overflow to 2^64 */
+                       overflow to 2^64 */
 
             rem_kernel(significand(&st0),
                        &significand(&tmp),
@@ -1342,7 +1342,7 @@ both_valid:
 
             changesign(st1_ptr);
         }
-        else if ( arith_invalid(1) < 0 )	  /* log(negative) */
+        else if ( arith_invalid(1) < 0 )      /* log(negative) */
             return;
     }
 

@@ -105,9 +105,9 @@ extern __inline__ void dump_parport_state (char *str, struct parport *p)
     printk ("]\n");
     return;
 }
-#else	/* !DEBUG_PARPORT */
+#else   /* !DEBUG_PARPORT */
 #define dump_parport_state(args...)
-#endif	/* !DEBUG_PARPORT */
+#endif  /* !DEBUG_PARPORT */
 
 /* __parport_pc_frob_control differs from parport_pc_frob_control in that
  * it doesn't do any extra masking. */
@@ -125,7 +125,7 @@ static __inline__ unsigned char __parport_pc_frob_control (struct parport *p,
     ctr = (ctr & ~mask) ^ val;
     ctr &= priv->ctr_writable; /* only write writable bits. */
     outb (ctr, CONTROL (p));
-    priv->ctr = ctr;	/* Update soft copy */
+    priv->ctr = ctr;    /* Update soft copy */
     return ctr;
 }
 

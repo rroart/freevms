@@ -1,22 +1,22 @@
 /*
- *	Intel IO-APIC support for multi-Pentium hosts.
+ *  Intel IO-APIC support for multi-Pentium hosts.
  *
- *	Copyright (C) 1997, 1998, 1999, 2000 Ingo Molnar, Hajnalka Szabo
+ *  Copyright (C) 1997, 1998, 1999, 2000 Ingo Molnar, Hajnalka Szabo
  *
- *	Many thanks to Stig Venaas for trying out countless experimental
- *	patches and reporting/debugging problems patiently!
+ *  Many thanks to Stig Venaas for trying out countless experimental
+ *  patches and reporting/debugging problems patiently!
  *
- *	(c) 1999, Multiple IO-APIC support, developed by
- *	Ken-ichi Yaku <yaku@css1.kbnes.nec.co.jp> and
+ *  (c) 1999, Multiple IO-APIC support, developed by
+ *  Ken-ichi Yaku <yaku@css1.kbnes.nec.co.jp> and
  *      Hidemi Kishimoto <kisimoto@css1.kbnes.nec.co.jp>,
- *	further tested and cleaned up by Zach Brown <zab@redhat.com>
- *	and Ingo Molnar <mingo@redhat.com>
+ *  further tested and cleaned up by Zach Brown <zab@redhat.com>
+ *  and Ingo Molnar <mingo@redhat.com>
  *
- *	Fixes
- *	Maciej W. Rozycki	:	Bits for genuine 82489DX APICs;
- *					thanks to Eric Gilmore
- *					and Rolf G. Tews
- *					for testing these extensively
+ *  Fixes
+ *  Maciej W. Rozycki   :   Bits for genuine 82489DX APICs;
+ *                  thanks to Eric Gilmore
+ *                  and Rolf G. Tews
+ *                  for testing these extensively
  */
 
 #include <linux/mm.h>
@@ -87,31 +87,31 @@ static void add_pin_to_irq(unsigned int irq, int apic, int pin)
     entry->pin = pin;
 }
 
-#define __DO_ACTION(R, ACTION, FINAL)					\
-									\
-{									\
-	int pin;							\
-	struct irq_pin_list *entry = irq_2_pin + irq;			\
-									\
-	for (;;) {							\
-		unsigned int reg;					\
-		pin = entry->pin;					\
-		if (pin == -1)						\
-			break;						\
-		reg = io_apic_read(entry->apic, 0x10 + R + pin*2);	\
-		reg ACTION;						\
-		io_apic_modify(entry->apic, reg);			\
-		if (!entry->next)					\
-			break;						\
-		entry = irq_2_pin + entry->next;			\
-	}								\
-	FINAL;								\
+#define __DO_ACTION(R, ACTION, FINAL)                   \
+                                    \
+{                                   \
+    int pin;                            \
+    struct irq_pin_list *entry = irq_2_pin + irq;           \
+                                    \
+    for (;;) {                          \
+        unsigned int reg;                   \
+        pin = entry->pin;                   \
+        if (pin == -1)                      \
+            break;                      \
+        reg = io_apic_read(entry->apic, 0x10 + R + pin*2);  \
+        reg ACTION;                     \
+        io_apic_modify(entry->apic, reg);           \
+        if (!entry->next)                   \
+            break;                      \
+        entry = irq_2_pin + entry->next;            \
+    }                               \
+    FINAL;                              \
 }
 
-#define DO_ACTION(name,R,ACTION, FINAL)					\
-									\
-	static void name##_IO_APIC_irq (unsigned int irq)		\
-	__DO_ACTION(R, ACTION, FINAL)
+#define DO_ACTION(name,R,ACTION, FINAL)                 \
+                                    \
+    static void name##_IO_APIC_irq (unsigned int irq)       \
+    __DO_ACTION(R, ACTION, FINAL)
 
 DO_ACTION( __mask,             0, |= 0x00010000, io_apic_sync(entry->apic) )
 /* mask = 1 */
@@ -319,26 +319,26 @@ static int __init EISA_ELCR(unsigned int irq)
  * EISA conforming in the MP table, that means its trigger type must
  * be read in from the ELCR */
 
-#define default_EISA_trigger(idx)	(EISA_ELCR(mp_irqs[idx].mpc_srcbusirq))
-#define default_EISA_polarity(idx)	(0)
+#define default_EISA_trigger(idx)   (EISA_ELCR(mp_irqs[idx].mpc_srcbusirq))
+#define default_EISA_polarity(idx)  (0)
 
 /* ISA interrupts are always polarity zero edge triggered,
  * when listed as conforming in the MP table. */
 
-#define default_ISA_trigger(idx)	(0)
-#define default_ISA_polarity(idx)	(0)
+#define default_ISA_trigger(idx)    (0)
+#define default_ISA_polarity(idx)   (0)
 
 /* PCI interrupts are always polarity one level triggered,
  * when listed as conforming in the MP table. */
 
-#define default_PCI_trigger(idx)	(1)
-#define default_PCI_polarity(idx)	(1)
+#define default_PCI_trigger(idx)    (1)
+#define default_PCI_polarity(idx)   (1)
 
 /* MCA interrupts are always polarity zero level triggered,
  * when listed as conforming in the MP table. */
 
-#define default_MCA_trigger(idx)	(1)
-#define default_MCA_polarity(idx)	(0)
+#define default_MCA_trigger(idx)    (1)
+#define default_MCA_polarity(idx)   (0)
 
 static int __init MPBIOS_polarity(int idx)
 {
@@ -629,7 +629,7 @@ void __init setup_IO_APIC_irqs(void)
 
             entry.delivery_mode = dest_LowestPrio;
             entry.dest_mode = INT_DELIVERY_MODE;
-            entry.mask = 0;				/* enable IRQ */
+            entry.mask = 0;             /* enable IRQ */
             entry.dest.logical.logical_dest = TARGET_CPUS;
 
             idx = find_irq_entry(apic,pin,mp_INT);
@@ -708,7 +708,7 @@ void __init setup_ExtINT_IRQ0_pin(unsigned int pin, int vector)
      * to the first CPU.
      */
     entry.dest_mode = INT_DELIVERY_MODE;
-    entry.mask = 0;					/* unmask IRQ now */
+    entry.mask = 0;                 /* unmask IRQ now */
     entry.dest.logical.logical_dest = TARGET_CPUS;
     entry.delivery_mode = dest_LowestPrio;
     entry.polarity = 0;
@@ -776,7 +776,7 @@ void __init print_IO_APIC(void)
 
         printk(KERN_DEBUG ".... register #01: %08X\n", *(int *)&reg_01);
         printk(KERN_DEBUG ".......     : max redirection entries: %04X\n", reg_01.entries);
-        if (	(reg_01.entries != 0x0f) && /* older (Neptune) boards */
+        if (    (reg_01.entries != 0x0f) && /* older (Neptune) boards */
                 (reg_01.entries != 0x17) && /* typical ISA+PCI boards */
                 (reg_01.entries != 0x1b) && /* Compaq Proliant boards */
                 (reg_01.entries != 0x1f) && /* dual Xeon boards */
@@ -788,7 +788,7 @@ void __init print_IO_APIC(void)
 
         printk(KERN_DEBUG ".......     : PRQ implemented: %X\n", reg_01.PRQ);
         printk(KERN_DEBUG ".......     : IO APIC version: %04X\n", reg_01.version);
-        if (	(reg_01.version != 0x01) && /* 82489DX IO-APICs */
+        if (    (reg_01.version != 0x01) && /* 82489DX IO-APICs */
                 (reg_01.version != 0x10) && /* oldest IO-APICs */
                 (reg_01.version != 0x11) && /* Pentium/Pro IO-APICs */
                 (reg_01.version != 0x13) && /* Xeon IO-APICs */
@@ -896,7 +896,7 @@ void /*__init*/ print_local_APIC(void * dummy)
     v = apic_read(APIC_TASKPRI);
     printk(KERN_DEBUG "... APIC TASKPRI: %08x (%02x)\n", v, v & APIC_TPRI_MASK);
 
-    if (APIC_INTEGRATED(ver))  			/* !82489DX */
+    if (APIC_INTEGRATED(ver))           /* !82489DX */
     {
         v = apic_read(APIC_ARBPRI);
         printk(KERN_DEBUG "... APIC ARBPRI: %08x (%02x)\n", v,
@@ -923,9 +923,9 @@ void /*__init*/ print_local_APIC(void * dummy)
     printk(KERN_DEBUG "... APIC IRR field:\n");
     print_APIC_bitfield(APIC_IRR);
 
-    if (APIC_INTEGRATED(ver))  		/* !82489DX */
+    if (APIC_INTEGRATED(ver))       /* !82489DX */
     {
-        if (maxlvt > 3)		/* Due to the Pentium erratum 3AP. */
+        if (maxlvt > 3)     /* Due to the Pentium erratum 3AP. */
             apic_write(APIC_ESR, 0);
         v = apic_read(APIC_ESR);
         printk(KERN_DEBUG "... APIC ESR: %08x\n", v);
@@ -949,7 +949,7 @@ void /*__init*/ print_local_APIC(void * dummy)
     v = apic_read(APIC_LVT1);
     printk(KERN_DEBUG "... APIC LVT1: %08x\n", v);
 
-    if (maxlvt > 2)  			/* ERR is LVT#3. */
+    if (maxlvt > 2)             /* ERR is LVT#3. */
     {
         v = apic_read(APIC_LVTERR);
         printk(KERN_DEBUG "... APIC LVTERR: %08x\n", v);
@@ -1150,9 +1150,9 @@ static void __init setup_ioapic_ids_from_mpc (void)
  * There is a nasty bug in some older SMP boards, their mptable lies
  * about the timer IRQ. We do the following to work around the situation:
  *
- *	- timer IRQ defaults to IO-APIC IRQ
- *	- if this function detects that timer IRQs are defunct, then we fall
- *	  back to ISA timer IRQs
+ *  - timer IRQ defaults to IO-APIC IRQ
+ *  - if this function detects that timer IRQs are defunct, then we fall
+ *    back to ISA timer IRQs
  */
 static int __init timer_irq_works(void)
 {
@@ -1222,7 +1222,7 @@ static unsigned int startup_edge_ioapic_irq(unsigned int irq)
     return was_pending;
 }
 
-#define shutdown_edge_ioapic_irq	disable_edge_ioapic_irq
+#define shutdown_edge_ioapic_irq    disable_edge_ioapic_irq
 
 /*
  * Once we have recorded IRQ_PENDING already, we can mask the
@@ -1264,9 +1264,9 @@ static unsigned int startup_level_ioapic_irq (unsigned int irq)
     return 0; /* don't check for pending */
 }
 
-#define shutdown_level_ioapic_irq	mask_IO_APIC_irq
-#define enable_level_ioapic_irq		unmask_IO_APIC_irq
-#define disable_level_ioapic_irq	mask_IO_APIC_irq
+#define shutdown_level_ioapic_irq   mask_IO_APIC_irq
+#define enable_level_ioapic_irq     unmask_IO_APIC_irq
+#define disable_level_ioapic_irq    mask_IO_APIC_irq
 
 static void end_level_ioapic_irq (unsigned int irq)
 {
@@ -1456,8 +1456,8 @@ static void enable_NMI_through_LVT0 (void * dummy)
 
     ver = apic_read(APIC_LVR);
     ver = GET_APIC_VERSION(ver);
-    v = APIC_DM_NMI;			/* unmask and set to NMI */
-    if (!APIC_INTEGRATED(ver))		/* 82489DX */
+    v = APIC_DM_NMI;            /* unmask and set to NMI */
+    if (!APIC_INTEGRATED(ver))      /* 82489DX */
         v |= APIC_LVT_LEVEL_TRIGGER;
     apic_write_around(APIC_LVT0, v);
 }
@@ -1507,8 +1507,8 @@ static inline void unlock_ExtINT_logic(void)
 
     memset(&entry1, 0, sizeof(entry1));
 
-    entry1.dest_mode = 0;			/* physical delivery */
-    entry1.mask = 0;			/* unmask IRQ now */
+    entry1.dest_mode = 0;           /* physical delivery */
+    entry1.mask = 0;            /* unmask IRQ now */
     entry1.dest.physical.physical_dest = hard_smp_processor_id();
     entry1.delivery_mode = dest_ExtINT;
     entry1.polarity = entry0.polarity;
@@ -1636,7 +1636,7 @@ static inline void check_timer(void)
 
     disable_8259A_irq(0);
     irq_desc[0].handler = &lapic_irq_type;
-    apic_write_around(APIC_LVT0, APIC_DM_FIXED | vector);	/* Fixed mode */
+    apic_write_around(APIC_LVT0, APIC_DM_FIXED | vector);   /* Fixed mode */
     enable_8259A_irq(0);
 
     if (timer_irq_works())
@@ -1679,7 +1679,7 @@ static inline void check_timer(void)
  * Additionally, something is definitely wrong with irq9
  * on PIIX4 boards.
  */
-#define PIC_IRQS	(1<<2)
+#define PIC_IRQS    (1<<2)
 
 void __init setup_IO_APIC(void)
 {

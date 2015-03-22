@@ -6,7 +6,7 @@
  */
 
 #define USHRT_MAX 0xffff
-#define SEQ_MULTIPLIER	(IPCMNI)
+#define SEQ_MULTIPLIER  (IPCMNI)
 
 void sem_init (void);
 void msg_init (void);
@@ -103,7 +103,7 @@ void ipc64_perm_to_ipc_perm(struct ipc64_perm *in, struct ipc_perm *out);
 
 #ifdef __ia64__
 /* On IA-64, we always use the "64-bit version" of the IPC structures.  */
-# define ipc_parse_version(cmd)	IPC_64
+# define ipc_parse_version(cmd) IPC_64
 #else
 int ipc_parse_version (int *cmd);
 #endif

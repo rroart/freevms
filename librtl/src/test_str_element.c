@@ -1,27 +1,27 @@
 /*
  * test_str_element.c
  *
- *	Test program for str$element function
+ *  Test program for str$element function
  *
  * Notes:
  *
- *	This program should be run using the Free-VMS packages
- *	'str$' function str$element, Vax/VMS's, and Alpha/VMS's to make
- *	sure they all happily work the same.
+ *  This program should be run using the Free-VMS packages
+ *  'str$' function str$element, Vax/VMS's, and Alpha/VMS's to make
+ *  sure they all happily work the same.
  *
  * History:
  *
- *	Feb 7, 1997 - Christof Zeile
- *	Initial version, based on Kevin Handy's teststr.c
- *	Function testanal is Kevin Handy's version, unchanged
+ *  Feb 7, 1997 - Christof Zeile
+ *  Initial version, based on Kevin Handy's teststr.c
+ *  Function testanal is Kevin Handy's version, unchanged
  *
- *	Feb 10, 1997 - Kevin Handy
- *		Change SS$_NORMAL to STR$_NORMAL so I don't need
- *		to copy SSDEF.H across.
- *		Use '%ld' instead of '%d' several places to quiet gcc.
+ *  Feb 10, 1997 - Kevin Handy
+ *      Change SS$_NORMAL to STR$_NORMAL so I don't need
+ *      to copy SSDEF.H across.
+ *      Use '%ld' instead of '%d' several places to quiet gcc.
  *
- *	Mar 23, 2005 - Andrew Allison
- *		Added casts to pass values to anacond as unsigned long
+ *  Mar 23, 2005 - Andrew Allison
+ *      Added casts to pass values to anacond as unsigned long
  *
  */
 

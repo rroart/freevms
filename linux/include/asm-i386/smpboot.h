@@ -45,10 +45,10 @@ extern volatile int cpu_2_physical_apicid[];
 #define cpu_to_logical_apicid(cpu) cpu_2_logical_apicid[cpu]
 #define physical_apicid_to_cpu(apicid) physical_apicid_2_cpu[apicid]
 #define cpu_to_physical_apicid(cpu) cpu_2_physical_apicid[cpu]
-#ifdef CONFIG_MULTIQUAD			/* use logical IDs to bootstrap */
+#ifdef CONFIG_MULTIQUAD         /* use logical IDs to bootstrap */
 #define boot_apicid_to_cpu(apicid) logical_apicid_2_cpu[apicid]
 #define cpu_to_boot_apicid(cpu) cpu_2_logical_apicid[cpu]
-#else /* !CONFIG_MULTIQUAD */		/* use physical IDs to bootstrap */
+#else /* !CONFIG_MULTIQUAD */       /* use physical IDs to bootstrap */
 #define boot_apicid_to_cpu(apicid) physical_apicid_2_cpu[apicid]
 #define cpu_to_boot_apicid(cpu) cpu_2_physical_apicid[cpu]
 #endif /* CONFIG_MULTIQUAD */

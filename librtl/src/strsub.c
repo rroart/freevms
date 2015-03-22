@@ -1,8 +1,8 @@
 
 /*
- *	strsub.c
+ *  strsub.c
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,61 +20,61 @@
  *
  *The author may be contacted at freevms@sympatico.ca
  *
- *	Andrew Allison
- *	50 Denlaw Road
- *	London, Ont
- *	Canada
- *	N6G 3L4
+ *  Andrew Allison
+ *  50 Denlaw Road
+ *  London, Ont
+ *  Canada
+ *  N6G 3L4
  *
  */
 
 /*
  * str.c
  *
- *	Code for VAX STR$ routines
+ *  Code for VAX STR$ routines
  *
  * Description:
  *
- *	This file contains various 'str$' functions equivalent
- *	to those available in Vax/VMS string library.
+ *  This file contains various 'str$' functions equivalent
+ *  to those available in Vax/VMS string library.
  *
  * Bugs:
  *
- *	Not compatible at the binary level.
+ *  Not compatible at the binary level.
  *
- *	No seperate "string zone" to allocate memory from,
- *	uses malloc/free instead.
+ *  No seperate "string zone" to allocate memory from,
+ *  uses malloc/free instead.
  *
- *	Some versions of realloc are broken! Some don't like to be
- *	called hundreds of times.  The program may
- *	crash with a segmentation fault in such a case.
+ *  Some versions of realloc are broken! Some don't like to be
+ *  called hundreds of times.  The program may
+ *  crash with a segmentation fault in such a case.
  *
- *	I probibly should be using dsc$descriptor instead of
- *	dsc$descriptor_s, but I prefer to have the type 'char*'
- *	instead of 'void*' which is the only difference.
+ *  I probibly should be using dsc$descriptor instead of
+ *  dsc$descriptor_s, but I prefer to have the type 'char*'
+ *  instead of 'void*' which is the only difference.
  *
- *	Not worrying about the dsc$b_dtype field yet. Assumes it
- *	will always be type DSC$K_DTYPE_T (character coded text).
- *	Type V should mean size is in bits, and P means size is in
- *	digits (4 bit nibbles).
+ *  Not worrying about the dsc$b_dtype field yet. Assumes it
+ *  will always be type DSC$K_DTYPE_T (character coded text).
+ *  Type V should mean size is in bits, and P means size is in
+ *  digits (4 bit nibbles).
  *
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design. Spelling errors are
- *		not my fault! Someone must have snuck them in
- *		there when I wasn't looking.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design. Spelling errors are
+ *      not my fault! Someone must have snuck them in
+ *      there when I wasn't looking.
  *
- *	Feb 4, 1997 - Kevin Handy
- *		Added a 'return STR$_ILLSTRCLA' so that compiling
- *		with '-Wall' won't display errors.
+ *  Feb 4, 1997 - Kevin Handy
+ *      Added a 'return STR$_ILLSTRCLA' so that compiling
+ *      with '-Wall' won't display errors.
  *
  *      Sep 10, 2003 - Andrew Allison
  *              Wrote str$sub code
  *
- *	Feb 19, 2004 - Andrew Allison
- *		Changed malloc to calloc to initialize memory
+ *  Feb 19, 2004 - Andrew Allison
+ *      Changed malloc to calloc to initialize memory
  */
 
 #include <stdio.h>
@@ -92,7 +92,7 @@
 /*************************************************************
  * str$sub
  *
- *	Subtract two decimal strings of digits
+ *  Subtract two decimal strings of digits
  *
  *      Fixed length output string results are blank padded or truncated
  *      Varying length output length is set or truncated
@@ -103,31 +103,31 @@
  *
  *       1,   23, +12345,  0,   -34,5432112, out,out,out
  *
- * 	Input
- *		digits	       65,536 	string portion of number
- *		exp	2,147,483,648	power of 10 to obtain value of number
- *		sign			sign of number 0 pos 1 neg
- *		Total   2,147,549,184
+ *  Input
+ *      digits         65,536   string portion of number
+ *      exp 2,147,483,648   power of 10 to obtain value of number
+ *      sign            sign of number 0 pos 1 neg
+ *      Total   2,147,549,184
  *
- *		value = sign digits * 10 ^^ exp
- *	Returns
- * 		STR$_NORMAL
- *		STR_TRU		Truncation
- *	Signal
- *		LIB$_INVARG	Invalid Argument
- *		STR$_FATINTERR  Internal Error
- * 		STR$_ILLSTRCLA	Illegal string Class
- *		STR$_INSVIRMEM	Insufficient virtual memory
- *		STR$_WRONUMARG	Wrong number of arguments
- *	Bugs
- *		You could create a much more elegant solution seeing if
- *		the numbers actually overlap befor going down the brute
- *		force road
+ *      value = sign digits * 10 ^^ exp
+ *  Returns
+ *      STR$_NORMAL
+ *      STR_TRU     Truncation
+ *  Signal
+ *      LIB$_INVARG Invalid Argument
+ *      STR$_FATINTERR  Internal Error
+ *      STR$_ILLSTRCLA  Illegal string Class
+ *      STR$_INSVIRMEM  Insufficient virtual memory
+ *      STR$_WRONUMARG  Wrong number of arguments
+ *  Bugs
+ *      You could create a much more elegant solution seeing if
+ *      the numbers actually overlap befor going down the brute
+ *      force road
  */
 #define MAXSTR 132000
-#define MAXUINT16	65536
-#define	POS 0
-#define	NEG 1
+#define MAXUINT16   65536
+#define POS 0
+#define NEG 1
 #define REV 0
 #define NORM 1
 #define FALSE 0
@@ -145,16 +145,16 @@ unsigned long str$sub (const unsigned long *asign,
                        long *cexp,
                        struct dsc$descriptor_s *cdigits)
 {
-    unsigned short	s1_len,  s2_len,  s3_len, c_len;
-    char		*s1_ptr, *s2_ptr, *s3_ptr;
-    unsigned long  	index, max_len, min_len;
-    int		i, j, k, l;
-    unsigned long	status;
-    signed long	min_exp, max_exp, a_size, b_size, max_size, min_size;
-    char 		ctemp;
-    int		sum, borrow, order, result;
-    int		a_not_zero,b_not_zero,c_not_zero;
-    unsigned long 	plus_sign;
+    unsigned short  s1_len,  s2_len,  s3_len, c_len;
+    char        *s1_ptr, *s2_ptr, *s3_ptr;
+    unsigned long   index, max_len, min_len;
+    int     i, j, k, l;
+    unsigned long   status;
+    signed long min_exp, max_exp, a_size, b_size, max_size, min_size;
+    char        ctemp;
+    int     sum, borrow, order, result;
+    int     a_not_zero,b_not_zero,c_not_zero;
+    unsigned long   plus_sign;
     char            *a, *b, *c;
 
     status = STR$_NORMAL;
@@ -180,7 +180,7 @@ unsigned long str$sub (const unsigned long *asign,
         status = STR$_INSVIRMEM;
     }
 
-//	Check the sign field is 1 or 0
+//  Check the sign field is 1 or 0
     if ( *asign == 1 || *asign == 0 )
         ;
     else
@@ -191,15 +191,15 @@ unsigned long str$sub (const unsigned long *asign,
     else
         status = LIB$_INVARG;
 
-//	We need to find which is larger a or b to set up formula
-//	Get the length of the input strings and how much room for the output
+//  We need to find which is larger a or b to set up formula
+//  Get the length of the input strings and how much room for the output
     str$analyze_sdesc (adigits, &s1_len, &s1_ptr);
     str$analyze_sdesc (bdigits, &s2_len, &s2_ptr);
     str$analyze_sdesc (cdigits, &s3_len, &s3_ptr);
-//	strcpy (s3_ptr,"0");
+//  strcpy (s3_ptr,"0");
     str$free1_dx (cdigits);
 
-// 	Quick abort
+//  Quick abort
     if (status != STR$_NORMAL)
     {
         free(a);
@@ -220,7 +220,7 @@ unsigned long str$sub (const unsigned long *asign,
     str$analyze_sdesc (adigits, &s1_len, &s1_ptr);
     str$analyze_sdesc (bdigits, &s2_len, &s2_ptr);
 
-//	Copy input strings to working storage
+//  Copy input strings to working storage
     for (i = 0; i < s1_len; i++ )
     {
         a[i] = s1_ptr[i];
@@ -239,10 +239,10 @@ unsigned long str$sub (const unsigned long *asign,
     }
     max_len = ( s1_len > s2_len ) ? s1_len : s2_len;
 
-//	Set the output exponent
+//  Set the output exponent
     *cexp = min_exp;
 
-//	Add zero's to the end of the number for remaining exponent
+//  Add zero's to the end of the number for remaining exponent
     for ( i = *aexp; i > (int) (min_exp); i--)
     {
         a[s1_len + *aexp - 1 ] = '0';
@@ -252,7 +252,7 @@ unsigned long str$sub (const unsigned long *asign,
         b[s2_len + *bexp - 1] = '0';
     }
 
-// 	New adjusted string length with zero's
+//  New adjusted string length with zero's
     i = (int) s1_len + (int) *aexp - (int) min_exp;
     j = (int) s2_len + (int) *bexp - (int) min_exp;
 
@@ -264,27 +264,27 @@ unsigned long str$sub (const unsigned long *asign,
 
     switch  (result )
     {
-// 	absolute (a) less than absolute (b)
+//  absolute (a) less than absolute (b)
     case -1:
-//		(-1) - (-2) = 1 = +(b-a)
+//      (-1) - (-2) = 1 = +(b-a)
         if ((*asign == NEG) && (*bsign == NEG))
         {
             *csign = POS;
             order  = REV;
         }
-//	 	1 - 2 = (-1) = -(b-a)
+//      1 - 2 = (-1) = -(b-a)
         if ((*asign == POS) && (*bsign == POS))
         {
             *csign = NEG;
             order  = REV;
         }
-//	 	1  - (-2) =  1 = +(b-a)
+//      1  - (-2) =  1 = +(b-a)
         if ((*asign == POS) && (*bsign == NEG))
         {
             *csign = POS;
             order  = REV;
         }
-//		(-1) - 2 = -3 =	-(a+b)
+//      (-1) - 2 = -3 = -(a+b)
         if ((*asign == NEG) && (*bsign == POS))
         {
             plus_sign = 0;
@@ -298,15 +298,15 @@ unsigned long str$sub (const unsigned long *asign,
             return status;
         }
         break;
-// 	absolute (a) equals absolute (b)
+//  absolute (a) equals absolute (b)
     case  0:
-//		2 - 2 = 0	zero
+//      2 - 2 = 0   zero
         if ((*asign == POS) && (*bsign == POS))
         {
             *csign = POS;
             order  = NORM;
         }
-//		2 - (-2) = 4	+(a+b)
+//      2 - (-2) = 4    +(a+b)
         if ((*asign == POS) && (*bsign == NEG))
         {
             plus_sign = 0;
@@ -319,7 +319,7 @@ unsigned long str$sub (const unsigned long *asign,
             free(c);
             return status;
         }
-//		-2 - 2 = -4	-(a+b)
+//      -2 - 2 = -4 -(a+b)
         if ((*asign == NEG) && (*bsign == POS))
         {
             plus_sign = 0;
@@ -332,7 +332,7 @@ unsigned long str$sub (const unsigned long *asign,
             free(c);
             return status;
         }
-//		-2 - -2 = 0	zero
+//      -2 - -2 = 0 zero
 
         if ((*asign == NEG) && (*bsign == NEG))
         {
@@ -340,21 +340,21 @@ unsigned long str$sub (const unsigned long *asign,
             order  = NORM;
         }
         break;
-//	absolute (a) greater than absolute (b)
+//  absolute (a) greater than absolute (b)
     case  1:
-//		-2 - -1	= -1	-(a-b)
+//      -2 - -1 = -1    -(a-b)
         if ((*asign == NEG) && (*bsign == NEG))
         {
             *csign = NEG;
             order = NORM;
         }
-//		2 - 1 = 1	+(a-b)
+//      2 - 1 = 1   +(a-b)
         if ((*asign == POS) && (*bsign == POS))
         {
             *csign = POS;
             order = NORM;
         }
-//		-2 - 1	-3	-(a+b)
+//      -2 - 1  -3  -(a+b)
         if ((*asign == NEG) && (*bsign == POS))
         {
             plus_sign = 0;
@@ -367,7 +367,7 @@ unsigned long str$sub (const unsigned long *asign,
             free(c);
             return status;
         }
-//		2 - -1 = 3	+(a+b)
+//      2 - -1 = 3  +(a+b)
         if ((*asign == POS) && (*bsign == NEG))
         {
             plus_sign = 0;
@@ -392,9 +392,9 @@ unsigned long str$sub (const unsigned long *asign,
     borrow =  0;
     ctemp  = '0';
 
-// 	New max string length
+//  New max string length
     max_len = ( i > j ) ? i : j ;
-//	Start Subtracting
+//  Start Subtracting
     for (k =(int) max_len; k > 0; k-- )
     {
         if ( order == NORM )
@@ -410,7 +410,7 @@ unsigned long str$sub (const unsigned long *asign,
             {
                 if ( b[j-1] > a[i-1] )
                 {
-//	Borrowing
+//  Borrowing
                     for ( l = i; l > 1; l-- )
                         if (( a[l-2] ) > '0' )
                         {
@@ -465,7 +465,7 @@ unsigned long str$sub (const unsigned long *asign,
         }
     }
 
-//	Truncate output sum string to 65536 MAXUINT16
+//  Truncate output sum string to 65536 MAXUINT16
     if ( max_len > MAXUINT16 )
     {
         status = STR$_TRU;

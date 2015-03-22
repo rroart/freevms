@@ -19,11 +19,11 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  *
  *  Goal-directed block allocation by Stephen Tweedie
- * 	(sct@dcs.ed.ac.uk), 1993, 1998
+ *  (sct@dcs.ed.ac.uk), 1993, 1998
  *  Big-endian to little-endian byte-swapping/bitmaps by
  *        David S. Miller (davem@caip.rutgers.edu), 1995
  *  64-bit file support on 64-bit platforms by Jakub Jelinek
- * 	(jj@sunsite.ms.mff.cuni.cz)
+ *  (jj@sunsite.ms.mff.cuni.cz)
  *
  *  Assorted race fixes, rewrite of ext2_get_block() by Al Viro, 2000
  */
@@ -73,7 +73,7 @@ void ext2_delete_inode (struct _vcb * vcb, struct _fcb * inode)
             ino == EXT2_ACL_IDX_INO ||
             ino == EXT2_ACL_DATA_INO)
         goto no_delete;
-    inode->u.ext2_i.i_dtime	= CURRENT_TIME;
+    inode->u.ext2_i.i_dtime = CURRENT_TIME;
 #endif
     mark_inode_dirty(inode);
     ext2_update_inode(vcb, inode, 1 /*IS_SYNC(inode)*/);
@@ -86,7 +86,7 @@ void ext2_delete_inode (struct _vcb * vcb, struct _fcb * inode)
     return;
 no_delete:
     unlock_kernel();
-    clear_inode(inode);	/* We must guarantee clearing of inode... */
+    clear_inode(inode); /* We must guarantee clearing of inode... */
 }
 
 void ext2_discard_prealloc (struct _fcb * inode)
@@ -149,8 +149,8 @@ static int ext2_alloc_block (struct _vcb * vcb, struct _fcb * inode, unsigned lo
 
 typedef struct
 {
-    u32	*p;
-    u32	key;
+    u32 *p;
+    u32 key;
     struct buffer_head *bh;
 } Indirect;
 
@@ -168,22 +168,22 @@ static inline int verify_chain(Indirect *from, Indirect *to)
 }
 
 /**
- *	ext2_block_to_path - parse the block number into array of offsets
- *	@inode: inode in question (we are only interested in its superblock)
- *	@i_block: block number to be parsed
- *	@offsets: array to store the offsets in
+ *  ext2_block_to_path - parse the block number into array of offsets
+ *  @inode: inode in question (we are only interested in its superblock)
+ *  @i_block: block number to be parsed
+ *  @offsets: array to store the offsets in
  *
- *	To store the locations of file's data ext2 uses a data structure common
- *	for UNIX filesystems - tree of pointers anchored in the inode, with
- *	data blocks at leaves and indirect blocks in intermediate nodes.
- *	This function translates the block number into path in that tree -
- *	return value is the path length and @offsets[n] is the offset of
- *	pointer to (n+1)th node in the nth one. If @block is out of range
- *	(negative or too large) warning is printed and zero returned.
+ *  To store the locations of file's data ext2 uses a data structure common
+ *  for UNIX filesystems - tree of pointers anchored in the inode, with
+ *  data blocks at leaves and indirect blocks in intermediate nodes.
+ *  This function translates the block number into path in that tree -
+ *  return value is the path length and @offsets[n] is the offset of
+ *  pointer to (n+1)th node in the nth one. If @block is out of range
+ *  (negative or too large) warning is printed and zero returned.
  *
- *	Note: function doesn't find node addresses, so no IO is needed. All
- *	we need to know is the capacity of indirect blocks (taken from the
- *	inode->i_sb).
+ *  Note: function doesn't find node addresses, so no IO is needed. All
+ *  we need to know is the capacity of indirect blocks (taken from the
+ *  inode->i_sb).
  */
 
 /*
@@ -240,33 +240,33 @@ static int ext2_block_to_path(struct _vcb * vcb, struct _fcb *inode, long i_bloc
 }
 
 /**
- *	ext2_get_branch - read the chain of indirect blocks leading to data
- *	@inode: inode in question
- *	@depth: depth of the chain (1 - direct pointer, etc.)
- *	@offsets: offsets of pointers in inode/indirect blocks
- *	@chain: place to store the result
- *	@err: here we store the error value
+ *  ext2_get_branch - read the chain of indirect blocks leading to data
+ *  @inode: inode in question
+ *  @depth: depth of the chain (1 - direct pointer, etc.)
+ *  @offsets: offsets of pointers in inode/indirect blocks
+ *  @chain: place to store the result
+ *  @err: here we store the error value
  *
- *	Function fills the array of triples <key, p, bh> and returns %NULL
- *	if everything went OK or the pointer to the last filled triple
- *	(incomplete one) otherwise. Upon the return chain[i].key contains
- *	the number of (i+1)-th block in the chain (as it is stored in memory,
- *	i.e. little-endian 32-bit), chain[i].p contains the address of that
- *	number (it points into struct inode for i==0 and into the bh->b_data
- *	for i>0) and chain[i].bh points to the buffer_head of i-th indirect
- *	block for i>0 and NULL for i==0. In other words, it holds the block
- *	numbers of the chain, addresses they were taken from (and where we can
- *	verify that chain did not change) and buffer_heads hosting these
- *	numbers.
+ *  Function fills the array of triples <key, p, bh> and returns %NULL
+ *  if everything went OK or the pointer to the last filled triple
+ *  (incomplete one) otherwise. Upon the return chain[i].key contains
+ *  the number of (i+1)-th block in the chain (as it is stored in memory,
+ *  i.e. little-endian 32-bit), chain[i].p contains the address of that
+ *  number (it points into struct inode for i==0 and into the bh->b_data
+ *  for i>0) and chain[i].bh points to the buffer_head of i-th indirect
+ *  block for i>0 and NULL for i==0. In other words, it holds the block
+ *  numbers of the chain, addresses they were taken from (and where we can
+ *  verify that chain did not change) and buffer_heads hosting these
+ *  numbers.
  *
- *	Function stops when it stumbles upon zero pointer (absent block)
- *		(pointer to last triple returned, *@err == 0)
- *	or when it gets an IO error reading an indirect block
- *		(ditto, *@err == -EIO)
- *	or when it notices that chain had been changed while it was reading
- *		(ditto, *@err == -EAGAIN)
- *	or when it reads all @depth-1 indirect blocks successfully and finds
- *	the whole chain, all way to the data (returns %NULL, *err == 0).
+ *  Function stops when it stumbles upon zero pointer (absent block)
+ *      (pointer to last triple returned, *@err == 0)
+ *  or when it gets an IO error reading an indirect block
+ *      (ditto, *@err == -EIO)
+ *  or when it notices that chain had been changed while it was reading
+ *      (ditto, *@err == -EAGAIN)
+ *  or when it reads all @depth-1 indirect blocks successfully and finds
+ *  the whole chain, all way to the data (returns %NULL, *err == 0).
  */
 static Indirect *ext2_get_branch(struct _vcb * vcb, struct _fcb *inode,
                                  int depth,
@@ -309,17 +309,17 @@ no_block:
 }
 
 /**
- *	ext2_find_near - find a place for allocation with sufficient locality
- *	@inode: owner
- *	@ind: descriptor of indirect block.
+ *  ext2_find_near - find a place for allocation with sufficient locality
+ *  @inode: owner
+ *  @ind: descriptor of indirect block.
  *
- *	This function returns the prefered place for block allocation.
- *	It is used when heuristic for sequential allocation fails.
- *	Rules are:
- *	  + if there is a block to the left of our position - allocate near it.
- *	  + if pointer will live in indirect block - allocate near that block.
- *	  + if pointer will live in inode - allocate in the same cylinder group.
- *	Caller must make sure that @ind is valid and will stay that way.
+ *  This function returns the prefered place for block allocation.
+ *  It is used when heuristic for sequential allocation fails.
+ *  Rules are:
+ *    + if there is a block to the left of our position - allocate near it.
+ *    + if pointer will live in indirect block - allocate near that block.
+ *    + if pointer will live in inode - allocate in the same cylinder group.
+ *  Caller must make sure that @ind is valid and will stay that way.
  */
 
 static inline unsigned long ext2_find_near(struct _vcb * vcb, struct _fcb *inode, Indirect *ind)
@@ -351,16 +351,16 @@ static inline unsigned long ext2_find_near(struct _vcb * vcb, struct _fcb *inode
 }
 
 /**
- *	ext2_find_goal - find a prefered place for allocation.
- *	@inode: owner
- *	@block:  block we want
- *	@chain:  chain of indirect blocks
- *	@partial: pointer to the last triple within a chain
- *	@goal:	place to store the result.
+ *  ext2_find_goal - find a prefered place for allocation.
+ *  @inode: owner
+ *  @block:  block we want
+ *  @chain:  chain of indirect blocks
+ *  @partial: pointer to the last triple within a chain
+ *  @goal:  place to store the result.
  *
- *	Normally this function find the prefered place for block allocation,
- *	stores it in *@goal and returns zero. If the branch had been changed
- *	under us we return -EAGAIN.
+ *  Normally this function find the prefered place for block allocation,
+ *  stores it in *@goal and returns zero. If the branch had been changed
+ *  under us we return -EAGAIN.
  */
 
 static inline int ext2_find_goal(struct _vcb * vcb, struct _fcb *inode,
@@ -394,28 +394,28 @@ static inline int ext2_find_goal(struct _vcb * vcb, struct _fcb *inode,
 }
 
 /**
- *	ext2_alloc_branch - allocate and set up a chain of blocks.
- *	@inode: owner
- *	@num: depth of the chain (number of blocks to allocate)
- *	@offsets: offsets (in the blocks) to store the pointers to next.
- *	@branch: place to store the chain in.
+ *  ext2_alloc_branch - allocate and set up a chain of blocks.
+ *  @inode: owner
+ *  @num: depth of the chain (number of blocks to allocate)
+ *  @offsets: offsets (in the blocks) to store the pointers to next.
+ *  @branch: place to store the chain in.
  *
- *	This function allocates @num blocks, zeroes out all but the last one,
- *	links them into chain and (if we are synchronous) writes them to disk.
- *	In other words, it prepares a branch that can be spliced onto the
- *	inode. It stores the information about that chain in the branch[], in
- *	the same format as ext2_get_branch() would do. We are calling it after
- *	we had read the existing part of chain and partial points to the last
- *	triple of that (one with zero ->key). Upon the exit we have the same
- *	picture as after the successful ext2_get_block(), excpet that in one
- *	place chain is disconnected - *branch->p is still zero (we did not
- *	set the last link), but branch->key contains the number that should
- *	be placed into *branch->p to fill that gap.
+ *  This function allocates @num blocks, zeroes out all but the last one,
+ *  links them into chain and (if we are synchronous) writes them to disk.
+ *  In other words, it prepares a branch that can be spliced onto the
+ *  inode. It stores the information about that chain in the branch[], in
+ *  the same format as ext2_get_branch() would do. We are calling it after
+ *  we had read the existing part of chain and partial points to the last
+ *  triple of that (one with zero ->key). Upon the exit we have the same
+ *  picture as after the successful ext2_get_block(), excpet that in one
+ *  place chain is disconnected - *branch->p is still zero (we did not
+ *  set the last link), but branch->key contains the number that should
+ *  be placed into *branch->p to fill that gap.
  *
- *	If allocation fails we free all blocks we've allocated (and forget
- *	their buffer_heads) and return the error value the from failed
- *	ext2_alloc_block() (normally -ENOSPC). Otherwise we set the chain
- *	as described above and return 0.
+ *  If allocation fails we free all blocks we've allocated (and forget
+ *  their buffer_heads) and return the error value the from failed
+ *  ext2_alloc_block() (normally -ENOSPC). Otherwise we set the chain
+ *  as described above and return 0.
  */
 
 static int ext2_alloc_branch(struct _vcb * vcb, struct _fcb *inode,
@@ -476,20 +476,20 @@ sync:
 }
 
 /**
- *	ext2_splice_branch - splice the allocated branch onto inode.
- *	@inode: owner
- *	@block: (logical) number of block we are adding
- *	@chain: chain of indirect blocks (with a missing link - see
- *		ext2_alloc_branch)
- *	@where: location of missing link
- *	@num:   number of blocks we are adding
+ *  ext2_splice_branch - splice the allocated branch onto inode.
+ *  @inode: owner
+ *  @block: (logical) number of block we are adding
+ *  @chain: chain of indirect blocks (with a missing link - see
+ *      ext2_alloc_branch)
+ *  @where: location of missing link
+ *  @num:   number of blocks we are adding
  *
- *	This function verifies that chain (up to the missing link) had not
- *	changed, fills the missing link and does all housekeeping needed in
- *	inode (->i_blocks, etc.). In case of success we end up with the full
- *	chain to new block and return 0. Otherwise (== chain had been changed)
- *	we free the new blocks (forgetting their buffer_heads, indeed) and
- *	return -EAGAIN.
+ *  This function verifies that chain (up to the missing link) had not
+ *  changed, fills the missing link and does all housekeeping needed in
+ *  inode (->i_blocks, etc.). In case of success we end up with the full
+ *  chain to new block and return 0. Otherwise (== chain had been changed)
+ *  we free the new blocks (forgetting their buffer_heads, indeed) and
+ *  return -EAGAIN.
  */
 
 static inline int ext2_splice_branch(struct _vcb * vcb, struct _fcb *inode,
@@ -524,13 +524,13 @@ static inline int ext2_splice_branch(struct _vcb * vcb, struct _fcb *inode,
     /* had we spliced it onto indirect block? */
     if (where->bh)
     {
-        //		vms_mark_buffer_dirty_inode(where->bh, inode);
+        //      vms_mark_buffer_dirty_inode(where->bh, inode);
         goto sync;
         if (1 /*IS_SYNC(inode)*/ || 1 /*inode->u.ext2_i.i_osync*/)
         {
 sync:
             vms_ll_rw_block (WRITE, 1, &where->bh, 0);
-            //			wait_on_buffer(where->bh);
+            //          wait_on_buffer(where->bh);
         }
     }
 
@@ -538,7 +538,7 @@ sync:
         ext2_sync_inode (vcb, inode);
     else
         ext2_sync_inode (vcb, inode);
-    //		mark_inode_dirty(inode);
+    //      mark_inode_dirty(inode);
     return 0;
 
 changed:
@@ -587,7 +587,7 @@ got_it:
         *bh_result = le32_to_cpu(chain[depth-1].key);
         if (create==0) panic("nocreate\n");
         e2_fcb_wcb_add_one(inode /*fcb*/,iblock,*bh_result);
-        //		bh_result->b_state |= (1UL << BH_Mapped);
+        //      bh_result->b_state |= (1UL << BH_Mapped);
         /* Clean up and exit */
         partial = chain+depth-1; /* the whole chain */
         goto cleanup;
@@ -627,7 +627,7 @@ out:
     if (ext2_splice_branch(vcb, inode, iblock, chain, partial, left) < 0)
         goto changed;
 
-    //	bh_result->b_state |= (1UL << BH_New);
+    //  bh_result->b_state |= (1UL << BH_New);
     goto got_it;
 
 changed:
@@ -696,37 +696,37 @@ static inline int all_zeroes(u32 *p, u32 *q)
 }
 
 /**
- *	ext2_find_shared - find the indirect blocks for partial truncation.
- *	@inode:	  inode in question
- *	@depth:	  depth of the affected branch
- *	@offsets: offsets of pointers in that branch (see ext2_block_to_path)
- *	@chain:	  place to store the pointers to partial indirect blocks
- *	@top:	  place to the (detached) top of branch
+ *  ext2_find_shared - find the indirect blocks for partial truncation.
+ *  @inode:   inode in question
+ *  @depth:   depth of the affected branch
+ *  @offsets: offsets of pointers in that branch (see ext2_block_to_path)
+ *  @chain:   place to store the pointers to partial indirect blocks
+ *  @top:     place to the (detached) top of branch
  *
- *	This is a helper function used by ext2_truncate().
+ *  This is a helper function used by ext2_truncate().
  *
- *	When we do truncate() we may have to clean the ends of several indirect
- *	blocks but leave the blocks themselves alive. Block is partially
- *	truncated if some data below the new i_size is refered from it (and
- *	it is on the path to the first completely truncated data block, indeed).
- *	We have to free the top of that path along with everything to the right
- *	of the path. Since no allocation past the truncation point is possible
- *	until ext2_truncate() finishes, we may safely do the latter, but top
- *	of branch may require special attention - pageout below the truncation
- *	point might try to populate it.
+ *  When we do truncate() we may have to clean the ends of several indirect
+ *  blocks but leave the blocks themselves alive. Block is partially
+ *  truncated if some data below the new i_size is refered from it (and
+ *  it is on the path to the first completely truncated data block, indeed).
+ *  We have to free the top of that path along with everything to the right
+ *  of the path. Since no allocation past the truncation point is possible
+ *  until ext2_truncate() finishes, we may safely do the latter, but top
+ *  of branch may require special attention - pageout below the truncation
+ *  point might try to populate it.
  *
- *	We atomically detach the top of branch from the tree, store the block
- *	number of its root in *@top, pointers to buffer_heads of partially
- *	truncated blocks - in @chain[].bh and pointers to their last elements
- *	that should not be removed - in @chain[].p. Return value is the pointer
- *	to last filled element of @chain.
+ *  We atomically detach the top of branch from the tree, store the block
+ *  number of its root in *@top, pointers to buffer_heads of partially
+ *  truncated blocks - in @chain[].bh and pointers to their last elements
+ *  that should not be removed - in @chain[].p. Return value is the pointer
+ *  to last filled element of @chain.
  *
- *	The work left to caller to do the actual freeing of subtrees:
- *		a) free the subtree starting from *@top
- *		b) free the subtrees whose roots are stored in
- *			(@chain[i].p+1 .. end of @chain[i].bh->b_data)
- *		c) free the subtrees growing from the inode past the @chain[0].p
- *			(no partially truncated stuff there).
+ *  The work left to caller to do the actual freeing of subtrees:
+ *      a) free the subtree starting from *@top
+ *      b) free the subtrees whose roots are stored in
+ *          (@chain[i].p+1 .. end of @chain[i].bh->b_data)
+ *      c) free the subtrees growing from the inode past the @chain[0].p
+ *          (no partially truncated stuff there).
  */
 
 static Indirect *ext2_find_shared(struct _vcb * vcb, struct _fcb *inode,
@@ -781,14 +781,14 @@ no_top:
 }
 
 /**
- *	ext2_free_data - free a list of data blocks
- *	@inode:	inode we are dealing with
- *	@p:	array of block numbers
- *	@q:	points immediately past the end of array
+ *  ext2_free_data - free a list of data blocks
+ *  @inode: inode we are dealing with
+ *  @p: array of block numbers
+ *  @q: points immediately past the end of array
  *
- *	We are freeing all blocks refered from that array (numbers are
- *	stored as little-endian 32-bit) and updating @inode->i_blocks
- *	appropriately.
+ *  We are freeing all blocks refered from that array (numbers are
+ *  stored as little-endian 32-bit) and updating @inode->i_blocks
+ *  appropriately.
  */
 static inline void ext2_free_data(struct _vcb * vcb, struct _fcb *inode, u32 *p, u32 *q)
 {
@@ -819,22 +819,22 @@ free_this:
     }
     if (count > 0)
     {
-        //		mark_inode_dirty(inode);
+        //      mark_inode_dirty(inode);
         ext2_sync_inode (vcb, inode);
         ext2_free_blocks (vcb, inode, block_to_free, count);
     }
 }
 
 /**
- *	ext2_free_branches - free an array of branches
- *	@inode:	inode we are dealing with
- *	@p:	array of block numbers
- *	@q:	pointer immediately past the end of array
- *	@depth:	depth of the branches to free
+ *  ext2_free_branches - free an array of branches
+ *  @inode: inode we are dealing with
+ *  @p: array of block numbers
+ *  @q: pointer immediately past the end of array
+ *  @depth: depth of the branches to free
  *
- *	We are freeing all blocks refered from these branches (numbers are
- *	stored as little-endian 32-bit) and updating @inode->i_blocks
- *	appropriately.
+ *  We are freeing all blocks refered from these branches (numbers are
+ *  stored as little-endian 32-bit) and updating @inode->i_blocks
+ *  appropriately.
  */
 static void ext2_free_branches(struct _vcb * vcb, struct _fcb *inode, u32 *p, u32 *q, int depth)
 {
@@ -936,7 +936,7 @@ void ext2_truncate (struct _vcb * vcb, struct _fcb * inode)
                            partial->p + 1,
                            (u32*)partial->bh->b_data + addr_per_block,
                            (chain+n-1) - partial);
-        //		mark_buffer_dirty_inode(partial->bh, inode);
+        //      mark_buffer_dirty_inode(partial->bh, inode);
         goto sync;
         if (1 /*IS_SYNC(inode)*/)
         {
@@ -975,7 +975,7 @@ do_indirects:
         {
             i_data[EXT2_TIND_BLOCK] = 0;
             ext2_sync_inode (vcb, inode);
-            //		mark_inode_dirty(inode);
+            //      mark_inode_dirty(inode);
             ext2_free_branches(vcb, inode, &nr, &nr+1, 3);
         }
     case EXT2_TIND_BLOCK:
@@ -988,7 +988,7 @@ do_indirects:
         ext2_sync_inode (vcb, inode);
     else
         ext2_sync_inode (vcb, inode);
-    //		mark_inode_dirty(inode);
+    //      mark_inode_dirty(inode);
 }
 
 void ext2_read_inode (struct _vcb * vcb, struct _fcb * inode, int i_ino, void ** ret, void * iosb)
@@ -1102,7 +1102,7 @@ void ext2_read_inode (struct _vcb * vcb, struct _fcb * inode, int i_ino, void **
         /* this inode is deleted */
         goto bad_inode;
     }
-    inode->i_blksize = PAGE_SIZE;	/* This is the optimal IO size (for stat), not the fs block size */
+    inode->i_blksize = PAGE_SIZE;   /* This is the optimal IO size (for stat), not the fs block size */
 #endif
     inode->fcb$l_efblk = le32_to_cpu(raw_inode->i_blocks);
 #if 0

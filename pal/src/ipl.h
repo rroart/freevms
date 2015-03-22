@@ -1,5 +1,5 @@
-#ifndef ipl_h
-#define ipl_h
+#ifndef IPL_H
+#define IPL_H
 
 /* Current API:
    pushpsl/poppsl: equivalent of push and pop on the stack
@@ -30,7 +30,7 @@ extern inline void savipl(void);
 
 /* no smp yet */
 inline void setipl(unsigned char i);
-inline int getipl();
+inline int getipl(void);
 
 //extern int prespl(unsigned char new);
 

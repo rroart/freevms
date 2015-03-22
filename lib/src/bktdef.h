@@ -1,5 +1,5 @@
-#ifndef bktdef_h
-#define bktdef_h
+#ifndef BKTDEF_H
+#define BKTDEF_H
 
 #define BKT$K_OVERHDSZ 14
 #define BKT$C_OVERHDSZ 14

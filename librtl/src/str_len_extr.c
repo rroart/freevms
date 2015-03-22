@@ -1,7 +1,7 @@
 /*
  * str_len_extr.c
  *
- *	Code for VAX STR$POS_EXTR routine
+ *  Code for VAX STR$POS_EXTR routine
  *
  * Description:
  *
@@ -10,8 +10,8 @@
  *
  * History
  *
- *	Feb 5, 1997 - Kevin Handy
- *		Preliminary design.
+ *  Feb 5, 1997 - Kevin Handy
+ *      Preliminary design.
  */
 
 #include <stdio.h>
@@ -29,13 +29,13 @@ unsigned long str$len_extr(struct dsc$descriptor_s* destination_string,
                            const long* start_position,
                            const long* longword_integer_length)
 {
-    char* s2_ptr;	 	 		/* Pointer to second string */
-    unsigned short s2_length;	 	/* Length of second string */
-    int final_length;			/* Signed final length */
-    unsigned short real_final_length;	/* Usable final length */
-    unsigned long result;			/* Result */
+    char* s2_ptr;               /* Pointer to second string */
+    unsigned short s2_length;       /* Length of second string */
+    int final_length;           /* Signed final length */
+    unsigned short real_final_length;   /* Usable final length */
+    unsigned long result;           /* Result */
     unsigned long second_result = STR$_NORMAL; /* Another possible result */
-    int start_offset = *start_position;	/* Real start character */
+    int start_offset = *start_position; /* Real start character */
 
     /*
      * Validate input

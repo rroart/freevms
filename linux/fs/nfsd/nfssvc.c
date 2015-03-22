@@ -9,7 +9,7 @@
  *
  * Central processing for nfsd.
  *
- * Authors:	Olaf Kirch (okir@monad.swb.de)
+ * Authors: Olaf Kirch (okir@monad.swb.de)
  *
  * Copyright (C) 1995, 1996, 1997 Olaf Kirch <okir@monad.swb.de>
  */
@@ -39,47 +39,47 @@
 #include <linux/nfsd/xdr.h>
 #include <linux/lockd/bind.h>
 
-#define NFSDDBG_FACILITY	NFSDDBG_SVC
-#define NFSD_BUFSIZE		(1024 + NFSSVC_MAXBLKSIZE)
+#define NFSDDBG_FACILITY    NFSDDBG_SVC
+#define NFSD_BUFSIZE        (1024 + NFSSVC_MAXBLKSIZE)
 
 /* these signals will be delivered to an nfsd thread
  * when handling a request
  */
-#define ALLOWED_SIGS	(sigmask(SIGKILL))
+#define ALLOWED_SIGS    (sigmask(SIGKILL))
 /* these signals will be delivered to an nfsd thread
  * when not handling a request. i.e. when waiting
  */
-#define SHUTDOWN_SIGS	(sigmask(SIGKILL) | sigmask(SIGHUP) | sigmask(SIGINT) | sigmask(SIGQUIT))
+#define SHUTDOWN_SIGS   (sigmask(SIGKILL) | sigmask(SIGHUP) | sigmask(SIGINT) | sigmask(SIGQUIT))
 /* if the last thread dies with SIGHUP, then the exports table is
  * left unchanged ( like 2.4-{0-9} ).  Any other signal will clear
  * the exports table (like 2.2).
  */
-#define	SIG_NOCLEAN	SIGHUP
+#define SIG_NOCLEAN SIGHUP
 
-extern struct svc_program	nfsd_program;
-static void			nfsd(struct svc_rqst *rqstp);
-struct timeval			nfssvc_boot;
-static struct svc_serv 		*nfsd_serv;
-static int			nfsd_busy;
-static unsigned long		nfsd_last_call;
+extern struct svc_program   nfsd_program;
+static void         nfsd(struct svc_rqst *rqstp);
+struct timeval          nfssvc_boot;
+static struct svc_serv      *nfsd_serv;
+static int          nfsd_busy;
+static unsigned long        nfsd_last_call;
 
 struct nfsd_list
 {
-    struct list_head 	list;
-    struct task_struct	*task;
+    struct list_head    list;
+    struct task_struct  *task;
 };
 struct list_head nfsd_list = LIST_HEAD_INIT(nfsd_list);
 
 /*
  * Maximum number of nfsd processes
  */
-#define	NFSD_MAXSERVS		128
+#define NFSD_MAXSERVS       128
 
 int
 nfsd_svc(unsigned short port, int nrservs)
 {
-    int	error;
-    int	none_left;
+    int error;
+    int none_left;
     struct list_head *victim;
 
     dprintk("nfsd: creating service\n");
@@ -90,7 +90,7 @@ nfsd_svc(unsigned short port, int nrservs)
         nrservs = NFSD_MAXSERVS;
 
     /* Readahead param cache - will no-op if it already exists */
-    error =	nfsd_racache_init(2*nrservs);
+    error = nfsd_racache_init(2*nrservs);
     if (error<0)
         goto out;
     if (!nfsd_serv)
@@ -102,12 +102,12 @@ nfsd_svc(unsigned short port, int nrservs)
         if (error < 0)
             goto failure;
 
-#if 0	/* Don't even pretend that TCP works. It doesn't. */
+#if 0   /* Don't even pretend that TCP works. It doesn't. */
         error = svc_makesock(nfsd_serv, IPPROTO_TCP, port);
         if (error < 0)
             goto failure;
 #endif
-        do_gettimeofday(&nfssvc_boot);		/* record boot time */
+        do_gettimeofday(&nfssvc_boot);      /* record boot time */
     }
     else
         nfsd_serv->sv_nrthreads++;
@@ -130,7 +130,7 @@ nfsd_svc(unsigned short port, int nrservs)
     }
 failure:
     none_left = (nfsd_serv->sv_nrthreads == 1);
-    svc_destroy(nfsd_serv);		/* Release server */
+    svc_destroy(nfsd_serv);     /* Release server */
     if (none_left)
     {
         nfsd_serv = NULL;
@@ -166,8 +166,8 @@ update_thread_usage(int busy_threads)
 static void
 nfsd(struct svc_rqst *rqstp)
 {
-    struct svc_serv	*serv = rqstp->rq_server;
-    int		err;
+    struct svc_serv *serv = rqstp->rq_server;
+    int     err;
     struct nfsd_list me;
 
     /* Lock module and set up kernel thread */
@@ -181,7 +181,7 @@ nfsd(struct svc_rqst *rqstp)
     /* Let svc_process check client's authentication. */
     rqstp->rq_auth = 1;
 
-    lockd_up();				/* start lockd */
+    lockd_up();             /* start lockd */
 
     me.task = current;
     list_add(&me.list, &nfsd_list);
@@ -236,7 +236,7 @@ nfsd(struct svc_rqst *rqstp)
     }
     else
     {
-        unsigned int	signo;
+        unsigned int    signo;
 
         for (signo = 1; signo <= _NSIG; signo++)
             if (sigismember(&current->pending.signal, signo) &&
@@ -259,7 +259,7 @@ nfsd(struct svc_rqst *rqstp)
             nfsd_export_shutdown();
         }
         nfsd_serv = NULL;
-        nfsd_racache_shutdown();	/* release read-ahead cache */
+        nfsd_racache_shutdown();    /* release read-ahead cache */
     }
     list_del(&me.list);
     nfsdstats.th_cnt --;
@@ -274,9 +274,9 @@ nfsd(struct svc_rqst *rqstp)
 static int
 nfsd_dispatch(struct svc_rqst *rqstp, u32 *statp)
 {
-    struct svc_procedure	*proc;
-    kxdrproc_t		xdr;
-    u32			nfserr;
+    struct svc_procedure    *proc;
+    kxdrproc_t      xdr;
+    u32         nfserr;
 
     dprintk("nfsd_dispatch: vers %d proc %d\n",
             rqstp->rq_vers, rqstp->rq_proc);
@@ -338,17 +338,17 @@ nfsd_dispatch(struct svc_rqst *rqstp, u32 *statp)
     return 1;
 }
 
-static struct svc_version	nfsd_version2 =
+static struct svc_version   nfsd_version2 =
 {
     2, 18, nfsd_procedures2, nfsd_dispatch
 };
 #ifdef CONFIG_NFSD_V3
-static struct svc_version	nfsd_version3 =
+static struct svc_version   nfsd_version3 =
 {
     3, 22, nfsd_procedures3, nfsd_dispatch
 };
 #endif
-static struct svc_version *	nfsd_version[] =
+static struct svc_version * nfsd_version[] =
 {
     NULL,
     NULL,
@@ -358,13 +358,13 @@ static struct svc_version *	nfsd_version[] =
 #endif
 };
 
-#define NFSD_NRVERS		(sizeof(nfsd_version)/sizeof(nfsd_version[0]))
-struct svc_program		nfsd_program =
+#define NFSD_NRVERS     (sizeof(nfsd_version)/sizeof(nfsd_version[0]))
+struct svc_program      nfsd_program =
 {
-    NFS_PROGRAM,		/* program number */
-    2, NFSD_NRVERS-1,	/* version range */
-    NFSD_NRVERS,		/* nr of entries in nfsd_version */
-    nfsd_version,		/* version table */
-    "nfsd",			/* program name */
-    &nfsd_svcstats,		/* version table */
+    NFS_PROGRAM,        /* program number */
+    2, NFSD_NRVERS-1,   /* version range */
+    NFSD_NRVERS,        /* nr of entries in nfsd_version */
+    nfsd_version,       /* version table */
+    "nfsd",         /* program name */
+    &nfsd_svcstats,     /* version table */
 };

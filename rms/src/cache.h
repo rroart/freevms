@@ -14,7 +14,7 @@
 
 #define CACHE_LOADED
 
-#ifndef VAXC	/* Stupid VAX C doesn't allow "signed" keyword */
+#ifndef VAXC    /* Stupid VAX C doesn't allow "signed" keyword */
 #define signed signed
 #else
 #define signed
@@ -22,16 +22,16 @@
 
 struct CACHE
 {
-    struct CACHE *nextlru;	/* next object on least recently used list */
-    struct CACHE *lastlru;	/* last object on least recently used list */
-    struct CACHE *left;		/* left branch of binary tree */
-    struct CACHE *right;	/* right branch of binary tree */
-    struct CACHE **parent;	/* address of pointer to this object */
+    struct CACHE *nextlru;  /* next object on least recently used list */
+    struct CACHE *lastlru;  /* last object on least recently used list */
+    struct CACHE *left;     /* left branch of binary tree */
+    struct CACHE *right;    /* right branch of binary tree */
+    struct CACHE **parent;  /* address of pointer to this object */
     void *(*objmanager) (struct CACHE * cacheobj,int flushonly);
-    unsigned hashval;		/* object hash value */
-    short refcount;		/* object reference count */
-    signed char balance;	/* object tree imbalance factor */
-    signed char objtype;	/* object type (for debugging) */
+    unsigned hashval;       /* object hash value */
+    short refcount;     /* object reference count */
+    signed char balance;    /* object tree imbalance factor */
+    signed char objtype;    /* object type (for debugging) */
 };
 
 void cache_show(void);

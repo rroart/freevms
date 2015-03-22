@@ -2,12 +2,12 @@
 #define _SMBNO_H_
 
 /* these define the attribute byte as seen by DOS */
-#define aRONLY	(1L<<0)
-#define aHIDDEN	(1L<<1)
-#define aSYSTEM	(1L<<2)
-#define aVOLID	(1L<<3)
-#define aDIR	(1L<<4)
-#define aARCH	(1L<<5)
+#define aRONLY  (1L<<0)
+#define aHIDDEN (1L<<1)
+#define aSYSTEM (1L<<2)
+#define aVOLID  (1L<<3)
+#define aDIR    (1L<<4)
+#define aARCH   (1L<<5)
 
 /* error classes */
 #define SUCCESS 0  /* The request was successful. */
@@ -45,14 +45,14 @@
 #define ERRnotconnected 233     /* No process on other end of named pipe */
 #define ERRmoredata 234         /* More data to be returned */
 
-#define ERROR_INVALID_PARAMETER	 87
-#define ERROR_DISK_FULL		112
-#define ERROR_INVALID_NAME	123
-#define ERROR_DIR_NOT_EMPTY	145
-#define ERROR_NOT_LOCKED	158
-#define ERROR_ALREADY_EXISTS	183  /* see also 80 ? */
-#define ERROR_EAS_DIDNT_FIT	275 /* Extended attributes didn't fit */
-#define ERROR_EAS_NOT_SUPPORTED	282 /* Extended attributes not supported */
+#define ERROR_INVALID_PARAMETER  87
+#define ERROR_DISK_FULL     112
+#define ERROR_INVALID_NAME  123
+#define ERROR_DIR_NOT_EMPTY 145
+#define ERROR_NOT_LOCKED    158
+#define ERROR_ALREADY_EXISTS    183  /* see also 80 ? */
+#define ERROR_EAS_DIDNT_FIT 275 /* Extended attributes didn't fit */
+#define ERROR_EAS_NOT_SUPPORTED 282 /* Extended attributes not supported */
 
 /* Error codes for the ERRSRV class */
 
@@ -110,10 +110,10 @@
 /*
  * Access modes when opening a file
  */
-#define SMB_ACCMASK	0x0003
-#define SMB_O_RDONLY	0x0000
-#define SMB_O_WRONLY	0x0001
-#define SMB_O_RDWR	0x0002
+#define SMB_ACCMASK 0x0003
+#define SMB_O_RDONLY    0x0000
+#define SMB_O_WRONLY    0x0001
+#define SMB_O_RDWR  0x0002
 
 /* offsets into message for common items */
 #define smb_com 8
@@ -222,7 +222,7 @@
 #define SMBsendtxt    0xD7   /* send text of multi-block message */
 
 /* Core+ protocol */
-#define SMBlockread	  0x13   /* Lock a range and read */
+#define SMBlockread   0x13   /* Lock a range and read */
 #define SMBwriteunlock 0x14 /* Unlock a range then write */
 #define SMBreadbraw   0x1a  /* read a block of data with no smb header */
 #define SMBwritebraw  0x1d  /* write a block of data with no smb header */

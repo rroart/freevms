@@ -1,23 +1,23 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "InterNet Protocol Handler"
 //SBTTL "InterNetwork Protocol Handler Overview."
@@ -25,182 +25,182 @@
 
 Module:
 
-	IP
+    IP
 
 Facility:
 
-	Inter-Network protocol handler.
+    Inter-Network protocol handler.
 
 Abstract:
 
-	IP provides TCP with a potentially unreliable datagram delivery
-	service.  IP handles the actual network datagram transmission,
-	receipt plus inter-network store & forward functions.  In this
-	implementation IP is called from TCP for segment transmission &
+    IP provides TCP with a potentially unreliable datagram delivery
+    service.  IP handles the actual network datagram transmission,
+    receipt plus inter-network store & forward functions.  In this
+    implementation IP is called from TCP for segment transmission &
         IP$Receive is called from a device handler AST routine to handle
         datagram reception.
 
 Author:
 
-	Tim Fallon, Stan Smith
-	This version by Vince Fuller, CMU-CSD, Spring/Summer, 1986
-	Copyright (c) 1986, 1987, Vince Fuller and Carnegie-Mellon University
+    Tim Fallon, Stan Smith
+    This version by Vince Fuller, CMU-CSD, Spring/Summer, 1986
+    Copyright (c) 1986, 1987, Vince Fuller and Carnegie-Mellon University
 
 Modification History:
 
      03-Jan-89, Edit bu DHP
         Further mods to allow recognition of several different broadcast
-	addresses (as per suggestion of VAF).....all 255"s, all 0"s, and a
-	0 instead of the 255 in the "host" field.
+    addresses (as per suggestion of VAF).....all 255"s, all 0"s, and a
+    0 instead of the 255 in the "host" field.
 
      03-Jan-89, Edit bu DHP
-	Add patches by Charles Lane (lane@duphy4.drexel.edu) to allow
-	reading of broadcasts
+    Add patches by Charles Lane (lane@duphy4.drexel.edu) to allow
+    reading of broadcasts
 
 *** Begin CMU change log ***
 
-4.5c	18-Jul-1991	Henry W. Miller		USBR
-	Use LIB$GET_VM_PAGE and LIB$FREE_VM_PAGE rather then LIB$GET_VM
-	and LIB$FREE_VM.
+4.5c    18-Jul-1991 Henry W. Miller     USBR
+    Use LIB$GET_VM_PAGE and LIB$FREE_VM_PAGE rather then LIB$GET_VM
+    and LIB$FREE_VM.
 
-4.5b	25-Mar-1991,	Henry W. Miller		USBR
-	Fixed many dot derefs for IP_group_MIB[].
+4.5b    25-Mar-1991,    Henry W. Miller     USBR
+    Fixed many dot derefs for IP_group_MIB[].
 
-4.5a	13-Jan-1991,	Henry W. Miller		USBR
-	Make IPTTL a configurable variable.
-	In IP_LOG(), print TTL of header.
+4.5a    13-Jan-1991,    Henry W. Miller     USBR
+    Make IPTTL a configurable variable.
+    In IP_LOG(), print TTL of header.
 
 4.5  18-Oct-90, Edit by Bruce R. Miller, CMU NetDev
-	Fixed dot deref.  (IP_group_MIB->IPMIB$ipForwDatagrams)
+    Fixed dot deref.  (IP_group_MIB->IPMIB$ipForwDatagrams)
 
 4.4  21-Sep-90, Edit by Bruce R. Miller, CMU NetDev
-	Modifications from Mark Berryman, SAIC.COM
-	Added code for proxy ARPs and restored clone device code.
+    Modifications from Mark Berryman, SAIC.COM
+    Added code for proxy ARPs and restored clone device code.
 
 4.3  06-Feb-90, Edit by Bruce R. Miller, CMU NetDev
-	Changed device configuration interface.
-	IP_RECEIVE now takes device config entry as last argument.
+    Changed device configuration interface.
+    IP_RECEIVE now takes device config entry as last argument.
 
      17-Nov-89, Edit by Bruce R. Miller, CMU NetDev
-	Moved all of the ICMP code into ICMP.BLI.
+    Moved all of the ICMP code into ICMP.BLI.
 
 4.2  20-Nov-87, Edit by VAF
-	Change IP$SEND to return zero on error (no route) and nonzero on
-	success. Also, deallocate packets that can't be sent in this manner.
-	Use new $ACPWAKE macro instead of testing "sleeping" and doing $WAKE.
-	Flush a few unneeded externals. Log IP errors under (new) LOG$IPERR as
-	well as under LOG$IP.
+    Change IP$SEND to return zero on error (no route) and nonzero on
+    success. Also, deallocate packets that can't be sent in this manner.
+    Use new $ACPWAKE macro instead of testing "sleeping" and doing $WAKE.
+    Flush a few unneeded externals. Log IP errors under (new) LOG$IPERR as
+    well as under LOG$IP.
 
 4.1  10-Jun-87, Edit by VAF
-	First cut at adding ICMP Echo support. Needs work.
+    First cut at adding ICMP Echo support. Needs work.
 
 4.0  23-Mar-87, Edit by VAF
-	Know how to receive IP fragments. Don't yet know how to handle sending
-	them because we don't expect higher levels to generate them.
-	Miscellaneous cleanup.
+    Know how to receive IP fragments. Don't yet know how to handle sending
+    them because we don't expect higher levels to generate them.
+    Miscellaneous cleanup.
 
 3.9  24-Feb-87, Edit by VAF
-	Move QL_FAO and friends into IOUTIL module. Flush "net message queue"
-	stuff - we don't keep IP datagrams around, we just send them to the
-	device drivers immediately.
+    Move QL_FAO and friends into IOUTIL module. Flush "net message queue"
+    stuff - we don't keep IP datagrams around, we just send them to the
+    device drivers immediately.
 
 3.8  10-Dec-86, Edit by VAF
-	Remove Gen_Checksum - it is now in the macro library. Remove first
-	parameter to Calc_Checksum.
+    Remove Gen_Checksum - it is now in the macro library. Remove first
+    parameter to Calc_Checksum.
 
 3.7   3-Nov-86, Edit by VAF
-	Before dispatching to ICMP$Input, log the IP header if ICMP logging
-	is enabled but IP logging is disabled. This is so we can trace who
-	ICMP packets are coming from without having to see all of the IP
-	packets.
+    Before dispatching to ICMP$Input, log the IP header if ICMP logging
+    is enabled but IP logging is disabled. This is so we can trace who
+    ICMP packets are coming from without having to see all of the IP
+    packets.
 
 3.6  12-Sep-86, Edit by VAF
-	Know about cloned devices in IP_ROUTE.
-	In IP$SEND, don't override IP$SRC if it has been specified. It is
-	necessary to allow the higher levels to specify the source IP address
-	in order to properly support multi-homing.
+    Know about cloned devices in IP_ROUTE.
+    In IP$SEND, don't override IP$SRC if it has been specified. It is
+    necessary to allow the higher levels to specify the source IP address
+    in order to properly support multi-homing.
 
 3.5  12-Aug-86, Edit by VAF
-	Put SET_HOSTS here where it belongs (IP$SET_HOSTS).
+    Put SET_HOSTS here where it belongs (IP$SET_HOSTS).
 
 3.4   8-Aug-86, Edit by VAF
-	Remove gateway structure from STRUCTURE.REQ. Initialize gateway
-	entry in this module in new routine IP$Gwy_Config.
+    Remove gateway structure from STRUCTURE.REQ. Initialize gateway
+    entry in this module in new routine IP$Gwy_Config.
 
 3.3  29-Jul-86, Edit by VAF
-	Move the Gen_Checksum routine into this module for UDP's use.
+    Move the Gen_Checksum routine into this module for UDP's use.
 
 3.2  22-Jul-86, Edit by VAF
-	Do ICMP logging based on LOG$ICMP now.
+    Do ICMP logging based on LOG$ICMP now.
 
 3.1  22-JUL-86, Edit by Dale Moore
-	Change to not preallocate the FAO string with STR$GET1_DX
-	and fill in with $FAO.  Instead we use LIB$SYS_FAOL.  The
-	old way we weren't freeing the whole string that we had
-	allocated.
+    Change to not preallocate the FAO string with STR$GET1_DX
+    and fill in with $FAO.  Instead we use LIB$SYS_FAOL.  The
+    old way we weren't freeing the whole string that we had
+    allocated.
 
 3.0  20-Jun-86, Edit by VAF
-	When logging IP sends, indicate first-hop destination when different
-	from final destination.
+    When logging IP sends, indicate first-hop destination when different
+    from final destination.
 
 2.9  19-Jun-86, Edit by VAF
-	IP_RECEIVE now takes device index as additional argument.
-	Put forwarding code in under control of ip_forward_ok global.
-	Fix forwarding code so it won't send something out the same
-	interface that it was received on.
+    IP_RECEIVE now takes device index as additional argument.
+    Put forwarding code in under control of ip_forward_ok global.
+    Fix forwarding code so it won't send something out the same
+    interface that it was received on.
 
 2.8  29-Apr-86, Edit by VAF
-	Issue $WAKEs here on IP receive, not in device drivers.
+    Issue $WAKEs here on IP receive, not in device drivers.
 
 2.7  21-Apr-86, Edit by VAF
-	Phase II of flushing XPORT - use $FAO for formatting output.
+    Phase II of flushing XPORT - use $FAO for formatting output.
 
 2.6  19-Apr-86, Edit by VAF
-	Redo ICMP hashing stuff in same style as ARP, Host table
+    Redo ICMP hashing stuff in same style as ARP, Host table
 
 2.5  18-Apr-86, Edit by VAF
-	Implement IP addresses as byte strings, not swapped longwords.
+    Implement IP addresses as byte strings, not swapped longwords.
 
 2.4  17-Apr-86, Edit by VAF
-	Add dynamic-string function to Q_MESSAGE
-	Change IP$Log to be a real routine.
+    Add dynamic-string function to Q_MESSAGE
+    Change IP$Log to be a real routine.
 
 2.3   7-Apr-86, Edit by VAF
-	Only log incoming IP packets that are for the local host.
-	Know about new logging flags.
+    Only log incoming IP packets that are for the local host.
+    Know about new logging flags.
 
 2.2  26-Mar-86, Edit by VAF
-	More ICMP work.
-	Add loopback capability at IP level.
+    More ICMP work.
+    Add loopback capability at IP level.
 
 2.1  24-Mar-86, Edit by VAF
-	Start adding ICMP code, more flexible IP_ROUTE stuff.
-	Add hooks for UDP input.
-	Finish flushing ARP code from here.
-	Various changes since 2.0.
+    Start adding ICMP code, more flexible IP_ROUTE stuff.
+    Add hooks for UDP input.
+    Finish flushing ARP code from here.
+    Various changes since 2.0.
 
 2.0  20-Feb-86, Edit by VAF
-	Start upgrade toward "real" Internet implementation:
-	    Flush "known hosts".
-	    First pass at implementing IP routing.
-	    Flush ARP code from here - it will go elsewhere.
-	    Pass first-hop IP address to device driver - let it figure out
-	    what the physical address really is.
-	Don't forward packets not directed at this host. If VMS is to act as a
-	packet router/gateway, more general code needs to be written than what
-	exists here.
+    Start upgrade toward "real" Internet implementation:
+        Flush "known hosts".
+        First pass at implementing IP routing.
+        Flush ARP code from here - it will go elsewhere.
+        Pass first-hop IP address to device driver - let it figure out
+        what the physical address really is.
+    Don't forward packets not directed at this host. If VMS is to act as a
+    packet router/gateway, more general code needs to be written than what
+    exists here.
 
 *** End CMU change log ***
 
-	1.0 - Original version.
+    1.0 - Original version.
         1.1 - Fix buffer delete bug in hc_driver
-	1.2 - Prevent AST level error logging if the log file is not active.
+    1.2 - Prevent AST level error logging if the log file is not active.
         1.3 - Separated IP code and device handler code into separate modules.
         1.4 - Changed to handle buffer from higher protocol that allows space
               to include the IP header right in front of the data without
               having to do a copy.
-	1.5 - Changed to allow for multiple internet names for this host.
-	1.51 - Added ARP code (Rick Watson)
+    1.5 - Changed to allow for multiple internet names for this host.
+    1.51 - Added ARP code (Rick Watson)
 */
 
 
@@ -217,15 +217,15 @@ MODULE IP(IDENT="4.5c",LANGUAGE(BLISS32),
 #ifdef __i386__
 #include <net/checksum.h>
 #endif
-#include <starlet.h>	// VMS system definitions
-// not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";		// BLISS transportablity package
-#include <cmuip/central/include/netcommon.h>	// CMU-OpenVMS/IP common decls
-#include <cmuip/central/include/netconfig.h> 	// Tranport devices interface
-#include <cmuip/central/include/nettcpip.h>		// IP definitions
-#include "netvms.h"		// VMS specifics
-#include "structure.h"		// TCB & Segment Structure definition
+#include <starlet.h>    // VMS system definitions
+// not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";      // BLISS transportablity package
+#include <cmuip/central/include/netcommon.h>    // CMU-OpenVMS/IP common decls
+#include <cmuip/central/include/netconfig.h>    // Tranport devices interface
+#include <cmuip/central/include/nettcpip.h>     // IP definitions
+#include "netvms.h"     // VMS specifics
+#include "structure.h"      // TCB & Segment Structure definition
 #include "cmuip.h" // needed before tcpmacros.h
-#include "tcpmacros.h"		// Local macros
+#include "tcpmacros.h"      // Local macros
 #include "snmp.h"
 
 #include <ssdef.h>
@@ -292,9 +292,9 @@ extern   struct queue_header_structure(si_fields)  SegIN;
 extern   Device_Configuration_Entry  dev_config_tab[];
 
 extern signed long
-dev_count,			// Number of devices known
-min_physical_bufsize,	// Size of "small" device buffers
-max_physical_bufsize;	// Size of "large" device buffers
+dev_count,          // Number of devices known
+min_physical_bufsize,   // Size of "small" device buffers
+max_physical_bufsize;   // Size of "large" device buffers
 
 extern signed long log_state;
 
@@ -303,18 +303,18 @@ extern signed long log_state;
 
 struct gateway_structure
 {
-    unsigned char    gwy_name[8];		// Gateway name
-    int     gwy_address		;	// Gateway IP address
-    int     gwy_network		;	// IP network served
-    int     gwy_netmask		;	// Mask for that network
-    char    gwy_status;		// Status (nonzero is "up")
+    unsigned char    gwy_name[8];       // Gateway name
+    int     gwy_address     ;   // Gateway IP address
+    int     gwy_network     ;   // IP network served
+    int     gwy_netmask     ;   // Mask for that network
+    char    gwy_status;     // Status (nonzero is "up")
 };
 
 #define MAX_GWY 10
 #if 0
 LITERAL
 GWY_Size = $Field_Set_Size,
-Max_GWY = 10;	// Max number of gateways we can store
+Max_GWY = 10;   // Max number of gateways we can store
 
 MACRO
 Gateway_Structure = BLOCKVECTOR[Max_GWY,GWY_Size] FIELD(GWY_Fields)%;
@@ -330,17 +330,17 @@ Gateway_Structure = BLOCKVECTOR[Max_GWY,GWY_Size] FIELD(GWY_Fields)%;
 
 struct RA$DATA_BLOCK
 {
-    void *     ra$next	;	// Next block on queue
-    void *     ra$prev	;	// Previous block on queue
-    unsigned int     ra$source;	// Source IP address
-    unsigned int     ra$dest;	// Destination IP address
-    unsigned short     ra$ident	;	// IP identifier
-    void *     ra$buf	;	// Pointer to buffer (first fragment pkt buffer)
-    unsigned short     ra$bufsize	;	// Size of buffer
-    void *     ra$data	;	// Pointer to start of protocol data in buffer
-    void *     ra$datend	;	// Pointer to first free byte in buffer
-    unsigned int     ra$octet	;	// Fragment octet offset we are waiting for
-    unsigned long long     ra$timeout	;// Timer for how long to wait for fragments
+    void *     ra$next  ;   // Next block on queue
+    void *     ra$prev  ;   // Previous block on queue
+    unsigned int     ra$source; // Source IP address
+    unsigned int     ra$dest;   // Destination IP address
+    unsigned short     ra$ident ;   // IP identifier
+    void *     ra$buf   ;   // Pointer to buffer (first fragment pkt buffer)
+    unsigned short     ra$bufsize   ;   // Size of buffer
+    void *     ra$data  ;   // Pointer to start of protocol data in buffer
+    void *     ra$datend    ;   // Pointer to first free byte in buffer
+    unsigned int     ra$octet   ;   // Fragment octet offset we are waiting for
+    unsigned long long     ra$timeout   ;// Timer for how long to wait for fragments
 };
 
 #define    RA$DATA_SIZE sizeof(struct RA$DATA_BLOCK)
@@ -353,16 +353,16 @@ RA$DATA_BLOCK = BLOCK->RA$DATA_SIZE FIELD(RA$DATA_FIELDS) %;
 
 //SBTTL "Data and definitions associated with IP and ICMP"
 
-#define    RA_EXPIRE_TIME 5		// Reassembly-expire time - multiply by TTL*CSEC
+#define    RA_EXPIRE_TIME 5     // Reassembly-expire time - multiply by TTL*CSEC
 
 struct dsc$descriptor    RA_CHECK_TIMESTR = ASCID2(13,"0 00:00:30.00");
 
 // Internet Protocol counters and states
 
 signed long
-retry_count  = 5,	// Number of time to retry an IP read.
+retry_count  = 5,   // Number of time to retry an IP read.
 // Setable through the config file.
-ipttl  = 32,	// Default time-to-live
+ipttl  = 32,    // Default time-to-live
 // Setable through the config file.
 max_gateways;
 struct IP_group_MIB_struct IP_group_MIB_, * IP_group_MIB = &IP_group_MIB_;
@@ -370,7 +370,7 @@ struct IP_group_MIB_struct IP_group_MIB_, * IP_group_MIB = &IP_group_MIB_;
 static   struct gateway_structure  gwy_table[MAX_GWY]; // space for list of known gateways
 static signed long
 //!!HACK!!// Make this dynamic
-gwy_count;			// Count of gateways
+gwy_count;          // Count of gateways
 static  struct queue_header_fields   RA_QUEUE_ =
 {
 qhead:
@@ -378,7 +378,7 @@ qhead:
 qtail:
     &RA_QUEUE_
 }, *RA_QUEUE=&RA_QUEUE_;
-static    RA_CHECK_TIME[2];	// Quadword time value for checking RA queue
+static    RA_CHECK_TIME[2]; // Quadword time value for checking RA queue
 
 struct gateway_structure * gwy_table_ptr = gwy_table; // Known gateways
 
@@ -388,7 +388,7 @@ struct gateway_structure * gwy_table_ptr = gwy_table; // Known gateways
 void ip$gwy_config(GWYNAME_A,GWYADDR,GWYNET,GWYNETMASK)
 {
     long
-    GWYNAME	= GWYNAME_A;
+    GWYNAME = GWYNAME_A;
     extern      STR$COPY_DX();
     signed long
     gwyidx,
@@ -452,25 +452,25 @@ void ip$init  (void)
         FATAL$FAO("$BINTIM failed for RA_CHECK_TIMSTR, RC = !XL",RC);
 
     // Initial the IP group MIB
-//    IP_group_MIB->IPMIB$ipForwarding	= 0;	// Initialized by CONFIG.BLI
-    IP_group_MIB->IPMIB$ipDefaultTTL	= ipttl;
-    IP_group_MIB->IPMIB$ipInReceives	= 0;
-    IP_group_MIB->IPMIB$ipInHdrErrors	= 0;
-    IP_group_MIB->IPMIB$ipInAddrErrors	= 0;
-    IP_group_MIB->IPMIB$ipForwDatagrams	= 0;
+//    IP_group_MIB->IPMIB$ipForwarding  = 0;    // Initialized by CONFIG.BLI
+    IP_group_MIB->IPMIB$ipDefaultTTL    = ipttl;
+    IP_group_MIB->IPMIB$ipInReceives    = 0;
+    IP_group_MIB->IPMIB$ipInHdrErrors   = 0;
+    IP_group_MIB->IPMIB$ipInAddrErrors  = 0;
+    IP_group_MIB->IPMIB$ipForwDatagrams = 0;
     IP_group_MIB->IPMIB$ipInUnknownProtos= 0;
-    IP_group_MIB->IPMIB$ipInDiscards	= 0;
-    IP_group_MIB->IPMIB$ipInDelivers	= 0;
-    IP_group_MIB->IPMIB$ipOutRequests	= 0;
-    IP_group_MIB->IPMIB$ipOutDiscards	= 0;
-    IP_group_MIB->IPMIB$ipOutNoRoutes	= 0;
-    IP_group_MIB->IPMIB$ipReasmTimeout	= 255*RA_EXPIRE_TIME;	// MAXTTL=255
-    IP_group_MIB->IPMIB$ipReasmReqds	= 0;
-    IP_group_MIB->IPMIB$ipReasmOKs	= 0;
-    IP_group_MIB->IPMIB$ipReasmFails	= 0;
-    IP_group_MIB->IPMIB$ipFragOKs	= 0;
-    IP_group_MIB->IPMIB$ipFragFails	= 0;
-    IP_group_MIB->IPMIB$ipFragCreates	= 0;
+    IP_group_MIB->IPMIB$ipInDiscards    = 0;
+    IP_group_MIB->IPMIB$ipInDelivers    = 0;
+    IP_group_MIB->IPMIB$ipOutRequests   = 0;
+    IP_group_MIB->IPMIB$ipOutDiscards   = 0;
+    IP_group_MIB->IPMIB$ipOutNoRoutes   = 0;
+    IP_group_MIB->IPMIB$ipReasmTimeout  = 255*RA_EXPIRE_TIME;   // MAXTTL=255
+    IP_group_MIB->IPMIB$ipReasmReqds    = 0;
+    IP_group_MIB->IPMIB$ipReasmOKs  = 0;
+    IP_group_MIB->IPMIB$ipReasmFails    = 0;
+    IP_group_MIB->IPMIB$ipFragOKs   = 0;
+    IP_group_MIB->IPMIB$ipFragFails = 0;
+    IP_group_MIB->IPMIB$ipFragCreates   = 0;
 
 }
 
@@ -506,23 +506,23 @@ void ip$log(long NAME,struct ip_structure * IPHDR)
 
 //    Here is where all routing descisions for IP packet output are made.
 //    The basic algorithm is:
-//	IF destination is on the same network as one of our interfaces,
-//	   return send directly - return device index for interface
-//	else
-//	    IF ICMP knows a route to that address, return device index for
-//	       appropriate gateway address
-//	    else
-//		IF we know a gateway for that address, return device index
-//		   for it
-//		else
-//		    Return device index for default gateway.
+//  IF destination is on the same network as one of our interfaces,
+//     return send directly - return device index for interface
+//  else
+//      IF ICMP knows a route to that address, return device index for
+//         appropriate gateway address
+//      else
+//      IF we know a gateway for that address, return device index
+//         for it
+//      else
+//          Return device index for default gateway.
 
 ip_find_dev(IPADDR)
 
 //Find interface for a destination IP address
 //Returns:
-//   -1	Failure, IP address is not on local network
-//  >=0	Success, device index to use is returned
+//   -1 Failure, IP address is not on local network
+//  >=0 Success, device index to use is returned
 {
     signed long IDX;
     for (IDX=0; IDX<=(dev_count-1); IDX++)
@@ -534,7 +534,7 @@ ip_find_dev(IPADDR)
             temp;
 
             // If this is a clone device return
-            //	number of device from which it was cloned.
+            //  number of device from which it was cloned.
             temp = dev_config_tab[IDX].dc_clone_dev;
             if ((temp >= 0)) return temp;
             return IDX;
@@ -567,10 +567,10 @@ IP_ROUTE(IPDEST,IPSRC,NEWIPDEST,LEV)
 
 //Obtain source and destination IP addresses for first hop given a
 //destination IP address.
-//   IPDEST	Pointer to destination IP address
-//		(may be changed on broadcasts)
-//   IPSRC	Pointer to place to put local IP source address
-//   NEWIPDEST	Pointer to place to put first hop IP destination address
+//   IPDEST Pointer to destination IP address
+//      (may be changed on broadcasts)
+//   IPSRC  Pointer to place to put local IP source address
+//   NEWIPDEST  Pointer to place to put first hop IP destination address
 //Returns:
 //   -1 on failure, no route known to that address
 //  >=0 on success, with device index
@@ -579,7 +579,7 @@ int * IPDEST, * IPSRC, * NEWIPDEST; // check
 {
     signed long
     IDX,GWY;
-#define	MAX_LEV 10
+#define MAX_LEV 10
 
 // If this address is on same network, use it
 
@@ -653,7 +653,7 @@ ip$isme(IPADDR, STRICT)
     };
 
     // Check for proxy ARP
-    if (STRICT > 1)	// ARP passes address, not boolean flag
+    if (STRICT > 1) // ARP passes address, not boolean flag
         if (IP_group_MIB->IPMIB$ipForwarding == 1) // IP forwarding on?
         {
             signed long
@@ -662,8 +662,8 @@ ip$isme(IPADDR, STRICT)
             temp = ip_find_dev (IPADDR);
             if ((temp >= 0) &&
                     (STRICT != dev_config_tab[temp].dc_dev_interface))
-                return temp;		// yes, make sure it's not
-        };			// device thaqt rcvd the ARP rqst.
+                return temp;        // yes, make sure it's not
+        };          // device thaqt rcvd the ARP rqst.
     return -1;
 }
 
@@ -673,7 +673,7 @@ void IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR)
 //
 // Set local/foreign hosts pair given list of foreign addresses.
 //
-long * ADRLST;	// Assume 32-bit IP addr
+long * ADRLST;  // Assume 32-bit IP addr
 long * LCLPTR, * FRNPTR;
 {
     signed long I,
@@ -706,29 +706,29 @@ long * LCLPTR, * FRNPTR;
 
 Function:
 
-	This routine is called by upper-level protocols to provide the
-	InterNetwork protocol service. Basically a Datagram service.
-	In the _RAW version of this function, the client provides the
-	entire IP segment, including the header.
+    This routine is called by upper-level protocols to provide the
+    InterNetwork protocol service. Basically a Datagram service.
+    In the _RAW version of this function, the client provides the
+    entire IP segment, including the header.
 
 Inputs:
 
-	Seg - Segment pointer.
-	SegSize - Byte length of segment.
+    Seg - Segment pointer.
+    SegSize - Byte length of segment.
         Delete_Seg - Delete the segment after transmission if true
         Buf - Address of buffer containing segment, used to free buffer
         BufSize - Length of Buf
 
 Outputs:
 
-	Nonzero on success, 0 on failure (no route)
+    Nonzero on success, 0 on failure (no route)
 
 Side Effects:
 
-	Protocol data is packaged in IP protocols & transmitted over the
-	network.  The only exception to this is if the destination address
-	is the same as the source address (eg, local host communication).
-	In this case, the packet is looped-back via IP$RECEIVE.
+    Protocol data is packaged in IP protocols & transmitted over the
+    network.  The only exception to this is if the destination address
+    is the same as the source address (eg, local host communication).
+    In this case, the packet is looped-back via IP$RECEIVE.
 
 *******************************************************************************
 */
@@ -755,7 +755,7 @@ struct segment_structure * Seg;
     //!!HACK!!// IP$ISME takes way too long
     if ((ip$isme(IP$Dest, TRUE) >= 0))
     {
-        dev = -1;		// Loopback
+        dev = -1;       // Loopback
     }
     else
     {
@@ -772,7 +772,7 @@ struct segment_structure * Seg;
                 IP_group_MIB->IPMIB$ipOutNoRoutes + 1;
             if (Delete_Seg != 0)
                 mm$seg_free(Bufsize,Buf);
-            return 0;		// No route exists
+            return 0;       // No route exists
         };
     };
 //*********************************
@@ -791,13 +791,13 @@ struct segment_structure * Seg;
             ASCII_DEC_BYTES(dststr,4,newip_dest,&dststr->dsc$w_length);
             QL$FAO("!%T IPsend: route is !AS!/",0,dststr);
         };
-//	QL$FAO("!%T IPsend: dev index=",1,dev,0)
+//  QL$FAO("!%T IPsend: dev index=",1,dev,0)
     };
 
     if (dev < 0)
         // Packet is for local host - use loopback
 
-        if (Delete_Seg)	// If deleting, then no copy needed
+        if (Delete_Seg) // If deleting, then no copy needed
             ip$receive(Buf,Bufsize,Seg,SegSize,0);
         else
         {
@@ -835,7 +835,7 @@ struct segment_structure * Seg;
 
 // Call appropriate device driver
         (dev_config->dc_rtn_Xmit)(dev_config);
-    };	// Give success return
+    };  // Give success return
 
     return -1;
 }
@@ -847,19 +847,19 @@ struct segment_structure * Seg;
 
 Function:
 
-	This routine is called by upper-level protocols to provide the
-	InterNetwork protocol service. Basically a Datagram service.
+    This routine is called by upper-level protocols to provide the
+    InterNetwork protocol service. Basically a Datagram service.
 
 Inputs:
 
-	IP$Src - Source Address
-	IP$Dest - Destination address (Network & host) = 32-bits.
-	Service - Type of IP service required.
-	Life - # of internet hops before segment is dead.
-	Seg - Segment pointer.
-	SegSize - Byte length of segment.
-	ID - Identifier code.
-	Frag - Don"t Fragment boolean, True = Don"t fragment.
+    IP$Src - Source Address
+    IP$Dest - Destination address (Network & host) = 32-bits.
+    Service - Type of IP service required.
+    Life - # of internet hops before segment is dead.
+    Seg - Segment pointer.
+    SegSize - Byte length of segment.
+    ID - Identifier code.
+    Frag - Don"t Fragment boolean, True = Don"t fragment.
         Delete_Seg - Delete the segment after transmission if true
         Protocol - Protocol number
         Buf - Address of buffer containing segment, used to free buffer
@@ -867,14 +867,14 @@ Inputs:
 
 Outputs:
 
-	Nonzero on success, 0 on failure (no route)
+    Nonzero on success, 0 on failure (no route)
 
 Side Effects:
 
-	Protocol data is packaged in IP protocols & transmitted over the
-	network.  The only exception to this is if the destination address
-	is the same as the source address (eg, local host communication).
-	In this case, the packet is looped-back via IP$RECEIVE.
+    Protocol data is packaged in IP protocols & transmitted over the
+    network.  The only exception to this is if the destination address
+    is the same as the source address (eg, local host communication).
+    In this case, the packet is looped-back via IP$RECEIVE.
 
 *******************************************************************************
 */
@@ -912,7 +912,7 @@ struct udpkt_structure * Seg;
         frag_offset,
         frag_size;
 
-        fragmenting = 1;	// Let us know we are fragmenting the packet
+        fragmenting = 1;    // Let us know we are fragmenting the packet
         frag_offset = 0;
 
         do
@@ -930,9 +930,9 @@ struct udpkt_structure * Seg;
         }
         while (frag_offset < SegSize);
 
-        fragmenting = 0;	// All done fragmenting
+        fragmenting = 0;    // All done fragmenting
         if (Delete_Seg != 0)
-            mm$seg_free(Bufsize,Buf);		// Get rid of the wasted space
+            mm$seg_free(Bufsize,Buf);       // Get rid of the wasted space
     }
     else
     {
@@ -944,7 +944,7 @@ struct udpkt_structure * Seg;
         if ((ip$isme(IP$Dest, TRUE) >= 0))
         {
             newip_dest = IP$Dest;
-            dev = -1;		// Loopback
+            dev = -1;       // Loopback
         }
         else
         {
@@ -961,7 +961,7 @@ struct udpkt_structure * Seg;
                     IP_group_MIB->IPMIB$ipOutNoRoutes + 1;
                 if (Delete_Seg != 0)
                     mm$seg_free(Bufsize,Buf);
-                return 0;		// No route exists
+                return 0;       // No route exists
             };
             if (ip_src == 0)
                 ip_src = newip_src;
@@ -1014,7 +1014,7 @@ struct udpkt_structure * Seg;
                 ASCII_DEC_BYTES(dststr,4,newip_dest,&dststr->dsc$w_length);
                 QL$FAO("!%T IPsend: route is !AS!/",0,dststr);
             };
-//	QL$FAO("!%T IPsend: dev index=",1,dev,0)
+//  QL$FAO("!%T IPsend: dev index=",1,dev,0)
         };
 
 // Re-arrange bytes and words in IP header
@@ -1030,7 +1030,7 @@ struct udpkt_structure * Seg;
 
 // Packet is for local host - use loopback
 
-            if (Delete_Seg)	// If deleting, then no copy needed
+            if (Delete_Seg) // If deleting, then no copy needed
                 ip$receive(Buf,Bufsize,IPHDR,iplen,0);
             else
             {
@@ -1048,8 +1048,8 @@ struct udpkt_structure * Seg;
         }
         else
         {
-//	BIND
-//	    dev_config = dev_config_tab[dev].dc_begin : Device_Configuration_Entry;
+//  BIND
+//      dev_config = dev_config_tab[dev].dc_begin : Device_Configuration_Entry;
             Device_Configuration_Entry * dev_config;
 
             dev_config = dev_config_tab[dev].dc_begin;
@@ -1116,7 +1116,7 @@ struct ip_structure * iphdr;
 {
     extern
     IPCB_Count;
-    extern	ipu$user_input();
+    extern  ipu$user_input();
     Net_Send_Queue_Element * QB;
     signed long
     Sum,
@@ -1138,7 +1138,7 @@ struct ip_structure * iphdr;
     if (Sum != 0/* was: 0xFFFF*/)
     {
         // Checksum error
-        IP_group_MIB->IPMIB$ipInHdrErrors =	// Ooops// another error...
+        IP_group_MIB->IPMIB$ipInHdrErrors = // Ooops// another error...
             IP_group_MIB->IPMIB$ipInHdrErrors + 1;
         if ($$LOGF(LOG$IP+LOG$IPERR))
         {
@@ -1162,7 +1162,7 @@ struct ip_structure * iphdr;
     if (iplen > devlen)
     {
         // inconsistent length - drop segment
-        IP_group_MIB->IPMIB$ipInHdrErrors =	// Ooops// another error...
+        IP_group_MIB->IPMIB$ipInHdrErrors = // Ooops// another error...
             IP_group_MIB->IPMIB$ipInHdrErrors + 1;
         if ($$LOGF(LOG$IP+LOG$IPERR))
         {
@@ -1360,7 +1360,7 @@ struct ip_structure * iphdr;
                   SEGSIZE,SEG);
         break;
 
-    default:	// Unknown protocol
+    default:    // Unknown protocol
     {
         IP_group_MIB->IPMIB$ipInUnknownProtos =
             IP_group_MIB->IPMIB$ipInUnknownProtos + 1;
@@ -1405,7 +1405,7 @@ struct ip_structure * iphdr;
 
 // See if we can find this fragment's header on the queue
 
-X:   			// *** Block X ***
+X:              // *** Block X ***
     {
         RAPTR = RA_QUEUE->qhead;
         while (RAPTR != RA_QUEUE->qhead)
@@ -1417,7 +1417,7 @@ X:   			// *** Block X ***
             RAPTR = RAPTR->ra$next;
         };
         RAPTR = 0;
-    }			// *** Block X ***
+    }           // *** Block X ***
 leave_x:
 
 // Handle the fragment according to the case.
@@ -1438,7 +1438,7 @@ leave_x:
 
 // RA data doesn't exist yet. Allocate it & fill in the IP parameters.
 
-//	    RC = LIB$GET_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
+//      RC = LIB$GET_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
             RC = LIB$GET_VM_PAGE(/*%REF*/((RA$DATA_BLEN / 512) + 1),&RAPTR);
             if (BLISSIFNOT(RC))
                 FATAL$FAO("IP_FRAGMENT - LIB$GET_VM failure, RC=!XL",RC);
@@ -1541,7 +1541,7 @@ Y:
 
 // Deallocate the queue block.
 
-//	    LIB$FREE_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
+//      LIB$FREE_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
             LIB$FREE_VM_PAGE(/*%REF*/((RA$DATA_BLEN / 512) + 1),RAPTR);
         };
         return;
@@ -1594,7 +1594,7 @@ void IP_FRAGMENT_CHECK  (void)
             XQL$FAO(LOG$IP,"!%T Flushing expired IP RA block !XL!/",0,RAPTR);
             REMQUE(RAPTR,&RAPTR);
             mm$seg_free(RAPTR->ra$bufsize,RAPTR->ra$buf);
-//	    LIB$FREE_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
+//      LIB$FREE_VM(/*%REF*/(RA$Data_BLEN),RAPTR);
             LIB$FREE_VM_PAGE(/*%REF*/((RA$DATA_BLEN / 512) + 1),RAPTR);
             IP_group_MIB->IPMIB$ipReasmFails =
                 IP_group_MIB->IPMIB$ipReasmFails + 1;

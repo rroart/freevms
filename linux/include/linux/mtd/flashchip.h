@@ -48,7 +48,7 @@ typedef enum
 struct flchip
 {
     unsigned long start; /* Offset within the map */
-    //	unsigned long len;
+    //  unsigned long len;
     /* We omit len for now, because when we group them together
        we insist that they're all of the same size, and the chip size
        is held in the next level up. If we get more versatile later,
@@ -61,7 +61,7 @@ struct flchip
     spinlock_t *mutex;
     spinlock_t _spinlock; /* We do it like this because sometimes they'll be shared. */
     wait_queue_head_t wq; /* Wait on here when we're waiting for the chip
-			     to be ready */
+                 to be ready */
     int word_write_time;
     int buffer_write_time;
     int erase_time;

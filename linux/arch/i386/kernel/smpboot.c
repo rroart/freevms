@@ -5,37 +5,37 @@
 // Modified Linux source file, 2001-2004.
 
 /*
- *	x86 SMP booting functions
+ *  x86 SMP booting functions
  *
- *	(c) 1995 Alan Cox, Building #3 <alan@redhat.com>
- *	(c) 1998, 1999, 2000 Ingo Molnar <mingo@redhat.com>
+ *  (c) 1995 Alan Cox, Building #3 <alan@redhat.com>
+ *  (c) 1998, 1999, 2000 Ingo Molnar <mingo@redhat.com>
  *
- *	Much of the core SMP work is based on previous work by Thomas Radke, to
- *	whom a great many thanks are extended.
+ *  Much of the core SMP work is based on previous work by Thomas Radke, to
+ *  whom a great many thanks are extended.
  *
- *	Thanks to Intel for making available several different Pentium,
- *	Pentium Pro and Pentium-II/Xeon MP machines.
- *	Original development of Linux SMP code supported by Caldera.
+ *  Thanks to Intel for making available several different Pentium,
+ *  Pentium Pro and Pentium-II/Xeon MP machines.
+ *  Original development of Linux SMP code supported by Caldera.
  *
- *	This code is released under the GNU General Public License version 2 or
- *	later.
+ *  This code is released under the GNU General Public License version 2 or
+ *  later.
  *
- *	Fixes
- *		Felix Koop	:	NR_CPUS used properly
- *		Jose Renau	:	Handle single CPU case.
- *		Alan Cox	:	By repeated request 8) - Total BogoMIP report.
- *		Greg Wright	:	Fix for kernel stacks panic.
- *		Erich Boleyn	:	MP v1.4 and additional changes.
- *	Matthias Sattler	:	Changes for 2.1 kernel map.
- *	Michel Lespinasse	:	Changes for 2.1 kernel map.
- *	Michael Chastain	:	Change trampoline.S to gnu as.
- *		Alan Cox	:	Dumb bug: 'B' step PPro's are fine
- *		Ingo Molnar	:	Added APIC timers, based on code
- *					from Jose Renau
- *		Ingo Molnar	:	various cleanups and rewrites
- *		Tigran Aivazian	:	fixed "0.00 in /proc/uptime on SMP" bug.
- *	Maciej W. Rozycki	:	Bits for genuine 82489DX APICs
- *		Martin J. Bligh	: 	Added support for multi-quad systems
+ *  Fixes
+ *      Felix Koop  :   NR_CPUS used properly
+ *      Jose Renau  :   Handle single CPU case.
+ *      Alan Cox    :   By repeated request 8) - Total BogoMIP report.
+ *      Greg Wright :   Fix for kernel stacks panic.
+ *      Erich Boleyn    :   MP v1.4 and additional changes.
+ *  Matthias Sattler    :   Changes for 2.1 kernel map.
+ *  Michel Lespinasse   :   Changes for 2.1 kernel map.
+ *  Michael Chastain    :   Change trampoline.S to gnu as.
+ *      Alan Cox    :   Dumb bug: 'B' step PPro's are fine
+ *      Ingo Molnar :   Added APIC timers, based on code
+ *                  from Jose Renau
+ *      Ingo Molnar :   various cleanups and rewrites
+ *      Tigran Aivazian :   fixed "0.00 in /proc/uptime on SMP" bug.
+ *  Maciej W. Rozycki   :   Bits for genuine 82489DX APICs
+ *      Martin J. Bligh :   Added support for multi-quad systems
  */
 
 #include <linux/config.h>
@@ -61,7 +61,7 @@
 #include <ipldef.h>
 #include <internals.h>
 
-/* Set if we find a B stepping CPU			*/
+/* Set if we find a B stepping CPU          */
 static int smp_b_stepping;
 
 /* Setup configured maximum number of CPUs to activate */
@@ -221,10 +221,10 @@ extern unsigned long fast_gettimeoffset_quotient;
  * anyway.
  *
  * result == a / b
- *	== (a1 + a2*(2^32)) / b
- *	== a1/b + a2*(2^32/b)
- *	== a1/b + a2*((2^32-1)/b) + a2/b + (a2*((2^32-1) % b))/b
- *		    ^---- (this multiplication can overflow)
+ *  == (a1 + a2*(2^32)) / b
+ *  == a1/b + a2*(2^32/b)
+ *  == a1/b + a2*((2^32-1)/b) + a2/b + (a2*((2^32-1) % b))/b
+ *          ^---- (this multiplication can overflow)
  */
 
 static unsigned long long div64 (unsigned long long a, unsigned long b0)
@@ -969,7 +969,7 @@ static void __init do_boot_cpu (int apicid)
         for (timeout = 0; timeout < 50000; timeout++)
         {
             if (test_bit(cpu, &cpu_callin_map))
-                break;	/* It has booted */
+                break;  /* It has booted */
             udelay(100);
         }
 
@@ -1289,7 +1289,7 @@ void __init smp_boot_cpus(void)
 
         for (cpu = 0; cpu < smp_num_cpus; cpu++)
         {
-            int 	i;
+            int     i;
 
             for (i = 0; i < smp_num_cpus; i++)
             {

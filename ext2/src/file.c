@@ -21,7 +21,7 @@
  *  ext2 fs regular file handling primitives
  *
  *  64-bit file support on 64-bit platforms by Jakub Jelinek
- * 	(jj@sunsite.ms.mff.cuni.cz)
+ *  (jj@sunsite.ms.mff.cuni.cz)
  */
 
 #include <linux/fs.h>

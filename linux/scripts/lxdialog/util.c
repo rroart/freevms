@@ -34,35 +34,35 @@ const char *dialog_result;
  */
 chtype attributes[] =
 {
-    A_NORMAL,			/* screen_attr */
-    A_NORMAL,			/* shadow_attr */
-    A_NORMAL,			/* dialog_attr */
-    A_BOLD,			/* title_attr */
-    A_NORMAL,			/* border_attr */
-    A_REVERSE,			/* button_active_attr */
-    A_DIM,			/* button_inactive_attr */
-    A_REVERSE,			/* button_key_active_attr */
-    A_BOLD,			/* button_key_inactive_attr */
-    A_REVERSE,			/* button_label_active_attr */
-    A_NORMAL,			/* button_label_inactive_attr */
-    A_NORMAL,			/* inputbox_attr */
-    A_NORMAL,			/* inputbox_border_attr */
-    A_NORMAL,			/* searchbox_attr */
-    A_BOLD,			/* searchbox_title_attr */
-    A_NORMAL,			/* searchbox_border_attr */
-    A_BOLD,			/* position_indicator_attr */
-    A_NORMAL,			/* menubox_attr */
-    A_NORMAL,			/* menubox_border_attr */
-    A_NORMAL,			/* item_attr */
-    A_REVERSE,			/* item_selected_attr */
-    A_BOLD,			/* tag_attr */
-    A_REVERSE,			/* tag_selected_attr */
-    A_BOLD,			/* tag_key_attr */
-    A_REVERSE,			/* tag_key_selected_attr */
-    A_BOLD,			/* check_attr */
-    A_REVERSE,			/* check_selected_attr */
-    A_BOLD,			/* uarrow_attr */
-    A_BOLD			/* darrow_attr */
+    A_NORMAL,           /* screen_attr */
+    A_NORMAL,           /* shadow_attr */
+    A_NORMAL,           /* dialog_attr */
+    A_BOLD,         /* title_attr */
+    A_NORMAL,           /* border_attr */
+    A_REVERSE,          /* button_active_attr */
+    A_DIM,          /* button_inactive_attr */
+    A_REVERSE,          /* button_key_active_attr */
+    A_BOLD,         /* button_key_inactive_attr */
+    A_REVERSE,          /* button_label_active_attr */
+    A_NORMAL,           /* button_label_inactive_attr */
+    A_NORMAL,           /* inputbox_attr */
+    A_NORMAL,           /* inputbox_border_attr */
+    A_NORMAL,           /* searchbox_attr */
+    A_BOLD,         /* searchbox_title_attr */
+    A_NORMAL,           /* searchbox_border_attr */
+    A_BOLD,         /* position_indicator_attr */
+    A_NORMAL,           /* menubox_attr */
+    A_NORMAL,           /* menubox_border_attr */
+    A_NORMAL,           /* item_attr */
+    A_REVERSE,          /* item_selected_attr */
+    A_BOLD,         /* tag_attr */
+    A_REVERSE,          /* tag_selected_attr */
+    A_BOLD,         /* tag_key_attr */
+    A_REVERSE,          /* tag_key_selected_attr */
+    A_BOLD,         /* check_attr */
+    A_REVERSE,          /* check_selected_attr */
+    A_BOLD,         /* uarrow_attr */
+    A_BOLD          /* darrow_attr */
 };
 
 
@@ -105,7 +105,7 @@ int color_table[][3] =
     {CHECK_SELECTED_FG, CHECK_SELECTED_BG, CHECK_SELECTED_HL},
     {UARROW_FG, UARROW_BG, UARROW_HL},
     {DARROW_FG, DARROW_BG, DARROW_HL},
-};				/* color_table */
+};              /* color_table */
 
 /*
  * Set window to attribute 'attr'
@@ -148,13 +148,13 @@ void dialog_clear (void)
 void
 init_dialog (void)
 {
-    initscr ();			/* Init curses */
+    initscr ();         /* Init curses */
     keypad (stdscr, TRUE);
     cbreak ();
     noecho ();
 
 
-    if (use_colors)	/* Set up colors */
+    if (use_colors) /* Set up colors */
         color_setup ();
 
 
@@ -169,7 +169,7 @@ color_setup (void)
 {
     int i;
 
-    if (has_colors ())  	/* Terminal supports color? */
+    if (has_colors ())      /* Terminal supports color? */
     {
         start_color ();
 
@@ -218,7 +218,7 @@ print_autowrap (WINDOW * win, const char *prompt, int width, int y, int x)
         if(tempstr[i] == '\n') tempstr[i] = ' ';
     }
 
-    if (prompt_len <= width - x * 2)  	/* If prompt is short */
+    if (prompt_len <= width - x * 2)    /* If prompt is short */
     {
         wmove (win, y, (width - prompt_len) / 2);
         waddstr (win, tempstr);
@@ -253,7 +253,7 @@ print_autowrap (WINDOW * win, const char *prompt, int width, int y, int x)
             cur_x++;
             if (sp && *sp == ' ')
             {
-                cur_x++;	/* double space */
+                cur_x++;    /* double space */
                 while (*++sp == ' ');
                 newl = 1;
             }
@@ -336,7 +336,7 @@ draw_shadow (WINDOW * win, int y, int x, int height, int width)
 {
     int i;
 
-    if (has_colors ())  	/* Whether terminal supports color? */
+    if (has_colors ())      /* Whether terminal supports color? */
     {
         wattrset (win, shadow_attr);
         wmove (win, y + height, x + 2);

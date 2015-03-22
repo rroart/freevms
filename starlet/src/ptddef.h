@@ -1,5 +1,5 @@
-#ifndef ptddef_h
-#define ptddef_h
+#ifndef PTDDEF_H
+#define PTDDEF_H
 
 #define PTD$C_SEND_XON 0
 #define PTD$C_SEND_BELL 1

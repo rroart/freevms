@@ -35,7 +35,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include "lib$routines.h"	/* Our header file! */
+#include "lib$routines.h"   /* Our header file! */
 #include "ssdef.h"
 
 /* addx & subx COULD use 32 bit arithmetic to do a word at a time. But
@@ -45,14 +45,14 @@
    will NOT perform arithmetic correctly for native data types on
    systems with opposite endian!!! */
 
-unsigned long lib$addx(	const	void *	addend,
-                        const	void *	addaug,
+unsigned long lib$addx( const   void *  addend,
+                        const   void *  addaug,
                         void *result,
                         const long *lenadd)
 {
     long count;
     unsigned long carry = 0;
-    char	sign_a, sign_b, sign_result;
+    char    sign_a, sign_b, sign_result;
 
     const unsigned char *a = (const unsigned char *) addend;
     const unsigned char *b = (const unsigned char *) addaug;

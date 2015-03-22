@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #define GTY(x)
 #define HOST_BITS_PER_WIDE_INT 64
@@ -35,7 +35,7 @@ const unsigned char tree_code_length[] =
 
 #define DEFTREECODE(SYM, NAME, TYPE, LEN) NAME,
 
-const char *const tree_code_name[] =
+const char * const tree_code_name[] =
 {
 #include "tree.def"
     "@@dummy",

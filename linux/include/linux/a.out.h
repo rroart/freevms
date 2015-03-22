@@ -34,8 +34,8 @@ enum machine_type
 #endif
     /* skip a bunch so we don't run into any of sun's numbers */
     M_386 = 100,
-    M_MIPS1 = 151,	/* MIPS R3000/R3000 binary */
-    M_MIPS2 = 152		/* MIPS R6000/R4000 binary */
+    M_MIPS1 = 151,  /* MIPS R3000/R3000 binary */
+    M_MIPS2 = 152       /* MIPS R6000/R4000 binary */
 };
 
 #if !defined (N_MAGIC)
@@ -44,19 +44,19 @@ enum machine_type
 #define N_MACHTYPE(exec) ((enum machine_type)(((exec).a_info >> 16) & 0xff))
 #define N_FLAGS(exec) (((exec).a_info >> 24) & 0xff)
 #define N_SET_INFO(exec, magic, type, flags) \
-	((exec).a_info = ((magic) & 0xffff) \
-	 | (((int)(type) & 0xff) << 16) \
-	 | (((flags) & 0xff) << 24))
+    ((exec).a_info = ((magic) & 0xffff) \
+     | (((int)(type) & 0xff) << 16) \
+     | (((flags) & 0xff) << 24))
 #define N_SET_MAGIC(exec, magic) \
-	((exec).a_info = (((exec).a_info & 0xffff0000) | ((magic) & 0xffff)))
+    ((exec).a_info = (((exec).a_info & 0xffff0000) | ((magic) & 0xffff)))
 
 #define N_SET_MACHTYPE(exec, machtype) \
-	((exec).a_info = \
-	 ((exec).a_info&0xff00ffff) | ((((int)(machtype))&0xff) << 16))
+    ((exec).a_info = \
+     ((exec).a_info&0xff00ffff) | ((((int)(machtype))&0xff) << 16))
 
 #define N_SET_FLAGS(exec, flags) \
-	((exec).a_info = \
-	 ((exec).a_info&0x00ffffff) | (((flags) & 0xff) << 24))
+    ((exec).a_info = \
+     ((exec).a_info&0x00ffffff) | (((flags) & 0xff) << 24))
 
 /* Code indicating object file or impure executable.  */
 #define OMAGIC 0407
@@ -72,10 +72,10 @@ enum machine_type
 #define CMAGIC 0421
 
 #if !defined (N_BADMAG)
-#define N_BADMAG(x)	  (N_MAGIC(x) != OMAGIC		\
-			&& N_MAGIC(x) != NMAGIC		\
-  			&& N_MAGIC(x) != ZMAGIC \
-		        && N_MAGIC(x) != QMAGIC)
+#define N_BADMAG(x)   (N_MAGIC(x) != OMAGIC     \
+            && N_MAGIC(x) != NMAGIC     \
+            && N_MAGIC(x) != ZMAGIC \
+                && N_MAGIC(x) != QMAGIC)
 #endif
 
 #define _N_HDROFF(x) (1024 - sizeof (struct exec))
@@ -117,9 +117,9 @@ enum machine_type
 #if defined(vax) || defined(hp300) || defined(pyr)
 #define SEGMENT_SIZE page_size
 #endif
-#ifdef	sony
-#define	SEGMENT_SIZE	0x2000
-#endif	/* Sony.  */
+#ifdef  sony
+#define SEGMENT_SIZE    0x2000
+#endif  /* Sony.  */
 #ifdef is68k
 #define SEGMENT_SIZE 0x20000
 #endif
@@ -131,10 +131,10 @@ enum machine_type
 #ifdef linux
 #include <asm/page.h>
 #if defined(__i386__) || defined(__mc68000__)
-#define SEGMENT_SIZE	1024
+#define SEGMENT_SIZE    1024
 #else
 #ifndef SEGMENT_SIZE
-#define SEGMENT_SIZE	PAGE_SIZE
+#define SEGMENT_SIZE    PAGE_SIZE
 #endif
 #endif
 #endif
@@ -221,13 +221,13 @@ struct nlist
    in that it can satisfy undefined external references.  */
 
 /* These appear as input to LD, in a .o file.  */
-#define	N_SETA	0x14		/* Absolute set element symbol */
-#define	N_SETT	0x16		/* Text set element symbol */
-#define	N_SETD	0x18		/* Data set element symbol */
-#define	N_SETB	0x1A		/* Bss set element symbol */
+#define N_SETA  0x14        /* Absolute set element symbol */
+#define N_SETT  0x16        /* Text set element symbol */
+#define N_SETD  0x18        /* Data set element symbol */
+#define N_SETB  0x1A        /* Bss set element symbol */
 
 /* This is output from LD.  */
-#define N_SETV	0x1C		/* Pointer to set vector in data area.  */
+#define N_SETV  0x1C        /* Pointer to set vector in data area.  */
 
 #if !defined (N_RELOCATION_INFO_DECLARED)
 /* This structure describes a single relocation to be performed.

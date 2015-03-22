@@ -178,7 +178,7 @@ static loff_t msr_seek(struct file *file, loff_t offset, int orig)
         file->f_pos += offset;
         return file->f_pos;
     default:
-        return -EINVAL;	/* SEEK_END not supported */
+        return -EINVAL; /* SEEK_END not supported */
     }
 }
 
@@ -240,9 +240,9 @@ static int msr_open(struct inode *inode, struct file *file)
     struct cpuinfo_x86 *c = &(cpu_data)[cpu];
 
     if ( !(cpu_online_map & (1UL << cpu)) )
-        return -ENXIO;		/* No such CPU */
+        return -ENXIO;      /* No such CPU */
     if ( !test_bit(X86_FEATURE_MSR, &c->x86_capability) )
-        return -EIO;		/* MSR not supported */
+        return -EIO;        /* MSR not supported */
 
     return 0;
 }

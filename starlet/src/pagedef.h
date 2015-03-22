@@ -1,5 +1,5 @@
-#ifndef pagedef_h
-#define pagedef_h
+#ifndef PAGEDEF_H
+#define PAGEDEF_H
 
 #define MMG$C_VAX_PAGE_SIZE 512
 #define MMG$C_ALPHA_MAX_PAGE_SIZE 65536

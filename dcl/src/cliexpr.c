@@ -840,27 +840,27 @@ c_parser_binary_expression (c_parser *parser, struct c_expr *after)
 #endif
     } stack[NUM_PRECS];
     int sp;
-#define POP								      \
-  do {									      \
-    /*switch (stack[sp].op)						      \
-      {									      \
-      case TRUTH_ANDIF_EXPR:						      \
-	skip_evaluation -= stack[sp - 1].expr.value == truthvalue_false_node; \
-	break;								      \
-      case TRUTH_ORIF_EXPR:						      \
-	skip_evaluation -= stack[sp - 1].expr.value == truthvalue_true_node;  \
-	break;								      \
-      default:								      \
-	break;								      \
-	}*/									      \
-    stack[sp - 1].expr							      \
-      = default_function_array_conversion (stack[sp - 1].expr);		      \
-    stack[sp].expr							      \
-      = default_function_array_conversion (stack[sp].expr);		      \
-    stack[sp - 1].expr = parser_build_binary_op (stack[sp].op,		      \
-						 stack[sp - 1].expr,	      \
-						 stack[sp].expr);	      \
-    sp--;								      \
+#define POP                                   \
+  do {                                        \
+    /*switch (stack[sp].op)                           \
+      {                                       \
+      case TRUTH_ANDIF_EXPR:                              \
+    skip_evaluation -= stack[sp - 1].expr.value == truthvalue_false_node; \
+    break;                                    \
+      case TRUTH_ORIF_EXPR:                           \
+    skip_evaluation -= stack[sp - 1].expr.value == truthvalue_true_node;  \
+    break;                                    \
+      default:                                    \
+    break;                                    \
+    }*/                                       \
+    stack[sp - 1].expr                                \
+      = default_function_array_conversion (stack[sp - 1].expr);           \
+    stack[sp].expr                                \
+      = default_function_array_conversion (stack[sp].expr);           \
+    stack[sp - 1].expr = parser_build_binary_op (stack[sp].op,            \
+                         stack[sp - 1].expr,          \
+                         stack[sp].expr);         \
+    sp--;                                     \
   } while (0)
 #if 0
     gcc_assert (!after || c_dialect_objc ());

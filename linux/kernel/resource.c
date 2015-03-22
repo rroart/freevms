@@ -1,8 +1,8 @@
 /*
- *	linux/kernel/resource.c
+ *  linux/kernel/resource.c
  *
- * Copyright (C) 1999	Linus Torvalds
- * Copyright (C) 1999	Martin Mares <mj@ucw.cz>
+ * Copyright (C) 1999   Linus Torvalds
+ * Copyright (C) 1999   Martin Mares <mj@ucw.cz>
  *
  * Arbitrary resource management.
  */

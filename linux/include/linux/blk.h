@@ -61,9 +61,9 @@ void add_blkdev_randomness(int major);
 extern int floppy_init(void);
 extern void rd_load(void);
 extern int rd_init(void);
-extern int rd_doload;		/* 1 = load ramdisk, 0 = don't load */
-extern int rd_prompt;		/* 1 = prompt for ramdisk, 0 = don't prompt */
-extern int rd_image_start;	/* starting block # of image */
+extern int rd_doload;       /* 1 = load ramdisk, 0 = don't load */
+extern int rd_prompt;       /* 1 = prompt for ramdisk, 0 = don't prompt */
+extern int rd_image_start;  /* starting block # of image */
 
 #ifdef CONFIG_BLK_DEV_INITRD
 
@@ -106,7 +106,7 @@ void end_that_request_last(struct request *req);
 
 #ifdef IDE_DRIVER
 
-#define DEVICE_NR(device)	(MINOR(device) >> PARTN_BITS)
+#define DEVICE_NR(device)   (MINOR(device) >> PARTN_BITS)
 #define DEVICE_NAME "ide"
 
 #elif (MAJOR_NR == RAMDISK_MAJOR)
@@ -376,21 +376,21 @@ static void (DEVICE_REQUEST)(request_queue_t *);
 #endif
 
 #define INIT_REQUEST \
-	if (QUEUE_EMPTY) {\
-		CLEAR_INTR; \
-		return; \
-	} \
-	if (MAJOR(CURRENT->rq_dev) != MAJOR_NR) \
-		panic(DEVICE_NAME ": request list destroyed"); \
-	if (CURRENT->bh) { \
-		if (!buffer_locked(CURRENT->bh)) \
-			panic(DEVICE_NAME ": block not locked"); \
-	}
+    if (QUEUE_EMPTY) {\
+        CLEAR_INTR; \
+        return; \
+    } \
+    if (MAJOR(CURRENT->rq_dev) != MAJOR_NR) \
+        panic(DEVICE_NAME ": request list destroyed"); \
+    if (CURRENT->bh) { \
+        if (!buffer_locked(CURRENT->bh)) \
+            panic(DEVICE_NAME ": block not locked"); \
+    }
 
 #endif /* !defined(IDE_DRIVER) */
 
 
-#ifndef LOCAL_END_REQUEST	/* If we have our own end_request, we do not want to include this mess */
+#ifndef LOCAL_END_REQUEST   /* If we have our own end_request, we do not want to include this mess */
 
 #if ! SCSI_BLK_MAJOR(MAJOR_NR) && (MAJOR_NR != COMPAQ_SMART2_MAJOR)
 

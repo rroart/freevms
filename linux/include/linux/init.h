@@ -57,10 +57,10 @@ typedef void (*exitcall_t)(void);
 
 extern initcall_t __initcall_start, __initcall_end;
 
-#define __initcall(fn)								\
-	static initcall_t __initcall_##fn __attribute_used__ __init_call = fn
-#define __exitcall(fn)								\
-	static exitcall_t __exitcall_##fn __exit_call = fn
+#define __initcall(fn)                              \
+    static initcall_t __initcall_##fn __attribute_used__ __init_call = fn
+#define __exitcall(fn)                              \
+    static exitcall_t __exitcall_##fn __exit_call = fn
 
 /*
  * Used for kernel command line parameter setup
@@ -73,9 +73,9 @@ struct kernel_param
 
 extern struct kernel_param __setup_start, __setup_end;
 
-#define __setup(str, fn)								\
-	static char __setup_str_##fn[] __initdata = str;				\
-	static struct kernel_param __setup_##fn __attribute_used__ __initsetup = { __setup_str_##fn, fn }
+#define __setup(str, fn)                                \
+    static char __setup_str_##fn[] __initdata = str;                \
+    static struct kernel_param __setup_##fn __attribute_used__ __initsetup = { __setup_str_##fn, fn }
 
 #endif /* __ASSEMBLY__ */
 
@@ -83,18 +83,18 @@ extern struct kernel_param __setup_start, __setup_end;
  * Mark functions and data as being only used at initialization
  * or exit time.
  */
-#define __init		__attribute__ ((__section__ (".text.init")))
-#define __exit		__attribute_used__ __attribute__ (( __section__(".text.exit")))
-#define __initdata	__attribute__ ((__section__ (".data.init")))
-#define __exitdata	__attribute_used__ __attribute__ ((__section__ (".data.exit")))
-#define __initsetup	__attribute_used__ __attribute__ ((__section__ (".setup.init")))
-#define __init_call	__attribute_used__ __attribute__ ((__section__ (".initcall.init")))
-#define __exit_call	__attribute_used__ __attribute__ ((__section__ (".exitcall.exit")))
+#define __init      __attribute__ ((__section__ (".text.init")))
+#define __exit      __attribute_used__ __attribute__ (( __section__(".text.exit")))
+#define __initdata  __attribute__ ((__section__ (".data.init")))
+#define __exitdata  __attribute_used__ __attribute__ ((__section__ (".data.exit")))
+#define __initsetup __attribute_used__ __attribute__ ((__section__ (".setup.init")))
+#define __init_call __attribute_used__ __attribute__ ((__section__ (".initcall.init")))
+#define __exit_call __attribute_used__ __attribute__ ((__section__ (".exitcall.exit")))
 
 /* For assembly routines */
-#define __INIT		.section	".text.init","ax"
-#define __FINIT		.previous
-#define __INITDATA	.section	".data.init","aw"
+#define __INIT      .section    ".text.init","ax"
+#define __FINIT     .previous
+#define __INITDATA  .section    ".data.init","aw"
 
 /**
  * module_init() - driver initialization entry point
@@ -106,7 +106,7 @@ extern struct kernel_param __setup_start, __setup_end;
  * routine with init_module() which is used by insmod and
  * modprobe when the driver is used as a module.
  */
-#define module_init(x)	__initcall(x);
+#define module_init(x)  __initcall(x);
 
 /**
  * module_exit() - driver exit entry point
@@ -117,9 +117,9 @@ extern struct kernel_param __setup_start, __setup_end;
  * the driver is a module.  If the driver is statically
  * compiled into the kernel, module_exit() has no effect.
  */
-#define module_exit(x)	__exitcall(x);
+#define module_exit(x)  __exitcall(x);
 
-#else	/* MODULE */
+#else   /* MODULE */
 
 #define __init
 #define __exit
@@ -139,17 +139,17 @@ extern struct kernel_param __setup_start, __setup_end;
 typedef int (*__init_module_func_t)(void);
 typedef void (*__cleanup_module_func_t)(void);
 #define module_init(x) \
-	int init_module(void) __attribute__((alias(#x))); \
-	static inline __init_module_func_t __init_module_inline(void) \
-	{ return x; }
+    int init_module(void) __attribute__((alias(#x))); \
+    static inline __init_module_func_t __init_module_inline(void) \
+    { return x; }
 #define module_exit(x) \
-	void cleanup_module(void) __attribute__((alias(#x))); \
-	static inline __cleanup_module_func_t __cleanup_module_inline(void) \
-	{ return x; }
+    void cleanup_module(void) __attribute__((alias(#x))); \
+    static inline __cleanup_module_func_t __cleanup_module_inline(void) \
+    { return x; }
 
 #define __setup(str,func) /* nothing */
 
-#endif	/* !MODULE */
+#endif  /* !MODULE */
 
 #ifdef CONFIG_HOTPLUG
 #define __devinit

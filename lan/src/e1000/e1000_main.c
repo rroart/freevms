@@ -240,9 +240,9 @@ MODULE_PARM_DESC(copybreak,
 static int e1000_notify_reboot(struct notifier_block *, unsigned long event, void *ptr);
 static struct notifier_block e1000_notifier_reboot =
 {
-    .notifier_call	= e1000_notify_reboot,
-    .next		= NULL,
-    .priority	= 0
+    .notifier_call  = e1000_notify_reboot,
+    .next       = NULL,
+    .priority   = 0
 };
 
 static struct pci_driver e1000_driver =
@@ -1710,7 +1710,7 @@ setup_tx_desc_die:
 
 /**
  * e1000_setup_all_tx_resources - wrapper to allocate Tx resources
- * 				  (Descriptors) for all queues
+ *                (Descriptors) for all queues
  * @adapter: board private structure
  *
  * Return 0 on success, negative on failure
@@ -1974,7 +1974,7 @@ setup_rx_desc_die:
 
 /**
  * e1000_setup_all_rx_resources - wrapper to allocate Rx resources
- * 				  (Descriptors) for all queues
+ *                (Descriptors) for all queues
  * @adapter: board private structure
  *
  * Return 0 on success, negative on failure
@@ -2007,7 +2007,7 @@ e1000_setup_all_rx_resources(struct e1000_adapter *adapter)
  * @adapter: Board private structure
  **/
 #define PAGE_USE_COUNT(S) (((S) >> PAGE_SHIFT) + \
-			(((S) & (PAGE_SIZE - 1)) ? 1 : 0))
+            (((S) & (PAGE_SIZE - 1)) ? 1 : 0))
 static void
 e1000_setup_rctl(struct e1000_adapter *adapter)
 {
@@ -2025,7 +2025,7 @@ e1000_setup_rctl(struct e1000_adapter *adapter)
     /* disable the stripping of CRC because it breaks
      * BMC firmware connected over SMBUS
     if (adapter->hw.mac_type > e1000_82543)
-    	rctl |= E1000_RCTL_SECRC;
+        rctl |= E1000_RCTL_SECRC;
     */
 
     if (adapter->hw.tbi_compatibility_on == 1)
@@ -3079,12 +3079,12 @@ set_itr_now:
     return;
 }
 
-#define E1000_TX_FLAGS_CSUM		0x00000001
-#define E1000_TX_FLAGS_VLAN		0x00000002
-#define E1000_TX_FLAGS_TSO		0x00000004
-#define E1000_TX_FLAGS_IPV4		0x00000008
-#define E1000_TX_FLAGS_VLAN_MASK	0xffff0000
-#define E1000_TX_FLAGS_VLAN_SHIFT	16
+#define E1000_TX_FLAGS_CSUM     0x00000001
+#define E1000_TX_FLAGS_VLAN     0x00000002
+#define E1000_TX_FLAGS_TSO      0x00000004
+#define E1000_TX_FLAGS_IPV4     0x00000008
+#define E1000_TX_FLAGS_VLAN_MASK    0xffff0000
+#define E1000_TX_FLAGS_VLAN_SHIFT   16
 
 static int
 e1000_tso(struct e1000_adapter *adapter, struct e1000_tx_ring *tx_ring,
@@ -3132,8 +3132,8 @@ e1000_tx_csum(struct e1000_adapter *adapter, struct e1000_tx_ring *tx_ring,
 }
 #endif
 
-#define E1000_MAX_TXD_PWR	12
-#define E1000_MAX_DATA_PER_TXD	(1<<E1000_MAX_TXD_PWR)
+#define E1000_MAX_TXD_PWR   12
+#define E1000_MAX_DATA_PER_TXD  (1<<E1000_MAX_TXD_PWR)
 
 static int
 e1000_tx_map(struct e1000_adapter *adapter, struct e1000_tx_ring *tx_ring,
@@ -3305,8 +3305,8 @@ e1000_tx_queue(struct e1000_adapter *adapter, struct e1000_tx_ring *tx_ring,
  * to the beginning of the Tx FIFO.
  **/
 
-#define E1000_FIFO_HDR			0x10
-#define E1000_82547_PAD_LEN		0x3E0
+#define E1000_FIFO_HDR          0x10
+#define E1000_82547_PAD_LEN     0x3E0
 
 #if 0
 // check not supported by freevms

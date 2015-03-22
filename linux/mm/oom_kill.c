@@ -8,8 +8,8 @@
  *  linux/mm/oom_kill.c
  *
  *  Copyright (C)  1998,2000  Rik van Riel
- *	Thanks go out to Claus Fischer for some serious inspiration and
- *	for goading me into coding this file...
+ *  Thanks go out to Claus Fischer for some serious inspiration and
+ *  for goading me into coding this file...
  *
  *  The routines in this file are used to kill a process when
  *  we're seriously out of memory. This gets called from kswapd()
@@ -202,7 +202,7 @@ static void oom_kill(void)
      * killing itself before someone else gets the chance to ask
      * for more memory.
      */
-    //	current->policy |= SCHED_YIELD;
+    //  current->policy |= SCHED_YIELD;
     //current->need_resched=1;
     //schedule();
     SOFTINT_RESCHED_VECTOR;

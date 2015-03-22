@@ -2,9 +2,9 @@
 #define __CODA_PSDEV_H
 
 #define CODA_PSDEV_MAJOR 67
-#define MAX_CODADEVS  5	   /* how many do we allow */
+#define MAX_CODADEVS  5    /* how many do we allow */
 
-#define CODA_SUPER_MAGIC	0x73757245
+#define CODA_SUPER_MAGIC    0x73757245
 
 struct coda_sb_info
 {
@@ -16,7 +16,7 @@ struct coda_sb_info
 /* communication pending/processing queues */
 struct venus_comm
 {
-    u_long		    vc_seq;
+    u_long          vc_seq;
     wait_queue_head_t   vc_waitq; /* Venus wait queue */
     struct list_head    vc_pending;
     struct list_head    vc_processing;
@@ -81,12 +81,12 @@ extern unsigned long coda_timeout;
 struct upc_req
 {
     struct list_head    uc_chain;
-    caddr_t	            uc_data;
-    u_short	            uc_flags;
+    caddr_t             uc_data;
+    u_short             uc_flags;
     u_short             uc_inSize;  /* Size is at most 5000 bytes */
-    u_short	            uc_outSize;
-    u_short	            uc_opcode;  /* copied from data to save lookup */
-    int		    uc_unique;
+    u_short             uc_outSize;
+    u_short             uc_opcode;  /* copied from data to save lookup */
+    int         uc_unique;
     wait_queue_head_t   uc_sleep;   /* process' wait queue */
     unsigned long       uc_posttime;
 };
@@ -102,9 +102,9 @@ struct upc_req
  */
 struct coda_upcallstats
 {
-    int	ncalls;			/* client requests */
-    int	nbadcalls;		/* upcall failures */
-    int	reqs[CODA_NCALLS];	/* count of each request */
+    int ncalls;         /* client requests */
+    int nbadcalls;      /* upcall failures */
+    int reqs[CODA_NCALLS];  /* count of each request */
 } ;
 
 extern struct coda_upcallstats coda_callstats;

@@ -204,7 +204,7 @@ __va_range(unsigned long phys, unsigned long size)
     do
     {
         if (idx++ == FIX_IO_APIC_BASE_END)
-            return 0;	/* cannot handle this */
+            return 0;   /* cannot handle this */
         mapped_phys = mapped_phys + PAGE_SIZE;
         set_fixmap(idx, mapped_phys);
         mapped_size = mapped_size + PAGE_SIZE;
@@ -367,7 +367,7 @@ acpi_parse_lapic(struct acpi_table_lapic *local_apic)
         proc_entry.mpc_featureflag = boot_cpu_data.x86_capability[0];
         proc_entry.mpc_reserved[0] = 0;
         proc_entry.mpc_reserved[1] = 0;
-        proc_entry.mpc_apicver = 0x10;	/* integrated APIC */
+        proc_entry.mpc_apicver = 0x10;  /* integrated APIC */
         MP_processor_info(&proc_entry);
     }
     else
@@ -396,7 +396,7 @@ acpi_parse_ioapic(struct acpi_table_ioapic *ioapic)
         printk(KERN_WARNING
                "Max # of I/O APICs (%d) exceeded (found %d).\n",
                MAX_IO_APICS, nr_ioapics);
-        /*		panic("Recompile kernel with bigger MAX_IO_APICS!\n");   */
+        /*      panic("Recompile kernel with bigger MAX_IO_APICS!\n");   */
     }
 }
 

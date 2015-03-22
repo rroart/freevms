@@ -1,9 +1,12 @@
-#ifndef dfu_h
-#define dfu_h
+#ifndef DFU_H
+#define DFU_H
 
 struct f_id;
+
 typedef unsigned long Boolean;
-void singlemsg(),put_disp(), put_status();
+void singlemsg(int stat1, int stat);
+void put_disp(void);
+void put_status(int x);
 int dfu_check_access(int *mask);
 int exit_command(int mask);
 int spawn_command(int mask);

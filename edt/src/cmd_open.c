@@ -16,12 +16,12 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*	open <file> [=<buffer>] [-readonly] [-output <file>]		*/
-/*									*/
-/*  Reads the <file> and puts it in the empty <buffer>			*/
-/*  It also causes it to be written on exit				*/
-/*									*/
+/*                                  */
+/*  open <file> [=<buffer>] [-readonly] [-output <file>]        */
+/*                                  */
+/*  Reads the <file> and puts it in the empty <buffer>          */
+/*  It also causes it to be written on exit             */
+/*                                  */
 /************************************************************************/
 
 #include <errno.h>

@@ -1,5 +1,5 @@
-#ifndef config_table_h
-#define config_table_h
+#ifndef CONFIG_TABLE_H
+#define CONFIG_TABLE_H
 
 struct _config_header
 {

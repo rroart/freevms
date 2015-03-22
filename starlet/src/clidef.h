@@ -1,5 +1,5 @@
-#ifndef clidef_h
-#define clidef_h
+#ifndef CLIDEF_H
+#define CLIDEF_H
 
 #include <descrip.h>
 

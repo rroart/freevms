@@ -1,20 +1,20 @@
 /*
  * str.c
  *
- *	Code for VAX STR$DUPL_CHAR routine
+ *  Code for VAX STR$DUPL_CHAR routine
  *
  * Description:
  *
  *
  * Bugs:
  *
- *	Should this function change the resulting string
- *	length to 1 if possible?
+ *  Should this function change the resulting string
+ *  length to 1 if possible?
  *
  * History
  *
- *	March 30, 1997 - Kevin Handy
- *		Original version based upon  str$dupl_char
+ *  March 30, 1997 - Kevin Handy
+ *      Original version based upon  str$dupl_char
  */
 
 #include <stdio.h>
@@ -29,18 +29,18 @@
 /*************************************************************
  * lib$char
  *
- *	Transform byte to first character of string converts
- *	a single 8-bit ascii character to an ascii string
- *	consisting of a single character followed by trailing
- *	spaces, if needed.
+ *  Transform byte to first character of string converts
+ *  a single 8-bit ascii character to an ascii string
+ *  consisting of a single character followed by trailing
+ *  spaces, if needed.
  */
 unsigned long lib$char(struct dsc$descriptor_s* destination_string,
                        const char* ascii_character)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
     unsigned long result = STR$_NORMAL;
-    char UseChar = ' ';		/* Character to use for duplication */
+    char UseChar = ' ';     /* Character to use for duplication */
     unsigned long alt_result;
 
     /*

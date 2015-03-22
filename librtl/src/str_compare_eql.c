@@ -1,7 +1,7 @@
 /*
  * str.c
  *
- *	Code for VAX STR$OMPARE_EQL routine
+ *  Code for VAX STR$OMPARE_EQL routine
  *
  * Description:
  *
@@ -11,15 +11,15 @@
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 4, 1997 - Kevin Handy
- *		Lose 'result' variable definition, which was never
- *		used. (Warning from '-Wall')
+ *  Feb 4, 1997 - Kevin Handy
+ *      Lose 'result' variable definition, which was never
+ *      used. (Warning from '-Wall')
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places
  */
 
 #include <stdio.h>
@@ -32,17 +32,17 @@
 /************************************************************
  * str$compare_eql
  *
- *	Compares two strings for equality, in both length
- *	and contents.
+ *  Compares two strings for equality, in both length
+ *  and contents.
  */
 long str$compare_eql(
     const struct dsc$descriptor_s* first_source_string,
     const struct dsc$descriptor_s* second_source_string)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
-    char* s2_ptr;			/* Pointer to second string */
-    unsigned short s2_length;	/* Length of second string */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
+    char* s2_ptr;           /* Pointer to second string */
+    unsigned short s2_length;   /* Length of second string */
 
     /*
      * Analyze source strings

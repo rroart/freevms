@@ -1,6 +1,6 @@
 /*
- *	Wrapper functions for 16bit uid back compatibility. All nicely tied
- *	together in the faint hope we can take the out in five years time.
+ *  Wrapper functions for 16bit uid back compatibility. All nicely tied
+ *  together in the faint hope we can take the out in five years time.
  */
 
 #include <linux/mm.h>

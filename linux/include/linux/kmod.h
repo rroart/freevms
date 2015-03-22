@@ -2,7 +2,7 @@
 #define __LINUX_KMOD_H__
 
 /*
- *	include/linux/kmod.h
+ *  include/linux/kmod.h
  *
  *      This program is free software; you can redistribute it and/or modify
  *      it under the terms of the GNU General Public License as published by

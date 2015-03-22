@@ -1,7 +1,7 @@
 /*
  * str_left.c
  *
- *	Code for VAX STR$LEFT routine
+ *  Code for VAX STR$LEFT routine
  *
  * Description:
  *
@@ -10,11 +10,11 @@
  *
  * History
  *
- *	Oct 15, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 15, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Changed 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Changed 'short' to 'unsigned short' in several places.
  */
 
 #include <stdio.h>
@@ -31,11 +31,11 @@ unsigned long str$left(struct dsc$descriptor_s* destination_string,
                        const struct dsc$descriptor_s* source_string,
                        const long* end_position)
 {
-    char* s2_ptr;			/* Pointer to second string */
-    unsigned short s2_length;	/* Length of second string */
-    int final_length;		/* Signed final length */
+    char* s2_ptr;           /* Pointer to second string */
+    unsigned short s2_length;   /* Length of second string */
+    int final_length;       /* Signed final length */
     unsigned short real_final_length; /* Usable final length */
-    unsigned long result;	/* Result */
+    unsigned long result;   /* Result */
     unsigned long second_result = STR$_NORMAL;
 
     /*

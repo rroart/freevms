@@ -1044,7 +1044,7 @@ STATIC int inflate()
  **********************************************************************/
 
 static ulg crc_32_tab[256];
-static ulg crc;		/* initialized in makecrc() so it'll reside in bss */
+static ulg crc;     /* initialized in makecrc() so it'll reside in bss */
 #define CRC_VALUE (crc ^ 0xffffffffL)
 
 /*
@@ -1055,7 +1055,7 @@ static ulg crc;		/* initialized in makecrc() so it'll reside in bss */
 static void
 makecrc(void)
 {
-    /* Not copyrighted 1990 Mark Adler	*/
+    /* Not copyrighted 1990 Mark Adler  */
 
     unsigned long c;      /* crc shift register */
     unsigned long e;      /* polynomial exclusive-or pattern */
@@ -1143,7 +1143,7 @@ static int gunzip(void)
         error("Input has invalid flags\n");
         return -1;
     }
-    (ulg)get_byte();	/* Get timestamp */
+    (ulg)get_byte();    /* Get timestamp */
     ((ulg)get_byte()) << 8;
     ((ulg)get_byte()) << 16;
     ((ulg)get_byte()) << 24;

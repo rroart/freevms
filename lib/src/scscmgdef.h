@@ -1,5 +1,5 @@
-#ifndef scscmgdef_h
-#define scscmgdef_h
+#ifndef SCSCMGDEF_H
+#define SCSCMGDEF_H
 
 #define SCSCMG$S_SCSCMGDEF 48
 

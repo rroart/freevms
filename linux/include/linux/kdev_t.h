@@ -61,19 +61,19 @@ aeb - 950811
    the kernel is not quite ready yet for larger minors.
    However, everything runs fine with an arbitrary kdev_t type. */
 
-#define MINORBITS	8
-#define MINORMASK	((1U << MINORBITS) - 1)
+#define MINORBITS   8
+#define MINORMASK   ((1U << MINORBITS) - 1)
 
 typedef unsigned short kdev_t;
 
-#define MAJOR(dev)	((unsigned int) ((dev) >> MINORBITS))
-#define MINOR(dev)	((unsigned int) ((dev) & MINORMASK))
-#define HASHDEV(dev)	((unsigned int) (dev))
-#define NODEV		0
-#define MKDEV(ma,mi)	(((ma) << MINORBITS) | (mi))
-#define B_FREE		0xffff		/* yuk */
+#define MAJOR(dev)  ((unsigned int) ((dev) >> MINORBITS))
+#define MINOR(dev)  ((unsigned int) ((dev) & MINORMASK))
+#define HASHDEV(dev)    ((unsigned int) (dev))
+#define NODEV       0
+#define MKDEV(ma,mi)    (((ma) << MINORBITS) | (mi))
+#define B_FREE      0xffff      /* yuk */
 
-extern const char * kdevname(kdev_t);	/* note: returns pointer to static data! */
+extern const char * kdevname(kdev_t);   /* note: returns pointer to static data! */
 
 /* 2.5.x compatibility */
 
@@ -118,8 +118,8 @@ static inline kdev_t to_kdev_t(int dev)
 Some programs want their definitions of MAJOR and MINOR and MKDEV
 from the kernel sources. These must be the externally visible ones.
 */
-#define MAJOR(dev)	((dev)>>8)
-#define MINOR(dev)	((dev) & 0xff)
-#define MKDEV(ma,mi)	((ma)<<8 | (mi))
+#define MAJOR(dev)  ((dev)>>8)
+#define MINOR(dev)  ((dev) & 0xff)
+#define MKDEV(ma,mi)    ((ma)<<8 | (mi))
 #endif /* __KERNEL__ || _LVM_H_INCLUDE */
 #endif

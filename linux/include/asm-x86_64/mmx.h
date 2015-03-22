@@ -2,7 +2,7 @@
 #define _ASM_MMX_H
 
 /*
- *	MMX 3Dnow! helper operations
+ *  MMX 3Dnow! helper operations
  */
 
 #include <linux/types.h>

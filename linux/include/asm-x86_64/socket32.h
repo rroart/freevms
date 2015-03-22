@@ -2,7 +2,7 @@
 #define SOCKET32_H 1
 
 /* XXX This really belongs in some header file... -DaveM */
-#define MAX_SOCK_ADDR	128		/* 108 for Unix domain - 
+#define MAX_SOCK_ADDR   128     /* 108 for Unix domain - 
 16 for IP, 16 for IPX,
        24 for IPv6,
               about 80 for AX.25 */
@@ -39,19 +39,19 @@ struct cmsghdr32
 
 #define CMSG32_ALIGN(len) ( ((len)+sizeof(int)-1) & ~(sizeof(int)-1) )
 
-#define CMSG32_DATA(cmsg)	((void *)((char *)(cmsg) + CMSG32_ALIGN(sizeof(struct cmsghdr32))))
+#define CMSG32_DATA(cmsg)   ((void *)((char *)(cmsg) + CMSG32_ALIGN(sizeof(struct cmsghdr32))))
 #define CMSG32_SPACE(len) (CMSG32_ALIGN(sizeof(struct cmsghdr32)) + CMSG32_ALIGN(len))
 #define CMSG32_LEN(len) (CMSG32_ALIGN(sizeof(struct cmsghdr32)) + (len))
 
 #define __CMSG32_FIRSTHDR(ctl,len) ((len) >= sizeof(struct cmsghdr32) ? \
-				    (struct cmsghdr32 *)(ctl) : \
-				    (struct cmsghdr32 *)NULL)
-#define CMSG32_FIRSTHDR(msg)	__CMSG32_FIRSTHDR((msg)->msg_control, (msg)->msg_controllen)
+                    (struct cmsghdr32 *)(ctl) : \
+                    (struct cmsghdr32 *)NULL)
+#define CMSG32_FIRSTHDR(msg)    __CMSG32_FIRSTHDR((msg)->msg_control, (msg)->msg_controllen)
 #define CMSG32_OK(ucmlen, ucmsg, mhdr) \
-	((ucmlen) >= sizeof(struct cmsghdr32) && \
-	 (ucmlen) <= (unsigned long) \
-	 ((mhdr)->msg_controllen - \
-	  ((char *)(ucmsg) - (char *)(mhdr)->msg_control)))
+    ((ucmlen) >= sizeof(struct cmsghdr32) && \
+     (ucmlen) <= (unsigned long) \
+     ((mhdr)->msg_controllen - \
+      ((char *)(ucmsg) - (char *)(mhdr)->msg_control)))
 
 __inline__ struct cmsghdr32 *__cmsg32_nxthdr(void *__ctl, __kernel_size_t __size,
         struct cmsghdr32 *__cmsg, int __cmsg_len)

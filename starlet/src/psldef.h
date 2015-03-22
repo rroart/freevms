@@ -1,5 +1,5 @@
-#ifndef psldef_h
-#define psldef_h
+#ifndef PSLDEF_H
+#define PSLDEF_H
 
 #define PSL$M_PRVMOD 0x3
 #define PSL$M_CURMOD 0x18

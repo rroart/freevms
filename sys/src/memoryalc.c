@@ -204,7 +204,7 @@ struct page * fastcall __alloc_pages(unsigned int gfp_mask, unsigned int order, 
     spin_unlock_irqrestore(&zone->lock, flags);
     vmsunlock(&SPIN_MMG, ipl);
 
-    //	printk("allocated pfn %x %x\n",pfn,1<<order);
+    //  printk("allocated pfn %x %x\n",pfn,1<<order);
 
     if (pfn>=0)
     {

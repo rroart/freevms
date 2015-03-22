@@ -1,5 +1,5 @@
-#ifndef xabdef_h
-#define xabdef_h
+#ifndef XABDEF_H
+#define XABDEF_H
 
 struct _xabdef
 {

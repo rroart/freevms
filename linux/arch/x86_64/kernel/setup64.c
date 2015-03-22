@@ -52,10 +52,10 @@ char boot_cpu_stack[IRQSTACKSIZE] __cacheline_aligned;
 
 /* noexec=on|off
 
-on	Enable
-off	Disable
+on  Enable
+off Disable
 noforce (default) Don't enable by default for heap/stack/data,
-	but allow PROT_EXEC to be effective
+    but allow PROT_EXEC to be effective
 
 */
 

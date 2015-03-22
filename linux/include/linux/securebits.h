@@ -23,8 +23,8 @@ extern unsigned securebits;
    setting is fixed or not. A setting which is fixed cannot be changed
    from user-level. */
 
-#define issecure(X) ( (1 << (X+1)) & SECUREBITS_DEFAULT ? 	\
-		      (1 << (X)) & SECUREBITS_DEFAULT :		\
-		      (1 << (X)) & securebits )
+#define issecure(X) ( (1 << (X+1)) & SECUREBITS_DEFAULT ?   \
+              (1 << (X)) & SECUREBITS_DEFAULT :     \
+              (1 << (X)) & securebits )
 
 #endif /* !_LINUX_SECUREBITS_H */

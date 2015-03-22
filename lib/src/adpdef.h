@@ -1,5 +1,5 @@
-#ifndef adpdef_h
-#define adpdef_h
+#ifndef ADPDEF_H
+#define ADPDEF_H
 
 #define ADP$M_INDIRECT_VECTOR 0x1
 #define ADP$M_ONLINE 0x2

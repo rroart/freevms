@@ -7,9 +7,9 @@
 #define _LINUX_LDT_H
 
 /* Maximum number of LDT entries supported. */
-#define LDT_ENTRIES	8192
+#define LDT_ENTRIES 8192
 /* The size of each LDT entry. */
-#define LDT_ENTRY_SIZE	8
+#define LDT_ENTRY_SIZE  8
 
 #ifndef __ASSEMBLY__
 struct modify_ldt_ldt_s
@@ -25,9 +25,9 @@ struct modify_ldt_ldt_s
     unsigned int  useable:1;
 };
 
-#define MODIFY_LDT_CONTENTS_DATA	0
-#define MODIFY_LDT_CONTENTS_STACK	1
-#define MODIFY_LDT_CONTENTS_CODE	2
+#define MODIFY_LDT_CONTENTS_DATA    0
+#define MODIFY_LDT_CONTENTS_STACK   1
+#define MODIFY_LDT_CONTENTS_CODE    2
 
 #endif /* !__ASSEMBLY__ */
 #endif

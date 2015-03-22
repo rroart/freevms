@@ -72,44 +72,44 @@ struct msg_msg
     /* the actual message follows immediately */
 };
 
-#define DATALEN_MSG	(PAGE_SIZE-sizeof(struct msg_msg))
-#define DATALEN_SEG	(PAGE_SIZE-sizeof(struct msg_msgseg))
+#define DATALEN_MSG (PAGE_SIZE-sizeof(struct msg_msg))
+#define DATALEN_SEG (PAGE_SIZE-sizeof(struct msg_msgseg))
 
 /* one msq_queue structure for each present queue on the system */
 struct msg_queue
 {
     struct kern_ipc_perm q_perm;
-    time_t q_stime;			/* last msgsnd time */
-    time_t q_rtime;			/* last msgrcv time */
-    time_t q_ctime;			/* last change time */
-    unsigned long q_cbytes;		/* current number of bytes on queue */
-    unsigned long q_qnum;		/* number of messages in queue */
-    unsigned long q_qbytes;		/* max number of bytes on queue */
-    pid_t q_lspid;			/* pid of last msgsnd */
-    pid_t q_lrpid;			/* last receive pid */
+    time_t q_stime;         /* last msgsnd time */
+    time_t q_rtime;         /* last msgrcv time */
+    time_t q_ctime;         /* last change time */
+    unsigned long q_cbytes;     /* current number of bytes on queue */
+    unsigned long q_qnum;       /* number of messages in queue */
+    unsigned long q_qbytes;     /* max number of bytes on queue */
+    pid_t q_lspid;          /* pid of last msgsnd */
+    pid_t q_lrpid;          /* last receive pid */
 
     struct list_head q_messages;
     struct list_head q_receivers;
     struct list_head q_senders;
 };
 
-#define SEARCH_ANY		1
-#define SEARCH_EQUAL		2
-#define SEARCH_NOTEQUAL		3
-#define SEARCH_LESSEQUAL	4
+#define SEARCH_ANY      1
+#define SEARCH_EQUAL        2
+#define SEARCH_NOTEQUAL     3
+#define SEARCH_LESSEQUAL    4
 
 static atomic_t msg_bytes = ATOMIC_INIT(0);
 static atomic_t msg_hdrs = ATOMIC_INIT(0);
 
 static struct ipc_ids msg_ids;
 
-#define msg_lock(id)	((struct msg_queue*)ipc_lock(&msg_ids,id))
-#define msg_unlock(id)	ipc_unlock(&msg_ids,id)
-#define msg_rmid(id)	((struct msg_queue*)ipc_rmid(&msg_ids,id))
-#define msg_checkid(msq, msgid)	\
-	ipc_checkid(&msg_ids,&msq->q_perm,msgid)
+#define msg_lock(id)    ((struct msg_queue*)ipc_lock(&msg_ids,id))
+#define msg_unlock(id)  ipc_unlock(&msg_ids,id)
+#define msg_rmid(id)    ((struct msg_queue*)ipc_rmid(&msg_ids,id))
+#define msg_checkid(msq, msgid) \
+    ipc_checkid(&msg_ids,&msq->q_perm,msgid)
 #define msg_buildid(id, seq) \
-	ipc_buildid(&msg_ids, id, seq)
+    ipc_buildid(&msg_ids, id, seq)
 
 static void freeque (int id);
 static int newque (key_t key, int msgflg);
@@ -370,29 +370,29 @@ static inline unsigned long copy_msqid_to_user(void *buf, struct msqid64_ds *in,
 
         ipc64_perm_to_ipc_perm(&in->msg_perm, &out.msg_perm);
 
-        out.msg_stime		= in->msg_stime;
-        out.msg_rtime		= in->msg_rtime;
-        out.msg_ctime		= in->msg_ctime;
+        out.msg_stime       = in->msg_stime;
+        out.msg_rtime       = in->msg_rtime;
+        out.msg_ctime       = in->msg_ctime;
 
         if(in->msg_cbytes > USHRT_MAX)
-            out.msg_cbytes	= USHRT_MAX;
+            out.msg_cbytes  = USHRT_MAX;
         else
-            out.msg_cbytes	= in->msg_cbytes;
-        out.msg_lcbytes		= in->msg_cbytes;
+            out.msg_cbytes  = in->msg_cbytes;
+        out.msg_lcbytes     = in->msg_cbytes;
 
         if(in->msg_qnum > USHRT_MAX)
-            out.msg_qnum	= USHRT_MAX;
+            out.msg_qnum    = USHRT_MAX;
         else
-            out.msg_qnum	= in->msg_qnum;
+            out.msg_qnum    = in->msg_qnum;
 
         if(in->msg_qbytes > USHRT_MAX)
-            out.msg_qbytes	= USHRT_MAX;
+            out.msg_qbytes  = USHRT_MAX;
         else
-            out.msg_qbytes	= in->msg_qbytes;
-        out.msg_lqbytes		= in->msg_qbytes;
+            out.msg_qbytes  = in->msg_qbytes;
+        out.msg_lqbytes     = in->msg_qbytes;
 
-        out.msg_lspid		= in->msg_lspid;
-        out.msg_lrpid		= in->msg_lrpid;
+        out.msg_lspid       = in->msg_lspid;
+        out.msg_lrpid       = in->msg_lrpid;
 
         return copy_to_user (buf, &out, sizeof(out));
     }
@@ -403,10 +403,10 @@ static inline unsigned long copy_msqid_to_user(void *buf, struct msqid64_ds *in,
 
 struct msq_setbuf
 {
-    unsigned long	qbytes;
-    uid_t		uid;
-    gid_t		gid;
-    mode_t		mode;
+    unsigned long   qbytes;
+    uid_t       uid;
+    gid_t       gid;
+    mode_t      mode;
 };
 
 static inline unsigned long copy_msqid_from_user(struct msq_setbuf *out, void *buf, int version)
@@ -420,10 +420,10 @@ static inline unsigned long copy_msqid_from_user(struct msq_setbuf *out, void *b
         if (copy_from_user (&tbuf, buf, sizeof (tbuf)))
             return -EFAULT;
 
-        out->qbytes		= tbuf.msg_qbytes;
-        out->uid		= tbuf.msg_perm.uid;
-        out->gid		= tbuf.msg_perm.gid;
-        out->mode		= tbuf.msg_perm.mode;
+        out->qbytes     = tbuf.msg_qbytes;
+        out->uid        = tbuf.msg_perm.uid;
+        out->gid        = tbuf.msg_perm.gid;
+        out->mode       = tbuf.msg_perm.mode;
 
         return 0;
     }
@@ -434,14 +434,14 @@ static inline unsigned long copy_msqid_from_user(struct msq_setbuf *out, void *b
         if (copy_from_user (&tbuf_old, buf, sizeof (tbuf_old)))
             return -EFAULT;
 
-        out->uid		= tbuf_old.msg_perm.uid;
-        out->gid		= tbuf_old.msg_perm.gid;
-        out->mode		= tbuf_old.msg_perm.mode;
+        out->uid        = tbuf_old.msg_perm.uid;
+        out->gid        = tbuf_old.msg_perm.gid;
+        out->mode       = tbuf_old.msg_perm.mode;
 
         if(tbuf_old.msg_qbytes == 0)
-            out->qbytes	= tbuf_old.msg_lqbytes;
+            out->qbytes = tbuf_old.msg_lqbytes;
         else
-            out->qbytes	= tbuf_old.msg_qbytes;
+            out->qbytes = tbuf_old.msg_qbytes;
 
         return 0;
     }

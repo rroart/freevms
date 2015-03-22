@@ -1,5 +1,5 @@
-#ifndef rsbdef_h
-#define rsbdef_h
+#ifndef RSBDEF_H
+#define RSBDEF_H
 
 #define RSB$M_DIRENTRY 0x1
 #define RSB$M_VALINVLD 0x2

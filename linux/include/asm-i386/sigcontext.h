@@ -9,7 +9,7 @@
  * coprocessor status word before entering the handler.
  *
  * Pentium III FXSR, SSE support
- *	Gareth Hughes <gareth@valinux.com>, May 2000
+ *  Gareth Hughes <gareth@valinux.com>, May 2000
  *
  * The FPU state data structure has had to grow to accomodate the
  * extended FPU state required by the Streaming SIMD Extensions.
@@ -36,27 +36,27 @@ struct _xmmreg
 struct _fpstate
 {
     /* Regular FPU environment */
-    unsigned long 	cw;
-    unsigned long	sw;
-    unsigned long	tag;
-    unsigned long	ipoff;
-    unsigned long	cssel;
-    unsigned long	dataoff;
-    unsigned long	datasel;
-    struct _fpreg	_st[8];
-    unsigned short	status;
-    unsigned short	magic;		/* 0xffff = regular FPU data only */
+    unsigned long   cw;
+    unsigned long   sw;
+    unsigned long   tag;
+    unsigned long   ipoff;
+    unsigned long   cssel;
+    unsigned long   dataoff;
+    unsigned long   datasel;
+    struct _fpreg   _st[8];
+    unsigned short  status;
+    unsigned short  magic;      /* 0xffff = regular FPU data only */
 
     /* FXSR FPU environment */
-    unsigned long	_fxsr_env[6];	/* FXSR FPU env is ignored */
-    unsigned long	mxcsr;
-    unsigned long	reserved;
-    struct _fpxreg	_fxsr_st[8];	/* FXSR FPU reg data is ignored */
-    struct _xmmreg	_xmm[8];
-    unsigned long	padding[56];
+    unsigned long   _fxsr_env[6];   /* FXSR FPU env is ignored */
+    unsigned long   mxcsr;
+    unsigned long   reserved;
+    struct _fpxreg  _fxsr_st[8];    /* FXSR FPU reg data is ignored */
+    struct _xmmreg  _xmm[8];
+    unsigned long   padding[56];
 };
 
-#define X86_FXSR_MAGIC		0x0000
+#define X86_FXSR_MAGIC      0x0000
 
 struct sigcontext
 {

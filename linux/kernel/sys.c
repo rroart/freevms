@@ -66,22 +66,22 @@ int cad_pid = INIT_PID;
 
 
 /*
- *	Notifier list for kernel code which wants to be called
- *	at shutdown. This is used to stop any idling DMA operations
- *	and the like.
+ *  Notifier list for kernel code which wants to be called
+ *  at shutdown. This is used to stop any idling DMA operations
+ *  and the like.
  */
 
 static struct notifier_block *reboot_notifier_list;
 rwlock_t notifier_lock = RW_LOCK_UNLOCKED;
 
 /**
- *	notifier_chain_register	- Add notifier to a notifier chain
- *	@list: Pointer to root list pointer
- *	@n: New entry in notifier chain
+ *  notifier_chain_register - Add notifier to a notifier chain
+ *  @list: Pointer to root list pointer
+ *  @n: New entry in notifier chain
  *
- *	Adds a notifier to a notifier chain.
+ *  Adds a notifier to a notifier chain.
  *
- *	Currently always returns zero.
+ *  Currently always returns zero.
  */
 
 int notifier_chain_register(struct notifier_block **list, struct notifier_block *n)
@@ -100,13 +100,13 @@ int notifier_chain_register(struct notifier_block **list, struct notifier_block 
 }
 
 /**
- *	notifier_chain_unregister - Remove notifier from a notifier chain
- *	@nl: Pointer to root list pointer
- *	@n: New entry in notifier chain
+ *  notifier_chain_unregister - Remove notifier from a notifier chain
+ *  @nl: Pointer to root list pointer
+ *  @n: New entry in notifier chain
  *
- *	Removes a notifier from a notifier chain.
+ *  Removes a notifier from a notifier chain.
  *
- *	Returns zero on success, or %-ENOENT on failure.
+ *  Returns zero on success, or %-ENOENT on failure.
  */
 
 int notifier_chain_unregister(struct notifier_block **nl, struct notifier_block *n)
@@ -127,19 +127,19 @@ int notifier_chain_unregister(struct notifier_block **nl, struct notifier_block 
 }
 
 /**
- *	notifier_call_chain - Call functions in a notifier chain
- *	@n: Pointer to root pointer of notifier chain
- *	@val: Value passed unmodified to notifier function
- *	@v: Pointer passed unmodified to notifier function
+ *  notifier_call_chain - Call functions in a notifier chain
+ *  @n: Pointer to root pointer of notifier chain
+ *  @val: Value passed unmodified to notifier function
+ *  @v: Pointer passed unmodified to notifier function
  *
- *	Calls each function in a notifier chain in turn.
+ *  Calls each function in a notifier chain in turn.
  *
- *	If the return value of the notifier can be and'd
- *	with %NOTIFY_STOP_MASK, then notifier_call_chain
- *	will return immediately, with the return value of
- *	the notifier function which halted execution.
- *	Otherwise, the return value is the return value
- *	of the last notifier function called.
+ *  If the return value of the notifier can be and'd
+ *  with %NOTIFY_STOP_MASK, then notifier_call_chain
+ *  will return immediately, with the return value of
+ *  the notifier function which halted execution.
+ *  Otherwise, the return value is the return value
+ *  of the last notifier function called.
  */
 
 int notifier_call_chain(struct notifier_block **n, unsigned long val, void *v)
@@ -160,14 +160,14 @@ int notifier_call_chain(struct notifier_block **n, unsigned long val, void *v)
 }
 
 /**
- *	register_reboot_notifier - Register function to be called at reboot time
- *	@nb: Info about notifier function to be called
+ *  register_reboot_notifier - Register function to be called at reboot time
+ *  @nb: Info about notifier function to be called
  *
- *	Registers a function with the list of functions
- *	to be called at reboot time.
+ *  Registers a function with the list of functions
+ *  to be called at reboot time.
  *
- *	Currently always returns zero, as notifier_chain_register
- *	always returns zero.
+ *  Currently always returns zero, as notifier_chain_register
+ *  always returns zero.
  */
 
 int register_reboot_notifier(struct notifier_block * nb)
@@ -176,13 +176,13 @@ int register_reboot_notifier(struct notifier_block * nb)
 }
 
 /**
- *	unregister_reboot_notifier - Unregister previously registered reboot notifier
- *	@nb: Hook to be unregistered
+ *  unregister_reboot_notifier - Unregister previously registered reboot notifier
+ *  @nb: Hook to be unregistered
  *
- *	Unregisters a previously registered reboot
- *	notifier function.
+ *  Unregisters a previously registered reboot
+ *  notifier function.
  *
- *	Returns zero on success, or %-ENOENT on failure.
+ *  Returns zero on success, or %-ENOENT on failure.
  */
 
 int unregister_reboot_notifier(struct notifier_block * nb)
@@ -863,10 +863,10 @@ asmlinkage long sys_setfsgid(gid_t gid)
 asmlinkage long sys_times(struct tms * tbuf)
 {
     /*
-     *	In the SMP world we might just be unlucky and have one of
-     *	the times increment as we use it. Since the value is an
-     *	atomically safe type this is just fine. Conceptually its
-     *	as if the syscall took an instant longer to occur.
+     *  In the SMP world we might just be unlucky and have one of
+     *  the times increment as we use it. Since the value is an
+     *  atomically safe type this is just fine. Conceptually its
+     *  as if the syscall took an instant longer to occur.
      */
     if (tbuf)
         if (copy_to_user(tbuf, &current->times, sizeof(struct tms)))
@@ -1026,8 +1026,8 @@ asmlinkage long sys_getgroups(int gidsetsize, gid_t *grouplist)
     int i;
 
     /*
-     *	SMP: Nobody else can change our grouplist. Thus we are
-     *	safe.
+     *  SMP: Nobody else can change our grouplist. Thus we are
+     *  safe.
      */
 
     if (gidsetsize < 0)
@@ -1044,8 +1044,8 @@ asmlinkage long sys_getgroups(int gidsetsize, gid_t *grouplist)
 }
 
 /*
- *	SMP: Our groups are not shared. We can copy to/from them safely
- *	without another task interfering.
+ *  SMP: Our groups are not shared. We can copy to/from them safely
+ *  without another task interfering.
  */
 
 asmlinkage long sys_setgroups(int gidsetsize, gid_t *grouplist)
@@ -1183,7 +1183,7 @@ asmlinkage long sys_getrlimit(unsigned int resource, struct rlimit *rlim)
 #if !defined(__ia64__)
 
 /*
- *	Back compatibility for getrlimit. Needed for some apps.
+ *  Back compatibility for getrlimit. Needed for some apps.
  */
 
 asmlinkage long sys_old_getrlimit(unsigned int resource, struct rlimit *rlim)

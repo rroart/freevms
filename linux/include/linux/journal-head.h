@@ -4,14 +4,14 @@
  * buffer_head fields for JBD
  *
  * 27 May 2001 ANdrew Morton <andrewm@uow.edu.au>
- *	Created - pulled out of fs.h
+ *  Created - pulled out of fs.h
  */
 
 #ifndef JOURNAL_HEAD_H_INCLUDED
 #define JOURNAL_HEAD_H_INCLUDED
 
-typedef unsigned int		tid_t;		/* Unique transaction ID */
-typedef struct transaction_s	transaction_t;	/* Compound transaction type */
+typedef unsigned int        tid_t;      /* Unique transaction ID */
+typedef struct transaction_s    transaction_t;  /* Compound transaction type */
 struct buffer_head;
 
 struct journal_head
@@ -68,4 +68,4 @@ struct journal_head
     struct journal_head *b_cpnext, *b_cpprev;
 };
 
-#endif		/* JOURNAL_HEAD_H_INCLUDED */
+#endif      /* JOURNAL_HEAD_H_INCLUDED */

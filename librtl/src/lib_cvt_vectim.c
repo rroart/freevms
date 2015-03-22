@@ -34,7 +34,7 @@
 
 */
 
-#include "lib$routines.h"	/* LIB$ header file */
+#include "lib$routines.h"   /* LIB$ header file */
 #include "ssdef.h"
 
 #define OFFSET_DAYS     94187

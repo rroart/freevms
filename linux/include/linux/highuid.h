@@ -35,8 +35,8 @@
 extern int overflowuid;
 extern int overflowgid;
 
-#define DEFAULT_OVERFLOWUID	65534
-#define DEFAULT_OVERFLOWGID	65534
+#define DEFAULT_OVERFLOWUID 65534
+#define DEFAULT_OVERFLOWGID 65534
 
 #ifdef CONFIG_UID16
 
@@ -52,28 +52,28 @@ extern int overflowgid;
 
 /* Avoid extra ifdefs with these macros */
 
-#define SET_UID16(var, uid)	var = high2lowuid(uid)
-#define SET_GID16(var, gid)	var = high2lowgid(gid)
-#define NEW_TO_OLD_UID(uid)	high2lowuid(uid)
-#define NEW_TO_OLD_GID(gid)	high2lowgid(gid)
+#define SET_UID16(var, uid) var = high2lowuid(uid)
+#define SET_GID16(var, gid) var = high2lowgid(gid)
+#define NEW_TO_OLD_UID(uid) high2lowuid(uid)
+#define NEW_TO_OLD_GID(gid) high2lowgid(gid)
 
 /* specific to fs/stat.c */
-#define SET_OLDSTAT_UID(stat, uid)	(stat).st_uid = high2lowuid(uid)
-#define SET_OLDSTAT_GID(stat, gid)	(stat).st_gid = high2lowgid(gid)
-#define SET_STAT_UID(stat, uid)		(stat).st_uid = high2lowuid(uid)
-#define SET_STAT_GID(stat, gid)		(stat).st_gid = high2lowgid(gid)
+#define SET_OLDSTAT_UID(stat, uid)  (stat).st_uid = high2lowuid(uid)
+#define SET_OLDSTAT_GID(stat, gid)  (stat).st_gid = high2lowgid(gid)
+#define SET_STAT_UID(stat, uid)     (stat).st_uid = high2lowuid(uid)
+#define SET_STAT_GID(stat, gid)     (stat).st_gid = high2lowgid(gid)
 
 #else
 
-#define SET_UID16(var, uid)	do { ; } while (0)
-#define SET_GID16(var, gid)	do { ; } while (0)
-#define NEW_TO_OLD_UID(uid)	(uid)
-#define NEW_TO_OLD_GID(gid)	(gid)
+#define SET_UID16(var, uid) do { ; } while (0)
+#define SET_GID16(var, gid) do { ; } while (0)
+#define NEW_TO_OLD_UID(uid) (uid)
+#define NEW_TO_OLD_GID(gid) (gid)
 
-#define SET_OLDSTAT_UID(stat, uid)	(stat).st_uid = (uid)
-#define SET_OLDSTAT_GID(stat, gid)	(stat).st_gid = (gid)
-#define SET_STAT_UID(stat, uid)		(stat).st_uid = (uid)
-#define SET_STAT_GID(stat, gid)		(stat).st_gid = (gid)
+#define SET_OLDSTAT_UID(stat, uid)  (stat).st_uid = (uid)
+#define SET_OLDSTAT_GID(stat, gid)  (stat).st_gid = (gid)
+#define SET_STAT_UID(stat, uid)     (stat).st_uid = (uid)
+#define SET_STAT_GID(stat, gid)     (stat).st_gid = (gid)
 
 #endif /* CONFIG_UID16 */
 
@@ -90,8 +90,8 @@ extern int overflowgid;
 extern int fs_overflowuid;
 extern int fs_overflowgid;
 
-#define DEFAULT_FS_OVERFLOWUID	65534
-#define DEFAULT_FS_OVERFLOWGID	65534
+#define DEFAULT_FS_OVERFLOWUID  65534
+#define DEFAULT_FS_OVERFLOWGID  65534
 
 /*
  * Since these macros are used in architectures that only need limited
@@ -100,7 +100,7 @@ extern int fs_overflowgid;
 #define fs_high2lowuid(uid) ((uid) > 65535 ? (uid16_t)fs_overflowuid : (uid16_t)(uid))
 #define fs_high2lowgid(gid) ((gid) > 65535 ? (gid16_t)fs_overflowgid : (gid16_t)(gid))
 
-#define low_16_bits(x)	((x) & 0xFFFF)
-#define high_16_bits(x)	(((x) & 0xFFFF0000) >> 16)
+#define low_16_bits(x)  ((x) & 0xFFFF)
+#define high_16_bits(x) (((x) & 0xFFFF0000) >> 16)
 
 #endif /* _LINUX_HIGHUID_H */

@@ -1,9 +1,9 @@
 /*
- * linux/drivers/block/ide-features.c	Version 0.04	June 9, 2000
+ * linux/drivers/block/ide-features.c   Version 0.04    June 9, 2000
  *
- *  Copyright (C) 1999-2000	Linus Torvalds & authors (see below)
+ *  Copyright (C) 1999-2000 Linus Torvalds & authors (see below)
  *
- *  Copyright (C) 1999-2000	Andre Hedrick <andre@linux-ide.org>
+ *  Copyright (C) 1999-2000 Andre Hedrick <andre@linux-ide.org>
  *
  *  Extracts if ide.c to address the evolving transfer rate code for
  *  the SETFEATURES_XFER callouts.  Various parts of any given function
@@ -245,31 +245,31 @@ int ide_driveid_update (ide_drive_t *drive)
         if (0 < (signed long)(jiffies - timeout))
         {
             SELECT_MASK(HWIF(drive), drive, 0);
-            return 0;	/* drive timed-out */
+            return 0;   /* drive timed-out */
         }
-        ide_delay_50ms();	/* give drive a breather */
+        ide_delay_50ms();   /* give drive a breather */
     }
     while (IN_BYTE(IDE_ALTSTATUS_REG) & BUSY_STAT);
-    ide_delay_50ms();	/* wait for IRQ and DRQ_STAT */
+    ide_delay_50ms();   /* wait for IRQ and DRQ_STAT */
     if (!OK_STAT(GET_STAT(),DRQ_STAT,BAD_R_STAT))
     {
         SELECT_MASK(HWIF(drive), drive, 0);
         printk("%s: CHECK for good STATUS\n", drive->name);
         return 0;
     }
-    __save_flags(flags);	/* local CPU only */
-    __cli();		/* local CPU only; some systems need this */
+    __save_flags(flags);    /* local CPU only */
+    __cli();        /* local CPU only; some systems need this */
     SELECT_MASK(HWIF(drive), drive, 0);
     id = kmalloc(SECTOR_WORDS*4, GFP_ATOMIC);
     if (!id)
     {
-        __restore_flags(flags);	/* local CPU only */
+        __restore_flags(flags); /* local CPU only */
         return 0;
     }
     ide_input_data(drive, id, SECTOR_WORDS);
-    (void) GET_STAT();	/* clear drive IRQ */
-    ide__sti();		/* local CPU only */
-    __restore_flags(flags);	/* local CPU only */
+    (void) GET_STAT();  /* clear drive IRQ */
+    ide__sti();     /* local CPU only */
+    __restore_flags(flags); /* local CPU only */
     ide_fix_driveid(id);
     if (id)
     {
@@ -360,7 +360,7 @@ byte eighty_ninty_three (ide_drive_t *drive)
 int ide_config_drive_speed (ide_drive_t *drive, byte speed)
 {
     ide_hwif_t *hwif = HWIF(drive);
-    int	i, error = 1;
+    int i, error = 1;
     byte stat;
 
 #if defined(CONFIG_BLK_DEV_IDEDMA) && !defined(CONFIG_DMA_NONPCI)
@@ -377,7 +377,7 @@ int ide_config_drive_speed (ide_drive_t *drive, byte speed)
     /*
      * Select the drive, and issue the SETFEATURES command
      */
-    disable_irq(hwif->irq);	/* disable_irq_nosync ?? */
+    disable_irq(hwif->irq); /* disable_irq_nosync ?? */
     udelay(1);
     SELECT_DRIVE(HWIF(drive), drive);
     SELECT_MASK(HWIF(drive), drive, 0);
@@ -396,8 +396,8 @@ int ide_config_drive_speed (ide_drive_t *drive, byte speed)
     if ((stat = GET_STAT()) & BUSY_STAT)
     {
         unsigned long flags, timeout;
-        __save_flags(flags);	/* local CPU only */
-        ide__sti();		/* local CPU only -- for jiffies */
+        __save_flags(flags);    /* local CPU only */
+        ide__sti();     /* local CPU only -- for jiffies */
         timeout = jiffies + WAIT_CMD;
         while ((stat = GET_STAT()) & BUSY_STAT)
         {

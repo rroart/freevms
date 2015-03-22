@@ -24,7 +24,7 @@
 #include <linux/interrupt.h>
 #include <linux/console.h>
 
-asmlinkage void sys_sync(void);	/* it's really int */
+asmlinkage void sys_sync(void); /* it's really int */
 
 int panic_timeout;
 
@@ -39,13 +39,13 @@ static int __init panic_setup(char *str)
 __setup("panic=", panic_setup);
 
 /**
- *	panic - halt the system
- *	@fmt: The text string to print
+ *  panic - halt the system
+ *  @fmt: The text string to print
  *
- *	Display a message, then perform cleanups. Functions in the panic
- *	notifier list are called after the filesystem cache is flushed (when possible).
+ *  Display a message, then perform cleanups. Functions in the panic
+ *  notifier list are called after the filesystem cache is flushed (when possible).
  *
- *	This function never returns.
+ *  This function never returns.
  */
 
 NORET_TYPE void panic(const char * fmt, ...)
@@ -87,9 +87,9 @@ NORET_TYPE void panic(const char * fmt, ...)
         printk(KERN_EMERG "Rebooting in %d seconds..",panic_timeout);
         mdelay(panic_timeout*1000);
         /*
-         *	Should we run the reboot notifier. For the moment Im
-         *	choosing not too. It might crash, be corrupt or do
-         *	more harm than good for other reasons.
+         *  Should we run the reboot notifier. For the moment Im
+         *  choosing not too. It might crash, be corrupt or do
+         *  more harm than good for other reasons.
          */
         machine_restart(NULL);
     }
@@ -116,9 +116,9 @@ NORET_TYPE void panic(const char * fmt, ...)
 }
 
 /**
- *	print_tainted - return a string to represent the kernel taint state.
+ *  print_tainted - return a string to represent the kernel taint state.
  *
- *	The string is overwritten by the next call to print_taint().
+ *  The string is overwritten by the next call to print_taint().
  */
 
 const char *print_tainted()

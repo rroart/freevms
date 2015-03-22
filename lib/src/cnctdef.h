@@ -1,5 +1,5 @@
-#ifndef cnctdef_h
-#define cnctdef_h
+#ifndef CNCTDEF_H
+#define CNCTDEF_H
 
 #define CNCT$K_ECOLEVEL                0x00
 #define CNCT$K_INITIAL                 0x01

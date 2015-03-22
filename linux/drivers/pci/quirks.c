@@ -50,7 +50,7 @@ static void __init quirk_passive_release(struct pci_dev *dev)
     chipset level fix */
 
 
-int isa_dma_bridge_buggy;		/* Exported */
+int isa_dma_bridge_buggy;       /* Exported */
 
 static void __init quirk_isa_dma_hangs(struct pci_dev *dev)
 {
@@ -64,7 +64,7 @@ static void __init quirk_isa_dma_hangs(struct pci_dev *dev)
 int pci_pci_problems;
 
 /*
- *	Chipsets where PCI->PCI transfers vanish or hang
+ *  Chipsets where PCI->PCI transfers vanish or hang
  */
 
 static void __init quirk_nopcipci(struct pci_dev *dev)
@@ -77,7 +77,7 @@ static void __init quirk_nopcipci(struct pci_dev *dev)
 }
 
 /*
- *	Triton requires workarounds to be used by the drivers
+ *  Triton requires workarounds to be used by the drivers
  */
 
 static void __init quirk_triton(struct pci_dev *dev)
@@ -90,14 +90,14 @@ static void __init quirk_triton(struct pci_dev *dev)
 }
 
 /*
- *	VIA Apollo KT133 needs PCI latency patch
- *	Made according to a windows driver based patch by George E. Breese
- *	see PCI Latency Adjust on http://www.viahardware.com/download/viatweak.shtm
+ *  VIA Apollo KT133 needs PCI latency patch
+ *  Made according to a windows driver based patch by George E. Breese
+ *  see PCI Latency Adjust on http://www.viahardware.com/download/viatweak.shtm
  *      Also see http://home.tiscalinet.de/au-ja/review-kt133a-1-en.html for
  *      the info on which Mr Breese based his work.
  *
- *	Updated based on further information from the site and also on
- *	information provided by VIA
+ *  Updated based on further information from the site and also on
+ *  information provided by VIA
  */
 static void __init quirk_vialatency(struct pci_dev *dev)
 {
@@ -119,7 +119,7 @@ static void __init quirk_vialatency(struct pci_dev *dev)
     else
     {
         p = pci_find_device(PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_8231, NULL);
-        if(p==NULL)	/* No problem parts */
+        if(p==NULL) /* No problem parts */
             return;
         pci_read_config_byte(p, PCI_CLASS_REVISION, &rev);
         /* Check for buggy part revisions */
@@ -128,16 +128,16 @@ static void __init quirk_vialatency(struct pci_dev *dev)
     }
 
     /*
-     *	Ok we have the problem. Now set the PCI master grant to
-     *	occur every master grant. The apparent bug is that under high
-     *	PCI load (quite common in Linux of course) you can get data
-     *	loss when the CPU is held off the bus for 3 bus master requests
-     *	This happens to include the IDE controllers....
+     *  Ok we have the problem. Now set the PCI master grant to
+     *  occur every master grant. The apparent bug is that under high
+     *  PCI load (quite common in Linux of course) you can get data
+     *  loss when the CPU is held off the bus for 3 bus master requests
+     *  This happens to include the IDE controllers....
      *
-     *	VIA only apply this fix when an SB Live! is present but under
-     *	both Linux and Windows this isnt enough, and we have seen
-     *	corruption without SB Live! but with things like 3 UDMA IDE
-     *	controllers. So we ignore that bit of the VIA recommendation..
+     *  VIA only apply this fix when an SB Live! is present but under
+     *  both Linux and Windows this isnt enough, and we have seen
+     *  corruption without SB Live! but with things like 3 UDMA IDE
+     *  controllers. So we ignore that bit of the VIA recommendation..
      */
 
     pci_read_config_byte(dev, 0x76, &busarb);
@@ -150,7 +150,7 @@ static void __init quirk_vialatency(struct pci_dev *dev)
 }
 
 /*
- *	VIA Apollo VP3 needs ETBF on BT848/878
+ *  VIA Apollo VP3 needs ETBF on BT848/878
  */
 
 static void __init quirk_viaetbf(struct pci_dev *dev)
@@ -172,8 +172,8 @@ static void __init quirk_vsfx(struct pci_dev *dev)
 
 
 /*
- *	Natoma has some interesting boundary conditions with Zoran stuff
- *	at least
+ *  Natoma has some interesting boundary conditions with Zoran stuff
+ *  at least
  */
 
 static void __init quirk_natoma(struct pci_dev *dev)
@@ -224,8 +224,8 @@ static void __init quirk_io_region(struct pci_dev *dev, unsigned region, unsigne
  * way of waking it up again. Bummer).
  *
  * ALI M7101: Two IO regions pointed to by words at
- *	0xE0 (64 bytes of ACPI registers)
- *	0xE2 (32 bytes of SMB registers)
+ *  0xE0 (64 bytes of ACPI registers)
+ *  0xE2 (32 bytes of SMB registers)
  */
 static void __init quirk_ali7101_acpi(struct pci_dev *dev)
 {
@@ -239,8 +239,8 @@ static void __init quirk_ali7101_acpi(struct pci_dev *dev)
 
 /*
  * PIIX4 ACPI: Two IO regions pointed to by longwords at
- *	0x40 (64 bytes of ACPI registers)
- *	0x90 (32 bytes of SMB registers)
+ *  0x40 (64 bytes of ACPI registers)
+ *  0x90 (32 bytes of SMB registers)
  */
 static void __init quirk_piix4_acpi(struct pci_dev *dev)
 {
@@ -254,7 +254,7 @@ static void __init quirk_piix4_acpi(struct pci_dev *dev)
 
 /*
  * VIA ACPI: One IO region pointed to by longword at
- *	0x48 or 0x20 (256 bytes of ACPI registers)
+ *  0x48 or 0x20 (256 bytes of ACPI registers)
  */
 static void __init quirk_vt82c586_acpi(struct pci_dev *dev)
 {
@@ -272,9 +272,9 @@ static void __init quirk_vt82c586_acpi(struct pci_dev *dev)
 
 /*
  * VIA VT82C686 ACPI: Three IO region pointed to by (long)words at
- *	0x48 (256 bytes of ACPI registers)
- *	0x70 (128 bytes of hardware monitoring register)
- *	0x90 (16 bytes of SMB registers)
+ *  0x48 (256 bytes of ACPI registers)
+ *  0x70 (128 bytes of hardware monitoring register)
+ *  0x90 (16 bytes of SMB registers)
  */
 static void __init quirk_vt82c686_acpi(struct pci_dev *dev)
 {
@@ -342,7 +342,7 @@ static void __init quirk_via_ioapic(struct pci_dev *dev)
  * support the PCI_INTERRUPT_LINE register at all.  Therefore
  * it seems like setting the pci_dev's 'irq' to the
  * value of the ACPI SCI interrupt is only done for convenience.
- *	-jgarzik
+ *  -jgarzik
  */
 static void __init quirk_via_acpi(struct pci_dev *d)
 {
@@ -458,7 +458,7 @@ static void __init quirk_amd_ordering(struct pci_dev *dev)
         printk(KERN_WARNING "BIOS failed to enable PCI standards compliance, fixing this error.\n");
         pci_write_config_dword(dev, 0x4C, pcic);
         pci_read_config_dword(dev, 0x84, &pcic);
-        pcic |= (1<<23);	/* Required in this mode */
+        pcic |= (1<<23);    /* Required in this mode */
         pci_write_config_dword(dev, 0x84, pcic);
     }
 }
@@ -469,54 +469,54 @@ static void __init quirk_amd_ordering(struct pci_dev *dev)
 
 static struct pci_fixup pci_fixups[] __initdata =
 {
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_82441,	quirk_passive_release },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_82441,	quirk_passive_release },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82441,  quirk_passive_release },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82441,  quirk_passive_release },
     /*
      * Its not totally clear which chipsets are the problematic ones
      * We know 82C586 and 82C596 variants are affected.
      */
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C586_0,	quirk_isa_dma_hangs },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C596,	quirk_isa_dma_hangs },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C586_0, quirk_isa_dma_hangs },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C596,   quirk_isa_dma_hangs },
     { PCI_FIXUP_FINAL,      PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82371SB_0,  quirk_isa_dma_hangs },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_S3,	PCI_DEVICE_ID_S3_868,		quirk_s3_64M },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_S3,	PCI_DEVICE_ID_S3_968,		quirk_s3_64M },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL, 	PCI_DEVICE_ID_INTEL_82437, 	quirk_triton },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL, 	PCI_DEVICE_ID_INTEL_82437VX, 	quirk_triton },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL, 	PCI_DEVICE_ID_INTEL_82439, 	quirk_triton },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL, 	PCI_DEVICE_ID_INTEL_82439TX, 	quirk_triton },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL, 	PCI_DEVICE_ID_INTEL_82441, 	quirk_natoma },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL, 	PCI_DEVICE_ID_INTEL_82443LX_0, 	quirk_natoma },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL, 	PCI_DEVICE_ID_INTEL_82443LX_1, 	quirk_natoma },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL, 	PCI_DEVICE_ID_INTEL_82443BX_0, 	quirk_natoma },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL, 	PCI_DEVICE_ID_INTEL_82443BX_1, 	quirk_natoma },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_INTEL, 	PCI_DEVICE_ID_INTEL_82443BX_2, 	quirk_natoma },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_SI,	PCI_DEVICE_ID_SI_5597,		quirk_nopcipci },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_SI,	PCI_DEVICE_ID_SI_496,		quirk_nopcipci },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_8363_0,	quirk_vialatency },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_8371_1,	quirk_vialatency },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_VIA,	0x3112	/* Not out yet ? */,	quirk_vialatency },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C576,	quirk_vsfx },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C597_0,	quirk_viaetbf },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C597_0,	quirk_vt82c598_id },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C586_3,	quirk_vt82c586_acpi },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C686_4,	quirk_vt82c686_acpi },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_82371AB_3,	quirk_piix4_acpi },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_AL,	PCI_DEVICE_ID_AL_M7101,		quirk_ali7101_acpi },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_82371SB_2,	quirk_piix3_usb },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_INTEL,	PCI_DEVICE_ID_INTEL_82371AB_2,	quirk_piix3_usb },
-    { PCI_FIXUP_FINAL,	PCI_ANY_ID,		PCI_ANY_ID,			quirk_cardbus_legacy },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_S3,   PCI_DEVICE_ID_S3_868,       quirk_s3_64M },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_S3,   PCI_DEVICE_ID_S3_968,       quirk_s3_64M },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82437,  quirk_triton },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82437VX,    quirk_triton },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82439,  quirk_triton },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82439TX,    quirk_triton },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82441,  quirk_natoma },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82443LX_0,  quirk_natoma },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82443LX_1,  quirk_natoma },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82443BX_0,  quirk_natoma },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82443BX_1,  quirk_natoma },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82443BX_2,  quirk_natoma },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_SI,   PCI_DEVICE_ID_SI_5597,      quirk_nopcipci },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_SI,   PCI_DEVICE_ID_SI_496,       quirk_nopcipci },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_8363_0,   quirk_vialatency },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_8371_1,   quirk_vialatency },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_VIA,  0x3112  /* Not out yet ? */,    quirk_vialatency },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C576,   quirk_vsfx },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C597_0, quirk_viaetbf },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C597_0, quirk_vt82c598_id },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C586_3, quirk_vt82c586_acpi },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C686_4, quirk_vt82c686_acpi },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82371AB_3,  quirk_piix4_acpi },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_AL,   PCI_DEVICE_ID_AL_M7101,     quirk_ali7101_acpi },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82371SB_2,  quirk_piix3_usb },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_INTEL,    PCI_DEVICE_ID_INTEL_82371AB_2,  quirk_piix3_usb },
+    { PCI_FIXUP_FINAL,  PCI_ANY_ID,     PCI_ANY_ID,         quirk_cardbus_legacy },
 
 #ifdef CONFIG_X86_IO_APIC
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C686,	quirk_via_ioapic },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C686,   quirk_via_ioapic },
 #endif
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C586_3,	quirk_via_acpi },
-    { PCI_FIXUP_HEADER,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C686_4,	quirk_via_acpi },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C586_2,	quirk_via_irqpic },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C686_5,	quirk_via_irqpic },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_VIA,	PCI_DEVICE_ID_VIA_82C686_6,	quirk_via_irqpic },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C586_3, quirk_via_acpi },
+    { PCI_FIXUP_HEADER, PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C686_4, quirk_via_acpi },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C586_2, quirk_via_irqpic },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C686_5, quirk_via_irqpic },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_VIA,  PCI_DEVICE_ID_VIA_82C686_6, quirk_via_irqpic },
 
-    { PCI_FIXUP_FINAL, 	PCI_VENDOR_ID_AMD,	PCI_DEVICE_ID_AMD_VIPER_7410,	quirk_amd_ioapic },
-    { PCI_FIXUP_FINAL,	PCI_VENDOR_ID_AMD,	PCI_DEVICE_ID_AMD_FE_GATE_700C, quirk_amd_ordering },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_AMD,  PCI_DEVICE_ID_AMD_VIPER_7410,   quirk_amd_ioapic },
+    { PCI_FIXUP_FINAL,  PCI_VENDOR_ID_AMD,  PCI_DEVICE_ID_AMD_FE_GATE_700C, quirk_amd_ordering },
 
     { 0 }
 };

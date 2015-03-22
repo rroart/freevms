@@ -1,5 +1,5 @@
-#ifndef scsnetdef_h
-#define scsnetdef_h
+#ifndef SCSNETDEF_H
+#define SCSNETDEF_H
 
 #define SCSNET$C_START_LEN 62
 #define SCSNET$C_STACK_LEN 62

@@ -1,5 +1,5 @@
-#ifndef rmsdef_h
-#define rmsdef_h
+#ifndef RMSDEF_H
+#define RMSDEF_H
 
 /* RMS.h v1.3   RMS routine definitions */
 
@@ -12,7 +12,7 @@
         must maintain comments in their source to acknowledge
         the contibution of the original author.
 
-	Originally part of rms.h
+    Originally part of rms.h
 */
 
 #define RMS$_RTB 98728

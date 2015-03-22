@@ -30,9 +30,9 @@ extern int  MCA_bus;
  * See Documentation/mca.txt or one of the existing drivers for
  * more information.
  */
-#define MCA_NOTFOUND	(-1)
-#define MCA_INTEGSCSI	(MCA_MAX_SLOT_NR)
-#define MCA_INTEGVIDEO	(MCA_MAX_SLOT_NR+1)
+#define MCA_NOTFOUND    (-1)
+#define MCA_INTEGSCSI   (MCA_MAX_SLOT_NR)
+#define MCA_INTEGVIDEO  (MCA_MAX_SLOT_NR+1)
 #define MCA_MOTHERBOARD (MCA_MAX_SLOT_NR+2)
 
 /* Max number of adapters, including both slots and various integrated

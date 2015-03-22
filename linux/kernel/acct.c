@@ -33,7 +33,7 @@
  *  Fixed a nasty interaction with with sys_umount(). If the accointing
  *  was suspeneded we failed to stop it on umount(). Messy.
  *  Another one: remount to readonly didn't stop accounting.
- *	Question: what should we do if we have CAP_SYS_ADMIN but not
+ *  Question: what should we do if we have CAP_SYS_ADMIN but not
  *  CAP_SYS_PACCT? Current code does the following: umount returns -EBUSY
  *  unless we are messing with the root. In that case we are getting a
  *  real mess with do_remount_sb(). 9/11/98, AV.
@@ -44,7 +44,7 @@
  *  OK, that's better. ANOTHER race and leak in BSD variant. There always
  *  is one more bug... 10/11/98, AV.
  *
- *	Oh, fsck... Oopsable SMP race in do_process_acct() - we must hold
+ *  Oh, fsck... Oopsable SMP race in do_process_acct() - we must hold
  * ->mmap_sem to walk the vma list of current->mm. Nasty, since it leaks
  * a struct file opened for write. Fixed. 2/6/2000, AV.
  */
@@ -71,9 +71,9 @@
  */
 
 int acct_parm[3] = {4, 2, 30};
-#define RESUME		(acct_parm[0])	/* >foo% free space - resume */
-#define SUSPEND		(acct_parm[1])	/* <foo% free space - suspend */
-#define ACCT_TIMEOUT	(acct_parm[2])	/* foo second timeout between checks */
+#define RESUME      (acct_parm[0])  /* >foo% free space - resume */
+#define SUSPEND     (acct_parm[1])  /* <foo% free space - suspend */
+#define ACCT_TIMEOUT    (acct_parm[2])  /* foo second timeout between checks */
 
 /*
  * External references and all of the globals.
@@ -246,9 +246,9 @@ void acct_auto_close(kdev_t dev)
  *  is a 13-bit fraction with a 3-bit (base 8) exponent.
  */
 
-#define	MANTSIZE	13			/* 13 bit mantissa. */
-#define	EXPSIZE		3			/* Base 8 (3 bit) exponent. */
-#define	MAXFRACT	((1 << MANTSIZE) - 1)	/* Maximum fractional value. */
+#define MANTSIZE    13          /* 13 bit mantissa. */
+#define EXPSIZE     3           /* Base 8 (3 bit) exponent. */
+#define MAXFRACT    ((1 << MANTSIZE) - 1)   /* Maximum fractional value. */
 
 static comp_t encode_comp_t(unsigned long value)
 {
@@ -257,8 +257,8 @@ static comp_t encode_comp_t(unsigned long value)
     exp = rnd = 0;
     while (value > MAXFRACT)
     {
-        rnd = value & (1 << (EXPSIZE - 1));	/* Round up? */
-        value >>= EXPSIZE;	/* Base 8 exponent == 3 bit shift. */
+        rnd = value & (1 << (EXPSIZE - 1)); /* Round up? */
+        value >>= EXPSIZE;  /* Base 8 exponent == 3 bit shift. */
         exp++;
     }
 
@@ -274,8 +274,8 @@ static comp_t encode_comp_t(unsigned long value)
     /*
          * Clean it up and polish it off.
          */
-    exp <<= MANTSIZE;		/* Shift the exponent into place */
-    exp += value;			/* and add on the mantissa. */
+    exp <<= MANTSIZE;       /* Shift the exponent into place */
+    exp += value;           /* and add on the mantissa. */
     return exp;
 }
 
@@ -346,7 +346,7 @@ static void do_acct_process(long exitcode, struct file *file)
     }
     vsize = vsize / 1024;
     ac.ac_mem = encode_comp_t(vsize);
-    ac.ac_io = encode_comp_t(0 /* current->io_usage */);	/* %% */
+    ac.ac_io = encode_comp_t(0 /* current->io_usage */);    /* %% */
     ac.ac_rw = encode_comp_t(ac.ac_io / 1024);
     ac.ac_minflt = encode_comp_t(current->min_flt);
     ac.ac_majflt = encode_comp_t(current->maj_flt);

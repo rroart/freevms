@@ -15,13 +15,13 @@ extern dma_addr_t bad_dma_address;
 #ifdef CONFIG_PCI
 extern unsigned int pcibios_assign_all_busses(void);
 #else
-#define pcibios_assign_all_busses()	0
+#define pcibios_assign_all_busses() 0
 #endif
-#define pcibios_scan_all_fns()		0
+#define pcibios_scan_all_fns()      0
 
 extern unsigned long pci_mem_start;
-#define PCIBIOS_MIN_IO		0x1000
-#define PCIBIOS_MIN_MEM		(pci_mem_start)
+#define PCIBIOS_MIN_IO      0x1000
+#define PCIBIOS_MIN_MEM     (pci_mem_start)
 
 void pcibios_config_init(void);
 struct pci_bus * pcibios_scan_root(int bus);
@@ -99,20 +99,20 @@ void pci_unmap_single(struct pci_dev *hwdev, dma_addr_t addr,
  */
 
 #define pci_map_page(dev,page,offset,size,dir) \
-	pci_map_single((dev), page_address(page)+(offset), (size), (dir))
+    pci_map_single((dev), page_address(page)+(offset), (size), (dir))
 
-#define DECLARE_PCI_UNMAP_ADDR(ADDR_NAME)	\
-	dma_addr_t ADDR_NAME;
-#define DECLARE_PCI_UNMAP_LEN(LEN_NAME)		\
-	__u32 LEN_NAME;
-#define pci_unmap_addr(PTR, ADDR_NAME)			\
-	((PTR)->ADDR_NAME)
-#define pci_unmap_addr_set(PTR, ADDR_NAME, VAL)		\
-	(((PTR)->ADDR_NAME) = (VAL))
-#define pci_unmap_len(PTR, LEN_NAME)			\
-	((PTR)->LEN_NAME)
-#define pci_unmap_len_set(PTR, LEN_NAME, VAL)		\
-	(((PTR)->LEN_NAME) = (VAL))
+#define DECLARE_PCI_UNMAP_ADDR(ADDR_NAME)   \
+    dma_addr_t ADDR_NAME;
+#define DECLARE_PCI_UNMAP_LEN(LEN_NAME)     \
+    __u32 LEN_NAME;
+#define pci_unmap_addr(PTR, ADDR_NAME)          \
+    ((PTR)->ADDR_NAME)
+#define pci_unmap_addr_set(PTR, ADDR_NAME, VAL)     \
+    (((PTR)->ADDR_NAME) = (VAL))
+#define pci_unmap_len(PTR, LEN_NAME)            \
+    ((PTR)->LEN_NAME)
+#define pci_unmap_len_set(PTR, LEN_NAME, VAL)       \
+    (((PTR)->LEN_NAME) = (VAL))
 
 static inline void pci_dma_sync_single(struct pci_dev *hwdev,
                                        dma_addr_t dma_handle,
@@ -140,7 +140,7 @@ static inline void pci_dma_sync_sg(struct pci_dev *hwdev,
  * address space.  The networking and block device layers use
  * this boolean for bounce buffer decisions.
  */
-#define PCI_DMA_BUS_IS_PHYS	(0)
+#define PCI_DMA_BUS_IS_PHYS (0)
 
 
 #else
@@ -185,10 +185,10 @@ static inline dma_addr_t pci_map_page(struct pci_dev *hwdev, struct page *page,
 /* pci_unmap_{page,single} is a nop so... */
 #define DECLARE_PCI_UNMAP_ADDR(ADDR_NAME)
 #define DECLARE_PCI_UNMAP_LEN(LEN_NAME)
-#define pci_unmap_addr(PTR, ADDR_NAME)		(0)
-#define pci_unmap_addr_set(PTR, ADDR_NAME, VAL)	do { } while (0)
-#define pci_unmap_len(PTR, LEN_NAME)		(0)
-#define pci_unmap_len_set(PTR, LEN_NAME, VAL)	do { } while (0)
+#define pci_unmap_addr(PTR, ADDR_NAME)      (0)
+#define pci_unmap_addr_set(PTR, ADDR_NAME, VAL) do { } while (0)
+#define pci_unmap_len(PTR, LEN_NAME)        (0)
+#define pci_unmap_len_set(PTR, LEN_NAME, VAL)   do { } while (0)
 
 /* Make physical memory consistent for a single
  * streaming mode DMA translation after a transfer.
@@ -223,7 +223,7 @@ static inline void pci_dma_sync_sg(struct pci_dev *hwdev,
     flush_write_buffers();
 }
 
-#define PCI_DMA_BUS_IS_PHYS	1
+#define PCI_DMA_BUS_IS_PHYS 1
 
 #endif
 
@@ -253,7 +253,7 @@ static inline int pci_dma_supported(struct pci_dev *hwdev, u64 mask)
 }
 
 /* This is always fine. */
-#define pci_dac_dma_supported(pci_dev, mask)	(1)
+#define pci_dac_dma_supported(pci_dev, mask)    (1)
 
 static __inline__ dma64_addr_t
 pci_dac_page_to_dma(struct pci_dev *pdev, struct page *page, unsigned long offset, int direction)
@@ -285,8 +285,8 @@ pci_dac_dma_sync_single(struct pci_dev *pdev, dma64_addr_t dma_addr, size_t len,
  * You should only work with the number of sg entries pci_map_sg
  * returns.
  */
-#define sg_dma_address(sg)	((sg)->dma_address)
-#define sg_dma_len(sg)		((sg)->length)
+#define sg_dma_address(sg)  ((sg)->dma_address)
+#define sg_dma_len(sg)      ((sg)->length)
 
 /* Return the index of the PCI controller for device. */
 static inline int pci_controller_num(struct pci_dev *dev)

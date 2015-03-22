@@ -1,57 +1,57 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "TCP_TELNET_MISC - TELNET Virtual Terminal service support routines"
 /*
 Facility:
 
-	TCP_TELNET - Run incoming TELNET service under TCP (RFC 854)
+    TCP_TELNET - Run incoming TELNET service under TCP (RFC 854)
 
 Abstract:
 
-	A collection of routines which support the TELNET module.
-	Includes option-specific code, etc...
+    A collection of routines which support the TELNET module.
+    Includes option-specific code, etc...
 
 Author:
 
-1.0	02-Feb-1989	Bruce R. Miller		CMU Network Development
+1.0 02-Feb-1989 Bruce R. Miller     CMU Network Development
 
 Module Modification History:
 
-1.1	13-Nov-1991	John M. Clement (JC)		Rice University
-	Added many terminal types and fixed the WINDOW_SIZE and TERMINAL_TYPE
-	setting routines.  Also removed all calls to SIGNAL
-	Calls to SIGNAL are forbidded if we run under IPACP.
+1.1 13-Nov-1991 John M. Clement (JC)        Rice University
+    Added many terminal types and fixed the WINDOW_SIZE and TERMINAL_TYPE
+    setting routines.  Also removed all calls to SIGNAL
+    Calls to SIGNAL are forbidded if we run under IPACP.
 
-	The Terminal name is now parsed by preceding it by "*"
-	and doing a wild search.  This allows syntax as VT240 or DEC-VT240
-	Indeed even 240 will be understood.
+    The Terminal name is now parsed by preceding it by "*"
+    and doing a wild search.  This allows syntax as VT240 or DEC-VT240
+    Indeed even 240 will be understood.
 
-	Set_DEVDEP added to turn on/off 8-bit, PASSALL
+    Set_DEVDEP added to turn on/off 8-bit, PASSALL
 
-	When Terminal type is received only ask for new one if current one
-	is different from last one or after 6 tries.
+    When Terminal type is received only ask for new one if current one
+    is different from last one or after 6 tries.
 
-	Fixed a problem in Timing_mark_ON Referred to REMOPTS instead of
-	LCLOPTS (JC)
+    Fixed a problem in Timing_mark_ON Referred to REMOPTS instead of
+    LCLOPTS (JC)
 */
 
 #if 0
@@ -65,12 +65,12 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 #include<descrip.h>
 #include<starlet.h>
 
-                       // not yet#include "SYS$LIBRARY:LIB";		// JC
+                       // not yet#include "SYS$LIBRARY:LIB";        // JC
 //LIBRARY "SYS$LIBRARY:STARLET";
-                       // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS common definitions
-#include "telnet.h"		// TELNET protocol definitions
+                       // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";   // BLISS common definitions
+#include "telnet.h"     // TELNET protocol definitions
 #include "cmuip.h" // needed before tcpmacros.h
-#include "tcpmacros.h"		// Local (tcp) Macro defintions.
+#include "tcpmacros.h"      // Local (tcp) Macro defintions.
 
 #include<ssdef.h>
 #include"netvms.h"
@@ -99,10 +99,10 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 //++
 // This macro describes the terminal translation table entries.
 //--
-//  Modified by J Clement		JC
-//	Changed table structure to include the Device dependent terminal
-//	This has been modified to include all known DEC terminal types.
-//	Characteristics.
+//  Modified by J Clement       JC
+//  Changed table structure to include the Device dependent terminal
+//  This has been modified to include all known DEC terminal types.
+//  Characteristics.
                        struct ttab$entry
 {
     void *    TTab$L_NAME;
@@ -112,10 +112,10 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 };
 
 #define    TTAB$K_SIZE sizeof(struct ttab$entry)
-#define    TTAB$K_TABLE_SIZE	39
+#define    TTAB$K_TABLE_SIZE    39
 #if 0
 LITERAL
-TTab$K_Size	= $Field_Set_Size,
+TTab$K_Size = $Field_Set_Size,
      MACRO
      TTab$Entry = BLOCK->TTab$K_Size FIELD(TTAB$FIELDS)%;
 #endif
@@ -130,7 +130,7 @@ static struct dsc$descriptor dscs[TTAB$K_TABLE_SIZE+1] = { {0, 0},
     ASCID2(7,"DEC-FT6"),
     ASCID2(7,"DEC-FT7"),
     ASCID2(7,"DEC-FT8"),
-    ASCID2(10,"DEC-TQ_BTS"),	// ????
+    ASCID2(10,"DEC-TQ_BTS"),    // ????
     ASCID2(8,"DEC-VT05"),
     ASCID2(9,"DEC-VK100"),
     ASCID2(3,"TEK"),
@@ -205,7 +205,7 @@ Term_Table [4*TTAB$K_TABLE_SIZE+1]=
     TT$_FT8,
     0,
     0,
-    &dscs[10],	// ????
+    &dscs[10],  // ????
     TT$_TQ_BTS,
     0,
     0,
@@ -304,7 +304,7 @@ Term_Table [4*TTAB$K_TABLE_SIZE+1]=
     +TT$M_SCOPE,
     0
     +TT2$M_ANSICRT
-//!!Optional		+TT2$M_AVO
+//!!Optional        +TT2$M_AVO
     +TT2$M_DECCRT,
     &dscs[23],
     TT$_VT100,
@@ -315,7 +315,7 @@ Term_Table [4*TTAB$K_TABLE_SIZE+1]=
     +TT$M_SCOPE,
     0
     +TT2$M_ANSICRT
-//!!Optional		+TT2$M_AVO
+//!!Optional        +TT2$M_AVO
     +TT2$M_DECCRT,
     &dscs[24],
     TT$_VT101,
@@ -349,7 +349,7 @@ Term_Table [4*TTAB$K_TABLE_SIZE+1]=
     +TT$M_SCOPE,
     0
     +TT2$M_ANSICRT
-//!!Optional		+TT2$M_AVO
+//!!Optional        +TT2$M_AVO
     +TT2$M_EDIT
     +TT2$M_DECCRT,
     &dscs[27],
@@ -566,7 +566,7 @@ void Line_Changed_AST (Parm)
 //--
 // Functional Description:
 //
-// 	Called whenever the TW's characteristics are changed by the child proc
+//  Called whenever the TW's characteristics are changed by the child proc
 //--
 {
     extern
@@ -578,8 +578,8 @@ void Line_Changed_AST (Parm)
     struct _iosb io_stats;
     struct TVT$BLOCK *TVT = Parm;
     union _ttdef * Old_Chars = &TVT->TVT$TTYDEPEND;
-    union _ttdef * Charistics	= &PTY_Char.QCB$L_CHARISTICS;
-    union _tt2def * Extend_Char	= &PTY_Char.QCB$L_EXTEND_CHAR;	// JC
+    union _ttdef * Charistics   = &PTY_Char.QCB$L_CHARISTICS;
+    union _tt2def * Extend_Char = &PTY_Char.QCB$L_EXTEND_CHAR;  // JC
 
     // Make sure the TVT is still valid
     if (TVT->TVT$CANCEL)
@@ -649,12 +649,12 @@ IS_CNTRLT_GOOD (TVT)
 //--
 // Functional Description:
 //
-//	Returns 1 if process will respond to ^T with status information.
+//  Returns 1 if process will respond to ^T with status information.
 //
-//	Right now it checks to see if the term is in Pasthru/ALL or TTSYNC
-//	mode which usually means I'm in EMACS, the only thing I know of
-//	Also TELNET !!!!!!!
-//	that eats ^T's.
+//  Right now it checks to see if the term is in Pasthru/ALL or TTSYNC
+//  mode which usually means I'm in EMACS, the only thing I know of
+//  Also TELNET !!!!!!!
+//  that eats ^T's.
 //--
 struct TVT$BLOCK * TVT;
 {
@@ -690,9 +690,9 @@ void Timing_Mark_On(TVT)
 //--
 // Functional Description:
 //
-//	The TM option has been turned on.  Turn it right back off.
-//	In the future we shouldn't respond until we think the process
-//	has, um, well, processed all of the data before the TM.
+//  The TM option has been turned on.  Turn it right back off.
+//  In the future we shouldn't respond until we think the process
+//  has, um, well, processed all of the data before the TM.
 //++
 struct TVT$BLOCK * TVT;
 {
@@ -709,11 +709,11 @@ void Set_PTY_Window_Size (TVT, pag, width)
 //--
 // Functional Description:
 //
-//	Set the terminal mode to reflect the new size.
+//  Set the terminal mode to reflect the new size.
 //--
 struct TVT$BLOCK * TVT;
 {
-    long pty_chan	= TVT->TVT$PTY_CHN;
+    long pty_chan   = TVT->TVT$PTY_CHN;
     struct _qcbdef * PTY_Char = &TVT->TVT$TTY_CHAR;
     union _ttdef * Charistics = &PTY_Char->QCB$L_CHARISTICS;
     union _tt2def * Extend_Char = &PTY_Char->QCB$L_EXTEND_CHAR;   // JC
@@ -776,7 +776,7 @@ void Window_Size_Sub (TVT)
 //++
 // Functional Description:
 //
-//	We've received new window size information.
+//  We've received new window size information.
 //--
 struct TVT$BLOCK * TVT;
 {
@@ -804,26 +804,26 @@ void Set_PTY_Term_Type (TVT, type, devdep)
 //--
 // Functional Description:
 //
-//	Set the terminal mode to reflect the new size.
+//  Set the terminal mode to reflect the new size.
 //--
-//	Rewritten by JC to make it work
+//  Rewritten by JC to make it work
 //
 unsigned long devdep[2];
 struct TVT$BLOCK * TVT;
 {
     extern void set_devdep(struct TVT$BLOCK * TVT);
-    long pty_chan	= TVT->TVT$PTY_CHN;
-    long tty_chan	= TVT->TVT$TTY_CHN;
+    long pty_chan   = TVT->TVT$PTY_CHN;
+    long tty_chan   = TVT->TVT$TTY_CHN;
     struct _qcbdef * PTY_Char = &TVT->TVT$TTY_CHAR;
     union _ttdef * Charistics = &PTY_Char->QCB$L_CHARISTICS;
     union _tt2def * Extend_Char = &PTY_Char->QCB$L_EXTEND_CHAR;   // JC
-    struct OPT$BLOCK * LCLOPTS		= &TVT->TVT$LCLOPTS;
-    long State_Echo	= LCLOPTS[Telnet$K_Echo].OPT$STATE;
-    long State_Binary	= LCLOPTS[Telnet$K_Binary].OPT$STATE;
-    long State_Eightbit	= LCLOPTS[Telnet$K_Extended_Ascii].OPT$STATE;
+    struct OPT$BLOCK * LCLOPTS      = &TVT->TVT$LCLOPTS;
+    long State_Echo = LCLOPTS[Telnet$K_Echo].OPT$STATE;
+    long State_Binary   = LCLOPTS[Telnet$K_Binary].OPT$STATE;
+    long State_Eightbit = LCLOPTS[Telnet$K_Extended_Ascii].OPT$STATE;
     struct _iosb io_stats;
     signed long
-    Status	;
+    Status  ;
 
     Status = sys$qiow (
                  0,
@@ -851,7 +851,7 @@ struct TVT$BLOCK * TVT;
     {
         PTY_Char->QCB$B_TYPE = type;
 //
-//	Set the new terminal characteristics JC
+//  Set the new terminal characteristics JC
 //
 
         long temp = PTY_Char->QCB$L_CHARISTICS[0] + ( PTY_Char->QCB$L_CHARISTICS[1] << 8) + (PTY_Char->QCB$L_CHARISTICS[2] << 16);
@@ -859,21 +859,21 @@ struct TVT$BLOCK * TVT;
         PTY_Char->QCB$L_CHARISTICS = (PTY_Char->QCB$L_CHARISTICS &&
 #endif
                                       temp = (temp &
-                                              (!	(   TT$M_LOWER
+                                              (!    (   TT$M_LOWER
                                                       | TT$M_EIGHTBIT
                                                       | TT$M_MECHFORM
                                                       | TT$M_MECHTAB
                                                       | TT$M_WRAP
                                                       | TT$M_SCOPE)))
-                                             ||		devdep[0];
+                                             ||     devdep[0];
                                       PTY_Char->QCB$L_CHARISTICS[0]=temp & 0xff;
                                       PTY_Char->QCB$L_CHARISTICS[1]=(temp & 0x00ff00) >> 8;
                                       PTY_Char->QCB$L_CHARISTICS[2]=(temp & 0xff0000) >> 16;
                                       PTY_Char->QCB$L_EXTEND_CHAR= (PTY_Char->QCB$L_EXTEND_CHAR &
-                                              (!	(   TT2$M_PRINTER
+                                              (!    (   TT2$M_PRINTER
                                                       | TT2$M_REGIS
                                                       | TT2$M_SIXEL
-//!!JC			 | TT2$M_PASTHRU
+//!!JC           | TT2$M_PASTHRU
                                                       | TT2$M_ANSICRT
                                                       | TT2$M_BLOCK
                                                       | TT2$M_AVO
@@ -881,7 +881,7 @@ struct TVT$BLOCK * TVT;
                                                       | TT2$M_DECCRT
                                                       | TT2$M_DECCRT2
                                                       | TT2$M_DECCRT3)))
-                                              ||		devdep[1];
+                                              ||        devdep[1];
 
                                       Charistics ->tt$v_eightbit = State_Binary | State_Eightbit;
                                       Status = sys$qiow (
@@ -905,7 +905,7 @@ struct TVT$BLOCK * TVT;
                  ,"!%T Set_PTY_Term_Type: SETMODE status=!UL!/",
                  0,io_stats.iosb$w_status);
         };
-        TVT->TVT$TTSET = 1;		// Set TTSET flag
+        TVT->TVT$TTSET = 1;     // Set TTSET flag
         set_devdep(TVT);
     }
     return SS$_NORMAL;
@@ -915,7 +915,7 @@ void Terminal_Type_On (TVT)
 //++
 // Functional Description:
 //
-//	We've agreed to talk about terminal types.
+//  We've agreed to talk about terminal types.
 //--
 struct TVT$BLOCK * TVT;
 {
@@ -932,9 +932,9 @@ void Window_Size_On (TVT)
 //++
 // Functional Description:
 //
-//	We've agreed to talk about terminal types.
+//  We've agreed to talk about terminal types.
 //--
-//	Added by JC
+//  Added by JC
 struct TVT$BLOCK * TVT;
 {
     extern
@@ -950,12 +950,12 @@ Lookup_terminal(Term_Desc, devdep)
 //++
 // Functional Description:
 //
-//	Search the terminal name list to find a string that matches
-//	term_desc.  If none found, return -1,
-//	Otherwise return(SS$_NORMAL) and set Type_id = term type number.
+//  Search the terminal name list to find a string that matches
+//  term_desc.  If none found, return -1,
+//  Otherwise return(SS$_NORMAL) and set Type_id = term type number.
 //--
 unsigned long * devdep[2];
-struct dsc$descriptor *	Term_Desc;
+struct dsc$descriptor * Term_Desc;
 {
     extern
     STR$UPCASE(),
@@ -970,7 +970,7 @@ struct dsc$descriptor *	Term_Desc;
     Status;
 
 //
-//	Setup buffer to hold input string
+//  Setup buffer to hold input string
 //
     Buffer[1]="*";
     TYPDSC->dsc$w_length = sizeof(Buffer)-2;
@@ -978,23 +978,23 @@ struct dsc$descriptor *	Term_Desc;
     TYPDSC->dsc$b_class = DSC$K_CLASS_S;
     TYPDSC->dsc$a_pointer = Buffer+2;
 //
-//	Get the string and trim off blanks
-//	Then Make it upper case
+//  Get the string and trim off blanks
+//  Then Make it upper case
 //
     Status = STR$TRIM(TYPDSC,Term_Desc,TYPDSC->dsc$w_length);
     Status = STR$UPCASE(TYPDSC,TYPDSC);
     TYPDSC->dsc$a_pointer = Buffer+1;
 //
-//	Now add the * to the string for a wild match
+//  Now add the * to the string for a wild match
 //
     TYPDSC->dsc$w_length = TYPDSC->dsc$w_length +1;
     Buffer[0] = Term_Desc->dsc$w_length+1;
     for ( i = 1; i < Term_Table[0]; i ++)
     {
 
-//!!	Status =  STR$CASE_BLIND_COMPARE(
+//!!    Status =  STR$CASE_BLIND_COMPARE(
 //
-//	Make a wild match
+//  Make a wild match
 //
         Status =  STR$MATCH_WILD(
                       Term_Table[Term_Table[1]*i+0],
@@ -1034,34 +1034,34 @@ struct TVT$BLOCK * TVT;
     struct dsc$descriptor typdsc_, *TYPDSC = & typdsc_;
 
     CH$RCHAR_A(TVT->TVT$SUB_PTR);
-    TYPDSC->dsc$w_length = TVT->TVT$SUB_CNT - 1;	// current string
+    TYPDSC->dsc$w_length = TVT->TVT$SUB_CNT - 1;    // current string
     TYPDSC->dsc$a_pointer = TVT->TVT$SUB_PTR;
     TYPDSC->dsc$b_dtype = DSC$K_DTYPE_T;
     TYPDSC->dsc$b_class = DSC$K_CLASS_S;
 //!//    OLDTYPDSC->dsc$w_length = sizeof( TVT->TVT$TERMINAL_TYPE);
-    OLDTYPDSC->dsc$w_length = 16;			// Saved terminal type
+    OLDTYPDSC->dsc$w_length = 16;           // Saved terminal type
     OLDTYPDSC->dsc$a_pointer = TVT->TVT$TERMINAL_TYPE;
     OLDTYPDSC->dsc$b_dtype = DSC$K_DTYPE_T;
     OLDTYPDSC->dsc$b_class = DSC$K_CLASS_S;
     TVT->TVT$SUB_PTR = TVT->TVT$SUB_BUF;
     TVT->TVT$SUB_CNT = 0;
 
-    type_id = Lookup_terminal(TYPDSC,devdep);	// Get terminal type
+    type_id = Lookup_terminal(TYPDSC,devdep);   // Get terminal type
 
-    if (type_id > 0)			// Is it OK ?
+    if (type_id > 0)            // Is it OK ?
     {
 //
-//		Setup the device dependent bits
+//      Setup the device dependent bits
 //
         Set_PTY_Term_Type(TVT,type_id,devdep);
     }
-    else if	(STR$CASE_BLIND_COMPARE(OLDTYPDSC,TYPDSC)	// Not same ?
-             && (TVT->TVT$KILL_TERMINAL_TYPE <= 6)	// Not 6 tries ?
+    else if (STR$CASE_BLIND_COMPARE(OLDTYPDSC,TYPDSC)   // Not same ?
+             && (TVT->TVT$KILL_TERMINAL_TYPE <= 6)  // Not 6 tries ?
              && (type_id != 0))
     {
         TVT_SEND_SUBOP(TVT,Telnet$K_Terminal_Type,
                        /*%REF*/(Option$K_Terminal_Type_Send), 1);
-//!!	    OPTBLK->OPT$PREFER = OPT$DONT_CARE;
+//!!        OPTBLK->OPT$PREFER = OPT$DONT_CARE;
     };
     TVT->TVT$KILL_TERMINAL_TYPE = TVT->TVT$KILL_TERMINAL_TYPE+1;
     Status = STR$COPY_DX(OLDTYPDSC,TYPDSC);
@@ -1071,7 +1071,7 @@ struct TVT$BLOCK * TVT;
 void Set_DEVDEP_DONE(TVT)
 struct TVT$BLOCK * TVT;
 {
-    int * tty_chan	= &TVT->TVT$TTY_CHN;
+    int * tty_chan  = &TVT->TVT$TTY_CHN;
     signed long
     Status;
 
@@ -1089,8 +1089,8 @@ void set_devdep(TVT)
 //--
 // Functional Description:
 //
-//	Set the terminal device dependent characteristics
-//	Added by JC
+//  Set the terminal device dependent characteristics
+//  Added by JC
 //--
 struct TVT$BLOCK * TVT;
 {
@@ -1127,27 +1127,29 @@ dsc$a_pointer :
     struct dsc$descriptor * ptynam = &ptynam_;
     struct item_list_3 Item_List[3];
     unsigned long Status;
-    short int pty_chan	= TVT->TVT$PTY_CHN;
-    short int tty_chan	= TVT->TVT$TTY_CHN;
+    short int pty_chan  = TVT->TVT$PTY_CHN;
+    short int tty_chan  = TVT->TVT$TTY_CHN;
     struct _qcbdef * PTY_Char= &TVT->TVT$TTY_CHAR;
     union _ttdef * Charistics = PTY_Char->QCB$L_CHARISTICS;
     union _tt2def * Extend_Char = PTY_Char->QCB$L_EXTEND_CHAR;   // JC
 
-    struct OPT$BLOCK * LCLOPTS		= &TVT->TVT$LCLOPTS;
-    struct OPT$BLOCK * Echo_opt	= LCLOPTS[Telnet$K_Echo].OPT$BASE;
-    long State_Echo	= LCLOPTS[Telnet$K_Echo].OPT$STATE;
-    long State_Binary	= LCLOPTS[Telnet$K_Binary].OPT$STATE;
-    long State_Eightbit	= LCLOPTS[Telnet$K_Extended_Ascii].OPT$STATE;
+    struct OPT$BLOCK * LCLOPTS      = &TVT->TVT$LCLOPTS;
+    struct OPT$BLOCK * Echo_opt = LCLOPTS[Telnet$K_Echo].OPT$BASE;
+    long State_Echo = LCLOPTS[Telnet$K_Echo].OPT$STATE;
+    long State_Binary   = LCLOPTS[Telnet$K_Binary].OPT$STATE;
+    long State_Eightbit = LCLOPTS[Telnet$K_Extended_Ascii].OPT$STATE;
     $DESCRIPTOR(lnm_proc,"LNM$PROCESS_TABLE");
     $DESCRIPTOR(lnm_pty,"INET$PTY_TERM");
     $DESCRIPTOR(lnm_pass,"TELNET_PASSALL");
-struct item_list_3 itm[2]= { {buflen:20, item_code:
+    struct item_list_3 itm[2]= { {
+buflen:20, item_code:
 LNM$_STRING, bufaddr:
             ptystr, &ptynam->dsc$w_length
-        }, {0,0,0,0} };
+        }, {0,0,0,0}
+    };
 
 //
-//	If user is not yet setup we must exit to prevent conflicts.
+//  If user is not yet setup we must exit to prevent conflicts.
 //
     if (TVT->TVT$DO_PID) return(0);
 
@@ -1197,7 +1199,7 @@ LNM$_STRING, bufaddr:
             Changed = Changed |
                       (Charistics ->tt$v_passall ^ State_Binary);
 
-        if (! Echo_opt->OPT$CURRENT)		// Echo being negotiated ??
+        if (! Echo_opt->OPT$CURRENT)        // Echo being negotiated ??
         {
             Changed = Changed ||
                       (Charistics ->tt$v_noecho ^ (! State_Echo));
@@ -1209,10 +1211,10 @@ LNM$_STRING, bufaddr:
                  ,"!%T Set_DEVDEP: Changed=x!XL!/",0
                  ,Changed);
 
-        if	(! (Changed ||
+        if  (! (Changed ||
                 (Charistics->tt$v_eightbit ^
                  (State_Binary | State_Eightbit))))
-            return(SS$_NORMAL);	// No changes to be made
+            return(SS$_NORMAL); // No changes to be made
 
         Charistics ->tt$v_eightbit = State_Binary | State_Eightbit;
         if (telnet_passall == 1)
@@ -1257,29 +1259,29 @@ LNM$_STRING, bufaddr:
     if (! Changed) return(SS$_NORMAL);
 
 //
-//	If we changed some vital stuff, change it through front end.
-//	JC
+//  If we changed some vital stuff, change it through front end.
+//  JC
 //
 
-    if (tty_chan != 0) return(SS$_NORMAL);		// Front end in use ?
+    if (tty_chan != 0) return(SS$_NORMAL);      // Front end in use ?
 //
-//	We find the correct terminal by:
-//	1.	Get unit number
-//	2.	Get Front end device name
-//	3.	Concatonate name and number
-//	4.	Then attach to it.
+//  We find the correct terminal by:
+//  1.  Get unit number
+//  2.  Get Front end device name
+//  3.  Concatonate name and number
+//  4.  Then attach to it.
 
     devnam->dsc$a_pointer = TVT->TVT$TTY_DEVSTR;
 
     Item_List[0].item_code=DVI$_UNIT;
     Item_List[0].bufaddr=&Unit_Number;
     Item_List[1].item_code=0; // check
-    Status = sys$getdviw (0,pty_chan,0,Item_List, 0, 0, 0, 0);		// Get unit
+    Status = sys$getdviw (0,pty_chan,0,Item_List, 0, 0, 0, 0);      // Get unit
     // seems C can not fill in the rest with 0?
 
-//!!JC	XLOG$FAO(LOG$TELNEG
-//!!JC		,"!%T Set_DEVDEP: Unit_Number=x!XL!/",0
-//!!JC		,Unit_Number);
+//!!JC  XLOG$FAO(LOG$TELNEG
+//!!JC      ,"!%T Set_DEVDEP: Unit_Number=x!XL!/",0
+//!!JC      ,Unit_Number);
 
     ptynam->dsc$w_length = sizeof(ptystr);
     Status = sys$trnlnm (0, &lnm_proc, &lnm_pty, 0, itm); // JC
@@ -1291,14 +1293,14 @@ LNM$_STRING, bufaddr:
     if (Status)
         Status = sys$getdviw (0,0,devnam,Item_List,0,0,0,0);
 
-//!!JC	xlog$fao(LOG$TELNEG
-//!!JC			,"!%T Set_DEVDEP: TTY_TERM == "!AS""
-//!!JC			,0,devnam);			// Concatonate
+//!!JC  xlog$fao(LOG$TELNEG
+//!!JC          ,"!%T Set_DEVDEP: TTY_TERM == "!AS""
+//!!JC          ,0,devnam);         // Concatonate
 
-    Status = sys$assign(devnam,&tty_chan,0,0,0);		// Open new channel
+    Status = sys$assign(devnam,&tty_chan,0,0,0);        // Open new channel
 
 
-    if (! Status)					// No channel ?
+    if (! Status)                   // No channel ?
     {
         TVT->TVT$TTY_CHN = 0; // was: tty_chan = 0;
         XLOG$FAO(LOG$TELERR
@@ -1316,7 +1318,7 @@ LNM$_STRING, bufaddr:
                      TVT,
                      PTY_Char,
                      QCB$K_SIZE,
-                     0,0,0,0);		// Set front end
+                     0,0,0,0);      // Set front end
         if (! Status)
         {
             XLOG$FAO(LOG$TELERR
@@ -1326,11 +1328,11 @@ LNM$_STRING, bufaddr:
         };
     };
 
-    TVT->TVT$TTSET = 0;			// True if characteristics changed
-//!!JC	    XLOG$FAO(LOG$TELNEG
-//!!JC		,"!%T Set_DEVDEP: tty_chan=!UL!/",0,tty_chan);
-//!!JC	    XLOG$FAO(LOG$TELNEG
-//!!JC		,"!%T Set_DEVDEP: pty_chan=!UL!/",0,PTY_chan);
+    TVT->TVT$TTSET = 0;         // True if characteristics changed
+//!!JC      XLOG$FAO(LOG$TELNEG
+//!!JC      ,"!%T Set_DEVDEP: tty_chan=!UL!/",0,tty_chan);
+//!!JC      XLOG$FAO(LOG$TELNEG
+//!!JC      ,"!%T Set_DEVDEP: pty_chan=!UL!/",0,PTY_chan);
 
     return SS$_NORMAL;
 }
@@ -1356,12 +1358,12 @@ struct TVT$BLOCK * TVT;
         else if (b1 == Option$K_LineMode_SLC)
             Linemode_SubOp_SLC (TVT->TVT$SUB_PTR, TVT->TVT$SUB_CNT-1);
         else
-    	{
-    	b2 = CH$RCHAR_A(TVT->TVT$SUB_PTR);
-    	if (b2 == Option$K_LineMode_Forwardmask)
-    	    Linemode_SubOp_Forwardmask(b1,
-    		TVT->TVT$SUB_PTR,TVT->TVT$SUB_CNT-2);
-    	}
+        {
+        b2 = CH$RCHAR_A(TVT->TVT$SUB_PTR);
+        if (b2 == Option$K_LineMode_Forwardmask)
+            Linemode_SubOp_Forwardmask(b1,
+            TVT->TVT$SUB_PTR,TVT->TVT$SUB_CNT-2);
+        }
     */
     return SS$_NORMAL;
 }
@@ -1370,32 +1372,32 @@ struct TVT$BLOCK * TVT;
 /*
 Linemode_SubOp_Mode ( Mask )
     {
-	extern Send_TCP_SubOption();
+    extern Send_TCP_SubOption();
     signed long
-	Mode_EDIT,Mode_TRAPSIG;
-	signed char New_Mask;
-	signed char SubOption_Data[2],
-	struct dsc$descriptor SubOption_Desc	= {
-				dsc$w_length	: 2,
-				dsc$b_dtype	: DSC$K_DTYPE_T,
-				dsc$b_class	: DSC$K_CLASS_D,
-				dsc$a_pointer	: SubOption_Data};
+    Mode_EDIT,Mode_TRAPSIG;
+    signed char New_Mask;
+    signed char SubOption_Data[2],
+    struct dsc$descriptor SubOption_Desc    = {
+                dsc$w_length    : 2,
+                dsc$b_dtype : DSC$K_DTYPE_T,
+                dsc$b_class : DSC$K_CLASS_D,
+                dsc$a_pointer   : SubOption_Data};
 
     // If the ACK bit is set, don't do anything.
     if (Mask<Option$K_LineMode_MODE_ACK,1>) return SS$_NORMAL;
 
-    Mask = Mask & 3;	// mask the mask.
+    Mask = Mask & 3;    // mask the mask.
 
     // Is the new mask different?
     if (Mask != Linemode_Modeflags)
-	{
-	Linemode_Modeflags = Mask;
-	Mask<Option$K_Linemode_Mode_EDIT_ACK,1> = 1;
-	SubOption_Data[0] = Option$K_Linemode_Mode;
-	SubOption_Data[1] = Mask;
-	!!!HACK!!// ???
-	Send_TCP_SubOption ( Option$K_Linemode , SubOption_Desc )
-	};
+    {
+    Linemode_Modeflags = Mask;
+    Mask<Option$K_Linemode_Mode_EDIT_ACK,1> = 1;
+    SubOption_Data[0] = Option$K_Linemode_Mode;
+    SubOption_Data[1] = Mask;
+    !!!HACK!!// ???
+    Send_TCP_SubOption ( Option$K_Linemode , SubOption_Desc )
+    };
 
     return SS$_NORMAL;
     }
@@ -1403,30 +1405,30 @@ Linemode_SubOp_Mode ( Mask )
 
 Linemode_SubOp_Forwardmask ( Action , Data_A , Length )
     {
-	char * Data = Data_A;
+    char * Data = Data_A;
     signed long
-	SrcI  = 0,
-	DstI  = 0;
+    SrcI  = 0,
+    DstI  = 0;
     BIND
-	Curr_FMask = Forward_Mask : VECTOR[32,BYTE];
+    Curr_FMask = Forward_Mask : VECTOR[32,BYTE];
 
     switch (Action)
-	{
-	case Telnet$K_DO :
-	    {
+    {
+    case Telnet$K_DO :
+        {
 //!!HACK!!// Should check for double IACs? Should check for Binary mode?
-	    while (SrcI < Length)
-		{
-		Curr_FMask[DstI] = Data[SrcI];
-		DstI = DstI + 1;
-		SrcI = SrcI + 1
-	 	}
-	    Linemode_FM_State = Option$K_State_On;
-	    };
-	case Telnet$K_DONT :
-	    Linemode_FM_State = Option$K_State_Off;
-//	[Telnet$K_WILL].Telnet$K_WONT :
-	};
+        while (SrcI < Length)
+        {
+        Curr_FMask[DstI] = Data[SrcI];
+        DstI = DstI + 1;
+        SrcI = SrcI + 1
+        }
+        Linemode_FM_State = Option$K_State_On;
+        };
+    case Telnet$K_DONT :
+        Linemode_FM_State = Option$K_State_Off;
+//  [Telnet$K_WILL].Telnet$K_WONT :
+    };
 
     return SS$_NORMAL;
     }
@@ -1434,14 +1436,14 @@ Linemode_SubOp_Forwardmask ( Action , Data_A , Length )
 
 
 Process_SLC(Code,Modifier,Value,Reply_Desc)
-	struct dsc$descriptor * Reply_Desc	;
+    struct dsc$descriptor * Reply_Desc  ;
     {
     signed long
-	Level,
-	struct $BBlock * Char_Def->SLC$K_Size;
+    Level,
+    struct $BBlock * Char_Def->SLC$K_Size;
 
     if ((Code LSS 0) || (Code > Option$K_Limemode_SLC_MaxOpt))
-	return SS$_NORMAL;
+    return SS$_NORMAL;
 
     Level = Modifier<SLC$F_Level>;
     Char_Def = SLC_Table[Code,SLC$B_{ING] ;
@@ -1451,11 +1453,11 @@ Process_SLC(Code,Modifier,Value,Reply_Desc)
 
     // 2) Same level / different value
     if (((Level == (Char_Def->SLC$B_STATUS)<SLC$F_Level>) &&
-	(Modifier<SLC$F_Ack)))
-	{
-	Char_Def->SLC$B_CURRENT = Value;
-	return SS$_NORMAL;
-	};
+    (Modifier<SLC$F_Ack)))
+    {
+    Char_Def->SLC$B_CURRENT = Value;
+    return SS$_NORMAL;
+    };
 
     // 3) "Do we agree?"
     // !!!HACK!!//  what do I do here?
@@ -1474,21 +1476,21 @@ Linemode_SubOp_SLC(Data_A, Length)
     {
     char * data = Data_A;
 
-	struct dsc$descriptor Reply_Desc=	 {
-				dsc$w_length	: 0,
-				dsc$b_dtype	: DSC$K_DTYPE_T,
-				dsc$b_class	: DSC$K_CLASS_D,
-				dsc$a_pointer	: 0};
+    struct dsc$descriptor Reply_Desc=    {
+                dsc$w_length    : 0,
+                dsc$b_dtype : DSC$K_DTYPE_T,
+                dsc$b_class : DSC$K_CLASS_D,
+                dsc$a_pointer   : 0};
 
     while (LENGTH >= 3)
-	{
-	Process_SLC(Data[0], Data[1], Data[2], &Reply_Desc);
-	Length = Length - 3;
-	Data = Data[3]
-	};
+    {
+    Process_SLC(Data[0], Data[1], Data[2], &Reply_Desc);
+    Length = Length - 3;
+    Data = Data[3]
+    };
 
     if (Reply_Desc->dsc$w_length > 0)
-	Send_TCP_SubOpt ( Option$K_Linemode , &Reply_Desc );
+    Send_TCP_SubOpt ( Option$K_Linemode , &Reply_Desc );
 
     return SS$_NORMAL;
     }

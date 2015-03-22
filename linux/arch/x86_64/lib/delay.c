@@ -1,11 +1,11 @@
 /*
- *	Precise Delay Loops for i386
+ *  Precise Delay Loops for i386
  *
- *	Copyright (C) 1993 Linus Torvalds
- *	Copyright (C) 1997 Martin Mares <mj@atrey.karlin.mff.cuni.cz>
+ *  Copyright (C) 1993 Linus Torvalds
+ *  Copyright (C) 1997 Martin Mares <mj@atrey.karlin.mff.cuni.cz>
  *
- *	The __delay function must _NOT_ be inlined as its execution time
- *	depends wildly on alignment on many x86 processors.
+ *  The __delay function must _NOT_ be inlined as its execution time
+ *  depends wildly on alignment on many x86 processors.
  */
 
 #include <linux/config.h>

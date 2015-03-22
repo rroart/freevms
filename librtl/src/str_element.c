@@ -1,7 +1,7 @@
 /*
- *	strelement.c
+ *  strelement.c
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,18 +19,18 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
 /*
- *	Code for VAX STR$ELEMENT routine
+ *  Code for VAX STR$ELEMENT routine
  *
  * Description:
  *
@@ -40,19 +40,19 @@
  *
  * History
  *
- *	Feb 3, 1997 - Kevin Handy
- *		Preliminary design.
+ *  Feb 3, 1997 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  *
- *	Feb 26, 2004 - Andrew Allison
- * 		Added GNU License
+ *  Feb 26, 2004 - Andrew Allison
+ *      Added GNU License
  *
- *	Mar 12, 2004 - Andrew Allison
- *		If text not found return NULL in destination
- *		return entire substring if token not found
- *		if no text present between delimiters return NULL
+ *  Mar 12, 2004 - Andrew Allison
+ *      If text not found return NULL in destination
+ *      return entire substring if token not found
+ *      if no text present between delimiters return NULL
  */
 
 #include <ctype.h>
@@ -74,22 +74,22 @@ unsigned long str$element(struct dsc$descriptor_s* destination_string,
                           const struct dsc$descriptor_s* delimiter_string,
                           const struct dsc$descriptor_s* source_string)
 {
-    char* s1_ptr;			/*Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
-    char* s2_ptr;			/* Pointer to second string */
-    unsigned short s2_length;	/* Length of second string */
-    char* s3_ptr	;		/* Pointer to third string */
-    unsigned short s3_length;	/* Length of third string */
-    short res_ptr;			/* Index into source*/
-    unsigned short res_length;	/* Index to end  of element */
-    char delimiter;			/* Delimiter character */
+    char* s1_ptr;           /*Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
+    char* s2_ptr;           /* Pointer to second string */
+    unsigned short s2_length;   /* Length of second string */
+    char* s3_ptr    ;       /* Pointer to third string */
+    unsigned short s3_length;   /* Length of third string */
+    short res_ptr;          /* Index into source*/
+    unsigned short res_length;  /* Index to end  of element */
+    char delimiter;         /* Delimiter character */
     unsigned long result1;
-    unsigned long result = STR$_NORMAL;	/* Result */
+    unsigned long result = STR$_NORMAL; /* Result */
     int element_number;
 
     element_number = (int) *find_element_number;
 
-//	Did we get a numeric value
+//  Did we get a numeric value
     if ( isdigit((char) element_number + '0') == 0 )
         return STR$_ILLSTRSPE;
 
@@ -109,12 +109,12 @@ unsigned long str$element(struct dsc$descriptor_s* destination_string,
     str$analyze_sdesc(source_string, &s2_length, &s2_ptr);
     str$analyze_sdesc(delimiter_string, &s3_length, &s3_ptr);
 
-//	If no delimiter's where found return entire string
+//  If no delimiter's where found return entire string
     if ( (s2_ptr != NULL) && (s3_ptr != NULL) )
     {
         if ( strstr (s2_ptr, s3_ptr) == NULL)
         {
-//			str$copy_dx (destination_string,source_string);
+//          str$copy_dx (destination_string,source_string);
             return SS$_NORMAL;
         }
     }
@@ -170,11 +170,11 @@ unsigned long str$element(struct dsc$descriptor_s* destination_string,
         result1 = str$copy_r(destination_string, &res_length, s1_ptr);
     }
     /*
-    	else
-    	{	str$free1_dx (destination_string);
-    		result1 = STR$_NOELEM;
-    		result  = STR$_NOELEM;
-    	}
+        else
+        {   str$free1_dx (destination_string);
+            result1 = STR$_NOELEM;
+            result  = STR$_NOELEM;
+        }
     */
     if (result1 == STR$_NORMAL)
     {

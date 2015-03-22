@@ -50,20 +50,20 @@
 enum fixed_addresses
 {
 #ifdef CONFIG_X86_LOCAL_APIC
-    FIX_APIC_BASE,	/* local (CPU) APIC) -- required for SMP or not */
+    FIX_APIC_BASE,  /* local (CPU) APIC) -- required for SMP or not */
 #endif
 #ifdef CONFIG_X86_IO_APIC
     FIX_IO_APIC_BASE_0,
     FIX_IO_APIC_BASE_END = FIX_IO_APIC_BASE_0 + MAX_IO_APICS-1,
 #endif
 #ifdef CONFIG_X86_VISWS_APIC
-    FIX_CO_CPU,	/* Cobalt timer */
-    FIX_CO_APIC,	/* Cobalt APIC Redirection Table */
-    FIX_LI_PCIA,	/* Lithium PCI Bridge A */
-    FIX_LI_PCIB,	/* Lithium PCI Bridge B */
+    FIX_CO_CPU, /* Cobalt timer */
+    FIX_CO_APIC,    /* Cobalt APIC Redirection Table */
+    FIX_LI_PCIA,    /* Lithium PCI Bridge A */
+    FIX_LI_PCIB,    /* Lithium PCI Bridge B */
 #endif
 #ifdef CONFIG_HIGHMEM
-    FIX_KMAP_BEGIN,	/* reserved pte's for temporary kernel mappings */
+    FIX_KMAP_BEGIN, /* reserved pte's for temporary kernel mappings */
     FIX_KMAP_END = FIX_KMAP_BEGIN+(KM_TYPE_NR*NR_CPUS)-1,
 #endif
     __end_of_fixed_addresses
@@ -73,12 +73,12 @@ extern void __set_fixmap (enum fixed_addresses idx,
                           unsigned long phys, pgprot_t flags);
 
 #define set_fixmap(idx, phys) \
-		__set_fixmap(idx, phys, PAGE_KERNEL)
+        __set_fixmap(idx, phys, PAGE_KERNEL)
 /*
  * Some hardware wants to get fixmapped without caching.
  */
 #define set_fixmap_nocache(idx, phys) \
-		__set_fixmap(idx, phys, PAGE_KERNEL_NOCACHE)
+        __set_fixmap(idx, phys, PAGE_KERNEL_NOCACHE)
 /*
  * used by vmalloc.c.
  *
@@ -86,11 +86,11 @@ extern void __set_fixmap (enum fixed_addresses idx,
  * the start of the fixmap, and leave one page empty
  * at the top of mem..
  */
-#define FIXADDR_TOP	(0xffffe000UL)
-#define FIXADDR_SIZE	(__end_of_fixed_addresses << PAGE_SHIFT)
-#define FIXADDR_START	(FIXADDR_TOP - FIXADDR_SIZE)
+#define FIXADDR_TOP (0xffffe000UL)
+#define FIXADDR_SIZE    (__end_of_fixed_addresses << PAGE_SHIFT)
+#define FIXADDR_START   (FIXADDR_TOP - FIXADDR_SIZE)
 
-#define __fix_to_virt(x)	(FIXADDR_TOP - ((x) << PAGE_SHIFT))
+#define __fix_to_virt(x)    (FIXADDR_TOP - ((x) << PAGE_SHIFT))
 
 extern void __this_fixmap_does_not_exist(void);
 

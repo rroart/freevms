@@ -16,9 +16,9 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*	quit [-save]							*/
-/*									*/
+/*                                  */
+/*  quit [-save]                            */
+/*                                  */
 /************************************************************************/
 
 #include <stdlib.h>
@@ -58,9 +58,9 @@ void cmd_quit (char *cp)
         modbuffs = 0;
         for (buffer = NULL; (buffer = buffer_next (buffer)) != NULL;)
         {
-            fn = buffer_filename (buffer);							/* get output filename */
-            if (fn == NULL) continue;								/* if none, don't try to write */
-            bn = buffer_name (buffer);							/* ok, write it out */
+            fn = buffer_filename (buffer);                          /* get output filename */
+            if (fn == NULL) continue;                               /* if none, don't try to write */
+            bn = buffer_name (buffer);                          /* ok, write it out */
             if (!buffer_dirty (buffer, -1)) continue;
             if (!modbuffs) outchr ('\n');
             outerr (strlen (fn) + strlen (bn), "file %s modified in buffer %s\n", fn, bn);

@@ -18,14 +18,14 @@
  */
 struct rpc_listitem
 {
-    struct rpc_listitem *	prev;
-    struct rpc_listitem *	next;
+    struct rpc_listitem *   prev;
+    struct rpc_listitem *   next;
 };
 
 static __inline__ void
 __rpc_append_list(struct rpc_listitem **q, struct rpc_listitem *item)
 {
-    struct rpc_listitem	*next, *prev;
+    struct rpc_listitem *next, *prev;
 
     if (!(next = *q))
     {
@@ -51,7 +51,7 @@ __rpc_insert_list(struct rpc_listitem **q, struct rpc_listitem *item)
 static __inline__ void
 __rpc_remove_list(struct rpc_listitem **q, struct rpc_listitem *item)
 {
-    struct rpc_listitem	*prev = item->prev,
+    struct rpc_listitem *prev = item->prev,
                                  *next = item->next;
 
     if (item != prev)
@@ -77,6 +77,6 @@ __rpc_remove_list(struct rpc_listitem **q, struct rpc_listitem *item)
 /*
  * Shorthands
  */
-#define signalled()		(signal_pending(current))
+#define signalled()     (signal_pending(current))
 
 #endif /* _LINUX_SUNRPC_TYPES_H_ */

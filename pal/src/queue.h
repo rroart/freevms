@@ -1,5 +1,5 @@
-#ifndef queue_h
-#define queue_h
+#ifndef QUEUE_H
+#define QUEUE_H
 
 void insque(void * entry, void * pred);
 unsigned long remque(void * entry, void * addr);

@@ -4,33 +4,33 @@
 
 struct eeprom_ops
 {
-    void	(*set_cs)(void *ee);
-    void	(*clear_cs)(void *ee);
+    void    (*set_cs)(void *ee);
+    void    (*clear_cs)(void *ee);
 };
 
-#define EEPOL_EEDI	0x01
-#define EEPOL_EEDO	0x02
-#define EEPOL_EECLK	0x04
-#define EEPOL_EESEL	0x08
+#define EEPOL_EEDI  0x01
+#define EEPOL_EEDO  0x02
+#define EEPOL_EECLK 0x04
+#define EEPOL_EESEL 0x08
 
 struct eeprom
 {
     void *dev;
     struct eeprom_ops *ops;
 
-    long		addr;
+    long        addr;
 
-    unsigned	ee_addr_bits;
+    unsigned    ee_addr_bits;
 
-    unsigned	eesel;
-    unsigned	eeclk;
-    unsigned	eedo;
-    unsigned	eedi;
-    unsigned	polarity;
-    unsigned	ee_state;
+    unsigned    eesel;
+    unsigned    eeclk;
+    unsigned    eedo;
+    unsigned    eedi;
+    unsigned    polarity;
+    unsigned    ee_state;
 
-    spinlock_t	*lock;
-    u32		*cache;
+    spinlock_t  *lock;
+    u32     *cache;
 };
 
 
@@ -115,7 +115,7 @@ void eeprom_send_addr(struct eeprom *ee, unsigned address)
 u16   eeprom_readw(struct eeprom *ee, unsigned address)
 {
     unsigned i;
-    u16	res = 0;
+    u16 res = 0;
 
     eeprom_clk_lo(ee);
     eeprom_update(ee, ee->eesel, 1 ^ !!(ee->polarity & EEPOL_EESEL));

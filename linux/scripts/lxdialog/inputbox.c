@@ -128,7 +128,7 @@ dialog_inputbox (const char *title, const char *prompt, int height, int width,
     {
         key = wgetch (dialog);
 
-        if (button == -1)  	/* Input box selected */
+        if (button == -1)   /* Input box selected */
         {
             switch (key)
             {
@@ -186,7 +186,7 @@ dialog_inputbox (const char *title, const char *prompt, int height, int width,
                         wrefresh (dialog);
                     }
                     else
-                        flash ();	/* Alarm user about overflow */
+                        flash ();   /* Alarm user about overflow */
                     continue;
                 }
             }
@@ -206,17 +206,17 @@ dialog_inputbox (const char *title, const char *prompt, int height, int width,
             switch (button)
             {
             case -1:
-                button = 1;	/* Indicates "Cancel" button is selected */
+                button = 1; /* Indicates "Cancel" button is selected */
                 print_buttons(dialog, height, width, 1);
                 break;
             case 0:
-                button = -1;	/* Indicates input box is selected */
+                button = -1;    /* Indicates input box is selected */
                 print_buttons(dialog, height, width, 0);
                 wmove (dialog, box_y, box_x + input_x);
                 wrefresh (dialog);
                 break;
             case 1:
-                button = 0;	/* Indicates "OK" button is selected */
+                button = 0; /* Indicates "OK" button is selected */
                 print_buttons(dialog, height, width, 0);
                 break;
             }
@@ -227,15 +227,15 @@ dialog_inputbox (const char *title, const char *prompt, int height, int width,
             switch (button)
             {
             case -1:
-                button = 0;	/* Indicates "OK" button is selected */
+                button = 0; /* Indicates "OK" button is selected */
                 print_buttons(dialog, height, width, 0);
                 break;
             case 0:
-                button = 1;	/* Indicates "Cancel" button is selected */
+                button = 1; /* Indicates "Cancel" button is selected */
                 print_buttons(dialog, height, width, 1);
                 break;
             case 1:
-                button = -1;	/* Indicates input box is selected */
+                button = -1;    /* Indicates input box is selected */
                 print_buttons(dialog, height, width, 0);
                 wmove (dialog, box_y, box_x + input_x);
                 wrefresh (dialog);
@@ -255,5 +255,5 @@ dialog_inputbox (const char *title, const char *prompt, int height, int width,
     }
 
     delwin (dialog);
-    return -1;			/* ESC pressed */
+    return -1;          /* ESC pressed */
 }

@@ -1,28 +1,28 @@
-#ifndef uafdef_h
-#define uafdef_h
+#ifndef UAFDEF_H
+#define UAFDEF_H
 
-#define		UAF$C_USER_ID			1
-#define		UAF$C_VERSION1			1
-#define		UAF$C_KEYED_PART		52
-#define		UAF$C_MAX_PWD_LENGTH		32
-#define		UAF$K_MAX_PWD_LENGTH		32
-#define		UAF$C_AD_II			0
-#define		UAF$C_PURDY			1
-#define		UAF$C_PURDY_V			2
-#define		UAF$C_PURDY_S			3
-#define		UAF$K_CURRENT_ALGORITHM		3
-#define		UAF$C_CURRENT_ALGORITHM		3
-#define		UAF$C_PREFERED_ALGORITHM	127
-#define		UAF$K_PREFERED_ALGORITHM	127
-#define		UAF$C_PREFERRED_ALGORITHM	127
-#define		UAF$K_PREFERRED_ALGORITHM	127
-#define		UAF$C_CUST_ALGORITHM		128
-#define		UAF$K_CUST_ALGORITHM		128
-#define		UAF$K_FIXED			644
-#define		UAF$C_FIXED			644
-#define		UAF$K_LENGTH			1412
-#define		UAF$C_LENGTH			1412
-#define		UAF$S_UAFDEF			1412
+#define     UAF$C_USER_ID           1
+#define     UAF$C_VERSION1          1
+#define     UAF$C_KEYED_PART        52
+#define     UAF$C_MAX_PWD_LENGTH        32
+#define     UAF$K_MAX_PWD_LENGTH        32
+#define     UAF$C_AD_II         0
+#define     UAF$C_PURDY         1
+#define     UAF$C_PURDY_V           2
+#define     UAF$C_PURDY_S           3
+#define     UAF$K_CURRENT_ALGORITHM     3
+#define     UAF$C_CURRENT_ALGORITHM     3
+#define     UAF$C_PREFERED_ALGORITHM    127
+#define     UAF$K_PREFERED_ALGORITHM    127
+#define     UAF$C_PREFERRED_ALGORITHM   127
+#define     UAF$K_PREFERRED_ALGORITHM   127
+#define     UAF$C_CUST_ALGORITHM        128
+#define     UAF$K_CUST_ALGORITHM        128
+#define     UAF$K_FIXED         644
+#define     UAF$C_FIXED         644
+#define     UAF$K_LENGTH            1412
+#define     UAF$C_LENGTH            1412
+#define     UAF$S_UAFDEF            1412
 
 struct _uaf
 {
@@ -92,32 +92,32 @@ struct _uaf
         unsigned int uaf$l_flags;
         struct
         {
-            unsigned uaf$v_disctly			: 1;
-            unsigned uaf$v_defcli			: 1;
-            unsigned uaf$v_lockpwd			: 1;
-            unsigned uaf$v_restricted			: 1;
-            unsigned uaf$v_disacnt			: 1;
-            unsigned uaf$v_diswelcom			: 1;
-            unsigned uaf$v_dismail			: 1;
-            unsigned uaf$v_nomail			: 1;
-            unsigned uaf$v_genpwd			: 1;
-            unsigned uaf$v_pwd_expired		: 1;
-            unsigned uaf$v_pwd2_expired		: 1;
-            unsigned uaf$v_audit			: 1;
-            unsigned uaf$v_disreport			: 1;
-            unsigned uaf$v_disreconnect		: 1;
-            unsigned uaf$v_autologin			: 1;
-            unsigned uaf$v_disforce_pwd_change	: 1;
-            unsigned uaf$v_captive			: 1;
-            unsigned uaf$v_disimage			: 1;
-            unsigned uaf$v_dispwddic			: 1;
-            unsigned uaf$v_dispwdhis			: 1;
-            unsigned uaf$v_defclsval			: 1;
-            unsigned uaf$v_extauth			: 1;
-            unsigned uaf$v_migratepwd			: 1;
-            unsigned uaf$v_vmsauth			: 1;
-            unsigned uaf$v_dispwdsynch		: 1;
-            unsigned uaf$v_fill_10_			: 7;
+            unsigned uaf$v_disctly          : 1;
+            unsigned uaf$v_defcli           : 1;
+            unsigned uaf$v_lockpwd          : 1;
+            unsigned uaf$v_restricted           : 1;
+            unsigned uaf$v_disacnt          : 1;
+            unsigned uaf$v_diswelcom            : 1;
+            unsigned uaf$v_dismail          : 1;
+            unsigned uaf$v_nomail           : 1;
+            unsigned uaf$v_genpwd           : 1;
+            unsigned uaf$v_pwd_expired      : 1;
+            unsigned uaf$v_pwd2_expired     : 1;
+            unsigned uaf$v_audit            : 1;
+            unsigned uaf$v_disreport            : 1;
+            unsigned uaf$v_disreconnect     : 1;
+            unsigned uaf$v_autologin            : 1;
+            unsigned uaf$v_disforce_pwd_change  : 1;
+            unsigned uaf$v_captive          : 1;
+            unsigned uaf$v_disimage         : 1;
+            unsigned uaf$v_dispwddic            : 1;
+            unsigned uaf$v_dispwdhis            : 1;
+            unsigned uaf$v_defclsval            : 1;
+            unsigned uaf$v_extauth          : 1;
+            unsigned uaf$v_migratepwd           : 1;
+            unsigned uaf$v_vmsauth          : 1;
+            unsigned uaf$v_dispwdsynch      : 1;
+            unsigned uaf$v_fill_10_         : 7;
         };
     };
     unsigned char uaf$b_network_access_p [3];
@@ -136,14 +136,14 @@ struct _uaf
         unsigned char uaf$b_primedays;
         struct
         {
-            unsigned uaf$v_monday		: 1;
-            unsigned uaf$v_tuesday		: 1;
-            unsigned uaf$v_wednesday		: 1;
-            unsigned uaf$v_thursday		: 1;
-            unsigned uaf$v_friday		: 1;
-            unsigned uaf$v_saturday		: 1;
-            unsigned uaf$v_sunday		: 1;
-            unsigned uaf$v_fill_11_		: 1;
+            unsigned uaf$v_monday       : 1;
+            unsigned uaf$v_tuesday      : 1;
+            unsigned uaf$v_wednesday        : 1;
+            unsigned uaf$v_thursday     : 1;
+            unsigned uaf$v_friday       : 1;
+            unsigned uaf$v_saturday     : 1;
+            unsigned uaf$v_sunday       : 1;
+            unsigned uaf$v_fill_11_     : 1;
         };
     };
     char uaf$$$_fill_5 [1];

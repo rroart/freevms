@@ -55,12 +55,12 @@
  *
  * Revoke information on buffers is a tri-state value:
  *
- * RevokeValid clear:	no cached revoke status, need to look it up
+ * RevokeValid clear:   no cached revoke status, need to look it up
  * RevokeValid set, Revoked clear:
- *			buffer has not been revoked, and cancel_revoke
- *			need do nothing.
+ *          buffer has not been revoked, and cancel_revoke
+ *          need do nothing.
  * RevokeValid set, Revoked set:
- *			buffer has been revoked.
+ *          buffer has been revoked.
  */
 
 #ifndef __KERNEL__
@@ -87,8 +87,8 @@ static kmem_cache_t *revoke_table_cache;
 struct jbd_revoke_record_s
 {
     struct list_head  hash;
-    tid_t		  sequence;	/* Used for recovery only */
-    unsigned long	  blocknr;
+    tid_t         sequence; /* Used for recovery only */
+    unsigned long     blocknr;
 };
 
 
@@ -97,8 +97,8 @@ struct jbd_revoke_table_s
 {
     /* It is conceivable that we might want a larger hash table
      * for recovery.  Must be a power of two. */
-    int		  hash_size;
-    int		  hash_shift;
+    int       hash_size;
+    int       hash_shift;
     struct list_head *hash_table;
 };
 
@@ -388,7 +388,7 @@ int journal_cancel_revoke(handle_t *handle, struct journal_head *jh)
     struct jbd_revoke_record_s *record;
     journal_t *journal = handle->h_transaction->t_journal;
     int need_cancel;
-    int did_revoke = 0;	/* akpm: debug */
+    int did_revoke = 0; /* akpm: debug */
     struct buffer_head *bh = jh2bh(jh);
 
     jbd_debug(4, "journal_head %p, cancelling revoke\n", jh);

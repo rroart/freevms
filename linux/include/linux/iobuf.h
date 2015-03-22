@@ -24,63 +24,63 @@
  * entire iovec.
  */
 
-#define KIO_MAX_ATOMIC_IO	512 /* in kb */
-#define KIO_STATIC_PAGES	(KIO_MAX_ATOMIC_IO / (PAGE_SIZE >> 10) + 1)
-#define KIO_MAX_SECTORS		(KIO_MAX_ATOMIC_IO * 2)
+#define KIO_MAX_ATOMIC_IO   512 /* in kb */
+#define KIO_STATIC_PAGES    (KIO_MAX_ATOMIC_IO / (PAGE_SIZE >> 10) + 1)
+#define KIO_MAX_SECTORS     (KIO_MAX_ATOMIC_IO * 2)
 
 /* The main kiobuf struct used for all our IO! */
 
 struct kiobuf
 {
-    int		nr_pages;	/* Pages actually referenced */
-    int		array_len;	/* Space in the allocated lists */
-    int		offset;		/* Offset to start of valid data */
-    int		length;		/* Number of valid bytes of data */
+    int     nr_pages;   /* Pages actually referenced */
+    int     array_len;  /* Space in the allocated lists */
+    int     offset;     /* Offset to start of valid data */
+    int     length;     /* Number of valid bytes of data */
 
     /* Keep separate track of the physical addresses and page
      * structs involved.  If we do IO to a memory-mapped device
      * region, there won't necessarily be page structs defined for
      * every address. */
 
-    struct page **	maplist;
+    struct page **  maplist;
 
-    unsigned int	locked : 1;	/* If set, pages has been locked */
+    unsigned int    locked : 1; /* If set, pages has been locked */
 
     /* Always embed enough struct pages for atomic IO */
-    struct page *	map_array[KIO_STATIC_PAGES];
+    struct page *   map_array[KIO_STATIC_PAGES];
     struct buffer_head * bh[KIO_MAX_SECTORS];
     unsigned long blocks[KIO_MAX_SECTORS];
 
     /* Dynamic state for IO completion: */
-    atomic_t	io_count;	/* IOs still in progress */
-    int		errno;		/* Status of completed IO */
-    void		(*end_io) (struct kiobuf *); /* Completion callback */
+    atomic_t    io_count;   /* IOs still in progress */
+    int     errno;      /* Status of completed IO */
+    void        (*end_io) (struct kiobuf *); /* Completion callback */
     wait_queue_head_t wait_queue;
 };
 
 
 /* mm/memory.c */
 
-int	map_user_kiobuf(int rw, struct kiobuf *, unsigned long va, size_t len);
-void	unmap_kiobuf(struct kiobuf *iobuf);
-int	lock_kiovec(int nr, struct kiobuf *iovec[], int wait);
-int	unlock_kiovec(int nr, struct kiobuf *iovec[]);
-void	mark_dirty_kiobuf(struct kiobuf *iobuf, int bytes);
+int map_user_kiobuf(int rw, struct kiobuf *, unsigned long va, size_t len);
+void    unmap_kiobuf(struct kiobuf *iobuf);
+int lock_kiovec(int nr, struct kiobuf *iovec[], int wait);
+int unlock_kiovec(int nr, struct kiobuf *iovec[]);
+void    mark_dirty_kiobuf(struct kiobuf *iobuf, int bytes);
 
 /* fs/iobuf.c */
 
-void	end_kio_request(struct kiobuf *, int);
-void	simple_wakeup_kiobuf(struct kiobuf *);
-int	alloc_kiovec(int nr, struct kiobuf **);
-void	free_kiovec(int nr, struct kiobuf **);
-int	expand_kiobuf(struct kiobuf *, int);
-void	kiobuf_wait_for_io(struct kiobuf *);
+void    end_kio_request(struct kiobuf *, int);
+void    simple_wakeup_kiobuf(struct kiobuf *);
+int alloc_kiovec(int nr, struct kiobuf **);
+void    free_kiovec(int nr, struct kiobuf **);
+int expand_kiobuf(struct kiobuf *, int);
+void    kiobuf_wait_for_io(struct kiobuf *);
 extern int alloc_kiobuf_bhs(struct kiobuf *);
 extern void free_kiobuf_bhs(struct kiobuf *);
 
 /* fs/buffer.c */
 
-int	brw_kiovec(int rw, int nr, struct kiobuf *iovec[],
+int brw_kiovec(int rw, int nr, struct kiobuf *iovec[],
                kdev_t dev, unsigned long b[], int size);
 
 #endif /* __LINUX_IOBUF_H */

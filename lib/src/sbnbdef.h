@@ -1,5 +1,5 @@
-#ifndef sbnbdef_h
-#define sbnbdef_h
+#ifndef SBNBDEF_H
+#define SBNBDEF_H
 
 #define SBNB$K_LENGTH 36
 #define SBNB$C_LENGTH 36

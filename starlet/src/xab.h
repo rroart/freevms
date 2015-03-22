@@ -1,5 +1,5 @@
-#ifndef xab_h
-#define xab_h
+#ifndef XAB_H
+#define XAB_H
 
 #include <xaballdef.h>
 #include <xabcxfdef.h>

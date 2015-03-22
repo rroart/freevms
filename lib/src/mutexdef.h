@@ -1,5 +1,5 @@
-#ifndef mutexdef_h
-#define mutexdef_h
+#ifndef MUTEXDEF_H
+#define MUTEXDEF_H
 
 #include <cpudef.h>
 
@@ -65,11 +65,11 @@ struct _mtxdbg
     unsigned char mtxdbg$b_subtype;
     unsigned int mtxdbg$l_revision;
     long long mtxdbg$q_size;
-    int (*mtxdbg$l_start_trace)();
-    int (*mtxdbg$l_stop_trace)();
-    void (*mtxdbg$l_trace_mutex)();
-    void (*mtxdbg$l_trace_mutex_wait)();
-    void (*mtxdbg$l_debug_print)();
+    int (*mtxdbg$l_start_trace)(void);
+    int (*mtxdbg$l_stop_trace)(void);
+    void (*mtxdbg$l_trace_mutex)(void);
+    void (*mtxdbg$l_trace_mutex_wait)(void);
+    void (*mtxdbg$l_debug_print)(void);
     union
     {
         unsigned int mtxdbg$l_trace_flags;

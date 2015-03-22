@@ -1,9 +1,9 @@
 /* Generic I/O and MEMIO string operations.  */
 
-#define __ide_insw	insw
-#define __ide_insl	insl
-#define __ide_outsw	outsw
-#define __ide_outsl	outsl
+#define __ide_insw  insw
+#define __ide_insl  insl
+#define __ide_outsw outsw
+#define __ide_outsl outsl
 
 static __inline__ void __ide_mm_insw(unsigned long port, void *addr, u32 count)
 {

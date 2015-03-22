@@ -1,7 +1,7 @@
 /*
  * str.c
  *
- *	Code for VAX STR$FREE1_DX routine
+ *  Code for VAX STR$FREE1_DX routine
  *
  * Description:
  *
@@ -10,11 +10,11 @@
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 4, 1997 - Kevin Handy
- *		Include 'stdlib.h' to lose warning with '-Wall'.
+ *  Feb 4, 1997 - Kevin Handy
+ *      Include 'stdlib.h' to lose warning with '-Wall'.
  */
 
 #include <stdio.h>
@@ -28,9 +28,9 @@
 /*************************************************************
  * str$free1_dx
  *
- *	Deallocates the described string space and flags
- *	the descriptor as no string at all (dsc$a_pointer = 0,
- *	dsc$w_length = 0).
+ *  Deallocates the described string space and flags
+ *  the descriptor as no string at all (dsc$a_pointer = 0,
+ *  dsc$w_length = 0).
  */
 unsigned long str$free1_dx(struct dsc$descriptor_s* string_descriptor)
 {

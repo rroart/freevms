@@ -1,5 +1,5 @@
-#ifndef stsdef_h
-#define stsdef_h
+#ifndef STSDEF_H
+#define STSDEF_H
 
 #define STS$M_SEVERITY 0x7
 #define STS$M_COND_ID 0xFFFFFF8
@@ -66,16 +66,16 @@ union _stsdef
 #define STS$V_SEVERITY   0x00
 #define STS$V_SUCCESS    0x00
 
-#define $VMS_STATUS_CODE(code) 		( ( (code) & STS$M_CODE ) 	>> STS$V_CODE )
-#define $VMS_STATUS_COND_ID(code) 	( ( (code) & STS$M_COND_ID ) 	>> STS$V_COND_ID )
-#define $VMS_STATUS_CONTROL(code) 	( ( (code) & STS$M_CONTROL ) 	>> STS$V_CONTROL )
-#define $VMS_STATUS_CUST_DEF(code) 	( ( (code) & STS$M_CUST_DEF ) 	>> STS$V_CUST_DEF )
-#define $VMS_STATUS_FAC_NO(code) 	( ( (code) & STS$M_FAC_NO ) 	>> STS$V_FAC_NO )
-#define $VMS_STATUS_FAC_SP(code) 	( ( (code) & STS$M_FAC_SP ) 	>> STS$V_FAC_SP )
-#define $VMS_STATUS_INHIB_MSG(code)	( ( (code) & STS$M_INHIB_MSG ) 	>> STS$V_INHIB_MSG )
-#define $VMS_STATUS_MSG_NO(code) 	( ( (code) & STS$M_MSG_NO ) 	>> STS$V_MSG_NO )
-#define $VMS_STATUS_SEVERITY(code) 	( ( (code) & STS$M_SEVERITY ) 	>> STS$V_SEVERITY )
-#define $VMS_STATUS_SUCCESS(code) 	( ( (code) & STS$M_SUCCESS ) 	>> STS$V_SUCCESS )
+#define $VMS_STATUS_CODE(code)      ( ( (code) & STS$M_CODE )   >> STS$V_CODE )
+#define $VMS_STATUS_COND_ID(code)   ( ( (code) & STS$M_COND_ID )    >> STS$V_COND_ID )
+#define $VMS_STATUS_CONTROL(code)   ( ( (code) & STS$M_CONTROL )    >> STS$V_CONTROL )
+#define $VMS_STATUS_CUST_DEF(code)  ( ( (code) & STS$M_CUST_DEF )   >> STS$V_CUST_DEF )
+#define $VMS_STATUS_FAC_NO(code)    ( ( (code) & STS$M_FAC_NO )     >> STS$V_FAC_NO )
+#define $VMS_STATUS_FAC_SP(code)    ( ( (code) & STS$M_FAC_SP )     >> STS$V_FAC_SP )
+#define $VMS_STATUS_INHIB_MSG(code) ( ( (code) & STS$M_INHIB_MSG )  >> STS$V_INHIB_MSG )
+#define $VMS_STATUS_MSG_NO(code)    ( ( (code) & STS$M_MSG_NO )     >> STS$V_MSG_NO )
+#define $VMS_STATUS_SEVERITY(code)  ( ( (code) & STS$M_SEVERITY )   >> STS$V_SEVERITY )
+#define $VMS_STATUS_SUCCESS(code)   ( ( (code) & STS$M_SUCCESS )    >> STS$V_SUCCESS )
 
 #endif
 

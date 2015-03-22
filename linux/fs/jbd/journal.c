@@ -94,9 +94,9 @@ static int journal_convert_superblock_v1(journal_t *, journal_superblock_t *);
 /*
  * journal_datalist_lock is used to protect data buffers:
  *
- *	bh->b_transaction
- *	bh->b_tprev
- *	bh->b_tnext
+ *  bh->b_transaction
+ *  bh->b_tprev
+ *  bh->b_tnext
  *
  * journal_free_buffer() is called from journal_try_to_free_buffer(), and is
  * async wrt everything else.
@@ -104,13 +104,13 @@ static int journal_convert_superblock_v1(journal_t *, journal_superblock_t *);
  * It is also used for checkpoint data, also to protect against
  * journal_try_to_free_buffer():
  *
- *	bh->b_cp_transaction
- *	bh->b_cpnext
- *	bh->b_cpprev
- *	transaction->t_checkpoint_list
- *	transaction->t_cpnext
- *	transaction->t_cpprev
- *	journal->j_checkpoint_transactions
+ *  bh->b_cp_transaction
+ *  bh->b_cpnext
+ *  bh->b_cpprev
+ *  transaction->t_checkpoint_list
+ *  transaction->t_cpnext
+ *  transaction->t_cpprev
+ *  journal->j_checkpoint_transactions
  *
  * It is global at this time rather than per-journal because it's
  * impossible for __journal_free_buffer to go from a buffer_head
@@ -129,7 +129,7 @@ spinlock_t journal_datalist_lock = SPIN_LOCK_UNLOCKED;
  *
  * In a number of places we want to do things like:
  *
- *	if (buffer_jbd(bh) && bh2jh(bh)->foo)
+ *  if (buffer_jbd(bh) && bh2jh(bh)->foo)
  *
  * This is racy on SMP, because another CPU could remove the journal_head
  * in the middle of this expression.  We need locking.
@@ -137,15 +137,15 @@ spinlock_t journal_datalist_lock = SPIN_LOCK_UNLOCKED;
  * But we can greatly optimise the locking cost by testing BH_JBD
  * outside the lock.  So, effectively:
  *
- *	ret = 0;
- *	if (buffer_jbd(bh)) {
- *		spin_lock(&jh_splice_lock);
- *		if (buffer_jbd(bh)) {	 (* Still there? *)
- *			ret = bh2jh(bh)->foo;
- *		}
- *		spin_unlock(&jh_splice_lock);
- *	}
- *	return ret;
+ *  ret = 0;
+ *  if (buffer_jbd(bh)) {
+ *      spin_lock(&jh_splice_lock);
+ *      if (buffer_jbd(bh)) {    (* Still there? *)
+ *          ret = bh2jh(bh)->foo;
+ *      }
+ *      spin_unlock(&jh_splice_lock);
+ *  }
+ *  return ret;
  *
  * Now, that protects us from races where another CPU can remove the
  * journal_head.  But it doesn't defend us from the situation where another
@@ -198,7 +198,7 @@ void __journal_internal_check(void)
  *    known as checkpointing, and this thread is responsible for that job.
  */
 
-journal_t *current_journal;		// AKPM: debug
+journal_t *current_journal;     // AKPM: debug
 
 int kjournald(void *arg)
 {
@@ -938,12 +938,12 @@ int journal_create (journal_t *journal)
     /* OK, fill in the initial static fields in the new superblock */
     sb = journal->j_superblock;
 
-    sb->s_header.h_magic	 = htonl(JFS_MAGIC_NUMBER);
+    sb->s_header.h_magic     = htonl(JFS_MAGIC_NUMBER);
     sb->s_header.h_blocktype = htonl(JFS_SUPERBLOCK_V2);
 
-    sb->s_blocksize	= htonl(journal->j_blocksize);
-    sb->s_maxlen	= htonl(journal->j_maxlen);
-    sb->s_first	= htonl(1);
+    sb->s_blocksize = htonl(journal->j_blocksize);
+    sb->s_maxlen    = htonl(journal->j_maxlen);
+    sb->s_first = htonl(1);
 
     journal->j_transaction_sequence = 1;
 
@@ -1612,10 +1612,10 @@ static int journal_init_journal_head_cache(void)
     J_ASSERT(journal_head_cache == 0);
     journal_head_cache = kmem_cache_create("journal_head",
                                            sizeof(struct journal_head),
-                                           0,		/* offset */
-                                           0,		/* flags */
-                                           NULL,		/* ctor */
-                                           NULL);		/* dtor */
+                                           0,       /* offset */
+                                           0,       /* flags */
+                                           NULL,        /* ctor */
+                                           NULL);       /* dtor */
     retval = 0;
     if (journal_head_cache == 0)
     {
@@ -1699,11 +1699,11 @@ static void journal_free_journal_head(struct journal_head *jh)
  *
  * So the typical usage would be:
  *
- *	(Attach a journal_head if needed.  Increments b_jcount)
- *	struct journal_head *jh = journal_add_journal_head(bh);
- *	...
- *	jh->b_transaction = xxx;
- *	journal_unlock_journal_head(jh);
+ *  (Attach a journal_head if needed.  Increments b_jcount)
+ *  struct journal_head *jh = journal_add_journal_head(bh);
+ *  ...
+ *  jh->b_transaction = xxx;
+ *  journal_unlock_journal_head(jh);
  *
  * Now, the journal_head's b_jcount is zero, but it is safe from being released
  * because it has a non-zero b_transaction.
@@ -1795,7 +1795,7 @@ void __journal_remove_journal_head(struct buffer_head *bh)
             BUFFER_TRACE(bh, "remove journal_head");
             spin_lock(&jh_splice_lock);
             bh->b_private = NULL;
-            jh->b_bh = NULL;	/* debug, really */
+            jh->b_bh = NULL;    /* debug, really */
             clear_bit(BH_JBD, &bh->b_state);
             __brelse(bh);
             spin_unlock(&jh_splice_lock);

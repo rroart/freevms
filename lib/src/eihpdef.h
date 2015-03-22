@@ -1,5 +1,5 @@
-#ifndef eihpdef_h
-#define eihpdef_h
+#ifndef EIHPDEF_H
+#define EIHPDEF_H
 
 #define EIHP$K_LENGTH 60
 #define EIHP$C_LENGTH 60

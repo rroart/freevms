@@ -19,7 +19,7 @@
 #include "poly.h"
 
 
-#define	HIPOWERon	6	/* odd poly, negative terms */
+#define HIPOWERon   6   /* odd poly, negative terms */
 static const unsigned long long oddnegterms[HIPOWERon] =
 {
     0x0000000000000000LL, /* Dummy (not for - 1.0) */
@@ -30,7 +30,7 @@ static const unsigned long long oddnegterms[HIPOWERon] =
     0x0000000355438407LL
 } ;
 
-#define	HIPOWERop	6	/* odd poly, positive terms */
+#define HIPOWERop   6   /* odd poly, positive terms */
 static const unsigned long long oddplterms[HIPOWERop] =
 {
     /*  0xaaaaaaaaaaaaaaabLL,  transferred to fixedpterm[] */
@@ -52,13 +52,13 @@ static const Xsig pi_signif = MK_XSIG(0xc90fdaa2, 0x2168c234, 0xc4c6628b);
 /*--- poly_atan() -----------------------------------------------------------+
  |                                                                           |
  +---------------------------------------------------------------------------*/
-void	poly_atan(FPU_REG *st0_ptr, u_char st0_tag,
+void    poly_atan(FPU_REG *st0_ptr, u_char st0_tag,
                   FPU_REG *st1_ptr, u_char st1_tag)
 {
-    u_char	transformed, inverted,
+    u_char  transformed, inverted,
             sign1, sign2;
     int           exponent;
-    long int   	dummy_exp;
+    long int    dummy_exp;
     Xsig          accumulator, Numer, Denom, accumulatore, argSignif,
                   argSq, argSqSq;
     u_char        tag;
@@ -227,6 +227,6 @@ void	poly_atan(FPU_REG *st0_ptr, u_char st0_tag,
     FPU_settagi(1, tag);
 
     set_precision_flag_up();  /* We do not really know if up or down,
-			       use this as the default. */
+                   use this as the default. */
 
 }

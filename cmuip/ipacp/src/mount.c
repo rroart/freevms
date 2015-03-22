@@ -1,42 +1,42 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 
 
 /****************************************************************************
 
-		Mount - RPC Disk Mounter program (#1000005)
+        Mount - RPC Disk Mounter program (#1000005)
 Facility:
 
-	mount.C - Provide remote mounting service under UDP (RFC 1097)
+    mount.C - Provide remote mounting service under UDP (RFC 1097)
 
 Abstract:
 
-	Supports the MOUNT protocol (MNT) for the IPACP.  Provides
-	RPC program #100005.
+    Supports the MOUNT protocol (MNT) for the IPACP.  Provides
+    RPC program #100005.
 
 Author:
 
-	Bruce R. Miller, CMU NetDev, 12-Nov-1990
-	Copyright (c) 1990, Bruce R. Miller and Carnegie-Mellon University
+    Bruce R. Miller, CMU NetDev, 12-Nov-1990
+    Copyright (c) 1990, Bruce R. Miller and Carnegie-Mellon University
 
 Module Modification History:
 
@@ -53,16 +53,16 @@ typedef unsigned int u_int;
 #include ctype
 #include descrip
 
-#include in			/* network defs (defines u_long!) */
+#include in         /* network defs (defines u_long!) */
 
-#include "rpc_types.h"		/* usefull and relavant definitions */
+#include "rpc_types.h"      /* usefull and relavant definitions */
 #include "xdr.h"
-#include "auth.h"		/* authorization structs */
-#include "rpc_msg.h"		/* protocol for rpc messages */
+#include "auth.h"       /* authorization structs */
+#include "rpc_msg.h"        /* protocol for rpc messages */
 #include "nfs.h"
 
 #include <netdevices.h>         /* CMU-OpenVMS/IP interface */
-#include <netconfig.h>		/* CMU-OpenVMS/IP interface */
+#include <netconfig.h>      /* CMU-OpenVMS/IP interface */
 
 /* File related includes */
 
@@ -85,16 +85,16 @@ IPACP_Info_Structure *IPACP_Interface;
 
 /* Mount specific definitions */
 
-#define RPCPROG_MOUNT		100005
+#define RPCPROG_MOUNT       100005
 
-#define NPROCS			 6
-#define MNT_VERSION		 1
-#define MNT_VERSION_LOW	 	 1
-#define MNT_VERSION_HIGH	 1
+#define NPROCS           6
+#define MNT_VERSION      1
+#define MNT_VERSION_LOW      1
+#define MNT_VERSION_HIGH     1
 
-#define MNTPATHLEN		  1024
-#define MNTNAMLEN		  80
-#define FHSIZE			  32
+#define MNTPATHLEN        1024
+#define MNTNAMLEN         80
+#define FHSIZE            32
 
 /* Basic data types */
 
@@ -112,9 +112,9 @@ typedef struct
 
 typedef struct
 {
-    struct mount_record	*next,*prev;
-    char	*hostname, *rempath;
-    fhandle	hand;
+    struct mount_record *next,*prev;
+    char    *hostname, *rempath;
+    fhandle hand;
 } mount_record;
 
 struct
@@ -146,8 +146,8 @@ fhandle fid;
 
     /* access the file */
     fab = cc$rms_fab;
-    fab.fab$b_shr = FAB$M_UPI;			/* allow multiple access */
-    fab.fab$b_fac = FAB$M_GET | FAB$M_PUT;	/* whatever...           */
+    fab.fab$b_shr = FAB$M_UPI;          /* allow multiple access */
+    fab.fab$b_fac = FAB$M_GET | FAB$M_PUT;  /* whatever...           */
     fab.fab$l_fna = fname;
     fab.fab$b_fns = strlen(fname);
 
@@ -227,7 +227,7 @@ unsigned int prog,vers,proc;
     }
 
     /* We're good to go */
-    cbody += 4;		/* jump over rpc_vers,prog,vers, and proc */
+    cbody += 4;     /* jump over rpc_vers,prog,vers, and proc */
 
     /* ignore credentials */
     flavor = mnt_int(*cbody++);
@@ -330,7 +330,7 @@ char *hostname;
 
 /**********************************************************************
 
-MNT procedure #0	- Do nothing
+MNT procedure #0    - Do nothing
 
 */
 
@@ -344,7 +344,7 @@ char *reply;
 
 /**********************************************************************
 
-MNT procedure #1	- Add Mount Entry
+MNT procedure #1    - Add Mount Entry
 
 */
 
@@ -372,9 +372,9 @@ char *remhost;
 
     if (check_export(mountpath, remhost))
     {
-        strcpy(mountpath, dir.data);		    /* Clear out upcasing */
+        strcpy(mountpath, dir.data);            /* Clear out upcasing */
 
-        convptr = strchr(mountpath + 1, '/');	    /* Skip leading `/' */
+        convptr = strchr(mountpath + 1, '/');       /* Skip leading `/' */
         if (!convptr)
         {
             strcat(mountpath, "/000000");
@@ -383,7 +383,7 @@ char *remhost;
         strncpy(vmspath, mountpath + 1, (convptr - (mountpath + 1)));
         vmspath[(convptr - (mountpath + 1))] = 0;
         strcat(vmspath, ":[000000.");
-        strtok(mountpath + 1, "/");	/* Skip the first element (device) */
+        strtok(mountpath + 1, "/"); /* Skip the first element (device) */
         vmsptr = vmspath + strlen(vmspath);
         while (convptr = strtok(NULL, "/"))
         {
@@ -419,7 +419,7 @@ char *remhost;
 
 /**********************************************************************
 
-MNT procedure #2	- Return Mount Entries
+MNT procedure #2    - Return Mount Entries
 
 */
 MNTPROC_DUMP(reply, args, remhost)
@@ -435,7 +435,7 @@ char *remhost;
 
     while (curmrp != &mount_queue.head)
     {
-        XDR$vton_uint(&1, reply);	/* Mark there as being some data */
+        XDR$vton_uint(&1, reply);   /* Mark there as being some data */
         reply += 4;
         len += 4;
 
@@ -460,7 +460,7 @@ char *remhost;
         curmrp = curmrp->next;
     }
 
-    XDR$vton_uint(&0, reply);		/* No more data available */
+    XDR$vton_uint(&0, reply);       /* No more data available */
     reply += 4;
     len += 4;
     return len;
@@ -470,7 +470,7 @@ char *remhost;
 
 /**********************************************************************
 
-MNT procedure #3	- Remove Mount Entry
+MNT procedure #3    - Remove Mount Entry
 
 */
 int MNTPROC_UMNT(reply,args,remhost)
@@ -504,7 +504,7 @@ char *remhost;
 
 /**********************************************************************
 
-MNT procedure #4	- Remove All Mount Entries (for this host)
+MNT procedure #4    - Remove All Mount Entries (for this host)
 
 */
 MNTPROC_UMNTALL(reply,args,remhost)
@@ -527,14 +527,14 @@ char *remhost;
         curmrp = nextmrp;
     }
 
-    return 0;		/* All OK (we hope; at least we tried) */
+    return 0;       /* All OK (we hope; at least we tried) */
 }
 
 
 
 /**********************************************************************
 
-MNT procedure #5	- Return Export List
+MNT procedure #5    - Return Export List
 
 */
 MNTPROC_EXPORT(reply,args,remhost)

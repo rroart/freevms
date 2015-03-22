@@ -18,18 +18,18 @@
    - The program uses BSD command line options to be used
      in connection with e.g. 'rlogind' i.e. 'new login'.
 
-   - HP features left out:	    password expiry
-				    '*' as login shell, add it if you need it
+   - HP features left out:      password expiry
+                    '*' as login shell, add it if you need it
 
    - BSD features left out:         quota checks
-   	                            password expiry
-				    analysis of terminal type (tset feature)
+                                password expiry
+                    analysis of terminal type (tset feature)
 
    - BSD features thrown in:        Security logging to syslogd.
                                     This requires you to have a (ported) syslog
-				    system -- 7.0 comes with syslog
+                    system -- 7.0 comes with syslog
 
-				    'Lastlog' feature.
+                    'Lastlog' feature.
 
    - A lot of nitty gritty details have been adjusted in favour of
      HP-UX, e.g. /etc/securetty, default paths and the environment
@@ -78,8 +78,8 @@
 
 /*
  * login [ name ]
- * login -h hostname	(for telnetd, etc.)
- * login -f name	(for pre-authenticated login: datakit, xterm, etc.)
+ * login -h hostname    (for telnetd, etc.)
+ * login -f name    (for pre-authenticated login: datakit, xterm, etc.)
  */
 
 /* #define TESTING */
@@ -170,11 +170,11 @@ static void motd (void);
 #include "cryptocard.h"
 #endif
 
-#ifdef	KERBEROS
+#ifdef  KERBEROS
 #include <kerberos/krb.h>
 #include <sys/termios.h>
-char	realm[REALM_SZ];
-int	kerror = KSUCCESS, notickets = 1;
+char    realm[REALM_SZ];
+int kerror = KSUCCESS, notickets = 1;
 #endif
 
 #ifdef USE_TTY_GROUP
@@ -183,7 +183,7 @@ int	kerror = KSUCCESS, notickets = 1;
 #  define TTY_MODE 0600
 #endif
 
-#define	TTYGRPNAME	"tty"		/* name of group to own ttys */
+#define TTYGRPNAME  "tty"       /* name of group to own ttys */
 
 #ifndef MAXPATHLEN
 #  define MAXPATHLEN 1024
@@ -194,12 +194,12 @@ int	kerror = KSUCCESS, notickets = 1;
  * be patched on machines where it's too small.
  */
 #ifndef __linux__
-int	timeout = 300;
+int timeout = 300;
 #else
-int     timeout = 60;		/* used in cryptocard.c */
+int     timeout = 60;       /* used in cryptocard.c */
 #endif
 
-struct	passwd *pwd;		/* used in cryptocard.c */
+struct  passwd *pwd;        /* used in cryptocard.c */
 struct passwd mypwd =
 {
 pw_name: "system"
@@ -211,20 +211,20 @@ pw_dir: "/root"
 pw_shell: "/vms$common/sysexe/dcl"
 };
 
-char    hostaddress[4];		/* used in checktty.c */
-char	*hostname;		/* idem */
-static char	*username/*, *tty_name, *tty_number*/;
-static char	thishost[100];
-static int	failures = 1;
-static pid_t	pid;
+char    hostaddress[4];     /* used in checktty.c */
+char    *hostname;      /* idem */
+static char *username/*, *tty_name, *tty_number*/;
+static char thishost[100];
+static int  failures = 1;
+static pid_t    pid;
 
 #ifndef __linux__
-struct	sgttyb sgttyb;
-struct	tchars tc =
+struct  sgttyb sgttyb;
+struct  tchars tc =
 {
     CINTR, CQUIT, CSTART, CSTOP, CEOT, CBRK
 };
-struct	ltchars ltc =
+struct  ltchars ltc =
 {
     CSUSP, CDSUSP, CRPRNT, CFLUSH, CWERASE, CLNEXT
 };
@@ -387,7 +387,7 @@ main(int argc, char **argv)
                     strcasecmp(p, domain) == 0)
                 *p = 0;
 
-            hostname = strdup(optarg); 	/* strdup: Ambrose C. Li */
+            hostname = strdup(optarg);  /* strdup: Ambrose C. Li */
             {
                 struct hostent *he = gethostbyname(hostname);
 
@@ -651,7 +651,7 @@ nocheck:
             if (kerror == INTK_OK)
             {
                 memset(pp, 0, strlen(pp));
-                notickets = 0;	/* user got ticket */
+                notickets = 0;  /* user got ticket */
                 break;
             }
         }
@@ -695,7 +695,7 @@ nocheck:
         default:
             perror("quota (Q_SETUID)");
         }
-        sleepexit(0);		/* %% */
+        sleepexit(0);       /* %% */
     }
 #endif
 
@@ -942,7 +942,7 @@ timedout2(int sig)
     ioctl(0, TCGETA, &ti);
     ti.c_lflag |= ECHO;
     ioctl(0, TCSETA, &ti);
-    exit(0);			/* %% */
+    exit(0);            /* %% */
 }
 
 static void

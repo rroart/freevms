@@ -1,5 +1,5 @@
-#ifndef vmspte_h
-#define vmspte_h
+#ifndef VMSPTE_H
+#define VMSPTE_H
 
 // $Id$
 // $Locker$

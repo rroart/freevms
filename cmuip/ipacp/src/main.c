@@ -1,364 +1,364 @@
 #if 0
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 %TITLE 'MAIN - major routines for servicing network connections'
 /*
 Facility:
 
-	This is the top-level controller for the IPACP
+    This is the top-level controller for the IPACP
 
 Abstract:
 
-	Handles tasks which must be "scheduled" in some way, as opposed to
-	event driven tasks such as user calls (handled in USER, TCP_USER)
-	or network input (handled in TCP_SEGIN). Also responsible for the
-	startup and initialization of the network ACP as a whole.
+    Handles tasks which must be "scheduled" in some way, as opposed to
+    event driven tasks such as user calls (handled in USER, TCP_USER)
+    or network input (handled in TCP_SEGIN). Also responsible for the
+    startup and initialization of the network ACP as a whole.
 
 Language:
 
-	BLISS-32
+    BLISS-32
 
 System:
 
-	VAX/VMS
+    VAX/VMS
 
 Author:
 
-	Original version by Stan C. Smith, Summer 1981
-	This version by	Vince Fuller, CMU-CSD, Spring/Summer, 1986
-	Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
+    Original version by Stan C. Smith, Summer 1981
+    This version by Vince Fuller, CMU-CSD, Spring/Summer, 1986
+    Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
 
 Module Modification History:
 
 *** Begin CMU change log ***
 
-8.1	29-Nov-1991	Henry W. Miller		USBR
-	Use unsigned arithmetic in Wait_For_Something_2_DO().
+8.1 29-Nov-1991 Henry W. Miller     USBR
+    Use unsigned arithmetic in Wait_For_Something_2_DO().
 
-8.0A	16-Jul-1991	Henry W. Miller		USBR
-	Added hooks for memory debugging.
+8.0A    16-Jul-1991 Henry W. Miller     USBR
+    Added hooks for memory debugging.
 
-8.0	06-Feb-1990	Bruce R. Miller		CMU NetDev
-	Changed TCP_Main.bli to Main.bli in an attempt to reorganize
-	the IPACP.  I moved all the TCP stuff into TCP.BLI.
+8.0 06-Feb-1990 Bruce R. Miller     CMU NetDev
+    Changed TCP_Main.bli to Main.bli in an attempt to reorganize
+    the IPACP.  I moved all the TCP stuff into TCP.BLI.
 
-	20-Oct-1989	Bruce R. Miller		CMU NetDev
-	Added a bit of code to initialize the activity log.
+    20-Oct-1989 Bruce R. Miller     CMU NetDev
+    Added a bit of code to initialize the activity log.
 
-	30-Aug-1989	Bruce R. Miller		CMU NetDev
-	Made Conect Table into a hash table structure.
+    30-Aug-1989 Bruce R. Miller     CMU NetDev
+    Made Conect Table into a hash table structure.
 
-	07-Aug-1989	Bruce R. Miller		CMU NetDev
-	Added NML$Cancel call to Inactivate_TCB routine.  When a TCB
-	is inactivated any outstanding NQE's should be deleted.  If this
-	were not done, and a new TCB with the old address were created,
-	the the Name Query reply from the first TCB would affect the
-	new TCB (which would be totally BOGUS!).
+    07-Aug-1989 Bruce R. Miller     CMU NetDev
+    Added NML$Cancel call to Inactivate_TCB routine.  When a TCB
+    is inactivated any outstanding NQE's should be deleted.  If this
+    were not done, and a new TCB with the old address were created,
+    the the Name Query reply from the first TCB would affect the
+    new TCB (which would be totally BOGUS!).
 
-	03-Jul-1989	Bruce R. Miller		CMU NetDev
-	Fixed DUMP_TCB to handle unknown TCP state.
+    03-Jul-1989 Bruce R. Miller     CMU NetDev
+    Fixed DUMP_TCB to handle unknown TCP state.
 
-	16-MAR-1989	Dale Moore	CMU-CS/RI
-	If connection timeout is zero, then don't timeout connection.
+    16-MAR-1989 Dale Moore  CMU-CS/RI
+    If connection timeout is zero, then don't timeout connection.
 
-	20-OCT-1988	Dale Moore	CMU-CS/RI
-	Changed Keep_Alives (Do_Probe) to be runtime configurable.
+    20-OCT-1988 Dale Moore  CMU-CS/RI
+    Changed Keep_Alives (Do_Probe) to be runtime configurable.
 
-	04-OCT-1988	Dale Moore	CMU-CS/RI
-	Changed TOS from %O'15' to 0.  Evidently some busted
-	implementations that couldn't take something in this
-	field that wasn't what they expected.
+    04-OCT-1988 Dale Moore  CMU-CS/RI
+    Changed TOS from %O'15' to 0.  Evidently some busted
+    implementations that couldn't take something in this
+    field that wasn't what they expected.
 
-7.10  22-JUN-1988, Dale Moore	CMU-CS/RI
-	Change the call on retransmit of SYN to send size of options
-	as long	rather than octets.  Thanks to Charles Lane of
-	Drexel University.
+7.10  22-JUN-1988, Dale Moore   CMU-CS/RI
+    Change the call on retransmit of SYN to send size of options
+    as long rather than octets.  Thanks to Charles Lane of
+    Drexel University.
 
 7.9  10-FEB-1988, Dale Moore
-	Modify the Maximum segment size to be dependent upon whether
-	the remote address is local or not.
+    Modify the Maximum segment size to be dependent upon whether
+    the remote address is local or not.
 
 7.8  18-Nov-87, Edit by VAF
-	Know about IP$SEND returning failure when no route available. Make
-	SEND_CTL propagate this information back to its caller. This allows
-	the TCP user interface to detect this condition immediately when
-	sending a SYN and abort the connection appropriately.
+    Know about IP$SEND returning failure when no route available. Make
+    SEND_CTL propagate this information back to its caller. This allows
+    the TCP user interface to detect this condition immediately when
+    sending a SYN and abort the connection appropriately.
 
 7.7   4-Aug-87, Edit by VAF
-	Remove CQ_DEQUEUE and CQ_ENQUEUE - they are now in MACLIB.
-	Use $$KCALL macro to do $CMKRNL stuff.
-	Disable Resource Wait Mode at startup so the ACP crashes instead of
-	waiting for resources.
-	Rewrite send options handling so it can be easily made more general.
+    Remove CQ_DEQUEUE and CQ_ENQUEUE - they are now in MACLIB.
+    Use $$KCALL macro to do $CMKRNL stuff.
+    Disable Resource Wait Mode at startup so the ACP crashes instead of
+    waiting for resources.
+    Rewrite send options handling so it can be easily made more general.
 
 7.6  28-Jul-87, Edit by VAF
-	Know about TVT's when trying to move data in main processing loop.
+    Know about TVT's when trying to move data in main processing loop.
 
 7.5  22-Jul-87, Edit by VAF
-	Know about internal TCB's in timeout processing.
+    Know about internal TCB's in timeout processing.
 
 7.4  20-Jul-87, Edit by VAF
-	Clean up handling of circular queues a bit.
+    Clean up handling of circular queues a bit.
 
 7.3  23-Mar-87, Edit by VAF
-	Make allocated buffer sizes and maximum segment size dynamic.
-	Save and reset process name when ACP starts/stops.
-	Call new IP initialization routine.
+    Make allocated buffer sizes and maximum segment size dynamic.
+    Save and reset process name when ACP starts/stops.
+    Call new IP initialization routine.
 
 7.2   3-Mar-87, Edit by VAF
-	Flush I/O request tags from all requests. New calling sequence for
-	User$Post_IO_Status.
+    Flush I/O request tags from all requests. New calling sequence for
+    User$Post_IO_Status.
 
 7.1  24-Feb-87, Edit by VAF
-	"Net message queue" has been flushed - remove references. Replace with
-	call to CHECK_ERRMSG_Q at end of main TCP processing loop.
+    "Net message queue" has been flushed - remove references. Replace with
+    call to CHECK_ERRMSG_Q at end of main TCP processing loop.
 
 7.0  19-Feb-87, Edit by VAF
-	Use new NMLOOK module entry points for name lookups.
+    Use new NMLOOK module entry points for name lookups.
 
 6.9  18-Feb-87, Edit by VAF
-	Use OPR$FAO and FATAL$FAO instead of old error handling stuff.
+    Use OPR$FAO and FATAL$FAO instead of old error handling stuff.
 
 6.8  17-Feb-87, Edit by VAF
-	Fix spelling of "Exception_Handler".
+    Fix spelling of "Exception_Handler".
 
 6.7  12-Feb-87, Edit by VAF
-	Add support for domain service.
+    Add support for domain service.
 
 6.6   9-Feb-87, Edit by VAF
-	Flush external reference to Error_Processor.
+    Flush external reference to Error_Processor.
 
 6.5   6-Feb-87, Edit by VAF
-	Print modification date of ACP during startup.
+    Print modification date of ACP during startup.
 
 6.4  10-Dec-86, Edit by VAF
-	Change order of arguments to Gen_Checksum.
+    Change order of arguments to Gen_Checksum.
 
 6.3   9-Dec-86, Edit by VAF
-	Don't log "Sending data for TCB..." under LOG$TCP.
+    Don't log "Sending data for TCB..." under LOG$TCP.
 
 6.2  12-Nov-86, Edit by VAF
-	Flush SYN_WAIT_LIST and WKS global structures. Add external call to
-	TIMEOUT_SYN_WAIT_LIST in main processing loop.
+    Flush SYN_WAIT_LIST and WKS global structures. Add external call to
+    TIMEOUT_SYN_WAIT_LIST in main processing loop.
 
 6.1  11-Nov-86, Edit by VAF
-	Add FQ_MAX cell set by config routines & used by SEGIN.
+    Add FQ_MAX cell set by config routines & used by SEGIN.
 
 6.0   3-Nov-86, Edit by VAF
-	Set Base_RT_Timeout (initial RX time value) to 5 seconds. The idea of
-	setting it to 1 second was a kluge to get around ARP eating the first
-	packet. Make a minor change in the calculation of TCB[RX_TIMER].
+    Set Base_RT_Timeout (initial RX time value) to 5 seconds. The idea of
+    setting it to 1 second was a kluge to get around ARP eating the first
+    packet. Make a minor change in the calculation of TCB[RX_TIMER].
 
 5.9  24-Oct-86, Edit by VAF
-	Additions to debugging code.
-	When enqueuing user data on send queue, know about retransmission
-	count in determining amount of space left on queue.
+    Additions to debugging code.
+    When enqueuing user data on send queue, know about retransmission
+    count in determining amount of space left on queue.
 
 5.8  30-Sep-86, Edit by VAF
-	In INACTIVATE_TCB - don't inactivate an already inactive connection -
-	log an error if this occurs. This is to detect cases (like the RX
-	timeout bug) where TCB's are being inactivated repeatedly.
-	Rewrite Check_Rexmit_Queue to be able to build a segment with both
-	data and control information.
+    In INACTIVATE_TCB - don't inactivate an already inactive connection -
+    log an error if this occurs. This is to detect cases (like the RX
+    timeout bug) where TCB's are being inactivated repeatedly.
+    Rewrite Check_Rexmit_Queue to be able to build a segment with both
+    data and control information.
 
 5.7  29-Aug-86, Edit by VAF
-	Call ARP_INIT in main initialization routine.
+    Call ARP_INIT in main initialization routine.
 
 5.6  14-Aug-86, Edit by VAF
-	Make sure name lookup cancel is done NOINT.
+    Make sure name lookup cancel is done NOINT.
 
 5.5  13-Aug-86, Edit by VAF
-	In Build_Header turn on ACK if IS_SYNCHED is set, not by state
-	GEQ CS$ESTABLISHED.
+    In Build_Header turn on ACK if IS_SYNCHED is set, not by state
+    GEQ CS$ESTABLISHED.
 
 5.4  12-Aug-86, Edit by VAF
-	Add CS$NAMELOOK - Name lookup wait state. Make CLOSE_TCB know about
-	this state (no others should ever see it). Make CLOSE_TCB know about
-	NMLook_Flag and do a GREEN_CANCEL on the TCB if it is set.
-	Use GREEN_GETNAME to get Local_Name value.
+    Add CS$NAMELOOK - Name lookup wait state. Make CLOSE_TCB know about
+    this state (no others should ever see it). Make CLOSE_TCB know about
+    NMLook_Flag and do a GREEN_CANCEL on the TCB if it is set.
+    Use GREEN_GETNAME to get Local_Name value.
 
 5.3   9-Aug-86, Edit by VAF
-	Get and store local host name in LOCAL_NAME descriptor.
+    Get and store local host name in LOCAL_NAME descriptor.
 
 5.2   6-Aug-86, Edit by VAF
-	Modify retransmission code to use send circular queue.
+    Modify retransmission code to use send circular queue.
 
 5.1   6-Aug-86, Edit by VAF
-	Modify SEND_DATA to use circular queue of buffered send data.
+    Modify SEND_DATA to use circular queue of buffered send data.
 
 5.0   5-Aug-86, Edit by VAF
-	Add routines for enq/deq into circular queues.
-	N.B. Do not use these at AST level, since they don't do locking.
+    Add routines for enq/deq into circular queues.
+    N.B. Do not use these at AST level, since they don't do locking.
 
 4.9  29-Jul-86, Edit by VAF
-	Minor rearrangements for UDP's sake...
-	Move TCP_Protocol definition out of here, change names of TTL,TOS,DF.
+    Minor rearrangements for UDP's sake...
+    Move TCP_Protocol definition out of here, change names of TTL,TOS,DF.
 
 4.8  25-Jul-86, Edit by VAF
-	Add ts$qfull_drops counter.
+    Add ts$qfull_drops counter.
 
 4.7  18-Jul-86, Edit by VAF
-	Add ts$abort_drops counter.
+    Add ts$abort_drops counter.
 
 4.6  17-Jul-86, Edit by VAF
-	Pass reference to TCB pointer in CLOSE_TCB so it can clear the
-	pointer when it deletes the connection.
+    Pass reference to TCB pointer in CLOSE_TCB so it can clear the
+    pointer when it deletes the connection.
 
 4.5  15-Jul-86, Edit by VAF
-	Add status cell ts$badseq.
-	Rearrange change log.
+    Add status cell ts$badseq.
+    Rearrange change log.
 
 4.4   9-Jul-86, Edit by VAF
-	Add status cell ts$future_dups.
+    Add status cell ts$future_dups.
 
 4.3   1-Jul-86, Edit by VAF
-	Add some more status cells.
+    Add some more status cells.
 
 4.2  25-Jun-86, Edit by VAF
-	Don't ever use index 0 into VALID_TCB table.
+    Don't ever use index 0 into VALID_TCB table.
 
 4.1  16-Jun-86, Edit by VAF
-	Don't go into FIN-WAIT-1 when setting Pending_close - wait until
-	the FIN is really sent.
+    Don't go into FIN-WAIT-1 when setting Pending_close - wait until
+    the FIN is really sent.
 
 4.0  12-Jun-86, Edit by VAF
-	Simplify buffering of user send requests.
+    Simplify buffering of user send requests.
 
 3.9  10-Jun-86, Edit by VAF
-	Implement buffering of user send requests.
+    Implement buffering of user send requests.
 
 3.8  10-Jun-86, Edit by VAF
-	Add new counters for user send queue in preparation for implementation
-	of send buffering.
+    Add new counters for user send queue in preparation for implementation
+    of send buffering.
 
 3.7  22-May-86, Edit by VAF
-	Use VMS error message facility.
+    Use VMS error message facility.
 
 3.6   9-May-86, Edit by VAF
-	Make SEND_DATA return count sent. When sending an ACK, we need to make
-	sure that SEND_DATA actually sent something.
+    Make SEND_DATA return count sent. When sending an ACK, we need to make
+    sure that SEND_DATA actually sent something.
 
 3.5   8-May-86, Edit by VAF
-	Add CLOSE_TIMEOUT. Implement blocking close (USER,SEGIN)
-	Add LAST_ACK state.
-	Know about U$CLOSE and M$CANCEL function timeouts.
+    Add CLOSE_TIMEOUT. Implement blocking close (USER,SEGIN)
+    Add LAST_ACK state.
+    Know about U$CLOSE and M$CANCEL function timeouts.
 
 3.4   5-May-86, Edit by VAF
-	Implement the "Nagle algorithm" (RFC896) in SEND_DATA.
+    Implement the "Nagle algorithm" (RFC896) in SEND_DATA.
 
 3.3   1-May-86, Edit by VAF
-	Allow delivery of user data when in FIN_WAIT_1 or FIN_WAIT_2.
-	Have Service_Connections and Check_ReXmit_Queue return next service
-	time values to simplify Wait_For_Something_2_Do.
-	Add code to compress retransmission queue when doing retransmisson.
+    Allow delivery of user data when in FIN_WAIT_1 or FIN_WAIT_2.
+    Have Service_Connections and Check_ReXmit_Queue return next service
+    time values to simplify Wait_For_Something_2_Do.
+    Add code to compress retransmission queue when doing retransmisson.
 
 3.2  30-Apr-86, Edit by VAF
-	Debugging code for indicating packet origination.
-	Turn off pending_ack flag in Build_Header when sending ACKs.
+    Debugging code for indicating packet origination.
+    Turn off pending_ack flag in Build_Header when sending ACKs.
 
 3.1  29-Apr-86, Edit by VAF
-	Add some debugging code for logging TCB servicing.
-	Remove device restart stuff from here.
-	Make retransmission timeout shorter and distinct from connection
-	timeout.
+    Add some debugging code for logging TCB servicing.
+    Remove device restart stuff from here.
+    Make retransmission timeout shorter and distinct from connection
+    timeout.
 
 3.0  22-Apr-86, Edit by VAF
-	Phase II of flushing XPORT - use $FAO for output formatting.
-	Remove much of the VMS-specific code to IOUTIL module.
+    Phase II of flushing XPORT - use $FAO for output formatting.
+    Remove much of the VMS-specific code to IOUTIL module.
 
 2.9  21-Apr-86, Edit by VAF
-	Open timeout is now split into Active (short) and Passive (*long*)
+    Open timeout is now split into Active (short) and Passive (*long*)
 
 2.8  18-Apr-86, Edit by VAF
-	Checksum routine shouldn't do byteswap on IP addresses...
+    Checksum routine shouldn't do byteswap on IP addresses...
 
 2.7  17-Apr-86, Edit by VAF
-	Log segment when doing retransmission.
-	Increase probe timer to 1 minute, connection timeout to 10 minutes.
+    Log segment when doing retransmission.
+    Increase probe timer to 1 minute, connection timeout to 10 minutes.
 
 2.6  11-Apr-86, Edit by VAF
-	Specifiy and do not exceed a minimum retransmission time of 1 sec.
-	Set initial retransmission time to 1 sec to speed things up when
-	ARP drops initial connection packets.
+    Specifiy and do not exceed a minimum retransmission time of 1 sec.
+    Set initial retransmission time to 1 sec to speed things up when
+    ARP drops initial connection packets.
 
 2.5   8-Apr-86, Edit by VAF
-	Make INACTIVATE_TCB and SET_TCB_STATE into routines. The Macros were
-	a little obscure to read and didn't save much (these events do not
-	happen often enough for the routine-calling overhead to matter).
+    Make INACTIVATE_TCB and SET_TCB_STATE into routines. The Macros were
+    a little obscure to read and didn't save much (these events do not
+    happen often enough for the routine-calling overhead to matter).
 
 2.4   7-Apr-86, Edit by VAF
-	First shot at more general logging facility.
+    First shot at more general logging facility.
 
 2.3  24-Mar-86, Edit by VAF
-	Start adding ICMP support.
-	Many small changes between previous entry and this one.
+    Start adding ICMP support.
+    Many small changes between previous entry and this one.
 
 2.2  17-Mar-86, Edit by VAF
-	Redo connection timeouts, add connection probing code.
-	Move a lot of code here from USER.BLI.
+    Redo connection timeouts, add connection probing code.
+    Move a lot of code here from USER.BLI.
 
 2.1   7-Mar-86, Edit by VAF
-	Phase I of flushing XPORT: replace all $XPO... calls with real RMS
-	calls. Phase II will flush all of the XPORT string handling...
+    Phase I of flushing XPORT: replace all $XPO... calls with real RMS
+    calls. Phase II will flush all of the XPORT string handling...
 
 2.0  21-Feb-86, Edit by VAF
-	Flush "known_hosts" table, add hooks for new hostname module.
-	Rename most logicals from TCP$xxx to INET$xxx.
-	Flush "myinternetnames" crud, my_internet_adrs, etc.
+    Flush "known_hosts" table, add hooks for new hostname module.
+    Rename most logicals from TCP$xxx to INET$xxx.
+    Flush "myinternetnames" crud, my_internet_adrs, etc.
 
 *** End CMU change log ***
 
-1.0	[10-15-81] stan
-	original version
+1.0 [10-15-81] stan
+    original version
 
-1.2	[5-5-83] stan
-	vms operator interface routines
+1.2 [5-5-83] stan
+    vms operator interface routines
 
-1.3	[5-20-83] stan
-	error processor routine.
+1.3 [5-20-83] stan
+    error processor routine.
 
-1.4	[6-12-83] stan
-	Support for SMTP (Simple Mail Transfer Protocol) as a weel-known server.
+1.4 [6-12-83] stan
+    Support for SMTP (Simple Mail Transfer Protocol) as a weel-known server.
 
-1.5	[6-13-83] stan
-	During connection timeout processing: check if process owning connection
-	has sub-processes.  If true, then update connection timeout as this
-	could be an ftp cmd connection attempting to timeout during a LONG, SLOW
-	data transfer.
+1.5 [6-13-83] stan
+    During connection timeout processing: check if process owning connection
+    has sub-processes.  If true, then update connection timeout as this
+    could be an ftp cmd connection attempting to timeout during a LONG, SLOW
+    data transfer.
 
-1.6	[7-15-83] stan
-	modified global literal definitions to be byte-size.
+1.6 [7-15-83] stan
+    modified global literal definitions to be byte-size.
 
-1.7	[9-13-83] stan
-	rewrote routine "read_known_hosts_file" to clean up code and utilize the
-	host-alias table.  Alias no longer utilize an entry in the known-hosts
-	table.
+1.7 [9-13-83] stan
+    rewrote routine "read_known_hosts_file" to clean up code and utilize the
+    host-alias table.  Alias no longer utilize an entry in the known-hosts
+    table.
 
-1.8	[5-1-85] noelan olson
-	Replace obsolete system services.
+1.8 [5-1-85] noelan olson
+    Replace obsolete system services.
 
-1.9	[5-30-85] noelan olson
-	Use a table to store multiple internet addresses for the purpose of
-	gatewaying between networks.
+1.9 [5-30-85] noelan olson
+    Use a table to store multiple internet addresses for the purpose of
+    gatewaying between networks.
 */
 
 
@@ -485,7 +485,7 @@ NOVALUE,
 
 ! MEM.BLI
 
-Make_Zone	:
+Make_Zone   :
 NOVALUE ;
 
 
@@ -534,18 +534,18 @@ NOVALUE ;
 
 //EXTERNAL
 // TCP_MECH.BLI
-extern unsigned long long Start_Time;	// Quadword time IPACP started.
+extern unsigned long long Start_Time;   // Quadword time IPACP started.
 extern unsigned long
 log_state,
 act_state,
-Begin_Lock,			// start & end address of process pages which
-End_Lock;			// are locked in the working set; see maclib.mar
+Begin_Lock,         // start & end address of process pages which
+End_Lock;           // are locked in the working set; see maclib.mar
 
 
 //%SBTTL 'Literals'
 
 //LITERAL
-#define MAXPRCLEN 15		// Max length of process name
+#define MAXPRCLEN 15        // Max length of process name
 
 //%SBTTL 'Global Data Declarations.'
 
@@ -554,11 +554,11 @@ static char mynamestr[128],
 
 //GLOBAL
 signed long bogus1[512],
-       intdf=-1,	// Interrupt-defer count (-1 means OKINT)
+       intdf=-1,    // Interrupt-defer count (-1 means OKINT)
        bogus2[512],
        ast_in_progress=FALSE, // AST service rtn executing.
        Time_2_Exit=FALSE,// Main processing loop control.
-       sleeping=FALSE;	// Nap control.
+       sleeping=FALSE;  // Nap control.
 struct dsc$descriptor myname_ =
 {
     dsc$w_length : 128,
@@ -578,10 +578,10 @@ DESC$STR_ALLOC(MyName,128), // eqv for logical "tek$network_name"
      DESC$STR_ALLOC(Local_Name,MAX_HNAME),
 #endif
      signed long
-     max_recv_datasize =OPT$MAX_RECV_DATASIZE,	// Max segment size
-     default_mss	=DEFAULT_DATA_SIZE,		// Max segment size
-     max_physical_bufsize,	// Max size of device receive buffer
-     min_physical_bufsize;	// Minimum size of device send buffer
+     max_recv_datasize =OPT$MAX_RECV_DATASIZE,  // Max segment size
+     default_mss    =DEFAULT_DATA_SIZE,     // Max segment size
+     max_physical_bufsize,  // Max size of device receive buffer
+     min_physical_bufsize;  // Minimum size of device send buffer
 
 // Segment Input from IP Queue header.
 // Initialize Queue header to point at itself (ie, empty state).
@@ -619,28 +619,28 @@ void MAIN$OKINT(void)
 
 Function:
 
-	Initialize TCP & IP.  We are at user access mode in case of errors
-	in processing we don't clobber the entire system.
-	*** warning ***
-		configure_acp routine MUST be called before init_memory_manager
-		 as configure_acp sets memory manager parameters.
+    Initialize TCP & IP.  We are at user access mode in case of errors
+    in processing we don't clobber the entire system.
+    *** warning ***
+        configure_acp routine MUST be called before init_memory_manager
+         as configure_acp sets memory manager parameters.
 
 Inputs:
 
-	None.
+    None.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	Host table is initialized (from INET$HOSTS, via HOST_INIT())
-	Device configuration table "dev_config" and memory manager are
-	initialized from logical filename "INET$CONFIG".
+    Host table is initialized (from INET$HOSTS, via HOST_INIT())
+    Device configuration table "dev_config" and memory manager are
+    initialized from logical filename "INET$CONFIG".
 */
 
-extern	void ACPINI_ADLOOK_DONE();
+extern  void ACPINI_ADLOOK_DONE();
 
 void Initialize_ACP(void)
 {
@@ -648,10 +648,10 @@ void Initialize_ACP(void)
     cidx,
     lclnlen;
 
-    if (log_state > 0 )		// Open log, if requested
+    if (log_state > 0 )     // Open log, if requested
         if (! LOG_OPEN() )
             log_state = 0;
-    if (act_state > 0 )		// Open activity log, if requested
+    if (act_state > 0 )     // Open activity log, if requested
         if (! ACT_OPEN() )
             act_state = 0;
 
@@ -662,21 +662,21 @@ void Initialize_ACP(void)
     max_physical_bufsize = DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+
                            OPT$MAX_RECV_DATASIZE;
 //    IF (.MAX_PHYSICAL_BUFSIZE MOD 4) NEQ 0 THEN
-//	FATAL$FAO('Initialize_ACP - Max buffer size not divisible by 4');
+//  FATAL$FAO('Initialize_ACP - Max buffer size not divisible by 4');
     min_physical_bufsize = DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+
                            DEFAULT_DATA_SIZE;
 
     // First define the IPACP interface for any other modules we may load...
     CNF$Define_IPACP_Interface();
 
-    RPC$INIT();				// initialize RPC module (& PortMapper)
+    RPC$INIT();             // initialize RPC module (& PortMapper)
 
-    CNF$Configure_ACP();		// read/process file "config.txt"
+    CNF$Configure_ACP();        // read/process file "config.txt"
 
-    mm$init();				// see memgr.bli module.
-    CNF$Net_Device_Init();		// Initialize Network device(s).
-    ip$init();				// Initialize IP
-    user$init_routines();		// Initialize stuff in USER module.
+    mm$init();              // see memgr.bli module.
+    CNF$Net_Device_Init();      // Initialize Network device(s).
+    ip$init();              // Initialize IP
+    user$init_routines();       // Initialize stuff in USER module.
     tcp$init();
 
 // Initialize name lookup service
@@ -709,25 +709,25 @@ void ACPINI_ADLOOK_DONE(DUMMY,STATUS,NAMLEN,NAMPTR)
 
 Function:
 
-	Determine if we have any work to do.  IF no work then snooze for an
-	hour or until we are wakened by VMS (ie, user IO request queue) or
-	a network segment arrives (ie, IP's AST routine which runs in response
-	to AST delivered from PI-13 driver).  If there are active connections
-	then skip the nap.
+    Determine if we have any work to do.  IF no work then snooze for an
+    hour or until we are wakened by VMS (ie, user IO request queue) or
+    a network segment arrives (ie, IP's AST routine which runs in response
+    to AST delivered from PI-13 driver).  If there are active connections
+    then skip the nap.
 
 
 Inputs:
 
-	Minimum time to sleep, derived from TCB examination.
+    Minimum time to sleep, derived from TCB examination.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	If we are taking a long nap (ie, nothing to do) then purge the working
-	set before hibernation to reduce system impact.
+    If we are taking a long nap (ie, nothing to do) then purge the working
+    set before hibernation to reduce system impact.
 */
 
 void  wait_for_something_2_do(unsigned long long nxtime)
@@ -738,10 +738,10 @@ void  wait_for_something_2_do(unsigned long long nxtime)
     PageRange0 = UPlit(1,Begin_lock-%O'1000'),
     PageRange1 = UPlit(End_Lock+%O'1000',%X'7FFFFFFF'),
 #endif
-    $DESCRIPTOR(Long_Nap,"0 12:0:0.0");		// hours.
+    $DESCRIPTOR(Long_Nap,"0 12:0:0.0");     // hours.
     //    LITERAL
-#define	SHORT_NAP (20*CSEC)
-#define	SHORTER_NAP (2*CSEC)
+#define SHORT_NAP (20*CSEC)
+#define SHORTER_NAP (2*CSEC)
     extern
     tcb_count;
 #if 0
@@ -754,7 +754,7 @@ qb:
     unsigned rto,
              delay;
     char Big_Sleep = FALSE;
-    unsigned long long BTime;	// Binary rep of time.
+    unsigned long long BTime;   // Binary rep of time.
 
 // Skip this snooze if we have network segments to process or IP has datagrams
 // to send or it's Time to exit.
@@ -768,14 +768,14 @@ qb:
         if (tcb_count > 0)
         {
             now = Time_Stamp();
-//	    RTO = MINU(SHORT_NAP,nxtime-now);
+//      RTO = MINU(SHORT_NAP,nxtime-now);
             if (nxtime > now)
             {
                 delay = nxtime - now;
             }
             else
             {
-//		Delay = 100 ;
+//      Delay = 100 ;
                 delay = 0 ;
             }
             rto = MINU(SHORTER_NAP,delay) ;
@@ -792,10 +792,10 @@ qb:
                          0,rto);
             }
 
-            ((int *)&BTime)[1] = -1;	// make it delta time.
+            ((int *)&BTime)[1] = -1;    // make it delta time.
             ((int *)&BTime)[0] = rto*CSEC_TIMER_DELTA; // nap size.
         }
-        else  			// No TCB's
+        else            // No TCB's
         {
             sys$bintim(&Long_Nap,&BTime);
             Big_Sleep = TRUE;
@@ -810,16 +810,16 @@ qb:
 
 // If we are doing a BIG sleep then purge the working set to reduce system impact.
 
-//	    IF .Big_Sleep THEN
-//		BEGIN
-//		$PurgWS(INadr=PageRange0);
-//		$PurgWS(INadr=PageRange1);
-//		END;
+//      IF .Big_Sleep THEN
+//      BEGIN
+//      $PurgWS(INadr=PageRange0);
+//      $PurgWS(INadr=PageRange1);
+//      END;
 
 // Snoooooozzzzzz!!!!!!!!!!!!
 
             sys$schdwk(0,0,&BTime,0); // Schedule a wake-up.
-            sleeping = TRUE;	// So AST Handler can wake us.
+            sleeping = TRUE;    // So AST Handler can wake us.
             sys$hiber();
 
 // If we received an Attention AST from the PI device (network mesg avail)
@@ -859,7 +859,7 @@ void Main (void)
     $DESCRIPTOR(logical_netname_,"INET$NETWORK_NAME");
 #if 0
     BUILTIN
-    fp;			// VAX Frame Pointer.
+    fp;         // VAX Frame Pointer.
     MAP
 fp:
     REF VECTOR[1];
@@ -867,16 +867,16 @@ fp:
     long
     rc;
     unsigned char eqv_name[255];
-    unsigned short 	eqv_len;
+    unsigned short  eqv_len;
     struct item_list_3 items[2]= { {
             255,// output buffer length
             LNM$_STRING, // item code
             eqv_name, // output buffer
             &eqv_len, // word for translated string length
         } , {0,0,0,0}
-    };	// list terminator.
-    long exitblk[4],	// exit handler arg blk.
-         exit_status;		// exit status code( SS$_xxxxxx).
+    };  // list terminator.
+    long exitblk[4],    // exit handler arg blk.
+         exit_status;       // exit status code( SS$_xxxxxx).
     $DESCRIPTOR(tabnam_,"LNM$SYSTEM_TABLE"); //check shorten later
     struct dsc$descriptor * logical_netname = &logical_netname_, * tabnam = &tabnam_;
 
@@ -950,12 +950,12 @@ fp:
 // user IO has been posted.
 
 #if 0
-    Fp[0] = Exception_Handler;	// Declare an exception handler.
-    ExitBlk[0] = 0;		// VMS uses this for a pointer.
-    ExitBlk[1] = Exit_Handler;	// Routine to field the exit.
-    ExitBlk[2] = 1;		// # of args for handler.
-    ExitBlk[3] = Exit_Status;	// adrs of where to store exit reason.
-    $DCLEXH(desblk=ExitBlk);	// Declare the exit handler.
+    Fp[0] = Exception_Handler;  // Declare an exception handler.
+    ExitBlk[0] = 0;     // VMS uses this for a pointer.
+    ExitBlk[1] = Exit_Handler;  // Routine to field the exit.
+    ExitBlk[2] = 1;     // # of args for handler.
+    ExitBlk[3] = Exit_Status;   // adrs of where to store exit reason.
+    $DCLEXH(desblk=ExitBlk);    // Declare the exit handler.
 #endif
 
 // Disable resource wait mode
@@ -966,7 +966,7 @@ fp:
 
 #define    IPACP_Version_String "IP_ACP(V6.6-5.001) "  //Becomes ACP process name.
 #define    IPACP_Version_Name IPACP_Version_String
-#define    IPACP_Date_String "9-Apr-2007" 	// Date of last change
+#define    IPACP_Date_String "9-Apr-2007"   // Date of last change
 #define    IPACP_Who_String "roart" // Author of last change
 
 // Announce that we exist.
@@ -1010,10 +1010,10 @@ fp:
 
 // Exit in an orderly fashion.
 
-    NML$PURGE(NET$_TE);		// Purge the name server queue
-    user$purge_all_io();	// Post any pending user IO.
+    NML$PURGE(NET$_TE);     // Purge the name server queue
+    user$purge_all_io();    // Post any pending user IO.
     LOG$FAO("!%T IPACP exit.!/",0);
-    sys$exit(SS$_NORMAL);	// say goodbye...
+    sys$exit(SS$_NORMAL);   // say goodbye...
 }
 
 
@@ -1117,12 +1117,12 @@ void ip4acp_main(void)
 // user IO has been posted.
 
 #if 0
-    Fp[0] = Exception_Handler;	// Declare an exception handler.
-    ExitBlk[0] = 0;		// VMS uses this for a pointer.
-    ExitBlk[1] = Exit_Handler;	// Routine to field the exit.
-    ExitBlk[2] = 1;		// # of args for handler.
-    ExitBlk[3] = Exit_Status;	// adrs of where to store exit reason.
-    $DCLEXH(desblk=ExitBlk);	// Declare the exit handler.
+    Fp[0] = Exception_Handler;  // Declare an exception handler.
+    ExitBlk[0] = 0;     // VMS uses this for a pointer.
+    ExitBlk[1] = Exit_Handler;  // Routine to field the exit.
+    ExitBlk[2] = 1;     // # of args for handler.
+    ExitBlk[3] = Exit_Status;   // adrs of where to store exit reason.
+    $DCLEXH(desblk=ExitBlk);    // Declare the exit handler.
 #endif
 
 // Disable resource wait mode
@@ -1174,9 +1174,9 @@ void ip4acp_main(void)
 
 // Exit in an orderly fashion.
 
-    NML$PURGE(NET$_TE);		// Purge the name server queue
-    user$purge_all_io();	// Post any pending user IO.
+    NML$PURGE(NET$_TE);     // Purge the name server queue
+    user$purge_all_io();    // Post any pending user IO.
     LOG$FAO("!%T IPACP exit.!/");
-    sys$exit(SS$_NORMAL);	// say goodbye...
+    sys$exit(SS$_NORMAL);   // say goodbye...
 }
 

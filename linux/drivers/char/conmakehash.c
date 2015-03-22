@@ -125,9 +125,9 @@ int main(int argc, char *argv[])
 
         /*
          * Syntax accepted:
-         *	<fontpos>	<unicode> <unicode> ...
-         *	<range>		idem
-         *	<range>		<unicode range>
+         *  <fontpos>   <unicode> <unicode> ...
+         *  <range>     idem
+         *  <range>     <unicode range>
          *
          * where <range> ::= <fontpos>-<fontpos>
          * and <unicode> ::= U+<h><h><h><h>
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
         while (*p == ' ' || *p == '\t')
             p++;
         if (!*p || *p == '#')
-            continue;	/* skip comment or blank line */
+            continue;   /* skip comment or blank line */
 
         fp0 = strtol(p, &p1, 0);
         if (p1 == p)

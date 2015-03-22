@@ -28,9 +28,9 @@
 #ifdef MODULE
 #define __cacheline_aligned ____cacheline_aligned
 #else
-#define __cacheline_aligned					\
-  __attribute__((__aligned__(SMP_CACHE_BYTES),			\
-		 __section__(".data.cacheline_aligned")))
+#define __cacheline_aligned                 \
+  __attribute__((__aligned__(SMP_CACHE_BYTES),          \
+         __section__(".data.cacheline_aligned")))
 #endif
 #endif /* __cacheline_aligned */
 

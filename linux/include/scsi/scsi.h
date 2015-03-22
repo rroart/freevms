@@ -199,7 +199,7 @@ struct ccs_modesel_head
 /* These are a few other constants  only used by scsi  devices */
 /* Note that include/linux/cdrom.h also defines IOCTL 0x5300 - 0x5395 */
 
-#define SCSI_IOCTL_GET_IDLUN 0x5382	/* conflicts with CDROMAUDIOBUFSIZ */
+#define SCSI_IOCTL_GET_IDLUN 0x5382 /* conflicts with CDROMAUDIOBUFSIZ */
 
 /* Used to turn on and off tagged queuing for scsi devices */
 

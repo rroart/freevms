@@ -1,7 +1,7 @@
 /*
  * str.c
  *
- *	Code for VAX STR$$IS_STRING_CLASS routine
+ *  Code for VAX STR$$IS_STRING_CLASS routine
  *
  * Description:
  *
@@ -11,8 +11,8 @@
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  */
 
 #include <stdio.h>
@@ -25,9 +25,9 @@
 /*************************************************************
  * str$$is_string_class
  *
- *	This function is used to determine if the descriptor
- *	passed in is actually a viable string for this set of
- *	functions.
+ *  This function is used to determine if the descriptor
+ *  passed in is actually a viable string for this set of
+ *  functions.
  */
 unsigned long str$$is_string_class(const struct dsc$descriptor_s* test_string)
 {

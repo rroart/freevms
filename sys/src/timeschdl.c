@@ -231,11 +231,11 @@ asmlinkage void exe$swtimint(void)
                 /** copy some field to ast - MISSING */
                 /** call qast */
                 sch$qast(t->tqe$l_pid,PRI$_TIMER,(struct _acb *) t);
-                //	void (*f)(void);
-                //	f=t->tqe$l_fpc;
-                //	if (f) f();
-                //	printk("herexxx\n");
-                //		printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
+                //  void (*f)(void);
+                //  f=t->tqe$l_fpc;
+                //  if (f) f();
+                //  printk("herexxx\n");
+                //      printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
             }
             /** 11.8,2 periodic system routine requests TODO check if right */
             if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_SSSNGL)
@@ -243,9 +243,9 @@ asmlinkage void exe$swtimint(void)
                 void (*f)(void);
                 f=t->tqe$l_fpc;
                 /** just call it */
-                //		printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
+                //      printk(KERN_EMERG "before f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
                 if (f) f();
-                //		printk(KERN_EMERG "after f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
+                //      printk(KERN_EMERG "after f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
             }
             /** 11.8.3 scheduled wakeup requests */
             if ((t->tqe$b_rqtype & TQE$M_TQTYPE) == TQE$C_WKSNGL)
@@ -260,18 +260,18 @@ asmlinkage void exe$swtimint(void)
                 /** if no repeat, do cleanup - MISSING */
                 /** release sched spinlock TODO says who? */
                 vmsunlock(&SPIN_SCHED,-1);
-                //	void (*f)(void);
-                //	f=t->tqe$l_fpc;
-                //	printk(KERN_EMERG "xbefore f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
+                //  void (*f)(void);
+                //  f=t->tqe$l_fpc;
+                //  printk(KERN_EMERG "xbefore f %x %x %x %x\n",f,t->tqe$l_fpc,exe$timeout,&exe$timeout);
             }
             /** if repeat add tqe delta to tqe time, and do instimq */
             if (t->tqe$b_rqtype & TQE$M_REPEAT)
             {
                 t->tqe$q_time=exe$gq_systime+t->tqe$q_delta;
-                //	if (times>=0 && times<5) printk("i\n");
+                //  if (times>=0 && times<5) printk("i\n");
                 //      if (times>=0 && times<5)   printtq(t);
                 //if (times>=0 && times<5)   printtq(exe$gl_tqfl);
-                //	printk(":");
+                //  printk(":");
                 if (0 && times>1000 && times<1200)
                 {
                     printtq(t);
@@ -292,7 +292,7 @@ asmlinkage void exe$swtimint(void)
                 //if (times>=0 && times<5)   printtq(t);
                 //if (times>=0 && times<5)   printtq(exe$gl_tqfl);
                 //if (times>=0 && times<5) printk("i\n");
-                //	insque(t,exe$gl_tqfl); /* move this to a sort */
+                //  insque(t,exe$gl_tqfl); /* move this to a sort */
             }
             /** acquire both TIMER and HWCLK spinlocks */
             vmslock(&SPIN_TIMER,IPL$_TIMER);
@@ -302,9 +302,9 @@ asmlinkage void exe$swtimint(void)
         vmsunlock(&SPIN_HWCLK,IPL$_TIMER);
         vmsunlock(&SPIN_TIMER,-1);
     }
-    //	if (times==4) { unsigned long long i=1;
-    //	cli();
-    //	for(i=1;i!=0;i++) ;}
+    //  if (times==4) { unsigned long long i=1;
+    //  cli();
+    //  for(i=1;i!=0;i++) ;}
     //printk(",");
 }
 
@@ -403,7 +403,7 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs)
             int user_tick=user_mode(regs);
             struct task_struct *p = current;
             int cpu = smp_processor_id(), system = user_tick ^ 1;
-            //	if (mydebug6 && in_idle_while)
+            //  if (mydebug6 && in_idle_while)
             //  printk(".");
             if (mydebug5 && !countme2--)
             {
@@ -412,7 +412,7 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs)
                 printk("timer %x %x %x\n",p->pcb$l_pid,p->pcb$w_quant,p->pcb$b_pri);
             }
             //  printk(":");
-            //	if (p->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
+            //  if (p->pcb$l_pid==2) { int i; for(i=0;i<1000000;i++) ; }
             // { int i; for (i=0; i<1000000; i++ ) ; }}
             /** linux leftover, TODO, check if needed */
             update_one_process(p, user_tick, system, cpu);
@@ -441,7 +441,7 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs)
                     if (p->pcb$w_quant<128)
                     {
                         SOFTINT_TIMERFORK_VECTOR;
-                        //		    sch$resched();
+                        //          sch$resched();
                     }
                 }
                 /** the rest is linux leftovers */
@@ -488,8 +488,8 @@ void exe$hwclkint(int irq, void *dev_id, struct pt_regs *regs)
 */
 
 #ifdef __x86_64__
-extern unsigned int hpet_tick;					/* HPET clocks / interrupt */
-extern int report_lost_ticks;					/* command line option */
+extern unsigned int hpet_tick;                  /* HPET clocks / interrupt */
+extern int report_lost_ticks;                   /* command line option */
 void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 {
     static unsigned long rtc_update = 0;
@@ -624,7 +624,7 @@ void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
             if (p->pcb$w_quant<128)
             {
                 SOFTINT_TIMERFORK_VECTOR;
-                //		    sch$resched();
+                //          sch$resched();
             }
         }
         /** the rest is linux leftovers */

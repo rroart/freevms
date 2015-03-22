@@ -25,7 +25,7 @@ static int mce_disabled __initdata;
 static unsigned long mce_cpus;
 
 /*
- *	Machine Check Handler For PII/PIII/K7
+ *  Machine Check Handler For PII/PIII/K7
  */
 
 static int banks;
@@ -43,7 +43,7 @@ static void generic_machine_check(struct pt_regs * regs, long error_code)
     struct notifier_mc_err mc_err;
 
     rdmsr(MSR_IA32_MCG_STATUS, mcgstl, mcgsth);
-    if(mcgstl&(1<<0))	/* Recoverable ? */
+    if(mcgstl&(1<<0))   /* Recoverable ? */
         recover=0;
 
     /* Make sure unrecoverable MCEs reach the console */
@@ -116,7 +116,7 @@ static void unexpected_machine_check(struct pt_regs *regs, long error_code)
 }
 
 /*
- *	Call the installed machine check handler for this CPU setup.
+ *  Call the installed machine check handler for this CPU setup.
  */
 
 static void (*machine_check_vector)(struct pt_regs *, long error_code) = unexpected_machine_check;
@@ -128,7 +128,7 @@ void do_machine_check(struct pt_regs * regs, long error_code)
 }
 
 /*
- *	K8 machine check.
+ *  K8 machine check.
  */
 
 static char *k8bank[] =
@@ -424,7 +424,7 @@ static void k8_machine_check(struct pt_regs * regs, long error_code)
     struct notifier_mc_err mc_err;
 
     rdmsrl(MSR_IA32_MCG_STATUS, mcgst);
-    if(mcgst&(1UL<<0))  	/* Recoverable ? */
+    if(mcgst&(1UL<<0))      /* Recoverable ? */
     {
         norecover=0;
     }
@@ -583,7 +583,7 @@ static void __init k8_mcheck_init(struct cpuinfo_x86 *c)
 }
 
 /*
- *	Set up machine check reporting for Intel processors
+ *  Set up machine check reporting for Intel processors
  */
 
 static void __init generic_mcheck_init(struct cpuinfo_x86 *c)
@@ -593,14 +593,14 @@ static void __init generic_mcheck_init(struct cpuinfo_x86 *c)
     static int done;
 
     /*
-     *	Check for MCE support
+     *  Check for MCE support
      */
 
     if( !test_bit(X86_FEATURE_MCE, &c->x86_capability) )
         return;
 
     /*
-     *	Check for PPro style MCA
+     *  Check for PPro style MCA
      */
 
     if( !test_bit(X86_FEATURE_MCA, &c->x86_capability) )
@@ -631,7 +631,7 @@ static void __init generic_mcheck_init(struct cpuinfo_x86 *c)
 }
 
 /*
- *	This has to be run for each processor
+ *  This has to be run for each processor
  */
 
 void __init mcheck_init(struct cpuinfo_x86 *c)

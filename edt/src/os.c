@@ -16,11 +16,11 @@
 //---2004-01-03
 
 /************************************************************************/
-/*									*/
-/*  OS dependent routines						*/
-/*									*/
-/*  Logical name EDT_TTYNAME can be used to point to alternate terminal	*/
-/*									*/
+/*                                  */
+/*  OS dependent routines                       */
+/*                                  */
+/*  Logical name EDT_TTYNAME can be used to point to alternate terminal */
+/*                                  */
 /************************************************************************/
 
 #include "edt.h"
@@ -43,17 +43,17 @@ char *help_name = NULL;
 #include ssdef
 #include tt2def
 
-static int jnlflushenable = 0;		/* 0: not in read routine, ast should not do anything */
+static int jnlflushenable = 0;      /* 0: not in read routine, ast should not do anything */
 /* 1: in read routine, it's ok for ast routine to flush */
-static int jnlflushtimerip = 0;		/* 0: no timer is queued */
+static int jnlflushtimerip = 0;     /* 0: no timer is queued */
 /* 1: timer request queued */
-static int ttsaveof = 0;		/* 0: last read ended normally */
+static int ttsaveof = 0;        /* 0: last read ended normally */
 /* 1: last read ended in eof */
-static uByte originalmodes[12];		/* original terminal modes */
-static uQuad nextjournalflush = 0;	/* 0: the journal was freshly flushed and a read is */
+static uByte originalmodes[12];     /* original terminal modes */
+static uQuad nextjournalflush = 0;  /* 0: the journal was freshly flushed and a read is */
 /*    in progress, so no journal flushing need be done */
 /* else: datetime of next journal flush */
-static uWord ttchan = 0;		/* 0: channel has not been assigned yet */
+static uWord ttchan = 0;        /* 0: channel has not been assigned yet */
 /* else: i/o channel to the terminal */
 
 void lib$stop ();
@@ -91,13 +91,13 @@ static void jnlflushast (void);
 static OZ_Console_modebuff modebuff;
 static OZ_Handle h_timer;
 static OZ_Handle h_tty;
-static int jnlflushenable = 0;		/* 0: not in read routine, ast should not do anything */
+static int jnlflushenable = 0;      /* 0: not in read routine, ast should not do anything */
 /* 1: in read routine, it's ok for ast routine to flush */
-static int jnlflushtimerip = 0;		/* 0: no timer is queued */
+static int jnlflushtimerip = 0;     /* 0: no timer is queued */
 /* 1: timer request queued */
-static int ttsaveof = 0;		/* 0: last read ended normally */
+static int ttsaveof = 0;        /* 0: last read ended normally */
 /* 1: last read ended in eof */
-static OZ_Datebin nextjournalflush = 0;	/* 0: the journal was freshly flushed and a read is */
+static OZ_Datebin nextjournalflush = 0; /* 0: the journal was freshly flushed and a read is */
 /*    in progress, so no journal flushing need be done */
 /* else: datetime of next journal flush */
 
@@ -141,9 +141,9 @@ static int timedread (char *buf, int siz);
 #endif
 
 /************************************************************************/
-/*									*/
-/*  Initialization routine						*/
-/*									*/
+/*                                  */
+/*  Initialization routine                      */
+/*                                  */
 /************************************************************************/
 
 void os_initialization (void)
@@ -294,46 +294,46 @@ void os_initialization (void)
 
     /* Try to find help file - same directory as executable */
 
-    pathstring = NULL;						/* haven't allocated a string yet */
-    pp = pn;							/* assume we just use 'program name' from argv[0] */
-    if (strchr (pn, '/') == NULL)  				/* use it if it contains a slash */
+    pathstring = NULL;                      /* haven't allocated a string yet */
+    pp = pn;                            /* assume we just use 'program name' from argv[0] */
+    if (strchr (pn, '/') == NULL)               /* use it if it contains a slash */
     {
-        pathstring = string_create (0, NULL);			/* no slash, create an empty string for the path */
-        for (p = getenv ("PATH"); p != NULL; p = q)  		/* look through PATH directories for executable */
+        pathstring = string_create (0, NULL);           /* no slash, create an empty string for the path */
+        for (p = getenv ("PATH"); p != NULL; p = q)         /* look through PATH directories for executable */
         {
-            q = strchr (p, ':');					/* get next directory name */
-            if (q == NULL) q = p + strlen (p);			/* point to the end of it */
-            string_setval (pathstring, q - p, p);			/* copy directory name to pathstring */
-            if (q[-1] != '/') string_concat (pathstring, 1, "/");	/* make sure it has a slash on the end */
-            string_concat (pathstring, strlen (pn), pn);		/* then put program name after that */
-            pp = string_getval (pathstring);				/* point to composite pathname string */
-            while ((rc = lstat (pp, &statbuf)) >= 0)  		/* try to stat the executable or the softlink */
+            q = strchr (p, ':');                    /* get next directory name */
+            if (q == NULL) q = p + strlen (p);          /* point to the end of it */
+            string_setval (pathstring, q - p, p);           /* copy directory name to pathstring */
+            if (q[-1] != '/') string_concat (pathstring, 1, "/");   /* make sure it has a slash on the end */
+            string_concat (pathstring, strlen (pn), pn);        /* then put program name after that */
+            pp = string_getval (pathstring);                /* point to composite pathname string */
+            while ((rc = lstat (pp, &statbuf)) >= 0)        /* try to stat the executable or the softlink */
             {
-                if (!S_ISLNK (statbuf.st_mode)) break;			/* if it's an actual file, we found it */
-                rc = readlink (pp, linkbuf, sizeof linkbuf - 1);	/* it's a softlink, read the softlink value */
-                if (rc <= 0) break;					/* stop trying if softlink broken */
+                if (!S_ISLNK (statbuf.st_mode)) break;          /* if it's an actual file, we found it */
+                rc = readlink (pp, linkbuf, sizeof linkbuf - 1);    /* it's a softlink, read the softlink value */
+                if (rc <= 0) break;                 /* stop trying if softlink broken */
                 if (linkbuf[0] == '/') string_setval (pathstring, rc, linkbuf); /* if absolute softlink, replace the old pathstring */
                 else
                 {
-                    qq = strrchr (pp, '/') + 1;				/* relative, add to end of old pathstring after directory */
+                    qq = strrchr (pp, '/') + 1;             /* relative, add to end of old pathstring after directory */
                     string_remove (pathstring, string_getlen (pathstring) - (qq - pp), qq - pp);
                     string_concat (pathstring, rc, linkbuf);
                 }
                 pp = string_getval (pathstring);
             }
-            if (rc >= 0) break;					/* if executable found, we're done looking thru PATH directories */
+            if (rc >= 0) break;                 /* if executable found, we're done looking thru PATH directories */
             if (*q != 0) q ++;
             else q = NULL;
         }
-        if (p == NULL) pp = pn;					/* if it wasn't found in PATH directories, just use pn */
-        else pp = string_getval (pathstring);			/* otherwise, use executable's path */
+        if (p == NULL) pp = pn;                 /* if it wasn't found in PATH directories, just use pn */
+        else pp = string_getval (pathstring);           /* otherwise, use executable's path */
     }
 
-    help_name = malloc (strlen (pp) + 5);				/* allocate a buffer for help filename */
-    strcpy (help_name, pp);					/* copy in the executable directory and name */
-    strcat (help_name, ".hlp");					/* append .hlp for the help file name */
+    help_name = malloc (strlen (pp) + 5);               /* allocate a buffer for help filename */
+    strcpy (help_name, pp);                 /* copy in the executable directory and name */
+    strcat (help_name, ".hlp");                 /* append .hlp for the help file name */
 
-    if (pathstring != NULL) string_delete (pathstring);		/* free off string if we allocated one */
+    if (pathstring != NULL) string_delete (pathstring);     /* free off string if we allocated one */
 
 #endif
 
@@ -344,14 +344,14 @@ void os_initialization (void)
 }
 
 /************************************************************************/
-/*									*/
-/*  Set screen mode							*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	on = 0 : off (used for line mode)				*/
-/*	     1 : on (used for screen (change) mode)			*/
-/*									*/
+/*                                  */
+/*  Set screen mode                         */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  on = 0 : off (used for line mode)               */
+/*       1 : on (used for screen (change) mode)         */
+/*                                  */
 /************************************************************************/
 
 void os_screenmode (int on)
@@ -388,46 +388,46 @@ void os_screenmode (int on)
 
     struct termios settings;
 
-    if (screenmode != on)  					/* see if requested differs from current state */
+    if (screenmode != on)                   /* see if requested differs from current state */
     {
         settings = initial_settings;
         if (on)
         {
-            settings.c_iflag &= ~(INLCR | IGNCR | ICRNL | IUCLC);	/* really screw it up by turning everything off */
+            settings.c_iflag &= ~(INLCR | IGNCR | ICRNL | IUCLC);   /* really screw it up by turning everything off */
             settings.c_oflag &= ~(OPOST | OLCUC | ONLCR | OCRNL | ONOCR | ONLRET | OFILL);
             settings.c_lflag &= ~(ISIG | ICANON | ECHO);
         }
-        if (tcsetattr (ttyfd, TCSANOW, &settings) < 0)  		/* set it the way we want it */
+        if (tcsetattr (ttyfd, TCSANOW, &settings) < 0)          /* set it the way we want it */
         {
             perror ("error setting terminal settings");
             abort ();
         }
-        screenmode = on;						/* now it is set to the new state */
+        screenmode = on;                        /* now it is set to the new state */
     }
 
 #endif
 }
 
 /************************************************************************/
-/*									*/
-/*  Read from terminal (in line mode) with prompt			*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	prompt = prompt string pointer					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	os_readprompt = NULL : eof					*/
-/*	                else : string pointer				*/
-/*									*/
-/*    Note:								*/
-/*									*/
-/*	This routine should only be called from jnl_readprompt.  	*/
-/*	Others should call jnl_readprompt instead.			*/
-/*									*/
-/*	Screenmode should be OFF					*/
-/*									*/
+/*                                  */
+/*  Read from terminal (in line mode) with prompt           */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  prompt = prompt string pointer                  */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  os_readprompt = NULL : eof                  */
+/*                  else : string pointer               */
+/*                                  */
+/*    Note:                             */
+/*                                  */
+/*  This routine should only be called from jnl_readprompt.     */
+/*  Others should call jnl_readprompt instead.          */
+/*                                  */
+/*  Screenmode should be OFF                    */
+/*                                  */
 /************************************************************************/
 
 String *os_readprompt (const char *prompt)
@@ -609,21 +609,21 @@ eof:
 }
 
 /************************************************************************/
-/*									*/
-/*  Read keypad sequence from terminal without echoing			*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	os_readkeyseq = NULL : eof					*/
-/*	                else : string pointer				*/
-/*									*/
-/*    Note:								*/
-/*									*/
-/*	This routine should only be called from jnl_readkeyseq.  	*/
-/*	Others should call jnl_readkeyseq instead.			*/
-/*									*/
-/*	Screenmode should be ON						*/
-/*									*/
+/*                                  */
+/*  Read keypad sequence from terminal without echoing          */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  os_readkeyseq = NULL : eof                  */
+/*                  else : string pointer               */
+/*                                  */
+/*    Note:                             */
+/*                                  */
+/*  This routine should only be called from jnl_readkeyseq.     */
+/*  Others should call jnl_readkeyseq instead.          */
+/*                                  */
+/*  Screenmode should be ON                     */
+/*                                  */
 /************************************************************************/
 
 int os_readkeyseq (String *keystring)
@@ -729,19 +729,19 @@ int os_readkeyseq (String *keystring)
 }
 
 /************************************************************************/
-/*									*/
-/*  Write a buffer to terminal screen					*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	size = size of data to be written				*/
-/*	buff = address of data						*/
-/*									*/
-/*    Note:								*/
-/*									*/
-/*	Screenmode is ON : no editing or formatting occurs		*/
-/*	             OFF : normal editing and formatting occurs		*/
-/*									*/
+/*                                  */
+/*  Write a buffer to terminal screen                   */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  size = size of data to be written               */
+/*  buff = address of data                      */
+/*                                  */
+/*    Note:                             */
+/*                                  */
+/*  Screenmode is ON : no editing or formatting occurs      */
+/*               OFF : normal editing and formatting occurs     */
+/*                                  */
 /************************************************************************/
 
 int os_writebuffer (int size, const char *buff)
@@ -775,25 +775,25 @@ int os_writebuffer (int size, const char *buff)
     iosb2.sts = 1;
     while (size > 0)
     {
-        p = memchr (buff, '\n', size);		/* find an <LF> */
-        if (p == NULL) p = buff + size;		/* if none left, point to end of string */
-        sts = sys$synch (1, &iosb1);		/* make sure we can use this iosb again */
+        p = memchr (buff, '\n', size);      /* find an <LF> */
+        if (p == NULL) p = buff + size;     /* if none left, point to end of string */
+        sts = sys$synch (1, &iosb1);        /* make sure we can use this iosb again */
         if (sts & 1) sts = iosb1.sts;
         if (!(sts & 1)) return (0);
         sts = sys$qio (1, ttchan, IO$_WRITEVBLK | IO$M_NOFORMAT, &iosb1, 0, 0, buff, p - buff, 0, 0, 0, 0); /* start all up to <LF> */
         if (!(sts & 1)) return (0);
-        size -= p - buff;				/* see how much is left, including the <LF> */
+        size -= p - buff;               /* see how much is left, including the <LF> */
         buff  = p;
-        if (size == 0) break;			/* if nothing (we hit the end above), we're all done */
-        sts = sys$synch (1, &iosb2);		/* make sure we can use this iosb again */
+        if (size == 0) break;           /* if nothing (we hit the end above), we're all done */
+        sts = sys$synch (1, &iosb2);        /* make sure we can use this iosb again */
         if (sts & 1) sts = iosb2.sts;
         if (!(sts & 1)) return (0);
         sts = sys$qio (1, ttchan, IO$_WRITEVBLK | IO$M_NOFORMAT, &iosb2, 0, 0, "\r\n", 2, 0, 0, 0, 0); /* start outputting <CR><LF> */
         if (!(sts & 1)) return (0);
-        size --;					/* increment over the <LF> */
+        size --;                    /* increment over the <LF> */
         buff ++;
     }
-    sts = sys$synch (1, &iosb1);			/* end of buffer, wait for writes to complete */
+    sts = sys$synch (1, &iosb1);            /* end of buffer, wait for writes to complete */
     if (sts & 1) sts = iosb1.sts;
     if (sts & 1) sts = sys$synch (1, &iosb2);
     if (sts & 1) sts = iosb2.sts;
@@ -844,9 +844,9 @@ int os_writebuffer (int size, const char *buff)
 }
 
 /************************************************************************/
-/*									*/
-/*  Get screen width and length						*/
-/*									*/
+/*                                  */
+/*  Get screen width and length                     */
+/*                                  */
 /************************************************************************/
 
 int os_getscreensize (int *width_r, int *length_r)
@@ -884,9 +884,9 @@ int os_getscreensize (int *width_r, int *length_r)
 }
 
 /************************************************************************/
-/*									*/
-/*  Make a journal filename from a given filename			*/
-/*									*/
+/*                                  */
+/*  Make a journal filename from a given filename           */
+/*                                  */
 /************************************************************************/
 
 char *os_makejnlname (const char *filename)
@@ -940,18 +940,18 @@ char *os_makejnlname (const char *filename)
 }
 
 /************************************************************************/
-/*									*/
-/*  Create new file							*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	name = name of file to create					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	os_crenewfile = NULL : error (message already output)		*/
-/*	                else : file pointer				*/
-/*									*/
+/*                                  */
+/*  Create new file                         */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  name = name of file to create                   */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  os_crenewfile = NULL : error (message already output)       */
+/*                  else : file pointer             */
+/*                                  */
 /************************************************************************/
 
 FILE *os_crenewfile (const char *name)
@@ -1036,9 +1036,9 @@ FILE *os_crenewfile (const char *name)
 }
 
 /************************************************************************/
-/*									*/
-/*  Get default initialization file name				*/
-/*									*/
+/*                                  */
+/*  Get default initialization file name                */
+/*                                  */
 /************************************************************************/
 
 char *os_defaultinitname (void)
@@ -1087,9 +1087,9 @@ static void setjnlflush (int on)
     uLong sts;
     uQuad now;
 
-    sys$setast (0);						/* inhibit ast delivery */
-    jnlflushenable = on;						/* save the enable flag */
-    sys$gettim (&now);						/* see what time it is now */
+    sys$setast (0);                     /* inhibit ast delivery */
+    jnlflushenable = on;                        /* save the enable flag */
+    sys$gettim (&now);                      /* see what time it is now */
 
     /* If we are exiting read routine and we don't have a next flush time established, set one up */
 
@@ -1101,17 +1101,17 @@ static void setjnlflush (int on)
     {
         if (nextjournalflush <= now)
         {
-            jnl_flush ();						/* it is already time, flush it */
-            nextjournalflush = 0;					/* don't start timer until a read completes */
+            jnl_flush ();                       /* it is already time, flush it */
+            nextjournalflush = 0;                   /* don't start timer until a read completes */
         }
         else
         {
-            jnlflushtimerip = 1;					/* not time yet, start timer going */
+            jnlflushtimerip = 1;                    /* not time yet, start timer going */
             sts = sys$setimr (0, &nextjournalflush, jnlflushast, NULL, 0);
             if (!(sts & 1)) lib$stop (sts);
         }
     }
-    sys$setast (1);						/* enable ast delivery */
+    sys$setast (1);                     /* enable ast delivery */
 }
 
 /* This ast routine gets called when the journal flush timer expires. */
@@ -1121,11 +1121,11 @@ static void setjnlflush (int on)
 static void jnlflushast (void)
 
 {
-    jnlflushtimerip = 0;		/* an timer ast is no longer pending */
-    if (jnlflushenable)  		/* see if we are in the read routine */
+    jnlflushtimerip = 0;        /* an timer ast is no longer pending */
+    if (jnlflushenable)         /* see if we are in the read routine */
     {
-        jnl_flush ();		/* if so, it is ok to flush the journal */
-        nextjournalflush = 0;	/* ... and remember that is was just flushed */
+        jnl_flush ();       /* if so, it is ok to flush the journal */
+        nextjournalflush = 0;   /* ... and remember that is was just flushed */
     }
 }
 
@@ -1142,9 +1142,9 @@ static void setjnlflush (int on)
     OZ_IO_timer_waituntil timer_waituntil;
     uLong sts;
 
-    oz_sys_thread_setast (OZ_ASTMODE_INHIBIT);			/* inhibit ast delivery */
-    jnlflushenable = on;						/* save the enable flag */
-    now = oz_hw_tod_getnow ();					/* see what time it is now */
+    oz_sys_thread_setast (OZ_ASTMODE_INHIBIT);          /* inhibit ast delivery */
+    jnlflushenable = on;                        /* save the enable flag */
+    now = oz_hw_tod_getnow ();                  /* see what time it is now */
 
     /* If we are exiting read routine and we don't have a next flush time established, set one up */
 
@@ -1156,19 +1156,19 @@ static void setjnlflush (int on)
     {
         if (nextjournalflush <= now)
         {
-            jnl_flush ();						/* it is already time, flush it */
-            nextjournalflush = 0;					/* don't start timer until a read completes */
+            jnl_flush ();                       /* it is already time, flush it */
+            nextjournalflush = 0;                   /* don't start timer until a read completes */
         }
         else
         {
-            jnlflushtimerip = 1;					/* not time yet, start timer going */
+            jnlflushtimerip = 1;                    /* not time yet, start timer going */
             memset (&timer_waituntil, 0, sizeof timer_waituntil);
             timer_waituntil.datebin = nextjournalflush;
             sts = oz_sys_io_start (OZ_PROCMODE_KNL, h_timer, NULL, 0, jnlflushast, NULL, OZ_IO_TIMER_WAITUNTIL, sizeof timer_waituntil, &timer_waituntil);
             if (sts != OZ_STARTED) oz_sys_condhand_signal (2, sts, 0);
         }
     }
-    oz_sys_thread_setast (OZ_ASTMODE_ENABLE);			/* enable ast delivery */
+    oz_sys_thread_setast (OZ_ASTMODE_ENABLE);           /* enable ast delivery */
 }
 
 /* This ast routine gets called when the journal flush timer expires. */
@@ -1178,11 +1178,11 @@ static void setjnlflush (int on)
 static void jnlflushast (void *dummy, uLong status, OZ_Mchargs *mchargs)
 
 {
-    jnlflushtimerip = 0;		/* an timer ast is no longer pending */
-    if (jnlflushenable)  		/* see if we are in the read routine */
+    jnlflushtimerip = 0;        /* an timer ast is no longer pending */
+    if (jnlflushenable)         /* see if we are in the read routine */
     {
-        jnl_flush ();		/* if so, it is ok to flush the journal */
-        nextjournalflush = 0;	/* ... and remember that is was just flushed */
+        jnl_flush ();       /* if so, it is ok to flush the journal */
+        nextjournalflush = 0;   /* ... and remember that is was just flushed */
     }
 }
 
@@ -1198,29 +1198,29 @@ static int timedread (char *buf, int siz)
     struct timeval timeout;
     time_t now;
 
-    while (nextjournalflush != 0)  		/* repeat while timeout is armed */
+    while (nextjournalflush != 0)       /* repeat while timeout is armed */
     {
-        now = time (NULL);				/* see if time has already elapsed */
+        now = time (NULL);              /* see if time has already elapsed */
         if (now >= nextjournalflush)
         {
-            jnl_flush ();				/* if so, flush the journal */
-            nextjournalflush = 0;			/* and disarm the timeout */
+            jnl_flush ();               /* if so, flush the journal */
+            nextjournalflush = 0;           /* and disarm the timeout */
             break;
         }
-        FD_ZERO (&readmask);			/* if not, set up the read mask for the terminal */
+        FD_ZERO (&readmask);            /* if not, set up the read mask for the terminal */
         FD_SET (ttyfd, &readmask);
-        timeout.tv_usec = 0;			/* ... and set up how long until it times out */
+        timeout.tv_usec = 0;            /* ... and set up how long until it times out */
         timeout.tv_sec  = nextjournalflush - now;
         rc = select (ttyfd + 1, &readmask, NULL, NULL, &timeout); /* wait for timer or for data to read */
         if (rc < 0) return (rc);
-        if (rc > 0) break;				/* exit loop if there is something to read */
+        if (rc > 0) break;              /* exit loop if there is something to read */
     }
 
-    rc = read (ttyfd, buf, siz);			/* journal was just flushed, wait for read data */
+    rc = read (ttyfd, buf, siz);            /* journal was just flushed, wait for read data */
 
     if (nextjournalflush == 0)
     {
-        nextjournalflush  = time (NULL);		/* re-arm timeout */
+        nextjournalflush  = time (NULL);        /* re-arm timeout */
         nextjournalflush += JOURNAL_FLUSH_INTERVAL;
     }
 

@@ -61,7 +61,7 @@ static void fld_const(FPU_REG const *c, int adj, u_char tag)
     push();
     reg_copy(c, st_new_ptr);
     st_new_ptr->sigl += adj;  /* For all our fldxxx constants, we don't need to
-			       borrow or carry. */
+                   borrow or carry. */
     FPU_settag0(tag);
     clear_C1();
 }

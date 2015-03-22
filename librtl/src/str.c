@@ -1,43 +1,43 @@
 /*
  * str.c
  *
- *	Code for VAX STR$ routines
+ *  Code for VAX STR$ routines
  *
  * Description:
  *
- *	This file contains various 'str$' functions equivalent
- *	to those available in Vax/VMS string library.
+ *  This file contains various 'str$' functions equivalent
+ *  to those available in Vax/VMS string library.
  *
  * Bugs:
  *
- *	Not compatible at the binary level.
+ *  Not compatible at the binary level.
  *
- *	No seperate "string zone" to allocate memory from,
- *	uses malloc/free instead.
+ *  No seperate "string zone" to allocate memory from,
+ *  uses malloc/free instead.
  *
- *	Some versions of realloc are broken! Some don't like to be
- *	called hundreds of times.  The program may
- *	crash with a segmentation fault in such a case.
+ *  Some versions of realloc are broken! Some don't like to be
+ *  called hundreds of times.  The program may
+ *  crash with a segmentation fault in such a case.
  *
- *	I probibly should be using dsc$descriptor instead of
- *	dsc$descriptor_s, but I prefer to have the type 'char*'
- *	instead of 'void*' which is the only difference.
+ *  I probibly should be using dsc$descriptor instead of
+ *  dsc$descriptor_s, but I prefer to have the type 'char*'
+ *  instead of 'void*' which is the only difference.
  *
- *	Not worrying about the dsc$b_dtype field yet. Assumes it
- *	will always be type DSC$K_DTYPE_T (character coded text).
- *	Type V should mean size is in bits, and P means size is in
- *	digits (4 bit nibbles).
+ *  Not worrying about the dsc$b_dtype field yet. Assumes it
+ *  will always be type DSC$K_DTYPE_T (character coded text).
+ *  Type V should mean size is in bits, and P means size is in
+ *  digits (4 bit nibbles).
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design. Spelling errors are
- *		not my fault! Someone must have snuck them in
- *		there when I wasn't looking.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design. Spelling errors are
+ *      not my fault! Someone must have snuck them in
+ *      there when I wasn't looking.
  *
- *	Feb 4, 1997 - Kevin Handy
- *		Added a 'return STR$_ILLSTRCLA' so that compiling
- *		with '-Wall' won't display errors.
+ *  Feb 4, 1997 - Kevin Handy
+ *      Added a 'return STR$_ILLSTRCLA' so that compiling
+ *      with '-Wall' won't display errors.
  */
 
 #include <stdio.h>
@@ -50,7 +50,7 @@
 /*************************************************************
  * str$add
  *
- *	Add two decimal strings of digits
+ *  Add two decimal strings of digits
  */
 unsigned long str$add_not(const unsigned long* asign, const long* aexp,
                           const struct dsc$descriptor_s* adigits,

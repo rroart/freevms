@@ -1,5 +1,5 @@
-#ifndef vfddef_h
-#define vfddef_h
+#ifndef VFDDEF_H
+#define VFDDEF_H
 
 struct vms_fd
 {

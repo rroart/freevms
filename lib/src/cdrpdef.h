@@ -1,7 +1,5 @@
-#ifndef cdrpdef_h
-#define cdrpdef_h
-
-//#include "../../freevms/lib/src/diobmdef.h"
+#ifndef CDRPDEF_H
+#define CDRPDEF_H
 
 #define CDRP$M_WLE_REUSE 0x1
 #define CDRP$M_WLE_SUPWL 0x2
@@ -104,10 +102,10 @@ struct _cdrp
     unsigned short int cdrp$w_cdrpsize;
     unsigned char cdrp$b_cd_type;
     unsigned char cdrp$b_flck;
-    void (*cdrp$l_fpc)();
+    void (*cdrp$l_fpc)(void);
     unsigned long cdrp$l_fr3;
     unsigned long cdrp$l_fr4;
-    void (*cdrp$l_savd_rtn)();
+    void (*cdrp$l_savd_rtn)(void);
     void *cdrp$l_msg_buf;
     unsigned int cdrp$l_rspid;
     struct _cdt *cdrp$l_cdt;

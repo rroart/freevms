@@ -1,8 +1,8 @@
 
 /*
- *	LIB$BUILD_NODESPEC
+ *  LIB$BUILD_NODESPEC
  *
- *	Copyright (C) 2004 Andrew Allison
+ *  Copyright (C) 2004 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,28 +20,28 @@
  *
  *The author(s) may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  *
  *
  * Description:
- *	The build a node-name specification routine builds a node-name
- *	specification from the primary node name. The output node-name
- *	specification can be used fotr other node-name parsing operations
+ *  The build a node-name specification routine builds a node-name
+ *  specification from the primary node name. The output node-name
+ *  specification can be used fotr other node-name parsing operations
  *
  * Bugs:
  *
  *
  * History
  *
- *	Mar 20, 2004 - Andrew Allison
- * 	 	Initial program creation
+ *  Mar 20, 2004 - Andrew Allison
+ *      Initial program creation
  */
 
 #include "ssdef.h"
@@ -51,17 +51,17 @@
 #include "lib$routines.h"
 #include "str$routines.h"
 
-unsigned long lib$build_nodespec(const 	struct	dsc$descriptor_s *primary,
-                                 struct	dsc$descriptor_s *nodespec,
-                                 const 	struct	dsc$descriptor_s *acs,
-                                 const 	struct	dsc$descriptor_s *secondary,
-                                 unsigned short	*nodespec_length )
+unsigned long lib$build_nodespec(const  struct  dsc$descriptor_s *primary,
+                                 struct dsc$descriptor_s *nodespec,
+                                 const  struct  dsc$descriptor_s *acs,
+                                 const  struct  dsc$descriptor_s *secondary,
+                                 unsigned short *nodespec_length )
 {
-    unsigned long	result_code, max_length;
-    unsigned short	primary_length;
-    signed long	quote_pos, start_pos;
-    char		*primary_ptr;
-    struct dsc$descriptor_s	 temp, quote, double_quote;
+    unsigned long   result_code, max_length;
+    unsigned short  primary_length;
+    signed long quote_pos, start_pos;
+    char        *primary_ptr;
+    struct dsc$descriptor_s  temp, quote, double_quote;
 
     result_code = SS$_NORMAL;
     max_length  = 1024;
@@ -73,7 +73,7 @@ unsigned long lib$build_nodespec(const 	struct	dsc$descriptor_s *primary,
         return LIB$_INVARG;
 
 //if ( primary_length > 1024 )
-//	return LIB$_NODTOOLNG;
+//  return LIB$_NODTOOLNG;
 
 //create descriptors containing 1 and 2 double quotes
     str$$malloc_sd (&temp,"NULL");
@@ -95,11 +95,11 @@ unsigned long lib$build_nodespec(const 	struct	dsc$descriptor_s *primary,
     if ( quote_pos != 0 )
         str$replace(nodespec,&temp,&quote_pos,&quote_pos,&double_quote);
 
-//	Append access control string to primary node name
+//  Append access control string to primary node name
     if ( (unsigned int) acs != (unsigned int) NULL )
         str$append (nodespec,acs);
 
-//	Append secondary node name
+//  Append secondary node name
     if ( (unsigned int) secondary != (unsigned int) NULL )
         str$append (nodespec,secondary);
 
@@ -111,7 +111,7 @@ unsigned long lib$build_nodespec(const 	struct	dsc$descriptor_s *primary,
         str$left (nodespec, primary,&max_length);
     }
 
-//	Set nodespec length
+//  Set nodespec length
     if ( nodespec_length != NULL )
     {
         str$analyze_sdesc (nodespec, &primary_length, &primary_ptr);

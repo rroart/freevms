@@ -78,7 +78,7 @@ struct desc_ptr
 
 #define __GDT_HEAD_SIZE 96 /* was: 64 */
 #define __CPU_DESC_INDEX(x,field) \
-	((x) * sizeof(struct per_cpu_gdt) + offsetof(struct per_cpu_gdt, field) + __GDT_HEAD_SIZE)
+    ((x) * sizeof(struct per_cpu_gdt) + offsetof(struct per_cpu_gdt, field) + __GDT_HEAD_SIZE)
 
 #define load_TR(cpu) asm volatile("ltr %w0"::"r" (__CPU_DESC_INDEX(cpu, tss)));
 #define __load_LDT(cpu) asm volatile("lldt %w0"::"r" (__CPU_DESC_INDEX(cpu, ldt)));

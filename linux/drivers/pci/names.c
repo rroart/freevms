@@ -1,8 +1,8 @@
 /*
- *	PCI Class and Device Name Tables
+ *  PCI Class and Device Name Tables
  *
- *	Copyright 1993--1999 Drew Eckhardt, Frederic Potter,
- *	David Mosberger-Tang, Martin Mares
+ *  Copyright 1993--1999 Drew Eckhardt, Frederic Potter,
+ *  David Mosberger-Tang, Martin Mares
  */
 
 #include <linux/config.h>
@@ -34,20 +34,20 @@ struct pci_vendor_info
  * real memory.. Parse the same file multiple times
  * to get all the info.
  */
-#define VENDOR( vendor, name )		static char __vendorstr_##vendor[] __initdata = name;
+#define VENDOR( vendor, name )      static char __vendorstr_##vendor[] __initdata = name;
 #define ENDVENDOR()
-#define DEVICE( vendor, device, name ) 	static char __devicestr_##vendor##device[] __initdata = name;
+#define DEVICE( vendor, device, name )  static char __devicestr_##vendor##device[] __initdata = name;
 #include "devlist.h"
 
 
-#define VENDOR( vendor, name )		static struct pci_device_info __devices_##vendor[] __initdata = {
-#define ENDVENDOR()			};
-#define DEVICE( vendor, device, name )	{ 0x##device, 0, __devicestr_##vendor##device },
+#define VENDOR( vendor, name )      static struct pci_device_info __devices_##vendor[] __initdata = {
+#define ENDVENDOR()         };
+#define DEVICE( vendor, device, name )  { 0x##device, 0, __devicestr_##vendor##device },
 #include "devlist.h"
 
 static struct pci_vendor_info __initdata pci_vendor_list[] =
 {
-#define VENDOR( vendor, name )		{ 0x##vendor, sizeof(__devices_##vendor) / sizeof(struct pci_device_info), __vendorstr_##vendor, __devices_##vendor },
+#define VENDOR( vendor, name )      { 0x##vendor, sizeof(__devices_##vendor) / sizeof(struct pci_device_info), __vendorstr_##vendor, __devices_##vendor },
 #define ENDVENDOR()
 #define DEVICE( vendor, device, name )
 #include "devlist.h"

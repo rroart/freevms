@@ -1,5 +1,5 @@
-#ifndef mtldef_h
-#define mtldef_h
+#ifndef MTLDEF_H
+#define MTLDEF_H
 
 #define MTL$K_LENGTH 32
 #define MTL$C_LENGTH 32

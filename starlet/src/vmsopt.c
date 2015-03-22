@@ -15,15 +15,15 @@
  * Parse VMS Options.
  *
  * !WARNING! This mangles argc and argv's option arguments (beginning with /),
- *	     but others are safe.
+ *       but others are safe.
  *
  */
 int vmsopt_parse( int argc, char **argv )
 {
     extern
-    char 	*vms_optstr,
+    char    *vms_optstr,
             *vms_optarg;
-    char	*ptr;
+    char    *ptr;
     int i;
 
 
@@ -37,7 +37,7 @@ int vmsopt_parse( int argc, char **argv )
         {
             vms_optstr = (char*) malloc ( strlen(argv[i]) + 1);
             strcpy( vms_optstr, argv[i] );
-//			vms_optstr++;
+//          vms_optstr++;
             argv[i][0]=0;
             vms_optarg = NULL;
             return(VMSOPT_ARG_PL);

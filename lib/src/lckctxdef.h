@@ -1,5 +1,5 @@
-#ifndef lckctxdef_h
-#define lckctxdef_h
+#ifndef LCKCTXDEF_H
+#define LCKCTXDEF_H
 
 #define LCKCTX$M_BUSY 0x1
 #define LCKCTX$M_CANCEL 0x2

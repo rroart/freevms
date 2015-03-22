@@ -23,15 +23,15 @@ extern int errno;
 
 #define ASMFMT_0()
 #define ASMFMT_1(arg1) \
-	        , "acdSD" (arg1)
+            , "acdSD" (arg1)
 #define ASMFMT_2(arg1, arg2) \
-	        , "adCD" (arg1), "c" (arg2)
+            , "adCD" (arg1), "c" (arg2)
 #define ASMFMT_3(arg1, arg2, arg3) \
-	        , "aCD" (arg1), "c" (arg2), "d" (arg3)
+            , "aCD" (arg1), "c" (arg2), "d" (arg3)
 #define ASMFMT_4(arg1, arg2, arg3, arg4) \
-	        , "aD" (arg1), "c" (arg2), "d" (arg3), "S" (arg4)
+            , "aD" (arg1), "c" (arg2), "d" (arg3), "S" (arg4)
 #define ASMFMT_5(arg1, arg2, arg3, arg4, arg5) \
-	        , "a" (arg1), "c" (arg2), "d" (arg3), "S" (arg4), "D" (arg5)
+            , "a" (arg1), "c" (arg2), "d" (arg3), "S" (arg4), "D" (arg5)
 
 
 #define INLINE_SYSCALL(name, nr, args...) \

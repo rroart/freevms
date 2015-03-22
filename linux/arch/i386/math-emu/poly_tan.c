@@ -18,7 +18,7 @@
 #include "poly.h"
 
 
-#define	HiPOWERop	3	/* odd poly, positive terms */
+#define HiPOWERop   3   /* odd poly, positive terms */
 static const unsigned long long oddplterm[HiPOWERop] =
 {
     0x0000000000000000LL,
@@ -26,21 +26,21 @@ static const unsigned long long oddplterm[HiPOWERop] =
     0x0000000071284ff7LL
 };
 
-#define	HiPOWERon	2	/* odd poly, negative terms */
+#define HiPOWERon   2   /* odd poly, negative terms */
 static const unsigned long long oddnegterm[HiPOWERon] =
 {
     0x1291a9a184244e80LL,
     0x0000583245819c21LL
 };
 
-#define	HiPOWERep	2	/* even poly, positive terms */
+#define HiPOWERep   2   /* even poly, positive terms */
 static const unsigned long long evenplterm[HiPOWERep] =
 {
     0x0e848884b539e888LL,
     0x00003c7f18b887daLL
 };
 
-#define	HiPOWERen	2	/* even poly, negative terms */
+#define HiPOWERen   2   /* even poly, negative terms */
 static const unsigned long long evennegterm[HiPOWERen] =
 {
     0xf1f0200fd51569ccLL,
@@ -53,9 +53,9 @@ static const unsigned long long twothirds = 0xaaaaaaaaaaaaaaabLL;
 /*--- poly_tan() ------------------------------------------------------------+
  |                                                                           |
  +---------------------------------------------------------------------------*/
-void	poly_tan(FPU_REG *st0_ptr)
+void    poly_tan(FPU_REG *st0_ptr)
 {
-    long int    		exponent;
+    long int            exponent;
     int                   invert;
     Xsig                  argSq, argSqSq, accumulatoro, accumulatore, accum,
                           argSignif, fix_up;
@@ -64,7 +64,7 @@ void	poly_tan(FPU_REG *st0_ptr)
     exponent = exponent(st0_ptr);
 
 #ifdef PARANOID
-    if ( signnegative(st0_ptr) )	/* Can't hack a number < 0.0 */
+    if ( signnegative(st0_ptr) )    /* Can't hack a number < 0.0 */
     {
         arith_invalid(0);    /* Need a positive number */
         return;
@@ -110,7 +110,7 @@ void	poly_tan(FPU_REG *st0_ptr)
         {
             /* shift the argument right by the required places */
             if ( FPU_shrx(&XSIG_LL(accum), -1-exponent) >= 0x80000000U )
-                XSIG_LL(accum) ++;	/* round up */
+                XSIG_LL(accum) ++;  /* round up */
         }
     }
 
@@ -186,7 +186,7 @@ void	poly_tan(FPU_REG *st0_ptr)
 
         if ( exponent == 0 )
             adj = 0xffffffff;   /* We want approx 1.0 here, but
-			       this is close enough. */
+                   this is close enough. */
         else if ( exponent > -30 )
         {
             adj = accum.msw >> -(exponent+1);      /* tan */

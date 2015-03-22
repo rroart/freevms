@@ -131,7 +131,7 @@ int main(int argc, char ** argv)
         die("Write call failed");
     close (fd);
 
-    file_open(argv[2]);				    /* Copy the setup code */
+    file_open(argv[2]);                 /* Copy the setup code */
     for (i=0 ; (c=read(fd, buf, sizeof(buf)))>0 ; i+=c )
         if (write(1, buf, c) != c)
             die("Write call failed");
@@ -139,7 +139,7 @@ int main(int argc, char ** argv)
         die("read-error on `setup'");
     close (fd);
 
-    setup_sectors = (i + 511) / 512;	/* Pad unused space with zeros */
+    setup_sectors = (i + 511) / 512;    /* Pad unused space with zeros */
     /* for compatibility with ancient versions of LILO. */
     if (setup_sectors < SETUP_SECTS)
         setup_sectors = SETUP_SECTS;
@@ -186,7 +186,7 @@ int main(int argc, char ** argv)
     }
     close(fd);
 
-    if (lseek(1, 497, SEEK_SET) != 497)		    /* Write sizes to the bootsector */
+    if (lseek(1, 497, SEEK_SET) != 497)         /* Write sizes to the bootsector */
         die("Output: seek failed");
     buf[0] = setup_sectors;
     if (write(1, buf, 1) != 1)
@@ -198,5 +198,5 @@ int main(int argc, char ** argv)
     if (write(1, buf, 2) != 2)
         die("Write of image length failed");
 
-    return 0;					    /* Everything is OK */
+    return 0;                       /* Everything is OK */
 }

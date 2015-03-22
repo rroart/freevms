@@ -1,5 +1,5 @@
-#ifndef kfpbdef_h
-#define kfpbdef_h
+#ifndef KFPBDEF_H
+#define KFPBDEF_H
 
 #define KFPB$K_LENGTH 16
 #define KFPB$C_LENGTH 16

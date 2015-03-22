@@ -13,29 +13,29 @@
 #include <linux/nfs.h>
 #include <linux/sunrpc/xdr.h>
 
-#define NLM_MAXSTRLEN		1024
+#define NLM_MAXSTRLEN       1024
 
-#define QUADLEN(len)		(((len) + 3) >> 2)
+#define QUADLEN(len)        (((len) + 3) >> 2)
 
-#define	nlm_granted		__constant_htonl(NLM_LCK_GRANTED)
-#define	nlm_lck_denied		__constant_htonl(NLM_LCK_DENIED)
-#define	nlm_lck_denied_nolocks	__constant_htonl(NLM_LCK_DENIED_NOLOCKS)
-#define	nlm_lck_blocked		__constant_htonl(NLM_LCK_BLOCKED)
-#define	nlm_lck_denied_grace_period	__constant_htonl(NLM_LCK_DENIED_GRACE_PERIOD)
+#define nlm_granted     __constant_htonl(NLM_LCK_GRANTED)
+#define nlm_lck_denied      __constant_htonl(NLM_LCK_DENIED)
+#define nlm_lck_denied_nolocks  __constant_htonl(NLM_LCK_DENIED_NOLOCKS)
+#define nlm_lck_blocked     __constant_htonl(NLM_LCK_BLOCKED)
+#define nlm_lck_denied_grace_period __constant_htonl(NLM_LCK_DENIED_GRACE_PERIOD)
 
 /* Lock info passed via NLM */
 struct nlm_lock
 {
-    char *			caller;
-    int			len; 	/* length of "caller" */
-    struct nfs_fh		fh;
-    struct xdr_netobj	oh;
-    struct file_lock	fl;
+    char *          caller;
+    int         len;    /* length of "caller" */
+    struct nfs_fh       fh;
+    struct xdr_netobj   oh;
+    struct file_lock    fl;
 };
 
 /*
- *	NLM cookies. Technically they can be 1K, Nobody uses over 8 bytes
- *	however.
+ *  NLM cookies. Technically they can be 1K, Nobody uses over 8 bytes
+ *  however.
  */
 
 struct nlm_cookie
@@ -49,14 +49,14 @@ struct nlm_cookie
  */
 struct nlm_args
 {
-    struct nlm_cookie	cookie;
-    struct nlm_lock		lock;
-    u32			block;
-    u32			reclaim;
-    u32			state;
-    u32			monitor;
-    u32			fsm_access;
-    u32			fsm_mode;
+    struct nlm_cookie   cookie;
+    struct nlm_lock     lock;
+    u32         block;
+    u32         reclaim;
+    u32         state;
+    u32         monitor;
+    u32         fsm_access;
+    u32         fsm_mode;
 };
 
 typedef struct nlm_args nlm_args;
@@ -66,9 +66,9 @@ typedef struct nlm_args nlm_args;
  */
 struct nlm_res
 {
-    struct nlm_cookie	cookie;
-    u32			status;
-    struct nlm_lock		lock;
+    struct nlm_cookie   cookie;
+    u32         status;
+    struct nlm_lock     lock;
 };
 
 /*
@@ -76,35 +76,35 @@ struct nlm_res
  */
 struct nlm_reboot
 {
-    char *		mon;
-    int		len;
-    u32		state;
-    u32		addr;
+    char *      mon;
+    int     len;
+    u32     state;
+    u32     addr;
 };
 
 /*
  * Contents of statd callback when monitored host rebooted
  */
-#define NLMSVC_XDRSIZE		sizeof(struct nlm_args)
+#define NLMSVC_XDRSIZE      sizeof(struct nlm_args)
 
-int	nlmsvc_decode_testargs(struct svc_rqst *, u32 *, struct nlm_args *);
-int	nlmsvc_encode_testres(struct svc_rqst *, u32 *, struct nlm_res *);
-int	nlmsvc_decode_lockargs(struct svc_rqst *, u32 *, struct nlm_args *);
-int	nlmsvc_decode_cancargs(struct svc_rqst *, u32 *, struct nlm_args *);
-int	nlmsvc_decode_unlockargs(struct svc_rqst *, u32 *, struct nlm_args *);
-int	nlmsvc_encode_res(struct svc_rqst *, u32 *, struct nlm_res *);
-int	nlmsvc_decode_res(struct svc_rqst *, u32 *, struct nlm_res *);
-int	nlmsvc_encode_void(struct svc_rqst *, u32 *, void *);
-int	nlmsvc_decode_void(struct svc_rqst *, u32 *, void *);
-int	nlmsvc_decode_shareargs(struct svc_rqst *, u32 *, struct nlm_args *);
-int	nlmsvc_encode_shareres(struct svc_rqst *, u32 *, struct nlm_res *);
-int	nlmsvc_decode_notify(struct svc_rqst *, u32 *, struct nlm_args *);
-int	nlmsvc_decode_reboot(struct svc_rqst *, u32 *, struct nlm_reboot *);
+int nlmsvc_decode_testargs(struct svc_rqst *, u32 *, struct nlm_args *);
+int nlmsvc_encode_testres(struct svc_rqst *, u32 *, struct nlm_res *);
+int nlmsvc_decode_lockargs(struct svc_rqst *, u32 *, struct nlm_args *);
+int nlmsvc_decode_cancargs(struct svc_rqst *, u32 *, struct nlm_args *);
+int nlmsvc_decode_unlockargs(struct svc_rqst *, u32 *, struct nlm_args *);
+int nlmsvc_encode_res(struct svc_rqst *, u32 *, struct nlm_res *);
+int nlmsvc_decode_res(struct svc_rqst *, u32 *, struct nlm_res *);
+int nlmsvc_encode_void(struct svc_rqst *, u32 *, void *);
+int nlmsvc_decode_void(struct svc_rqst *, u32 *, void *);
+int nlmsvc_decode_shareargs(struct svc_rqst *, u32 *, struct nlm_args *);
+int nlmsvc_encode_shareres(struct svc_rqst *, u32 *, struct nlm_res *);
+int nlmsvc_decode_notify(struct svc_rqst *, u32 *, struct nlm_args *);
+int nlmsvc_decode_reboot(struct svc_rqst *, u32 *, struct nlm_reboot *);
 /*
-int	nlmclt_encode_testargs(struct rpc_rqst *, u32 *, struct nlm_args *);
-int	nlmclt_encode_lockargs(struct rpc_rqst *, u32 *, struct nlm_args *);
-int	nlmclt_encode_cancargs(struct rpc_rqst *, u32 *, struct nlm_args *);
-int	nlmclt_encode_unlockargs(struct rpc_rqst *, u32 *, struct nlm_args *);
+int nlmclt_encode_testargs(struct rpc_rqst *, u32 *, struct nlm_args *);
+int nlmclt_encode_lockargs(struct rpc_rqst *, u32 *, struct nlm_args *);
+int nlmclt_encode_cancargs(struct rpc_rqst *, u32 *, struct nlm_args *);
+int nlmclt_encode_unlockargs(struct rpc_rqst *, u32 *, struct nlm_args *);
  */
 
 #endif /* LOCKD_XDR_H */

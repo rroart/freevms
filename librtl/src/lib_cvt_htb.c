@@ -1,20 +1,20 @@
 /*
  * lib_cvt_htb.c
  *
- *	Code for VAX LIB$CVT_HTB routine
+ *  Code for VAX LIB$CVT_HTB routine
  *
  * Description:
  *
- *	Converts an ascii hexidecimal string representation to
- *	binary.
+ *  Converts an ascii hexidecimal string representation to
+ *  binary.
  *
  * Bugs:
  *
  *
  * History
  *
- *	March 30, 1996 - Kevin Handy
- *		Preliminary design.
+ *  March 30, 1996 - Kevin Handy
+ *      Preliminary design.
  *
  */
 
@@ -25,10 +25,10 @@
 /*************************************************************
  * xtoi
  *
- *	Convert one hex digit to a number
+ *  Convert one hex digit to a number
  *
  * Bugs:
- *	Assumes that it is actually givin a hex digit.
+ *  Assumes that it is actually givin a hex digit.
  */
 static int xtoi(char ch)
 {
@@ -61,9 +61,9 @@ static int xtoi(char ch)
 unsigned long lib$cvt_htb(int byte_count, const char* source_string,
                           long* result)
 {
-    int Loop;			/* Loop for characters */
-    long answer = 0;		/* Result returned back */
-    unsigned long status = 1;	/* Exit status */
+    int Loop;           /* Loop for characters */
+    long answer = 0;        /* Result returned back */
+    unsigned long status = 1;   /* Exit status */
 
     /*
      * Loop through all the characters passed

@@ -1,12 +1,12 @@
 /*
- *	$Id$
+ *  $Id$
  *
- *	PCI Bus Services, see include/linux/pci.h for further explanation.
+ *  PCI Bus Services, see include/linux/pci.h for further explanation.
  *
- *	Copyright 1993 -- 1997 Drew Eckhardt, Frederic Potter,
- *	David Mosberger-Tang
+ *  Copyright 1993 -- 1997 Drew Eckhardt, Frederic Potter,
+ *  David Mosberger-Tang
  *
- *	Copyright 1997 -- 2000 Martin Mares <mj@ucw.cz>
+ *  Copyright 1997 -- 2000 Martin Mares <mj@ucw.cz>
  */
 
 #include <linux/config.h>
@@ -20,12 +20,12 @@
 #include <linux/ioport.h>
 #include <linux/spinlock.h>
 #include <linux/pm.h>
-#include <linux/kmod.h>		/* for hotplug_path */
+#include <linux/kmod.h>     /* for hotplug_path */
 #include <linux/bitops.h>
 #include <linux/delay.h>
 
 #include <asm/page.h>
-#include <asm/dma.h>	/* isa_dma_bridge_buggy */
+#include <asm/dma.h>    /* isa_dma_bridge_buggy */
 
 #undef DEBUG
 
@@ -224,13 +224,13 @@ pci_find_parent_resource(const struct pci_dev *dev, struct resource *res)
         if (!r)
             continue;
         if (res->start && !(res->start >= r->start && res->end <= r->end))
-            continue;	/* Not contained */
+            continue;   /* Not contained */
         if ((res->flags ^ r->flags) & (IORESOURCE_IO | IORESOURCE_MEM))
-            continue;	/* Wrong type */
+            continue;   /* Wrong type */
         if (!((res->flags ^ r->flags) & IORESOURCE_PREFETCH))
-            return r;	/* Exact match */
+            return r;   /* Exact match */
         if ((res->flags & IORESOURCE_PREFETCH) && !(r->flags & IORESOURCE_PREFETCH))
-            best = r;	/* Approximating prefetchable by non-prefetchable */
+            best = r;   /* Approximating prefetchable by non-prefetchable */
     }
     return best;
 }
@@ -475,12 +475,12 @@ pci_get_interrupt_pin(struct pci_dev *dev, struct pci_dev **bridge)
 }
 
 /**
- *	pci_release_regions - Release reserved PCI I/O and memory resources
- *	@pdev: PCI device whose resources were previously reserved by pci_request_regions
+ *  pci_release_regions - Release reserved PCI I/O and memory resources
+ *  @pdev: PCI device whose resources were previously reserved by pci_request_regions
  *
- *	Releases all PCI I/O and memory resources previously reserved by a
- *	successful call to pci_request_regions.  Call this function only
- *	after all use of the PCI regions has ceased.
+ *  Releases all PCI I/O and memory resources previously reserved by a
+ *  successful call to pci_request_regions.  Call this function only
+ *  after all use of the PCI regions has ceased.
  */
 void pci_release_regions(struct pci_dev *pdev)
 {
@@ -502,17 +502,17 @@ void pci_release_regions(struct pci_dev *pdev)
 }
 
 /**
- *	pci_request_regions - Reserved PCI I/O and memory resources
- *	@pdev: PCI device whose resources are to be reserved
- *	@res_name: Name to be associated with resource.
+ *  pci_request_regions - Reserved PCI I/O and memory resources
+ *  @pdev: PCI device whose resources are to be reserved
+ *  @res_name: Name to be associated with resource.
  *
- *	Mark all PCI regions associated with PCI device @pdev as
- *	being reserved by owner @res_name.  Do not access any
- *	address inside the PCI regions unless this call returns
- *	successfully.
+ *  Mark all PCI regions associated with PCI device @pdev as
+ *  being reserved by owner @res_name.  Do not access any
+ *  address inside the PCI regions unless this call returns
+ *  successfully.
  *
- *	Returns 0 on success, or %EBUSY on error.  A warning
- *	message is also printed on failure.
+ *  Returns 0 on success, or %EBUSY on error.  A warning
+ *  message is also printed on failure.
  */
 int pci_request_regions(struct pci_dev *pdev, char *res_name)
 {
@@ -665,8 +665,8 @@ pci_unregister_driver(struct pci_driver *drv)
 #ifdef CONFIG_HOTPLUG
 
 #ifndef FALSE
-#define FALSE	(0)
-#define TRUE	(!FALSE)
+#define FALSE   (0)
+#define TRUE    (!FALSE)
 #endif
 
 static void
@@ -838,14 +838,14 @@ static spinlock_t pci_lock = SPIN_LOCK_UNLOCKED;
 
 #define PCI_OP(rw,size,type) \
 int pci_##rw##_config_##size (struct pci_dev *dev, int pos, type value) \
-{									\
-	int res;							\
-	unsigned long flags;						\
-	if (PCI_##size##_BAD) return PCIBIOS_BAD_REGISTER_NUMBER;	\
-	spin_lock_irqsave(&pci_lock, flags);				\
-	res = dev->bus->ops->rw##_##size(dev, pos, value);		\
-	spin_unlock_irqrestore(&pci_lock, flags);			\
-	return res;							\
+{                                   \
+    int res;                            \
+    unsigned long flags;                        \
+    if (PCI_##size##_BAD) return PCIBIOS_BAD_REGISTER_NUMBER;   \
+    spin_lock_irqsave(&pci_lock, flags);                \
+    res = dev->bus->ops->rw##_##size(dev, pos, value);      \
+    spin_unlock_irqrestore(&pci_lock, flags);           \
+    return res;                         \
 }
 
 PCI_OP(read, byte, u8 *)
@@ -919,9 +919,9 @@ static inline unsigned int pci_calc_resource_flags(unsigned int flags)
  */
 static u32 pci_size(u32 base, unsigned long mask)
 {
-    u32 size = mask & base;		/* Find the significant bits */
-    size = size & ~(size-1);	/* Get the lowest of them to find the decode size */
-    return size-1;			/* extent = size - 1 */
+    u32 size = mask & base;     /* Find the significant bits */
+    size = size & ~(size-1);    /* Get the lowest of them to find the decode size */
+    return size-1;          /* extent = size - 1 */
 }
 
 static void pci_read_bases(struct pci_dev *dev, unsigned int howmany, int rom)
@@ -1012,7 +1012,7 @@ void __devinit  pci_read_bridge_bases(struct pci_bus *child)
     struct resource *res;
     int i;
 
-    if (!dev)		/* It's a host bus, nothing to read */
+    if (!dev)       /* It's a host bus, nothing to read */
         return;
 
     for(i=0; i<3; i++)
@@ -1276,7 +1276,7 @@ int pci_setup_device(struct pci_dev * dev)
     sprintf(dev->name, "PCI device %04x:%04x", dev->vendor, dev->device);
 
     pci_read_config_dword(dev, PCI_CLASS_REVISION, &class);
-    class >>= 8;				    /* upper 3 bytes */
+    class >>= 8;                    /* upper 3 bytes */
     dev->class = class;
     class >>= 8;
 
@@ -1285,9 +1285,9 @@ int pci_setup_device(struct pci_dev * dev)
     /* "Unknown power state" */
     dev->current_state = 4;
 
-    switch (dev->hdr_type)  		    /* header type */
+    switch (dev->hdr_type)              /* header type */
     {
-    case PCI_HEADER_TYPE_NORMAL:		    /* standard header */
+    case PCI_HEADER_TYPE_NORMAL:            /* standard header */
         if (class == PCI_CLASS_BRIDGE_PCI)
             goto bad;
         pci_read_irq(dev);
@@ -1296,13 +1296,13 @@ int pci_setup_device(struct pci_dev * dev)
         pci_read_config_word(dev, PCI_SUBSYSTEM_ID, &dev->subsystem_device);
         break;
 
-    case PCI_HEADER_TYPE_BRIDGE:		    /* bridge header */
+    case PCI_HEADER_TYPE_BRIDGE:            /* bridge header */
         if (class != PCI_CLASS_BRIDGE_PCI)
             goto bad;
         pci_read_bases(dev, 2, PCI_ROM_ADDRESS1);
         break;
 
-    case PCI_HEADER_TYPE_CARDBUS:		    /* CardBus bridge header */
+    case PCI_HEADER_TYPE_CARDBUS:           /* CardBus bridge header */
         if (class != PCI_CLASS_BRIDGE_CARDBUS)
             goto bad;
         pci_read_irq(dev);
@@ -1311,7 +1311,7 @@ int pci_setup_device(struct pci_dev * dev)
         pci_read_config_word(dev, PCI_CB_SUBSYSTEM_ID, &dev->subsystem_device);
         break;
 
-    default:				    /* unknown header */
+    default:                    /* unknown header */
         printk(KERN_ERR "PCI: device %s has unknown header type %02x, ignoring.\n",
                dev->slot_name, dev->hdr_type);
         return -1;
@@ -1372,7 +1372,7 @@ struct pci_dev * __devinit pci_scan_slot(struct pci_dev *temp)
 
     for (func = 0; func < 8; func++, temp->devfn++)
     {
-        if (func && !is_multi)		/* not a multi-function device */
+        if (func && !is_multi)      /* not a multi-function device */
             continue;
         if (pci_read_config_byte(temp, PCI_HEADER_TYPE, &hdr_type))
             continue;
@@ -1666,29 +1666,29 @@ pci_pm_callback(struct pm_dev *pm_device, pm_request_t rqst, void *data)
  * This should probably be sharing the guts of the slab allocator.
  */
 
-struct pci_pool  	/* the pool */
+struct pci_pool     /* the pool */
 {
-    struct list_head	page_list;
-    spinlock_t		lock;
-    size_t			blocks_per_page;
-    size_t			size;
-    int			flags;
-    struct pci_dev		*dev;
-    size_t			allocation;
-    char			name [32];
-    wait_queue_head_t	waitq;
+    struct list_head    page_list;
+    spinlock_t      lock;
+    size_t          blocks_per_page;
+    size_t          size;
+    int         flags;
+    struct pci_dev      *dev;
+    size_t          allocation;
+    char            name [32];
+    wait_queue_head_t   waitq;
 };
 
-struct pci_page  	/* cacheable header for 'allocation' bytes */
+struct pci_page     /* cacheable header for 'allocation' bytes */
 {
-    struct list_head	page_list;
-    void			*vaddr;
-    dma_addr_t		dma;
-    unsigned long		bitmap [0];
+    struct list_head    page_list;
+    void            *vaddr;
+    dma_addr_t      dma;
+    unsigned long       bitmap [0];
 };
 
-#define	POOL_TIMEOUT_JIFFIES	((100 /* msec */ * HZ) / 1000)
-#define	POOL_POISON_BYTE	0xa7
+#define POOL_TIMEOUT_JIFFIES    ((100 /* msec */ * HZ) / 1000)
+#define POOL_POISON_BYTE    0xa7
 
 // #define CONFIG_PCIPOOL_DEBUG
 
@@ -1718,7 +1718,7 @@ struct pci_pool *
 pci_pool_create (const char *name, struct pci_dev *pdev,
                  size_t size, size_t align, size_t allocation, int flags)
 {
-    struct pci_pool		*retval;
+    struct pci_pool     *retval;
 
     if (align == 0)
         align = 1;
@@ -1746,7 +1746,7 @@ pci_pool_create (const char *name, struct pci_dev *pdev,
     if (!(retval = kmalloc (sizeof *retval, flags)))
         return retval;
 
-#ifdef	CONFIG_PCIPOOL_DEBUG
+#ifdef  CONFIG_PCIPOOL_DEBUG
     flags |= SLAB_POISON;
 #endif
 
@@ -1775,8 +1775,8 @@ pci_pool_create (const char *name, struct pci_dev *pdev,
 static struct pci_page *
 pool_alloc_page (struct pci_pool *pool, int mem_flags)
 {
-    struct pci_page	*page;
-    int		mapsize;
+    struct pci_page *page;
+    int     mapsize;
 
     mapsize = pool->blocks_per_page;
     mapsize = (mapsize + BITS_PER_LONG - 1) / BITS_PER_LONG;
@@ -1790,7 +1790,7 @@ pool_alloc_page (struct pci_pool *pool, int mem_flags)
                                         &page->dma);
     if (page->vaddr)
     {
-        memset (page->bitmap, 0xff, mapsize);	// bit set == free
+        memset (page->bitmap, 0xff, mapsize);   // bit set == free
         if (pool->flags & SLAB_POISON)
             memset (page->vaddr, POOL_POISON_BYTE, pool->allocation);
         list_add (&page->page_list, &pool->page_list);
@@ -1819,7 +1819,7 @@ is_page_busy (int blocks, unsigned long *bitmap)
 static void
 pool_free_page (struct pci_pool *pool, struct pci_page *page)
 {
-    dma_addr_t	dma = page->dma;
+    dma_addr_t  dma = page->dma;
 
     if (pool->flags & SLAB_POISON)
         memset (page->vaddr, POOL_POISON_BYTE, pool->allocation);
@@ -1839,7 +1839,7 @@ pool_free_page (struct pci_pool *pool, struct pci_page *page)
 void
 pci_pool_destroy (struct pci_pool *pool)
 {
-    unsigned long		flags;
+    unsigned long       flags;
 
 #ifdef CONFIG_PCIPOOL_DEBUG
     printk (KERN_DEBUG "pcipool destroy %s/%s\n",
@@ -1850,7 +1850,7 @@ pci_pool_destroy (struct pci_pool *pool)
     spin_lock_irqsave (&pool->lock, flags);
     while (!list_empty (&pool->page_list))
     {
-        struct pci_page		*page;
+        struct pci_page     *page;
         page = list_entry (pool->page_list.next,
                            struct pci_page, page_list);
         if (is_page_busy (pool->blocks_per_page, page->bitmap))
@@ -1883,18 +1883,18 @@ pci_pool_destroy (struct pci_pool *pool)
 void *
 pci_pool_alloc (struct pci_pool *pool, int mem_flags, dma_addr_t *handle)
 {
-    unsigned long		flags;
-    struct list_head	*entry;
-    struct pci_page		*page;
-    int			map, block;
-    size_t			offset;
-    void			*retval;
+    unsigned long       flags;
+    struct list_head    *entry;
+    struct pci_page     *page;
+    int         map, block;
+    size_t          offset;
+    void            *retval;
 
 restart:
     spin_lock_irqsave (&pool->lock, flags);
     list_for_each (entry, &pool->page_list)
     {
-        int		i;
+        int     i;
         page = list_entry (entry, struct pci_page, page_list);
         /* only cachable accesses here ... */
         for (map = 0, i = 0;
@@ -1947,9 +1947,9 @@ done:
 static struct pci_page *
 pool_find_page (struct pci_pool *pool, dma_addr_t dma)
 {
-    unsigned long		flags;
-    struct list_head	*entry;
-    struct pci_page		*page;
+    unsigned long       flags;
+    struct list_head    *entry;
+    struct pci_page     *page;
 
     spin_lock_irqsave (&pool->lock, flags);
     list_for_each (entry, &pool->page_list)
@@ -1979,9 +1979,9 @@ done:
 void
 pci_pool_free (struct pci_pool *pool, void *vaddr, dma_addr_t dma)
 {
-    struct pci_page		*page;
-    unsigned long		flags;
-    int			map, block;
+    struct pci_page     *page;
+    unsigned long       flags;
+    int         map, block;
 
     if ((page = pool_find_page (pool, dma)) == 0)
     {
@@ -1990,7 +1990,7 @@ pci_pool_free (struct pci_pool *pool, void *vaddr, dma_addr_t dma)
                 pool->name, vaddr, (int) (dma & 0xffffffff));
         return;
     }
-#ifdef	CONFIG_PCIPOOL_DEBUG
+#ifdef  CONFIG_PCIPOOL_DEBUG
     if (((dma - page->dma) + (void *)page->vaddr) != vaddr)
     {
         printk (KERN_ERR "pci_pool_free %s/%s, %p (bad vaddr)/%x\n",
@@ -2005,7 +2005,7 @@ pci_pool_free (struct pci_pool *pool, void *vaddr, dma_addr_t dma)
     map = block / BITS_PER_LONG;
     block %= BITS_PER_LONG;
 
-#ifdef	CONFIG_PCIPOOL_DEBUG
+#ifdef  CONFIG_PCIPOOL_DEBUG
     if (page->bitmap [map] & (1UL << block))
     {
         printk (KERN_ERR "pci_pool_free %s/%s, dma %x already free\n",

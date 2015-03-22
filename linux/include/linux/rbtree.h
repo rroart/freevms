@@ -32,67 +32,67 @@
 
 -----------------------------------------------------------------------
 static inline struct page * rb_search_page_cache(struct inode * inode,
-						 unsigned long offset)
+                         unsigned long offset)
 {
-	rb_node_t * n = inode->i_rb_page_cache.rb_node;
-	struct page * page;
+    rb_node_t * n = inode->i_rb_page_cache.rb_node;
+    struct page * page;
 
-	while (n)
-	{
-		page = rb_entry(n, struct page, rb_page_cache);
+    while (n)
+    {
+        page = rb_entry(n, struct page, rb_page_cache);
 
-		if (offset < page->offset)
-			n = n->rb_left;
-		else if (offset > page->offset)
-			n = n->rb_right;
-		else
-			return page;
-	}
-	return NULL;
+        if (offset < page->offset)
+            n = n->rb_left;
+        else if (offset > page->offset)
+            n = n->rb_right;
+        else
+            return page;
+    }
+    return NULL;
 }
 
 static inline struct page * __rb_insert_page_cache(struct inode * inode,
-						   unsigned long offset,
-						   rb_node_t * node)
+                           unsigned long offset,
+                           rb_node_t * node)
 {
-	rb_node_t ** p = &inode->i_rb_page_cache.rb_node;
-	rb_node_t * parent = NULL;
-	struct page * page;
+    rb_node_t ** p = &inode->i_rb_page_cache.rb_node;
+    rb_node_t * parent = NULL;
+    struct page * page;
 
-	while (*p)
-	{
-		parent = *p;
-		page = rb_entry(parent, struct page, rb_page_cache);
+    while (*p)
+    {
+        parent = *p;
+        page = rb_entry(parent, struct page, rb_page_cache);
 
-		if (offset < page->offset)
-			p = &(*p)->rb_left;
-		else if (offset > page->offset)
-			p = &(*p)->rb_right;
-		else
-			return page;
-	}
+        if (offset < page->offset)
+            p = &(*p)->rb_left;
+        else if (offset > page->offset)
+            p = &(*p)->rb_right;
+        else
+            return page;
+    }
 
-	rb_link_node(node, parent, p);
+    rb_link_node(node, parent, p);
 
-	return NULL;
+    return NULL;
 }
 
 static inline struct page * rb_insert_page_cache(struct inode * inode,
-						 unsigned long offset,
-						 rb_node_t * node)
+                         unsigned long offset,
+                         rb_node_t * node)
 {
-	struct page * ret;
-	if ((ret = __rb_insert_page_cache(inode, offset, node)))
-		goto out;
-	rb_insert_color(node, &inode->i_rb_page_cache);
+    struct page * ret;
+    if ((ret = __rb_insert_page_cache(inode, offset, node)))
+        goto out;
+    rb_insert_color(node, &inode->i_rb_page_cache);
  out:
-	return ret;
+    return ret;
 }
 -----------------------------------------------------------------------
 */
 
-#ifndef	_LINUX_RBTREE_H
-#define	_LINUX_RBTREE_H
+#ifndef _LINUX_RBTREE_H
+#define _LINUX_RBTREE_H
 
 #include <linux/kernel.h>
 #include <linux/stddef.h>
@@ -101,8 +101,8 @@ typedef struct rb_node_s
 {
     struct rb_node_s * rb_parent;
     int rb_color;
-#define	RB_RED		0
-#define	RB_BLACK	1
+#define RB_RED      0
+#define RB_BLACK    1
     struct rb_node_s * rb_right;
     struct rb_node_s * rb_left;
 }
@@ -114,9 +114,9 @@ typedef struct rb_root_s
 }
 rb_root_t;
 
-#define RB_ROOT	(rb_root_t) { NULL, }
-#define	rb_entry(ptr, type, member)					\
-	((type *)((char *)(ptr)-(unsigned long)(&((type *)0)->member)))
+#define RB_ROOT (rb_root_t) { NULL, }
+#define rb_entry(ptr, type, member)                 \
+    ((type *)((char *)(ptr)-(unsigned long)(&((type *)0)->member)))
 
 extern void rb_insert_color(rb_node_t *, rb_root_t *);
 extern void rb_erase(rb_node_t *, rb_root_t *);
@@ -130,4 +130,4 @@ static inline void rb_link_node(rb_node_t * node, rb_node_t * parent, rb_node_t 
     *rb_link = node;
 }
 
-#endif	/* _LINUX_RBTREE_H */
+#endif  /* _LINUX_RBTREE_H */

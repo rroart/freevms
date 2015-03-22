@@ -73,13 +73,13 @@
 #include <linux/if_vlan.h>
 #endif
 
-#define BAR_0		0
-#define BAR_1		1
-#define BAR_5		5
+#define BAR_0       0
+#define BAR_1       1
+#define BAR_5       5
 
 #include "kcompat.h"
 #define INTEL_E1000_ETHERNET_DEVICE(device_id) {\
-	PCI_DEVICE(PCI_VENDOR_ID_INTEL, device_id)}
+    PCI_DEVICE(PCI_VENDOR_ID_INTEL, device_id)}
 
 struct e1000_adapter;
 
@@ -91,9 +91,9 @@ struct e1000_adapter;
 
 #define PFX "e1000: "
 #define DPRINTK(nlevel, klevel, fmt, args...) \
-	(void)((NETIF_MSG_##nlevel & adapter->msg_enable) && \
-	printk(KERN_##klevel PFX "%s: %s: " fmt, adapter->netdev->name, \
-		__FUNCTION__ , ## args))
+    (void)((NETIF_MSG_##nlevel & adapter->msg_enable) && \
+    printk(KERN_##klevel PFX "%s: %s: " fmt, adapter->netdev->name, \
+        __FUNCTION__ , ## args))
 
 #define E1000_MAX_INTR 10
 
@@ -137,9 +137,9 @@ struct e1000_adapter;
 #define E1000_FC_PAUSE_TIME 0x0680 /* 858 usec */
 
 /* How many Tx Descriptors do we need to call netif_wake_queue ? */
-#define E1000_TX_QUEUE_WAKE	16
+#define E1000_TX_QUEUE_WAKE 16
 /* How many Rx Buffers do we bundle into one write to the hardware ? */
-#define E1000_RX_BUFFER_WRITE	16	/* Must be power of 2 */
+#define E1000_RX_BUFFER_WRITE   16  /* Must be power of 2 */
 
 #define AUTO_ALL_MODES            0
 #define E1000_EEPROM_82544_APM    0x0004
@@ -148,7 +148,7 @@ struct e1000_adapter;
 
 #ifndef E1000_MASTER_SLAVE
 /* Switch to override PHY master/slave setting */
-#define E1000_MASTER_SLAVE	e1000_ms_hw_default
+#define E1000_MASTER_SLAVE  e1000_ms_hw_default
 #endif
 
 #ifdef NETIF_F_HW_VLAN_TX
@@ -232,17 +232,17 @@ struct e1000_rx_ring
 };
 
 #define E1000_DESC_UNUSED(R) \
-	((((R)->next_to_clean > (R)->next_to_use) ? 0 : (R)->count) + \
-	(R)->next_to_clean - (R)->next_to_use - 1)
+    ((((R)->next_to_clean > (R)->next_to_use) ? 0 : (R)->count) + \
+    (R)->next_to_clean - (R)->next_to_use - 1)
 
-#define E1000_RX_DESC_PS(R, i)	    \
-	(&(((union e1000_rx_desc_packet_split *)((R).desc))[i]))
-#define E1000_RX_DESC_EXT(R, i)	    \
-	(&(((union e1000_rx_desc_extended *)((R).desc))[i]))
-#define E1000_GET_DESC(R, i, type)	(&(((struct type *)((R).desc))[i]))
-#define E1000_RX_DESC(R, i)		E1000_GET_DESC(R, i, e1000_rx_desc)
-#define E1000_TX_DESC(R, i)		E1000_GET_DESC(R, i, e1000_tx_desc)
-#define E1000_CONTEXT_DESC(R, i)	E1000_GET_DESC(R, i, e1000_context_desc)
+#define E1000_RX_DESC_PS(R, i)      \
+    (&(((union e1000_rx_desc_packet_split *)((R).desc))[i]))
+#define E1000_RX_DESC_EXT(R, i)     \
+    (&(((union e1000_rx_desc_extended *)((R).desc))[i]))
+#define E1000_GET_DESC(R, i, type)  (&(((struct type *)((R).desc))[i]))
+#define E1000_RX_DESC(R, i)     E1000_GET_DESC(R, i, e1000_rx_desc)
+#define E1000_TX_DESC(R, i)     E1000_GET_DESC(R, i, e1000_tx_desc)
+#define E1000_CONTEXT_DESC(R, i)    E1000_GET_DESC(R, i, e1000_context_desc)
 
 /* board specific private data structure */
 
@@ -370,7 +370,7 @@ struct e1000_adapter
     uint32_t *config_space;
     int msg_enable;
     /* to not mess up cache alignment, always add to the bottom */
-    boolean_t smart_power_down;	/* phy smart power down */
+    boolean_t smart_power_down; /* phy smart power down */
     boolean_t quad_port_a;
     unsigned long flags;
     uint32_t eeprom_wol;

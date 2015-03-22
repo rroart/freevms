@@ -7,7 +7,7 @@
 /*
  * Herein lies all the functions/variables that are "exported" for linkage
  * with dynamically loaded kernel modules.
- *			Jon.
+ *          Jon.
  *
  * - Stacked module support and unified symbol table added (June 1994)
  * - External symbol table support added (December 1994)
@@ -212,7 +212,7 @@ EXPORT_SYMBOL(add_timer);
 EXPORT_SYMBOL(del_timer);
 EXPORT_SYMBOL(request_irq);
 EXPORT_SYMBOL(free_irq);
-#if !defined(CONFIG_IA64)	/* irq_stat is part of struct cpuinfo_ia64 */
+#if !defined(CONFIG_IA64)   /* irq_stat is part of struct cpuinfo_ia64 */
 EXPORT_SYMBOL(irq_stat);
 #endif
 
@@ -320,8 +320,8 @@ EXPORT_SYMBOL(vsscanf);
 EXPORT_SYMBOL(simple_strtol);
 EXPORT_SYMBOL(simple_strtoul);
 EXPORT_SYMBOL(simple_strtoull);
-EXPORT_SYMBOL(system_utsname);	/* UTS data */
-EXPORT_SYMBOL(uts_sem);		/* UTS semaphore */
+EXPORT_SYMBOL(system_utsname);  /* UTS data */
+EXPORT_SYMBOL(uts_sem);     /* UTS semaphore */
 #ifndef __mips__
 EXPORT_SYMBOL(sys_call_table);
 #endif
@@ -369,7 +369,7 @@ EXPORT_SYMBOL(fs_overflowgid);
 EXPORT_SYMBOL(fasync_helper);
 EXPORT_SYMBOL(kill_fasync);
 
-EXPORT_SYMBOL(disk_name);	/* for md.c */
+EXPORT_SYMBOL(disk_name);   /* for md.c */
 
 /* binfmt_aout */
 EXPORT_SYMBOL(get_write_access);

@@ -29,11 +29,11 @@
 #include <asm/proto.h>
 #include "pci-x86_64.h"
 
-unsigned long iommu_bus_base;	/* GART remapping area (physical) */
-static unsigned long iommu_size; 	/* size of remapping area bytes */
-static unsigned long iommu_pages;	/* .. and in pages */
+unsigned long iommu_bus_base;   /* GART remapping area (physical) */
+static unsigned long iommu_size;    /* size of remapping area bytes */
+static unsigned long iommu_pages;   /* .. and in pages */
 
-u32 *iommu_gatt_base; 		/* Remapping table */
+u32 *iommu_gatt_base;       /* Remapping table */
 
 int no_iommu;
 static int no_agp;
@@ -61,10 +61,10 @@ static unsigned long *iommu_gart_bitmap; /* guarded by iommu_bitmap_lock */
 #define GPTE_DECODE(x) (((x) & 0xfffff000) | (((u64)(x) & 0xff0) << 28))
 
 #define for_all_nb(dev) \
-	pci_for_each_dev(dev) \
-		if (dev->vendor == PCI_VENDOR_ID_AMD && dev->device==0x1103 &&\
-		    dev->bus->number == 0 && PCI_FUNC(dev->devfn) == 3 && \
-		    (PCI_SLOT(dev->devfn) >= 24) && (PCI_SLOT(dev->devfn) <= 31))
+    pci_for_each_dev(dev) \
+        if (dev->vendor == PCI_VENDOR_ID_AMD && dev->device==0x1103 &&\
+            dev->bus->number == 0 && PCI_FUNC(dev->devfn) == 3 && \
+            (PCI_SLOT(dev->devfn) >= 24) && (PCI_SLOT(dev->devfn) <= 31))
 
 #define EMERGENCY_PAGES 32 /* = 128KB */
 
@@ -83,7 +83,7 @@ static unsigned long next_bit;  /* protected by iommu_bitmap_lock */
 
 static struct pci_dev *northbridges[NR_CPUS + 1];
 static u32 northbridge_flush_word[NR_CPUS + 1];
-static int need_flush; 	/* global flush state. set for each gart wrap */
+static int need_flush;  /* global flush state. set for each gart wrap */
 static unsigned long alloc_iommu(int size)
 {
     unsigned long offset, flags;
@@ -313,7 +313,7 @@ static void iommu_full(struct pci_dev *dev, void *addr, size_t size, int dir)
      * Unfortunately the drivers cannot handle this operation properly.
      * Return some non mapped prereserved space in the aperture and
      * let the Northbridge deal with it. This will result in garbage
-     * in the IO operation. When the size exceeds the prereserved spa	 * memory corruption will occur or random memory will be DMAed
+     * in the IO operation. When the size exceeds the prereserved spa    * memory corruption will occur or random memory will be DMAed
      * out. Hopefully no network devices use single mappings that big.
      */
 

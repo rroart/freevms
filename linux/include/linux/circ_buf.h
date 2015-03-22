@@ -20,14 +20,14 @@ struct circ_buf
    accessing head and tail more than once, so they can change
    underneath us without returning inconsistent results.  */
 #define CIRC_CNT_TO_END(head,tail,size) \
-	({int end = (size) - (tail); \
-	  int n = ((head) + end) & ((size)-1); \
-	  n < end ? n : end;})
+    ({int end = (size) - (tail); \
+      int n = ((head) + end) & ((size)-1); \
+      n < end ? n : end;})
 
 /* Return space available up to the end of the buffer.  */
 #define CIRC_SPACE_TO_END(head,tail,size) \
-	({int end = (size) - 1 - (head); \
-	  int n = (end + (tail)) & ((size)-1); \
-	  n <= end ? n : end+1;})
+    ({int end = (size) - 1 - (head); \
+      int n = (end + (tail)) & ((size)-1); \
+      n <= end ? n : end+1;})
 
 #endif /* _LINUX_CIRC_BUF_H  */

@@ -1,5 +1,5 @@
-#ifndef lksbdef_h
-#define lksbdef_h
+#ifndef LKSBDEF_H
+#define LKSBDEF_H
 
 struct _lksb
 {

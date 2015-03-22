@@ -27,12 +27,12 @@
 #ifndef I2C_ALGO_PCF_H
 #define I2C_ALGO_PCF_H 1
 
-/* --- Defines for pcf-adapters ---------------------------------------	*/
+/* --- Defines for pcf-adapters --------------------------------------- */
 #include <linux/i2c.h>
 
 struct i2c_algo_pcf_data
 {
-    void *data;		/* private data for lolevel routines	*/
+    void *data;     /* private data for lolevel routines    */
     void (*setpcf) (void *data, int ctl, int val);
     int  (*getpcf) (void *data, int ctl);
     int  (*getown) (void *data);
@@ -45,7 +45,7 @@ struct i2c_algo_pcf_data
     int timeout;
 };
 
-#define I2C_PCF_ADAP_MAX	16
+#define I2C_PCF_ADAP_MAX    16
 
 int i2c_pcf_add_bus(struct i2c_adapter *);
 int i2c_pcf_del_bus(struct i2c_adapter *);

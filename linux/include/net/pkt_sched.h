@@ -1,11 +1,11 @@
 #ifndef __NET_PKT_SCHED_H
 #define __NET_PKT_SCHED_H
 
-#define PSCHED_GETTIMEOFDAY	1
-#define PSCHED_JIFFIES 		2
-#define PSCHED_CPU 		3
+#define PSCHED_GETTIMEOFDAY 1
+#define PSCHED_JIFFIES      2
+#define PSCHED_CPU      3
 
-#define PSCHED_CLOCK_SOURCE	PSCHED_JIFFIES
+#define PSCHED_CLOCK_SOURCE PSCHED_JIFFIES
 
 #include <linux/config.h>
 #include <linux/pkt_sched.h>
@@ -20,88 +20,88 @@ struct Qdisc;
 
 struct qdisc_walker
 {
-    int	stop;
-    int	skip;
-    int	count;
-    int	(*fn)(struct Qdisc *, unsigned long cl, struct qdisc_walker *);
+    int stop;
+    int skip;
+    int count;
+    int (*fn)(struct Qdisc *, unsigned long cl, struct qdisc_walker *);
 };
 
 struct Qdisc_class_ops
 {
     /* Child qdisc manipulation */
-    int			(*graft)(struct Qdisc *, unsigned long cl, struct Qdisc *, struct Qdisc **);
-    struct Qdisc *		(*leaf)(struct Qdisc *, unsigned long cl);
+    int         (*graft)(struct Qdisc *, unsigned long cl, struct Qdisc *, struct Qdisc **);
+    struct Qdisc *      (*leaf)(struct Qdisc *, unsigned long cl);
 
     /* Class manipulation routines */
-    unsigned long		(*get)(struct Qdisc *, u32 classid);
-    void			(*put)(struct Qdisc *, unsigned long);
-    int			(*change)(struct Qdisc *, u32, u32, struct rtattr **, unsigned long *);
-    int			(*delete)(struct Qdisc *, unsigned long);
-    void			(*walk)(struct Qdisc *, struct qdisc_walker * arg);
+    unsigned long       (*get)(struct Qdisc *, u32 classid);
+    void            (*put)(struct Qdisc *, unsigned long);
+    int         (*change)(struct Qdisc *, u32, u32, struct rtattr **, unsigned long *);
+    int         (*delete)(struct Qdisc *, unsigned long);
+    void            (*walk)(struct Qdisc *, struct qdisc_walker * arg);
 
     /* Filter manipulation */
-    struct tcf_proto **	(*tcf_chain)(struct Qdisc *, unsigned long);
-    unsigned long		(*bind_tcf)(struct Qdisc *, unsigned long, u32 classid);
-    void			(*unbind_tcf)(struct Qdisc *, unsigned long);
+    struct tcf_proto ** (*tcf_chain)(struct Qdisc *, unsigned long);
+    unsigned long       (*bind_tcf)(struct Qdisc *, unsigned long, u32 classid);
+    void            (*unbind_tcf)(struct Qdisc *, unsigned long);
 
     /* rtnetlink specific */
-    int			(*dump)(struct Qdisc *, unsigned long, struct sk_buff *skb, struct tcmsg*);
+    int         (*dump)(struct Qdisc *, unsigned long, struct sk_buff *skb, struct tcmsg*);
 };
 
 struct Qdisc_ops
 {
-    struct Qdisc_ops	*next;
-    struct Qdisc_class_ops	*cl_ops;
-    char			id[IFNAMSIZ];
-    int			priv_size;
+    struct Qdisc_ops    *next;
+    struct Qdisc_class_ops  *cl_ops;
+    char            id[IFNAMSIZ];
+    int         priv_size;
 
-    int 			(*enqueue)(struct sk_buff *, struct Qdisc *);
-    struct sk_buff *	(*dequeue)(struct Qdisc *);
-    int 			(*requeue)(struct sk_buff *, struct Qdisc *);
-    int			(*drop)(struct Qdisc *);
+    int             (*enqueue)(struct sk_buff *, struct Qdisc *);
+    struct sk_buff *    (*dequeue)(struct Qdisc *);
+    int             (*requeue)(struct sk_buff *, struct Qdisc *);
+    int         (*drop)(struct Qdisc *);
 
-    int			(*init)(struct Qdisc *, struct rtattr *arg);
-    void			(*reset)(struct Qdisc *);
-    void			(*destroy)(struct Qdisc *);
-    int			(*change)(struct Qdisc *, struct rtattr *arg);
+    int         (*init)(struct Qdisc *, struct rtattr *arg);
+    void            (*reset)(struct Qdisc *);
+    void            (*destroy)(struct Qdisc *);
+    int         (*change)(struct Qdisc *, struct rtattr *arg);
 
-    int			(*dump)(struct Qdisc *, struct sk_buff *);
+    int         (*dump)(struct Qdisc *, struct sk_buff *);
 };
 
 extern rwlock_t qdisc_tree_lock;
 
 struct Qdisc
 {
-    int 			(*enqueue)(struct sk_buff *skb, struct Qdisc *dev);
-    struct sk_buff *	(*dequeue)(struct Qdisc *dev);
-    unsigned		flags;
-#define TCQ_F_BUILTIN	1
-#define TCQ_F_THROTTLED	2
-#define TCQ_F_INGRES	4
-    struct Qdisc_ops	*ops;
-    struct Qdisc		*next;
-    u32			handle;
-    atomic_t		refcnt;
-    struct sk_buff_head	q;
-    struct net_device	*dev;
+    int             (*enqueue)(struct sk_buff *skb, struct Qdisc *dev);
+    struct sk_buff *    (*dequeue)(struct Qdisc *dev);
+    unsigned        flags;
+#define TCQ_F_BUILTIN   1
+#define TCQ_F_THROTTLED 2
+#define TCQ_F_INGRES    4
+    struct Qdisc_ops    *ops;
+    struct Qdisc        *next;
+    u32         handle;
+    atomic_t        refcnt;
+    struct sk_buff_head q;
+    struct net_device   *dev;
 
-    struct tc_stats		stats;
-    int			(*reshape_fail)(struct sk_buff *skb, struct Qdisc *q);
+    struct tc_stats     stats;
+    int         (*reshape_fail)(struct sk_buff *skb, struct Qdisc *q);
 
     /* This field is deprecated, but it is still used by CBQ
      * and it will live until better solution will be invented.
      */
-    struct Qdisc		*__parent;
+    struct Qdisc        *__parent;
 
-    char			data[0];
+    char            data[0];
 };
 
 struct qdisc_rate_table
 {
     struct tc_ratespec rate;
-    u32		data[256];
+    u32     data[256];
     struct qdisc_rate_table *next;
-    int		refcnt;
+    int     refcnt;
 };
 
 static inline void sch_tree_lock(struct Qdisc *q)
@@ -192,8 +192,8 @@ __cls_set_class(unsigned long *clp, unsigned long cl)
 
 #if PSCHED_CLOCK_SOURCE == PSCHED_GETTIMEOFDAY
 
-typedef struct timeval	psched_time_t;
-typedef long		psched_tdiff_t;
+typedef struct timeval  psched_time_t;
+typedef long        psched_tdiff_t;
 
 #define PSCHED_GET_TIME(stamp) do_gettimeofday(&(stamp))
 #define PSCHED_US2JIFFIE(usecs) (((usecs)+(1000000/HZ-1))/(1000000/HZ))
@@ -204,10 +204,10 @@ typedef long		psched_tdiff_t;
 
 #define PSCHED_EXPORTLIST PSCHED_EXPORTLIST_1 PSCHED_EXPORTLIST_2
 
-typedef u64	psched_time_t;
-typedef long	psched_tdiff_t;
+typedef u64 psched_time_t;
+typedef long    psched_tdiff_t;
 
-extern psched_time_t	psched_time_base;
+extern psched_time_t    psched_time_base;
 
 #if PSCHED_CLOCK_SOURCE == PSCHED_JIFFIES
 
@@ -292,107 +292,107 @@ extern PSCHED_WATCHER psched_time_mark;
 #if PSCHED_CLOCK_SOURCE == PSCHED_GETTIMEOFDAY
 #define PSCHED_TDIFF(tv1, tv2) \
 ({ \
-	   int __delta_sec = (tv1).tv_sec - (tv2).tv_sec; \
-	   int __delta = (tv1).tv_usec - (tv2).tv_usec; \
-	   if (__delta_sec) { \
-	           switch (__delta_sec) { \
-		   default: \
-			   __delta = 0; \
-		   case 2: \
-			   __delta += 1000000; \
-		   case 1: \
-			   __delta += 1000000; \
-	           } \
-	   } \
-	   __delta; \
+       int __delta_sec = (tv1).tv_sec - (tv2).tv_sec; \
+       int __delta = (tv1).tv_usec - (tv2).tv_usec; \
+       if (__delta_sec) { \
+               switch (__delta_sec) { \
+           default: \
+               __delta = 0; \
+           case 2: \
+               __delta += 1000000; \
+           case 1: \
+               __delta += 1000000; \
+               } \
+       } \
+       __delta; \
 })
 
 extern int psched_tod_diff(int delta_sec, int bound);
 
 #define PSCHED_TDIFF_SAFE(tv1, tv2, bound, guard) \
 ({ \
-	   int __delta_sec = (tv1).tv_sec - (tv2).tv_sec; \
-	   int __delta = (tv1).tv_usec - (tv2).tv_usec; \
-	   switch (__delta_sec) { \
-	   default: \
-		   __delta = psched_tod_diff(__delta_sec, bound); guard; break; \
-	   case 2: \
-		   __delta += 1000000; \
-	   case 1: \
-		   __delta += 1000000; \
-	   case 0: ; \
-	   } \
-	   __delta; \
+       int __delta_sec = (tv1).tv_sec - (tv2).tv_sec; \
+       int __delta = (tv1).tv_usec - (tv2).tv_usec; \
+       switch (__delta_sec) { \
+       default: \
+           __delta = psched_tod_diff(__delta_sec, bound); guard; break; \
+       case 2: \
+           __delta += 1000000; \
+       case 1: \
+           __delta += 1000000; \
+       case 0: ; \
+       } \
+       __delta; \
 })
 
 #define PSCHED_TLESS(tv1, tv2) (((tv1).tv_usec < (tv2).tv_usec && \
-				(tv1).tv_sec <= (tv2).tv_sec) || \
-				 (tv1).tv_sec < (tv2).tv_sec)
+                (tv1).tv_sec <= (tv2).tv_sec) || \
+                 (tv1).tv_sec < (tv2).tv_sec)
 
 #define PSCHED_TADD2(tv, delta, tv_res) \
 ({ \
-	   int __delta = (tv).tv_usec + (delta); \
-	   (tv_res).tv_sec = (tv).tv_sec; \
-	   if (__delta > 1000000) { (tv_res).tv_sec++; __delta -= 1000000; } \
-	   (tv_res).tv_usec = __delta; \
+       int __delta = (tv).tv_usec + (delta); \
+       (tv_res).tv_sec = (tv).tv_sec; \
+       if (__delta > 1000000) { (tv_res).tv_sec++; __delta -= 1000000; } \
+       (tv_res).tv_usec = __delta; \
 })
 
 #define PSCHED_TADD(tv, delta) \
 ({ \
-	   (tv).tv_usec += (delta); \
-	   if ((tv).tv_usec > 1000000) { (tv).tv_sec++; \
-		 (tv).tv_usec -= 1000000; } \
+       (tv).tv_usec += (delta); \
+       if ((tv).tv_usec > 1000000) { (tv).tv_sec++; \
+         (tv).tv_usec -= 1000000; } \
 })
 
 /* Set/check that time is in the "past perfect";
    it depends on concrete representation of system time
  */
 
-#define PSCHED_SET_PASTPERFECT(t)	((t).tv_sec = 0)
-#define PSCHED_IS_PASTPERFECT(t)	((t).tv_sec == 0)
+#define PSCHED_SET_PASTPERFECT(t)   ((t).tv_sec = 0)
+#define PSCHED_IS_PASTPERFECT(t)    ((t).tv_sec == 0)
 
-#define	PSCHED_AUDIT_TDIFF(t) ({ if ((t) > 2000000) (t) = 2000000; })
+#define PSCHED_AUDIT_TDIFF(t) ({ if ((t) > 2000000) (t) = 2000000; })
 
 #else
 
 #define PSCHED_TDIFF(tv1, tv2) (long)((tv1) - (tv2))
 #define PSCHED_TDIFF_SAFE(tv1, tv2, bound, guard) \
 ({ \
-	   long __delta = (tv1) - (tv2); \
-	   if ( __delta > (bound)) {  __delta = (bound); guard; } \
-	   __delta; \
+       long __delta = (tv1) - (tv2); \
+       if ( __delta > (bound)) {  __delta = (bound); guard; } \
+       __delta; \
 })
 
 
 #define PSCHED_TLESS(tv1, tv2) ((tv1) < (tv2))
 #define PSCHED_TADD2(tv, delta, tv_res) ((tv_res) = (tv) + (delta))
 #define PSCHED_TADD(tv, delta) ((tv) += (delta))
-#define PSCHED_SET_PASTPERFECT(t)	((t) = 0)
-#define PSCHED_IS_PASTPERFECT(t)	((t) == 0)
-#define	PSCHED_AUDIT_TDIFF(t)
+#define PSCHED_SET_PASTPERFECT(t)   ((t) = 0)
+#define PSCHED_IS_PASTPERFECT(t)    ((t) == 0)
+#define PSCHED_AUDIT_TDIFF(t)
 
 #endif
 
 struct tcf_police
 {
     struct tcf_police *next;
-    int		refcnt;
-    u32		index;
+    int     refcnt;
+    u32     index;
 
-    int		action;
-    int		result;
-    u32		ewma_rate;
-    u32		burst;
-    u32		mtu;
+    int     action;
+    int     result;
+    u32     ewma_rate;
+    u32     burst;
+    u32     mtu;
 
-    u32		toks;
-    u32		ptoks;
-    psched_time_t	t_c;
-    spinlock_t	lock;
+    u32     toks;
+    u32     ptoks;
+    psched_time_t   t_c;
+    spinlock_t  lock;
     struct qdisc_rate_table *R_tab;
     struct qdisc_rate_table *P_tab;
 
-    struct tc_stats	stats;
+    struct tc_stats stats;
 };
 
 extern int qdisc_copy_stats(struct sk_buff *skb, struct tc_stats *st);

@@ -34,7 +34,7 @@ static inline unsigned long twd_fxsr_to_i387(struct i387_fxsave_struct *fxsave)
     unsigned long ret = 0xffff0000;
     int i;
 
-#define FPREG_ADDR(f, n)	((void *)&(f)->st_space + (n) * 16);
+#define FPREG_ADDR(f, n)    ((void *)&(f)->st_space + (n) * 16);
 
     for (i = 0 ; i < 8 ; i++)
     {
@@ -45,7 +45,7 @@ static inline unsigned long twd_fxsr_to_i387(struct i387_fxsave_struct *fxsave)
             switch (st->exponent & 0x7fff)
             {
             case 0x7fff:
-                tag = 2;		/* Special */
+                tag = 2;        /* Special */
                 break;
             case 0x0000:
                 if ( !st->significand[0] &&
@@ -53,28 +53,28 @@ static inline unsigned long twd_fxsr_to_i387(struct i387_fxsave_struct *fxsave)
                         !st->significand[2] &&
                         !st->significand[3] )
                 {
-                    tag = 1;	/* Zero */
+                    tag = 1;    /* Zero */
                 }
                 else
                 {
-                    tag = 2;	/* Special */
+                    tag = 2;    /* Special */
                 }
                 break;
             default:
                 if (st->significand[3] & 0x8000)
                 {
-                    tag = 0;	/* Valid */
+                    tag = 0;    /* Valid */
                 }
                 else
                 {
-                    tag = 2;	/* Special */
+                    tag = 2;    /* Special */
                 }
                 break;
             }
         }
         else
         {
-            tag = 3;			/* Empty */
+            tag = 3;            /* Empty */
         }
         ret |= (tag << (2 * i));
         twd = twd >> 1;
@@ -99,7 +99,7 @@ static inline int convert_fxsr_from_user(struct i387_fxsave_struct *fxsave,
     fxsave->twd = twd_i387_to_fxsr(fxsave->twd);
     G(3, fxsave->rip);
     G(4, v);
-    fxsave->fop = v>>16;	/* cs ignored */
+    fxsave->fop = v>>16;    /* cs ignored */
     G(5, fxsave->rdp);
     /* 6: ds ignored */
 #undef G

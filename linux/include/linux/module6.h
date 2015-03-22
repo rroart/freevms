@@ -86,8 +86,8 @@ void sort_main_extable(void);
 extern struct subsystem module_subsys;
 
 #ifdef MODULE
-#define MODULE_GENERIC_TABLE(gtype,name)			\
-extern const struct gtype##_id __mod_##gtype##_table		\
+#define MODULE_GENERIC_TABLE(gtype,name)            \
+extern const struct gtype##_id __mod_##gtype##_table        \
   __attribute__ ((unused, alias(__stringify(name))))
 
 extern struct module __this_module;
@@ -107,29 +107,29 @@ extern struct module __this_module;
  * The following license idents are currently accepted as indicating free
  * software modules
  *
- *	"GPL"				[GNU Public License v2 or later]
- *	"GPL v2"			[GNU Public License v2]
- *	"GPL and additional rights"	[GNU Public License v2 rights and more]
- *	"Dual BSD/GPL"			[GNU Public License v2
- *					 or BSD license choice]
- *	"Dual MIT/GPL"			[GNU Public License v2
- *					 or MIT license choice]
- *	"Dual MPL/GPL"			[GNU Public License v2
- *					 or Mozilla license choice]
+ *  "GPL"               [GNU Public License v2 or later]
+ *  "GPL v2"            [GNU Public License v2]
+ *  "GPL and additional rights" [GNU Public License v2 rights and more]
+ *  "Dual BSD/GPL"          [GNU Public License v2
+ *                   or BSD license choice]
+ *  "Dual MIT/GPL"          [GNU Public License v2
+ *                   or MIT license choice]
+ *  "Dual MPL/GPL"          [GNU Public License v2
+ *                   or Mozilla license choice]
  *
  * The following other idents are available
  *
- *	"Proprietary"			[Non free products]
+ *  "Proprietary"           [Non free products]
  *
  * There are dual licensed components, but when running with Linux it is the
  * GPL that is relevant so this is a non issue. Similarly LGPL linked with GPL
  * is a GPL combined work.
  *
  * This exists for several reasons
- * 1.	So modinfo can show license info for users wanting to vet their setup
- *	is free
- * 2.	So the community can ignore bug reports including proprietary modules
- * 3.	So vendors can do likewise based on their own policies
+ * 1.   So modinfo can show license info for users wanting to vet their setup
+ *  is free
+ * 2.   So the community can ignore bug reports including proprietary modules
+ * 3.   So vendors can do likewise based on their own policies
  */
 #define MODULE_LICENSE(_license) MODULE_INFO(license, _license)
 
@@ -142,19 +142,19 @@ extern struct module __this_module;
 /* One for each parameter, describing how to use it.  Some files do
    multiple of these per line, so can't just use MODULE_INFO. */
 #define MODULE_PARM_DESC(_parm, desc) \
-	__MODULE_INFO(parm, _parm, #_parm ":" desc)
+    __MODULE_INFO(parm, _parm, #_parm ":" desc)
 
-#define MODULE_DEVICE_TABLE(type,name)		\
+#define MODULE_DEVICE_TABLE(type,name)      \
   MODULE_GENERIC_TABLE(type##_device,name)
 
 /* Version of form [<epoch>:]<version>[-<extra-version>].
    Or for CVS/RCS ID version, everything but the number is stripped.
   <epoch>: A (small) unsigned integer which allows you to start versions
            anew. If not mentioned, it's zero.  eg. "2:1.0" is after
-	   "1:2.0".
+       "1:2.0".
   <version>: The <version> may contain only alphanumerics and the
            character `.'.  Ordered by numeric sort for numeric parts,
-	   ascii sort for ascii parts (as per RPM or DEB algorithm).
+       ascii sort for ascii parts (as per RPM or DEB algorithm).
   <extraversion>: Like <version>, but inserted for local
            customizations, eg "rh3" or "rusty1".
 
@@ -179,12 +179,12 @@ void *__symbol_get_gpl(const char *symbol);
 #ifdef CONFIG_MODVERSIONS
 /* Mark the CRC weak since genksyms apparently decides not to
  * generate a checksums for some symbols */
-#define __CRC_SYMBOL(sym, sec)					\
-	extern void *__crc_##sym __attribute__((weak));		\
-	static const unsigned long __kcrctab_##sym		\
-	__attribute_used__					\
-	__attribute__((section("__kcrctab" sec), unused))	\
-	= (unsigned long) &__crc_##sym;
+#define __CRC_SYMBOL(sym, sec)                  \
+    extern void *__crc_##sym __attribute__((weak));     \
+    static const unsigned long __kcrctab_##sym      \
+    __attribute_used__                  \
+    __attribute__((section("__kcrctab" sec), unused))   \
+    = (unsigned long) &__crc_##sym;
 #else
 #define __CRC_SYMBOL(sym, sec)
 #endif
@@ -192,25 +192,25 @@ void *__symbol_get_gpl(const char *symbol);
 // check. temp fix.
 #define __CRC_SYMBOL(sym, sec)
 /* For every exported symbol, place a struct in the __ksymtab section */
-#define __EXPORT_SYMBOL(sym, sec)				\
-	extern typeof(sym) sym;					\
-	__CRC_SYMBOL(sym, sec)					\
-	static const char __kstrtab_##sym[]			\
-	__attribute__((section("__ksymtab_strings")))		\
-	= MODULE_SYMBOL_PREFIX #sym;                    	\
-	static const struct kernel_symbol __ksymtab_##sym	\
-	__attribute_used__					\
-	__attribute__((section("__ksymtab" sec), unused))	\
-	= { (unsigned long)&sym, __kstrtab_##sym }
+#define __EXPORT_SYMBOL(sym, sec)               \
+    extern typeof(sym) sym;                 \
+    __CRC_SYMBOL(sym, sec)                  \
+    static const char __kstrtab_##sym[]         \
+    __attribute__((section("__ksymtab_strings")))       \
+    = MODULE_SYMBOL_PREFIX #sym;                        \
+    static const struct kernel_symbol __ksymtab_##sym   \
+    __attribute_used__                  \
+    __attribute__((section("__ksymtab" sec), unused))   \
+    = { (unsigned long)&sym, __kstrtab_##sym }
 
-#define EXPORT_SYMBOL(sym)					\
-	__EXPORT_SYMBOL(sym, "")
+#define EXPORT_SYMBOL(sym)                  \
+    __EXPORT_SYMBOL(sym, "")
 
-#define EXPORT_SYMBOL_GPL(sym)					\
-	__EXPORT_SYMBOL(sym, "_gpl")
+#define EXPORT_SYMBOL_GPL(sym)                  \
+    __EXPORT_SYMBOL(sym, "_gpl")
 
-#define EXPORT_SYMBOL_GPL_FUTURE(sym)				\
-	__EXPORT_SYMBOL(sym, "_gpl_future")
+#define EXPORT_SYMBOL_GPL_FUTURE(sym)               \
+    __EXPORT_SYMBOL(sym, "_gpl_future")
 
 
 #ifdef CONFIG_UNUSED_SYMBOLS
@@ -457,20 +457,20 @@ static inline void __module_get(struct module *module)
 #endif /* CONFIG_MODULE_UNLOAD */
 
 /* This is a #define so the string doesn't get put in every .o file */
-#define module_name(mod)			\
-({						\
-	struct module *__mod = (mod);		\
-	__mod ? __mod->name : "kernel";		\
+#define module_name(mod)            \
+({                      \
+    struct module *__mod = (mod);       \
+    __mod ? __mod->name : "kernel";     \
 })
 
-#define __unsafe(mod)							     \
-do {									     \
-	if (mod && !(mod)->unsafe) {					     \
-		printk(KERN_WARNING					     \
-		       "Module %s cannot be unloaded due to unsafe usage in" \
-		       " %s:%u\n", (mod)->name, __FILE__, __LINE__);	     \
-		(mod)->unsafe = 1;					     \
-	}								     \
+#define __unsafe(mod)                                \
+do {                                         \
+    if (mod && !(mod)->unsafe) {                         \
+        printk(KERN_WARNING                      \
+               "Module %s cannot be unloaded due to unsafe usage in" \
+               " %s:%u\n", (mod)->name, __FILE__, __LINE__);         \
+        (mod)->unsafe = 1;                       \
+    }                                    \
 } while(0)
 
 /* For kallsyms to ask for address resolution.  NULL means not found. */

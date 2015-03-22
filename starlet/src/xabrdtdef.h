@@ -1,5 +1,5 @@
-#ifndef xabrdtdef_h
-#define xabrdtdef_h
+#ifndef XABRDTDEF_H
+#define XABRDTDEF_H
 
 #define XAB$C_RDT 30
 

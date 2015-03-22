@@ -1,5 +1,5 @@
-#ifndef ttyrbdef_h
-#define ttyrbdef_h
+#ifndef TTYRBDEF_H
+#define TTYRBDEF_H
 
 #define TTY$M_RS_WRAP 0x1
 #define TTY$S_TTYRBDEF 84

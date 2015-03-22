@@ -1,5 +1,5 @@
-#ifndef smgdef_h
-#define smgdef_h
+#ifndef SMGDEF_H
+#define SMGDEF_H
 
 #define SMG$K_TRM_NULL_CHAR 0
 #define SMG$K_TRM_CTRLA 1
@@ -311,14 +311,14 @@
 
 struct _smgmode_bits
 {
-    unsigned smg$v_buf_enabled	: 1;
-    unsigned smg$v_minupd		: 1;
-    unsigned smg$v_clear_screen	: 1;
-    unsigned smg$v_notabs		: 1;
-    unsigned smg$v_protect	: 1;
-    unsigned smg$v_ignore		: 1;
-    unsigned smg$v_release_pbd	: 1;
-    unsigned smg$v_spare15	: 25;
+    unsigned smg$v_buf_enabled  : 1;
+    unsigned smg$v_minupd       : 1;
+    unsigned smg$v_clear_screen : 1;
+    unsigned smg$v_notabs       : 1;
+    unsigned smg$v_protect  : 1;
+    unsigned smg$v_ignore       : 1;
+    unsigned smg$v_release_pbd  : 1;
+    unsigned smg$v_spare15  : 25;
 };
 
 #define SMG$M_KEY_NOECHO 0x1
@@ -330,12 +330,12 @@ struct _smgmode_bits
 
 struct _smg$r_key_def_attr
 {
-    unsigned smg$v_key_noecho		: 1;
-    unsigned smg$v_key_terminate		: 1;
-    unsigned smg$v_key_lock		: 1;
-    unsigned smg$v_key_protected		: 1;
-    unsigned smg$v_key_setstate		: 1;
-    unsigned smg$v_spare18		: 27;
+    unsigned smg$v_key_noecho       : 1;
+    unsigned smg$v_key_terminate        : 1;
+    unsigned smg$v_key_lock     : 1;
+    unsigned smg$v_key_protected        : 1;
+    unsigned smg$v_key_setstate     : 1;
+    unsigned smg$v_spare18      : 27;
 };
 
 #define SMG$M_BOLD 0x1
@@ -355,21 +355,21 @@ struct _smg$r_key_def_attr
 
 struct _smgdef_bits
 {
-    unsigned smg$v_bold		: 1;
-    unsigned smg$v_reverse	: 1;
-    unsigned smg$v_blink		: 1;
-    unsigned smg$v_underline	: 1;
-    unsigned smg$v_invisible	: 1;
-    unsigned smg$v_fill1		: 3;
-    unsigned smg$v_user1		: 1;
-    unsigned smg$v_user2		: 1;
-    unsigned smg$v_user3		: 1;
-    unsigned smg$v_user4		: 1;
-    unsigned smg$v_user5		: 1;
-    unsigned smg$v_user6		: 1;
-    unsigned smg$v_user7		: 1;
-    unsigned smg$v_user8		: 1;
-    unsigned smg$v_spare14	: 16;
+    unsigned smg$v_bold     : 1;
+    unsigned smg$v_reverse  : 1;
+    unsigned smg$v_blink        : 1;
+    unsigned smg$v_underline    : 1;
+    unsigned smg$v_invisible    : 1;
+    unsigned smg$v_fill1        : 3;
+    unsigned smg$v_user1        : 1;
+    unsigned smg$v_user2        : 1;
+    unsigned smg$v_user3        : 1;
+    unsigned smg$v_user4        : 1;
+    unsigned smg$v_user5        : 1;
+    unsigned smg$v_user6        : 1;
+    unsigned smg$v_user7        : 1;
+    unsigned smg$v_user8        : 1;
+    unsigned smg$v_spare14  : 16;
 };
 
 #define SMG$M_BORDER 0x1
@@ -382,13 +382,13 @@ struct _smgdef_bits
 
 struct _display_attributes
 {
-    unsigned smg$v_border			: 1;
-    unsigned smg$v_trunc_icon		: 1;
-    unsigned smg$v_display_controls	: 1;
-    unsigned smg$v_user_display		: 1;
-    unsigned smg$v_block_border		: 1;
-    unsigned smg$v_protect_display	: 1;
-    unsigned smg$v_spare12		: 26;
+    unsigned smg$v_border           : 1;
+    unsigned smg$v_trunc_icon       : 1;
+    unsigned smg$v_display_controls : 1;
+    unsigned smg$v_user_display     : 1;
+    unsigned smg$v_block_border     : 1;
+    unsigned smg$v_protect_display  : 1;
+    unsigned smg$v_spare12      : 26;
 };
 
 #define SMG$M_TRUSTED 0x1
@@ -398,10 +398,10 @@ struct _display_attributes
 
 struct _smg$r_create_subprocess_flags
 {
-    unsigned smg$v_trusted		: 1;
-    unsigned smg$v_authpriv		: 1;
-    unsigned smg$v_subsystem		: 1;
-    unsigned smg$v_spare20		: 29;
+    unsigned smg$v_trusted      : 1;
+    unsigned smg$v_authpriv     : 1;
+    unsigned smg$v_subsystem        : 1;
+    unsigned smg$v_spare20      : 29;
 };
 
 #define SMG$M_DATA_FOLLOWS 0x1
@@ -411,10 +411,10 @@ struct _smg$r_create_subprocess_flags
 
 struct _smg$r_subprocess_flags
 {
-    unsigned smg$v_data_follows		: 1;
-    unsigned smg$v_send_eof		: 1;
-    unsigned smg$v_no_print		: 1;
-    unsigned smg$v_spare11		: 29;
+    unsigned smg$v_data_follows     : 1;
+    unsigned smg$v_send_eof     : 1;
+    unsigned smg$v_no_print     : 1;
+    unsigned smg$v_spare11      : 29;
 };
 
 #define SMG$M_ERASE_PBD 0x1
@@ -423,9 +423,9 @@ struct _smg$r_subprocess_flags
 
 struct _smg$r_delete_pbd_flags
 {
-    unsigned smg$v_erase_pbd		: 1;
-    unsigned smg$v_ignore_batched		: 1;
-    unsigned smg$v_spare10		: 30;
+    unsigned smg$v_erase_pbd        : 1;
+    unsigned smg$v_ignore_batched       : 1;
+    unsigned smg$v_spare10      : 30;
 };
 
 #define SMG$M_KEEP_CONTENTS 0x1
@@ -434,9 +434,9 @@ struct _smg$r_delete_pbd_flags
 
 struct _smg$r_create_pbd_flags
 {
-    unsigned smg$v_keep_contents		: 1;
-    unsigned smg$v_workstation		: 1;
-    unsigned smg$v_spare9			: 30;
+    unsigned smg$v_keep_contents        : 1;
+    unsigned smg$v_workstation      : 1;
+    unsigned smg$v_spare9           : 30;
 };
 
 #define SMG$M_FUNC_KEYS 0x1
@@ -446,10 +446,10 @@ struct _smg$r_create_pbd_flags
 
 struct _smg$r_read_flags
 {
-    unsigned smg$v_func_keys		: 1;
-    unsigned smg$v_nokeep			: 1;
-    unsigned smg$v_norecall		: 1;
-    unsigned smg$v_spare8			: 29;
+    unsigned smg$v_func_keys        : 1;
+    unsigned smg$v_nokeep           : 1;
+    unsigned smg$v_norecall     : 1;
+    unsigned smg$v_spare8           : 29;
 };
 
 #define SMG$M_CURSOR_OFF 0x1
@@ -460,11 +460,11 @@ struct _smg$r_read_flags
 
 struct _smg$r_set_cursor_flags
 {
-    unsigned smg$v_cursor_off		: 1;
-    unsigned smg$v_cursor_on		: 1;
-    unsigned smg$v_scroll_jump		: 1;
-    unsigned smg$v_scroll_smooth		: 1;
-    unsigned smg$v_spare16		: 28;
+    unsigned smg$v_cursor_off       : 1;
+    unsigned smg$v_cursor_on        : 1;
+    unsigned smg$v_scroll_jump      : 1;
+    unsigned smg$v_scroll_smooth        : 1;
+    unsigned smg$v_spare16      : 28;
 };
 
 #define SMG$M_VIEWPORT 0x1
@@ -474,10 +474,10 @@ struct _smg$r_set_cursor_flags
 
 struct _smg$r_get_display_flags
 {
-    unsigned smg$v_viewport		: 1;
-    unsigned smg$v_subprocess		: 1;
-    unsigned smg$v_menu			: 1;
-    unsigned smg$v_spare7			: 29;
+    unsigned smg$v_viewport     : 1;
+    unsigned smg$v_subprocess       : 1;
+    unsigned smg$v_menu         : 1;
+    unsigned smg$v_spare7           : 29;
 };
 
 #define SMG$M_ERASE_LINE 0x1
@@ -486,9 +486,9 @@ struct _smg$r_get_display_flags
 
 struct _smg$r_put_chars_flags
 {
-    unsigned smg$v_erase_line		: 1;
-    unsigned smg$v_erase_to_eol		: 1;
-    unsigned smg$v_spare6			: 30;
+    unsigned smg$v_erase_line       : 1;
+    unsigned smg$v_erase_to_eol     : 1;
+    unsigned smg$v_spare6           : 30;
 };
 
 #define SMG$M_TEXT_SAVE 0x1
@@ -497,9 +497,9 @@ struct _smg$r_put_chars_flags
 
 struct _smg$r_move_text_flags
 {
-    unsigned smg$v_text_save		: 1;
-    unsigned smg$v_text_only		: 1;
-    unsigned smg$v_spare17		: 30;
+    unsigned smg$v_text_save        : 1;
+    unsigned smg$v_text_only        : 1;
+    unsigned smg$v_spare17      : 30;
 };
 
 #define SMG$M_FORM_FEED 0x1
@@ -507,8 +507,8 @@ struct _smg$r_move_text_flags
 
 struct _smg$r_snapshot_flags
 {
-    unsigned smg$v_form_feed		: 1;
-    unsigned smg$v_spare5			: 31;
+    unsigned smg$v_form_feed        : 1;
+    unsigned smg$v_spare5           : 31;
 };
 
 #define SMG$M_WRAP_CHAR 0x1
@@ -517,9 +517,9 @@ struct _smg$r_snapshot_flags
 
 struct _smg$r_put_line_flags
 {
-    unsigned smg$v_wrap_char		: 1;
-    unsigned smg$v_wrap_word		: 1;
-    unsigned smg$v_spare4			: 30;
+    unsigned smg$v_wrap_char        : 1;
+    unsigned smg$v_wrap_word        : 1;
+    unsigned smg$v_spare4           : 30;
 };
 
 #define SMG$M_KEYPAD_APPLICATION 0x1
@@ -528,9 +528,9 @@ struct _smg$r_put_line_flags
 
 struct _smg$r_keypad_modes
 {
-    unsigned smg$v_keypad_application		: 1;
-    unsigned smg$v_keypad_numeric			: 1;
-    unsigned smg$v_spare3				: 30;
+    unsigned smg$v_keypad_application       : 1;
+    unsigned smg$v_keypad_numeric           : 1;
+    unsigned smg$v_spare3               : 30;
 };
 
 #define SMG$M_DISPLAY_PASTED 0x1
@@ -538,8 +538,8 @@ struct _smg$r_keypad_modes
 
 struct _smg$r_pasting_info_flags
 {
-    unsigned smg$v_display_pasted		: 1;
-    unsigned smg$v_spare19		: 31;
+    unsigned smg$v_display_pasted       : 1;
+    unsigned smg$v_spare19      : 31;
 };
 
 #define SMG$M_REMOVE_ITEM 0x1
@@ -554,15 +554,15 @@ struct _smg$r_pasting_info_flags
 
 struct _smg$r_menu_flags
 {
-    unsigned smg$v_remove_item	: 1;
-    unsigned smg$v_fixed_format	: 1;
-    unsigned smg$v_double_space	: 1;
-    unsigned smg$v_return_immed	: 1;
-    unsigned smg$v_erase_menu	: 1;
-    unsigned smg$v_wide_menu	: 1;
-    unsigned smg$v_wrap_menu	: 1;
-    unsigned smg$v_full_field	: 1;
-    unsigned smg$v_spare2		: 24;
+    unsigned smg$v_remove_item  : 1;
+    unsigned smg$v_fixed_format : 1;
+    unsigned smg$v_double_space : 1;
+    unsigned smg$v_return_immed : 1;
+    unsigned smg$v_erase_menu   : 1;
+    unsigned smg$v_wide_menu    : 1;
+    unsigned smg$v_wrap_menu    : 1;
+    unsigned smg$v_full_field   : 1;
+    unsigned smg$v_spare2       : 24;
 };
 
 #define SMG$M_UP 0x1
@@ -573,11 +573,11 @@ struct _smg$r_menu_flags
 
 struct _scroll_dirs
 {
-    unsigned smg$v_up		: 1;
-    unsigned smg$v_down		: 1;
-    unsigned smg$v_right		: 1;
-    unsigned smg$v_left		: 1;
-    unsigned smg$v_spare1		: 28;
+    unsigned smg$v_up       : 1;
+    unsigned smg$v_down     : 1;
+    unsigned smg$v_right        : 1;
+    unsigned smg$v_left     : 1;
+    unsigned smg$v_spare1       : 28;
 };
 
 #define SMG$C_BAND_INFORMATION_TABLE 12

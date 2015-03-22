@@ -1,30 +1,30 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 /*
  * Simple Network Management Protocol (RFC 1067).
  *
  */
 /***********************************************************
-	Copyright 1988, 1989 by Carnegie Mellon University
+    Copyright 1988, 1989 by Carnegie Mellon University
 
                       All Rights Reserved
 
@@ -82,14 +82,14 @@ SOFTWARE.
 #include <linux/string.h>
 #include <strings.h>
 
-int	snmp_input();
-void	snmp_trap();
-int	create_identical();
-int	parse_var_op_list();
-int	snmp_access();
+int snmp_input();
+void    snmp_trap();
+int create_identical();
+int parse_var_op_list();
+int snmp_access();
 
-#define NUM_COMMUNITIES	5
-char	*communities[NUM_COMMUNITIES] =
+#define NUM_COMMUNITIES 5
+char    *communities[NUM_COMMUNITIES] =
 {
     "public",
     "proxy",
@@ -99,10 +99,10 @@ char	*communities[NUM_COMMUNITIES] =
 };
 
 /* these can't be global in a multi-process router */
-u_char	sid[SID_MAX_LEN + 1];
-int		sidlen;
-u_char	*packet_end;
-int		community;
+u_char  sid[SID_MAX_LEN + 1];
+int     sidlen;
+u_char  *packet_end;
+int     community;
 
 
 int
@@ -111,8 +111,8 @@ char *in_buff,*out_buff;
 int in_len;
 int *out_len;
 {
-    int		    out_length;
-    u_short	    udp_src;
+    int         out_length;
+    u_short     udp_src;
 
     if (!snmp_agent_parse(in_buff, in_len, out_buff, out_len ))
     {
@@ -124,20 +124,20 @@ int *out_len;
 
 int
 snmp_agent_parse(data, length, out_data, out_length, sourceip)
-register u_char	*data;
-int			length;
-register u_char	*out_data;
-int			*out_length;
-u_long		sourceip;	/* possibly for authentication */
+register u_char *data;
+int         length;
+register u_char *out_data;
+int         *out_length;
+u_long      sourceip;   /* possibly for authentication */
 {
-    u_char	    msg_type, type;
-    long	    zero = 0;
-    long	    reqid, errstat, errindex;
+    u_char      msg_type, type;
+    long        zero = 0;
+    long        reqid, errstat, errindex;
     register u_char *out_auth, *out_header, *out_reqid;
-    u_char	    *startData = data;
-    int		    startLength = length;
-    long	    version;
-    int		    header_shift, auth_shift;
+    u_char      *startData = data;
+    int         startLength = length;
+    long        version;
+    int         header_shift, auth_shift;
 
     sidlen = SID_MAX_LEN;
 
@@ -319,26 +319,26 @@ u_long		sourceip;	/* possibly for authentication */
  */
 int
 parse_var_op_list(data, length, out_data, out_length, msgtype, index, doSet)
-register u_char	*data;
-int			length;
-register u_char	*out_data;
-int			out_length;
-u_char		msgtype;
-register long	*index;
-int			doSet;
+register u_char *data;
+int         length;
+register u_char *out_data;
+int         out_length;
+u_char      msgtype;
+register long   *index;
+int         doSet;
 {
     u_char  type;
-    oid	    var_name[MAX_NAME_LEN];
-    int	    var_name_len, var_val_len;
+    oid     var_name[MAX_NAME_LEN];
+    int     var_name_len, var_val_len;
     u_char  var_val_type, *var_val, statType;
     register u_char *statP;
-    int	    statLen;
+    int     statLen;
     u_short acl;
-    int	    rw, exact;
-    int	    (*write_method)();
+    int     rw, exact;
+    int     (*write_method)();
     u_char  *headerP, *var_list_start;
-    int	    dummyLen;
-    int	    header_shift;
+    int     dummyLen;
+    int     header_shift;
     u_char  *getStatPtr();
 
     if (msgtype == SET_REQ_MSG)
@@ -383,7 +383,7 @@ int			doSet;
             return SNMP_ERR_NOSUCHNAME;
         /* Check if this user has access rights to this variable */
         if (!snmp_access(acl, community, rw))
-            return SNMP_ERR_NOSUCHNAME;	/* bogus */
+            return SNMP_ERR_NOSUCHNAME; /* bogus */
         if (msgtype == SET_REQ_MSG)
         {
             if (write_method == 0)
@@ -437,7 +437,7 @@ int			doSet;
     dummyLen = packet_end - var_list_start;
     if (asn_build_header(headerP, &dummyLen, (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), dummyLen) == NULL)
     {
-        return SNMP_ERR_TOOBIG;	/* bogus error ???? */
+        return SNMP_ERR_TOOBIG; /* bogus error ???? */
     }
     *index = 0;
     return SNMP_ERR_NOERROR;
@@ -450,15 +450,15 @@ int			doSet;
  */
 int
 create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex)
-u_char	    *snmp_in;
-u_char	    *snmp_out;
-int		    snmp_length;
-long	    errstat, errindex;
+u_char      *snmp_in;
+u_char      *snmp_out;
+int         snmp_length;
+long        errstat, errindex;
 {
     register u_char *data;
-    u_char	    type;
-    u_long	    dummy;
-    int		    length, headerLength;
+    u_char      type;
+    u_long      dummy;
+    int         length, headerLength;
     register u_char *headerPtr, *reqidPtr, *errstatPtr, *errindexPtr, *varListPtr;
 
     bcopy((char *)snmp_in, (char *)snmp_out, snmp_length);
@@ -470,13 +470,13 @@ long	    errstat, errindex;
     if (reqidPtr == NULL)
         return 0;
     headerLength = length;
-    errstatPtr = asn_parse_int(reqidPtr, &length, &type, (long *)&dummy, sizeof dummy);	/* request id */
+    errstatPtr = asn_parse_int(reqidPtr, &length, &type, (long *)&dummy, sizeof dummy); /* request id */
     if (errstatPtr == NULL)
         return 0;
-    errindexPtr = asn_parse_int(errstatPtr, &length, &type, (long *)&dummy, sizeof dummy);	/* error status */
+    errindexPtr = asn_parse_int(errstatPtr, &length, &type, (long *)&dummy, sizeof dummy);  /* error status */
     if (errindexPtr == NULL)
         return 0;
-    varListPtr = asn_parse_int(errindexPtr, &length, &type, (long *)&dummy, sizeof dummy);	/* error index */
+    varListPtr = asn_parse_int(errindexPtr, &length, &type, (long *)&dummy, sizeof dummy);  /* error index */
     if (varListPtr == NULL)
         return 0;
 
@@ -497,16 +497,16 @@ long	    errstat, errindex;
 
 int
 snmp_access(acl, community, rw)
-u_short 	acl;
-int		community;
-int		rw;
+u_short     acl;
+int     community;
+int     rw;
 {
     /*
      * Each group has 2 bits, the more significant one is for read access,
      * the less significant one is for write access.
      */
 
-    community <<= 1;	/* multiply by two two shift two bits at a time */
+    community <<= 1;    /* multiply by two two shift two bits at a time */
     if (rw == READ)
     {
         return (acl & (2 << community));    /* return the correct bit */
@@ -519,9 +519,9 @@ int		rw;
 
 int
 get_community(sessionid)
-u_char	*sessionid;
+u_char  *sessionid;
 {
-    int	count;
+    int count;
 
     for(count = 0; count < NUM_COMMUNITIES; count++)
     {
@@ -535,8 +535,8 @@ u_char	*sessionid;
 
 int
 goodValue(inType, inLen, actualType, actualLen)
-u_char	inType, actualType;
-int		inLen, actualLen;
+u_char  inType, actualType;
+int     inLen, actualLen;
 {
     if (inLen > actualLen)
         return FALSE;
@@ -546,11 +546,11 @@ int		inLen, actualLen;
 setVariable(var_val, var_val_type, var_val_len, statP, statLen)
 u_char  *var_val;
 u_char  var_val_type;
-int	    var_val_len;
+int     var_val_len;
 u_char  *statP;
-int	    statLen;
+int     statLen;
 {
-    int	    buffersize = 1000;
+    int     buffersize = 1000;
 
     switch(var_val_type)
     {

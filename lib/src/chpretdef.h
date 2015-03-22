@@ -1,5 +1,5 @@
-#ifndef chpretdef_h
-#define chpretdef_h
+#ifndef CHPRETDEF_H
+#define CHPRETDEF_H
 
 #define CHPRET$M_ACMODE 0x1
 #define CHPRET$M_MAC 0x2

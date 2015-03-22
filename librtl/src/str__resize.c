@@ -1,7 +1,7 @@
 /*
  * str.c
  *
- *	Code for VAX STR$$RESIZE routine
+ *  Code for VAX STR$$RESIZE routine
  *
  * Description:
  *
@@ -11,11 +11,11 @@
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Ziele
- *		Changed 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Ziele
+ *      Changed 'short' to 'unsigned short' in several places.
  */
 
 #include <stdio.h>
@@ -28,8 +28,8 @@
 /*************************************************************
  * str$$resize
  *
- *	Try to resize the destination, giving as close to the
- *	desired final size as possible.
+ *  Try to resize the destination, giving as close to the
+ *  desired final size as possible.
  */
 unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
 {

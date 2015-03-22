@@ -38,19 +38,19 @@
                                        Paul Nankervis
 
 History:
-	02/12/1998 - Kevin Handy
-		This funtion returns a time based upon GMT, and
-		is thus off if you are in the wrong area.
-		Added use of localtime()/timezone to adjust date
-		(Probibly did it wrong, but ...).
+    02/12/1998 - Kevin Handy
+        This funtion returns a time based upon GMT, and
+        is thus off if you are in the wrong area.
+        Added use of localtime()/timezone to adjust date
+        (Probibly did it wrong, but ...).
 */
 
 /* Some mods by Roar Thronæs */
 
-#include <system_data_cells.h>	/* SYS$ header file */
-#include <sys$routines.h>	/* SYS$ header file */
-#include <ssdef.h>	/* SYS$ header file */
-#include <linux/time.h>		/* C header for $GETTIM to find time */
+#include <system_data_cells.h>  /* SYS$ header file */
+#include <sys$routines.h>   /* SYS$ header file */
+#include <ssdef.h>  /* SYS$ header file */
+#include <linux/time.h>     /* C header for $GETTIM to find time */
 #include<linux/linkage.h>
 #include <linux/string.h>
 

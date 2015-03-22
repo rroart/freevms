@@ -71,10 +71,10 @@ enum operator
 
 struct condition
 {
-    struct condition *	next;
-    enum operator	op;
-    const char *	str;		/* op_constant */
-    int			nameindex;	/* op_variable */
+    struct condition *  next;
+    enum operator   op;
+    const char *    str;        /* op_constant */
+    int         nameindex;  /* op_variable */
 };
 
 /*
@@ -83,8 +83,8 @@ struct condition
 
 struct dependency
 {
-    char *		name;
-    struct dependency *	next;
+    char *      name;
+    struct dependency * next;
 };
 
 /*
@@ -93,26 +93,26 @@ struct dependency
 
 struct kconfig
 {
-    struct kconfig *	next;
-    enum e_token	token;
-    int			nameindex;
-    char *		label;
-    char *		value;
-    struct condition *	cond;
-    struct dependency *	depend;		/* token_dep_tristate */
-    struct kconfig *	cfg_parent;	/* token_choice_item */
+    struct kconfig *    next;
+    enum e_token    token;
+    int         nameindex;
+    char *      label;
+    char *      value;
+    struct condition *  cond;
+    struct dependency * depend;     /* token_dep_tristate */
+    struct kconfig *    cfg_parent; /* token_choice_item */
 
     /* used only in tkgen.c */
-    int			menu_number;
-    int			menu_line;
-    struct kconfig *	menu_next;
+    int         menu_number;
+    int         menu_line;
+    struct kconfig *    menu_next;
 };
 
 struct variable
 {
-    char *	name;
-    char	defined;
-    char	global_written;
+    char *  name;
+    char    defined;
+    char    global_written;
 };
 
 extern struct variable vartable[];
@@ -122,6 +122,6 @@ extern int max_varnum;
  * Prototypes
  */
 
-extern void fix_conditionals ( struct kconfig * scfg );		/* tkcond.c */
-extern void dump_tk_script   ( struct kconfig * scfg );		/* tkgen.c  */
-extern int get_varnum        ( char * name );			/* tkparse.c */
+extern void fix_conditionals ( struct kconfig * scfg );     /* tkcond.c */
+extern void dump_tk_script   ( struct kconfig * scfg );     /* tkgen.c  */
+extern int get_varnum        ( char * name );           /* tkparse.c */

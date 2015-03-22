@@ -1,5 +1,5 @@
-#ifndef portdef_h
-#define portdef_h
+#ifndef PORTDEF_H
+#define PORTDEF_H
 
 #define PORT$C_ERRLOG_THRES            0x0A
 #define PORT$C_ERR_RATE_INT            0x03

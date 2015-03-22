@@ -1,19 +1,19 @@
 /*
  * str.c
  *
- *	Code for VAX STR$ routines
+ *  Code for VAX STR$ routines
  *
  * Description:
  *
- *	This file contains various constants that are externally
- *	accessable from STR$ routines.
+ *  This file contains various constants that are externally
+ *  accessable from STR$ routines.
  *
  * Bugs:
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  */
 
 #include "descrip.h"

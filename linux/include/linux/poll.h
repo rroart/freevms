@@ -47,9 +47,9 @@ typedef struct
 /*
  * How many longwords for "nr" bits?
  */
-#define FDS_BITPERLONG	(8*sizeof(long))
-#define FDS_LONGS(nr)	(((nr)+FDS_BITPERLONG-1)/FDS_BITPERLONG)
-#define FDS_BYTES(nr)	(FDS_LONGS(nr)*sizeof(long))
+#define FDS_BITPERLONG  (8*sizeof(long))
+#define FDS_LONGS(nr)   (((nr)+FDS_BITPERLONG-1)/FDS_BITPERLONG)
+#define FDS_BYTES(nr)   (FDS_LONGS(nr)*sizeof(long))
 
 /*
  * We do a VERIFY_WRITE here even though we are only reading this time:

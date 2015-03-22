@@ -24,7 +24,7 @@
 #include <linux/interrupt.h>
 #include <linux/init.h>
 #include <linux/tty.h>
-#include <linux/vt_kern.h>		/* For unblank_screen() */
+#include <linux/vt_kern.h>      /* For unblank_screen() */
 
 #include <asm/system.h>
 #include <asm/uaccess.h>
@@ -95,7 +95,7 @@ bad_area:
 out_of_memory:
     if (current->pcb$l_pid == INIT_PID)
     {
-        //		current->policy |= SCHED_YIELD;
+        //      current->policy |= SCHED_YIELD;
 #if 0
         current->need_resched=1;
         schedule();
@@ -119,7 +119,7 @@ void bust_spinlocks(int yes)
     {
         oops_in_progress = 1;
 #ifdef CONFIG_SMP
-        global_irq_lock = 0;	/* Many serial drivers do __global_cli() */
+        global_irq_lock = 0;    /* Many serial drivers do __global_cli() */
 #endif
     }
     else
@@ -134,7 +134,7 @@ void bust_spinlocks(int yes)
          * without oops_in_progress set so that printk will give klogd
          * a poke.  Hold onto your hats...
          */
-        console_loglevel = 15;		/* NMI oopser may have shut the console up */
+        console_loglevel = 15;      /* NMI oopser may have shut the console up */
         printk(" ");
         console_loglevel = loglevel_save;
     }

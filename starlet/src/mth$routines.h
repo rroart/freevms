@@ -1,500 +1,503 @@
 /* <mth$routines.h>
  *
- *	Math run-time library routines.
+ *  Math run-time library routines.
  */
 #ifndef _MTH$ROUTINES_H
 #define _MTH$ROUTINES_H
 
-float mth$acos();
-double mth$dacos(), mth$gacos();
+float mth$acos(void);
+double mth$dacos(void);
+double mth$gacos(void);
+
+float mth$acosd(void);
+double mth$dacosd(void);
+double mth$gacosd(void);
+
+float mth$asin(void);
+double mth$dasin(void);
+double mth$gasin(void);
+
+float mth$asind(void);
+double mth$dasind(void);
+double mth$gasind(void);
+
+float mth$atan(void);
+double mth$datan(void);
+double mth$gatan(void);
+
+float mth$atan2(void);
+double mth$datan2(void);
+double mth$gatan2(void);
+
+float mth$atand(void);
+double mth$datand(void);
+double mth$gatand(void);
+
+float mth$atanh(void);
+double mth$datanh(void);
+double mth$gatanh(void);
+
+float mth$atand2(void);
+double mth$datand2(void);
+double mth$gatand2(void);
+
+long blas1$visamax(void);
+double blas1$vidamax(void);
+double blas1$vigamax(void);
+double blas1$vicamax(void);
+double blas1$vizamax(void);
+double blas1$viwamax(void);
 
-float mth$acosd();
-double mth$dacosd(), mth$gacosd();
+float blas1$vsasum(void);
+double blas1$vdasum(void);
+double blas1$vgasum(void);
 
-float mth$asin();
-double mth$dasin(), mth$gasin();
+int blas1$vsaxpy(void);
+double blas1$vdaxpy(void);
+double blas1$vgaxpy(void);
+double blas1$vcaxpy(void);
+double blas1$vzaxpy(void);
+double blas1$vwaxpy(void);
 
-float mth$asind();
-double mth$dasind(), mth$gasind();
+int blas1$vscopy(void);
+double blas1$vdcopy(void);
+double blas1$vccopy(void);
+double blas1$vzcopy(void);
 
-float mth$atan();
-double mth$datan(), mth$gatan();
+float blas1$vsdot(void);
+double blas1$vddot(void);
+double blas1$vgdot(void);
 
-float mth$atan2();
-double mth$datan2(), mth$gatan2();
+float blas1$vsnrm2(void);
+double blas1$vdnrm2(void);
+double blas1$vgnrm2(void);
 
-float mth$atand();
-double mth$datand(), mth$gatand();
+int blas1$vsrot(void);
+double blas1$vdrot(void);
+double blas1$vgrot(void);
+double blas1$vcsrot(void);
+double blas1$vzdrot(void);
+double blas1$vwgrot(void);
 
-float mth$atanh();
-double mth$datanh(), mth$gatanh();
+int blas1$vsrotg(void);
+double blas1$vdrotg(void);
+double blas1$vgrotg(void);
+double blas1$vcrotg(void);
+double blas1$vzrotg(void);
+double blas1$vwrotg(void);
 
-float mth$atand2();
-double mth$datand2(), mth$gatand2();
+int blas1$vsscal(void);
+double blas1$vdscal(void);
+double blas1$vgscal(void);
+double blas1$vcscal(void);
+double blas1$vcsscal(void);
+double blas1$vzscal(void);
+double blas1$vwscal(void);
+double blas1$vzdscal(void);
+double blas1$vwgscal(void);
 
+int blas1$vsswap(void);
+double blas1$vdswap(void);
+double blas1$vcswap(void);
+double blas1$vzswap(void);
 
+float mth$cabs(void);
+double mth$cdabs(void);
+double mth$cgabs(void);
 
-long blas1$visamax(), blas1$vidamax(), blas1$vigamax(),
-     blas1$vicamax(), blas1$vizamax(), blas1$viwamax();
+float mth$cos(void);
+double mth$dcos(void);
+double mth$gcos(void);
 
+float mth$cosd(void);
+double mth$dcosd(void);
+double mth$gcosd(void);
 
+float mth$cosh(void);
+double mth$dcosh(void);
+double mth$gcosh(void);
 
-float blas1$vsasum();
-double blas1$vdasum(), blas1$vgasum();
+double mth$cvt_d_g(void);
+double mth$cvt_g_d(void);
 
+double *mth$cvt_da_ga(void);
+double *mth$cvt_ga_da(void);
 
+float mth$exp(void);
 
+double mth$dexp(void);
 
-int blas1$vsaxpy(), blas1$vdaxpy(), blas1$vgaxpy(),
-    blas1$vcaxpy(), blas1$vzaxpy(), blas1$vwaxpy();
+double mth$gexp(void);
 
+long mth$vjfolrlp_ma_v5(void);
 
+float mth$vffolrlp_ma_v5(void);
 
-int blas1$vscopy(), blas1$vdcopy(), blas1$vccopy(), blas1$vzcopy();
+double mth$vdfolrlp_ma_v5(void);
 
+double mth$vgfolrlp_ma_v5(void);
 
+long mth$vjfolrln_ma_v5(void);
 
+float mth$vffolrln_ma_v5(void);
 
+double mth$vdfolrln_ma_v5(void);
 
+double mth$vgfolrln_ma_v5(void);
 
+long mth$vjfolrlp_m_v2(void);
 
-float blas1$vsdot();
-double blas1$vddot(), blas1$vgdot();
+float mth$vffolrlp_m_v2(void);
 
+double mth$vdfolrlp_m_v2(void);
 
+double mth$vgfolrlp_m_v2(void);
 
+long mth$vjfolrln_m_v2(void);
 
+float mth$vffolrln_m_v2(void);
 
-float blas1$vsnrm2();
-double blas1$vdnrm2(), blas1$vgnrm2();
+double mth$vdfolrln_m_v2(void);
 
+double mth$vgfolrln_m_v2(void);
 
+long mth$vjfolrlp_a_v2(void);
 
+float mth$vffolrlp_a_v2(void);
 
-int blas1$vsrot(), blas1$vdrot(), blas1$vgrot(),
-    blas1$vcsrot(), blas1$vzdrot(), blas1$vwgrot();
+double mth$vdfolrlp_a_v2(void);
 
+double mth$vgfolrlp_a_v2(void);
 
+long mth$vjfolrln_a_v2(void);
 
-int blas1$vsrotg(), blas1$vdrotg(), blas1$vgrotg(),
-    blas1$vcrotg(), blas1$vzrotg(), blas1$vwrotg();
+float mth$vffolrln_a_v2(void);
 
+double mth$vdfolrln_a_v2(void);
 
+double mth$vgfolrln_a_v2(void);
 
+int mth$vjfolrp_ma_v15(void);
 
-int blas1$vsscal(), blas1$vdscal(), blas1$vgscal(),
-    blas1$vcscal(), blas1$vcsscal(), blas1$vzscal(),
-    blas1$vwscal(), blas1$vzdscal(), blas1$vwgscal();
+int mth$vffolrp_ma_v15(void);
 
+int mth$vdfolrp_ma_v15(void);
 
+int mth$vgfolrp_ma_v15(void);
 
-int blas1$vsswap(), blas1$vdswap(), blas1$vcswap(), blas1$vzswap();
+int mth$vjfolrn_ma_v15(void);
 
+int mth$vffolrn_ma_v15(void);
 
-float mth$cabs();
-double mth$cdabs(), mth$cgabs();
+int mth$vdfolrn_ma_v15(void);
 
+int mth$vgfolrn_ma_v15(void);
 
+int mth$vjfolrp_m_v8(void);
 
+int mth$vffolrp_m_v8(void);
 
+int mth$vdfolrp_m_v8(void);
 
+int mth$vgfolrp_m_v8(void);
 
+int mth$vjfolrn_m_v8(void);
 
+int mth$vffolrn_m_v8(void);
 
+int mth$vdfolrn_m_v8(void);
 
+int mth$vgfolrn_m_v8(void);
 
+int mth$vjfolrp_a_v8(void);
 
+int mth$vffolrp_a_v8(void);
 
+int mth$vdfolrp_a_v8(void);
 
+int mth$vgfolrp_a_v8(void);
 
+int mth$vjfolrn_a_v8(void);
 
-float mth$cos();
-double mth$dcos(), mth$gcos();
+int mth$vffolrn_a_v8(void);
 
-float mth$cosd();
-double mth$dcosd(), mth$gcosd();
+int mth$vdfolrn_a_v8(void);
 
-float mth$cosh();
-double mth$dcosh(), mth$gcosh();
+int mth$vgfolrn_a_v8(void);
 
+int mth$hacos(void);
 
+int mth$hacosd(void);
 
+int mth$hasin(void);
 
+int mth$hasind(void);
 
+int mth$hatan(void);
 
-double mth$cvt_d_g(), mth$cvt_g_d();
+int mth$hatan2(void);
 
-double *mth$cvt_da_ga(), *mth$cvt_ga_da();
+int mth$hatand(void);
 
+int mth$hatanh(void);
 
+int mth$hcos(void);
 
+int mth$hcosd(void);
 
+int mth$hcosh(void);
 
+int mth$hexp(void);
 
+int mth$hlog10(void);
 
+int mth$hlog(void);
 
+int mth$hlog2(void);
 
+int mth$hsin(void);
 
+int mth$hsind(void);
 
+int mth$hsinh(void);
 
+int mth$hsqrt(void);
 
-float mth$exp();
+int mth$htan(void);
 
-double mth$dexp();
+int mth$htand(void);
 
-double mth$gexp();
+int mth$htanh(void);
 
-long mth$vjfolrlp_ma_v5();
+int mth$hatand2(void);
 
-float mth$vffolrlp_ma_v5();
+float mth$aimag(void);
+double mth$dimag(void);
+double mth$gimag(void);
 
-double mth$vdfolrlp_ma_v5();
+float mth$alog(void);
+double mth$dlog(void);
+double mth$glog(void);
 
-double mth$vgfolrlp_ma_v5();
+float mth$alog10(void);
+double mth$dlog10(void);
+double mth$glog10(void);
 
-long mth$vjfolrln_ma_v5();
+float mth$alog2(void);
+double mth$dlog2(void);
+double mth$glog2(void);
 
-float mth$vffolrln_ma_v5();
+float mth$random(void);
 
-double mth$vdfolrln_ma_v5();
+float mth$real(void);
+double mth$dreal(void);
+double mth$greal(void);
 
-double mth$vgfolrln_ma_v5();
+float mth$sin(void);
+double mth$dsin(void);
+double mth$gsin(void);
 
-long mth$vjfolrlp_m_v2();
+float mth$sind(void);
+double mth$dsind(void);
+double mth$gsind(void);
 
-float mth$vffolrlp_m_v2();
+float mth$sinh(void);
+double mth$dsinh(void);
+double mth$gsinh(void);
 
-double mth$vdfolrlp_m_v2();
+int mth$sincos(void);
+double mth$dsincos(void);
+double mth$gsincos(void);
+double mth$hsincos(void);
 
-double mth$vgfolrlp_m_v2();
+int mth$sincosd(void);
+double mth$dsincosd(void);
+double mth$gsincosd(void);
+double mth$hsincosd(void);
 
-long mth$vjfolrln_m_v2();
+float mth$sqrt(void);
+double mth$dsqrt(void);
+double mth$gsqrt(void);
 
-float mth$vffolrln_m_v2();
+float mth$tan(void);
+double mth$dtan(void);
+double mth$gtan(void);
 
-double mth$vdfolrln_m_v2();
+float mth$tand(void);
+double mth$dtand(void);
+double mth$gtand(void);
 
-double mth$vgfolrln_m_v2();
+float mth$tanh(void);
+double mth$dtanh(void);
+double mth$gtanh(void);
 
-long mth$vjfolrlp_a_v2();
+unsigned long mth$umax(void);
 
-float mth$vffolrlp_a_v2();
+unsigned long mth$umin(void);
 
-double mth$vdfolrlp_a_v2();
+float mth$abs(void);
+double mth$dabs(void);
+double mth$gabs(void);
+int mth$habs(void);
 
-double mth$vgfolrlp_a_v2();
+short mth$iiabs(void);
+long mth$jiabs(void);
 
-long mth$vjfolrln_a_v2();
+unsigned short mth$iiand(void);
 
-float mth$vffolrln_a_v2();
+unsigned long mth$jiand(void);
 
-double mth$vdfolrln_a_v2();
+double mth$dble(void);
+double mth$gdble(void);
 
-double mth$vgfolrln_a_v2();
+float mth$dim(void);
+double mth$ddim(void);
+double mth$gdim(void);
+int mth$hdim(void);
 
-int mth$vjfolrp_ma_v15();
+short mth$iidim(void);
+long mth$jidim(void);
 
-int mth$vffolrp_ma_v15();
+unsigned short mth$iieor(void);
 
-int mth$vdfolrp_ma_v15();
+unsigned long mth$jieor(void);
 
-int mth$vgfolrp_ma_v15();
+short mth$iifix(void);
 
-int mth$vjfolrn_ma_v15();
+long mth$jifix(void);
 
-int mth$vffolrn_ma_v15();
+float mth$floati(void);
+double mth$dfloti(void);
+double mth$gfloti(void);
 
-int mth$vdfolrn_ma_v15();
+float mth$floatj(void);
+double mth$dflotj(void);
+double mth$gflotj(void);
 
-int mth$vgfolrn_ma_v15();
+float mth$floor(void);
+double mth$dfloor(void);
+double mth$gfloor(void);
+int mth$hfloor(void);
 
-int mth$vjfolrp_m_v8();
+float mth$aint(void);
 
-int mth$vffolrp_m_v8();
+double mth$dint(void);
 
-int mth$vdfolrp_m_v8();
+short mth$iidint(void);
 
-int mth$vgfolrp_m_v8();
+long mth$jidint(void);
 
-int mth$vjfolrn_m_v8();
+double mth$gint(void);
 
-int mth$vffolrn_m_v8() ;
+short mth$iigint(void);
 
-int mth$vdfolrn_m_v8();
+long mth$jigint(void);
 
-int mth$vgfolrn_m_v8();
+int mth$hint(void);
 
-int mth$vjfolrp_a_v8();
+short mth$iihint(void);
 
-int mth$vffolrp_a_v8();
+long mth$jihint(void);
 
-int mth$vdfolrp_a_v8();
+short mth$iint(void);
 
-int mth$vgfolrp_a_v8();
+long mth$jint(void);
 
-int mth$vjfolrn_a_v8();
+unsigned short mth$iior(void);
 
-int mth$vffolrn_a_v8();
+unsigned long mth$jior(void);
 
-int mth$vdfolrn_a_v8();
+float mth$aimax0(void);
 
-int mth$vgfolrn_a_v8();
+float mth$ajmax0(void);
 
-int mth$hacos();
+short mth$imax0(void);
 
-int mth$hacosd();
+long mth$jmax0(void);
 
-int mth$hasin();
+float mth$amax1(void);
 
-int mth$hasind();
+double mth$dmax1(void);
 
-int mth$hatan();
+double mth$gmax1(void);
 
-int mth$hatan2();
+int mth$hmax1(void);
 
-int mth$hatand();
+short mth$imax1(void);
 
-int mth$hatanh();
+long mth$jmax1(void);
 
-int mth$hcos();
+float mth$aimin0(void);
 
-int mth$hcosd();
+float mth$ajmin0(void);
 
-int mth$hcosh();
+short mth$imin0(void);
 
-int mth$hexp();
+long mth$jmin0(void);
 
-int mth$hlog10();
+float mth$amin1(void);
 
-int mth$hlog();
+double mth$dmin1(void);
 
-int mth$hlog2();
+double mth$gmin1(void);
 
-int mth$hsin();
+int mth$hmin1(void);
 
-int mth$hsind();
+short mth$imin1(void);
 
-int mth$hsinh();
+long mth$jmin1(void);
 
-int mth$hsqrt();
+float mth$amod(void);
+double mth$dmod(void);
+double mth$gmod(void);
+int mth$hmod(void);
 
-int mth$htan();
+short mth$imod(void);
+long mth$jmod(void);
 
-int mth$htand();
+float mth$anint(void);
+double mth$dnint(void);
+double mth$gnint(void);
+int mth$hnint(void);
 
-int mth$htanh();
+short mth$inint(void);
+long mth$jnint(void);
 
-int mth$hatand2();
+short mth$iidnnt(void);
+long mth$jidnnt(void);
 
+short mth$iignnt(void);
+long mth$jignnt(void);
 
-float mth$aimag();
-double mth$dimag(), mth$gimag();
+short mth$iihnnt(void);
+long mth$jihnnt(void);
 
-float mth$alog();
-double mth$dlog(), mth$glog();
+unsigned short mth$inot(void);
 
-float mth$alog10();
-double mth$dlog10(), mth$glog10();
+unsigned long mth$jnot(void);
 
-float mth$alog2();
-double mth$dlog2(), mth$glog2();
+double mth$dprod(void);
+double mth$gprod(void);
 
-float mth$random();
+long mth$sgn(void);
 
-float mth$real();
-double mth$dreal(), mth$greal();
+unsigned short mth$iishft(void);
 
-float mth$sin();
-double mth$dsin(), mth$gsin();
+unsigned long mth$jishft(void);
 
-float mth$sind();
-double mth$dsind(), mth$gsind();
+float mth$sign(void);
 
-float mth$sinh();
-double mth$dsinh(), mth$gsinh();
+double mth$dsign(void);
 
+double mth$gsign(void);
 
+int mth$hsign(void);
 
-int mth$sincos(), mth$dsincos(), mth$gsincos(), mth$hsincos();
+short mth$iisign(void);
 
+long mth$jisign(void);
 
-int mth$sincosd(), mth$dsincosd(), mth$gsincosd(), mth$hsincosd();
-
-
-float mth$sqrt();
-double mth$dsqrt(), mth$gsqrt();
-
-float mth$tan();
-double mth$dtan(), mth$gtan();
-
-float mth$tand();
-double mth$dtand(), mth$gtand();
-
-float mth$tanh();
-double mth$dtanh(), mth$gtanh();
-
-
-unsigned long mth$umax();
-
-unsigned long mth$umin();
-
-float mth$abs();
-double mth$dabs(), mth$gabs();
-int mth$habs();
-
-short mth$iiabs();
-long mth$jiabs();
-
-unsigned short mth$iiand();
-
-unsigned long mth$jiand();
-
-double mth$dble(), mth$gdble();
-
-float mth$dim();
-double mth$ddim(), mth$gdim();
-int mth$hdim();
-
-short mth$iidim();
-long mth$jidim();
-
-unsigned short mth$iieor();
-
-unsigned long mth$jieor();
-
-short mth$iifix();
-
-long mth$jifix();
-
-
-float mth$floati();
-double mth$dfloti(), mth$gfloti();
-
-float mth$floatj();
-double mth$dflotj(), mth$gflotj();
-
-
-float mth$floor();
-double mth$dfloor(), mth$gfloor();
-int mth$hfloor();
-
-float mth$aint();
-
-double mth$dint();
-
-short mth$iidint();
-
-long mth$jidint();
-
-double mth$gint();
-
-short mth$iigint();
-
-long mth$jigint();
-
-int mth$hint();
-
-short mth$iihint();
-
-long mth$jihint();
-
-short mth$iint();
-
-long mth$jint();
-
-unsigned short mth$iior();
-
-unsigned long mth$jior();
-
-float mth$aimax0();
-
-float mth$ajmax0();
-
-short mth$imax0();
-
-long mth$jmax0();
-
-float mth$amax1();
-
-double mth$dmax1();
-
-double mth$gmax1();
-
-int mth$hmax1();
-
-short mth$imax1();
-
-long mth$jmax1();
-
-float mth$aimin0();
-
-float mth$ajmin0();
-
-short mth$imin0();
-
-long mth$jmin0();
-
-float mth$amin1();
-
-double mth$dmin1();
-
-double mth$gmin1();
-
-int mth$hmin1();
-
-short mth$imin1();
-
-long mth$jmin1();
-
-
-float mth$amod();
-double mth$dmod(), mth$gmod();
-int mth$hmod();
-
-short mth$imod();
-long mth$jmod();
-
-
-float mth$anint();
-double mth$dnint(), mth$gnint();
-int mth$hnint();
-
-short mth$inint();
-long mth$jnint();
-
-short mth$iidnnt();
-long mth$jidnnt();
-
-short mth$iignnt();
-long mth$jignnt();
-
-short mth$iihnnt();
-long mth$jihnnt();
-
-unsigned short mth$inot();
-
-unsigned long mth$jnot();
-
-double mth$dprod(), mth$gprod();
-
-long mth$sgn();
-
-unsigned short mth$iishft();
-
-unsigned long mth$jishft();
-
-float mth$sign();
-
-double mth$dsign();
-
-double mth$gsign();
-
-int mth$hsign();
-
-short mth$iisign();
-
-long mth$jisign();
-
-float mth$sngl(), mth$snglg();
+float mth$sngl(void);
+double mth$snglg(void);
 
 #endif

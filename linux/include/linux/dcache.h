@@ -40,7 +40,7 @@ extern struct dentry_stat_t dentry_stat;
 
 /* Name hashing routines. Initial hash value */
 /* Hash courtesy of the R5 hash in reiserfs modulo sign bits */
-#define init_name_hash()		0
+#define init_name_hash()        0
 
 /* partial hash update function. Assume roughly 4 bits per character */
 static __inline__ unsigned long partial_name_hash(unsigned long c, unsigned long prevhash)
@@ -69,20 +69,20 @@ struct dentry
 {
     atomic_t d_count;
     unsigned int d_flags;
-    struct inode  * d_inode;	/* Where the name belongs to - NULL is negative */
-    struct dentry * d_parent;	/* parent directory */
-    struct list_head d_hash;	/* lookup hash list */
-    struct list_head d_lru;		/* d_count = 0 LRU list */
-    struct list_head d_child;	/* child of parent list */
-    struct list_head d_subdirs;	/* our children */
-    struct list_head d_alias;	/* inode alias list */
+    struct inode  * d_inode;    /* Where the name belongs to - NULL is negative */
+    struct dentry * d_parent;   /* parent directory */
+    struct list_head d_hash;    /* lookup hash list */
+    struct list_head d_lru;     /* d_count = 0 LRU list */
+    struct list_head d_child;   /* child of parent list */
+    struct list_head d_subdirs; /* our children */
+    struct list_head d_alias;   /* inode alias list */
     int d_mounted;
     struct qstr d_name;
-    unsigned long d_time;		/* used by d_revalidate */
+    unsigned long d_time;       /* used by d_revalidate */
     struct dentry_operations  *d_op;
-    struct super_block * d_sb;	/* The root of the dentry tree */
+    struct super_block * d_sb;  /* The root of the dentry tree */
     unsigned long d_vfs_flags;
-    void * d_fsdata;		/* fs-specific data */
+    void * d_fsdata;        /* fs-specific data */
     unsigned char d_iname[DNAME_INLINE_LEN]; /* small names */
 };
 
@@ -105,13 +105,13 @@ struct dentry_operations
 
 /*
 locking rules:
-		big lock	dcache_lock	may block
-d_revalidate:	no		no		yes
-d_hash		no		no		yes
-d_compare:	no		yes		no
-d_delete:	no		yes		no
-d_release:	no		no		yes
-d_iput:		no		no		yes
+        big lock    dcache_lock may block
+d_revalidate:   no      no      yes
+d_hash      no      no      yes
+d_compare:  no      yes     no
+d_delete:   no      yes     no
+d_release:  no      no      yes
+d_iput:     no      no      yes
  */
 
 /* d_flags entries */
@@ -120,13 +120,13 @@ d_iput:		no		no		yes
 * renamed" and has to be
 * deleted on the last dput()
 */
-#define	DCACHE_NFSD_DISCONNECTED 0x0004	/* This dentry is not currently connected to the
+#define DCACHE_NFSD_DISCONNECTED 0x0004 /* This dentry is not currently connected to the
 * dcache tree. Its parent will either be itself,
 * or will have this flag as well.
 * If this dentry points to a directory, then
 * s_nfsd_free_path semaphore will be down
 */
-#define DCACHE_REFERENCED	0x0008  /* Recently used, don't discard. */
+#define DCACHE_REFERENCED   0x0008  /* Recently used, don't discard. */
 
 extern spinlock_t dcache_lock;
 
@@ -232,16 +232,16 @@ struct vfsmount *, char *, int);
 /* Allocation counts.. */
 
 /**
-*	dget, dget_locked	-	get a reference to a dentry
-*	@dentry: dentry to get a reference to
+*   dget, dget_locked   -   get a reference to a dentry
+*   @dentry: dentry to get a reference to
 *
-*	Given a dentry or %NULL pointer increment the reference count
-*	if appropriate and return the dentry. A dentry will not be
-*	destroyed when it has references. dget() should never be
-*	called for dentries with zero reference counter. For these cases
-*	(preferably none, functions in dcache.c are sufficient for normal
-*	needs and they take necessary precautions) you should hold dcache_lock
-*	and call dget_locked() instead of dget().
+*   Given a dentry or %NULL pointer increment the reference count
+*   if appropriate and return the dentry. A dentry will not be
+*   destroyed when it has references. dget() should never be
+*   called for dentries with zero reference counter. For these cases
+*   (preferably none, functions in dcache.c are sufficient for normal
+*   needs and they take necessary precautions) you should hold dcache_lock
+*   and call dget_locked() instead of dget().
 */
 
 static __inline__ struct dentry * dget(struct dentry *dentry)
@@ -258,10 +258,10 @@ return dentry;
 extern struct dentry * dget_locked(struct dentry *);
 
 /**
-*	d_unhashed -	is dentry hashed
-*	@dentry: entry to check
+*   d_unhashed -    is dentry hashed
+*   @dentry: entry to check
 *
-*	Returns true if the dentry passed is not currently hashed.
+*   Returns true if the dentry passed is not currently hashed.
 */
 
 static __inline__ int d_unhashed(struct dentry *dentry)
@@ -279,4 +279,4 @@ return dentry->d_mounted;
 extern struct vfsmount *lookup_mnt(struct vfsmount *, struct dentry *);
 #endif /* __KERNEL__ */
 
-#endif	/* __LINUX_DCACHE_H */
+#endif  /* __LINUX_DCACHE_H */

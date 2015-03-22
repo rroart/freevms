@@ -1,5 +1,5 @@
-#ifndef chpctldef_h
-#define chpctldef_h
+#ifndef CHPCTLDEF_H
+#define CHPCTLDEF_H
 
 #define CHPCTL$M_READ 0x1
 #define CHPCTL$M_WRITE 0x2

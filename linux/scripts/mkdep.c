@@ -311,7 +311,7 @@ void use_config(const char * name, int len)
  * Thus, there is one memory access per sizeof(unsigned long) characters.
  */
 
-#if defined(__alpha__) || defined(__i386__) || defined(__ia64__)  || defined(__x86_64__) || defined(__MIPSEL__)	\
+#if defined(__alpha__) || defined(__i386__) || defined(__ia64__)  || defined(__x86_64__) || defined(__MIPSEL__) \
     || defined(__arm__)
 #define LE_MACHINE
 #endif
@@ -325,13 +325,13 @@ void use_config(const char * name, int len)
 #endif
 
 #define GETNEXT { \
-	next_byte(__buf); \
-	if ((unsigned long) next % sizeof(unsigned long) == 0) { \
-		if (next >= end) \
-			break; \
-		__buf = * (unsigned long *) next; \
-	} \
-	next++; \
+    next_byte(__buf); \
+    if ((unsigned long) next % sizeof(unsigned long) == 0) { \
+        if (next >= end) \
+            break; \
+        __buf = * (unsigned long *) next; \
+    } \
+    next++; \
 }
 
 /*
@@ -611,7 +611,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    add_path(".");		/* for #include "..." */
+    add_path(".");      /* for #include "..." */
 
     while (++argv, --argc > 0)
     {
@@ -634,7 +634,7 @@ int main(int argc, char **argv)
         }
     }
 
-    add_path(hpath);	/* must be last entry, for config files */
+    add_path(hpath);    /* must be last entry, for config files */
 
     while (--argc > 0)
     {

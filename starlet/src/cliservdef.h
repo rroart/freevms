@@ -1,5 +1,5 @@
-#ifndef cliservdef_h
-#define cliservdef_h
+#ifndef CLISERVDEF_H
+#define CLISERVDEF_H
 
 #define CLI$K_PAUSE 1
 #define CLI$K_DEFLOCAL 2

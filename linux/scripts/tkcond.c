@@ -61,7 +61,7 @@ static void mark_variables( struct kconfig * scfg )
                 ||   cfg->token == token_tristate
                 ||   cfg->token == token_unset )
         {
-            if ( cfg->nameindex > 0 )	/* paranoid */
+            if ( cfg->nameindex > 0 )   /* paranoid */
             {
                 vartable[cfg->nameindex].defined = 1;
             }

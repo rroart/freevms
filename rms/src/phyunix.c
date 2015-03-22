@@ -17,7 +17,7 @@
 */
 
 /*
-	If the user mounts  cd0   we open up /dev/cd0 for access.
+    If the user mounts  cd0   we open up /dev/cd0 for access.
 */
 
 #include <linux/config.h>

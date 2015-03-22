@@ -5,17 +5,17 @@
 // Modified Linux source file, 2001-2006
 
 /*
- *	Local APIC handling, local APIC timers
+ *  Local APIC handling, local APIC timers
  *
- *	(c) 1999, 2000 Ingo Molnar <mingo@redhat.com>
+ *  (c) 1999, 2000 Ingo Molnar <mingo@redhat.com>
  *
- *	Fixes
- *	Maciej W. Rozycki	:	Bits for genuine 82489DX APICs;
- *					thanks to Eric Gilmore
- *					and Rolf G. Tews
- *					for testing these extensively.
- *	Maciej W. Rozycki	:	Various updates and fixes.
- *	Mikael Pettersson	:	Power Management for UP-APIC.
+ *  Fixes
+ *  Maciej W. Rozycki   :   Bits for genuine 82489DX APICs;
+ *                  thanks to Eric Gilmore
+ *                  and Rolf G. Tews
+ *                  for testing these extensively.
+ *  Maciej W. Rozycki   :   Various updates and fixes.
+ *  Mikael Pettersson   :   Power Management for UP-APIC.
  */
 
 #include <linux/config.h>
@@ -102,7 +102,7 @@ void clear_local_APIC(void)
     if (maxlvt >= 4)
         apic_write_around(APIC_LVTPC, APIC_LVT_MASKED);
     v = GET_APIC_VERSION(apic_read(APIC_LVR));
-    if (APIC_INTEGRATED(v))  	/* !82489DX */
+    if (APIC_INTEGRATED(v))     /* !82489DX */
     {
         if (maxlvt > 3)
             apic_write(APIC_ESR, 0);
@@ -271,7 +271,7 @@ void __init init_bsp_APIC(void)
      */
     apic_write_around(APIC_LVT0, APIC_DM_EXTINT);
     value = APIC_DM_NMI;
-    if (!APIC_INTEGRATED(ver))		/* 82489DX */
+    if (!APIC_INTEGRATED(ver))      /* 82489DX */
         value |= APIC_LVT_LEVEL_TRIGGER;
     apic_write_around(APIC_LVT1, value);
 }
@@ -407,19 +407,19 @@ void __init setup_local_APIC (void)
         value = APIC_DM_NMI;
     else
         value = APIC_DM_NMI | APIC_LVT_MASKED;
-    if (!APIC_INTEGRATED(ver))		/* 82489DX */
+    if (!APIC_INTEGRATED(ver))      /* 82489DX */
         value |= APIC_LVT_LEVEL_TRIGGER;
     apic_write_around(APIC_LVT1, value);
 
-    if (APIC_INTEGRATED(ver) && !esr_disable)  		/* !82489DX */
+    if (APIC_INTEGRATED(ver) && !esr_disable)       /* !82489DX */
     {
         maxlvt = get_maxlvt();
-        if (maxlvt > 3)			/* Due to the Pentium erratum 3AP. */
+        if (maxlvt > 3)         /* Due to the Pentium erratum 3AP. */
             apic_write(APIC_ESR, 0);
         value = apic_read(APIC_ESR);
         Dprintk("ESR value before enabling vector: %08x\n", value);
 
-        value = ERROR_APIC_VECTOR;	/* enables sending errors */
+        value = ERROR_APIC_VECTOR;  /* enables sending errors */
         apic_write_around(APIC_LVTERR, value);
         /*
          * spec says clear errors after enabling vector.
@@ -561,7 +561,7 @@ struct pm_dev *apic_pm_register(pm_dev_t type,
     if (!apic_pm_state.active)
         return pm_register(type, id, callback);
     if (apic_pm_state.perfctr_pmdev)
-        return NULL;	/* we're busy */
+        return NULL;    /* we're busy */
     dev = kmalloc(sizeof(struct pm_dev), GFP_KERNEL);
     if (dev)
     {
@@ -601,12 +601,12 @@ static void __init apic_pm_init2(void)
         pm_register(PM_SYS_DEV, 0, apic_pm_callback);
 }
 
-#else	/* CONFIG_PM */
+#else   /* CONFIG_PM */
 
 static inline void apic_pm_init1(void) { }
 static inline void apic_pm_init2(void) { }
 
-#endif	/* CONFIG_PM */
+#endif  /* CONFIG_PM */
 
 /*
  * Detect and enable local APICs on non-SMP boards.

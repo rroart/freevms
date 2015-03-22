@@ -56,7 +56,7 @@ static int reg_offset_vm86[] =
 };
 
 #define VM86_REG_(x) (*(unsigned short *) \
-		      (reg_offset_vm86[((unsigned)x)]+(u_char *) FPU_info))
+              (reg_offset_vm86[((unsigned)x)]+(u_char *) FPU_info))
 
 /* These are dummy, fs and gs are not saved on the stack. */
 #define ___FS ___ds
@@ -74,7 +74,7 @@ static int reg_offset_pm[] =
 };
 
 #define PM_REG_(x) (*(unsigned short *) \
-		      (reg_offset_pm[((unsigned)x)]+(u_char *) FPU_info))
+              (reg_offset_pm[((unsigned)x)]+(u_char *) FPU_info))
 
 
 /* Decode the SIB byte. This function assumes mod != 0 */
@@ -289,7 +289,7 @@ void *FPU_get_address(u_char FPU_modrm, unsigned long *fpu_eip,
             else
             {
                 address = *cpu_reg_ptr;  /* Just return the contents
-					  of the cpu register */
+                      of the cpu register */
                 addr->offset = address;
                 return (void *) address;
             }

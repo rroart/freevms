@@ -49,98 +49,98 @@ struct __sysctl_args
 
 /* For internal pattern-matching use only: */
 #ifdef __KERNEL__
-#define CTL_ANY		-1	/* Matches any name */
-#define CTL_NONE	0
+#define CTL_ANY     -1  /* Matches any name */
+#define CTL_NONE    0
 #endif
 
 enum
 {
-    CTL_KERN=1,		/* General kernel info and control */
-    CTL_VM=2,		/* VM management */
-    CTL_NET=3,		/* Networking */
-    CTL_PROC=4,		/* Process info */
-    CTL_FS=5,		/* Filesystems */
-    CTL_DEBUG=6,		/* Debugging */
-    CTL_DEV=7,		/* Devices */
-    CTL_BUS=8,		/* Busses */
-    CTL_ABI=9,		/* Binary emulation */
-    CTL_CPU=10		/* CPU stuff (speed scaling, etc) */
+    CTL_KERN=1,     /* General kernel info and control */
+    CTL_VM=2,       /* VM management */
+    CTL_NET=3,      /* Networking */
+    CTL_PROC=4,     /* Process info */
+    CTL_FS=5,       /* Filesystems */
+    CTL_DEBUG=6,        /* Debugging */
+    CTL_DEV=7,      /* Devices */
+    CTL_BUS=8,      /* Busses */
+    CTL_ABI=9,      /* Binary emulation */
+    CTL_CPU=10      /* CPU stuff (speed scaling, etc) */
 };
 
 /* CTL_BUS names: */
 enum
 {
-    BUS_ISA=1		/* ISA */
+    BUS_ISA=1       /* ISA */
 };
 
 /* CTL_KERN names: */
 enum
 {
-    KERN_OSTYPE=1,		/* string: system version */
-    KERN_OSRELEASE=2,	/* string: system release */
-    KERN_OSREV=3,		/* int: system revision */
-    KERN_VERSION=4,		/* string: compile time info */
-    KERN_SECUREMASK=5,	/* struct: maximum rights mask */
-    KERN_PROF=6,		/* table: profiling information */
+    KERN_OSTYPE=1,      /* string: system version */
+    KERN_OSRELEASE=2,   /* string: system release */
+    KERN_OSREV=3,       /* int: system revision */
+    KERN_VERSION=4,     /* string: compile time info */
+    KERN_SECUREMASK=5,  /* struct: maximum rights mask */
+    KERN_PROF=6,        /* table: profiling information */
     KERN_NODENAME=7,
     KERN_DOMAINNAME=8,
 
-    KERN_CAP_BSET=14,	/* int: capability bounding set */
-    KERN_PANIC=15,		/* int: panic timeout */
-    KERN_REALROOTDEV=16,	/* real root device to mount after initrd */
+    KERN_CAP_BSET=14,   /* int: capability bounding set */
+    KERN_PANIC=15,      /* int: panic timeout */
+    KERN_REALROOTDEV=16,    /* real root device to mount after initrd */
 
-    KERN_SPARC_REBOOT=21,	/* reboot command on Sparc */
-    KERN_CTLALTDEL=22,	/* int: allow ctl-alt-del to reboot */
-    KERN_PRINTK=23,		/* struct: control printk logging parameters */
-    KERN_NAMETRANS=24,	/* Name translation */
+    KERN_SPARC_REBOOT=21,   /* reboot command on Sparc */
+    KERN_CTLALTDEL=22,  /* int: allow ctl-alt-del to reboot */
+    KERN_PRINTK=23,     /* struct: control printk logging parameters */
+    KERN_NAMETRANS=24,  /* Name translation */
     KERN_PPC_HTABRECLAIM=25, /* turn htab reclaimation on/off on PPC */
-    KERN_PPC_ZEROPAGED=26,	/* turn idle page zeroing on/off on PPC */
+    KERN_PPC_ZEROPAGED=26,  /* turn idle page zeroing on/off on PPC */
     KERN_PPC_POWERSAVE_NAP=27, /* use nap mode for power saving */
     KERN_MODPROBE=28,
     KERN_SG_BIG_BUFF=29,
-    KERN_ACCT=30,		/* BSD process accounting parameters */
-    KERN_PPC_L2CR=31,	/* l2cr register on PPC */
+    KERN_ACCT=30,       /* BSD process accounting parameters */
+    KERN_PPC_L2CR=31,   /* l2cr register on PPC */
 
-    KERN_RTSIGNR=32,	/* Number of rt sigs queued */
-    KERN_RTSIGMAX=33,	/* Max queuable */
+    KERN_RTSIGNR=32,    /* Number of rt sigs queued */
+    KERN_RTSIGMAX=33,   /* Max queuable */
 
     KERN_SHMMAX=34,         /* long: Maximum shared memory segment */
     KERN_MSGMAX=35,         /* int: Maximum size of a messege */
     KERN_MSGMNB=36,         /* int: Maximum message queue size */
     KERN_MSGPOOL=37,        /* int: Maximum system message pool size */
-    KERN_SYSRQ=38,		/* int: Sysreq enable */
-    KERN_MAX_THREADS=39,	/* int: Maximum nr of threads in the system */
-    KERN_RANDOM=40,		/* Random driver */
-    KERN_SHMALL=41,		/* int: Maximum size of shared memory */
-    KERN_MSGMNI=42,		/* int: msg queue identifiers */
-    KERN_SEM=43,		/* struct: sysv semaphore limits */
-    KERN_SPARC_STOP_A=44,	/* int: Sparc Stop-A enable */
-    KERN_SHMMNI=45,		/* int: shm array identifiers */
-    KERN_OVERFLOWUID=46,	/* int: overflow UID */
-    KERN_OVERFLOWGID=47,	/* int: overflow GID */
-    KERN_SHMPATH=48,	/* string: path to shm fs */
-    KERN_HOTPLUG=49,	/* string: path to hotplug policy agent */
+    KERN_SYSRQ=38,      /* int: Sysreq enable */
+    KERN_MAX_THREADS=39,    /* int: Maximum nr of threads in the system */
+    KERN_RANDOM=40,     /* Random driver */
+    KERN_SHMALL=41,     /* int: Maximum size of shared memory */
+    KERN_MSGMNI=42,     /* int: msg queue identifiers */
+    KERN_SEM=43,        /* struct: sysv semaphore limits */
+    KERN_SPARC_STOP_A=44,   /* int: Sparc Stop-A enable */
+    KERN_SHMMNI=45,     /* int: shm array identifiers */
+    KERN_OVERFLOWUID=46,    /* int: overflow UID */
+    KERN_OVERFLOWGID=47,    /* int: overflow GID */
+    KERN_SHMPATH=48,    /* string: path to shm fs */
+    KERN_HOTPLUG=49,    /* string: path to hotplug policy agent */
     KERN_IEEE_EMULATION_WARNINGS=50, /* int: unimplemented ieee instructions */
     KERN_S390_USER_DEBUG_LOGGING=51,  /* int: dumps of user faults */
-    KERN_CORE_USES_PID=52,		/* int: use core or core.%pid */
-    KERN_TAINTED=53,	/* int: various kernel tainted flags */
-    KERN_CADPID=54,		/* int: PID of the process to notify on CAD */
+    KERN_CORE_USES_PID=52,      /* int: use core or core.%pid */
+    KERN_TAINTED=53,    /* int: various kernel tainted flags */
+    KERN_CADPID=54,     /* int: PID of the process to notify on CAD */
 };
 
 
 /* CTL_VM names: */
 enum
 {
-    VM_SWAPCTL=1,		/* struct: Set vm swapping control */
-    VM_SWAPOUT=2,		/* int: Linear or sqrt() swapout for hogs */
-    VM_FREEPG=3,		/* struct: Set free page thresholds */
-    VM_BDFLUSH=4,		/* struct: Control buffer cache flushing */
-    VM_OVERCOMMIT_MEMORY=5,	/* Turn off the virtual memory safety limit */
-    VM_BUFFERMEM=6,		/* struct: Set buffer memory thresholds */
-    VM_PAGECACHE=7,		/* struct: Set cache memory thresholds */
-    VM_PAGERDAEMON=8,	/* struct: Control kswapd behaviour */
-    VM_PGT_CACHE=9,		/* struct: Set page table cache parameters */
-    VM_PAGE_CLUSTER=10,	/* int: set number of pages to swap together */
+    VM_SWAPCTL=1,       /* struct: Set vm swapping control */
+    VM_SWAPOUT=2,       /* int: Linear or sqrt() swapout for hogs */
+    VM_FREEPG=3,        /* struct: Set free page thresholds */
+    VM_BDFLUSH=4,       /* struct: Control buffer cache flushing */
+    VM_OVERCOMMIT_MEMORY=5, /* Turn off the virtual memory safety limit */
+    VM_BUFFERMEM=6,     /* struct: Set buffer memory thresholds */
+    VM_PAGECACHE=7,     /* struct: Set cache memory thresholds */
+    VM_PAGERDAEMON=8,   /* struct: Control kswapd behaviour */
+    VM_PGT_CACHE=9,     /* struct: Set page table cache parameters */
+    VM_PAGE_CLUSTER=10, /* int: set number of pages to swap together */
     VM_MIN_READAHEAD=12,    /* Min file readahead */
     VM_MAX_READAHEAD=13     /* Max file readahead */
 };
@@ -194,7 +194,7 @@ enum
     NET_CORE_RMEM_MAX=2,
     NET_CORE_WMEM_DEFAULT=3,
     NET_CORE_RMEM_DEFAULT=4,
-    /* was	NET_CORE_DESTROY_DELAY */
+    /* was  NET_CORE_DESTROY_DELAY */
     NET_CORE_MAX_BACKLOG=6,
     NET_CORE_FASTROUTE=7,
     NET_CORE_MSG_COST=8,
@@ -499,19 +499,19 @@ enum
 /* /proc/sys/net/khttpd/ */
 enum
 {
-    NET_KHTTPD_DOCROOT	= 1,
-    NET_KHTTPD_START	= 2,
-    NET_KHTTPD_STOP		= 3,
-    NET_KHTTPD_UNLOAD	= 4,
-    NET_KHTTPD_CLIENTPORT	= 5,
-    NET_KHTTPD_PERMREQ	= 6,
-    NET_KHTTPD_PERMFORBID	= 7,
-    NET_KHTTPD_LOGGING	= 8,
-    NET_KHTTPD_SERVERPORT	= 9,
+    NET_KHTTPD_DOCROOT  = 1,
+    NET_KHTTPD_START    = 2,
+    NET_KHTTPD_STOP     = 3,
+    NET_KHTTPD_UNLOAD   = 4,
+    NET_KHTTPD_CLIENTPORT   = 5,
+    NET_KHTTPD_PERMREQ  = 6,
+    NET_KHTTPD_PERMFORBID   = 7,
+    NET_KHTTPD_LOGGING  = 8,
+    NET_KHTTPD_SERVERPORT   = 9,
     NET_KHTTPD_DYNAMICSTRING= 10,
     NET_KHTTPD_SLOPPYMIME   = 11,
-    NET_KHTTPD_THREADS	= 12,
-    NET_KHTTPD_MAXCONNECT	= 13
+    NET_KHTTPD_THREADS  = 12,
+    NET_KHTTPD_MAXCONNECT   = 13
 };
 
 /* /proc/sys/net/decnet/conf/<dev> */
@@ -544,21 +544,21 @@ enum
 /* CTL_FS names: */
 enum
 {
-    FS_NRINODE=1,	/* int:current number of allocated inodes */
+    FS_NRINODE=1,   /* int:current number of allocated inodes */
     FS_STATINODE=2,
-    FS_MAXINODE=3,	/* int:maximum number of inodes that can be allocated */
-    FS_NRDQUOT=4,	/* int:current number of allocated dquots */
-    FS_MAXDQUOT=5,	/* int:maximum number of dquots that can be allocated */
-    FS_NRFILE=6,	/* int:current number of allocated filedescriptors */
-    FS_MAXFILE=7,	/* int:maximum number of filedescriptors that can be allocated */
+    FS_MAXINODE=3,  /* int:maximum number of inodes that can be allocated */
+    FS_NRDQUOT=4,   /* int:current number of allocated dquots */
+    FS_MAXDQUOT=5,  /* int:maximum number of dquots that can be allocated */
+    FS_NRFILE=6,    /* int:current number of allocated filedescriptors */
+    FS_MAXFILE=7,   /* int:maximum number of filedescriptors that can be allocated */
     FS_DENTRY=8,
-    FS_NRSUPER=9,	/* int:current number of allocated super_blocks */
-    FS_MAXSUPER=10,	/* int:maximum number of super_blocks that can be allocated */
-    FS_OVERFLOWUID=11,	/* int: overflow UID */
-    FS_OVERFLOWGID=12,	/* int: overflow GID */
-    FS_LEASES=13,	/* int: leases enabled */
-    FS_DIR_NOTIFY=14,	/* int: directory notification enabled */
-    FS_LEASE_TIME=15,	/* int: maximum time to wait for a lease break */
+    FS_NRSUPER=9,   /* int:current number of allocated super_blocks */
+    FS_MAXSUPER=10, /* int:maximum number of super_blocks that can be allocated */
+    FS_OVERFLOWUID=11,  /* int: overflow UID */
+    FS_OVERFLOWGID=12,  /* int: overflow GID */
+    FS_LEASES=13,   /* int: leases enabled */
+    FS_DIR_NOTIFY=14,   /* int: directory notification enabled */
+    FS_LEASE_TIME=15,   /* int: maximum time to wait for a lease break */
 };
 
 /* CTL_DEBUG names: */
@@ -642,12 +642,12 @@ enum
 /* /proc/sys/abi */
 enum
 {
-    ABI_DEFHANDLER_COFF=1,	/* default handler for coff binaries */
-    ABI_DEFHANDLER_ELF=2, 	/* default handler for ELF binaries */
+    ABI_DEFHANDLER_COFF=1,  /* default handler for coff binaries */
+    ABI_DEFHANDLER_ELF=2,   /* default handler for ELF binaries */
     ABI_DEFHANDLER_LCALL7=3,/* default handler for procs using lcall7 */
     ABI_DEFHANDLER_LIBCSO=4,/* default handler for an libc.so ELF interp */
-    ABI_TRACE=5,		/* tracing flags */
-    ABI_FAKE_UTSNAME=6,	/* fake target utsname information */
+    ABI_TRACE=5,        /* tracing flags */
+    ABI_FAKE_UTSNAME=6, /* fake target utsname information */
 };
 
 #ifdef __KERNEL__
@@ -734,15 +734,15 @@ extern ctl_handler sysctl_jiffies;
 /* A sysctl table is an array of struct ctl_table: */
 struct ctl_table
 {
-    int ctl_name;			/* Binary ID */
-    const char *procname;		/* Text ID for /proc/sys, or zero */
+    int ctl_name;           /* Binary ID */
+    const char *procname;       /* Text ID for /proc/sys, or zero */
     void *data;
     int maxlen;
     mode_t mode;
     ctl_table *child;
-    proc_handler *proc_handler;	/* Callback for text formatting */
-    ctl_handler *strategy;		/* Callback function for all r/w */
-    struct proc_dir_entry *de;	/* /proc control block */
+    proc_handler *proc_handler; /* Callback for text formatting */
+    ctl_handler *strategy;      /* Callback function for all r/w */
+    struct proc_dir_entry *de;  /* /proc control block */
     void *extra1;
     void *extra2;
 };

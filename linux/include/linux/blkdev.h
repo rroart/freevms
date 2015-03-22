@@ -21,15 +21,15 @@ struct request
     struct list_head queue;
     int elevator_sequence;
 
-    volatile int rq_status;	/* should split this into a few status bits */
-#define RQ_INACTIVE		(-1)
-#define RQ_ACTIVE		1
-#define RQ_SCSI_BUSY		0xffff
-#define RQ_SCSI_DONE		0xfffe
-#define RQ_SCSI_DISCONNECTING	0xffe0
+    volatile int rq_status; /* should split this into a few status bits */
+#define RQ_INACTIVE     (-1)
+#define RQ_ACTIVE       1
+#define RQ_SCSI_BUSY        0xffff
+#define RQ_SCSI_DONE        0xfffe
+#define RQ_SCSI_DISCONNECTING   0xffe0
 
     kdev_t rq_dev;
-    int cmd;		/* READ or WRITE */
+    int cmd;        /* READ or WRITE */
     int errors;
     unsigned long sector;
     unsigned long nr_sectors;
@@ -65,7 +65,7 @@ typedef void (unplug_device_fn) (void *q);
  * Default nr free requests per queue, ll_rw_blk will scale it down
  * according to available RAM at init time
  */
-#define QUEUE_NR_REQUESTS	8192
+#define QUEUE_NR_REQUESTS   8192
 
 struct request_list
 {
@@ -78,52 +78,52 @@ struct request_queue
     /*
      * the queue request freelist, one for reads and one for writes
      */
-    struct request_list	rq[2];
+    struct request_list rq[2];
 
     /*
      * Together with queue_head for cacheline sharing
      */
-    struct list_head	queue_head;
-    elevator_t		elevator;
+    struct list_head    queue_head;
+    elevator_t      elevator;
 
-    request_fn_proc		* request_fn;
-    merge_request_fn	* back_merge_fn;
-    merge_request_fn	* front_merge_fn;
-    merge_requests_fn	* merge_requests_fn;
-    make_request_fn		* make_request_fn;
-    plug_device_fn		* plug_device_fn;
+    request_fn_proc     * request_fn;
+    merge_request_fn    * back_merge_fn;
+    merge_request_fn    * front_merge_fn;
+    merge_requests_fn   * merge_requests_fn;
+    make_request_fn     * make_request_fn;
+    plug_device_fn      * plug_device_fn;
     /*
      * The queue owner gets to use this for whatever they like.
      * ll_rw_blk doesn't touch it.
      */
-    void			* queuedata;
+    void            * queuedata;
 
     /*
      * This is used to remove the plug when tq_disk runs.
      */
-    struct tq_struct	plug_tq;
+    struct tq_struct    plug_tq;
 
     /*
      * Boolean that indicates whether this queue is plugged or not.
      */
-    char			plugged;
+    char            plugged;
 
     /*
      * Boolean that indicates whether current_request is active or
      * not.
      */
-    char			head_active;
+    char            head_active;
 
     /*
      * Is meant to protect the queue in the future instead of
      * io_request_lock
      */
-    spinlock_t		queue_lock;
+    spinlock_t      queue_lock;
 
     /*
      * Tasks wait here for free request
      */
-    wait_queue_head_t	wait_for_request;
+    wait_queue_head_t   wait_for_request;
 };
 
 struct blk_dev_struct
@@ -131,9 +131,9 @@ struct blk_dev_struct
     /*
      * queue_proc has to be atomic
      */
-    request_queue_t		request_queue;
-    queue_proc		*queue;
-    void			*data;
+    request_queue_t     request_queue;
+    queue_proc      *queue;
+    void            *data;
 };
 
 struct sec_size
@@ -207,8 +207,8 @@ static inline int get_hardsect_size(kdev_t dev)
     return retval;
 }
 
-#define blk_finished_io(nsects)	do { } while (0)
-#define blk_started_io(nsects)	do { } while (0)
+#define blk_finished_io(nsects) do { } while (0)
+#define blk_started_io(nsects)  do { } while (0)
 
 static inline unsigned int blksize_bits(unsigned int size)
 {

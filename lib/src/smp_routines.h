@@ -1,5 +1,5 @@
-#ifndef smp_routines_h
-#define smp_routines_h
+#ifndef SMP_ROUTINES_H
+#define SMP_ROUTINES_H
 
 #include <ctddef.h>
 #include <iosbdef.h>
@@ -30,13 +30,13 @@ void  smp_std$restore_shr (int spl_index);
 void  smp_std$restorel_shr (struct _spl *spl);
 int   smp_std$setup_cpu(int);
 
-int	  smp$cpu_orphan_check(int,unsigned long long,unsigned long long);
-int	  smp$request_shutdown_cpu(int, int);
+int   smp$cpu_orphan_check(int,unsigned long long,unsigned long long);
+int   smp$request_shutdown_cpu(int, int);
 int       smp$system_event_notify(struct _ctd_pq ctd, int event);
 void      smp$timeout (void);
-int	  smp$validate_hw_configuration(int, char **, char **);
+int   smp$validate_hw_configuration(int, char **, char **);
 
 void smp_send_work(int work, int cpu);
-void smp_work();
+void smp_work(void);
 
 #endif

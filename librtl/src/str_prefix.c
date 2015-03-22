@@ -1,7 +1,7 @@
 /*
  * str_prefix.c
  *
- *	Code for VAX STR$APPEND routine
+ *  Code for VAX STR$APPEND routine
  *
  * Description:
  *
@@ -11,11 +11,11 @@
  *
  * History
  *
- *	Feb 5, 1997 - Kevin Handy
- *		Preliminary design.
+ *  Feb 5, 1997 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 11, 1997 - Christof Ziele
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 11, 1997 - Christof Ziele
+ *      Change 'short' to 'unsigned short' in several places.
  */
 
 #include <stdio.h>
@@ -33,13 +33,13 @@
 unsigned long str$prefix(struct dsc$descriptor_s* destination_string,
                          const struct dsc$descriptor_s* source_string)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
-    char* s2_ptr;			/* Pointer to second string */
-    unsigned short s2_length;	/* Length of second string */
-    unsigned short final_length;	/* Final sstring length */
-    char* work;			/* Working area */
-    unsigned long result = STR$_NORMAL;	/* Result */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
+    char* s2_ptr;           /* Pointer to second string */
+    unsigned short s2_length;   /* Length of second string */
+    unsigned short final_length;    /* Final sstring length */
+    char* work;         /* Working area */
+    unsigned long result = STR$_NORMAL; /* Result */
 
     /*
      * Destination MUST be a dynamic string

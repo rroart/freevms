@@ -1,7 +1,7 @@
 /*
  * str.c
  *
- *	Code for VAX STR$DUPL_CHAR routine
+ *  Code for VAX STR$DUPL_CHAR routine
  *
  * Description:
  *
@@ -11,18 +11,18 @@
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 4, 1997 - Kevin Handy
- *		Lose variables 's2_length', 's2_ptr' which were
- *		defined but never used (found with '-Wall')
+ *  Feb 4, 1997 - Kevin Handy
+ *      Lose variables 's2_length', 's2_ptr' which were
+ *      defined but never used (found with '-Wall')
  *
- *	Feb 7, 1997 - Kevin Handy
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Kevin Handy
+ *      Change 'short' to 'unsigned short' in several places.
  *
- *	Feb 11, 1997 - Kevin Handy
- *		Changed UseCount from 'long' to 'unsigned short'
+ *  Feb 11, 1997 - Kevin Handy
+ *      Changed UseCount from 'long' to 'unsigned short'
  */
 
 #include <stdio.h>
@@ -40,10 +40,10 @@ unsigned long str$dupl_char(struct dsc$descriptor_s* destination_string,
                             const long* repetition_count,
                             const char* ascii_character)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
     unsigned long result = STR$_NORMAL;
-    char UseChar = ' ';		/* Character to use for duplication */
+    char UseChar = ' ';     /* Character to use for duplication */
     unsigned short UseCount;
     unsigned long alt_result;
 
@@ -75,7 +75,7 @@ unsigned long str$dupl_char(struct dsc$descriptor_s* destination_string,
     /*
      * Validate the repitition count
      */
-#if 0	/* Not possible with unsigned */
+#if 0   /* Not possible with unsigned */
     if (UseCount < 0)
     {
         UseCount = 0;

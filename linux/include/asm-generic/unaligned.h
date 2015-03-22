@@ -12,9 +12,9 @@
 #define get_unaligned(ptr) \
   ({ __typeof__(*(ptr)) __tmp; memcpy(&__tmp, (ptr), sizeof(*(ptr))); __tmp; })
 
-#define put_unaligned(val, ptr)				\
-  ({ __typeof__(*(ptr)) __tmp = (val);			\
-     memcpy((ptr), &__tmp, sizeof(*(ptr)));		\
+#define put_unaligned(val, ptr)             \
+  ({ __typeof__(*(ptr)) __tmp = (val);          \
+     memcpy((ptr), &__tmp, sizeof(*(ptr)));     \
      (void)0; })
 
 #endif /* _ASM_GENERIC_UNALIGNED_H */

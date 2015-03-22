@@ -8,8 +8,8 @@
 #include <linux/netfilter.h>
 
 /* Hooks */
-#define NF_X25_INPUT	0
-#define NF_X25_FORWARD	1
-#define NF_X25_OUTPUT	2
+#define NF_X25_INPUT    0
+#define NF_X25_FORWARD  1
+#define NF_X25_OUTPUT   2
 
 #endif /*__LINUX_X25_NETFILTER_H*/

@@ -13,29 +13,29 @@ typedef struct
     unsigned int __local_bh_count;
     unsigned int __syscall_count;
     struct task_struct * __ksoftirqd_task; /* waitqueue is too large */
-    unsigned int __nmi_count;	/* arch dependent */
+    unsigned int __nmi_count;   /* arch dependent */
 } ____cacheline_aligned irq_cpustat_t;
 
-#include <linux/irq_cpustat.h>	/* Standard mappings for irq_cpustat_t above */
+#include <linux/irq_cpustat.h>  /* Standard mappings for irq_cpustat_t above */
 
 /*
  * Are we in an interrupt context? Either doing bottom half
  * or hardware interrupt processing?
  */
 #define in_interrupt() ({ int __cpu = smp_processor_id(); \
-	(local_irq_count(__cpu) + local_bh_count(__cpu) != 0); })
+    (local_irq_count(__cpu) + local_bh_count(__cpu) != 0); })
 
 #define in_irq() (local_irq_count(smp_processor_id()) != 0)
 
 #ifndef CONFIG_SMP
 
-#define hardirq_trylock(cpu)	(local_irq_count(cpu) == 0)
-#define hardirq_endlock(cpu)	do { } while (0)
+#define hardirq_trylock(cpu)    (local_irq_count(cpu) == 0)
+#define hardirq_endlock(cpu)    do { } while (0)
 
-#define irq_enter(cpu, irq)	(local_irq_count(cpu)++)
-#define irq_exit(cpu, irq)	(local_irq_count(cpu)--)
+#define irq_enter(cpu, irq) (local_irq_count(cpu)++)
+#define irq_exit(cpu, irq)  (local_irq_count(cpu)--)
 
-#define synchronize_irq()	barrier()
+#define synchronize_irq()   barrier()
 
 #else
 
@@ -87,7 +87,7 @@ static inline int hardirq_trylock(int cpu)
     return !local_irq_count(cpu) && !test_bit(0,&global_irq_lock);
 }
 
-#define hardirq_endlock(cpu)	do { } while (0)
+#define hardirq_endlock(cpu)    do { } while (0)
 
 extern void synchronize_irq(void);
 

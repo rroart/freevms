@@ -15,9 +15,9 @@ int is_sony_vaio_laptop;
 
 struct dmi_header
 {
-    u8	type;
-    u8	length;
-    u16	handle;
+    u8  type;
+    u8  length;
+    u16 handle;
 };
 
 #define dmi_printk(x)
@@ -40,8 +40,8 @@ static char * __init dmi_string(struct dmi_header *dm, u8 s)
 }
 
 /*
- *	We have to be cautious here. We have seen BIOSes with DMI pointers
- *	pointing to completely the wrong place for example
+ *  We have to be cautious here. We have seen BIOSes with DMI pointers
+ *  pointing to completely the wrong place for example
  */
 
 static int __init dmi_table(u32 base, int len, int num, void (*decode)(struct dmi_header *))
@@ -58,8 +58,8 @@ static int __init dmi_table(u32 base, int len, int num, void (*decode)(struct dm
     data = buf;
 
     /*
-     *	Stop when we see al the items the table claimed to have
-     *	OR we run off the end of the table (also happens)
+     *  Stop when we see al the items the table claimed to have
+     *  OR we run off the end of the table (also happens)
      */
 
     while(i<num && (data - buf) < len)
@@ -67,16 +67,16 @@ static int __init dmi_table(u32 base, int len, int num, void (*decode)(struct dm
         dm=(struct dmi_header *)data;
 
         /*
-         *	Avoid misparsing crud if the length of the last
-         *	record is crap
+         *  Avoid misparsing crud if the length of the last
+         *  record is crap
          */
         if((data-buf+dm->length) >= len)
             break;
         decode(dm);
         data+=dm->length;
         /*
-         *	Don't go off the end of the data if there is
-         *	stuff looking like string fill past the end
+         *  Don't go off the end of the data if there is
+         *  stuff looking like string fill past the end
          */
         while((data-buf) < len && (*data || data[1]))
             data++;
@@ -96,8 +96,8 @@ static int __init dmi_iterate(void (*decode)(struct dmi_header *))
 
 #ifdef CONFIG_SIMNOW
     /*
-     *	Skip on x86/64 with simnow. Will eventually go away
-     *	If you see this ifdef in 2.6pre mail me !
+     *  Skip on x86/64 with simnow. Will eventually go away
+     *  If you see this ifdef in 2.6pre mail me !
      */
     return -1;
 #endif
@@ -144,7 +144,7 @@ enum
 static char *dmi_ident[DMI_STRING_MAX];
 
 /*
- *	Save a DMI string
+ *  Save a DMI string
  */
 
 static void __init dmi_save_ident(struct dmi_header *dm, int slot, int string)
@@ -163,7 +163,7 @@ static void __init dmi_save_ident(struct dmi_header *dm, int slot, int string)
 }
 
 /*
- *	DMI callbacks for problem boards
+ *  DMI callbacks for problem boards
  */
 
 struct dmi_strmatch
@@ -172,7 +172,7 @@ struct dmi_strmatch
     char *substr;
 };
 
-#define NONE	255
+#define NONE    255
 
 struct dmi_blacklist
 {
@@ -181,14 +181,14 @@ struct dmi_blacklist
     struct dmi_strmatch matches[4];
 };
 
-#define NO_MATCH	{ NONE, NULL}
-#define MATCH(a,b)	{ a, b }
+#define NO_MATCH    { NONE, NULL}
+#define MATCH(a,b)  { a, b }
 
 /*
- *	We have problems with IDE DMA on some platforms. In paticular the
- *	KT7 series. On these it seems the newer BIOS has fixed them. The
- *	rule needs to be improved to match specific BIOS revisions with
- *	corruption problems
+ *  We have problems with IDE DMA on some platforms. In paticular the
+ *  KT7 series. On these it seems the newer BIOS has fixed them. The
+ *  rule needs to be improved to match specific BIOS revisions with
+ *  corruption problems
  */
 
 static __init int disable_ide_dma(struct dmi_blacklist *d)
@@ -301,12 +301,12 @@ static __init int apm_is_horked(struct dmi_blacklist *d)
  *               |                ^
  *      < Does it Compile >----N--
  *               |Y               ^
- *	< Does it Boot Win98 >-N--
+ *  < Does it Boot Win98 >-N--
  *               |Y
  *           [Ship It]
  *
- *	Phoenix A04  08/24/2000 is known bad (Dell Inspiron 5000e)
- *	Phoenix A07  09/29/2000 is known good (Dell Inspiron 5000)
+ *  Phoenix A04  08/24/2000 is known bad (Dell Inspiron 5000e)
+ *  Phoenix A07  09/29/2000 is known good (Dell Inspiron 5000)
  */
 
 static __init int broken_apm_power(struct dmi_blacklist *d)
@@ -416,7 +416,7 @@ static __init int broken_ps2_resume(struct dmi_blacklist *d)
 
 
 /*
- *	Simple "print if true" callback
+ *  Simple "print if true" callback
  */
 
 static __init int print_if_true(struct dmi_blacklist *d)
@@ -426,55 +426,55 @@ static __init int print_if_true(struct dmi_blacklist *d)
 }
 
 /*
- *	Process the DMI blacklists
+ *  Process the DMI blacklists
  */
 
 
 /*
- *	This will be expanded over time to force things like the APM
- *	interrupt mask settings according to the laptop
+ *  This will be expanded over time to force things like the APM
+ *  interrupt mask settings according to the laptop
  */
 
 static __initdata struct dmi_blacklist dmi_blacklist[]=
 {
 #if 0
     {
-        disable_ide_dma, "KT7", {	/* Overbroad right now - kill DMA on problem KT7 boards */
+        disable_ide_dma, "KT7", {   /* Overbroad right now - kill DMA on problem KT7 boards */
             MATCH(DMI_PRODUCT_NAME, "KT7-RAID"),
             NO_MATCH, NO_MATCH, NO_MATCH
         }
     },
 #endif
     {
-        broken_ps2_resume, "Dell Latitude C600", {	/* Handle problems with APM on the C600 */
+        broken_ps2_resume, "Dell Latitude C600", {  /* Handle problems with APM on the C600 */
             MATCH(DMI_SYS_VENDOR, "Dell"),
             MATCH(DMI_PRODUCT_NAME, "Latitude C600"),
             NO_MATCH, NO_MATCH
         }
     },
     {
-        broken_apm_power, "Dell Inspiron 5000e", {	/* Handle problems with APM on Inspiron 5000e */
+        broken_apm_power, "Dell Inspiron 5000e", {  /* Handle problems with APM on Inspiron 5000e */
             MATCH(DMI_BIOS_VENDOR, "Phoenix Technologies LTD"),
             MATCH(DMI_BIOS_VERSION, "A04"),
             MATCH(DMI_BIOS_DATE, "08/24/2000"), NO_MATCH
         }
     },
     {
-        set_realmode_power_off, "Award Software v4.60 PGMA", {	/* broken PM poweroff bios */
+        set_realmode_power_off, "Award Software v4.60 PGMA", {  /* broken PM poweroff bios */
             MATCH(DMI_BIOS_VENDOR, "Award Software International, Inc."),
             MATCH(DMI_BIOS_VERSION, "4.60 PGMA"),
             MATCH(DMI_BIOS_DATE, "134526184"), NO_MATCH
         }
     },
     {
-        set_smp_bios_reboot, "Dell PowerEdge 1300", {	/* Handle problems with rebooting on Dell 1300's */
+        set_smp_bios_reboot, "Dell PowerEdge 1300", {   /* Handle problems with rebooting on Dell 1300's */
             MATCH(DMI_SYS_VENDOR, "Dell Computer Corporation"),
             MATCH(DMI_PRODUCT_NAME, "PowerEdge 1300/"),
             NO_MATCH, NO_MATCH
         }
     },
     {
-        set_bios_reboot, "Dell PowerEdge 300", {	/* Handle problems with rebooting on Dell 1300's */
+        set_bios_reboot, "Dell PowerEdge 300", {    /* Handle problems with rebooting on Dell 1300's */
             MATCH(DMI_SYS_VENDOR, "Dell Computer Corporation"),
             MATCH(DMI_PRODUCT_NAME, "PowerEdge 300/"),
             NO_MATCH, NO_MATCH
@@ -488,14 +488,14 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
         }
     },
     {
-        set_apm_ints, "Dell Inspiron", {	/* Allow interrupts during suspend on Dell Inspiron laptops*/
+        set_apm_ints, "Dell Inspiron", {    /* Allow interrupts during suspend on Dell Inspiron laptops*/
             MATCH(DMI_SYS_VENDOR, "Dell Computer Corporation"),
             MATCH(DMI_PRODUCT_NAME, "Inspiron 4000"),
             NO_MATCH, NO_MATCH
         }
     },
     {
-        set_apm_ints, "Compaq 12XL125", {	/* Allow interrupts during suspend on Compaq Laptops*/
+        set_apm_ints, "Compaq 12XL125", {   /* Allow interrupts during suspend on Compaq Laptops*/
             MATCH(DMI_SYS_VENDOR, "Compaq"),
             MATCH(DMI_PRODUCT_NAME, "Compaq PC"),
             MATCH(DMI_BIOS_VENDOR, "Phoenix Technologies LTD"),
@@ -548,7 +548,7 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
     },
 
     {
-        swab_apm_power_in_minutes, "Sony VAIO", {	/* Handle problems with APM on Sony Vaio PCG-XG29 */
+        swab_apm_power_in_minutes, "Sony VAIO", {   /* Handle problems with APM on Sony Vaio PCG-XG29 */
             MATCH(DMI_BIOS_VENDOR, "Phoenix Technologies LTD"),
             MATCH(DMI_BIOS_VERSION, "R0117A0"),
             MATCH(DMI_BIOS_DATE, "04/25/00"), NO_MATCH
@@ -556,7 +556,7 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
     },
 
     {
-        swab_apm_power_in_minutes, "Sony VAIO", {	/* Handle problems with APM on Sony Vaio PCG-Z600NE */
+        swab_apm_power_in_minutes, "Sony VAIO", {   /* Handle problems with APM on Sony Vaio PCG-Z600NE */
             MATCH(DMI_BIOS_VENDOR, "Phoenix Technologies LTD"),
             MATCH(DMI_BIOS_VERSION, "R0121Z1"),
             MATCH(DMI_BIOS_DATE, "05/11/00"), NO_MATCH
@@ -564,7 +564,7 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
     },
 
     {
-        swab_apm_power_in_minutes, "Sony VAIO", {	/* Handle problems with APM on Sony Vaio PCG-Z600NE */
+        swab_apm_power_in_minutes, "Sony VAIO", {   /* Handle problems with APM on Sony Vaio PCG-Z600NE */
             MATCH(DMI_BIOS_VENDOR, "Phoenix Technologies LTD"),
             MATCH(DMI_BIOS_VERSION, "WME01Z1"),
             MATCH(DMI_BIOS_DATE, "08/11/00"), NO_MATCH
@@ -572,7 +572,7 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
     },
 
     {
-        swab_apm_power_in_minutes, "Sony VAIO", {	/* Handle problems with APM on Sony Vaio PCG-Z505LS */
+        swab_apm_power_in_minutes, "Sony VAIO", {   /* Handle problems with APM on Sony Vaio PCG-Z505LS */
             MATCH(DMI_BIOS_VENDOR, "Phoenix Technologies LTD"),
             MATCH(DMI_BIOS_VERSION, "R0203D0"),
             MATCH(DMI_BIOS_DATE, "05/12/00"), NO_MATCH
@@ -580,7 +580,7 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
     },
 
     {
-        swab_apm_power_in_minutes, "Sony VAIO", {	/* Handle problems with APM on Sony Vaio PCG-Z505LS */
+        swab_apm_power_in_minutes, "Sony VAIO", {   /* Handle problems with APM on Sony Vaio PCG-Z505LS */
             MATCH(DMI_BIOS_VENDOR, "Phoenix Technologies LTD"),
             MATCH(DMI_BIOS_VERSION, "R0203Z3"),
             MATCH(DMI_BIOS_DATE, "08/25/00"), NO_MATCH
@@ -588,7 +588,7 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
     },
 
     {
-        swab_apm_power_in_minutes, "Sony VAIO", {	/* Handle problems with APM on Sony Vaio PCG-F104K */
+        swab_apm_power_in_minutes, "Sony VAIO", {   /* Handle problems with APM on Sony Vaio PCG-F104K */
             MATCH(DMI_BIOS_VENDOR, "Phoenix Technologies LTD"),
             MATCH(DMI_BIOS_VERSION, "R0204K2"),
             MATCH(DMI_BIOS_DATE, "08/28/00"), NO_MATCH
@@ -596,14 +596,14 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
     },
 
     {
-        swab_apm_power_in_minutes, "Sony VAIO", {	/* Handle problems with APM on Sony Vaio PCG-C1VN/C1VE */
+        swab_apm_power_in_minutes, "Sony VAIO", {   /* Handle problems with APM on Sony Vaio PCG-C1VN/C1VE */
             MATCH(DMI_BIOS_VENDOR, "Phoenix Technologies LTD"),
             MATCH(DMI_BIOS_VERSION, "R0208P1"),
             MATCH(DMI_BIOS_DATE, "11/09/00"), NO_MATCH
         }
     },
     {
-        swab_apm_power_in_minutes, "Sony VAIO", {	/* Handle problems with APM on Sony Vaio PCG-C1VE */
+        swab_apm_power_in_minutes, "Sony VAIO", {   /* Handle problems with APM on Sony Vaio PCG-C1VE */
             MATCH(DMI_BIOS_VENDOR, "Phoenix Technologies LTD"),
             MATCH(DMI_BIOS_VERSION, "R0204P1"),
             MATCH(DMI_BIOS_DATE, "09/12/00"), NO_MATCH
@@ -613,35 +613,35 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
     /* Problem Intel 440GX bioses */
 
     {
-        broken_pirq, "SABR1 Bios", {			/* Bad $PIR */
+        broken_pirq, "SABR1 Bios", {            /* Bad $PIR */
             MATCH(DMI_BIOS_VENDOR, "Intel Corporation"),
             MATCH(DMI_BIOS_VERSION,"SABR1"),
             NO_MATCH, NO_MATCH
         }
     },
     {
-        broken_pirq, "l44GX Bios", {        		/* Bad $PIR */
+        broken_pirq, "l44GX Bios", {                /* Bad $PIR */
             MATCH(DMI_BIOS_VENDOR, "Intel Corporation"),
             MATCH(DMI_BIOS_VERSION,"L440GX0.86B.0094.P10"),
             NO_MATCH, NO_MATCH
         }
     },
     {
-        broken_pirq, "l44GX Bios", {        		/* Bad $PIR */
+        broken_pirq, "l44GX Bios", {                /* Bad $PIR */
             MATCH(DMI_BIOS_VENDOR, "Intel Corporation"),
             MATCH(DMI_BIOS_VERSION,"L440GX0.86B.0120.P12"),
             NO_MATCH, NO_MATCH
         }
     },
     {
-        broken_pirq, "l44GX Bios", {		/* Bad $PIR */
+        broken_pirq, "l44GX Bios", {        /* Bad $PIR */
             MATCH(DMI_BIOS_VENDOR, "Intel Corporation"),
             MATCH(DMI_BIOS_VERSION,"L440GX0.86B.0125.P13"),
             NO_MATCH, NO_MATCH
         }
     },
     {
-        broken_pirq, "l44GX Bios", {		/* Bad $PIR */
+        broken_pirq, "l44GX Bios", {        /* Bad $PIR */
             MATCH(DMI_BIOS_VENDOR, "Intel Corporation"),
             MATCH(DMI_BIOS_VERSION,"L440GX0.86B.0066.P07.9906041405"),
             NO_MATCH, NO_MATCH
@@ -651,14 +651,14 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
     /* Intel in disgiuse - In this case they can't hide and they don't run
        too well either... */
     {
-        broken_pirq, "Dell PowerEdge 8450", {		/* Bad $PIR */
+        broken_pirq, "Dell PowerEdge 8450", {       /* Bad $PIR */
             MATCH(DMI_PRODUCT_NAME, "Dell PowerEdge 8450"),
             NO_MATCH, NO_MATCH, NO_MATCH
         }
     },
 
     {
-        broken_acpi_Sx, "ASUS K7V-RM", {		/* Bad ACPI Sx table */
+        broken_acpi_Sx, "ASUS K7V-RM", {        /* Bad ACPI Sx table */
             MATCH(DMI_BIOS_VERSION,"ASUS K7V-RM ACPI BIOS Revision 1003A"),
             MATCH(DMI_BOARD_NAME, "<K7V-RM>"),
             NO_MATCH, NO_MATCH
@@ -688,11 +688,11 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
 
 
     /*
-     *	Generic per vendor APM settings
+     *  Generic per vendor APM settings
      */
 
     {
-        set_apm_ints, "IBM", {	/* Allow interrupts during suspend on IBM laptops */
+        set_apm_ints, "IBM", {  /* Allow interrupts during suspend on IBM laptops */
             MATCH(DMI_SYS_VENDOR, "IBM"),
             NO_MATCH, NO_MATCH, NO_MATCH
         }
@@ -703,8 +703,8 @@ static __initdata struct dmi_blacklist dmi_blacklist[]=
 
 
 /*
- *	Walk the blacklist table running matching functions until someone
- *	returns 1 or we hit the end.
+ *  Walk the blacklist table running matching functions until someone
+ *  returns 1 or we hit the end.
  */
 
 static __init void dmi_check_blacklist(void)
@@ -735,9 +735,9 @@ fail:
 
 
 /*
- *	Process a DMI table entry. Right now all we care about are the BIOS
- *	and machine entries. For 2.5 we should pull the smbus controller info
- *	out of here.
+ *  Process a DMI table entry. Right now all we care about are the BIOS
+ *  and machine entries. For 2.5 we should pull the smbus controller info
+ *  out of here.
  */
 
 static void __init dmi_decode(struct dmi_header *dm)

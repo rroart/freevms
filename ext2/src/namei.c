@@ -48,7 +48,7 @@
 static inline void ext2_inc_count(struct inode *inode)
 {
     inode->i_nlink++;
-    //	mark_inode_dirty(inode);
+    //  mark_inode_dirty(inode);
     ext2_sync_inode (inode);
 }
 
@@ -112,7 +112,7 @@ static int ext2_create (struct inode * dir, struct dentry * dentry, int mode)
     {
         inode->i_op = &ext2_file_inode_operations;
         inode->i_fop = &ext2_file_operations;
-        //		mark_inode_dirty(inode);
+        //      mark_inode_dirty(inode);
         ext2_sync_inode (inode);
         err = ext2_add_nondir(dentry, inode);
     }
@@ -126,7 +126,7 @@ static int ext2_mknod (struct inode * dir, struct dentry *dentry, int mode, int 
     if (!IS_ERR(inode))
     {
         init_special_inode(inode, mode, rdev);
-        //		mark_inode_dirty(inode);
+        //      mark_inode_dirty(inode);
         ext2_sync_inode (inode);
         err = ext2_add_nondir(dentry, inode);
     }
@@ -164,7 +164,7 @@ static int ext2_symlink (struct inode * dir, struct dentry * dentry,
         memcpy((char*)&inode->u.ext2_i.i_data,symname,l);
         inode->i_size = l-1;
     }
-    //	mark_inode_dirty(inode);
+    //  mark_inode_dirty(inode);
     ext2_sync_inode (inode);
 
     err = ext2_add_nondir(dentry, inode);
@@ -277,7 +277,7 @@ static int ext2_rmdir (struct inode * dir, struct dentry *dentry)
 }
 
 static int ext2_rename (struct inode * old_dir, struct dentry * old_dentry,
-                        struct inode * new_dir,	struct dentry * new_dentry )
+                        struct inode * new_dir, struct dentry * new_dentry )
 {
     struct inode * old_inode = old_dentry->d_inode;
     struct inode * new_inode = new_dentry->d_inode;

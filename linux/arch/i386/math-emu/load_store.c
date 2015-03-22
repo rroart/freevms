@@ -32,7 +32,7 @@
 #define _PUSH_ 3   /* Need to check for space to push onto stack */
 #define _null_ 4   /* Function illegal or not implemented */
 
-#define pop_0()	{ FPU_settag0(TAG_Empty); top++; }
+#define pop_0() { FPU_settag0(TAG_Empty); top++; }
 
 
 static u_char const type_table[32] =
@@ -97,7 +97,7 @@ int FPU_load_store(u_char type, fpu_addr_modes addr_modes,
         break;
     case _REG0_:
         st0_ptr = &st(0);       /* Some of these instructions pop after
-				 storing */
+                 storing */
         st0_tag = FPU_gettag0();
         break;
     case _PUSH_:
@@ -177,25 +177,25 @@ int FPU_load_store(u_char type, fpu_addr_modes addr_modes,
         clear_C1();
         if ( FPU_store_single(st0_ptr, st0_tag, (float *)data_address) )
             pop_0();  /* pop only if the number was actually stored
-		     (see the 80486 manual p16-28) */
+             (see the 80486 manual p16-28) */
         break;
     case 015:     /* fistp m32int */
         clear_C1();
         if ( FPU_store_int32(st0_ptr, st0_tag, (long *)data_address) )
             pop_0();  /* pop only if the number was actually stored
-		     (see the 80486 manual p16-28) */
+             (see the 80486 manual p16-28) */
         break;
     case 016:     /* fstp m64real */
         clear_C1();
         if ( FPU_store_double(st0_ptr, st0_tag, (double *)data_address) )
             pop_0();  /* pop only if the number was actually stored
-		     (see the 80486 manual p16-28) */
+             (see the 80486 manual p16-28) */
         break;
     case 017:     /* fistp m16int */
         clear_C1();
         if ( FPU_store_int16(st0_ptr, st0_tag, (short *)data_address) )
             pop_0();  /* pop only if the number was actually stored
-		     (see the 80486 manual p16-28) */
+             (see the 80486 manual p16-28) */
         break;
     case 020:     /* fldenv  m14/28byte */
         fldenv(addr_modes, (u_char *)data_address);
@@ -245,7 +245,7 @@ int FPU_load_store(u_char type, fpu_addr_modes addr_modes,
         clear_C1();
         if ( FPU_store_bcd(st0_ptr, st0_tag, (u_char *)data_address) )
             pop_0();  /* pop only if the number was actually stored
-		     (see the 80486 manual p16-28) */
+             (see the 80486 manual p16-28) */
         break;
     case 034:      /* fstcw m16int */
         RE_ENTRANT_CHECK_OFF;
@@ -257,7 +257,7 @@ int FPU_load_store(u_char type, fpu_addr_modes addr_modes,
         clear_C1();
         if ( FPU_store_extended(st0_ptr, st0_tag, (long double *)data_address) )
             pop_0();  /* pop only if the number was actually stored
-		     (see the 80486 manual p16-28) */
+             (see the 80486 manual p16-28) */
         break;
     case 036:      /* fstsw m2byte */
         RE_ENTRANT_CHECK_OFF;
@@ -269,7 +269,7 @@ int FPU_load_store(u_char type, fpu_addr_modes addr_modes,
         clear_C1();
         if ( FPU_store_int64(st0_ptr, st0_tag, (long long *)data_address) )
             pop_0();  /* pop only if the number was actually stored
-		     (see the 80486 manual p16-28) */
+             (see the 80486 manual p16-28) */
         break;
     }
     return 0;

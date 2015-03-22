@@ -1,20 +1,20 @@
 /*
- * INET		An implementation of the TCP/IP protocol suite for the LINUX
- *		operating system.  INET is implemented using the  BSD Socket
- *		interface as the means of communication with the user level.
+ * INET     An implementation of the TCP/IP protocol suite for the LINUX
+ *      operating system.  INET is implemented using the  BSD Socket
+ *      interface as the means of communication with the user level.
  *
- *		Global definitions for the Token-Ring IEEE 802.5 interface.
+ *      Global definitions for the Token-Ring IEEE 802.5 interface.
  *
- * Version:	@(#)if_tr.h	0.0	07/11/94
+ * Version: @(#)if_tr.h 0.0 07/11/94
  *
- * Author:	Fred N. van Kempen, <waltje@uWalt.NL.Mugnet.ORG>
- *		Donald Becker, <becker@super.org>
+ * Author:  Fred N. van Kempen, <waltje@uWalt.NL.Mugnet.ORG>
+ *      Donald Becker, <becker@super.org>
  *    Peter De Schrijver, <stud11@cc4.kuleuven.ac.be>
  *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
+ *      This program is free software; you can redistribute it and/or
+ *      modify it under the terms of the GNU General Public License
+ *      as published by the Free Software Foundation; either version
+ *      2 of the License, or (at your option) any later version.
  */
 #ifndef _LINUX_IF_TR_H
 #define _LINUX_IF_TR_H
@@ -22,15 +22,15 @@
 
 /* IEEE 802.5 Token-Ring magic constants.  The frame sizes omit the preamble
    and FCS/CRC (frame check sequence). */
-#define TR_ALEN	6		/* Octets in one ethernet addr	 */
+#define TR_ALEN 6       /* Octets in one ethernet addr   */
 #define TR_HLEN   (sizeof(struct trh_hdr)+sizeof(struct trllc))
-#define AC			0x10
+#define AC          0x10
 #define LLC_FRAME 0x40
 #if 0
-#define ETH_HLEN	14		/* Total octets in header.	 */
-#define ETH_ZLEN	60		/* Min. octets in frame sans FCS */
-#define ETH_DATA_LEN	1500		/* Max. octets in payload	 */
-#define ETH_FRAME_LEN	1514		/* Max. octets in frame sans FCS */
+#define ETH_HLEN    14      /* Total octets in header.   */
+#define ETH_ZLEN    60      /* Min. octets in frame sans FCS */
+#define ETH_DATA_LEN    1500        /* Max. octets in payload    */
+#define ETH_FRAME_LEN   1514        /* Max. octets in frame sans FCS */
 #endif
 
 
@@ -41,36 +41,36 @@
 /* This is an Token-Ring frame header. */
 struct trh_hdr
 {
-    __u8  ac;			/* access control field */
-    __u8  fc;			/* frame control field */
-    __u8  daddr[TR_ALEN];		/* destination address */
-    __u8  saddr[TR_ALEN];		/* source address */
-    __u16 rcf;			/* route control field */
-    __u16 rseg[8];			/* routing registers */
+    __u8  ac;           /* access control field */
+    __u8  fc;           /* frame control field */
+    __u8  daddr[TR_ALEN];       /* destination address */
+    __u8  saddr[TR_ALEN];       /* source address */
+    __u16 rcf;          /* route control field */
+    __u16 rseg[8];          /* routing registers */
 };
 
 /* This is an Token-Ring LLC structure */
 struct trllc
 {
-    __u8  dsap;			/* destination SAP */
-    __u8  ssap;			/* source SAP */
-    __u8  llc;			/* LLC control field */
-    __u8  protid[3];		/* protocol id */
-    __u16 ethertype;		/* ether type field */
+    __u8  dsap;         /* destination SAP */
+    __u8  ssap;         /* source SAP */
+    __u8  llc;          /* LLC control field */
+    __u8  protid[3];        /* protocol id */
+    __u16 ethertype;        /* ether type field */
 };
 
 /* Token-Ring statistics collection data. */
 struct tr_statistics
 {
-    unsigned long rx_packets;       /* total packets received	*/
-    unsigned long tx_packets;	/* total packets transmitted	*/
-    unsigned long rx_bytes;		/* total bytes received   	*/
-    unsigned long tx_bytes;		/* total bytes transmitted	*/
-    unsigned long rx_errors;	/* bad packets received		*/
-    unsigned long tx_errors;	/* packet transmit problems	*/
-    unsigned long rx_dropped;	/* no space in linux buffers	*/
-    unsigned long tx_dropped;	/* no space available in linux	*/
-    unsigned long multicast;	/* multicast packets received	*/
+    unsigned long rx_packets;       /* total packets received   */
+    unsigned long tx_packets;   /* total packets transmitted    */
+    unsigned long rx_bytes;     /* total bytes received     */
+    unsigned long tx_bytes;     /* total bytes transmitted  */
+    unsigned long rx_errors;    /* bad packets received     */
+    unsigned long tx_errors;    /* packet transmit problems */
+    unsigned long rx_dropped;   /* no space in linux buffers    */
+    unsigned long tx_dropped;   /* no space available in linux  */
+    unsigned long multicast;    /* multicast packets received   */
     unsigned long transmit_collision;
 
     /* detailed Token-Ring errors. See IBM Token-Ring Network
@@ -100,4 +100,4 @@ struct tr_statistics
 #define TR_RCF_BROADCAST_MASK 0xC000
 #define TR_MAXRIFLEN 18
 
-#endif	/* _LINUX_IF_TR_H */
+#endif  /* _LINUX_IF_TR_H */

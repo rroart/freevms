@@ -1,8 +1,8 @@
 
 /*
- *	sysgeterrno.c
+ *  sysgeterrno.c
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@
  *
  *The author may be contacted at freevms@sympatico.ca
  *
- *	Andrew Allison
- *	50 Denlaw Road
- *	London, Ont
- *	Canada
- *	N6G 3L4
+ *  Andrew Allison
+ *  50 Denlaw Road
+ *  London, Ont
+ *  Canada
+ *  N6G 3L4
  *
  */
 int sys$$geterrno(char *errmsg);
@@ -36,8 +36,8 @@ int sys$$geterrno(char *errmsg);
 
 int sys$$geterrno(char *errmsg)
 {
-    int	i, numelements;
-    struct	errorcode
+    int i, numelements;
+    struct  errorcode
     {
         char *msg;
         int errno;

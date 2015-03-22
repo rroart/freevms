@@ -1,5 +1,5 @@
-#ifndef cmuip_h
-#define cmuip_h
+#ifndef CMUIP_H
+#define CMUIP_H
 
 struct tcb_structure;
 BLISSIF(int i);

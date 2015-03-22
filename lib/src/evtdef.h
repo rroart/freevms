@@ -1,5 +1,5 @@
-#ifndef evtdef_h
-#define evtdef_h
+#ifndef EVTDEF_H
+#define EVTDEF_H
 
 #define EVT$_AST 0
 #define EVT$_COLPGA 0

@@ -33,7 +33,7 @@
 #include <linux/cramfs_fs.h>
 #include <zlib.h>
 
-#define PAD_SIZE 512		/* only 0 and 512 supported by kernel */
+#define PAD_SIZE 512        /* only 0 and 512 supported by kernel */
 
 static const char *progname = "mkcramfs";
 
@@ -98,7 +98,7 @@ struct entry
     /* points to other identical file */
     struct entry *same;
     unsigned int offset;            /* pointer to compressed data in archive */
-    unsigned int dir_offset;	/* Where in the archive is the directory entry? */
+    unsigned int dir_offset;    /* Where in the archive is the directory entry? */
 
     /* organization */
     struct entry *child; /* null for non-directories and empty directories */
@@ -333,7 +333,7 @@ static unsigned int parse_directory(struct entry *root_entry, const char *name, 
         totalsize += size;
     }
     free(path);
-    free(dirlist);		/* allocated by scandir() with malloc() */
+    free(dirlist);      /* allocated by scandir() with malloc() */
     return totalsize;
 }
 
@@ -422,7 +422,7 @@ static unsigned int write_directory_structure(struct entry *entry, char *base, u
                write over inode->offset later. */
 
             offset += sizeof(struct cramfs_inode);
-            total_nodes++;	/* another node */
+            total_nodes++;  /* another node */
             memcpy(base + offset, entry->name, len);
             /* Pad up the name to a 4-byte boundary */
             while (len & 3)
@@ -625,8 +625,8 @@ static unsigned int write_file(char *file, char *base, unsigned int offset)
  * hardware and kernel can support (64MB?).
  */
 #define MAXFSLEN ((((1 << CRAMFS_OFFSET_WIDTH) - 1) << 2) /* offset */ \
-		  + (1 << CRAMFS_SIZE_WIDTH) - 1 /* filesize */ \
-		  + (1 << CRAMFS_SIZE_WIDTH) * 4 / PAGE_CACHE_SIZE /* block pointers */ )
+          + (1 << CRAMFS_SIZE_WIDTH) - 1 /* filesize */ \
+          + (1 << CRAMFS_SIZE_WIDTH) * 4 / PAGE_CACHE_SIZE /* block pointers */ )
 
 
 /*
@@ -640,7 +640,7 @@ static unsigned int write_file(char *file, char *base, unsigned int offset)
  */
 int main(int argc, char **argv)
 {
-    struct stat st;		/* used twice... */
+    struct stat st;     /* used twice... */
     struct entry *root_entry;
     char *rom_image;
     ssize_t offset, written;
@@ -649,7 +649,7 @@ int main(int argc, char **argv)
     loff_t fslen_ub = sizeof(struct cramfs_super);
     char const *dirname, *outfile;
     u32 crc = crc32(0L, Z_NULL, 0);
-    int c;			/* for getopt */
+    int c;          /* for getopt */
 
     total_blocks = 0;
 

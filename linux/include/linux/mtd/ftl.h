@@ -35,43 +35,43 @@
 
 typedef struct erase_unit_header_t
 {
-    u_int8_t	LinkTargetTuple[5];
-    u_int8_t	DataOrgTuple[10];
-    u_int8_t	NumTransferUnits;
-    u_int32_t	EraseCount;
-    u_int16_t	LogicalEUN;
-    u_int8_t	BlockSize;
-    u_int8_t	EraseUnitSize;
-    u_int16_t	FirstPhysicalEUN;
-    u_int16_t	NumEraseUnits;
-    u_int32_t	FormattedSize;
-    u_int32_t	FirstVMAddress;
-    u_int16_t	NumVMPages;
-    u_int8_t	Flags;
-    u_int8_t	Code;
-    u_int32_t	SerialNumber;
-    u_int32_t	AltEUHOffset;
-    u_int32_t	BAMOffset;
-    u_int8_t	Reserved[12];
-    u_int8_t	EndTuple[2];
+    u_int8_t    LinkTargetTuple[5];
+    u_int8_t    DataOrgTuple[10];
+    u_int8_t    NumTransferUnits;
+    u_int32_t   EraseCount;
+    u_int16_t   LogicalEUN;
+    u_int8_t    BlockSize;
+    u_int8_t    EraseUnitSize;
+    u_int16_t   FirstPhysicalEUN;
+    u_int16_t   NumEraseUnits;
+    u_int32_t   FormattedSize;
+    u_int32_t   FirstVMAddress;
+    u_int16_t   NumVMPages;
+    u_int8_t    Flags;
+    u_int8_t    Code;
+    u_int32_t   SerialNumber;
+    u_int32_t   AltEUHOffset;
+    u_int32_t   BAMOffset;
+    u_int8_t    Reserved[12];
+    u_int8_t    EndTuple[2];
 } erase_unit_header_t;
 
 /* Flags in erase_unit_header_t */
-#define HIDDEN_AREA		0x01
-#define REVERSE_POLARITY	0x02
-#define DOUBLE_BAI		0x04
+#define HIDDEN_AREA     0x01
+#define REVERSE_POLARITY    0x02
+#define DOUBLE_BAI      0x04
 
 /* Definitions for block allocation information */
 
-#define BLOCK_FREE(b)		((b) == 0xffffffff)
-#define BLOCK_DELETED(b)	(((b) == 0) || ((b) == 0xfffffffe))
+#define BLOCK_FREE(b)       ((b) == 0xffffffff)
+#define BLOCK_DELETED(b)    (((b) == 0) || ((b) == 0xfffffffe))
 
-#define BLOCK_TYPE(b)		((b) & 0x7f)
-#define BLOCK_ADDRESS(b)	((b) & ~0x7f)
-#define BLOCK_NUMBER(b)		((b) >> 9)
-#define BLOCK_CONTROL		0x30
-#define BLOCK_DATA		0x40
-#define BLOCK_REPLACEMENT	0x60
-#define BLOCK_BAD		0x70
+#define BLOCK_TYPE(b)       ((b) & 0x7f)
+#define BLOCK_ADDRESS(b)    ((b) & ~0x7f)
+#define BLOCK_NUMBER(b)     ((b) >> 9)
+#define BLOCK_CONTROL       0x30
+#define BLOCK_DATA      0x40
+#define BLOCK_REPLACEMENT   0x60
+#define BLOCK_BAD       0x70
 
 #endif /* _LINUX_FTL_H */

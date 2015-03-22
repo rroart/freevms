@@ -23,28 +23,28 @@
  */
 struct ext3_inode_info
 {
-    __u32	i_data[15];
-    __u32	i_flags;
+    __u32   i_data[15];
+    __u32   i_flags;
 #ifdef EXT3_FRAGMENTS
-    __u32	i_faddr;
-    __u8	i_frag_no;
-    __u8	i_frag_size;
-    __u16	unused;			/* formerly i_osync */
+    __u32   i_faddr;
+    __u8    i_frag_no;
+    __u8    i_frag_size;
+    __u16   unused;         /* formerly i_osync */
 #endif
-    __u32	i_file_acl;
-    __u32	i_dir_acl;
-    __u32	i_dtime;
-    __u32	i_block_group;
-    __u32	i_state;		/* Dynamic state flags for ext3 */
-    __u32	i_next_alloc_block;
-    __u32	i_next_alloc_goal;
+    __u32   i_file_acl;
+    __u32   i_dir_acl;
+    __u32   i_dtime;
+    __u32   i_block_group;
+    __u32   i_state;        /* Dynamic state flags for ext3 */
+    __u32   i_next_alloc_block;
+    __u32   i_next_alloc_goal;
 #ifdef EXT3_PREALLOCATE
-    __u32	i_prealloc_block;
-    __u32	i_prealloc_count;
+    __u32   i_prealloc_block;
+    __u32   i_prealloc_count;
 #endif
-    __u32	i_dir_start_lookup;
+    __u32   i_dir_start_lookup;
 
-    struct list_head i_orphan;	/* unlinked but open inodes */
+    struct list_head i_orphan;  /* unlinked but open inodes */
 
     /*
      * i_disksize keeps track of what the inode size is ON DISK, not
@@ -61,7 +61,7 @@ struct ext3_inode_info
      * a truncate is in progress.  The only things which change i_disksize
      * are ext3_get_block (growth) and ext3_truncate (shrinkth).
      */
-    loff_t	i_disksize;
+    loff_t  i_disksize;
 
     /*
      * truncate_sem is for serialising ext3_truncate() against
@@ -76,4 +76,4 @@ struct ext3_inode_info
     struct rw_semaphore truncate_sem;
 };
 
-#endif	/* _LINUX_EXT3_FS_I */
+#endif  /* _LINUX_EXT3_FS_I */

@@ -1,5 +1,5 @@
-#ifndef shm_iddef_h
-#define shm_iddef_h
+#ifndef SHM_IDDEF_H
+#define SHM_IDDEF_H
 
 struct _shm_id
 {

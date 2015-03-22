@@ -18,26 +18,26 @@
  * Copyright (C) 1998 Ingo Molnar.
  */
 
-#define FPU_SAVE							\
-  do {									\
-	if (!(current->flags & PF_USEDFPU))				\
-		__asm__ __volatile__ (" clts;\n");			\
-	__asm__ __volatile__ ("fsave %0; fwait": "=m"(fpu_save[0]));	\
+#define FPU_SAVE                            \
+  do {                                  \
+    if (!(current->flags & PF_USEDFPU))             \
+        __asm__ __volatile__ (" clts;\n");          \
+    __asm__ __volatile__ ("fsave %0; fwait": "=m"(fpu_save[0]));    \
   } while (0)
 
-#define FPU_RESTORE							\
-  do {									\
-	__asm__ __volatile__ ("frstor %0": : "m"(fpu_save[0]));		\
-	if (!(current->flags & PF_USEDFPU))				\
-		stts();							\
+#define FPU_RESTORE                         \
+  do {                                  \
+    __asm__ __volatile__ ("frstor %0": : "m"(fpu_save[0]));     \
+    if (!(current->flags & PF_USEDFPU))             \
+        stts();                         \
   } while (0)
 
-#define LD(x,y)		"       movq   8*("#x")(%1), %%mm"#y"   ;\n"
-#define ST(x,y)		"       movq %%mm"#y",   8*("#x")(%1)   ;\n"
-#define XO1(x,y)	"       pxor   8*("#x")(%2), %%mm"#y"   ;\n"
-#define XO2(x,y)	"       pxor   8*("#x")(%3), %%mm"#y"   ;\n"
-#define XO3(x,y)	"       pxor   8*("#x")(%4), %%mm"#y"   ;\n"
-#define XO4(x,y)	"       pxor   8*("#x")(%5), %%mm"#y"   ;\n"
+#define LD(x,y)     "       movq   8*("#x")(%1), %%mm"#y"   ;\n"
+#define ST(x,y)     "       movq %%mm"#y",   8*("#x")(%1)   ;\n"
+#define XO1(x,y)    "       pxor   8*("#x")(%2), %%mm"#y"   ;\n"
+#define XO2(x,y)    "       pxor   8*("#x")(%3), %%mm"#y"   ;\n"
+#define XO3(x,y)    "       pxor   8*("#x")(%4), %%mm"#y"   ;\n"
+#define XO4(x,y)    "       pxor   8*("#x")(%5), %%mm"#y"   ;\n"
 
 
 static void
@@ -51,18 +51,18 @@ xor_pII_mmx_2(unsigned long bytes, unsigned long *p1, unsigned long *p2)
     __asm__ __volatile__ (
 #undef BLOCK
 #define BLOCK(i) \
-	LD(i,0)					\
-		LD(i+1,1)			\
-			LD(i+2,2)		\
-				LD(i+3,3)	\
-	XO1(i,0)				\
-	ST(i,0)					\
-		XO1(i+1,1)			\
-		ST(i+1,1)			\
-			XO1(i+2,2)		\
-			ST(i+2,2)		\
-				XO1(i+3,3)	\
-				ST(i+3,3)
+    LD(i,0)                 \
+        LD(i+1,1)           \
+            LD(i+2,2)       \
+                LD(i+3,3)   \
+    XO1(i,0)                \
+    ST(i,0)                 \
+        XO1(i+1,1)          \
+        ST(i+1,1)           \
+            XO1(i+2,2)      \
+            ST(i+2,2)       \
+                XO1(i+3,3)  \
+                ST(i+3,3)
 
         " .align 32			;\n"
         " 1:                            ;\n"
@@ -96,22 +96,22 @@ xor_pII_mmx_3(unsigned long bytes, unsigned long *p1, unsigned long *p2,
     __asm__ __volatile__ (
 #undef BLOCK
 #define BLOCK(i) \
-	LD(i,0)					\
-		LD(i+1,1)			\
-			LD(i+2,2)		\
-				LD(i+3,3)	\
-	XO1(i,0)				\
-		XO1(i+1,1)			\
-			XO1(i+2,2)		\
-				XO1(i+3,3)	\
-	XO2(i,0)				\
-	ST(i,0)					\
-		XO2(i+1,1)			\
-		ST(i+1,1)			\
-			XO2(i+2,2)		\
-			ST(i+2,2)		\
-				XO2(i+3,3)	\
-				ST(i+3,3)
+    LD(i,0)                 \
+        LD(i+1,1)           \
+            LD(i+2,2)       \
+                LD(i+3,3)   \
+    XO1(i,0)                \
+        XO1(i+1,1)          \
+            XO1(i+2,2)      \
+                XO1(i+3,3)  \
+    XO2(i,0)                \
+    ST(i,0)                 \
+        XO2(i+1,1)          \
+        ST(i+1,1)           \
+            XO2(i+2,2)      \
+            ST(i+2,2)       \
+                XO2(i+3,3)  \
+                ST(i+3,3)
 
         " .align 32			;\n"
         " 1:                            ;\n"
@@ -146,26 +146,26 @@ xor_pII_mmx_4(unsigned long bytes, unsigned long *p1, unsigned long *p2,
     __asm__ __volatile__ (
 #undef BLOCK
 #define BLOCK(i) \
-	LD(i,0)					\
-		LD(i+1,1)			\
-			LD(i+2,2)		\
-				LD(i+3,3)	\
-	XO1(i,0)				\
-		XO1(i+1,1)			\
-			XO1(i+2,2)		\
-				XO1(i+3,3)	\
-	XO2(i,0)				\
-		XO2(i+1,1)			\
-			XO2(i+2,2)		\
-				XO2(i+3,3)	\
-	XO3(i,0)				\
-	ST(i,0)					\
-		XO3(i+1,1)			\
-		ST(i+1,1)			\
-			XO3(i+2,2)		\
-			ST(i+2,2)		\
-				XO3(i+3,3)	\
-				ST(i+3,3)
+    LD(i,0)                 \
+        LD(i+1,1)           \
+            LD(i+2,2)       \
+                LD(i+3,3)   \
+    XO1(i,0)                \
+        XO1(i+1,1)          \
+            XO1(i+2,2)      \
+                XO1(i+3,3)  \
+    XO2(i,0)                \
+        XO2(i+1,1)          \
+            XO2(i+2,2)      \
+                XO2(i+3,3)  \
+    XO3(i,0)                \
+    ST(i,0)                 \
+        XO3(i+1,1)          \
+        ST(i+1,1)           \
+            XO3(i+2,2)      \
+            ST(i+2,2)       \
+                XO3(i+3,3)  \
+                ST(i+3,3)
 
         " .align 32			;\n"
         " 1:                            ;\n"
@@ -201,30 +201,30 @@ xor_pII_mmx_5(unsigned long bytes, unsigned long *p1, unsigned long *p2,
     __asm__ __volatile__ (
 #undef BLOCK
 #define BLOCK(i) \
-	LD(i,0)					\
-		LD(i+1,1)			\
-			LD(i+2,2)		\
-				LD(i+3,3)	\
-	XO1(i,0)				\
-		XO1(i+1,1)			\
-			XO1(i+2,2)		\
-				XO1(i+3,3)	\
-	XO2(i,0)				\
-		XO2(i+1,1)			\
-			XO2(i+2,2)		\
-				XO2(i+3,3)	\
-	XO3(i,0)				\
-		XO3(i+1,1)			\
-			XO3(i+2,2)		\
-				XO3(i+3,3)	\
-	XO4(i,0)				\
-	ST(i,0)					\
-		XO4(i+1,1)			\
-		ST(i+1,1)			\
-			XO4(i+2,2)		\
-			ST(i+2,2)		\
-				XO4(i+3,3)	\
-				ST(i+3,3)
+    LD(i,0)                 \
+        LD(i+1,1)           \
+            LD(i+2,2)       \
+                LD(i+3,3)   \
+    XO1(i,0)                \
+        XO1(i+1,1)          \
+            XO1(i+2,2)      \
+                XO1(i+3,3)  \
+    XO2(i,0)                \
+        XO2(i+1,1)          \
+            XO2(i+2,2)      \
+                XO2(i+3,3)  \
+    XO3(i,0)                \
+        XO3(i+1,1)          \
+            XO3(i+2,2)      \
+                XO3(i+3,3)  \
+    XO4(i,0)                \
+    ST(i,0)                 \
+        XO4(i+1,1)          \
+        ST(i+1,1)           \
+            XO4(i+2,2)      \
+            ST(i+2,2)       \
+                XO4(i+3,3)  \
+                ST(i+3,3)
 
         " .align 32			;\n"
         " 1:                            ;\n"
@@ -542,45 +542,45 @@ do_5:
  * Copyright (C) 1999 Zach Brown (with obvious credit due Ingo)
  */
 
-#define XMMS_SAVE				\
-	__asm__ __volatile__ ( 			\
-		"movl %%cr0,%0		;\n\t"	\
-		"clts			;\n\t"	\
-		"movups %%xmm0,(%1)	;\n\t"	\
-		"movups %%xmm1,0x10(%1)	;\n\t"	\
-		"movups %%xmm2,0x20(%1)	;\n\t"	\
-		"movups %%xmm3,0x30(%1)	;\n\t"	\
-		: "=r" (cr0)			\
-		: "r" (xmm_save) 		\
-		: "memory")
+#define XMMS_SAVE               \
+    __asm__ __volatile__ (          \
+        "movl %%cr0,%0		;\n\t"  \
+        "clts			;\n\t"  \
+        "movups %%xmm0,(%1)	;\n\t"  \
+        "movups %%xmm1,0x10(%1)	;\n\t"  \
+        "movups %%xmm2,0x20(%1)	;\n\t"  \
+        "movups %%xmm3,0x30(%1)	;\n\t"  \
+        : "=r" (cr0)            \
+        : "r" (xmm_save)        \
+        : "memory")
 
-#define XMMS_RESTORE				\
-	__asm__ __volatile__ ( 			\
-		"sfence			;\n\t"	\
-		"movups (%1),%%xmm0	;\n\t"	\
-		"movups 0x10(%1),%%xmm1	;\n\t"	\
-		"movups 0x20(%1),%%xmm2	;\n\t"	\
-		"movups 0x30(%1),%%xmm3	;\n\t"	\
-		"movl 	%0,%%cr0	;\n\t"	\
-		:				\
-		: "r" (cr0), "r" (xmm_save)	\
-		: "memory")
+#define XMMS_RESTORE                \
+    __asm__ __volatile__ (          \
+        "sfence			;\n\t"    \
+        "movups (%1),%%xmm0	;\n\t"  \
+        "movups 0x10(%1),%%xmm1	;\n\t"  \
+        "movups 0x20(%1),%%xmm2	;\n\t"  \
+        "movups 0x30(%1),%%xmm3	;\n\t"  \
+        "movl 	%0,%%cr0	;\n\t"  \
+        :               \
+        : "r" (cr0), "r" (xmm_save) \
+        : "memory")
 
-#define OFFS(x)		"16*("#x")"
-#define PF_OFFS(x)	"256+16*("#x")"
-#define	PF0(x)		"	prefetchnta "PF_OFFS(x)"(%1)		;\n"
-#define LD(x,y)		"       movaps   "OFFS(x)"(%1), %%xmm"#y"	;\n"
-#define ST(x,y)		"       movaps %%xmm"#y",   "OFFS(x)"(%1)	;\n"
-#define PF1(x)		"	prefetchnta "PF_OFFS(x)"(%2)		;\n"
-#define PF2(x)		"	prefetchnta "PF_OFFS(x)"(%3)		;\n"
-#define PF3(x)		"	prefetchnta "PF_OFFS(x)"(%4)		;\n"
-#define PF4(x)		"	prefetchnta "PF_OFFS(x)"(%5)		;\n"
-#define PF5(x)		"	prefetchnta "PF_OFFS(x)"(%6)		;\n"
-#define XO1(x,y)	"       xorps   "OFFS(x)"(%2), %%xmm"#y"	;\n"
-#define XO2(x,y)	"       xorps   "OFFS(x)"(%3), %%xmm"#y"	;\n"
-#define XO3(x,y)	"       xorps   "OFFS(x)"(%4), %%xmm"#y"	;\n"
-#define XO4(x,y)	"       xorps   "OFFS(x)"(%5), %%xmm"#y"	;\n"
-#define XO5(x,y)	"       xorps   "OFFS(x)"(%6), %%xmm"#y"	;\n"
+#define OFFS(x)     "16*("#x")"
+#define PF_OFFS(x)  "256+16*("#x")"
+#define PF0(x)      "	prefetchnta "PF_OFFS(x)"(%1)		;\n"
+#define LD(x,y)     "       movaps   "OFFS(x)"(%1), %%xmm"#y"	;\n"
+#define ST(x,y)     "       movaps %%xmm"#y",   "OFFS(x)"(%1)	;\n"
+#define PF1(x)      "	prefetchnta "PF_OFFS(x)"(%2)		;\n"
+#define PF2(x)      "	prefetchnta "PF_OFFS(x)"(%3)		;\n"
+#define PF3(x)      "	prefetchnta "PF_OFFS(x)"(%4)		;\n"
+#define PF4(x)      "	prefetchnta "PF_OFFS(x)"(%5)		;\n"
+#define PF5(x)      "	prefetchnta "PF_OFFS(x)"(%6)		;\n"
+#define XO1(x,y)    "       xorps   "OFFS(x)"(%2), %%xmm"#y"	;\n"
+#define XO2(x,y)    "       xorps   "OFFS(x)"(%3), %%xmm"#y"	;\n"
+#define XO3(x,y)    "       xorps   "OFFS(x)"(%4), %%xmm"#y"	;\n"
+#define XO4(x,y)    "       xorps   "OFFS(x)"(%5), %%xmm"#y"	;\n"
+#define XO5(x,y)    "       xorps   "OFFS(x)"(%6), %%xmm"#y"	;\n"
 
 
 static void
@@ -595,22 +595,22 @@ xor_sse_2(unsigned long bytes, unsigned long *p1, unsigned long *p2)
     __asm__ __volatile__ (
 #undef BLOCK
 #define BLOCK(i) \
-		LD(i,0)					\
-			LD(i+1,1)			\
-		PF1(i)					\
-				PF1(i+2)		\
-				LD(i+2,2)		\
-					LD(i+3,3)	\
-		PF0(i+4)				\
-				PF0(i+6)		\
-		XO1(i,0)				\
-			XO1(i+1,1)			\
-				XO1(i+2,2)		\
-					XO1(i+3,3)	\
-		ST(i,0)					\
-			ST(i+1,1)			\
-				ST(i+2,2)		\
-					ST(i+3,3)	\
+        LD(i,0)                 \
+            LD(i+1,1)           \
+        PF1(i)                  \
+                PF1(i+2)        \
+                LD(i+2,2)       \
+                    LD(i+3,3)   \
+        PF0(i+4)                \
+                PF0(i+6)        \
+        XO1(i,0)                \
+            XO1(i+1,1)          \
+                XO1(i+2,2)      \
+                    XO1(i+3,3)  \
+        ST(i,0)                 \
+            ST(i+1,1)           \
+                ST(i+2,2)       \
+                    ST(i+3,3)   \
  
 
         PF0(0)
@@ -649,28 +649,28 @@ xor_sse_3(unsigned long bytes, unsigned long *p1, unsigned long *p2,
     __asm__ __volatile__ (
 #undef BLOCK
 #define BLOCK(i) \
-		PF1(i)					\
-				PF1(i+2)		\
-		LD(i,0)					\
-			LD(i+1,1)			\
-				LD(i+2,2)		\
-					LD(i+3,3)	\
-		PF2(i)					\
-				PF2(i+2)		\
-		PF0(i+4)				\
-				PF0(i+6)		\
-		XO1(i,0)				\
-			XO1(i+1,1)			\
-				XO1(i+2,2)		\
-					XO1(i+3,3)	\
-		XO2(i,0)				\
-			XO2(i+1,1)			\
-				XO2(i+2,2)		\
-					XO2(i+3,3)	\
-		ST(i,0)					\
-			ST(i+1,1)			\
-				ST(i+2,2)		\
-					ST(i+3,3)	\
+        PF1(i)                  \
+                PF1(i+2)        \
+        LD(i,0)                 \
+            LD(i+1,1)           \
+                LD(i+2,2)       \
+                    LD(i+3,3)   \
+        PF2(i)                  \
+                PF2(i+2)        \
+        PF0(i+4)                \
+                PF0(i+6)        \
+        XO1(i,0)                \
+            XO1(i+1,1)          \
+                XO1(i+2,2)      \
+                    XO1(i+3,3)  \
+        XO2(i,0)                \
+            XO2(i+1,1)          \
+                XO2(i+2,2)      \
+                    XO2(i+3,3)  \
+        ST(i,0)                 \
+            ST(i+1,1)           \
+                ST(i+2,2)       \
+                    ST(i+3,3)   \
  
 
         PF0(0)
@@ -710,34 +710,34 @@ xor_sse_4(unsigned long bytes, unsigned long *p1, unsigned long *p2,
     __asm__ __volatile__ (
 #undef BLOCK
 #define BLOCK(i) \
-		PF1(i)					\
-				PF1(i+2)		\
-		LD(i,0)					\
-			LD(i+1,1)			\
-				LD(i+2,2)		\
-					LD(i+3,3)	\
-		PF2(i)					\
-				PF2(i+2)		\
-		XO1(i,0)				\
-			XO1(i+1,1)			\
-				XO1(i+2,2)		\
-					XO1(i+3,3)	\
-		PF3(i)					\
-				PF3(i+2)		\
-		PF0(i+4)				\
-				PF0(i+6)		\
-		XO2(i,0)				\
-			XO2(i+1,1)			\
-				XO2(i+2,2)		\
-					XO2(i+3,3)	\
-		XO3(i,0)				\
-			XO3(i+1,1)			\
-				XO3(i+2,2)		\
-					XO3(i+3,3)	\
-		ST(i,0)					\
-			ST(i+1,1)			\
-				ST(i+2,2)		\
-					ST(i+3,3)	\
+        PF1(i)                  \
+                PF1(i+2)        \
+        LD(i,0)                 \
+            LD(i+1,1)           \
+                LD(i+2,2)       \
+                    LD(i+3,3)   \
+        PF2(i)                  \
+                PF2(i+2)        \
+        XO1(i,0)                \
+            XO1(i+1,1)          \
+                XO1(i+2,2)      \
+                    XO1(i+3,3)  \
+        PF3(i)                  \
+                PF3(i+2)        \
+        PF0(i+4)                \
+                PF0(i+6)        \
+        XO2(i,0)                \
+            XO2(i+1,1)          \
+                XO2(i+2,2)      \
+                    XO2(i+3,3)  \
+        XO3(i,0)                \
+            XO3(i+1,1)          \
+                XO3(i+2,2)      \
+                    XO3(i+3,3)  \
+        ST(i,0)                 \
+            ST(i+1,1)           \
+                ST(i+2,2)       \
+                    ST(i+3,3)   \
  
 
         PF0(0)
@@ -778,40 +778,40 @@ xor_sse_5(unsigned long bytes, unsigned long *p1, unsigned long *p2,
     __asm__ __volatile__ (
 #undef BLOCK
 #define BLOCK(i) \
-		PF1(i)					\
-				PF1(i+2)		\
-		LD(i,0)					\
-			LD(i+1,1)			\
-				LD(i+2,2)		\
-					LD(i+3,3)	\
-		PF2(i)					\
-				PF2(i+2)		\
-		XO1(i,0)				\
-			XO1(i+1,1)			\
-				XO1(i+2,2)		\
-					XO1(i+3,3)	\
-		PF3(i)					\
-				PF3(i+2)		\
-		XO2(i,0)				\
-			XO2(i+1,1)			\
-				XO2(i+2,2)		\
-					XO2(i+3,3)	\
-		PF4(i)					\
-				PF4(i+2)		\
-		PF0(i+4)				\
-				PF0(i+6)		\
-		XO3(i,0)				\
-			XO3(i+1,1)			\
-				XO3(i+2,2)		\
-					XO3(i+3,3)	\
-		XO4(i,0)				\
-			XO4(i+1,1)			\
-				XO4(i+2,2)		\
-					XO4(i+3,3)	\
-		ST(i,0)					\
-			ST(i+1,1)			\
-				ST(i+2,2)		\
-					ST(i+3,3)	\
+        PF1(i)                  \
+                PF1(i+2)        \
+        LD(i,0)                 \
+            LD(i+1,1)           \
+                LD(i+2,2)       \
+                    LD(i+3,3)   \
+        PF2(i)                  \
+                PF2(i+2)        \
+        XO1(i,0)                \
+            XO1(i+1,1)          \
+                XO1(i+2,2)      \
+                    XO1(i+3,3)  \
+        PF3(i)                  \
+                PF3(i+2)        \
+        XO2(i,0)                \
+            XO2(i+1,1)          \
+                XO2(i+2,2)      \
+                    XO2(i+3,3)  \
+        PF4(i)                  \
+                PF4(i+2)        \
+        PF0(i+4)                \
+                PF0(i+6)        \
+        XO3(i,0)                \
+            XO3(i+1,1)          \
+                XO3(i+2,2)      \
+                    XO3(i+3,3)  \
+        XO4(i,0)                \
+            XO4(i+1,1)          \
+                XO4(i+2,2)      \
+                    XO4(i+3,3)  \
+        ST(i,0)                 \
+            ST(i+1,1)           \
+                ST(i+2,2)       \
+                    ST(i+3,3)   \
  
 
         PF0(0)
@@ -858,20 +858,20 @@ do_5:
 #include <asm-generic/xor.h>
 
 #undef XOR_TRY_TEMPLATES
-#define XOR_TRY_TEMPLATES				\
-	do {						\
-		xor_speed(&xor_block_8regs);		\
-		xor_speed(&xor_block_32regs);		\
-	        if (cpu_has_xmm)			\
-			xor_speed(&xor_block_pIII_sse);	\
-	        if (md_cpu_has_mmx()) {			\
-	                xor_speed(&xor_block_pII_mmx);	\
-	                xor_speed(&xor_block_p5_mmx);	\
-	        }					\
-	} while (0)
+#define XOR_TRY_TEMPLATES               \
+    do {                        \
+        xor_speed(&xor_block_8regs);        \
+        xor_speed(&xor_block_32regs);       \
+            if (cpu_has_xmm)            \
+            xor_speed(&xor_block_pIII_sse); \
+            if (md_cpu_has_mmx()) {         \
+                    xor_speed(&xor_block_pII_mmx);  \
+                    xor_speed(&xor_block_p5_mmx);   \
+            }                   \
+    } while (0)
 
 /* We force the use of the SSE xor block because it can write around L2.
    We may also be able to load into the L1 only depending on how the cpu
    deals with a load to a line that is being prefetched.  */
 #define XOR_SELECT_TEMPLATE(FASTEST) \
-	(cpu_has_xmm ? &xor_block_pIII_sse : FASTEST)
+    (cpu_has_xmm ? &xor_block_pIII_sse : FASTEST)

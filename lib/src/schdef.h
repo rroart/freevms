@@ -1,5 +1,5 @@
-#ifndef schdef_h
-#define schdef_h
+#ifndef SCHDEF_H
+#define SCHDEF_H
 
 #define SCH$C_SWPPIX 1
 #define SCH$V_SIP    0

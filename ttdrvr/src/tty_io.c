@@ -37,26 +37,26 @@
  *
  * Added functionality to the OPOST tty handling.  No delays, but all
  * other bits should be there.
- *	-- Nick Holloway <alfie@dcs.warwick.ac.uk>, 27th May 1993.
+ *  -- Nick Holloway <alfie@dcs.warwick.ac.uk>, 27th May 1993.
  *
  * Rewrote canonical mode and added more termios flags.
- * 	-- julian@uhunix.uhcc.hawaii.edu (J. Cowley), 13Jan94
+ *  -- julian@uhunix.uhcc.hawaii.edu (J. Cowley), 13Jan94
  *
  * Reorganized FASYNC support so mouse code can share it.
- *	-- ctm@ardi.com, 9Sep95
+ *  -- ctm@ardi.com, 9Sep95
  *
  * New TIOCLINUX variants added.
- *	-- mj@k332.feld.cvut.cz, 19-Nov-95
+ *  -- mj@k332.feld.cvut.cz, 19-Nov-95
  *
  * Restrict vt switching via ioctl()
  *      -- grif@cs.ucr.edu, 5-Dec-95
  *
  * Move console and virtual terminal code to more appropriate files,
  * implement CONFIG_VT and generalize console device interface.
- *	-- Marko Kohtala <Marko.Kohtala@hut.fi>, March 97
+ *  -- Marko Kohtala <Marko.Kohtala@hut.fi>, March 97
  *
  * Rewrote init_dev and release_dev to eliminate races.
- *	-- Bill Hawes <whawes@star.net>, June 97
+ *  -- Bill Hawes <whawes@star.net>, June 97
  *
  * Added devfs support.
  *      -- C. Scott Ananian <cananian@alumni.princeton.edu>, 13-Jan-1998
@@ -132,13 +132,13 @@ extern void con_init_devfs (void);
 #define TTY_PARANOIA_CHECK 1
 #define CHECK_TTY_COUNT 1
 
-struct termios tty_std_termios;		/* for the benefit of tty drivers  */
-struct tty_driver *tty_drivers;		/* linked list of tty drivers */
-struct tty_ldisc ldiscs[NR_LDISCS];	/* line disc dispatch table	*/
+struct termios tty_std_termios;     /* for the benefit of tty drivers  */
+struct tty_driver *tty_drivers;     /* linked list of tty drivers */
+struct tty_ldisc ldiscs[NR_LDISCS]; /* line disc dispatch table */
 
 #ifdef CONFIG_UNIX98_PTYS
-extern struct tty_driver ptm_driver[];	/* Unix98 pty masters; for /dev/ptmx */
-extern struct tty_driver pts_driver[];	/* Unix98 pty slaves;  for /dev/ptmx */
+extern struct tty_driver ptm_driver[];  /* Unix98 pty masters; for /dev/ptmx */
+extern struct tty_driver pts_driver[];  /* Unix98 pty slaves;  for /dev/ptmx */
 #endif
 
 /*
@@ -178,10 +178,10 @@ extern void tx3912_console_init(void);
 extern void tx3912_rs_init(void);
 
 #ifndef MIN
-#define MIN(a,b)	((a) < (b) ? (a) : (b))
+#define MIN(a,b)    ((a) < (b) ? (a) : (b))
 #endif
 #ifndef MAX
-#define MAX(a,b)	((a) < (b) ? (b) : (a))
+#define MAX(a,b)    ((a) < (b) ? (b) : (a))
 #endif
 
 static struct tty_struct *alloc_tty_struct(void)
@@ -217,7 +217,7 @@ _tty_make_name(struct tty_struct *tty, const char *name, char *buf)
 }
 
 #define TTY_NUMBER(tty) (MINOR((tty)->device) - (tty)->driver.minor_start + \
-			 (tty)->driver.name_base)
+             (tty)->driver.name_base)
 
 char *tty_name(struct tty_struct *tty, char *buf)
 {
@@ -297,8 +297,8 @@ EXPORT_SYMBOL(tty_register_ldisc);
 /* Set the discipline of a tty line. */
 static int tty_set_ldisc(struct tty_struct *tty, int ldisc)
 {
-    int	retval = 0;
-    struct	tty_ldisc o_ldisc;
+    int retval = 0;
+    struct  tty_ldisc o_ldisc;
     char buf[64];
 
     if ((ldisc < N_TTY) || (ldisc >= NR_LDISCS))
@@ -315,7 +315,7 @@ static int tty_set_ldisc(struct tty_struct *tty, int ldisc)
         return -EINVAL;
 
     if (tty->ldisc.num == ldisc)
-        return 0;	/* We are already in the desired discipline */
+        return 0;   /* We are already in the desired discipline */
     o_ldisc = tty->ldisc;
 
 #if 0
@@ -360,7 +360,7 @@ static int tty_set_ldisc(struct tty_struct *tty, int ldisc)
  */
 struct tty_driver *get_tty_driver(kdev_t device)
 {
-    int	major, minor;
+    int major, minor;
     struct tty_driver *p;
 
     minor = MINOR(device);
@@ -428,7 +428,7 @@ fasync:
 void tty_vhangup(struct tty_struct * tty)
 {
 #ifdef TTY_DEBUG_HANGUP
-    char	buf[64];
+    char    buf[64];
 
     printk(KERN_DEBUG "%s vhangup...\n", tty_name(tty, buf));
 #endif
@@ -442,10 +442,10 @@ void tty_vhangup(struct tty_struct * tty)
  * it wants to disassociate itself from its controlling tty.
  *
  * It performs the following functions:
- * 	(1)  Sends a SIGHUP and SIGCONT to the foreground process group
- * 	(2)  Clears the tty from being controlling the session
- * 	(3)  Clears the controlling tty for all processes in the
- * 		session group.
+ *  (1)  Sends a SIGHUP and SIGCONT to the foreground process group
+ *  (2)  Clears the tty from being controlling the session
+ *  (3)  Clears the controlling tty for all processes in the
+ *      session group.
  *
  * The argument on_exit is set to 1 if called when a process is
  * exiting; it is 0 if called by the ioctl TIOCNOTTY.
@@ -506,7 +506,7 @@ void stop_tty(struct tty_struct *tty)
         tty->ctrl_status &= ~TIOCPKT_START;
         tty->ctrl_status |= TIOCPKT_STOP;
         wake_up_interruptible(&tty->link->read_wait);
-        //		wake_up_interruptible2(&tty->link->read_wait,PRI$_TICOM);
+        //      wake_up_interruptible2(&tty->link->read_wait,PRI$_TICOM);
     }
     if (tty->driver.stop)
         (tty->driver.stop)(tty);
@@ -522,7 +522,7 @@ void start_tty(struct tty_struct *tty)
         tty->ctrl_status &= ~TIOCPKT_STOP;
         tty->ctrl_status |= TIOCPKT_START;
         wake_up_interruptible(&tty->link->read_wait);
-        //		wake_up_interruptible2(&tty->link->read_wait,PRI$_TICOM);
+        //      wake_up_interruptible2(&tty->link->read_wait,PRI$_TICOM);
     }
     if (tty->driver.start)
         (tty->driver.start)(tty);
@@ -530,7 +530,7 @@ void start_tty(struct tty_struct *tty)
             tty->ldisc.write_wakeup)
         (tty->ldisc.write_wakeup)(tty);
     wake_up_interruptible(&tty->write_wait);
-    //	wake_up_interruptible2(&tty->write_wait,PRI$_TOCOM);
+    //  wake_up_interruptible2(&tty->write_wait,PRI$_TOCOM);
 }
 
 static ssize_t tty_read(struct file * file, char * buf, size_t count,
@@ -580,7 +580,7 @@ static ssize_t tty_write(struct file * file, const char * buf, size_t count,
     sts=exe$assign(&d,&chan,0,0,0);
     struct _ucb *u=ctl$gl_ccbbase[chan].ccb$l_ucb;
 
-    //	sts = exe$qio(0,(unsigned short)dev2chan(con_redirect(inode->i_rdev)),IO$_WRITEPBLK,0/*&iosb*/,0,0,
+    //  sts = exe$qio(0,(unsigned short)dev2chan(con_redirect(inode->i_rdev)),IO$_WRITEPBLK,0/*&iosb*/,0,0,
     sts = exe$qio(28,chan,IO$_WRITEPBLK,0/*&iosb*/,0,0,
                   buf,count,0,0,0,0);
 
@@ -875,9 +875,9 @@ static void release_mem(struct tty_struct *tty, int idx)
 static void release_dev(struct file * filp)
 {
     struct tty_struct *tty, *o_tty;
-    int	pty_master, tty_closing, o_tty_closing, do_sleep;
-    int	idx;
-    char	buf[64];
+    int pty_master, tty_closing, o_tty_closing, do_sleep;
+    int idx;
+    char    buf[64];
 
     tty = (struct tty_struct *)filp->private_data;
     if (tty_paranoia_check(tty, filp->f_dentry->d_inode->i_rdev, "release_dev"))
@@ -1152,7 +1152,7 @@ static int tty_open(struct inode * inode, struct file * filp)
     int noctty, retval;
     kdev_t device;
     unsigned short saved_flags;
-    char	buf[64];
+    char    buf[64];
 
     saved_flags = filp->f_flags;
 retry_open:
@@ -1663,11 +1663,11 @@ int tty_ioctl(struct inode * inode, struct file * file,
         /*
          * Break handling
          */
-    case TIOCSBRK:	/* Turn break on, unconditionally */
+    case TIOCSBRK:  /* Turn break on, unconditionally */
         tty->driver.break_ctl(tty, -1);
         return 0;
 
-    case TIOCCBRK:	/* Turn break off, unconditionally */
+    case TIOCCBRK:  /* Turn break off, unconditionally */
         tty->driver.break_ctl(tty, 0);
         return 0;
     case TCSBRK:   /* SVID version: non-zero arg --> no break */
@@ -1679,7 +1679,7 @@ int tty_ioctl(struct inode * inode, struct file * file,
         if (!arg)
             return send_break(tty, HZ/4);
         return 0;
-    case TCSBRKP:	/* support for POSIX tcsendbreak() */
+    case TCSBRKP:   /* support for POSIX tcsendbreak() */
         return send_break(tty, arg ? arg*(HZ/10) : HZ/4);
     }
     if (tty->driver.ioctl)
@@ -1848,9 +1848,9 @@ int tty_register_driver(struct tty_driver *driver)
  */
 int tty_unregister_driver(struct tty_driver *driver)
 {
-    int	retval;
+    int retval;
     struct tty_driver *p;
-    int	i, found = 0;
+    int i, found = 0;
     struct termios *tp;
     const char *othername = NULL;
 

@@ -1,7 +1,7 @@
 /*
- *	strtranslate
+ *  strtranslate
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,19 +19,19 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
 /* str_translate.c
  *
- *	Code for VAX STR$TRANSLATE routine
+ *  Code for VAX STR$TRANSLATE routine
  *
  * Description:
  *
@@ -40,17 +40,17 @@
  *
  * History
  *
- *	Jan 30, 1997 - Kevin Handy
- *		Preliminary design.
+ *  Jan 30, 1997 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  *
- *	Feb 26, 2004 - Andrew Allison
- *		Added GNU License
+ *  Feb 26, 2004 - Andrew Allison
+ *      Added GNU License
  *
- *	Mar 16, 2004 - Andrew Allison
- *		Corrected operation
+ *  Mar 16, 2004 - Andrew Allison
+ *      Corrected operation
  */
 
 #include <stdio.h>
@@ -69,16 +69,16 @@ unsigned long str$translate(struct dsc$descriptor_s* destination_string,
                             const struct dsc$descriptor_s* translation_string,
                             const struct dsc$descriptor_s* match_string)
 {
-    char* s2_ptr;			/* Pointer to second string */
-    unsigned short s2_length;	/* Length of second string */
-    char* s3_ptr;			/* Pointer to third string */
-    unsigned short s3_length;	/* Length of third string */
-    char* s4_ptr;			/* Pointer to forth string */
-    unsigned short s4_length;	/* Length of forth string */
-    char* OutputString;		/* Work Area */
-    int loop1;			/* Outer Loop */
-    int loop2;			/* Inner loop */
-    char ch;			/* Character being looked at */
+    char* s2_ptr;           /* Pointer to second string */
+    unsigned short s2_length;   /* Length of second string */
+    char* s3_ptr;           /* Pointer to third string */
+    unsigned short s3_length;   /* Length of third string */
+    char* s4_ptr;           /* Pointer to forth string */
+    unsigned short s4_length;   /* Length of forth string */
+    char* OutputString;     /* Work Area */
+    int loop1;          /* Outer Loop */
+    int loop2;          /* Inner loop */
+    char ch;            /* Character being looked at */
 
     /*
      * Determine how much we can use

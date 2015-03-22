@@ -12,52 +12,52 @@
  * Linus
  */
 
-#define TF_MASK		0x00000100
-#define IF_MASK		0x00000200
-#define IOPL_MASK	0x00003000
-#define NT_MASK		0x00004000
-#define VM_MASK		0x00020000
-#define AC_MASK		0x00040000
-#define VIF_MASK	0x00080000	/* virtual interrupt flag */
-#define VIP_MASK	0x00100000	/* virtual interrupt pending */
-#define ID_MASK		0x00200000
+#define TF_MASK     0x00000100
+#define IF_MASK     0x00000200
+#define IOPL_MASK   0x00003000
+#define NT_MASK     0x00004000
+#define VM_MASK     0x00020000
+#define AC_MASK     0x00040000
+#define VIF_MASK    0x00080000  /* virtual interrupt flag */
+#define VIP_MASK    0x00100000  /* virtual interrupt pending */
+#define ID_MASK     0x00200000
 
-#define BIOSSEG		0x0f000
+#define BIOSSEG     0x0f000
 
-#define CPU_086		0
-#define CPU_186		1
-#define CPU_286		2
-#define CPU_386		3
-#define CPU_486		4
-#define CPU_586		5
+#define CPU_086     0
+#define CPU_186     1
+#define CPU_286     2
+#define CPU_386     3
+#define CPU_486     4
+#define CPU_586     5
 
 /*
  * Return values for the 'vm86()' system call
  */
-#define VM86_TYPE(retval)	((retval) & 0xff)
-#define VM86_ARG(retval)	((retval) >> 8)
+#define VM86_TYPE(retval)   ((retval) & 0xff)
+#define VM86_ARG(retval)    ((retval) >> 8)
 
-#define VM86_SIGNAL	0	/* return due to signal */
-#define VM86_UNKNOWN	1	/* unhandled GP fault - IO-instruction or similar */
-#define VM86_INTx	2	/* int3/int x instruction (ARG = x) */
-#define VM86_STI	3	/* sti/popf/iret instruction enabled virtual interrupts */
+#define VM86_SIGNAL 0   /* return due to signal */
+#define VM86_UNKNOWN    1   /* unhandled GP fault - IO-instruction or similar */
+#define VM86_INTx   2   /* int3/int x instruction (ARG = x) */
+#define VM86_STI    3   /* sti/popf/iret instruction enabled virtual interrupts */
 
 /*
  * Additional return values when invoking new vm86()
  */
-#define VM86_PICRETURN	4	/* return due to pending PIC request */
-#define VM86_TRAP	6	/* return due to DOS-debugger request */
+#define VM86_PICRETURN  4   /* return due to pending PIC request */
+#define VM86_TRAP   6   /* return due to DOS-debugger request */
 
 /*
  * function codes when invoking new vm86()
  */
-#define VM86_PLUS_INSTALL_CHECK	0
-#define VM86_ENTER		1
-#define VM86_ENTER_NO_BYPASS	2
-#define	VM86_REQUEST_IRQ	3
-#define VM86_FREE_IRQ		4
-#define VM86_GET_IRQ_BITS	5
-#define VM86_GET_AND_RESET_IRQ	6
+#define VM86_PLUS_INSTALL_CHECK 0
+#define VM86_ENTER      1
+#define VM86_ENTER_NO_BYPASS    2
+#define VM86_REQUEST_IRQ    3
+#define VM86_FREE_IRQ       4
+#define VM86_GET_IRQ_BITS   5
+#define VM86_GET_AND_RESET_IRQ  6
 
 /*
  * This is the stack-layout seen by the user space program when we have
@@ -98,7 +98,7 @@ struct vm86_regs
 
 struct revectored_struct
 {
-    unsigned long __map[8];			/* 256 bits */
+    unsigned long __map[8];         /* 256 bits */
 };
 
 struct vm86_struct
@@ -114,7 +114,7 @@ struct vm86_struct
 /*
  * flags masks
  */
-#define VM86_SCREEN_BITMAP	0x0001
+#define VM86_SCREEN_BITMAP  0x0001
 
 struct vm86plus_info_struct
 {
@@ -122,7 +122,7 @@ struct vm86plus_info_struct
     unsigned long vm86dbg_active:1;       /* for debugger */
     unsigned long vm86dbg_TFpendig:1;     /* for debugger */
     unsigned long unused:28;
-    unsigned long is_vm86pus:1;	      /* for vm86 internal use */
+    unsigned long is_vm86pus:1;       /* for vm86 internal use */
     unsigned char vm86dbg_intxxtab[32];   /* for debugger */
 };
 
@@ -202,8 +202,8 @@ struct kernel_vm86_struct
      * in 'regs32' above.
      * However, with GCC-2.7.2 and the current CFLAGS you see exactly this:
 
-    	long return-eip;        from call to vm86()
-    	struct pt_regs oldregs;  user space registers as saved by syscall
+        long return-eip;        from call to vm86()
+        struct pt_regs oldregs;  user space registers as saved by syscall
      */
 };
 

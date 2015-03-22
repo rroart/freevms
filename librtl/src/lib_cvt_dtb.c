@@ -1,20 +1,20 @@
 /*
  * lib_cvt_dtb.c
  *
- *	Code for VAX LIB$CVT_DTB routine
+ *  Code for VAX LIB$CVT_DTB routine
  *
  * Description:
  *
- *	Converts an ascii decimal string representation to
- *	binary.
+ *  Converts an ascii decimal string representation to
+ *  binary.
  *
  * Bugs:
  *
  *
  * History
  *
- *	March 30, 1996 - Kevin Handy
- *		Preliminary design.
+ *  March 30, 1996 - Kevin Handy
+ *      Preliminary design.
  *
  */
 
@@ -29,9 +29,9 @@
 unsigned long lib$cvt_dtb(int byte_count, const char* source_string,
                           long* result)
 {
-    int Loop;			/* Loop for characters */
-    long answer = 0;		/* Result returned back */
-    unsigned long status = 1;	/* Exit status */
+    int Loop;           /* Loop for characters */
+    long answer = 0;        /* Result returned back */
+    unsigned long status = 1;   /* Exit status */
 
     /*
      * Loop through all the characters passed

@@ -20,19 +20,19 @@
  * For historical reasons, these macros are grossly misnamed.
  */
 
-#define MAKE_MM_SEG(s)	((mm_segment_t) { (s) })
+#define MAKE_MM_SEG(s)  ((mm_segment_t) { (s) })
 
 
-#define KERNEL_DS	MAKE_MM_SEG(0xFFFFFFFF)
-#define SUPERVISOR_DS	MAKE_MM_SEG(0xFFFFFFFF)
+#define KERNEL_DS   MAKE_MM_SEG(0xFFFFFFFF)
+#define SUPERVISOR_DS   MAKE_MM_SEG(0xFFFFFFFF)
 // check. related to CLI supervisor
-#define USER_DS		MAKE_MM_SEG(PAGE_OFFSET)
+#define USER_DS     MAKE_MM_SEG(PAGE_OFFSET)
 
-#define get_ds()	(KERNEL_DS)
-#define get_fs()	(current->addr_limit)
-#define set_fs(x)	(current->addr_limit = (x))
+#define get_ds()    (KERNEL_DS)
+#define get_fs()    (current->addr_limit)
+#define set_fs(x)   (current->addr_limit = (x))
 
-#define segment_eq(a,b)	((a).seg == (b).seg)
+#define segment_eq(a,b) ((a).seg == (b).seg)
 
 extern int __verify_write(const void *, unsigned long);
 
@@ -42,11 +42,11 @@ extern int __verify_write(const void *, unsigned long);
  * Uhhuh, this needs 33-bit arithmetic. We have a carry..
  */
 #define __range_ok(addr,size) ({ \
-	unsigned long flag,sum; \
-	asm("addl %3,%1 ; sbbl %0,%0; cmpl %1,%4; sbbl $0,%0" \
-		:"=&r" (flag), "=r" (sum) \
-		:"1" (addr),"g" ((int)(size)),"g" (current->addr_limit.seg)); \
-	flag; })
+    unsigned long flag,sum; \
+    asm("addl %3,%1 ; sbbl %0,%0; cmpl %1,%4; sbbl $0,%0" \
+        :"=&r" (flag), "=r" (sum) \
+        :"1" (addr),"g" ((int)(size)),"g" (current->addr_limit.seg)); \
+    flag; })
 
 #ifdef CONFIG_X86_WP_WORKS_OK
 
@@ -55,9 +55,9 @@ extern int __verify_write(const void *, unsigned long);
 #else
 
 #define access_ok(type,addr,size) ( (__range_ok(addr,size) == 0) && \
-			 ((type) == VERIFY_READ || boot_cpu_data.wp_works_ok || \
-			 segment_eq(get_fs(),KERNEL_DS) || \
-			  __verify_write((void *)(addr),(size))))
+             ((type) == VERIFY_READ || boot_cpu_data.wp_works_ok || \
+             segment_eq(get_fs(),KERNEL_DS) || \
+              __verify_write((void *)(addr),(size))))
 
 #endif
 
@@ -109,21 +109,21 @@ extern void __get_user_2(void);
 extern void __get_user_4(void);
 
 #define __get_user_x(size,ret,x,ptr) \
-	__asm__ __volatile__("call __get_user_" #size \
-		:"=a" (ret),"=d" (x) \
-		:"0" (ptr))
+    __asm__ __volatile__("call __get_user_" #size \
+        :"=a" (ret),"=d" (x) \
+        :"0" (ptr))
 
 /* Careful: we have to cast the result to the type of the pointer for sign reasons */
-#define get_user(x,ptr)							\
-({	int __ret_gu,__val_gu;						\
-	switch(sizeof (*(ptr))) {					\
-	case 1:  __get_user_x(1,__ret_gu,__val_gu,ptr); break;		\
-	case 2:  __get_user_x(2,__ret_gu,__val_gu,ptr); break;		\
-	case 4:  __get_user_x(4,__ret_gu,__val_gu,ptr); break;		\
-	default: __get_user_x(X,__ret_gu,__val_gu,ptr); break;		\
-	}								\
-	(x) = (__typeof__(*(ptr)))__val_gu;				\
-	__ret_gu;							\
+#define get_user(x,ptr)                         \
+({  int __ret_gu,__val_gu;                      \
+    switch(sizeof (*(ptr))) {                   \
+    case 1:  __get_user_x(1,__ret_gu,__val_gu,ptr); break;      \
+    case 2:  __get_user_x(2,__ret_gu,__val_gu,ptr); break;      \
+    case 4:  __get_user_x(4,__ret_gu,__val_gu,ptr); break;      \
+    default: __get_user_x(X,__ret_gu,__val_gu,ptr); break;      \
+    }                               \
+    (x) = (__typeof__(*(ptr)))__val_gu;             \
+    __ret_gu;                           \
 })
 
 extern void __put_user_1(void);
@@ -133,7 +133,7 @@ extern void __put_user_8(void);
 
 extern void __put_user_bad(void);
 
-#define put_user(x,ptr)							\
+#define put_user(x,ptr)                         \
   __put_user_check((__typeof__(*(ptr)))(x),(ptr),sizeof(*(ptr)))
 
 #define __get_user(x,ptr) \
@@ -141,50 +141,50 @@ extern void __put_user_bad(void);
 #define __put_user(x,ptr) \
   __put_user_nocheck((__typeof__(*(ptr)))(x),(ptr),sizeof(*(ptr)))
 
-#define __put_user_nocheck(x,ptr,size)			\
-({							\
-	long __pu_err;					\
-	__put_user_size((x),(ptr),(size),__pu_err);	\
-	__pu_err;					\
+#define __put_user_nocheck(x,ptr,size)          \
+({                          \
+    long __pu_err;                  \
+    __put_user_size((x),(ptr),(size),__pu_err); \
+    __pu_err;                   \
 })
 
 
-#define __put_user_check(x,ptr,size)			\
-({							\
-	long __pu_err = -EFAULT;					\
-	__typeof__(*(ptr)) *__pu_addr = (ptr);		\
-	if (access_ok(VERIFY_WRITE,__pu_addr,size))	\
-		__put_user_size((x),__pu_addr,(size),__pu_err);	\
-	__pu_err;					\
+#define __put_user_check(x,ptr,size)            \
+({                          \
+    long __pu_err = -EFAULT;                    \
+    __typeof__(*(ptr)) *__pu_addr = (ptr);      \
+    if (access_ok(VERIFY_WRITE,__pu_addr,size)) \
+        __put_user_size((x),__pu_addr,(size),__pu_err); \
+    __pu_err;                   \
 })
 
-#define __put_user_u64(x, addr, err)				\
-	__asm__ __volatile__(					\
-		"1:	movl %%eax,0(%2)\n"			\
-		"2:	movl %%edx,4(%2)\n"			\
-		"3:\n"						\
-		".section .fixup,\"ax\"\n"			\
-		"4:	movl %3,%0\n"				\
-		"	jmp 3b\n"				\
-		".previous\n"					\
-		".section __ex_table,\"a\"\n"			\
-		"	.align 4\n"				\
-		"	.long 1b,4b\n"				\
-		"	.long 2b,4b\n"				\
-		".previous"					\
-		: "=r"(err)					\
-		: "A" (x), "r" (addr), "i"(-EFAULT), "0"(err))
+#define __put_user_u64(x, addr, err)                \
+    __asm__ __volatile__(                   \
+        "1:	movl %%eax,0(%2)\n"         \
+        "2:	movl %%edx,4(%2)\n"         \
+        "3:\n"                      \
+        ".section .fixup,\"ax\"\n"          \
+        "4:	movl %3,%0\n"               \
+        "	jmp 3b\n"             \
+        ".previous\n"                   \
+        ".section __ex_table,\"a\"\n"           \
+        "	.align 4\n"               \
+        "	.long 1b,4b\n"                \
+        "	.long 2b,4b\n"                \
+        ".previous"                 \
+        : "=r"(err)                 \
+        : "A" (x), "r" (addr), "i"(-EFAULT), "0"(err))
 
-#define __put_user_size(x,ptr,size,retval)				\
-do {									\
-	retval = 0;							\
-	switch (size) {							\
-	  case 1: __put_user_asm(x,ptr,retval,"b","b","iq"); break;	\
-	  case 2: __put_user_asm(x,ptr,retval,"w","w","ir"); break;	\
-	  case 4: __put_user_asm(x,ptr,retval,"l","","ir"); break;	\
-	  case 8: __put_user_u64(x,ptr,retval); break;			\
-	  default: __put_user_bad();					\
-	}								\
+#define __put_user_size(x,ptr,size,retval)              \
+do {                                    \
+    retval = 0;                         \
+    switch (size) {                         \
+      case 1: __put_user_asm(x,ptr,retval,"b","b","iq"); break; \
+      case 2: __put_user_asm(x,ptr,retval,"w","w","ir"); break; \
+      case 4: __put_user_asm(x,ptr,retval,"l","","ir"); break;  \
+      case 8: __put_user_u64(x,ptr,retval); break;          \
+      default: __put_user_bad();                    \
+    }                               \
 } while (0)
 
 struct __large_struct
@@ -198,58 +198,58 @@ struct __large_struct
  * we do not write to any memory gcc knows about, so there are no
  * aliasing issues.
  */
-#define __put_user_asm(x, addr, err, itype, rtype, ltype)	\
-	__asm__ __volatile__(					\
-		"1:	mov"itype" %"rtype"1,%2\n"		\
-		"2:\n"						\
-		".section .fixup,\"ax\"\n"			\
-		"3:	movl %3,%0\n"				\
-		"	jmp 2b\n"				\
-		".previous\n"					\
-		".section __ex_table,\"a\"\n"			\
-		"	.align 4\n"				\
-		"	.long 1b,3b\n"				\
-		".previous"					\
-		: "=r"(err)					\
-		: ltype (x), "m"(__m(addr)), "i"(-EFAULT), "0"(err))
+#define __put_user_asm(x, addr, err, itype, rtype, ltype)   \
+    __asm__ __volatile__(                   \
+        "1:	mov"itype" %"rtype"1,%2\n"      \
+        "2:\n"                      \
+        ".section .fixup,\"ax\"\n"          \
+        "3:	movl %3,%0\n"               \
+        "	jmp 2b\n"             \
+        ".previous\n"                   \
+        ".section __ex_table,\"a\"\n"           \
+        "	.align 4\n"               \
+        "	.long 1b,3b\n"                \
+        ".previous"                 \
+        : "=r"(err)                 \
+        : ltype (x), "m"(__m(addr)), "i"(-EFAULT), "0"(err))
 
 
-#define __get_user_nocheck(x,ptr,size)				\
-({								\
-	long __gu_err, __gu_val;				\
-	__get_user_size(__gu_val,(ptr),(size),__gu_err);	\
-	(x) = (__typeof__(*(ptr)))__gu_val;			\
-	__gu_err;						\
+#define __get_user_nocheck(x,ptr,size)              \
+({                              \
+    long __gu_err, __gu_val;                \
+    __get_user_size(__gu_val,(ptr),(size),__gu_err);    \
+    (x) = (__typeof__(*(ptr)))__gu_val;         \
+    __gu_err;                       \
 })
 
 extern long __get_user_bad(void);
 
-#define __get_user_size(x,ptr,size,retval)				\
-do {									\
-	retval = 0;							\
-	switch (size) {							\
-	  case 1: __get_user_asm(x,ptr,retval,"b","b","=q"); break;	\
-	  case 2: __get_user_asm(x,ptr,retval,"w","w","=r"); break;	\
-	  case 4: __get_user_asm(x,ptr,retval,"l","","=r"); break;	\
-	  default: (x) = __get_user_bad();				\
-	}								\
+#define __get_user_size(x,ptr,size,retval)              \
+do {                                    \
+    retval = 0;                         \
+    switch (size) {                         \
+      case 1: __get_user_asm(x,ptr,retval,"b","b","=q"); break; \
+      case 2: __get_user_asm(x,ptr,retval,"w","w","=r"); break; \
+      case 4: __get_user_asm(x,ptr,retval,"l","","=r"); break;  \
+      default: (x) = __get_user_bad();              \
+    }                               \
 } while (0)
 
-#define __get_user_asm(x, addr, err, itype, rtype, ltype)	\
-	__asm__ __volatile__(					\
-		"1:	mov"itype" %2,%"rtype"1\n"		\
-		"2:\n"						\
-		".section .fixup,\"ax\"\n"			\
-		"3:	movl %3,%0\n"				\
-		"	xor"itype" %"rtype"1,%"rtype"1\n"	\
-		"	jmp 2b\n"				\
-		".previous\n"					\
-		".section __ex_table,\"a\"\n"			\
-		"	.align 4\n"				\
-		"	.long 1b,3b\n"				\
-		".previous"					\
-		: "=r"(err), ltype (x)				\
-		: "m"(__m(addr)), "i"(-EFAULT), "0"(err))
+#define __get_user_asm(x, addr, err, itype, rtype, ltype)   \
+    __asm__ __volatile__(                   \
+        "1:	mov"itype" %2,%"rtype"1\n"      \
+        "2:\n"                      \
+        ".section .fixup,\"ax\"\n"          \
+        "3:	movl %3,%0\n"               \
+        "	xor"itype" %"rtype"1,%"rtype"1\n" \
+        "	jmp 2b\n"             \
+        ".previous\n"                   \
+        ".section __ex_table,\"a\"\n"           \
+        "	.align 4\n"               \
+        "	.long 1b,3b\n"                \
+        ".previous"                 \
+        : "=r"(err), ltype (x)              \
+        : "m"(__m(addr)), "i"(-EFAULT), "0"(err))
 
 
 /*
@@ -257,54 +257,54 @@ do {									\
  */
 
 /* Generic arbitrary sized copy.  */
-#define __copy_user(to,from,size)					\
-do {									\
-	int __d0, __d1;							\
-	__asm__ __volatile__(						\
-		"0:	rep; movsl\n"					\
-		"	movl %3,%0\n"					\
-		"1:	rep; movsb\n"					\
-		"2:\n"							\
-		".section .fixup,\"ax\"\n"				\
-		"3:	lea 0(%3,%0,4),%0\n"				\
-		"	jmp 2b\n"					\
-		".previous\n"						\
-		".section __ex_table,\"a\"\n"				\
-		"	.align 4\n"					\
-		"	.long 0b,3b\n"					\
-		"	.long 1b,2b\n"					\
-		".previous"						\
-		: "=&c"(size), "=&D" (__d0), "=&S" (__d1)		\
-		: "r"(size & 3), "0"(size / 4), "1"(to), "2"(from)	\
-		: "memory");						\
+#define __copy_user(to,from,size)                   \
+do {                                    \
+    int __d0, __d1;                         \
+    __asm__ __volatile__(                       \
+        "0:	rep; movsl\n"                   \
+        "	movl %3,%0\n"                 \
+        "1:	rep; movsb\n"                   \
+        "2:\n"                          \
+        ".section .fixup,\"ax\"\n"              \
+        "3:	lea 0(%3,%0,4),%0\n"                \
+        "	jmp 2b\n"                 \
+        ".previous\n"                       \
+        ".section __ex_table,\"a\"\n"               \
+        "	.align 4\n"                   \
+        "	.long 0b,3b\n"                    \
+        "	.long 1b,2b\n"                    \
+        ".previous"                     \
+        : "=&c"(size), "=&D" (__d0), "=&S" (__d1)       \
+        : "r"(size & 3), "0"(size / 4), "1"(to), "2"(from)  \
+        : "memory");                        \
 } while (0)
 
-#define __copy_user_zeroing(to,from,size)				\
-do {									\
-	int __d0, __d1;							\
-	__asm__ __volatile__(						\
-		"0:	rep; movsl\n"					\
-		"	movl %3,%0\n"					\
-		"1:	rep; movsb\n"					\
-		"2:\n"							\
-		".section .fixup,\"ax\"\n"				\
-		"3:	lea 0(%3,%0,4),%0\n"				\
-		"4:	pushl %0\n"					\
-		"	pushl %%eax\n"					\
-		"	xorl %%eax,%%eax\n"				\
-		"	rep; stosb\n"					\
-		"	popl %%eax\n"					\
-		"	popl %0\n"					\
-		"	jmp 2b\n"					\
-		".previous\n"						\
-		".section __ex_table,\"a\"\n"				\
-		"	.align 4\n"					\
-		"	.long 0b,3b\n"					\
-		"	.long 1b,4b\n"					\
-		".previous"						\
-		: "=&c"(size), "=&D" (__d0), "=&S" (__d1)		\
-		: "r"(size & 3), "0"(size / 4), "1"(to), "2"(from)	\
-		: "memory");						\
+#define __copy_user_zeroing(to,from,size)               \
+do {                                    \
+    int __d0, __d1;                         \
+    __asm__ __volatile__(                       \
+        "0:	rep; movsl\n"                   \
+        "	movl %3,%0\n"                 \
+        "1:	rep; movsb\n"                   \
+        "2:\n"                          \
+        ".section .fixup,\"ax\"\n"              \
+        "3:	lea 0(%3,%0,4),%0\n"                \
+        "4:	pushl %0\n"                 \
+        "	pushl %%eax\n"                    \
+        "	xorl %%eax,%%eax\n"               \
+        "	rep; stosb\n"                 \
+        "	popl %%eax\n"                 \
+        "	popl %0\n"                    \
+        "	jmp 2b\n"                 \
+        ".previous\n"                       \
+        ".section __ex_table,\"a\"\n"               \
+        "	.align 4\n"                   \
+        "	.long 0b,3b\n"                    \
+        "	.long 1b,4b\n"                    \
+        ".previous"                     \
+        : "=&c"(size), "=&D" (__d0), "=&S" (__d1)       \
+        : "r"(size & 3), "0"(size / 4), "1"(to), "2"(from)  \
+        : "memory");                        \
 } while (0)
 
 /* We let the __ versions of copy_from/to_user inline, because they're often
@@ -326,223 +326,223 @@ __generic_copy_to_user_nocheck(void *to, const void *from, unsigned long n)
 
 
 /* Optimize just a little bit when we know the size of the move. */
-#define __constant_copy_user(to, from, size)			\
-do {								\
-	int __d0, __d1;						\
-	switch (size & 3) {					\
-	default:						\
-		__asm__ __volatile__(				\
-			"0:	rep; movsl\n"			\
-			"1:\n"					\
-			".section .fixup,\"ax\"\n"		\
-			"2:	shl $2,%0\n"			\
-			"	jmp 1b\n"			\
-			".previous\n"				\
-			".section __ex_table,\"a\"\n"		\
-			"	.align 4\n"			\
-			"	.long 0b,2b\n"			\
-			".previous"				\
-			: "=c"(size), "=&S" (__d0), "=&D" (__d1)\
-			: "1"(from), "2"(to), "0"(size/4)	\
-			: "memory");				\
-		break;						\
-	case 1:							\
-		__asm__ __volatile__(				\
-			"0:	rep; movsl\n"			\
-			"1:	movsb\n"			\
-			"2:\n"					\
-			".section .fixup,\"ax\"\n"		\
-			"3:	shl $2,%0\n"			\
-			"4:	incl %0\n"			\
-			"	jmp 2b\n"			\
-			".previous\n"				\
-			".section __ex_table,\"a\"\n"		\
-			"	.align 4\n"			\
-			"	.long 0b,3b\n"			\
-			"	.long 1b,4b\n"			\
-			".previous"				\
-			: "=c"(size), "=&S" (__d0), "=&D" (__d1)\
-			: "1"(from), "2"(to), "0"(size/4)	\
-			: "memory");				\
-		break;						\
-	case 2:							\
-		__asm__ __volatile__(				\
-			"0:	rep; movsl\n"			\
-			"1:	movsw\n"			\
-			"2:\n"					\
-			".section .fixup,\"ax\"\n"		\
-			"3:	shl $2,%0\n"			\
-			"4:	addl $2,%0\n"			\
-			"	jmp 2b\n"			\
-			".previous\n"				\
-			".section __ex_table,\"a\"\n"		\
-			"	.align 4\n"			\
-			"	.long 0b,3b\n"			\
-			"	.long 1b,4b\n"			\
-			".previous"				\
-			: "=c"(size), "=&S" (__d0), "=&D" (__d1)\
-			: "1"(from), "2"(to), "0"(size/4)	\
-			: "memory");				\
-		break;						\
-	case 3:							\
-		__asm__ __volatile__(				\
-			"0:	rep; movsl\n"			\
-			"1:	movsw\n"			\
-			"2:	movsb\n"			\
-			"3:\n"					\
-			".section .fixup,\"ax\"\n"		\
-			"4:	shl $2,%0\n"			\
-			"5:	addl $2,%0\n"			\
-			"6:	incl %0\n"			\
-			"	jmp 3b\n"			\
-			".previous\n"				\
-			".section __ex_table,\"a\"\n"		\
-			"	.align 4\n"			\
-			"	.long 0b,4b\n"			\
-			"	.long 1b,5b\n"			\
-			"	.long 2b,6b\n"			\
-			".previous"				\
-			: "=c"(size), "=&S" (__d0), "=&D" (__d1)\
-			: "1"(from), "2"(to), "0"(size/4)	\
-			: "memory");				\
-		break;						\
-	}							\
+#define __constant_copy_user(to, from, size)            \
+do {                                \
+    int __d0, __d1;                     \
+    switch (size & 3) {                 \
+    default:                        \
+        __asm__ __volatile__(               \
+            "0:	rep; movsl\n"           \
+            "1:\n"                  \
+            ".section .fixup,\"ax\"\n"      \
+            "2:	shl $2,%0\n"            \
+            "	jmp 1b\n"         \
+            ".previous\n"               \
+            ".section __ex_table,\"a\"\n"       \
+            "	.align 4\n"           \
+            "	.long 0b,2b\n"            \
+            ".previous"             \
+            : "=c"(size), "=&S" (__d0), "=&D" (__d1)\
+            : "1"(from), "2"(to), "0"(size/4)   \
+            : "memory");                \
+        break;                      \
+    case 1:                         \
+        __asm__ __volatile__(               \
+            "0:	rep; movsl\n"           \
+            "1:	movsb\n"            \
+            "2:\n"                  \
+            ".section .fixup,\"ax\"\n"      \
+            "3:	shl $2,%0\n"            \
+            "4:	incl %0\n"          \
+            "	jmp 2b\n"         \
+            ".previous\n"               \
+            ".section __ex_table,\"a\"\n"       \
+            "	.align 4\n"           \
+            "	.long 0b,3b\n"            \
+            "	.long 1b,4b\n"            \
+            ".previous"             \
+            : "=c"(size), "=&S" (__d0), "=&D" (__d1)\
+            : "1"(from), "2"(to), "0"(size/4)   \
+            : "memory");                \
+        break;                      \
+    case 2:                         \
+        __asm__ __volatile__(               \
+            "0:	rep; movsl\n"           \
+            "1:	movsw\n"            \
+            "2:\n"                  \
+            ".section .fixup,\"ax\"\n"      \
+            "3:	shl $2,%0\n"            \
+            "4:	addl $2,%0\n"           \
+            "	jmp 2b\n"         \
+            ".previous\n"               \
+            ".section __ex_table,\"a\"\n"       \
+            "	.align 4\n"           \
+            "	.long 0b,3b\n"            \
+            "	.long 1b,4b\n"            \
+            ".previous"             \
+            : "=c"(size), "=&S" (__d0), "=&D" (__d1)\
+            : "1"(from), "2"(to), "0"(size/4)   \
+            : "memory");                \
+        break;                      \
+    case 3:                         \
+        __asm__ __volatile__(               \
+            "0:	rep; movsl\n"           \
+            "1:	movsw\n"            \
+            "2:	movsb\n"            \
+            "3:\n"                  \
+            ".section .fixup,\"ax\"\n"      \
+            "4:	shl $2,%0\n"            \
+            "5:	addl $2,%0\n"           \
+            "6:	incl %0\n"          \
+            "	jmp 3b\n"         \
+            ".previous\n"               \
+            ".section __ex_table,\"a\"\n"       \
+            "	.align 4\n"           \
+            "	.long 0b,4b\n"            \
+            "	.long 1b,5b\n"            \
+            "	.long 2b,6b\n"            \
+            ".previous"             \
+            : "=c"(size), "=&S" (__d0), "=&D" (__d1)\
+            : "1"(from), "2"(to), "0"(size/4)   \
+            : "memory");                \
+        break;                      \
+    }                           \
 } while (0)
 
 /* Optimize just a little bit when we know the size of the move. */
-#define __constant_copy_user_zeroing(to, from, size)		\
-do {								\
-	int __d0, __d1;						\
-	switch (size & 3) {					\
-	default:						\
-		__asm__ __volatile__(				\
-			"0:	rep; movsl\n"			\
-			"1:\n"					\
-			".section .fixup,\"ax\"\n"		\
-			"2:	pushl %0\n"			\
-			"	pushl %%eax\n"			\
-			"	xorl %%eax,%%eax\n"		\
-			"	rep; stosl\n"			\
-			"	popl %%eax\n"			\
-			"	popl %0\n"			\
-			"	shl $2,%0\n"			\
-			"	jmp 1b\n"			\
-			".previous\n"				\
-			".section __ex_table,\"a\"\n"		\
-			"	.align 4\n"			\
-			"	.long 0b,2b\n"			\
-			".previous"				\
-			: "=c"(size), "=&S" (__d0), "=&D" (__d1)\
-			: "1"(from), "2"(to), "0"(size/4)	\
-			: "memory");				\
-		break;						\
-	case 1:							\
-		__asm__ __volatile__(				\
-			"0:	rep; movsl\n"			\
-			"1:	movsb\n"			\
-			"2:\n"					\
-			".section .fixup,\"ax\"\n"		\
-			"3:	pushl %0\n"			\
-			"	pushl %%eax\n"			\
-			"	xorl %%eax,%%eax\n"		\
-			"	rep; stosl\n"			\
-			"	stosb\n"			\
-			"	popl %%eax\n"			\
-			"	popl %0\n"			\
-			"	shl $2,%0\n"			\
-			"	incl %0\n"			\
-			"	jmp 2b\n"			\
-			"4:	pushl %%eax\n"			\
-			"	xorl %%eax,%%eax\n"		\
-			"	stosb\n"			\
-			"	popl %%eax\n"			\
-			"	incl %0\n"			\
-			"	jmp 2b\n"			\
-			".previous\n"				\
-			".section __ex_table,\"a\"\n"		\
-			"	.align 4\n"			\
-			"	.long 0b,3b\n"			\
-			"	.long 1b,4b\n"			\
-			".previous"				\
-			: "=c"(size), "=&S" (__d0), "=&D" (__d1)\
-			: "1"(from), "2"(to), "0"(size/4)	\
-			: "memory");				\
-		break;						\
-	case 2:							\
-		__asm__ __volatile__(				\
-			"0:	rep; movsl\n"			\
-			"1:	movsw\n"			\
-			"2:\n"					\
-			".section .fixup,\"ax\"\n"		\
-			"3:	pushl %0\n"			\
-			"	pushl %%eax\n"			\
-			"	xorl %%eax,%%eax\n"		\
-			"	rep; stosl\n"			\
-			"	stosw\n"			\
-			"	popl %%eax\n"			\
-			"	popl %0\n"			\
-			"	shl $2,%0\n"			\
-			"	addl $2,%0\n"			\
-			"	jmp 2b\n"			\
-			"4:	pushl %%eax\n"			\
-			"	xorl %%eax,%%eax\n"		\
-			"	stosw\n"			\
-			"	popl %%eax\n"			\
-			"	addl $2,%0\n"			\
-			"	jmp 2b\n"			\
-			".previous\n"				\
-			".section __ex_table,\"a\"\n"		\
-			"	.align 4\n"			\
-			"	.long 0b,3b\n"			\
-			"	.long 1b,4b\n"			\
-			".previous"				\
-			: "=c"(size), "=&S" (__d0), "=&D" (__d1)\
-			: "1"(from), "2"(to), "0"(size/4)	\
-			: "memory");				\
-		break;						\
-	case 3:							\
-		__asm__ __volatile__(				\
-			"0:	rep; movsl\n"			\
-			"1:	movsw\n"			\
-			"2:	movsb\n"			\
-			"3:\n"					\
-			".section .fixup,\"ax\"\n"		\
-			"4:	pushl %0\n"			\
-			"	pushl %%eax\n"			\
-			"	xorl %%eax,%%eax\n"		\
-			"	rep; stosl\n"			\
-			"	stosw\n"			\
-			"	stosb\n"			\
-			"	popl %%eax\n"			\
-			"	popl %0\n"			\
-			"	shl $2,%0\n"			\
-			"	addl $3,%0\n"			\
-			"	jmp 2b\n"			\
-			"5:	pushl %%eax\n"			\
-			"	xorl %%eax,%%eax\n"		\
-			"	stosw\n"			\
-			"	stosb\n"			\
-			"	popl %%eax\n"			\
-			"	addl $3,%0\n"			\
-			"	jmp 2b\n"			\
-			"6:	pushl %%eax\n"			\
-			"	xorl %%eax,%%eax\n"		\
-			"	stosb\n"			\
-			"	popl %%eax\n"			\
-			"	incl %0\n"			\
-			"	jmp 3b\n"			\
-			".previous\n"				\
-			".section __ex_table,\"a\"\n"		\
-			"	.align 4\n"			\
-			"	.long 0b,4b\n"			\
-			"	.long 1b,5b\n"			\
-			"	.long 2b,6b\n"			\
-			".previous"				\
-			: "=c"(size), "=&S" (__d0), "=&D" (__d1)\
-			: "1"(from), "2"(to), "0"(size/4)	\
-			: "memory");				\
-		break;						\
-	}							\
+#define __constant_copy_user_zeroing(to, from, size)        \
+do {                                \
+    int __d0, __d1;                     \
+    switch (size & 3) {                 \
+    default:                        \
+        __asm__ __volatile__(               \
+            "0:	rep; movsl\n"           \
+            "1:\n"                  \
+            ".section .fixup,\"ax\"\n"      \
+            "2:	pushl %0\n"         \
+            "	pushl %%eax\n"            \
+            "	xorl %%eax,%%eax\n"       \
+            "	rep; stosl\n"         \
+            "	popl %%eax\n"         \
+            "	popl %0\n"            \
+            "	shl $2,%0\n"          \
+            "	jmp 1b\n"         \
+            ".previous\n"               \
+            ".section __ex_table,\"a\"\n"       \
+            "	.align 4\n"           \
+            "	.long 0b,2b\n"            \
+            ".previous"             \
+            : "=c"(size), "=&S" (__d0), "=&D" (__d1)\
+            : "1"(from), "2"(to), "0"(size/4)   \
+            : "memory");                \
+        break;                      \
+    case 1:                         \
+        __asm__ __volatile__(               \
+            "0:	rep; movsl\n"           \
+            "1:	movsb\n"            \
+            "2:\n"                  \
+            ".section .fixup,\"ax\"\n"      \
+            "3:	pushl %0\n"         \
+            "	pushl %%eax\n"            \
+            "	xorl %%eax,%%eax\n"       \
+            "	rep; stosl\n"         \
+            "	stosb\n"          \
+            "	popl %%eax\n"         \
+            "	popl %0\n"            \
+            "	shl $2,%0\n"          \
+            "	incl %0\n"            \
+            "	jmp 2b\n"         \
+            "4:	pushl %%eax\n"          \
+            "	xorl %%eax,%%eax\n"       \
+            "	stosb\n"          \
+            "	popl %%eax\n"         \
+            "	incl %0\n"            \
+            "	jmp 2b\n"         \
+            ".previous\n"               \
+            ".section __ex_table,\"a\"\n"       \
+            "	.align 4\n"           \
+            "	.long 0b,3b\n"            \
+            "	.long 1b,4b\n"            \
+            ".previous"             \
+            : "=c"(size), "=&S" (__d0), "=&D" (__d1)\
+            : "1"(from), "2"(to), "0"(size/4)   \
+            : "memory");                \
+        break;                      \
+    case 2:                         \
+        __asm__ __volatile__(               \
+            "0:	rep; movsl\n"           \
+            "1:	movsw\n"            \
+            "2:\n"                  \
+            ".section .fixup,\"ax\"\n"      \
+            "3:	pushl %0\n"         \
+            "	pushl %%eax\n"            \
+            "	xorl %%eax,%%eax\n"       \
+            "	rep; stosl\n"         \
+            "	stosw\n"          \
+            "	popl %%eax\n"         \
+            "	popl %0\n"            \
+            "	shl $2,%0\n"          \
+            "	addl $2,%0\n"         \
+            "	jmp 2b\n"         \
+            "4:	pushl %%eax\n"          \
+            "	xorl %%eax,%%eax\n"       \
+            "	stosw\n"          \
+            "	popl %%eax\n"         \
+            "	addl $2,%0\n"         \
+            "	jmp 2b\n"         \
+            ".previous\n"               \
+            ".section __ex_table,\"a\"\n"       \
+            "	.align 4\n"           \
+            "	.long 0b,3b\n"            \
+            "	.long 1b,4b\n"            \
+            ".previous"             \
+            : "=c"(size), "=&S" (__d0), "=&D" (__d1)\
+            : "1"(from), "2"(to), "0"(size/4)   \
+            : "memory");                \
+        break;                      \
+    case 3:                         \
+        __asm__ __volatile__(               \
+            "0:	rep; movsl\n"           \
+            "1:	movsw\n"            \
+            "2:	movsb\n"            \
+            "3:\n"                  \
+            ".section .fixup,\"ax\"\n"      \
+            "4:	pushl %0\n"         \
+            "	pushl %%eax\n"            \
+            "	xorl %%eax,%%eax\n"       \
+            "	rep; stosl\n"         \
+            "	stosw\n"          \
+            "	stosb\n"          \
+            "	popl %%eax\n"         \
+            "	popl %0\n"            \
+            "	shl $2,%0\n"          \
+            "	addl $3,%0\n"         \
+            "	jmp 2b\n"         \
+            "5:	pushl %%eax\n"          \
+            "	xorl %%eax,%%eax\n"       \
+            "	stosw\n"          \
+            "	stosb\n"          \
+            "	popl %%eax\n"         \
+            "	addl $3,%0\n"         \
+            "	jmp 2b\n"         \
+            "6:	pushl %%eax\n"          \
+            "	xorl %%eax,%%eax\n"       \
+            "	stosb\n"          \
+            "	popl %%eax\n"         \
+            "	incl %0\n"            \
+            "	jmp 3b\n"         \
+            ".previous\n"               \
+            ".section __ex_table,\"a\"\n"       \
+            "	.align 4\n"           \
+            "	.long 0b,4b\n"            \
+            "	.long 1b,5b\n"            \
+            "	.long 2b,6b\n"            \
+            ".previous"             \
+            : "=c"(size), "=&S" (__d0), "=&D" (__d1)\
+            : "1"(from), "2"(to), "0"(size/4)   \
+            : "memory");                \
+        break;                      \
+    }                           \
 } while (0)
 
 unsigned long __generic_copy_to_user(void *, const void *, unsigned long);
@@ -581,25 +581,25 @@ __constant_copy_from_user_nocheck(void *to, const void *from, unsigned long n)
     return n;
 }
 
-#define copy_to_user(to,from,n)				\
-	(__builtin_constant_p(n) ?			\
-	 __constant_copy_to_user((to),(from),(n)) :	\
-	 __generic_copy_to_user((to),(from),(n)))
+#define copy_to_user(to,from,n)             \
+    (__builtin_constant_p(n) ?          \
+     __constant_copy_to_user((to),(from),(n)) : \
+     __generic_copy_to_user((to),(from),(n)))
 
-#define copy_from_user(to,from,n)			\
-	(__builtin_constant_p(n) ?			\
-	 __constant_copy_from_user((to),(from),(n)) :	\
-	 __generic_copy_from_user((to),(from),(n)))
+#define copy_from_user(to,from,n)           \
+    (__builtin_constant_p(n) ?          \
+     __constant_copy_from_user((to),(from),(n)) :   \
+     __generic_copy_from_user((to),(from),(n)))
 
-#define __copy_to_user(to,from,n)			\
-	(__builtin_constant_p(n) ?			\
-	 __constant_copy_to_user_nocheck((to),(from),(n)) :	\
-	 __generic_copy_to_user_nocheck((to),(from),(n)))
+#define __copy_to_user(to,from,n)           \
+    (__builtin_constant_p(n) ?          \
+     __constant_copy_to_user_nocheck((to),(from),(n)) : \
+     __generic_copy_to_user_nocheck((to),(from),(n)))
 
-#define __copy_from_user(to,from,n)			\
-	(__builtin_constant_p(n) ?			\
-	 __constant_copy_from_user_nocheck((to),(from),(n)) :	\
-	 __generic_copy_from_user_nocheck((to),(from),(n)))
+#define __copy_from_user(to,from,n)         \
+    (__builtin_constant_p(n) ?          \
+     __constant_copy_from_user_nocheck((to),(from),(n)) :   \
+     __generic_copy_from_user_nocheck((to),(from),(n)))
 
 long strncpy_from_user(char *dst, const char *src, long count);
 long __strncpy_from_user(char *dst, const char *src, long count);

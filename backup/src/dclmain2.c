@@ -1,8 +1,8 @@
 /* This is the version of main() for DCL-style option parsing.  */
 
 /* FIXME: Probably should be using init_cli from the VERB distribution
-   so that we can be defined as a foreign command as well as by SET
-   COMMAND.  */
+ so that we can be defined as a foreign command as well as by SET
+ COMMAND.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,17 +15,16 @@
 extern int cli$get_value();
 extern int cli$present();
 
-extern int sys$asctim ();
+extern int sys$asctim();
 
-int
-main (argc, argv)
+int main(argc, argv)
 int argc;
 char *argv[];
 {
     static $DESCRIPTOR (file1,"P1");
     static $DESCRIPTOR (file2,"P2");
     /* Is the /SAVE_SET qualifier specified with P1 and P2,
-       respectively.  */
+     respectively.  */
     int p1_saveset = 0;
     int p2_saveset = 0;
     /* Was P2 specified?  */
@@ -36,10 +35,10 @@ char *argv[];
     static $DESCRIPTOR (q_full, "FULL");
     static $DESCRIPTOR (q_brief, "BRIEF");
     static struct dsc$descriptor result =
-        {0,DSC$K_DTYPE_T,DSC$K_CLASS_D,0};
+        {   0,DSC$K_DTYPE_T,DSC$K_CLASS_D,0};
 
     /* We don't yet have a mechanism to select only some files from
-       a save set.  */
+     a save set.  */
     gargv = NULL;
     gargc = 0;
     goptind = 0;
@@ -92,16 +91,16 @@ char *argv[];
     }
 
     /* Note that our processing of the parameters, /SAVE_SET, etc.
-       differs somewhat from BACKUP.  In some cases this perhaps
-       should be changed, but in other cases I'm not sure the
-       way BACKUP does it is very good.  For example, did the
-       user who typed "BACKUP [-]TESTB.BCK []" really mean to
-       copy the saveset intact?  Seems to me that an error is more
-       useful in that case.  */
+     differs somewhat from BACKUP.  In some cases this perhaps
+     should be changed, but in other cases I'm not sure the
+     way BACKUP does it is very good.  For example, did the
+     user who typed "BACKUP [-]TESTB.BCK []" really mean to
+     copy the saveset intact?  Seems to me that an error is more
+     useful in that case.  */
 
     /* If P1 or P2 refers to a tape device, we should be setting
-       p1_saveset or p2_saveset.  But this is not yet implemented
-       (FIXME).  */
+     p1_saveset or p2_saveset.  But this is not yet implemented
+     (FIXME).  */
     if (!p1_saveset)
     {
         fprintf (stderr, "error: must specify /SAVE_SET\n");
@@ -131,20 +130,16 @@ char *argv[];
 }
 
 /* The following is code for VMS systems which isn't related to main()
-   or option parsing.  It should perhaps be part of a separate file
-   (depending, of course, on things like whether anyone ever feels like
-   separating the two concepts).  */
+ or option parsing.  It should perhaps be part of a separate file
+ (depending, of course, on things like whether anyone ever feels like
+ separating the two concepts).  */
 
 /* Given an 8-byte VMS-format date (little-endian) in SRCTIME, put an
-   ASCII representation in *ASCBUFFER and put the length in *ASCLENGTH.
-   ASCBUFFER must be big enough for 23 characters.
-   Returns: condition code.  */
+ ASCII representation in *ASCBUFFER and put the length in *ASCLENGTH.
+ ASCBUFFER must be big enough for 23 characters.
+ Returns: condition code.  */
 
-int
-time_vms_to_asc (asclength, ascbuffer, srctime)
-short *asclength;
-char *ascbuffer;
-void *srctime;
+int time_vms_to_asc(short *asclength, char *ascbuffer, void *srctime)
 {
     struct dsc$descriptor buffer;
 
@@ -152,5 +147,5 @@ void *srctime;
     buffer.dsc$b_dtype = DSC$K_DTYPE_T;
     buffer.dsc$b_class = DSC$K_CLASS_S;
     buffer.dsc$a_pointer = ascbuffer;
-    return sys$asctim (asclength, &buffer, srctime, 0);
+    return sys$asctim(asclength, &buffer, srctime, 0);
 }

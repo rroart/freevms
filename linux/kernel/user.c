@@ -16,11 +16,11 @@
  * UID task count cache, to get fast user lookup in "alloc_uid"
  * when changing user ID's (ie setuid() and friends).
  */
-#define UIDHASH_BITS		8
-#define UIDHASH_SZ		(1 << UIDHASH_BITS)
-#define UIDHASH_MASK		(UIDHASH_SZ - 1)
-#define __uidhashfn(uid)	(((uid >> UIDHASH_BITS) ^ uid) & UIDHASH_MASK)
-#define uidhashentry(uid)	(uidhash_table + __uidhashfn(uid))
+#define UIDHASH_BITS        8
+#define UIDHASH_SZ      (1 << UIDHASH_BITS)
+#define UIDHASH_MASK        (UIDHASH_SZ - 1)
+#define __uidhashfn(uid)    (((uid >> UIDHASH_BITS) ^ uid) & UIDHASH_MASK)
+#define uidhashentry(uid)   (uidhash_table + __uidhashfn(uid))
 
 static kmem_cache_t *uid_cachep;
 static struct user_struct *uidhash_table[UIDHASH_SZ];

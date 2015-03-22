@@ -1,23 +1,23 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "User Datagram Protocol Handler"
 //SBTTL "User Datagram Protocol Handler Overview"
@@ -25,157 +25,157 @@
 
 Module:
 
-	UDP
+    UDP
 
 Facility:
 
-	User Datagram Protocol (UDP) handler
+    User Datagram Protocol (UDP) handler
 
 Abstract:
 
-	UDP provides the user with a potentially unreliable datagram
-	service via the Internet Protocol (IP). This module handles the
-	UDP interface between the user and the IP layer.
+    UDP provides the user with a potentially unreliable datagram
+    service via the Internet Protocol (IP). This module handles the
+    UDP interface between the user and the IP layer.
 
 Author:
 
-	Vince Fuller, CMU-CSD, March, 1986
-	Copyright (c) 1986, 1987, Vince Fuller and Carnegie-Mellon University
+    Vince Fuller, CMU-CSD, March, 1986
+    Copyright (c) 1986, 1987, Vince Fuller and Carnegie-Mellon University
 
 Modification History
 
-4.0e	21-Jan-1992	Marc A. Shannon		CMU Group N
-	Don't compute checksum for UDP packets going out from here to IP
-	since a broadcast packet (to 255.255.255.255) will need its checksum
-	recomputed when the destination address is changed to the local
-	broadcast (something like 128.2.255.255).
+4.0e    21-Jan-1992 Marc A. Shannon     CMU Group N
+    Don't compute checksum for UDP packets going out from here to IP
+    since a broadcast packet (to 255.255.255.255) will need its checksum
+    recomputed when the destination address is changed to the local
+    broadcast (something like 128.2.255.255).
 
-4.0d	28-Aug-1991	Henry W. Miller		USBR
-	Range check size of buffers and return NET$_IR if requested
-	buffer size is greater than Max_UDP_Data_Size.
+4.0d    28-Aug-1991 Henry W. Miller     USBR
+    Range check size of buffers and return NET$_IR if requested
+    buffer size is greater than Max_UDP_Data_Size.
 
-4.0c	18-Jul-1991	Henry W. Miller		USBR
-	Use LIB$GET_VM_PAGE and LIB$FREE_VM_PAGE rather then LIB$GET_VM
-	and LIB$FREE_VM, and check return status.
+4.0c    18-Jul-1991 Henry W. Miller     USBR
+    Use LIB$GET_VM_PAGE and LIB$FREE_VM_PAGE rather then LIB$GET_VM
+    and LIB$FREE_VM, and check return status.
 
-4.0b	30-May-1991	Henry W. Miller		USBR
-	In UDP_COPEN_DONE(), log failures.
+4.0b    30-May-1991 Henry W. Miller     USBR
+    In UDP_COPEN_DONE(), log failures.
 
-4.0a	13-Jan-1991	Henry W. Miller		USBR
-	Make UDPTTL a configurable variable.
-	Updated IDENT.
+4.0a    13-Jan-1991 Henry W. Miller     USBR
+    Make UDPTTL a configurable variable.
+    Updated IDENT.
 
-	10-Sep-1990     Henry W. Miller 	USBR
-	Make UDP_CSEND() use DEFTTL.
+    10-Sep-1990     Henry W. Miller     USBR
+    Make UDP_CSEND() use DEFTTL.
 
-4.0   04-Dec-1989, Bruce R. Miller	CMU Network Development
-	Restructured the UDP packet.  Wildcard receives are passed
-	by the driver into a user supplied buffer instead of being
-	appended to the begining of the user's data buffer.
+4.0   04-Dec-1989, Bruce R. Miller  CMU Network Development
+    Restructured the UDP packet.  Wildcard receives are passed
+    by the driver into a user supplied buffer instead of being
+    appended to the begining of the user's data buffer.
 
-	Removed the Internal UDP processing.  No one uses it anymore.
-	Changed name UCB to UDPCB to avoid confusion with Unit
-	Control Blocks.  Removed address mode.  UDP address can
-	now be spedified with a user supplid buffer.
+    Removed the Internal UDP processing.  No one uses it anymore.
+    Changed name UCB to UDPCB to avoid confusion with Unit
+    Control Blocks.  Removed address mode.  UDP address can
+    now be spedified with a user supplid buffer.
 
 3.7   11-FEB-1988, Dale Moore
-	On UDP$SEND and ADDR_MODE check to see if sufficient bytes
-	given by user for udp header. If not return BTS.
+    On UDP$SEND and ADDR_MODE check to see if sufficient bytes
+    given by user for udp header. If not return BTS.
 
 3.6  19-Nov-87, Edit by VAF
-	Know about IP$SEND failures and give user return status of NET$_NRT
-	on failures (no route to destination).
+    Know about IP$SEND failures and give user return status of NET$_NRT
+    on failures (no route to destination).
 
 3.5  23-Sep-87, Edit by VAF
-	Don't check checksums for packets with no checksums (i.e. checksum=0)
-	Believe it or not, there are still weenies out there who don't put
-	checksums in their UDP packets...
+    Don't check checksums for packets with no checksums (i.e. checksum=0)
+    Believe it or not, there are still weenies out there who don't put
+    checksums in their UDP packets...
 
 3.4  30-Jul-87, Edit by VAF
-	Use $$KCALL macro instead of using $CMKRNL directly.
+    Use $$KCALL macro instead of using $CMKRNL directly.
 
 3.3  26-Mar-87, Edit by VAF
-	Check for aborted UCB status when receiving UDP messages from the
-	network and when queuing user send and receive requests.
+    Check for aborted UCB status when receiving UDP messages from the
+    network and when queuing user send and receive requests.
 
 3.2  23-Mar-87, Edit by VAF
-	Use TCP's packet buffer sizes for speed.
+    Use TCP's packet buffer sizes for speed.
 
 3.1  10-Mar-87, Edit by VAF
-	Make "address-mode" also handle the UDP ports, so one connection can
-	handle packets to/from multiple foreign ports. Note that the local
-	port is always resolved at open time and cannot be set this way.
+    Make "address-mode" also handle the UDP ports, so one connection can
+    handle packets to/from multiple foreign ports. Note that the local
+    port is always resolved at open time and cannot be set this way.
 
 3.0   3-Mar-87, Edit by VAF
-	Change calling sequence of User$Post_IO_Status. Add facility for
-	returning ICMP messages to the user for "address mode" connections.
+    Change calling sequence of User$Post_IO_Status. Add facility for
+    returning ICMP messages to the user for "address mode" connections.
 
 2.9   2-Mar-87, Edit by VAF
-	Add support for klugy "address mode" - allows user to specify the IP
-	addresses for each UDP$SEND and returns the IP addresses of the input
-	packet for each UDP$RECEIVE.
+    Add support for klugy "address mode" - allows user to specify the IP
+    addresses for each UDP$SEND and returns the IP addresses of the input
+    packet for each UDP$RECEIVE.
 
 2.8  19-Feb-87, Edit by VAF
-	Use new name lookup routines.
-	Fix a bug in UCB_FIND - infinite loop if no UCB's...
+    Use new name lookup routines.
+    Fix a bug in UCB_FIND - infinite loop if no UCB's...
 
 2.7  18-Feb-87, Edit by VAF
-	Support open with IP address instead of host name.
+    Support open with IP address instead of host name.
 
 2.6  12-Feb-87, Edit by VAF
-	Modifications for domain service.
+    Modifications for domain service.
 
 2.5   5-Feb-87, Edit by VAF
-	Call USER$CHECK_ACCESS for user UDP opens.
+    Call USER$CHECK_ACCESS for user UDP opens.
 
 2.4   4-Feb-87, Edit by VAF
-	Recode UDP open to avoid name lookup for internal opens.
+    Recode UDP open to avoid name lookup for internal opens.
 
 2.3   3-Feb-87, Edit by VAF
-	Fix bug in UDP_ADLOOK_DONE - was using the name pointer as the name
-	length when copying it back to the UCB. Crashes ACP.
+    Fix bug in UDP_ADLOOK_DONE - was using the name pointer as the name
+    length when copying it back to the UCB. Crashes ACP.
 
 2.2  10-Dec-86, Edit by VAF
-	Change order of arguments to Gen_Checksum.
+    Change order of arguments to Gen_Checksum.
 
 2.1   2-Oct-86, Edit by VAF
-	On ICMP errors, don"t close internal UCB"s - just abort all of their
-	pending requests. Internal UCB's have to take care of themselves...
+    On ICMP errors, don"t close internal UCB"s - just abort all of their
+    pending requests. Internal UCB's have to take care of themselves...
 
 2.0  30-Sep-86, Edit by VAF
-	Make IUDP_CLOSE give the correct number of arguments to UCB_CLOSE.
+    Make IUDP_CLOSE give the correct number of arguments to UCB_CLOSE.
 
 1.9  14-Aug-86, Edit by VAF
-	Be NOINT when examining UCB->UCB$ARGBLK.
-	Make Kill_UDP_Reqeuests also post UCB->UCB$ARGBLK.
+    Be NOINT when examining UCB->UCB$ARGBLK.
+    Make Kill_UDP_Reqeuests also post UCB->UCB$ARGBLK.
 
 1.8  13-Aug-86, Edit by VAF
-	Add UDP debugging dump routines.
+    Add UDP debugging dump routines.
 
 1.7  12-Aug-86, Edit by VAF
-	Add internal entry points for use by ACP green protocol module.
+    Add internal entry points for use by ACP green protocol module.
 
 1.6  12-Aug-86, Edit by VAF
-	Make UDP$OPEN use the green protocol name lookup routines.
+    Make UDP$OPEN use the green protocol name lookup routines.
 
 1.5   9-Aug-86, Edit by VAF
-	Don't use SET_HOSTS any more - domain system makes things too
-	complicated to use common routine for both TCP and UDP.
+    Don't use SET_HOSTS any more - domain system makes things too
+    complicated to use common routine for both TCP and UDP.
 
 1.4   4-Aug-86, Edit by VAF
-	Forgot to post request in UDP$CLOSE/UDP$ABORT.
+    Forgot to post request in UDP$CLOSE/UDP$ABORT.
 
 1.3  31-Jul-86, Edit by VAF
-	Debugging, general reorganization.
+    Debugging, general reorganization.
 
 1.2  29-Jul-86, Edit by VAF
-	Start working on the real implementation.
+    Start working on the real implementation.
 
 1.1  23-Jul-86, Edit by VAF
-	Add stub routines for user interface.
+    Add stub routines for user interface.
 
 1.0  24-Mar-86, Edit by VAF
-	Original, nonfunctional stub routines for IP interface.
+    Original, nonfunctional stub routines for IP interface.
 */
 
 //SBTTL "Module definition"
@@ -284,7 +284,7 @@ extern     RPC$INPUT();
 extern    RPC$CHECK_PORT();
 
 signed long
-udpttl	= 32;
+udpttl  = 32;
 
 extern signed long
 snmp_service,
@@ -293,40 +293,40 @@ RPC_SERVICE;
 
 //SBTTL "UDP data structures"
 
-#define    Max_UDP_Data_Size  16384	// Max UDP data size
-#define    UDPTOS  0			// Type of service
-#define    UDPDF  FALSE		// Don't fragment flag (try fragmenting)
+#define    Max_UDP_Data_Size  16384 // Max UDP data size
+#define    UDPTOS  0            // Type of service
+#define    UDPDF  FALSE     // Don't fragment flag (try fragmenting)
 
 // Define the "UDPCB" - UDP analogue of TCB.
 
 struct  UDPCB_Structure
 {
-    unsigned int     udpcb$foreign_host	;	// UDP foreign host number
-    unsigned int     udpcb$foreign_port	;	//     foreign port
-    unsigned int     udpcb$local_host	;	//     local host
-    unsigned int     udpcb$local_port	;	//     local port
-    unsigned char     udpcb$foreign_hname	[MAX_HNAME];
-    unsigned short int     udpcb$foreign_hnlen	;
-    void *     udpcb$usr_qhead	;	// User receive request queue
-    void *     udpcb$usr_qtail	;
-    void *     udpcb$nr_qhead	;	// Net receive queue
-    void *     udpcb$nr_qtail	;
-    unsigned short int     udpcb$nr_qcount	;
+    unsigned int     udpcb$foreign_host ;   // UDP foreign host number
+    unsigned int     udpcb$foreign_port ;   //     foreign port
+    unsigned int     udpcb$local_host   ;   //     local host
+    unsigned int     udpcb$local_port   ;   //     local port
+    unsigned char     udpcb$foreign_hname   [MAX_HNAME];
+    unsigned short int     udpcb$foreign_hnlen  ;
+    void *     udpcb$usr_qhead  ;   // User receive request queue
+    void *     udpcb$usr_qtail  ;
+    void *     udpcb$nr_qhead   ;   // Net receive queue
+    void *     udpcb$nr_qtail   ;
+    unsigned short int     udpcb$nr_qcount  ;
     union
     {
-        unsigned char     udpcb$flags		[2];
+        unsigned char     udpcb$flags       [2];
         struct
         {
-            unsigned  	udpcb$wildcard	 : 1;	// UDPCB opened with wild FH/FP/LH
-            unsigned  	udpcb$addr_mode	 : 1;	// IP addresses in data buffer
-            unsigned  	udpcb$aborting	 : 1;	// UDPCB is closing
-            unsigned  	udpcb$nmlook	 : 1;	// UDPCB has an outstanding name lookup
+            unsigned    udpcb$wildcard   : 1;   // UDPCB opened with wild FH/FP/LH
+            unsigned    udpcb$addr_mode  : 1;   // IP addresses in data buffer
+            unsigned    udpcb$aborting   : 1;   // UDPCB is closing
+            unsigned    udpcb$nmlook     : 1;   // UDPCB has an outstanding name lookup
         };
     };
-    void *     udpcb$udpcbid	;	// UDPCB_Table index for this connection
-    void *     udpcb$ucb_adrs	;	// Connection UDPCB address
-    void *     udpcb$uargs		;	// Uarg block in pending open
-    unsigned int     udpcb$user_id	;	// Process ID of owner
+    void *     udpcb$udpcbid    ;   // UDPCB_Table index for this connection
+    void *     udpcb$ucb_adrs   ;   // Connection UDPCB address
+    void *     udpcb$uargs      ;   // Uarg block in pending open
+    unsigned int     udpcb$user_id  ;   // Process ID of owner
     unsigned short     udpcb$piochan;// Process IO channel
 };
 
@@ -340,11 +340,11 @@ void UDPCB_Abort(struct UDPCB_Structure * UDPCB,long RC);
 //SBTTL "UDP data storage"
 
 static signed long
-UDPIPID  = 1,	// Current IP packet ID
-UDPCB_Count  = 0;	// Count of active UDPCBs
+UDPIPID  = 1,   // Current IP packet ID
+UDPCB_Count  = 0;   // Count of active UDPCBs
 long    UDPCB_TABLE[MAX_UDPCB+1];// Table of UDPCBs
 
-struct UDP_MIB_struct udp_mib_, * udp_mib=&udp_mib_ ;	// UDP Management Information Block
+struct UDP_MIB_struct udp_mib_, * udp_mib=&udp_mib_ ;   // UDP Management Information Block
 
 
 //SBTTL "UDP packet logger"
@@ -361,12 +361,12 @@ struct udpkt_structure * Seg;
     struct udpkt_structure segcopy_ , * segcopy = &segcopy_;
     struct udpkt_structure * seghdr;
 
-    seghdr = Seg;		// Point at segment header
+    seghdr = Seg;       // Point at segment header
     segdata = (long)Seg + UDP_HEADER_SIZE;
-    if (SwapFlag)		// Need to byteswap header?
+    if (SwapFlag)       // Need to byteswap header?
     {
         CH$MOVE(UDP_HEADER_SIZE,CH$PTR(Seg,0),CH$PTR(segcopy,0)); // Make a copy
-        seghdr = segcopy;	// Point at this version...
+        seghdr = segcopy;   // Point at this version...
         swapbytes(UDP_HEADER_SIZE/2,seghdr); // Swap header bytes
     };
 
@@ -389,8 +389,8 @@ struct udpkt_structure * Seg;
 
     if (seghdr->up$length > UDP_HEADER_SIZE)
     {
-#define	    maxhex  20
-#define	    maxasc 50
+#define     maxhex  20
+#define     maxasc 50
         signed long
         datalen,
         asccnt,
@@ -539,7 +539,7 @@ struct udpkt_structure * Seg;
         if (delete)
             mm$seg_free(BufSize,Buf);
 
-        return;	// Don't pass this buffer on to the upper layers
+        return; // Don't pass this buffer on to the upper layers
     };
 
 // Check to see if it's an SNMP packet
@@ -571,7 +571,7 @@ struct udpkt_structure * Seg;
         if (delete)
             mm$seg_free(BufSize,Buf);
 
-        return;	// Don't pass this buffer on to the upper layers
+        return; // Don't pass this buffer on to the upper layers
     };
 
 // Try to match the input packet up with a UDPCB
@@ -605,12 +605,12 @@ X2:
 
 // "Normal" UDPCB's stop being wildcarded when they receive something....
 
-//	if (! UDPCB->udpcb$addr_mode)
-//	    {
+//  if (! UDPCB->udpcb$addr_mode)
+//      {
 
 // If the connection was wildcarded, resolve hosts and ports now
 
-//	    if (UDPCB->udpcb$wildcard)
+//      if (UDPCB->udpcb$wildcard)
         if (0)
         {
             UDPCB->udpcb$wildcard = FALSE;
@@ -621,7 +621,7 @@ X2:
             else if (UDPCB->udpcb$foreign_port == WILD)
                 UDPCB->udpcb$foreign_port = Seg->up$source_port;
         };
-//	    };		// (non ADDR_MODE case)
+//      };      // (non ADDR_MODE case)
 
 // Kluge. Overwrite the UDP/IP header in the buffer, since we don't need it.
 //!!HACK!!!
@@ -697,7 +697,7 @@ struct udpkt_structure * UDPptr;
         };
     }
     else
-X:	 			// Good UDP/ICMP message
+X:              // Good UDP/ICMP message
     {
         if ($$LOGF(LOG$ICMP+LOG$UDP))
             QL$FAO("!%T ICMP type !SL for UDPCB !XL!/",0,ICMtype,UDPCB);
@@ -721,7 +721,7 @@ X:	 			// Good UDP/ICMP message
             ipadr$address_block * Uptr;
             signed long
             Ucount;
-            extern		mm$qblk_get();
+            extern      mm$qblk_get();
 
 // Allocate and setup the fields in the QB. ** N.B. We overwrite part of the IP
 // header, so be careful if you change the size of the UDPUSER block **
@@ -746,7 +746,7 @@ X:	 			// Good UDP/ICMP message
 
             switch (ICMtype)
             {
-            case ICM_DUNREACH:	// Destination Unreachable - abort connection
+            case ICM_DUNREACH:  // Destination Unreachable - abort connection
             {
                 UDPCB_Abort(UDPCB,NET$_URC);
                 if ($$LOGF(LOG$ICMP | LOG$UDP))
@@ -756,7 +756,7 @@ X:	 			// Good UDP/ICMP message
             };
             break;
 
-            case ICM_TEXCEED:	// Time exceeded - abort
+            case ICM_TEXCEED:   // Time exceeded - abort
             {
                 UDPCB_Abort(UDPCB,NET$_CTO);
                 if ($$LOGF(LOG$ICMP | LOG$UDP))
@@ -765,19 +765,19 @@ X:	 			// Good UDP/ICMP message
             };
             break;
 
-            case ICM_SQUENCH:	// Source quench - currently unsupported
+            case ICM_SQUENCH:   // Source quench - currently unsupported
             {
                 0;
             };
             break;
 
-            case ICM_REDIRECT:	// Redirect - not supported in this module
+            case ICM_REDIRECT:  // Redirect - not supported in this module
             {
                 0;
             };
             break;
 
-            case ICM_PPROBLEM:	// Parameter problem - not yet supported
+            case ICM_PPROBLEM:  // Parameter problem - not yet supported
             {
                 0;
             };
@@ -810,8 +810,8 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 {
     signed long
     QBR;
-    extern	mm$qblk_get();
-#define	UDPCB$NR_Qmax 5	// Max input packets permitted on input queue
+    extern  mm$qblk_get();
+#define UDPCB$NR_Qmax 5 // Max input packets permitted on input queue
 
 // See if the input queue is full for this UDPCB
 
@@ -820,17 +820,17 @@ struct queue_blk_structure(qb_nr_fields) * QB;
         udp_mib->MIB$UDPINERRORS = udp_mib->MIB$UDPINERRORS + 1;
         if ($$LOGF(LOG$UDP))
             QL$FAO("!%T UDP at !XL dropped - UDPCB NR queue full!/",0,Uptr);
-        return TRUE;		// Drop the packet - no room
+        return TRUE;        // Drop the packet - no room
     };
 
 // Allocate a queue block and insert onto user receive queue
 
     if (QB == 0)
         QB = mm$qblk_get();
-    QB->nr$buf_size = Bufsize;	// Total size of network buffer
-    QB->nr$buf = Buf;		// Pointer to network buffer
-    QB->nr$ucount = Usize;	// Length of the data
-    QB->nr$uptr = Uptr;	// Pointer to the data
+    QB->nr$buf_size = Bufsize;  // Total size of network buffer
+    QB->nr$buf = Buf;       // Pointer to network buffer
+    QB->nr$ucount = Usize;  // Length of the data
+    QB->nr$uptr = Uptr; // Pointer to the data
 
 // If there is a user read outstanding, deliver data, else queue for later
 
@@ -838,7 +838,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
         Deliver_UDP_Data (UDPCB,QB,QBR);
     else
         INSQUE(QB,UDPCB->udpcb$nr_qtail);
-    return FALSE;		// Don't deallocate this segment...
+    return FALSE;       // Don't deallocate this segment...
 }
 
 //SBTTL "Deliver_UDP_Data - Deliver UDP data to user"
@@ -917,25 +917,25 @@ struct queue_blk_structure(qb_ur_fields) * URQ;
 UDPCB_OK(long Conn_ID,long * RCaddr,struct user_default_args * Uargs)
 {
     struct UDPCB_Structure * UDPCB;
-#define	UDPCBERR(EC) { *RCaddr = EC; return 0;}
+#define UDPCBERR(EC) { *RCaddr = EC; return 0;}
 
 // Range check the connection id. This should never fail, since the user should
 // not be fondling connection IDs.
 
     if ((Conn_ID <= 0) || (Conn_ID > MAX_UDPCB))
-        UDPCBERR(NET$_CDE);	// Nonexistant connection ID
+        UDPCBERR(NET$_CDE); // Nonexistant connection ID
     UDPCB = UDPCB_TABLE[Conn_ID];
 
 // Make sure the table had something reasonable for this connection ID
 
     if (UDPCB <= 0)
-        UDPCBERR(NET$_CDE);	// UDPCB has been deleted (possible)
+        UDPCBERR(NET$_CDE); // UDPCB has been deleted (possible)
 
 // Check consistancy of UDPCB back-pointer into table
 
     if ((UDPCB->udpcb$udpcbid != Conn_ID) ||
             (UDPCB->udpcb$ucb_adrs != Uargs->ud$ucb_adrs))
-        UDPCBERR(NET$_CDE);	// Confusion (can this happen?)
+        UDPCBERR(NET$_CDE); // Confusion (can this happen?)
 
 // Everything is good - return the UDPCB address
 
@@ -947,8 +947,8 @@ UDPCB_OK(long Conn_ID,long * RCaddr,struct user_default_args * Uargs)
 UDPCB_Get(IDX,Src$Port)
 long * IDX;
 {
-    extern	LIB$GET_VM();
-    extern	LIB$GET_VM_PAGE();
+    extern  LIB$GET_VM();
+    extern  LIB$GET_VM_PAGE();
     struct UDPCB_Structure * UDPCB;
     signed long I,
            Ucount,
@@ -972,7 +972,7 @@ long * IDX;
 
 // Find a free slot in the UDPCB table
 
-X:   			// ** Block X **
+X:              // ** Block X **
     {
         UDPCBIDX = 0;
         for (I=1; I<=MAX_UDPCB; I++)
@@ -981,8 +981,8 @@ X:   			// ** Block X **
                 UDPCBIDX = I;
                 goto leave_x;
             }
-        return 0;			// Failed to allocate a UDPCB
-    }			// ** Block X **
+        return 0;           // Failed to allocate a UDPCB
+    }           // ** Block X **
 leave_x:
 
 // Allocate some space for the UDPCB
@@ -1017,7 +1017,7 @@ leave_x:
 
 void udpcb_free(long UDPCBIX,struct UDPCB_Structure * UDPCB)
 {
-    extern	LIB$FREE_VM();
+    extern  LIB$FREE_VM();
     extern LIB$FREE_VM_PAGE();
     signed long
     RC ;
@@ -1045,7 +1045,7 @@ void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,long RC)
 // Make sure we aren't doing this more than once
 //
 //   if (UDPCB->udpcb$aborting)
-//	RETURN;
+//  RETURN;
 
 // Say that this connection is aborting (prevent future requests)
 
@@ -1227,7 +1227,7 @@ void udp$open(struct user_open_args * Uargs)
 
 // Check for supplied IP address instead of name
 
-X:   			// *** Block X ***
+X:              // *** Block X ***
     {
         if (Uargs->op$addr_flag)
             IPADDR = Uargs->op$foreign_address;
@@ -1239,7 +1239,7 @@ X:   			// *** Block X ***
         UDPCB->udpcb$nmlook = TRUE;
         NML$GETNAME(IPADDR,UDP_ADLOOK_DONE,UDPCB);
         return;
-    }			// *** Block X ***
+    }           // *** Block X ***
 leave_x:
 
 // "standard" case, host name is supplied - start name lookup for it
@@ -1265,12 +1265,12 @@ struct UDPCB_Structure * UDPCB;
     RC;
     struct user_open_args * Uargs;
     netio_status_block IOSB_, * IOSB = &IOSB_ ;
-#define	UOP_ERROR(EC) \
-	    { \
-	    USER$Err(Uargs,EC); \
-	    udpcb_free(UDPCB->udpcb$udpcbid,UDPCB); \
-	    return; \
-	    }
+#define UOP_ERROR(EC) \
+        { \
+        USER$Err(Uargs,EC); \
+        udpcb_free(UDPCB->udpcb$udpcbid,UDPCB); \
+        return; \
+        }
 
 // Clear name lookup flag and get uargs
 
@@ -1338,7 +1338,7 @@ struct UDPCB_Structure * UDPCB;
     }
     else
     {
-#define	    Max_LP_Tries 100
+#define     Max_LP_Tries 100
 
 // Try a bunch of times to find a unique local port...
 
@@ -1479,7 +1479,7 @@ void udp$send(struct user_send_args * Uargs)
 
     if ((UDPCB = UDPCB_OK(Uargs->se$local_conn_id,&RC,Uargs)) == 0)
     {
-        USER$Err(Uargs,RC);	// No such connection
+        USER$Err(Uargs,RC); // No such connection
         return;
     };
     XLOG$FAO(LOG$USER,"!%T UDP$SEND: Conn=!XL, UDPCB=!XL, Size=!SL, X1=!XL, X2=!XL!/",
@@ -1576,7 +1576,7 @@ UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
         bufsize = min_physical_bufsize;
     else if (bufsize <= max_physical_bufsize)
         bufsize = max_physical_bufsize;
-    buf = mm$seg_get(bufsize);	// Get a buffer
+    buf = mm$seg_get(bufsize);  // Get a buffer
     Seg = buf + DEVICE_HEADER + IP_HDR_BYTE_SIZE; // Point at UDP segment
     Segsize = Usize+UDP_HEADER_SIZE; // Length of segment + UDP header
 
@@ -1601,11 +1601,11 @@ UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
 
     swapbytes(UDP_HEADER_SIZE/2,Seg);
 //    Seg->UP$Checksum=Gen_Checksum(Segsize,Seg,LocalAddr,ForeignAddr,
-//				  UDP_Protocol);
+//                UDP_Protocol);
 
 // Send the segment to IP (it will deallocate it)
 
-    UDPIPID = UDPIPID+1;	// Increment packet ID
+    UDPIPID = UDPIPID+1;    // Increment packet ID
     RC = ip$send(LocalAddr,ForeignAddr,UDPTOS,udpttl,
                  Seg,Segsize,UDPIPID,UDPDF,TRUE,UDP_Protocol,
                  buf,bufsize);
@@ -1639,7 +1639,7 @@ void udp$receive(struct user_recv_args * Uargs)
 
     if ((UDPCB = UDPCB_OK(Uargs->re$local_conn_id,&RC,Uargs)) == 0)
     {
-        USER$Err(Uargs,RC);	// No such connection
+        USER$Err(Uargs,RC); // No such connection
         return;
     };
     XLOG$FAO(LOG$USER,"!%T UDP$RECEIVE: Conn=!XL, UDPCB=!XL, Size=!SL!/",
@@ -1670,12 +1670,12 @@ void udp$receive(struct user_recv_args * Uargs)
 
 // Make a request block for the receive
 
-    URQ = mm$qblk_get();		// Get a queue block
+    URQ = mm$qblk_get();        // Get a queue block
     URQ->ur$size = Uargs->re$buf_size; // # of bytes this rq can take
     URQ->ur$data = Uargs->re$data_start; // Address of system buffer
     URQ->ur$irp_adrs = Uargs->re$irp_adrs; // IO request packet address
     URQ->ur$ucb_adrs = Uargs->re$ucb_adrs; // Unit Control Block address
-    URQ->ur$uargs = Uargs;	// User argument block address
+    URQ->ur$uargs = Uargs;  // User argument block address
 
 // If anything is available on the queue, deliver it now, else queue for later
 
@@ -1704,7 +1704,7 @@ void udp$info(struct user_info_args * Uargs)
 
     if ((UDPCB = UDPCB_OK(Uargs->if$local_conn_id,&RC,Uargs)) == 0)
         {
-            USER$Err(Uargs,RC);	// Bad connection ID
+            USER$Err(Uargs,RC); // Bad connection ID
             return;
         };
 

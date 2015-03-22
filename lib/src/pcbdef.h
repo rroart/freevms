@@ -1,5 +1,5 @@
-#ifndef pcbdef_h
-#define pcbdef_h
+#ifndef PCBDEF_H
+#define PCBDEF_H
 
 #define PCB$M_RES 0x1
 #define PCB$M_DELPEN 0x2
@@ -292,8 +292,8 @@ struct _pcb {
     union  {
       unsigned int pcb$l_uic;
       struct  {
-	unsigned short int pcb$w_mem;
-	unsigned short int pcb$w_grp;
+    unsigned short int pcb$w_mem;
+    unsigned short int pcb$w_grp;
       };
     };
     char pcb$$$_arb_fill_2 [60];

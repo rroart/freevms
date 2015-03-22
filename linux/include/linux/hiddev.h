@@ -78,9 +78,9 @@ struct hiddev_report_info
 #define HID_REPORT_ID_MASK    0x000000ff
 #define HID_REPORT_ID_MAX     0x000000ff
 
-#define HID_REPORT_TYPE_INPUT	1
-#define HID_REPORT_TYPE_OUTPUT	2
-#define HID_REPORT_TYPE_FEATURE	3
+#define HID_REPORT_TYPE_INPUT   1
+#define HID_REPORT_TYPE_OUTPUT  2
+#define HID_REPORT_TYPE_FEATURE 3
 #define HID_REPORT_TYPE_MIN     1
 #define HID_REPORT_TYPE_MAX     3
 
@@ -91,9 +91,9 @@ struct hiddev_field_info
     unsigned field_index;
     unsigned maxusage;
     unsigned flags;
-    unsigned physical;		/* physical usage for this field */
-    unsigned logical;		/* logical usage for this field */
-    unsigned application;		/* application usage for this field */
+    unsigned physical;      /* physical usage for this field */
+    unsigned logical;       /* logical usage for this field */
+    unsigned application;       /* application usage for this field */
     __s32 logical_minimum;
     __s32 logical_maximum;
     __s32 physical_minimum;
@@ -105,15 +105,15 @@ struct hiddev_field_info
 /* Fill in report_type, report_id and field_index to get the information on a
  * field.
  */
-#define HID_FIELD_CONSTANT		0x001
-#define HID_FIELD_VARIABLE		0x002
-#define HID_FIELD_RELATIVE		0x004
-#define HID_FIELD_WRAP			0x008
-#define HID_FIELD_NONLINEAR		0x010
-#define HID_FIELD_NO_PREFERRED		0x020
-#define HID_FIELD_NULL_STATE		0x040
-#define HID_FIELD_VOLATILE		0x080
-#define HID_FIELD_BUFFERED_BYTE		0x100
+#define HID_FIELD_CONSTANT      0x001
+#define HID_FIELD_VARIABLE      0x002
+#define HID_FIELD_RELATIVE      0x004
+#define HID_FIELD_WRAP          0x008
+#define HID_FIELD_NONLINEAR     0x010
+#define HID_FIELD_NO_PREFERRED      0x020
+#define HID_FIELD_NULL_STATE        0x040
+#define HID_FIELD_VOLATILE      0x080
+#define HID_FIELD_BUFFERED_BYTE     0x100
 
 struct hiddev_usage_ref
 {
@@ -130,20 +130,20 @@ struct hiddev_usage_ref
  * Protocol version.
  */
 
-#define HID_VERSION		0x010002
+#define HID_VERSION     0x010002
 
 /*
  * IOCTLs (0x00 - 0x7f)
  */
 
-#define HIDIOCGVERSION		_IOR('H', 0x01, int)
-#define HIDIOCAPPLICATION	_IO('H', 0x02)
-#define HIDIOCGDEVINFO		_IOR('H', 0x03, struct hiddev_devinfo)
-#define HIDIOCGSTRING		_IOR('H', 0x04, struct hiddev_string_descriptor)
-#define HIDIOCINITREPORT	_IO('H', 0x05)
-#define HIDIOCGNAME(len)	_IOC(_IOC_READ, 'H', 0x06, len)
-#define HIDIOCGREPORT		_IOW('H', 0x07, struct hiddev_report_info)
-#define HIDIOCSREPORT		_IOW('H', 0x08, struct hiddev_report_info)
+#define HIDIOCGVERSION      _IOR('H', 0x01, int)
+#define HIDIOCAPPLICATION   _IO('H', 0x02)
+#define HIDIOCGDEVINFO      _IOR('H', 0x03, struct hiddev_devinfo)
+#define HIDIOCGSTRING       _IOR('H', 0x04, struct hiddev_string_descriptor)
+#define HIDIOCINITREPORT    _IO('H', 0x05)
+#define HIDIOCGNAME(len)    _IOC(_IOC_READ, 'H', 0x06, len)
+#define HIDIOCGREPORT       _IOW('H', 0x07, struct hiddev_report_info)
+#define HIDIOCSREPORT       _IOW('H', 0x08, struct hiddev_report_info)
 #define HIDIOCGREPORTINFO       _IOWR('H', 0x09, struct hiddev_report_info)
 #define HIDIOCGFIELDINFO        _IOWR('H', 0x0A, struct hiddev_field_info)
 #define HIDIOCGUSAGE            _IOWR('H', 0x0B, struct hiddev_usage_ref)
@@ -159,19 +159,19 @@ struct hiddev_usage_ref
  *
  *  while (ret >= 0) {
  *      for (i = 0; i < rinfo.num_fields; i++) {
- *	    finfo.report_type = rinfo.report_type;
+ *      finfo.report_type = rinfo.report_type;
  *          finfo.report_id = rinfo.report_id;
  *          finfo.field_index = i;
  *          ioctl(fd, HIDIOCGFIELDINFO, &finfo);
  *          for (j = 0; j < finfo.maxusage; j++) {
  *              uref.field_index = i;
- *		uref.usage_index = j;
- *		ioctl(fd, HIDIOCGUCODE, &uref);
- *		ioctl(fd, HIDIOCGUSAGE, &uref);
+ *      uref.usage_index = j;
+ *      ioctl(fd, HIDIOCGUCODE, &uref);
+ *      ioctl(fd, HIDIOCGUSAGE, &uref);
  *          }
- *	}
- *	uref.report_id |= HID_REPORT_ID_NEXT;
- *	ret = ioctl(fd, HIDIOCGREPORTINFO, &uref);
+ *  }
+ *  uref.report_id |= HID_REPORT_ID_NEXT;
+ *  ret = ioctl(fd, HIDIOCGREPORTINFO, &uref);
  *  }
  */
 

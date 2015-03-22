@@ -16,9 +16,9 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*  Execute line-mode command						*/
-/*									*/
+/*                                  */
+/*  Execute line-mode command                       */
+/*                                  */
 /************************************************************************/
 
 #include <stdio.h>
@@ -37,21 +37,21 @@ int ln_command (const char *cmdstr)
     char *cmdbuf, *cmdpnt;
     int i, l;
 
-    cmdbuf = strdup (cmdstr);					/* copy const string to writable */
-    cmdpnt = skipspaces (cmdbuf);					/* skip leading spaces */
+    cmdbuf = strdup (cmdstr);                   /* copy const string to writable */
+    cmdpnt = skipspaces (cmdbuf);                   /* skip leading spaces */
     for (l = 0; cmdpnt[l] != 0; l ++) if ((cmdpnt[l] < 'A') || (cmdpnt[l] > 'z') || (cmdpnt[l] > 'Z' && cmdpnt[l] < 'a')) break;
-    if (l == 0) cmd_type (cmdpnt);				/* no alphabetics means 'type <whatever>' */
+    if (l == 0) cmd_type (cmdpnt);              /* no alphabetics means 'type <whatever>' */
     else
     {
         for (i = 0; cmdtbl[i].name != NULL; i ++) if (strncasecmp (cmdtbl[i].name, cmdpnt, l) == 0) break;
         if (cmdtbl[i].name == NULL) outerr (l, "unknown command: %*.*s\n", l, l, cmdpnt);
         else
         {
-            cmdpnt = skipspaces (cmdpnt + l);				/* ok, skip spaces following command name */
-            (*(cmdtbl[i].entry)) (cmdpnt);				/* execute the command */
+            cmdpnt = skipspaces (cmdpnt + l);               /* ok, skip spaces following command name */
+            (*(cmdtbl[i].entry)) (cmdpnt);              /* execute the command */
         }
     }
-    free (cmdbuf);						/* free off writable copy */
+    free (cmdbuf);                      /* free off writable copy */
     return (1);
 }
 

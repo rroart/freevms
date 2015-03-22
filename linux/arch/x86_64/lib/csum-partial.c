@@ -47,7 +47,7 @@ static __force_inline unsigned do_csum(const unsigned char *buff, unsigned len)
         len--;
         buff++;
     }
-    count = len >> 1;		/* nr of 16-bit words.. */
+    count = len >> 1;       /* nr of 16-bit words.. */
     if (count)
     {
         if (2 & (unsigned long) buff)
@@ -57,7 +57,7 @@ static __force_inline unsigned do_csum(const unsigned char *buff, unsigned len)
             len -= 2;
             buff += 2;
         }
-        count >>= 1;		/* nr of 32-bit words.. */
+        count >>= 1;        /* nr of 32-bit words.. */
         if (count)
         {
             if (4 & (unsigned long) buff)
@@ -67,7 +67,7 @@ static __force_inline unsigned do_csum(const unsigned char *buff, unsigned len)
                 len -= 4;
                 buff += 4;
             }
-            count >>= 1;	/* nr of 64-bit words.. */
+            count >>= 1;    /* nr of 64-bit words.. */
 
             /* main loop using 64byte blocks */
             unsigned long zero = 0;

@@ -239,26 +239,26 @@ ext2_validate_entry(char *base, unsigned offset, unsigned mask)
 
 static unsigned char ext2_filetype_table[EXT2_FT_MAX] =
 {
-    [EXT2_FT_UNKNOWN]	DT_UNKNOWN,
-    [EXT2_FT_REG_FILE]	DT_REG,
-    [EXT2_FT_DIR]		DT_DIR,
-    [EXT2_FT_CHRDEV]	DT_CHR,
-    [EXT2_FT_BLKDEV]	DT_BLK,
-    [EXT2_FT_FIFO]		DT_FIFO,
-    [EXT2_FT_SOCK]		DT_SOCK,
-    [EXT2_FT_SYMLINK]	DT_LNK,
+    [EXT2_FT_UNKNOWN]   DT_UNKNOWN,
+    [EXT2_FT_REG_FILE]  DT_REG,
+    [EXT2_FT_DIR]       DT_DIR,
+    [EXT2_FT_CHRDEV]    DT_CHR,
+    [EXT2_FT_BLKDEV]    DT_BLK,
+    [EXT2_FT_FIFO]      DT_FIFO,
+    [EXT2_FT_SOCK]      DT_SOCK,
+    [EXT2_FT_SYMLINK]   DT_LNK,
 };
 
 #define S_SHIFT 12
 static unsigned char ext2_type_by_mode[S_IFMT >> S_SHIFT] =
 {
-    [S_IFREG >> S_SHIFT]	EXT2_FT_REG_FILE,
-    [S_IFDIR >> S_SHIFT]	EXT2_FT_DIR,
-    [S_IFCHR >> S_SHIFT]	EXT2_FT_CHRDEV,
-    [S_IFBLK >> S_SHIFT]	EXT2_FT_BLKDEV,
-    [S_IFIFO >> S_SHIFT]	EXT2_FT_FIFO,
-    [S_IFSOCK >> S_SHIFT]	EXT2_FT_SOCK,
-    [S_IFLNK >> S_SHIFT]	EXT2_FT_SYMLINK,
+    [S_IFREG >> S_SHIFT]    EXT2_FT_REG_FILE,
+    [S_IFDIR >> S_SHIFT]    EXT2_FT_DIR,
+    [S_IFCHR >> S_SHIFT]    EXT2_FT_CHRDEV,
+    [S_IFBLK >> S_SHIFT]    EXT2_FT_BLKDEV,
+    [S_IFIFO >> S_SHIFT]    EXT2_FT_FIFO,
+    [S_IFSOCK >> S_SHIFT]   EXT2_FT_SOCK,
+    [S_IFLNK >> S_SHIFT]    EXT2_FT_SYMLINK,
 };
 
 static inline void ext2_set_de_type(ext2_dirent *de, struct _fcb *inode)
@@ -345,7 +345,7 @@ done:
 }
 
 /*
- *	ext2_find_entry()
+ *  ext2_find_entry()
  *
  * finds an entry in the specified directory with the wanted name. It
  * returns the page in which the entry was found, and the entry itself
@@ -462,7 +462,7 @@ void ext2_set_link(struct _vcb *vcb, struct _fcb *dir, struct ext2_dir_entry_2 *
 }
 
 /*
- *	Parent is locked.
+ *  Parent is locked.
  */
 int ext2_add_link (struct _vcb * vcb, struct dentry *dentry, struct _fcb *inode)
 {

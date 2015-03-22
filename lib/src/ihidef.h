@@ -1,5 +1,5 @@
-#ifndef ihidef_h
-#define ihidef_h
+#ifndef IHIDEF_H
+#define IHIDEF_H
 
 #define IHI$K_LENGTH 80
 #define IHI$C_LENGTH 80

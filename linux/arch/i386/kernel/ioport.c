@@ -1,5 +1,5 @@
 /*
- *	linux/arch/i386/kernel/ioport.c
+ *  linux/arch/i386/kernel/ioport.c
  *
  * This contains the io-permission bitmap code - written by obz, with changes
  * by Linus.

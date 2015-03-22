@@ -7,7 +7,7 @@
  * Parse a config.in file and translate it to a wish script.
  * This task has three parts:
  *
- *   tkparse.c	tokenize the input
+ *   tkparse.c  tokenize the input
  *   tkcond.c   transform 'if ...' statements
  *   tkgen.c    generate output
  *

@@ -1,5 +1,5 @@
-#ifndef pdscdef_h
-#define pdscdef_h
+#ifndef PDSCDEF_H
+#define PDSCDEF_H
 
 #define PDSC$K_KIND_BOUND 0
 #define PDSC$K_KIND_NULL 8

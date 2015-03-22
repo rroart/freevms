@@ -44,10 +44,10 @@
 #include <linux/time.h>               /* C header for $GETTIM to find time */
 #include <linux/string.h>
 //#include <stdlib.h>
-#include <sys$routines.h>	/* Our header file! */
+#include <sys$routines.h>   /* Our header file! */
 #include <ssdef.h>
 #include <descrip.h>
-#include <lib$routines.h>	/* LIB$ Header File */
+#include <lib$routines.h>   /* LIB$ Header File */
 
 #define TIMEBASE 100000         /* 10 millisecond units in quadword */
 #define TIMESIZE 8640000        /* Factor between dates & times */

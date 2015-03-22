@@ -85,27 +85,27 @@ struct smb_fattr
 
     __u16 attr;
 
-    unsigned long	f_ino;
-    umode_t		f_mode;
-    nlink_t		f_nlink;
-    uid_t		f_uid;
-    gid_t		f_gid;
-    kdev_t		f_rdev;
-    off_t		f_size;
-    time_t		f_atime;
-    time_t		f_mtime;
-    time_t		f_ctime;
-    unsigned long	f_blksize;
-    unsigned long	f_blocks;
+    unsigned long   f_ino;
+    umode_t     f_mode;
+    nlink_t     f_nlink;
+    uid_t       f_uid;
+    gid_t       f_gid;
+    kdev_t      f_rdev;
+    off_t       f_size;
+    time_t      f_atime;
+    time_t      f_mtime;
+    time_t      f_ctime;
+    unsigned long   f_blksize;
+    unsigned long   f_blocks;
 };
 
 enum smb_conn_state
 {
-    CONN_VALID,		/* everything's fine */
-    CONN_INVALID,		/* Something went wrong, but did not
-				   try to reconnect yet. */
-    CONN_RETRIED,		/* Tried a reconnection, but was refused */
-    CONN_RETRYING		/* Currently trying to reconnect */
+    CONN_VALID,     /* everything's fine */
+    CONN_INVALID,       /* Something went wrong, but did not
+                   try to reconnect yet. */
+    CONN_RETRIED,       /* Tried a reconnection, but was refused */
+    CONN_RETRYING       /* Currently trying to reconnect */
 };
 
 #define SMB_SUPER_MAGIC               0x517B
@@ -113,8 +113,8 @@ enum smb_conn_state
 #define SMB_HEADER_LEN   37     /* includes everything up to, but not
 * including smb_bcc */
 
-#define SMB_INITIAL_PACKET_SIZE		4000
-#define SMB_MAX_PACKET_SIZE		32768
+#define SMB_INITIAL_PACKET_SIZE     4000
+#define SMB_MAX_PACKET_SIZE     32768
 
 /* reserve this much space for trans2 parameters. Shouldn't have to be more
    than 10 or so, but OS/2 seems happier like this. */

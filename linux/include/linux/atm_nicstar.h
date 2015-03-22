@@ -21,11 +21,11 @@
 #include <linux/atmapi.h>
 #include <linux/atmioc.h>
 
-#define NS_GETPSTAT	_IOWR('a',ATMIOC_SARPRV+1,struct atmif_sioc)
+#define NS_GETPSTAT _IOWR('a',ATMIOC_SARPRV+1,struct atmif_sioc)
 /* get pool statistics */
-#define NS_SETBUFLEV	_IOW('a',ATMIOC_SARPRV+2,struct atmif_sioc)
+#define NS_SETBUFLEV    _IOW('a',ATMIOC_SARPRV+2,struct atmif_sioc)
 /* set buffer level markers */
-#define NS_ADJBUFLEV	_IO('a',ATMIOC_SARPRV+3)
+#define NS_ADJBUFLEV    _IO('a',ATMIOC_SARPRV+3)
 /* adjust buffer level */
 
 typedef struct buf_nr
@@ -39,7 +39,7 @@ typedef struct buf_nr
 typedef struct pool_levels
 {
     int buftype;
-    int count;		/* (At least for now) only used in NS_GETPSTAT */
+    int count;      /* (At least for now) only used in NS_GETPSTAT */
     buf_nr level;
 } pool_levels;
 

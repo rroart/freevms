@@ -1,7 +1,7 @@
 /*
  * strcompare_multi.c
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,18 +19,18 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 /*
  *
- *	Code for VAX STR$COMPARE routine
+ *  Code for VAX STR$COMPARE routine
  *
  * Description:
  *
@@ -39,18 +39,18 @@
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  *
- *	Feb 19, 1997 - Kevin Handy
- *		Fix so that a shorter string is assumed to be padded
- *		with spaces.
+ *  Feb 19, 1997 - Kevin Handy
+ *      Fix so that a shorter string is assumed to be padded
+ *      with spaces.
  *
- *	Feb 24, 2004 - Andrew Allison
- *		Inserted GNU License
+ *  Feb 24, 2004 - Andrew Allison
+ *      Inserted GNU License
  */
 
 #include <stdio.h>
@@ -65,37 +65,37 @@
 /*************************************************************
  * str$compare_multi
  *
- *	Compares two strings for the same contents. This
- *	routine distinguishes between upper and lower case
- *	strings.
+ *  Compares two strings for the same contents. This
+ *  routine distinguishes between upper and lower case
+ *  strings.
  *
- *	returns:
- *		-1 if first < second
- *		0 if equal
- *		1 if first > second
+ *  returns:
+ *      -1 if first < second
+ *      0 if equal
+ *      1 if first > second
  */
 long str$compare_multi( const struct dsc$descriptor_s* first_source_string,
                         const struct dsc$descriptor_s *second_source_string,
                         const unsigned long *flags,
                         const unsigned long *language)
 {
-    unsigned long 	case_sensitive,  character_set;
-    char 		*s1_ptr, *s2_ptr;
-    unsigned short 	s1_length, s2_length;
-    unsigned short 	min_length;
-    long 		result;
+    unsigned long   case_sensitive,  character_set;
+    char        *s1_ptr, *s2_ptr;
+    unsigned short  s1_length, s2_length;
+    unsigned short  min_length;
+    long        result;
 
 
-    case_sensitive = 1; 		// default case sensitive comparision
+    case_sensitive = 1;         // default case sensitive comparision
     if ( (unsigned long) flags != 0 )
     {
         switch ( *flags)
         {
         case 0:
-            case_sensitive = 1;	// comparision is case sensitive
+            case_sensitive = 1; // comparision is case sensitive
             break;
         case 1:
-            case_sensitive = 0;	// ignore case
+            case_sensitive = 0; // ignore case
             break;
         default:
             result = LIB$_INVARG;
@@ -109,22 +109,22 @@ long str$compare_multi( const struct dsc$descriptor_s* first_source_string,
         switch ( *language )
         {
         case 1:
-            character_set = 1;	// multinational
+            character_set = 1;  // multinational
             break;
         case 2:
-            character_set = 2;	// Danish
+            character_set = 2;  // Danish
             break;
         case 3:
-            character_set = 3;	// Finish Swedish
+            character_set = 3;  // Finish Swedish
             break;
         case 4:
-            character_set = 4;	// German
+            character_set = 4;  // German
             break;
         case 5:
-            character_set = 5; 	// Norwegian
+            character_set = 5;  // Norwegian
             break;
         case 6:
-            character_set = 6;	// Spanish
+            character_set = 6;  // Spanish
             break;
         default:
             result = LIB$_INVARG;

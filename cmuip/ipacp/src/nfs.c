@@ -1,53 +1,53 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 /****************************************************************************
 
-		NFS - RPC Network File Service program (#1000003)
+        NFS - RPC Network File Service program (#1000003)
 Facility:
 
-	NFS.C - Provide Network File Service under UDP (RFC 1097)
+    NFS.C - Provide Network File Service under UDP (RFC 1097)
 
 Abstract:
 
-	Supports the NFS protocol for the IPACP.  Provides
-	RPC program #100003.
+    Supports the NFS protocol for the IPACP.  Provides
+    RPC program #100003.
 
 Notes:
 
-	(Mention contruction of the file handles)
+    (Mention contruction of the file handles)
 
 
 Author:
 
-	Bruce R. Miller, CMU NetDev, 13-Nov-1990
-	Copyright (c) 1990, Bruce R. Miller and Carnegie-Mellon University
+    Bruce R. Miller, CMU NetDev, 13-Nov-1990
+    Copyright (c) 1990, Bruce R. Miller and Carnegie-Mellon University
 
 Module Modification History:
 
-    13-AUG-1991	    Marc A. Shannon	    CMU Group N		V6.6-2
-	Thanks to Tom Allebrandi, a problem was fixed where variable
-	length records (not IMPLIEDCC) such as .OBJ files would be accessed
-	without the recordlength table causing the IPACP to ACCVIO to its
-	death.
+    13-AUG-1991     Marc A. Shannon     CMU Group N     V6.6-2
+    Thanks to Tom Allebrandi, a problem was fixed where variable
+    length records (not IMPLIEDCC) such as .OBJ files would be accessed
+    without the recordlength table causing the IPACP to ACCVIO to its
+    death.
 
  ***************************************************************************/
 
@@ -67,16 +67,16 @@ typedef unsigned int u_int;
 #include chpdef
 #include armdef
 #include errno
-#include in			/* network defs (defines u_long!) */
+#include in         /* network defs (defines u_long!) */
 
-#include "rpc_types.h"		/* usefull and relavant definitions */
+#include "rpc_types.h"      /* usefull and relavant definitions */
 #include "xdr.h"
-#include "auth.h"		/* authorization structs */
-#include "rpc_msg.h"		/* protocol for rpc messages */
+#include "auth.h"       /* authorization structs */
+#include "rpc_msg.h"        /* protocol for rpc messages */
 #include "nfs.h"
 
-#include <netdevices.h>		/* CMU-OpenVMS/IP interface */
-#include <netconfig.h>		/* CMU-OpenVMS/IP interface */
+#include <netdevices.h>     /* CMU-OpenVMS/IP interface */
+#include <netconfig.h>      /* CMU-OpenVMS/IP interface */
 
 /* File related includes */
 
@@ -122,20 +122,20 @@ IPACP_Info_Structure *IPACP_Interface;
 
 /* NFS specific definitions */
 
-#define RPCPROG_NFS		100003
+#define RPCPROG_NFS     100003
 
-#define NPROCS			18
-#define NFS_VERSION		 2
-#define NFS_VERSION_LOW	 	 2
-#define NFS_VERSION_HIGH	 2
+#define NPROCS          18
+#define NFS_VERSION      2
+#define NFS_VERSION_LOW      2
+#define NFS_VERSION_HIGH     2
 
-#define HTAB_SIZE		17
+#define HTAB_SIZE       17
 
 /* Block caching constants */
 
 #define BLKSIZE 10240
 
-int MAX_CACHE=50;	    /* Default value - changed during NFS$INIT */
+int MAX_CACHE=50;       /* Default value - changed during NFS$INIT */
 
 /* Basic data types */
 
@@ -154,22 +154,22 @@ typedef struct
 
 typedef struct
 {
-    struct file_record *next,*prev;		/* links for cache */
-    fhandle	hand;				/* internal NFS file ID */
-    int		ref_count;			/* links to file */
-    char	filename[MAX_FNAME];		/* file name */
+    struct file_record *next,*prev;     /* links for cache */
+    fhandle hand;               /* internal NFS file ID */
+    int     ref_count;          /* links to file */
+    char    filename[MAX_FNAME];        /* file name */
 
     /* open file information */
-    uword	fchan;				/* XQP channel */
-    long int	filesize;			/* Unix file size */
-    struct dsc$descriptor fib_desc;		/* Descriptor to FIB */
-    struct fibdef fib;				/* File Information Block */
-    struct atrdef atrblock[2];			/* Attributes pointer block */
-    struct fatdef fat;				/* File attributes */
+    uword   fchan;              /* XQP channel */
+    long int    filesize;           /* Unix file size */
+    struct dsc$descriptor fib_desc;     /* Descriptor to FIB */
+    struct fibdef fib;              /* File Information Block */
+    struct atrdef atrblock[2];          /* Attributes pointer block */
+    struct fatdef fat;              /* File attributes */
 
-    record_starts *offsets;			/* Array of block offsets */
+    record_starts *offsets;         /* Array of block offsets */
 
-    timer_record *timerblock;			/* pointer to timer entry */
+    timer_record *timerblock;           /* pointer to timer entry */
 
 } file_record;
 
@@ -303,7 +303,7 @@ unsigned int prog,vers,proc;
     }
 
     /* We're good to go */
-    cbody += 4;		/* jump over rpc_vers,prog,vers, and proc */
+    cbody += 4;     /* jump over rpc_vers,prog,vers, and proc */
 
     /* ignore credentials */
     flavor = nfs_int(*cbody++);
@@ -313,7 +313,7 @@ unsigned int prog,vers,proc;
     flavor = nfs_int(*cbody++);
     cbody += ((RNDUP(nfs_int(*cbody))/4) +1);
 
-    if (uic == -2)		/* No match was found in RPC */
+    if (uic == -2)      /* No match was found in RPC */
     {
         XDR$vton_int(&NFSERR_ACCES, areply+1);
         result_len = 1;
@@ -340,7 +340,7 @@ unsigned int prog,vers,proc;
 
 /*************************************************************************
 
-			Hash Table Routines
+            Hash Table Routines
 
 **************************************************************************/
 
@@ -418,7 +418,7 @@ file_record *frp;
     new_timer = (timer_record *)malloc(sizeof(timer_record));
     new_timer->next = new_timer->prev = NULL;
     new_timer->item = (char *)frp;
-    new_timer->referenced = 2;		    /* Give it two minutes to start */
+    new_timer->referenced = 2;          /* Give it two minutes to start */
     _INSQUE(new_timer, &fifo_timer.head);
 
     frp->timerblock = new_timer;
@@ -456,7 +456,7 @@ int clean_frs()
 
 /*********************************************************************
 
-		Cache Management Routines
+        Cache Management Routines
 
 **********************************************************************/
 
@@ -575,7 +575,7 @@ fhandle hand;
                 {
                     if (!reclen)
                     {
-                        if (curvms & 1)	    /* Increment to next whole word */
+                        if (curvms & 1)     /* Increment to next whole word */
                         {
                             curvms++;
                             blockptr++;
@@ -682,7 +682,7 @@ fhandle hand;
 
 /**********************************************************************
 
-			File Access Routines
+            File Access Routines
 
 ***********************************************************************/
 
@@ -706,8 +706,8 @@ char *updir(char *path)
     {
         leftbracket = strrchr(path, '[');
         strcpy(leftbracket + 8, leftbracket + 1);   /* Move directory name to
-						       filename position */
-        strncpy(leftbracket, "[000000]", 8);	    /* Don't null-terminate */
+                               filename position */
+        strncpy(leftbracket, "[000000]", 8);        /* Don't null-terminate */
     }
     else
         *dot = ']';
@@ -766,9 +766,9 @@ char *hostname;
     if ((stats.st_mode & S_IFMT) == S_IFDIR) attribs->type = NFDIR;
     else attribs->type = NFREG;
 
-    attribs->mode	= stats.st_mode;
-    attribs->nlink	= stats.st_nlink;
-    attribs->nlink	= 1;
+    attribs->mode   = stats.st_mode;
+    attribs->nlink  = stats.st_nlink;
+    attribs->nlink  = 1;
 
     uid = (short)stats.st_uid;
     gid = (short)stats.st_gid;
@@ -781,21 +781,21 @@ char *hostname;
     attribs->uid &= 0x0000ffff;
     attribs->gid &= 0x0000ffff;
 
-    attribs->size	= (frp->filesize != -1) ? frp->filesize : stats.st_size;
-    attribs->blocksize	= 512;
-    attribs->rdev	= stats.st_rdev;
+    attribs->size   = (frp->filesize != -1) ? frp->filesize : stats.st_size;
+    attribs->blocksize  = 512;
+    attribs->rdev   = stats.st_rdev;
 
     attribs->blocks = (frp->fat.fat$l_hiblk.fat$w_hiblkh * 65536) +
                       (frp->fat.fat$l_hiblk.fat$w_hiblkl);
-    attribs->fsid	= stats.st_dev;
-    attribs->fileid	= (stats.st_ino[0] * 65536) + stats.st_ino[1];
+    attribs->fsid   = stats.st_dev;
+    attribs->fileid = (stats.st_ino[0] * 65536) + stats.st_ino[1];
 
-    attribs->atime.seconds	= stats.st_atime - GMT_OFFSET;
-    attribs->atime.useconds	= 0;
-    attribs->mtime.seconds	= stats.st_mtime - GMT_OFFSET;
-    attribs->mtime.useconds	= 0;
-    attribs->ctime.seconds	= stats.st_ctime - GMT_OFFSET;
-    attribs->ctime.useconds	= 0;
+    attribs->atime.seconds  = stats.st_atime - GMT_OFFSET;
+    attribs->atime.useconds = 0;
+    attribs->mtime.seconds  = stats.st_mtime - GMT_OFFSET;
+    attribs->mtime.useconds = 0;
+    attribs->ctime.seconds  = stats.st_ctime - GMT_OFFSET;
+    attribs->ctime.useconds = 0;
 
     return 1;
 }
@@ -905,9 +905,9 @@ int has_access(char *username, char *hname, char *filename, unsigned access)
 
 /*******************************************************************
 
-			XDR output routines
+            XDR output routines
 
-	N.B.  All these routines return sizes in terms of longs.
+    N.B.  All these routines return sizes in terms of longs.
 
 ********************************************************************/
 
@@ -1019,7 +1019,7 @@ int dirp;
 
 /**********************************************************************
 
-NFS procedure #0	- Do Nothing
+NFS procedure #0    - Do Nothing
 
 */
 
@@ -1036,7 +1036,7 @@ long *reply;
 
 /**********************************************************************
 
-NFS procedure #1	- Get File Attributes
+NFS procedure #1    - Get File Attributes
 
 */
 
@@ -1070,7 +1070,7 @@ fhandle hand;
 
 /**********************************************************************
 
-NFS procedure #2	- Set File Attributes
+NFS procedure #2    - Set File Attributes
 
 */
 
@@ -1118,7 +1118,7 @@ char *args;
 
 /**********************************************************************
 
-NFS procedure #3	- Get Filesystem Root (!!!OBSELETE!!!)
+NFS procedure #3    - Get Filesystem Root (!!!OBSELETE!!!)
 
 */
 int NFSPROC_ROOT(uic,hname,username,reply)
@@ -1134,7 +1134,7 @@ long *reply;
 
 /**********************************************************************
 
-NFS procedure #4	- Look Up File Name
+NFS procedure #4    - Look Up File Name
 
 */
 
@@ -1187,7 +1187,7 @@ char *args;
         if (!RC) return write_XDR_stat(NFSERR_ACCES,&reply);
 
         len = write_XDR_stat(NFS_OK,&reply);
-        len += write_XDR_fhandle(hand,&reply);	/* add another handle */
+        len += write_XDR_fhandle(hand,&reply);  /* add another handle */
         len += write_XDR_file_attributes(&attribs,&reply);
     }
     else len = write_XDR_stat(RC, &reply);
@@ -1199,7 +1199,7 @@ char *args;
 
 /**********************************************************************
 
-NFS procedure #5	- Read From Symbolic Link
+NFS procedure #5    - Read From Symbolic Link
 
 */
 NFSPROC_READLINK(uic,hname,username,reply,hand)
@@ -1223,7 +1223,7 @@ fhandle hand;
 
 /**********************************************************************
 
-NFS procedure #6	- Read From file
+NFS procedure #6    - Read From file
 
 */
 NFSPROC_READ(uic,hname,username,reply,rargs)
@@ -1284,15 +1284,15 @@ struct
        must indicate that there is carriage control for us to insert LF's into
        the stream - if not, we send the data through blindly (since it doesn't
        make any difference).  The translation methods for each type are:
-    FAT$C_FIXED	pure binary
-    FAT$C_VARIABLE	first two bytes represent length of current record
-    		round length up to next even value for padded length
-    FAT$C_VFC	not handled yet
-    FAT$C_UNDEFINED	pure binary
-    FAT$C_STREAM	CRLF stream (what this means, I don't know)
-    FAT$C_STREAMLF	LF stream - handled as pure binary data since it's
-    		what the other side expects
-    FAT$C_STREAMCR	replace the CR terminators with LF for remote side */
+    FAT$C_FIXED pure binary
+    FAT$C_VARIABLE  first two bytes represent length of current record
+            round length up to next even value for padded length
+    FAT$C_VFC   not handled yet
+    FAT$C_UNDEFINED pure binary
+    FAT$C_STREAM    CRLF stream (what this means, I don't know)
+    FAT$C_STREAMLF  LF stream - handled as pure binary data since it's
+            what the other side expects
+    FAT$C_STREAMCR  replace the CR terminators with LF for remote side */
 
     /*
      * Change to 65536 from 256 per mail conversation with
@@ -1354,8 +1354,8 @@ struct
                      */
                     transcount = transcount - (transcount % 512) + 512;
                     recordlen = 0xFFFFFFFF; /* Can't use 0 since that might
-					       cause a newline on the next
-					       pass */
+                           cause a newline on the next
+                           pass */
                     continue;
                 }
 
@@ -1451,7 +1451,7 @@ struct
 
 /**********************************************************************
 
-NFS procedure #7	- Write to Cache (!!!NYI!!!)
+NFS procedure #7    - Write to Cache (!!!NYI!!!)
 
 */
 NFSPROC_WRITECACHE(uic,hname,username,reply)
@@ -1467,7 +1467,7 @@ long *reply;
 
 /**********************************************************************
 
-NFS procedure #8	- Write to File
+NFS procedure #8    - Write to File
 
 */
 NFSPROC_WRITE(uic,hname,username,reply,wargs)
@@ -1583,9 +1583,9 @@ struct
         char *inoutbuf;
         int bytesneeded;
 
-        bytesneeded = (offset % 512) +		/* Pre-block data */
-                      count;			/* Given data */
-        bytesneeded = (bytesneeded + 511) / 512 * 512;	    /* Round up */
+        bytesneeded = (offset % 512) +      /* Pre-block data */
+                      count;            /* Given data */
+        bytesneeded = (bytesneeded + 511) / 512 * 512;      /* Round up */
 
         inoutbuf = (char *)malloc(bytesneeded);
 
@@ -1626,7 +1626,7 @@ struct
 
 /**********************************************************************
 
-NFS procedure #9	- Create File
+NFS procedure #9    - Create File
 
 */
 NFSPROC_CREATE(uic,hname,username,reply,args)
@@ -1702,7 +1702,7 @@ char *args;
         return write_XDR_stat(NFSERR_ACCES,&reply);
 
     len = write_XDR_stat(NFS_OK,&reply);
-    len += write_XDR_fhandle(hand,&reply);	/* add another handle */
+    len += write_XDR_fhandle(hand,&reply);  /* add another handle */
     len += write_XDR_file_attributes(&attribs,&reply);
 
     return len;
@@ -1712,7 +1712,7 @@ char *args;
 
 /**********************************************************************
 
-NFS procedure #10	- Remove File
+NFS procedure #10   - Remove File
 
 */
 
@@ -1765,7 +1765,7 @@ char *args;
 
 /**********************************************************************
 
-NFS procedure #11	- Rename File
+NFS procedure #11   - Rename File
 
 */
 
@@ -1862,7 +1862,7 @@ char *args;
 
 /**********************************************************************
 
-NFS procedure #12	- Create Link to File
+NFS procedure #12   - Create Link to File
 
 */
 NFSPROC_LINK(uic,hname,username,reply)
@@ -1878,7 +1878,7 @@ long *reply;
 
 /**********************************************************************
 
-NFS procedure #13	- Create Symbolic Link
+NFS procedure #13   - Create Symbolic Link
 
 */
 NFSPROC_SYMLINK(uic,hname,username,reply)
@@ -1894,7 +1894,7 @@ long *reply;
 
 /**********************************************************************
 
-NFS procedure #14	- Create Directory
+NFS procedure #14   - Create Directory
 
 */
 NFSPROC_MKDIR(uic,hname,username,reply,args)
@@ -1941,14 +1941,14 @@ char *args;
                              nfname,1);
 
     if (nfname[fnlen - 1] == '.')
-        fnlen--;		/* Remove trailing dot from dir name */
+        fnlen--;        /* Remove trailing dot from dir name */
 
     memcpy(s,nfname,fnlen);
     s[fnlen++] = ']';
     s[fnlen] = 0;
 
     strcpy(dirname, fname);
-    updir(updir(dirname));	    /* Get parent directory name as file */
+    updir(updir(dirname));      /* Get parent directory name as file */
     if ((RC = has_access(username, hname, dirname, ARM$M_WRITE)))
         return write_XDR_stat(RC, &reply);
 
@@ -1987,7 +1987,7 @@ char *args;
 
 /**********************************************************************
 
-NFS procedure #15	- Remove Directory
+NFS procedure #15   - Remove Directory
 
 */
 NFSPROC_RMDIR(uic,hname,username,reply,args)
@@ -2032,7 +2032,7 @@ char *args;
 
 /**********************************************************************
 
-NFS procedure #16	- Read From Directory
+NFS procedure #16   - Read From Directory
 
 */
 
@@ -2092,7 +2092,7 @@ readdirargs *rd_args;
     esbuff[nam.nam$b_esl] = 0;
 
     len = write_XDR_stat(NFS_OK,&reply);
-    nfiles = 2;		/* Count the "." and ".." entries */
+    nfiles = 2;     /* Count the "." and ".." entries */
     if (!cookie)
     {
         char dirname[MAX_FNAME];
@@ -2103,18 +2103,18 @@ readdirargs *rd_args;
         enough, but we assume that it is for 32 bytes, the directories "."
         and ".." for this directory. */
         XDR$vton_int(&1, reply++);
-        len++;	    /* Data here - "." */
+        len++;      /* Data here - "." */
         XDR$vton_int(&frp->fib.fib$r_fid_overlay, reply++);
         len++;
         XDR$vton_int(&1, reply++);
-        len++;	    /* Length of "." */
+        len++;      /* Length of "." */
         memset(reply, 0, RNDUP(1));
         strncpy(reply, ".", 1);
         reply += (1 + RNDUP(1))/4;
         len += (1 + RNDUP(1))/4;
         cookie++;
         XDR$vton_int(&cookie, reply++);
-        len++;	    /* Cookie number 1 */
+        len++;      /* Cookie number 1 */
 
         strcpy(dirname, frp->filename);
         updir(dirname);
@@ -2123,18 +2123,18 @@ readdirargs *rd_args;
         {
             /* Now write out the parent's directory information */
             XDR$vton_int(&1, reply++);
-            len++;	    /* More data - ".." */
+            len++;      /* More data - ".." */
             XDR$vton_int(&dirhand[16], reply++);
             len++;
             XDR$vton_int(&2, reply++);
-            len++;	    /* Length of ".." */
+            len++;      /* Length of ".." */
             memset(reply, 0, RNDUP(2));
             strncpy(reply, "..", 2);
             reply += (1 + RNDUP(2))/4;
             len += (1 + RNDUP(2))/4;
             cookie++;
             XDR$vton_int(&cookie, reply++);
-            len++;	/* Cookie number 2 */
+            len++;  /* Cookie number 2 */
         }
     }
 
@@ -2156,7 +2156,7 @@ readdirargs *rd_args;
         s=rsbuff;
         while (*s && (*s++ != ']'));
         nstr = s;  /* nstr=start of fname */
-        while (*s && (*s++ != ';')) nlen++;	/* size of it */
+        while (*s && (*s++ != ';')) nlen++; /* size of it */
 
         stat(rsbuff, &fstats);
         inode = (fstats.st_ino[0] * 65536) + fstats.st_ino[1];
@@ -2173,13 +2173,13 @@ readdirargs *rd_args;
 
         /* write this entry into the reply buffer */
         XDR$vton_int(&1,reply++);
-        len++;	     /* optional data: yes */
+        len++;       /* optional data: yes */
         XDR$vton_int(&inode,reply++);
-        len++;			    /* fid */
+        len++;              /* fid */
 
         /* filename */
         XDR$vton_int(&nlen,reply++);
-        len++;		/* filename length */
+        len++;      /* filename length */
         memset(reply,0,RNDUP(nlen));
         strncpy(reply,fname_str,nlen);
 
@@ -2190,12 +2190,12 @@ readdirargs *rd_args;
     }
 
     /*    if (RC != SS$_NORMAL) {
-    	get_file_attributes(frp,&attribs, hname);
-    	XDR$vton_int(&attribs.size,reply-1);
-    	}
+        get_file_attributes(frp,&attribs, hname);
+        XDR$vton_int(&attribs.size,reply-1);
+        }
     */
     XDR$vton_int(&0,reply++);
-    len++;		/* optional data: no */
+    len++;      /* optional data: no */
     EOdir = (RC != SS$_NORMAL);
     XDR$vton_int(&EOdir, reply++);
     len++;
@@ -2206,7 +2206,7 @@ readdirargs *rd_args;
 
 /**********************************************************************
 
-NFS procedure #17	- Get Filesystem Statistics
+NFS procedure #17   - Get Filesystem Statistics
 
 */
 
@@ -2232,24 +2232,24 @@ fhandle hand;
     struct item items[3];
     long max_blocks,free_blocks;
 
-    desc.dsc$w_length	= hand[0];
-    desc.dsc$b_dtype	= 0;
-    desc.dsc$b_dtype	= 0;
-    desc.dsc$a_pointer	= &hand[1];
+    desc.dsc$w_length   = hand[0];
+    desc.dsc$b_dtype    = 0;
+    desc.dsc$b_dtype    = 0;
+    desc.dsc$a_pointer  = &hand[1];
 
-    items[0].buff_len	= 4;
-    items[0].item_code	= DVI$_MAXBLOCK;
-    items[0].buff_addr	= &max_blocks;
-    items[0].ret_len_addr	= &length;
+    items[0].buff_len   = 4;
+    items[0].item_code  = DVI$_MAXBLOCK;
+    items[0].buff_addr  = &max_blocks;
+    items[0].ret_len_addr   = &length;
 
-    items[1].buff_len	= 4;
-    items[1].item_code	= DVI$_FREEBLOCKS;
-    items[1].buff_addr	= &free_blocks;
-    items[1].ret_len_addr	= &length;
+    items[1].buff_len   = 4;
+    items[1].item_code  = DVI$_FREEBLOCKS;
+    items[1].buff_addr  = &free_blocks;
+    items[1].ret_len_addr   = &length;
 
     /* longword of zeros terminates the item list */
-    items[2].buff_len	= 0;
-    items[2].item_code	= 0;
+    items[2].buff_len   = 0;
+    items[2].item_code  = 0;
 
     RC = sys$getdviw(0,0,&desc,items,0,0,0,0);
     if (ERROR(RC))
@@ -2262,11 +2262,11 @@ fhandle hand;
 
     write_XDR_stat(NFS_OK,&reply);
 
-    XDR$vton_int(&8192,reply++);	/* optimal transfer size */
-    XDR$vton_int(&512,reply++);		/* FS block size */
-    XDR$vton_int(&max_blocks,reply++);	/* total blocks on disk */
-    XDR$vton_int(&free_blocks,reply++);	/* available blocks on disk */
-    XDR$vton_int(&free_blocks,reply++);	/* available blocks on disk */
+    XDR$vton_int(&8192,reply++);    /* optimal transfer size */
+    XDR$vton_int(&512,reply++);     /* FS block size */
+    XDR$vton_int(&max_blocks,reply++);  /* total blocks on disk */
+    XDR$vton_int(&free_blocks,reply++); /* available blocks on disk */
+    XDR$vton_int(&free_blocks,reply++); /* available blocks on disk */
 
     return 1 + 5;
 }
@@ -2308,7 +2308,7 @@ void *IPACP_Int;
 
     SYS$GETJPIW(0, 0, 0, &itemlist, 0, 0, 0);
 
-    remfiles -= 5;			/* Allow room for log files and such */
+    remfiles -= 5;          /* Allow room for log files and such */
 
     itemlist.buflen = sizeof(maxchannels);
     itemlist.itmcod = SYI$_CHANNELCNT;
@@ -2318,7 +2318,7 @@ void *IPACP_Int;
 
     SYS$GETSYIW(0, 0, 0, &itemlist, 0, 0, 0);
 
-    maxchannels -= 32;			/* Allow room for added system chans */
+    maxchannels -= 32;          /* Allow room for added system chans */
 
     MAX_CACHE = (remfiles > maxchannels) ? maxchannels : remfiles;
 

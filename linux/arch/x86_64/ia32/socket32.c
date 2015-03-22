@@ -7,14 +7,14 @@
 /*
  * 32bit Socket syscall emulation. Based on arch/sparc64/kernel/sys_sparc32.c.
  *
- * Copyright (C) 2000		VA Linux Co
- * Copyright (C) 2000		Don Dugger <n0ano@valinux.com>
- * Copyright (C) 1999 		Arun Sharma <arun.sharma@intel.com>
- * Copyright (C) 1997,1998 	Jakub Jelinek (jj@sunsite.mff.cuni.cz)
- * Copyright (C) 1997 		David S. Miller (davem@caip.rutgers.edu)
- * Copyright (C) 2000		Hewlett-Packard Co.
- * Copyright (C) 2000		David Mosberger-Tang <davidm@hpl.hp.com>
- * Copyright (C) 2000,2001	Andi Kleen, SuSE Labs
+ * Copyright (C) 2000       VA Linux Co
+ * Copyright (C) 2000       Don Dugger <n0ano@valinux.com>
+ * Copyright (C) 1999       Arun Sharma <arun.sharma@intel.com>
+ * Copyright (C) 1997,1998  Jakub Jelinek (jj@sunsite.mff.cuni.cz)
+ * Copyright (C) 1997       David S. Miller (davem@caip.rutgers.edu)
+ * Copyright (C) 2000       Hewlett-Packard Co.
+ * Copyright (C) 2000       David Mosberger-Tang <davidm@hpl.hp.com>
+ * Copyright (C) 2000,2001  Andi Kleen, SuSE Labs
  */
 
 #include <linux/kernel.h>
@@ -32,8 +32,8 @@
 #include <asm/uaccess.h>
 #include <asm/socket32.h>
 
-#define A(__x)		((unsigned long)(__x))
-#define AA(__x)		((unsigned long)(__x))
+#define A(__x)      ((unsigned long)(__x))
+#define AA(__x)     ((unsigned long)(__x))
 
 
 static inline int iov_from_user32_to_kern(struct iovec *kiov,
@@ -251,24 +251,24 @@ static void scm_detach_fds32(struct msghdr *kmsg, struct scm_cookie *scm)
  * SCM_RIGHTS and SCM_CREDENTIALS are done by hand in recvmsg32 right after
  * we do our work.  The remaining cases are:
  *
- * SOL_IP	IP_PKTINFO	struct in_pktinfo	32-bit clean
- *		IP_TTL		int			32-bit clean
- *		IP_TOS		__u8			32-bit clean
- *		IP_RECVOPTS	variable length		32-bit clean
- *		IP_RETOPTS	variable length		32-bit clean
- *		(these last two are clean because the types are defined
- *		 by the IPv4 protocol)
- *		IP_RECVERR	struct sock_extended_err +
- *				struct sockaddr_in	32-bit clean
- * SOL_IPV6	IPV6_RECVERR	struct sock_extended_err +
- *				struct sockaddr_in6	32-bit clean
- *		IPV6_PKTINFO	struct in6_pktinfo	32-bit clean
- *		IPV6_HOPLIMIT	int			32-bit clean
- *		IPV6_FLOWINFO	u32			32-bit clean
- *		IPV6_HOPOPTS	ipv6 hop exthdr		32-bit clean
- *		IPV6_DSTOPTS	ipv6 dst exthdr(s)	32-bit clean
- *		IPV6_RTHDR	ipv6 routing exthdr	32-bit clean
- *		IPV6_AUTHHDR	ipv6 auth exthdr	32-bit clean
+ * SOL_IP   IP_PKTINFO  struct in_pktinfo   32-bit clean
+ *      IP_TTL      int         32-bit clean
+ *      IP_TOS      __u8            32-bit clean
+ *      IP_RECVOPTS variable length     32-bit clean
+ *      IP_RETOPTS  variable length     32-bit clean
+ *      (these last two are clean because the types are defined
+ *       by the IPv4 protocol)
+ *      IP_RECVERR  struct sock_extended_err +
+ *              struct sockaddr_in  32-bit clean
+ * SOL_IPV6 IPV6_RECVERR    struct sock_extended_err +
+ *              struct sockaddr_in6 32-bit clean
+ *      IPV6_PKTINFO    struct in6_pktinfo  32-bit clean
+ *      IPV6_HOPLIMIT   int         32-bit clean
+ *      IPV6_FLOWINFO   u32         32-bit clean
+ *      IPV6_HOPOPTS    ipv6 hop exthdr     32-bit clean
+ *      IPV6_DSTOPTS    ipv6 dst exthdr(s)  32-bit clean
+ *      IPV6_RTHDR  ipv6 routing exthdr 32-bit clean
+ *      IPV6_AUTHHDR    ipv6 auth exthdr    32-bit clean
  */
 static void cmsg32_recvmsg_fixup(struct msghdr *kmsg,
                                  unsigned long orig_cmsg_uptr, __kernel_size_t orig_cmsg_len)

@@ -86,11 +86,11 @@
  */
 
 /* [Feb-Apr 2000 AV] Complete rewrite. Rules for symlinks:
- *	inside the path - always follow.
- *	in the last component in creation/removal/renaming - never follow.
- *	if LOOKUP_FOLLOW passed - follow.
- *	if the pathname has trailing slashes - follow.
- *	otherwise - don't follow.
+ *  inside the path - always follow.
+ *  in the last component in creation/removal/renaming - never follow.
+ *  if LOOKUP_FOLLOW passed - follow.
+ *  if the pathname has trailing slashes - follow.
+ *  otherwise - don't follow.
  * (applied in that order).
  *
  * [Jun 2000 AV] Inconsistent behaviour of open() in case if flags==O_CREAT
@@ -195,8 +195,8 @@ asmlinkage long sys_mkdir(const char * pathname, int mode)
  * A low-level filesystem can, if it choses, legally
  * do a
  *
- *	if (!d_unhashed(dentry))
- *		return -EBUSY;
+ *  if (!d_unhashed(dentry))
+ *      return -EBUSY;
  *
  * if it cannot handle the case of removing a directory
  * that is still in use by something else..

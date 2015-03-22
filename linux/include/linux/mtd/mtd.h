@@ -35,44 +35,44 @@ struct mtd_oob_buf
 
 
 
-#define MTD_ABSENT		0
-#define MTD_RAM			1
-#define MTD_ROM			2
-#define MTD_NORFLASH		3
-#define MTD_NANDFLASH		4
-#define MTD_PEROM		5
-#define MTD_OTHER		14
-#define MTD_UNKNOWN		15
+#define MTD_ABSENT      0
+#define MTD_RAM         1
+#define MTD_ROM         2
+#define MTD_NORFLASH        3
+#define MTD_NANDFLASH       4
+#define MTD_PEROM       5
+#define MTD_OTHER       14
+#define MTD_UNKNOWN     15
 
 
 
-#define MTD_CLEAR_BITS		1       // Bits can be cleared (flash)
-#define MTD_SET_BITS		2       // Bits can be set
-#define MTD_ERASEABLE		4       // Has an erase function
-#define MTD_WRITEB_WRITEABLE	8       // Direct IO is possible
-#define MTD_VOLATILE		16      // Set for RAMs
-#define MTD_XIP			32	// eXecute-In-Place possible
-#define MTD_OOB			64	// Out-of-band data (NAND flash)
-#define MTD_ECC			128	// Device capable of automatic ECC
+#define MTD_CLEAR_BITS      1       // Bits can be cleared (flash)
+#define MTD_SET_BITS        2       // Bits can be set
+#define MTD_ERASEABLE       4       // Has an erase function
+#define MTD_WRITEB_WRITEABLE    8       // Direct IO is possible
+#define MTD_VOLATILE        16      // Set for RAMs
+#define MTD_XIP         32  // eXecute-In-Place possible
+#define MTD_OOB         64  // Out-of-band data (NAND flash)
+#define MTD_ECC         128 // Device capable of automatic ECC
 
 // Some common devices / combinations of capabilities
-#define MTD_CAP_ROM		0
-#define MTD_CAP_RAM		(MTD_CLEAR_BITS|MTD_SET_BITS|MTD_WRITEB_WRITEABLE)
+#define MTD_CAP_ROM     0
+#define MTD_CAP_RAM     (MTD_CLEAR_BITS|MTD_SET_BITS|MTD_WRITEB_WRITEABLE)
 #define MTD_CAP_NORFLASH        (MTD_CLEAR_BITS|MTD_ERASEABLE)
 #define MTD_CAP_NANDFLASH       (MTD_CLEAR_BITS|MTD_ERASEABLE|MTD_OOB)
-#define MTD_WRITEABLE		(MTD_CLEAR_BITS|MTD_SET_BITS)
+#define MTD_WRITEABLE       (MTD_CLEAR_BITS|MTD_SET_BITS)
 
 
 // Types of automatic ECC/Checksum available
-#define MTD_ECC_NONE		0 	// No automatic ECC available
-#define MTD_ECC_RS_DiskOnChip	1	// Automatic ECC on DiskOnChip
-#define MTD_ECC_SW		2	// SW ECC for Toshiba & Samsung devices
+#define MTD_ECC_NONE        0   // No automatic ECC available
+#define MTD_ECC_RS_DiskOnChip   1   // Automatic ECC on DiskOnChip
+#define MTD_ECC_SW      2   // SW ECC for Toshiba & Samsung devices
 
 struct mtd_info_user
 {
     u_char type;
     u_int32_t flags;
-    u_int32_t size;	 // Total size of the MTD
+    u_int32_t size;  // Total size of the MTD
     u_int32_t erasesize;
     u_int32_t oobblock;  // Size of OOB blocks (e.g. 512)
     u_int32_t oobsize;   // Amount of OOB data per block (e.g. 16)
@@ -82,10 +82,10 @@ struct mtd_info_user
 
 struct region_info_user
 {
-    u_int32_t offset;		/* At which this region starts,
-					 * from the beginning of the MTD */
-    u_int32_t erasesize;		/* For this region */
-    u_int32_t numblocks;		/* Number of blocks in this region */
+    u_int32_t offset;       /* At which this region starts,
+                     * from the beginning of the MTD */
+    u_int32_t erasesize;        /* For this region */
+    u_int32_t numblocks;        /* Number of blocks in this region */
     u_int32_t regionindex;
 };
 
@@ -95,8 +95,8 @@ struct region_info_user
 #define MEMREADOOB              _IOWR('M', 4, struct mtd_oob_buf)
 #define MEMLOCK                 _IOW('M', 5, struct erase_info_user)
 #define MEMUNLOCK               _IOW('M', 6, struct erase_info_user)
-#define MEMGETREGIONCOUNT	_IOR('M', 7, int)
-#define MEMGETREGIONINFO	_IOWR('M', 8, struct region_info_user)
+#define MEMGETREGIONCOUNT   _IOR('M', 7, int)
+#define MEMGETREGIONINFO    _IOWR('M', 8, struct region_info_user)
 
 #ifndef __KERNEL__
 
@@ -110,9 +110,9 @@ typedef struct region_info_user region_info_t;
 #else /* __KERNEL__ */
 
 
-#define MTD_ERASE_PENDING      	0x01
-#define MTD_ERASING		0x02
-#define MTD_ERASE_SUSPEND	0x04
+#define MTD_ERASE_PENDING       0x01
+#define MTD_ERASING     0x02
+#define MTD_ERASE_SUSPEND   0x04
 #define MTD_ERASE_DONE          0x08
 #define MTD_ERASE_FAILED        0x10
 
@@ -133,16 +133,16 @@ struct erase_info
 
 struct mtd_erase_region_info
 {
-    u_int32_t offset;			/* At which this region starts, from the beginning of the MTD */
-    u_int32_t erasesize;		/* For this region */
-    u_int32_t numblocks;		/* Number of blocks of erasesize in this region */
+    u_int32_t offset;           /* At which this region starts, from the beginning of the MTD */
+    u_int32_t erasesize;        /* For this region */
+    u_int32_t numblocks;        /* Number of blocks of erasesize in this region */
 };
 
 struct mtd_info
 {
     u_char type;
     u_int32_t flags;
-    u_int32_t size;	 // Total size of the MTD
+    u_int32_t size;  // Total size of the MTD
 
     /* "Major" erase size for the device. Naïve users may take this
      * to be the only erase size available, or may use the more detailed
@@ -266,16 +266,16 @@ extern int unregister_mtd_user (struct mtd_notifier *old);
 /*
  * Debugging macro and defines
  */
-#define MTD_DEBUG_LEVEL0	(0)	/* Quiet   */
-#define MTD_DEBUG_LEVEL1	(1)	/* Audible */
-#define MTD_DEBUG_LEVEL2	(2)	/* Loud    */
-#define MTD_DEBUG_LEVEL3	(3)	/* Noisy   */
+#define MTD_DEBUG_LEVEL0    (0) /* Quiet   */
+#define MTD_DEBUG_LEVEL1    (1) /* Audible */
+#define MTD_DEBUG_LEVEL2    (2) /* Loud    */
+#define MTD_DEBUG_LEVEL3    (3) /* Noisy   */
 
 #ifdef CONFIG_MTD_DEBUG
-#define DEBUG(n, args...)			\
-	if (n <=  CONFIG_MTD_DEBUG_VERBOSE) {	\
-		printk(KERN_INFO args);	\
-	}
+#define DEBUG(n, args...)           \
+    if (n <=  CONFIG_MTD_DEBUG_VERBOSE) {   \
+        printk(KERN_INFO args); \
+    }
 #else /* CONFIG_MTD_DEBUG */
 #define DEBUG(n, args...)
 #endif /* CONFIG_MTD_DEBUG */

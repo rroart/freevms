@@ -1,5 +1,5 @@
-#ifndef pfn_macros_h
-#define pfn_macros_h
+#ifndef PFN_MACROS_H
+#define PFN_MACROS_H
 
 #include <far_pointers.h>
 #include <ints.h>

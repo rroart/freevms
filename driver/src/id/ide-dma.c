@@ -5,9 +5,9 @@
 // Modified Linux source file, 2001-2007.
 
 /*
- *  linux/drivers/ide/ide-dma.c		Version 4.10	June 9, 2000
+ *  linux/drivers/ide/ide-dma.c     Version 4.10    June 9, 2000
  *
- *  Copyright (c) 1999-2000	Andre Hedrick <andre@linux-ide.org>
+ *  Copyright (c) 1999-2000 Andre Hedrick <andre@linux-ide.org>
  *  May be copied or modified under the terms of the GNU General Public License
  */
 
@@ -103,9 +103,9 @@
  * when PnP failed.  Oh the things we forget.  I believe this was part
  * of SFF-8038i that has been withdrawn from public access... :-((
  */
-#define DEFAULT_BMIBA	0xe800	/* in case BIOS did not init it */
-#define DEFAULT_BMCRBA	0xcc00	/* VIA's default value */
-#define DEFAULT_BMALIBA	0xd400	/* ALI's default value */
+#define DEFAULT_BMIBA   0xe800  /* in case BIOS did not init it */
+#define DEFAULT_BMCRBA  0xcc00  /* VIA's default value */
+#define DEFAULT_BMALIBA 0xd400  /* ALI's default value */
 
 extern char *ide_dmafunc_verbose(ide_dma_action_t dmafunc);
 
@@ -120,50 +120,50 @@ struct drive_list_entry
 struct drive_list_entry drive_whitelist [] =
 {
 
-    { "Micropolis 2112A"	,       "ALL"		},
-    { "CONNER CTMA 4000"	,       "ALL"		},
-    { "CONNER CTT8000-A"	,       "ALL"		},
-    { "ST34342A"		,	"ALL"		},
-    { 0			,	0		}
+    { "Micropolis 2112A"    ,       "ALL"       },
+    { "CONNER CTMA 4000"    ,       "ALL"       },
+    { "CONNER CTT8000-A"    ,       "ALL"       },
+    { "ST34342A"        ,   "ALL"       },
+    { 0         ,   0       }
 };
 
 struct drive_list_entry drive_blacklist [] =
 {
 
-    { "WDC AC11000H"	,	"ALL"		},
-    { "WDC AC22100H"	,	"ALL"		},
-    { "WDC AC32500H"	,	"ALL"		},
-    { "WDC AC33100H"	,	"ALL"		},
-    { "WDC AC31600H"	,	"ALL"		},
-    { "WDC AC32100H"	,	"24.09P07"	},
-    { "WDC AC23200L"	,	"21.10N21"	},
-    { "Compaq CRD-8241B"	,	"ALL"		},
-    { "CRD-8400B"		,	"ALL"		},
-    { "CRD-8480B",			"ALL"		},
-    { "CRD-8480C",			"ALL"		},
-    { "CRD-8482B",			"ALL"		},
-    { "CRD-84"		,	"ALL"		},
-    { "SanDisk SDP3B"	,	"ALL"		},
-    { "SanDisk SDP3B-64"	,	"ALL"		},
-    { "SANYO CD-ROM CRD"	,	"ALL"		},
-    { "HITACHI CDR-8"	,	"ALL"		},
-    { "HITACHI CDR-8335"	,	"ALL"		},
-    { "HITACHI CDR-8435"	,	"ALL"		},
-    { "Toshiba CD-ROM XM-6202B"	,	"ALL"		},
-    { "CD-532E-A"		,	"ALL"		},
-    { "E-IDE CD-ROM CR-840",	"ALL"		},
-    { "CD-ROM Drive/F5A",	"ALL"		},
-    { "RICOH CD-R/RW MP7083A",	"ALL"		},
-    { "WPI CDD-820",		"ALL"		},
-    { "SAMSUNG CD-ROM SC-148C",	"ALL"		},
-    { "SAMSUNG CD-ROM SC-148F",	"ALL"		},
-    { "SAMSUNG CD-ROM SC",	"ALL"		},
-    { "SanDisk SDP3B-64"	,	"ALL"		},
-    { "SAMSUNG CD-ROM SN-124",	"ALL"		},
-    { "PLEXTOR CD-R PX-W8432T",	"ALL"		},
-    { "ATAPI CD-ROM DRIVE 40X MAXIMUM",	"ALL"		},
+    { "WDC AC11000H"    ,   "ALL"       },
+    { "WDC AC22100H"    ,   "ALL"       },
+    { "WDC AC32500H"    ,   "ALL"       },
+    { "WDC AC33100H"    ,   "ALL"       },
+    { "WDC AC31600H"    ,   "ALL"       },
+    { "WDC AC32100H"    ,   "24.09P07"  },
+    { "WDC AC23200L"    ,   "21.10N21"  },
+    { "Compaq CRD-8241B"    ,   "ALL"       },
+    { "CRD-8400B"       ,   "ALL"       },
+    { "CRD-8480B",          "ALL"       },
+    { "CRD-8480C",          "ALL"       },
+    { "CRD-8482B",          "ALL"       },
+    { "CRD-84"      ,   "ALL"       },
+    { "SanDisk SDP3B"   ,   "ALL"       },
+    { "SanDisk SDP3B-64"    ,   "ALL"       },
+    { "SANYO CD-ROM CRD"    ,   "ALL"       },
+    { "HITACHI CDR-8"   ,   "ALL"       },
+    { "HITACHI CDR-8335"    ,   "ALL"       },
+    { "HITACHI CDR-8435"    ,   "ALL"       },
+    { "Toshiba CD-ROM XM-6202B" ,   "ALL"       },
+    { "CD-532E-A"       ,   "ALL"       },
+    { "E-IDE CD-ROM CR-840",    "ALL"       },
+    { "CD-ROM Drive/F5A",   "ALL"       },
+    { "RICOH CD-R/RW MP7083A",  "ALL"       },
+    { "WPI CDD-820",        "ALL"       },
+    { "SAMSUNG CD-ROM SC-148C", "ALL"       },
+    { "SAMSUNG CD-ROM SC-148F", "ALL"       },
+    { "SAMSUNG CD-ROM SC",  "ALL"       },
+    { "SanDisk SDP3B-64"    ,   "ALL"       },
+    { "SAMSUNG CD-ROM SN-124",  "ALL"       },
+    { "PLEXTOR CD-R PX-W8432T", "ALL"       },
+    { "ATAPI CD-ROM DRIVE 40X MAXIMUM", "ALL"       },
     { "_NEC DV5800A",               "ALL"           },
-    { 0			,	0		}
+    { 0         ,   0       }
 
 };
 
@@ -187,7 +187,7 @@ int in_drive_list(struct hd_driveid *id, struct drive_list_entry * drive_table)
 const char *good_dma_drives[] = {"Micropolis 2112A",
                                  "CONNER CTMA 4000",
                                  "CONNER CTT8000-A",
-                                 "ST34342A",	/* for Sun Ultra */
+                                 "ST34342A",    /* for Sun Ultra */
                                  NULL
                                 };
 
@@ -229,8 +229,8 @@ const char *bad_dma_drives[] = {"WDC AC11000H",
  * so the two PRD tables (ide0 & ide1) will each get half of that,
  * allowing each to have about 256 entries (8 bytes each) from this.
  */
-#define PRD_BYTES	8
-#define PRD_ENTRIES	(PAGE_SIZE / (2 * PRD_BYTES))
+#define PRD_BYTES   8
+#define PRD_ENTRIES (PAGE_SIZE / (2 * PRD_BYTES))
 
 /*
  * dma_intr() is the handler for disk read/write DMA interrupts
@@ -241,7 +241,7 @@ ide_startstop_t ide_dma_intr (ide_drive_t *drive)
     byte stat, dma_stat;
 
     dma_stat = HWIF(drive)->dmaproc(ide_dma_end, drive);
-    stat = GET_STAT();			/* get drive status */
+    stat = GET_STAT();          /* get drive status */
     if (OK_STAT(stat,DRIVE_READY,drive->bad_wstat|DRQ_STAT))
     {
         if (!dma_stat)
@@ -481,15 +481,15 @@ int report_drive_dmaing (ide_drive_t *drive)
     {
         if ((id->dma_ultra >> 13) & 1)
         {
-            printk(", UDMA(100)");	/* UDMA BIOS-enabled! */
+            printk(", UDMA(100)");  /* UDMA BIOS-enabled! */
         }
         else if ((id->dma_ultra >> 12) & 1)
         {
-            printk(", UDMA(66)");	/* UDMA BIOS-enabled! */
+            printk(", UDMA(66)");   /* UDMA BIOS-enabled! */
         }
         else
         {
-            printk(", UDMA(44)");	/* UDMA BIOS-enabled! */
+            printk(", UDMA(44)");   /* UDMA BIOS-enabled! */
         }
     }
     else if ((id->field_valid & 4) &&
@@ -497,20 +497,20 @@ int report_drive_dmaing (ide_drive_t *drive)
     {
         if ((id->dma_ultra >> 10) & 1)
         {
-            printk(", UDMA(33)");	/* UDMA BIOS-enabled! */
+            printk(", UDMA(33)");   /* UDMA BIOS-enabled! */
         }
         else if ((id->dma_ultra >> 9) & 1)
         {
-            printk(", UDMA(25)");	/* UDMA BIOS-enabled! */
+            printk(", UDMA(25)");   /* UDMA BIOS-enabled! */
         }
         else
         {
-            printk(", UDMA(16)");	/* UDMA BIOS-enabled! */
+            printk(", UDMA(16)");   /* UDMA BIOS-enabled! */
         }
     }
     else if (id->field_valid & 4)
     {
-        printk(", (U)DMA");	/* Can be BIOS-enabled! */
+        printk(", (U)DMA"); /* Can be BIOS-enabled! */
     }
     else
     {
@@ -535,11 +535,11 @@ static int config_drive_for_dma (ide_drive_t *drive)
             if ((id->dma_ultra & (id->dma_ultra >> 11) & 7))
                 return hwif->dmaproc(ide_dma_on, drive);
         /* Enable DMA on any drive that has UltraDMA (mode 0/1/2) enabled */
-        if (id->field_valid & 4)	/* UltraDMA */
+        if (id->field_valid & 4)    /* UltraDMA */
             if ((id->dma_ultra & (id->dma_ultra >> 8) & 7))
                 return hwif->dmaproc(ide_dma_on, drive);
         /* Enable DMA on any drive that has mode2 DMA (multi or single) enabled */
-        if (id->field_valid & 2)	/* regular DMA */
+        if (id->field_valid & 2)    /* regular DMA */
             if ((id->dma_mword & 0x404) == 0x404 || (id->dma_1word & 0x404) == 0x404)
                 return hwif->dmaproc(ide_dma_on, drive);
         /* Consult the list of known "good" drives */
@@ -562,24 +562,24 @@ static int dma_timer_expiry (ide_drive_t *drive)
 #endif /* DEBUG */
 
 #if 1
-    HWGROUP(drive)->expiry = NULL;	/* one free ride for now */
+    HWGROUP(drive)->expiry = NULL;  /* one free ride for now */
 #endif
 
-    if (dma_stat & 2)  	/* ERROR */
+    if (dma_stat & 2)   /* ERROR */
     {
         byte stat = GET_STAT();
         return ide_error(drive, "dma_timer_expiry", stat);
     }
-    if (dma_stat & 1)	/* DMAing */
+    if (dma_stat & 1)   /* DMAing */
         return WAIT_CMD;
     return 0;
 }
 #else /* CONFIG_BLK_DEV_IDEDMA_TIMEOUT */
 static ide_startstop_t ide_dma_timeout_revovery (ide_drive_t *drive)
 {
-    ide_hwgroup_t *hwgroup	= HWGROUP(drive);
-    ide_hwif_t *hwif	= HWIF(drive);
-    int enable_dma		= drive->using_dma;
+    ide_hwgroup_t *hwgroup  = HWGROUP(drive);
+    ide_hwif_t *hwif    = HWIF(drive);
+    int enable_dma      = drive->using_dma;
     unsigned long flags;
     ide_startstop_t startstop;
 
@@ -617,11 +617,11 @@ static ide_startstop_t ide_dma_timeout_revovery (ide_drive_t *drive)
  */
 int ide_dmaproc (ide_dma_action_t func, ide_drive_t *drive)
 {
-//	ide_hwgroup_t *hwgroup		= HWGROUP(drive);
-    ide_hwif_t *hwif		= HWIF(drive);
-    unsigned long dma_base		= hwif->dma_base;
-    byte unit			= (drive->select.b.unit & 0x01);
-    unsigned int count, reading	= 0;
+//  ide_hwgroup_t *hwgroup      = HWGROUP(drive);
+    ide_hwif_t *hwif        = HWIF(drive);
+    unsigned long dma_base      = hwif->dma_base;
+    byte unit           = (drive->select.b.unit & 0x01);
+    unsigned int count, reading = 0;
     byte dma_stat;
 
     switch (func)
@@ -642,17 +642,17 @@ int ide_dmaproc (ide_dma_action_t func, ide_drive_t *drive)
     case ide_dma_write:
         SELECT_READ_WRITE(hwif,drive,func);
         if (!(count = ide_build_dmatable(drive, func)))
-            return 1;	/* try PIO instead of DMA */
+            return 1;   /* try PIO instead of DMA */
         outl(hwif->dmatable_dma, dma_base + 4); /* PRD table */
-        outb(reading, dma_base);			/* specify r/w */
-        outb(inb(dma_base+2)|6, dma_base+2);		/* clear INTR & ERROR flags */
+        outb(reading, dma_base);            /* specify r/w */
+        outb(inb(dma_base+2)|6, dma_base+2);        /* clear INTR & ERROR flags */
         drive->waiting_for_dma = 1;
         if (drive->media != ide_disk)
             return 0;
 #ifdef CONFIG_BLK_DEV_IDEDMA_TIMEOUT
-        ide_set_handler(drive, &ide_dma_intr, WAIT_CMD, NULL);	/* issue cmd to drive */
+        ide_set_handler(drive, &ide_dma_intr, WAIT_CMD, NULL);  /* issue cmd to drive */
 #else /* !CONFIG_BLK_DEV_IDEDMA_TIMEOUT */
-        ide_set_handler(drive, &ide_dma_intr, WAIT_CMD, dma_timer_expiry);	/* issue cmd to drive */
+        ide_set_handler(drive, &ide_dma_intr, WAIT_CMD, dma_timer_expiry);  /* issue cmd to drive */
 #endif /* CONFIG_BLK_DEV_IDEDMA_TIMEOUT */
         OUT_BYTE(reading ? WIN_READDMA : WIN_WRITEDMA, IDE_COMMAND_REG);
     case ide_dma_begin:
@@ -661,25 +661,25 @@ int ide_dmaproc (ide_dma_action_t func, ide_drive_t *drive)
          * The Promise Ultra33 doesn't work correctly when
          * we do this part before issuing the drive cmd.
          */
-        outb(inb(dma_base)|1, dma_base);		/* start DMA */
+        outb(inb(dma_base)|1, dma_base);        /* start DMA */
         return 0;
     case ide_dma_end: /* returns 1 on error, 0 otherwise */
         drive->waiting_for_dma = 0;
-        outb(inb(dma_base)&~1, dma_base);	/* stop DMA */
-        dma_stat = inb(dma_base+2);		/* get DMA status */
-        outb(dma_stat|6, dma_base+2);	/* clear the INTR & ERROR bits */
-        ide_destroy_dmatable(drive);	/* purge DMA mappings */
-        return (dma_stat & 7) != 4 ? (0x10 | dma_stat) : 0;	/* verify good DMA status */
+        outb(inb(dma_base)&~1, dma_base);   /* stop DMA */
+        dma_stat = inb(dma_base+2);     /* get DMA status */
+        outb(dma_stat|6, dma_base+2);   /* clear the INTR & ERROR bits */
+        ide_destroy_dmatable(drive);    /* purge DMA mappings */
+        return (dma_stat & 7) != 4 ? (0x10 | dma_stat) : 0; /* verify good DMA status */
     case ide_dma_test_irq: /* returns 1 if dma irq issued, 0 otherwise */
         dma_stat = inb(dma_base+2);
-#if 0	/* do not set unless you know what you are doing */
+#if 0   /* do not set unless you know what you are doing */
         if (dma_stat & 4)
         {
             byte stat = GET_STAT();
             outb(dma_base+2, dma_stat & 0xE4);
         }
 #endif
-        return (dma_stat & 4) == 4;	/* return 1 if INTR asserted */
+        return (dma_stat & 4) == 4; /* return 1 if INTR asserted */
     case ide_dma_bad_drive:
     case ide_dma_good_drive:
         return check_drive_lists(drive, (func == ide_dma_good_drive));
@@ -701,9 +701,9 @@ int ide_dmaproc (ide_dma_action_t func, ide_drive_t *drive)
          * we have to clean up the mess, and here is as good
          * as any.  Do it globally for all chipsets.
          */
-        outb(0x00, dma_base);		/* stop DMA */
-        dma_stat = inb(dma_base+2);	/* get DMA status */
-        outb(dma_stat|6, dma_base+2);	/* clear the INTR & ERROR bits */
+        outb(0x00, dma_base);       /* stop DMA */
+        dma_stat = inb(dma_base+2); /* get DMA status */
+        outb(dma_stat|6, dma_base+2);   /* clear the INTR & ERROR bits */
         printk("%s: %s: Lets do it again!" \
                "stat = 0x%02x, dma_stat = 0x%02x\n",
                drive->name, ide_dmafunc_verbose(func),
@@ -754,7 +754,7 @@ int ide_release_dma (ide_hwif_t *hwif)
 }
 
 /*
- *	This can be called for a dynamically installed interface. Don't __init it
+ *  This can be called for a dynamically installed interface. Don't __init it
  */
 
 void ide_setup_dma (ide_hwif_t *hwif, unsigned long dma_base, unsigned int num_ports)
@@ -807,8 +807,8 @@ dma_alloc_failure:
  */
 unsigned long __init ide_get_or_set_dma_base (ide_hwif_t *hwif, int extra, const char *name)
 {
-    unsigned long	dma_base = 0;
-    struct pci_dev	*dev = hwif->pci_dev;
+    unsigned long   dma_base = 0;
+    struct pci_dev  *dev = hwif->pci_dev;
 
 #ifdef CONFIG_BLK_DEV_IDEDMA_FORCED
     int second_chance = 0;
@@ -880,7 +880,7 @@ second_chance_to_dma:
              * So we should enable DMA only on one of the
              * two interfaces.
              */
-            if ((inb(dma_base+2) & 0x80))  	/* simplex device? */
+            if ((inb(dma_base+2) & 0x80))   /* simplex device? */
             {
                 if ((!hwif->drives[0].present && !hwif->drives[1].present) ||
                         (hwif->mate && hwif->mate->dma_base))

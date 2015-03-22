@@ -68,18 +68,18 @@ int er$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 
 /* 8390.c: A general NS8390 ethernet driver core for linux. */
 /*
-	Written 1992-94 by Donald Becker.
+    Written 1992-94 by Donald Becker.
 
-	Copyright 1993 United States Government as represented by the
-	Director, National Security Agency.
+    Copyright 1993 United States Government as represented by the
+    Director, National Security Agency.
 
-	This software may be used and distributed according to the terms
-	of the GNU General Public License, incorporated herein by reference.
+    This software may be used and distributed according to the terms
+    of the GNU General Public License, incorporated herein by reference.
 
-	The author may be reached as becker@scyld.com, or C/O
-	Scyld Computing Corporation
-	410 Severn Ave., Suite 210
-	Annapolis MD 21403
+    The author may be reached as becker@scyld.com, or C/O
+    Scyld Computing Corporation
+    410 Severn Ave., Suite 210
+    Annapolis MD 21403
 
 
   This is the chip-specific code for many 8390-based ethernet adaptors.
@@ -94,21 +94,21 @@ int er$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 
   Changelog:
 
-  Paul Gortmaker	: remove set_bit lock, other cleanups.
-  Paul Gortmaker	: add ei_get_8390_hdr() so we can pass skb's to
-			  ei_block_input() for eth_io_copy_and_sum().
-  Paul Gortmaker	: exchange static int ei_pingpong for a #define,
-			  also add better Tx error handling.
-  Paul Gortmaker	: rewrite Rx overrun handling as per NS specs.
-  Alexey Kuznetsov	: use the 8390's six bit hash multicast filter.
-  Paul Gortmaker	: tweak ANK's above multicast changes a bit.
-  Paul Gortmaker	: update packet statistics for v2.1.x
-  Alan Cox		: support arbitary stupid port mappings on the
-  			  68K Macintosh. Support >16bit I/O spaces
-  Paul Gortmaker	: add kmod support for auto-loading of the 8390
-			  module by all drivers that require it.
-  Alan Cox		: Spinlocking work, added 'BUG_83C690'
-  Paul Gortmaker	: Separate out Tx timeout code from Tx path.
+  Paul Gortmaker    : remove set_bit lock, other cleanups.
+  Paul Gortmaker    : add ei_get_8390_hdr() so we can pass skb's to
+              ei_block_input() for eth_io_copy_and_sum().
+  Paul Gortmaker    : exchange static int ei_pingpong for a #define,
+              also add better Tx error handling.
+  Paul Gortmaker    : rewrite Rx overrun handling as per NS specs.
+  Alexey Kuznetsov  : use the 8390's six bit hash multicast filter.
+  Paul Gortmaker    : tweak ANK's above multicast changes a bit.
+  Paul Gortmaker    : update packet statistics for v2.1.x
+  Alan Cox      : support arbitary stupid port mappings on the
+              68K Macintosh. Support >16bit I/O spaces
+  Paul Gortmaker    : add kmod support for auto-loading of the 8390
+              module by all drivers that require it.
+  Alan Cox      : Spinlocking work, added 'BUG_83C690'
+  Paul Gortmaker    : Separate out Tx timeout code from Tx path.
 
   Sources:
   The National Semiconductor LAN Databook, and the 3Com 3c503 databook.
@@ -147,21 +147,21 @@ static const char version[] =
 
 /* These are the operational function interfaces to board-specific
    routines.
-	void reset_8390(struct net_device *dev)
-		Resets the board associated with DEV, including a hardware reset of
-		the 8390.  This is only called when there is a transmit timeout, and
-		it is always followed by 8390_init().
-	void block_output(struct net_device *dev, int count, const unsigned char *buf,
-					  int start_page)
-		Write the COUNT bytes of BUF to the packet buffer at START_PAGE.  The
-		"page" value uses the 8390's 256-byte pages.
-	void get_8390_hdr(struct net_device *dev, struct e8390_hdr *hdr, int ring_page)
-		Read the 4 byte, page aligned 8390 header. *If* there is a
-		subsequent read, it will be of the rest of the packet.
-	void block_input(struct net_device *dev, int count, struct sk_buff *skb, int ring_offset)
-		Read COUNT bytes from the packet buffer into the skb data area. Start
-		reading from RING_OFFSET, the address as the 8390 sees it.  This will always
-		follow the read of the 8390 header.
+    void reset_8390(struct net_device *dev)
+        Resets the board associated with DEV, including a hardware reset of
+        the 8390.  This is only called when there is a transmit timeout, and
+        it is always followed by 8390_init().
+    void block_output(struct net_device *dev, int count, const unsigned char *buf,
+                      int start_page)
+        Write the COUNT bytes of BUF to the packet buffer at START_PAGE.  The
+        "page" value uses the 8390's 256-byte pages.
+    void get_8390_hdr(struct net_device *dev, struct e8390_hdr *hdr, int ring_page)
+        Read the 4 byte, page aligned 8390 header. *If* there is a
+        subsequent read, it will be of the rest of the packet.
+    void block_input(struct net_device *dev, int count, struct sk_buff *skb, int ring_offset)
+        Read COUNT bytes from the packet buffer into the skb data area. Start
+        reading from RING_OFFSET, the address as the 8390 sees it.  This will always
+        follow the read of the 8390 header.
 */
 #define ei_reset_8390 (ei_local->reset_8390)
 #define ei_block_output (ei_local->block_output)
@@ -189,29 +189,29 @@ static void set_multicast_list(struct net_device *dev);
 static void do_set_multicast_list(struct net_device *dev);
 
 /*
- *	SMP and the 8390 setup.
+ *  SMP and the 8390 setup.
  *
- *	The 8390 isnt exactly designed to be multithreaded on RX/TX. There is
- *	a page register that controls bank and packet buffer access. We guard
- *	this with ei_local->page_lock. Nobody should assume or set the page other
- *	than zero when the lock is not held. Lock holders must restore page 0
- *	before unlocking. Even pure readers must take the lock to protect in
- *	page 0.
+ *  The 8390 isnt exactly designed to be multithreaded on RX/TX. There is
+ *  a page register that controls bank and packet buffer access. We guard
+ *  this with ei_local->page_lock. Nobody should assume or set the page other
+ *  than zero when the lock is not held. Lock holders must restore page 0
+ *  before unlocking. Even pure readers must take the lock to protect in
+ *  page 0.
  *
- *	To make life difficult the chip can also be very slow. We therefore can't
- *	just use spinlocks. For the longer lockups we disable the irq the device
- *	sits on and hold the lock. We must hold the lock because there is a dual
- *	processor case other than interrupts (get stats/set multicast list in
- *	parallel with each other and transmit).
+ *  To make life difficult the chip can also be very slow. We therefore can't
+ *  just use spinlocks. For the longer lockups we disable the irq the device
+ *  sits on and hold the lock. We must hold the lock because there is a dual
+ *  processor case other than interrupts (get stats/set multicast list in
+ *  parallel with each other and transmit).
  *
- *	Note: in theory we can just disable the irq on the card _but_ there is
- *	a latency on SMP irq delivery. So we can easily go "disable irq" "sync irqs"
- *	enter lock, take the queued irq. So we waddle instead of flying.
+ *  Note: in theory we can just disable the irq on the card _but_ there is
+ *  a latency on SMP irq delivery. So we can easily go "disable irq" "sync irqs"
+ *  enter lock, take the queued irq. So we waddle instead of flying.
  *
- *	Finally by special arrangement for the purpose of being generally
- *	annoying the transmit function is called bh atomic. That places
- *	restrictions on the user context callers as disable_irq won't save
- *	them.
+ *  Finally by special arrangement for the purpose of being generally
+ *  annoying the transmit function is called bh atomic. That places
+ *  restrictions on the user context callers as disable_irq won't save
+ *  them.
  */
 
 
@@ -244,8 +244,8 @@ int ei_open(struct net_device *dev)
         dev->watchdog_timeo = TX_TIMEOUT;
 
     /*
-     *	Grab the page lock so we own the register set, then call
-     *	the init function.
+     *  Grab the page lock so we own the register set, then call
+     *  the init function.
      */
 
     spin_lock_irqsave(&ei_local->page_lock, flags);
@@ -270,7 +270,7 @@ int ei_close(struct net_device *dev)
     unsigned long flags;
 
     /*
-     *	Hold the page lock during close
+     *  Hold the page lock during close
      */
 
     spin_lock_irqsave(&ei_local->page_lock, flags);
@@ -356,7 +356,7 @@ static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, stru
 
 
     /*
-     *	Slow phase with lock held.
+     *  Slow phase with lock held.
      */
 
     disable_irq_nosync(dev->irq);
@@ -440,7 +440,7 @@ static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, stru
     else
         netif_start_queue(dev);
 
-#else	/* EI_PINGPONG */
+#else   /* EI_PINGPONG */
 
     /*
      * Only one Tx buffer in use. You need two Tx bufs to come close to
@@ -454,7 +454,7 @@ static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, stru
     dev->trans_start = jiffies;
     netif_stop_queue(dev);
 
-#endif	/* EI_PINGPONG */
+#endif  /* EI_PINGPONG */
 
     /* Turn 8390 interrupts back on. */
     ei_local->irqlock = 0;
@@ -463,7 +463,7 @@ static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, stru
     spin_unlock(&ei_local->page_lock);
     enable_irq(dev->irq);
 
-    // check	dev_kfree_skb (skb);
+    // check    dev_kfree_skb (skb);
 #if 1
     kfree(buf);
 #endif
@@ -502,7 +502,7 @@ void ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
     ei_local = (struct ei_device *) dev->priv;
 
     /*
-     *	Protect the irq test too.
+     *  Protect the irq test too.
      */
 
     spin_lock(&ei_local->page_lock);
@@ -527,7 +527,7 @@ void ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
         printk(KERN_DEBUG "%s: interrupt(isr=%#2.2x).\n", dev->name,
                inb_p(e8390_base + EN0_ISR));
 
-    /* !!Assumption!! -- we stay in page 0.	 Don't break this. */
+    /* !!Assumption!! -- we stay in page 0.  Don't break this. */
     while ((interrupts = inb_p(e8390_base + EN0_ISR)) != 0
             && ++nr_serviced < MAX_SERVICE)
     {
@@ -696,10 +696,10 @@ static void ei_tx_intr(struct net_device *dev)
         else
             ei_local->lasttx = 10, ei_local->txing = 0;
     }
-//	else printk(KERN_WARNING "%s: unexpected TX-done interrupt, lasttx=%d.\n",
-//			dev->name, ei_local->lasttx);
+//  else printk(KERN_WARNING "%s: unexpected TX-done interrupt, lasttx=%d.\n",
+//          dev->name, ei_local->lasttx);
 
-#else	/* EI_PINGPONG */
+#else   /* EI_PINGPONG */
     /*
      *  Single Tx buffer: mark it free so another packet can be loaded.
      */
@@ -789,8 +789,8 @@ static void ei_receive(struct net_device *dev)
             printk(KERN_ERR "%s: mismatched read page pointers %2x vs %2x.\n",
                    dev->name, this_frame, ei_local->current_page);
 
-        if (this_frame == rxing_page)	/* Read all the frames? */
-            break;				/* Done for now */
+        if (this_frame == rxing_page)   /* Read all the frames? */
+            break;              /* Done for now */
 
         current_offset = this_frame << 8;
         ei_get_8390_hdr(dev, &rx_frame, this_frame);
@@ -841,9 +841,9 @@ static void ei_receive(struct net_device *dev)
 #endif
             {
 #if 0
-                skb_reserve(skb,2);	/* IP headers on 16 byte boundaries */
+                skb_reserve(skb,2); /* IP headers on 16 byte boundaries */
                 skb->dev = dev;
-                skb_put(skb, pkt_len);	/* Make room */
+                skb_put(skb, pkt_len);  /* Make room */
 #endif
                 struct _cxb * cb1 = lan$alloc_cxb(pkt_len);
                 struct _cxb * cb2 = cb1->cxb$l_link;
@@ -974,7 +974,7 @@ static void ei_rx_overrun(struct net_device *dev)
 }
 
 /*
- *	Collect the stats. This is called unlocked and from several contexts.
+ *  Collect the stats. This is called unlocked and from several contexts.
  */
 
 static struct net_device_stats *get_stats(struct net_device *dev)
@@ -1011,7 +1011,7 @@ static inline u32 update_crc(u8 byte, u32 current_crc)
         current_crc <<= 1;
         ah = ((ah<<1) | carry) ^ byte;
         if (ah&1)
-            current_crc ^= 0x04C11DB7;	/* CRC polynomial */
+            current_crc ^= 0x04C11DB7;  /* CRC polynomial */
         ah >>= 1;
         byte >>= 1;
     }
@@ -1036,7 +1036,7 @@ static inline void make_mc_bits(u8 *bits, struct net_device *dev)
             printk(KERN_INFO "%s: invalid multicast address length given.\n", dev->name);
             continue;
         }
-        crc = 0xffffffff;	/* initial CRC value */
+        crc = 0xffffffff;   /* initial CRC value */
         for (i=0; i<ETH_ALEN; i++)
             crc = update_crc(dmi->dmi_addr[i], crc);
         /*
@@ -1051,8 +1051,8 @@ static inline void make_mc_bits(u8 *bits, struct net_device *dev)
  * do_set_multicast_list - set/clear multicast filter
  * @dev: net device for which multicast filter is adjusted
  *
- *	Set or clear the multicast filter for this adaptor. May be called
- *	from a BH in 2.1.x. Must be called with lock held.
+ *  Set or clear the multicast filter for this adaptor. May be called
+ *  from a BH in 2.1.x. Must be called with lock held.
  */
 
 static void do_set_multicast_list(struct net_device *dev)
@@ -1068,7 +1068,7 @@ static void do_set_multicast_list(struct net_device *dev)
             make_mc_bits(ei_local->mcfilter, dev);
     }
     else
-        memset(ei_local->mcfilter, 0xFF, 8);	/* mcast set to accept-all */
+        memset(ei_local->mcfilter, 0xFF, 8);    /* mcast set to accept-all */
 
     /*
      * DP8390 manuals don't specify any magic sequence for altering
@@ -1105,9 +1105,9 @@ static void do_set_multicast_list(struct net_device *dev)
 }
 
 /*
- *	Called without lock held. This is invoked from user context and may
- *	be parallel to just about everything else. Its also fairly quick and
- *	not called too often. Must protect against both bh and irq users
+ *  Called without lock held. This is invoked from user context and may
+ *  be parallel to just about everything else. Its also fairly quick and
+ *  not called too often. Must protect against both bh and irq users
  */
 
 static void set_multicast_list(struct net_device *dev)
@@ -1146,10 +1146,10 @@ int ethdev_init(struct net_device *dev)
     }
 
     dev->hard_start_xmit = &ei_start_xmit;
-    dev->get_stats	= get_stats;
+    dev->get_stats  = get_stats;
     dev->set_multicast_list = &set_multicast_list;
 
-    // not yet?	ether_setup(dev);
+    // not yet? ether_setup(dev);
 
     return 0;
 }
@@ -1164,7 +1164,7 @@ int ethdev_init(struct net_device *dev)
  * @dev: network device to initialize
  * @startp: boolean.  non-zero value to initiate chip processing
  *
- *	Must be called with lock held.
+ *  Must be called with lock held.
  */
 
 void NS8390_init(struct net_device *dev, int startp)
@@ -1180,7 +1180,7 @@ void NS8390_init(struct net_device *dev, int startp)
         panic("8390.c: header struct mispacked\n");
     /* Follow National Semi's recommendations for initing the DP83902. */
     outb_p(E8390_NODMA+E8390_PAGE0+E8390_STOP, e8390_base+E8390_CMD); /* 0x21 */
-    outb_p(endcfg, e8390_base + EN0_DCFG);	/* 0x48 or 0x49 */
+    outb_p(endcfg, e8390_base + EN0_DCFG);  /* 0x48 or 0x49 */
     /* Clear the remote byte count registers. */
     outb_p(0x00,  e8390_base + EN0_RCNTLO);
     outb_p(0x00,  e8390_base + EN0_RCNTHI);
@@ -1191,8 +1191,8 @@ void NS8390_init(struct net_device *dev, int startp)
     outb_p(ei_local->tx_start_page, e8390_base + EN0_TPSR);
     ei_local->tx1 = ei_local->tx2 = 0;
     outb_p(ei_local->rx_start_page, e8390_base + EN0_STARTPG);
-    outb_p(ei_local->stop_page-1, e8390_base + EN0_BOUNDARY);	/* 3c503 says 0x3f,NS0x26*/
-    ei_local->current_page = ei_local->rx_start_page;		/* assert boundary+1 */
+    outb_p(ei_local->stop_page-1, e8390_base + EN0_BOUNDARY);   /* 3c503 says 0x3f,NS0x26*/
+    ei_local->current_page = ei_local->rx_start_page;       /* assert boundary+1 */
     outb_p(ei_local->stop_page, e8390_base + EN0_STOPPG);
     /* Clear the pending interrupts and mask. */
     outb_p(0xFF, e8390_base + EN0_ISR);
@@ -1223,7 +1223,7 @@ void NS8390_init(struct net_device *dev, int startp)
         outb_p(E8390_TXCONFIG, e8390_base + EN0_TXCR); /* xmit on. */
         /* 3c503 TechMan says rxconfig only after the NIC is started. */
         outb_p(E8390_RXCONFIG, e8390_base + EN0_RXCR); /* rx on,  */
-        do_set_multicast_list(dev);	/* (re)load the mcast table */
+        do_set_multicast_list(dev); /* (re)load the mcast table */
     }
 }
 

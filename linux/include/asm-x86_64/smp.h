@@ -42,7 +42,7 @@ extern int cpu_sibling_map[];
 extern void smp_flush_tlb(void);
 extern void smp_message_irq(int cpl, void *dev_id, struct pt_regs *regs);
 extern void smp_send_reschedule(int cpu);
-extern void smp_invalidate_rcv(void);		/* Process an NMI */
+extern void smp_invalidate_rcv(void);       /* Process an NMI */
 extern void (*mtrr_hook) (void);
 extern void zap_low_mappings (void);
 extern void smp_stop_cpu(void);
@@ -73,7 +73,7 @@ extern volatile int x86_cpu_to_apicid[NR_CPUS];
  */
 
 extern void smp_boot_cpus(void);
-extern void smp_store_cpu_info(int id);		/* Store per CPU info (like the initial udelay numbers */
+extern void smp_store_cpu_info(int id);     /* Store per CPU info (like the initial udelay numbers */
 
 /*
  * This function is needed by all SMP systems. It must _always_ be valid
@@ -101,19 +101,19 @@ extern int apic_disabled;
 
 #endif /* !ASSEMBLY */
 
-#define NO_PROC_ID		0xFF		/* No processor magic marker */
+#define NO_PROC_ID      0xFF        /* No processor magic marker */
 
 /*
- *	This magic constant controls our willingness to transfer
- *	a process across CPUs. Such a transfer incurs misses on the L1
- *	cache, and on a P6 or P5 with multiple L2 caches L2 hits. My
- *	gut feeling is this will vary by board in value. For a board
- *	with separate L2 cache it probably depends also on the RSS, and
- *	for a board with shared L2 cache it ought to decay fast as other
- *	processes are run.
+ *  This magic constant controls our willingness to transfer
+ *  a process across CPUs. Such a transfer incurs misses on the L1
+ *  cache, and on a P6 or P5 with multiple L2 caches L2 hits. My
+ *  gut feeling is this will vary by board in value. For a board
+ *  with separate L2 cache it probably depends also on the RSS, and
+ *  for a board with shared L2 cache it ought to decay fast as other
+ *  processes are run.
  */
 
-#define PROC_CHANGE_PENALTY	15		/* Schedule penalty */
+#define PROC_CHANGE_PENALTY 15      /* Schedule penalty */
 
 
 

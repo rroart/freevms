@@ -23,7 +23,7 @@ struct idt77105_stats
     __u32 rx_hec_errors;  /* Header Error Check errors on receive */
 };
 
-#define IDT77105_GETSTAT	_IOW('a',ATMIOC_PHYPRV+2,struct atmif_sioc)	/* get stats */
-#define IDT77105_GETSTATZ	_IOW('a',ATMIOC_PHYPRV+3,struct atmif_sioc)	/* get stats and zero */
+#define IDT77105_GETSTAT    _IOW('a',ATMIOC_PHYPRV+2,struct atmif_sioc) /* get stats */
+#define IDT77105_GETSTATZ   _IOW('a',ATMIOC_PHYPRV+3,struct atmif_sioc) /* get stats and zero */
 
 #endif

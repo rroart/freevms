@@ -1,5 +1,5 @@
-#ifndef cli$routines_h
-#define cli$routines_h
+#ifndef CLI_ROUTINES_H
+#define CLI_ROUTINES_H
 
 unsigned int cli$dcl_parse(void * command_string, ...);
 

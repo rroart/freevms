@@ -16,9 +16,9 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*  These routines handle the keypad codes for change mode		*/
-/*									*/
+/*                                  */
+/*  These routines handle the keypad codes for change mode      */
+/*                                  */
 /************************************************************************/
 
 #include <stdlib.h>
@@ -27,99 +27,99 @@
 
 static struct
 {
-    int clen;		/* strlen (code) */
-    const char *code; 	/* code sequence from keyboard routine */
-    const char *defk; 	/* 'define key' command's name for the key */
-    char *chgm[2];		/* [0]: normal change mode command; [1]: gold change mode command */
+    int clen;       /* strlen (code) */
+    const char *code;   /* code sequence from keyboard routine */
+    const char *defk;   /* 'define key' command's name for the key */
+    char *chgm[2];      /* [0]: normal change mode command; [1]: gold change mode command */
 
 } keycodes[] =
 {
 
     /* Delete key */
 
-    1, "",	"DEL",	" (-DC)",	NULL,
+    1, "", "DEL",  " (-DC)",   NULL,
 
     /* Keypad keys */
 
-    3, "Op",	"KP0",	" L",		" (10ASC-C)",
-    3, "Oq",	"KP1",	" W",		" CHGCSR",
-    3, "Or",	"KP2",	" EL",		" (+DEL)",
-    3, "Os",	"KP3",	" C",		" ASC",
-    3, "Ot",	"KP4",	" ADV",		" (+R)",
-    3, "Ou",	"KP5",	" BACK",	" (-R)",
-    3, "Ov",	"KP6",	" CUTSR",	" PASTE",
-    3, "Ow",	"KP7",	" PAGE",	" EXT?'Command: '",
-    3, "Ox",	"KP8",	" (LLLLLLLLLLLLLLLL)", " ",
-    3, "Oy",	"KP9",	" APPENDSR",	" (DFSPASTE)",
-    3, "Ol",	"KPC",	" (+DC)",	" UNDC", 		/* keypad comma */
-    3, "OM",	"KPE",	" .",		" (DFSPASTE'')", 	/* keypad enter */
-    3, "Om",	"KPH",	" (+DW)",	" UNDW", 		/* keypad hyphen */
-    3, "On",	"KPD",	" SEL",		" DESEL", 		/* keypad period */
-    3, "OP",	"PF1",	" GOLD",	" GOLD",
-    3, "OQ",	"PF2",	" HELP",	" HELP",
-    3, "OR",	"PF3",	" ''",		" ?'Search for: '",
-    3, "OS",	"PF4",	" (+DL)",	" UNDL",
+    3, "Op",   "KP0",  " L",       " (10ASC-C)",
+    3, "Oq",   "KP1",  " W",       " CHGCSR",
+    3, "Or",   "KP2",  " EL",      " (+DEL)",
+    3, "Os",   "KP3",  " C",       " ASC",
+    3, "Ot",   "KP4",  " ADV",     " (+R)",
+    3, "Ou",   "KP5",  " BACK",    " (-R)",
+    3, "Ov",   "KP6",  " CUTSR",   " PASTE",
+    3, "Ow",   "KP7",  " PAGE",    " EXT?'Command: '",
+    3, "Ox",   "KP8",  " (LLLLLLLLLLLLLLLL)", " ",
+    3, "Oy",   "KP9",  " APPENDSR",    " (DFSPASTE)",
+    3, "Ol",   "KPC",  " (+DC)",   " UNDC",        /* keypad comma */
+    3, "OM",   "KPE",  " .",       " (DFSPASTE'')",    /* keypad enter */
+    3, "Om",   "KPH",  " (+DW)",   " UNDW",        /* keypad hyphen */
+    3, "On",   "KPD",  " SEL",     " DESEL",       /* keypad period */
+    3, "OP",   "PF1",  " GOLD",    " GOLD",
+    3, "OQ",   "PF2",  " HELP",    " HELP",
+    3, "OR",   "PF3",  " ''",      " ?'Search for: '",
+    3, "OS",   "PF4",  " (+DL)",   " UNDL",
 
     /* PC Supplemental keypad */
 
-    4, "[1~",	"KINS",	" ",		" ",
-    4, "[2~",	"KHOM",	" (-R)", 	" ",
-    4, "[3~",	"KPGU",	" (-PAGE)",	" ",
-    4, "[4~",	"KDEL",	" (+DW)", 	" UNDW",
-    4, "[5~", 	"KEND",	" (+R)", 	" ",
-    4, "[6~",	"KPGD",	" (+PAGE)",	" ",
+    4, "[1~",  "KINS", " ",        " ",
+    4, "[2~",  "KHOM", " (-R)",    " ",
+    4, "[3~",  "KPGU", " (-PAGE)", " ",
+    4, "[4~",  "KDEL", " (+DW)",   " UNDW",
+    4, "[5~",  "KEND", " (+R)",    " ",
+    4, "[6~",  "KPGD", " (+PAGE)", " ",
 
     /* Arrows: DOWN, LEFT, RIGHT, UP */
 
-    3, "[B",	"DN",	" (+V)",	" ",
-    3, "[D",	"LF",	" (-C)",	" SHR",
-    3, "[C",	"RT",	" (+C)",	" SHL",
-    3, "[A",	"UP",	" (-V)",	" ",
+    3, "[B",   "DN",   " (+V)",    " ",
+    3, "[D",   "LF",   " (-C)",    " SHR",
+    3, "[C",   "RT",   " (+C)",    " SHL",
+    3, "[A",   "UP",   " (-V)",    " ",
 
     /* Control keys: @, A-Z, [, \, ], ^, _ */
 
-    1, "\000",	"NUL",  " (0ASC)",	" (0ASC)",
-    1, "",	"CTLA",	" (1ASC)",	" (1ASC)",
-    1, "",	"CTLB",	" (2ASC)",	" (2ASC)",
-    1, "",	"CTLC",	" (3ASC)",	" (3ASC)",
-    1, "",	"CTLD",	" EX",		" (4ASC)",
-    1, "",	"CTLE",	" (5ASC)",	" (5ASC)",
-    1, "",	"CTLF",	" (6ASC)",	" (6ASC)",
-    1, "",	"CTLG",	" (7ASC)",	" (7ASC)",
-    1, "",	"CTLH",	" (-L)",	" (8ASC)",
-    1, "	",	"CTLI",	" (9ASC)",	" (9ASC)",
-    1, "\n",	"CTLJ",	" (-DW)",	" (10ASC)",
-    1, "",	"CTLK",	" DEFK",	" (11ASC)",
-    1, "",	"CTLL",	" (12ASC)",	" (12ASC)",
-    1, "\r",	"CTLM",	" (10ASC)",	" (13ASC)",
-    1, "",	"CTLN",	" (14ASC)",	" (14ASC)",
-    1, "",	"CTLO",	" (15ASC)",	" (15ASC)",
-    1, "",	"CTLP",	" (16ASC)",	" (16ASC)",
-    1, "",	"CTLQ",	" (17ASC)",	" (17ASC)",
-    1, "",	"CTLR",	" REF",		" (18ASC)",
-    1, "",	"CTLS",	" (19ASC)",	" (19ASC)",
-    1, "",	"CTLT",	" (20ASC)",	" (20ASC)",
-    1, "",	"CTLU",	" (-DL)",	" (21ASC)",
-    1, "",	"CTLV",	" (22ASC)",	" (22ASC)",
-    1, "",	"CTLW",	" REF",		" (23ASC)",
-    1, "",	"CTLX",	" (24ASC)",	" (24ASC)",
-    1, "",	"CTLY",	" (25ASC)",	" (25ASC)",
-    1, "",	"CTLZ",	" EX",		" (26ASC)",
-    2, "", "ESC",	" (27ASC)",	" (27ASC)",
-    1, "",	"CTBS", " (28ASC)",	" (28ASC)",
-    1, "",	"CTCB", " (29ASC)",	" (29ASC)",
-    1, "",	"CTCT", " (30ASC)",	" (30ASC)",
-    1, "",	"CTUN", " (31ASC)",	" (31ASC)",
+    1, "\000",  "NUL",  " (0ASC)",  " (0ASC)",
+    1, "", "CTLA", " (1ASC)",  " (1ASC)",
+    1, "", "CTLB", " (2ASC)",  " (2ASC)",
+    1, "", "CTLC", " (3ASC)",  " (3ASC)",
+    1, "", "CTLD", " EX",      " (4ASC)",
+    1, "", "CTLE", " (5ASC)",  " (5ASC)",
+    1, "", "CTLF", " (6ASC)",  " (6ASC)",
+    1, "", "CTLG", " (7ASC)",  " (7ASC)",
+    1, "", "CTLH", " (-L)",    " (8ASC)",
+    1, "	", "CTLI", " (9ASC)",  " (9ASC)",
+    1, "\n",    "CTLJ", " (-DW)",   " (10ASC)",
+    1, "", "CTLK", " DEFK",    " (11ASC)",
+    1, "", "CTLL", " (12ASC)", " (12ASC)",
+    1, "\r",    "CTLM", " (10ASC)", " (13ASC)",
+    1, "", "CTLN", " (14ASC)", " (14ASC)",
+    1, "", "CTLO", " (15ASC)", " (15ASC)",
+    1, "", "CTLP", " (16ASC)", " (16ASC)",
+    1, "", "CTLQ", " (17ASC)", " (17ASC)",
+    1, "", "CTLR", " REF",     " (18ASC)",
+    1, "", "CTLS", " (19ASC)", " (19ASC)",
+    1, "", "CTLT", " (20ASC)", " (20ASC)",
+    1, "", "CTLU", " (-DL)",   " (21ASC)",
+    1, "", "CTLV", " (22ASC)", " (22ASC)",
+    1, "", "CTLW", " REF",     " (23ASC)",
+    1, "", "CTLX", " (24ASC)", " (24ASC)",
+    1, "", "CTLY", " (25ASC)", " (25ASC)",
+    1, "", "CTLZ", " EX",      " (26ASC)",
+    2, "", "ESC", " (27ASC)", " (27ASC)",
+    1, "", "CTBS", " (28ASC)", " (28ASC)",
+    1, "", "CTCB", " (29ASC)", " (29ASC)",
+    1, "", "CTCT", " (30ASC)", " (30ASC)",
+    1, "", "CTUN", " (31ASC)", " (31ASC)",
 
     /* End of table */
 
-    0, NULL, 	NULL,	NULL,		NULL
+    0, NULL,    NULL,   NULL,       NULL
 };
 
 /************************************************************************/
-/*									*/
-/*  Define keypad key							*/
-/*									*/
+/*                                  */
+/*  Define keypad key                           */
+/*                                  */
 /************************************************************************/
 
 void cmd_defk (char *cmdpnt)
@@ -175,9 +175,9 @@ foundit:
 }
 
 /************************************************************************/
-/*									*/
-/*  Show keypad definitions						*/
-/*									*/
+/*                                  */
+/*  Show keypad definitions                     */
+/*                                  */
 /************************************************************************/
 
 void show_keypad (void)
@@ -204,18 +204,18 @@ void show_keypad (void)
 }
 
 /************************************************************************/
-/*									*/
-/*  Get definition for a keypad key					*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	keyname = name of key to get definition for			*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	keypad_getdef = NULL : unknown key name				*/
-/*	                else : pointer to command string		*/
-/*									*/
+/*                                  */
+/*  Get definition for a keypad key                 */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  keyname = name of key to get definition for         */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  keypad_getdef = NULL : unknown key name             */
+/*                  else : pointer to command string        */
+/*                                  */
 /************************************************************************/
 
 const char *keypad_getdef (const char *keyname)
@@ -243,14 +243,14 @@ const char *keypad_getdef (const char *keyname)
 }
 
 /************************************************************************/
-/*									*/
-/*  Set the definition for a keypad key					*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	keyname = name of key to define					*/
-/*	command = definition command string				*/
-/*									*/
+/*                                  */
+/*  Set the definition for a keypad key                 */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  keyname = name of key to define                 */
+/*  command = definition command string             */
+/*                                  */
 /************************************************************************/
 
 void keypad_setdef (const char *keyname, const char *command)
@@ -277,20 +277,20 @@ void keypad_setdef (const char *keyname, const char *command)
 }
 
 /************************************************************************/
-/*									*/
-/*  Convert a keypad code string to a keypad key name			*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	keystring = keypad code string					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	keypad_getname < 0 : invalid/unknown keystring			*/
-/*	               = 0 : partial keystring, come back when complete	*/
-/*	               > 0 : valid, number of keystring bytes used	*/
-/*	                     keyname filled in with key's name		*/
-/*									*/
+/*                                  */
+/*  Convert a keypad code string to a keypad key name           */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  keystring = keypad code string                  */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  keypad_getname < 0 : invalid/unknown keystring          */
+/*                 = 0 : partial keystring, come back when complete */
+/*                 > 0 : valid, number of keystring bytes used  */
+/*                       keyname filled in with key's name      */
+/*                                  */
 /************************************************************************/
 
 int keypad_getname (const char *keystring, char keyname[16])
@@ -325,23 +325,23 @@ scantable:
 }
 
 /************************************************************************/
-/*									*/
-/*  Convert a keypad code string to a changemode command string		*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	keystring = key code string to process				*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	keypad_decode = 0 : don't attempt to execute cmdstring, it is 	*/
-/*	                    only a partial command sequence		*/
-/*	                1 : it is ok to execute cmdstring, it ends on 	*/
-/*	                    a completed command sequence		*/
-/*	                    if string is null, means user has entered 	*/
-/*	                    GOLD-DEL and wants to cancel command seq	*/
-/*	cmdstring = processed codes					*/
-/*									*/
+/*                                  */
+/*  Convert a keypad code string to a changemode command string     */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  keystring = key code string to process              */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  keypad_decode = 0 : don't attempt to execute cmdstring, it is   */
+/*                      only a partial command sequence     */
+/*                  1 : it is ok to execute cmdstring, it ends on   */
+/*                      a completed command sequence        */
+/*                      if string is null, means user has entered   */
+/*                      GOLD-DEL and wants to cancel command seq    */
+/*  cmdstring = processed codes                 */
+/*                                  */
 /************************************************************************/
 
 int keypad_decode (String *keystring, String *cmdstring)
@@ -354,12 +354,12 @@ int keypad_decode (String *keystring, String *cmdstring)
 
     string_setval (cmdstring, 0, NULL);
 
-    done       = 0;	/* we have not ended on a changemode command */
-    goldesc    = 0;	/* not in gold escape mode - set when GOLD was followed by something alphanumeric */
+    done       = 0; /* we have not ended on a changemode command */
+    goldesc    = 0; /* not in gold escape mode - set when GOLD was followed by something alphanumeric */
     /* the alphanumerics get put in the cmdstring as direct changemode commands */
     /* or it's good for just entering repeat counts, too */
-    goldmode   = 0;	/* the GOLD key is not in effect to start */
-    insertmode = 0;	/* we do not have an open 'I' changemode command going */
+    goldmode   = 0; /* the GOLD key is not in effect to start */
+    insertmode = 0; /* we do not have an open 'I' changemode command going */
     n = string_getlen (keystring);
     s = string_getval (keystring);
 
@@ -375,76 +375,76 @@ int keypad_decode (String *keystring, String *cmdstring)
             if ((n >= keycodes[i].clen) && (memcmp (s, keycodes[i].code, keycodes[i].clen) == 0)) goto foundone;
             if ((n <  keycodes[i].clen) && (memcmp (s, keycodes[i].code, n) == 0))
             {
-                done = 0;					/* partial sequence, tell it to come back when it has more */
-                goto stopnow;					/* we're all done for now till we get the rest */
+                done = 0;                   /* partial sequence, tell it to come back when it has more */
+                goto stopnow;                   /* we're all done for now till we get the rest */
             }
         }
 
         /* Not in table and we're gold, append directly to command string (user can type in a repeat count)            */
         /* Not in table and we're not gold, append as part of an insert string (user is typing in text to be inserted) */
 
-        if (goldmode && (c >= '0' && c <= '9'))  		/* see if we're in gold mode and it is a number (for repeat count) */
+        if (goldmode && (c >= '0' && c <= '9'))         /* see if we're in gold mode and it is a number (for repeat count) */
         {
             if (insertmode)
             {
-                string_concat (cmdstring, 1, "");		/* if so, make sure we're not in insert mode */
-                insertmode = 0;					/* now we're not in insert mode */
+                string_concat (cmdstring, 1, "");      /* if so, make sure we're not in insert mode */
+                insertmode = 0;                 /* now we're not in insert mode */
             }
-            done = 0;						/* we can't finish on character about to be processed */
+            done = 0;                       /* we can't finish on character about to be processed */
             /* because it would not be a complete changemode command */
-            goldesc = 1;					/* we have output some 'gold escaped' characters */
+            goldesc = 1;                    /* we have output some 'gold escaped' characters */
         }
         else
         {
-            if (!insertmode)  				/* nromal, make sure we're in insert mode */
+            if (!insertmode)                /* nromal, make sure we're in insert mode */
             {
-                string_concat (cmdstring, 1, "I");		/* if not, put an insert command in command string */
-                insertmode = 1;					/* now we're in insert mode */
+                string_concat (cmdstring, 1, "I");      /* if not, put an insert command in command string */
+                insertmode = 1;                 /* now we're in insert mode */
             }
-            goldmode = 0;					/* terminate any repeat count stuff */
+            goldmode = 0;                   /* terminate any repeat count stuff */
             goldesc  = 0;
-            done = 1;						/* we can finish on character about to be processed */
+            done = 1;                       /* we can finish on character about to be processed */
             /* (but we have to close insert mode first) */
         }
-        string_concat (cmdstring, 1, s);			/* put on the character to be inserted */
-        n --;						/* remove it from keycode buffer */
+        string_concat (cmdstring, 1, s);            /* put on the character to be inserted */
+        n --;                       /* remove it from keycode buffer */
         s ++;
         continue;
 
         /* Found keycode, append equivalent change mode command to command string */
 
 foundone:
-        if (goldesc)  					/* if the reason we were in GOLD mode was just to enter escaped chars ... */
+        if (goldesc)                    /* if the reason we were in GOLD mode was just to enter escaped chars ... */
         {
-            goldesc  = 0;					/* ... make that no longer the case */
-            goldmode = 0;					/* ... and exit gold mode, they have to press GOLD key again */
+            goldesc  = 0;                   /* ... make that no longer the case */
+            goldmode = 0;                   /* ... and exit gold mode, they have to press GOLD key again */
         }
-        p = keycodes[i].chgm[goldmode];			/* point to key's corresponding change mode command string */
+        p = keycodes[i].chgm[goldmode];         /* point to key's corresponding change mode command string */
         if (p != NULL)
         {
-            if (*p == ' ') p ++;				/* skip over leading space, if any */
-            if (insertmode)  					/* get out of insert mode */
+            if (*p == ' ') p ++;                /* skip over leading space, if any */
+            if (insertmode)                     /* get out of insert mode */
             {
                 string_concat (cmdstring, 1, "");
                 insertmode = 0;
             }
-            if (strcasecmp ("GOLD", p) == 0) goldmode = 1;	/* if the 'GOLD' key, enter gold mode */
+            if (strcasecmp ("GOLD", p) == 0) goldmode = 1;  /* if the 'GOLD' key, enter gold mode */
             else
             {
-                string_concat (cmdstring, strlen (p), p);	/* otherwise, append change mode command string */
-                goldmode = 0;					/* not GOLD anymore */
-                done = 1;					/* we can finish on sequence just processed */
+                string_concat (cmdstring, strlen (p), p);   /* otherwise, append change mode command string */
+                goldmode = 0;                   /* not GOLD anymore */
+                done = 1;                   /* we can finish on sequence just processed */
             }
         }
         else
         {
-            done       = 1;					/* GOLD-DEL, reset */
+            done       = 1;                 /* GOLD-DEL, reset */
             goldesc    = 0;
             goldmode   = 0;
             insertmode = 0;
             string_setval (cmdstring, 0, NULL);
         }
-        n -= keycodes[i].clen;				/* remove key sequence from input string */
+        n -= keycodes[i].clen;              /* remove key sequence from input string */
         s += keycodes[i].clen;
     }
 

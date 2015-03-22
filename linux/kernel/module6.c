@@ -595,19 +595,19 @@ static inline void percpu_modcopy(void *pcpudst, const void *src,
 }
 #endif /* CONFIG_SMP */
 
-#define MODINFO_ATTR(field)	\
+#define MODINFO_ATTR(field) \
 static void setup_modinfo_##field(struct module *mod, const char *s)  \
 {                                                                     \
-	mod->field = kstrdup(s, GFP_KERNEL);                          \
+    mod->field = kstrdup(s, GFP_KERNEL);                          \
 }                                                                     \
 static ssize_t show_modinfo_##field(struct module_attribute *mattr,   \
-	                struct module *mod, char *buffer)             \
+                    struct module *mod, char *buffer)             \
 {                                                                     \
-	return sprintf(buffer, "%s\n", mod->field);                   \
+    return sprintf(buffer, "%s\n", mod->field);                   \
 }                                                                     \
 static int modinfo_##field##_exists(struct module *mod)               \
 {                                                                     \
-	return mod->field != NULL;                                    \
+    return mod->field != NULL;                                    \
 }                                                                     \
 static void free_modinfo_##field(struct module *mod)                  \
 {                                                                     \
@@ -615,12 +615,12 @@ static void free_modinfo_##field(struct module *mod)                  \
         mod->field = NULL;                                            \
 }                                                                     \
 static struct module_attribute modinfo_##field = {                    \
-	.attr = { .name = __stringify(field), .mode = 0444,           \
-		  .owner = THIS_MODULE },                             \
-	.show = show_modinfo_##field,                                 \
-	.setup = setup_modinfo_##field,                               \
-	.test = modinfo_##field##_exists,                             \
-	.free = free_modinfo_##field,                                 \
+    .attr = { .name = __stringify(field), .mode = 0444,           \
+          .owner = THIS_MODULE },                             \
+    .show = show_modinfo_##field,                                 \
+    .setup = setup_modinfo_##field,                               \
+    .test = modinfo_##field##_exists,                             \
+    .free = free_modinfo_##field,                                 \
 };
 
 #if 0
@@ -2563,10 +2563,10 @@ static int m_show(struct seq_file *m, void *p)
 */
 struct seq_operations modules_op =
 {
-    .start	= m_start,
-    .next	= m_next,
-    .stop	= m_stop,
-    .show	= m_show
+    .start  = m_start,
+    .next   = m_next,
+    .stop   = m_stop,
+    .show   = m_show
 };
 
 /* Given an address, look for it in the module exception tables. */
@@ -2828,7 +2828,7 @@ int load_driver_inner(int (*init_tables)(), struct _ddt * ddt, struct _dpt * dpt
     iogen$init_db(ddb, ddt, dpt, fdt);
     iogen$init_controller(crb, ddb);
     int count = crb->crb$l_refc;
-    //		count = idb->idb$w_maxunits;
+    //      count = idb->idb$w_maxunits;
     count = dpt->dpt$w_defunits;
     int i;
     ddb->ddb$ps_ucb = 0; // check. remove later

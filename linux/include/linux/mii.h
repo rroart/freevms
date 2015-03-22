@@ -71,7 +71,7 @@
 #define ADVERTISE_NPAGE         0x8000  /* Next page bit               */
 
 #define ADVERTISE_FULL (ADVERTISE_100FULL | ADVERTISE_10FULL | \
-			ADVERTISE_CSMA)
+            ADVERTISE_CSMA)
 #define ADVERTISE_ALL (ADVERTISE_10HALF | ADVERTISE_10FULL | \
                        ADVERTISE_100HALF | ADVERTISE_100FULL)
 
@@ -87,8 +87,8 @@
 #define LPA_LPACK               0x4000  /* Link partner acked us       */
 #define LPA_NPAGE               0x8000  /* Next page bit               */
 
-#define LPA_DUPLEX		(LPA_10FULL | LPA_100FULL)
-#define LPA_100			(LPA_100FULL | LPA_100HALF | LPA_100BASE4)
+#define LPA_DUPLEX      (LPA_10FULL | LPA_100FULL)
+#define LPA_100         (LPA_100FULL | LPA_100HALF | LPA_100BASE4)
 
 /* Expansion register for auto-negotiation. */
 #define EXPANSION_NWAY          0x0001  /* Can do N-way auto-nego      */
@@ -128,10 +128,10 @@ int mii_ethtool_sset(struct mii_if_info *mii, struct ethtool_cmd *ecmd);
 /* This structure is used in all SIOCxMIIxxx ioctl calls */
 struct mii_ioctl_data
 {
-    u16		phy_id;
-    u16		reg_num;
-    u16		val_in;
-    u16		val_out;
+    u16     phy_id;
+    u16     reg_num;
+    u16     val_in;
+    u16     val_out;
 };
 
 

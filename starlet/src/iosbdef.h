@@ -1,5 +1,5 @@
-#ifndef iosbdef_h
-#define iosbdef_h
+#ifndef IOSBDEF_H
+#define IOSBDEF_H
 
 #define IOSB$K_LENGTH 8
 #define IOSB$C_LENGTH 8

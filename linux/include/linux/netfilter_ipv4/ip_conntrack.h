@@ -51,13 +51,13 @@ enum ip_conntrack_status
 #include <linux/netfilter_ipv4/ip_conntrack_icmp.h>
 
 #ifdef CONFIG_NF_DEBUG
-#define IP_NF_ASSERT(x)							\
-do {									\
-	if (!(x))							\
-		/* Wooah!  I'm tripping my conntrack in a frenzy of	\
-		   netplay... */					\
-		printk("NF_IP_ASSERT: %s:%i(%s)\n",			\
-		       __FILE__, __LINE__, __FUNCTION__);		\
+#define IP_NF_ASSERT(x)                         \
+do {                                    \
+    if (!(x))                           \
+        /* Wooah!  I'm tripping my conntrack in a frenzy of \
+           netplay... */                    \
+        printk("NF_IP_ASSERT: %s:%i(%s)\n",         \
+               __FILE__, __LINE__, __FUNCTION__);       \
 } while(0)
 #else
 #define IP_NF_ASSERT(x)
@@ -142,7 +142,7 @@ struct ip_conntrack
             /* insert nat helper private data here */
         } help;
 #if defined(CONFIG_IP_NF_TARGET_MASQUERADE) || \
-	defined(CONFIG_IP_NF_TARGET_MASQUERADE_MODULE)
+    defined(CONFIG_IP_NF_TARGET_MASQUERADE_MODULE)
         int masq_index;
 #endif
     } nat;

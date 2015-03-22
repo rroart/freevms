@@ -44,9 +44,9 @@ extern spinlock_t journal_datalist_lock;
  * once we have started to commit the old one).
  *
  * Preconditions:
- *	The journal MUST be locked.  We don't perform atomic mallocs on the
- *	new transaction	and we can't block without protecting against other
- *	processes trying to touch the journal while it is in transition.
+ *  The journal MUST be locked.  We don't perform atomic mallocs on the
+ *  new transaction and we can't block without protecting against other
+ *  processes trying to touch the journal while it is in transition.
  */
 
 static transaction_t * get_transaction (journal_t * journal, int is_try)
@@ -1322,7 +1322,7 @@ not_jbd:
     return;
 }
 
-#if 0	/* Unused */
+#if 0   /* Unused */
 /*
  * journal_sync_buffer: flush a potentially-journaled buffer to disk.
  *

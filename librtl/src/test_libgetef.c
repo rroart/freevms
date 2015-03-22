@@ -4,8 +4,8 @@
 
 #define __NEW_STARLET
 #include <lib$routines.h>
-#include <libdef.h>						/* lib messages */
-#include <ssdef.h>						/* system messages */
+#include <libdef.h>                     /* lib messages */
+#include <ssdef.h>                      /* system messages */
 
 #include <stdio.h>
 

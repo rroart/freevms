@@ -1,5 +1,5 @@
-#ifndef prcpoldef_h
-#define prcpoldef_h
+#ifndef PRCPOLDEF_H
+#define PRCPOLDEF_H
 
 #define PRCPOL$C_SIZ 56
 #define PRCPOL$S_PRCPOLDEF 56

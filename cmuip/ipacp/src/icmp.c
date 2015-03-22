@@ -1,60 +1,60 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //SBTTL "InterNetwork Control Message Protocol Handler Overview."
 /*
 
 Module:
 
-	ICMP
+    ICMP
 
 Facility:
 
-	Inter-Network control message protocol handler.
+    Inter-Network control message protocol handler.
 
 Abstract:
 
-	ICMP is defined in RFC 792
+    ICMP is defined in RFC 792
 
 Author:
-	Bruce R. Miller		CMU Network Development
-	November 17, friday, 1989
-	Copyright (c) 1989 Carnegie-Mellon University
+    Bruce R. Miller     CMU Network Development
+    November 17, friday, 1989
+    Copyright (c) 1989 Carnegie-Mellon University
 
 Modifications:
 
-1.0b	29-Aug-1991	Henry W. Miller		USBR
-	In ICMP$INPUT(), protect against bad IP header in data portion of
-	ICMP packet - scrambled data was causing Access Violations.  If
-	supposed data portion of IP header in ICMP packet is greater than
-	size of the buffer, it's a good clue we got a bad packet.  Bounce
-	it.  Yell at operator.
+1.0b    29-Aug-1991 Henry W. Miller     USBR
+    In ICMP$INPUT(), protect against bad IP header in data portion of
+    ICMP packet - scrambled data was causing Access Violations.  If
+    supposed data portion of IP header in ICMP packet is greater than
+    size of the buffer, it's a good clue we got a bad packet.  Bounce
+    it.  Yell at operator.
 
-1.0a	24-Apr-1991	Henry W. Miller		USBR
-	Make ICMPTTL a configurable variable.
-	Add hooks for generating ICMP DUNR replies.  NYI.
+1.0a    24-Apr-1991 Henry W. Miller     USBR
+    Make ICMPTTL a configurable variable.
+    Add hooks for generating ICMP DUNR replies.  NYI.
 
- 1.0	17-Nov-89	Bruce R. Miller		CMU NetDev
-	Initial version.  I copied all of the other ICMP stuff
-	into this module.
+ 1.0    17-Nov-89   Bruce R. Miller     CMU NetDev
+    Initial version.  I copied all of the other ICMP stuff
+    into this module.
 
 */
 
@@ -72,14 +72,14 @@ MODULE ICMP(IDENT="1.0B",LANGUAGE(BLISS32),
 #ifdef __i386__
 #include <net/checksum.h>
 #endif
-#include <starlet.h>	// VMS system definitions
-#include <cmuip/central/include/netcommon.h>	// Common decls
-// not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";		// BLISS transportablity package
-#include "netvms.h">		// VMS specific
-#include <cmuip/central/include/nettcpip.h>		// IP & ICMP definitions
-#include "structure.h"		// TCB & Segment Structure definition
+#include <starlet.h>    // VMS system definitions
+#include <cmuip/central/include/netcommon.h>    // Common decls
+// not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";      // BLISS transportablity package
+#include "netvms.h">        // VMS specific
+#include <cmuip/central/include/nettcpip.h>     // IP & ICMP definitions
+#include "structure.h"      // TCB & Segment Structure definition
 #include "cmuip.h" // needed before tcpmacros.h
-#include "tcpmacros.h"		// Local macros
+#include "tcpmacros.h"      // Local macros
 #include "snmp.h"
 
 #include <descrip.h>
@@ -98,8 +98,8 @@ extern  void    mm$seg_free();
 extern  void    ASCII_DEC_BYTES();
 
 // MacLib.mar
-extern     CALC_CHECKSUM();		// MacLib
-extern      swapbytes();	// MacLib
+extern     CALC_CHECKSUM();     // MacLib
+extern      swapbytes();    // MacLib
 
 // IP.bli
 //extern  void    ip$send();
@@ -114,8 +114,8 @@ extern  void    udp$icmp();
 extern signed long
 log_state,
 icmpttl,
-min_physical_bufsize,	// Size of "small" device buffers
-max_physical_bufsize;	// Size of "large" device buffers
+min_physical_bufsize,   // Size of "small" device buffers
+max_physical_bufsize;   // Size of "large" device buffers
 
 
 
@@ -133,8 +133,8 @@ max_physical_bufsize;	// Size of "large" device buffers
 
 struct ICM_DBLOCK
 {
-    void *     icm$next	;
-    unsigned int     icm$address	;
+    void *     icm$next ;
+    unsigned int     icm$address    ;
     unsigned int    icm$gwy
 };
 
@@ -144,13 +144,13 @@ MACRO
 ICM_DBLOCK = BLOCK->ICM_Dsize FIELD(ICM_Dblock_Fields) %;
 #endif
 
-#define    ICM_HSHLEN 128		// Length of hash table
-#define    ICM_HSHAND ICM_HSHLEN-1	// && value for forming hash values
+#define    ICM_HSHLEN 128       // Length of hash table
+#define    ICM_HSHAND ICM_HSHLEN-1  // && value for forming hash values
 
 static signed long
 ICMHTB [ICM_HSHLEN]; // ICMP database hash table
 
-struct ICMP_MIB_struct icmp_mib_, * icmp_mib = &icmp_mib_ ;	// ICMP Management Information Block
+struct ICMP_MIB_struct icmp_mib_, * icmp_mib = &icmp_mib_ ; // ICMP Management Information Block
 
 
 //SBTTL "ICMP routing code"
@@ -196,7 +196,7 @@ void ICMP_Add(int GWY_Addr,struct ip_structure * IP_Pkt)
 //   the ICMP redirect to be generated.
 
 {
-    extern	LIB$GET_VM();
+    extern  LIB$GET_VM();
     signed long
     IPdest;
     struct ICM_DBLOCK * ICMblock;
@@ -219,8 +219,8 @@ icmp$check(IPaddr)
 
 //Check if the ICMP routing table has an entry for this IP address.
 //Returns:
-//   0	No ICMP routing info
-//  !=0	IP address of gateway from ICMP info.
+//   0  No ICMP routing info
+//  !=0 IP address of gateway from ICMP info.
 int IPaddr;
 {
     struct ICM_DBLOCK * ICMptr;
@@ -251,7 +251,7 @@ void icmp$input (ICMptr,ICMlen,IPptr,IPlen,bufsize,buf)
 struct ip_structure * IPptr;
 struct icmp_header * ICMptr;
 {
-    extern	icmp$user_input();
+    extern  icmp$user_input();
     signed long
     ICMP_swapped  = 0,
     ICMdat,ICMtype,

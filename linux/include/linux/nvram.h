@@ -4,8 +4,8 @@
 #include <linux/ioctl.h>
 
 /* /dev/nvram ioctls */
-#define NVRAM_INIT		_IO('p', 0x40) /* initialize NVRAM and set checksum */
-#define	NVRAM_SETCKS	_IO('p', 0x41) /* recalculate checksum */
+#define NVRAM_INIT      _IO('p', 0x40) /* initialize NVRAM and set checksum */
+#define NVRAM_SETCKS    _IO('p', 0x41) /* recalculate checksum */
 
 #ifdef __KERNEL__
 extern unsigned char nvram_read_byte( int i );

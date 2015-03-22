@@ -34,7 +34,7 @@ static __inline__ int md_cpu_has_mmx(void)
     return test_bit(X86_FEATURE_MMX,  &boot_cpu_data.x86_capability);
 }
 #else
-#define md_cpu_has_mmx(x)	(0)
+#define md_cpu_has_mmx(x)   (0)
 #endif
 
 /* 002 */

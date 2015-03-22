@@ -32,17 +32,17 @@ struct i2c_bus;
 struct i2c_driver;
 struct i2c_device;
 
-#define I2C_DRIVERID_MSP3400    	 1
-#define I2C_DRIVERID_TUNER      	 2
-#define I2C_DRIVERID_VIDEOTEXT		 3
-#define I2C_DRIVERID_VIDEODECODER	 4
-#define I2C_DRIVERID_VIDEOENCODER	 5
+#define I2C_DRIVERID_MSP3400         1
+#define I2C_DRIVERID_TUNER           2
+#define I2C_DRIVERID_VIDEOTEXT       3
+#define I2C_DRIVERID_VIDEODECODER    4
+#define I2C_DRIVERID_VIDEOENCODER    5
 
-#define I2C_BUSID_BT848		1	/* I2C bus on a BT848 */
-#define I2C_BUSID_PARPORT	2	/* Bit banging on a parallel port */
-#define I2C_BUSID_BUZ		3
-#define I2C_BUSID_ZORAN		4
-#define I2C_BUSID_CYBER2000	5
+#define I2C_BUSID_BT848     1   /* I2C bus on a BT848 */
+#define I2C_BUSID_PARPORT   2   /* Bit banging on a parallel port */
+#define I2C_BUSID_BUZ       3
+#define I2C_BUSID_ZORAN     4
+#define I2C_BUSID_CYBER2000 5
 
 /*
  * struct for a driver for a i2c chip (tuner, soundprocessor,
@@ -86,7 +86,7 @@ struct i2c_driver
  * One must hold the spinlock to access the i2c bus (XXX: is the irqsave
  * required? Maybe better use a semaphore?).
  * [-AC-] having a spinlock_irqsave is only needed if we have drivers wishing
- *	  to bang their i2c bus from an interrupt.
+ *    to bang their i2c bus from an interrupt.
  *
  * attach/detach_inform is a callback to inform the bus driver about
  * attached chip drivers.
@@ -141,7 +141,7 @@ struct i2c_bus
 
 
 /*
- *	This holds per-device data for a i2c device
+ *  This holds per-device data for a i2c device
  */
 
 struct i2c_device
@@ -186,5 +186,5 @@ int     i2c_read(struct i2c_bus *bus, unsigned char addr);
 int     i2c_write(struct i2c_bus *bus, unsigned char addr,
                   unsigned char b1, unsigned char b2, int both);
 
-int	i2c_init(void);
+int i2c_init(void);
 #endif /* I2C_H */

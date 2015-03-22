@@ -1,7 +1,7 @@
 /*
  * str.c
  *
- *	Code for VAX STR$UPCASE routine
+ *  Code for VAX STR$UPCASE routine
  *
  * Description:
  *
@@ -11,11 +11,11 @@
  *
  * History
  *
- *	Oct 16, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 16, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  */
 
 #include <stdio.h>
@@ -33,9 +33,9 @@
 unsigned long str$upcase(struct dsc$descriptor_s* destination_string,
                          const struct dsc$descriptor_s* source_string)
 {
-    char* s1_ptr;				/* Pointer to string */
-    unsigned short s1_length;		/* Length of string */
-    unsigned long result;			/* Working result */
+    char* s1_ptr;               /* Pointer to string */
+    unsigned short s1_length;       /* Length of string */
+    unsigned long result;           /* Working result */
 
     /*
      * Copy over the string, retaining original case

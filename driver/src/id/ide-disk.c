@@ -5,7 +5,7 @@
 // Modified Linux source file, 2001-2004.
 
 /*
- *  linux/drivers/ide/ide-disk.c	Version 1.10	June 9, 2000
+ *  linux/drivers/ide/ide-disk.c    Version 1.10    June 9, 2000
  *
  *  Copyright (C) 1994-1998  Linus Torvalds & authors (see below)
  */
@@ -17,27 +17,27 @@
  *
  * This is the IDE/ATA disk driver, as evolved from hd.c and ide.c.
  *
- * Version 1.00		move disk only code from ide.c to ide-disk.c
- *			support optional byte-swapping of all data
- * Version 1.01		fix previous byte-swapping code
- * Version 1.02		remove ", LBA" from drive identification msgs
- * Version 1.03		fix display of id->buf_size for big-endian
- * Version 1.04		add /proc configurable settings and S.M.A.R.T support
- * Version 1.05		add capacity support for ATA3 >= 8GB
- * Version 1.06		get boot-up messages to show full cyl count
- * Version 1.07		disable door-locking if it fails
- * Version 1.08		fixed CHS/LBA translations for ATA4 > 8GB,
- *			process of adding new ATA4 compliance.
- *			fixed problems in allowing fdisk to see
- *			the entire disk.
- * Version 1.09		added increment of rq->sector in ide_multwrite
- *			added UDMA 3/4 reporting
- * Version 1.10		request queue changes, Ultra DMA 100
+ * Version 1.00     move disk only code from ide.c to ide-disk.c
+ *          support optional byte-swapping of all data
+ * Version 1.01     fix previous byte-swapping code
+ * Version 1.02     remove ", LBA" from drive identification msgs
+ * Version 1.03     fix display of id->buf_size for big-endian
+ * Version 1.04     add /proc configurable settings and S.M.A.R.T support
+ * Version 1.05     add capacity support for ATA3 >= 8GB
+ * Version 1.06     get boot-up messages to show full cyl count
+ * Version 1.07     disable door-locking if it fails
+ * Version 1.08     fixed CHS/LBA translations for ATA4 > 8GB,
+ *          process of adding new ATA4 compliance.
+ *          fixed problems in allowing fdisk to see
+ *          the entire disk.
+ * Version 1.09     added increment of rq->sector in ide_multwrite
+ *          added UDMA 3/4 reporting
+ * Version 1.10     request queue changes, Ultra DMA 100
  */
 
-#define IDEDISK_VERSION	"1.10"
+#define IDEDISK_VERSION "1.10"
 
-#undef REALLY_SLOW_IO		/* most systems can safely undef this */
+#undef REALLY_SLOW_IO       /* most systems can safely undef this */
 
 #include <linux/config.h>
 #include <linux/module.h>
@@ -69,7 +69,7 @@
 #ifdef CONFIG_BLK_DEV_PDC4030
 #define IS_PDC4030_DRIVE (HWIF(drive)->chipset == ide_pdc4030)
 #else
-#define IS_PDC4030_DRIVE (0)	/* auto-NULLs out pdc4030 code */
+#define IS_PDC4030_DRIVE (0)    /* auto-NULLs out pdc4030 code */
 #endif
 
 static void idedisk_bswap_data (void *buffer, int wcount)
@@ -108,8 +108,8 @@ static inline void idedisk_output_data (ide_drive_t *drive, void *buffer, unsign
  * lba_capacity_is_ok() performs a sanity check on the claimed "lba_capacity"
  * value for this drive (from its reported identification information).
  *
- * Returns:	1 if lba_capacity looks sensible
- *		0 otherwise
+ * Returns: 1 if lba_capacity looks sensible
+ *      0 otherwise
  *
  * It is called only once for each drive.
  */
@@ -144,10 +144,10 @@ static int lba_capacity_is_ok (struct hd_driveid *id)
     if ((lba_sects - chs_sects) < chs_sects/10)
     {
         id->lba_capacity = lba_sects;
-        return 1;	/* lba_capacity is (now) good */
+        return 1;   /* lba_capacity is (now) good */
     }
 
-    return 0;	/* lba_capacity value may be bad */
+    return 0;   /* lba_capacity value may be bad */
 }
 
 extern struct _ucb * ideu;
@@ -254,7 +254,7 @@ static ide_startstop_t write_intr (ide_drive_t *drive)
             return ide_stopped;
         }
         kfree(rq);
-        return ide_stopped;	/* the original code did this here (?) */
+        return ide_stopped; /* the original code did this here (?) */
     }
     return ide_error(drive, "write_intr", stat);
 }
@@ -272,8 +272,8 @@ static ide_startstop_t write_intr (ide_drive_t *drive)
  */
 int ide_multwrite (ide_drive_t *drive, unsigned int mcount)
 {
-    ide_hwgroup_t	*hwgroup= HWGROUP(drive);
-    struct request	*rq = &hwgroup->wrq;
+    ide_hwgroup_t   *hwgroup= HWGROUP(drive);
+    struct request  *rq = &hwgroup->wrq;
 
     do
     {
@@ -334,8 +334,8 @@ static ide_startstop_t multwrite_intr (ide_drive_t *drive)
         if (stat & DRQ_STAT)
         {
             /*
-             *	The drive wants data. Remember rq is the copy
-             *	of the request
+             *  The drive wants data. Remember rq is the copy
+             *  of the request
              */
             if (rq->nr_sectors)
             {
@@ -348,10 +348,10 @@ static ide_startstop_t multwrite_intr (ide_drive_t *drive)
         else
         {
             /*
-             *	If the copy has all the blocks completed then
-             *	we can end the original request.
+             *  If the copy has all the blocks completed then
+             *  we can end the original request.
              */
-            if (!rq->nr_sectors)  	/* all done? */
+            if (!rq->nr_sectors)    /* all done? */
             {
                 rq = hwgroup->rq;
                 for (i = rq->nr_sectors; i > 0;)
@@ -362,7 +362,7 @@ static ide_startstop_t multwrite_intr (ide_drive_t *drive)
                 return ide_stopped;
             }
         }
-        return ide_stopped;	/* the original code did this here (?) */
+        return ide_stopped; /* the original code did this here (?) */
     }
     return ide_error(drive, "multwrite_intr", stat);
 }
@@ -535,7 +535,7 @@ ide_startstop_t do_rw_disk (ide_drive_t *drive, struct request *rq, unsigned lon
             return startstop;
         }
         if (!drive->unmask)
-            __cli();	/* local CPU only */
+            __cli();    /* local CPU only */
         if (drive->mult_count)
         {
             ide_hwgroup_t *hwgroup = HWGROUP(drive);
@@ -604,7 +604,7 @@ static void idedisk_release (struct inode *inode, struct file *filp, ide_drive_t
 
 static int idedisk_media_change (ide_drive_t *drive)
 {
-    return drive->removable;	/* if removable, always assume it was changed */
+    return drive->removable;    /* if removable, always assume it was changed */
 }
 
 static void idedisk_revalidate (ide_drive_t *drive)
@@ -691,7 +691,7 @@ static void idedisk_pre_reset (ide_drive_t *drive)
         drive->special.b.set_multmode = 1;
 }
 
-#define	idedisk_proc	NULL
+#define idedisk_proc    NULL
 
 static int set_multcount(ide_drive_t *drive, int arg)
 {
@@ -722,18 +722,18 @@ static void idedisk_add_settings(ide_drive_t *drive)
     int major = HWIF(drive)->major;
     int minor = drive->select.b.unit << PARTN_BITS;
 
-    ide_add_setting(drive,	"bios_cyl",		SETTING_RW,					-1,			-1,			TYPE_INT,	0,	65535,				1,	1,	&drive->bios_cyl,		NULL);
-    ide_add_setting(drive,	"bios_head",		SETTING_RW,					-1,			-1,			TYPE_BYTE,	0,	255,				1,	1,	&drive->bios_head,		NULL);
-    ide_add_setting(drive,	"bios_sect",		SETTING_RW,					-1,			-1,			TYPE_BYTE,	0,	63,				1,	1,	&drive->bios_sect,		NULL);
-    ide_add_setting(drive,	"bswap",		SETTING_READ,					-1,			-1,			TYPE_BYTE,	0,	1,				1,	1,	&drive->bswap,			NULL);
-    ide_add_setting(drive,	"multcount",		id ? SETTING_RW : SETTING_READ,			HDIO_GET_MULTCOUNT,	HDIO_SET_MULTCOUNT,	TYPE_BYTE,	0,	id ? id->max_multsect : 0,	1,	2,	&drive->mult_count,		set_multcount);
-    ide_add_setting(drive,	"nowerr",		SETTING_RW,					HDIO_GET_NOWERR,	HDIO_SET_NOWERR,	TYPE_BYTE,	0,	1,				1,	1,	&drive->nowerr,			set_nowerr);
-    ide_add_setting(drive,	"breada_readahead",	SETTING_RW,					BLKRAGET,		BLKRASET,		TYPE_INT,	0,	255,				1,	2,	&read_ahead[major],		NULL);
-    ide_add_setting(drive,	"file_readahead",	SETTING_RW,					BLKFRAGET,		BLKFRASET,		TYPE_INTA,	0,	4096,			PAGE_SIZE,	1024,	&max_readahead[major][minor],	NULL);
-    ide_add_setting(drive,	"max_kb_per_request",	SETTING_RW,					BLKSECTGET,		BLKSECTSET,		TYPE_INTA,	1,	255,				1,	2,	&max_sectors[major][minor],	NULL);
-    ide_add_setting(drive,	"lun",			SETTING_RW,					-1,			-1,			TYPE_INT,	0,	7,				1,	1,	&drive->lun,			NULL);
-    ide_add_setting(drive,	"failures",		SETTING_RW,					-1,			-1,			TYPE_INT,	0,	65535,				1,	1,	&drive->failures,		NULL);
-    ide_add_setting(drive,	"max_failures",		SETTING_RW,					-1,			-1,			TYPE_INT,	0,	65535,				1,	1,	&drive->max_failures,		NULL);
+    ide_add_setting(drive,  "bios_cyl",     SETTING_RW,                 -1,         -1,         TYPE_INT,   0,  65535,              1,  1,  &drive->bios_cyl,       NULL);
+    ide_add_setting(drive,  "bios_head",        SETTING_RW,                 -1,         -1,         TYPE_BYTE,  0,  255,                1,  1,  &drive->bios_head,      NULL);
+    ide_add_setting(drive,  "bios_sect",        SETTING_RW,                 -1,         -1,         TYPE_BYTE,  0,  63,             1,  1,  &drive->bios_sect,      NULL);
+    ide_add_setting(drive,  "bswap",        SETTING_READ,                   -1,         -1,         TYPE_BYTE,  0,  1,              1,  1,  &drive->bswap,          NULL);
+    ide_add_setting(drive,  "multcount",        id ? SETTING_RW : SETTING_READ,         HDIO_GET_MULTCOUNT, HDIO_SET_MULTCOUNT, TYPE_BYTE,  0,  id ? id->max_multsect : 0,  1,  2,  &drive->mult_count,     set_multcount);
+    ide_add_setting(drive,  "nowerr",       SETTING_RW,                 HDIO_GET_NOWERR,    HDIO_SET_NOWERR,    TYPE_BYTE,  0,  1,              1,  1,  &drive->nowerr,         set_nowerr);
+    ide_add_setting(drive,  "breada_readahead", SETTING_RW,                 BLKRAGET,       BLKRASET,       TYPE_INT,   0,  255,                1,  2,  &read_ahead[major],     NULL);
+    ide_add_setting(drive,  "file_readahead",   SETTING_RW,                 BLKFRAGET,      BLKFRASET,      TYPE_INTA,  0,  4096,           PAGE_SIZE,  1024,   &max_readahead[major][minor],   NULL);
+    ide_add_setting(drive,  "max_kb_per_request",   SETTING_RW,                 BLKSECTGET,     BLKSECTSET,     TYPE_INTA,  1,  255,                1,  2,  &max_sectors[major][minor], NULL);
+    ide_add_setting(drive,  "lun",          SETTING_RW,                 -1,         -1,         TYPE_INT,   0,  7,              1,  1,  &drive->lun,            NULL);
+    ide_add_setting(drive,  "failures",     SETTING_RW,                 -1,         -1,         TYPE_INT,   0,  65535,              1,  1,  &drive->failures,       NULL);
+    ide_add_setting(drive,  "max_failures",     SETTING_RW,                 -1,         -1,         TYPE_INT,   0,  65535,              1,  1,  &drive->max_failures,       NULL);
 }
 
 static void idedisk_setup (ide_drive_t *drive)
@@ -835,7 +835,7 @@ static void idedisk_setup (ide_drive_t *drive)
         id->multsect_valid = id->multsect ? 1 : 0;
         drive->mult_req = id->multsect_valid ? id->max_multsect : INITIAL_MULT_COUNT;
         drive->special.b.set_multmode = drive->mult_req ? 1 : 0;
-#else	/* original, pre IDE-NFG, per request of AC */
+#else   /* original, pre IDE-NFG, per request of AC */
         drive->mult_req = INITIAL_MULT_COUNT;
         if (drive->mult_req > id->max_multsect)
             drive->mult_req = id->max_multsect;
@@ -861,15 +861,15 @@ static int idedisk_cleanup (ide_drive_t *drive)
  */
 static ide_driver_t idedisk_driver =
 {
-name:			"ide-disk"
+name:           "ide-disk"
     ,
 version:
     IDEDISK_VERSION,
 media:
     ide_disk,
-    busy:			0,
-    supports_dma:		1,
-    supports_dsc_overlap:	0,
+    busy:           0,
+    supports_dma:       1,
+    supports_dsc_overlap:   0,
 cleanup:
     idedisk_cleanup,
 do_request:
@@ -951,7 +951,7 @@ int idedisk_init (void)
             ccb = &ctl$ga_ccb_table[dev2chan(MKDEV(IDE0_MAJOR,0))];
             ccb->ccb$l_ucb->ucb$l_orb=drive;
             ((struct _dt_ucb *)ccb->ccb$l_ucb)->ucb$l_maxblock=drive->capacity;
-            //		  printk("ccb ucb %x %x %x %x\n",ccb,ccb->ccb$l_ucb,ccb->ccb$l_ucb->ucb$w_unit,drive);
+            //        printk("ccb ucb %x %x %x %x\n",ccb,ccb->ccb$l_ucb,ccb->ccb$l_ucb->ucb$w_unit,drive);
             ccb = &ctl$ga_ccb_table[dev2chan(MKDEV(IDE0_MAJOR,1))];
             ccb->ccb$l_ucb->ucb$l_orb=drive;
             ((struct _dt_ucb *)ccb->ccb$l_ucb)->ucb$l_maxblock=drive->capacity;

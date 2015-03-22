@@ -1,5 +1,5 @@
-#ifndef xabjnldef_h
-#define xabjnldef_h
+#ifndef XABJNLDEF_H
+#define XABJNLDEF_H
 
 #define XAB$C_JNL 34
 
@@ -24,9 +24,9 @@ struct _xabjnldef
         unsigned short int xab$w_jnl_flags;
         struct
         {
-            unsigned xab$v_journal_disabled	: 1;
-            unsigned xab$v_backup_done	: 1;
-            unsigned xab$v_fill_16_		: 6;
+            unsigned xab$v_journal_disabled : 1;
+            unsigned xab$v_backup_done  : 1;
+            unsigned xab$v_fill_16_     : 6;
         };
     };
     struct _fabdef *xab$l_jnl_fab;

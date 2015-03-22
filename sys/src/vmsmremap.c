@@ -5,9 +5,9 @@
 // Modified Linux source file, 2001-2004. Based on mremap.c.
 
 /*
- *	linux/mm/remap.c
+ *  linux/mm/remap.c
  *
- *	(C) Copyright 1996 Linus Torvalds
+ *  (C) Copyright 1996 Linus Torvalds
  */
 
 #include <linux/config.h>
@@ -339,7 +339,7 @@ unsigned long do_mremap(unsigned long addr,
         goto out;
     /* Private writable mapping? Check memory availability.. */
     if ((vma->rde$l_flags & (VM_SHARED | VM_WRITE)) == VM_WRITE &&
-            !(flags & MAP_NORESERVE)				 &&
+            !(flags & MAP_NORESERVE)                 &&
             !vm_enough_memory((new_len - old_len) >> PAGE_SHIFT))
         goto out;
 

@@ -1,15 +1,15 @@
 /******************************************************************************
  *
- *		telephony.h
+ *      telephony.h
  *
- *		Basic Linux Telephony Interface
+ *      Basic Linux Telephony Interface
  *
- *		(c) Copyright 1999-2001 Quicknet Technologies, Inc.
+ *      (c) Copyright 1999-2001 Quicknet Technologies, Inc.
  *
- *		This program is free software; you can redistribute it and/or
- *		modify it under the terms of the GNU General Public License
- *		as published by the Free Software Foundation; either version
- *		2 of the License, or (at your option) any later version.
+ *      This program is free software; you can redistribute it and/or
+ *      modify it under the terms of the GNU General Public License
+ *      as published by the Free Software Foundation; either version
+ *      2 of the License, or (at your option) any later version.
  *
  *    Authors:       Ed Okerson, <eokerson@quicknet.net>
  *                   Greg Herlein, <gherlein@quicknet.net>
@@ -40,7 +40,7 @@
 #define TELEPHONY_VERSION 3013
 
 #define PHONE_VENDOR_IXJ          1
-#define PHONE_VENDOR_QUICKNET	  PHONE_VENDOR_IXJ
+#define PHONE_VENDOR_QUICKNET     PHONE_VENDOR_IXJ
 #define PHONE_VENDOR_VOICETRONIX  2
 #define PHONE_VENDOR_ACULAB       3
 #define PHONE_VENDOR_DIGI         4
@@ -56,11 +56,11 @@
  *  the telephony products they support under Linux)
  *
  *****************************************************************************/
-#define QTI_PHONEJACK		100
-#define QTI_LINEJACK		300
-#define QTI_PHONEJACK_LITE	400
-#define QTI_PHONEJACK_PCI	500
-#define QTI_PHONECARD		600
+#define QTI_PHONEJACK       100
+#define QTI_LINEJACK        300
+#define QTI_PHONEJACK_LITE  400
+#define QTI_PHONEJACK_PCI   500
+#define QTI_PHONECARD       600
 
 /******************************************************************************
 *
@@ -114,55 +114,55 @@ typedef struct
     char name[80];
 } PHONE_CID;
 
-#define PHONE_RING			_IO  ('q', 0x83)
-#define PHONE_HOOKSTATE			_IO  ('q', 0x84)
-#define PHONE_MAXRINGS			_IOW ('q', 0x85, char)
-#define PHONE_RING_CADENCE		_IOW ('q', 0x86, short)
+#define PHONE_RING          _IO  ('q', 0x83)
+#define PHONE_HOOKSTATE         _IO  ('q', 0x84)
+#define PHONE_MAXRINGS          _IOW ('q', 0x85, char)
+#define PHONE_RING_CADENCE      _IOW ('q', 0x86, short)
 #define OLD_PHONE_RING_START            _IO  ('q', 0x87)
-#define PHONE_RING_START		_IOW ('q', 0x87, PHONE_CID *)
-#define PHONE_RING_STOP			_IO  ('q', 0x88)
+#define PHONE_RING_START        _IOW ('q', 0x87, PHONE_CID *)
+#define PHONE_RING_STOP         _IO  ('q', 0x88)
 
-#define USA_RING_CADENCE	 0xC0C0
+#define USA_RING_CADENCE     0xC0C0
 
-#define PHONE_REC_CODEC			_IOW ('q', 0x89, int)
-#define PHONE_REC_START			_IO  ('q', 0x8A)
-#define PHONE_REC_STOP			_IO  ('q', 0x8B)
-#define PHONE_REC_DEPTH			_IOW ('q', 0x8C, int)
-#define PHONE_FRAME			_IOW ('q', 0x8D, int)
-#define PHONE_REC_VOLUME		_IOW ('q', 0x8E, int)
-#define PHONE_REC_VOLUME_LINEAR		_IOW ('q', 0xDB, int)
-#define PHONE_REC_LEVEL			_IO  ('q', 0x8F)
+#define PHONE_REC_CODEC         _IOW ('q', 0x89, int)
+#define PHONE_REC_START         _IO  ('q', 0x8A)
+#define PHONE_REC_STOP          _IO  ('q', 0x8B)
+#define PHONE_REC_DEPTH         _IOW ('q', 0x8C, int)
+#define PHONE_FRAME         _IOW ('q', 0x8D, int)
+#define PHONE_REC_VOLUME        _IOW ('q', 0x8E, int)
+#define PHONE_REC_VOLUME_LINEAR     _IOW ('q', 0xDB, int)
+#define PHONE_REC_LEVEL         _IO  ('q', 0x8F)
 
-#define PHONE_PLAY_CODEC		_IOW ('q', 0x90, int)
-#define PHONE_PLAY_START		_IO  ('q', 0x91)
-#define PHONE_PLAY_STOP			_IO  ('q', 0x92)
-#define PHONE_PLAY_DEPTH		_IOW ('q', 0x93, int)
-#define PHONE_PLAY_VOLUME		_IOW ('q', 0x94, int)
-#define PHONE_PLAY_VOLUME_LINEAR	_IOW ('q', 0xDC, int)
-#define PHONE_PLAY_LEVEL		_IO  ('q', 0x95)
-#define PHONE_DTMF_READY		_IOR ('q', 0x96, int)
-#define PHONE_GET_DTMF			_IOR ('q', 0x97, int)
-#define PHONE_GET_DTMF_ASCII		_IOR ('q', 0x98, int)
-#define PHONE_DTMF_OOB			_IOW ('q', 0x99, int)
-#define PHONE_EXCEPTION			_IOR ('q', 0x9A, int)
-#define PHONE_PLAY_TONE			_IOW ('q', 0x9B, char)
-#define PHONE_SET_TONE_ON_TIME		_IOW ('q', 0x9C, int)
-#define PHONE_SET_TONE_OFF_TIME		_IOW ('q', 0x9D, int)
-#define PHONE_GET_TONE_ON_TIME		_IO  ('q', 0x9E)
-#define PHONE_GET_TONE_OFF_TIME		_IO  ('q', 0x9F)
-#define PHONE_GET_TONE_STATE		_IO  ('q', 0xA0)
-#define PHONE_BUSY			_IO  ('q', 0xA1)
-#define PHONE_RINGBACK			_IO  ('q', 0xA2)
-#define PHONE_DIALTONE			_IO  ('q', 0xA3)
-#define PHONE_CPT_STOP			_IO  ('q', 0xA4)
+#define PHONE_PLAY_CODEC        _IOW ('q', 0x90, int)
+#define PHONE_PLAY_START        _IO  ('q', 0x91)
+#define PHONE_PLAY_STOP         _IO  ('q', 0x92)
+#define PHONE_PLAY_DEPTH        _IOW ('q', 0x93, int)
+#define PHONE_PLAY_VOLUME       _IOW ('q', 0x94, int)
+#define PHONE_PLAY_VOLUME_LINEAR    _IOW ('q', 0xDC, int)
+#define PHONE_PLAY_LEVEL        _IO  ('q', 0x95)
+#define PHONE_DTMF_READY        _IOR ('q', 0x96, int)
+#define PHONE_GET_DTMF          _IOR ('q', 0x97, int)
+#define PHONE_GET_DTMF_ASCII        _IOR ('q', 0x98, int)
+#define PHONE_DTMF_OOB          _IOW ('q', 0x99, int)
+#define PHONE_EXCEPTION         _IOR ('q', 0x9A, int)
+#define PHONE_PLAY_TONE         _IOW ('q', 0x9B, char)
+#define PHONE_SET_TONE_ON_TIME      _IOW ('q', 0x9C, int)
+#define PHONE_SET_TONE_OFF_TIME     _IOW ('q', 0x9D, int)
+#define PHONE_GET_TONE_ON_TIME      _IO  ('q', 0x9E)
+#define PHONE_GET_TONE_OFF_TIME     _IO  ('q', 0x9F)
+#define PHONE_GET_TONE_STATE        _IO  ('q', 0xA0)
+#define PHONE_BUSY          _IO  ('q', 0xA1)
+#define PHONE_RINGBACK          _IO  ('q', 0xA2)
+#define PHONE_DIALTONE          _IO  ('q', 0xA3)
+#define PHONE_CPT_STOP          _IO  ('q', 0xA4)
 
-#define PHONE_PSTN_SET_STATE		_IOW ('q', 0xA4, int)
-#define PHONE_PSTN_GET_STATE		_IO  ('q', 0xA5)
+#define PHONE_PSTN_SET_STATE        _IOW ('q', 0xA4, int)
+#define PHONE_PSTN_GET_STATE        _IO  ('q', 0xA5)
 
-#define PSTN_ON_HOOK		0
-#define PSTN_RINGING		1
-#define PSTN_OFF_HOOK		2
-#define PSTN_PULSE_DIAL		3
+#define PSTN_ON_HOOK        0
+#define PSTN_RINGING        1
+#define PSTN_OFF_HOOK       2
+#define PSTN_PULSE_DIAL     3
 
 /******************************************************************************
 *
@@ -171,8 +171,8 @@ typedef struct
 * different wink duration.
 *
 ******************************************************************************/
-#define PHONE_WINK_DURATION		_IOW ('q', 0xA6, int)
-#define PHONE_WINK			_IOW ('q', 0xAA, int)
+#define PHONE_WINK_DURATION     _IOW ('q', 0xA6, int)
+#define PHONE_WINK          _IOW ('q', 0xAA, int)
 
 /******************************************************************************
 *
@@ -213,14 +213,14 @@ struct phone_codec_data
 * frame type is encoded in the least significant two bits of the first
 * WORD of the frame as follows:
 *
-* bits 1-0	Frame Type	Data Rate		Significant Words
-* 00		0		G.723.1 6.3		12
-* 01		1		G.723.1 5.3		10
-* 10		2		VAD/CNG			 2
-* 11		3		Repeat last CNG		 2 bits
+* bits 1-0  Frame Type  Data Rate       Significant Words
+* 00        0       G.723.1 6.3     12
+* 01        1       G.723.1 5.3     10
+* 10        2       VAD/CNG          2
+* 11        3       Repeat last CNG      2 bits
 *
 ******************************************************************************/
-#define PHONE_VAD			_IOW ('q', 0xA9, int)
+#define PHONE_VAD           _IOW ('q', 0xA9, int)
 
 
 /******************************************************************************
@@ -268,5 +268,5 @@ union telephony_exception
 };
 
 
-#endif		/* TELEPHONY_H */
+#endif      /* TELEPHONY_H */
 

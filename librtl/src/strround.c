@@ -1,7 +1,7 @@
 /*
- *	strround.c
+ *  strround.c
  *
- *	Copyright (C) 2004 Andrew Allison
+ *  Copyright (C) 2004 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,50 +19,50 @@
  *
  *The author may be contacted at freevms@sympatico.ca
  *
- *	Andrew Allison
- *	50 Denlaw Road
- *	London, Ont
- *	Canada
- *	N6G 3L4
+ *  Andrew Allison
+ *  50 Denlaw Road
+ *  London, Ont
+ *  Canada
+ *  N6G 3L4
  *
  */
 
 /*
  * str.c
  *
- *	Code for VAX STR$ routines
+ *  Code for VAX STR$ routines
  *
  * Description:
  *
- *	This file contains various 'str$' functions equivalent
- *	to those available in Vax/VMS string library.
+ *  This file contains various 'str$' functions equivalent
+ *  to those available in Vax/VMS string library.
  *
  * Bugs:
  *
- *	Not compatible at the binary level.
+ *  Not compatible at the binary level.
  *
- *	No seperate "string zone" to allocate memory from,
- *	uses malloc/free instead.
+ *  No seperate "string zone" to allocate memory from,
+ *  uses malloc/free instead.
  *
- *	Some versions of realloc are broken! Some don't like to be
- *	called hundreds of times.  The program may
- *	crash with a segmentation fault in such a case.
+ *  Some versions of realloc are broken! Some don't like to be
+ *  called hundreds of times.  The program may
+ *  crash with a segmentation fault in such a case.
  *
- *	I probibly should be using dsc$descriptor instead of
- *	dsc$descriptor_s, but I prefer to have the type 'char*'
- *	instead of 'void*' which is the only difference.
+ *  I probibly should be using dsc$descriptor instead of
+ *  dsc$descriptor_s, but I prefer to have the type 'char*'
+ *  instead of 'void*' which is the only difference.
  *
- *	Not worrying about the dsc$b_dtype field yet. Assumes it
- *	will always be type DSC$K_DTYPE_T (character coded text).
- *	Type V should mean size is in bits, and P means size is in
- *	digits (4 bit nibbles).
+ *  Not worrying about the dsc$b_dtype field yet. Assumes it
+ *  will always be type DSC$K_DTYPE_T (character coded text).
+ *  Type V should mean size is in bits, and P means size is in
+ *  digits (4 bit nibbles).
  *
- *	Should we abort if input string c is not null?
+ *  Should we abort if input string c is not null?
  *
  * History
  *
  *
- *	Feb 23, 2004 - Andrew Allison
+ *  Feb 23, 2004 - Andrew Allison
  *              Wrote str$round code
  *
  */
@@ -81,39 +81,39 @@
 /*************************************************************
  * str$round
  *
- *	Either round or truncate a string to a desired number of digits
+ *  Either round or truncate a string to a desired number of digits
  *
  *
  *       Format
  *       places, flags, insign,inexp, indigits, outsign,outexp,outdigits
  *
- * 	Input
+ *  Input
  *
- *	Returns
- * 		STR$_NORMAL
- *		STR_TRU		Truncation
- *	Signal
- *		LIB$_INVARG	Invalid Argument
- *		STR$_FATINTERR  Internal Error
- * 		STR$_ILLSTRCLA	Illegal string Class
- *		STR$_INSVIRMEM	Insufficient virtual memory
- *		STR$_WRONUMARG	Wrong number of arguments
+ *  Returns
+ *      STR$_NORMAL
+ *      STR_TRU     Truncation
+ *  Signal
+ *      LIB$_INVARG Invalid Argument
+ *      STR$_FATINTERR  Internal Error
+ *      STR$_ILLSTRCLA  Illegal string Class
+ *      STR$_INSVIRMEM  Insufficient virtual memory
+ *      STR$_WRONUMARG  Wrong number of arguments
  */
-#define MAXSTR 		132000
-#define MAXUINT16	65536
+#define MAXSTR      132000
+#define MAXUINT16   65536
 
-unsigned long str$round (	const 		long *tdigits,
-                            const unsigned	long *rti,
-                            const unsigned	long *asign,
-                            const         	long *aexp,
-                            const struct 	dsc$descriptor_s *adigits,
-                            unsigned	long *csign,
+unsigned long str$round (   const       long *tdigits,
+                            const unsigned  long *rti,
+                            const unsigned  long *asign,
+                            const           long *aexp,
+                            const struct    dsc$descriptor_s *adigits,
+                            unsigned    long *csign,
                             long *cexp,
-                            struct 	dsc$descriptor_s *cdigits)
+                            struct  dsc$descriptor_s *cdigits)
 
 {
-    char	*s1_ptr, *one_ptr, *temp_ptr, rounding_char;
-    unsigned short	s1_len, one_len, new_length, temp_len;
+    char    *s1_ptr, *one_ptr, *temp_ptr, rounding_char;
+    unsigned short  s1_len, one_len, new_length, temp_len;
     unsigned long status;
     struct dsc$descriptor_s one, temp_sd;
 
@@ -129,16 +129,16 @@ unsigned long str$round (	const 		long *tdigits,
     if ( ( *rti != 0 ) && ( *rti != 1) )
         return LIB$_INVARG;
 
-//	Create a descriptor with the string value of 1 so we can round up
+//  Create a descriptor with the string value of 1 so we can round up
     str$$malloc_sd (&one,"1");
     str$analyze_sdesc (&one, &one_len, &one_ptr);
 
-// 	Get the length of the input string
+//  Get the length of the input string
     str$analyze_sdesc (adigits, &s1_len, &s1_ptr);
-//	Is there even enough digits to do a rounding or truncation
+//  Is there even enough digits to do a rounding or truncation
     if ( s1_len <= *tdigits )
     {
-        str$copy_dx (cdigits, adigits);	// Nope just copy to output
+        str$copy_dx (cdigits, adigits); // Nope just copy to output
     }
     else
     {
@@ -146,7 +146,7 @@ unsigned long str$round (	const 		long *tdigits,
         {
             str$analyze_sdesc (adigits,&temp_len,&temp_ptr);
 
-// 			correct the multiplier we are changing the string length
+//          correct the multiplier we are changing the string length
             if ( (*cexp) <= 0 )
             {
                 (*cexp) += temp_len - *tdigits;
@@ -157,21 +157,21 @@ unsigned long str$round (	const 		long *tdigits,
             }
 
             rounding_char = temp_ptr[*tdigits];
-            str$get1_dx ( &s1_len, cdigits );	//make same size
-            str$copy_dx ( cdigits, adigits);	// copy
-            str$get1_dx ( &new_length, cdigits );	// resize
+            str$get1_dx ( &s1_len, cdigits );   //make same size
+            str$copy_dx ( cdigits, adigits);    // copy
+            str$get1_dx ( &new_length, cdigits );   // resize
             str$$malloc_sd (&temp_sd, s1_ptr);
             str$copy_dx (&temp_sd, cdigits);
             str$analyze_sdesc (&temp_sd,&temp_len,&temp_ptr);
 
             if ( rounding_char >= '5' )
             {
-                str$add	(asign, aexp, &temp_sd,	// round up
+                str$add (asign, aexp, &temp_sd, // round up
                          asign, aexp, &one,
                          csign, cexp, cdigits );
             }
         }
-        else		// Just truncate
+        else        // Just truncate
         {
             str$copy_dx ( cdigits,  adigits);
             str$get1_dx ( &new_length, cdigits );

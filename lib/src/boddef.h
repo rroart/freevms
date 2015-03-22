@@ -1,5 +1,5 @@
-#ifndef boddef_h
-#define boddef_h
+#ifndef BODDEF_H
+#define BODDEF_H
 
 #define BOD$M_DELPEN    0x1
 #define BOD$M_NOQUOTA   0x2

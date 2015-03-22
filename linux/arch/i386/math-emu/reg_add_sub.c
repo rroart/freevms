@@ -62,7 +62,7 @@ valid_add:
             if (!diff)
             {
                 diff = a->sigh - b->sigh;  /* This works only if the ms bits
-					    are identical. */
+                        are identical. */
                 if (!diff)
                 {
                     diff = a->sigl > b->sigl;

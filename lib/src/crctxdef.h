@@ -1,5 +1,5 @@
-#ifndef crctxdef_h
-#define crctxdef_h
+#ifndef CRCTXDEF_H
+#define CRCTXDEF_H
 
 #define CRCTX$M_HIGH_PRIO 0x1
 #define CRCTX$M_ITEM_VALID 0x2
@@ -53,8 +53,8 @@ struct _crctx
     int crctx$l_item_num;
     int crctx$l_up_bound;
     int crctx$l_low_bound;
-    int (*crctx$l_callback)();
-    int (*crctx$l_saved_callback)();
+    int (*crctx$l_callback)(void);
+    int (*crctx$l_saved_callback)(void);
     void *crctx$l_aux_context;
     int crctx$l_reserved1;
     int crctx$l_dma_adr;

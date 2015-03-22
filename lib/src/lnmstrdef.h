@@ -1,5 +1,5 @@
-#ifndef lnmstrdef_h
-#define lnmstrdef_h
+#ifndef LNMSTRDEF_H
+#define LNMSTRDEF_H
 
 /* Author: Roar Thronæs */
 

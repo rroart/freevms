@@ -35,9 +35,9 @@
  */
 
 #include <linux/errno.h>
-#include <linux/fs.h>			/* for BLKRASET, ... */
-#include <linux/sched.h>		/* for capable() */
-#include <linux/blk.h>			/* for set_device_ro() */
+#include <linux/fs.h>           /* for BLKRASET, ... */
+#include <linux/sched.h>        /* for capable() */
+#include <linux/blk.h>          /* for set_device_ro() */
 #include <linux/blkpg.h>
 #include <linux/genhd.h>
 #include <linux/module.h>               /* for EXPORT_SYMBOL */

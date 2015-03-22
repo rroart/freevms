@@ -107,31 +107,31 @@ static inline void scs_rt_finish_output2(char *buf, int len, char *dst);
 
 struct  scs_interface_structure
 {
-    void *     sei$dev_config		;
-    unsigned long     sei$io_chan			;
-    unsigned long     sei$arp_io_chan		;
-    void *     sei$rcvhdrs			;
-    void *     sei$recv_qhead		;
-    void *     sei$recv_qtail		;
-    void *     sei$arp_buffer		;
-    void *     sei$arp_block		;
-    unsigned short     sei$phy_size		;
-    unsigned char     sei$phy_addr		[6];
-    unsigned long     sei$restart_time		;
-    unsigned short     sei$restart_count		;
-    unsigned short     sei$retry_count		;
-    unsigned short     sei$max_retry		;
-    unsigned short     sei$mpbs			;
-    unsigned short     sei$curhdr			;
+    void *     sei$dev_config       ;
+    unsigned long     sei$io_chan           ;
+    unsigned long     sei$arp_io_chan       ;
+    void *     sei$rcvhdrs          ;
+    void *     sei$recv_qhead       ;
+    void *     sei$recv_qtail       ;
+    void *     sei$arp_buffer       ;
+    void *     sei$arp_block        ;
+    unsigned short     sei$phy_size     ;
+    unsigned char     sei$phy_addr      [6];
+    unsigned long     sei$restart_time      ;
+    unsigned short     sei$restart_count        ;
+    unsigned short     sei$retry_count      ;
+    unsigned short     sei$max_retry        ;
+    unsigned short     sei$mpbs         ;
+    unsigned short     sei$curhdr           ;
     union
     {
-        unsigned short     sei$flags			;
+        unsigned short     sei$flags            ;
         struct
         {
-            unsigned 	sei$need_2_free	 : 1;	// XEshutdown buf free pending
-            unsigned 	sei$io_queued	 : 1;	// XE I/O has been started
-            unsigned 	sei$xe_decnet	 : 1;	// XE DECNET address seen
-            unsigned 	sei$xe_started	 : 1;// XE started at least once
+            unsigned    sei$need_2_free  : 1;   // XEshutdown buf free pending
+            unsigned    sei$io_queued    : 1;   // XE I/O has been started
+            unsigned    sei$xe_decnet    : 1;   // XE DECNET address seen
+            unsigned    sei$xe_started   : 1;// XE started at least once
         };
     };
 } scs_int_, * scs_int = &scs_int_;
@@ -157,7 +157,7 @@ static inline void scs_rt_finish_output2(char * buf , int len, char *dst)
 {
 
     struct XE_iosb_structure IOS_, * IOS = &IOS_;
-    int sts = exe$qiow(4,	scs_int->sei$io_chan,
+    int sts = exe$qiow(4,   scs_int->sei$io_chan,
                        IO$_WRITEVBLK,
                        IOS, 0, 0,
                        buf,
@@ -294,7 +294,7 @@ int scs_neigh_endnode_hello(struct sk_buff *skb)
         printk("scs received hello from node %s\n",&msg->nisca$t_nodename[1]);
         {
             signed long long time=-1000000000;
-            //	    $DESCRIPTOR(tensec,"0 00:00:10.00");
+            //      $DESCRIPTOR(tensec,"0 00:00:10.00");
             //exe$bintim(&tensec,&time);
             //time=-time;
             exe$setimr(0,&time,startconnect,0,0);
@@ -909,7 +909,7 @@ int scs_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt)
     func=nisca_dispatch[scs->scs$w_mtype];
     return func(skb,scs);
 #endif
-    //	nisca_snt_dg(skb,scs);
+    //  nisca_snt_dg(skb,scs);
     return NF_HOOK(PF_DECnet, NF_SCS_HELLO, skb, skb->dev, NULL, nisca_snt_dg);
 dump_it:
 out:
@@ -934,9 +934,9 @@ scs_startdev ( scs_int2 , setflag , setaddr)
 // This routine initializes the ethernet device to receive SCS packets.
 // Issue start command to the controller.
 // Accepts:
-//   XE_INT	EtherNet interface info block
-//   SETFLAG	TRUE if device physical address needs to be set
-//   SETADDR	If SETFLAG, then physical address to set
+//   XE_INT EtherNet interface info block
+//   SETFLAG    TRUE if device physical address needs to be set
+//   SETADDR    If SETFLAG, then physical address to set
 // Returns:
 //   0 (false) on failure, device not started
 //  -1 (true) on success, device ready, reads queued
@@ -1037,14 +1037,14 @@ struct scs_interface_structure * scs_int2;
 
 struct scs_rcv_qb_structure
 {
-    void *     scs_rcv$next		;
-    void *     scs_rcv$last		;
-    unsigned short int     scs_rcv$vms_code	;
-    unsigned short int     scs_rcv$tran_size	;
-    unsigned short     scs_rcv$cmd_status	;
-    unsigned char     scs_rcv$error_summary	;
-    unsigned char     scs_rcv$iosb_unused2	;
-    unsigned char     scs_rcv$data		;
+    void *     scs_rcv$next     ;
+    void *     scs_rcv$last     ;
+    unsigned short int     scs_rcv$vms_code ;
+    unsigned short int     scs_rcv$tran_size    ;
+    unsigned short     scs_rcv$cmd_status   ;
+    unsigned char     scs_rcv$error_summary ;
+    unsigned char     scs_rcv$iosb_unused2  ;
+    unsigned char     scs_rcv$data      ;
 };
 
 void scs_receive ( int i);
@@ -1105,7 +1105,7 @@ void scs_receive ( int i)
 
     if ((RC = Rbuf->scs_rcv$vms_code) != SS$_NORMAL)
     {
-        //	Error_Flag = 1;
+        //  Error_Flag = 1;
         switch (Rbuf->scs_rcv$vms_code)
         {
         case SS$_ABORT:
@@ -1274,7 +1274,7 @@ int scs_rcv2(char * bufh, char * buf)
     func=nisca_dispatch[scs->scs$w_mtype];
     return func(skb,scs);
 #endif
-    //	nisca_snt_dg(skb,scs);
+    //  nisca_snt_dg(skb,scs);
     return NF_HOOK(PF_DECnet, NF_SCS_HELLO, buf, 0, NULL, nisca_snt_dg);
 dump_it:
 out:

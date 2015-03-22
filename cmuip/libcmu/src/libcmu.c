@@ -23,129 +23,129 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  *
- * Facility:	LIBCMU
+ * Facility:    LIBCMU
  *
- * Abstract:	Socket interface routines for CMU-OpenVMS/IP v6.6
+ * Abstract:    Socket interface routines for CMU-OpenVMS/IP v6.6
  *
  * Module Description:
- *	This collection of routines provides the standard `C' programming
+ *  This collection of routines provides the standard `C' programming
  * interface CMU-OpenVMS/IP network transport.
  *
  * Routine provided:
- *	int socket(int domain, int type, int protocol)
- *	int bind(int s, struct sockaddr *name, int namelen)
- *	int connect(int s, struct sockaddr *name, int namelen)
- *	int listen (int s, int backlog)
- *	int accept(int s, struct sockaddr *addr, int *addrlen)
- *	int recv(int s, char *buf, int len, int flags)
- *	int recvfrom(int s, char *buf, int len, int flags,
- *			struct sockaddr *from, int *fromlen)
- *	int send(int s, char *msg, int len, int flags)
- *	int sendto(int s, char *msg, int len, int flags,
- *			struct sockaddr *to, int tolen)
- *	int shutdown(int s, int how)
+ *  int socket(int domain, int type, int protocol)
+ *  int bind(int s, struct sockaddr *name, int namelen)
+ *  int connect(int s, struct sockaddr *name, int namelen)
+ *  int listen (int s, int backlog)
+ *  int accept(int s, struct sockaddr *addr, int *addrlen)
+ *  int recv(int s, char *buf, int len, int flags)
+ *  int recvfrom(int s, char *buf, int len, int flags,
+ *          struct sockaddr *from, int *fromlen)
+ *  int send(int s, char *msg, int len, int flags)
+ *  int sendto(int s, char *msg, int len, int flags,
+ *          struct sockaddr *to, int tolen)
+ *  int shutdown(int s, int how)
  *
- *	int select(int nfds, int *readfds, int *writefds, int *execptfds,
- *			struct timeval *timeout)
+ *  int select(int nfds, int *readfds, int *writefds, int *execptfds,
+ *          struct timeval *timeout)
  *
- *	int getsockname(int s, struct sockaddr *name, int *namelen)
- *	int getpeername(int s, struct sockaddr *name, int *namelen)
- *	int getsockopt(int s, int level, int optname,
- *			char *optval, int *optlen)
- *	int setsockopt(int s, int level, int optname,
- *			char *optval, int *optlen)
+ *  int getsockname(int s, struct sockaddr *name, int *namelen)
+ *  int getpeername(int s, struct sockaddr *name, int *namelen)
+ *  int getsockopt(int s, int level, int optname,
+ *          char *optval, int *optlen)
+ *  int setsockopt(int s, int level, int optname,
+ *          char *optval, int *optlen)
  *
- *	int gethostname(char *name, int namelen)
- *	struct servent *getservbyname(char *name, char *proto)
- *	struct servent *getservbyport(int port, char *proto)
- *	struct hostent *gethostbyname(char *name)
- *	struct hostent *gethostbyaddr(char *addr, int len, int type)
+ *  int gethostname(char *name, int namelen)
+ *  struct servent *getservbyname(char *name, char *proto)
+ *  struct servent *getservbyport(int port, char *proto)
+ *  struct hostent *gethostbyname(char *name)
+ *  struct hostent *gethostbyaddr(char *addr, int len, int type)
  *
- *	int ioctl(int s, int request, char *argp)
- *	int fcntl(int s, int request, int arg)
+ *  int ioctl(int s, int request, char *argp)
+ *  int fcntl(int s, int request, int arg)
  *
  * The following routines were named to prevent conflict with routine names
  * in the VAXCRTL:
- *	int cmu_read(int s, char *buf, int len)
- *	int cmu_write(int s, char *msg, int len, int flags)
- *	int cmu_close(int s)
+ *  int cmu_read(int s, char *buf, int len)
+ *  int cmu_write(int s, char *msg, int len, int flags)
+ *  int cmu_close(int s)
  *
  * The following routines may be called from outside this library:
- *	int *cmu_stdin_open(char *name)
- *	int cmu_stdin_read(flags,buf,len,prompt,mask)
- *	int cmu_get_sdc(int s)
- *	int cmu_trnlnm(char *table, char *name, char *mode, char *buff)
- *	int cmu_get_errno(NetIO_Status_Block *iosb)
+ *  int *cmu_stdin_open(char *name)
+ *  int cmu_stdin_read(flags,buf,len,prompt,mask)
+ *  int cmu_get_sdc(int s)
+ *  int cmu_trnlnm(char *table, char *name, char *mode, char *buff)
+ *  int cmu_get_errno(NetIO_Status_Block *iosb)
  *
  * The following routines should not be accessed outside this library:
- *	int cmu_listen_accept(int s)
- *	int cmu_queue_listen(int s)
- *	int cmu_read_ast(int s)
- *	int cmu_write_ast(int s)
- *	int cmu_queue_net_read(int s)
+ *  int cmu_listen_accept(int s)
+ *  int cmu_queue_listen(int s)
+ *  int cmu_read_ast(int s)
+ *  int cmu_write_ast(int s)
+ *  int cmu_queue_net_read(int s)
  *
  * Acknowledgements:
- *	Guidence, concepts, examples derived from the works of:
- *		UNIXSHR		- unknown
- *		NETLIB		- Matt Madison, RPI
+ *  Guidence, concepts, examples derived from the works of:
+ *      UNIXSHR     - unknown
+ *      NETLIB      - Matt Madison, RPI
  * Author:
- *	Mike O'Malley (mlo)				      September 1993
- *	Digital Equipment Corp.			Sandia National Laboratories
- *	Digital Consulting	   Scientific Computing Center, User Support
- *	Albuquerque, NM
- *      Mike.OMalley@aqo.mts.dec.com			  mlomall@sandia.GOV
+ *  Mike O'Malley (mlo)                   September 1993
+ *  Digital Equipment Corp.         Sandia National Laboratories
+ *  Digital Consulting     Scientific Computing Center, User Support
+ *  Albuquerque, NM
+ *      Mike.OMalley@aqo.mts.dec.com              mlomall@sandia.GOV
  *
  * With modifications by:
- *	 Chen He (che) (617)566-0001 Ext.2919
- *	 IDX Systems Corp.
- *	 he@chen.idx.com
+ *   Chen He (che) (617)566-0001 Ext.2919
+ *   IDX Systems Corp.
+ *   he@chen.idx.com
  *
  * THIS SOFTWARE IS SUBJECT TO CHANGE WITHOUT NOTICE.  THIS SOFTWARE SHOULD
  * NOT BE CONSTRUED AS SUPPORTED, OR A COMMITMENT OF SUPPORT, BY
  * DIGITAL EQUIPMENT CORPORATION.
  *
  * Modifications:
- *	14-MAR-1994 mlo 1.2
- *		Added getpeername routine.
- *		Modified all qio calls to use vaxc$errno for status; modified
- *		get_cmu_errno to return EVMSERR when the IOSB is zero; perror()
- *		will now print the vms specific error.
- *	14-MAR-1994 mlo 1.1.3
- *		Modified all qio calls that use cmu_read_ast to NOT use the
- *		event flag. Set the event flag in the cmu_read_ast routine.
- *		In cmu_read_ast make the socket invalid if a socket shutdown
- *		was detected.
- *		In select insure that all sockets are still valid.
- *		Modified exception conditions in cmu_read_ast routine.
- *	 8-FEB-1994 che 1.1.2
- *		Fixed accept function to return the remote host information.
- *	 4-FEB-1994 che 1.1.1
- *		Fixed problem in gethostbyaddr; it worked after called
- *		gethostbyname but would get access violation when it was
- *		called first time.
- *	18-JAN-1994 mlo 1.1.0
- *		Removed references to `sys/', `vnet/', `netinet/' from
- *		include files.
- *	18-JAN-1994 mlo 1.0.8
- *		Fixed serious problems in gethostbyaddr; never worked!
- *	10-DEC-1993 mlo 1.0.7
- *		In cmu_read_ast detect `socket close by peer' event.
- *	10-DEC-1993 mlo 1.0.6
- *		detect ENOCONN in connect.  Seems that the TCP$OPEN qio does
- *		not fail when the remote system is not reachable.
- *	28-NOV-1993 mlo 1.0.5
- *		in recvfrom don't check error status if socket is not ready to
- *		read.  Caused bad return status.
- *	 8-NOV-1993 mlo 1.0.4
- *		detect numeric address passed to gethostbyname
- *	18-OCT-1993 mlo 1.0.3
- *		corrected return from cmu_get_errno
- *	 7-OCT-1993 mlo 1.0.2
- *		add write and exception events to select.
- *	 6-OCT-1993 mlo 1.0.1
- *		add better error reporting via errno
- *	16-SEP-1993 mlo 1.0.0
- *		original
+ *  14-MAR-1994 mlo 1.2
+ *      Added getpeername routine.
+ *      Modified all qio calls to use vaxc$errno for status; modified
+ *      get_cmu_errno to return EVMSERR when the IOSB is zero; perror()
+ *      will now print the vms specific error.
+ *  14-MAR-1994 mlo 1.1.3
+ *      Modified all qio calls that use cmu_read_ast to NOT use the
+ *      event flag. Set the event flag in the cmu_read_ast routine.
+ *      In cmu_read_ast make the socket invalid if a socket shutdown
+ *      was detected.
+ *      In select insure that all sockets are still valid.
+ *      Modified exception conditions in cmu_read_ast routine.
+ *   8-FEB-1994 che 1.1.2
+ *      Fixed accept function to return the remote host information.
+ *   4-FEB-1994 che 1.1.1
+ *      Fixed problem in gethostbyaddr; it worked after called
+ *      gethostbyname but would get access violation when it was
+ *      called first time.
+ *  18-JAN-1994 mlo 1.1.0
+ *      Removed references to `sys/', `vnet/', `netinet/' from
+ *      include files.
+ *  18-JAN-1994 mlo 1.0.8
+ *      Fixed serious problems in gethostbyaddr; never worked!
+ *  10-DEC-1993 mlo 1.0.7
+ *      In cmu_read_ast detect `socket close by peer' event.
+ *  10-DEC-1993 mlo 1.0.6
+ *      detect ENOCONN in connect.  Seems that the TCP$OPEN qio does
+ *      not fail when the remote system is not reachable.
+ *  28-NOV-1993 mlo 1.0.5
+ *      in recvfrom don't check error status if socket is not ready to
+ *      read.  Caused bad return status.
+ *   8-NOV-1993 mlo 1.0.4
+ *      detect numeric address passed to gethostbyname
+ *  18-OCT-1993 mlo 1.0.3
+ *      corrected return from cmu_get_errno
+ *   7-OCT-1993 mlo 1.0.2
+ *      add write and exception events to select.
+ *   6-OCT-1993 mlo 1.0.1
+ *      add better error reporting via errno
+ *  16-SEP-1993 mlo 1.0.0
+ *      original
  */
 #ifdef VAXC
 #module LIBCMU "v1.2"
@@ -367,10 +367,10 @@ static struct ITEM_LIST syinfo[2] =
 /*
  * File descriptor mask to keep track of i/o events.
  */
-static fd_set sys_validfds;	/* is sd valid		*/
-static fd_set sys_readfds;	/* is sd ready to read	*/
-static fd_set sys_writefds;	/* is sd ready to write */
-static fd_set sys_exceptfds;	/* does sd have an error*/
+static fd_set sys_validfds; /* is sd valid      */
+static fd_set sys_readfds;  /* is sd ready to read  */
+static fd_set sys_writefds; /* is sd ready to write */
+static fd_set sys_exceptfds;    /* does sd have an error*/
 
 /*
  * Accept event flag so we know when a request comes in
@@ -389,12 +389,12 @@ static int accept_net_event = 16; // check
  * int socket(int domain, int type, int protocol)
  *
  * Description:
- *	Creates an endpoint of a connection.
+ *  Creates an endpoint of a connection.
  *
  * domain   - AF_INET is the only address domain supported at this time.
  * type     - SOCK_STREAM or SOCK_DGRAM
  * protocol - IPPROTO_TCP, IPPROTO_UDP.  If IPPROTO_IP (default) is specified
- *	      protocol will be chosen that matches `type'.
+ *        protocol will be chosen that matches `type'.
  *
  * Returns:
  *  If successful a socket number is returned, otherwise, a -1 is returned and
@@ -408,7 +408,7 @@ asmlinkage int sys_socket(domain,type,protocol)
 int domain,type,protocol;
 {
 
-    int	s;
+    int s;
 
     /*
      * Verify the address family (domain)
@@ -456,8 +456,8 @@ int domain,type,protocol;
     struct FD_ENTRY *sd[FD_SETSIZE];
 #endif
     sd[s] = calloc( 1, sizeof(struct FD_ENTRY));
-    sd[s]->domain	= domain;
-    sd[s]->type		= type;
+    sd[s]->domain   = domain;
+    sd[s]->type     = type;
 #ifdef  __KERNEL__
     struct vms_fd * vms_fd = kmalloc(sizeof(struct vms_fd), GFP_KERNEL);
     vms_fd->vfd$l_is_cmu = 1;
@@ -472,11 +472,11 @@ int domain,type,protocol;
         switch(type)
         {
         case SOCK_STREAM :
-            sd[s]->protocol	= IPPROTO_TCP;
+            sd[s]->protocol = IPPROTO_TCP;
             break;
         case SOCK_DGRAM :
         default:
-            sd[s]->protocol	= IPPROTO_UDP;
+            sd[s]->protocol = IPPROTO_UDP;
         }
     }
     else
@@ -544,15 +544,15 @@ int domain,type,protocol;
  * int bind(int s, struct sockaddr *name, int namelen)
  *
  * Description:
- *	binds a name (address/port) to a socket.  Socket (s) must have been
+ *  binds a name (address/port) to a socket.  Socket (s) must have been
  * created with call to socket.
  *
  * s       - valid socket descriptor
- * name	   - address of sockaddr structure for local host port information
+ * name    - address of sockaddr structure for local host port information
  * namelen - length of the name structure in bytes
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 #ifndef __KERNEL__
@@ -560,13 +560,13 @@ int bind(s,name,namelen)
 #else
 asmlinkage int sys_bind(s,name,namelen)
 #endif
-int			s;	/* socket to bind to	*/
-struct sockaddr		*name;	/* name stuff		*/
-int			namelen;/* length of name stuff	*/
+int         s;  /* socket to bind to    */
+struct sockaddr     *name;  /* name stuff       */
+int         namelen;/* length of name stuff */
 {
-    int	status;
-    int	protocol;
-    struct	sockaddr_in *my = name;
+    int status;
+    int protocol;
+    struct  sockaddr_in *my = name;
 
     /*
      * Verify the address family (domain)
@@ -675,14 +675,14 @@ int			namelen;/* length of name stuff	*/
  * int connect(int s, struct sockaddr *name, int namelen)
  *
  * Description:
- *	initiates a connection on a socket.
+ *  initiates a connection on a socket.
  *
  * s       - valid socket descriptor
- * name	   - pointer to an address structure for the remote port
+ * name    - pointer to an address structure for the remote port
  * namelen - length of the name structure in bytes
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 #ifndef __KERNEL__
@@ -694,9 +694,9 @@ int s;
 struct sockaddr *name;
 int namelen;
 {
-    int	status;
-    int	to_addr, to_port, my_port;
-    struct	sockaddr_in *p;
+    int status;
+    int to_addr, to_port, my_port;
+    struct  sockaddr_in *p;
     /*
      * Verify the address family (domain) we are to connect to.
      */
@@ -761,9 +761,9 @@ int namelen;
     if (sd[s]->protocol == IPPROTO_TCP)
         vaxc$errno = sys$qiow( 0, sd[s]->chan,
                                TCP$OPEN, &sd[s]->read_iosb, 0, 0,
-                               &to_addr,		/* host to connect to */
-                               to_port,		/* remote port	      */
-                               my_port,		/* local port         */
+                               &to_addr,        /* host to connect to */
+                               to_port,     /* remote port        */
+                               my_port,     /* local port         */
                                (MODE_TCP_SendSYN | MODE_OpenWait | MODE_Addr32bit),
                                U$TCP_Protocol,
                                0);
@@ -828,14 +828,14 @@ int namelen;
  * int listen (int s, int backlog)
  *
  * Description:
- *	Sets the maximum limit of outstanding connection requests for a socket
+ *  Sets the maximum limit of outstanding connection requests for a socket
  * that is connection-oriented.
  *
- * s	   - a valid socket descriptor of type SOCK_STREAM
+ * s       - a valid socket descriptor of type SOCK_STREAM
  * backlog - maximum number of pending connections that may be queued
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 #ifndef __KERNEL__
@@ -876,7 +876,7 @@ int backlog;
     }
 
     sd[s]->backlog = backlog;
-    sd[s]->sock_opts |= SO_ACCEPTCONN;	/* socket has had listen() */
+    sd[s]->sock_opts |= SO_ACCEPTCONN;  /* socket has had listen() */
 
     /*
      * Allocate an event flag used to signal a blocked accept call
@@ -908,15 +908,15 @@ int backlog;
  * int accept(int s, struct sockaddr *addr, int *addrlen)
  *
  * Description:
- *	Accepts a connection on a socket.
+ *  Accepts a connection on a socket.
  *
- * s	   - valid socket that is listening
- * addr	   - sockaddr address structure filled with information from the accepted
+ * s       - valid socket that is listening
+ * addr    - sockaddr address structure filled with information from the accepted
  *           connection
  * addrlen - length of returned address structure
  *
  * Returns:
- *	Nonnegative integer that is the descriptor for the accepted socket or
+ *  Nonnegative integer that is the descriptor for the accepted socket or
  * -1 on error.  Addition error information is specified in the global
  * variable errno.
  */
@@ -925,12 +925,12 @@ int accept( s, addr, addrlen)
 #else
 asmlinkage int sys_accept( s, addr, addrlen)
 #endif
-int	s;
-struct	sockaddr *addr;
-int	*addrlen;
+int s;
+struct  sockaddr *addr;
+int *addrlen;
 {
-    int	ns, status;
-    struct	backlogEntry *entry;
+    int ns, status;
+    struct  backlogEntry *entry;
 
     /*
      * check for valid socket
@@ -1043,22 +1043,22 @@ CHECK_QUEUE:
  * #include <socket.h>
  *
  * int recvfrom(int s, char *buf, int len, int flags,
- *			struct sockaddr *from, int *fromlen)
+ *          struct sockaddr *from, int *fromlen)
  *
  * Description:
- *	receives bytes from a socket from any source.
+ *  receives bytes from a socket from any source.
  *
- * s	 - a valid socket descriptor
- * buf	 - address of buffer to where input data is placed
- * len	 - max size of buf
+ * s     - a valid socket descriptor
+ * buf   - address of buffer to where input data is placed
+ * len   - max size of buf
  * flags - 0 or MSG_PEEK may be specified.
- * from	 - address of sockaddr structure address of the socket which the data
+ * from  - address of sockaddr structure address of the socket which the data
  *         is received from.  May be specified as 0; no information will be
  *         returned.
  * fromlen - length of from structure returned.
  *
  * Returns:
- *	Number of bytes read from the socket, -1 on error.  Addition error
+ *  Number of bytes read from the socket, -1 on error.  Addition error
  * information is specified in the global variable errno.
  */
 #ifndef __KERNEL__
@@ -1067,8 +1067,8 @@ int recvfrom(int s, char *buf, int len, int flags, struct sockaddr *from, int *f
 asmlinkage int sys_recvfrom(int s, char *buf, int len, int flags, struct sockaddr *from, int *fromlen)
 #endif
 {
-    int	size, offset;
-    struct	sockaddr_in *frm;
+    int size, offset;
+    struct  sockaddr_in *frm;
 
     /*
      * check for valid socket
@@ -1200,15 +1200,15 @@ CHECKforDATA:
  * int recv(int s, char *buf, int len, int flags)
  *
  * Description:
- *	Receive bytes from a connected socket.
+ *  Receive bytes from a connected socket.
  *
- * s	 - a valid socket descriptor
- * buf	 - address of buffer to where input data is placed
- * len	 - max size of buf
+ * s     - a valid socket descriptor
+ * buf   - address of buffer to where input data is placed
+ * len   - max size of buf
  * flags - 0 or MSG_PEEK may be specified.
  *
  * Returns:
- *	Number of bytes read from the socket, -1 on error.  Addition error
+ *  Number of bytes read from the socket, -1 on error.  Addition error
  * information is specified in the global variable errno.
  */
 #ifndef __KERNEL__
@@ -1260,21 +1260,21 @@ asmlinkage int sys_recv(int s, char *buf, int len, int flags)
  * #include <socket.h>
  *
  * int sendto(int s, char *msg, int len, int flags,
- *			struct sockaddr *to, int tolen)
+ *          struct sockaddr *to, int tolen)
  *
  * Description:
- *	Send bytes through a socket to any other socket.
+ *  Send bytes through a socket to any other socket.
  *
- * s	 - a valid socket descriptor
- * buf	 - address of buffer of data to be sent
- * len	 - size of buf
+ * s     - a valid socket descriptor
+ * buf   - address of buffer of data to be sent
+ * len   - size of buf
  * flags - none supported.
- * to	 - address of sockaddr structure which contains the address of the
-	   socket which the data is to be written.
+ * to    - address of sockaddr structure which contains the address of the
+       socket which the data is to be written.
  * tolen - length of from structure returned.
  *
  * Returns:
- *	Number of bytes written to the socket, -1 on error.  Addition error
+ *  Number of bytes written to the socket, -1 on error.  Addition error
  * information is specified in the global variable errno.
  */
 #ifndef __KERNEL__
@@ -1283,7 +1283,7 @@ int sendto(int s, char *msg, int len, int flags, struct sockaddr *to, int tolen)
 asmlinkage int sys_sendto(int s, char *msg, int len, int flags, struct sockaddr *to, int tolen)
 #endif
 {
-    struct	sockaddr_in *too;
+    struct  sockaddr_in *too;
     IPADR$ADDRESS_BLOCK UDP_ADDR;
 #ifndef __KERNEL__
     static int write_ef = 0;
@@ -1331,7 +1331,7 @@ asmlinkage int sys_sendto(int s, char *msg, int len, int flags, struct sockaddr 
     {
         vaxc$errno = sys$qiow( 0, sd[s]->chan, TCP$OPEN, &sd[s]->read_iosb, 0, 0,
                                0, 0,
-                               0,	/* my port -- not specified */
+                               0,   /* my port -- not specified */
                                (MODE_UDP_A_struct | MODE_OpenNoWait),
                                U$UDP_Protocol, 0);
 
@@ -1401,21 +1401,21 @@ asmlinkage int sys_sendto(int s, char *msg, int len, int flags, struct sockaddr 
     if (sd[s]->protocol == IPPROTO_UDP)
         vaxc$errno = sys$qio( write_ef, sd[s]->chan, TCP$SEND, &sd[s]->write_iosb,
                               cmu_write_ast, s,
-                              msg,	/* message buffer address */
-                              len,	/* message length */
-                              0,	/* unused */
-                              1,	/* set EXACT */
-                              4,	/* size of IP header buffer */
-                              &UDP_ADDR);	/* IP header address */
+                              msg,  /* message buffer address */
+                              len,  /* message length */
+                              0,    /* unused */
+                              1,    /* set EXACT */
+                              4,    /* size of IP header buffer */
+                              &UDP_ADDR);   /* IP header address */
     else
         vaxc$errno = sys$qio( write_ef, sd[s]->chan, TCP$SEND, &sd[s]->write_iosb,
                               cmu_write_ast, s,
-                              msg,	/* message buffer address */
-                              len,	/* message length*/
-                              0,	/* unused */
-                              0,	/* send EOL */
-                              0,	/* urgent flag (not yet implemented) */
-                              0);	/* unused in TCP */
+                              msg,  /* message buffer address */
+                              len,  /* message length*/
+                              0,    /* unused */
+                              0,    /* send EOL */
+                              0,    /* urgent flag (not yet implemented) */
+                              0);   /* unused in TCP */
 
     if (vaxc$errno == SS$_NORMAL)
         return (len);
@@ -1440,15 +1440,15 @@ asmlinkage int sys_sendto(int s, char *msg, int len, int flags, struct sockaddr 
  * int send(int s, char *msg, int len, int flags)
  *
  * Description:
- *	Send bytes through a socket to its connected peer.
+ *  Send bytes through a socket to its connected peer.
  *
- * s	 - a valid socket descriptor
- * buf	 - address of buffer of data to be sent
- * len	 - size of buf
+ * s     - a valid socket descriptor
+ * buf   - address of buffer of data to be sent
+ * len   - size of buf
  * flags - 0 or MSG_PEEK may be specified.
  *
  * Returns:
- *	Number of bytes written to the socket, -1 on error.  Addition error
+ *  Number of bytes written to the socket, -1 on error.  Addition error
  * information is specified in the global variable errno.
  */
 #ifndef __KERNEL__
@@ -1501,16 +1501,16 @@ asmlinkage int sys_send(int s, char *msg, int len, int flags)
  * int shutdown(int s, int how)
  *
  * Description:
- *	Shuts down all or part of a connection on a socket.
+ *  Shuts down all or part of a connection on a socket.
  *
  * s - a valid socket
  * how - one of:
- *	0 - no more receives
- *	1 - no more sends
- *	2 - no more receives or sends
+ *  0 - no more receives
+ *  1 - no more sends
+ *  2 - no more receives or sends
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 #ifndef __KERNEL__
@@ -1577,29 +1577,29 @@ int s, how;
  * #include <socket.h>
  *
  * int select(int nfds, int *readfds, int *writefds, int *execptfds,
- *		struct timeval *timeout)
+ *      struct timeval *timeout)
  *
  * Description:
- *	Allows the user to poll or check a group of sockets for I/O activity.
+ *  Allows the user to poll or check a group of sockets for I/O activity.
  * It can check what sockets are ready to be read or written, or what sockets
  * have a pending exception.
  *
  * Notes:
- *	This routine (and library) only handles 32 file descriptors max (0-31).
+ *  This routine (and library) only handles 32 file descriptors max (0-31).
  * The `fd_set' type is long int.  To select on file descriptor 0 (stdin) the
  * routine cmu_stdin_open must be used to setup the file descriptor.  See
  * routines cmu_stdin_open and cmu_stdin_read for further information.
  *
- * nfds		- maximum file descriptor +1 to scan
- * readfds	- address of descriptor bit mask to scan for read events
- * writefds	- address of descriptor bit mask to scan for write events
- * exceptfds	- address of descriptor bit mask to scan for exception events
- * timeout	- specifies how long to wait for a read, write, or exception
- *		  event.  If timeout argument is NULL select will block until
- *		  one of the specified descriptors is ready.
+ * nfds     - maximum file descriptor +1 to scan
+ * readfds  - address of descriptor bit mask to scan for read events
+ * writefds - address of descriptor bit mask to scan for write events
+ * exceptfds    - address of descriptor bit mask to scan for exception events
+ * timeout  - specifies how long to wait for a read, write, or exception
+ *        event.  If timeout argument is NULL select will block until
+ *        one of the specified descriptors is ready.
  *
  * Returns:
- *	Number of socket descriptors ready for I/O or that have exceptions,
+ *  Number of socket descriptors ready for I/O or that have exceptions,
  * 0 if the operation timed out, -1 on error.  Addition error information is
  * specified in the global variable errno.
  */
@@ -1608,21 +1608,21 @@ int select(nfds,readfds,writefds,exceptfds,timeout)
 #else
 asmlinkage int sys_select_cmu(nfds,readfds,writefds,exceptfds,timeout)
 #endif
-int	nfds;
-int	*readfds, *writefds, *exceptfds;
-struct	timeval *timeout;
+int nfds;
+int *readfds, *writefds, *exceptfds;
+struct  timeval *timeout;
 {
-    int	i;
-    int	maxfds, maxfds_mask, ready_fds, all_fds;
-    int	readyfds;
+    int i;
+    int maxfds, maxfds_mask, ready_fds, all_fds;
+    int readyfds;
 
-    int	block, timer_ef, t[2];
-    char	at[20];
-    struct	tm *lt;
+    int block, timer_ef, t[2];
+    char    at[20];
+    struct  tm *lt;
     struct dsc$descriptor ascii_time =
         {20, DSC$K_DTYPE_T, DSC$K_CLASS_S, at };
 
-    int	ef_mask;
+    int ef_mask;
 #ifdef __KERNEL__
     int errno;
 #endif
@@ -1834,14 +1834,14 @@ EXIT:
  * int getsockname(int s, struct sockaddr *name, int *namelen)
  *
  * Description:
- *	Returns the name associated with a socket
+ *  Returns the name associated with a socket
  *
- * s	   - a valid socket descriptor
- * name	   - sockaddr address structure where data is to be written
+ * s       - a valid socket descriptor
+ * name    - sockaddr address structure where data is to be written
  * namelen - number of bytes written to name
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 #ifndef __KERNEL__
@@ -1849,11 +1849,11 @@ int getsockname(s,name,namelen)
 #else
 asmlinkage int sys_getsockname(s,name,namelen)
 #endif
-int	s;
-struct	sockaddr *name;
-int	*namelen;
+int s;
+struct  sockaddr *name;
+int *namelen;
 {
-    int	size;
+    int size;
 
     /*
      * check for valid socket
@@ -1888,14 +1888,14 @@ int	*namelen;
  * int getpeername(int s, struct sockaddr *name, int *namelen)
  *
  * Description:
- *	Returns the name associated with a socket
+ *  Returns the name associated with a socket
  *
- * s	   - a valid socket descriptor
- * name	   - sockaddr address structure where data is to be written
+ * s       - a valid socket descriptor
+ * name    - sockaddr address structure where data is to be written
  * namelen - number of bytes written to name
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 #ifndef __KERNEL__
@@ -1903,11 +1903,11 @@ int getpeername(s,name,namelen)
 #else
 asmlinkage int sys_getpeername(s,name,namelen)
 #endif
-int	s;
-struct	sockaddr *name;
-int	*namelen;
+int s;
+struct  sockaddr *name;
+int *namelen;
 {
-    int	conInfoSize;
+    int conInfoSize;
     struct sockaddr_in *from;
     NetIO_Status_Block iosb;
     Connection_Info_Return_Block conInfo;
@@ -1948,8 +1948,8 @@ int	*namelen;
      */
     conInfoSize = sizeof(Connection_Info_Return_Block);
     vaxc$errno = sys$qiow( 0, sd[s]->chan, TCP$INFO, &iosb, 0, 0,
-                           &conInfo,		/* buffer		*/
-                           conInfoSize,		/* Size of said buffer  */
+                           &conInfo,        /* buffer       */
+                           conInfoSize,     /* Size of said buffer  */
                            0,0,0,0);
 
     /*
@@ -1971,9 +1971,9 @@ int	*namelen;
     /*
      * record the from port info in our priviate data structure
      */
-    from		= &sd[s]->from;
-    from->sin_family	= AF_INET;
-    from->sin_port	= htons(conInfo.CI$Foreign_Port);
+    from        = &sd[s]->from;
+    from->sin_family    = AF_INET;
+    from->sin_port  = htons(conInfo.CI$Foreign_Port);
     from->sin_addr.s_addr = conInfo.CI$remote_internet_adrs;
 
     /*
@@ -1996,17 +1996,17 @@ int	*namelen;
  * #include <socket.h>
  *
  * int getsockopt(int s, int level, int optname,
- *			char *optval, int *optlen)
+ *          char *optval, int *optlen)
  *
  * Description:
- *	Returns the options set on a socket.
+ *  Returns the options set on a socket.
  *
  * Note:
- *	This routine does nothing.  Always returns -1 with errno set to
+ *  This routine does nothing.  Always returns -1 with errno set to
  * ENOPROTOOPT.
  *
  * Returns: (if it did do something)
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 #ifndef __KERNEL__
@@ -2014,9 +2014,9 @@ int getsockopt(s,level,optname,optval,optlen)
 #else
 asmlinkage int sys_getsockopt(s,level,optname,optval,optlen)
 #endif
-int	s, level, optname;
-char	*optval;
-int	*optlen;
+int s, level, optname;
+char    *optval;
+int *optlen;
 {
     /*
      * check for valid socket
@@ -2052,17 +2052,17 @@ int	*optlen;
  * #include <socket.h>
  *
  * int setsockopt(int s, int level, int optname,
- *			char *optval, int *optlen)
+ *          char *optval, int *optlen)
  *
  * Description: (if it did do something)
- *	Set the options on a socket.
+ *  Set the options on a socket.
  *
  * Note:
- *	This routine does nothing.  Always returns -1 with errno set to
+ *  This routine does nothing.  Always returns -1 with errno set to
  * ENOPROTOOPT.
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 #ifndef __KERNEL__
@@ -2070,9 +2070,9 @@ int setsockopt(s,level,optname,optval,optlen)
 #else
 asmlinkage int sys_setsockopt(s,level,optname,optval,optlen)
 #endif
-int	s, level, optname;
-char	*optval;
-int	optlen;
+int s, level, optname;
+char    *optval;
+int optlen;
 {
     /*
      * check for valid socket
@@ -2108,18 +2108,18 @@ int	optlen;
  * int gethostname(char *name, int namelen)
  *
  * Description:
- *	Returns the name currently associated to the host.
+ *  Returns the name currently associated to the host.
  *
- * name	   - address of buffer to write name of host
+ * name    - address of buffer to write name of host
  * namelen - length of name buffer
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 int gethostname(name, namelen)
-char	*name;
-int	namelen;
+char    *name;
+int namelen;
 {
     return(cmu_trnlnm("LNM$SYSTEM","INTERNET_HOST_NAME","Super",name,namelen));
 }
@@ -2129,37 +2129,37 @@ int	namelen;
  * struct servent *getservbyname(char *name, char *proto);
  *
  * Description:
- *	returns a servent structure filled in with information about the
+ *  returns a servent structure filled in with information about the
  * requested service.
  *
  * name  - pointer to character string of service to search for
  * proto - pointer to character string of protocol type desired (tcp, udp)
  *
  * Notes:
- *	The usual services text file is not supported.  Instead, services are
+ *  The usual services text file is not supported.  Instead, services are
  * are logical names defined in the system logical name table.  Services
  * logical names are defined as follows:
  *
- *	$ DEFINE /SYSTEM INET$SERVICE_service_name_protocol value
+ *  $ DEFINE /SYSTEM INET$SERVICE_service_name_protocol value
  *
  * Example:
  *   To define the service telnet, protocol tcp, port 23 use the following
  * statement:
- *	$ DEFINE/SYSTEM INET$SERVICE_TELNET_TCP 23
+ *  $ DEFINE/SYSTEM INET$SERVICE_TELNET_TCP 23
  *
  * Returns:
- *	Returns the address of a servent structure on success, the NULL pointer
+ *  Returns the address of a servent structure on success, the NULL pointer
  * on error (see cmu_trnlnm).
  */
 
 static struct servent serv;
 
 struct servent *getservbyname(name, proto)
-char	*name;
-char	*proto;
+char    *name;
+char    *proto;
 {
-    char	logical[256];
-    char	port[16];
+    char    logical[256];
+    char    port[16];
 
 
     sprintf(logical,"INET$SERVICE_%s_%s",name,proto);
@@ -2180,34 +2180,34 @@ char	*proto;
  * struct servent *getservbyport(int port, char *proto);
  *
  * Description:
- *	returns a servent structure filled in with information about the
+ *  returns a servent structure filled in with information about the
  * requested port.
  *
  * port  - int value of port number to search for
  * proto - pointer to character string of protocol type desired (tcp, udp)
  *
  * Notes:
- *	The usual services text file is not supported.  Instead, services are
+ *  The usual services text file is not supported.  Instead, services are
  * are logical names defined in the system logical name table.  Services
  * logical names are defined as follows:
  *
- *	$ DEFINE /SYSTEM INET$SERVICE_port_number_protocol service
+ *  $ DEFINE /SYSTEM INET$SERVICE_port_number_protocol service
  *
  * Example:
  *   To define the service telnet, protocol tcp, port 23 use the following
  * statement:
- *	$ DEFINE/SYSTEM INET$SERVICE_23_TCP TELNET
+ *  $ DEFINE/SYSTEM INET$SERVICE_23_TCP TELNET
  *
  * Returns:
- *	Returns the address of a servent structure on success, the NULL pointer
+ *  Returns the address of a servent structure on success, the NULL pointer
  * on error (see cmu_trnlnm).
  */
 struct servent *getservbyport(port, proto)
-int	port;
-char	*proto;
+int port;
+char    *proto;
 {
-    char	logical[256];
-    char	name[32];
+    char    logical[256];
+    char    name[32];
 
     sprintf(logical,"INET$SERVICE_%d_%s",port,proto);
 
@@ -2228,24 +2228,24 @@ char	*proto;
  * struct hostent *gethostbyname(char *name)
  *
  * Description:
- *	returns the host address associated with the given name.
+ *  returns the host address associated with the given name.
  *
  * name - pointer to a character string that contains the host/domain name to
  *        search for.
  *
  * Return:
- *	Returns the address of a hostent structure on success, the NULL pointer
+ *  Returns the address of a hostent structure on success, the NULL pointer
  * on error.  Additional error information is returned in the global variable
  * errno.
  */
-static	struct hostent inet_host;
-static	GTHST_NMLOOK_BLOCK inet_list;
-static	int	*addrlist = inet_list.GHA$NL_ADRLST;
+static  struct hostent inet_host;
+static  GTHST_NMLOOK_BLOCK inet_list;
+static  int *addrlist = inet_list.GHA$NL_ADRLST;
 
 struct hostent *gethostbyname(name)
-char	*name;
+char    *name;
 {
-    int	chan;
+    int chan;
     NetIO_Status_Block iosb;
 
     /*
@@ -2288,7 +2288,7 @@ char	*name;
  * struct hostent *gethostbyaddr(char *addr, int len, int type)
  *
  * Description:
- *	Return official name of host given the host address.
+ *  Return official name of host given the host address.
  *
  * addr - a pointer to a series of bytes in network order specifying the
  *        address of the host to search for.
@@ -2296,18 +2296,18 @@ char	*name;
  * type - address format. Only AF_INET is supported.
  *
  * Return:
- *	Returns the address of a hostent structure on success, the NULL pointer
+ *  Returns the address of a hostent structure on success, the NULL pointer
  * on error.  Additional error information is returned in the global variable
  * errno.
  */
 static GTHST_ADLOOK_BLOCK inet_name;
 
 struct hostent *gethostbyaddr(addr,len,type)
-char	*addr;
-int	len, type;
+char    *addr;
+int len, type;
 {
-    int	chan;
-    int	laddr;
+    int chan;
+    int laddr;
     NetIO_Status_Block iosb;
 
     if (type != AF_INET)
@@ -2355,21 +2355,21 @@ int	len, type;
  * int ioctl(int s, int request, char *argp)
  *
  * Description:
- *	control device.
+ *  control device.
  *
  * s       - a valid socket descriptor
  * request - one of:
- *		FIOCLEX		- set exclusive use on socket
- *		FIONCLEX	- remove exclusive use
- *		FIONBIO		- set/clear non-blocking i/o
- *		FIONREAD	- get # bytes ready to be read
- *		SIOCGIFADDR	- get ifnet addres
- *		SIOCGIFFLAGS	- get ifnet flags
- *		SIOCGIFCONF	- get ifnet list
+ *      FIOCLEX     - set exclusive use on socket
+ *      FIONCLEX    - remove exclusive use
+ *      FIONBIO     - set/clear non-blocking i/o
+ *      FIONREAD    - get # bytes ready to be read
+ *      SIOCGIFADDR - get ifnet addres
+ *      SIOCGIFFLAGS    - get ifnet flags
+ *      SIOCGIFCONF - get ifnet list
  * argp    - address of buffer for return information
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 #ifndef __KERNEL__
@@ -2377,11 +2377,11 @@ int ioctl(s,request,argp)
 #else
 int cmu_ioctl(s,request,argp)
 #endif
-int	s;
-int	request;
-char	*argp;
+int s;
+int request;
+char    *argp;
 {
-    int	i;
+    int i;
 #define BUFR_SIZE 512
     char bufr[BUFR_SIZE];
 
@@ -2389,8 +2389,8 @@ char	*argp;
 
     struct DU$IF_List
     {
-        int	cnt;		/* number of if returned  */
-        int	index[10];	/* limit of 10 interfaces */
+        int cnt;        /* number of if returned  */
+        int index[10];  /* limit of 10 interfaces */
     } du_iflist;
 
     struct ifconf *ifc;
@@ -2435,14 +2435,14 @@ char	*argp;
     case 'f' :
         switch (request & 0x000000ff)
         {
-        case 1 :	/* FIOCLEX - set exclusive use on socket */
-        case 2 :	/* FIONCLEX - remove exclusive use	 */
+        case 1 :    /* FIOCLEX - set exclusive use on socket */
+        case 2 :    /* FIONCLEX - remove exclusive use   */
             sd[s]->ioctl_opts ^= FEXLOCK;
             break;
-        case 126 :	/* FIONBIO - set/clear non-blocking i/o  */
+        case 126 :  /* FIONBIO - set/clear non-blocking i/o  */
             sd[s]->ioctl_opts ^= O_NDELAY;
             break;
-        case 127:	/* FIONREAD - get # bytes ready to be read */
+        case 127:   /* FIONREAD - get # bytes ready to be read */
             n  = argp;
             /*
              * if the socket read blocked return an error
@@ -2566,16 +2566,16 @@ char	*argp;
  * int fcntl(int s, int request, int arg)
  *
  * Description:
- *	file control.
+ *  file control.
  *
  * s       - a valid socket descriptor
  * request - One of:
- *		F_GETFL - get file flags
- *		F_SETFL - set file flags
+ *      F_GETFL - get file flags
+ *      F_SETFL - set file flags
  * arg     - flags to set
  *
  * Returns:
- *	Value of flags or -1 on error.  Addition error information is
+ *  Value of flags or -1 on error.  Addition error information is
  * specified in the global variable errno.
  */
 #ifndef __KERNEL__
@@ -2627,7 +2627,7 @@ int s, request, arg;
  * int cmu_read(int s, char *buf, int len)
  *
  * Description:
- *	Receive bytes from a connected socket.
+ *  Receive bytes from a connected socket.
  *
  * To avoid conflict and link warnings regarding the `read' routine
  * in the standard VAXCRTL this routine name is `cmu_read'.
@@ -2638,13 +2638,13 @@ int s, request, arg;
  * len - max size of buf
  *
  * Returns:
- *	Number of bytes read from the socket, -1 on error.  Addition error
+ *  Number of bytes read from the socket, -1 on error.  Addition error
  * information is specified in the global variable errno.
  */
 int cmu_read(s,buf,len)
-int	s;
-char	*buf;
-int	len;
+int s;
+char    *buf;
+int len;
 {
     /*
      * check for valid socket
@@ -2691,20 +2691,20 @@ int	len;
  * int cmu_write(int s, char *msg, int len, int flags)
  *
  * Description:
- *	Send bytes through a socket to its connected peer.
+ *  Send bytes through a socket to its connected peer.
  *
  * s   - a valid socket descriptor
  * buf - address of buffer of data to be sent
  * len - size of buf
  *
  * Returns:
- *	Number of bytes written to the socket, -1 on error.  Addition error
+ *  Number of bytes written to the socket, -1 on error.  Addition error
  * information is specified in the global variable errno.
  */
 int cmu_write(s,msg,len)
-int	s;
-char	*msg;
-int	len;
+int s;
+char    *msg;
+int len;
 {
     /*
      * check for valid socket
@@ -2748,7 +2748,7 @@ int	len;
  * int cmu_close(int s)
  *
  * Description:
- *	Closes a connection and deletes a socket descriptor.
+ *  Closes a connection and deletes a socket descriptor.
  *
  * To avoid confusion and link warnings regarding the `close' routine
  * for other file descriptors this routine name is `cmu_close'.
@@ -2760,13 +2760,13 @@ int	len;
  * s - an open socket descriptor
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 int cmu_close(s)
-int	s;
+int s;
 {
-    struct	backlogEntry *entry;
+    struct  backlogEntry *entry;
 
     /*
      * if this is not one of our channels then pass it on to the systems
@@ -2844,7 +2844,7 @@ int	s;
     cfree(sd[s]);
     sd[s] = 0;
 #ifndef __KERNEL__
-    close(s);	/* this should free up the duped file descriptor */
+    close(s);   /* this should free up the duped file descriptor */
 #else
     sys_close(s);
 #endif
@@ -2857,7 +2857,7 @@ int	s;
  * int *cmu_stdin_open(char *name)
  *
  * Description:
- *	To have stdin a device that can be selected the descriptor needs to be
+ *  To have stdin a device that can be selected the descriptor needs to be
  * allocated within the domain of these routines.  This routine allocates the
  * file descriptor and returns the address of the FD_ENTRY so the user can
  * control reads/writes and still use select to see if the descriptor is ready.
@@ -2866,13 +2866,13 @@ int	s;
  * name - character string device name of the device to assign a channel to.
  *
  * Returns:
- *	Address of an FD_ENTRY structure on success, -1 on error.  Addition
+ *  Address of an FD_ENTRY structure on success, -1 on error.  Addition
  * error information is specified in the global variable errno.
  */
 int *cmu_stdin_open(name)
-char	*name;
+char    *name;
 {
-    struct	dsc$descriptor dev_name;
+    struct  dsc$descriptor dev_name;
 
 #ifdef __KERNEL__
     struct vms_fd * vms_fd = fget(0);
@@ -2954,7 +2954,7 @@ ERROR_RETURN:
  * int cmu_stdin_read(int flags, char *buf, int len, char *prompt, int mask)
  *
  * Description:
- *	queue an i/o to the descriptor described in sd[0].  Since this read is
+ *  queue an i/o to the descriptor described in sd[0].  Since this read is
  * ment to be used with the select call a non-blocking qio is done.  The
  * completion routine will set the file descriptor and event flag on read
  * completion.
@@ -2966,14 +2966,14 @@ ERROR_RETURN:
  * mask   - read terminator mask
  *
  * Returns:
- *	Status from the SYS$QIO system service call.
+ *  Status from the SYS$QIO system service call.
  */
 int cmu_stdin_read(flags,buf,len,prompt,mask)
-int	flags;
-char	*buf;
-int	len;
-char	*prompt;
-int	mask;
+int flags;
+char    *buf;
+int len;
+char    *prompt;
+int mask;
 {
 
     /*
@@ -3004,7 +3004,7 @@ int	mask;
  * int cmu_get_sdc(int s)
  *
  * Description:
- *	Returns the assigned VMS channel for a particular file descriptor
+ *  Returns the assigned VMS channel for a particular file descriptor
  *
  * s - a valid socket descriptor
  *
@@ -3013,7 +3013,7 @@ int	mask;
  *  errno is set.
  */
 int cmu_get_sdc(s)
-int	s;
+int s;
 {
     /*
      * check for valid socket.
@@ -3041,8 +3041,8 @@ int	s;
  * int cmu_trnlnm(char *table, char *name, char *mode, char *buff, int len)
  *
  * Description:
- *	Translate a logical name.  Terminate the output buffer with a null
- *	character.
+ *  Translate a logical name.  Terminate the output buffer with a null
+ *  character.
  *
  * table - pointer to string that describes the logical name table to search
  * name  - pointer to character string of logical name to search for
@@ -3051,44 +3051,44 @@ int	s;
  * len   - size of buff
  *
  * Returns:
- *	0 on success.  -1 on error.  vaxc$errno is set to status of
+ *  0 on success.  -1 on error.  vaxc$errno is set to status of
  * sys$trnlnm service call and errno is set to EVMSERR.
  */
 
 int cmu_trnlnm( table, name, mode, buff, len )
-char	*table;	/* table name */
-char	*name;	/* logical name */
-char	*mode;	/* access mode */
-char	*buff;	/* return buffer */
-int	len;	/* size of return buffer */
+char    *table; /* table name */
+char    *name;  /* logical name */
+char    *mode;  /* access mode */
+char    *buff;  /* return buffer */
+int len;    /* size of return buffer */
 {
-    int	attr;
+    int attr;
     unsigned char *acmode;
-    struct	dsc$descriptor tabnam, lognam, eqvstr;
-    struct	ITEM_LIST itmlst[2];
+    struct  dsc$descriptor tabnam, lognam, eqvstr;
+    struct  ITEM_LIST itmlst[2];
 
     /* definitions for different access modes
      * See STARLET.REQ $PSLDEF
      */
-    char	PSL$C_KERNEL = 0;
-    char	PSL$C_EXEC   = 1;
-    char	PSL$C_SUPER  = 2;
-    char	PSL$C_USER   = 3;
+    char    PSL$C_KERNEL = 0;
+    char    PSL$C_EXEC   = 1;
+    char    PSL$C_SUPER  = 2;
+    char    PSL$C_USER   = 3;
 
-    tabnam.dsc$b_dtype	= DSC$K_DTYPE_T;
-    tabnam.dsc$b_class	= DSC$K_CLASS_S;
+    tabnam.dsc$b_dtype  = DSC$K_DTYPE_T;
+    tabnam.dsc$b_class  = DSC$K_CLASS_S;
     tabnam.dsc$a_pointer= table;
-    tabnam.dsc$w_length	= strlen(table);
+    tabnam.dsc$w_length = strlen(table);
 
-    lognam.dsc$b_dtype	= DSC$K_DTYPE_T;
-    lognam.dsc$b_class	= DSC$K_CLASS_S;
+    lognam.dsc$b_dtype  = DSC$K_DTYPE_T;
+    lognam.dsc$b_class  = DSC$K_CLASS_S;
     lognam.dsc$a_pointer= name;
-    lognam.dsc$w_length	= strlen(name);
+    lognam.dsc$w_length = strlen(name);
 
-    eqvstr.dsc$b_dtype	= DSC$K_DTYPE_T;
-    eqvstr.dsc$b_class	= DSC$K_CLASS_S;
+    eqvstr.dsc$b_dtype  = DSC$K_DTYPE_T;
+    eqvstr.dsc$b_class  = DSC$K_CLASS_S;
     eqvstr.dsc$a_pointer= buff;
-    eqvstr.dsc$w_length	= len;
+    eqvstr.dsc$w_length = len;
 
     itmlst[0].itm$w_length = len;
     itmlst[0].itm$w_itmcode= LNM$_STRING;
@@ -3143,12 +3143,12 @@ int	len;	/* size of return buffer */
  * int cmu_get_errno(NetIO_Status_Block *iosb)
  *
  * Description:
- *	returns best guess value for errno be examining the i/o status block.
+ *  returns best guess value for errno be examining the i/o status block.
  *
  * iosb - address of an i/o status block.
  *
  * Returns:
- *	Returns an errno value.
+ *  Returns an errno value.
  */
 int cmu_get_errno(iosb)
 NetIO_Status_Block *iosb;
@@ -3162,22 +3162,22 @@ NetIO_Status_Block *iosb;
     switch (iosb->NSB$STATUS)
     {
     case 0:
-        qio_errno = EVMSERR;	/* use vaxc$errno */
+        qio_errno = EVMSERR;    /* use vaxc$errno */
         break;
-    case SS$_MEDOFL:		/* INETACP has died */
+    case SS$_MEDOFL:        /* INETACP has died */
         qio_errno = ENETDOWN;
         break;
-    case SS$_BADPARAM:		/* parameter not valid for call */
+    case SS$_BADPARAM:      /* parameter not valid for call */
         qio_errno = EINVAL;
         break;
-    case SS$_EXQUOTA:		/* buffer allocation problems */
+    case SS$_EXQUOTA:       /* buffer allocation problems */
     case SS$_INSFMEM:
         qio_errno = EMSGSIZE;
         break;
-    case SS$_ACCVIO:		/* buffer access problems */
+    case SS$_ACCVIO:        /* buffer access problems */
         qio_errno = EFAULT;
         break;
-    case SS$_ILLCNTRFUNC:		/* internal ACP error */
+    case SS$_ILLCNTRFUNC:       /* internal ACP error */
         qio_errno = EIO;
     default:
         qio_errno = 0;
@@ -3416,21 +3416,21 @@ NetIO_Status_Block *iosb;
  * int cmu_listen_accept(int s)
  *
  * Description:
- *	AST completion routine called when a connection completes on an open
- *	listening socket.
+ *  AST completion routine called when a connection completes on an open
+ *  listening socket.
  *
  * s - valid socket descriptor
  *
  * Returns:
- *	None.
+ *  None.
  */
 int cmu_listen_accept(s)
-int	s;	/* socket descriptor */
+int s;  /* socket descriptor */
 {
-    int	ns, tmp;
-    struct	backlogEntry *backlogQueue;
-    struct	sockaddr_in *to;
-    int	conInfoSize;
+    int ns, tmp;
+    struct  backlogEntry *backlogQueue;
+    struct  sockaddr_in *to;
+    int conInfoSize;
     Connection_Info_Return_Block conInfo;
 
     /*
@@ -3464,8 +3464,8 @@ int	s;	/* socket descriptor */
      */
     conInfoSize = sizeof(Connection_Info_Return_Block);
     vaxc$errno = sys$qiow( 0, sd[s]->chan, TCP$INFO, &sd[s]->read_iosb, 0, 0,
-                           &conInfo,		/* buffer		*/
-                           conInfoSize,		/* Size of said buffer  */
+                           &conInfo,        /* buffer       */
+                           conInfoSize,     /* Size of said buffer  */
                            0,0,0,0);
 
     /*
@@ -3475,9 +3475,9 @@ int	s;	/* socket descriptor */
     struct vms_fd * vms_fd2 = fget(ns);
     sd[ns] = vms_fd2->vfd$l_fd_p;
 #endif
-    to			= &sd[ns]->to;
-    to->sin_family	= AF_INET;
-    to->sin_port	= htons(conInfo.CI$Foreign_Port);
+    to          = &sd[ns]->to;
+    to->sin_family  = AF_INET;
+    to->sin_port    = htons(conInfo.CI$Foreign_Port);
     to->sin_addr.s_addr = conInfo.CI$remote_internet_adrs;
 
     /*
@@ -3498,7 +3498,7 @@ int	s;	/* socket descriptor */
     /*
      * switch the assigned I/O channels
      */
-    tmp		 = sd[s]->chan;
+    tmp      = sd[s]->chan;
     sd[s]->chan  = sd[ns]->chan;
     sd[ns]->chan = tmp;
 
@@ -3543,18 +3543,18 @@ int	s;	/* socket descriptor */
  * int cmu_queue_listen(int s)
  *
  * Description:
- *	Queue a read that will accept a TCP connection
+ *  Queue a read that will accept a TCP connection
  *
  * s - a valid socket descriptor
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 int cmu_queue_listen(s)
-int	s;	/* socket descriptor to listen on */
+int s;  /* socket descriptor to listen on */
 {
-    struct	sockaddr_in *my;
+    struct  sockaddr_in *my;
 
 
     /*
@@ -3584,13 +3584,13 @@ int	s;	/* socket descriptor to listen on */
         sd[s]->flags |= SD_LISTENING;
         my = &sd[s]->my;
         vaxc$errno = sys$qio( sd[s]->ef, sd[s]->chan, TCP$OPEN, &sd[s]->read_iosb,
-                              cmu_listen_accept, s,	/* ast completion routine and param */
-                              0,			/* whomever			    */
-                              0,			/* remote port			    */
-                              ntohs(my->sin_port),	/* protocol filter		    */
+                              cmu_listen_accept, s, /* ast completion routine and param */
+                              0,            /* whomever             */
+                              0,            /* remote port              */
+                              ntohs(my->sin_port),  /* protocol filter          */
                               (MODE_TCP_WaitSYN | MODE_OpenNoWait),
-                              U$TCP_Protocol,		/* Protocol code		    */
-                              0);			/* timeout			    */
+                              U$TCP_Protocol,       /* Protocol code            */
+                              0);           /* timeout              */
 
         if (vaxc$errno != SS$_NORMAL)
         {
@@ -3618,17 +3618,17 @@ int	s;	/* socket descriptor to listen on */
  * int cmu_read_ast(int s)
  *
  * Description:
- *	AST read completion routine.  Sets the global sys_readfds to
+ *  AST read completion routine.  Sets the global sys_readfds to
  * indicate the socket is ready to read or sys_exceptfds if there was an
  * error.
  *
  * s - valid socket descriptor
  *
  * Returns:
- *	Nothing.
+ *  Nothing.
  */
 int cmu_read_ast(s)
-int	s;	/* file descriptor that is ready. */
+int s;  /* file descriptor that is ready. */
 {
 
 #ifdef __KERNEL__
@@ -3676,17 +3676,17 @@ int	s;	/* file descriptor that is ready. */
  * int cmu_write_ast(int s)
  *
  * Description:
- *	AST write completion routine.  Sets the global sys_writefds to
+ *  AST write completion routine.  Sets the global sys_writefds to
  * indicate the socket is ready to be written or sys_exceptfds if there was an
  * error.
  *
  * s - valid socket descriptor
  *
  * Returns:
- *	Nothing.
+ *  Nothing.
  */
 int cmu_write_ast(s)
-int	s;	/* file descriptor that is ready. */
+int s;  /* file descriptor that is ready. */
 {
 #ifdef __KERNEL__
     struct vms_fd * vms_fd = fget(s);
@@ -3705,17 +3705,17 @@ int	s;	/* file descriptor that is ready. */
  * int cmu_queue_net_read(int s)
  *
  * Description:
- *	Queue a read on socket `s' to be completed by net_read_ast.  This
+ *  Queue a read on socket `s' to be completed by net_read_ast.  This
  * routine will also allocate an event flag and receive buffer if necessary.
  *
  * s - valid socket descriptor
  *
  * Returns:
- *	0 on success, -1 on error.  Addition error information is specified in
+ *  0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
  */
 int cmu_queue_net_read(s)
-int	s;
+int s;
 {
     /*
      * get and clear an event flag and file descriptor for this read request.
@@ -3754,16 +3754,16 @@ int	s;
 
     if (sd[s]->protocol == IPPROTO_UDP)
         vaxc$errno = sys$qio( 0, sd[s]->chan, TCP$RECEIVE, &sd[s]->read_iosb,
-                              cmu_read_ast, s,	/* AST completion routine and arg */
-                              sd[s]->rcvbuf,		/* receive buffer*/
-                              sd[s]->rcvbufsize,	/* receive buffer size*/
-                              &sd[s]->rcvfrom,	/* receive from address buffer*/
+                              cmu_read_ast, s,  /* AST completion routine and arg */
+                              sd[s]->rcvbuf,        /* receive buffer*/
+                              sd[s]->rcvbufsize,    /* receive buffer size*/
+                              &sd[s]->rcvfrom,  /* receive from address buffer*/
                               0,0,0);
     else
         vaxc$errno = sys$qio( 0, sd[s]->chan, TCP$RECEIVE, &sd[s]->read_iosb,
-                              cmu_read_ast, s,	/* AST completion routine and arg */
-                              sd[s]->rcvbuf,		/* receive buffer*/
-                              sd[s]->rcvbufsize,	/* receive buffer size*/
+                              cmu_read_ast, s,  /* AST completion routine and arg */
+                              sd[s]->rcvbuf,        /* receive buffer*/
+                              sd[s]->rcvbufsize,    /* receive buffer size*/
                               0,0,0,0);
 
     if (vaxc$errno == SS$_NORMAL)

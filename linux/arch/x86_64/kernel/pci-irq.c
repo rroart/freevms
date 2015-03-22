@@ -5,9 +5,9 @@
 // Modified Linux source file, 2001-2006
 
 /*
- *	Low-Level PCI Support for PC -- Routing of Interrupts
+ *  Low-Level PCI Support for PC -- Routing of Interrupts
  *
- *	(c) 1999--2000 Martin Mares <mj@ucw.cz>
+ *  (c) 1999--2000 Martin Mares <mj@ucw.cz>
  */
 
 #include <linux/config.h>
@@ -25,7 +25,7 @@
 
 #include "pci-x86_64.h"
 
-#define PIRQ_SIGNATURE	(('$' << 0) + ('P' << 8) + ('I' << 16) + ('R' << 24))
+#define PIRQ_SIGNATURE  (('$' << 0) + ('P' << 8) + ('I' << 16) + ('R' << 24))
 #define PIRQ_VERSION 0x0100
 
 static struct irq_routing_table *pirq_table;
@@ -251,39 +251,39 @@ static int pirq_cyrix_set(struct pci_dev *router, struct pci_dev *dev, int pirq,
 }
 
 /*
- *	PIRQ routing for SiS 85C503 router used in several SiS chipsets
- *	According to the SiS 5595 datasheet (preliminary V1.0, 12/24/1997)
- *	the related registers work as follows:
+ *  PIRQ routing for SiS 85C503 router used in several SiS chipsets
+ *  According to the SiS 5595 datasheet (preliminary V1.0, 12/24/1997)
+ *  the related registers work as follows:
  *
- *	general: one byte per re-routable IRQ,
- *		 bit 7      IRQ mapping enabled (0) or disabled (1)
- *		 bits [6:4] reserved
- *		 bits [3:0] IRQ to map to
- *		     allowed: 3-7, 9-12, 14-15
- *		     reserved: 0, 1, 2, 8, 13
+ *  general: one byte per re-routable IRQ,
+ *       bit 7      IRQ mapping enabled (0) or disabled (1)
+ *       bits [6:4] reserved
+ *       bits [3:0] IRQ to map to
+ *           allowed: 3-7, 9-12, 14-15
+ *           reserved: 0, 1, 2, 8, 13
  *
- *	individual registers in device config space:
+ *  individual registers in device config space:
  *
- *	0x41/0x42/0x43/0x44:	PCI INT A/B/C/D - bits as in general case
+ *  0x41/0x42/0x43/0x44:    PCI INT A/B/C/D - bits as in general case
  *
- *	0x61:			IDEIRQ: bits as in general case - but:
- *				bits [6:5] must be written 01
- *				bit 4 channel-select primary (0), secondary (1)
+ *  0x61:           IDEIRQ: bits as in general case - but:
+ *              bits [6:5] must be written 01
+ *              bit 4 channel-select primary (0), secondary (1)
  *
- *	0x62:			USBIRQ: bits as in general case - but:
- *				bit 4 OHCI function disabled (0), enabled (1)
+ *  0x62:           USBIRQ: bits as in general case - but:
+ *              bit 4 OHCI function disabled (0), enabled (1)
  *
- *	0x6a:			ACPI/SCI IRQ - bits as in general case
+ *  0x6a:           ACPI/SCI IRQ - bits as in general case
  *
- *	0x7e:			Data Acq. Module IRQ - bits as in general case
+ *  0x7e:           Data Acq. Module IRQ - bits as in general case
  *
- *	Apparently there are systems implementing PCI routing table using both
- *	link values 0x01-0x04 and 0x41-0x44 for PCI INTA..D, but register offsets
- *	like 0x62 as link values for USBIRQ e.g. So there is no simple
- *	"register = offset + pirq" relation.
- *	Currently we support PCI INTA..D and USBIRQ and try our best to handle
- *	both link mappings.
- *	IDE/ACPI/DAQ mapping is currently unsupported (left untouched as set by BIOS).
+ *  Apparently there are systems implementing PCI routing table using both
+ *  link values 0x01-0x04 and 0x41-0x44 for PCI INTA..D, but register offsets
+ *  like 0x62 as link values for USBIRQ e.g. So there is no simple
+ *  "register = offset + pirq" relation.
+ *  Currently we support PCI INTA..D and USBIRQ and try our best to handle
+ *  both link mappings.
+ *  IDE/ACPI/DAQ mapping is currently unsupported (left untouched as set by BIOS).
  */
 
 static int pirq_sis_get(struct pci_dev *router, struct pci_dev *dev, int pirq)
@@ -751,7 +751,7 @@ void __init pcibios_fixup_irqs(void)
 
             if (pin)
             {
-                pin--;		/* interrupt pins are numbered starting from 1 */
+                pin--;      /* interrupt pins are numbered starting from 1 */
                 irq = IO_APIC_get_PCI_irq_vector(dev->bus->number, PCI_SLOT(dev->devfn), pin);
                 /*
                  * Busses behind bridges are typically not listed in the MP-table.

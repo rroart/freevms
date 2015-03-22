@@ -61,7 +61,7 @@ EXPORT_SYMBOL(acpi_disabled);
 int swiotlb;
 EXPORT_SYMBOL(swiotlb);
 
-extern	int phys_proc_id[NR_CPUS];
+extern  int phys_proc_id[NR_CPUS];
 
 /*
  * Machine setup..
@@ -589,10 +589,10 @@ static void __init init_intel(struct cpuinfo_x86 *c)
 #ifdef CONFIG_SMP
     if (test_bit(X86_FEATURE_HT, &c->x86_capability))
     {
-        int 	index_lsb, index_msb, tmp;
-        int	initial_apic_id;
-        int 	cpu = smp_processor_id();
-        u32 	ebx, ecx, edx;
+        int     index_lsb, index_msb, tmp;
+        int initial_apic_id;
+        int     cpu = smp_processor_id();
+        u32     ebx, ecx, edx;
 
         cpuid(1, &eax, &ebx, &ecx, &edx);
         smp_num_siblings = (ebx & 0xff0000) >> 16;
@@ -609,7 +609,7 @@ static void __init init_intel(struct cpuinfo_x86 *c)
              * At this point we only support two siblings per
              * processor package.
              */
-#define NR_SIBLINGS	2
+#define NR_SIBLINGS 2
             if (smp_num_siblings != NR_SIBLINGS)
             {
                 printk(KERN_WARNING "CPU: Unsupported number of the siblings %d", smp_num_siblings);
@@ -705,7 +705,7 @@ void __init identify_cpu(struct cpuinfo_x86 *c)
     c->loops_per_jiffy = loops_per_jiffy;
     c->x86_cache_size = -1;
     c->x86_vendor = X86_VENDOR_UNKNOWN;
-    c->x86_model = c->x86_mask = 0;	/* So far unknown... */
+    c->x86_model = c->x86_mask = 0; /* So far unknown... */
     c->x86_vendor_id[0] = '\0'; /* Unset */
     c->x86_model_id[0] = '\0';  /* Unset */
     memset(&c->x86_capability, 0, sizeof c->x86_capability);
@@ -823,7 +823,7 @@ void __init print_cpu_info(struct cpuinfo_x86 *c)
 }
 
 /*
- *	Get CPU information for use by the procfs.
+ *  Get CPU information for use by the procfs.
  */
 
 static int show_cpuinfo(struct seq_file *m, void *v)
@@ -872,7 +872,7 @@ static int show_cpuinfo(struct seq_file *m, void *v)
     };
     static char *x86_power_flags[] =
     {
-        "ts",	/* temperature sensor */
+        "ts",   /* temperature sensor */
         "fid",  /* frequency id control */
         "vid",  /* voltage id control */
         "ttp",  /* thermal trip */

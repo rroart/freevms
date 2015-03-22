@@ -31,7 +31,7 @@ struct exception_table_entry;
 struct kernel_sym
 {
     unsigned long value;
-    char name[60];		/* should have been 64-sizeof(long); oh well */
+    char name[60];      /* should have been 64-sizeof(long); oh well */
 };
 
 struct module_symbol
@@ -42,8 +42,8 @@ struct module_symbol
 
 struct module_ref
 {
-    struct module *dep;	/* "parent" pointer */
-    struct module *ref;	/* "child" pointer */
+    struct module *dep; /* "parent" pointer */
+    struct module *ref; /* "child" pointer */
     struct module_ref *next_ref;
 };
 
@@ -52,7 +52,7 @@ struct module_persist;
 
 struct module
 {
-    unsigned long size_of_struct;	/* == sizeof(module) */
+    unsigned long size_of_struct;   /* == sizeof(module) */
     struct module *next;
     const char *name;
     unsigned long size;
@@ -61,9 +61,9 @@ struct module
     {
         atomic_t usecount;
         long pad;
-    } uc;				/* Needs to keep its size - so says rth */
+    } uc;               /* Needs to keep its size - so says rth */
 
-    unsigned long flags;		/* AUTOCLEAN et al */
+    unsigned long flags;        /* AUTOCLEAN et al */
 
     unsigned nsyms;
     unsigned ndeps;
@@ -84,12 +84,12 @@ struct module
     const struct module_persist *persist_start;
     const struct module_persist *persist_end;
     int (*can_unload)(void);
-    int runsize;			/* In modutils, not currently used */
-    const char *kallsyms_start;	/* All symbols for kernel debugging */
+    int runsize;            /* In modutils, not currently used */
+    const char *kallsyms_start; /* All symbols for kernel debugging */
     const char *kallsyms_end;
-    const char *archdata_start;	/* arch specific data for module */
+    const char *archdata_start; /* arch specific data for module */
     const char *archdata_end;
-    const char *kernel_data;	/* Reserved for kernel internal use */
+    const char *kernel_data;    /* Reserved for kernel internal use */
 };
 
 struct module_info
@@ -102,22 +102,22 @@ struct module_info
 
 /* Bits of module.flags.  */
 
-#define MOD_UNINITIALIZED	0
-#define MOD_RUNNING		1
-#define MOD_DELETED		2
-#define MOD_AUTOCLEAN		4
-#define MOD_VISITED  		8
-#define MOD_USED_ONCE		16
-#define MOD_JUST_FREED		32
-#define MOD_INITIALIZING	64
+#define MOD_UNINITIALIZED   0
+#define MOD_RUNNING     1
+#define MOD_DELETED     2
+#define MOD_AUTOCLEAN       4
+#define MOD_VISITED         8
+#define MOD_USED_ONCE       16
+#define MOD_JUST_FREED      32
+#define MOD_INITIALIZING    64
 
 /* Values for query_module's which.  */
 
-#define QM_MODULES	1
-#define QM_DEPS		2
-#define QM_REFS		3
-#define QM_SYMBOLS	4
-#define QM_INFO		5
+#define QM_MODULES  1
+#define QM_DEPS     2
+#define QM_REFS     3
+#define QM_SYMBOLS  4
+#define QM_INFO     5
 
 /* Can the module be queried? */
 #define MOD_CAN_QUERY(mod) (((mod)->flags & (MOD_RUNNING | MOD_INITIALIZING)) && !((mod)->flags & MOD_DELETED))
@@ -126,42 +126,42 @@ struct module_info
    is present in the header received from insmod before we can use it.
    This function returns true if the member is present.  */
 
-#define mod_member_present(mod,member) 					\
-	((unsigned long)(&((struct module *)0L)->member + 1)		\
-	 <= (mod)->size_of_struct)
+#define mod_member_present(mod,member)                  \
+    ((unsigned long)(&((struct module *)0L)->member + 1)        \
+     <= (mod)->size_of_struct)
 
 /*
  * Ditto for archdata.  Assumes mod->archdata_start and mod->archdata_end
  * are validated elsewhere.
  */
-#define mod_archdata_member_present(mod, type, member)			\
-	(((unsigned long)(&((type *)0L)->member) +			\
-	  sizeof(((type *)0L)->member)) <=				\
-	 ((mod)->archdata_end - (mod)->archdata_start))
+#define mod_archdata_member_present(mod, type, member)          \
+    (((unsigned long)(&((type *)0L)->member) +          \
+      sizeof(((type *)0L)->member)) <=              \
+     ((mod)->archdata_end - (mod)->archdata_start))
 
 
 /* Check if an address p with number of entries n is within the body of module m */
 #define mod_bound(p, n, m) ((unsigned long)(p) >= ((unsigned long)(m) + ((m)->size_of_struct)) && \
-	         (unsigned long)((p)+(n)) <= (unsigned long)(m) + (m)->size)
+             (unsigned long)((p)+(n)) <= (unsigned long)(m) + (m)->size)
 
 /* Backwards compatibility definition.  */
 
-#define GET_USE_COUNT(module)	(atomic_read(&(module)->uc.usecount))
+#define GET_USE_COUNT(module)   (atomic_read(&(module)->uc.usecount))
 
 /* Poke the use count of a module.  */
 
-#define __MOD_INC_USE_COUNT(mod)					\
-	(atomic_inc(&(mod)->uc.usecount), (mod)->flags |= MOD_VISITED|MOD_USED_ONCE)
-#define __MOD_DEC_USE_COUNT(mod)					\
-	(atomic_dec(&(mod)->uc.usecount), (mod)->flags |= MOD_VISITED)
-#define __MOD_IN_USE(mod)						\
-	(mod_member_present((mod), can_unload) && (mod)->can_unload	\
-	 ? (mod)->can_unload() : atomic_read(&(mod)->uc.usecount))
+#define __MOD_INC_USE_COUNT(mod)                    \
+    (atomic_inc(&(mod)->uc.usecount), (mod)->flags |= MOD_VISITED|MOD_USED_ONCE)
+#define __MOD_DEC_USE_COUNT(mod)                    \
+    (atomic_dec(&(mod)->uc.usecount), (mod)->flags |= MOD_VISITED)
+#define __MOD_IN_USE(mod)                       \
+    (mod_member_present((mod), can_unload) && (mod)->can_unload \
+     ? (mod)->can_unload() : atomic_read(&(mod)->uc.usecount))
 
 /* Indirect stringification.  */
 
-#define __MODULE_STRING_1(x)	#x
-#define __MODULE_STRING(x)	__MODULE_STRING_1(x)
+#define __MODULE_STRING_1(x)    #x
+#define __MODULE_STRING(x)  __MODULE_STRING_1(x)
 
 /* Generic inter module communication.
  *
@@ -203,41 +203,41 @@ extern int try_inc_mod_count(struct module *mod);
 
 /* For documentation purposes only.  */
 
-#define MODULE_AUTHOR(name)						   \
-const char __module_author[] __attribute__((section(".modinfo"))) = 	   \
+#define MODULE_AUTHOR(name)                        \
+const char __module_author[] __attribute__((section(".modinfo"))) =        \
 "author=" name
 
-#define MODULE_DESCRIPTION(desc)					   \
+#define MODULE_DESCRIPTION(desc)                       \
 const char __module_description[] __attribute__((section(".modinfo"))) =   \
 "description=" desc
 
 /* Could potentially be used by kmod...  */
 
-#define MODULE_SUPPORTED_DEVICE(dev)					   \
-const char __module_device[] __attribute__((section(".modinfo"))) = 	   \
+#define MODULE_SUPPORTED_DEVICE(dev)                       \
+const char __module_device[] __attribute__((section(".modinfo"))) =        \
 "device=" dev
 
 /* Used to verify parameters given to the module.  The TYPE arg should
    be a string in the following format:
-   	[min[-max]]{b,h,i,l,s}
+    [min[-max]]{b,h,i,l,s}
    The MIN and MAX specifiers delimit the length of the array.  If MAX
    is omitted, it defaults to MIN; if both are omitted, the default is 1.
    The final character is a type specifier:
-	b	byte
-	h	short
-	i	int
-	l	long
-	s	string
+    b   byte
+    h   short
+    i   int
+    l   long
+    s   string
 */
 
-#define MODULE_PARM(var,type)			\
-const char __module_parm_##var[]		\
-__attribute__((section(".modinfo"))) =		\
+#define MODULE_PARM(var,type)           \
+const char __module_parm_##var[]        \
+__attribute__((section(".modinfo"))) =      \
 "parm_" __MODULE_STRING(var) "=" type
 
-#define MODULE_PARM_DESC(var,desc)		\
-const char __module_parm_desc_##var[]		\
-__attribute__((section(".modinfo"))) =		\
+#define MODULE_PARM_DESC(var,desc)      \
+const char __module_parm_desc_##var[]       \
+__attribute__((section(".modinfo"))) =      \
 "parm_desc_" __MODULE_STRING(var) "=" desc
 
 /*
@@ -253,7 +253,7 @@ __attribute__((section(".modinfo"))) =		\
  * isapnp - struct isapnp_device_id - List of ISA PnP ids supported by this module
  * usb - struct usb_device_id - List of USB ids supported by this module
  */
-#define MODULE_GENERIC_TABLE(gtype,name)	\
+#define MODULE_GENERIC_TABLE(gtype,name)    \
 static const unsigned long __module_##gtype##_size \
   __attribute_used__ = sizeof(struct gtype##_id); \
 static const struct gtype##_id * __module_##gtype##_table \
@@ -263,38 +263,38 @@ static const struct gtype##_id * __module_##gtype##_table \
  * The following license idents are currently accepted as indicating free
  * software modules
  *
- *	"GPL"				[GNU Public License v2 or later]
- *	"GPL v2"			[GNU Public License v2]
- *	"GPL and additional rights"	[GNU Public License v2 rights and more]
- *	"Dual BSD/GPL"			[GNU Public License v2 or BSD license choice]
- *	"Dual MPL/GPL"			[GNU Public License v2 or Mozilla license choice]
+ *  "GPL"               [GNU Public License v2 or later]
+ *  "GPL v2"            [GNU Public License v2]
+ *  "GPL and additional rights" [GNU Public License v2 rights and more]
+ *  "Dual BSD/GPL"          [GNU Public License v2 or BSD license choice]
+ *  "Dual MPL/GPL"          [GNU Public License v2 or Mozilla license choice]
  *
  * The following other idents are available
  *
- *	"Proprietary"			[Non free products]
+ *  "Proprietary"           [Non free products]
  *
  * There are dual licensed components, but when running with Linux it is the
  * GPL that is relevant so this is a non issue. Similarly LGPL linked with GPL
  * is a GPL combined work.
  *
  * This exists for several reasons
- * 1.	So modinfo can show license info for users wanting to vet their setup
- *	is free
- * 2.	So the community can ignore bug reports including proprietary modules
- * 3.	So vendors can do likewise based on their own policies
+ * 1.   So modinfo can show license info for users wanting to vet their setup
+ *  is free
+ * 2.   So the community can ignore bug reports including proprietary modules
+ * 3.   So vendors can do likewise based on their own policies
  */
 
-#define MODULE_LICENSE(license) 	\
+#define MODULE_LICENSE(license)     \
 static const char __module_license[] __attribute__((section(".modinfo"))) =   \
 "license=" license
 
 /* Define the module variable, and usage macros.  */
 extern struct module __this_module;
 
-#define THIS_MODULE		(&__this_module)
-#define MOD_INC_USE_COUNT	__MOD_INC_USE_COUNT(THIS_MODULE)
-#define MOD_DEC_USE_COUNT	__MOD_DEC_USE_COUNT(THIS_MODULE)
-#define MOD_IN_USE		__MOD_IN_USE(THIS_MODULE)
+#define THIS_MODULE     (&__this_module)
+#define MOD_INC_USE_COUNT   __MOD_INC_USE_COUNT(THIS_MODULE)
+#define MOD_DEC_USE_COUNT   __MOD_DEC_USE_COUNT(THIS_MODULE)
+#define MOD_IN_USE      __MOD_IN_USE(THIS_MODULE)
 
 #include <linux/version.h>
 static const char __module_kernel_version[] __attribute__((section(".modinfo"))) =
@@ -324,10 +324,10 @@ static const struct gtype##_id * __module_##gtype##_table \
 
 #ifndef __GENKSYMS__
 
-#define THIS_MODULE		NULL
-#define MOD_INC_USE_COUNT	do { } while (0)
-#define MOD_DEC_USE_COUNT	do { } while (0)
-#define MOD_IN_USE		1
+#define THIS_MODULE     NULL
+#define MOD_INC_USE_COUNT   do { } while (0)
+#define MOD_DEC_USE_COUNT   do { } while (0)
+#define MOD_IN_USE      1
 
 extern struct module *module_list;
 
@@ -335,7 +335,7 @@ extern struct module *module_list;
 
 #endif /* MODULE */
 
-#define MODULE_DEVICE_TABLE(type,name)		\
+#define MODULE_DEVICE_TABLE(type,name)      \
   MODULE_GENERIC_TABLE(type##_device,name)
 
 /* Export a symbol either from the kernel or a module.
@@ -354,7 +354,7 @@ extern struct module *module_list;
 #elif !defined(AUTOCONF_INCLUDED)
 
 #define __EXPORT_SYMBOL(sym,str)   error config_must_be_included_before_module
-#define EXPORT_SYMBOL(var)	   error config_must_be_included_before_module
+#define EXPORT_SYMBOL(var)     error config_must_be_included_before_module
 #define EXPORT_SYMBOL_NOVERS(var)  error config_must_be_included_before_module
 #define EXPORT_SYMBOL_GPL(var)  error config_must_be_included_before_module
 
@@ -368,24 +368,24 @@ extern struct module *module_list;
 #elif !defined(EXPORT_SYMTAB)
 
 #define __EXPORT_SYMBOL(sym,str)   error this_object_must_be_defined_as_export_objs_in_the_Makefile
-#define EXPORT_SYMBOL(var)	   error this_object_must_be_defined_as_export_objs_in_the_Makefile
+#define EXPORT_SYMBOL(var)     error this_object_must_be_defined_as_export_objs_in_the_Makefile
 #define EXPORT_SYMBOL_NOVERS(var)  error this_object_must_be_defined_as_export_objs_in_the_Makefile
 #define EXPORT_SYMBOL_GPL(var)  error this_object_must_be_defined_as_export_objs_in_the_Makefile
 
 #else
 
-#define __EXPORT_SYMBOL(sym, str)			\
-const char __kstrtab_##sym[]				\
-__attribute__((section(".kstrtab"))) = str;		\
-const struct module_symbol __ksymtab_##sym 		\
-__attribute__((section("__ksymtab"))) =			\
+#define __EXPORT_SYMBOL(sym, str)           \
+const char __kstrtab_##sym[]                \
+__attribute__((section(".kstrtab"))) = str;     \
+const struct module_symbol __ksymtab_##sym      \
+__attribute__((section("__ksymtab"))) =         \
 { (unsigned long)&sym, __kstrtab_##sym }
 
-#define __EXPORT_SYMBOL_GPL(sym, str)			\
-const char __kstrtab_##sym[]				\
-__attribute__((section(".kstrtab"))) = "GPLONLY_" str;	\
-const struct module_symbol __ksymtab_##sym		\
-__attribute__((section("__ksymtab"))) =			\
+#define __EXPORT_SYMBOL_GPL(sym, str)           \
+const char __kstrtab_##sym[]                \
+__attribute__((section(".kstrtab"))) = "GPLONLY_" str;  \
+const struct module_symbol __ksymtab_##sym      \
+__attribute__((section("__ksymtab"))) =         \
 { (unsigned long)&sym, __kstrtab_##sym }
 
 #if defined(MODVERSIONS) || !defined(CONFIG_MODVERSIONS)

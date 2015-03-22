@@ -107,7 +107,7 @@ enum nubus_drsw
 enum nubus_drhw
 {
     /* NUBUS_CAT_DISPLAY */
-    NUBUS_DRHW_APPLE_TFB	= 0x0001, /* Toby frame buffer card */
+    NUBUS_DRHW_APPLE_TFB    = 0x0001, /* Toby frame buffer card */
     NUBUS_DRHW_APPLE_RBV1   = 0x0018, /* IIci RBV video */
     NUBUS_DRHW_APPLE_MDC    = 0x0019, /* Macintosh Display Card */
     NUBUS_DRHW_APPLE_SONORA = 0x0022, /* Sonora built-in video */
@@ -148,13 +148,13 @@ enum nubus_res_id
 /* Category-specific resources. */
 enum nubus_board_res_id
 {
-    NUBUS_RESID_BOARDID	 = 0x0020,
+    NUBUS_RESID_BOARDID  = 0x0020,
     NUBUS_RESID_PRAMINITDATA = 0x0021,
-    NUBUS_RESID_PRIMARYINIT	 = 0x0022,
+    NUBUS_RESID_PRIMARYINIT  = 0x0022,
     NUBUS_RESID_TIMEOUTCONST = 0x0023,
-    NUBUS_RESID_VENDORINFO	 = 0x0024,
-    NUBUS_RESID_BOARDFLAGS	 = 0x0025,
-    NUBUS_RESID_SECONDINIT	 = 0x0026,
+    NUBUS_RESID_VENDORINFO   = 0x0024,
+    NUBUS_RESID_BOARDFLAGS   = 0x0025,
+    NUBUS_RESID_SECONDINIT   = 0x0026,
 
     /* Not sure why Apple put these next two in here */
     NUBUS_RESID_VIDNAMES = 0x0041,
@@ -184,13 +184,13 @@ enum nubus_cpu_res_id
 
 enum nubus_display_res_id
 {
-    NUBUS_RESID_GAMMADIR	= 0x0040,
-    NUBUS_RESID_FIRSTMODE	= 0x0080,
-    NUBUS_RESID_SECONDMODE	= 0x0081,
-    NUBUS_RESID_THIRDMODE	= 0x0082,
-    NUBUS_RESID_FOURTHMODE	= 0x0083,
-    NUBUS_RESID_FIFTHMODE	= 0x0084,
-    NUBUS_RESID_SIXTHMODE	= 0x0085
+    NUBUS_RESID_GAMMADIR    = 0x0040,
+    NUBUS_RESID_FIRSTMODE   = 0x0080,
+    NUBUS_RESID_SECONDMODE  = 0x0081,
+    NUBUS_RESID_THIRDMODE   = 0x0082,
+    NUBUS_RESID_FOURTHMODE  = 0x0083,
+    NUBUS_RESID_FIFTHMODE   = 0x0084,
+    NUBUS_RESID_SIXTHMODE   = 0x0085
 };
 
 struct nubus_dir
@@ -205,7 +205,7 @@ struct nubus_dirent
 {
     unsigned char *base;
     unsigned char type;
-    __u32 data;	/* Actually 24bits used */
+    __u32 data; /* Actually 24bits used */
     int mask;
 };
 

@@ -1,5 +1,5 @@
-#ifndef ldr_routines_h
-#define ldr_routines_h
+#ifndef LDR_ROUTINES_H
+#define LDR_ROUTINES_H
 
 #include <far_pointers.h>
 #include <ptedef.h>

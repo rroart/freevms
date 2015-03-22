@@ -8,21 +8,21 @@
 
 
 /*
- *	MMX 3DNow! library helper functions
+ *  MMX 3DNow! library helper functions
  *
- *	To do:
- *	We can use MMX just for prefetch in IRQ's. This may be a win.
- *		(reported so on K6-III)
- *	We should use a better code neutral filler for the short jump
- *		leal ebx. [ebx] is apparently best for K6-2, but Cyrix ??
- *	We also want to clobber the filler register so we dont get any
- *		register forwarding stalls on the filler.
+ *  To do:
+ *  We can use MMX just for prefetch in IRQ's. This may be a win.
+ *      (reported so on K6-III)
+ *  We should use a better code neutral filler for the short jump
+ *      leal ebx. [ebx] is apparently best for K6-2, but Cyrix ??
+ *  We also want to clobber the filler register so we dont get any
+ *      register forwarding stalls on the filler.
  *
- *	Add *user handling. Checksums are not a win with MMX on any CPU
- *	tested so far for any MMX solution figured.
+ *  Add *user handling. Checksums are not a win with MMX on any CPU
+ *  tested so far for any MMX solution figured.
  *
- *	22/09/2000 - Arjan van de Ven
- *		Improved for non-egineering-sample Athlons
+ *  22/09/2000 - Arjan van de Ven
+ *      Improved for non-egineering-sample Athlons
  *
  */
 
@@ -40,14 +40,14 @@ void *_mmx_memcpy(void *to, const void *from, size_t len)
     kernel_fpu_begin();
 
     __asm__ __volatile__ (
-        "1: prefetch (%0)\n"		/* This set is 28 bytes */
+        "1: prefetch (%0)\n"        /* This set is 28 bytes */
         "   prefetch 64(%0)\n"
         "   prefetch 128(%0)\n"
         "   prefetch 192(%0)\n"
         "   prefetch 256(%0)\n"
         "2:  \n"
         ".section .fixup, \"ax\"\n"
-        "3: movw $0x1AEB, 1b\n"	/* jmp on 26 bytes */
+        "3: movw $0x1AEB, 1b\n" /* jmp on 26 bytes */
         "   jmp 2b\n"
         ".previous\n"
         ".section __ex_table,\"a\"\n"
@@ -78,7 +78,7 @@ void *_mmx_memcpy(void *to, const void *from, size_t len)
             "  movq %%mm2, 48(%1)\n"
             "  movq %%mm3, 56(%1)\n"
             ".section .fixup, \"ax\"\n"
-            "3: movw $0x05EB, 1b\n"	/* jmp on 5 bytes */
+            "3: movw $0x05EB, 1b\n" /* jmp on 5 bytes */
             "   jmp 2b\n"
             ".previous\n"
             ".section __ex_table,\"a\"\n"
@@ -90,7 +90,7 @@ void *_mmx_memcpy(void *to, const void *from, size_t len)
         to+=64;
     }
     /*
-     *	Now do the tail of the block
+     *  Now do the tail of the block
      */
     __memcpy(to, from, len&63);
     kernel_fpu_end();
@@ -100,8 +100,8 @@ void *_mmx_memcpy(void *to, const void *from, size_t len)
 #ifdef CONFIG_MK7
 
 /*
- *	The K7 has streaming cache bypass load/store. The Cyrix III, K6 and
- *	other MMX using processors do not.
+ *  The K7 has streaming cache bypass load/store. The Cyrix III, K6 and
+ *  other MMX using processors do not.
  */
 
 static void fast_clear_page(void *page)
@@ -154,7 +154,7 @@ static void fast_copy_page(void *to, void *from)
         "   prefetch 256(%0)\n"
         "2:  \n"
         ".section .fixup, \"ax\"\n"
-        "3: movw $0x1AEB, 1b\n"	/* jmp on 26 bytes */
+        "3: movw $0x1AEB, 1b\n" /* jmp on 26 bytes */
         "   jmp 2b\n"
         ".previous\n"
         ".section __ex_table,\"a\"\n"
@@ -184,7 +184,7 @@ static void fast_copy_page(void *to, void *from)
             "   movq 56(%0), %%mm7\n"
             "   movntq %%mm7, 56(%1)\n"
             ".section .fixup, \"ax\"\n"
-            "3: movw $0x05EB, 1b\n"	/* jmp on 5 bytes */
+            "3: movw $0x05EB, 1b\n" /* jmp on 5 bytes */
             "   jmp 2b\n"
             ".previous\n"
             ".section __ex_table,\"a\"\n"
@@ -230,7 +230,7 @@ static void fast_copy_page(void *to, void *from)
 #else
 
 /*
- *	Generic MMX implementation without K7 specific streaming
+ *  Generic MMX implementation without K7 specific streaming
  */
 
 static void fast_clear_page(void *page)
@@ -284,7 +284,7 @@ static void fast_copy_page(void *to, void *from)
         "   prefetch 256(%0)\n"
         "2:  \n"
         ".section .fixup, \"ax\"\n"
-        "3: movw $0x1AEB, 1b\n"	/* jmp on 26 bytes */
+        "3: movw $0x1AEB, 1b\n" /* jmp on 26 bytes */
         "   jmp 2b\n"
         ".previous\n"
         ".section __ex_table,\"a\"\n"
@@ -314,7 +314,7 @@ static void fast_copy_page(void *to, void *from)
             "   movq %%mm2, 48(%1)\n"
             "   movq %%mm3, 56(%1)\n"
             ".section .fixup, \"ax\"\n"
-            "3: movw $0x05EB, 1b\n"	/* jmp on 5 bytes */
+            "3: movw $0x05EB, 1b\n" /* jmp on 5 bytes */
             "   jmp 2b\n"
             ".previous\n"
             ".section __ex_table,\"a\"\n"
@@ -332,7 +332,7 @@ static void fast_copy_page(void *to, void *from)
 #endif
 
 /*
- *	Favour MMX for page clear and copy.
+ *  Favour MMX for page clear and copy.
  */
 
 static void slow_zero_page(void * page)

@@ -40,7 +40,7 @@ struct poll_table_page
 };
 
 #define POLL_TABLE_FULL(table) \
-	((unsigned long)((table)->entry+1) > PAGE_SIZE + (unsigned long)(table))
+    ((unsigned long)((table)->entry+1) > PAGE_SIZE + (unsigned long)(table))
 
 /*
  * Ok, Peter made a complicated, but straightforward multiple_wait() function.
@@ -110,14 +110,14 @@ void __pollwait(struct file * filp, wait_queue_head_t * wait_address, poll_table
     }
 }
 
-#define __IN(fds, n)		(fds->in + n)
-#define __OUT(fds, n)		(fds->out + n)
-#define __EX(fds, n)		(fds->ex + n)
-#define __RES_IN(fds, n)	(fds->res_in + n)
-#define __RES_OUT(fds, n)	(fds->res_out + n)
-#define __RES_EX(fds, n)	(fds->res_ex + n)
+#define __IN(fds, n)        (fds->in + n)
+#define __OUT(fds, n)       (fds->out + n)
+#define __EX(fds, n)        (fds->ex + n)
+#define __RES_IN(fds, n)    (fds->res_in + n)
+#define __RES_OUT(fds, n)   (fds->res_out + n)
+#define __RES_EX(fds, n)    (fds->res_ex + n)
 
-#define BITS(fds, n)		(*__IN(fds, n)|*__OUT(fds, n)|*__EX(fds, n))
+#define BITS(fds, n)        (*__IN(fds, n)|*__OUT(fds, n)|*__EX(fds, n))
 
 static int max_select_fd(unsigned long n, fd_set_bits *fds)
 {
@@ -164,10 +164,10 @@ get_max:
     return max;
 }
 
-#define BIT(i)		(1UL << ((i)&(__NFDBITS-1)))
-#define MEM(i,m)	((m)+(unsigned)(i)/__NFDBITS)
-#define ISSET(i,m)	(((i)&*(m)) != 0)
-#define SET(i,m)	(*(m) |= (i))
+#define BIT(i)      (1UL << ((i)&(__NFDBITS-1)))
+#define MEM(i,m)    ((m)+(unsigned)(i)/__NFDBITS)
+#define ISSET(i,m)  (((i)&*(m)) != 0)
+#define SET(i,m)    (*(m) |= (i))
 
 #define POLLIN_SET (POLLRDNORM | POLLRDBAND | POLLIN | POLLHUP | POLLERR)
 #define POLLOUT_SET (POLLWRBAND | POLLWRNORM | POLLOUT | POLLERR)
@@ -272,7 +272,7 @@ static void select_bits_free(void *bits, int size)
  * I'm trying ERESTARTNOHAND which restart only when you want to.
  */
 #define MAX_SELECT_SECONDS \
-	((unsigned long) (MAX_SCHEDULE_TIMEOUT / HZ)-1)
+    ((unsigned long) (MAX_SCHEDULE_TIMEOUT / HZ)-1)
 
 asmlinkage long
 sys_select(int n, fd_set *inp, fd_set *outp, fd_set *exp, struct timeval *tvp)

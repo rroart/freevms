@@ -55,7 +55,7 @@ static __inline__ void DQUOT_DROP(struct inode *inode)
     {
         if (!inode->i_sb)
             BUG();
-        inode->i_sb->dq_op->drop(inode);	/* Ops must be set when there's any quota... */
+        inode->i_sb->dq_op->drop(inode);    /* Ops must be set when there's any quota... */
     }
     unlock_kernel();
 }
@@ -168,21 +168,21 @@ static __inline__ int DQUOT_TRANSFER(struct inode *inode, struct iattr *iattr)
     return 0;
 }
 
-#define DQUOT_SYNC(dev)	sync_dquots(dev, -1)
-#define DQUOT_OFF(sb)	quota_off(sb, -1)
+#define DQUOT_SYNC(dev) sync_dquots(dev, -1)
+#define DQUOT_OFF(sb)   quota_off(sb, -1)
 
 #else
 
 /*
  * NO-OP when quota not configured.
  */
-#define DQUOT_INIT(inode)			do { } while(0)
-#define DQUOT_DROP(inode)			do { } while(0)
-#define DQUOT_ALLOC_INODE(inode)		(0)
-#define DQUOT_FREE_INODE(inode)			do { } while(0)
-#define DQUOT_SYNC(dev)				do { } while(0)
-#define DQUOT_OFF(sb)				do { } while(0)
-#define DQUOT_TRANSFER(inode, iattr)		(0)
+#define DQUOT_INIT(inode)           do { } while(0)
+#define DQUOT_DROP(inode)           do { } while(0)
+#define DQUOT_ALLOC_INODE(inode)        (0)
+#define DQUOT_FREE_INODE(inode)         do { } while(0)
+#define DQUOT_SYNC(dev)             do { } while(0)
+#define DQUOT_OFF(sb)               do { } while(0)
+#define DQUOT_TRANSFER(inode, iattr)        (0)
 extern __inline__ int DQUOT_PREALLOC_BLOCK_NODIRTY(struct inode *inode, int nr)
 {
     lock_kernel();

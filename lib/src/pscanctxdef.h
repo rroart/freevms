@@ -1,28 +1,28 @@
-#ifndef pscanctxdef_h
-#define pscanctxdef_h
+#ifndef PSCANCTXDEF_H
+#define PSCANCTXDEF_H
 
-#define		PSCANCTX$M_SUPER		0x1
-#define		PSCANCTX$M_CSID_VEC		0x2
-#define		PSCANCTX$M_LOCKED		0x4
-#define		PSCANCTX$M_MULTI_NODE		0x8
-#define		PSCANCTX$M_BUSY		        0x10
-#define		PSCANCTX$M_RELOCK		0x20
-#define		PSCANCTX$M_THREAD		0x40
-#define		PSCANCTX$M_NEED_THREAD_CAP	0x80
-#define		PSCANCTX$M_SCHED_CLASS_CAP	0x100
-#define		PSCANCTX$K_LENGTH		64
-#define		PSCANCTX$M_THREAD_ITEM		1073741824
-#define		PSCANCTX$V_THREAD_ITEM		30
-#define		PSCANCTX$M_NODE_ITEM		-2147483648
-#define		PSCANCTX$V_NODE_ITEM		31
-#define		PSCANCTX$S_$PSCANCTXDEF		64
+#define     PSCANCTX$M_SUPER        0x1
+#define     PSCANCTX$M_CSID_VEC     0x2
+#define     PSCANCTX$M_LOCKED       0x4
+#define     PSCANCTX$M_MULTI_NODE       0x8
+#define     PSCANCTX$M_BUSY             0x10
+#define     PSCANCTX$M_RELOCK       0x20
+#define     PSCANCTX$M_THREAD       0x40
+#define     PSCANCTX$M_NEED_THREAD_CAP  0x80
+#define     PSCANCTX$M_SCHED_CLASS_CAP  0x100
+#define     PSCANCTX$K_LENGTH       64
+#define     PSCANCTX$M_THREAD_ITEM      1073741824
+#define     PSCANCTX$V_THREAD_ITEM      30
+#define     PSCANCTX$M_NODE_ITEM        -2147483648
+#define     PSCANCTX$V_NODE_ITEM        31
+#define     PSCANCTX$S_$PSCANCTXDEF     64
 
-#define		PSCANBUF$M_SPARE0		0x1
-#define		PSCANBUF$K_LENGTH		32
-#define		PSCANBUF$S_$PSCANBUFDEF		32
+#define     PSCANBUF$M_SPARE0       0x1
+#define     PSCANBUF$K_LENGTH       32
+#define     PSCANBUF$S_$PSCANBUFDEF     32
 
-#define		PSCANITM$K_LENGTH		12
-#define		PSCANITM$S_$PSCANITMDEF		13
+#define     PSCANITM$K_LENGTH       12
+#define     PSCANITM$S_$PSCANITMDEF     13
 
 struct _pscanctx
 {

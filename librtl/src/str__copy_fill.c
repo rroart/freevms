@@ -1,7 +1,7 @@
 /*
  * str.c
  *
- *	Code for VAX STR$$COPY_FILL routine
+ *  Code for VAX STR$$COPY_FILL routine
  *
  * Description:
  *
@@ -11,11 +11,11 @@
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  */
 
 #include <stdio.h>
@@ -28,7 +28,7 @@
 /*************************************************************
  * str$$copy_fill
  *
- *	Copies over text from source to dest.
+ *  Copies over text from source to dest.
  */
 unsigned long str$$copy_fill_not(char* dest_ptr, unsigned short dest_length,
                                  const char* source_ptr, unsigned short source_length, char fill)

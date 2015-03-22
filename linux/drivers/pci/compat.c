@@ -1,9 +1,9 @@
 /*
- *	$Id$
+ *  $Id$
  *
- *	PCI Bus Services -- Function For Backward Compatibility
+ *  PCI Bus Services -- Function For Backward Compatibility
  *
- *	Copyright 1998--2000 Martin Mares <mj@ucw.cz>
+ *  Copyright 1998--2000 Martin Mares <mj@ucw.cz>
  */
 
 #include <linux/types.h>
@@ -50,13 +50,13 @@ pcibios_find_device(unsigned short vendor, unsigned short device, unsigned short
     return PCIBIOS_DEVICE_NOT_FOUND;
 }
 
-#define PCI_OP(rw,size,type)							\
-int pcibios_##rw##_config_##size (unsigned char bus, unsigned char dev_fn,	\
-				  unsigned char where, unsigned type val)	\
-{										\
-	struct pci_dev *dev = pci_find_slot(bus, dev_fn);			\
-	if (!dev) return PCIBIOS_DEVICE_NOT_FOUND;				\
-	return pci_##rw##_config_##size(dev, where, val);			\
+#define PCI_OP(rw,size,type)                            \
+int pcibios_##rw##_config_##size (unsigned char bus, unsigned char dev_fn,  \
+                  unsigned char where, unsigned type val)   \
+{                                       \
+    struct pci_dev *dev = pci_find_slot(bus, dev_fn);           \
+    if (!dev) return PCIBIOS_DEVICE_NOT_FOUND;              \
+    return pci_##rw##_config_##size(dev, where, val);           \
 }
 
 PCI_OP(read, byte, char *)

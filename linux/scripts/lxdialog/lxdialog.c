@@ -73,7 +73,7 @@ main (int argc, const char * const * argv)
         exit (-1);
     }
 
-    while (offset < argc - 1 && !end_common_opts)  	/* Common options */
+    while (offset < argc - 1 && !end_common_opts)   /* Common options */
     {
         if (!strcmp (argv[offset + 1], "--title"))
         {
@@ -103,15 +103,15 @@ main (int argc, const char * const * argv)
         }
         else if (!strcmp (argv[offset + 1], "--clear"))
         {
-            if (clear_screen)  	/* Hey, "--clear" can't appear twice! */
+            if (clear_screen)   /* Hey, "--clear" can't appear twice! */
             {
                 Usage (argv[0]);
                 exit (-1);
             }
-            else if (argc == 2)  	/* we only want to clear the screen */
+            else if (argc == 2)     /* we only want to clear the screen */
             {
                 init_dialog ();
-                refresh ();	/* init_dialog() will clear the screen for us */
+                refresh (); /* init_dialog() will clear the screen for us */
                 end_dialog ();
                 return 0;
             }
@@ -121,18 +121,18 @@ main (int argc, const char * const * argv)
                 offset++;
             }
         }
-        else			/* no more common options */
+        else            /* no more common options */
             end_common_opts = 1;
     }
 
-    if (argc - 1 == offset)  	/* no more options */
+    if (argc - 1 == offset)     /* no more options */
     {
         Usage (argv[0]);
         exit (-1);
     }
     /* use a table to look for the requested mode, to avoid code duplication */
 
-    for (modePtr = modes; modePtr->name; modePtr++)	/* look for the mode */
+    for (modePtr = modes; modePtr->name; modePtr++) /* look for the mode */
         if (!strcmp (argv[offset + 1], modePtr->name))
             break;
 
@@ -148,7 +148,7 @@ main (int argc, const char * const * argv)
     init_dialog ();
     retval = (*(modePtr->jumper)) (title, argc - offset, argv + offset);
 
-    if (clear_screen)  		/* clear screen before exit */
+    if (clear_screen)       /* clear screen before exit */
     {
         attr_clear (stdscr, LINES, COLS, screen_attr);
         refresh ();

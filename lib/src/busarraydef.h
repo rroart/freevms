@@ -1,5 +1,5 @@
-#ifndef busarraydef_h
-#define busarraydef_h
+#ifndef BUSARRAYDEF_H
+#define BUSARRAYDEF_H
 
 #define BUSARRAY$M_NO_RECONNECT 0x1
 

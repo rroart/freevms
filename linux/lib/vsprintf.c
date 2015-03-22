@@ -127,13 +127,13 @@ static int skip_atoi(const char **s)
     return i;
 }
 
-#define ZEROPAD	1		/* pad with zero */
-#define SIGN	2		/* unsigned/signed long */
-#define PLUS	4		/* show plus */
-#define SPACE	8		/* space if plus */
-#define LEFT	16		/* left justified */
-#define SPECIAL	32		/* 0x */
-#define LARGE	64		/* use 'ABCDEF' instead of 'abcdef' */
+#define ZEROPAD 1       /* pad with zero */
+#define SIGN    2       /* unsigned/signed long */
+#define PLUS    4       /* show plus */
+#define SPACE   8       /* space if plus */
+#define LEFT    16      /* left justified */
+#define SPECIAL 32      /* 0x */
+#define LARGE   64      /* use 'ABCDEF' instead of 'abcdef' */
 
 static char * number(char * buf, char * end, long long num, int base, int size, int precision, int type)
 {
@@ -265,12 +265,12 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
     char *str, *end, c;
     const char *s;
 
-    int flags;		/* flags to number() */
+    int flags;      /* flags to number() */
 
-    int field_width;	/* width of output field */
-    int precision;		/* min. # of digits for integers; max
-				   number of chars for from string */
-    int qualifier;		/* 'h', 'l', or 'L' for integer fields */
+    int field_width;    /* width of output field */
+    int precision;      /* min. # of digits for integers; max
+                   number of chars for from string */
+    int qualifier;      /* 'h', 'l', or 'L' for integer fields */
     /* 'z' support added 23/7/1999 S.H.    */
     /* 'z' changed to 'Z' --davidm 1/25/99 */
 
@@ -296,7 +296,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
         /* process flags */
         flags = 0;
 repeat:
-        ++fmt;		/* this also skips first '%' */
+        ++fmt;      /* this also skips first '%' */
         switch (*fmt)
         {
         case '-':
@@ -581,9 +581,9 @@ int sprintf(char * buf, const char *fmt, ...)
 
 /**
  * vsscanf - Unformat a buffer into a list of arguments
- * @buf:	input buffer
- * @fmt:	format of buffer
- * @args:	arguments
+ * @buf:    input buffer
+ * @fmt:    format of buffer
+ * @args:   arguments
  */
 int vsscanf(const char * buf, const char * fmt, va_list args)
 {
@@ -789,9 +789,9 @@ int vsscanf(const char * buf, const char * fmt, va_list args)
 
 /**
  * sscanf - Unformat a buffer into a list of arguments
- * @buf:	input buffer
- * @fmt:	formatting of buffer
- * @...:	resulting arguments
+ * @buf:    input buffer
+ * @fmt:    formatting of buffer
+ * @...:    resulting arguments
  */
 int sscanf(const char * buf, const char * fmt, ...)
 {

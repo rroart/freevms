@@ -77,8 +77,8 @@ enum
 
 struct softirq_action
 {
-    void	(*action)(struct softirq_action *);
-    void	*data;
+    void    (*action)(struct softirq_action *);
+    void    *data;
 };
 
 asmlinkage void do_softirq(void);
@@ -128,8 +128,8 @@ struct tasklet_struct name = { NULL, 0, ATOMIC_INIT(1), func, data }
 
 enum
 {
-    TASKLET_STATE_SCHED,	/* Tasklet is scheduled for execution */
-    TASKLET_STATE_RUN	/* Tasklet is running (SMP only) */
+    TASKLET_STATE_SCHED,    /* Tasklet is scheduled for execution */
+    TASKLET_STATE_RUN   /* Tasklet is running (SMP only) */
 };
 
 struct tasklet_head
@@ -219,7 +219,7 @@ extern void tasklet_init(struct tasklet_struct *t,
 DECLARE_TASKLET(task, name##__thr, 0); \
 static void name (unsigned long dummy) \
 { \
-	tasklet_schedule(&(task)); \
+    tasklet_schedule(&(task)); \
 }
 
 #else /* CONFIG_SMP */
@@ -273,8 +273,8 @@ extern void remove_bh(int nr);
  * or zero if none occurred, or a negative irq number
  * if more than one irq occurred.
  */
-extern unsigned long probe_irq_on(void);	/* returns 0 on failure */
-extern int probe_irq_off(unsigned long);	/* returns 0 or negative on failure */
-extern unsigned int probe_irq_mask(unsigned long);	/* returns mask of ISA interrupts */
+extern unsigned long probe_irq_on(void);    /* returns 0 on failure */
+extern int probe_irq_off(unsigned long);    /* returns 0 or negative on failure */
+extern unsigned int probe_irq_mask(unsigned long);  /* returns mask of ISA interrupts */
 
 #endif

@@ -9,7 +9,7 @@
 static int mce_disabled __initdata = 0;
 
 /*
- *	Machine Check Handler For PII/PIII
+ *  Machine Check Handler For PII/PIII
  */
 
 static int banks;
@@ -22,7 +22,7 @@ static void intel_machine_check(struct pt_regs * regs, long error_code)
     int i;
 
     rdmsr(MSR_IA32_MCG_STATUS, mcgstl, mcgsth);
-    if(mcgstl&(1<<0))	/* Recoverable ? */
+    if(mcgstl&(1<<0))   /* Recoverable ? */
         recover=0;
 
     printk(KERN_EMERG "CPU %d: Machine Check Exception: %08x%08x\n", smp_processor_id(), mcgsth, mcgstl);
@@ -67,7 +67,7 @@ static void intel_machine_check(struct pt_regs * regs, long error_code)
 }
 
 /*
- *	Machine check handler for Pentium class Intel
+ *  Machine check handler for Pentium class Intel
  */
 
 static void pentium_machine_check(struct pt_regs * regs, long error_code)
@@ -81,7 +81,7 @@ static void pentium_machine_check(struct pt_regs * regs, long error_code)
 }
 
 /*
- *	Machine check handler for WinChip C6
+ *  Machine check handler for WinChip C6
  */
 
 static void winchip_machine_check(struct pt_regs * regs, long error_code)
@@ -90,7 +90,7 @@ static void winchip_machine_check(struct pt_regs * regs, long error_code)
 }
 
 /*
- *	Handle unconfigured int18 (should never happen)
+ *  Handle unconfigured int18 (should never happen)
  */
 
 static void unexpected_machine_check(struct pt_regs * regs, long error_code)
@@ -99,7 +99,7 @@ static void unexpected_machine_check(struct pt_regs * regs, long error_code)
 }
 
 /*
- *	Call the installed machine check handler for this CPU setup.
+ *  Call the installed machine check handler for this CPU setup.
  */
 
 static void (*machine_check_vector)(struct pt_regs *, long error_code) = unexpected_machine_check;
@@ -110,7 +110,7 @@ asmlinkage void do_machine_check(struct pt_regs * regs, long error_code)
 }
 
 /*
- *	Set up machine check reporting for Intel processors
+ *  Set up machine check reporting for Intel processors
  */
 
 static void __init intel_mcheck_init(struct cpuinfo_x86 *c)
@@ -120,14 +120,14 @@ static void __init intel_mcheck_init(struct cpuinfo_x86 *c)
     static int done;
 
     /*
-     *	Check for MCE support
+     *  Check for MCE support
      */
 
     if( !test_bit(X86_FEATURE_MCE, &c->x86_capability) )
         return;
 
     /*
-     *	Pentium machine check
+     *  Pentium machine check
      */
 
     if(c->x86 == 5)
@@ -150,7 +150,7 @@ static void __init intel_mcheck_init(struct cpuinfo_x86 *c)
 
 
     /*
-     *	Check for PPro style MCA
+     *  Check for PPro style MCA
      */
 
     if( !test_bit(X86_FEATURE_MCA, &c->x86_capability) )
@@ -181,7 +181,7 @@ static void __init intel_mcheck_init(struct cpuinfo_x86 *c)
 }
 
 /*
- *	Set up machine check reporting on the Winchip C6 series
+ *  Set up machine check reporting on the Winchip C6 series
  */
 
 static void __init winchip_mcheck_init(struct cpuinfo_x86 *c)
@@ -194,8 +194,8 @@ static void __init winchip_mcheck_init(struct cpuinfo_x86 *c)
     machine_check_vector = winchip_machine_check;
     wmb();
     rdmsr(MSR_IDT_FCR1, lo, hi);
-    lo|= (1<<2);	/* Enable EIERRINT (int 18 MCE) */
-    lo&= ~(1<<4);	/* Enable MCE */
+    lo|= (1<<2);    /* Enable EIERRINT (int 18 MCE) */
+    lo&= ~(1<<4);   /* Enable MCE */
     wrmsr(MSR_IDT_FCR1, lo, hi);
     set_in_cr4(X86_CR4_MCE);
     printk(KERN_INFO "Winchip machine check reporting enabled on CPU#%d.\n", smp_processor_id());
@@ -203,7 +203,7 @@ static void __init winchip_mcheck_init(struct cpuinfo_x86 *c)
 
 
 /*
- *	This has to be run for each processor
+ *  This has to be run for each processor
  */
 
 
@@ -217,7 +217,7 @@ void __init mcheck_init(struct cpuinfo_x86 *c)
     {
     case X86_VENDOR_AMD:
         /*
-         *	AMD K7 machine check is Intel like
+         *  AMD K7 machine check is Intel like
          */
         if(c->x86 == 6)
             intel_mcheck_init(c);

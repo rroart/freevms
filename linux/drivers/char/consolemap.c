@@ -169,17 +169,17 @@ static unsigned short translations[][256] =
 /* The standard kernel character-to-font mappings are not invertible
    -- this is just a best effort. */
 
-#define MAX_GLYPH 512		/* Max possible glyph value */
+#define MAX_GLYPH 512       /* Max possible glyph value */
 
 static int inv_translate[MAX_NR_CONSOLES];
 
 struct uni_pagedir
 {
-    u16 		**uni_pgdir[32];
-    unsigned long	refcount;
-    unsigned long	sum;
-    unsigned char	*inverse_translations[4];
-    int		readonly;
+    u16         **uni_pgdir[32];
+    unsigned long   refcount;
+    unsigned long   sum;
+    unsigned char   *inverse_translations[4];
+    int     readonly;
 };
 
 static struct uni_pagedir *dflt;
@@ -347,7 +347,7 @@ int con_get_trans_new(ushort * arg)
  * this 3-level paged table scheme to be comparable to a hash table.
  */
 
-extern u8 dfont_unicount[];	/* Defined in console_defmap.c */
+extern u8 dfont_unicount[]; /* Defined in console_defmap.c */
 extern u16 dfont_unitable[];
 
 static void con_release_unimap(struct uni_pagedir *p)
@@ -604,7 +604,7 @@ con_set_default_unimap(int con)
     }
 
     for (i = 0; i <= 3; i++)
-        set_inverse_transl(conp, p, i);	/* Update all inverse translations */
+        set_inverse_transl(conp, p, i); /* Update all inverse translations */
     dflt = p;
     return err;
 }
@@ -677,11 +677,11 @@ conv_uni_to_pc(struct vc_data *conp, long ucs)
 
     /* Only 16-bit codes supported at this time */
     if (ucs > 0xffff)
-        ucs = 0xfffd;		/* U+FFFD: REPLACEMENT CHARACTER */
+        ucs = 0xfffd;       /* U+FFFD: REPLACEMENT CHARACTER */
     else if (ucs < 0x20 || ucs >= 0xfffe)
-        return -1;		/* Not a printable character */
+        return -1;      /* Not a printable character */
     else if (ucs == 0xfeff || (ucs >= 0x200a && ucs <= 0x200f))
-        return -2;			/* Zero-width space */
+        return -2;          /* Zero-width space */
     /*
      * UNI_DIRECT_BASE indicates the start of the region in the User Zone
      * which always has a 1:1 mapping to the currently loaded font.  The
@@ -699,7 +699,7 @@ conv_uni_to_pc(struct vc_data *conp, long ucs)
             (h = p2[ucs & 0x3f]) < MAX_GLYPH)
         return h;
 
-    return -4;		/* not found */
+    return -4;      /* not found */
 }
 
 /*

@@ -31,10 +31,10 @@ typedef unsigned char  uch;
 typedef unsigned short ush;
 typedef unsigned long  ulg;
 
-#define WSIZE 0x8000		/* Window size must be at least 32k, */
+#define WSIZE 0x8000        /* Window size must be at least 32k, */
 /* and a power of two */
 
-static uch *inbuf;	     /* input buffer */
+static uch *inbuf;       /* input buffer */
 static uch window[WSIZE];    /* Sliding window buffer */
 
 static unsigned insize = 0;  /* valid bytes in inbuf */
@@ -127,7 +127,7 @@ static void *malloc(int size)
     if (size <0) error("Malloc error\n");
     if (free_mem_ptr <= 0) error("Memory error\n");
 
-    free_mem_ptr = (free_mem_ptr + 3) & ~3;	/* Align */
+    free_mem_ptr = (free_mem_ptr + 3) & ~3; /* Align */
 
     p = (void *)free_mem_ptr;
     free_mem_ptr += size;
@@ -199,7 +199,7 @@ static void putstr(const char *s)
     SCREEN_INFO.orig_x = x;
     SCREEN_INFO.orig_y = y;
 
-    pos = (x + cols * y) * 2;	/* Update cursor position */
+    pos = (x + cols * y) * 2;   /* Update cursor position */
     outb_p(14, vidport);
     outb_p(0xff & (pos >> 9), vidport+1);
     outb_p(15, vidport);

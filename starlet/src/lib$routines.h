@@ -1,6 +1,6 @@
 /* <lib$routines.h>
  *
- *	General run-time library routines.
+ *  General run-time library routines.
  */
 #ifndef _LIB$ROUTINES_H
 #define _LIB$ROUTINES_H
@@ -22,7 +22,7 @@ unsigned long lib$analyze_sdesc_64 (const struct dsc$descriptor_s* descrip,
                                     char            **data_address,
                                     unsigned long   *descriptor_type );
 
-unsigned long lib$ascii_to_uid();
+unsigned long lib$ascii_to_uid(void);
 
 int lib$asn_wth_mbx(const void *,const long *,const long *,
                     unsigned short *,unsigned short *);
@@ -39,7 +39,7 @@ unsigned long lib$build_nodespec(const  struct  dsc$descriptor_s *primary,
                                  const  struct  dsc$descriptor_s *secondary,
                                  unsigned short *nodespec_length );
 
-unsigned long lib$callg(const void *,const unsigned long (*)());
+unsigned long lib$callg(const void *,const unsigned long (*)(void));
 
 #if 0
 // not now
@@ -48,7 +48,7 @@ unsigned long lib$char(void *,const char *);
 unsigned long lib$char(struct dsc$descriptor_s*, const char*);
 #endif
 
-unsigned long lib$compare_uid();
+unsigned long lib$compare_uid(void);
 
 #if 0
 unsigned long lib$convert_date_string(const void *,void *,...);
@@ -156,7 +156,7 @@ struct FAB;
 unsigned long lib$file_scan(const struct FAB *,const unsigned long (*)(struct FAB *),
                             const unsigned long (*)(struct FAB *),...);
 
-unsigned long lib$file_scan_end();
+unsigned long lib$file_scan_end(void);
 
 unsigned long lib$find_file(const void *,void *,unsigned long *,...);
 
@@ -172,7 +172,7 @@ unsigned long lib$flt_under(const unsigned long *);
 
 unsigned long lib$format_date_time(void *,...);
 
-unsigned long lib$free_date_time_context();
+unsigned long lib$free_date_time_context(void);
 
 unsigned int lib$free_ef(const unsigned int *);
 
@@ -313,9 +313,9 @@ unsigned long lib$sfreen_dd(const unsigned *,void *);
 
 unsigned long lib$sget1_dd(const unsigned short *,void *);
 
-int lib$show_timer (void * handle_address, int * code, int (*user_action_procedure)(), unsigned long user_argument_value);
+int lib$show_timer (void * handle_address, int * code, int (*user_action_procedure)(void), unsigned long user_argument_value);
 
-unsigned long lib$show_vm();
+unsigned long lib$show_vm(int * code , int (*user_action_procedure)(void) , long * user_specified_argument);
 
 unsigned long lib$show_vm_zone(const unsigned long *,...);
 
@@ -331,7 +331,7 @@ int lib$skpc(const void *,const void *);
 
 int lib$spanc(const void *,const unsigned char *,const unsigned char *);
 
-unsigned long lib$spawn();
+unsigned long lib$spawn(void);
 
 // not now: unsigned long lib$stat_timer(const int *,void *,...);
 int lib$stat_timer (int * code, long * value_argument, void * handle_address);
@@ -366,7 +366,7 @@ unsigned long lib$traverse_tree(const void *,const unsigned long (*)(void *,void
 
 unsigned long lib$trim_filespec(const void *,void *);
 
-unsigned long lib$uid_to_ascii();
+unsigned long lib$uid_to_ascii(void);
 
 unsigned long lib$verify_vm_zone(const unsigned long *);
 

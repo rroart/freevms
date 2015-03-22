@@ -24,11 +24,11 @@
 
 extern struct vt_struct
 {
-    int vc_num;				/* The console number */
-    unsigned char	vc_mode;		/* KD_TEXT, ... */
-    struct vt_mode	vt_mode;
-    int		vt_pid;
-    int		vt_newvt;
+    int vc_num;             /* The console number */
+    unsigned char   vc_mode;        /* KD_TEXT, ... */
+    struct vt_mode  vt_mode;
+    int     vt_pid;
+    int     vt_newvt;
     wait_queue_head_t paste_wait;
 } *vt_cons[MAX_NR_CONSOLES];
 

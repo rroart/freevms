@@ -12,10 +12,10 @@ struct fs_struct
 };
 
 #define INIT_FS { \
-	ATOMIC_INIT(1), \
-	RW_LOCK_UNLOCKED, \
-	0022, \
-	NULL, NULL, NULL, NULL, NULL, NULL \
+    ATOMIC_INIT(1), \
+    RW_LOCK_UNLOCKED, \
+    0022, \
+    NULL, NULL, NULL, NULL, NULL, NULL \
 }
 
 extern void exit_fs(struct task_struct *);

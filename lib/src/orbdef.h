@@ -1,5 +1,5 @@
-#ifndef orbdef_h
-#define orbdef_h
+#ifndef ORBDEF_H
+#define ORBDEF_H
 
 #define ORB$M_PROT_16 0x1
 #define ORB$M_ACL_QUEUE 0x2
@@ -54,22 +54,22 @@ struct _orb
             unsigned short int orb$w_flag_bits;
             struct
             {
-                unsigned orb$v_prot_16		: 1;
-                unsigned orb$v_acl_queue	: 1;
-                unsigned orb$v_mode_vector	: 1;
-                unsigned orb$v_noacl		: 1;
-                unsigned orb$v_class_prot	: 1;
-                unsigned orb$v_noaudit		: 1;
-                unsigned orb$v_reserved_1	: 1;
-                unsigned orb$v_mode_valid	: 1;
-                unsigned orb$v_profile_locked	: 1;
-                unsigned orb$v_indirect_acl	: 1;
-                unsigned orb$v_boottime		: 1;
-                unsigned orb$v_unmodified	: 1;
-                unsigned orb$v_damaged		: 1;
-                unsigned orb$v_template		: 1;
-                unsigned orb$v_transition	: 1;
-                unsigned orb$v_ext_nameblock	: 1;
+                unsigned orb$v_prot_16      : 1;
+                unsigned orb$v_acl_queue    : 1;
+                unsigned orb$v_mode_vector  : 1;
+                unsigned orb$v_noacl        : 1;
+                unsigned orb$v_class_prot   : 1;
+                unsigned orb$v_noaudit      : 1;
+                unsigned orb$v_reserved_1   : 1;
+                unsigned orb$v_mode_valid   : 1;
+                unsigned orb$v_profile_locked   : 1;
+                unsigned orb$v_indirect_acl : 1;
+                unsigned orb$v_boottime     : 1;
+                unsigned orb$v_unmodified   : 1;
+                unsigned orb$v_damaged      : 1;
+                unsigned orb$v_template     : 1;
+                unsigned orb$v_transition   : 1;
+                unsigned orb$v_ext_nameblock    : 1;
             };
         };
     };

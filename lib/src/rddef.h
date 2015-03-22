@@ -1,5 +1,5 @@
-#ifndef rddef_h
-#define rddef_h
+#ifndef RDDEF_H
+#define RDDEF_H
 
 #define RD$K_LENGTH 8
 #define RD$C_LENGTH 8
@@ -25,11 +25,11 @@ struct _scs_rd
     unsigned short int rd$w_seqnum;
 };
 
-#define		rd$l_cdrp		rd$r_cdrp_ovl.rd$l_cdrp
-#define		rd$l_link		rd$r_cdrp_ovl.rd$l_link
-#define		rd$v_busy		rd$r_state_ovl.rd$r_state_bits.rd$v_busy
-#define		rd$v_perm		rd$r_state_ovl.rd$r_state_bits.rd$v_perm
-#define		rd$w_state		rd$r_state_ovl.rd$w_state
+#define     rd$l_cdrp       rd$r_cdrp_ovl.rd$l_cdrp
+#define     rd$l_link       rd$r_cdrp_ovl.rd$l_link
+#define     rd$v_busy       rd$r_state_ovl.rd$r_state_bits.rd$v_busy
+#define     rd$v_perm       rd$r_state_ovl.rd$r_state_bits.rd$v_perm
+#define     rd$w_state      rd$r_state_ovl.rd$w_state
 
 #endif
 

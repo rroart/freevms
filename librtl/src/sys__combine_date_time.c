@@ -35,7 +35,7 @@
 */
 
 #include <time.h>               /* C header for $GETTIM to find time */
-#include "sys$routines.h"	/* Our header file! */
+#include "sys$routines.h"   /* Our header file! */
 #include "ssdef.h"
 
 #define TIMEBASE 100000         /* 10 millisecond units in quadword */

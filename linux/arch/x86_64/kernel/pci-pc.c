@@ -5,16 +5,16 @@
 // Modified Linux source file, 2001-2006
 
 /*
- *	Low-Level PCI Support for PC
+ *  Low-Level PCI Support for PC
  *
- *	(c) 1999--2000 Martin Mares <mj@ucw.cz>
- * 	2001 Andi Kleen. Cleanup for x86-64. Removed PCI-BIOS access and fixups
- *	for hardware that is unlikely to exist on any Hammer platform.
+ *  (c) 1999--2000 Martin Mares <mj@ucw.cz>
+ *  2001 Andi Kleen. Cleanup for x86-64. Removed PCI-BIOS access and fixups
+ *  for hardware that is unlikely to exist on any Hammer platform.
  *
- * 	On x86-64 we don't have any access to the PCI-BIOS in long mode, so we
- *	cannot sort the pci device table based on what the BIOS did. This might
- *	change the probing order of some devices compared to an i386 kernel.
- * 	May need to use ACPI to fix this.
+ *  On x86-64 we don't have any access to the PCI-BIOS in long mode, so we
+ *  cannot sort the pci device table based on what the BIOS did. This might
+ *  change the probing order of some devices compared to an i386 kernel.
+ *  May need to use ACPI to fix this.
  */
 
 #include <linux/config.h>
@@ -72,7 +72,7 @@ static spinlock_t pci_config_lock = SPIN_LOCK_UNLOCKED;
 #define CONFIG_CMD(dev, where)   (0x80000000 | (dev->bus->number << 16) | (dev->devfn << 8) | (where & ~3))
 
 #define PCI_CONF1_ADDRESS(bus, dev, fn, reg) \
-	(0x80000000 | (bus << 16) | (dev << 11) | (fn << 8) | (reg & ~3))
+    (0x80000000 | (bus << 16) | (dev << 11) | (fn << 8) | (reg & ~3))
 
 static int pci_conf1_read (int seg, int bus, int dev, int fn, int reg, int len,
                            u32 *value)
@@ -206,13 +206,13 @@ static struct pci_ops pci_direct_conf1 =
  * Functions for accessing PCI configuration space with type 2 accesses
  */
 
-#define IOADDR(devfn, where)	((0xC000 | ((devfn & 0x78) << 5)) + where)
-#define FUNC(devfn)		(((devfn & 7) << 1) | 0xf0)
-#define SET(dev)		if (dev->devfn & 0x80) return PCIBIOS_DEVICE_NOT_FOUND;		\
-				outb(FUNC(dev->devfn), 0xCF8);					\
-				outb(dev->bus->number, 0xCFA);
+#define IOADDR(devfn, where)    ((0xC000 | ((devfn & 0x78) << 5)) + where)
+#define FUNC(devfn)     (((devfn & 7) << 1) | 0xf0)
+#define SET(dev)        if (dev->devfn & 0x80) return PCIBIOS_DEVICE_NOT_FOUND;     \
+                outb(FUNC(dev->devfn), 0xCF8);                  \
+                outb(dev->bus->number, 0xCFA);
 
-#define PCI_CONF2_ADDRESS(dev, reg)	(u16)(0xC000 | (dev << 8) | reg)
+#define PCI_CONF2_ADDRESS(dev, reg) (u16)(0xC000 | (dev << 8) | reg)
 
 static int pci_conf2_read (int seg, int bus, int dev, int fn, int reg, int len, u32 *value)
 {
@@ -367,7 +367,7 @@ static struct pci_ops pci_direct_conf2 =
 static int __devinit pci_sanity_check(struct pci_ops *o)
 {
     u16 x;
-    struct pci_bus bus;		/* Fake bus and device */
+    struct pci_bus bus;     /* Fake bus and device */
     struct pci_dev dev;
 
     if (pci_probe & PCI_NO_CHECKS)
@@ -595,7 +595,7 @@ static void __devinit pci_fixup_ide_bases(struct pci_dev *d)
 
 struct pci_fixup pcibios_fixups[] =
 {
-    { PCI_FIXUP_HEADER, PCI_ANY_ID,	PCI_ANY_ID, pci_fixup_ide_bases },
+    { PCI_FIXUP_HEADER, PCI_ANY_ID, PCI_ANY_ID, pci_fixup_ide_bases },
     { 0 }
 };
 

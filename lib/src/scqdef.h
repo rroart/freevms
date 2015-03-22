@@ -1,5 +1,5 @@
-#ifndef scqdef_h
-#define scqdef_h
+#ifndef SCQDEF_H
+#define SCQDEF_H
 
 #define SCQ$C_VERSION 1
 
@@ -42,11 +42,11 @@ struct _scq
             unsigned short int scq$iw_scsi_lun;
         };
     };
-    int (*scq$ps_sel_callback)();
+    int (*scq$ps_sel_callback)(void);
     unsigned int scq$is_sel_context;
-    int (*scq$ps_aen_callback)();
+    int (*scq$ps_aen_callback)(void);
     unsigned int scq$is_aen_context;
-    int (*scq$ps_port_state_callback)();
+    int (*scq$ps_port_state_callback)(void);
     unsigned int scq$is_port_state_context;
 
     void *scq$ps_spdt;

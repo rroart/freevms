@@ -1,5 +1,5 @@
-#ifndef varargs_h
-#define varargs_h
+#ifndef VARARGS_H
+#define VARARGS_H
 
 typedef char *va_list;
 

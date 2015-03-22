@@ -10,7 +10,7 @@
  *  Copyright (C) 1995  Linus Torvalds
  *
  *  Pentium III FXSR, SSE support
- *	Gareth Hughes <gareth@valinux.com>, May 2000
+ *  Gareth Hughes <gareth@valinux.com>, May 2000
  */
 
 /*
@@ -166,12 +166,12 @@ void cpu_idle (void)
     {
         int myvar=0;
         void (*idle)(void) = pm_idle;
-        //		 printk("cpu_idle\n");
+        //       printk("cpu_idle\n");
         if (!idle)
             idle = default_idle;
         // printk("bef while\n");
         in_idle_while=1;
-        //		while (!current->need_resched)
+        //      while (!current->need_resched)
         //  idle();
         while (sch$gl_idle_cpus & (1 << current->pcb$l_cpu_id))
         {
@@ -182,7 +182,7 @@ void cpu_idle (void)
         myvar=0;
         //round_and_round=1;
         //while (!current->need_resched && round_and_round++)
-        //			idle();
+        //          idle();
         //if (!round_and_round)
         //  printk("enough idling\n");
         in_idle_while=0;
@@ -219,7 +219,7 @@ int reboot_thru_bios;
 int reboot_smp = 0;
 static int reboot_cpu = -1;
 /* shamelessly grabbed from lib/vsprintf.c for readability */
-#define is_digit(c)	((c) >= '0' && (c) <= '9')
+#define is_digit(c) ((c) >= '0' && (c) <= '9')
 #endif
 static int __init reboot_setup(char *str)
 {
@@ -274,9 +274,9 @@ __setup("reboot=", reboot_setup);
 static unsigned long long
 real_mode_gdt_entries [3] =
 {
-    0x0000000000000000ULL,	/* Null descriptor */
-    0x00009a000000ffffULL,	/* 16-bit real-mode 64k code at 0x00000000 */
-    0x000092000100ffffULL	/* 16-bit real-mode 64k data at 0x00000100 */
+    0x0000000000000000ULL,  /* Null descriptor */
+    0x00009a000000ffffULL,  /* 16-bit real-mode 64k code at 0x00000000 */
+    0x000092000100ffffULL   /* 16-bit real-mode 64k data at 0x00000100 */
 };
 
 static struct
@@ -309,21 +309,21 @@ no_idt = { 0, 0 };
 
 static unsigned char real_mode_switch [] =
 {
-    0x66, 0x0f, 0x20, 0xc0,			/*    movl  %cr0,%eax        */
-    0x66, 0x83, 0xe0, 0x11,			/*    andl  $0x00000011,%eax */
-    0x66, 0x0d, 0x00, 0x00, 0x00, 0x60,	/*    orl   $0x60000000,%eax */
-    0x66, 0x0f, 0x22, 0xc0,			/*    movl  %eax,%cr0        */
-    0x66, 0x0f, 0x22, 0xd8,			/*    movl  %eax,%cr3        */
-    0x66, 0x0f, 0x20, 0xc3,			/*    movl  %cr0,%ebx        */
-    0x66, 0x81, 0xe3, 0x00, 0x00, 0x00, 0x60,	/*    andl  $0x60000000,%ebx */
-    0x74, 0x02,				/*    jz    f                */
-    0x0f, 0x08,				/*    invd                   */
-    0x24, 0x10,				/* f: andb  $0x10,al         */
-    0x66, 0x0f, 0x22, 0xc0			/*    movl  %eax,%cr0        */
+    0x66, 0x0f, 0x20, 0xc0,         /*    movl  %cr0,%eax        */
+    0x66, 0x83, 0xe0, 0x11,         /*    andl  $0x00000011,%eax */
+    0x66, 0x0d, 0x00, 0x00, 0x00, 0x60, /*    orl   $0x60000000,%eax */
+    0x66, 0x0f, 0x22, 0xc0,         /*    movl  %eax,%cr0        */
+    0x66, 0x0f, 0x22, 0xd8,         /*    movl  %eax,%cr3        */
+    0x66, 0x0f, 0x20, 0xc3,         /*    movl  %cr0,%ebx        */
+    0x66, 0x81, 0xe3, 0x00, 0x00, 0x00, 0x60,   /*    andl  $0x60000000,%ebx */
+    0x74, 0x02,             /*    jz    f                */
+    0x0f, 0x08,             /*    invd                   */
+    0x24, 0x10,             /* f: andb  $0x10,al         */
+    0x66, 0x0f, 0x22, 0xc0          /*    movl  %eax,%cr0        */
 };
 static unsigned char jump_to_bios [] =
 {
-    0xea, 0x00, 0x00, 0xff, 0xff		/*    ljmp  $0xffff,$0x0000  */
+    0xea, 0x00, 0x00, 0xff, 0xff        /*    ljmp  $0xffff,$0x0000  */
 };
 
 static inline void kb_wait(void)
@@ -561,16 +561,16 @@ int kernel_thread(int (*fn)(void *), void * arg, unsigned long flags)
 
     __asm__ __volatile__(
         "movl %%esp,%%esi\n\t"
-        "int $0x80\n\t"		/* Linux/i386 system call */
-        "cmpl %%esp,%%esi\n\t"	/* child or parent? */
-        "je 1f\n\t"		/* parent - jump */
+        "int $0x80\n\t"     /* Linux/i386 system call */
+        "cmpl %%esp,%%esi\n\t"  /* child or parent? */
+        "je 1f\n\t"     /* parent - jump */
         /* Load the argument into eax, and push it.  That way, it does
          * not matter whether the called function is compiled with
          * -mregparm or not.  */
         "movl %4,%%eax\n\t"
         "pushl %%eax\n\t"
-        "call *%5\n\t"		/* call fn */
-        "movl %3,%0\n\t"	/* exit */
+        "call *%5\n\t"      /* call fn */
+        "movl %3,%0\n\t"    /* exit */
         "int $0x80\n"
         "1:\t"
         :"=&a" (retval), "=&S" (d0)
@@ -642,17 +642,17 @@ void copy_segments(struct task_struct *p, struct mm_struct *new_mm)
             memcpy(ldt, old_ldt, LDT_ENTRIES*LDT_ENTRY_SIZE);
     }
     new_mm->context.segments = ldt;
-    new_mm->context.cpuvalid = ~0UL;	/* valid on all CPU's - they can't have stale data */
+    new_mm->context.cpuvalid = ~0UL;    /* valid on all CPU's - they can't have stale data */
 }
 
 /*
  * Save a segment.
  */
 #define savesegment(seg,value) \
-	asm volatile("movl %%" #seg ",%0":"=m" (*(int *)&(value)))
+    asm volatile("movl %%" #seg ",%0":"=m" (*(int *)&(value)))
 #undef savesegment
 #define savesegment(seg,value) \
-	asm volatile("mov %%" #seg ",%0":"=rm" (value))
+    asm volatile("mov %%" #seg ",%0":"=rm" (value))
 
 int copy_thread(int nr, unsigned long clone_flags, unsigned long esp,
                 unsigned long unused,
@@ -760,12 +760,12 @@ void dump_thread(struct pt_regs * regs, struct user * dump)
  * This special macro can be used to load a debugging register
  */
 #define loaddebug(thread,register) \
-		__asm__("movl %0,%%db" #register  \
-			: /* no output */ \
-			:"r" (thread->debugreg[register]))
+        __asm__("movl %0,%%db" #register  \
+            : /* no output */ \
+            :"r" (thread->debugreg[register]))
 
 /*
- *	switch_to(x,yn) should switch tasks from x to y.
+ *  switch_to(x,yn) should switch tasks from x to y.
  *
  * We fsave/fwait so that an exception goes off at the right time
  * (as a call from the fsave or fwait in effect) rather than to
@@ -914,8 +914,8 @@ out:
  */
 extern void scheduling_functions_start_here(void);
 extern void scheduling_functions_end_here(void);
-#define first_sched	((unsigned long) scheduling_functions_start_here)
-#define last_sched	((unsigned long) scheduling_functions_end_here)
+#define first_sched ((unsigned long) scheduling_functions_start_here)
+#define last_sched  ((unsigned long) scheduling_functions_end_here)
 
 unsigned long get_wchan(struct task_struct *p)
 {

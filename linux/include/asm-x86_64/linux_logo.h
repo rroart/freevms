@@ -10,8 +10,8 @@
  * image size has to be 80x80
  * values have to start from 0x20
  * (i.e. RGB(linux_logo_red[0],
- *	     linux_logo_green[0],
- *	     linux_logo_blue[0]) is color 0x20)
+ *       linux_logo_green[0],
+ *       linux_logo_blue[0]) is color 0x20)
  * BW image has to be 80x80 as well, with MS bit
  * on the left
  * Serial_console ascii image can be any size,

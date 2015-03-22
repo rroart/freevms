@@ -42,26 +42,26 @@ struct dn_scp                                   /* Session Control Port */
     unsigned short          ackrcv_dat;
     unsigned short          ackrcv_oth;
     unsigned char           flowrem_sw;
-    unsigned char		flowloc_sw;
+    unsigned char       flowloc_sw;
 #define DN_SEND         2
 #define DN_DONTSEND     1
 #define DN_NOCHANGE     0
-    unsigned short		flowrem_dat;
-    unsigned short		flowrem_oth;
-    unsigned short		flowloc_dat;
-    unsigned short		flowloc_oth;
-    unsigned char		services_rem;
-    unsigned char		services_loc;
-    unsigned char		info_rem;
-    unsigned char		info_loc;
+    unsigned short      flowrem_dat;
+    unsigned short      flowrem_oth;
+    unsigned short      flowloc_dat;
+    unsigned short      flowloc_oth;
+    unsigned char       services_rem;
+    unsigned char       services_loc;
+    unsigned char       info_rem;
+    unsigned char       info_loc;
 
-    unsigned short		segsize_rem;
-    unsigned short		segsize_loc;
+    unsigned short      segsize_rem;
+    unsigned short      segsize_loc;
 
-    unsigned char		nonagle;
-    unsigned char		multi_ireq;
-    unsigned char		accept_mode;
-    unsigned long		seg_total; /* Running total of current segment */
+    unsigned char       nonagle;
+    unsigned char       multi_ireq;
+    unsigned char       accept_mode;
+    unsigned long       seg_total; /* Running total of current segment */
 
     struct optdata_dn     conndata_in;
     struct optdata_dn     conndata_out;

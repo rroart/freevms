@@ -1,7 +1,7 @@
 /*
- *	strfind_first_not_in_set
+ *  strfind_first_not_in_set
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,13 +19,13 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
@@ -43,14 +43,14 @@
  *      Jan 30, 1997 - Kevin Handy
  *              Preliminary design.
  *
- *	Feb 7, 1997 - Christof Ziele
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Ziele
+ *      Change 'short' to 'unsigned short' in several places.
  *
- *	Feb 26, 2004 - Andrew Allison
- *		Added GNU License
+ *  Feb 26, 2004 - Andrew Allison
+ *      Added GNU License
  *
- *	Mar 12, 2004 - Andrew Allison
- *		Return 1 if set-of-characters is empty
+ *  Mar 12, 2004 - Andrew Allison
+ *      Return 1 if set-of-characters is empty
  */
 
 #include <stdio.h>
@@ -63,27 +63,27 @@
 /*************************************************************
  * str$find_first_not_in_set
  *
- *	This function searches a string, one character at a time, from
- *	the left to right, comparing each character in the string to
- *	every character in a specified set of characters for which it
- *	is searching, and return when no match is found.
+ *  This function searches a string, one character at a time, from
+ *  the left to right, comparing each character in the string to
+ *  every character in a specified set of characters for which it
+ *  is searching, and return when no match is found.
  *
- *	Returns:
- *		0 if no match found, otherwise returns the position
- *		in the source string where the first match is found.
+ *  Returns:
+ *      0 if no match found, otherwise returns the position
+ *      in the source string where the first match is found.
  *
  */
 long str$find_first_not_in_set(
     const struct dsc$descriptor_s* first_source_string,
     const struct dsc$descriptor_s* second_source_string)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
-    char* s2_ptr;			/* Pointer to second string */
-    unsigned short s2_length;	/* Length of second string */
-    int loop1;			/* Outer loop */
-    int loop2;			/* Inner loop */
-    int result;			/* Partial result */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
+    char* s2_ptr;           /* Pointer to second string */
+    unsigned short s2_length;   /* Length of second string */
+    int loop1;          /* Outer loop */
+    int loop2;          /* Inner loop */
+    int result;         /* Partial result */
 
     /*
      * Analyze source strings

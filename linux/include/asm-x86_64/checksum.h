@@ -31,11 +31,11 @@ static inline unsigned int csum_fold(unsigned int sum)
 }
 
 /*
- *	This is a version of ip_compute_csum() optimized for IP headers,
- *	which always checksum on 4 octet boundaries.
+ *  This is a version of ip_compute_csum() optimized for IP headers,
+ *  which always checksum on 4 octet boundaries.
  *
- *	By Jorge Cwik <jorge@laser.satlink.net>, adapted for linux by
- *	Arnt Gulbrandsen.
+ *  By Jorge Cwik <jorge@laser.satlink.net>, adapted for linux by
+ *  Arnt Gulbrandsen.
  */
 
 /**
@@ -47,7 +47,7 @@ static inline unsigned short ip_fast_csum(unsigned char *iph, unsigned int ihl)
 {
     unsigned int sum;
 
-    asm(	"  movl (%1), %0\n"
+    asm(    "  movl (%1), %0\n"
             "  subl $4, %2\n"
             "  jbe 2f\n"
             "  addl 4(%1), %0\n"

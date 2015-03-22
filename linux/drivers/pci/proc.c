@@ -1,9 +1,9 @@
 /*
- *	$Id$
+ *  $Id$
  *
- *	Procfs interface for the PCI bus.
+ *  Procfs interface for the PCI bus.
  *
- *	Copyright (c) 1997--1999 Martin Mares <mj@ucw.cz>
+ *  Copyright (c) 1997--1999 Martin Mares <mj@ucw.cz>
  */
 
 #include <linux/types.h>

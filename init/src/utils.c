@@ -12,9 +12,9 @@
  *      Initiale version. Device size hardcoded, geometry not set, and many
  *      other things :-)        Usage: init /dev/hdb4
  *
- *   20-OCT-2003	Zakaria Yassine <zakaria@sympatico.ca>
- *	some bugs corrected. support write. add params: device-size (in blocks), volume-label
- *		Usage: init /dev/hdb4 VOLNAME 40000
+ *   20-OCT-2003    Zakaria Yassine <zakaria@sympatico.ca>
+ *  some bugs corrected. support write. add params: device-size (in blocks), volume-label
+ *      Usage: init /dev/hdb4 VOLNAME 40000
  *
  * Report Bugs:
  *   To: FreeVMS project mailing list <http://freevms.nvg.org/>

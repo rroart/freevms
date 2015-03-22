@@ -1,5 +1,5 @@
 /*
- *  linux/drivers/ide/piix.c		Version 0.32	June 9, 2000
+ *  linux/drivers/ide/piix.c        Version 0.32    June 9, 2000
  *
  *  Copyright (C) 1998-1999 Andrzej Krzysztofowicz, Author and Maintainer
  *  Copyright (C) 1998-2000 Andre Hedrick <andre@linux-ide.org>
@@ -14,10 +14,10 @@
  *                 41
  *                 43
  *
- * | PIO 0       | c0 | 80 | 0 | 	piix_tune_drive(drive, 0);
- * | PIO 2 | SW2 | d0 | 90 | 4 | 	piix_tune_drive(drive, 2);
- * | PIO 3 | MW1 | e1 | a1 | 9 | 	piix_tune_drive(drive, 3);
- * | PIO 4 | MW2 | e3 | a3 | b | 	piix_tune_drive(drive, 4);
+ * | PIO 0       | c0 | 80 | 0 |    piix_tune_drive(drive, 0);
+ * | PIO 2 | SW2 | d0 | 90 | 4 |    piix_tune_drive(drive, 2);
+ * | PIO 3 | MW1 | e1 | a1 | 9 |    piix_tune_drive(drive, 3);
+ * | PIO 4 | MW2 | e3 | a3 | b |    piix_tune_drive(drive, 4);
  *
  * sitre = word40 & 0x4000; primary
  * sitre = word42 & 0x4000; secondary
@@ -67,7 +67,7 @@
 
 #include "ide_modes.h"
 
-#define PIIX_DEBUG_DRIVE_INFO		0
+#define PIIX_DEBUG_DRIVE_INFO       0
 
 #define DISPLAY_PIIX_TIMINGS
 
@@ -109,7 +109,7 @@ static int piix_get_info (char *buffer, char **addr, off_t offset, int count)
         break;
     case PCI_DEVICE_ID_INTEL_82371MX:
         p += sprintf(p, "\n                                Intel MPIIX Chipset.\n");
-        return p-buffer;	/* => must be less than 4k! */
+        return p-buffer;    /* => must be less than 4k! */
     case PCI_DEVICE_ID_INTEL_82371FB_1:
     case PCI_DEVICE_ID_INTEL_82371FB_0:
     default:
@@ -182,10 +182,10 @@ static int piix_get_info (char *buffer, char **addr, off_t offset, int count)
     p += sprintf(p, "PIO\n");
 
     /*
-     *	FIXME.... Add configuration junk data....blah blah......
+     *  FIXME.... Add configuration junk data....blah blah......
      */
 
-    return p-buffer;	 /* => must be less than 4k! */
+    return p-buffer;     /* => must be less than 4k! */
 }
 #endif  /* defined(DISPLAY_PIIX_TIMINGS) && defined(CONFIG_PROC_FS) */
 
@@ -241,11 +241,11 @@ static void piix_tune_drive (ide_drive_t *drive, byte pio)
     unsigned long flags;
     u16 master_data;
     byte slave_data;
-    int is_slave		= (&HWIF(drive)->drives[1] == drive);
-    int master_port		= HWIF(drive)->index ? 0x42 : 0x40;
-    int slave_port		= 0x44;
+    int is_slave        = (&HWIF(drive)->drives[1] == drive);
+    int master_port     = HWIF(drive)->index ? 0x42 : 0x40;
+    int slave_port      = 0x44;
     /* ISP  RTC */
-    byte timings[][2]	= { { 0, 0 },
+    byte timings[][2]   = { { 0, 0 },
         { 0, 0 },
         { 1, 0 },
         { 2, 1 },
@@ -285,18 +285,18 @@ static void piix_tune_drive (ide_drive_t *drive, byte pio)
 #if defined(CONFIG_BLK_DEV_IDEDMA) && defined(CONFIG_PIIX_TUNING)
 static int piix_tune_chipset (ide_drive_t *drive, byte speed)
 {
-    ide_hwif_t *hwif	= HWIF(drive);
-    struct pci_dev *dev	= hwif->pci_dev;
-    byte maslave		= hwif->channel ? 0x42 : 0x40;
-    int a_speed		= 3 << (drive->dn * 4);
-    int u_flag		= 1 << drive->dn;
-    int v_flag		= 0x01 << drive->dn;
-    int w_flag		= 0x10 << drive->dn;
-    int u_speed		= 0;
-    int err			= 0;
-    int			sitre;
-    short			reg4042, reg44, reg48, reg4a, reg54;
-    byte			reg55;
+    ide_hwif_t *hwif    = HWIF(drive);
+    struct pci_dev *dev = hwif->pci_dev;
+    byte maslave        = hwif->channel ? 0x42 : 0x40;
+    int a_speed     = 3 << (drive->dn * 4);
+    int u_flag      = 1 << drive->dn;
+    int v_flag      = 0x01 << drive->dn;
+    int w_flag      = 0x10 << drive->dn;
+    int u_speed     = 0;
+    int err         = 0;
+    int         sitre;
+    short           reg4042, reg44, reg48, reg4a, reg54;
+    byte            reg55;
 
     pci_read_config_word(dev, maslave, &reg4042);
     sitre = (reg4042 & 0x4000) ? 1 : 0;
@@ -383,19 +383,19 @@ static int piix_tune_chipset (ide_drive_t *drive, byte speed)
 
 static int piix_config_drive_for_dma (ide_drive_t *drive)
 {
-    struct hd_driveid *id	= drive->id;
-    ide_hwif_t *hwif	= HWIF(drive);
-    struct pci_dev *dev	= hwif->pci_dev;
-    byte			speed;
+    struct hd_driveid *id   = drive->id;
+    ide_hwif_t *hwif    = HWIF(drive);
+    struct pci_dev *dev = hwif->pci_dev;
+    byte            speed;
 
-    byte udma_66		= eighty_ninty_three(drive);
-    int ultra100		= ((dev->device == PCI_DEVICE_ID_INTEL_82801BA_8) ||
+    byte udma_66        = eighty_ninty_three(drive);
+    int ultra100        = ((dev->device == PCI_DEVICE_ID_INTEL_82801BA_8) ||
                            (dev->device == PCI_DEVICE_ID_INTEL_82801BA_9) ||
                            (dev->device == PCI_DEVICE_ID_INTEL_82801CA_10)) ? 1 : 0;
-    int ultra66		= ((ultra100) ||
+    int ultra66     = ((ultra100) ||
                        (dev->device == PCI_DEVICE_ID_INTEL_82801AA_1) ||
                        (dev->device == PCI_DEVICE_ID_INTEL_82372FB_1)) ? 1 : 0;
-    int ultra		= ((ultra66) ||
+    int ultra       = ((ultra66) ||
                        (dev->device == PCI_DEVICE_ID_INTEL_82371AB) ||
                        (dev->device == PCI_DEVICE_ID_INTEL_82443MX_1) ||
                        (dev->device == PCI_DEVICE_ID_INTEL_82451NX) ||
@@ -444,7 +444,7 @@ static int piix_config_drive_for_dma (ide_drive_t *drive)
 
     (void) piix_tune_chipset(drive, speed);
 
-    return ((int)	((id->dma_ultra >> 11) & 7) ? ide_dma_on :
+    return ((int)   ((id->dma_ultra >> 11) & 7) ? ide_dma_on :
             ((id->dma_ultra >> 8) & 7) ? ide_dma_on :
             ((id->dma_mword >> 8) & 7) ? ide_dma_on :
             ((id->dma_1word >> 8) & 7) ? ide_dma_on :

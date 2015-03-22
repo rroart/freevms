@@ -1,39 +1,39 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 /****************************************************************************
 
-		RPC - Remote Procedure Call module
+        RPC - Remote Procedure Call module
 Facility:
 
-	RPC.C - Provide port mapping service under UDP (RFC 1057)
+    RPC.C - Provide port mapping service under UDP (RFC 1057)
 
 Abstract:
 
-	Implements Sun's remote procedure call mechanism
+    Implements Sun's remote procedure call mechanism
 
 Author:
 
-	Bruce R. Miller, CMU NetDev, 12-Nov-1990
-	Copyright (c) 1990, Bruce R. Miller and Carnegie-Mellon University
+    Bruce R. Miller, CMU NetDev, 12-Nov-1990
+    Copyright (c) 1990, Bruce R. Miller and Carnegie-Mellon University
 
 Module Modification History:
 
@@ -61,22 +61,22 @@ typedef unsigned int u_int;
 #include <string.h>
 #include <opcdef.h>
 
-#include <netinet/in.h>			/* network defs (defines u_long!) */
+#include <netinet/in.h>         /* network defs (defines u_long!) */
 
-#include "rpc_types.h"		/* usefull and relavant definitions */
+#include "rpc_types.h"      /* usefull and relavant definitions */
 #include "xdr.h"
-#include "auth.h"		/* authorization structs */
-#include "rpc_msg.h"		/* protocol for rpc messages */
+#include "auth.h"       /* authorization structs */
+#include "rpc_msg.h"        /* protocol for rpc messages */
 #include "rpc.h"
-#include <nettcpip.h>		/* TCP/IP suite definitions */
+#include <nettcpip.h>       /* TCP/IP suite definitions */
 
 
 
 #if 0
-#define RPC_VERSION		 2
-#define RPC_VERSION_LOW		 2
-#define RPC_VERSION_HIGH	 2
-#define MAX_RPC_SRV		10
+#define RPC_VERSION      2
+#define RPC_VERSION_LOW      2
+#define RPC_VERSION_HIGH     2
+#define MAX_RPC_SRV     10
 #else
 static const int RPC_VERSION = 2;
 static const int RPC_VERSION_LOW = 2;
@@ -95,10 +95,10 @@ static const int prog_mismatch = PROG_MISMATCH;
 static const int proc_unavail = PROC_UNAVAIL;
 static const int garbage_args = GARBAGE_ARGS;
 static const int success = SUCCESS;
-#define DEF_MAX_RPC_SRV		10
+#define DEF_MAX_RPC_SRV     10
 #endif
 
-#define RPC_MAX_REPLY_CACHE	10
+#define RPC_MAX_REPLY_CACHE 10
 
 long GMT_OFFSET = 0;
 char *NFS_ANONYMOUS = NULL;
@@ -157,7 +157,7 @@ extern IPACP_Int;
 
 /*********************************************************************
 
-			UIC translation routines
+            UIC translation routines
 
 **********************************************************************/
 
@@ -219,7 +219,7 @@ int add_uic_translation(int uid, int gid, char *hname, char *username)
         uailist.null = 0;
 
         RC = SYS$GETUAI(0, 0, &usrnam, &uailist, 0, 0, 0);
-        if (!(RC & 0x1))	    /* Map unknown users to -1,-1 (denied) */
+        if (!(RC & 0x1))        /* Map unknown users to -1,-1 (denied) */
             UICMAP_table.tail->localuser = -1;
     }
 
@@ -442,7 +442,7 @@ RPC$get_exports(char *buffer)
 }
 
 /*
-	RPC$CONFIG - Add an entry to the RPC services table'
+    RPC$CONFIG - Add an entry to the RPC services table'
 
     Called by the CONFIG module when an RPC command is seen, this routine adds
     the new RPC entry to the table.  Returns table index of new entry, or
@@ -485,7 +485,7 @@ int prog,vers,prot,port;
 
 
 /*
-	RPC$CONFIG_AUTH - Add an authorization entry to the RPC table'
+    RPC$CONFIG_AUTH - Add an authorization entry to the RPC table'
 
     Called by the CONFIG module when an AUTH command is seen, this routine adds
     the new AUTH entry to the table.  Returns -1 if addition fails.
@@ -495,13 +495,13 @@ int RPC$CONFIG_AUTH(uic, uid, gid, hostname_desc)
 struct dsc$descriptor *hostname_desc;
 int uic,uid,gid;
 {
-    char tbuff[256];	/* !!!HACK!!! hardwired constant. */
+    char tbuff[256];    /* !!!HACK!!! hardwired constant. */
 
     /*    memcpy(hostname_desc->dsc$a_pointer,tbuff,hostname_desc->dsc$w_length);
         tbuff[hostname_desc->dsc$w_length] = 0;
 
         if (!add_uic_translation(uic,uid,gid,tbuff))
-    	return -1; */
+        return -1; */
     return 1;
 }
 
@@ -608,7 +608,7 @@ int RPC$INIT()
 
     /* Do the numbers first */
     RPCsrv_tab[idx].prog = RPCPROG_PMAP;
-    RPCsrv_tab[idx].vers = 2;		/* !!!HACK!!! */
+    RPCsrv_tab[idx].vers = 2;       /* !!!HACK!!! */
     RPCsrv_tab[idx].prot = UDP_Protocol;
     RPCsrv_tab[idx].port = UDP_PORT_SUNRPC;
 
@@ -635,7 +635,7 @@ int RPC$INIT()
 
     /* Do the numbers first */
     RPCsrv_tab[idx].prog = RPCPROG_MOUNT;
-    RPCsrv_tab[idx].vers = 1;		/* !!!HACK!!! */
+    RPCsrv_tab[idx].vers = 1;       /* !!!HACK!!! */
     RPCsrv_tab[idx].prot = UDP_Protocol;
     RPCsrv_tab[idx].port = 2000;
 
@@ -660,7 +660,7 @@ int RPC$INIT()
 
     /* Do the numbers first */
     RPCsrv_tab[idx].prog = RPCPROG_NFS;
-    RPCsrv_tab[idx].vers = 2;		/* !!!HACK!!! */
+    RPCsrv_tab[idx].vers = 2;       /* !!!HACK!!! */
     RPCsrv_tab[idx].prot = UDP_Protocol;
     RPCsrv_tab[idx].port = UDP_PORT_NFS;
 
@@ -724,8 +724,8 @@ int RPC$CHECK_PORT(port)
 int RPC$INPUT ( index, SrcAddr , DstAdr , SrcPrt , DstPrt ,
                 Size , Buff , out, len)
 int index;
-unsigned int	SrcAddr, DstAdr;
-short unsigned int	SrcPrt, DstPrt;
+unsigned int    SrcAddr, DstAdr;
+short unsigned int  SrcPrt, DstPrt;
 int Size, *len;
 struct rpc_msg *Buff,*out;
 {
@@ -930,7 +930,7 @@ authentication",
             RC = SYS$SNDOPR(&OPC_descript, 0);
         }
 
-        uic = -2;	/* For security - set to unused value */
+        uic = -2;   /* For security - set to unused value */
     }
 
     /* ok, we've accepted it. */
@@ -969,20 +969,20 @@ authentication",
 
 /****************************************************************************
 
-		PortMap - RPC port mapper program (#1000000)
+        PortMap - RPC port mapper program (#1000000)
 Facility:
 
-	ProtMap.C - Provide port mapping service under UDP (RFC 1057)
+    ProtMap.C - Provide port mapping service under UDP (RFC 1057)
 
 Abstract:
 
-	Supports the Port Mapper protocol (PMAP) for the IPACP.  Provides
-	RPC program #100000.
+    Supports the Port Mapper protocol (PMAP) for the IPACP.  Provides
+    RPC program #100000.
 
 Author:
 
-	Bruce R. Miller, CMU NetDev, 12-Nov-1990
-	Copyright (c) 1990, Bruce R. Miller and Carnegie-Mellon University
+    Bruce R. Miller, CMU NetDev, 12-Nov-1990
+    Copyright (c) 1990, Bruce R. Miller and Carnegie-Mellon University
 
 Module Modification History:
 
@@ -990,13 +990,13 @@ Module Modification History:
 
 /* Port Map specific definitions */
 
-#define NPROCS			 6
-#define PMAP_VERSION		 2
-#define PMAP_VERSION_LOW	 2
-#define PMAP_VERSION_HIGH	 2
-#define NAUTHPROCS		 2
-#define PCNFSD_VERSION		 1
-#define PCNFSD_VERSION_LOW	 1
+#define NPROCS           6
+#define PMAP_VERSION         2
+#define PMAP_VERSION_LOW     2
+#define PMAP_VERSION_HIGH    2
+#define NAUTHPROCS       2
+#define PCNFSD_VERSION       1
+#define PCNFSD_VERSION_LOW   1
 #define PCNFSD_VERSION_HIGH      1
 
 static const int pmap_version_low = PMAP_VERSION_LOW;
@@ -1061,7 +1061,7 @@ unsigned int prog,vers,proc;
     }
 
     /* We're good to go */
-    cbody += 4;		/* jump over rpc_vers,prog,vers, and proc */
+    cbody += 4;     /* jump over rpc_vers,prog,vers, and proc */
 
     /* ignore credentials */
     flavor = xdr_int(*cbody++);
@@ -1090,7 +1090,7 @@ unsigned int prog,vers,proc;
 
 /**********************************************************************
 
-PMAP procedure #0	- Do nothing
+PMAP procedure #0   - Do nothing
 
 */
 
@@ -1104,7 +1104,7 @@ long *reply;
 
 /**********************************************************************
 
-PMAP procedure #1	-
+PMAP procedure #1   -
 
 */
 
@@ -1134,7 +1134,7 @@ struct mapping *map;
 
 /**********************************************************************
 
-PMAP procedure #3	-
+PMAP procedure #3   -
 
 */
 
@@ -1155,17 +1155,17 @@ struct mapping *map;
                 (RPCsrv_tab[i].prot == map->prot))
             break;
     }
-    if (i>=RPCsrv_count) return -1;	/* not found */
+    if (i>=RPCsrv_count) return -1; /* not found */
 
     XDR$vton_uint(&RPCsrv_tab[i].port,reply);
-    return 4;	/* size of an int */
+    return 4;   /* size of an int */
 }
 
 
 
 /**********************************************************************
 
-PMAP procedure #4	- Dump a list of known RPC services
+PMAP procedure #4   - Dump a list of known RPC services
 
 */
 
@@ -1190,7 +1190,7 @@ long *reply;
     static const int zero = 0;
     XDR$vton_uint(&zero,reply++);
 
-    return(RPCsrv_count*5*4 + 4);	/* size of an int */
+    return(RPCsrv_count*5*4 + 4);   /* size of an int */
 }
 
 

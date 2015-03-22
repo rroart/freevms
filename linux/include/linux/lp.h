@@ -14,9 +14,9 @@
  */
 #define LP_EXIST 0x0001
 #define LP_SELEC 0x0002
-#define LP_BUSY	 0x0004
+#define LP_BUSY  0x0004
 #define LP_BUSY_BIT_POS 2
-#define LP_OFFL	 0x0008
+#define LP_OFFL  0x0008
 #define LP_NOPA  0x0010
 #define LP_ERR   0x0020
 #define LP_ABORT 0x0040
@@ -32,11 +32,11 @@
  * base + 1
  * accessed with LP_S(minor), which gets the byte...
  */
-#define LP_PBUSY	0x80  /* inverted input, active high */
-#define LP_PACK		0x40  /* unchanged input, active low */
-#define LP_POUTPA	0x20  /* unchanged input, active high */
-#define LP_PSELECD	0x10  /* unchanged input, active high */
-#define LP_PERRORP	0x08  /* unchanged input, active low */
+#define LP_PBUSY    0x80  /* inverted input, active high */
+#define LP_PACK     0x40  /* unchanged input, active low */
+#define LP_POUTPA   0x20  /* unchanged input, active high */
+#define LP_PSELECD  0x10  /* unchanged input, active high */
+#define LP_PERRORP  0x08  /* unchanged input, active low */
 
 /* timeout for each character.  This is relative to bus cycles -- it
  * is the count in a busy loop.  THIS IS THE VALUE TO CHANGE if you
@@ -93,8 +93,8 @@ or 0 for polling (no IRQ) */
              This is also used for re-checking error conditions if LP_ABORT is
              not set.  This is the default behavior. */
 
-#define LP_TIMEOUT_INTERRUPT	(60 * HZ)
-#define LP_TIMEOUT_POLLED	(10 * HZ)
+#define LP_TIMEOUT_INTERRUPT    (60 * HZ)
+#define LP_TIMEOUT_POLLED   (10 * HZ)
 
 #ifdef __KERNEL__
 
@@ -104,18 +104,18 @@ or 0 for polling (no IRQ) */
 #define LP_PARPORT_OFF -2
 #define LP_PARPORT_NONE -1
 
-#define LP_F(minor)	lp_table[(minor)].flags		/* flags for busy, etc. */
-#define LP_CHAR(minor)	lp_table[(minor)].chars		/* busy timeout */
-#define LP_TIME(minor)	lp_table[(minor)].time		/* wait time */
-#define LP_WAIT(minor)	lp_table[(minor)].wait		/* strobe wait */
-#define LP_IRQ(minor)	lp_table[(minor)].dev->port->irq /* interrupt # */
+#define LP_F(minor) lp_table[(minor)].flags     /* flags for busy, etc. */
+#define LP_CHAR(minor)  lp_table[(minor)].chars     /* busy timeout */
+#define LP_TIME(minor)  lp_table[(minor)].time      /* wait time */
+#define LP_WAIT(minor)  lp_table[(minor)].wait      /* strobe wait */
+#define LP_IRQ(minor)   lp_table[(minor)].dev->port->irq /* interrupt # */
           /* PARPORT_IRQ_NONE means polled */
 #ifdef LP_STATS
-#define LP_STAT(minor)	lp_table[(minor)].stats		/* statistics area */
+#define LP_STAT(minor)  lp_table[(minor)].stats     /* statistics area */
 #endif
 #define LP_BUFFER_SIZE PAGE_SIZE
 
-#define LP_BASE(x)	lp_table[(x)].dev->port->base
+#define LP_BASE(x)  lp_table[(x)].dev->port->base
 
 #ifdef LP_STATS
           struct lp_stats
@@ -166,24 +166,24 @@ struct lp_struct
  * base + 2
  * accessed with LP_C(minor)
  */
-#define LP_PINTEN	0x10  /* high to read data in or-ed with data out */
-#define LP_PSELECP	0x08  /* inverted output, active low */
-#define LP_PINITP	0x04  /* unchanged output, active low */
-#define LP_PAUTOLF	0x02  /* inverted output, active low */
-#define LP_PSTROBE	0x01  /* short high output on raising edge */
+#define LP_PINTEN   0x10  /* high to read data in or-ed with data out */
+#define LP_PSELECP  0x08  /* inverted output, active low */
+#define LP_PINITP   0x04  /* unchanged output, active low */
+#define LP_PAUTOLF  0x02  /* inverted output, active low */
+#define LP_PSTROBE  0x01  /* short high output on raising edge */
 
 /*
  * the value written to ports to test existence. PC-style ports will
  * return the value written. AT-style ports will return 0. so why not
  * make them the same ?
  */
-#define LP_DUMMY	0x00
+#define LP_DUMMY    0x00
 
 /*
  * This is the port delay time, in microseconds.
  * It is used only in the lp_init() and lp_reset() routine.
  */
-#define LP_DELAY 	50
+#define LP_DELAY    50
 
 /*
  * function prototypes

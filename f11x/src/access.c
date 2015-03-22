@@ -106,7 +106,7 @@ void vms2_mount(void)
 
 unsigned long get_xqp_prim_fcb()
 {
-    return 	  xqp->primary_fcb;
+    return    xqp->primary_fcb;
 }
 
 int ods2_block_read_full_page3(struct _wcb * wcb,struct page *page, unsigned long pageno)
@@ -1704,7 +1704,7 @@ unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],stru
                 struct _fcb * idxfcb;
                 struct _fh2 * idxhd;
                 struct _fcb * mapfcb;
-                //	  vcb->vcb$ibmaplbn = idxfcb->stlbn;
+                //    vcb->vcb$ibmaplbn = idxfcb->stlbn;
                 vcb->vcb$l_homelbn = home.hm2$l_homelbn;
                 vcb->vcb$l_ibmaplbn = home.hm2$l_ibmaplbn;
                 vcb->vcb$l_ibmapvbn = home.hm2$w_ibmapvbn;

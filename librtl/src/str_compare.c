@@ -1,7 +1,7 @@
 /*
  * strcompare.c
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,18 +19,18 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 /*
  *
- *	Code for VAX STR$COMPARE routine
+ *  Code for VAX STR$COMPARE routine
  *
  * Description:
  *
@@ -39,21 +39,21 @@
  *
  * History
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 10, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  *
- *	Feb 19, 1997 - Kevin Handy
- *		Fix so that a shorter string is assumed to be padded
- *		with spaces.
+ *  Feb 19, 1997 - Kevin Handy
+ *      Fix so that a shorter string is assumed to be padded
+ *      with spaces.
  *
- *	Feb 24, 2004 - Andrew Allison
- *		Inserted GNU License
+ *  Feb 24, 2004 - Andrew Allison
+ *      Inserted GNU License
  *
- *	Mar 2, 2004 - Andrew Allison
- *		Null comparison
+ *  Mar 2, 2004 - Andrew Allison
+ *      Null comparison
  */
 
 #include <stdio.h>
@@ -66,25 +66,25 @@
 /*************************************************************
  * str$compare
  *
- *	Compares two strings for the same contents. This
- *	routine distinguishes between upper and lower case
- *	strings.
+ *  Compares two strings for the same contents. This
+ *  routine distinguishes between upper and lower case
+ *  strings.
  *
- *	returns:
- *		-1 if first < second
- *		0 if equal
- *		1 if first > second
+ *  returns:
+ *      -1 if first < second
+ *      0 if equal
+ *      1 if first > second
  */
 long str$compare(
     const struct dsc$descriptor_s* first_source_string,
     const struct dsc$descriptor_s* second_source_string)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
-    char* s2_ptr;			/* Pointer to second string */
-    unsigned short s2_length;	/* Length of second string */
-    unsigned short min_length;	/* length of shortest string */
-    long result;			/* Result of comparison */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
+    char* s2_ptr;           /* Pointer to second string */
+    unsigned short s2_length;   /* Length of second string */
+    unsigned short min_length;  /* length of shortest string */
+    long result;            /* Result of comparison */
 
     result = 0;
     /*

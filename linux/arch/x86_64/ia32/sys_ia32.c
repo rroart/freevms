@@ -8,14 +8,14 @@
  * sys_ia32.c: Conversion between 32bit and 64bit native syscalls. Based on
  *             sys_sparc32
  *
- * Copyright (C) 2000		VA Linux Co
- * Copyright (C) 2000		Don Dugger <n0ano@valinux.com>
- * Copyright (C) 1999 		Arun Sharma <arun.sharma@intel.com>
- * Copyright (C) 1997,1998 	Jakub Jelinek (jj@sunsite.mff.cuni.cz)
- * Copyright (C) 1997 		David S. Miller (davem@caip.rutgers.edu)
- * Copyright (C) 2000		Hewlett-Packard Co.
- * Copyright (C) 2000		David Mosberger-Tang <davidm@hpl.hp.com>
- * Copyright (C) 2000,2001,2002	Andi Kleen, SuSE Labs (x86-64 port)
+ * Copyright (C) 2000       VA Linux Co
+ * Copyright (C) 2000       Don Dugger <n0ano@valinux.com>
+ * Copyright (C) 1999       Arun Sharma <arun.sharma@intel.com>
+ * Copyright (C) 1997,1998  Jakub Jelinek (jj@sunsite.mff.cuni.cz)
+ * Copyright (C) 1997       David S. Miller (davem@caip.rutgers.edu)
+ * Copyright (C) 2000       Hewlett-Packard Co.
+ * Copyright (C) 2000       David Mosberger-Tang <davidm@hpl.hp.com>
+ * Copyright (C) 2000,2001,2002 Andi Kleen, SuSE Labs (x86-64 port)
  *
  * These routines maintain argument size conversion between 32bit and 64bit
  * environment. In 2.5 most of this should be moved to a generic directory.
@@ -77,9 +77,9 @@
 
 #include <linux/vmalloc.h>
 
-#define A(__x)		((unsigned long)(__x))
-#define AA(__x)		((unsigned long)(__x))
-#define ROUND_UP(x,a)	((__typeof__(x))(((unsigned long)(x) + ((a) - 1)) & ~((a) - 1)))
+#define A(__x)      ((unsigned long)(__x))
+#define AA(__x)     ((unsigned long)(__x))
+#define ROUND_UP(x,a)   ((__typeof__(x))(((unsigned long)(x) + ((a) - 1)) & ~((a) - 1)))
 #define NAME_OFFSET(de) ((int) ((de)->d_name - (char *) (de)))
 
 #undef high2lowuid
@@ -744,8 +744,8 @@ sys32_alarm(unsigned int seconds)
 
 struct utimbuf_32
 {
-    int	atime;
-    int	mtime;
+    int atime;
+    int mtime;
 };
 
 extern asmlinkage long sys_utimes(char * filename, struct timeval * utimes);
@@ -794,18 +794,18 @@ sys32_settimeofday(struct timeval32 *tv, struct timezone *tz)
 
 struct linux32_dirent
 {
-    u32	d_ino;
-    u32	d_off;
-    u16	d_reclen;
-    char	d_name[1];
+    u32 d_ino;
+    u32 d_off;
+    u16 d_reclen;
+    char    d_name[1];
 };
 
 struct old_linux32_dirent
 {
-    u32	d_ino;
-    u32	d_offset;
-    u16	d_namlen;
-    char	d_name[1];
+    u32 d_ino;
+    u32 d_offset;
+    u16 d_namlen;
+    char    d_name[1];
 };
 
 struct getdents32_callback
@@ -830,7 +830,7 @@ filldir32 (void *__buf, const char *name, int namlen, loff_t offset, ino_t ino,
     struct getdents32_callback * buf = (struct getdents32_callback *) __buf;
     int reclen = ROUND_UP(NAME_OFFSET(dirent) + namlen + 1, 4);
 
-    buf->error = -EINVAL;	/* only used if we fail.. */
+    buf->error = -EINVAL;   /* only used if we fail.. */
     if (reclen > buf->count)
         return -EINVAL;
     dirent = buf->previous;
@@ -933,7 +933,7 @@ out:
  * I'm trying ERESTARTNOHAND which restart only when you want to.
  */
 #define MAX_SELECT_SECONDS \
-	((unsigned long) (MAX_SCHEDULE_TIMEOUT / HZ)-1)
+    ((unsigned long) (MAX_SCHEDULE_TIMEOUT / HZ)-1)
 #define ROUND_UP_TIME(x,y) (((x)+(y)-1)/(y))
 
 asmlinkage long
@@ -1185,13 +1185,13 @@ sys32_writev(int fd, struct iovec32 *vector, u32 count)
     return ret;
 }
 
-#define RLIM_INFINITY32	0xffffffff
+#define RLIM_INFINITY32 0xffffffff
 #define RESOURCE32(x) ((x > RLIM_INFINITY32) ? RLIM_INFINITY32 : x)
 
 struct rlimit32
 {
-    unsigned	rlim_cur;
-    unsigned	rlim_max;
+    unsigned    rlim_cur;
+    unsigned    rlim_max;
 };
 
 extern asmlinkage long sys_getrlimit(unsigned int resource, struct rlimit *rlim);
@@ -1829,7 +1829,7 @@ siginfo64to32(siginfo_t32 *d, siginfo_t *s)
         case SIGFPE:
         case SIGILL:
             d->si_addr = (long)(s->si_addr);
-//		d->si_trapno = s->si_trapno;
+//      d->si_trapno = s->si_trapno;
             break;
         case SIGPOLL:
             d->si_band = s->si_band;
@@ -1871,7 +1871,7 @@ siginfo32to64(siginfo_t *d, siginfo_t32 *s)
         case SIGFPE:
         case SIGILL:
             d->si_addr = (void *)A(s->si_addr);
-//		d->si_trapno = s->si_trapno;
+//      d->si_trapno = s->si_trapno;
             break;
         case SIGPOLL:
             d->si_band = s->si_band;
@@ -1999,13 +1999,13 @@ sys32_pause(void)
 
 struct sysctl_ia32
 {
-    unsigned int	name;
-    int		nlen;
-    unsigned int	oldval;
-    unsigned int	oldlenp;
-    unsigned int	newval;
-    unsigned int	newlen;
-    unsigned int	__unused[4];
+    unsigned int    name;
+    int     nlen;
+    unsigned int    oldval;
+    unsigned int    oldlenp;
+    unsigned int    newval;
+    unsigned int    newlen;
+    unsigned int    __unused[4];
 };
 
 
@@ -2436,91 +2436,91 @@ asmlinkage long sys32_kill(int pid, int sig)
 /* Stuff for NFS server syscalls... */
 struct nfsctl_svc32
 {
-    u16			svc32_port;
-    s32			svc32_nthreads;
+    u16         svc32_port;
+    s32         svc32_nthreads;
 };
 
 struct nfsctl_client32
 {
-    s8			cl32_ident[NFSCLNT_IDMAX+1];
-    s32			cl32_naddr;
-    struct in_addr		cl32_addrlist[NFSCLNT_ADDRMAX];
-    s32			cl32_fhkeytype;
-    s32			cl32_fhkeylen;
-    u8			cl32_fhkey[NFSCLNT_KEYMAX];
+    s8          cl32_ident[NFSCLNT_IDMAX+1];
+    s32         cl32_naddr;
+    struct in_addr      cl32_addrlist[NFSCLNT_ADDRMAX];
+    s32         cl32_fhkeytype;
+    s32         cl32_fhkeylen;
+    u8          cl32_fhkey[NFSCLNT_KEYMAX];
 };
 
 struct nfsctl_export32
 {
-    s8			ex32_client[NFSCLNT_IDMAX+1];
-    s8			ex32_path[NFS_MAXPATHLEN+1];
-    __kernel_dev_t32	ex32_dev;
-    __kernel_ino_t32	ex32_ino;
-    s32			ex32_flags;
-    __kernel_uid_t32	ex32_anon_uid;
-    __kernel_gid_t32	ex32_anon_gid;
+    s8          ex32_client[NFSCLNT_IDMAX+1];
+    s8          ex32_path[NFS_MAXPATHLEN+1];
+    __kernel_dev_t32    ex32_dev;
+    __kernel_ino_t32    ex32_ino;
+    s32         ex32_flags;
+    __kernel_uid_t32    ex32_anon_uid;
+    __kernel_gid_t32    ex32_anon_gid;
 };
 
 struct nfsctl_uidmap32
 {
-    u32			ug32_ident;   /* char * */
-    __kernel_uid_t32	ug32_uidbase;
-    s32			ug32_uidlen;
-    u32			ug32_udimap;  /* uid_t * */
-    __kernel_uid_t32	ug32_gidbase;
-    s32			ug32_gidlen;
-    u32			ug32_gdimap;  /* gid_t * */
+    u32         ug32_ident;   /* char * */
+    __kernel_uid_t32    ug32_uidbase;
+    s32         ug32_uidlen;
+    u32         ug32_udimap;  /* uid_t * */
+    __kernel_uid_t32    ug32_gidbase;
+    s32         ug32_gidlen;
+    u32         ug32_gdimap;  /* gid_t * */
 };
 
 struct nfsctl_fhparm32
 {
-    struct sockaddr		gf32_addr;
-    __kernel_dev_t32	gf32_dev;
-    __kernel_ino_t32	gf32_ino;
-    s32			gf32_version;
+    struct sockaddr     gf32_addr;
+    __kernel_dev_t32    gf32_dev;
+    __kernel_ino_t32    gf32_ino;
+    s32         gf32_version;
 };
 
 struct nfsctl_fdparm32
 {
-    struct sockaddr		gd32_addr;
-    s8			gd32_path[NFS_MAXPATHLEN+1];
-    s32			gd32_version;
+    struct sockaddr     gd32_addr;
+    s8          gd32_path[NFS_MAXPATHLEN+1];
+    s32         gd32_version;
 };
 
 struct nfsctl_fsparm32
 {
-    struct sockaddr		gd32_addr;
-    s8			gd32_path[NFS_MAXPATHLEN+1];
-    s32			gd32_maxlen;
+    struct sockaddr     gd32_addr;
+    s8          gd32_path[NFS_MAXPATHLEN+1];
+    s32         gd32_maxlen;
 };
 
 struct nfsctl_arg32
 {
-    s32			ca32_version;	/* safeguard */
+    s32         ca32_version;   /* safeguard */
     union
     {
-        struct nfsctl_svc32	u32_svc;
-        struct nfsctl_client32	u32_client;
-        struct nfsctl_export32	u32_export;
-        struct nfsctl_uidmap32	u32_umap;
-        struct nfsctl_fhparm32	u32_getfh;
-        struct nfsctl_fdparm32	u32_getfd;
-        struct nfsctl_fsparm32	u32_getfs;
+        struct nfsctl_svc32 u32_svc;
+        struct nfsctl_client32  u32_client;
+        struct nfsctl_export32  u32_export;
+        struct nfsctl_uidmap32  u32_umap;
+        struct nfsctl_fhparm32  u32_getfh;
+        struct nfsctl_fdparm32  u32_getfd;
+        struct nfsctl_fsparm32  u32_getfs;
     } u;
-#define ca32_svc	u.u32_svc
-#define ca32_client	u.u32_client
-#define ca32_export	u.u32_export
-#define ca32_umap	u.u32_umap
-#define ca32_getfh	u.u32_getfh
-#define ca32_getfd	u.u32_getfd
-#define ca32_getfs	u.u32_getfs
-#define ca32_authd	u.u32_authd
+#define ca32_svc    u.u32_svc
+#define ca32_client u.u32_client
+#define ca32_export u.u32_export
+#define ca32_umap   u.u32_umap
+#define ca32_getfh  u.u32_getfh
+#define ca32_getfd  u.u32_getfd
+#define ca32_getfs  u.u32_getfs
+#define ca32_authd  u.u32_authd
 };
 
 union nfsctl_res32
 {
-    __u8			cr32_getfh[NFS_FHSIZE];
-    struct knfsd_fh		cr32_getfs;
+    __u8            cr32_getfh[NFS_FHSIZE];
+    struct knfsd_fh     cr32_getfs;
 };
 
 static int nfs_svc32_trans(struct nfsctl_arg *karg, struct nfsctl_arg32 *arg32)

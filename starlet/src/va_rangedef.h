@@ -1,5 +1,5 @@
-#ifndef va_rangedef_h
-#define va_rangedef_h
+#ifndef VA_RANGEDEF_H
+#define VA_RANGEDEF_H
 
 #define VA_RANGE$K_LENGTH 8
 #define VA_RANGE$C_LENGTH 8

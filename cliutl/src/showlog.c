@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <stdio.h>
 #include <string.h>
@@ -16,7 +16,7 @@
 // this will be a bit limited because we can not use the kernel routines for
 // now, but instead the system services
 
-show_logical(int argc, char**argv)
+int show_logical(int argc, char**argv)
 {
     int sts;
     struct item_list_3 itm[2];

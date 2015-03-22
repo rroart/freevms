@@ -1,5 +1,5 @@
-#ifndef bufiodef_h
-#define bufiodef_h
+#ifndef BUFIODEF_H
+#define BUFIODEF_H
 
 #define BUFIO$K_64 -1
 #define BUFIO$K_HDRLEN32 12

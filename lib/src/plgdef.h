@@ -1,5 +1,5 @@
-#ifndef plgdef_h
-#define plgdef_h
+#ifndef PLGDEF_H
+#define PLGDEF_H
 
 #define PLG$M_NOEXTEND 0x1
 #define PLG$C_VER_NO 1

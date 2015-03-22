@@ -12,112 +12,112 @@
 
 struct nfsd_fhandle
 {
-    struct svc_fh		fh;
+    struct svc_fh       fh;
 };
 
 struct nfsd_sattrargs
 {
-    struct svc_fh		fh;
-    struct iattr		attrs;
+    struct svc_fh       fh;
+    struct iattr        attrs;
 };
 
 struct nfsd_diropargs
 {
-    struct svc_fh		fh;
-    char *			name;
-    int			len;
+    struct svc_fh       fh;
+    char *          name;
+    int         len;
 };
 
 struct nfsd_readargs
 {
-    struct svc_fh		fh;
-    __u32			offset;
-    __u32			count;
-    __u32			totalsize;
+    struct svc_fh       fh;
+    __u32           offset;
+    __u32           count;
+    __u32           totalsize;
 };
 
 struct nfsd_writeargs
 {
-    svc_fh			fh;
-    __u32			beginoffset;
-    __u32			offset;
-    __u32			totalcount;
-    __u8 *			data;
-    int			len;
+    svc_fh          fh;
+    __u32           beginoffset;
+    __u32           offset;
+    __u32           totalcount;
+    __u8 *          data;
+    int         len;
 };
 
 struct nfsd_createargs
 {
-    struct svc_fh		fh;
-    char *			name;
-    int			len;
-    struct iattr		attrs;
+    struct svc_fh       fh;
+    char *          name;
+    int         len;
+    struct iattr        attrs;
 };
 
 struct nfsd_renameargs
 {
-    struct svc_fh		ffh;
-    char *			fname;
-    int			flen;
-    struct svc_fh		tfh;
-    char *			tname;
-    int			tlen;
+    struct svc_fh       ffh;
+    char *          fname;
+    int         flen;
+    struct svc_fh       tfh;
+    char *          tname;
+    int         tlen;
 };
 
 struct nfsd_linkargs
 {
-    struct svc_fh		ffh;
-    struct svc_fh		tfh;
-    char *			tname;
-    int			tlen;
+    struct svc_fh       ffh;
+    struct svc_fh       tfh;
+    char *          tname;
+    int         tlen;
 };
 
 struct nfsd_symlinkargs
 {
-    struct svc_fh		ffh;
-    char *			fname;
-    int			flen;
-    char *			tname;
-    int			tlen;
-    struct iattr		attrs;
+    struct svc_fh       ffh;
+    char *          fname;
+    int         flen;
+    char *          tname;
+    int         tlen;
+    struct iattr        attrs;
 };
 
 struct nfsd_readdirargs
 {
-    struct svc_fh		fh;
-    __u32			cookie;
-    __u32			count;
+    struct svc_fh       fh;
+    __u32           cookie;
+    __u32           count;
 };
 
 struct nfsd_attrstat
 {
-    struct svc_fh		fh;
+    struct svc_fh       fh;
 };
 
 struct nfsd_diropres
 {
-    struct svc_fh		fh;
+    struct svc_fh       fh;
 };
 
 struct nfsd_readlinkres
 {
-    int			len;
+    int         len;
 };
 
 struct nfsd_readres
 {
-    struct svc_fh		fh;
-    unsigned long		count;
+    struct svc_fh       fh;
+    unsigned long       count;
 };
 
 struct nfsd_readdirres
 {
-    int			count;
+    int         count;
 };
 
 struct nfsd_statfsres
 {
-    struct statfs		stats;
+    struct statfs       stats;
 };
 
 /*
@@ -125,18 +125,18 @@ struct nfsd_statfsres
  */
 union nfsd_xdrstore
 {
-    struct nfsd_sattrargs	sattr;
-    struct nfsd_diropargs	dirop;
-    struct nfsd_readargs	read;
-    struct nfsd_writeargs	write;
-    struct nfsd_createargs	create;
-    struct nfsd_renameargs	rename;
-    struct nfsd_linkargs	link;
-    struct nfsd_symlinkargs	symlink;
-    struct nfsd_readdirargs	readdir;
+    struct nfsd_sattrargs   sattr;
+    struct nfsd_diropargs   dirop;
+    struct nfsd_readargs    read;
+    struct nfsd_writeargs   write;
+    struct nfsd_createargs  create;
+    struct nfsd_renameargs  rename;
+    struct nfsd_linkargs    link;
+    struct nfsd_symlinkargs symlink;
+    struct nfsd_readdirargs readdir;
 };
 
-#define NFSSVC_XDRSIZE		sizeof(union nfsd_xdrstore)
+#define NFSSVC_XDRSIZE      sizeof(union nfsd_xdrstore)
 
 
 int nfssvc_decode_void(struct svc_rqst *, u32 *, void *);

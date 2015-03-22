@@ -1,5 +1,5 @@
-#ifndef wqhdef_h
-#define wqhdef_h
+#ifndef WQHDEF_H
+#define WQHDEF_H
 
 #define WQH$K_LENGTH 16
 #define WQH$C_LENGTH 16

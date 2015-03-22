@@ -1,5 +1,5 @@
-#ifndef eihddef_h
-#define eihddef_h
+#ifndef EIHDDEF_H
+#define EIHDDEF_H
 
 #define EIHD$K_MAJORID 3
 #define EIHD$K_MINORID 0
@@ -75,21 +75,21 @@ struct _eihd
         unsigned int eihd$l_lnkflags;
         struct
         {
-            unsigned eihd$v_lnkdebug		: 1;
-            unsigned eihd$v_lnknotfr		: 1;
-            unsigned eihd$v_nop0bufs		: 1;
-            unsigned eihd$v_picimg		: 1;
-            unsigned eihd$v_p0image		: 1;
-            unsigned eihd$v_dbgdmt		: 1;
-            unsigned eihd$v_inishr		: 1;
-            unsigned eihd$v_xlated		: 1;
-            unsigned eihd$v_bind_code_sec	: 1;
-            unsigned eihd$v_bind_data_sec	: 1;
-            unsigned eihd$v_mkthreads		: 1;
-            unsigned eihd$v_upcalls		: 1;
-            unsigned eihd$v_omv_ready		: 1;
-            unsigned eihd$v_ext_bind_sect	: 1;
-            unsigned eihd$v_fill_0_		: 2;
+            unsigned eihd$v_lnkdebug        : 1;
+            unsigned eihd$v_lnknotfr        : 1;
+            unsigned eihd$v_nop0bufs        : 1;
+            unsigned eihd$v_picimg      : 1;
+            unsigned eihd$v_p0image     : 1;
+            unsigned eihd$v_dbgdmt      : 1;
+            unsigned eihd$v_inishr      : 1;
+            unsigned eihd$v_xlated      : 1;
+            unsigned eihd$v_bind_code_sec   : 1;
+            unsigned eihd$v_bind_data_sec   : 1;
+            unsigned eihd$v_mkthreads       : 1;
+            unsigned eihd$v_upcalls     : 1;
+            unsigned eihd$v_omv_ready       : 1;
+            unsigned eihd$v_ext_bind_sect   : 1;
+            unsigned eihd$v_fill_0_     : 2;
         };
     };
     unsigned int eihd$l_ident;

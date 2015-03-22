@@ -50,7 +50,7 @@
 #define BREAKPOINT3
 #define ACPI_DISABLE_IRQS() __cli()
 #define ACPI_ENABLE_IRQS()  __sti()
-#define ACPI_FLUSH_CPU_CACHE()	wbinvd()
+#define ACPI_FLUSH_CPU_CACHE()  wbinvd()
 
 static inline int
 __acpi_acquire_global_lock (unsigned int *lock)
@@ -81,10 +81,10 @@ __acpi_release_global_lock (unsigned int *lock)
 }
 
 #define ACPI_ACQUIRE_GLOBAL_LOCK(GLptr, Acq) \
-	((Acq) = __acpi_acquire_global_lock((unsigned int *) GLptr))
+    ((Acq) = __acpi_acquire_global_lock((unsigned int *) GLptr))
 
 #define ACPI_RELEASE_GLOBAL_LOCK(GLptr, Acq) \
-	((Acq) = __acpi_release_global_lock((unsigned int *) GLptr))
+    ((Acq) = __acpi_release_global_lock((unsigned int *) GLptr))
 
 /*
  * Math helper asm macros
@@ -142,10 +142,10 @@ static inline void disable_acpi(void)
 /* Fixmap pages to reserve for ACPI boot-time tables (see fixmap.h) */
 #define FIX_ACPI_PAGES 4
 
-#else	/* !CONFIG_ACPI_BOOT */
+#else   /* !CONFIG_ACPI_BOOT */
 #define acpi_lapic 0
 #define acpi_ioapic 0
-#endif	/* !CONFIG_ACPI_BOOT */
+#endif  /* !CONFIG_ACPI_BOOT */
 
 
 #ifdef CONFIG_ACPI_SLEEP

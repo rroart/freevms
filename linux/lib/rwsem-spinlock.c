@@ -17,11 +17,11 @@
 
 struct rwsem_waiter
 {
-    struct list_head	list;
-    struct task_struct	*task;
-    unsigned int		flags;
-#define RWSEM_WAITING_FOR_READ	0x00000001
-#define RWSEM_WAITING_FOR_WRITE	0x00000002
+    struct list_head    list;
+    struct task_struct  *task;
+    unsigned int        flags;
+#define RWSEM_WAITING_FOR_READ  0x00000001
+#define RWSEM_WAITING_FOR_WRITE 0x00000002
 };
 
 #if RWSEM_DEBUG

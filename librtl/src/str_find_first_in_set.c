@@ -13,8 +13,8 @@
  *      Jan 30, 1997 - Kevin Handy
  *              Preliminary design.
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
  */
 
 #include <stdio.h>
@@ -27,26 +27,26 @@
 /*************************************************************
  * str$find_first_in_set
  *
- *	This function searches a string, one character at a time, from
- *	the left to right, comparing each character in the string to
- *	every character in a specified set of characters for which it
- *	is searching.
+ *  This function searches a string, one character at a time, from
+ *  the left to right, comparing each character in the string to
+ *  every character in a specified set of characters for which it
+ *  is searching.
  *
- *	Returns:
- *		0 if no match found, otherwise returns the position
- *		in the source string where the first match is found.
+ *  Returns:
+ *      0 if no match found, otherwise returns the position
+ *      in the source string where the first match is found.
  *
  */
 long str$find_first_in_set(
     const struct dsc$descriptor_s* first_source_string,
     const struct dsc$descriptor_s* second_source_string)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
-    char* s2_ptr;			/* Pointer to second string */
-    unsigned short s2_length;	/* Length of second string */
-    int loop1;			/* Outer loop */
-    int loop2;			/* Inner loop */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
+    char* s2_ptr;           /* Pointer to second string */
+    unsigned short s2_length;   /* Length of second string */
+    int loop1;          /* Outer loop */
+    int loop2;          /* Inner loop */
 
     /*
      * Analyze source strings

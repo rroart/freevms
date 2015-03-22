@@ -1,5 +1,5 @@
-#ifndef ccdef_h
-#define ccdef_h
+#ifndef CCDEF_H
+#define CCDEF_H
 
 #define CC$C_EVT_HELLO                 0x00
 #define CC$C_EVT_BYE                   0x01

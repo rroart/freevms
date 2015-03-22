@@ -99,7 +99,7 @@ do {                                                                      \
         CDEBUG(D_MALLOC, "kmalloced: %lx at %p.\n", (long)size, ptr);     \
      }  else {                                                            \
         ptr = (cast)vmalloc((unsigned long) size);                        \
-	CDEBUG(D_MALLOC, "vmalloced: %lx at %p .\n", (long)size, ptr);}   \
+    CDEBUG(D_MALLOC, "vmalloced: %lx at %p .\n", (long)size, ptr);}   \
     if (ptr == 0) {                                                       \
         printk("kernel malloc returns 0 at %s:%d\n", __FILE__, __LINE__); \
     }                                                                     \

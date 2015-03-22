@@ -8,7 +8,7 @@
 /* By Ross Biro 1/23/92 */
 /*
  * Pentium III FXSR, SSE support
- *	Gareth Hughes <gareth@valinux.com>, May 2000
+ *  Gareth Hughes <gareth@valinux.com>, May 2000
  */
 
 #include <linux/kernel.h>
@@ -189,7 +189,7 @@ asmlinkage int sys_ptrace(long request, long pid, long addr, long data)
         goto out;
 
     ret = -EPERM;
-    if (pid == INIT_PID)		/* you may not mess with init */
+    if (pid == INIT_PID)        /* you may not mess with init */
         goto out_tsk;
 
     if (request == PTRACE_ATTACH)
@@ -324,7 +324,7 @@ asmlinkage int sys_ptrace(long request, long pid, long addr, long data)
         long tmp;
 
         ret = 0;
-        if (child->state == TASK_ZOMBIE)	/* already dead */
+        if (child->state == TASK_ZOMBIE)    /* already dead */
             break;
         child->exit_code = SIGKILL;
         /* make sure the single step bit is not set. */

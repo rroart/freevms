@@ -53,16 +53,16 @@ enum brlock_indices
 #endif
 
 #ifdef __BRLOCK_USE_ATOMICS
-typedef rwlock_t	brlock_read_lock_t;
+typedef rwlock_t    brlock_read_lock_t;
 #else
-typedef unsigned int	brlock_read_lock_t;
+typedef unsigned int    brlock_read_lock_t;
 #endif
 
 /*
  * align last allocated index to the next cacheline:
  */
 #define __BR_IDX_MAX \
-	(((sizeof(brlock_read_lock_t)*__BR_END + SMP_CACHE_BYTES-1) & ~(SMP_CACHE_BYTES-1)) / sizeof(brlock_read_lock_t))
+    (((sizeof(brlock_read_lock_t)*__BR_END + SMP_CACHE_BYTES-1) & ~(SMP_CACHE_BYTES-1)) / sizeof(brlock_read_lock_t))
 
 extern brlock_read_lock_t __brlock_array[NR_CPUS][__BR_IDX_MAX];
 
@@ -121,19 +121,19 @@ again:
     {
         (*ctr)--;
         wmb(); /*
-			* The release of the ctr must become visible
-			* to the other cpus eventually thus wmb(),
-			* we don't care if spin_is_locked is reordered
-			* before the releasing of the ctr.
-			* However IMHO this wmb() is superflous even in theory.
-			* It would not be superflous only if on the
-			* other CPUs doing a ldl_l instead of an ldl
-			* would make a difference and I don't think this is
-			* the case.
-			* I'd like to clarify this issue further
-			* but for now this is a slow path so adding the
-			* wmb() will keep us on the safe side.
-			*/
+            * The release of the ctr must become visible
+            * to the other cpus eventually thus wmb(),
+            * we don't care if spin_is_locked is reordered
+            * before the releasing of the ctr.
+            * However IMHO this wmb() is superflous even in theory.
+            * It would not be superflous only if on the
+            * other CPUs doing a ldl_l instead of an ldl
+            * would make a difference and I don't think this is
+            * the case.
+            * I'd like to clarify this issue further
+            * but for now this is a slow path so adding the
+            * wmb() will keep us on the safe side.
+            */
         while (spin_is_locked(lock))
             barrier();
         goto again;
@@ -179,10 +179,10 @@ static inline void br_write_unlock (enum brlock_indices idx)
 }
 
 #else
-# define br_read_lock(idx)	((void)(idx))
-# define br_read_unlock(idx)	((void)(idx))
-# define br_write_lock(idx)	((void)(idx))
-# define br_write_unlock(idx)	((void)(idx))
+# define br_read_lock(idx)  ((void)(idx))
+# define br_read_unlock(idx)    ((void)(idx))
+# define br_write_lock(idx) ((void)(idx))
+# define br_write_unlock(idx)   ((void)(idx))
 #endif
 
 /*
@@ -190,39 +190,39 @@ static inline void br_write_unlock (enum brlock_indices idx)
  * versions of the interfaces.
  */
 #define br_read_lock_irqsave(idx, flags) \
-	do { local_irq_save(flags); br_read_lock(idx); } while (0)
+    do { local_irq_save(flags); br_read_lock(idx); } while (0)
 
 #define br_read_lock_irq(idx) \
-	do { local_irq_disable(); br_read_lock(idx); } while (0)
+    do { local_irq_disable(); br_read_lock(idx); } while (0)
 
 #define br_read_lock_bh(idx) \
-	do { local_bh_disable(); br_read_lock(idx); } while (0)
+    do { local_bh_disable(); br_read_lock(idx); } while (0)
 
 #define br_write_lock_irqsave(idx, flags) \
-	do { local_irq_save(flags); br_write_lock(idx); } while (0)
+    do { local_irq_save(flags); br_write_lock(idx); } while (0)
 
 #define br_write_lock_irq(idx) \
-	do { local_irq_disable(); br_write_lock(idx); } while (0)
+    do { local_irq_disable(); br_write_lock(idx); } while (0)
 
 #define br_write_lock_bh(idx) \
-	do { local_bh_disable(); br_write_lock(idx); } while (0)
+    do { local_bh_disable(); br_write_lock(idx); } while (0)
 
 #define br_read_unlock_irqrestore(idx, flags) \
-	do { br_read_unlock(irx); local_irq_restore(flags); } while (0)
+    do { br_read_unlock(irx); local_irq_restore(flags); } while (0)
 
 #define br_read_unlock_irq(idx) \
-	do { br_read_unlock(idx); local_irq_enable(); } while (0)
+    do { br_read_unlock(idx); local_irq_enable(); } while (0)
 
 #define br_read_unlock_bh(idx) \
-	do { br_read_unlock(idx); local_bh_enable(); } while (0)
+    do { br_read_unlock(idx); local_bh_enable(); } while (0)
 
 #define br_write_unlock_irqrestore(idx, flags) \
-	do { br_write_unlock(irx); local_irq_restore(flags); } while (0)
+    do { br_write_unlock(irx); local_irq_restore(flags); } while (0)
 
 #define br_write_unlock_irq(idx) \
-	do { br_write_unlock(idx); local_irq_enable(); } while (0)
+    do { br_write_unlock(idx); local_irq_enable(); } while (0)
 
 #define br_write_unlock_bh(idx) \
-	do { br_write_unlock(idx); local_bh_enable(); } while (0)
+    do { br_write_unlock(idx); local_bh_enable(); } while (0)
 
 #endif /* __LINUX_BRLOCK_H */

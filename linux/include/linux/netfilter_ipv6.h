@@ -42,16 +42,16 @@
 
 /* IP6 Hooks */
 /* After promisc drops, checksum checks. */
-#define NF_IP6_PRE_ROUTING	0
+#define NF_IP6_PRE_ROUTING  0
 /* If the packet is destined for this box. */
-#define NF_IP6_LOCAL_IN		1
+#define NF_IP6_LOCAL_IN     1
 /* If the packet is destined for another interface. */
-#define NF_IP6_FORWARD		2
+#define NF_IP6_FORWARD      2
 /* Packets coming from a local process. */
-#define NF_IP6_LOCAL_OUT		3
+#define NF_IP6_LOCAL_OUT        3
 /* Packets about to hit the wire. */
-#define NF_IP6_POST_ROUTING	4
-#define NF_IP6_NUMHOOKS		5
+#define NF_IP6_POST_ROUTING 4
+#define NF_IP6_NUMHOOKS     5
 
 
 enum nf_ip6_hook_priorities

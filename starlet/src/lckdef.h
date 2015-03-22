@@ -1,5 +1,5 @@
-#ifndef lckdef_h
-#define lckdef_h
+#ifndef LCKDEF_H
+#define LCKDEF_H
 
 #define LCK$M_VALBLK 0x1
 #define LCK$M_CONVERT 0x2

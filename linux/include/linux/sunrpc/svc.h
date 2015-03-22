@@ -27,18 +27,18 @@
  */
 struct svc_serv
 {
-    struct svc_rqst *	sv_threads;	/* idle server threads */
-    struct svc_sock *	sv_sockets;	/* pending sockets */
-    struct svc_program *	sv_program;	/* RPC program */
-    struct svc_stat *	sv_stats;	/* RPC statistics */
-    spinlock_t		sv_lock;
-    unsigned int		sv_nrthreads;	/* # of server threads */
-    unsigned int		sv_bufsz;	/* datagram buffer size */
-    unsigned int		sv_xdrsize;	/* XDR buffer size */
+    struct svc_rqst *   sv_threads; /* idle server threads */
+    struct svc_sock *   sv_sockets; /* pending sockets */
+    struct svc_program *    sv_program; /* RPC program */
+    struct svc_stat *   sv_stats;   /* RPC statistics */
+    spinlock_t      sv_lock;
+    unsigned int        sv_nrthreads;   /* # of server threads */
+    unsigned int        sv_bufsz;   /* datagram buffer size */
+    unsigned int        sv_xdrsize; /* XDR buffer size */
 
-    struct svc_sock *	sv_allsocks;	/* all sockets */
+    struct svc_sock *   sv_allsocks;    /* all sockets */
 
-    char *			sv_name;	/* service name */
+    char *          sv_name;    /* service name */
 };
 
 /*
@@ -46,7 +46,7 @@ struct svc_serv
  * This is use to determine the max number of pages nfsd is
  * willing to return in a single READ operation.
  */
-#define RPCSVC_MAXPAYLOAD	16384u
+#define RPCSVC_MAXPAYLOAD   16384u
 
 /*
  * Buffer to store RPC requests or replies in.
@@ -68,21 +68,21 @@ struct svc_serv
  * the list of IP fragments once we get to process fragmented UDP
  * datagrams directly.
  */
-#define RPCSVC_MAXIOV		((RPCSVC_MAXPAYLOAD+PAGE_SIZE-1)/PAGE_SIZE + 1)
+#define RPCSVC_MAXIOV       ((RPCSVC_MAXPAYLOAD+PAGE_SIZE-1)/PAGE_SIZE + 1)
 struct svc_buf
 {
-    u32 *			area;	/* allocated memory */
-    u32 *			base;	/* base of RPC datagram */
-    int			buflen;	/* total length of buffer */
-    u32 *			buf;	/* read/write pointer */
-    int			len;	/* current end of buffer */
+    u32 *           area;   /* allocated memory */
+    u32 *           base;   /* base of RPC datagram */
+    int         buflen; /* total length of buffer */
+    u32 *           buf;    /* read/write pointer */
+    int         len;    /* current end of buffer */
 
     /* iovec for zero-copy NFS READs */
-    struct iovec		iov[RPCSVC_MAXIOV];
-    int			nriov;
+    struct iovec        iov[RPCSVC_MAXIOV];
+    int         nriov;
 };
-#define svc_getlong(argp, val)	{ (val) = *(argp)->buf++; (argp)->len--; }
-#define svc_putlong(resp, val)	{ *(resp)->buf++ = (val); (resp)->len++; }
+#define svc_getlong(argp, val)  { (val) = *(argp)->buf++; (argp)->len--; }
+#define svc_putlong(resp, val)  { *(resp)->buf++ = (val); (resp)->len++; }
 
 /*
  * The context of a single thread, including the request currently being
@@ -91,37 +91,37 @@ struct svc_buf
  */
 struct svc_rqst
 {
-    struct svc_rqst *	rq_prev;	/* idle list */
-    struct svc_rqst *	rq_next;
-    struct svc_sock *	rq_sock;	/* socket */
-    struct sockaddr_in	rq_addr;	/* peer address */
-    int			rq_addrlen;
+    struct svc_rqst *   rq_prev;    /* idle list */
+    struct svc_rqst *   rq_next;
+    struct svc_sock *   rq_sock;    /* socket */
+    struct sockaddr_in  rq_addr;    /* peer address */
+    int         rq_addrlen;
 
-    struct svc_serv *	rq_server;	/* RPC service definition */
-    struct svc_procedure *	rq_procinfo;	/* procedure info */
-    struct svc_cred		rq_cred;	/* auth info */
-    struct sk_buff *	rq_skbuff;	/* fast recv inet buffer */
-    struct svc_buf		rq_defbuf;	/* default buffer */
-    struct svc_buf		rq_argbuf;	/* argument buffer */
-    struct svc_buf		rq_resbuf;	/* result buffer */
-    u32			rq_xid;		/* transmission id */
-    u32			rq_prog;	/* program number */
-    u32			rq_vers;	/* program version */
-    u32			rq_proc;	/* procedure number */
-    u32			rq_prot;	/* IP protocol */
-    unsigned short		rq_verfed  : 1,	/* reply has verifier */
-                 rq_userset : 1,	/* auth->setuser OK */
-                 rq_secure  : 1,	/* secure port */
-                 rq_auth    : 1;	/* check client */
+    struct svc_serv *   rq_server;  /* RPC service definition */
+    struct svc_procedure *  rq_procinfo;    /* procedure info */
+    struct svc_cred     rq_cred;    /* auth info */
+    struct sk_buff *    rq_skbuff;  /* fast recv inet buffer */
+    struct svc_buf      rq_defbuf;  /* default buffer */
+    struct svc_buf      rq_argbuf;  /* argument buffer */
+    struct svc_buf      rq_resbuf;  /* result buffer */
+    u32         rq_xid;     /* transmission id */
+    u32         rq_prog;    /* program number */
+    u32         rq_vers;    /* program version */
+    u32         rq_proc;    /* procedure number */
+    u32         rq_prot;    /* IP protocol */
+    unsigned short      rq_verfed  : 1, /* reply has verifier */
+             rq_userset : 1,    /* auth->setuser OK */
+             rq_secure  : 1,    /* secure port */
+             rq_auth    : 1;    /* check client */
 
-    void *			rq_argp;	/* decoded arguments */
-    void *			rq_resp;	/* xdr'd results */
+    void *          rq_argp;    /* decoded arguments */
+    void *          rq_resp;    /* xdr'd results */
 
     /* Catering to nfsd */
-    struct svc_client *	rq_client;	/* RPC peer info */
-    struct svc_cacherep *	rq_cacherep;	/* cache info */
+    struct svc_client * rq_client;  /* RPC peer info */
+    struct svc_cacherep *   rq_cacherep;    /* cache info */
 
-    wait_queue_head_t	rq_wait;	/* synchronozation */
+    wait_queue_head_t   rq_wait;    /* synchronozation */
 };
 
 /*
@@ -129,13 +129,13 @@ struct svc_rqst
  */
 struct svc_program
 {
-    u32			pg_prog;	/* program number */
-    unsigned int		pg_lovers;	/* lowest version */
-    unsigned int		pg_hivers;	/* lowest version */
-    unsigned int		pg_nvers;	/* number of versions */
-    struct svc_version **	pg_vers;	/* version array */
-    char *			pg_name;	/* service name */
-    struct svc_stat *	pg_stats;	/* rpc statistics */
+    u32         pg_prog;    /* program number */
+    unsigned int        pg_lovers;  /* lowest version */
+    unsigned int        pg_hivers;  /* lowest version */
+    unsigned int        pg_nvers;   /* number of versions */
+    struct svc_version **   pg_vers;    /* version array */
+    char *          pg_name;    /* service name */
+    struct svc_stat *   pg_stats;   /* rpc statistics */
 };
 
 /*
@@ -143,47 +143,47 @@ struct svc_program
  */
 struct svc_version
 {
-    u32			vs_vers;	/* version number */
-    u32			vs_nproc;	/* number of procedures */
-    struct svc_procedure *	vs_proc;	/* per-procedure info */
+    u32         vs_vers;    /* version number */
+    u32         vs_nproc;   /* number of procedures */
+    struct svc_procedure *  vs_proc;    /* per-procedure info */
 
     /* Override dispatch function (e.g. when caching replies).
      * A return value of 0 means drop the request.
      * vs_dispatch == NULL means use default dispatcher.
      */
-    int			(*vs_dispatch)(struct svc_rqst *, u32 *);
+    int         (*vs_dispatch)(struct svc_rqst *, u32 *);
 };
 
 /*
  * RPC procedure info
  */
-typedef int	(*svc_procfunc)(struct svc_rqst *, void *argp, void *resp);
+typedef int (*svc_procfunc)(struct svc_rqst *, void *argp, void *resp);
 struct svc_procedure
 {
-    svc_procfunc		pc_func;	/* process the request */
-    kxdrproc_t		pc_decode;	/* XDR decode args */
-    kxdrproc_t		pc_encode;	/* XDR encode result */
-    kxdrproc_t		pc_release;	/* XDR free result */
-    unsigned int		pc_argsize;	/* argument struct size */
-    unsigned int		pc_ressize;	/* result struct size */
-    unsigned int		pc_count;	/* call count */
-    unsigned int		pc_cachetype;	/* cache info (NFS) */
+    svc_procfunc        pc_func;    /* process the request */
+    kxdrproc_t      pc_decode;  /* XDR decode args */
+    kxdrproc_t      pc_encode;  /* XDR encode result */
+    kxdrproc_t      pc_release; /* XDR free result */
+    unsigned int        pc_argsize; /* argument struct size */
+    unsigned int        pc_ressize; /* result struct size */
+    unsigned int        pc_count;   /* call count */
+    unsigned int        pc_cachetype;   /* cache info (NFS) */
 };
 
 /*
  * This is the RPC server thread function prototype
  */
-typedef void		(*svc_thread_fn)(struct svc_rqst *);
+typedef void        (*svc_thread_fn)(struct svc_rqst *);
 
 /*
  * Function prototypes.
  */
 struct svc_serv *  svc_create(struct svc_program *, unsigned int, unsigned int);
-int		   svc_create_thread(svc_thread_fn, struct svc_serv *);
-void		   svc_exit_thread(struct svc_rqst *);
-void		   svc_destroy(struct svc_serv *);
-int		   svc_process(struct svc_serv *, struct svc_rqst *);
-int		   svc_register(struct svc_serv *, int, unsigned short);
-void		   svc_wake_up(struct svc_serv *);
+int        svc_create_thread(svc_thread_fn, struct svc_serv *);
+void           svc_exit_thread(struct svc_rqst *);
+void           svc_destroy(struct svc_serv *);
+int        svc_process(struct svc_serv *, struct svc_rqst *);
+int        svc_register(struct svc_serv *, int, unsigned short);
+void           svc_wake_up(struct svc_serv *);
 
 #endif /* SUNRPC_SVC_H */

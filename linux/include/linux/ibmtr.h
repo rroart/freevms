@@ -6,10 +6,10 @@
 
 /* ported to the Alpha architecture 02/20/96 (just used the HZ macro) */
 
-#define TR_RETRY_INTERVAL	(30*HZ)	/* 500 on PC = 5 s */
-#define TR_RST_TIME		(HZ/20) /* 5 on PC = 50 ms */
-#define TR_BUSY_INTERVAL	(HZ/5)	/* 5 on PC = 200 ms */
-#define TR_SPIN_INTERVAL	(3*HZ)	/* 3 seconds before init timeout */
+#define TR_RETRY_INTERVAL   (30*HZ) /* 500 on PC = 5 s */
+#define TR_RST_TIME     (HZ/20) /* 5 on PC = 50 ms */
+#define TR_BUSY_INTERVAL    (HZ/5)  /* 5 on PC = 200 ms */
+#define TR_SPIN_INTERVAL    (3*HZ)  /* 3 seconds before init timeout */
 
 #define TR_ISA 1
 #define TR_MCA 2
@@ -29,11 +29,11 @@
 #define AIPSHRAMPAGE    0X1FA8
 #define AIP4MBDHB       0X1FAA
 #define AIP16MBDHB      0X1FAC
-#define AIPFID		0X1FBA
+#define AIPFID      0X1FBA
 
 #define ADAPTRESET      0x1     /* Control Adapter reset (add to base) */
 #define ADAPTRESETREL   0x2     /* Release Adapter from reset ( """)  */
-#define ADAPTINTREL	0x3 	/* Adapter interrupt release */
+#define ADAPTINTREL 0x3     /* Adapter interrupt release */
 
 #define GLOBAL_INT_ENABLE 0x02f0
 
@@ -58,7 +58,7 @@
 
 #define TCR_INT    0x10    /* Bit 4 - Timer interrupt.  The TVR_EVEN timer has
 expired. */
-#define ERR_INT	   0x08    /* Bit 3 - Error interrupt.  The adapter has had an
+#define ERR_INT    0x08    /* Bit 3 - Error interrupt.  The adapter has had an
 internal error. */
 #define ACCESS_INT 0x04    /* Bit 2 - Access interrupt.  You have attempted to
 write to an invalid area of shared RAM
@@ -69,7 +69,7 @@ or an invalid register within the MMIO. */
 occur.  If 1, interrupts will occur normally.
 Normally set to 1.  */
 /* Bit 0 - Primary or alternate adapter.  Set to zero if this adapter is the
-		primary adapter, 1 if this adapter is the alternate adapter. */
+        primary adapter, 1 if this adapter is the alternate adapter. */
 
 
 #define ISRP_ODD        0x09
@@ -127,7 +127,7 @@ an SRB request and set the return code within
 #define TVR_ODD         0x0F
 #define SRPR_EVEN       0x18    /* Shared RAM paging registers - even and odd */
 #define SRPR_ENABLE_PAGING 0xc0
-#define SRPR_ODD        0x19	/* Not used. */
+#define SRPR_ODD        0x19    /* Not used. */
 #define TOKREAD         0x60
 #define TOKOR           0x40
 #define TOKAND          0x20
@@ -164,7 +164,7 @@ an SRB request and set the return code within
 #define FIRST_INT 1
 #define NOT_FIRST 2
 
-                                                  typedef enum {	CLOSED,	OPEN } open_state;
+                                                  typedef enum {    CLOSED, OPEN } open_state;
 //staic const char *printstate[] = { "CLOSED","OPEN"};
 
                                                   struct tok_info
@@ -209,32 +209,32 @@ an SRB request and set the return code within
                                                   struct sk_buff *current_skb;
                                                   struct net_device_stats tr_stats;
                                                   unsigned char auto_speedsave;
-                                                  open_state			open_status, sap_status;
-                                                  enum {MANUAL, AUTOMATIC}	open_mode;
-                                                  enum {FAIL, RESTART, REOPEN}	open_action;
-                                                  enum {NO, YES}			open_failure;
+                                                  open_state            open_status, sap_status;
+                                                  enum {MANUAL, AUTOMATIC}  open_mode;
+                                                  enum {FAIL, RESTART, REOPEN}  open_action;
+                                                  enum {NO, YES}            open_failure;
                                                   unsigned char readlog_pending;
                                                   unsigned short adapter_int_enable; /* Adapter-specific int enable */
                                                   struct timer_list tr_timer;
                                                   unsigned char ring_speed;
-                                                  spinlock_t lock;		/* SMP protection */
+                                                  spinlock_t lock;      /* SMP protection */
                                               };
 
                                                   /* token ring adapter commands */
-#define DIR_INTERRUPT 		0x00 /* struct srb_interrupt */
-#define DIR_MOD_OPEN_PARAMS 	0x01
-#define DIR_OPEN_ADAPTER 	0x03 /* struct dir_open_adapter */
-#define DIR_CLOSE_ADAPTER   	0x04
-#define DIR_SET_GRP_ADDR    	0x06
-#define DIR_SET_FUNC_ADDR   	0x07 /* struct srb_set_funct_addr */
-#define DIR_READ_LOG 		0x08 /* struct srb_read_log */
-#define DLC_OPEN_SAP 		0x15 /* struct dlc_open_sap */
-#define DLC_CLOSE_SAP       	0x16
-#define DATA_LOST 		0x20 /* struct asb_rec */
-#define REC_DATA 		0x81 /* struct arb_rec_req */
-#define XMIT_DATA_REQ 		0x82 /* struct arb_xmit_req */
-#define DLC_STATUS 		0x83 /* struct arb_dlc_status */
-#define RING_STAT_CHANGE    	0x84 /* struct dlc_open_sap ??? */
+#define DIR_INTERRUPT       0x00 /* struct srb_interrupt */
+#define DIR_MOD_OPEN_PARAMS     0x01
+#define DIR_OPEN_ADAPTER    0x03 /* struct dir_open_adapter */
+#define DIR_CLOSE_ADAPTER       0x04
+#define DIR_SET_GRP_ADDR        0x06
+#define DIR_SET_FUNC_ADDR       0x07 /* struct srb_set_funct_addr */
+#define DIR_READ_LOG        0x08 /* struct srb_read_log */
+#define DLC_OPEN_SAP        0x15 /* struct dlc_open_sap */
+#define DLC_CLOSE_SAP           0x16
+#define DATA_LOST       0x20 /* struct asb_rec */
+#define REC_DATA        0x81 /* struct arb_rec_req */
+#define XMIT_DATA_REQ       0x82 /* struct arb_xmit_req */
+#define DLC_STATUS      0x83 /* struct arb_dlc_status */
+#define RING_STAT_CHANGE        0x84 /* struct dlc_open_sap ??? */
 
                                                   /* DIR_OPEN_ADAPTER options */
 #define OPEN_PASS_BCON_MAC 0x0100

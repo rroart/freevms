@@ -5,7 +5,7 @@
 // Modified Linux source file, 2001-2004. Based on mmap.c.
 
 /*
- *	linux/mm/mmap.c
+ *  linux/mm/mmap.c
  *
  * Written by obz.
  */
@@ -46,15 +46,15 @@ struct vm_area_struct * find_vma_intersection2(struct mm_struct * mm, unsigned l
  * this is due to the limited x86 page protection hardware.  The expected
  * behavior is in parens:
  *
- * map_type	prot
- *		PROT_NONE	PROT_READ	PROT_WRITE	PROT_EXEC
- * MAP_SHARED	r: (no) no	r: (yes) yes	r: (no) yes	r: (no) yes
- *		w: (no) no	w: (no) no	w: (yes) yes	w: (no) no
- *		x: (no) no	x: (no) yes	x: (no) yes	x: (yes) yes
+ * map_type prot
+ *      PROT_NONE   PROT_READ   PROT_WRITE  PROT_EXEC
+ * MAP_SHARED   r: (no) no  r: (yes) yes    r: (no) yes r: (no) yes
+ *      w: (no) no  w: (no) no  w: (yes) yes    w: (no) no
+ *      x: (no) no  x: (no) yes x: (no) yes x: (yes) yes
  *
- * MAP_PRIVATE	r: (no) no	r: (yes) yes	r: (no) yes	r: (no) yes
- *		w: (no) no	w: (no) no	w: (copy) copy	w: (no) no
- *		x: (no) no	x: (no) yes	x: (no) yes	x: (yes) yes
+ * MAP_PRIVATE  r: (no) no  r: (yes) yes    r: (no) yes r: (no) yes
+ *      w: (no) no  w: (no) no  w: (copy) copy  w: (no) no
+ *      x: (no) no  x: (no) yes x: (no) yes x: (yes) yes
  *
  */
 pgprot_t protection_map[16] =
@@ -429,7 +429,7 @@ munmap_back:
 
     /* Private writable mapping? Check memory availability.. */
     if ((rde$l_flags & (VM_SHARED | VM_WRITE)) == VM_WRITE &&
-            !(flags & MAP_NORESERVE)				 &&
+            !(flags & MAP_NORESERVE)                 &&
             !vm_enough_memory(len >> PAGE_SHIFT))
         return -ENOMEM;
 
@@ -558,8 +558,8 @@ free_vma:
  * Ugly calling convention alert:
  * Return value with the low bits set means error value,
  * ie
- *	if (ret & ~PAGE_MASK)
- *		error = ret;
+ *  if (ret & ~PAGE_MASK)
+ *      error = ret;
  *
  * This function "knows" that -ENOMEM has the bits set.
  */
@@ -772,7 +772,7 @@ static struct _rde * unmap_fixup(struct mm_struct *mm,
         if (mpnt->vm_ops && mpnt->vm_ops->open)
             mpnt->vm_ops->open(mpnt);
 #endif
-        area->rde$q_region_size = addr - (unsigned long) area->rde$pq_start_va;	/* Truncate area */
+        area->rde$q_region_size = addr - (unsigned long) area->rde$pq_start_va; /* Truncate area */
 
         /* Because mpnt->vm_file == area->vm_file this locks
          * things correctly.
@@ -908,7 +908,7 @@ int do_munmap(struct mm_struct *mm, unsigned long addr, size_t len)
         free = mpnt;
         //rb_erase(&mpnt->vm_rb, &mm->mm_rb);
     }
-    mm->mmap_cache = NULL;	/* Kill the cache. */
+    mm->mmap_cache = NULL;  /* Kill the cache. */
     spin_unlock(&mm->page_table_lock);
 
     /* Ok - we have the memory areas we should free on the 'free' list,
@@ -1078,7 +1078,7 @@ out:
         release_segments(mm);
         spin_lock(&mm->page_table_lock);
         mpnt = current->pcb$l_phd->phd$ps_p0_va_list_flink;
-        //	mpnt = 0;
+        //  mpnt = 0;
         // find right phd, otherwise we have got some leak
         mm->mmap = mm->mmap_cache = NULL;
         mm->mm_rb = RB_ROOT;

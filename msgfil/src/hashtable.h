@@ -49,8 +49,8 @@ struct ht
     /* Call back.  */
     hashnode (*alloc_node) (hash_table *);
 
-    unsigned int nslots;		/* Total slots in the entries array.  */
-    unsigned int nelements;	/* Number of live elements.  */
+    unsigned int nslots;        /* Total slots in the entries array.  */
+    unsigned int nelements; /* Number of live elements.  */
 
     /* Link to reader, if any.  For the benefit of cpplib.  */
     struct cpp_reader *pfile;

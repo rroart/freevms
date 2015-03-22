@@ -6,25 +6,25 @@
 // Have also used some CMU stuff
 
 //
-//	****************************************************************
+//  ****************************************************************
 //
-//		Copyright (c) 1992, Carnegie Mellon University
+//      Copyright (c) 1992, Carnegie Mellon University
 //
-//		All Rights Reserved
+//      All Rights Reserved
 //
-//	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-//	distribute  this software  provided  that the  above  copyright
-//	notice appears in  all copies and that  any distribution be for
-//	noncommercial purposes.
+//  Permission  is  hereby  granted   to  use,  copy,  modify,  and
+//  distribute  this software  provided  that the  above  copyright
+//  notice appears in  all copies and that  any distribution be for
+//  noncommercial purposes.
 //
-//	Carnegie Mellon University disclaims all warranties with regard
-//	to this software.  In no event shall Carnegie Mellon University
-//	be liable for  any special, indirect,  or consequential damages
-//	or any damages whatsoever  resulting from loss of use, data, or
-//	profits  arising  out of  or in  connection  with  the  use  or
-//	performance of this software.
+//  Carnegie Mellon University disclaims all warranties with regard
+//  to this software.  In no event shall Carnegie Mellon University
+//  be liable for  any special, indirect,  or consequential damages
+//  or any damages whatsoever  resulting from loss of use, data, or
+//  profits  arising  out of  or in  connection  with  the  use  or
+//  performance of this software.
 //
-//	****************************************************************
+//  ****************************************************************
 //
 
 #include <crbdef.h>
@@ -65,29 +65,29 @@
 
 extern struct tty_driver console_driver;
 
-void con$startio(int R3, struct _ucb * u, signed int CC)  				// START I/O ON UNIT
+void con$startio(int R3, struct _ucb * u, signed int CC)                // START I/O ON UNIT
 {
     struct _ucb * ucb = u;
     struct _tty_ucb * tty=ucb;
-    if (CC==1)  			// Single character
+    if (CC==1)              // Single character
     {
-        tty->tty$b_tank_char = R3;		// Save output character
-        tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;	// Signal charater in tank
+        tty->tty$b_tank_char = R3;      // Save output character
+        tty->ucb$w_tt_hold|=TTY$M_TANK_HOLD;    // Signal charater in tank
     }
     else
     {
-        tty->ucb$w_tt_hold|=TTY$M_TANK_BURST;	// Signal burst active
+        tty->ucb$w_tt_hold|=TTY$M_TANK_BURST;   // Signal burst active
     }
 
     //
     // Here we must do something to notify our mate device that
     // there is data to pick up
     //
-    // not?  ucb = ((struct _tz_ucb *)ucb)->ucb$l_tz_xucb;		// Switch to PZ UCB
-    if (ucb)  			// PZ is disconnected: skip
+    // not?  ucb = ((struct _tz_ucb *)ucb)->ucb$l_tz_xucb;      // Switch to PZ UCB
+    if (ucb)            // PZ is disconnected: skip
     {
 #if 0
-        int savipl = forklock(ucb->ucb$b_flck, ucb->ucb$b_flck);	// Take out PZ device FORK LOCK
+        int savipl = forklock(ucb->ucb$b_flck, ucb->ucb$b_flck);    // Take out PZ device FORK LOCK
 #endif
 #if 0
         if (ucb->ucb$l_irp->irp$l_func==IO$_WRITEPBLK)
@@ -176,13 +176,13 @@ again:
 #endif
         }
 #if 0
-        if	(UCB$M_BSY&		// If the device isn't busy,
-                ucb->ucb$l_sts) 	// then dont do i/o
+        if  (UCB$M_BSY&     // If the device isn't busy,
+                ucb->ucb$l_sts)     // then dont do i/o
 
-            ioc$initiate(ucb->ucb$l_irp, ucb);		// IOC$INITIATE needs IRP addr
+            ioc$initiate(ucb->ucb$l_irp, ucb);      // IOC$INITIATE needs IRP addr
 #endif
 #if 0
-        forkunlock(ucb->ucb$b_flck, savipl);			// Release PZ drvice FORK LOCK
+        forkunlock(ucb->ucb$b_flck, savipl);            // Release PZ drvice FORK LOCK
 #endif
 
         return;
@@ -195,7 +195,7 @@ again:
         //
         ucb=u;
         tty=ucb;
-        tty->ucb$w_tt_hold&= ~(	TTY$M_TANK_HOLD|	// Nothing in progress now
+        tty->ucb$w_tt_hold&= ~( TTY$M_TANK_HOLD|    // Nothing in progress now
                                 TTY$M_TANK_BURST|
                                 TTY$M_TANK_PREMPT);
     }
@@ -227,7 +227,7 @@ struct _tt_port con_port_vector =
     //
     // Added port vector table using VEC macros
     //
-    //	    $VECINI	TZ:con$null
+    //      $VECINI TZ:con$null
 port_startio:
     con$startio,
 port_disconnect:
@@ -465,13 +465,13 @@ int op$unit_init (struct _idb * idb, struct _ucb * ucb)
 
     ucb->ucb$v_online = 1;
 
-    int R0=&con_port_vector; // check TZ$VEC?		// Set TZ port vector table
+    int R0=&con_port_vector; // check TZ$VEC?       // Set TZ port vector table
     CLASS_UNIT_INIT(ucb,R0);
     struct _tty_ucb * tty;
     struct _tt_class * R2;
     tty = ucb;
-    R2	 = tty->ucb$l_tt_class;		// Address class vector table
-    R2->class_setup_ucb(tty);		// Init ucb fields
+    R2   = tty->ucb$l_tt_class;     // Address class vector table
+    R2->class_setup_ucb(tty);       // Init ucb fields
 
     return SS$_NORMAL;
 }
@@ -610,7 +610,7 @@ int con_vmsinit(void)
 unsigned int video_font_height;
 unsigned int default_font_height;
 unsigned int video_scan_lines;
-int sel_cons = 0;		/* must not be disallocated */
+int sel_cons = 0;       /* must not be disallocated */
 
 void clear_selection(void) { }
 

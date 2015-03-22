@@ -36,7 +36,7 @@
 
 #include <stdlib.h>
 #include "descrip.h"
-#include "sys$routines.h"	/* Our header file! */
+#include "sys$routines.h"   /* Our header file! */
 #include "ssdef.h"
 
 struct TIME

@@ -56,13 +56,13 @@
 /* How small can we sensibly write nodes? */
 #define JFFS2_MIN_DATA_LEN 128
 
-#define JFFS2_COMPR_NONE	0x00
-#define JFFS2_COMPR_ZERO	0x01
-#define JFFS2_COMPR_RTIME	0x02
-#define JFFS2_COMPR_RUBINMIPS	0x03
-#define JFFS2_COMPR_COPY	0x04
-#define JFFS2_COMPR_DYNRUBIN	0x05
-#define JFFS2_COMPR_ZLIB	0x06
+#define JFFS2_COMPR_NONE    0x00
+#define JFFS2_COMPR_ZERO    0x01
+#define JFFS2_COMPR_RTIME   0x02
+#define JFFS2_COMPR_RUBINMIPS   0x03
+#define JFFS2_COMPR_COPY    0x04
+#define JFFS2_COMPR_DYNRUBIN    0x05
+#define JFFS2_COMPR_ZLIB    0x06
 /* Compatibility flags. */
 #define JFFS2_COMPAT_MASK 0xc000      /* What do to if an unknown nodetype is found */
 #define JFFS2_NODE_ACCURATE 0x2000
@@ -89,10 +89,10 @@
 //#define JFFS2_NODETYPE_DIRENT_ECC (JFFS2_FEATURE_INCOMPAT | JFFS2_NODE_ACCURATE | 5)
 //#define JFFS2_NODETYPE_INODE_ECC (JFFS2_FEATURE_INCOMPAT | JFFS2_NODE_ACCURATE | 6)
 
-#define JFFS2_INO_FLAG_PREREAD	  1	/* Do read_inode() for this one at 
+#define JFFS2_INO_FLAG_PREREAD    1 /* Do read_inode() for this one at 
 mount time, don't wait for it to
 happen later */
-#define JFFS2_INO_FLAG_USERCOMPR  2	/* User has requested a specific 
+#define JFFS2_INO_FLAG_USERCOMPR  2 /* User has requested a specific 
 compression type */
 
 
@@ -108,7 +108,7 @@ __u32 hdr_crc;
 struct jffs2_raw_dirent
 {
     __u16 magic;
-    __u16 nodetype;	/* == JFFS_NODETYPE_DIRENT */
+    __u16 nodetype; /* == JFFS_NODETYPE_DIRENT */
     __u32 totlen;
     __u32 hdr_crc;
     __u32 pino;
@@ -146,13 +146,13 @@ struct jffs2_raw_inode
     __u32 ctime;      /* Change time.  */
     __u32 offset;     /* Where to begin to write.  */
     __u32 csize;      /* (Compressed) data size */
-    __u32 dsize;	  /* Size of the node's data. (after decompression) */
+    __u32 dsize;      /* Size of the node's data. (after decompression) */
     __u8 compr;       /* Compression algorithm used */
-    __u8 usercompr;	  /* Compression algorithm requested by the user */
-    __u16 flags;	  /* See JFFS2_INO_FLAG_* */
+    __u8 usercompr;   /* Compression algorithm requested by the user */
+    __u16 flags;      /* See JFFS2_INO_FLAG_* */
     __u32 data_crc;   /* CRC for the (compressed) data.  */
     __u32 node_crc;   /* CRC for the raw inode (excluding data)  */
-//	__u8 data[dsize];
+//  __u8 data[dsize];
 };
 
 union jffs2_node_union

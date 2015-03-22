@@ -160,7 +160,7 @@ asmlinkage long sys_dup2(unsigned int oldfd, unsigned int newfd)
     err = -EBADF;
     if (newfd >= current->rlim[RLIMIT_NOFILE].rlim_cur)
         goto out_unlock;
-    get_file(file);			/* We are now finished with oldfd */
+    get_file(file);         /* We are now finished with oldfd */
 
     err = expand_files(files, newfd);
     if (err < 0)
@@ -322,12 +322,12 @@ out:
 
 static long band_table[NSIGPOLL] =
 {
-    POLLIN | POLLRDNORM,			/* POLL_IN */
-    POLLOUT | POLLWRNORM | POLLWRBAND,	/* POLL_OUT */
-    POLLIN | POLLRDNORM | POLLMSG,		/* POLL_MSG */
-    POLLERR,				/* POLL_ERR */
-    POLLPRI | POLLRDBAND,			/* POLL_PRI */
-    POLLHUP | POLLERR			/* POLL_HUP */
+    POLLIN | POLLRDNORM,            /* POLL_IN */
+    POLLOUT | POLLWRNORM | POLLWRBAND,  /* POLL_OUT */
+    POLLIN | POLLRDNORM | POLLMSG,      /* POLL_MSG */
+    POLLERR,                /* POLL_ERR */
+    POLLPRI | POLLRDBAND,           /* POLL_PRI */
+    POLLHUP | POLLERR           /* POLL_HUP */
 };
 
 static void send_sigio_to_task(struct task_struct *p,
@@ -373,7 +373,7 @@ static void send_sigio_to_task(struct task_struct *p,
 void send_sigio(struct fown_struct *fown, int fd, int band)
 {
     struct task_struct * p;
-    int   pid	= fown->pid;
+    int   pid   = fown->pid;
 
     read_lock(&tasklist_lock);
     if ( (pid > 0) && (p = find_task_by_pid(pid)) )

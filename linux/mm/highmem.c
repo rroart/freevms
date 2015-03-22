@@ -100,7 +100,7 @@ start:
             count = LAST_PKMAP;
         }
         if (!pkmap_count[last_pkmap_nr])
-            break;	/* Found a usable entry */
+            break;  /* Found a usable entry */
         if (--count)
             continue;
 
@@ -373,7 +373,7 @@ repeat_alloc:
     /* we need to wait I/O completion */
     run_task_queue(&tq_disk);
 
-    //	current->policy |= SCHED_YIELD;
+    //  current->policy |= SCHED_YIELD;
     current->need_resched=1;
     __set_current_state(TASK_RUNNING);
     schedule();
@@ -413,7 +413,7 @@ repeat_alloc:
     /* we need to wait I/O completion */
     run_task_queue(&tq_disk);
 
-    //	current->policy |= SCHED_YIELD;
+    //  current->policy |= SCHED_YIELD;
     current->need_resched=1;
     __set_current_state(TASK_RUNNING);
     schedule();

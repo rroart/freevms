@@ -1,5 +1,5 @@
-#ifndef dirdef_h
-#define dirdef_h
+#ifndef DIRDEF_H
+#define DIRDEF_H
 
 /* Direct.h v1.3    Definitions for directory access routines */
 

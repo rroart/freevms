@@ -155,28 +155,28 @@ unsigned long tty$startio (struct _irp * i, struct _ucb * u)
         char * buf;
         int size;
         int devdep2 = 0;
-        buf = i->irp$l_qio_p1;		// ADDRESS USER BUFFER
+        buf = i->irp$l_qio_p1;      // ADDRESS USER BUFFER
         buf = &i->irp$l_media;
-        size=i->irp$l_qio_p2;		// GET SIZE ARGUMENT
-        devtype=((char *)buf)[1];		// Get Type
-        bufsiz=((short *)buf)[1];		// Width
-        devdep=((long *)buf)[1];		// Page/characteristics
-        if	(size>=12)			// DID HE ASK FOR 2ND ?
-            devdep2=((long *)buf)[2];		// Get extended char.
+        size=i->irp$l_qio_p2;       // GET SIZE ARGUMENT
+        devtype=((char *)buf)[1];       // Get Type
+        bufsiz=((short *)buf)[1];       // Width
+        devdep=((long *)buf)[1];        // Page/characteristics
+        if  (size>=12)          // DID HE ASK FOR 2ND ?
+            devdep2=((long *)buf)[2];       // Get extended char.
 
-        u->ucb$b_devtype = devtype;		// BUILD TYPE, AND BUFFER SIZE
-        u->ucb$w_devbufsiz = bufsiz;		// Buffer size
-        u->ucb$l_devdepend = devdep;		// Set 1ST CHARACTERISTICS LONGWORD
-        if	(size>=12)  			// DID HE ASK FOR 2ND ?
+        u->ucb$b_devtype = devtype;     // BUILD TYPE, AND BUFFER SIZE
+        u->ucb$w_devbufsiz = bufsiz;        // Buffer size
+        u->ucb$l_devdepend = devdep;        // Set 1ST CHARACTERISTICS LONGWORD
+        if  (size>=12)              // DID HE ASK FOR 2ND ?
         {
-            devdep2&=~TT2$M_DCL_MAILBX;	// Kill bad bits
-            u->ucb$l_devdepnd2 = devdep2;		// Set 2nd CHARACTERISTICS LONGWORD
+            devdep2&=~TT2$M_DCL_MAILBX; // Kill bad bits
+            u->ucb$l_devdepnd2 = devdep2;       // Set 2nd CHARACTERISTICS LONGWORD
         }
-        sts=	SS$_NORMAL;		// Damn, it worked!
+        sts=    SS$_NORMAL;     // Damn, it worked!
         ioc$reqcom(sts,0,u);
         return sts;
 #if 0
-        return exe$finishioc(sts,i,p,u);		// Complete request
+        return exe$finishioc(sts,i,p,u);        // Complete request
 #endif
     }
     break;

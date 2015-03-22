@@ -84,7 +84,7 @@
  * preprocessor definitions
  */
 /* if you like emergency reset code in the driver */
-#define	LVM_TOTAL_RESET
+#define LVM_TOTAL_RESET
 
 #ifdef __KERNEL__
 #undef LVM_HD_NAME /* display nice names in /proc/partitions */
@@ -101,7 +101,7 @@
    #define DEBUG_LVM_BLK_OPEN
    #define DEBUG_KFREE
  */
-#endif				/* #ifdef __KERNEL__ */
+#endif              /* #ifdef __KERNEL__ */
 
 #include <linux/kdev_t.h>
 #include <linux/list.h>
@@ -113,7 +113,7 @@
 #include <linux/spinlock.h>
 
 #include <asm/semaphore.h>
-#endif				/* #ifdef __KERNEL__ */
+#endif              /* #ifdef __KERNEL__ */
 
 #include <asm/page.h>
 
@@ -121,24 +121,24 @@
 #error Bad include/linux/major.h - LVM MAJOR undefined
 #endif
 
-#ifdef	BLOCK_SIZE
-#undef	BLOCK_SIZE
+#ifdef  BLOCK_SIZE
+#undef  BLOCK_SIZE
 #endif
 
 #ifdef CONFIG_ARCH_S390
-#define BLOCK_SIZE	4096
+#define BLOCK_SIZE  4096
 #else
-#define BLOCK_SIZE	1024
+#define BLOCK_SIZE  1024
 #endif
 
-#ifndef	SECTOR_SIZE
-#define SECTOR_SIZE	512
+#ifndef SECTOR_SIZE
+#define SECTOR_SIZE 512
 #endif
 
 /* structure version */
 #define LVM_STRUCT_VERSION 1
 
-#define	LVM_DIR_PREFIX	"/dev/"
+#define LVM_DIR_PREFIX  "/dev/"
 
 /*
  * i/o protocol version
@@ -147,35 +147,35 @@
  * user land tools/lib/liblvm.h
  *
  */
-#define	LVM_DRIVER_IOP_VERSION	        10
+#define LVM_DRIVER_IOP_VERSION          10
 
 #define LVM_NAME        "lvm"
-#define LVM_GLOBAL	"global"
-#define LVM_DIR		"lvm"
-#define LVM_VG_SUBDIR	"VGs"
-#define LVM_LV_SUBDIR	"LVs"
-#define LVM_PV_SUBDIR	"PVs"
+#define LVM_GLOBAL  "global"
+#define LVM_DIR     "lvm"
+#define LVM_VG_SUBDIR   "VGs"
+#define LVM_LV_SUBDIR   "LVs"
+#define LVM_PV_SUBDIR   "PVs"
 
 /*
  * VG/LV indexing macros
  */
 /* character minor maps directly to volume group */
-#define	VG_CHR(a) ( a)
+#define VG_CHR(a) ( a)
 
 /* block minor indexes into a volume group/logical volume indirection table */
-#define	VG_BLK(a)	( vg_lv_map[a].vg_number)
-#define LV_BLK(a)	( vg_lv_map[a].lv_number)
+#define VG_BLK(a)   ( vg_lv_map[a].vg_number)
+#define LV_BLK(a)   ( vg_lv_map[a].lv_number)
 
 /*
  * absolute limits for VGs, PVs per VG and LVs per VG
  */
-#define ABS_MAX_VG	99
-#define ABS_MAX_PV	256
-#define ABS_MAX_LV	256	/* caused by 8 bit minor */
+#define ABS_MAX_VG  99
+#define ABS_MAX_PV  256
+#define ABS_MAX_LV  256 /* caused by 8 bit minor */
 
 #define MAX_VG  ABS_MAX_VG
-#define MAX_LV	ABS_MAX_LV
-#define	MAX_PV	ABS_MAX_PV
+#define MAX_LV  ABS_MAX_LV
+#define MAX_PV  ABS_MAX_PV
 
 #if ( MAX_VG > ABS_MAX_VG)
 #undef MAX_VG
@@ -205,66 +205,66 @@
  */
 
 /* This is the usable size of pe_disk_t.le_num !!!        v     v */
-#define	LVM_PE_T_MAX		( ( 1 << ( sizeof ( uint16_t) * 8)) - 2)
+#define LVM_PE_T_MAX        ( ( 1 << ( sizeof ( uint16_t) * 8)) - 2)
 
-#define	LVM_LV_SIZE_MAX(a)	( ( long long) LVM_PE_T_MAX * (a)->pe_size > ( long long) 1024*1024/SECTOR_SIZE*1024*1024 ? ( long long) 1024*1024/SECTOR_SIZE*1024*1024 : ( long long) LVM_PE_T_MAX * (a)->pe_size)
-#define	LVM_MIN_PE_SIZE		( 8192L / SECTOR_SIZE) /* 8 KB in sectors */
-#define	LVM_MAX_PE_SIZE		( 16L * 1024L * 1024L / SECTOR_SIZE * 1024)	/* 16GB in sectors */
-#define	LVM_DEFAULT_PE_SIZE	( 4096L * 1024 / SECTOR_SIZE)	/* 4 MB in sectors */
-#define	LVM_DEFAULT_STRIPE_SIZE	16L	/* 16 KB  */
-#define	LVM_MIN_STRIPE_SIZE	( PAGE_SIZE/SECTOR_SIZE)	/* PAGESIZE in sectors */
-#define	LVM_MAX_STRIPE_SIZE	( 512L * 1024 / SECTOR_SIZE)	/* 512 KB in sectors */
-#define	LVM_MAX_STRIPES		128	/* max # of stripes */
-#define	LVM_MAX_SIZE            ( 1024LU * 1024 / SECTOR_SIZE * 1024 * 1024)	/* 1TB[sectors] */
-#define	LVM_MAX_MIRRORS    	2	/* future use */
-#define	LVM_MIN_READ_AHEAD	2	/* minimum read ahead sectors */
-#define	LVM_MAX_READ_AHEAD	120	/* maximum read ahead sectors */
-#define	LVM_MAX_LV_IO_TIMEOUT	60	/* seconds I/O timeout (future use) */
-#define	LVM_PARTITION           0xfe	/* LVM partition id */
-#define	LVM_NEW_PARTITION       0x8e	/* new LVM partition id (10/09/1999) */
-#define	LVM_PE_SIZE_PV_SIZE_REL	5	/* max relation PV size and PE size */
+#define LVM_LV_SIZE_MAX(a)  ( ( long long) LVM_PE_T_MAX * (a)->pe_size > ( long long) 1024*1024/SECTOR_SIZE*1024*1024 ? ( long long) 1024*1024/SECTOR_SIZE*1024*1024 : ( long long) LVM_PE_T_MAX * (a)->pe_size)
+#define LVM_MIN_PE_SIZE     ( 8192L / SECTOR_SIZE) /* 8 KB in sectors */
+#define LVM_MAX_PE_SIZE     ( 16L * 1024L * 1024L / SECTOR_SIZE * 1024) /* 16GB in sectors */
+#define LVM_DEFAULT_PE_SIZE ( 4096L * 1024 / SECTOR_SIZE)   /* 4 MB in sectors */
+#define LVM_DEFAULT_STRIPE_SIZE 16L /* 16 KB  */
+#define LVM_MIN_STRIPE_SIZE ( PAGE_SIZE/SECTOR_SIZE)    /* PAGESIZE in sectors */
+#define LVM_MAX_STRIPE_SIZE ( 512L * 1024 / SECTOR_SIZE)    /* 512 KB in sectors */
+#define LVM_MAX_STRIPES     128 /* max # of stripes */
+#define LVM_MAX_SIZE            ( 1024LU * 1024 / SECTOR_SIZE * 1024 * 1024)    /* 1TB[sectors] */
+#define LVM_MAX_MIRRORS     2   /* future use */
+#define LVM_MIN_READ_AHEAD  2   /* minimum read ahead sectors */
+#define LVM_MAX_READ_AHEAD  120 /* maximum read ahead sectors */
+#define LVM_MAX_LV_IO_TIMEOUT   60  /* seconds I/O timeout (future use) */
+#define LVM_PARTITION           0xfe    /* LVM partition id */
+#define LVM_NEW_PARTITION       0x8e    /* new LVM partition id (10/09/1999) */
+#define LVM_PE_SIZE_PV_SIZE_REL 5   /* max relation PV size and PE size */
 
-#define	LVM_SNAPSHOT_MAX_CHUNK	1024	/* 1024 KB */
-#define	LVM_SNAPSHOT_DEF_CHUNK	64	/* 64  KB */
-#define	LVM_SNAPSHOT_MIN_CHUNK	(PAGE_SIZE/1024)	/* 4 or 8 KB */
+#define LVM_SNAPSHOT_MAX_CHUNK  1024    /* 1024 KB */
+#define LVM_SNAPSHOT_DEF_CHUNK  64  /* 64  KB */
+#define LVM_SNAPSHOT_MIN_CHUNK  (PAGE_SIZE/1024)    /* 4 or 8 KB */
 
-#define	UNDEF	-1
+#define UNDEF   -1
 
 /*
  * ioctls
  * FIXME: the last parameter to _IO{W,R,WR} is a data type.  The macro will
- *	  expand this using sizeof(), so putting "1" there is misleading
- *	  because sizeof(1) = sizeof(int) = sizeof(2) = 4 on a 32-bit machine!
+ *    expand this using sizeof(), so putting "1" there is misleading
+ *    because sizeof(1) = sizeof(int) = sizeof(2) = 4 on a 32-bit machine!
  */
 /* volume group */
-#define	VG_CREATE_OLD           _IOW ( 0xfe, 0x00, 1)
-#define	VG_REMOVE               _IOW ( 0xfe, 0x01, 1)
+#define VG_CREATE_OLD           _IOW ( 0xfe, 0x00, 1)
+#define VG_REMOVE               _IOW ( 0xfe, 0x01, 1)
 
-#define	VG_EXTEND               _IOW ( 0xfe, 0x03, 1)
-#define	VG_REDUCE               _IOW ( 0xfe, 0x04, 1)
+#define VG_EXTEND               _IOW ( 0xfe, 0x03, 1)
+#define VG_REDUCE               _IOW ( 0xfe, 0x04, 1)
 
-#define	VG_STATUS               _IOWR ( 0xfe, 0x05, 1)
-#define	VG_STATUS_GET_COUNT     _IOWR ( 0xfe, 0x06, 1)
-#define	VG_STATUS_GET_NAMELIST  _IOWR ( 0xfe, 0x07, 1)
+#define VG_STATUS               _IOWR ( 0xfe, 0x05, 1)
+#define VG_STATUS_GET_COUNT     _IOWR ( 0xfe, 0x06, 1)
+#define VG_STATUS_GET_NAMELIST  _IOWR ( 0xfe, 0x07, 1)
 
-#define	VG_SET_EXTENDABLE       _IOW ( 0xfe, 0x08, 1)
-#define	VG_RENAME		_IOW ( 0xfe, 0x09, 1)
+#define VG_SET_EXTENDABLE       _IOW ( 0xfe, 0x08, 1)
+#define VG_RENAME       _IOW ( 0xfe, 0x09, 1)
 
 /* Since 0.9beta6 */
-#define	VG_CREATE               _IOW ( 0xfe, 0x0a, 1)
+#define VG_CREATE               _IOW ( 0xfe, 0x0a, 1)
 
 /* logical volume */
-#define	LV_CREATE               _IOW ( 0xfe, 0x20, 1)
-#define	LV_REMOVE               _IOW ( 0xfe, 0x21, 1)
+#define LV_CREATE               _IOW ( 0xfe, 0x20, 1)
+#define LV_REMOVE               _IOW ( 0xfe, 0x21, 1)
 
-#define	LV_ACTIVATE             _IO ( 0xfe, 0x22)
-#define	LV_DEACTIVATE           _IO ( 0xfe, 0x23)
+#define LV_ACTIVATE             _IO ( 0xfe, 0x22)
+#define LV_DEACTIVATE           _IO ( 0xfe, 0x23)
 
-#define	LV_EXTEND               _IOW ( 0xfe, 0x24, 1)
-#define	LV_REDUCE               _IOW ( 0xfe, 0x25, 1)
+#define LV_EXTEND               _IOW ( 0xfe, 0x24, 1)
+#define LV_REDUCE               _IOW ( 0xfe, 0x25, 1)
 
-#define	LV_STATUS_BYNAME        _IOWR ( 0xfe, 0x26, 1)
-#define	LV_STATUS_BYINDEX       _IOWR ( 0xfe, 0x27, 1)
+#define LV_STATUS_BYNAME        _IOWR ( 0xfe, 0x26, 1)
+#define LV_STATUS_BYINDEX       _IOWR ( 0xfe, 0x27, 1)
 
 #define LV_SET_ACCESS           _IOW ( 0xfe, 0x28, 1)
 #define LV_SET_ALLOCATION       _IOW ( 0xfe, 0x29, 1)
@@ -274,31 +274,31 @@
 
 #define LV_SNAPSHOT_USE_RATE    _IOWR ( 0xfe, 0x2c, 1)
 
-#define	LV_STATUS_BYDEV		_IOWR ( 0xfe, 0x2e, 1)
+#define LV_STATUS_BYDEV     _IOWR ( 0xfe, 0x2e, 1)
 
-#define	LV_RENAME		_IOW ( 0xfe, 0x2f, 1)
+#define LV_RENAME       _IOW ( 0xfe, 0x2f, 1)
 
-#define	LV_BMAP			_IOWR ( 0xfe, 0x30, 1)
+#define LV_BMAP         _IOWR ( 0xfe, 0x30, 1)
 
 
 /* physical volume */
-#define	PV_STATUS               _IOWR ( 0xfe, 0x40, 1)
-#define	PV_CHANGE               _IOWR ( 0xfe, 0x41, 1)
-#define	PV_FLUSH                _IOW ( 0xfe, 0x42, 1)
+#define PV_STATUS               _IOWR ( 0xfe, 0x40, 1)
+#define PV_CHANGE               _IOWR ( 0xfe, 0x41, 1)
+#define PV_FLUSH                _IOW ( 0xfe, 0x42, 1)
 
 /* physical extent */
-#define	PE_LOCK_UNLOCK          _IOW ( 0xfe, 0x50, 1)
+#define PE_LOCK_UNLOCK          _IOW ( 0xfe, 0x50, 1)
 
 /* i/o protocol version */
-#define	LVM_GET_IOP_VERSION     _IOR ( 0xfe, 0x98, 1)
+#define LVM_GET_IOP_VERSION     _IOR ( 0xfe, 0x98, 1)
 
 #ifdef LVM_TOTAL_RESET
 /* special reset function for testing purposes */
-#define	LVM_RESET               _IO ( 0xfe, 0x99)
+#define LVM_RESET               _IO ( 0xfe, 0x99)
 #endif
 
 /* lock the logical volume manager */
-#define	LVM_LOCK_LVM            _IO ( 0xfe, 0x100)
+#define LVM_LOCK_LVM            _IO ( 0xfe, 0x100)
 /* END ioctls */
 
 
@@ -306,32 +306,32 @@
  * Status flags
  */
 /* volume group */
-#define	VG_ACTIVE            0x01	/* vg_status */
-#define	VG_EXPORTED          0x02	/*     "     */
-#define	VG_EXTENDABLE        0x04	/*     "     */
+#define VG_ACTIVE            0x01   /* vg_status */
+#define VG_EXPORTED          0x02   /*     "     */
+#define VG_EXTENDABLE        0x04   /*     "     */
 
-#define	VG_READ              0x01	/* vg_access */
-#define	VG_WRITE             0x02	/*     "     */
-#define	VG_CLUSTERED         0x04	/*     "     */
-#define	VG_SHARED            0x08	/*     "     */
+#define VG_READ              0x01   /* vg_access */
+#define VG_WRITE             0x02   /*     "     */
+#define VG_CLUSTERED         0x04   /*     "     */
+#define VG_SHARED            0x08   /*     "     */
 
 /* logical volume */
-#define	LV_ACTIVE            0x01	/* lv_status */
-#define	LV_SPINDOWN          0x02	/*     "     */
+#define LV_ACTIVE            0x01   /* lv_status */
+#define LV_SPINDOWN          0x02   /*     "     */
 
-#define	LV_READ              0x01	/* lv_access */
-#define	LV_WRITE             0x02	/*     "     */
-#define	LV_SNAPSHOT          0x04	/*     "     */
-#define	LV_SNAPSHOT_ORG      0x08	/*     "     */
+#define LV_READ              0x01   /* lv_access */
+#define LV_WRITE             0x02   /*     "     */
+#define LV_SNAPSHOT          0x04   /*     "     */
+#define LV_SNAPSHOT_ORG      0x08   /*     "     */
 
-#define	LV_BADBLOCK_ON       0x01	/* lv_badblock */
+#define LV_BADBLOCK_ON       0x01   /* lv_badblock */
 
-#define	LV_STRICT            0x01	/* lv_allocation */
-#define	LV_CONTIGUOUS        0x02	/*       "       */
+#define LV_STRICT            0x01   /* lv_allocation */
+#define LV_CONTIGUOUS        0x02   /*       "       */
 
 /* physical volume */
-#define	PV_ACTIVE            0x01	/* pv_status */
-#define	PV_ALLOCATABLE       0x02	/* pv_allocatable */
+#define PV_ACTIVE            0x01   /* pv_status */
+#define PV_ALLOCATABLE       0x02   /* pv_allocatable */
 
 
 /* misc */
@@ -345,8 +345,8 @@
  *
  */
 
-#define	NAME_LEN		128	/* don't change!!! */
-#define	UUID_LEN		32	/* don't change!!! */
+#define NAME_LEN        128 /* don't change!!! */
+#define UUID_LEN        32  /* don't change!!! */
 
 /* copy on write tables in disk format */
 typedef struct lv_COW_table_disk_v1
@@ -389,8 +389,8 @@ typedef struct
 /* core */
 typedef struct pv_v2
 {
-    char id[2];		/* Identifier */
-    unsigned short version;	/* HM lvm version */
+    char id[2];     /* Identifier */
+    unsigned short version; /* HM lvm version */
     lvm_disk_data_t pv_on_disk;
     lvm_disk_data_t vg_on_disk;
     lvm_disk_data_t pv_uuidlist_on_disk;
@@ -398,23 +398,23 @@ typedef struct pv_v2
     lvm_disk_data_t pe_on_disk;
     char pv_name[NAME_LEN];
     char vg_name[NAME_LEN];
-    char system_id[NAME_LEN];	/* for vgexport/vgimport */
+    char system_id[NAME_LEN];   /* for vgexport/vgimport */
     kdev_t pv_dev;
     uint pv_number;
     uint pv_status;
     uint pv_allocatable;
-    uint pv_size;		/* HM */
+    uint pv_size;       /* HM */
     uint lv_cur;
     uint pe_size;
     uint pe_total;
     uint pe_allocated;
-    uint pe_stale;		/* for future use */
-    pe_disk_t *pe;		/* HM */
+    uint pe_stale;      /* for future use */
+    pe_disk_t *pe;      /* HM */
     struct block_device *bd;
     char pv_uuid[UUID_LEN+1];
 
 #ifndef __KERNEL__
-    uint32_t pe_start;	/* in sectors */
+    uint32_t pe_start;  /* in sectors */
 #endif
 } pv_t;
 
@@ -422,8 +422,8 @@ typedef struct pv_v2
 /* disk */
 typedef struct pv_disk_v2
 {
-    uint8_t id[2];		/* Identifier */
-    uint16_t version;		/* HM lvm version */
+    uint8_t id[2];      /* Identifier */
+    uint16_t version;       /* HM lvm version */
     lvm_disk_data_t pv_on_disk;
     lvm_disk_data_t vg_on_disk;
     lvm_disk_data_t pv_uuidlist_on_disk;
@@ -431,19 +431,19 @@ typedef struct pv_disk_v2
     lvm_disk_data_t pe_on_disk;
     uint8_t pv_uuid[NAME_LEN];
     uint8_t vg_name[NAME_LEN];
-    uint8_t system_id[NAME_LEN];	/* for vgexport/vgimport */
+    uint8_t system_id[NAME_LEN];    /* for vgexport/vgimport */
     uint32_t pv_major;
     uint32_t pv_number;
     uint32_t pv_status;
     uint32_t pv_allocatable;
-    uint32_t pv_size;		/* HM */
+    uint32_t pv_size;       /* HM */
     uint32_t lv_cur;
     uint32_t pe_size;
     uint32_t pe_total;
     uint32_t pe_allocated;
 
     /* new in struct version 2 */
-    uint32_t pe_start;	        /* in sectors */
+    uint32_t pe_start;          /* in sectors */
 
 } pv_disk_t;
 
@@ -456,7 +456,7 @@ typedef struct pv_disk_v2
 typedef struct
 {
     kdev_t dev;
-    uint32_t pe;		/* to be changed if > 2TB */
+    uint32_t pe;        /* to be changed if > 2TB */
     uint32_t reads;
     uint32_t writes;
 } pe_t;
@@ -487,21 +487,21 @@ typedef struct lv_v5
     char vg_name[NAME_LEN];
     uint lv_access;
     uint lv_status;
-    uint lv_open;		/* HM */
-    kdev_t lv_dev;		/* HM */
-    uint lv_number;		/* HM */
-    uint lv_mirror_copies;	/* for future use */
-    uint lv_recovery;	/*       "        */
-    uint lv_schedule;	/*       "        */
+    uint lv_open;       /* HM */
+    kdev_t lv_dev;      /* HM */
+    uint lv_number;     /* HM */
+    uint lv_mirror_copies;  /* for future use */
+    uint lv_recovery;   /*       "        */
+    uint lv_schedule;   /*       "        */
     uint lv_size;
-    pe_t *lv_current_pe;	/* HM */
-    uint lv_current_le;	/* for future use */
+    pe_t *lv_current_pe;    /* HM */
+    uint lv_current_le; /* for future use */
     uint lv_allocated_le;
     uint lv_stripes;
     uint lv_stripesize;
-    uint lv_badblock;	/* for future use */
+    uint lv_badblock;   /* for future use */
     uint lv_allocation;
-    uint lv_io_timeout;	/* for future use */
+    uint lv_io_timeout; /* for future use */
     uint lv_read_ahead;
 
     /* delta to version 1 starts here */
@@ -521,8 +521,8 @@ typedef struct lv_v5
     uint32_t lv_snapshot_hash_table_size;
     uint32_t lv_snapshot_hash_mask;
     wait_queue_head_t lv_snapshot_wait;
-    int	lv_snapshot_use_rate;
-    struct vg_v3	*vg;
+    int lv_snapshot_use_rate;
+    struct vg_v3    *vg;
 
     uint lv_allocated_snapshot_le;
 #else
@@ -537,23 +537,23 @@ typedef struct lv_disk_v3
     uint8_t vg_name[NAME_LEN];
     uint32_t lv_access;
     uint32_t lv_status;
-    uint32_t lv_open;		/* HM */
-    uint32_t lv_dev;		/* HM */
-    uint32_t lv_number;	/* HM */
-    uint32_t lv_mirror_copies;	/* for future use */
-    uint32_t lv_recovery;	/*       "        */
-    uint32_t lv_schedule;	/*       "        */
+    uint32_t lv_open;       /* HM */
+    uint32_t lv_dev;        /* HM */
+    uint32_t lv_number; /* HM */
+    uint32_t lv_mirror_copies;  /* for future use */
+    uint32_t lv_recovery;   /*       "        */
+    uint32_t lv_schedule;   /*       "        */
     uint32_t lv_size;
     uint32_t lv_snapshot_minor;/* minor number of original */
-    uint16_t lv_chunk_size;	/* chunk size of snapshot */
+    uint16_t lv_chunk_size; /* chunk size of snapshot */
     uint16_t dummy;
     uint32_t lv_allocated_le;
     uint32_t lv_stripes;
     uint32_t lv_stripesize;
-    uint32_t lv_badblock;	/* for future use */
+    uint32_t lv_badblock;   /* for future use */
     uint32_t lv_allocation;
-    uint32_t lv_io_timeout;	/* for future use */
-    uint32_t lv_read_ahead;	/* HM */
+    uint32_t lv_io_timeout; /* for future use */
+    uint32_t lv_read_ahead; /* HM */
 } lv_disk_t;
 
 /*
@@ -563,26 +563,26 @@ typedef struct lv_disk_v3
 /* core */
 typedef struct vg_v3
 {
-    char vg_name[NAME_LEN];	/* volume group name */
-    uint vg_number;		/* volume group number */
-    uint vg_access;		/* read/write */
-    uint vg_status;		/* active or not */
-    uint lv_max;		/* maximum logical volumes */
-    uint lv_cur;		/* current logical volumes */
-    uint lv_open;		/* open    logical volumes */
-    uint pv_max;		/* maximum physical volumes */
-    uint pv_cur;		/* current physical volumes FU */
-    uint pv_act;		/* active physical volumes */
-    uint dummy;		/* was obsolete max_pe_per_pv */
-    uint vgda;		/* volume group descriptor arrays FU */
-    uint pe_size;		/* physical extent size in sectors */
-    uint pe_total;		/* total of physical extents */
-    uint pe_allocated;	/* allocated physical extents */
-    uint pvg_total;		/* physical volume groups FU */
+    char vg_name[NAME_LEN]; /* volume group name */
+    uint vg_number;     /* volume group number */
+    uint vg_access;     /* read/write */
+    uint vg_status;     /* active or not */
+    uint lv_max;        /* maximum logical volumes */
+    uint lv_cur;        /* current logical volumes */
+    uint lv_open;       /* open    logical volumes */
+    uint pv_max;        /* maximum physical volumes */
+    uint pv_cur;        /* current physical volumes FU */
+    uint pv_act;        /* active physical volumes */
+    uint dummy;     /* was obsolete max_pe_per_pv */
+    uint vgda;      /* volume group descriptor arrays FU */
+    uint pe_size;       /* physical extent size in sectors */
+    uint pe_total;      /* total of physical extents */
+    uint pe_allocated;  /* allocated physical extents */
+    uint pvg_total;     /* physical volume groups FU */
     struct proc_dir_entry *proc;
-    pv_t *pv[ABS_MAX_PV + 1];	/* physical volume struct pointers */
-    lv_t *lv[ABS_MAX_LV + 1];	/* logical  volume struct pointers */
-    char vg_uuid[UUID_LEN+1];	/* volume group UUID */
+    pv_t *pv[ABS_MAX_PV + 1];   /* physical volume struct pointers */
+    lv_t *lv[ABS_MAX_LV + 1];   /* logical  volume struct pointers */
+    char vg_uuid[UUID_LEN+1];   /* volume group UUID */
 #ifdef __KERNEL__
     struct proc_dir_entry *vg_dir_pde;
     struct proc_dir_entry *lv_subdir_pde;
@@ -596,23 +596,23 @@ typedef struct vg_v3
 /* disk */
 typedef struct vg_disk_v2
 {
-    uint8_t vg_uuid[UUID_LEN];	/* volume group UUID */
-    uint8_t vg_name_dummy[NAME_LEN-UUID_LEN];	/* rest of v1 VG name */
-    uint32_t vg_number;	/* volume group number */
-    uint32_t vg_access;	/* read/write */
-    uint32_t vg_status;	/* active or not */
-    uint32_t lv_max;		/* maximum logical volumes */
-    uint32_t lv_cur;		/* current logical volumes */
-    uint32_t lv_open;		/* open    logical volumes */
-    uint32_t pv_max;		/* maximum physical volumes */
-    uint32_t pv_cur;		/* current physical volumes FU */
-    uint32_t pv_act;		/* active physical volumes */
+    uint8_t vg_uuid[UUID_LEN];  /* volume group UUID */
+    uint8_t vg_name_dummy[NAME_LEN-UUID_LEN];   /* rest of v1 VG name */
+    uint32_t vg_number; /* volume group number */
+    uint32_t vg_access; /* read/write */
+    uint32_t vg_status; /* active or not */
+    uint32_t lv_max;        /* maximum logical volumes */
+    uint32_t lv_cur;        /* current logical volumes */
+    uint32_t lv_open;       /* open    logical volumes */
+    uint32_t pv_max;        /* maximum physical volumes */
+    uint32_t pv_cur;        /* current physical volumes FU */
+    uint32_t pv_act;        /* active physical volumes */
     uint32_t dummy;
-    uint32_t vgda;		/* volume group descriptor arrays FU */
-    uint32_t pe_size;		/* physical extent size in sectors */
-    uint32_t pe_total;		/* total of physical extents */
-    uint32_t pe_allocated;	/* allocated physical extents */
-    uint32_t pvg_total;	/* physical volume groups FU */
+    uint32_t vgda;      /* volume group descriptor arrays FU */
+    uint32_t pe_size;       /* physical extent size in sectors */
+    uint32_t pe_total;      /* total of physical extents */
+    uint32_t pe_allocated;  /* allocated physical extents */
+    uint32_t pvg_total; /* physical volume groups FU */
 } vg_disk_t;
 
 
@@ -678,8 +678,8 @@ typedef struct
 /* Request structure LV_SNAPSHOT_USE_RATE */
 typedef struct
 {
-    int	block;
-    int	rate;
+    int block;
+    int rate;
 } lv_snapshot_use_rate_req_t;
 
 
@@ -719,4 +719,4 @@ static int inline LVM_GET_COW_TABLE_ENTRIES_PER_PE(vg_t *vg, lv_t *lv)
     return entries;
 }
 
-#endif				/* #ifndef _LVM_H_INCLUDE */
+#endif              /* #ifndef _LVM_H_INCLUDE */

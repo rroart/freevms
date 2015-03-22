@@ -19,7 +19,7 @@
 #include <linux/jbd.h>
 #include <linux/ext3_fs.h>
 
-#define EXT3_JOURNAL(inode)	(EXT3_SB((inode)->i_sb)->s_journal)
+#define EXT3_JOURNAL(inode) (EXT3_SB((inode)->i_sb)->s_journal)
 
 /* Define the number of blocks we need to account to a transaction to
  * modify one block of data.
@@ -28,7 +28,7 @@
  * indirection blocks, the group and superblock summaries, and the data
  * block to complete the transaction.  */
 
-#define EXT3_SINGLEDATA_TRANS_BLOCKS	8
+#define EXT3_SINGLEDATA_TRANS_BLOCKS    8
 
 /* Define the minimum size for a transaction which modifies data.  This
  * needs to take into account the fact that we may end up modifying two
@@ -36,7 +36,7 @@
  * superblock only gets updated once, of course, so don't bother
  * counting that again for the quota updates. */
 
-#define EXT3_DATA_TRANS_BLOCKS		(3 * EXT3_SINGLEDATA_TRANS_BLOCKS - 2)
+#define EXT3_DATA_TRANS_BLOCKS      (3 * EXT3_SINGLEDATA_TRANS_BLOCKS - 2)
 
 extern int ext3_writepage_trans_blocks(struct inode *inode);
 
@@ -44,7 +44,7 @@ extern int ext3_writepage_trans_blocks(struct inode *inode);
  * entire inode, plus arbitrary amounts of bitmap/indirection data.  Be
  * generous.  We can grow the delete transaction later if necessary. */
 
-#define EXT3_DELETE_TRANS_BLOCKS	(2 * EXT3_DATA_TRANS_BLOCKS + 64)
+#define EXT3_DELETE_TRANS_BLOCKS    (2 * EXT3_DATA_TRANS_BLOCKS + 64)
 
 /* Define an arbitrary limit for the amount of data we will anticipate
  * writing to any given transaction.  For unbounded transactions such as
@@ -52,7 +52,7 @@ extern int ext3_writepage_trans_blocks(struct inode *inode);
  * start off at the maximum transaction size and grow the transaction
  * optimistically as we go. */
 
-#define EXT3_MAX_TRANS_DATA		64
+#define EXT3_MAX_TRANS_DATA     64
 
 /* We break up a large truncate or write transaction once the handle's
  * buffer credits gets this low, we need either to extend the
@@ -61,7 +61,7 @@ extern int ext3_writepage_trans_blocks(struct inode *inode);
  * one block, plus two quota updates.  Quota allocations are not
  * needed. */
 
-#define EXT3_RESERVE_TRANS_BLOCKS	12
+#define EXT3_RESERVE_TRANS_BLOCKS   12
 
 int
 ext3_mark_iloc_dirty(handle_t *handle,
@@ -172,17 +172,17 @@ __ext3_journal_dirty_metadata(const char *where,
 
 
 #define ext3_journal_get_undo_access(handle, bh) \
-	__ext3_journal_get_undo_access(__FUNCTION__, (handle), (bh))
+    __ext3_journal_get_undo_access(__FUNCTION__, (handle), (bh))
 #define ext3_journal_get_write_access(handle, bh) \
-	__ext3_journal_get_write_access(__FUNCTION__, (handle), (bh))
+    __ext3_journal_get_write_access(__FUNCTION__, (handle), (bh))
 #define ext3_journal_dirty_data(handle, bh, async) \
-	__ext3_journal_dirty_data(__FUNCTION__, (handle), (bh), (async))
+    __ext3_journal_dirty_data(__FUNCTION__, (handle), (bh), (async))
 #define ext3_journal_revoke(handle, blocknr, bh) \
-	__ext3_journal_revoke(__FUNCTION__, (handle), (blocknr), (bh))
+    __ext3_journal_revoke(__FUNCTION__, (handle), (blocknr), (bh))
 #define ext3_journal_get_create_access(handle, bh) \
-	__ext3_journal_get_create_access(__FUNCTION__, (handle), (bh))
+    __ext3_journal_get_create_access(__FUNCTION__, (handle), (bh))
 #define ext3_journal_dirty_metadata(handle, bh) \
-	__ext3_journal_dirty_metadata(__FUNCTION__, (handle), (bh))
+    __ext3_journal_dirty_metadata(__FUNCTION__, (handle), (bh))
 
 
 
@@ -243,7 +243,7 @@ static inline int __ext3_journal_stop(const char *where,
     return err;
 }
 #define ext3_journal_stop(handle, inode) \
-	__ext3_journal_stop(__FUNCTION__, (handle), (inode))
+    __ext3_journal_stop(__FUNCTION__, (handle), (inode))
 
 static inline handle_t *ext3_journal_current_handle(void)
 {
@@ -301,4 +301,4 @@ static inline int ext3_should_order_data(struct inode *inode)
 }
 
 
-#endif	/* _LINUX_EXT3_JBD_H */
+#endif  /* _LINUX_EXT3_JBD_H */

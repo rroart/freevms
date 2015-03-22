@@ -8,7 +8,7 @@
  */
 
 #include <linux/config.h>
-#include <linux/module.h>	/* For EXPORT_SYMBOL */
+#include <linux/module.h>   /* For EXPORT_SYMBOL */
 
 #include <linux/errno.h>
 #include <linux/sched.h>
@@ -29,7 +29,7 @@
 
 struct pty_struct
 {
-    int	magic;
+    int magic;
     wait_queue_head_t open_wait;
 };
 
@@ -61,7 +61,7 @@ static struct termios *pts_termios_locked[UNIX98_NR_MAJORS][NR_PTYS];
 static struct pty_struct ptm_state[UNIX98_NR_MAJORS][NR_PTYS];
 #endif
 
-#define MIN(a,b)	((a) < (b) ? (a) : (b))
+#define MIN(a,b)    ((a) < (b) ? (a) : (b))
 
 static void pty_close(struct tty_struct * tty, struct file * filp)
 {
@@ -121,9 +121,9 @@ static void pty_unthrottle(struct tty_struct * tty)
 /*
  * WSH 05/24/97: modified to
  *   (1) use space in tty->flip instead of a shared temp buffer
- *	 The flip buffers aren't being used for a pty, so there's lots
- *	 of space available.  The buffer is protected by a per-pty
- *	 semaphore that should almost never come under contention.
+ *   The flip buffers aren't being used for a pty, so there's lots
+ *   of space available.  The buffer is protected by a per-pty
+ *   semaphore that should almost never come under contention.
  *   (2) avoid redundant copying for cases where count >> receive_room
  * N.B. Calls from user space may now return an error code instead of
  * a count.
@@ -132,8 +132,8 @@ static int pty_write(struct tty_struct * tty, int from_user,
                      const unsigned char *buf, int count)
 {
     struct tty_struct *to = tty->link;
-    int	c=0, n, room;
-    char	*temp_buffer;
+    int c=0, n, room;
+    char    *temp_buffer;
 
     if (!to || tty->stopped)
         return 0;
@@ -193,21 +193,21 @@ static int pty_write_room(struct tty_struct *tty)
 }
 
 /*
- *	WSH 05/24/97:  Modified for asymmetric MASTER/SLAVE behavior
- *	The chars_in_buffer() value is used by the ldisc select() function
- *	to hold off writing when chars_in_buffer > WAKEUP_CHARS (== 256).
- *	The pty driver chars_in_buffer() Master/Slave must behave differently:
+ *  WSH 05/24/97:  Modified for asymmetric MASTER/SLAVE behavior
+ *  The chars_in_buffer() value is used by the ldisc select() function
+ *  to hold off writing when chars_in_buffer > WAKEUP_CHARS (== 256).
+ *  The pty driver chars_in_buffer() Master/Slave must behave differently:
  *
  *      The Master side needs to allow typed-ahead commands to accumulate
  *      while being canonicalized, so we report "our buffer" as empty until
- *	some threshold is reached, and then report the count. (Any count >
- *	WAKEUP_CHARS is regarded by select() as "full".)  To avoid deadlock
- *	the count returned must be 0 if no canonical data is available to be
- *	read. (The N_TTY ldisc.chars_in_buffer now knows this.)
+ *  some threshold is reached, and then report the count. (Any count >
+ *  WAKEUP_CHARS is regarded by select() as "full".)  To avoid deadlock
+ *  the count returned must be 0 if no canonical data is available to be
+ *  read. (The N_TTY ldisc.chars_in_buffer now knows this.)
  *
- *	The Slave side passes all characters in raw mode to the Master side's
- *	buffer where they can be read immediately, so in this case we can
- *	return the true count in the buffer.
+ *  The Slave side passes all characters in raw mode to the Master side's
+ *  buffer where they can be read immediately, so in this case we can
+ *  return the true count in the buffer.
  */
 static int pty_chars_in_buffer(struct tty_struct *tty)
 {
@@ -311,9 +311,9 @@ static void pty_flush_buffer(struct tty_struct *tty)
 
 static int pty_open(struct tty_struct *tty, struct file * filp)
 {
-    int	retval;
-    int	line;
-    struct	pty_struct *pty;
+    int retval;
+    int line;
+    struct  pty_struct *pty;
 
     retval = -ENODEV;
     if (!tty || !tty->link)

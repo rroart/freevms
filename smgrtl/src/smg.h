@@ -1,5 +1,5 @@
-#ifndef smg_h
-#define smg_h
+#ifndef SMG_H
+#define SMG_H
 
 struct virtual_display;
 

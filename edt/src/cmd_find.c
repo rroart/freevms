@@ -16,11 +16,11 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*	find <range>							*/
-/*									*/
-/*  Sets current position to first line of given range			*/
-/*									*/
+/*                                  */
+/*  find <range>                            */
+/*                                  */
+/*  Sets current position to first line of given range          */
+/*                                  */
 /************************************************************************/
 
 #include "edt.h"

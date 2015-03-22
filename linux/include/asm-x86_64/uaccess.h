@@ -21,17 +21,17 @@
  * For historical reasons, these macros are grossly misnamed.
  */
 
-#define MAKE_MM_SEG(s)	((mm_segment_t) { (s) })
+#define MAKE_MM_SEG(s)  ((mm_segment_t) { (s) })
 
-#define KERNEL_DS	MAKE_MM_SEG(0xFFFFFFFFFFFFFFFF)
-#define SUPERVISOR_DS	MAKE_MM_SEG(0xFFFFFFFFFFFFFFFF)
-#define USER_DS		MAKE_MM_SEG(PAGE_OFFSET)
+#define KERNEL_DS   MAKE_MM_SEG(0xFFFFFFFFFFFFFFFF)
+#define SUPERVISOR_DS   MAKE_MM_SEG(0xFFFFFFFFFFFFFFFF)
+#define USER_DS     MAKE_MM_SEG(PAGE_OFFSET)
 
-#define get_ds()	(KERNEL_DS)
-#define get_fs()	(current->addr_limit)
-#define set_fs(x)	(current->addr_limit = (x))
+#define get_ds()    (KERNEL_DS)
+#define get_fs()    (current->addr_limit)
+#define set_fs(x)   (current->addr_limit = (x))
 
-#define segment_eq(a,b)	((a).seg == (b).seg)
+#define segment_eq(a,b) ((a).seg == (b).seg)
 
 #define __addr_ok(addr) (!((unsigned long)(addr) & (current->addr_limit.seg)))
 
@@ -39,12 +39,12 @@
  * Uhhuh, this needs 65-bit arithmetic. We have a carry..
  */
 #define __range_not_ok(addr,size) ({ \
-	unsigned long flag,sum; \
-	asm("# range_ok\n\r" \
-		"addq %3,%1 ; sbbq %0,%0 ; cmpq %1,%4 ; sbbq $0,%0"  \
-		:"=&r" (flag), "=r" (sum) \
-		:"1" (addr),"g" ((long)(size)),"g" (current->addr_limit.seg)); \
-	flag; })
+    unsigned long flag,sum; \
+    asm("# range_ok\n\r" \
+        "addq %3,%1 ; sbbq %0,%0 ; cmpq %1,%4 ; sbbq $0,%0"  \
+        :"=&r" (flag), "=r" (sum) \
+        :"1" (addr),"g" ((long)(size)),"g" (current->addr_limit.seg)); \
+    flag; })
 
 #define access_ok(type,addr,size) (__range_not_ok(addr,size) == 0)
 
@@ -94,24 +94,24 @@ extern void __get_user_4(void);
 extern void __get_user_8(void);
 
 #define __get_user_x(size,ret,x,ptr) \
-	__asm__ __volatile__("call __get_user_" #size \
-		:"=a" (ret),"=d" (x) \
-		:"0" (ptr) \
-		:"rbx")
+    __asm__ __volatile__("call __get_user_" #size \
+        :"=a" (ret),"=d" (x) \
+        :"0" (ptr) \
+        :"rbx")
 
 /* Careful: we have to cast the result to the type of the pointer for sign reasons */
-#define get_user(x,ptr)							\
-({	long __val_gu;							\
-	int __ret_gu; 							\
-	switch(sizeof (*(ptr))) {					\
-	case 1:  __get_user_x(1,__ret_gu,__val_gu,ptr); break;		\
-	case 2:  __get_user_x(2,__ret_gu,__val_gu,ptr); break;		\
-	case 4:  __get_user_x(4,__ret_gu,__val_gu,ptr); break;		\
-	case 8:  __get_user_x(8,__ret_gu,__val_gu,ptr); break;		\
-	default: __get_user_bad(); break;				\
-	}								\
-	(x) = (__typeof__(*(ptr)))__val_gu;				\
-	__ret_gu;							\
+#define get_user(x,ptr)                         \
+({  long __val_gu;                          \
+    int __ret_gu;                           \
+    switch(sizeof (*(ptr))) {                   \
+    case 1:  __get_user_x(1,__ret_gu,__val_gu,ptr); break;      \
+    case 2:  __get_user_x(2,__ret_gu,__val_gu,ptr); break;      \
+    case 4:  __get_user_x(4,__ret_gu,__val_gu,ptr); break;      \
+    case 8:  __get_user_x(8,__ret_gu,__val_gu,ptr); break;      \
+    default: __get_user_bad(); break;               \
+    }                               \
+    (x) = (__typeof__(*(ptr)))__val_gu;             \
+    __ret_gu;                           \
 })
 
 extern void __put_user_1(void);
@@ -121,13 +121,13 @@ extern void __put_user_8(void);
 
 extern void __put_user_bad(void);
 
-#define __put_user_x(size,ret,x,ptr)					\
-	__asm__ __volatile__("call __put_user_" #size			\
-		:"=a" (ret)						\
-		:"0" (ptr),"d" (x)					\
-		:"rbx")
+#define __put_user_x(size,ret,x,ptr)                    \
+    __asm__ __volatile__("call __put_user_" #size           \
+        :"=a" (ret)                     \
+        :"0" (ptr),"d" (x)                  \
+        :"rbx")
 
-#define put_user(x,ptr)							\
+#define put_user(x,ptr)                         \
   __put_user_check((__typeof__(*(ptr)))(x),(ptr),sizeof(*(ptr)))
 
 #define __get_user(x,ptr) \
@@ -135,33 +135,33 @@ extern void __put_user_bad(void);
 #define __put_user(x,ptr) \
   __put_user_nocheck((__typeof__(*(ptr)))(x),(ptr),sizeof(*(ptr)))
 
-#define __put_user_nocheck(x,ptr,size)			\
-({							\
-	int __pu_err;					\
-	__put_user_size((x),(ptr),(size),__pu_err);	\
-	__pu_err;					\
+#define __put_user_nocheck(x,ptr,size)          \
+({                          \
+    int __pu_err;                   \
+    __put_user_size((x),(ptr),(size),__pu_err); \
+    __pu_err;                   \
 })
 
 
-#define __put_user_check(x,ptr,size)			\
-({							\
-	int __pu_err = -EFAULT;				\
-	__typeof__(*(ptr)) *__pu_addr = (ptr);		\
-	if (access_ok(VERIFY_WRITE,__pu_addr,size))	\
-		__put_user_size((x),__pu_addr,(size),__pu_err);	\
-	__pu_err;					\
+#define __put_user_check(x,ptr,size)            \
+({                          \
+    int __pu_err = -EFAULT;             \
+    __typeof__(*(ptr)) *__pu_addr = (ptr);      \
+    if (access_ok(VERIFY_WRITE,__pu_addr,size)) \
+        __put_user_size((x),__pu_addr,(size),__pu_err); \
+    __pu_err;                   \
 })
 
-#define __put_user_size(x,ptr,size,retval)				\
-do {									\
-	retval = 0;							\
-	switch (size) {							\
-	  case 1: __put_user_asm(x,ptr,retval,"b","b","iq",-EFAULT); break;\
-	  case 2: __put_user_asm(x,ptr,retval,"w","w","ir",-EFAULT); break;\
-	  case 4: __put_user_asm(x,ptr,retval,"l","k","ir",-EFAULT); break;\
-	  case 8: __put_user_asm(x,ptr,retval,"q","","ir",-EFAULT); break;\
-	  default: __put_user_bad();					\
-	}								\
+#define __put_user_size(x,ptr,size,retval)              \
+do {                                    \
+    retval = 0;                         \
+    switch (size) {                         \
+      case 1: __put_user_asm(x,ptr,retval,"b","b","iq",-EFAULT); break;\
+      case 2: __put_user_asm(x,ptr,retval,"w","w","ir",-EFAULT); break;\
+      case 4: __put_user_asm(x,ptr,retval,"l","k","ir",-EFAULT); break;\
+      case 8: __put_user_asm(x,ptr,retval,"q","","ir",-EFAULT); break;\
+      default: __put_user_bad();                    \
+    }                               \
 } while (0)
 
 /* FIXME: this hack is definitely wrong -AK */
@@ -176,60 +176,60 @@ struct __large_struct
  * we do not write to any memory gcc knows about, so there are no
  * aliasing issues.
  */
-#define __put_user_asm(x, addr, err, itype, rtype, ltype, errno)	\
-	__asm__ __volatile__(				\
-		"1:	mov"itype" %"rtype"1,%2\n"	\
-		"2:\n"							\
-		".section .fixup,\"ax\"\n"		\
-		"3:	mov %3,%0\n"				\
-		"	jmp 2b\n"					\
-		".previous\n"					\
-		".section __ex_table,\"a\"\n"	\
-		"	.align 8\n"					\
-		"	.quad 1b,3b\n"				\
-		".previous"						\
-		: "=r"(err)						\
-		: ltype (x), "m"(__m(addr)), "i"(errno), "0"(err))
+#define __put_user_asm(x, addr, err, itype, rtype, ltype, errno)    \
+    __asm__ __volatile__(               \
+        "1:	mov"itype" %"rtype"1,%2\n"  \
+        "2:\n"                          \
+        ".section .fixup,\"ax\"\n"      \
+        "3:	mov %3,%0\n"                \
+        "	jmp 2b\n"                 \
+        ".previous\n"                   \
+        ".section __ex_table,\"a\"\n"   \
+        "	.align 8\n"                   \
+        "	.quad 1b,3b\n"                \
+        ".previous"                     \
+        : "=r"(err)                     \
+        : ltype (x), "m"(__m(addr)), "i"(errno), "0"(err))
 
 
-#define __get_user_nocheck(x,ptr,size)				\
-({								\
-	int __gu_err;						\
-	long __gu_val;						\
-	__get_user_size(__gu_val,(ptr),(size),__gu_err);	\
-	(x) = (__typeof__(*(ptr)))__gu_val;			\
-	__gu_err;						\
+#define __get_user_nocheck(x,ptr,size)              \
+({                              \
+    int __gu_err;                       \
+    long __gu_val;                      \
+    __get_user_size(__gu_val,(ptr),(size),__gu_err);    \
+    (x) = (__typeof__(*(ptr)))__gu_val;         \
+    __gu_err;                       \
 })
 
 extern int __get_user_bad(void);
 
-#define __get_user_size(x,ptr,size,retval)				\
-do {									\
-	retval = 0;							\
-	switch (size) {							\
-	  case 1: __get_user_asm(x,ptr,retval,"b","b","=q",-EFAULT); break;\
-	  case 2: __get_user_asm(x,ptr,retval,"w","w","=r",-EFAULT); break;\
-	  case 4: __get_user_asm(x,ptr,retval,"l","k","=r",-EFAULT); break;\
-	  case 8: __get_user_asm(x,ptr,retval,"q","","=r",-EFAULT); break;\
-	  default: (x) = __get_user_bad();				\
-	}								\
+#define __get_user_size(x,ptr,size,retval)              \
+do {                                    \
+    retval = 0;                         \
+    switch (size) {                         \
+      case 1: __get_user_asm(x,ptr,retval,"b","b","=q",-EFAULT); break;\
+      case 2: __get_user_asm(x,ptr,retval,"w","w","=r",-EFAULT); break;\
+      case 4: __get_user_asm(x,ptr,retval,"l","k","=r",-EFAULT); break;\
+      case 8: __get_user_asm(x,ptr,retval,"q","","=r",-EFAULT); break;\
+      default: (x) = __get_user_bad();              \
+    }                               \
 } while (0)
 
-#define __get_user_asm(x, addr, err, itype, rtype, ltype, errno)	\
-	__asm__ __volatile__(					\
-		"1:	mov"itype" %2,%"rtype"1\n"		\
-		"2:\n"						\
-		".section .fixup,\"ax\"\n"			\
-		"3:	mov %3,%0\n"				\
-		"	xor"itype" %"rtype"1,%"rtype"1\n"	\
-		"	jmp 2b\n"				\
-		".previous\n"					\
-		".section __ex_table,\"a\"\n"			\
-		"	.align 8\n"				\
-		"	.quad 1b,3b\n"				\
-		".previous"					\
-		: "=r"(err), ltype (x)				\
-		: "m"(__m(addr)), "i"(errno), "0"(err))
+#define __get_user_asm(x, addr, err, itype, rtype, ltype, errno)    \
+    __asm__ __volatile__(                   \
+        "1:	mov"itype" %2,%"rtype"1\n"      \
+        "2:\n"                      \
+        ".section .fixup,\"ax\"\n"          \
+        "3:	mov %3,%0\n"                \
+        "	xor"itype" %"rtype"1,%"rtype"1\n" \
+        "	jmp 2b\n"             \
+        ".previous\n"                   \
+        ".section __ex_table,\"a\"\n"           \
+        "	.align 8\n"               \
+        "	.quad 1b,3b\n"                \
+        ".previous"                 \
+        : "=r"(err), ltype (x)              \
+        : "m"(__m(addr)), "i"(errno), "0"(err))
 
 /*
  * Copy To/From Userspace

@@ -45,52 +45,52 @@ struct dn_fib_res
 
 struct dn_fib_nh
 {
-    struct net_device	*nh_dev;
-    unsigned		nh_flags;
-    unsigned char		nh_scope;
-    int			nh_weight;
-    int			nh_power;
-    int			nh_oif;
-    u32			nh_gw;
+    struct net_device   *nh_dev;
+    unsigned        nh_flags;
+    unsigned char       nh_scope;
+    int         nh_weight;
+    int         nh_power;
+    int         nh_oif;
+    u32         nh_gw;
 };
 
 struct dn_fib_info
 {
-    struct dn_fib_info	*fib_next;
-    struct dn_fib_info	*fib_prev;
-    int 			fib_treeref;
-    atomic_t		fib_clntref;
-    int			fib_dead;
-    unsigned		fib_flags;
-    int			fib_protocol;
-    dn_address		fib_prefsrc;
-    u32			fib_priority;
-    int			fib_nhs;
-    int			fib_power;
-    struct dn_fib_nh	fib_nh[0];
-#define fib_dev		fib_nh[0].nh_dev
+    struct dn_fib_info  *fib_next;
+    struct dn_fib_info  *fib_prev;
+    int             fib_treeref;
+    atomic_t        fib_clntref;
+    int         fib_dead;
+    unsigned        fib_flags;
+    int         fib_protocol;
+    dn_address      fib_prefsrc;
+    u32         fib_priority;
+    int         fib_nhs;
+    int         fib_power;
+    struct dn_fib_nh    fib_nh[0];
+#define fib_dev     fib_nh[0].nh_dev
 };
 
 
-#define DN_FIB_RES_NH(res)	((res).fi->fib_nh[(res).nh_sel])
-#define DN_FIB_RES_RESET(res)	((res).nh_sel = 0)
-#define DN_FIB_RES_GW(res)	(DN_FIB_RES_NH(res).nh_gw)
-#define DN_FIB_RES_DEV(res)	(DN_FIB_RES_NH(res).nh_dev)
-#define DN_FIB_RES_OIF(res)	(DN_FIB_RES_NH(res).nh_oif)
+#define DN_FIB_RES_NH(res)  ((res).fi->fib_nh[(res).nh_sel])
+#define DN_FIB_RES_RESET(res)   ((res).nh_sel = 0)
+#define DN_FIB_RES_GW(res)  (DN_FIB_RES_NH(res).nh_gw)
+#define DN_FIB_RES_DEV(res) (DN_FIB_RES_NH(res).nh_dev)
+#define DN_FIB_RES_OIF(res) (DN_FIB_RES_NH(res).nh_oif)
 
 typedef struct
 {
-    u16	datum;
+    u16 datum;
 } dn_fib_key_t;
 
 typedef struct
 {
-    u16	datum;
+    u16 datum;
 } dn_fib_hash_t;
 
 typedef struct
 {
-    u16	datum;
+    u16 datum;
 } dn_fib_idx_t;
 
 struct dn_fib_node
@@ -98,10 +98,10 @@ struct dn_fib_node
     struct dn_fib_node *fn_next;
     struct dn_fib_info *fn_info;
 #define DN_FIB_INFO(f) ((f)->fn_info)
-    dn_fib_key_t	fn_key;
-    u8		fn_type;
-    u8		fn_scope;
-    u8		fn_state;
+    dn_fib_key_t    fn_key;
+    u8      fn_type;
+    u8      fn_scope;
+    u8      fn_state;
 };
 
 

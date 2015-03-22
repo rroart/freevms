@@ -118,18 +118,18 @@ static int
 getstring(long * string, int type);
 
 #define next_state(state, type) \
-	    if (type&TPA$M_EXTRAFLAG) \
-	      state+=4; \
-	    if (type&TPA$M_EXTFLAG) \
-	      state+=2; \
-	    if (type&TPA$M_ACTFLAG) \
-	      state+=4; \
-	    if (type&TPA$M_ADDRFLAG) \
-	      state+=4; \
-	    if (type&TPA$M_MASKFLAG) \
-	      state+=4; \
-	    if (type&TPA$M_TRANFLAG) \
-	      state+=2;
+        if (type&TPA$M_EXTRAFLAG) \
+          state+=4; \
+        if (type&TPA$M_EXTFLAG) \
+          state+=2; \
+        if (type&TPA$M_ACTFLAG) \
+          state+=4; \
+        if (type&TPA$M_ADDRFLAG) \
+          state+=4; \
+        if (type&TPA$M_MASKFLAG) \
+          state+=4; \
+        if (type&TPA$M_TRANFLAG) \
+          state+=2;
 
 static int upcase(char c)
 {

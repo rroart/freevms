@@ -1,5 +1,5 @@
-#ifndef ctsidef_h
-#define ctsidef_h
+#ifndef CTSIDEF_H
+#define CTSIDEF_H
 
 #define CTSI$K_REVISION 1
 #define CTSI$C_REVISION 1
@@ -33,8 +33,8 @@ struct _ctcb
     unsigned char ctcb$b_dvatr;
     unsigned char ctcb$b_chatr;
     unsigned short int ctcb$w_statesz;
-    int (*ctcb$l_phy_entry)();
-    int (*ctcb$l_vir_entry)();
+    int (*ctcb$l_phy_entry)(void);
+    int (*ctcb$l_vir_entry)(void);
     void *ctcb$l_phy_segment;
     void *ctcb$l_vir_segment;
     void *ctcb$l_phy_extend;

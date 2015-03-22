@@ -16,27 +16,27 @@
 #define __builtin_expect(x, expected_value) (x)
 #endif
 
-#define likely(x)	__builtin_expect((x),1)
-#define unlikely(x)	__builtin_expect((x),0)
+#define likely(x)   __builtin_expect((x),1)
+#define unlikely(x) __builtin_expect((x),0)
 
 #if __GNUC__ > 3
-#define __attribute_used__	__attribute((__used__))
+#define __attribute_used__  __attribute((__used__))
 #elif __GNUC__ == 3
 #if  __GNUC_MINOR__ >= 3
-# define __attribute_used__	__attribute__((__used__))
+# define __attribute_used__ __attribute__((__used__))
 #else
-# define __attribute_used__	__attribute__((__unused__))
+# define __attribute_used__ __attribute__((__unused__))
 #endif /* __GNUC_MINOR__ >= 3 */
 #elif __GNUC__ == 2
-#define __attribute_used__	__attribute__((__unused__))
+#define __attribute_used__  __attribute__((__unused__))
 #else
-#define __attribute_used__	/* not implemented */
+#define __attribute_used__  /* not implemented */
 #endif /* __GNUC__ */
 
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
-#define __attribute_const__	__attribute__((__const__))
+#define __attribute_const__ __attribute__((__const__))
 #else
-#define __attribute_const__	/* unimplemented */
+#define __attribute_const__ /* unimplemented */
 #endif
 
 #endif /* __LINUX_COMPILER_H */

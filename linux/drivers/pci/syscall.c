@@ -1,5 +1,5 @@
 /*
- *	pci_syscall.c
+ *  pci_syscall.c
  *
  * For architectures where we want to allow direct access
  * to the PCI config stuff - it would probably be preferable

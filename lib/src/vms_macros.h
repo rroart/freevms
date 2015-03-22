@@ -1,5 +1,5 @@
-#ifndef vms_macros_h
-#define vms_macros_h
+#ifndef VMS_MACROS_H
+#define VMS_MACROS_H
 
 // timeconsuming. do later
 

@@ -1,5 +1,5 @@
-#ifndef mmgdef_h
-#define mmgdef_h
+#ifndef MMGDEF_H
+#define MMGDEF_H
 
 #define MMG$M_NO_MPL_FLUSH 4
 #define MMG$V_NO_MPL_FLUSH 2

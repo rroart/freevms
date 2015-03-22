@@ -21,8 +21,8 @@
  * Reduced memory usage for older ARM systems  - Russell King.
  *
  * 2000/01/20   Fixed SMP locking on put_tty_queue using bits of
- *		the patch by Andrew J. Kroll <ag784@freenet.buffalo.edu>
- *		who actually finally proved there really was a race.
+ *      the patch by Andrew J. Kroll <ag784@freenet.buffalo.edu>
+ *      who actually finally proved there really was a race.
  */
 
 #include <linux/types.h>
@@ -55,7 +55,7 @@
 #define SYSCONS_DEV  MKDEV(TTYAUX_MAJOR,1)
 
 #ifndef MIN
-#define MIN(a,b)	((a) < (b) ? (a) : (b))
+#define MIN(a,b)    ((a) < (b) ? (a) : (b))
 #endif
 
 /* number of characters left in xmit buffer before select has we have room */
@@ -66,8 +66,8 @@
  * unthrottling the TTY driver.  These watermarks are used for
  * controlling the space in the read buffer.
  */
-#define TTY_THRESHOLD_THROTTLE		128 /* now based on remaining room */
-#define TTY_THRESHOLD_UNTHROTTLE 	128
+#define TTY_THRESHOLD_THROTTLE      128 /* now based on remaining room */
+#define TTY_THRESHOLD_UNTHROTTLE    128
 
 int is_ignored(int sig)
 {
@@ -77,21 +77,21 @@ int is_ignored(int sig)
 
 struct tty_ldisc tty_ldisc_N_TTY =
 {
-    TTY_LDISC_MAGIC,	/* magic */
-    "n_tty",		/* name */
-    0,			/* num */
-    0,			/* flags */
-    0,		/* open */
-    0,		/* close */
-    0,	/* flush_buffer */
-    0,	/* chars_in_buffer */
-    0,		/* read */
-    0,		/* write */
-    0,		/* ioctl */
-    0,	/* set_termios */
-    0,		/* poll */
-    0,	/* receive_buf */
-    0,	/* receive_room */
-    0			/* write_wakeup */
+    TTY_LDISC_MAGIC,    /* magic */
+    "n_tty",        /* name */
+    0,          /* num */
+    0,          /* flags */
+    0,      /* open */
+    0,      /* close */
+    0,  /* flush_buffer */
+    0,  /* chars_in_buffer */
+    0,      /* read */
+    0,      /* write */
+    0,      /* ioctl */
+    0,  /* set_termios */
+    0,      /* poll */
+    0,  /* receive_buf */
+    0,  /* receive_room */
+    0           /* write_wakeup */
 };
 

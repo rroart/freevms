@@ -400,13 +400,13 @@ int kbd_vmsinit(void)
 
 #ifdef CONFIG_MAGIC_SYSRQ
 unsigned char pckbd_sysrq_xlate[128] =
-    "\000\0331234567890-=\177\t"			/* 0x00 - 0x0f */
-    "qwertyuiop[]\r\000as"				/* 0x10 - 0x1f */
-    "dfghjkl;'`\000\\zxcv"				/* 0x20 - 0x2f */
-    "bnm,./\000*\000 \000\201\202\203\204\205"	/* 0x30 - 0x3f */
-    "\206\207\210\211\212\000\000789-456+1"		/* 0x40 - 0x4f */
+    "\000\0331234567890-=\177\t"            /* 0x00 - 0x0f */
+    "qwertyuiop[]\r\000as"              /* 0x10 - 0x1f */
+    "dfghjkl;'`\000\\zxcv"              /* 0x20 - 0x2f */
+    "bnm,./\000*\000 \000\201\202\203\204\205"  /* 0x30 - 0x3f */
+    "\206\207\210\211\212\000\000789-456+1"     /* 0x40 - 0x4f */
     "230\177\000\000\213\214\000\000\000\000\000\000\000\000\000\000" /* 0x50 - 0x5f */
-    "\r\000/";					/* 0x60 - 0x6f */
+    "\r\000/";                  /* 0x60 - 0x6f */
 #endif
 
 static void kbd_write_command_w(int data);
@@ -428,15 +428,15 @@ static volatile unsigned char resend;
 
 #if defined CONFIG_PSMOUSE
 /*
- *	PS/2 Auxiliary Device
+ *  PS/2 Auxiliary Device
  */
 
 static int __init psaux_init(void);
 
-#define AUX_RECONNECT1 0xaa	/* scancode1 when ps2 device is plugged (back) in */
-#define AUX_RECONNECT2 0x00	/* scancode2 when ps2 device is plugged (back) in */
+#define AUX_RECONNECT1 0xaa /* scancode1 when ps2 device is plugged (back) in */
+#define AUX_RECONNECT2 0x00 /* scancode2 when ps2 device is plugged (back) in */
 
-static struct aux_queue *queue;	/* Mouse data buffer. */
+static struct aux_queue *queue; /* Mouse data buffer. */
 static int aux_count;
 /* used when we send commands to the mouse that expect an ACK. */
 static unsigned char mouse_reply_expected;
@@ -444,7 +444,7 @@ static unsigned char mouse_reply_expected;
 #define AUX_INTS_OFF (KBD_MODE_KCC | KBD_MODE_DISABLE_MOUSE | KBD_MODE_SYS | KBD_MODE_KBD_INT)
 #define AUX_INTS_ON  (KBD_MODE_KCC | KBD_MODE_SYS | KBD_MODE_MOUSE_INT | KBD_MODE_KBD_INT)
 
-#define MAX_RETRIES	60		/* some aux operations take long time*/
+#define MAX_RETRIES 60      /* some aux operations take long time*/
 #endif /* CONFIG_PSMOUSE */
 
 /*
@@ -569,35 +569,35 @@ static unsigned char high_keys[128 - SC_LIM] =
  * My OmniKey generates e0 4c for  the "OMNI" key and the
  * right alt key does nada. [kkoller@nyx10.cs.du.edu]
  */
-#define E0_OK	124
+#define E0_OK   124
 /*
  * New microsoft keyboard is rumoured to have
  * e0 5b (left window button), e0 5c (right window button),
  * e0 5d (menu button). [or: LBANNER, RBANNER, RMENU]
  * [or: Windows_L, Windows_R, TaskMan]
  */
-#define E0_MSLW	125
-#define E0_MSRW	126
-#define E0_MSTM	127
+#define E0_MSLW 125
+#define E0_MSRW 126
+#define E0_MSTM 127
 
 static unsigned char e0_keys[128] =
 {
-    0, 0, 0, 0, 0, 0, 0, 0,			      /* 0x00-0x07 */
-    0, 0, 0, 0, 0, 0, 0, 0,			      /* 0x08-0x0f */
-    0, 0, 0, 0, 0, 0, 0, 0,			      /* 0x10-0x17 */
-    0, 0, 0, 0, E0_KPENTER, E0_RCTRL, 0, 0,	      /* 0x18-0x1f */
-    0, 0, 0, 0, 0, 0, 0, 0,			      /* 0x20-0x27 */
-    0, 0, 0, 0, 0, 0, 0, 0,			      /* 0x28-0x2f */
-    0, 0, 0, 0, 0, E0_KPSLASH, 0, E0_PRSCR,	      /* 0x30-0x37 */
-    E0_RALT, 0, 0, 0, 0, E0_F13, E0_F14, E0_HELP,	      /* 0x38-0x3f */
-    E0_DO, E0_F17, 0, 0, 0, 0, E0_BREAK, E0_HOME,	      /* 0x40-0x47 */
+    0, 0, 0, 0, 0, 0, 0, 0,               /* 0x00-0x07 */
+    0, 0, 0, 0, 0, 0, 0, 0,               /* 0x08-0x0f */
+    0, 0, 0, 0, 0, 0, 0, 0,               /* 0x10-0x17 */
+    0, 0, 0, 0, E0_KPENTER, E0_RCTRL, 0, 0,       /* 0x18-0x1f */
+    0, 0, 0, 0, 0, 0, 0, 0,               /* 0x20-0x27 */
+    0, 0, 0, 0, 0, 0, 0, 0,               /* 0x28-0x2f */
+    0, 0, 0, 0, 0, E0_KPSLASH, 0, E0_PRSCR,       /* 0x30-0x37 */
+    E0_RALT, 0, 0, 0, 0, E0_F13, E0_F14, E0_HELP,         /* 0x38-0x3f */
+    E0_DO, E0_F17, 0, 0, 0, 0, E0_BREAK, E0_HOME,         /* 0x40-0x47 */
     E0_UP, E0_PGUP, 0, E0_LEFT, E0_OK, E0_RIGHT, E0_KPMINPLUS, E0_END,/* 0x48-0x4f */
-    E0_DOWN, E0_PGDN, E0_INS, E0_DEL, 0, 0, 0, 0,	      /* 0x50-0x57 */
-    0, 0, 0, E0_MSLW, E0_MSRW, E0_MSTM, 0, 0,	      /* 0x58-0x5f */
-    0, 0, 0, 0, 0, 0, 0, 0,			      /* 0x60-0x67 */
-    0, 0, 0, 0, 0, 0, 0, E0_MACRO,		      /* 0x68-0x6f */
-    0, 0, 0, 0, 0, 0, 0, 0,			      /* 0x70-0x77 */
-    0, 0, 0, 0, 0, 0, 0, 0			      /* 0x78-0x7f */
+    E0_DOWN, E0_PGDN, E0_INS, E0_DEL, 0, 0, 0, 0,         /* 0x50-0x57 */
+    0, 0, 0, E0_MSLW, E0_MSRW, E0_MSTM, 0, 0,         /* 0x58-0x5f */
+    0, 0, 0, 0, 0, 0, 0, 0,               /* 0x60-0x67 */
+    0, 0, 0, 0, 0, 0, 0, E0_MACRO,            /* 0x68-0x6f */
+    0, 0, 0, 0, 0, 0, 0, 0,               /* 0x70-0x77 */
+    0, 0, 0, 0, 0, 0, 0, 0                /* 0x78-0x7f */
 };
 
 int pckbd_setkeycode(unsigned int scancode, unsigned int keycode)
@@ -820,7 +820,7 @@ static inline void handle_mouse_event(unsigned char scancode)
             && aux_reconnect)
     {
         printk (KERN_INFO "PS/2 mouse reconnect detected\n");
-        queue->head = queue->tail = 0;	/* Flush input queue */
+        queue->head = queue->tail = 0;  /* Flush input queue */
         __aux_write_ack(AUX_ENABLE_DEV);  /* ping the mouse :) */
         return;
     }
@@ -957,13 +957,13 @@ void pckbd_leds(unsigned char leds)
 {
     if (kbd_exists && (!send_data(KBD_CMD_SET_LEDS) || !send_data(leds)))
     {
-        send_data(KBD_CMD_ENABLE);	/* re-enable kbd if any errors */
+        send_data(KBD_CMD_ENABLE);  /* re-enable kbd if any errors */
         kbd_exists = 0;
     }
 }
 
-#define DEFAULT_KEYB_REP_DELAY	250
-#define DEFAULT_KEYB_REP_RATE	30	/* cps */
+#define DEFAULT_KEYB_REP_DELAY  250
+#define DEFAULT_KEYB_REP_RATE   30  /* cps */
 
 static struct kbd_repeat kbdrate=
 {
@@ -977,7 +977,7 @@ static unsigned char parse_kbd_rate(struct kbd_repeat *r)
     {
         int rate;
         unsigned char val;
-    } kbd_rates[]= {	{5,0x14},
+    } kbd_rates[]= {    {5,0x14},
         {7,0x10},
         {10,0x0c},
         {15,0x08},
@@ -1026,7 +1026,7 @@ static int write_kbd_rate(unsigned char r)
 {
     if (!send_data(KBD_CMD_SET_RATE) || !send_data(r))
     {
-        send_data(KBD_CMD_ENABLE); 	/* re-enable kbd if any errors */
+        send_data(KBD_CMD_ENABLE);  /* re-enable kbd if any errors */
         return 0;
     }
     else
@@ -1076,8 +1076,8 @@ static int __init kbd_reset_setup(char *str)
 
 __setup("kbd-reset", kbd_reset_setup);
 
-#define KBD_NO_DATA	(-1)	/* No data */
-#define KBD_BAD_DATA	(-2)	/* Parity or other error */
+#define KBD_NO_DATA (-1)    /* No data */
+#define KBD_BAD_DATA    (-2)    /* Parity or other error */
 
 static int __init kbd_read_data(void)
 {
@@ -1098,7 +1098,7 @@ static int __init kbd_read_data(void)
 
 static void __init kbd_clear_input(void)
 {
-    int maxread = 100;	/* Random number */
+    int maxread = 100;  /* Random number */
 
     do
     {
@@ -1468,7 +1468,7 @@ static int release_aux(struct inode * inode, struct file * file)
         unlock_kernel();
         return 0;
     }
-    kbd_write_cmd(AUX_INTS_OFF);			    /* Disable controller ints */
+    kbd_write_cmd(AUX_INTS_OFF);                /* Disable controller ints */
     kbd_write_command_w(KBD_CCMD_MOUSE_DISABLE);
     aux_free_irq(AUX_DEV);
     unlock_kernel();
@@ -1486,21 +1486,21 @@ static int open_aux(struct inode * inode, struct file * file)
     {
         return 0;
     }
-    queue->head = queue->tail = 0;		/* Flush input queue */
+    queue->head = queue->tail = 0;      /* Flush input queue */
     if (aux_request_irq(keyboard_interrupt, AUX_DEV))
     {
         aux_count--;
         return -EBUSY;
     }
-    kbd_write_command_w(KBD_CCMD_MOUSE_ENABLE);	/* Enable the
-							   auxiliary port on
-							   controller. */
+    kbd_write_command_w(KBD_CCMD_MOUSE_ENABLE); /* Enable the
+                               auxiliary port on
+                               controller. */
     aux_write_ack(AUX_ENABLE_DEV); /* Enable aux device */
     kbd_write_cmd(AUX_INTS_ON); /* Enable controller ints */
 
-    mdelay(2);			/* Ensure we follow the kbc access delay rules.. */
+    mdelay(2);          /* Ensure we follow the kbc access delay rules.. */
 
-    send_data(KBD_CMD_ENABLE);	/* try to workaround toshiba4030cdt problem */
+    send_data(KBD_CMD_ENABLE);  /* try to workaround toshiba4030cdt problem */
 
     return 0;
 }
@@ -1603,10 +1603,10 @@ static int __init psaux_init(void)
 #ifdef INITIALIZE_MOUSE
     kbd_write_command_w(KBD_CCMD_MOUSE_ENABLE); /* Enable Aux. */
     aux_write_ack(AUX_SET_SAMPLE);
-    aux_write_ack(100);			/* 100 samples/sec */
+    aux_write_ack(100);         /* 100 samples/sec */
     aux_write_ack(AUX_SET_RES);
-    aux_write_ack(3);			/* 8 counts per mm */
-    aux_write_ack(AUX_SET_SCALE21);		/* 2:1 scaling */
+    aux_write_ack(3);           /* 8 counts per mm */
+    aux_write_ack(AUX_SET_SCALE21);     /* 2:1 scaling */
 #endif /* INITIALIZE_MOUSE */
     kbd_write_command(KBD_CCMD_MOUSE_DISABLE); /* Disable aux device. */
     kbd_write_cmd(AUX_INTS_OFF); /* Disable controller ints. */

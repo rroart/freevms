@@ -1,10 +1,10 @@
 /*
- *	drivers/pci/setup-irq.c
+ *  drivers/pci/setup-irq.c
  *
  * Extruded from code written by
  *      Dave Rusling (david.rusling@reo.mts.dec.com)
  *      David Mosberger (davidm@cs.arizona.edu)
- *	David Miller (davem@redhat.com)
+ *  David Miller (davem@redhat.com)
  *
  * Support routines for initializing a PCI subsystem.
  */

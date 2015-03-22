@@ -32,48 +32,48 @@
 
 /* ne2k-pci.c: A NE2000 clone on PCI bus driver for Linux. */
 /*
-	A Linux device driver for PCI NE2000 clones.
+    A Linux device driver for PCI NE2000 clones.
 
-	Authors and other copyright holders:
-	1992-2000 by Donald Becker, NE2000 core and various modifications.
-	1995-1998 by Paul Gortmaker, core modifications and PCI support.
-	Copyright 1993 assigned to the United States Government as represented
-	by the Director, National Security Agency.
+    Authors and other copyright holders:
+    1992-2000 by Donald Becker, NE2000 core and various modifications.
+    1995-1998 by Paul Gortmaker, core modifications and PCI support.
+    Copyright 1993 assigned to the United States Government as represented
+    by the Director, National Security Agency.
 
-	This software may be used and distributed according to the terms of
-	the GNU General Public License (GPL), incorporated herein by reference.
-	Drivers based on or derived from this code fall under the GPL and must
-	retain the authorship, copyright and license notice.  This file is not
-	a complete program and may only be used when the entire operating
-	system is licensed under the GPL.
+    This software may be used and distributed according to the terms of
+    the GNU General Public License (GPL), incorporated herein by reference.
+    Drivers based on or derived from this code fall under the GPL and must
+    retain the authorship, copyright and license notice.  This file is not
+    a complete program and may only be used when the entire operating
+    system is licensed under the GPL.
 
-	The author may be reached as becker@scyld.com, or C/O
-	Scyld Computing Corporation
-	410 Severn Ave., Suite 210
-	Annapolis MD 21403
+    The author may be reached as becker@scyld.com, or C/O
+    Scyld Computing Corporation
+    410 Severn Ave., Suite 210
+    Annapolis MD 21403
 
-	Issues remaining:
-	People are making PCI ne2000 clones! Oh the horror, the horror...
-	Limited full-duplex support.
+    Issues remaining:
+    People are making PCI ne2000 clones! Oh the horror, the horror...
+    Limited full-duplex support.
 */
 
-#define DRV_NAME	"ne2k-pci"
-#define DRV_VERSION	"1.02"
-#define DRV_RELDATE	"10/19/2000"
+#define DRV_NAME    "ne2k-pci"
+#define DRV_VERSION "1.02"
+#define DRV_RELDATE "10/19/2000"
 
 
 /* The user-configurable values.
    These may be modified when a driver module is loaded.*/
 
-static int debug = 1;			/* 1 normal messages, 0 quiet .. 7 verbose. */
+static int debug = 1;           /* 1 normal messages, 0 quiet .. 7 verbose. */
 
-#define MAX_UNITS 8				/* More are supported, limit only on options */
+#define MAX_UNITS 8             /* More are supported, limit only on options */
 /* Used to pass the full-duplex flag, etc. */
 static int full_duplex[MAX_UNITS];
 static int options[MAX_UNITS];
 
 /* Force a non std. amount of memory.  Units are 256 byte pages. */
-/* #define PACKETBUF_MEMSIZE	0x40 */
+/* #define PACKETBUF_MEMSIZE    0x40 */
 
 
 #include <linux/module.h>
@@ -131,8 +131,8 @@ MODULE_PARM_DESC(full_duplex, "PCI NE2000 full duplex setting(s) (1)");
 #define ne2k_flags reg0
 enum
 {
-    ONLY_16BIT_IO=8, ONLY_32BIT_IO=4,	/* Chip can do only 16/32-bit xfers. */
-    FORCE_FDX=0x20,						/* User override. */
+    ONLY_16BIT_IO=8, ONLY_32BIT_IO=4,   /* Chip can do only 16/32-bit xfers. */
+    FORCE_FDX=0x20,                     /* User override. */
     REALTEK_FDX=0x40, HOLTEK_FDX=0x80,
     STOP_PG_0x60=0x100,
 };
@@ -191,14 +191,14 @@ MODULE_DEVICE_TABLE(pci, ne2k_pci_tbl);
 
 /* ---- No user-serviceable parts below ---- */
 
-#define NE_BASE	 (dev->base_addr)
-#define NE_CMD	 	0x00
-#define NE_DATAPORT	0x10	/* NatSemi-defined port window offset. */
-#define NE_RESET	0x1f	/* Issue a read to reset, a write to clear. */
-#define NE_IO_EXTENT	0x20
+#define NE_BASE  (dev->base_addr)
+#define NE_CMD      0x00
+#define NE_DATAPORT 0x10    /* NatSemi-defined port window offset. */
+#define NE_RESET    0x1f    /* Issue a read to reset, a write to clear. */
+#define NE_IO_EXTENT    0x20
 
-#define NESM_START_PG	0x40	/* First page of TX buffer */
-#define NESM_STOP_PG	0x80	/* Last page +1 of RX ring */
+#define NESM_START_PG   0x40    /* First page of TX buffer */
+#define NESM_STOP_PG    0x80    /* Last page +1 of RX ring */
 
 
 static int ne2k_pci_open(struct net_device *dev);
@@ -295,7 +295,7 @@ static int __devinit ne2k_pci_init_one (struct pci_dev *pdev,
         if (inb(ioaddr + EN0_COUNTER0) != 0)
         {
             outb(reg0, ioaddr);
-            outb(regd, ioaddr + 0x0d);	/* Restore the old values. */
+            outb(regd, ioaddr + 0x0d);  /* Restore the old values. */
             goto err_out_free_res;
         }
     }
@@ -325,7 +325,7 @@ static int __devinit ne2k_pci_init_one (struct pci_dev *pdev,
                 goto err_out_free_netdev;
             }
 
-        outb(0xff, ioaddr + EN0_ISR);		/* Ack all intr. */
+        outb(0xff, ioaddr + EN0_ISR);       /* Ack all intr. */
     }
 
     /* Read the 16 bytes of station address PROM.
@@ -339,17 +339,17 @@ static int __devinit ne2k_pci_init_one (struct pci_dev *pdev,
         } program_seq[] =
         {
             {E8390_NODMA+E8390_PAGE0+E8390_STOP, E8390_CMD}, /* Select page 0*/
-            {0x49,	EN0_DCFG},	/* Set word-wide access. */
-            {0x00,	EN0_RCNTLO},	/* Clear the count regs. */
-            {0x00,	EN0_RCNTHI},
-            {0x00,	EN0_IMR},	/* Mask completion irq. */
-            {0xFF,	EN0_ISR},
-            {E8390_RXOFF, EN0_RXCR},	/* 0x20  Set to monitor */
-            {E8390_TXOFF, EN0_TXCR},	/* 0x02  and loopback mode. */
-            {32,	EN0_RCNTLO},
-            {0x00,	EN0_RCNTHI},
-            {0x00,	EN0_RSARLO},	/* DMA starting at 0x0000. */
-            {0x00,	EN0_RSARHI},
+            {0x49,  EN0_DCFG},  /* Set word-wide access. */
+            {0x00,  EN0_RCNTLO},    /* Clear the count regs. */
+            {0x00,  EN0_RCNTHI},
+            {0x00,  EN0_IMR},   /* Mask completion irq. */
+            {0xFF,  EN0_ISR},
+            {E8390_RXOFF, EN0_RXCR},    /* 0x20  Set to monitor */
+            {E8390_TXOFF, EN0_TXCR},    /* 0x02  and loopback mode. */
+            {32,    EN0_RCNTLO},
+            {0x00,  EN0_RCNTHI},
+            {0x00,  EN0_RSARLO},    /* DMA starting at 0x0000. */
+            {0x00,  EN0_RSARHI},
             {E8390_RREAD+E8390_START, E8390_CMD},
         };
         for (i = 0; i < sizeof(program_seq)/sizeof(program_seq[0]); i++)
@@ -491,7 +491,7 @@ static void ne2k_pci_reset_8390(struct net_device *dev)
             printk("%s: ne2k_pci_reset_8390() did not complete.\n", dev->name);
             break;
         }
-    outb(ENISR_RESET, NE_BASE + EN0_ISR);	/* Ack intr. */
+    outb(ENISR_RESET, NE_BASE + EN0_ISR);   /* Ack intr. */
 }
 
 /* Grab the 8390 specific header. Similar to the block_input routine, but
@@ -516,7 +516,7 @@ static void ne2k_pci_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *
     outb(E8390_NODMA+E8390_PAGE0+E8390_START, nic_base+ NE_CMD);
     outb(sizeof(struct e8390_pkt_hdr), nic_base + EN0_RCNTLO);
     outb(0, nic_base + EN0_RCNTHI);
-    outb(0, nic_base + EN0_RSARLO);		/* On page boundary */
+    outb(0, nic_base + EN0_RSARLO);     /* On page boundary */
     outb(ring_page, nic_base + EN0_RSARHI);
     outb(E8390_RREAD+E8390_START, nic_base + NE_CMD);
 
@@ -530,7 +530,7 @@ static void ne2k_pci_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *
         le16_to_cpus(&hdr->count);
     }
 
-    outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+    outb(ENISR_RDC, nic_base + EN0_ISR);    /* Ack intr. */
     ei_status.dmaing &= ~0x01;
 }
 
@@ -587,7 +587,7 @@ static void ne2k_pci_block_input(struct net_device *dev, int count,
         }
     }
 
-    outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+    outb(ENISR_RDC, nic_base + EN0_ISR);    /* Ack intr. */
     ei_status.dmaing &= ~0x01;
 }
 
@@ -657,7 +657,7 @@ static void ne2k_pci_block_output(struct net_device *dev, int count,
     dma_start = jiffies;
 
     while ((inb(nic_base + EN0_ISR) & ENISR_RDC) == 0)
-        if (jiffies - dma_start > 2)  			/* Avoid clock roll-over. */
+        if (jiffies - dma_start > 2)            /* Avoid clock roll-over. */
         {
             printk(KERN_WARNING "%s: timeout waiting for Tx RDC.\n", dev->name);
             ne2k_pci_reset_8390(dev);
@@ -665,7 +665,7 @@ static void ne2k_pci_block_output(struct net_device *dev, int count,
             break;
         }
 
-    outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+    outb(ENISR_RDC, nic_base + EN0_ISR);    /* Ack intr. */
     ei_status.dmaing &= ~0x01;
     return;
 }

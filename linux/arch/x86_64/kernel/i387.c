@@ -12,7 +12,7 @@
  *
  *  Pentium III FXSR, SSE support
  *  General FPU state handling cleanups
- *	Gareth Hughes <gareth@valinux.com>, May 2000
+ *  Gareth Hughes <gareth@valinux.com>, May 2000
  *
  *  x86-64 rework 2002 Andi Kleen.
  *  Does direct fxsave in and out of user space now for signal handlers.

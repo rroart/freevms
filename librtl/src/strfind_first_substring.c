@@ -1,8 +1,8 @@
 
 /*
- *	str$find_first_substring
+ *  str$find_first_substring
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,47 +20,47 @@
  *
  *The author may be contacted at freevms@sympatico.ca
  *
- *	Andrew Allison
- *	50 Denlaw Road
- *	London, Ont
- *	Canada
- *	N6G 3L4
+ *  Andrew Allison
+ *  50 Denlaw Road
+ *  London, Ont
+ *  Canada
+ *  N6G 3L4
  *
  */
 
-/*	Description
+/*  Description
  *
- *	Str$find_first_substring takes as input a string to be searched
- *	and an unspecified number of substrings ffor which tosearch. It
- *	searches the specified string and returnbs the position of the
- *	substring that is found earliest in the string.This is not necessarilly
- *	the position of the first substring specified. That is,
- *	str$find_first_substring returns the position of the leftmost matching
- *	substring. The order in which the substrings are searched for is
- *	irrelevant.
+ *  Str$find_first_substring takes as input a string to be searched
+ *  and an unspecified number of substrings ffor which tosearch. It
+ *  searches the specified string and returnbs the position of the
+ *  substring that is found earliest in the string.This is not necessarilly
+ *  the position of the first substring specified. That is,
+ *  str$find_first_substring returns the position of the leftmost matching
+ *  substring. The order in which the substrings are searched for is
+ *  irrelevant.
  *
- *	Unlike many of the compare and search routines,
- *	str$find_first_substring does not return the position in a returned
- *	value. The position of the substring which is found earlies in the
- *	string is retuurned in the the index argument. If none of the specified
- *	substring is found in the string, the value of index is 0.
+ *  Unlike many of the compare and search routines,
+ *  str$find_first_substring does not return the position in a returned
+ *  value. The position of the substring which is found earlies in the
+ *  string is retuurned in the the index argument. If none of the specified
+ *  substring is found in the string, the value of index is 0.
  *
- *	Zero lenght string, of null arguments produced unexpected rresults.
- *	Any time the routine is called with a null substring as an argument.
- *	str$find_first_substring always returns the position of the null
- *	substring as the first substring found. All other substring are
- *	interprtoted as appearing in the string after the null string.
+ *  Zero lenght string, of null arguments produced unexpected rresults.
+ *  Any time the routine is called with a null substring as an argument.
+ *  str$find_first_substring always returns the position of the null
+ *  substring as the first substring found. All other substring are
+ *  interprtoted as appearing in the string after the null string.
  *
 */
-/* 	str$find_first_substring source-string,index,substring-index,substring
- *	[,substring]
+/*  str$find_first_substring source-string,index,substring-index,substring
+ *  [,substring]
  *
  *
  * source-string
- *	source-string	char_string
- * 	type		character string
- * 	access		read only
- * 	mechanism	by descriptor
+ *  source-string   char_string
+ *  type        character string
+ *  access      read only
+ *  mechanism   by descriptor
  * String that STR$FIND_FIRST_SUBSTRING searches. The source-string
  * argument is the address of a descriptor pointing to the string
  *
@@ -89,11 +89,11 @@ unsigned long str$find_first_substring (const struct dsc$descriptor_s *s1,
                                         struct dsc$descriptor_s *sub, ...)
 
 {
-    int	i, status, result;
-    long	j;
-    char	*s1_ptr,*s2_ptr;
+    int i, status, result;
+    long    j;
+    char    *s1_ptr,*s2_ptr;
     struct dsc$descriptor_s *sd_ptr, temp_sd, temp2_sd;
-    unsigned short	s1_len, s2_len,temp_len;
+    unsigned short  s1_len, s2_len,temp_len;
     va_list ap;
 
     *index = 0;
@@ -102,7 +102,7 @@ unsigned long str$find_first_substring (const struct dsc$descriptor_s *s1,
 
     str$analyze_sdesc (s1,&s1_len,&s1_ptr);
     str$analyze_sdesc (sub,&s2_len,&s2_ptr);
-    va_start(ap,sub);		// make ap point to first unnamed arg
+    va_start(ap,sub);       // make ap point to first unnamed arg
     sd_ptr = sub;
     do
     {
@@ -155,8 +155,8 @@ unsigned long str$find_first_substring (const struct dsc$descriptor_s *s1,
 
     while (  sd_ptr != NULL  );
 
-    va_end(ap);			// clean up argument pointer
-    *subindex = 0;			// not found set back to zero
+    va_end(ap);         // clean up argument pointer
+    *subindex = 0;          // not found set back to zero
     return 0;
 }
 

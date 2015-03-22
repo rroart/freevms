@@ -1,5 +1,5 @@
-#ifndef ihpdef_h
-#define ihpdef_h
+#ifndef IHPDEF_H
+#define IHPDEF_H
 
 #define IHP$K_LENGTH 44
 #define IHP$C_LENGTH 44

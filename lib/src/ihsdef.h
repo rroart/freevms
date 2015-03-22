@@ -1,5 +1,5 @@
-#ifndef ihsdef_h
-#define ihsdef_h
+#ifndef IHSDEF_H
+#define IHSDEF_H
 
 #define IHS$K_LENGTH 28
 #define IHS$C_LENGTH 28

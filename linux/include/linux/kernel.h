@@ -18,25 +18,25 @@
 /* The "volatile" is due to gcc bugs */
 #define barrier() __asm__ __volatile__("": : :"memory")
 
-#define INT_MAX		((int)(~0U>>1))
-#define INT_MIN		(-INT_MAX - 1)
-#define UINT_MAX	(~0U)
-#define LONG_MAX	((long)(~0UL>>1))
-#define LONG_MIN	(-LONG_MAX - 1)
-#define ULONG_MAX	(~0UL)
+#define INT_MAX     ((int)(~0U>>1))
+#define INT_MIN     (-INT_MAX - 1)
+#define UINT_MAX    (~0U)
+#define LONG_MAX    ((long)(~0UL>>1))
+#define LONG_MIN    (-LONG_MAX - 1)
+#define ULONG_MAX   (~0UL)
 
-#define STACK_MAGIC	0xdeadbeef
+#define STACK_MAGIC 0xdeadbeef
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
-#define	KERN_EMERG	"<0>"	/* system is unusable			*/
-#define	KERN_ALERT	"<1>"	/* action must be taken immediately	*/
-#define	KERN_CRIT	"<2>"	/* critical conditions			*/
-#define	KERN_ERR	"<3>"	/* error conditions			*/
-#define	KERN_WARNING	"<4>"	/* warning conditions			*/
-#define	KERN_NOTICE	"<5>"	/* normal but significant condition	*/
-#define	KERN_INFO	"<6>"	/* informational			*/
-#define	KERN_DEBUG	"<7>"	/* debug-level messages			*/
+#define KERN_EMERG  "<0>"   /* system is unusable           */
+#define KERN_ALERT  "<1>"   /* action must be taken immediately */
+#define KERN_CRIT   "<2>"   /* critical conditions          */
+#define KERN_ERR    "<3>"   /* error conditions         */
+#define KERN_WARNING    "<4>"   /* warning conditions           */
+#define KERN_NOTICE "<5>"   /* normal but significant condition */
+#define KERN_INFO   "<6>"   /* informational            */
+#define KERN_DEBUG  "<7>"   /* debug-level messages         */
 
 extern int console_printk[];
 
@@ -50,10 +50,10 @@ extern int console_printk[];
 # define NORET_AND     noreturn,
 
 #ifdef __i386__
-#define FASTCALL(x)	x __attribute__((regparm(3)))
-#define fastcall	__attribute__((regparm(3)))
+#define FASTCALL(x) x __attribute__((regparm(3)))
+#define fastcall    __attribute__((regparm(3)))
 #else
-#define FASTCALL(x)	x
+#define FASTCALL(x) x
 #define fastcall
 #endif
 
@@ -108,7 +108,7 @@ static inline void console_verbose(void)
 }
 
 extern void bust_spinlocks(int yes);
-extern int oops_in_progress;		/* If set, an oops, panic(), BUG() or die() is in progress */
+extern int oops_in_progress;        /* If set, an oops, panic(), BUG() or die() is in progress */
 
 extern int tainted;
 extern const char *print_tainted(void);
@@ -118,14 +118,14 @@ extern void dump_stack(void);
 #ifdef __i386__
 #if DEBUG
 #define pr_debug(fmt,arg...) \
-	printk(KERN_DEBUG fmt,##arg)
+    printk(KERN_DEBUG fmt,##arg)
 #else
 #define pr_debug(fmt,arg...) \
-	do { } while (0)
+    do { } while (0)
 #endif
 
 #define pr_info(fmt,arg...) \
-	printk(KERN_INFO fmt,##arg)
+    printk(KERN_INFO fmt,##arg)
 #endif
 
 /*
@@ -133,19 +133,19 @@ extern void dump_stack(void);
  */
 
 #define NIPQUAD(addr) \
-	((unsigned char *)&addr)[0], \
-	((unsigned char *)&addr)[1], \
-	((unsigned char *)&addr)[2], \
-	((unsigned char *)&addr)[3]
+    ((unsigned char *)&addr)[0], \
+    ((unsigned char *)&addr)[1], \
+    ((unsigned char *)&addr)[2], \
+    ((unsigned char *)&addr)[3]
 
 #if defined(__LITTLE_ENDIAN)
 #define HIPQUAD(addr) \
-	((unsigned char *)&addr)[3], \
-	((unsigned char *)&addr)[2], \
-	((unsigned char *)&addr)[1], \
-	((unsigned char *)&addr)[0]
+    ((unsigned char *)&addr)[3], \
+    ((unsigned char *)&addr)[2], \
+    ((unsigned char *)&addr)[1], \
+    ((unsigned char *)&addr)[0]
 #elif defined(__BIG_ENDIAN)
-#define HIPQUAD	NIPQUAD
+#define HIPQUAD NIPQUAD
 #else
 #error "Please fix asm/byteorder.h"
 #endif /* __LITTLE_ENDIAN */
@@ -156,16 +156,16 @@ extern void dump_stack(void);
  * "unnecessary" pointer comparison.
  */
 #define min(x,y) ({ \
-	const typeof(x) _x = (x);	\
-	const typeof(y) _y = (y);	\
-	(void) (&_x == &_y);		\
-	_x < _y ? _x : _y; })
+    const typeof(x) _x = (x);   \
+    const typeof(y) _y = (y);   \
+    (void) (&_x == &_y);        \
+    _x < _y ? _x : _y; })
 
 #define max(x,y) ({ \
-	const typeof(x) _x = (x);	\
-	const typeof(y) _y = (y);	\
-	(void) (&_x == &_y);		\
-	_x > _y ? _x : _y; })
+    const typeof(x) _x = (x);   \
+    const typeof(y) _y = (y);   \
+    (void) (&_x == &_y);        \
+    _x > _y ? _x : _y; })
 
 /*
  * ..and if you can't take the strict
@@ -174,41 +174,41 @@ extern void dump_stack(void);
  * Or not use min/max at all, of course.
  */
 #define min_t(type,x,y) \
-	({ type __x = (x); type __y = (y); __x < __y ? __x: __y; })
+    ({ type __x = (x); type __y = (y); __x < __y ? __x: __y; })
 #define max_t(type,x,y) \
-	({ type __x = (x); type __y = (y); __x > __y ? __x: __y; })
+    ({ type __x = (x); type __y = (y); __x > __y ? __x: __y; })
 
 extern void __out_of_line_bug(int line) ATTRIB_NORET;
 #define out_of_line_bug() __out_of_line_bug(__LINE__)
 
 #endif /* __KERNEL__ */
 
-#define SI_LOAD_SHIFT	16
+#define SI_LOAD_SHIFT   16
 struct sysinfo
 {
-    long uptime;			/* Seconds since boot */
-    unsigned long loads[3];		/* 1, 5, and 15 minute load averages */
-    unsigned long totalram;		/* Total usable main memory size */
-    unsigned long freeram;		/* Available memory size */
-    unsigned long sharedram;	/* Amount of shared memory */
-    unsigned long bufferram;	/* Memory used by buffers */
-    unsigned long totalswap;	/* Total swap space size */
-    unsigned long freeswap;		/* swap space still available */
-    unsigned short procs;		/* Number of current processes */
-    unsigned short pad;		/* explicit padding for m68k */
-    unsigned long totalhigh;	/* Total high memory size */
-    unsigned long freehigh;		/* Available high memory size */
-    unsigned int mem_unit;		/* Memory unit size in bytes */
-    char _f[20-2*sizeof(long)-sizeof(int)];	/* Padding: libc5 uses this.. */
+    long uptime;            /* Seconds since boot */
+    unsigned long loads[3];     /* 1, 5, and 15 minute load averages */
+    unsigned long totalram;     /* Total usable main memory size */
+    unsigned long freeram;      /* Available memory size */
+    unsigned long sharedram;    /* Amount of shared memory */
+    unsigned long bufferram;    /* Memory used by buffers */
+    unsigned long totalswap;    /* Total swap space size */
+    unsigned long freeswap;     /* swap space still available */
+    unsigned short procs;       /* Number of current processes */
+    unsigned short pad;     /* explicit padding for m68k */
+    unsigned long totalhigh;    /* Total high memory size */
+    unsigned long freehigh;     /* Available high memory size */
+    unsigned int mem_unit;      /* Memory unit size in bytes */
+    char _f[20-2*sizeof(long)-sizeof(int)]; /* Padding: libc5 uses this.. */
 };
 
 #define BUG_ON(condition) do { if (unlikely((condition)!=0)) BUG(); } while(0)
 
 #define WARN_ON(condition) do { \
-	if (unlikely((condition)!=0)) { \
-		printk("Badness in %s at %s:%d\n", __FUNCTION__, __FILE__, __LINE__); \
-		dump_stack(); \
-	} \
+    if (unlikely((condition)!=0)) { \
+        printk("Badness in %s at %s:%d\n", __FUNCTION__, __FILE__, __LINE__); \
+        dump_stack(); \
+    } \
 } while (0)
 
 #endif /* _LINUX_KERNEL_H */

@@ -7,9 +7,9 @@
 
 #include <linux/atm.h>
 
-#define PPPOATM_ENCAPS_AUTODETECT	(0)
-#define PPPOATM_ENCAPS_VC		(1)
-#define PPPOATM_ENCAPS_LLC		(2)
+#define PPPOATM_ENCAPS_AUTODETECT   (0)
+#define PPPOATM_ENCAPS_VC       (1)
+#define PPPOATM_ENCAPS_LLC      (2)
 
 /*
  * This is for the ATM_SETBACKEND call - these are like socket families:
@@ -18,8 +18,8 @@
  */
 struct atm_backend_ppp
 {
-    atm_backend_t	backend_num;	/* ATM_BACKEND_PPP */
-    int		encaps;		/* PPPOATM_ENCAPS_* */
+    atm_backend_t   backend_num;    /* ATM_BACKEND_PPP */
+    int     encaps;     /* PPPOATM_ENCAPS_* */
 };
 
-#endif	/* _LINUX_ATMPPP_H */
+#endif  /* _LINUX_ATMPPP_H */

@@ -1,5 +1,5 @@
-#ifndef ftucbdef_h
-#define ftucbdef_h
+#ifndef FTUCBDEF_H
+#define FTUCBDEF_H
 
 #include <ttyucbdef.h>
 
@@ -25,11 +25,11 @@ struct _ft_ucb
         unsigned short int ucb$w_ft_sts;
         struct
         {
-            unsigned ucb$v_ft_bsy		: 1;
-            unsigned ucb$v_ft_delpend		: 1;
-            unsigned ucb$v_ft_delete_act	: 1;
-            unsigned ucb$v_ft_input_crit	: 1;
-            unsigned ucb$v_fill_0_		: 4;
+            unsigned ucb$v_ft_bsy       : 1;
+            unsigned ucb$v_ft_delpend       : 1;
+            unsigned ucb$v_ft_delete_act    : 1;
+            unsigned ucb$v_ft_input_crit    : 1;
+            unsigned ucb$v_fill_0_      : 4;
         };
     };
     unsigned short int ucb$w_ft_chan;
@@ -59,7 +59,7 @@ struct _ft_ucb
             unsigned short int ucb$w_ft_frksize;
             unsigned char ucb$b_ft_frk_type;
             unsigned char ucb$b_ft_flck;
-            void (*ucb$l_ft_fpc)();
+            void (*ucb$l_ft_fpc)(void);
             unsigned long long ucb$q_ft_fr3;
             unsigned long long ucb$q_ft_fr4;
         };

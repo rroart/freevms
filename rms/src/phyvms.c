@@ -22,11 +22,11 @@
 
 /* Modified by:
  *
- *   31-AUG-2001 01:04	Hunter Goatley <goathunter@goatley.com>
+ *   31-AUG-2001 01:04  Hunter Goatley <goathunter@goatley.com>
  *
- *	Added checks to be sure device we're mounting is a
- *	disk and that it's already physically mounted at the
- *	DCL level,
+ *  Added checks to be sure device we're mounting is a
+ *  disk and that it's already physically mounted at the
+ *  DCL level,
  *
  */
 
@@ -101,7 +101,7 @@ unsigned phyio_init(int devlen,char *devnam,unsigned *handle,struct phyio_info *
     status = sys$getdviw(0,0,&devdsc, &dvi_itmlst, 0,0,0,0);
     if (status & 1)
     {
-        if (devclass != DC$_DISK)	/* If not a disk, return an error */
+        if (devclass != DC$_DISK)   /* If not a disk, return an error */
             return (SS$_IVDEVNAM);
 
         if (!(devchar & DEV$M_MNT))

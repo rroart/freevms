@@ -12,28 +12,28 @@
  * This file contains the PC-specific time handling details:
  * reading the RTC at bootup, etc..
  * 1994-07-02    Alan Modra
- *	fixed set_rtc_mmss, fixed time.year for >= 2000, new mktime
+ *  fixed set_rtc_mmss, fixed time.year for >= 2000, new mktime
  * 1995-03-26    Markus Kuhn
  *      fixed 500 ms bug at call to set_rtc_mmss, fixed DS12887
  *      precision CMOS clock update
  * 1996-05-03    Ingo Molnar
  *      fixed time warps in do_[slow|fast]_gettimeoffset()
- * 1997-09-10	Updated NTP code according to technical memorandum Jan '96
- *		"A Kernel Model for Precision Timekeeping" by Dave Mills
+ * 1997-09-10   Updated NTP code according to technical memorandum Jan '96
+ *      "A Kernel Model for Precision Timekeeping" by Dave Mills
  * 1998-09-05    (Various)
- *	More robust do_fast_gettimeoffset() algorithm implemented
- *	(works with APM, Cyrix 6x86MX and Centaur C6),
- *	monotonic gettimeofday() with fast_get_timeoffset(),
- *	drift-proof precision TSC calibration on boot
- *	(C. Scott Ananian <cananian@alumni.princeton.edu>, Andrew D.
- *	Balsa <andrebalsa@altern.org>, Philip Gladstone <philip@raptor.com>;
- *	ported from 2.0.35 Jumbo-9 by Michael Krause <m.krause@tu-harburg.de>).
+ *  More robust do_fast_gettimeoffset() algorithm implemented
+ *  (works with APM, Cyrix 6x86MX and Centaur C6),
+ *  monotonic gettimeofday() with fast_get_timeoffset(),
+ *  drift-proof precision TSC calibration on boot
+ *  (C. Scott Ananian <cananian@alumni.princeton.edu>, Andrew D.
+ *  Balsa <andrebalsa@altern.org>, Philip Gladstone <philip@raptor.com>;
+ *  ported from 2.0.35 Jumbo-9 by Michael Krause <m.krause@tu-harburg.de>).
  * 1998-12-16    Andrea Arcangeli
- *	Fixed Jumbo-9 code in 2.1.131: do_gettimeofday was missing 1 jiffy
- *	because was not accounting lost_ticks.
+ *  Fixed Jumbo-9 code in 2.1.131: do_gettimeofday was missing 1 jiffy
+ *  because was not accounting lost_ticks.
  * 1998-12-24 Copyright (C) 1998  Andrea Arcangeli
- *	Fixed a xtime SMP race (we need the xtime_lock rw spinlock to
- *	serialize accesses to xtime/lost_ticks).
+ *  Fixed a xtime SMP race (we need the xtime_lock rw spinlock to
+ *  serialize accesses to xtime/lost_ticks).
  */
 
 #include <linux/errno.h>
@@ -70,7 +70,7 @@
 #include <linux/irq.h>
 
 
-unsigned long cpu_khz;	/* Detected as we calibrate the TSC */
+unsigned long cpu_khz;  /* Detected as we calibrate the TSC */
 
 /* Number of usecs that the last interrupt was delayed */
 int delay_at_last_interrupt;
@@ -98,7 +98,7 @@ static inline unsigned long do_fast_gettimeoffset(void)
     rdtsc(eax,edx);
 
     /* .. relative to previous jiffy (32 bits is enough) */
-    eax -= last_tsc_low;	/* tsc_low delta */
+    eax -= last_tsc_low;    /* tsc_low delta */
 
     /*
          * Time offset = (tsc_low delta) * fast_gettimeoffset_quotient
@@ -152,7 +152,7 @@ extern spinlock_t i8259A_lock;
  * but it appears that the speaker driver really needs interrupt more
  * often than every 120 us or so.
  *
- * Anyway, this needs more thought....		pjsg (1993-08-28)
+ * Anyway, this needs more thought....      pjsg (1993-08-28)
  *
  * If you are really that interested, you should be reading
  * comp.protocols.time.ntp!
@@ -173,9 +173,9 @@ static unsigned long do_slow_gettimeoffset(void)
     /* gets recalled with irq locally disabled */
     spin_lock(&i8253_lock);
     /* timer count may underflow right here */
-    outb_p(0x00, 0x43);	/* latch the count ASAP */
+    outb_p(0x00, 0x43); /* latch the count ASAP */
 
-    count = inb_p(0x40);	/* read the latched count */
+    count = inb_p(0x40);    /* read the latched count */
 
     /*
      * We do this guaranteed double memory access instead of a _p
@@ -268,7 +268,7 @@ static unsigned long (*do_gettimeoffset)(void) = do_slow_gettimeoffset;
 
 #else
 
-#define do_gettimeoffset()	do_fast_gettimeoffset()
+#define do_gettimeoffset()  do_fast_gettimeoffset()
 
 #endif
 
@@ -321,7 +321,7 @@ void do_settimeofday(struct timeval *tv)
     }
 
     xtime = *tv;
-    time_adjust = 0;		/* stop active adjtime() */
+    time_adjust = 0;        /* stop active adjtime() */
     time_status |= STA_UNSYNC;
     time_maxerror = NTP_PHASE_LIMIT;
     time_esterror = NTP_PHASE_LIMIT;
@@ -365,7 +365,7 @@ int set_rtc_mmss(unsigned long nowtime)
     real_seconds = nowtime % 60;
     real_minutes = nowtime / 60;
     if (((abs(real_minutes - cmos_minutes) + 15)/30) & 1)
-        real_minutes += 30;		/* correct for half hour time zone */
+        real_minutes += 30;     /* correct for half hour time zone */
     real_minutes %= 60;
 
     if (abs(real_minutes - cmos_minutes) < 30)
@@ -476,8 +476,8 @@ static inline void do_timer_interrupt(int irq, void *dev_id, struct pt_regs *reg
         high bit of the PPI port B (0x61).  Note that some PS/2s,
         notably the 55SX, work fine if this is removed.  */
 
-        irq = inb_p( 0x61 );	/* read the current state */
-        outb_p( irq|0x80, 0x61 );	/* reset the IRQ */
+        irq = inb_p( 0x61 );    /* read the current state */
+        outb_p( irq|0x80, 0x61 );   /* reset the IRQ */
     }
 #endif
 }
@@ -551,10 +551,10 @@ unsigned long get_cmos_time(void)
      * Let's hope other operating systems interpret the RTC the same way.
      */
     /* read RTC exactly on falling edge of update flag */
-    for (i = 0 ; i < 1000000 ; i++)	/* may take up to 1 second... */
+    for (i = 0 ; i < 1000000 ; i++) /* may take up to 1 second... */
         if (CMOS_READ(RTC_FREQ_SELECT) & RTC_UIP)
             break;
-    for (i = 0 ; i < 1000000 ; i++)	/* must try at least 2.228 ms */
+    for (i = 0 ; i < 1000000 ; i++) /* must try at least 2.228 ms */
         if (!(CMOS_READ(RTC_FREQ_SELECT) & RTC_UIP))
             break;
     do   /* Isn't this overkill ? UIP above should guarantee consistency */
@@ -597,8 +597,8 @@ static struct irqaction irq0  = { exe$hwclkint, SA_INTERRUPT, 0, "timer", NULL, 
  * device.
  */
 
-#define CALIBRATE_LATCH	(5 * LATCH)
-#define CALIBRATE_TIME	(5 * 1000020/HZ)
+#define CALIBRATE_LATCH (5 * LATCH)
+#define CALIBRATE_TIME  (5 * 1000020/HZ)
 
 static unsigned long __init calibrate_tsc(void)
 {
@@ -612,9 +612,9 @@ static unsigned long __init calibrate_tsc(void)
      * (interrupt on terminal count mode), binary count,
      * load 5 * LATCH count, (LSB and MSB) to begin countdown.
      */
-    outb(0xb0, 0x43);			/* binary, mode 0, LSB/MSB, Ch 2 */
-    outb(CALIBRATE_LATCH & 0xff, 0x42);	/* LSB of count */
-    outb(CALIBRATE_LATCH >> 8, 0x42);	/* MSB of count */
+    outb(0xb0, 0x43);           /* binary, mode 0, LSB/MSB, Ch 2 */
+    outb(CALIBRATE_LATCH & 0xff, 0x42); /* LSB of count */
+    outb(CALIBRATE_LATCH >> 8, 0x42);   /* MSB of count */
 
     {
         unsigned long startlow, starthigh;
@@ -689,14 +689,14 @@ void __init time_init(void)
      * smart.  See arch/i386/kernel/apm.c.
      */
     /*
-     *	Firstly we have to do a CPU check for chips with
-     * 	a potentially buggy TSC. At this point we haven't run
-     *	the ident/bugs checks so we must run this hook as it
-     *	may turn off the TSC flag.
+     *  Firstly we have to do a CPU check for chips with
+     *  a potentially buggy TSC. At this point we haven't run
+     *  the ident/bugs checks so we must run this hook as it
+     *  may turn off the TSC flag.
      *
-     *	NOTE: this doesnt yet handle SMP 486 machines where only
-     *	some CPU's have a TSC. Thats never worked and nobody has
-     *	moaned if you have the only one in the world - you fix it!
+     *  NOTE: this doesnt yet handle SMP 486 machines where only
+     *  some CPU's have a TSC. Thats never worked and nobody has
+     *  moaned if you have the only one in the world - you fix it!
      */
 
     dodgy_tsc();
@@ -709,8 +709,8 @@ void __init time_init(void)
             fast_gettimeoffset_quotient = tsc_quotient;
             use_tsc = 1;
             /*
-             *	We could be more selective here I suspect
-             *	and just enable this for the next intel chips ?
+             *  We could be more selective here I suspect
+             *  and just enable this for the next intel chips ?
              */
             x86_udelay_tsc = 1;
 #ifndef do_gettimeoffset

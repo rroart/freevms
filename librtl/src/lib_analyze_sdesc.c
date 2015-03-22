@@ -3,7 +3,7 @@
  *
  * libanaalyze_sdesc.c
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -21,20 +21,20 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
 /*
  * libanalyze_sdesc.c
  *
- *	Code for VAX STR$ANALYSE_SDESC routine
+ *  Code for VAX STR$ANALYSE_SDESC routine
  *
  * Description:
  *
@@ -44,8 +44,8 @@
  *
  * History
  *
- *	Mar 19, 2004 - Andrew Allison
- *		Copied code from str$analyze
+ *  Mar 19, 2004 - Andrew Allison
+ *      Copied code from str$analyze
  */
 
 #include <stdio.h>
@@ -60,9 +60,9 @@
 /*************************************************************
  * lib$analyze_sdesc
  *
- *	Analyze String Descriptor extracts the length and
- *	starting address of the data for a variety of
- *	string descriptor classes
+ *  Analyze String Descriptor extracts the length and
+ *  starting address of the data for a variety of
+ *  string descriptor classes
  */
 unsigned long lib$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
                                 unsigned short* word_integer_length, char** data_address)
@@ -83,7 +83,7 @@ unsigned long lib$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
      */
     if (input_descriptor->dsc$a_pointer == NULL)
     {
-//		assert(input_descriptor->dsc$w_length == 0);
+//      assert(input_descriptor->dsc$w_length == 0);
         *word_integer_length = 0;
         *data_address = NULL;
     }

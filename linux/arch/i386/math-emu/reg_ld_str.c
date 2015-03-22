@@ -420,7 +420,7 @@ int FPU_store_extended(FPU_REG *st0_ptr, u_char st0_tag, long double *d)
 int FPU_store_double(FPU_REG *st0_ptr, u_char st0_tag, double *dfloat)
 {
     unsigned long l[2];
-    unsigned long increment = 0;	/* avoid gcc warnings */
+    unsigned long increment = 0;    /* avoid gcc warnings */
     int precision_loss;
     int exp;
     FPU_REG tmp;
@@ -530,8 +530,8 @@ overflow:
 
                 /* This is a special case: see sec 16.2.5.1 of the 80486 book */
                 /* Overflow to infinity */
-                l[0] = 0x00000000;	/* Set to */
-                l[1] = 0x7ff00000;	/* + INF */
+                l[0] = 0x00000000;  /* Set to */
+                l[1] = 0x7ff00000;  /* + INF */
             }
             else
             {
@@ -639,7 +639,7 @@ overflow:
 int FPU_store_single(FPU_REG *st0_ptr, u_char st0_tag, float *single)
 {
     long templ;
-    unsigned long increment = 0;     	/* avoid gcc warnings */
+    unsigned long increment = 0;        /* avoid gcc warnings */
     int precision_loss;
     int exp;
     FPU_REG tmp;
@@ -1141,14 +1141,14 @@ int FPU_round_to_int(FPU_REG *r, u_char tag)
 
     eax = FPU_shrxs(&r->sigl, 63 - exponent(r));
     very_big = !(~(r->sigh) | ~(r->sigl));  /* test for 0xfff...fff */
-#define	half_or_more	(eax & 0x80000000)
-#define	frac_part	(eax)
+#define half_or_more    (eax & 0x80000000)
+#define frac_part   (eax)
 #define more_than_half  ((eax & 0x80000001) == 0x80000001)
     switch (control_word & CW_RC)
     {
     case RC_RND:
-        if ( more_than_half               	/* nearest */
-                || (half_or_more && (r->sigl & 1)) )	/* odd -> even */
+        if ( more_than_half                 /* nearest */
+                || (half_or_more && (r->sigl & 1)) )    /* odd -> even */
         {
             if ( very_big ) return 1;        /* overflow */
             significand(r) ++;

@@ -18,8 +18,8 @@
  *
  *  1996-12-23  Modified by Dave Grothe to fix bugs in semaphores and
  *              make semaphores SMP safe
- *  1998-11-19	Implemented schedule_timeout() and related stuff
- *		by Andrea Arcangeli
+ *  1998-11-19  Implemented schedule_timeout() and related stuff
+ *      by Andrea Arcangeli
  *  1998-12-28  Implemented better SMP scheduling by Ingo Molnar
  */
 
@@ -235,7 +235,7 @@ int numproc(void)
             {
                 n++;
                 tmp2=tmp2->pcb$l_sqfl;
-                //	printk("%x %x %x & ",tmp2,tmp2->pcb$l_pid,tmp2->pcb$b_pri);
+                //  printk("%x %x %x & ",tmp2,tmp2->pcb$l_pid,tmp2->pcb$b_pri);
             }
             while (tmp2!=tmp);
             n--;
@@ -319,23 +319,23 @@ void printcom2(void)
  * calculation depends on the value of HZ.
  */
 #if HZ < 200
-#define TICK_SCALE(x)	((x) >> 2)
+#define TICK_SCALE(x)   ((x) >> 2)
 #elif HZ < 400
-#define TICK_SCALE(x)	((x) >> 1)
+#define TICK_SCALE(x)   ((x) >> 1)
 #elif HZ < 800
-#define TICK_SCALE(x)	(x)
+#define TICK_SCALE(x)   (x)
 #elif HZ < 1600
-#define TICK_SCALE(x)	((x) << 1)
+#define TICK_SCALE(x)   ((x) << 1)
 #else
-#define TICK_SCALE(x)	((x) << 2)
+#define TICK_SCALE(x)   ((x) << 2)
 #endif
 
-#define NICE_TO_TICKS(nice)	(TICK_SCALE(20-(nice))+1)
+#define NICE_TO_TICKS(nice) (TICK_SCALE(20-(nice))+1)
 
 
 /*
- *	Init task must be ok at boot for the ix86 as we will check its signals
- *	via the SMP irq return path.
+ *  Init task must be ok at boot for the ix86 as we will check its signals
+ *  via the SMP irq return path.
  */
 
 struct task_struct * init_tasks[NR_CPUS] = {&init_task, };
@@ -352,7 +352,7 @@ struct task_struct * init_tasks[NR_CPUS] = {&init_task, };
  * task->alloc_lock nests inside tasklist_lock.
  */
 spinlock_t runqueue_lock __cacheline_aligned = SPIN_LOCK_UNLOCKED;  /* inner */
-rwlock_t tasklist_lock __cacheline_aligned = RW_LOCK_UNLOCKED;	/* outer */
+rwlock_t tasklist_lock __cacheline_aligned = RW_LOCK_UNLOCKED;  /* outer */
 
 struct kernel_stat kstat;
 extern struct task_struct *child_reaper;
@@ -361,7 +361,7 @@ extern struct task_struct *child_reaper;
 
 #define idle_task(cpu) (init_tasks[cpu_number_map(cpu)])
 #define can_schedule(p,cpu) \
-	((p)->cpus_runnable & (p)->cpus_allowed & (1 << cpu))
+    ((p)->cpus_runnable & (p)->cpus_allowed & (1 << cpu))
 
 #else
 
@@ -505,8 +505,8 @@ int task_on_comqueue(struct _pcb *p)
             tmp2=tmp;
             do
             {
-                //	if (tmp2 == p) found=1;
-                // wrong/why?	if (tmp2 == p && tmp2->pcb$l_sqfl!=tmp) found=1;
+                //  if (tmp2 == p) found=1;
+                // wrong/why?   if (tmp2 == p && tmp2->pcb$l_sqfl!=tmp) found=1;
                 if (tmp2 == p) found=1;
                 tmp2=tmp2->pcb$l_sqfl;
             }
@@ -1026,7 +1026,7 @@ gethead:
         //    if(*(unsigned long *)qhead == qhead)
         //  if(*(unsigned long *)qhead == 0)
         if (mydebug5) printk("comq3 %x %x %x\n",tmppri,sch$gl_comqs,(~(1 << tmppri)));
-        //	  printk("sch %x\n",sch$gl_comqs);
+        //    printk("sch %x\n",sch$gl_comqs);
     }
 
     if(next==0)
@@ -1286,7 +1286,7 @@ qempty:
     panic("qempty");
     return;
 sch$idle:
-    //	printk("sch$idle\n");
+    //  printk("sch$idle\n");
     sch$gl_idle_cpus=sch$gl_idle_cpus | (cpu->cpu$l_cpuid_mask);
     // cpu->cpu$l_curpcb = sch$ar_nullpcb;
     cpu->cpu$l_curpcb = idle_task(cpuid);
@@ -1366,20 +1366,20 @@ void fastcall wait_for_completion(struct completion *x)
 {
 }
 
-#define	SLEEP_ON_VAR				\
-	unsigned long flags;			\
-	wait_queue_t wait;			\
-	init_waitqueue_entry(&wait, current);
+#define SLEEP_ON_VAR                \
+    unsigned long flags;            \
+    wait_queue_t wait;          \
+    init_waitqueue_entry(&wait, current);
 
-#define	SLEEP_ON_HEAD					\
-	wq_write_lock_irqsave(&q->lock,flags);		\
-	__add_wait_queue(q, &wait);			\
-	wq_write_unlock(&q->lock);
+#define SLEEP_ON_HEAD                   \
+    wq_write_lock_irqsave(&q->lock,flags);      \
+    __add_wait_queue(q, &wait);         \
+    wq_write_unlock(&q->lock);
 
-#define	SLEEP_ON_TAIL						\
-	wq_write_lock_irq(&q->lock);				\
-	__remove_wait_queue(q, &wait);				\
-	wq_write_unlock_irqrestore(&q->lock,flags);
+#define SLEEP_ON_TAIL                       \
+    wq_write_lock_irq(&q->lock);                \
+    __remove_wait_queue(q, &wait);              \
+    wq_write_unlock_irqrestore(&q->lock,flags);
 
 void fastcall interruptible_sleep_on(wait_queue_head_t *q)
 {
@@ -1448,9 +1448,9 @@ asmlinkage long sys_nice(int increment)
     long newprio;
 
     /*
-     *	Setpriority might change our priority at the same moment.
-     *	We don't have to worry. Conceptually one call occurs first
-     *	and we have a single winner.
+     *  Setpriority might change our priority at the same moment.
+     *  We don't have to worry. Conceptually one call occurs first
+     *  and we have a single winner.
      */
     if (increment < 0)
     {
@@ -1543,9 +1543,9 @@ static int setscheduler(pid_t pid, int policy,
 
     retval = 0;
     p->pcb$l_sched_policy = policy;
-    //	p->rt_priority = lp.sched_priority;
-    //	if (task_on_runqueue(p))
-    //		move_first_runqueue(p);
+    //  p->rt_priority = lp.sched_priority;
+    //  if (task_on_runqueue(p))
+    //      move_first_runqueue(p);
 
 #if 0
     current->need_resched = 1;
@@ -1615,7 +1615,7 @@ asmlinkage long sys_sched_getparam(pid_t pid, struct sched_param *param)
     retval = -ESRCH;
     if (!p)
         goto out_unlock;
-    //	lp.sched_priority = p->rt_priority;
+    //  lp.sched_priority = p->rt_priority;
     read_unlock(&tasklist_lock);
 
     /*
@@ -1666,14 +1666,14 @@ asmlinkage long sys_sched_yield(void)
          * This process can only be rescheduled by us,
          * so this is safe without any locking.
          */
-        //		if (current->pcb$l_sched_policy == PCB$K_SCHED_OTHER)
-        //			current->pcb$l_sched_policy |= SCHED_YIELD;
+        //      if (current->pcb$l_sched_policy == PCB$K_SCHED_OTHER)
+        //          current->pcb$l_sched_policy |= SCHED_YIELD;
 #if 0
         current->need_resched = 1;
 #endif
 
         spin_lock_irq(&runqueue_lock);
-        //		move_last_runqueue(current);
+        //      move_last_runqueue(current);
         spin_unlock_irq(&runqueue_lock);
     }
     return 0;
@@ -1877,8 +1877,8 @@ void reparent_to_init(void)
 }
 
 /*
- *	Put all the gunge required to become a kernel thread without
- *	attached user resources in one place where it belongs.
+ *  Put all the gunge required to become a kernel thread without
+ *  attached user resources in one place where it belongs.
  */
 
 void daemonize(void)
@@ -1899,7 +1899,7 @@ void daemonize(void)
 
     /* Become as one with the init task */
 
-    exit_fs(current);	/* current->fs->count--; */
+    exit_fs(current);   /* current->fs->count--; */
     fs = init_task.fs;
     current->fs = fs;
     atomic_inc(&fs->count);
@@ -1915,13 +1915,13 @@ extern struct _phd system_phd;
 void __init init_idle(void)
 {
     struct _pcb * cur = smp$gl_cpu_data[smp_processor_id()]->cpu$l_curpcb;
-    //	if (current != &init_task && task_on_runqueue(current)) {
-    //		printk("UGH! (%d:%d) was on the runqueue, removing.\n",
-    //			smp_processor_id(), current->pcb$l_pid);
-    //		del_from_runqueue(current);
-    //	}
+    //  if (current != &init_task && task_on_runqueue(current)) {
+    //      printk("UGH! (%d:%d) was on the runqueue, removing.\n",
+    //          smp_processor_id(), current->pcb$l_pid);
+    //      del_from_runqueue(current);
+    //  }
     //sched_data->curr = current;
-    //	sched_data->last_schedule = get_cycles();
+    //  sched_data->last_schedule = get_cycles();
     clear_bit(cur->pcb$l_cpu_id, &wait_init_idle);
     cur->psl=0;
     cur->pslindex=0;
@@ -1966,7 +1966,7 @@ void __init sched_init(void)
     memset(sch$gl_seqvec,0,(unsigned long)MAXPROCESSCNT*sizeof(unsigned long));
 
     printk("pid 0 here %x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl);
-    //	{ int i,j; for(j=0;j<2;j++) for(i=0;i<1000000000;i++); }
+    //  { int i,j; for(j=0;j<2;j++) for(i=0;i<1000000000;i++); }
 
     init_timervecs();
 

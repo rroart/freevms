@@ -1,5 +1,5 @@
-#ifndef spldef_h
-#define spldef_h
+#ifndef SPLDEF_H
+#define SPLDEF_H
 
 #include <cpudef.h>
 

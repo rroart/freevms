@@ -1,70 +1,70 @@
-#ifndef tcpmacros_h
-#define tcpmacros_h
+#ifndef TCPMACROS_H
+#define TCPMACROS_H
 
 #if 0
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 %Title 'TCP global Macro definitions'
 /*
 Module:
 
-	TCPMACROS
+    TCPMACROS
 
 Facility:
 
-	Provide some macros for convenient usage by the various modules in the
-	TCP/IP network ACP.
+    Provide some macros for convenient usage by the various modules in the
+    TCP/IP network ACP.
 
 Author:
 
-	Original author ?
-	This version by Vince Fuller, CMU-CSD, Summer, 1986
-	Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
+    Original author ?
+    This version by Vince Fuller, CMU-CSD, Summer, 1986
+    Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
 
 Change log:
 
-6.7	7-Jan-1992	John Clement		Rice
-	Added LOG$FLUSH
+6.7 7-Jan-1992  John Clement        Rice
+    Added LOG$FLUSH
 
-6.6	17-Jul-1991	Henry W. Miller		USBR
-	Added debugging flags for name lookup and memory allocation.
+6.6 17-Jul-1991 Henry W. Miller     USBR
+    Added debugging flags for name lookup and memory allocation.
 
 6.4  24-Mar-88, Edit by VAF
-	Enclose X..$FAO macros in BEGIN/END blocks to prevent weird IF/THEN
-	block semantics.
+    Enclose X..$FAO macros in BEGIN/END blocks to prevent weird IF/THEN
+    block semantics.
 
 6.3  20-Nov-87, Edit by VAF
-	General cleanup. Create $KCALL macro to isolate all $CMKRNL calls to
-	this macro package. Make logging macros, NOINT/OKINT, etc. check and
-	declare necessary externals so modules don't have to. Add $ACPWAKE
-	macro. Add LOG$IPERR - IP error logging.
+    General cleanup. Create $KCALL macro to isolate all $CMKRNL calls to
+    this macro package. Make logging macros, NOINT/OKINT, etc. check and
+    declare necessary externals so modules don't have to. Add $ACPWAKE
+    macro. Add LOG$IPERR - IP error logging.
 
 6.2  10-Jun-87, Edit by VAF
-	Flush hostname processing from ACP. Change GTHST and OPEN blocks to
-	know about host name length.
+    Flush hostname processing from ACP. Change GTHST and OPEN blocks to
+    know about host name length.
 
 6.1  18-Feb-87, Edit by VAF
-	Conditional compilation of a bunch of stuff (logging, GREEN, etc.)
-	Improvements to a bunch of the logging stuff.
+    Conditional compilation of a bunch of stuff (logging, GREEN, etc.)
+    Improvements to a bunch of the logging stuff.
 */
 #endif
 
@@ -78,18 +78,18 @@ Change log:
 // Define version-specific debugging flags.
 
 #if 0
-REQUIRE 'MACROSWI.REQ';		// Compile switches
+REQUIRE 'MACROSWI.REQ';     // Compile switches
 
-COMPILETIME NO_CrLf = 1;	// For message macros
+COMPILETIME NO_CrLf = 1;    // For message macros
 
 FIELD VB$FIELDS =
     SET
-    VB$LEN = [0,0,16,0],	// Varying string - current length
-       VB$DAT = [0,16,8,0]		// First byte of data
+    VB$LEN = [0,0,16,0],    // Varying string - current length
+       VB$DAT = [0,16,8,0]      // First byte of data
                 TES;
 
 MACRO
-REPEAT = DO%,		// Extend bliss for Repeat until lovers.
+REPEAT = DO%,       // Extend bliss for Repeat until lovers.
 
 // Generate a pointer to a character string descriptor quadword.
 
@@ -154,9 +154,9 @@ $QEXTR(NAME,MODIF) =
 %,
 #endif
 
-extern 	void OPR_FAO(long, ...);
-extern 	void ERROR_FAO(long, ...);
-extern 	void FATAL_FAO(long, ...);
+extern  void OPR_FAO(long, ...);
+extern  void ERROR_FAO(long, ...);
+extern  void FATAL_FAO(long, ...);
 
 // Write a message to the console operator
 
@@ -275,46 +275,46 @@ Fatal_Error(S,ERRCODE) =
 #define    NOINT { \
   extern signed long ast_in_progress; \
   extern signed long intdf; \
-	if (! ast_in_progress && (intdf = intdf+1) == 0) \
-	    DISABLE_AST \
+    if (! ast_in_progress && (intdf = intdf+1) == 0) \
+        DISABLE_AST \
 }
 #define    OKINT { \
   extern signed long ast_in_progress; \
   extern signed long intdf; \
-	if (! ast_in_progress && (intdf = intdf-1) < 0) \
-	    ENABLE_AST \
+    if (! ast_in_progress && (intdf = intdf-1) < 0) \
+        ENABLE_AST \
 }
 
 // Wake sleeping ACP from $HIBER call. This is used when an AST routine wants
 // the mainline ACP code to do something at non-AST level.
 
 #define    $ACPWAKE \
-	{ \
-	extern sleeping; \
-	if (sleeping) \
-	    { \
-	    sleeping = FALSE; \
-	    sys$wake(0,0); \
-	} \
-	}   /*need to add 0,0 until proper calls are done*/
+    { \
+    extern sleeping; \
+    if (sleeping) \
+        { \
+        sleeping = FALSE; \
+        sys$wake(0,0); \
+    } \
+    }   /*need to add 0,0 until proper calls are done*/
 
 // Macros to do word and longword byte swapping.
 
 #define    SWAPWORD(ADDR) \
-	{ \
-	char * XX = ADDR;\
-	register YY;\
-	YY = XX[0];\
-	XX[0] = XX[1];\
-	XX[1] = YY;\
-	}
+    { \
+    char * XX = ADDR;\
+    register YY;\
+    YY = XX[0];\
+    XX[0] = XX[1];\
+    XX[1] = YY;\
+    }
 #define    SWAPLONG(ADDR) \
-	{\
-	short * XX = ADDR;\
-	register  TEMP;\
-	TEMP = XX[0]; /* Word swap of TTL*/ \
+    {\
+    short * XX = ADDR;\
+    register  TEMP;\
+    TEMP = XX[0]; /* Word swap of TTL*/ \
         XX[0] = XX[1];\
-	XX[1] = TEMP;\
+    XX[1] = TEMP;\
         }
 
 // Macro to set $CMKRNL argument list
@@ -363,12 +363,12 @@ END
 %,
 
 #endif
-#ifdef LOGSWITCH		// Want the logging macros
+#ifdef LOGSWITCH        // Want the logging macros
 //know how to implement these, but delay it
 // Conditionally do something according to LOG_STATE flags
 
 #define   $$LOGF(logf) \
-	((log_state & (logf)) != 0)
+    ((log_state & (logf)) != 0)
 
 #if 0
 // Macros for output to log and opr and the activity log.
@@ -438,55 +438,55 @@ XQL$FAO(LOGF) =
     %;
 #endif
 
-#else				// Don't want logging macros - make them null
+#else               // Don't want logging macros - make them null
 
 #if 0
 #define $$LOGF SSLOGF
-static inline    $$LOGF(/*LOGF*/)  { } ;		// $$LOGF always fails
+static inline    $$LOGF(/*LOGF*/)  { } ;        // $$LOGF always fails
 #else
 #define $$LOGF(dummy) 0
 #endif
-static inline    LOG$OUT(/*XSTR*/)  { } ;	// LOG$OUT does nothing
-static inline    XLOG$OUT(/*LOGF*/)  { } ;	// XLOG$OUT
-static inline    LOG$FAO(/*CST*/)  { } ;		// LOG$FAO
-static inline    ACT$OUT(/*XSTR*/)  { } ;	// ACT$OUT does nothing
-static inline    ACT$FAO(/*CST*/) { } ;		// ACT$FAO
-static inline    XLOG$FAO(/*LOGF*/)  { };	// XLOG$FAO
-static inline    QL$FAO(/*CST*/) { } ;		// QL$FAO
-static inline    XQL$FAO(/*LOGF*/) { } ;	// XQL$FAO
+static inline    LOG$OUT(/*XSTR*/)  { } ;   // LOG$OUT does nothing
+static inline    XLOG$OUT(/*LOGF*/)  { } ;  // XLOG$OUT
+static inline    LOG$FAO(/*CST*/)  { } ;        // LOG$FAO
+static inline    ACT$OUT(/*XSTR*/)  { } ;   // ACT$OUT does nothing
+static inline    ACT$FAO(/*CST*/) { } ;     // ACT$FAO
+static inline    XLOG$FAO(/*LOGF*/)  { };   // XLOG$FAO
+static inline    QL$FAO(/*CST*/) { } ;      // QL$FAO
+static inline    XQL$FAO(/*LOGF*/) { } ;    // XQL$FAO
 #endif
 
 // Network logger flag bits - determine what events to log
 
-#define    LOG$PHY	 0x01	// Packet physical headers
-#define    LOG$ARP	 0x02	// ARP packet info
-#define    LOG$IP	 0x04	// IP packet headers
-#define    LOG$TCP	 0x08	// TCP segment info (packet trace)
-#define    LOG$TCBDUMP	 0x10	// TCB dump on servicing
-#define    LOG$USER	 0x20	// User I/O requests
-#define    LOG$TCBSTATE 0x40	// TCB state changes
-#define    LOG$TCBCHECK 0x80	// TCB servicing timing
-#define    LOG$TCPERR	 0x100	// TCP errors (dropped pkts, etc.)
-#define    LOG$ICMP	 0x200	// ICMP activity
-#define    LOG$UDP	 0x400	// UDP activity
-#define    LOG$TVT	 0x800	// TVT (virtual terminal) activity
-#define    LOG$IPERR	 0x1000	// IP errors (bad routing, etc.)
-#define    LOG$DEBUG	 0x2000	// Temporary statements
-#define    LOG$MEM	 0x4000	// Memory Allocation
-#define    LOG$MSG	 0x8000	// Name Lookup
-#define    LOG$TELNET	 0x10000	// Log Telnet activity
-#define    LOG$TELNEG	 0x20000	// Log Telnet negotiations
-#define    LOG$TELERR	 0x40000	// Log Telnet errors
-#define    LOG$SNOOP	 0x80000	// SNOOP activity
-#define    LOG$FLUSH	 0x100000	// Dump each line
+#define    LOG$PHY   0x01   // Packet physical headers
+#define    LOG$ARP   0x02   // ARP packet info
+#define    LOG$IP    0x04   // IP packet headers
+#define    LOG$TCP   0x08   // TCP segment info (packet trace)
+#define    LOG$TCBDUMP   0x10   // TCB dump on servicing
+#define    LOG$USER  0x20   // User I/O requests
+#define    LOG$TCBSTATE 0x40    // TCB state changes
+#define    LOG$TCBCHECK 0x80    // TCB servicing timing
+#define    LOG$TCPERR    0x100  // TCP errors (dropped pkts, etc.)
+#define    LOG$ICMP  0x200  // ICMP activity
+#define    LOG$UDP   0x400  // UDP activity
+#define    LOG$TVT   0x800  // TVT (virtual terminal) activity
+#define    LOG$IPERR     0x1000 // IP errors (bad routing, etc.)
+#define    LOG$DEBUG     0x2000 // Temporary statements
+#define    LOG$MEM   0x4000 // Memory Allocation
+#define    LOG$MSG   0x8000 // Name Lookup
+#define    LOG$TELNET    0x10000    // Log Telnet activity
+#define    LOG$TELNEG    0x20000    // Log Telnet negotiations
+#define    LOG$TELERR    0x40000    // Log Telnet errors
+#define    LOG$SNOOP     0x80000    // SNOOP activity
+#define    LOG$FLUSH     0x100000   // Dump each line
 
 // Define QBLK/Input segment queue flags.
 
-#define    Q$XERCV  1		// XEDRV receive buffer queue
-#define    Q$SEGIN  2		// AST segment input queue
-#define    Q$TCBNR  4		// TCB net receive queue
-#define    Q$TCBFQ  8		// TCB future queue
-#define    Q$USRCV  16		// User receive queue
+#define    Q$XERCV  1       // XEDRV receive buffer queue
+#define    Q$SEGIN  2       // AST segment input queue
+#define    Q$TCBNR  4       // TCB net receive queue
+#define    Q$TCBFQ  8       // TCB future queue
+#define    Q$USRCV  16      // User receive queue
 #if 0
 
 // Conditional coding for debugging

@@ -1,5 +1,5 @@
-#ifndef ihvndef_h
-#define ihvndef_h
+#ifndef IHVNDEF_H
+#define IHVNDEF_H
 
 #define IHVN$M_SUBVERSION_MINOR_ID 0xFFFF
 #define IHVN$M_SUBVERSION_MAJOR_ID 0xFFFF0000

@@ -20,18 +20,18 @@
 #ifndef _HEADER_ACPITABLE_H_
 #define _HEADER_ACPITABLE_H_
 
-struct acpi_table_header  		/* ACPI common table header */
+struct acpi_table_header        /* ACPI common table header */
 {
-    char signature[4];		/* identifies type of table */
-    u32 length;			/* length of table,
-					   in bytes, * including header */
-    u8 revision;			/* specification minor version # */
-    u8 checksum;			/* to make sum of entire table == 0 */
-    char oem_id[6];			/* OEM identification */
-    char oem_table_id[8];		/* OEM table identification */
-    u32 oem_revision;		/* OEM revision number */
-    char asl_compiler_id[4];	/* ASL compiler vendor ID */
-    u32 asl_compiler_revision;	/* ASL compiler revision number */
+    char signature[4];      /* identifies type of table */
+    u32 length;         /* length of table,
+                       in bytes, * including header */
+    u8 revision;            /* specification minor version # */
+    u8 checksum;            /* to make sum of entire table == 0 */
+    char oem_id[6];         /* OEM identification */
+    char oem_table_id[8];       /* OEM table identification */
+    u32 oem_revision;       /* OEM revision number */
+    char asl_compiler_id[4];    /* ASL compiler vendor ID */
+    u32 asl_compiler_revision;  /* ASL compiler revision number */
 } __attribute__ ((packed));;
 
 enum
@@ -74,13 +74,13 @@ enum
 
 };
 
-#define LO_RSDP_WINDOW_BASE		0	/* Physical Address */
-#define HI_RSDP_WINDOW_BASE		0xE0000	/* Physical Address */
-#define LO_RSDP_WINDOW_SIZE		0x400
-#define HI_RSDP_WINDOW_SIZE		0x20000
-#define RSDP_SCAN_STEP			16
-#define RSDP_CHECKSUM_LENGTH		20
-#define RSDP2_CHECKSUM_LENGTH		36
+#define LO_RSDP_WINDOW_BASE     0   /* Physical Address */
+#define HI_RSDP_WINDOW_BASE     0xE0000 /* Physical Address */
+#define LO_RSDP_WINDOW_SIZE     0x400
+#define HI_RSDP_WINDOW_SIZE     0x20000
+#define RSDP_SCAN_STEP          16
+#define RSDP_CHECKSUM_LENGTH        20
+#define RSDP2_CHECKSUM_LENGTH       36
 
 typedef int (*acpi_table_handler) (struct acpi_table_header *header, unsigned long);
 
@@ -209,9 +209,9 @@ struct acpi_table_plat_int_src
     u32 reserved;
 } __attribute__ ((packed));
 
-#define ACPI_SPACE_MEM		0
-#define ACPI_SPACE_IO		1
-#define ACPI_SPACE_PCICONF	2
+#define ACPI_SPACE_MEM      0
+#define ACPI_SPACE_IO       1
+#define ACPI_SPACE_PCICONF  2
 
 struct acpi_gen_regaddr
 {

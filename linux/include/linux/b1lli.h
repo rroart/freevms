@@ -54,10 +54,10 @@ typedef struct avmb1_carddef
     int irq;
 } avmb1_carddef;
 
-#define AVM_CARDTYPE_B1		0
-#define AVM_CARDTYPE_T1		1
-#define AVM_CARDTYPE_M1		2
-#define AVM_CARDTYPE_M2		3
+#define AVM_CARDTYPE_B1     0
+#define AVM_CARDTYPE_T1     1
+#define AVM_CARDTYPE_M1     2
+#define AVM_CARDTYPE_M2     3
 
 typedef struct avmb1_extcarddef
 {
@@ -67,14 +67,14 @@ typedef struct avmb1_extcarddef
     int cardnr;  /* for HEMA/T1 */
 } avmb1_extcarddef;
 
-#define	AVMB1_LOAD		0	/* load image to card */
-#define AVMB1_ADDCARD		1	/* add a new card */
-#define AVMB1_RESETCARD		2	/* reset a card */
-#define	AVMB1_LOAD_AND_CONFIG	3	/* load image and config to card */
-#define	AVMB1_ADDCARD_WITH_TYPE	4	/* add a new card, with cardtype */
-#define AVMB1_GET_CARDINFO	5	/* get cardtype */
-#define AVMB1_REMOVECARD	6	/* remove a card (useful for T1) */
+#define AVMB1_LOAD      0   /* load image to card */
+#define AVMB1_ADDCARD       1   /* add a new card */
+#define AVMB1_RESETCARD     2   /* reset a card */
+#define AVMB1_LOAD_AND_CONFIG   3   /* load image and config to card */
+#define AVMB1_ADDCARD_WITH_TYPE 4   /* add a new card, with cardtype */
+#define AVMB1_GET_CARDINFO  5   /* get cardtype */
+#define AVMB1_REMOVECARD    6   /* remove a card (useful for T1) */
 
-#define	AVMB1_REGISTERCARD_IS_OBSOLETE
+#define AVMB1_REGISTERCARD_IS_OBSOLETE
 
-#endif				/* _B1LLI_H_ */
+#endif              /* _B1LLI_H_ */

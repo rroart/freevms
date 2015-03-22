@@ -1,5 +1,5 @@
-#ifndef tqedef_h
-#define tqedef_h
+#ifndef TQEDEF_H
+#define TQEDEF_H
 
 #define TQE$M_TQTYPE 0x3
 #define TQE$M_REPEAT 0x4

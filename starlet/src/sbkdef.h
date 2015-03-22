@@ -1,5 +1,5 @@
-#ifndef sbkdef_h
-#define sbkdef_h
+#ifndef SBKDEF_H
+#define SBKDEF_H
 
 #define SBK$K_LENGTH 32
 #define SBK$C_LENGTH 32

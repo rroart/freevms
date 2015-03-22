@@ -8,7 +8,7 @@
 #include <linux/netfilter.h>
 
 /* Appletalk hooks */
-#define NF_DDP_INPUT	0
-#define NF_DDP_FORWARD	1
-#define NF_DDP_OUTPUT	2
+#define NF_DDP_INPUT    0
+#define NF_DDP_FORWARD  1
+#define NF_DDP_OUTPUT   2
 #endif /*__LINUX_DDP_NETFILTER_H*/

@@ -1,5 +1,5 @@
-#ifndef ihadef_h
-#define ihadef_h
+#ifndef IHADEF_H
+#define IHADEF_H
 
 #define IHA$K_LENGTH 20
 #define IHA$C_LENGTH 20

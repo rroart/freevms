@@ -1,5 +1,5 @@
-#ifndef gsddef_h
-#define gsddef_h
+#ifndef GSDDEF_H
+#define GSDDEF_H
 
 #define GSD$K_LENGTH 49
 #define GSD$C_LENGTH 49

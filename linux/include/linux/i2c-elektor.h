@@ -37,10 +37,10 @@
 
 /*
 struct i2c_pcf_isa {
-	int pi_base;
-	int pi_irq;
-	int pi_clock;
-	int pi_own;
+    int pi_base;
+    int pi_irq;
+    int pi_clock;
+    int pi_own;
 };
 */
 

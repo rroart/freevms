@@ -5,10 +5,10 @@
  *
  * Portions Copyright 1999 Red Hat, Inc.
  *
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
  *
  * rw semaphores implemented November 1999 by Benjamin LaHaise <bcrl@redhat.com>
  */
@@ -78,7 +78,7 @@ void __down(struct semaphore * sem)
             sem->sleepers = 0;
             break;
         }
-        sem->sleepers = 1;	/* us - see -1 above */
+        sem->sleepers = 1;  /* us - see -1 above */
         spin_unlock_irq(&semaphore_lock);
 
         schedule();
@@ -133,7 +133,7 @@ int __down_interruptible(struct semaphore * sem)
             sem->sleepers = 0;
             break;
         }
-        sem->sleepers = 1;	/* us - see -1 above */
+        sem->sleepers = 1;  /* us - see -1 above */
         spin_unlock_irq(&semaphore_lock);
 
         schedule();

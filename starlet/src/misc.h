@@ -1,5 +1,5 @@
-#ifndef misc_h
-#define misc_h
+#ifndef MISC_H
+#define MISC_H
 
 #include"iosbdef.h"
 

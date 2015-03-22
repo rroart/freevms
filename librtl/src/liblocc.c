@@ -1,22 +1,22 @@
 /*
  * liblocc
  *
- *	Code for VAX LIB$LOCC routine
+ *  Code for VAX LIB$LOCC routine
  *
  * Description:
- *	Locate a character in a string by comparing successive bytes
- *	in the string whith the character specified. The search continues
- *	until the character is found or the string has no more characters.
+ *  Locate a character in a string by comparing successive bytes
+ *  in the string whith the character specified. The search continues
+ *  until the character is found or the string has no more characters.
  *
- *	If no character matches or if the string has a length of zero,
- *	then zero is returned
+ *  If no character matches or if the string has a length of zero,
+ *  then zero is returned
  *
  * Bugs:
  *
  * History
  *
- *	March 25, 2005 - Andrew Allison
- *		Procedure creation
+ *  March 25, 2005 - Andrew Allison
+ *      Procedure creation
  */
 
 //#include <stdio.h>
@@ -31,9 +31,9 @@ unsigned long lib$locc( const struct dsc$descriptor_s* char_string,
                         const struct dsc$descriptor_s* source_string)
 {
 
-    char		*s1_ptr, *s2_ptr;
-    unsigned short	s1_len, s2_len;
-    unsigned long	i;
+    char        *s1_ptr, *s2_ptr;
+    unsigned short  s1_len, s2_len;
+    unsigned long   i;
 
     lib$analyze_sdesc(char_string,   &s1_len, &s1_ptr);
     lib$analyze_sdesc(source_string, &s2_len, &s2_ptr);

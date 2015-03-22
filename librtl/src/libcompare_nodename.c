@@ -1,8 +1,8 @@
 
 /*
- *	LIB$COMPARE_NODENAME
+ *  LIB$COMPARE_NODENAME
  *
- *	Copyright (C) 2004 Andrew Allison
+ *  Copyright (C) 2004 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,27 +20,27 @@
  *
  *The author(s) may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  *
  *
  * Description:
- *	The compare two node names routine compares two node name to see
- *	if they resolve to the same full name.
+ *  The compare two node names routine compares two node name to see
+ *  if they resolve to the same full name.
  *
  * Bugs:
  *
  *
  * History
  *
- *	Mar 20, 2004 - Andrew Allison
- * 	 	Initial program creation
+ *  Mar 20, 2004 - Andrew Allison
+ *      Initial program creation
  */
 #include "libdef.h"
 #include "descrip.h"
@@ -48,7 +48,7 @@
 #include "lib$routines.h"
 
 //Prototype
-int	not_valid_node_name (const struct dsc$descriptor_s *nodename);
+int not_valid_node_name (const struct dsc$descriptor_s *nodename);
 
 unsigned long lib$expand_nodename (const struct dsc$descriptor_s *name,
                                    struct dsc$descriptor_s  *xname,
@@ -59,9 +59,9 @@ unsigned long lib$compare_nodename (const struct dsc$descriptor_s *nodename1,
                                     const struct dsc$descriptor_s *nodename2,
                                     unsigned long *result)
 {
-    unsigned short	name1_len, name2_len, expandlen;
-    unsigned long	result_code;
-    char		*name1_ptr, *name2_ptr;
+    unsigned short  name1_len, name2_len, expandlen;
+    unsigned long   result_code;
+    char        *name1_ptr, *name2_ptr;
     struct dsc$descriptor_s node1, node2;
 
     str$analyze_sdesc (nodename1,&name1_len, &name1_ptr);
@@ -88,8 +88,8 @@ unsigned long lib$compare_nodename (const struct dsc$descriptor_s *nodename1,
 
 // *******************************
 
-int	not_valid_node_name (const struct dsc$descriptor_s *nodename)
+int not_valid_node_name (const struct dsc$descriptor_s *nodename)
 {
-//	Put code to test node name her
+//  Put code to test node name her
     return 0;
 }

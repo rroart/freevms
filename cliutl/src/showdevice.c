@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <stdio.h>
 #include <ssdef.h>
@@ -10,7 +10,7 @@
 #include <starlet.h>
 #include <misc.h>
 
-show_device()
+void show_device(void)
 {
     int i;
     struct item_list_3 lst[4];

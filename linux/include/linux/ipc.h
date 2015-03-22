@@ -8,13 +8,13 @@
 /* Obsolete, used only for backwards compatibility and libc5 compiles */
 struct ipc_perm
 {
-    __kernel_key_t	key;
-    __kernel_uid_t	uid;
-    __kernel_gid_t	gid;
-    __kernel_uid_t	cuid;
-    __kernel_gid_t	cgid;
-    __kernel_mode_t	mode;
-    unsigned short	seq;
+    __kernel_key_t  key;
+    __kernel_uid_t  uid;
+    __kernel_gid_t  gid;
+    __kernel_uid_t  cuid;
+    __kernel_gid_t  cgid;
+    __kernel_mode_t mode;
+    unsigned short  seq;
 };
 
 /* Include the definition of ipc64_perm */
@@ -44,7 +44,7 @@ struct ipc_perm
  * Version flags for semctl, msgctl, and shmctl commands
  * These are passed as bitflags or-ed with the actual command
  */
-#define IPC_OLD 0	/* Old version (no 32-bit UID support on many
+#define IPC_OLD 0   /* Old version (no 32-bit UID support on many
 architectures) */
 #define IPC_64  0x0100  /* New version (support 32-bit UIDs, bigger
 message sizes, etc. */
@@ -56,13 +56,13 @@ message sizes, etc. */
 /* used by in-kernel data structures */
 struct kern_ipc_perm
 {
-    key_t		key;
-    uid_t		uid;
-    gid_t		gid;
-    uid_t		cuid;
-    gid_t		cgid;
-    mode_t		mode;
-    unsigned long	seq;
+    key_t       key;
+    uid_t       uid;
+    gid_t       gid;
+    uid_t       cuid;
+    gid_t       cgid;
+    mode_t      mode;
+    unsigned long   seq;
 };
 
 #endif /* __KERNEL__ */

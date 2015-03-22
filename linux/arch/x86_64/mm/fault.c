@@ -25,7 +25,7 @@
 #include <linux/interrupt.h>
 #include <linux/init.h>
 #include <linux/tty.h>
-#include <linux/vt_kern.h>		/* For unblank_screen() */
+#include <linux/vt_kern.h>      /* For unblank_screen() */
 #include <linux/compiler.h>
 
 #include <asm/system.h>
@@ -45,7 +45,7 @@ void bust_spinlocks(int yes)
     {
         oops_in_progress = 1;
 #ifdef CONFIG_SMP
-        global_irq_lock = 0;	/* Many serial drivers do __global_cli() */
+        global_irq_lock = 0;    /* Many serial drivers do __global_cli() */
 #endif
     }
     else
@@ -60,7 +60,7 @@ void bust_spinlocks(int yes)
          * without oops_in_progress set so that printk will give klogd
          * a poke.  Hold onto your hats...
          */
-        console_loglevel = 15;		/* NMI oopser may have shut the console up */
+        console_loglevel = 15;      /* NMI oopser may have shut the console up */
         printk(" ");
         console_loglevel = loglevel_save;
     }
@@ -87,12 +87,12 @@ void dump_pagetable(unsigned long address)
     pgd_t *pgd = __pgd_offset_k((pgd_t *)pml4_page(*pml4), address);
     if (bad_address(pgd)) goto bad;
     printk("PGD %lx ", pgd_val(*pgd));
-    if (!pgd_present(*pgd))	goto ret;
+    if (!pgd_present(*pgd)) goto ret;
 
     pmd_t *pmd = pmd_offset(pgd, address);
     if (bad_address(pmd)) goto bad;
     printk("PMD %lx ", pmd_val(*pmd));
-    if (!pmd_present(*pmd))	goto ret;
+    if (!pmd_present(*pmd)) goto ret;
 
     pte_t *pte = pte_offset(pmd, address);
     if (bad_address(pte)) goto bad;

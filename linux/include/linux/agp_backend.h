@@ -92,7 +92,7 @@ typedef struct _agp_kern_info
     unsigned long mode;
     off_t aper_base;
     size_t aper_size;
-    int max_memory;		/* In pages */
+    int max_memory;     /* In pages */
     int current_memory;
     int cant_use_aperture;
     unsigned long page_mask;
@@ -269,4 +269,4 @@ extern const drm_agp_t *drm_agp_p;
  * use it.  Keith Owens <kaos@ocs.com.au> 28 Oct 2000.
  */
 
-#endif				/* _AGP_BACKEND_H */
+#endif              /* _AGP_BACKEND_H */

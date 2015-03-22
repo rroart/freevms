@@ -3,8 +3,8 @@
  *
  * History:
  *
- *	02/12/1998 - Kevin Handy
- *		Original version
+ *  02/12/1998 - Kevin Handy
+ *      Original version
  */
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,97 +1,97 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "NMLOOK - Mailbox name lookup service"
 //++
 // Module:
 //
-//	NMLOOK - Handle IPACP name lookup requests.
+//  NMLOOK - Handle IPACP name lookup requests.
 //
 // Facility:
 //
-//	Provides host name and address translation by talking to the system
-//	name resolver through mailboxes.
+//  Provides host name and address translation by talking to the system
+//  name resolver through mailboxes.
 //
 // Abstract:
 //
-//	Exports the following routines for host name processing:
+//  Exports the following routines for host name processing:
 //
-//	    NML$CONFIG(IMNAME,PRIOR,STATS,PRIVS,QUOTAS)
-//		Get the name resolver process configuration info from the config
-//		file. Called from CONFIG module when this information is read.
-//	    NML$INIT
-//		Initialize name lookup state. Create IPACP mailbox and start
-//		name resolver process if none exists. Must be called before any
-//		other functions may be performed.
-//	    NML$GETALST(NAMPTR,NAMLEN,ASTADR,ASTPRM)
-//		Enqueue name translation. AST routine will be called when the
-//		request completes. AST routine calling sequence is:
-//		(ASTADR)(ASTPRM,<RC>,<ADRCNT>,<ADRLST>,<NAMLEN>,<NAMPTR>)
-//	    NML$GETNAME(ADDR,ASTADR,ASTPRM)
-//		Enqueue address translation. AST routine will be called when
-//		the request completes. AST routine calling sequence is:
-//		(ASTADR)(ASTPRM,<RC>,<NAMLEN>,<NAMPTR>)
-//	    NML$GETRR(RRTYPE,NAMPTR,NAMLEN,ASTADR,ASTPRM)
-//		Enqueue name translation. AST routine will be called when the
-//		request completes. AST routine calling sequence is:
-//		(ASTADR)(ASTPRM,<RC>,<RDLEN>,<RDATA>,<NAMLEN>,<NAMPTR>)
-//	    NML$CANCEL(ASTPRM,ASTFLG,STATUS)
-//		Delete an entry from the queue. Returns count of requests
-//		found.
-//	    NML$STEP(COADDR) (void)
-//		Step through the queue, calling the user coroutine for each
-//		queue entry.
-//	    NML$PURGE(STATUS) (void)
-//		Purge the name lookup queue and shutdown the name resolver.
+//      NML$CONFIG(IMNAME,PRIOR,STATS,PRIVS,QUOTAS)
+//      Get the name resolver process configuration info from the config
+//      file. Called from CONFIG module when this information is read.
+//      NML$INIT
+//      Initialize name lookup state. Create IPACP mailbox and start
+//      name resolver process if none exists. Must be called before any
+//      other functions may be performed.
+//      NML$GETALST(NAMPTR,NAMLEN,ASTADR,ASTPRM)
+//      Enqueue name translation. AST routine will be called when the
+//      request completes. AST routine calling sequence is:
+//      (ASTADR)(ASTPRM,<RC>,<ADRCNT>,<ADRLST>,<NAMLEN>,<NAMPTR>)
+//      NML$GETNAME(ADDR,ASTADR,ASTPRM)
+//      Enqueue address translation. AST routine will be called when
+//      the request completes. AST routine calling sequence is:
+//      (ASTADR)(ASTPRM,<RC>,<NAMLEN>,<NAMPTR>)
+//      NML$GETRR(RRTYPE,NAMPTR,NAMLEN,ASTADR,ASTPRM)
+//      Enqueue name translation. AST routine will be called when the
+//      request completes. AST routine calling sequence is:
+//      (ASTADR)(ASTPRM,<RC>,<RDLEN>,<RDATA>,<NAMLEN>,<NAMPTR>)
+//      NML$CANCEL(ASTPRM,ASTFLG,STATUS)
+//      Delete an entry from the queue. Returns count of requests
+//      found.
+//      NML$STEP(COADDR) (void)
+//      Step through the queue, calling the user coroutine for each
+//      queue entry.
+//      NML$PURGE(STATUS) (void)
+//      Purge the name lookup queue and shutdown the name resolver.
 //
 // Author:
 //
-//	Vince Fuller, CMU-CSD, February, 1987
-//	Copyright (c) 1987, Vince Fuller and Carnegie-Mellon University
+//  Vince Fuller, CMU-CSD, February, 1987
+//  Copyright (c) 1987, Vince Fuller and Carnegie-Mellon University
 //
 // Edit history:
 //
-// 1.2b	18-Jul-1991	Henry W. Miller		USBR
-//	Use LIB$GET_VM_PAGE and LIB$FREE_VM_PAGE rather then LIB$GET_VM
-//	and LIB$FREE_VM.
+// 1.2b 18-Jul-1991 Henry W. Miller     USBR
+//  Use LIB$GET_VM_PAGE and LIB$FREE_VM_PAGE rather then LIB$GET_VM
+//  and LIB$FREE_VM.
 //
-// 1.2a	17-Jul-1991	Henry W. Miller		USBR
-//	Fix comments from "server" to "resolver".
-//	Updated IDENT.
-//	Comment out LOG$MSG; now defined in TCPMACROS.
-//	Corrected some spelling errors.
+// 1.2a 17-Jul-1991 Henry W. Miller     USBR
+//  Fix comments from "server" to "resolver".
+//  Updated IDENT.
+//  Comment out LOG$MSG; now defined in TCPMACROS.
+//  Corrected some spelling errors.
 //
-// 1.2  15-Jun-89, Edit by BRM (Bruce R. Miller)	CMU Network Development
-//	Added NML$GETRR routine.
+// 1.2  15-Jun-89, Edit by BRM (Bruce R. Miller)    CMU Network Development
+//  Added NML$GETRR routine.
 //
-//	31-OCT-1988	Dale Moore	CMU-CS/RI
-//	Store the name string in dynamic descriptors.  They
-//	are easier to work with than descriptors created with
-//	LIB$GET_VM.
+//  31-OCT-1988 Dale Moore  CMU-CS/RI
+//  Store the name string in dynamic descriptors.  They
+//  are easier to work with than descriptors created with
+//  LIB$GET_VM.
 //
 // 1.1  10-Sep-87, Edit by VAF
-//	Copy but don't count the null for name lookup requests.
+//  Copy but don't count the null for name lookup requests.
 //
 // 1.0  24-Feb-87, Edit by VAF
-//	Original version.
+//  Original version.
 //--
 
 #if 0
@@ -144,7 +144,7 @@ MODULE NMLOOK(IDENT="1.2b",LANGUAGE(BLISS32),
 
 //LITERAL
 //!!HACK!!// Why is this temporary
-//    LOG$MSG = %X"800";		// Temporary
+//    LOG$MSG = %X"800";        // Temporary
 
 extern     LIB$GET_VM ();
 extern     LIB$GET_VM_PAGE ();
@@ -171,24 +171,24 @@ intdf;
 
 struct NQENTRY
 {
-    void *     NQE$NEXT	;	// Pointer to next item on queue
-    void *     NQE$PREV	;	// Pointer to previous item on queue
-    unsigned short     NQE$ID	;	// Request ID
-    unsigned short     NQE$TYPE	;	// Request type
-    unsigned short     NQE$LENGTH	;	// Request buffer length
+    void *     NQE$NEXT ;   // Pointer to next item on queue
+    void *     NQE$PREV ;   // Pointer to previous item on queue
+    unsigned short     NQE$ID   ;   // Request ID
+    unsigned short     NQE$TYPE ;   // Request type
+    unsigned short     NQE$LENGTH   ;   // Request buffer length
     union
     {
-        unsigned short     NQE$FLAGS	;	// Request flags
+        unsigned short     NQE$FLAGS    ;   // Request flags
         struct
         {
-            unsigned NQE$F_XMIT:1;	// Request has been successfully transmitted
+            unsigned NQE$F_XMIT:1;  // Request has been successfully transmitted
         };
     };
-    long  NQE$TIME;	// Time request was enqueued
-    void (*     NQE$ASTADR)()	;	// Address of routine to call when done
-    void *     NQE$ASTPRM	;	// Parameter to AST routine
-    long long    NQE$IOSB;	// IOSB for mailbox send
-    char    NQE$DATA[0];	// Mailbox message buffer
+    long  NQE$TIME; // Time request was enqueued
+    void (*     NQE$ASTADR)()   ;   // Address of routine to call when done
+    void *     NQE$ASTPRM   ;   // Parameter to AST routine
+    long long    NQE$IOSB;  // IOSB for mailbox send
+    char    NQE$DATA[0];    // Mailbox message buffer
 };
 
 #define    NQENTRY_SIZE sizeof(struct NQENTRY)
@@ -201,8 +201,8 @@ struct NQENTRY
 
 struct MAIL$BUF
 {
-    long long    MB$IOSB;	// IOSB for receive
-    char    MB$DATA	[0];	// Data area
+    long long    MB$IOSB;   // IOSB for receive
+    char    MB$DATA [0];    // Data area
 };
 
 #define    MAIL$BUF_SIZE sizeof(struct MAIL$BUF)
@@ -216,22 +216,22 @@ MAIL$BUF = BLOCK->MAIL$BUF_SIZE FIELD(MAIL$BUF_FIELDS) %,
 
 //SBTTL "Constants and OWN data"
 
-struct dsc$descriptor     SRVPRCNAM_ = ASCID2(6,"NAMRES"), *SRVPRCNAM=&SRVPRCNAM_;	// Name of the resolver process
+struct dsc$descriptor     SRVPRCNAM_ = ASCID2(6,"NAMRES"), *SRVPRCNAM=&SRVPRCNAM_;  // Name of the resolver process
 struct dsc$descriptor     SYSTABNAM_ = ASCID2(15,"LNM$SYSTEM_TABLE"), *SYSTABNAM=&SYSTABNAM_; // Logical name of system table
 struct dsc$descriptor     SRVMBXNAM_ = ASCID2(10,"NAMRES_MBX"), *SRVMBXNAM=&SRVMBXNAM_; // System-wide logical name of resolver mailbox
 struct dsc$descriptor     ACPMBXNAM_ = ASCID2(9 ,"IPACP_MBX"), *ACPMBXNAM=&ACPMBXNAM_; // System-wide logical name of ACP mailbox
 struct dsc$descriptor     MYMBXNAM_ = ASCID2(9,"IPACP_MBX"), *MYMBXNAM=&MYMBXNAM_; // Temporary name of ACP mailbox
-long    ACPMBXPRO = 0xFF00;	// Protection: (W:<no>,G:<no>,O:RWLP,S:RWLP)
+long    ACPMBXPRO = 0xFF00; // Protection: (W:<no>,G:<no>,O:RWLP,S:RWLP)
 
-#define     MBAMAX   MBNMAX*2		// Max mailbox string length
-#define     MSGCNT   10		// Number of receive messages to buffer
-#define     NQE_QLIMIT   20		// Max length of request queue
-#define     SRV$DOWN   -1		// Resolver is unavailable
-#define     SRV$INIT   0		// Resolver is initializing
-#define     SRV$UP   1			// Resolver is up
+#define     MBAMAX   MBNMAX*2       // Max mailbox string length
+#define     MSGCNT   10     // Number of receive messages to buffer
+#define     NQE_QLIMIT   20     // Max length of request queue
+#define     SRV$DOWN   -1       // Resolver is unavailable
+#define     SRV$INIT   0        // Resolver is initializing
+#define     SRV$UP   1          // Resolver is up
 
-static struct MAIL$BUF    RCVBUF[MSGMAX];	// Receive buffer
-static struct queue_header_fields    NQE_QUEUE_ =  	// Request queue
+static struct MAIL$BUF    RCVBUF[MSGMAX];   // Receive buffer
+static struct queue_header_fields    NQE_QUEUE_ =   // Request queue
 {
 qhead:
     &NQE_QUEUE_,
@@ -239,27 +239,27 @@ qtail:
     &NQE_QUEUE_
 }, * NQE_QUEUE = &NQE_QUEUE;
 static signed long
-SRVSTATE,			// Resolver state
-SRVMBXCHN,			// I/O channel on nameresolver mailbox
-SRVPID,			// PID of the nameresolver
-ACPMBXCHN,			// I/O channel on ACP mailbox
+SRVSTATE,           // Resolver state
+SRVMBXCHN,          // I/O channel on nameresolver mailbox
+SRVPID,         // PID of the nameresolver
+ACPMBXCHN,          // I/O channel on ACP mailbox
 MYMBA_BUF[MBAMAX],
 MYMBA_LEN,
 MYMBA_ATTR,
-NQE_COUNT,			// Count of blocks currently allocated
-CURQID,			// Current request ID
-SRVPRIOR,			// Name resolver priority
-SRVSTATUS,			// Name resolver status flags
-SRVPRIVS[2],	// Name resolver privileges
-* SRVQUOTAS;	// Name resolver quotas
-struct dsc$descriptor   SRVIMGNAME_ =  	// Name resolver process name
+NQE_COUNT,          // Count of blocks currently allocated
+CURQID,         // Current request ID
+SRVPRIOR,           // Name resolver priority
+SRVSTATUS,          // Name resolver status flags
+SRVPRIVS[2],    // Name resolver privileges
+* SRVQUOTAS;    // Name resolver quotas
+struct dsc$descriptor   SRVIMGNAME_ =   // Name resolver process name
 {
     dsc$w_length:0,
-dsc$b_dtype:
-    DSC$K_DTYPE_T,
-dsc$b_class:
-    DSC$K_CLASS_D,
-    dsc$a_pointer:0
+    dsc$b_dtype:
+        DSC$K_DTYPE_T,
+    dsc$b_class:
+        DSC$K_CLASS_D,
+        dsc$a_pointer:0
 },*SRVIMGNAME=&SRVIMGNAME;
 
 //SBTTL "NML$CONFIG - Configure name resolver process"
@@ -269,10 +269,10 @@ void NML$CONFIG(IMNAME_A,PRIOR,STATUS,PRIVS, QUOTAS)
 // Copy the configuration information about the name resolver into this module.
 // This information is used by NML$INIT when creating the name resolver process.
 //
-long     PRIVS	[2];
-struct dsc$descriptor	* QUOTAS;
+long     PRIVS  [2];
+struct dsc$descriptor   * QUOTAS;
 {
-    long IMNAME	= IMNAME_A;
+    long IMNAME = IMNAME_A;
     extern STR$COPY_DX();
     signed long
     RC,
@@ -295,9 +295,9 @@ struct dsc$descriptor	* QUOTAS;
 
 // Copy the remaining values into their appropriate places
 
-    SRVPRIOR = PRIOR;		// Resolver priority
-    SRVSTATUS = STATUS;	// Resolver process status flags
-    SRVPRIVS[0] = PRIVS[0];	// Resolver privileges
+    SRVPRIOR = PRIOR;       // Resolver priority
+    SRVSTATUS = STATUS; // Resolver process status flags
+    SRVPRIVS[0] = PRIVS[0]; // Resolver privileges
     SRVPRIVS[1] = PRIVS[1];
 }
 
@@ -414,7 +414,7 @@ void NML$INIT (void)
     if (CHECK_SERVER())
     {
         SEND_CONTROL(CNRQ$START,0); // Tell it that the network is here
-        SRVSTATE = SRV$UP;	// Resolver should be ready now
+        SRVSTATE = SRV$UP;  // Resolver should be ready now
     }
     else
     {
@@ -443,7 +443,7 @@ void NML$INIT (void)
             ERROR$FAO("$CREPRC for NAMRES failed, RC = !XL",RC);
             return;
         };
-        SRVSTATE = SRV$INIT;	// Resolver is initializing
+        SRVSTATE = SRV$INIT;    // Resolver is initializing
     };
 }
 
@@ -771,7 +771,7 @@ void SEND_CONTROL(CCODE,CVALUE)
 // Build and send a control message to the name resolver.
 //
 {
-#define	CONTROL_MSGSIZE RQ$CONTROL_BLEN + MAIL$MSG_BLEN
+#define CONTROL_MSGSIZE RQ$CONTROL_BLEN + MAIL$MSG_BLEN
     static
     struct MAIL$MSG MSBUF[MAIL$BUF_SIZE + (MSGMAX/4)] ;
     signed long
@@ -792,7 +792,7 @@ void SEND_CONTROL(CCODE,CVALUE)
 
 // Send the message off to the name resolver
 
-    RC = sys$qio(0, SRVMBXCHN,	IO$_WRITEVBLK | IO$M_NOW, 0,
+    RC = sys$qio(0, SRVMBXCHN,  IO$_WRITEVBLK | IO$M_NOW, 0,
                  MSBUF,
                  CONTROL_MSGSIZE, 0, 0, 0, 0, 0, 0);
     if (BLISSIFNOT(RC))
@@ -930,7 +930,7 @@ struct NQENTRY * NQE;
     RC;
 
     XQL$FAO(LOG$MSG,"!%T NQE_XMIT of NQE !XL, ID !XL!/",0,NQE,NQE->NQE$ID);
-    RC = sys$qio(0, 	SRVMBXCHN,
+    RC = sys$qio(0,     SRVMBXCHN,
                  IO$_WRITEVBLK,
                  NQE->NQE$IOSB,
                  NQE_XMIT_DONE,
@@ -1035,7 +1035,7 @@ struct MAIL$BUF * MBUF;
 
 // Queue up another read
 
-    RC = sys$qio(0, ACPMBXCHN,	IO$_READVBLK,
+    RC = sys$qio(0, ACPMBXCHN,  IO$_READVBLK,
                  RCVIOSB,
                  MBX_RECV_AST,
                  MBUF,
@@ -1103,7 +1103,7 @@ struct RPLY$DEFAULT * RBUF;
             if ( RTYPE >= NLRP$MIN && RTYPE <= NLRP$MAX)
                 switch (RTYPE)
                 {
-                case NLRP$ERROR:	// Error reply - abort request
+                case NLRP$ERROR:    // Error reply - abort request
                 {
                     struct RPLY$ERROR * RBUF2=RBUF;
 
@@ -1113,11 +1113,11 @@ struct RPLY$DEFAULT * RBUF;
                 };
                 break;
 
-                case NLRP$CONTROL:	// Not possible at this level
+                case NLRP$CONTROL:  // Not possible at this level
                     0;
                     break;
 
-                case NLRP$NMLOOK:	// Name lookup reply
+                case NLRP$NMLOOK:   // Name lookup reply
                 {
                     struct RPLY$NMLOOK * RBUF2 = RBUF;
                     signed long
@@ -1135,7 +1135,7 @@ struct RPLY$DEFAULT * RBUF;
                 };
                 break;
 
-                case NLRP$ADLOOK:	// Address lookup reply
+                case NLRP$ADLOOK:   // Address lookup reply
                 {
                     struct RPLY$ADLOOK * RBUF2 = RBUF;
 
@@ -1146,7 +1146,7 @@ struct RPLY$DEFAULT * RBUF;
                     (ASTADR)(ASTPRM,SS$_NORMAL,NAMLEN,NAMPTR);
                 };
                 break;
-                case NLRP$RRLOOK:	// RR lookup reply
+                case NLRP$RRLOOK:   // RR lookup reply
                 {
                     struct RPLY$RRLOOK * RBUF2=RBUF;
                     signed long
@@ -1155,8 +1155,8 @@ struct RPLY$DEFAULT * RBUF;
 
                     RDLEN = RBUF2->RPRR$RDLEN;
                     RDATA = RBUF2->RPRR$RDATA;
-//		NAMLEN = RBUF2->RPRR$NAMLEN;
-//		NAMPTR = RBUF2->RPRR$DATA + RDLEN;
+//      NAMLEN = RBUF2->RPRR$NAMLEN;
+//      NAMPTR = RBUF2->RPRR$DATA + RDLEN;
                     XQL$FAO(LOG$MSG,
                             "!%T NS RRLOOK reply, ID=!XL, SIZE=!SL, RDATA=!AD /",
                             0,RBUF2->RPRR$ID,RDLEN,
@@ -1164,7 +1164,7 @@ struct RPLY$DEFAULT * RBUF;
                     (ASTADR)(ASTPRM,SS$_NORMAL,RDLEN,RDATA,NAMLEN,NAMPTR);
                 };
                 break;
-                default:	// Not possible at this level
+                default:    // Not possible at this level
                     0;
                 };
 
@@ -1202,24 +1202,24 @@ struct RQ$CONTROL * RBUF;
     CTYPE = RBUF->RQCN$CCODE;
     switch (CTYPE)
     {
-    case CNRQ$START:		// Resolver has finished starting
+    case CNRQ$START:        // Resolver has finished starting
     {
         XQL$FAO(LOG$MSG,"!%T NS Control: NS is up, PID=!XL!/",0,PID);
         if (CHECK_SERVER())
         {
-            SRVSTATE = SRV$UP;	// Indicate that everything is ready
-            XMIT_REQUESTS();	// And send all queued requests to the resolver
+            SRVSTATE = SRV$UP;  // Indicate that everything is ready
+            XMIT_REQUESTS();    // And send all queued requests to the resolver
         };
     };
     break;
 
-    case CNRQ$STOP:		// Resolver is shutting down
+    case CNRQ$STOP:     // Resolver is shutting down
     {
         XQL$FAO(LOG$MSG,"!%T NS Control: NS shutting down, PID=!XL!/",0,PID);
         sys$dassgn(SRVMBXCHN);
-        SRVSTATE = SRV$DOWN;	// Service is unavailable
-        SRVMBXCHN = 0;		// No channel defined
-        SRVPID = 0;		// And no PID defined
+        SRVSTATE = SRV$DOWN;    // Service is unavailable
+        SRVMBXCHN = 0;      // No channel defined
+        SRVPID = 0;     // And no PID defined
     };
     break;
 

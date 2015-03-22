@@ -9,9 +9,9 @@
 
 typedef struct _cciss_pci_info_struct
 {
-    unsigned char 	bus;
-    unsigned char 	dev_fn;
-    __u32 		board_id;
+    unsigned char   bus;
+    unsigned char   dev_fn;
+    __u32       board_id;
 } cciss_pci_info_struct;
 
 typedef struct _cciss_coalint_struct
@@ -24,10 +24,10 @@ typedef char NodeName_type[16];
 
 typedef __u32 Heartbeat_type;
 
-#define CISS_PARSCSIU2 	0x0001
-#define CISS_PARCSCIU3 	0x0002
-#define CISS_FIBRE1G	0x0100
-#define CISS_FIBRE2G	0x0200
+#define CISS_PARSCSIU2  0x0001
+#define CISS_PARCSCIU3  0x0002
+#define CISS_FIBRE1G    0x0100
+#define CISS_FIBRE2G    0x0200
 typedef __u32 BusTypes_type;
 
 typedef char FirmwareVer_type[4];
@@ -53,7 +53,7 @@ typedef __u32 DriverVer_type;
 #define CMD_ABORT_FAILED        0x0009
 #define CMD_UNSOLICITED_ABORT   0x000A
 #define CMD_TIMEOUT             0x000B
-#define CMD_UNABORTABLE		0x000C
+#define CMD_UNABORTABLE     0x000C
 
 //transfer direction
 #define XFER_NONE               0x00
@@ -69,8 +69,8 @@ typedef __u32 DriverVer_type;
 #define ATTR_ACA                0x07
 
 //cdb type
-#define TYPE_CMD				0x00
-#define TYPE_MSG				0x01
+#define TYPE_CMD                0x00
+#define TYPE_MSG                0x01
 
 // Type defs used in the following structs
 #define BYTE __u8
@@ -78,7 +78,7 @@ typedef __u32 DriverVer_type;
 #define HWORD __u16
 #define DWORD __u32
 
-#define CISS_MAX_LUN	16
+#define CISS_MAX_LUN    16
 
 #define LEVEL2LUN   1   // index into Target(x) structure, due to byte swapping
 #define LEVEL3LUN   0
@@ -176,11 +176,11 @@ typedef struct _ErrorInfo_struct
 
 typedef struct _IOCTL_Command_struct
 {
-    LUNAddr_struct	   LUN_info;
+    LUNAddr_struct     LUN_info;
     RequestBlock_struct      Request;
-    ErrorInfo_struct  	   error_info;
-    WORD			   buf_size;  /* size in bytes of the buf */
-    BYTE			   *buf;
+    ErrorInfo_struct       error_info;
+    WORD               buf_size;  /* size in bytes of the buf */
+    BYTE               *buf;
 } IOCTL_Command_struct;
 
 
@@ -197,7 +197,7 @@ typedef struct _IOCTL_Command_struct
 #define CCISS_GETFIRMVER   _IOR(CCISS_IOC_MAGIC, 8, FirmwareVer_type)
 #define CCISS_GETDRIVVER   _IOR(CCISS_IOC_MAGIC, 9, DriverVer_type)
 #define CCISS_REVALIDVOLS  _IO(CCISS_IOC_MAGIC, 10)
-#define CCISS_PASSTHRU	   _IOWR(CCISS_IOC_MAGIC, 11, IOCTL_Command_struct)
+#define CCISS_PASSTHRU     _IOWR(CCISS_IOC_MAGIC, 11, IOCTL_Command_struct)
 
 
 #endif

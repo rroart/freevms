@@ -1,5 +1,5 @@
-#ifndef cdtdef_h
-#define cdtdef_h
+#ifndef CDTDEF_H
+#define CDTDEF_H
 
 #define CDT$C_CLOSED 0
 #define CDT$C_LISTEN 1

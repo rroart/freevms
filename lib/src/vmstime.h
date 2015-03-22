@@ -1,5 +1,5 @@
-#ifndef vmstime_h
-#define vmstime_h
+#ifndef VMSTIME_H
+#define VMSTIME_H
 
 /*
 

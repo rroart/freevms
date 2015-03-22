@@ -110,7 +110,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
     // set pris
     p->pcb$b_prib=31-baspri;
     p->pcb$b_pri=31-baspri-6;
-    //	if (p->pcb$b_pri<16) p->pcb$b_pri=16;
+    //  if (p->pcb$b_pri<16) p->pcb$b_pri=16;
     p->pcb$w_quant=-QUANTUM;
 
     // set uic
@@ -196,7 +196,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
     p->state = TASK_UNINTERRUPTIBLE;
 
     //copy_flags(clone_flags, p);
-    // not here?	p->pcb$l_pid = alloc_ipid();
+    // not here?    p->pcb$l_pid = alloc_ipid();
 
     p->run_list.next = NULL;
     p->run_list.prev = NULL;
@@ -214,11 +214,11 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
     init_timer(&p->real_timer);
     p->real_timer.data = (unsigned long) p;
 
-    p->leader = 0;		/* session leadership doesn't inherit */
+    p->leader = 0;      /* session leadership doesn't inherit */
     p->tty_old_pgrp = 0;
     p->times.tms_utime = p->times.tms_stime = 0;
     p->times.tms_cutime = p->times.tms_cstime = 0;
-    p->lock_depth = -1;		/* -1 = no lock */
+    p->lock_depth = -1;     /* -1 = no lock */
     p->start_time = jiffies;
 
     INIT_LIST_HEAD(&p->local_pages);
@@ -279,9 +279,9 @@ bad_fork_cleanup_fs:
     nr_threads++;
     write_unlock_irq(&tasklist_lock);
 
-    //	printk("fork befwak\n");
-    //wake_up_process(p);		/* do this last */
-    //	wake_up_process2(p,PRI$_TICOM);		/* do this last */
+    //  printk("fork befwak\n");
+    //wake_up_process(p);       /* do this last */
+    //  wake_up_process2(p,PRI$_TICOM);     /* do this last */
     //goto fork_out;//??
 
 
@@ -334,7 +334,7 @@ bad_fork_cleanup_fs:
 
     int eip=0,esp=0;
 
-    //	start_thread(regs,eip,esp);
+    //  start_thread(regs,eip,esp);
 
     sch$chse(p, PRI$_TICOM);
 

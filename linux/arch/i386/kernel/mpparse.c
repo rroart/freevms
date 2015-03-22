@@ -1,15 +1,15 @@
 /*
- *	Intel Multiprocessor Specificiation 1.1 and 1.4
- *	compliant MP-table parsing routines.
+ *  Intel Multiprocessor Specificiation 1.1 and 1.4
+ *  compliant MP-table parsing routines.
  *
- *	(c) 1995 Alan Cox, Building #3 <alan@redhat.com>
- *	(c) 1998, 1999, 2000 Ingo Molnar <mingo@redhat.com>
+ *  (c) 1995 Alan Cox, Building #3 <alan@redhat.com>
+ *  (c) 1998, 1999, 2000 Ingo Molnar <mingo@redhat.com>
  *
- *	Fixes
- *		Erich Boleyn	:	MP v1.4 and additional changes.
- *		Alan Cox	:	Added EBDA scanning
- *		Ingo Molnar	:	various cleanups and rewrites
- *	Maciej W. Rozycki	:	Bits for default MP configurations
+ *  Fixes
+ *      Erich Boleyn    :   MP v1.4 and additional changes.
+ *      Alan Cox    :   Added EBDA scanning
+ *      Ingo Molnar :   various cleanups and rewrites
+ *  Maciej W. Rozycki   :   Bits for default MP configurations
  */
 
 #include <linux/mm.h>
@@ -122,7 +122,7 @@ static char __init *mpc_family(int family,int model)
 }
 
 #ifdef CONFIG_X86_IO_APIC
-extern int have_acpi_tables;	/* set by acpitable.c */
+extern int have_acpi_tables;    /* set by acpitable.c */
 #else
 #define have_acpi_tables (0)
 #endif
@@ -465,7 +465,7 @@ static int __init smp_read_mpc(struct mp_config_table *mpc)
     }
 
     /*
-     *	Now process the configuration blocks.
+     *  Now process the configuration blocks.
      */
     while (count < mpc->mpc_length)
     {
@@ -553,7 +553,7 @@ static void __init construct_default_ioirq_mptable(int mpc_default_type)
     int ELCR_fallback = 0;
 
     intsrc.mpc_type = MP_INTSRC;
-    intsrc.mpc_irqflag = 0;			/* conforming */
+    intsrc.mpc_irqflag = 0;         /* conforming */
     intsrc.mpc_srcbus = 0;
     intsrc.mpc_dstapic = mp_ioapics[0].mpc_apicid;
 
@@ -586,11 +586,11 @@ static void __init construct_default_ioirq_mptable(int mpc_default_type)
         {
         case 2:
             if (i == 0 || i == 13)
-                continue;	/* IRQ0 & IRQ13 not connected */
+                continue;   /* IRQ0 & IRQ13 not connected */
             /* fall through */
         default:
             if (i == 2)
-                continue;	/* IRQ2 is never connected */
+                continue;   /* IRQ2 is never connected */
         }
 
         if (ELCR_fallback)
@@ -607,13 +607,13 @@ static void __init construct_default_ioirq_mptable(int mpc_default_type)
         }
 
         intsrc.mpc_srcbusirq = i;
-        intsrc.mpc_dstirq = i ? i : 2;		/* IRQ0 to INTIN2 */
+        intsrc.mpc_dstirq = i ? i : 2;      /* IRQ0 to INTIN2 */
         MP_intsrc_info(&intsrc);
     }
 
     intsrc.mpc_irqtype = mp_ExtINT;
     intsrc.mpc_srcbusirq = 0;
-    intsrc.mpc_dstirq = 0;				/* 8259A to INTIN0 */
+    intsrc.mpc_dstirq = 0;              /* 8259A to INTIN0 */
     MP_intsrc_info(&intsrc);
 }
 
@@ -692,7 +692,7 @@ static inline void __init construct_default_ISA_mptable(int mpc_default_type)
     construct_default_ioirq_mptable(mpc_default_type);
 
     lintsrc.mpc_type = MP_LINTSRC;
-    lintsrc.mpc_irqflag = 0;		/* conforming */
+    lintsrc.mpc_irqflag = 0;        /* conforming */
     lintsrc.mpc_srcbusid = 0;
     lintsrc.mpc_srcbusirq = 0;
     lintsrc.mpc_destapic = MP_APIC_ALL;
@@ -705,7 +705,7 @@ static inline void __init construct_default_ISA_mptable(int mpc_default_type)
 }
 
 static struct intel_mp_floating *mpf_found;
-extern void 	config_acpi_tables(void);
+extern void     config_acpi_tables(void);
 
 /*
  * Scan the memory blocks for an SMP configuration block.

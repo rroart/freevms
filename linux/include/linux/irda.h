@@ -45,15 +45,15 @@
 
 /* IrLMP character code values */
 #define CS_ASCII         0x00
-#define	CS_ISO_8859_1    0x01
-#define	CS_ISO_8859_2    0x02
-#define	CS_ISO_8859_3    0x03
-#define	CS_ISO_8859_4    0x04
-#define	CS_ISO_8859_5    0x05
-#define	CS_ISO_8859_6    0x06
-#define	CS_ISO_8859_7    0x07
-#define	CS_ISO_8859_8    0x08
-#define	CS_ISO_8859_9    0x09
+#define CS_ISO_8859_1    0x01
+#define CS_ISO_8859_2    0x02
+#define CS_ISO_8859_3    0x03
+#define CS_ISO_8859_4    0x04
+#define CS_ISO_8859_5    0x05
+#define CS_ISO_8859_6    0x06
+#define CS_ISO_8859_7    0x07
+#define CS_ISO_8859_8    0x08
+#define CS_ISO_8859_9    0x09
 #define CS_UNICODE       0xff
 
 /* These are the currently known dongles */
@@ -81,25 +81,25 @@ enum
 #define SOL_IRLMP      266 /* Same as SOL_IRDA for now */
 #define SOL_IRTTP      266 /* Same as SOL_IRDA for now */
 
-#define IRLMP_ENUMDEVICES        1	/* Return discovery log */
-#define IRLMP_IAS_SET            2	/* Set an attribute in local IAS */
-#define IRLMP_IAS_QUERY          3	/* Query remote IAS for attribute */
-#define IRLMP_HINTS_SET          4	/* Set hint bits advertised */
+#define IRLMP_ENUMDEVICES        1  /* Return discovery log */
+#define IRLMP_IAS_SET            2  /* Set an attribute in local IAS */
+#define IRLMP_IAS_QUERY          3  /* Query remote IAS for attribute */
+#define IRLMP_HINTS_SET          4  /* Set hint bits advertised */
 #define IRLMP_QOS_SET            5
 #define IRLMP_QOS_GET            6
 #define IRLMP_MAX_SDU_SIZE       7
-#define IRLMP_IAS_GET            8	/* Get an attribute from local IAS */
-#define IRLMP_IAS_DEL		 9	/* Remove attribute from local IAS */
-#define IRLMP_HINT_MASK_SET	10	/* Set discovery filter */
-#define IRLMP_WAITDEVICE	11	/* Wait for a new discovery */
+#define IRLMP_IAS_GET            8  /* Get an attribute from local IAS */
+#define IRLMP_IAS_DEL        9  /* Remove attribute from local IAS */
+#define IRLMP_HINT_MASK_SET 10  /* Set discovery filter */
+#define IRLMP_WAITDEVICE    11  /* Wait for a new discovery */
 
 #define IRTTP_MAX_SDU_SIZE IRLMP_MAX_SDU_SIZE /* Compatibility */
 
-#define IAS_MAX_STRING         256	/* See IrLMP 1.1, 4.3.3.2 */
-#define IAS_MAX_OCTET_STRING  1024	/* See IrLMP 1.1, 4.3.3.2 */
-#define IAS_MAX_CLASSNAME       60	/* See IrLMP 1.1, 4.3.1 */
-#define IAS_MAX_ATTRIBNAME      60	/* See IrLMP 1.1, 4.3.3.1 */
-#define IAS_MAX_ATTRIBNUMBER   256	/* See IrLMP 1.1, 4.3.3.1 */
+#define IAS_MAX_STRING         256  /* See IrLMP 1.1, 4.3.3.2 */
+#define IAS_MAX_OCTET_STRING  1024  /* See IrLMP 1.1, 4.3.3.2 */
+#define IAS_MAX_CLASSNAME       60  /* See IrLMP 1.1, 4.3.1 */
+#define IAS_MAX_ATTRIBNAME      60  /* See IrLMP 1.1, 4.3.3.1 */
+#define IAS_MAX_ATTRIBNUMBER   256  /* See IrLMP 1.1, 4.3.3.1 */
 /* For user space backward compatibility - may be fixed in kernel 2.5.X
  * Note : need 60+1 ('\0'), make it 64 for alignement - Jean II */
 #define IAS_EXPORT_CLASSNAME       64

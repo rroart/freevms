@@ -1,5 +1,5 @@
-#ifndef npool_data_h
-#define npool_data_h
+#ifndef NPOOL_DATA_H
+#define NPOOL_DATA_H
 
 #define IOC_C_INVALID_ADDRESS -8388608
 #define IOC_C_MAXLISTPKT 8192
@@ -92,11 +92,11 @@ struct _npool_data
                 unsigned int npool$l_pool_flags;
                 struct
                 {
-                    unsigned npool$v_not_npp		: 1;
-                    unsigned npool$v_pool_separate	: 1;
-                    unsigned npool$v_pool_within_npp	: 1;
-                    unsigned npool$v_minimum_mode		: 1;
-                    unsigned npool$v_fill_0_		: 4;
+                    unsigned npool$v_not_npp        : 1;
+                    unsigned npool$v_pool_separate  : 1;
+                    unsigned npool$v_pool_within_npp    : 1;
+                    unsigned npool$v_minimum_mode       : 1;
+                    unsigned npool$v_fill_0_        : 4;
                 };
             };
             unsigned int npool$l_filler3;

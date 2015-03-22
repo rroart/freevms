@@ -135,11 +135,11 @@ extern "C" {
 
     /* The prototypes of the package functions. */
 
-    extern htab_t	htab_create_alloc	PARAMS ((size_t, htab_hash,
+    extern htab_t   htab_create_alloc   PARAMS ((size_t, htab_hash,
             htab_eq, htab_del,
             htab_alloc, htab_free));
 
-    extern htab_t	htab_create_alloc_ex	PARAMS ((size_t, htab_hash,
+    extern htab_t   htab_create_alloc_ex    PARAMS ((size_t, htab_hash,
             htab_eq, htab_del,
             PTR, htab_alloc_with_arg,
             htab_free_with_arg));
@@ -148,31 +148,31 @@ extern "C" {
     extern htab_t htab_create PARAMS ((size_t, htab_hash, htab_eq, htab_del));
     extern htab_t htab_try_create PARAMS ((size_t, htab_hash, htab_eq, htab_del));
 
-    extern void	htab_set_functions_ex	PARAMS ((htab_t, htab_hash,
+    extern void htab_set_functions_ex   PARAMS ((htab_t, htab_hash,
             htab_eq, htab_del,
             PTR, htab_alloc_with_arg,
             htab_free_with_arg));
 
-    extern void	htab_delete	PARAMS ((htab_t));
-    extern void	htab_empty	PARAMS ((htab_t));
+    extern void htab_delete PARAMS ((htab_t));
+    extern void htab_empty  PARAMS ((htab_t));
 
-    extern PTR	htab_find	PARAMS ((htab_t, const void *));
-    extern PTR     *htab_find_slot	PARAMS ((htab_t, const void *,
+    extern PTR  htab_find   PARAMS ((htab_t, const void *));
+    extern PTR     *htab_find_slot  PARAMS ((htab_t, const void *,
                                             enum insert_option));
-    extern PTR	htab_find_with_hash	  PARAMS ((htab_t, const void *,
+    extern PTR  htab_find_with_hash   PARAMS ((htab_t, const void *,
             hashval_t));
     extern PTR     *htab_find_slot_with_hash  PARAMS ((htab_t, const void *,
             hashval_t,
             enum insert_option));
-    extern void	htab_clear_slot	PARAMS ((htab_t, void **));
-    extern void	htab_remove_elt	PARAMS ((htab_t, void *));
+    extern void htab_clear_slot PARAMS ((htab_t, void **));
+    extern void htab_remove_elt PARAMS ((htab_t, void *));
 
-    extern void	htab_traverse	PARAMS ((htab_t, htab_trav, void *));
-    extern void	htab_traverse_noresize	PARAMS ((htab_t, htab_trav, void *));
+    extern void htab_traverse   PARAMS ((htab_t, htab_trav, void *));
+    extern void htab_traverse_noresize  PARAMS ((htab_t, htab_trav, void *));
 
-    extern size_t	htab_size	PARAMS ((htab_t));
-    extern size_t	htab_elements	PARAMS ((htab_t));
-    extern double	htab_collisions	PARAMS ((htab_t));
+    extern size_t   htab_size   PARAMS ((htab_t));
+    extern size_t   htab_elements   PARAMS ((htab_t));
+    extern double   htab_collisions PARAMS ((htab_t));
 
     /* A hash function for pointers.  */
     extern htab_hash htab_hash_pointer;

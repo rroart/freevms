@@ -152,7 +152,7 @@
 #undef __NR_$bintim
 
 #define __NR_$testtest         238
-#define __NR_$setpri	239
+#define __NR_$setpri    239
 #define __NR_$crelnt        240
 #define __NR_$setprn           241
 #define __NR_$dclast           242

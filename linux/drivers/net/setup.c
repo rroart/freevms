@@ -1,6 +1,6 @@
 
 /*
- *	New style setup code for the network devices
+ *  New style setup code for the network devices
  */
 
 #include <linux/config.h>
@@ -39,20 +39,20 @@ extern int uml_net_probe(void);
 
 
 /*
- *	Devices in this list must do new style probing. That is they must
- *	allocate their own device objects and do their own bus scans.
+ *  Devices in this list must do new style probing. That is they must
+ *  allocate their own device objects and do their own bus scans.
  */
 
 struct net_probe
 {
     int (*probe)(void);
-    int status;	/* non-zero if autoprobe has failed */
+    int status; /* non-zero if autoprobe has failed */
 };
 
 static struct net_probe pci_probes[] __initdata =
 {
     /*
-     *	Early setup devices
+     *  Early setup devices
      */
 
 #if defined(CONFIG_DMASCC)
@@ -83,7 +83,7 @@ static struct net_probe pci_probes[] __initdata =
 
     /*
     *
-    *	Wireless non-HAM
+    *   Wireless non-HAM
     *
     */
 #ifdef CONFIG_AIRONET4500_NONCS
@@ -99,7 +99,7 @@ static struct net_probe pci_probes[] __initdata =
 #endif
 
     /*
-     *	Token Ring Drivers
+     *  Token Ring Drivers
      */
 #ifdef CONFIG_MADGEMC
     {madgemc_probe, 0},
@@ -113,8 +113,8 @@ static struct net_probe pci_probes[] __initdata =
 
 
 /*
- *	Run the updated device probes. These do not need a device passed
- *	into them.
+ *  Run the updated device probes. These do not need a device passed
+ *  into them.
  */
 
 static void __init network_probe(void)
@@ -130,7 +130,7 @@ static void __init network_probe(void)
 
 
 /*
- *	Initialise the line discipline drivers
+ *  Initialise the line discipline drivers
  */
 
 static void __init network_ldisc_init(void)
@@ -159,7 +159,7 @@ static void __init special_device_init(void)
 }
 
 /*
- *	Initialise network devices
+ *  Initialise network devices
  */
 
 void __init net_device_init(void)

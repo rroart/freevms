@@ -1,4 +1,4 @@
-#ifndef btddef_h
-#define btddef_h
+#ifndef BTDDEF_H
+#define BTDDEF_H
 
 #endif

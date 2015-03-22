@@ -26,11 +26,11 @@ static void log2_kernel(FPU_REG const *arg, u_char argsign,
 /*--- poly_l2() -------------------------------------------------------------+
  |   Base 2 logarithm by a polynomial approximation.                         |
  +---------------------------------------------------------------------------*/
-void	poly_l2(FPU_REG *st0_ptr, FPU_REG *st1_ptr, u_char st1_sign)
+void    poly_l2(FPU_REG *st0_ptr, FPU_REG *st1_ptr, u_char st1_sign)
 {
-    long int	       exponent, expon, expon_expon;
+    long int           exponent, expon, expon_expon;
     Xsig                 accumulator, expon_accum, yaccum;
-    u_char		       sign, argsign;
+    u_char             sign, argsign;
     FPU_REG              x;
     int                  tag;
 
@@ -118,12 +118,12 @@ void	poly_l2(FPU_REG *st0_ptr, FPU_REG *st1_ptr, u_char st1_sign)
  |   Base 2 logarithm by a polynomial approximation.                         |
  |   log2(x+1)                                                               |
  +---------------------------------------------------------------------------*/
-int	poly_l2p1(u_char sign0, u_char sign1,
+int poly_l2p1(u_char sign0, u_char sign1,
               FPU_REG *st0_ptr, FPU_REG *st1_ptr, FPU_REG *dest)
 {
-    u_char             	tag;
-    long int        	exponent;
-    Xsig              	accumulator, yaccum;
+    u_char              tag;
+    long int            exponent;
+    Xsig                accumulator, yaccum;
 
     if ( exponent16(st0_ptr) < 0 )
     {
@@ -180,7 +180,7 @@ int	poly_l2p1(u_char sign0, u_char sign1,
 
 
 #undef HIPOWER
-#define	HIPOWER	10
+#define HIPOWER 10
 static const unsigned long long logterms[HIPOWER] =
 {
     0x2a8eca5705fc2ef0LL,

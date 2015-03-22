@@ -19,15 +19,15 @@
 #include <asm/system.h>
 #include <asm/cpufeature.h>
 
-#define TF_MASK		0x00000100
-#define IF_MASK		0x00000200
-#define IOPL_MASK	0x00003000
-#define NT_MASK		0x00004000
-#define VM_MASK		0x00020000
-#define AC_MASK		0x00040000
-#define VIF_MASK	0x00080000	/* virtual interrupt flag */
-#define VIP_MASK	0x00100000	/* virtual interrupt pending */
-#define ID_MASK		0x00200000
+#define TF_MASK     0x00000100
+#define IF_MASK     0x00000200
+#define IOPL_MASK   0x00003000
+#define NT_MASK     0x00004000
+#define VM_MASK     0x00020000
+#define AC_MASK     0x00040000
+#define VIF_MASK    0x00080000  /* virtual interrupt flag */
+#define VIP_MASK    0x00100000  /* virtual interrupt pending */
+#define ID_MASK     0x00200000
 
 /*
  * Default implementation of macro that returns current
@@ -41,18 +41,18 @@
 
 struct cpuinfo_x86
 {
-    __u8	x86;		/* CPU family */
-    __u8	x86_vendor;	/* CPU vendor */
-    __u8	x86_model;
-    __u8	x86_mask;
-    int	cpuid_level;	/* Maximum supported CPUID level, -1=no CPUID */
-    __u32	x86_capability[NCAPINTS];
-    char	x86_vendor_id[16];
-    char	x86_model_id[64];
-    int 	x86_cache_size;  /* in KB - valid for CPUS which support this
-				    call  */
-    int	x86_clflush_size;
-    int	x86_tlbsize;	/* number of 4K pages in DTLB/ITLB combined(in pages)*/
+    __u8    x86;        /* CPU family */
+    __u8    x86_vendor; /* CPU vendor */
+    __u8    x86_model;
+    __u8    x86_mask;
+    int cpuid_level;    /* Maximum supported CPUID level, -1=no CPUID */
+    __u32   x86_capability[NCAPINTS];
+    char    x86_vendor_id[16];
+    char    x86_model_id[64];
+    int     x86_cache_size;  /* in KB - valid for CPUS which support this
+                    call  */
+    int x86_clflush_size;
+    int x86_tlbsize;    /* number of 4K pages in DTLB/ITLB combined(in pages)*/
     __u8    x86_virt_bits, x86_phys_bits;
     __u32   x86_power;
     unsigned long loops_per_jiffy;
@@ -87,27 +87,27 @@ extern void dodgy_tsc(void);
 /*
  * EFLAGS bits
  */
-#define X86_EFLAGS_CF	0x00000001 /* Carry Flag */
-#define X86_EFLAGS_PF	0x00000004 /* Parity Flag */
-#define X86_EFLAGS_AF	0x00000010 /* Auxillary carry Flag */
-#define X86_EFLAGS_ZF	0x00000040 /* Zero Flag */
-#define X86_EFLAGS_SF	0x00000080 /* Sign Flag */
-#define X86_EFLAGS_TF	0x00000100 /* Trap Flag */
-#define X86_EFLAGS_IF	0x00000200 /* Interrupt Flag */
-#define X86_EFLAGS_DF	0x00000400 /* Direction Flag */
-#define X86_EFLAGS_OF	0x00000800 /* Overflow Flag */
-#define X86_EFLAGS_IOPL	0x00003000 /* IOPL mask */
-#define X86_EFLAGS_NT	0x00004000 /* Nested Task */
-#define X86_EFLAGS_RF	0x00010000 /* Resume Flag */
-#define X86_EFLAGS_VM	0x00020000 /* Virtual Mode */
-#define X86_EFLAGS_AC	0x00040000 /* Alignment Check */
-#define X86_EFLAGS_VIF	0x00080000 /* Virtual Interrupt Flag */
-#define X86_EFLAGS_VIP	0x00100000 /* Virtual Interrupt Pending */
-#define X86_EFLAGS_ID	0x00200000 /* CPUID detection flag */
+#define X86_EFLAGS_CF   0x00000001 /* Carry Flag */
+#define X86_EFLAGS_PF   0x00000004 /* Parity Flag */
+#define X86_EFLAGS_AF   0x00000010 /* Auxillary carry Flag */
+#define X86_EFLAGS_ZF   0x00000040 /* Zero Flag */
+#define X86_EFLAGS_SF   0x00000080 /* Sign Flag */
+#define X86_EFLAGS_TF   0x00000100 /* Trap Flag */
+#define X86_EFLAGS_IF   0x00000200 /* Interrupt Flag */
+#define X86_EFLAGS_DF   0x00000400 /* Direction Flag */
+#define X86_EFLAGS_OF   0x00000800 /* Overflow Flag */
+#define X86_EFLAGS_IOPL 0x00003000 /* IOPL mask */
+#define X86_EFLAGS_NT   0x00004000 /* Nested Task */
+#define X86_EFLAGS_RF   0x00010000 /* Resume Flag */
+#define X86_EFLAGS_VM   0x00020000 /* Virtual Mode */
+#define X86_EFLAGS_AC   0x00040000 /* Alignment Check */
+#define X86_EFLAGS_VIF  0x00080000 /* Virtual Interrupt Flag */
+#define X86_EFLAGS_VIP  0x00100000 /* Virtual Interrupt Pending */
+#define X86_EFLAGS_ID   0x00200000 /* CPUID detection flag */
 
 /*
- *	Generic CPUID function
- * 	FIXME: This really belongs to msr.h
+ *  Generic CPUID function
+ *  FIXME: This really belongs to msr.h
  */
 extern inline void cpuid(int op, int *eax, int *ebx, int *ecx, int *edx)
 {
@@ -166,17 +166,17 @@ extern inline unsigned int cpuid_edx(unsigned int op)
 /*
  * Intel CPU features in CR4
  */
-#define X86_CR4_VME		0x0001	/* enable vm86 extensions */
-#define X86_CR4_PVI		0x0002	/* virtual interrupts flag enable */
-#define X86_CR4_TSD		0x0004	/* disable time stamp at ipl 3 */
-#define X86_CR4_DE		0x0008	/* enable debugging extensions */
-#define X86_CR4_PSE		0x0010	/* enable page size extensions */
-#define X86_CR4_PAE		0x0020	/* enable physical address extensions */
-#define X86_CR4_MCE		0x0040	/* Machine check enable */
-#define X86_CR4_PGE		0x0080	/* enable global pages */
-#define X86_CR4_PCE		0x0100	/* enable performance counters at ipl 3 */
-#define X86_CR4_OSFXSR		0x0200	/* enable fast FPU save and restore */
-#define X86_CR4_OSXMMEXCPT	0x0400	/* enable unmasked SSE exceptions */
+#define X86_CR4_VME     0x0001  /* enable vm86 extensions */
+#define X86_CR4_PVI     0x0002  /* virtual interrupts flag enable */
+#define X86_CR4_TSD     0x0004  /* disable time stamp at ipl 3 */
+#define X86_CR4_DE      0x0008  /* enable debugging extensions */
+#define X86_CR4_PSE     0x0010  /* enable page size extensions */
+#define X86_CR4_PAE     0x0020  /* enable physical address extensions */
+#define X86_CR4_MCE     0x0040  /* Machine check enable */
+#define X86_CR4_PGE     0x0080  /* enable global pages */
+#define X86_CR4_PCE     0x0100  /* enable performance counters at ipl 3 */
+#define X86_CR4_OSFXSR      0x0200  /* enable fast FPU save and restore */
+#define X86_CR4_OSXMMEXCPT  0x0400  /* enable unmasked SSE exceptions */
 
 /*
  * Save the cr4 feature set we're using (ie
@@ -229,8 +229,8 @@ static inline void clear_in_cr4 (unsigned long mask)
 #define getCx86(reg) ({ outb((reg), 0x22); inb(0x23); })
 
 #define setCx86(reg, data) do { \
-	outb((reg), 0x22); \
-	outb((data), 0x23); \
+    outb((reg), 0x22); \
+    outb((data), 0x23); \
 } while (0)
 
 /*
@@ -244,7 +244,7 @@ static inline void clear_in_cr4 (unsigned long mask)
 /*
  * User space process size: 512GB - 1GB (default).
  */
-#define TASK_SIZE	(0x0000007fc0000000)
+#define TASK_SIZE   (0x0000007fc0000000)
 
 /* This decides where the kernel will search for a free chunk of vm
  * space during mmap's.
@@ -253,35 +253,35 @@ static inline void clear_in_cr4 (unsigned long mask)
 #define IA32_PAGE_OFFSET ((current->personality & ADDR_LIMIT_3GB) ? 0x80000000 : 0xFFFFe000)
 #define TASK_UNMAPPED_32 (IA32_PAGE_OFFSET / 3)
 #define TASK_UNMAPPED_64 (TASK_SIZE/3)
-#define TASK_UNMAPPED_BASE	\
-	((current->thread.flags & THREAD_IA32) ? TASK_UNMAPPED_32 : TASK_UNMAPPED_64)
+#define TASK_UNMAPPED_BASE  \
+    ((current->thread.flags & THREAD_IA32) ? TASK_UNMAPPED_32 : TASK_UNMAPPED_64)
 
 /*
  * Size of io_bitmap in longwords: 32 is ports 0-0x3ff.
  */
-#define IO_BITMAP_SIZE	32
+#define IO_BITMAP_SIZE  32
 #define IO_BITMAP_BYTES (IO_BITMAP_SIZE * sizeof(u32))
 #define IO_BITMAP_OFFSET offsetof(struct tss_struct,io_bitmap)
 #define INVALID_IO_BITMAP_OFFSET 0x8000
 
 struct i387_fxsave_struct
 {
-    u16	cwd;
-    u16	swd;
-    u16	twd;
-    u16	fop;
-    u64	rip;
-    u64	rdp;
-    u32	mxcsr;
-    u32	mxcsr_mask;
-    u32	st_space[32];	/* 8*16 bytes for each FP-reg = 128 bytes */
-    u32	xmm_space[64];	/* 16*16 bytes for each XMM-reg = 128 bytes */
-    u32	padding[24];
+    u16 cwd;
+    u16 swd;
+    u16 twd;
+    u16 fop;
+    u64 rip;
+    u64 rdp;
+    u32 mxcsr;
+    u32 mxcsr_mask;
+    u32 st_space[32];   /* 8*16 bytes for each FP-reg = 128 bytes */
+    u32 xmm_space[64];  /* 16*16 bytes for each XMM-reg = 128 bytes */
+    u32 padding[24];
 } __attribute__ ((aligned (16)));
 
 union i387_union
 {
-    struct i387_fxsave_struct	fxsave;
+    struct i387_fxsave_struct   fxsave;
 };
 
 typedef struct
@@ -308,27 +308,27 @@ extern struct tss_struct init_tss[NR_CPUS];
 
 struct thread_struct
 {
-    unsigned long	rsp0;
-    unsigned long	rip;
-    unsigned long	rsp;
-    unsigned long 	userrsp;	/* Copy from PDA */
-    unsigned long	fs;
-    unsigned long	gs;
-    unsigned short	es, ds, fsindex, gsindex;
+    unsigned long   rsp0;
+    unsigned long   rip;
+    unsigned long   rsp;
+    unsigned long   userrsp;    /* Copy from PDA */
+    unsigned long   fs;
+    unsigned long   gs;
+    unsigned short  es, ds, fsindex, gsindex;
     enum
     {
         THREAD_IA32 = 0x0001,
     } flags;
     /* Hardware debugging registers */
-    unsigned long	debugreg[8];  /* %%db0-7 debug registers */
+    unsigned long   debugreg[8];  /* %%db0-7 debug registers */
     /* fault info */
-    unsigned long	cr2, trap_no, error_code;
+    unsigned long   cr2, trap_no, error_code;
     /* floating point info */
-    union i387_union	i387;
-    u32	*io_bitmap_ptr;
+    union i387_union    i387;
+    u32 *io_bitmap_ptr;
 };
 
-#define INIT_THREAD  {						\
+#define INIT_THREAD  {                      \
 }
 
 #define INIT_MMAP \
@@ -343,27 +343,27 @@ struct thread_struct
 extern void load_gs_index(unsigned);
 
 #define start_thread(regs,new_rip,new_rsp) do { \
-	asm volatile("movl %0,%%fs; movl %0,%%es; movl %0,%%ds": :"r" (0));	 \
-	load_gs_index(0);							\
-	(regs)->rip = (new_rip);						 \
-	(regs)->rsp = (new_rsp);						 \
-	write_pda(oldrsp, (new_rsp));						 \
-	(regs)->cs = __USER_CS;							 \
-	(regs)->ss = __USER_DS;							 \
-	(regs)->eflags = 0x200;							 \
-	set_fs(USER_DS);							 \
+    asm volatile("movl %0,%%fs; movl %0,%%es; movl %0,%%ds": :"r" (0));  \
+    load_gs_index(0);                           \
+    (regs)->rip = (new_rip);                         \
+    (regs)->rsp = (new_rsp);                         \
+    write_pda(oldrsp, (new_rsp));                        \
+    (regs)->cs = __USER_CS;                          \
+    (regs)->ss = __USER_DS;                          \
+    (regs)->eflags = 0x200;                          \
+    set_fs(USER_DS);                             \
 } while(0)
 
 #define start_thread_cli(regs,new_rip,new_rsp) do { \
-	asm volatile("movl %0,%%fs; movl %0,%%es; movl %0,%%ds": :"r" (0));	 \
-	load_gs_index(0);							\
-	(regs)->rip = (new_rip);						 \
-	(regs)->rsp = (new_rsp);						 \
-	write_pda(oldrsp, (new_rsp));						 \
-	(regs)->cs = __SUPERVISOR_CS;							 \
-	(regs)->ss = __SUPERVISOR_DS;							 \
-	(regs)->eflags = 0x200;							 \
-	set_fs(SUPERVISOR_DS);							 \
+    asm volatile("movl %0,%%fs; movl %0,%%es; movl %0,%%ds": :"r" (0));  \
+    load_gs_index(0);                           \
+    (regs)->rip = (new_rip);                         \
+    (regs)->rsp = (new_rsp);                         \
+    write_pda(oldrsp, (new_rsp));                        \
+    (regs)->cs = __SUPERVISOR_CS;                            \
+    (regs)->ss = __SUPERVISOR_DS;                            \
+    (regs)->eflags = 0x200;                          \
+    set_fs(SUPERVISOR_DS);                           \
 } while(0)
 
 struct task_struct;
@@ -393,18 +393,18 @@ extern inline unsigned long thread_saved_pc(struct thread_struct *t)
 
 extern unsigned long get_wchan(struct task_struct *p);
 #define KSTK_EIP(tsk) \
-	(((struct pt_regs *)(tsk->thread.rsp0 - sizeof(struct pt_regs)))->rip)
+    (((struct pt_regs *)(tsk->thread.rsp0 - sizeof(struct pt_regs)))->rip)
 #define KSTK_ESP(tsk) -1 /* sorry. doesn't work for syscall. */
 
 /* Note: most of the infrastructure to separate stack and task_struct
    are already there. When you run out of stack try this first. */
 #define alloc_task_struct() \
-	((struct task_struct *) __get_free_pages(GFP_KERNEL,THREAD_ORDER))
+    ((struct task_struct *) __get_free_pages(GFP_KERNEL,THREAD_ORDER))
 #define free_task_struct(p) free_pages((unsigned long) (p), 1)
 #define get_task_struct(tsk)      atomic_inc(&virt_to_page(tsk)->count)
 
-#define init_task	(init_task_union.task)
-#define init_stack	(init_task_union.stack)
+#define init_task   (init_task_union.task)
+#define init_stack  (init_task_union.stack)
 
 /* REP NOP (PAUSE) is a good thing to insert into busy-wait loops. */
 extern inline void rep_nop(void)

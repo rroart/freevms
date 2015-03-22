@@ -72,13 +72,13 @@
 
 #undef CONFIG_PROC_FS
 
-#define sem_lock(id)	((struct sem_array*)ipc_lock(&sem_ids,id))
-#define sem_unlock(id)	ipc_unlock(&sem_ids,id)
-#define sem_rmid(id)	((struct sem_array*)ipc_rmid(&sem_ids,id))
-#define sem_checkid(sma, semid)	\
-	ipc_checkid(&sem_ids,&sma->sem_perm,semid)
+#define sem_lock(id)    ((struct sem_array*)ipc_lock(&sem_ids,id))
+#define sem_unlock(id)  ipc_unlock(&sem_ids,id)
+#define sem_rmid(id)    ((struct sem_array*)ipc_rmid(&sem_ids,id))
+#define sem_checkid(sma, semid) \
+    ipc_checkid(&sem_ids,&sma->sem_perm,semid)
 #define sem_buildid(id, seq) \
-	ipc_buildid(&sem_ids, id, seq)
+    ipc_buildid(&sem_ids, id, seq)
 static struct ipc_ids sem_ids;
 
 static int newary (key_t, int, int);
@@ -87,23 +87,23 @@ static void freeary (int id);
 static int sysvipc_sem_read_proc(char *buffer, char **start, off_t offset, int length, int *eof, void *data);
 #endif
 
-#define SEMMSL_FAST	256 /* 512 bytes on stack */
-#define SEMOPM_FAST	64  /* ~ 372 bytes on stack */
+#define SEMMSL_FAST 256 /* 512 bytes on stack */
+#define SEMOPM_FAST 64  /* ~ 372 bytes on stack */
 
 /*
  * linked list protection:
- *	sem_undo.id_next,
- *	sem_array.sem_pending{,last},
- *	sem_array.sem_undo: sem_lock() for read/write
- *	sem_undo.proc_next: only "current" is allowed to read/write that field.
+ *  sem_undo.id_next,
+ *  sem_array.sem_pending{,last},
+ *  sem_array.sem_undo: sem_lock() for read/write
+ *  sem_undo.proc_next: only "current" is allowed to read/write that field.
  *
  */
 
 int sem_ctls[4] = {SEMMSL, SEMMNS, SEMOPM, SEMMNI};
-#define sc_semmsl	(sem_ctls[0])
-#define sc_semmns	(sem_ctls[1])
-#define sc_semopm	(sem_ctls[2])
-#define sc_semmni	(sem_ctls[3])
+#define sc_semmsl   (sem_ctls[0])
+#define sc_semmns   (sem_ctls[1])
+#define sc_semopm   (sem_ctls[2])
+#define sc_semmni   (sem_ctls[3])
 
 static int used_sems;
 
@@ -279,7 +279,7 @@ static int try_atomic_semop (struct sem_array * sma, struct sembuf * sops,
         {
             int undo = un->semadj[sop->sem_num] - sem_op;
             /*
-             *	Exceeding the undo range is an error.
+             *  Exceeding the undo range is an error.
              */
             if (undo < (-SEMAEM - 1) || undo > SEMAEM)
             {
@@ -342,7 +342,7 @@ static void update_queue (struct sem_array * sma)
     {
 
         if (q->status == 1)
-            continue;	/* this one was woken up before */
+            continue;   /* this one was woken up before */
 
         error = try_atomic_semop(sma, q->sops, q->nsops,
                                  q->undo, q->pid, q->alter);
@@ -455,9 +455,9 @@ static unsigned long copy_semid_to_user(void *buf, struct semid64_ds *in, int ve
 
         ipc64_perm_to_ipc_perm(&in->sem_perm, &out.sem_perm);
 
-        out.sem_otime	= in->sem_otime;
-        out.sem_ctime	= in->sem_ctime;
-        out.sem_nsems	= in->sem_nsems;
+        out.sem_otime   = in->sem_otime;
+        out.sem_ctime   = in->sem_ctime;
+        out.sem_nsems   = in->sem_nsems;
 
         return copy_to_user(buf, &out, sizeof(out));
     }
@@ -697,9 +697,9 @@ out_free:
 
 struct sem_setbuf
 {
-    uid_t	uid;
-    gid_t	gid;
-    mode_t	mode;
+    uid_t   uid;
+    gid_t   gid;
+    mode_t  mode;
 };
 
 static inline unsigned long copy_semid_from_user(struct sem_setbuf *out, void *buf, int version)
@@ -713,9 +713,9 @@ static inline unsigned long copy_semid_from_user(struct sem_setbuf *out, void *b
         if(copy_from_user(&tbuf, buf, sizeof(tbuf)))
             return -EFAULT;
 
-        out->uid	= tbuf.sem_perm.uid;
-        out->gid	= tbuf.sem_perm.gid;
-        out->mode	= tbuf.sem_perm.mode;
+        out->uid    = tbuf.sem_perm.uid;
+        out->gid    = tbuf.sem_perm.gid;
+        out->mode   = tbuf.sem_perm.mode;
 
         return 0;
     }
@@ -726,9 +726,9 @@ static inline unsigned long copy_semid_from_user(struct sem_setbuf *out, void *b
         if(copy_from_user(&tbuf_old, buf, sizeof(tbuf_old)))
             return -EFAULT;
 
-        out->uid	= tbuf_old.sem_perm.uid;
-        out->gid	= tbuf_old.sem_perm.gid;
-        out->mode	= tbuf_old.sem_perm.mode;
+        out->uid    = tbuf_old.sem_perm.uid;
+        out->gid    = tbuf_old.sem_perm.gid;
+        out->mode   = tbuf_old.sem_perm.mode;
 
         return 0;
     }

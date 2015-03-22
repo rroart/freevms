@@ -1,5 +1,5 @@
-#ifndef iocdef_h
-#define iocdef_h
+#ifndef IOCDEF_H
+#define IOCDEF_H
 
 #define IOC$M_PHY 0x1
 #define IOC$M_TYPE 0x2

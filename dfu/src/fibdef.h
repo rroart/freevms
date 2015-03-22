@@ -180,8 +180,8 @@ extern "C" {
 #if 0
             // gave offset problem
             __struct  {                     /* File ID fields for ISO 9660      */
-                unsigned short int fib$w_fid_dirnum; /*	Directory number of File-Id */
-                unsigned int fib$l_fid_recnum; /*	Record number of File-ID    */
+                unsigned short int fib$w_fid_dirnum; /* Directory number of File-Id */
+                unsigned int fib$l_fid_recnum; /*   Record number of File-ID    */
             } fib$r_fid_iso_9660_fields;
 #endif
         } fib$r_fid_overlay;
@@ -202,8 +202,8 @@ extern "C" {
 #if 0
             // gave offset problem
             __struct  {                     /* Directory ID fields for ISO 9660 */
-                unsigned short int fib$w_did_dirnum; /*	Directory number of File-Id */
-                unsigned int fib$l_did_recnum; /*	Record number of File-ID    */
+                unsigned short int fib$w_did_dirnum; /* Directory number of File-Id */
+                unsigned int fib$l_did_recnum; /*   Record number of File-ID    */
             } fib$r_did_iso_9660_fields;
 #endif
         } fib$r_did_overlay;
@@ -407,7 +407,7 @@ _loc_rvn_fields.fib$b_loc_nmx
 #define fib$v_wildfid_flag fib$r_status_overlay.fib$r_status_bits.fib$v_wildfid_flag
 #define fib$l_mov_svbn fib$r_funcdepend.fib$r_movfildp.fib$l_mov_svbn
 #define fib$l_mov_vbncnt fib$r_funcdepend.fib$r_movfildp.fib$l_mov_vbncnt
-#endif		/* #if !defined(__VAXC) && !defined(VAXC) */
+#endif      /* #if !defined(__VAXC) && !defined(VAXC) */
 
 #define FIB$C_REWINDVOL 1               /* REWIND VOLUME SET                */
 #define FIB$C_POSEND 2                  /* POSITION TO END OF VOLUME SET    */
@@ -485,7 +485,7 @@ _loc_rvn_fields.fib$b_loc_nmx
 #define fib$v_mod_use fib$r_cntrlval_overlay.fib$r_cntrlval_bits.fib$v_mod_use
 #define fib$v_mod_perm fib$r_cntrlval_overlay.fib$r_cntrlval_bits.fib$v_mod_perm
 #define fib$v_mod_over fib$r_cntrlval_overlay.fib$r_cntrlval_bits.fib$v_mod_over
-#endif		/* #if !defined(__VAXC) && !defined(VAXC) */
+#endif      /* #if !defined(__VAXC) && !defined(VAXC) */
 
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
-#ifndef cebdef_h
-#define cebdef_h
+#ifndef CEBDEF_H
+#define CEBDEF_H
 
 #define CEB$K_LENGTH 72
 #define CEB$C_LENGTH 72

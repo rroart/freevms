@@ -269,7 +269,7 @@ dialog_checklist (const char *title, const char *prompt, int height, int width,
 
                     wrefresh (dialog);
 
-                    continue;	/* wait for another key press */
+                    continue;   /* wait for another key press */
                 }
                 else
                     i = choice - 1;
@@ -302,7 +302,7 @@ dialog_checklist (const char *title, const char *prompt, int height, int width,
 
                     wrefresh (dialog);
 
-                    continue;	/* wait for another key press */
+                    continue;   /* wait for another key press */
                 }
                 else
                     i = choice + 1;
@@ -319,7 +319,7 @@ dialog_checklist (const char *title, const char *prompt, int height, int width,
                 wnoutrefresh (list);
                 wrefresh (dialog);
             }
-            continue;		/* wait for another key press */
+            continue;       /* wait for another key press */
         }
         switch (key)
         {
@@ -399,5 +399,5 @@ dialog_checklist (const char *title, const char *prompt, int height, int width,
 
     delwin (dialog);
     free (status);
-    return -1;			/* ESC pressed */
+    return -1;          /* ESC pressed */
 }

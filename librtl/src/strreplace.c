@@ -1,8 +1,8 @@
 
 /*
- *	str$replace
+ *  str$replace
  *
- *	Copyright (C) 2004 Andrew Allison
+ *  Copyright (C) 2004 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,22 +20,22 @@
  *
  *The author may be contacted at freevms@sympatico.ca
  *
- *	Andrew Allison
- *	50 Denlaw Road
- *	London, Ont
- *	Canada
- *	N6G 3L4
+ *  Andrew Allison
+ *  50 Denlaw Road
+ *  London, Ont
+ *  Canada
+ *  N6G 3L4
  *
  */
 /*
  * History
- *	Feb 26, 2004 - Andrew Allison
- *		Wrote str$replace code
+ *  Feb 26, 2004 - Andrew Allison
+ *      Wrote str$replace code
  *
  * Description
  *
  *
- * 	str$replace (destination-string, source-string, start, end, substring)
+ *  str$replace (destination-string, source-string, start, end, substring)
  *
  * Bugs
  *
@@ -52,16 +52,16 @@
 
 /************************************/
 
-unsigned long str$replace(	struct dsc$descriptor_s *destin,
-                            const	struct dsc$descriptor_s *source,
-                            const	long *begin, const long *finish,
-                            const	struct dsc$descriptor_s *sub)
+unsigned long str$replace(  struct dsc$descriptor_s *destin,
+                            const   struct dsc$descriptor_s *source,
+                            const   long *begin, const long *finish,
+                            const   struct dsc$descriptor_s *sub)
 
 {
-    int	status;
-    char	*s1_ptr;
-    unsigned short	s1_len, temp_len;
-    long	start,end,newstart,newend;
+    int status;
+    char    *s1_ptr;
+    unsigned short  s1_len, temp_len;
+    long    start,end,newstart,newend;
     struct dsc$descriptor_s temp;
 
 
@@ -81,10 +81,10 @@ unsigned long str$replace(	struct dsc$descriptor_s *destin,
     {
         str$$malloc_sd(&temp,"NULL");
         start--;
-        str$left   (destin,source,&start);	// move over 1'st part
-        str$append (destin,sub);		// copy in replacement
+        str$left   (destin,source,&start);  // move over 1'st part
+        str$append (destin,sub);        // copy in replacement
         end++;
-        str$right  (&temp, source,&end);	// append rest of source
+        str$right  (&temp, source,&end);    // append rest of source
         str$append (destin,&temp);
         str$free1_dx (&temp);
     }
@@ -95,14 +95,14 @@ unsigned long str$replace(	struct dsc$descriptor_s *destin,
         newstart = end;
         newend   = start;
         newstart--;
-        str$left   (destin,source,&newstart);	// move over 1'st part
+        str$left   (destin,source,&newstart);   // move over 1'st part
         str$$malloc_sd(&temp,"NULL");
         newstart++;
         str$pos_extr (&temp,source,&newstart,&newend); //extract overlap
-        str$append   (destin,&temp);		// insert overlap twice
+        str$append   (destin,&temp);        // insert overlap twice
         str$append   (destin,&temp);
         newend++;
-        str$right  (&temp, source,&newend);	// append rest of source
+        str$right  (&temp, source,&newend); // append rest of source
         str$append (destin,&temp);
         str$free1_dx (&temp);
     }

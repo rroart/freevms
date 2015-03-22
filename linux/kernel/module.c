@@ -44,7 +44,7 @@ struct module kernel_module =
 {
 size_of_struct:
     sizeof(struct module),
-name: 			""
+name:           ""
     ,
 uc:
     {ATOMIC_INIT(1)},
@@ -64,7 +64,7 @@ kallsyms_end:
 
 struct module *module_list = &kernel_module;
 
-#endif	/* defined(CONFIG_MODULES) || defined(CONFIG_KALLSYMS) */
+#endif  /* defined(CONFIG_MODULES) || defined(CONFIG_KALLSYMS) */
 
 /* inter_module functions are always available, even when the kernel is
  * compiled without modules.  Consumers of inter_module_xxx routines
@@ -77,12 +77,12 @@ static spinlock_t ime_lock = SPIN_LOCK_UNLOCKED;
 static int kmalloc_failed;
 
 /*
- *	This lock prevents modifications that might race the kernel fault
- *	fixups. It does not prevent reader walks that the modules code
- *	does. The kernel lock does that.
+ *  This lock prevents modifications that might race the kernel fault
+ *  fixups. It does not prevent reader walks that the modules code
+ *  does. The kernel lock does that.
  *
- *	Since vmalloc fault fixups occur in any context this lock is taken
- *	irqsave at all times.
+ *  Since vmalloc fault fixups occur in any context this lock is taken
+ *  irqsave at all times.
  */
 
 spinlock_t modlist_lock = SPIN_LOCK_UNLOCKED;
@@ -252,7 +252,7 @@ void inter_module_put(const char *im_name)
 }
 
 
-#if defined(CONFIG_MODULES)	/* The rest of the source */
+#if defined(CONFIG_MODULES) /* The rest of the source */
 
 static long get_mod_name(const char *user_name, char **buf);
 static void put_mod_name(char *buf);
@@ -354,7 +354,7 @@ sys_create_module(const char *name_user, size_t size)
 
     spin_lock_irqsave(&modlist_lock, flags);
     mod->next = module_list;
-    module_list = mod;	/* link it in */
+    module_list = mod;  /* link it in */
     spin_unlock_irqrestore(&modlist_lock, flags);
 
     error = (long) mod;
@@ -411,7 +411,7 @@ sys_init_module(const char *name_user, struct module *mod_user)
     /* Hold the current contents while we play with the user's idea
        of righteousness.  */
     mod_tmp = *mod;
-    name_tmp = kmalloc(strlen(mod->name) + 1, GFP_KERNEL);	/* Where's kstrdup()? */
+    name_tmp = kmalloc(strlen(mod->name) + 1, GFP_KERNEL);  /* Where's kstrdup()? */
     if (name_tmp == NULL)
     {
         error = -ENOMEM;
@@ -609,7 +609,7 @@ sys_init_module(const char *name_user, struct module *mod_user)
     {
         atomic_set(&mod->uc.usecount,0);
         mod->flags &= ~MOD_INITIALIZING;
-        if (error > 0)	/* Buggy module */
+        if (error > 0)  /* Buggy module */
             error = -EBUSY;
         goto err0;
     }
@@ -624,7 +624,7 @@ err3:
     put_mod_name(n_name);
 err2:
     *mod = mod_tmp;
-    strcpy((char *)mod->name, name_tmp);	/* We know there is room for this */
+    strcpy((char *)mod->name, name_tmp);    /* We know there is room for this */
 err1:
     put_mod_name(name);
 err0:
@@ -1174,13 +1174,13 @@ int get_module_list(char *p)
         long len;
         const char *q;
 
-#define safe_copy_str(str, len)						\
-		do {							\
-			if (left < len)					\
-				goto fini;				\
-			memcpy(p, str, len); p += len, left -= len;	\
-		} while (0)
-#define safe_copy_cstr(str)	safe_copy_str(str, sizeof(str)-1)
+#define safe_copy_str(str, len)                     \
+        do {                            \
+            if (left < len)                 \
+                goto fini;              \
+            memcpy(p, str, len); p += len, left -= len; \
+        } while (0)
+#define safe_copy_cstr(str) safe_copy_str(str, sizeof(str)-1)
 
         len = strlen(mod->name);
         safe_copy_str(mod->name, len);
@@ -1341,7 +1341,7 @@ show:
     s_show
 };
 
-#else		/* CONFIG_MODULES */
+#else       /* CONFIG_MODULES */
 
 /* Dummy syscalls for people who don't want modules */
 
@@ -1386,4 +1386,4 @@ int try_inc_mod_count(struct module *mod)
     return 1;
 }
 
-#endif	/* CONFIG_MODULES */
+#endif  /* CONFIG_MODULES */

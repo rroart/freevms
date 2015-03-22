@@ -1,5 +1,5 @@
-#ifndef vcdef_h
-#define vcdef_h
+#ifndef VCDEF_H
+#define VCDEF_H
 
 #define vc$c_que_number 4 ;
 

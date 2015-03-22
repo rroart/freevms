@@ -1,45 +1,45 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 /*
 
 Module:
 
-	ROUTE
+    ROUTE
 
 Facility:
 
-	Routing facility
+    Routing facility
 
 Abstract:
 
-	Given an IP address, this module determains which interface
-	to send it out of.  The Routing Information Block (RIB)
-	consists of the list of route knows to the IPACP.  Route
-	look-up is augmented by the
+    Given an IP address, this module determains which interface
+    to send it out of.  The Routing Information Block (RIB)
+    consists of the list of route knows to the IPACP.  Route
+    look-up is augmented by the
 
 Author:
 
-	Bruce R. Miller, CMU Network Development, 1991
-	Copyright (c) 1991, Carnegie-Mellon University
+    Bruce R. Miller, CMU Network Development, 1991
+    Copyright (c) 1991, Carnegie-Mellon University
 
 Modification History:
 
@@ -55,151 +55,151 @@ Modification History:
 
 
 /*
-	Entry Points:
-	-------------
+    Entry Points:
+    -------------
 
-	ROUTE$IP_route ( IPaddr )
+    ROUTE$IP_route ( IPaddr )
 
-		Returns interface number.
+        Returns interface number.
 
 
 
-	Organization:
-	-------------
+    Organization:
+    -------------
 */
 
 
 
-typedef unsigned char	u_byte;
-typedef unsigned short	u_word;
-typedef unsigned long	u_long;
+typedef unsigned char   u_byte;
+typedef unsigned short  u_word;
+typedef unsigned long   u_long;
 
 
 
-/*	Interface definition */
+/*  Interface definition */
 
 typedef struct
 {
-    u_long	next;		/* Next route */
-    u_long	prev;		/* Previous route */
-    u_long	Inum;		/* Interface number */
+    u_long  next;       /* Next route */
+    u_long  prev;       /* Previous route */
+    u_long  Inum;       /* Interface number */
 
-    u_long	IPaddr;		/* Interface IP address */
-    u_long	Network;	/* Network IP address */
-    u_long	NetMask;	/* Network Mask */
+    u_long  IPaddr;     /* Interface IP address */
+    u_long  Network;    /* Network IP address */
+    u_long  NetMask;    /* Network Mask */
 } Interface;
 
 
 
-/*	Route Entry definition */
+/*  Route Entry definition */
 
 typedef struct
 {
-    u_long	next;		/* Next route */
-    u_long	prev;		/* Previous route */
+    u_long  next;       /* Next route */
+    u_long  prev;       /* Previous route */
 
-    u_long	Create_Time;	/* Creation Time */
-    u_long	Delete_Time;	/* Deletion Time (when to timeout) */
+    u_long  Create_Time;    /* Creation Time */
+    u_long  Delete_Time;    /* Deletion Time (when to timeout) */
 
-    u_long	Next_Hop;	/* Route's router */
-    u_long	Network;	/* Network IP address */
-    u_long	NetMask;	/* Network Mask */
-    u_long	Mask_NOB;	/* Mask number-of-bits */
+    u_long  Next_Hop;   /* Route's router */
+    u_long  Network;    /* Network IP address */
+    u_long  NetMask;    /* Network Mask */
+    u_long  Mask_NOB;   /* Mask number-of-bits */
 
-    u_long	Inum;		/* Interface Number */
+    u_long  Inum;       /* Interface Number */
 
-    u_long	TOS;		/* Route Type-of-Service */
-    u_long	IS_Class;	/* Route IS-IS Class */
-    u_long	OSPF_Class;	/* Route OSPF Class */
+    u_long  TOS;        /* Route Type-of-Service */
+    u_long  IS_Class;   /* Route IS-IS Class */
+    u_long  OSPF_Class; /* Route OSPF Class */
 } Route_Entry;
 
 
 
-/*	IP Cache Entry definition */
+/*  IP Cache Entry definition */
 /* NB:  These *must* be quadword alligned!!! */
 
 typedef struct
 {
-    u_long	next;		/* Next */
-    u_long	prev;		/* Previous */
+    u_long  next;       /* Next */
+    u_long  prev;       /* Previous */
     struct
     {
-        u_long	valid :  1;	/* cache entry valid? */
-        u_long	dummy : 31;	/* space filler */
+        u_long  valid :  1; /* cache entry valid? */
+        u_long  dummy : 31; /* space filler */
     } flags;
 
-    u_long	Create_Time;	/* Creation time */
-    u_long	Delete_Time;	/* Deletion time */
+    u_long  Create_Time;    /* Creation time */
+    u_long  Delete_Time;    /* Deletion time */
 
-    u_long	IPaddr;		/* IP address */
-    u_long	Route;		/* Route Entry ptr */
+    u_long  IPaddr;     /* IP address */
+    u_long  Route;      /* Route Entry ptr */
 
-    u_long	dummy;		/* Insure quadword allignment! */
+    u_long  dummy;      /* Insure quadword allignment! */
 } IPcache_Entry;
 
 typedef struct
 {
-    u_long	QHead;
-    u_long	QTail;
+    u_long  QHead;
+    u_long  QTail;
 } IPcache_hashtab_entry;
 
 
 
 #define MAX_ARP_ADDR_SIZE 20
 
-/*	ARP Cache Entry definition */
+/*  ARP Cache Entry definition */
 
 typedef struct
 {
-    u_long	next;		/* Next */
-    u_long	prev;		/* Previous */
+    u_long  next;       /* Next */
+    u_long  prev;       /* Previous */
     struct
     {
-        u_long	valid :  1;	/* cache entry valid? */
-        u_long	dummy : 31;	/* space filler */
+        u_long  valid :  1; /* cache entry valid? */
+        u_long  dummy : 31; /* space filler */
     } flags;
 
-    u_long	Create_Time;	/* Creation time */
-    u_long	Delete_Time;	/* Deletion time */
+    u_long  Create_Time;    /* Creation time */
+    u_long  Delete_Time;    /* Deletion time */
 
-    u_long	Inum;		/* Interface Number */
-    u_long	AddrSize;	/* address size */
-    u_byte	AddrData[MAX_ARP_ADDR_SIZE];	/* address data */
+    u_long  Inum;       /* Interface Number */
+    u_long  AddrSize;   /* address size */
+    u_byte  AddrData[MAX_ARP_ADDR_SIZE];    /* address data */
 } ARPcache_Entry;
 
 
 
-#define Route_LockName		"Route_Lock"
-#define IPcache_LockName	"IPcache_Lock"
-#define ARPcache_LockName	"ARPcache_Lock"
+#define Route_LockName      "Route_Lock"
+#define IPcache_LockName    "IPcache_Lock"
+#define ARPcache_LockName   "ARPcache_Lock"
 
 /* General */
 time_now;
 zone_id;
 
 /* Linked list of interfaces */
-u_long	Interface_List[2];
-int		nInterfaces;
+u_long  Interface_List[2];
+int     nInterfaces;
 
 /* Linked list of route entries */
 last_mod_time;
-u_long	Route_List[2];
-int		nRoutes;
+u_long  Route_List[2];
+int     nRoutes;
 
 /* The IP address cache */
-u_long	IPcache_FreeList[2];	/*!!!HACK!!! quadword alligned? */
-IPcache_hashtab_entry	*IP_Cache;
-int				IPcache_ents_tot;
+u_long  IPcache_FreeList[2];    /*!!!HACK!!! quadword alligned? */
+IPcache_hashtab_entry   *IP_Cache;
+int             IPcache_ents_tot;
 
 /* The IP address cache statistics */
-int	IPcache_ents_used;
-int	IPcache_overruns;
-int	IPcache_hits;
-int	IPcache_misses;
+int IPcache_ents_used;
+int IPcache_overruns;
+int IPcache_hits;
+int IPcache_misses;
 
 /* The ARP cache */
-ARPcache_Entry	(*ARP_Cache)[10];	/*!!!HACK!!! bogus bound */
-int			ARPcache_size;
+ARPcache_Entry  (*ARP_Cache)[10];   /*!!!HACK!!! bogus bound */
+int         ARPcache_size;
 
 
 
@@ -244,7 +244,7 @@ int Time_Stamp ()
 
 /****************************************************************
 
-	ARP cache routines
+    ARP cache routines
 
  ****************************************************************/
 
@@ -252,12 +252,12 @@ int Time_Stamp ()
 
 /****************************************************************
 
-	IP cache routines
+    IP cache routines
 
  ****************************************************************/
 
 int IPcache_hash(IPaddr)
-u_long	IPaddr;
+u_long  IPaddr;
 {
     u_byte *IPaddr2 = &IPaddr;
     int hash;
@@ -293,11 +293,11 @@ int size;
         IPent->next = IPent->prev = 0;
         _INSQHI(IPent,IPcache_FreeList);
     }
-    IPcache_ents_tot	= size;
-    IPcache_ents_used	= 0;
-    IPcache_overruns	= 0;
-    IPcache_hits	= 0;
-    IPcache_misses	= 0;
+    IPcache_ents_tot    = size;
+    IPcache_ents_used   = 0;
+    IPcache_overruns    = 0;
+    IPcache_hits    = 0;
+    IPcache_misses  = 0;
 }
 
 
@@ -307,7 +307,7 @@ int IPcache_Check(IPaddr,Route)
 u_long IPaddr,*Route;
 {
     int hval,flag=0;
-    IPcache_Entry	*IPent;
+    IPcache_Entry   *IPent;
 
     hval = IPcache_hash(IPaddr);
 
@@ -341,11 +341,11 @@ int IPcache_Add(IPaddr,Route)
 u_long IPaddr,*Route;
 {
     int hval,RC,flag;
-    IPcache_Entry	*IPent;
+    IPcache_Entry   *IPent;
 
     hval = IPcache_hash(IPaddr);
     RC = _REMQHI(IPcache_FreeList,&IPent);
-    if (RC&5)  		 /* not very clear, is it? */
+    if (RC&5)        /* not very clear, is it? */
     {
         ++IPcache_overruns;
         return 0;
@@ -370,11 +370,11 @@ u_long IPaddr,*Route;
 
 /****************************************************************
 
-	Route List routines
+    Route List routines
 
  ****************************************************************/
 
-/*	Route module initialization */
+/*  Route module initialization */
 
 int ROUTE$Init ( ARP_Cache_Size , IP_Cache_Size )
 {
@@ -401,33 +401,33 @@ int ROUTE$Init ( ARP_Cache_Size , IP_Cache_Size )
 
 /*
 
-	ROUTE$Add
+    ROUTE$Add
 
-	Add a route to the known routes list.  We insert it into the
-	list based on the number of bits in the NetMask.
+    Add a route to the known routes list.  We insert it into the
+    list based on the number of bits in the NetMask.
 
-	NB: Should we check for duplicates?
+    NB: Should we check for duplicates?
 
 */
 
-int ROUTE$Add (	Next_Hop, Network, NetMask, Inum, TOS, IS_Class, OSPF_Class )
+int ROUTE$Add ( Next_Hop, Network, NetMask, Inum, TOS, IS_Class, OSPF_Class )
 
 u_long Next_Hop, Network, NetMask, Inum, TOS, IS_Class, OSPF_Class;
 {
 
-    Route_Entry	*RE,*pred;
+    Route_Entry *RE,*pred;
 
     /* Allocate and initialize the route entry */
     MM$GET_MEM( &RE , sizeof(Route_Entry));
     RE->next = RE->prev = RE;
-    RE->Next_Hop	= Next_Hop;
-    RE->Network		= Network;
-    RE->NetMask		= NetMask;
-    RE->Mask_NOB	= Calc_NOB(NetMask);
-    RE->Inum		= Inum;
-    RE->TOS		= TOS;
-    RE->IS_Class	= IS_Class;
-    RE->OSPF_Class	= OSPF_Class;
+    RE->Next_Hop    = Next_Hop;
+    RE->Network     = Network;
+    RE->NetMask     = NetMask;
+    RE->Mask_NOB    = Calc_NOB(NetMask);
+    RE->Inum        = Inum;
+    RE->TOS     = TOS;
+    RE->IS_Class    = IS_Class;
+    RE->OSPF_Class  = OSPF_Class;
 
     Critical_Section_Begin;
     pred = Route_List[1];
@@ -457,11 +457,11 @@ u_long Next_Hop, Network, NetMask, Inum, TOS, IS_Class, OSPF_Class;
 
 
 /*
-	ROUTE$Find
+    ROUTE$Find
 
-	Search the route list from front to back.  Since the list
-	is sorted in descending order by the number of bits in the
-	NetMask, the first match will be the best (longest) match.
+    Search the route list from front to back.  Since the list
+    is sorted in descending order by the number of bits in the
+    NetMask, the first match will be the best (longest) match.
 */
 
 int ROUTE$Find ( IPaddr , Next_Hop, Network, NetMask, Inum )
@@ -470,7 +470,7 @@ u_long IPaddr;
 u_long *Next_Hop, *Network, *NetMask, *Inum;
 {
     int Status;
-    Route_Entry	*RE,*result=NULL;
+    Route_Entry *RE,*result=NULL;
 
     printf("ROUTE$Find(%8x) ",IPaddr);
 
@@ -500,10 +500,10 @@ u_long *Next_Hop, *Network, *NetMask, *Inum;
             IPcache_Add(IPaddr,result);
         else printf(" !cache hit!");
 
-        *Next_Hop	= result->Next_Hop;
-        *Network	= result->Network;
-        *NetMask	= result->NetMask;
-        *Inum		= result->Inum;
+        *Next_Hop   = result->Next_Hop;
+        *Network    = result->Network;
+        *NetMask    = result->NetMask;
+        *Inum       = result->Inum;
     }
 
     Critical_Section_End;
@@ -523,7 +523,7 @@ u_long *Next_Hop, *Network, *NetMask, *Inum;
 
 /****************************************************************
 
-	Router game routines
+    Router game routines
 
  ****************************************************************/
 
@@ -532,9 +532,9 @@ u_long *Next_Hop, *Network, *NetMask, *Inum;
 
 
 /*
-	GAME$Print
+    GAME$Print
 
-	Print out all of the routes in the list to stdout.
+    Print out all of the routes in the list to stdout.
 */
 
 int GAME$Print_Stats ()
@@ -557,15 +557,15 @@ int GAME$Print_Stats ()
 
 
 /*
-	GAME$Print
+    GAME$Print
 
-	Print out all of the routes in the list to stdout.
+    Print out all of the routes in the list to stdout.
 */
 
 int GAME$Print ()
 {
     int count=0;
-    Route_Entry	*RE;
+    Route_Entry *RE;
 
     RE = Route_List[0];
 
@@ -592,16 +592,16 @@ int GAME$Print ()
 
 int GAME$Add_Interface(IPaddr,NetMask)
 {
-    Interface	*IF;
+    Interface   *IF;
 
     printf("Adding interface #%d (IPaddr=%8x,Mask=%8x)\n",
            nInterfaces,IPaddr,NetMask);
     /* Allocate and initialize the route entry */
     MM$GET_MEM( &IF , sizeof(Interface));
     IF->next = IF->prev = IF;
-    IF->IPaddr		= IPaddr;
-    IF->NetMask		= NetMask;
-    IF->Inum		= nInterfaces++;
+    IF->IPaddr      = IPaddr;
+    IF->NetMask     = NetMask;
+    IF->Inum        = nInterfaces++;
 
     _INSQUE ( IF , Interface_List );
 
@@ -654,7 +654,7 @@ int GAME$Init( IPcache_size, ARPcache_size )
     /* Initialize interface list */
     Interface_List[1] = Interface_List[0] = Interface_List;
 
-    nInterfaces = 0;	/* loopback */
+    nInterfaces = 0;    /* loopback */
 
     /* The loopback interface */
     GAME$Add_Interface(0x7F000000,0xFF000000);
@@ -728,12 +728,12 @@ main ()
 
     /* Add some interfaces */
     /* Two EtherNets */
-    Ether1int	= GAME$Add_Interface ( 0x8002e845, 0xFFFF0000);
-    Ether2int	= GAME$Add_Interface ( 0x80020745, 0xFFFFFF00);
+    Ether1int   = GAME$Add_Interface ( 0x8002e845, 0xFFFF0000);
+    Ether2int   = GAME$Add_Interface ( 0x80020745, 0xFFFFFF00);
     /* A SLIP connection */
-    SLIPint	= GAME$Add_Interface ( 0x80030102, 0xFFFF0000);
+    SLIPint = GAME$Add_Interface ( 0x80030102, 0xFFFF0000);
     /* and a X.25 link to the outside world */
-    X25int	= GAME$Add_Interface ( 0x80025502, 0x00000000);
+    X25int  = GAME$Add_Interface ( 0x80025502, 0x00000000);
     printf("\n");
 
     /* Add some routers */

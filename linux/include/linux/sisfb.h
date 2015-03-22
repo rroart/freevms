@@ -7,18 +7,18 @@
 #define DISPTYPE_TV         0x00000001L
 #define DISPTYPE_DISP1      DISPTYPE_CRT1
 #define DISPTYPE_DISP2      (DISPTYPE_CRT2 | DISPTYPE_LCD | DISPTYPE_TV)
-#define DISPMODE_SINGLE	    0x00000020L
-#define DISPMODE_MIRROR	    0x00000010L
+#define DISPMODE_SINGLE     0x00000020L
+#define DISPMODE_MIRROR     0x00000010L
 #define DISPMODE_DUALVIEW   0x00000040L
 
-#define HASVB_NONE      	0x00
-#define HASVB_301       	0x01
-#define HASVB_LVDS      	0x02
-#define HASVB_TRUMPION  	0x04
-#define HASVB_LVDS_CHRONTEL	0x10
-#define HASVB_302       	0x20
-#define HASVB_303       	0x40
-#define HASVB_CHRONTEL  	0x80
+#define HASVB_NONE          0x00
+#define HASVB_301           0x01
+#define HASVB_LVDS          0x02
+#define HASVB_TRUMPION      0x04
+#define HASVB_LVDS_CHRONTEL 0x10
+#define HASVB_302           0x20
+#define HASVB_303           0x40
+#define HASVB_CHRONTEL      0x80
 
 typedef enum _SIS_CHIP_TYPE
 {

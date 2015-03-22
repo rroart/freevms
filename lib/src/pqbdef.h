@@ -1,5 +1,5 @@
-#ifndef pqbdef_h
-#define pqbdef_h
+#ifndef PQBDEF_H
+#define PQBDEF_H
 
 #define PQB$M_IMGDMP         0x1
 #define PQB$M_DEBUG          0x2
@@ -34,11 +34,11 @@ struct _pqb
         unsigned short int pqb$w_flags;
         struct
         {
-            unsigned pqb$v_imgdmp		: 1;
-            unsigned pqb$v_debug		: 1;
-            unsigned pqb$v_dbgtru		: 1;
-            unsigned pqb$v_parse_extended	: 1;
-            unsigned pqb$v_fill_2_		: 4;
+            unsigned pqb$v_imgdmp       : 1;
+            unsigned pqb$v_debug        : 1;
+            unsigned pqb$v_dbgtru       : 1;
+            unsigned pqb$v_parse_extended   : 1;
+            unsigned pqb$v_fill_2_      : 4;
         };
     };
     unsigned char pqb$b_msgmask;

@@ -1,5 +1,5 @@
-#ifndef com_routines_h
-#define com_routines_h
+#ifndef COM_ROUTINES_H
+#define COM_ROUTINES_H
 
 #include <far_pointers.h>
 

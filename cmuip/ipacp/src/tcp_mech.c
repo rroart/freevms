@@ -1,23 +1,23 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "TCP_MECH - TCP data structure routines"
 //SBTTL "TCP mechanism overview"
@@ -25,36 +25,36 @@
 
 Module:
 
-	TCP_USER
+    TCP_USER
 
 Facility:
 
-	Process user TCP I/O requests.
+    Process user TCP I/O requests.
 
 Abstract:
 
-	This module maintains and manipulates all of the data structures
-	used to implement the TCP sub-system.  These data structures are
-	the conection-list (ordered by local port number) and the Valid
-	TCB list.
+    This module maintains and manipulates all of the data structures
+    used to implement the TCP sub-system.  These data structures are
+    the conection-list (ordered by local port number) and the Valid
+    TCB list.
 
 Author:
 
-	(originally extracted from USER.BLI)
-	This version by Vince Fuller, CMU-CSD, Summer/Fall, 1986
-	Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
+    (originally extracted from USER.BLI)
+    This version by Vince Fuller, CMU-CSD, Summer/Fall, 1986
+    Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
 
 
 Modification History:
 
-1.0c	13-Mar-1991	Henry W. Miller		USBR
-	Fix port comparison logic.
+1.0c    13-Mar-1991 Henry W. Miller     USBR
+    Fix port comparison logic.
 
-1.0b	11-Mar-1991	Henry W. Miller		USBR
-	Fix port comparison logic.
+1.0b    11-Mar-1991 Henry W. Miller     USBR
+    Fix port comparison logic.
 
-1.0a	25-Jan-1991	Henry W. Miller		USBR
-	Make WINDOW_DEFAULT a configurable variable.
+1.0a    25-Jan-1991 Henry W. Miller     USBR
+    Make WINDOW_DEFAULT a configurable variable.
 
 */
 
@@ -69,17 +69,17 @@ MODULE TCP_MECH(IDENT="1.0c",LANGUAGE(BLISS32),
                 OPTIMIZE,OPTLEVEL=3,ZIP)
 #endif
 
-#include <starlet.h>	// VMS system definitions
-// not yet #include <cmuip/central/include/netxport.h>	// XPORT data structure definitions
-#include <cmuip/central/include/neterror.h>	// Network error message definitions
-#include "netvms.h"	// Special VMS definitions
+#include <starlet.h>    // VMS system definitions
+// not yet #include <cmuip/central/include/netxport.h>  // XPORT data structure definitions
+#include <cmuip/central/include/neterror.h> // Network error message definitions
+#include "netvms.h" // Special VMS definitions
 #include <cmuip/central/include/netcommon.h> // Network common defs
-#include <cmuip/central/include/nettcpip.h>	// TCP/IP protocols
-#include "structure.h"		// TCP system data structure definitions
+#include <cmuip/central/include/nettcpip.h> // TCP/IP protocols
+#include "structure.h"      // TCP system data structure definitions
 #include "cmuip.h" // needed before tcpmacros.h
-#include "tcpmacros.h"		// System macro definitions
-#include "tcp.h"			// TCP related definitions
-#include "snmp.h"			// Simple Network Management Protocol
+#include "tcpmacros.h"      // System macro definitions
+#include "tcp.h"            // TCP related definitions
+#include "snmp.h"           // Simple Network Management Protocol
 
 #include <ssdef.h>
 
@@ -97,9 +97,9 @@ mm$get_mem(), mm$free_mem();
 extern
 window_default ;
 
-unsigned long long    Start_Time;	// Quadword time IPACP started.
-unsigned long long    TEK$sys_uptime;	// Quadword delta time since IPACP started.
-struct TCP_MIB_struct tcp_mib_, * tcp_mib=&tcp_mib_;	// TCP management Information Block
+unsigned long long    Start_Time;   // Quadword time IPACP started.
+unsigned long long    TEK$sys_uptime;   // Quadword delta time since IPACP started.
+struct TCP_MIB_struct tcp_mib_, * tcp_mib=&tcp_mib_;    // TCP management Information Block
 
 
 
@@ -120,7 +120,7 @@ static ConectSize;
 static struct connection_table_structure * ConectPtr;
 
 signed long
-max_local_ports  = 30;	// Settable in CONFIG
+max_local_ports  = 30;  // Settable in CONFIG
 
 // Valid TCB table, contains pointers to valid TCB's. Used to verify
 // user supplied Local_connection_Id.  As one sees: A local_Connection_ID is
@@ -128,9 +128,9 @@ max_local_ports  = 30;	// Settable in CONFIG
 
 long * vtcb_ptr;
 signed long    max_tcb  = 0,
-               max_conn  = 60,	// Settable in CONFIG
+               max_conn  = 60,  // Settable in CONFIG
                vtcb_size  = 0,
-               tcb_count  = 0;	// # of valid TCB's in VTCB table.
+               tcb_count  = 0;  // # of valid TCB's in VTCB table.
 
 
 //SBTTL "Initialize TCP"
@@ -138,20 +138,20 @@ signed long    max_tcb  = 0,
 
 Function:
 
-	Initialize TCP.  We are at user access mode in case of errors
-	in processing we don't clobber the entire system.
+    Initialize TCP.  We are at user access mode in case of errors
+    in processing we don't clobber the entire system.
 
 Inputs:
 
-	None.
+    None.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	Allocate and initialize the TCP tables.
+    Allocate and initialize the TCP tables.
 */
 
 //!!HACK!!// we're breaking the ADT... (gasp)
@@ -178,17 +178,17 @@ void tcp$init (void)
     CH$FILL ( 0 , (vtcb_size+1) * sizeof(long) , vtcb_ptr );
 
     tcp_mib->MIB$tcpRtoAlgorithm= 0;
-    tcp_mib->MIB$tcpRtoMin	= 0;
-    tcp_mib->MIB$tcpRtoMax	= 0;
-    tcp_mib->MIB$tcpMaxConn	= 0;
-    tcp_mib->MIB$tcpActiveOpens	= 0;
+    tcp_mib->MIB$tcpRtoMin  = 0;
+    tcp_mib->MIB$tcpRtoMax  = 0;
+    tcp_mib->MIB$tcpMaxConn = 0;
+    tcp_mib->MIB$tcpActiveOpens = 0;
     tcp_mib->MIB$tcpPassiveOpens= 0;
     tcp_mib->MIB$tcpAttemptFails= 0;
-    tcp_mib->MIB$tcpEstabResets	= 0;
-    tcp_mib->MIB$tcpCurrEstab	= 0;
-    tcp_mib->MIB$tcpInSegs	= 0;
-    tcp_mib->MIB$tcpOutSegs	= 0;
-    tcp_mib->MIB$tcpRetransSegs	= 0;
+    tcp_mib->MIB$tcpEstabResets = 0;
+    tcp_mib->MIB$tcpCurrEstab   = 0;
+    tcp_mib->MIB$tcpInSegs  = 0;
+    tcp_mib->MIB$tcpOutSegs = 0;
+    tcp_mib->MIB$tcpRetransSegs = 0;
 
 };
 
@@ -205,28 +205,28 @@ void tcp$init (void)
 
 Function:
 
-	Given foreign address and port pair, find the TCB.
+    Given foreign address and port pair, find the TCB.
 
 Inputs:
 
-	lclport = Local port number
-	frnaddr = Foreign address
-	frnport = Foreign port
+    lclport = Local port number
+    frnaddr = Foreign address
+    frnport = Foreign port
 
 Outputs:
 
-	False(0) = unknown connection
-	Otherwise The address of the destination connection's TCB.
+    False(0) = unknown connection
+    Otherwise The address of the destination connection's TCB.
 
 Side Effects:
 
-	None.
+    None.
 */
 
 
 VTCB_Insert ( struct tcb_structure * TCB )
 {
-    extern	MOVBYT();
+    extern  MOVBYT();
     signed long J,
            Indx,
            Old;
@@ -267,7 +267,7 @@ VTCB_Insert ( struct tcb_structure * TCB )
     tcb_count = tcb_count + 1; // Keep track of active TCB's.
     TCB->vtcb_index = Indx; // Remember index into Valid TCB Table
 
-    OKINT;	// Carry on...
+    OKINT;  // Carry on...
 
     return SS$_NORMAL;
 }
@@ -283,7 +283,7 @@ VTCB_Remove ( struct tcb_structure * TCB )
     IDX = TCB->vtcb_index;
     if (vtcb_ptr[IDX] == TCB)
     {
-        vtcb_ptr[IDX] = 0;	// Clean out entry
+        vtcb_ptr[IDX] = 0;  // Clean out entry
         tcb_count = tcb_count-1; // Account for this TCB going away.
         if (max_tcb <= IDX)
 X :
@@ -319,22 +319,22 @@ leave:
 
 Function:
 
-	Given foreign address and port pair, find the TCB.
+    Given foreign address and port pair, find the TCB.
 
 Inputs:
 
-	lclport = Local port number
-	frnaddr = Foreign address
-	frnport = Foreign port
+    lclport = Local port number
+    frnaddr = Foreign address
+    frnport = Foreign port
 
 Outputs:
 
-	False(0) = unknown connection
-	Otherwise The address of the destination connection's TCB.
+    False(0) = unknown connection
+    Otherwise The address of the destination connection's TCB.
 
 Side Effects:
 
-	None.
+    None.
 */
 
 
@@ -360,7 +360,7 @@ signed long (*ASTRTN)();
             if ((count = count-1) <= 0) //only process what we have.
             {
                 OKINT;
-                return sum;	// all done.
+                return sum; // all done.
             }
         };
     OKINT;
@@ -410,10 +410,10 @@ VTCB_Indx_OK ( LCID )
 //SBTTL "FIND Local Port in Connection Table"
 /*
 Function:
-	Scan connection table for specified local port.
+    Scan connection table for specified local port.
 
 Outputs:
-	CONECT index or -1 for local_port NOT found.
+    CONECT index or -1 for local_port NOT found.
 
 */
 
@@ -464,11 +464,11 @@ Conect_Remove ( struct tcb_structure * TCB )
 //SBTTL "Init Local Port Entry"
 /*
 Function:
-	Initialize an entry in the local port table.
+    Initialize an entry in the local port table.
 
 Inputs:
-	Index,		// which table entry to initialize.
-	LPort		// Local port which this entry represents.
+    Index,      // which table entry to initialize.
+    LPort       // Local port which this entry represents.
 
 */
 
@@ -486,12 +486,12 @@ void Init_LP_Entry (Index, LPort)
 //SBTTL "Find Free Connection Table Entry"
 /*
 Function:
-	Scan connection tbl "CONECT" for an entry which has the local_port
-	field set to -1 for available.
+    Scan connection tbl "CONECT" for an entry which has the local_port
+    field set to -1 for available.
 
 Outputs:
-	CONECT index of free entry.
-	"Not_Found"(-1) for table full.
+    CONECT index of free entry.
+    "Not_Found"(-1) for table full.
 */
 
 
@@ -499,7 +499,7 @@ Outputs:
 
 Find_Free_LP_Entry (LPort)
 {
-    extern	MOVBYT(),
+    extern  MOVBYT(),
             mm$get_mem(), mm$free_mem();
     signed long
     J,
@@ -532,11 +532,11 @@ Find_Free_LP_Entry (LPort)
 
         // Initialize the new table.
     //    INCR cidx FROM (Idx) TO (ConectSize-1) DO
-    	{				// Initialize connection table
-    	ConectPtr[cidx].CN$TCB_List = ConectPtr[cidx].CN$TCB_List;
-    	ConectPtr[cidx].CN$TCB_Tail = ConectPtr[cidx].CN$TCB_List;
-    	ConectPtr[cidx].CN$Local_Port = -1;
-    	};
+        {               // Initialize connection table
+        ConectPtr[cidx].CN$TCB_List = ConectPtr[cidx].CN$TCB_List;
+        ConectPtr[cidx].CN$TCB_Tail = ConectPtr[cidx].CN$TCB_List;
+        ConectPtr[cidx].CN$Local_Port = -1;
+        };
         MOVBYT ( idx * CN$BLK_SIZE, Old , ConectPtr );
 
         OKINT;
@@ -622,34 +622,34 @@ void Conect_Insert(struct tcb_structure * TCB,signed long CN_Index)
 
 Function:
 
-	Verify specified connection is unique or the requestor has privileges
-	to request a non-unique connection (case of: Well-Known-Port).  User
-	can specify a local port on an active open if the port is in the range
-	of [32768..65535].  Otherwise TCP will supply the local port.  To open
-	a passive connection the connection must be unique or the user MUST
-	have privileges.  To use a well-known port [1..255] the user must have
-	privileges.
+    Verify specified connection is unique or the requestor has privileges
+    to request a non-unique connection (case of: Well-Known-Port).  User
+    can specify a local port on an active open if the port is in the range
+    of [32768..65535].  Otherwise TCP will supply the local port.  To open
+    a passive connection the connection must be unique or the user MUST
+    have privileges.  To use a well-known port [1..255] the user must have
+    privileges.
 
 Inputs:
 
-	Lport = Requested local port #
-	Fhost = Foreign_Host (Internet adrs + Host adrs)
-	Fport = Foreign_Port
-		F(host or port) maybe unspecified(WILD=0)
-	IDX = Address of fullword which gets conect table index.
+    Lport = Requested local port #
+    Fhost = Foreign_Host (Internet adrs + Host adrs)
+    Fport = Foreign_Port
+        F(host or port) maybe unspecified(WILD=0)
+    IDX = Address of fullword which gets conect table index.
 
 Outputs:
 
-	TRUE = unique connection.
-	False = non-unique connection
-	-1 = Connection tbl (CONECT) is full
+    TRUE = unique connection.
+    False = non-unique connection
+    -1 = Connection tbl (CONECT) is full
 
 Side Effects:
 
-	Fullword which IDX points at gets the index into the connection
-	table (CONECT) for the specified local port.  If the specified
-	Local_Port is not in connection table (CONECT) then it will be
-	inserted if space is avail.
+    Fullword which IDX points at gets the index into the connection
+    table (CONECT) for the specified local port.  If the specified
+    Local_Port is not in connection table (CONECT) then it will be
+    inserted if space is avail.
 */
 
 
@@ -682,18 +682,18 @@ signed long * IDX;
 // Init local port queue header.
 
             Init_LP_Entry (Index, LP);
-            *IDX = Index;	// return conect index.
-            Unique = TRUE;	// Connection is unique.
+            *IDX = Index;   // return conect index.
+            Unique = TRUE;  // Connection is unique.
         };
     }
-    else			// Local port is in conect table
+    else            // Local port is in conect table
     {
 
 // Search this Local Port's TCB list checking for non-unique connection.
 // Compare rtn call arg connection(Fhost,Fport) with TCB(Foreign_Host&Port).
 
-        *IDX = Index;		// return conect index.
-        Unique = TRUE;		// assume a good attitude!
+        *IDX = Index;       // return conect index.
+        Unique = TRUE;      // assume a good attitude!
         TCB = ConectPtr[Index].CN$TCB_List; //point at 1st TCB is list.
         while ((TCB != &ConectPtr[Index].CN$TCB_List) && (Unique == TRUE))
         {
@@ -716,22 +716,22 @@ signed long * IDX;
 
 Function:
 
-	Given foreign address and port pair, find the TCB.
+    Given foreign address and port pair, find the TCB.
 
 Inputs:
 
-	lclport = Local port number
-	frnaddr = Foreign address
-	frnport = Foreign port
+    lclport = Local port number
+    frnaddr = Foreign address
+    frnport = Foreign port
 
 Outputs:
 
-	False(0) = unknown connection
-	Otherwise The address of the destination connection's TCB.
+    False(0) = unknown connection
+    Otherwise The address of the destination connection's TCB.
 
 Side Effects:
 
-	None.
+    None.
 */
 
 
@@ -759,7 +759,7 @@ TCB_Find(lclport,frnaddr,frnport)
         {
 
 // Check seg source-address aginst TCB foreign-host or a WILD foreign-host.
-//	LOG$FAO ( "TCB = !XL !/", TCB);
+//  LOG$FAO ( "TCB = !XL !/", TCB);
 
             if ((frnaddr == TCB->foreign_host) ||
                     (TCB->foreign_host == WILD))
@@ -813,46 +813,46 @@ void TCB_Promote ( struct tcb_structure * TCB )
 
 Function:
 
-	Create one TCB (transmission Control Block) & place it's address in
-	the valid TCB table.
+    Create one TCB (transmission Control Block) & place it's address in
+    the valid TCB table.
 
 Calling Convention:
 
-	CALLS, standard BLISS linkage.
+    CALLS, standard BLISS linkage.
 
 Inputs:
 
-	none
+    none
 
 Outputs:
 
-	Address of newly allocated uninitialized TCB.
-	Error(-1) for Valid TCB table full
+    Address of newly allocated uninitialized TCB.
+    Error(-1) for Valid TCB table full
 
 Side Effects:
 
-	Address of newly allocated TCB is placed in first free entry
-	in the Valid TCB table.
+    Address of newly allocated TCB is placed in first free entry
+    in the Valid TCB table.
 
 */
 
 tcb$create (void)
 {
-    struct tcb_structure * TCB;	// New TCB
+    struct tcb_structure * TCB; // New TCB
     signed long
-    Indx,	// location of new TCB in Valid TCB table.
-    Old,	// remember the old value of VTCB_ptr when resizing...
-    SENDQ,	// Send Queue
-    RECVQ,	// Receive Queue
-    RC;	// return code
+    Indx,   // location of new TCB in Valid TCB table.
+    Old,    // remember the old value of VTCB_ptr when resizing...
+    SENDQ,  // Send Queue
+    RECVQ,  // Receive Queue
+    RC; // return code
 
-    NOINT;			// Hold AST's please...
+    NOINT;          // Hold AST's please...
     mm$get_mem ( &TCB   , TCB_SIZE );
     mm$get_mem ( &SENDQ , window_default );
     mm$get_mem ( &RECVQ , window_default );
     OKINT;
 
-//    CH$FILL(%CHAR(0),tcb_size*4,TCB);	// clean house.....zero fill.
+//    CH$FILL(%CHAR(0),tcb_size*4,TCB); // clean house.....zero fill.
 
 // Set pointers and sizes of send and receive queues
 
@@ -874,22 +874,22 @@ tcb$create (void)
 
 Function:
 
-	Free the memory associated with a specified TCB.  If this happens
-	to be the last TCB in a Local_Port TCB list then free the Local_port
-	slot from the Connection table (CONECT).
+    Free the memory associated with a specified TCB.  If this happens
+    to be the last TCB in a Local_Port TCB list then free the Local_port
+    slot from the Connection table (CONECT).
 
 Inputs:
 
-	TCB_Ptr = address of TCB data structure.
+    TCB_Ptr = address of TCB data structure.
 
 Outputs:
 
-	None.
+    None.
 
 Side Effects:
 
-	Connection table (CONECT) entry maybe cleared if last TCB for specified
-	local_port.
+    Connection table (CONECT) entry maybe cleared if last TCB for specified
+    local_port.
 
 */
 
@@ -898,7 +898,7 @@ long tcbi=0;
 
 void tcb$delete ( TCB_Ptr )
 {
-    extern	TELNET_CLOSE();
+    extern  TELNET_CLOSE();
     signed long
     RC,
     IDX;
@@ -920,7 +920,7 @@ void tcb$delete ( TCB_Ptr )
         TELNET_CLOSE(TCB);
 
     // Remove the TCB from the Valid TCB table.
-    NOINT;			// Hold AST's
+    NOINT;          // Hold AST's
     if (VTCB_Remove(TCB) != 0)
     {
 
@@ -948,37 +948,37 @@ void tcb$delete ( TCB_Ptr )
 
 Function:
 
-	Scan the valid tcb table checking for a match with the user specified
-	local_connection_id, which is actually the TCB's address.  If found
-	then check to see if the TCB is still active (ie, state neq
-	CS$inactive).
-	Returns TCB address for valid TCB, or 0, with ERROR value returned.
-	All this inactive business stems from the fact that under some
-	pathological conditions a connection maybe deleted from under the
-	user.  The inactive scheme allows the user a one time access to a
-	connection that has gone away and gives the user an idea as to why
-	instead of just the knowledge that the connectio has gone away.
+    Scan the valid tcb table checking for a match with the user specified
+    local_connection_id, which is actually the TCB's address.  If found
+    then check to see if the TCB is still active (ie, state neq
+    CS$inactive).
+    Returns TCB address for valid TCB, or 0, with ERROR value returned.
+    All this inactive business stems from the fact that under some
+    pathological conditions a connection maybe deleted from under the
+    user.  The inactive scheme allows the user a one time access to a
+    connection that has gone away and gives the user an idea as to why
+    instead of just the knowledge that the connectio has gone away.
 
 Inputs:
 
-	TCBptr = user specified Local_Connection_ID.
+    TCBptr = user specified Local_Connection_ID.
 
 Outputs:
 
-	OK = (0) Valid connection ID, RTCB updated to TCB address.
-	OTHERWISE the appropriate error code.
+    OK = (0) Valid connection ID, RTCB updated to TCB address.
+    OTHERWISE the appropriate error code.
 
 Side Effects:
 
-	If the TCB was marked inactive (TCB->State == CS$Inactive) then
-	the inactive code is returned as the routine value.  The TCB is
-	completly deleted.
+    If the TCB was marked inactive (TCB->State == CS$Inactive) then
+    the inactive code is returned as the routine value.  The TCB is
+    completly deleted.
 */
 
 tcb_ok(signed long TCBIDX,signed long * ERR,struct user_default_args * uargs)
 {
-    extern	tcp$kill_pending_requests();
-#define	TCBERR(EC) {*ERR = EC; return 0;}
+    extern  tcp$kill_pending_requests();
+#define TCBERR(EC) {*ERR = EC; return 0;}
     register
     struct tcb_structure * TCB;
 
@@ -987,13 +987,13 @@ tcb_ok(signed long TCBIDX,signed long * ERR,struct user_default_args * uargs)
 // functions), neither of these checks should ever fail.
 
     if ((TCBIDX <= 0) || (TCBIDX > vtcb_size))
-        TCBERR(NET$_CDE);	// Bad connection-ID
+        TCBERR(NET$_CDE);   // Bad connection-ID
     TCB = vtcb_ptr[TCBIDX];
     if (TCB <= 0)
-        TCBERR(NET$_CDE);	// TCB has been deleted
+        TCBERR(NET$_CDE);   // TCB has been deleted
     if ((TCB->vtcb_index != TCBIDX) ||
             (TCB->ucb_adrs != uargs->ud$ucb_adrs))
-        TCBERR(NET$_CDE);	// Confusion...
+        TCBERR(NET$_CDE);   // Confusion...
 
 // Check to see if the connection is still active
 // (ie, TCB->State != CS$Inactive).
@@ -1009,7 +1009,7 @@ tcb_ok(signed long TCBIDX,signed long * ERR,struct user_default_args * uargs)
         return 0;
     }
     else
-        return TCB;		// Good connection - return TCB
+        return TCB;     // Good connection - return TCB
 }
 
 
@@ -1020,16 +1020,16 @@ tcb_ok(signed long TCBIDX,signed long * ERR,struct user_default_args * uargs)
 
 Function:
 
-	Simple index to TCB translation with a few error checks.
+    Simple index to TCB translation with a few error checks.
 
 Inputs:
 
-	TCBidx = user specified Local_Connection_ID.
+    TCBidx = user specified Local_Connection_ID.
 
 Outputs:
 
-	SS$_NORMAL if everything is ok,
-	OTHERWISE the appropriate error code.
+    SS$_NORMAL if everything is ok,
+    OTHERWISE the appropriate error code.
 
 Side Effects:
 
@@ -1039,7 +1039,7 @@ GET_TCB(TCBIDX,TCBret)
 long * TCBret;
 {
 
-    extern	tcp$kill_pending_requests();
+    extern  tcp$kill_pending_requests();
     register
     struct tcb_structure * TCB;
 
@@ -1048,14 +1048,14 @@ long * TCBret;
 // functions), neither of these checks should ever fail.
 
     if ((TCBIDX <= 0) || (TCBIDX > vtcb_size))
-        return NET$_CDE;	// Bad connection-ID
+        return NET$_CDE;    // Bad connection-ID
     TCB = vtcb_ptr[TCBIDX];
     if (TCB <= 0)
-        return NET$_CDE;	// TCB has been deleted
+        return NET$_CDE;    // TCB has been deleted
     if ((TCB->vtcb_index != TCBIDX))
-        return NET$_CDE;	// Confusion...
+        return NET$_CDE;    // Confusion...
 
-    *TCBret = TCB;		// Good connection - return TCB
+    *TCBret = TCB;      // Good connection - return TCB
     return    SS$_NORMAL;
 }
 
@@ -1068,17 +1068,17 @@ CALCULATE_UPTIME (void)
 {
     signed long
     uptime;
-    unsigned short	time_buffer[8];
-    unsigned long long	One=1,	// QuadWord of val 1.
-                        Now;			// time as in now.
+    unsigned short  time_buffer[8];
+    unsigned long long  One=1,  // QuadWord of val 1.
+                        Now;            // time as in now.
 
-    sys$gettim(&Now);	// current time
+    sys$gettim(&Now);   // current time
     Subm(2,Start_Time,Now,Now); // compute uptime.
 
 // Convert to delta system time (ie, multiply by -1)  Problem is that we have
 // time in quadwords.
 
-    Now = ! Now;	// Compute Delta time (quadword).
+    Now = ! Now;    // Compute Delta time (quadword).
 #if 0
     Now[1] = ! Now[1];
 #endif

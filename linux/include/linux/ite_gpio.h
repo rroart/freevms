@@ -2,7 +2,7 @@
  * FILE NAME ite_gpio.h
  *
  * BRIEF MODULE DESCRIPTION
- *	Generic gpio.
+ *  Generic gpio.
  *
  *  Author: MontaVista Software, Inc.  <source@mvista.com>
  *          Hai-Pao Fan <haipao@mvista.com>
@@ -42,19 +42,19 @@ struct ite_gpio_ioctl_data
     __u32 data;
 };
 
-#define ITE_GPIO_IOCTL_BASE	'Z'
+#define ITE_GPIO_IOCTL_BASE 'Z'
 
-#define ITE_GPIO_IN		_IOWR(ITE_GPIO_IOCTL_BASE, 0, struct ite_gpio_ioctl_data)
-#define ITE_GPIO_OUT		_IOW (ITE_GPIO_IOCTL_BASE, 1, struct ite_gpio_ioctl_data)
-#define	ITE_GPIO_INT_CTRL	_IOW (ITE_GPIO_IOCTL_BASE, 2, struct ite_gpio_ioctl_data)
-#define	ITE_GPIO_IN_STATUS	_IOW (ITE_GPIO_IOCTL_BASE, 3, struct ite_gpio_ioctl_data)
-#define	ITE_GPIO_OUT_STATUS	_IOW (ITE_GPIO_IOCTL_BASE, 4, struct ite_gpio_ioctl_data)
-#define ITE_GPIO_GEN_CTRL	_IOW (ITE_GPIO_IOCTL_BASE, 5, struct ite_gpio_ioctl_data)
-#define ITE_GPIO_INT_WAIT	_IOW (ITE_GPIO_IOCTL_BASE, 6, struct ite_gpio_ioctl_data)
+#define ITE_GPIO_IN     _IOWR(ITE_GPIO_IOCTL_BASE, 0, struct ite_gpio_ioctl_data)
+#define ITE_GPIO_OUT        _IOW (ITE_GPIO_IOCTL_BASE, 1, struct ite_gpio_ioctl_data)
+#define ITE_GPIO_INT_CTRL   _IOW (ITE_GPIO_IOCTL_BASE, 2, struct ite_gpio_ioctl_data)
+#define ITE_GPIO_IN_STATUS  _IOW (ITE_GPIO_IOCTL_BASE, 3, struct ite_gpio_ioctl_data)
+#define ITE_GPIO_OUT_STATUS _IOW (ITE_GPIO_IOCTL_BASE, 4, struct ite_gpio_ioctl_data)
+#define ITE_GPIO_GEN_CTRL   _IOW (ITE_GPIO_IOCTL_BASE, 5, struct ite_gpio_ioctl_data)
+#define ITE_GPIO_INT_WAIT   _IOW (ITE_GPIO_IOCTL_BASE, 6, struct ite_gpio_ioctl_data)
 
-#define	ITE_GPIO_PORTA	0x01
-#define	ITE_GPIO_PORTB	0x02
-#define	ITE_GPIO_PORTC	0x04
+#define ITE_GPIO_PORTA  0x01
+#define ITE_GPIO_PORTB  0x02
+#define ITE_GPIO_PORTC  0x04
 
 extern int ite_gpio_in(__u32 device, __u32 mask, volatile __u32 *data);
 extern int ite_gpio_out(__u32 device, __u32 mask, __u32 data);

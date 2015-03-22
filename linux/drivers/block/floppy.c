@@ -216,7 +216,7 @@ static int set_dor(int fdc, char mask, char data);
 static void register_devfs_entries (int drive) __init;
 static devfs_handle_t devfs_handle;
 
-#define K_64	0x10000		/* 64KB */
+#define K_64    0x10000     /* 64KB */
 
 /* the following is the mask of allowed drives. By default units 2 and
  * 3 of both floppy controllers are disabled, because switching on the
@@ -283,7 +283,7 @@ static inline int DRIVE(kdev_t x)
 }
 #define ITYPE(x) (((x)>>2) & 0x1f)
 #define TOMINOR(x) ((x & 3) | ((x & 4) << 5))
-#define UNIT(x) ((x) & 0x03)		/* drive on fdc */
+#define UNIT(x) ((x) & 0x03)        /* drive on fdc */
 #define FDC(x) (((x) & 0x04) >> 2)  /* fdc of drive */
 #define REVDRIVE(fdc, unit) ((unit) + ((fdc) << 2))
 /* reverse mapping from unit and fdc to drive */
@@ -421,8 +421,8 @@ static struct
     } /*3 1/2 ED*/
     /*    |  --autodetected formats---    |      |      |
      *    read_track                      |      |    Name printed when booting
-     *				      |     Native format
-     *	            Frequency of disk change checks */
+     *                    |     Native format
+     *              Frequency of disk change checks */
 };
 
 static struct floppy_drive_params drive_params[N_DRIVE];
@@ -446,37 +446,37 @@ static struct floppy_raw_cmd *raw_cmd, default_raw_cmd;
  * setfdprm(8)).
  */
 /*
-	    Size
-	     |  Sectors per track
-	     |  | Head
-	     |  | |  Tracks
-	     |  | |  | Stretch
-	     |  | |  | |  Gap 1 size
-	     |  | |  | |    |  Data rate, | 0x40 for perp
-	     |  | |  | |    |    |  Spec1 (stepping rate, head unload
-	     |  | |  | |    |    |    |    /fmt gap (gap2) */
+        Size
+         |  Sectors per track
+         |  | Head
+         |  | |  Tracks
+         |  | |  | Stretch
+         |  | |  | |  Gap 1 size
+         |  | |  | |    |  Data rate, | 0x40 for perp
+         |  | |  | |    |    |  Spec1 (stepping rate, head unload
+         |  | |  | |    |    |    |    /fmt gap (gap2) */
 static struct floppy_struct floppy_type[32] =
 {
-    {    0, 0,0, 0,0,0x00,0x00,0x00,0x00,NULL    },	/*  0 no testing    */
+    {    0, 0,0, 0,0,0x00,0x00,0x00,0x00,NULL    }, /*  0 no testing    */
     {  720, 9,2,40,0,0x2A,0x02,0xDF,0x50,"d360"  }, /*  1 360KB PC      */
-    { 2400,15,2,80,0,0x1B,0x00,0xDF,0x54,"h1200" },	/*  2 1.2MB AT      */
-    {  720, 9,1,80,0,0x2A,0x02,0xDF,0x50,"D360"  },	/*  3 360KB SS 3.5" */
-    { 1440, 9,2,80,0,0x2A,0x02,0xDF,0x50,"D720"  },	/*  4 720KB 3.5"    */
-    {  720, 9,2,40,1,0x23,0x01,0xDF,0x50,"h360"  },	/*  5 360KB AT      */
-    { 1440, 9,2,80,0,0x23,0x01,0xDF,0x50,"h720"  },	/*  6 720KB AT      */
-    { 2880,18,2,80,0,0x1B,0x00,0xCF,0x6C,"H1440" },	/*  7 1.44MB 3.5"   */
-    { 5760,36,2,80,0,0x1B,0x43,0xAF,0x54,"E2880" },	/*  8 2.88MB 3.5"   */
-    { 6240,39,2,80,0,0x1B,0x43,0xAF,0x28,"E3120" },	/*  9 3.12MB 3.5"   */
+    { 2400,15,2,80,0,0x1B,0x00,0xDF,0x54,"h1200" }, /*  2 1.2MB AT      */
+    {  720, 9,1,80,0,0x2A,0x02,0xDF,0x50,"D360"  }, /*  3 360KB SS 3.5" */
+    { 1440, 9,2,80,0,0x2A,0x02,0xDF,0x50,"D720"  }, /*  4 720KB 3.5"    */
+    {  720, 9,2,40,1,0x23,0x01,0xDF,0x50,"h360"  }, /*  5 360KB AT      */
+    { 1440, 9,2,80,0,0x23,0x01,0xDF,0x50,"h720"  }, /*  6 720KB AT      */
+    { 2880,18,2,80,0,0x1B,0x00,0xCF,0x6C,"H1440" }, /*  7 1.44MB 3.5"   */
+    { 5760,36,2,80,0,0x1B,0x43,0xAF,0x54,"E2880" }, /*  8 2.88MB 3.5"   */
+    { 6240,39,2,80,0,0x1B,0x43,0xAF,0x28,"E3120" }, /*  9 3.12MB 3.5"   */
 
     { 2880,18,2,80,0,0x25,0x00,0xDF,0x02,"h1440" }, /* 10 1.44MB 5.25"  */
     { 3360,21,2,80,0,0x1C,0x00,0xCF,0x0C,"H1680" }, /* 11 1.68MB 3.5"   */
-    {  820,10,2,41,1,0x25,0x01,0xDF,0x2E,"h410"  },	/* 12 410KB 5.25"   */
-    { 1640,10,2,82,0,0x25,0x02,0xDF,0x2E,"H820"  },	/* 13 820KB 3.5"    */
-    { 2952,18,2,82,0,0x25,0x00,0xDF,0x02,"h1476" },	/* 14 1.48MB 5.25"  */
-    { 3444,21,2,82,0,0x25,0x00,0xDF,0x0C,"H1722" },	/* 15 1.72MB 3.5"   */
-    {  840,10,2,42,1,0x25,0x01,0xDF,0x2E,"h420"  },	/* 16 420KB 5.25"   */
-    { 1660,10,2,83,0,0x25,0x02,0xDF,0x2E,"H830"  },	/* 17 830KB 3.5"    */
-    { 2988,18,2,83,0,0x25,0x00,0xDF,0x02,"h1494" },	/* 18 1.49MB 5.25"  */
+    {  820,10,2,41,1,0x25,0x01,0xDF,0x2E,"h410"  }, /* 12 410KB 5.25"   */
+    { 1640,10,2,82,0,0x25,0x02,0xDF,0x2E,"H820"  }, /* 13 820KB 3.5"    */
+    { 2952,18,2,82,0,0x25,0x00,0xDF,0x02,"h1476" }, /* 14 1.48MB 5.25"  */
+    { 3444,21,2,82,0,0x25,0x00,0xDF,0x0C,"H1722" }, /* 15 1.72MB 3.5"   */
+    {  840,10,2,42,1,0x25,0x01,0xDF,0x2E,"h420"  }, /* 16 420KB 5.25"   */
+    { 1660,10,2,83,0,0x25,0x02,0xDF,0x2E,"H830"  }, /* 17 830KB 3.5"    */
+    { 2988,18,2,83,0,0x25,0x00,0xDF,0x02,"h1494" }, /* 18 1.49MB 5.25"  */
     { 3486,21,2,83,0,0x25,0x00,0xDF,0x0C,"H1743" }, /* 19 1.74 MB 3.5"  */
 
     { 1760,11,2,80,0,0x1C,0x09,0xCF,0x00,"h880"  }, /* 20 880KB 5.25"   */
@@ -490,11 +490,11 @@ static struct floppy_struct floppy_type[32] =
     { 7680,48,2,80,0,0x25,0x63,0xCF,0x00,"E3840" }, /* 28 3.84MB 3.5"   */
 
     { 3680,23,2,80,0,0x1C,0x10,0xCF,0x00,"H1840" }, /* 29 1.84MB 3.5"   */
-    { 1600,10,2,80,0,0x25,0x02,0xDF,0x2E,"D800"  },	/* 30 800KB 3.5"    */
+    { 1600,10,2,80,0,0x25,0x02,0xDF,0x2E,"D800"  }, /* 30 800KB 3.5"    */
     { 3200,20,2,80,0,0x1C,0x00,0xCF,0x2C,"H1600" }, /* 31 1.6MB 3.5"    */
 };
 
-#define	NUMBER(x)	(sizeof(x) / sizeof(*(x)))
+#define NUMBER(x)   (sizeof(x) / sizeof(*(x)))
 #define SECTSIZE (_FD_SECTSIZE(*floppy))
 
 /* Auto-detection: Disk type used until the next media change occurs. */
@@ -559,11 +559,11 @@ typedef void (*done_f)(int);
 static struct cont_t
 {
     void (*interrupt)(void); /* this is called after the interrupt of the
-				  * main command */
+                  * main command */
     void (*redo)(void); /* this is called to retry the operation */
     void (*error)(void); /* this is called to tally an error */
     done_f done; /* this is called to say if the operation has
-		      * succeeded/failed */
+              * succeeded/failed */
 } *cont;
 
 static void floppy_ready(void);
@@ -610,8 +610,8 @@ static struct floppy_struct *_floppy = floppy_type;
 static unsigned char current_drive;
 static long current_count_sectors;
 static unsigned char sector_t; /* sector in track */
-static unsigned char in_sector_offset;	/* offset within physical sector,
-					 * expressed in units of 512 bytes */
+static unsigned char in_sector_offset;  /* offset within physical sector,
+                     * expressed in units of 512 bytes */
 
 #ifndef fd_eject
 #define fd_eject(x) -EINVAL
@@ -852,9 +852,9 @@ static int set_dor(int fdc, char mask, char data)
         }
     }
     /*
-     *	We should propogate failures to grab the resources back
-     *	nicely from here. Actually we ought to rewrite the fd
-     *	driver some day too.
+     *  We should propogate failures to grab the resources back
+     *  nicely from here. Actually we ought to rewrite the fd
+     *  driver some day too.
      */
     if (newdor & FLOPPY_MOTOR_MASK)
         floppy_grab_irq_and_dma();
@@ -1097,8 +1097,8 @@ static int fd_wait_for_completion(unsigned long delay, timeout_fn function)
     if (FDCS->reset)
     {
         reset_fdc(); /* do the reset during sleep to win time
-			      * if we don't need to sleep, it's a good
-			      * occasion anyways */
+                  * if we don't need to sleep, it's a good
+                  * occasion anyways */
         return 1;
     }
 
@@ -1318,8 +1318,8 @@ static inline void perpendicular_mode(void)
             DPRINT("Invalid data rate for perpendicular mode!\n");
             cont->done(0);
             FDCS->reset = 1; /* convenient way to return to
-						  * redo without to much hassle (deep
-						  * stack et al. */
+                          * redo without to much hassle (deep
+                          * stack et al. */
             return;
         }
     }
@@ -1351,8 +1351,8 @@ static int fdc_configure(void)
         return 0;
     output_byte(0);
     output_byte(0x10 | (no_fifo & 0x20) | (fifo_depth & 0xf));
-    output_byte(0);	/* pre-compensation from track
-			   0 upwards */
+    output_byte(0); /* pre-compensation from track
+               0 upwards */
     return 1;
 }
 
@@ -1509,7 +1509,7 @@ static int interpret_errors(void)
     /* check IC to find cause of interrupt */
     switch (ST0 & ST0_INTR)
     {
-    case 0x40:	/* error occurred during command execution */
+    case 0x40:  /* error occurred during command execution */
         if (ST1 & ST1_EOC)
             return 0; /* occurs with pseudo-DMA */
         bad = 1;
@@ -1557,11 +1557,11 @@ static int interpret_errors(void)
                 else
                     printk("probe failed...");
             }
-            else if (ST2 & ST2_WC)  	/* seek error */
+            else if (ST2 & ST2_WC)      /* seek error */
             {
                 printk("wrong cylinder");
             }
-            else if (ST2 & ST2_BC)  	/* cylinder marked as bad */
+            else if (ST2 & ST2_BC)      /* cylinder marked as bad */
             {
                 printk("bad cylinder");
             }
@@ -1943,7 +1943,7 @@ static void reset_interrupt(void)
 #ifdef DEBUGT
     debugt("reset interrupt:");
 #endif
-    result();		/* get the status ready for set_fdc */
+    result();       /* get the status ready for set_fdc */
     if (FDCS->reset)
     {
         printk("reset set in interrupt, calling %p\n", cont->error);
@@ -2109,7 +2109,7 @@ static void floppy_ready(void)
             disk_change(current_drive) &&
             !DP->select_delay)
         twaddle(); /* this clears the dcl on certain drive/controller
-			    * combinations */
+                * combinations */
 
 #ifdef fd_chose_dma_mode
     if ((raw_cmd->flags & FD_RAW_READ) ||
@@ -2802,7 +2802,7 @@ static void virtualdmabug_workaround(void)
         }
 #endif
         SECT_PER_TRACK = end_sector; /* make sure SECT_PER_TRACK points
-					      * to end of transfer */
+                          * to end of transfer */
     }
 }
 
@@ -3011,9 +3011,9 @@ static int make_raw_rw_request(void)
                        indirect, direct, sector_t);
                 return 0;
             }
-            /*			check_dma_crossing(raw_cmd->kernel_data,
-            					   raw_cmd->length,
-            					   "end of make_raw_request [1]");*/
+            /*          check_dma_crossing(raw_cmd->kernel_data,
+                                   raw_cmd->length,
+                                   "end of make_raw_request [1]");*/
 
             virtualdmabug_workaround();
             return 2;
@@ -4289,15 +4289,15 @@ static char __init get_fdc_version(void)
 {
     int r;
 
-    output_byte(FD_DUMPREGS);	/* 82072 and better know DUMPREGS */
+    output_byte(FD_DUMPREGS);   /* 82072 and better know DUMPREGS */
     if (FDCS->reset)
         return FDC_NONE;
     if ((r = result()) <= 0x00)
-        return FDC_NONE;	/* No FDC present ??? */
+        return FDC_NONE;    /* No FDC present ??? */
     if ((r==1) && (reply_buffer[0] == 0x80))
     {
         printk(KERN_INFO "FDC %d is an 8272A\n",fdc);
-        return FDC_8272A;	/* 8272a/765 don't know DUMPREGS */
+        return FDC_8272A;   /* 8272a/765 don't know DUMPREGS */
     }
     if (r != 10)
     {
@@ -4309,7 +4309,7 @@ static char __init get_fdc_version(void)
     if (!fdc_configure())
     {
         printk(KERN_INFO "FDC %d is an 82072\n",fdc);
-        return FDC_82072;      	/* 82072 doesn't know CONFIGURE */
+        return FDC_82072;       /* 82072 doesn't know CONFIGURE */
     }
 
     output_byte(FD_PERPENDICULAR);
@@ -4320,7 +4320,7 @@ static char __init get_fdc_version(void)
     else
     {
         printk(KERN_INFO "FDC %d is an 82072A\n", fdc);
-        return FDC_82072A;	/* 82072A as found on Sparcs. */
+        return FDC_82072A;  /* 82072A as found on Sparcs. */
     }
 
     output_byte(FD_UNLOCK);
@@ -4328,8 +4328,8 @@ static char __init get_fdc_version(void)
     if ((r == 1) && (reply_buffer[0] == 0x80))
     {
         printk(KERN_INFO "FDC %d is a pre-1991 82077\n", fdc);
-        return FDC_82077_ORIG;	/* Pre-1991 82077, doesn't know
-					 * LOCK/UNLOCK */
+        return FDC_82077_ORIG;  /* Pre-1991 82077, doesn't know
+                     * LOCK/UNLOCK */
     }
     if ((r != 1) || (reply_buffer[0] != 0x00))
     {
@@ -4348,7 +4348,7 @@ static char __init get_fdc_version(void)
     if (reply_buffer[0] == 0x80)
     {
         printk(KERN_INFO "FDC %d is a post-1991 82077\n",fdc);
-        return FDC_82077;	/* Revised 82077AA passes all the tests */
+        return FDC_82077;   /* Revised 82077AA passes all the tests */
     }
     switch (reply_buffer[0] >> 5)
     {
@@ -4736,8 +4736,8 @@ static int floppy_grab_irq_and_dma(void)
         if (FDCS->address != -1)
             fd_outb(FDCS->dor, FD_DOR);
     /*
-     *	The driver will try and free resources and relies on us
-     *	to know if they were allocated or not.
+     *  The driver will try and free resources and relies on us
+     *  to know if they were allocated or not.
      */
     fdc = 0;
     irqdma_allocated = 1;

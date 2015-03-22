@@ -1,5 +1,5 @@
-#ifndef isddef_h
-#define isddef_h
+#ifndef ISDDEF_H
+#define ISDDEF_H
 
 #define ISD$K_LENDZRO 12
 #define ISD$C_LENDZRO 12

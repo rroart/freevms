@@ -626,7 +626,7 @@ unsigned mounte2(unsigned flags, unsigned devices,char *devnam[],char *label[],s
             {
                 //printk("bef qio %x %x\n",hba,chan);
                 sts = sys$qiow(EXT2_EF,chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct ext2_super_block),hba,root_device_name[3]-48,0,0);
-                //	printk("aft qio %x\n",sts);
+                //  printk("aft qio %x\n",sts);
                 if (!(sts & 1)) break;
                 if (home.s_magic == EXT2_SUPER_MAGIC)
                     break;
@@ -641,7 +641,7 @@ unsigned mounte2(unsigned flags, unsigned devices,char *devnam[],char *label[],s
             {
                 struct _fcb * idxfcb;
                 struct _fcb * mapfcb;
-                //	  vcb->vcb$ibmaplbn = idxfcb->stlbn;
+                //    vcb->vcb$ibmaplbn = idxfcb->stlbn;
                 vcb->vcb$l_homelbn = home.s_first_data_block;
                 vcb->vcb$l_ibmaplbn = 0;//home.hm2$l_ibmaplbn;
                 vcb->vcb$l_ibmapvbn = 0;//home.hm2$w_ibmapvbn;

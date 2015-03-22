@@ -1,5 +1,5 @@
-#ifndef xabfhcdef_h
-#define xabfhcdef_h
+#ifndef XABFHCDEF_H
+#define XABFHCDEF_H
 
 #define XAB$C_FHC 29
 #define XAB$M_FTN 0x1

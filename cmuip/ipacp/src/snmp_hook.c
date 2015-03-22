@@ -1,60 +1,60 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "SNMP_HOOK - Simple Network Management service"
 /*
 Facility:
 
-	SNMP_HOOK.BLI - Provide SMNP service under UDP (RFC 1098)
+    SNMP_HOOK.BLI - Provide SMNP service under UDP (RFC 1098)
 
 Abstract:
 
-	Supports the Simple Network Management Protocol (SMNP) for
-	the IPACP.  Provides the ability to read and write MIB variables.
+    Supports the Simple Network Management Protocol (SMNP) for
+    the IPACP.  Provides the ability to read and write MIB variables.
 
-	There are four entry points into this module:
+    There are four entry points into this module:
 
-	SNMP$INIT :
-		Initialize the module.
-	SNMP$NET_INPUT :
-		Where UDP/SNMP packets are delivered.
-	SNMP$NET_INPUT :
-		Provides the IPACP access to SNMP.
-	getStatPtr :
-		Entry point from the generic SNMP processing code.
+    SNMP$INIT :
+        Initialize the module.
+    SNMP$NET_INPUT :
+        Where UDP/SNMP packets are delivered.
+    SNMP$NET_INPUT :
+        Provides the IPACP access to SNMP.
+    getStatPtr :
+        Entry point from the generic SNMP processing code.
 
 Author:
 
-	Bruce R. Miller, CMU NetDev, 8am Thursday morn. 2/22/90
-	Copyright (c) 1990, Bruce R. Miller and Carnegie-Mellon University
+    Bruce R. Miller, CMU NetDev, 8am Thursday morn. 2/22/90
+    Copyright (c) 1990, Bruce R. Miller and Carnegie-Mellon University
 
 Module Modification History:
 
-07/18/90 Bruce R. Miller	CMU Network Development
-	 Merged in SNMP_vars.bli
+07/18/90 Bruce R. Miller    CMU Network Development
+     Merged in SNMP_vars.bli
 
 Copywrite:
 
 ***********************************************************
-	Copyright 1990 by Carnegie Mellon University
+    Copyright 1990 by Carnegie Mellon University
 
                       All Rights Reserved
 
@@ -88,16 +88,16 @@ MODULE SNMP_HOOK(IDENT="1.0",LANGUAGE(BLISS32),
                      typedef unsigned char u_char;
 typedef unsigned long u_long;
 
-#include <starlet.h>	// VMS system definitions
-// not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";	// BLISS common definitions
-//LIBRARY "CMUIP_SRC:[CENTRAL]NETERROR";	// Network error codes
-#include <cmuip/central/include/netconfig.h>			// VMS-specific definitions
+#include <starlet.h>    // VMS system definitions
+// not yet#include "CMUIP_SRC:[CENTRAL]NETXPORT";   // BLISS common definitions
+//LIBRARY "CMUIP_SRC:[CENTRAL]NETERROR";    // Network error codes
+#include <cmuip/central/include/netconfig.h>            // VMS-specific definitions
 #include "cmuip.h" // needed before tcpmacros.h
-#include "tcpmacros.h"		// System-wide Macro definitions
-//LIBRARY "structure.h"		// System-wide structure definitions
-#include "asn1.h"			// ASN defs
-#include "snmp.h"			// SNMP definitions
-#include "tcp.h"			// TCP definitions
+#include "tcpmacros.h"      // System-wide Macro definitions
+//LIBRARY "structure.h"     // System-wide structure definitions
+#include "asn1.h"           // ASN defs
+#include "snmp.h"           // SNMP definitions
+#include "tcp.h"            // TCP definitions
 
 #include <ssdef.h>
 #include <descrip.h>
@@ -167,16 +167,16 @@ long_return;
 //!!HACK!!// Update these comments
  * u_char *
  * findVar(name, length, exact, var_len, access_method)
- * oid	    *name;	    IN/OUT - input name requested, output name found
- * int	    length;	    IN/OUT - number of sub-ids in the in and out oid's
- * int	    exact;	    IN - TRUE if an exact match was requested.
- * int	    len;	    OUT - length of variable or 0 if function returned.
- * int	    access_method; OUT - 1 if function, 0 if char pointer.
+ * oid      *name;      IN/OUT - input name requested, output name found
+ * int      length;     IN/OUT - number of sub-ids in the in and out oid's
+ * int      exact;      IN - TRUE if an exact match was requested.
+ * int      len;        OUT - length of variable or 0 if function returned.
+ * int      access_method; OUT - 1 if function, 0 if char pointer.
  *
  * accessVar(rw, var, varLen)
- * int	    rw;	    IN - request to READ or WRITE the variable
+ * int      rw;     IN - request to READ or WRITE the variable
  * u_char   *var;   IN/OUT - input or output buffer space
- * int	    *varLen;IN/OUT - input and output buffer len
+ * int      *varLen;IN/OUT - input and output buffer len
 */
 
 #define    SNMP$K_OIDsize 4
@@ -184,14 +184,14 @@ long_return;
 struct variable_struct
 {
     char    var$name[24*SNMP$K_OIDsize]; // object identifier of variable
-    char    var$namelen;	// /* length of above */
-    char    var$type;	// type of variable, INTEGER or (octet) STRING
-    char    var$magic;	// passed to function as a hint
-    unsigned short    var$acl;	// access control list for variable
-    int (*    var$findVar)();	// function that finds variable
+    char    var$namelen;    // /* length of above */
+    char    var$type;   // type of variable, INTEGER or (octet) STRING
+    char    var$magic;  // passed to function as a hint
+    unsigned short    var$acl;  // access control list for variable
+    int (*    var$findVar)();   // function that finds variable
 };
 
-#define    MIBmax_size	3+21+19+4+26+12+5+4+2	// Add 2 as a fudge factor...
+#define    MIBmax_size  3+21+19+4+26+12+5+4+2   // Add 2 as a fudge factor...
 #define    VAR_Block_Size sizeof(struct variable_struct)
 
 #if 0
@@ -213,17 +213,17 @@ PRESET (
 #endif
 
 #define    $MIBoid(oid) \
-	var$name : oid
+    var$name : oid
 
 #define    $MIBent(rtn,nlen,type,magic,acl,oid) \
-	{ \
-	$MIBoid(oid),\
-	var$namelen	: nlen,\
-	var$type	: type,\
-	var$magic	: magic,\
-	var$acl		: acl,\
-	var$findVar	: rtn \
-	}
+    { \
+    $MIBoid(oid),\
+    var$namelen : nlen,\
+    var$type    : type,\
+    var$magic   : magic,\
+    var$acl     : acl,\
+    var$findVar : rtn \
+    }
 
 #if 0
     $MIBend (void)
@@ -304,77 +304,77 @@ struct variable_struct
     "MIB, 2, 2, 1, 20, 0xFF"),
     $MIBent( var_ifEntry, 11, GAUGE,   IFOUTQLEN, RONLY,
     "MIB, 2, 2, 1, 21, 0xFF"),
-    $MIBent( var_ip,  9, INTEGER, IPFORWARDING, RONLY,	"MIB, 4, 1, 0"),
-    $MIBent( var_ip,  9, INTEGER, IPDEFAULTTTL, RONLY,	"MIB, 4, 2, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPINRECEIVES, RONLY,	"MIB, 4, 3, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPINHDRERRORS, RONLY,	"MIB, 4, 4, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPINADDRERRORS, RONLY,	"MIB, 4, 5, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPFORWDATAGRAMS, RONLY,	"MIB, 4, 6, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPINUNKNOWNPROTOS, RONLY,	"MIB, 4, 7, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPINDISCARDS, RONLY,	"MIB, 4, 8, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPINDELIVERS, RONLY,	"MIB, 4, 9, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPOUTREQUESTS, RONLY,	"MIB, 4, 10, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPOUTDISCARDS, RONLY,	"MIB, 4, 11, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPOUTNOROUTES, RONLY,	"MIB, 4, 12, 0"),
-    $MIBent( var_ip,  9, INTEGER, IPREASMTIMEOUT, RONLY,	"MIB, 4, 13, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPREASMREQDS, RONLY,	"MIB, 4, 14, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPREASMOKS, RONLY,	"MIB, 4, 15, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPREASMFAILS, RONLY,	"MIB, 4, 16, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPFRAGOKS, RONLY,		"MIB, 4, 17, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPFRAGFAILS, RONLY,	"MIB, 4, 18, 0"),
-    $MIBent( var_ip,  9, COUNTER, IPFRAGCREATES, RONLY,	"MIB, 4, 19, 0"),
+    $MIBent( var_ip,  9, INTEGER, IPFORWARDING, RONLY,  "MIB, 4, 1, 0"),
+    $MIBent( var_ip,  9, INTEGER, IPDEFAULTTTL, RONLY,  "MIB, 4, 2, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPINRECEIVES, RONLY,  "MIB, 4, 3, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPINHDRERRORS, RONLY, "MIB, 4, 4, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPINADDRERRORS, RONLY,    "MIB, 4, 5, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPFORWDATAGRAMS, RONLY,   "MIB, 4, 6, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPINUNKNOWNPROTOS, RONLY, "MIB, 4, 7, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPINDISCARDS, RONLY,  "MIB, 4, 8, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPINDELIVERS, RONLY,  "MIB, 4, 9, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPOUTREQUESTS, RONLY, "MIB, 4, 10, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPOUTDISCARDS, RONLY, "MIB, 4, 11, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPOUTNOROUTES, RONLY, "MIB, 4, 12, 0"),
+    $MIBent( var_ip,  9, INTEGER, IPREASMTIMEOUT, RONLY,    "MIB, 4, 13, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPREASMREQDS, RONLY,  "MIB, 4, 14, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPREASMOKS, RONLY,    "MIB, 4, 15, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPREASMFAILS, RONLY,  "MIB, 4, 16, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPFRAGOKS, RONLY,     "MIB, 4, 17, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPFRAGFAILS, RONLY,   "MIB, 4, 18, 0"),
+    $MIBent( var_ip,  9, COUNTER, IPFRAGCREATES, RONLY, "MIB, 4, 19, 0"),
 
 // IP Address Table
     $MIBent( var_ipAddrEntry, 14, IPADDRESS, IPADADDR, RONLY,
     "MIB, 4, 20, 1, 1, 0xFF, 0xFF, 0xFF, 0xFF"),
-    $MIBent( var_ipAddrEntry, 14, INTEGER,	IPADIFINDEX, RONLY,
+    $MIBent( var_ipAddrEntry, 14, INTEGER,  IPADIFINDEX, RONLY,
     "MIB, 4, 20, 1, 2, 0xFF, 0xFF, 0xFF, 0xFF"),
     $MIBent( var_ipAddrEntry, 14, IPADDRESS, IPADNETMASK, RONLY,
     "MIB, 4, 20, 1, 3, 0xFF, 0xFF, 0xFF, 0xFF"),
-    $MIBent( var_ipAddrEntry, 14, INTEGER,	IPADBCASTADDR, RONLY,
+    $MIBent( var_ipAddrEntry, 14, INTEGER,  IPADBCASTADDR, RONLY,
     "MIB, 4, 20, 1, 4, 0xFF, 0xFF, 0xFF, 0xFF"),
 
 // ICMP group
-    $MIBent( var_icmp, 9, COUNTER, ICMPINMSGS, RONLY, 		"MIB, 5, 1, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINERRORS, RONLY, 		"MIB, 5, 2, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINDESTUNREACHS, RONLY,	"MIB, 5, 3, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINTIMEEXCDS, RONLY, 		"MIB, 5, 4, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINPARMPROBS, RONLY, 		"MIB, 5, 5, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINSRCQUENCHS, RONLY, 	"MIB, 5, 6, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINREDIRECTS, RONLY, 		"MIB, 5, 7, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINECHOS, RONLY, 		"MIB, 5, 8, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINECHOREPS, RONLY, 		"MIB, 5, 9, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINTIMESTAMPS, RONLY, 	"MIB, 5, 10, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINTIMESTAMPREPS, RONLY, 	"MIB, 5, 11, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINADDRMASKS, RONLY, 		"MIB, 5, 12, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPINADDRMASKREPS, RONLY, 	"MIB, 5, 13, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTMSGS, RONLY, 		"MIB, 5, 14, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTERRORS, RONLY,		"MIB, 5, 15, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTDESTUNREACHS, RONLY,	"MIB, 5, 16, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTTIMEEXCDS, RONLY, 	"MIB, 5, 17, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTPARMPROBS, RONLY, 	"MIB, 5, 18, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTSRCQUENCHS, RONLY, 	"MIB, 5, 19, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTREDIRECTS, RONLY, 	"MIB, 5, 20, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTECHOS, RONLY, 		"MIB, 5, 21, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTECHOREPS, RONLY, 		"MIB, 5, 22, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTTIMESTAMPS, RONLY, 	"MIB, 5, 23, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTTIMESTAMPREPS, RONLY, 	"MIB, 5, 24, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTADDRMASKS, RONLY, 	"MIB, 5, 25, 0"),
-    $MIBent( var_icmp, 9, COUNTER, ICMPOUTADDRMASKREPS, RONLY, 	"MIB, 5, 26, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINMSGS, RONLY,       "MIB, 5, 1, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINERRORS, RONLY,         "MIB, 5, 2, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINDESTUNREACHS, RONLY,   "MIB, 5, 3, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINTIMEEXCDS, RONLY,      "MIB, 5, 4, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINPARMPROBS, RONLY,      "MIB, 5, 5, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINSRCQUENCHS, RONLY,     "MIB, 5, 6, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINREDIRECTS, RONLY,      "MIB, 5, 7, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINECHOS, RONLY,      "MIB, 5, 8, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINECHOREPS, RONLY,       "MIB, 5, 9, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINTIMESTAMPS, RONLY,     "MIB, 5, 10, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINTIMESTAMPREPS, RONLY,  "MIB, 5, 11, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINADDRMASKS, RONLY,      "MIB, 5, 12, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPINADDRMASKREPS, RONLY,   "MIB, 5, 13, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTMSGS, RONLY,      "MIB, 5, 14, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTERRORS, RONLY,        "MIB, 5, 15, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTDESTUNREACHS, RONLY,  "MIB, 5, 16, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTTIMEEXCDS, RONLY,     "MIB, 5, 17, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTPARMPROBS, RONLY,     "MIB, 5, 18, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTSRCQUENCHS, RONLY,    "MIB, 5, 19, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTREDIRECTS, RONLY,     "MIB, 5, 20, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTECHOS, RONLY,         "MIB, 5, 21, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTECHOREPS, RONLY,      "MIB, 5, 22, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTTIMESTAMPS, RONLY,    "MIB, 5, 23, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTTIMESTAMPREPS, RONLY,     "MIB, 5, 24, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTADDRMASKS, RONLY,     "MIB, 5, 25, 0"),
+    $MIBent( var_icmp, 9, COUNTER, ICMPOUTADDRMASKREPS, RONLY,  "MIB, 5, 26, 0"),
 
 // TCP group
-    $MIBent( var_tcp, 9, INTEGER, TCPRTOALGORITHM, RONLY,	"MIB, 6, 1, 0"),
-    $MIBent( var_tcp, 9, INTEGER, TCPRTOMIN, RONLY,		"MIB, 6, 2, 0"),
-    $MIBent( var_tcp, 9, INTEGER, TCPRTOMAX, RONLY, 	"MIB, 6, 3, 0"),
-    $MIBent( var_tcp, 9, INTEGER, TCPMAXCONN, RONLY, 	"MIB, 6, 4, 0"),
-    $MIBent( var_tcp, 9, COUNTER, TCPACTIVEOPENS, RONLY, 	"MIB, 6, 5, 0"),
-    $MIBent( var_tcp, 9, COUNTER, TCPPASSIVEOPENS, RONLY, 	"MIB, 6, 6, 0"),
-    $MIBent( var_tcp, 9, COUNTER, TCPATTEMPTFAILS, RONLY, 	"MIB, 6, 7, 0"),
-    $MIBent( var_tcp, 9, COUNTER, TCPESTABRESETS, RONLY, 	"MIB, 6, 8, 0"),
-    $MIBent( var_tcp, 9, GAUGE,	TCPCURRESTAB, RONLY, 	"MIB, 6, 9, 0"),
-    $MIBent( var_tcp, 9, COUNTER, TCPINSEGS, RONLY, 	"MIB, 6,10, 0"),
-    $MIBent( var_tcp, 9, COUNTER, TCPOUTSEGS, RONLY, 	"MIB, 6,11, 0"),
-    $MIBent( var_tcp, 9, COUNTER, TCPRETRANSSEGS, RONLY, 	"MIB, 6,12, 0"),
+    $MIBent( var_tcp, 9, INTEGER, TCPRTOALGORITHM, RONLY,   "MIB, 6, 1, 0"),
+    $MIBent( var_tcp, 9, INTEGER, TCPRTOMIN, RONLY,     "MIB, 6, 2, 0"),
+    $MIBent( var_tcp, 9, INTEGER, TCPRTOMAX, RONLY,     "MIB, 6, 3, 0"),
+    $MIBent( var_tcp, 9, INTEGER, TCPMAXCONN, RONLY,    "MIB, 6, 4, 0"),
+    $MIBent( var_tcp, 9, COUNTER, TCPACTIVEOPENS, RONLY,    "MIB, 6, 5, 0"),
+    $MIBent( var_tcp, 9, COUNTER, TCPPASSIVEOPENS, RONLY,   "MIB, 6, 6, 0"),
+    $MIBent( var_tcp, 9, COUNTER, TCPATTEMPTFAILS, RONLY,   "MIB, 6, 7, 0"),
+    $MIBent( var_tcp, 9, COUNTER, TCPESTABRESETS, RONLY,    "MIB, 6, 8, 0"),
+    $MIBent( var_tcp, 9, GAUGE, TCPCURRESTAB, RONLY,    "MIB, 6, 9, 0"),
+    $MIBent( var_tcp, 9, COUNTER, TCPINSEGS, RONLY,     "MIB, 6,10, 0"),
+    $MIBent( var_tcp, 9, COUNTER, TCPOUTSEGS, RONLY,    "MIB, 6,11, 0"),
+    $MIBent( var_tcp, 9, COUNTER, TCPRETRANSSEGS, RONLY,    "MIB, 6,12, 0"),
 
 // TCP connection table
     $MIBent( var_tcpConn, 20, INTEGER, TCPCONNSTATE, RONLY,
@@ -390,10 +390,10 @@ struct variable_struct
 
 
 // UDP group
-    $MIBent( var_udp, 9, COUNTER, UDPINDATAGRAMS, RONLY,	"MIB, 7, 1, 0"),
-    $MIBent( var_udp, 9, COUNTER, UDPINNOPORTS, RONLY,	"MIB, 7, 2, 0"),
-    $MIBent( var_udp, 9, COUNTER, UDPINERRORS, RONLY,	"MIB, 7, 3, 0"),
-    $MIBent( var_udp, 9, COUNTER, UDPOUTDATAGRAMS, RONLY,	"MIB, 7, 4, 0")
+    $MIBent( var_udp, 9, COUNTER, UDPINDATAGRAMS, RONLY,    "MIB, 7, 1, 0"),
+    $MIBent( var_udp, 9, COUNTER, UDPINNOPORTS, RONLY,  "MIB, 7, 2, 0"),
+    $MIBent( var_udp, 9, COUNTER, UDPINERRORS, RONLY,   "MIB, 7, 3, 0"),
+    $MIBent( var_udp, 9, COUNTER, UDPOUTDATAGRAMS, RONLY,   "MIB, 7, 4, 0")
 
 
 };
@@ -417,13 +417,13 @@ getStatPtr (name,namelen,type,len,acl,exact,access_method)
 // If no appropriate variable can be found, NULL is returned.
 //
 // The C language interface looks like this:
-//    oid		*name;	    /* IN - name of var, OUT - name matched */
-//    int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
-//    u_char	*type;	    /* OUT - type of matched variable */
-//    int		*len;	    /* OUT - length of matched variable */
-//    u_short	*acl;	    /* OUT - access control list */
-//    int		exact;	    /* IN - TRUE if exact match wanted */
-//    int		*access_method; /* OUT - 1 if function, 0 if char * */
+//    oid       *name;      /* IN - name of var, OUT - name matched */
+//    int       *namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
+//    u_char    *type;      /* OUT - type of matched variable */
+//    int       *len;       /* OUT - length of matched variable */
+//    u_short   *acl;       /* OUT - access control list */
+//    int       exact;      /* IN - TRUE if exact match wanted */
+//    int       *access_method; /* OUT - 1 if function, 0 if char * */
 //
 char name[SNMP$K_OIDsize];
 long * type;
@@ -486,7 +486,7 @@ char * name2;
     if ((len1 < len2)) return -1;  // name1 shorter, so it is "less"
     if ((len2 < len1)) return 1;
 
-    return 0;	// both strings are equal
+    return 0;   // both strings are equal
 }
 
 cmp_ipaddr (ip1,ip2)
@@ -503,7 +503,7 @@ char ip2 [4];
         if ((ip2[i] < ip1[i])) return 1;
     };
 
-    return 0;	// both IP addresses are equal
+    return 0;   // both IP addresses are equal
 }
 
 cmp_TCB (TCB1,TCB2)
@@ -539,26 +539,26 @@ struct tcb_structure * TCB2;
 
 #if 0
 /*
-	The remainder of this module is filled with variable access
-	routines which take parameters in the following format.
+    The remainder of this module is filled with variable access
+    routines which take parameters in the following format.
 
     /* IN - pointer to variable entry that points here */
 register struct variable *vp;
 
 /* IN/OUT - input name requested, output name found */
-register oid 	*name;
+register oid    *name;
 
 /* IN/OUT - length of input and output oid's */
-register int	*length;
+register int    *length;
 
 /* IN - TRUE if an exact match was requested. */
-int			exact;
+int         exact;
 
 /* OUT - length of variable or 0 if function returned. */
-int			*var_len;
+int         *var_len;
 
 /* OUT - 1 if function, 0 if char pointer. */
-int			*access_method;
+int         *access_method;
 
 */
 #endif
@@ -598,7 +598,7 @@ long * var_len;
 
     *length = vp->var$namelen;
     *access_method = 0;
-    *var_len = 4;	// default length == 4 bytes
+    *var_len = 4;   // default length == 4 bytes
 
     switch (vp->var$magic)
     {
@@ -647,7 +647,7 @@ long * var_len;
     extern dev_count;
     signed long i,
            newname [MAX_NAME_LEN],
-           interface,	// interface number
+           interface,   // interface number
            result;
     Device_Configuration_Entry * dev_config;
 
@@ -673,7 +673,7 @@ long * var_len;
 
     *length = vp->var$namelen;
     *access_method = 0;
-    *var_len = 4;	// default length == 4 bytes
+    *var_len = 4;   // default length == 4 bytes
 
     dev_config = dev_config_tab[interface].dc_begin;
     switch (vp->var$magic)
@@ -763,33 +763,33 @@ long * var_len;
  * from arp.c:
  * There is no arp.h, so this must be recreated here.
  */
-#define	ARPHLNMAX	6	/* largest arp_hln value needed */
-#define	ARPPLN		4	/* length of protocol address (IP) */
-struct	arptab
+#define ARPHLNMAX   6   /* largest arp_hln value needed */
+#define ARPPLN      4   /* length of protocol address (IP) */
+struct  arptab
 {
-    iaddr_t at_iaddr;		/* internet address */
-    u_char	at_haddr->ARPHLNMAX;	/* hardware address */
-    u_char	at_timer;		/* minutes since last reference */
-    u_char	at_flags;		/* flags */
-    struct	pbuf *at_hold;		/* last packet until resolved/timeout */
+    iaddr_t at_iaddr;       /* internet address */
+    u_char  at_haddr->ARPHLNMAX;    /* hardware address */
+    u_char  at_timer;       /* minutes since last reference */
+    u_char  at_flags;       /* flags */
+    struct  pbuf *at_hold;      /* last packet until resolved/timeout */
 };
 /* at_flags field values */
-#define	ATF_INUSE	1		/* entry in use */
-#define ATF_COM		2		/* completed entry (haddr valid) */
+#define ATF_INUSE   1       /* entry in use */
+#define ATF_COM     2       /* completed entry (haddr valid) */
 
-#define	ARPTAB_BSIZ	5		/* bucket size */
-#define	ARPTAB_NB	11		/* number of buckets */
-#define	ARPTAB_SIZE	(ARPTAB_BSIZ * ARPTAB_NB)
+#define ARPTAB_BSIZ 5       /* bucket size */
+#define ARPTAB_NB   11      /* number of buckets */
+#define ARPTAB_SIZE (ARPTAB_BSIZ * ARPTAB_NB)
 
 
 u_char *
 var_atEntry(vp, name, length, exact, var_len, access_method)
-register struct variable *vp;	/* IN - pointer to variable entry that points here */
-register oid	    *name;	/* IN/OUT - input name requested, output name found */
-register int	    *length;	/* IN/OUT - length of input and output oid's */
-int			    exact;	/* IN - TRUE if an exact match was requested. */
-int			    *var_len;	/* OUT - length of variable or 0 if function returned. */
-int			    *access_method; /* OUT - 1 if function, 0 if char pointer. */
+register struct variable *vp;   /* IN - pointer to variable entry that points here */
+register oid        *name;  /* IN/OUT - input name requested, output name found */
+register int        *length;    /* IN/OUT - length of input and output oid's */
+int             exact;  /* IN - TRUE if an exact match was requested. */
+int             *var_len;   /* OUT - length of variable or 0 if function returned. */
+int             *access_method; /* OUT - 1 if function, 0 if char pointer. */
 {
     /*
      * object identifier is of form:
@@ -797,29 +797,29 @@ int			    *access_method; /* OUT - 1 if function, 0 if char pointer. */
      * Interface is at offset 10,
      * IPADDR starts at offset 12.
      */
-    oid			    lowest[16];
-    oid			    current[16];
+    oid             lowest[16];
+    oid             current[16];
     register struct arptab  *arp;
-    struct arptab	    *lowarp = 0;
+    struct arptab       *lowarp = 0;
     extern struct arptab    arptab[];
     register struct ipdad   *ipdp;
-    struct ipdad	    *lowipdp = 0;
-    extern struct ipdad	    ipdad[];
-    long		    ipaddr;
-    int			    addrlen;
-    extern struct conf	    conf;
-    register u_char	    *cp;
-    register oid	    *op;
-    register int	    count;
+    struct ipdad        *lowipdp = 0;
+    extern struct ipdad     ipdad[];
+    long            ipaddr;
+    int             addrlen;
+    extern struct conf      conf;
+    register u_char     *cp;
+    register oid        *op;
+    register int        count;
 
     /* fill in object part of name for current (less sizeof instance part) */
     bcopy((char *)vp->name, (char *)current, (int)(vp->namelen - 6) * sizeof(oid));
     for(arp = arptab; arp < arptab + ARPTAB_SIZE; arp++)
     {
-        if (!(arp->at_flags & ATF_COM))	/* if this entry isn't valid */
+        if (!(arp->at_flags & ATF_COM)) /* if this entry isn't valid */
             continue;
         /* create new object id */
-        current[10] = 1;	/* ifIndex == 1 (ethernet) */
+        current[10] = 1;    /* ifIndex == 1 (ethernet) */
         current[11] = 1;
         cp = (u_char *)&(arp->at_iaddr);
         op = current + 12;
@@ -831,7 +831,7 @@ int			    *access_method; /* OUT - 1 if function, 0 if char pointer. */
             {
                 bcopy((char *)current, (char *)lowest, 16 * sizeof(oid));
                 lowarp = arp;
-                break;	/* no need to search further */
+                break;  /* no need to search further */
             }
         }
         else
@@ -850,10 +850,10 @@ int			    *access_method; /* OUT - 1 if function, 0 if char pointer. */
     ipaddr = conf.ipaddr + conf.ipstatic + 1;
     for(ipdp = ipdad; ipdp < ipdad + NIPDAD; ipdp++, ipaddr++)
     {
-        if (ipdp->timer == 0)	/* if this entry is unused, continue */
+        if (ipdp->timer == 0)   /* if this entry is unused, continue */
             continue;
         /* create new object id */
-        current[10] = 2;	/* ifIndex == 2 (appletalk) */
+        current[10] = 2;    /* ifIndex == 2 (appletalk) */
         current[11] = 1;
         cp = (u_char *)&ipaddr;
         op = current + 12;
@@ -866,7 +866,7 @@ int			    *access_method; /* OUT - 1 if function, 0 if char pointer. */
                 bcopy((char *)current, (char *)lowest, 16 * sizeof(oid));
                 lowipdp = ipdp;
                 lowarp = 0;
-                break;	/* no need to search further */
+                break;  /* no need to search further */
             }
         }
         else
@@ -884,7 +884,7 @@ int			    *access_method; /* OUT - 1 if function, 0 if char pointer. */
             }
         }
     }
-    if (lowarp != 0) 	/* arp entry was lowest */
+    if (lowarp != 0)    /* arp entry was lowest */
     {
         addrlen = 6;
         bcopy((char *)lowarp->at_haddr, (char *)return_buf, 6);
@@ -901,7 +901,7 @@ int			    *access_method; /* OUT - 1 if function, 0 if char pointer. */
         return_buf[2] = lowipdp->node;
     }
     else
-        return NULL;	/* no match */
+        return NULL;    /* no match */
     bcopy((char *)lowest, (char *)name, 16 * sizeof(oid));
     *length = 16;
     *access_method = 0;
@@ -948,7 +948,7 @@ long * var_len;
 
     *length = vp->var$namelen;
     *access_method = 0;
-    *var_len = 4;	// default length == 4 bytes
+    *var_len = 4;   // default length == 4 bytes
 
     return IP_group_MIB + (vp->var$magic-1)*4;
 }
@@ -958,20 +958,20 @@ long * var_len;
 u_char *
 var_ipRouteEntry(vp, name, length, exact, var_len, access_method)
 register struct variable *vp;   /* IN - pointer to variable entry that points here */
-register oid    	*name;	    /* IN/OUT - input name requested, output name found */
-register int	*length;    /* IN/OUT - length of input and output strings */
-int			exact;	    /* IN - TRUE if an exact match was requested. */
-int			*var_len;   /* OUT - length of variable or 0 if function returned. */
-int			*access_method; /* OUT - 1 if function, 0 if char pointer. */
+register oid        *name;      /* IN/OUT - input name requested, output name found */
+register int    *length;    /* IN/OUT - length of input and output strings */
+int         exact;      /* IN - TRUE if an exact match was requested. */
+int         *var_len;   /* OUT - length of variable or 0 if function returned. */
+int         *access_method; /* OUT - 1 if function, 0 if char pointer. */
 {
-    oid			    newname->MAX_NAME_LEN;
-    register int	    entry;
-    register struct mib_ipRouteEntry	*routep;
-    int			    result;
-    register int	    count;
-    register u_char	    *cp;
-    register oid	    *op;
-    extern struct conf	    conf;
+    oid             newname->MAX_NAME_LEN;
+    register int        entry;
+    register struct mib_ipRouteEntry    *routep;
+    int             result;
+    register int        count;
+    register u_char     *cp;
+    register oid        *op;
+    extern struct conf      conf;
 
     /* set up a routing table to search. All other values are set at startup. */
     routep = mib_ipRouteEntry;
@@ -1023,7 +1023,7 @@ char name[SNMP$K_OIDsize];
 {
     extern
     Device_Configuration_Entry * dev_config_tab ;
-    extern	dev_count;
+    extern  dev_count;
     signed long i,
            newname [MAX_NAME_LEN],
            result,
@@ -1079,7 +1079,7 @@ char name[SNMP$K_OIDsize];
 
     length = vp->var$namelen;
     access_method = 0;
-    var_len = 4;	// default length == 4 bytes
+    var_len = 4;    // default length == 4 bytes
 
     switch (vp->var$magic)
     {
@@ -1115,7 +1115,7 @@ char name[SNMP$K_OIDsize];
 
     length = vp->var$namelen;
     access_method = 0;
-    var_len = 4;	// default length == 4 bytes
+    var_len = 4;    // default length == 4 bytes
 
     return icmp_mib + (vp->var$magic-1)*4;
 }
@@ -1135,7 +1135,7 @@ char name[SNMP$K_OIDsize];
 
     length = vp->var$namelen;
     access_method = 0;
-    var_len = 4;	// default length == 4 bytes
+    var_len = 4;    // default length == 4 bytes
 
     return udp_mib + (vp->var$magic-1)*4;
 }
@@ -1155,7 +1155,7 @@ char name[SNMP$K_OIDsize];
 
     length = vp->var$namelen;
     access_method = 0;
-    var_len = 4;	// default length == 4 bytes
+    var_len = 4;    // default length == 4 bytes
 
     return tcp_mib + (vp->var$magic-1)*4;
 }
@@ -1188,19 +1188,19 @@ char name[SNMP$K_OIDsize];
         if ((tcb = vtcb_ptr[j]) != 0)
         {
             // "Cobble" in the new name
-            tcpaddr = &tcb->local_host;		// Local Host
+            tcpaddr = &tcb->local_host;     // Local Host
             newname[10] = tcpaddr[0];
             newname[11] = tcpaddr[1];
             newname[12] = tcpaddr[2];
             newname[13] = tcpaddr[3];
-            newname[14] = tcb->local_port;	// Local Port
+            newname[14] = tcb->local_port;  // Local Port
 
-            tcpaddr = &tcb->foreign_host;	// Remote Host
+            tcpaddr = &tcb->foreign_host;   // Remote Host
             newname[15] = tcpaddr[0];
             newname[16] = tcpaddr[1];
             newname[17] = tcpaddr[2];
             newname[18] = tcpaddr[3];
-            newname[19] = tcb->local_port;	// Remote Port
+            newname[19] = tcb->local_port;  // Remote Port
 
             result = compare(name, length, newname, vp->var$namelen);
             if ((! exact && (result < 0)))
@@ -1221,25 +1221,25 @@ char name[SNMP$K_OIDsize];
     if ((besttcb == 0)) return 0;
 
     // "Cobble" in the new name
-    tcpaddr = &besttcb->local_host;		// Local Host
+    tcpaddr = &besttcb->local_host;     // Local Host
     newname[10] = tcpaddr[0];
     newname[11] = tcpaddr[1];
     newname[12] = tcpaddr[2];
     newname[13] = tcpaddr[3];
-    newname[14] = besttcb->local_port;	// Local Port
+    newname[14] = besttcb->local_port;  // Local Port
 
-    tcpaddr = &besttcb->foreign_host;	// Remote Host
+    tcpaddr = &besttcb->foreign_host;   // Remote Host
     newname[15] = tcpaddr[0];
     newname[16] = tcpaddr[1];
     newname[17] = tcpaddr[2];
     newname[18] = tcpaddr[3];
-    newname[19] = besttcb->local_port;	// Remote Port
+    newname[19] = besttcb->local_port;  // Remote Port
 
     ch$move(vp->var$namelen * SNMP$K_OIDsize, newname, name );
 
     length = vp->var$namelen;
     access_method = 0;
-    var_len = 4;	// default length == 4 bytes
+    var_len = 4;    // default length == 4 bytes
 
     switch (vp->var$magic)
     {

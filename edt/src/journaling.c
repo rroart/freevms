@@ -16,14 +16,14 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*  Journaling routines							*/
-/*									*/
-/*  These routines are wrappers around the os_read* routines.  If the 	*/
-/*  recovery file is open, they read from it, else they call the os 	*/
-/*  read routine.  Either way, if the journal file is open, they write 	*/
-/*  the results from the read to it.					*/
-/*									*/
+/*                                  */
+/*  Journaling routines                         */
+/*                                  */
+/*  These routines are wrappers around the os_read* routines.  If the   */
+/*  recovery file is open, they read from it, else they call the os     */
+/*  read routine.  Either way, if the journal file is open, they write  */
+/*  the results from the read to it.                    */
+/*                                  */
 /************************************************************************/
 
 #include <errno.h>
@@ -35,18 +35,18 @@
 #include "edt.h"
 
 /************************************************************************/
-/*									*/
-/*  Read from journal or terminal (in line mode) with prompt		*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	prompt = prompt string pointer					*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	jnl_readprompt = NULL : eof					*/
-/*	                 else : string pointer				*/
-/*									*/
+/*                                  */
+/*  Read from journal or terminal (in line mode) with prompt        */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  prompt = prompt string pointer                  */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  jnl_readprompt = NULL : eof                 */
+/*                   else : string pointer              */
+/*                                  */
 /************************************************************************/
 
 String *jnl_readprompt (const char *prompt)
@@ -108,14 +108,14 @@ writejournal:
 }
 
 /************************************************************************/
-/*									*/
-/*  Read keypad sequence from journal or terminal without echoing	*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	jnl_readkeyseq = 0 : eof					*/
-/*	                 1 : keysequences appended to keystring		*/
-/*									*/
+/*                                  */
+/*  Read keypad sequence from journal or terminal without echoing   */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  jnl_readkeyseq = 0 : eof                    */
+/*                   1 : keysequences appended to keystring     */
+/*                                  */
 /************************************************************************/
 
 int jnl_readkeyseq (String *keystring)
@@ -176,9 +176,9 @@ writejournal:
 }
 
 /************************************************************************/
-/*									*/
-/*  Call this periodically to flush journal file			*/
-/*									*/
+/*                                  */
+/*  Call this periodically to flush journal file            */
+/*                                  */
 /************************************************************************/
 
 void jnl_flush (void)
@@ -196,9 +196,9 @@ void jnl_flush (void)
 }
 
 /************************************************************************/
-/*									*/
-/*  Close and maybe delete journal file					*/
-/*									*/
+/*                                  */
+/*  Close and maybe delete journal file                 */
+/*                                  */
 /************************************************************************/
 
 void jnl_close (int del)

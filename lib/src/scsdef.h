@@ -1,5 +1,5 @@
-#ifndef scsdef_h
-#define scsdef_h
+#ifndef SCSDEF_H
+#define SCSDEF_H
 
 #define SCS$C_OVHD 14
 #define SCS$C_CON_REQL 66

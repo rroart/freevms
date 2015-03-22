@@ -1,7 +1,7 @@
 /*
- *	strmatch_wild
+ *  strmatch_wild
  *
- *	Copyright (C) 2003 Andrew Allison
+ *  Copyright (C) 2003 Andrew Allison
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,34 +19,34 @@
  *
  *The authors may be contacted at:
  *
- *	Andrew Allison		freevms@sympatico.ca
+ *  Andrew Allison      freevms@sympatico.ca
  *
- *				Andrew Allison
- *				50 Denlaw Road
- *				London, Ont
- *				Canada
- *				N6G 3L4
+ *              Andrew Allison
+ *              50 Denlaw Road
+ *              London, Ont
+ *              Canada
+ *              N6G 3L4
  *
  */
 
 /* strmatch_wild
 *
-*	Code for VAX STR$MATCH_WILD routine
+*   Code for VAX STR$MATCH_WILD routine
 *
 * Description:
-*	Compares a pattern string that includes wildcard charaters
-*	with a candidate string.
+*   Compares a pattern string that includes wildcard charaters
+*   with a candidate string.
 *
-*	Translates wildcard characters and searches the candidate string to
-*	determine if it matches the pattern string. The pattern string may
-*	contain either one or both of the wildcard characters asterisk (*) and
-*	percent (%)
+*   Translates wildcard characters and searches the candidate string to
+*   determine if it matches the pattern string. The pattern string may
+*   contain either one or both of the wildcard characters asterisk (*) and
+*   percent (%)
 *
 * Bugs:
 *
 * History
 *
-*	Created Andrew Allison Feb 18,2004
+*   Created Andrew Allison Feb 18,2004
 */
 
 #include <string.h>
@@ -62,13 +62,13 @@
  *
  */
 
-unsigned long str$match_wild ( 	const struct dsc$descriptor_s *candidate_string,
+unsigned long str$match_wild (  const struct dsc$descriptor_s *candidate_string,
                                 const struct dsc$descriptor_s *pattern_string)
 {
-    int		s1_pos, s2_pos;
-    char 		*s1_ptr, *s2_ptr, *s1_copy, *s2_copy;
-    unsigned short 	s1_len, s2_len;
-    unsigned long 	result;
+    int     s1_pos, s2_pos;
+    char        *s1_ptr, *s2_ptr, *s1_copy, *s2_copy;
+    unsigned short  s1_len, s2_len;
+    unsigned long   result;
 
     result = 0;
 
@@ -99,13 +99,13 @@ unsigned long str$match_wild ( 	const struct dsc$descriptor_s *candidate_string,
         }
         else if ( s2_copy[s2_pos] == '*' )
         {
-            if (s2_pos+1 >= s2_len )	// wild card last char
+            if (s2_pos+1 >= s2_len )    // wild card last char
             {
                 s1_pos = s1_len;
                 s2_pos++;
                 result = STR$_MATCH;
             }
-            else	// wild card not last character
+            else    // wild card not last character
             {
                 if ( s1_copy[s1_pos] == s2_copy[s2_pos+1] )
                 {

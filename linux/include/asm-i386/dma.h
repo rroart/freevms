@@ -9,18 +9,18 @@
 #define _ASM_DMA_H
 
 #include <linux/config.h>
-#include <linux/spinlock.h>	/* And spinlocks */
-#include <asm/io.h>		/* need byte IO */
+#include <linux/spinlock.h> /* And spinlocks */
+#include <asm/io.h>     /* need byte IO */
 #include <linux/delay.h>
 
 
 #ifdef HAVE_REALLY_SLOW_DMA_CONTROLLER
-#define dma_outb	outb_p
+#define dma_outb    outb_p
 #else
-#define dma_outb	outb
+#define dma_outb    outb
 #endif
 
-#define dma_inb		inb
+#define dma_inb     inb
 
 /*
  * NOTES about DMA transfers:
@@ -70,35 +70,35 @@
  *
  */
 
-#define MAX_DMA_CHANNELS	8
+#define MAX_DMA_CHANNELS    8
 
 /* The maximum address that we can perform a DMA transfer to on this platform */
 #define MAX_DMA_ADDRESS      (PAGE_OFFSET+0x1000000)
 
 /* 8237 DMA controllers */
-#define IO_DMA1_BASE	0x00	/* 8 bit slave DMA, channels 0..3 */
-#define IO_DMA2_BASE	0xC0	/* 16 bit master DMA, ch 4(=slave input)..7 */
+#define IO_DMA1_BASE    0x00    /* 8 bit slave DMA, channels 0..3 */
+#define IO_DMA2_BASE    0xC0    /* 16 bit master DMA, ch 4(=slave input)..7 */
 
 /* DMA controller registers */
-#define DMA1_CMD_REG		0x08	/* command register (w) */
-#define DMA1_STAT_REG		0x08	/* status register (r) */
+#define DMA1_CMD_REG        0x08    /* command register (w) */
+#define DMA1_STAT_REG       0x08    /* status register (r) */
 #define DMA1_REQ_REG            0x09    /* request register (w) */
-#define DMA1_MASK_REG		0x0A	/* single-channel mask (w) */
-#define DMA1_MODE_REG		0x0B	/* mode register (w) */
-#define DMA1_CLEAR_FF_REG	0x0C	/* clear pointer flip-flop (w) */
+#define DMA1_MASK_REG       0x0A    /* single-channel mask (w) */
+#define DMA1_MODE_REG       0x0B    /* mode register (w) */
+#define DMA1_CLEAR_FF_REG   0x0C    /* clear pointer flip-flop (w) */
 #define DMA1_TEMP_REG           0x0D    /* Temporary Register (r) */
-#define DMA1_RESET_REG		0x0D	/* Master Clear (w) */
+#define DMA1_RESET_REG      0x0D    /* Master Clear (w) */
 #define DMA1_CLR_MASK_REG       0x0E    /* Clear Mask */
 #define DMA1_MASK_ALL_REG       0x0F    /* all-channels mask (w) */
 
-#define DMA2_CMD_REG		0xD0	/* command register (w) */
-#define DMA2_STAT_REG		0xD0	/* status register (r) */
+#define DMA2_CMD_REG        0xD0    /* command register (w) */
+#define DMA2_STAT_REG       0xD0    /* status register (r) */
 #define DMA2_REQ_REG            0xD2    /* request register (w) */
-#define DMA2_MASK_REG		0xD4	/* single-channel mask (w) */
-#define DMA2_MODE_REG		0xD6	/* mode register (w) */
-#define DMA2_CLEAR_FF_REG	0xD8	/* clear pointer flip-flop (w) */
+#define DMA2_MASK_REG       0xD4    /* single-channel mask (w) */
+#define DMA2_MODE_REG       0xD6    /* mode register (w) */
+#define DMA2_CLEAR_FF_REG   0xD8    /* clear pointer flip-flop (w) */
 #define DMA2_TEMP_REG           0xDA    /* Temporary Register (r) */
-#define DMA2_RESET_REG		0xDA	/* Master Clear (w) */
+#define DMA2_RESET_REG      0xDA    /* Master Clear (w) */
 #define DMA2_CLR_MASK_REG       0xDC    /* Clear Mask */
 #define DMA2_MASK_ALL_REG       0xDE    /* all-channels mask (w) */
 
@@ -128,11 +128,11 @@
 #define DMA_PAGE_6              0x89
 #define DMA_PAGE_7              0x8A
 
-#define DMA_MODE_READ	0x44	/* I/O to memory, no autoinit, increment, single mode */
-#define DMA_MODE_WRITE	0x48	/* memory to I/O, no autoinit, increment, single mode */
+#define DMA_MODE_READ   0x44    /* I/O to memory, no autoinit, increment, single mode */
+#define DMA_MODE_WRITE  0x48    /* memory to I/O, no autoinit, increment, single mode */
 #define DMA_MODE_CASCADE 0xC0   /* pass thru DREQ->HRQ, DACK<-HLDA only */
 
-#define DMA_AUTOINIT	0x10
+#define DMA_AUTOINIT    0x10
 
 
 extern spinlock_t  dma_spin_lock;
@@ -291,15 +291,15 @@ static __inline__ int get_dma_residue(unsigned int dmanr)
 
 
 /* These are in kernel/dma.c: */
-extern int request_dma(unsigned int dmanr, const char * device_id);	/* reserve a DMA channel */
-extern void free_dma(unsigned int dmanr);	/* release it again */
+extern int request_dma(unsigned int dmanr, const char * device_id); /* reserve a DMA channel */
+extern void free_dma(unsigned int dmanr);   /* release it again */
 
 /* From PCI */
 
 #ifdef CONFIG_PCI
 extern int isa_dma_bridge_buggy;
 #else
-#define isa_dma_bridge_buggy 	(0)
+#define isa_dma_bridge_buggy    (0)
 #endif
 
 #endif /* _ASM_DMA_H */

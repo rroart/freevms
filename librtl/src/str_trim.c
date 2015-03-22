@@ -1,27 +1,27 @@
 /*
  * str.c
  *
- *	Code for VAX STR$TRIM routine
+ *  Code for VAX STR$TRIM routine
  *
  * Description:
  *
- *	Removes trailing spaces and tabs from the end of a
- *	string.
+ *  Removes trailing spaces and tabs from the end of a
+ *  string.
  *
  * Bugs:
  *
  *
  * History
  *
- *	Oct 16, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 16, 1996 - Kevin Handy
+ *      Preliminary design.
  *
- *	Feb 4, 1997 - Kevin Handy
- *		Lose variable 'i', which was defined but not used
- *		(found with '-Wall').
+ *  Feb 4, 1997 - Kevin Handy
+ *      Lose variable 'i', which was defined but not used
+ *      (found with '-Wall').
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places
  */
 
 #include <stdio.h>
@@ -39,9 +39,9 @@ unsigned long str$trim(struct dsc$descriptor_s* destination_string,
                        const struct dsc$descriptor_s* source_string,
                        unsigned short* resultant_length)
 {
-    char* s2_ptr;				/* Pointer to string */
-    unsigned short s2_length;		/* Length of string */
-    unsigned long result;			/* Result */
+    char* s2_ptr;               /* Pointer to string */
+    unsigned short s2_length;       /* Length of string */
+    unsigned long result;           /* Result */
 
     /*
      * Look at the original string

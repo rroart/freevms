@@ -384,18 +384,18 @@ int er_vmsinit(long dev)
 
     Changelog:
 
-    Paul Gortmaker	: use ENISR_RDC to monitor Tx PIO uploads, made
-			  sanity checks and bad clone support optional.
-    Paul Gortmaker	: new reset code, reset card after probe at boot.
-    Paul Gortmaker	: multiple card support for module users.
-    Paul Gortmaker	: Support for PCI ne2k clones, similar to lance.c
-    Paul Gortmaker	: Allow users with bad cards to avoid full probe.
-    Paul Gortmaker	: PCI probe changes, more PCI cards supported.
+    Paul Gortmaker  : use ENISR_RDC to monitor Tx PIO uploads, made
+              sanity checks and bad clone support optional.
+    Paul Gortmaker  : new reset code, reset card after probe at boot.
+    Paul Gortmaker  : multiple card support for module users.
+    Paul Gortmaker  : Support for PCI ne2k clones, similar to lance.c
+    Paul Gortmaker  : Allow users with bad cards to avoid full probe.
+    Paul Gortmaker  : PCI probe changes, more PCI cards supported.
     rjohnson@analogic.com : Changed init order so an interrupt will only
     occur after memory is allocated for dev->priv. Deallocated memory
     last in cleanup_modue()
     Richard Guenther    : Added support for ISAPnP cards
-    Paul Gortmaker	: Discontinued PCI support - use ne2k-pci.c instead.
+    Paul Gortmaker  : Discontinued PCI support - use ne2k-pci.c instead.
 
 */
 
@@ -433,7 +433,7 @@ static const char version2[] =
 /* #define NE_RW_BUGFIX */
 
 /* Do we have a non std. amount of memory? (in units of 256 byte pages) */
-/* #define PACKETBUF_MEMSIZE	0x40 */
+/* #define PACKETBUF_MEMSIZE    0x40 */
 
 /* A zero-terminated list of I/O addresses to be probed at boot. */
 #ifndef MODULE
@@ -455,7 +455,7 @@ static struct isapnp_device_id isapnp_clone_list[] __initdata =
         ISAPNP_VENDOR('P','N','P'), ISAPNP_FUNCTION(0x80d6),
         (long) "Generic PNP"
     },
-    { }	/* terminate list */
+    { } /* terminate list */
 };
 
 MODULE_DEVICE_TABLE(isapnp, isapnp_clone_list);
@@ -489,16 +489,16 @@ bad_clone_list[] __initdata =
 
 /* ---- No user-serviceable parts below ---- */
 
-#define NE_BASE	 (dev->base_addr)
-#define NE_CMD	 	0x00
-#define NE_DATAPORT	0x10	/* NatSemi-defined port window offset. */
-#define NE_RESET	0x1f	/* Issue a read to reset, a write to clear. */
-#define NE_IO_EXTENT	0x20
+#define NE_BASE  (dev->base_addr)
+#define NE_CMD      0x00
+#define NE_DATAPORT 0x10    /* NatSemi-defined port window offset. */
+#define NE_RESET    0x1f    /* Issue a read to reset, a write to clear. */
+#define NE_IO_EXTENT    0x20
 
-#define NE1SM_START_PG	0x20	/* First page of TX buffer */
-#define NE1SM_STOP_PG 	0x40	/* Last page +1 of RX ring */
-#define NESM_START_PG	0x40	/* First page of TX buffer */
-#define NESM_STOP_PG	0x80	/* Last page +1 of RX ring */
+#define NE1SM_START_PG  0x20    /* First page of TX buffer */
+#define NE1SM_STOP_PG   0x40    /* Last page +1 of RX ring */
+#define NESM_START_PG   0x40    /* First page of TX buffer */
+#define NESM_STOP_PG    0x80    /* Last page +1 of RX ring */
 
 int ne_probe(struct net_device *dev);
 static int ne_probe1(struct net_device *dev, int ioaddr);
@@ -532,10 +532,10 @@ static void ne_block_output(struct net_device *dev, const int count,
    We use the minimum memory size for some ethercard product lines, iff we can't
    distinguish models.  You can increase the packet buffer size by setting
    PACKETBUF_MEMSIZE.  Reported Cabletron packet buffer locations are:
-	E1010   starts at 0x100 and ends at 0x2000.
-	E1010-x starts at 0x100 and ends at 0x8000. ("-x" means "more memory")
-	E2010	 starts at 0x100 and ends at 0x4000.
-	E2010-x starts at 0x100 and ends at 0xffff.  */
+    E1010   starts at 0x100 and ends at 0x2000.
+    E1010-x starts at 0x100 and ends at 0x8000. ("-x" means "more memory")
+    E2010    starts at 0x100 and ends at 0x4000.
+    E2010-x starts at 0x100 and ends at 0xffff.  */
 
 int /*__init*/ ne_probe(struct net_device *dev)
 {
@@ -544,9 +544,9 @@ int /*__init*/ ne_probe(struct net_device *dev)
     SET_MODULE_OWNER(dev);
 
     /* First check any supplied i/o locations. User knows best. <cough> */
-    if (base_addr > 0x1ff)	/* Check a single specified location. */
+    if (base_addr > 0x1ff)  /* Check a single specified location. */
         return ne_probe1(dev, base_addr);
-    else if (base_addr != 0)	/* Don't probe at all. */
+    else if (base_addr != 0)    /* Don't probe at all. */
         return -ENXIO;
 
     /* Then look for any installed ISAPnP clones */
@@ -594,7 +594,7 @@ static int /*__init*/ ne_probe_isapnp(struct net_device *dev)
                    (char *) isapnp_clone_list[i].driver_data,
 
                    dev->base_addr, dev->irq);
-            if (ne_probe1(dev, dev->base_addr) != 0)  	/* Shouldn't happen. */
+            if (ne_probe1(dev, dev->base_addr) != 0)    /* Shouldn't happen. */
             {
                 printk(KERN_ERR "ne.c: Probe of ISAPnP card at %#lx failed.\n", dev->base_addr);
                 return -ENXIO;
@@ -642,7 +642,7 @@ static int /*__init*/ ne_probe1(struct net_device *dev, int ioaddr)
         if (inb_p(ioaddr + EN0_COUNTER0) != 0)
         {
             outb_p(reg0, ioaddr);
-            outb_p(regd, ioaddr + 0x0d);	/* Restore the old values. */
+            outb_p(regd, ioaddr + 0x0d);    /* Restore the old values. */
             ret = -ENODEV;
             goto err_out;
         }
@@ -685,7 +685,7 @@ static int /*__init*/ ne_probe1(struct net_device *dev, int ioaddr)
                 }
             }
 
-        outb_p(0xff, ioaddr + EN0_ISR);		/* Ack all intr. */
+        outb_p(0xff, ioaddr + EN0_ISR);     /* Ack all intr. */
     }
 
     /* Read the 16 bytes of station address PROM.
@@ -699,17 +699,17 @@ static int /*__init*/ ne_probe1(struct net_device *dev, int ioaddr)
         } program_seq[] =
         {
             {E8390_NODMA+E8390_PAGE0+E8390_STOP, E8390_CMD}, /* Select page 0*/
-            {0x48,	EN0_DCFG},	/* Set byte-wide (0x48) access. */
-            {0x00,	EN0_RCNTLO},	/* Clear the count regs. */
-            {0x00,	EN0_RCNTHI},
-            {0x00,	EN0_IMR},	/* Mask completion irq. */
-            {0xFF,	EN0_ISR},
-            {E8390_RXOFF, EN0_RXCR},	/* 0x20  Set to monitor */
-            {E8390_TXOFF, EN0_TXCR},	/* 0x02  and loopback mode. */
-            {32,	EN0_RCNTLO},
-            {0x00,	EN0_RCNTHI},
-            {0x00,	EN0_RSARLO},	/* DMA starting at 0x0000. */
-            {0x00,	EN0_RSARHI},
+            {0x48,  EN0_DCFG},  /* Set byte-wide (0x48) access. */
+            {0x00,  EN0_RCNTLO},    /* Clear the count regs. */
+            {0x00,  EN0_RCNTHI},
+            {0x00,  EN0_IMR},   /* Mask completion irq. */
+            {0xFF,  EN0_ISR},
+            {E8390_RXOFF, EN0_RXCR},    /* 0x20  Set to monitor */
+            {E8390_TXOFF, EN0_TXCR},    /* 0x02  and loopback mode. */
+            {32,    EN0_RCNTLO},
+            {0x00,  EN0_RCNTHI},
+            {0x00,  EN0_RSARLO},    /* DMA starting at 0x0000. */
+            {0x00,  EN0_RSARHI},
             {E8390_RREAD+E8390_START, E8390_CMD},
         };
 
@@ -794,12 +794,12 @@ static int /*__init*/ ne_probe1(struct net_device *dev, int ioaddr)
     if (dev->irq < 2)
     {
         unsigned long cookie = probe_irq_on();
-        outb_p(0x50, ioaddr + EN0_IMR);	/* Enable one interrupt. */
+        outb_p(0x50, ioaddr + EN0_IMR); /* Enable one interrupt. */
         outb_p(0x00, ioaddr + EN0_RCNTLO);
         outb_p(0x00, ioaddr + EN0_RCNTHI);
         outb_p(E8390_RREAD+E8390_START, ioaddr); /* Trigger it... */
-        mdelay(10);		/* wait 10ms for interrupt to propagate */
-        outb_p(0x00, ioaddr + EN0_IMR); 		/* Mask it again. */
+        mdelay(10);     /* wait 10ms for interrupt to propagate */
+        outb_p(0x00, ioaddr + EN0_IMR);         /* Mask it again. */
         dev->irq = probe_irq_off(cookie);
         if (ei_debug > 2)
             printk(" autoirq is %d\n", dev->irq);
@@ -913,7 +913,7 @@ static void ne_reset_8390(struct net_device *dev)
             printk(KERN_WARNING "%s: ne_reset_8390() did not complete.\n", dev->name);
             break;
         }
-    outb_p(ENISR_RESET, NE_BASE + EN0_ISR);	/* Ack intr. */
+    outb_p(ENISR_RESET, NE_BASE + EN0_ISR); /* Ack intr. */
 }
 
 /* Grab the 8390 specific header. Similar to the block_input routine, but
@@ -938,7 +938,7 @@ static void ne_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr, i
     outb_p(E8390_NODMA+E8390_PAGE0+E8390_START, nic_base+ NE_CMD);
     outb_p(sizeof(struct e8390_pkt_hdr), nic_base + EN0_RCNTLO);
     outb_p(0, nic_base + EN0_RCNTHI);
-    outb_p(0, nic_base + EN0_RSARLO);		/* On page boundary */
+    outb_p(0, nic_base + EN0_RSARLO);       /* On page boundary */
     outb_p(ring_page, nic_base + EN0_RSARHI);
     outb_p(E8390_RREAD+E8390_START, nic_base + NE_CMD);
 
@@ -947,7 +947,7 @@ static void ne_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr, i
     else
         insb(NE_BASE + NE_DATAPORT, hdr, sizeof(struct e8390_pkt_hdr));
 
-    outb_p(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+    outb_p(ENISR_RDC, nic_base + EN0_ISR);  /* Ack intr. */
     ei_status.dmaing &= ~0x01;
 
     le16_to_cpus(&hdr->count);
@@ -1023,7 +1023,7 @@ static void ne_block_input(struct net_device *dev, int count, char * buf, int ri
                    dev->name, ring_offset + xfer_count, addr);
     }
 #endif
-    outb_p(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+    outb_p(ENISR_RDC, nic_base + EN0_ISR);  /* Ack intr. */
     ei_status.dmaing &= ~0x01;
 }
 
@@ -1124,7 +1124,7 @@ retry:
 #endif
 
     while ((inb_p(nic_base + EN0_ISR) & ENISR_RDC) == 0)
-        if (jiffies - dma_start > 2*HZ/100)  		/* 20ms */
+        if (jiffies - dma_start > 2*HZ/100)         /* 20ms */
         {
             printk(KERN_WARNING "%s: timeout waiting for Tx RDC.\n", dev->name);
             ne_reset_8390(dev);
@@ -1132,18 +1132,18 @@ retry:
             break;
         }
 
-    outb_p(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+    outb_p(ENISR_RDC, nic_base + EN0_ISR);  /* Ack intr. */
     ei_status.dmaing &= ~0x01;
     return;
 }
 
 
 #ifdef MODULE
-#define MAX_NE_CARDS	4	/* Max number of NE cards per module */
+#define MAX_NE_CARDS    4   /* Max number of NE cards per module */
 static struct net_device dev_ne[MAX_NE_CARDS];
 static int io[MAX_NE_CARDS];
 static int irq[MAX_NE_CARDS];
-static int bad[MAX_NE_CARDS];	/* 0xbad = bad sig or no reset ack */
+static int bad[MAX_NE_CARDS];   /* 0xbad = bad sig or no reset ack */
 
 MODULE_PARM(io, "1-" __MODULE_STRING(MAX_NE_CARDS) "i");
 MODULE_PARM(irq, "1-" __MODULE_STRING(MAX_NE_CARDS) "i");
@@ -1173,7 +1173,7 @@ int init_module(void)
             found++;
             continue;
         }
-        if (found != 0)   	/* Got at least one. */
+        if (found != 0)     /* Got at least one. */
         {
             return 0;
         }

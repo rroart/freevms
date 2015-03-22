@@ -16,20 +16,20 @@
 //---2001-10-06
 
 /************************************************************************/
-/*									*/
-/*  Write range of lines to file					*/
-/*									*/
-/*    Input:								*/
-/*									*/
-/*	out_name = name of file to write the lines to			*/
-/*	beg_line = starting line to write (inclusive)			*/
-/*	end_line = ending line to write (inclusive)			*/
-/*									*/
-/*    Output:								*/
-/*									*/
-/*	write_file = 0 : write error					*/
-/*	             1 : successful					*/
-/*									*/
+/*                                  */
+/*  Write range of lines to file                    */
+/*                                  */
+/*    Input:                                */
+/*                                  */
+/*  out_name = name of file to write the lines to           */
+/*  beg_line = starting line to write (inclusive)           */
+/*  end_line = ending line to write (inclusive)         */
+/*                                  */
+/*    Output:                               */
+/*                                  */
+/*  write_file = 0 : write error                    */
+/*               1 : successful                 */
+/*                                  */
 /************************************************************************/
 
 #include <errno.h>

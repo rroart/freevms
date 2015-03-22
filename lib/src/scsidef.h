@@ -1,5 +1,5 @@
-#ifndef scsidef_h
-#define scsidef_h
+#ifndef SCSIDEF_H
+#define SCSIDEF_H
 
 #define INQ_CMD$K_INQ_OPCODE 18
 #define INQ_CMD$M_ENABLE_VPD 0x1

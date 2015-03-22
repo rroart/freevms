@@ -16,17 +16,17 @@
 /*
  * Maximum protocol version supported by knfsd
  */
-#define NFSSVC_MAXVERS		3
+#define NFSSVC_MAXVERS      3
 
 /*
  * Maximum blocksize supported by daemon currently at 8K
  */
-#define NFSSVC_MAXBLKSIZE	8192
+#define NFSSVC_MAXBLKSIZE   8192
 
 #ifdef __KERNEL__
 
 #ifndef NFS_SUPER_MAGIC
-# define NFS_SUPER_MAGIC	0x6969
+# define NFS_SUPER_MAGIC    0x6969
 #endif
 
 #endif /* __KERNEL__ */

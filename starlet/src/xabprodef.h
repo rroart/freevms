@@ -1,5 +1,5 @@
-#ifndef xabprodef_h
-#define xabprodef_h
+#ifndef XABPRODEF_H
+#define XABPRODEF_H
 
 #define XAB$C_PRO 19
 #define XAB$M_NOREAD 0x1
@@ -89,21 +89,21 @@ struct _xabprodef1
 #define XAB$K_PROLEN 88
 #define XAB$C_PROLEN 88
 
-#define XAB$V_SYS	0
-#define XAB$S_SYS	4
-#define XAB$V_OWN	4
-#define XAB$S_OWN	4
-#define XAB$V_GRP	8
-#define XAB$S_GRP	4
-#define XAB$V_WLD	12
-#define XAB$S_WLD	4
-#define XAB$V_NOREAD	0
-#define XAB$V_NOWRITE	1
-#define XAB$V_NOEXE	2
-#define XAB$V_NODEL	3
-#define XAB$V_PROPAGATE	0
-#define XAB$V_PROPOGATE	0
-#define XAB$M_PROPOGATE	(1 << XAB$V_PROPOGATE)
+#define XAB$V_SYS   0
+#define XAB$S_SYS   4
+#define XAB$V_OWN   4
+#define XAB$S_OWN   4
+#define XAB$V_GRP   8
+#define XAB$S_GRP   4
+#define XAB$V_WLD   12
+#define XAB$S_WLD   4
+#define XAB$V_NOREAD    0
+#define XAB$V_NOWRITE   1
+#define XAB$V_NOEXE 2
+#define XAB$V_NODEL 3
+#define XAB$V_PROPAGATE 0
+#define XAB$V_PROPOGATE 0
+#define XAB$M_PROPOGATE (1 << XAB$V_PROPOGATE)
 
 extern struct _xabprodef1 cc$rms_xabpro;
 

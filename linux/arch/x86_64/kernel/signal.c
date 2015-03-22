@@ -148,11 +148,11 @@ restore_sigcontext(struct pt_regs *regs, struct sigcontext *sc, unsigned long *p
     unsigned int err = 0;
 
 
-#define COPY(x)		err |= __get_user(regs->x, &sc->x)
+#define COPY(x)     err |= __get_user(regs->x, &sc->x)
 #define COPY_CANON(x)   \
-	COPY(x); \
-	if ((regs->x >> 48)  != 0 && (regs->x >> 48) != 0xffff) \
-				regs->x = 0;
+    COPY(x); \
+    if ((regs->x >> 48)  != 0 && (regs->x >> 48) != 0xffff) \
+                regs->x = 0;
 
     /* fs and gs are ignored because we cannot handle the 64bit base easily */
 
@@ -180,7 +180,7 @@ restore_sigcontext(struct pt_regs *regs, struct sigcontext *sc, unsigned long *p
         unsigned int tmpflags;
         err |= __get_user(tmpflags, &sc->eflags);
         regs->eflags = (regs->eflags & ~0x40DD5) | (tmpflags & 0x40DD5);
-        regs->orig_rax = -1;		/* disable syscall checks */
+        regs->orig_rax = -1;        /* disable syscall checks */
     }
 
     {

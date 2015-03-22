@@ -2,12 +2,12 @@
  * LIB$MOVC3
  *
  *
- *	Source item is moved to destination
+ *  Source item is moved to destination
  *
  * History
  *
- *	Mar 28, 2005 - Andrew Allison
- *		Initial procedure creation
+ *  Mar 28, 2005 - Andrew Allison
+ *      Initial procedure creation
  *
  * Bugs
  *
@@ -18,7 +18,7 @@
 
 void lib$movc3(const unsigned short *size,const void *source,void *destination)
 {
-//	use memmove allows source and destination to overlap
+//  use memmove allows source and destination to overlap
     memmove (destination, source, *size);
 
     return;

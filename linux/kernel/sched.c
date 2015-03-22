@@ -7,8 +7,8 @@
  *
  *  1996-12-23  Modified by Dave Grothe to fix bugs in semaphores and
  *              make semaphores SMP safe
- *  1998-11-19	Implemented schedule_timeout() and related stuff
- *		by Andrea Arcangeli
+ *  1998-11-19  Implemented schedule_timeout() and related stuff
+ *      by Andrea Arcangeli
  *  1998-12-28  Implemented better SMP scheduling by Ingo Molnar
  */
 
@@ -57,23 +57,23 @@ extern void mem_use(void);
  * calculation depends on the value of HZ.
  */
 #if HZ < 200
-#define TICK_SCALE(x)	((x) >> 2)
+#define TICK_SCALE(x)   ((x) >> 2)
 #elif HZ < 400
-#define TICK_SCALE(x)	((x) >> 1)
+#define TICK_SCALE(x)   ((x) >> 1)
 #elif HZ < 800
-#define TICK_SCALE(x)	(x)
+#define TICK_SCALE(x)   (x)
 #elif HZ < 1600
-#define TICK_SCALE(x)	((x) << 1)
+#define TICK_SCALE(x)   ((x) << 1)
 #else
-#define TICK_SCALE(x)	((x) << 2)
+#define TICK_SCALE(x)   ((x) << 2)
 #endif
 
-#define NICE_TO_TICKS(nice)	(TICK_SCALE(20-(nice))+1)
+#define NICE_TO_TICKS(nice) (TICK_SCALE(20-(nice))+1)
 
 
 /*
- *	Init task must be ok at boot for the ix86 as we will check its signals
- *	via the SMP irq return path.
+ *  Init task must be ok at boot for the ix86 as we will check its signals
+ *  via the SMP irq return path.
  */
 
 struct task_struct * init_tasks[NR_CPUS] = {&init_task, };
@@ -90,7 +90,7 @@ struct task_struct * init_tasks[NR_CPUS] = {&init_task, };
  * task->alloc_lock nests inside tasklist_lock.
  */
 spinlock_t runqueue_lock __cacheline_aligned = SPIN_LOCK_UNLOCKED;  /* inner */
-rwlock_t tasklist_lock __cacheline_aligned = RW_LOCK_UNLOCKED;	/* outer */
+rwlock_t tasklist_lock __cacheline_aligned = RW_LOCK_UNLOCKED;  /* outer */
 
 static LIST_HEAD(runqueue_head);
 
@@ -118,7 +118,7 @@ extern struct task_struct *child_reaper;
 
 #define idle_task(cpu) (init_tasks[cpu_number_map(cpu)])
 #define can_schedule(p,cpu) \
-	((p)->cpus_runnable & (p)->cpus_allowed & (1 << cpu))
+    ((p)->cpus_runnable & (p)->cpus_allowed & (1 << cpu))
 
 #else
 
@@ -136,11 +136,11 @@ void scheduling_functions_start_here(void) { }
  * and TLB miss penalties.
  *
  * Return values:
- *	 -1000: never select this
- *	     0: out of time, recalculate counters (but it might still be
- *		selected)
- *	   +ve: "goodness" value (the larger, the better)
- *	 +1000: realtime process, select this.
+ *   -1000: never select this
+ *       0: out of time, recalculate counters (but it might still be
+ *      selected)
+ *     +ve: "goodness" value (the larger, the better)
+ *   +1000: realtime process, select this.
  */
 
 static inline int goodness(struct task_struct * p, int this_cpu, struct mm_struct *this_mm)
@@ -272,8 +272,8 @@ send_now_idle:
 #if defined(__i386__) && defined(CONFIG_SMP)
             /*
             * Check if two siblings are idle in the same
-            		 * physical package. Use them if found.
-            		 */
+                     * physical package. Use them if found.
+                     */
             if (smp_num_siblings == 2)
             {
                 if (cpu_curr(cpu_sibling_map[cpu]) ==
@@ -511,7 +511,7 @@ static inline void __schedule_tail(struct task_struct *prev)
         goto needs_resched;
 
 out_unlock:
-    task_unlock(prev);	/* Synchronise here with release_task() if prev is TASK_ZOMBIE */
+    task_unlock(prev);  /* Synchronise here with release_task() if prev is TASK_ZOMBIE */
     return;
 
     /*
@@ -823,20 +823,20 @@ void wait_for_completion(struct completion *x)
     spin_unlock_irq(&x->wait.lock);
 }
 
-#define	SLEEP_ON_VAR				\
-	unsigned long flags;			\
-	wait_queue_t wait;			\
-	init_waitqueue_entry(&wait, current);
+#define SLEEP_ON_VAR                \
+    unsigned long flags;            \
+    wait_queue_t wait;          \
+    init_waitqueue_entry(&wait, current);
 
-#define	SLEEP_ON_HEAD					\
-	wq_write_lock_irqsave(&q->lock,flags);		\
-	__add_wait_queue(q, &wait);			\
-	wq_write_unlock(&q->lock);
+#define SLEEP_ON_HEAD                   \
+    wq_write_lock_irqsave(&q->lock,flags);      \
+    __add_wait_queue(q, &wait);         \
+    wq_write_unlock(&q->lock);
 
-#define	SLEEP_ON_TAIL						\
-	wq_write_lock_irq(&q->lock);				\
-	__remove_wait_queue(q, &wait);				\
-	wq_write_unlock_irqrestore(&q->lock,flags);
+#define SLEEP_ON_TAIL                       \
+    wq_write_lock_irq(&q->lock);                \
+    __remove_wait_queue(q, &wait);              \
+    wq_write_unlock_irqrestore(&q->lock,flags);
 
 void interruptible_sleep_on(wait_queue_head_t *q)
 {
@@ -901,9 +901,9 @@ asmlinkage long sys_nice(int increment)
     long newprio;
 
     /*
-     *	Setpriority might change our priority at the same moment.
-     *	We don't have to worry. Conceptually one call occurs first
-     *	and we have a single winner.
+     *  Setpriority might change our priority at the same moment.
+     *  We don't have to worry. Conceptually one call occurs first
+     *  and we have a single winner.
      */
     if (increment < 0)
     {
@@ -1311,8 +1311,8 @@ void reparent_to_init(void)
 }
 
 /*
- *	Put all the gunge required to become a kernel thread without
- *	attached user resources in one place where it belongs.
+ *  Put all the gunge required to become a kernel thread without
+ *  attached user resources in one place where it belongs.
  */
 
 void daemonize(void)
@@ -1333,7 +1333,7 @@ void daemonize(void)
 
     /* Become as one with the init task */
 
-    exit_fs(current);	/* current->fs->count--; */
+    exit_fs(current);   /* current->fs->count--; */
     fs = init_task.fs;
     current->fs = fs;
     atomic_inc(&fs->count);

@@ -1,5 +1,5 @@
-#ifndef eihvndef_h
-#define eihvndef_h
+#ifndef EIHVNDEF_H
+#define EIHVNDEF_H
 
 #define EIHVN$M_SUBVERSION_MINOR_ID 0xFFFF
 #define EIHVN$M_SUBVERSION_MAJOR_ID 0xFFFF0000

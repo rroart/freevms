@@ -1,20 +1,20 @@
 /*
  * str.c
  *
- *	Code for VAX STR$CONACT routine
+ *  Code for VAX STR$CONACT routine
  *
  * Description:
  *
  *
  * Bugs:
  *
- *	List MUST be terminated will a null item, because there's
- *	no standard way to determine where the list ends.
+ *  List MUST be terminated will a null item, because there's
+ *  no standard way to determine where the list ends.
  *
  * History
  *
- *	Oct 18, 1996 - Kevin Handy
- *		Preliminary design.
+ *  Oct 18, 1996 - Kevin Handy
+ *      Preliminary design.
  */
 
 #include <stdio.h>

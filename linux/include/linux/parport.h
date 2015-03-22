@@ -56,13 +56,13 @@ typedef enum
 
 /* The "modes" entry in parport is a bit field representing the
    capabilities of the hardware. */
-#define PARPORT_MODE_PCSPP	(1<<0) /* IBM PC registers available. */
-#define PARPORT_MODE_TRISTATE	(1<<1) /* Can tristate. */
-#define PARPORT_MODE_EPP	(1<<2) /* Hardware EPP. */
-#define PARPORT_MODE_ECP	(1<<3) /* Hardware ECP. */
-#define PARPORT_MODE_COMPAT	(1<<4) /* Hardware 'printer protocol'. */
-#define PARPORT_MODE_DMA	(1<<5) /* Hardware can DMA. */
-#define PARPORT_MODE_SAFEININT	(1<<6) /* SPP registers accessible in IRQ. */
+#define PARPORT_MODE_PCSPP  (1<<0) /* IBM PC registers available. */
+#define PARPORT_MODE_TRISTATE   (1<<1) /* Can tristate. */
+#define PARPORT_MODE_EPP    (1<<2) /* Hardware EPP. */
+#define PARPORT_MODE_ECP    (1<<3) /* Hardware ECP. */
+#define PARPORT_MODE_COMPAT (1<<4) /* Hardware 'printer protocol'. */
+#define PARPORT_MODE_DMA    (1<<5) /* Hardware can DMA. */
+#define PARPORT_MODE_SAFEININT  (1<<6) /* SPP registers accessible in IRQ. */
 
 /* IEEE1284 modes:
    Nibble mode, byte mode, ECP, ECPRLE and EPP are their own
@@ -87,12 +87,12 @@ typedef enum
 /* For the benefit of parport_read/write, you can use these with
  * parport_negotiate to use address operations.  They have no effect
  * other than to make parport_read/write use address transfers. */
-#define IEEE1284_ADDR			(1<<13)	/* This is a flag */
-#define IEEE1284_DATA			 0	/* So is this */
+#define IEEE1284_ADDR           (1<<13) /* This is a flag */
+#define IEEE1284_DATA            0  /* So is this */
 
 /* Flags for block transfer operations. */
-#define PARPORT_EPP_FAST		(1<<0) /* Unreliable counts. */
-#define PARPORT_W91284PIC		(1<<1) /* have a Warp9 w91284pic in the device */
+#define PARPORT_EPP_FAST        (1<<0) /* Unreliable counts. */
+#define PARPORT_W91284PIC       (1<<1) /* have a Warp9 w91284pic in the device */
 
 /* The rest is for the kernel only */
 #ifdef __KERNEL__
@@ -240,7 +240,7 @@ struct pardevice
     unsigned long int time;
     unsigned long int timeslice;
     volatile long int timeout;
-    unsigned long waiting;		 /* long req'd for set_bit --RR */
+    unsigned long waiting;       /* long req'd for set_bit --RR */
     struct pardevice *waitprev;
     struct pardevice *waitnext;
     void * sysctl_table;
@@ -274,15 +274,15 @@ struct ieee1284_info
 /* A parallel port */
 struct parport
 {
-    unsigned long base;	/* base address */
+    unsigned long base; /* base address */
     unsigned long base_hi;  /* base address (hi - ECR) */
-    unsigned int size;	/* IO extent */
+    unsigned int size;  /* IO extent */
     const char *name;
     unsigned int modes;
-    int irq;		/* interrupt (or -1 for none) */
+    int irq;        /* interrupt (or -1 for none) */
     int dma;
-    int muxport;		/* which muxport (if any) this is */
-    int portnum;		/* which physical parallel port (not mux) */
+    int muxport;        /* which muxport (if any) this is */
+    int portnum;        /* which physical parallel port (not mux) */
 
     struct parport *physport;
     /* If this is a non-default mux
@@ -300,9 +300,9 @@ struct parport
        ourself. */
 
     struct pardevice *devices;
-    struct pardevice *cad;	/* port owner */
-    int daisy;		/* currently selected daisy addr */
-    int muxsel;		/* currently selected mux port */
+    struct pardevice *cad;  /* port owner */
+    int daisy;      /* currently selected daisy addr */
+    int muxsel;     /* currently selected mux port */
 
     struct pardevice *waithead;
     struct pardevice *waittail;
@@ -317,7 +317,7 @@ struct parport
     struct parport_operations *ops;
     void *private_data;     /* for lowlevel driver */
 
-    int number;		/* port index - the `n' in `parportn' */
+    int number;     /* port index - the `n' in `parportn' */
     spinlock_t pardevice_lock;
     spinlock_t waitlist_lock;
     rwlock_t cad_lock;
@@ -457,11 +457,11 @@ static __inline__ int parport_yield_blocking(struct pardevice *dev)
 }
 
 /* Flags used to identify what a device does. */
-#define PARPORT_DEV_TRAN		0	/* WARNING !! DEPRECATED !! */
-#define PARPORT_DEV_LURK		(1<<0)	/* WARNING !! DEPRECATED !! */
-#define PARPORT_DEV_EXCL		(1<<1)	/* Need exclusive access. */
+#define PARPORT_DEV_TRAN        0   /* WARNING !! DEPRECATED !! */
+#define PARPORT_DEV_LURK        (1<<0)  /* WARNING !! DEPRECATED !! */
+#define PARPORT_DEV_EXCL        (1<<1)  /* Need exclusive access. */
 
-#define PARPORT_FLAG_EXCL		(1<<1)	/* EXCL driver registered. */
+#define PARPORT_FLAG_EXCL       (1<<1)  /* EXCL driver registered. */
 
 extern int parport_parse_irqs(int, const char *[], int irqval[]);
 extern int parport_parse_dmas(int, const char *[], int dmaval[]);

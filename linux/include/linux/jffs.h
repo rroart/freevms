@@ -99,16 +99,16 @@ struct jffs_raw_inode
 
 /* Define the offset of the accurate byte in struct jffs_raw_inode.  */
 #define JFFS_RAW_INODE_ACCURATE_OFFSET (sizeof(struct jffs_raw_inode) \
-					- 2 * sizeof(__u32) - sizeof(__u8))
+                    - 2 * sizeof(__u32) - sizeof(__u8))
 
 /* Define the offset of the chksum member in struct jffs_raw_inode.  */
 #define JFFS_RAW_INODE_CHKSUM_OFFSET (sizeof(struct jffs_raw_inode) \
-				      - sizeof(__u16))
+                      - sizeof(__u16))
 
 /* Define the offset of the dchksum member in struct jffs_raw_inode.  */
 #define JFFS_RAW_INODE_DCHKSUM_OFFSET (sizeof(struct jffs_raw_inode)   \
-				       - sizeof(__u16) - sizeof(__u16) \
-				       - sizeof(__u32))
+                       - sizeof(__u16) - sizeof(__u16) \
+                       - sizeof(__u32))
 
 
 /* The RAM representation of the node.  The names of pointers to
@@ -121,7 +121,7 @@ struct jffs_node
     __u32 data_size;    /* The amount of data this node inserts.  */
     __u32 removed_size; /* The amount of data that this node removes.  */
     __u32 fm_offset;    /* Physical location of the data in the actual
-			       flash memory data chunk.  */
+                   flash memory data chunk.  */
     __u8 name_size;     /* Size of the name.  */
     struct jffs_fm *fm; /* Physical memory information.  */
     struct jffs_node *version_prev;
@@ -178,18 +178,18 @@ struct jffs_delete_list
    jffs_control structs are named `c' in the source code.  */
 struct jffs_control
 {
-    struct super_block *sb;		/* Reference to the VFS super block.  */
-    struct jffs_file *root;		/* The root directory file.  */
-    struct list_head *hash;		/* Hash table for finding files by ino.  */
-    struct jffs_fmcontrol *fmc;	/* Flash memory control structure.  */
-    __u32 hash_len;			/* The size of the hash table.  */
-    __u32 next_ino;			/* Next inode number to use for new files.  */
-    __u16 building_fs;		/* Is the file system being built right now?  */
+    struct super_block *sb;     /* Reference to the VFS super block.  */
+    struct jffs_file *root;     /* The root directory file.  */
+    struct list_head *hash;     /* Hash table for finding files by ino.  */
+    struct jffs_fmcontrol *fmc; /* Flash memory control structure.  */
+    __u32 hash_len;         /* The size of the hash table.  */
+    __u32 next_ino;         /* Next inode number to use for new files.  */
+    __u16 building_fs;      /* Is the file system being built right now?  */
     struct jffs_delete_list *delete_list; /* Track deleted files.  */
-    pid_t thread_pid;		/* GC thread's PID */
-    struct task_struct *gc_task;	/* GC task struct */
+    pid_t thread_pid;       /* GC thread's PID */
+    struct task_struct *gc_task;    /* GC task struct */
     struct completion gc_thread_comp; /* GC thread exit mutex */
-    __u32 gc_minfree_threshold;	/* GC trigger thresholds */
+    __u32 gc_minfree_threshold; /* GC trigger thresholds */
     __u32 gc_maxdirty_threshold;
 };
 

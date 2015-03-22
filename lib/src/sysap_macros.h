@@ -1,5 +1,5 @@
-#ifndef sysap_macros_h
-#define sysap_macros_h
+#ifndef SYSAP_MACROS_H
+#define SYSAP_MACROS_H
 
 #include <scs_routines.h>
 

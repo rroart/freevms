@@ -1,245 +1,245 @@
 /*
-	****************************************************************
+    ****************************************************************
 
-		Copyright (c) 1992, Carnegie Mellon University
+        Copyright (c) 1992, Carnegie Mellon University
 
-		All Rights Reserved
+        All Rights Reserved
 
-	Permission  is  hereby  granted   to  use,  copy,  modify,  and
-	distribute  this software  provided  that the  above  copyright
-	notice appears in  all copies and that  any distribution be for
-	noncommercial purposes.
+    Permission  is  hereby  granted   to  use,  copy,  modify,  and
+    distribute  this software  provided  that the  above  copyright
+    notice appears in  all copies and that  any distribution be for
+    noncommercial purposes.
 
-	Carnegie Mellon University disclaims all warranties with regard
-	to this software.  In no event shall Carnegie Mellon University
-	be liable for  any special, indirect,  or consequential damages
-	or any damages whatsoever  resulting from loss of use, data, or
-	profits  arising  out of  or in  connection  with  the  use  or
-	performance of this software.
+    Carnegie Mellon University disclaims all warranties with regard
+    to this software.  In no event shall Carnegie Mellon University
+    be liable for  any special, indirect,  or consequential damages
+    or any damages whatsoever  resulting from loss of use, data, or
+    profits  arising  out of  or in  connection  with  the  use  or
+    performance of this software.
 
-	****************************************************************
+    ****************************************************************
 */
 //TITLE "CONFIG - Configure the network ACP"
 /*
 
 Module:
 
-	CONFIG  - Network ACP configuration
+    CONFIG  - Network ACP configuration
 
 Facility:
 
-	Configure the the ACP according the information extracted from the
-	configuration file "INET$CONFIG", generally "config.txt".
+    Configure the the ACP according the information extracted from the
+    configuration file "INET$CONFIG", generally "config.txt".
 
 Abstract:
 
-	Handle the aspects of physical network device management.
-	Here you will find the table(dev_config) which IP accesses to send
-	datagrams.  Also device configuration and initialization routines are
-	located here.  The init routine here should not be confused with the
-	actual device init routines found in the driver modules.  Device init
-	here implies the routine which will call all device init routines for
-	those devices which have been properly configured during the device
-	configuration phase of start-up. Other initializations handled by this
-	module include memory manager block preallocation, gateway definition,
-	name server definition, and the settings of various internal control
-	variables such as "IP_FORWARDING' and 'LOG_STATE".
+    Handle the aspects of physical network device management.
+    Here you will find the table(dev_config) which IP accesses to send
+    datagrams.  Also device configuration and initialization routines are
+    located here.  The init routine here should not be confused with the
+    actual device init routines found in the driver modules.  Device init
+    here implies the routine which will call all device init routines for
+    those devices which have been properly configured during the device
+    configuration phase of start-up. Other initializations handled by this
+    module include memory manager block preallocation, gateway definition,
+    name server definition, and the settings of various internal control
+    variables such as "IP_FORWARDING' and 'LOG_STATE".
 
 Author:
 
-	Original version by Stan Smith, Tim Fallon Fall/Winter, 1982.
-	This version by Vince Fuller, CMU-CSD, Spring/Summer, 1986
-	Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
+    Original version by Stan Smith, Tim Fallon Fall/Winter, 1982.
+    This version by Vince Fuller, CMU-CSD, Spring/Summer, 1986
+    Copyright (c) 1986,1987, Vince Fuller and Carnegie-Mellon University
 
 Modification History:
 
 *** Begin USBR change log ***
 
-6,6	24-Dec-1991	Henry W. Miller 	USBR
-	Make LOG_THRESHOLD and ACT_THRESHOLD configurable variables.
+6,6 24-Dec-1991 Henry W. Miller     USBR
+    Make LOG_THRESHOLD and ACT_THRESHOLD configurable variables.
 
-6.5d	28-Jan-1990	Henry W. Miller 	USBR
-	Make WINDOW_DEFAULT and ACK_THRESHOLD configurable variables.
+6.5d    28-Jan-1990 Henry W. Miller     USBR
+    Make WINDOW_DEFAULT and ACK_THRESHOLD configurable variables.
 
-6.5c	13-Jan-1990	Henry W. Miller 	USBR
-	Make ICMPTTL, IPTTL, TCPTTL, UDPTTL configurable variables.
+6.5c    13-Jan-1990 Henry W. Miller     USBR
+    Make ICMPTTL, IPTTL, TCPTTL, UDPTTL configurable variables.
 
 *** Begin CMU change log ***
 
-6.5b	12-Nov-1990	Bruce R. Miller		CMU NetDev
-	Added the RPC keyword to configure RPC services.
-	Added AUTH keyword to do UIC mapping (for NFS)
+6.5b    12-Nov-1990 Bruce R. Miller     CMU NetDev
+    Added the RPC keyword to configure RPC services.
+    Added AUTH keyword to do UIC mapping (for NFS)
 
-6.5a	28-Aug-1990     Henry W. Miller USBR
-	Added DEFTTL configuration variable.
+6.5a    28-Aug-1990     Henry W. Miller USBR
+    Added DEFTTL configuration variable.
 
-6.5	21-Sep-90	Bruce R. Miller		CMU NetDev
-	Modifications from Mark Berryman, SAIC.COM
-	Added code for proxy ARPs and restored clone device code.
+6.5 21-Sep-90   Bruce R. Miller     CMU NetDev
+    Modifications from Mark Berryman, SAIC.COM
+    Added code for proxy ARPs and restored clone device code.
 
-6.5	02-Feb-1990	Bruce R. Miller		CMU NetDev
-	Removed compile-time device support.
-	Added run-time device support.
+6.5 02-Feb-1990 Bruce R. Miller     CMU NetDev
+    Removed compile-time device support.
+    Added run-time device support.
 
-6.5	20-Oct-1989	Bruce R. Miller		CMU NetDev
-	Added Activity Logging stuff.  Copied from normal logging stuff.
+6.5 20-Oct-1989 Bruce R. Miller     CMU NetDev
+    Added Activity Logging stuff.  Copied from normal logging stuff.
 
-6.3	13-MAR-1989	Dale Moore	CMU-CS
-	Added Keep Alive stuff.  (I could have sworn that I added
-	this stuff before, but I musta lost it.)
+6.3 13-MAR-1989 Dale Moore  CMU-CS
+    Added Keep Alive stuff.  (I could have sworn that I added
+    this stuff before, but I musta lost it.)
 
 6.2B 7-Oct-88, Edit by Robert Smart
-	Fix test for number of interfaces (John Mann fix).
+    Fix test for number of interfaces (John Mann fix).
 
 6.2A 21-Jun-88, Edit by Peter Dewildt
-	Add X25 driver support
-	Add SLIP driver support
-	Add DECNET driver support
+    Add X25 driver support
+    Add SLIP driver support
+    Add DECNET driver support
 
 6.2  29-Oct-87, Edit by VAF
-	Flush TMPJNL and PRMJNL privs - they no longer exist in VMS 4.6.
+    Flush TMPJNL and PRMJNL privs - they no longer exist in VMS 4.6.
 
 6.1  31-Jul-87, Edit by VAF
-	Change network config file to include device type field, as distinct
-	from device name field. Add TELNET_SERVICE variable.
+    Change network config file to include device type field, as distinct
+    from device name field. Add TELNET_SERVICE variable.
 
 6.0  23-Mar-87, Edit by VAF
-	Add variable MAX_RECV_DATASIZE.
-	Replace three sizes of packet buffers with two.
+    Add variable MAX_RECV_DATASIZE.
+    Replace three sizes of packet buffers with two.
 
 5.9  24-Feb-87, Edit by VAF
-	Add support for mailbox name server (MBX_SERVER keyword). Also
-	reorganized the parsing of WKS stuff.
+    Add support for mailbox name server (MBX_SERVER keyword). Also
+    reorganized the parsing of WKS stuff.
 
 5.8  19-Feb-87, Edit by VAF
-	Flush support for GREEN and DOMAIN.
+    Flush support for GREEN and DOMAIN.
 
 5.7  17-Feb-87, Edit by VAF
-	Make improvements to the error reporting.
+    Make improvements to the error reporting.
 
 5.6  12-Feb-87, Edit by VAF
-	Add support for domain servers.
+    Add support for domain servers.
 
 5.5   9-Feb-87, Edit by VAF
-	Add support for specifying process priviliges in WKS entries.
+    Add support for specifying process priviliges in WKS entries.
 
 5.4   6-Feb-87, Edit by VAF
-	Change references to DEUNA/DEQNA to be "DEC Ethernet". Add support for
-	VAXstation-2000 "ES" device (same as XE/XQ).
+    Change references to DEUNA/DEQNA to be "DEC Ethernet". Add support for
+    VAXstation-2000 "ES" device (same as XE/XQ).
 
 5.3   5-Feb-87, Edit by VAF
-	Add support for network access control.
+    Add support for network access control.
 
 5.2  12-Nov-86, Edit by VAF
-	Add support for WKS records in the config file.
+    Add support for WKS records in the config file.
 
 5.1  11-Nov-86, Edit by VAF
-	Add routine to set various parameter variables in the config file.
-	Currently supported are IP_FORWARDING and FQ_MAX.
+    Add routine to set various parameter variables in the config file.
+    Currently supported are IP_FORWARDING and FQ_MAX.
 
 5.0  12-Sep-86, Edit by VAF
-	Add support for "cloned" devices.
+    Add support for "cloned" devices.
 
 4.9   8-Aug-86, Edit by VAF
-	Change name server initialization code to call GREEN_CONFIG.
+    Change name server initialization code to call GREEN_CONFIG.
 
 4.8   4-Aug-86, Edit by VAF
-	Add code to initialize name server table.
+    Add code to initialize name server table.
 
 4.7  23-Jun-86, Edit by VAF
-	Add code to initialize IP forwarding state.
+    Add code to initialize IP forwarding state.
 
 4.6  29-Apr-86, Edit by VAF
-	Put device checking timers in here.
+    Put device checking timers in here.
 
 4.5  21-Apr-86, Edit by VAF
-	Phase II of flushing XPORT - Use $FAO instead of XPORT string stuff.
+    Phase II of flushing XPORT - Use $FAO instead of XPORT string stuff.
 
 4.4  18-Apr-86, Edit by VAF
-	Add new I/O utilities (IOUTIL.BLI module)
-	Add EN (3MB ethernet) device
-	Report device status after init routine called
+    Add new I/O utilities (IOUTIL.BLI module)
+    Add EN (3MB ethernet) device
+    Report device status after init routine called
 
 4.3  15-Apr-86, Edit by VAF
-	Support for variable-length hardware addresses.
-	Read physical address as one string of Hex digits.
-	Make a byte-swapped copy of the IP address for ARP's use.
+    Support for variable-length hardware addresses.
+    Read physical address as one string of Hex digits.
+    Make a byte-swapped copy of the IP address for ARP's use.
 
 4.2   8-Mar-86, Edit by VAF
-	Logging flag values are in hex now.
+    Logging flag values are in hex now.
 
 4.1   6-Mar-86, Edit by VAF
-	Rewrite to flush all traces of XPORT.
+    Rewrite to flush all traces of XPORT.
 
 4.0  21-Feb-86, Edit by VAF
-	Give each network interface its own IP address and network mask.
-	Reorganize initialization code for easier modification.
-	Don't preset "dev_config table", flush "NL_xxx" routines.
-	Add support for gateways
+    Give each network interface its own IP address and network mask.
+    Reorganize initialization code for easier modification.
+    Don't preset "dev_config table", flush "NL_xxx" routines.
+    Add support for gateways
 
 *** End CMU change log ***
 
 1.0 [1-5-82] tim fallon
 
-	Device configuration was buried inside of IP as we only had one
-	network device at the time (hyperchannel).
+    Device configuration was buried inside of IP as we only had one
+    network device at the time (hyperchannel).
 
 2.0 [4-10-82] stan smith, tim fallon.
 
-	Moved device configuration out of IP into this module.  Idea was to
-	make IP device independent; such that IP accessed all network device
-	driver routines (not to be confused with vms kernel level device drivers)
-	in the same fashion (same calling conventions via dev_config table).
-	Devices are configured (dev_config initialized) by macro invocations
-	during devconfig.bli compilation.  Actual reason behind all this change
-	was that ethernet were comming to tek and we needed to be able to support
-	multiple network devices (hyperchannel and ethernet) from the same
-	network acp.
+    Moved device configuration out of IP into this module.  Idea was to
+    make IP device independent; such that IP accessed all network device
+    driver routines (not to be confused with vms kernel level device drivers)
+    in the same fashion (same calling conventions via dev_config table).
+    Devices are configured (dev_config initialized) by macro invocations
+    during devconfig.bli compilation.  Actual reason behind all this change
+    was that ethernet were comming to tek and we needed to be able to support
+    multiple network devices (hyperchannel and ethernet) from the same
+    network acp.
 
 2.1 [4-20-83] stan smith
 
-	Developed routine "configure_network_devices", one no longer has to
-	recompile devconfig.bli to include a new ethernet or hyperchannel
-	device.  Dev_config table is now initialized from the file logical
-	name "tcp$network_device_file".  Each non-comment line of the file
-	describes a network device (vms name, used in $assign system service;
-	physical device address and device dependent bits).
+    Developed routine "configure_network_devices", one no longer has to
+    recompile devconfig.bli to include a new ethernet or hyperchannel
+    device.  Dev_config table is now initialized from the file logical
+    name "tcp$network_device_file".  Each non-comment line of the file
+    describes a network device (vms name, used in $assign system service;
+    physical device address and device dependent bits).
 
 3.0 [4-28-83] stan smith
 
-	Expanded device configuration to include memory mgmt config. Routine
-	"configure_network_Devices" has been renamed to configure_acp.  Format
-	of "devconfig.txt" now "config.txt" file has been expanded.  First
-	field is now a keyword field, processing is dispatched via this
-	keyword.
+    Expanded device configuration to include memory mgmt config. Routine
+    "configure_network_Devices" has been renamed to configure_acp.  Format
+    of "devconfig.txt" now "config.txt" file has been expanded.  First
+    field is now a keyword field, processing is dispatched via this
+    keyword.
 
 3.1 [8-2-85] Noelan Olson
 
-	Continue to run if no network devides were configured.  Favor to Stan.
+    Continue to run if no network devides were configured.  Favor to Stan.
 
 3.11 [11-18-85] Rick Watson U.Texas
 
-	Added ARP transponder code for Deuna device
+    Added ARP transponder code for Deuna device
 */
 
 #if 0
 MODULE CONFIG(IDENT="6.6",ZIP,OPTIMIZE,
               ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
                               NONEXTERNAL=LONG_RELATIVE),
-              LIST(NOEXPAND,NOREQUIRE,ASSEMBLY,	OBJECT,BINARY))
+              LIST(NOEXPAND,NOREQUIRE,ASSEMBLY, OBJECT,BINARY))
 #endif
 
-extern 	void OPR_FAO(long, ...);
-extern 	void ERROR_FAO(long, ...);
-extern 	void FATAL_FAO(long, ...);
+extern  void OPR_FAO(long, ...);
+extern  void ERROR_FAO(long, ...);
+extern  void FATAL_FAO(long, ...);
 
-#include	<starlet.h>	// VMS system definitions
-// not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";	// String descriptor stuff
-#include "netvms.h"		// Special VMS definitions
-#include "structure.h"	// Data structures
+#include    <starlet.h> // VMS system definitions
+// not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";  // String descriptor stuff
+#include "netvms.h"     // Special VMS definitions
+#include "structure.h"  // Data structures
 #include "cmuip.h" // needed before tcpmacros.h
-#include	"tcpmacros.h"	// ACP-wide macros
-#include "snmp.h"		// MIB definitions
+#include    "tcpmacros.h"   // ACP-wide macros
+#include "snmp.h"       // MIB definitions
 #include <cmuip/central/include/netcommon.h> // Common Defs
 #include <cmuip/central/include/netconfig.h> // Device configuration defs
 
@@ -280,25 +280,25 @@ extern  void    ASCII_HEX_BYTES();
 
 #if 0
 STR[] = CH$PTR(UPLIT(%ASCIZ %STRING(%REMAINING))) %,
-        STRMOVE(THESTR,DPTR) =		// Strmove - STRMOVE(STRING,BP)
+        STRMOVE(THESTR,DPTR) =      // Strmove - STRMOVE(STRING,BP)
             CH$MOVE(sizeof(THESTR),STR(THESTR),DPTR) %,
-            STREQL(THESTR,LITSTR) =		// Compare to literal string
+            STREQL(THESTR,LITSTR) =     // Compare to literal string
                 CH$EQL(sizeof(LITSTR),STR(LITSTR),sizeof(LITSTR),THESTR) %,
 #endif
-#define    STREQLZ(THESTR,LITSTR) 	/* Compare to literal string (ASCIZ) */ \
-	(0==strncmp(THESTR,LITSTR,sizeof(LITSTR))) // or other, or min/max?
+#define    STREQLZ(THESTR,LITSTR)   /* Compare to literal string (ASCIZ) */ \
+    (0==strncmp(THESTR,LITSTR,sizeof(LITSTR))) // or other, or min/max?
 
 #if 0
                 CH$EQL(sizeof(LITSTR)+1,STR(LITSTR),sizeof(LITSTR)+1,THESTR)
 #endif
 
 #define    INIT_DYNDESC(D) \
-	{ \
-	((struct dsc$descriptor*)&D)->dsc$w_length = 0; \
-	((struct dsc$descriptor*)&D)->dsc$b_dtype = DSC$K_DTYPE_T; \
-	((struct dsc$descriptor*)&D)->dsc$b_class =  DSC$K_CLASS_D; \
-	((struct dsc$descriptor*)&D)->dsc$a_pointer = 0; \
-	};
+    { \
+    ((struct dsc$descriptor*)&D)->dsc$w_length = 0; \
+    ((struct dsc$descriptor*)&D)->dsc$b_dtype = DSC$K_DTYPE_T; \
+    ((struct dsc$descriptor*)&D)->dsc$b_class =  DSC$K_CLASS_D; \
+    ((struct dsc$descriptor*)&D)->dsc$a_pointer = 0; \
+    };
 
 
 // Module-wide definitions
@@ -376,60 +376,60 @@ CNF$Define_IPACP_Interface (void)
     log_state;
 
     // IAPCP receive callback (from IP.BLI)
-    extern	ip$receive();
+    extern  ip$receive();
     // IPACP self-address recognition (from IP.BLI)
-    extern 	ip$isme();
+    extern  ip$isme();
 
     // Interrupt blocking routines (from WHERE???)
-    extern 	void MAIN$NOINT();
-    extern 	void MAIN$OKINT();
+    extern  void MAIN$NOINT();
+    extern  void MAIN$OKINT();
 
     // Error reporting routines (from CONFIG.BLI)
-    extern 	void CNF$Device_Error();
+    extern  void CNF$Device_Error();
 
     // Memory allocation routines (from MEMGR.BLI)
-    extern 	void mm$seg_get();
-    extern 	void mm$seg_free();
-    extern 	void mm$qblk_free();
+    extern  void mm$seg_get();
+    extern  void mm$seg_free();
+    extern  void mm$qblk_free();
 
     // Formatted event logging routines (from IOUTIL.BLI)
-    extern 	void LOG_FAO();
-    extern 	void QL_FAO();
+    extern  void LOG_FAO();
+    extern  void QL_FAO();
 
     // IAPCP receive callback.
-    IPACP_Int ->  ACPI$IP_Receive 	= ip$receive;
+    IPACP_Int ->  ACPI$IP_Receive   = ip$receive;
 
     // pointer to IPACP sleeping flag
-    IPACP_Int ->  ACPI$Sleeping  	= sleeping;
+    IPACP_Int ->  ACPI$Sleeping     = sleeping;
 
     // pointer to IPACP AST_in_progress flag
-    IPACP_Int ->  ACPI$AST_in_progress  	= &ast_in_progress;
+    IPACP_Int ->  ACPI$AST_in_progress      = &ast_in_progress;
 
     // Interrupt blocking routines
-    IPACP_Int ->  ACPI$NOINT 		= MAIN$NOINT;
-    IPACP_Int ->  ACPI$OKINT 		= MAIN$OKINT;
+    IPACP_Int ->  ACPI$NOINT        = MAIN$NOINT;
+    IPACP_Int ->  ACPI$OKINT        = MAIN$OKINT;
 
     // Error reporting routines
-    IPACP_Int ->  ACPI$Device_Error 	= CNF$Device_Error;
+    IPACP_Int ->  ACPI$Device_Error     = CNF$Device_Error;
 
     // IPACP self-address recognition
-    IPACP_Int ->  ACPI$IP_ISME 		= ip$isme;
+    IPACP_Int ->  ACPI$IP_ISME      = ip$isme;
 
     // Memory allocation routines
-    IPACP_Int ->  ACPI$Seg_Get 		= mm$seg_get;
-    IPACP_Int ->  ACPI$Seg_Free 		= mm$seg_free;
-    IPACP_Int ->  ACPI$QBlk_Free 	= mm$qblk_free;
+    IPACP_Int ->  ACPI$Seg_Get      = mm$seg_get;
+    IPACP_Int ->  ACPI$Seg_Free         = mm$seg_free;
+    IPACP_Int ->  ACPI$QBlk_Free    = mm$qblk_free;
 
     // Provide event logging entry points
-    IPACP_Int ->  ACPI$LOG_STATE 	= log_state;	// pointer
-    IPACP_Int ->  ACPI$LOG_FAO 		= LOG_FAO;
-    IPACP_Int ->  ACPI$QL_FAO 		= QL_FAO;
-    IPACP_Int ->  ACPI$OPR_FAO 		= OPR_FAO;
-    IPACP_Int ->  ACPI$ERROR_FAO 	= ERROR_FAO;
-    IPACP_Int ->  ACPI$FATAL_FAO 	= FATAL_FAO;
+    IPACP_Int ->  ACPI$LOG_STATE    = log_state;    // pointer
+    IPACP_Int ->  ACPI$LOG_FAO      = LOG_FAO;
+    IPACP_Int ->  ACPI$QL_FAO       = QL_FAO;
+    IPACP_Int ->  ACPI$OPR_FAO      = OPR_FAO;
+    IPACP_Int ->  ACPI$ERROR_FAO    = ERROR_FAO;
+    IPACP_Int ->  ACPI$FATAL_FAO    = FATAL_FAO;
 
     // IPACP max physical buffer size
-    IPACP_Int ->  ACPI$MPBS  		= max_physical_bufsize;
+    IPACP_Int ->  ACPI$MPBS         = max_physical_bufsize;
 
     return IPACP_Int;
 }
@@ -445,7 +445,7 @@ void init_vars (void)
     extern
     struct IP_group_MIB_struct * IP_group_MIB;
 
-    IP_group_MIB->IPMIB$ipForwarding = 2;	// Just a host, no forwarding
+    IP_group_MIB->IPMIB$ipForwarding = 2;   // Just a host, no forwarding
 }
 
 
@@ -560,17 +560,17 @@ long * RB; // check
 /*
 Function:
 
-	Read the IPACP configuration file, "INET$CONFIG", containing all info
-	about the ACP initialization parameters, including: devices, memory
-	management parameters, logging state, variables, well-known services,
-	etc. Each line of the file contains a keyword followed by the values
-	associated with the keyword. Lines beginning in ";" are ignored as
-	comment lines.
+    Read the IPACP configuration file, "INET$CONFIG", containing all info
+    about the ACP initialization parameters, including: devices, memory
+    management parameters, logging state, variables, well-known services,
+    etc. Each line of the file contains a keyword followed by the values
+    associated with the keyword. Lines beginning in ";" are ignored as
+    comment lines.
 
 Side Effects:
 
-	Initializes the DEV_CONFIG table, the globals for memory management,
-	and calls all of the configuration routines in other modules.
+    Initializes the DEV_CONFIG table, the globals for memory management,
+    and calls all of the configuration routines in other modules.
 */
 
 void CNF$Configure_ACP (void)
@@ -608,7 +608,7 @@ void CNF$Configure_ACP (void)
 
 // Extract information from each non-comment line of the file
 
-    dev_count = 0;		// No devices
+    dev_count = 0;      // No devices
 
 #ifndef NOKERNEL
 #define RMS_WORKAROUND
@@ -646,7 +646,7 @@ void CNF$Configure_ACP (void)
             if (linlen > (RECLEN-1))
                 linlen = RECLEN-1;
             cptr = CH$PLUS(linptr,linlen);
-            CH$WCHAR_A(0,cptr);		// Make ASCIZ
+            CH$WCHAR_A(0,cptr);     // Make ASCIZ
 
 // Read the first field (category keyword) and dispatch to the appro processing
 // routine.
@@ -722,16 +722,16 @@ void Init_Device (void)
 // Parses the device description and adds to DEV_CONFIG table.
 
 {
-    //extern 	LIB$CALLG();
-    extern 	LIB$FIND_IMAGE_SYMBOL();
-    extern 	STR$APPEND		();
-    extern 	STR$CASE_BLIND_COMPARE	();
-    extern 	STR$COPY_DX		();
+    //extern    LIB$CALLG();
+    extern  LIB$FIND_IMAGE_SYMBOL();
+    extern  STR$APPEND      ();
+    extern  STR$CASE_BLIND_COMPARE  ();
+    extern  STR$COPY_DX     ();
     Device_Info_Structure * devinfo;
     Device_Configuration_Entry * dev_config;
     int (*Image_Init)();
     signed long I,
-//	tmp,
+//  tmp,
            rc,
            ipaddr,
            ipmask,
@@ -741,7 +741,7 @@ void Init_Device (void)
            devstr[STRSIZ],
            devslen,
            devspec[STRSIZ],
-           devidx;		// device index into devconfig.
+           devidx;      // device index into devconfig.
     struct dsc$descriptor dev_desc_ =
     {
         dsc$w_length :0,
@@ -752,7 +752,7 @@ dsc$b_class :
 dsc$a_pointer :
         devstr
     }, * dev_desc=&dev_desc_;
-    struct dsc$descriptor	devtyp_desc_ =
+    struct dsc$descriptor   devtyp_desc_ =
     {
         dsc$w_length :0,
 dsc$b_dtype :
@@ -762,7 +762,7 @@ dsc$b_class :
 dsc$a_pointer :
         devtype
     }, * devtyp_desc=&devtyp_desc_;
-    struct dsc$descriptor	dev_spec_desc_  =
+    struct dsc$descriptor   dev_spec_desc_  =
     {
         dsc$w_length :0,
 dsc$b_dtype :
@@ -806,7 +806,7 @@ dsc$a_pointer :
     $DESCRIPTOR(ether,"ETHER");
     if ((STR$CASE_BLIND_COMPARE(devtyp_desc,&ether) == 0))
     {
-        extern	    drv$transport_init();
+        extern      drv$transport_init();
 
         Image_Init = drv$transport_init;
     }
@@ -856,8 +856,8 @@ dsc$a_pointer :
 
 // Set hardware address/device dependant words
 //    IF GET_HEX_BYTES(dev_config->dc_phy_size,linptr,
-//		     CH$PTR(dev_config->dc_phy_addr)) < 0 THEN
-//	config_err(ASCID("Bad device address"));
+//           CH$PTR(dev_config->dc_phy_addr)) < 0 THEN
+//  config_err(ASCID("Bad device address"));
 //    SKIPTO(':');
 
 // Get device IP address
@@ -911,21 +911,21 @@ void Init_Gateway (void)
 // Gateway entries are of the form:
 //   GATEWAY:<gwy_name>:<gwy_address>:<gwy-network>:<gwy-netmask>
 // Where (these are also the names of the GWY_TABLE fields):
-//   gwy_name	Name of the gateway (for debugging purposes)
-//   gwy_address	IP address of gateway *must be locally-connected*
-//   gwy_network	Network number served by gateway (0 means any/default)
-//   gwy_netmask	AND mask for comparing network number
-//   gwy_status	Gateway status. Initialized to "up" (nonzero) by this code.
+//   gwy_name   Name of the gateway (for debugging purposes)
+//   gwy_address    IP address of gateway *must be locally-connected*
+//   gwy_network    Network number served by gateway (0 means any/default)
+//   gwy_netmask    AND mask for comparing network number
+//   gwy_status Gateway status. Initialized to "up" (nonzero) by this code.
 
 {
-    extern	void ip$gwy_config();
+    extern  void ip$gwy_config();
     signed long
     GWYname [STRSIZ],
             GWYaddr,
             GWYnet,
             GWYnetmask,
             tmp;
-    struct dsc$descriptor 	GWY_Name_Desc_ =
+    struct dsc$descriptor   GWY_Name_Desc_ =
     {
         dsc$w_length :0,
 dsc$b_dtype :
@@ -974,9 +974,9 @@ void Init_NameServer (void)
 // Name Server entries are of the form:
 //   NAME_SERVER:<NS_name>:<NS_address>
 // Where (these are also the names of the NS_TABLE fields):
-//   NS_name	Name of the gateway (for debugging purposes)
-//   NS_address	IP address of gateway *must be locally-connected*
-//   NS_status	Gateway status. Initialized to "up" (nonzero) by this code.
+//   NS_name    Name of the gateway (for debugging purposes)
+//   NS_address IP address of gateway *must be locally-connected*
+//   NS_status  Gateway status. Initialized to "up" (nonzero) by this code.
 
 {
     signed long
@@ -1048,7 +1048,7 @@ void init_logging (void)
 // Set initial logging state.
 
 {
-    extern	void LOG_CHANGE();
+    extern  void LOG_CHANGE();
     signed long
     logstate;
 
@@ -1073,7 +1073,7 @@ void init_activity_logging (void)
 // Set initial activity logging state.
 
 {
-    extern	void ACT_CHANGE();
+    extern  void ACT_CHANGE();
     signed long
     logstate;
 
@@ -1144,7 +1144,7 @@ void init_variable (void)
     udpttl,
     act_threshold,
     log_threshold;
-    extern	struct IP_group_MIB_struct * IP_group_MIB;
+    extern  struct IP_group_MIB_struct * IP_group_MIB;
     signed long
     varname [STRSIZ],
             varlen,
@@ -1237,7 +1237,7 @@ void init_variable (void)
 
 // Define the STATUS keywords
 
-char *	 STATNAMES[] =
+char *   STATNAMES[] =
 {
     ASCIDNOT("SSRWAIT"),PRC$M_SSRWAIT,
     ASCIDNOT("SSFEXCU"),PRC$M_SSFEXCU,
@@ -1303,30 +1303,30 @@ char * PRIVNAMES[] =
 
 struct QUOTA
 {
-    char  QTA$TYPE;	// Quota type
-    unsigned long    QTA$VALUE;	// Quota value
+    char  QTA$TYPE; // Quota type
+    unsigned long    QTA$VALUE; // Quota value
 };
 
 #define     QUOTA_SIZE   $FIELD_SET_SIZE
 #define     QUOTA_BLEN   5
 
-#define     MAXQUOTA   15		// Max number of quotas to specify
+#define     MAXQUOTA   15       // Max number of quotas to specify
 
 // Define a keyword table for parsing the process quotas.
 
 char * QUOTANAMES[] =
 {
-    ASCIDNOT("ASTLM"),	PQL$_ASTLM,
-    ASCIDNOT("BIOLM"),	PQL$_BIOLM,
-    ASCIDNOT("BYTLM"),	PQL$_BYTLM,
-    ASCIDNOT("CPULM"),	PQL$_CPULM,
-    ASCIDNOT("DIOLM"),	PQL$_DIOLM,
-    ASCIDNOT("ENQLM"),	PQL$_ENQLM,
-    ASCIDNOT("FILLM"),	PQL$_FILLM,
+    ASCIDNOT("ASTLM"),  PQL$_ASTLM,
+    ASCIDNOT("BIOLM"),  PQL$_BIOLM,
+    ASCIDNOT("BYTLM"),  PQL$_BYTLM,
+    ASCIDNOT("CPULM"),  PQL$_CPULM,
+    ASCIDNOT("DIOLM"),  PQL$_DIOLM,
+    ASCIDNOT("ENQLM"),  PQL$_ENQLM,
+    ASCIDNOT("FILLM"),  PQL$_FILLM,
     ASCIDNOT("JTQUOTA"),PQL$_JTQUOTA,
     ASCIDNOT("PGFLQUOTA"),PQL$_PGFLQUOTA,
-    ASCIDNOT("PRCLM"),	PQL$_PRCLM,
-    ASCIDNOT("TQELM"),	PQL$_TQELM,
+    ASCIDNOT("PRCLM"),  PQL$_PRCLM,
+    ASCIDNOT("TQELM"),  PQL$_TQELM,
     ASCIDNOT("WSDEFAULT"),PQL$_WSDEFAULT,
     ASCIDNOT("WSEXTENT"),PQL$_WSEXTENT,
     ASCIDNOT("WSQUOTA"),PQL$_WSQUOTA
@@ -1526,8 +1526,8 @@ void Init_WKS (void)
 // (cont) <queue-limit>:<maxsrv>
 
 {
-    extern	STR$COPY_DX();
-    extern	void seg$wks_config();
+    extern  STR$COPY_DX();
+    extern  void seg$wks_config();
     signed long
     CHR,LPTR,
         WKSprname [STRSIZ],
@@ -1704,8 +1704,8 @@ void Init_RPC (void)
 //   RPC:<name>:<prog>:<vers>:<prot>:<port>:<imagename>
 
 {
-    extern	STR$COPY_DX	();
-    extern	RPC$CONFIG();
+    extern  STR$COPY_DX ();
+    extern  RPC$CONFIG();
     signed long
     RC,
     CHR,LPTR,
@@ -1783,8 +1783,8 @@ void Init_Auth (void)
 //   AUTH:<[UIC]>:<uid>:<gid>:<hostname>
 
 {
-    extern	STR$COPY_DX	();
-    extern	RPC$CONFIG_AUTH();
+    extern  STR$COPY_DX ();
+    extern  RPC$CONFIG_AUTH();
     signed long
     RC,
     CHR,LPTR,
@@ -1834,7 +1834,7 @@ void init_mbxresolver (void)
 // MBX_RESOLVER:<image>:<priority>:<flags>:<privs>:<quotas>
 //
 {
-    extern	void NML$CONFIG();
+    extern  void NML$CONFIG();
     signed long
     imagename [STRSIZ],
               STATFLAGS,
@@ -1903,7 +1903,7 @@ void init_local_host (void)
 // Reads the data and calls USER$ACCESS_CONFIG(ipaddr,ipmask)
 //
 {
-    extern	void user$access_config();
+    extern  void user$access_config();
     signed long
     hostaddr,
     hostmask;
@@ -2016,25 +2016,25 @@ PARSE_NULLFIELD (void)
 
 Function:
 
-	Initialize all known network devices from dev_config table.
+    Initialize all known network devices from dev_config table.
 
 Inputs:
 
-	None.
+    None.
 
 Implicit Inputs:
 
-	dev_config table entries.
+    dev_config table entries.
 
 Outputs:
 ]
-	None.
+    None.
 
 Side Effects:
 
-	if the dev_config table entry is marked as a valid entry then
-	the device init routine is called.  This routine will assign the
-	device & place the IO channel in the dev_config table entry dc_io_chan.
+    if the dev_config table entry is marked as a valid entry then
+    the device init routine is called.  This routine will assign the
+    device & place the IO channel in the dev_config table entry dc_io_chan.
 */
 
 
@@ -2048,7 +2048,7 @@ void CNF$Net_Device_Init (void)
     cdev;
     struct Device_Configuration_Entry * dev_config;
 
-    dev_attn = 0;		// No devices need attention
+    dev_attn = 0;       // No devices need attention
     for (J=0; J<=(dev_count-1); J++)
     {
         if (dev_config_tab[J].dc_valid_device)
@@ -2076,9 +2076,9 @@ void CNF$Net_Device_Init (void)
 // And tell the operator the status.
 
             devnam = &dev_config_tab[J].dc_devname;
-//	    ASCII_Hex_Bytes(phystr,dev_config_tab[cdev].dc_phy_size,
-//			    dev_config[cdev,dc_phy_addr],
-//			    phystr->dsc$w_length);
+//      ASCII_Hex_Bytes(phystr,dev_config_tab[cdev].dc_phy_size,
+//              dev_config[cdev,dc_phy_addr],
+//              phystr->dsc$w_length);
             ASCII_DEC_BYTES(ipstr,4,dev_config_tab[J].dc_ip_address,
                             &ipstr->dsc$w_length);
             if (dev_config_tab[cdev].dc_online)
@@ -2096,7 +2096,7 @@ void CNF$Net_Device_Init (void)
 }
 
 
-//SBTTL	"Check devices needing attention"
+//SBTTL "Check devices needing attention"
 
 void    CNF$Check_Devices();
 
@@ -2105,15 +2105,15 @@ CHECKTIME [2] = {-20000000,-1}; // 2 seconds in the future
 
 void CNF$Check_Sched (void)
 {
-    sys$setimr(	0,  CHECKTIME,
+    sys$setimr( 0,  CHECKTIME,
                 CNF$Check_Devices, 0, 0);
 }
 
 void CNF$Device_Error (void)
 {
     if (dev_attn == 0)
-        CNF$Check_Sched();		// Schedule a check
-    dev_attn = dev_attn+1;	// And bump count of wedged devices
+        CNF$Check_Sched();      // Schedule a check
+    dev_attn = dev_attn+1;  // And bump count of wedged devices
 }
 
 void CNF$Check_Devices (void)
@@ -2128,7 +2128,7 @@ void CNF$Check_Devices (void)
                            dev_config_tab[i].dc_begin);
 
     if (dev_attn != 0)
-        CNF$Check_Sched();		// Reschedule if there is still a problem
+        CNF$Check_Sched();      // Reschedule if there is still a problem
 }
 
 

@@ -1,11 +1,11 @@
 #ifndef __TIME_LOADED
-#define __TIME_LOADED	1
+#define __TIME_LOADED   1
 
-/*	TIME - V3.0 - Localtime() RTL Routine Return Structure Definition	*/
+/*  TIME - V3.0 - Localtime() RTL Routine Return Structure Definition   */
 /*
  * MODIFICATIONS:
- *	19-JAN-1994  mlo -- removed reference to sys/ in include statements
- *	19-MAY-1992  mlo -- extended tm structure to hold GMT and DST stuff
+ *  19-JAN-1994  mlo -- removed reference to sys/ in include statements
+ *  19-MAY-1992  mlo -- extended tm structure to hold GMT and DST stuff
  */
 # define CLK_TCK (100)
 
@@ -29,11 +29,11 @@ typedef struct tbuffer tbuffer_t;
 
 struct tm
 {
-    int	tm_sec, tm_min, tm_hour;
-    int	tm_mday, tm_mon, tm_year;
-    int	tm_wday, tm_yday, tm_isdst;
-    long	tm_gmtoff;
-    char	*tm_zone;
+    int tm_sec, tm_min, tm_hour;
+    int tm_mday, tm_mon, tm_year;
+    int tm_wday, tm_yday, tm_isdst;
+    long    tm_gmtoff;
+    char    *tm_zone;
 };
 
 /*
@@ -42,21 +42,21 @@ struct tm
  */
 struct timeval
 {
-    long	tv_sec;		/* seconds */
-    long	tv_usec;	/* and microseconds */
+    long    tv_sec;     /* seconds */
+    long    tv_usec;    /* and microseconds */
 };
 
 struct timezone
 {
-    int	tz_minuteswest;	/* minutes west of Greenwich */
-    int	tz_dsttime;	/* type of dst correction */
+    int tz_minuteswest; /* minutes west of Greenwich */
+    int tz_dsttime; /* type of dst correction */
 };
-#define	DST_NONE	0	/* not on dst */
-#define	DST_USA		1	/* USA style dst */
-#define	DST_AUST	2	/* Australian style dst */
-#define	DST_WET		3	/* Western European dst */
-#define	DST_MET		4	/* Middle European dst */
-#define	DST_EET		5	/* Eastern European dst */
+#define DST_NONE    0   /* not on dst */
+#define DST_USA     1   /* USA style dst */
+#define DST_AUST    2   /* Australian style dst */
+#define DST_WET     3   /* Western European dst */
+#define DST_MET     4   /* Middle European dst */
+#define DST_EET     5   /* Eastern European dst */
 
 typedef struct tm tm_t;
 
@@ -106,4 +106,4 @@ double vaxc$ddifftime(time_t time2, time_t time1);
 #endif
 #endif
 
-#endif					/* __TIME_LOADED */
+#endif                  /* __TIME_LOADED */

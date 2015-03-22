@@ -17,9 +17,9 @@
 
 #ifndef MAX_HWIFS
 # ifdef CONFIG_BLK_DEV_IDEPCI
-#define MAX_HWIFS	10
+#define MAX_HWIFS   10
 # else
-#define MAX_HWIFS	6
+#define MAX_HWIFS   6
 # endif
 #endif
 
@@ -108,24 +108,24 @@ static __inline__ void ide_init_default_hwifs(void)
 
 typedef union
 {
-    unsigned all			: 8;	/* all of the bits together */
+    unsigned all            : 8;    /* all of the bits together */
     struct
     {
-        unsigned head		: 4;	/* always zeros here */
-        unsigned unit		: 1;	/* drive select number, 0 or 1 */
-        unsigned bit5		: 1;	/* always 1 */
-        unsigned lba		: 1;	/* using LBA instead of CHS */
-        unsigned bit7		: 1;	/* always 1 */
+        unsigned head       : 4;    /* always zeros here */
+        unsigned unit       : 1;    /* drive select number, 0 or 1 */
+        unsigned bit5       : 1;    /* always 1 */
+        unsigned lba        : 1;    /* using LBA instead of CHS */
+        unsigned bit7       : 1;    /* always 1 */
     } b;
 } select_t;
 
 /*
  * The following are not needed for the non-m68k ports
  */
-#define ide_ack_intr(hwif)		(1)
-#define ide_fix_driveid(id)		do {} while (0)
-#define ide_release_lock(lock)		do {} while (0)
-#define ide_get_lock(lock, hdlr, data)	do {} while (0)
+#define ide_ack_intr(hwif)      (1)
+#define ide_fix_driveid(id)     do {} while (0)
+#define ide_release_lock(lock)      do {} while (0)
+#define ide_get_lock(lock, hdlr, data)  do {} while (0)
 
 #endif /* __KERNEL__ */
 

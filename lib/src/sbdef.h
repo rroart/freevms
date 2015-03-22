@@ -1,5 +1,5 @@
-#ifndef sbdef_h
-#define sbdef_h
+#ifndef SBDEF_H
+#define SBDEF_H
 
 #define SB$M_LOCAL 0x1
 #define SB$M_LOCAL_DIRECTORY 0x2

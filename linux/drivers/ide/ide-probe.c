@@ -5,7 +5,7 @@
 // Modified Linux source file, 2001-2004.
 
 /*
- *  linux/drivers/ide/ide-probe.c	Version 1.07	March 18, 2001
+ *  linux/drivers/ide/ide-probe.c   Version 1.07    March 18, 2001
  *
  *  Copyright (C) 1994-1998  Linus Torvalds & authors (see below)
  */
@@ -19,23 +19,23 @@
  *
  * This is the IDE probe module, as evolved from hd.c and ide.c.
  *
- * Version 1.00		move drive probing code from ide.c to ide-probe.c
- * Version 1.01		fix compilation problem for m68k
- * Version 1.02		increase WAIT_PIDENTIFY to avoid CD-ROM locking at boot
- *			 by Andrea Arcangeli
- * Version 1.03		fix for (hwif->chipset == ide_4drives)
- * Version 1.04		fixed buggy treatments of known flash memory cards
+ * Version 1.00     move drive probing code from ide.c to ide-probe.c
+ * Version 1.01     fix compilation problem for m68k
+ * Version 1.02     increase WAIT_PIDENTIFY to avoid CD-ROM locking at boot
+ *           by Andrea Arcangeli
+ * Version 1.03     fix for (hwif->chipset == ide_4drives)
+ * Version 1.04     fixed buggy treatments of known flash memory cards
  *
- * Version 1.05		fix for (hwif->chipset == ide_pdc4030)
- *			added ide6/7/8/9
- *			allowed for secondary flash card to be detectable
- *			 with new flag : drive->ata_flash : 1;
- * Version 1.06		stream line request queue and prep for cascade project.
- * Version 1.07		max_sect <= 255; slower disks would get behind and
- * 			then fall over when they get to 256.	Paul G.
+ * Version 1.05     fix for (hwif->chipset == ide_pdc4030)
+ *          added ide6/7/8/9
+ *          allowed for secondary flash card to be detectable
+ *           with new flag : drive->ata_flash : 1;
+ * Version 1.06     stream line request queue and prep for cascade project.
+ * Version 1.07     max_sect <= 255; slower disks would get behind and
+ *          then fall over when they get to 256.    Paul G.
  */
 
-#undef REALLY_SLOW_IO		/* most systems can safely undef this */
+#undef REALLY_SLOW_IO       /* most systems can safely undef this */
 
 #include <linux/config.h>
 #include <linux/module.h>
@@ -70,9 +70,9 @@ static inline void do_identify (ide_drive_t *drive, byte cmd)
     int bswap = 1;
     struct hd_driveid *id;
 
-    id = drive->id = kmalloc (SECTOR_WORDS*4, GFP_ATOMIC);	/* called with interrupts disabled! */
-    ide_input_data(drive, id, SECTOR_WORDS);		/* read 512 bytes of id info */
-    ide__sti();	/* local CPU only */
+    id = drive->id = kmalloc (SECTOR_WORDS*4, GFP_ATOMIC);  /* called with interrupts disabled! */
+    ide_input_data(drive, id, SECTOR_WORDS);        /* read 512 bytes of id info */
+    ide__sti(); /* local CPU only */
     ide_fix_driveid(id);
 
     if (id->word156 == 0x4d42)
@@ -105,7 +105,7 @@ static inline void do_identify (ide_drive_t *drive, byte cmd)
         if ((id->model[0] == 'N' && id->model[1] == 'E') /* NEC */
                 || (id->model[0] == 'F' && id->model[1] == 'X') /* Mitsumi */
                 || (id->model[0] == 'P' && id->model[1] == 'i'))/* Pioneer */
-            bswap ^= 1;	/* Vertos drives may still be weird */
+            bswap ^= 1; /* Vertos drives may still be weird */
     }
     ide_fixstring (id->model,     sizeof(id->model),     bswap);
     ide_fixstring (id->fw_rev,    sizeof(id->fw_rev),    bswap);
@@ -114,7 +114,7 @@ static inline void do_identify (ide_drive_t *drive, byte cmd)
     if (strstr(id->model, "E X A B Y T E N E S T"))
         return;
 
-    id->model[sizeof(id->model)-1] = '\0';	/* we depend on this a lot! */
+    id->model[sizeof(id->model)-1] = '\0';  /* we depend on this a lot! */
     printk("%s: %s, ", drive->name, id->model);
     drive->present = 1;
 
@@ -146,7 +146,7 @@ static inline void do_identify (ide_drive_t *drive, byte cmd)
                     break;
                 }
             }
-            type = ide_cdrom;	/* Early cdrom models used zero */
+            type = ide_cdrom;   /* Early cdrom models used zero */
         case ide_cdrom:
             drive->removable = 1;
 #ifdef CONFIG_PPC
@@ -206,9 +206,9 @@ static inline void do_identify (ide_drive_t *drive, byte cmd)
  * happening, in hope of automatically determining which one is
  * being used by the interface.
  *
- * Returns:	0  device was identified
- *		1  device timed-out (no response to identify request)
- *		2  device aborted the command (refused to identify itself)
+ * Returns: 0  device was identified
+ *      1  device timed-out (no response to identify request)
+ *      2  device aborted the command (refused to identify itself)
  */
 static int actual_try_to_identify (ide_drive_t *drive, byte cmd)
 {
@@ -226,11 +226,11 @@ static int actual_try_to_identify (ide_drive_t *drive, byte cmd)
         if ((a ^ s) & ~INDEX_STAT)
         {
             printk("%s: probing with STATUS(0x%02x) instead of ALTSTATUS(0x%02x)\n", drive->name, s, a);
-            hd_status = IDE_STATUS_REG;	/* ancient Seagate drives, broken interfaces */
+            hd_status = IDE_STATUS_REG; /* ancient Seagate drives, broken interfaces */
         }
         else
         {
-            hd_status = IDE_ALTSTATUS_REG;	/* use non-intrusive polling */
+            hd_status = IDE_ALTSTATUS_REG;  /* use non-intrusive polling */
         }
     }
     else
@@ -241,7 +241,7 @@ static int actual_try_to_identify (ide_drive_t *drive, byte cmd)
 
     /* set features register for atapi identify command to be sure of reply */
     if ((cmd == WIN_PIDENTIFY))
-        OUT_BYTE(0,IDE_FEATURE_REG);	/* disable dma & overlap */
+        OUT_BYTE(0,IDE_FEATURE_REG);    /* disable dma & overlap */
 
 #if CONFIG_BLK_DEV_PDC4030
     if (HWIF(drive)->chipset == ide_pdc4030)
@@ -255,32 +255,32 @@ static int actual_try_to_identify (ide_drive_t *drive, byte cmd)
     }
     else
 #endif /* CONFIG_BLK_DEV_PDC4030 */
-        OUT_BYTE(cmd,IDE_COMMAND_REG);		/* ask drive for ID */
+        OUT_BYTE(cmd,IDE_COMMAND_REG);      /* ask drive for ID */
     timeout = ((cmd == WIN_IDENTIFY) ? WAIT_WORSTCASE : WAIT_PIDENTIFY) / 2;
     timeout += jiffies;
     do
     {
         if (0 < (signed long)(jiffies - timeout))
         {
-            return 1;	/* drive timed-out */
+            return 1;   /* drive timed-out */
         }
-        ide_delay_50ms();		/* give drive a breather */
+        ide_delay_50ms();       /* give drive a breather */
     }
     while (IN_BYTE(hd_status) & BUSY_STAT);
 
-    ide_delay_50ms();		/* wait for IRQ and DRQ_STAT */
+    ide_delay_50ms();       /* wait for IRQ and DRQ_STAT */
     if (OK_STAT(GET_STAT(),DRQ_STAT,BAD_R_STAT))
     {
         unsigned long flags;
-        __save_flags(flags);	/* local CPU only */
-        __cli();		/* local CPU only; some systems need this */
+        __save_flags(flags);    /* local CPU only */
+        __cli();        /* local CPU only; some systems need this */
         do_identify(drive, cmd); /* drive returned ID */
-        rc = 0;			/* drive responded with ID */
-        (void) GET_STAT();	/* clear drive IRQ */
-        __restore_flags(flags);	/* local CPU only */
+        rc = 0;         /* drive responded with ID */
+        (void) GET_STAT();  /* clear drive IRQ */
+        __restore_flags(flags); /* local CPU only */
     }
     else
-        rc = 2;			/* drive refused ID */
+        rc = 2;         /* drive refused ID */
     return rc;
 }
 
@@ -294,7 +294,7 @@ static int try_to_identify (ide_drive_t *drive, byte cmd)
     {
         autoprobe = 1;
         cookie = probe_irq_on();
-        OUT_BYTE(drive->ctl,IDE_CONTROL_REG);	/* enable device irq */
+        OUT_BYTE(drive->ctl,IDE_CONTROL_REG);   /* enable device irq */
     }
 
     retval = actual_try_to_identify(drive, cmd);
@@ -302,8 +302,8 @@ static int try_to_identify (ide_drive_t *drive, byte cmd)
     if (autoprobe)
     {
         int irq;
-        OUT_BYTE(drive->ctl|2,IDE_CONTROL_REG);	/* mask device irq */
-        (void) GET_STAT();			/* clear drive IRQ */
+        OUT_BYTE(drive->ctl|2,IDE_CONTROL_REG); /* mask device irq */
+        (void) GET_STAT();          /* clear drive IRQ */
         udelay(5);
         irq = probe_irq_off(cookie);
         if (!HWIF(drive)->irq)
@@ -312,7 +312,7 @@ static int try_to_identify (ide_drive_t *drive, byte cmd)
             {
                 HWIF(drive)->irq = irq;
             }
-            else  	/* Mmmm.. multiple IRQs.. don't know which was ours */
+            else    /* Mmmm.. multiple IRQs.. don't know which was ours */
             {
                 printk("%s: IRQ probe failed (0x%lx)\n", drive->name, cookie);
 #ifdef CONFIG_BLK_DEV_CMD640
@@ -341,17 +341,17 @@ static int try_to_identify (ide_drive_t *drive, byte cmd)
  * for the maximum wait time (about 30 seconds), otherwise it will
  * exit much more quickly.
  *
- * Returns:	0  device was identified
- *		1  device timed-out (no response to identify request)
- *		2  device aborted the command (refused to identify itself)
- *		3  bad status from device (possible for ATAPI drives)
- *		4  probe was not attempted because failure was obvious
+ * Returns: 0  device was identified
+ *      1  device timed-out (no response to identify request)
+ *      2  device aborted the command (refused to identify itself)
+ *      3  bad status from device (possible for ATAPI drives)
+ *      4  probe was not attempted because failure was obvious
  */
 static int do_probe (ide_drive_t *drive, byte cmd)
 {
     int rc;
     ide_hwif_t *hwif = HWIF(drive);
-    if (drive->present)  	/* avoid waiting for inappropriate probes */
+    if (drive->present)     /* avoid waiting for inappropriate probes */
     {
         if ((drive->media != ide_disk) && (cmd == WIN_IDENTIFY))
             return 4;
@@ -361,15 +361,15 @@ static int do_probe (ide_drive_t *drive, byte cmd)
            drive->name, drive->present, drive->media,
            (cmd == WIN_IDENTIFY) ? "ATA" : "ATAPI");
 #endif
-    ide_delay_50ms();	/* needed for some systems (e.g. crw9624 as drive0 with disk as slave) */
+    ide_delay_50ms();   /* needed for some systems (e.g. crw9624 as drive0 with disk as slave) */
     SELECT_DRIVE(hwif,drive);
     ide_delay_50ms();
     if (IN_BYTE(IDE_SELECT_REG) != drive->select.all && !drive->present)
     {
         if (drive->select.b.unit != 0)
         {
-            SELECT_DRIVE(hwif,&hwif->drives[0]);	/* exit with drive0 selected */
-            ide_delay_50ms();		/* allow BUSY_STAT to assert & clear */
+            SELECT_DRIVE(hwif,&hwif->drives[0]);    /* exit with drive0 selected */
+            ide_delay_50ms();       /* allow BUSY_STAT to assert & clear */
         }
         return 3;    /* no i/f present: mmm.. this should be a 4 -ml */
     }
@@ -394,17 +394,17 @@ static int do_probe (ide_drive_t *drive, byte cmd)
         }
         if (rc == 1)
             printk("%s: no response (status = 0x%02x)\n", drive->name, GET_STAT());
-        (void) GET_STAT();		/* ensure drive irq is clear */
+        (void) GET_STAT();      /* ensure drive irq is clear */
     }
     else
     {
-        rc = 3;				/* not present or maybe ATAPI */
+        rc = 3;             /* not present or maybe ATAPI */
     }
     if (drive->select.b.unit != 0)
     {
-        SELECT_DRIVE(hwif,&hwif->drives[0]);	/* exit with drive0 selected */
+        SELECT_DRIVE(hwif,&hwif->drives[0]);    /* exit with drive0 selected */
         ide_delay_50ms();
-        (void) GET_STAT();		/* ensure drive irq is clear */
+        (void) GET_STAT();      /* ensure drive irq is clear */
     }
     return rc;
 }
@@ -436,21 +436,21 @@ static void enable_nest (ide_drive_t *drive)
         printk("failed (status = 0x%02x)\n", GET_STAT());
     else
         printk("success\n");
-    if (do_probe(drive, WIN_IDENTIFY) >= 2)  	/* if !(success||timed-out) */
+    if (do_probe(drive, WIN_IDENTIFY) >= 2)     /* if !(success||timed-out) */
     {
-        (void) do_probe(drive, WIN_PIDENTIFY);	/* look for ATAPI device */
+        (void) do_probe(drive, WIN_PIDENTIFY);  /* look for ATAPI device */
     }
 }
 
 /*
  * probe_for_drive() tests for existence of a given drive using do_probe().
  *
- * Returns:	0  no device was found
- *		1  device was found (note: drive->present might still be 0)
+ * Returns: 0  no device was found
+ *      1  device was found (note: drive->present might still be 0)
  */
 static inline byte probe_for_drive (ide_drive_t *drive)
 {
-    if (drive->noprobe)			/* skip probing? */
+    if (drive->noprobe)         /* skip probing? */
         return drive->present;
     if (do_probe(drive, WIN_IDENTIFY) >= 2)   /* if !(success||timed-out) */
     {
@@ -459,8 +459,8 @@ static inline byte probe_for_drive (ide_drive_t *drive)
     if (drive->id && strstr(drive->id->model, "E X A B Y T E N E S T"))
         enable_nest(drive);
     if (!drive->present)
-        return 0;			/* drive not found */
-    if (drive->id == NULL)  		/* identification failed? */
+        return 0;           /* drive not found */
+    if (drive->id == NULL)          /* identification failed? */
     {
         if (drive->media == ide_disk)
         {
@@ -473,10 +473,10 @@ static inline byte probe_for_drive (ide_drive_t *drive)
         }
         else
         {
-            drive->present = 0;	/* nuke it */
+            drive->present = 0; /* nuke it */
         }
     }
-    return 1;	/* drive was found */
+    return 1;   /* drive was found */
 }
 
 /*
@@ -589,8 +589,8 @@ static void probe_hwif (ide_hwif_t *hwif)
         return;
     }
 
-    __save_flags(flags);	/* local CPU only */
-    __sti();		/* local CPU only; needed for jiffies and irq probing */
+    __save_flags(flags);    /* local CPU only */
+    __sti();        /* local CPU only; needed for jiffies and irq probing */
     /*
      * Second drive should only exist if first drive was found,
      * but a lot of cdrom drives are configured as single slaves.
@@ -625,7 +625,7 @@ static void probe_hwif (ide_hwif_t *hwif)
         while ((stat & BUSY_STAT) && 0 < (signed long)(timeout - jiffies));
 
     }
-    __restore_flags(flags);	/* local CPU only */
+    __restore_flags(flags); /* local CPU only */
     for (unit = 0; unit < MAX_DRIVES; ++unit)
     {
         ide_drive_t *drive = &hwif->drives[unit];
@@ -633,7 +633,7 @@ static void probe_hwif (ide_hwif_t *hwif)
         {
             ide_tuneproc_t *tuneproc = HWIF(drive)->tuneproc;
             if (tuneproc != NULL && drive->autotune == 1)
-                tuneproc(drive, 255);	/* auto-tune PIO mode */
+                tuneproc(drive, 255);   /* auto-tune PIO mode */
         }
     }
 }
@@ -700,8 +700,8 @@ static int init_irq (ide_hwif_t *hwif)
 
     new_hwgroup = kmalloc(sizeof(ide_hwgroup_t),GFP_KERNEL);
 
-    save_flags(flags);	/* all CPUs */
-    cli();			/* all CPUs */
+    save_flags(flags);  /* all CPUs */
+    cli();          /* all CPUs */
 
     hwif->hwgroup = NULL;
 #if MAX_HWIFS > 1
@@ -748,7 +748,7 @@ static int init_irq (ide_hwif_t *hwif)
         hwgroup = new_hwgroup;
         if (!hwgroup)
         {
-            restore_flags(flags);	/* all CPUs */
+            restore_flags(flags);   /* all CPUs */
             return 1;
         }
         memset(hwgroup, 0, sizeof(ide_hwgroup_t));
@@ -776,7 +776,7 @@ static int init_irq (ide_hwif_t *hwif)
         {
             if (!match)
                 kfree(hwgroup);
-            restore_flags(flags);	/* all CPUs */
+            restore_flags(flags);   /* all CPUs */
             return 1;
         }
     }
@@ -806,7 +806,7 @@ static int init_irq (ide_hwif_t *hwif)
         printk("%s : Adding missed hwif to hwgroup!!\n", hwif->name);
 #endif
     }
-    restore_flags(flags);	/* all CPUs; safe now that hwif->hwgroup is set up */
+    restore_flags(flags);   /* all CPUs; safe now that hwif->hwgroup is set up */
 
 #if !defined(__mc68000__) && !defined(CONFIG_APUS) && !defined(__sparc__)
     printk("%s at 0x%03x-0x%03x,0x%03x on irq %d", hwif->name,
@@ -876,15 +876,15 @@ static void init_gendisk (ide_hwif_t *hwif)
     for (unit = 0; unit < units; ++unit)
         hwif->drives[unit].part = &gd->part[unit << PARTN_BITS];
 
-    gd->major	= hwif->major;		/* our major device number */
-    gd->major_name	= IDE_MAJOR_NAME;	/* treated special in genhd.c */
-    gd->minor_shift	= PARTN_BITS;		/* num bits for partitions */
-    gd->max_p	= 1<<PARTN_BITS;	/* 1 + max partitions / drive */
-    gd->nr_real	= units;		/* current num real drives */
-    gd->real_devices= hwif;			/* ptr to internal data */
-    gd->next	= NULL;			/* linked list of major devs */
+    gd->major   = hwif->major;      /* our major device number */
+    gd->major_name  = IDE_MAJOR_NAME;   /* treated special in genhd.c */
+    gd->minor_shift = PARTN_BITS;       /* num bits for partitions */
+    gd->max_p   = 1<<PARTN_BITS;    /* 1 + max partitions / drive */
+    gd->nr_real = units;        /* current num real drives */
+    gd->real_devices= hwif;         /* ptr to internal data */
+    gd->next    = NULL;         /* linked list of major devs */
     gd->fops        = ide_fops;             /* file operations */
-    gd->flags	= kmalloc (sizeof *gd->flags * units, GFP_KERNEL);
+    gd->flags   = kmalloc (sizeof *gd->flags * units, GFP_KERNEL);
     if (gd->flags)
         memset (gd->flags, 0, sizeof *gd->flags * units);
 
@@ -932,8 +932,8 @@ static int hwif_init (ide_hwif_t *hwif)
     {
         int i = hwif->irq;
         /*
-         *	It failed to initialise. Find the default IRQ for
-         *	this port and try that.
+         *  It failed to initialise. Find the default IRQ for
+         *  this port and try that.
          */
         if (!(hwif->irq = ide_default_irq(hwif->io_ports[IDE_DATA_OFFSET])))
         {
@@ -953,8 +953,8 @@ static int hwif_init (ide_hwif_t *hwif)
     init_gendisk(hwif);
     blk_dev[hwif->major].data = hwif;
     blk_dev[hwif->major].queue = ide_get_queue;
-    read_ahead[hwif->major] = 8;	/* (4kB) */
-    hwif->present = 1;	/* success */
+    read_ahead[hwif->major] = 8;    /* (4kB) */
+    hwif->present = 1;  /* success */
 
 #if (DEBUG_SPINLOCK > 0)
     {

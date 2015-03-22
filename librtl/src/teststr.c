@@ -1,27 +1,27 @@
 /*
  * teststr.c
  *
- *	Test program for str functions
+ *  Test program for str functions
  *
  * Notes:
  *
- *	This program should be run using the Free-VMS packages
- *	'str$' functions, Vax/VMS's, and Alpha/VMS's to make
- *	sure they all happily work the same.
+ *  This program should be run using the Free-VMS packages
+ *  'str$' functions, Vax/VMS's, and Alpha/VMS's to make
+ *  sure they all happily work the same.
  *
  * History:
  *
- *	Oct 10, 1996 - Kevin Handy
- *		Initial version
+ *  Oct 10, 1996 - Kevin Handy
+ *      Initial version
  *
- *	Feb 4, 1997 - Kevin Handy
- *		Lose variable 'Tets2', change '%d' to '%ld' in several
- *		places to lose '-Wall' messages.
- *		Include 'stdlib.h'
+ *  Feb 4, 1997 - Kevin Handy
+ *      Lose variable 'Tets2', change '%d' to '%ld' in several
+ *      places to lose '-Wall' messages.
+ *      Include 'stdlib.h'
  *
- *	Feb 7, 1997 - Christof Zeile
- *		Change 'short' to 'unsigned short' in several places.
- *		Add 'include <strdef.h>'
+ *  Feb 7, 1997 - Christof Zeile
+ *      Change 'short' to 'unsigned short' in several places.
+ *      Add 'include <strdef.h>'
  */
 
 #include <stdio.h>
@@ -75,7 +75,7 @@ int main()
 
     testanal("Pre Test1", &GlobalString1);
     printf("get1dx = %ld\n", str$get1_dx(&ten, &Test1));
-    memcpy(Test1.dsc$a_pointer, "qwertyuiop", 10);	/* Force out garbage */
+    memcpy(Test1.dsc$a_pointer, "qwertyuiop", 10);  /* Force out garbage */
     testanal("get1_dx test", &Test1);
 
     /*
@@ -181,8 +181,8 @@ int main()
 
 void testanal(char* Title, struct dsc$descriptor_s* strptr)
 {
-    char* s1_ptr;			/* Pointer to first string */
-    unsigned short s1_length;	/* Length of first string */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;   /* Length of first string */
 
     printf("Analyzing '%s':\n", Title);
 

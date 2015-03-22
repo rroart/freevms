@@ -46,11 +46,11 @@
 /*
  * Values for Layer-3-protocol-selection
  */
-#define ISDN_PROTO_L3_TRANS	0	/* Transparent */
-#define ISDN_PROTO_L3_TRANSDSP	1	/* Transparent with DSP */
-#define ISDN_PROTO_L3_FCLASS2	2	/* Fax Group 2/3 CLASS 2 */
-#define ISDN_PROTO_L3_FCLASS1	3	/* Fax Group 2/3 CLASS 1 */
-#define ISDN_PROTO_L3_MAX	7	/* Max. 8 Protocols */
+#define ISDN_PROTO_L3_TRANS 0   /* Transparent */
+#define ISDN_PROTO_L3_TRANSDSP  1   /* Transparent with DSP */
+#define ISDN_PROTO_L3_FCLASS2   2   /* Fax Group 2/3 CLASS 2 */
+#define ISDN_PROTO_L3_FCLASS1   3   /* Fax Group 2/3 CLASS 1 */
+#define ISDN_PROTO_L3_MAX   7   /* Max. 8 Protocols */
 
 #ifdef __KERNEL__
 
@@ -218,8 +218,8 @@ typedef struct
 /*
  * Audio commands
  */
-#define ISDN_AUDIO_SETDD	0	/* Set DTMF detection           */
-#define ISDN_AUDIO_DTMF		1	/* Rx/Tx DTMF                   */
+#define ISDN_AUDIO_SETDD    0   /* Set DTMF detection           */
+#define ISDN_AUDIO_DTMF     1   /* Rx/Tx DTMF                   */
 
 /*
  * Values for errcode field
@@ -242,7 +242,7 @@ typedef struct
 #define ISDN_FEATURE_L2_V11019  (0x0001 << ISDN_PROTO_L2_V11019)
 #define ISDN_FEATURE_L2_V11038  (0x0001 << ISDN_PROTO_L2_V11038)
 #define ISDN_FEATURE_L2_MODEM   (0x0001 << ISDN_PROTO_L2_MODEM)
-#define ISDN_FEATURE_L2_FAX	(0x0001 << ISDN_PROTO_L2_FAX)
+#define ISDN_FEATURE_L2_FAX (0x0001 << ISDN_PROTO_L2_FAX)
 #define ISDN_FEATURE_L2_HDLC_56K (0x0001 << ISDN_PROTO_L2_HDLC_56K)
 
 #define ISDN_FEATURE_L2_MASK    (0x0FFFF) /* Max. 16 protocols */
@@ -251,8 +251,8 @@ typedef struct
 /* Layer 3 */
 #define ISDN_FEATURE_L3_TRANS   (0x10000 << ISDN_PROTO_L3_TRANS)
 #define ISDN_FEATURE_L3_TRANSDSP (0x10000 << ISDN_PROTO_L3_TRANSDSP)
-#define ISDN_FEATURE_L3_FCLASS2	(0x10000 << ISDN_PROTO_L3_FCLASS2)
-#define ISDN_FEATURE_L3_FCLASS1	(0x10000 << ISDN_PROTO_L3_FCLASS1)
+#define ISDN_FEATURE_L3_FCLASS2 (0x10000 << ISDN_PROTO_L3_FCLASS2)
+#define ISDN_FEATURE_L3_FCLASS1 (0x10000 << ISDN_PROTO_L3_FCLASS1)
 
 #define ISDN_FEATURE_L3_MASK    (0x0FF0000) /* Max. 8 Protocols */
 #define ISDN_FEATURE_L3_SHIFT   (16)
@@ -268,8 +268,8 @@ typedef struct
 
 typedef struct setup_parm
 {
-    unsigned char phone[32];	/* Remote Phone-Number */
-    unsigned char eazmsn[32];	/* Local EAZ or MSN    */
+    unsigned char phone[32];    /* Remote Phone-Number */
+    unsigned char eazmsn[32];   /* Local EAZ or MSN    */
     unsigned char si1;      /* Service Indicator 1 */
     unsigned char si2;      /* Service Indicator 2 */
     unsigned char plan;     /* Numbering plan      */
@@ -285,103 +285,103 @@ typedef struct setup_parm
 typedef struct T30_s
 {
     /* session parameters */
-    __u8 resolution		__attribute__ ((packed));
-    __u8 rate		__attribute__ ((packed));
-    __u8 width		__attribute__ ((packed));
-    __u8 length		__attribute__ ((packed));
-    __u8 compression	__attribute__ ((packed));
-    __u8 ecm		__attribute__ ((packed));
-    __u8 binary		__attribute__ ((packed));
-    __u8 scantime		__attribute__ ((packed));
-    __u8 id[FAXIDLEN]	__attribute__ ((packed));
+    __u8 resolution     __attribute__ ((packed));
+    __u8 rate       __attribute__ ((packed));
+    __u8 width      __attribute__ ((packed));
+    __u8 length     __attribute__ ((packed));
+    __u8 compression    __attribute__ ((packed));
+    __u8 ecm        __attribute__ ((packed));
+    __u8 binary     __attribute__ ((packed));
+    __u8 scantime       __attribute__ ((packed));
+    __u8 id[FAXIDLEN]   __attribute__ ((packed));
     /* additional parameters */
-    __u8 phase		__attribute__ ((packed));
-    __u8 direction		__attribute__ ((packed));
-    __u8 code		__attribute__ ((packed));
-    __u8 badlin		__attribute__ ((packed));
-    __u8 badmul		__attribute__ ((packed));
-    __u8 bor		__attribute__ ((packed));
-    __u8 fet		__attribute__ ((packed));
-    __u8 pollid[FAXIDLEN]	__attribute__ ((packed));
-    __u8 cq			__attribute__ ((packed));
-    __u8 cr			__attribute__ ((packed));
-    __u8 ctcrty		__attribute__ ((packed));
-    __u8 minsp		__attribute__ ((packed));
-    __u8 phcto		__attribute__ ((packed));
-    __u8 rel		__attribute__ ((packed));
-    __u8 nbc		__attribute__ ((packed));
+    __u8 phase      __attribute__ ((packed));
+    __u8 direction      __attribute__ ((packed));
+    __u8 code       __attribute__ ((packed));
+    __u8 badlin     __attribute__ ((packed));
+    __u8 badmul     __attribute__ ((packed));
+    __u8 bor        __attribute__ ((packed));
+    __u8 fet        __attribute__ ((packed));
+    __u8 pollid[FAXIDLEN]   __attribute__ ((packed));
+    __u8 cq         __attribute__ ((packed));
+    __u8 cr         __attribute__ ((packed));
+    __u8 ctcrty     __attribute__ ((packed));
+    __u8 minsp      __attribute__ ((packed));
+    __u8 phcto      __attribute__ ((packed));
+    __u8 rel        __attribute__ ((packed));
+    __u8 nbc        __attribute__ ((packed));
     /* remote station parameters */
-    __u8 r_resolution	__attribute__ ((packed));
-    __u8 r_rate		__attribute__ ((packed));
-    __u8 r_width		__attribute__ ((packed));
-    __u8 r_length		__attribute__ ((packed));
-    __u8 r_compression	__attribute__ ((packed));
-    __u8 r_ecm		__attribute__ ((packed));
-    __u8 r_binary		__attribute__ ((packed));
-    __u8 r_scantime		__attribute__ ((packed));
-    __u8 r_id[FAXIDLEN]	__attribute__ ((packed));
-    __u8 r_code		__attribute__ ((packed));
+    __u8 r_resolution   __attribute__ ((packed));
+    __u8 r_rate     __attribute__ ((packed));
+    __u8 r_width        __attribute__ ((packed));
+    __u8 r_length       __attribute__ ((packed));
+    __u8 r_compression  __attribute__ ((packed));
+    __u8 r_ecm      __attribute__ ((packed));
+    __u8 r_binary       __attribute__ ((packed));
+    __u8 r_scantime     __attribute__ ((packed));
+    __u8 r_id[FAXIDLEN] __attribute__ ((packed));
+    __u8 r_code     __attribute__ ((packed));
 } T30_s;
 
-#define ISDN_TTY_FAX_CONN_IN	0
-#define ISDN_TTY_FAX_CONN_OUT	1
+#define ISDN_TTY_FAX_CONN_IN    0
+#define ISDN_TTY_FAX_CONN_OUT   1
 
-#define ISDN_TTY_FAX_FCON	0
-#define ISDN_TTY_FAX_DIS 	1
-#define ISDN_TTY_FAX_FTT 	2
-#define ISDN_TTY_FAX_MCF 	3
-#define ISDN_TTY_FAX_DCS 	4
-#define ISDN_TTY_FAX_TRAIN_OK	5
-#define ISDN_TTY_FAX_EOP 	6
-#define ISDN_TTY_FAX_EOM 	7
-#define ISDN_TTY_FAX_MPS 	8
-#define ISDN_TTY_FAX_DTC 	9
-#define ISDN_TTY_FAX_RID 	10
-#define ISDN_TTY_FAX_HNG 	11
-#define ISDN_TTY_FAX_DT  	12
-#define ISDN_TTY_FAX_FCON_I	13
-#define ISDN_TTY_FAX_DR  	14
-#define ISDN_TTY_FAX_ET  	15
-#define ISDN_TTY_FAX_CFR 	16
-#define ISDN_TTY_FAX_PTS 	17
-#define ISDN_TTY_FAX_SENT	18
+#define ISDN_TTY_FAX_FCON   0
+#define ISDN_TTY_FAX_DIS    1
+#define ISDN_TTY_FAX_FTT    2
+#define ISDN_TTY_FAX_MCF    3
+#define ISDN_TTY_FAX_DCS    4
+#define ISDN_TTY_FAX_TRAIN_OK   5
+#define ISDN_TTY_FAX_EOP    6
+#define ISDN_TTY_FAX_EOM    7
+#define ISDN_TTY_FAX_MPS    8
+#define ISDN_TTY_FAX_DTC    9
+#define ISDN_TTY_FAX_RID    10
+#define ISDN_TTY_FAX_HNG    11
+#define ISDN_TTY_FAX_DT     12
+#define ISDN_TTY_FAX_FCON_I 13
+#define ISDN_TTY_FAX_DR     14
+#define ISDN_TTY_FAX_ET     15
+#define ISDN_TTY_FAX_CFR    16
+#define ISDN_TTY_FAX_PTS    17
+#define ISDN_TTY_FAX_SENT   18
 
-#define ISDN_FAX_PHASE_IDLE	0
-#define ISDN_FAX_PHASE_A	1
-#define ISDN_FAX_PHASE_B   	2
-#define ISDN_FAX_PHASE_C   	3
-#define ISDN_FAX_PHASE_D   	4
-#define ISDN_FAX_PHASE_E   	5
+#define ISDN_FAX_PHASE_IDLE 0
+#define ISDN_FAX_PHASE_A    1
+#define ISDN_FAX_PHASE_B    2
+#define ISDN_FAX_PHASE_C    3
+#define ISDN_FAX_PHASE_D    4
+#define ISDN_FAX_PHASE_E    5
 
 #endif /* TTY_FAX */
 
-#define ISDN_FAX_CLASS1_FAE	0
-#define ISDN_FAX_CLASS1_FTS	1
-#define ISDN_FAX_CLASS1_FRS	2
-#define ISDN_FAX_CLASS1_FTM	3
-#define ISDN_FAX_CLASS1_FRM	4
-#define ISDN_FAX_CLASS1_FTH	5
-#define ISDN_FAX_CLASS1_FRH	6
-#define ISDN_FAX_CLASS1_CTRL	7
+#define ISDN_FAX_CLASS1_FAE 0
+#define ISDN_FAX_CLASS1_FTS 1
+#define ISDN_FAX_CLASS1_FRS 2
+#define ISDN_FAX_CLASS1_FTM 3
+#define ISDN_FAX_CLASS1_FRM 4
+#define ISDN_FAX_CLASS1_FTH 5
+#define ISDN_FAX_CLASS1_FRH 6
+#define ISDN_FAX_CLASS1_CTRL    7
 
-#define ISDN_FAX_CLASS1_OK	0
-#define ISDN_FAX_CLASS1_CONNECT	1
-#define ISDN_FAX_CLASS1_NOCARR	2
-#define ISDN_FAX_CLASS1_ERROR	3
-#define ISDN_FAX_CLASS1_FCERROR	4
-#define ISDN_FAX_CLASS1_QUERY	5
+#define ISDN_FAX_CLASS1_OK  0
+#define ISDN_FAX_CLASS1_CONNECT 1
+#define ISDN_FAX_CLASS1_NOCARR  2
+#define ISDN_FAX_CLASS1_ERROR   3
+#define ISDN_FAX_CLASS1_FCERROR 4
+#define ISDN_FAX_CLASS1_QUERY   5
 
 typedef struct
 {
-    __u8	cmd;
-    __u8	subcmd;
-    __u8	para[50];
+    __u8    cmd;
+    __u8    subcmd;
+    __u8    para[50];
 } aux_s;
 
-#define AT_COMMAND	0
-#define AT_EQ_VALUE	1
-#define AT_QUERY	2
-#define AT_EQ_QUERY	3
+#define AT_COMMAND  0
+#define AT_EQ_VALUE 1
+#define AT_QUERY    2
+#define AT_EQ_QUERY 3
 
 /* CAPI structs */
 
@@ -413,23 +413,23 @@ typedef struct
  */
 typedef struct
 {
-    int   driver;		/* Lowlevel-Driver-ID            */
-    int   command;		/* Command or Status (see above) */
-    ulong arg;		/* Additional Data               */
+    int   driver;       /* Lowlevel-Driver-ID            */
+    int   command;      /* Command or Status (see above) */
+    ulong arg;      /* Additional Data               */
     union
     {
-        ulong errcode;	/* Type of error with STAT_L1ERR	*/
-        int length;	/* Amount of bytes sent with STAT_BSENT	*/
-        u_char num[50];	/* Additional Data			*/
-        setup_parm setup;/* For SETUP msg			*/
-        capi_msg cmsg;	/* For CAPI like messages		*/
-        char display[85];/* display message data		*/
-        isdn_cmd_stat isdn_io; /* ISDN IO-parameter/result	*/
-        aux_s aux;	/* for modem commands/indications	*/
+        ulong errcode;  /* Type of error with STAT_L1ERR    */
+        int length; /* Amount of bytes sent with STAT_BSENT */
+        u_char num[50]; /* Additional Data          */
+        setup_parm setup;/* For SETUP msg           */
+        capi_msg cmsg;  /* For CAPI like messages       */
+        char display[85];/* display message data        */
+        isdn_cmd_stat isdn_io; /* ISDN IO-parameter/result  */
+        aux_s aux;  /* for modem commands/indications   */
 #ifdef CONFIG_ISDN_TTY_FAX
-        T30_s	*fax;	/* Pointer to ttys fax struct		*/
+        T30_s   *fax;   /* Pointer to ttys fax struct       */
 #endif
-        ulong userdata;	/* User Data */
+        ulong userdata; /* User Data */
     } parm;
 } isdn_ctrl;
 

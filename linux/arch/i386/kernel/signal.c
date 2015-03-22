@@ -202,22 +202,22 @@ restore_sigcontext(struct pt_regs *regs, struct sigcontext *sc, int *peax)
 {
     unsigned int err = 0;
 
-#define COPY(x)		err |= __get_user(regs->x, &sc->x)
+#define COPY(x)     err |= __get_user(regs->x, &sc->x)
 
-#define COPY_SEG(seg)							\
-	{ unsigned short tmp;						\
-	  err |= __get_user(tmp, &sc->seg);				\
-	  regs->x##seg = tmp; }
+#define COPY_SEG(seg)                           \
+    { unsigned short tmp;                       \
+      err |= __get_user(tmp, &sc->seg);             \
+      regs->x##seg = tmp; }
 
-#define COPY_SEG_STRICT(seg)						\
-	{ unsigned short tmp;						\
-	  err |= __get_user(tmp, &sc->seg);				\
-	  regs->x##seg = tmp|3; }
+#define COPY_SEG_STRICT(seg)                        \
+    { unsigned short tmp;                       \
+      err |= __get_user(tmp, &sc->seg);             \
+      regs->x##seg = tmp|3; }
 
-#define GET_SEG(seg)							\
-	{ unsigned short tmp;						\
-	  err |= __get_user(tmp, &sc->seg);				\
-	  loadsegment(seg,tmp); }
+#define GET_SEG(seg)                            \
+    { unsigned short tmp;                       \
+      err |= __get_user(tmp, &sc->seg);             \
+      loadsegment(seg,tmp); }
 
     GET_SEG(gs);
     GET_SEG(fs);
@@ -238,7 +238,7 @@ restore_sigcontext(struct pt_regs *regs, struct sigcontext *sc, int *peax)
         unsigned int tmpflags;
         err |= __get_user(tmpflags, &sc->eflags);
         regs->eflags = (regs->eflags & ~0x40DD5) | (tmpflags & 0x40DD5);
-        regs->orig_eax = -1;		/* disable syscall checks */
+        regs->orig_eax = -1;        /* disable syscall checks */
     }
 
     {
@@ -624,7 +624,7 @@ int fastcall do_signal(struct pt_regs *regs, sigset_t *oldset)
     if (!oldset)
         oldset = &current->blocked;
 
-    //	printk(KERN_ALERT "?");
+    //  printk(KERN_ALERT "?");
     for (;;)
     {
         unsigned long signr;
@@ -744,13 +744,13 @@ int fastcall do_signal(struct pt_regs *regs, sigset_t *oldset)
          * have been cleared if the watchpoint triggered
          * inside the kernel.
          */
-        __asm__("movl %0,%%db7"	: : "r" (current->thread.debugreg[7]));
+        __asm__("movl %0,%%db7" : : "r" (current->thread.debugreg[7]));
 
         /* Whee!  Actually deliver the signal.  */
         handle_signal(signr, ka, &info, oldset, regs);
         return 1;
     }
-    //	printk(KERN_EMERG "after for\n");
+    //  printk(KERN_EMERG "after for\n");
 
     /* Did we come from a system call? */
     if (regs->orig_eax >= 0)

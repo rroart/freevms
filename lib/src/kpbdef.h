@@ -1,5 +1,5 @@
-#ifndef kpbdef_h
-#define kpbdef_h
+#ifndef KPBDEF_H
+#define KPBDEF_H
 
 #define KPBDBG$K_PC_VEC_CNT 8
 

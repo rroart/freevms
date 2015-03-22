@@ -1,11 +1,11 @@
 /*
- * Facility:	LIBCMU
+ * Facility:    LIBCMU
  *
- * Abstract:	Network to/from host short and long conversions
+ * Abstract:    Network to/from host short and long conversions
  *
  * Modifications:
- *	16-SEP-1993 mlo 1.0.0
- *		original
+ *  16-SEP-1993 mlo 1.0.0
+ *      original
  */
 #ifdef VAXC
 #module NTOH_HTON "v1.0.0"

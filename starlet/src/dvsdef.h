@@ -1,5 +1,5 @@
-#ifndef dvsdef_h
-#define dvsdef_h
+#ifndef DVSDEF_H
+#define DVSDEF_H
 
 #define DVS$_DEVCLASS 1
 #define DVS$_DEVTYPE  2

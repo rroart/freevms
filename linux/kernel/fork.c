@@ -54,7 +54,7 @@ int nr_threads;
 int nr_running;
 
 int max_threads;
-unsigned long total_forks;	/* Handle normal Linux uptimes. */
+unsigned long total_forks;  /* Handle normal Linux uptimes. */
 int last_pid;
 
 void fastcall add_wait_queue(wait_queue_head_t *q, wait_queue_t * wait)
@@ -226,8 +226,8 @@ fail_nomem:
 spinlock_t mmlist_lock __cacheline_aligned = SPIN_LOCK_UNLOCKED;
 int mmlist_nr;
 
-#define allocate_mm()	(kmem_cache_alloc(mm_cachep, SLAB_KERNEL))
-#define free_mm(mm)	(kmem_cache_free(mm_cachep, (mm)))
+#define allocate_mm()   (kmem_cache_alloc(mm_cachep, SLAB_KERNEL))
+#define free_mm(mm) (kmem_cache_free(mm_cachep, (mm)))
 
 /*static*/ struct mm_struct * mm_init(struct mm_struct * mm)
 {
@@ -484,13 +484,13 @@ static int count_open_files(struct files_struct *files, int size)
 
     atomic_set(&newf->count, 1);
 
-    newf->file_lock	    = RW_LOCK_UNLOCKED;
-    newf->next_fd	    = 0;
-    newf->max_fds	    = NR_OPEN_DEFAULT;
-    newf->max_fdset	    = __FD_SETSIZE;
+    newf->file_lock     = RW_LOCK_UNLOCKED;
+    newf->next_fd       = 0;
+    newf->max_fds       = NR_OPEN_DEFAULT;
+    newf->max_fdset     = __FD_SETSIZE;
     newf->close_on_exec = &newf->close_on_exec_init;
-    newf->open_fds	    = &newf->open_fds_init;
-    newf->fd	    = &newf->fd_array[0];
+    newf->open_fds      = &newf->open_fds_init;
+    newf->fd        = &newf->fd_array[0];
 
     /* We don't yet have the oldf readlock, but even if the old
            fdset gets grown now, we'll only copy up to "size" fds */
@@ -652,7 +652,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
     struct completion vfork;
 
     retval = -EPERM;
-    //	printk("do_fork\n");
+    //  printk("do_fork\n");
     /*
      * CLONE_PID is only allowed for the initial SMP swapper
      * calls
@@ -732,7 +732,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
     init_timer(&p->real_timer);
     p->real_timer.data = (unsigned long) p;
 
-    p->leader = 0;		/* session leadership doesn't inherit */
+    p->leader = 0;      /* session leadership doesn't inherit */
     p->tty_old_pgrp = 0;
     p->times.tms_utime = p->times.tms_stime = 0;
     p->times.tms_cutime = p->times.tms_cstime = 0;
@@ -745,7 +745,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
             p->per_cpu_utime[i] = p->per_cpu_stime[i] = 0;
         spin_lock_init(&p->sigmask_lock);
     }
-    p->lock_depth = -1;		/* -1 = no lock */
+    p->lock_depth = -1;     /* -1 = no lock */
     p->start_time = jiffies;
 
     INIT_LIST_HEAD(&p->local_pages);
@@ -824,7 +824,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
     p->pcb$b_prib=31-DEFPRI;
     p->pcb$b_pri=31-DEFPRI-6;
-    //	if (p->pcb$b_pri<16) p->pcb$b_pri=16;
+    //  if (p->pcb$b_pri<16) p->pcb$b_pri=16;
     p->pcb$w_quant=-QUANTUM;
 
     qhead_init(&p->pcb$l_lockqfl);
@@ -838,7 +838,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
     p->pr_astlvl=4;
 
     p->psl=0;
-    //	p->pslindex=0;
+    //  p->pslindex=0;
 
     /*
      * "share" dynamic priority between parent and child, thus the
@@ -888,11 +888,11 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
     p->pcb$w_state = SCH$C_HIB;
     ((struct _wqh *)sch$gq_mwait)->wqh$l_wqcnt++; // temp fix
     qhead_init(p); // move this up?
-    //	vmslock(&SPIN_SCHED,IPL$_SCHED);
+    //  vmslock(&SPIN_SCHED,IPL$_SCHED);
     sch$rse(p,PRI$_RESAVL,EVT$_WAKE); // check if this is right
     vmsunlock(&SPIN_MMG,-1);
     vmsunlock(&SPIN_SCHED,0);
-    //	wake_up_process2(p,PRI$_TICOM);		/* do this last */
+    //  wake_up_process2(p,PRI$_TICOM);     /* do this last */
     ++total_forks;
     if (clone_flags & CLONE_VFORK)
         wait_for_completion(&vfork);

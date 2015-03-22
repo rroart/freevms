@@ -78,7 +78,7 @@ typedef struct mdk_rdev_s mdk_rdev_t;
 #error MD doesnt handle bigger kdev yet
 #endif
 
-#define MAX_MD_DEVS  (1<<MINORBITS)	/* Max number of md dev */
+#define MAX_MD_DEVS  (1<<MINORBITS) /* Max number of md dev */
 
 /*
  * Maps a kdev to an mddev/subdev. How 'data' is handled is up to
@@ -108,7 +108,7 @@ static inline mddev_t * kdev_to_mddev (kdev_t dev)
 /*
  * default readahead
  */
-#define MD_READAHEAD	vm_max_readahead
+#define MD_READAHEAD    vm_max_readahead
 
 static inline int disk_faulty(mdp_disk_t * d)
 {
@@ -175,63 +175,63 @@ static inline void mark_disk_nonsync(mdp_disk_t * d)
  */
 struct mdk_rdev_s
 {
-    struct md_list_head same_set;	/* RAID devices within the same set */
-    struct md_list_head all;	/* all RAID devices */
-    struct md_list_head pending;	/* undetected RAID devices */
+    struct md_list_head same_set;   /* RAID devices within the same set */
+    struct md_list_head all;    /* all RAID devices */
+    struct md_list_head pending;    /* undetected RAID devices */
 
-    kdev_t dev;			/* Device number */
-    kdev_t old_dev;			/*  "" when it was last imported */
-    unsigned long size;		/* Device size (in blocks) */
-    mddev_t *mddev;			/* RAID array if running */
-    unsigned long last_events;	/* IO event timestamp */
+    kdev_t dev;         /* Device number */
+    kdev_t old_dev;         /*  "" when it was last imported */
+    unsigned long size;     /* Device size (in blocks) */
+    mddev_t *mddev;         /* RAID array if running */
+    unsigned long last_events;  /* IO event timestamp */
 
-    struct block_device *bdev;	/* block device handle */
+    struct block_device *bdev;  /* block device handle */
 
     mdp_super_t *sb;
     unsigned long sb_offset;
 
-    int alias_device;		/* device alias to the same disk */
-    int faulty;			/* if faulty do not issue IO requests */
-    int desc_nr;			/* descriptor index in the superblock */
+    int alias_device;       /* device alias to the same disk */
+    int faulty;         /* if faulty do not issue IO requests */
+    int desc_nr;            /* descriptor index in the superblock */
 };
 
 
 /*
  * disk operations in a working array:
  */
-#define DISKOP_SPARE_INACTIVE	0
-#define DISKOP_SPARE_WRITE	1
-#define DISKOP_SPARE_ACTIVE	2
-#define DISKOP_HOT_REMOVE_DISK	3
-#define DISKOP_HOT_ADD_DISK	4
+#define DISKOP_SPARE_INACTIVE   0
+#define DISKOP_SPARE_WRITE  1
+#define DISKOP_SPARE_ACTIVE 2
+#define DISKOP_HOT_REMOVE_DISK  3
+#define DISKOP_HOT_ADD_DISK 4
 
 typedef struct mdk_personality_s mdk_personality_t;
 
 struct mddev_s
 {
-    void				*private;
-    mdk_personality_t		*pers;
-    int				__minor;
-    mdp_super_t			*sb;
-    int				nb_dev;
-    struct md_list_head 		disks;
-    int				sb_dirty;
-    mdu_param_t			param;
-    int				ro;
-    unsigned long			curr_resync;	/* blocks scheduled */
-    unsigned long			resync_mark;	/* a recent timestamp */
-    unsigned long			resync_mark_cnt;/* blocks written at resync_mark */
-    char				*name;
-    int				recovery_running;
-    struct semaphore		reconfig_sem;
-    struct semaphore		recovery_sem;
-    struct semaphore		resync_sem;
-    atomic_t			active;
+    void                *private;
+    mdk_personality_t       *pers;
+    int             __minor;
+    mdp_super_t         *sb;
+    int             nb_dev;
+    struct md_list_head         disks;
+    int             sb_dirty;
+    mdu_param_t         param;
+    int             ro;
+    unsigned long           curr_resync;    /* blocks scheduled */
+    unsigned long           resync_mark;    /* a recent timestamp */
+    unsigned long           resync_mark_cnt;/* blocks written at resync_mark */
+    char                *name;
+    int             recovery_running;
+    struct semaphore        reconfig_sem;
+    struct semaphore        recovery_sem;
+    struct semaphore        resync_sem;
+    atomic_t            active;
 
-    atomic_t			recovery_active; /* blocks scheduled, but not written */
-    md_wait_queue_head_t		recovery_wait;
+    atomic_t            recovery_active; /* blocks scheduled, but not written */
+    md_wait_queue_head_t        recovery_wait;
 
-    struct md_list_head		all_mddevs;
+    struct md_list_head     all_mddevs;
 };
 
 struct mdk_personality_s
@@ -284,47 +284,47 @@ extern mdp_disk_t *get_spare(mddev_t *mddev);
  * iterates through some rdev ringlist. It's safe to remove the
  * current 'rdev'. Dont touch 'tmp' though.
  */
-#define ITERATE_RDEV_GENERIC(head,field,rdev,tmp)			\
-									\
-	for (tmp = head.next;						\
-		rdev = md_list_entry(tmp, mdk_rdev_t, field),		\
-			tmp = tmp->next, tmp->prev != &head		\
-		; )
+#define ITERATE_RDEV_GENERIC(head,field,rdev,tmp)           \
+                                    \
+    for (tmp = head.next;                       \
+        rdev = md_list_entry(tmp, mdk_rdev_t, field),       \
+            tmp = tmp->next, tmp->prev != &head     \
+        ; )
 /*
  * iterates through the 'same array disks' ringlist
  */
-#define ITERATE_RDEV(mddev,rdev,tmp)					\
-	ITERATE_RDEV_GENERIC((mddev)->disks,same_set,rdev,tmp)
+#define ITERATE_RDEV(mddev,rdev,tmp)                    \
+    ITERATE_RDEV_GENERIC((mddev)->disks,same_set,rdev,tmp)
 
 /*
  * Same as above, but assumes that the device has rdev->desc_nr numbered
  * from 0 to mddev->nb_dev, and iterates through rdevs in ascending order.
  */
-#define ITERATE_RDEV_ORDERED(mddev,rdev,i)				\
-	for (i = 0; rdev = find_rdev_nr(mddev, i), i < mddev->nb_dev; i++)
+#define ITERATE_RDEV_ORDERED(mddev,rdev,i)              \
+    for (i = 0; rdev = find_rdev_nr(mddev, i), i < mddev->nb_dev; i++)
 
 
 /*
  * Iterates through all 'RAID managed disks'
  */
-#define ITERATE_RDEV_ALL(rdev,tmp)					\
-	ITERATE_RDEV_GENERIC(all_raid_disks,all,rdev,tmp)
+#define ITERATE_RDEV_ALL(rdev,tmp)                  \
+    ITERATE_RDEV_GENERIC(all_raid_disks,all,rdev,tmp)
 
 /*
  * Iterates through 'pending RAID disks'
  */
-#define ITERATE_RDEV_PENDING(rdev,tmp)					\
-	ITERATE_RDEV_GENERIC(pending_raid_disks,pending,rdev,tmp)
+#define ITERATE_RDEV_PENDING(rdev,tmp)                  \
+    ITERATE_RDEV_GENERIC(pending_raid_disks,pending,rdev,tmp)
 
 /*
  * iterates through all used mddevs in the system.
  */
-#define ITERATE_MDDEV(mddev,tmp)					\
-									\
-	for (tmp = all_mddevs.next;					\
-		mddev = md_list_entry(tmp, mddev_t, all_mddevs),	\
-			tmp = tmp->next, tmp->prev != &all_mddevs	\
-		; )
+#define ITERATE_MDDEV(mddev,tmp)                    \
+                                    \
+    for (tmp = all_mddevs.next;                 \
+        mddev = md_list_entry(tmp, mddev_t, all_mddevs),    \
+            tmp = tmp->next, tmp->prev != &all_mddevs   \
+        ; )
 
 static inline int lock_mddev (mddev_t * mddev)
 {
@@ -337,17 +337,17 @@ static inline void unlock_mddev (mddev_t * mddev)
 }
 
 #define xchg_values(x,y) do { __typeof__(x) __tmp = x; \
-				x = y; y = __tmp; } while (0)
+                x = y; y = __tmp; } while (0)
 
 typedef struct mdk_thread_s
 {
-    void			(*run) (void *data);
-    void			*data;
-    md_wait_queue_head_t	wqueue;
+    void            (*run) (void *data);
+    void            *data;
+    md_wait_queue_head_t    wqueue;
     unsigned long           flags;
-    struct completion	*event;
-    struct task_struct	*tsk;
-    const char		*name;
+    struct completion   *event;
+    struct task_struct  *tsk;
+    const char      *name;
 } mdk_thread_t;
 
 #define THREAD_WAKEUP  0
@@ -363,55 +363,55 @@ typedef struct dev_name_s
 } dev_name_t;
 
 
-#define __wait_event_lock_irq(wq, condition, lock) 			\
-do {									\
-	wait_queue_t __wait;						\
-	init_waitqueue_entry(&__wait, current);				\
-									\
-	add_wait_queue(&wq, &__wait);					\
-	for (;;) {							\
-		set_current_state(TASK_UNINTERRUPTIBLE);		\
-		if (condition)						\
-			break;						\
-		spin_unlock_irq(&lock);					\
-		run_task_queue(&tq_disk);				\
-		schedule();						\
-		spin_lock_irq(&lock);					\
-	}								\
-	current->state = TASK_RUNNING;					\
-	remove_wait_queue(&wq, &__wait);				\
+#define __wait_event_lock_irq(wq, condition, lock)          \
+do {                                    \
+    wait_queue_t __wait;                        \
+    init_waitqueue_entry(&__wait, current);             \
+                                    \
+    add_wait_queue(&wq, &__wait);                   \
+    for (;;) {                          \
+        set_current_state(TASK_UNINTERRUPTIBLE);        \
+        if (condition)                      \
+            break;                      \
+        spin_unlock_irq(&lock);                 \
+        run_task_queue(&tq_disk);               \
+        schedule();                     \
+        spin_lock_irq(&lock);                   \
+    }                               \
+    current->state = TASK_RUNNING;                  \
+    remove_wait_queue(&wq, &__wait);                \
 } while (0)
 
-#define wait_event_lock_irq(wq, condition, lock) 			\
-do {									\
-	if (condition)	 						\
-		break;							\
-	__wait_event_lock_irq(wq, condition, lock);			\
+#define wait_event_lock_irq(wq, condition, lock)            \
+do {                                    \
+    if (condition)                          \
+        break;                          \
+    __wait_event_lock_irq(wq, condition, lock);         \
 } while (0)
 
 
-#define __wait_disk_event(wq, condition) 				\
-do {									\
-	wait_queue_t __wait;						\
-	init_waitqueue_entry(&__wait, current);				\
-									\
-	add_wait_queue(&wq, &__wait);					\
-	for (;;) {							\
-		set_current_state(TASK_UNINTERRUPTIBLE);		\
-		if (condition)						\
-			break;						\
-		run_task_queue(&tq_disk);				\
-		schedule();						\
-	}								\
-	current->state = TASK_RUNNING;					\
-	remove_wait_queue(&wq, &__wait);				\
+#define __wait_disk_event(wq, condition)                \
+do {                                    \
+    wait_queue_t __wait;                        \
+    init_waitqueue_entry(&__wait, current);             \
+                                    \
+    add_wait_queue(&wq, &__wait);                   \
+    for (;;) {                          \
+        set_current_state(TASK_UNINTERRUPTIBLE);        \
+        if (condition)                      \
+            break;                      \
+        run_task_queue(&tq_disk);               \
+        schedule();                     \
+    }                               \
+    current->state = TASK_RUNNING;                  \
+    remove_wait_queue(&wq, &__wait);                \
 } while (0)
 
-#define wait_disk_event(wq, condition) 					\
-do {									\
-	if (condition)	 						\
-		break;							\
-	__wait_disk_event(wq, condition);				\
+#define wait_disk_event(wq, condition)                  \
+do {                                    \
+    if (condition)                          \
+        break;                          \
+    __wait_disk_event(wq, condition);               \
 } while (0)
 
 #endif

@@ -186,7 +186,7 @@ static inline int expand_stack2(struct _rde * vma, unsigned long address)
     //vma->vm_pgoff -= grow;
     current->active_mm->total_vm += grow;
     //if (vma->vm_flags & VM_LOCKED)
-    //	vma->vm_mm->locked_vm += grow;
+    //  vma->vm_mm->locked_vm += grow;
     //spin_unlock(&vma->vm_mm->page_table_lock);
     return 0;
 }
@@ -385,7 +385,7 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
      * If we're in an interrupt or have no user
      * context, we must not take the fault..
      */
-    //	if (in_interrupt() || !mm)
+    //  if (in_interrupt() || !mm)
     if (mm==&init_mm)
         goto no_context;
     if (!mm)
@@ -618,12 +618,12 @@ survive2:
     return;
 #endif
 
-    //	printk("fault2 %x ",address);
+    //  printk("fault2 %x ",address);
     down_read(&mm->mmap_sem);
 
-    //	vma = find_vma(mm, address);
+    //  vma = find_vma(mm, address);
     vma = mmg$lookup_rde_va(address, current->pcb$l_phd, LOOKUP_RDE_EXACT, IPL$_ASTDEL);
-    //	printk("err %x vma %x\n",error_code,vma);
+    //  printk("err %x vma %x\n",error_code,vma);
     if (!vma)
         goto bad_area;
     if (vma->rde$ps_start_va <= address)
@@ -652,22 +652,22 @@ good_area:
     write = 0;
     switch (error_code & 3)
     {
-    default:	/* 3: write, present */
+    default:    /* 3: write, present */
 #ifdef TEST_VERIFY_AREA
         if (regs->cs == KERNEL_CS)
             printk("WP fault at %08lx\n", regs->eip);
 #endif
         /* fall through */
-    case 2:		/* write, not present */
+    case 2:     /* write, not present */
         if (!(vma->rde$l_flags & VM_WRITE))
             goto bad_area;
         write++;
         pfn=mypte->pte$v_pfn;
         mem_map[pfn].pfn$l_page_state=PFN$M_MODIFY;
         break;
-    case 1:		/* read, present */
+    case 1:     /* read, present */
         goto bad_area;
-    case 0:		/* read, not present */
+    case 0:     /* read, not present */
         if (!(vma->rde$l_flags & (VM_READ | VM_EXEC)))
             goto bad_area;
     }
@@ -678,8 +678,8 @@ survive:
      * make sure we exit gracefully rather than endlessly redo
      * the fault.
      */
-    //	printk("ha mm 1\n");
-    //	switch (handle_mm_fault(mm, vma, address, write))
+    //  printk("ha mm 1\n");
+    //  switch (handle_mm_fault(mm, vma, address, write))
     switch (do_wp_page(mm, vma, address, pte, *pte))
     {
     case 1:
@@ -791,7 +791,7 @@ out_of_memory:
     up_read(&mm->mmap_sem);
     if (tsk->pcb$l_pid == INIT_PID)
     {
-        //		tsk->policy |= SCHED_YIELD;
+        //      tsk->policy |= SCHED_YIELD;
 #if 0
         current->need_resched=1;
         schedule();
@@ -1143,9 +1143,9 @@ int exception_trace = 1;
  * routines.
  *
  * error_code:
- *	bit 0 == 0 means no page found, 1 means protection fault
- *	bit 1 == 0 means read, 1 means write
- *	bit 2 == 0 means kernel, 1 means user-mode
+ *  bit 0 == 0 means no page found, 1 means protection fault
+ *  bit 1 == 0 means read, 1 means write
+ *  bit 2 == 0 means kernel, 1 means user-mode
  *      bit 3 == 1 means fault was an instruction fetch
  */
 asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
@@ -1480,18 +1480,18 @@ good_area:
     write = 0;
     switch (error_code & 3)
     {
-    default:	/* 3: write, present */
+    default:    /* 3: write, present */
         /* fall through */
-    case 2:		/* write, not present */
+    case 2:     /* write, not present */
         if (!(vma->rde$l_flags & VM_WRITE))
             goto bad_area;
         write++;
         pfn=mypte->pte$v_pfn;
         mem_map[pfn].pfn$l_page_state=PFN$M_MODIFY;
         break;
-    case 1:		/* read, present */
+    case 1:     /* read, present */
         goto bad_area;
-    case 0:		/* read, not present */
+    case 0:     /* read, not present */
         if (!(vma->rde$l_flags & (VM_READ | VM_EXEC)))
             goto bad_area;
     }

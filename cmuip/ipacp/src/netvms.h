@@ -1,5 +1,5 @@
-#ifndef netvms_h
-#define netvms_h
+#ifndef NETVMS_H
+#define NETVMS_H
 
 #define FALSE 0
 #define TRUE 1
@@ -8,12 +8,12 @@
 
 // a few ascii characters.
 
-#define     CH_NUL	  0
-#define     CH_tab	  9
-#define     CH_sp	  32
-#define     CH_FF	  12		// formFeed
-#define     CH_LF	  10		// Line-Feed
-#define     CH_CR	  13		// Carriage-Return
+#define     CH_NUL    0
+#define     CH_tab    9
+#define     CH_sp     32
+#define     CH_FF     12        // formFeed
+#define     CH_LF     10        // Line-Feed
+#define     CH_CR     13        // Carriage-Return
 
 struct queue_header_fields
 {

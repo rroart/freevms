@@ -15,32 +15,32 @@ Version 2 and 3 extensions to driver:
     This version is for 2.4 series kernels.
 
     Changes since 3.1.21 (20011029)
-    	- add support for SG_FLAG_MMAP_IO [permit mmap() on sg devices]
-    	- update documentation pointers in this header
-    	- put KERNEL_VERSION macros around code that breaks early 2.4 series
-    	- fix use count for multiple queued requests on closed fd
-    	- switch back to alloc_kiovec()
+        - add support for SG_FLAG_MMAP_IO [permit mmap() on sg devices]
+        - update documentation pointers in this header
+        - put KERNEL_VERSION macros around code that breaks early 2.4 series
+        - fix use count for multiple queued requests on closed fd
+        - switch back to alloc_kiovec()
     Changes since 3.1.20 (20010814)
-	- use alloc_kiovec_sz() to speed dio [set num_buffer_heads==0]
-	- changes to cope with larger scatter gather element sizes
-	- clean up some printk()s
-	- add MODULE_LICENSE("GPL") [in a 3.1.20 subversion]
-	- fix race around generic_unplug_device() [in a 3.1.20 subversion]
+    - use alloc_kiovec_sz() to speed dio [set num_buffer_heads==0]
+    - changes to cope with larger scatter gather element sizes
+    - clean up some printk()s
+    - add MODULE_LICENSE("GPL") [in a 3.1.20 subversion]
+    - fix race around generic_unplug_device() [in a 3.1.20 subversion]
     Changes since 3.1.19 (20010623)
-	- add SG_GET_ACCESS_COUNT ioctl
-	- make open() increment and close() decrement access_count
-	- only register first 256 devices, reject subsequent devices
+    - add SG_GET_ACCESS_COUNT ioctl
+    - make open() increment and close() decrement access_count
+    - only register first 256 devices, reject subsequent devices
     Changes since 3.1.18 (20010505)
-	- fix bug that caused long wait when large buffer requested
-	- fix leak in error case of sg_new_read() [report: Eric Barton]
-	- add 'online' column to /proc/scsi/sg/devices
+    - fix bug that caused long wait when large buffer requested
+    - fix leak in error case of sg_new_read() [report: Eric Barton]
+    - add 'online' column to /proc/scsi/sg/devices
     Changes since 3.1.17 (20000921)
-    	- add CAP_SYS_RAWIO capability for sensitive stuff
-    	- compile in dio stuff, procfs 'allow_dio' defaulted off (0)
-	- make premature close and detach more robust
-	- lun masked into commands <= SCSI_2
-	- poll() and async notification now yield POLL_HUP on detach
-	- various 3rd party tweaks tracking lk 2.4 internal changes
+        - add CAP_SYS_RAWIO capability for sensitive stuff
+        - compile in dio stuff, procfs 'allow_dio' defaulted off (0)
+    - make premature close and detach more robust
+    - lun masked into commands <= SCSI_2
+    - poll() and async notification now yield POLL_HUP on detach
+    - various 3rd party tweaks tracking lk 2.4 internal changes
 
 Map of SG verions to the Linux kernels in which they appear:
        ----------        ----------------------------------
@@ -50,9 +50,9 @@ Map of SG verions to the Linux kernels in which they appear:
        3.1.17++          2.4.0++
 
 Major new features in SG 3.x driver (cf SG 2.x drivers)
-	- SG_IO ioctl() combines function if write() and read()
-	- new interface (sg_io_hdr_t) but still supports old interface
-	- scatter/gather in user space, direct IO, and mmap supported
+    - SG_IO ioctl() combines function if write() and read()
+    - new interface (sg_io_hdr_t) but still supports old interface
+    - scatter/gather in user space, direct IO, and mmap supported
 
  The normal action of this driver is to use the adapter (HBA) driver to DMA
  data into kernel buffers and then use the CPU to copy the data into the
@@ -74,15 +74,15 @@ Major new features in SG 3.x driver (cf SG 2.x drivers)
  Documentation
  =============
  A web site for the SG device driver can be found at:
-	http://www.torque.net/sg  [alternatively check the MAINTAINERS file]
+    http://www.torque.net/sg  [alternatively check the MAINTAINERS file]
  The documentation for the sg version 3 driver can be found at:
- 	http://www.torque.net/sg/p/sg_v3_ho.html
+    http://www.torque.net/sg/p/sg_v3_ho.html
  This is a rendering from DocBook source [change the extension to "sgml"
  or "xml"]. There are renderings in "ps", "pdf", "rtf" and "txt" (soon).
 
  The older, version 2 documents discuss the original sg interface in detail:
-	http://www.torque.net/sg/p/scsi-generic.txt
-	http://www.torque.net/sg/p/scsi-generic_long.txt
+    http://www.torque.net/sg/p/scsi-generic.txt
+    http://www.torque.net/sg/p/scsi-generic_long.txt
  A version of this document (potentially out of date) may also be found in
  the kernel source tree, probably at:
         /usr/src/linux/Documentation/scsi-generic.txt .
@@ -92,7 +92,7 @@ Major new features in SG 3.x driver (cf SG 2.x drivers)
  lk 2.4 series).
 
  There is a HOWTO on the Linux SCSI subsystem in the lk 2.4 series at:
- 	http://www.linuxdoc.org/HOWTO/SCSI-2.4-HOWTO
+    http://www.linuxdoc.org/HOWTO/SCSI-2.4-HOWTO
 */
 
 
@@ -115,7 +115,7 @@ typedef struct sg_io_hdr
     unsigned short iovec_count; /* [i] 0 implies no scatter gather */
     unsigned int dxfer_len;     /* [i] byte count of data transfer */
     void * dxferp;              /* [i], [*io] points to data transfer memory
-					      or scatter gather list */
+                          or scatter gather list */
     unsigned char * cmdp;       /* [i], [*i] points to command to perform */
     unsigned char * sbp;        /* [i], [*o] points to sense_buffer memory */
     unsigned int timeout;       /* [i] MAX_UINT->no timeout (unit: millisec) */
@@ -183,7 +183,7 @@ typedef struct sg_req_info   /* used by SG_GET_REQUEST_TABLE ioctl() */
     int pack_id;        /* pack_id associated with request */
     void * usr_ptr;     /* user provided pointer (in new interface) */
     unsigned int duration; /* millisecs elapsed since written (req_state==1)
-			      or request duration (req_state==2) */
+                  or request duration (req_state==2) */
     int unused;
 } sg_req_info_t; /* 20 bytes long on i386 */
 
@@ -228,10 +228,10 @@ typedef struct sg_req_info   /* used by SG_GET_REQUEST_TABLE ioctl() */
 /* Returns -EBUSY if occupied. 3rd argument pointer to int (see next) */
 #define SG_SCSI_RESET 0x2284
 /* Associated values that can be given to SG_SCSI_RESET follow */
-#define		SG_SCSI_RESET_NOTHING	0
-#define		SG_SCSI_RESET_DEVICE	1
-#define		SG_SCSI_RESET_BUS	2
-#define		SG_SCSI_RESET_HOST	3
+#define     SG_SCSI_RESET_NOTHING   0
+#define     SG_SCSI_RESET_DEVICE    1
+#define     SG_SCSI_RESET_BUS   2
+#define     SG_SCSI_RESET_HOST  3
 
 /* synchronous SCSI command ioctl, (only in version 3 interface) */
 #define SG_IO 0x2285   /* similar effect as write() followed by read() */
@@ -293,15 +293,15 @@ struct sg_header
     unsigned int driver_status:8;   /* [o] driver status+suggestion */
     unsigned int other_flags:10;    /* unused */
     unsigned char sense_buffer[SG_MAX_SENSE]; /* [o] Output in 3 cases:
-	   when target_status is CHECK_CONDITION or
-	   when target_status is COMMAND_TERMINATED or
-	   when (driver_status & DRIVER_SENSE) is true. */
+       when target_status is CHECK_CONDITION or
+       when target_status is COMMAND_TERMINATED or
+       when (driver_status & DRIVER_SENSE) is true. */
 };      /* This structure is 36 bytes long on i386 */
 
 
 /* IOCTLs: The following are not required (or ignored) when the sg_io_hdr_t
-	   interface is used. They are kept for backward compatibility with
-	   the original and version 2 drivers. */
+       interface is used. They are kept for backward compatibility with
+       the original and version 2 drivers. */
 
 #define SG_SET_TIMEOUT 0x2201  /* unit: jiffies (10ms on i386) */
 #define SG_GET_TIMEOUT 0x2202  /* yield timeout as _return_ value */
