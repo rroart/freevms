@@ -1,6 +1,11 @@
 #ifndef FDTDEF_H
 #define FDTDEF_H
 
+#include <ccbdef.h>
+#include <irpdef.h>
+#include <pcbdef.h>
+#include <ucbdef.h>
+
 #define FDT$K_LENGTH 528
 
 struct __fdt

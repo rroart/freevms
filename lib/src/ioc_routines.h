@@ -1,7 +1,6 @@
 #ifndef IOC_ROUTINES_H
 #define IOC_ROUTINES_H
 
-//#include <ints.h>
 #include <acbdef.h>
 #include <adpdef.h>
 #include <busarraydef.h>
