@@ -139,7 +139,7 @@ void run_logical_test(void)
     EXPECT_EQ(call_sys$trnlnm("LNM$PROCESS_TABLE", "SOME_NON_EXISTING_LOGICALNAME", value_list), SS$_NOLOGNAM);
     EXPECT_SUCCESS(call_sys$crelnm("LNM$PROCESS_TABLE", "MY_TEST_LOGICAL", "Test Value 1"));
     EXPECT_EQ(call_sys$trnlnm("LNM$PROCESS_TABLE", "MY_TEST_LOGICAL", value_list), SS$_NORMAL);
-    EXPECT_EQ(strcmp(value_list, "Test Value!"), 0);
+    EXPECT_EQ(strcmp(value_list, "Test Value 1"), 0);
     EXPECT_SUCCESS(call_sys$dellnm("LNM$PROCESS_TABLE", "MY_TEST_LOGICAL"));
     EXPECT_EQ(call_sys$trnlnm("LNM$PROCESS_TABLE", "MY_TEST_LOGICAL", value_list), SS$_NORMAL);
 
