@@ -6,15 +6,15 @@
 #define SOR$BEGIN_MERGE sor$begin_merge
 
 unsigned int sor$begin_merge(short * key_buffer, short * lrl, int * options,
-		char * merge_order, long * user_compare, long * user_equal,
-		long * user_input, long * context);
+                             char * merge_order, long * user_compare, long * user_equal,
+                             long * user_input, long * context);
 #define sor$begin_merge(...) sor$begin_merge(_buildargz9(__VA_ARGS__))
 
 #define SOR$BEGIN_SORT sor$begin_sort
 
 unsigned int sor$begin_sort(short * key_buffer, short * lrl, int * options,
-		int * file_alloc, long * user_compare, long * user_equal,
-		char * sort_process, char * work_files, long * context);
+                            int * file_alloc, long * user_compare, long * user_equal,
+                            char * sort_process, char * work_files, long * context);
 #define sor$begin_sort(...) sor$begin_sort(_buildargz9(__VA_ARGS__))
 
 #define SOR$DO_MERGE sor$do_merge
@@ -37,8 +37,8 @@ int sor$init_sort(void);
 #define SOR$PASS_FILES sor$pass_files
 
 unsigned int sor$pass_files(void * inp_desc, void * out_desc, char * org,
-		char * rfm, char * bks, short * bls, short * mrs, int * alq, int * fop,
-		char * fsz, long * context);
+                            char * rfm, char * bks, short * bls, short * mrs, int * alq, int * fop,
+                            char * fsz, long * context);
 #define sor$pass_files(...) sor$pass_files(_buildargz11(__VA_ARGS__))
 
 #define SOR$RELEASE_REC sor$release_rec

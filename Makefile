@@ -1,8 +1,8 @@
 TOPDIR	:= $(shell /bin/pwd)
 
-VMSSUBDIRS = crtl starlet librtl smgrtl sort cld cdu msgfil cliutl backup dir init login dcl edt dfu mount copy delete dif util32 sda instal uaf sysman
-VMSSUBDIRSINST = crtl starlet librtl smgrtl sort cld cliutl dir dcl login init edt dfu mount copy delete dif util32 sda instal uaf sysman driver
-VMSSUBDIRS2 = 
+VMSSUBDIRS = crtl starlet librtl smgrtl sort cld cdu msgfil cliutl backup dir init login dcl edt dfu mount copy delete dif util32 sda instal uaf sysman sstest
+VMSSUBDIRSINST = crtl starlet librtl smgrtl sort cld cliutl dir dcl login init edt dfu mount copy delete dif util32 sda instal uaf sysman driver sstest
+VMSSUBDIRS2 =
 VMSSUBDIRS3 = cmuip/ipacp/src/
 
 export BLISS = $(TOPDIR)/bliss/bin/gcc
