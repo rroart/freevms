@@ -143,13 +143,13 @@ void run_logical_test(void)
     EXPECT_SUCCESS(call_sys$dellnm("LNM$PROCESS_TABLE", "MY_TEST_LOGICAL"));
     EXPECT_EQ(call_sys$trnlnm("LNM$PROCESS_TABLE", "MY_TEST_LOGICAL", value_list), SS$_NORMAL);
 
-    EXPECT_EQ(call_sys$crelnt("MY_TEST_TABLE", "LNM$PROCESS_TABLE"), SS$_NOPRIV);
+    EXPECT_EQ(call_sys$crelnt("MY_TEST_TABLE", "LNM$PROCESS_DIRECTORY"), SS$_NOPRIV);
     /*
-    EXPECT_SUCCESS(call_sys$crelnt("MY_TEST_TABLE", "LNM$PROCESS_TABLE"));
+    EXPECT_SUCCESS(call_sys$crelnt("MY_TEST_TABLE", "LNM$PROCESS_DIRECTORY"));
     EXPECT_SUCCESS(call_sys$crelnm("MY_TEST_TABLE", "MY_TEST_LOGICAL", "Test Value 2"));
     EXPECT_EQ(call_sys$trnlnm("MY_TEST_TABLE", "MY_TEST_LOGICAL", value_list), SS$_NORMAL);
     EXPECT_EQ(strcmp(value_list, "Test Value 2"), 0);
-    EXPECT_SUCCESS(call_sys$dellnm("LNM$PROCESS_TABLE", "MY_TEST_TABLE"));
+    EXPECT_SUCCESS(call_sys$dellnm("LNM$PROCESS_DIRECTORY", "MY_TEST_TABLE"));
     EXPECT_EQ(call_sys$trnlnm("MY_TEST_TABLE", "MY_TEST_LOGICAL", value_list), SS$_NORMAL);
     */
 }

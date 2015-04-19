@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -52,9 +52,6 @@ NORET_TYPE void panic(const char * fmt, ...)
 {
     static char buf[1024];
     va_list args;
-#if defined(CONFIG_ARCH_S390)
-    unsigned long caller = (unsigned long) __builtin_return_address(0);
-#endif
 
     bust_spinlocks(1);
     va_start(args, fmt);
@@ -93,17 +90,6 @@ NORET_TYPE void panic(const char * fmt, ...)
          */
         machine_restart(NULL);
     }
-#ifdef __sparc__
-    {
-        extern int stop_a_enabled;
-        /* Make sure the user can actually press L1-A */
-        stop_a_enabled = 1;
-        printk("Press L1-A to return to the boot prom\n");
-    }
-#endif
-#if defined(CONFIG_ARCH_S390)
-    disabled_wait(caller);
-#endif
     {
         int i,j;
         for(j=0; j<20; j++) for(i=0; i<1000000000; i++);

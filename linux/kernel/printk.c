@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -37,8 +37,6 @@
 
 #ifdef CONFIG_MULTIQUAD
 #define LOG_BUF_LEN (65536)
-#elif defined(CONFIG_ARCH_S390)
-#define LOG_BUF_LEN (131072)
 #elif defined(CONFIG_SMP)
 #define LOG_BUF_LEN (32768)
 #else
@@ -126,12 +124,6 @@ static int __init console_setup(char *str)
     name[sizeof(name) - 1] = 0;
     if ((options = strchr(str, ',')) != NULL)
         *(options++) = 0;
-#ifdef __sparc__
-    if (!strcmp(str, "ttya"))
-        strcpy(name, "ttyS0");
-    if (!strcmp(str, "ttyb"))
-        strcpy(name, "ttyS1");
-#endif
     for(s = name; *s; s++)
         if (*s >= '0' && *s <= '9')
             break;

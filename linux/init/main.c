@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -45,38 +45,16 @@
 #include <asm/io.h>
 #include <asm/bugs.h>
 
-#if defined(CONFIG_ARCH_S390)
-#include <asm/s390mach.h>
-#include <asm/ccwcache.h>
-#endif
-
 #ifdef CONFIG_PCI
 #include <linux/pci.h>
-#endif
-
-#ifdef CONFIG_DIO
-#include <linux/dio.h>
-#endif
-
-#ifdef CONFIG_ZORRO
-#include <linux/zorro.h>
 #endif
 
 #ifdef CONFIG_MTRR
 #  include <asm/mtrr.h>
 #endif
 
-#ifdef CONFIG_NUBUS
-#include <linux/nubus.h>
-#endif
-
 #ifdef CONFIG_ISAPNP
 #include <linux/isapnp.h>
-#endif
-
-#ifdef CONFIG_IRDA
-extern int irda_proto_init(void);
-extern int irda_device_init(void);
 #endif
 
 #ifdef CONFIG_X86_LOCAL_APIC
@@ -133,10 +111,6 @@ extern void signals_init(void);
 extern int init_pcmcia_ds(void);
 
 extern void free_initmem(void);
-
-#ifdef CONFIG_TC
-extern void tc_init(void);
-#endif
 
 extern void ecard_init(void);
 
@@ -254,16 +228,6 @@ static struct dev_name_struct
     { "ddv", DDV_MAJOR << 8},
     { "ubd", UBD_MAJOR << 8 },
     { "jsfd",    JSFD_MAJOR << 8},
-#if defined(CONFIG_ARCH_S390)
-    { "dasda", (DASD_MAJOR << MINORBITS) },
-    { "dasdb", (DASD_MAJOR << MINORBITS) + (1 << 2) },
-    { "dasdc", (DASD_MAJOR << MINORBITS) + (2 << 2) },
-    { "dasdd", (DASD_MAJOR << MINORBITS) + (3 << 2) },
-    { "dasde", (DASD_MAJOR << MINORBITS) + (4 << 2) },
-    { "dasdf", (DASD_MAJOR << MINORBITS) + (5 << 2) },
-    { "dasdg", (DASD_MAJOR << MINORBITS) + (6 << 2) },
-    { "dasdh", (DASD_MAJOR << MINORBITS) + (7 << 2) },
-#endif
 #if defined(CONFIG_BLK_CPQ_DA) || defined(CONFIG_BLK_CPQ_DA_MODULE)
     { "ida/c0d0p",0x4800 },
     { "ida/c0d1p",0x4810 },
@@ -724,9 +688,6 @@ asmlinkage void __init start_kernel(void)
     proc_caches_init();
     buffer_init(mempages);
     page_cache_init(mempages);
-#if defined(CONFIG_ARCH_S390)
-    ccwcache_init();
-#endif
     signals_init();
 #if defined(CONFIG_SYSVIPC)
     ipc_init();
@@ -825,48 +786,21 @@ static void __init do_basic_setup(void)
      * Ok, at this point all CPU's should be initialized, so
      * we can start looking into devices..
      */
-#if defined(CONFIG_ARCH_S390)
-    s390_init_machine_check();
-#endif
-
 #ifdef CONFIG_PCI
     pci_init();
 #endif
 #ifdef CONFIG_SBUS
     sbus_init();
 #endif
-#if defined(CONFIG_PPC)
-    ppc_init();
-#endif
 #ifdef CONFIG_MCA
     mca_init();
-#endif
-#ifdef CONFIG_ARCH_ACORN
-    ecard_init();
-#endif
-#ifdef CONFIG_ZORRO
-    zorro_init();
-#endif
-#ifdef CONFIG_DIO
-    dio_init();
-#endif
-#ifdef CONFIG_NUBUS
-    nubus_init();
 #endif
 #ifdef CONFIG_ISAPNP
     isapnp_init();
 #endif
-#ifdef CONFIG_TC
-    tc_init();
-#endif
-
     do_initcalls();
     printk("%%KERNEL-I-DEBUG, After do_initcalls\n");
 
-#ifdef CONFIG_IRDA
-    irda_proto_init();
-    irda_device_init(); /* Must be done after protocol initialization */
-#endif
 #ifdef CONFIG_PCMCIA
     init_pcmcia_ds();       /* Do this last */
 #endif

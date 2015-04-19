@@ -6,14 +6,14 @@
 #
 
 
-mod-subdirs :=	mtd video input ide
+mod-subdirs :=	pci video ide
 
 subdir-y :=	char block net
 subdir-m :=	$(subdir-y)
 
 
 subdir-$(CONFIG_PCI)		+= pci
-subdir-$(CONFIG_VT)		+= video
+subdir-$(CONFIG_VT)			+= video
 subdir-$(CONFIG_IDE)		+= ide
 
 include $(TOPDIR)/Rules.make

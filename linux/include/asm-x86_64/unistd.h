@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006.
 
 #ifndef _ASM_X86_64_UNISTD_H_
@@ -510,7 +510,7 @@ __SYSCALL(__NR_semtimedop, sys_semtimedop)
 
 /* vms kernel mode */
 #define __NR_$testtest          1
-#define __NR_$setpri        2
+#define __NR_$setpri            2
 #define __NR_$crelnt            3
 #define __NR_$setprn            4
 #define __NR_$dclast            5
@@ -620,8 +620,8 @@ __SYSCALL(__NR_semtimedop, sys_semtimedop)
 #define __NR_$set_implicit_affinity 109
 #define __NR_$cpu_capabilities 110
 #define __NR_$process_capabilities 111
-#define __NR_$set_security 112
-#define __NR_$get_security 113
+#define __NR_$set_security     112
+#define __NR_$get_security     113
 
 #define __NR_$close 1
 #define __NR_$connect 2

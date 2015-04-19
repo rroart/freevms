@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -227,10 +227,8 @@ EXPORT_SYMBOL(complete);
 
 /* The notion of irq probe/assignment is foreign to S/390 */
 
-#if !defined(CONFIG_ARCH_S390)
 EXPORT_SYMBOL(probe_irq_on);
 EXPORT_SYMBOL(probe_irq_off);
-#endif
 
 #ifdef CONFIG_SMP
 EXPORT_SYMBOL(del_timer_sync);

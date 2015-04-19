@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -1343,7 +1343,6 @@ out:
     return error;
 }
 
-#ifndef __sparc__
 asmlinkage long
 sys_rt_sigaction(int sig, const struct sigaction *act, struct sigaction *oact,
                  size_t sigsetsize)
@@ -1371,7 +1370,6 @@ sys_rt_sigaction(int sig, const struct sigaction *act, struct sigaction *oact,
 out:
     return ret;
 }
-#endif /* __sparc__ */
 #endif
 
 #if !defined(__alpha__) && !defined(__ia64__)

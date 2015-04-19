@@ -704,12 +704,7 @@ check_if_enabled:
     {
         if (d->init_chipset)
             (void) d->init_chipset(dev, d->name);
-#ifdef __sparc__
-        printk("%s: 100%% native mode on irq %s\n",
-               d->name, __irq_itoa(pciirq));
-#else
         printk("%s: 100%% native mode on irq %d\n", d->name, pciirq);
-#endif
     }
 
     /*

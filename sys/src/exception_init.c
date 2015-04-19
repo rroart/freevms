@@ -1,22 +1,22 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file exception_init.c
    \brief misc important hairy system routines
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
  */
 
 #include <ssdef.h>
 #include <starlet.h>
+#include <sysdep.h>
 #include <iosbdef.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
 
-#include<linux/linkage.h>
-#include<asm/unistd.h>
-#include "../../starlet/src/sysdep.h"
+#include <linux/linkage.h>
+#include <asm/unistd.h>
 
 /**
    \brief wait until event flag set and eventual iosb flag too - see 5.2 6.3.6.3 (recheck the implementation of this routine)

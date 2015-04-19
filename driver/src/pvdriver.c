@@ -4813,10 +4813,6 @@ int __init floppy_init(void)
         CLEARSTRUCT(FDCS);
         FDCS->dtr = -1;
         FDCS->dor = 0x4;
-#ifdef __sparc__
-        /*sparcs don't have a DOR reset which we can fall back on to*/
-        FDCS->version = FDC_82072A;
-#endif
     }
 
     use_virtual_dma = can_use_virtual_dma & 1;
@@ -5033,9 +5029,7 @@ static void floppy_release_irq_and_dma(void)
 {
     int old_fdc;
 #ifdef FLOPPY_SANITY_CHECK
-#ifndef __sparc__
     int drive;
-#endif
 #endif
     long tmpsize;
     unsigned long tmpaddr;
@@ -5072,11 +5066,9 @@ static void floppy_release_irq_and_dma(void)
     }
 
 #ifdef FLOPPY_SANITY_CHECK
-#ifndef __sparc__
     for (drive=0; drive < N_FDC * 4; drive++)
         if (timer_pending(motor_off_timer + drive))
             printk("motor off timer %d still active\n", drive);
-#endif
 
     if (timer_pending(&fd_timeout))
         printk("floppy timer still active:%s\n", timeout_message);

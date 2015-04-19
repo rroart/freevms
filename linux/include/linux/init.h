@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 #ifndef _LINUX_INIT_H
@@ -151,17 +151,10 @@ typedef void (*__cleanup_module_func_t)(void);
 
 #endif  /* !MODULE */
 
-#ifdef CONFIG_HOTPLUG
-#define __devinit
-#define __devinitdata
-#define __devexit
-#define __devexitdata
-#else
 #define __devinit __init
 #define __devinitdata __initdata
 #define __devexit __exit
 #define __devexitdata __exitdata
-#endif
 
 /* Functions marked as __devexit may be discarded at kernel link time, depending
    on config options.  Newer versions of binutils detect references from
@@ -169,7 +162,7 @@ typedef void (*__cleanup_module_func_t)(void);
    __devexit functions must use __devexit_p(function_name), the wrapper will
    insert either the function_name or NULL, depending on the config options.
  */
-#if defined(MODULE) || defined(CONFIG_HOTPLUG)
+#if defined(MODULE)
 #define __devexit_p(x) x
 #else
 #define __devexit_p(x) NULL

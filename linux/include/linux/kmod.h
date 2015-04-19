@@ -34,8 +34,4 @@ static inline int request_module(const char * name)
 extern int exec_usermodehelper(char *program_path, char *argv[], char *envp[]);
 extern int call_usermodehelper(char *path, char *argv[], char *envp[]);
 
-#ifdef CONFIG_HOTPLUG
-extern char hotplug_path [];
-#endif
-
 #endif /* __LINUX_KMOD_H__ */

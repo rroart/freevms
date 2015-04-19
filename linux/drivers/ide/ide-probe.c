@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -149,15 +149,6 @@ static inline void do_identify (ide_drive_t *drive, byte cmd)
             type = ide_cdrom;   /* Early cdrom models used zero */
         case ide_cdrom:
             drive->removable = 1;
-#ifdef CONFIG_PPC
-            /* kludge for Apple PowerBook internal zip */
-            if (!strstr(id->model, "CD-ROM") && strstr(id->model, "ZIP"))
-            {
-                printk ("FLOPPY");
-                type = ide_floppy;
-                break;
-            }
-#endif
             printk ("CD/DVD-ROM");
             break;
         case ide_tape:
@@ -808,16 +799,11 @@ static int init_irq (ide_hwif_t *hwif)
     }
     restore_flags(flags);   /* all CPUs; safe now that hwif->hwgroup is set up */
 
-#if !defined(__mc68000__) && !defined(CONFIG_APUS) && !defined(__sparc__)
+#if !defined(__mc68000__) && !defined(CONFIG_APUS)
     printk("%s at 0x%03x-0x%03x,0x%03x on irq %d", hwif->name,
            hwif->io_ports[IDE_DATA_OFFSET],
            hwif->io_ports[IDE_DATA_OFFSET]+7,
            hwif->io_ports[IDE_CONTROL_OFFSET], hwif->irq);
-#elif defined(__sparc__)
-    printk("%s at 0x%03lx-0x%03lx,0x%03lx on irq %s", hwif->name,
-           hwif->io_ports[IDE_DATA_OFFSET],
-           hwif->io_ports[IDE_DATA_OFFSET]+7,
-           hwif->io_ports[IDE_CONTROL_OFFSET], __irq_itoa(hwif->irq));
 #else
     printk("%s at %p on irq 0x%08x", hwif->name,
            hwif->io_ports[IDE_DATA_OFFSET], hwif->irq);

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -77,17 +77,6 @@ static int (*check_part[])(struct gendisk *hd, struct block_device *bdev, unsign
 };
 
 /*
- *  This is ucking fugly but its probably the best thing for 2.4.x
- *  Take it as a clear reminder than we should put the device name
- *  generation in the object kdev_t points to in 2.5.
- */
-
-#ifdef CONFIG_ARCH_S390
-int (*genhd_dasd_name)(char*,int,int,struct gendisk*) = NULL;
-EXPORT_SYMBOL(genhd_dasd_name);
-#endif
-
-/*
  * disk_name() is used by partition check code and the md driver.
  * It formats the devicename of the indicated disk into
  * the supplied buffer (of size at least 32), and returns
@@ -100,11 +89,6 @@ char *disk_name (struct gendisk *hd, int minor, char *buf)
     unsigned int unit = (minor >> hd->minor_shift);
     unsigned int part = (minor & ((1 << hd->minor_shift) -1 ));
 
-#ifdef CONFIG_ARCH_S390
-    if (genhd_dasd_name
-            && genhd_dasd_name (buf, unit, part, hd) == 0)
-        return buf;
-#endif
     /*
      * IDE devices use multiple major numbers, but the drives
      * are named as:  {hda,hdb}, {hdc,hdd}, {hde,hdf}, {hdg,hdh}..

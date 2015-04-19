@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -39,10 +39,6 @@
 
 #undef CONFIG_PROC_FS
 
-#ifdef CONFIG_ROOT_NFS
-#include <linux/nfs_fs.h>
-#endif
-
 #if defined(CONFIG_SYSCTL)
 
 /* External variables not in a header file. */
@@ -64,12 +60,6 @@ static int minolduid;
 #ifdef CONFIG_KMOD
 extern char modprobe_path[];
 #endif
-#ifdef CONFIG_HOTPLUG
-extern char hotplug_path[];
-#endif
-#ifdef CONFIG_CHR_DEV_SG
-extern int sg_big_buff;
-#endif
 #ifdef CONFIG_SYSVIPC
 extern size_t shm_ctlmax;
 extern size_t shm_ctlall;
@@ -78,24 +68,6 @@ extern int msg_ctlmax;
 extern int msg_ctlmnb;
 extern int msg_ctlmni;
 extern int sem_ctls[];
-#endif
-
-#ifdef __sparc__
-extern char reboot_command [];
-extern int stop_a_enabled;
-#endif
-
-#ifdef CONFIG_ARCH_S390
-#ifdef CONFIG_MATHEMU
-extern int sysctl_ieee_emulation_warnings;
-#endif
-extern int sysctl_userprocess_debug;
-#endif
-
-#ifdef CONFIG_PPC32
-extern unsigned long zero_paged_on, powersave_nap;
-int proc_dol2crvec(ctl_table *table, int write, struct file *filp,
-                   void *buffer, size_t *lenp);
 #endif
 
 #ifdef CONFIG_BSD_PROCESS_ACCT
@@ -208,30 +180,6 @@ static ctl_table kern_table[] =
         0644, NULL, &proc_dointvec
     },
 #endif
-#ifdef __sparc__
-    {
-        KERN_SPARC_REBOOT, "reboot-cmd", reboot_command,
-        256, 0644, NULL, &proc_dostring, &sysctl_string
-    },
-    {
-        KERN_SPARC_STOP_A, "stop-a", &stop_a_enabled, sizeof (int),
-        0644, NULL, &proc_dointvec
-    },
-#endif
-#ifdef CONFIG_PPC32
-    {
-        KERN_PPC_ZEROPAGED, "zero-paged", &zero_paged_on, sizeof(int),
-        0644, NULL, &proc_dointvec
-    },
-    {
-        KERN_PPC_POWERSAVE_NAP, "powersave-nap", &powersave_nap, sizeof(int),
-        0644, NULL, &proc_dointvec
-    },
-    {
-        KERN_PPC_L2CR, "l2cr", NULL, 0,
-        0644, NULL, &proc_dol2crvec
-    },
-#endif
     {
         KERN_CTLALTDEL, "ctrl-alt-del", &C_A_D, sizeof(int),
         0644, NULL, &proc_dointvec
@@ -244,18 +192,6 @@ static ctl_table kern_table[] =
     {
         KERN_MODPROBE, "modprobe", &modprobe_path, 256,
         0644, NULL, &proc_dostring, &sysctl_string
-    },
-#endif
-#ifdef CONFIG_HOTPLUG
-    {
-        KERN_HOTPLUG, "hotplug", &hotplug_path, 256,
-        0644, NULL, &proc_dostring, &sysctl_string
-    },
-#endif
-#ifdef CONFIG_CHR_DEV_SG
-    {
-        KERN_SG_BIG_BUFF, "sg-big-buff", &sg_big_buff, sizeof (int),
-        0444, NULL, &proc_dointvec
     },
 #endif
 #ifdef CONFIG_BSD_PROCESS_ACCT
@@ -314,18 +250,6 @@ static ctl_table kern_table[] =
         &proc_dointvec_minmax, &sysctl_intvec, NULL,
         &minolduid, &maxolduid
     },
-#ifdef CONFIG_ARCH_S390
-#ifdef CONFIG_MATHEMU
-    {
-        KERN_IEEE_EMULATION_WARNINGS,"ieee_emulation_warnings",
-        &sysctl_ieee_emulation_warnings,sizeof(int),0644,NULL,&proc_dointvec
-    },
-#endif
-    {
-        KERN_S390_USER_DEBUG_LOGGING,"userprocess_debug",
-        &sysctl_userprocess_debug,sizeof(int),0644,NULL,&proc_dointvec
-    },
-#endif
     {0}
 };
 

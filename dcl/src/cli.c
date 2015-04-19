@@ -3385,7 +3385,8 @@ static unsigned long func_sub(Symbol *symbol, char *strp, char **rtnp,
                               void *valuep)
 
 {
-    char *string, *substring;
+    char *string = 0;
+    char *substring = 0;
     unsigned long length, offset, sts, totalen;
 
     while ((*strp != 0) && (*strp <= ' '))
@@ -3407,10 +3408,10 @@ static unsigned long func_sub(Symbol *symbol, char *strp, char **rtnp,
         return (sts); /* return error status if any failure */
     *rtnp = strp; /* return pointer just past the ) */
     totalen = strlen(string); /* get total length of the original string */
-    if (length > totalen - offset)
-        length = totalen - offset; /* chop off length at end of string */
     if (offset > totalen)
         offset = totalen; /* chop off offset at end of string */
+    if (length > totalen - offset)
+        length = totalen - offset; /* chop off length at end of string */
     substring = malloc(length + 1); /* malloc a substring buffer */
     memcpy(substring, string + offset, length); /* copy in the substring */
     substring[length] = 0; /* null terminate it */

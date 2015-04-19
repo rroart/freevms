@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004
 
 #include<crbdef.h>
@@ -1679,17 +1679,12 @@ static int __devinit vortex_probe1(struct pci_dev *pdev,
     for (i = 0; i < 6; i++)
         outb(dev->dev_addr[i], ioaddr + i);
 
-#ifdef __sparc__
-    if (print_info)
-        printk(", IRQ %s\n", __irq_itoa(dev->irq));
-#else
     if (print_info)
         printk(", IRQ %d\n", dev->irq);
     /* Tell them about an invalid IRQ. */
     if (dev->irq <= 0 || dev->irq >= NR_IRQS)
         printk(KERN_WARNING " *** Warning: IRQ %d is unlikely to work! ***\n",
                dev->irq);
-#endif
 
     EL3WINDOW(4);
     step = (inb(ioaddr + Wn4_NetDiag) & 0x1e) >> 1;

@@ -31,7 +31,7 @@
 #include <internals.h>
 #include <system_data_cells.h>
 
-void  com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid);
+void com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid);
 
 void com$post(struct _irp * i, struct _ucb * u)
 {
@@ -103,7 +103,7 @@ void fork_routine2(fr3,fr4,fr5)
    \param ipid internal pid
 */
 
-void  com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid)
+void com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid)
 {
     struct _acb * next, * cur = acb_lh;
     /** scan acb/fkb list */
@@ -135,7 +135,7 @@ void  com_std$delattnastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid)
    \param inclchar_p
 */
 
-void  com_std$delctrlastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid, int matchchar, int *inclchar_p)
+void com_std$delctrlastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid, int matchchar, int *inclchar_p)
 {
     /** already entered with device lock and ipl */
     struct _acb * next, * cur = acb_lh;
@@ -172,12 +172,12 @@ void  com_std$delctrlastp (struct _acb **acb_lh, struct _ucb *ucb, int ipid, int
     }
 }
 
-void  com_std$delctrlast (struct _acb **acb_lh, struct _ucb *ucb, int matchchar, int *inclchar_p)
+void com_std$delctrlast (struct _acb **acb_lh, struct _ucb *ucb, int matchchar, int *inclchar_p)
 {
     com_std$delctrlastp(acb_lh, ucb, 0, matchchar, inclchar_p);
 }
 
-void  com_std$drvdealmem (void *ptr)
+void com_std$drvdealmem (void *ptr)
 {
     kfree(ptr); // maybe do more checks
 }
@@ -190,7 +190,7 @@ void  com_std$drvdealmem (void *ptr)
    \param acb pointer to acb list head
 */
 
-int   com_std$flushattns (struct _pcb *pcb, struct _ucb *ucb, int chan, struct _acb **acb_lh)
+int com_std$flushattns (struct _pcb *pcb, struct _ucb *ucb, int chan, struct _acb **acb_lh)
 {
     /** set ipl and device lock - MISSING */
     setipl(ucb->ucb$b_dipl);
@@ -228,7 +228,7 @@ int   com_std$flushattns (struct _pcb *pcb, struct _ucb *ucb, int chan, struct _
    \param mask
 */
 
-int   com_std$flushctrls (struct _pcb *pcb, struct _ucb *ucb, int chan, struct _acb **acb_lh, int *mask_p)
+int com_std$flushctrls (struct _pcb *pcb, struct _ucb *ucb, int chan, struct _acb **acb_lh, int *mask_p)
 {
     struct _tast * tast = 0;
     /** device lock - MISSING */
@@ -276,12 +276,12 @@ int   com_std$flushctrls (struct _pcb *pcb, struct _ucb *ucb, int chan, struct _
     return SS$_NORMAL;
 }
 
-void  com_std$post (struct _irp *irp, struct _ucb *ucb)
+void com_std$post (struct _irp *irp, struct _ucb *ucb)
 {
     com$post(irp,ucb);
 }
 
-void  com_std$post_nocnt (struct _irp *irp);
+void com_std$post_nocnt (struct _irp *irp);
 
 /**
    \brief set attention ast mechanism - see 5.2 7.9.1
@@ -292,7 +292,7 @@ void  com_std$post_nocnt (struct _irp *irp);
    \param acb pointer to acb list head
 */
 
-int   com_std$setattnast (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb, struct _acb **acb_lh)
+int com_std$setattnast (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb, struct _acb **acb_lh)
 {
     short int chan=ccb-&ctl$gl_ccbbase[0];
     long * exp;
@@ -329,7 +329,7 @@ int   com_std$setattnast (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, 
    \param tast_p terminal ast list
 */
 
-int   com_std$setctrlast (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb, struct _acb **acb_lh,int mask, struct _tast **tast_p)
+int com_std$setctrlast (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb, struct _acb **acb_lh,int mask, struct _tast **tast_p)
 {
     struct _acb * a;
     struct _tast * tast;
