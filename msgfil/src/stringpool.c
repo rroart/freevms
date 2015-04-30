@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // More or less modified GCC source file, 2004
 
 /* String pool for GCC.
@@ -52,7 +52,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
                   obstack_chunk_free)
 
 
-#include<stdio.h>
+#include <stdio.h>
 #include <ctype.h>
 
 #if 0

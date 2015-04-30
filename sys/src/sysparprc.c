@@ -1,22 +1,22 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file sysparprc.c
    \brief system service for rescheduling
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
-#include<asm/hw_irq.h>
-#include<system_data_cells.h>
-#include<ipldef.h>
-#include<ipl.h>
-#include<phddef.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
+#include <asm/hw_irq.h>
+#include <system_data_cells.h>
+#include <ipldef.h>
+#include <ipl.h>
+#include <phddef.h>
 #include <sch_routines.h>
-#include<internals.h>
+#include <internals.h>
 
 /**
    \brief reschedule system service - see 5.2 13.4.2

@@ -1,40 +1,40 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2009
 // From 2.4.37.6
 // support the same as virtualbox, may skip the rest
 // only Intel Pro/1000 MT Desktop (82540EM), Intel Pro/1000 MT Server (82545EM), and Intel Pro/1000 T Server (82543GC)?
 
-#include<crbdef.h>
-#include<cxbdef.h>
-#include<cdtdef.h>
-#include<dcdef.h>
-#include<ddtdef.h>
-#include<dptdef.h>
-#include<fdtdef.h>
-#include<pdtdef.h>
-#include<idbdef.h>
-#include<irpdef.h>
-#include<ucbdef.h>
-#include<ucbnidef.h>
-#include<ddbdef.h>
-#include<ipldef.h>
-#include<dyndef.h>
-#include<ssdef.h>
-#include<iodef.h>
-#include<devdef.h>
-#include<system_data_cells.h>
-#include<ipl.h>
-#include<linux/pci.h>
-#include<system_service_setup.h>
-#include<descrip.h>
+#include <crbdef.h>
+#include <cxbdef.h>
+#include <cdtdef.h>
+#include <dcdef.h>
+#include <ddtdef.h>
+#include <dptdef.h>
+#include <fdtdef.h>
+#include <pdtdef.h>
+#include <idbdef.h>
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ucbnidef.h>
+#include <ddbdef.h>
+#include <ipldef.h>
+#include <dyndef.h>
+#include <ssdef.h>
+#include <iodef.h>
+#include <devdef.h>
+#include <system_data_cells.h>
+#include <ipl.h>
+#include <linux/pci.h>
+#include <system_service_setup.h>
+#include <descrip.h>
 #include <ioc_routines.h>
 #include <misc_routines.h>
 #include <exe_routines.h>
 
-#include<linux/netdevice.h>
+#include <linux/netdevice.h>
 
 /*static*/extern int e1000_xmit_frame(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 

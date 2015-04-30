@@ -1,13 +1,13 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
-#include<linux/kernel.h>
+#include <linux/linkage.h>
+#include <linux/kernel.h>
 
-#include<descrip.h>
-#include<opcdef.h>
+#include <descrip.h>
+#include <opcdef.h>
 
 asmlinkage int exe$sndopr(void *msgbuf, unsigned short int chan)
 {

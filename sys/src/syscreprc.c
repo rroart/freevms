@@ -1,27 +1,27 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
-#include<linux/completion.h>
-#include<linux/personality.h>
-#include<linux/mm.h>
-#include<linux/module.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
+#include <linux/completion.h>
+#include <linux/personality.h>
+#include <linux/mm.h>
+#include <linux/module.h>
 
-#include<system_data_cells.h>
-#include<descrip.h>
-#include<dyndef.h>
-#include<ipldef.h>
-#include<phddef.h>
-#include<pqbdef.h>
-#include<prcdef.h>
-#include<pridef.h>
-#include<rdedef.h>
-#include<secdef.h>
-#include<ssdef.h>
-#include<starlet.h>
+#include <system_data_cells.h>
+#include <descrip.h>
+#include <dyndef.h>
+#include <ipldef.h>
+#include <phddef.h>
+#include <pqbdef.h>
+#include <prcdef.h>
+#include <pridef.h>
+#include <rdedef.h>
+#include <secdef.h>
+#include <ssdef.h>
+#include <starlet.h>
 #include <queue.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
@@ -31,7 +31,7 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
 
-#include<asm/uaccess.h>
+#include <asm/uaccess.h>
 
 struct _generic_64
 {

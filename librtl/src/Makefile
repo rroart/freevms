@@ -75,12 +75,12 @@ CVTOBJ_PIC = $(addprefix pic/,$(STROBJ))
 QUELIB_PIC = $(addprefix pic/,$(QUELIB))
 OTSOBJ_PIC = $(addprefix pic/,$(OTSOBJ))
 
-STRLIB = librtl.a
-STRLIB_PIC = librtl_pic.a
+RTLLIB = librtl.a
+RTLLIB_PIC = librtl_pic.a
 #ELFLIB = i386/librtl$(EXE_ELF)
 EXELIB = i386/librtl$(EXE)
 
-all : $(STRLIB) $(STRLIB_PIC) tests
+all : $(RTLLIB) $(RTLLIB_PIC) tests
 #$(EXELIB) 
 #$(ELFLIB)
 
@@ -100,20 +100,20 @@ clean :
 tests: teststr test_str_element test_addx rtl_lib_test rtl_str_test test_ile test_libgetef
 # not: test_date
 
-teststr : teststr.c $(STRLIB)
-test_str_element : test_str_element.c $(STRLIB)
-test_addx : test_addx.c $(STRLIB)
-test_date : test_date.c $(STRLIB)
-rtl_str_test : rtl_str_test.c $(STRLIB) $(SYSLIB)
-rtl_lib_test : rtl_lib_test.c $(STRLIB) $(SYSLIB)
-test_ile : test_ile.c $(STRLIB) $(SYSLIB)
-test_libgetef : test_libgetef.c $(STRLIB) $(SYSLIB)
+teststr : teststr.c $(RTLLIB)
+test_str_element : test_str_element.c $(RTLLIB)
+test_addx : test_addx.c $(RTLLIB)
+test_date : test_date.c $(RTLLIB)
+rtl_str_test : rtl_str_test.c $(VMSLIBS)
+rtl_lib_test : rtl_lib_test.c $(VMSLIBS)
+test_ile : test_ile.c $(VMSLIBS)
+test_libgetef : test_libgetef.c $(VMSLIBS)
 
-$(STRLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB) $(OTSOBJ)
-	ar -rv $(STRLIB) $?
+$(RTLLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB) $(OTSOBJ)
+	ar -rv $(RTLLIB) $?
 
-$(STRLIB_PIC) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUELIB_PIC) $(OTSOBJ)
-	ar -rv $(STRLIB_PIC) $?
+$(RTLLIB_PIC) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUELIB_PIC) $(OTSOBJ)
+	ar -rv $(RTLLIB_PIC) $?
 
 $(EXELIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB) $(OTSOBJ)
 	install -d i386

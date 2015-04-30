@@ -34,8 +34,8 @@
 !--
 */
 
-#include<stdarg.h>
-#include<descrip.h>
+#include <stdarg.h>
+#include <descrip.h>
 
 #ifndef NOKERNEL
 #define sys$wake exe$wake

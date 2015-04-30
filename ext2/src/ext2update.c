@@ -2,12 +2,11 @@
 // $Locker$
 
 // Author. Paul Nankervis.
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/vmalloc.h>
-#include<linux/linkage.h>
+#include <linux/vmalloc.h>
+#include <linux/linkage.h>
 
-//#include <stdio.h>
 #include <linux/string.h>
 
 #include <mytypes.h>
@@ -38,26 +37,23 @@
 
 #include "x2p.h"
 
-//#include "ssdef.h"
 #include <exe_routines.h>
 #include <misc_routines.h>
 
 #include <linux/ext2_fs.h>
 
-unsigned deaccesshead(struct ext2_inode *head,unsigned idxblk);
-unsigned accesshead(struct _vcb *vcb,struct _fiddef *fid,unsigned seg_num,
-                    struct ext2_inode **headbuff,
-                    unsigned *retidxblk,unsigned wrtflg);
-unsigned getwindow(struct _fcb * fcb,unsigned vbn,struct _vcb **devptr,
-                   unsigned *phyblk,unsigned *phylen,struct _fiddef *hdrfid,
+unsigned deaccesshead(struct ext2_inode *head, unsigned idxblk);
+unsigned accesshead(struct _vcb *vcb, struct _fiddef *fid, unsigned seg_num,
+                    struct ext2_inode **headbuff, unsigned *retidxblk, unsigned wrtflg);
+unsigned getwindow(struct _fcb * fcb, unsigned vbn, struct _vcb **devptr,
+                   unsigned *phyblk, unsigned *phylen, struct _fiddef *hdrfid,
                    unsigned *hdrseq);
-struct _vcb *rvn_to_dev(struct _vcb *vcb,unsigned rvn);
+struct _vcb *rvn_to_dev(struct _vcb *vcb, unsigned rvn);
 
-unsigned exttwo_extend(struct _fcb *fcb,unsigned blocks,unsigned contig);
-
+unsigned exttwo_extend(struct _fcb *fcb, unsigned blocks, unsigned contig);
 
 /* Bitmaps get accesses in 'WORK_UNITs' which can be an integer
-   on a little endian machine but must be a byte on a big endian system */
+ on a little endian machine but must be a byte on a big endian system */
 
 #ifdef FREEVMS_BIG_ENDIAN
 #define WORK_UNIT unsigned char
@@ -70,7 +66,7 @@ unsigned exttwo_extend(struct _fcb *fcb,unsigned blocks,unsigned contig);
 
 #if 0
 /* update_freecount() to read the device cluster bitmap and compute
-   the number of un-used clusters */
+ the number of un-used clusters */
 
 unsigned update_freecount(struct _vcb *vcbdev,unsigned *retcount)
 {
@@ -116,7 +112,7 @@ unsigned update_freecount(struct _vcb *vcbdev,unsigned *retcount)
 }
 
 /* bitmap_modify() will either set or release a block of bits in the
-   device cluster bitmap */
+ device cluster bitmap */
 
 unsigned bitmap_modify(struct _vcb *vcbdev,unsigned cluster,unsigned count,
                        unsigned release_flag)
@@ -211,7 +207,7 @@ unsigned bitmap_modify(struct _vcb *vcbdev,unsigned cluster,unsigned count,
 }
 
 /* bitmap_search() is a routine to find a pool of free clusters in the
-   device cluster bitmap */
+ device cluster bitmap */
 
 unsigned bitmap_search(struct _vcb *vcbdev,unsigned *position,unsigned *count)
 {
@@ -334,7 +330,7 @@ out_of_here:
 }
 
 /* headmap_clear() will release a header from the indexf.sys file header
-   bitmap */
+ bitmap */
 
 unsigned headmap_clear(struct _vcb *vcbdev,unsigned head_no)
 {
@@ -445,7 +441,6 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
 #endif
                                     //sts=exttwo_extend(getidxfcb(vcbdev),vcbdev->vcb$l_cluster,1);
 
-
                                     sts = exttwo_accesschunk(getidxfcb(vcbdev),idxblk,(char **) headbuff,NULL,1,0);
                                 }
                                 return SS$_NORMAL;
@@ -538,14 +533,14 @@ unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
 
 /* update_create() will create a new file... */
 
-unsigned exttwo_create(struct _vcb *vcb,struct _irp * i)
+unsigned exttwo_create(struct _vcb *vcb, struct _irp * i)
 {
-    struct dsc$descriptor * fibdsc=i->irp$l_qio_p1;
-    struct dsc$descriptor * filedsc=i->irp$l_qio_p2;
-    struct _fibdef * fib=fibdsc->dsc$a_pointer;
-    struct _fiddef * fid=&fib->fib$w_fid_num;
-    struct _fiddef * did=&fib->fib$w_did_num;
-    char *filename=filedsc->dsc$a_pointer;
+    struct dsc$descriptor * fibdsc = i->irp$l_qio_p1;
+    struct dsc$descriptor * filedsc = i->irp$l_qio_p2;
+    struct _fibdef * fib = fibdsc->dsc$a_pointer;
+    struct _fiddef * fid = &fib->fib$w_fid_num;
+    struct _fiddef * did = &fib->fib$w_did_num;
+    char *filename = filedsc->dsc$a_pointer;
     struct ext2_inode *head;
     unsigned idxblk;
     unsigned sts;
@@ -555,9 +550,10 @@ unsigned exttwo_create(struct _vcb *vcb,struct _irp * i)
     sts = update_addhead(vcb,filename,did,0,fid,&head,&idxblk);
 #else
     sts = 1;
-    head = ext2_new_inode(vcb, x2p->primary_fcb,0);
+    head = ext2_new_inode(vcb, x2p->primary_fcb, 0);
 #endif
-    if (!(sts & 1)) return sts;
+    if (!(sts & 1))
+        return sts;
     //sts = deaccesshead(head,idxblk);
     //    sts = writehead(getidxfcb(vcb),head);
 
@@ -566,16 +562,16 @@ unsigned exttwo_create(struct _vcb *vcb,struct _irp * i)
         unsigned short reslen;
         char retbuf[256];
         struct dsc$descriptor resdsc;
-        resdsc.dsc$w_length=255;
-        resdsc.dsc$a_pointer=&retbuf;
+        resdsc.dsc$w_length = 255;
+        resdsc.dsc$a_pointer = &retbuf;
         //fib->fib$w_did_num = 0;
         //fib->fib$w_did_seq = 0;
         //fib->fib$b_did_rvn = 0;
         //fib->fib$b_did_nmx = 0;
-        sts = exttwo_access(vcb,i); // should not be, but can not implement otherwise for a while
-        if ( (sts & 1) == 0)
+        sts = exttwo_access(vcb, i); // should not be, but can not implement otherwise for a while
+        if ((sts & 1) == 0)
         {
-            iosbret(i,sts);
+            iosbret(i, sts);
             return sts;
         }
 #if 0
@@ -609,29 +605,31 @@ unsigned exttwo_create(struct _vcb *vcb,struct _irp * i)
 
     }
 
-    x2p->primary_fcb=f11b_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
+    x2p->primary_fcb = f11b_search_fcb(x2p->current_vcb, &fib->fib$w_fid_num);
 
-    if ((fib->fib$w_exctl&FIB$M_EXTEND) && (sts & 1))
+    if ((fib->fib$w_exctl & FIB$M_EXTEND) && (sts & 1))
     {
         struct _fcb * newfcb;
-        newfcb=f11b_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
-        sts = exttwo_extend(newfcb,fib->fib$l_exsz,0);
+        newfcb = f11b_search_fcb(x2p->current_vcb, &fib->fib$w_fid_num);
+        sts = exttwo_extend(newfcb, fib->fib$l_exsz, 0);
     }
 
-    struct _fatdef * fat = ((long *)i->irp$l_qio_p5)[1];
+    struct _fatdef * fat = ((long *) i->irp$l_qio_p5)[1];
     fat->fat$l_efblk = VMSSWAP(1); // so this won't be changed to 0
 
-    struct _fcb * newfcb=f11b_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
+    struct _fcb * newfcb = f11b_search_fcb(x2p->current_vcb,
+                                           &fib->fib$w_fid_num);
     exttwo_write_attrib(newfcb, i->irp$l_qio_p5);
 
-    printk("(%d,%d,%d) %d\n",fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn,sts);
+    printk("(%d,%d,%d) %d\n", fid->fid$w_num, fid->fid$w_seq, fid->fid$b_rvn,
+           sts);
     return sts;
 }
 
-unsigned exttwo_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
+unsigned exttwo_extend(struct _fcb *fcb, unsigned blocks, unsigned contig)
 {
     struct _iosb iosb;
-    unsigned sts=1;
+    unsigned sts = 1;
     struct _vcb *vcbdev;
     struct _fh2 *head;
     unsigned headvbn;
@@ -639,12 +637,13 @@ unsigned exttwo_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
     unsigned hdrseq;
     unsigned start_pos = 0;
     unsigned block_count = blocks;
-    if (block_count < 1) return 0;
+    if (block_count < 1)
+        return 0;
     int dummy;
 
-    for (; block_count; block_count--,fcb->fcb$l_efblk++)
+    for (; block_count; block_count--, fcb->fcb$l_efblk++)
     {
-        ext2_get_block(x2p->current_vcb, fcb,fcb->fcb$l_efblk,&dummy,1,fcb);
+        ext2_get_block(x2p->current_vcb, fcb, fcb->fcb$l_efblk, &dummy, 1, fcb);
         short map[4];
         map[0] = (3 << 14) | 0;
         map[1] = 1;
@@ -657,8 +656,8 @@ unsigned exttwo_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
 }
 
 /* This routine has bugs and does NOT work properly yet!!!!
-It may be something simple but I haven't had time to look...
-So DON'T use mount/write!!!  */
+ It may be something simple but I haven't had time to look...
+ So DON'T use mount/write!!!  */
 
 #if 0
 unsigned deallocfile(struct _fcb *fcb)
@@ -666,8 +665,8 @@ unsigned deallocfile(struct _fcb *fcb)
     struct _iosb iosb;
     unsigned sts = 1;
     /*
-    First mark all file clusters as free in BITMAP.SYS
-    */
+     First mark all file clusters as free in BITMAP.SYS
+     */
     struct ext2_inode * head;
     unsigned vbn = 1;
     while (vbn <= fcb->fcb$l_efblk)
@@ -682,9 +681,9 @@ unsigned deallocfile(struct _fcb *fcb)
         if ((sts & 1) == 0) break;
     }
     /*
-    Now reset file header bit map in INDEXF.SYS and
-    update each of the file headers...
-    */
+     Now reset file header bit map in INDEXF.SYS and
+     update each of the file headers...
+     */
     {
         unsigned rvn = fcb->fcb$b_fid_rvn;
         unsigned headvbn = 0;
@@ -753,39 +752,41 @@ unsigned deallocfile(struct _fcb *fcb)
 #endif
 /* accesserase: delete a file... */
 
-unsigned exttwo_delete(struct _vcb * vcb,struct _irp * irp)
+unsigned exttwo_delete(struct _vcb * vcb, struct _irp * irp)
 {
     struct _iosb iosb;
     struct _fcb *fcb;
-    struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
-    struct dsc$descriptor * filedsc=irp->irp$l_qio_p2;
-    unsigned short *reslen=irp->irp$l_qio_p3;
-    struct dsc$descriptor * resdsc=irp->irp$l_qio_p4;
-    struct _fibdef * fib=fibdsc->dsc$a_pointer;
-    struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
-    int sts=0;
-    struct ext2_inode *  head;
-    unsigned action=1;
+    struct dsc$descriptor * fibdsc = irp->irp$l_qio_p1;
+    struct dsc$descriptor * filedsc = irp->irp$l_qio_p2;
+    unsigned short *reslen = irp->irp$l_qio_p3;
+    struct dsc$descriptor * resdsc = irp->irp$l_qio_p4;
+    struct _fibdef * fib = fibdsc->dsc$a_pointer;
+    struct _fiddef * fid =
+        &((struct _fibdef *) fibdsc->dsc$a_pointer)->fib$w_fid_num;
+    int sts = 0;
+    struct ext2_inode * head;
+    unsigned action = 1;
 
     if (x2p->primary_fcb)
     {
         struct _fcb * fcb = x2p->primary_fcb;
-        if (fid->fid$w_num!=fcb->fcb$w_fid_num)
-            x2p->primary_fcb=0; //f11b_search_fcb(vcb,fid);
+        if (fid->fid$w_num != fcb->fcb$w_fid_num)
+            x2p->primary_fcb = 0; //f11b_search_fcb(vcb,fid);
     }
 
     if (fib->fib$w_did_num)
     {
         struct ext2_inode * head;
-        struct _fcb * fcb=x2p->primary_fcb;
-        if (fcb==0)
-            fcb=f11b_search_fcb(vcb,&fib->fib$w_did_num);
-        head = exttwo_read_header (vcb, 0, fcb, &iosb);
-        sts=iosb.iosb$w_status;
+        struct _fcb * fcb = x2p->primary_fcb;
+        if (fcb == 0)
+            fcb = f11b_search_fcb(vcb, &fib->fib$w_did_num);
+        head = exttwo_read_header(vcb, 0, fcb, &iosb);
+        sts = iosb.iosb$w_status;
         if (S_ISDIR(head->i_mode))
         {
             unsigned eofblk = head->i_blocks;
-            sts = exttwo_search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
+            sts = exttwo_search_ent(fcb, fibdsc, filedsc, reslen, resdsc,
+                                    eofblk, action);
         }
         else
         {
@@ -793,13 +794,13 @@ unsigned exttwo_delete(struct _vcb * vcb,struct _irp * irp)
         }
     }
 
-    if ( (sts & 1) == 0)
+    if ((sts & 1) == 0)
     {
-        iosbret(irp,sts);
+        iosbret(irp, sts);
         return sts;
     }
 
-    fcb=exttwo_search_fcb(vcb,fid);
+    fcb = exttwo_search_fcb(vcb, fid);
 
     if (sts & 1)
     {

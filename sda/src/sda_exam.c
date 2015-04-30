@@ -1,15 +1,15 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <stdio.h>
 #include <ssdef.h>
 #include <descrip.h>
 #include <starlet.h>
 #include <misc.h>
-#include<cli$routines.h>
-#include<starlet.h>
+#include <cli$routines.h>
+#include <starlet.h>
 
 #include <stdlib.h>
 #include <string.h>

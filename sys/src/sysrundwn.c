@@ -1,12 +1,12 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <linux/config.h>
-#include<linux/linkage.h>
+#include <linux/linkage.h>
 
-#include<ssdef.h>
+#include <ssdef.h>
 #include <asm/atomic.h>
 #include <linux/tqueue.h>
 #include <mmg_routines.h>

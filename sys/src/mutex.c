@@ -1,20 +1,20 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file mutex.c
    \brief mutexes
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<system_data_cells.h>
-#include<ipl.h>
-#include<internals.h>
-#include<pridef.h>
-#include<wqhdef.h>
-#include<linux/sched.h>
-#include<ipldef.h>
+#include <system_data_cells.h>
+#include <ipl.h>
+#include <internals.h>
+#include <pridef.h>
+#include <wqhdef.h>
+#include <linux/sched.h>
+#include <ipldef.h>
 #include <sch_routines.h>
 #include <linux/spinlock.h>
 #include <mtxdef.h>

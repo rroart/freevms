@@ -1,12 +1,12 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004
 /**
    \file sched.c
    \brief Scheduling - TODO still more doc
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
 /*
@@ -23,7 +23,7 @@
  *  1998-12-28  Implemented better SMP scheduling by Ingo Molnar
  */
 
-/* sch$resched, sch$sched and more by Roar Thronæs */
+/* sch$resched, sch$sched and more by Roar Thronï¿½s */
 
 /*
  * 'sched.c' is the main kernel file. It contains scheduling primitives
@@ -53,7 +53,7 @@
 #include <ipl.h>
 #include <statedef.h>
 #include <queue.h>
-#include<system_service_setup.h>
+#include <system_service_setup.h>
 #include <internals.h>
 #include <exe_routines.h>
 #include <sch_routines.h>

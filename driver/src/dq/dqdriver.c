@@ -573,7 +573,6 @@
 /*                                  */
 /************************************************************************/
 
-
 
 /* Miscellaneous tidbits (from Ben, 'way back when)
  *
@@ -656,7 +655,6 @@
  *
  *
  */
-
 
 
 /* Basic Build instructions:
@@ -748,7 +746,6 @@
  *
  */
 
-
 
 /* Usage Instructions:
  * ===================
@@ -803,7 +800,6 @@
  *
  *
  */
-
 
 
 /* Supported and/or tested devices
@@ -906,7 +902,6 @@
  *
  */
 
-
 
 /* Caveats:
  *
@@ -939,7 +934,6 @@
  *
  *
  */
-
 
 
 /* Registers - Here's my register cheat sheet.
@@ -1006,7 +1000,6 @@
  *
  */
 
-
 
 /* DMA Registers
  *
@@ -1056,7 +1049,6 @@
  *
  *
  */
-
 
 
 /* IDE/ATA Basics
@@ -1108,7 +1100,6 @@
  *   Not all implementations "pin-out" the Secondary IDE bus.
  *
  */
-
 
 
 /* IDE/ATA Basics (Cont'd)
@@ -1165,8 +1156,6 @@
  *
  */
 
-
-
 
 /* ATAPI Basics
  *
@@ -1181,7 +1170,6 @@
  * disconnect/reconnect, much-simplified phases, and so on.
  *
  */
-
 
 
 /* DISK ADDRESSING
@@ -1250,7 +1238,6 @@
  *
  */
 
-
 
 /* CD-DA BASICS
  *
@@ -1304,7 +1291,6 @@
  *     Record Code (ISRC).
  *
  */
-
 
 
 /* CD-ROM STANDARDS
@@ -1360,7 +1346,6 @@
  *
  */
 
-
 
 /* CD TRACKS, TOCs, AND SESSIONS
  *
@@ -1402,7 +1387,6 @@
  * each session could be separately mounted.
  *
  */
-
 
 
 /* Mapping 512-byte VMS blocks to 2K-byte sectors
@@ -1594,7 +1578,6 @@
  *
  */
 
-
 
 /* BLOCKS and SECTORS
  *
@@ -1611,7 +1594,6 @@
  * "blocks" to refer to the standard VMS-sized 512-byte data blocks.
  *
  */
-
 
 
 /* REQUEST SEGMENTATION
@@ -1667,7 +1649,6 @@
  *     to disable some or all of VMS's segmentation.
  *
  */
-
 
 
 /* IDE/ATAPI Bus Mastering DMA
@@ -1728,7 +1709,6 @@
  *
  */
 
-
 
 /* IDE/ATAPI Bus Mastering DMA (Continued)
  *
@@ -1767,7 +1747,6 @@
  *   direct-mapping window rather than the scatter/gather window.
  *
  */
-
 
 
 /* More PRDT Fun
@@ -1819,7 +1798,6 @@
  *    that is, transfers that are not even word-aligned.)
  *
  */
-
 
 
 /* Define system data structure types and constants */
@@ -1874,19 +1852,12 @@
 #include   <vms_drivers.h>              /* Device driver support macros */
 #include   <vms_macros.h>               /* Define bug_check and such */
 
-/* Define the DEC C functions used by this driver */
-
-//#include   <builtins.h>               /* C builtin functions -- unused, but... */
-//#include   <string.h>             /* String rtns from "kernel CRTL" */
-
 /* Define some useful types */
 
-typedef unsigned short int WORD;        /* Define a WORD (16 bits) */
-typedef unsigned char      BYTE;        /* Define a BYTE (8 bits) */
-typedef unsigned int       UINT;        /* Usigned int (32 bits) */
+typedef unsigned short int WORD; /* Define a WORD (16 bits) */
+typedef unsigned char BYTE; /* Define a BYTE (8 bits) */
+typedef unsigned int UINT; /* Usigned int (32 bits) */
 
-
-
 /* Define constants specific to this driver */
 
 /* Miscellaneous controller-related constants: */
@@ -1901,14 +1872,12 @@ typedef unsigned int       UINT;        /* Usigned int (32 bits) */
 #define RDSTATS_LEN     ((TIMEOUT_TIME + 9) * 4)/* Size of RDSTATS_LEN buffer */
 #define DEVICE_IPL          21          /* IPL of device */
 
-
 /* Timeout times */
 #define DRQ_TIME     (1000 * 1000)      /* DRQ wait time (i.e, 1 millisecond) */
 #define RESET_TIME           4          /* Reset time (seconds) (Ensure two passes) */
 #define READY_TIME    (100 * 1000)      /* Ready time (i.e., 100 microseconds) */
 
 #define TIMEOUT_TIME        15          /* I/O Timeout time (seconds) */
-
 
 /* Geometry and transfer constants                                */
 #define MAX_UCB_CYL       4095          /* UCB max values based on max ata lba of 0x0fffffff              */
@@ -1949,7 +1918,6 @@ typedef unsigned int       UINT;        /* Usigned int (32 bits) */
 /*   blocks. And keeping this "by 4" will keep an aligned         */
 /*   transfer aligned through all segments.                       */
 
-
 #define BLK_SIZE_CAPACITY    8          /* Size of returned capacity data block in bytes           */
 #define BLK_SIZE_SENSE      18          /* Size of returned sense data block in bytes              */
 #define BLK_SIZE_512       512          /* Size of a VMS (and typical IDE/ATA) disk block in bytes */
@@ -1974,7 +1942,6 @@ typedef unsigned int       UINT;        /* Usigned int (32 bits) */
 /*   At least some of them (like the Zip) take    */
 /*   that as 0, not 64K.                          */
 
-
 //#saythis "XFER_BUFFER_MAP_PAGES ought to be calculated, not forced!"
 #define XFER_BUFFER_MAP_PAGES  8        /* Number of map pages to cover the xfer buffer   */
 
@@ -1988,32 +1955,29 @@ typedef unsigned int       UINT;        /* Usigned int (32 bits) */
 /*    re-use the end of this buffer for the       */
 /*    for the DMA PRDT table.                     */
 
-
 #define PRDT_ENTRIES 8              /* Number of PRDT (Scatter/Gather Table) entries  */
 #define PRDT_TABLE_SIZE (PRDT_ENTRIES*sizeof(PRDT))
 /* Total size of the PRDT table                   */
 #define PRDT_ADX_MASK ~(PRDT_TABLE_SIZE-1)  /* Mask to force natural alignment of the PRDT    */
-
 
 
 /* External references */
 
 #include "mytypedefs.h"
 extern unsigned long mmg$gl_bwp_mask;
-static DDT   _ddt;          /* Prototype DDT */
-static DPT   _dpt;          /* Prototype DPT */
-static FDT   _fdt;          /* Prototype FDT */
+static DDT _ddt; /* Prototype DDT */
+static DPT _dpt; /* Prototype DPT */
+static FDT _fdt; /* Prototype FDT */
 
+extern int MMG$GL_PAGE_SIZE; /* Page size in bytes */
+extern int MMG$GL_VPN_TO_VA; /* Page to byte shift count */
 
-extern int   MMG$GL_PAGE_SIZE;          /* Page size in bytes */
-extern int   MMG$GL_VPN_TO_VA;          /* Page to byte shift count */
+extern PTE * const mmg$gl_sptbase; /* Base of system page table */
 
-extern PTE   * const mmg$gl_sptbase;        /* Base of system page table */
-
-extern DDT   driver$ddt;            /* Prototype DDT */
-extern DPT   driver$dpt;            /* Prototype DPT */
-extern FDT   driver$fdt;            /* Prototype FDT */
-extern UCB   *sys$ar_bootucb;           /* Boot UCB */
+extern DDT driver$ddt; /* Prototype DDT */
+extern DPT driver$dpt; /* Prototype DPT */
+extern FDT driver$fdt; /* Prototype FDT */
+extern UCB *sys$ar_bootucb; /* Boot UCB */
 
 /* Shortcuts for some of the external references */
 
@@ -2021,25 +1985,23 @@ extern UCB   *sys$ar_bootucb;           /* Boot UCB */
 //#define _dpt  driver$dpt          /* Abbreviation for DPT */
 //#define _fdt  driver$fdt          /* Abbreviation for FDT */
 
-
 
 /* OWN values used for debugging only */
 
 #ifdef TRACE_COMMON
 
-int  trc_dummy;                 /* An ASCII tag to help you find this               */
-int *trc_buf;                   /* Pointer to the base of the common tracing buffer */
-int  trc_index;                 /* Current index into the common tracing buffer     */
-int  trc_buf_alloc=0;               /* Have we already allocated this?                  */
+int trc_dummy; /* An ASCII tag to help you find this               */
+int *trc_buf; /* Pointer to the base of the common tracing buffer */
+int trc_index; /* Current index into the common tracing buffer     */
+int trc_buf_alloc=0; /* Have we already allocated this?                  */
 
 //#saythis "Remove these fixup counters after the root cause of the UCB corruption problem is found */
-int  fixup_dummy;               /* An ASCII tag to help you find this           */
-int  fixup_bcnt;                /* The number of times we've fixed UCB$L_BCNT   */
-int  fixup_boff;                /* The number of times we've fixed UCB$L_BOFF   */
-int  fixup_svapte;              /* The number of times we've fixed UCB$L_SVAPTE */
+int fixup_dummy; /* An ASCII tag to help you find this           */
+int fixup_bcnt; /* The number of times we've fixed UCB$L_BCNT   */
+int fixup_boff; /* The number of times we've fixed UCB$L_BOFF   */
+int fixup_svapte; /* The number of times we've fixed UCB$L_SVAPTE */
 
 #endif
-
 
 
 /* Define the IDE disk controller CSRs.
@@ -2054,7 +2016,6 @@ int  fixup_svapte;              /* The number of times we've fixed UCB$L_SVAPTE 
  * DMA Registers               90A0-90A7h      90A8-90AFh
  *
  */
-
 
 /* Offsets for control block registers */
 
@@ -2085,24 +2046,20 @@ int  fixup_svapte;              /* The number of times we've fixed UCB$L_SVAPTE 
 #define REG_LBA_16      5       /* LBA bits 16-23               0x1F5       0x175    */
 #define REG_LBA_24      6       /* LBA bits 24-27               0x1F6       0x176    */
 
-
 /* Device Control Register */
 
 #define CTL_M_nIEN     0x01     /* Interrupt enable bit for the host */
 #define CTL_M_SRST     0x02     /* Host software reset bit */
-
 
 /* Drive/Head Register */
 
 #define DRVHD_M_BASE  0xA0      /* Bits 7 and 5 must be 1 */
 #define DRVHD_M_LBA   0x40      /* LBA addressing bit */
 
-
 /* ATAPI Features Register */
 
 #define FEAT_M_DMA   0x01       /* Use DMA */
 #define FEAT_M_OVL   0x02       /* Overlap operations */
-
 
 /* Status (and Alternate Status) Register */
 
@@ -2126,7 +2083,6 @@ int  fixup_svapte;              /* The number of times we've fixed UCB$L_SVAPTE 
 #define STS_V_DRDY  7           /* Drive ready */
 #define STS_V_BSY   8           /* Busy */
 
-
 
 /* Offsets for DMA block (SFF-8038i) registers */
 
@@ -2142,7 +2098,6 @@ int  fixup_svapte;              /* The number of times we've fixed UCB$L_SVAPTE 
 #define DMA_AD2        6        /* R/W:  :                     0xnnnnn6    0xnnnnnE  */
 #define DMA_AD3        7        /* R/W: PRD Table Address MSB  0xnnnnn7    0xnnnnnF  */
 
-
 /* DMA (SFF-8038i) Command Register */
 
 #define DMA_CMD_M_INBOUND  0x08     /* The DMA direction will be "INBOUND"    */
@@ -2151,7 +2106,6 @@ int  fixup_svapte;              /* The number of times we've fixed UCB$L_SVAPTE 
 /*   (That is, a disk WRITE/memory READ!) */
 #define DMA_CMD_M_ACTIVE   0x01     /* Make the DMA controller active         */
 #define DMA_CMD_M_INACTIVE 0x00     /* Make the DMA controller inactive       */
-
 
 /* DMA (SFF-8038i) Status Register */
 
@@ -2165,19 +2119,17 @@ int  fixup_svapte;              /* The number of times we've fixed UCB$L_SVAPTE 
 #define DMA_STS_M_ERR     0x02      /* Error                                  */
 #define DMA_STS_M_ACTIVE  0x01      /* Active                                 */
 
-
 /* DMA (SFF-8038i) PRDT */
 
 typedef struct
 {
     /* The PRDT structure */
-    UINT phys_adx;          /* Physical address */
-    WORD count;             /* Byte count for this region */
-    WORD flags;             /* Flags: Only high bit is meaningful as EDT (end) flag */
+    UINT phys_adx; /* Physical address */
+    WORD count; /* Byte count for this region */
+    WORD flags; /* Flags: Only high bit is meaningful as EDT (end) flag */
 } PRDT;
 
 #define DMA_PRDT_M_EDT  0x8000      /* The EDT (End-Descriptor-Table) flag */
-
 
 
 /* ATAPI magic "Signature" values */
@@ -2188,7 +2140,6 @@ typedef struct
 #define ATAPI_SIG_CYL_HI 0xEB       /* In the Cylinder "Hi" Register */
 
 #define ATAPI_SIG_CYL_LO 0x14       /* In the Cylinder "Lo" Register */
-
 
 
 /* ATA Commands
@@ -2287,7 +2238,6 @@ typedef struct
 #define CMD_ATA_SECUR_FREEZE_LOCK        0xF5   /* Security Freeze Lock                               */
 #define CMD_ATA_SECUR_DSBL_PSWD          0xF6   /* Security Disable Password                          */
 
-
 
 /* ATAPI Commands
  *
@@ -2372,7 +2322,6 @@ typedef struct
 
 #define CMD_ATAPI_F0                     0xF0   /* Unused group 0xFn                                  */
 
-
 
 /* Set up the table for CRAM initialization.  This table contains the
  * CSR offset, the command used in this CRAM and the byte lane shift
@@ -2383,11 +2332,10 @@ typedef struct
 typedef struct
 {
     /* The CRAM initialization structure */
-    int cmd;                /* Command index */
-    int offset;             /* Register offset */
-    int shift;              /* Byte lane shift count */
+    int cmd; /* Command index */
+    int offset; /* Register offset */
+    int shift; /* Byte lane shift count */
 } cram_item;
-
 
 /* Define the indices in this (and the UCB) table */
 
@@ -2420,7 +2368,6 @@ typedef struct
 
 #define RD_STS         18
 #define WT_CMD         19
-
 
 /* DMA (SFF-8038i) CRAMs */
 
@@ -2457,68 +2404,48 @@ typedef struct
 cram_item cram_init[NUMBER_OF_CRAMS] =
 {
 
-    cram_def(RDBYTE,REG_ALT_STS),
-    cram_def(WTBYTE,REG_DEV_CTL),
+    cram_def(RDBYTE,REG_ALT_STS), cram_def(WTBYTE,REG_DEV_CTL),
 
-    cram_def(RDBYTE,REG_DRV_ADDR),      /* Belongs to FDC ------ Don't read!  */
-    cram_def(WTBYTE,REG_DRV_ADDR),      /* Read-only register -- Don't write! */
+    cram_def(RDBYTE,REG_DRV_ADDR), /* Belongs to FDC ------ Don't read!  */
+    cram_def(WTBYTE,REG_DRV_ADDR), /* Read-only register -- Don't write! */
 
-    cram_def(RDWORD,REG_DATA),
-    cram_def(WTWORD,REG_DATA),
+    cram_def(RDWORD,REG_DATA), cram_def(WTWORD,REG_DATA),
 
-    cram_def(RDBYTE,REG_ERROR),
-    cram_def(WTBYTE,REG_FEATURES),
+    cram_def(RDBYTE,REG_ERROR), cram_def(WTBYTE,REG_FEATURES),
 
-    cram_def(RDBYTE,REG_SEC_CNT),
-    cram_def(WTBYTE,REG_SEC_CNT),
+    cram_def(RDBYTE,REG_SEC_CNT), cram_def(WTBYTE,REG_SEC_CNT),
 
-    cram_def(RDBYTE,REG_SECTOR),
-    cram_def(WTBYTE,REG_SECTOR),
+    cram_def(RDBYTE,REG_SECTOR), cram_def(WTBYTE,REG_SECTOR),
 
-    cram_def(RDBYTE,REG_CYL_LO),
-    cram_def(WTBYTE,REG_CYL_LO),
+    cram_def(RDBYTE,REG_CYL_LO), cram_def(WTBYTE,REG_CYL_LO),
 
-    cram_def(RDBYTE,REG_CYL_HI),
-    cram_def(WTBYTE,REG_CYL_HI),
+    cram_def(RDBYTE,REG_CYL_HI), cram_def(WTBYTE,REG_CYL_HI),
 
-    cram_def(RDBYTE,REG_DRV_HD),
-    cram_def(WTBYTE,REG_DRV_HD),
+    cram_def(RDBYTE,REG_DRV_HD), cram_def(WTBYTE,REG_DRV_HD),
 
-    cram_def(RDBYTE,REG_STATUS),
-    cram_def(WTBYTE,REG_CMD),
-
+    cram_def(RDBYTE,REG_STATUS), cram_def(WTBYTE,REG_CMD),
 
     /* DMA (SFF-8038i) CRAMs */
 
-    cram_def(RDBYTE,DMA_CMD),
-    cram_def(WTBYTE,DMA_CMD),
+    cram_def(RDBYTE,DMA_CMD), cram_def(WTBYTE,DMA_CMD),
 
-    cram_def(RDBYTE,DMA_DS1),
-    cram_def(WTBYTE,DMA_DS1),
+    cram_def(RDBYTE,DMA_DS1), cram_def(WTBYTE,DMA_DS1),
 
-    cram_def(RDBYTE,DMA_STS),
-    cram_def(WTBYTE,DMA_STS),       /* Probably read-only register --  Don't write! */
+    cram_def(RDBYTE,DMA_STS), cram_def(WTBYTE,DMA_STS), /* Probably read-only register --  Don't write! */
 
-    cram_def(RDBYTE,DMA_DS2),
-    cram_def(WTBYTE,DMA_DS2),
+    cram_def(RDBYTE,DMA_DS2), cram_def(WTBYTE,DMA_DS2),
 
-    cram_def(RDBYTE,DMA_AD0),
-    cram_def(WTBYTE,DMA_AD0),
+    cram_def(RDBYTE,DMA_AD0), cram_def(WTBYTE,DMA_AD0),
 
-    cram_def(RDLONG,DMA_AD0),
-    cram_def(WTLONG,DMA_AD0),
+    cram_def(RDLONG,DMA_AD0), cram_def(WTLONG,DMA_AD0),
 
-    cram_def(RDBYTE,DMA_AD1),
-    cram_def(WTBYTE,DMA_AD1),
+    cram_def(RDBYTE,DMA_AD1), cram_def(WTBYTE,DMA_AD1),
 
-    cram_def(RDBYTE,DMA_AD2),
-    cram_def(WTBYTE,DMA_AD2),
+    cram_def(RDBYTE,DMA_AD2), cram_def(WTBYTE,DMA_AD2),
 
-    cram_def(RDBYTE,DMA_AD3),
-    cram_def(WTBYTE,DMA_AD3)
+    cram_def(RDBYTE,DMA_AD3), cram_def(WTBYTE,DMA_AD3)
 
 };
-
 
 
 /* Define Device-Dependent Unit Control Block with extensions for DQ device
@@ -2542,67 +2469,66 @@ typedef struct _diagnose_param
     UINT disconnect_timeout;
 } DIAGNOSE_PARAM;
 
-
 typedef struct
 {
-    DT_UCB ucb$r_dtucb;         /* Generic UCB                                    */
-    union               /* LBN as a longword (LBN) or CHS                 */
+    DT_UCB ucb$r_dtucb; /* Generic UCB                                    */
+    union /* LBN as a longword (LBN) or CHS                 */
     {
-        UINT lbn;           /* Block number                                   */
+        UINT lbn; /* Block number                                   */
         struct
         {
-            BYTE sec;           /* Sector number                                  */
-            BYTE trk;           /* Track number                                   */
-            WORD cyl;           /* Cylinder number                                */
+            BYTE sec; /* Sector number                                  */
+            BYTE trk; /* Track number                                   */
+            WORD cyl; /* Cylinder number                                */
         } pa;
     } ucb$l_media;
-    int    ucb$l_bcr;           /* Byte count remaining                           */
-    UINT   ucb$l_org_media;     /* Original LBN                                   */
-    void   *ucb$l_org_svapte;       /* Original SVAPTE address                        */
-    UINT   ucb$l_org_bcnt;      /* Original byte count                            */
-    UINT   ucb$l_org_boff;      /* Original byte offset                           */
-    UINT   ucb$l_drv_head;      /* Drive/head info                                */
-    KPB    *ucb$ps_kpb;         /* KPB pointer                                    */
-    CRAM   *ucb$ps_crams[NUMBER_OF_CRAMS];/* Table of CRAMs                               */
-    UINT   *ucb$ps_xfer_buffer;     /* Transfer buffer pointer                        */
-    UINT   *ucb$ps_sense_buffer;    /* Sense buffer pointer                           */
-    int    ucb$l_dummy_flgs;        /* ASCII-tag the beginning of flag words          */
-    UINT   ucb$l_drive_lba_capable; /* 0=CSH, 1=Drive is capable of LBA addressing    */
-    UINT   ucb$l_drive_dma_capable; /* 0=PIO, 1=Drive is capable of DMA               */
-    int    ucb$l_ctrl_id;       /* PCIbus ID of the controller                    */
-    UINT   ucb$l_ctrl_dma_capable;  /* 0=PIO, 1=Controller is capable of DMA          */
-    UINT   ucb$l_atapi_flag;        /* 0=ATA, 1=ATAPI                                 */
-    UINT   ucb$l_2K_flag;       /* 0=512 byte blocks, 1=CD-ROM-style 2KB blocks   */
-    int    ucb$l_dummy_sens;        /* ASCII-tag the beginning of saved sense keys    */
-    UINT   ucb$l_sense_key;     /* Latest sense key                               */
-    UINT   ucb$l_asc;           /* Latest additional sense code                   */
-    UINT   ucb$l_ascq;          /* Latest additional sense code qualifier         */
-    PTE    *ucb$ps_s0_svapte;       /* Pointer to base SPTE                           */
-    BYTE   *ucb$ps_s0_va;       /* Pointer to user buffer                         */
-    uint64 ucb$q_iohandle_1;        /* Handle for main I/O regs -- kept for debugging */
-    uint64 ucb$q_iohandle_2;        /* Handle for DMA I/O regs --- kept for debugging */
-    int    ucb$l_unsolicited_int;   /* An unsolicited interrupt is pending            */
-    int    ucb$l_dummy_pakt;        /* ASCII-tag the beginning of saved packet        */
-    BYTE   ucb$b_packet[12];        /* The most-recent ATAPI packet                   */
-    int    ucb$l_dummy_ints;        /* ASCII-tag the total interrupts                 */
-    int    ucb$l_total_ints;        /* Total interrupts count                         */
-    int    ucb$l_dummy_unso;        /* ASCII-tag the unsolicited interrupts           */
-    int    ucb$l_unsol_ints;        /* Count of unsolicited interrupts                */
-    int    ucb$l_dummy_hist;        /* ASCII-tag the beginning of interrupt histogram */
-    int    ucb$l_int_hist[TIMEOUT_TIME+1];/* Timeout histogram vector, allowing an entry for [0] as well */
-    int    ucb$l_dummy_tmo;     /* ASCII-tag the count of interrupt timeouts      */
-    int    ucb$l_int_tmo;       /* Count interrupt timeouts                       */
-    int    ucb$l_dummy_resets;      /* ASCII-tag the count of drive resets            */
-    int    ucb$l_resets;        /* Count of drive resets issued by us             */
-    int    ucb$l_dummy_trace;       /* ASCII-tag the trace-buffer pointer and index   */
-    int    *ucb$l_trc_buf;      /* Pointer to the tracing buffer                  */
-    int    ucb$l_trc_index;     /* Current index within the tracing buffer        */
-    int    ucb$l_trc_unit;      /* DQA0:=1, DQA1:=2, DQB0:=3, DQB1:=4             */
-    int    *ucb$l_prdt;         /* Pointer to the PRDT                            */
-    CRCTX  *ucb$ps_prdt_crctx;      /* Pointer to the PRDT map-register CRCTX         */
-    void   *ucb$l_prdt_phy;     /* Pointer to the PRDT PCIbus (DMA) address       */
-    CRCTX  *ucb$ps_xfer_crctx;      /* Pointer to the xfer buffer map-register CRCTX  */
-    void   *ucb$l_xfer_phy;     /* Pointer to the xfer buffer PCIbus (DMA) adx    */
+    int ucb$l_bcr; /* Byte count remaining                           */
+    UINT ucb$l_org_media; /* Original LBN                                   */
+    void *ucb$l_org_svapte; /* Original SVAPTE address                        */
+    UINT ucb$l_org_bcnt; /* Original byte count                            */
+    UINT ucb$l_org_boff; /* Original byte offset                           */
+    UINT ucb$l_drv_head; /* Drive/head info                                */
+    KPB *ucb$ps_kpb; /* KPB pointer                                    */
+    CRAM *ucb$ps_crams[NUMBER_OF_CRAMS];/* Table of CRAMs                               */
+    UINT *ucb$ps_xfer_buffer; /* Transfer buffer pointer                        */
+    UINT *ucb$ps_sense_buffer; /* Sense buffer pointer                           */
+    int ucb$l_dummy_flgs; /* ASCII-tag the beginning of flag words          */
+    UINT ucb$l_drive_lba_capable; /* 0=CSH, 1=Drive is capable of LBA addressing    */
+    UINT ucb$l_drive_dma_capable; /* 0=PIO, 1=Drive is capable of DMA               */
+    int ucb$l_ctrl_id; /* PCIbus ID of the controller                    */
+    UINT ucb$l_ctrl_dma_capable; /* 0=PIO, 1=Controller is capable of DMA          */
+    UINT ucb$l_atapi_flag; /* 0=ATA, 1=ATAPI                                 */
+    UINT ucb$l_2K_flag; /* 0=512 byte blocks, 1=CD-ROM-style 2KB blocks   */
+    int ucb$l_dummy_sens; /* ASCII-tag the beginning of saved sense keys    */
+    UINT ucb$l_sense_key; /* Latest sense key                               */
+    UINT ucb$l_asc; /* Latest additional sense code                   */
+    UINT ucb$l_ascq; /* Latest additional sense code qualifier         */
+    PTE *ucb$ps_s0_svapte; /* Pointer to base SPTE                           */
+    BYTE *ucb$ps_s0_va; /* Pointer to user buffer                         */
+    uint64 ucb$q_iohandle_1; /* Handle for main I/O regs -- kept for debugging */
+    uint64 ucb$q_iohandle_2; /* Handle for DMA I/O regs --- kept for debugging */
+    int ucb$l_unsolicited_int; /* An unsolicited interrupt is pending            */
+    int ucb$l_dummy_pakt; /* ASCII-tag the beginning of saved packet        */
+    BYTE ucb$b_packet[12]; /* The most-recent ATAPI packet                   */
+    int ucb$l_dummy_ints; /* ASCII-tag the total interrupts                 */
+    int ucb$l_total_ints; /* Total interrupts count                         */
+    int ucb$l_dummy_unso; /* ASCII-tag the unsolicited interrupts           */
+    int ucb$l_unsol_ints; /* Count of unsolicited interrupts                */
+    int ucb$l_dummy_hist; /* ASCII-tag the beginning of interrupt histogram */
+    int ucb$l_int_hist[TIMEOUT_TIME + 1];/* Timeout histogram vector, allowing an entry for [0] as well */
+    int ucb$l_dummy_tmo; /* ASCII-tag the count of interrupt timeouts      */
+    int ucb$l_int_tmo; /* Count interrupt timeouts                       */
+    int ucb$l_dummy_resets; /* ASCII-tag the count of drive resets            */
+    int ucb$l_resets; /* Count of drive resets issued by us             */
+    int ucb$l_dummy_trace; /* ASCII-tag the trace-buffer pointer and index   */
+    int *ucb$l_trc_buf; /* Pointer to the tracing buffer                  */
+    int ucb$l_trc_index; /* Current index within the tracing buffer        */
+    int ucb$l_trc_unit; /* DQA0:=1, DQA1:=2, DQB0:=3, DQB1:=4             */
+    int *ucb$l_prdt; /* Pointer to the PRDT                            */
+    CRCTX *ucb$ps_prdt_crctx; /* Pointer to the PRDT map-register CRCTX         */
+    void *ucb$l_prdt_phy; /* Pointer to the PRDT PCIbus (DMA) address       */
+    CRCTX *ucb$ps_xfer_crctx; /* Pointer to the xfer buffer map-register CRCTX  */
+    void *ucb$l_xfer_phy; /* Pointer to the xfer buffer PCIbus (DMA) adx    */
 
     /* Diagnose command information */
     UINT diagnose_opcode;
@@ -2614,9 +2540,8 @@ typedef struct
     UINT diagnose_phase_timeout;
     UINT diagnose_disconnect_timeout;
 
-    int    ucb$l_dummy_end;     /* ASCII-tag the end of the UCB                   */
+    int ucb$l_dummy_end; /* ASCII-tag the end of the UCB                   */
 } DQ_UCB;
-
 
 #define ucb$r_dq_ucb ucb$r_dtucb.ucb$r_dpucb.ucb$r_erlucb.ucb$r_ucb
 #define ucb$r_dq_erl ucb$r_dtucb.ucb$r_dpucb.ucb$r_erlucb
@@ -2624,7 +2549,6 @@ typedef struct
 #define ucb$r_dq_dt  ucb$r_dtucb
 
 #define baseucb ucb->ucb$r_dq_ucb
-
 
 
 /* Define the Identify Drive information buffer
@@ -2640,70 +2564,70 @@ typedef struct
 {
     /* Word(s):  ATA-5 description                            */
     /*--------------------------------------------------------*/
-    WORD  config;           /*  0:       Configuration information                    */
-    WORD  cyls;             /*  1:       Number of cylinders                          */
-    WORD  rsvd2;            /*  2:       Reserved word                                */
-    WORD  heads;            /*  3:       Number of heads                              */
-    WORD  ubytes_track;         /*  4:       Unformatted bytes/track           (retired)  */
-    WORD  ubytes_sector;        /*  5:       Unformatted bytes/sector          (retired)  */
-    WORD  sectors;          /*  6:       Number of sectors                            */
-    WORD  unique7[3];           /*  7-9:     Vendor unique                     (retired)  */
-    char  serial_number[20];        /*  10-19:   ASCII serial number                          */
-    WORD  buffer_type;          /*  20:      Buffer type (retired)                        */
-    WORD  buffer_size_blocks;       /*  21:      Buffer size (in blocks)           (retired)  */
-    WORD  ecc_bytes;            /*  22:      Number of ECC bytes/sector        (obsolete) */
-    char  firmware_revision[8];     /*  23-26:   ASCII firmware revision                      */
-    char  model_number[MODEL_LENGTH];   /*  27-46:   ASCII drive model                            */
-    BYTE  rw_multiple;          /*  47:      Max number of sectors/interrupt              */
-    BYTE  unique47;         /*  47.5:    0x80                                         */
-    WORD  rsvd48;           /*  48:      Reserved                                     */
-    WORD  capabilities_49;      /*  49:      Capabilities                                 */
-    WORD  capabilities_50;      /*  50:      More Capabilities                            */
-    WORD  pio_cycle;            /*  51:      PIO data transfer mode                       */
-    WORD  dma_cycle;            /*  52:      DMA I/O cycle times               (retired)  */
-    WORD  valid_bits;           /*  53:      Valid bits for several fields                */
-    WORD  curr_cyls;            /*  54:      Current logical cylinder count               */
-    WORD  curr_heads;           /*  55:      Current logical head count                   */
-    WORD  curr_sectors;         /*  56:      Current logical sector count                 */
-    int   curr_capacity;        /*  57-58:   Current capacity in sectors                  */
-    WORD  multiple_sectors;     /*  59:      Current sectors/interrupt setting            */
-    UINT  lba_total_blocks;     /*  60-61:   Total number of user-adx'ible sectors        */
-    WORD  single_word_dma;      /*  62:      Single word DMA info              (retired)  */
-    WORD  multi_word_dma;       /*  63:      Multi word DMA info                          */
-    WORD  pio_modes_supported;      /*  64:      Advanced PIO modes supported                 */
-    WORD  min_dma_cycle_time;       /*  65:      Min multiword DMA transfer cycle time        */
-    WORD  rec_dma_cycle_time;       /*  66:      Rec multiword DMA transfer cycle time        */
-    WORD  min_pio_cycle_time;       /*  67:      Min non-IORDY PIO transfer cycle time        */
-    WORD  min_iordy_pio_cycle_time; /*  68:      Min IORDY PIO transfer cycle time            */
-    WORD  rsvd69;           /*  69:      Reserved (for command queuing)               */
-    WORD  rsvd70;           /*  70:      Reserved (for command queuing)               */
-    WORD  atapi_pkt_time;       /*  71:      ns from PACKET cmd to bus release (ATAPI)    */
-    WORD  atapi_svc_time;       /*  72:      ns from SERVICE to clearing BSY   (ATAPI)    */
-    WORD  rsvd73;           /*  73:      Reserved                          (ATAPI)    */
-    WORD  rsvd74;           /*  74:      Reserved                          (ATAPI)    */
-    WORD  queue_depth;          /*  75:      Maximum queue depth                          */
-    WORD  rsvd76;           /*  76:      Reserved                                     */
-    WORD  rsvd77;           /*  77:      Reserved                                     */
-    WORD  rsvd78;           /*  78:      Reserved                                     */
-    WORD  rsvd79;           /*  79:      Reserved                                     */
-    WORD  major_version_number;     /*  80:      Major version number (e.g, 4=ATA/ATAPI-4)    */
-    WORD  minor_version_number;     /*  81:      Minor version number                         */
-    WORD  cmd_set_supported_1;      /*  82:      Command set supported, word 1                */
-    WORD  cmd_set_supported_2;      /*  83:      Command set supported, word 2                */
-    WORD  cmd_set_supported_x;      /*  84:      Command set supported, extension             */
-    WORD  cmd_set_enabled_1;        /*  85:      Command set enabled, word 1                  */
-    WORD  cmd_set_enabled_2;        /*  86:      Command set enabled, word 2                  */
-    WORD  cmd_set_default;      /*  87:      Command set default                          */
-    WORD  ultra_dma;            /*  88:      Ultra DMA control                            */
-    WORD  dse_time;         /*  89:      Data Security Erase time (~secs/2)           */
-    WORD  enhanced_dse_time;        /*  90:      Enhanced Data Security Erase time (~secs/2)  */
-    WORD  cur_apm_value;        /*  91:      Current Advanced Power Management value      */
-    WORD  master_passwd_rev;        /*  92:      Master Password Revision Code                */
-    WORD  rsvd94[33];           /*  94-126:  Reserved                                     */
-    WORD  media_status_notification;    /*  127:     Removable Media Status Notification          */
-    WORD  security_status;      /*  128:     Security Status                              */
-    WORD  vendor_specific[31];      /*  129-159: Vendor specific                              */
-    WORD  rsvd160[96];          /*  160-255: Reserved                                     */
+    WORD config; /*  0:       Configuration information                    */
+    WORD cyls; /*  1:       Number of cylinders                          */
+    WORD rsvd2; /*  2:       Reserved word                                */
+    WORD heads; /*  3:       Number of heads                              */
+    WORD ubytes_track; /*  4:       Unformatted bytes/track           (retired)  */
+    WORD ubytes_sector; /*  5:       Unformatted bytes/sector          (retired)  */
+    WORD sectors; /*  6:       Number of sectors                            */
+    WORD unique7[3]; /*  7-9:     Vendor unique                     (retired)  */
+    char serial_number[20]; /*  10-19:   ASCII serial number                          */
+    WORD buffer_type; /*  20:      Buffer type (retired)                        */
+    WORD buffer_size_blocks; /*  21:      Buffer size (in blocks)           (retired)  */
+    WORD ecc_bytes; /*  22:      Number of ECC bytes/sector        (obsolete) */
+    char firmware_revision[8]; /*  23-26:   ASCII firmware revision                      */
+    char model_number[MODEL_LENGTH]; /*  27-46:   ASCII drive model                            */
+    BYTE rw_multiple; /*  47:      Max number of sectors/interrupt              */
+    BYTE unique47; /*  47.5:    0x80                                         */
+    WORD rsvd48; /*  48:      Reserved                                     */
+    WORD capabilities_49; /*  49:      Capabilities                                 */
+    WORD capabilities_50; /*  50:      More Capabilities                            */
+    WORD pio_cycle; /*  51:      PIO data transfer mode                       */
+    WORD dma_cycle; /*  52:      DMA I/O cycle times               (retired)  */
+    WORD valid_bits; /*  53:      Valid bits for several fields                */
+    WORD curr_cyls; /*  54:      Current logical cylinder count               */
+    WORD curr_heads; /*  55:      Current logical head count                   */
+    WORD curr_sectors; /*  56:      Current logical sector count                 */
+    int curr_capacity; /*  57-58:   Current capacity in sectors                  */
+    WORD multiple_sectors; /*  59:      Current sectors/interrupt setting            */
+    UINT lba_total_blocks; /*  60-61:   Total number of user-adx'ible sectors        */
+    WORD single_word_dma; /*  62:      Single word DMA info              (retired)  */
+    WORD multi_word_dma; /*  63:      Multi word DMA info                          */
+    WORD pio_modes_supported; /*  64:      Advanced PIO modes supported                 */
+    WORD min_dma_cycle_time; /*  65:      Min multiword DMA transfer cycle time        */
+    WORD rec_dma_cycle_time; /*  66:      Rec multiword DMA transfer cycle time        */
+    WORD min_pio_cycle_time; /*  67:      Min non-IORDY PIO transfer cycle time        */
+    WORD min_iordy_pio_cycle_time; /*  68:      Min IORDY PIO transfer cycle time            */
+    WORD rsvd69; /*  69:      Reserved (for command queuing)               */
+    WORD rsvd70; /*  70:      Reserved (for command queuing)               */
+    WORD atapi_pkt_time; /*  71:      ns from PACKET cmd to bus release (ATAPI)    */
+    WORD atapi_svc_time; /*  72:      ns from SERVICE to clearing BSY   (ATAPI)    */
+    WORD rsvd73; /*  73:      Reserved                          (ATAPI)    */
+    WORD rsvd74; /*  74:      Reserved                          (ATAPI)    */
+    WORD queue_depth; /*  75:      Maximum queue depth                          */
+    WORD rsvd76; /*  76:      Reserved                                     */
+    WORD rsvd77; /*  77:      Reserved                                     */
+    WORD rsvd78; /*  78:      Reserved                                     */
+    WORD rsvd79; /*  79:      Reserved                                     */
+    WORD major_version_number; /*  80:      Major version number (e.g, 4=ATA/ATAPI-4)    */
+    WORD minor_version_number; /*  81:      Minor version number                         */
+    WORD cmd_set_supported_1; /*  82:      Command set supported, word 1                */
+    WORD cmd_set_supported_2; /*  83:      Command set supported, word 2                */
+    WORD cmd_set_supported_x; /*  84:      Command set supported, extension             */
+    WORD cmd_set_enabled_1; /*  85:      Command set enabled, word 1                  */
+    WORD cmd_set_enabled_2; /*  86:      Command set enabled, word 2                  */
+    WORD cmd_set_default; /*  87:      Command set default                          */
+    WORD ultra_dma; /*  88:      Ultra DMA control                            */
+    WORD dse_time; /*  89:      Data Security Erase time (~secs/2)           */
+    WORD enhanced_dse_time; /*  90:      Enhanced Data Security Erase time (~secs/2)  */
+    WORD cur_apm_value; /*  91:      Current Advanced Power Management value      */
+    WORD master_passwd_rev; /*  92:      Master Password Revision Code                */
+    WORD rsvd94[33]; /*  94-126:  Reserved                                     */
+    WORD media_status_notification; /*  127:     Removable Media Status Notification          */
+    WORD security_status; /*  128:     Security Status                              */
+    WORD vendor_specific[31]; /*  129-159: Vendor specific                              */
+    WORD rsvd160[96]; /*  160-255: Reserved                                     */
 } ID_PAGE;
 
 #pragma member_alignment restore
@@ -2711,7 +2635,6 @@ typedef struct
 /* Capabilities bits */
 #define  CAP_M_LBA  0x200           /* Handles LBA mode */
 #define  CAP_M_DMA  0x100           /* Handles DMA */
-
 
 
 #define IS_SET(   reg, bits ) ( (reg & bits) == bits )
@@ -2723,87 +2646,86 @@ typedef struct
 #define TRUE    1
 #define FALSE   0
 
-
 
 /* Prototypes for driver routines defined in this module */
 
-int     atapi_packet_command(     DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt, int dma_flag );
+int atapi_packet_command(DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt,
+                         int dma_flag);
 /* xfer_req is implicit in the command packet */
-int     atapi_process_size(       DQ_UCB *ucb );
-int     atapi_read_capacity(      DQ_UCB *ucb, BYTE *buffer );
-int     atapi_request_sense(      DQ_UCB *ucb, BYTE *buffer );
-int     atapi_xlate_error_to_vms( DQ_UCB *ucb );
+int atapi_process_size(DQ_UCB *ucb);
+int atapi_read_capacity(DQ_UCB *ucb, BYTE *buffer);
+int atapi_request_sense(DQ_UCB *ucb, BYTE *buffer);
+int atapi_xlate_error_to_vms(DQ_UCB *ucb);
 #ifdef BREAKPOINTS
-void    call_ini$brk( int code, int p1, int p2, int p3 );
+void call_ini$brk( int code, int p1, int p2, int p3 );
 #endif
-void    compute_address(          DQ_UCB *ucb, int *sec, int *head, int *cyl );
-int     ctrl_init(       IDB *idb, DDB *ddb, CRB *crb );
-int     datacheck(                DQ_UCB *ucb );
-int     diagnose(                 DQ_UCB *ucb);
-int     diagnose_fdt(             IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb );
-int     dq_wfikpch(      KPB *kpb, int orig_ipl, int erl_param );
-int     dq_qsrv_helper(  int action, IRP *irp, uint32 *dqqh_iost1, uint32 *dqqh_iost2 );
-void    dq_qsrv_unit_init_comp(   IRP *irp );
-void    dq_qsrv_unit_init_strt(   UCB *ucb );
-int     driver$init_tables();
-int     drvclr(                   DQ_UCB *ucb );
-int     fetch_drive_info(         DQ_UCB *ucb, int atapi_flag, int init_time_flag );
-int     fill_packet_w_adx(        DQ_UCB *ucb );
-BYTE    inp(                      DQ_UCB *ucb, int reg );
-WORD    inpw(                     DQ_UCB *ucb, int reg );
-void    isr(             IDB *idb);
-void    load_prdt(                DQ_UCB *ucb );
-int     locate_dma_regs(          DQ_UCB *ucb, int *csr_base );
-BYTE   *map_user_buffer(          DQ_UCB *ucb, int offset, int length );
-void    move_sec_from_drive(      DQ_UCB *ucb, BYTE *buffer, int bytecount );
-void    move_sec_to_drive(        DQ_UCB *ucb, BYTE *buffer, int bytecount );
-void    out(                      DQ_UCB *ucb, int reg, BYTE data );
-void    outw(                     DQ_UCB *ucb, int reg, WORD data );
-void    outw_t(                   DQ_UCB *ucb, int reg, WORD data );
-void    outl(             DQ_UCB *ucb, int reg, int data );
-int     packack(                  DQ_UCB *ucb, int init_time_flag );
-int     process_drive_info(       DQ_UCB *ucb );
-int     rct_fdt(         IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb );
-int     rdstats_fdt(     IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb );
-int     read(                     DQ_UCB *ucb );
-int     read_ata_seg_pio(         DQ_UCB *ucb, int xfer_req, int *xfer_cnt );   /* Buffer adx comes from UCB */
-int     read_ata_seg_dma(         DQ_UCB *ucb, int xfer_req, int *xfer_cnt );   /* Buffer adx comes from UCB */
-int     read_atapi_512_seg(       DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag );
+void compute_address(DQ_UCB *ucb, int *sec, int *head, int *cyl);
+int ctrl_init(IDB *idb, DDB *ddb, CRB *crb);
+int datacheck(DQ_UCB *ucb);
+int diagnose(DQ_UCB *ucb);
+int diagnose_fdt(IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb);
+int dq_wfikpch(KPB *kpb, int orig_ipl, int erl_param);
+int dq_qsrv_helper(int action, IRP *irp, uint32 *dqqh_iost1, uint32 *dqqh_iost2);
+void dq_qsrv_unit_init_comp(IRP *irp);
+void dq_qsrv_unit_init_strt(UCB *ucb);
+int driver$init_tables();
+int drvclr(DQ_UCB *ucb);
+int fetch_drive_info(DQ_UCB *ucb, int atapi_flag, int init_time_flag);
+int fill_packet_w_adx(DQ_UCB *ucb);
+BYTE inp(DQ_UCB *ucb, int reg);
+WORD inpw(DQ_UCB *ucb, int reg);
+void isr(IDB *idb);
+void load_prdt(DQ_UCB *ucb);
+int locate_dma_regs(DQ_UCB *ucb, int *csr_base);
+BYTE *map_user_buffer(DQ_UCB *ucb, int offset, int length);
+void move_sec_from_drive(DQ_UCB *ucb, BYTE *buffer, int bytecount);
+void move_sec_to_drive(DQ_UCB *ucb, BYTE *buffer, int bytecount);
+void out(DQ_UCB *ucb, int reg, BYTE data);
+void outw(DQ_UCB *ucb, int reg, WORD data);
+void outw_t(DQ_UCB *ucb, int reg, WORD data);
+void outl(DQ_UCB *ucb, int reg, int data);
+int packack(DQ_UCB *ucb, int init_time_flag);
+int process_drive_info(DQ_UCB *ucb);
+int rct_fdt(IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb);
+int rdstats_fdt(IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb);
+int read(DQ_UCB *ucb);
+int read_ata_seg_pio(DQ_UCB *ucb, int xfer_req, int *xfer_cnt); /* Buffer adx comes from UCB */
+int read_ata_seg_dma(DQ_UCB *ucb, int xfer_req, int *xfer_cnt); /* Buffer adx comes from UCB */
+int read_atapi_512_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag);
 /* Buffer adx comes from UCB */
-int     read_atapi_2K_seg     (   DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag );
+int read_atapi_2K_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag);
 /* Buffer adx comes from UCB */
-int     read_dispatcher(          DQ_UCB *ucb, int xfer_req, int *xfer_cnt );
-int     readrct(                  DQ_UCB *ucb );
-void    regdump(         BYTE *buffer, int arg_2, DQ_UCB *ucb );
-int     reset_ctrl(               DQ_UCB *ucb );
-int     seek(                     DQ_UCB *ucb );
-int     set_features(             DQ_UCB *ucb, int feature, int value );
-int     set_geom(                 DQ_UCB *ucb );
-int     sleep(                    DQ_UCB *ucb, int seconds );
-void    startio(         KPB *kpb );
-void    struc_init(      CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb );
-void    struc_reinit(    CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb );
+int read_dispatcher(DQ_UCB *ucb, int xfer_req, int *xfer_cnt);
+int readrct(DQ_UCB *ucb);
+void regdump(BYTE *buffer, int arg_2, DQ_UCB *ucb);
+int reset_ctrl(DQ_UCB *ucb);
+int seek(DQ_UCB *ucb);
+int set_features(DQ_UCB *ucb, int feature, int value);
+int set_geom(DQ_UCB *ucb);
+int sleep(DQ_UCB *ucb, int seconds);
+void startio(KPB *kpb);
+void struc_init(CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb);
+void struc_reinit(CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb);
 #ifdef TRACING
-void    trace(                    DQ_UCB *ucb, int code, int bpt );
+void trace( DQ_UCB *ucb, int code, int bpt );
 #endif
-int     unit_init(       IDB *idb, DQ_UCB *ucb );
-void    unit_init_fork(  void *fr3, IDB *idb, DQ_UCB *ucb );
-int     unload(                   DQ_UCB *ucb );
-int     wait_busy(                DQ_UCB *ucb );
-int     wait_drq(                 DQ_UCB *ucb );
-int     wait_ready(               DQ_UCB *ucb );
-int     write(                    DQ_UCB *ucb );
-int     write_ata_seg_pio(        DQ_UCB *ucb, int xfer_req, int *xfer_cnt );   /* Buffer adx comes from UCB */
-int     write_ata_seg_dma(        DQ_UCB *ucb, int xfer_req, int *xfer_cnt );   /* Buffer adx comes from UCB */
-int     write_atapi_512_seg(      DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag );
+int unit_init(IDB *idb, DQ_UCB *ucb);
+void unit_init_fork(void *fr3, IDB *idb, DQ_UCB *ucb);
+int unload(DQ_UCB *ucb);
+int wait_busy(DQ_UCB *ucb);
+int wait_drq(DQ_UCB *ucb);
+int wait_ready(DQ_UCB *ucb);
+int write(DQ_UCB *ucb);
+int write_ata_seg_pio(DQ_UCB *ucb, int xfer_req, int *xfer_cnt); /* Buffer adx comes from UCB */
+int write_ata_seg_dma(DQ_UCB *ucb, int xfer_req, int *xfer_cnt); /* Buffer adx comes from UCB */
+int write_atapi_512_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag);
 /* Buffer adx comes from UCB */
-int     write_atapi_2K_seg(       DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag );
+int write_atapi_2K_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag);
 /* Buffer adx comes from UCB */
-int     write_dispatcher(         DQ_UCB *ucb, int xfer_req, int *xfer_cnt );
+int write_dispatcher(DQ_UCB *ucb, int xfer_req, int *xfer_cnt);
 
 /* following is a modified prototype for exe_std$alononpaged in [lib_h]exe_routines.h   */
-int   exe$alononpaged_aln (int reqsize, int align, void **pool_p, int32 *alosize_p);
-
+int exe$alononpaged_aln(int reqsize, int align, void **pool_p, int32 *alosize_p);
 
 
 #ifdef TRACE_PER_DRIVE
@@ -2828,39 +2750,37 @@ void trace( DQ_UCB *ucb, int code, int bpt )
 
 {
 
-    ADP *adp;                   /* Address of ADP */
-    int *ptr;                   /* Bind onto the ucb's pointer value */
-    int save_ipl;               /* Place to save the old IPL */
+    ADP *adp; /* Address of ADP */
+    int *ptr; /* Bind onto the ucb's pointer value */
+    int save_ipl; /* Place to save the old IPL */
 
-    adp = baseucb.ucb$ps_adp;           /* Get ADP address */
+    adp = baseucb.ucb$ps_adp; /* Get ADP address */
     device_lock( adp->adp$ps_spinlock, RAISE_IPL, &save_ipl );
     /* Ensure exclusive access at IPL 31 */
 
-    ptr = &ucb->ucb$l_trc_index;        /* Fill our local pointer */
-    code = code | (ucb->ucb$l_trc_unit<<28);    /* Shift the unit into the high nibble, .OR. into the code */
-    ucb->ucb$l_trc_buf[*ptr] = code;        /* Save the new trace code */
-    (*ptr)++;                   /* Bump the pointer */
-    if (*ptr >= TRACING)            /* Beyond the end? */
-        *ptr = 0;                   /* If so, back to the beginning */
-    ucb->ucb$l_trc_buf[*ptr] = 0x0FEEEEEE;  /* Mark the current end point */
+    ptr = &ucb->ucb$l_trc_index; /* Fill our local pointer */
+    code = code | (ucb->ucb$l_trc_unit<<28); /* Shift the unit into the high nibble, .OR. into the code */
+    ucb->ucb$l_trc_buf[*ptr] = code; /* Save the new trace code */
+    (*ptr)++; /* Bump the pointer */
+    if (*ptr >= TRACING) /* Beyond the end? */
+        *ptr = 0; /* If so, back to the beginning */
+    ucb->ucb$l_trc_buf[*ptr] = 0x0FEEEEEE; /* Mark the current end point */
 
     device_unlock( adp->adp$ps_spinlock, save_ipl, SMP_RESTORE );
 
 #ifdef BREAKPOINTS
     /* Release exclusive access, back to old IPL */
-    if (bpt)                    /* Does this caller want a breakpoint? */
+    if (bpt) /* Does this caller want a breakpoint? */
         call_ini$brk( code, (int) ucb, (int) ucb->ucb$l_trc_buf, ucb->ucb$l_trc_index );
     /* If so, make it so */
 #endif
 
 }
 
-
 #define TRACE( data )    trace( ucb, data, FALSE )
 #define BPTRACE( data )  trace( ucb, data, TRUE  )
 
 #endif
-
 
 
 #ifdef TRACE_COMMON
@@ -2885,31 +2805,30 @@ void trace( DQ_UCB *ucb, int code, int bpt )
 
 {
 
-    ADP *adp;                   /* Address of ADP */
-    int save_ipl;               /* Place to save the old IPL */
+    ADP *adp; /* Address of ADP */
+    int save_ipl; /* Place to save the old IPL */
 
-    adp = baseucb.ucb$ps_adp;           /* Get ADP address */
+    adp = baseucb.ucb$ps_adp; /* Get ADP address */
     device_lock( adp->adp$ps_spinlock, RAISE_IPL, &save_ipl );
     /* Ensure exclusive access at IPL 31 */
 
-    code = code | (ucb->ucb$l_trc_unit<<28);    /* Shift the unit into the high nibble, .OR. into the code */
-    trc_buf[trc_index] = code;          /* Save the new trace code */
-    trc_index++;                /* Bump the pointer */
-    if (trc_index >= TRACING)           /* Beyond the end? */
-        trc_index = 0;              /* If so, back to the beginning */
-    trc_buf[trc_index] = 0x0FEEEEEE;        /* Mark the current end point */
+    code = code | (ucb->ucb$l_trc_unit<<28); /* Shift the unit into the high nibble, .OR. into the code */
+    trc_buf[trc_index] = code; /* Save the new trace code */
+    trc_index++; /* Bump the pointer */
+    if (trc_index >= TRACING) /* Beyond the end? */
+        trc_index = 0; /* If so, back to the beginning */
+    trc_buf[trc_index] = 0x0FEEEEEE; /* Mark the current end point */
 
     device_unlock( adp->adp$ps_spinlock, save_ipl, SMP_RESTORE );
 
 #ifdef BREAKPOINTS
     /* Release exclusive access, back to old IPL */
-    if (bpt)                    /* Does this caller want a breakpoint? */
+    if (bpt) /* Does this caller want a breakpoint? */
         call_ini$brk( code, (int) ucb, (int) trc_buf, trc_index );
     /* If so, make it so */
 #endif
 
 }
-
 
 #define TRACE( data )    trace( ucb, data, FALSE )
 #define BPTRACE( data )  trace( ucb, data, TRUE  )
@@ -2928,7 +2847,6 @@ void trace( DQ_UCB *ucb, int code, int bpt )
 #define TRACE( data )
 #define BPTRACE( data )
 #endif
-
 
 
 /* Define or null-out the debugging breakpoints */
@@ -2952,9 +2870,8 @@ void trace( DQ_UCB *ucb, int code, int bpt )
 
 void call_ini$brk( int code, int p1, int p2, int p3 )
 {
-    ini$brk( );                 /* And then break */
+    ini$brk( ); /* And then break */
 }
-
 
 #define BREAK( code, p1, p2, p3 )  call_ini$brk( code, p1, p2, p3 )
 
@@ -2987,7 +2904,7 @@ void call_ini$brk( int code, int p1, int p2, int p3 )
  *
  */
 
-int driver$init_tables( void )
+int driver$init_tables(void)
 
 {
 
@@ -2995,104 +2912,105 @@ int driver$init_tables( void )
 
     /* Finish initialization of the Driver Prologue Table (DPT) */
 
-    ini_dpt_name(         &_dpt, "DQDRIVER" );      /* Driver name */
-    ini_dpt_adapt(        &_dpt, AT$_ISA );     /* ISA bus device */
-    ini_dpt_flags(        &_dpt, DPT$M_SMPMOD|DPT$M_SVP|DPT$M_QSVR);
+    ini_dpt_name(&_dpt, "DQDRIVER"); /* Driver name */
+    ini_dpt_adapt(&_dpt, AT$_ISA); /* ISA bus device */
+    ini_dpt_flags(&_dpt, DPT$M_SMPMOD | DPT$M_SVP | DPT$M_QSVR);
     /* Set flags */
-    ini_dpt_maxunits(     &_dpt, 4 );           /* 4 units max */
-    ini_dpt_ucbsize(      &_dpt, sizeof(DQ_UCB) );  /* UCB size */
-    ini_dpt_struc_init(   &_dpt, struc_init );      /* Structure init rtn */
-    ini_dpt_struc_reinit( &_dpt, struc_reinit );    /* Structure reinit rtn */
-    ini_dpt_ucb_crams(    &_dpt, NUMBER_OF_CRAMS ); /* Allocate some CRAMs */
-    ini_dpt_end(          &_dpt );
+    ini_dpt_maxunits(&_dpt, 4); /* 4 units max */
+    ini_dpt_ucbsize(&_dpt, sizeof(DQ_UCB)); /* UCB size */
+    ini_dpt_struc_init(&_dpt, struc_init); /* Structure init rtn */
+    ini_dpt_struc_reinit(&_dpt, struc_reinit); /* Structure reinit rtn */
+    ini_dpt_ucb_crams(&_dpt, NUMBER_OF_CRAMS); /* Allocate some CRAMs */
+    ini_dpt_end(&_dpt);
 
     /* Finish initialization of the Driver Dispatch Table (DDT) */
 
-    ini_ddt_ctrlinit(      &_ddt, ctrl_init );      /* Controller init rtn */
-    ini_ddt_unitinit(      &_ddt, unit_init );      /* Unit init rtn */
-    ini_ddt_start(         &_ddt, exe_std$kp_startio ); /* Exec's Start I/O rtn */
-    ini_ddt_kp_startio(    &_ddt, startio );        /* KP's Start I/O rtn */
-    ini_ddt_kp_stack_size( &_ddt, KPB$K_MIN_IO_STACK ); /* KP stack size */
-    ini_ddt_kp_reg_mask(   &_ddt, KPREG$K_HLL_REG_MASK );/* KP register mask */
-    ini_ddt_cancel(        &_ddt, ioc_std$cancelio );   /* Cancel rtn */
-    ini_ddt_regdmp(        &_ddt, regdump );        /* Register dump routine */
-    ini_ddt_erlgbf(        &_ddt, ERR_BYTES );      /* Set error log size */
-    ini_ddt_qsrv_helper(   &_ddt, dq_qsrv_helper ); /* Specify QIOServer helper routine */
-    ini_ddt_end(           &_ddt);
+    ini_ddt_ctrlinit(&_ddt, ctrl_init); /* Controller init rtn */
+    ini_ddt_unitinit(&_ddt, unit_init); /* Unit init rtn */
+    ini_ddt_start(&_ddt, exe_std$kp_startio); /* Exec's Start I/O rtn */
+    ini_ddt_kp_startio(&_ddt, startio); /* KP's Start I/O rtn */
+    ini_ddt_kp_stack_size(&_ddt, KPB$K_MIN_IO_STACK); /* KP stack size */
+    ini_ddt_kp_reg_mask(&_ddt, KPREG$K_HLL_REG_MASK);/* KP register mask */
+    ini_ddt_cancel(&_ddt, ioc_std$cancelio); /* Cancel rtn */
+    ini_ddt_regdmp(&_ddt, regdump); /* Register dump routine */
+    ini_ddt_erlgbf(&_ddt, ERR_BYTES); /* Set error log size */
+    ini_ddt_qsrv_helper(&_ddt, dq_qsrv_helper); /* Specify QIOServer helper routine */
+    ini_ddt_end(&_ddt);
 
     /* Finish initialization of the Function Decision Table (FDT) */
 
-    ini_fdt_act( &_fdt, IO$_READLBLK,   acp_std$readblk,     DIRECT_64   );
-    ini_fdt_act( &_fdt, IO$_READPBLK,   acp_std$readblk,     DIRECT_64   );
-    ini_fdt_act( &_fdt, IO$_READVBLK,   acp_std$readblk,     DIRECT_64   );
-    ini_fdt_act( &_fdt, IO$_WRITECHECK, acp_std$readblk,     DIRECT_64   );
+    ini_fdt_act(&_fdt, IO$_READLBLK, acp_std$readblk, DIRECT_64);
+    ini_fdt_act(&_fdt, IO$_READPBLK, acp_std$readblk, DIRECT_64);
+    ini_fdt_act(&_fdt, IO$_READVBLK, acp_std$readblk, DIRECT_64);
+    ini_fdt_act(&_fdt, IO$_WRITECHECK, acp_std$readblk, DIRECT_64);
 
-    ini_fdt_act( &_fdt, IO$_WRITELBLK,  acp_std$writeblk,    DIRECT_64   );
-    ini_fdt_act( &_fdt, IO$_WRITEPBLK,  acp_std$writeblk,    DIRECT_64   );
-    ini_fdt_act( &_fdt, IO$_WRITEVBLK,  acp_std$writeblk,    DIRECT_64   );
+    ini_fdt_act(&_fdt, IO$_WRITELBLK, acp_std$writeblk, DIRECT_64);
+    ini_fdt_act(&_fdt, IO$_WRITEPBLK, acp_std$writeblk, DIRECT_64);
+    ini_fdt_act(&_fdt, IO$_WRITEVBLK, acp_std$writeblk, DIRECT_64);
 
-    ini_fdt_act( &_fdt, IO$_ACCESS,     acp_std$access,      BUFFERED    );
-    ini_fdt_act( &_fdt, IO$_CREATE,     acp_std$access,      BUFFERED    );
+    ini_fdt_act(&_fdt, IO$_ACCESS, acp_std$access, BUFFERED);
+    ini_fdt_act(&_fdt, IO$_CREATE, acp_std$access, BUFFERED);
 
-    ini_fdt_act( &_fdt, IO$_DEACCESS,   acp_std$deaccess,    BUFFERED    );
+    ini_fdt_act(&_fdt, IO$_DEACCESS, acp_std$deaccess, BUFFERED);
 
-    ini_fdt_act( &_fdt, IO$_ACPCONTROL, acp_std$modify,      BUFFERED    );
-    ini_fdt_act( &_fdt, IO$_DELETE,     acp_std$modify,      BUFFERED    );
-    ini_fdt_act( &_fdt, IO$_MODIFY,     acp_std$modify,      BUFFERED    );
+    ini_fdt_act(&_fdt, IO$_ACPCONTROL, acp_std$modify, BUFFERED);
+    ini_fdt_act(&_fdt, IO$_DELETE, acp_std$modify, BUFFERED);
+    ini_fdt_act(&_fdt, IO$_MODIFY, acp_std$modify, BUFFERED);
 
-    ini_fdt_act( &_fdt, IO$_MOUNT,      acp_std$mount,       BUFFERED    );
+    ini_fdt_act(&_fdt, IO$_MOUNT, acp_std$mount, BUFFERED);
 
-    ini_fdt_act( &_fdt, IO$_READRCT,    rct_fdt,             DIRECT      );
-    ini_fdt_act( &_fdt, IO$_RDSTATS,    rdstats_fdt,         DIRECT      );
+    ini_fdt_act(&_fdt, IO$_READRCT, rct_fdt, DIRECT);
+    ini_fdt_act(&_fdt, IO$_RDSTATS, rdstats_fdt, DIRECT);
 
-    ini_fdt_act( &_fdt, IO$_UNLOAD,     exe_std$lcldskvalid, BUFFERED_64 );
-    ini_fdt_act( &_fdt, IO$_AVAILABLE,  exe_std$lcldskvalid, BUFFERED_64 );
-    ini_fdt_act( &_fdt, IO$_PACKACK,    exe_std$lcldskvalid, BUFFERED_64 );
+    ini_fdt_act(&_fdt, IO$_UNLOAD, exe_std$lcldskvalid, BUFFERED_64);
+    ini_fdt_act(&_fdt, IO$_AVAILABLE, exe_std$lcldskvalid, BUFFERED_64);
+    ini_fdt_act(&_fdt, IO$_PACKACK, exe_std$lcldskvalid, BUFFERED_64);
 
-    ini_fdt_act( &_fdt, IO$_NOP,        exe_std$zeroparm,    BUFFERED_64 );
-    ini_fdt_act( &_fdt, IO$_DRVCLR,     exe_std$zeroparm,    BUFFERED_64 );
-    ini_fdt_act( &_fdt, IO$_RELEASE,    exe_std$zeroparm,    BUFFERED_64 );
+    ini_fdt_act(&_fdt, IO$_NOP, exe_std$zeroparm, BUFFERED_64);
+    ini_fdt_act(&_fdt, IO$_DRVCLR, exe_std$zeroparm, BUFFERED_64);
+    ini_fdt_act(&_fdt, IO$_RELEASE, exe_std$zeroparm, BUFFERED_64);
 
-    ini_fdt_act( &_fdt, IO$_SEEK,       exe_std$oneparm,     BUFFERED    );
-    ini_fdt_act( &_fdt, IO$_FORMAT,     exe_std$oneparm,     BUFFERED    );
+    ini_fdt_act(&_fdt, IO$_SEEK, exe_std$oneparm, BUFFERED);
+    ini_fdt_act(&_fdt, IO$_FORMAT, exe_std$oneparm, BUFFERED);
 
-    ini_fdt_act( &_fdt, IO$_SETMODE,    exe_std$setchar,     BUFFERED_64 );
-    ini_fdt_act( &_fdt, IO$_SETCHAR,    exe_std$setchar,     BUFFERED_64 );
+    ini_fdt_act(&_fdt, IO$_SETMODE, exe_std$setchar, BUFFERED_64);
+    ini_fdt_act(&_fdt, IO$_SETCHAR, exe_std$setchar, BUFFERED_64);
 
-    ini_fdt_act( &_fdt, IO$_SENSEMODE,  exe_std$sensemode,   BUFFERED_64 );
-    ini_fdt_act( &_fdt, IO$_SENSECHAR,  exe_std$sensemode,   BUFFERED_64 );
+    ini_fdt_act(&_fdt, IO$_SENSEMODE, exe_std$sensemode, BUFFERED_64);
+    ini_fdt_act(&_fdt, IO$_SENSECHAR, exe_std$sensemode, BUFFERED_64);
 
-    ini_fdt_act( &_fdt, IO$_DIAGNOSE,   diagnose_fdt,        DIRECT );
+    ini_fdt_act(&_fdt, IO$_DIAGNOSE, diagnose_fdt, DIRECT);
 
     /* Set QIOServer control flags */
 
-    ini_fdt_qsrv( &_fdt, IO$_PACKACK,   IRP$M_QSVD|IRP$M_QBARRIER|IRP$M_QCNTRL|IRP$M_QRQT_SRVR_HLPR );
-    ini_fdt_qsrv( &_fdt, IO$_SENSECHAR, IRP$M_QSVD|IRP$M_QBARRIER|IRP$M_QCNTRL|IRP$M_QRQT_SRVR_HLPR );
+    ini_fdt_qsrv(&_fdt, IO$_PACKACK,
+                 IRP$M_QSVD | IRP$M_QBARRIER | IRP$M_QCNTRL | IRP$M_QRQT_SRVR_HLPR);
+    ini_fdt_qsrv(&_fdt, IO$_SENSECHAR,
+                 IRP$M_QSVD | IRP$M_QBARRIER | IRP$M_QCNTRL | IRP$M_QRQT_SRVR_HLPR);
 
-    ini_fdt_qsrv( &_fdt, IO$_AVAILABLE, IRP$M_QBARRIER|IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_NOP,       IRP$M_QBARRIER|IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_UNLOAD,    IRP$M_QBARRIER|IRP$M_QCNTRL );
+    ini_fdt_qsrv(&_fdt, IO$_AVAILABLE, IRP$M_QBARRIER | IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_NOP, IRP$M_QBARRIER | IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_UNLOAD, IRP$M_QBARRIER | IRP$M_QCNTRL);
 
-    ini_fdt_qsrv( &_fdt, IO$_ACCESS,    IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_ACPCONTROL,IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_CREATE,    IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_DEACCESS,  IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_DELETE,    IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_DRVCLR,    IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_FORMAT,    IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_MODIFY,    IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_MOUNT,     IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_SEEK,      IRP$M_QCNTRL );
-    ini_fdt_qsrv( &_fdt, IO$_SENSEMODE, IRP$M_QCNTRL );
+    ini_fdt_qsrv(&_fdt, IO$_ACCESS, IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_ACPCONTROL, IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_CREATE, IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_DEACCESS, IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_DELETE, IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_DRVCLR, IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_FORMAT, IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_MODIFY, IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_MOUNT, IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_SEEK, IRP$M_QCNTRL);
+    ini_fdt_qsrv(&_fdt, IO$_SENSEMODE, IRP$M_QCNTRL);
 
-    ini_fdt_end( &_fdt );
+    ini_fdt_end(&_fdt);
 
     /* If we got this far then everything worked, so return success. */
 
-    return( SS$_NORMAL );           /* Return with success status */
+    return (SS$_NORMAL); /* Return with success status */
 
 }
-
 
 
 /* STRUC_INIT - Device Data Structure Initialization Routine
@@ -3118,7 +3036,7 @@ int driver$init_tables( void )
  *
  */
 
-void struc_init( CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb )
+void struc_init(CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb)
 
 {
 
@@ -3126,33 +3044,31 @@ void struc_init( CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb )
 
     /* Initialize the fork lock and device IPL fields */
 
-    baseucb.ucb$b_flck = SPL$C_IOLOCK8;     /* set up fork lock index */
-    baseucb.ucb$b_dipl = DEVICE_IPL;        /*  and device IPL */
+    baseucb.ucb$b_flck = SPL$C_IOLOCK8; /* set up fork lock index */
+    baseucb.ucb$b_dipl = DEVICE_IPL; /*  and device IPL */
 
     /* Initialize some UCB fields */
 
-    baseucb.ucb$l_devchar = ( DEV$M_DIR     /* Device is directory-structured */
-                              + DEV$M_FOD       /* File-oriented device */
-                              + DEV$M_AVL       /* Device is available for use */
-                              + DEV$M_ELG       /* Device has error-Logging enabled */
-                              + DEV$M_IDV       /* Device is capable of providing input */
-                              + DEV$M_ODV       /* Device is capable of providing output */
-                              + DEV$M_SHR       /* Device is shareable */
-                              + DEV$M_RND );    /* Device allows random-access */
-    baseucb.ucb$l_devchar2 =
-        ( DEV$M_CLU     /* The device is cluster accessible */
-          + DEV$M_NNM       /* Use "node$" device names */
-          + DEV$M_NLT );    /* "No Last Track" bad block info on these devices */
-    baseucb.ucb$b_devclass  = DC$_DISK;     /* Device class is a disk */
-    baseucb.ucb$b_devtype   = DT$_GENERIC_DK;   /* Device type for DDR */
-    baseucb.ucb$l_devsts    = UCB$M_NOCNVRT;    /* Do NOT convert LBNs */
+    baseucb.ucb$l_devchar = (DEV$M_DIR /* Device is directory-structured */
+                             + DEV$M_FOD /* File-oriented device */
+                             + DEV$M_AVL /* Device is available for use */
+                             + DEV$M_ELG /* Device has error-Logging enabled */
+                             + DEV$M_IDV /* Device is capable of providing input */
+                             + DEV$M_ODV /* Device is capable of providing output */
+                             + DEV$M_SHR /* Device is shareable */
+                             + DEV$M_RND); /* Device allows random-access */
+    baseucb.ucb$l_devchar2 = (DEV$M_CLU /* The device is cluster accessible */
+                              + DEV$M_NNM /* Use "node$" device names */
+                              + DEV$M_NLT); /* "No Last Track" bad block info on these devices */
+    baseucb.ucb$b_devclass = DC$_DISK; /* Device class is a disk */
+    baseucb.ucb$b_devtype = DT$_GENERIC_DK; /* Device type for DDR */
+    baseucb.ucb$l_devsts = UCB$M_NOCNVRT; /* Do NOT convert LBNs */
     baseucb.ucb$w_devbufsiz = BLK_SIZE_512; /* Default to ATA-sized blocks */
-    baseucb.ucb$l_media_id  = 0x245242B2;   /* Media ID of DQ|IDE50 in magic encoding */
+    baseucb.ucb$l_media_id = 0x245242B2; /* Media ID of DQ|IDE50 in magic encoding */
 
     return;
 
 }
-
 
 
 /* STRUC_REINIT - Device Data Structure Re-Initialization Routine
@@ -3178,20 +3094,19 @@ void struc_init( CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb )
  *
  */
 
-void struc_reinit ( CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb )
+void struc_reinit(CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb)
 
 {
 
     /*  BREAK( 0x00030000, (int) ucb, 0, 0 );   /@ BREAK: struc_reinit called -- Can't TRACE yet */
 
-    ddb->ddb$ps_ddt = &_ddt;            /* Point ddb to the ddt */
-    ddb->ddb$l_acpd = 'F11';            /* Fill-in the default ACP name */
-    dpt_store_isr( crb, isr );          /* Set up ISR address */
+    ddb->ddb$ps_ddt = &_ddt; /* Point ddb to the ddt */
+    ddb->ddb$l_acpd = 'F11'; /* Fill-in the default ACP name */
+    dpt_store_isr(crb, isr); /* Set up ISR address */
 
-    return;                 /* Return to caller */
+    return; /* Return to caller */
 
 }
-
 
 
 /* RCT_FDT - IO$_READRCT FDT Processing
@@ -3213,41 +3128,35 @@ void struc_reinit ( CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb )
  *
  */
 
-int rct_fdt( IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb )
+int rct_fdt(IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb)
 
 {
 
-    int status;                 /* Returned routine status */
+    int status; /* Returned routine status */
 
-    irp->irp$l_bcnt = irp->irp$l_qio_p2;    /* Copy the byte count */
-    irp->irp$l_media= irp->irp$l_qio_p3;    /* and the LBN */
+    irp->irp$l_bcnt = irp->irp$l_qio_p2; /* Copy the byte count */
+    irp->irp$l_media = irp->irp$l_qio_p3; /* and the LBN */
 
-    if (    (irp->irp$l_bcnt <= BLK_SIZE_512)   /* Byte count is less than or equal 512? */
-            && (irp->irp$l_media == 0) )        /* LBN = 0? */
+    if ((irp->irp$l_bcnt <= BLK_SIZE_512) /* Byte count is less than or equal 512? */
+            && (irp->irp$l_media == 0)) /* LBN = 0? */
     {
         /* Met the tests */
-        status = exe_std$readlock( irp,     /* Then do it! */
-                                   pcb,
-                                   (UCB *) ucb,
-                                   ccb,
-                                   (void *) irp->irp$l_qio_p1,
-                                   irp->irp$l_bcnt,
-                                   0 );
-        exe_std$qiodrvpkt( irp, (UCB *) ucb );  /* Queue the packet */
-        return( SS$_FDT_COMPL );        /*  and exit */
+        status = exe_std$readlock(irp, /* Then do it! */
+                                  pcb, (UCB *) ucb, ccb, (void *) irp->irp$l_qio_p1, irp->irp$l_bcnt, 0);
+        exe_std$qiodrvpkt(irp, (UCB *) ucb); /* Queue the packet */
+        return (SS$_FDT_COMPL); /*  and exit */
     }
     else
     {
         /* Failed the tests */
-        irp->irp$l_iost1 = SS$_BADPARAM;    /* Load error code */
-        irp->irp$l_iost2 = 0;           /* Clear high IOSB */
-        exe_std$finishio( irp, (UCB *) ucb );   /* Finish with error */
+        irp->irp$l_iost1 = SS$_BADPARAM; /* Load error code */
+        irp->irp$l_iost2 = 0; /* Clear high IOSB */
+        exe_std$finishio(irp, (UCB *) ucb); /* Finish with error */
     }
 
-    return( SS$_FDT_COMPL );            /* exit */
+    return (SS$_FDT_COMPL); /* exit */
 
 }
-
 
 
 /* RDSTATS_FDT - IO$_RDSTATS FDT Processing
@@ -3270,60 +3179,59 @@ int rct_fdt( IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb )
  *
  */
 
-int rdstats_fdt( IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb )
+int rdstats_fdt(IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb)
 
 {
 
-    int  *bp;                   /* Longword buffer pointer */
-    int  i;                 /* Loop counter */
+    int *bp; /* Longword buffer pointer */
+    int i; /* Loop counter */
 
     /* Check that LBN = 0 and byte count is large enough  */
 
 #ifdef EXTRA_STATS
-    irp->irp$l_iost1 = SS$_BADPARAM;        /* Assume an error - Load error code */
+    irp->irp$l_iost1 = SS$_BADPARAM; /* Assume an error - Load error code */
 
     if ( !( baseucb.ucb$l_devchar & DEV$M_QSVD ) &&
             (irp->irp$l_qio_p2 >= RDSTATS_LEN) && (irp->irp$l_qio_p3 == 0) )
     {
-        bp = (void *) irp->irp$l_qio_p1;    /* Point to the buffer */
-        *bp = ucb->ucb$l_total_ints;        /* Get count of all interrupts */
-        bp++;                   /* Move to next longword */
-        *bp = ucb->ucb$l_unsol_ints;        /* Get count of unsolicited interrupts */
-        bp++;                   /* Move to next longword */
-        *bp = NUMBER_OF_CRAMS;          /* Copy over the number of CRAMS */
+        bp = (void *) irp->irp$l_qio_p1; /* Point to the buffer */
+        *bp = ucb->ucb$l_total_ints; /* Get count of all interrupts */
+        bp++; /* Move to next longword */
+        *bp = ucb->ucb$l_unsol_ints; /* Get count of unsolicited interrupts */
+        bp++; /* Move to next longword */
+        *bp = NUMBER_OF_CRAMS; /* Copy over the number of CRAMS */
         bp++;
-        *bp = (int) ucb->ucb$ps_xfer_buffer;    /* Transfer buffer address */
+        *bp = (int) ucb->ucb$ps_xfer_buffer; /* Transfer buffer address */
         bp++;
-        *bp = (int) ucb->ucb$ps_s0_svapte;  /* Base SPTE address */
+        *bp = (int) ucb->ucb$ps_s0_svapte; /* Base SPTE address */
         bp++;
-        *bp = (int) ucb->ucb$ps_s0_va;      /* S0 VA (user buffer) */
+        *bp = (int) ucb->ucb$ps_s0_va; /* S0 VA (user buffer) */
         bp++;
-        *bp = TIMEOUT_TIME+2;           /* Save size of TIMEOUT vector */
-        bp++;                   /* Move to next location */
+        *bp = TIMEOUT_TIME+2; /* Save size of TIMEOUT vector */
+        bp++; /* Move to next location */
 
         /* Copy over the timeout histogram vector */
 
         for (i=0; i<=(TIMEOUT_TIME+1); i++)
         {
-            *bp = ucb->ucb$l_int_hist[i];   /* Copy over the interrupt time histogram */
-            bp++;               /* Advance pointer */
+            *bp = ucb->ucb$l_int_hist[i]; /* Copy over the interrupt time histogram */
+            bp++; /* Advance pointer */
         }
 
-        *bp = ucb->ucb$l_int_tmo;       /* Copy over the timeout count */
-        bp++;                   /* Advance pointer */
+        *bp = ucb->ucb$l_int_tmo; /* Copy over the timeout count */
+        bp++; /* Advance pointer */
 
         irp->irp$l_iost1 = (RDSTATS_LEN << 16) + SS$_NORMAL;
     }
 #else
-    irp->irp$l_iost1 = SS$_NODATA;      /* Load error code */
+    irp->irp$l_iost1 = SS$_NODATA; /* Load error code */
 #endif
 
-    irp->irp$l_iost2 = 0;           /* Clear high IOSB */
-    exe_std$finishio( irp, (UCB *) ucb );   /* Finish the I/O */
-    return( SS$_FDT_COMPL );            /*  and exit */
+    irp->irp$l_iost2 = 0; /* Clear high IOSB */
+    exe_std$finishio(irp, (UCB *) ucb); /* Finish the I/O */
+    return (SS$_FDT_COMPL); /*  and exit */
 
 }
-
 
 
 /* DIAGNOSE_FDT - IO$_DIAGNOSE FDT Processing
@@ -3344,23 +3252,23 @@ int rdstats_fdt( IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb )
  *
  */
 
-int diagnose_fdt( IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb )
+int diagnose_fdt(IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb)
 {
     DIAGNOSE_PARAM *diagnose_param;
     int status;
-    int64   prvprv;
+    int64 prvprv;
 
     /* For now disable remote DIAGNOSTICS */
 
-    if ( ( ( ( UCB * )( ucb ) )->ucb$l_devchar & DEV$M_QSVD ) != 0 )
-        return(exe_std$abortio( irp, pcb, (UCB *) ucb, SS$_UNSUPPORTED));
+    if ((((UCB *) (ucb))->ucb$l_devchar & DEV$M_QSVD) != 0)
+        return (exe_std$abortio(irp, pcb, (UCB *) ucb, SS$_UNSUPPORTED));
 
     /* Check if process has the required privilege */
 
     sys$setprv(0, 0, 0, &prvprv);
 
     if ((prvprv & PRV$M_DIAGNOSE) == 0)
-        return(exe_std$abortio( irp, pcb, (UCB *) ucb, SS$_NOPRIV));
+        return (exe_std$abortio(irp, pcb, (UCB *) ucb, SS$_NOPRIV));
 
     diagnose_param = (DIAGNOSE_PARAM *) irp->irp$l_qio_p1;
 
@@ -3389,20 +3297,15 @@ int diagnose_fdt( IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb )
 
     if (irp->irp$l_bcnt > 0)
     {
-        status = exe_std$readlock( irp,     /* Then do it! */
-                                   pcb,
-                                   (UCB *) ucb,
-                                   ccb,
-                                   (void *) diagnose_param->data,
-                                   irp->irp$l_bcnt,
-                                   0 );
+        status = exe_std$readlock(irp, /* Then do it! */
+                                  pcb, (UCB *) ucb, ccb, (void *) diagnose_param->data, irp->irp$l_bcnt,
+                                  0);
     }
 
-    exe_std$qiodrvpkt( irp, (UCB *) ucb );  /* Queue the packet */
-    return( SS$_FDT_COMPL );            /*  and exit */
+    exe_std$qiodrvpkt(irp, (UCB *) ucb); /* Queue the packet */
+    return (SS$_FDT_COMPL); /*  and exit */
 
 }
-
 
 
 /* CTRL_INIT - Controller Initialization Routine
@@ -3428,16 +3331,15 @@ int diagnose_fdt( IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb )
  *
  */
 
-int ctrl_init ( IDB *idb, DDB *ddb, CRB *crb )
+int ctrl_init(IDB *idb, DDB *ddb, CRB *crb)
 
 {
 
     /*  BREAK( 0x00040000, 0, 0, 0 );       /@ BREAK: ctrl_init called -- Can't TRACE yet */
 
-    return( SS$_NORMAL );           /* Return SUCCESS */
+    return (SS$_NORMAL); /* Return SUCCESS */
 
 }
-
 
 
 /* UNIT_INIT - Unit Initialization Routine
@@ -3465,24 +3367,23 @@ int ctrl_init ( IDB *idb, DDB *ddb, CRB *crb )
  *
  */
 
-int unit_init ( IDB *idb, DQ_UCB *ucb )
+int unit_init(IDB *idb, DQ_UCB *ucb)
 
 {
 
     /*  BREAK( 0x00050000, (int) ucb, (int) idb, 0 );/@ BREAK: unit_init called -- Can't TRACE yet */
 
-    if (baseucb.ucb$v_power)            /* Is this power recovery ? */
-        return( SS$_NORMAL );           /* Power recovery - just exit */
+    if (baseucb.ucb$v_power) /* Is this power recovery ? */
+        return (SS$_NORMAL); /* Power recovery - just exit */
 
     /* Set up and queue fork process to complete the unit initialization */
 
-    baseucb.ucb$l_fpc = &unit_init_fork;    /* Point to fork routine address */
-    exe_std$primitive_fork( 0, (int64) idb, (FKB *) ucb );
+    baseucb.ucb$l_fpc = &unit_init_fork; /* Point to fork routine address */
+    exe_std$primitive_fork(0, (int64) idb, (FKB *) ucb);
     /* Start fork process */
-    return( SS$_NORMAL );           /* Return with success */
+    return (SS$_NORMAL); /* Return with success */
 
 }
-
 
 
 /* UNIT_INIT_FORK - Unit Initialization Fork Routine
@@ -3516,31 +3417,30 @@ int unit_init ( IDB *idb, DQ_UCB *ucb )
  *
  */
 
-void unit_init_fork( void *fr3, IDB *idb, DQ_UCB *ucb )
+void unit_init_fork(void *fr3, IDB *idb, DQ_UCB *ucb)
 
 {
 
-    char    model[DTN$K_NAMELEN_MAX+1] = "Generic IDE/ATAPI disk";
+    char model[DTN$K_NAMELEN_MAX + 1] = "Generic IDE/ATAPI disk";
     /* Default model name */
-    int     mod_len = 22;           /* Length of model string (*WITHOUT* trailing <null>!) */
-    DTN     *dtn;               /* Dummy DTN pointer */
-    CRAM    *cram_ptr;              /* Pointer to a CRAM */
-    CRCTX   *ctx;               /* Pointer to a CRCTX */
-    int     index;              /* Index for walking the CRAM list */
-    ADP     *adp;               /* Address of ADP */
-    CRB     *crb;               /* Address of CRB */
-    DDB     *ddb;               /* Address of DDB */
-    int     status;             /* Routine status values */
-    int     page_cnt;               /* Number of pages to allocate */
-    int     offset;             /* PTE offset in page table */
-    int     csr_base=0;             /* Base CSR address */
-    IDB     *idb_ptr;               /* CRAM IDB pointer value to use */
-    uint64  q_nul = 0;              /* A quadword of zeroes */
-    uint64  q_dma_csr_base;         /* A quadword of dma register address */
-    IRP     *irp;               /* Pointer to the IRP we'll build */
-    int32   size;               /* The size of several structures we'll allocate */
-    PTE     *svapte;                /* Pointer to PTE that maps our VA */
-
+    int mod_len = 22; /* Length of model string (*WITHOUT* trailing <null>!) */
+    DTN *dtn; /* Dummy DTN pointer */
+    CRAM *cram_ptr; /* Pointer to a CRAM */
+    CRCTX *ctx; /* Pointer to a CRCTX */
+    int index; /* Index for walking the CRAM list */
+    ADP *adp; /* Address of ADP */
+    CRB *crb; /* Address of CRB */
+    DDB *ddb; /* Address of DDB */
+    int status; /* Routine status values */
+    int page_cnt; /* Number of pages to allocate */
+    int offset; /* PTE offset in page table */
+    int csr_base = 0; /* Base CSR address */
+    IDB *idb_ptr; /* CRAM IDB pointer value to use */
+    uint64 q_nul = 0; /* A quadword of zeroes */
+    uint64 q_dma_csr_base; /* A quadword of dma register address */
+    IRP *irp; /* Pointer to the IRP we'll build */
+    int32 size; /* The size of several structures we'll allocate */
+    PTE *svapte; /* Pointer to PTE that maps our VA */
 
     BREAK( 0x00060000, (int) ucb, (int) idb, 0 );/* BREAK: unit_init_fork called --- Can't TRACE yet */
 
@@ -3549,112 +3449,109 @@ void unit_init_fork( void *fr3, IDB *idb, DQ_UCB *ucb )
      * UCB update.  Otherwise, fall through and actually initialize the unit.
      */
 
-    if ( baseucb.ucb$l_devchar & DEV$M_QSVD )
+    if (baseucb.ucb$l_devchar & DEV$M_QSVD)
     {
-        dq_qsrv_unit_init_strt( ( UCB * ) ucb );/* Allocate and initiate an IO$_PACKACK IRP */
-        return;                 /* and return */
+        dq_qsrv_unit_init_strt((UCB *) ucb);/* Allocate and initiate an IO$_PACKACK IRP */
+        return; /* and return */
     }
 
-    adp = baseucb.ucb$ps_adp;           /* Get ADP address */
-    crb = baseucb.ucb$l_crb;            /* Get CRB address */
-    ddb = baseucb.ucb$l_ddb;            /* Get DDB address */
+    adp = baseucb.ucb$ps_adp; /* Get ADP address */
+    crb = baseucb.ucb$l_crb; /* Get CRB address */
+    ddb = baseucb.ucb$l_ddb; /* Get DDB address */
 
-    ucb->ucb$l_dummy_flgs   = 'Flgs';       /* Put markers in the UCB */
-    ucb->ucb$l_dummy_sens   = 'Sens';       /*   :                    */
-    ucb->ucb$l_dummy_pakt   = 'Pakt';       /*   :                    */
-    ucb->ucb$l_dummy_ints   = 'Ints';       /*   :                    */
-    ucb->ucb$l_dummy_unso   = 'Unso';       /*   :                    */
-    ucb->ucb$l_dummy_hist   = 'Hist';       /*   :                    */
-    ucb->ucb$l_dummy_tmo    = 'Tmo!';       /*   :                    */
-    ucb->ucb$l_dummy_resets = 'Rst!';       /*   :                    */
-    ucb->ucb$l_dummy_trace  = 'Trac';       /*   :                    */
-    ucb->ucb$l_dummy_end    = 'End!';       /*   :                    */
+    ucb->ucb$l_dummy_flgs = 'Flgs'; /* Put markers in the UCB */
+    ucb->ucb$l_dummy_sens = 'Sens'; /*   :                    */
+    ucb->ucb$l_dummy_pakt = 'Pakt'; /*   :                    */
+    ucb->ucb$l_dummy_ints = 'Ints'; /*   :                    */
+    ucb->ucb$l_dummy_unso = 'Unso'; /*   :                    */
+    ucb->ucb$l_dummy_hist = 'Hist'; /*   :                    */
+    ucb->ucb$l_dummy_tmo = 'Tmo!'; /*   :                    */
+    ucb->ucb$l_dummy_resets = 'Rst!'; /*   :                    */
+    ucb->ucb$l_dummy_trace = 'Trac'; /*   :                    */
+    ucb->ucb$l_dummy_end = 'End!'; /*   :                    */
 
-    ucb->ucb$l_unsolicited_int   = 0;       /* Forget any pending unsolicited interrupts */
-    ucb->ucb$l_drive_lba_capable = 0;       /* Clear all the flags */
-    ucb->ucb$l_drive_dma_capable = 0;       /*   :   */
-    ucb->ucb$l_ctrl_id           = 0;       /*   :   */
-    ucb->ucb$l_ctrl_dma_capable  = 0;       /*   :   */
-    ucb->ucb$l_atapi_flag        = 0;       /*   :   */
-    ucb->ucb$l_2K_flag           = 0;       /*   :   */
+    ucb->ucb$l_unsolicited_int = 0; /* Forget any pending unsolicited interrupts */
+    ucb->ucb$l_drive_lba_capable = 0; /* Clear all the flags */
+    ucb->ucb$l_drive_dma_capable = 0; /*   :   */
+    ucb->ucb$l_ctrl_id = 0; /*   :   */
+    ucb->ucb$l_ctrl_dma_capable = 0; /*   :   */
+    ucb->ucb$l_atapi_flag = 0; /*   :   */
+    ucb->ucb$l_2K_flag = 0; /*   :   */
 
     ucb->ucb$l_drv_head = DRVHD_M_BASE + (baseucb.ucb$w_unit << 4);
     /* Set up drive/head unit bit for later use in commands */
 
-    ucb->ucb$l_trc_buf      = (void *) 0xDEADDEAD;
+    ucb->ucb$l_trc_buf = (void *) 0xDEADDEAD;
     /* Indicate no tracing (yet) */
-    ucb->ucb$l_trc_index    = 0x0000DEAD;   /*   :   */
+    ucb->ucb$l_trc_index = 0x0000DEAD; /*   :   */
 
-    ucb->ucb$l_trc_unit     = baseucb.ucb$w_unit + 1;
+    ucb->ucb$l_trc_unit = baseucb.ucb$w_unit + 1;
     /* Set up part of our canonical unit number    */
-    if (     ( (ddb->ddb$t_name_str[2] & 0x01 ) ==0 )
-             /* Check controller letter:                    */
-             /* Secondary controller (DQB, DQD, DQF, etc.)? */
-             || (baseucb.ucb$w_unit>=2) )       /* DQA2:, DQA3:, DQC2:, DQC3, etc. ?           */
-        ucb->ucb$l_trc_unit += 2;       /* If either, bump canonical unit by 2         */
+    if (((ddb->ddb$t_name_str[2] & 0x01) == 0)
+            /* Check controller letter:                    */
+            /* Secondary controller (DQB, DQD, DQF, etc.)? */
+            || (baseucb.ucb$w_unit >= 2)) /* DQA2:, DQA3:, DQC2:, DQC3, etc. ?           */
+        ucb->ucb$l_trc_unit += 2; /* If either, bump canonical unit by 2         */
     /* Now, 1->DQA0:, 2->DQA1:, 3->DQB0:, 4->DQB1: */
     /* allocate enough memory for two device id pages */
-    status = exe$alononpaged_aln( 1024, 9, (void **)&crb->crb$l_auxstruc, &size);
-    if ( $FAIL( status ) )          /* Check the return status */
-        return;                 /* Return if error */
+    status = exe$alononpaged_aln(1024, 9, (void **) &crb->crb$l_auxstruc,
+                                 &size);
+    if ($FAIL( status )) /* Check the return status */
+        return; /* Return if error */
 
 #ifdef TRACE_PER_DRIVE
 
     status = exe_std$alononpaged( TRACING*4, &size, (void **) &ucb->ucb$l_trc_buf );
     /* Allocate pool for our tracing buffer */
-    if ( $FAIL( status ) )          /* Check the return status */
-        return;                 /* Return if error */
-    ucb->ucb$l_trc_index = 0;           /* Point the index to the beginning of the buffer */
-    TRACE( 0x0FFFFFFF );            /* Record a distinctive starting pattern */
-    TRACE( 0x0FF0F0F0 );            /*   :   */
-    TRACE( 0x0F0F0F0F );            /*   :   */
-    TRACE( 0x0FF0FFFF );            /*   :   */
+    if ( $FAIL( status ) ) /* Check the return status */
+        return; /* Return if error */
+    ucb->ucb$l_trc_index = 0; /* Point the index to the beginning of the buffer */
+    TRACE( 0x0FFFFFFF ); /* Record a distinctive starting pattern */
+    TRACE( 0x0FF0F0F0 ); /*   :   */
+    TRACE( 0x0F0F0F0F ); /*   :   */
+    TRACE( 0x0FF0FFFF ); /*   :   */
 
 #endif
-
 
 #ifdef TRACE_COMMON
 
-    ucb->ucb$l_trc_buf = &trc_dummy;        /* Provide a pointer in the UCB to the common trace buffer */
+    ucb->ucb$l_trc_buf = &trc_dummy; /* Provide a pointer in the UCB to the common trace buffer */
 
-    if (trc_buf_alloc == 0)         /* Only allocate the buffer once */
+    if (trc_buf_alloc == 0) /* Only allocate the buffer once */
     {
-        trc_buf_alloc++;            /* Remember we've allocated this */
+        trc_buf_alloc++; /* Remember we've allocated this */
 
-        trc_dummy    = 'Trac';          /* Set the ASCII tags */
-        fixup_dummy  = 'FxUp';          /*   :                */
-        fixup_bcnt   = 0;           /* Zero some counters */
-        fixup_boff   = 0;           /*   :                */
-        fixup_svapte = 0;           /*   :                */
+        trc_dummy = 'Trac'; /* Set the ASCII tags */
+        fixup_dummy = 'FxUp'; /*   :                */
+        fixup_bcnt = 0; /* Zero some counters */
+        fixup_boff = 0; /*   :                */
+        fixup_svapte = 0; /*   :                */
 
         status = exe_std$alononpaged( TRACING*4, &size, (void **) &trc_buf );
         /* Allocate pool for our tracing buffer */
-        if ( $FAIL( status ) )          /* Check the return status */
-            return;                 /* Return if error */
-        trc_index = 0;              /* Point the index to the beginning of the buffer */
-        TRACE( 0x0FFFFFFF );            /* Record a distinctive starting pattern */
-        TRACE( 0x0FF0F0F0 );            /*   :   */
-        TRACE( 0x0F0F0F0F );            /*   :   */
-        TRACE( 0x0FF0FFFF );            /*   :   */
+        if ( $FAIL( status ) ) /* Check the return status */
+            return; /* Return if error */
+        trc_index = 0; /* Point the index to the beginning of the buffer */
+        TRACE( 0x0FFFFFFF ); /* Record a distinctive starting pattern */
+        TRACE( 0x0FF0F0F0 ); /*   :   */
+        TRACE( 0x0F0F0F0F ); /*   :   */
+        TRACE( 0x0FF0FFFF ); /*   :   */
     }
 
 #endif
-
 
     /* Clear the histogram buffer counts.  Clear each entry from 0 to */
     /* TIMEOUT_TIME and the overflow count at the end of the vector. */
 
-    for (index = 0 ; index < TIMEOUT_TIME+1; index++)
+    for (index = 0; index < TIMEOUT_TIME + 1; index++)
     {
-        ucb->ucb$l_int_hist[index] = 0;     /* Clear the interrupt histogram counters */
+        ucb->ucb$l_int_hist[index] = 0; /* Clear the interrupt histogram counters */
     }
 
-
-    status = ioc$add_device_type( model, mod_len, (UCB *) ucb, &dtn );
+    status = ioc$add_device_type(model, mod_len, (UCB *) ucb, &dtn);
     /* Set up a default model name of "Generic IDE/ATAPI disk" */
 
 
-    
     /* Decide which PCI controller chip, if any, we're using.
      * Then, by reading the BASE_ADDRESS_V register in the controller chip,
      * figure out where the Console has "located" the DMA registers today.
@@ -3667,12 +3564,11 @@ void unit_init_fork( void *fr3, IDB *idb, DQ_UCB *ucb )
      *
      */
 
-    q_dma_csr_base = locate_dma_regs( ucb, &csr_base );/* Locate the DMA registers, if any, for this chip */
+    q_dma_csr_base = locate_dma_regs(ucb, &csr_base);/* Locate the DMA registers, if any, for this chip */
     /* This also sets the node_id and ctrl_dma_enable */
     /*   fields in the ucb. */
 
 
-    
     /* Ok, here's a hack.  We're going to pick up the IDB$Q_CSR value.
      * If it's <= 0x80000000, then it's treated as an offset from the
      * the base of ISA space.  For example, 0x1F0.  If not, we'll
@@ -3721,30 +3617,28 @@ void unit_init_fork( void *fr3, IDB *idb, DQ_UCB *ucb )
      *
      */
 
-    idb_ptr= NULL;              /* Use no IDB pointer in CRAM */
+    idb_ptr = NULL; /* Use no IDB pointer in CRAM */
 
-    if ( csr_base == 0)
+    if (csr_base == 0)
     {
-        if (idb->idb$q_csr < 0x80000000)        /* Check if it's in ISA space */
+        if (idb->idb$q_csr < 0x80000000) /* Check if it's in ISA space */
         {
-            csr_base = idb->idb$q_csr;      /* Apparently, so use the passed CSR as the base */
-            q_dma_csr_base = 0;         /* What to do about the DMA registers in this case??? */
-            ucb->ucb$l_ctrl_dma_capable = 0;    /* For the moment, disable DMA for this controller */
+            csr_base = idb->idb$q_csr; /* Apparently, so use the passed CSR as the base */
+            q_dma_csr_base = 0; /* What to do about the DMA registers in this case??? */
+            ucb->ucb$l_ctrl_dma_capable = 0; /* For the moment, disable DMA for this controller */
         }
-        else                    /* No, big VA so Autoconfig passing base adx of ISA bus */
-            if (ucb->ucb$l_trc_unit <= 2)       /* DQA0: (=1) or DQA1: (=2) ?                           */
+        else /* No, big VA so Autoconfig passing base adx of ISA bus */
+            if (ucb->ucb$l_trc_unit <= 2) /* DQA0: (=1) or DQA1: (=2) ?                           */
             {
                 /* If either, then...                                   */
-                csr_base     =  0x1F0;      /* Use legacy primary addresses                    */
+                csr_base = 0x1F0; /* Use legacy primary addresses                    */
             }
-            else                    /* Else DQB0:/DQA2: (=3) or DQB1:/DQA3: (=4)            */
+            else /* Else DQB0:/DQA2: (=3) or DQB1:/DQA3: (=4)            */
             {
-                csr_base     =  0x170;      /* Use legacy secondary addresses                   */
-                q_dma_csr_base += 0x8;      /* Use secondary group of DMA CSRs                  */
+                csr_base = 0x170; /* Use legacy secondary addresses                   */
+                q_dma_csr_base += 0x8; /* Use secondary group of DMA CSRs                  */
             }
     }
-
-
 
     /* !!!???
      *
@@ -3756,72 +3650,61 @@ void unit_init_fork( void *fr3, IDB *idb, DQ_UCB *ucb )
      *
      */
 
-
 //#saythis "Consider creating just one pair of mappings and sharing them among our four units"
+    status = ioc$map_io(adp, /* Map the main CSRs into our space */
+                        crb->crb$l_node, /* Node number of the bus to map */
+                        &q_nul, /* physical_offset */
+                        0x1000, /* Bytes to map including *ALL OF*: */
+                        /*   - Primary   ISA main regs at 0x01F0 and 0x3F6 */
+                        /*   - Secondary ISA main regs at 0x0170 and 0x376 */IOC$K_BUS_IO_BYTE_GRAN,/* attributes */
+                        &ucb->ucb$q_iohandle_1);
+    if ($FAIL( status )) /* Check the return status */
+        return; /* Return if error */
 
-    status = ioc$map_io( adp,           /* Map the main CSRs into our space */
-                         crb->crb$l_node,   /* Node number of the bus to map */
-                         &q_nul,        /* physical_offset */
-                         0x1000,        /* Bytes to map including *ALL OF*: */
-                         /*   - Primary   ISA main regs at 0x01F0 and 0x3F6 */
-                         /*   - Secondary ISA main regs at 0x0170 and 0x376 */
-                         IOC$K_BUS_IO_BYTE_GRAN,/* attributes */
-                         &ucb->ucb$q_iohandle_1 );
-    if ( $FAIL( status ) )          /* Check the return status */
-        return;                 /* Return if error */
-
-
-    status = ioc$map_io( adp,           /* Map the DMA CSRs into our space */
-                         crb->crb$l_node,   /* Node number of the bus to map */
-                         &q_dma_csr_base,   /* physical_offset */
-                         0x8,           /* Bytes to map including *EITHER*: */
-                         /*   - Primary   ISA DMA regs at 0xnnnnn0 */
-                         /*   - Secondary ISA DMA regs at 0xnnnnn8 */
-                         IOC$K_BUS_IO_BYTE_GRAN,/* attributes */
-                         &ucb->ucb$q_iohandle_2 );
-    if ( $FAIL( status ) )          /* Check the return status */
-        return;                 /* Return if error */
-
+    status = ioc$map_io(adp, /* Map the DMA CSRs into our space */
+                        crb->crb$l_node, /* Node number of the bus to map */
+                        &q_dma_csr_base, /* physical_offset */
+                        0x8, /* Bytes to map including *EITHER*: */
+                        /*   - Primary   ISA DMA regs at 0xnnnnn0 */
+                        /*   - Secondary ISA DMA regs at 0xnnnnn8 */IOC$K_BUS_IO_BYTE_GRAN,/* attributes */
+                        &ucb->ucb$q_iohandle_2);
+    if ($FAIL( status )) /* Check the return status */
+        return; /* Return if error */
 
     /*
      * Now, load the CRAMs that we'll use for register accesses
      *
      */
 
-    cram_ptr = baseucb.ucb$ps_cram;     /* Point to the first CRAM in our chain */
+    cram_ptr = baseucb.ucb$ps_cram; /* Point to the first CRAM in our chain */
 
-    for ( index=0; index<NUMBER_OF_NON_DMA_CRAMS; index++ )
+    for (index = 0; index < NUMBER_OF_NON_DMA_CRAMS; index++)
     {
         /* For each non-DMA CSR... */
-        cram_ptr->cram$l_idb = idb_ptr;     /* Set IDB pointer in the CRAM */
-        ucb->ucb$ps_crams[index] = cram_ptr;    /* Set up UCB table */
-        status = ioc$cram_cmd( cram_init[index].cmd,
-                               csr_base+cram_init[index].offset,
-                               adp,
-                               cram_ptr,
-                               (uint64*) &ucb->ucb$q_iohandle_1 );
-        cram_ptr->cram$l_idb = idb;     /* Set the IDB pointer correctly */
-        if ( $FAIL( status ) )          /* Check the return status */
-            return;             /* Return if error */
-        cram_ptr->cram$v_der = 1;       /* Disable error reporting */
-        cram_ptr = cram_ptr->cram$l_flink;  /* On to next CRAM pointer, preparing for a possible next pass */
+        cram_ptr->cram$l_idb = idb_ptr; /* Set IDB pointer in the CRAM */
+        ucb->ucb$ps_crams[index] = cram_ptr; /* Set up UCB table */
+        status = ioc$cram_cmd(cram_init[index].cmd,
+                              csr_base + cram_init[index].offset, adp, cram_ptr,
+                              (uint64*) &ucb->ucb$q_iohandle_1);
+        cram_ptr->cram$l_idb = idb; /* Set the IDB pointer correctly */
+        if ($FAIL( status )) /* Check the return status */
+            return; /* Return if error */
+        cram_ptr->cram$v_der = 1; /* Disable error reporting */
+        cram_ptr = cram_ptr->cram$l_flink; /* On to next CRAM pointer, preparing for a possible next pass */
     }
 
-    for ( ; index<NUMBER_OF_CRAMS; index++ )    /* (Continuing our use of the already-initialized index...) */
+    for (; index < NUMBER_OF_CRAMS; index++) /* (Continuing our use of the already-initialized index...) */
     {
         /* For each DMA CSR... */
-        cram_ptr->cram$l_idb = idb_ptr;     /* Set IDB pointer in the CRAM */
-        ucb->ucb$ps_crams[index] = cram_ptr;    /* Set up UCB table */
-        status = ioc$cram_cmd( cram_init[index].cmd,
-                               cram_init[index].offset,
-                               adp,
-                               cram_ptr,
-                               (uint64*) &ucb->ucb$q_iohandle_2 );
-        cram_ptr->cram$l_idb = idb;     /* Set the IDB pointer correctly */
-        if ( $FAIL( status ) )          /* Check the return status */
-            return;             /* Return if error */
-        cram_ptr->cram$v_der = 1;       /* Disable error reporting */
-        cram_ptr = cram_ptr->cram$l_flink;  /* On to next CRAM pointer, preparing for a possible next pass */
+        cram_ptr->cram$l_idb = idb_ptr; /* Set IDB pointer in the CRAM */
+        ucb->ucb$ps_crams[index] = cram_ptr; /* Set up UCB table */
+        status = ioc$cram_cmd(cram_init[index].cmd, cram_init[index].offset,
+                              adp, cram_ptr, (uint64*) &ucb->ucb$q_iohandle_2);
+        cram_ptr->cram$l_idb = idb; /* Set the IDB pointer correctly */
+        if ($FAIL( status )) /* Check the return status */
+            return; /* Return if error */
+        cram_ptr->cram$v_der = 1; /* Disable error reporting */
+        cram_ptr = cram_ptr->cram$l_flink; /* On to next CRAM pointer, preparing for a possible next pass */
     }
 
     /*
@@ -3836,82 +3719,78 @@ void unit_init_fork( void *fr3, IDB *idb, DQ_UCB *ucb )
      *
      */
 
-    inp( ucb, RD_ALT_STS );         /* Get alternate status register */
-    inp( ucb, RD_DMA_STS );         /* Get a DMA register */
+    inp(ucb, RD_ALT_STS); /* Get alternate status register */
+    inp(ucb, RD_DMA_STS); /* Get a DMA register */
 
     /*
      * Allocate transfer buffer
      *
      */
 
-    page_cnt = ( XFER_BUFFER_SIZE + MMG$GL_PAGE_SIZE - 1 ) >> MMG$GL_VPN_TO_VA;
+    page_cnt = (XFER_BUFFER_SIZE + MMG$GL_PAGE_SIZE - 1) >> MMG$GL_VPN_TO_VA;
     /* Compute the size of the buffer in pages */
-    status = exe_std$alophycntg( page_cnt, (void *) &ucb->ucb$ps_xfer_buffer );
-
+    status = exe_std$alophycntg(page_cnt, (void *) &ucb->ucb$ps_xfer_buffer);
 
     /*
      * Allocate a buffer to hold last ATAPI request-sense
      *
      */
 
-    status = exe_std$alophycntg( (SENSE_BUFFER_SIZE + MMG$GL_PAGE_SIZE - 1) >> MMG$GL_VPN_TO_VA,
-                                 (void *) &ucb->ucb$ps_sense_buffer );
-    if ( $FAIL( status) )           /* Allocate the sense buffer (usually, just one page -- plenty) */
-        return;                 /* Just exit on failure */
-
+    status = exe_std$alophycntg(
+                 (SENSE_BUFFER_SIZE + MMG$GL_PAGE_SIZE - 1) >> MMG$GL_VPN_TO_VA,
+                 (void *) &ucb->ucb$ps_sense_buffer);
+    if ($FAIL( status)) /* Allocate the sense buffer (usually, just one page -- plenty) */
+        return; /* Just exit on failure */
 
     /* Allocate SPTEs for double mapping the user buffer (plus guard + spillage) */
 
-    status = ldr_std$alloc_pt( page_cnt+3, (void *) &ucb->ucb$ps_s0_svapte );
-    if ( $FAIL( status ) )
-        return;                 /* Just exit on failure */
-
+    status = ldr_std$alloc_pt(page_cnt + 3, (void *) &ucb->ucb$ps_s0_svapte);
+    if ($FAIL( status ))
+        return; /* Just exit on failure */
 
     /* Compute S0 address of the double map buffer.  Note that "offset" will */
     /* be the number of PTEs, not the offset from SPTBASE.  So, the shift is */
     /* page number to VA, not PTE offset to VA.  A small factor of PTE size. */
 
     offset = ucb->ucb$ps_s0_svapte - mmg$gl_sptbase;
-    ucb->ucb$ps_s0_va = (BYTE *) ( (offset << MMG$GL_VPN_TO_VA) | VA$M_SYSTEM );
+    ucb->ucb$ps_s0_va = (BYTE *) ((offset << MMG$GL_VPN_TO_VA) | VA$M_SYSTEM);
 
 
-    
     /*
      * Allocate and initialize the data buffer CRCTX structure.
      * Then load the map registers that cover our data buffer
      *
      */
 
-    status = ioc$alloc_crctx( adp->adp$l_crab,      /* CRAB address */
-                              &ucb->ucb$ps_xfer_crctx,  /* Address to save the CRCTX address */
-                              SPL$C_IOLOCK8);       /* Lock information */
-    if ( $FAIL( status ) )              /* Did that go okay? */
-        return;                     /* Just return on failure */
-    ctx = ucb->ucb$ps_xfer_crctx;           /* Point to the context we just created */
-    ctx->crctx$l_item_cnt = XFER_BUFFER_MAP_PAGES + 2;  /* Including 2 for guard pages */
-    status = ioc$alloc_cnt_res( adp->adp$l_crab,    /* CRAB address */
-                                ucb->ucb$ps_xfer_crctx, /* xfer buffer CRCTX address */
-                                0,          /* Unused */
-                                0,          /*    :   */
-                                0 );            /*    :   */
-    if ( $FAIL( status ) )              /* Did that go okay? */
-        return;                     /* Just return on failure */
+    status = ioc$alloc_crctx(adp->adp$l_crab, /* CRAB address */
+                             &ucb->ucb$ps_xfer_crctx, /* Address to save the CRCTX address */
+                             SPL$C_IOLOCK8); /* Lock information */
+    if ($FAIL( status )) /* Did that go okay? */
+        return; /* Just return on failure */
+    ctx = ucb->ucb$ps_xfer_crctx; /* Point to the context we just created */
+    ctx->crctx$l_item_cnt = XFER_BUFFER_MAP_PAGES + 2; /* Including 2 for guard pages */
+    status = ioc$alloc_cnt_res(adp->adp$l_crab, /* CRAB address */
+                               ucb->ucb$ps_xfer_crctx, /* xfer buffer CRCTX address */
+                               0, /* Unused */
+                               0, /*    :   */
+                               0); /*    :   */
+    if ($FAIL( status )) /* Did that go okay? */
+        return; /* Just return on failure */
 
-    mmg_std$svaptechk( ucb->ucb$ps_xfer_buffer, 0, 0, &svapte );
+    mmg_std$svaptechk(ucb->ucb$ps_xfer_buffer, 0, 0, &svapte);
     /* Get SVAPTE for the data buffer's VA */
 
-    status = ioc$load_map( adp,             /* ADP address */
-                           ucb->ucb$ps_xfer_crctx,  /* xfer buffer CRCTX address */
-                           svapte,          /* SVAPTE */
-                           (int) ucb->ucb$ps_xfer_buffer & mmg$gl_bwp_mask,
-                           /* Byte offset into the page */
-                           &(ucb->ucb$l_xfer_phy) );
+    status = ioc$load_map(adp, /* ADP address */
+                          ucb->ucb$ps_xfer_crctx, /* xfer buffer CRCTX address */
+                          svapte, /* SVAPTE */
+                          (int) ucb->ucb$ps_xfer_buffer & mmg$gl_bwp_mask,
+                          /* Byte offset into the page */
+                          &(ucb->ucb$l_xfer_phy));
     /* Address to save the resulting DMA address */
-    if ( $FAIL( status ) )              /* Did that go okay? */
-        return;                     /* Just return on failure */
+    if ($FAIL( status )) /* Did that go okay? */
+        return; /* Just return on failure */
 
 
-    
     /*
      * Allocate and align a small space to hold our PRDT table
      * Allocate and initialize the PRDT CRCTX structure.
@@ -3919,94 +3798,87 @@ void unit_init_fork( void *fr3, IDB *idb, DQ_UCB *ucb )
      *
      */
 
-
-    status = exe_std$alononpaged( PRDT_TABLE_SIZE*2, &size, (void **) &ucb->ucb$l_prdt );
-    if ( $FAIL( status) )               /* Allocate the PRDT table space */
-        return;                     /* Just exit on failure */
-    ucb->ucb$l_prdt = (int *)  ( (  ( (int) ucb->ucb$l_prdt ) + PRDT_TABLE_SIZE - 1 ) & PRDT_ADX_MASK );
+    status = exe_std$alononpaged(PRDT_TABLE_SIZE * 2, &size,
+                                 (void **) &ucb->ucb$l_prdt);
+    if ($FAIL( status)) /* Allocate the PRDT table space */
+        return; /* Just exit on failure */
+    ucb->ucb$l_prdt = (int *) ((((int) ucb->ucb$l_prdt) + PRDT_TABLE_SIZE - 1)
+                               & PRDT_ADX_MASK);
     /* Now, force the pointer into alignment. */
     /* This also ensures that it doesn't      */
     /*   cross any page boundaries            */
 
-    status = ioc$alloc_crctx( adp->adp$l_crab,      /* CRAB address */
-                              &ucb->ucb$ps_prdt_crctx,  /* Address to save the CRCTX address */
-                              SPL$C_IOLOCK8);       /* Lock information */
-    if ( $FAIL( status ) )              /* Did that go okay? */
-        return;                     /* Just return on failure */
+    status = ioc$alloc_crctx(adp->adp$l_crab, /* CRAB address */
+                             &ucb->ucb$ps_prdt_crctx, /* Address to save the CRCTX address */
+                             SPL$C_IOLOCK8); /* Lock information */
+    if ($FAIL( status )) /* Did that go okay? */
+        return; /* Just return on failure */
 
-    ctx = ucb->ucb$ps_prdt_crctx;           /* Point to the context we just created */
-    ctx->crctx$l_item_cnt = 3;              /* Including 1 page for spillover and 1 page for guard */
-    status = ioc$alloc_cnt_res( adp->adp$l_crab,    /* CRAB address */
-                                ucb->ucb$ps_prdt_crctx, /* PRDT CRCTX address */
-                                0,          /* Unused */
-                                0,          /*    :   */
-                                0 );            /*    :   */
-    if ( $FAIL( status ) )              /* Did that go okay? */
-        return;                     /* Just return on failure */
+    ctx = ucb->ucb$ps_prdt_crctx; /* Point to the context we just created */
+    ctx->crctx$l_item_cnt = 3; /* Including 1 page for spillover and 1 page for guard */
+    status = ioc$alloc_cnt_res(adp->adp$l_crab, /* CRAB address */
+                               ucb->ucb$ps_prdt_crctx, /* PRDT CRCTX address */
+                               0, /* Unused */
+                               0, /*    :   */
+                               0); /*    :   */
+    if ($FAIL( status )) /* Did that go okay? */
+        return; /* Just return on failure */
 
-    mmg_std$svaptechk( ucb->ucb$l_prdt, 0, 0, &svapte );/* Get SVAPTE for the PRDT's VA */
+    mmg_std$svaptechk(ucb->ucb$l_prdt, 0, 0, &svapte);/* Get SVAPTE for the PRDT's VA */
 
-    status = ioc$load_map( adp,             /* ADP address */
-                           ucb->ucb$ps_prdt_crctx,  /* PRDT CRCTX address */
-                           svapte,          /* SVAPTE */
-                           (int) ucb->ucb$l_prdt & mmg$gl_bwp_mask,
-                           /* Byte offset into the page */
-                           &(ucb->ucb$l_prdt_phy) );
+    status = ioc$load_map(adp, /* ADP address */
+                          ucb->ucb$ps_prdt_crctx, /* PRDT CRCTX address */
+                          svapte, /* SVAPTE */
+                          (int) ucb->ucb$l_prdt & mmg$gl_bwp_mask,
+                          /* Byte offset into the page */
+                          &(ucb->ucb$l_prdt_phy));
     /* Address to save the resulting DMA address */
-    if ( $FAIL( status ) )              /* Did that go okay? */
-        return;                     /* Just return on failure */
+    if ($FAIL( status )) /* Did that go okay? */
+        return; /* Just return on failure */
 
 
-    
     /* Do any controller-specific initialization
      *
      */
 
-
     switch (ucb->ucb$l_ctrl_id)
     {
 
-    case 0x522910B9:            /* The Acer chip */
+    case 0x522910B9: /* The Acer chip */
     {
-        status = ioc$write_pci_config( adp,     /* Write the CDRC -- CD-ROM (ATAPI?) Control Register  */
-                                       crb->crb$l_node,
-                                       0x53,        /* Register at offset 0x53 in config space             */
-                                       IOC$K_BYTE_LANED,
-                                       /* For V71R's benefit, avoid EV6 IOC$K_BYTE feature    */
-                                       0x01<<24 );  /* Enabling CD-ROM DMA, shifted into the MS byte lane  */
-        if ( $FAIL( status ) )          /* Check the return status                             */
-            return;                 /* Return if error                                     */
-        break;                  /* Done with Acer-specific stuff                       */
+        status = ioc$write_pci_config(adp, /* Write the CDRC -- CD-ROM (ATAPI?) Control Register  */
+                                      crb->crb$l_node, 0x53, /* Register at offset 0x53 in config space             */
+                                      IOC$K_BYTE_LANED,
+                                      /* For V71R's benefit, avoid EV6 IOC$K_BYTE feature    */
+                                      0x01 << 24); /* Enabling CD-ROM DMA, shifted into the MS byte lane  */
+        if ($FAIL( status )) /* Check the return status                             */
+            return; /* Return if error                                     */
+        break; /* Done with Acer-specific stuff                       */
     }
 
-
-    case 0xC6931080:            /* The Cypress chip */
+    case 0xC6931080: /* The Cypress chip */
     {
         /*   :              */
-        break;              /* (Nothing to do)  */
-    }                   /*   :              */
+        break; /* (Nothing to do)  */
+    } /*   :              */
 
-
-    default:                /* Anything else (hopefully ISA comes here too!) */
+    default: /* Anything else (hopefully ISA comes here too!) */
     {
         /*   :              */
-        break;              /* (Nothing to do)  */
-    }                   /*   :              */
-
+        break; /* (Nothing to do)  */
+    } /*   :              */
 
     }
 
 
-    
     /*
      * Enable interrupts
      *
      */
 
-    status = ioc$node_function( baseucb.ucb$l_crb, IOC$K_ENABLE_INTR );
-    if ( $FAIL( status ) )          /* Check status and */
-        return;                 /*  simply exit if error */
-
+    status = ioc$node_function(baseucb.ucb$l_crb, IOC$K_ENABLE_INTR);
+    if ($FAIL( status )) /* Check status and */
+        return; /*  simply exit if error */
 
     /*
      * Size the disk (for non-system disks)
@@ -4014,35 +3886,35 @@ void unit_init_fork( void *fr3, IDB *idb, DQ_UCB *ucb )
      *
      */
 
-    status = exe_std$alononpaged( sizeof(IRP), &size, (void **) &irp );
-    if ( $FAIL( status ) )          /* Check status */
-        return;                 /* If it failed, return */
+    status = exe_std$alononpaged(sizeof(IRP), &size, (void **) &irp);
+    if ($FAIL( status )) /* Check status */
+        return; /* If it failed, return */
 
-    memset( irp, 0x0, size );           /* Clear all the memory we just allocated */
-    irp->irp$w_size   = size;           /* And make it all into an IO$_PACKACK or IO$_SENSECHAR IRP */
-    irp->irp$b_type   = DYN$C_IRP;      /*   :   */
-    irp->irp$l_ucb    = &baseucb;       /*   :   */
-    if (&baseucb == sys$ar_bootucb)     /*   :   */
-        irp->irp$l_func   = IO$_PACKACK;    /*   :   */
-    else                    /*   :   */
-        irp->irp$l_func   = IO$_SENSECHAR;  /*   :   */
-    irp->irp$v_physio = 1;          /*   :   */
-    irp->irp$l_pid    = (unsigned int) exe_std$deanonpaged;
-    baseucb.ucb$l_qlen++;           /* Bump up our IO queue length */
-
+    memset(irp, 0x0, size); /* Clear all the memory we just allocated */
+    irp->irp$w_size = size; /* And make it all into an IO$_PACKACK or IO$_SENSECHAR IRP */
+    irp->irp$b_type = DYN$C_IRP; /*   :   */
+    irp->irp$l_ucb = &baseucb; /*   :   */
+    if (&baseucb == sys$ar_bootucb) /*   :   */
+        irp->irp$l_func = IO$_PACKACK; /*   :   */
+    else
+        /*   :   */
+        irp->irp$l_func = IO$_SENSECHAR; /*   :   */
+    irp->irp$v_physio = 1; /*   :   */
+    irp->irp$l_pid = (unsigned int) exe_std$deanonpaged;
+    baseucb.ucb$l_qlen++; /* Bump up our IO queue length */
 
 //#saythis "Don't forget to knock it offline upon a possible failure later!"
-    baseucb.ucb$v_online = 1;           /* Mark the purported disk as on-line */
+    baseucb.ucb$v_online = 1; /* Mark the purported disk as on-line */
     ucb->ucb$r_dq_dt.ucb$l_maxblock = 0x7FFFFFFF;
     /* Give it a temporary (but valid) capacity */
-    baseucb.ucb$v_bsy = 1;          /* Mark the unit as busy */
+    baseucb.ucb$v_bsy = 1; /* Mark the unit as busy */
 
-    ioc_std$initiate( irp, &baseucb );      /* Initiate processing of that IRP */
+    ioc_std$initiate(irp, &baseucb); /* Initiate processing of that IRP */
 
-    return;                 /* And return */
+    return; /* And return */
 
 }
-
+
 /* DQ_QSRV_UNIT_INIT_STRT - Allocate and initialize a PACKACK IRP
  *
  * This routine causes the unit to be added to the QIOServer Client's
@@ -4065,37 +3937,38 @@ void unit_init_fork( void *fr3, IDB *idb, DQ_UCB *ucb )
  *
  */
 
-void dq_qsrv_unit_init_strt( UCB *ucb )
+void dq_qsrv_unit_init_strt(UCB *ucb)
 {
-    IRP         *irp;
-    IRP         *scratch_irp;
-    UCB         *scratch_ucb;
-    int32       size;
-    unsigned int    status;
+    IRP *irp;
+    IRP *scratch_irp;
+    UCB *scratch_ucb;
+    int32 size;
+    unsigned int status;
 
-    status = exe_std$qioserver_new_unit( ucb );
-    if ( $SUCCESS( status ) )
+    status = exe_std$qioserver_new_unit(ucb);
+    if ($SUCCESS( status ))
     {
-        status = exe_std$alononpaged( sizeof( IRP ), &size, (void **) &irp );
+        status = exe_std$alononpaged(sizeof(IRP), &size, (void **) &irp);
         /* Allocate an IRP */
-        if ( $SUCCESS( status ) )
+        if ($SUCCESS( status ))
         {
-            memset( irp, 0x0, size );           /* Clear all the memory we just allocated */
-            irp->irp$w_size   = size;           /* Initialize the IRP */
-            irp->irp$b_type   = DYN$C_IRP;
-            irp->irp$l_ucb    = ucb;            /* And make it into an IO$_PACKACK IRP */
-            irp->irp$l_func   = IO$M_QSRV_CLIENT_UPDATE|IO$_PACKACK;
-            irp->irp$l_sts    = IRP$M_PHYSIO|IRP$M_FAST_FINISH|IRP$M_FINIPL8;
-            irp->irp$l_sts2   = IRP$M_NORETRY|IRP$M_PID_S0_MV;
-            irp->irp$l_pid    = ( unsigned int ) &dq_qsrv_unit_init_comp;
-            ucb->ucb$l_qlen++;              /* Bump up our IO queue length */
-            ioc_std$initiate( irp, ucb );       /* Initiate the request */
+            memset(irp, 0x0, size); /* Clear all the memory we just allocated */
+            irp->irp$w_size = size; /* Initialize the IRP */
+            irp->irp$b_type = DYN$C_IRP;
+            irp->irp$l_ucb = ucb; /* And make it into an IO$_PACKACK IRP */
+            irp->irp$l_func = IO$M_QSRV_CLIENT_UPDATE | IO$_PACKACK;
+            irp->irp$l_sts = IRP$M_PHYSIO | IRP$M_FAST_FINISH | IRP$M_FINIPL8;
+            irp->irp$l_sts2 = IRP$M_NORETRY | IRP$M_PID_S0_MV;
+            irp->irp$l_pid = (unsigned int) &dq_qsrv_unit_init_comp;
+            ucb->ucb$l_qlen++; /* Bump up our IO queue length */
+            ioc_std$initiate(irp, ucb); /* Initiate the request */
             return;
         }
     }
-    ucb->ucb$l_sts &= ~( UCB$M_ONLINE|UCB$M_BSY|UCB$M_VALID );
-    while ( remque( &ucb->ucb$l_ioqfl, &irp ) )
-        ioc_std$altreqcom( SS$_MEDOFL, 0, ( CDRP * ) &irp->irp$l_fqfl, &scratch_irp, &scratch_ucb );
+    ucb->ucb$l_sts &= ~(UCB$M_ONLINE | UCB$M_BSY | UCB$M_VALID);
+    while (remque(&ucb->ucb$l_ioqfl, &irp))
+        ioc_std$altreqcom(SS$_MEDOFL, 0, (CDRP *) &irp->irp$l_fqfl,
+                          &scratch_irp, &scratch_ucb);
 }
 
 /* DQ_QSRV_UNIT_INIT_COMP - De-allocate the IRP and place the unit online
@@ -4115,17 +3988,17 @@ void dq_qsrv_unit_init_strt( UCB *ucb )
  *  none
  */
 
-void dq_qsrv_unit_init_comp( IRP *irp )
+void dq_qsrv_unit_init_comp(IRP *irp)
 {
-    unsigned int    iost1;
-    IRP         *scratch_irp;
-    UCB         *scratch_ucb;
-    UCB         *ucb;
+    unsigned int iost1;
+    IRP *scratch_irp;
+    UCB *scratch_ucb;
+    UCB *ucb;
 
     irp->irp$l_ucb->ucb$l_qlen -= 1;
-    exe_std$deanonpaged( irp );
+    exe_std$deanonpaged(irp);
 }
-
+
 /* LOCATE_DMA_REGS -- Locate the base address for the DMA register block
  *
  * Decide which PCI controller chip, if any, we're using.
@@ -4167,42 +4040,35 @@ void dq_qsrv_unit_init_comp( IRP *irp )
  *
  */
 
-int locate_dma_regs( DQ_UCB *ucb, int   *csr_base )
+int locate_dma_regs(DQ_UCB *ucb, int *csr_base)
 
 {
 
-    ADP     *adp;               /* Address of ADP */
-    CRB     *crb;               /* Address of CRB */
-    int     dma_csr_base;           /* Base DMA CSR address */
-    int     node;               /* PCI node number of this device */
-    int     status;             /* Routine status values */
+    ADP *adp; /* Address of ADP */
+    CRB *crb; /* Address of CRB */
+    int dma_csr_base; /* Base DMA CSR address */
+    int node; /* PCI node number of this device */
+    int status; /* Routine status values */
 
+    adp = baseucb.ucb$ps_adp; /* Get ADP address */
+    crb = baseucb.ucb$l_crb; /* Get CRB address */
 
-    adp = baseucb.ucb$ps_adp;           /* Get ADP address */
-    crb = baseucb.ucb$l_crb;            /* Get CRB address */
+    ucb->ucb$l_ctrl_dma_capable = 0; /* For the moment, disable DMA for this controller */
 
-    ucb->ucb$l_ctrl_dma_capable = 0;        /* For the moment, disable DMA for this controller */
+    status = ioc$read_pci_config(adp, /* Read the vendor ID and device ID fields of the IDE controller */
+                                 crb->crb$l_node, PCI$K_VENDOR_ID, /* *AND* DEVICE_ID! */
+                                 4, &(ucb->ucb$l_ctrl_id));
+    if ($FAIL( status )) /* Failure? */
+        return (0x0); /* If so, then indicate no DMA registers */
 
-    status = ioc$read_pci_config( adp,      /* Read the vendor ID and device ID fields of the IDE controller */
-                                  crb->crb$l_node,
-                                  PCI$K_VENDOR_ID,  /* *AND* DEVICE_ID! */
-                                  4,
-                                  &(ucb->ucb$l_ctrl_id) );
-    if ( $FAIL( status ) )          /* Failure? */
-        return( 0x0 );              /* If so, then indicate no DMA registers */
-
-
-    if (ucb->ucb$l_ctrl_id == 0x522910B9)   /* Acer Aladdin chip? */
+    if (ucb->ucb$l_ctrl_id == 0x522910B9) /* Acer Aladdin chip? */
     {
         /* If so, then... */
-        status = ioc$read_pci_config( adp,  /* Read the BA_V register */
-                                      crb->crb$l_node,
-                                      0x20,
-                                      4,
-                                      &dma_csr_base );
-        if ( $FAIL( status ) )          /* Check the return status */
-            return( 0x0 );          /* Return if error */
-        ucb->ucb$l_ctrl_dma_capable = 1;    /* Else, enable DMA for this controller */
+        status = ioc$read_pci_config(adp, /* Read the BA_V register */
+                                     crb->crb$l_node, 0x20, 4, &dma_csr_base);
+        if ($FAIL( status )) /* Check the return status */
+            return (0x0); /* Return if error */
+        ucb->ucb$l_ctrl_dma_capable = 1; /* Else, enable DMA for this controller */
         dma_csr_base = dma_csr_base & 0xFFFFFFF0;
         /* Mask off the low four bits */
 
@@ -4213,86 +4079,78 @@ int locate_dma_regs( DQ_UCB *ucb, int   *csr_base )
          * out only one channel, and to have multiple adapters in their system.
          */
         node = crb->crb$l_node;
-        if (( node & 1) == 0)
-            *csr_base     =  0x1F0;     /* Use legacy primary addresses    */
+        if ((node & 1) == 0)
+            *csr_base = 0x1F0; /* Use legacy primary addresses    */
         else
         {
-            *csr_base     =  0x170;     /* Use legacy secondary addresses  */
-            dma_csr_base += 0x8;        /* Use secondary group of DMA CSRs */
+            *csr_base = 0x170; /* Use legacy secondary addresses  */
+            dma_csr_base += 0x8; /* Use secondary group of DMA CSRs */
         }
 
-
-
-        return( dma_csr_base );         /* Return the found value */
+        return (dma_csr_base); /* Return the found value */
     }
-
 
 #ifdef CYPRESS_DMA
 
     if ( ucb->ucb$l_ctrl_id == 0xC6931080 ) /* Cypress chip? */
     {
 
-        int     base_node;          /* Base node to look for the Cypress registers */
-        int     i;              /* A counter to look through the Cypress registers */
-        int     temp;               /* Temporary storage for a returned value */
+        int base_node; /* Base node to look for the Cypress registers */
+        int i; /* A counter to look through the Cypress registers */
+        int temp; /* Temporary storage for a returned value */
 
+        base_node = crb->crb$l_node & 0xFFF0; /* Find the base node for this bus */
 
-        base_node = crb->crb$l_node & 0xFFF0;   /* Find the base node for this bus */
-
-        for (i=0; i<16; i++)            /* For each node on this bus... */
+        for (i=0; i<16; i++) /* For each node on this bus... */
 
         {
-            status = ioc$read_pci_config( adp,  /* Read the BA_V register */
+            status = ioc$read_pci_config( adp, /* Read the BA_V register */
                                           base_node+i,
-                                          PCI$K_VENDOR_ID,  /* *AND* DEVICE_ID! */
+                                          PCI$K_VENDOR_ID, /* *AND* DEVICE_ID! */
                                           4,
                                           &temp );
-            if ( $FAIL( status ) )      /* Check the return status */
-                continue;           /* If error, next i */
-            if (temp != 0xC6931080)     /* Is this a Cypress register block? */
-                continue;           /* If not, next i */
+            if ( $FAIL( status ) ) /* Check the return status */
+                continue; /* If error, next i */
+            if (temp != 0xC6931080) /* Is this a Cypress register block? */
+                continue; /* If not, next i */
 
-            status = ioc$read_pci_config( adp,  /* Read the BA_V register */
+            status = ioc$read_pci_config( adp, /* Read the BA_V register */
                                           base_node+i,
-                                          PCI$K_REVISION_ID,    /* *AND* PROGRAMMING_IF! */
+                                          PCI$K_REVISION_ID, /* *AND* PROGRAMMING_IF! */
                                           4,
                                           &temp );
-            if ( $FAIL( status ) )      /* Check the return status */
-                return( 0x0 );          /* Return if error */
-            temp = temp & 0xFFFFFF00;       /* Mask off the revision byte */
-            if (temp != 0x01018000)     /* Is this a Cypress primary IDE register block? */
-                continue;           /* If not, next i */
+            if ( $FAIL( status ) ) /* Check the return status */
+                return( 0x0 ); /* Return if error */
+            temp = temp & 0xFFFFFF00; /* Mask off the revision byte */
+            if (temp != 0x01018000) /* Is this a Cypress primary IDE register block? */
+                continue; /* If not, next i */
 
-
-            status = ioc$read_pci_config( adp,  /* Read the BA_V register */
+            status = ioc$read_pci_config( adp, /* Read the BA_V register */
                                           base_node+i,
                                           0x20,
                                           4,
                                           &dma_csr_base );
-            if ( $FAIL( status ) )      /* Check the return status */
-                return( 0x0 );          /* Return if error */
-            ucb->ucb$l_ctrl_dma_capable = 1;    /* Else enable DMA for this controller */
+            if ( $FAIL( status ) ) /* Check the return status */
+                return( 0x0 ); /* Return if error */
+            ucb->ucb$l_ctrl_dma_capable = 1; /* Else enable DMA for this controller */
             dma_csr_base = dma_csr_base & 0xFFFFFFF0;
             /* Mask off the low four bits */
-            return( dma_csr_base );     /* Return the found value */
+            return( dma_csr_base ); /* Return the found value */
 
-        }                   /* Next i */
+        } /* Next i */
 
-        return( 0x0 );          /* Can't find the regs; indicate no DMA registers */
+        return( 0x0 ); /* Can't find the regs; indicate no DMA registers */
         /* And leave ucb$l_ctrl_dma_capable cleared */
         /* (We probably should bugcheck here */
 
     }
 
-
 #endif
 
-
-    return( 0x0 );              /* Nothing we recognize; indicate no DMA registers */
+    return (0x0); /* Nothing we recognize; indicate no DMA registers */
     /* And leave ucb$l_ctrl_dma_capable cleared */
 
 }
-
 
 
 /* REGDUMP - Register Dump Routine
@@ -4317,49 +4175,48 @@ int locate_dma_regs( DQ_UCB *ucb, int   *csr_base )
  *
  */
 
-void regdump( BYTE *buffer, int arg_2, DQ_UCB *ucb )
+void regdump(BYTE *buffer, int arg_2, DQ_UCB *ucb)
 
 {
 
-    TRACE( 0x03500000 + arg_2 );        /* REGDUMP beginning */
+    TRACE( 0x03500000 + arg_2 ); /* REGDUMP beginning */
 
-    buffer += 5;                /* Advance pointer */
+    buffer += 5; /* Advance pointer */
 
-    *buffer++ = 's';                /* Bracket the buffer */
-    *buffer++ = 's';                /*   :   */
-    *buffer++ = 's';                /*   :   */
-    *buffer++ = 's';                /*   :   */
+    *buffer++ = 's'; /* Bracket the buffer */
+    *buffer++ = 's'; /*   :   */
+    *buffer++ = 's'; /*   :   */
+    *buffer++ = 's'; /*   :   */
 
     /* Put all of the registers into the buffer. */
     /* Pad to an even longword                   */
-    *buffer++ = arg_2;              /* Copy over the marker                      */
-    *buffer++ = inp( ucb, RD_DMA_CMD  );    /* Get the DMA command register              */
-    *buffer++ = inp( ucb, RD_DMA_DS1  );    /* Get the DMA device-specific register 1    */
-    *buffer++ = inp( ucb, RD_DMA_STS  );    /* Get the DMA status register               */
-    *buffer++ = inp( ucb, RD_DMA_DS2  );    /* Get the DMA device-specific register 2    */
-    *buffer++ = inp( ucb, RD_DMA_AD0  );    /* Get the DMA PRDT Address Register 0       */
-    *buffer++ = inp( ucb, RD_DMA_AD1  );    /* Get the DMA PRDT Address Register 1       */
-    *buffer++ = inp( ucb, RD_DMA_AD2  );    /* Get the DMA PRDT Address Register 2       */
-    *buffer++ = inp( ucb, RD_DMA_AD3  );    /* Get the DMA PRDT Address Register 3       */
-    *buffer++ = inp( ucb, RD_ERROR    );    /* Get error                                 */
-    *buffer++ = inp( ucb, RD_SEC_CNT  );    /* Get sector count                          */
-    *buffer++ = inp( ucb, RD_SECTOR   );    /* Get sector number                         */
-    *buffer++ = inp( ucb, RD_CYL_LO   );    /* Get cylinder number (low)                 */
-    *buffer++ = inp( ucb, RD_CYL_HI   );    /* Get cylinder number (high)                */
-    *buffer++ = inp( ucb, RD_DRV_HD   );    /* Get drive/head information                */
-    *buffer++ = inp( ucb, RD_STS      );    /* Get status, quashing any pending interrupts as well */
-    *buffer++ = 0;              /* Round up to an even                       */
-    *buffer++ = 0;              /*  number of longwords                      */
+    *buffer++ = arg_2; /* Copy over the marker                      */
+    *buffer++ = inp(ucb, RD_DMA_CMD); /* Get the DMA command register              */
+    *buffer++ = inp(ucb, RD_DMA_DS1); /* Get the DMA device-specific register 1    */
+    *buffer++ = inp(ucb, RD_DMA_STS); /* Get the DMA status register               */
+    *buffer++ = inp(ucb, RD_DMA_DS2); /* Get the DMA device-specific register 2    */
+    *buffer++ = inp(ucb, RD_DMA_AD0); /* Get the DMA PRDT Address Register 0       */
+    *buffer++ = inp(ucb, RD_DMA_AD1); /* Get the DMA PRDT Address Register 1       */
+    *buffer++ = inp(ucb, RD_DMA_AD2); /* Get the DMA PRDT Address Register 2       */
+    *buffer++ = inp(ucb, RD_DMA_AD3); /* Get the DMA PRDT Address Register 3       */
+    *buffer++ = inp(ucb, RD_ERROR); /* Get error                                 */
+    *buffer++ = inp(ucb, RD_SEC_CNT); /* Get sector count                          */
+    *buffer++ = inp(ucb, RD_SECTOR); /* Get sector number                         */
+    *buffer++ = inp(ucb, RD_CYL_LO); /* Get cylinder number (low)                 */
+    *buffer++ = inp(ucb, RD_CYL_HI); /* Get cylinder number (high)                */
+    *buffer++ = inp(ucb, RD_DRV_HD); /* Get drive/head information                */
+    *buffer++ = inp(ucb, RD_STS); /* Get status, quashing any pending interrupts as well */
+    *buffer++ = 0; /* Round up to an even                       */
+    *buffer++ = 0; /*  number of longwords                      */
 
-    *buffer++ = 'e';                /* Add tail of buffer bracket */
-    *buffer++ = 'e';                /*   :   */
-    *buffer++ = 'e';                /*   :   */
-    *buffer++ = 'e';                /*   :   */
+    *buffer++ = 'e'; /* Add tail of buffer bracket */
+    *buffer++ = 'e'; /*   :   */
+    *buffer++ = 'e'; /*   :   */
+    *buffer++ = 'e'; /*   :   */
 
-    TRACE( 0x03510000 + arg_2 );        /* REGDUMP ending */
+    TRACE( 0x03510000 + arg_2 ); /* REGDUMP ending */
 
 }
-
 
 
 /* STARTIO - Start I/O Routine
@@ -4384,289 +4241,281 @@ void regdump( BYTE *buffer, int arg_2, DQ_UCB *ucb )
  *
  */
 
-void startio( KPB *kpb )
+void startio(KPB *kpb)
 
 {
 
-    int     iost1, iost2;           /* IOSB fields */
-    int     temp;               /* Temporary value */
-    DQ_UCB  *ucb;               /* Pointer to UCB */
-    IRP     *irp;               /* Pointer to IRP */
-    int     status;
+    int iost1, iost2; /* IOSB fields */
+    int temp; /* Temporary value */
+    DQ_UCB *ucb; /* Pointer to UCB */
+    IRP *irp; /* Pointer to IRP */
+    int status;
 
     /* Set up necessary pointers */
 
-
-    ucb = (DQ_UCB *) kpb->kpb$ps_ucb;       /* Get UCB pointer */
+    ucb = (DQ_UCB *) kpb->kpb$ps_ucb; /* Get UCB pointer */
 
 //#saythis "Temporary test for the V_BSY bit.."
-    if (baseucb.ucb$v_bsy == 0)         /* Is this an expected interrupt?            */
-        BPTRACE( 0x010E0000 );          /* STARTIO starting *WITHOUT* V_BSY!          */
+    if (baseucb.ucb$v_bsy == 0) /* Is this an expected interrupt?            */
+        BPTRACE( 0x010E0000 ); /* STARTIO starting *WITHOUT* V_BSY!          */
 
-    irp = kpb->kpb$ps_irp;          /* Get IRP pointer */
-    ucb->ucb$ps_kpb = kpb;          /* Save the KPB address */
-    ucb->ucb$l_media.lbn = irp->irp$l_media;    /* Copy the disk address */
-
+    irp = kpb->kpb$ps_irp; /* Get IRP pointer */
+    ucb->ucb$ps_kpb = kpb; /* Save the KPB address */
+    ucb->ucb$l_media.lbn = irp->irp$l_media; /* Copy the disk address */
 
 //#saythis "Temporary new copies to hack around VBNMAPFAIL crashes..."
 
-    if (baseucb.ucb$l_bcnt != irp->irp$l_bcnt)  /* Is bcnt correct?                            */
+    if (baseucb.ucb$l_bcnt != irp->irp$l_bcnt) /* Is bcnt correct?                            */
     {
         /* If not, then...                             */
 #ifdef TRACE_COMMON             /*                                             */
-        fixup_bcnt++;               /* Bump the event counter                      */
+        fixup_bcnt++; /* Bump the event counter                      */
 #endif                      /*                                             */
-        TRACE(   0x01200000 );          /* UCB$L_BCNT corruption (by IRP over-copy!)   */
+        TRACE( 0x01200000 ); /* UCB$L_BCNT corruption (by IRP over-copy!)   */
 //      BPTRACE( 0x01200000 );          /* Blammo!                                     */
-        baseucb.ucb$l_bcnt   = irp->irp$l_bcnt; /* Copy the bcnt from the IRP                  */
+        baseucb.ucb$l_bcnt = irp->irp$l_bcnt; /* Copy the bcnt from the IRP                  */
     }
 
-    if (baseucb.ucb$l_boff != irp->irp$l_boff)  /* Is boff correct?                            */
+    if (baseucb.ucb$l_boff != irp->irp$l_boff) /* Is boff correct?                            */
     {
         /* If not, then...                             */
 #ifdef TRACE_COMMON             /*                                             */
-        fixup_boff++;               /* Bump the event counter                      */
+        fixup_boff++; /* Bump the event counter                      */
 #endif                      /*                                             */
-        TRACE(   0x01210000 );          /* UCB$L_BOFF corruption (by IRP over-copy!)   */
+        TRACE( 0x01210000 ); /* UCB$L_BOFF corruption (by IRP over-copy!)   */
 //      BPTRACE( 0x01210000 );          /* Blammo!                                     */
-        baseucb.ucb$l_boff   = irp->irp$l_boff; /* Copy the boff from the IRP                  */
+        baseucb.ucb$l_boff = irp->irp$l_boff; /* Copy the boff from the IRP                  */
     }
 
-    if (baseucb.ucb$l_svapte != irp->irp$l_svapte)  /* Is bcnt correct?                    */
+    if (baseucb.ucb$l_svapte != irp->irp$l_svapte) /* Is bcnt correct?                    */
     {
         /* If not, then...                     */
 #ifdef TRACE_COMMON             /*                                             */
-        fixup_svapte++;             /* Bump the event counter                      */
+        fixup_svapte++; /* Bump the event counter                      */
 #endif                      /*                                             */
-        TRACE(   0x01220000 );          /* UCB$L_SVAPTE corruption (by IRP over-copy!) */
+        TRACE( 0x01220000 ); /* UCB$L_SVAPTE corruption (by IRP over-copy!) */
 //      BPTRACE( 0x01220000 );          /* Blammo!                                     */
-        baseucb.ucb$l_svapte  = irp->irp$l_svapte;  /* Copy the bcnt from the IRP          */
+        baseucb.ucb$l_svapte = irp->irp$l_svapte; /* Copy the bcnt from the IRP          */
     }
 
 //#saythis "...End of Temporary new copies to hack around VBNMAPFAIL crashes"
 
+    ucb->ucb$l_bcr = baseucb.ucb$l_bcnt; /* Copy remaining byte count */
 
-    ucb->ucb$l_bcr = baseucb.ucb$l_bcnt;    /* Copy remaining byte count */
-
-    TRACE( 0x01000000 +   (irp->irp$v_fcode    )           );   /* STARTIO starting...         */
-    TRACE( 0x01010000 + ( ( (int) irp>>16      ) & 0xFFFF) );   /*   :  Log starting IRP_hi    */
-    TRACE( 0x01020000 + ( ( (int) irp          ) & 0xFFFF) );   /*   :  Log starting IRP_lo    */
-    TRACE( 0x01030000 + ( (irp->irp$l_media>>16) & 0xFFFF) );   /*   :  Log starting LBA_hi    */
-    TRACE( 0x01040000 + ( (irp->irp$l_media    ) & 0xFFFF) );   /*   :  Log starting LBA_lo    */
-    TRACE( 0x01050000 + ( (baseucb.ucb$l_bcnt  ) & 0xFFFF) );   /*   :  Log starting bytecount */
-
+    TRACE( 0x01000000 + (irp->irp$v_fcode ) ); /* STARTIO starting...         */
+    TRACE( 0x01010000 + ( ( (int) irp>>16 ) & 0xFFFF) ); /*   :  Log starting IRP_hi    */
+    TRACE( 0x01020000 + ( ( (int) irp ) & 0xFFFF) ); /*   :  Log starting IRP_lo    */
+    TRACE( 0x01030000 + ( (irp->irp$l_media>>16) & 0xFFFF) ); /*   :  Log starting LBA_hi    */
+    TRACE( 0x01040000 + ( (irp->irp$l_media ) & 0xFFFF) ); /*   :  Log starting LBA_lo    */
+    TRACE( 0x01050000 + ( (baseucb.ucb$l_bcnt ) & 0xFFFF) ); /*   :  Log starting bytecount */
 
     /* Check that either volume is valid or this is a physical I/O */
 
-    if ( !irp->irp$v_physio && !baseucb.ucb$v_valid)
+    if (!irp->irp$v_physio && !baseucb.ucb$v_valid)
     {
-        ioc_std$reqcom( SS$_VOLINV, 0, (UCB *) ucb );
+        ioc_std$reqcom(SS$_VOLINV, 0, (UCB *) ucb);
         /* Finish I/O */
-        BPTRACE( 0x01100000 );          /* BREAK: STARTIO punting on volume not valid... */
-        return;                 /* And return */
+        BPTRACE( 0x01100000 ); /* BREAK: STARTIO punting on volume not valid... */
+        return; /* And return */
     }
 
     /* Interpret the LBN according to PHYSIO bit */
 
-    if (irp->irp$v_physio)          /* Convert from physical format? */
+    if (irp->irp$v_physio) /* Convert from physical format? */
     {
-        switch (irp->irp$v_fcode)       /* Does this command use an address? */
+        switch (irp->irp$v_fcode)
+            /* Does this command use an address? */
         {
 
-        case IO$_READLBLK:          /* These shouldn't occur with v_phys set, right? */
-        case IO$_WRITELBLK:         /*    :   */
-            BPTRACE( 0x01110000 );      /* BREAK: IO$_READLBLK or IO$_WRITELBLOCK with V_PHYS set */
+        case IO$_READLBLK: /* These shouldn't occur with v_phys set, right? */
+        case IO$_WRITELBLK: /*    :   */
+            BPTRACE( 0x01110000 ); /* BREAK: IO$_READLBLK or IO$_WRITELBLOCK with V_PHYS set */
             /* Fall through anyway... */
-        case IO$_SEEK:          /* These can be physical and use an address */
-        case IO$_WRITECHECK:        /*    :   */
-        case IO$_READPBLK:          /*    :   */
-        case IO$_WRITEPBLK:         /*    :   */
+        case IO$_SEEK: /* These can be physical and use an address */
+        case IO$_WRITECHECK: /*    :   */
+        case IO$_READPBLK: /*    :   */
+        case IO$_WRITEPBLK: /*    :   */
         {
             /* So range-check the address */
-            if (    (ucb->ucb$l_media.pa.sec == 0)              /* [1:n]   */
-                    || (ucb->ucb$l_media.pa.sec >  baseucb.ucb$b_sectors )  /*   :     */
-                    || (ucb->ucb$l_media.pa.trk >= baseucb.ucb$b_tracks  )  /* [0:n-1] */
-                    || (ucb->ucb$l_media.pa.cyl >= baseucb.ucb$w_cylinders ) )  /* [0:n-1] */
+            if ((ucb->ucb$l_media.pa.sec == 0) /* [1:n]   */
+                    || (ucb->ucb$l_media.pa.sec > baseucb.ucb$b_sectors) /*   :     */
+                    || (ucb->ucb$l_media.pa.trk >= baseucb.ucb$b_tracks) /* [0:n-1] */
+                    || (ucb->ucb$l_media.pa.cyl >= baseucb.ucb$w_cylinders)) /* [0:n-1] */
             {
-                BPTRACE( 0x0112000 );   /* BREAK: CHS address out of range */
-                ioc_std$reqcom( SS$_BADPARAM, 0, (UCB *) ucb );
+                BPTRACE( 0x0112000 ); /* BREAK: CHS address out of range */
+                ioc_std$reqcom(SS$_BADPARAM, 0, (UCB *) ucb);
                 /* Complete the I/O failing */
-                return;         /* And return */
+                return; /* And return */
                 break;
             }
         }
 
-        default:                /* No address used -- no need to range-check */
+        default: /* No address used -- no need to range-check */
             break;
 
         }
 
-        ucb->ucb$l_media.lbn = (   (   (   (ucb->ucb$l_media.pa.cyl * baseucb.ucb$b_tracks )
-                                           + ucb->ucb$l_media.pa.trk) * baseucb.ucb$b_sectors )
-                                   + ucb->ucb$l_media.pa.sec - 1 );
+        ucb->ucb$l_media.lbn = ((((ucb->ucb$l_media.pa.cyl
+                                   * baseucb.ucb$b_tracks) + ucb->ucb$l_media.pa.trk)
+                                 * baseucb.ucb$b_sectors) + ucb->ucb$l_media.pa.sec - 1);
         /* Convert the physical address to an LBN */
     }
-
 
     /* Remember the transfer parameters */
 
     ucb->ucb$l_org_media = ucb->ucb$l_media.lbn;/* LBN */
-    ucb->ucb$l_org_svapte= baseucb.ucb$l_svapte;/* Page table address */
-    ucb->ucb$l_org_bcnt  = baseucb.ucb$l_bcnt;  /* Byte count */
-    ucb->ucb$l_org_boff  = baseucb.ucb$l_boff;  /* Byte offset */
+    ucb->ucb$l_org_svapte = baseucb.ucb$l_svapte;/* Page table address */
+    ucb->ucb$l_org_bcnt = baseucb.ucb$l_bcnt; /* Byte count */
+    ucb->ucb$l_org_boff = baseucb.ucb$l_boff; /* Byte offset */
 
     /* Handle based on function code */
 
-    TRACE( 0x01060000 );            /* Log our calling reqchan... */
-    iost1 = ioc$kp_reqchan( kpb, KPB$K_LOW );   /* Get the data channel */
-    if ( $FAIL( iost1 ) )           /* Check for failure to get channel */
+    TRACE( 0x01060000 ); /* Log our calling reqchan... */
+    iost1 = ioc$kp_reqchan(kpb, KPB$K_LOW); /* Get the data channel */
+    if ($FAIL( iost1 )) /* Check for failure to get channel */
     {
-        ioc_std$reqcom( iost1, 0, (UCB *) ucb );/* Finish I/O */
+        ioc_std$reqcom(iost1, 0, (UCB *) ucb);/* Finish I/O */
         BPTRACE( 0x01130000 + (iost1 &0xFFFF) );/* BREAK: STARTIO punting on failure to get channel... */
-        return;                 /* And exit */
+        return; /* And exit */
     }
 
-    iost1 = SS$_ILLIOFUNC;          /* Assume illegal I/O function */
-    iost2 = 0;                  /* Assume no data transferred */
+    iost1 = SS$_ILLIOFUNC; /* Assume illegal I/O function */
+    iost2 = 0; /* Assume no data transferred */
 
     switch (irp->irp$v_fcode)
     {
 
     case IO$_NOP:
-        BPTRACE( 0x01070000 );      /* BREAK: IO$_NOP */
-        iost1 = SS$_NORMAL;         /* Status is "normal" */
-        break;              /*  and complete the I/O */
+        BPTRACE( 0x01070000 ); /* BREAK: IO$_NOP */
+        iost1 = SS$_NORMAL; /* Status is "normal" */
+        break; /*  and complete the I/O */
 
     case IO$_UNLOAD:
-        BPTRACE( 0x01070001 );      /* BREAK: IO$_UNLOAD */
-        iost1 = unload( ucb );      /* Call the unload function */
-        break;              /*  and complete the I/O */
+        BPTRACE( 0x01070001 ); /* BREAK: IO$_UNLOAD */
+        iost1 = unload(ucb); /* Call the unload function */
+        break; /*  and complete the I/O */
 
     case IO$_SEEK:
-        BPTRACE( 0x01070002 );      /* BREAK: IO$_SEEK */
-        iost1 = seek( ucb );        /* Call the SEEK function */
-        break;              /*  and complete the I/O */
+        BPTRACE( 0x01070002 ); /* BREAK: IO$_SEEK */
+        iost1 = seek(ucb); /* Call the SEEK function */
+        break; /*  and complete the I/O */
 
     case IO$_DRVCLR:
-        BPTRACE( 0x01070004 );      /* BREAK: IO$_DRVCLR */
-        iost1 = drvclr( ucb );      /* Call the DRIVE CLEAR function */
-        break;              /*  and complete the I/O */
+        BPTRACE( 0x01070004 ); /* BREAK: IO$_DRVCLR */
+        iost1 = drvclr(ucb); /* Call the DRIVE CLEAR function */
+        break; /*  and complete the I/O */
 
     case IO$_PACKACK:
-        iost1 = packack( ucb, 0 );      /* Call PACKACK w/o asserting the init_time_flag */
-        break;              /*  and complete the I/O */
+        iost1 = packack(ucb, 0); /* Call PACKACK w/o asserting the init_time_flag */
+        break; /*  and complete the I/O */
 
     case IO$_READRCT:
-        BPTRACE( 0x01070009 );      /* BREAK: IO$_READRCT */
-        iost1 = readrct( ucb );     /* Get back the drive data */
+        BPTRACE( 0x01070009 ); /* BREAK: IO$_READRCT */
+        iost1 = readrct(ucb); /* Get back the drive data */
         iost1 = (iost1 & 0xFFFF) + (baseucb.ucb$l_bcnt << 16);
-        break;              /*  and complete the I/O */
+        break; /*  and complete the I/O */
 
     case IO$_AVAILABLE:
-        BPTRACE( 0x01070011 );      /* BREAK: IO$_AVAILABLE */
-        iost1 = unload( ucb );      /* Call the unload function */
-        break;              /*  and complete the I/O */
+        BPTRACE( 0x01070011 ); /* BREAK: IO$_AVAILABLE */
+        iost1 = unload(ucb); /* Call the unload function */
+        break; /*  and complete the I/O */
 
     case IO$_DIAGNOSE:
         ucb->ucb$l_sense_key = 0;
-        status = diagnose( ucb );           /* Call the audio function */
-        temp  = baseucb.ucb$l_bcnt - ucb->ucb$l_bcr;
+        status = diagnose(ucb); /* Call the audio function */
+        temp = baseucb.ucb$l_bcnt - ucb->ucb$l_bcr;
         iost1 = SS$_NORMAL | ((temp & 0xFFFF) << 16);
         iost2 = ((ucb->ucb$l_sense_key & 0xFF) << 24);
-        break;              /*  and complete the I/O */
+        break; /*  and complete the I/O */
 
     case IO$_FORMAT:
-        BPTRACE( 0x0107001E );      /* BREAK: IO$_FORMAT */
-        iost1 = SS$_UNSUPPORTED;        /* Return UNSUPPORTED error for now */
-        break;              /*  and complete the I/O */
+        BPTRACE( 0x0107001E ); /* BREAK: IO$_FORMAT */
+        iost1 = SS$_UNSUPPORTED; /* Return UNSUPPORTED error for now */
+        break; /*  and complete the I/O */
 
     case IO$_SENSECHAR:
-        iost1 = packack( ucb, 1 );      /* Call PACKACK asserting the init_time_flag */
-        break;              /*  and complete the I/O */
+        iost1 = packack(ucb, 1); /* Call PACKACK asserting the init_time_flag */
+        break; /*  and complete the I/O */
 
     case IO$_WRITECHECK:
-        BPTRACE( 0x0107000A );      /* BREAK: IO$_WRITECHECK */
+        BPTRACE( 0x0107000A ); /* BREAK: IO$_WRITECHECK */
     case IO$_READLBLK:
     case IO$_READPBLK:
-        iost1 = read( ucb );        /* Read the required blocks */
-        if ( $FAIL( iost1 ) )       /* Did the read go akay? */
-            break;              /* If not, bug out now */
-        if ( IS_SET( irp->irp$l_func, IO$M_DATACHECK ) )
+        iost1 = read(ucb); /* Read the required blocks */
+        if ($FAIL( iost1 )) /* Did the read go akay? */
+            break; /* If not, bug out now */
+        if (IS_SET( irp->irp$l_func, IO$M_DATACHECK ))
             /* Datacheck requested? */
-            iost1 = datacheck( ucb );   /*  Yes, do the datacheck */
-        temp  = baseucb.ucb$l_bcnt - ucb->ucb$l_bcr;
+            iost1 = datacheck(ucb); /*  Yes, do the datacheck */
+        temp = baseucb.ucb$l_bcnt - ucb->ucb$l_bcr;
         iost1 = (iost1 & 0xFFFF) + (temp << 16);
-        break;              /*  and complete the I/O */
+        break; /*  and complete the I/O */
 
     case IO$_WRITELBLK:
     case IO$_WRITEPBLK:
-        iost1 = write( ucb );       /* Write the required blocks */
-        if ( $FAIL( iost1 ) )       /* Did the read go akay? */
-            break;              /* If not, bug out now */
-        if ( IS_SET( irp->irp$l_func, IO$M_DATACHECK ) )
+        iost1 = write(ucb); /* Write the required blocks */
+        if ($FAIL( iost1 )) /* Did the read go akay? */
+            break; /* If not, bug out now */
+        if (IS_SET( irp->irp$l_func, IO$M_DATACHECK ))
             /* Datacheck requested? */
-            iost1 = datacheck( ucb );   /*  Yes, do the datacheck */
-        temp  = baseucb.ucb$l_bcnt - ucb->ucb$l_bcr;
+            iost1 = datacheck(ucb); /*  Yes, do the datacheck */
+        temp = baseucb.ucb$l_bcnt - ucb->ucb$l_bcr;
         iost1 = (iost1 & 0xFFFF) + (temp << 16);
-        break;              /*  and complete the I/O */
+        break; /*  and complete the I/O */
 
     case IO$_AUDIO:
-        BPTRACE( 0x01070037 );      /* BREAK: IO$_AUDIO (IO$_READPROMPT) */
-        iost1 = SS$_UNSUPPORTED;        /* Return UNSUPPORTED error for now */
+        BPTRACE( 0x01070037 ); /* BREAK: IO$_AUDIO (IO$_READPROMPT) */
+        iost1 = SS$_UNSUPPORTED; /* Return UNSUPPORTED error for now */
         /*          iost1 = audio_audio( ucb );     /@ Call the audio function */
-        break;              /*  and complete the I/O */
+        break; /*  and complete the I/O */
 
-    default:                /* Better not happen! */
-        BPTRACE( 0x01071FFF );      /* BREAK: Default case taken at IO$_function dispatch */
-        break;              /* But if it does, ILLIOFUNC gets returned */
+    default: /* Better not happen! */
+        BPTRACE( 0x01071FFF ); /* BREAK: Default case taken at IO$_function dispatch */
+        break; /* But if it does, ILLIOFUNC gets returned */
 
     }
 
-
-    TRACE( 0x01FC0000 + ( iost1      & 0xFFFF));/* STARTIO finishing... (IOSB_1 low word)  */
+    TRACE( 0x01FC0000 + ( iost1 & 0xFFFF));/* STARTIO finishing... (IOSB_1 low word)  */
     TRACE( 0x01FD0000 + ((iost1>>16) & 0xFFFF));/* STARTIO finishing... (IOSB_1 high word) */
-    TRACE( 0x01FE0000 + ( iost2      & 0xFFFF));/* STARTIO finishing... (IOSB_2 low word)  */
+    TRACE( 0x01FE0000 + ( iost2 & 0xFFFF));/* STARTIO finishing... (IOSB_2 low word)  */
     TRACE( 0x01FF0000 + ((iost2>>16) & 0xFFFF));/* STARTIO finishing... (IOSB_2 high word) */
-    ioc_std$relchan( (UCB *) ucb );     /* Release the data channel */
+    ioc_std$relchan((UCB *) ucb); /* Release the data channel */
 
 //#saythis "Temporary test for the V_BSY bit..."
-    if (baseucb.ucb$v_bsy == 0)         /* Is this an expected interrupt?            */
-        BPTRACE( 0x010F0000 );          /* STARTIO ending *WITHOUT* V_BSY!           */
-
+    if (baseucb.ucb$v_bsy == 0) /* Is this an expected interrupt?            */
+        BPTRACE( 0x010F0000 ); /* STARTIO ending *WITHOUT* V_BSY!           */
 
 //#saythis "Temporary test for UCB corruption..."
 
-    if (baseucb.ucb$l_bcnt != irp->irp$l_bcnt)  /* Is bcnt correct?                            */
+    if (baseucb.ucb$l_bcnt != irp->irp$l_bcnt) /* Is bcnt correct?                            */
     {
         /* If not, then...                             */
 //      TRACE(   0x01300000 );          /* UCB$L_BCNT corruption (by IRP over-copy!)   */
-        BPTRACE( 0x01300000 );          /* Blammo!                                     */
+        BPTRACE( 0x01300000 ); /* Blammo!                                     */
     }
 
-    if (baseucb.ucb$l_boff != irp->irp$l_boff)  /* Is boff correct?                            */
+    if (baseucb.ucb$l_boff != irp->irp$l_boff) /* Is boff correct?                            */
     {
         /* If not, then...                             */
 //      TRACE(   0x01310000 );          /* UCB$L_BOFF corruption (by IRP over-copy!)   */
-        BPTRACE( 0x01310000 );          /* Blammo!                                     */
+        BPTRACE( 0x01310000 ); /* Blammo!                                     */
     }
 
-    if (baseucb.ucb$l_svapte != irp->irp$l_svapte)  /* Is bcnt correct?                    */
+    if (baseucb.ucb$l_svapte != irp->irp$l_svapte) /* Is bcnt correct?                    */
     {
         /* If not, then...                     */
 //      TRACE(   0x01320000 );          /* UCB$L_SVAPTE corruption (by IRP over-copy!) */
-        BPTRACE( 0x01320000 );          /* Blammo!                                     */
+        BPTRACE( 0x01320000 ); /* Blammo!                                     */
     }
 
 //#saythis "...End of temporary new copies to hack around VBNMAPFAIL crashes"
 
-
-    ioc_std$reqcom( iost1, iost2, (UCB *) ucb );/* Finish I/O, providing status in IOSB */
-    return;                 /* And return */
+    ioc_std$reqcom(iost1, iost2, (UCB *) ucb);/* Finish I/O, providing status in IOSB */
+    return; /* And return */
 
 }
 
 
-
 /* PACKACK - Perform PACKACK operation
  *
  * This routine is used to determine information about the drive so
@@ -4720,134 +4569,133 @@ void startio( KPB *kpb )
  *
  */
 
-
-int packack( DQ_UCB *ucb, int init_time_flag )
+int packack(DQ_UCB *ucb, int init_time_flag)
 
 {
 
-    char  model[DTN$K_NAMELEN_MAX+1] = "Nonexistent IDE/ATAPI disk";
+    char model[DTN$K_NAMELEN_MAX + 1] = "Nonexistent IDE/ATAPI disk";
     /* Model name upon failure */
-    int   mod_len = 26;             /* Length of model string (*WITHOUT* trailing <null>!) */
-    DTN   *dtn;                 /* Dummy DTN pointer */
-    int   status;               /* Return status from various routines */
-    int   retry;                /* Retry counter */
-    int   cyl_lo;               /* Drive CYL_LO register */
-    int   cyl_hi;               /* Drive CYL_HI register */
-    int   drvsts;               /* Drive status register */
+    int mod_len = 26; /* Length of model string (*WITHOUT* trailing <null>!) */
+    DTN *dtn; /* Dummy DTN pointer */
+    int status; /* Return status from various routines */
+    int retry; /* Retry counter */
+    int cyl_lo; /* Drive CYL_LO register */
+    int cyl_hi; /* Drive CYL_HI register */
+    int drvsts; /* Drive status register */
 
+    ucb->ucb$l_sense_key = 0xDEADDEAD; /* Forget any remembered sense key */
+    ucb->ucb$l_asc = 0xDEADDEAD; /* Forget any remembered additional sense code */
+    ucb->ucb$l_ascq = 0xDEADDEAD; /* Forget any remembered additional sense code qualifier */
 
-    ucb->ucb$l_sense_key = 0xDEADDEAD;      /* Forget any remembered sense key */
-    ucb->ucb$l_asc       = 0xDEADDEAD;      /* Forget any remembered additional sense code */
-    ucb->ucb$l_ascq      = 0xDEADDEAD;      /* Forget any remembered additional sense code qualifier */
-
-    status = fetch_drive_info( ucb, 0, init_time_flag );
+    status = fetch_drive_info(ucb, 0, init_time_flag);
     /* Try an ATA get_info */
 
-    if ( $FAIL( status ) )          /* Did it fail? */
+    if ($FAIL( status )) /* Did it fail? */
     {
         /* If so, then read "signature", just in case */
-        drvsts = inp( ucb, RD_STS );        /* Read device status, quashing any pending interupts as well */
-        cyl_hi = inp( ucb, RD_CYL_HI );     /* Read high order cylinder bits */
-        cyl_lo = inp( ucb, RD_CYL_LO );     /* Read low order cylinder bits */
-        status = fetch_drive_info( ucb, 1, init_time_flag );
+        drvsts = inp(ucb, RD_STS); /* Read device status, quashing any pending interupts as well */
+        cyl_hi = inp(ucb, RD_CYL_HI); /* Read high order cylinder bits */
+        cyl_lo = inp(ucb, RD_CYL_LO); /* Read low order cylinder bits */
+        status = fetch_drive_info(ucb, 1, init_time_flag);
         /* And try an ATAPI get_info instead */
     }
 
-    if ( $FAIL( status ) )          /* Is status still failing? */
+    if ($FAIL( status )) /* Is status still failing? */
     {
         /* If so, then... */
-        status = ioc$add_device_type( model, mod_len, (UCB *) ucb, &dtn );
+        status = ioc$add_device_type(model, mod_len, (UCB *) ucb, &dtn);
         /* Change the device name to "Nonexistent IDE/ATAPI disk" */
-        return( SS$_NOSUCHDEV );        /* And exit with appropriate status */
+        return (SS$_NOSUCHDEV); /* And exit with appropriate status */
     }
     /* Either ATA or ATAPI get_info worked */
-    status = process_drive_info( ucb );     /* Collect the returned drive info */
+    status = process_drive_info(ucb); /* Collect the returned drive info */
 
-    if ( $FAIL( status ) )          /* Success? */
-        return( status );           /* If not, then exit with error */
+    if ($FAIL( status )) /* Success? */
+        return (status); /* If not, then exit with error */
 
-    if (init_time_flag)             /* Doing this during init_time? */
+    if (init_time_flag) /* Doing this during init_time? */
     {
         /* If not QIOServer serveable yet */
-        if ( ( ( ( UCB * )( ucb ) )->ucb$l_devchar & DEV$M_QSVBL ) == 0 )
+        if ((((UCB *) (ucb))->ucb$l_devchar & DEV$M_QSVBL) == 0)
         {
-            ( ( UCB * )( ucb ) )->ucb$l_devchar |= DEV$M_QSVBL; /* Mark the unit as QIOServeable and add the unit */
-            exe_std$qioserver_new_unit( ( UCB * ) ucb );    /* to the QIOServer data base */
+            ((UCB *) (ucb))->ucb$l_devchar |= DEV$M_QSVBL; /* Mark the unit as QIOServeable and add the unit */
+            exe_std$qioserver_new_unit((UCB *) ucb); /* to the QIOServer data base */
         }
-        return( SS$_NORMAL );           /* If so, all done -- go no further */
+        return (SS$_NORMAL); /* If so, all done -- go no further */
     }
 
-    if (ucb->ucb$l_atapi_flag != 0)     /* ATAPI ? */
+    if (ucb->ucb$l_atapi_flag != 0) /* ATAPI ? */
     {
 
-        for (retry=0; retry<8; retry++)     /* Try this eight times... */
+        for (retry = 0; retry < 8; retry++) /* Try this eight times... */
         {
             /* Drives take ~10 seconds to become ready */
 
-            status = atapi_read_capacity( ucb, (BYTE *) ucb->ucb$ps_sense_buffer );
+            status = atapi_read_capacity(ucb,
+                                         (BYTE *) ucb->ucb$ps_sense_buffer);
             /* Read the drive capacity */
 
-            if ( $SUCCESS( status ) )       /* Success? */
-                break;              /* If so, then break out of retry loop */
+            if ($SUCCESS( status )) /* Success? */
+                break; /* If so, then break out of retry loop */
 
-            BPTRACE( 0x04200000 );      /* BREAK: Error during packack */
+            BPTRACE( 0x04200000 ); /* BREAK: Error during packack */
 
-            status = atapi_request_sense( ucb, (BYTE *) ucb->ucb$ps_sense_buffer );
+            status = atapi_request_sense(ucb,
+                                         (BYTE *) ucb->ucb$ps_sense_buffer);
             /* Read the sense data to see what went wrong */
 
-            BPTRACE( 0x04210000 );      /* BREAK: After request_sense during packack */
+            BPTRACE( 0x04210000 ); /* BREAK: After request_sense during packack */
 
-            if ( $FAIL( status ) )      /* Success? */
-                return( status );       /* If not, then exit with error */
+            if ($FAIL( status )) /* Success? */
+                return (status); /* If not, then exit with error */
 
-            if (    (ucb->ucb$l_asc==0x04)  /* "Logical unit is in process of becoming ready" */
-                    && (ucb->ucb$l_ascq==0x01) )    /*   :   */
+            if ((ucb->ucb$l_asc == 0x04) /* "Logical unit is in process of becoming ready" */
+                    && (ucb->ucb$l_ascq == 0x01)) /*   :   */
             {
                 /* If so, then... */
-                sleep( ucb, 2 );        /* Hang out for 2 seconds */
-                continue;           /* And commence the next retry */
+                sleep(ucb, 2); /* Hang out for 2 seconds */
+                continue; /* And commence the next retry */
             }
 
-            if (ucb->ucb$l_asc==0x28)       /* "Medium may have changed" */
-                continue;           /* If so, commence the next retry */
+            if (ucb->ucb$l_asc == 0x28) /* "Medium may have changed" */
+                continue; /* If so, commence the next retry */
 
-            if (ucb->ucb$l_asc==0x29)       /* Various "Reset occurred" errors */
-                continue;           /* If so, commence the next retry */
+            if (ucb->ucb$l_asc == 0x29) /* Various "Reset occurred" errors */
+                continue; /* If so, commence the next retry */
 
-            if (ucb->ucb$l_asc==0x30)       /* Incompatible medium in drive */
-                return( SS$_MEDOFL );       /* Not much point in re-trying */
+            if (ucb->ucb$l_asc == 0x30) /* Incompatible medium in drive */
+                return (SS$_MEDOFL); /* Not much point in re-trying */
 
-            if (ucb->ucb$l_asc==0x3A)       /* No medium in drive */
-                return( SS$_MEDOFL );       /* Not much point in re-trying */
+            if (ucb->ucb$l_asc == 0x3A) /* No medium in drive */
+                return (SS$_MEDOFL); /* Not much point in re-trying */
 
-            if (    (ucb->ucb$l_asc==0x00)  /* The drive doesn't think an error occurred */
-                    && (ucb->ucb$l_ascq==0x00) )    /*   :   */
+            if ((ucb->ucb$l_asc == 0x00) /* The drive doesn't think an error occurred */
+                    && (ucb->ucb$l_ascq == 0x00)) /*   :   */
             {
-                BPTRACE( 0x04220000 );      /* BREAK: Drive denies any error occurred during packack */
-                continue;           /* Commence the next retry anyway */
+                BPTRACE( 0x04220000 ); /* BREAK: Drive denies any error occurred during packack */
+                continue; /* Commence the next retry anyway */
             }
 
             /* Any other sense keys... */
-            BPTRACE( 0x04230000 );      /* BREAK: Unhandled sense key during packack */
-            return( SS$_DRVERR );       /* And default to a nice, safe disaster */
+            BPTRACE( 0x04230000 ); /* BREAK: Unhandled sense key during packack */
+            return (SS$_DRVERR); /* And default to a nice, safe disaster */
             /*   "SYSTEM-W-DRVERR, fatal driver error" */
 
-        }                   /* Next retry */
+        } /* Next retry */
 
-        status = atapi_process_size( ucb ); /* Collect the returned drive info */
-        if ( $FAIL( status ) )          /* Success? */
-            return( status );           /* If not, then exit with error */
+        status = atapi_process_size(ucb); /* Collect the returned drive info */
+        if ($FAIL( status )) /* Success? */
+            return (status); /* If not, then exit with error */
 
     }
 
-    baseucb.ucb$v_valid = 1;            /* Set the Volume VALID bit */
+    baseucb.ucb$v_valid = 1; /* Set the Volume VALID bit */
 
-    return( SS$_NORMAL );           /* Return to caller with success */
+    return (SS$_NORMAL); /* Return to caller with success */
 
 }
 
 
-
 /* FETCH_DRIVE_INFO - This routine is used to read a drive's
  *                    drive information page
  *
@@ -4868,25 +4716,24 @@ int packack( DQ_UCB *ucb, int init_time_flag )
  *
  */
 
-int fetch_drive_info( DQ_UCB *ucb, int atapi_flag, int init_time_flag )
+int fetch_drive_info(DQ_UCB *ucb, int atapi_flag, int init_time_flag)
 
 {
 
-    int  status;                /* Routine return status */
-    int  orig_ipl;              /* Original IPL */
-    int  drverr;                /* Drive error register */
-    int  drvsts;                /* Drive status register */
-
+    int status; /* Routine return status */
+    int orig_ipl; /* Original IPL */
+    int drverr; /* Drive error register */
+    int drvsts; /* Drive status register */
 
 //#saythis "Hacking around the funny buddy-init problem here"
     /* (This test is bypassed for ATAPI devices during init time!) */
-    if (    (init_time_flag == 0)       /* After init time? */
-            || (atapi_flag     == 0) )      /* Or trying an ATA (IDE) device? */
+    if ((init_time_flag == 0) /* After init time? */
+            || (atapi_flag == 0)) /* Or trying an ATA (IDE) device? */
     {
         /* If either, then... */
-        status = wait_ready( ucb );     /* Wait for drive to be ready */
-        if ( $FAIL( status ) )          /* Check the status for failure */
-            return( status );           /* Return with error */
+        status = wait_ready(ucb); /* Wait for drive to be ready */
+        if ($FAIL( status )) /* Check the status for failure */
+            return (status); /* Return with error */
     }
 
     /*
@@ -4896,46 +4743,45 @@ int fetch_drive_info( DQ_UCB *ucb, int atapi_flag, int init_time_flag )
      *
      */
 
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
-    out( ucb, WT_DRV_HD, ucb->ucb$l_drv_head ); /* Select drive and head 0 */
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
+    out(ucb, WT_DRV_HD, ucb->ucb$l_drv_head); /* Select drive and head 0 */
 
 #ifdef NEVER
-    inp( ucb, RD_ALT_STS );         /* Read all the registers except STS */
-    inp( ucb, RD_DATA );            /*   :                               */
-    inp( ucb, RD_ERROR );           /*   :                               */
-    inp( ucb, RD_SEC_CNT );         /*   :                               */
-    inp( ucb, RD_SECTOR );          /*   :                               */
-    inp( ucb, RD_CYL_LO );          /*   :                               */
-    inp( ucb, RD_CYL_HI );          /*   :                               */
-    inp( ucb, RD_DRV_HD );          /*   :                               */
+    inp( ucb, RD_ALT_STS ); /* Read all the registers except STS */
+    inp( ucb, RD_DATA ); /*   :                               */
+    inp( ucb, RD_ERROR ); /*   :                               */
+    inp( ucb, RD_SEC_CNT ); /*   :                               */
+    inp( ucb, RD_SECTOR ); /*   :                               */
+    inp( ucb, RD_CYL_LO ); /*   :                               */
+    inp( ucb, RD_CYL_HI ); /*   :                               */
+    inp( ucb, RD_DRV_HD ); /*   :                               */
 #endif
 
-    if (atapi_flag)             /* Expecting ATA or ATAPI drive? */
-        out( ucb, WT_CMD, CMD_ATA_PACKET_IDENTIFY);
+    if (atapi_flag) /* Expecting ATA or ATAPI drive? */
+        out(ucb, WT_CMD, CMD_ATA_PACKET_IDENTIFY);
     /* Expecting ATAPI drive */
     else
-        out( ucb, WT_CMD, CMD_ATA_IDENTIFY_DEV);/* Expecting ATA drive */
+        out(ucb, WT_CMD, CMD_ATA_IDENTIFY_DEV);/* Expecting ATA drive */
 
-    status = dq_wfikpch( ucb->ucb$ps_kpb, orig_ipl, 1 );
+    status = dq_wfikpch(ucb->ucb$ps_kpb, orig_ipl, 1);
     /* Wait for the interrupt */
-    if ( $FAIL( status ) )          /* Any error (timeout, etc.) ? */
-        return( status );           /* If so, return with status */
+    if ($FAIL( status )) /* Any error (timeout, etc.) ? */
+        return (status); /* If so, return with status */
 
-    drvsts = inp( ucb, RD_ALT_STS );        /* Get the status byte */
-    if ( IS_SET( drvsts, STS_M_ERR ) )      /* Any errors?  */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+    if (IS_SET( drvsts, STS_M_ERR )) /* Any errors?  */
     {
         /* If so, then... */
-        drverr = inp( ucb, RD_ERROR );      /* Get the error byte */
-        return( SS$_NODATA );           /* Return error */
+        drverr = inp(ucb, RD_ERROR); /* Get the error byte */
+        return (SS$_NODATA); /* Return error */
     }
     /* Else success, so... */
-    ucb->ucb$l_atapi_flag = atapi_flag;     /* Remember ATA or ATAPI */
-    return( SS$_NORMAL );           /* Return success */
+    ucb->ucb$l_atapi_flag = atapi_flag; /* Remember ATA or ATAPI */
+    return (SS$_NORMAL); /* Return success */
 
 }
 
 
-
 /* PROCESS_DRIVE_INFO - This routine is used to read and process the
  *                      information returned by the drive in the ID page.
  *
@@ -4958,23 +4804,23 @@ int fetch_drive_info( DQ_UCB *ucb, int atapi_flag, int init_time_flag )
  *
  */
 
-int process_drive_info( DQ_UCB *ucb )
+int process_drive_info(DQ_UCB *ucb)
 
 {
 
-    char    model[DTN$K_NAMELEN_MAX+1];     /* ASCIZ model name */
-    int     mod_len;                /* Length of model string */
-    ID_PAGE *id_ptr;                /* Pointer to the ID page */
-    DTN     *dtn;               /* Dummy DTN pointer */
-    int     status;             /* Returned routine status */
-    int     i;                  /* String index */
-    CRB     *crb;
+    char model[DTN$K_NAMELEN_MAX + 1]; /* ASCIZ model name */
+    int mod_len; /* Length of model string */
+    ID_PAGE *id_ptr; /* Pointer to the ID page */
+    DTN *dtn; /* Dummy DTN pointer */
+    int status; /* Returned routine status */
+    int i; /* String index */
+    CRB *crb;
 
     /* Read the data from the sector buffer into the right place in the id page */
 
-    crb=baseucb.ucb$l_crb;
-    id_ptr = (ID_PAGE *)((crb->crb$l_auxstruc) + (baseucb.ucb$w_unit * 512));
-    move_sec_from_drive( ucb, (BYTE *) id_ptr, BLK_SIZE_512 );
+    crb = baseucb.ucb$l_crb;
+    id_ptr = (ID_PAGE *) ((crb->crb$l_auxstruc) + (baseucb.ucb$w_unit * 512));
+    move_sec_from_drive(ucb, (BYTE *) id_ptr, BLK_SIZE_512);
 
     /*
      * Do some sanity checks for magnetic drives
@@ -4982,29 +4828,29 @@ int process_drive_info( DQ_UCB *ucb )
      * Else force some data for ATAPI drives
      *
      */
-    if (ucb->ucb$l_atapi_flag == 0)     /* ATA or ATAPI ? */
+    if (ucb->ucb$l_atapi_flag == 0) /* ATA or ATAPI ? */
     {
         /* ATA */
-        if (    (id_ptr->cyls > MAX_CYLINDER)   /* Check for too many cylinders */
-                || (id_ptr->heads > MAX_HEAD+1) /*   or too many heads          */
-                || (id_ptr->sectors > MAX_SECTOR)   /*   or too many sectors        */
-                || (id_ptr->cyls == 0)      /*   or too few cylinders       */
-                || (id_ptr->heads == 0)     /*   or too few heads           */
-                || (id_ptr->sectors == 0) ) /*   or too few sectors         */
+        if ((id_ptr->cyls > MAX_CYLINDER) /* Check for too many cylinders */
+                || (id_ptr->heads > MAX_HEAD + 1) /*   or too many heads          */
+                || (id_ptr->sectors > MAX_SECTOR) /*   or too many sectors        */
+                || (id_ptr->cyls == 0) /*   or too few cylinders       */
+                || (id_ptr->heads == 0) /*   or too few heads           */
+                || (id_ptr->sectors == 0)) /*   or too few sectors         */
         {
             /* Any of those are bad, so...  */
-            BPTRACE( 0x04300000 );      /* BREAK: Sanity checks failed during PROCESS_DRIVE_INFO */
-            return( SS$_IVADDR );       /* Sanity failed - exit */
+            BPTRACE( 0x04300000 ); /* BREAK: Sanity checks failed during PROCESS_DRIVE_INFO */
+            return (SS$_IVADDR); /* Sanity failed - exit */
         }
-        /* Copy over the geometry information... */
-        baseucb.ucb$w_cylinders= id_ptr->cyls;  /* Set the cylinders */
-        baseucb.ucb$b_tracks   = id_ptr->heads; /* and tracks */
-        baseucb.ucb$b_sectors  = id_ptr->sectors;/* and sectors */
-        ucb->ucb$r_dq_dt.ucb$l_maxblock =   /* Now set maxblock based on those */
-            baseucb.ucb$b_sectors   /*   :   */
-            * baseucb.ucb$b_tracks  /*   :   */
-            * baseucb.ucb$w_cylinders;  /*   :   */
-        set_geom( ucb );            /* Set the geometry in the drive */
+        /* Copy over the geometry information... */baseucb.ucb$w_cylinders =
+            id_ptr->cyls; /* Set the cylinders */
+        baseucb.ucb$b_tracks = id_ptr->heads; /* and tracks */
+        baseucb.ucb$b_sectors = id_ptr->sectors;/* and sectors */
+        ucb->ucb$r_dq_dt.ucb$l_maxblock =
+            /* Now set maxblock based on those */baseucb.ucb$b_sectors /*   :   */
+            * baseucb.ucb$b_tracks /*   :   */
+            * baseucb.ucb$w_cylinders; /*   :   */
+        set_geom(ucb); /* Set the geometry in the drive */
 
         /* If drive will is capable of logical block addressing then use    */
         /* max lba as maxblock and fake  ucb geometry.  An exact geometry   */
@@ -5012,24 +4858,25 @@ int process_drive_info( DQ_UCB *ucb )
         /* maxblock or the Volume Control Block blockfactor will be 0 and   */
         /* cause divide by 0 crashes in mount and/or f11xqp.                */
 
-        ucb->ucb$l_drive_lba_capable = 0;       /* Assume no LBA capability */
-        if ( IS_SET( id_ptr->capabilities_49, CAP_M_LBA ) )
+        ucb->ucb$l_drive_lba_capable = 0; /* Assume no LBA capability */
+        if (IS_SET( id_ptr->capabilities_49, CAP_M_LBA ))
         {
             /* If LBA capable */
-            ucb->ucb$l_drive_lba_capable = 1;   /* Set the LBA flag */
-            if ( (UINT)(ucb->ucb$r_dq_dt.ucb$l_maxblock) < id_ptr->lba_total_blocks)
+            ucb->ucb$l_drive_lba_capable = 1; /* Set the LBA flag */
+            if ((UINT) (ucb->ucb$r_dq_dt.ucb$l_maxblock)
+                    < id_ptr->lba_total_blocks)
             {
-                unsigned int cyl,trk,sec,lba;
+                unsigned int cyl, trk, sec, lba;
                 ucb->ucb$r_dq_dt.ucb$l_maxblock = id_ptr->lba_total_blocks;
-                lba=id_ptr->lba_total_blocks;
-                cyl=sec=trk=0;
-                while ( (lba > (cyl*trk*sec)) && (cyl < MAX_UCB_CYL) )
+                lba = id_ptr->lba_total_blocks;
+                cyl = sec = trk = 0;
+                while ((lba > (cyl * trk * sec)) && (cyl < MAX_UCB_CYL))
                 {
-                    trk=0;
-                    while ( (lba > (cyl*trk*sec)) && (trk < MAX_UCB_TRK) )
+                    trk = 0;
+                    while ((lba > (cyl * trk * sec)) && (trk < MAX_UCB_TRK))
                     {
-                        sec=0;
-                        while ( (lba > (cyl*trk*sec)) && (sec < MAX_UCB_SEC) )
+                        sec = 0;
+                        while ((lba > (cyl * trk * sec)) && (sec < MAX_UCB_SEC))
                         {
                             sec++;
                         }
@@ -5037,31 +4884,31 @@ int process_drive_info( DQ_UCB *ucb )
                     }
                     cyl++;
                 }
-                baseucb.ucb$b_sectors=sec;
-                baseucb.ucb$b_tracks=trk;
-                baseucb.ucb$w_cylinders=cyl;
+                baseucb.ucb$b_sectors = sec;
+                baseucb.ucb$b_tracks = trk;
+                baseucb.ucb$w_cylinders = cyl;
             }
         }
     }
     else
     {
         /* ATAPI */
-        baseucb.ucb$w_cylinders= MAX_CYLINDER+1;/* Set the cylinders */
-        baseucb.ucb$b_tracks   = MAX_HEAD+1;    /* and tracks */
-        baseucb.ucb$b_sectors  = MAX_SECTOR;    /* and sectors */
-        ucb->ucb$r_dq_dt.ucb$l_maxblock =   /* and now maxblock, based on those */
-            baseucb.ucb$w_cylinders /*   :   */
-            * baseucb.ucb$b_tracks  /*   :   */
-            * baseucb.ucb$b_sectors;    /*   :   */
-        set_geom( ucb );            /* Set the geometry in the drive */
+        baseucb.ucb$w_cylinders = MAX_CYLINDER + 1;/* Set the cylinders */
+        baseucb.ucb$b_tracks = MAX_HEAD + 1; /* and tracks */
+        baseucb.ucb$b_sectors = MAX_SECTOR; /* and sectors */
+        ucb->ucb$r_dq_dt.ucb$l_maxblock =
+            /* and now maxblock, based on those */baseucb.ucb$w_cylinders /*   :   */
+            * baseucb.ucb$b_tracks /*   :   */
+            * baseucb.ucb$b_sectors; /*   :   */
+        set_geom(ucb); /* Set the geometry in the drive */
     }
     /*
      * Set flags based on capabilities flag
      *
      */
 
-    ucb->ucb$l_drive_dma_capable = 0;       /* Assume no DMA capability */
-    if ( IS_SET( id_ptr->capabilities_49, CAP_M_DMA ) )
+    ucb->ucb$l_drive_dma_capable = 0; /* Assume no DMA capability */
+    if (IS_SET( id_ptr->capabilities_49, CAP_M_DMA ))
         /* If the drive is DMA capable, then... */
         ucb->ucb$l_drive_dma_capable = ucb->ucb$l_ctrl_dma_capable;
     /* Set the drive's DMA flag based on the controller's DMA flag */
@@ -5072,7 +4919,6 @@ int process_drive_info( DQ_UCB *ucb )
 //    else                  /* Else if not, then... */
 //       set_features( ucb, 0x03, 0x08 );   /* Set PIO mode 0 with flow-control */
 
-
     /*
      * Add the device type name
      *
@@ -5081,43 +4927,42 @@ int process_drive_info( DQ_UCB *ucb )
      * So, swap them back
      *
      */
-    mod_len =(MODEL_LENGTH>DTN$K_NAMELEN_MAX) ?
-             DTN$K_NAMELEN_MAX : MODEL_LENGTH;  /* Set the length of string */
+    mod_len =
+        (MODEL_LENGTH > DTN$K_NAMELEN_MAX) ?
+        DTN$K_NAMELEN_MAX : MODEL_LENGTH; /* Set the length of string */
 
-    for (i=0; i < (mod_len>>1)<<1; i += 2)  /* For each word... */
+    for (i = 0; i < (mod_len >> 1) << 1; i += 2) /* For each word... */
     {
-        model[i]   = id_ptr->model_number[i+1]; /* Copy the swapped bytes */
-        model[i+1] = id_ptr->model_number[i];   /*   :   */
+        model[i] = id_ptr->model_number[i + 1]; /* Copy the swapped bytes */
+        model[i + 1] = id_ptr->model_number[i]; /*   :   */
     }
 
-    if ( (mod_len & 1) == 1)            /* Get the odd last byte if needed */
-        model[mod_len-1] = id_ptr->model_number[mod_len];
+    if ((mod_len & 1) == 1) /* Get the odd last byte if needed */
+        model[mod_len - 1] = id_ptr->model_number[mod_len];
 
-    model[mod_len] = '\0';          /* Make the string ASCIZ so strlen can size it */
+    model[mod_len] = '\0'; /* Make the string ASCIZ so strlen can size it */
 
     /*
      * Now, working backwards along the string, remove trailing spaces
      *
      */
-    for (i=1; i < mod_len; i++)
+    for (i = 1; i < mod_len; i++)
     {
-        if (model[mod_len - i] != ' ')      /* Is this a space ? */
-            break;              /* Non-space - leave loop */
-        model[mod_len - i] = '\0';      /* Terminate string at space */
+        if (model[mod_len - i] != ' ') /* Is this a space ? */
+            break; /* Non-space - leave loop */
+        model[mod_len - i] = '\0'; /* Terminate string at space */
     }
 
-    mod_len = strlen( model );          /* Get the new length (as ASCII, not ASCIZ) */
-
+    mod_len = strlen(model); /* Get the new length (as ASCII, not ASCIZ) */
 
     /*
      * Now, add the device type and name for Dynamic Device Recognition
      *
      */
-    status = ioc$add_device_type( model, mod_len, (UCB *) ucb, &dtn );
-    return( SS$_NORMAL );           /* Return success to caller */
+    status = ioc$add_device_type(model, mod_len, (UCB *) ucb, &dtn);
+    return (SS$_NORMAL); /* Return success to caller */
 
 }
-
 
 
 /* ATAPI_PROCESS_SIZE - This routine is used to process the READ_CAPACITY
@@ -5143,58 +4988,56 @@ int process_drive_info( DQ_UCB *ucb )
  *
  */
 
-int atapi_process_size( DQ_UCB *ucb )
+int atapi_process_size(DQ_UCB *ucb)
 
 {
 
-    BYTE   *sense_ptr;              /* Pointer to the ID page */
-    int    blocks;              /* Number of blocks on the volume*/
-    int    blocksize;               /* Bytes per block for the volume */
-
+    BYTE *sense_ptr; /* Pointer to the ID page */
+    int blocks; /* Number of blocks on the volume*/
+    int blocksize; /* Bytes per block for the volume */
 
     sense_ptr = (BYTE *) ucb->ucb$ps_sense_buffer;
     /* Bind onto returned data as a byte array */
 
-    blocks =   (   sense_ptr[0]<<24     /* Re-order the maxblock value */
-                   | sense_ptr[1]<<16       /*   :   */
-                   | sense_ptr[2]<<8        /*   :   */
-                   | sense_ptr[3] )     /*   :   */
-               + 1;             /* Account for blocks vs. max LBN */
+    blocks = (sense_ptr[0] << 24 /* Re-order the maxblock value */
+              | sense_ptr[1] << 16 /*   :   */
+              | sense_ptr[2] << 8 /*   :   */
+              | sense_ptr[3]) /*   :   */
+             + 1; /* Account for blocks vs. max LBN */
 
-    blocksize = sense_ptr[4]<<24        /* And the blocksize value */
-                | sense_ptr[5]<<16      /*   :   */
-                | sense_ptr[6]<<8           /*   :   */
-                | sense_ptr[7];         /*   :   */
+    blocksize = sense_ptr[4] << 24 /* And the blocksize value */
+                | sense_ptr[5] << 16 /*   :   */
+                | sense_ptr[6] << 8 /*   :   */
+                | sense_ptr[7]; /*   :   */
 
-    if (    (blocksize!=BLK_SIZE_512)       /* Do we recognize this blocksize? */
-            && (blocksize!=BLK_SIZE_2048)       /* SCSI-3 spec'd CD-ROM? blocksize*/
-            && (blocksize!=BLK_SIZE_2352) ) /* ATAPI tested CD-ROM blocksize? */
-        return( SS$_IVBUFLEN );         /* If not, "Invalid buffer length" */
+    if ((blocksize != BLK_SIZE_512) /* Do we recognize this blocksize? */
+            && (blocksize != BLK_SIZE_2048) /* SCSI-3 spec'd CD-ROM? blocksize*/
+            && (blocksize != BLK_SIZE_2352)) /* ATAPI tested CD-ROM blocksize? */
+        return (SS$_IVBUFLEN); /* If not, "Invalid buffer length" */
 
-    ucb->ucb$l_2K_flag = 0;         /* Clear the 2K block flag */
-    if (blocksize>=BLK_SIZE_2048)       /* CD-ROM-sized blocks? */
+    ucb->ucb$l_2K_flag = 0; /* Clear the 2K block flag */
+    if (blocksize >= BLK_SIZE_2048) /* CD-ROM-sized blocks? */
     {
         /* If so, then... */
-        ucb->ucb$l_2K_flag = 1;         /* Set the 2K block flag */
+        ucb->ucb$l_2K_flag = 1; /* Set the 2K block flag */
         ucb->ucb$r_dq_dt.ucb$l_maxbcnt = (MAX_ATAPI_2K_XFER * BLK_SIZE_512);
         /* And set the appropriate maximum transfer size */
-        blocks = (blocks<<2);           /* And account for 4-to-1 packing */
+        blocks = (blocks << 2); /* And account for 4-to-1 packing */
     }
     /* Copy over the geometry information */
-    ucb->ucb$r_dq_dt.ucb$l_maxblock = blocks;   /* Set maxblock */
-    baseucb.ucb$b_sectors   = 8;        /* Dummy-up the sectors */
-    baseucb.ucb$b_tracks    = 4;        /* Dummy-up the tracks */
-    baseucb.ucb$w_cylinders = (blocks>>5)   /* Compute the cylinders (/32) */
-                              + ( (blocks&0x1F) != 0 ); /* Did our division have a remainder? */
+    ucb->ucb$r_dq_dt.ucb$l_maxblock = blocks; /* Set maxblock */
+    baseucb.ucb$b_sectors = 8; /* Dummy-up the sectors */
+    baseucb.ucb$b_tracks = 4; /* Dummy-up the tracks */
+    baseucb.ucb$w_cylinders = (blocks >> 5) /* Compute the cylinders (/32) */
+                              + ((blocks & 0x1F) != 0); /* Did our division have a remainder? */
     /* If so, add another cylinder */
     /* This will get us to 1.05 GBs, then ucb$w_cylinders overflows */
 
-    return( SS$_NORMAL );           /* Return succeeding */
+    return (SS$_NORMAL); /* Return succeeding */
 
 }
 
 
-
 /* SET_GEOM - this routine is used to set the current geometry in the drive.
  *
  * Input:
@@ -5209,24 +5052,24 @@ int atapi_process_size( DQ_UCB *ucb )
  *
  */
 
-int set_geom( DQ_UCB *ucb )
+int set_geom(DQ_UCB *ucb)
 
 {
 
-    int   sector;                   /* Sector number */
-    int   drv_head;                 /* Drive drive/head register */
-    int   cyl;                      /* Cylinder number */
-    int   status;                   /* Status returned from routines */
-    int   orig_ipl;                 /* Original IPL */
-    int   drvsts;                   /* Drive status register */
-    int   drverr;                   /* Drive error register */
+    int sector; /* Sector number */
+    int drv_head; /* Drive drive/head register */
+    int cyl; /* Cylinder number */
+    int status; /* Status returned from routines */
+    int orig_ipl; /* Original IPL */
+    int drvsts; /* Drive status register */
+    int drverr; /* Drive error register */
 
     /* Attempt to read the maximum block */
 
-    sector   = baseucb.ucb$b_sectors;           /* Use highest sector number */
-    drv_head = ucb->ucb$l_drv_head+(baseucb.ucb$b_tracks-1);
+    sector = baseucb.ucb$b_sectors; /* Use highest sector number */
+    drv_head = ucb->ucb$l_drv_head + (baseucb.ucb$b_tracks - 1);
     /* Use highest head number */
-    cyl      = baseucb.ucb$w_cylinders - 1;     /* Use highest cylinder number */
+    cyl = baseucb.ucb$w_cylinders - 1; /* Use highest cylinder number */
 
     /*
      * Take out the device lock and raise IPL
@@ -5235,34 +5078,33 @@ int set_geom( DQ_UCB *ucb )
      *
      */
 
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
-    out( ucb, WT_SEC_CNT, sector);          /* Set sectors/track */
-    out( ucb, WT_DRV_HD, drv_head);         /* Set heads/cylinder */
-    out( ucb, WT_CMD, CMD_ATA_INIT_DEV_PARAMS);     /* Issue the command */
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
+    out(ucb, WT_SEC_CNT, sector); /* Set sectors/track */
+    out(ucb, WT_DRV_HD, drv_head); /* Set heads/cylinder */
+    out(ucb, WT_CMD, CMD_ATA_INIT_DEV_PARAMS); /* Issue the command */
 
-    status = dq_wfikpch( ucb->ucb$ps_kpb, orig_ipl, 2 );/* Wait for the interrupt */
-    if ( $FAIL( status ) )              /* Any error (timeout, etc.) ? */
-        return( status );               /* If so, return with status */
+    status = dq_wfikpch(ucb->ucb$ps_kpb, orig_ipl, 2);/* Wait for the interrupt */
+    if ($FAIL( status )) /* Any error (timeout, etc.) ? */
+        return (status); /* If so, return with status */
 
-    drvsts = inp( ucb, RD_ALT_STS );            /* Get the status byte */
-    if ( IS_SET( drvsts, STS_M_ERR ) )          /* Any errors? */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+    if (IS_SET( drvsts, STS_M_ERR )) /* Any errors? */
     {
         /* If so, then... */
-        drverr = inp( ucb, RD_ERROR );          /* Get the error byte */
-        BPTRACE( 0x04400000 );              /* BREAK: Drive error during set_geometry */
-        return( SS$_IVADDR );               /*  and return an error */
+        drverr = inp(ucb, RD_ERROR); /* Get the error byte */
+        BPTRACE( 0x04400000 ); /* BREAK: Drive error during set_geometry */
+        return (SS$_IVADDR); /*  and return an error */
     }
 
-    if ( IS_CLEAR( drvsts, STS_M_DRDY ) )       /* If not READY */
+    if (IS_CLEAR( drvsts, STS_M_DRDY )) /* If not READY */
     {
-        BPTRACE( 0x04410000 );              /* BREAK: Drive not ready during set_geometry */
-        return( SS$_DRVERR );               /*  return with DRIVE ERROR */
+        BPTRACE( 0x04410000 ); /* BREAK: Drive not ready during set_geometry */
+        return (SS$_DRVERR); /*  return with DRIVE ERROR */
     }
 
-    return( SS$_NORMAL );               /* Return with success */
+    return (SS$_NORMAL); /* Return with success */
 
 }
-
 
 
 /* SET_FEATURES - This routine is used to set the current features in the drive.
@@ -5279,46 +5121,44 @@ int set_geom( DQ_UCB *ucb )
  *
  */
 
-int set_features( DQ_UCB *ucb, int feature, int value )
+int set_features(DQ_UCB *ucb, int feature, int value)
 
 {
 
-    int   drvsts;                   /* Drive status register */
-    int   drverr;                   /* Drive error register */
-    int   orig_ipl;                 /* Original IPL */
-    int   status;                   /* Status returned from routines */
+    int drvsts; /* Drive status register */
+    int drverr; /* Drive error register */
+    int orig_ipl; /* Original IPL */
+    int status; /* Status returned from routines */
 
-
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
-    wait_ready( ucb );                  /* Make sure unit is selected and ready */
-    out( ucb, WT_FEATURES, feature );           /* Select the specific feature to be set */
-    out( ucb, WT_SEC_CNT, value );          /* Set specific value */
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
+    wait_ready(ucb); /* Make sure unit is selected and ready */
+    out(ucb, WT_FEATURES, feature); /* Select the specific feature to be set */
+    out(ucb, WT_SEC_CNT, value); /* Set specific value */
     /*   (A value is only meaningful for feature 0x03) */
-    out( ucb, WT_CMD, CMD_ATA_SET_FEATURES );       /* Issue the command */
+    out(ucb, WT_CMD, CMD_ATA_SET_FEATURES); /* Issue the command */
 
-    status = dq_wfikpch( ucb->ucb$ps_kpb, orig_ipl, 3 );/* Wait for the interrupt */
-    if ( $FAIL( status ) )              /* Any error (timeout, etc.) ? */
-        return( status );               /* If so, return with status */
+    status = dq_wfikpch(ucb->ucb$ps_kpb, orig_ipl, 3);/* Wait for the interrupt */
+    if ($FAIL( status )) /* Any error (timeout, etc.) ? */
+        return (status); /* If so, return with status */
 
-    drvsts = inp( ucb, RD_ALT_STS );            /* Get the status byte */
-    if ( IS_SET( drvsts, STS_M_ERR ) )          /* Any errors? */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+    if (IS_SET( drvsts, STS_M_ERR )) /* Any errors? */
     {
         /* If so, then... */
-        drverr = inp( ucb, RD_ERROR );          /* Get the error byte */
-        BPTRACE( 0x04080300 );              /* BREAK: Drive error during set_features */
-        return( SS$_IVADDR );               /*  and return an error */
+        drverr = inp(ucb, RD_ERROR); /* Get the error byte */
+        BPTRACE( 0x04080300 ); /* BREAK: Drive error during set_features */
+        return (SS$_IVADDR); /*  and return an error */
     }
 
-    if ( IS_CLEAR( drvsts, STS_M_DRDY ) )       /* If not READY */
+    if (IS_CLEAR( drvsts, STS_M_DRDY )) /* If not READY */
     {
-        BPTRACE( 0x04080301 );              /* BREAK: Drive not ready during set_features */
-        return( SS$_DRVERR );               /*  return with DRIVE ERROR */
+        BPTRACE( 0x04080301 ); /* BREAK: Drive not ready during set_features */
+        return (SS$_DRVERR); /*  return with DRIVE ERROR */
     }
 
-    return( SS$_NORMAL );               /* Return with success */
+    return (SS$_NORMAL); /* Return with success */
 
 }
-
 
 
 /* SEEK - Perform Seek operation
@@ -5338,23 +5178,23 @@ int set_features( DQ_UCB *ucb, int feature, int value )
  *
  */
 
-int seek( DQ_UCB *ucb )
+int seek(DQ_UCB *ucb)
 
 {
 
-    int   status;               /* Status of calls */
-    int   orig_ipl;             /* Original IPL */
-    int   cyl;                  /* Cylinder number */
-    int   drvsts;               /* Drive status register */
-    int   drverr;               /* Drive error register */
+    int status; /* Status of calls */
+    int orig_ipl; /* Original IPL */
+    int cyl; /* Cylinder number */
+    int drvsts; /* Drive status register */
+    int drverr; /* Drive error register */
 
-    status = wait_ready( ucb );         /* Wait for drive to be ready */
-    if ( $FAIL( status ) )          /* Check the status for failure */
-        return( status );           /* Return with error */
+    status = wait_ready(ucb); /* Wait for drive to be ready */
+    if ($FAIL( status )) /* Check the status for failure */
+        return (status); /* Return with error */
 
     /* Set up seek parameters */
 
-    cyl = ucb->ucb$l_media.lbn;         /* Get the cylinder number */
+    cyl = ucb->ucb$l_media.lbn; /* Get the cylinder number */
 
     /*
      * Take out the device lock and raise IPL
@@ -5363,31 +5203,30 @@ int seek( DQ_UCB *ucb )
      *
      */
 
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
-    out( ucb, WT_DRV_HD, ucb->ucb$l_drv_head);  /* Select drive and head */
-    out( ucb, WT_SECTOR, 1);            /* Put in the sector number */
-    out( ucb, WT_CYL_LO, cyl);          /* Low order cylinder bits */
-    out( ucb, WT_CYL_HI, cyl>>8);       /* High order cylinder bits */
-    out( ucb, WT_CMD,    CMD_ATA_SEEK);     /* Attempt to seek to the sector */
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
+    out(ucb, WT_DRV_HD, ucb->ucb$l_drv_head); /* Select drive and head */
+    out(ucb, WT_SECTOR, 1); /* Put in the sector number */
+    out(ucb, WT_CYL_LO, cyl); /* Low order cylinder bits */
+    out(ucb, WT_CYL_HI, cyl >> 8); /* High order cylinder bits */
+    out(ucb, WT_CMD, CMD_ATA_SEEK); /* Attempt to seek to the sector */
 
-    status = dq_wfikpch( ucb->ucb$ps_kpb, orig_ipl, 4 );
+    status = dq_wfikpch(ucb->ucb$ps_kpb, orig_ipl, 4);
     /* Wait for the interrupt */
-    if ( $FAIL( status ) )          /* Any error (timeout, etc.) ? */
-        return( status );           /* If so, return with status */
+    if ($FAIL( status )) /* Any error (timeout, etc.) ? */
+        return (status); /* If so, return with status */
 
-    drvsts = inp( ucb, RD_ALT_STS );        /* Get the status byte */
-    if ( IS_SET( drvsts, STS_M_ERR ) )      /* Any errors? */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+    if (IS_SET( drvsts, STS_M_ERR )) /* Any errors? */
     {
         /* If so, then... */
-        drverr = inp( ucb, RD_ERROR );      /* Get the error byte */
-        BPTRACE( 0x04100000 );          /* BREAK: Drive error during seek */
-        return( SS$_DRVERR );           /* Return with DRIVE ERROR status */
+        drverr = inp(ucb, RD_ERROR); /* Get the error byte */
+        BPTRACE( 0x04100000 ); /* BREAK: Drive error during seek */
+        return (SS$_DRVERR); /* Return with DRIVE ERROR status */
     }
 
-    return( SS$_NORMAL );           /* Return with success */
+    return (SS$_NORMAL); /* Return with success */
 
 }
-
 
 
 /* DRVCLR - Perform Drive Clear operation
@@ -5400,14 +5239,13 @@ int seek( DQ_UCB *ucb )
  *
  */
 
-int drvclr( DQ_UCB *ucb )
+int drvclr(DQ_UCB *ucb)
 
 {
 
-    return( SS$_NORMAL );
+    return (SS$_NORMAL);
 
 }
-
 
 
 /* READRCT - Perform READRCT operation
@@ -5427,49 +5265,47 @@ int drvclr( DQ_UCB *ucb )
  *
  */
 
-int readrct( DQ_UCB *ucb )
+int readrct(DQ_UCB *ucb)
 
 {
 
-    int   status;               /* Routine return status */
-    int   orig_ipl;             /* Original IPL */
-    int   drvsts;               /* Drive status register */
-    int   drverr;               /* Drive error register */
-    void  *temp;                /* Dummy for IOC$MOVTOUSER call */
+    int status; /* Routine return status */
+    int orig_ipl; /* Original IPL */
+    int drvsts; /* Drive status register */
+    int drverr; /* Drive error register */
+    void *temp; /* Dummy for IOC$MOVTOUSER call */
 
+    status = wait_ready(ucb); /* Wait for drive ready */
+    if ($FAIL( status )) /* Check for error */
+        return (status); /*   and return if there is one */
 
-    status = wait_ready( ucb );         /* Wait for drive ready */
-    if ( $FAIL( status ) )          /* Check for error */
-        return( status );           /*   and return if there is one */
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
+    out(ucb, WT_DRV_HD, ucb->ucb$l_drv_head); /* Select drive and head 0 */
+    out(ucb, WT_CMD, CMD_ATA_IDENTIFY_DEV); /* Ask for drive info */
 
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
-    out( ucb, WT_DRV_HD, ucb->ucb$l_drv_head ); /* Select drive and head 0 */
-    out( ucb, WT_CMD, CMD_ATA_IDENTIFY_DEV );   /* Ask for drive info */
-
-    status = dq_wfikpch( ucb->ucb$ps_kpb, orig_ipl, 5 );
+    status = dq_wfikpch(ucb->ucb$ps_kpb, orig_ipl, 5);
     /* Wait for the interrupt */
-    if ( $FAIL( status ) )          /* Any error (timeout, etc.) ? */
-        return( status );           /* If so, return with status */
+    if ($FAIL( status )) /* Any error (timeout, etc.) ? */
+        return (status); /* If so, return with status */
 
-    drvsts = inp( ucb, RD_ALT_STS );        /* Get the status byte */
-    if ( IS_SET( drvsts, STS_M_ERR) )       /* Any errors? */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+    if (IS_SET( drvsts, STS_M_ERR)) /* Any errors? */
     {
         /* If so, then.. */
-        drverr = inp( ucb, RD_ERROR );      /* Get the error byte */
-        return( SS$_NODATA );           /* Exit with error */
+        drverr = inp(ucb, RD_ERROR); /* Get the error byte */
+        return (SS$_NODATA); /* Exit with error */
     }
 
-    move_sec_from_drive( ucb, (BYTE *) ucb->ucb$ps_xfer_buffer, BLK_SIZE_512 );
+    move_sec_from_drive(ucb, (BYTE *) ucb->ucb$ps_xfer_buffer, BLK_SIZE_512);
     /* Get the returned data from our drive */
 
-    ioc_std$movtouser( ucb->ucb$ps_xfer_buffer, baseucb.ucb$l_bcnt, (UCB *) ucb, &temp );
+    ioc_std$movtouser(ucb->ucb$ps_xfer_buffer, baseucb.ucb$l_bcnt, (UCB *) ucb,
+                      &temp);
     /* Move the data to the user */
 
-    return( SS$_NORMAL );           /* Return with success */
+    return (SS$_NORMAL); /* Return with success */
 
 }
-
-
 
 
 /* DIAGNOSE - Perform DIAGNOSE operation
@@ -5490,25 +5326,26 @@ int readrct( DQ_UCB *ucb )
  *
  */
 
-int diagnose(DQ_UCB *ucb )
+int diagnose(DQ_UCB *ucb)
 {
-    BYTE  *packet;              /* The packet bytes within the UCB */
-    int   *packetl;                 /* The packet (as longwords) within the UCB */
-    int    status;              /* Routine return status */
-    int    xfer_cnt;                /* Count of blocks actually transferred (dummy here) */
-    BYTE  *buffer;              /* Pointer to our transfer buffer */
-    BYTE  *user_va;             /* Returned user buffer address */
+    BYTE *packet; /* The packet bytes within the UCB */
+    int *packetl; /* The packet (as longwords) within the UCB */
+    int status; /* Routine return status */
+    int xfer_cnt; /* Count of blocks actually transferred (dummy here) */
+    BYTE *buffer; /* Pointer to our transfer buffer */
+    BYTE *user_va; /* Returned user buffer address */
     void *svaptr;
 
-    packetl = (int *) ucb->ucb$b_packet;    /* Bind onto packet in the UCB as a longword array */
-    packetl[0] = 0;             /* Clear the packet */
-    packetl[1] = 0;             /*   :   */
-    packetl[2] = 0;             /*   :   */
+    packetl = (int *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a longword array */
+    packetl[0] = 0; /* Clear the packet */
+    packetl[1] = 0; /*   :   */
+    packetl[2] = 0; /*   :   */
 
-    packet = (BYTE *) ucb->ucb$b_packet;    /* Bind onto packet in the UCB as a byte array */
+    packet = (BYTE *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a byte array */
     memcpy(packet, ucb->diagnose_command, ucb->diagnose_command_length);
-    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer;  /* Initialize our buffer pointer */
-    status = atapi_packet_command(ucb, buffer, baseucb.ucb$l_bcnt, &xfer_cnt, FALSE );
+    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer; /* Initialize our buffer pointer */
+    status = atapi_packet_command(ucb, buffer, baseucb.ucb$l_bcnt, &xfer_cnt,
+                                  FALSE);
 
     if (status == SS$_NORMAL)
     {
@@ -5520,9 +5357,8 @@ int diagnose(DQ_UCB *ucb )
 
     ucb->ucb$l_bcr = baseucb.ucb$l_bcnt - xfer_cnt;
 
-    return(status);
+    return (status);
 }
-
 
 
 /* READ - Performs IO$_READxBLK driver function
@@ -5539,116 +5375,116 @@ int diagnose(DQ_UCB *ucb )
  *
  */
 
-int read( DQ_UCB *ucb )
+int read(DQ_UCB *ucb)
 
 {
 
-    int   offset;               /* Offset within a possible 2K block */
-    int   xfer_size;                /* Size (in sectors) */
-    int   xfer_cnt;             /* Count of 512-byte blocks read in the latest segment*/
-    int   blks_xfrd;                /* For-loop index */
-    int   byte_cnt;             /* Number of bytes read */
-    BYTE  *buffer;              /* Pointer to our transfer buffer */
-    int   xfer_req;             /* Number of sectors requested */
-    int   status;               /* Routine return status */
-    int   retry_cnt;                /* Error retry count */
-    int   buf_ofs;              /* Offset into user buffer */
-    BYTE  *user_va;             /* Returned user buffer address */
+    int offset; /* Offset within a possible 2K block */
+    int xfer_size; /* Size (in sectors) */
+    int xfer_cnt; /* Count of 512-byte blocks read in the latest segment*/
+    int blks_xfrd; /* For-loop index */
+    int byte_cnt; /* Number of bytes read */
+    BYTE *buffer; /* Pointer to our transfer buffer */
+    int xfer_req; /* Number of sectors requested */
+    int status; /* Routine return status */
+    int retry_cnt; /* Error retry count */
+    int buf_ofs; /* Offset into user buffer */
+    BYTE *user_va; /* Returned user buffer address */
 
-    TRACE( 0x07000000 );            /* READ starting */
+    TRACE( 0x07000000 ); /* READ starting */
 
-    status = wait_ready( ucb );         /* Wait for drive to be ready for a command */
-    if ( $FAIL( status ) )          /* Check status for error */
-        return( status );           /* Return with error */
+    status = wait_ready(ucb); /* Wait for drive to be ready for a command */
+    if ($FAIL( status )) /* Check status for error */
+        return (status); /* Return with error */
 
     /* Compute number of blocks and set up */
     xfer_size = (baseucb.ucb$l_bcnt + BLK_SIZE_512 - 1) >> BLK_SHIFT;
-    if (xfer_size == 0)             /* Was there any work to do ? */
-        return( SS$_NORMAL );           /* Exit with success if not */
+    if (xfer_size == 0) /* Was there any work to do ? */
+        return (SS$_NORMAL); /* Exit with success if not */
 
-    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer;  /* Initialize our buffer pointer */
-    retry_cnt = 0;              /* Initialize the retry counter */
+    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer; /* Initialize our buffer pointer */
+    retry_cnt = 0; /* Initialize the retry counter */
 
     for (blks_xfrd = 0; blks_xfrd < xfer_size;) /* For each segment... */
     {
 
-        xfer_req = xfer_size - blks_xfrd;   /* Compute 512-byte blocks left to be read */
+        xfer_req = xfer_size - blks_xfrd; /* Compute 512-byte blocks left to be read */
 
         /* Later, for unbuffered DMA, set up the map registers here */
 
-        if (ucb->ucb$l_2K_flag)         /* A 2KB sector device? */
+        if (ucb->ucb$l_2K_flag) /* A 2KB sector device? */
             offset = ucb->ucb$l_media.lbn & 0x03;/* Calculate offset within our transfer buffer */
-        else                    /* Else if no... */
-            offset = 0;         /* No offset required */
+        else
+            /* Else if no... */
+            offset = 0; /* No offset required */
 
-        status = read_dispatcher( ucb, xfer_req, &xfer_cnt );
+        status = read_dispatcher(ucb, xfer_req, &xfer_cnt);
         /* Read this segment */
-        if ( $FAIL( status ) )          /* How did that segment go? */
+        if ($FAIL( status )) /* How did that segment go? */
         {
 
-            if (    (ucb->ucb$l_asc==0x04)  /* "Logical unit is in process of becoming ready" */
-                    && (ucb->ucb$l_ascq==0x01) )    /*   :   */
-                sleep( ucb, 10 );       /* Hang out for 10 seconds */
+            if ((ucb->ucb$l_asc == 0x04) /* "Logical unit is in process of becoming ready" */
+                    && (ucb->ucb$l_ascq == 0x01)) /*   :   */
+                sleep(ucb, 10); /* Hang out for 10 seconds */
 
-            if (ucb->ucb$l_asc==0x30)       /* Incompatible medium in drive */
-                return( status );       /* Not much point in re-trying */
+            if (ucb->ucb$l_asc == 0x30) /* Incompatible medium in drive */
+                return (status); /* Not much point in re-trying */
 
-            if (ucb->ucb$l_asc==0x3A)       /* No medium in drive */
-                return( status );       /* Not much point in re-trying */
+            if (ucb->ucb$l_asc == 0x3A) /* No medium in drive */
+                return (status); /* Not much point in re-trying */
 
-            if (status==SS$_BADPARAM)       /* Bad parameter (e.g., LBN out of range)? */
-                return( status );       /* We won't retry that either */
+            if (status == SS$_BADPARAM) /* Bad parameter (e.g., LBN out of range)? */
+                return (status); /* We won't retry that either */
 
-            if (status==SS$_VOLINV)     /* Did the volume go invalid? */
-                return( status );       /* We won't retry that either */
+            if (status == SS$_VOLINV) /* Did the volume go invalid? */
+                return (status); /* We won't retry that either */
             /* (A retry might erroneously succeed!) */
 
             if (xfer_cnt == 0)
             {
-                retry_cnt++;            /* Update retry count */
-                if (retry_cnt == MAX_RETRY/2)   /* Halfway through the retries? */
+                retry_cnt++; /* Update retry count */
+                if (retry_cnt == MAX_RETRY / 2) /* Halfway through the retries? */
                 {
-                    BPTRACE( 0x07010000 );  /* BREAK: read wants to do a reset */
-                    reset_ctrl(ucb);        /* If so, reset things */
+                    BPTRACE( 0x07010000 ); /* BREAK: read wants to do a reset */
+                    reset_ctrl(ucb); /* If so, reset things */
                 }
-                if (retry_cnt > MAX_RETRY)  /* Were there too many retries yet? */
-                    return( status );       /* Yes, exit with error */
+                if (retry_cnt > MAX_RETRY) /* Were there too many retries yet? */
+                    return (status); /* Yes, exit with error */
             }
         }
         else
         {
-            if (xfer_cnt > 0)           /* Was any data transferred ? */
-                retry_cnt = 0;          /* Clear retry count on each success */
+            if (xfer_cnt > 0) /* Was any data transferred ? */
+                retry_cnt = 0; /* Clear retry count on each success */
         }
 
-        if (xfer_cnt == 0)          /* Check that we got something */
-            continue;               /* Next retry */
+        if (xfer_cnt == 0) /* Check that we got something */
+            continue; /* Next retry */
 
         /* Later, for unbuffered DMA, skip this block */
 
         /* This segment is now in the transfer buffer. */
         /* Move the data segment to the user */
-        byte_cnt = xfer_cnt << BLK_SHIFT;   /* Calculate the byte count for this segment */
-        if (byte_cnt > ucb->ucb$l_bcr)      /* Check if the transfer exceeded the user's desired bytecount */
-            byte_cnt = ucb->ucb$l_bcr;      /* If so, minimize it to the user's actual request */
+        byte_cnt = xfer_cnt << BLK_SHIFT; /* Calculate the byte count for this segment */
+        if (byte_cnt > ucb->ucb$l_bcr) /* Check if the transfer exceeded the user's desired bytecount */
+            byte_cnt = ucb->ucb$l_bcr; /* If so, minimize it to the user's actual request */
         buf_ofs = (ucb->ucb$l_media.lbn - ucb->ucb$l_org_media) * BLK_SIZE_512;
         /* Calculate the offset (so far) into the user's buffer */
-        user_va = map_user_buffer( ucb, buf_ofs, byte_cnt );
+        user_va = map_user_buffer(ucb, buf_ofs, byte_cnt);
         /* Map that part of the user buffer */
-        TRACE( 0x07020000 + byte_cnt );     /* READ moving bytes to the user */
-        memcpy( user_va, &buffer[offset*BLK_SIZE_512], byte_cnt );
+        TRACE( 0x07020000 + byte_cnt ); /* READ moving bytes to the user */
+        memcpy(user_va, &buffer[offset * BLK_SIZE_512], byte_cnt);
         /* And copy our data to the user buffer */
 
-        ucb->ucb$l_bcr -= byte_cnt;     /* Update the byte count remaining */
-        ucb->ucb$l_media.lbn += xfer_cnt;   /* Update the LBN */
-        blks_xfrd += xfer_cnt;          /* Update the for-loop index */
+        ucb->ucb$l_bcr -= byte_cnt; /* Update the byte count remaining */
+        ucb->ucb$l_media.lbn += xfer_cnt; /* Update the LBN */
+        blks_xfrd += xfer_cnt; /* Update the for-loop index */
 
-    }                   /* Next segment */
+    } /* Next segment */
 
-    return( SS$_NORMAL );           /* Return with success */
+    return (SS$_NORMAL); /* Return with success */
 
 }
-
 
 
 /* READ_DISPATCHER - Figure out which routine to use for this segment
@@ -5671,49 +5507,48 @@ int read( DQ_UCB *ucb )
  *
  */
 
-int read_dispatcher( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
+int read_dispatcher(DQ_UCB *ucb, int xfer_req, int *xfer_cnt)
 
 {
 
     int dispatch;
 
+    dispatch = (ucb->ucb$l_atapi_flag << 2) /* Decide which routine to use */
+               + (ucb->ucb$l_2K_flag << 1) /*   :   */
+               + (ucb->ucb$l_drive_dma_capable); /*   :   */
 
-    dispatch = (ucb->ucb$l_atapi_flag << 2)     /* Decide which routine to use */
-               + (ucb->ucb$l_2K_flag    << 1)       /*   :   */
-               + (ucb->ucb$l_drive_dma_capable    );    /*   :   */
-
-    switch (dispatch)                   /* Switch to the appropriate handler */
+    switch (dispatch)
+        /* Switch to the appropriate handler */
     {
 
     case (0x0):
-        return read_ata_seg_pio(   ucb, xfer_req, xfer_cnt );       /* ATA, 512-byte sectors, via PIO */
+        return read_ata_seg_pio(ucb, xfer_req, xfer_cnt); /* ATA, 512-byte sectors, via PIO */
 
     case (0x1):
-        return read_ata_seg_dma(   ucb, xfer_req, xfer_cnt );       /* ATA, 512-byte sectors, via DMA */
+        return read_ata_seg_dma(ucb, xfer_req, xfer_cnt); /* ATA, 512-byte sectors, via DMA */
 
     case (0x4):
-        return read_atapi_512_seg( ucb, xfer_req, xfer_cnt, FALSE );    /* ATAPI, 512-byte sectors, via PIO */
+        return read_atapi_512_seg(ucb, xfer_req, xfer_cnt, FALSE); /* ATAPI, 512-byte sectors, via PIO */
 
     case (0x5):
-        return read_atapi_512_seg( ucb, xfer_req, xfer_cnt, TRUE ); /* ATAPI, 512-byte sectors, via DMA */
+        return read_atapi_512_seg(ucb, xfer_req, xfer_cnt, TRUE); /* ATAPI, 512-byte sectors, via DMA */
 
     case (0x6):
-        return read_atapi_2K_seg(  ucb, xfer_req, xfer_cnt, FALSE );    /* ATAPI, 2KB sectors, via PIO */
+        return read_atapi_2K_seg(ucb, xfer_req, xfer_cnt, FALSE); /* ATAPI, 2KB sectors, via PIO */
 
     case (0x7):
-        return read_atapi_2K_seg(  ucb, xfer_req, xfer_cnt, TRUE ); /* ATAPI, 2KB sectors, via DMA */
+        return read_atapi_2K_seg(ucb, xfer_req, xfer_cnt, TRUE); /* ATAPI, 2KB sectors, via DMA */
 
-    default:                            /* Unexpected case */
-        break;                          /* Fall into the bugcheck... */
+    default: /* Unexpected case */
+        break; /* Fall into the bugcheck... */
 
     }
 
     //    bug_check( INCONSTATE, FATAL, COLD );             /* So be it */
     panic("INCONSTATE, FATAL, COLD\n");
-    return( SS$_ABORT );                        /* (You should live so long as to get here) */
+    return (SS$_ABORT); /* (You should live so long as to get here) */
 
 }
-
 
 
 /* READ_ATA_SEG_PIO - Read one segment from an ATA drive using PIO
@@ -5741,32 +5576,32 @@ int read_dispatcher( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
  *
  */
 
-int read_ata_seg_pio( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
+int read_ata_seg_pio(DQ_UCB *ucb, int xfer_req, int *xfer_cnt)
 
 {
 
-    int   sec;                  /* Disk location (sector) */
-    int   head;                 /* Disk location (head) */
-    BYTE *buffer;               /* Pointer to our transfer buffer */
-    int   cyl;                  /* Disk location (cyl) */
-    int   drv_head;             /* Drive drive/head register */
-    int   status;               /* Returned status from routine */
-    int   orig_ipl;             /* Saved IPL */
-    int   drvsts;               /* Drive status register */
-    int   drverr;               /* Drive error register */
+    int sec; /* Disk location (sector) */
+    int head; /* Disk location (head) */
+    BYTE *buffer; /* Pointer to our transfer buffer */
+    int cyl; /* Disk location (cyl) */
+    int drv_head; /* Drive drive/head register */
+    int status; /* Returned status from routine */
+    int orig_ipl; /* Saved IPL */
+    int drvsts; /* Drive status register */
+    int drverr; /* Drive error register */
 
-    TRACE( 0x07100000 + xfer_req );     /* READ_ATA_SEG_PIO starting */
-    ucb->ucb$l_unsolicited_int = 0;     /* Forget any pending unsolicited interrupts */
+    TRACE( 0x07100000 + xfer_req ); /* READ_ATA_SEG_PIO starting */
+    ucb->ucb$l_unsolicited_int = 0; /* Forget any pending unsolicited interrupts */
 
-    if (xfer_req > MAX_ATA_XFER)        /* Check for too large a request*/
-        xfer_req = MAX_ATA_XFER;        /*  and minimize if too big */
+    if (xfer_req > MAX_ATA_XFER) /* Check for too large a request*/
+        xfer_req = MAX_ATA_XFER; /*  and minimize if too big */
 
-    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer;  /* Initialize our buffer pointer */
-    *xfer_cnt = 0;              /* Clear count of blocks read */
-    drv_head= ucb->ucb$l_drv_head;      /* Get drive info */
-    if (ucb->ucb$l_drive_lba_capable)       /* If LBA mode, ... */
-        drv_head |= DRVHD_M_LBA;        /* Set the LBA bit */
-    compute_address( ucb, &sec, &head, &cyl );  /* Compute physical address */
+    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer; /* Initialize our buffer pointer */
+    *xfer_cnt = 0; /* Clear count of blocks read */
+    drv_head = ucb->ucb$l_drv_head; /* Get drive info */
+    if (ucb->ucb$l_drive_lba_capable) /* If LBA mode, ... */
+        drv_head |= DRVHD_M_LBA; /* Set the LBA bit */
+    compute_address(ucb, &sec, &head, &cyl); /* Compute physical address */
 
     /*
      * Take out the device lock and raise IPL
@@ -5775,51 +5610,51 @@ int read_ata_seg_pio( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
      *
      */
 
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
     /* Take out the device lock for the first sector */
-    out( ucb, WT_DRV_HD, drv_head|head );   /* Select drive and head */
-    out( ucb, WT_SEC_CNT, xfer_req );       /* Ask for "n" sectors */
-    out( ucb, WT_SECTOR, sec );         /* Put in the sector number */
-    out( ucb, WT_CYL_LO, cyl );         /* Low order cylinder bits */
-    out( ucb, WT_CYL_HI, cyl>>8 );      /* High order cylinder bits */
-    out( ucb, WT_CMD, CMD_ATA_READ_SECS );  /* Attempt to read the sector */
+    out(ucb, WT_DRV_HD, drv_head | head); /* Select drive and head */
+    out(ucb, WT_SEC_CNT, xfer_req); /* Ask for "n" sectors */
+    out(ucb, WT_SECTOR, sec); /* Put in the sector number */
+    out(ucb, WT_CYL_LO, cyl); /* Low order cylinder bits */
+    out(ucb, WT_CYL_HI, cyl >> 8); /* High order cylinder bits */
+    out(ucb, WT_CMD, CMD_ATA_READ_SECS); /* Attempt to read the sector */
 
-    for (;;)                    /* Do forever (for each sector in the transfer request)... */
+    for (;;) /* Do forever (for each sector in the transfer request)... */
 
     {
 
-        status = dq_wfikpch( ucb->ucb$ps_kpb, orig_ipl, 6 );
+        status = dq_wfikpch(ucb->ucb$ps_kpb, orig_ipl, 6);
         /* Wait for the interrupt */
-        if ( $FAIL( status ) )          /* Any error (timeout, etc.) ? */
-            return( status );           /* If so, return with status */
+        if ($FAIL( status )) /* Any error (timeout, etc.) ? */
+            return (status); /* If so, return with status */
 
-        drvsts = inp( ucb, RD_ALT_STS );    /* Get the status byte */
-        if ( IS_SET( drvsts, STS_M_ERR ) )  /* Check the status */
+        drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+        if (IS_SET( drvsts, STS_M_ERR )) /* Check the status */
         {
             /* If any errors, then... */
-            drverr = inp( ucb, RD_ERROR );  /* Get the error byte */
-            BPTRACE( 0x07110000 );      /* BREAK: Drive error during READ_ATA_SEG_PIO */
-            return( SS$_DRVERR );       /* Return with error status */
+            drverr = inp(ucb, RD_ERROR); /* Get the error byte */
+            BPTRACE( 0x07110000 ); /* BREAK: Drive error during READ_ATA_SEG_PIO */
+            return (SS$_DRVERR); /* Return with error status */
         }
 
-        move_sec_from_drive( ucb, &buffer[(*xfer_cnt)*BLK_SIZE_512], BLK_SIZE_512 );
+        move_sec_from_drive(ucb, &buffer[(*xfer_cnt) * BLK_SIZE_512],
+                            BLK_SIZE_512);
         /* Move the sector from the drive to our transfer buffer */
-        *xfer_cnt += 1;             /* Count a block read */
+        *xfer_cnt += 1; /* Count a block read */
 
-        if (*xfer_cnt >= xfer_req )     /* Finished? */
-            break;              /* If so, break out of the do-forever loop */
+        if (*xfer_cnt >= xfer_req) /* Finished? */
+            break; /* If so, break out of the do-forever loop */
 
-        device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+        device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
         /* Else take out the deviced lock and go 'round again */
 
-    }                   /* Next sector in the do-forever loop */
+    } /* Next sector in the do-forever loop */
 
-    return( SS$_NORMAL );           /* Return to caller succeeding */
+    return (SS$_NORMAL); /* Return to caller succeeding */
 
 }
 
 
-
 /* READ_ATA_SEG_DMA - Read one segment from an ATA drive using DMA
  *
  * This routine performs the read of a single I/O segment.
@@ -5845,89 +5680,88 @@ int read_ata_seg_pio( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
  *
  */
 
-int read_ata_seg_dma( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
+int read_ata_seg_dma(DQ_UCB *ucb, int xfer_req, int *xfer_cnt)
 
 {
 
-    int   sec;                  /* Disk location (sector) */
-    int   head;                 /* Disk location (head) */
-    BYTE *buffer;               /* Pointer to our transfer buffer */
-    int   cyl;                  /* Disk location (cyl) */
-    int   drv_head;             /* Drive drive/head register */
-    int   status;               /* Returned status from routine */
-    int   orig_ipl;             /* Saved IPL */
-    int   drvsts;               /* Drive status register */
-    int   drverr;               /* Drive error register */
+    int sec; /* Disk location (sector) */
+    int head; /* Disk location (head) */
+    BYTE *buffer; /* Pointer to our transfer buffer */
+    int cyl; /* Disk location (cyl) */
+    int drv_head; /* Drive drive/head register */
+    int status; /* Returned status from routine */
+    int orig_ipl; /* Saved IPL */
+    int drvsts; /* Drive status register */
+    int drverr; /* Drive error register */
 
+    TRACE( 0x07800000 + xfer_req ); /* READ_ATA_SEG_DMA starting */
+    ucb->ucb$l_unsolicited_int = 0; /* Forget any pending unsolicited interrupts */
+    *xfer_cnt = 0; /* Consider none of the blocks read */
 
-    TRACE( 0x07800000 + xfer_req );     /* READ_ATA_SEG_DMA starting */
-    ucb->ucb$l_unsolicited_int = 0;     /* Forget any pending unsolicited interrupts */
-    *xfer_cnt = 0;              /* Consider none of the blocks read */
+    if (xfer_req > MAX_ATA_XFER) /* Check for too large a request*/
+        xfer_req = MAX_ATA_XFER; /*  and minimize if too big */
 
-    if (xfer_req > MAX_ATA_XFER)        /* Check for too large a request*/
-        xfer_req = MAX_ATA_XFER;        /*  and minimize if too big */
+    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer; /* Initialize our buffer pointer */
+    drv_head = ucb->ucb$l_drv_head; /* Get drive info */
+    if (ucb->ucb$l_drive_lba_capable) /* If LBA mode, ... */
+        drv_head |= DRVHD_M_LBA; /* Set the LBA bit */
+    compute_address(ucb, &sec, &head, &cyl); /* Compute physical address */
 
-    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer;  /* Initialize our buffer pointer */
-    drv_head= ucb->ucb$l_drv_head;      /* Get drive info */
-    if (ucb->ucb$l_drive_lba_capable)       /* If LBA mode, ... */
-        drv_head |= DRVHD_M_LBA;        /* Set the LBA bit */
-    compute_address( ucb, &sec, &head, &cyl );  /* Compute physical address */
+    load_prdt(ucb); /* Load the PRDT */
 
-    load_prdt( ucb );               /* Load the PRDT */
-
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
     /* Take out the device lock so we can write the registers */
 
-    out( ucb, WT_DMA_CMD, DMA_CMD_M_INBOUND | DMA_CMD_M_INACTIVE );
+    out(ucb, WT_DMA_CMD, DMA_CMD_M_INBOUND | DMA_CMD_M_INACTIVE);
     /* Make sure the DMA controller is inbound     */
     /*   (that is, reading disk -> writing memory) */
     /*   but not active yet                        */
-    out( ucb, WT_DMA_AD0, ( ( (UINT) ucb->ucb$l_prdt_phy )      ) & 0xFF );
-    out( ucb, WT_DMA_AD1, ( ( (UINT) ucb->ucb$l_prdt_phy ) >> 8 ) & 0xFF );
-    out( ucb, WT_DMA_AD2, ( ( (UINT) ucb->ucb$l_prdt_phy ) >>16 ) & 0xFF );
-    out( ucb, WT_DMA_AD3, ( ( (UINT) ucb->ucb$l_prdt_phy ) >>24 ) & 0xFF );
+    out(ucb, WT_DMA_AD0, (((UINT) ucb->ucb$l_prdt_phy)) & 0xFF);
+    out(ucb, WT_DMA_AD1, (((UINT) ucb->ucb$l_prdt_phy) >> 8) & 0xFF);
+    out(ucb, WT_DMA_AD2, (((UINT) ucb->ucb$l_prdt_phy) >> 16) & 0xFF);
+    out(ucb, WT_DMA_AD3, (((UINT) ucb->ucb$l_prdt_phy) >> 24) & 0xFF);
     /* Point the controller to the PCI address of our PRDT table */
-    out( ucb, WT_DMA_STS, DMA_STS_M_DRV1 | DMA_STS_M_DRV0 | DMA_STS_M_INT | DMA_STS_M_ERR );
+    out(ucb, WT_DMA_STS,
+        DMA_STS_M_DRV1 | DMA_STS_M_DRV0 | DMA_STS_M_INT | DMA_STS_M_ERR);
     /* For now, set both drives as DMA-capable */
     /* Write "1"s to INT and ERR to clear them in case they're set */
-    out( ucb, WT_DRV_HD, drv_head|head );   /* Select drive and head */
-    out( ucb, WT_SEC_CNT, xfer_req );       /* Ask for "n" sectors */
-    out( ucb, WT_SECTOR, sec );         /* Put in the sector number */
-    out( ucb, WT_CYL_LO, cyl );         /* Low order cylinder bits */
-    out( ucb, WT_CYL_HI, cyl>>8 );      /* High order cylinder bits */
-    out( ucb, WT_CMD, CMD_ATA_READ_DMA );   /* Attempt to read the sector(s) */
-    out( ucb, WT_DMA_CMD, DMA_CMD_M_INBOUND | DMA_CMD_M_ACTIVE );
+    out(ucb, WT_DRV_HD, drv_head | head); /* Select drive and head */
+    out(ucb, WT_SEC_CNT, xfer_req); /* Ask for "n" sectors */
+    out(ucb, WT_SECTOR, sec); /* Put in the sector number */
+    out(ucb, WT_CYL_LO, cyl); /* Low order cylinder bits */
+    out(ucb, WT_CYL_HI, cyl >> 8); /* High order cylinder bits */
+    out(ucb, WT_CMD, CMD_ATA_READ_DMA); /* Attempt to read the sector(s) */
+    out(ucb, WT_DMA_CMD, DMA_CMD_M_INBOUND | DMA_CMD_M_ACTIVE);
     /* Set the DMA controller inbound              */
     /*   (that is, reading disk -> writing memory) */
     /*   and active                                */
 
-    status = dq_wfikpch( ucb->ucb$ps_kpb, orig_ipl, 7 );
+    status = dq_wfikpch(ucb->ucb$ps_kpb, orig_ipl, 7);
     /* Wait for the interrupt */
-    if ( $FAIL( status ) )          /* Any error (timeout, etc.) ? */
-        return( status );           /* If so, return with status */
+    if ($FAIL( status )) /* Any error (timeout, etc.) ? */
+        return (status); /* If so, return with status */
 
-    drvsts = inp( ucb, RD_ALT_STS );        /* Get the status byte */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
 
-    if ( IS_SET( drvsts, STS_M_ERR ) )      /* Check the status (saved from above) */
+    if (IS_SET( drvsts, STS_M_ERR )) /* Check the status (saved from above) */
     {
         /* If any errors, then... */
-        drverr = inp( ucb, RD_ERROR );      /* Get the error byte */
-        BPTRACE( 0x07810000 );          /* BREAK: Drive error during READ_ATA_SEG_DMA */
-        return( SS$_DRVERR );           /* Return with error status */
+        drverr = inp(ucb, RD_ERROR); /* Get the error byte */
+        BPTRACE( 0x07810000 ); /* BREAK: Drive error during READ_ATA_SEG_DMA */
+        return (SS$_DRVERR); /* Return with error status */
     }
 
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
     /* Take out the deviced lock */
-    out( ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE ); /* Set the DMA controller inactive */
-    device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE );
+    out(ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE); /* Set the DMA controller inactive */
+    device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE);
     /* Return the deviced lock */
 
-    *xfer_cnt = xfer_req;           /* Consider all of the blocks read */
+    *xfer_cnt = xfer_req; /* Consider all of the blocks read */
 
-    return( SS$_NORMAL );           /* Return to caller succeeding */
+    return (SS$_NORMAL); /* Return to caller succeeding */
 
 }
-
 
 
 /* READ_ATAPI_512_SEG_PIO - Read one segment from a 512-byte-sector ATAPI drive using PIO
@@ -5949,75 +5783,73 @@ int read_ata_seg_dma( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
  *
  */
 
-int read_atapi_512_seg( DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag )
+int read_atapi_512_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag)
 
 {
 
-    BYTE *buffer;               /* Pointer to our transfer buffer */
-    int   offset;               /* Offset within 2K block */
-    BYTE  *packet;              /* The packet bytes within the UCB */
-    int   *packetl;             /* The packet (as longwords) within the UCB */
-    int   status;               /* Routine status value */
-    int   orig_ipl;             /* Originial IPL */
+    BYTE *buffer; /* Pointer to our transfer buffer */
+    int offset; /* Offset within 2K block */
+    BYTE *packet; /* The packet bytes within the UCB */
+    int *packetl; /* The packet (as longwords) within the UCB */
+    int status; /* Routine status value */
+    int orig_ipl; /* Originial IPL */
 
+    TRACE( 0x07200000 + xfer_req ); /* READ_ATAPI_512_SEG_PIO starting */
 
-    TRACE( 0x07200000 + xfer_req );     /* READ_ATAPI_512_SEG_PIO starting */
+    if (xfer_req > MAX_ATAPI_512_XFER) /* Check for too large a transfer */
+        xfer_req = MAX_ATAPI_512_XFER; /*  and limit it if so */
 
-    if (xfer_req > MAX_ATAPI_512_XFER)      /* Check for too large a transfer */
-        xfer_req = MAX_ATAPI_512_XFER;      /*  and limit it if so */
+    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer; /* Initialize our buffer pointer */
 
-    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer;  /* Initialize our buffer pointer */
+    packetl = (int *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a longword array */
+    packetl[0] = 0; /* Clear the packet */
+    packetl[1] = 0; /*   :   */
+    packetl[2] = 0; /*   :   */
 
-    packetl = (int *) ucb->ucb$b_packet;    /* Bind onto packet in the UCB as a longword array */
-    packetl[0] = 0;             /* Clear the packet */
-    packetl[1] = 0;             /*   :   */
-    packetl[2] = 0;             /*   :   */
-
-    packet  = (BYTE *) ucb->ucb$b_packet;   /* Bind onto packet in the UCB as a byte array */
-    packet[0]  = CMD_ATAPI_READ_12;     /* Read(12) command */
+    packet = (BYTE *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a byte array */
+    packet[0] = CMD_ATAPI_READ_12; /* Read(12) command */
     /*  packet[1]  = 0x00;              /@ (Reserved) */
     /*  packet[2]  = 0x00;              /@ Address MSB (filled in momentarily) */
     /*  packet[3]  = 0x00;              /@   :      :   */
     /*  packet[4]  = 0x00;              /@   :      :   */
     /*  packet[5]  = 0x00;              /@   :     LSB  */
-    packet[6]  = xfer_req>>24;          /* Transfer length MSB in blocks */
-    packet[7]  = xfer_req>>16;          /*   :              :  */
-    packet[8]  = xfer_req>>8;           /*   :              :  */
-    packet[9]  = xfer_req;          /*   :             LSB */
+    packet[6] = xfer_req >> 24; /* Transfer length MSB in blocks */
+    packet[7] = xfer_req >> 16; /*   :              :  */
+    packet[8] = xfer_req >> 8; /*   :              :  */
+    packet[9] = xfer_req; /*   :             LSB */
     /*  packet[10] = 0x00;              /@ (Reserved) */
     /*  packet[11] = 0x00;              /@ (Reserved) */
-    offset     = fill_packet_w_adx( ucb );  /* Fill the packet address cells*/
+    offset = fill_packet_w_adx(ucb); /* Fill the packet address cells*/
 
-    status = atapi_packet_command( ucb, buffer, xfer_req, xfer_cnt, dma_flag );
+    status = atapi_packet_command(ucb, buffer, xfer_req, xfer_cnt, dma_flag);
     /* Do the common packet-command processing using appropriate mode */
 
-    if (dma_flag)               /* Using DMA? */
+    if (dma_flag) /* Using DMA? */
     {
         /* If so, then... */
-        device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+        device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
         /* Take out the deviced lock */
-        out( ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE ); /* Set the DMA controller inactive */
-        device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE );
-    }                   /* Return the deviced lock */
+        out(ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE); /* Set the DMA controller inactive */
+        device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE);
+    } /* Return the deviced lock */
 
-    if (status == SS$_DRVERR)           /* Did it result in a drive error? */
+    if (status == SS$_DRVERR) /* Did it result in a drive error? */
     {
         /* If so, then... */
-        atapi_request_sense( ucb, (BYTE *) ucb->ucb$ps_sense_buffer );
+        atapi_request_sense(ucb, (BYTE *) ucb->ucb$ps_sense_buffer);
         /* Get error info from drive */
-        status = atapi_xlate_error_to_vms( ucb );
+        status = atapi_xlate_error_to_vms(ucb);
         /* Turn it into a VMS error code */
-        return( status );           /* and exit */
+        return (status); /* and exit */
     }
 
-    if ( $FAIL( status ) )          /* Check for any other error */
-        return( status );           /*  and exit if so */
+    if ($FAIL( status )) /* Check for any other error */
+        return (status); /*  and exit if so */
 
     /* All looks okay */
-    return( SS$_NORMAL );           /* Return to caller */
+    return (SS$_NORMAL); /* Return to caller */
 
 }
-
 
 
 /* READ_ATAPI_2K_SEG - Read one segment from a 2Kbyte-sector ATAPI drive
@@ -6038,85 +5870,81 @@ int read_atapi_512_seg( DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag )
  *
  */
 
-int read_atapi_2K_seg( DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag )
+int read_atapi_2K_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag)
 
 {
 
-    BYTE *buffer;               /* Pointer to our transfer buffer */
-    int   offset;               /* Offset within 2K block */
-    BYTE  *packet;              /* The packet bytes within the UCB */
-    int   *packetl;             /* The packet (as longwords) within the UCB */
-    int   status;               /* Routine status value */
-    int   orig_ipl;             /* Original IPL */
-    int   xfer_req_2K;              /* Number of 2Kbyte sectors to transfer */
+    BYTE *buffer; /* Pointer to our transfer buffer */
+    int offset; /* Offset within 2K block */
+    BYTE *packet; /* The packet bytes within the UCB */
+    int *packetl; /* The packet (as longwords) within the UCB */
+    int status; /* Routine status value */
+    int orig_ipl; /* Original IPL */
+    int xfer_req_2K; /* Number of 2Kbyte sectors to transfer */
 
+    TRACE( 0x07300000 + xfer_req ); /* READ_ATAPI_2K_SEG starting */
 
-    TRACE( 0x07300000 + xfer_req );     /* READ_ATAPI_2K_SEG starting */
+    if (xfer_req > MAX_ATAPI_2K_XFER) /* Check for too large a transfer */
+        xfer_req = MAX_ATAPI_2K_XFER; /*  and limit it if so */
 
-    if (xfer_req > MAX_ATAPI_2K_XFER)       /* Check for too large a transfer */
-        xfer_req = MAX_ATAPI_2K_XFER;       /*  and limit it if so */
+    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer; /* Initialize our buffer pointer */
 
-    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer;  /* Initialize our buffer pointer */
+    packetl = (int *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a longword array */
+    packetl[0] = 0; /* Clear the packet */
+    packetl[1] = 0; /*   :   */
+    packetl[2] = 0; /*   :   */
 
-    packetl = (int *) ucb->ucb$b_packet;    /* Bind onto packet in the UCB as a longword array */
-    packetl[0] = 0;             /* Clear the packet */
-    packetl[1] = 0;             /*   :   */
-    packetl[2] = 0;             /*   :   */
+    packet = (BYTE *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a byte array */
 
-    packet  = (BYTE *) ucb->ucb$b_packet;   /* Bind onto packet in the UCB as a byte array */
+    offset = fill_packet_w_adx(ucb); /* Fill the packet address cells and calculate the offset */
 
-    offset     = fill_packet_w_adx( ucb );  /* Fill the packet address cells and calculate the offset */
-
-    xfer_req    = xfer_req + offset - 1;    /* Maximize the transfer so it spans any 2K-byte sectors needed */
-    xfer_req_2K = (xfer_req >> 2) + 1;      /* Divide the transfer request by 4 to account for 2K blocks */
+    xfer_req = xfer_req + offset - 1; /* Maximize the transfer so it spans any 2K-byte sectors needed */
+    xfer_req_2K = (xfer_req >> 2) + 1; /* Divide the transfer request by 4 to account for 2K blocks */
     /*   and add 1 */
-    xfer_req    = xfer_req_2K<<2;       /* Now expand the 512-byte-block-oriented xfer_req to encompass */
+    xfer_req = xfer_req_2K << 2; /* Now expand the 512-byte-block-oriented xfer_req to encompass */
     /*   all of the 2K-byte block(s) to be transferred              */
 
-    packet[0]  = CMD_ATAPI_READ_12;     /* Read(12) command */
+    packet[0] = CMD_ATAPI_READ_12; /* Read(12) command */
     /*  packet[1]  = 0x00;              /@ (Reserved) */
     /*  packet[2]  = 0x00;              /@ Address MSB (already filled-in) */
     /*  packet[3]  = 0x00;              /@   :      :   */
     /*  packet[4]  = 0x00;              /@   :      :   */
     /*  packet[5]  = 0x00;              /@   :     LSB  */
-    packet[6]  = xfer_req_2K>>24;       /* Transfer length MSB in 2Kbyte sectors */
-    packet[7]  = xfer_req_2K>>16;       /*   :              :  */
-    packet[8]  = xfer_req_2K>>8;        /*   :              :  */
-    packet[9]  = xfer_req_2K;           /*   :             LSB */
+    packet[6] = xfer_req_2K >> 24; /* Transfer length MSB in 2Kbyte sectors */
+    packet[7] = xfer_req_2K >> 16; /*   :              :  */
+    packet[8] = xfer_req_2K >> 8; /*   :              :  */
+    packet[9] = xfer_req_2K; /*   :             LSB */
     /*  packet[10] = 0x00;              /@ (Reserved) */
     /*  packet[11] = 0x00;              /@ (Reserved) */
 
-
-    status = atapi_packet_command( ucb, buffer, xfer_req, xfer_cnt, dma_flag );
+    status = atapi_packet_command(ucb, buffer, xfer_req, xfer_cnt, dma_flag);
     /* Do the common packet-command processing using desired mode */
 
-    if (dma_flag)               /* Using DMA? */
+    if (dma_flag) /* Using DMA? */
     {
         /* If so, then... */
-        device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+        device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
         /* Take out the deviced lock */
-        out( ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE ); /* Set the DMA controller inactive */
-        device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE );
-    }                   /* Return the deviced lock */
+        out(ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE); /* Set the DMA controller inactive */
+        device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE);
+    } /* Return the deviced lock */
 
-    if (status == SS$_DRVERR)           /* Did it result in a drive error? */
+    if (status == SS$_DRVERR) /* Did it result in a drive error? */
     {
         /* If so, then... */
-        atapi_request_sense( ucb, (BYTE *) ucb->ucb$ps_sense_buffer );
+        atapi_request_sense(ucb, (BYTE *) ucb->ucb$ps_sense_buffer);
         /* Get error info from drive */
-        status = atapi_xlate_error_to_vms( ucb );
+        status = atapi_xlate_error_to_vms(ucb);
         /* Turn it into a VMS error code */
-        return( status );           /* and exit */
+        return (status); /* and exit */
     }
 
-    if ( $FAIL( status ) )          /* Check for any other error */
-        return( status );           /*  and exit if so */
+    if ($FAIL( status )) /* Check for any other error */
+        return (status); /*  and exit if so */
 
-
-    return( SS$_NORMAL );           /* Return to caller */
+    return (SS$_NORMAL); /* Return to caller */
 
 }
-
 
 
 /* DATACHECK - Performs data check function for read and write
@@ -6132,101 +5960,100 @@ int read_atapi_2K_seg( DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag )
  *
  */
 
-int datacheck( DQ_UCB *ucb )
+int datacheck(DQ_UCB *ucb)
 
 {
 
-    int   offset;               /* Offset within a possible 2K block */
-    int   xfer_size;                /* Size (in sectors) */
-    int   xfer_cnt;             /* Count of blocks read (to be compared) in latest segment */
-    int   blks_xfrd;                /* For-loop index */
-    BYTE  *buffer;              /* Pointer to our transfer buffer */
-    int   byte_cnt;             /* Number of bytes compared */
-    int   xfer_req;             /* Number of sectors requested */
-    int   status;               /* Routine return status */
-    int   retry_cnt;                /* Error retry count */
-    int   buf_ofs;              /* Offset into user buffer */
-    BYTE  *user_va;             /* Returned user buffer address */
+    int offset; /* Offset within a possible 2K block */
+    int xfer_size; /* Size (in sectors) */
+    int xfer_cnt; /* Count of blocks read (to be compared) in latest segment */
+    int blks_xfrd; /* For-loop index */
+    BYTE *buffer; /* Pointer to our transfer buffer */
+    int byte_cnt; /* Number of bytes compared */
+    int xfer_req; /* Number of sectors requested */
+    int status; /* Routine return status */
+    int retry_cnt; /* Error retry count */
+    int buf_ofs; /* Offset into user buffer */
+    BYTE *user_va; /* Returned user buffer address */
 
+    TRACE( 0x08000000 ); /* DATACHECK starting */
 
-    TRACE( 0x08000000 );            /* DATACHECK starting */
-
-    ucb->ucb$l_bcr = ucb->ucb$l_org_bcnt;   /* Get byte count */
+    ucb->ucb$l_bcr = ucb->ucb$l_org_bcnt; /* Get byte count */
     ucb->ucb$l_media.lbn = ucb->ucb$l_org_media;/* Get first block number */
-    baseucb.ucb$l_bcnt = ucb->ucb$l_org_bcnt;   /* Get byte count */
+    baseucb.ucb$l_bcnt = ucb->ucb$l_org_bcnt; /* Get byte count */
     baseucb.ucb$l_svapte = ucb->ucb$l_org_svapte;/* Get SVAPTE */
-    baseucb.ucb$l_boff = ucb->ucb$l_org_boff;   /* Get BOFF */
+    baseucb.ucb$l_boff = ucb->ucb$l_org_boff; /* Get BOFF */
 
-    status = wait_ready( ucb );         /* Wait for drive to be ready for a command */
-    if ( $FAIL( status ) )          /* Check return status */
-        return( status );           /*  and exit on error */
+    status = wait_ready(ucb); /* Wait for drive to be ready for a command */
+    if ($FAIL( status )) /* Check return status */
+        return (status); /*  and exit on error */
 
     /* Compute number of blocks and set up */
     xfer_size = (baseucb.ucb$l_bcnt + BLK_SIZE_512 - 1) >> BLK_SHIFT;
-    if (xfer_size == 0)             /* Was there any work to do ? */
-        return( SS$_NORMAL );           /* Exit with success if not */
+    if (xfer_size == 0) /* Was there any work to do ? */
+        return (SS$_NORMAL); /* Exit with success if not */
 
-    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer;  /* Initialize our buffer pointer */
-    retry_cnt = 0;              /* Initialize the retry counter */
+    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer; /* Initialize our buffer pointer */
+    retry_cnt = 0; /* Initialize the retry counter */
 
     for (blks_xfrd = 0; blks_xfrd < xfer_size;) /* For each segment... */
     {
-        xfer_req = xfer_size - blks_xfrd;   /* Compute 512-byte blocks left to be read */
+        xfer_req = xfer_size - blks_xfrd; /* Compute 512-byte blocks left to be read */
 
-        if (ucb->ucb$l_2K_flag)         /* A 2KB sector device? */
+        if (ucb->ucb$l_2K_flag) /* A 2KB sector device? */
             offset = ucb->ucb$l_media.lbn & 0x03;/* Calculate offset within our transfer buffer */
-        else                    /* Else if no... */
-            offset = 0;         /* No offset required */
+        else
+            /* Else if no... */
+            offset = 0; /* No offset required */
 
-        status = read_dispatcher( ucb, xfer_req, &xfer_cnt );
+        status = read_dispatcher(ucb, xfer_req, &xfer_cnt);
         /* Read this segment */
 
-        if ( $FAIL( status ) )          /* How did that segment go? */
+        if ($FAIL( status )) /* How did that segment go? */
         {
-            if (xfer_cnt == 0)          /* If no data was transferred... */
+            if (xfer_cnt == 0) /* If no data was transferred... */
             {
-                retry_cnt++;            /* Update retry count */
-                if (retry_cnt == MAX_RETRY/2)   /* Halfway through the retries? */
+                retry_cnt++; /* Update retry count */
+                if (retry_cnt == MAX_RETRY / 2) /* Halfway through the retries? */
                 {
-                    BPTRACE( 0x08010000 );  /* BREAK: datacheck wants to do reset */
-                    reset_ctrl( ucb );      /* If so, reset things */
+                    BPTRACE( 0x08010000 ); /* BREAK: datacheck wants to do reset */
+                    reset_ctrl(ucb); /* If so, reset things */
                 }
-                if (retry_cnt > MAX_RETRY)  /* Were there too many retries yet? */
-                    return( status );       /* Yes, exit with error */
+                if (retry_cnt > MAX_RETRY) /* Were there too many retries yet? */
+                    return (status); /* Yes, exit with error */
             }
         }
         else
         {
-            if (xfer_cnt > 0)           /* Was any data transferred ? */
-                retry_cnt = 0;          /* Clear retry count on each success */
+            if (xfer_cnt > 0) /* Was any data transferred ? */
+                retry_cnt = 0; /* Clear retry count on each success */
         }
         /* This segment is now in our transfer buffer */
         /* Do the data comparison */
 
-        byte_cnt = xfer_cnt << BLK_SHIFT;   /* Compute byte count */
-        if (byte_cnt > ucb->ucb$l_bcr)      /* Check if the transfer exceeded the user's desired bytecount */
-            byte_cnt = ucb->ucb$l_bcr;      /* If so, minimize it to the user's actual request */
+        byte_cnt = xfer_cnt << BLK_SHIFT; /* Compute byte count */
+        if (byte_cnt > ucb->ucb$l_bcr) /* Check if the transfer exceeded the user's desired bytecount */
+            byte_cnt = ucb->ucb$l_bcr; /* If so, minimize it to the user's actual request */
 
         buf_ofs = (ucb->ucb$l_media.lbn - ucb->ucb$l_org_media) * BLK_SIZE_512;
         /* Calculate the offset (so far) into the user's buffer */
-        user_va = map_user_buffer( ucb, buf_ofs, byte_cnt );
+        user_va = map_user_buffer(ucb, buf_ofs, byte_cnt);
         /* Map that part of the user buffer */
-        TRACE( 0x08020000 + byte_cnt );     /* DATACHECK comparing bytes with the user */
-        status = memcmp( &buffer[offset*BLK_SIZE_512], user_va, byte_cnt );
+        TRACE( 0x08020000 + byte_cnt ); /* DATACHECK comparing bytes with the user */
+        status = memcmp(&buffer[offset * BLK_SIZE_512], user_va, byte_cnt);
         /* And compare user buffer and our transfer buffer */
-        if (status != 0)            /* Check comparison results */
-            return( SS$_DATACHECK );        /* Failed - return DATACHECK error */
+        if (status != 0) /* Check comparison results */
+            return (SS$_DATACHECK); /* Failed - return DATACHECK error */
 
-        ucb->ucb$l_bcr -= byte_cnt;     /* Update the byte count remaining */
-        ucb->ucb$l_media.lbn += xfer_cnt;   /* Bump the LBN */
-        blks_xfrd += xfer_cnt;          /* Update the for-loop index */
+        ucb->ucb$l_bcr -= byte_cnt; /* Update the byte count remaining */
+        ucb->ucb$l_media.lbn += xfer_cnt; /* Bump the LBN */
+        blks_xfrd += xfer_cnt; /* Update the for-loop index */
 
-    }                   /* Next segment */
+    } /* Next segment */
 
-    return( SS$_NORMAL );           /* Return with success */
+    return (SS$_NORMAL); /* Return with success */
 
 }
-
 
 
 /* WRITE - Performs IO$_WRITExBLK driver functions
@@ -6239,88 +6066,86 @@ int datacheck( DQ_UCB *ucb )
  *
  */
 
-int write( DQ_UCB *ucb )
+int write(DQ_UCB *ucb)
 
 {
 
-    int   byte_cnt;             /* Number of bytes written */
-    int   xfer_size;                /* Size (in sectors) */
-    int   xfer_cnt;             /* Count of blocks actually written in latest segment */
-    int   blks_xfrd;                /* For-loop index */
-    int   xfer_req;             /* Number of sectors requested */
-    int   status;               /* Routine status */
-    int   retry_cnt;                /* Retry counter */
+    int byte_cnt; /* Number of bytes written */
+    int xfer_size; /* Size (in sectors) */
+    int xfer_cnt; /* Count of blocks actually written in latest segment */
+    int blks_xfrd; /* For-loop index */
+    int xfer_req; /* Number of sectors requested */
+    int status; /* Routine status */
+    int retry_cnt; /* Retry counter */
 
-    TRACE( 0x09000000 );            /* WRITE starting */
+    TRACE( 0x09000000 ); /* WRITE starting */
 
-    status = wait_ready( ucb );         /* Wait for drive to be ready for a command */
-    if ( $FAIL( status ) )          /* Check the error */
-        return( status );           /*  if an error, then return */
-
+    status = wait_ready(ucb); /* Wait for drive to be ready for a command */
+    if ($FAIL( status )) /* Check the error */
+        return (status); /*  if an error, then return */
 
     /* Compute number of blocks and set up */
     xfer_size = (baseucb.ucb$l_bcnt + BLK_SIZE_512 - 1) >> BLK_SHIFT;
-    if (xfer_size == 0)             /* Was there any work */
-        return( SS$_NORMAL );           /* Exit with success if not */
+    if (xfer_size == 0) /* Was there any work */
+        return (SS$_NORMAL); /* Exit with success if not */
 
-    retry_cnt = 0;              /* Initialize the retry counter */
+    retry_cnt = 0; /* Initialize the retry counter */
 
     for (blks_xfrd = 0; blks_xfrd < xfer_size;) /* For each segment... */
     {
-        xfer_req = xfer_size - blks_xfrd;   /* Compute 512-byte blocks left to be written */
+        xfer_req = xfer_size - blks_xfrd; /* Compute 512-byte blocks left to be written */
 
-        status = write_dispatcher( ucb, xfer_req, &xfer_cnt );
+        status = write_dispatcher(ucb, xfer_req, &xfer_cnt);
 
-        if ( $FAIL( status ) )          /* How did that segment go? */
+        if ($FAIL( status )) /* How did that segment go? */
         {
 
-            if (ucb->ucb$l_asc==0x30)       /* Incompatible medium in drive */
-                return( status );       /* Not much point in re-trying */
+            if (ucb->ucb$l_asc == 0x30) /* Incompatible medium in drive */
+                return (status); /* Not much point in re-trying */
 
-            if (ucb->ucb$l_asc==0x3A)       /* No medium in drive */
-                return( status );       /* Not much point in re-trying */
+            if (ucb->ucb$l_asc == 0x3A) /* No medium in drive */
+                return (status); /* Not much point in re-trying */
 
-            if (status==SS$_BADPARAM)       /* Bad parameter (e.g., LBN out of range)? */
-                return( status );       /* We won't retry that either */
+            if (status == SS$_BADPARAM) /* Bad parameter (e.g., LBN out of range)? */
+                return (status); /* We won't retry that either */
 
-            if (status==SS$_VOLINV)     /* Did the volume go invalid? */
-                return( status );       /* We won't retry that either */
+            if (status == SS$_VOLINV) /* Did the volume go invalid? */
+                return (status); /* We won't retry that either */
             /* (A retry might erroneously succeed!) */
 
-            if (status==SS$_WRITLCK)        /* Medium appers to be write-locked */
-                return( status );       /* Not much point in re-trying */
+            if (status == SS$_WRITLCK) /* Medium appers to be write-locked */
+                return (status); /* Not much point in re-trying */
 
-            if (xfer_cnt == 0)          /* If no data was transfered... */
+            if (xfer_cnt == 0) /* If no data was transfered... */
             {
-                retry_cnt++;            /* Update retry count */
-                if (retry_cnt == MAX_RETRY/2)   /* Halfway through the retries? */
+                retry_cnt++; /* Update retry count */
+                if (retry_cnt == MAX_RETRY / 2) /* Halfway through the retries? */
                 {
-                    BPTRACE( 0x09010000 );  /* BREAK: write wants to do reset */
-                    reset_ctrl( ucb );      /* If so, reset things */
+                    BPTRACE( 0x09010000 ); /* BREAK: write wants to do reset */
+                    reset_ctrl(ucb); /* If so, reset things */
                 }
-                if (retry_cnt > MAX_RETRY)  /* Were there too many retries yet? */
-                    return( status );       /* Yes, exit with error */
+                if (retry_cnt > MAX_RETRY) /* Were there too many retries yet? */
+                    return (status); /* Yes, exit with error */
             }
         }
         else
         {
-            if (xfer_cnt > 0)           /* Was any data transferred ? */
-                retry_cnt = 0;          /* Clear retry count on each success */
+            if (xfer_cnt > 0) /* Was any data transferred ? */
+                retry_cnt = 0; /* Clear retry count on each success */
         }
 
-        byte_cnt = xfer_cnt << BLK_SHIFT;   /* Compute byte count */
-        if (byte_cnt > ucb->ucb$l_bcr)      /* Check if the transfer exceeded the user's desired bytecount */
-            byte_cnt = ucb->ucb$l_bcr;      /* If so, minimize it to the user's actual request */
+        byte_cnt = xfer_cnt << BLK_SHIFT; /* Compute byte count */
+        if (byte_cnt > ucb->ucb$l_bcr) /* Check if the transfer exceeded the user's desired bytecount */
+            byte_cnt = ucb->ucb$l_bcr; /* If so, minimize it to the user's actual request */
 
-        ucb->ucb$l_bcr -= byte_cnt;     /* Update byte count remaining */
-        ucb->ucb$l_media.lbn += xfer_cnt;   /* Update the LBN */
-        blks_xfrd += xfer_cnt;          /* Update the for-loop index */
+        ucb->ucb$l_bcr -= byte_cnt; /* Update byte count remaining */
+        ucb->ucb$l_media.lbn += xfer_cnt; /* Update the LBN */
+        blks_xfrd += xfer_cnt; /* Update the for-loop index */
     }
 
-    return( SS$_NORMAL );               /* Return to caller with success */
+    return (SS$_NORMAL); /* Return to caller with success */
 
 }
-
 
 
 /* WRITE_DISPATCHER - Figure out which routine to use for this segment
@@ -6343,49 +6168,48 @@ int write( DQ_UCB *ucb )
  *
  */
 
-int write_dispatcher( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
+int write_dispatcher(DQ_UCB *ucb, int xfer_req, int *xfer_cnt)
 
 {
 
     int dispatch;
 
+    dispatch = (ucb->ucb$l_atapi_flag << 2) /* Decide which routine to use */
+               + (ucb->ucb$l_2K_flag << 1) /*   :   */
+               + (ucb->ucb$l_drive_dma_capable); /*   :   */
 
-    dispatch = (ucb->ucb$l_atapi_flag    << 2)      /* Decide which routine to use */
-               + (ucb->ucb$l_2K_flag       << 1)        /*   :   */
-               + (ucb->ucb$l_drive_dma_capable );       /*   :   */
-
-    switch (dispatch)                   /* Switch to the appropriate handler */
+    switch (dispatch)
+        /* Switch to the appropriate handler */
     {
 
     case (0x0):
-        return write_ata_seg_pio(   ucb, xfer_req, xfer_cnt );  /* ATA, 512-byte sectors, via PIO */
+        return write_ata_seg_pio(ucb, xfer_req, xfer_cnt); /* ATA, 512-byte sectors, via PIO */
 
     case (0x1):
-        return write_ata_seg_dma(   ucb, xfer_req, xfer_cnt );  /* ATA, 512-byte sectors, via DMA */
+        return write_ata_seg_dma(ucb, xfer_req, xfer_cnt); /* ATA, 512-byte sectors, via DMA */
 
     case (0x4):
-        return write_atapi_512_seg( ucb, xfer_req, xfer_cnt, FALSE );   /* ATAPI, 512-byte sectors, via PIO */
+        return write_atapi_512_seg(ucb, xfer_req, xfer_cnt, FALSE); /* ATAPI, 512-byte sectors, via PIO */
 
     case (0x5):
-        return write_atapi_512_seg( ucb, xfer_req, xfer_cnt, TRUE );    /* ATAPI, 512-byte sectors, via DMA */
+        return write_atapi_512_seg(ucb, xfer_req, xfer_cnt, TRUE); /* ATAPI, 512-byte sectors, via DMA */
 
     case (0x6):
-        return write_atapi_2K_seg(  ucb, xfer_req, xfer_cnt, FALSE );   /* ATAPI, 2KB sectors, via PIO */
+        return write_atapi_2K_seg(ucb, xfer_req, xfer_cnt, FALSE); /* ATAPI, 2KB sectors, via PIO */
 
     case (0x7):
-        return write_atapi_2K_seg(  ucb, xfer_req, xfer_cnt, TRUE );    /* ATAPI, 2KB sectors, via DMA */
+        return write_atapi_2K_seg(ucb, xfer_req, xfer_cnt, TRUE); /* ATAPI, 2KB sectors, via DMA */
 
-    default:                            /* Unexpected case */
-        break;                          /* Fall into the bugcheck... */
+    default: /* Unexpected case */
+        break; /* Fall into the bugcheck... */
 
     }
 
     //bug_check( INCONSTATE, FATAL, COLD );             /* So be it */
-    panic(" INCONSTATE, FATAL, COLD \n");               /* So be it */
-    return( SS$_ABORT );                        /* (You should live so long as to get here) */
+    panic(" INCONSTATE, FATAL, COLD \n"); /* So be it */
+    return (SS$_ABORT); /* (You should live so long as to get here) */
 
 }
-
 
 
 /* WRITE_ATA_SEG_PIO - Write one segment to an ATA drive using PIO
@@ -6413,58 +6237,58 @@ int write_dispatcher( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
  *
  */
 
-int write_ata_seg_pio( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
+int write_ata_seg_pio(DQ_UCB *ucb, int xfer_req, int *xfer_cnt)
 
 {
 
-    int   buf_ofs;              /* Offset into user buffer */
-    BYTE *buffer;               /* Pointer to our transfer buffer */
-    int   byte_cnt;             /* Count of bytes to be transferred */
-    int   cyl;                  /* Cylinder number and components */
-    int   drv_head;             /* Drive drive/head register */
-    int   drverr;               /* Drive error register */
-    int   drvsts;               /* Drive status register */
-    int   head;                 /* Head number */
-    int   idx;                  /* Zero fill index */
-    int   orig_ipl;             /* Original IPL */
-    int   remainder;                /* Bytes left at end of block */
-    int   sec;                  /* Sector number and count */
-    int   status;               /* Routine status value */
-    BYTE  *user_va;             /* Mapped user buffer address */
+    int buf_ofs; /* Offset into user buffer */
+    BYTE *buffer; /* Pointer to our transfer buffer */
+    int byte_cnt; /* Count of bytes to be transferred */
+    int cyl; /* Cylinder number and components */
+    int drv_head; /* Drive drive/head register */
+    int drverr; /* Drive error register */
+    int drvsts; /* Drive status register */
+    int head; /* Head number */
+    int idx; /* Zero fill index */
+    int orig_ipl; /* Original IPL */
+    int remainder; /* Bytes left at end of block */
+    int sec; /* Sector number and count */
+    int status; /* Routine status value */
+    BYTE *user_va; /* Mapped user buffer address */
 
-    TRACE( 0x09100000 + xfer_req );     /* WRITE_ATA_SEG_PIO starting */
-    ucb->ucb$l_unsolicited_int = 0;     /* Forget any pending unsolicited interrupts */
+    TRACE( 0x09100000 + xfer_req ); /* WRITE_ATA_SEG_PIO starting */
+    ucb->ucb$l_unsolicited_int = 0; /* Forget any pending unsolicited interrupts */
 
-    if (xfer_req > MAX_ATA_XFER)        /* Check for too large a transfer */
-        xfer_req = MAX_ATA_XFER;        /*  and limit it if so */
+    if (xfer_req > MAX_ATA_XFER) /* Check for too large a transfer */
+        xfer_req = MAX_ATA_XFER; /*  and limit it if so */
 
-    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer;  /* Initialize our buffer pointer */
-    *xfer_cnt = 0;              /* Clear count of blocks written */
-    drv_head = ucb->ucb$l_drv_head;     /* Get base drive info */
-    if (ucb->ucb$l_drive_lba_capable)       /* If LBA mode, ... */
-        drv_head |= DRVHD_M_LBA;        /*  ... set the LBA bit */
-    compute_address( ucb, &sec, &head, &cyl );  /* Compute the address */
+    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer; /* Initialize our buffer pointer */
+    *xfer_cnt = 0; /* Clear count of blocks written */
+    drv_head = ucb->ucb$l_drv_head; /* Get base drive info */
+    if (ucb->ucb$l_drive_lba_capable) /* If LBA mode, ... */
+        drv_head |= DRVHD_M_LBA; /*  ... set the LBA bit */
+    compute_address(ucb, &sec, &head, &cyl); /* Compute the address */
 
     /* Move the data segment from the user */
-    byte_cnt = xfer_req << BLK_SHIFT;       /* Compute byte count */
-    if (byte_cnt > ucb->ucb$l_bcr)      /* Check for too large */
-        byte_cnt = ucb->ucb$l_bcr;      /* Minimize it */
+    byte_cnt = xfer_req << BLK_SHIFT; /* Compute byte count */
+    if (byte_cnt > ucb->ucb$l_bcr) /* Check for too large */
+        byte_cnt = ucb->ucb$l_bcr; /* Minimize it */
 
     buf_ofs = (ucb->ucb$l_media.lbn - ucb->ucb$l_org_media) * BLK_SIZE_512;
     /* Calculate the offset (so far) into the user's buffer */
-    user_va = map_user_buffer( ucb, buf_ofs, byte_cnt );
+    user_va = map_user_buffer(ucb, buf_ofs, byte_cnt);
     /* Map that part of the user buffer */
-    TRACE( 0x09110000 + byte_cnt );     /* WRITE_ATA_SEG_PIO moving bytes from the user */
-    memcpy( buffer, user_va, byte_cnt );    /* Copy the user data to our buffer */
+    TRACE( 0x09110000 + byte_cnt ); /* WRITE_ATA_SEG_PIO moving bytes from the user */
+    memcpy(buffer, user_va, byte_cnt); /* Copy the user data to our buffer */
 
     /* If less than a full block, then zero the remainder */
-    remainder = byte_cnt & BLK_MASK;        /* Compute remainder */
-    if (remainder > 0)              /* Is there any? */
+    remainder = byte_cnt & BLK_MASK; /* Compute remainder */
+    if (remainder > 0) /* Is there any? */
     {
         /* If so, then... */
-        remainder = BLK_SIZE_512 - remainder;   /* Compute bytes left */
-        for (idx=0; idx < remainder; idx++) /* For each additional byte */
-            buffer[byte_cnt+idx]=0;     /* Zero the byte */
+        remainder = BLK_SIZE_512 - remainder; /* Compute bytes left */
+        for (idx = 0; idx < remainder; idx++) /* For each additional byte */
+            buffer[byte_cnt + idx] = 0; /* Zero the byte */
     }
 
     /*
@@ -6474,59 +6298,59 @@ int write_ata_seg_pio( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
      *
      */
 
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
     /* Take out the device lock for the first sector */
-    out( ucb, WT_DRV_HD, drv_head|head );   /* Select drive and head */
-    out( ucb, WT_SEC_CNT, xfer_req );       /* Ask for "n" sectors */
-    out( ucb, WT_SECTOR, sec );         /* Put in the sector number */
-    out( ucb, WT_CYL_LO, cyl );         /* Low order cylinder bits */
-    out( ucb, WT_CYL_HI, cyl>>8 );      /* High order cylinder bits */
-    out( ucb, WT_CMD, CMD_ATA_WRITE_SECS ); /* Attempt to write the sector */
+    out(ucb, WT_DRV_HD, drv_head | head); /* Select drive and head */
+    out(ucb, WT_SEC_CNT, xfer_req); /* Ask for "n" sectors */
+    out(ucb, WT_SECTOR, sec); /* Put in the sector number */
+    out(ucb, WT_CYL_LO, cyl); /* Low order cylinder bits */
+    out(ucb, WT_CYL_HI, cyl >> 8); /* High order cylinder bits */
+    out(ucb, WT_CMD, CMD_ATA_WRITE_SECS); /* Attempt to write the sector */
 
-    for (;;)                    /* Do forever (for each sector in the transfer request)... */
+    for (;;) /* Do forever (for each sector in the transfer request)... */
 
     {
 
-        status = wait_drq( ucb );       /* Wait for data request */
-        if ( $FAIL( status ) )          /* Check for error */
+        status = wait_drq(ucb); /* Wait for data request */
+        if ($FAIL( status )) /* Check for error */
         {
             /* If any, then... */
-            device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE );
+            device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE);
             /* Release the device lock */
-            return( status );           /* And return failing status */
+            return (status); /* And return failing status */
         }
 
-        move_sec_to_drive( ucb, &buffer[(*xfer_cnt)*BLK_SIZE_512], BLK_SIZE_512 );
+        move_sec_to_drive(ucb, &buffer[(*xfer_cnt) * BLK_SIZE_512],
+                          BLK_SIZE_512);
         /* Move the sector from our transfer buffer to the drive */
 
-        status = dq_wfikpch( ucb->ucb$ps_kpb, orig_ipl, 8 );
+        status = dq_wfikpch(ucb->ucb$ps_kpb, orig_ipl, 8);
         /* Wait for the interrupt */
-        if ( $FAIL( status ) )          /* Any error (timeout, etc.) ? */
-            return( status );           /* If so, return with status */
+        if ($FAIL( status )) /* Any error (timeout, etc.) ? */
+            return (status); /* If so, return with status */
 
-        drvsts = inp( ucb, RD_ALT_STS );    /* Get the status byte */
-        if ( IS_SET( drvsts, STS_M_ERR ) )  /* Check the status */
+        drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+        if (IS_SET( drvsts, STS_M_ERR )) /* Check the status */
         {
             /* If any errors, then... */
-            drverr = inp( ucb, RD_ERROR );  /* Get the error byte */
-            BPTRACE( 0x09120000 );      /* BREAK: Drive error during WRITE_ATA_SEG_PIO */
-            return( SS$_DRVERR );       /* Return with error status */
+            drverr = inp(ucb, RD_ERROR); /* Get the error byte */
+            BPTRACE( 0x09120000 ); /* BREAK: Drive error during WRITE_ATA_SEG_PIO */
+            return (SS$_DRVERR); /* Return with error status */
         }
 
-        *xfer_cnt += 1;             /* Count a block written */
+        *xfer_cnt += 1; /* Count a block written */
 
-        if (*xfer_cnt >= xfer_req )     /* Finished? */
-            break;              /* If so, break out of the do-forever loop */
+        if (*xfer_cnt >= xfer_req) /* Finished? */
+            break; /* If so, break out of the do-forever loop */
 
-        device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+        device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
         /* Else take out the device lock and go 'round again */
 
-    }                   /* Next sector in the do-forever loop */
+    } /* Next sector in the do-forever loop */
 
-    return( SS$_NORMAL );           /* Return to caller succeeding */
+    return (SS$_NORMAL); /* Return to caller succeeding */
 
 }
-
 
 
 /* WRITE_ATA_SEG_DMA - Write one segment to an ATA drive using DMA
@@ -6554,68 +6378,66 @@ int write_ata_seg_pio( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
  *
  */
 
-int write_ata_seg_dma( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
+int write_ata_seg_dma(DQ_UCB *ucb, int xfer_req, int *xfer_cnt)
 
 {
 
-    int   buf_ofs;              /* Offset into user buffer */
-    BYTE *buffer;               /* Pointer to our transfer buffer */
-    int   byte_cnt;             /* Count of bytes to be transferred */
-    int   cyl;                  /* Cylinder number and components */
-    int   drv_head;             /* Drive drive/head register */
-    int   drverr;               /* Drive error register */
-    int   drvsts;               /* Drive status register */
-    int   head;                 /* Head number */
-    int   idx;                  /* Zero fill index */
-    int   orig_ipl;             /* Original IPL */
-    int   remainder;                /* Bytes left at end of block */
-    int   sec;                  /* Sector number and count */
-    int   status;               /* Routine status value */
-    BYTE  *user_va;             /* Mapped user buffer address */
+    int buf_ofs; /* Offset into user buffer */
+    BYTE *buffer; /* Pointer to our transfer buffer */
+    int byte_cnt; /* Count of bytes to be transferred */
+    int cyl; /* Cylinder number and components */
+    int drv_head; /* Drive drive/head register */
+    int drverr; /* Drive error register */
+    int drvsts; /* Drive status register */
+    int head; /* Head number */
+    int idx; /* Zero fill index */
+    int orig_ipl; /* Original IPL */
+    int remainder; /* Bytes left at end of block */
+    int sec; /* Sector number and count */
+    int status; /* Routine status value */
+    BYTE *user_va; /* Mapped user buffer address */
 
-    TRACE( 0x09800000 + xfer_req );     /* WRITE_ATA_SEG_DMA starting */
-    ucb->ucb$l_unsolicited_int = 0;     /* Forget any pending unsolicited interrupts */
-    *xfer_cnt = 0;              /* Consider none of the blocks written */
+    TRACE( 0x09800000 + xfer_req ); /* WRITE_ATA_SEG_DMA starting */
+    ucb->ucb$l_unsolicited_int = 0; /* Forget any pending unsolicited interrupts */
+    *xfer_cnt = 0; /* Consider none of the blocks written */
 
-    if (xfer_req > MAX_ATA_XFER)        /* Check for too large a transfer */
-        xfer_req = MAX_ATA_XFER;        /*  and limit it if so */
+    if (xfer_req > MAX_ATA_XFER) /* Check for too large a transfer */
+        xfer_req = MAX_ATA_XFER; /*  and limit it if so */
 
-    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer;  /* Initialize our buffer pointer */
-    drv_head = ucb->ucb$l_drv_head;     /* Get base drive info */
-    if (ucb->ucb$l_drive_lba_capable)       /* If LBA mode, ... */
-        drv_head |= DRVHD_M_LBA;        /*  ... set the LBA bit */
-    compute_address( ucb, &sec, &head, &cyl );  /* Compute the address */
-
+    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer; /* Initialize our buffer pointer */
+    drv_head = ucb->ucb$l_drv_head; /* Get base drive info */
+    if (ucb->ucb$l_drive_lba_capable) /* If LBA mode, ... */
+        drv_head |= DRVHD_M_LBA; /*  ... set the LBA bit */
+    compute_address(ucb, &sec, &head, &cyl); /* Compute the address */
 
     /* Later, for unbuffered DMA, skip this and set map registers instead */
     /*   :   */
     /*   :   */
     /* Move the data segment from the user */
-    byte_cnt = xfer_req << BLK_SHIFT;       /* Compute byte count */
-    if (byte_cnt > ucb->ucb$l_bcr)      /* Check for too large */
-        byte_cnt = ucb->ucb$l_bcr;      /* Minimize it */
+    byte_cnt = xfer_req << BLK_SHIFT; /* Compute byte count */
+    if (byte_cnt > ucb->ucb$l_bcr) /* Check for too large */
+        byte_cnt = ucb->ucb$l_bcr; /* Minimize it */
 
     buf_ofs = (ucb->ucb$l_media.lbn - ucb->ucb$l_org_media) * BLK_SIZE_512;
     /* Calculate the offset (so far) into the user's buffer */
-    user_va = map_user_buffer( ucb, buf_ofs, byte_cnt );
+    user_va = map_user_buffer(ucb, buf_ofs, byte_cnt);
     /* Map that part of the user buffer */
-    TRACE( 0x09810000 + byte_cnt );     /* WRITE_ATA_SEG_DMA moving bytes from the user */
-    memcpy( buffer, user_va, byte_cnt );    /* Copy the user data to our buffer */
+    TRACE( 0x09810000 + byte_cnt ); /* WRITE_ATA_SEG_DMA moving bytes from the user */
+    memcpy(buffer, user_va, byte_cnt); /* Copy the user data to our buffer */
 
     /* If less than a full block, then zero the remainder */
-    remainder = byte_cnt & BLK_MASK;        /* Compute remainder */
-    if (remainder > 0)              /* Is there any? */
+    remainder = byte_cnt & BLK_MASK; /* Compute remainder */
+    if (remainder > 0) /* Is there any? */
     {
         /* If so, then... */
-        remainder = BLK_SIZE_512 - remainder;   /* Compute bytes left */
-        for (idx=0; idx < remainder; idx++) /* For each additional byte */
-            buffer[byte_cnt+idx]=0;     /* Zero the byte */
+        remainder = BLK_SIZE_512 - remainder; /* Compute bytes left */
+        for (idx = 0; idx < remainder; idx++) /* For each additional byte */
+            buffer[byte_cnt + idx] = 0; /* Zero the byte */
     }
 
     /*   :   */
     /*   :   */
     /* Later, for unbuffered DMA, skip this and set map registers instead */
-
 
     /*
      * Take out the device lock and raise IPL
@@ -6624,61 +6446,61 @@ int write_ata_seg_dma( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
      *
      */
 
-    load_prdt( ucb );               /* Load the PRDT */
+    load_prdt(ucb); /* Load the PRDT */
 
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
     /* Take out the device lock so we can write the registers */
 
-    out( ucb, WT_DMA_CMD, DMA_CMD_M_OUTBOUND | DMA_CMD_M_INACTIVE );
+    out(ucb, WT_DMA_CMD, DMA_CMD_M_OUTBOUND | DMA_CMD_M_INACTIVE);
     /* Make sure the DMA controller is outbound    */
     /*   (that is, reading memory -> writing disk) */
     /*   but not active yet                        */
-    out( ucb, WT_DMA_AD0, ( ( (UINT) ucb->ucb$l_prdt_phy )      ) & 0xFF );
-    out( ucb, WT_DMA_AD1, ( ( (UINT) ucb->ucb$l_prdt_phy ) >> 8 ) & 0xFF );
-    out( ucb, WT_DMA_AD2, ( ( (UINT) ucb->ucb$l_prdt_phy ) >>16 ) & 0xFF );
-    out( ucb, WT_DMA_AD3, ( ( (UINT) ucb->ucb$l_prdt_phy ) >>24 ) & 0xFF );
+    out(ucb, WT_DMA_AD0, (((UINT) ucb->ucb$l_prdt_phy)) & 0xFF);
+    out(ucb, WT_DMA_AD1, (((UINT) ucb->ucb$l_prdt_phy) >> 8) & 0xFF);
+    out(ucb, WT_DMA_AD2, (((UINT) ucb->ucb$l_prdt_phy) >> 16) & 0xFF);
+    out(ucb, WT_DMA_AD3, (((UINT) ucb->ucb$l_prdt_phy) >> 24) & 0xFF);
     /* Point the controller to the PCI address of our PRDT table */
-    out( ucb, WT_DMA_STS, DMA_STS_M_DRV1 | DMA_STS_M_DRV0 | DMA_STS_M_INT | DMA_STS_M_ERR );
+    out(ucb, WT_DMA_STS,
+        DMA_STS_M_DRV1 | DMA_STS_M_DRV0 | DMA_STS_M_INT | DMA_STS_M_ERR);
     /* For now, set both drives as DMA-capable */
     /* Write "1"s to INT and ERR to clear them in case they're set */
-    out( ucb, WT_DRV_HD, drv_head|head );   /* Select drive and head */
-    out( ucb, WT_SEC_CNT, xfer_req );       /* Ask for "n" sectors */
-    out( ucb, WT_SECTOR, sec );         /* Put in the sector number */
-    out( ucb, WT_CYL_LO, cyl );         /* Low order cylinder bits */
-    out( ucb, WT_CYL_HI, cyl>>8 );      /* High order cylinder bits */
-    out( ucb, WT_CMD, CMD_ATA_WRITE_DMA );  /* Attempt to write the sector(s) */
-    out( ucb, WT_DMA_CMD, DMA_CMD_M_OUTBOUND | DMA_CMD_M_ACTIVE );
+    out(ucb, WT_DRV_HD, drv_head | head); /* Select drive and head */
+    out(ucb, WT_SEC_CNT, xfer_req); /* Ask for "n" sectors */
+    out(ucb, WT_SECTOR, sec); /* Put in the sector number */
+    out(ucb, WT_CYL_LO, cyl); /* Low order cylinder bits */
+    out(ucb, WT_CYL_HI, cyl >> 8); /* High order cylinder bits */
+    out(ucb, WT_CMD, CMD_ATA_WRITE_DMA); /* Attempt to write the sector(s) */
+    out(ucb, WT_DMA_CMD, DMA_CMD_M_OUTBOUND | DMA_CMD_M_ACTIVE);
     /* Set the DMA controller outbound            */
     /*   (that is, reading memory-> writing disk) */
     /*   and active                               */
 
-    status = dq_wfikpch( ucb->ucb$ps_kpb, orig_ipl, 9 );
+    status = dq_wfikpch(ucb->ucb$ps_kpb, orig_ipl, 9);
     /* Wait for the interrupt */
-    if ( $FAIL( status ) )          /* Any error (timeout, etc.) ? */
-        return( status );           /* If so, return with status */
+    if ($FAIL( status )) /* Any error (timeout, etc.) ? */
+        return (status); /* If so, return with status */
 
-    drvsts = inp( ucb, RD_ALT_STS );        /* Get the status byte */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
 
-    if ( IS_SET( drvsts, STS_M_ERR ) )      /* Check the status (saved from above) */
+    if (IS_SET( drvsts, STS_M_ERR )) /* Check the status (saved from above) */
     {
         /* If any errors, then... */
-        drverr = inp( ucb, RD_ERROR );      /* Get the error byte */
-        BPTRACE( 0x09820000 );          /* BREAK: Drive error during WRITE_ATA_SEG_PIO */
-        return( SS$_DRVERR );           /* Return with error status */
+        drverr = inp(ucb, RD_ERROR); /* Get the error byte */
+        BPTRACE( 0x09820000 ); /* BREAK: Drive error during WRITE_ATA_SEG_PIO */
+        return (SS$_DRVERR); /* Return with error status */
     }
 
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
     /* Take out the deviced lock */
-    out( ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE ); /* Set the DMA controller inactive */
-    device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE );
+    out(ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE); /* Set the DMA controller inactive */
+    device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE);
     /* Return the deviced lock */
 
-    *xfer_cnt = xfer_req;           /* Consider all of the blocks written */
+    *xfer_cnt = xfer_req; /* Consider all of the blocks written */
 
-    return( SS$_NORMAL );           /* Return to caller succeeding */
+    return (SS$_NORMAL); /* Return to caller succeeding */
 
 }
-
 
 
 /* WRITE_ATAPI_512_SEG - Write one segment to a 512-byte-sector ATAPI drive
@@ -6701,102 +6523,100 @@ int write_ata_seg_dma( DQ_UCB *ucb, int xfer_req, int *xfer_cnt )
  *
  */
 
-int write_atapi_512_seg( DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag )
+int write_atapi_512_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag)
 
 {
 
-    int   buf_ofs;              /* Offset into user buffer */
-    BYTE  *buffer;              /* Pointer to our transfer buffer */
-    int   byte_cnt;             /* Count of bytes to be transferred */
-    int   idx;                  /* Zero fill index */
-    int   offset;               /* Offset within 2K block */
-    BYTE  *packet;              /* The packet bytes within the UCB */
-    int   *packetl;             /* The packet (as longwords) within the UCB */
-    int   remainder;                /* Bytes left at end of block */
-    int   status;               /* Routine status value */
-    BYTE  *user_va;             /* Mapped user buffer address */
-    int   orig_ipl;             /* Original IPL */
+    int buf_ofs; /* Offset into user buffer */
+    BYTE *buffer; /* Pointer to our transfer buffer */
+    int byte_cnt; /* Count of bytes to be transferred */
+    int idx; /* Zero fill index */
+    int offset; /* Offset within 2K block */
+    BYTE *packet; /* The packet bytes within the UCB */
+    int *packetl; /* The packet (as longwords) within the UCB */
+    int remainder; /* Bytes left at end of block */
+    int status; /* Routine status value */
+    BYTE *user_va; /* Mapped user buffer address */
+    int orig_ipl; /* Original IPL */
 
+    TRACE( 0x09200000 + xfer_req ); /* WRITE_ATAPI_512_SEG starting */
 
-    TRACE( 0x09200000 + xfer_req );     /* WRITE_ATAPI_512_SEG starting */
+    if (xfer_req > MAX_ATAPI_512_XFER) /* Check for too large a transfer */
+        xfer_req = MAX_ATAPI_512_XFER; /*  and limit it if so */
 
-    if (xfer_req > MAX_ATAPI_512_XFER)      /* Check for too large a transfer */
-        xfer_req = MAX_ATAPI_512_XFER;      /*  and limit it if so */
-
-    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer;  /* Initialize our buffer pointer */
-    byte_cnt = 0;               /* Clear count of bytes transferred */
+    buffer = (BYTE *) ucb->ucb$ps_xfer_buffer; /* Initialize our buffer pointer */
+    byte_cnt = 0; /* Clear count of bytes transferred */
 
     /* Move the data segment from the user */
-    byte_cnt = xfer_req << BLK_SHIFT;       /* Compute byte count */
-    if (byte_cnt > ucb->ucb$l_bcr)      /* Check for too large */
-        byte_cnt = ucb->ucb$l_bcr;      /* Minimize it */
+    byte_cnt = xfer_req << BLK_SHIFT; /* Compute byte count */
+    if (byte_cnt > ucb->ucb$l_bcr) /* Check for too large */
+        byte_cnt = ucb->ucb$l_bcr; /* Minimize it */
 
     buf_ofs = (ucb->ucb$l_media.lbn - ucb->ucb$l_org_media) * BLK_SIZE_512;
     /* Calculate the offset (so far) into the user's buffer */
-    user_va = map_user_buffer( ucb, buf_ofs, byte_cnt );
+    user_va = map_user_buffer(ucb, buf_ofs, byte_cnt);
     /* Map that part of the user buffer */
-    TRACE( 0x09210000 + byte_cnt );     /* WRITE_ATA_SEG_PIO moving bytes from the user */
-    memcpy( buffer, user_va, byte_cnt );    /* Copy the user data to our buffer */
+    TRACE( 0x09210000 + byte_cnt ); /* WRITE_ATA_SEG_PIO moving bytes from the user */
+    memcpy(buffer, user_va, byte_cnt); /* Copy the user data to our buffer */
 
     /* If less than a full block, then zero the remainder */
-    remainder = byte_cnt & BLK_MASK;        /* Compute remainder */
-    if (remainder > 0)              /* Is there any? */
+    remainder = byte_cnt & BLK_MASK; /* Compute remainder */
+    if (remainder > 0) /* Is there any? */
     {
         /* If so, then... */
-        remainder = BLK_SIZE_512 - remainder;   /* Compute bytes left */
-        for (idx=0; idx < remainder; idx++) /* For each additional byte */
-            buffer[byte_cnt+idx]=0;     /* Zero the byte */
+        remainder = BLK_SIZE_512 - remainder; /* Compute bytes left */
+        for (idx = 0; idx < remainder; idx++) /* For each additional byte */
+            buffer[byte_cnt + idx] = 0; /* Zero the byte */
     }
 
-    packetl = (int *) ucb->ucb$b_packet;    /* Bind onto packet in the UCB as a longword array */
-    packetl[0] = 0;             /* Clear the packet */
-    packetl[1] = 0;             /*   :   */
-    packetl[2] = 0;             /*   :   */
+    packetl = (int *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a longword array */
+    packetl[0] = 0; /* Clear the packet */
+    packetl[1] = 0; /*   :   */
+    packetl[2] = 0; /*   :   */
 
-    packet  = (BYTE *) ucb->ucb$b_packet;   /* Bind onto packet in the UCB as a byte array */
-    packet[0]  = CMD_ATAPI_WRITE_12;        /* Write(12) command */
+    packet = (BYTE *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a byte array */
+    packet[0] = CMD_ATAPI_WRITE_12; /* Write(12) command */
     /*  packet[1]  = 0x00;              /@ (Reserved) */
     /*  packet[2]  = 0x00;              /@ Address MSB (filled in momentarily) */
     /*  packet[3]  = 0x00;              /@   :      :   */
     /*  packet[4]  = 0x00;              /@   :      :   */
     /*  packet[5]  = 0x00;              /@   :     LSB  */
-    packet[6]  = xfer_req>>24;          /* Transfer length MSB in blocks */
-    packet[7]  = xfer_req>>16;          /*   :              :  */
-    packet[8]  = xfer_req>>8;           /*   :              :  */
-    packet[9]  = xfer_req;          /*   :             LSB */
+    packet[6] = xfer_req >> 24; /* Transfer length MSB in blocks */
+    packet[7] = xfer_req >> 16; /*   :              :  */
+    packet[8] = xfer_req >> 8; /*   :              :  */
+    packet[9] = xfer_req; /*   :             LSB */
     /*  packet[10] = 0x00;              /@ (Reserved) */
     /*  packet[11] = 0x00;              /@ (Reserved) */
-    offset     = fill_packet_w_adx( ucb );  /* Fill the packet address cells*/
+    offset = fill_packet_w_adx(ucb); /* Fill the packet address cells*/
 
-    status = atapi_packet_command( ucb, buffer, xfer_req, xfer_cnt, dma_flag );
+    status = atapi_packet_command(ucb, buffer, xfer_req, xfer_cnt, dma_flag);
     /* Do the common packet-command processing using appropriate mode */
 
-    if (dma_flag)               /* Using DMA? */
+    if (dma_flag) /* Using DMA? */
     {
         /* If so, then... */
-        device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+        device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
         /* Take out the deviced lock */
-        out( ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE ); /* Set the DMA controller inactive */
-        device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE );
-    }                   /* Return the deviced lock */
+        out(ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE); /* Set the DMA controller inactive */
+        device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE);
+    } /* Return the deviced lock */
 
-    if (status == SS$_DRVERR)           /* Did it result in a drive error? */
+    if (status == SS$_DRVERR) /* Did it result in a drive error? */
     {
         /* If so, then... */
-        atapi_request_sense( ucb, (BYTE *) ucb->ucb$ps_sense_buffer );
+        atapi_request_sense(ucb, (BYTE *) ucb->ucb$ps_sense_buffer);
         /* Get error info from drive */
-        status = atapi_xlate_error_to_vms( ucb );
+        status = atapi_xlate_error_to_vms(ucb);
         /* Turn it into a VMS error code */
-        return( status );           /* and exit */
+        return (status); /* and exit */
     }
 
-    if ( $FAIL( status ) )          /* Check for any other error */
-        return( status );           /*  and exit if so */
+    if ($FAIL( status )) /* Check for any other error */
+        return (status); /*  and exit if so */
 
-    return( SS$_NORMAL );           /* Return to caller */
+    return (SS$_NORMAL); /* Return to caller */
 
 }
-
 
 
 /* WRITE_ATAPI_2K_SEG - Write one segment to a 2Kbyte-sector ATAPI drive
@@ -6816,18 +6636,17 @@ int write_atapi_512_seg( DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag 
  *
  */
 
-int write_atapi_2K_seg( DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag )
+int write_atapi_2K_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag)
 
 {
 
-    TRACE( 0x09300000 + xfer_req );     /* WRITE_ATAPI_2K_SEG_PIO starting */
+    TRACE( 0x09300000 + xfer_req ); /* WRITE_ATAPI_2K_SEG_PIO starting */
 
-    return( SS$_WRITLCK );          /* We don't know how to write 2K (CD-ROM/DVD-ROM sized) blocks? */
+    return (SS$_WRITLCK); /* We don't know how to write 2K (CD-ROM/DVD-ROM sized) blocks? */
     /* (Presently, we'd need a read-modify-write) */
 }
 
 
-
 /* ATAPI_READ_CAPACITY - Read the drive capacity and bytes/sector
  *
  * Input:
@@ -6840,22 +6659,21 @@ int write_atapi_2K_seg( DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag )
  *
  */
 
-int atapi_read_capacity( DQ_UCB *ucb, BYTE *buffer )
+int atapi_read_capacity(DQ_UCB *ucb, BYTE *buffer)
 
 {
 
-    BYTE  *packet;              /* The packet bytes within the UCB */
-    int   *packetl;             /* The packet (as longwords) within the UCB */
-    int    xfer_cnt;                /* Count of sectors actually transferred (dummy here) */
+    BYTE *packet; /* The packet bytes within the UCB */
+    int *packetl; /* The packet (as longwords) within the UCB */
+    int xfer_cnt; /* Count of sectors actually transferred (dummy here) */
 
+    packetl = (int *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a longword array */
+    packetl[0] = 0; /* Clear the packet */
+    packetl[1] = 0; /*   :   */
+    packetl[2] = 0; /*   :   */
 
-    packetl = (int *) ucb->ucb$b_packet;    /* Bind onto packet in the UCB as a longword array */
-    packetl[0] = 0;             /* Clear the packet */
-    packetl[1] = 0;             /*   :   */
-    packetl[2] = 0;             /*   :   */
-
-    packet = (BYTE *) ucb->ucb$b_packet;    /* Bind onto packet in the UCB as a byte array */
-    packet[0]  = CMD_ATAPI_READ_CAPACITY;   /* Read capacity command */
+    packet = (BYTE *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a byte array */
+    packet[0] = CMD_ATAPI_READ_CAPACITY; /* Read capacity command */
     /*  packet[1]  = 0x00;              /@ (Reserved) */
     /*  packet[2]  = 0x00;              /@ Address MSB */
     /*  packet[3]  = 0x00;              /@   :      :  */
@@ -6868,10 +6686,9 @@ int atapi_read_capacity( DQ_UCB *ucb, BYTE *buffer )
     /*  packet[10] = 0x00;              /@ (Reserved) */
     /*  packet[11] = 0x00;              /@ (Reserved) */
 
-    return( atapi_packet_command( ucb, buffer, 0, &xfer_cnt, FALSE ) );
+    return (atapi_packet_command(ucb, buffer, 0, &xfer_cnt, FALSE));
     /* Do the common packet-command processing using PIO */
 }
-
 
 
 /* ATAPI_REQUEST_SENSE - Get the sense keys from the drive
@@ -6886,27 +6703,26 @@ int atapi_read_capacity( DQ_UCB *ucb, BYTE *buffer )
  *
  */
 
-int atapi_request_sense( DQ_UCB *ucb, BYTE *buffer )
+int atapi_request_sense(DQ_UCB *ucb, BYTE *buffer)
 
 {
 
-    BYTE  *packet;              /* The packet bytes within the UCB */
-    int   *packetl;                 /* The packet (as longwords) within the UCB */
-    int    status;              /* Routine return status */
-    int    xfer_cnt;                /* Count of blocks actually transferred (dummy here) */
+    BYTE *packet; /* The packet bytes within the UCB */
+    int *packetl; /* The packet (as longwords) within the UCB */
+    int status; /* Routine return status */
+    int xfer_cnt; /* Count of blocks actually transferred (dummy here) */
 
+    packetl = (int *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a longword array */
+    packetl[0] = 0; /* Clear the packet */
+    packetl[1] = 0; /*   :   */
+    packetl[2] = 0; /*   :   */
 
-    packetl = (int *) ucb->ucb$b_packet;    /* Bind onto packet in the UCB as a longword array */
-    packetl[0] = 0;             /* Clear the packet */
-    packetl[1] = 0;             /*   :   */
-    packetl[2] = 0;             /*   :   */
-
-    packet = (BYTE *) ucb->ucb$b_packet;    /* Bind onto packet in the UCB as a byte array */
-    packet[0]  = CMD_ATAPI_REQUEST_SENSE;   /* Request_Sense command */
+    packet = (BYTE *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a byte array */
+    packet[0] = CMD_ATAPI_REQUEST_SENSE; /* Request_Sense command */
     /*  packet[1]  = 0x00;              /@ (Reserved) */
     /*  packet[2]  = 0x00;              /@ (Reserved) */
     /*  packet[3]  = 0x00;              /@ (Reserved) */
-    packet[4]  =   18;              /* Allocation Length */
+    packet[4] = 18; /* Allocation Length */
     /*  packet[5]  = 0x00;              /@ (Reserved) */
     /*  packet[6]  = 0x00;              /@ (Reserved) */
     /*  packet[7]  = 0x00;              /@ (Reserved) */
@@ -6915,25 +6731,24 @@ int atapi_request_sense( DQ_UCB *ucb, BYTE *buffer )
     /*  packet[10] = 0x00;              /@ (Reserved) */
     /*  packet[11] = 0x00;              /@ (Reserved) */
 
-    status = atapi_packet_command( ucb, buffer, 0, &xfer_cnt, FALSE );
+    status = atapi_packet_command(ucb, buffer, 0, &xfer_cnt, FALSE);
     /* Do the common packet-command processing using PIO */
 
-    if ( $FAIL( status ) )          /* Check for any other error */
-        return( status );           /*  and exit if so */
+    if ($FAIL( status )) /* Check for any other error */
+        return (status); /*  and exit if so */
 
-    TRACE( 0x0C000000    + (buffer[2] & 0x0F) );/* ATAPI_REQUEST_SENSE storing the sense_key */
-    ucb->ucb$l_sense_key = (buffer[2] & 0x0F);  /* Save sense key */
-    TRACE( 0x0C010000    + buffer[12] );    /* ATAPI_REQUEST_SENSE storing the ASC */
-    ucb->ucb$l_asc       = buffer[12];      /* Save additional sense code */
-    TRACE( 0x0C020000    + buffer[13] );    /* ATAPI_REQUEST_SENSE storing the ASC Qualifier */
-    ucb->ucb$l_ascq      = buffer[13];      /* Save additional sense code qualifier */
+    TRACE( 0x0C000000 + (buffer[2] & 0x0F) );/* ATAPI_REQUEST_SENSE storing the sense_key */
+    ucb->ucb$l_sense_key = (buffer[2] & 0x0F); /* Save sense key */
+    TRACE( 0x0C010000 + buffer[12] ); /* ATAPI_REQUEST_SENSE storing the ASC */
+    ucb->ucb$l_asc = buffer[12]; /* Save additional sense code */
+    TRACE( 0x0C020000 + buffer[13] ); /* ATAPI_REQUEST_SENSE storing the ASC Qualifier */
+    ucb->ucb$l_ascq = buffer[13]; /* Save additional sense code qualifier */
 
-    return( status );               /* And return with status */
+    return (status); /* And return with status */
 
 }
 
 
-
 /* ATAPI_PACKET_COMMAND - Do the common ATAPI packet command processing using desired mode
  *
  * Input:
@@ -6976,41 +6791,42 @@ int atapi_request_sense( DQ_UCB *ucb, BYTE *buffer )
  *
  */
 
-int atapi_packet_command( DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt, int dma_flag )
+int atapi_packet_command(DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt,
+                         int dma_flag)
 
 {
 
-    int   drv_head;                 /* Drive drive/head register */
-    int   status;                   /* Routine status value */
-    int   orig_ipl;                 /* Original IPL */
-    int   reason;                   /* Drive "interrupt reason" */
-    int   drvsts;                       /* Drive status register */
-    int   drverr;                   /* Drive error register */
-    int   drvdrq;                   /* Drive DRQ bit from STS/ALTSTS */
-    int   drvbytcnt;                    /* Drive byte count */
-    int   buffer_size;                  /* Size of the target buffer */
-    IRP   *irp;
+    int drv_head; /* Drive drive/head register */
+    int status; /* Routine status value */
+    int orig_ipl; /* Original IPL */
+    int reason; /* Drive "interrupt reason" */
+    int drvsts; /* Drive status register */
+    int drverr; /* Drive error register */
+    int drvdrq; /* Drive DRQ bit from STS/ALTSTS */
+    int drvbytcnt; /* Drive byte count */
+    int buffer_size; /* Size of the target buffer */
+    IRP *irp;
 
-    TRACE( 0x02000000 );                /* ATAPI_PACKET_COMMAND_DMA starting */
+    TRACE( 0x02000000 ); /* ATAPI_PACKET_COMMAND_DMA starting */
 
-    ucb->ucb$l_unsolicited_int = 0;         /* Forget any pending unsolicited interrupts       */
-    reason    = 0xDEADDEAD;             /* Invalidate this, just in case anyone's looking  */
-    *xfer_cnt = 0;                  /* Consider none of the blocks transfered          */
-    buffer_size = 0;                    /* Set this to a default that's guaranteed to fail */
+    ucb->ucb$l_unsolicited_int = 0; /* Forget any pending unsolicited interrupts       */
+    reason = 0xDEADDEAD; /* Invalidate this, just in case anyone's looking  */
+    *xfer_cnt = 0; /* Consider none of the blocks transfered          */
+    buffer_size = 0; /* Set this to a default that's guaranteed to fail */
     if (buffer == (BYTE *) ucb->ucb$ps_xfer_buffer) /* Pointing to the transfer buffer?                */
-        buffer_size = XFER_BUFFER_SIZE;         /* If so, remember that size                       */
-    if (buffer == (BYTE *) ucb->ucb$ps_sense_buffer)    /* Pointing to the sense buffer?                   */
-        buffer_size = SENSE_BUFFER_SIZE;        /* If so, remember that size                       */
+        buffer_size = XFER_BUFFER_SIZE; /* If so, remember that size                       */
+    if (buffer == (BYTE *) ucb->ucb$ps_sense_buffer) /* Pointing to the sense buffer?                   */
+        buffer_size = SENSE_BUFFER_SIZE; /* If so, remember that size                       */
     /* Else we don't know any other buffer sizes       */
     /*    -- leave it zero                             */
 
-    status = wait_ready( ucb );             /* Wait for drive to be ready */
-    if ( $FAIL( status ) )              /* Check the status for failure */
-        return( status );               /* Return with error */
+    status = wait_ready(ucb); /* Wait for drive to be ready */
+    if ($FAIL( status )) /* Check the status for failure */
+        return (status); /* Return with error */
 
-    drv_head = ucb->ucb$l_drv_head;         /* Get base drive info */
-    if (ucb->ucb$l_drive_lba_capable)           /* If LBA mode, ... */
-        drv_head |= DRVHD_M_LBA;            /*  ... set the LBA bit */
+    drv_head = ucb->ucb$l_drv_head; /* Get base drive info */
+    if (ucb->ucb$l_drive_lba_capable) /* If LBA mode, ... */
+        drv_head |= DRVHD_M_LBA; /*  ... set the LBA bit */
 
     /*
      * Take out the device lock and raise IPL
@@ -7020,141 +6836,140 @@ int atapi_packet_command( DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt
      *
      */
 
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
     /* Take out the device lock so we can write the registers */
-    out( ucb, WT_DRV_HD, drv_head );            /* Select drive, ignore head               */
+    out(ucb, WT_DRV_HD, drv_head); /* Select drive, ignore head               */
     if (dma_flag)
     {
-        load_prdt( ucb );               /* Load the PRDT */
+        load_prdt(ucb); /* Load the PRDT */
         /* Make sure the DMA controller is inbound     */
         /*   (that is, reading disk -> writing memory) */
         /*   but not active yet                        */
-        out( ucb, WT_DMA_CMD, DMA_CMD_M_INBOUND | DMA_CMD_M_INACTIVE );
+        out(ucb, WT_DMA_CMD, DMA_CMD_M_INBOUND | DMA_CMD_M_INACTIVE);
         /* For now, set both drives as DMA-capable */
         /* Write "1"s to INT and ERR to clear them in case they're set */
-        out( ucb, WT_DMA_STS, DMA_STS_M_DRV1 | DMA_STS_M_DRV0 | DMA_STS_M_INT | DMA_STS_M_ERR );
+        out(ucb, WT_DMA_STS,
+            DMA_STS_M_DRV1 | DMA_STS_M_DRV0 | DMA_STS_M_INT | DMA_STS_M_ERR);
         /* Point the controller to the PCI address of our PRDT table */
-        outl(ucb, WTL_DMA_AD0, (UINT) ucb->ucb$l_prdt_phy );
-
+        outl(ucb, WTL_DMA_AD0, (UINT) ucb->ucb$l_prdt_phy);
 
     }
-
 
     if (dma_flag)
-        out( ucb, WT_FEATURES, 0x01 );          /* No Overlap (bit <1>), Yes DMA (bit <0>) */
+        out(ucb, WT_FEATURES, 0x01); /* No Overlap (bit <1>), Yes DMA (bit <0>) */
     else
-        out( ucb, WT_FEATURES, 0x00 );          /* No Overlap (bit <1>), No DMA (bit <0>) */
-    out( ucb, WT_CYL_LO, buffer_size );         /* Low order cylinder bits/bytecount       */
-    out( ucb, WT_CYL_HI, buffer_size>>8 );      /* High order cylinder bits/bytecount      */
-    out( ucb, WT_CMD, CMD_ATA_PACKET_CMD );     /* Issue the "packet" command              */
-    device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE ); /* release and let ints happen */
+        out(ucb, WT_FEATURES, 0x00); /* No Overlap (bit <1>), No DMA (bit <0>) */
+    out(ucb, WT_CYL_LO, buffer_size); /* Low order cylinder bits/bytecount       */
+    out(ucb, WT_CYL_HI, buffer_size >> 8); /* High order cylinder bits/bytecount      */
+    out(ucb, WT_CMD, CMD_ATA_PACKET_CMD); /* Issue the "packet" command              */
+    device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE); /* release and let ints happen */
 
-    status = wait_drq( ucb );               /* Explicitly wait for DRQ (Toshiba fix) */
-    if ( $FAIL( status ) )              /* Check for error */
+    status = wait_drq(ucb); /* Explicitly wait for DRQ (Toshiba fix) */
+    if ($FAIL( status )) /* Check for error */
     {
         /* If any, then... */
-        BPTRACE( 0x02010000 );              /* BREAK: WAIT_DRQ() failed during atapi_packet_command */
-        return( SS$_CTRLERR );              /*  and return complaining */
+        BPTRACE( 0x02010000 ); /* BREAK: WAIT_DRQ() failed during atapi_packet_command */
+        return (SS$_CTRLERR); /*  and return complaining */
     }
 
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
-    for (;;)                        /* Now, forever process based on the drive's requests */
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
+    for (;;) /* Now, forever process based on the drive's requests */
 
     {
 
-        drvsts = inp( ucb, RD_ALT_STS );        /* Read status byte */
+        drvsts = inp(ucb, RD_ALT_STS); /* Read status byte */
 
-        if (    (dma_flag)              /* If we're doing a DMA transfer                   */
-                && ( (reason & ~STS_M_DRQ)==0x01) ) /*   and the last state was "Get Packet"           */
+        if ((dma_flag) /* If we're doing a DMA transfer                   */
+                && ((reason & ~STS_M_DRQ) == 0x01)) /*   and the last state was "Get Packet"           */
         {
             /*                                                 */
-            TRACE( 0x02060000 );            /*   ATAPI quashing interrupt-bypass 'cause of DMA */
-            drvsts = 0;                 /*   then quash the captured status byte so we     */
-        }                       /*   don't allow the interrupt to be bypassed      */
+            TRACE( 0x02060000 ); /*   ATAPI quashing interrupt-bypass 'cause of DMA */
+            drvsts = 0; /*   then quash the captured status byte so we     */
+        } /*   don't allow the interrupt to be bypassed      */
 
-        if (    ( (drvsts & STS_M_BSY) == 0 )       /* Is the drive already idle? */
-                && ( (drvsts & STS_M_DRQ) != 0 ) )      /*    and waiting with DRQ asserted? */
+        if (((drvsts & STS_M_BSY) == 0) /* Is the drive already idle? */
+                && ((drvsts & STS_M_DRQ) != 0)) /*    and waiting with DRQ asserted? */
         {
             /* If so, bypass WFIKPCH, etc. */
-            TRACE( 0x02020000 );            /* ATAPI taking the already-DRQ WFIKPCH bypass */
-            ucb->ucb$l_unsolicited_int = 0;     /* Forget any pending unsolicited interrupts */
-            drvsts = inp( ucb, RD_STS );        /* Read status byte to quash any pending interrupts */
-            device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE );
-        }                       /* And release the device lock */
+            TRACE( 0x02020000 ); /* ATAPI taking the already-DRQ WFIKPCH bypass */
+            ucb->ucb$l_unsolicited_int = 0; /* Forget any pending unsolicited interrupts */
+            drvsts = inp(ucb, RD_STS); /* Read status byte to quash any pending interrupts */
+            device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE);
+        } /* And release the device lock */
         else
         {
             /* Else wait for an interrupt... */
 
             if (dma_flag)
             {
-                out( ucb, WT_DMA_CMD, DMA_CMD_M_INBOUND | DMA_CMD_M_ACTIVE );
+                out(ucb, WT_DMA_CMD, DMA_CMD_M_INBOUND | DMA_CMD_M_ACTIVE);
                 /* Set the DMA controller inbound              */
                 /*   (that is, reading disk -> writing memory) */
                 /*   and active                                */
             }
-            status = dq_wfikpch( ucb->ucb$ps_kpb, orig_ipl, 11 );
+            status = dq_wfikpch(ucb->ucb$ps_kpb, orig_ipl, 11);
             /* Wait for the interrupt */
-            if ( $FAIL( status ) )          /* Any error (timeout, etc.) ? */
+            if ($FAIL( status )) /* Any error (timeout, etc.) ? */
             {
                 if (dma_flag)
                 {
-                    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
-                    out( ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE ); /* assure dma aborted */
-                    device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE );
+                    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
+                    out(ucb, WT_DMA_CMD, DMA_CMD_M_INACTIVE); /* assure dma aborted */
+                    device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE);
                 }
                 if (status == SS$_TIMEOUT)
                 {
                     reset_ctrl(ucb);
                 }
-                BPTRACE( 0x020F0000 );          /* BREAK: ATAPI is handling a WFIPTCH error */
-                return( status );           /* If so, return with status */
+                BPTRACE( 0x020F0000 ); /* BREAK: ATAPI is handling a WFIPTCH error */
+                return (status); /* If so, return with status */
             }
 
-            drvsts = inp( ucb, RD_ALT_STS );        /* Get the status byte */
+            drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
 
         }
 
-        if ( IS_SET( drvsts, STS_M_ERR ) )      /* Any errors?                                      */
+        if (IS_SET( drvsts, STS_M_ERR )) /* Any errors?                                      */
         {
             /* If so, then ...                                  */
-            drverr = inp( ucb, RD_ERROR );      /* Get the error byte                               */
-            BPTRACE( 0x02030000 + drverr );     /* BREAK: ATAPI drive error, "sense_key" stored     */
-            ucb->ucb$l_sense_key = drverr;      /* Save latest sense key                            */
+            drverr = inp(ucb, RD_ERROR); /* Get the error byte                               */
+            BPTRACE( 0x02030000 + drverr ); /* BREAK: ATAPI drive error, "sense_key" stored     */
+            ucb->ucb$l_sense_key = drverr; /* Save latest sense key                            */
             /*   (Note: Raw register -- not in justified form!) */
-            return( SS$_DRVERR );           /* Caller may fill in more detail later             */
+            return (SS$_DRVERR); /* Caller may fill in more detail later             */
         }
 
-        drvdrq = ( drvsts & STS_M_DRQ );        /* Get DRQ bit (val=0x08) */
-        reason = inp( ucb, RD_SEC_CNT );        /* See what the drive wants */
-        reason &= 0x07;                 /* Keep just [0:0:0:0:0:RLS:IO:CoD] */
+        drvdrq = (drvsts & STS_M_DRQ); /* Get DRQ bit (val=0x08) */
+        reason = inp(ucb, RD_SEC_CNT); /* See what the drive wants */
+        reason &= 0x07; /* Keep just [0:0:0:0:0:RLS:IO:CoD] */
 //#saythis "Inoring REL for now..."
-        reason &= 0x03;                 /* Throw away RELease, too. */
-        reason |= drvdrq;               /* 'OR' in the DRQ bit */
+        reason &= 0x03; /* Throw away RELease, too. */
+        reason |= drvdrq; /* 'OR' in the DRQ bit */
         /*  [0:0:0:0:DRQ:RLS:IO:CoD] */
 
-        switch (reason)                 /* Dispatch based on that combined reason */
+        switch (reason)
+            /* Dispatch based on that combined reason */
         {
 
-
-        case (0x00):                /* Write-data (and no DRQ) to drive */
+        case (0x00): /* Write-data (and no DRQ) to drive */
         {
             /* *THAT* would be a surprise! */
-            BPTRACE( 0x02040000 );          /* BREAK: ATAPI error: "Write-data" requested w/o DRQ */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x02040000 ); /* BREAK: ATAPI error: "Write-data" requested w/o DRQ */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-        case (STS_M_DRQ+0x00):          /* Write data to drive */
+        case (STS_M_DRQ + 0x00): /* Write data to drive */
         {
-            TRACE( 0x02040002 );            /* ATAPI Write-Data phase */
+            TRACE( 0x02040002 ); /* ATAPI Write-Data phase */
 
-            drvbytcnt =   inp( ucb, RD_CYL_LO ) /* Get the bytecount now desired by the drive           */
-                          | inp( ucb, RD_CYL_HI )<<8;   /*    :                                                 */
-            if (drvbytcnt > buffer_size)        /* Is it too big to transfer?                           */
+            drvbytcnt = inp(ucb, RD_CYL_LO) /* Get the bytecount now desired by the drive           */
+                        | inp(ucb, RD_CYL_HI) << 8; /*    :                                                 */
+            if (drvbytcnt > buffer_size) /* Is it too big to transfer?                           */
             {
                 /* If so, then...                                       */
-                BPTRACE( 0x02040008 );      /* BREAK: ATAPI error: Bytecount mismatch on write-data */
-                return( SS$_DRVERR );       /* Make that an error instead of possibly               */
+                BPTRACE( 0x02040008 ); /* BREAK: ATAPI error: Bytecount mismatch on write-data */
+                return (SS$_DRVERR); /* Make that an error instead of possibly               */
                 /*   over-running our buffer                            */
             }
             /* For DIAGNOSE operations, return count of BYTES tranfered.
@@ -7168,80 +6983,77 @@ int atapi_packet_command( DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt
                  * Note that 1 was added to drvbytcnt to force odd byte
                  * transfers to be rounded up to the next word.
                  */
-                move_sec_to_drive( ucb, buffer + *xfer_cnt, drvbytcnt+1 );
-                *xfer_cnt += drvbytcnt;     /* Count of bytes transfered */
+                move_sec_to_drive(ucb, buffer + *xfer_cnt, drvbytcnt + 1);
+                *xfer_cnt += drvbytcnt; /* Count of bytes transfered */
             }
             else
             {
-                move_sec_to_drive( ucb, &buffer[(*xfer_cnt)*BLK_SIZE_512], drvbytcnt );
+                move_sec_to_drive(ucb, &buffer[(*xfer_cnt) * BLK_SIZE_512],
+                                  drvbytcnt);
                 /* Move the sector from our transfer buffer to the drive */
-                *xfer_cnt += ( (drvbytcnt + BLK_SIZE_512 - 1) >> BLK_SHIFT );
+                *xfer_cnt += ((drvbytcnt + BLK_SIZE_512 - 1) >> BLK_SHIFT);
                 /* Count blocks written */
             }
-            device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+            device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
             /* Take the device lock again */
             /* As we go back to WFIKPCH again */
             break;
         }
 
-
-
-        case (0x01):                /* Command packet wanted but no DRQ */
+        case (0x01): /* Command packet wanted but no DRQ */
         {
             /* *THAT* would be a surprise! */
-            BPTRACE( 0x02040001 );          /* BREAK: ATAPI error: "Cmd Pkt wanted" w/o DRQ */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x02040001 ); /* BREAK: ATAPI error: "Cmd Pkt wanted" w/o DRQ */
+            return (SS$_DRVERR); /* Then, make that an error */
         }
 
-        case (STS_M_DRQ+0x01):          /* Command packet wanted */
+        case (STS_M_DRQ + 0x01): /* Command packet wanted */
         {
-            BYTE  *packet;              /* The packet bytes within the UCB */
+            BYTE *packet; /* The packet bytes within the UCB */
 
-            TRACE( 0x02040009 );            /* ATAPI Cmd Pkt Wanted phase */
+            TRACE( 0x02040009 ); /* ATAPI Cmd Pkt Wanted phase */
 
-            device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+            device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
             /* Take the device lock again */
-            packet = (BYTE *) ucb->ucb$b_packet;        /* Bind onto packet in the UCB as a byte array */
-            outw_t( ucb, WT_DATA, packet[ 0]|(packet[ 1]<<8) );/* Push out packet to the drive */
-            outw_t( ucb, WT_DATA, packet[ 2]|(packet[ 3]<<8) );/*   :   */
-            outw_t( ucb, WT_DATA, packet[ 4]|(packet[ 5]<<8) );/*   :   */
-            outw_t( ucb, WT_DATA, packet[ 6]|(packet[ 7]<<8) );/*   :   */
-            outw_t( ucb, WT_DATA, packet[ 8]|(packet[ 9]<<8) );/*   :   */
-            outw_t( ucb, WT_DATA, packet[10]|(packet[11]<<8) );/*   :   */
-            break;                      /* And go back to WFIKPCH again */
+            packet = (BYTE *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a byte array */
+            outw_t(ucb, WT_DATA, packet[0] | (packet[1] << 8));/* Push out packet to the drive */
+            outw_t(ucb, WT_DATA, packet[2] | (packet[3] << 8));/*   :   */
+            outw_t(ucb, WT_DATA, packet[4] | (packet[5] << 8));/*   :   */
+            outw_t(ucb, WT_DATA, packet[6] | (packet[7] << 8));/*   :   */
+            outw_t(ucb, WT_DATA, packet[8] | (packet[9] << 8));/*   :   */
+            outw_t(ucb, WT_DATA, packet[10] | (packet[11] << 8));/*   :   */
+            break; /* And go back to WFIKPCH again */
         }
 
-
-
-        case (0x02):                /* "Get data" without DRQ */
+        case (0x02): /* "Get data" without DRQ */
         {
             /* *THAT* would be a surprise! */
-            BPTRACE( 0x02040002 );          /* BREAK: ATAPI error: "Get data" w/o DRQ */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x02040002 ); /* BREAK: ATAPI error: "Get data" w/o DRQ */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-        case (STS_M_DRQ+0x02):          /* Get the data from the silo                         */
+        case (STS_M_DRQ + 0x02): /* Get the data from the silo                         */
         {
             /* and into the transfer buffer                       */
             /*                                                    */
-            TRACE( 0x0204000A );            /* ATAPI Get-Data phase                               */
-            if (dma_flag)               /* Doing a DMA transfer?                              */
+            TRACE( 0x0204000A ); /* ATAPI Get-Data phase                               */
+            if (dma_flag) /* Doing a DMA transfer?                              */
             {
                 /* If so, we shouldn't be here -- this is a bad thing!*/
-                BPTRACE( 0x02060001 );      /* ATAPI Get-Data phase quashed 'cause of DMA         */
-            }                                 /*                                                    */
-            else                    /* We're doing PIO -- go ahead and get the data       */
+                BPTRACE( 0x02060001 ); /* ATAPI Get-Data phase quashed 'cause of DMA         */
+            } /*                                                    */
+            else /* We're doing PIO -- go ahead and get the data       */
             {
                 /*                                                    */
-                drvbytcnt =   inp( ucb, RD_CYL_LO ) /* Get the bytecount now desired by the drive         */
-                              | inp( ucb, RD_CYL_HI )<<8;/*    :                                              */
-                if (drvbytcnt > buffer_size)        /* Is it too big to transfer?                         */
+                drvbytcnt = inp(ucb, RD_CYL_LO) /* Get the bytecount now desired by the drive         */
+                            | inp(ucb, RD_CYL_HI) << 8;/*    :                                              */
+                if (drvbytcnt > buffer_size) /* Is it too big to transfer?                         */
                 {
                     /* If so, then...                                     */
-                    BPTRACE( 0x02050000 );      /* BREAK: ATAPI error: Bytecount mismatch on get_data */
-                    return( SS$_DRVERR );       /* Make that an error instead of possibly             */
-                }               /*   over-running our buffer                          */
+                    BPTRACE( 0x02050000 ); /* BREAK: ATAPI error: Bytecount mismatch on get_data */
+                    return (SS$_DRVERR); /* Make that an error instead of possibly             */
+                } /*   over-running our buffer                          */
                 /*                                                    */
 
                 /* For DIAGNOSE operations, return count of BYTES tranfered.
@@ -7255,17 +7067,18 @@ int atapi_packet_command( DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt
                      * Note that 1 was added to drvbytcnt to force odd byte
                      * transfers to be rounded up to next word.
                      */
-                    move_sec_from_drive( ucb, buffer+*xfer_cnt, drvbytcnt+1);
-                    *xfer_cnt += drvbytcnt;     /* Count of bytes transfered */
+                    move_sec_from_drive(ucb, buffer + *xfer_cnt, drvbytcnt + 1);
+                    *xfer_cnt += drvbytcnt; /* Count of bytes transfered */
                 }
                 else
                 {
-                    move_sec_from_drive( ucb, &buffer[(*xfer_cnt)*BLK_SIZE_512], drvbytcnt );
+                    move_sec_from_drive(ucb,
+                                        &buffer[(*xfer_cnt) * BLK_SIZE_512], drvbytcnt);
                     /* Move the sector from the drive to our xfer buffer  */
-                    *xfer_cnt += ( (drvbytcnt + BLK_SIZE_512 - 1) >> BLK_SHIFT );
+                    *xfer_cnt += ((drvbytcnt + BLK_SIZE_512 - 1) >> BLK_SHIFT);
                     /* Count blocks read                                  */
                 }
-                device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+                device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
                 /* Take the device lock again                         */
                 /* As we go back to WFIKPCH again                     */
             }
@@ -7273,115 +7086,102 @@ int atapi_packet_command( DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt
             break;
         }
 
-
-
-        case (0x03):                /* Reason 0x03 *WITHOUT* DRQ indicates completion */
+        case (0x03): /* Reason 0x03 *WITHOUT* DRQ indicates completion */
         {
-            TRACE( 0x02040003 );            /* ATAPI Normal Completion phase */
-            if (dma_flag)               /* Using DMA? If so, then... */
-                *xfer_cnt = xfer_req;       /* Consider all of the blocks transfered */
-            return( SS$_NORMAL );           /* So break out of the forever loop */
-            break;                  /* (Break for safety) */
+            TRACE( 0x02040003 ); /* ATAPI Normal Completion phase */
+            if (dma_flag) /* Using DMA? If so, then... */
+                *xfer_cnt = xfer_req; /* Consider all of the blocks transfered */
+            return (SS$_NORMAL); /* So break out of the forever loop */
+            break; /* (Break for safety) */
         }
 
-        case (STS_M_DRQ+0x03):          /* DRQ + Message from drive (future feature) */
+        case (STS_M_DRQ + 0x03): /* DRQ + Message from drive (future feature) */
         {
             /* *THAT* would be a surprise! */
-            BPTRACE( 0x0204000B );          /* BREAK: ATAPI error: "Message" from drive (with DRQ) */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x0204000B ); /* BREAK: ATAPI error: "Message" from drive (with DRQ) */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-
-
-        case (0x04):                /* "Release" without DRQ */
+        case (0x04): /* "Release" without DRQ */
         {
             /* *THAT* would be a surprise! */
-            BPTRACE( 0x02040004 );          /* BREAK: ATAPI error: "Release" from drive (w/o DRQ) */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x02040004 ); /* BREAK: ATAPI error: "Release" from drive (w/o DRQ) */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-        case (STS_M_DRQ+0x04):          /* "Release" with DRQ */
+        case (STS_M_DRQ + 0x04): /* "Release" with DRQ */
         {
             /* Either way, it's surprising */
-            BPTRACE( 0x0204000C );          /* BREAK: ATAPI error: "Release" from drive (with DRQ) */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x0204000C ); /* BREAK: ATAPI error: "Release" from drive (with DRQ) */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-
-
-        case (0x05):                /* Undefined reason 0x05 */
+        case (0x05): /* Undefined reason 0x05 */
         {
             /* *THAT* would be a surprise! */
-            BPTRACE( 0x02040005 );          /* BREAK: ATAPI error: Reason=0x05 (w/o DRQ) */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x02040005 ); /* BREAK: ATAPI error: Reason=0x05 (w/o DRQ) */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-        case (STS_M_DRQ+0x05):          /* Undefined reason 0x05 + DRQ */
+        case (STS_M_DRQ + 0x05): /* Undefined reason 0x05 + DRQ */
         {
             /* *THAT* would be a surprise! */
-            BPTRACE( 0x0204000D );          /* BREAK: ATAPI error: Reason=0x5 (with DRQ) */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x0204000D ); /* BREAK: ATAPI error: Reason=0x5 (with DRQ) */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-
-
-        case (0x06):                /* Undefined reason 0x06 */
+        case (0x06): /* Undefined reason 0x06 */
         {
             /* *THAT* would be a surprise! */
-            BPTRACE( 0x02040006 );          /* BREAK: ATAPI error: Reason=0x6 (w/o DRQ) */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x02040006 ); /* BREAK: ATAPI error: Reason=0x6 (w/o DRQ) */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-        case (STS_M_DRQ+0x06):          /* Undefined reason DRQ + 0x06 */
+        case (STS_M_DRQ + 0x06): /* Undefined reason DRQ + 0x06 */
         {
             /* *THAT* would be a surprise! */
-            BPTRACE( 0x0204000E );          /* BREAK: ATAPI error: Reason=0x6 (with DRQ) */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x0204000E ); /* BREAK: ATAPI error: Reason=0x6 (with DRQ) */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-
-
-        case (0x07):                /* Undefined reason 0x07 */
+        case (0x07): /* Undefined reason 0x07 */
         {
             /* *THAT* would be a surprise! */
-            BPTRACE( 0x02040007 );          /* BREAK: ATAPI error: Reason=0x7 (w/o DRQ) */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x02040007 ); /* BREAK: ATAPI error: Reason=0x7 (w/o DRQ) */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-        case (STS_M_DRQ+0x07):          /* Undefined reason DRQ + 0x07 */
+        case (STS_M_DRQ + 0x07): /* Undefined reason DRQ + 0x07 */
         {
             /* *THAT* would be a surprise! */
-            BPTRACE( 0x0204000F );          /* BREAK: ATAPI error: Reason=0x7 (with DRQ) */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            BPTRACE( 0x0204000F ); /* BREAK: ATAPI error: Reason=0x7 (with DRQ) */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-
-
-        default:                    /* Out-of-range combination? */
+        default: /* Out-of-range combination? */
         {
             /* *THAT* would *REALLY* be a surprise! */
-            BPTRACE( 0x020400FF );          /* BREAK: ATAPI error: Out-of-bounds Reason */
+            BPTRACE( 0x020400FF ); /* BREAK: ATAPI error: Out-of-bounds Reason */
             //bug_check( INCONSTATE, FATAL, COLD ); /* So be it */
-            panic(" INCONSTATE, FATAL, COLD \n");   /* So be it */
-            return( SS$_DRVERR );           /* Then, make that an error */
+            panic(" INCONSTATE, FATAL, COLD \n"); /* So be it */
+            return (SS$_DRVERR); /* Then, make that an error */
             break;
         }
 
-        }                       /* End of the switch */
+        } /* End of the switch */
 
-    }                       /* End of the forever loop */
+    } /* End of the forever loop */
 
-}                           /* Never gets here */
-
+} /* Never gets here */
 
 
 /* ATAPI_XLATE_ERROR_TO_VMS - Map the sense keys to a VMS error code
@@ -7394,51 +7194,49 @@ int atapi_packet_command( DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt
  *
  */
 
-int atapi_xlate_error_to_vms( DQ_UCB *ucb )
+int atapi_xlate_error_to_vms(DQ_UCB *ucb)
 {
 
     int asc;
     int ascq;
 
+    asc = ucb->ucb$l_asc; /* Get additional sense code */
+    ascq = ucb->ucb$l_ascq; /* Get additional sense code qualifier */
 
-    asc  = ucb->ucb$l_asc;          /* Get additional sense code */
-    ascq = ucb->ucb$l_ascq;         /* Get additional sense code qualifier */
-
-    if ( (asc==0x04) && (ascq==0x01) )      /* "Logical unit is in process of becoming ready" */
-        return( SS$_MEDOFL );           /*   becomes "Medium is offline" */
+    if ((asc == 0x04) && (ascq == 0x01)) /* "Logical unit is in process of becoming ready" */
+        return (SS$_MEDOFL); /*   becomes "Medium is offline" */
     /* Higher-level code will handle this. */
 
     /* More inclusively, */
-    if (asc==0x04)              /* Various "Logical unit not ready" errors */
-        return( SS$_MEDOFL );           /*   all become "Medium is offline" */
+    if (asc == 0x04) /* Various "Logical unit not ready" errors */
+        return (SS$_MEDOFL); /*   all become "Medium is offline" */
 
-    if (asc==0x21)              /* "Logical block address out of range" */
-        return( SS$_BADPARAM );         /*   becomes "Bad Parameter" */
+    if (asc == 0x21) /* "Logical block address out of range" */
+        return (SS$_BADPARAM); /*   becomes "Bad Parameter" */
 
-    if (asc==0x28)              /* "Medium may have changed" */
+    if (asc == 0x28) /* "Medium may have changed" */
     {
         /*   becomes "Volume is not software enabled" */
-        baseucb.ucb$v_valid = 0;        /* Also clear the VALID bit and */
-        return( SS$_VOLINV );           /* And return the status */
+        baseucb.ucb$v_valid = 0; /* Also clear the VALID bit and */
+        return (SS$_VOLINV); /* And return the status */
     }
 
-    if (asc==0x29)              /* Various "Reset occurred" errors */
-        return( SS$_MEDOFL );           /*   become "Medium is offline" */
+    if (asc == 0x29) /* Various "Reset occurred" errors */
+        return (SS$_MEDOFL); /*   become "Medium is offline" */
 
-    if (asc==0x30)              /* Various "Incompatible medium" errors */
-        return( SS$_MEDOFL );           /*   become "Medium is offline" */
+    if (asc == 0x30) /* Various "Incompatible medium" errors */
+        return (SS$_MEDOFL); /*   become "Medium is offline" */
 
-    if (asc==0x3A)              /* Various "Medium not present" errors */
-        return( SS$_MEDOFL );           /*   become "Medium is offline" */
+    if (asc == 0x3A) /* Various "Medium not present" errors */
+        return (SS$_MEDOFL); /*   become "Medium is offline" */
 
-    BPTRACE( 0x02060000 );          /* BREAK: Untranslated sense key during atapi_xlate_error_to_vms */
-    return( SS$_DRVERR );           /* All else defaults to a nice, safe, disaster */
+    BPTRACE( 0x02060000 ); /* BREAK: Untranslated sense key during atapi_xlate_error_to_vms */
+    return (SS$_DRVERR); /* All else defaults to a nice, safe, disaster */
     /*   "%SYSTEM-W-DRVERR, fatal drive error" */
 
 }
 
 
-
 /* COMPUTE_ADDRESS - This routine is used to compute the head, sector
  * and track information from a logical block number.
  *
@@ -7462,17 +7260,17 @@ int atapi_xlate_error_to_vms( DQ_UCB *ucb )
  *
  */
 
-void compute_address( DQ_UCB *ucb, int *sec, int *head, int *cyl )
+void compute_address(DQ_UCB *ucb, int *sec, int *head, int *cyl)
 
 {
 
-    if (ucb->ucb$l_drive_lba_capable)           /* LBA or CSH mode? */
+    if (ucb->ucb$l_drive_lba_capable) /* LBA or CSH mode? */
 
     {
         /* LBA mode... */
-        *sec  =  ucb->ucb$l_media.lbn        & 0x00FF;  /* Bits 0-7 */
-        *cyl  = (ucb->ucb$l_media.lbn >> 8)  & 0xFFFF;  /* Bits 8 - 23 */
-        *head = (ucb->ucb$l_media.lbn >> 24) & 0x000F;  /* Bits 24 - 27 */
+        *sec = ucb->ucb$l_media.lbn & 0x00FF; /* Bits 0-7 */
+        *cyl = (ucb->ucb$l_media.lbn >> 8) & 0xFFFF; /* Bits 8 - 23 */
+        *head = (ucb->ucb$l_media.lbn >> 24) & 0x000F; /* Bits 24 - 27 */
     }
 
     else
@@ -7480,16 +7278,15 @@ void compute_address( DQ_UCB *ucb, int *sec, int *head, int *cyl )
     {
         /* CSH mode... */
         int temp;
-        *sec  = ucb->ucb$l_media.lbn % baseucb.ucb$b_sectors + 1;
-        temp  = ucb->ucb$l_media.lbn / baseucb.ucb$b_sectors;
+        *sec = ucb->ucb$l_media.lbn % baseucb.ucb$b_sectors + 1;
+        temp = ucb->ucb$l_media.lbn / baseucb.ucb$b_sectors;
         *head = temp % baseucb.ucb$b_tracks;
-        *cyl  = temp / baseucb.ucb$b_tracks;
+        *cyl = temp / baseucb.ucb$b_tracks;
     }
 
 }
 
 
-
 /* FILL_PACKET_W_ADX - This routine is used to fill the address field
  *                     in the packet based on the logical blck number
  *
@@ -7508,38 +7305,36 @@ void compute_address( DQ_UCB *ucb, int *sec, int *head, int *cyl )
  *
  */
 
-int fill_packet_w_adx( DQ_UCB *ucb )
+int fill_packet_w_adx(DQ_UCB *ucb)
 
 {
 
     int cd_rom_lbn;
     int offset;
-    BYTE  *packet;              /* The packet bytes within the UCB */
+    BYTE *packet; /* The packet bytes within the UCB */
 
+    packet = (BYTE *) ucb->ucb$b_packet; /* Bind onto packet in the UCB as a byte array */
 
-    packet = (BYTE *) ucb->ucb$b_packet;    /* Bind onto packet in the UCB as a byte array */
+    cd_rom_lbn = ucb->ucb$l_media.lbn; /* Get desired LBN */
+    offset = 0; /* Assume no offset in buffer */
 
-    cd_rom_lbn = ucb->ucb$l_media.lbn;      /* Get desired LBN */
-    offset     = 0;             /* Assume no offset in buffer */
-
-    if (ucb->ucb$l_2K_flag)         /* 2K blocks on this device? */
+    if (ucb->ucb$l_2K_flag) /* 2K blocks on this device? */
     {
         /* If so, then... */
-        offset     = cd_rom_lbn & 0x03;     /* Calculate offset within buffer */
-        cd_rom_lbn = cd_rom_lbn>>2;     /* Then divide LBN by 4 */
+        offset = cd_rom_lbn & 0x03; /* Calculate offset within buffer */
+        cd_rom_lbn = cd_rom_lbn >> 2; /* Then divide LBN by 4 */
     }
 
-    packet[2] = (cd_rom_lbn >> 24) & 0x00FF;    /* LBN bits [24:31] */
-    packet[3] = (cd_rom_lbn >> 16) & 0x00FF;    /* LBN bits [16:23] */
-    packet[4] = (cd_rom_lbn >>  8) & 0x00FF;    /* LBN bits  [8:15] */
-    packet[5] = (cd_rom_lbn      ) & 0x00FF;    /* LBN bits  [0:7]  */
+    packet[2] = (cd_rom_lbn >> 24) & 0x00FF; /* LBN bits [24:31] */
+    packet[3] = (cd_rom_lbn >> 16) & 0x00FF; /* LBN bits [16:23] */
+    packet[4] = (cd_rom_lbn >> 8) & 0x00FF; /* LBN bits  [8:15] */
+    packet[5] = (cd_rom_lbn) & 0x00FF; /* LBN bits  [0:7]  */
 
-    return( offset );               /* Return the offset, if any */
+    return (offset); /* Return the offset, if any */
 
 }
 
 
-
 /* LOAD_PRDT - This routine is used to load the PRDT with 8 pointers
  *             pointing to the 8 PCI pages that map through to our
  *             transfer buffer.
@@ -7563,32 +7358,30 @@ int fill_packet_w_adx( DQ_UCB *ucb )
  *
  */
 
-void load_prdt( DQ_UCB *ucb )
+void load_prdt(DQ_UCB *ucb)
 
 {
 
-    int   i;                    /* Loop counter */
-    int   page_base_adx;            /* Starting address of this PCI page */
-    PRDT  *prdt_tbl;                /* PRDT table */
+    int i; /* Loop counter */
+    int page_base_adx; /* Starting address of this PCI page */
+    PRDT *prdt_tbl; /* PRDT table */
 
-
-    prdt_tbl = (PRDT *) ucb->ucb$l_prdt;    /* Bind onto the PRDT as a vector of PRDT entries         */
+    prdt_tbl = (PRDT *) ucb->ucb$l_prdt; /* Bind onto the PRDT as a vector of PRDT entries         */
     page_base_adx = (UINT) ucb->ucb$l_xfer_phy; /* Get the beginning PCI address of the xfer_buffer       */
 
-    for ( i=0; i<XFER_BUFFER_MAP_PAGES; i++ )   /* Now, for each of the 8 pages in our transfer buffer... */
+    for (i = 0; i < XFER_BUFFER_MAP_PAGES; i++) /* Now, for each of the 8 pages in our transfer buffer... */
     {
-        prdt_tbl[i].phys_adx = page_base_adx;   /* Load the physical address field                        */
-        prdt_tbl[i].count    = MMG$GL_PAGE_SIZE;/* Load the bytecount field with 8K bytes                 */
-        prdt_tbl[i].flags    = 0x0;     /* Clear the End-of-Table marker in this PRDT entry       */
+        prdt_tbl[i].phys_adx = page_base_adx; /* Load the physical address field                        */
+        prdt_tbl[i].count = MMG$GL_PAGE_SIZE;/* Load the bytecount field with 8K bytes                 */
+        prdt_tbl[i].flags = 0x0; /* Clear the End-of-Table marker in this PRDT entry       */
         page_base_adx += prdt_tbl[i].count; /* Bump the PCI address onwards for the next pass         */
-    }                   /* Next page                                              */
+    } /* Next page                                              */
 
-    prdt_tbl[i-1].flags    = DMA_PRDT_M_EDT;    /* Set the End-of-Table marker in the last PRDT entry     */
+    prdt_tbl[i - 1].flags = DMA_PRDT_M_EDT; /* Set the End-of-Table marker in the last PRDT entry     */
 
 }
 
 
-
 /* MOVE_SEC_FROM_DRIVE - This routine is used to move a sector from the
  * disk drive on a READ operation.
  *
@@ -7614,28 +7407,26 @@ void load_prdt( DQ_UCB *ucb )
  *
  */
 
-void move_sec_from_drive( DQ_UCB *ucb, BYTE *buffer, int bytecount )
+void move_sec_from_drive(DQ_UCB *ucb, BYTE *buffer, int bytecount)
 
 {
 
-    int   i;                    /* Loop counter */
-    WORD *w_buffer;             /* Point to the buffer as words */
+    int i; /* Loop counter */
+    WORD *w_buffer; /* Point to the buffer as words */
 
+    TRACE( 0x0A000000 + bytecount ); /* MOVE_SEC_FROM_DRIVE starting */
 
-    TRACE( 0x0A000000 + bytecount );        /* MOVE_SEC_FROM_DRIVE starting */
+    w_buffer = (WORD *) buffer; /* Bind onto the buffer as words */
 
-    w_buffer = (WORD *) buffer;         /* Bind onto the buffer as words */
-
-    for (i=0; i<(bytecount>>1); i++)        /* For all the requested words... */
+    for (i = 0; i < (bytecount >> 1); i++) /* For all the requested words... */
     {
         /* Future DRQ test goes here */
-        w_buffer[i] = inpw( ucb, RD_DATA ); /* Get and enbuffer the data word */
+        w_buffer[i] = inpw(ucb, RD_DATA); /* Get and enbuffer the data word */
     }
 
 }
 
 
-
 /* MOVE_SEC_TO_DRIVE - This routine is used to move a sector to the
  * disk drive on a WRITE operation.
  *
@@ -7661,34 +7452,33 @@ void move_sec_from_drive( DQ_UCB *ucb, BYTE *buffer, int bytecount )
  *
  */
 
-void move_sec_to_drive( DQ_UCB *ucb, BYTE *buffer, int bytecount )
+void move_sec_to_drive(DQ_UCB *ucb, BYTE *buffer, int bytecount)
 
 {
 
-    int   i;                    /* Loop counter */
-    volatile int   j;               /* Delay counter */
-    WORD *w_buffer;             /* Point to the buffer as words */
+    int i; /* Loop counter */
+    volatile int j; /* Delay counter */
+    WORD *w_buffer; /* Point to the buffer as words */
 
+    TRACE( 0x0B000000 + bytecount ); /* MOVE_SEC_TO_DRIVE starting */
 
-    TRACE( 0x0B000000 + bytecount );        /* MOVE_SEC_TO_DRIVE starting */
+    w_buffer = (WORD *) buffer; /* Bind onto the buffer as words */
 
-    w_buffer = (WORD *) buffer;         /* Bind onto the buffer as words */
-
-    for (i=0; i<(bytecount>>1); i++)        /* For all the requested words... */
+    for (i = 0; i < (bytecount >> 1); i++) /* For all the requested words... */
     {
         /* Future DRQ test goes here */
-        outw( ucb, WT_DATA, w_buffer[i] );  /* Write out the data word */
+        outw(ucb, WT_DATA, w_buffer[i]); /* Write out the data word */
 
 //#saythis "Delay kludge for Brick..."
-        for (j=0; j<100; j++)           /* Kill some time */
-            {}
+        for (j = 0; j < 100; j++) /* Kill some time */
+        {
+        }
 
     }
 
 }
 
 
-
 /* MAP_USER_BUFFER - this routine is used to directly map a section of
  * the users buffer.
  *
@@ -7703,44 +7493,45 @@ void move_sec_to_drive( DQ_UCB *ucb, BYTE *buffer, int bytecount )
  *
  */
 
-BYTE *map_user_buffer( DQ_UCB *ucb, int offset, int length )
+BYTE *map_user_buffer(DQ_UCB *ucb, int offset, int length)
 
 {
 
-    int     pfn;                /* PFN */
-    int     first_pte;              /* First PTE number */
-    int     pte_cnt;                /* Number of pages to map */
-    int     i;                  /* Loop counter */
-    int     byte_ofs;               /* Byte offset */
-    PTE     *user_pte;              /* Current PTE pointer */
-    BYTE    *s0_va;             /* Current S0 address */
-    PTE     *s0_pte;                /* Current S0 PTE address */
-    BYTE    *user_va;               /* Mapped buffer address */
-    uint64  *clr_pte;               /* Pointer used to clear PTE */
+    int pfn; /* PFN */
+    int first_pte; /* First PTE number */
+    int pte_cnt; /* Number of pages to map */
+    int i; /* Loop counter */
+    int byte_ofs; /* Byte offset */
+    PTE *user_pte; /* Current PTE pointer */
+    BYTE *s0_va; /* Current S0 address */
+    PTE *s0_pte; /* Current S0 PTE address */
+    BYTE *user_va; /* Mapped buffer address */
+    uint64 *clr_pte; /* Pointer used to clear PTE */
 
 #define PTE_BITS PTE$C_KOWN + PTE$C_KW + PTE$M_VALID + PTE$M_ASM
 
     /* Calculate sizes, base PTE addresses and such */
 
-    offset += baseucb.ucb$l_boff;       /* Compute true offset from page */
-    byte_ofs = offset & mmg$gl_bwp_mask;    /* Compute byte offset in page */
+    offset += baseucb.ucb$l_boff; /* Compute true offset from page */
+    byte_ofs = offset & mmg$gl_bwp_mask; /* Compute byte offset in page */
     first_pte = (offset >> MMG$GL_VPN_TO_VA) * PTE$C_BYTES_PER_PTE;
     /* Compute PTE offset */
-    pte_cnt = ( ( (offset & mmg$gl_bwp_mask) + length) + mmg$gl_bwp_mask) >> MMG$GL_VPN_TO_VA;
+    pte_cnt = (((offset & mmg$gl_bwp_mask) + length) + mmg$gl_bwp_mask)
+              >> MMG$GL_VPN_TO_VA;
     /* Compute page count */
-    user_pte = (PTE *) ( (int) baseucb.ucb$l_svapte + first_pte);
+    user_pte = (PTE *) ((int) baseucb.ucb$l_svapte + first_pte);
     /* Compute first PTE address */
-    s0_va   = ucb->ucb$ps_s0_va;        /* S0 address of mapped region */
-    s0_pte  = ucb->ucb$ps_s0_svapte;        /* Get S0 PTE address */
+    s0_va = ucb->ucb$ps_s0_va; /* S0 address of mapped region */
+    s0_pte = ucb->ucb$ps_s0_svapte; /* Get S0 PTE address */
 
     /* Loop over all of the PTEs and set them to double map the user buffer */
 
-    for (i=0; i<pte_cnt; i++)
+    for (i = 0; i < pte_cnt; i++)
     {
-        if (user_pte->pte$v_valid)      /* Check for VALID user PTE */
-            pfn = user_pte->pte$v_pfn;      /* It is - get copy of PFN */
+        if (user_pte->pte$v_valid) /* Check for VALID user PTE */
+            pfn = user_pte->pte$v_pfn; /* It is - get copy of PFN */
         else
-            pfn = ioc_std$ptetopfn( user_pte ); /* Find PFN the hard way */
+            pfn = ioc_std$ptetopfn(user_pte); /* Find PFN the hard way */
 
         /* The following should be set field by field, but PTEDEF
          * doesn't have a proper definition for this, and frankly
@@ -7753,28 +7544,27 @@ BYTE *map_user_buffer( DQ_UCB *ucb, int offset, int length )
          *      s0_pte->pte$v_asm = 1;          /@ Address space match @/
          */
 
-        clr_pte = (void *) s0_pte;      /* Point to the PTE */
-        *clr_pte = PTE_BITS;            /* Clear the PTE and set constant bits */
-        s0_pte->pte$v_pfn = pfn;        /* Now, include the PFN */
-        mmg$tbi_single( s0_va );        /* Invalidate the address */
-        s0_va += MMG$GL_PAGE_SIZE;      /* Point to the next page */
-        s0_pte++;               /* Point to next S0 PTE */
-        user_pte++;             /* Point to next user PTE */
+        clr_pte = (void *) s0_pte; /* Point to the PTE */
+        *clr_pte = PTE_BITS; /* Clear the PTE and set constant bits */
+        s0_pte->pte$v_pfn = pfn; /* Now, include the PFN */
+        mmg$tbi_single(s0_va); /* Invalidate the address */
+        s0_va += MMG$GL_PAGE_SIZE; /* Point to the next page */
+        s0_pte++; /* Point to next S0 PTE */
+        user_pte++; /* Point to next user PTE */
     }
 
     /* Now, make a guard page */
 
-    clr_pte = (void *) s0_pte;          /* Get PTE address */
-    *clr_pte= 0;                /*  and clear it */
-    mmg$tbi_single( s0_va );            /* Invalidate the address */
+    clr_pte = (void *) s0_pte; /* Get PTE address */
+    *clr_pte = 0; /*  and clear it */
+    mmg$tbi_single(s0_va); /* Invalidate the address */
 
     /* Return the S0 VA of the user buffer */
 
-    user_va = (BYTE *) ( (int) ucb->ucb$ps_s0_va + byte_ofs );
-    return( user_va );              /* Return with the address */
+    user_va = (BYTE *) ((int) ucb->ucb$ps_s0_va + byte_ofs);
+    return (user_va); /* Return with the address */
 
 }
-
 
 
 /* UNLOAD - Perform IO$_UNLOAD driver function
@@ -7788,15 +7578,14 @@ BYTE *map_user_buffer( DQ_UCB *ucb, int offset, int length )
  *
  */
 
-int unload( DQ_UCB *ucb )
+int unload(DQ_UCB *ucb)
 
 {
 
-    baseucb.ucb$v_valid = 0;            /* Clear the VALID bit */
-    return( SS$_NORMAL );           /* Return with success */
+    baseucb.ucb$v_valid = 0; /* Clear the VALID bit */
+    return (SS$_NORMAL); /* Return with success */
 
 }
-
 
 
 /* WAIT_READY - Wait Until The Drive Is Ready.  This means that the
@@ -7820,79 +7609,79 @@ int unload( DQ_UCB *ucb )
  *
  */
 
-int wait_ready( DQ_UCB *ucb )
+int wait_ready(DQ_UCB *ucb)
 
 {
 
-    int   status;               /* Routine status value */
-    int   drvsts;               /* Drive status register */
-    int   cyl_hi;               /* High-order byte of cylinder address */
-    int   cyl_lo;               /* Low-order byte of cylinder address */
+    int status; /* Routine status value */
+    int drvsts; /* Drive status register */
+    int cyl_hi; /* High-order byte of cylinder address */
+    int cyl_lo; /* Low-order byte of cylinder address */
 
+    TRACE( 0x03100000 ); /* WAIT_READY starting */
 
-    TRACE( 0x03100000 );            /* WAIT_READY starting */
-
-    drvsts = inp( ucb, RD_ALT_STS );        /* Get the status byte */
-    if (drvsts!=0xFF)               /* If it looks like a real drive, then */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+    if (drvsts != 0xFF) /* If it looks like a real drive, then */
     {
-        if ( IS_SET( drvsts, STS_M_BSY ) )  /* Is the drive busy? */
+        if (IS_SET( drvsts, STS_M_BSY )) /* Is the drive busy? */
         {
             /* If so, then... */
-            status = wait_busy( ucb );      /* Make sure BUSY is clear on the current drive */
-            if ( $FAIL( status ) )      /* Check status for error */
+            status = wait_busy(ucb); /* Make sure BUSY is clear on the current drive */
+            if ($FAIL( status )) /* Check status for error */
             {
-                TRACE( 0x03110000 );        /* WAIT_BUSY failed for WAIT_READY before drive selection */
-                return( status );       /* Exit with the error code */
+                TRACE( 0x03110000 ); /* WAIT_BUSY failed for WAIT_READY before drive selection */
+                return (status); /* Exit with the error code */
             }
         }
     }
 
-    out( ucb, WT_DRV_HD, ucb->ucb$l_drv_head ); /* Select the drive we really want (and head 0) */
+    out(ucb, WT_DRV_HD, ucb->ucb$l_drv_head); /* Select the drive we really want (and head 0) */
 
-    drvsts = inp( ucb, RD_ALT_STS );        /* Get the status byte */
-    if (drvsts==0xFF)               /* If it looks like a real drive, then */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+    if (drvsts == 0xFF) /* If it looks like a real drive, then */
     {
-        TRACE( 0x03120000 );            /* WAIT_READY trying to select an apparently-nonexistent drive */
-        return( SS$_DEVOFFLINE );       /* Exit with the error code */
+        TRACE( 0x03120000 ); /* WAIT_READY trying to select an apparently-nonexistent drive */
+        return (SS$_DEVOFFLINE); /* Exit with the error code */
     }
 
-    if ( IS_SET( drvsts, STS_M_BSY ) )      /* Is the newly-selected drive busy? */
+    if (IS_SET( drvsts, STS_M_BSY )) /* Is the newly-selected drive busy? */
     {
         /* If so, then... */
-        status = wait_busy( ucb );      /* Make sure BUSY is clear on this drive, too */
-        if ( $FAIL( status ) )          /* Check status for error */
+        status = wait_busy(ucb); /* Make sure BUSY is clear on this drive, too */
+        if ($FAIL( status )) /* Check status for error */
         {
-            TRACE( 0x03130000 );        /* WAIT_BUSY failed for WAIT_READY after drive selection */
-            return( status );           /* Exit with the error code */
+            TRACE( 0x03130000 ); /* WAIT_BUSY failed for WAIT_READY after drive selection */
+            return (status); /* Exit with the error code */
         }
     }
 
-    if ( IS_SET( drvsts, STS_M_DRDY ) )     /* Check for drive READY */
+    if (IS_SET( drvsts, STS_M_DRDY )) /* Check for drive READY */
     {
-        TRACE( 0x03140000 );            /* WAIT_READY succeeding */
-        return( SS$_NORMAL );           /* Return succeeding if ready */
+        TRACE( 0x03140000 ); /* WAIT_READY succeeding */
+        return (SS$_NORMAL); /* Return succeeding if ready */
     }
 
     /* Collect the other two pieces of the ATAPI signature */
-    cyl_hi = inp( ucb, RD_CYL_HI );     /* Read high order cylinder bits */
-    cyl_lo = inp( ucb, RD_CYL_LO );     /* Read low order cylinder bits */
-    if ( (drvsts==ATAPI_SIG_STS) && (cyl_hi==ATAPI_SIG_CYL_HI) && (cyl_lo==ATAPI_SIG_CYL_LO) )
+    cyl_hi = inp(ucb, RD_CYL_HI); /* Read high order cylinder bits */
+    cyl_lo = inp(ucb, RD_CYL_LO); /* Read low order cylinder bits */
+    if ((drvsts == ATAPI_SIG_STS) && (cyl_hi == ATAPI_SIG_CYL_HI)
+            && (cyl_lo == ATAPI_SIG_CYL_LO))
     {
-        TRACE( 0x03150000 );            /* WAIT_READY barging ahead on ATAPI signature */
-        return( SS$_NORMAL );           /* If we see ATAPI signature, barge ahead w/o ready */
+        TRACE( 0x03150000 ); /* WAIT_READY barging ahead on ATAPI signature */
+        return (SS$_NORMAL); /* If we see ATAPI signature, barge ahead w/o ready */
     }
 
-    if ( (drvsts==ATAPI_SIG_STSE) && (cyl_hi==ATAPI_SIG_CYL_HI) && (cyl_lo==ATAPI_SIG_CYL_LO) )
+    if ((drvsts == ATAPI_SIG_STSE) && (cyl_hi == ATAPI_SIG_CYL_HI)
+            && (cyl_lo == ATAPI_SIG_CYL_LO))
     {
-        TRACE( 0x03160000 );            /* WAIT_READY barging ahead on ATAPI signature (w/ error bit) */
-        return( SS$_NORMAL );           /* If we see ATAPI signature, barge ahead w/o ready */
+        TRACE( 0x03160000 ); /* WAIT_READY barging ahead on ATAPI signature (w/ error bit) */
+        return (SS$_NORMAL); /* If we see ATAPI signature, barge ahead w/o ready */
     }
 
-    TRACE( 0x03170000 );            /* WAIT_READY failing on non-ready drive */
-    return( SS$_DEVACTIVE );            /* Otherwise, exit with failure if */
+    TRACE( 0x03170000 ); /* WAIT_READY failing on non-ready drive */
+    return (SS$_DEVACTIVE); /* Otherwise, exit with failure if */
     /*   not ready and not ATAPI signature */
 }
-
 
 
 /* WAIT_BUSY - Wait for BSY to be clear
@@ -7905,67 +7694,66 @@ int wait_ready( DQ_UCB *ucb )
  *
  */
 
-int wait_busy( DQ_UCB *ucb )
+int wait_busy(DQ_UCB *ucb)
 
 {
 
-    int      status;                /* Routine status value */
-    int     drvsts;             /* Drive status register */
-    __int64  delta_time;            /* Timedwait delta time */
-    __int64  end_value;             /* Timedwait end value */
+    int status; /* Routine status value */
+    int drvsts; /* Drive status register */
+    __int64 delta_time; /* Timedwait delta time */
+    __int64 end_value; /* Timedwait end value */
 
     /* Check to see if the drive is ready right now */
 
-    TRACE( 0x03200000 );            /* WAIT_BUSY starting */
+    TRACE( 0x03200000 ); /* WAIT_BUSY starting */
 
-    drvsts = inp( ucb, RD_ALT_STS );        /* Get the status byte */
-    if ( IS_CLEAR( drvsts, STS_M_BSY ) )    /* If not busy, then */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+    if (IS_CLEAR( drvsts, STS_M_BSY )) /* If not busy, then */
     {
-        TRACE( 0x03210000 );            /* WAIT_BUSY normal exit -- was already not-busy */
-        return( SS$_NORMAL );           /* Drive is ready - exit */
+        TRACE( 0x03210000 ); /* WAIT_BUSY normal exit -- was already not-busy */
+        return (SS$_NORMAL); /* Drive is ready - exit */
     }
 
     /* Drive is busy - wait a bit for it */
 
     /* Set up the timedwait */
 
-    delta_time = DRQ_TIME;          /* Set DRQ wait time */
-    status = exe$timedwait_setup( &delta_time, &end_value );
-    if ( $FAIL( status) )           /* Check for success */
+    delta_time = DRQ_TIME; /* Set DRQ wait time */
+    status = exe$timedwait_setup(&delta_time, &end_value);
+    if ($FAIL( status)) /* Check for success */
     {
-        TRACE( 0x03220000 );            /* WAIT_BUSY exe$timedwait_setup failure */
-        return( status );           /* Return with the failure status */
+        TRACE( 0x03220000 ); /* WAIT_BUSY exe$timedwait_setup failure */
+        return (status); /* Return with the failure status */
     }
 
     /* Spin until ready or timeout */
 
-    while ( ( status=exe$timedwait_complete( &end_value ) ) == SS$_CONTINUE)
+    while ((status = exe$timedwait_complete(&end_value)) == SS$_CONTINUE)
     {
-        drvsts = inp( ucb, RD_ALT_STS );    /* Read status byte */
-        if ( IS_CLEAR( drvsts, STS_M_BSY ) )    /* Check for it to be clear */
+        drvsts = inp(ucb, RD_ALT_STS); /* Read status byte */
+        if (IS_CLEAR( drvsts, STS_M_BSY )) /* Check for it to be clear */
         {
-            TRACE( 0x03230000 );        /* WAIT_BUSY "became not-busy" success */
-            return( SS$_NORMAL );       /* BUSY is clear - exit */
+            TRACE( 0x03230000 ); /* WAIT_BUSY "became not-busy" success */
+            return (SS$_NORMAL); /* BUSY is clear - exit */
         }
     }
 
     /* Ok - still not ready.  Let's reset the controller and try again */
 
-    BPTRACE( 0x03240000 );          /* BREAK: wait_busy wants to do reset */
-    reset_ctrl( ucb );              /* Attempt a reset */
-    drvsts = inp( ucb, RD_ALT_STS );        /* Get the status byte */
-    if ( IS_CLEAR( drvsts, STS_M_BSY ) )    /* If not busy, then */
+    BPTRACE( 0x03240000 ); /* BREAK: wait_busy wants to do reset */
+    reset_ctrl(ucb); /* Attempt a reset */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+    if (IS_CLEAR( drvsts, STS_M_BSY )) /* If not busy, then */
     {
-        TRACE( 0x03250000 );            /* WAIT_BUSY "became not-busy" after reset */
-        return( SS$_NORMAL );           /*  return with success */
+        TRACE( 0x03250000 ); /* WAIT_BUSY "became not-busy" after reset */
+        return (SS$_NORMAL); /*  return with success */
     }
     else
     {
-        TRACE( 0x03260000 );            /* WAIT_BUSY "still busy" after reset failure */
-        return( SS$_CTRLERR );          /* Exit with controller error */
+        TRACE( 0x03260000 ); /* WAIT_BUSY "still busy" after reset failure */
+        return (SS$_CTRLERR); /* Exit with controller error */
     }
 }
-
 
 
 /* WAIT_DRQ - Wait for DRQ to be set and BSY to be clear
@@ -7978,27 +7766,27 @@ int wait_busy( DQ_UCB *ucb )
  *
  */
 
-int wait_drq( DQ_UCB *ucb )
+int wait_drq(DQ_UCB *ucb)
 
 {
 
-    int      status;                /* Routine status value */
-    int      drvsts;                /* Drive status register */
-    __int64  delta_time;            /* Timedwait delta time */
-    __int64  end_value;             /* Timedwait end value */
+    int status; /* Routine status value */
+    int drvsts; /* Drive status register */
+    __int64 delta_time; /* Timedwait delta time */
+    __int64 end_value; /* Timedwait end value */
 
     /* Check to see if the drive is ready right now */
 
-    TRACE( 0x03300000 );            /* WAIT_DRQ starting */
+    TRACE( 0x03300000 ); /* WAIT_DRQ starting */
 
-    drvsts = inp( ucb, RD_ALT_STS );        /* Get the status byte */
-    if ( IS_CLEAR( drvsts, STS_M_BSY ) )    /* Is the drive busy? */
+    drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+    if (IS_CLEAR( drvsts, STS_M_BSY )) /* Is the drive busy? */
     {
         /* If not, then... */
-        if ( IS_SET( drvsts, STS_M_DRQ ) )  /*  get the DRQ bit */
+        if (IS_SET( drvsts, STS_M_DRQ )) /*  get the DRQ bit */
         {
-            TRACE( 0x03310000 );        /* WAIT_DRQ normal exit -- was already DRQ */
-            return( SS$_NORMAL );       /* Drive is ready and DRQ is set -- exit */
+            TRACE( 0x03310000 ); /* WAIT_DRQ normal exit -- was already DRQ */
+            return (SS$_NORMAL); /* Drive is ready and DRQ is set -- exit */
         }
     }
 
@@ -8006,36 +7794,35 @@ int wait_drq( DQ_UCB *ucb )
 
     /* Set up the timedwait */
 
-    delta_time = DRQ_TIME;          /* Set DRQ wait time */
-    status = exe$timedwait_setup( &delta_time, &end_value );
-    if ( $FAIL( status ) )          /* Check for success */
+    delta_time = DRQ_TIME; /* Set DRQ wait time */
+    status = exe$timedwait_setup(&delta_time, &end_value);
+    if ($FAIL( status )) /* Check for success */
     {
-        TRACE( 0x03320000 );            /* WAIT_DRQ exe$timedwait_setup failure */
-        return( status );           /* Return with the failure status */
+        TRACE( 0x03320000 ); /* WAIT_DRQ exe$timedwait_setup failure */
+        return (status); /* Return with the failure status */
     }
 
     /* Spin until ready or timeout */
 
-    while ( (status=exe$timedwait_complete( &end_value ) ) == SS$_CONTINUE)
+    while ((status = exe$timedwait_complete(&end_value)) == SS$_CONTINUE)
     {
-        drvsts = inp( ucb, RD_ALT_STS );    /* No, so read status byte */
-        if ( IS_CLEAR( drvsts, STS_M_BSY ) )
+        drvsts = inp(ucb, RD_ALT_STS); /* No, so read status byte */
+        if (IS_CLEAR( drvsts, STS_M_BSY ))
         {
-            if ( IS_SET( drvsts, STS_M_DRQ ) )
+            if (IS_SET( drvsts, STS_M_DRQ ))
             {
-                TRACE( 0x03330000 );        /* WAIT_DRQ "became ready" success */
-                return( SS$_NORMAL );       /* Looks ok - set new status */
+                TRACE( 0x03330000 ); /* WAIT_DRQ "became ready" success */
+                return (SS$_NORMAL); /* Looks ok - set new status */
             }
         }
     }
 
-    TRACE( 0x03340000 );            /* WAIT_DRQ ending with TIMEOUT waiting for DRQ */
-    return( status );               /* Return with status code */
+    TRACE( 0x03340000 ); /* WAIT_DRQ ending with TIMEOUT waiting for DRQ */
+    return (status); /* Return with status code */
 
 }
 
 
-
 
 /* DQ_WFIKPCH - Wait for Interrupt and Keep Channel (opionally w/Histogram)
  *
@@ -8055,70 +7842,68 @@ int wait_drq( DQ_UCB *ucb )
  *
  */
 
-int dq_wfikpch( KPB *kpb, int orig_ipl, int erl_param )
+int dq_wfikpch(KPB *kpb, int orig_ipl, int erl_param)
 
 {
 
-    DQ_UCB      *ucb;               /* Pointer to UCB */
-    int         status;             /* Returned routine status */
-    extern int  EXE$GL_ABSTIM;          /* Current time (seconds) */
-    int         time;               /* Starting time, later, Elapsed time */
+    DQ_UCB *ucb; /* Pointer to UCB */
+    int status; /* Returned routine status */
+    extern int EXE$GL_ABSTIM; /* Current time (seconds) */
+    int time; /* Starting time, later, Elapsed time */
 
+    ucb = (DQ_UCB *) kpb->kpb$ps_ucb; /* Get UCB pointer */
 
-    ucb    = (DQ_UCB *) kpb->kpb$ps_ucb;    /* Get UCB pointer */
+    TRACE( 0x03400000 ); /* DQ_WFIKPTCH starting */
 
-    TRACE( 0x03400000 );            /* DQ_WFIKPTCH starting */
+    inp(ucb, RD_ALT_STS); /* Get the status byte (just for tracing's benefit) */
 
-    inp( ucb, RD_ALT_STS );         /* Get the status byte (just for tracing's benefit) */
-
-    if (ucb->ucb$l_unsolicited_int!=0)      /* Is an unsolicited interrupt already pending? */
+    if (ucb->ucb$l_unsolicited_int != 0) /* Is an unsolicited interrupt already pending? */
     {
         /* If so, bypass WFIKPCH, etc. */
-        TRACE( 0x03410000 );            /* DQ_WFIKPCH taking the pending-unsolicited-interrupt bypass */
-        ucb->ucb$l_unsolicited_int = 0;     /* Forget any pending unsolicited interrupts */
-        inp( ucb, RD_STS );         /* Read status byte to quash any pending interrupts */
-        device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE );
+        TRACE( 0x03410000 ); /* DQ_WFIKPCH taking the pending-unsolicited-interrupt bypass */
+        ucb->ucb$l_unsolicited_int = 0; /* Forget any pending unsolicited interrupts */
+        inp(ucb, RD_STS); /* Read status byte to quash any pending interrupts */
+        device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE);
         /* Release the device lock */
-        return( SS$_NORMAL );           /* And return succeeding */
+        return (SS$_NORMAL); /* And return succeeding */
     }
 
     /* Else we'll wait for an interrupt... */
 
-    time = EXE$GL_ABSTIM;           /* Get the current time */
-    status = ioc$kp_wfikpch( kpb, TIMEOUT_TIME, orig_ipl );
-    time = EXE$GL_ABSTIM - time;        /* Calculate elapsed time */
-    TRACE( 0x03420000 + time );         /* IOC$KP_WFIKPTCH end */
-    ucb->ucb$l_int_hist[time]++;        /* Bump a histogram entry */
+    time = EXE$GL_ABSTIM; /* Get the current time */
+    status = ioc$kp_wfikpch(kpb, TIMEOUT_TIME, orig_ipl);
+    time = EXE$GL_ABSTIM - time; /* Calculate elapsed time */
+    TRACE( 0x03420000 + time ); /* IOC$KP_WFIKPTCH end */
+    ucb->ucb$l_int_hist[time]++; /* Bump a histogram entry */
 
-    if (status == SS$_TIMEOUT)          /* Interrupt timeout? */
+    if (status == SS$_TIMEOUT) /* Interrupt timeout? */
     {
         /* If so, then... */
-        ucb->ucb$l_int_tmo++;           /* Bump the explicit timeout indicator */
-        erl_std$devictmo( erl_param, (UCB *) ucb );
+        ucb->ucb$l_int_tmo++; /* Bump the explicit timeout indicator */
+        erl_std$devictmo(erl_param, (UCB *) ucb);
         /* Handle the device timeout */
-        exe$kp_fork( ucb->ucb$ps_kpb, (FKB *) ucb );
+        exe$kp_fork(ucb->ucb$ps_kpb, (FKB *) ucb);
         /* Fork, and... */
-        BPTRACE( 0x03430000 );          /* BREAK: WFIKPCH timeout */
-        return( status );           /* Return with status intact */
+        BPTRACE( 0x03430000 ); /* BREAK: WFIKPCH timeout */
+        return (status); /* Return with status intact */
     }
 
-    if ( $FAIL( status ) )          /* Any other WFIKPCH error? */
+    if ($FAIL( status )) /* Any other WFIKPCH error? */
     {
         /* If so, then... */
-        device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE );
-        BPTRACE( 0x03440000 );          /* BREAK: Non-timeout WFIKPCH error */
-        return( status );           /*  and return with status */
+        device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE);
+        BPTRACE( 0x03440000 ); /* BREAK: Non-timeout WFIKPCH error */
+        return (status); /*  and return with status */
     }
 
     /* All is well after the 'rupt... */
 
-    ucb->ucb$l_unsolicited_int = 0;     /* Forget any pending unsolicited interrupts */
-    status = exe$kp_fork( ucb->ucb$ps_kpb, (FKB *) ucb );
+    ucb->ucb$l_unsolicited_int = 0; /* Forget any pending unsolicited interrupts */
+    status = exe$kp_fork(ucb->ucb$ps_kpb, (FKB *) ucb);
     /* Drop back to fork IPL */
-    return( status );               /* and return with status */
+    return (status); /* and return with status */
 
 }
-
 
 
 /* RESET_CTRL - Reset the controller
@@ -8140,59 +7925,57 @@ int dq_wfikpch( KPB *kpb, int orig_ipl, int erl_param )
  *
  */
 
-int reset_ctrl( DQ_UCB *ucb )
+int reset_ctrl(DQ_UCB *ucb)
 
 {
 
-    int   orig_ipl;             /* Original IPL */
-    int   status;               /* Routine status value */
-    int   drv_head;             /* Drive drive/head register */
-    int   drvsts;               /* Drive status register */
-    int   loop;                 /* Loop counter */
+    int orig_ipl; /* Original IPL */
+    int status; /* Routine status value */
+    int drv_head; /* Drive drive/head register */
+    int drvsts; /* Drive status register */
+    int loop; /* Loop counter */
 
+    TRACE( 0x00070000 ); /* RESET_CTRL starting */
+    ucb->ucb$l_resets++; /* Count a reset issued by us */
 
-    TRACE( 0x00070000 );            /* RESET_CTRL starting */
-    ucb->ucb$l_resets++;            /* Count a reset issued by us */
-
-    device_lock( baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl );
+    device_lock(baseucb.ucb$l_dlck, RAISE_IPL, &orig_ipl);
     /* Take out the device lock */
 
-    if (ucb->ucb$l_atapi_flag==0)       /* ATAPI flag clear? */
+    if (ucb->ucb$l_atapi_flag == 0) /* ATAPI flag clear? */
     {
         /* If so, ATA RESET -- Use reset bit */
-        out( ucb, WT_DEV_CTL, (CTL_M_SRST | CTL_M_nIEN) );
+        out(ucb, WT_DEV_CTL, (CTL_M_SRST | CTL_M_nIEN));
         /* Set the Reset + no_ints bits */
-        out( ucb, WT_DEV_CTL, 0x00 );       /* Cear the Reset + no_ints bits  */
+        out(ucb, WT_DEV_CTL, 0x00); /* Cear the Reset + no_ints bits  */
     }
     else
     {
         /* ATAPI RESET -- Use reset command */
 
-        drv_head = ucb->ucb$l_drv_head;     /* Get base drive info */
-        if (ucb->ucb$l_drive_lba_capable)   /* If LBA mode, ... */
-            drv_head |= DRVHD_M_LBA;        /*  ... set the LBA bit */
-        out( ucb, WT_DRV_HD, drv_head );    /* Select drive, ignore head */
-        out( ucb, WT_CMD, CMD_ATA_ATAPI_SOFT_RESET );
-    }                   /* Issue the ATAPI reset command */
+        drv_head = ucb->ucb$l_drv_head; /* Get base drive info */
+        if (ucb->ucb$l_drive_lba_capable) /* If LBA mode, ... */
+            drv_head |= DRVHD_M_LBA; /*  ... set the LBA bit */
+        out(ucb, WT_DRV_HD, drv_head); /* Select drive, ignore head */
+        out(ucb, WT_CMD, CMD_ATA_ATAPI_SOFT_RESET);
+    } /* Issue the ATAPI reset command */
 
-    device_unlock( baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE );
+    device_unlock(baseucb.ucb$l_dlck, orig_ipl, SMP_RESTORE);
     /* And release the device lock */
 
-    for (loop=0; loop<RESET_TIME>>1; loop++)    /* Now wait for a few seconds... */
+    for (loop = 0; loop < RESET_TIME >> 1; loop++) /* Now wait for a few seconds... */
     {
-        status = sleep( ucb, 2 );       /* Sleep a bit (up to two seconds) */
+        status = sleep(ucb, 2); /* Sleep a bit (up to two seconds) */
         /* (First sleep allows drive to go busy) */
-        if ( $FAIL( status ) )          /* Check the KP status */
-            return( status );           /* Failed - exit w/error */
-        drvsts = inp( ucb, RD_ALT_STS );    /* Get the status byte */
-        if ( IS_CLEAR( drvsts, STS_M_BSY ) )    /* If not busy, then */
-            return( SS$_NORMAL );       /* Drive is ready - exit */
+        if ($FAIL( status )) /* Check the KP status */
+            return (status); /* Failed - exit w/error */
+        drvsts = inp(ucb, RD_ALT_STS); /* Get the status byte */
+        if (IS_CLEAR( drvsts, STS_M_BSY )) /* If not busy, then */
+            return (SS$_NORMAL); /* Drive is ready - exit */
     }
 
-    return( SS$_CTRLERR );          /* It never became ready again -- punt */
+    return (SS$_CTRLERR); /* It never became ready again -- punt */
 
 }
-
 
 
 /* SLEEP - Kill some time
@@ -8213,27 +7996,25 @@ int reset_ctrl( DQ_UCB *ucb )
  *
  */
 
-int sleep( DQ_UCB *ucb, int seconds )
+int sleep(DQ_UCB *ucb, int seconds)
 
 {
 
     int loop;
     int status;
 
+    TRACE( 0x00080000 + seconds ); /* SLEEP starting */
 
-    TRACE( 0x00080000 + seconds );      /* SLEEP starting */
-
-    for (loop=0; loop<seconds; loop++)
+    for (loop = 0; loop < seconds; loop++)
     {
-        status = exe$kp_fork_wait( ucb->ucb$ps_kpb, (FKB *) ucb );
-        if ( $FAIL( status ) )          /* Check the KP status */
-            return( status );           /* Failed - exit w/error */
+        status = exe$kp_fork_wait(ucb->ucb$ps_kpb, (FKB *) ucb);
+        if ($FAIL( status )) /* Check the KP status */
+            return (status); /* Failed - exit w/error */
     }
 
-    return( SS$_NORMAL );
+    return (SS$_NORMAL);
 
 }
-
 
 
 /* ISR - Interrupt Service Routine
@@ -8254,52 +8035,50 @@ int sleep( DQ_UCB *ucb, int seconds )
  *
  */
 
-void isr( IDB *idb )
+void isr(IDB *idb)
 
 {
 
-    DQ_UCB *ucb;                /* Pointer to the UCB */
-    int    dummy;               /* Place to dump STATUS */
-
+    DQ_UCB *ucb; /* Pointer to the UCB */
+    int dummy; /* Place to dump STATUS */
 
     /* Get pointer to the UCB;  If null, then there is none and we just exit */
 
-    ucb = (DQ_UCB *) idb->idb$ps_owner;     /* Get UCB address from the IDB */
-    if (ucb == NULL)
-        return;                 /* Unowned and unexpected - dismiss */
-    ucb->ucb$l_total_ints++;            /* Increment interrupt count */
+    ucb = (DQ_UCB *) idb->idb$ps_owner; /* Get UCB address from the IDB */
+    if (ucb == NULL )
+        return; /* Unowned and unexpected - dismiss */
+    ucb->ucb$l_total_ints++; /* Increment interrupt count */
 
     /* There's an owner.  If the interrupt is expected, then restart the KP */
 
-    device_lock( baseucb.ucb$l_dlck, NORAISE_IPL, NOSAVE_IPL );
+    device_lock(baseucb.ucb$l_dlck, NORAISE_IPL, NOSAVE_IPL);
     /* Acquire the device lock */
 
-    if (baseucb.ucb$v_int)          /* Is this an expected interrupt?            */
+    if (baseucb.ucb$v_int) /* Is this an expected interrupt?            */
     {
         /* If so, then...                            */
-        TRACE( 0x0E000000 );            /* Expected interrupt                        */
-        baseucb.ucb$v_int = 0;          /* Clear "interrupt expected"                */
-        baseucb.ucb$v_tim = 0;          /* Clear TIMEOUT expected bit                */
+        TRACE( 0x0E000000 ); /* Expected interrupt                        */
+        baseucb.ucb$v_int = 0; /* Clear "interrupt expected"                */
+        baseucb.ucb$v_tim = 0; /* Clear TIMEOUT expected bit                */
         fork( (void (*)()) exe$kp_restart, ucb->ucb$ps_kpb, SS$_NORMAL, ucb );
-    }                   /* Fork off a routine to restart the stalled */
+    } /* Fork off a routine to restart the stalled */
     /*   mainline kernel process                 */
-    else                    /* Else unexpected interrupt...              */
+    else /* Else unexpected interrupt...              */
     {
         /*                                           */
-        TRACE( 0x0E100000 );            /* Unexpected interrupt!                     */
-        ucb->ucb$l_unsolicited_int = 1;     /* An unsolicited interrupt is now pending   */
-        ucb->ucb$l_unsol_ints++;        /* Increment unsolicited interrupt count     */
+        TRACE( 0x0E100000 ); /* Unexpected interrupt!                     */
+        ucb->ucb$l_unsolicited_int = 1; /* An unsolicited interrupt is now pending   */
+        ucb->ucb$l_unsol_ints++; /* Increment unsolicited interrupt count     */
     }
 
-    dummy = inp( ucb, RD_STS );         /* Read STATUS to acknowledge the interrupt  */
+    dummy = inp(ucb, RD_STS); /* Read STATUS to acknowledge the interrupt  */
 
-    device_unlock( baseucb.ucb$l_dlck, NOLOWER_IPL, SMP_RESTORE );
+    device_unlock(baseucb.ucb$l_dlck, NOLOWER_IPL, SMP_RESTORE);
     /* Release the device lock */
-    TRACE( 0x0E200000 );            /* ISR ending */
-    return;                 /* Return to the interrupt dispatcher */
+    TRACE( 0x0E200000 ); /* ISR ending */
+    return; /* Return to the interrupt dispatcher */
 
 }
-
 
 
 /* INP - This routine is used to read a byte from a CSR.
@@ -8316,26 +8095,25 @@ void isr( IDB *idb )
  *
  */
 
-BYTE inp( DQ_UCB *ucb, int reg )
+BYTE inp(DQ_UCB *ucb, int reg)
 
 {
 
-    CRAM  *cram_ptr;                /* Pointer to CRAM */
-    int   status;               /* Routine status */
-    BYTE  data;                 /* Data byte */
+    CRAM *cram_ptr; /* Pointer to CRAM */
+    int status; /* Routine status */
+    BYTE data; /* Data byte */
 
-    cram_ptr = ucb->ucb$ps_crams[reg];      /* Point to the CRAM */
-    status   = ioc$cram_io( cram_ptr );     /* Read the byte */
+    cram_ptr = ucb->ucb$ps_crams[reg]; /* Point to the CRAM */
+    status = ioc$cram_io(cram_ptr); /* Read the byte */
     data = (cram_ptr->cram$q_rdata >> cram_init[reg].shift) & 0xFF;
 
     TRACE( 0x05000000 + (reg<<16) + data ); /* Byte read */
 
-    return( data );             /* Return the value */
+    return (data); /* Return the value */
 
 }
 
 
-
 /* INPW - This routine is used to read a word from a CSR.
  *
  * Input:
@@ -8350,26 +8128,25 @@ BYTE inp( DQ_UCB *ucb, int reg )
  *
  */
 
-WORD inpw( DQ_UCB *ucb, int reg )
+WORD inpw(DQ_UCB *ucb, int reg)
 
 {
 
-    CRAM  *cram_ptr;                /* Pointer to the CRAM */
-    int   status;               /* Routine status value */
-    WORD  data;                 /* Data value */
+    CRAM *cram_ptr; /* Pointer to the CRAM */
+    int status; /* Routine status value */
+    WORD data; /* Data value */
 
-    cram_ptr = ucb->ucb$ps_crams[reg];      /* Point to CRAM */
-    status   = ioc$cram_io( cram_ptr );     /* Read the word */
+    cram_ptr = ucb->ucb$ps_crams[reg]; /* Point to CRAM */
+    status = ioc$cram_io(cram_ptr); /* Read the word */
     data = cram_ptr->cram$q_rdata >> cram_init[reg].shift & 0xFFFF;
 
 #ifdef TRACE_DATA_TOO
     TRACE( 0x05400000 + (reg<<16) + data ); /* Word read */
 #endif
 
-    return( data );             /* Send back the data */
+    return (data); /* Send back the data */
 
 }
-
 
 
 /* OUT - This routine is used to write a byte to a CSR.
@@ -8384,22 +8161,21 @@ WORD inpw( DQ_UCB *ucb, int reg )
  *
  */
 
-void out( DQ_UCB *ucb, int reg, BYTE data )
+void out(DQ_UCB *ucb, int reg, BYTE data)
 
 {
 
-    CRAM  *cram_ptr;                /* Pointer to the CRAM */
-    int   status;               /* Returned status */
+    CRAM *cram_ptr; /* Pointer to the CRAM */
+    int status; /* Returned status */
 
-    cram_ptr = ucb->ucb$ps_crams[reg];      /* Get correct CRAM */
+    cram_ptr = ucb->ucb$ps_crams[reg]; /* Get correct CRAM */
     cram_ptr->cram$q_wdata = data << cram_init[reg].shift;
     /* Position data */
-    status   = ioc$cram_io( cram_ptr );     /* Perform the write */
+    status = ioc$cram_io(cram_ptr); /* Perform the write */
 
     TRACE( 0x06000000 + (reg<<16) + data ); /* Byte written */
 
 }
-
 
 
 /* OUTW - This routine is used to write a word of data to a CSR.
@@ -8414,24 +8190,23 @@ void out( DQ_UCB *ucb, int reg, BYTE data )
  *
  */
 
-void outw( DQ_UCB *ucb, int reg, WORD data )
+void outw(DQ_UCB *ucb, int reg, WORD data)
 
 {
 
-    CRAM  *cram_ptr;                /* Pointer to CRAM */
-    int   status;               /* Routine status */
+    CRAM *cram_ptr; /* Pointer to CRAM */
+    int status; /* Routine status */
 
-    cram_ptr = ucb->ucb$ps_crams[reg];      /* Point to the CRAM */
+    cram_ptr = ucb->ucb$ps_crams[reg]; /* Point to the CRAM */
     cram_ptr->cram$q_wdata = data << cram_init[reg].shift;
     /* Position the data */
-    status   = ioc$cram_io( cram_ptr );     /* Write the word */
+    status = ioc$cram_io(cram_ptr); /* Write the word */
 
 #ifdef TRACE_DATA_TOO
     TRACE( 0x06400000 + (reg<<16) + data ); /* Word written */
 #endif
 
 }
-
 
 
 /* OUTW_T - This routine is used to write a word of ATAPI packet data to a CSR.
@@ -8453,17 +8228,17 @@ void outw( DQ_UCB *ucb, int reg, WORD data )
  *
  */
 
-void outw_t( DQ_UCB *ucb, int reg, WORD data )
+void outw_t(DQ_UCB *ucb, int reg, WORD data)
 
 {
 
-    CRAM  *cram_ptr;                /* Pointer to CRAM */
-    int   status;               /* Routine status */
+    CRAM *cram_ptr; /* Pointer to CRAM */
+    int status; /* Routine status */
 
-    cram_ptr = ucb->ucb$ps_crams[reg];      /* Point to the CRAM */
+    cram_ptr = ucb->ucb$ps_crams[reg]; /* Point to the CRAM */
     cram_ptr->cram$q_wdata = data << cram_init[reg].shift;
     /* Position the data */
-    status   = ioc$cram_io( cram_ptr );     /* Write the word */
+    status = ioc$cram_io(cram_ptr); /* Write the word */
 
     TRACE( 0x06800000 + (reg<<16) + data ); /* ATAPI packet word written */
 
@@ -8481,17 +8256,17 @@ void outw_t( DQ_UCB *ucb, int reg, WORD data )
  *
  */
 
-void outl( DQ_UCB *ucb, int reg, int data )
+void outl(DQ_UCB *ucb, int reg, int data)
 
 {
 
-    CRAM  *cram_ptr;                /* Pointer to CRAM */
-    int   status;               /* Routine status */
+    CRAM *cram_ptr; /* Pointer to CRAM */
+    int status; /* Routine status */
 
-    cram_ptr = ucb->ucb$ps_crams[reg];      /* Point to the CRAM */
+    cram_ptr = ucb->ucb$ps_crams[reg]; /* Point to the CRAM */
     cram_ptr->cram$q_wdata = data << cram_init[reg].shift;
     /* Position the data */
-    status   = ioc$cram_io( cram_ptr );     /* Write the word */
+    status = ioc$cram_io(cram_ptr); /* Write the word */
 
 #ifdef TRACE_DATA_TOO
     TRACE( 0x06440000 + (reg<<16) + data ); /* Word written */
@@ -8604,38 +8379,36 @@ void outl( DQ_UCB *ucb, int reg, int data )
  *---
  */
 
-int dq_qsrv_helper( int action,
-                    IRP *irp,
-                    uint32 *iost1,
-                    uint32 *iost2 )
+int dq_qsrv_helper(int action, IRP *irp, uint32 *iost1, uint32 *iost2)
 {
-    BUFIO       *buffer;
-    DT_UCB      *dt_ucb;
-    DTN         *dtn;
-    QSRV_PACKACK    *qp;
-    DTN         *scratch_dtn;
-    __int32     size;
-    unsigned int    status;
-    UCB         *ucb;
+    BUFIO *buffer;
+    DT_UCB *dt_ucb;
+    DTN *dtn;
+    QSRV_PACKACK *qp;
+    DTN *scratch_dtn;
+    __int32 size;
+    unsigned int status;
+    UCB *ucb;
 
-
-    switch ( action )
+    switch (action)
     {
     case QSRV_HLPR_ACT$C_C_PREP:
 
-        if ( irp->irp$v_qcntrl )
+        if (irp->irp$v_qcntrl)
         {
-            if ( irp->irp$v_fcode == IO$_PACKACK )
+            if (irp->irp$v_fcode == IO$_PACKACK)
             {
 
                 /* Allocate a non-paged pool buffer for the PACKACK return data */
 
-                status = exe_std$alononpaged( BUFIO$K_HDRLEN32 + QSRV_PACKACK$C_LENGTH, &size, ( void * ) &buffer );
-                if ( $FAIL( status ) )
+                status = exe_std$alononpaged(
+                             BUFIO$K_HDRLEN32 + QSRV_PACKACK$C_LENGTH, &size,
+                             (void *) &buffer);
+                if ($FAIL( status ))
                 {
                     *iost1 = SS$_INSFMEM;
                     *iost2 = 0;
-                    return ( SS$_INSFMEM );
+                    return (SS$_INSFMEM);
                 }
 
                 /* Initialize the buffer */
@@ -8645,39 +8418,39 @@ int dq_qsrv_helper( int action,
                 irp->irp$ps_bufio_pkt = buffer;
                 buffer->bufio$ps_uva32 = NULL;
                 buffer->bufio$b_type = DYN$C_BUFIO;
-                buffer->bufio$ps_pktdata = ( char * ) buffer + BUFIO$K_HDRLEN32;
-                qp = ( QSRV_PACKACK * ) buffer->bufio$ps_pktdata;
+                buffer->bufio$ps_pktdata = (char *) buffer + BUFIO$K_HDRLEN32;
+                qp = (QSRV_PACKACK *) buffer->bufio$ps_pktdata;
                 qp->qsrv_packack$l_controls = 0;
-                if ( irp->irp$v_bufio )
+                if (irp->irp$v_bufio)
                     qp->qsrv_packack$v_orig_bufio = 1;
                 irp->irp$v_bufio = 1;
                 irp->irp$l_bcnt = QSRV_PACKACK$C_LENGTH;
             }
         }
-        return ( SS$_NORMAL );
+        return (SS$_NORMAL);
         break;
 
     case QSRV_HLPR_ACT$C_C_POST:
 
-        if ( irp->irp$v_qcntrl )
+        if (irp->irp$v_qcntrl)
         {
-            if ( irp->irp$v_fcode == IO$_PACKACK )
+            if (irp->irp$v_fcode == IO$_PACKACK)
             {
 
                 /* If this is an IO$_PACKACK, then set things up */
 
                 ucb = irp->irp$l_ucb;
-                dt_ucb = ( DT_UCB * ) irp->irp$l_ucb;
-                if ( irp->irp$ps_bufio_pkt != 0 )
+                dt_ucb = (DT_UCB *) irp->irp$l_ucb;
+                if (irp->irp$ps_bufio_pkt != 0)
                 {
                     buffer = irp->irp$ps_bufio_pkt;
-                    qp = ( QSRV_PACKACK * ) buffer->bufio$ps_pktdata;
+                    qp = (QSRV_PACKACK *) buffer->bufio$ps_pktdata;
                     *iost1 &= 0xffff;
                     *iost2 = 0;
                     irp->irp$v_bufio = 0;
-                    if ( qp->qsrv_packack$v_orig_bufio )
+                    if (qp->qsrv_packack$v_orig_bufio)
                         irp->irp$v_bufio = 1;
-                    if ( qp->qsrv_packack$v_data_valid )
+                    if (qp->qsrv_packack$v_data_valid)
                     {
 
                         /* If we have valid data, then update the UCB */
@@ -8691,77 +8464,73 @@ int dq_qsrv_helper( int action,
                         dt_ucb->ucb$l_maxblock = qp->qsrv_packack$l_maxblock;
                         dt_ucb->ucb$l_maxbcnt = qp->qsrv_packack$l_maxbcnt;
                         dt_ucb->ucb$l_alloclass = qp->qsrv_packack$l_alloclass;
-                        dtn = ( DTN * ) &qp->qsrv_packack$r_dtn;
-                        if ( ( ucb->ucb$l_devchar2 & DEV$M_DTN ) != 0 )
-                            ioc$remove_device_type( ucb );
-                        if ( ( qp->qsrv_packack$l_devchar2 & DEV$M_DTN ) != 0 )
-                            ioc$add_device_type( &dtn->dtn$t_dtname_str[0],
-                                                 dtn->dtn$ib_dtname_len,
-                                                 ucb,
-                                                 &scratch_dtn );
-                        ucb->ucb$l_sts &= ~(    UCB$M_ONLINE|
-                                                UCB$M_VALID);
-                        qp->qsrv_packack$l_sts &= ( UCB$M_ONLINE|
-                                                    UCB$M_VALID);
+                        dtn = (DTN *) &qp->qsrv_packack$r_dtn;
+                        if ((ucb->ucb$l_devchar2 & DEV$M_DTN) != 0)
+                            ioc$remove_device_type(ucb);
+                        if ((qp->qsrv_packack$l_devchar2 & DEV$M_DTN) != 0)
+                            ioc$add_device_type(&dtn->dtn$t_dtname_str[0],
+                                                dtn->dtn$ib_dtname_len, ucb, &scratch_dtn);
+                        ucb->ucb$l_sts &= ~(UCB$M_ONLINE | UCB$M_VALID);
+                        qp->qsrv_packack$l_sts &= (UCB$M_ONLINE | UCB$M_VALID);
                         ucb->ucb$l_sts |= qp->qsrv_packack$l_sts;
                     }
-                    exe_std$deanonpaged( irp->irp$ps_bufio_pkt );
+                    exe_std$deanonpaged(irp->irp$ps_bufio_pkt);
                     irp->irp$ps_bufio_pkt = NULL;
                     irp->irp$l_boff = irp->irp$l_bcnt = 0;
                 }
-                return ( SS$_NORMAL );
+                return (SS$_NORMAL);
             }
-            return ( SS$_NORMAL );
+            return (SS$_NORMAL);
         }
-        return ( SS$_NORMAL );
+        return (SS$_NORMAL);
 
     case QSRV_HLPR_ACT$C_C_CLNUP:
 
-        if ( irp->irp$v_fcode == IO$_PACKACK )
+        if (irp->irp$v_fcode == IO$_PACKACK)
         {
 
             /* If this is an IO$_PACKACK, then set things up */
 
-            if ( irp->irp$ps_bufio_pkt != 0 )
+            if (irp->irp$ps_bufio_pkt != 0)
             {
                 buffer = irp->irp$ps_bufio_pkt;
-                qp = ( QSRV_PACKACK * ) buffer->bufio$ps_pktdata;
+                qp = (QSRV_PACKACK *) buffer->bufio$ps_pktdata;
                 irp->irp$v_bufio = 0;
-                if ( qp->qsrv_packack$v_orig_bufio )
+                if (qp->qsrv_packack$v_orig_bufio)
                     irp->irp$v_bufio = 1;
-                exe_std$deanonpaged( irp->irp$ps_bufio_pkt );
+                exe_std$deanonpaged(irp->irp$ps_bufio_pkt);
                 irp->irp$ps_bufio_pkt = NULL;
                 irp->irp$l_boff = irp->irp$l_bcnt = 0;
             }
         }
-        return ( SS$_NORMAL );
+        return (SS$_NORMAL);
 
     case QSRV_HLPR_ACT$C_S_PREP:
 
-        if ( irp->irp$v_qcntrl )
+        if (irp->irp$v_qcntrl)
         {
-            if ( irp->irp$v_func == IO$_PACKACK &&
-                    ( irp->irp$l_func & IO$M_QSRV_CLIENT_UPDATE ) != 0 )
+            if (irp->irp$v_func == IO$_PACKACK
+                    && (irp->irp$l_func & IO$M_QSRV_CLIENT_UPDATE) != 0)
             {
                 *iost1 = SS$_NORMAL;
                 *iost2 = 0;
-                return ( 0 );
+                return (0);
             }
         }
-        return ( SS$_NORMAL );
+        return (SS$_NORMAL);
 
     case QSRV_HLPR_ACT$C_S_POST:
 
-        if ( irp->irp$v_qcntrl )
+        if (irp->irp$v_qcntrl)
         {
-            if ( irp->irp$v_fcode == IO$_PACKACK )
+            if (irp->irp$v_fcode == IO$_PACKACK)
             {
                 ucb = irp->irp$l_ucb;
-                dt_ucb = ( DT_UCB * ) irp->irp$l_ucb;
-                if ( irp->irp$ps_bufio_pkt != 0 )
+                dt_ucb = (DT_UCB *) irp->irp$l_ucb;
+                if (irp->irp$ps_bufio_pkt != 0)
                 {
                     buffer = irp->irp$ps_bufio_pkt;
-                    qp = ( QSRV_PACKACK * ) buffer->bufio$ps_pktdata;
+                    qp = (QSRV_PACKACK *) buffer->bufio$ps_pktdata;
                     qp->qsrv_packack$v_data_valid = 1;
                     qp->qsrv_packack$l_devchar2 = ucb->ucb$l_devchar2;
                     qp->qsrv_packack$b_devclass = ucb->ucb$b_devclass;
@@ -8774,20 +8543,20 @@ int dq_qsrv_helper( int action,
                     qp->qsrv_packack$l_maxblock = dt_ucb->ucb$l_maxblock;
                     qp->qsrv_packack$l_maxbcnt = dt_ucb->ucb$l_maxbcnt;
                     qp->qsrv_packack$l_alloclass = dt_ucb->ucb$l_alloclass;
-                    if ( ( ucb->ucb$l_devchar2 & DEV$M_DTN ) != 0 )
-                        dtn = ( DTN * ) &qp->qsrv_packack$r_dtn;
-                    memcpy( &dtn->dtn$t_dtname,
-                            &( ( DTN * )( ucb->ucb$ps_dtn ) )->dtn$t_dtname,
-                            sizeof ( ( ( DTN * )( ucb->ucb$ps_dtn ) )->dtn$t_dtname ) );
+                    if ((ucb->ucb$l_devchar2 & DEV$M_DTN) != 0)
+                        dtn = (DTN *) &qp->qsrv_packack$r_dtn;
+                    memcpy(&dtn->dtn$t_dtname,
+                           &((DTN *) (ucb->ucb$ps_dtn))->dtn$t_dtname,
+                           sizeof(((DTN *) (ucb->ucb$ps_dtn))->dtn$t_dtname));
                     *iost1 &= 0xffff;
-                    *iost1 |= QSRV_PACKACK$C_LENGTH<<16;
+                    *iost1 |= QSRV_PACKACK$C_LENGTH << 16;
                     *iost2 = 0;
                 }
             }
         }
-        return ( SS$_NORMAL );
+        return (SS$_NORMAL);
     case QSRV_HLPR_ACT$C_S_CLNUP:
 
-        return ( SS$_NORMAL );
+        return (SS$_NORMAL);
     }
 }

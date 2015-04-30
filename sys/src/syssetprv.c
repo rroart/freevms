@@ -1,13 +1,13 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
 
-#include<ssdef.h>
-#include<system_data_cells.h>
+#include <ssdef.h>
+#include <system_data_cells.h>
 
 asmlinkage int exe$setprv(char enbflg, struct _generic_64 *prvadr, char prmflg, struct _generic_64 *prvprv)
 {

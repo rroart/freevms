@@ -1,18 +1,18 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file syscredel.c
    \brief MM create or delete
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/config.h>
-#include<linux/unistd.h>
-#include<linux/linkage.h>
-#include<linux/sched.h>
-#include<linux/vmalloc.h>
+#include <linux/config.h>
+#include <linux/unistd.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
+#include <linux/vmalloc.h>
 #include <system_data_cells.h>
 #include <linux/mm.h>
 #include <ipldef.h>

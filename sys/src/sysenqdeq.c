@@ -1,27 +1,27 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 // Some lines/parts may be taken from lustre and modified. (Required line)
 
-#include<linux/linkage.h>
-#include<asm/current.h>
-#include<system_data_cells.h>
-#include<ipl.h>
-#include<lckdef.h>
-#include<lckctxdef.h>
-#include<lksbdef.h>
-#include<misc.h>
-#include<ssdef.h>
-#include<starlet.h>
-#include<acbdef.h>
-#include<ipldef.h>
-#include<rsbdef.h>
-#include<lkbdef.h>
-#include<pridef.h>
-#include<descrip.h>
-#include<cdrpdef.h>
+#include <linux/linkage.h>
+#include <asm/current.h>
+#include <system_data_cells.h>
+#include <ipl.h>
+#include <lckdef.h>
+#include <lckctxdef.h>
+#include <lksbdef.h>
+#include <misc.h>
+#include <ssdef.h>
+#include <starlet.h>
+#include <acbdef.h>
+#include <ipldef.h>
+#include <rsbdef.h>
+#include <lkbdef.h>
+#include <pridef.h>
+#include <descrip.h>
+#include <cdrpdef.h>
 #include <queue.h>
 #include <exe_routines.h>
 #include <misc_routines.h>

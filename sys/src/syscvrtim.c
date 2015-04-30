@@ -5,45 +5,44 @@
 
 /*
 
-       VMSTIME.C  v1.1
+ VMSTIME.C  v1.1
 
-       Author: Paul Nankervis
+ Author: Paul Nankervis
 
-       Please send bug reports or requests for enhancement
-       or improvement via email to:     PaulNank@au1.ibm.com
+ Please send bug reports or requests for enhancement
+ or improvement via email to:     PaulNank@au1.ibm.com
 
 
-       This module contains versions of the VMS time routines
-       sys$numtim(), sys$asctim() and friends... They are
-       intended to be compatible with the routines of the same
-       name on a VMS system (so descriptors feature regularly!)
+ This module contains versions of the VMS time routines
+ sys$numtim(), sys$asctim() and friends... They are
+ intended to be compatible with the routines of the same
+ name on a VMS system (so descriptors feature regularly!)
 
-       This code relies on being able to manipluate day numbers
-       and times using 32 bit arithmetic to crack a VMS quadword
-       byte by byte. If your C compiler doesn't have 32 bit int
-       fields give up now! On a 64 bit systems this code could
-       be modified to do 64 bit operations directly....
+ This code relies on being able to manipluate day numbers
+ and times using 32 bit arithmetic to crack a VMS quadword
+ byte by byte. If your C compiler doesn't have 32 bit int
+ fields give up now! On a 64 bit systems this code could
+ be modified to do 64 bit operations directly....
 
-       One advantage of doing arihmetic byte by byte is that
-       the code does not depend on what 'endian' the target
-       machine is - it will always treat bytes in the same order!
-       (Hopefully VMS time bytes will always be in the same order!)
+ One advantage of doing arihmetic byte by byte is that
+ the code does not depend on what 'endian' the target
+ machine is - it will always treat bytes in the same order!
+ (Hopefully VMS time bytes will always be in the same order!)
 
-       A couple of stupid questions to go on with:-
-           o OK, I give up! What is the difference between a zero
-             date and a zero delta time?
-           o Anyone notice that the use of 16 bit words in
-             sys$numtim restricts delta times to 65535 days?
+ A couple of stupid questions to go on with:-
+ o OK, I give up! What is the difference between a zero
+ date and a zero delta time?
+ o Anyone notice that the use of 16 bit words in
+ sys$numtim restricts delta times to 65535 days?
 
-                                       Paul Nankervis
+ Paul Nankervis
 
-*/
+ */
 
-/* Some mods by Roar Thronæs */
+/* Some mods by Roar Thronï¿½s */
 
 #include <linux/time.h>               /* C header for $GETTIM to find time */
 #include <linux/string.h>
-//#include <stdlib.h>
 #include <sys$routines.h>   /* Our header file! */
 #include <ssdef.h>
 #include <descrip.h>
@@ -62,12 +61,12 @@
 /*   365        */
 #define OFFSET_DAYS     94187
 /*   ((1858_1601)*365) + ((1858_1601)/4) - ((1858_1601)/100)
-   + ((1858_1601)/400) + 320
-        OFFSET FROM 1/1/1601 TO 17/11/1858  */
+ + ((1858_1601)/400) + 320
+ OFFSET FROM 1/1/1601 TO 17/11/1858  */
 #define BASE_YEAR       1601
 
 /* combine_date_time() is an internal routine to put date and time into a
-   quadword - basically the opposite of lib_day() .... */
+ quadword - basically the opposite of lib_day() .... */
 
 struct TIME
 {
@@ -79,9 +78,10 @@ struct TIME
 const char month_names[] = "-JAN-FEB-MAR-APR-MAY-JUN-JUL-AUG-SEP-OCT-NOV-DEC-";
 
 static const unsigned short month_end[] =
-{0,31,59,90,120,151,181,212,243,273,304,334,365};
+{ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 };
 
-unsigned long sys$__combine_date_time(int days,struct TIME *timadr,int day_time)
+unsigned long sys$__combine_date_time(int days, struct TIME *timadr,
+                                      int day_time)
 {
     if (day_time >= TIMESIZE)
     {
@@ -92,7 +92,7 @@ unsigned long sys$__combine_date_time(int days,struct TIME *timadr,int day_time)
 
         /* Put days into quad timbuf... */
 
-        unsigned long count,time;
+        unsigned long count, time;
         unsigned char *ptr;
 
         count = 8;
@@ -135,15 +135,15 @@ unsigned long sys$__combine_date_time(int days,struct TIME *timadr,int day_time)
     }
 }
 
-/* borrowed... -Roar Thronæs */
+/* borrowed... -Roar Thronï¿½s */
 
 /* lib_day() is a routine to crack quadword into day number and time */
 
 unsigned long lib$day(long *days, const void *timadra, int *day_time)
 {
-    const struct TIME *timadr = (const struct TIME *)timadra;
+    const struct TIME *timadr = (const struct TIME *) timadra;
 
-    register unsigned date,time,count;
+    register unsigned date, time, count;
     register const unsigned char *srcptr;
     register unsigned char *dstptr;
     struct TIME wrktim;
@@ -151,7 +151,7 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
 
     /* If no time specified get current using gettim() */
 
-    if (timadr == NULL)
+    if (timadr == NULL )
     {
         register unsigned sts;
         sts = exe$gettim(&wrktim);
@@ -188,7 +188,6 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
         }
     }
 
-
     /* Throw away the unrequired time precision */
 
     count = 8;
@@ -201,7 +200,6 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
         time %= TIMEBASE;
     }
     while (--count > 0);
-
 
     /* Seperate the date and time */
 
@@ -221,12 +219,14 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
     if (delta)
     {
         *days = -(int) date;
-        if (day_time != NULL) *day_time = -(int) time;
+        if (day_time != NULL )
+            *day_time = -(int) time;
     }
     else
     {
         *days = date;
-        if (day_time != NULL) *day_time = time;
+        if (day_time != NULL )
+            *day_time = time;
     }
 
     return SS$_NORMAL;
@@ -236,11 +236,11 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
 
 unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
 {
-    const unsigned short * timbuf = (const unsigned short *)timbufa;
-    struct TIME *timadr = (struct TIME *)timadra;
+    const unsigned short * timbuf = (const unsigned short *) timbufa;
+    struct TIME *timadr = (struct TIME *) timadra;
 
     int delta = 0;
-    register unsigned sts,days,day_time;
+    register unsigned sts, days, day_time;
     sts = SS$_NORMAL;
 
     /* lib_cvt_vectim packs the seven date/time components into a quadword... */
@@ -252,7 +252,7 @@ unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
     }
     else
     {
-        register leap = 0,year = timbuf[0],month = timbuf[1];
+        register leap = 0, year = timbuf[0], month = timbuf[1];
         if (month >= 2)
         {
             if ((year % 4) == 0)
@@ -271,11 +271,12 @@ unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
             }
         }
         days = timbuf[2];
-        if (year >= 1858 && year <= 9999 && month >= 1 &&
-                month <= 12 && days >= 1)
+        if (year >= 1858 && year <= 9999 && month >= 1 && month <= 12
+                && days >= 1)
         {
             days += month_end[month - 1];
-            if (month > 2) days += leap;
+            if (month > 2)
+                days += leap;
             if (days <= month_end[month] + leap)
             {
                 year -= BASE_YEAR;
@@ -292,22 +293,21 @@ unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
             sts = SS$_IVTIME;
         }
     }
-    if (timbuf[3] > 23 || timbuf[4] > 59 ||
-            timbuf[5] > 59 || timbuf[6] > 99)
+    if (timbuf[3] > 23 || timbuf[4] > 59 || timbuf[5] > 59 || timbuf[6] > 99)
     {
         sts = SS$_IVTIME;
     }
     if (sts & 1)
     {
-        day_time = timbuf[3] * 360000 + timbuf[4] * 6000 +
-                   timbuf[5] * 100 + timbuf[6];
-        sts = sys$__combine_date_time(days,timadr,day_time);
+        day_time = timbuf[3] * 360000 + timbuf[4] * 6000 + timbuf[5] * 100
+                   + timbuf[6];
+        sts = sys$__combine_date_time(days, timadr, day_time);
         if (delta)
         {
 
             /* We have to 2's complement delta times - sigh!! */
 
-            register unsigned count,time;
+            register unsigned count, time;
             register unsigned char *ptr;
             count = 8;
             ptr = timadr->time;
@@ -324,15 +324,13 @@ unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
     return sts;
 }
 
-
 /* sys_asctim() converts quadword to ascii... */
 
-int exe$asctim(unsigned short *timlen,
-               struct dsc$descriptor *timbuf,
+int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf,
                const void *timadra, unsigned long cvtflg)
 {
-    const struct TIME *timadr = (const struct TIME *)timadra;
-    long count,timval;
+    const struct TIME *timadr = (const struct TIME *) timadra;
+    long count, timval;
     unsigned short wrktim[7];
     long length = timbuf->dsc$w_length;
     char *chrptr = timbuf->dsc$a_pointer;
@@ -388,8 +386,9 @@ int exe$asctim(unsigned short *timlen,
                 *chrptr++ = '0' + (timval % 10);
                 length--;
             }
-            if ((count = length) > 5) count = 5;
-            memcpy(chrptr,month_names + (wrktim[1] * 4 - 4),count);
+            if ((count = length) > 5)
+                count = 5;
+            memcpy(chrptr, month_names + (wrktim[1] * 4 - 4), count);
             length -= count;
             chrptr += count;
             timval = *wrktim;
@@ -437,7 +436,8 @@ int exe$asctim(unsigned short *timlen,
     do
     {
         timval = wrktim[count];
-        if (length >= 1) *chrptr++ = '0' + (timval / 10);
+        if (length >= 1)
+            *chrptr++ = '0' + (timval / 10);
         if (length >= 2)
         {
             *chrptr++ = '0' + (timval % 10);
@@ -464,7 +464,8 @@ int exe$asctim(unsigned short *timlen,
 
     /* We've done it - time to return length... */
 
-    if (timlen != NULL) *timlen = timbuf->dsc$w_length - length;
+    if (timlen != NULL )
+        *timlen = timbuf->dsc$w_length - length;
     return SS$_NORMAL;
 }
 
@@ -474,13 +475,12 @@ static const char time_sep[] = "::.";
 
 int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
 {
-    struct TIME *timadr = (struct TIME *)timadra;
+    struct TIME *timadr = (struct TIME *) timadra;
 
     register length = timbuf->dsc$w_length;
     register char *chrptr = timbuf->dsc$a_pointer;
     unsigned short wrktim[7];
-    int num,tf;
-
+    int num, tf;
 
     /* Skip leading spaces... */
 
@@ -510,8 +510,9 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
 
         /* Get current time for defaults... */
 
-        exe$numtim(wrktim,NULL);
-        if (num >= 0) wrktim[2] = num;
+        exe$numtim(wrktim, NULL );
+        if (num >= 0)
+            wrktim[2] = num;
         num = 0;
         if (--length >= 3 && *chrptr != '-')
         {
@@ -519,7 +520,8 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
             num = 1;
             while (num <= 12)
             {
-                if (memcmp(chrptr,mn,3) == 0) break;
+                if (memcmp(chrptr, mn, 3) == 0)
+                    break;
                 mn += 4;
                 num++;
             }
@@ -576,7 +578,8 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
             }
             while (--length > 0 && *chrptr >= '0' && *chrptr <= '9');
             wrktim[3 + tf] = num;
-            if (num > 59) wrktim[1] = 13;
+            if (num > 59)
+                wrktim[1] = 13;
         }
         if (length > 0 && *chrptr == time_sep[tf])
         {
@@ -615,7 +618,7 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
 
     if (length == 0)
     {
-        return lib$cvt_vectim(wrktim,timadr);
+        return lib$cvt_vectim(wrktim, timadr);
     }
     else
     {
@@ -623,21 +626,20 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
     }
 }
 
-
-
 /* sys_numtim() takes quadword and breaks it into a seven word time buffer */
 
-static const unsigned char month_days[] = {31,29,31,30,31,30,31,31,30,31,30,31};
+static const unsigned char month_days[] =
+{ 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 int exe$numtim(unsigned short timbuf[7], struct TIME *timadra)
 {
-    struct TIME *timadr = (struct TIME *)timadra;
-    register date,time;
+    struct TIME *timadr = (struct TIME *) timadra;
+    register date, time;
 
     /* Use lib_day to crack time into date/time... */
 
     {
-        int days,day_time;
+        int days, day_time;
         register unsigned sts;
         sts = lib$day(&days, timadr, &day_time);
         if ((sts & 1) == 0)
@@ -652,9 +654,9 @@ int exe$numtim(unsigned short timbuf[7], struct TIME *timadra)
 
     if (date < 0 || time < 0)
     {
-        timbuf[2] = -date;      /* Days */
-        timbuf[1] = 0;          /* Month */
-        timbuf[0] = 0;          /* Year */
+        timbuf[2] = -date; /* Days */
+        timbuf[1] = 0; /* Month */
+        timbuf[0] = 0; /* Year */
         time = -time;
 
     }
@@ -663,24 +665,26 @@ int exe$numtim(unsigned short timbuf[7], struct TIME *timadra)
 
         /* Date... */
 
-        register year,month;
+        register year, month;
         date += OFFSET_DAYS;
         year = BASE_YEAR + (date / QUAD_CENTURY_DAYS) * 400;
         date %= QUAD_CENTURY_DAYS;
 
         /* Kludge century division - last century in quad is longer!! */
 
-        if ((month = date / CENTURY_DAYS) == 4) month = 3;
+        if ((month = date / CENTURY_DAYS) == 4)
+            month = 3;
         date -= month * CENTURY_DAYS;
         year += month * 100;
 
         /* Use the same technique to find out the quad year and year -
-           last year in quad is longer!! */
+         last year in quad is longer!! */
 
         year += (date / QUAD_YEAR_DAYS) * 4;
         date %= QUAD_YEAR_DAYS;
 
-        if ((month = date / YEAR_DAYS) == 4) month = 3;
+        if ((month = date / YEAR_DAYS) == 4)
+            month = 3;
         date -= month * YEAR_DAYS;
         year += month;
 
@@ -694,7 +698,8 @@ int exe$numtim(unsigned short timbuf[7], struct TIME *timadra)
             }
             else
             {
-                if ((year % 100) == 0 && (year % 400) != 0) date++;
+                if ((year % 100) == 0 && (year % 400) != 0)
+                    date++;
             }
         }
         /* Figure out what month it is... */
@@ -711,19 +716,19 @@ int exe$numtim(unsigned short timbuf[7], struct TIME *timadra)
 
         /* Return date results... */
 
-        timbuf[2] = date;       /* Days */
-        timbuf[1] = month;      /* Month */
-        timbuf[0] = year;       /* Year */
+        timbuf[2] = date; /* Days */
+        timbuf[1] = month; /* Month */
+        timbuf[0] = year; /* Year */
     }
 
     /* Return time... */
 
-    timbuf[6] = time % 100;     /* Hundredths */
+    timbuf[6] = time % 100; /* Hundredths */
     time /= 100;
-    timbuf[5] = time % 60;      /* Seconds */
+    timbuf[5] = time % 60; /* Seconds */
     time /= 60;
-    timbuf[4] = time % 60;      /* Minutes */
-    timbuf[3] = time / 60;      /* Hours */
+    timbuf[4] = time % 60; /* Minutes */
+    timbuf[3] = time / 60; /* Hours */
 
     return SS$_NORMAL;
 }

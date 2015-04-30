@@ -1,16 +1,16 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
-#include<descrip.h>
-#include<system_data_cells.h>
-#include<ssdef.h>
-#include<stdarg.h>
+#include <linux/linkage.h>
+#include <descrip.h>
+#include <system_data_cells.h>
+#include <ssdef.h>
+#include <stdarg.h>
 #include <exe_routines.h>
 #include <linux/string.h>
-#include<linux/kernel.h>
+#include <linux/kernel.h>
 
 asmlinkage int exe$faol(void * ctrstr , short int * outlen , void * outbuf , int * prmlst)
 {

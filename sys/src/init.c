@@ -1,12 +1,12 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #if 0
 is this the erroneous one?
-#include<linux/vmalloc.h>
-#include<system_data_cells.h>
+#include <linux/vmalloc.h>
+#include <system_data_cells.h>
 
 void __init vms_mem(void)
 {

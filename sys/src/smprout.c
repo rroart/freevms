@@ -1,14 +1,14 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/kernel.h>
-#include<linux/sched.h>
-#include<asm/hw_irq.h>
+#include <linux/kernel.h>
+#include <linux/sched.h>
+#include <asm/hw_irq.h>
 
-#include<cpudef.h>
-#include<system_data_cells.h>
+#include <cpudef.h>
+#include <system_data_cells.h>
 
 #include <smp_routines.h>
 

@@ -1,27 +1,27 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<mytypes.h>
+#include <mytypes.h>
 
-#include<fiddef.h>
-#include<atrdef.h>
-#include<descrip.h>
-#include<fabdef.h>
-#include<fatdef.h>
-#include<fibdef.h>
-#include<iodef.h>
-#include<namdef.h>
-#include<ssdef.h>
-#include<starlet.h>
-#include<rms.h>
-#include<uicdef.h>
-#include<fh2def.h>
+#include <fiddef.h>
+#include <atrdef.h>
+#include <descrip.h>
+#include <fabdef.h>
+#include <fatdef.h>
+#include <fibdef.h>
+#include <iodef.h>
+#include <namdef.h>
+#include <ssdef.h>
+#include <starlet.h>
+#include <rms.h>
+#include <uicdef.h>
+#include <fh2def.h>
 #include <misc.h>
 
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
+#include <string.h>
 
 // change to w_[df]id_rvn from b_ later
 

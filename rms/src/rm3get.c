@@ -1,13 +1,12 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/config.h>
-#include<linux/linkage.h>
-#include<linux/string.h>
+#include <linux/config.h>
+#include <linux/linkage.h>
+#include <linux/string.h>
 
-//#include <stdio.h>
 #include <linux/ctype.h>
 
 #include <mytypes.h>
@@ -42,7 +41,7 @@
 #include <ircdef.h>
 #include <ifbdef.h>
 
-//#include <rms.h>
+//#include "rms.h"
 #include "cache.h"
 #if 0
 #include "access.h"

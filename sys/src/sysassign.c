@@ -1,26 +1,26 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file sysassign.c
    \brief QIO assign channel - TODO still more doc
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/config.h>
+#include <linux/config.h>
 
-#include<starlet.h>
-#include<iodef.h>
-#include<ssdef.h>
-#include<misc.h>
-#include<irpdef.h>
-#include<ucbdef.h>
-#include<ccbdef.h>
+#include <starlet.h>
+#include <iodef.h>
+#include <ssdef.h>
+#include <misc.h>
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ccbdef.h>
 #include <ddtdef.h>
-#include<system_data_cells.h>
+#include <system_data_cells.h>
 #include <ioc_routines.h>
-#include<linux/linkage.h>
+#include <linux/linkage.h>
 #include <sch_routines.h>
 #include <ioc_routines.h>
 

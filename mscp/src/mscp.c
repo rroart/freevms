@@ -1,38 +1,38 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<cdtdef.h>
-#include<pdtdef.h>
+#include <cdtdef.h>
+#include <pdtdef.h>
 
-#include<acbdef.h>
-#include<aqbdef.h>
-#include<cdrpdef.h>
-#include<ddbdef.h>
-#include<dyndef.h>
-#include<descrip.h>
-#include<iodef.h>
-#include<iosbdef.h>
-#include<hrbdef.h>
-#include<irpdef.h>
-#include<misc.h>
-#include<mscpdef.h>
-#include<sbdef.h>
-#include<scsdef.h>
-#include<ssdef.h>
-#include<ucbdef.h>
-#include<vcbdef.h>
-#include<system_data_cells.h>
+#include <acbdef.h>
+#include <aqbdef.h>
+#include <cdrpdef.h>
+#include <ddbdef.h>
+#include <dyndef.h>
+#include <descrip.h>
+#include <iodef.h>
+#include <iosbdef.h>
+#include <hrbdef.h>
+#include <irpdef.h>
+#include <misc.h>
+#include <mscpdef.h>
+#include <sbdef.h>
+#include <scsdef.h>
+#include <ssdef.h>
+#include <ucbdef.h>
+#include <vcbdef.h>
+#include <system_data_cells.h>
 #include <queue.h>
 #include <exe_routines.h>
 #include <ioc_routines.h>
 #include <misc_routines.h>
 #include <scs_routines.h>
 
-#include<linux/vmalloc.h>
+#include <linux/vmalloc.h>
 #include <linux/slab.h>
-#include<starlet.h>
+#include <starlet.h>
 
 void mscpmyerr(void)
 {

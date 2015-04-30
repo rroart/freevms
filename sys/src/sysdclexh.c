@@ -1,12 +1,12 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
-#include<misc.h>
-#include<ssdef.h>
-#include<system_data_cells.h>
+#include <linux/linkage.h>
+#include <misc.h>
+#include <ssdef.h>
+#include <system_data_cells.h>
 
 asmlinkage int exe$dclexh(long handler)
 {

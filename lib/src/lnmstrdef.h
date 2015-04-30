@@ -1,10 +1,10 @@
 #ifndef LNMSTRDEF_H
 #define LNMSTRDEF_H
 
-/* Author: Roar Thronæs */
+/* Author: Roar Thronï¿½s */
 
-#include<sysgen.h>
-#include<linux/linkage.h>
+#include <sysgen.h>
+#include <linux/linkage.h>
 
 #define LNM$M_NO_DELETE 0x10 /* for use in lnmb. the rest is decl otherplace */
 

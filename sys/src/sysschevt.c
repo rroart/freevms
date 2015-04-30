@@ -1,25 +1,25 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file sysschevt.c
    \brief system scheduling and timer
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
-#include<ssdef.h>
-#include<tqedef.h>
-#include<cpudef.h>
-#include<dyndef.h>
-#include<system_data_cells.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
+#include <ssdef.h>
+#include <tqedef.h>
+#include <cpudef.h>
+#include <dyndef.h>
+#include <system_data_cells.h>
 #include <ipl.h>
-#include<internals.h>
+#include <internals.h>
 #include <statedef.h>
-#include<linux/vmalloc.h>
-#include<linux/smp.h>
+#include <linux/vmalloc.h>
+#include <linux/smp.h>
 #include <linux/slab.h>
 #include <exe_routines.h>
 

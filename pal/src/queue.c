@@ -1,11 +1,11 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file queue.c
    \brief CPU queue instructions
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
  */
 
 /* Not implemented: atomicity */
@@ -15,9 +15,9 @@
 
 /* These are VARM based. 32 bits */
 
-/* Author: Roar Thronæs */
+/* Author: Roar Thronï¿½s */
 
-#include<queue.h>
+#include <queue.h>
 
 #ifdef __i386__
 #define OFFSET 4
@@ -27,7 +27,7 @@
 #define OFFSET 8
 #endif
 
-#include<linux/kernel.h>
+#include <linux/kernel.h>
 
 long inline mycli(void);
 void inline mysti(long flags);

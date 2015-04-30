@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <linux/config.h>
 #include <linux/compiler.h>
@@ -9,10 +9,10 @@
 #include <linux/mm.h>
 #include <linux/bootmem.h>
 
-#include<irpdef.h>
-#include<npool_data.h>
-#include<ssdef.h>
-#include<system_data_cells.h>
+#include <irpdef.h>
+#include <npool_data.h>
+#include <ssdef.h>
+#include <system_data_cells.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <mmg_routines.h>

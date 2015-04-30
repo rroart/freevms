@@ -1,15 +1,15 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
-#include<phddef.h>
-#include<sysgen.h>
-#include<system_data_cells.h>
-#include<va_rangedef.h>
-#include<wsldef.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
+#include <phddef.h>
+#include <sysgen.h>
+#include <system_data_cells.h>
+#include <va_rangedef.h>
+#include <wsldef.h>
 
 int exe$adjwsl(signed int pagcnt, unsigned int *wsetlm)
 {

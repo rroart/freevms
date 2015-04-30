@@ -1,24 +1,24 @@
 /*
-    ****************************************************************
+ ****************************************************************
 
-        Copyright (c) 1992, Carnegie Mellon University
+ Copyright (c) 1992, Carnegie Mellon University
 
-        All Rights Reserved
+ All Rights Reserved
 
-    Permission  is  hereby  granted   to  use,  copy,  modify,  and
-    distribute  this software  provided  that the  above  copyright
-    notice appears in  all copies and that  any distribution be for
-    noncommercial purposes.
+ Permission  is  hereby  granted   to  use,  copy,  modify,  and
+ distribute  this software  provided  that the  above  copyright
+ notice appears in  all copies and that  any distribution be for
+ noncommercial purposes.
 
-    Carnegie Mellon University disclaims all warranties with regard
-    to this software.  In no event shall Carnegie Mellon University
-    be liable for  any special, indirect,  or consequential damages
-    or any damages whatsoever  resulting from loss of use, data, or
-    profits  arising  out of  or in  connection  with  the  use  or
-    performance of this software.
+ Carnegie Mellon University disclaims all warranties with regard
+ to this software.  In no event shall Carnegie Mellon University
+ be liable for  any special, indirect,  or consequential damages
+ or any damages whatsoever  resulting from loss of use, data, or
+ profits  arising  out of  or in  connection  with  the  use  or
+ performance of this software.
 
-    ****************************************************************
-*/
+ ****************************************************************
+ */
 //TITLE "XEDrv Address Resolution Protocol handler"
 //++
 // Module:
@@ -112,7 +112,6 @@
 // 1.1  21-Apr-86, Edit by VAF
 //  Phase II of flushing XPORT - use $FAO instead of XPORT string stuff.
 //--
-
 #if 0
 MODULE ARP( IDENT="1.9A",LANGUAGE(BLISS32),
             ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
@@ -123,9 +122,6 @@ MODULE ARP( IDENT="1.9A",LANGUAGE(BLISS32),
 #endif
 
 #include <starlet.h>
-//#include "tcpmacros.h"
-//LIBRARY "STRUCTURE";
-//LIBRARY "VMS";
 
 // not yet #include <cmuip/central/include/netxport.h>   // VMS peculiarities.
 #include "netvms.h"   // VMS peculiarities.
@@ -133,7 +129,6 @@ MODULE ARP( IDENT="1.9A",LANGUAGE(BLISS32),
 #include <cmuip/central/include/netconfig.h>   // Device interface specs.
 #include "cmuip.h" // needed before netdevices.h
 #include <cmuip/central/include/netdevices.h>  // Helpfull macros...
-
 #include "xedrv.h"
 #include "xearp.h"
 
@@ -147,26 +142,24 @@ MODULE ARP( IDENT="1.9A",LANGUAGE(BLISS32),
 
 // Externals used by this module
 
-                extern
-                IPACP_Info_Structure * IPACP_Interface;
-
+                extern IPACP_Info_Structure * IPACP_Interface;
 
 // NETMACLIB.OBJ
-extern     swapbytes();
+extern swapbytes();
 
 // NETDEVICES.OBJ
-extern  void    ASCII_HEX_BYTES();
-extern  void    ASCII_DEC_BYTES();
+extern void ASCII_HEX_BYTES();
+extern void ASCII_DEC_BYTES();
 
 // XEDRV.BLI
-extern     xe$xmit();
-extern     xe$arp_xmit();
+extern xe$xmit();
+extern xe$arp_xmit();
 
 //    STR$GET1_DX : ADDRESSING_MODE(GENERAL),
-extern     LIB$GET_VM ();
-extern     LIB$GET_VM_PAGE ();
-extern     LIB$FREE_VM ();
-extern     LIB$FREE_VM_PAGE ();
+extern LIB$GET_VM();
+extern LIB$GET_VM_PAGE();
+extern LIB$FREE_VM();
+extern LIB$FREE_VM_PAGE();
 
 extern long log_state;
 
@@ -174,31 +167,31 @@ extern long log_state;
 
 struct ARP_BLK
 {
-    unsigned short     AB_HWSIZE        ;   // Size of hardware address
-    unsigned short     AB_HDRLEN        ;   // ARP buffer header length
+    unsigned short AB_HWSIZE;   // Size of hardware address
+    unsigned short AB_HDRLEN;   // ARP buffer header length
     union
     {
-        unsigned short     AB_FLAGS     ;  // ARP flags
+        unsigned short AB_FLAGS;  // ARP flags
         struct
         {
-            unsigned    AB_SWAP_PAR  : 1;   // If HWTYPE, etc need to be swapped
-            unsigned    AB_SWAP_16       : 1;   // If 3MB-style word swapping needed
+            unsigned AB_SWAP_PAR :1;   // If HWTYPE, etc need to be swapped
+            unsigned AB_SWAP_16 :1;   // If 3MB-style word swapping needed
         };
     };
-    unsigned char    AB_HWADDR[ARP_HDW_LEN]; // Hardware address
-    unsigned int     AB_IPADDR      ;   // ARP IP address
+    unsigned char AB_HWADDR[ARP_HDW_LEN]; // Hardware address
+    unsigned int AB_IPADDR;   // ARP IP address
 #if 0
     $ALIGN(FULLWORD)
 #endif
-    unsigned char     AB_SWP_START  [0];    // Start of items to be swapped...
-    unsigned short     AB_HWTYPE        ;   // ARP hardware type code
-    unsigned short     AB_IPTYPE        ;   // ARP/IP hardware protocol code
-    unsigned short     AB_RQUEST        ;   // Code for ARP REQUEST
-    unsigned short     AB_REPLY     ;   // Code for ARP REPLY
+    unsigned char AB_SWP_START[0];    // Start of items to be swapped...
+    unsigned short AB_HWTYPE;   // ARP hardware type code
+    unsigned short AB_IPTYPE;   // ARP/IP hardware protocol code
+    unsigned short AB_RQUEST;   // Code for ARP REQUEST
+    unsigned short AB_REPLY;   // Code for ARP REPLY
 #if 0
     $ALIGN(FULLWORD)            // Don't let SWAPBYTES get carried away
 #endif
-    unsigned char     AB_SWP_END        [0];// End of items to be swapped...
+    unsigned char AB_SWP_END[0];            // End of items to be swapped...
 };
 
 #define ARP_BLK_LEN sizeof(struct ARP_BLK)
@@ -212,27 +205,26 @@ MACRO ARP_BLK = BLOCK->ARP_BLK_LEN FIELD(ARP_BLK_FIELDS) %;
 #define     ARP_EXP_TIME   10*60*100    // 10 minutes for cache timeout
 #define     ARP_EXP_HALF   ARP_EXP_TIME/2 // 5 minutes to refresh cache entry
 #define     ARP_RFTIME   30*100 // Minimum interval between refresh attempts
-
 // Structure of an ARP cache entry
 
 struct ACACHE_BLK
 {
-    void  *   AC$NEXT   ;   // Next entry on hash chain
-    unsigned long long     AC$EXPIRE    ; // Expiration time of this entry
-    unsigned int     AC$RFTIME  ; // Next time to try refresh
-    void *     AC$DEVICE    ;   // pntr to dev_config entry of this address
-    unsigned int     AC$IPADDR  ;   // IP address
-    void *     AC$SAVEQB    ;   // Pointer to saved IP packet if nonzero
+    void * AC$NEXT;   // Next entry on hash chain
+    unsigned long long AC$EXPIRE; // Expiration time of this entry
+    unsigned int AC$RFTIME; // Next time to try refresh
+    void * AC$DEVICE;   // pntr to dev_config entry of this address
+    unsigned int AC$IPADDR;   // IP address
+    void * AC$SAVEQB;   // Pointer to saved IP packet if nonzero
     union
     {
-        unsigned short     AC$FLAGS ;   // Status flags
+        unsigned short AC$FLAGS;   // Status flags
         struct
         {
-            unsigned        AC$VALID     : 1;   // Nonzero if this entry valid
+            unsigned AC$VALID :1;   // Nonzero if this entry valid
         };
     };
-    unsigned short     AC$HWSIZE    ;   // Length of this address
-    unsigned char    AC$HWADDR[ARP_HDW_LEN]; // Physical address
+    unsigned short AC$HWSIZE;   // Length of this address
+    unsigned char AC$HWADDR[ARP_HDW_LEN]; // Physical address
 };
 #define ACACHE_LEN sizeof(struct ACACHE_BLK)
 #if 0
@@ -243,15 +235,13 @@ MACRO ACACHE_BLK = BLOCK->ACACHE_LEN FIELD(ACACHE_FIELDS) %;
 
 #define     ARP_HSHLEN   128        // Length of hash table
 #define     ARP_HSHAND   ARP_HSHLEN-1   // && value for forming hash values
-static signed long
-ARP_SWP_TIME[2],    // Delta time to sweep cache
-             ARPHTB [ARP_HSHLEN];
+static signed long ARP_SWP_TIME[2],    // Delta time to sweep cache
+       ARPHTB[ARP_HSHLEN];
 
 #define    ARP_SWP_TTXT_STR "0000 00:02:00.00" // Every 2 minutes...
-
 
 
-static xearp$_log (NAME)
+static xearp$_log( NAME)
 {
     long STR_DESC[2];
 
@@ -261,54 +251,50 @@ static xearp$_log (NAME)
 #if 0
     xearp$log(STR_DESC,%REMAINING)
 #endif
-};
+}
+;
 
-void xearp$log(NAME,IPADDR,HWLEN,HWADDR)
+void xearp$log( NAME, IPADDR, HWLEN, HWADDR)
 
 // Write a logging entry for ARP.
 
 {
-    DESC$STR_ALLOC(IPSTR,20);
-    DESC$STR_ALLOC(PHYSTR,50);
+    DESC$STR_ALLOC(IPSTR, 20);
+    DESC$STR_ALLOC(PHYSTR, 50);
 
 // Translate IP address and physical address into ASCII
 
-    ASCII_DEC_BYTES(IPSTR,4,IPADDR,&IPSTR->dsc$w_length);
-    ASCII_HEX_BYTES(PHYSTR,HWLEN,HWADDR,&PHYSTR->dsc$w_length);
+    ASCII_DEC_BYTES(IPSTR, 4, IPADDR, &IPSTR->dsc$w_length);
+    ASCII_HEX_BYTES(PHYSTR, HWLEN, HWADDR, &PHYSTR->dsc$w_length);
 
 // Queue up a message for later output
-    DRV$QL_FAO("!%T !AS: IP=!AS, PHY=!AS!/",0,NAME,IPSTR,PHYSTR);
+    DRV$QL_FAO("!%T !AS: IP=!AS, PHY=!AS!/", 0, NAME, IPSTR, PHYSTR);
 }
 
 
-void    ARP_SWEEP();
+void ARP_SWEEP();
 
-void xearp$init (void)
+void xearp$init(void)
 
 // Initialize ARP package.
 // Initializes all hash buckets to be circular lists.
 // Also, initialize cache sweep time and start timer.
 
 {
-    signed long I,
-           ARP_SWP_TTXT[2];
+    signed long I, ARP_SWP_TTXT[2];
 
-    ARP_SWP_TTXT[0] = sizeof( ARP_SWP_TTXT_STR )-1;
-    ARP_SWP_TTXT[1] =  ( ARP_SWP_TTXT_STR );
+    ARP_SWP_TTXT[0] = sizeof(ARP_SWP_TTXT_STR) - 1;
+    ARP_SWP_TTXT[1] = (ARP_SWP_TTXT_STR);
 
-    for (I=0; I<=(ARP_HSHLEN-1); I++)
+    for (I = 0; I <= (ARP_HSHLEN - 1); I++)
         ARPHTB[I] = 0;
-    sys$bintim(ARP_SWP_TTXT,
-               ARP_SWP_TIME);
-    sys$setimr(0, ARP_SWP_TIME,
-               ARP_SWEEP, 0, 0);
+    sys$bintim(ARP_SWP_TTXT, ARP_SWP_TIME);
+    sys$setimr(0, ARP_SWP_TIME, ARP_SWEEP, 0, 0);
 }
 
 
 #define     MAX_HDR_SIZE   100      // Max size of device header on ARP packet
-
-void xearp$dev_init(XE_Int,HWTYPE,IPTYPE,HWADDR,HDRSIZ,
-                    SWAPPF,SWAP16F)
+void xearp$dev_init(XE_Int, HWTYPE, IPTYPE, HWADDR, HDRSIZ, SWAPPF, SWAP16F)
 
 // Initialize ARP portions of device status block entry.
 // Inputs:
@@ -328,15 +314,14 @@ struct XE_Interface_Structure * XE_Int;
 {
     Device_Configuration_Entry * dev_config;
     struct ARP_BLK * ARBLK;
-    signed long
-    RC ;
+    signed long RC;
 
     dev_config = XE_Int->xei$dev_config;
 
     if (HDRSIZ > MAX_HDR_SIZE)
     {
-        DRV$WARN_FAO("XE header size exceeds ARP max, size=!UL",HDRSIZ);
-        DRV$FATAL_FAO("Device is !AS",dev_config->dc_devname);
+        DRV$WARN_FAO("XE header size exceeds ARP max, size=!UL", HDRSIZ);
+        DRV$FATAL_FAO("Device is !AS", dev_config->dc_devname);
     };
 
 // If this device already has an ARP block, use it, else allocate one
@@ -348,8 +333,8 @@ struct XE_Interface_Structure * XE_Int;
         RC = LIB$GET_VM_PAGE(/*%REF*/(((ARP_BLK_LEN) / 512) + 1), &ARBLK);
     if (BLISSIFNOT(RC))
     {
-        DRV$WARN_FAO("XE ARP memory allocation error, RC=!XL",RC);
-        DRV$FATAL_FAO("Device is !AS",dev_config->dc_devname);
+        DRV$WARN_FAO("XE ARP memory allocation error, RC=!XL", RC);
+        DRV$FATAL_FAO("Device is !AS", dev_config->dc_devname);
     };
 
 // Fill in the fields
@@ -359,7 +344,7 @@ struct XE_Interface_Structure * XE_Int;
     ARBLK->AB_IPTYPE = IPTYPE;
     ARBLK->AB_HDRLEN = HDRSIZ;
     ARBLK->AB_HWSIZE = XE_Int->XEI$Phy_Size;
-    CH$MOVE(ARBLK->AB_HWSIZE,CH$PTR(HWADDR),CH$PTR(ARBLK->AB_HWADDR));
+    CH$MOVE(ARBLK->AB_HWSIZE, CH$PTR(HWADDR), CH$PTR(ARBLK->AB_HWADDR));
     ARBLK->AB_RQUEST = AR$OP_REQUEST;
     ARBLK->AB_REPLY = AR$OP_REPLY;
     ARBLK->AB_SWAP_PAR = SWAPPF;
@@ -368,7 +353,7 @@ struct XE_Interface_Structure * XE_Int;
 // If byteswapping is needed, then some fields need to be fixed
 
     if (SWAPPF)
-        swapbytes((ARBLK->AB_SWP_END-ARBLK->AB_SWP_START)/2,
+        swapbytes((ARBLK->AB_SWP_END - ARBLK->AB_SWP_START) / 2,
                   &ARBLK->AB_SWP_START);
     XE_Int->XEI$ARP_Block = ARBLK;
 }
@@ -394,25 +379,22 @@ Net_Send_Queue_Element * QB;
 struct XE_Interface_Structure * XE_Int;
 {
     static
-    long NULADR [ARP_HDW_LEN]; // check
-    signed long
-    XE_DESC[2],
-            FOUND,
-            RFLAG;
+    long NULADR[ARP_HDW_LEN]; // check
+    signed long XE_DESC[2], FOUND, RFLAG;
     struct ACACHE_BLK * ACPTR;
     struct ARP_BLK * ARBLK;
 
 #define XE_PREFRIX_STR "XE:"
 
-    XE_DESC[0] = sizeof( XE_PREFRIX_STR );
-    XE_DESC[1] = ( XE_PREFRIX_STR );
-    CH$FILL(0,ARP_HDW_LEN,NULADR);
+    XE_DESC[0] = sizeof(XE_PREFRIX_STR);
+    XE_DESC[1] = (XE_PREFRIX_STR);
+    CH$FILL(0, ARP_HDW_LEN, NULADR);
 
 // Get, validate pointer to device ARP block.
 
     if ((ARBLK = XE_Int->XEI$ARP_Block) == 0)
     {
-        DRV$OPR_FAO("ARP_CHECK: Device not initialized, DEV=!XL",XE_DESC);
+        DRV$OPR_FAO("ARP_CHECK: Device not initialized, DEV=!XL", XE_DESC);
         return 0;
     };
 
@@ -422,16 +404,16 @@ struct XE_Interface_Structure * XE_Int;
     RFLAG = 0;          // Clear retransmit flag
     FOUND = 0;          // and return status
     DRV$NOINT;          // Disable AST's through here
-    ACPTR = ARP_FIND(IPADDR,XE_Int);
+    ACPTR = ARP_FIND(IPADDR, XE_Int);
 
     if (ACPTR == 0)
     {
-        ACPTR = ARP_CNEW(IPADDR,XE_Int,ARBLK->AB_HWSIZE);
+        ACPTR = ARP_CNEW(IPADDR, XE_Int, ARBLK->AB_HWSIZE);
         if (ACPTR == -1)
         {
             DRV$OKINT;          // Re-allow AST now
-            return FOUND ;
-        } ;
+            return FOUND;
+        };
         if (QB->NSQ$Delete)
         {
             ACPTR->AC$SAVEQB = QB;
@@ -441,10 +423,8 @@ struct XE_Interface_Structure * XE_Int;
     else
     {
         // Found it - copy cached data and give success
-        signed long
-        HWLEN;
-        signed long long NOW,
-               CTIME;
+        signed long HWLEN;
+        signed long long NOW, CTIME;
 
 // Ignore this entry if it isn't valid yet
 
@@ -459,14 +439,13 @@ struct XE_Interface_Structure * XE_Int;
             {
                 FOUND = 1;
                 HWLEN = ACPTR->AC$HWSIZE;
-                CH$MOVE(HWLEN,ACPTR->AC$HWADDR,CH$PTR(HWADDR));
+                CH$MOVE(HWLEN, ACPTR->AC$HWADDR, CH$PTR(HWADDR));
                 if ($$LOGF(LOG$ARP))
-                    xearp$_log("ARP cache hit",IPADDR,HWLEN,HWADDR);
+                    xearp$_log("ARP cache hit", IPADDR, HWLEN, HWADDR);
 
 // See if we should try to refresh this entry now.
 
-                if ((CTIME < ARP_EXP_HALF) &&
-                        (NOW > ACPTR->AC$RFTIME))
+                if ((CTIME < ARP_EXP_HALF) && (NOW > ACPTR->AC$RFTIME))
                 {
                     ACPTR->AC$RFTIME = NOW + ARP_RFTIME;
 //          RFLAG = -1;
@@ -488,21 +467,15 @@ struct XE_Interface_Structure * XE_Int;
 
     if ((FOUND <= 0) || (RFLAG != 0))
     {
-        signed long
-        ARPLEN,
-        HWLEN,
-        HDRLEN,
-        SWPTMP,
-        APTR,
-        DPTR;
-        long ARPKT [MAX_HDR_SIZE+ARP_LEN]; // check stack size
+        signed long ARPLEN, HWLEN, HDRLEN, SWPTMP, APTR, DPTR;
+        long ARPKT[MAX_HDR_SIZE + ARP_LEN]; // check stack size
         struct arp_PKT * ARBUF;
 
 // Get ARP packet format, make a pointer to the packet itself
 
         HDRLEN = ARBLK->AB_HDRLEN;
         HWLEN = ARBLK->AB_HWSIZE;
-        ARBUF = ARPKT+HDRLEN;
+        ARBUF = ARPKT + HDRLEN;
 
 // Set fixed fields in ARP packet
 
@@ -519,43 +492,42 @@ struct XE_Interface_Structure * XE_Int;
 // Source physical address (n bytes)
 
         DPTR = APTR;
-        APTR = CH$MOVE(HWLEN,CH$PTR(ARBLK->AB_HWADDR),APTR);
+        APTR = CH$MOVE(HWLEN, CH$PTR(ARBLK->AB_HWADDR), APTR);
 
 // Source IP address (m bytes)
 
         DPTR = APTR;
-        APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(&ARBLK->AB_IPADDR),APTR);
+        APTR = CH$MOVE(ARP_IP_LEN, CH$PTR(&ARBLK->AB_IPADDR), APTR);
 
 // Target hardware address (unknown)
 
-        APTR = CH$FILL(0,HWLEN,APTR);
+        APTR = CH$FILL(0, HWLEN, APTR);
 
 // Target IP address (m bytes)
 
         DPTR = APTR;
-        APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(&IPADDR),APTR);
+        APTR = CH$MOVE(ARP_IP_LEN, CH$PTR(&IPADDR), APTR);
 
 // Calculate length
 
-        ARPLEN = (long)APTR-(long)ARBUF;
+        ARPLEN = (long) APTR - (long) ARBUF;
 
 // See if we need to byteswap the words
 
         if (ARBLK->AB_SWAP_16)
         {
-            swapbytes(1,&ARBUF->ar$hln);
-            swapbytes((HWLEN+ARP_IP_LEN)/2,&ARBUF->ar$xtra);
+            swapbytes(1, &ARBUF->ar$hln);
+            swapbytes((HWLEN + ARP_IP_LEN) / 2, &ARBUF->ar$xtra);
         };
 
         if ($$LOGF(LOG$ARP))
         {
-            signed long
-            ADRPTR;
+            signed long ADRPTR;
             if (FOUND == 0)
                 ADRPTR = NULADR;
             else
                 ADRPTR = HWADDR;
-            xearp$_log("ARP RQ XMIT",IPADDR,HWLEN,ADRPTR);
+            xearp$_log("ARP RQ XMIT", IPADDR, HWLEN, ADRPTR);
         };
 
 // Now, call the device-dependant routine to send an ARP
@@ -564,7 +536,7 @@ struct XE_Interface_Structure * XE_Int;
 
         if (FOUND <= 0)
             HWADDR = 0;
-        xe$arp_xmit(XE_Int,ARBUF,ARPLEN,HWADDR);
+        xe$arp_xmit(XE_Int, ARBUF, ARPLEN, HWADDR);
     };
 
 // Return appropriate reply
@@ -573,9 +545,9 @@ struct XE_Interface_Structure * XE_Int;
 }
 
 
-void    ARP_UPDATE();
+void ARP_UPDATE();
 
-void xearp$input ( XE_Int , ARBUF )
+void xearp$input(XE_Int, ARBUF)
 
 // Handle ARP reception by device driver.
 // Called at AST level when an ARP packet has been
@@ -596,20 +568,14 @@ void xearp$input ( XE_Int , ARBUF )
 struct arp_PKT * ARBUF;
 struct XE_Interface_Structure * XE_Int;
 {
-    signed long
-    XDEV,
-    APTR,
-    HWLEN,
-    PROTYPE,
-    AR_SPA,
-    AR_TPA;
+    signed long XDEV, APTR, HWLEN, PROTYPE, AR_SPA, AR_TPA;
     struct ARP_BLK * ARBLK;
-    char AR_SHA [ARP_HDW_LEN];
-    char AR_THA [ARP_HDW_LEN];
+    char AR_SHA[ARP_HDW_LEN];
+    char AR_THA[ARP_HDW_LEN];
 
     if ((ARBLK = XE_Int->XEI$ARP_Block) == 0)
     {
-        DRV$OPR_FAO("ARP_INPUT: Device not initialized, XEI=!XL",XE_Int);
+        DRV$OPR_FAO("ARP_INPUT: Device not initialized, XEI=!XL", XE_Int);
         return;
     };
 
@@ -617,30 +583,29 @@ struct XE_Interface_Structure * XE_Int;
 
 // Check some fields in the ARP header
 
-    if ((ARBUF->ar$hrd == ARBLK->AB_HWTYPE) &&
-            (ARBUF->ar$pro == ARBLK->AB_IPTYPE) &&
-            (ARBUF->ar$hln == HWLEN) &&
-            (ARBUF->ar$pln == ARP_IP_LEN))
+    if ((ARBUF->ar$hrd == ARBLK->AB_HWTYPE)
+            && (ARBUF->ar$pro == ARBLK->AB_IPTYPE) && (ARBUF->ar$hln == HWLEN)
+            && (ARBUF->ar$pln == ARP_IP_LEN))
     {
 
 // See if we need to byteswap the words
 
         if (ARBLK->AB_SWAP_16)
         {
-            swapbytes(1,&ARBUF->ar$hln);
-            swapbytes((HWLEN+ARP_IP_LEN)/2,&ARBUF->ar$xtra);
+            swapbytes(1, &ARBUF->ar$hln);
+            swapbytes((HWLEN + ARP_IP_LEN) / 2, &ARBUF->ar$xtra);
         };
 
 // Copy the dynamic fields out of the ARP buffer. Order is same as above
 
         APTR = CH$PTR(ARBUF->ar$xtra);
-        CH$MOVE(HWLEN,APTR,CH$PTR(AR_SHA));
-        APTR = CH$PLUS(APTR,HWLEN);
-        CH$MOVE(ARP_IP_LEN,APTR,CH$PTR(&AR_SPA));
-        APTR = CH$PLUS(APTR,ARP_IP_LEN);
-        CH$MOVE(HWLEN,APTR,CH$PTR(AR_THA));
-        APTR = CH$PLUS(APTR,HWLEN);
-        CH$MOVE(HWLEN,APTR,CH$PTR(&AR_TPA));
+        CH$MOVE(HWLEN, APTR, CH$PTR(AR_SHA));
+        APTR = CH$PLUS(APTR, HWLEN);
+        CH$MOVE(ARP_IP_LEN, APTR, CH$PTR(&AR_SPA));
+        APTR = CH$PLUS(APTR, ARP_IP_LEN);
+        CH$MOVE(HWLEN, APTR, CH$PTR(AR_THA));
+        APTR = CH$PLUS(APTR, HWLEN);
+        CH$MOVE(HWLEN, APTR, CH$PTR(&AR_TPA));
 
 // See if this packet is for us
 
@@ -654,18 +619,17 @@ struct XE_Interface_Structure * XE_Int;
             {
                 if (ARBUF->ar$op == ARBLK->AB_RQUEST)
                 {
-                    signed long
-                    DPTR,ARPLEN,IPADDR;
+                    signed long DPTR, ARPLEN, IPADDR;
 
 // If he wants to talk to us, chances are we'll want to talk back - update
 // our cache entry for him now.
 // N.B. ARP_UPDATE assumes that we are NOINT or at AST level.
 
                     IPADDR = AR_SPA;
-                    ARP_UPDATE ( IPADDR , XE_Int , HWLEN , AR_SHA );
+                    ARP_UPDATE(IPADDR, XE_Int, HWLEN, AR_SHA);
 
                     if ($$LOGF(LOG$ARP))
-                        xearp$_log("ARP RQ RCV",IPADDR,HWLEN,AR_SHA);
+                        xearp$_log("ARP RQ RCV", IPADDR, HWLEN, AR_SHA);
 
 // Doing reply now
 
@@ -675,77 +639,73 @@ struct XE_Interface_Structure * XE_Int;
 // Fill in my physical address
 
                     DPTR = APTR;
-                    APTR = CH$MOVE(HWLEN,CH$PTR(ARBLK->AB_HWADDR),APTR);
+                    APTR = CH$MOVE(HWLEN, CH$PTR(ARBLK->AB_HWADDR), APTR);
 
 // Reverse the destination IP address
 
                     DPTR = APTR;
-                    APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(&AR_TPA),APTR);
+                    APTR = CH$MOVE(ARP_IP_LEN, CH$PTR(&AR_TPA), APTR);
 
 // And switch the source to the destination
 
-                    APTR = CH$MOVE(HWLEN,CH$PTR(AR_SHA),APTR);
-                    APTR = CH$MOVE(ARP_IP_LEN,CH$PTR(&AR_SPA),APTR);
+                    APTR = CH$MOVE(HWLEN, CH$PTR(AR_SHA), APTR);
+                    APTR = CH$MOVE(ARP_IP_LEN, CH$PTR(&AR_SPA), APTR);
 
-                    ARPLEN = (long)APTR-(long)ARBUF;
+                    ARPLEN = (long) APTR - (long) ARBUF;
 
 // See if we need to byteswap the words (again, *sigh*)
 
                     if (ARBLK->AB_SWAP_16)
                     {
-                        swapbytes(1,&ARBUF->ar$hln);
-                        swapbytes((HWLEN+ARP_IP_LEN)/2,&ARBUF->ar$xtra);
+                        swapbytes(1, &ARBUF->ar$hln);
+                        swapbytes((HWLEN + ARP_IP_LEN) / 2, &ARBUF->ar$xtra);
                     };
 
 // Do an ARP output
 
-                    xe$arp_xmit(XE_Int,ARBUF,ARPLEN,AR_SHA);
+                    xe$arp_xmit(XE_Int, ARBUF, ARPLEN, AR_SHA);
                 }
                 else
 
-
                     if (ARBUF->ar$op == ARBLK->AB_REPLY)
                     {
-                        signed long
-                        IPADDR,
-                        ACPTR;
-                        char HWADDR [ARP_HDW_LEN];
+                        signed long IPADDR, ACPTR;
+                        char HWADDR[ARP_HDW_LEN];
 
 // Extract the source hardware address
 
                         APTR = CH$PTR(ARBUF->ar$xtra);
-                        CH$MOVE(HWLEN,APTR,CH$PTR(HWADDR));
-                        APTR = CH$PLUS(APTR,HWLEN);
+                        CH$MOVE(HWLEN, APTR, CH$PTR(HWADDR));
+                        APTR = CH$PLUS(APTR, HWLEN);
 
 // Extract and swap source IP address into longword form
 
-                        CH$MOVE(ARP_IP_LEN,APTR,CH$PTR(&IPADDR));
+                        CH$MOVE(ARP_IP_LEN, APTR, CH$PTR(&IPADDR));
 
 // Add this entry to the cache, replacing old entry if necessary
 // N.B. We are at AST level here, which makes this OK
 
-                        ARP_UPDATE ( IPADDR , XE_Int , HWLEN , HWADDR );
+                        ARP_UPDATE(IPADDR, XE_Int, HWLEN, HWADDR);
 
                         if ($$LOGF(LOG$ARP))
-                            xearp$_log("ARP RPLY RCV",IPADDR,HWLEN,HWADDR);
+                            xearp$_log("ARP RPLY RCV", IPADDR, HWLEN, HWADDR);
                     };
             };
         };
     };
 }
 
-
-ARP_HASH(IPA)
+ARP_HASH( IPA)
 
 // Hash an IP address.
 // Returns hash value for this IP address.
 
 {
     char * IPAP = &IPA;
-    return ((IPAP[0]+IPAP[1]+IPAP[2]+IPAP[3]) & (ARP_HSHAND));
+    return ((IPAP[0] + IPAP[1] + IPAP[2] + IPAP[3]) & (ARP_HSHAND));
 }
 
-ARP_FIND ( long IPADDR , struct XE_Interface_Structure * XE_Int )
+ARP_FIND(long IPADDR, struct XE_Interface_Structure * XE_Int)
 
 // Find hash table entry for this IP address.
 // Returns 0 if entry is not in cache, or nonzero pointer to entry.
@@ -754,21 +714,19 @@ ARP_FIND ( long IPADDR , struct XE_Interface_Structure * XE_Int )
 
 {
     struct ACACHE_BLK * ACPTR;
-    signed long
-    AHEAD;
+    signed long AHEAD;
 
     ACPTR = ARPHTB[ARP_HASH(IPADDR)];
     //!!HACK!!// Screw this.  give each XE interface it's own hash table.
     while (ACPTR != 0)
-        if ((ACPTR->AC$DEVICE == XE_Int) &&
-                (ACPTR->AC$IPADDR == IPADDR))
+        if ((ACPTR->AC$DEVICE == XE_Int) && (ACPTR->AC$IPADDR == IPADDR))
             return ACPTR;
         else
             ACPTR = ACPTR->AC$NEXT;
     return 0;
 }
 
-ARP_CNEW(IPADDR,XE_Int,HWLEN)
+ARP_CNEW(IPADDR, XE_Int, HWLEN)
 
 // Create a new ARP cache entry. Assumes that it doesn't already exist.
 // Returns a pointer to the new entry.
@@ -776,9 +734,7 @@ ARP_CNEW(IPADDR,XE_Int,HWLEN)
 struct XE_Interface_Structure * XE_Int;
 {
     struct ACACHE_BLK * ACPTR;
-    signed long
-    HSHVAL,
-    RC ;
+    signed long HSHVAL, RC;
 
 // Get a new block and hash the address.
 
@@ -786,8 +742,8 @@ struct XE_Interface_Structure * XE_Int;
     RC = LIB$GET_VM_PAGE(/*%REF*/(((ACACHE_LEN) / 512) + 1), &ACPTR);
     if (BLISSIFNOT(RC))
     {
-        DRV$WARN_FAO("XE ARP CNEW memory allocation error, RC=!XL",RC);
-        return -1 ;
+        DRV$WARN_FAO("XE ARP CNEW memory allocation error, RC=!XL", RC);
+        return -1;
     };
     HSHVAL = ARP_HASH(IPADDR);
 
@@ -799,11 +755,11 @@ struct XE_Interface_Structure * XE_Int;
 
 // Initialize remaining fields
 
-    CH$FILL(0,HWLEN,CH$PTR(ACPTR->AC$HWADDR));
+    CH$FILL(0, HWLEN, CH$PTR(ACPTR->AC$HWADDR));
     ACPTR->AC$SAVEQB = 0;
     ACPTR->AC$FLAGS = 0;
     ACPTR->AC$RFTIME = 0;
-    ACPTR->AC$EXPIRE = Time_Stamp()+ARP_INI_TIME;
+    ACPTR->AC$EXPIRE = Time_Stamp() + ARP_INI_TIME;
 
 // Insert this block into the hash chain. N.B. It is important this this step
 // be done either at AST level or NOINT.
@@ -813,7 +769,7 @@ struct XE_Interface_Structure * XE_Int;
     return ACPTR;
 }
 
-void ARP_UPDATE( IPADDR , XE_Int , HWLEN , HWADDR )
+void ARP_UPDATE(IPADDR, XE_Int, HWLEN, HWADDR)
 
 // Update an ARP cache entry, creating a new one if none exists.
 // N.B. Should be called either at AST level or with AST's disabled
@@ -821,13 +777,12 @@ void ARP_UPDATE( IPADDR , XE_Int , HWLEN , HWADDR )
 struct XE_Interface_Structure * XE_Int;
 {
     struct ACACHE_BLK * ACPTR;
-    signed long
-    HSHVAL;
-    if ((ACPTR = ARP_FIND(IPADDR,XE_Int/*,HWLEN*/)) == 0) // check
-        ACPTR = ARP_CNEW(IPADDR,XE_Int,HWLEN);
+    signed long HSHVAL;
+    if ((ACPTR = ARP_FIND(IPADDR, XE_Int/*,HWLEN*/)) == 0) // check
+        ACPTR = ARP_CNEW(IPADDR, XE_Int, HWLEN);
     else
     {
-        ACPTR->AC$EXPIRE = Time_Stamp()+ARP_EXP_TIME;
+        ACPTR->AC$EXPIRE = Time_Stamp() + ARP_EXP_TIME;
         ACPTR->AC$RFTIME = 0;
     };
 
@@ -835,12 +790,12 @@ struct XE_Interface_Structure * XE_Int;
 
     if (ACPTR == -1)
     {
-        return ;
-    } ;
+        return;
+    };
 
 // Update the hardware address and mark this as valid
 
-    CH$MOVE(HWLEN,CH$PTR(HWADDR),CH$PTR(ACPTR->AC$HWADDR));
+    CH$MOVE(HWLEN, CH$PTR(HWADDR), CH$PTR(ACPTR->AC$HWADDR));
     ACPTR->AC$VALID = TRUE;
 
 // Retransmit the saved packet, if we have one
@@ -850,13 +805,12 @@ struct XE_Interface_Structure * XE_Int;
     if (ACPTR->AC$SAVEQB != 0)
     {
         Device_Configuration_Entry * dev_config = XE_Int->xei$dev_config;
-        signed long
-        QB;
+        signed long QB;
 
         QB = ACPTR->AC$SAVEQB;
         ACPTR->AC$SAVEQB = 0;
         XE_Int = ACPTR->AC$DEVICE;
-        INSQUE(QB,dev_config->dc_send_Qtail);
+        INSQUE(QB, dev_config->dc_send_Qtail);
         xe$xmit(dev_config);
     };
 }
@@ -869,14 +823,12 @@ void ARP_SWEEP(void)
 
 {
     struct ACACHE_BLK * ACPTR;
-    signed long I,
-           *APREV,
-           CTIME;
+    signed long I, *APREV, CTIME;
 
     CTIME = Time_Stamp();
     if ($$LOGF(LOG$ARP))
-        DRV$QL_FAO("!%T ARP_SWEEP running!/",0);
-    for (I=(ARP_HSHLEN-1); I>=0; I--)
+        DRV$QL_FAO("!%T ARP_SWEEP running!/", 0);
+    for (I = (ARP_HSHLEN - 1); I >= 0; I--)
     {
 
 // Start at hash bucket. NB: APREV points at pointer to update on unlink
@@ -899,7 +851,7 @@ void ARP_SWEEP(void)
                     Net_Send_Queue_Element * QB;
 
                     QB = ACPTR->AC$SAVEQB;
-                    drv$seg_free(QB->NSQ$Del_buf_size,QB->NSQ$Del_Buf);
+                    drv$seg_free(QB->NSQ$Del_buf_size, QB->NSQ$Del_Buf);
                     drv$qblk_free(QB);
                 };
 
@@ -920,26 +872,21 @@ void ARP_SWEEP(void)
 
 // Reset sweep timer
 
-    sys$setimr(0  ,  ARP_SWP_TIME,
-               ARP_SWEEP, 0, 0);
+    sys$setimr(0, ARP_SWP_TIME, ARP_SWEEP, 0, 0);
 }
 
 //SBTTL "ARP_DUMP - Dump ARP cache"
 /*
-    Dump a portion of the ARP cache into a block for return to the user.
-    ACIDX is the ARP cache "index", RBLOCK is the address of the block,
-    RBSIZE is the size of the block.
-    Returns: -1 on error, or size of block returned.
-*/
+ Dump a portion of the ARP cache into a block for return to the user.
+ ACIDX is the ARP cache "index", RBLOCK is the address of the block,
+ RBSIZE is the size of the block.
+ Returns: -1 on error, or size of block returned.
+ */
 
-XE$ARP_DUMP(ACIDX,RBLOCK,RBSIZE)
+XE$ARP_DUMP(ACIDX, RBLOCK, RBSIZE)
 d$arp_dump_return_blk_entry * RBLOCK;
 {
-    signed long
-    LRSIZE,
-    CIDX,
-    HTIDX,
-    NOW;
+    signed long LRSIZE, CIDX, HTIDX, NOW;
     struct ACACHE_BLK * ACPTR;
 
 // Scan through the ARP hash table
@@ -950,19 +897,18 @@ d$arp_dump_return_blk_entry * RBLOCK;
     DRV$NOINT;          // Don't allow anything to change
 X:              // Labelled block X
     {
-        for (HTIDX=0; HTIDX<=ARP_HSHLEN-1; HTIDX++)
+        for (HTIDX = 0; HTIDX <= ARP_HSHLEN - 1; HTIDX++)
         {
             ACPTR = ARPHTB[HTIDX];
             while (ACPTR != 0)
             {
                 if (ACIDX > 0)
                     // If we haven't gotten to the one he wants yet, advance
-                    ACIDX = ACIDX-1;
+                    ACIDX = ACIDX - 1;
                 else
                     // Else, copy the info about this entry to his block
                 {
-                    signed long
-                    ETIME;
+                    signed long ETIME;
                     ETIME = ACPTR->AC$EXPIRE - NOW;
                     if (ETIME < 0)
                         ETIME = 0;
@@ -974,7 +920,7 @@ X:              // Labelled block X
                     RBLOCK->du$arp_saveqb = ACPTR->AC$SAVEQB;
                     RBLOCK->du$arp_flags = ACPTR->AC$FLAGS;
                     RBLOCK->du$arp_hwsize = ACPTR->AC$HWSIZE;
-                    CH$MOVE(ACPTR->AC$HWSIZE,ACPTR->AC$HWADDR,
+                    CH$MOVE(ACPTR->AC$HWSIZE, ACPTR->AC$HWADDR,
                             RBLOCK->du$arp_hwaddr);
                     RBLOCK = RBLOCK + D$ARP_DUMP_BLKSIZE;
                     LRSIZE = LRSIZE - D$ARP_DUMP_BLKSIZE;

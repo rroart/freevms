@@ -1,9 +1,9 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
+#include <linux/linkage.h>
 
 asmlinkage void exe$updsec(void)
 {

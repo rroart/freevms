@@ -1,45 +1,49 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
-   \file sysgetjpi.c
-   \brief system get job and process information
-   \author Roar Thronæs
-*/
+ \file sysgetjpi.c
+ \brief system get job and process information
+ \author Roar Thronï¿½s
+ */
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
 
-#include<starlet.h>
-#include<jpidef.h>
+#include <starlet.h>
+#include <jpidef.h>
 #include <ssdef.h>
 #include <misc.h>
 #include <phddef.h>
-#include<pridef.h>
+#include <pridef.h>
 #include <exe_routines.h>
 #include <sch_routines.h>
 
 // this behaves like getjpiw for now
 
 /**
-   \brief system service get job or process info - see 5.2 13.2.3
-   \details make multiuser version
-*/
+ \brief system service get job or process info - see 5.2 13.2.3
+ \details make multiuser version
+ */
 
-asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long long astprm)
+asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
+                          void *itmlst, struct _iosb *iosb, void (*astadr)(),
+                          unsigned long long astprm)
 {
-    struct _pcb * p;
+    struct _pcb *p;
     int sts;
-    struct item_list_3 * it=itmlst;
+    struct item_list_3 *it = itmlst;
     /** test list item entries */
     /** use pidadr - MISSING */
     /** clear event flag */
     exe$clref(efn);
     /** find next pcb */
-    sts=exe$pscan_next_id(&p);
-    if (sts==0)
+    sts = exe$pscan_next_id(&p);
+    if (sts == 0)
+    {
         return SS$_NOMOREPROC;
+    }
     /** invoke nampid - MISSING */
     /** if other node, cwps - MISSING */
     /** iosb writecheck - MISSING */
@@ -51,83 +55,83 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
         switch (it->item_code)
         {
         case JPI$_PRCNAM:
-            memcpy(it->bufaddr,&p->pcb$t_lname,15);
+            memcpy(it->bufaddr, &p->pcb$t_lname, 15);
             break;
 
         case JPI$_PID:
-            memcpy(it->bufaddr,&p->pcb$l_epid,4);
+            memcpy(it->bufaddr, &p->pcb$l_epid, 4);
             break;
 
         case JPI$_MASTER_PID:
-            memcpy(it->bufaddr,&p->pcb$l_pid,4);
+            memcpy(it->bufaddr, &p->pcb$l_pid, 4);
             break;
 
         case JPI$_STATE:
-            *(unsigned long *)it->bufaddr=p->pcb$w_state;
+            *(unsigned long *) it->bufaddr = p->pcb$w_state;
             break;
 
         case JPI$_PRI:
-            *(unsigned long *)it->bufaddr=p->pcb$b_pri;
+            *(unsigned long *) it->bufaddr = p->pcb$b_pri;
             break;
 
         case JPI$_PAGEFLTS:
-            *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_pageflts;
+            *(unsigned long *) it->bufaddr = p->pcb$l_phd->phd$l_pageflts;
             break;
 
         case JPI$_PPGCNT:
-            *(unsigned long *)it->bufaddr=p->pcb$l_ppgcnt;
+            *(unsigned long *) it->bufaddr = p->pcb$l_ppgcnt;
             break;
 
         case JPI$_GPGCNT:
-            *(unsigned long *)it->bufaddr=p->pcb$l_gpgcnt;
+            *(unsigned long *) it->bufaddr = p->pcb$l_gpgcnt;
             break;
 
         case JPI$_WSAUTH:
-            *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_wsauth;
+            *(unsigned long *) it->bufaddr = p->pcb$l_phd->phd$l_wsauth;
             break;
 
         case JPI$_WSQUOTA:
-            *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_wsquota;
+            *(unsigned long *) it->bufaddr = p->pcb$l_phd->phd$l_wsquota;
             break;
 
         case JPI$_WSSIZE:
-            *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_wssize;
+            *(unsigned long *) it->bufaddr = p->pcb$l_phd->phd$l_wssize;
             break;
 
         case JPI$_WSAUTHEXT:
-            *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_wsauthext;
+            *(unsigned long *) it->bufaddr = p->pcb$l_phd->phd$l_wsauthext;
             break;
 
         case JPI$_WSEXTENT:
-            *(unsigned long *)it->bufaddr=p->pcb$l_phd->phd$l_wsextent;
+            *(unsigned long *) it->bufaddr = p->pcb$l_phd->phd$l_wsextent;
             break;
 
         case JPI$_BIOCNT:
-            *(unsigned short *)it->bufaddr=p->pcb$w_biocnt;
+            *(unsigned short *) it->bufaddr = p->pcb$w_biocnt;
             break;
 
         case JPI$_BIOLM:
-            *(unsigned short *)it->bufaddr=p->pcb$w_biolm;
+            *(unsigned short *) it->bufaddr = p->pcb$w_biolm;
             break;
 
         case JPI$_DIOCNT:
-            *(unsigned short *)it->bufaddr=p->pcb$w_diocnt;
+            *(unsigned short *) it->bufaddr = p->pcb$w_diocnt;
             break;
 
         case JPI$_DIOLM:
-            *(unsigned short *)it->bufaddr=p->pcb$w_diolm;
+            *(unsigned short *) it->bufaddr = p->pcb$w_diolm;
             break;
 
         case JPI$_CPUTIM:
-            *(long long *)it->bufaddr=p->pcb$l_phd->phd$l_cputim;
+            *(long long *) it->bufaddr = p->pcb$l_phd->phd$l_cputim;
             break;
 
         case JPI$_DIRIO:
-            *(unsigned int *)it->bufaddr=p->pcb$l_phd->phd$l_diocnt;
+            *(unsigned int *) it->bufaddr = p->pcb$l_phd->phd$l_diocnt;
             break;
 
         case JPI$_BUFIO:
-            *(unsigned int *)it->bufaddr=p->pcb$l_phd->phd$l_biocnt;
+            *(unsigned int *) it->bufaddr = p->pcb$l_phd->phd$l_biocnt;
             break;
 
         }
@@ -142,7 +146,7 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
 
     /** eventual iosb write */
     if (iosb)
-        iosb->iosb$w_status=SS$_NORMAL;
+        iosb->iosb$w_status = SS$_NORMAL;
 
     return SS$_NORMAL;
 
@@ -151,24 +155,29 @@ asmlinkage int exe$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam,
 
 }
 
-asmlinkage int exe$getjpiw(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(), unsigned long long astprm)
+asmlinkage int exe$getjpiw(unsigned int efn, unsigned int *pidadr,
+                           void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(),
+                           unsigned long long astprm)
 {
 
     /* I think this is about it */
 
-    int status=exe$getjpi(efn,pidadr,prcnam,itmlst,iosb,astadr,astprm);
-    if ((status&1)==0) return status;
-    return exe$synch(efn,iosb);
+    int status = exe$getjpi(efn, pidadr, prcnam, itmlst, iosb, astadr, astprm);
+    if ((status & 1) == 0)
+        return status;
+    return exe$synch(efn, iosb);
 
 }
 
 asmlinkage int exe$getjpi_wrap(struct struct_getjpi *s)
 {
-    return exe$getjpi(s->efn,s->pidadr,s->prcnam,s->itmlst,s->iosb,s->astadr,s->astprm);
+    return exe$getjpi(s->efn, s->pidadr, s->prcnam, s->itmlst, s->iosb,
+                      s->astadr, s->astprm);
 }
 
 asmlinkage int exe$getjpiw_wrap(struct struct_getjpi *s)
 {
-    return exe$getjpiw(s->efn,s->pidadr,s->prcnam,s->itmlst,s->iosb,s->astadr,s->astprm);
+    return exe$getjpiw(s->efn, s->pidadr, s->prcnam, s->itmlst, s->iosb,
+                       s->astadr, s->astprm);
 }
 

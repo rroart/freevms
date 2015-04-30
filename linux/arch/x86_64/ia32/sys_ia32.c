@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -53,7 +53,6 @@
 #include <linux/sunrpc/svc.h>
 #include <linux/nfsd/nfsd.h>
 #include <linux/nfsd/cache.h>
-//#include <linux/nfsd/xdr.h>
 #include <linux/nfsd/syscall.h>
 #include <linux/poll.h>
 #include <linux/personality.h>

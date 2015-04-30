@@ -1,22 +1,22 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file sysdassgn.c
    \brief QIO deassign channel - TODO still more doc
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<starlet.h>
-#include<iodef.h>
-#include<ssdef.h>
-#include<irpdef.h>
-#include<ucbdef.h>
-#include<ccbdef.h>
-#include<system_data_cells.h>
-#include<linux/vmalloc.h>
-#include<linux/linkage.h>
+#include <starlet.h>
+#include <iodef.h>
+#include <ssdef.h>
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ccbdef.h>
+#include <system_data_cells.h>
+#include <linux/vmalloc.h>
+#include <linux/linkage.h>
 #include <exe_routines.h>
 #include <ioc_routines.h>
 #include <sch_routines.h>

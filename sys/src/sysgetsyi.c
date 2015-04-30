@@ -1,22 +1,22 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
+#include <linux/linkage.h>
 
-#include<syidef.h>
-#include<ssdef.h>
-#include<misc.h>
-#include<pridef.h>
-#include<sbdef.h>
-#include<starlet.h>
+#include <syidef.h>
+#include <ssdef.h>
+#include <misc.h>
+#include <pridef.h>
+#include <sbdef.h>
+#include <starlet.h>
 #include <exe_routines.h>
 #include <sch_routines.h>
 
-#include<linux/sched.h>
+#include <linux/sched.h>
 
-#include<linux/version.h>
+#include <linux/version.h>
 
 extern struct _sb mysb;
 

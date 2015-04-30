@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004
 
 /*
@@ -52,18 +52,18 @@
 #include <linux/kmod.h>
 #endif
 
-#include<phddef.h>
-#include<rdedef.h>
-#include<secdef.h>
-#include<sysgen.h>
-#include<dyndef.h>
-#include<rabdef.h>
-#include<ccbdef.h>
-#include<ucbdef.h>
+#include <phddef.h>
+#include <rdedef.h>
+#include <secdef.h>
+#include <sysgen.h>
+#include <dyndef.h>
+#include <rabdef.h>
+#include <ccbdef.h>
+#include <ucbdef.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <queue.h>
-#include<wsldef.h>
+#include <wsldef.h>
 
 int core_uses_pid;
 

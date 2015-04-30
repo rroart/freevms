@@ -14,18 +14,16 @@ struct dsc$descriptor
     unsigned short  dsc$w_length;
     unsigned char   dsc$b_dtype;
     unsigned char   dsc$b_class;
-    void        *dsc$a_pointer;
+    void           *dsc$a_pointer;
 };
 
 
 struct dsc$descriptor_s
 {
     unsigned short  dsc$w_length;
-
-
     unsigned char   dsc$b_dtype;
     unsigned char   dsc$b_class;
-    char        *dsc$a_pointer;
+    char           *dsc$a_pointer;
 };
 
 
@@ -34,7 +32,7 @@ struct dsc$descriptor_d
     unsigned short  dsc$w_length;
     unsigned char   dsc$b_dtype;
     unsigned char   dsc$b_class;
-    char        *dsc$a_pointer;
+    char           *dsc$a_pointer;
 };
 
 
@@ -43,17 +41,17 @@ struct dsc$descriptor_a
     unsigned short  dsc$w_length;
     unsigned char   dsc$b_dtype;
     unsigned char   dsc$b_class;
-    void        *dsc$a_pointer;
-    char        dsc$b_scale;
+    void           *dsc$a_pointer;
+    char            dsc$b_scale;
     unsigned char   dsc$b_digits;
     struct
     {
-        unsigned         : 4;
+        unsigned                 : 4;
         unsigned dsc$v_fl_redim  : 1;
         unsigned dsc$v_fl_column : 1;
         unsigned dsc$v_fl_coeff  : 1;
         unsigned dsc$v_fl_bounds : 1;
-    }       dsc$b_aflags;
+    }               dsc$b_aflags;
     unsigned char   dsc$b_dimct;
     unsigned long   dsc$l_arsize;
 
@@ -65,7 +63,7 @@ struct dsc$descriptor_p
     unsigned short  dsc$w_length;
     unsigned char   dsc$b_dtype;
     unsigned char   dsc$b_class;
-    void        *dsc$a_pointer;
+    void           *dsc$a_pointer;
 };
 
 
@@ -74,8 +72,8 @@ struct dsc$descriptor_sd
     unsigned short  dsc$w_length;
     unsigned char   dsc$b_dtype;
     unsigned char   dsc$b_class;
-    char        *dsc$a_pointer;
-    char        dsc$b_scale;
+    char           *dsc$a_pointer;
+    char            dsc$b_scale;
     unsigned char   dsc$b_digits;
     unsigned    : 16;
 };
@@ -86,15 +84,15 @@ struct dsc$descriptor_nca
     unsigned short  dsc$w_length;
     unsigned char   dsc$b_dtype;
     unsigned char   dsc$b_class;
-    void        *dsc$a_pointer;
-    char        dsc$b_scale;
+    void           *dsc$a_pointer;
+    char            dsc$b_scale;
     unsigned char   dsc$b_digits;
     struct
     {
-        unsigned         : 4;
-        unsigned dsc$v_fl_redim  : 1;
-        unsigned         : 3;
-    }       dsc$b_aflags;
+        unsigned                : 4;
+        unsigned dsc$v_fl_redim : 1;
+        unsigned                : 3;
+    }               dsc$b_aflags;
     unsigned char   dsc$b_dimct;
     unsigned long   dsc$l_arsize;
 
@@ -106,7 +104,7 @@ struct dsc$descriptor_vs
     unsigned short  dsc$w_maxstrlen;
     unsigned char   dsc$b_dtype;
     unsigned char   dsc$b_class;
-    void        *dsc$a_pointer;
+    void           *dsc$a_pointer;
 };
 
 
@@ -115,15 +113,15 @@ struct dsc$descriptor_vsa
     unsigned short  dsc$w_maxstrlen;
     unsigned char   dsc$b_dtype;
     unsigned char   dsc$b_class;
-    void        *dsc$a_pointer;
-    char        dsc$b_scale;
+    void           *dsc$a_pointer;
+    char            dsc$b_scale;
     unsigned char   dsc$b_digits;
     struct
     {
-        unsigned         : 4;
+        unsigned                 : 4;
         unsigned dsc$v_fl_redim  : 1;
-        unsigned         : 3;
-    }       dsc$b_aflags;
+        unsigned                 : 3;
+    }               dsc$b_aflags;
     unsigned char   dsc$b_dimct;
     unsigned long   dsc$l_arsize;
 };
@@ -134,8 +132,8 @@ struct dsc$descriptor_ubs
     unsigned short  dsc$w_length;
     unsigned char   dsc$b_dtype;
     unsigned char   dsc$b_class;
-    char        *dsc$a_base;
-    long        dsc$l_pos;
+    char           *dsc$a_base;
+    long            dsc$l_pos;
 };
 
 
@@ -144,15 +142,15 @@ struct dsc$descriptor_uba
     unsigned short  dsc$w_length;
     unsigned char   dsc$b_dtype;
     unsigned char   dsc$b_class;
-    char        *dsc$a_base;
-    char        dsc$b_scale;
+    char           *dsc$a_base;
+    char            dsc$b_scale;
     unsigned char   dsc$b_digits;
     struct
     {
-        unsigned         : 4;
+        unsigned                 : 4;
         unsigned dsc$v_fl_redim  : 1;
-        unsigned         : 3;
-    }       dsc$b_aflags;
+        unsigned                 : 3;
+    }               dsc$b_aflags;
     unsigned char   dsc$b_dimct;
     unsigned long   dsc$l_arsize;
 };
@@ -160,13 +158,9 @@ struct dsc$descriptor_uba
 
 struct dsc$descriptor_bfa
 {
-    int *dsc$a_handle;
-
-
+    int    *dsc$a_handle;
     long    dsc$l_byteoff;
-
     long    dsc$l_logunit;
-
 };
 
 

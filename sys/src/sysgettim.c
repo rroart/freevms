@@ -45,13 +45,13 @@ History:
         (Probibly did it wrong, but ...).
 */
 
-/* Some mods by Roar Thronæs */
+/* Some mods by Roar Thronï¿½s */
 
 #include <system_data_cells.h>  /* SYS$ header file */
 #include <sys$routines.h>   /* SYS$ header file */
 #include <ssdef.h>  /* SYS$ header file */
 #include <linux/time.h>     /* C header for $GETTIM to find time */
-#include<linux/linkage.h>
+#include <linux/linkage.h>
 #include <linux/string.h>
 
 /*

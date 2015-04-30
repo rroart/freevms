@@ -1,13 +1,13 @@
-#include<linux/kernel.h>
-#include<linux/sched.h>
-#include<spldef.h>
-#include<asm/bitops.h>
-#include<system_data_cells.h>
+#include <linux/kernel.h>
+#include <linux/sched.h>
+#include <spldef.h>
+#include <asm/bitops.h>
+#include <system_data_cells.h>
 
 /**
    \file spinlocks.c
    \brief spinlocking
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
 // define SPINDEF in spinlocks_mon?

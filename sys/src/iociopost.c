@@ -1,26 +1,26 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file iociopost.c
    \brief QIO I/O postprocessing - TODO still more doc
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/smp.h>
-#include<linux/kernel.h>
-#include<linux/sched.h>
-#include<asm/hw_irq.h>
-#include<cxbdef.h>
-#include<bufiodef.h>
-#include<dyndef.h>
-#include<irpdef.h>
-#include<acbdef.h>
-#include<ipldef.h>
-#include<pridef.h>
-#include<ipl.h>
-#include<phddef.h>
+#include <linux/smp.h>
+#include <linux/kernel.h>
+#include <linux/sched.h>
+#include <asm/hw_irq.h>
+#include <cxbdef.h>
+#include <bufiodef.h>
+#include <dyndef.h>
+#include <irpdef.h>
+#include <acbdef.h>
+#include <ipldef.h>
+#include <pridef.h>
+#include <ipl.h>
+#include <phddef.h>
 #include <system_data_cells.h>
 #include <internals.h>
 #include <rsndef.h>

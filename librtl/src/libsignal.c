@@ -1,4 +1,4 @@
-#include"ssdef.h"
+#include "ssdef.h"
 
 char vms$msgs[]=
 {

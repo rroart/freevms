@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #define GTY(x)
 #define HOST_BITS_PER_WIDE_INT 64
@@ -9,8 +9,8 @@
 #define true 1
 #define false 0
 
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "tree.h"
 

@@ -7,9 +7,9 @@
 
 struct _ile3
 {
-    unsigned short int ile3$w_length;       /* Length of buffer in bytes */
-    unsigned short int ile3$w_code;     /* Item code */
-    void *ile3$ps_bufaddr;          /* 32 bit buffer address */
+    unsigned short int ile3$w_length;           /* Length of buffer in bytes */
+    unsigned short int ile3$w_code;             /* Item code */
+    void *ile3$ps_bufaddr;                      /* 32 bit buffer address */
     unsigned short int *ile3$ps_retlen_addr;    /* 32 bit address of a word for the returned length */
 };
 #define ILE3$K_LENGTH sizeof(struct _ile3)
@@ -21,11 +21,11 @@ struct _ile3
 
 struct _ileb_64
 {
-    unsigned short int ileb_64$w_mbo;       /* Must be One */
-    unsigned short int ileb_64$w_code;      /* Item code */
-    int ileb_64$l_mbmo;             /* Must be Minus One */
-    unsigned long long ileb_64$q_length;    /* Length of buffer in bytes */
-    void *ileb_64$pq_bufaddr;           /* 64 bit Buffer pointer */
+    unsigned short int ileb_64$w_mbo;           /* Must be One */
+    unsigned short int ileb_64$w_code;          /* Item code */
+    int ileb_64$l_mbmo;                         /* Must be Minus One */
+    unsigned long long ileb_64$q_length    ;    /* Length of buffer in bytes */
+    void *ileb_64$pq_bufaddr;                   /* 64 bit Buffer pointer */
     unsigned long long *ileb_64$pq_retlen_addr; /* 64 bit address of quadword for returned length */
 };
 #define ILEB_64$K_LENGTH sizeof(struct _ileb_64)
@@ -38,8 +38,8 @@ struct _ileb_64
 struct _ile2
 {
     unsigned short int ile2$w_length;       /* Length of buffer in bytes */
-    unsigned short int ile2$w_code;     /* Item code value */
-    void *ile2$ps_bufaddr;          /* 32 bit buffer address */
+    unsigned short int ile2$w_code;         /* Item code value */
+    void *ile2$ps_bufaddr;                  /* 32 bit buffer address */
 };
 #define ILE2$K_LENGTH sizeof(struct _ile2)
 #define ILE2$C_LENGTH sizeof(struct _ile2)
@@ -52,17 +52,14 @@ struct _ilea_64
 {
     unsigned short int ilea_64$w_mbo;       /* Must be One */
     unsigned short int ilea_64$w_code;      /* Item code */
-    int ilea_64$l_mbmo;             /* Must be Minus One */
+    int ilea_64$l_mbmo;                     /* Must be Minus One */
     unsigned long long ilea_64$q_length;    /* Length of buffer in bytes */
-    void *ilea_64$pq_bufaddr;           /* 64 bit Buffer address */
+    void *ilea_64$pq_bufaddr;               /* 64 bit Buffer address */
 };
 #define ILEA_64$K_LENGTH sizeof(struct _ilea_64)
 #define ILEA_64$C_LENGTH sizeof(struct _ilea_64)
 
 #define $is_itmlst64 _is_itmlst64
-inline int _is_itmlst64(const void *item_list)
-{
-    return ((const struct _ilea_64 *)item_list)->ilea_64$w_mbo == 1 &&
-           ((const struct _ilea_64 *)item_list)->ilea_64$l_mbmo == -1;
-}
+inline int _is_itmlst64(const void *item_list);
+
 #endif

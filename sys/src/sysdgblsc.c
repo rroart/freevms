@@ -1,21 +1,21 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
 #include <linux/vmalloc.h>
 #include <system_data_cells.h>
-#include<descrip.h>
-#include<gsddef.h>
-#include<ipldef.h>
-#include<phddef.h>
-#include<rdedef.h>
-#include<secdef.h>
-#include<seciddef.h>
-#include<va_rangedef.h>
-#include<wsldef.h>
+#include <descrip.h>
+#include <gsddef.h>
+#include <ipldef.h>
+#include <phddef.h>
+#include <rdedef.h>
+#include <secdef.h>
+#include <seciddef.h>
+#include <va_rangedef.h>
+#include <wsldef.h>
 
 /**
    \brief test compatibility of the flags arguments to crmpsc - see 5.2 15.4.1.1

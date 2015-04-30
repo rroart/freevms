@@ -1,11 +1,11 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/unistd.h>
-#include<linux/linkage.h>
-#include<linux/mm.h>
+#include <linux/unistd.h>
+#include <linux/linkage.h>
+#include <linux/mm.h>
 
 #include <mytypes.h>
 #include <misc.h>

@@ -1,11 +1,11 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file iosubrams.c
    \brief QIO subroutines
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
 #include <linux/kernel.h>
@@ -16,13 +16,13 @@
 #include <asm/current.h>
 #include <system_data_cells.h>
 #include <internals.h>
-#include<queue.h>
-#include<ddtdef.h>
-#include<ucbdef.h>
-#include<irpdef.h>
-#include<ipldef.h>
-#include<wcbdef.h>
-#include<ssdef.h>
+#include <queue.h>
+#include <ddtdef.h>
+#include <ucbdef.h>
+#include <irpdef.h>
+#include <ipldef.h>
+#include <wcbdef.h>
+#include <ssdef.h>
 
 /**
    \brief map virtual block to logical block - see 5.2 21.8.2

@@ -1,33 +1,33 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file rse.c
    \brief report system event
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/sched.h>
+#include <linux/sched.h>
 #include <asmlink.h>
-#include<asm/hw_irq.h>
+#include <asm/hw_irq.h>
 
-#include<sysgen.h>
-#include<rse.h>
-#include<pridef.h>
-#include<evtdef.h>
-#include<statedef.h>
-#include<cpudef.h>
-#include<system_data_cells.h>
-#include<ipl.h>
-#include<internals.h>
+#include <sysgen.h>
+#include <rse.h>
+#include <pridef.h>
+#include <evtdef.h>
+#include <statedef.h>
+#include <cpudef.h>
+#include <system_data_cells.h>
+#include <ipl.h>
+#include <internals.h>
 #include <exe_routines.h>
 #include <sch_routines.h>
 #include <smp_routines.h>
 #include <misc_routines.h>
-#include<queue.h>
-#include<ipldef.h>
-#include<cpbdef.h>
+#include <queue.h>
+#include <ipldef.h>
+#include <cpbdef.h>
 
 extern int mydebug;
 

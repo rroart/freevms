@@ -1,10 +1,10 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/vmalloc.h>
-#include<linux/linkage.h>
+#include <linux/vmalloc.h>
+#include <linux/linkage.h>
 
 #include <system_data_cells.h>
 #include <descrip.h>

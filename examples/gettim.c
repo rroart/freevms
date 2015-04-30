@@ -1,4 +1,4 @@
-#include<stdio.h>
+#include <stdio.h>
 #include <descrip.h>
 
 signed long long timevalue;

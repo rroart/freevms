@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <linux/sched.h>
 
@@ -11,7 +11,7 @@
 #include <descrip.h>
 #include <iodef.h>
 #include <ssdef.h>
-#include<starlet.h>
+#include <starlet.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
 

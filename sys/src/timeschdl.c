@@ -1,21 +1,21 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on timer.c.
 /**
    \file timeschdl.c
    \brief timer system hardware interrupt
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<queue.h>
+#include <queue.h>
 #include <asmlink.h>
 #include <pridef.h>
-#include<ipldef.h>
-#include<lkbdef.h>
-#include<phddef.h>
-#include<ipl.h>
+#include <ipldef.h>
+#include <lkbdef.h>
+#include <phddef.h>
+#include <ipl.h>
 #include <linux/linkage.h>
 #include <linux/sched.h>
 

@@ -1,26 +1,26 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file sysforcex.c
    \brief system service forced exit
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
-#include<linux/vmalloc.h>
-#include<acbdef.h>
-#include<pridef.h>
-#include<ipldef.h>
-#include<ipl.h>
-#include<internals.h>
-#include<system_data_cells.h>
-#include<cwpsdef.h>
-#include<cdrpdef.h>
-#include<rddef.h>
-#include<ssdef.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
+#include <linux/vmalloc.h>
+#include <acbdef.h>
+#include <pridef.h>
+#include <ipldef.h>
+#include <ipl.h>
+#include <internals.h>
+#include <system_data_cells.h>
+#include <cwpsdef.h>
+#include <cdrpdef.h>
+#include <rddef.h>
+#include <ssdef.h>
 #include <linux/slab.h>
 #include <exe_routines.h>
 #include <misc_routines.h>

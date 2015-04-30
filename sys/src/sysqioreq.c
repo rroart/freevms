@@ -1,38 +1,38 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file sysqioreq.c
    \brief QIO - TODO still more doc
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/spinlock.h>
-#include<asm/unistd.h>
+#include <linux/spinlock.h>
+#include <asm/unistd.h>
 
-#include<acbdef.h>
-#include<aqbdef.h>
-#include<cdrpdef.h>
-#include<ddtdef.h>
-#include<dyndef.h>
-#include<fdtdef.h>
-#include<ipl.h>
-#include<internals.h>
-#include<iodef.h>
-#include<ipldef.h>
-#include<irpdef.h>
-#include<pridef.h>
-#include<ssdef.h>
-#include<starlet.h>
-#include<system_data_cells.h>
-#include<ucbdef.h>
-#include<vcbdef.h>
+#include <acbdef.h>
+#include <aqbdef.h>
+#include <cdrpdef.h>
+#include <ddtdef.h>
+#include <dyndef.h>
+#include <fdtdef.h>
+#include <ipl.h>
+#include <internals.h>
+#include <iodef.h>
+#include <ipldef.h>
+#include <irpdef.h>
+#include <pridef.h>
+#include <ssdef.h>
+#include <starlet.h>
+#include <system_data_cells.h>
+#include <ucbdef.h>
+#include <vcbdef.h>
 
-#include<linux/vmalloc.h>
-#include<linux/linkage.h>
-#include<linux/kernel.h>
-#include<asm/hw_irq.h>
+#include <linux/vmalloc.h>
+#include <linux/linkage.h>
+#include <linux/kernel.h>
+#include <asm/hw_irq.h>
 #include "../../starlet/src/sysdep.h"
 #include <exe_routines.h>
 #include <misc_routines.h>

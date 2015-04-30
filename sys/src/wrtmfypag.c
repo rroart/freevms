@@ -1,25 +1,25 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <linux/bitops.h>
 #include <linux/config.h>
 #include <linux/mm.h>
 #include <linux/vmalloc.h>
 
-#include<dyndef.h>
-#include<fcbdef.h>
-#include<ipldef.h>
-#include<irpdef.h>
-#include<mpwdef.h>
-#include<schdef.h>
-#include<system_data_cells.h>
-#include<vmspte.h>
-#include<ssdef.h>
-#include<pfndef.h>
-#include<pfldef.h>
-#include<wcbdef.h>
+#include <dyndef.h>
+#include <fcbdef.h>
+#include <ipldef.h>
+#include <irpdef.h>
+#include <mpwdef.h>
+#include <schdef.h>
+#include <system_data_cells.h>
+#include <vmspte.h>
+#include <ssdef.h>
+#include <pfndef.h>
+#include <pfldef.h>
+#include <wcbdef.h>
 #include <linux/slab.h>
 #include <linux/init.h>
 #include <misc_routines.h>

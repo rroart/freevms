@@ -1,24 +1,24 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file sysascefc.c
    \brief associate event flags
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
  */
 
-#include<linux/unistd.h>
-#include<linux/linkage.h>
-#include<linux/sched.h>
-#include<ssdef.h>
-#include<starlet.h>
-#include<cebdef.h>
-#include<pridef.h>
-#include<statedef.h>
-#include<evtdef.h>
-#include<ipldef.h>
-#include<descrip.h>
+#include <linux/unistd.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
+#include <ssdef.h>
+#include <starlet.h>
+#include <cebdef.h>
+#include <pridef.h>
+#include <statedef.h>
+#include <evtdef.h>
+#include <ipldef.h>
+#include <descrip.h>
 #include <system_data_cells.h>
 #include <internals.h>
 #include <misc_routines.h>
@@ -26,7 +26,7 @@
 #include <queue.h>
 #include <linux/vmalloc.h>
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 /**
    \brief associating to a common event flag cluster - See 5.2 9.3

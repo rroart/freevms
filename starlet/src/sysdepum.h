@@ -1,34 +1,29 @@
 /* Copyright (C) 1992, 93, 95, 96, 97, 98, 99, 00 Free Software Foundation, Inc.
-   This file is part of the GNU C Library.
-   Contributed by Ulrich Drepper, <drepper@gnu.org>, August 1995.
+ This file is part of the GNU C Library.
+ Contributed by Ulrich Drepper, <drepper@gnu.org>, August 1995.
 
-   The GNU C Library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public
-   License as published by the Free Software Foundation; either
-   version 2.1 of the License, or (at your option) any later version.
+ The GNU C Library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-   The GNU C Library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
+ The GNU C Library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with the GNU C Library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+ You should have received a copy of the GNU Lesser General Public
+ License along with the GNU C Library; if not, write to the Free
+ Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+ 02111-1307 USA.  */
 
 #ifndef _LINUX_I386_SYSDEP_H
 #define _LINUX_I386_SYSDEP_H 1
 
-/* There is some commonality.  */
-//#include <sysdeps/unix/i386/sysdep.h>
-//#include <bp-sym.h>
-//#include <bp-asm.h>
-
 /* For Linux we can use the system call table in the header file
-    /usr/include/asm/unistd.h
-   of the kernel.  But these symbols do not follow the SYS_* syntax
-   so we have to redefine the `SYS_ify' macro here.  */
+ /usr/include/asm/unistd.h
+ of the kernel.  But these symbols do not follow the SYS_* syntax
+ so we have to redefine the `SYS_ify' macro here.  */
 #undef SYS_ify
 #define SYS_ify(syscall_name)   __NR_##syscall_name
 
@@ -39,18 +34,18 @@
 #ifdef __ASSEMBLER__
 
 /* Linux uses a negative return value to indicate syscall errors,
-   unlike most Unices, which use the condition codes' carry flag.
+ unlike most Unices, which use the condition codes' carry flag.
 
-   Since version 2.1 the return value of a system call might be
-   negative even if the call succeeded.  E.g., the `lseek' system call
-   might return a large offset.  Therefore we must not anymore test
-   for < 0, but test for a real error by making sure the value in %eax
-   is a real error number.  Linus said he will make sure the no syscall
-   returns a value in -1 .. -4095 as a valid result so we can savely
-   test with -4095.  */
+ Since version 2.1 the return value of a system call might be
+ negative even if the call succeeded.  E.g., the `lseek' system call
+ might return a large offset.  Therefore we must not anymore test
+ for < 0, but test for a real error by making sure the value in %eax
+ is a real error number.  Linus said he will make sure the no syscall
+ returns a value in -1 .. -4095 as a valid result so we can savely
+ test with -4095.  */
 
 /* We don't want the label for the error handle to be global when we define
-   it here.  */
+ it here.  */
 #ifdef PIC
 # define SYSCALL_ERROR_LABEL 0f
 #else
@@ -93,7 +88,7 @@
   orl $-1, %eax;                                  \
   jmp L(pseudo_end);
 /* A quick note: it is assumed that the call to `__errno_location' does
-   not modify the stack!  */
+ not modify the stack!  */
 #else
 #define SYSCALL_ERROR_HANDLER                             \
 0:call 1f;                                    \
@@ -110,47 +105,47 @@
 
 /* Linux takes system call arguments in registers:
 
-    syscall number  %eax         call-clobbered
-    arg 1       %ebx         call-saved
-    arg 2       %ecx         call-clobbered
-    arg 3       %edx         call-clobbered
-    arg 4       %esi         call-saved
-    arg 5       %edi         call-saved
+ syscall number  %eax         call-clobbered
+ arg 1       %ebx         call-saved
+ arg 2       %ecx         call-clobbered
+ arg 3       %edx         call-clobbered
+ arg 4       %esi         call-saved
+ arg 5       %edi         call-saved
 
-   The stack layout upon entering the function is:
+ The stack layout upon entering the function is:
 
-    20(%esp)    Arg# 5
-    16(%esp)    Arg# 4
-    12(%esp)    Arg# 3
-     8(%esp)    Arg# 2
-     4(%esp)    Arg# 1
-      (%esp)    Return address
+ 20(%esp)    Arg# 5
+ 16(%esp)    Arg# 4
+ 12(%esp)    Arg# 3
+ 8(%esp)    Arg# 2
+ 4(%esp)    Arg# 1
+ (%esp)    Return address
 
-   (Of course a function with say 3 arguments does not have entries for
-   arguments 4 and 5.)
+ (Of course a function with say 3 arguments does not have entries for
+ arguments 4 and 5.)
 
-   The following code tries hard to be optimal.  A general assumption
-   (which is true according to the data books I have) is that
+ The following code tries hard to be optimal.  A general assumption
+ (which is true according to the data books I have) is that
 
-    2 * xchg    is more expensive than  pushl + movl + popl
+ 2 * xchg    is more expensive than  pushl + movl + popl
 
-   Beside this a neat trick is used.  The calling conventions for Linux
-   tell that among the registers used for parameters %ecx and %edx need
-   not be saved.  Beside this we may clobber this registers even when
-   they are not used for parameter passing.
+ Beside this a neat trick is used.  The calling conventions for Linux
+ tell that among the registers used for parameters %ecx and %edx need
+ not be saved.  Beside this we may clobber this registers even when
+ they are not used for parameter passing.
 
-   As a result one can see below that we save the content of the %ebx
-   register in the %edx register when we have less than 3 arguments
-   (2 * movl is less expensive than pushl + popl).
+ As a result one can see below that we save the content of the %ebx
+ register in the %edx register when we have less than 3 arguments
+ (2 * movl is less expensive than pushl + popl).
 
-   Second unlike for the other registers we don't save the content of
-   %ecx and %edx when we have more than 1 and 2 registers resp.
+ Second unlike for the other registers we don't save the content of
+ %ecx and %edx when we have more than 1 and 2 registers resp.
 
-   The code below might look a bit long but we have to take care for
-   the pipelined processors (i586).  Here the `pushl' and `popl'
-   instructions are marked as NP (not pairable) but the exception is
-   two consecutive of these instruction.  This gives no penalty on
-   other processors though.  */
+ The code below might look a bit long but we have to take care for
+ the pipelined processors (i586).  Here the `pushl' and `popl'
+ instructions are marked as NP (not pairable) but the exception is
+ two consecutive of these instruction.  This gives no penalty on
+ other processors though.  */
 
 #undef  DO_CALL
 #define DO_CALL(args, syscall_name)                           \
@@ -205,7 +200,7 @@
 #else   /* !__ASSEMBLER__ */
 
 /* We need some help from the assembler to generate optimal code.  We
-   define some macros here which later will be used.  */
+ define some macros here which later will be used.  */
 asm (".L__X'%ebx = 1\n\t"
      ".L__X'%ecx = 2\n\t"
      ".L__X'%edx = 2\n\t"
@@ -243,7 +238,7 @@ asm (".L__X'%ebx = 1\n\t"
 extern int errno;
 
 /* Define a macro which expands inline into the wrapper code for a system
-   call.  */
+ call.  */
 #undef INLINE_SYSCALL
 #define INLINE_SYSCALL(name, nr, args...) \
   ({                                          \

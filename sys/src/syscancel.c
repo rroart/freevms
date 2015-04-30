@@ -1,29 +1,29 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file syscancel.c
    \brief QIO cancel
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/config.h>
+#include <linux/config.h>
 
-#include<starlet.h>
-#include<ddtdef.h>
-#include<iodef.h>
-#include<ipldef.h>
-#include<ssdef.h>
-#include<misc.h>
-#include<irpdef.h>
-#include<ucbdef.h>
-#include<ccbdef.h>
-#include<system_data_cells.h>
+#include <starlet.h>
+#include <ddtdef.h>
+#include <iodef.h>
+#include <ipldef.h>
+#include <ssdef.h>
+#include <misc.h>
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ccbdef.h>
+#include <system_data_cells.h>
 #include <queue.h>
 #include <ipl.h>
-#include<linux/linkage.h>
-#include<linux/sched.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
 #include <exe_routines.h>
 
 /**

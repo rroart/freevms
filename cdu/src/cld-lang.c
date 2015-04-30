@@ -9,7 +9,7 @@
 #define true 1
 #define false 0
 
-#include<stdio.h>
+#include <stdio.h>
 
 #include "tree.h"
 

@@ -1,4 +1,4 @@
-#include<stdio.h>
+#include <stdio.h>
 void fn(int i)
 {
     printf("hi %x %x %x\n",i,getuid(),getgid());

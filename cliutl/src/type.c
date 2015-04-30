@@ -4,36 +4,36 @@
 /*     Ods2.c v1.3   Mainline ODS2 program   */
 
 /*
-        This is part of ODS2 written by Paul Nankervis,
-        email address:  Paulnank@au1.ibm.com
+ This is part of ODS2 written by Paul Nankervis,
+ email address:  Paulnank@au1.ibm.com
 
-        ODS2 is distributed freely for all members of the
-        VMS community to use. However all derived works
-        must maintain comments in their source to acknowledge
-        the contibution of the original author.
+ ODS2 is distributed freely for all members of the
+ VMS community to use. However all derived works
+ must maintain comments in their source to acknowledge
+ the contibution of the original author.
 
-        The modules in ODS2 are:-
+ The modules in ODS2 are:-
 
-                ACCESS.C        Routines for accessing ODS2 disks
-                CACHE.C         Routines for managing memory cache
-                DEVICE.C        Routines to maintain device information
-                DIRECT.C        Routines for handling directories
-                ODS2.C          The mainline program
-                PHYVMS.C        Routine to perform physical I/O
-                RMS.C           Routines to handle RMS structures
-                VMSTIME.C       Routines to handle VMS times
+ ACCESS.C        Routines for accessing ODS2 disks
+ CACHE.C         Routines for managing memory cache
+ DEVICE.C        Routines to maintain device information
+ DIRECT.C        Routines for handling directories
+ ODS2.C          The mainline program
+ PHYVMS.C        Routine to perform physical I/O
+ RMS.C           Routines to handle RMS structures
+ VMSTIME.C       Routines to handle VMS times
 
-        On non-VMS platforms PHYVMS.C should be replaced as follows:-
+ On non-VMS platforms PHYVMS.C should be replaced as follows:-
 
-                OS/2            PHYOS2.C
-                Windows 95/NT   PHYNT.C
+ OS/2            PHYOS2.C
+ Windows 95/NT   PHYNT.C
 
-        For example under OS/2 the program is compiled using the GCC
-        compiler with the single command:-
+ For example under OS/2 the program is compiled using the GCC
+ compiler with the single command:-
 
-                gcc -fdollars-in-identifiers ods2.c,rms.c,direct.c,
-                      access.c,device.c,cache.c,phyos2.c,vmstime.c
-*/
+ gcc -fdollars-in-identifiers ods2.c,rms.c,direct.c,
+ access.c,device.c,cache.c,phyos2.c,vmstime.c
+ */
 
 /* Modified by:
  *
@@ -45,18 +45,18 @@
  */
 
 /*  This version will compile and run using normal VMS I/O by
-    defining VMSIO
-*/
+ defining VMSIO
+ */
 
 /*  This is the top level set of routines. It is fairly
-    simple minded asking the user for a command, doing some
-    primitive command parsing, and then calling a set of routines
-    to perform whatever function is required (for example COPY).
-    Some routines are implemented in different ways to test the
-    underlying routines - for example TYPE is implemented without
-    a NAM block meaning that it cannot support wildcards...
-    (sorry! - could be easily fixed though!)
-*/
+ simple minded asking the user for a command, doing some
+ primitive command parsing, and then calling a set of routines
+ to perform whatever function is required (for example COPY).
+ Some routines are implemented in different ways to test the
+ underlying routines - for example TYPE is implemented without
+ a NAM block meaning that it cannot support wildcards...
+ (sorry! - could be easily fixed though!)
+ */
 
 #ifdef VMS
 #ifdef __DECC
@@ -75,7 +75,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
 
 #ifdef VMSIO
 #include <ssdef.h>
@@ -118,8 +117,8 @@
 #include <hm2def.h>
 #include "../../rms/src/cache.h"
 #include "../../f11x/src/access.h"
-#include<starlet.h>
-#include<cli$routines.h>
+#include <starlet.h>
+#include <cli$routines.h>
 //#include "rms.h"
 #endif
 
@@ -127,17 +126,27 @@
 //extern struct _fab cc$rms_fab;
 
 #if 0
-struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
-struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
-struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
-           0, 0, 0, 0,
-           VMSTIME_ZERO, VMSTIME_ZERO,
-           VMSTIME_ZERO, VMSTIME_ZERO,
-           VMSTIME_ZERO, VMSTIME_ZERO
+struct _fabdef cc$rms_fab =
+    {   NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
+struct _namdef cc$rms_nam =
+    {   0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
+struct _xabdatdef cc$rms_xabdat =
+{
+    XAB$C_DAT,0,
+    0, 0, 0, 0,
+    VMSTIME_ZERO, VMSTIME_ZERO,
+    VMSTIME_ZERO, VMSTIME_ZERO,
+    VMSTIME_ZERO, VMSTIME_ZERO
 };
-struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
-struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};
-struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
+struct _xabfhcdef cc$rms_xabfhc =
+    {   XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
+struct _xabprodef1 cc$rms_xabpro =
+    {   XAB$C_PRO,0,0,0};
+struct _rabdef cc$rms_rab =
+{
+    NULL,NULL,NULL,NULL,0,0,0,
+    {   0,0,0}
+};
 #endif
 
 #define PRINT_ATTR (FAB$M_CR | FAB$M_PRN | FAB$M_FTN)
@@ -159,11 +168,11 @@ unsigned typ(int userarg)
     $DESCRIPTOR(p, "p1");
     char c[80];
     struct dsc$descriptor o;
-    o.dsc$a_pointer=c;
-    o.dsc$w_length=80;
-    memset (c, 0, 80);
+    o.dsc$a_pointer = c;
+    o.dsc$w_length = 80;
+    memset(c, 0, 80);
     sts = cli$present(&p);
-    if ((sts&1)==0)
+    if ((sts & 1) == 0)
         return sts;
     int retlen;
     sts = cli$get_value(&p, &o, &retlen);
@@ -183,19 +192,21 @@ unsigned typ(int userarg)
             while ((sts = sys$get(&rab, 0, 0)) & 1)
             {
                 unsigned rsz = rab.rab$w_rsz;
-                if (fab.fab$b_rat & PRINT_ATTR) rec[rsz++] = '\n';
+                if (fab.fab$b_rat & PRINT_ATTR)
+                    rec[rsz++] = '\n';
                 rec[rsz++] = '\0';
-                fputs(rec,stdout);
+                fputs(rec, stdout);
                 records++;
             }
             sys$disconnect(&rab, 0, 0);
         }
         sys$close(&fab, 0, 0);
-        if (sts == RMS$_EOF) sts = 1;
+        if (sts == RMS$_EOF)
+            sts = 1;
     }
     if ((sts & 1) == 0)
     {
-        printf("%%TYPE-F-ERROR Status: %d\n",sts);
+        printf("%%TYPE-F-ERROR Status: %d\n", sts);
     }
     return sts;
 }

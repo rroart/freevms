@@ -113,7 +113,7 @@ MODULE TELNET(IDENT="1.11",LANGUAGE(BLISS32),
 
 //!!HACK!!// why does this module make so many refs to AST_in_Progress?
 
-#include<descrip.h>
+#include <descrip.h>
 
 #include <starlet.h>    // VMS system definitions
 #include <lib$routines.h>
@@ -127,17 +127,17 @@ MODULE TELNET(IDENT="1.11",LANGUAGE(BLISS32),
 #include "tcp.h"            // TCP related definitions
 #include "telnet.h"     // TELNET protocol definitions
 
-#include<ssdef.h>
-#include<iodef.h>
-#include<dvidef.h>
-#include<iosbdef.h>
-#include<msgdef.h>
-#include<lnmdef.h>
-#include<misc.h>
+#include <ssdef.h>
+#include <iodef.h>
+#include <dvidef.h>
+#include <iosbdef.h>
+#include <msgdef.h>
+#include <lnmdef.h>
+#include <misc.h>
 #ifdef __x86_64__
-#include<linux/sched.h>
+#include <linux/sched.h>
 #endif
-#include<acbdef.h>
+#include <acbdef.h>
                   extern signed long log_state,
                   local_name,
                   ast_in_progress;

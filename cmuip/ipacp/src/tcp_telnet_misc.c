@@ -62,8 +62,8 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
                    OPTIMIZE,OPTLEVEL=3,ZIP)=
 #endif
 
-#include<descrip.h>
-#include<starlet.h>
+#include <descrip.h>
+#include <starlet.h>
 
                        // not yet#include "SYS$LIBRARY:LIB";        // JC
 //LIBRARY "SYS$LIBRARY:STARLET";
@@ -72,16 +72,16 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 #include "cmuip.h" // needed before tcpmacros.h
 #include "tcpmacros.h"      // Local (tcp) Macro defintions.
 
-#include<ssdef.h>
-#include"netvms.h"
-#include<ttdef.h>
-#include<tt2def.h>
-#include<iodef.h>
-#include<iosbdef.h>
-#include<dvidef.h>
-#include<lnmdef.h>
-#include<misc.h>
-#include<starlet.h>
+#include <ssdef.h>
+#include "netvms.h"
+#include <ttdef.h>
+#include <tt2def.h>
+#include <iodef.h>
+#include <iosbdef.h>
+#include <dvidef.h>
+#include <lnmdef.h>
+#include <misc.h>
+#include <starlet.h>
 
 #ifndef NOKERNEL
 #define sys$faol exe$faol

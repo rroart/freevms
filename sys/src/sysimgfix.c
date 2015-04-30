@@ -1,35 +1,35 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
+#include <linux/linkage.h>
 
-#include<linux/mm.h>
+#include <linux/mm.h>
 #include <asm/uaccess.h>
 
-#include<starlet.h>
+#include <starlet.h>
 
-#include<descrip.h>
-#include<ihadef.h>
-#include<ihddef.h>
-#include<ihidef.h>
-#include<ihpdef.h>
-#include<ihsdef.h>
-#include<ihvndef.h>
-#include<isddef.h>
+#include <descrip.h>
+#include <ihadef.h>
+#include <ihddef.h>
+#include <ihidef.h>
+#include <ihpdef.h>
+#include <ihsdef.h>
+#include <ihvndef.h>
+#include <isddef.h>
 
-#include<imcbdef.h>
+#include <imcbdef.h>
 
-#include<va_rangedef.h>
+#include <va_rangedef.h>
 
-#include<system_data_cells.h>
+#include <system_data_cells.h>
 
 #include <iafdef.h>
 #include <ihddef.h>
 #include <shldef.h>
 
-#include<ssdef.h>
+#include <ssdef.h>
 
 typedef struct
 {

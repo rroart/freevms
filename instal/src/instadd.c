@@ -1,12 +1,12 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<descrip.h>
-#include<kfedef.h>
-#include<prvdef.h>
-#include<cli$routines.h>
+#include <descrip.h>
+#include <kfedef.h>
+#include <prvdef.h>
+#include <cli$routines.h>
 
 #include <stdio.h>
 #include <string.h>

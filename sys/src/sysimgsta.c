@@ -1,11 +1,11 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
+#include <linux/linkage.h>
 
-#include<starlet.h>
+#include <starlet.h>
 #include <exe_routines.h>
 
 asmlinkage int exe$imgsta_wrap(struct struct_args * s)

@@ -1,29 +1,29 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file iosubpagd.c
    \brief QIO - TODO still more doc
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<starlet.h>
-#include<iodef.h>
-#include<ssdef.h>
-#include<descrip.h>
-#include<misc.h>
-#include<irpdef.h>
-#include<ucbdef.h>
-#include<ddbdef.h>
-#include<ccbdef.h>
-#include<lnmdef.h>
-#include<sbdef.h>
-#include<system_data_cells.h>
-#include<sysgen.h>
+#include <starlet.h>
+#include <iodef.h>
+#include <ssdef.h>
+#include <descrip.h>
+#include <misc.h>
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ddbdef.h>
+#include <ccbdef.h>
+#include <lnmdef.h>
+#include <sbdef.h>
+#include <system_data_cells.h>
+#include <sysgen.h>
 #include <ioc_routines.h>
-#include<linux/vmalloc.h>
-#include<linux/linkage.h>
+#include <linux/vmalloc.h>
+#include <linux/linkage.h>
 #include <exe_routines.h>
 #include <lnmsub.h>
 #include <lnmstrdef.h>

@@ -9,7 +9,7 @@ install: all
 	install -d ../../rooti386/vms"$$"common/systest
 	install i386/* ../../rooti386/vms"$$"common/systest
 
-OBJS = main.o logicaltest.o
+OBJS = main.o logicaltest.o processtest.o systemtest.o
 
 i386/sstest${NOEXE}: $(OBJS) $(VMSLIBS)
 	install -d i386

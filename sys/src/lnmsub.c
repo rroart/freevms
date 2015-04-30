@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #ifdef USERLAND
 #define __LINUX_VMALLOC_H
@@ -11,24 +11,24 @@ inline void panic(char * c) { }
 #endif
 
 #ifdef USERLAND
-#include<sysgen.h>
-#include<lnmsub.h>
-#include<system_data_cells.h>
-#include<queue.h>
-#include<lnmstrdef.h>
-#include<ssdef.h>
+#include <sysgen.h>
+#include <lnmsub.h>
+#include <system_data_cells.h>
+#include <queue.h>
+#include <lnmstrdef.h>
+#include <ssdef.h>
 #else
-#include<linux/mm.h>
-#include<sysgen.h>
-#include<lnmdef.h>
-#include<lnmsub.h>
-#include<system_data_cells.h>
-#include<queue.h>
-#include<lnmdef.h>
-#include<lnmstrdef.h>
-#include<ssdef.h>
-#include<descrip.h>
-#include<misc.h>
+#include <linux/mm.h>
+#include <sysgen.h>
+#include <lnmdef.h>
+#include <lnmsub.h>
+#include <system_data_cells.h>
+#include <queue.h>
+#include <lnmdef.h>
+#include <lnmstrdef.h>
+#include <ssdef.h>
+#include <descrip.h>
+#include <misc.h>
 #include <exe_routines.h>
 #include <sch_routines.h>
 #include <misc_routines.h>
@@ -37,7 +37,7 @@ inline void panic(char * c) { }
 #include <mtxdef.h>
 #endif
 
-/* Author: Roar Thronæs */
+/* Author: Roar Thronï¿½s */
 
 #define LNM_DEBUG
 #undef LNM_DEBUG

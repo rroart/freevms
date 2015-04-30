@@ -1,16 +1,16 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include<string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
-#include<descrip.h>
-#include<cli$routines.h>
-#include<lib$routines.h>
+#include <descrip.h>
+#include <cli$routines.h>
+#include <lib$routines.h>
 
 #ifdef __i386__
 //int errno;

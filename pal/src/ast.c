@@ -1,19 +1,19 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file ast.c
    \brief CPU ast handling
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
  */
 
-#include<linux/linkage.h>
-#include<acbdef.h>
-#include<cpudef.h>
-#include<linux/sched.h>
+#include <linux/linkage.h>
+#include <acbdef.h>
+#include <cpudef.h>
+#include <linux/sched.h>
 #include <asmlink.h>
-#include<asm/hw_irq.h>
+#include <asm/hw_irq.h>
 #include <system_data_cells.h>
 
 int in_sw_ast;

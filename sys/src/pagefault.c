@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source, 2001-2004. Parts from fault.c and trap_kern.c
 
 #include <linux/config.h>
@@ -18,9 +18,9 @@
 #include <asm/uaccess.h>
 #include <asm/pgalloc.h>
 
-#include<linux/unistd.h>
-#include<linux/linkage.h>
-#include<linux/sched.h>
+#include <linux/unistd.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
 #include <system_data_cells.h>
 #include <linux/mm.h>
 #include <acbdef.h>

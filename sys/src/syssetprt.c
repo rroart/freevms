@@ -1,24 +1,24 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 // everything is untested
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
-#include<linux/slab.h>
-#include<asm/pgalloc.h>
-#include<asm/mmu_context.h>
-#include<internals.h>
-#include<ipldef.h>
-#include<mmg_functions.h>
-#include<mmg_routines.h>
-#include<rdedef.h>
-#include<ssdef.h>
-#include<system_data_cells.h>
-#include<va_rangedef.h>
-#include<vmspte.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
+#include <linux/slab.h>
+#include <asm/pgalloc.h>
+#include <asm/mmu_context.h>
+#include <internals.h>
+#include <ipldef.h>
+#include <mmg_functions.h>
+#include <mmg_routines.h>
+#include <rdedef.h>
+#include <ssdef.h>
+#include <system_data_cells.h>
+#include <va_rangedef.h>
+#include <vmspte.h>
 
 int mmg$pteref_64 (void * va, struct _rde *rde, void ** va_pte);
 

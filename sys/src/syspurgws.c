@@ -1,22 +1,22 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
+#include <linux/linkage.h>
 
-#include<linux/mm.h>
-#include<linux/sched.h>
+#include <linux/mm.h>
+#include <linux/sched.h>
 
-#include<asm/current.h>
+#include <asm/current.h>
 
-#include<ipldef.h>
-#include<phddef.h>
-#include<ssdef.h>
-#include<va_rangedef.h>
-#include<wsldef.h>
-#include<vmspte.h>
-#include<ipl.h>
+#include <ipldef.h>
+#include <phddef.h>
+#include <ssdef.h>
+#include <va_rangedef.h>
+#include <wsldef.h>
+#include <vmspte.h>
+#include <ipl.h>
 #include <mmg_routines.h>
 #include <misc_routines.h>
 

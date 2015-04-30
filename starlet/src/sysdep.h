@@ -24,11 +24,6 @@
 #ifndef _LINUX_I386_SYSDEP_H
 #define _LINUX_I386_SYSDEP_H 1
 
-/* There is some commonality.  */
-//#include <sysdeps/unix/i386/sysdep.h>
-//#include <bp-sym.h>
-//#include <bp-asm.h>
-
 #ifdef __i386__
 /* For Linux we can use the system call table in the header file
     /usr/include/asm/unistd.h

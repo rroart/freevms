@@ -1,24 +1,24 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #define __KERNEL_SYSCALLS__
 
 #define errno kernel_errno
 
-#include<linux/linkage.h>
-#include<linux/mm.h>
-#include<descrip.h>
-#include<dyndef.h>
-#include<ihddef.h>
-#include<ihadef.h>
-#include<lnmdef.h>
-#include<lnmstrdef.h>
-#include<misc.h>
-#include<pqbdef.h>
-#include<ssdef.h>
-#include<system_service_setup.h>
+#include <linux/linkage.h>
+#include <linux/mm.h>
+#include <descrip.h>
+#include <dyndef.h>
+#include <ihddef.h>
+#include <ihadef.h>
+#include <lnmdef.h>
+#include <lnmstrdef.h>
+#include <misc.h>
+#include <pqbdef.h>
+#include <ssdef.h>
+#include <system_service_setup.h>
 
 #include "linux/unistd.h"
 #include "asm/ptrace.h"

@@ -1,34 +1,34 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 // This is supposed to be a file driver
 
-#include<aqbdef.h>
-#include<cdtdef.h>
-#include<crbdef.h>
-#include<dcdef.h>
-#include<ddbdef.h>
-#include<ddtdef.h>
-#include<devdef.h>
-#include<dptdef.h>
-#include<dyndef.h>
-#include<fdtdef.h>
-#include<iodef.h>
-#include<ipl.h>
-#include<ipldef.h>
-#include<irpdef.h>
-#include<pdtdef.h>
-#include<ssdef.h>
-#include<system_data_cells.h>
-#include<ucbdef.h>
-#include<vcbdef.h>
+#include <aqbdef.h>
+#include <cdtdef.h>
+#include <crbdef.h>
+#include <dcdef.h>
+#include <ddbdef.h>
+#include <ddtdef.h>
+#include <devdef.h>
+#include <dptdef.h>
+#include <dyndef.h>
+#include <fdtdef.h>
+#include <iodef.h>
+#include <ipl.h>
+#include <ipldef.h>
+#include <irpdef.h>
+#include <pdtdef.h>
+#include <ssdef.h>
+#include <system_data_cells.h>
+#include <ucbdef.h>
+#include <vcbdef.h>
 #include <exe_routines.h>
 #include <ioc_routines.h>
 #include <misc_routines.h>
 
-#include<linux/mm.h>
+#include <linux/mm.h>
 #include <linux/slab.h>
 
 struct _fdt file$fdt =

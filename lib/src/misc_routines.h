@@ -15,10 +15,13 @@
 #include <iosbdef.h>
 #include <mscpdef.h>
 #include <nisca.h>
+#include <pfndef.h>
 #include <rabdef.h>
 #include <scsdef.h>
 #include <ucbdef.h>
 #include <ucbnidef.h>
+
+#include <../../f11x/src/xqp.h>
 
 #include <descrip.h>
 

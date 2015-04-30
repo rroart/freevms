@@ -1,34 +1,34 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/kernel.h>
-#include<linux/slab.h>
-#include<acedef.h>
-#include<acldef.h>
-#include<atrdef.h>
-#include<descrip.h>
-#include<dyndef.h>
-#include<fabdef.h>
-#include<fcbdef.h>
+#include <linux/kernel.h>
+#include <linux/slab.h>
+#include <acedef.h>
+#include <acldef.h>
+#include <atrdef.h>
+#include <descrip.h>
+#include <dyndef.h>
+#include <fabdef.h>
+#include <fcbdef.h>
 #define _is_itmlst64 _is_itmlst64_not
-#include<iledef.h>
-#include<iodef.h>
-#include<iosbdef.h>
-#include<mytypes.h>
-#include<fatdef.h>
-#include<fibdef.h>
-#include<fiddef.h>
-#include<uicdef.h>
-#include<fh2def.h>
-#include<iosbdef.h>
-#include<misc.h>
-#include<namdef.h>
-#include<ssdef.h>
-#include<starlet.h>
-#include<xabdatdef.h>
-#include<xabfhcdef.h>
+#include <iledef.h>
+#include <iodef.h>
+#include <iosbdef.h>
+#include <mytypes.h>
+#include <fatdef.h>
+#include <fibdef.h>
+#include <fiddef.h>
+#include <uicdef.h>
+#include <fh2def.h>
+#include <iosbdef.h>
+#include <misc.h>
+#include <namdef.h>
+#include <ssdef.h>
+#include <starlet.h>
+#include <xabdatdef.h>
+#include <xabfhcdef.h>
 
 int create_fcb_acl(struct _fcb * fcb, struct _fh2 * fh2)
 {

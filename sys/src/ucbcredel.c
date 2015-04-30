@@ -1,22 +1,22 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file ucbcredel.c
    \brief QIO UCB routines for creation and deletion - TODO still more doc
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<ssdef.h>
-#include<misc.h>
-#include<crbdef.h>
-#include<dyndef.h>
+#include <ssdef.h>
+#include <misc.h>
+#include <crbdef.h>
+#include <dyndef.h>
 
-#include<linux/vmalloc.h>
-#include<ucbdef.h>
-#include<ddbdef.h>
-#include<ssdef.h>
+#include <linux/vmalloc.h>
+#include <ucbdef.h>
+#include <ddbdef.h>
+#include <ssdef.h>
 #include <ioc_routines.h>
 #include <queue.h>
 #include <linux/slab.h>

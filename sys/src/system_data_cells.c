@@ -1,25 +1,25 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file system_data_cells.c
    \brief most of our global variables
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
  */
 
 
-#include<linux/vmalloc.h>
+#include <linux/vmalloc.h>
 #ifdef __x86_64__
-#include<linux/init.h>
+#include <linux/init.h>
 #endif
-#include<system_data_cells.h>
-#include<dyndef.h>
-#include<queue.h>
-#include<phddef.h>
-#include<rddef.h>
-#include<cdtdef.h>
-#include<syidef.h>
+#include <system_data_cells.h>
+#include <dyndef.h>
+#include <queue.h>
+#include <phddef.h>
+#include <rddef.h>
+#include <cdtdef.h>
+#include <syidef.h>
 #include <exe_routines.h>
 #include <sch_routines.h>
 #include <misc_routines.h>
@@ -27,7 +27,7 @@
 #include <spldef.h>
 #include <cpbdef.h>
 
-/* Author: Roar Thronæs */
+/* Author: Roar Thronï¿½s */
 
 /* based on grep and cut from AAA_SYSTEM_CELLS.H
    as a gross approx everything is unsigned long

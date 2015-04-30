@@ -1,11 +1,11 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file iosubnpag.c
    \brief QIO - TODO still more doc
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
 #include <linux/kernel.h>
@@ -17,12 +17,12 @@
 #include <system_data_cells.h>
 #include <ipl.h>
 #include <internals.h>
-#include<queue.h>
-#include<ddtdef.h>
-#include<ucbdef.h>
-#include<irpdef.h>
-#include<ipldef.h>
-#include<ddbdef.h>
+#include <queue.h>
+#include <ddtdef.h>
+#include <ucbdef.h>
+#include <irpdef.h>
+#include <ipldef.h>
+#include <ddbdef.h>
 #include <ioc_routines.h>
 #include <smp_routines.h>
 

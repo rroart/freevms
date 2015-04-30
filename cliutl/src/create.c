@@ -1,15 +1,15 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<descrip.h>
-#include<ssdef.h>
-#include<lib$routines.h>
-#include<cli$routines.h>
+#include <descrip.h>
+#include <ssdef.h>
+#include <lib$routines.h>
+#include <cli$routines.h>
 
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
+#include <string.h>
 
 int main(int argc, char *argv[])
 {

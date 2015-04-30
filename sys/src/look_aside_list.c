@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 struct _myhead
 {
@@ -9,10 +9,10 @@ struct _myhead
     long hd$l_seq;
 };
 
-#include<linux/kernel.h>
-#include<spldef.h>
-#include<internals.h>
-#include<linux/cache.h>
+#include <linux/kernel.h>
+#include <spldef.h>
+#include <internals.h>
+#include <linux/cache.h>
 
 static struct _spl SPIN_LAL __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/

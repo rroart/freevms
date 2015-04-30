@@ -1,14 +1,14 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
-#include<misc.h>
-#include<ssdef.h>
-#include<system_data_cells.h>
-#include<linux/kernel.h>
-#include<asm/segment.h>
+#include <linux/linkage.h>
+#include <misc.h>
+#include <ssdef.h>
+#include <system_data_cells.h>
+#include <linux/kernel.h>
+#include <asm/segment.h>
 
 asmlinkage int exe$exit(unsigned int code)
 {

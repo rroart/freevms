@@ -1,11 +1,11 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 // like memcpy
 
-#include<starlet.h>
+#include <starlet.h>
 
 int memcpy(void *dest, const void *src, int n);
 

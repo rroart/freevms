@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Author. Linux people.
 
 /*
@@ -249,24 +249,24 @@ static void floppy_hardint2(struct _idb * idb);
 
 // This is a pre-alpha level driver
 
-#include<crbdef.h>
-#include<cdtdef.h>
-#include<ddtdef.h>
-#include<dptdef.h>
-#include<fdtdef.h>
-#include<pdtdef.h>
-#include<irpdef.h>
-#include<ucbdef.h>
-#include<ddbdef.h>
-#include<ipldef.h>
-#include<dyndef.h>
-#include<idbdef.h>
-#include<vecdef.h>
-#include<ssdef.h>
-#include<iodef.h>
-#include<devdef.h>
-#include<system_data_cells.h>
-#include<linux/vmalloc.h>
+#include <crbdef.h>
+#include <cdtdef.h>
+#include <ddtdef.h>
+#include <dptdef.h>
+#include <fdtdef.h>
+#include <pdtdef.h>
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ddbdef.h>
+#include <ipldef.h>
+#include <dyndef.h>
+#include <idbdef.h>
+#include <vecdef.h>
+#include <ssdef.h>
+#include <iodef.h>
+#include <devdef.h>
+#include <system_data_cells.h>
+#include <linux/vmalloc.h>
 
 struct _fdt fdt_floppy = {
   fdt$q_valid:IO$_NOP|IO$_UNLOAD|IO$_AVAILABLE|IO$_PACKACK|IO$_SENSECHAR|IO$_SETCHAR|IO$_SENSEMODE|IO$_SETMODE|IO$_WRITECHECK|IO$_READPBLK|IO$_WRITELBLK|IO$_DSE|IO$_ACCESS|IO$_ACPCONTROL|IO$_CREATE|IO$_DEACCESS|IO$_DELETE|IO$_MODIFY|IO$_MOUNT|IO$_READRCT|IO$_CRESHAD|IO$_ADDSHAD|IO$_COPYSHAD|IO$_REMSHAD|IO$_SHADMV|IO$_DISPLAY|IO$_SETPRFPATH|IO$_FORMAT,

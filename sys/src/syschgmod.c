@@ -1,12 +1,12 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
-#include<prvdef.h>
-#include<ssdef.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
+#include <prvdef.h>
+#include <ssdef.h>
 
 asmlinkage int exe$cmkrnl(int (*routin)(__unknown_params), unsigned long *arglst)
 {

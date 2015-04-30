@@ -1,33 +1,33 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Contains some modified Linux sources, 2001-2004
 
-#include<cxbdef.h>
-#include<crbdef.h>
-#include<cdtdef.h>
-#include<dcdef.h>
-#include<ddtdef.h>
-#include<dptdef.h>
-#include<fdtdef.h>
-#include<pdtdef.h>
-#include<idbdef.h>
-#include<irpdef.h>
-#include<ucbdef.h>
-#include<ucbnidef.h>
-#include<ddbdef.h>
-#include<ipldef.h>
-#include<dyndef.h>
-#include<ssdef.h>
-#include<iodef.h>
-#include<devdef.h>
-#include<nmadef.h>
-#include<system_data_cells.h>
-#include<ipl.h>
-#include<linux/pci.h>
-#include<system_service_setup.h>
-#include<descrip.h>
+#include <cxbdef.h>
+#include <crbdef.h>
+#include <cdtdef.h>
+#include <dcdef.h>
+#include <ddtdef.h>
+#include <dptdef.h>
+#include <fdtdef.h>
+#include <pdtdef.h>
+#include <idbdef.h>
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ucbnidef.h>
+#include <ddbdef.h>
+#include <ipldef.h>
+#include <dyndef.h>
+#include <ssdef.h>
+#include <iodef.h>
+#include <devdef.h>
+#include <nmadef.h>
+#include <system_data_cells.h>
+#include <ipl.h>
+#include <linux/pci.h>
+#include <system_service_setup.h>
+#include <descrip.h>
 
 #include <iosbdef.h>
 #include <queue.h>
@@ -35,8 +35,8 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 
-#include<linux/mm.h>
-#include<linux/if_ether.h>
+#include <linux/mm.h>
+#include <linux/if_ether.h>
 
 #include <linux/netdevice.h>
 #include <linux/inetdevice.h>

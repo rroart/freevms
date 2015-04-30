@@ -1,22 +1,22 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file postef.c
    \brief post event flag
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
  */
 
-#include<linux/sched.h>
-#include<asm/bitops.h>
-#include<ssdef.h>
-#include<cebdef.h>
-#include<evtdef.h>
-#include<ipldef.h>
-#include<system_data_cells.h>
-#include<ipl.h>
-#include<internals.h>
+#include <linux/sched.h>
+#include <asm/bitops.h>
+#include <ssdef.h>
+#include <cebdef.h>
+#include <evtdef.h>
+#include <ipldef.h>
+#include <system_data_cells.h>
+#include <ipl.h>
+#include <internals.h>
 #include <exe_routines.h>
 #include <sch_routines.h>
 #include <misc_routines.h>

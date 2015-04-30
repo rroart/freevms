@@ -1,23 +1,23 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
+#include <linux/linkage.h>
 
-#include<starlet.h>
-#include<ssdef.h>
-#include<dvidef.h>
-#include<system_data_cells.h>
-#include<misc.h>
-#include<ddbdef.h>
-#include<pridef.h>
-#include<ucbdef.h>
+#include <starlet.h>
+#include <ssdef.h>
+#include <dvidef.h>
+#include <system_data_cells.h>
+#include <misc.h>
+#include <ddbdef.h>
+#include <pridef.h>
+#include <ucbdef.h>
 #include <exe_routines.h>
 #include <ioc_routines.h>
 #include <sch_routines.h>
 
-#include<linux/sched.h>
+#include <linux/sched.h>
 
 struct _generic_64
 {

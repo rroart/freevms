@@ -1,5 +1,5 @@
-#include<ipl.h>
-#include<spldef.h>
+#include <ipl.h>
+#include <spldef.h>
 
 #undef VMSLOCK_DEBUG
 #define VMSLOCK_DEBUG

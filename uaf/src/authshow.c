@@ -1,17 +1,17 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<descrip.h>
-#include<iledef.h>
-#include<prvdef.h>
-#include<uaidef.h>
-#include<cli$routines.h>
-#include<starlet.h>
+#include <descrip.h>
+#include <iledef.h>
+#include <prvdef.h>
+#include <uaidef.h>
+#include <cli$routines.h>
+#include <starlet.h>
 
-#include<stdio.h>
-#include<string.h>
+#include <stdio.h>
+#include <string.h>
 #include <strings.h>
 
 char * privs[] =

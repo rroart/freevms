@@ -1,30 +1,30 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file syscrmspc.c
    \brief MM process private and global sections
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
 #include <linux/vmalloc.h>
 #include <linux/file.h>
 #include <system_data_cells.h>
-#include<descrip.h>
-#include<gsddef.h>
-#include<ipldef.h>
-#include<ipl.h>
-#include<phddef.h>
-#include<rdedef.h>
-#include<secdef.h>
-#include<seciddef.h>
-#include<starlet.h>
-#include<va_rangedef.h>
-#include<vmspte.h>
-#include<wsldef.h>
+#include <descrip.h>
+#include <gsddef.h>
+#include <ipldef.h>
+#include <ipl.h>
+#include <phddef.h>
+#include <rdedef.h>
+#include <secdef.h>
+#include <seciddef.h>
+#include <starlet.h>
+#include <va_rangedef.h>
+#include <vmspte.h>
+#include <wsldef.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <mmg_routines.h>

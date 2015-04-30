@@ -1,16 +1,16 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
-#include<system_data_cells.h>
-#include<ucbdef.h>
-#include<irpdef.h>
-#include<fkbdef.h>
-#include<ipldef.h>
-#include<ipl.h>
-#include<internals.h>
+#include <linux/linkage.h>
+#include <system_data_cells.h>
+#include <ucbdef.h>
+#include <irpdef.h>
+#include <fkbdef.h>
+#include <ipldef.h>
+#include <ipl.h>
+#include <internals.h>
 #include <linux/smp.h>
 #include <asm/current.h>
 #include <linux/kernel.h>

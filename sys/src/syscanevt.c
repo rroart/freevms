@@ -1,19 +1,19 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file syscanevt.c
    \brief system cancel events
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<ssdef.h>
+#include <ssdef.h>
 
-#include<linux/linkage.h>
-#include<linux/sched.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
 
-#include<system_data_cells.h>
+#include <system_data_cells.h>
 
 #include <tqedef.h>
 #include <exe_routines.h>

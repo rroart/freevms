@@ -1,24 +1,24 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file syspcntrl.c
    \brief system process controll
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/unistd.h>
-#include<linux/linkage.h>
-#include<linux/sched.h>
-#include<asm/bitops.h>
-#include<starlet.h>
-#include<ssdef.h>
-#include<pridef.h>
-#include<statedef.h>
-#include<evtdef.h>
-#include<ipldef.h>
-#include<descrip.h>
+#include <linux/unistd.h>
+#include <linux/linkage.h>
+#include <linux/sched.h>
+#include <asm/bitops.h>
+#include <starlet.h>
+#include <ssdef.h>
+#include <pridef.h>
+#include <statedef.h>
+#include <evtdef.h>
+#include <ipldef.h>
+#include <descrip.h>
 #include <system_data_cells.h>
 #include <exe_routines.h>
 #include <sch_routines.h>
@@ -27,7 +27,7 @@
 #include <internals.h>
 #include <prvdef.h>
 
-/* Author: Roar Thronæs */
+/* Author: Roar Thronï¿½s */
 
 unsigned long maxprocesscnt=MAXPROCESSCNT;
 

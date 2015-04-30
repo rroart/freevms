@@ -1,19 +1,19 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 // temporary module. should really be at least one privileged shareable image
 
-#include<linux/kernel.h>
-#include<linux/fs.h>
-#include<linux/linkage.h>
-#include<linux/string.h>
-#include<descrip.h>
-#include<iledef.h>
-#include<ssdef.h>
-#include<uafdef.h>
-#include<uaidef.h>
+#include <linux/kernel.h>
+#include <linux/fs.h>
+#include <linux/linkage.h>
+#include <linux/string.h>
+#include <descrip.h>
+#include <iledef.h>
+#include <ssdef.h>
+#include <uafdef.h>
+#include <uaidef.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <rabdef.h>

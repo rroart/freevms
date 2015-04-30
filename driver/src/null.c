@@ -1,32 +1,32 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 // This is supposed to be a test driver
 
-#include<crbdef.h>
-#include<cdtdef.h>
-#include<dcdef.h>
-#include<ddtdef.h>
-#include<devdef.h>
-#include<dptdef.h>
-#include<fdtdef.h>
-#include<pdtdef.h>
-#include<idbdef.h>
-#include<irpdef.h>
-#include<ucbdef.h>
-#include<ddbdef.h>
-#include<ipldef.h>
-#include<dyndef.h>
-#include<ssdef.h>
-#include<iodef.h>
-#include<devdef.h>
-#include<system_data_cells.h>
-#include<ipl.h>
-#include<linux/vmalloc.h>
-#include<ttyucbdef.h>
-#include<ttyvecdef.h>
+#include <crbdef.h>
+#include <cdtdef.h>
+#include <dcdef.h>
+#include <ddtdef.h>
+#include <devdef.h>
+#include <dptdef.h>
+#include <fdtdef.h>
+#include <pdtdef.h>
+#include <idbdef.h>
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ddbdef.h>
+#include <ipldef.h>
+#include <dyndef.h>
+#include <ssdef.h>
+#include <iodef.h>
+#include <devdef.h>
+#include <system_data_cells.h>
+#include <ipl.h>
+#include <linux/vmalloc.h>
+#include <ttyucbdef.h>
+#include <ttyvecdef.h>
 #include <exe_routines.h>
 #include <ioc_routines.h>
 #include <misc_routines.h>

@@ -46,7 +46,6 @@
 #include "strdef.h"
 #include "libdef.h"
 #include "str$routines.h"
-//#include "stdint.h"
 
 #define MAXSTR      132000
 #define MAXUINT16   65536

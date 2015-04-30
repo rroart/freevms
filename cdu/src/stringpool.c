@@ -51,7 +51,7 @@
                   obstack_chunk_alloc,                  \
                   obstack_chunk_free)
 
-#include<stdio.h>
+#include <stdio.h>
 #include <ctype.h>
 
 #if 0

@@ -1,17 +1,17 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
-#include<linux/linkage.h>
-#include<linux/kernel.h>
-#include<linux/sched.h>
-#include<internals.h>
-#include<ipldef.h>
-#include<pcbdef.h>
-#include<prvdef.h>
-#include<ssdef.h>
-#include<system_data_cells.h>
+#include <linux/linkage.h>
+#include <linux/kernel.h>
+#include <linux/sched.h>
+#include <internals.h>
+#include <ipldef.h>
+#include <pcbdef.h>
+#include <prvdef.h>
+#include <ssdef.h>
+#include <system_data_cells.h>
 
 asmlinkage int exe$setrwm(int flags)
 {

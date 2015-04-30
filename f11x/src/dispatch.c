@@ -2,32 +2,32 @@
 // $Locker$
 
 // Author. Paul Nankervis.
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <linux/config.h>
 
-#include<mytypes.h>
-#include<ccbdef.h>
-#include<cpudef.h>
-#include<descrip.h>
-#include<fatdef.h>
-#include<fcbdef.h>
-#include<fibdef.h>
-#include<fiddef.h>
-#include<iodef.h>
-#include<iosbdef.h>
-#include<ipldef.h>
-#include<irpdef.h>
-#include<ssdef.h>
-#include<ucbdef.h>
-#include<uicdef.h>
-#include<vcbdef.h>
-#include<fh2def.h>
-#include"../../f11x/src/xqp.h"
+#include <mytypes.h>
+#include <ccbdef.h>
+#include <cpudef.h>
+#include <descrip.h>
+#include <fatdef.h>
+#include <fcbdef.h>
+#include <fibdef.h>
+#include <fiddef.h>
+#include <iodef.h>
+#include <iosbdef.h>
+#include <ipldef.h>
+#include <irpdef.h>
+#include <ssdef.h>
+#include <ucbdef.h>
+#include <uicdef.h>
+#include <vcbdef.h>
+#include <fh2def.h>
+#include "xqp.h"
 
-#include<linux/init.h>
-#include<linux/sched.h>
-#include<asm/current.h>
+#include <linux/init.h>
+#include <linux/sched.h>
+#include <asm/current.h>
 #include <queue.h>
 #include <ipl.h>
 #include <misc_routines.h>

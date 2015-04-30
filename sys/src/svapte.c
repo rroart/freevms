@@ -1,17 +1,17 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 // everything is untested
 
-#include<linux/linkage.h>
-#include<linux/mm.h>
-#include<linux/sched.h>
-#include<internals.h>
-#include<ipldef.h>
-#include<rdedef.h>
-#include<ssdef.h>
+#include <linux/linkage.h>
+#include <linux/mm.h>
+#include <linux/sched.h>
+#include <internals.h>
+#include <ipldef.h>
+#include <rdedef.h>
+#include <ssdef.h>
 
 int mmg$pteref_64 (void * va, struct _rde *rde, void ** va_pte)
 {

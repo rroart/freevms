@@ -2,21 +2,21 @@
 // $Locker$
 
 // Author. Paul Nankervis.
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <linux/config.h>
 #include <linux/fs.h>
 #include <linux/ext2_fs.h>
 
-#include<linux/linkage.h>
-#include<linux/mm.h>
-#include<linux/dirent.h>
-#include<linux/file.h>
+#include <linux/linkage.h>
+#include <linux/mm.h>
+#include <linux/dirent.h>
+#include <linux/file.h>
 #ifdef __x86_64__
-#include<linux/init.h>
+#include <linux/init.h>
 #endif
 
-#include<system_data_cells.h>
+#include <system_data_cells.h>
 
 #include <mytypes.h>
 #include <aqbdef.h>

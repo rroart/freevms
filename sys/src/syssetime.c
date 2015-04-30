@@ -1,20 +1,20 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file syssetime.c
    \brief set system time
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include<linux/linkage.h>
+#include <linux/linkage.h>
 #include <linux/string.h>
 #include <system_data_cells.h>  /* SYS$ header file */
 #include <sys$routines.h>   /* SYS$ header file */
 #include <ssdef.h>  /* SYS$ header file */
 
-/* Author: Roar Thronæs */
+/* Author: Roar Thronï¿½s */
 
 /**
    \brief set new system time - see 5.2 11.4

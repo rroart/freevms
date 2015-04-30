@@ -280,10 +280,10 @@ static inline char *pci_name(struct pci_dev *pdev)
 }
 
 // freevms include
-#include<cxbdef.h>
-#include<irpdef.h>
-#include<ucbdef.h>
-#include<ucbnidef.h>
+#include <cxbdef.h>
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ucbnidef.h>
 
 // freevms decls
 int ip_vmsinit(long dev);

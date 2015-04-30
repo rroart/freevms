@@ -1,4 +1,3 @@
-
 /*
  *  libutil.c
  *
@@ -33,48 +32,44 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-//#include <values.h>
 #include "descrip.h"
 #include <stdlib.h>
 #include "strdef.h"
 #include "libdef.h"
 #include "str$routines.h"
-//#include "stdint.h"
 
 #define MAXSTR      132000
 #define MAXUINT16   65536
 #define TRUE        1
 #define FALSE       0
 
-int lib$$ncompare (char *s1,char *s2);
-
+int lib$$ncompare(char *s1, char *s2);
 
 /*************************************************************/
 
-
-int lib$$ncompare (char *s1,char *s2)
+int lib$$ncompare(char *s1, char *s2)
 
 {
-    unsigned short  s1_len,  s2_len;
-    int     min_len, max_len, i;
+    unsigned short s1_len, s2_len;
+    int min_len, max_len, i;
 
-    s1_len = strlen (s1);
-    s2_len = strlen (s2);
+    s1_len = strlen(s1);
+    s2_len = strlen(s2);
 
-    min_len = ( s1_len < s2_len) ? s1_len : s2_len;
-    max_len = ( s1_len > s2_len) ? s1_len : s2_len;
+    min_len = (s1_len < s2_len) ? s1_len : s2_len;
+    max_len = (s1_len > s2_len) ? s1_len : s2_len;
 
-    if ( s1_len > s2_len )
-        return  1;
-    if ( s1_len < s2_len )
+    if (s1_len > s2_len)
+        return 1;
+    if (s1_len < s2_len)
         return -1;
 
 //  The string are of equal length
     for (i = 0; i < max_len; i++)
     {
-        if ( s1[i] > s2[i] )
-            return  1;
-        if ( s1[i] < s2[i] )
+        if (s1[i] > s2[i])
+            return 1;
+        if (s1[i] < s2[i])
             return -1;
     }
 

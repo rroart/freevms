@@ -3,13 +3,12 @@
 
 // Author. Roar Thron�s.
 
-#include<starlet.h>
-//#include"../../starlet/src/vmsopt.h"
-#include<descrip.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<ssdef.h>
-#include<cli$routines.h>
+#include <starlet.h>
+#include <descrip.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ssdef.h>
+#include <cli$routines.h>
 
 /* Author: Roar Thron�s */
 
@@ -24,18 +23,18 @@ int set_process(int argc, char**argv)
 
     char idstr[80];
     struct dsc$descriptor idval;
-    idval.dsc$a_pointer=idstr;
-    idval.dsc$w_length=80;
+    idval.dsc$a_pointer = idstr;
+    idval.dsc$w_length = 80;
 
     char nastr[80];
     struct dsc$descriptor naval;
-    naval.dsc$a_pointer=nastr;
-    naval.dsc$w_length=80;
+    naval.dsc$a_pointer = nastr;
+    naval.dsc$w_length = 80;
 
     char prstr[80];
     struct dsc$descriptor prval;
-    prval.dsc$a_pointer=prstr;
-    prval.dsc$w_length=80;
+    prval.dsc$a_pointer = prstr;
+    prval.dsc$w_length = 80;
 
     int sts, idsts, nasts, prsts;
     int retlen;
@@ -53,7 +52,7 @@ int set_process(int argc, char**argv)
     if (idsts & 1)
     {
         idsts = cli$get_value(&id, &idval, &retlen);
-        pid = strtol(id.dsc$a_pointer,0,16);
+        pid = strtol(id.dsc$a_pointer, 0, 16);
     }
 
     nasts = cli$present(&na);
@@ -62,8 +61,8 @@ int set_process(int argc, char**argv)
     {
         nasts = cli$get_value(&na, &naval, &retlen);
         struct dsc$descriptor d;
-        d.dsc$a_pointer=naval.dsc$a_pointer;
-        d.dsc$w_length=retlen;
+        d.dsc$a_pointer = naval.dsc$a_pointer;
+        d.dsc$w_length = retlen;
         sys$setprn(&d);
     }
 

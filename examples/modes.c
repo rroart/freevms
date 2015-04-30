@@ -1,7 +1,7 @@
 #ifdef __i386__
 extern int errno;
 #else
-#include<errno.h>
+#include <errno.h>
 #endif
 
 #define LOADARGS_0

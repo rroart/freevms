@@ -1,7 +1,10 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
+
+#ifndef XQP_H
+#define XQP_H
 
 struct __xqp
 {
@@ -116,3 +119,4 @@ extern struct __xqp xqps[1]; // number of pids
 
 extern struct __xqp * xqp;
 
+#endif /* XQP_H */

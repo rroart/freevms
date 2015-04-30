@@ -1,21 +1,21 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 // This is supposed to be a test driver
 
-#include<cdtdef.h>
-#include<ddtdef.h>
-#include<dptdef.h>
-#include<fdtdef.h>
-#include<pdtdef.h>
-#include<irpdef.h>
-#include<ucbdef.h>
-#include<ipldef.h>
-#include<dyndef.h>
-#include<iodef.h>
-#include<devdef.h>
+#include <cdtdef.h>
+#include <ddtdef.h>
+#include <dptdef.h>
+#include <fdtdef.h>
+#include <pdtdef.h>
+#include <irpdef.h>
+#include <ucbdef.h>
+#include <ipldef.h>
+#include <dyndef.h>
+#include <iodef.h>
+#include <devdef.h>
 #include <ioc_routines.h>
 #include <misc_routines.h>
 #include <ssdef.h>

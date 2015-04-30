@@ -1,4 +1,4 @@
-#include<linux/linkage.h>
+#include <linux/linkage.h>
 
 asmlinkage void sched_vector(void);
 asmlinkage void resched_vector(void);

@@ -1,6 +1,7 @@
 #ifndef EXPECT_H
 #define  EXPECT_H
 
+#include <stdio.h>
 #include <stsdef.h>
 
 extern unsigned int passed;
