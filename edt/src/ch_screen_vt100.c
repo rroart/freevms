@@ -98,7 +98,7 @@ static void outputnewcontent (int begofs, int endofs, char *cflags_r);
 static void printstring (String *string);
 static void printchar (char c);
 static void storechar (char c, char f);
-
+
 /* Initialization */
 
 int ch_screen_init (void)
@@ -212,7 +212,7 @@ uLong ch_screen_col2chr (uLong linesz, const char *linebf, uLong ncols)
 
     return (nchrs);
 }
-
+
 /* Update the screen and read command */
 
 String *ch_screen_read (void)
@@ -473,7 +473,7 @@ gendone:
     output ();                          /* flush to position cursor while processing */
     return (cmdstring);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Output newcontent string to the screen              */
@@ -559,7 +559,7 @@ static void outputnewcontent (int begofs, int endofs, char *cflags_r)
 
     *cflags_r = curcflags;
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Display a character on the screen                   */

@@ -122,7 +122,7 @@ static int matchstr (Line *line, uLong linesz, const char *linebf);
 static void emptybuffer (const char *name);
 static String *removeline (Line *line);
 static void message (int extra, const char *format, ...);
-
+
 void cmd_change (char *cp)
 
 {
@@ -183,7 +183,7 @@ void cmd_change (char *cp)
     output ();
     os_screenmode (0);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  This routine checks to make sure the current line is visible given  */
@@ -288,7 +288,7 @@ static void check_top_line (void)
         ch_screen_top_line = line;
     }
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Calculate what line should be on the top of the screen when we  */
@@ -355,7 +355,7 @@ static void calc_top_line (void)
     }
     ch_screen_top_line = line;
 }
-
+
 /* Keyword table */
 
 #define KW_FLAG_NEEDSENT 0x80000000
@@ -508,7 +508,7 @@ static int decodekw (const char **s_r)
     message (strlen (s), "unknown subcommand or entity %s", s);
     return (-1);                            /* couldn't find it */
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Command processing routines                     */
@@ -1279,7 +1279,7 @@ static int ch_cmd_move (int erpt, int eidx, const char **s_r)
     }
     return (1);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Skip position forward or backward the number of entities        */
@@ -1997,7 +1997,7 @@ static int skip_buff (int erpt, Position *pos, const char **s_r)
     ch_screen_top_line = pos -> line;
     return (1);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Insert char at current position and increment           */
@@ -2072,7 +2072,7 @@ static void insertchar (char c)
 
     normalize (&cur_position.line, &cur_position.offset);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Get paste buffer name from command string               */
@@ -2108,7 +2108,7 @@ static char *getpastebufname (const char **s_r)
     }
     return (bufname);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Cut out a block of text and save in a buffer            */
@@ -2270,7 +2270,7 @@ repeat:
 
     return (1);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Paste a buffer back in                      */
@@ -2336,7 +2336,7 @@ static int pasteitin (int crpt, const char *bufname)
 
     return (1);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Normalize position (ie, if at very end of line, point to very   */
@@ -2392,7 +2392,7 @@ static void normalise (Buffer *buffer, Line **line_r, uLong *offset_r)
     *line_r   = line;
     *offset_r = offset;
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  See if the 'searchstr' matches at 'line[offset]'            */
@@ -2428,7 +2428,7 @@ static int matchstr (Line *line, uLong linesz, const char *linebf)
         linebf = string_getval (line_string (line));
     }
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Free all lines of a buffer                      */
@@ -2448,7 +2448,7 @@ static void emptybuffer (const char *name)
         string_delete (removeline (line));
     }
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Remove line from buffer (just line line_remove), but if it is the   */
@@ -2468,7 +2468,7 @@ static String *removeline (Line *line)
     }
     return (line_remove (line));
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Output (error) message to screen                    */

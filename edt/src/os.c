@@ -139,7 +139,7 @@ static time_t nextjournalflush = 0;
 static int timedread (char *buf, int siz);
 
 #endif
-
+
 /************************************************************************/
 /*                                  */
 /*  Initialization routine                      */
@@ -342,7 +342,7 @@ void os_initialization (void)
     fflush (stderr);
     fflush (stdout);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Set screen mode                         */
@@ -407,7 +407,7 @@ void os_screenmode (int on)
 
 #endif
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Read from terminal (in line mode) with prompt           */
@@ -607,7 +607,7 @@ eof:
     return (NULL);
 #endif
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Read keypad sequence from terminal without echoing          */
@@ -727,7 +727,7 @@ int os_readkeyseq (String *keystring)
 
 #endif
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Write a buffer to terminal screen                   */
@@ -842,7 +842,7 @@ int os_writebuffer (int size, const char *buff)
 
 #endif
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Get screen width and length                     */
@@ -882,7 +882,7 @@ int os_getscreensize (int *width_r, int *length_r)
 
 #endif
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Make a journal filename from a given filename           */
@@ -938,7 +938,7 @@ char *os_makejnlname (const char *filename)
 #endif
     return (jnlfn);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Create new file                         */
@@ -1034,7 +1034,7 @@ FILE *os_crenewfile (const char *name)
 
 #endif
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Get default initialization file name                */
@@ -1074,7 +1074,7 @@ char *os_defaultinitname (void)
 
 #endif
 }
-
+
 #if defined (VMS)
 
 /* Turn journal flushing ast on or off */

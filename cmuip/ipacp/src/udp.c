@@ -290,7 +290,7 @@ extern signed long
 snmp_service,
 RPC_SERVICE;
 
-
+
 //SBTTL "UDP data structures"
 
 #define    Max_UDP_Data_Size  16384 // Max UDP data size
@@ -336,7 +336,7 @@ void UDPCB_Abort(struct UDPCB_Structure * UDPCB,long RC);
 
 //MESSAGE(%NUMBER(UDPCB_Size)," longwords per UDPCB")
 
-
+
 //SBTTL "UDP data storage"
 
 static signed long
@@ -346,7 +346,7 @@ long    UDPCB_TABLE[MAX_UDPCB+1];// Table of UDPCBs
 
 struct UDP_MIB_struct udp_mib_, * udp_mib=&udp_mib_ ;   // UDP Management Information Block
 
-
+
 //SBTTL "UDP packet logger"
 /*
     Queue up a log entry to dump out a UDP packet.
@@ -410,7 +410,7 @@ struct udpkt_structure * Seg;
                datalen,dathex,asccnt,segdata);
     };
 }
-
+
 //SBTTL "UDPCB_Find - look up UDP control block"
 
 UDPCB_Find(Src$Adrs,Src$Port,Dest$Port)
@@ -439,7 +439,7 @@ UDPCB_Find(Src$Adrs,Src$Port,Dest$Port)
     return 0;
 }
 
-
+
 //SBTTL "UDP input handler"
 /*
     Come here at AST level when input packet is determined to be UDP packet.
@@ -643,7 +643,7 @@ leave_x2:
     if (delete)
         mm$seg_free(BufSize,Buf);
 }
-
+
 //SBTTL "ICMP input handler for UDP"
 /*
     Handles ICMP messages received in response to our UDP packets.
@@ -792,7 +792,7 @@ leave_x:
     if (delete)
         mm$seg_free(bufsize,buf);
 }
-
+
 //SBTTL "Queue_User_UDP - Queue up UDP packet for delivery to user"
 /*
     Called by UDP$Input at AST level when an input packet matches a
@@ -840,7 +840,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
         INSQUE(QB,UDPCB->udpcb$nr_qtail);
     return FALSE;       // Don't deallocate this segment...
 }
-
+
 //SBTTL "Deliver_UDP_Data - Deliver UDP data to user"
 /*
     Perform actual delivery of UDP packet to a user request.
@@ -911,7 +911,7 @@ struct queue_blk_structure(qb_ur_fields) * URQ;
     mm$qblk_free(QB);
     udp_mib->MIB$UDPINDATAGRAMS = udp_mib->MIB$UDPINDATAGRAMS + 1;
 }
-
+
 //SBTTL "UDPCB_OK - Match connection ID to UDPCB address"
 
 UDPCB_OK(long Conn_ID,long * RCaddr,struct user_default_args * Uargs)
@@ -941,7 +941,7 @@ UDPCB_OK(long Conn_ID,long * RCaddr,struct user_default_args * Uargs)
 
     return UDPCB;
 }
-
+
 //SBTTL "UDPCB_Get - Allocate and initialize one UDPCB"
 
 UDPCB_Get(IDX,Src$Port)
@@ -1012,7 +1012,7 @@ leave_x:
     *IDX = UDPCBIDX;
     return UDPCB;
 }
-
+
 //SBTTL "UDPCB_Free - Deallocate a UDPCB"
 
 void udpcb_free(long UDPCBIX,struct UDPCB_Structure * UDPCB)
@@ -1034,7 +1034,7 @@ void udpcb_free(long UDPCBIX,struct UDPCB_Structure * UDPCB)
         FATAL$FAO("UDPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     UDPCB_Count = UDPCB_Count-1;
 }
-
+
 //SBTTL "Kill_UDP_Requests - purge all I/O requests for a connection"
 
 void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,long RC)
@@ -1086,7 +1086,7 @@ void Kill_UDP_Requests(struct UDPCB_Structure * UDPCB,long RC)
         mm$qblk_free(QB);
     };
 }
-
+
 //SBTTL "UDPCB_Close - Close/deallocate a UDPCB"
 
 void udpcb_close(long UIDX,struct UDPCB_Structure * UDPCB,long RC)
@@ -1103,7 +1103,7 @@ void UDPCB_Abort(struct UDPCB_Structure * UDPCB,long RC)
     udpcb_close(UDPCB->udpcb$udpcbid,UDPCB,RC);
 }
 
-
+
 
 //SBTTL "Purge_All_UDP_IO - delete UDP database before network exits"
 
@@ -1119,7 +1119,7 @@ void udp$purge_all_io  (void)
         if ((UDPCB = UDPCB_TABLE[UDPCBIDX]) != 0)
             udpcb_close(UDPCBIDX,UDPCB,NET$_TE);
 }
-
+
 //SBTTL "UDP_Conn_Unique - Check for unique UDP connection"
 /*
     Verify that a given set of Local Port, Foreign Host, Foreign Port
@@ -1146,7 +1146,7 @@ UDP_Conn_Unique(LP,FH,FP)
         };
     return TRUE;
 }
-
+
 //SBTTL "udp$open - open a UDP "connection""
 /*
     Open a UDP "connection". Create a UDP Control Block, which serves as a
@@ -1249,7 +1249,7 @@ leave_x:
     NML$GETALST(NAMPTR,NAMLEN,UDP_NMLOOK_DONE,UDPCB);
 }
 
-
+
 
 //SBTTL "UDP_NMLOOK_DONE - Second phase of UDP$OPEN when namelookup done"
 /*
@@ -1313,7 +1313,7 @@ struct UDPCB_Structure * UDPCB;
     IO$POST(IOSB,Uargs);
     mm$uarg_free(Uargs);
 }
-
+
 //SBTTL "UDP_COPEN_DONE - Common user UDP open done routine"
 
 UDP_COPEN_DONE(UDPCB,ADRCNT,ADRLST)
@@ -1378,7 +1378,7 @@ struct UDPCB_Structure * UDPCB;
            );
     return SS$_NORMAL;
 }
-
+
 //SBTTL "UDP_ADLOOK_DONE - Finish UDP address to name lookup"
 
 void UDP_ADLOOK_DONE(UDPCB,STATUS,NAMLEN,NAMPTR)
@@ -1399,7 +1399,7 @@ struct UDPCB_Structure * UDPCB;
     UDPCB->udpcb$foreign_hnlen = NAMLEN;
     CH$MOVE(NAMLEN,NAMPTR,CH$PTR(UDPCB->udpcb$foreign_hname,0));
 }
-
+
 //SBTTL "UDP$CLOSE - close UDP "connection""
 /*
     Close a UDP "connection". Kills any receive requests that haven't
@@ -1430,7 +1430,7 @@ void udp$close(struct user_close_args * Uargs)
     user$post_io_status(Uargs,SS$_NORMAL,0,0,0);
     mm$uarg_free(Uargs);
 }
-
+
 //SBTTL "UDP$ABORT - abort UDP "connection""
 /*
     Abort a UDP "connection". Identical in functionality to UDP$CLOSE.
@@ -1459,7 +1459,7 @@ void udp$abort(struct user_abort_args * Uargs)
     user$post_io_status(Uargs,SS$_NORMAL,0,0,0);
     mm$uarg_free(Uargs);
 }
-
+
 //SBTTL "UDP$SEND - send UDP packet"
 /*
     Handle user send request for UDP connection. Form a UDP packet from the
@@ -1547,7 +1547,7 @@ void udp$send(struct user_send_args * Uargs)
     mm$uarg_free(Uargs);
 }
 
-
+
 
 //SBTTL "UDP_SEND - Common routine for sending UDP datagrams"
 
@@ -1618,7 +1618,7 @@ UDP_SEND ( LocalAddr, ForeignAddr, LocalPort, ForeignPort,
     else return SS$_NORMAL;
 }
 
-
+
 
 //SBTTL "UDP$RECEIVE - receive a UDP packet"
 /*
@@ -1687,7 +1687,7 @@ void udp$receive(struct user_recv_args * Uargs)
     OKINT;
 }
 
-
+
 
 //SBTTL "UDP$INFO - get info about UDP "connection""
 /*
@@ -1715,7 +1715,7 @@ void udp$info(struct user_info_args * Uargs)
                              UDPCB->udpcb$foreign_hname,UDPCB->udpcb$foreign_hnlen);
 }
 
-
+
 //SBTTL "UDP$STATUS - get status of UDP "connection""
 /*
     This routine is a placeholder for the network STATUS command, which is
@@ -1726,7 +1726,7 @@ void udp$status(struct user_status_args * Uargs)
 {
     USER$Err(Uargs,NET$_NYI);
 }
-
+
 //SBTTL "UDP$CANCEL - Handle VMS cancel for UDP connection"
 /*
     Handle process abort/$CANCEL request for a UDP connection. Identical
@@ -1759,7 +1759,7 @@ udp$cancel(struct vms$cancel_args * Uargs)
         };
     return Fcount;
 }
-
+
 //SBTTL "UDP dump routines"
 
 void udp$connection_list(RB)

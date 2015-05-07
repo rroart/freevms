@@ -153,7 +153,7 @@ extern  void    ASCII_HEX_BYTES();
 extern  void    LOG_FAO();
 extern  void    QL_FAO();
 
-
+
 //SBTTL "IP data structures"
 
 // Define the "IPCB" - IP analogue of TCB.
@@ -203,7 +203,7 @@ IPCB_Structure = BLOCK->IPCB_Size FIELD(IPCB_Fields) %;
 //MESSAGE(%NUMBER(IPCB_Size)," longwords per IPCB")
 #endif
 
-
+
 
 //SBTTL "IP data storage"
 
@@ -212,7 +212,7 @@ IPIPID  = 1,    // Current IP packet ID
 IPCB_Count  = 0,    // Count of active IPCBs
 ipcb_table[MAX_IPCB+1];// Table of IPCBs
 
-
+
 
 //SBTTL "IP packet logger"
 /*
@@ -255,7 +255,7 @@ struct ip_structure * seg;
            seghdr->iph$checksum);
 
 }
-
+
 //SBTTL "IPCB_Find - look up IP control block"
 IPCB_Find(Src$Adrs,Dst$Adrs,Protocol)
 {
@@ -281,7 +281,7 @@ IPCB_Find(Src$Adrs,Dst$Adrs,Protocol)
     };
     return 0;
 }
-
+
 //SBTTL "IP input handler"
 /*
     Come here at AST level when input packet is determined to be IP packet.
@@ -352,7 +352,7 @@ leave_x:
 
 }
 
-
+
 //SBTTL "Queue_User_IP - Queue up IP packet for delivery to user"
 /*
     Called by IP_Input at AST level when an input packet matches a
@@ -410,7 +410,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 
     return TRUE;        // Go ahead and deallocate this segment...
 }
-
+
 //SBTTL "Deliver_IP_Data - Deliver IP data to user"
 /*
     Perform actual delivery of IP packet to a user request.
@@ -480,7 +480,7 @@ struct queue_blk_structure(qb_ur_fields) * URQ;
     mm$seg_free(QB->nr$buf_size,QB->nr$buf);
     mm$qblk_free(QB);
 }
-
+
 //SBTTL "IPCB_OK - Match connection ID to IPCB address"
 
 IPCB_OK(long Conn_ID,long * RCaddr,struct user_default_args * Uargs)
@@ -511,7 +511,7 @@ IPCB_OK(long Conn_ID,long * RCaddr,struct user_default_args * Uargs)
 
     return IPCB;
 }
-
+
 //SBTTL "IPCB_Get - Allocate and initialize one IPCB"
 
 IPCB_Get(IDX)
@@ -566,7 +566,7 @@ leave_x:
     *IDX = IPCBIDX;
     return IPCB;
 }
-
+
 //SBTTL "IPCB_Free - Deallocate a IPCB"
 
 void ipcb_free(long IPCBIX,struct IPCB_Structure * IPCB)
@@ -589,7 +589,7 @@ void ipcb_free(long IPCBIX,struct IPCB_Structure * IPCB)
         FATAL$FAO("IPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     IPCB_Count = IPCB_Count-1;
 }
-
+
 //SBTTL "Kill_IP_Requests - purge all I/O requests for a connection"
 
 void Kill_IP_Requests(struct IPCB_Structure * IPCB,long RC)
@@ -641,7 +641,7 @@ void Kill_IP_Requests(struct IPCB_Structure * IPCB,long RC)
         mm$qblk_free(QB);
     };
 }
-
+
 //SBTTL "IPCB_Close - Close/deallocate a IPCB"
 
 void ipcb_close(long UIDX,struct IPCB_Structure * IPCB, long RC)
@@ -658,7 +658,7 @@ void IPCB_Abort(struct IPCB_Structure * IPCB, long RC)
     ipcb_close(IPCB->ipcb$ipcbid,IPCB,RC);
 }
 
-
+
 //SBTTL "IPU$Purge_All_IO - delete IP database before network exits"
 
 void ipu$purge_all_io (void)
@@ -673,7 +673,7 @@ void ipu$purge_all_io (void)
         if ((IPCB = ipcb_table[IPCBIDX]) != 0)
             ipcb_close(IPCBIDX,IPCB,NET$_TE);
 }
-
+
 
 //SBTTL "IPU$OPEN - open a user IP "connection""
 /*
@@ -766,7 +766,7 @@ leave_x:
     NML$GETALST(NAMPTR,NAMLEN,IP_NMLOOK_DONE,IPCB);
 }
 
-
+
 
 //SBTTL "IP_NMLOOK_DONE - Second phase of IPU$OPEN when namelookup done"
 /*
@@ -836,7 +836,7 @@ struct IPCB_Structure * IPCB;
     mm$uarg_free(Uargs);
 }
 
-
+
 
 //SBTTL "IP_ADLOOK_DONE - Finish IP address to name lookup"
 
@@ -859,7 +859,7 @@ struct IPCB_Structure * IPCB;
     CH$MOVE(NAMLEN,NAMPTR,CH$PTR(IPCB->ipcb$foreign_hname,0));
 }
 
-
+
 
 //SBTTL "IPU$CLOSE - close IP "connection""
 /*
@@ -891,7 +891,7 @@ void ipu$close(struct user_close_args * Uargs)
     user$post_io_status(Uargs,SS$_NORMAL,0,0,0);
     mm$uarg_free(Uargs);
 }
-
+
 //SBTTL "IPU$ABORT - abort IP "connection""
 /*
     Abort a IP "connection". Identical in functionality to IPU$CLOSE.
@@ -920,7 +920,7 @@ void ipu$abort(struct user_abort_args * Uargs)
     user$post_io_status(Uargs,SS$_NORMAL,0,0,0);
     mm$uarg_free(Uargs);
 }
-
+
 //SBTTL "IPU$SEND - send IP packet"
 /*
     Handle user send request for IP connection. Form a IP packet from the
@@ -1066,7 +1066,7 @@ void ipu$send(struct user_send_args * Uargs)
     mm$uarg_free(Uargs);
 }
 
-
+
 
 //SBTTL "ipu$receive - receive a IP packet"
 /*
@@ -1129,7 +1129,7 @@ void ipu$receive(struct user_recv_args * Uargs)
     OKINT;
 }
 
-
+
 
 //SBTTL "IPU$INFO - get info about IP "connection""
 /*
@@ -1159,7 +1159,7 @@ void ipu$info(struct user_info_args * Uargs)
                              IPCB->ipcb$foreign_hnlen);
 }
 
-
+
 //SBTTL "IPU$STATUS - get status of IP "connection""
 /*
     This routine is a placeholder for the network STATUS command, which is
@@ -1170,7 +1170,7 @@ void ipu$status(struct user_status_args * Uargs)
 {
     USER$Err(Uargs,NET$_NYI);
 }
-
+
 //SBTTL "IPU$CANCEL - Handle VMS cancel for IP connection"
 /*
     Handle process abort/$CANCEL request for a IP connection. Identical
@@ -1203,7 +1203,7 @@ ipu$cancel(struct vms$cancel_args * Uargs)
         };
     return Fcount;
 }
-
+
 //SBTTL "IP dump routines"
 
 void ipu$connection_list(RB)

@@ -692,7 +692,7 @@ Modification History:
 // Define more UDP ports
 #define    UDP_PORT_NFS          2049
 
-
+
 
 //SBTTL 'IP header structure definition'
 
@@ -759,7 +759,7 @@ struct ip_structure
 //////HACK////// What a hack//////  Get rid of this.  Calculate it at run time//
 #define    DEVICE_HEADER     68
 
-
+
 
 //SBTTL 'ICMP message definitions'
 
@@ -877,7 +877,7 @@ struct icmp_header
 #define    ICMPTOS  0       // Type of service
 #define    ICMPDF  1            // Don't fragment flag
 
-
+
 
 //SBTTL 'UDP message definitions'
 
@@ -897,13 +897,13 @@ struct udpkt_structure
 #define    UDPKT_LENGTH  sizeof(struct udpkt_structure)
 #define    UDP_HEADER_SIZE  UDPKT_LENGTH
 
-
+
 
 //SBTTL 'TCP message definitions'
 
 // This section defines the Transmission Control Protcol structures.
 
-
+
 //SBTTL 'TCP Segment definition.'
 
 /*

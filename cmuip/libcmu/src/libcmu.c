@@ -381,7 +381,7 @@ static int accept_net_event;
 static int accept_net_event = 16; // check
 #endif
 
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -536,7 +536,7 @@ int domain,type,protocol;
     }
     return(s);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -667,7 +667,7 @@ int         namelen;/* length of name stuff */
     sd[s]->flags |= SD_BIND;
     return(0);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -822,7 +822,7 @@ int namelen;
     sd[s]->flags |= SD_CONNECTED;
     return(0);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * int listen (int s, int backlog)
@@ -900,7 +900,7 @@ int backlog;
         return(-1);
 }
 
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -1037,7 +1037,7 @@ CHECK_QUEUE:
      */
     return(ns);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -1192,7 +1192,7 @@ CHECKforDATA:
      */
     return (size);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -1254,7 +1254,7 @@ asmlinkage int sys_recv(int s, char *buf, int len, int flags)
 #endif
     }
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -1494,7 +1494,7 @@ asmlinkage int sys_send(int s, char *msg, int len, int flags)
 #endif
     }
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <socket.h>
  *
@@ -1571,7 +1571,7 @@ int s, how;
     }
     return(0);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -1826,7 +1826,7 @@ EXIT:
         *readfds = (sys_readfds.fds_bits[0] & maxfds_mask);
     return(readyfds);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -1880,7 +1880,7 @@ int *namelen;
     memcpy(name,&sd[s]->my,size);
     return(0);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -1990,7 +1990,7 @@ int *namelen;
     return(0);
 
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -2046,7 +2046,7 @@ int *optlen;
     return -ENOPROTOOPT;
 #endif
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -2102,7 +2102,7 @@ int optlen;
     return -ENOPROTOOPT;
 #endif
 }
-
+
 #ifndef __KERNEL__
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * int gethostname(char *name, int namelen)
@@ -2123,7 +2123,7 @@ int namelen;
 {
     return(cmu_trnlnm("LNM$SYSTEM","INTERNET_HOST_NAME","Super",name,namelen));
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * struct servent *getservbyname(char *name, char *proto);
@@ -2175,7 +2175,7 @@ char    *proto;
     else
         return(NULL);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * struct servent *getservbyport(int port, char *proto);
  *
@@ -2222,7 +2222,7 @@ char    *proto;
     else
         return(NULL);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * struct hostent *gethostbyname(char *name)
@@ -2283,7 +2283,7 @@ char    *name;
 
     return(&inet_host);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * struct hostent *gethostbyaddr(char *addr, int len, int type)
  *
@@ -2348,7 +2348,7 @@ int len, type;
     return(&inet_host);
 }
 #endif
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <ioctl.h>
  *
@@ -2559,7 +2559,7 @@ char    *argp;
     return -errno;
 #endif
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <file.h>
  *
@@ -2619,7 +2619,7 @@ int s, request, arg;
 #endif
     }
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -2683,7 +2683,7 @@ int len;
 #endif
     }
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -2743,7 +2743,7 @@ int len;
 #endif
     }
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * int cmu_close(int s)
  *
@@ -2850,7 +2850,7 @@ int s;
 #endif
     return(0);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include "libcmu.h"
  *
@@ -2949,7 +2949,7 @@ ERROR_RETURN:
     return -errno;
 #endif
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * int cmu_stdin_read(int flags, char *buf, int len, char *prompt, int mask)
  *
@@ -2999,7 +2999,7 @@ int mask;
                               0, 0, 0, 0);
     return(vaxc$errno);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * int cmu_get_sdc(int s)
  *
@@ -3035,7 +3035,7 @@ int s;
     else
         return(sd[s]->chan);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * int cmu_trnlnm(char *table, char *name, char *mode, char *buff, int len)
@@ -3138,7 +3138,7 @@ int len;    /* size of return buffer */
 #endif
     }
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * int cmu_get_errno(NetIO_Status_Block *iosb)
  *
@@ -3411,7 +3411,7 @@ NetIO_Status_Block *iosb;
     else
         return(EIO); /* punt! */
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * int cmu_listen_accept(int s)
  *
@@ -3538,7 +3538,7 @@ int s;  /* socket descriptor */
 
     return(SS$_NORMAL);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * int cmu_queue_listen(int s)
  *
@@ -3613,7 +3613,7 @@ int s;  /* socket descriptor to listen on */
 
     return(0);
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * int cmu_read_ast(int s)
  *
@@ -3671,7 +3671,7 @@ int s;  /* file descriptor that is ready. */
     sys$setef(sd[s]->ef);
 }
 
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * int cmu_write_ast(int s)
  *
@@ -3699,7 +3699,7 @@ int s;  /* file descriptor that is ready. */
         FD_SET(s,&sys_exceptfds.fds_bits[0]);
 
 }
-
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * int cmu_queue_net_read(int s)

@@ -105,7 +105,7 @@ typedef unsigned long u_long;
 signed long
 snmp_service = 0;
 
-
+
 
 void SNMP$INIT (void)
 {
@@ -143,11 +143,11 @@ SNMP$USER_INPUT (in_buff, in_len, out_buff, out_len)
     return SS$_NORMAL;
 }
 
-
+
 //
 // The rest of the module Provides access to the IPACP's MIB variables
 //
-
+
 
 static signed long
 long_return;
@@ -535,7 +535,7 @@ struct tcb_structure * TCB2;
 
     return 0;
 }
-
+
 
 #if 0
 /*
@@ -563,7 +563,7 @@ int         *access_method;
 */
 #endif
 
-
+
 
 //
 // System Variables:
@@ -1100,7 +1100,7 @@ char name[SNMP$K_OIDsize];
     return 0;
 }
 
-
+
 
 var_icmp (vp, name, length, exact, var_len, access_method)
 struct variable_struct * vp;
@@ -1120,7 +1120,7 @@ char name[SNMP$K_OIDsize];
     return icmp_mib + (vp->var$magic-1)*4;
 }
 
-
+
 
 var_udp (vp, name, length, exact, var_len, access_method)
 struct variable_struct * vp;
@@ -1140,7 +1140,7 @@ char name[SNMP$K_OIDsize];
     return udp_mib + (vp->var$magic-1)*4;
 }
 
-
+
 
 var_tcp (vp, name, length, exact, var_len, access_method)
 struct variable_struct * vp;
@@ -1160,7 +1160,7 @@ char name[SNMP$K_OIDsize];
     return tcp_mib + (vp->var$magic-1)*4;
 }
 
-
+
 
 var_tcpConn (vp, name, length, exact, var_len, access_method)
 struct variable_struct * vp;

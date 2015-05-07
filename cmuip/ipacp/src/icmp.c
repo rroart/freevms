@@ -57,7 +57,7 @@ Modifications:
     into this module.
 
 */
-
+
 
 //SBTTL "Module Definition"
 
@@ -117,7 +117,7 @@ icmpttl,
 min_physical_bufsize,   // Size of "small" device buffers
 max_physical_bufsize;   // Size of "large" device buffers
 
-
+
 
 //SBTTL  "ICMP database definitions"
 
@@ -152,7 +152,7 @@ ICMHTB [ICM_HSHLEN]; // ICMP database hash table
 
 struct ICMP_MIB_struct icmp_mib_, * icmp_mib = &icmp_mib_ ; // ICMP Management Information Block
 
-
+
 //SBTTL "ICMP routing code"
 
 // This code maintains the ICMP database, containing alternate routes to hosts
@@ -230,7 +230,7 @@ int IPaddr;
         return ICMptr->icm$gwy;
 }
 
-
+
 //SBTTL  "Handle ICMP packet input"
 /*
     Decode input ICMP packet and dispatch according to packet type.
@@ -494,7 +494,7 @@ struct icmp_header * ICMptr;
     // Release the buffer
     mm$seg_free(bufsize,buf);
 }
-
+
 void ICMP_Pproblem(ICMpkt,ICMlen,IPpkt,IPlen,ICMpptr)
 
 // Handle ICMP Parameter Problem packet.

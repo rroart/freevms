@@ -2,7 +2,7 @@
 
 /************************************************************************/
 /*                                  */
-/* Copyright © Digital Equipment Corporation, 1994 All Rights Reserved. */
+/* Copyright ï¿½ Digital Equipment Corporation, 1994 All Rights Reserved. */
 /* Unpublished rights reserved under the copyright laws of the United   */
 /* States.                              */
 /*                                  */
@@ -111,7 +111,7 @@ typedef struct                  /* Standard I/O status block */
     short int   byte_cnt;           /* Transferred byte count */
     int     unused;             /* Unused */
 } IOSB_T;
-
+
 void copy(char *out, char *in,int nchar)
 {
 
@@ -137,7 +137,7 @@ void copy(char *out, char *in,int nchar)
 
     out[nchar] = 0;         /* Terminate the string */
 }
-
+
 int main (int argc, char *argv[])
 {
 

@@ -19,7 +19,7 @@
 
     ****************************************************************
 */
-
+
 
 /****************************************************************************
 
@@ -72,7 +72,7 @@ typedef unsigned int u_int;
 #include <iodef.h>
 
 extern int nfs_int();
-
+
 
 /* The IPACP_Interface tells us all about the IPACP.  It gives us   */
 /* entry points, literals and global pointers.  See NETDEVICES.REQ  */
@@ -81,7 +81,7 @@ extern int nfs_int();
 IPACP_Info_Structure *IPACP_Interface;
 
 
-
+
 
 /* Mount specific definitions */
 
@@ -133,7 +133,7 @@ int mnt_int(int x)
     return(y);
 }
 
-
+
 
 convert_filename_to_fid(fname,fid)
 char *fname;
@@ -174,7 +174,7 @@ fhandle fid;
 }
 
 
-
+
 
 /* NB:  At this point the opaque_auth structs come into play, since
    they are variable length structs, we declare cbody and areply as
@@ -252,7 +252,7 @@ unsigned int prog,vers,proc;
     return 1;
 }
 
-
+
 
 mount_record *find_mr(str)
 char *str;
@@ -326,7 +326,7 @@ char *hostname;
     return mrp;
 }
 
-
+
 
 /**********************************************************************
 
@@ -340,7 +340,7 @@ char *reply;
     return 0;
 }
 
-
+
 
 /**********************************************************************
 
@@ -415,7 +415,7 @@ char *remhost;
     }
 }
 
-
+
 
 /**********************************************************************
 
@@ -466,7 +466,7 @@ char *remhost;
     return len;
 }
 
-
+
 
 /**********************************************************************
 
@@ -500,7 +500,7 @@ char *remhost;
     return 0;
 }
 
-
+
 
 /**********************************************************************
 
@@ -530,7 +530,7 @@ char *remhost;
     return 0;       /* All OK (we hope; at least we tried) */
 }
 
-
+
 
 /**********************************************************************
 
@@ -591,7 +591,7 @@ char *remhost;
     return len;
 }
 
-
+
 
 /* Initialize the module.  This should be an entry point. */
 int MNT$INIT(IPACP_Int)

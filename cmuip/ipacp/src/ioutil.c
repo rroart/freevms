@@ -157,7 +157,7 @@ extern  void FATAL_FAO(long, ...);
 #define kmalloc malloc
 #endif
 
-
+
 
 #define APPCHR(CHR,DPTR,DCNT,OCNT) \
     if ((DCNT=DCNT-1) > 0) \
@@ -178,7 +178,7 @@ signed long
 act_threshold    = 512,
 log_threshold  = 512 ;
 
-
+
 void APPEND_DEC(DPTR,DCNT,NUM,OUTCNT)
 
 // Append a decimal value to a string
@@ -243,7 +243,7 @@ long * LEN;
     if (*LEN != 0)
         *LEN = MIN(OUTCNT,DESC->dsc$w_length);
 }
-
+
 APPEND_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE)
 
 // Append a hexidecimal value to a string
@@ -290,7 +290,7 @@ long * LEN;
     if (*LEN != 0)
         *LEN = MIN(OUTCNT,DESC->dsc$w_length);
 }
-
+
 
 GET_DEC_NUM();
 
@@ -353,7 +353,7 @@ int * VAL;
     *VAL = RVAL;
     return CHR;
 }
-
+
 
 GET_HEX_NUM();
 
@@ -429,7 +429,7 @@ long * VAL;
     return CHR;
 }
 
-
+
 //SBTTL "Log file handling routines"
 
 struct _fabdef    LOGFAB_ = {   fab$l_fna : "INET$LOG:"
@@ -589,7 +589,7 @@ void LOG_Time_Stamp (void)
     LOG$FAO("!%T ",0);
 }
 
-
+
 
 //SBTTL "Activity file handling routines"
 
@@ -737,7 +737,7 @@ void ACT_Time_Stamp (void)
 {
     ACT$FAO("!%T ",0);
 }
-
+
 //sbttl "Send messages to the Central VMS operator"
 /*
 
@@ -846,7 +846,7 @@ void OPR_FAO(long CSTR, ...)
 
 signed long
 PRINT_MSG = OPR_FAO;    // Synonym for host table module to use
-
+
 //SBTTL "Error processing routines - ERROR_FAO, FATAL_FAO"
 
 void ERROR_FAO(long CSTR, ...)
@@ -982,7 +982,7 @@ void FATAL_FAO(long CSTR, ...)
     LOG_CHANGE(OLDSTATE);
     sys$exit( SS$_ABORT);
 }
-
+
 //SBTTL "Queued message processing"
 /*
     In order to debug timing-related problems, it is often necessary to log
@@ -1022,7 +1022,7 @@ ERR_MSG_Q_ = { EM$QHEAD :
 EM$QTAIL:
     & ERR_MSG_Q_
 },*ERR_MSG_Q=&ERR_MSG_Q_;
-
+
 void QL_FAO(CSTR, args)
 va_list args;
 //
@@ -1076,7 +1076,7 @@ va_list args;
 
     $ACPWAKE;
 }
-
+
 void CHECK_ERRMSG_Q (void)
 //
 // Write all of the messages pending on the error message queue.
@@ -1098,7 +1098,7 @@ void CHECK_ERRMSG_Q (void)
         mm$qblk_free(QB);
     };
 }
-
+
 //Sbttl "VMS Exit Handler"
 /*
 
@@ -1141,7 +1141,7 @@ void Exit_Handler (void)
 
     RESET_PROCNAME();
 }
-
+
 //Sbttl "VMS Exception Handler"
 /*
 

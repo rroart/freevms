@@ -3,30 +3,7 @@
 
 // Author. Roar Thron�s.
 
-#ifdef USERLAND
-#define __LINUX_VMALLOC_H
-#define _LINUX_VMALLOC_H
-#define LINUX_VMALLOC_H
-struct lnmhshs lnmhshs; /* should be one struct, will be solved later */
-struct lnmhshp lnmhshp;
-#endif
-
 #include <linux/linkage.h>
-#ifdef USERLAND
-#include <starlet.h>
-#include <lnmdef.h>
-#include <ssdef.h>
-#include <misc.h>
-#include <descrip.h>
-#include <lnmstrdef.h>
-#include <orbdef.h>
-#include <ipldef.h>
-#include <dyndef.h>
-#include <system_service_setup.h>
-#include <lnmsub.h>
-#include <sysgen.h>
-#include <system_data_cells.h>
-#else
 #include <linux/mm.h>
 #include <starlet.h>
 #include <lnmdef.h>
@@ -46,28 +23,8 @@ struct lnmhshp lnmhshp;
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <linux/slab.h>
-#endif
 
 /* Author: Roar Thron�s */
-
-#ifndef USERLAND
-#if 0
-#define __KERNEL__         /* We're part of the kernel */
-#define MODULE             /* Not a permanent part, though. */
-#endif
-#endif
-
-#if 0
-/* Standard headers for LKMs */
-#include <linux/modversions.h>
-#include <linux/module.h>
-
-#define _LOOSE_KERNEL_NAMES
-/* With some combinations of Linux and gcc, tty.h will not compile if
- you don't define _LOOSE_KERNEL_NAMES.  It's a bug somewhere.
- */
-#include <linux/tty.h>      /* console_print() interface */
-#endif
 
 int isp1(void * a)
 {
@@ -78,32 +35,6 @@ int isshar(void * a)
 {
     return 1;
 }
-
-/* Initialize the LKM */
-#ifdef MODULE
-int init_module()
-{
-    /*exe$crelnt();*/
-    /*ctl$gl_lnmdirect=LNM$PROCESS_DIRECTORY;
-     lnm$al_dirtbl[0]=LNM$SYSTEM_DIRECTORY;
-     lnm$al_dirtbl[1]=ctl$gl_lnmdirect;*/
-    console_print("Hello, world - this is the kernel speaking\n");
-    /* More normal is printk(), but there's less that can go wrong with
-     console_print(), so let's start simple.
-     */
-
-    /* If we return a non zero value, it means that
-     * init_module failed and the LKM can't be loaded
-     */
-    return 0;
-}
-
-/* Cleanup - undo whatever init_module did */
-void cleanup_module()
-{
-    console_print("Short is the life of an LKM\n");
-}
-#endif
 
 asmlinkage sys_$CRELNM();
 asmlinkage exe$crelnm(unsigned int *attr, void *tabnam, void *lognam,
@@ -117,7 +48,7 @@ asmlinkage exe$crelnm(unsigned int *attr, void *tabnam, void *lognam,
     struct _lnmx * mylnmx = 0;
     struct dsc$descriptor * mytabnam = tabnam;
     struct dsc$descriptor * mylognam = lognam;
-    struct item_list_3 * i, j;
+    struct item_list_3 * i;
     struct struct_rt * RT;
 
     if (mytabnam && mytabnam->dsc$a_pointer)
@@ -127,15 +58,12 @@ asmlinkage exe$crelnm(unsigned int *attr, void *tabnam, void *lognam,
 
     setipl(IPL$_ASTDEL);
 
-    mylnmb = lnmmalloc(sizeof(struct _lnmb))
-             ;
+    mylnmb = lnmmalloc(sizeof(struct _lnmb));
     memset(mylnmb, 0, sizeof(struct _lnmb));
-    mylnmth = lnmmalloc(sizeof(struct _lnmth))
-              ;
+    mylnmth = lnmmalloc(sizeof(struct _lnmth));
     memset(mylnmth, 0, sizeof(struct _lnmth));
 
-    RT = (struct struct_rt *) lnmmalloc(sizeof(struct struct_rt))
-         ;
+    RT = (struct struct_rt *) lnmmalloc(sizeof(struct struct_rt));
     memset(RT, 0, sizeof(struct struct_rt));
 
     lnm$lockw();
@@ -143,8 +71,7 @@ asmlinkage exe$crelnm(unsigned int *attr, void *tabnam, void *lognam,
     status = lnm$firsttab(&ret, mytabnam->dsc$w_length,
                           mytabnam->dsc$a_pointer);
 
-    mylnmb = lnmmalloc(sizeof(struct _lnmb))
-             ;
+    mylnmb = lnmmalloc(sizeof(struct _lnmb));
     memset(mylnmb, 0, sizeof(struct _lnmb));
     mylnmb->lnmb$l_flink = 0;
     mylnmb->lnmb$l_blink = 0;
@@ -167,8 +94,7 @@ asmlinkage exe$crelnm(unsigned int *attr, void *tabnam, void *lognam,
             memcpy(&mylnmx->lnmx$l_index, i->bufaddr, 4);
             break;
         case LNM$_STRING:
-            mylnmx = lnmmalloc(sizeof(struct _lnmx))
-                     ;
+            mylnmx = lnmmalloc(sizeof(struct _lnmx));
             memset(mylnmx, 0, sizeof(struct _lnmx));
 
             *next_lnmx = mylnmx;
@@ -462,119 +388,6 @@ asmlinkage int exe$crelnt_wrap(struct struct_crelnt *s)
     return exe$crelnt(s->attr, s->resnam, s->reslen, s->quota, s->promsk,
                       s->tabnam, s->partab, s->acmode);
 }
-
-#ifdef USERLAND
-main()
-{
-    struct item_list_3 i[2];
-    int c;
-    unsigned long * myhash;
-    int status;
-    struct _lnmb * lnm$system_directory;
-    struct _lnmth * lnm$system_directory_b;
-    struct struct_crelnt * s;
-    $DESCRIPTOR(mynam,"BIBI");
-    $DESCRIPTOR(mynam2,"BOBO");
-    $DESCRIPTOR(mytabnam3,"MYTEST3");
-    $DESCRIPTOR(mytabnam2,"MYTEST2");
-    $DESCRIPTOR(mytabnam,"MYTEST");
-    $DESCRIPTOR(mypartab,"LNM$SYSTEM_DIRECTORY");
-    char resstring[LNM$C_NAMLENGTH];
-
-    /*    lnm$system_directory_b=lnmmalloc(sizeof(struct _lnmth));*/
-    lnm$system_directory=lnmmalloc(sizeof(struct _lnmb));
-    memset(lnm$system_directory,0,sizeof(struct _lnmb));
-    lnm$system_directory->lnmb$l_flink=lnm$system_directory;
-    lnm$system_directory->lnmb$l_blink=lnm$system_directory;
-    lnm$system_directory->lnmb$b_type=DYN$C_LNM;
-    lnm$system_directory->lnmb$b_acmode=MODE_K_KERNEL;
-    lnm$system_directory_b=(struct _lnmth *)&lnm$system_directory->lnmxs[0].lnmx$l_xlen;
-    lnm$system_directory->lnmb$l_table=lnm$system_directory_b;
-    lnm$system_directory->lnmb$b_flags=LNM$M_NO_ALIAS|LNM$M_TABLE|LNM$M_NO_DELETE;
-    lnm$system_directory->lnmb$b_count=mypartab.dsc$w_length;
-    strncpy(lnm$system_directory->lnmb$t_name,mypartab.dsc$a_pointer,lnm$system_directory->lnmb$b_count);
-    lnm$system_directory->lnmxs[0].lnmx$b_flags=LNMX$M_TERMINAL;
-    lnm$system_directory->lnmxs[0].lnmx$b_index=LNMX$C_TABLE;
-    lnm$system_directory->lnmxs[1].lnmx$b_flags=LNMXH$M_XEND;
-
-    lnm$system_directory_b->lnmth$b_flags=LNMTH$M_SHAREABLE|LNMTH$M_DIRECTORY;
-    lnm$system_directory_b->lnmth$l_name=lnm$system_directory;
-    lnm$system_directory_b->lnmth$l_parent=0;
-    lnm$system_directory_b->lnmth$l_sibling=0;
-    lnm$system_directory_b->lnmth$l_child=0;
-    lnm$system_directory_b->lnmth$l_qtable=0;
-    lnm$system_directory_b->lnmth$l_hash=0;
-    lnm$system_directory_b->lnmth$l_orb=0;
-    lnm$system_directory_b->lnmth$l_byteslm=0;
-    lnm$system_directory_b->lnmth$l_bytes=0;
-
-    /*ctl$gl_lnmdirect=LNM$PROCESS_DIRECTORY;
-     lnm$al_dirtbl[0]=LNM$SYSTEM_DIRECTORY;
-     lnm$al_dirtbl[1]=ctl$gl_lnmdirect;*/
-    myhash=lnmmalloc(sizeof(unsigned long));
-    status=lnm$hash(mypartab.dsc$w_length,mypartab.dsc$a_pointer,0xffff,myhash);
-#ifdef LNM_DEBUG
-    lnmprintf("here %x %x\n",myhash,*myhash);
-#endif
-    lnmhshs.entry[2*(*myhash)]=lnm$system_directory;
-    lnmhshs.entry[2*(*myhash)+1]=lnm$system_directory;
-    s=lnmmalloc(sizeof(struct struct_crelnt));
-    s->partab=&mypartab;
-    s->tabnam=&mytabnam;
-    status=exe$crelnt_wrap(s);
-    s=lnmmalloc(sizeof(struct struct_crelnt));
-    s->partab=&mypartab;
-    s->tabnam=&mytabnam2;
-    status=exe$crelnt_wrap(s);
-    s=lnmmalloc(sizeof(struct struct_crelnt));
-    s->partab=&mytabnam2;
-    s->tabnam=&mytabnam3;
-    status=exe$crelnt_wrap(s);
-    i[0].item_code=LNM$_STRING;
-    i[0].buflen=5;
-    i[0].bufaddr="mylog";
-    memset(&i[1],0,sizeof(struct item_list_3));
-    status=exe$crelnm(0,&mytabnam2,&mynam,0,i);
-    i[0].item_code=LNM$_STRING;
-    i[0].buflen=6;
-    i[0].bufaddr="mylog3";
-    memset(&i[1],0,sizeof(struct item_list_3));
-    status=exe$crelnm(0,&mytabnam2,&mynam2,0,i);
-    i[0].item_code=LNM$_STRING;
-    i[0].buflen=6;
-    i[0].bufaddr=resstring;
-    memset(&i[1],0,sizeof(struct item_list_3));
-    status=exe$trnlnm(0,&mytabnam2,&mynam,0,i);
-#ifdef LNM_DEBUG
-    lnmprintf("end status %x\n",status);
-#endif
-    for (c=0; c<LNMSHASHTBL; c++)
-    {
-        if (lnmhshs.entry[2*c])
-        {
-            struct _lnmth * l;
-            struct _lnmb *head, *tmp;
-            head=lnmhshs.entry[2*c];
-            tmp=head;
-            do
-            {
-#ifdef LNM_DEBUG
-                lnmprintf("lnmhshs entry %x %x %s\n",c,tmp,tmp->lnmb$t_name);
-#endif
-                l=&(tmp->lnmxs[0].lnmx$l_xlen);
-#ifdef LNM_DEBUG
-                lnmprintf("     parent %x\n",l->lnmth$l_parent);
-                lnmprintf("     table %x\n",tmp->lnmb$l_table);
-#endif
-                tmp=tmp->lnmb$l_flink;
-            }
-            while (tmp!=head);
-        }
-    }
-}
-#else
-
-#endif
 
 void cre_syscommon(char * name)
 {

@@ -111,7 +111,7 @@ typedef union
 #define U$ICMP_PROTOCOL 2       /* ICMP protocol */
 #define U$IP_PROTOCOL   3       /* IP protocol */
 
-
+
 
 /*
     Net I/O Status block (Quadword) field definitions. These are basically the
@@ -160,7 +160,7 @@ typedef struct
 #define NSB$EOFBIT   4      /* Bit value for EOF bit */
 #define NSB$ICMPBIT  8      /* Bit value for ICMP bit */
 
-
+
 
 /* %SBTTL 'IP protocols header information block definition.' */
 
@@ -227,7 +227,7 @@ typedef struct
 #endif
 #define CONNECTION_INFO_BYTESIZE sizeof(connection_info_return_block)
 
-
+
 
 /* NET$GTHST - Return block for Name to Address translation */
 // check swap with nmlook?
@@ -261,7 +261,7 @@ typedef struct
     char  grr$rdata[];  /* RData followed by name. */
 } gthst_rrlook_block;
 
-
+
 
 /* Dump Directive Codes. */
 
@@ -549,7 +549,7 @@ typedef struct
 #undef uchar unsigned char
 #undef uint unsigned int
 
-
+
 
 /* Function call (FCALL) codes */
 #define NCP$C_NULL       0

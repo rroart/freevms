@@ -603,7 +603,7 @@ static unsigned long show_user_bylogical(unsigned long h_output,
 static unsigned long show_user_byhandle(unsigned long h_output,
                                         unsigned long h_error, unsigned long h_user, unsigned long *showopts);
 static unsigned long wait_events(unsigned long nevents, unsigned long *h_events);
-
+
 /* Internal command declarations */
 
 static unsigned long int_allocate_device(unsigned long h_input,
@@ -705,7 +705,7 @@ static Command intcmd[] =
     "SYS$SYSTEM:edt.exe", 0, "odfu", 1, 0, "SYS$SYSTEM:dfu.exe", 0, NULL,
     NULL, NULL, NULL
 };
-
+
 
 struct cli_struct
 {
@@ -1318,7 +1318,7 @@ static void startendmsg(const char *name)
     sys$qio(0, h_s_input, IO$_WRITELBLK, 0, 0, 0, &console_write,
             sizeof console_write, 0, 0, 0, 0);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Enable and process control-Y detection on h_s_console device    */
@@ -1362,7 +1362,7 @@ static void ctrly_ast(void *dummy, unsigned long status, void *mchargs)
 
     ctrly_enable();
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Enable and process control-T detection on h_s_console device    */
@@ -1544,7 +1544,7 @@ static void ctrlt_ast(void *dummy, unsigned long status, void *mchargs)
 cleanup:
     ctrlt_enable();
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Close current script and re-activate next outer script      */
@@ -1596,7 +1596,7 @@ static void exit_script(void)
     }
     inscript = 0;
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Process the optional label at the beginning of a command line   */
@@ -1668,7 +1668,7 @@ static char *proclabels(char *cmdbuf)
 
     return (p);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  This routine executes a command line                */
@@ -1770,7 +1770,7 @@ rtn:
     return (sts);
 
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Execute chopped-up command                      */
@@ -1922,7 +1922,7 @@ static unsigned long exechopped(int argc, const char *argv[], const char *input,
     return (sts);
 }
 
-
+
 /************************************************************************/
 /*                                  */
 /*  This routine takes a command line and makes all the variable    */
@@ -2037,7 +2037,7 @@ static unsigned long substitute(char *inbuf, char **outbuf_r)
     *outbuf_r = outbuf; /* return outbuf pointer */
     return (SS$_NORMAL); /* return success status */
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Evaluate the expression up to a terminator character        */
@@ -2749,7 +2749,7 @@ static char *cvt_sym_to_str(Symbol *symbol)
 
     return (NULL);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  All internal symbol functions:                  */
@@ -3526,7 +3526,7 @@ static unsigned long func_verify(Symbol *symbol, char *strp, char **rtnp,
         verify = newverify; /* maybe set new verify value */
     return (SS$_NORMAL); /* successful */
 }
-
+
 static struct
 {
     unsigned char b;
@@ -3570,7 +3570,7 @@ static const char *encode_objtype_string(unsigned char b_objtype)
     fprintf(h_s_error, "oz_cli: unknown object type %d\n", b_objtype);
     return ("");
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Define a function symbol                        */
@@ -3767,7 +3767,7 @@ static Symbol *lookup_symbol(const char *name, unsigned long level,
         symbol = script->symbols;
     }
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Decode keyword from command table                   */
@@ -3874,7 +3874,7 @@ static int cmpcmdname(int argc, const char **argv, char *name)
     }
     return (0); /* argv too short to match multiple-word name */
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Get object associated with logical name             */
@@ -3951,7 +3951,7 @@ static unsigned long logname_creobj(const char *name, unsigned char objtype,
     }
     return (sts);
 }
-
+
 static unsigned long int_allocate_device(unsigned long h_input,
         unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
@@ -4029,7 +4029,7 @@ static unsigned long int_allocate_device(unsigned long h_input,
         fprintf(h_error, "oz_cli: error %u allocating %s\n", sts, devname);
     return (sts);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  change password [<old_password> [<new_password>]]       */
@@ -4118,7 +4118,7 @@ static unsigned long readpromptne(const char *prompt, int bufsiz, char *buffer)
     return (sts);
 }
 
-
+
 /************************************************************************/
 /*                                  */
 /*  create logical name <logical_name> <value0> <value1> ...    */
@@ -4226,7 +4226,7 @@ static unsigned long crelognam(unsigned long cprocmode, void *crelognamparv)
     sts = sys$crelnm(0, p->h_table, PSL$C_KERNEL, p->logical_name, NULL);
     return (sts);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  create logical table <logical_name>             */
@@ -4314,7 +4314,7 @@ static unsigned long crelogtbl(unsigned long cprocmode, void *crelogtblparv)
     sts = sys$crelnm(0, 0, PSL$C_KERNEL, p->table_name, NULL);
     return (sts);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  create symbol <name> <value0> <value1> ...          */
@@ -4482,7 +4482,7 @@ static unsigned long int_create_symbol(unsigned long h_input,
     insert_symbol(symbol, NULL, level);
     return (SS$_NORMAL);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  deallocate device <devicename>                  */
@@ -4507,7 +4507,7 @@ static unsigned long int_deallocate_device(unsigned long h_input,
         fprintf(h_error, "oz_cli: error %u deallocating %s\n", sts, argv[0]);
     return (sts);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  delete logical name <logical_name>              */
@@ -4585,7 +4585,7 @@ static unsigned long delete_logical(unsigned long h_error,
     }
     return (sts);
 }
-
+
 static unsigned long int_open(int userarg)
 {
     unsigned long sts;
@@ -4848,7 +4848,7 @@ static unsigned long int_read(int userarg)
 
     return set_symbol(e, buf);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  exit [<status>]                         */
@@ -4894,7 +4894,7 @@ static unsigned long int_logout(unsigned long h_input, unsigned long h_output,
 
     return (exitst);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  goto <label>                            */
@@ -4938,7 +4938,7 @@ static unsigned long int_goto(unsigned long h_input, unsigned long h_output,
 
     return (SS$_BRANCHSTARTED);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  help                                */
@@ -5002,7 +5002,7 @@ static unsigned long int_help(unsigned long h_input, unsigned long h_output,
 
     return (sts);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  if <integervalue> <statement ...>               */
@@ -5088,7 +5088,7 @@ static unsigned long int_then(unsigned long h_input, unsigned long h_output,
     // nothing yet
 }
 
-
+
 /************************************************************************/
 /*                                  */
 /*  Run an external command whose name is given in OZ_CLI_TABLES    */
@@ -5187,7 +5187,7 @@ static unsigned long extcommand(unsigned long h_input, unsigned long h_output,
 
     return (sts);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Spawn an image and optionally wait for it to exit           */
@@ -5480,7 +5480,7 @@ rtn:
     return (sts);
 }
 
-
+
 /************************************************************************/
 /*                                  */
 /*  Decode 'run' options                        */
@@ -5794,7 +5794,7 @@ static unsigned long decode_runopts(const char *input, const char *output,
     return (SS$_NORMAL);
 }
 
-
+
 /************************************************************************/
 /*                                  */
 /*  script <script_name> [<args> ...]               */
@@ -5915,7 +5915,7 @@ static unsigned long int_set_process(unsigned long h_input,
     return SS$_NORMAL;
 }
 
-
+
 /************************************************************************/
 /*                                  */
 /*  set default <directory>                     */
@@ -5977,7 +5977,7 @@ static unsigned long int_show_datetime(unsigned long h_input,
     return (SS$_NORMAL);
 }
 
-
+
 /************************************************************************/
 /*                                  */
 /*  show default                            */
@@ -6011,7 +6011,7 @@ static unsigned long int_show_default(unsigned long h_input,
     return (sts);
 }
 
-
+
 static unsigned long show_status(int userarg)
 
 {
@@ -6120,7 +6120,7 @@ static unsigned long int_show_device(unsigned long h_input,
     return (sts);
 }
 
-
+
 /************************************************************************/
 /*                                  */
 /*  show logical name <logical_name> [-security]            */
@@ -6145,7 +6145,7 @@ static unsigned long int_show_logical_name(unsigned long h_input,
     return sts;
 }
 
-
+
 /************************************************************************/
 /*                                  */
 /*  show system                         */

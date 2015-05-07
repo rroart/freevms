@@ -175,7 +175,7 @@ void    Conect_Insert();
 #define     Telnet$K_Char_EL      025   // Control-U
 #define     Telnet$K_Char_IP      003   // Control-C.
 
-
+
 
 //SBTTL "TELNET definitions"
 
@@ -200,7 +200,7 @@ PTY$IOSB = BLOCK->PTY$IOSB_SIZE FIELD(PTY$IOSB_FIELDS) %;
 
 #define  USE_ASTS 1
 
-
+
 //SBTTL "Module data"
 
 struct dsc$descriptor PTY_NAME = ASCID2(8,"INET$PTY");
@@ -446,7 +446,7 @@ struct OPT$BLOCK TVT_DEF_REMOTE[TELNET$K_X_DISPLAY_LOCATION] =
         { /* x_disp */ }
     }
 } ;
-
+
 
 //SBTTL "TELNET_CREATE - Initialize a TCP connection for a TVT"
 /*
@@ -516,7 +516,7 @@ TELNET_CREATE(LHOST,LPORT,FHOST,FPORT)
     OKINT;
     return TCB;
 }
-
+
 void TELNET_OPEN_TIMEOUT(TCB)
 struct tcb_structure * TCB;
 {
@@ -531,7 +531,7 @@ struct tcb_structure * TCB;
     XLOG$FAO(LOG$TCPERR,"!%T TVT open timeout for TCB x!XL!/",0,TCB);
     tcb$delete(TCB);
 }
-
+
 //SBTTL "TELNET_OPEN - Finish open of TCP connection for a TVT"
 /*
     Finish setup of TELNET connection, creating TVT data block within the
@@ -851,7 +851,7 @@ LNM$_STRING, bufaddr:
 // And give success return.
     return TRUE;
 }
-
+
 //SBTTL "TELNET_CLOSE - Handle close of TELNET connection"
 /*
     Handle normal close of TELNET connection. Flush the TVT data structure.
@@ -963,7 +963,7 @@ struct TVT$BLOCK * TVT;
 //    LIB$FREE_VM(%REF(TVT$SIZE*4),TVT);
     LIB$FREE_VM_PAGE(/*%REF*/(((TVT$SIZE) / 512) + 1),TVT);
 }
-
+
 //SBTTL "TELNET_INPUT - Do TCP input for TELNET connection"
 /*
     Process incoming network data for a TELNET connection, handling any
@@ -985,7 +985,7 @@ struct tcb_structure * TCB;
     PTY_WRITE(TCB->tvtdata);
 #endif
 }
-
+
 //SBTTL "TELNET_OUTPUT - Do TCP output for TELNET connection"
 /*
     Obtain some data to output to the network whenever the TCP send queue
@@ -1008,7 +1008,7 @@ struct tcb_structure * TCB;
     PTY_READ(TCB->tvtdata);
 #endif
 }
-
+
 //SBTTL "Routines to interface to the network"
 
 void    TVT_READ_WILL();
@@ -1408,7 +1408,7 @@ leave_x:
     } ;
 
 }
-
+
 
 void PTY_TO_NET(TVT, CHR)
 //
@@ -1475,7 +1475,7 @@ struct TVT$BLOCK * TVT;
     TVT->TVT$NWRITE = FALSE;
 }
 
-
+
 void TCP_WRITE(TVT)
 //
 // TCP_WRITE - Write as much data as possible from the PTY read buffer to the
@@ -1599,7 +1599,7 @@ struct TVT$BLOCK * TVT;
     TVT->TVT$NWRITE = FALSE;
 }
 
-
+
 
 void tcp_add_string(TVT,STRDESC_A)
 //
@@ -1718,7 +1718,7 @@ struct TVT$BLOCK * TVT;
 
 }
 
-
+
 
 //SBTTL "Routines to interface to the PTY"
 
@@ -2006,7 +2006,7 @@ struct TVT$BLOCK * TVT;
     } ;
 
 }
-
+
 
 void    PTY_WRITE_DONE();
 
@@ -2228,7 +2228,7 @@ struct TVT$BLOCK * TVT;
 #endif
 
 }
-
+
 //SBTTL "Mailbox handling routines"
 
 MBX_READ(TVT)
@@ -2333,7 +2333,7 @@ struct TVT$BLOCK * TVT;
 //    OKINT ;
     MBX_READ(TVT);
 }
-
+
 //SBTTL "Option negotiation routines"
 
 void Set_State_ON (TVT, OPTBLK)
@@ -2362,7 +2362,7 @@ struct OPT$BLOCK * OPTBLK;
     }
 }
 
-
+
 
 void    TVT_SEND();
 
@@ -2408,7 +2408,7 @@ struct TVT$BLOCK * TVT;
                 TVT_SEND(TVT,TELNET$K_DONT,OPTION);
         }
 }
-
+
 void TVT_READ_WONT(TVT,OPTION)
 //
 // Received a WONT for an option. Handle according to the option table.
@@ -2447,7 +2447,7 @@ struct TVT$BLOCK * TVT;
         }
 }
 
-
+
 
 void TVT_READ_DO(TVT,OPTION)
 //
@@ -2493,7 +2493,7 @@ struct TVT$BLOCK * TVT;
         };
 }
 
-
+
 
 void TVT_READ_DONT(TVT,OPTION)
 //
@@ -2537,7 +2537,7 @@ struct TVT$BLOCK * TVT;
     } ;
 }
 
-
+
 
 void TVT_SEND(TVT,OPR,OPTION)
 //
@@ -2566,7 +2566,7 @@ struct TVT$BLOCK * TVT;
     TVT->TVT$NEG_CNT = TVT->TVT$NEG_CNT + TVT_OPTION_LEN;
 }
 
-
+
 
 void TVT_SEND_SUBOP(TVT,OPTION,DATA_A,size)
 //
@@ -2613,7 +2613,7 @@ struct TVT$BLOCK * TVT;
     TVT->TVT$NEG_CNT = TVT->TVT$NEG_CNT + (size+5);
 }
 
-
+
 
 void TVT_READ_SUB(TVT)
 //
@@ -2637,7 +2637,7 @@ struct TVT$BLOCK * TVT;
             (OPTS[opt].OPT$SUB_RTN)(TVT);
 }
 
-
+
 
 void TVT_NEGOTIATE(TVT)
 //

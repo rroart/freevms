@@ -143,7 +143,7 @@ extern  void    ASCII_HEX_BYTES();
 extern  void    LOG_FAO();
 extern  void    QL_FAO();
 
-
+
 //SBTTL "ICMP data structures"
 
 // Define the "ICMPCB" - ICMP analogue of TCB.
@@ -191,7 +191,7 @@ MACRO
 ICMPCB_Structure = BLOCK->ICMPCB_Size FIELD(ICMPCB_Fields) %;
 //MESSAGE(%NUMBER(ICMPCB_Size)," longwords per ICMPCB")
 #endif
-
+
 
 //SBTTL "ICMP data storage"
 
@@ -203,7 +203,7 @@ ICMPIPID  = 1,  // Current IP packet ID
 ICMPCB_Count  = 0,  // Count of active ICMPCBs
 icmpcb_table[MAX_ICMPCB+1];// Table of ICMPCBs
 
-
+
 
 //SBTTL "ICMP packet logger"
 /*
@@ -242,7 +242,7 @@ struct icmp_header * Seg;
            seghdr->icm$cksum);
 
 }
-
+
 //SBTTL "ICMPCB_Find - look up ICMP control block"
 
 ICMPCB_Find(Src$Adrs)
@@ -266,7 +266,7 @@ ICMPCB_Find(Src$Adrs)
     };
     return 0;
 }
-
+
 //SBTTL "ICMP input handler"
 /*
     Come here at AST level when input packet is determined to be ICMP packet.
@@ -361,7 +361,7 @@ leave_x:
         mm$seg_free(bufsize,Buf2);
 }
 
-
+
 //SBTTL "Queue_User_ICMP - Queue up ICMP packet for delivery to user"
 /*
     Called by ICMP_Input at AST level when an input packet matches a
@@ -411,7 +411,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
         INSQUE(QB,ICMPCB->ICMPCB$NR_Qtail);
     return FALSE;       // Don't deallocate this segment...
 }
-
+
 //SBTTL "Deliver_ICMP_Data - Deliver ICMP data to user"
 /*
     Perform actual delivery of ICMP packet to a user request.
@@ -473,7 +473,7 @@ struct queue_blk_structure(qb_ur_fields) * URQ;
     mm$seg_free(QB->nr$buf_size,QB->nr$buf);
     mm$qblk_free(QB);
 }
-
+
 //SBTTL "ICMPCB_OK - Match connection ID to ICMPCB address"
 
 ICMPCB_OK(long Conn_ID,long *RCaddr,struct user_default_args * uargs)
@@ -504,7 +504,7 @@ ICMPCB_OK(long Conn_ID,long *RCaddr,struct user_default_args * uargs)
 
     return ICMPCB;
 }
-
+
 //SBTTL "ICMPCB_Get - Allocate and initialize one ICMPCB"
 
 ICMPCB_Get(IDX)
@@ -561,7 +561,7 @@ leave_x:
     *IDX = ICMPCBIDX;
     return ICMPCB;
 }
-
+
 //SBTTL "ICMPCB_Free - Deallocate a ICMPCB"
 
 void ICMPCB_Free(long ICMPCBIX,struct ICMPCB_Structure * ICMPCB)
@@ -586,7 +586,7 @@ void ICMPCB_Free(long ICMPCBIX,struct ICMPCB_Structure * ICMPCB)
         FATAL$FAO("ICMPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     ICMPCB_Count = ICMPCB_Count-1;
 }
-
+
 //SBTTL "Kill_ICMP_Requests - purge all I/O requests for a connection"
 
 void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,long RC)
@@ -643,7 +643,7 @@ void Kill_ICMP_Requests(struct ICMPCB_Structure * ICMPCB,long RC)
         mm$qblk_free(QB);
     };
 }
-
+
 //SBTTL "ICMPCB_Close - Close/deallocate a ICMPCB"
 
 void ICMPCB_Close(long UIDX,struct ICMPCB_Structure * ICMPCB, long RC)
@@ -663,7 +663,7 @@ void ICMPCB_Abort(struct ICMPCB_Structure * ICMPCB,long RC)
         ICMPCB_Close(ICMPCB->icmpcb$icmpcbid,ICMPCB,RC);
 }
 
-
+
 //SBTTL "ICMP$Purge_All_IO - delete ICMP database before network exits"
 
 void icmp$purge_all_io (void)
@@ -678,7 +678,7 @@ void icmp$purge_all_io (void)
         if ((ICMPCB = icmpcb_table[ICMPCBIDX]) != 0)
             ICMPCB_Close(ICMPCBIDX,ICMPCB,NET$_TE);
 }
-
+
 
 //SBTTL "ICMP$OPEN - open a ICMP "connection""
 /*
@@ -771,7 +771,7 @@ leave_x:
     NML$GETALST(NAMPTR,NAMLEN,ICMP_NMLOOK_DONE,ICMPCB);
 }
 
-
+
 
 //SBTTL "ICMP_NMLOOK_DONE - Second phase of ICMP$OPEN when namelookup done"
 /*
@@ -836,7 +836,7 @@ struct ICMPCB_Structure * ICMPCB;
     IO$POST(IOSB,uargs);
     mm$uarg_free(uargs);
 }
-
+
 //SBTTL "ICMP_COPEN_DONE - Common user/internal ICMP open done routine"
 
 ICMP_COPEN_DONE(ICMPCB,ADRCNT,ADRLST)
@@ -855,7 +855,7 @@ struct ICMPCB_Structure * ICMPCB;
              0,ICMPCB->icmpcb$icmpcbid,ICMPCB);
     return SS$_NORMAL;
 }
-
+
 //SBTTL "ICMP_ADLOOK_DONE - Finish ICMP address to name lookup"
 
 void ICMP_ADLOOK_DONE(ICMPCB,STATUS,NAMLEN,NAMPTR)
@@ -876,7 +876,7 @@ struct ICMPCB_Structure * ICMPCB;
     ICMPCB->ICMPCB$Foreign_Hnlen = NAMLEN;
     CH$MOVE(NAMLEN,NAMPTR,CH$PTR(ICMPCB->ICMPCB$Foreign_Hname,0));
 }
-
+
 //SBTTL "ICMP$CLOSE - close ICMP "connection""
 /*
     Close a ICMP "connection". Kills any receive requests that haven't
@@ -907,7 +907,7 @@ void icmp$close(struct user_close_args * uargs)
     user$post_io_status(uargs,SS$_NORMAL,0,0,0);
     mm$uarg_free(uargs);
 }
-
+
 //SBTTL "ICMP$ABORT - abort ICMP "connection""
 /*
     Abort a ICMP "connection". Identical in functionality to ICMP$CLOSE.
@@ -936,7 +936,7 @@ void icmp$abort(struct user_abort_args * uargs)
     user$post_io_status(uargs,SS$_NORMAL,0,0,0);
     mm$uarg_free(uargs);
 }
-
+
 //SBTTL "ICMP$SEND - send ICMP packet"
 /*
     Handle user send request for ICMP connection. Form a ICMP packet from the
@@ -1116,7 +1116,7 @@ void icmp$send(struct user_send_args * uargs)
 
 }
 
-
+
 
 //SBTTL "ICMP$RECEIVE - receive a ICMP packet"
 /*
@@ -1179,7 +1179,7 @@ void icmp$receive(struct user_recv_args * uargs)
     OKINT;
 }
 
-
+
 
 //SBTTL "ICMP$INFO - get info about ICMP "connection""
 /*
@@ -1210,7 +1210,7 @@ void icmp$info(struct user_info_args * uargs)
                              ICMPCB->ICMPCB$Foreign_Hnlen);
 }
 
-
+
 //SBTTL "ICMP$STATUS - get status of ICMP "connection""
 /*
     This routine is a placeholder for the network STATUS command, which is
@@ -1221,7 +1221,7 @@ void icmp$status(struct user_status_args * uargs)
 {
     USER$Err(uargs,NET$_NYI);
 }
-
+
 //SBTTL "ICMP$CANCEL - Handle VMS cancel for ICMP connection"
 /*
     Handle process abort/$CANCEL request for a ICMP connection. Identical
@@ -1254,7 +1254,7 @@ icmp$cancel(struct vms$cancel_args * uargs)
         };
     return Fcount;
 }
-
+
 //SBTTL "ICMP dump routines"
 
 void icmp$connection_list(RB)

@@ -239,7 +239,7 @@ static signed long ARP_SWP_TIME[2],    // Delta time to sweep cache
        ARPHTB[ARP_HSHLEN];
 
 #define    ARP_SWP_TTXT_STR "0000 00:02:00.00" // Every 2 minutes...
-
+
 
 static xearp$_log( NAME)
 {
@@ -270,7 +270,7 @@ void xearp$log( NAME, IPADDR, HWLEN, HWADDR)
 // Queue up a message for later output
     DRV$QL_FAO("!%T !AS: IP=!AS, PHY=!AS!/", 0, NAME, IPSTR, PHYSTR);
 }
-
+
 
 void ARP_SWEEP();
 
@@ -291,7 +291,7 @@ void xearp$init(void)
     sys$bintim(ARP_SWP_TTXT, ARP_SWP_TIME);
     sys$setimr(0, ARP_SWP_TIME, ARP_SWEEP, 0, 0);
 }
-
+
 
 #define     MAX_HDR_SIZE   100      // Max size of device header on ARP packet
 void xearp$dev_init(XE_Int, HWTYPE, IPTYPE, HWADDR, HDRSIZ, SWAPPF, SWAP16F)
@@ -357,7 +357,7 @@ struct XE_Interface_Structure * XE_Int;
                   &ARBLK->AB_SWP_START);
     XE_Int->XEI$ARP_Block = ARBLK;
 }
-
+
 ARP_HASH();
 ARP_FIND();
 ARP_CNEW();
@@ -543,7 +543,7 @@ struct XE_Interface_Structure * XE_Int;
 
     return FOUND;
 }
-
+
 
 void ARP_UPDATE();
 
@@ -814,7 +814,7 @@ struct XE_Interface_Structure * XE_Int;
         xe$xmit(dev_config);
     };
 }
-
+
 void ARP_SWEEP(void)
 
 // Sweep the ARP cache, deleting expired entries.
@@ -874,7 +874,7 @@ void ARP_SWEEP(void)
 
     sys$setimr(0, ARP_SWP_TIME, ARP_SWEEP, 0, 0);
 }
-
+
 //SBTTL "ARP_DUMP - Dump ARP cache"
 /*
  Dump a portion of the ARP cache into a block for return to the user.

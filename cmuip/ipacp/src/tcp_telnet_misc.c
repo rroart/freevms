@@ -94,7 +94,7 @@ MODULE TELNET_MISC(IDENT="1.0",LANGUAGE(BLISS32),
 #define sys$trnlnm exe$trnlnm
 #endif
 
-                       
+
 
 //++
 // This macro describes the terminal translation table entries.
@@ -535,7 +535,7 @@ Term_Table [4*TTAB$K_TABLE_SIZE+1]=
     +TT2$M_DECCRT4
 };
 
-
+
 
 Print (control_string, P1)
 {
@@ -560,7 +560,7 @@ Print (control_string, P1)
     return send_2_operator(Out_Desc);
 }
 
-
+
 
 void Line_Changed_AST (Parm)
 //--
@@ -643,7 +643,7 @@ void Line_Changed_AST (Parm)
                  ,0,io_stats.iosb$w_status);
     };
 }
-
+
 
 IS_CNTRLT_GOOD (TVT)
 //--
@@ -684,7 +684,7 @@ struct TVT$BLOCK * TVT;
            );
 }
 
-
+
 
 void Timing_Mark_On(TVT)
 //--
@@ -703,7 +703,7 @@ struct TVT$BLOCK * TVT;
 
 }
 
-
+
 
 void Set_PTY_Window_Size (TVT, pag, width)
 //--
@@ -799,7 +799,7 @@ struct TVT$BLOCK * TVT;
     return SS$_NORMAL;
 }
 
-
+
 void Set_PTY_Term_Type (TVT, type, devdep)
 //--
 // Functional Description:
@@ -927,7 +927,7 @@ struct TVT$BLOCK * TVT;
                    /*%REF*/(Option$K_Terminal_Type_Send), 1);
 
 }
-
+
 void Window_Size_On (TVT)
 //++
 // Functional Description:
@@ -1067,7 +1067,7 @@ struct TVT$BLOCK * TVT;
     Status = STR$COPY_DX(OLDTYPDSC,TYPDSC);
     return SS$_NORMAL;
 }
-
+
 void Set_DEVDEP_DONE(TVT)
 struct TVT$BLOCK * TVT;
 {
@@ -1337,7 +1337,7 @@ LNM$_STRING, bufaddr:
     return SS$_NORMAL;
 }
 
-
+
 void LineMode_Sub (TVT)
 struct TVT$BLOCK * TVT;
 {
@@ -1368,7 +1368,7 @@ struct TVT$BLOCK * TVT;
     return SS$_NORMAL;
 }
 
-
+
 /*
 Linemode_SubOp_Mode ( Mask )
     {
@@ -1433,7 +1433,7 @@ Linemode_SubOp_Forwardmask ( Action , Data_A , Length )
     return SS$_NORMAL;
     }
 
-
+
 
 Process_SLC(Code,Modifier,Value,Reply_Desc)
     struct dsc$descriptor * Reply_Desc  ;

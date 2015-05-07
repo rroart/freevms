@@ -1344,7 +1344,7 @@ static void set_rx_mode(struct net_device *dev);
 static int vortex_ioctl(struct net_device *dev, struct ifreq *rq, int cmd);
 static void vortex_tx_timeout(struct net_device *dev);
 static void acpi_set_WOL(struct net_device *dev);
-
+
 /* This driver uses 'options' to pass the media type, full-duplex flag, etc. */
 /* Option count limit only -- unlimited interfaces are supported. */
 #define MAX_UNITS 8
@@ -3677,7 +3677,7 @@ static void mdio_write(struct net_device *dev, int phy_id, int location, int val
 #endif
     return;
 }
-
+
 /* ACPI: Advanced Configuration and Power Interface. */
 /* Set Wake-On-LAN mode and put the board into D3 (power-down) state. */
 static void acpi_set_WOL(struct net_device *dev)
@@ -3813,7 +3813,7 @@ static void __exit vortex_cleanup (void)
 module_init(vortex_init);
 module_exit(vortex_cleanup);
 
-
+
 /*
  * Local variables:
  *  c-indent-level: 4

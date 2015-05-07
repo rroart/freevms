@@ -154,7 +154,7 @@ Modification History:
 #define    FIRST_QUEUE_ELEM 1 // INSQUE return - inserted 1st element.
 
 #define    tblsize = 0;
-
+
 //SBTTL 'Define circular byte queue header'
 /*
     Circular byte queues are used to keep track of data as it flows between
@@ -178,7 +178,7 @@ struct cq_fields
 #define    CQ_SIZE sizeof(struct cq_fields)
 
 #define    cq$block struct cq_fields
-
+
 
 //SBTTL 'Queue Element Block Definitions.'
 /*
@@ -321,7 +321,7 @@ struct qb_ur_fields
 
 #define queue_blk_structure(F) F
 //MESSAGE(%NUMBER(qb_size),' Longwords allocated per Queue Block')
-
+
 //SBTTL 'Network Segment Received Queue Definition.'
 /*
 
@@ -337,7 +337,7 @@ struct si_fields
 };
 
 #define    SI_Qheader_Size sizeof(struct si_fields)
-
+
 
 //SBTTL '"SYN" Wait Queue Definition.'
 
@@ -350,7 +350,7 @@ struct sw_fields
     void *     sw_qhead;
     void *     sw_qtail;
 };
-
+
 
 //SBTTL 'User (TCP) I/O request Argument Block definitions.'
 /*

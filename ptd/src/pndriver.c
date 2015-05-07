@@ -277,7 +277,7 @@
 //          Change name to PNDRIVER
 //
 //--
-
+
 #if 0
 .PAGE
 .SBTTL  Declarations
@@ -398,7 +398,7 @@ struct _tz_ucb              // Start of UCB definitions
 
 };          // end of UCB definitions
 #if 0
-
+
 .PAGE
 #endif
 //
@@ -454,7 +454,7 @@ FORK LOCK
                       DPT_STORE REINIT
                       DPT_STORE CRB,CRB$L_INTD+VEC$L_INITIAL,D,PN$INITIAL    // Controller
                       DPT_STORE END
-                      
+
                       .PAGE
                       .SBTTL Driver Dispatch table and function decision table
 //
@@ -503,7 +503,7 @@ FORK LOCK
                                                                        char * TZSTRING="tza"; // ascii,  yes // was: TZA, case prob
 #define TZLENGTH 3
 
-
+
 //++
 // PZ_UNLOAD, Unload the driver
 //
@@ -537,7 +537,7 @@ int PZ_UNLOAD()             // Unload device
     return SS$_NORMAL;              // Return
 }
 
-
+
 #if 0
 .PAGE
 .SBTTL  PN$FDTREAD - Function decision routine for PZ control read
@@ -625,7 +625,7 @@ int PN$FDTREAD(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
     // longword
     return  exe$qiodrvpkt(i, p, u); // Queue I/O packet to start I/O routine
 }
-
+
 #if 0
 .PAGE
 .SBTTL  PN$FDTWRITE - Function decision routine for PZ control write
@@ -875,7 +875,7 @@ l170:
     R|=SS$_DATAOVERUN;  // Cannot input more data
     return exe$finishioc(R,i,p,u);      // Complete the I/O request
 }
-
+
 #if 0
 .PAGE
 .SBTTL  PN$CANCEL - Cancel the IO on the PZ device
@@ -970,7 +970,7 @@ l20:
     u->ucb$l_sts|=UCB$M_DELETEUCB;  // Set our own delete bit
     return;
 }
-
+
 #if 0
 .PAGE
 .SBTTL PN$INITIAL - Initialize Pseudo terminal interface
@@ -1000,7 +1000,7 @@ int PN$INITIAL(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * 
 {
     return;
 }
-
+
 #if 0
 .PAGE
 .SBTTL  PN$CLONE_INIT - initialize the unit
@@ -1130,7 +1130,7 @@ l50:
 
     return;
 }
-
+
 #if 0
 .PAGE
 .SBTTL  DDB finding Routines
@@ -1212,7 +1212,7 @@ l30:
 l40:
     return sts;
 }
-
+
 #if 0
 .PAGE
 .SBTTL  PN$STARTIO - Device Startio routines
@@ -1409,7 +1409,7 @@ PZ_PREMPT:
 }
 #if 0
 .DISABLE LSB
-
+
 .SBTTL  PN$FDTSET - Set up ATTENTION ASTs
 #endif
 //++
@@ -1581,7 +1581,7 @@ SET_ACC_PORT_FINISH:
     return  exe$finishioc(sts,i,p,u);       // Complete request
 }
 
-
+
 #if 0
 .SBTTL  PN$FDTSENSEM - Sense mode routine
 #endif
@@ -1657,9 +1657,9 @@ int PN$FDTSENSEM (struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb
     // RETURN IOSB DATA
     //expanded  goto    CMN_EXIT;       // EXIT RETURNING R0,R1
     return exe$finishio(speed|SS$_NORMAL,parity,i,p,u); // check    // COMPLETE REQUEST IOSB WORD 0,1
-    
+
 }
-
+
 #if 0
 .SBTTL  PN$FDTSENSEC - Sense char routine
 #endif
@@ -1738,7 +1738,7 @@ int PN$FDTSENSEC(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
     //duplicated
 
 }
-
+
 //  THIS ROUTINE BUILDS DCL PRIVATE CHARACTERISTICS
 
 int GET_DCL(struct _ucb * ucb)
@@ -1749,13 +1749,13 @@ int GET_DCL(struct _ucb * ucb)
     return spec_chr;
 }
 
-
+
 //  Common exit path for PN$FDTSENSEM and PN$FDTSENSEC
 #if 0
 CMN_EXIT:
 R0= SS$_NORMAL;
 return EXE$FINISHIO();      // COMPLETE REQUEST IOSB WORD 0,1
-
+
 #endif
 //  If no TZ device abort with SS$_NOSUCHDEV
 
@@ -1787,7 +1787,7 @@ l20:
     return exe_std$abortio(i,p,u,SS$_ACCVIO);       // ABORT THE IO
 }
 #if 0
-
+
 .SBTTL  PN$END - End of driver
 PN$END:
 // End of driver

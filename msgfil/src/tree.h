@@ -85,7 +85,7 @@ extern const unsigned char tree_code_length[];
 /* Names of tree components.  */
 
 extern const char *const tree_code_name[];
-
+
 /* Classify which part of the compiler has defined a given builtin function.
    Note that we assume below that this is no more than two bits.  */
 enum built_in_class
@@ -123,7 +123,7 @@ extern const char *const built_in_names[(int) END_BUILTINS];
 extern GTY(()) tree built_in_decls[(int) END_BUILTINS];
 extern GTY(()) tree implicit_built_in_decls[(int) END_BUILTINS];
 #endif
-
+
 /* The definition of tree nodes fills the next several pages.  */
 
 /* A tree node can represent a data type, a variable, an expression
@@ -519,7 +519,7 @@ ATTRIBUTE_NORETURN;
 /* Nonzero if TYPE represents a type.  */
 
 #define TYPE_P(TYPE)    (TREE_CODE_CLASS (TREE_CODE (TYPE)) == 't')
-
+
 /* Define many boolean fields that all tree nodes have.  */
 
 /* In VAR_DECL nodes, nonzero means address of this is needed.
@@ -676,7 +676,7 @@ ATTRIBUTE_NORETURN;
 #define TREE_LANG_FLAG_4(NODE) ((NODE)->common.lang_flag_4)
 #define TREE_LANG_FLAG_5(NODE) ((NODE)->common.lang_flag_5)
 #define TREE_LANG_FLAG_6(NODE) ((NODE)->common.lang_flag_6)
-
+
 /* Define additional fields and accessors for nodes representing constants.  */
 
 /* In an INTEGER_CST node.  These two together make a 2-word integer.
@@ -756,7 +756,7 @@ struct tree_vector GTY(())
     struct tree_common common;
     tree elements;
 };
-
+
 #include "hashtable.h"
 
 /* Define fields and accessors for some special-purpose tree nodes.  */
@@ -878,7 +878,7 @@ struct tree_exp GTY(())
                desc ("TREE_CODE ((tree) &%0)")))
     operands[1];
 };
-
+
 /* In a BLOCK node.  */
 #define BLOCK_VARS(NODE) (BLOCK_CHECK (NODE)->block.vars)
 #define BLOCK_SUBBLOCKS(NODE) (BLOCK_CHECK (NODE)->block.subblocks)
@@ -939,7 +939,7 @@ struct tree_block GTY(())
     tree fragment_origin;
     tree fragment_chain;
 };
-
+
 /* Define fields and accessors for nodes representing data types.  */
 
 /* See tree.def for documentation of the use of these fields.
@@ -1162,7 +1162,7 @@ struct tree_type GTY(())
     /* Points to a structure whose details depend on the language in use.  */
     struct lang_type *lang_specific;
 };
-
+
 /* Define accessor macros for information about type inheritance
    and basetypes.
 
@@ -1257,7 +1257,7 @@ struct tree_type GTY(())
    It is up to the language-dependent front-ends to maintain
    this information as necessary.  */
 #define BINFO_INHERITANCE_CHAIN(NODE) TREE_VEC_ELT ((NODE), 0)
-
+
 /* Define fields and accessors for nodes representing declared names.  */
 
 /* Nonzero if DECL represents a decl.  */
@@ -1780,7 +1780,7 @@ struct tree_decl GTY(())
     /* Points to a structure whose details depend on the language in use.  */
     struct lang_decl *lang_specific;
 };
-
+
 enum tree_node_structure_enum
 {
     TS_COMMON,
@@ -1820,7 +1820,7 @@ union tree_node GTY ((ptr_alias (union lang_tree_node),
     struct tree_exp GTY ((tag ("TS_EXP"))) exp;
     struct tree_block GTY ((tag ("TS_BLOCK"))) block;
 };
-
+
 /* Standard named or nameless data types of the C compiler.  */
 
 enum tree_index
@@ -2045,7 +2045,7 @@ extern GTY(()) tree integer_types[itk_none];
 #define long_unsigned_type_node     integer_types[itk_unsigned_long]
 #define long_long_integer_type_node integer_types[itk_long_long]
 #define long_long_unsigned_type_node    integer_types[itk_unsigned_long_long]
-
+
 /* Set to the default thread-local storage (tls) model to use.  */
 
 enum tls_model
@@ -2058,7 +2058,7 @@ enum tls_model
 
 extern enum tls_model flag_tls_default;
 
-
+
 /* A pointer-to-function member type looks like:
 
      struct {
@@ -2085,7 +2085,7 @@ enum ptrmemfunc_vbit_where_t
     ptrmemfunc_vbit_in_pfn,
     ptrmemfunc_vbit_in_delta
 };
-
+
 #define NULL_TREE (tree) NULL
 
 extern tree decl_assembler_name (tree);
@@ -2202,7 +2202,7 @@ extern tree get_inner_array_type (tree);
    tree.h had been included.  */
 
 extern tree make_tree (tree, rtx);
-
+
 /* Return a type like TTYPE except that its TYPE_ATTRIBUTES
    is ATTRIBUTE.
 
@@ -2710,7 +2710,7 @@ extern const char *function_cannot_inline_p (tree);
 
 /* Return 1 if EXPR is the real constant zero.  */
 extern int real_zerop (tree);
-
+
 /* Declare commonly used variables for tree structure.  */
 
 /* Nonzero means lvalues are limited to those valid in pedantic ANSI C.
@@ -2742,7 +2742,7 @@ extern tree poplevel (int, int, int);
    provided by each language frontend.  */
 extern tree builtin_function (const char *, tree, int, enum built_in_class,
                               const char *, tree);
-
+
 /* In tree.c */
 extern unsigned crc32_string (unsigned, const char *);
 extern void clean_symbol_name (char *);
@@ -2754,7 +2754,7 @@ extern void change_decl_assembler_name (tree, tree);
 extern int type_num_arguments (tree);
 extern tree lhd_unsave_expr_now (tree);
 
-
+
 /* In stmt.c */
 
 extern void expand_fixups (rtx);
@@ -3046,7 +3046,7 @@ extern void declare_nonlocal_label (tree);
 /* If KIND=='I', return a suitable global initializer (constructor) name.
    If KIND=='D', return a suitable global clean-up (destructor) name.  */
 extern tree get_file_function_name (int);
-
+
 /* Interface of the DWARF2 unwind info support.  */
 
 /* Generate a new label for the CFI info to refer to.  */
@@ -3115,7 +3115,7 @@ extern const char *dump_flag_name (enum tree_dump_index);
 /* Assign the RTX to declaration.  */
 
 extern void set_decl_rtl (tree, rtx);
-
+
 /* Redefine abort to report an internal error w/o coredump, and
    reporting the location of the error in the source file.  This logic
    is duplicated in rtl.h and tree.h because every file that needs the

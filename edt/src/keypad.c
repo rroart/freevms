@@ -90,7 +90,7 @@ static struct
     1, "	", "CTLI", " (9ASC)",  " (9ASC)",
     1, "\n",    "CTLJ", " (-DW)",   " (10ASC)",
     1, "", "CTLK", " DEFK",    " (11ASC)",
-    1, "", "CTLL", " (12ASC)", " (12ASC)",
+    1, "", "CTLL", " (12ASC)", " (12ASC)",
     1, "\r",    "CTLM", " (10ASC)", " (13ASC)",
     1, "", "CTLN", " (14ASC)", " (14ASC)",
     1, "", "CTLO", " (15ASC)", " (15ASC)",
@@ -115,7 +115,7 @@ static struct
 
     0, NULL,    NULL,   NULL,       NULL
 };
-
+
 /************************************************************************/
 /*                                  */
 /*  Define keypad key                           */
@@ -202,7 +202,7 @@ void show_keypad (void)
         outfmt (41 + strlen (stan) + strlen (gold), "%6s  %-35s %s\n", keycodes[i].defk, stan, gold);
     }
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Get definition for a keypad key                 */
@@ -275,7 +275,7 @@ void keypad_setdef (const char *keyname, const char *command)
         }
     }
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Convert a keypad code string to a keypad key name           */
@@ -323,7 +323,7 @@ scantable:
     }
     return (-1);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Convert a keypad code string to a changemode command string     */

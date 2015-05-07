@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified DFU source file, 2004.
 
 /*
@@ -79,7 +79,7 @@ static struct
 } iostat;
 
 extern globalvalue DFU_EXPREG;
-
+
 int read_bitmap(short chan, int xpages, Boolean locked, int *addr)
 
 /*
@@ -141,7 +141,7 @@ int read_bitmap(short chan, int xpages, Boolean locked, int *addr)
     }
     return(status);
 }
-
+
 int scan_bitmap(short chan, int pages, Boolean locked, int *free,
                 int *large, int *blocks, int *large_lbn, int *table)
 /*
@@ -268,7 +268,7 @@ int scan_bitmap(short chan, int pages, Boolean locked, int *free,
     *large_lbn = lbn;
     return(1);
 }
-
+
 void new_bitmap(int *addr, struct header_area_struct *hdr, int cluster,
                 int curvol, FILE *fp, int pass, int *lis, Boolean *flag,
                 Boolean matoutput)
@@ -427,7 +427,7 @@ void new_bitmap(int *addr, struct header_area_struct *hdr, int cluster,
         }
     } /* End i loop */
 }
-
+
 void set_bitmap(int * addr, int cluster, int lbn_start,
                 int lbn_count, Boolean mbs)
 /*
@@ -484,7 +484,7 @@ void set_bitmap(int * addr, int cluster, int lbn_start,
         } /* End j loop */
     }
 }
-
+
 int rebuild_bitmap(struct header_area_struct *hdr, int *addr, int cluster,
                    int curvol, Boolean check_only)
 /*   Called by UNDELETE
@@ -615,7 +615,7 @@ int rebuild_bitmap(struct header_area_struct *hdr, int *addr, int cluster,
     } /* End i loop */
     return(status);
 }
-
+
 int compare_bitmap(short chan, int *addr, int pages, Boolean locked,
                    int cluster, FILE *fp, Boolean rebuild, Boolean matoutput)
 /*
@@ -790,7 +790,7 @@ int compare_bitmap(short chan, int *addr, int pages, Boolean locked,
     SYS$DELTVA(&bmap_addr, &bmap_addr, 0);
     return(1);
 }
-
+
 void add_usage(struct _usg *table, int owner, int r_size, int a_size, int hdrs)
 /*
    Build a disk usage table based on identifiers/uic's.
@@ -829,7 +829,7 @@ void add_usage(struct _usg *table, int owner, int r_size, int a_size, int hdrs)
     usage_table->asize += a_size;
     usage_table->rsize += r_size;
 }
-
+
 void add_quota(short chan, int uic, int hdrs, int size)
 /*
    Add the diskquota for an undeleted file
@@ -880,7 +880,7 @@ void add_quota(short chan, int uic, int hdrs, int size)
                           &fibdescr, &qb_descr, &len, &qb_descr, 0 , 0);
     }
 }
-
+
 void report_usage(struct _usg *table, short chan, FILE *fp,
                   Boolean matoutput)
 /*
@@ -987,7 +987,7 @@ void report_usage(struct _usg *table, short chan, FILE *fp,
         usage_table++;
     }
 }
-
+
 void check_usage(struct _usg *table, short chan, FILE *fp, Boolean reb,
                  Boolean matoutput)
 /*

@@ -135,7 +135,7 @@ Modification History:
     Track current overflow and maximum size of preallocated queues.
 
 */
-
+
 //SBTTL "Module & Environment Definition"
 
 #if 0
@@ -156,7 +156,7 @@ MODULE MEMGR(Ident="2.8",LANGUAGE(BLISS32),
 
 #include <ssdef.h>
 #include "nettcpip.h" // for some min max defines
-                 
+
 //SBTTL "External: Routines, Literals and data"
 
                  extern    LIB$GET_VM();
@@ -185,7 +185,7 @@ MAX_PHYSICAL_BUFSIZE;
 #define    MAX_PHYSICAL_BUFSIZE (DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+OPT$MAX_RECV_DATASIZE)
 #define    MIN_PHYSICAL_BUFSIZE (DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+DEFAULT_DATA_SIZE)
 
-
+
 //SBTTL "Memory manager header structure"
 
 struct MEM$HDR_STRUCT
@@ -223,7 +223,7 @@ MEM$HDR_SIZE = $FIELD_SET_SIZE;
 MACRO
 MEM$HDR_STRUCT = BLOCK->MEM$HDR_SIZE FIELD(MEM$HDR_FIELDS) %;
 #endif
-
+
 //Sbttl "Preallocated dynamic data structures."
 /*
 
@@ -304,7 +304,7 @@ qb_max  = 0,    // Queue Blk max queue size
 ua_max  = 0,    // User arg max queue size
 min_max  = 0,   // Minimum size buffers max queue size
 max_max  = 0;   // Maximum seg max queue size
-
+
 //Sbttl "Memory Management Fault Handler"
 /*
 
@@ -336,7 +336,7 @@ void Memgr_Fault_Handler(Caller,Primary_CC,Sec_CC)
     Fatal_Error("Memory Mgmt. Fault detected.",Primary_CC);
 }
 
-
+
 
 //SBTTL "Get_Mem: Allocate memory."
 /*
@@ -381,7 +381,7 @@ long * Addr;
     return RC;
 }
 
-
+
 
 //SBTTL "Free_Mem:  Release allocated memory."
 /*
@@ -418,7 +418,7 @@ void mm$free_mem(Mem,Size)
     OKINT;
 }
 
-
+
 
 //SBTTL "Queue Block Handlers"
 /*
@@ -595,7 +595,7 @@ void QBLK_Init (void)
     };
 }
 
-
+
 
 //Sbttl "TCP User IO argument block (uarg) memory mangler"
 /*
@@ -749,7 +749,7 @@ void uarg_init (void)
         INSQUE(Ptr,FREE_Uargs.qtail);
     };
 }
-
+
 //SBTTL "Segment Handlers"
 /*
 
@@ -998,7 +998,7 @@ void seg_init (void)
         INSQUE(Ptr,Free_Maxsize_Segs.qtail);
     };
 }
-
+
 //Sbttl "Memory Management Initialization."
 /*
 
@@ -1028,7 +1028,7 @@ void mm$init (void)
     seg_init();
 }
 
-
+
 //SBTTL "Debugging routines to simulate INSQUE and REMQUE"
 /*
 

@@ -213,7 +213,7 @@ static void ne2k_pci_block_output(struct net_device *dev, const int count,
                                   const unsigned char *buf, const int start_page);
 static int netdev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd);
 
-
+
 
 /* There is no room in the standard 8390 structure for extra info we need,
    so we build a meta/outer-wrapper structure.. */

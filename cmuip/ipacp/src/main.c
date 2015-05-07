@@ -361,7 +361,7 @@ Module Modification History:
     gatewaying between networks.
 */
 
-
+
 %sbttl 'Module Environment & Definition.'
 
 MODULE IPACP
@@ -395,7 +395,7 @@ LIBRARY 'TCPMacros';
 ! Local (tcp) Macro defintions.
 LIBRARY 'TCPMOD';
 ! Modification history/version
-
+
 
 %SBTTL 'External Routines'
 
@@ -488,7 +488,7 @@ NOVALUE,
 Make_Zone   :
 NOVALUE ;
 
-
+
 
 %SBTTL 'External Literals & data segments'
 
@@ -541,12 +541,12 @@ act_state,
 Begin_Lock,         // start & end address of process pages which
 End_Lock;           // are locked in the working set; see maclib.mar
 
-
+
 //%SBTTL 'Literals'
 
 //LITERAL
 #define MAXPRCLEN 15        // Max length of process name
-
+
 //%SBTTL 'Global Data Declarations.'
 
 static char mynamestr[128],
@@ -600,7 +600,7 @@ static signed long
 myprcname [MAXPRCLEN],
           myprclen;
 
-
+
 
 void MAIN$NOINT(void)
 {
@@ -612,7 +612,7 @@ void MAIN$OKINT(void)
     OKINT
 }
 
-
+
 
 //SBTTL 'Initialize ACP'
 /*
@@ -687,7 +687,7 @@ void Initialize_ACP(void)
 
     NML$GETNAME(CNF$Get_Local_IP_addr(),ACPINI_ADLOOK_DONE,0);
 }
-
+
 //SBTTL 'ACPINI_ADLOOK_DONE - Set local host name when name lookup finished'
 
 void ACPINI_ADLOOK_DONE(DUMMY,STATUS,NAMLEN,NAMPTR)
@@ -703,7 +703,7 @@ void ACPINI_ADLOOK_DONE(DUMMY,STATUS,NAMLEN,NAMPTR)
     Local_Name.dsc$w_length = NAMLEN;
     memcpy(Local_Name.dsc$a_pointer,NAMPTR,NAMLEN);
 }
-
+
 //SBTTL 'Wait-For-Something-2-DO: Snooze if we have the time.'
 /*
 
@@ -840,7 +840,7 @@ qb:
     }
 }
 
-
+
 //SBTTL 'TCP Mainline rtn.'
 
 void    INIT_PROCNAME(void);
@@ -1016,7 +1016,7 @@ fp:
     sys$exit(SS$_NORMAL);   // say goodbye...
 }
 
-
+
 //SBTTL 'Set and reset process name'
 
 void INIT_PROCNAME (void)
@@ -1056,7 +1056,7 @@ void INIT_PROCNAME (void)
             FATAL$FAO("$SETPRN failure, RC = %x",rc);
     }
 }
-
+
 void RESET_PROCNAME (void)
 {
     struct dsc$descriptor namdsc;

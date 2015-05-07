@@ -163,7 +163,7 @@ log_state,
 ast_in_progress,
 intdf;
 
-
+
 //SBTTL "Define name lookup queue entry"
 
 // The name lookup queue contains an entry for each pending request. The request
@@ -213,7 +213,7 @@ MACRO
 MAIL$BUF = BLOCK->MAIL$BUF_SIZE FIELD(MAIL$BUF_FIELDS) %,
      MAX_MAIL$BUF = BLOCK[MAIL$BUF_SIZE + (MSGMAX/4)] FIELD(MAIL$BUF_FIELDS) %;
 #endif
-
+
 //SBTTL "Constants and OWN data"
 
 struct dsc$descriptor     SRVPRCNAM_ = ASCID2(6,"NAMRES"), *SRVPRCNAM=&SRVPRCNAM_;  // Name of the resolver process
@@ -261,7 +261,7 @@ struct dsc$descriptor   SRVIMGNAME_ =   // Name resolver process name
         DSC$K_CLASS_D,
         dsc$a_pointer:0
 },*SRVIMGNAME=&SRVIMGNAME;
-
+
 //SBTTL "NML$CONFIG - Configure name resolver process"
 
 void NML$CONFIG(IMNAME_A,PRIOR,STATUS,PRIVS, QUOTAS)
@@ -300,7 +300,7 @@ struct dsc$descriptor   * QUOTAS;
     SRVPRIVS[0] = PRIVS[0]; // Resolver privileges
     SRVPRIVS[1] = PRIVS[1];
 }
-
+
 //SBTTL "NML$INIT - Initialize module state"
 
 void    MBX_RECV_AST();
@@ -446,7 +446,7 @@ void NML$INIT (void)
         SRVSTATE = SRV$INIT;    // Resolver is initializing
     };
 }
-
+
 //SBTTL "NML$GETALST - Translate name to address list"
 
 NQE_ALLOC();
@@ -504,7 +504,7 @@ int (*ASTADR)();
     NQE->NQE$ASTPRM = ASTPRM;
     NQE_ENQUEUE(NQE,CURQID,MSLEN,MSBUF);
 }
-
+
 //SBTTL "NML$GETNAME - Translate address to name"
 
 void NML$GETNAME(ADDR,ASTADR,ASTPRM)
@@ -612,7 +612,7 @@ int (*ASTADR)();
     NQE->NQE$ASTPRM = ASTPRM;
     NQE_ENQUEUE(NQE,CURQID,MSLEN,MSBUF);
 }
-
+
 //SBTTL "NML$CANCEL - Cancel name lookup request"
 
 NML$CANCEL(ASTPRM,ASTFLG,STATUS)
@@ -655,7 +655,7 @@ NML$CANCEL(ASTPRM,ASTFLG,STATUS)
 
     return RC;
 }
-
+
 //SBTTL "NML$STEP - Examine the name lookup queue, calling coroutine"
 
 void NML$STEP(COADDR,COVALUE)
@@ -679,7 +679,7 @@ int (*COADDR)();
         NQE = NXNQE;
     };
 }
-
+
 void NML$PURGE(STATUS)
 //
 // Purge the name lookup queue and tell the name resolver to shutdown.
@@ -721,7 +721,7 @@ void NML$PURGE(STATUS)
         NQE = NXNQE;
     };
 }
-
+
 //SBTTL "Debugging routine to dump out the queue contents"
 
 void    NQE_DUMP();
@@ -765,7 +765,7 @@ void NQE_DUMP(struct NQENTRY * NQE)
             NQE->NQE$TYPE,NQE->NQE$LENGTH,NQE->NQE$FLAGS,NQE->NQE$TIME,
             NQE->NQE$ASTADR,NQE->NQE$ASTPRM);
 }
-
+
 void SEND_CONTROL(CCODE,CVALUE)
 //
 // Build and send a control message to the name resolver.
@@ -798,7 +798,7 @@ void SEND_CONTROL(CCODE,CVALUE)
     if (BLISSIFNOT(RC))
         ERROR$FAO("Failed to send NAMRES control message, RC = !XL",RC);
 }
-
+
 //SBTTL "Request queue management routines"
 
 #define    NQE_MAXSIZE NQENTRY_BLEN + MSGMAX
@@ -830,7 +830,7 @@ long * NQE;
     return RC;
 }
 
-
+
 
 void NQE_DEALLOC(NQE)
 //
@@ -854,7 +854,7 @@ struct NQENTRY * NQE;
     NQE_COUNT = NQE_COUNT - 1;
     return SS$_NORMAL;
 }
-
+
 void NQE_ENQUEUE(NQE,QRYID,MSLEN,MSBUF)
 //
 // Insert a new request onto the request queue and transmit it.
@@ -891,7 +891,7 @@ struct MAIL$MSG * MSBUF;
     if (SRVSTATE >= SRV$UP)
         NQE_XMIT(NQE);
 }
-
+
 void NQE_DELETE(NQE,ASTFLG,STATUS)
 //
 // Delete an entry from the queue, optionally calling the AST routine with the
@@ -915,7 +915,7 @@ struct NQENTRY * NQE;
 
     NQE_DEALLOC(NQE);
 }
-
+
 
 void    NQE_XMIT_DONE();
 
@@ -968,7 +968,7 @@ struct NQENTRY * NQE;
     XQL$FAO(LOG$MSG,"!%T NQE_XMIT_DONE, NQE=!XL, RC=!XL!/",0,NQE,RC);
     NQE->NQE$F_XMIT = 1;
 }
-
+
 void XMIT_REQUESTS (void)
 //
 // Transmit all of the pending requests when the name resolver has come online.
@@ -989,7 +989,7 @@ void XMIT_REQUESTS (void)
         NQE = NXNQE;
     };
 }
-
+
 //SBTTL "Mailbox message receiving routines"
 
 void    DECODE_REPLY();
@@ -1047,7 +1047,7 @@ struct MAIL$BUF * MBUF;
         return;
     };
 }
-
+
 
 void    CONTROL_MSG();
 
@@ -1184,7 +1184,7 @@ struct RPLY$DEFAULT * RBUF;
         XQL$FAO(LOG$MSG,"!%T DECODE_REPLY failed to find RQ !XL, TYPE !SL!/",
                 0,RID,RTYPE);
 }
-
+
 void CONTROL_MSG(PID,RLEN,RBUF)
 //
 // Handle a resolver control message. We are interested in being told when
@@ -1230,7 +1230,7 @@ struct RQ$CONTROL * RBUF;
     };
     };
 }
-
+
 CHECK_SERVER (void)
 //
 // Check for the existance of the NAMRES process and the name resolver system

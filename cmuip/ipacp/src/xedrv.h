@@ -42,7 +42,7 @@
 
 #define     XEDMP$ARP_Entry   1 // Get an ARP cache entry.
 
-
+
 
 // This structure defines the interface information that is specific
 // to the EtherNet driver.
@@ -84,7 +84,7 @@ struct  XE_Interface_Structure
 MACRO XE_Interface_Structure = BLOCK[XE_Interface_size] FIELD(XE_Interface_Fields)%;
 #endif
 
-
+
 
 //Sbttl   'XE Driver Structures'
 

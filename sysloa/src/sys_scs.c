@@ -69,7 +69,8 @@
 
 struct _pb mypb;
 struct _sb mysb =
-{ sb$t_nodename : "MYNODE"
+{
+sb$t_nodename : "MYNODE"
 };
 struct _pdt mypdt;
 struct _pb otherpb;

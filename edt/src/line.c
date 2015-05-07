@@ -58,7 +58,7 @@ static Buffer *buffers = NULL;
 
 static Line *line_alloc (Buffer *buffer, String *string);
 static void getprint (char *print, uQuad number);
-
+
 /************************************************************************/
 /*                                  */
 /*  Create a new buffer                         */
@@ -212,7 +212,7 @@ int buffer_dirty (Buffer *buffer, int newdirty)
     if (newdirty >= 0) buffer -> dirty = newdirty;
     return (olddirty);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Insert new line into buffer                     */
@@ -518,7 +518,7 @@ void line_reseq (Line *line)
     line -> number   = 0;
     line -> print[0] = 0;
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Print out line on terminal                      */
@@ -562,7 +562,7 @@ void line_print (Line *line)
         }
     }
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Generates printable number string from internal binary      */

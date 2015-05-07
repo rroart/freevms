@@ -384,7 +384,7 @@ int ip$writeblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
 #error You must compile this driver with "-O".
 #endif
 
-
+
 /*
  * Local variables:
  *  c-indent-level: 4

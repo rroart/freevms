@@ -11,7 +11,7 @@ O_TARGET := sys.o
 
 export-objs = 
 
-obj-y     = sched.o \
+obj-y     = sched.o ileutil.o \
 	    syssetpri.o system_data_cells.o syspcntrl.o timeschdl.o \
 	    exception_init.o syswait.o sysevtsrv.o rse.o exsubrout.o \
 	    iociopost.o postef.o astdel.o forkcntrl.o iosubnpag.o sysastcon.o \

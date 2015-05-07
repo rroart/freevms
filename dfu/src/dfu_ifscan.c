@@ -211,7 +211,7 @@ void cleanup(), copy_fid(), disass_map_ptr(), add_item(),
 
 int open_device(), get_next_header();
 
-
+
 int display_stat(struct dsc$descriptor *out_str, int user_arg)
 /* user action routine to catch LIB$SHOW_TIMER output */
 {
@@ -224,7 +224,7 @@ int display_stat(struct dsc$descriptor *out_str, int user_arg)
         printf("\n%.*s\n",out_str->dsc$w_length, out_str->dsc$a_pointer);
     return(1);
 }
-
+
 void do_abort(void)
 {
     sprintf(outbuf,"\n%%DFU-W-ABORTED , command interrupted by CTRL/C");
@@ -232,7 +232,7 @@ void do_abort(void)
     sprintf(outbuf," ");
     put_status(2);
 }
-
+
 int search_command (int mask)
 
 /*
@@ -994,7 +994,7 @@ nexti:
     if (matstat == TRUE) status = lib$show_timer(0,0,display_stat,0);
     return(1);
 }
-
+
 int report_command(int mask)
 /*
     Create disk fragmentation report
@@ -1472,7 +1472,7 @@ next_rep:
     if (matstat == TRUE) status = lib$show_timer(0,0,display_stat,0);
     return(1);
 }
-
+
 int undel_command(int mask)
 /*
     Undelete a file on a disk
@@ -2186,7 +2186,7 @@ next_und:
     if (matstat == TRUE) status = lib$show_timer(0,0,display_stat,0);
     return(1);
 }
-
+
 int make_syslost(struct f_id *l_fid)
 /*
     Routine to create the syslost directory on RVN 1
@@ -2288,7 +2288,7 @@ int make_syslost(struct f_id *l_fid)
     copy_fid(&l_fid->fid_num, &lost_fib.fib$w_fid[0], FALSE);
     return(1);
 }
-
+
 int verify_command(int mask)
 /*
     Verify disk (like ANALYZE/DISK) and report errors.
@@ -2977,7 +2977,7 @@ next_ver2 :
     if (matstat == TRUE) status = lib$show_timer(0,0,display_stat,0);
     return(1);
 }
-
+
 void report_lost_files(Boolean matfix, Boolean matoutput)
 /* The dynamic tables build up in Phase 1 of verify will be used
    to check for lost files. If the backlink = 0 or points to an
@@ -3116,7 +3116,7 @@ skip: ; /* Next header */
         if (ctrlc == 1) j = maxvol;
     } /* End j loop */
 }
-
+
 int build_dir_table(char *dev_str, Boolean matoutput)
 /*
     Build directory table needed for DIR/VERSION. DIR/CHECK, DIR/EMPTY
@@ -3313,7 +3313,7 @@ next_file:
     cleanup();
     return(1);
 }
-
+
 
 int parse_item(char *inp, struct dsc$descriptor *return_descr,
                int *convert, Boolean *flag, int typ)
@@ -3461,7 +3461,7 @@ Outputs :
     }
     else return(1);
 }
-
+
 void fid_to_name(char * ret_dir)
 /*
    Get the filename from the file-id or the file header
@@ -3534,7 +3534,7 @@ void fid_to_name(char * ret_dir)
         dirrec.lendir = strindex(ret_dir," ",200);
     }
 }
-
+
 int open_device(struct dsc$descriptor *device_descr, int flag)
 /* Open the device or volume set.
    Outputs :
@@ -3779,7 +3779,7 @@ int open_device(struct dsc$descriptor *device_descr, int flag)
 
     return(1);
 }
-
+
 void read_indexf_bitmap(int *free_hdr)
 /*
    Read in Indexf.Sys Bitmap.
@@ -3860,7 +3860,7 @@ void read_indexf_bitmap(int *free_hdr)
     iosize = (highbit < 1500) ? (highbit/3) : 500;
     if (rvt[1].slow) iosize = 125;
 }
-
+
 int read_indexf_multi()
 /* Read IOSIZE file headers with IOCNT threads.
    Return VBN where next READ IO should resume
@@ -3892,7 +3892,7 @@ int read_indexf_multi()
     }
     return(1);
 }
-
+
 int get_next_header()
 /*
    This routine is responsible for returning the next
@@ -4004,7 +4004,7 @@ int get_next_header()
     }
     return(1);
 }
-
+
 void cleanup()
 /*
    Various cleanup actions depending on flags
@@ -4061,7 +4061,7 @@ void cleanup()
                 stat = SYS$DELTVA(&rvt[i].bmap_addr[0], &rvt[i].bmap_addr[0], 0);
         }
 }
-
+
 void copy_fid(struct f_id *target,struct f_id *from, Boolean check_rvn)
 /*
     Procedure to copy FID's from one structure to
@@ -4080,7 +4080,7 @@ void copy_fid(struct f_id *target,struct f_id *from, Boolean check_rvn)
     if (check_rvn)
         if (p1->fid_rvn ==0) p1->fid_rvn = curvol;
 }
-
+
 int verify_header (struct header_area_struct *fh2)
 /*
    Validate if a file header is valid. See File System
@@ -4102,7 +4102,7 @@ int verify_header (struct header_area_struct *fh2)
     if (fh2->fid_overlay.fid_fields.fid_seq == 0) return (SS$_BADFILEHDR);
     return (SS$_NORMAL);
 }
-
+
 void get_map_pointers(struct header_area_struct *hdr, unsigned int *ptrs)
 /*
    Count retrieval pointers in file header
@@ -4146,7 +4146,7 @@ void get_map_pointers(struct header_area_struct *hdr, unsigned int *ptrs)
         i += format + 1;
     }
 }
-
+
 void disass_map_ptr(struct header_area_struct *hdr, int *j)
 /*
     Disassemble mapping pointer. Return start lbn, count and offset to
@@ -4186,7 +4186,7 @@ void disass_map_ptr(struct header_area_struct *hdr, int *j)
     }   /* End switch */
     *j = *j + format + 1;
 }
-
+
 int follow_extents(struct header_area_struct *hdr, int *rtv, int *num_hdrs)
 /*
    Follow extension links and get the retrieval pointers
@@ -4226,7 +4226,7 @@ int follow_extents(struct header_area_struct *hdr, int *rtv, int *num_hdrs)
     }
     return(1);
 }
-
+
 void dfu_handler()
 /* Exit handler to unlock volume */
 
@@ -4252,7 +4252,7 @@ void dfu_handler()
         lock_chan = 0;
     }
 }
-
+
 void add_item(struct _it3 *i_list, int len, int itm, int bufadr, int ret)
 /*
    Routine to fill an item in an VMS item_list

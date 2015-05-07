@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // More or less modified GCC source file, 2004
 
 /* Language-independent node constructors for parse phase of GNU compiler.
@@ -142,7 +142,7 @@ static int type_hash_marked_p (const void *);
 
 tree global_trees[TI_MAX];
 tree integer_types[itk_none];
-
+
 /* Init tree.c.  */
 
 void
@@ -154,7 +154,7 @@ init_ttree (void)
 }
 
 #if 0
-
+
 /* The name of the object as the assembler will see it (but before any
    translations made by ASM_OUTPUT_LABELREF).  Often this is the same
    as DECL_NAME.  It is an IDENTIFIER_NODE.  */
@@ -397,7 +397,7 @@ make_node (enum tree_code code)
 
     return t;
 }
-
+
 /* Return a new node with the same contents as NODE except that its
    TREE_CHAIN is zero and it has a fresh uid.  */
 
@@ -455,7 +455,7 @@ copy_list (tree list)
     return head;
 }
 
-
+
 /* Return a newly constructed INTEGER_CST node whose constant value
    is specified by the two ints LOW and HI.
    The TREE_TYPE is set to `int'.
@@ -637,7 +637,7 @@ make_tree_vec (int len)
 
     return t;
 }
-
+
 /* Return 1 if EXPR is the integer constant zero or a complex constant
    of zero.  */
 
@@ -936,7 +936,7 @@ really_constant_p (tree exp)
         exp = TREE_OPERAND (exp, 0);
     return TREE_CONSTANT (exp);
 }
-
+
 /* Return first list element whose TREE_VALUE is ELEM.
    Return 0 if ELEM is not in LIST.  */
 
@@ -1085,7 +1085,7 @@ nreverse (tree t)
     }
     return prev;
 }
-
+
 /* Return a newly created TREE_LIST node whose
    purpose and value fields are PARM and VALUE.  */
 
@@ -1161,7 +1161,7 @@ expr_length (tree expr)
     ++len;
     return len;
 }
-
+
 /* Return the size nominally occupied by an object of type TYPE
    when it resides in memory.  The value is measured in units of bytes,
    and its data type is that normally used for type sizes
@@ -1220,7 +1220,7 @@ int_size_in_bytes (tree type)
 
     return TREE_INT_CST_LOW (t);
 }
-
+
 /* Return the bit position of FIELD, in bits from the start of the record.
    This is a tree of type bitsizetype.  */
 
@@ -1241,7 +1241,7 @@ int_bit_position (tree field)
 {
     return tree_low_cst (bit_position (field), 0);
 }
-
+
 /* Return the byte position of FIELD, in bytes from the start of the record.
    This is a tree of type sizetype.  */
 
@@ -1262,7 +1262,7 @@ int_byte_position (tree field)
     return tree_low_cst (byte_position (field), 0);
 }
 #endif
-
+
 /* Return the strictest alignment, in bits, that T is known to have.  */
 
 unsigned int
@@ -1321,7 +1321,7 @@ expr_align (tree t)
     /* Otherwise take the alignment from that of the type.  */
     return TYPE_ALIGN (TREE_TYPE (t));
 }
-
+
 /* Return, as a tree node, the number of elements for TYPE (which is an
    ARRAY_TYPE) minus one. This counts only elements of the top array.  */
 
@@ -1345,7 +1345,7 @@ array_type_nelts (tree type)
             : fold (build (MINUS_EXPR, TREE_TYPE (max), max, min)));
 }
 #endif
-
+
 /* Return nonzero if arg is static -- a reference to an object in
    static storage.  This is not the same as the C meaning of `static'.  */
 
@@ -1407,7 +1407,7 @@ staticp (tree arg)
             return 0;
     }
 }
-
+
 /* Wrap a SAVE_EXPR around EXPR, if appropriate.
    Do this to any expression which may be used in more than one place,
    but must be evaluated only once.
@@ -1800,7 +1800,7 @@ unsafe_for_reeval (tree expr)
         return 2;
     }
 }
-
+
 /* Return 1 if EXP contains a PLACEHOLDER_EXPR; i.e., if it represents a size
    or offset that depends on a field within a record.  */
 
@@ -2051,7 +2051,7 @@ has_cleanups (tree exp)
 
     return 0;
 }
-
+
 /* Given a tree EXP, a FIELD_DECL F, and a replacement value R,
    return a tree with all occurrences of references to F in a
    PLACEHOLDER_EXPR replaced by R.   Note that we assume here that EXP
@@ -2230,7 +2230,7 @@ substitute_in_expr (tree exp, tree f, tree r)
     TREE_READONLY (new) = TREE_READONLY (exp);
     return new;
 }
-
+
 /* Stabilize a reference so that we can use it any number of times
    without causing its operands to be evaluated more than once.
    Returns the stabilized reference.  This works by means of save_expr,
@@ -2408,7 +2408,7 @@ stabilize_reference_1 (tree e)
     return result;
 }
 #endif
-
+
 /* Low-level constructors for expressions.  */
 
 /* Build an expression of code CODE, data type TYPE,
@@ -2662,7 +2662,7 @@ build_nt (enum tree_code code, ...)
     va_end (p);
     return t;
 }
-
+
 /* Create a DECL_... node of code CODE, name NAME and data type TYPE.
    We do NOT enter this node in any sort of symbol table.
 
@@ -2693,7 +2693,7 @@ build_decl (enum tree_code code, tree name, tree type)
 
     return t;
 }
-
+
 /* BLOCK nodes are used to represent the structure of binding contours
    and declarations, once those contours have been exited and their contents
    compiled.  This information is used for outputting debugging info.  */
@@ -2740,7 +2740,7 @@ build_expr_wfl (tree node, const char *file, int line, int col)
 
     return wfl;
 }
-
+
 /* Return a declaration like DDECL except that its DECL_ATTRIBUTES
    is ATTRIBUTE.  */
 
@@ -2998,7 +2998,7 @@ merge_dllimport_decl_attributes (tree old, tree new)
 }
 
 #endif /* TARGET_DLLIMPORT_DECL_ATTRIBUTES  */
-
+
 /* Set the type qualifiers for TYPE to TYPE_QUALS, which is a bitmask
    of the various TYPE_QUAL values.  */
 
@@ -3071,7 +3071,7 @@ build_type_copy (tree type)
 
     return t;
 }
-
+
 /* Hashing of types so that we don't make duplicates.
    The entry point is `type_hash_canon'.  */
 
@@ -3755,7 +3755,7 @@ iterative_hash_expr (tree t, hashval_t val)
 
     return val;
 }
-
+
 /* Constructors for pointer, array and function types.
    (RECORD_TYPE, UNION_TYPE and ENUMERAL_TYPE nodes are
    constructed by language-dependent code, not here.)  */
@@ -4180,7 +4180,7 @@ build_complex_type (tree component_type)
     return t;
 }
 #endif
-
+
 /* Return OP, stripped of any conversions to wider types as much as is safe.
    Converting the value back to OP's type makes a value equivalent to OP.
 
@@ -4293,7 +4293,7 @@ get_unwidened (tree op, tree for_type)
 
     return win;
 }
-
+
 /* Return OP or a simpler expression for a narrower value
    which can be sign-extended or zero-extended to give back OP.
    Store in *UNSIGNEDP_PTR either 1 if the value should be zero-extended
@@ -4386,7 +4386,7 @@ get_narrower (tree op, int *unsignedp_ptr)
     *unsignedp_ptr = uns;
     return win;
 }
-
+
 /* Nonzero if integer constant C has a value that is permissible
    for type TYPE (an INTEGER_TYPE).  */
 
@@ -4698,7 +4698,7 @@ dump_tree_statistics (void)
     printf("not this either a\n");
 #endif
 }
-
+
 #define FILE_FUNCTION_FORMAT "_GLOBAL__%s_%s"
 
 /* Generate a crc32 of a string.  */
@@ -4804,7 +4804,7 @@ get_file_function_name (int kind)
 
     return get_file_function_name_long (p);
 }
-
+
 /* Expand (the constant part of) a SET_TYPE CONSTRUCTOR node.
    The result is placed in BUFFER (which has length BIT_SIZE),
    with one bit in each char ('\000' or '\001').
@@ -4897,7 +4897,7 @@ get_set_constructor_bytes (tree init, unsigned char *buffer, int wd_size)
     return non_const_bits;
 }
 #endif
-
+
 #if defined ENABLE_TREE_CHECKING && (GCC_VERSION >= 2007)
 /* Complain that the tree code of NODE does not match the expected CODE.
    FILE, LINE, and FUNCTION are of the caller.  */
@@ -4949,7 +4949,7 @@ tree_operand_check_failed (int idx, enum tree_code code, const char *file,
      function, trim_filename (file), line);
 }
 #endif /* ENABLE_TREE_CHECKING */
-
+
 /* For a new vector type node T, build the information necessary for
    debugging output.  */
 

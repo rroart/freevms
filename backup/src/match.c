@@ -23,7 +23,7 @@ static BOOLEAN do_list();
 static char nextch();
 static VOID list_parse();
 
-
+
 /*
  *  FUNCTION
  *
@@ -48,7 +48,7 @@ static VOID list_parse();
  *
  */
 
-
+
 /*
  *  PSEUDO CODE
  *
@@ -125,7 +125,7 @@ register char *pattern;
     return (ismatch);
 }
 
-
+
 /*
  *  FUNCTION
  *
@@ -172,7 +172,7 @@ register char *pattern;
  *
  */
 
-
+
 /*
  *  PSEUDO CODE
  *
@@ -251,7 +251,7 @@ char *pattern;
     return (ismatch);
 }
 
-
+
 /*
  *  FUNCTION
  *
@@ -293,7 +293,7 @@ char *highp;
     }
 }
 
-
+
 /*
  *  FUNCTION
  *

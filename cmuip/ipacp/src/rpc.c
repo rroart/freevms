@@ -70,7 +70,7 @@ typedef unsigned int u_int;
 #include "rpc.h"
 #include <nettcpip.h>       /* TCP/IP suite definitions */
 
-
+
 
 #if 0
 #define RPC_VERSION      2
@@ -122,7 +122,7 @@ struct mapping
     unsigned int port;
 };
 
-
+
 
 struct service_record
 {
@@ -138,7 +138,7 @@ struct service_record
     char image[40];
 };
 
-
+
 
 globaldef int RPC_SERVICE = 0;
 int RPCsrv_count = 0;
@@ -153,7 +153,7 @@ int xdr_int(int x)
 
 extern IPACP_Int;
 
-
+
 
 /*********************************************************************
 
@@ -318,7 +318,7 @@ unsigned map_unix(unsigned uic, unsigned short *uid, unsigned short *gid,
     }
     return FALSE;
 }
-
+
 /*  Information kept about exported filesystems  */
 typedef struct
 {
@@ -482,7 +482,7 @@ int prog,vers,prot,port;
     return idx;
 }
 
-
+
 
 /*
     RPC$CONFIG_AUTH - Add an authorization entry to the RPC table'
@@ -505,7 +505,7 @@ int uic,uid,gid;
     return 1;
 }
 
-
+
 
 extern int PMAP$INIT();
 extern int MNT$INIT();
@@ -700,7 +700,7 @@ int RPC$INIT()
         (*RPCsrv_tab[idx].init_routine)(&IPACP_Int);
 }
 
-
+
 
 /* Returns index of RPC service at given port.  Returns -1 if
    there is no service at that port. */
@@ -715,7 +715,7 @@ int RPC$CHECK_PORT(port)
     return -1;
 }
 
-
+
 
 /*
     Main input routine.  UDP datagrams to RPC serviced ports are sent here.
@@ -965,7 +965,7 @@ authentication",
     return(RC);
 }
 
-
+
 
 /****************************************************************************
 
@@ -1007,7 +1007,7 @@ static const int pcnfsd_version_high = PCNFSD_VERSION_HIGH;
 int ((*(pmap_proc_vector[NPROCS]))());
 int ((*(pcnfsd_proc_vector[NAUTHPROCS]))());
 
-
+
 
 /* NB:  At this point the opaque_auth structs come into play, since
    they are variable length structs, we declare cbody and areply as
@@ -1086,7 +1086,7 @@ unsigned int prog,vers,proc;
     return 1;
 }
 
-
+
 
 /**********************************************************************
 
@@ -1100,7 +1100,7 @@ long *reply;
     return 0;
 }
 
-
+
 
 /**********************************************************************
 
@@ -1115,7 +1115,7 @@ struct mapping *map;
     return 0;
 }
 
-
+
 
 /**********************************************************************
 
@@ -1130,7 +1130,7 @@ struct mapping *map;
     return 0;
 }
 
-
+
 
 /**********************************************************************
 
@@ -1161,7 +1161,7 @@ struct mapping *map;
     return 4;   /* size of an int */
 }
 
-
+
 
 /**********************************************************************
 
@@ -1193,7 +1193,7 @@ long *reply;
     return(RPCsrv_count*5*4 + 4);   /* size of an int */
 }
 
-
+
 
 /**********************************************************************
 
@@ -1207,7 +1207,7 @@ struct call_args *call_args;
     return 0;
 }
 
-
+
 
 /* Initialize the module.  This should be an entry point. */
 int PMAP$INIT()

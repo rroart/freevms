@@ -350,7 +350,7 @@ PARSE_NULLFIELD();
 void    SKIPTO();
 void    SKIPWHITE();
 
-
+
 
 // Here we set up the IPACP_Interface.  It provides entry points,
 // literals and global pointers to any modules which may be loaded
@@ -434,7 +434,7 @@ CNF$Define_IPACP_Interface (void)
     return IPACP_Int;
 }
 
-
+
 
 /* Here we initialize all of the variable that can be set by the config
    file.
@@ -447,7 +447,7 @@ void init_vars (void)
 
     IP_group_MIB->IPMIB$ipForwarding = 2;   // Just a host, no forwarding
 }
-
+
 
 //Sbttl "Device Configuration table definitions"
 /*
@@ -485,7 +485,7 @@ signed long
 dev_count;
 Device_Configuration_Entry dev_config_tab[DC_Max_Num_Net_Devices]; /* check PSECT(quads) ALIGN(3), */
 
-
+
 
 cnf$device_stat ( Inx, RB_A )
 //
@@ -529,7 +529,7 @@ cnf$device_stat ( Inx, RB_A )
 
     return D$DEV_DUMP_BLKSIZE;
 }
-
+
 
 cnf$device_list ( RB )
 //
@@ -554,7 +554,7 @@ long * RB; // check
     return RBIX * sizeof(long); // check
 }
 
-
+
 //SBTTL "Configure Network ACP"
 
 /*
@@ -706,7 +706,7 @@ again:
     if (dev_count <= 0)
         ERROR$FAO("No network devices detected in INET$CONFIG");
 }
-
+
 void config_err(EMSG)
 //
 // Handle error in configuration file. Give the error message and exit.
@@ -715,7 +715,7 @@ void config_err(EMSG)
     FATAL$FAO("CONFIG - !AS in line:!/!_!AD",
               EMSG,CFRAB->rab$w_rsz,CFRAB->rab$l_ubf);
 }
-
+
 void Init_Device (void)
 
 // Handle a DEVICE_INIT entry in the INET$CONFIG file.
@@ -903,7 +903,7 @@ dsc$a_pointer :
             };
         };
 }
-
+
 void Init_Gateway (void)
 //!!HACK!!// Make gateway struct dynamic.
 // Handle a GATEWAY entry in the INET$CONFIG file.
@@ -966,7 +966,7 @@ dsc$a_pointer :
 
     ip$gwy_config(GWY_Name_Desc,GWYaddr,GWYnet,GWYnetmask);
 }
-
+
 void Init_NameServer (void)
 
 // Handle a Name_Server entry in the INET$CONFIG file.
@@ -1003,7 +1003,7 @@ void Init_NameServer (void)
 
     OPR$FAO("%IPACP: Obsolete keyword NAME_SERVER found in INET$CONFIG");
 }
-
+
 void init_memgr (void)
 //
 // Handle MEMGR-INIT entry in the INET$CONFIG file.
@@ -1041,7 +1041,7 @@ void init_memgr (void)
         config_err(ASCID("Bad integer value"));
 }
 
-
+
 
 void init_logging (void)
 
@@ -1066,7 +1066,7 @@ void init_logging (void)
     LOG_CHANGE(logstate);
 }
 
-
+
 
 void init_activity_logging (void)
 
@@ -1091,7 +1091,7 @@ void init_activity_logging (void)
     ACT_CHANGE(logstate);
 }
 
-
+
 
 //SBTTL "Initialize IP forwarding state"
 
@@ -1116,7 +1116,7 @@ void init_forwarding (void)
     IP_group_MIB->IPMIB$ipForwarding = ipstate;
 }
 
-
+
 
 //SBTTL "Initialize various configuration variables"
 
@@ -1219,7 +1219,7 @@ void init_variable (void)
         config_err(ASCID("Unknown variable name"));
 }
 
-
+
 
 //SBTTL "Process definitions"
 /*
@@ -1331,7 +1331,7 @@ char * QUOTANAMES[] =
     ASCIDNOT("WSEXTENT"),PQL$_WSEXTENT,
     ASCIDNOT("WSQUOTA"),PQL$_WSQUOTA
 };
-
+
 KEY_VALUE(KEYTAB,KEYLEN,KEYSTR)
 //
 // Get keyword value from keyword string.
@@ -1351,7 +1351,7 @@ long * KEYTAB;
     config_err(ASCID("Bad keyword field"));
     return -1;
 }
-
+
 PARSE_PRCPRIVS(PRVBLK)
 //
 // Parse a comma-separated list of privilege keywords.
@@ -1402,7 +1402,7 @@ long PRVBLK[2];
     return PRIVCNT;
 }
 
-
+
 PARSE_PRCQUOTAS(QLIST,QMAX)
 //
 // Parse a comma-separated list of quota values.
@@ -1479,7 +1479,7 @@ PARSE_PRCQUOTAS(QLIST,QMAX)
 
     return QUOTCNT+1;
 }
-
+
 PARSE_PRCSTATUS (void)
 //
 // Parse a comma-separated list of process status flags.
@@ -1514,7 +1514,7 @@ PARSE_PRCSTATUS (void)
 
     return STATVAL;
 }
-
+
 //SBTTL "Init_WKS - Add a WKS entry"
 
 void Init_WKS (void)
@@ -1693,7 +1693,7 @@ dsc$a_pointer :
                    wkspriv,WKSprior,WKSqlim,WKSmaxsrv,Quota_Desc,
                    WKSInput_Desc,WKSOutput_Desc,WKSError_Desc);
 }
-
+
 //SBTTL "Init_RPC - Add an RPC entry"
 
 void Init_RPC (void)
@@ -1772,7 +1772,7 @@ dsc$a_pointer :
     RC=RPC$CONFIG( RPCname_Desc,RPCprog,RPCvers,RPCprot,RPCport,RPCimname_Desc);
     if (RC < 0) config_err(ASCID("Can not accept RPC config entry"));
 }
-
+
 //SBTTL "Init_Auth - Add an authorization entry"
 
 void Init_Auth (void)
@@ -1825,7 +1825,7 @@ dsc$a_pointer :
     RC=RPC$CONFIG_AUTH(AUTHuic, AUTHuid, AUTHgid, AUTHhostname_Desc);
     if ((RC < 0)) config_err(ASCID("Can not accept AUTH config entry"));
 }
-
+
 //SBTTL "Init_MBXResolver - Define the system name resolver process"
 
 void init_mbxresolver (void)
@@ -1894,7 +1894,7 @@ dsc$a_pointer :
     NML$CONFIG(ImageName_Desc, PRIORITY, STATFLAGS, PRIVS,
                Quota_Desc);
 }
-
+
 //SBTTL "Add an entry to the local hosts list"
 
 void init_local_host (void)
@@ -1924,7 +1924,7 @@ void init_local_host (void)
 
     user$access_config(hostaddr,hostmask);
 }
-
+
 //SBTTL "Parsing utility routines"
 
 void SKIPTO(TCHR)
@@ -2010,7 +2010,7 @@ PARSE_NULLFIELD (void)
     else return 1;
 
 }
-
+
 //Sbttl "Initialize Network Devices as described in dev_config."
 /*
 
@@ -2094,7 +2094,7 @@ void CNF$Net_Device_Init (void)
         };
     };
 }
-
+
 
 //SBTTL "Check devices needing attention"
 
@@ -2131,7 +2131,7 @@ void CNF$Check_Devices (void)
         CNF$Check_Sched();      // Reschedule if there is still a problem
 }
 
-
+
 
 //
 // A simple routine to return our local IP address.  By using this, we

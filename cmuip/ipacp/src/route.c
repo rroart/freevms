@@ -52,7 +52,7 @@ Modification History:
 #include stdio
 #include ssdef
 
-
+
 
 /*
     Entry Points:
@@ -68,13 +68,13 @@ Modification History:
     -------------
 */
 
-
+
 
 typedef unsigned char   u_byte;
 typedef unsigned short  u_word;
 typedef unsigned long   u_long;
 
-
+
 
 /*  Interface definition */
 
@@ -89,7 +89,7 @@ typedef struct
     u_long  NetMask;    /* Network Mask */
 } Interface;
 
-
+
 
 /*  Route Entry definition */
 
@@ -113,7 +113,7 @@ typedef struct
     u_long  OSPF_Class; /* Route OSPF Class */
 } Route_Entry;
 
-
+
 
 /*  IP Cache Entry definition */
 /* NB:  These *must* be quadword alligned!!! */
@@ -143,7 +143,7 @@ typedef struct
     u_long  QTail;
 } IPcache_hashtab_entry;
 
-
+
 
 #define MAX_ARP_ADDR_SIZE 20
 
@@ -167,7 +167,7 @@ typedef struct
     u_byte  AddrData[MAX_ARP_ADDR_SIZE];    /* address data */
 } ARPcache_Entry;
 
-
+
 
 #define Route_LockName      "Route_Lock"
 #define IPcache_LockName    "IPcache_Lock"
@@ -201,7 +201,7 @@ int IPcache_misses;
 ARPcache_Entry  (*ARP_Cache)[10];   /*!!!HACK!!! bogus bound */
 int         ARPcache_size;
 
-
+
 
 int Calc_NOB ( mask )
 
@@ -238,9 +238,9 @@ int Time_Stamp ()
     return(time_now);
 }
 
-
 
-
+
+
 
 /****************************************************************
 
@@ -248,7 +248,7 @@ int Time_Stamp ()
 
  ****************************************************************/
 
-
+
 
 /****************************************************************
 
@@ -268,7 +268,7 @@ u_long  IPaddr;
 }
 
 
-
+
 
 int IPcache_Init(size)
 
@@ -300,7 +300,7 @@ int size;
     IPcache_misses  = 0;
 }
 
-
+
 
 int IPcache_Check(IPaddr,Route)
 
@@ -334,7 +334,7 @@ u_long IPaddr,*Route;
 }
 
 
-
+
 
 int IPcache_Add(IPaddr,Route)
 
@@ -366,7 +366,7 @@ u_long IPaddr,*Route;
 }
 
 
-
+
 
 /****************************************************************
 
@@ -397,7 +397,7 @@ int ROUTE$Init ( ARP_Cache_Size , IP_Cache_Size )
     return (SS$_NORMAL);
 }
 
-
+
 
 /*
 
@@ -454,7 +454,7 @@ u_long Next_Hop, Network, NetMask, Inum, TOS, IS_Class, OSPF_Class;
     return (SS$_NORMAL);
 }
 
-
+
 
 /*
     ROUTE$Find
@@ -519,7 +519,7 @@ u_long *Next_Hop, *Network, *NetMask, *Inum;
     return (result == NULL);
 }
 
-
+
 
 /****************************************************************
 
@@ -527,9 +527,9 @@ u_long *Next_Hop, *Network, *NetMask, *Inum;
 
  ****************************************************************/
 
-
 
-
+
+
 
 /*
     GAME$Print
@@ -554,7 +554,7 @@ int GAME$Print_Stats ()
 
 }
 
-
+
 
 /*
     GAME$Print
@@ -588,7 +588,7 @@ int GAME$Print ()
     return (count);
 }
 
-
+
 
 int GAME$Add_Interface(IPaddr,NetMask)
 {
@@ -610,7 +610,7 @@ int GAME$Add_Interface(IPaddr,NetMask)
 
 }
 
-
+
 
 int GAME$Add_Router(GwyIP,Network,NetMask)
 {
@@ -642,7 +642,7 @@ int GAME$Add_Router(GwyIP,Network,NetMask)
     return (Inum != 0);
 }
 
-
+
 
 int GAME$Init( IPcache_size, ARPcache_size )
 {
@@ -665,43 +665,43 @@ int GAME$Init( IPcache_size, ARPcache_size )
 
 }
 
-
+
 
 int GAME$Time_Passes(ms)
 {
 }
 
-
+
 
 int GAME$ICMP_DUnreach(Code,SrcIP,DstIP)
 {
 }
 
-
+
 
 int GAME$ICMP_TExceed(SrcIP,DstIP,TTL)
 {
 }
 
-
+
 
 int GAME$ICMP_Redirect(Code,GwyIP,SrcIP,DstIP)
 {
 }
 
-
+
 
 int GAME$ICMP_Gwy_Advert()
 {
 }
 
-
+
 
 int GAME$IP_Receive(SrcIP,DstIP,Int)
 {
 }
 
-
+
 
 int GAME$IP_Send(DstIP)
 {
@@ -713,7 +713,7 @@ int GAME$IP_Send(DstIP)
     printf("   IP datagram routed : *** %8x => %d ***\n",DstIP,int_num);
 }
 
-
+
 
 main ()
 {

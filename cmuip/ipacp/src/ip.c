@@ -202,7 +202,7 @@ Modification History:
     1.5 - Changed to allow for multiple internet names for this host.
     1.51 - Added ARP code (Rick Watson)
 */
-
+
 
 //SBTTL "Module Definition"
 
@@ -298,7 +298,7 @@ max_physical_bufsize;   // Size of "large" device buffers
 
 extern signed long log_state;
 
-
+
 //SBTTL "Gateway table definition"
 
 struct gateway_structure
@@ -320,7 +320,7 @@ MACRO
 Gateway_Structure = BLOCKVECTOR[Max_GWY,GWY_Size] FIELD(GWY_Fields)%;
 #endif
 
-
+
 //SBTTL "IP Fragment reassembly queue blocks"
 
 // The fragment reassembly queue contains partial IP datagrams which were
@@ -350,7 +350,7 @@ struct RA$DATA_BLOCK
 MACRO
 RA$DATA_BLOCK = BLOCK->RA$DATA_SIZE FIELD(RA$DATA_FIELDS) %;
 #endif
-
+
 //SBTTL "Data and definitions associated with IP and ICMP"
 
 #define    RA_EXPIRE_TIME 5     // Reassembly-expire time - multiply by TTL*CSEC
@@ -382,7 +382,7 @@ static    RA_CHECK_TIME[2]; // Quadword time value for checking RA queue
 
 struct gateway_structure * gwy_table_ptr = gwy_table; // Known gateways
 
-
+
 //SBTTL "IP$Gwy_Config - Add a gateway entry to the table"
 
 void ip$gwy_config(GWYNAME_A,GWYADDR,GWYNET,GWYNETMASK)
@@ -430,7 +430,7 @@ void ip$gwy_config(GWYNAME_A,GWYADDR,GWYNET,GWYNETMASK)
     }
 
 }
-
+
 //SBTTL "IP_INIT - Initialize state of IP"
 
 void ip$init  (void)
@@ -473,7 +473,7 @@ void ip$init  (void)
     IP_group_MIB->IPMIB$ipFragCreates   = 0;
 
 }
-
+
 //SBTTL "IP$LOG - make a logging entry for an IP packet"
 
 void ip$log(long NAME,struct ip_structure * IPHDR)
@@ -501,7 +501,7 @@ void ip$log(long NAME,struct ip_structure * IPHDR)
            IPHDR->iph$total_length,IPHDR->iph$ident,IPHDR->iph$fragment_offset>>13,
            IPHDR->iph$fragment_offset,IPHDR->iph$ttl,NAME,IPHDR,DATAPTR);
 }
-
+
 //SBTTL "IP routing code"
 
 //    Here is where all routing descisions for IP packet output are made.
@@ -700,7 +700,7 @@ long * LCLPTR, * FRNPTR;
     *FRNPTR = ADRLST[FIDX];
     *LCLPTR = dev_config_tab[LIDX].dc_ip_address;
 }
-
+
 //SBTTL "IP$SEND_RAW:  Send TCP segment to IP for transmission."
 /******************************************************************************
 
@@ -840,7 +840,7 @@ struct segment_structure * Seg;
     return -1;
 }
 
-
+
 
 //SBTTL "IP$SEND:  Send TCP segment to IP for transmission."
 /******************************************************************************
@@ -1077,9 +1077,9 @@ struct udpkt_structure * Seg;
     }
     return -1;
 }
-
 
-
+
+
 //SBTTL "IP$RECEIVE - Receive an IP datagram"
 /******************************************************************************
 
@@ -1314,7 +1314,7 @@ struct ip_structure * iphdr;
         (dev_config->dc_rtn_Xmit)(dev_config);
     };
 }
-
+
 //SBTTL "Dispatch IP packet to protocol routine"
 
 void IP_DISPATCH(iphdr,iplen,HDRLEN,BUF,BUFSIZE)
@@ -1377,7 +1377,7 @@ struct ip_structure * iphdr;
 
     $ACPWAKE;
 }
-
+
 //SBTTL "Handle reception of IP packet fragment"
 
 void    IP_FRAGMENT_CHECK();
@@ -1564,7 +1564,7 @@ leave_y:
     };
     mm$seg_free(BUFSIZE,BUF);
 }
-
+
 void IP_FRAGMENT_CHECK  (void)
 //
 // Routine to periodically check the reassembly queue, purging any entries

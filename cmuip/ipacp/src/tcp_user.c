@@ -173,7 +173,7 @@ Modification History:
     Change routine names from NET$... to TCP$...
 */
 
-
+
 //SBTTL "Module definition"
 
 #if 0
@@ -293,7 +293,7 @@ extern     user$check_access();
 extern     user$get_local_port();
 
 void tcp$kill_pending_requests();
-
+
 //SBTTL "User_OK - Verify a user has Privileges to use Connection"
 
 /*
@@ -319,7 +319,7 @@ USER_OK(struct user_default_args * args,struct tcb_structure * tcb)
     else
         return(FALSE);
 }
-
+
 //SBTTL "Purge User Send Request Queue"
 /*
 
@@ -360,7 +360,7 @@ void tcp$purge_send_queue(struct tcb_structure * TCB,signed long RC)
         mm$qblk_free(QB);       // release queue block
     };
 }
-
+
 //Sbttl "Purge-User-Receive-Queue: Dump user network IO requests."
 /*
 
@@ -405,7 +405,7 @@ void tcp$purge_receive_queue(struct tcb_structure * TCB, signed long RC)
         mm$qblk_free(QB);
     };
 }
-
+
 //SBTTL "Purge/Post all I/O requests for all TCBs."
 /*
 
@@ -428,7 +428,7 @@ Purge_TCB ( TCB , IDX , P1 , P2 )
     tcp$kill_pending_requests(TCB,NET$_TE);
     return 1;
 }
-
+
 //SBTTL "Purge/Post all I/O requests for all TCBs."
 /*
 
@@ -452,7 +452,7 @@ void tcp$purge_all_io  (void)
 
     VTCB_Scan ( Purge_TCB , 0 , 0 );
 }
-
+
 //SBTTL "Purge User Requests for specified TCB"
 /*
     Purge all user requests as well as any pending I/O and any received data
@@ -491,7 +491,7 @@ void Purge_User_Requests(struct tcb_structure * TCB, signed long ERcode)
     TCB->rcv_wnd = TCB->rcv_wnd + TCB->rcv_q_count;
     TCB->rcv_q_count = 0;
 }
-
+
 //SBTTL "Kill Pending send/receive requests from specified TCB."
 /*
 
@@ -539,7 +539,7 @@ void tcp$kill_pending_requests(struct tcb_structure * TCB,signed long ERcode)
 
     SEG$Purge_RT_Queue(TCB);
 }
-
+
 //SBTTL "TCP$Cancel - Cancel connection for TCP."
 /*
 
@@ -611,7 +611,7 @@ struct vms$cancel_args * Uargs;
     return 0;
 }
 
-
+
 //SBTTL "tcp$cancel - Cancel connection for TCP."
 /*
 
@@ -721,7 +721,7 @@ void tcp$status(struct user_status_args * Uargs)
     user$post_io_status(Uargs,SS$_NORMAL,SR_BLK_SIZE,0,0);
     mm$uarg_free(Uargs);        // release user arg block.
 }
-
+
 //SBTTL "User call: TCP$INFO - Return Connection Information."
 /*
 
@@ -868,7 +868,7 @@ d$tcb_dump_return_blk * RB;
 
     return TRUE;
 }
-
+
 //SBTTL "TCP$ABORT - User call to abort connection."
 /*
 
@@ -934,7 +934,7 @@ tcp$kill(TCBidx)
 
     return SS$_NORMAL;
 }// 3
-
+
 //SBTTL "TCP$ABORT - User call to abort connection."
 /*
 
@@ -998,7 +998,7 @@ void tcp$abort(struct user_abort_args * Uargs)
 
     user$post_function_ok(Uargs);   // okay
 }
-
+
 
 //SBTTL "Deliver User Data"
 /*
@@ -1144,7 +1144,7 @@ maxhex*3,dsc$a_pointer:
         UQB = TCB->ur_qhead;    // point at next user request blk.
     };  // End of "OUTER" While.
 }
-
+
 //SBTTL "Queue User Receive Request"
 /*
 
@@ -1195,7 +1195,7 @@ struct user_recv_args * Uargs;
 
     INSQUE(QB,TCB->ur_qtail);
 }
-
+
 //SBTTL "TCP$RECEIVE - User call to receive data."
 /*
 
@@ -1324,7 +1324,7 @@ void tcp$receive(struct user_recv_args * Uargs)
         USER$Err(Uargs,NET$_CC);    // Error: Connection Closing.
     }
 }
-
+
 //SBTTL "Generate an Initial Sequence space number."
 /*
 
@@ -1364,7 +1364,7 @@ ISN_GEN(void)
     RVAL = (user$clock_base()+isn)<<16; // check
     return RVAL;
 }
-
+
 //SBTTL "Queue_Send_Data: Queue a data bearing send request."
 /*
 
@@ -1445,7 +1445,7 @@ struct tcb_structure * TCB;
 
     TCB->data_2_send = TRUE;
 }
-
+
 //SBTTL "TCP$SEND: User call to send data over network"
 /*
 
@@ -1556,7 +1556,7 @@ void tcp$send(struct user_send_args * Uargs)
         break;
     }
 }
-
+
 //SBTTL "User Call: (TCP$CLOSE) CLOSE a network connection"
 /*
 
@@ -1623,7 +1623,7 @@ void tcp$close(struct user_close_args * Uargs)
         TCB->argblk = Uargs;
     };
 }
-
+
 //Sbttl "Post User Close IO Status"
 /*
 
@@ -1684,7 +1684,7 @@ void tcp$post_user_close_io_status(struct tcb_structure * TCB,
         mm$uarg_free(Uargs);    // Free user arg blk memory.
     };
 }
-
+
 
 //SBTTL "Initialize specified TCB"
 /*
@@ -1764,7 +1764,7 @@ struct tcb_structure * TCB;
     TCB->delayed_ack_timer  =   BASE_RT_TIMEOUT + Time_Stamp() ;
     XLOG$FAO(LOG$TCP,"!%T TCB_INIT TCB !XL!/",0,TCB);
 }
-
+
 //SBTTL "TCP$OPEN - OPEN a Network connection"
 /*
 
@@ -1949,7 +1949,7 @@ leave:
     NML$GETALST(CH$PTR(Uargs->op$foreign_host,0),Uargs->op$foreign_hlen,
                 TCP_NMLOOK_DONE,TCB);
 }
-
+
 //SBTTL "TCP_NMLOOK_DONE - Come here when name lookup for TCB finishes"
 /*
     Here is where we finish up the open.
@@ -2206,7 +2206,7 @@ struct tcb_structure * TCB;
     if (! TCB->active_open)
         SEG$Check_SYN_Wait_List(TCB);
 }
-
+
 //SBTTL "TCP$Adlook_Done - Handle completion of address to name lookup"
 
 void tcp$adlook_done(TCB,STATUS,NAMLEN,NAMPTR)
@@ -2242,7 +2242,7 @@ struct tcb_structure * TCB;
     TCB->foreign_hnlen = NAMLEN;
     CH$MOVE(NAMLEN,NAMPTR,CH$PTR(TCB->foreign_hname,0));
 }
-
+
 //Sbttl "Post Users Active Open User IO Status"
 /*
 

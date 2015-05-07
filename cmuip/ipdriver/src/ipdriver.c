@@ -86,14 +86,14 @@
 //
 // Modification History:
 //
-
+
 //++
 // For VAX-VMS V4 systems, uncomment the following line
 //--
 
 //;;;;VMS_V4=1
 
-
+
 //  .SBTTL  External and local symbol definitions
 
 //
@@ -849,7 +849,7 @@ int ip_unload(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
     // Return
 }
 
-
+
 //  .sbttl  Unit Initialization rtn.
 
 // Bogus unit initialization rtn that sysgen can call even though this is
@@ -882,7 +882,7 @@ int unit_init(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
 //  JSB G^INI$BRK
     return SS$_NORMAL;
 }
-
+
 //  .SBTTL  FDT Routine: "OPEN" a Network Connection.
 
 //++
@@ -1127,7 +1127,7 @@ int queue_2_acp(struct _irp * i, struct _pcb * p, struct _ucb * u)
     //  movl    #42,IRP$L_EXTEND(R3) // Mark this...
     return  exe$qioacppkt(i,p,u);       // to the ACP......
 }
-
+
 //  .SBTTL  FDT Routine: "CLOSE/ABORT" a Network Connection.
 
 //++
@@ -1257,7 +1257,7 @@ int net_abort(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
 Bad_LC_ID:
 return exe_std$abortio(i, p, u, SS$_BADPARAM);      // return error to user.
 #endif
-
+
 // .SBTTL   FDT Routines: "ACP Functions: SEND,RECEIVE,STATUS,INFO,DUMP & EVENT".
 
 //++
@@ -1349,7 +1349,7 @@ return exe_std$abortio(i, p, u, SS$_BADPARAM);      // return error to user.
 //
 //--
 
-
+
 
 int Net_Send(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
 {
@@ -1565,7 +1565,7 @@ l5:
 
     return  send_common(i,p,u,c,buf);           // return to main routine
 }
-
+
 
 int net_receive(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)                 // Receive data from network
 {
@@ -1678,7 +1678,7 @@ int net_receive(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
     return queue_2_acp(i,p,u);          // finish up (not really)
 }
 
-
+
 
 // Common routines for Info & Status.
 
@@ -1755,7 +1755,7 @@ int net_r_common(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
     return queue_2_acp(i,p,u);          // finish up
 }
 
-
+
 // Network dump debugging function.
 // Basically a read function, but a little bit different.
 
@@ -1822,7 +1822,7 @@ int net_dump(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
     return queue_2_acp(i,p,u);
 }
 
-
+
 // Network NCP function.
 // Delivery a buffer of commands to the IPACP.  Return the results to
 // the client
@@ -1922,7 +1922,7 @@ l20:
     return queue_2_acp(i,p,u);
 }
 
-   //.SBTTL    FDT Routines: GTHST - get host info
+//.SBTTL    FDT Routines: GTHST - get host info
 
 //++
 //
@@ -2124,7 +2124,7 @@ l20:
     return queue_2_acp(i,p,u);
 }
 
-   //.SBTTL    FDT Routine: EXIT and Debug routines.
+//.SBTTL    FDT Routine: EXIT and Debug routines.
 
 //++
 //
@@ -2230,7 +2230,7 @@ int net_debug(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
     return queue_2_acp(i,p,u);
 }
 
-
+
 
 int net_event(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
 {
@@ -2305,7 +2305,7 @@ Event$Copy_data:
     return queue_2_acp(i,p,u);
 }
 
-
+
 //  .SBTTL  GetBuf - Allocate a System buffer & Check resources.
 
 //++
@@ -2431,7 +2431,7 @@ l20:
 }
 
 //  .DSABL  LSB
-
+
 //  .SBTTL  GetDiag - Allocate a System buffer & Check resources.
 
 //++
@@ -2510,7 +2510,7 @@ int getdiag(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c, 
 }
 
 //  .DSABL  LSB
-
+
 //  .SBTTL  IP-FINISHIO, Finish I/O routine
 
 //++
@@ -2591,7 +2591,7 @@ l10:
     return SS$_NORMAL;          // bring it on home, Jimmy.
 }
 
-
+
 //  .SBTTL  IP-CANCEL, Cancel I/O routine
 
 //++
@@ -2718,7 +2718,7 @@ l9:
 Finish_Cancel:
     return SS$_NORMAL;                  // Return
 }
-
+
 // .sbttl   Netacp_alive, Check if network acp process is alive.
 
 //++

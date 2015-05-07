@@ -107,7 +107,7 @@ Modification history:
 
 #define     TELNET$K_TTLFMT   0
 
-
+
 //++
 //   The Telnet TCP connection is established between the user's port U
 //   and the server's port L.  The server listens on its well known port L
@@ -124,7 +124,7 @@ Modification history:
 //--
 
 #define     Telnet$K_SERVER_PORT      23
-
+
 //++
 // I'm not sure where these are defined, but they should be defined
 // in some telnet options rfc
@@ -242,7 +242,7 @@ struct _qcbdef
 };
 
 #define    QCB$K_SIZE   12              // JC End
-
+
 // Define the format of a TELNET option block
 
 struct OPT$BLOCK
@@ -277,7 +277,7 @@ OPT$BLOCK = BLOCK[OPT$SIZE] FIELD(OPT$FIELDS)%,
 #define     OPT$STATE_ON      1
 #define     OPT$DONT_CARE     2
 
-
+
 
 // Define the format of a TVT data block.
 

@@ -76,7 +76,7 @@ Modification history:
 #include "structure.h"
 #include <descrip.h>
 
-
+
 //SBTTL 'Literals'
 
 // TCB Connection States
@@ -133,7 +133,7 @@ Modification history:
 #define DEFAULT_SEND_TIMEOUT 300*CSEC// Time allowed for a user's buffer
 // to be sent.
 
-
+
 //SBTTL 'Define a TCB: (Transmission Control Block) data structure.'
 /*
 
@@ -292,7 +292,7 @@ struct  tcb_structure
 #define TCB_SIZE sizeof(struct tcb_structure)       // in BLISS Fullwords.
 
 //MESSAGE(%NUMBER(tcb_size),' longwords per tcb')
-
+
 //SBTTL 'Connection Table definitions.'
 /*
 
@@ -328,7 +328,7 @@ struct connection_table_structure
 //ASSIGN(tblsize,%NUMBER(conect_tbl_size)*%NUMBER(cn$blk_size))
 //MESSAGE(%NUMBER(tblsize),' Longwords allocated to Connection Table')
 
-
+
 //SBTTL 'Definition of structure for WKS server process table & SYN-wait list'
 
 struct  wks_structure

@@ -109,7 +109,7 @@ log_IO_error(int ret1, int ret2, char *oprtn)
     fclose(logtest);
 }
 
-
+
 
 /* The IPACP_Interface tells us all about the IPACP.  It gives us   */
 /* entry points, literals and global pointers.  See NETDEVICES.REQ  */
@@ -118,7 +118,7 @@ log_IO_error(int ret1, int ret2, char *oprtn)
 IPACP_Info_Structure *IPACP_Interface;
 
 
-
+
 
 /* NFS specific definitions */
 
@@ -199,7 +199,7 @@ int nfs_int(int x)
     return(y);
 }
 
-
+
 
 /* Convert VMS error codes into NFS ones - should be easy, right? :-) */
 int VMS_to_NFSERR(int vmscode)
@@ -336,7 +336,7 @@ unsigned int prog,vers,proc;
     return 1;
 }
 
-
+
 
 /*************************************************************************
 
@@ -452,7 +452,7 @@ int clean_frs()
 
     RC = SYS$SETIMR(0, &one_minute_delta, clean_frs, 0, 0);
 }
-
+
 
 /*********************************************************************
 
@@ -678,7 +678,7 @@ fhandle hand;
     return frp;
 }
 
-
+
 
 /**********************************************************************
 
@@ -686,7 +686,7 @@ fhandle hand;
 
 ***********************************************************************/
 
-
+
 
 char *updir(char *path)
 {
@@ -961,7 +961,7 @@ long **buf;
     /*    return RNDUP(sizeof(*attribs))/4; */
 }
 
-
+
 
 file_to_dir(s)
 char *s;
@@ -1015,7 +1015,7 @@ int dirp;
     return drp;
 }
 
-
+
 
 /**********************************************************************
 
@@ -1032,7 +1032,7 @@ long *reply;
     return 0;
 }
 
-
+
 
 /**********************************************************************
 
@@ -1066,7 +1066,7 @@ fhandle hand;
     return write_XDR_stat(RC, &reply);
 }
 
-
+
 
 /**********************************************************************
 
@@ -1114,7 +1114,7 @@ char *args;
     return 1 + write_XDR_file_attributes(&attribs,&reply);
 }
 
-
+
 
 /**********************************************************************
 
@@ -1130,7 +1130,7 @@ long *reply;
     return write_XDR_stat(NFSERR_NXIO, &reply);
 }
 
-
+
 
 /**********************************************************************
 
@@ -1195,7 +1195,7 @@ char *args;
     return len;
 }
 
-
+
 
 /**********************************************************************
 
@@ -1219,7 +1219,7 @@ fhandle hand;
     return write_XDR_stat(NFSERR_NOENT,&reply);
 }
 
-
+
 
 /**********************************************************************
 
@@ -1447,7 +1447,7 @@ struct
     return len;
 }
 
-
+
 
 /**********************************************************************
 
@@ -1463,7 +1463,7 @@ long *reply;
     return write_XDR_stat(NFSERR_NXIO, &reply);
 }
 
-
+
 
 /**********************************************************************
 
@@ -1622,7 +1622,7 @@ struct
     return len;
 }
 
-
+
 
 /**********************************************************************
 
@@ -1708,7 +1708,7 @@ char *args;
     return len;
 }
 
-
+
 
 /**********************************************************************
 
@@ -1761,7 +1761,7 @@ char *args;
     return write_XDR_stat(NFS_OK,&reply);
 }
 
-
+
 
 /**********************************************************************
 
@@ -1858,7 +1858,7 @@ char *args;
     return write_XDR_stat(NFS_OK,&reply);
 }
 
-
+
 
 /**********************************************************************
 
@@ -1874,7 +1874,7 @@ long *reply;
     return write_XDR_stat(NFSERR_NXIO, &reply);
 }
 
-
+
 
 /**********************************************************************
 
@@ -1890,7 +1890,7 @@ long *reply;
     return write_XDR_stat(NFSERR_NXIO, &reply);
 }
 
-
+
 
 /**********************************************************************
 
@@ -1983,7 +1983,7 @@ char *args;
     return len;
 }
 
-
+
 
 /**********************************************************************
 
@@ -2028,7 +2028,7 @@ char *args;
     return write_XDR_stat(NFS_OK,&reply);
 }
 
-
+
 
 /**********************************************************************
 
@@ -2202,7 +2202,7 @@ readdirargs *rd_args;
     return len;
 }
 
-
+
 
 /**********************************************************************
 
@@ -2271,7 +2271,7 @@ fhandle hand;
     return 1 + 5;
 }
 
-
+
 
 /**********************************************************************/
 

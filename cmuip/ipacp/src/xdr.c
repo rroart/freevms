@@ -71,7 +71,7 @@ typedef char * caddr_t;
 
 typedef unsigned char BYTE;
 
-
+
 
 /* XDR type: INTEGER
 
@@ -106,7 +106,7 @@ BYTE *in,*out;
     XDR$ntov_int(in,out);
 }
 
-
+
 
 /* XDR type: UNSIGNED INTEGER
 

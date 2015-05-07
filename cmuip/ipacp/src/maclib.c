@@ -188,7 +188,7 @@ LIB.MLB/
 //      set the actual # of bytes received in irp$w_bcnt instead of
 //      original requested amount.  save some time.
 //--
-
+
 //.SBTTL    System & Local Symbol definitions
 
 // VMS External Definitions.
@@ -333,7 +333,7 @@ $DEF    AB$SIZE
 
 $DEFEND AB
 #endif
-
+
 //SBTTL Local Data Declarations
 
 //Shared_Device::   .ASCID /_ip0:/  // name of shared pseudo device
@@ -368,7 +368,7 @@ struct _iosb IOSB= {0,0,0,0};
 
 long no_argblk=0;
 long funct=0;
-
+
 //SBTTL Mount_ip_DEVICE - Mount the Pseudo device "ip".
 
 //++
@@ -527,7 +527,7 @@ Not_Mounted:
     if ((R0&1)==1) goto all_done;
     return  Dismount();     // lbs = Error.
 }
-
+
 //SBTTL LOCK_IODB - Lock the I/O Database
 
 //++
@@ -560,7 +560,7 @@ lock_iodb(long * R4)
     *R4=ctl$gl_pcb;
     return  SCH$IOLOCKW();      // lock & return
 }
-
+
 //SBTTL UNLOCK_IODB - Unlock the I/O Database
 
 //++
@@ -599,7 +599,7 @@ unlock_iodb(long * R4)
 #endif
     return R0;
 }
-
+
 //SBTTL FIND_UCB - Locate specified Unit Control Block.
 
 //++
@@ -646,7 +646,7 @@ struct _ucb ** U;
     // not yet  MOVQ    (SP)+,R0        // restore info
     return sts;             // return
 }
-
+
 //SBTTL BUILD_ACP_QB - build the ACP Queue Blk structure
 
 //++
@@ -753,7 +753,7 @@ struct _ucb * R5;
     R0 = unlock_iodb(&R4);          // unlock & return
     return R0;
 }
-
+
 //SBTTL BUILD_VCB - Build A volume Control block.
 
 //++
@@ -828,7 +828,7 @@ struct _aqb * R8;
     R5->ucb$l_vcb = R2;     // UCB ==> VCB
     return SS$_NORMAL;
 }
-
+
 //SBTTL Set ip Device Off-line
 
 //++
@@ -894,7 +894,7 @@ l10:
 l15:
     return R0;
 }
-
+
 //SBTTL DISMOUNT - Dismount the ACP volume & deallocate the data structures.
 
 //++
@@ -1026,7 +1026,7 @@ l100:   /*POPL  r0*/            // get return code
     return R0;
 }
 
-
+
 //SBTTL USER REQUESTS AVAIL - Get User I/O requests for IP.
 
 //++
@@ -1198,7 +1198,7 @@ UR$Post:
     goto    Try_Again;      // dismiss this & look for more.
 }
 #endif
-
+
 //SBTTL VMS_IO$POST - Hand User's IRP to VMS IO Post-processing.
 
 //++
@@ -1309,7 +1309,7 @@ int VMS_IO$POST(long IOSB$ADRS, long IRP$ADRS, long UCB$ADRS)
 }
 
 //End_Lock::        // end of locked pages
-
+
 //SBTTL Move Bytes "FAST" with movc3 instruction.
 
 //++
@@ -1368,7 +1368,7 @@ static int getmem(const void *src, void *dest, int n)
     sys$cmkrnl(memmove, &arglst[0]);
 }
 
-
+
 //SBTTL Time_Stamp - Get time in hundredths of a second.
 
 //++
@@ -1418,7 +1418,7 @@ long long Time_Stamp()
     return 10*(long)(R0>>20);
 }
 
-
+
 //SBTTL Swap bytes on word boundaries.
 
 //++
@@ -1466,7 +1466,7 @@ Swp_Loop:
     if  (--WrdCnt) goto Swp_Loop;       // decr word's left to do
     return R0;
 }
-
+
 //SBTTL Zero block of bytes.
 
 //++
@@ -1504,7 +1504,7 @@ int Zero_Blk(Count,Size,Adrs)
     // not yet
     return R0;
 }
-
+
 //SBTTL Calculate Checksums
 
 //++
@@ -1798,7 +1798,7 @@ ZSum:   // Return 0 as FFFF
 //Comp:
 //  XORW    #^X0FFFF,R0     // Complement to 16-bits.
 //  return R0;
-
+
 //SBTTL Circular byte queue manipulation routines
 
 // These routines are written in MACRO for two reasons:

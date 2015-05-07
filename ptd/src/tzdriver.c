@@ -233,7 +233,7 @@
 //  Version V05-003 Dale Moore  Carnegie Mellon University
 //          Added some fixes gleaned from DECWindows version.
 //--
-
+
 #if 0
 .PAGE
 .SBTTL  Declarations
@@ -346,7 +346,7 @@ char ucb$t_pz_buffer[BUFFER_SIZE]; // Buffer to store characters to be transmitt
 //
 #if 0
 .PSECT  $$$105_PROLOGUE
-
+
 .PAGE
 .SBTTL  Standard Tables
 #endif
@@ -442,7 +442,7 @@ struct _tt_port port_vector;
 void TZ$NULL()              // Null port routine
 { }
 
-
+
 #if 0
 .PAGE
 .SBTTL  TZ$INITIAL - Initialize pseudo terminal interface
@@ -479,7 +479,7 @@ struct _crb * R8;
     tz$dpt.dpt$ps_vector=&port_vector; // does CLASS... do this? already done?
     R8->crb$b_tt_type=DT$_TZ;
 }
-
+
 #if 0
 .PAGE
 .SBTTL  TZ$INITLINE - RESET INDIVIDUAL LINE
@@ -544,7 +544,7 @@ l20:
 }
 
 
-
+
 //++
 // TZ$SET_LINE - Used to Reset SPEED and UCB
 //
@@ -588,7 +588,7 @@ void SET_FORCED_CHARS(struct _ucb * ucb)
 }
 
 #if 0
-
+
 
 .Page
 #endif
@@ -638,7 +638,7 @@ void TZ$DISCONNECT(struct _ucb * ucb, int r0)
 }
 
 
-
+
 #if 0
 .PAGE
 .SBTTL  TZ START I/O ROUTINE
@@ -731,7 +731,7 @@ void TZ$STARTIO(int R3, struct _ucb * u, signed int CC)                 // START
     return;
 
 }
-
+
 #if 0
 .PAGE
 .SBTTL  Port Routines Stop,Resume,XON,XOFF
@@ -893,7 +893,7 @@ void TZ$ABORT(struct _tty_ucb * ucb)
 l10:
     return;
 }
-
+
 #if 0
 TZ_END:             // End of driver
 

@@ -347,7 +347,7 @@ struct header_area_struct
         unsigned char dummy[2]; /*  Not used                */
     } class_prot;
 };
-
+
 /*
 **  Identification area structures and definitions
 */
@@ -362,7 +362,7 @@ struct ident_area_struct
     unsigned int  bakdate[2];   /* Date of last backup/record       */
     unsigned char  filenamext[66];/* Rest of filename           */
 };
-
+
 /*
 **  Mapping area structures and definitions
 */

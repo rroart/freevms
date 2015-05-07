@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 #include <cxbdef.h>
@@ -215,7 +215,7 @@ static void do_set_multicast_list(struct net_device *dev);
  */
 
 
-
+
 /**
  * ei_open - Open/initialize the board.
  * @dev: network device to initialize
@@ -471,7 +471,7 @@ static int ei_start_xmit(struct _irp * i, struct _pcb * p, struct _ucb * u, stru
 
     return 0;
 }
-
+
 /**
  * ei_interrupt - handle the interrupts from an 8390
  * @irq: interrupt number
@@ -1153,7 +1153,7 @@ int ethdev_init(struct net_device *dev)
 
     return 0;
 }
-
+
 
 
 /* This page of functions should be 8390 generic */
@@ -1271,7 +1271,7 @@ void cleanup_module(void)
 #endif /* MODULE */
 MODULE_LICENSE("GPL");
 
-
+
 /*
  * Local variables:
  *  compile-command: "gcc -D__KERNEL__ -I/usr/src/linux/net/inet -Wall -Wstrict-prototypes -O6 -m486 -c 8390.c"

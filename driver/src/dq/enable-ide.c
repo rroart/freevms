@@ -2,7 +2,7 @@
 
 /************************************************************************/
 /*                                  */
-/* Copyright © Digital Equipment Corporation, 1994 All Rights Reserved. */
+/* Copyright ï¿½ Digital Equipment Corporation, 1994 All Rights Reserved. */
 /* Unpublished rights reserved under the copyright laws of the United   */
 /* States.                              */
 /*                                  */
@@ -97,7 +97,7 @@ typedef struct              /* VMS item list item */
 
 #define $SUCCESS(code)  ( (code & STS$M_SUCCESS) == 1)
 #define $FAIL(code) ( (code & STS$M_SUCCESS) == 0)
-
+
 void chk_sts(status,string,va_alist)
 
 /* This routine is used to check a VMS status code.  If the code does   */
@@ -130,7 +130,7 @@ va_dcl                      /* Declare varying arg list */
     va_end(ap);                 /* End list */
     exit(status);               /* Exit with error */
 }
-
+
 int check_system_type()
 {
 
@@ -179,7 +179,7 @@ int check_system_type()
 
     return SS$_UNSUPPORTED;     /* None of the above - exit with ?? */
 }
-
+
 int set_ide()
 {
 
@@ -249,7 +249,7 @@ int set_ide()
 
     return  status;         /* Exit with status */
 }
-
+
 int get_isa_base()
 {
 
@@ -408,7 +408,7 @@ int load_driver()
 
     return  SS$_NORMAL;         /* Exit with success */
 }
-
+
 /* Main program */
 
 int main(int argc, char *argv[])

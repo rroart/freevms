@@ -190,7 +190,7 @@ Modification History:
       2.0 - Converted from Interlan driver to DEUNA/DEQNA driver.
       2.01 - Add ARP responder (Rick Watson U.Texas)
 */
-
+
 
 //Sbttl   "Module definitions"
 
@@ -258,7 +258,7 @@ static signed long
 // String descriptor used to hold description
 long    XE_descriptor[2];
 
-
+
 //SBTTL "Declare the device information block used to describe entry points."
 
 static
@@ -272,7 +272,7 @@ Device_Info_Structure DRV$Device_Info_, * DRV$Device_Info = &DRV$Device_Info_;
 // Note: This pointer must be named "IPACP_Interface"
 IPACP_Info_Structure * IPACP_Interface;
 
-
+
 
 void    XE_Shutdown();
 
@@ -282,7 +282,7 @@ static XE$ERR(XE_Int)
     XE_Shutdown(XE_Int,TRUE);
 }
 
-
+
 
 //SBTTL "Start asynchronous I/O on the DEC ethernet"
 
@@ -343,7 +343,7 @@ XE_StartIO ( struct XE_Interface_Structure * XE_Int)
     return -1;
 }
 
-
+
 
 //SBTTL "Start the device"
 
@@ -456,7 +456,7 @@ struct XE_Interface_Structure * XE_Int;
 
     return -1;
 }
-
+
 XE_SenseDev( struct XE_Interface_Structure * XE_Int,
              struct xe_addrs_structure * phaddr,
              struct xe_Addrs_structure * hwaddr,
@@ -527,7 +527,7 @@ XE_SenseDev( struct XE_Interface_Structure * XE_Int,
 
     return -1;
 }
-
+
 //SBTTL "Start device - top-level"
 
 xe_startall ( XE_Int , restart )
@@ -641,7 +641,7 @@ struct XE_Interface_Structure * XE_Int;
     return TRUE;
 }
 
-
+
 
 #define    EMPTY_QUEUE 3
 
@@ -749,7 +749,7 @@ struct XE_Interface_Structure * XE_Int;
     DRV$OKINT;
 
 }
-
+
 //SBTTL "Ethernet driver check routine"
 // Routine to call whenever the device is offline and shouldn't be.
 
@@ -785,7 +785,7 @@ XE$CHECK ( Device_Configuration_Entry * dev_config )
 // Return 0 since device still needs attention.
     return 0;
 }
-
+
 //Sbttl   "Ethernet driver init routine"
 /******************************************************************************
 
@@ -941,7 +941,7 @@ void XE$init ( Device_Configuration_Entry * dev_config ,
 
 }
 
-
+
 //Sbttl   "Ethernet driver xmit"
 /******************************************************************************
 
@@ -1090,7 +1090,7 @@ leave_x:
     };
     DRV$OKINT;
 }
-
+
 //SBTTL   "Ethernet driver recv"
 /******************************************************************************
 
@@ -1257,7 +1257,7 @@ void XE_receive ( struct XE_Interface_Structure * XE_Int )
 
     DRV$AST_IN_PROGRESS = FALSE;
 }
-
+
 
 //Sbttl   "Ethernet driver arp recv"
 /******************************************************************************
@@ -1331,7 +1331,7 @@ void xe_arprcv( struct XE_Interface_Structure * XE_Int )
     DRV$AST_IN_PROGRESS = FALSE;
 }
 
-
+
 //SBTTL "ARP transmit routine"
 
 void xe$arp_xmit(XE_Int,arbuf,arlen,dest)
@@ -1366,7 +1366,7 @@ struct XE_Interface_Structure * XE_Int;
         XE_LOG("XE ARP xmit",0,dest);
     DRV$OKINT ;
 }
-
+
 //SBTTL "Perform device specific DUMP functions"
 
 XE$dump(dev_config, funct, arg, buffer, sizeAdrs)
@@ -1388,7 +1388,7 @@ long * sizeAdrs;
     }
 }
 
-
+
 
 drv$transport_init (void)
 // Initialize the transport information/entry vector

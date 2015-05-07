@@ -14,19 +14,12 @@
 
 #define MAX_VALUE_LENGTH 255
 
-int call_sys$crelnm(char *table_name, char *logical_name, char *value,
-                    unsigned int *attribute, unsigned char *access_mode)
+int call_sys$crelnm(char *table_name, char *logical_name, char *value, unsigned int *attribute, unsigned char *access_mode)
 {
     struct dsc$descriptor_s table_name_desc =
-    {
-        (unsigned short) strlen(table_name), DSC$K_DTYPE_T, DSC$K_CLASS_S,
-        table_name
-    };
+        { (unsigned short) strlen(table_name), DSC$K_DTYPE_T, DSC$K_CLASS_S, table_name };
     struct dsc$descriptor_s logical_name_desc =
-    {
-        (unsigned short) strlen(logical_name), DSC$K_DTYPE_T, DSC$K_CLASS_S,
-        logical_name
-    };
+        { (unsigned short) strlen(logical_name), DSC$K_DTYPE_T, DSC$K_CLASS_S, logical_name };
 
     struct _ile3 item_list[] =
     {
@@ -34,62 +27,39 @@ int call_sys$crelnm(char *table_name, char *logical_name, char *value,
         { 0, 0, NULL, NULL }
     };
 
-    return sys$crelnm(attribute, &table_name_desc, &logical_name_desc,
-                      access_mode, item_list);
+    return sys$crelnm(attribute, &table_name_desc, &logical_name_desc, access_mode, item_list);
 }
 
-int call_sys$crelnt(char *table_name, char *parent_table,
-                    unsigned int *attribute, unsigned int *quota,
+int call_sys$crelnt(char *table_name, char *parent_table, unsigned int *attribute, unsigned int *quota,
                     unsigned short* protection_mask, unsigned char *access_mode)
 {
     /* TODO: resnam */
     struct dsc$descriptor_s table_name_desc =
-    {
-        (unsigned short) strlen(table_name), DSC$K_DTYPE_T, DSC$K_CLASS_S,
-        table_name
-    };
+        { (unsigned short) strlen(table_name), DSC$K_DTYPE_T, DSC$K_CLASS_S, table_name };
     struct dsc$descriptor_s parent_table_desc =
-    {
-        (unsigned short) strlen(parent_table), DSC$K_DTYPE_T, DSC$K_CLASS_S,
-        parent_table
-    };
+        { (unsigned short) strlen(parent_table), DSC$K_DTYPE_T, DSC$K_CLASS_S, parent_table };
 
-    return sys$crelnt(attribute, NULL, NULL, quota, protection_mask,
-                      &table_name_desc, &parent_table_desc, access_mode);
+    return sys$crelnt(attribute, NULL, NULL, quota, protection_mask, &table_name_desc, &parent_table_desc, access_mode);
 }
 
-int call_sys$dellnm(char *table_name, char *logical_name,
-                    unsigned char *access_mode)
+int call_sys$dellnm(char *table_name, char *logical_name, unsigned char *access_mode)
 {
     struct dsc$descriptor_s table_name_desc =
-    {
-        (unsigned short) strlen(table_name), DSC$K_DTYPE_T, DSC$K_CLASS_S,
-        table_name
-    };
+        { (unsigned short) strlen(table_name), DSC$K_DTYPE_T, DSC$K_CLASS_S, table_name };
     struct dsc$descriptor_s logical_name_desc =
-    {
-        (unsigned short) strlen(logical_name), DSC$K_DTYPE_T, DSC$K_CLASS_S,
-        logical_name
-    };
+        { (unsigned short) strlen(logical_name), DSC$K_DTYPE_T, DSC$K_CLASS_S, logical_name };
 
     return sys$dellnm(&table_name_desc, &logical_name_desc, access_mode);
 }
 
-int call_sys$trnlnm(char *table_name, char *logical_name, char *value_list,
-                    unsigned int *attribute, unsigned char *access_mode)
+int call_sys$trnlnm(char *table_name, char *logical_name, char *value_list, unsigned int *attribute, unsigned char *access_mode)
 {
     int ret_status = SS$_NORMAL;
 
     struct dsc$descriptor_s table_name_desc =
-    {
-        (unsigned short) strlen(table_name), DSC$K_DTYPE_T, DSC$K_CLASS_S,
-        table_name
-    };
+        { (unsigned short) strlen(table_name), DSC$K_DTYPE_T, DSC$K_CLASS_S, table_name };
     struct dsc$descriptor_s logical_name_desc =
-    {
-        (unsigned short) strlen(logical_name), DSC$K_DTYPE_T, DSC$K_CLASS_S,
-        logical_name
-    };
+        { (unsigned short) strlen(logical_name), DSC$K_DTYPE_T, DSC$K_CLASS_S, logical_name };
 
     char *value_ptr = value_list;
     unsigned int item_index = 0;
@@ -107,8 +77,7 @@ int call_sys$trnlnm(char *table_name, char *logical_name, char *value_list,
     {
         item_list[1].ile3$w_length = MAX_VALUE_LENGTH;
         item_list[1].ile3$ps_bufaddr = value_ptr;
-        int status = sys$trnlnm(attribute, &table_name_desc, &logical_name_desc,
-                                access_mode, item_list);
+        int status = sys$trnlnm(attribute, &table_name_desc, &logical_name_desc, access_mode, item_list);
         if ($VMS_STATUS_SUCCESS(status))
         {
             value_ptr[value_length] = '\0';
@@ -145,11 +114,11 @@ void run_logical_test(void)
 
     EXPECT_EQ(call_sys$crelnt("MY_TEST_TABLE", "LNM$PROCESS_DIRECTORY", NULL, NULL, NULL, NULL), SS$_NOPRIV);
     /*
-    EXPECT_SUCCESS(call_sys$crelnt("MY_TEST_TABLE", "LNM$PROCESS_DIRECTORY", NULL, NULL, NULL, NULL));
-    EXPECT_SUCCESS(call_sys$crelnm("MY_TEST_TABLE", "MY_TEST_LOGICAL", "Test Value 2", NULL, NULL));
-    EXPECT_EQ(call_sys$trnlnm("MY_TEST_TABLE", "MY_TEST_LOGICAL", value_list, NULL, NULL), SS$_NORMAL);
-    EXPECT_EQ(strcmp(value_list, "Test Value 2"), 0);
-    EXPECT_SUCCESS(call_sys$dellnm("LNM$PROCESS_DIRECTORY", "MY_TEST_TABLE", NULL));
-    EXPECT_EQ(call_sys$trnlnm("MY_TEST_TABLE", "MY_TEST_LOGICAL", value_list, NULL, NULL), SS$_NORMAL);
-    */
+     EXPECT_SUCCESS(call_sys$crelnt("MY_TEST_TABLE", "LNM$PROCESS_DIRECTORY", NULL, NULL, NULL, NULL));
+     EXPECT_SUCCESS(call_sys$crelnm("MY_TEST_TABLE", "MY_TEST_LOGICAL", "Test Value 2", NULL, NULL));
+     EXPECT_EQ(call_sys$trnlnm("MY_TEST_TABLE", "MY_TEST_LOGICAL", value_list, NULL, NULL), SS$_NORMAL);
+     EXPECT_EQ(strcmp(value_list, "Test Value 2"), 0);
+     EXPECT_SUCCESS(call_sys$dellnm("LNM$PROCESS_DIRECTORY", "MY_TEST_TABLE", NULL));
+     EXPECT_EQ(call_sys$trnlnm("MY_TEST_TABLE", "MY_TEST_LOGICAL", value_list, NULL, NULL), SS$_NORMAL);
+     */
 }

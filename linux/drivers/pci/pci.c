@@ -658,7 +658,8 @@ void pci_unregister_driver(struct pci_driver *drv)
 }
 
 static struct pci_driver pci_compat_driver =
-{ name: "compat"
+{
+name: "compat"
 };
 
 /**

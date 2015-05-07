@@ -99,7 +99,7 @@ SOFTWARE.
 #define TIMETICKS    (ASN_APPLICATION | 3)
 #define    OPAQUE    (ASN_APPLICATION | 4)
 
-
+
 
 // IP group MIB (Management Information Block)
 
@@ -129,7 +129,7 @@ struct IP_group_MIB_struct
 
 #define    IP_group_MIB_Size    sizeof(struct IP_group_MIB_struct)
 
-
+
 
 // ICMP group MIB (Management Information Block)
 
@@ -165,7 +165,7 @@ struct ICMP_MIB_struct
 
 #define    ICMP_MIB_Size    sizeof(ICMP_MIB_struct)
 
-
+
 
 // UDP group MIB (Management Information Block)
 
@@ -179,7 +179,7 @@ struct UDP_MIB_struct
 
 #define    UDP_MIB_Size sizeof(struct UDP_MIB_struct)
 
-
+
 
 // TCP group MIB (Management Information Block)
 
@@ -201,7 +201,7 @@ struct TCP_MIB_struct
 
 #define    TCP_MIB_Size sizeof(TCP_MIB_struct)
 
-
+
 
 // Magic Numbers
 

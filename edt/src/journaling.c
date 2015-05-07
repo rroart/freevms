@@ -33,7 +33,7 @@
 #include <unistd.h>
 
 #include "edt.h"
-
+
 /************************************************************************/
 /*                                  */
 /*  Read from journal or terminal (in line mode) with prompt        */
@@ -106,7 +106,7 @@ writejournal:
 
     return (string);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Read keypad sequence from journal or terminal without echoing   */
@@ -174,7 +174,7 @@ writejournal:
 
     return (ok);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Call this periodically to flush journal file            */
@@ -194,7 +194,7 @@ void jnl_flush (void)
         }
     }
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Close and maybe delete journal file                 */

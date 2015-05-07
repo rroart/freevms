@@ -28,16 +28,10 @@
 #define LNMX$C_CW_LINKS     0x84
 #define LNMX$S_LNMXDEF      25
 
-#ifndef USERLAND
 #define lnmmalloc(x) kmalloc(x,GFP_KERNEL);
 #define lnmfree kfree
 #undef lnmprintf
 #define lnmprintf printk
-#else
-#define lnmmalloc malloc
-#define lnmfree free
-#define lnmprintf printf
-#endif
 
 struct _lnmth
 {

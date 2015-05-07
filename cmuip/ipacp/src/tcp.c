@@ -399,7 +399,7 @@ Module Modification History:
     gatewaying between networks.
 */
 
-
+
 //sbttl "Module Environment & Definition."
 
 #if 0
@@ -442,7 +442,7 @@ MODULE TCP(IDENT="8.2",LANGUAGE(BLISS32),
 #define Calc_Checksum(x,y) ip_compute_csum(y,x)
 #define Gen_Checksum(a,b,c,d,e) csum_tcpudp_magic(c,d,a,e,csum_partial(b,a,0))
 
-               
+
 
 //SBTTL "External Routines"
 
@@ -508,7 +508,7 @@ extern     IP$Send();
 
 extern    NML$CANCEL();
 
-
+
 
 //SBTTL "External Literals & data segments"
 
@@ -543,7 +543,7 @@ log_state,
 act_state;
 extern    struct TCP_MIB_struct * tcp_mib;   // TCP management Information Block
 
-
+
 //SBTTL "Global Data Declarations."
 
 unsigned long
@@ -585,7 +585,7 @@ ts$uir = 0, // user io requests
 
 //    IO_Status: IO_Status_Blk,
 
-
+
 
 // Common macro used by all to send a TCP segment to IP.
 
@@ -608,7 +608,7 @@ ts$uir = 0, // user io requests
     send_seg(TCB,SEGADDR,SEGSIZE,DELFLAG,BUFPTR,BUFSIZE,0); \
     }
 
-
+
 void tcp$set_tcb_state(struct tcb_structure * tcb, long S)
 // Set the State of a TCB, Old state ==> last_state.
 {
@@ -681,7 +681,7 @@ void tcp$inactivate_tcb(struct tcb_structure * tcb,long err)
     else
         XLOG$FAO(LOG$TCPERR,"!%T TCB !XL inactive in TCP$Inactivate_TCB!/",0,tcb);
 };
-
+
 //SBTTL "TCP$CLOSE - Close a network connection"
 /*
 
@@ -775,8 +775,8 @@ tcp$tcb_close(struct tcb_structure * * tcbpt)  // check
         return 0;
     };
 }
-
-
+
+
 //SBTTL "Send_TCP_Options - Set TCP options when sending SYN segment"
 
 #define    SEND_OPT_SIZE 4      // Total number of bytes of options we set
@@ -809,7 +809,7 @@ struct segment_structure * Seg;
 // sure that the maximum TCP header size is not exceeded.
 
 };
-
+
 //SBTTL "Compute_RTT: Compute Round Trip Time"
 /*
 
@@ -880,7 +880,7 @@ signed long  tcp$compute_rtt(struct tcb_structure * tcb)
     return (newrto) ;
 
 }
-
+
 //SBTTL "Check Retransmission Queue"
 /*
 
@@ -1052,7 +1052,7 @@ long long tcp$check_rexmit_queue(struct tcb_structure * tcb)
     return (now + (20*CSEC));   // Nothing on retransmission queue
 
 };
-
+
 //SBTTL "Queue Segment for ReTransmission."
 /*
 
@@ -1141,7 +1141,7 @@ struct tcb_structure * tcb;
              0,tcb->srx_q_deqp,tcb->snd_q_deqp,tcb->rx_seq,SEQsize,
              tcb->srx_q_count,tcb->rx_ctl, tcb->rx_count);
 };
-
+
 //SBTTL "Debug rtn: Display Specified TCB"
 /*
 
@@ -1248,7 +1248,7 @@ lhstr= {dsc$w_length:20, dsc$a_pointer:
             tcb->snd_una,tcb->snd_una,rxtime,rxtime-now);
 };
 
-
+
 
 //SBTTL "Service-Connections - Look for things to do."
 /*
@@ -1517,7 +1517,7 @@ Check_TCB ( struct tcb_structure * tcb , signed long Idx , unsigned long now, un
     return 1;
 }
 
-
+
 //SBTTL "Service-Connections - Look for things to do."
 /*
 
@@ -1574,7 +1574,7 @@ long long tcp$service_connections (void)
 
     return nxtime;
 };
-
+
 //SBTTL "TCP$SEND_ENQUEUE - Copy send data from user send queue to circular buffer"
 
 void tcp$send_enqueue(tcb,bufcount,buf,pushf)
@@ -1611,7 +1611,7 @@ signed long * bufcount, *buf; // check my adds
         tcb->snd_pptr = tcb->snd_nxt + tcb->snd_q_count;
     };
 }
-
+
 //SBTTL "SEND DATA: Segmentize data & send segment over the network."
 /*
 
@@ -1883,7 +1883,7 @@ tcp$send_data(struct tcb_structure * tcb)
     return dcount;
 }
 
-
+
 //SBTTL "Send-ACK: Check if we can piggyback ACK or must send a lone ACK"
 /*
 
@@ -1945,7 +1945,7 @@ void tcp$enqueue_ack(struct tcb_structure * tcb)
 
 }
 
-
+
 //SBTTL "Send-ACK: Check if we can piggyback ACK or must send a lone ACK"
 /*
 
@@ -1996,7 +1996,7 @@ void tcp$send_ack(struct tcb_structure * tcb)
             tcp$send_ctl(tcb,M$ACK); // Send an ACK control segment.
     }
 }
-
+
 //SBTTL "SEND CTL: Send a Control Segment"
 /*
 
@@ -2115,7 +2115,7 @@ tcp$send_ctl(struct tcb_structure * tcb,long type)
         else
             send_seg0(tcb, seg, segsize, TRUE, bufptr, bufsize,0);
 }
-
+
 //%SBTTL "Send a probe packet"
 /*
 Function:
@@ -2175,7 +2175,7 @@ void do_probe(struct tcb_structure * tcb)
     send_seg1(tcb, seg, segsize, FALSE, buf, bufsize);
 }
 
-
+
 //%SBTTL "Build Header: Fill in TCP segment header."
 /*
 

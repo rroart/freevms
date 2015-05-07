@@ -58,7 +58,7 @@ static int columnumber;     /* in range 0..screenwidth-1 */
 static int linenumber;      /* in range 1..screenlength */
 
 static void printchar (char c);
-
+
 /* Initialization */
 
 int ch_screen_init (void)
@@ -152,7 +152,7 @@ uLong ch_screen_col2chr (uLong linesz, const char *linebf, uLong ncols)
 
     return (nchrs);
 }
-
+
 /* Update the screen and read command */
 
 String *ch_screen_read (void)
@@ -224,7 +224,7 @@ gendone:
 
     return (jnl_readprompt ("\r\nC*"));
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Display a character on the screen                   */

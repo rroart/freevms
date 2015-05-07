@@ -114,7 +114,7 @@ static struct
 extern globalvalue DFU_ASSIGN, DFU_NOPRIV;
 
 int display_stat();
-
+
 int set_command(mask)
 /*
    Set any file attribute you like!
@@ -500,7 +500,7 @@ next_name:
     put_disp();
     return(1);
 }
-
+
 int delete_file(unsigned short id[3], unsigned short dchan,
                 Boolean noremove, Boolean deldir, Boolean nolog,
                 Boolean rem_file)
@@ -609,7 +609,7 @@ int delete_file(unsigned short id[3], unsigned short dchan,
 end_del:
     return(status);
 }
-
+
 int remove_file(unsigned short id[3], unsigned short did[3],
                 unsigned short dchan)
 /*
@@ -646,7 +646,7 @@ int remove_file(unsigned short id[3], unsigned short did[3],
     if ((status & 1 ) == 1) status = iostat.iosb_1;
     return(status);
 }
-
+
 int delete_directory(unsigned int dchan, unsigned short f_id[3],
                      char *r_str, Boolean nolog)
 /*
@@ -855,7 +855,7 @@ next_del:
         SYS$DELTVA(&retadr.address[0], 0 , 0);
     return(1);
 }
-
+
 int parse_tree(short int dchan, char *r_str, Boolean nolog)
 /*
    Subroutine to parse for all subdirectories.
@@ -968,7 +968,7 @@ int parse_tree(short int dchan, char *r_str, Boolean nolog)
 #endif
     return(1);
 }
-
+
 int delete_command(mask)
 /*
    Delete file by file-id
@@ -1163,7 +1163,7 @@ int delete_command(mask)
     put_disp();
     if (matstat) status = lib$show_timer(0,0,display_stat,0);
 }
-
+
 int defrag_command(mask)
 /*
    Defrag files using the XQP MOVEFILE function.
@@ -1310,7 +1310,7 @@ int defrag_command(mask)
     if (matstat) status = lib$show_timer(0,0,display_stat,0);
     return(1);
 }
-
+
 int move_to_lbn(unsigned short * from, unsigned int lbn_to,
                 unsigned short chan)
 /*
@@ -1353,7 +1353,7 @@ int move_to_lbn(unsigned short * from, unsigned int lbn_to,
     if ((status & 1) == 1) status = iostat.iosb_1;
     return(status);
 }
-
+
 int movefile(char *defr_file, int flag)
 /*
    Performs the actual MOVEFILE function
@@ -1477,7 +1477,7 @@ int movefile(char *defr_file, int flag)
     }
     return(status);
 }
-
+
 int directory_command(mask)
 /*
    Performs the directory command
@@ -1657,7 +1657,7 @@ int directory_command(mask)
     fclose(fp);
     return(1);
 }
-
+
 void create_dir (char *crea_file, int all_size)
 /*
    Create a new directory with a preallocated size
@@ -1740,7 +1740,7 @@ void create_dir (char *crea_file, int all_size)
         put_disp();
     }
 }
-
+
 int compdir (char *comp_file, Boolean matoutput)
 /*
    Performs the actual directory compress or dump
@@ -2115,7 +2115,7 @@ next_dir:
     if (ctrlc == 1) do_abort();
     return(1);
 }
-
+
 int scan_directories(int *rvt, int rvn, int cnt, int max, Boolean matoutput)
 /* Scan all directories found on this disk. Implicitly called
      by the DIR/VERSION , /ALIAS , /CHECK or DIR/EMPTY command.

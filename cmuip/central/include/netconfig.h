@@ -179,7 +179,7 @@ dc_is_clone = On if device is a clone (multiple IP address).
 
 #define DC_Max_Num_Net_Devices 4    /* size of table. */
 
-
+
 
 /*%SBTTL     'Net Send Queue structure definition'*/
 /****************************************************************************
@@ -215,7 +215,7 @@ typedef struct
     char    *NS$Qtail;
 } QH_Net_send;
 
-
+
 
 /*!!!HACK!!! Why are there no comments here? (besides this one?)*/
 
@@ -228,7 +228,7 @@ typedef struct
     int     (*DI$ARP_Dump)();
 } Device_Info_Structure;
 
-
+
 
 /*
 Here we describe the IPACP Information block.  This structure

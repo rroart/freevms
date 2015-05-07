@@ -3,11 +3,10 @@
 
 // Author. Roar Thron�s.
 /**
-   \file system_data_cells.c
-   \brief most of our global variables
-   \author Roar Thron�s
+ \file system_data_cells.c
+ \brief most of our global variables
+ \author Roar Thron�s
  */
-
 
 #include <linux/vmalloc.h>
 #ifdef __x86_64__
@@ -30,8 +29,8 @@
 /* Author: Roar Thron�s */
 
 /* based on grep and cut from AAA_SYSTEM_CELLS.H
-   as a gross approx everything is unsigned long
-   (most is that anyway */
+ as a gross approx everything is unsigned long
+ (most is that anyway */
 
 /* some may not belong, but will be moved later */
 
@@ -427,8 +426,8 @@ unsigned long exe$ga_wp_del;
 unsigned long exe$ga_wp_wpre;
 unsigned long exe$gb_erlbufpagelets;
 unsigned long exe$gb_vp_load;
-unsigned long exe$gl_abstim=0;
-unsigned long exe$gl_abstim_tics=0;
+unsigned long exe$gl_abstim = 0;
+unsigned long exe$gl_abstim_tics = 0;
 unsigned long exe$gl_abstim_utics;
 unsigned long exe$gl_aclmtx;
 unsigned long exe$gl_acmflags;
@@ -485,7 +484,7 @@ unsigned long exe$gl_hwname_length;
 unsigned long exe$gl_hwtype_length;
 unsigned long exe$gl_imgreg_pages;
 unsigned long exe$gl_itb_entries;
-unsigned long exe$gl_known_files=0;
+unsigned long exe$gl_known_files = 0;
 unsigned long exe$gl_ldr_cnt;
 unsigned long exe$gl_ldr_seq;
 unsigned long exe$gl_limbolen;
@@ -580,7 +579,7 @@ unsigned long exe$gl_tickadjust;
 unsigned long exe$gl_ticklength=100000;
 #endif
 #ifdef __x86_64__
-unsigned long exe$gl_ticklength=100000;
+unsigned long exe$gl_ticklength = 100000;
 #endif
 unsigned long exe$gl_tickwidth;
 unsigned long exe$gl_time_control;
@@ -747,7 +746,7 @@ unsigned long icc$gl_icc_pdb_vector;
 unsigned long icc$gl_icc_rand;
 unsigned long icc$gl_icc_trace_area;
 unsigned long img$gl_image_region;
-unsigned long img$gl_imcb_list=0;
+unsigned long img$gl_imcb_list = 0;
 unsigned long io$gl_scb_int0;
 unsigned long io$gl_uba_int0;
 unsigned long io$gl_unexp_fbus_intr;
@@ -761,7 +760,7 @@ unsigned long ioc$gl_cramh_blink;
 unsigned long ioc$gl_cramh_flink;
 unsigned long ioc$gl_cramh_pages;
 unsigned long ioc$gl_crbtmout;
-unsigned long ioc$gl_devlist=0; ///< ddb list
+unsigned long ioc$gl_devlist = 0; ///< ddb list
 unsigned long ioc$gl_dptlist;
 unsigned long ioc$gl_dtn_list;
 unsigned long ioc$gl_du_cddb;
@@ -788,8 +787,8 @@ unsigned long ioc$gq_ddma_base_pa;
 unsigned long ioc$gq_dev_wwid_list;
 unsigned long ioc$gq_min_bap_window;
 unsigned long ioc$gq_mountlst;
-unsigned long ioc$gq_mutex=0;
-unsigned long long ioc$gq_postiq=0;
+unsigned long ioc$gq_mutex = 0;
+unsigned long long ioc$gq_postiq = 0;
 unsigned long ioc$gw_lamapreg;
 unsigned long ioc$gw_maxbuf = MAXBUF; // check
 unsigned long ioc$gw_mbxbfquo;
@@ -863,7 +862,7 @@ unsigned long lmf$ar_grouptbl;
 unsigned long lmf$gl_reserved;
 long * lnm$al_dirtbl[2];
 unsigned long lnm$al_hashtbl;
-unsigned long lnm$aq_mutex=0;
+unsigned long lnm$aq_mutex = 0;
 unsigned long lnm$ar_cluster_lnmb;
 unsigned long lnm$ar_syscluster_lnmb;
 unsigned long lnm$ar_system_directory;
@@ -924,7 +923,7 @@ unsigned long mmg$gl_maxbobs0s1_pages;
 unsigned long mmg$gl_maxbobs2_pagelets;
 unsigned long mmg$gl_maxbobs2_pages;
 unsigned long mmg$gl_maxmem;
-unsigned long mmg$gl_maxpfidx=0;
+unsigned long mmg$gl_maxpfidx = 0;
 unsigned long mmg$gl_maxpfn;
 unsigned long mmg$gl_memsize;
 unsigned long mmg$gl_min_node_pfn;
@@ -974,10 +973,10 @@ unsigned long mmg$gq_64sys_shift;
 unsigned long mmg$gq_bap;
 unsigned long mmg$gq_bwp_mask;
 unsigned long mmg$gq_bwp_width;
-unsigned long mmg$gq_free_gpt=0;
+unsigned long mmg$gq_free_gpt = 0;
 unsigned long mmg$gq_gap_hi_va;
 unsigned long mmg$gq_gap_lo_va;
-unsigned long mmg$gq_gpt_base=0;
+unsigned long mmg$gq_gpt_base = 0;
 unsigned long mmg$gq_l1_base;
 unsigned long mmg$gq_l2_base;
 unsigned long mmg$gq_level_width;
@@ -1434,15 +1433,15 @@ unsigned long sch$gl_def_rad_skip_cnt;
 unsigned long sch$gl_default_cpu_cap = CPB$M_RUN; // add quorum later
 unsigned long sch$gl_default_process_cap = CPB$M_RUN; // ditto
 unsigned long sch$gl_exit_queue_rad;
-unsigned long sch$gl_freecnt=0;
-unsigned long sch$gl_freelim=64;
+unsigned long sch$gl_freecnt = 0;
+unsigned long sch$gl_freelim = 64;
 unsigned long sch$gl_freereq;
 unsigned long sch$gl_growlim;
 unsigned long sch$gl_idle_cpus;
 unsigned long sch$gl_max_sched_class;
-unsigned long sch$gl_maxpix=MAXPROCESSCNT;
-unsigned long sch$gl_mfycnt=0;
-unsigned long sch$gl_mfylim=64;
+unsigned long sch$gl_maxpix = MAXPROCESSCNT;
+unsigned long sch$gl_mfycnt = 0;
+unsigned long sch$gl_mfylim = 64;
 unsigned long sch$gl_mfylimsv;
 unsigned long sch$gl_mfylolim;
 unsigned long sch$gl_mfylosv;
@@ -1455,9 +1454,9 @@ unsigned long sch$gl_pfrath;
 unsigned long sch$gl_pfratl;
 unsigned long sch$gl_pixlast;
 unsigned long sch$gl_pixwidth;
-unsigned long sch$gl_resmask=0;
+unsigned long sch$gl_resmask = 0;
 unsigned long sch$gl_seqvec;
-unsigned long sch$gl_sip=0;
+unsigned long sch$gl_sip = 0;
 unsigned long sch$gl_swppid;
 unsigned long sch$gl_swprate;
 unsigned long sch$gl_tbsh;
@@ -1468,8 +1467,10 @@ unsigned long sch$gl_wsdec_pagelets;
 unsigned long sch$gl_wsdec_pages;
 unsigned long sch$gl_wsinc_pagelets;
 unsigned long sch$gl_wsinc_pages;
-unsigned long sch$gl_active_priority = 0;;
-unsigned long sch$al_cpu_priority[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+unsigned long sch$gl_active_priority = 0;
+;
+unsigned long sch$al_cpu_priority[32] =
+{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 unsigned long sch$gq_affinity_time_int;
 unsigned long sch$gq_cc_per_hardtick;
 unsigned long sch$gq_cc_per_quant;
@@ -1494,7 +1495,7 @@ unsigned long sch$gq_susp;
 unsigned long sch$gq_suspo;
 unsigned long sch$gw_cebcnt;
 unsigned long sch$gw_delphdct;
-unsigned long sch$gw_dormantwait=DORMANTWAIT;
+unsigned long sch$gw_dormantwait = DORMANTWAIT;
 unsigned long sch$gw_iota;
 unsigned long sch$gw_localnode;
 unsigned long sch$gw_longwait;
@@ -1564,7 +1565,7 @@ unsigned long scs$gq_poll;
 unsigned long scs$gq_reuse_cdt;
 unsigned long scs$gq_worse_path;
 unsigned long scs$gw_bdtcnt;
-unsigned long scs$gw_cdtcnt=1024;
+unsigned long scs$gw_cdtcnt = 1024;
 unsigned long scs$gw_flowcush;
 unsigned long scs$gw_maxdg;
 unsigned long scs$gw_maxmsg;
@@ -1574,7 +1575,7 @@ unsigned long scs$gw_papoolin;
 unsigned long scs$gw_pappddg;
 unsigned long scs$gw_pastmout;
 unsigned long scs$gw_prcpolint;
-unsigned long scs$gw_rdtcnt=128;
+unsigned long scs$gw_rdtcnt = 128;
 unsigned long scs$gw_timvcfail;
 unsigned long sevms$ar_alarm_vector;
 unsigned long sevms$ar_audit_vector;
@@ -1618,7 +1619,7 @@ unsigned long sgn$gl_fast_path_ports;
 unsigned long sgn$gl_file_cache;
 unsigned long sgn$gl_file_cache_max;
 unsigned long sgn$gl_file_cache_min;
-unsigned long sgn$gl_freegoal=1024;
+unsigned long sgn$gl_freegoal = 1024;
 unsigned long sgn$gl_freelim;
 unsigned long sgn$gl_galaxy;
 unsigned long sgn$gl_gblpagfil;
@@ -1652,7 +1653,7 @@ unsigned long sgn$gl_npag_gentle;
 unsigned long sgn$gl_npag_interval;
 unsigned long sgn$gl_npag_ring_size;
 unsigned long sgn$gl_npagecalc;
-unsigned long sgn$gl_npagedyn=0x800000;
+unsigned long sgn$gl_npagedyn = 0x800000;
 unsigned long sgn$gl_npagerad;
 unsigned long sgn$gl_npagevir;
 unsigned long sgn$gl_p1lwcnt;
@@ -1712,7 +1713,7 @@ unsigned long sgn$gw_maxpstct;
 unsigned long sgn$gw_pagfilct;
 unsigned long sgn$gw_pchancnt;
 unsigned long sgn$gw_piopagelets;
-unsigned long sgn$gw_pixscan=1;
+unsigned long sgn$gw_pixscan = 1;
 unsigned long sgn$gw_swpfilct;
 unsigned long sgn$gw_swpfiles;
 unsigned long sgn$gw_tpwait;
@@ -1945,13 +1946,13 @@ unsigned long xqp$gl_sections;
 struct lnmhshs lnmhshs; /* should be one struct, will be solved later */
 struct lnmhshp lnmhshp;
 
-struct _tqe tqe,tqe2;
+struct _tqe tqe, tqe2;
 
 struct _cpu vmscpus[32]; /* max. this number should be defined */
 
 //long long forklistheads[32][6];
 
-struct _rsb * reshashtbl[2*RESHASHTBL];
+struct _rsb * reshashtbl[2 * RESHASHTBL];
 unsigned long lockidtbl[LOCKIDTBL];
 unsigned long lockmaxid;
 unsigned long locknxtid;
@@ -1961,79 +1962,127 @@ struct _scs_rd rdtl[128]; //[scs$gw_rdtcnt];
 
 /* spinlocks */
 
-struct _spl SPIN_ATOMIC __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_ATOMIC __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 }; /* for atomic operations */
 
 /* corresponding to ipls */
 
-struct _spl SPIN_EMB __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_EMB __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_MCHECK __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_MCHECK __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_MEGA __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_MEGA __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_HWCLK __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_HWCLK __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_VIRTCONS __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_VIRTCONS __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_INVALIDATE __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_INVALIDATE __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_PERFMON __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_PERFMON __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_POOL __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_POOL __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_MAILBOX __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_MAILBOX __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_PR_LK11 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_PR_LK11 __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_IOLOCK11 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_IOLOCK11 __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_PR_LK10 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_PR_LK10 __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_IOLOCK10 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_IOLOCK10 __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_PR_LK9 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_PR_LK9 __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_IOLOCK9 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_IOLOCK9 __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_SCHED __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_SCHED __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_MMG __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_MMG __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_JIB __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_JIB __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_TIMER __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_TIMER __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_PR_LK8 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_PR_LK8 __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_IOLOCK8 __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_IOLOCK8 __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_SCS __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_SCS __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 };
-struct _spl SPIN_IOPOST __cacheline_aligned = { spl$l_own_cpu : 0, spl$l_own_cnt :
+struct _spl SPIN_IOPOST __cacheline_aligned =
+{
+spl$l_own_cpu : 0, spl$l_own_cnt :
     -1 /*, spl$l_spinlock : 0*/
 }; // new in freevms
 
@@ -2043,12 +2092,12 @@ extern void exe$timeout(void);
 
 void qhead_init(void * l)
 {
-    struct _pcb * tmp=(struct _pcb *)l; /* could be anything */
-    tmp->pcb$l_sqfl=tmp;
-    tmp->pcb$l_sqbl=tmp;
+    struct _pcb * tmp = (struct _pcb *) l; /* could be anything */
+    tmp->pcb$l_sqfl = tmp;
+    tmp->pcb$l_sqbl = tmp;
 }
 
-int vmstimerconf=0;
+int vmstimerconf = 0;
 
 struct myq2
 {
@@ -2066,27 +2115,28 @@ char boot_cpu_stack[0x4000] __cacheline_aligned;
 
 void __init vms_init(void)
 {
-    int i,j;
+    int i, j;
 
-    sch$gl_pixwidth=0;
-    for(i=MAXPROCESSCNT; i; i=i>>1) sch$gl_pixwidth++;
+    sch$gl_pixwidth = 0;
+    for (i = MAXPROCESSCNT; i; i = i >> 1)
+        sch$gl_pixwidth++;
 
-    for(i=0; i<32; i++)
+    for (i = 0; i < 32; i++)
     {
-        smp$gl_cpu_data[i]=&vmscpus[i];
-        smp$gl_cpu_data[i]->cpu$l_cpuid_mask=1 << i;
-        for(j=0; j<6; j++)
+        smp$gl_cpu_data[i] = &vmscpus[i];
+        smp$gl_cpu_data[i]->cpu$l_cpuid_mask = 1 << i;
+        for (j = 0; j < 6; j++)
         {
             struct myq2 * q = &smp$gl_cpu_data[i]->cpu$q_swiqfl[j];
-            q->flink=q;
-            q->blink=q;
+            q->flink = q;
+            q->blink = q;
         }
         qhead_init(&smp$gl_cpu_data[i]->cpu$l_psfl);
         smp$gl_cpu_data[i]->cpu$l_phy_cpuid = i;
         smp$gl_cpu_data[i]->cpu$l_cpuid_mask = 1 << i;
 #ifdef __x86_64__
 #include <asm/pda.h>
-        smp$gl_cpu_data[i]->cpu$ps_pda=cpu_pda + i;
+        smp$gl_cpu_data[i]->cpu$ps_pda = cpu_pda + i;
 #endif
     }
 
@@ -2096,12 +2146,12 @@ void __init vms_init(void)
 #else
     sch$add_cpu_cap(0, CPB$M_RUN | CPB$M_PRIMARY, 0);
 #endif
-    sch$al_cpu_cap[0]=smp$gl_cpu_data[0]->cpu$l_capability;
+    sch$al_cpu_cap[0] = smp$gl_cpu_data[0]->cpu$l_capability;
 #ifdef __i386__
     smp$gl_cpu_data[0]->cpu$l_saved_isp = &boot_cpu_stack[0x4000];
 #endif
 
-    sch$gl_idle_cpus=0;
+    sch$gl_idle_cpus = 0;
 #ifdef __i386__
     sch$aq_comot=(void *)sch$aq_comoh+4;
     sch$aq_comt=(void *)sch$aq_comh+4;
@@ -2112,87 +2162,87 @@ void __init vms_init(void)
 #endif
 #endif
 
-    for(i=0; i<32; i++)
+    for (i = 0; i < 32; i++)
     {
         struct _pcb * tmp;
-        tmp=(struct _pcb *) &sch$aq_comh[i];
-        tmp->pcb$l_sqfl=tmp;
-        tmp->pcb$l_sqbl=tmp;
+        tmp = (struct _pcb *) &sch$aq_comh[i];
+        tmp->pcb$l_sqfl = tmp;
+        tmp->pcb$l_sqbl = tmp;
     }
 
-    for(i=0; i<12; i++)
+    for (i = 0; i < 12; i++)
     {
         struct _wqh * tmp;
-        tmp=&sch$aq_wqhdr[i];
-        tmp->wqh$l_wqfl=tmp;
-        tmp->wqh$l_wqbl=tmp;
-        tmp->wqh$l_wqcnt=0;
-        tmp->wqh$l_wqstate=i;
+        tmp = &sch$aq_wqhdr[i];
+        tmp->wqh$l_wqfl = tmp;
+        tmp->wqh$l_wqbl = tmp;
+        tmp->wqh$l_wqcnt = 0;
+        tmp->wqh$l_wqstate = i;
     }
 
-    sch$gq_colpgwq=&sch$aq_wqhdr[1];
-    sch$gq_mwait=&sch$aq_wqhdr[2];
+    sch$gq_colpgwq = &sch$aq_wqhdr[1];
+    sch$gq_mwait = &sch$aq_wqhdr[2];
 //sch$gq_cefwq=&sch$aq_wqhdr[3];
-    sch$gq_pfwq=&sch$aq_wqhdr[4];
-    sch$gq_lefwq=&sch$aq_wqhdr[5];
-    sch$gq_lefowq=&sch$aq_wqhdr[6];
-    sch$gq_hibwq=&sch$aq_wqhdr[7];
-    sch$gq_hibowq=&sch$aq_wqhdr[8];
-    sch$gq_susp=&sch$aq_wqhdr[9];
-    sch$gq_suspo=&sch$aq_wqhdr[10];
-    sch$gq_fpgwq=&sch$aq_wqhdr[11];
+    sch$gq_pfwq = &sch$aq_wqhdr[4];
+    sch$gq_lefwq = &sch$aq_wqhdr[5];
+    sch$gq_lefowq = &sch$aq_wqhdr[6];
+    sch$gq_hibwq = &sch$aq_wqhdr[7];
+    sch$gq_hibowq = &sch$aq_wqhdr[8];
+    sch$gq_susp = &sch$aq_wqhdr[9];
+    sch$gq_suspo = &sch$aq_wqhdr[10];
+    sch$gq_fpgwq = &sch$aq_wqhdr[11];
 
-    exe$gq_systime=40916*864;
-    exe$gq_systime*=100;
-    exe$gq_systime+=xtime.tv_sec;
-    exe$gq_systime*=10000000;
+    exe$gq_systime = 40916 * 864;
+    exe$gq_systime *= 100;
+    exe$gq_systime += xtime.tv_sec;
+    exe$gq_systime *= 10000000;
 
     exe$gq_boottime = exe$gq_systime;
 
-    exe$gl_tqfl=(void *)&tqehead;
-    exe$gl_tqfl->tqe$l_tqfl=exe$gl_tqfl;
-    exe$gl_tqfl->tqe$l_tqbl=exe$gl_tqfl;
+    exe$gl_tqfl = (void *) &tqehead;
+    exe$gl_tqfl->tqe$l_tqfl = exe$gl_tqfl;
+    exe$gl_tqfl->tqe$l_tqbl = exe$gl_tqfl;
 
-    tqe.tqe$l_tqfl=0;
-    tqe.tqe$l_tqbl=0;
-    tqe.tqe$w_size=0;
-    tqe.tqe$b_type=DYN$C_TQE;
-    tqe.tqe$b_rqtype=TQE$C_TMSNGL|TQE$M_REPEAT; /* ???? */
-    tqe.tqe$l_rqpid=0xffffffff;
-    tqe.tqe$l_cputim=0xffffffff;
-    tqe.tqe$q_time=0x4000000000000000;
-    insque(&tqe,exe$gl_tqfl);
+    tqe.tqe$l_tqfl = 0;
+    tqe.tqe$l_tqbl = 0;
+    tqe.tqe$w_size = 0;
+    tqe.tqe$b_type = DYN$C_TQE;
+    tqe.tqe$b_rqtype = TQE$C_TMSNGL | TQE$M_REPEAT; /* ???? */
+    tqe.tqe$l_rqpid = 0xffffffff;
+    tqe.tqe$l_cputim = 0xffffffff;
+    tqe.tqe$q_time = 0x4000000000000000;
+    insque(&tqe, exe$gl_tqfl);
 
-    tqe2.tqe$l_tqfl=0;
-    tqe2.tqe$l_tqbl=0;
-    tqe2.tqe$w_size=0;
-    tqe2.tqe$b_type=DYN$C_TQE;
-    tqe2.tqe$b_rqtype=TQE$C_SSREPT;
-    tqe2.tqe$l_fpc=&exe$timeout;
-    tqe2.tqe$l_fr3=0; /* something? */
-    tqe2.tqe$l_fr4=0; /* something? */
-    tqe2.tqe$q_time=0;
-    tqe2.tqe$q_delta=10000000;
-    insque(&tqe2,exe$gl_tqfl);
+    tqe2.tqe$l_tqfl = 0;
+    tqe2.tqe$l_tqbl = 0;
+    tqe2.tqe$w_size = 0;
+    tqe2.tqe$b_type = DYN$C_TQE;
+    tqe2.tqe$b_rqtype = TQE$C_SSREPT;
+    tqe2.tqe$l_fpc = &exe$timeout;
+    tqe2.tqe$l_fr3 = 0; /* something? */
+    tqe2.tqe$l_fr4 = 0; /* something? */
+    tqe2.tqe$q_time = 0;
+    tqe2.tqe$q_delta = 10000000;
+    insque(&tqe2, exe$gl_tqfl);
     //  exe$instimq(&tqe2);
 
-    vmstimerconf=1;
+    vmstimerconf = 1;
 
     //  qhead_init(&ioc$gq_postiq);
 
     qhead_init(&lck$gl_rrsfl);
 
-    for(i=0; i<RESHASHTBL; i++)
+    for (i = 0; i < RESHASHTBL; i++)
     {
         //    reshashtbl[i]=0;
-        qhead_init(&reshashtbl[2*i]);
+        qhead_init(&reshashtbl[2 * i]);
     }
-    lck$gl_hashtbl=&reshashtbl;
-    lck$gl_idtbl=&lockidtbl;
-    for(i=0; i<LOCKIDTBL-1; i++)
-        lockidtbl[i]=i+1;
-    lck$gl_nxtid=&locknxtid;
-    lck$gl_maxid=&lockmaxid;
+    lck$gl_hashtbl = &reshashtbl;
+    lck$gl_idtbl = &lockidtbl;
+    for (i = 0; i < LOCKIDTBL - 1; i++)
+        lockidtbl[i] = i + 1;
+    lck$gl_nxtid = &locknxtid;
+    lck$gl_maxid = &lockmaxid;
 
     qhead_init(&scs$gq_local_names);
 
@@ -2209,10 +2259,10 @@ void __init vms_init(void)
 void __init vms_init2(void)
 {
     //  exe$gq_systime=40916*864;
-    exe$gq_systime=FUDGEFACTOR*864;
-    exe$gq_systime*=100;
-    exe$gq_systime+=xtime.tv_sec;
-    exe$gq_systime*=10000000;
+    exe$gq_systime = FUDGEFACTOR * 864;
+    exe$gq_systime *= 100;
+    exe$gq_systime += xtime.tv_sec;
+    exe$gq_systime *= 10000000;
 
     exe$gq_boottime = exe$gq_systime;
 
@@ -2237,15 +2287,15 @@ void __init vms_init4(void)
     tz_vmsinit();
     ip4_vmsinit();
     void exe$reclaim_pool_gentle(void * pool);
-    signed long long time=-10000000*60;
+    signed long long time = -10000000 * 60;
     exe$setimr(0, &time, exe$reclaim_pool_gentle, exe$gs_npp_npool, 0);
 }
 
 void __init vms_init3(void)
 {
-    mmg$gq_gpt_base=kmalloc(4096,GFP_KERNEL);
+    mmg$gq_gpt_base = kmalloc(4096, GFP_KERNEL);
 
-    mmg$gl_sysphd=&system_phd;
+    mmg$gl_sysphd = &system_phd;
     init_phd(&system_phd);
 
     csid = xtime.tv_sec;
@@ -2253,20 +2303,20 @@ void __init vms_init3(void)
 
 unsigned long long inline unix_to_vms_time(unsigned long l)
 {
-    unsigned long long retval=FUDGEFACTOR*864;
-    retval*=100;
-    retval+=l;
-    retval*=10000000;
+    unsigned long long retval = FUDGEFACTOR * 864;
+    retval *= 100;
+    retval += l;
+    retval *= 10000000;
     return retval;
 }
 
 unsigned long inline vms_to_unix_time(unsigned long long l)
 {
-    unsigned long long retval=FUDGEFACTOR*864;
-    retval*=100;
-    retval=l-retval;
+    unsigned long long retval = FUDGEFACTOR * 864;
+    retval *= 100;
+    retval = l - retval;
     //  retval/=10000000;
-    retval>>=23;
+    retval >>= 23;
     return retval;
 }
 

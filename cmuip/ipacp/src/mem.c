@@ -65,7 +65,7 @@ Free_Mem();
 Reset_Mem();
 void    MEM_STAT();
 void Mem_Stat (void);
-
+
 void Make_Zone (void)
 {
     extern
@@ -99,7 +99,7 @@ void Make_Zone (void)
     Mem_Stat();
     return (User_Zone);
 }
-
+
 Get_Mem (Size, Block_A, Zone)
 {
     signed long
@@ -113,7 +113,7 @@ Get_Mem (Size, Block_A, Zone)
     Mem_Stat();
     return (Status);
 }
-
+
 Free_Mem (Size, Block_A, Zone)
 {
     signed long
@@ -125,7 +125,7 @@ Free_Mem (Size, Block_A, Zone)
     Mem_Stat() ;
     return (Status);
 }
-
+
 Reset_Mem (Size, Block_A, Zone)
 {
     signed long
@@ -137,7 +137,7 @@ Reset_Mem (Size, Block_A, Zone)
     Mem_Stat() ;
     return (Status);
 }
-
+
 void Mem_Stat (void)
 {
     signed long

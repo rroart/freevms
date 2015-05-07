@@ -287,7 +287,7 @@ Modification History:
 1.61  Rick Watson U.Texas
     Find available port for user.
 */
-
+
 
 //SBTTL "Module Definition"
 
@@ -460,7 +460,7 @@ extern     ip_islocal();
 
 #define     M$INTERNAL    15
 
-
+
 
 //SBTTL "Data for checking network access"
 
@@ -499,7 +499,7 @@ struct ACCESS_LIST * ACHOSTS ;  // List of local hosts
 
 #define    ARPANET_STRING ASCID2(14, "ARPANET_ACCESS")
 #define    INTERNET_STRING ASCID2(15, "INTERNET_ACCESS")
-
+
 //Sbttl "Request VMS to Post users IO request."
 /*
 
@@ -548,7 +548,7 @@ void IO$POST (long long * IOSB, struct user_default_args * UArg)
     $$KCALL(VMS_IO$POST,IOSB,IRP,UArg->ud$ucb_adrs);
 }
 
-
+
 
 //SBTTL "POST User IO Status"
 
@@ -608,7 +608,7 @@ void user$post_io_status (UARG,STATUS,NBYTES,
 
 }
 
-
+
 //SBTTL "USER Err - Return Errors to users process"
 
 /*
@@ -667,7 +667,7 @@ USER$Err (struct user_default_args * Arg, long Err)
 
     return TRUE;
 }
-
+
 
 //Sbttl "POST USER FUNCTION OK - Give em a "YOU DONE GOOD" "
 /*
@@ -709,7 +709,7 @@ void user$post_function_ok(struct user_default_args * Arg)
     IO$POST(IOSB,Arg);
     mm$uarg_free(Arg);      // Release user arg block.
 }
-
+
 //SBTTL "Give info about a connection"
 
 // Common routine used by TCP and UDP to return connection info
@@ -765,7 +765,7 @@ void user$net_connection_info(struct user_info_args * uargs,
     user$post_io_status(uargs,SS$_NORMAL,CONNECTION_INFO_BYTESIZE,0,0);
     mm$uarg_free(uargs);        // relese user arg block.
 }
-
+
 //SBTTL "Derive an integer Clock base"
 
 // get a portion of the 64-bit time to use as a clock based factor in
@@ -783,7 +783,7 @@ user$clock_base (void)
     sys$gettim(Now);
     return ((Now[0]>>20)+(Now[1]<<12)) & 0x7FFF; // check
 }
-
+
 //SBTTL "Allocate a USER Local Port"
 /*
 
@@ -832,7 +832,7 @@ void user$init_routines (void)
     ACCESS_INIT();
 }
 
-
+
 
 //SBTTL "Net$Debug - Debug maintenance call."
 
@@ -873,7 +873,7 @@ void Net$Debug(struct debug_args * uargs)
     user$post_function_ok(uargs);
 }
 
-
+
 
 //SBTTL "Net$Event - Activity logging maintenance call."
 
@@ -915,7 +915,7 @@ void Net$Event(struct event_args * uargs)
     mm$free_mem(Buffer,uargs->ev$buf_size);
 }
 
-
+
 
 //SBTTL "Net$SNMP - Simple Network Management Protocol routine."
 
@@ -1058,7 +1058,7 @@ void net$snmp(struct snmp_args * uargs)
     };
 }
 
-
+
 
 //Sbttl "Purge/Post All Remaining User IO Requests."
 /*
@@ -1138,7 +1138,7 @@ void user$purge_all_io (void)
     };
 }
 
-
+
 
 //Sbttl "VMS$Cancel - Connection Cancel initiated by VMS."
 /*
@@ -1226,7 +1226,7 @@ void VMS$Cancel(struct vms$cancel_args * uargs)
     GTHST_CANCEL(uargs);
     mm$uarg_free(uargs);        // Release IPACP argument block
 }
-
+
 //Sbttl "NET$Dump - Dump the TCB blocks to a user process"
 
 /*
@@ -1508,7 +1508,7 @@ void net$dump(struct debug_dump_args * uargs)
         };
     };
 }
-
+
 //SBTTL "Net$Exit - Orderly shutdown of IP ACP"
 /*
 Function:
@@ -1538,7 +1538,7 @@ void Net$EXIT(struct debug_exit_args * uargs)
     Time_2_Exit = TRUE;     // Set global for exit, rtn: start_network.
     $$KCALL(set_ip_device_offline); // mark network device(s) offline.
 }
-
+
 //SBTTL "Network access check routines"
 
 struct GETJPI_BLOCK
@@ -1750,7 +1750,7 @@ void ACCESS_INIT (void)
         };
     };
 }
-
+
 //SBTTL "NET$GTHST: Get host information"
 /*
 Function:
@@ -1896,7 +1896,7 @@ void net$gthst(struct gthst_args * uargs)
             USER$Err(uargs,NET$_IGF);
         };
 }
-
+
 //SBTTL "Name lookup done handler"
 /*
     Come here when name GTH_NMLOOK function has completed.
@@ -1935,7 +1935,7 @@ struct gthst_nmlook_args * uargs;
     user$post_io_status(uargs,SS$_NORMAL,NLBSIZE,0,0);
     mm$uarg_free(uargs);
 }
-
+
 //SBTTL "Address lookup done handler"
 /*
     Same as above, but for GTH_ADLOOK function.
@@ -1970,7 +1970,7 @@ struct gthst_adlook_args * uargs;
     user$post_io_status(uargs,SS$_NORMAL,ALBSIZE,0,0);
     mm$uarg_free(uargs);
 }
-
+
 //SBTTL "RR lookup done handler"
 /*
     Come here when name GTH_RRLOOK function has completed.
@@ -2017,7 +2017,7 @@ struct gthst_rrlook_args * uargs;
     user$post_io_status(uargs,SS$_NORMAL, RLBSize + RDLen,0,0);
     mm$uarg_free(uargs);
 }
-
+
 //SBTTL "GTHST_CANCEL - Cancel GTHST requests for a process"
 
 void    GTHST_CANCEL_ONE();
@@ -2082,7 +2082,7 @@ void GTHST_PURGE_ONE(COVALUE,ASTADR,UARGS)
         return;
     NML$CANCEL(UARGS,TRUE,NET$_TE);
 }
-
+
 //SBTTL "Process User Requests."
 /*
 

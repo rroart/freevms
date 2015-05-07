@@ -124,7 +124,7 @@ Modification History:
     Track current overflow and maximum size of preallocated queues.
 
 */
-
+
 //SBTTL "Module & Environment Definition"
 
 MODULE MEMGR(Ident="2.7",LANGUAGE(BLISS32),
@@ -139,7 +139,7 @@ MODULE MEMGR(Ident="2.7",LANGUAGE(BLISS32),
 #include "CMUIP_SRC:[CENTRAL]NETVMS";           // VMS specifics
 #include "TCPMACROS";       // Local Macros
 #include "STRUCTURE";       // Structure & Field definitions
-    
+
 //SBTTL "External: Routines, Literals and data"
 
     extern
@@ -172,7 +172,7 @@ Queue_Empty_Now :
                 TCB_Count,          // # of "valid_TCB" table entries.
                 MIN_PHYSICAL_BUFSIZE,
                 MAX_PHYSICAL_BUFSIZE;
-    
+
 //SBTTL "Memory manager header structure"
 
     $FIELD MEM$HDR_FIELDS (void)
@@ -202,7 +202,7 @@ Queue_Empty_Now :
     MEM$HDR_SIZE = $FIELD_SET_SIZE;
     MACRO
     MEM$HDR_STRUCT = BLOCK->MEM$HDR_SIZE FIELD(MEM$HDR_FIELDS) %;
-    
+
 //Sbttl "Preallocated dynamic data structures."
     /*
 
@@ -288,7 +288,7 @@ Max_Seg_Count:
     UA_max  = 0,    // User arg max queue size
     MIN_max  = 0,   // Minimum size buffers max queue size
     MAX_max  = 0;   // Maximum seg max queue size
-    
+
 //Sbttl "Memory Management Fault Handler"
     /*
 
@@ -320,7 +320,7 @@ Max_Seg_Count:
         Fatal_Error("Memory Mgmt. Fault detected.",Primary_cc);
     }
 
-    
+
 
 //SBTTL "Get_Mem: Allocate memory."
     /*
@@ -358,7 +358,7 @@ Max_Seg_Count:
         RC
     }
 
-    
+
 
 //SBTTL "Free_Mem:  Release allocated memory."
     /*
@@ -388,7 +388,7 @@ Max_Seg_Count:
         OKINT;
     }
 
-    
+
 
 //SBTTL "Queue Block Handlers"
     /*
@@ -543,7 +543,7 @@ QBLK_Init:
             INSQUE(Hptr,Free_QBlks->QTail);
         };
     }
-    
+
 //SBTTL "TCB_Create: Create a Transmission Control Blk."
     /*
 
@@ -643,7 +643,7 @@ if (Indx > Max_TCB) Max_TCB = Indx;
 
                                                       TCB
 }
-                                                      
+
 //SBTTL "TCB-Delete:  Delete one TCB"
                                                       /*
 
@@ -738,7 +738,7 @@ X :
         Warn_Error("Attempt to Delete unknown TCB,");
 }
 
-
+
 
 //Sbttl "TCP User IO argument block (uarg) memory mangler"
 /*
@@ -881,7 +881,7 @@ NOVALUE (void)
         INSQUE(Ptr,Free_Uargs->QTail);
     };
 }
-
+
 //SBTTL "Segment Handlers"
 /*
 
@@ -1094,7 +1094,7 @@ NOVALUE (void)
         INSQUE(Ptr,Free_Maxsize_Segs->QTail);
     };
 }
-
+
 //Sbttl "Memory Management Initialization."
 /*
 
@@ -1125,7 +1125,7 @@ NOVALUE (void)
     Seg_Init();
 }
 
-
+
 //SBTTL "Debugging routines to simulate INSQUE and REMQUE"
 /*
 

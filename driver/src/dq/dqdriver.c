@@ -573,7 +573,7 @@
 /*                                  */
 /************************************************************************/
 
-
+
 /* Miscellaneous tidbits (from Ben, 'way back when)
  *
  *   o Always check the BUSY bit.  If set, none of the other bits
@@ -656,7 +656,7 @@
  *
  */
 
-
+
 /* Basic Build instructions:
  * =========================
  *
@@ -746,7 +746,7 @@
  *
  */
 
-
+
 /* Usage Instructions:
  * ===================
  *
@@ -801,7 +801,7 @@
  *
  */
 
-
+
 /* Supported and/or tested devices
  *
  * So far, this driver is known to have been recently tested
@@ -902,7 +902,7 @@
  *
  */
 
-
+
 /* Caveats:
  *
  * This driver was written from the X3T9.2 specs, which may or may not
@@ -935,7 +935,7 @@
  *
  */
 
-
+
 /* Registers - Here's my register cheat sheet.
  *
  * +-----+-----+-----+-----++-----+-----+-----+-----+
@@ -1000,7 +1000,7 @@
  *
  */
 
-
+
 /* DMA Registers
  *
  * +-----+-----+-----+-----++-----+-----+-----+-----+
@@ -1050,7 +1050,7 @@
  *
  */
 
-
+
 /* IDE/ATA Basics
  *
  * IDE ("Integrated Device Electronics" or "Integrated Drive Electronics",
@@ -1101,7 +1101,7 @@
  *
  */
 
-
+
 /* IDE/ATA Basics (Cont'd)
  *
  *  From a PCI perspective, it's a little more confusing.
@@ -1156,7 +1156,7 @@
  *
  */
 
-
+
 /* ATAPI Basics
  *
  * ATAPI (ATA Packet Interface) eveolved when it became apparent
@@ -1171,7 +1171,7 @@
  *
  */
 
-
+
 /* DISK ADDRESSING
  *
  * Disk addressing in the ATA world is, umm, "less than straight-forward".
@@ -1238,7 +1238,7 @@
  *
  */
 
-
+
 /* CD-DA BASICS
  *
  * CD's all use the same basic physical structure, a 2352-byte
@@ -1292,7 +1292,7 @@
  *
  */
 
-
+
 /* CD-ROM STANDARDS
  *
  * The great thing about standards is that there are so many of them!
@@ -1346,7 +1346,7 @@
  *
  */
 
-
+
 /* CD TRACKS, TOCs, AND SESSIONS
  *
  * CDs are divided into "tracks, which are simply collections of
@@ -1388,7 +1388,7 @@
  *
  */
 
-
+
 /* Mapping 512-byte VMS blocks to 2K-byte sectors
  *
  * Because CD-ROM drives read 2Kbyte sectors, it is necessary to
@@ -1578,7 +1578,7 @@
  *
  */
 
-
+
 /* BLOCKS and SECTORS
  *
  * Most ATA devices employ 512-byte sectors the same as any traditional
@@ -1595,7 +1595,7 @@
  *
  */
 
-
+
 /* REQUEST SEGMENTATION
  *
  * A single large I/O request may be segmented (fragmented) into several
@@ -1650,7 +1650,7 @@
  *
  */
 
-
+
 /* IDE/ATAPI Bus Mastering DMA
  *
  * This is a term used in the PC industry to describe the concept
@@ -1709,7 +1709,7 @@
  *
  */
 
-
+
 /* IDE/ATAPI Bus Mastering DMA (Continued)
  *
  * We open two mapping windows per unit: One for the PRDT (controller-
@@ -1748,7 +1748,7 @@
  *
  */
 
-
+
 /* More PRDT Fun
  *
  * Some day when we start doing direct I/O, the PRDT could, in
@@ -1799,7 +1799,7 @@
  *
  */
 
-
+
 /* Define system data structure types and constants */
 
 #include   <bufiodef.h>             /* BUFfered I/O header                      */
@@ -1960,7 +1960,7 @@ typedef unsigned int UINT; /* Usigned int (32 bits) */
 /* Total size of the PRDT table                   */
 #define PRDT_ADX_MASK ~(PRDT_TABLE_SIZE-1)  /* Mask to force natural alignment of the PRDT    */
 
-
+
 /* External references */
 
 #include "mytypedefs.h"
@@ -1985,7 +1985,7 @@ extern UCB *sys$ar_bootucb; /* Boot UCB */
 //#define _dpt  driver$dpt          /* Abbreviation for DPT */
 //#define _fdt  driver$fdt          /* Abbreviation for FDT */
 
-
+
 /* OWN values used for debugging only */
 
 #ifdef TRACE_COMMON
@@ -2003,7 +2003,7 @@ int fixup_svapte; /* The number of times we've fixed UCB$L_SVAPTE */
 
 #endif
 
-
+
 /* Define the IDE disk controller CSRs.
  *
  * Here are the customary values for PC AT compatible machines.
@@ -2083,7 +2083,7 @@ int fixup_svapte; /* The number of times we've fixed UCB$L_SVAPTE */
 #define STS_V_DRDY  7           /* Drive ready */
 #define STS_V_BSY   8           /* Busy */
 
-
+
 /* Offsets for DMA block (SFF-8038i) registers */
 
 /*                            Actual Legacy Address  */
@@ -2131,7 +2131,7 @@ typedef struct
 
 #define DMA_PRDT_M_EDT  0x8000      /* The EDT (End-Descriptor-Table) flag */
 
-
+
 /* ATAPI magic "Signature" values */
 
 #define ATAPI_SIG_STS    0x00       /* In the Status/Alternate Status Register */
@@ -2141,7 +2141,7 @@ typedef struct
 
 #define ATAPI_SIG_CYL_LO 0x14       /* In the Cylinder "Lo" Register */
 
-
+
 /* ATA Commands
  *
  * Notes:
@@ -2238,7 +2238,7 @@ typedef struct
 #define CMD_ATA_SECUR_FREEZE_LOCK        0xF5   /* Security Freeze Lock                               */
 #define CMD_ATA_SECUR_DSBL_PSWD          0xF6   /* Security Disable Password                          */
 
-
+
 /* ATAPI Commands
  *
  * Notes:
@@ -2322,7 +2322,7 @@ typedef struct
 
 #define CMD_ATAPI_F0                     0xF0   /* Unused group 0xFn                                  */
 
-
+
 /* Set up the table for CRAM initialization.  This table contains the
  * CSR offset, the command used in this CRAM and the byte lane shift
  * value.  The byte lane shift value is computed at run time.
@@ -2398,7 +2398,7 @@ typedef struct
 #define RD_DMA_AD3     36
 #define WT_DMA_AD3     37
 
-
+
 #define cram_def(cmd,csr) CRAMCMD$K_##cmd##32, csr, ((csr & 3) <<3)
 
 cram_item cram_init[NUMBER_OF_CRAMS] =
@@ -2447,7 +2447,7 @@ cram_item cram_init[NUMBER_OF_CRAMS] =
 
 };
 
-
+
 /* Define Device-Dependent Unit Control Block with extensions for DQ device
  *
  */
@@ -2550,7 +2550,7 @@ typedef struct
 
 #define baseucb ucb->ucb$r_dq_ucb
 
-
+
 /* Define the Identify Drive information buffer
  *   Use the nomember_alignment to make sure that this structure
  *   matches what the drive uses
@@ -2636,7 +2636,7 @@ typedef struct
 #define  CAP_M_LBA  0x200           /* Handles LBA mode */
 #define  CAP_M_DMA  0x100           /* Handles DMA */
 
-
+
 #define IS_SET(   reg, bits ) ( (reg & bits) == bits )
 #define IS_CLEAR( reg, bits ) ( (reg & bits) == 0    )
 
@@ -2646,7 +2646,7 @@ typedef struct
 #define TRUE    1
 #define FALSE   0
 
-
+
 /* Prototypes for driver routines defined in this module */
 
 int atapi_packet_command(DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt,
@@ -2727,7 +2727,7 @@ int write_dispatcher(DQ_UCB *ucb, int xfer_req, int *xfer_cnt);
 /* following is a modified prototype for exe_std$alononpaged in [lib_h]exe_routines.h   */
 int exe$alononpaged_aln(int reqsize, int align, void **pool_p, int32 *alosize_p);
 
-
+
 #ifdef TRACE_PER_DRIVE
 
 /* TRACE - This routine is used to write a debugging entry in our tracing tumble-table
@@ -2782,7 +2782,7 @@ void trace( DQ_UCB *ucb, int code, int bpt )
 
 #endif
 
-
+
 #ifdef TRACE_COMMON
 
 /* TRACE - This routine is used to write a debugging entry in our tracing tumble-table
@@ -2835,7 +2835,7 @@ void trace( DQ_UCB *ucb, int code, int bpt )
 
 #endif
 
-
+
 /* One way or another, make sure we have TRACE and BPTRACE macros defined
  *
  * If neither real tracing routine defined them,
@@ -2848,7 +2848,7 @@ void trace( DQ_UCB *ucb, int code, int bpt )
 #define BPTRACE( data )
 #endif
 
-
+
 /* Define or null-out the debugging breakpoints */
 
 #ifdef BREAKPOINTS
@@ -2884,7 +2884,7 @@ void call_ini$brk( int code, int p1, int p2, int p3 )
 //#define insque(x,y) (__PAL_INSQUEL_D((void **)(x),(void *)(y)))
 //#define remque(x,y) (__PAL_REMQUEL_D((void **)(x),(void **)(y))>=0)
 
-
+
 /* DRIVER$INIT_TABLES - Initialize Driver Tables
  *
  * This routine is used to initialize the driver tables.  The DPT, DDT
@@ -3012,7 +3012,7 @@ int driver$init_tables(void)
 
 }
 
-
+
 /* STRUC_INIT - Device Data Structure Initialization Routine
  *
  * This routine is used to initialize the data structures at driver
@@ -3070,7 +3070,7 @@ void struc_init(CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb)
 
 }
 
-
+
 /* STRUC_REINIT - Device Data Structure Re-Initialization Routine
  *
  * This routine is used to reinitialize the data structures at driver
@@ -3108,7 +3108,7 @@ void struc_reinit(CRB *crb, DDB *ddb, IDB *idb, ORB *orb, DQ_UCB *ucb)
 
 }
 
-
+
 /* RCT_FDT - IO$_READRCT FDT Processing
  *
  * This routine is the FDT processing routine for the RCT function
@@ -3158,7 +3158,7 @@ int rct_fdt(IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb)
 
 }
 
-
+
 /* RDSTATS_FDT - IO$_RDSTATS FDT Processing
  *
  * This routine is the FDT processing routine for the RDSTATS
@@ -3233,7 +3233,7 @@ int rdstats_fdt(IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb)
 
 }
 
-
+
 /* DIAGNOSE_FDT - IO$_DIAGNOSE FDT Processing
  *
  * This routine is the FDT processing routine for the DIAGNOSE
@@ -3307,7 +3307,7 @@ int diagnose_fdt(IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb)
 
 }
 
-
+
 /* CTRL_INIT - Controller Initialization Routine
  *
  * This routine is used to perform controller specific initialization
@@ -3341,7 +3341,7 @@ int ctrl_init(IDB *idb, DDB *ddb, CRB *crb)
 
 }
 
-
+
 /* UNIT_INIT - Unit Initialization Routine
  *
  * This routine is used to perform unit specific initialization
@@ -3385,7 +3385,7 @@ int unit_init(IDB *idb, DQ_UCB *ucb)
 
 }
 
-
+
 /* UNIT_INIT_FORK - Unit Initialization Fork Routine
  *
  * This is the fork routine that does the bulk of the
@@ -4152,7 +4152,7 @@ int locate_dma_regs(DQ_UCB *ucb, int *csr_base)
 
 }
 
-
+
 /* REGDUMP - Register Dump Routine
  *
  * This is the register dump routine.  It is used to dump the registers
@@ -4218,7 +4218,7 @@ void regdump(BYTE *buffer, int arg_2, DQ_UCB *ucb)
 
 }
 
-
+
 /* STARTIO - Start I/O Routine
  *
  * This is the driver start I/O routine.  This routine processes each
@@ -4964,7 +4964,7 @@ int process_drive_info(DQ_UCB *ucb)
 
 }
 
-
+
 /* ATAPI_PROCESS_SIZE - This routine is used to process the READ_CAPACITY
  *                      information returned by the ATAPI drive.
  *
@@ -5106,7 +5106,7 @@ int set_geom(DQ_UCB *ucb)
 
 }
 
-
+
 /* SET_FEATURES - This routine is used to set the current features in the drive.
  *
  * Input:
@@ -5160,7 +5160,7 @@ int set_features(DQ_UCB *ucb, int feature, int value)
 
 }
 
-
+
 /* SEEK - Perform Seek operation
  *
  * IDE drives will return immediately upon issuing the first seek
@@ -5228,7 +5228,7 @@ int seek(DQ_UCB *ucb)
 
 }
 
-
+
 /* DRVCLR - Perform Drive Clear operation
  *
  * Input:
@@ -5247,7 +5247,7 @@ int drvclr(DQ_UCB *ucb)
 
 }
 
-
+
 /* READRCT - Perform READRCT operation
  *
  * This routine returns the drive information page.
@@ -5307,7 +5307,7 @@ int readrct(DQ_UCB *ucb)
 
 }
 
-
+
 /* DIAGNOSE - Perform DIAGNOSE operation
  *
  * This routine implements pass-through of user formatted ATAPI commands
@@ -5360,7 +5360,7 @@ int diagnose(DQ_UCB *ucb)
     return (status);
 }
 
-
+
 /* READ - Performs IO$_READxBLK driver function
  *
  * This routine issues READ commands to the drive.  This routine will
@@ -5486,7 +5486,7 @@ int read(DQ_UCB *ucb)
 
 }
 
-
+
 /* READ_DISPATCHER - Figure out which routine to use for this segment
  *
  * We have (up to) six different handlers for doing the actual reads.
@@ -5550,7 +5550,7 @@ int read_dispatcher(DQ_UCB *ucb, int xfer_req, int *xfer_cnt)
 
 }
 
-
+
 /* READ_ATA_SEG_PIO - Read one segment from an ATA drive using PIO
  *
  * This routine performs the read of a single I/O segment.
@@ -5763,7 +5763,7 @@ int read_ata_seg_dma(DQ_UCB *ucb, int xfer_req, int *xfer_cnt)
 
 }
 
-
+
 /* READ_ATAPI_512_SEG_PIO - Read one segment from a 512-byte-sector ATAPI drive using PIO
  *
  * This routine performs the read of a single I/O segment.
@@ -5851,7 +5851,7 @@ int read_atapi_512_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag)
 
 }
 
-
+
 /* READ_ATAPI_2K_SEG - Read one segment from a 2Kbyte-sector ATAPI drive
  *
  * This routine performs the read of a single I/O segment.
@@ -5946,7 +5946,7 @@ int read_atapi_2K_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag)
 
 }
 
-
+
 /* DATACHECK - Performs data check function for read and write
  * requests.
  *
@@ -6055,7 +6055,7 @@ int datacheck(DQ_UCB *ucb)
 
 }
 
-
+
 /* WRITE - Performs IO$_WRITExBLK driver functions
  *
  * Input:
@@ -6147,7 +6147,7 @@ int write(DQ_UCB *ucb)
 
 }
 
-
+
 /* WRITE_DISPATCHER - Figure out which routine to use for this segment
  *
  * We have (up to) six different handlers for doing the actual writes.
@@ -6211,7 +6211,7 @@ int write_dispatcher(DQ_UCB *ucb, int xfer_req, int *xfer_cnt)
 
 }
 
-
+
 /* WRITE_ATA_SEG_PIO - Write one segment to an ATA drive using PIO
  *
  * This routine performs the write of a single I/O segment.  Each
@@ -6352,7 +6352,7 @@ int write_ata_seg_pio(DQ_UCB *ucb, int xfer_req, int *xfer_cnt)
 
 }
 
-
+
 /* WRITE_ATA_SEG_DMA - Write one segment to an ATA drive using DMA
  *
  * This routine performs the write of a single I/O segment.  Each
@@ -6502,7 +6502,7 @@ int write_ata_seg_dma(DQ_UCB *ucb, int xfer_req, int *xfer_cnt)
 
 }
 
-
+
 /* WRITE_ATAPI_512_SEG - Write one segment to a 512-byte-sector ATAPI drive
  *
  * This routine performs the write of a single I/O segment.
@@ -6618,7 +6618,7 @@ int write_atapi_512_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag)
 
 }
 
-
+
 /* WRITE_ATAPI_2K_SEG - Write one segment to a 2Kbyte-sector ATAPI drive
  *
  * This routine would performs the write of a single I/O segment, but punts
@@ -6690,7 +6690,7 @@ int atapi_read_capacity(DQ_UCB *ucb, BYTE *buffer)
     /* Do the common packet-command processing using PIO */
 }
 
-
+
 /* ATAPI_REQUEST_SENSE - Get the sense keys from the drive
  *
  * Input:
@@ -7183,7 +7183,7 @@ int atapi_packet_command(DQ_UCB *ucb, BYTE *buffer, int xfer_req, int *xfer_cnt,
 
 } /* Never gets here */
 
-
+
 /* ATAPI_XLATE_ERROR_TO_VMS - Map the sense keys to a VMS error code
  *
  * Input:
@@ -7566,7 +7566,7 @@ BYTE *map_user_buffer(DQ_UCB *ucb, int offset, int length)
 
 }
 
-
+
 /* UNLOAD - Perform IO$_UNLOAD driver function
  *
  * Input:
@@ -7587,7 +7587,7 @@ int unload(DQ_UCB *ucb)
 
 }
 
-
+
 /* WAIT_READY - Wait Until The Drive Is Ready.  This means that the
  * BSY status bit is clear and the DRDY status bit is set.
  *
@@ -7683,7 +7683,7 @@ int wait_ready(DQ_UCB *ucb)
     /*   not ready and not ATAPI signature */
 }
 
-
+
 /* WAIT_BUSY - Wait for BSY to be clear
  *
  * Input:
@@ -7755,7 +7755,7 @@ int wait_busy(DQ_UCB *ucb)
     }
 }
 
-
+
 /* WAIT_DRQ - Wait for DRQ to be set and BSY to be clear
  *
  * Input:
@@ -7905,7 +7905,7 @@ int dq_wfikpch(KPB *kpb, int orig_ipl, int erl_param)
 
 }
 
-
+
 /* RESET_CTRL - Reset the controller
  *
  * This routine issues a RESET to the controller. It does this for
@@ -7977,7 +7977,7 @@ int reset_ctrl(DQ_UCB *ucb)
 
 }
 
-
+
 /* SLEEP - Kill some time
  *
  *
@@ -8016,7 +8016,7 @@ int sleep(DQ_UCB *ucb, int seconds)
 
 }
 
-
+
 /* ISR - Interrupt Service Routine
  *
  *
@@ -8080,7 +8080,7 @@ void isr(IDB *idb)
 
 }
 
-
+
 /* INP - This routine is used to read a byte from a CSR.
  *
  * Input:
@@ -8148,7 +8148,7 @@ WORD inpw(DQ_UCB *ucb, int reg)
 
 }
 
-
+
 /* OUT - This routine is used to write a byte to a CSR.
  *
  * Input:
@@ -8177,7 +8177,7 @@ void out(DQ_UCB *ucb, int reg, BYTE data)
 
 }
 
-
+
 /* OUTW - This routine is used to write a word of data to a CSR.
  *
  * Input:
@@ -8208,7 +8208,7 @@ void outw(DQ_UCB *ucb, int reg, WORD data)
 
 }
 
-
+
 /* OUTW_T - This routine is used to write a word of ATAPI packet data to a CSR.
  *
  * Input:
@@ -8243,7 +8243,7 @@ void outw_t(DQ_UCB *ucb, int reg, WORD data)
     TRACE( 0x06800000 + (reg<<16) + data ); /* ATAPI packet word written */
 
 }
-
+
 /* OUTL - This routine is used to write a longword of data to a CSR.
  *
  * Input:
@@ -8273,7 +8273,7 @@ void outl(DQ_UCB *ucb, int reg, int data)
 #endif
 
 }
-
+
 /*+++
  * DV_QSRV_HELPER - Process QIOServer Control and Complex I/O Functions
  *

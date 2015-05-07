@@ -58,7 +58,7 @@ Modification History:
 
 */
 
-
+
 //SBTTL "Module definition"
 
 #if 0
@@ -91,7 +91,7 @@ MODULE TCP_MECH(IDENT="1.0c",LANGUAGE(BLISS32),
 extern
 mm$get_mem(), mm$free_mem();
 
-
+
 //SBTTL "System variable allocation and declaration"
 
 extern
@@ -101,7 +101,7 @@ unsigned long long    Start_Time;   // Quadword time IPACP started.
 unsigned long long    TEK$sys_uptime;   // Quadword delta time since IPACP started.
 struct TCP_MIB_struct tcp_mib_, * tcp_mib=&tcp_mib_;    // TCP management Information Block
 
-
+
 
 //SBTTL "Connection Table Allocation."
 /*
@@ -132,7 +132,7 @@ signed long    max_tcb  = 0,
                vtcb_size  = 0,
                tcb_count  = 0;  // # of valid TCB's in VTCB table.
 
-
+
 //SBTTL "Initialize TCP"
 /*
 
@@ -192,13 +192,13 @@ void tcp$init (void)
 
 };
 
-
+
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // VTCB ADT routines
 //---------------------------------------------------------------------
 
-
+
 
 //SBTTL "VTCB_Insert - Insert a TCB into the VTCB"
 /*
@@ -272,7 +272,7 @@ VTCB_Insert ( struct tcb_structure * TCB )
     return SS$_NORMAL;
 }
 
-
+
 
 VTCB_Remove ( struct tcb_structure * TCB )
 {
@@ -312,7 +312,7 @@ leave:
     return TCB;
 }
 
-
+
 
 //SBTTL "VTCB_Scan"
 /*
@@ -368,7 +368,7 @@ signed long (*ASTRTN)();
     return sum;
 }
 
-
+
 
 void tcp$connection_list(RB)
 //
@@ -389,7 +389,7 @@ D$LC_ID_Return_Blk RB;
     };
 }
 
-
+
 
 VTCB_Indx_OK ( LCID )
 {
@@ -399,13 +399,13 @@ VTCB_Indx_OK ( LCID )
     return 0;
 }
 
-
+
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Conect_Table ADT routines
 //---------------------------------------------------------------------
 
-
+
 
 //SBTTL "FIND Local Port in Connection Table"
 /*
@@ -437,7 +437,7 @@ Find_Local_Port(Port)
     return(LP);
 }
 
-
+
 
 // Remove the TCB from local port list.
 // Check if the Local_port queue of TCB's is now empty.
@@ -458,7 +458,7 @@ Conect_Remove ( struct tcb_structure * TCB )
     }
     else return 0;
 }
-
+
 
 //SBTTL "TCP mechanism overview"
 //SBTTL "Init Local Port Entry"
@@ -481,7 +481,7 @@ void Init_LP_Entry (Index, LPort)
     OKINT;
 }
 
-
+
 
 //SBTTL "Find Free Connection Table Entry"
 /*
@@ -495,7 +495,7 @@ Outputs:
 */
 
 
-
+
 
 Find_Free_LP_Entry (LPort)
 {
@@ -547,7 +547,7 @@ Find_Free_LP_Entry (LPort)
     */
 }
 
-
+
 //SBTTL "Conect_Insert - Insert TCB into CONECT table"
 /*
 // Insert the TCB into the Local port list according to the following order:
@@ -615,7 +615,7 @@ void Conect_Insert(struct tcb_structure * TCB,signed long CN_Index)
     OKINT;
 }
 
-
+
 
 //SBTTL "Verify Requested Socket Pair represents a unique connection."
 /*
@@ -709,7 +709,7 @@ signed long * IDX;
     return(Unique);
 }
 
-
+
 
 //SBTTL "TCB_Find - Find TCB for specified frn addrs and ports"
 /*
@@ -787,7 +787,7 @@ TCB_Find(lclport,frnaddr,frnport)
     return result;
 }
 
-
+
 
 void TCB_Promote ( struct tcb_structure * TCB )
 {
@@ -800,13 +800,13 @@ void TCB_Promote ( struct tcb_structure * TCB )
     OKINT;
 }
 
-
+
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // TCB ADT routines
 //---------------------------------------------------------------------
 
-
+
 
 //SBTTL "TCB_Create: Create a Transmission Control Blk."
 /*
@@ -867,7 +867,7 @@ tcb$create (void)
     return TCB;
 }
 
-
+
 
 //SBTTL "TCB-Delete:  Delete one TCB"
 /*
@@ -940,7 +940,7 @@ void tcb$delete ( TCB_Ptr )
     OKINT;
 }
 
-
+
 
 //SBTTL "TCB_OK - Verify that Local_Connection_ID is really a TCB address."
 /*
@@ -1012,7 +1012,7 @@ tcb_ok(signed long TCBIDX,signed long * ERR,struct user_default_args * uargs)
         return TCB;     // Good connection - return TCB
 }
 
-
+
 
 //SBTTL "GET_TCB - Translate index into a TCB."
 /*
@@ -1059,7 +1059,7 @@ long * TCBret;
     return    SS$_NORMAL;
 }
 
-
+
 //SBTTL "Calculate system uptime"
 
 CALCULATE_UPTIME (void)

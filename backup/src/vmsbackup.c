@@ -78,7 +78,7 @@ int mkdir();
 
 int match();
 char *strlocase();
-
+
 /* Byte-swapping routines.  Note that these do not depend on the size
  of datatypes such as short, long, etc., nor do they require us to
  detect the endianness of the machine we are running on.  It is
@@ -140,7 +140,7 @@ FILE *lf;
 #endif
 
 int fd; /* tape file descriptor */
-
+
 /* Command line stuff.  */
 
 /* The save set that we are listing or extracting.  */
@@ -172,7 +172,7 @@ int selset;
  are the names.  */
 char **gargv;
 int goptind, gargc;
-
+
 int setnr;
 
 char label[LABEL_SIZE];

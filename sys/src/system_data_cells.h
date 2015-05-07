@@ -276,7 +276,7 @@ extern unsigned long long ctl$gq_kt_region_base;
 extern unsigned long long ctl$gq_kt_region_id;
 extern unsigned long long ctl$gq_lastlogin_i;
 extern unsigned long long ctl$gq_lastlogin_n;
-extern unsigned long long  ctl$gq_lnmtblcache;
+extern unsigned long long ctl$gq_lnmtblcache;
 extern unsigned long long ctl$gq_login;
 extern unsigned long long ctl$gq_misc_p1_flags;
 extern unsigned long long ctl$gq_mountlst;
@@ -1362,7 +1362,7 @@ extern unsigned long long sch$aq_comoh[33];
 extern unsigned long long sch$aq_comh[33][2];
 extern unsigned long long sch$aq_comoh[33][2];
 #endif
-extern  unsigned long long * sch$aq_comot; /* really 32 */
+extern unsigned long long * sch$aq_comot; /* really 32 */
 extern unsigned long long * sch$aq_comt;
 extern struct _wqh sch$aq_wqhdr[12];
 extern unsigned long sch$ar_cap_priv;

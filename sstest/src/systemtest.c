@@ -46,6 +46,8 @@ void run_system_test(void)
     char scsnode[MAX_SCSNODE_STRING_LENGTH];
     unsigned short int scsnode_length = MAX_SCSNODE_STRING_LENGTH;
 
+    EXPECT_EQ(call_sys$getsyiw1(SYI$_VERSION, NULL, &version_length), SS$_ACCVIO);
+    EXPECT_EQ(call_sys$getsyiw1(11111, version, &version_length), SS$_BADPARAM);
     EXPECT_EQ(call_sys$getsyiw1(SYI$_VERSION, version, &version_length), SS$_NORMAL);
     EXPECT_EQ(strncmp(version, FREEVMS_RELEASE, version_length), 0);
     EXPECT_EQ(call_sys$getsyiw1(SYI$_BOOTTIME, &boottime, &boottime_length), SS$_NORMAL);

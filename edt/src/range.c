@@ -41,7 +41,7 @@ const char bufnamechars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY
 
 static int range_mult_run (char *cp, char **cp_r, int (*entry) (void *param, Buffer *buffer, Line *line), void *param);
 static int getline2 (char *cp, char **cp_r, Position *position);
-
+
 /************************************************************************/
 /*                                  */
 /*  Parse range spec from command line for a single line        */
@@ -114,7 +114,7 @@ badrange:
     outerr (strlen (cp), "bad range specification %s\n", cp);
     return (-1);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Parse range spec from command line for multiple lines       */
@@ -392,7 +392,7 @@ badrange:
     outerr (strlen (cp), "bad range specification %s\n", cp);
     return (-1);
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Try to get line number                      */
@@ -642,7 +642,7 @@ static int search_setup (char *cp, char **cp_r, const char **p_r, char *c_r)
     *c_r  = c;                      /* return search string terminator */
     return (1);                     /* success */
 }
-
+
 /************************************************************************/
 /*                                  */
 /*  Match keyword in string                     */
