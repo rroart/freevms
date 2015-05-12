@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on mremap.c.
 
 /*
@@ -13,7 +13,6 @@
 #include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/smp_lock.h>
-#include <linux/shm.h>
 #include <linux/mman.h>
 
 #include <asm/uaccess.h>

@@ -16,8 +16,6 @@
 #include <linux/elf.h>
 #include <linux/stringify.h>
 #if 0
-#include <linux/kobject.h>
-#include <linux/moduleparam.h>
 #include <asm/local.h>
 #endif
 
@@ -322,11 +320,6 @@ struct module
 
     /* The handle returned from unwind_add_table. */
     void *unwind_info;
-
-#if 0
-    /* Arch-specific module values */
-    struct mod_arch_specific arch;
-#endif
 
     /* Am I unsafe to unload? */
     int unsafe;

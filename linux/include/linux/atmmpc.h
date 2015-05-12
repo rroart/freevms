@@ -63,7 +63,7 @@ struct k_message
         struct mpc_parameters params;
     } content;
     struct atm_qos qos;
-} __ATM_API_ALIGN;
+};
 
 struct llc_snap_hdr
 {

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -764,8 +764,6 @@ void do_timer(struct pt_regs *regs)
 #endif
 }
 
-#if !defined(__alpha__) && !defined(__ia64__)
-
 /*
  * For backwards compatibility?  This can be done in libc so Alpha
  * and all newer ports shouldn't need it.
@@ -787,15 +785,9 @@ asmlinkage unsigned long sys_alarm(unsigned int seconds)
     return oldalarm;
 }
 
-#endif
-
-#ifndef __alpha__
-
 /*
- * The Alpha uses getxpid, getxuid, and getxgid instead.  Maybe this
- * should be moved into arch/i386 instead?
+ * Maybe this should be moved into arch/i386 instead?
  */
-
 asmlinkage long sys_getpid(void)
 {
     /* This is SMP safe - current->pcb$l_pid doesn't change */
@@ -873,8 +865,6 @@ asmlinkage long sys_getegid(void)
     /* Only we change this so SMP safe */
     return  current->egid;
 }
-
-#endif
 
 /* Thread ID - the internal kernel "pid" */
 asmlinkage long sys_gettid(void)

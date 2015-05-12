@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on swapfile.c.
 
 /*
@@ -18,7 +18,6 @@
 #include <linux/blkdev.h> /* for blk_size */
 #include <linux/vmalloc.h>
 #include <linux/pagemap.h>
-#include <linux/shm.h>
 #include <linux/compiler.h>
 
 #include <asm/pgtable.h>

@@ -1287,7 +1287,6 @@ sys_sigpending(old_sigset_t *set)
     return do_sigpending(set, sizeof(*set));
 }
 
-#if !defined(__alpha__)
 /* Alpha has its own versions with special arguments.  */
 
 asmlinkage long
@@ -1370,9 +1369,7 @@ sys_rt_sigaction(int sig, const struct sigaction *act, struct sigaction *oact,
 out:
     return ret;
 }
-#endif
 
-#if !defined(__alpha__) && !defined(__ia64__)
 /*
  * For backwards compatibility.  Functionality superseded by sigprocmask.
  */
@@ -1398,9 +1395,7 @@ sys_ssetmask(int newmask)
 
     return old;
 }
-#endif /* !defined(__alpha__) */
 
-#if !defined(__alpha__) && !defined(__ia64__) && !defined(__mips__)
 /*
  * For backwards compatibility.  Functionality superseded by sigaction.
  */
@@ -1417,4 +1412,3 @@ sys_signal(int sig, __sighandler_t handler)
 
     return ret ? ret : (unsigned long)old_sa.sa.sa_handler;
 }
-#endif /* !alpha && !__ia64__ && !defined(__mips__) */

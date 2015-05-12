@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on mlock.c.
 
 /*
@@ -11,7 +11,6 @@
  */
 #include <linux/config.h>
 #include <linux/slab.h>
-#include <linux/shm.h>
 #include <linux/mman.h>
 #include <linux/smp_lock.h>
 #include <linux/pagemap.h>

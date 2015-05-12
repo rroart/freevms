@@ -61,9 +61,6 @@ static int minolduid;
 extern char modprobe_path[];
 #endif
 #ifdef CONFIG_SYSVIPC
-extern size_t shm_ctlmax;
-extern size_t shm_ctlall;
-extern int shm_ctlmni;
 extern int msg_ctlmax;
 extern int msg_ctlmnb;
 extern int msg_ctlmni;

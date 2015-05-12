@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -31,7 +31,6 @@
 #include <linux/fcntl.h>
 #include <linux/ptrace.h>
 #include <linux/slab.h>
-#include <linux/shm.h>
 #include <linux/personality.h>
 #include <linux/elfcore.h>
 #include <linux/init.h>

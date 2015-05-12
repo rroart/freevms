@@ -913,41 +913,6 @@ int search_binary_handler(struct linux_binprm *bprm,struct pt_regs *regs)
 {
     int try,retval=0;
     struct linux_binfmt *fmt;
-#ifdef __alpha__
-    /* handle /sbin/loader.. */
-    {
-        struct exec * eh = (struct exec *) bprm->buf;
-
-        if (!bprm->loader && eh->fh.f_magic == 0x183 &&
-                (eh->fh.f_flags & 0x3000) == 0x3000)
-        {
-            struct file * file;
-            unsigned long loader;
-
-            allow_write_access(bprm->file);
-            fput(bprm->file);
-            bprm->file = NULL;
-
-            loader = PAGE_SIZE*MAX_ARG_PAGES-sizeof(void *);
-
-            file = open_exec("/sbin/loader");
-            retval = PTR_ERR(file);
-            if (IS_ERR(file))
-                return retval;
-
-            /* Remember if the application is TASO.  */
-            bprm->sh_bang = eh->ah.entry < 0x100000000;
-
-            bprm->file = file;
-            bprm->loader = loader;
-            retval = prepare_binprm(bprm);
-            if (retval<0)
-                return retval;
-            /* should call search_binary_handler recursively here,
-               but it does not matter */
-        }
-    }
-#endif
     /* kernel module loader fixup */
     /* so we don't try to load run modprobe in kernel space. */
     set_fs(USER_DS);

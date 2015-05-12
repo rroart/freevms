@@ -301,7 +301,6 @@ int ubd$init_tables()
 #include "init.h"
 #include "irq_user.h"
 #include "ubd_user.h"
-#include "2_5compat.h"
 
 extern __u64 file_size(char *file);
 

@@ -56,7 +56,7 @@ struct atm_dev_stats
     struct atm_aal_stats aal0;
     struct atm_aal_stats aal34;
     struct atm_aal_stats aal5;
-} __ATM_API_ALIGN;
+};
 
 
 #define ATM_GETLINKRATE _IOW('a',ATMIOC_ITF+1,struct atmif_sioc)

@@ -1435,8 +1435,6 @@ long fastcall sleep_on_timeout(wait_queue_head_t *q, long timeout)
 
 void scheduling_functions_end_here(void) { }
 
-#ifndef __alpha__
-
 /*
  * This has been replaced by sys_setpriority.  Maybe it should be
  * moved into the arch dependent tree for those ports that require
@@ -1470,8 +1468,6 @@ asmlinkage long sys_nice(int increment)
     current->pcb$b_prib = newprio;
     return 0;
 }
-
-#endif
 
 inline struct task_struct *find_process_by_pid(pid_t pid)
 {

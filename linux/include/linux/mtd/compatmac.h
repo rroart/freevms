@@ -71,7 +71,7 @@
 
 /* changed the prototype of read/write */
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,0) || defined(__alpha__)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,1,0)
 # define count_t unsigned long
 # define read_write_t long
 #else

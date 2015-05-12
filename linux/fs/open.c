@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -199,8 +199,6 @@ asmlinkage long sys_ftruncate64(unsigned int fd, loff_t length)
 }
 #endif
 
-#if !(defined(__alpha__) || defined(__ia64__))
-
 /*
  * sys_utime() can be implemented in user-level using sys_utimes().
  * Is this for backwards compatibility?  If so, why not move it
@@ -216,8 +214,6 @@ asmlinkage long sys_utime(char * filename, struct utimbuf * times)
 {
     return -EPERM;
 }
-
-#endif
 
 /* If times==NULL, set access and modification to current time,
  * must be owner or have write permission.
@@ -441,8 +437,6 @@ asmlinkage long sys_open(const char * filename, int flags, int mode)
     return fd;
 }
 
-#ifndef __alpha__
-
 /*
  * For backward compatibility?  Maybe this should be moved
  * into arch/i386 instead?
@@ -451,8 +445,6 @@ asmlinkage long sys_creat(const char * pathname, int mode)
 {
     return sys_open(pathname, O_CREAT | O_WRONLY | O_TRUNC, mode);
 }
-
-#endif
 
 /*
  * "id" is the POSIX thread ID. We use the

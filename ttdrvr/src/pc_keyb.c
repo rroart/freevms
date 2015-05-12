@@ -1143,40 +1143,6 @@ static void kbd_write_output_w(int data)
     spin_unlock_irqrestore(&kbd_controller_lock, flags);
 }
 
-#if defined(__alpha__)
-/*
- * Some Alphas cannot mask some/all interrupts, so we have to
- * make sure not to allow interrupts AT ALL when polling for
- * specific return values from the keyboard.
- *
- * I think this should work on any architecture, but for now, only Alpha.
- */
-static int kbd_write_command_w_and_wait(int data)
-{
-    unsigned long flags;
-    int input;
-
-    spin_lock_irqsave(&kbd_controller_lock, flags);
-    kb_wait();
-    kbd_write_command(data);
-    input = kbd_wait_for_input();
-    spin_unlock_irqrestore(&kbd_controller_lock, flags);
-    return input;
-}
-
-static int kbd_write_output_w_and_wait(int data)
-{
-    unsigned long flags;
-    int input;
-
-    spin_lock_irqsave(&kbd_controller_lock, flags);
-    kb_wait();
-    kbd_write_output(data);
-    input = kbd_wait_for_input();
-    spin_unlock_irqrestore(&kbd_controller_lock, flags);
-    return input;
-}
-#else
 static int kbd_write_command_w_and_wait(int data)
 {
     kbd_write_command_w(data);
@@ -1188,7 +1154,6 @@ static int kbd_write_output_w_and_wait(int data)
     kbd_write_output_w(data);
     return kbd_wait_for_input();
 }
-#endif /* __alpha__ */
 
 #if defined CONFIG_PSMOUSE
 static void kbd_write_cmd(int cmd)

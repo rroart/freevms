@@ -42,7 +42,7 @@ struct atmtcp_control
     struct sockaddr_atmpvc addr; /* suggested value from kernel */
     struct atm_qos  qos;    /* both directions */
     int result;     /* to kernel only */
-} __ATM_API_ALIGN;
+};
 
 /*
  * Field usage:

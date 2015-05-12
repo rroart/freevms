@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Linux people.
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 // Modified Linux source code 2007
 
@@ -38,13 +38,6 @@
 #define ELF_ST_TYPE(x) (((unsigned int) x) & 0xf)
 #include <linux/module6.h>
 
-#if 0
-struct kernel_symbol
-{
-    unsigned long value;
-    const char *name;
-};
-#endif
 #include <linux/moduleloader.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -58,21 +51,15 @@ struct kernel_symbol
 #include <linux/rcupdate.h>
 #include <linux/capability.h>
 #include <linux/cpu.h>
-#include <linux/moduleparam.h>
 #endif
 #include <linux/errno.h>
 #if 0
-#include <linux/err.h>
-#include <linux/vermagic.h>
 #include <linux/notifier.h>
-#include <linux/stop_machine.h>
-#include <linux/device.h>
 #endif
 #include <linux/string.h>
 #include <linux/sched.h>
 #if 0
 #include <linux/mutex.h>
-#include <linux/unwind.h>
 #endif
 #include <asm/uaccess.h>
 #include <asm/semaphore.h>

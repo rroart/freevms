@@ -11,6 +11,6 @@ O_TARGET := ipc.o
 
 obj-y   := util.o
 
-obj-$(CONFIG_SYSVIPC) += msg.o sem.o shm.o
+obj-$(CONFIG_SYSVIPC) += msg.o sem.o
 
 include $(TOPDIR)/Rules.make

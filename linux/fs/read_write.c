@@ -154,7 +154,6 @@ asmlinkage off_t sys_lseek(unsigned int fd, off_t offset, unsigned int origin)
     return offset;
 }
 
-#if !defined(__alpha__)
 asmlinkage long sys_llseek(unsigned int fd, unsigned long offset_high,
                            unsigned long offset_low, loff_t * result,
                            unsigned int origin)
@@ -188,7 +187,6 @@ out_putf:
 bad:
     return retval;
 }
-#endif
 
 asmlinkage ssize_t sys_read(unsigned int fd, char * buf, size_t count)
 {

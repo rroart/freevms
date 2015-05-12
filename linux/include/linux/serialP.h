@@ -129,17 +129,6 @@ struct rs_multiport_struct
     int     port_monitor;
 };
 
-#if defined(__alpha__) && !defined(CONFIG_PCI)
-/*
- * Digital did something really horribly wrong with the OUT1 and OUT2
- * lines on at least some ALPHA's.  The failure mode is that if either
- * is cleared, the machine locks up with endless interrupts.
- */
-#define ALPHA_KLUDGE_MCR  (UART_MCR_OUT2 | UART_MCR_OUT1)
-#else
-#define ALPHA_KLUDGE_MCR 0
-#endif
-
 /*
  * Structures and definitions for PCI support
  */

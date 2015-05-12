@@ -40,8 +40,6 @@ struct timezone sys_tz;
    serializing all accesses to the global NTP variables now. */
 extern rwlock_t xtime_lock;
 
-#if !defined(__alpha__) && !defined(__ia64__)
-
 /*
  * sys_time() can be implemented in user-level using
  * sys_gettimeofday().  Is this for backwards compatibility?  If so,
@@ -90,8 +88,6 @@ asmlinkage long sys_stime(int * tptr)
     write_unlock_irq(&xtime_lock);
     return 0;
 }
-
-#endif
 
 asmlinkage long sys_gettimeofday(struct timeval *tv, struct timezone *tz)
 {

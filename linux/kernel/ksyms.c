@@ -299,11 +299,7 @@ EXPORT_SYMBOL(jiffies);
 EXPORT_SYMBOL(xtime);
 EXPORT_SYMBOL(do_gettimeofday);
 EXPORT_SYMBOL(do_settimeofday);
-
-#if !defined(__ia64__)
 EXPORT_SYMBOL(loops_per_jiffy);
-#endif
-
 EXPORT_SYMBOL(kstat);
 EXPORT_SYMBOL(nr_running);
 
@@ -320,9 +316,7 @@ EXPORT_SYMBOL(simple_strtoul);
 EXPORT_SYMBOL(simple_strtoull);
 EXPORT_SYMBOL(system_utsname);  /* UTS data */
 EXPORT_SYMBOL(uts_sem);     /* UTS semaphore */
-#ifndef __mips__
 EXPORT_SYMBOL(sys_call_table);
-#endif
 EXPORT_SYMBOL(machine_restart);
 EXPORT_SYMBOL(machine_halt);
 EXPORT_SYMBOL(machine_power_off);

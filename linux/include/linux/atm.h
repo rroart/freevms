@@ -159,9 +159,9 @@ struct atm_trafprm
 struct atm_qos
 {
     struct atm_trafprm txtp;    /* parameters in TX direction */
-    struct atm_trafprm rxtp __ATM_API_ALIGN;
+    struct atm_trafprm rxtp;
     /* parameters in RX direction */
-    unsigned char aal __ATM_API_ALIGN;
+    unsigned char aal;
 };
 
 /* PVC addressing */
@@ -181,7 +181,7 @@ struct sockaddr_atmpvc
         short   itf;        /* ATM interface */
         short   vpi;        /* VPI (only 8 bits at UNI) */
         int vci;        /* VCI (only 16 bits at UNI) */
-    } sap_addr __ATM_API_ALIGN; /* PVC address */
+    } sap_addr; /* PVC address */
 };
 
 /* SVC addressing */
@@ -215,7 +215,7 @@ struct sockaddr_atmsvc
         /* unused addresses must be bzero'ed */
         char        lij_type;   /* role in LIJ call; one of ATM_LIJ* */
         uint32_t    lij_id;     /* LIJ call identifier */
-    } sas_addr __ATM_API_ALIGN;     /* SVC address */
+    } sas_addr;     /* SVC address */
 };
 
 

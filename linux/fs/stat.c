@@ -32,7 +32,7 @@ do_revalidate(struct dentry *dentry)
 }
 
 
-#if !defined(__alpha__) && !defined(__ia64__) && !defined(__hppa__) && !defined(__x86_64__)
+#if !defined(__x86_64__)
 
 /*
  * For backward compatibility?  Maybe this should be moved
@@ -98,7 +98,7 @@ static int cp_new_stat(struct inode * inode, struct stat * statbuf)
 }
 
 
-#if !defined(__alpha__) && !defined(__ia64__) && !defined(__hppa__) && !defined(__x86_64__)
+#if !defined(__x86_64__)
 /*
  * For backward compatibility?  Maybe this should be moved
  * into arch/i386 instead?
@@ -132,7 +132,7 @@ asmlinkage long sys_newstat(char * filename, struct stat * statbuf)
     return error;
 }
 
-#if !defined(__alpha__) && !defined(__ia64__) && !defined(__hppa__) && !defined(__x86_64__)
+#if !defined(__x86_64__)
 
 /*
  * For backward compatibility?  Maybe this should be moved
@@ -167,7 +167,7 @@ asmlinkage long sys_newlstat(char * filename, struct stat * statbuf)
     return error;
 }
 
-#if !defined(__alpha__) && !defined(__ia64__) && !defined(__hppa__) && !defined(__x86_64__)
+#if !defined(__x86_64__)
 
 /*
  * For backward compatibility?  Maybe this should be moved
@@ -208,7 +208,7 @@ asmlinkage long sys_readlink(const char * path, char * buf, int bufsiz)
 
 
 /* ---------- LFS-64 ----------- */
-#if !defined(__alpha__) && !defined(__ia64__) && !defined(__mips64) && !defined(__x86_64__)
+#if !defined(__x86_64__)
 
 static long cp_new_stat64(struct inode * inode, struct stat64 * statbuf)
 {

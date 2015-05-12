@@ -84,7 +84,7 @@ struct atmlec_msg
         } proxy;
         /* For mapping LE_ARP requests to responses. Filled by */
     } content;       /* zeppelin, returned by kernel. Used only when proxying */
-} __ATM_API_ALIGN;
+};
 
 struct atmlec_ioc
 {

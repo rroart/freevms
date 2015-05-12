@@ -262,23 +262,6 @@ extern int psched_clock_scale;
 
 #define PSCHED_EXPORTLIST_1
 
-#elif defined (__alpha__)
-
-#define PSCHED_WATCHER u32
-
-extern PSCHED_WATCHER psched_time_mark;
-
-#define PSCHED_GET_TIME(stamp) \
-({ u32 __res; \
-   __asm__ __volatile__ ("rpcc %0" : "r="(__res)); \
-   if (__res <= psched_time_mark) psched_time_base += 0x100000000UL; \
-   psched_time_mark = __res; \
-   (stamp) = (psched_time_base + __res)>>psched_clock_scale; \
-})
-
-#define PSCHED_EXPORTLIST_1 EXPORT_SYMBOL(psched_time_base); \
-                            EXPORT_SYMBOL(psched_time_mark);
-
 #else
 
 #error PSCHED_CLOCK_SOURCE=PSCHED_CPU is not supported on this arch.

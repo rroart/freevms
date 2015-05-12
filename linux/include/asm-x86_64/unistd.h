@@ -80,11 +80,11 @@ __SYSCALL(__NR_mincore, sys_mincore)
 #define __NR_madvise                            28
 __SYSCALL(__NR_madvise, sys_madvise)
 #define __NR_shmget                             29
-__SYSCALL(__NR_shmget, sys_shmget)
+__SYSCALL(__NR_shmget, sys_ni_syscall)
 #define __NR_shmat                              30
-__SYSCALL(__NR_shmat, wrap_sys_shmat)
+__SYSCALL(__NR_shmat, sys_ni_syscall)
 #define __NR_shmctl                             31
-__SYSCALL(__NR_shmctl, sys_shmctl)
+__SYSCALL(__NR_shmctl, sys_ni_syscall)
 
 #define __NR_dup                                32
 __SYSCALL(__NR_dup, sys_dup)
@@ -161,7 +161,7 @@ __SYSCALL(__NR_semop, sys_semop)
 #define __NR_semctl                             66
 __SYSCALL(__NR_semctl, sys_semctl)
 #define __NR_shmdt                              67
-__SYSCALL(__NR_shmdt, sys_shmdt)
+__SYSCALL(__NR_shmdt, sys_ni_syscall)
 #define __NR_msgget                             68
 __SYSCALL(__NR_msgget, sys_msgget)
 #define __NR_msgsnd                             69

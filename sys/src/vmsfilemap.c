@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on filemap.c.
 
 /*
@@ -18,7 +18,6 @@
 #include <linux/config.h>
 #include <linux/module.h>
 #include <linux/slab.h>
-#include <linux/shm.h>
 #include <linux/mman.h>
 #include <linux/locks.h>
 #include <linux/pagemap.h>

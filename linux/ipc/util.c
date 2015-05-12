@@ -12,7 +12,6 @@
 
 #include <linux/config.h>
 #include <linux/mm.h>
-#include <linux/shm.h>
 #include <linux/init.h>
 #include <linux/msg.h>
 #include <linux/smp_lock.h>
@@ -35,7 +34,6 @@ void __init ipc_init (void)
 {
     sem_init();
     msg_init();
-    shm_init();
     return;
 }
 
@@ -320,8 +318,6 @@ void ipc64_perm_to_ipc_perm (struct ipc64_perm *in, struct ipc_perm *out)
     out->seq    = in->seq;
 }
 
-#ifndef __ia64__
-
 /**
  *  ipc_parse_version   -   IPC call version
  *  @cmd: pointer to command
@@ -343,8 +339,6 @@ int ipc_parse_version (int *cmd)
         return IPC_OLD;
     }
 }
-
-#endif /* __ia64__ */
 
 #else
 /*

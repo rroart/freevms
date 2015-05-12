@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 #include <linux/kernel.h>
@@ -11,7 +11,6 @@
 #include <linux/sem.h>
 #include <linux/msg.h>
 #include <linux/mm.h>
-#include <linux/shm.h>
 #include <linux/slab.h>
 #include <linux/ipc.h>
 #include <asm/mman.h>
@@ -23,9 +22,6 @@
 #include <asm/ia32.h>
 
 extern int sem_ctls[];
-
-extern asmlinkage long sys_shmat (int shmid, char *shmaddr, int shmflg, ulong *raddr);
-extern asmlinkage long sys_shmctl (int shmid, int cmd, struct shmid_ds *buf);
 
 /*
  * sys32_ipc() is the de-multiplexer for the SysV IPC calls in 32bit emulation..
@@ -124,77 +120,14 @@ struct msqid64_ds32
     unsigned int __unused5;
 };
 
-struct shmid_ds32
-{
-    struct ipc_perm32 shm_perm;
-    int shm_segsz;
-    __kernel_time_t32 shm_atime;
-    __kernel_time_t32 shm_dtime;
-    __kernel_time_t32 shm_ctime;
-    __kernel_ipc_pid_t32 shm_cpid;
-    __kernel_ipc_pid_t32 shm_lpid;
-    unsigned short shm_nattch;
-};
-
-struct shmid64_ds32
-{
-    struct ipc64_perm32 shm_perm;
-    __kernel_size_t32 shm_segsz;
-    __kernel_time_t32 shm_atime;
-    unsigned int __unused1;
-    __kernel_time_t32 shm_dtime;
-    unsigned int __unused2;
-    __kernel_time_t32 shm_ctime;
-    unsigned int __unused3;
-    __kernel_pid_t32 shm_cpid;
-    __kernel_pid_t32 shm_lpid;
-    unsigned int shm_nattch;
-    unsigned int __unused4;
-    unsigned int __unused5;
-};
-
-struct shminfo64_32
-{
-    unsigned int shmmax;
-    unsigned int shmmin;
-    unsigned int shmmni;
-    unsigned int shmseg;
-    unsigned int shmall;
-    unsigned int __unused1;
-    unsigned int __unused2;
-    unsigned int __unused3;
-    unsigned int __unused4;
-};
-
-struct shm_info32
-{
-    int used_ids;
-    u32 shm_tot, shm_rss, shm_swp;
-    u32 swap_attempts, swap_successes;
-};
-
 struct ipc_kludge
 {
     u32 msgp;
     s32 msgtyp;
 };
 
-
 #define A(__x)      ((unsigned long)(__x))
 #define AA(__x)     ((unsigned long)(__x))
-
-#define SEMOP        1
-#define SEMGET       2
-#define SEMCTL       3
-#define SEMTIMEDOP       4
-#define MSGSND      11
-#define MSGRCV      12
-#define MSGGET      13
-#define MSGCTL      14
-#define SHMAT       21
-#define SHMDT       22
-#define SHMGET      23
-#define SHMCTL      24
 
 #define IPCOP_MASK(__x) (1UL << (__x))
 
@@ -499,198 +432,6 @@ msgctl32 (int first, int second, void *uptr)
     return err;
 }
 
-static int
-shmat32 (int first, int second, int third, int version, void *uptr)
-{
-    unsigned long raddr;
-    u32 *uaddr = (u32 *)A((u32)third);
-    int err;
-
-    if (version == 1)
-        return -EINVAL; /* iBCS2 emulator entry point: unsupported */
-    err = sys_shmat(first, uptr, second, &raddr);
-    if (err)
-        return err;
-    return put_user(raddr, uaddr);
-}
-
-static int put_shmid64(struct shmid64_ds *s64p, void *uptr, int version)
-{
-    int err2;
-#define s64 (*s64p)
-    if (version == IPC_64)
-    {
-        struct shmid64_ds32 *up64 = (struct shmid64_ds32 *)uptr;
-
-        if (!access_ok(VERIFY_WRITE, up64, sizeof(*up64)))
-            return -EFAULT;
-
-        err2 = __put_user(s64.shm_perm.key, &up64->shm_perm.key);
-        err2 |= __put_user(s64.shm_perm.uid, &up64->shm_perm.uid);
-        err2 |= __put_user(s64.shm_perm.gid, &up64->shm_perm.gid);
-        err2 |= __put_user(s64.shm_perm.cuid, &up64->shm_perm.cuid);
-        err2 |= __put_user(s64.shm_perm.cgid, &up64->shm_perm.cgid);
-        err2 |= __put_user(s64.shm_perm.mode, &up64->shm_perm.mode);
-        err2 |= __put_user(s64.shm_perm.seq, &up64->shm_perm.seq);
-        err2 |= __put_user(s64.shm_atime, &up64->shm_atime);
-        err2 |= __put_user(s64.shm_dtime, &up64->shm_dtime);
-        err2 |= __put_user(s64.shm_ctime, &up64->shm_ctime);
-        err2 |= __put_user(s64.shm_segsz, &up64->shm_segsz);
-        err2 |= __put_user(s64.shm_nattch, &up64->shm_nattch);
-        err2 |= __put_user(s64.shm_cpid, &up64->shm_cpid);
-        err2 |= __put_user(s64.shm_lpid, &up64->shm_lpid);
-    }
-    else
-    {
-        struct shmid_ds32 *up32 = (struct shmid_ds32 *)uptr;
-
-        if (!access_ok(VERIFY_WRITE, up32, sizeof(*up32)))
-            return -EFAULT;
-
-        err2 = __put_user(s64.shm_perm.key, &up32->shm_perm.key);
-        err2 |= __put_user(s64.shm_perm.uid, &up32->shm_perm.uid);
-        err2 |= __put_user(s64.shm_perm.gid, &up32->shm_perm.gid);
-        err2 |= __put_user(s64.shm_perm.cuid, &up32->shm_perm.cuid);
-        err2 |= __put_user(s64.shm_perm.cgid, &up32->shm_perm.cgid);
-        err2 |= __put_user(s64.shm_perm.mode, &up32->shm_perm.mode);
-        err2 |= __put_user(s64.shm_perm.seq, &up32->shm_perm.seq);
-        err2 |= __put_user(s64.shm_atime, &up32->shm_atime);
-        err2 |= __put_user(s64.shm_dtime, &up32->shm_dtime);
-        err2 |= __put_user(s64.shm_ctime, &up32->shm_ctime);
-        err2 |= __put_user(s64.shm_segsz, &up32->shm_segsz);
-        err2 |= __put_user(s64.shm_nattch, &up32->shm_nattch);
-        err2 |= __put_user(s64.shm_cpid, &up32->shm_cpid);
-        err2 |= __put_user(s64.shm_lpid, &up32->shm_lpid);
-    }
-#undef s64
-    return err2 ? -EFAULT : 0;
-}
-static int
-shmctl32 (int first, int second, void *uptr)
-{
-    int err = -EFAULT, err2;
-    struct shmid_ds s;
-    struct shmid64_ds s64;
-    mm_segment_t old_fs;
-    struct shm_info32 *uip = (struct shm_info32 *)uptr;
-    struct shm_info si;
-    int version = ipc_parse_version32(&second);
-    struct shminfo64 smi;
-    struct shminfo *usi32 = (struct shminfo *) uptr;
-    struct shminfo64_32 *usi64 = (struct shminfo64_32 *) uptr;
-
-    switch (second)
-    {
-    case IPC_INFO:
-        old_fs = get_fs();
-        set_fs(KERNEL_DS);
-        err = sys_shmctl(first, second|IPC_64, (struct shmid_ds *)&smi);
-        set_fs(old_fs);
-
-        if (version == IPC_64)
-        {
-            if (!access_ok(VERIFY_WRITE, usi64, sizeof(*usi64)))
-            {
-                err = -EFAULT;
-                break;
-            }
-            err2 = __put_user(smi.shmmax, &usi64->shmmax);
-            err2 |= __put_user(smi.shmmin, &usi64->shmmin);
-            err2 |= __put_user(smi.shmmni, &usi64->shmmni);
-            err2 |= __put_user(smi.shmseg, &usi64->shmseg);
-            err2 |= __put_user(smi.shmall, &usi64->shmall);
-        }
-        else
-        {
-            if (!access_ok(VERIFY_WRITE, usi32, sizeof(*usi32)))
-            {
-                err = -EFAULT;
-                break;
-            }
-            err2 = __put_user(smi.shmmax, &usi32->shmmax);
-            err2 |= __put_user(smi.shmmin, &usi32->shmmin);
-            err2 |= __put_user(smi.shmmni, &usi32->shmmni);
-            err2 |= __put_user(smi.shmseg, &usi32->shmseg);
-            err2 |= __put_user(smi.shmall, &usi32->shmall);
-        }
-        if (err2)
-            err = -EFAULT;
-        break;
-
-    case IPC_RMID:
-    case SHM_LOCK:
-    case SHM_UNLOCK:
-        err = sys_shmctl(first, second, (struct shmid_ds *)uptr);
-        break;
-
-    case IPC_SET:
-        if (version == IPC_64)
-        {
-            struct shmid64_ds32 *up64 = (struct shmid64_ds32 *)uptr;
-            err = get_user(s.shm_perm.uid, &up64->shm_perm.uid);
-            err |= get_user(s.shm_perm.gid, &up64->shm_perm.gid);
-            err |= get_user(s.shm_perm.mode, &up64->shm_perm.mode);
-        }
-        else
-        {
-            struct shmid_ds32 *up32 = (struct shmid_ds32 *)uptr;
-            err = get_user(s.shm_perm.uid, &up32->shm_perm.uid);
-            err |= get_user(s.shm_perm.gid, &up32->shm_perm.gid);
-            err |= get_user(s.shm_perm.mode, &up32->shm_perm.mode);
-        }
-        if (err)
-            break;
-        old_fs = get_fs();
-        set_fs(KERNEL_DS);
-        err = sys_shmctl(first, second, &s);
-        set_fs(old_fs);
-        break;
-
-    case IPC_STAT:
-    case SHM_STAT:
-        old_fs = get_fs();
-        set_fs(KERNEL_DS);
-        err = sys_shmctl(first, second|IPC_64, (void *) &s64);
-        set_fs(old_fs);
-
-        if (err < 0)
-            break;
-        err2 = put_shmid64(&s64, uptr, version);
-        if (err2)
-            err = err2;
-        break;
-
-    case SHM_INFO:
-        old_fs = get_fs();
-        set_fs(KERNEL_DS);
-        err = sys_shmctl(first, second, (void *)&si);
-        set_fs(old_fs);
-        if (err < 0)
-            break;
-
-        if (!access_ok(VERIFY_WRITE, uip, sizeof(*uip)))
-        {
-            err = -EFAULT;
-            break;
-        }
-        err2 = __put_user(si.used_ids, &uip->used_ids);
-        err2 |= __put_user(si.shm_tot, &uip->shm_tot);
-        err2 |= __put_user(si.shm_rss, &uip->shm_rss);
-        err2 |= __put_user(si.shm_swp, &uip->shm_swp);
-        err2 |= __put_user(si.swap_attempts, &uip->swap_attempts);
-        err2 |= __put_user(si.swap_successes, &uip->swap_successes);
-        if (err2)
-            err = -EFAULT;
-        break;
-
-    default:
-        err = -EINVAL;
-        break;
-
-    }
-    return err;
-}
-
 asmlinkage long
 sys32_ipc (u32 call, int first, int second, int third, u32 ptr, u32 fifth)
 {
@@ -743,14 +484,10 @@ sys32_ipc (u32 call, int first, int second, int third, u32 ptr, u32 fifth)
         return msgctl32(first, second, (void *)AA(ptr));
 
     case SHMAT:
-        return shmat32(first, second, third, version, (void *)AA(ptr));
-        break;
     case SHMDT:
-        return sys_shmdt((char *)AA(ptr));
     case SHMGET:
-        return sys_shmget(first, second, third);
     case SHMCTL:
-        return shmctl32(first, second, (void *)AA(ptr));
+        return -EINVAL;
 
     }
 #endif

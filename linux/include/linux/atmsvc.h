@@ -36,7 +36,7 @@ struct atmsvc_msg
     struct atm_sap sap;     /* SAP */
     unsigned int session;       /* for p2pm */
     struct sockaddr_atmsvc svc; /* SVC address */
-} __ATM_API_ALIGN;
+};
 
 /*
  * Message contents: see ftp://icaftp.epfl.ch/pub/linux/atm/docs/isp-*.tar.gz

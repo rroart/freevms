@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -839,7 +839,7 @@ asmlinkage long sys_setfsuid(uid_t uid)
 }
 
 /*
- * Samma på svenska..
+ * Samma pï¿½ svenska..
  */
 asmlinkage long sys_setfsgid(gid_t gid)
 {
@@ -1180,8 +1180,6 @@ asmlinkage long sys_getrlimit(unsigned int resource, struct rlimit *rlim)
                ? -EFAULT : 0;
 }
 
-#if !defined(__ia64__)
-
 /*
  *  Back compatibility for getrlimit. Needed for some apps.
  */
@@ -1199,8 +1197,6 @@ asmlinkage long sys_old_getrlimit(unsigned int resource, struct rlimit *rlim)
         x.rlim_max = 0x7FFFFFFF;
     return copy_to_user(rlim, &x, sizeof(x))?-EFAULT:0;
 }
-
-#endif
 
 asmlinkage long sys_setrlimit(unsigned int resource, struct rlimit *rlim)
 {

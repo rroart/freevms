@@ -75,9 +75,6 @@ struct module
     void (*cleanup)(void);
     const struct exception_table_entry *ex_table_start;
     const struct exception_table_entry *ex_table_end;
-#ifdef __alpha__
-    unsigned long gp;
-#endif
     /* Members past this point are extensions to the basic
        module support and are optional.  Use mod_member_present()
        to examine them.  */

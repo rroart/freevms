@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -34,8 +34,6 @@ int vfs_readdir(struct file *file, filldir_t filler, void *buf)
  */
 #define NAME_OFFSET(de) ((int) ((de)->d_name - (char *) (de)))
 #define ROUND_UP(x) (((x)+sizeof(long)-1) & ~(sizeof(long)-1))
-
-#ifndef __ia64__
 
 struct old_linux_dirent
 {
@@ -91,8 +89,6 @@ asmlinkage int old_readdir(unsigned int fd, void * dirent, unsigned int count)
 out:
     return error;
 }
-
-#endif /* !__ia64__ */
 
 /*
  * New, all-improved, singing, dancing, iBCS2-compliant getdents()

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -15,7 +15,6 @@
 #include <linux/smp_lock.h>
 #include <linux/sem.h>
 #include <linux/msg.h>
-#include <linux/shm.h>
 #include <linux/stat.h>
 #include <linux/mman.h>
 #include <linux/file.h>
@@ -128,13 +127,6 @@ asmlinkage long sys_pause(void)
     current->state = TASK_INTERRUPTIBLE;
     schedule();
     return -ERESTARTNOHAND;
-}
-
-extern asmlinkage long sys_shmat (int shmid, char *shmaddr, int shmflg, ulong *raddr);
-asmlinkage long wrap_sys_shmat(int shmid, char *shmaddr, int shmflg)
-{
-    unsigned long raddr;
-    return sys_shmat(shmid,shmaddr,shmflg,&raddr) ?: raddr;
 }
 
 asmlinkage long sys_time64(long * tloc)

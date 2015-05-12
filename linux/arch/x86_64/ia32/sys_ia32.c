@@ -45,7 +45,6 @@
 #include <linux/sem.h>
 #include <linux/msg.h>
 #include <linux/mm.h>
-#include <linux/shm.h>
 #include <linux/slab.h>
 #include <linux/uio.h>
 #include <linux/quota.h>
