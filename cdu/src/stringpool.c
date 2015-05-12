@@ -33,12 +33,10 @@
  overhead per string, which is unacceptable.  Also, this algorithm
  is faster.  */
 
-#define GTY(x)
 #define HOST_BITS_PER_WIDE_INT 64
 #define POINTER_SIZE 32
 #define true 1
 #define false 0
-#define ATTRIBUTE_UNUSED
 
 #include <malloc.h>
 #define xmalloc malloc
@@ -98,7 +96,7 @@ void init_stringpool(void)
 }
 
 /* Allocate a hash node.  */
-static hashnode alloc_node(hash_table *table ATTRIBUTE_UNUSED)
+static hashnode alloc_node(hash_table *table)
 {
     return GCC_IDENT_TO_HT_IDENT (make_node (IDENTIFIER_NODE)) ;
 }
@@ -178,8 +176,8 @@ void stringpool_statistics(void)
 
 #if 0
 static int
-mark_ident (struct cpp_reader *pfile ATTRIBUTE_UNUSED, hashnode h,
-            const void *v ATTRIBUTE_UNUSED)
+mark_ident (struct cpp_reader *pfile, hashnode h,
+            const void *v)
 {
     gt_ggc_m_9tree_node (HT_IDENT_TO_GCC_IDENT (h));
     return 1;
@@ -202,7 +200,7 @@ ggc_mark_stringpool (void)
  roots table isn't needed for the few global variables that refer
  to strings.  */
 
-void gt_ggc_m_S(void *x ATTRIBUTE_UNUSED)
+void gt_ggc_m_S(void *x)
 {
 }
 
@@ -210,10 +208,7 @@ void gt_ggc_m_S(void *x ATTRIBUTE_UNUSED)
  strings don't contain pointers).  */
 
 #if 0
-void
-gt_pch_p_S (void *obj ATTRIBUTE_UNUSED, void *x ATTRIBUTE_UNUSED,
-            gt_pointer_operator op ATTRIBUTE_UNUSED,
-            void *cookie ATTRIBUTE_UNUSED)
+void gt_pch_p_S(void *obj, void *x, gt_pointer_operator op, void *cookie)
 {
 }
 #endif
@@ -231,18 +226,16 @@ gt_pch_n_S (const void *x)
 /* Handle saving and restoring the string pool for PCH.  */
 
 struct string_pool_data
-GTY(())
 {
-    tree * GTY((length ("%h.nslots"))) entries;
+    tree *entries;
     unsigned int nslots;
     unsigned int nelements;
 };
 
-static GTY(()) struct string_pool_data * spd;
+static struct string_pool_data * spd;
 
 #if 0
-static int
-ht_copy_and_clear (cpp_reader *r ATTRIBUTE_UNUSED, hashnode hp, const void *ht2_p)
+static int ht_copy_and_clear (cpp_reader *r, hashnode hp, const void *ht2_p)
 {
     cpp_hashnode *h = CPP_HASHNODE (hp);
     struct ht *ht2 = (struct ht *) ht2_p;

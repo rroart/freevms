@@ -22,8 +22,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #ifndef GCC_TREE_H
 #define GCC_TREE_H
 
-#define GTY(x)
-
 #if 0
 #include "machmode.h"
 #include "version.h"
@@ -120,8 +118,8 @@ enum built_in_function
 extern const char *const built_in_names[(int) END_BUILTINS];
 
 /* An array of _DECL trees for the above.  */
-extern GTY(()) tree built_in_decls[(int) END_BUILTINS];
-extern GTY(()) tree implicit_built_in_decls[(int) END_BUILTINS];
+extern tree built_in_decls[(int) END_BUILTINS];
+extern tree implicit_built_in_decls[(int) END_BUILTINS];
 #endif
 
 /* The definition of tree nodes fills the next several pages.  */
@@ -146,7 +144,7 @@ extern GTY(()) tree implicit_built_in_decls[(int) END_BUILTINS];
    See the accessor macros, defined below, for documentation of the
    fields.  */
 
-struct tree_common GTY(())
+struct tree_common
 {
     tree chain;
     tree type;
@@ -699,7 +697,7 @@ ATTRIBUTE_NORETURN;
     == (unsigned HOST_WIDE_INT) TREE_INT_CST_HIGH (B))  \
        && TREE_INT_CST_LOW (A) < TREE_INT_CST_LOW (B)))
 
-struct tree_int_cst GTY(())
+struct tree_int_cst
 {
     struct tree_common common;
     /* A sub-struct is necessary here because the function `const_hash'
@@ -720,7 +718,7 @@ struct real_value;
 #define TREE_REAL_CST_PTR(NODE) (REAL_CST_CHECK (NODE)->real_cst.real_cst_ptr)
 #define TREE_REAL_CST(NODE) (*TREE_REAL_CST_PTR (NODE))
 
-struct tree_real_cst GTY(())
+struct tree_real_cst
 {
     struct tree_common common;
     struct real_value * real_cst_ptr;
@@ -730,7 +728,7 @@ struct tree_real_cst GTY(())
 #define TREE_STRING_LENGTH(NODE) (STRING_CST_CHECK (NODE)->string.length)
 #define TREE_STRING_POINTER(NODE) (STRING_CST_CHECK (NODE)->string.pointer)
 
-struct tree_string GTY(())
+struct tree_string
 {
     struct tree_common common;
     int length;
@@ -741,7 +739,7 @@ struct tree_string GTY(())
 #define TREE_REALPART(NODE) (COMPLEX_CST_CHECK (NODE)->complex.real)
 #define TREE_IMAGPART(NODE) (COMPLEX_CST_CHECK (NODE)->complex.imag)
 
-struct tree_complex GTY(())
+struct tree_complex
 {
     struct tree_common common;
     tree real;
@@ -751,7 +749,7 @@ struct tree_complex GTY(())
 /* In a VECTOR_CST node.  */
 #define TREE_VECTOR_CST_ELTS(NODE) (VECTOR_CST_CHECK (NODE)->vector.elements)
 
-struct tree_vector GTY(())
+struct tree_vector
 {
     struct tree_common common;
     tree elements;
@@ -775,7 +773,7 @@ struct tree_vector GTY(())
   ((tree) ((char *) (NODE) - sizeof (struct tree_common)))
 #define GCC_IDENT_TO_HT_IDENT(NODE) (&((struct tree_identifier *) (NODE))->id)
 
-struct tree_identifier GTY(())
+struct tree_identifier
 {
     struct tree_common common;
     struct ht_identifier id;
@@ -785,7 +783,7 @@ struct tree_identifier GTY(())
 #define TREE_PURPOSE(NODE) (TREE_LIST_CHECK (NODE)->list.purpose)
 #define TREE_VALUE(NODE) (TREE_LIST_CHECK (NODE)->list.value)
 
-struct tree_list GTY(())
+struct tree_list
 {
     struct tree_common common;
     tree purpose;
@@ -799,11 +797,11 @@ struct tree_list GTY(())
 
 #define TREE_VEC_ELT(NODE,I) TREE_VEC_ELT_CHECK (NODE, I)
 
-struct tree_vec GTY(())
+struct tree_vec
 {
     struct tree_common common;
     int length;
-    tree GTY ((length ("TREE_VEC_LENGTH ((tree)&%h)"))) a[1];
+    tree a[1];
 };
 
 /* Define fields and accessors for some nodes that represent expressions.  */
@@ -870,13 +868,11 @@ struct tree_vec GTY(())
 #define TARGET_EXPR_INITIAL(NODE) TREE_OPERAND_CHECK_CODE (NODE, TARGET_EXPR, 1)
 #define TARGET_EXPR_CLEANUP(NODE) TREE_OPERAND_CHECK_CODE (NODE, TARGET_EXPR, 2)
 
-struct tree_exp GTY(())
+struct tree_exp
 {
     struct tree_common common;
     int complexity;
-    tree GTY ((special ("tree_exp"),
-               desc ("TREE_CODE ((tree) &%0)")))
-    operands[1];
+    tree operands[1];
 };
 
 /* In a BLOCK node.  */
@@ -924,7 +920,7 @@ struct tree_exp GTY(())
 #define BLOCK_FRAGMENT_ORIGIN(NODE) (BLOCK_CHECK (NODE)->block.fragment_origin)
 #define BLOCK_FRAGMENT_CHAIN(NODE) (BLOCK_CHECK (NODE)->block.fragment_chain)
 
-struct tree_block GTY(())
+struct tree_block
 {
     struct tree_common common;
 
@@ -1107,7 +1103,7 @@ struct tree_block GTY(())
 
 struct die_struct;
 
-struct tree_type GTY(())
+struct tree_type
 {
     struct tree_common common;
     tree values;
@@ -1146,11 +1142,10 @@ struct tree_type GTY(())
     tree reference_to;
     union tree_type_symtab
     {
-        int GTY ((tag ("0"))) address;
-        char * GTY ((tag ("1"))) pointer;
-        struct die_struct * GTY ((tag ("2"))) die;
-    } GTY ((desc ("debug_hooks == &sdb_debug_hooks ? 1 : debug_hooks == &dwarf2_debug_hooks ? 2 : 0"),
-            descbits ("2"))) symtab;
+        int address;
+        char *pointer;
+        struct die_struct *die;
+    } symtab;
     tree name;
     tree minval;
     tree maxval;
@@ -1671,7 +1666,7 @@ enum symbol_visibility
 
 struct function;
 
-struct tree_decl GTY(())
+struct tree_decl
 {
     struct tree_common common;
     location_t locus;
@@ -1741,7 +1736,7 @@ struct tree_decl GTY(())
             unsigned int align : 24;
             unsigned int off_align : 8;
         } a;
-    } GTY ((skip (""))) u1;
+    } u1;
 
     tree size_unit;
     tree name;
@@ -1762,11 +1757,11 @@ struct tree_decl GTY(())
        Used by Chill and Java in LABEL_DECL and by C++ and Java in VAR_DECL.  */
     union tree_decl_u2
     {
-        struct function * GTY ((tag ("FUNCTION_DECL"))) f;
-        rtx GTY ((tag ("PARM_DECL"))) r;
-        tree GTY ((tag ("FIELD_DECL"))) t;
-        int GTY ((tag ("VAR_DECL"))) i;
-    } GTY ((desc ("TREE_CODE((tree) &(%0))"))) u2;
+        struct function *f;
+        rtx r;
+        tree t;
+        int i;
+    } u2;
 
     /* In a FUNCTION_DECL, this is DECL_SAVED_TREE.  */
     tree saved_tree;
@@ -1803,22 +1798,21 @@ enum tree_node_structure_enum
    It may be any of the structures declared above
    for various types of node.  */
 
-union tree_node GTY ((ptr_alias (union lang_tree_node),
-                              desc ("tree_node_structure (&%h)")))
+union tree_node
 {
-    struct tree_common GTY ((tag ("TS_COMMON"))) common;
-    struct tree_int_cst GTY ((tag ("TS_INT_CST"))) int_cst;
-    struct tree_real_cst GTY ((tag ("TS_REAL_CST"))) real_cst;
-    struct tree_vector GTY ((tag ("TS_VECTOR"))) vector;
-    struct tree_string GTY ((tag ("TS_STRING"))) string;
-    struct tree_complex GTY ((tag ("TS_COMPLEX"))) complex;
-    struct tree_identifier GTY ((tag ("TS_IDENTIFIER"))) identifier;
-    struct tree_decl GTY ((tag ("TS_DECL"))) decl;
-    struct tree_type GTY ((tag ("TS_TYPE"))) type;
-    struct tree_list GTY ((tag ("TS_LIST"))) list;
-    struct tree_vec GTY ((tag ("TS_VEC"))) vec;
-    struct tree_exp GTY ((tag ("TS_EXP"))) exp;
-    struct tree_block GTY ((tag ("TS_BLOCK"))) block;
+    struct tree_common common;
+    struct tree_int_cst int_cst;
+    struct tree_real_cst real_cst;
+    struct tree_vector vector;
+    struct tree_string string;
+    struct tree_complex complex;
+    struct tree_identifier identifier;
+    struct tree_decl decl;
+    struct tree_type type;
+    struct tree_list list;
+    struct tree_vec vec;
+    struct tree_exp exp;
+    struct tree_block block;
 };
 
 /* Standard named or nameless data types of the C compiler.  */
@@ -1913,7 +1907,7 @@ enum tree_index
     TI_MAX
 };
 
-extern GTY(()) tree global_trees[TI_MAX];
+extern tree global_trees[TI_MAX];
 
 #define error_mark_node         global_trees[TI_ERROR_MARK]
 
@@ -2032,7 +2026,7 @@ typedef enum integer_type_kind integer_type_kind;
 
 /* The standard C integer types.  Use integer_type_kind to index into
    this array.  */
-extern GTY(()) tree integer_types[itk_none];
+extern tree integer_types[itk_none];
 
 #define char_type_node          integer_types[itk_char]
 #define signed_char_type_node       integer_types[itk_signed_char]
@@ -2460,7 +2454,7 @@ enum size_type_kind
     TYPE_KIND_LAST
 };
 
-extern GTY(()) tree sizetype_tab[(int) TYPE_KIND_LAST];
+extern tree sizetype_tab[(int) TYPE_KIND_LAST];
 
 #define sizetype sizetype_tab[(int) SIZETYPE]
 #define bitsizetype sizetype_tab[(int) BITSIZETYPE]
@@ -2725,10 +2719,10 @@ extern int immediate_size_expand;
 
 /* Points to the FUNCTION_DECL of the function whose body we are reading.  */
 
-extern GTY(()) tree current_function_decl;
+extern tree current_function_decl;
 
 /* Nonzero means a FUNC_BEGIN label was emitted.  */
-extern GTY(()) tree current_function_func_begin_label;
+extern tree current_function_func_begin_label;
 
 /* Nonzero means all ..._TYPE nodes should be allocated permanently.  */
 

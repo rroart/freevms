@@ -19,6 +19,10 @@
 
     ****************************************************************
 */
+
+#ifndef NETWORK_H
+#define NETWORK_H
+
 /* Define Network User Interface. */
 
 /* LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';  ! Common defs. */
@@ -85,3 +89,5 @@
 
 /* State only reached via FIN-WAIT-1 (local initiation of close)    */
 /** State only reached via CLOSE-WAIT (remote initiation of close)  */
+
+#endif /* NETWORK_H */

@@ -85,7 +85,6 @@ enum
 
 #define NULL_TREE 0
 
-#define GTY(x)
 #if 0
 #define ENUM_BITFIELD(TYPE) __extension__ enum TYPE
 #else
@@ -220,7 +219,6 @@ typedef enum c_id_kind
 /* A single C token after string literal concatenation and conversion
  of preprocessing tokens to tokens.  */
 typedef struct c_token
-GTY (())
 {
     /* The kind of token.  */ENUM_BITFIELD (cpp_ttype) type :8;
     /* If this token is a CPP_NAME, this value indicates whether also
@@ -241,7 +239,6 @@ GTY (())
  context of parsing.  Includes lexer information with up to two
  tokens of look-ahead; more are not needed for C.  */
 typedef struct c_parser
-GTY(())
 {
     /* The look-ahead tokens.  */
     c_token tokens[2];

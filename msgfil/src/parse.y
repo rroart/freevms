@@ -3,13 +3,10 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 int yy2debug=0;
 int yydebug=0;
-
-#define PARAMS(x) x
-#define ATTRIBUTE_UNUSED
 
 #define YYERROR_VERBOSE
 #define YYDEBUG 1

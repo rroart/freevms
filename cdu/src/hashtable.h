@@ -19,13 +19,11 @@
 #define GCC_HASHTABLE_H
 
 #include "obstack.h"
-#define GTY(x) /* nothing */
 
 /* This is what each hash table entry points to.  It may be embedded
  deeply within another object.  */
 typedef struct ht_identifier ht_identifier;
 struct ht_identifier
-GTY(())
 {
     const unsigned char *str;
     unsigned int len;
@@ -70,8 +68,7 @@ extern hash_table *ht_create(unsigned int order);
 /* Frees all memory associated with a hash table.  */
 extern void ht_destroy(hash_table *);
 
-extern hashnode ht_lookup(hash_table *, const unsigned char *, size_t,
-                          enum ht_lookup_option);
+extern hashnode ht_lookup(hash_table *, const unsigned char *, size_t, enum ht_lookup_option);
 
 /* For all nodes in TABLE, make a callback.  The callback takes
  TABLE->PFILE, the node, and a PTR, and the callback sequence stops

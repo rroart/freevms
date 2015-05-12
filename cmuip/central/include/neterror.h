@@ -53,6 +53,9 @@
 *******************************************************************************
 *--*/
 
+#ifndef NETERROR_H
+#define NETERROR_H
+
 enum { NET$_IR, NET$_IFC, NET$_IPC, NET$_UCT, NET$_IFS, NET$_ILP,
        NET$_NUC, NET$_CSE, NET$_NOPRV, NET$_CIP, NET$_CDE, NET$_CR,
        NET$_FSU, NET$_UNN, NET$_VTF, NET$_CREF, NET$_CCAN, NET$_FIP,
@@ -69,3 +72,5 @@ enum { NET$_IR, NET$_IFC, NET$_IPC, NET$_UCT, NET$_IFS, NET$_ILP,
        NET$_GP_NOTFND, NET$_GP_UNKMBX, NET$_GP_NOTIMP, NET$_GP_TOOBIG,
        NET$_GP_NSDOWN, NET$_NRT, NET$_KILL
      };
+
+#endif /* NETERROR_H */

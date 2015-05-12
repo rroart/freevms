@@ -34,6 +34,9 @@
 !--
 */
 
+#ifndef NETCONFIG_H
+#define NETCONFIG_H
+
 #ifndef _CMU_TYPES
 #define _CMU_TYPES
 
@@ -63,7 +66,7 @@ typedef union
 #define ulong unsigned long
 #define uchar unsigned char
 
-#endif _CMU_TYPES
+#endif /* _CMU_TYPES */
 
 #define word short
 #define uword unsigned short
@@ -229,7 +232,6 @@ typedef struct
 } Device_Info_Structure;
 
 
-
 /*
 Here we describe the IPACP Information block.  This structure
 is assembled by the IPACP to describe itself to other modules
@@ -275,9 +277,11 @@ typedef struct
     ushort  ACPI$MPBS;
 } IPACP_Info_Structure;
 
-#undef word short
-#undef uword unsigned short
-#undef ushort unsigned short
-#undef ulong unsigned long
-#undef uchar unsigned char
-#undef uint unsigned int
+#undef word
+#undef uword
+#undef ushort
+#undef ulong
+#undef uchar
+#undef uint
+
+#endif /* NETCONFIG_H */

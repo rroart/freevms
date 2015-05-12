@@ -19,12 +19,11 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define GCC_HASHTABLE_H
 
 #include "obstack.h"
-#define GTY(x) /* nothing */
 
 /* This is what each hash table entry points to.  It may be embedded
    deeply within another object.  */
 typedef struct ht_identifier ht_identifier;
-struct ht_identifier GTY(())
+struct ht_identifier
 {
     const unsigned char *str;
     unsigned int len;

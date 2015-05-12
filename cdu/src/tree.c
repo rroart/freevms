@@ -39,7 +39,6 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#define GTY(x)
 #define HOST_BITS_PER_WIDE_INT 64
 #define POINTER_SIZE 32
 #define true 1
@@ -107,15 +106,14 @@ static const char * const tree_node_kind_names[] =
 #endif /* GATHER_STATISTICS */
 
 /* Unique id for next decl created.  */
-static GTY(()) int next_decl_uid;
+static int next_decl_uid;
 /* Unique id for next type created.  */
-static GTY(()) int next_type_uid = 1;
+static int next_type_uid = 1;
 
 /* Since we cannot rehash a type after it is in the table, we have to
  keep the hash code.  */
 
 struct type_hash
-GTY(())
 {
     unsigned long hash;
     tree type;
@@ -131,8 +129,7 @@ GTY(())
  same table, they are completely independent, and the hash code is
  computed differently for each of these.  */
 
-static GTY ((if_marked ("type_hash_marked_p"), param_is (struct type_hash)))
-htab_t type_hash_table;
+static htab_t type_hash_table;
 
 static void set_type_quals(tree, int);
 static int type_hash_eq(const void *, const void *);
@@ -149,9 +146,8 @@ tree integer_types[itk_none];
 void init_ttree(void)
 {
     /* Initialize the hash table of types.  */
-    type_hash_table =
-        htab_create_ggc (TYPE_HASH_INITIAL_SIZE, type_hash_hash,
-                         type_hash_eq, 0);
+    type_hash_table = htab_create_ggc (TYPE_HASH_INITIAL_SIZE, type_hash_hash,
+                                       type_hash_eq, 0);
 }
 
 #if 0
@@ -451,7 +447,6 @@ tree copy_list(tree list)
     }
     return head;
 }
-
 
 /* Return a newly constructed INTEGER_CST node whose constant value
  is specified by the two ints LOW and HI.
@@ -922,8 +917,7 @@ real_minus_onep (tree expr)
 int really_constant_p(tree exp)
 {
     /* This is not quite the same as STRIP_NOPS.  It does more.  */
-    while (TREE_CODE (exp) == NOP_EXPR || TREE_CODE (exp) == CONVERT_EXPR
-            || TREE_CODE (exp) == NON_LVALUE_EXPR)
+    while (TREE_CODE (exp) == NOP_EXPR || TREE_CODE (exp) == CONVERT_EXPR || TREE_CODE (exp) == NON_LVALUE_EXPR)
         exp = TREE_OPERAND (exp, 0);
     return TREE_CONSTANT (exp);
 }
@@ -1184,8 +1178,7 @@ HOST_WIDE_INT int_size_in_bytes(tree type)
 
     type = TYPE_MAIN_VARIANT (type);
     t = TYPE_SIZE_UNIT (type);
-    if (t == 0 || TREE_CODE (t) != INTEGER_CST || TREE_OVERFLOW (t)
-            || TREE_INT_CST_HIGH (t) != 0
+    if (t == 0 || TREE_CODE (t) != INTEGER_CST || TREE_OVERFLOW (t) || TREE_INT_CST_HIGH (t) != 0
             /* If the result would appear negative, it's too big to represent.  */
             || (HOST_WIDE_INT) TREE_INT_CST_LOW (t) < 0)
         return -1;
@@ -1334,7 +1327,7 @@ int staticp(tree arg)
                 && ! DECL_NON_ADDR_CONST_P (arg));
 
     case
-            CONSTRUCTOR :
+            CONSTRUCTOR        :
         return TREE_STATIC (arg);
 
     case LABEL_DECL:
@@ -1859,10 +1852,8 @@ bool type_contains_placeholder_p(tree type)
 {
     /* If the size contains a placeholder or the parent type (component type in
      the case of arrays) type involves a placeholder, this type does.  */
-    if (CONTAINS_PLACEHOLDER_P (TYPE_SIZE (type))
-            || CONTAINS_PLACEHOLDER_P (TYPE_SIZE_UNIT (type))
-            || (TREE_TYPE (type) != 0
-                && type_contains_placeholder_p(TREE_TYPE (type))))
+    if (CONTAINS_PLACEHOLDER_P (TYPE_SIZE (type)) || CONTAINS_PLACEHOLDER_P (TYPE_SIZE_UNIT (type))
+            || (TREE_TYPE (type) != 0 && type_contains_placeholder_p(TREE_TYPE (type))))
         return 1;
 
     /* Now do type-specific checks.  Note that the last part of the check above
@@ -1886,8 +1877,7 @@ bool type_contains_placeholder_p(tree type)
     case INTEGER_TYPE:
     case REAL_TYPE:
         /* Here we just check the bounds.  */
-        return (CONTAINS_PLACEHOLDER_P (TYPE_MIN_VALUE (type))
-                || CONTAINS_PLACEHOLDER_P (TYPE_MAX_VALUE (type)));
+        return (CONTAINS_PLACEHOLDER_P (TYPE_MIN_VALUE (type)) || CONTAINS_PLACEHOLDER_P (TYPE_MAX_VALUE (type)));
 
     case ARRAY_TYPE:
     case SET_TYPE:
@@ -1916,8 +1906,7 @@ bool type_contains_placeholder_p(tree type)
             if (seen_types == type)
                 return 0;
 
-            seen_types = tree_cons(NULL_TREE, type,
-                                   build_tree_list(NULL_TREE, seen_types));
+            seen_types = tree_cons(NULL_TREE, type, build_tree_list(NULL_TREE, seen_types));
         }
         else
         {
@@ -1930,8 +1919,7 @@ bool type_contains_placeholder_p(tree type)
         for (field = TYPE_FIELDS (type); field; field = TREE_CHAIN (field))
             if (TREE_CODE (field) == FIELD_DECL
                     && (CONTAINS_PLACEHOLDER_P (DECL_FIELD_OFFSET (field))
-                        || (TREE_CODE (type) == QUAL_UNION_TYPE
-                            && CONTAINS_PLACEHOLDER_P (DECL_QUALIFIER (field)))
+                        || (TREE_CODE (type) == QUAL_UNION_TYPE && CONTAINS_PLACEHOLDER_P (DECL_QUALIFIER (field)))
                         || type_contains_placeholder_p (TREE_TYPE (field))))
             {
                 ret = true;
@@ -2651,8 +2639,7 @@ tree build_decl(enum tree_code code, tree name, tree type)
  and declarations, once those contours have been exited and their contents
  compiled.  This information is used for outputting debugging info.  */
 
-tree build_block(tree vars, tree tags ATTRIBUTE_UNUSED, tree subblocks,
-                 tree supercontext, tree chain)
+tree build_block(tree vars, tree tags, tree subblocks, tree supercontext, tree chain)
 {
     tree block = make_node(BLOCK);
 
@@ -2782,17 +2769,14 @@ int is_attribute_p(const char *attr, tree ident)
     /* If ATTR is `__text__', IDENT must be `text'; and vice versa.  */
     if (attr[0] == '_')
     {
-        if (attr[1] != '_' || attr[attr_len - 2] != '_'
-                || attr[attr_len - 1] != '_')
+        if (attr[1] != '_' || attr[attr_len - 2] != '_' || attr[attr_len - 1] != '_')
             abort ();
-        if (ident_len == attr_len - 4
-                && strncmp(attr + 2, p, attr_len - 4) == 0)
+        if (ident_len == attr_len - 4 && strncmp(attr + 2, p, attr_len - 4) == 0)
             return 1;
     }
     else
     {
-        if (ident_len == attr_len + 4 && p[0] == '_' && p[1] == '_'
-                && p[ident_len - 2] == '_' && p[ident_len - 1] == '_'
+        if (ident_len == attr_len + 4 && p[0] == '_' && p[1] == '_' && p[ident_len - 2] == '_' && p[ident_len - 1] == '_'
                 && strncmp(attr, p + 2, attr_len) == 0)
             return 1;
     }
@@ -2848,12 +2832,8 @@ tree merge_attributes(tree a1, tree a2)
             for (; a2 != 0; a2 = TREE_CHAIN (a2))
             {
                 tree a;
-                for (a = lookup_attribute(
-                             IDENTIFIER_POINTER (TREE_PURPOSE (a2)), attributes);
-                        a != NULL_TREE ;
-                        a = lookup_attribute(
-                                IDENTIFIER_POINTER (TREE_PURPOSE (a2)),
-                                TREE_CHAIN (a)))
+                for (a = lookup_attribute(IDENTIFIER_POINTER (TREE_PURPOSE (a2)), attributes); a != NULL_TREE ; a =
+                            lookup_attribute(IDENTIFIER_POINTER (TREE_PURPOSE (a2)), TREE_CHAIN (a)))
                 {
                     if (simple_cst_equal(TREE_VALUE (a), TREE_VALUE (a2)) == 1)
                         break;
@@ -2883,8 +2863,7 @@ tree merge_type_attributes(tree t1, tree t2)
 
 tree merge_decl_attributes(tree olddecl, tree newdecl)
 {
-    return merge_attributes(DECL_ATTRIBUTES (olddecl),
-                            DECL_ATTRIBUTES (newdecl));
+    return merge_attributes(DECL_ATTRIBUTES (olddecl), DECL_ATTRIBUTES (newdecl));
 }
 
 #ifdef TARGET_DLLIMPORT_DECL_ATTRIBUTES
@@ -2964,10 +2943,8 @@ tree get_qualified_type(tree type, int type_quals)
      like the one we need to have.  If so, use that existing one.  We must
      preserve the TYPE_NAME, since there is code that depends on this.  */
     for (t = TYPE_MAIN_VARIANT (type); t; t = TYPE_NEXT_VARIANT (t))
-        if (TYPE_QUALS (t) == type_quals && TYPE_NAME (t) == TYPE_NAME (type)
-                && TYPE_CONTEXT (t) == TYPE_CONTEXT (type)
-                && attribute_list_equal(TYPE_ATTRIBUTES (t),
-                                        TYPE_ATTRIBUTES (type)))
+        if (TYPE_QUALS (t) == type_quals && TYPE_NAME (t) == TYPE_NAME (type) && TYPE_CONTEXT (t) == TYPE_CONTEXT (type)
+                && attribute_list_equal(TYPE_ATTRIBUTES (t), TYPE_ATTRIBUTES (type)))
             return t;
 
     return NULL_TREE ;
@@ -3006,8 +2983,7 @@ tree build_type_copy(tree type)
     TYPE_REFERENCE_TO (t) = 0;
 
     /* Add this type to the chain of variants of TYPE.  */
-    TYPE_NEXT_VARIANT (t) =
-        TYPE_NEXT_VARIANT (m);
+    TYPE_NEXT_VARIANT (t) = TYPE_NEXT_VARIANT (m);
     TYPE_NEXT_VARIANT (m) = t;
 
     return t;
@@ -3038,14 +3014,11 @@ unsigned int type_hash_list(tree list)
 static int type_hash_eq(const void *va, const void *vb)
 {
     const struct type_hash *a = va, *b = vb;
-    if (a->hash == b->hash && TREE_CODE (a->type) == TREE_CODE (b->type)
-            && TREE_TYPE (a->type) == TREE_TYPE (b->type)
-            && attribute_list_equal(TYPE_ATTRIBUTES (a->type),
-                                    TYPE_ATTRIBUTES (b->type))
+    if (a->hash == b->hash && TREE_CODE (a->type) == TREE_CODE (b->type) && TREE_TYPE (a->type) == TREE_TYPE (b->type)
+            && attribute_list_equal(TYPE_ATTRIBUTES (a->type), TYPE_ATTRIBUTES (b->type))
             && TYPE_ALIGN (a->type) == TYPE_ALIGN (b->type)
             && (TYPE_MAX_VALUE (a->type) == TYPE_MAX_VALUE (b->type)
-                || tree_int_cst_equal(TYPE_MAX_VALUE (a->type),
-                                      TYPE_MAX_VALUE (b->type)))
+                || tree_int_cst_equal(TYPE_MAX_VALUE (a->type), TYPE_MAX_VALUE (b->type)))
             && (TYPE_MIN_VALUE (a->type) == TYPE_MIN_VALUE (b->type)
                 || tree_int_cst_equal (TYPE_MIN_VALUE (a->type),
                                        TYPE_MIN_VALUE (b->type)))
@@ -3211,10 +3184,8 @@ int attribute_list_contained(tree l1, tree l2)
         return 1;
 
     /* Maybe the lists are similar.  */
-    for (t1 = l1, t2 = l2;
-            t1 != 0 && t2 != 0 && TREE_PURPOSE (t1) == TREE_PURPOSE (t2)
-            && TREE_VALUE (t1) == TREE_VALUE (t2);
-            t1 = TREE_CHAIN (t1), t2 = TREE_CHAIN (t2))
+    for (t1 = l1, t2 = l2; t1 != 0 && t2 != 0 && TREE_PURPOSE (t1) == TREE_PURPOSE (t2) && TREE_VALUE (t1) == TREE_VALUE (t2); t1 =
+                TREE_CHAIN (t1), t2 = TREE_CHAIN (t2))
         ;
 
     /* Maybe the lists are equal.  */
@@ -3224,10 +3195,8 @@ int attribute_list_contained(tree l1, tree l2)
     for (; t2 != 0; t2 = TREE_CHAIN (t2))
     {
         tree attr;
-        for (attr = lookup_attribute(IDENTIFIER_POINTER (TREE_PURPOSE (t2)), l1);
-                attr != NULL_TREE ;
-                attr = lookup_attribute(IDENTIFIER_POINTER (TREE_PURPOSE (t2)),
-                                        TREE_CHAIN (attr)))
+        for (attr = lookup_attribute(IDENTIFIER_POINTER (TREE_PURPOSE (t2)), l1); attr != NULL_TREE ;
+                attr = lookup_attribute(IDENTIFIER_POINTER (TREE_PURPOSE (t2)), TREE_CHAIN (attr)))
         {
             if (simple_cst_equal(TREE_VALUE (t2), TREE_VALUE (attr)) == 1)
                 break;
@@ -3255,11 +3224,8 @@ int type_list_equal(tree l1, tree l2)
     for (t1 = l1, t2 = l2; t1 && t2; t1 = TREE_CHAIN (t1), t2 = TREE_CHAIN (t2))
         if (TREE_VALUE (t1) != TREE_VALUE (t2)
                 || (TREE_PURPOSE (t1) != TREE_PURPOSE (t2)
-                    && !(1
-                         == simple_cst_equal(TREE_PURPOSE (t1),
-                                             TREE_PURPOSE (t2))
-                         && (TREE_TYPE (TREE_PURPOSE (t1))
-                             == TREE_TYPE (TREE_PURPOSE (t2))))))
+                    && !(1 == simple_cst_equal(TREE_PURPOSE (t1), TREE_PURPOSE (t2))
+                         && (TREE_TYPE (TREE_PURPOSE (t1)) == TREE_TYPE (TREE_PURPOSE (t2))))))
             return 0;
 
     return t1 == t2;
@@ -3296,7 +3262,7 @@ int tree_int_cst_equal(tree t1, tree t2)
     if (t1 == 0 || t2 == 0)
         return 0;
 
-    if (TREE_CODE (t1) == INTEGER_CST && TREE_CODE (t2) == INTEGER_CST
+    if (TREE_CODE (t1) == INTEGER_CST&& TREE_CODE (t2) == INTEGER_CST
             && TREE_INT_CST_LOW (t1) == TREE_INT_CST_LOW (t2)
             && TREE_INT_CST_HIGH (t1) == TREE_INT_CST_HIGH (t2))
         return 1;
@@ -3351,10 +3317,8 @@ int tree_int_cst_compare(tree t1, tree t2)
 int host_integerp(tree t, int pos)
 {
     return (TREE_CODE (t) == INTEGER_CST && !TREE_OVERFLOW (t)
-            && ((TREE_INT_CST_HIGH (t) == 0
-                 && (HOST_WIDE_INT) TREE_INT_CST_LOW (t) >= 0)
-                || (!pos && TREE_INT_CST_HIGH (t) == -1
-                    && (HOST_WIDE_INT) TREE_INT_CST_LOW (t) < 0
+            && ((TREE_INT_CST_HIGH (t) == 0 && (HOST_WIDE_INT) TREE_INT_CST_LOW (t) >= 0)
+                || (!pos && TREE_INT_CST_HIGH (t) == -1 && (HOST_WIDE_INT) TREE_INT_CST_LOW (t) < 0
                     && !TREE_UNSIGNED (TREE_TYPE (t)))|| (pos && TREE_INT_CST_HIGH (t) == 0)));
 }
 
@@ -3444,8 +3408,7 @@ int simple_cst_equal(tree t1, tree t2)
 
     if (code1 == NOP_EXPR || code1 == CONVERT_EXPR || code1 == NON_LVALUE_EXPR)
     {
-        if (code2 == NOP_EXPR || code2 == CONVERT_EXPR
-                || code2 == NON_LVALUE_EXPR)
+        if (code2 == NOP_EXPR || code2 == CONVERT_EXPR || code2 == NON_LVALUE_EXPR)
             return simple_cst_equal(TREE_OPERAND (t1, 0), TREE_OPERAND (t2, 0));
         else
             return simple_cst_equal (TREE_OPERAND (t1, 0), t2);
@@ -3461,8 +3424,7 @@ int simple_cst_equal(tree t1, tree t2)
     switch (code1)
     {
     case INTEGER_CST:
-        return (TREE_INT_CST_LOW (t1) == TREE_INT_CST_LOW (t2)
-                && TREE_INT_CST_HIGH (t1) == TREE_INT_CST_HIGH (t2));
+        return (TREE_INT_CST_LOW (t1) == TREE_INT_CST_LOW (t2) && TREE_INT_CST_HIGH (t1) == TREE_INT_CST_HIGH (t2));
 
 #if 0
     case REAL_CST:
@@ -3471,8 +3433,7 @@ int simple_cst_equal(tree t1, tree t2)
 
     case STRING_CST:
         return (TREE_STRING_LENGTH (t1) == TREE_STRING_LENGTH (t2)
-                && !memcmp(TREE_STRING_POINTER (t1), TREE_STRING_POINTER (t2),
-                           TREE_STRING_LENGTH (t1)));
+                && !memcmp(TREE_STRING_POINTER (t1), TREE_STRING_POINTER (t2), TREE_STRING_LENGTH (t1)));
 
     case CONSTRUCTOR:
         if (CONSTRUCTOR_ELTS (t1)== CONSTRUCTOR_ELTS (t2))
@@ -4127,14 +4088,12 @@ tree get_unwidened(tree op, tree for_type)
     /* Set UNS initially if converting OP to FOR_TYPE is a zero-extension.  */
     tree type = TREE_TYPE (op);
     unsigned final_prec = TYPE_PRECISION (for_type != 0 ? for_type : type);
-    int uns = (for_type != 0 && for_type != type
-               && final_prec > TYPE_PRECISION (type) && TREE_UNSIGNED (type));
+    int uns = (for_type != 0 && for_type != type && final_prec > TYPE_PRECISION (type) && TREE_UNSIGNED (type));
     tree win = op;
 
     while (TREE_CODE (op) == NOP_EXPR)
     {
-        int bitschange = TYPE_PRECISION (TREE_TYPE (op))
-                         - TYPE_PRECISION (TREE_TYPE (TREE_OPERAND (op, 0)));
+        int bitschange = TYPE_PRECISION (TREE_TYPE (op)) - TYPE_PRECISION (TREE_TYPE (TREE_OPERAND (op, 0)));
 
         /* Truncations are many-one so cannot be removed.
          Unless we are later going to truncate down even farther.  */
@@ -4158,8 +4117,8 @@ tree get_unwidened(tree op, tree for_type)
             if (! uns || final_prec <= TYPE_PRECISION (TREE_TYPE (op)))
                 win = op;
             /* TREE_UNSIGNED says whether this is a zero-extension.
-               Let's avoid computing it if it does not affect WIN
-               and if UNS will not be needed again.  */
+             Let's avoid computing it if it does not affect WIN
+             and if UNS will not be needed again.  */
             if ((uns || TREE_CODE (op) == NOP_EXPR)
                     && TREE_UNSIGNED (TREE_TYPE (op)))
             {
@@ -4220,8 +4179,7 @@ tree get_narrower(tree op, int *unsignedp_ptr)
 
     while (TREE_CODE (op) == NOP_EXPR)
     {
-        int bitschange = (TYPE_PRECISION (TREE_TYPE (op))
-                          - TYPE_PRECISION (TREE_TYPE (TREE_OPERAND (op, 0))));
+        int bitschange = (TYPE_PRECISION (TREE_TYPE (op)) - TYPE_PRECISION (TREE_TYPE (TREE_OPERAND (op, 0))));
 
         /* Truncations are many-one so cannot be removed.  */
         if (bitschange < 0)
@@ -4274,7 +4232,7 @@ tree get_narrower(tree op, int *unsignedp_ptr)
         tree type = 0;
 #endif
         /* We can get this structure field in a narrower type that fits it,
-        but the resulting extension to its nominal type (a fullword type)
+         but the resulting extension to its nominal type (a fullword type)
          must satisfy the same conditions as for other extensions.
 
          Do this only for fields that are aligned (not bit-fields),
@@ -4544,16 +4502,13 @@ tree get_callee_fndecl(tree call)
     STRIP_NOPS(addr);
 
     /* If this is a readonly function pointer, extract its initial value.  */
-    if (DECL_P (addr)
-            && TREE_CODE (addr)
-            != FUNCTION_DECL && TREE_READONLY (addr) && ! TREE_THIS_VOLATILE (addr)
+    if (DECL_P (addr) && TREE_CODE (addr) != FUNCTION_DECL&& TREE_READONLY (addr) && ! TREE_THIS_VOLATILE (addr)
             && DECL_INITIAL (addr))addr
         = DECL_INITIAL (addr);
 
     /* If the address is just `&f' for some function `f', then we know
      that `f' is being called.  */
-    if (TREE_CODE (addr) == ADDR_EXPR
-            && TREE_CODE (TREE_OPERAND (addr, 0)) == FUNCTION_DECL)
+    if (TREE_CODE (addr) == ADDR_EXPR && TREE_CODE (TREE_OPERAND (addr, 0)) == FUNCTION_DECL)
         return TREE_OPERAND (addr, 0);
 
     /* We couldn't figure out what was being called.  Maybe the front
@@ -5167,8 +5122,7 @@ bool initializer_zerop(tree init)
     case CONSTRUCTOR:
     {
         /* Set is empty if it has no elements.  */
-        if ((TREE_CODE (TREE_TYPE (init)) == SET_TYPE)
-                && CONSTRUCTOR_ELTS (init))return false;
+        if ((TREE_CODE (TREE_TYPE (init)) == SET_TYPE) && CONSTRUCTOR_ELTS (init))return false;
 
         if (AGGREGATE_TYPE_P (TREE_TYPE (init)))
         {

@@ -41,6 +41,9 @@ Modification History:
 
 */
 
+#ifndef NETTCPIP_H
+#define NETTCPIP_H
+
 /* Define IP-based protocols */
 #define ICMP_PROTOCOL    1
 #define TCP_PROTOCOL     6
@@ -1017,3 +1020,4 @@ struct tcp$opt_block
 #define   OPT$SEG_DATASIZE  2           // MSS option value
 #define   OPT$MAX_RECV_DATASIZE  1392       // MSS default value
 
+#endif /* NETTCPIP_H */

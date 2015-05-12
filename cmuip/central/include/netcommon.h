@@ -1,6 +1,3 @@
-#ifndef netcommon_h
-#define netcommon_h
-
 /*
     ****************************************************************
 
@@ -48,6 +45,9 @@ Modification History:
 
 /* Miscellaneous stuff to make life easier. */
 
+#ifndef NETCOMMON_H
+#define NETCOMMON_H
+
 #ifndef _CMU_TYPES
 #define _CMU_TYPES
 
@@ -78,7 +78,7 @@ typedef union
 #define uchar unsigned char
 
 
-#endif _CMU_TYPES
+#endif /* _CMU_TYPES */
 
 #define word short
 #define uword unsigned short
@@ -353,8 +353,7 @@ typedef struct
 */
 
 #define D$LC_ID_BLKSIZE 100*4 /* byte size. */
-typedef
-uint D$LC_ID_Return_Blk[D$LC_ID_BLKSIZE/4];
+typedef uint D$LC_ID_Return_Blk[D$LC_ID_BLKSIZE/4];
 
 /* Dump a specified TCB */
 
@@ -398,8 +397,7 @@ typedef struct
 
 #define D$UDP_LIST_BLKSIZE  MAX_UDPCB*4 /* byte size. */
 
-typedef
-uint D$UDP_LIST_RETURN_BLK[D$UDP_LIST_BLKSIZE/4];
+typedef uint D$UDP_LIST_RETURN_BLK[D$UDP_LIST_BLKSIZE/4];
 
 /* Dump of a single UDPCB */
 
@@ -433,8 +431,7 @@ typedef struct
 /* Dump list of ICMPCB's */
 
 #define D$ICMP_LIST_BLKSIZE MAX_ICMPCB*4    /* byte size. */
-typedef
-uint D$ICMP_LIST_RETURN_BLK[D$ICMP_LIST_BLKSIZE/4];
+typedef uint D$ICMP_LIST_RETURN_BLK[D$ICMP_LIST_BLKSIZE/4];
 
 /* Dump of a single ICMPCB */
 
@@ -465,8 +462,7 @@ typedef struct
 /* Dump list of IPCB's */
 
 #define D$IP_List_BlkSize   MAX_IPCB*4  /* byte size. */
-typedef
-uint D$IP_List_Return_Blk[D$IP_List_BlkSize/4];
+typedef uint D$IP_List_Return_Blk[D$IP_List_BlkSize/4];
 
 /* Dump of a single IPCB */
 
@@ -542,13 +538,12 @@ typedef struct
 
 #define D$User_Return_Blk_Max_Size 128 // check random
 
-#undef word short
-#undef uword unsigned short
-#undef ushort unsigned short
-#undef ulong unsigned long
-#undef uchar unsigned char
-#undef uint unsigned int
-
+#undef word
+#undef uword
+#undef ushort
+#undef ulong
+#undef uchar
+#undef uint
 
 
 /* Function call (FCALL) codes */
@@ -604,4 +599,4 @@ typedef struct
 /* SNMP FCall subfunctions  */
 #define NCP$C_SNMP_NULL     0
 
-#endif
+#endif /* NETCOMMON_H */

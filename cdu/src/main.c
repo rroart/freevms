@@ -3,7 +3,6 @@
 
 // Author. Roar Thron�s.
 
-#define GTY(x)
 #define HOST_BITS_PER_WIDE_INT 64
 #define POINTER_SIZE 32
 #define true 1

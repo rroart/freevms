@@ -24,7 +24,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 /* The data structure used to record a location in a translation unit.  */
 /* Long-term, we want to get rid of this and typedef fileline location_t.  */
-struct location_s GTY (())
+struct location_s
 {
     /* The name of the source file involved.  */
     const char *file;
