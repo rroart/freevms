@@ -1,15 +1,15 @@
 #ifndef STARLET_H
 #define STARLET_H
 
+#include <iosbdef.h>
+#include <lksbdef.h>
 #include <zarg.h>
 
 /*
  ** System Service Entry Points.
  */
 
-struct _iosb;
 struct _generic_64;
-struct _lksb;
 
 #define __unknown_params
 

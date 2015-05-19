@@ -4,6 +4,10 @@
  */
 #ifndef _SYS$ROUTINES_H
 #define _SYS$ROUTINES_H
+
+#include "iosbdef.h"
+#include "lksbdef.h"
+
 # ifdef __cplusplus
 extern "C"
 {
@@ -133,8 +137,7 @@ extern "C"
 
     unsigned long sys$deltva(void);
 
-    unsigned long sys$deq(unsigned int lkid, void *valblk, unsigned int acmode,
-                          unsigned int flags);
+    unsigned long sys$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags);
 
     unsigned long sys$device_scan(void);
 
@@ -163,14 +166,10 @@ extern "C"
     unsigned long sys$end_trans(void);
     unsigned long sys$end_transw(void);
 
-    unsigned long sys$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb,
-                          unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(),
-                          unsigned long astprm, void (*blkastadr)(), unsigned int acmode,
-                          unsigned int rsdm_id);
-    unsigned long sys$enqw(unsigned int efn, unsigned int lkmode,
-                           struct _lksb *lksb, unsigned int flags, void *resnam,
-                           unsigned int parid, void (*astadr)(), unsigned long astprm,
-                           void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id);
+    unsigned long sys$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam,
+                          unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id);
+    unsigned long sys$enqw(unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam,
+                           unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id);
 
     unsigned long sys$erapat(void);
 
@@ -294,12 +293,10 @@ extern "C"
 
     unsigned long sys$putmsg(void);
 
-    unsigned long sys$qio(unsigned int efn, unsigned short int chan,
-                          unsigned int func, struct _iosb *iosb, void (*astadr)(__unknown_params),
-                          long astprm, void*p1, long p2, long p3, long p4, long p5, long p6);
-    unsigned long sys$qiow(unsigned int efn, unsigned short int chan,
-                           unsigned int func, struct _iosb *iosb, void (*astadr)(__unknown_params),
-                           long astprm, void*p1, long p2, long p3, long p4, long p5, long p6);
+    unsigned long sys$qio(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb,
+                          void (*astadr)(__unknown_params), long astprm, void*p1, long p2, long p3, long p4, long p5, long p6);
+    unsigned long sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb,
+                           void (*astadr)(__unknown_params), long astprm, void*p1, long p2, long p3, long p4, long p5, long p6);
 
     unsigned long sys$readef(void);
 

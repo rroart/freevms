@@ -448,7 +448,7 @@ static inline int pmd_large(pmd_t pte)
  */
 #define pgd_page(pgd) ((unsigned long) __va((unsigned long)pgd_val(pgd) & PTE_MASK))
 #define pgd_index(address) (((address) >> PGDIR_SHIFT) & (PTRS_PER_PGD-1))
-#define pgd_offset(mm, addr) ((mm)->pgd + pgd_index(addr))
+#define pgd_offset(mm, address) ((mm)->pgd + pgd_index(address))
 #define pgd_offset_k(address) (init_level4_pgt + pgd_index(address))
 #define pgd_present(pgd) (pgd_val(pgd) & _PAGE_PRESENT)
 #define mk_kernel_pgd(address) ((pgd_t){ (address) | _KERNPG_TABLE })
@@ -519,10 +519,6 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 
 #define page_pte(page) page_pte_prot(page, __pgprot(0))
 #define __pmd_page(pmd) (__va(pmd_val(pmd) & PHYSICAL_PAGE_MASK))
-
-/* to find an entry in a page-table-directory. */
-#define pgd_index(address) ((address >> PGDIR_SHIFT) & (PTRS_PER_PGD-1))
-#define pgd_offset(mm, address) ((mm)->pgd+pgd_index(address))
 
 #define __pgd_offset_k(pgd, address) ((pgd) + pgd_index(address))
 

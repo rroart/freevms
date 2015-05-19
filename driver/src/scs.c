@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source, 2001-2004. Based on decnet files.
 
 #define ETH_P_MYSCS 0x6009
@@ -929,7 +929,7 @@ int do_opc_dispatch(struct sk_buff *skb)
 //extern signed long XE_BROADCAST[];
 signed long XE_BROADCAST[3]= { -1 , -1 , -1}; // check
 
-scs_startdev ( scs_int2 , setflag , setaddr)
+int scs_startdev ( scs_int2 , setflag , setaddr)
 
 // This routine initializes the ethernet device to receive SCS packets.
 // Issue start command to the controller.

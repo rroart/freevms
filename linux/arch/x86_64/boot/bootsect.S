@@ -105,14 +105,14 @@ go:	movw	$0x4000-12, %di		# 0x4000 is an arbitrary value >=
 	movw	%cx, %fs		# %fs = 0
 	movw	$0x78, %bx		# %fs:%bx is parameter table address
 	pushw	%ds
-	ldsw	%fs:(%bx), %si		# %ds:%si is source
+	ldsw	%fs:(%bx), %si	# %ds:%si is source
 	movb	$6, %cl			# copy 12 bytes
-	pushw	%di			# %di = 0x4000-12.
-	rep				# don't worry about cld
-	movsw				# already done above
+	pushw	%di				# %di = 0x4000-12.
+	rep						# don't worry about cld
+	movsw					# already done above
 	popw	%di
 	popw	%ds
-	movb	$36, 0x4(%di)		# patch sector count
+	movb	$36, 0x4(%di)	# patch sector count
 	movw	%di, %fs:(%bx)
 	movw	%es, %fs:2(%bx)
 
@@ -123,20 +123,20 @@ go:	movw	$0x4000-12, %di		# 0x4000 is an arbitrary value >=
 # can be read, 15 if sector 15 can be read.  Otherwise guess 9.
 # Note that %cx = 0 from rep movsw above.
 
-	movw	$disksizes, %si		# table of sizes to try
+	movw	$disksizes, %si	# table of sizes to try
 probe_loop:
 	lodsb
-	cbtw				# extend to word
+	cbtw					# extend to word
 	movw	%ax, sectors
 	cmpw	$disksizes+4, %si
-	jae	got_sectors		# If all else fails, try 9
+	jae	got_sectors			# If all else fails, try 9
 
 	xchgw	%cx, %ax		# %cx = track and sector
 	xorw	%dx, %dx		# drive 0, head 0
-	movw	$0x0200, %bx		# address = 512, in INITSEG (%es = %cs)
-	movw	$0x0201, %ax		# service 2, 1 sector
+	movw	$0x0200, %bx	# address = 512, in INITSEG (%es = %cs)
+	movw	$0x0201, %ax	# service 2, 1 sector
 	int	$0x13
-	jc	probe_loop		# try next value
+	jc	probe_loop			# try next value
 
 got_sectors:
 	movb	$0x03, %ah		# read cursor pos
@@ -147,21 +147,21 @@ got_sectors:
 					# %bh is set above; int10 doesn't
 					# modify it
 	movw	$msg1, %bp
-	movw	$0x1301, %ax		# write string, move cursor
-	int	$0x10			# tell the user we're loading..
+	movw	$0x1301, %ax	# write string, move cursor
+	int	$0x10				# tell the user we're loading..
 
 # Load the setup-sectors directly after the moved bootblock (at 0x90200).
 # We should know the drive geometry to do it, as setup may exceed first
 # cylinder (for 9-sector 360K and 720K floppies).
 
-	movw	$0x0001, %ax		# set sread (sector-to-read) to 1 as
+	movw	$0x0001, %ax	# set sread (sector-to-read) to 1 as
 	movw	$sread, %si		# the boot sector has already been read
 	movw	%ax, (%si)
 
 	xorw	%ax, %ax		# reset FDC
 	xorb	%dl, %dl
 	int	$0x13
-	movw	$0x0200, %bx		# address = 512, in INITSEG
+	movw	$0x0200, %bx	# address = 512, in INITSEG
 next_step:
 	movb	setup_sects, %al
 	movw	sectors, %cx
@@ -172,14 +172,14 @@ next_step:
 	subw	(%si), %ax		# (%si) = sread
 no_cyl_crossing:
 	call	read_track
-	pushw	%ax			# save it
+	pushw	%ax				# save it
 	call	set_next		# set %bx properly; it uses %ax,%cx,%dx
-	popw	%ax			# restore
+	popw	%ax				# restore
 	subb	%al, setup_sects	# rest - for next step
 	jnz	next_step
 
 	pushw	$SYSSEG
-	popw	%es			# %es = SYSSEG
+	popw	%es				# %es = SYSSEG
 	call	read_it
 	call	kill_motor
 	call	print_nl
@@ -197,7 +197,7 @@ no_cyl_crossing:
 	jne	root_defined
 
 	movw	sectors, %bx
-	movw	$0x0208, %ax		# /dev/ps0 - 1.2Mb
+	movw	$0x0208, %ax	# /dev/ps0 - 1.2Mb
 	cmpw	$15, %bx
 	je	root_defined
 
@@ -231,21 +231,21 @@ track:	.word 0				# current track
 read_it:
 	movw	%es, %ax		# %es = SYSSEG when called
 	testw	$0x0fff, %ax
-die:	jne	die			# %es must be at 64kB boundary
+die:	jne	die				# %es must be at 64kB boundary
 	xorw	%bx, %bx		# %bx is starting address within segment
 rp_read:
 #ifdef __BIG_KERNEL__				
-					# look in setup.S for bootsect_kludge
+	# look in setup.S for bootsect_kludge
 	bootsect_kludge = 0x220		# 0x200 + 0x20 which is the size of the
-	lcall	*bootsect_kludge		# bootsector + bootsect_kludge offset
+	lcall	*bootsect_kludge	# bootsector + bootsect_kludge offset
 #else
 	movw	%es, %ax
 	subw	$SYSSEG, %ax
 	movw	%bx, %cx
 	shr	$4, %cx
-	add	%cx, %ax		# check offset
+	add	%cx, %ax			# check offset
 #endif
-	cmpw	syssize, %ax		# have we loaded everything yet?
+	cmpw	syssize, %ax	# have we loaded everything yet?
 	jbe	ok1_read
 
 	ret
@@ -271,7 +271,7 @@ ok2_read:
 read_track:
 	pusha
 	pusha	
-	movw	$0xe2e, %ax 		# loading... message 2e = .
+	movw	$0xe2e, %ax 	# loading... message 2e = .
 	movw	$7, %bx
  	int	$0x10
 	popa		
@@ -286,7 +286,7 @@ read_track:
 	movb	%dl, %dh
 	andw	$0x0100, %dx
 	movb	$2, %ah
-	pushw	%dx			# save for error dump
+	pushw	%dx				# save for error dump
 	pushw	%cx
 	pushw	%bx
 	pushw	%ax
@@ -321,7 +321,7 @@ set_next_fin:
 	ret
 
 bad_rt:
-	pushw	%ax			# save error code
+	pushw	%ax				# save error code
 	call	print_all		# %ah = error, %al = read
 	xorb	%ah, %ah
 	xorb	%dl, %dl
@@ -346,10 +346,10 @@ print_all:
 	movw	$5, %cx			# error code + 4 registers
 	movw	%sp, %bp
 print_loop:
-	pushw	%cx			# save count remaining
+	pushw	%cx				# save count remaining
 	call	print_nl		# <-- for readability
 	cmpb	$5, %cl
-	jae	no_reg			# see if register name is needed
+	jae	no_reg				# see if register name is needed
 	
 	movw	$0xe05 + 'A' - 1, %ax
 	subb	%cl, %al

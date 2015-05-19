@@ -10,6 +10,7 @@
 #include <ddbdef.h>
 #include <ddtdef.h>
 #include <dptdef.h>
+#include <fcbdef.h>
 #include <fdtdef.h>
 #include <fh2def.h>
 #include <iosbdef.h>
@@ -161,7 +162,7 @@ int block_commit_write2(struct _fcb * inode, struct page *page, unsigned from, u
 #if 0
 int ext2_sync_inode (struct _vcb * vcb, struct _fcb *inode);
 #endif
-mypfncheckaddr(void);
+void mypfncheckaddr(void);
 void vms_submit_bh(int rw, struct buffer_head * bh);
 signed long e2_map_vbn(struct _fcb * fcb, signed long vbn);
 void myqio(long rw, long data, long size, long blocknr,kdev_t dev, long block_factor);
@@ -173,7 +174,7 @@ int du_readblk(struct _irp * i, struct _ucb * u, struct _mscp_basic_pkt * m);
 int du_writeblk(struct _irp * i, struct _ucb * u, struct _mscp_basic_pkt * m);
 int du_rw(struct _irp * i, struct _mscp_ucb * u, struct _transfer_commands * m);
 void * find_mscp_cdt(void);
-insertfillist(struct _ucb *u, char *s);
+void insertfillist(struct _ucb *u, char *s);
 inline BLISSIF(int i);
 inline BLISSIFNOT(int i);
 long CH$PTR(long);
@@ -206,7 +207,7 @@ void scs_msg_fill(char * buf, struct _cdt * cdt, unsigned char msgflg, struct _s
 void scs_msg_fill_more(char * buf,struct _cdt * cdt, struct _cdrp * cdrp, int bufsiz);
 void scs_receive ( int i);
 inline void scs_nsp_send2(char * buf, int len);
-scs_startdev ( scs_int2 , setflag , setaddr);
+int scs_startdev ( scs_int2 , setflag , setaddr);
 //scs_startdev ( long, long, long);
 unsigned long inline buffer_offset(unsigned long buffer, unsigned long offset);
 int rms$get_idx(struct _rabdef * rab);
@@ -229,7 +230,7 @@ int f11b_io_done(struct _irp * i);
 unsigned f11b_extend(struct _fcb *fcb,unsigned blocks,unsigned contig);
 void *fcb_create2(struct _fh2 * head,unsigned *retsts);
 void *f11b_read_header(struct _vcb *vcb,struct _fiddef *fid,struct _fcb * fcb, unsigned long * retsts);
-void vms_ll_rw_block(int rw, int nr, struct buffer_head * bhs[],kdev_t dev);
+void vms_ll_rw_block(int rw, int nr, struct buffer_head * bhs[], kdev_t dev);
 void vms_mark_buffer_dirty(struct buffer_head * bh);
 int e2_fcb_wcb_add_one(struct _fcb * fcb,signed long vbn,signed long result);
 int ext2_delete_entry2 (struct _vcb * vcb, struct ext2_dir_entry_2 * dir, struct page * page, struct _fcb * inode );
@@ -282,16 +283,16 @@ void mscp_talk_with(char * node, char * sysap);
 void sig_exit(int sig, int exit_code, struct siginfo *info);
 
 #ifdef __x86_64__
-int new_thread(int nr, unsigned long clone_flags, unsigned long rsp,unsigned long unused,struct task_struct * p, struct pt_regs * regs);
+int new_thread(int nr, unsigned long clone_flags, unsigned long rsp,unsigned long unused, struct task_struct * p, struct pt_regs * regs);
 #else
-int new_thread(int nr, unsigned long clone_flags, unsigned long esp,unsigned long unused,struct task_struct * p, struct pt_regs * regs);
+int new_thread(int nr, unsigned long clone_flags, unsigned long esp,unsigned long unused, struct task_struct * p, struct pt_regs * regs);
 #endif
 
 void set_ccb_wind(short int channel, struct _fcb * fcb);
 
-unsigned device_lookup(unsigned devlen,char *devnam,int create,short int *retchan);
-unsigned deaccesschunk(unsigned wrtvbn,int wrtblks,int reuse);
-unsigned mount(unsigned flags,unsigned devices,char *devnam[],char *label[],struct _vcb **vcb);
+unsigned int device_lookup(unsigned devlen,char *devnam,int create,short int *retchan);
+unsigned int deaccesschunk(unsigned wrtvbn,int wrtblks,int reuse);
+unsigned int mount(unsigned flags,unsigned devices,char *devnam[],char *label[],struct _vcb **vcb);
 int unlock_xqp(char * prefix, struct __xqp * xqp);
 int serial_file(char * prefix, struct __xqp * xqp, int fid);
 int volume_lock(char * prefix, char * name);

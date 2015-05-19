@@ -6,8 +6,6 @@
 #ifndef __FIBDEF_LOADED
 #define __FIBDEF_LOADED 1
 
-#pragma nostandard
-
 #ifdef __cplusplus
 extern "C" {
 #define __unknown_params ...
@@ -491,7 +489,6 @@ _loc_rvn_fields.fib$b_loc_nmx
 #ifdef __cplusplus
 }
 #endif
-#pragma standard
 
 #endif /* __FIBDEF_LOADED */
 

@@ -11,7 +11,6 @@
 
 typedef  long int clock_t;
 
-#pragma nostandard
 #ifndef __TYPES_LOADED
 #include <types.h>
 #endif
@@ -25,7 +24,6 @@ struct tbuffer
 typedef struct tbuffer tbuffer_t;
 
 #include <timeb.h>
-#pragma standard
 
 struct tm
 {
@@ -62,9 +60,7 @@ typedef struct tm tm_t;
 
 clock_t clock (void);
 
-#pragma nostandard
 #undef difftime
-#pragma standard
 double difftime (time_t time2, time_t time1);
 
 time_t time (time_t *time_location);

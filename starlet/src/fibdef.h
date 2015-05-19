@@ -10,7 +10,7 @@
         ODS2 is distributed freely for all members of the
         VMS community to use. However all derived works
         must maintain comments in their source to acknowledge
-        the contibution of the original author.
+        the contribution of the original author.
 */
 
 #define FIB$M_NOWRITE 0x1

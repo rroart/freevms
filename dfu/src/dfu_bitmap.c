@@ -15,9 +15,6 @@
      Called by REPORT, UNDELETE , VERIFY.
 
 */
-#ifndef VAXC
-#pragma message disable(GLOBALEXT)
-#endif
 
 #include "fibdef.h"
 #include <ssdef.h>

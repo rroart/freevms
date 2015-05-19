@@ -4,6 +4,8 @@
     Used by DFU
 */
 
+#ifndef FILE_HDR_H
+#define FILE_HDR_H
 
 #define FH2$C_LEVEL1    257     /* Structure level 1        */
 #define FH2$C_LEVEL2    512     /* Structure level 2        */
@@ -470,3 +472,5 @@ struct map_3_struct
     unsigned short lowcount;    /* Low order part of the block count    */
     unsigned int   lbn;     /* Starting LBN for this extent     */
 };
+
+#endif /* FILE_HDR_H */

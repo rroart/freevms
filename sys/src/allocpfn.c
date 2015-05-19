@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <system_data_cells.h>
 #include <linux/mm.h>
@@ -535,7 +535,7 @@ out:
 #endif
 }
 
-mypfncheckaddr()
+void mypfncheckaddr()
 {
 #if 0
     // for debugging "only"

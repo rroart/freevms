@@ -100,8 +100,8 @@ HOSTCC  	= gcc
 CPPFLAGS := -I$(TOPDIR)/sys/src -I$(TOPDIR)/lib/src -I$(TOPDIR)/librtl/src -I$(TOPDIR)/starlet/src -I$(HPATH) $(OLDINCLUDE)
 
 CFLAGS := -Werror-implicit-function-declaration $(CPPFLAGS) -Wall -Wstrict-prototypes -Wno-trigraphs
-#CFLAGS += -fno-builtin-sprintf -O2 -fomit-frame-pointer -fno-strict-aliasing -fno-common
-CFLAGS += -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -DNOKERNEL
+#CFLAGS += -O2 -fomit-frame-pointer
+CFLAGS += -fdollars-in-identifiers -Wmissing-prototypes -Wcast-qual -Wconversion -DNOKERNEL
 
 HOSTCFLAGS	= -Werror-implicit-function-declaration -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -I$(TOPDIR)/linux/include2
 

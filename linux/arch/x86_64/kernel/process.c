@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -440,20 +440,20 @@ void __show_regs(struct pt_regs * regs)
     unsigned int fsindex,gsindex;
     unsigned int ds,cs,es;
 
-    printk("\n");
-    printk("Pid: %d, comm: %.20s %s\n", current->pcb$l_pid, current->pcb$t_lname, print_tainted());
-    printk("RIP: %04lx:", regs->cs & 0xffff);
+    printk(KERN_EMERG "\n");
+    printk(KERN_EMERG "Pid: %d, comm: %.20s %s\n", current->pcb$l_pid, current->pcb$t_lname, print_tainted());
+    printk(KERN_EMERG "RIP: %04lx:", regs->cs & 0xffff);
     printk_address(regs->rip);
-    printk("\nRSP: %04lx:%016lx  EFLAGS: %08lx\n", regs->ss, regs->rsp, regs->eflags);
-    printk("RAX: %016lx RBX: %016lx RCX: %016lx\n",
+    printk(KERN_EMERG "\nRSP: %04lx:%016lx  EFLAGS: %08lx\n", regs->ss, regs->rsp, regs->eflags);
+    printk(KERN_EMERG "RAX: %016lx RBX: %016lx RCX: %016lx\n",
            regs->rax, regs->rbx, regs->rcx);
-    printk("RDX: %016lx RSI: %016lx RDI: %016lx\n",
+    printk(KERN_EMERG "RDX: %016lx RSI: %016lx RDI: %016lx\n",
            regs->rdx, regs->rsi, regs->rdi);
-    printk("RBP: %016lx R08: %016lx R09: %016lx\n",
+    printk(KERN_EMERG "RBP: %016lx R08: %016lx R09: %016lx\n",
            regs->rbp, regs->r8, regs->r9);
-    printk("R10: %016lx R11: %016lx R12: %016lx\n",
+    printk(KERN_EMERG "R10: %016lx R11: %016lx R12: %016lx\n",
            regs->r10, regs->r11, regs->r12);
-    printk("R13: %016lx R14: %016lx R15: %016lx\n",
+    printk(KERN_EMERG "R13: %016lx R14: %016lx R15: %016lx\n",
            regs->r13, regs->r14, regs->r15);
 
     asm("movl %%ds,%0" : "=r" (ds));
@@ -471,10 +471,10 @@ void __show_regs(struct pt_regs * regs)
     asm("movq %%cr3, %0": "=r" (cr3));
     asm("movq %%cr4, %0": "=r" (cr4));
 
-    printk("FS:  %016lx(%04x) GS:%016lx(%04x) knlGS:%016lx\n",
+    printk(KERN_EMERG "FS:  %016lx(%04x) GS:%016lx(%04x) knlGS:%016lx\n",
            fs,fsindex,gs,gsindex,shadowgs);
-    printk("CS:  %04x DS: %04x ES: %04x CR0: %016lx\n", cs, ds, es, cr0);
-    printk("CR2: %016lx CR3: %016lx CR4: %016lx\n", cr2, cr3, cr4);
+    printk(KERN_EMERG "CS:  %04x DS: %04x ES: %04x CR0: %016lx\n", cs, ds, es, cr0);
+    printk(KERN_EMERG "CR2: %016lx CR3: %016lx CR4: %016lx\n", cr2, cr3, cr4);
 }
 
 void show_regs(struct pt_regs * regs)

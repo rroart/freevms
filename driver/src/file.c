@@ -360,7 +360,7 @@ struct _ucb * myfilelist[50];
 char * myfilelists[50];
 int myfilelistptr=0;
 
-insertfillist(struct _ucb *u, char *s)
+void insertfillist(struct _ucb *u, char *s)
 {
     myfilelists[myfilelistptr]=kmalloc(strlen(s)+1,0);
     memcpy(myfilelists[myfilelistptr],s,strlen(s)+1);

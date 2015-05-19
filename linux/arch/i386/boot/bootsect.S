@@ -172,14 +172,14 @@ next_step:
 	subw	(%si), %ax		# (%si) = sread
 no_cyl_crossing:
 	call	read_track
-	pushw	%ax			# save it
+	pushw	%ax				# save it
 	call	set_next		# set %bx properly; it uses %ax,%cx,%dx
-	popw	%ax			# restore
+	popw	%ax				# restore
 	subb	%al, setup_sects	# rest - for next step
 	jnz	next_step
 
 	pushw	$SYSSEG
-	popw	%es			# %es = SYSSEG
+	popw	%es				# %es = SYSSEG
 	call	read_it
 	call	kill_motor
 	call	print_nl
@@ -201,15 +201,15 @@ no_cyl_crossing:
 	cmpw	$15, %bx
 	je	root_defined
 
-	movb	$0x1c, %al		# /dev/PS0 - 1.44Mb
+	movb	$0x1c, %al			# /dev/PS0 - 1.44Mb
 	cmpw	$18, %bx
 	je	root_defined
 
-	movb	$0x20, %al		# /dev/fd0H2880 - 2.88Mb
+	movb	$0x20, %al			# /dev/fd0H2880 - 2.88Mb
 	cmpw	$36, %bx
 	je	root_defined
 
-	movb	$0, %al			# /dev/fd0 - autodetect
+	movb	$0, %al				# /dev/fd0 - autodetect
 root_defined:
 	movw	%ax, root_dev
 
@@ -231,10 +231,12 @@ track:	.word 0				# current track
 read_it:
 	movw	%es, %ax		# %es = SYSSEG when called
 	testw	$0x0fff, %ax
-die:	jne	die			# %es must be at 64kB boundary
+die:
+	jne	die			# %es must be at 64kB boundary
 	xorw	%bx, %bx		# %bx is starting address within segment
 rp_read:
-#ifdef __BIG_KERNEL__			# look in setup.S for bootsect_kludge
+#ifdef __BIG_KERNEL__
+	# look in setup.S for bootsect_kludge
 	bootsect_kludge = 0x220		# 0x200 + 0x20 which is the size of the
 	lcall	bootsect_kludge		# bootsector + bootsect_kludge offset
 #else
@@ -242,7 +244,7 @@ rp_read:
 	subw	$SYSSEG, %ax
 	movw	%bx, %cx
 	shr	$4, %cx
-	add	%cx, %ax		# check offset
+	add	%cx, %ax				# check offset
 #endif
 	cmpw	syssize, %ax		# have we loaded everything yet?
 	jbe	ok1_read
@@ -251,7 +253,7 @@ rp_read:
 
 ok1_read:
 	movw	sectors, %ax
-	subw	(%si), %ax		# (%si) = sread
+	subw	(%si), %ax			# (%si) = sread
 	movw	%ax, %cx
 	shlw	$9, %cx
 	addw	%bx, %cx
@@ -285,7 +287,7 @@ read_track:
 	movb	%dl, %dh
 	andw	$0x0100, %dx
 	movb	$2, %ah
-	pushw	%dx			# save for error dump
+	pushw	%dx				# save for error dump
 	pushw	%cx
 	pushw	%bx
 	pushw	%ax
@@ -320,7 +322,7 @@ set_next_fin:
 	ret
 
 bad_rt:
-	pushw	%ax			# save error code
+	pushw	%ax				# save error code
 	call	print_all		# %ah = error, %al = read
 	xorb	%ah, %ah
 	xorb	%dl, %dl
@@ -345,10 +347,10 @@ print_all:
 	movw	$5, %cx			# error code + 4 registers
 	movw	%sp, %bp
 print_loop:
-	pushw	%cx			# save count remaining
+	pushw	%cx				# save count remaining
 	call	print_nl		# <-- for readability
 	cmpb	$5, %cl
-	jae	no_reg			# see if register name is needed
+	jae	no_reg				# see if register name is needed
 	
 	movw	$0xe05 + 'A' - 1, %ax
 	subb	%cl, %al
