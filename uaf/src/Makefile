@@ -40,7 +40,7 @@ i386/authorize$(EXE): $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 
 i386/authorize${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 	install -d i386
-	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -lc $(EXTERNAL) $(VMSLIBS) -lelf -ldl $(LINKVMLINUX) -o i386/authorize${NOEXE}
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) $(EXTERNAL) $(VMSLIBS) -lelf -lc -ldl $(LINKVMLINUX) -o i386/authorize${NOEXE}
 
 ifneq ($(ARCH),x86_64)
 i386/authorize${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC) $(VMLINUX)

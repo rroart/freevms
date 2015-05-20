@@ -80,7 +80,7 @@ i386/sda$(EXE): $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 
 i386/sda${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(VMLINUX)
 	install -d i386
-	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) -lc $(EXTERNAL) $(VMSLIBS) -lelf -ldl $(LINKVMLINUX) -o i386/sda${NOEXE}
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) $(EXTERNAL) $(VMSLIBS) -lelf -lc -ldl $(LINKVMLINUX) -o i386/sda${NOEXE}
 
 ifneq ($(ARCH),x86_64)
 i386/sda${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC) $(VMLINUX)
