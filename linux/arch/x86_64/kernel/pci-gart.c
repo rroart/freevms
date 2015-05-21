@@ -47,10 +47,6 @@ int iommu_fullflush = 1;
 extern int fallback_aper_order;
 extern int fallback_aper_force;
 
-#ifdef CONFIG_SWIOTLB
-extern char *io_tlb_start, *io_tlb_end;
-#endif
-
 /* Allocation bitmap for the remapping area */
 static spinlock_t iommu_bitmap_lock = SPIN_LOCK_UNLOCKED;
 static unsigned long *iommu_gart_bitmap; /* guarded by iommu_bitmap_lock */
@@ -166,8 +162,10 @@ void *pci_alloc_consistent(struct pci_dev *hwdev, size_t size,
     int i;
     unsigned long iommu_page;
 
-    if (hwdev == NULL || hwdev->dma_mask < 0xffffffff || (no_iommu && !swiotlb))
+    if ((hwdev == NULL) || (hwdev->dma_mask < 0xffffffff) || (no_iommu))
+    {
         gfp |= GFP_DMA;
+    }
 
     /*
      * First try to allocate continuous and use directly if already
@@ -189,24 +187,6 @@ void *pci_alloc_consistent(struct pci_dev *hwdev, size_t size,
             mmu = 1;
         if (no_iommu)
         {
-#ifdef CONFIG_SWIOTLB
-            if (swiotlb && high && hwdev)
-            {
-                unsigned long dma_mask = 0;
-                if (hwdev->dma_mask == ~0UL)
-                {
-                    hwdev->dma_mask = 0xffffffff;
-                    dma_mask = ~0UL;
-                }
-                *dma_handle = swiotlb_map_single(hwdev, memory, size,
-                                                 PCI_DMA_FROMDEVICE);
-                if (dma_mask)
-                    hwdev->dma_mask = dma_mask;
-                memset(phys_to_virt(*dma_handle), 0, size);
-                free_pages((unsigned long)memory, get_order(size));
-                return phys_to_virt(*dma_handle);
-            }
-#endif
             if (high) goto error;
             mmu = 0;
         }
@@ -255,15 +235,6 @@ void pci_free_consistent(struct pci_dev *hwdev, size_t size,
     unsigned long iommu_page;
 
     size = round_up(size, PAGE_SIZE);
-#ifdef CONFIG_SWIOTLB
-    /* Overlap should not happen */
-    if (swiotlb && vaddr >= (void *)io_tlb_start &&
-            vaddr < (void *)io_tlb_end)
-    {
-        swiotlb_unmap_single (hwdev, bus, size, PCI_DMA_TODEVICE);
-        return;
-    }
-#endif
     if (bus >= iommu_bus_base && bus < iommu_bus_base + iommu_size)
     {
         unsigned pages = size >> PAGE_SHIFT;
@@ -359,12 +330,6 @@ dma_addr_t pci_map_single(struct pci_dev *dev, void *addr, size_t size,
 
     BUG_ON(dir == PCI_DMA_NONE);
 
-#ifdef CONFIG_SWIOTLB
-    if (swiotlb)
-        return swiotlb_map_single(dev,addr,size,dir);
-#endif
-
-
     phys_mem = virt_to_phys(addr);
     if (!need_iommu(dev, phys_mem, size))
         return phys_mem;
@@ -409,15 +374,6 @@ void pci_unmap_single(struct pci_dev *hwdev, dma_addr_t dma_addr,
 {
     unsigned long iommu_page;
     int npages;
-
-#ifdef CONFIG_SWIOTLB
-    if (swiotlb)
-    {
-        swiotlb_unmap_single(hwdev,dma_addr,size,direction);
-        return;
-    }
-#endif
-
 
     if (dma_addr < iommu_bus_base + EMERGENCY_PAGES*PAGE_SIZE ||
             dma_addr >= iommu_bus_base + iommu_size)
@@ -558,15 +514,6 @@ void __init pci_iommu_init(void)
     no_agp = 1;
 #else
     no_agp = no_agp || (agp_init() < 0) || (agp_copy_info(&info) < 0);
-#endif
-
-#ifdef CONFIG_SWIOTLB
-    if (swiotlb)
-    {
-        no_iommu = 1;
-        printk(KERN_INFO "PCI-DMA: Using SWIOTLB\n");
-        return;
-    }
 #endif
 
     if (no_iommu || (!force_mmu && end_pfn < 0xffffffff>>PAGE_SHIFT) || !iommu_aperture)

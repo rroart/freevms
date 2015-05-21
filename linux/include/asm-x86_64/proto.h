@@ -25,8 +25,6 @@ extern void syscall_init(void);
 
 extern void do_softirq_thunk(void);
 
-extern void swiotlb_init(void);
-
 extern int setup_early_printk(char *);
 extern void early_printk(const char *fmt, ...) __attribute__((format(printf,1,2)));
 

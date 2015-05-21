@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -57,9 +57,6 @@
 
 int acpi_disabled;
 EXPORT_SYMBOL(acpi_disabled);
-
-int swiotlb;
-EXPORT_SYMBOL(swiotlb);
 
 extern  int phys_proc_id[NR_CPUS];
 
@@ -367,13 +364,6 @@ void __init setup_arch(char **cmdline_p)
 
 #ifdef CONFIG_GART_IOMMU
     iommu_hole_init();
-#endif
-#ifdef CONFIG_SWIOTLB
-    if (!iommu_aperture && end_pfn >= 0xffffffff>>PAGE_SHIFT)
-    {
-        swiotlb_init();
-        swiotlb = 1;
-    }
 #endif
 
 #ifdef CONFIG_VT
