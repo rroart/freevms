@@ -21,7 +21,7 @@ int vms_mm=0;
 
 extern char *strndup (__const char *__string, size_t __n);
 
-genwrite();
+void genwrite();
 
 char * module_name;
 

@@ -19,8 +19,8 @@
 
     ****************************************************************
 */
-#ifndef _FATDEF_H_
-#define _FATDEF_H_ 1
+#ifndef FATDEF_H
+#define FATDEF_H
 
 /* Definitions for file (record) attributes */
 
@@ -72,5 +72,4 @@ struct fatdef
 #define FAT$C_LENGTH    32
 #define FAT$S_LENGTH    32
 
-#endif _FATDEF_H_
-
+#endif FATDEF_H

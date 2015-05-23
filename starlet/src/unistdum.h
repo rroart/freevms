@@ -3,8 +3,8 @@
  * Licensed under the GPL
  */
 
-#ifndef _UM_UNISTD_H_
-#define _UM_UNISTD_H_
+#ifndef UM_UNISTD_H
+#define UM_UNISTD_H
 
 #if 0
 #include "/usr/include/asm/unistd.h"

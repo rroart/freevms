@@ -29,8 +29,8 @@
 
 /* Linux PRO/1000 Ethernet Driver main header file */
 
-#ifndef _E1000_H_
-#define _E1000_H_
+#ifndef E1000_H
+#define E1000_H
 
 #include <linux/stddef.h>
 #include <linux/module.h>
@@ -382,4 +382,4 @@ enum e1000_state_t
     __E1000_RESETTING,
     __E1000_DOWN
 };
-#endif /* _E1000_H_ */
+#endif /* E1000_H */

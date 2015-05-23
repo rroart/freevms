@@ -17,7 +17,7 @@ extern char *strndup (__const char *__string, size_t __n);
 
 int out;
 
-genwrite()
+void genwrite()
 {
     if (module_name)
     {

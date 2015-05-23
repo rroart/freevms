@@ -10,6 +10,11 @@
         the contibution of the original author.
 */
 
+#ifndef DIRECT_H
+#define DIRECT_H
+
 unsigned direct(struct _vcb *vcb,struct dsc$descriptor *fibdsc,
                 struct dsc$descriptor *filedsc,unsigned short *reslen,
                 struct dsc$descriptor *resdsc, struct _atrdef * atrp, unsigned action, struct _irp * i);
+
+#endif /* DIRECT_H */

@@ -31,7 +31,7 @@ int gencode_single_clause(tree t, struct _cdu * cdu);
 int gencode_cliflags(tree t, struct _cdu * cdu);
 int gencode_type(tree t, struct _cdu * cdu);
 int gencode_verb(tree t, struct _cdu * cdu);
-genwrite();
+void genwrite();
 int gencode(tree t);
 
 main(int argc, char ** argv)
@@ -370,7 +370,7 @@ next:
     }
 }
 
-genwrite()
+void genwrite()
 {
     int out;
     if (module_name)

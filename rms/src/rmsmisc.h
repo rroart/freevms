@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Paul Nankervis.
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 /*      For file context info we use WCCDIR and WCCFILE structures...
         Each WCCFILE structure contains one WCCDIR structure for file
@@ -22,6 +22,8 @@
         exist before the bit contributed by this WCCDIR. (ie to store
         the device name and any previous directory name entries.)  */
 
+#ifndef RMSMISC_H
+#define RMSMISC_H
 
 #define STATUS_INIT 1
 #define STATUS_TMPDIR  2
@@ -66,3 +68,5 @@ extern struct _ifbdef *ifb_table[];
 // pick 30 for xqp; set in access.c
 
 #define RMS_EF 29
+
+#endif /* RMSMISC_H */

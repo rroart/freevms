@@ -748,7 +748,7 @@ size_t rsize;
  *  process a virtual block record (file record)
  *
  */
-process_vbn(buffer, rsize)
+void process_vbn(buffer, rsize)
 char *buffer;
 unsigned short rsize;
 {

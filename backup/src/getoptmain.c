@@ -4,11 +4,12 @@ char *version = "VMSBACKUP4.1";
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "sysdep.h"
 #include "vmsbackup.h"
 #include "getopt.h"
 
-void usage(progname)
-char *progname;
+void usage(char *progname)
 {
     fprintf(stderr,
             "\
@@ -19,9 +20,7 @@ Usage:  %s -{tx}[cdevwF][-b blocksize][-s setnumber][-f tapefile]\n",
 extern int optind;
 extern char *optarg;
 
-int main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char *argv[])
 {
     char *progname;
     int c;
@@ -108,6 +107,7 @@ char *argv[];
         exit(1);
     }
     vmsbackup();
+    return 0;
 }
 
 /* The following is code for non-VMS systems which isn't related to main()

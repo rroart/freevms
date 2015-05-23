@@ -28,7 +28,7 @@ MODELGCC = gcc
 endif
 
 OBJS = sdamain.o sda_parse.o device.o misc.o sda_lock.o sda_dump.o sda_exam.o \
-	sda_proc.o sda_spin.o sda_addr.o System_map.o sdamap.o
+	sda_proc.o sda_spin.o sda_addr.o system_map.o sdamap.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 pic/%.o: %.c

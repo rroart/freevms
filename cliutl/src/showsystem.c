@@ -19,7 +19,7 @@ static char * states[] =
     "SUSPO", "FPG", "COM", "COMO", "CUR"
 };
 
-show_system()
+void show_system()
 {
     int i;
     struct item_list_3 lst[14], syilst[4];
@@ -143,5 +143,5 @@ show_system()
                pagef, pagep + pageg);
     }
     while (jpistatus == SS$_NORMAL);
-//    } while (jpistatus != SS$_NOMOREPROC);
+//    while (jpistatus != SS$_NOMOREPROC);
 }

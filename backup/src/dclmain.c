@@ -67,8 +67,8 @@ char *argv[];
             p2_saveset = 1;
         }
         if (result.dsc$w_length != 2
-                || result.dsc$a_pointer[0] != '['
-                || result.dsc$a_pointer[1] != ']')
+                || ((char *)result.dsc$a_pointer)[0] != '['
+                || ((char *)result.dsc$a_pointer)[1] != ']')
         {
             fprintf (stderr,
                      "error: extraction only supported to []\n");

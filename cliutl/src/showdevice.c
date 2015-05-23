@@ -30,6 +30,5 @@ void show_device(void)
         printf("%s\n",devname);
     }
     while (dvistatus == SS$_NORMAL);
-//} while (jpistatus != SS$_NOMOREPROC);
 //printf("dvistatus %x\n",dvistatus);
 }

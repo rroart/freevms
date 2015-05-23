@@ -10,9 +10,8 @@
         the contibution of the original author.
 */
 
-#ifndef CACHE_LOADED
-
-#define CACHE_LOADED
+#ifndef CACHE_H
+#define CACHE_H
 
 #ifndef VAXC    /* Stupid VAX C doesn't allow "signed" keyword */
 #define signed signed
@@ -45,4 +44,5 @@ void cache_untouch(struct CACHE * cacheobj,int recycle);
 void *cache_find(void **root,unsigned hashval,void *keyval,unsigned *retsts,
                  int (*compare_func) (unsigned hashval,void *keyval,void *node),
                  void *(*create_func) (unsigned hashval,void *keyval,unsigned *retsts));
-#endif
+
+#endif /* CACHE_H */

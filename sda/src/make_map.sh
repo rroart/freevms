@@ -1,12 +1,12 @@
 #!/bin/sh
 
-echo \#include \"System_map.h\" > System_map.c
-echo "struct System_map System_map[] = {" >> System_map.c
-for X in `cat ../../linux/System.map|sed -e "s/ . /,\"/g"`; do
-echo "{" >> System_map.c
+echo \#include \"system_map.h\" > system_map.c
+echo "struct system_map system_map[] = {" >> system_map.c
+for X in `cat ../../linux/system.map|sed -e "s/ . /,\"/g"`; do
+echo "{" >> system_map.c
 #Y=`echo $X|sed -e "s/:.:/, \"/"`
-echo 0x$X\" >> System_map.c
-echo "}," >> System_map.c
+echo 0x$X\" >> system_map.c
+echo "}," >> system_map.c
 done
-echo "{ 0,0 }" >> System_map.c
-echo "};" >> System_map.c
+echo "{ 0,0 }" >> system_map.c
+echo "};" >> system_map.c

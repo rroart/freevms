@@ -1,5 +1,5 @@
-#ifndef __SYSGEN_LOADED
-#define __SYSGEN_LOADED 1
+#ifndef SYSGEN_H
+#define SYSGEN_H
 
 /* Will change name to sysparam.h */
 
@@ -260,4 +260,4 @@
 
 #define CHANNELCNT 1024
 
-#endif /* __SYSGEN_LOADED */
+#endif /* SYSGEN_H */

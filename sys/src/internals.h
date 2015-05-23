@@ -1,3 +1,6 @@
+#ifndef INTERNALS_H
+#define INTERNALS_H
+
 #include <ipl.h>
 #include <spldef.h>
 
@@ -59,3 +62,4 @@ static void inline vmsunlock(struct _spl * lockname,signed int lockipl)
 #endif
 }
 
+#endif /* INTERNALS_H */

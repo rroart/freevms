@@ -26,8 +26,8 @@
 
 *******************************************************************************/
 
-#ifndef _KCOMPAT_H_
-#define _KCOMPAT_H_
+#ifndef KCOMPAT_H
+#define KCOMPAT_H
 
 #include <linux/version.h>
 #include <linux/types.h>
@@ -404,5 +404,5 @@ static inline int _kc_request_irq(unsigned int irq, new_handler_t handler, unsig
 #endif /* < 2.6.19 */
 /*****************************************************************************/
 
-#endif /* _KCOMPAT_H_ */
+#endif /* KCOMPAT_H */
 

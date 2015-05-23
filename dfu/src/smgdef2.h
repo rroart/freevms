@@ -1,3 +1,6 @@
+#ifndef SMGDEF2_H
+#define SMGDEF2_H
+
 #undef SMG$M_CURSOR_OFF
 static int SMG$M_CURSOR_OFF = 1;
 #undef SMG$M_CURSOR_ON
@@ -58,3 +61,5 @@ static int i2 = 2;
 static int i80 = 80;
 static int i132 = 132;
 static int i500 = 500;
+
+#endif /* SMGDEF2_H */

@@ -1,3 +1,6 @@
+#ifndef HOME2DEF_H
+#define HOME2DEF_H
+
 /*
     Home block definitions for DFU
 */
@@ -162,3 +165,5 @@ struct  HM2_Struct
     unsigned short reserved2;   /* Unused word              */
     unsigned short checksum2;   /* Checksum for preceeding 510 bytes    */
 };
+
+#endif /* HOME2DEF_H */

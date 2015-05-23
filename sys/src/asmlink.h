@@ -1,3 +1,6 @@
+#ifndef ASMLINK_H
+#define ASMLINK_H
+
 #include <linux/linkage.h>
 
 asmlinkage void sched_vector(void);
@@ -28,3 +31,5 @@ asmlinkage int vms_system_call2(void);
 asmlinkage int vms_system_call3(void);
 asmlinkage int vms_system_call0(void);
 #endif
+
+#endif /* ASMLINK_H */

@@ -1,3 +1,6 @@
+#ifndef CLIPARSE_H
+#define CLIPARSE_H
+
 typedef int bool;
 
 typedef struct struct_tree tree;
@@ -260,3 +263,5 @@ static inline tree build_not (int is_integer, long p1, long p2)
     return t;
 }
 #endif
+
+#endif /* CLIPARSE_H */

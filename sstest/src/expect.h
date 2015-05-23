@@ -23,6 +23,86 @@ extern unsigned int failed;
         }\
     }
 
+#define EXPECT_NE(x, y)\
+    {\
+        int xx = x;\
+        int yy = y;\
+        if ((xx) != (yy))\
+        {\
+            passed++;\
+        }\
+        else\
+        {\
+            failed++;\
+            printf("FAIL %s:%d\n\texpected " #x " != " #y "\n\tgot %d (0x%x)\n",\
+                    __FILE__, __LINE__, xx, (unsigned int)xx);\
+        }\
+    }
+
+#define EXPECT_GE(x, y)\
+    {\
+        int xx = x;\
+        int yy = y;\
+        if ((xx) >= (yy))\
+        {\
+            passed++;\
+        }\
+        else\
+        {\
+            failed++;\
+            printf("FAIL %s:%d\n\texpected " #x " >= " #y "\n\tgot %d (0x%x) < %d (0x%x)\n",\
+                    __FILE__, __LINE__, xx, (unsigned int)xx, yy, (unsigned int)yy);\
+        }\
+    }
+
+#define EXPECT_GT(x, y)\
+    {\
+        int xx = x;\
+        int yy = y;\
+        if ((xx) > (yy))\
+        {\
+            passed++;\
+        }\
+        else\
+        {\
+            failed++;\
+            printf("FAIL %s:%d\n\texpected " #x " > " #y "\n\tgot %d (0x%x) <= %d (0x%x)\n",\
+                    __FILE__, __LINE__, xx, (unsigned int)xx, yy, (unsigned int)yy);\
+        }\
+    }
+
+#define EXPECT_LE(x, y)\
+    {\
+        int xx = x;\
+        int yy = y;\
+        if ((xx) <= (yy))\
+        {\
+            passed++;\
+        }\
+        else\
+        {\
+            failed++;\
+            printf("FAIL %s:%d\n\texpected " #x " <= " #y "\n\tgot %d (0x%x) > %d (0x%x)\n",\
+                    __FILE__, __LINE__, xx, (unsigned int)xx, yy, (unsigned int)yy);\
+        }\
+    }
+
+#define EXPECT_LT(x, y)\
+    {\
+        int xx = x;\
+        int yy = y;\
+        if ((xx) < (yy))\
+        {\
+            passed++;\
+        }\
+        else\
+        {\
+            failed++;\
+            printf("FAIL %s:%d\n\texpected " #x " < " #y "\n\tgot %d (0x%x) >= %d (0x%x)\n",\
+                    __FILE__, __LINE__, xx, (unsigned int)xx, yy, (unsigned int)yy);\
+        }\
+    }
+
 #define EXPECT_SUCCESS(x)\
     {\
         int xx = x;\

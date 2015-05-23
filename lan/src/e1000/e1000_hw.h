@@ -30,8 +30,8 @@
  * Structures, enums, and macros for the MAC
  */
 
-#ifndef _E1000_HW_H_
-#define _E1000_HW_H_
+#ifndef E1000_HW_H
+#define E1000_HW_H
 
 #include "e1000_osdep.h"
 
@@ -3485,4 +3485,4 @@ uint16_t regval;
 #define AUTONEG_ADVERTISE_10_100_ALL    0x000F /* All 10/100 speeds*/
 #define AUTONEG_ADVERTISE_10_ALL        0x0003 /* 10Mbps Full & Half speeds*/
 
-#endif /* _E1000_HW_H_ */
+#endif /* E1000_HW_H */

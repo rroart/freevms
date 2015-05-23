@@ -1,3 +1,6 @@
+#ifndef MYTYPEDEFS_H
+#define MYTYPEDEFS_H
+
 typedef long long __int64;
 typedef long __int32;
 typedef long long int64;
@@ -212,3 +215,5 @@ typedef struct _write_log_entry  WRITE_LOG_ENTRY ;
 typedef struct _wwid  WWID ;
 typedef struct _wwident  WWIDENT ;
 typedef struct _wwidhdr WWIDHDR ;
+
+#endif /* MYTYPEDEFS_H */

@@ -182,13 +182,13 @@ void boot_insqti (void * entry, void * header)
     *(signed long *)header=tmp1;
 }
 
-INSQUE(long x, long y)
+int INSQUE(long x, long y)
 {
     insque(x,y);
     return 1; //SS$_NORMAL;
 }
 
-REMQUE(long * e, long * a)
+int REMQUE(long * e, long * a)
 {
     int retval=0;
     if (e==e[1]) retval|=1;

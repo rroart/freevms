@@ -4,8 +4,8 @@
    Some of these names and comments originated from the Crynwr
    packet drivers, which are distributed under the GPL. */
 
-#ifndef _8390_h
-#define _8390_h
+#ifndef _8390_H
+#define _8390_H
 
 #include <linux/config.h>
 #include <linux/if_ether.h>
@@ -196,4 +196,4 @@ struct ei_device
 #define ENTSR_CDH 0x40  /* The collision detect "heartbeat" signal was lost. */
 #define ENTSR_OWC 0x80  /* There was an out-of-window collision. */
 
-#endif /* _8390_h */
+#endif /* _8390_H */

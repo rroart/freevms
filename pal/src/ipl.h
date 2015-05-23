@@ -37,4 +37,4 @@ inline int getipl(void);
 inline char intr_blocked(unsigned char this);
 inline void regtrap(char type, char param);
 
-#endif
+#endif /* IPL_H */

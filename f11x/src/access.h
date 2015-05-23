@@ -10,6 +10,9 @@
  the contibution of the original author.
  */
 
+#ifndef ACCESS_H
+#define ACCESS_H
+
 #include <fcbdef.h>
 #include <fh2def.h>
 #include <fiddef.h>
@@ -54,3 +57,4 @@ unsigned writehead(struct _fcb * fcb, struct _fh2 *headbuff);
 void * f11b_read_header(struct _vcb *vcb, struct _fiddef *fid,
                         struct _fcb * fcb, unsigned long * retsts);
 
+#endif /* ACCESS_H */

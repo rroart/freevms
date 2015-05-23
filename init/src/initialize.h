@@ -1,3 +1,6 @@
+#ifndef INITIALIZE_H
+#define INITIALIZE_H
+
 #include "../../lib/src/mytypes.h"
 #include "../../starlet/src/uicdef.h"
 #include "../../lib/src/hm2def.h"
@@ -23,3 +26,5 @@ struct FM2_C_FORMAT2
     unsigned short int fm2$w_word0;
     unsigned short int fm2$v_count2;
 };
+
+#endif /* INITIALIZE_H */

@@ -31,8 +31,8 @@
  * includes register access macros
  */
 
-#ifndef _E1000_OSDEP_H_
-#define _E1000_OSDEP_H_
+#ifndef E1000_OSDEP_H
+#define E1000_OSDEP_H
 
 #include <linux/types.h>
 #include <linux/pci.h>
@@ -137,4 +137,4 @@ typedef enum
 #define E1000_READ_ICH_FLASH_REG16(a, reg) ( \
     readw((a)->flash_address + reg))
 
-#endif /* _E1000_OSDEP_H_ */
+#endif /* E1000_OSDEP_H */
