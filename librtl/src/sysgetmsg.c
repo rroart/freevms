@@ -28,13 +28,13 @@
  *
  */
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <ssdef.h>
-#include <strdef.h>
-#include <libdef.h>
 #include <rmsdef.h>
-#include <stdarg.h>
+#include <libdef.h>
+#include <strdef.h>
 
 // just as a workaround until someone implements MSG utility (-Roar)
 
@@ -51,7 +51,6 @@
  *
  */
 
-int sys$$getmsg (unsigned int msgid, unsigned short int *msglen, char *fmt,...);
 void    check_ss_codes ( int strmsgid, void *bufadr, void *smesg);
 void    check_str_codes( int strmsgid, void *bufadr, void *smesg);
 void    check_lib_codes( int libmsgid, void *bufadr, void *smesg);

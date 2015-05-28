@@ -35,9 +35,10 @@
 */
 
 #include <stdlib.h>
+#include <ssdef.h>
+#include <starlet.h>
+
 #include "lib$routines.h"   /* Our header file! */
-#include "sys$routines.h"
-#include "ssdef.h"
 
 #define TIMEBASE 100000         /* 10 millisecond units in quadword */
 #define TIMESIZE 8640000        /* Factor between dates & times */
@@ -64,8 +65,7 @@ struct TIME
 
 
 /* lib_day() is a routine to crack quadword into day number and time */
-
-unsigned long lib$day(long *days, const void *timadra, int *day_time)
+int lib$day(long *days, const void *timadra, int *day_time)
 {
     const struct TIME *timadr = (const struct TIME *)timadra;
 
@@ -79,8 +79,7 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
 
     if (timadr == NULL)
     {
-        register unsigned sts;
-        sts = sys$gettim(&wrktim);
+        register int sts = sys$gettim(&wrktim);
         if ((sts & 1) == 0)
         {
             return sts;

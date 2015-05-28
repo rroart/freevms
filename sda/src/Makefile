@@ -99,7 +99,7 @@ sda_parse.o: sda_parse.c
 sda_parse.c: sda_parse.cld
 	../../cdu/src/cdu sda_parse.cld
 
-System_map.c: ../../linux/vmlinux make_map.sh
+system_map.c: ../../linux/vmlinux make_map.sh
 	./make_map.sh
 
 include $(TOPDIR)/Rules.make.freevms

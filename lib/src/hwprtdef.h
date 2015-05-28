@@ -1,4 +1,4 @@
-#ifdef HWPRTDEF_H
+#ifndef HWPRTDEF_H
 #define HWPRTDEF_H
 
 // really axp stuff
@@ -19,5 +19,4 @@
 #define HWPRT$C_UREW 0x3f
 #define HWPRT$C_URSW 0x7f
 
-#endif
-
+#endif /* HWPRTDEF_H */

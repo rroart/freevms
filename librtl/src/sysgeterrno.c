@@ -27,7 +27,6 @@
  *  N6G 3L4
  *
  */
-int sys$$geterrno(char *errmsg);
 
 #include <stdio.h>
 #include <string.h>

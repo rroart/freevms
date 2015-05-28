@@ -24,6 +24,9 @@
  *      Change 'short' to 'unsigned short' in several places.
  */
 
+#ifndef STR_ROUTINES_H
+#define STR_ROUTINES_H
+
 #undef _buildz
 #define _buildz(...) __VA_ARGS__, 0
 
@@ -259,4 +262,4 @@ PROTO unsigned long str$$copy_fill(char* dest_ptr, unsigned short dest_length,
 PROTO void str$$malloc_sd(struct dsc$descriptor_s *temp_sd, char *string);
 PROTO void    str$$print_sd (const struct dsc$descriptor_s *sd1 );
 
-
+#endif /* STR_ROUTINES_H */

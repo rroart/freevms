@@ -43,7 +43,6 @@
 
 #include <linux/time.h>               /* C header for $GETTIM to find time */
 #include <linux/string.h>
-#include <sys$routines.h>   /* Our header file! */
 #include <ssdef.h>
 #include <descrip.h>
 #include <lib$routines.h>   /* LIB$ Header File */
@@ -89,9 +88,7 @@ unsigned long sys$__combine_date_time(int days, struct TIME *timadr,
     }
     else
     {
-
         /* Put days into quad timbuf... */
-
         unsigned long count, time;
         unsigned char *ptr;
 
@@ -119,7 +116,6 @@ unsigned long sys$__combine_date_time(int days, struct TIME *timadr,
         while (--count > 0);
 
         /* Factor by time base... */
-
         count = 8;
         ptr = timadr->time;
         time = 0;
@@ -138,8 +134,7 @@ unsigned long sys$__combine_date_time(int days, struct TIME *timadr,
 /* borrowed... -Roar Thron�s */
 
 /* lib_day() is a routine to crack quadword into day number and time */
-
-unsigned long lib$day(long *days, const void *timadra, int *day_time)
+int lib$day(long *days, const void *timadra, int *day_time)
 {
     const struct TIME *timadr = (const struct TIME *) timadra;
 
@@ -150,11 +145,9 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
     int delta;
 
     /* If no time specified get current using gettim() */
-
     if (timadr == NULL )
     {
-        register unsigned sts;
-        sts = exe$gettim(&wrktim);
+        register int sts = exe$gettim(&wrktim);
         if ((sts & 1) == 0)
         {
             return sts;
@@ -164,15 +157,11 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
     }
     else
     {
-
         /* Check specified time for delta... */
-
         srcptr = timadr->time + 7;
         if ((delta = (*srcptr & 0x80)))
         {
-
             /* We have to 2's complement delta times - sigh!! */
-
             count = 8;
             srcptr = timadr->time;
             dstptr = wrktim.time;
@@ -189,7 +178,6 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
     }
 
     /* Throw away the unrequired time precision */
-
     count = 8;
     dstptr = wrktim.time + 7;
     time = 0;
@@ -202,7 +190,6 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
     while (--count > 0);
 
     /* Seperate the date and time */
-
     date = time = 0;
     srcptr = wrktim.time + 7;
     count = 8;
@@ -215,7 +202,6 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
     while (--count > 0);
 
     /* Return results... */
-
     if (delta)
     {
         *days = -(int) date;
@@ -233,7 +219,6 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
 }
 
 /* more borrowed... */
-
 unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
 {
     const unsigned short * timbuf = (const unsigned short *) timbufa;
@@ -304,9 +289,7 @@ unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
         sts = sys$__combine_date_time(days, timadr, day_time);
         if (delta)
         {
-
             /* We have to 2's complement delta times - sigh!! */
-
             register unsigned count, time;
             register unsigned char *ptr;
             count = 8;
@@ -325,7 +308,6 @@ unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
 }
 
 /* sys_asctim() converts quadword to ascii... */
-
 int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf,
                const void *timadra, unsigned long cvtflg)
 {
@@ -335,11 +317,14 @@ int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf,
     long length = timbuf->dsc$w_length;
     char *chrptr = timbuf->dsc$a_pointer;
 
+    if (timlen != NULL)
+    {
+        *timlen = 0;
+    }
 #if 0
     printk("flag %x\n",cvtflg);
 #endif
     /* First use sys_numtim to get the date/time fields... */
-
     {
         register unsigned sts;
         sts = exe$numtim(wrktim, timadr);
@@ -349,8 +334,6 @@ int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf,
         }
     }
 
-    /* See if we want delta days or date... */
-
 #if 0
     {
         int i;
@@ -358,17 +341,13 @@ int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf,
         printk("\n");
     }
 #endif
-
+    /* See if we want delta days or date... */
     if (cvtflg == 0)
     {
-
         /* Check if date or delta time... */
-
         if (*wrktim)
         {
-
             /* Put in days and month... */
-
             if (length > 0)
             {
                 if ((timval = wrktim[2]) / 10 == 0)
@@ -386,8 +365,11 @@ int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf,
                 *chrptr++ = '0' + (timval % 10);
                 length--;
             }
-            if ((count = length) > 5)
+            count = length;
+            if (count > 5)
+            {
                 count = 5;
+            }
             memcpy(chrptr, month_names + (wrktim[1] * 4 - 4), count);
             length -= count;
             chrptr += count;
@@ -395,14 +377,11 @@ int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf,
         }
         else
         {
-
             /* Get delta days... */
-
             timval = wrktim[2];
         }
 
         /* Common code for year number and delta days!! */
-
         count = 10000;
         if (timval < count)
         {
@@ -423,15 +402,14 @@ int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf,
         }
 
         /* Space between date and time... */
-
         if (length > 0)
         {
             *chrptr++ = ' ';
             length--;
         }
     }
-    /* Do time... :-) */
 
+    /* Do time... :-) */
     count = 3;
     do
     {
@@ -463,9 +441,10 @@ int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf,
     while (++count < 7);
 
     /* We've done it - time to return length... */
-
     if (timlen != NULL )
+    {
         *timlen = timbuf->dsc$w_length - length;
+    }
     return SS$_NORMAL;
 }
 
@@ -483,7 +462,6 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
     int num, tf;
 
     /* Skip leading spaces... */
-
     while (length > 0 && *chrptr == ' ')
     {
         length--;
@@ -491,7 +469,6 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
     }
 
     /* Get the day number... */
-
     num = -1;
     if (length > 0 && *chrptr >= '0' && *chrptr <= '9')
     {
@@ -502,14 +479,13 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
         }
         while (--length > 0 && *chrptr >= '0' && *chrptr <= '9');
     }
-    /* Check for month separator "-" - if none delta time... */
 
+    /* Check for month separator "-" - if none delta time... */
     if (length > 0 && *chrptr == '-')
     {
         chrptr++;
 
         /* Get current time for defaults... */
-
         exe$numtim(wrktim, NULL );
         if (num >= 0)
             wrktim[2] = num;
@@ -529,8 +505,8 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
             length -= 3;
             wrktim[1] = num;
         }
-        /* Now look for year... */
 
+        /* Now look for year... */
         if (length > 0 && *chrptr == '-')
         {
             length--;
@@ -549,16 +525,13 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
     }
     else
     {
-
         /* Delta time then... */
-
         wrktim[0] = wrktim[1] = 0;
         wrktim[2] = num;
         wrktim[3] = wrktim[4] = wrktim[5] = wrktim[6] = 0;
     }
 
     /* Skip any spaces between date and time... */
-
     while (length > 0 && *chrptr == ' ')
     {
         length--;
@@ -566,7 +539,6 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
     }
 
     /* Now wrap up time fields... */
-
     for (tf = 0; tf < 3; tf++)
     {
         if (length > 0 && *chrptr >= '0' && *chrptr <= '9')
@@ -593,8 +565,7 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
     }
 
     /* Hundredths of seconds need special handling... */
-
-    if (length > 0 && *chrptr >= '0' && *chrptr <= '9')
+    if ((length > 0) && (*chrptr >= '0') && (*chrptr <= '9'))
     {
         tf = 10;
         num = 0;
@@ -606,8 +577,8 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
         while (--length > 0 && *chrptr >= '0' && *chrptr <= '9');
         wrktim[6] = num;
     }
-    /* Now skip any trailing spaces... */
 
+    /* Now skip any trailing spaces... */
     while (length > 0 && *chrptr == ' ')
     {
         length--;
@@ -615,7 +586,6 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
     }
 
     /* If anything left then we have a problem... */
-
     if (length == 0)
     {
         return lib$cvt_vectim(wrktim, timadr);
@@ -627,20 +597,19 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
 }
 
 /* sys_numtim() takes quadword and breaks it into a seven word time buffer */
-
 static const unsigned char month_days[] =
 { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 int exe$numtim(unsigned short timbuf[7], struct TIME *timadra)
 {
     struct TIME *timadr = (struct TIME *) timadra;
-    register date, time;
+    register int date, time;
 
     /* Use lib_day to crack time into date/time... */
 
     {
         int days, day_time;
-        register unsigned sts;
+        register int sts;
         sts = lib$day(&days, timadr, &day_time);
         if ((sts & 1) == 0)
         {
@@ -665,7 +634,7 @@ int exe$numtim(unsigned short timbuf[7], struct TIME *timadra)
 
         /* Date... */
 
-        register year, month;
+        register int year, month;
         date += OFFSET_DAYS;
         year = BASE_YEAR + (date / QUAD_CENTURY_DAYS) * 400;
         date %= QUAD_CENTURY_DAYS;
@@ -732,4 +701,3 @@ int exe$numtim(unsigned short timbuf[7], struct TIME *timadra)
 
     return SS$_NORMAL;
 }
-

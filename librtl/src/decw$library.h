@@ -50,8 +50,8 @@ in this Software without prior written authorization from the X Consortium.
 
 */
 
-#ifndef _XtIntrinsic_h
-#define _XtIntrinsic_h
+#ifndef DECW_LIBRARY_H
+#define DECW_LIBRARY_H
 
 #include    <X11/Xlib.h>
 #include    <X11/Xutil.h>
@@ -3593,5 +3593,5 @@ extern void XtProcessUnlock(
 
 _XFUNCPROTOEND
 
-#endif /* _XtIntrinsicP_h */
+#endif /* DECW_LIBRARY_H */
 /* DON'T ADD STUFF AFTER THIS #endif */

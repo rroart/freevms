@@ -1,7 +1,7 @@
-#ifndef ifbdef_h
-#define ifbdef_h
+#ifndef IRBDEF_H
+#define IRBDEF_H
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 // based on / taken from rmsint2.doc
 
@@ -43,4 +43,4 @@ struct _irbdef
     unsigned short irb$w_spos;
 };
 
-#endif
+#endif /* IRBDEF_H */

@@ -45,7 +45,8 @@ void run_time_test(void)
     EXPECT_EQ(call_sys$gettim(&date_time), SS$_NORMAL);
     EXPECT_NE(memcmp(&date_time, &date_time_copy, sizeof(date_time)), 0);
     EXPECT_EQ(call_sys$asctim(&time_name_length, time_name, &date_time), SS$_NORMAL);
-    EXPECT_NE(strncmp(time_name, "", MAX_TIME_NAME_LEN), 0);
+    EXPECT_EQ(time_name_length, MAX_TIME_NAME_LEN);
+    EXPECT_NE(strncmp(time_name, "", time_name_length), 0);
     EXPECT_EQ(call_sys$bintim(time_name, &date_time_copy), SS$_NORMAL);
     EXPECT_EQ(memcmp(&date_time, &date_time_copy, sizeof(date_time)), 0);
     EXPECT_EQ(call_sys$numtim(time_vector, &date_time_copy), SS$_NORMAL);

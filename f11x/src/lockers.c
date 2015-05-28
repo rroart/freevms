@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <linux/kernel.h>
 #include <string.h>
@@ -10,7 +10,7 @@
 #include <lckdef.h>
 #include <lksbdef.h>
 #include <ssdef.h>
-#include <sys$routines.h>
+#include <starlet.h>
 
 #include "xqp.h"
 

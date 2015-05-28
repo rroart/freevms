@@ -1,5 +1,5 @@
-#ifndef sor_routines_h
-#define sor_routines_h
+#ifndef SOR_ROUTINES_H
+#define SOR_ROUTINES_H
 
 #include <zarg.h>
 
@@ -66,4 +66,4 @@ unsigned int sor$spec_file(void * spec_file, void * spec_buffer, long *context);
 unsigned int sor$stat(int * code, int * result, long * context);
 #define sor$stat(...) sor$stat(_buildargz3(__VA_ARGS__))
 
-#endif
+#endif /* SOR_ROUTINES_H */

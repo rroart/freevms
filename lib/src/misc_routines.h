@@ -1,5 +1,5 @@
-#ifndef misc_functions_h
-#define misc_functions_h
+#ifndef MISC_ROUTINES_H
+#define MISC_ROUTINES_H
 
 #include <linux/types.h>
 #include <linux/kdev_t.h>
@@ -297,4 +297,4 @@ int unlock_xqp(char * prefix, struct __xqp * xqp);
 int serial_file(char * prefix, struct __xqp * xqp, int fid);
 int volume_lock(char * prefix, char * name);
 
-#endif
+#endif /* MISC_ROUTINES_H */

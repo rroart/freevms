@@ -1,5 +1,5 @@
-#ifndef namdef_h
-#define namdef_h
+#ifndef NMADEF_H
+#define NMADEF_H
 
 #define     NMA$C_OBJ_NIC       19
 
@@ -1736,5 +1736,4 @@ struct _nma7
     };
 };
 
-#endif
-
+#endif /* NMADEF_H */

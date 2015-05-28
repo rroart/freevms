@@ -56,23 +56,20 @@ LIBOBJ = lib_analyze_sdesc.o lib_cvt_dtb.o lib_cvt_htb.o \
 	libgetdvi.o libgetjpi.o libgetsyi.o \
 	libgetlog.o libtparse.o libgetfor.o \
 	libwait.o libebcdic.o libbintree.o liblookey.o libtimer.o libvm.o \
-	libexpand_nodename.o sys__combine_date_time.o \
-	sysgetmsg.o sysgeterrno.o
-
-SYSOBJ = sys__combine_date_time.o sys_asctim.o sys_bintim.o \
-	sys_gettim.o sys_numtim.o
+	libexpand_nodename.o sys__combine_date_time.o
 
 CVTOBJ = cvt_convert_float.o
 
-QUELIB = libinsqhi.o
+QUEOBJ = libinsqhi.o
 
 OTSOBJ = otscvt.o
 
+TESTOBJ = sysgetmsg.o sysgeterrno.o
+
 STROBJ_PIC = $(addprefix pic/,$(STROBJ))
 LIBOBJ_PIC = $(addprefix pic/,$(LIBOBJ))
-SYSOBJ_PIC = $(addprefix pic/,$(SYSOBJ))
 CVTOBJ_PIC = $(addprefix pic/,$(STROBJ))
-QUELIB_PIC = $(addprefix pic/,$(QUELIB))
+QUEOBJ_PIC = $(addprefix pic/,$(QUEOBJ))
 OTSOBJ_PIC = $(addprefix pic/,$(OTSOBJ))
 
 RTLLIB = librtl.a
@@ -104,25 +101,25 @@ teststr : teststr.c $(RTLLIB)
 test_str_element : test_str_element.c $(RTLLIB)
 test_addx : test_addx.c $(RTLLIB)
 test_date : test_date.c $(RTLLIB)
-rtl_str_test : rtl_str_test.c $(VMSLIBS)
-rtl_lib_test : rtl_lib_test.c $(VMSLIBS)
+rtl_str_test : rtl_str_test.c $(TESTOBJ) $(RTLLIB)
+rtl_lib_test : rtl_lib_test.c $(TESTOBJ) $(RTLLIB)
 test_ile : test_ile.c $(VMSLIBS)
 test_libgetef : test_libgetef.c $(VMSLIBS)
 
-$(RTLLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB) $(OTSOBJ)
+$(RTLLIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUEOBJ) $(OTSOBJ)
 	ar -rv $(RTLLIB) $?
 
-$(RTLLIB_PIC) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUELIB_PIC) $(OTSOBJ)
+$(RTLLIB_PIC) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUEOBJ_PIC) $(OTSOBJ)
 	ar -rv $(RTLLIB_PIC) $?
 
-$(EXELIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUELIB) $(OTSOBJ)
+$(EXELIB) : $(STROBJ) $(LIBOBJ) $(CVTOBJ) $(QUEOBJ) $(OTSOBJ)
 	install -d i386
 	$(LINKER) -Bshareable $? ../../starlet/src/i386/starlet$(EXE) -o $(EXELIB)
 
 starlet$(EXE_ELF): $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 	ln -s $(TOPDIR)/starlet/src/i386/starlet$(EXE_ELF)
 
-$(ELFLIB) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUELIB_PIC) $(OTSOBJ_PIC) starlet$(EXE_ELF)
+$(ELFLIB) : $(STROBJ_PIC) $(LIBOBJ_PIC) $(CVTOBJ_PIC) $(QUEOBJ_PIC) $(OTSOBJ_PIC) starlet$(EXE_ELF)
 	install -d i386
 	ld -Bshareable $(VMS_LD_RPATH) $? starlet$(EXE_ELF) $(LIBGCC) -o $(ELFLIB)
 

@@ -24,6 +24,8 @@
  *      Change 'short' to 'unsigned short' in several places.
  */
 
+#ifndef STRDEF_H
+#define STRDEF_H
 
 /*
  * String error messages
@@ -49,4 +51,4 @@
 #define STR$_MATCH      2393113
 #define STR$_NORMAL     1
 
-
+#endif /* STRDEF_H */

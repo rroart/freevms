@@ -17,10 +17,6 @@
    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
    02111-1307 USA.  */
 
-#ifdef compile_um
-#include "sysdepum.h"
-#else
-
 #ifndef _LINUX_I386_SYSDEP_H
 #define _LINUX_I386_SYSDEP_H 1
 
@@ -974,4 +970,3 @@ extern int errno;
 #endif
 #endif /* __x86_64__ */
 #endif /* linux/i386/sysdep.h */ /* linux/x86_64/sysdep.h */
-#endif /* compile_um */

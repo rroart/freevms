@@ -100,9 +100,9 @@ unsigned long lib$date_time(void *);
 unsigned long lib$date_time(struct dsc$descriptor_s *);
 #endif
 
-unsigned long lib$day(long *, const void*, int*);
+int lib$day(long *, const void*, int*);
 
-unsigned long lib$day_of_week(const void *,int *);
+int lib$day_of_week(const void *,int *);
 
 unsigned long lib$dec_over(const unsigned long *);
 

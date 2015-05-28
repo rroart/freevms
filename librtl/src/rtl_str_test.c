@@ -65,11 +65,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "descrip.h"
-#include "strdef.h"
+#include "lib$routines.h"
 #include "ssdef.h"
 #include "str$routines.h"
-#include "sys$routines.h"
-#include "lib$routines.h"
+#include "strdef.h"
 
 /***********************************************/
 /*
@@ -145,6 +144,9 @@ int tempf (void);
 
 int get_fun_num (char *functionname);
 void call_test_function (int which_fun,char *fname,char *cont, FILE *fptr);
+
+int sys$$geterrno(char *errmsg);
+int sys$$getmsg (unsigned int msgid, unsigned short int *msglen, char *fmt,...);
 
 /*
  * Some local constants

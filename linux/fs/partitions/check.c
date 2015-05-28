@@ -27,12 +27,10 @@
 #include <linux/raid/md.h>
 
 #include "check.h"
-
 #include "msdos.h"
 
-#include <sys$routines.h>
-#include <misc_routines.h>
 #include <iodef.h>
+#include <misc_routines.h>
 
 extern int *blk_size[];
 
@@ -315,7 +313,7 @@ unsigned char *read_dev_sector(struct block_device *bdev, unsigned long n, Secto
     myqio(0, page_address(page), 4096, n, to_kdev_t(bdev->bd_dev), 2);
 #else
     unsigned long long iosb;
-    int sts = sys$qiow(0,(unsigned short)dev2chan(to_kdev_t(bdev->bd_dev)),IO$_READPBLK,&iosb,0,0, page_address(page),4096,n*2,0,0,0);
+    int sts = exe$qiow(0,(unsigned short)dev2chan(to_kdev_t(bdev->bd_dev)),IO$_READPBLK,&iosb,0,0, page_address(page),4096,n*2,0,0,0);
 #endif
 #endif
 

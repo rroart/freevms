@@ -15,6 +15,9 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //---2001-10-06
 
+#ifndef CMDTBL_H
+#define CMDTBL_H
+
 void cmd_change (char *cmdpnt);
 void cmd_copy (char *cmdpnt);
 void cmd_defk (char *cmdpnt);
@@ -68,3 +71,4 @@ static struct
     NULL, NULL
 };
 
+#endif /* CMDTBL_H */

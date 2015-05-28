@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -35,12 +35,12 @@
 
 #include <misc.h>
 #include <misc_routines.h>
+#include <starlet.h>
 #include <fcbdef.h>
 #include <vcbdef.h>
 
 #include <iodef.h>
 #define EXT2_EF 30
-#include <sys$routines.h>
 
 static void ext2_sync_super(struct _vcb * vcb,
                             struct ext2_super_block *es);

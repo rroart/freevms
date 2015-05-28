@@ -3,8 +3,8 @@
 /* Source:  10-AUG-1994 09:38:21 SSOVCS$DKA300:[SYS0.SYSUPD.CC040]STARDEFFL.SDI; */
 /********************************************************************************************************************************/
 /*** MODULE $FIBDEF ***/
-#ifndef __FIBDEF_LOADED
-#define __FIBDEF_LOADED 1
+#ifndef FIBDEF_H
+#define FIBDEF_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -490,5 +490,4 @@ _loc_rvn_fields.fib$b_loc_nmx
 }
 #endif
 
-#endif /* __FIBDEF_LOADED */
-
+#endif /* FIBDEF_H */

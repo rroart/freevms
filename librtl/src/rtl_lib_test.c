@@ -54,13 +54,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "descrip.h"
-#include "strdef.h"
 #include "ssdef.h"
 #include "rmsdef.h"
-#include "str$routines.h"
-#include "sys$routines.h"
-#include "lib$routines.h"
 #include <fabdef.h>
+#include "lib$routines.h"
+#include "str$routines.h"
+#include "strdef.h"
 
 /***********************************************/
 /*
@@ -128,6 +127,9 @@ int testlibwait         (FILE *fptr, int *fstatus, char *cont);
 
 int get_fun_num (char *functionname);
 void    call_test_function (int which_fun,char *fname, FILE *fptr,char *cont);
+
+int sys$$geterrno(char *errmsg);
+int sys$$getmsg (unsigned int msgid, unsigned short int *msglen, char *fmt,...);
 
 /*
  * Some local constants
