@@ -1,6 +1,6 @@
 #!/bin/bash
 
-	(cd ../starlet/src; ln -s sys\$routines.h sysoutines.h)
+# because the '$' in the original filename gets mangled by the gcc preprocessor on linux ...
 	(cd ../starlet/src; ln -s lib\$routines.h liboutines.h)
 	(cd ../starlet/src; ln -s cli\$routines.h clioutines.h)
 	(cd ../starlet/src; ln -s lbr\$routines.h lbroutines.h)

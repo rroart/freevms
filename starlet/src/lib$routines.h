@@ -91,7 +91,7 @@ unsigned long lib$cvt_to_internal_time(const unsigned long *,const long *,void *
 
 unsigned long lib$cvtf_to_internal_time(const unsigned long *,const float *,void *);
 
-unsigned long lib$cvt_vectim(const void *,void *);
+int lib$cvt_vectim(const void *,void *);
 
 #if 0
 // not now

@@ -1,5 +1,7 @@
 O_TARGET := mount.o
 
+override CFLAGS += -D__KERNEL__
+
 obj-y := mountdsp.o
 
 include $(TOPDIR)/Rules.make

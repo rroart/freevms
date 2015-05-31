@@ -48,7 +48,7 @@ struct TIME
     unsigned char time[8];
 };
 
-unsigned long sys$__combine_date_time(int days,struct TIME *timadr,int day_time)
+int sys$__combine_date_time(int days,struct TIME *timadr,int day_time)
 {
     if (day_time >= TIMESIZE)
     {

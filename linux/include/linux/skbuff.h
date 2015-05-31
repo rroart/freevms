@@ -210,17 +210,6 @@ struct sk_buff
     unsigned int nf_debug;
 #endif
 #endif /*CONFIG_NETFILTER*/
-
-#if defined(CONFIG_HIPPI)
-    union
-    {
-        __u32   ifield;
-    } private;
-#endif
-
-#ifdef CONFIG_NET_SCHED
-    __u32           tc_index;               /* traffic control index */
-#endif
 };
 
 #define SK_WMEM_MAX 65535

@@ -152,7 +152,6 @@ DRIVERS-y += linux/drivers/char/char.o \
 	linux/drivers/block/block.o \
 	linux/drivers/net/net.o
 DRIVERS-$(CONFIG_IDE) += linux/drivers/ide/idedriver.o
-#DRIVERS-$(CONFIG_SCSI) += linux/drivers/scsi/scsidrv.o
 
 DRIVERS-$(CONFIG_PCI) += linux/drivers/pci/driver.o
 DRIVERS-$(CONFIG_VT) += linux/drivers/video/video.o
@@ -168,51 +167,11 @@ CLEAN_FILES = \
 	linux/vmlinux linux/System.map \
 	linux/.tmp* \
 	linux/drivers/char/consolemap_deftbl.c linux/drivers/video/promcon_tbl.c \
-	linux/drivers/char/conmakehash \
-	linux/drivers/char/drm/*-mod.c \
-	linux/drivers/pci/devlist.h linux/drivers/pci/classlist.h linux/drivers/pci/gen-devlist \
-	linux/drivers/zorro/devlist.h linux/drivers/zorro/gen-devlist \
-	linux/drivers/sound/bin2hex linux/drivers/sound/hex2hex \
-	linux/drivers/atm/fore200e_mkfirm linux/drivers/atm/{pca,sba}*{.bin,.bin1,.bin2} \
-	linux/drivers/scsi/aic7xxx/aicasm/aicasm_gram.c \
-	linux/drivers/scsi/aic7xxx/aicasm/aicasm_scan.c \
-	linux/drivers/scsi/aic7xxx/aicasm/y.tab.h \
-	linux/drivers/scsi/aic7xxx/aicasm/aicasm \
-	linux/drivers/scsi/53c700_d.h \
-	linux/net/khttpd/make_times_h \
-	linux/net/khttpd/times.h \
-	linux/submenu*
+	linux/drivers/char/conmakehash
+
 # directories removed with 'make clean'
 CLEAN_DIRS = \
 	linux/modules
-
-# files removed with 'make mrproper'
-MRPROPER_FILES = \
-	linux/include/linux/autoconf.h linux/include/linux/version.h \
-	linux/drivers/net/hamradio/soundmodem/sm_tbl_{afsk1200,afsk2666,fsk9600}.h \
-	linux/drivers/net/hamradio/soundmodem/sm_tbl_{hapn4800,psk4800}.h \
-	linux/drivers/net/hamradio/soundmodem/sm_tbl_{afsk2400_7,afsk2400_8}.h \
-	linux/drivers/net/hamradio/soundmodem/gentbl \
-	linux/drivers/sound/*_boot.h linux/drivers/sound/.*.boot \
-	linux/drivers/sound/msndinit.c \
-	linux/drivers/sound/msndperm.c \
-	linux/drivers/sound/pndsperm.c \
-	linux/drivers/sound/pndspini.c \
-	linux/drivers/atm/fore200e_*_fw.c linux/drivers/atm/.fore200e_*.fw \
-	linux/.version linux/.config* linux/config.in linux/config.old \
-	linux/scripts/tkparse linux/scripts/kconfig.tk linux/scripts/kconfig.tmp \
-	linux/scripts/lxdialog/*.o linux/scripts/lxdialog/lxdialog \
-	linux/.menuconfig.log \
-	linux/include/asm \
-	linux/.hdepend linux/scripts/mkdep linux/scripts/split-include linux/scripts/docproc \
-	$(TOPDIR)/linux/include/linux/modversions.h \
-	linux/kernel.spec
-
-# directories removed with 'make mrproper'
-MRPROPER_DIRS = \
-	linux/include/config \
-	$(TOPDIR)/linux/include/linux/modules
-
 
 include linux/arch/$(ARCH)/Makefile
 
@@ -352,15 +311,6 @@ endif
 _modinst_post: _modinst_post_pcmcia
 	if [ -r System.map ]; then $(DEPMOD) -ae -F System.map $(depmod_opts) $(KERNELRELEASE); fi
 
-# Backwards compatibilty symlinks for people still using old versions
-# of pcmcia-cs with hard coded pathnames on insmod.  Remove
-# _modinst_post_pcmcia for kernel 2.4.1.
-.PHONY: _modinst_post_pcmcia
-_modinst_post_pcmcia:
-	cd $(MODLIB); \
-	mkdir -p pcmcia; \
-	find kernel -path '*/pcmcia/*' -name '*.o' | xargs -i -r ln -sf ../{} pcmcia
-
 .PHONY: $(patsubst %, _modinst_%, $(SUBDIRS))
 $(patsubst %, _modinst_%, $(SUBDIRS)) :
 	$(MAKE) -C $(patsubst _modinst_%, %, $@) modules_install
@@ -377,24 +327,19 @@ modules modules_install: dummy
 	@exit 1
 endif
 
-clean:	archclean
+clean:
 	find . \( -name '*.[oas]' -o -name core -o -name '.*.flags' \) -type f -print \
 		| grep -v lxdialog/ | xargs rm -f
 	rm -f $(CLEAN_FILES)
 	rm -rf $(CLEAN_DIRS)
 
-mrproper: clean archmrproper
-	find . \( -size 0 -o -name .depend \) -type f -print | xargs rm -f
-	rm -f $(MRPROPER_FILES)
-	rm -rf $(MRPROPER_DIRS)
-
-distclean: mrproper
+distclean:
 	rm -f core `find . \( -not -type d \) -and \
 		\( -name '*.orig' -o -name '*.rej' -o -name '*~' \
 		-o -name '*.bak' -o -name '#*#' -o -name '.*.orig' \
 		-o -name '.*.rej' -o -name '.SUMS' -o -size 0 \) -type f -print` TAGS tags
 
-backup: mrproper
+backup:
 	cd .. && tar cf - linux/ | gzip -9 > backup.gz
 	sync
 

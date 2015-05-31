@@ -15,7 +15,7 @@
 
 #include <linux/config.h>
 
-#if defined(CONFIG_VGA_CONSOLE) || defined(CONFIG_MDA_CONSOLE)
+#if defined(CONFIG_VGA_CONSOLE)
 #include <asm/vga.h>
 #endif
 

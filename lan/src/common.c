@@ -591,14 +591,9 @@ int __init net_dev_init(void)
     dev_mcast_init();
 #endif
 
-#ifdef CONFIG_NET_SCHED
-    pktsched_init();
-#endif
-
     /*
      *  Initialise network devices
      */
-
     void __init net_device_init(void);
     net_device_init();
 

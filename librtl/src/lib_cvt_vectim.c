@@ -48,7 +48,7 @@ struct TIME
     unsigned char time[8];
 };
 
-unsigned long sys$__combine_date_time(int days, const struct TIME *timadr,
+int sys$__combine_date_time(int days, const struct TIME *timadr,
                                       int day_time);
 
 /* lib_cvt_vectim() takes individual time fields in seven word buffer and
@@ -57,7 +57,7 @@ unsigned long sys$__combine_date_time(int days, const struct TIME *timadr,
 static const unsigned short month_end[] =
 {0,31,59,90,120,151,181,212,243,273,304,334,365};
 
-unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
+int lib$cvt_vectim(const void* timbufa, void *timadra)
 {
     const unsigned short * timbuf = (const unsigned short *)timbufa;
     struct TIME *timadr = (struct TIME *)timadra;
@@ -146,5 +146,3 @@ unsigned long lib$cvt_vectim(const void* timbufa, void *timadra)
     }
     return sts;
 }
-
-

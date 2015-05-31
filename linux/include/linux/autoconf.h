@@ -77,29 +77,11 @@
 #undef  CONFIG_ECONET
 #undef  CONFIG_WAN_ROUTER
 #undef  CONFIG_NET_FASTROUTE
-#undef  CONFIG_NET_HW_FLOWCONTROL
-
-/*
- * QoS and/or fair queueing
- */
-#undef  CONFIG_NET_SCHED
 
 /*
  * Ethernet (1000 Mbit)
  */
-#undef  CONFIG_FDDI
-#undef  CONFIG_HIPPI
-#undef  CONFIG_PLIP
 #undef  CONFIG_PPP
-#undef  CONFIG_SLIP
-
-/*
- * Wireless LAN (non-hamradio)
- */
-#undef  CONFIG_NET_RADIO
-#undef  CONFIG_NET_FC
-#undef  CONFIG_RCPCI
-#undef  CONFIG_SHAPER
 
 /*
  * File systems

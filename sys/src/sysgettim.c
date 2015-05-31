@@ -54,11 +54,6 @@ History:
 #include <linux/string.h>
 
 /*
- * Special function that is not really part of SYS$ library
- */
-unsigned long sys$__combine_date_time(int days, void *timadr,int day_time);
-
-/*
  * This variable is set by the Unix localtime() function
  * and contains the offset from UTC for the locale.
  */
