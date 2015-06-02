@@ -57,7 +57,7 @@ int sys$setimr(unsigned int efn, signed long long *daytim, void (*astadr)(long),
 
 int sys$cantim(unsigned long long reqidt, unsigned int acmode);
 
-int sys$numtim(unsigned short int timbuf[7], unsigned long long * timadr);
+int sys$numtim(unsigned short timbuf[7], unsigned long long * timadr);
 
 int sys$gettim(unsigned long long * timadr);
 
@@ -102,10 +102,9 @@ int sys$dellnm(void *tabnam, void *lognam, unsigned char *acmode);
 
 int sys$trnlnm(unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
 
-int sys$dassgn(unsigned short int chan);
+int sys$dassgn(unsigned short chan);
 
-int sys$assign(void *devnam, unsigned short int *chan, unsigned int acmode, void *mbxnam, int flags);
-#define sys$assign(...) sys$assign(_buildargz5(__VA_ARGS__))
+int sys$assign(void *devnam, unsigned short *chan, unsigned int acmode, void *mbxnam, unsigned int flags);
 
 int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb, void (*astadr)(__unknown_params),
         long astprm, void *p1, long p2, long p3, long p4, long p5, long p6);

@@ -5,10 +5,8 @@
 #define CONFIG_X86_64 1
 #define CONFIG_X86 1
 #undef  CONFIG_ISA
-#undef  CONFIG_SBUS
 #undef  CONFIG_UID16
 #define CONFIG_RWSEM_GENERIC_SPINLOCK 1
-#undef  CONFIG_RWSEM_XCHGADD_ALGORITHM
 #define CONFIG_X86_CMPXCHG 1
 #define ONFIG_EARLY_PRINTK 1
 
@@ -25,7 +23,6 @@
 #endif
 #define CONFIG_X86_TSC 1
 #define CONFIG_X86_GOOD_APIC 1
-#undef  CONFIG_X86_MSR
 #undef  CONFIG_X86_CPUID
 #undef  CONFIG_MATH_EMULATION
 #undef  CONFIG_EISA
@@ -51,7 +48,6 @@
 #endif
 #endif
 
-#undef  CONFIG_KCORE_AOUT
 #undef  CONFIG_PM
 #undef  CONFIG_APM_IGNORE_USER_SUSPEND
 #undef  CONFIG_APM_DO_ENABLE
@@ -59,19 +55,15 @@
 #undef  CONFIG_APM_DISPLAY_BLANK
 #undef  CONFIG_APM_RTC_IS_GMT
 #undef  CONFIG_APM_ALLOW_INTS
-#undef  CONFIG_APM_REAL_MODE_POWER_OFF
 
 /*
  * General setup
  */
 #define CONFIG_PCI 1
-#undef  CONFIG_PCI_GOBIOS
-#undef  CONFIG_PCI_GODIRECT
 #undef  CONFIG_PCI_GOANY
 #undef  CONFIG_PCI_BIOS
 #define CONFIG_PCI_DIRECT 1
 #undef  CONFIG_PCI_NAMES
-#undef  CONFIG_PCMCIA
 #undef  CONFIG_HOTPLUG_PCI
 
 /*
@@ -84,8 +76,6 @@
 #undef  CONFIG_BLK_DEV_XD
 #undef  CONFIG_PARIDE
 #undef  CONFIG_BLK_CPQ_DA
-#undef  CONFIG_BLK_CPQ_CISS_DA
-#undef  CONFIG_BLK_DEV_DAC960
 
 /*
  * ATA/IDE/MFM/RLL support
@@ -104,12 +94,6 @@
 #undef  CONFIG_BLK_DEV_HD
 #define CONFIG_BLK_DEV_IDEDISK 1
 #define CONFIG_IDEDISK_MULTI_MODE 1
-#undef  CONFIG_BLK_DEV_IDEDISK_VENDOR
-#undef  CONFIG_BLK_DEV_COMMERIAL
-#undef  CONFIG_BLK_DEV_IDECD
-#undef  CONFIG_BLK_DEV_IDETAPE
-#undef  CONFIG_BLK_DEV_IDEFLOPPY
-#undef  CONFIG_BLK_DEV_IDESCSI
 
 /*
  * IDE chipset support/bugfixes
@@ -125,11 +109,6 @@
 #define CONFIG_BLK_DEV_IDE_MODES 1
 #define CONFIG_BLK_DEV_PIIX 1
 #define CONFIG_PIIX_TUNING 1
-
-/*
- * SCSI support
- */
-#undef  CONFIG_SCSI
 
 /*
  * Network device support

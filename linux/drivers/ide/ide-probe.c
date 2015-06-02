@@ -82,19 +82,6 @@ static inline void do_identify (ide_drive_t *drive, byte cmd)
 
     if (!drive->forced_lun)
         drive->last_lun = id->last_lun & 0x7;
-#if defined (CONFIG_SCSI_EATA_DMA) || defined (CONFIG_SCSI_EATA_PIO) || defined (CONFIG_SCSI_EATA)
-    /*
-     * EATA SCSI controllers do a hardware ATA emulation:
-     * Ignore them if there is a driver for them available.
-     */
-    if ((id->model[0] == 'P' && id->model[1] == 'M')
-            || (id->model[0] == 'S' && id->model[1] == 'K'))
-    {
-        printk("%s: EATA SCSI HBA %.10s\n", drive->name, id->model);
-        drive->present = 0;
-        return;
-    }
-#endif /* CONFIG_SCSI_EATA_DMA || CONFIG_SCSI_EATA_PIO */
 
     /*
      *  WIN_IDENTIFY returns little-endian info,

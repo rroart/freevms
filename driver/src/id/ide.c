@@ -3778,13 +3778,8 @@ int __init ide_setup (char *s)
             drive->remap_0_to_1 = 2;
             goto done;
         case -14: /* "scsi" */
-#if defined(CONFIG_BLK_DEV_IDESCSI) && defined(CONFIG_SCSI)
-            drive->scsi = 1;
-            goto done;
-#else
             drive->scsi = 0;
             goto bad_option;
-#endif /* defined(CONFIG_BLK_DEV_IDESCSI) && defined(CONFIG_SCSI) */
         case 3: /* cyl,head,sect */
             drive->media    = ide_disk;
             drive->cyl  = drive->bios_cyl  = vals[0];
@@ -4115,22 +4110,6 @@ void __init ide_init_builtin_drivers (void)
 #ifdef CONFIG_BLK_DEV_IDEDISK
     (void) idedisk_init();
 #endif /* CONFIG_BLK_DEV_IDEDISK */
-#ifdef CONFIG_BLK_DEV_IDECD
-    (void) ide_cdrom_init();
-#endif /* CONFIG_BLK_DEV_IDECD */
-#ifdef CONFIG_BLK_DEV_IDETAPE
-    (void) idetape_init();
-#endif /* CONFIG_BLK_DEV_IDETAPE */
-#ifdef CONFIG_BLK_DEV_IDEFLOPPY
-    (void) idefloppy_init();
-#endif /* CONFIG_BLK_DEV_IDEFLOPPY */
-#ifdef CONFIG_BLK_DEV_IDESCSI
-#ifdef CONFIG_SCSI
-    (void) idescsi_init();
-#else
-#warning ide scsi-emulation selected but no SCSI-subsystem in kernel
-#endif
-#endif /* CONFIG_BLK_DEV_IDESCSI */
 }
 
 static int default_cleanup (ide_drive_t *drive)

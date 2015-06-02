@@ -631,14 +631,13 @@ cwpslisten(void * packet, struct _cdt * c, struct _pdt * p)
     }
 }
 
-init_cwps()
+void init_cwps(void)
 {
     char myname[] = "cwps";
     char myinfo[] = "cwps service";
 
     //  listen(msgbuf,err,cdt,pdt,cdt);
     scs_std$listen(cwpslisten, cwpsmyerr, myname, myinfo, 0);
-
 }
 
 cwps$getjpi()

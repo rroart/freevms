@@ -64,7 +64,7 @@ int call_sys$trnlnm(char *table_name, char *logical_name, char *value_list, unsi
     char *value_ptr = value_list;
     unsigned int item_index = 0;
     unsigned int max_item_index = 0;
-    unsigned short int value_length;
+    unsigned short value_length;
     struct _ile3 item_list[] =
     {
         { 4, LNM$_INDEX, &item_index, NULL },

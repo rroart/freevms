@@ -81,8 +81,7 @@ functions are available. */
 #endif
 #endif
 
-#if !defined(CONFIG_NET_IPIP) && \
-    !defined(CONFIG_IPV6) && !defined(CONFIG_IPV6_MODULE)
+#if !defined(CONFIG_IPV6) && !defined(CONFIG_IPV6_MODULE)
 #define MAX_HEADER LL_MAX_HEADER
 #else
 #define MAX_HEADER (LL_MAX_HEADER + 48)

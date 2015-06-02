@@ -883,18 +883,6 @@ int ideprobe_init (void);
 #ifdef CONFIG_BLK_DEV_IDEDISK
 int idedisk_init (void);
 #endif /* CONFIG_BLK_DEV_IDEDISK */
-#ifdef CONFIG_BLK_DEV_IDECD
-int ide_cdrom_init (void);
-#endif /* CONFIG_BLK_DEV_IDECD */
-#ifdef CONFIG_BLK_DEV_IDETAPE
-int idetape_init (void);
-#endif /* CONFIG_BLK_DEV_IDETAPE */
-#ifdef CONFIG_BLK_DEV_IDEFLOPPY
-int idefloppy_init (void);
-#endif /* CONFIG_BLK_DEV_IDEFLOPPY */
-#ifdef CONFIG_BLK_DEV_IDESCSI
-int idescsi_init (void);
-#endif /* CONFIG_BLK_DEV_IDESCSI */
 #endif /* _IDE_C */
 
 int ide_register_module (ide_module_t *module);

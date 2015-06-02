@@ -60,7 +60,6 @@ void add_blkdev_randomness(int major);
 
 extern int floppy_init(void);
 extern void rd_load(void);
-extern int rd_init(void);
 extern int rd_doload;       /* 1 = load ramdisk, 0 = don't load */
 extern int rd_prompt;       /* 1 = prompt for ramdisk, 0 = don't prompt */
 extern int rd_image_start;  /* starting block # of image */

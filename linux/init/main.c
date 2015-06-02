@@ -76,11 +76,11 @@ int scs_init2(void);
 void vms_mount(void);
 void vms2_mount(void);
 int dlminit(void);
-init_cwps();
+void init_cwps(void);
 void cre_syscommon(char * name);
-probe_units();
+void probe_units(void);
 void lnm_init_sys(void);
-open_tty();
+void open_tty(void);
 int mscp(void);
 void early_printk(const char *fmt, ...);
 
@@ -104,11 +104,9 @@ extern void init_modules(void);
 extern void sock_init(void);
 extern void fork_init(unsigned long);
 extern void mca_init(void);
-extern void sbus_init(void);
 extern void ppc_init(void);
 extern void sysctl_init(void);
 extern void signals_init(void);
-extern int init_pcmcia_ds(void);
 
 extern void free_initmem(void);
 
@@ -245,24 +243,6 @@ static struct dev_name_struct
     { "ida/c0d13p",0x48D0 },
     { "ida/c0d14p",0x48E0 },
     { "ida/c0d15p",0x48F0 },
-#endif
-#if defined(CONFIG_BLK_CPQ_CISS_DA) || defined(CONFIG_BLK_CPQ_CISS_DA_MODULE)
-    { "cciss/c0d0p",0x6800 },
-    { "cciss/c0d1p",0x6810 },
-    { "cciss/c0d2p",0x6820 },
-    { "cciss/c0d3p",0x6830 },
-    { "cciss/c0d4p",0x6840 },
-    { "cciss/c0d5p",0x6850 },
-    { "cciss/c0d6p",0x6860 },
-    { "cciss/c0d7p",0x6870 },
-    { "cciss/c0d8p",0x6880 },
-    { "cciss/c0d9p",0x6890 },
-    { "cciss/c0d10p",0x68A0 },
-    { "cciss/c0d11p",0x68B0 },
-    { "cciss/c0d12p",0x68C0 },
-    { "cciss/c0d13p",0x68D0 },
-    { "cciss/c0d14p",0x68E0 },
-    { "cciss/c0d15p",0x68F0 },
 #endif
     { "nftla", 0x5d00 },
     { "nftlb", 0x5d10 },
@@ -789,9 +769,6 @@ static void __init do_basic_setup(void)
 #ifdef CONFIG_PCI
     pci_init();
 #endif
-#ifdef CONFIG_SBUS
-    sbus_init();
-#endif
 #ifdef CONFIG_MCA
     mca_init();
 #endif
@@ -800,10 +777,6 @@ static void __init do_basic_setup(void)
 #endif
     do_initcalls();
     printk("%%KERNEL-I-DEBUG, After do_initcalls\n");
-
-#ifdef CONFIG_PCMCIA
-    init_pcmcia_ds();       /* Do this last */
-#endif
 }
 
 extern void rd_load(void);

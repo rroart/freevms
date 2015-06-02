@@ -657,19 +657,8 @@ end_move_self:					# now we are at the right place
 # AMD Elan bug fix by Robert Schwebel.
 #
 
-#if defined(CONFIG_MELAN)
-	movb $0x02, %al			# alternate A20 gate
-	outb %al, $0x92			# this works on SC410/SC520
-a20_elan_wait:
-        call a20_test
-        jz a20_elan_wait
-	jmp a20_done
-#endif
-
-
 A20_TEST_LOOPS		=  32		# Iterations per wait
 A20_ENABLE_LOOPS	= 255		# Total loops to try		
-
 
 a20_try_loop:
 

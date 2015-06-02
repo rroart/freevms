@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -14,7 +14,7 @@
  *
  *  Force Cyrix 6x86(MX) and M II processors to report MTRR capability
  *  and Cyrix "coma bug" recognition by
- *      Zoltán Böszörményi <zboszor@mail.externet.hu> February 1999.
+ *      Zoltï¿½n Bï¿½szï¿½rmï¿½nyi <zboszor@mail.externet.hu> February 1999.
  *
  *  Force Centaur C6 processors to report MTRR capability.
  *      Bart Hartgers <bart@etpmod.phys.tue.nl>, May 1999.
@@ -99,9 +99,6 @@
 #include <linux/config.h>
 #include <linux/init.h>
 #include <linux/apm_bios.h>
-#ifdef CONFIG_BLK_DEV_RAM
-#include <linux/blk.h>
-#endif
 #include <linux/highmem.h>
 #include <linux/bootmem.h>
 #include <linux/seq_file.h>
@@ -863,11 +860,6 @@ void __init setup_arch(char **cmdline_p)
     }
     aux_device_present = AUX_DEVICE_INFO;
 
-#ifdef CONFIG_BLK_DEV_RAM
-    rd_image_start = RAMDISK_FLAGS & RAMDISK_IMAGE_START_MASK;
-    rd_prompt = ((RAMDISK_FLAGS & RAMDISK_PROMPT_FLAG) != 0);
-    rd_doload = ((RAMDISK_FLAGS & RAMDISK_LOAD_FLAG) != 0);
-#endif
     setup_memory_region();
 
     if (!MOUNT_ROOT_RDONLY)

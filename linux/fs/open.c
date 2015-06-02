@@ -473,7 +473,7 @@ int filp_close(struct file *filp, fl_owner_t id)
         retval = filp->f_op->flush(filp);
         unlock_kernel();
     }
-    extern is_tty_fops(struct file * f);
+    extern int is_tty_fops(struct file * f);
     if (!is_tty_fops(filp))
     {
         locks_remove_posix(filp, id);

@@ -225,11 +225,6 @@ void __init setup_arch(char **cmdline_p)
     screen_info = SCREEN_INFO;
     aux_device_present = AUX_DEVICE_INFO;
 
-#ifdef CONFIG_BLK_DEV_RAM
-    rd_image_start = RAMDISK_FLAGS & RAMDISK_IMAGE_START_MASK;
-    rd_prompt = ((RAMDISK_FLAGS & RAMDISK_PROMPT_FLAG) != 0);
-    rd_doload = ((RAMDISK_FLAGS & RAMDISK_LOAD_FLAG) != 0);
-#endif
     setup_memory_region();
 
     if (!MOUNT_ROOT_RDONLY)

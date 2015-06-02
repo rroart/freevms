@@ -457,10 +457,6 @@ int __init net_dev_init(void)
     if (!dev_boot_phase)
         return 0;
 
-#ifdef CONFIG_NET_DIVERT
-    dv_init();
-#endif /* CONFIG_NET_DIVERT */
-
     /*
      *  Initialise the packet receive queues.
      */
@@ -797,7 +793,7 @@ config_in_dev(struct in_device ** in)
 struct net_device mynetdevice;
 struct net_device mynetdevice2;
 
-probe_units()
+void probe_units(void)
 {
 #if 0
     bzero(&mynetdevice,sizeof(mynetdevice));

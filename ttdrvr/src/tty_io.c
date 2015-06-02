@@ -1120,12 +1120,12 @@ static void release_dev(struct file * filp)
     release_mem(tty, idx);
 }
 
-is_tty_fops(struct file * f)
+int is_tty_fops(struct file * f)
 {
     return f->f_op==&tty_fops;
 }
 
-open_tty()
+void open_tty(void)
 {
     int fd=get_unused_fd();
     struct file * f=get_empty_filp();

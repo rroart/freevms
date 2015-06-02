@@ -30,60 +30,12 @@ ifdef CONFIG_M386
 CFLAGS += -march=i386
 endif
 
-ifdef CONFIG_M486
-CFLAGS += -march=i486
-endif
-
-ifdef CONFIG_M586
-CFLAGS += -march=i586
-endif
-
-ifdef CONFIG_M586TSC
-CFLAGS += -march=i586
-endif
-
-ifdef CONFIG_M586MMX
-CFLAGS += -march=i586
-endif
-
 ifdef CONFIG_M686
 CFLAGS += -march=i686
 endif
 
 ifdef CONFIG_MPENTIUMIII
 CFLAGS += -march=i686
-endif
-
-ifdef CONFIG_MPENTIUM4
-CFLAGS += -march=i686
-endif
-
-ifdef CONFIG_MK6
-CFLAGS += $(shell if $(CC) -march=k6 -S -o /dev/null -xc /dev/null >/dev/null 2>&1; then echo "-march=k6"; else echo "-march=i586"; fi)
-endif
-
-ifdef CONFIG_MK7
-CFLAGS += $(shell if $(CC) -march=athlon -S -o /dev/null -xc /dev/null >/dev/null 2>&1; then echo "-march=athlon"; else echo "-march=i686 -malign-functions=4"; fi) 
-endif
-
-ifdef CONFIG_MCRUSOE
-CFLAGS += -march=i686 -malign-functions=0 -malign-jumps=0 -malign-loops=0
-endif
-
-ifdef CONFIG_MWINCHIPC6
-CFLAGS += -march=i586
-endif
-
-ifdef CONFIG_MWINCHIP2
-CFLAGS += -march=i586
-endif
-
-ifdef CONFIG_MWINCHIP3D
-CFLAGS += -march=i586
-endif
-
-ifdef CONFIG_MCYRIXIII
-CFLAGS += -march=i586
 endif
 
 HEAD := linux/arch/i386/kernel/head.o linux/arch/i386/kernel/init_task.o

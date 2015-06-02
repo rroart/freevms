@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /* -*- linux-c -*-
@@ -382,43 +382,39 @@ static struct
     unsigned long   offset;
     unsigned short  segment;
 }               apm_bios_entry;
-static int          clock_slowed;
+static int          clock_slowed = 0;
 static int          idle_threshold = DEFAULT_IDLE_THRESHOLD;
 static int          idle_period = DEFAULT_IDLE_PERIOD;
-static int          set_pm_idle;
-static int          suspends_pending;
-static int          standbys_pending;
-static int          waiting_for_resume;
-static int          ignore_normal_resume;
+static int          set_pm_idle = 0;
+static int          suspends_pending = 0;
+static int          standbys_pending = 0;
+static int          waiting_for_resume = 0;
+static int          ignore_normal_resume = 0;
 static int          bounce_interval = DEFAULT_BOUNCE_INTERVAL;
 
 #ifdef CONFIG_APM_RTC_IS_GMT
 #   define  clock_cmos_diff 0
 #   define  got_clock_diff  1
 #else
-static long         clock_cmos_diff;
-static int          got_clock_diff;
+static long         clock_cmos_diff = 0;
+static int          got_clock_diff = 0;
 #endif
-static int          debug;
+static int          debug = 0;
 static int          apm_disabled = -1;
 #ifdef CONFIG_SMP
-static int          power_off;
+static int          power_off = 0;
 #else
 static int          power_off = 1;
 #endif
-#ifdef CONFIG_APM_REAL_MODE_POWER_OFF
-static int          realmode_power_off = 1;
-#else
-static int          realmode_power_off;
-#endif
-static int          exit_kapmd;
-static int          kapmd_running;
+static int          realmode_power_off = 0;
+static int          exit_kapmd = 0;
+static int          kapmd_running = 0;
 #ifdef CONFIG_APM_ALLOW_INTS
 static int          allow_ints = 1;
 #else
-static int          allow_ints;
+static int          allow_ints = 0;
 #endif
-static int          broken_psr;
+static int          broken_psr = 0;
 
 static DECLARE_WAIT_QUEUE_HEAD(apm_waitqueue);
 static DECLARE_WAIT_QUEUE_HEAD(apm_suspend_waitqueue);

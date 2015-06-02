@@ -35,7 +35,6 @@
 #define CONFIG_BINFMT_AOUT 1
 #define CONFIG_BINFMT_ELF 1
 #define CONFIG_BINFMT_MISC 1
-#undef  CONFIG_KCORE_AOUT
 #define CONFIG_KCORE_ELF 1
 #define CONFIG_UNIX98_PTYS 1
 #define CONFIG_UNIX98_PTY_COUNT (256)
@@ -44,44 +43,22 @@
  * Block devices
  */
 #undef  CONFIG_BLK_DEV_INITRD
-#undef  CONFIG_BLK_DEV_LOOP
-#undef  CONFIG_BLK_DEV_NBD
-#undef  CONFIG_BLK_DEV_RAM
 
 /*
  * Networking options
  */
 #define CONFIG_PACKET 1
-#undef  CONFIG_PACKET_MMAP
-#undef  CONFIG_NETLINK_DEV
 #undef  CONFIG_NETFILTER
-#undef  CONFIG_FILTER
 #define CONFIG_UNIX 1
 #define CONFIG_INET 1
 #define CONFIG_IP_MULTICAST 1
-#undef  CONFIG_IP_ADVANCED_ROUTER
-#undef  CONFIG_IP_PNP
-#undef  CONFIG_NET_IPIP
-#undef  CONFIG_NET_IPGRE
-#undef  CONFIG_IP_MROUTE
-#undef  CONFIG_ARPD
-#undef  CONFIG_INET_ECN
 #define CONFIG_SYN_COOKIES 1
 #undef  CONFIG_ATM
-#undef  CONFIG_VLAN_8021Q
-#undef  CONFIG_BRIDGE
 #undef  CONFIG_X25
-#undef  CONFIG_LAPB
-#undef  CONFIG_LLC
 #undef  CONFIG_NET_DIVERT
 #undef  CONFIG_ECONET
 #undef  CONFIG_WAN_ROUTER
 #undef  CONFIG_NET_FASTROUTE
-
-/*
- * Ethernet (1000 Mbit)
- */
-#undef  CONFIG_PPP
 
 /*
  * File systems

@@ -150,9 +150,6 @@ int __init blk_dev_init(void)
 #ifdef CONFIG_STRAM_SWAP
     stram_device_init();
 #endif
-#ifdef CONFIG_BLK_DEV_RAM
-    rd_init();
-#endif
 #ifdef CONFIG_ISP16_CDI
     isp16_init();
 #endif

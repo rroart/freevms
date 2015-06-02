@@ -14,7 +14,7 @@ all: kernel.o head.o head64.o init_task.o
 
 O_TARGET := kernel.o
 
-export-objs     := mtrr.o msr.o cpuid.o x8664_ksyms.o pci-gart.o setup.o \
+export-objs     := mtrr.o cpuid.o x8664_ksyms.o pci-gart.o setup.o \
 		bluesmoke.o
 
 obj-y	:= process.o semaphore.o signal.o entry.o traps.o irq.o \
@@ -28,7 +28,6 @@ obj-y			+= pci-pc.o pci-irq.o
 endif
 
 obj-$(CONFIG_MTRR)	+= mtrr.o
-obj-$(CONFIG_X86_MSR)	+= msr.o
 obj-$(CONFIG_X86_CPUID)	+= cpuid.o
 obj-$(CONFIG_SMP)	+= smp.o smpboot.o trampoline.o
 obj-$(CONFIG_X86_LOCAL_APIC)	+= apic.o  nmi.o

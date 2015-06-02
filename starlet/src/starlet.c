@@ -239,13 +239,14 @@ int sys$getlkiw(unsigned int efn, unsigned int *lkidadr, void *itmlst, struct _i
     return INLINE_SYSCALL($getlkiw, 1, &s);
 }
 
-int sys$dassgn(unsigned short int chan)
+int sys$dassgn(unsigned short chan)
 {
     return INLINE_SYSCALL($dassgn, 1, chan);
 }
 
-int sys$assign(void *devnam, unsigned short int *chan, unsigned int acmode, void *mbxnam, int flags){
-return INLINE_SYSCALL($assign,5,devnam,chan,acmode,mbxnam,flags);
+int sys$assign(void *devnam, unsigned short *chan, unsigned int acmode, void *mbxnam, unsigned int flags)
+{
+    return INLINE_SYSCALL($assign, 5, devnam, chan, acmode, mbxnam, flags);
 }
 
 static int exe$synch(unsigned int efn, struct _iosb *iosb)
