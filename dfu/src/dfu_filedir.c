@@ -337,7 +337,7 @@ int set_command(mask)
             /* Open a channel to the device */
             devnam_descr.dsc$w_length = nam.nam$t_dvi[0];
             strcpy(devnam,&nam.nam$t_dvi[1]);
-            status = SYS$ASSIGN(&devnam_descr, &chan, 0 , 0);
+            status = SYS$ASSIGN(&devnam_descr, &chan, 0, 0, 0);
             if ((status & 1 ) != 1)
             {
                 singlemsg(DFU_ASSIGN,status);
@@ -1065,7 +1065,7 @@ int delete_command(mask)
         /* Parsing complete , now proceed to delete this file */
 
         /* Open a channel to disk */
-        status = SYS$ASSIGN(&device_descr, &chan, 0 , 0);
+        status = SYS$ASSIGN(&device_descr, &chan, 0, 0, 0);
         if ((status & 1 ) != 1)
         {
             singlemsg(DFU_ASSIGN,status);
@@ -1128,7 +1128,7 @@ int delete_command(mask)
                 device_descr.dsc$w_length = nam.nam$t_dvi[0];
                 strcpy(device,&nam.nam$t_dvi[1]);
                 /* Open a second channel to the disk */
-                status = SYS$ASSIGN(&device_descr, &chan, 0 , 0);
+                status = SYS$ASSIGN(&device_descr, &chan, 0, 0, 0);
                 if ((status & 1 ) != 1)
                 {
                     singlemsg(DFU_ASSIGN,status);
@@ -1432,7 +1432,7 @@ int movefile(char *defr_file, int flag)
         /* Open a channel to the device */
         devnam_descr.dsc$w_length = nam.nam$t_dvi[0];
         strcpy(devnam,&nam.nam$t_dvi[1]);
-        status = SYS$ASSIGN(&devnam_descr, &chan, 0 , 0);
+        status = SYS$ASSIGN(&devnam_descr, &chan, 0, 0, 0);
         if ((status & 1 ) != 1)
         {
             singlemsg(DFU_ASSIGN,status);
@@ -1833,7 +1833,7 @@ int compdir (char *comp_file, Boolean matoutput)
         {
             devnam_descr.dsc$w_length = nam.nam$t_dvi[0];
             strcpy(devnam,&nam.nam$t_dvi[1]);
-            status = SYS$ASSIGN(&devnam_descr, &chan, 0 , 0);
+            status = SYS$ASSIGN(&devnam_descr, &chan, 0, 0, 0);
             if ((status & 1 ) != 1)
             {
                 singlemsg(DFU_ASSIGN,status);

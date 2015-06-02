@@ -1345,7 +1345,7 @@ next_rep:
             strcpy(device, rvt[curvol].devnam);
             device_descr.dsc$w_length = rvt[curvol].devnam_len;
             rvt[curvol].bchan = 0;
-            status = SYS$ASSIGN(&device_descr, &rvt[curvol].bchan, 0, 0);
+            status = SYS$ASSIGN(&device_descr, &rvt[curvol].bchan, 0, 0, 0);
             if ((status & 1) != 1)
             {
                 singlemsg(DFU_ASSIGN,status);
@@ -1663,7 +1663,7 @@ int undel_command(int mask)
     {
         strcpy(device, rvt[x].devnam);
         device_descr.dsc$w_length = rvt[x].devnam_len;
-        status = SYS$ASSIGN(&device_descr, &rvt[x].bchan, 0, 0);
+        status = SYS$ASSIGN(&device_descr, &rvt[x].bchan, 0, 0, 0);
         if ((status & 1) != 1)
         {
             singlemsg(DFU_ASSIGN,status);
@@ -2035,7 +2035,7 @@ int undel_command(int mask)
                     device_descr.dsc$w_length = rvt[1].devnam_len;
                     if (qchan == 0)
                     {
-                        status = SYS$ASSIGN(&device_descr, &qchan, 0, 0);
+                        status = SYS$ASSIGN(&device_descr, &qchan, 0, 0, 0);
                         if ((status & 1) != 1)
                             singlemsg(DFU_ASSIGN,status);
                     }
@@ -2229,7 +2229,7 @@ int make_syslost(struct f_id *l_fid)
     fname_descr.dsc$a_pointer = (char *) &fname;
     device_descr.dsc$a_pointer = (char *) &rvt[1].devnam;
     device_descr.dsc$w_length = rvt[1].devnam_len;
-    status = SYS$ASSIGN(&device_descr, &l_chan, 0, 0);
+    status = SYS$ASSIGN(&device_descr, &l_chan, 0, 0, 0);
     /* Setup fib. First we access the MFD to get the correct attributes,
        next we create SYSLOST */
     if ((status & 1) != 1) return(2);
@@ -2846,7 +2846,7 @@ next_ver2 :
             strcpy(device, rvt[curvol].devnam);
             device_descr.dsc$w_length = rvt[curvol].devnam_len;
             rvt[curvol].bchan = 0;
-            status = SYS$ASSIGN(&device_descr, &rvt[curvol].bchan, 0, 0);
+            status = SYS$ASSIGN(&device_descr, &rvt[curvol].bchan, 0, 0, 0);
             if ((status & 1) != 1)
             {
                 singlemsg(DFU_ASSIGN,status);
@@ -3644,7 +3644,7 @@ int open_device(struct dsc$descriptor *device_descr, int flag)
     lock_chan = 0;
     if ((flag ==1) && (rvt[1].wlk == FALSE))
     {
-        stat = SYS$ASSIGN(device_descr, &lock_chan,0,0);
+        stat = SYS$ASSIGN(device_descr, &lock_chan, 0, 0, 0);
         if ((stat & 1) != 1)
         {
             singlemsg(DFU_ASSIGN,stat);
@@ -3677,7 +3677,7 @@ int open_device(struct dsc$descriptor *device_descr, int flag)
     while (i <= maxvol)
     {
         rvt[i].i_open = 0; /* First assign a channel for this volume */
-        stat = SYS$ASSIGN(device_descr,&rvt[i].channel,0,0);
+        stat = SYS$ASSIGN(device_descr,&rvt[i].channel,0 ,0, 0);
         if ((stat & 1) != 1)
         {
             rvt[i].maxblocks=0;

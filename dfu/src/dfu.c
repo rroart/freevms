@@ -326,7 +326,7 @@ main(int argc, char *argv[])
     status = dfu_check_access(&prvmask); /*Get the privilege mask */
 
     /* Setup terminal channel for control purposes; get the terminal chars */
-    status = SYS$ASSIGN(&terminal, &tchan, 0,0);
+    status = SYS$ASSIGN(&terminal, &tchan, 0, 0, 0);
     status = SYS$QIOW(0, tchan, IO$_SENSEMODE, 0, 0, 0, &orgttchar, 12, 0, 0, 0,
                       0);
     for (i = 0; i < 3; i++)
