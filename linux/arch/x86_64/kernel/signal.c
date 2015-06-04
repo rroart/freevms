@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -442,17 +442,7 @@ handle_signal(unsigned long sig, struct k_sigaction *ka,
         }
     }
 
-#ifdef CONFIG_IA32_EMULATION
-    if (current->thread.flags & THREAD_IA32)
-    {
-        if (ka->sa.sa_flags & SA_SIGINFO)
-            ia32_setup_rt_frame(sig, ka, info, oldset, regs);
-        else
-            ia32_setup_frame(sig, ka, oldset, regs);
-    }
-    else
-#endif
-        setup_rt_frame(sig, ka, info, oldset, regs);
+    setup_rt_frame(sig, ka, info, oldset, regs);
 
     if (ka->sa.sa_flags & SA_ONESHOT)
         ka->sa.sa_handler = SIG_DFL;

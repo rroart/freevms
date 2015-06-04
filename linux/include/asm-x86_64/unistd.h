@@ -504,7 +504,7 @@ __SYSCALL(__NR_getdents64, sys_getdents64)
 #define __NR_restart_syscall    219
 __SYSCALL(__NR_restart_syscall, sys_ni_syscall)
 #define __NR_semtimedop     220
-__SYSCALL(__NR_semtimedop, sys_semtimedop)
+__SYSCALL(__NR_semtimedop, sys_ni_syscall)
 
 #define __NR_syscall_max __NR_semtimedop
 

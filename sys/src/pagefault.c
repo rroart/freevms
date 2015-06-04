@@ -1005,7 +1005,7 @@ int mmg$frewslx(struct _pcb * p, void * va,unsigned long * pte, unsigned long in
     return SS$_NORMAL;
 }
 
-mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index, unsigned long pte)
+void mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index, unsigned long pte)
 {
     struct _wsl * wsl = phd->phd$l_wslist;
 

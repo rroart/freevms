@@ -1,7 +1,6 @@
 #ifndef i386_autoconf_h
 #define i386_autoconf_h
 
-#define CONFIG_IA32_EMULATION 1
 #define CONFIG_X86_64 1
 #define CONFIG_X86 1
 #undef  CONFIG_ISA

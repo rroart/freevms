@@ -51,21 +51,11 @@ CFLAGS += $(call check_gcc,-mpreferred-stack-boundary=3,)
 CFLAGS += -mno-red-zone
 CFLAGS += -mcmodel=kernel
 CFLAGS += -pipe
-#CFLAGS += -fno-reorder-blocks
-# needed for later gcc 3.1
-# not in 3.16
-#CFLAGS += -finline-limit=2000
-# needed for earlier gcc 3.1
-# not in 3.16
-#CFLAGS += -fno-strength-reduce
 CFLAGS += -Wno-sign-compare
 #CFLAGS += -g
 ifneq ($(CONFIG_X86_REMOTE_DEBUG),y)
 CFLAGS += -fno-asynchronous-unwind-tables
 endif
-# this is needed right now for the 32bit ioctl code (no-unit-at-a-time)
-# Linux 3.16 uses these
-CFLAGS += $(call check_gcc,-funit-at-a-time,)
 
 ifdef CONFIG_MK8
 CFLAGS += $(call check_gcc,-march=k8,)
@@ -80,16 +70,6 @@ SUBDIRS := linux/arch/x86_64/tools $(SUBDIRS) linux/arch/x86_64/kernel linux/arc
 CORE_FILES := linux/arch/x86_64/kernel/kernel.o $(CORE_FILES)
 CORE_FILES +=  linux/arch/x86_64/mm/mm.o
 LIBS := $(TOPDIR)/linux/arch/x86_64/lib/lib.a $(LIBS)
-
-ifdef CONFIG_IA32_EMULATION
-SUBDIRS += linux/arch/x86_64/ia32
-CORE_FILES += linux/arch/x86_64/ia32/ia32.o
-endif
-
-ifdef CONFIG_HOSTFS
-SUBDIRS += linux/arch/x86_64/hostfs
-core-$(CONFIG_HOSTFS) += linux/arch/x86_64/hostfs/hostfs.o
-endif
 
 CORE_FILES += $(core-y)
 
@@ -108,7 +88,7 @@ linux/vmlinux: linux/arch/x86_64/vmlinux.lds
 
 FORCE: ;
 
-.PHONY: zImage bzImage compressed zlilo bzlilo zdisk bzdisk install \
+.PHONY: bzImage compressed bzdisk install \
 		clean archclean archmrproper archdep checkoffset
 
 checkoffset: FORCE

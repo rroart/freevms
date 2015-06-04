@@ -42,25 +42,25 @@
 /*                                  */
 /************************************************************************/
 
-#include    "../../../freevms/lib/src/adpdef.h"         /* Define the ADP */
-#include    "../../../freevms/starlet/src/dcdef.h"          /* Define device and ADP codes */
-#include    "../../../freevms/librtl/src/descrip.h"         /* Define descriptors */
-#include    "../../../freevms/lib/src/iocdef.h"         /* Add I/O constants */
-#include    "../../../freevms/lib/src/iogendef.h"       /* IOGEN symbols (load driver) */
-#include    "../../../freevms/lib/src/ipldef.h"         /* Define IPLs */
-#include    "../../../freevms/starlet/src/lib$routines.h"       /* Define LIB$ routines */
-#include    "../../../freevms/lib/src/pcbdef.h"         /* Define the PCB */
-#include    "../../../freevms/starlet/src/ssdef.h"          /* System service statys codes */
-#include    "../../../freevms/starlet/src/starlet.h"            /* Define SYS$ routines */
+#include    "../../lib/src/adpdef.h"         /* Define the ADP */
+#include    "../../starlet/src/dcdef.h"          /* Define device and ADP codes */
+#include    "../../librtl/src/descrip.h"         /* Define descriptors */
+#include    "../../lib/src/iocdef.h"         /* Add I/O constants */
+#include    "../../lib/src/iogendef.h"       /* IOGEN symbols (load driver) */
+#include    "../../lib/src/ipldef.h"         /* Define IPLs */
+#include    "../../starlet/src/lib$routines.h"       /* Define LIB$ routines */
+#include    "../../lib/src/pcbdef.h"         /* Define the PCB */
+#include    "../../starlet/src/ssdef.h"          /* System service statys codes */
+#include    "../../starlet/src/starlet.h"            /* Define SYS$ routines */
 #include    <stdio.h>           /* Standard I/O */
 #include    <stdlib.h>          /* Define standard definitions */
 #include    <string.h>          /* Define string handling routines */
-#include    "../../../freevms/starlet/src/stsdef.h"         /* Define status codes */
-#include    "../../../freevms/starlet/src/varargs.h"            /* Handle variable argument lists */
+#include    "../../starlet/src/stsdef.h"         /* Define status codes */
+#include    "../../starlet/src/varargs.h"            /* Handle variable argument lists */
 
-#include    "../../../freevms/lib/src/ioc_routines.h"       /* Define the IOC$ routines */
-#include    "../../../freevms/lib/src/sch_routines.h"       /* Deinf the SCH$ routines */
-#include    "../../../freevms/lib/src/vms_macros.h"     /* Include the VMS macros */
+#include    "../../lib/src/ioc_routines.h"       /* Define the IOC$ routines */
+#include    "../../lib/src/sch_routines.h"       /* Deinf the SCH$ routines */
+#include    "../../lib/src/vms_macros.h"     /* Include the VMS macros */
 
 #include "mytypedefs.h"
 
@@ -144,7 +144,7 @@ int check_system_type()
     /*  status      SS$_NORMAL  system is supported     */
     /*          SS$_UNSUPPORTED no support on this system   */
 
-#include    "../../../freevms/starlet/src/syidef.h"         /* Define GETSYI items */
+#include    "../../starlet/src/syidef.h"         /* Define GETSYI items */
 
     IOSB_T  iosb;               /* IOSB for $GETSYI */
     static int cpu_type;            /* CPU type code */

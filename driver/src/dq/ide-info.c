@@ -43,15 +43,15 @@
 /*                                  */
 /************************************************************************/
 
-#include    "../../../freevms/librtl/src/descrip.h"         /* Define string descriptors */
-#include    "../../../freevms/starlet/src/iodef.h"          /* I/O function code */
-#include    "../../../freevms/starlet/src/lib$routines.h"       /* Define LIB$ routines */
-#include    "../../../freevms/starlet/src/ssdef.h"          /* Define SS$ status codes */
-#include    "../../../freevms/starlet/src/starlet.h"            /* Get system service definitions */
+#include    "../../librtl/src/descrip.h"         /* Define string descriptors */
+#include    "../../starlet/src/iodef.h"          /* I/O function code */
+#include    "../../starlet/src/lib$routines.h"       /* Define LIB$ routines */
+#include    "../../starlet/src/ssdef.h"          /* Define SS$ status codes */
+#include    "../../starlet/src/starlet.h"            /* Get system service definitions */
 #include    <stdio.h>           /* Define standard I/O values */
 #include    <stdlib.h>          /* Get standard definitions */
 #include    <string.h>          /* String definitions */
-#include    "../../../freevms/starlet/src/stsdef.h"         /* Status values */
+#include    "../../starlet/src/stsdef.h"         /* Status values */
 
 /* Define the Identify Drive information buffer */
 

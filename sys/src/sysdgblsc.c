@@ -31,7 +31,7 @@ int exe$dgblsc(void)
 
 }
 
-mmg$gsdscn(void * input_gsnam, unsigned long long * input_ident, int section_flags, char *return_gsnam, unsigned long long  *return_ident, struct _gsd **gsd)
+void mmg$gsdscn(void * input_gsnam, unsigned long long * input_ident, int section_flags, char *return_gsnam, unsigned long long  *return_ident, struct _gsd **gsd)
 {
     struct _pcb * p = ctl$gl_pcb;
     struct _gsd * head, * tmp;

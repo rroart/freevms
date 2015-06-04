@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -926,9 +926,6 @@ void __init trap_init(void)
     set_intr_gate(18,&machine_check);
     set_intr_gate(19,&simd_coprocessor_error);
 
-#ifdef CONFIG_IA32_EMULATION
-    set_system_gate(IA32_SYSCALL_VECTOR, ia32_syscall);
-#endif
     set_system_gate(IA32_VMSSYSCALL_VECTOR,&vms_system_call);
 #if 1
     _set_gate_exe(idt_table+IA32_VMSSYSCALL_VECTOR1,15,&vms_system_call1,3,0);

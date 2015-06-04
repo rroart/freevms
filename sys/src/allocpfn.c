@@ -636,7 +636,7 @@ int mmg$relpfn(signed int pfn)
     }
 }
 
-mmg$delconpfn(struct _pcb * p, int pfn)
+void mmg$delconpfn(struct _pcb * p, int pfn)
 {
     struct _pfn * pfnp=&mem_map[pfn];
     unsigned long * pte = pfnp->pfn$q_pte_index;
@@ -661,7 +661,7 @@ mmg$delconpfn(struct _pcb * p, int pfn)
     }
 }
 
-mmg$delpfnlst(int type, int pfn)
+void mmg$delpfnlst(int type, int pfn)
 {
 #ifdef OLDINT
     mmg$rempfn(type,&mem_map[pfn]);

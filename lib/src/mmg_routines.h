@@ -219,11 +219,11 @@ signed long mmg$rempfn(unsigned long type, int pfn);
 #else
 signed long mmg$rempfn(unsigned long type, struct _pfn * pfn);
 #endif
-mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index,unsigned long pte);
-mmg$delpfnlst(int type, int pfn);
-mmg$dalcstxscn(void);
-mmg$gsdscn(void * input_gsnam, unsigned long long * input_ident, int section_flags, char *return_gsnam, unsigned long long  *return_ident, struct _gsd **gsd);
-mmg$imgreset(void);
+void mmg$delwslx(struct _pcb * pcb, struct _phd * phd, int index,unsigned long pte);
+void mmg$delpfnlst(int type, int pfn);
+void mmg$dalcstxscn(void);
+void mmg$gsdscn(void * input_gsnam, unsigned long long * input_ident, int section_flags, char *return_gsnam, unsigned long long  *return_ident, struct _gsd **gsd);
+void mmg$imgreset(void);
 void mmg$purgempl(unsigned long command);
 void mmg$wrtmfypag(void);
 signed int mmg$ininewpfn(struct _pcb * p, struct _phd * phd, void * va, struct _mypte * pte);
@@ -238,7 +238,7 @@ signed long mmg$inspfn(unsigned long type, struct _pfn * pfn, struct _pfn * list
 signed long mmg$inspfn(unsigned long type, int pfn, int list);
 #endif
 signed long mmg$inspfnh(unsigned long type, struct _pfn * pfn);
-mmg$delconpfn(struct _pcb * p, int pfn);
+void mmg$delconpfn(struct _pcb * p, int pfn);
 
 #include <linux/linkage.h>
 

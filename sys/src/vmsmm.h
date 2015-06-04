@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on mm.h.
 
 #ifndef _LINUX_MM_H
@@ -399,7 +399,7 @@ static inline pmd_t *pmd_alloc(struct mm_struct *mm, pud_t *pud, unsigned long a
  * inlining and the symmetry break with pte_alloc() that does all
  * of this out-of-line.
  */
-static inline pmd_t *pud_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address)
+static inline pud_t *pud_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address)
 {
     if (pgd_none(*pgd))
         return __pud_alloc(mm, pgd, address);
@@ -449,7 +449,6 @@ extern void free_area_init_node(int nid, pg_data_t *pgdat, struct page *pmap,
 extern void mem_init(void);
 extern void show_mem(void);
 extern void si_meminfo(struct sysinfo * val);
-extern void swapin_readahead(swp_entry_t);
 
 extern struct address_space swapper_space;
 #define PageSwapCache(page) ((page)->mapping == &swapper_space)

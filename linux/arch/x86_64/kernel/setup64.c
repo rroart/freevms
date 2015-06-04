@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -33,7 +33,6 @@ static unsigned long cpu_initialized __initdata = 0;
 struct x8664_pda cpu_pda[NR_CPUS] __cacheline_aligned;
 
 extern void system_call(void);
-extern void ia32_cstar_target(void);
 
 struct desc_ptr gdt_descr = { 0 /* filled in */, (unsigned long) gdt_table };
 struct desc_ptr idt_descr = { 256 * 16, (unsigned long) idt_table };
@@ -161,10 +160,6 @@ void syscall_init(void)
      */
     wrmsrl(MSR_STAR,  ((u64)__USER32_CS)<<48  | ((u64)__KERNEL_CS)<<32);
     wrmsrl(MSR_LSTAR, system_call);
-
-#ifdef CONFIG_IA32_EMULATION
-    wrmsrl(MSR_CSTAR, ia32_cstar_target);
-#endif
 }
 
 char boot_exception_stacks[N_EXCEPTION_STACKS*EXCEPTION_STKSZ];
