@@ -16,44 +16,8 @@ extern spinlock_t io_request_lock;
 /*
  * Initialization functions.
  */
-extern int isp16_init(void);
-extern int cdu31a_init(void);
-extern int acsi_init(void);
-extern int mcd_init(void);
-extern int mcdx_init(void);
-extern int sbpcd_init(void);
-extern int aztcd_init(void);
-extern int sony535_init(void);
-extern int gscd_init(void);
-extern int cm206_init(void);
-extern int optcd_init(void);
-extern int sjcd_init(void);
-extern int cdi_init(void);
 extern int hd_init(void);
 extern int ide_init(void);
-extern int xd_init(void);
-extern int mfm_init(void);
-extern int loop_init(void);
-extern int md_init(void);
-extern int ap_init(void);
-extern int ddv_init(void);
-extern int z2_init(void);
-extern int swim3_init(void);
-extern int swimiop_init(void);
-extern int amiga_floppy_init(void);
-extern int atari_floppy_init(void);
-extern int ez_init(void);
-extern int bpcd_init(void);
-extern int ps2esdi_init(void);
-extern int jsfd_init(void);
-extern int viodasd_init(void);
-extern int viocd_init(void);
-
-#if defined(CONFIG_ARCH_S390)
-extern int dasd_init(void);
-extern int xpram_init(void);
-extern int tapeblock_init(void);
-#endif /* CONFIG_ARCH_S390 */
 
 extern void set_device_ro(kdev_t dev,int flag);
 void add_blkdev_randomness(int major);
@@ -63,18 +27,6 @@ extern void rd_load(void);
 extern int rd_doload;       /* 1 = load ramdisk, 0 = don't load */
 extern int rd_prompt;       /* 1 = prompt for ramdisk, 0 = don't prompt */
 extern int rd_image_start;  /* starting block # of image */
-
-#ifdef CONFIG_BLK_DEV_INITRD
-
-#define INITRD_MINOR 250 /* shouldn't collide with /dev/ram* too soon ... */
-
-extern unsigned long initrd_start,initrd_end;
-extern int mount_initrd; /* zero if initrd should not be mounted */
-extern int initrd_below_start_ok; /* 1 if it is not an error if initrd_start < memory_start */
-void initrd_init(void);
-
-#endif
-
 
 /*
  * end_request() and friends. Must be called with the request queue spinlock
@@ -190,13 +142,6 @@ static void floppy_off(unsigned int nr);
 #define DEVICE_NAME "CDU31A"
 #define DEVICE_REQUEST do_cdu31a_request
 #define DEVICE_NR(device) (MINOR(device))
-
-#elif (MAJOR_NR == ACSI_MAJOR) && (defined(CONFIG_ATARI_ACSI) || defined(CONFIG_ATARI_ACSI_MODULE))
-
-#define DEVICE_NAME "ACSI"
-#define DEVICE_INTR do_acsi
-#define DEVICE_REQUEST do_acsi_request
-#define DEVICE_NR(device) (MINOR(device) >> 4)
 
 #elif (MAJOR_NR == MITSUMI_CDROM_MAJOR)
 

@@ -9,8 +9,6 @@
 #include <linux/init.h>
 #include <linux/netlink.h>
 
-extern int x25_asy_init_ctrl_dev(void);
-
 extern int dmascc_init(void);
 
 extern int awc4500_pci_probe(void);
@@ -134,9 +132,6 @@ static void __init network_probe(void)
 
 static void __init network_ldisc_init(void)
 {
-#if defined(CONFIG_X25_ASY)
-    x25_asy_init_ctrl_dev();
-#endif
 }
 
 

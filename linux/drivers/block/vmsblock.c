@@ -144,47 +144,11 @@ int __init blk_dev_init(void)
     batch_requests = queue_nr_requests/4;
     printk("block: %d slots per queue, batch=%d\n", queue_nr_requests, batch_requests);
 
-#ifdef CONFIG_AMIGA_Z2RAM
-    z2_init();
-#endif
-#ifdef CONFIG_STRAM_SWAP
-    stram_device_init();
-#endif
-#ifdef CONFIG_ISP16_CDI
-    isp16_init();
-#endif
 #if defined(CONFIG_IDE) && defined(CONFIG_BLK_DEV_IDE)
     ide_init();     /* this MUST precede hd_init */
 #endif
 #if defined(CONFIG_IDE) && defined(CONFIG_BLK_DEV_HD)
     hd_init();
-#endif
-#ifdef CONFIG_BLK_DEV_PS2
-    ps2esdi_init();
-#endif
-#ifdef CONFIG_BLK_DEV_XD
-    xd_init();
-#endif
-#ifdef CONFIG_BLK_DEV_MFM
-    mfm_init();
-#endif
-#ifdef CONFIG_PARIDE
-    {
-        extern void paride_init(void);
-        paride_init();
-    };
-#endif
-#ifdef CONFIG_MAC_FLOPPY
-    swim3_init();
-#endif
-#ifdef CONFIG_BLK_DEV_SWIM_IOP
-    swimiop_init();
-#endif
-#ifdef CONFIG_AMIGA_FLOPPY
-    amiga_floppy_init();
-#endif
-#ifdef CONFIG_ATARI_FLOPPY
-    atari_floppy_init();
 #endif
 #ifdef CONFIG_BLK_DEV_FD_VMS
     vms_floppy_init();
@@ -196,60 +160,6 @@ int __init blk_dev_init(void)
     outb_p(0xc, 0x3f2);
 #endif
 #endif
-#ifdef CONFIG_CDU31A
-    cdu31a_init();
-#endif
-#ifdef CONFIG_ATARI_ACSI
-    acsi_init();
-#endif
-#ifdef CONFIG_MCD
-    mcd_init();
-#endif
-#ifdef CONFIG_MCDX
-    mcdx_init();
-#endif
-#ifdef CONFIG_SBPCD
-    sbpcd_init();
-#endif
-#ifdef CONFIG_AZTCD
-    aztcd_init();
-#endif
-#ifdef CONFIG_CDU535
-    sony535_init();
-#endif
-#ifdef CONFIG_GSCD
-    gscd_init();
-#endif
-#ifdef CONFIG_CM206
-    cm206_init();
-#endif
-#ifdef CONFIG_OPTCD
-    optcd_init();
-#endif
-#ifdef CONFIG_SJCD
-    sjcd_init();
-#endif
-#ifdef CONFIG_APBLOCK
-    ap_init();
-#endif
-#ifdef CONFIG_DDV
-    ddv_init();
-#endif
-#ifdef CONFIG_MDISK
-    mdisk_init();
-#endif
-#ifdef CONFIG_DASD
-    dasd_init();
-#endif
-#if defined(CONFIG_S390_TAPE) && defined(CONFIG_S390_TAPE_BLOCK)
-    tapeblock_init();
-#endif
-#ifdef CONFIG_BLK_DEV_XPRAM
-    xpram_init();
-#endif
 
-#ifdef CONFIG_SUN_JSFLASH
-    jsfd_init();
-#endif
     return 0;
 };

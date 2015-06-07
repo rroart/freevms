@@ -171,12 +171,6 @@ static ctl_table kern_table[] =
         KERN_CAP_BSET, "cap-bound", &cap_bset, sizeof(kernel_cap_t),
         0600, NULL, &proc_dointvec_bset
     },
-#ifdef CONFIG_BLK_DEV_INITRD
-    {
-        KERN_REALROOTDEV, "real-root-dev", &real_root_dev, sizeof(int),
-        0644, NULL, &proc_dointvec
-    },
-#endif
     {
         KERN_CTLALTDEL, "ctrl-alt-del", &C_A_D, sizeof(int),
         0644, NULL, &proc_dointvec

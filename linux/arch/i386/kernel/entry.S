@@ -1,7 +1,7 @@
 # $Id$
 # $Locker$
 
-# Author. Roar Thronæs.
+# Author. Roar Thronï¿½s.
 # Modified Linux source file, 2001-2004  
 
 /*
@@ -1148,7 +1148,7 @@ ENTRY(sys_call_table)
 	.long SYMBOL_NAME(sys_vm86)
 	.long SYMBOL_NAME(sys_query_module)
 	.long SYMBOL_NAME(sys_poll)
-	.long SYMBOL_NAME(sys_nfsservctl)
+	.long SYMBOL_NAME(sys_ni_syscall)
 	.long SYMBOL_NAME(sys_setresgid16)	/* 170 */
 	.long SYMBOL_NAME(sys_getresgid16)
 	.long SYMBOL_NAME(sys_prctl)

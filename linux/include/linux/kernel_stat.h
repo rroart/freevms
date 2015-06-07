@@ -27,9 +27,7 @@ struct kernel_stat
     unsigned int dk_drive_wblk[DK_MAX_MAJOR][DK_MAX_DISK];
     unsigned int pgpgin, pgpgout;
     unsigned int pswpin, pswpout;
-#if !defined(CONFIG_ARCH_S390)
     unsigned int irqs[NR_CPUS][NR_IRQS];
-#endif
     unsigned int ipackets, opackets;
     unsigned int ierrors, oerrors;
     unsigned int collisions;
@@ -38,7 +36,6 @@ struct kernel_stat
 
 extern struct kernel_stat kstat;
 
-#if !defined(CONFIG_ARCH_S390)
 /*
  * Number of interrupts per specific IRQ source, since bootup
  */
@@ -51,6 +48,5 @@ static inline int kstat_irqs (int irq)
 
     return sum;
 }
-#endif
 
 #endif /* _LINUX_KERNEL_STAT_H */

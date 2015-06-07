@@ -151,9 +151,6 @@ endif
 # A rule to make modules
 #
 ALL_MOBJS = $(filter-out $(obj-y), $(obj-m))
-ifneq "$(strip $(ALL_MOBJS))" ""
-MOD_DESTDIR := $(shell $(CONFIG_SHELL) $(TOPDIR)/linux/scripts/pathdown.sh)
-endif
 
 unexport MOD_DIRS
 MOD_DIRS := $(MOD_SUB_DIRS) $(MOD_IN_SUB_DIRS)
@@ -161,26 +158,11 @@ ifneq "$(strip $(MOD_DIRS))" ""
 .PHONY: $(patsubst %,_modsubdir_%,$(MOD_DIRS))
 $(patsubst %,_modsubdir_%,$(MOD_DIRS)) : dummy
 	$(MAKE) -C $(patsubst _modsubdir_%,%,$@) modules
-
-.PHONY: $(patsubst %,_modinst_%,$(MOD_DIRS))
-$(patsubst %,_modinst_%,$(MOD_DIRS)) : dummy
-	$(MAKE) -C $(patsubst _modinst_%,%,$@) modules_install
 endif
 
 .PHONY: modules
 modules: $(ALL_MOBJS) dummy \
 	 $(patsubst %,_modsubdir_%,$(MOD_DIRS))
-
-.PHONY: _modinst__
-_modinst__: dummy
-ifneq "$(strip $(ALL_MOBJS))" ""
-	mkdir -p $(MODLIB)/kernel/$(MOD_DESTDIR)
-	cp $(ALL_MOBJS) $(MODLIB)/kernel/$(MOD_DESTDIR)$(MOD_TARGET)
-endif
-
-.PHONY: modules_install
-modules_install: _modinst__ \
-	 $(patsubst %,_modinst_%,$(MOD_DIRS))
 
 #
 # A rule to do nothing

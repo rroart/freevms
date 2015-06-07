@@ -363,10 +363,10 @@ int ide_config_drive_speed (ide_drive_t *drive, byte speed)
     int i, error = 1;
     byte stat;
 
-#if defined(CONFIG_BLK_DEV_IDEDMA) && !defined(CONFIG_DMA_NONPCI)
+#if defined(CONFIG_BLK_DEV_IDEDMA)
     byte unit = (drive->select.b.unit & 0x01);
     outb(inb(hwif->dma_base+2) & ~(1<<(5+unit)), hwif->dma_base+2);
-#endif /* (CONFIG_BLK_DEV_IDEDMA) && !(CONFIG_DMA_NONPCI) */
+#endif /* (CONFIG_BLK_DEV_IDEDMA) */
 
     /*
      * Don't use ide_wait_cmd here - it will
@@ -438,7 +438,7 @@ int ide_config_drive_speed (ide_drive_t *drive, byte speed)
     drive->id->dma_mword &= ~0x0F00;
     drive->id->dma_1word &= ~0x0F00;
 
-#if defined(CONFIG_BLK_DEV_IDEDMA) && !defined(CONFIG_DMA_NONPCI)
+#if defined(CONFIG_BLK_DEV_IDEDMA)
     if (speed > XFER_PIO_4)
     {
         outb(inb(hwif->dma_base+2)|(1<<(5+unit)), hwif->dma_base+2);
@@ -447,7 +447,7 @@ int ide_config_drive_speed (ide_drive_t *drive, byte speed)
     {
         outb(inb(hwif->dma_base+2) & ~(1<<(5+unit)), hwif->dma_base+2);
     }
-#endif /* (CONFIG_BLK_DEV_IDEDMA) && !(CONFIG_DMA_NONPCI) */
+#endif /* (CONFIG_BLK_DEV_IDEDMA) */
 
     switch(speed)
     {

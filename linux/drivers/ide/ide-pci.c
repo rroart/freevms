@@ -87,273 +87,88 @@
 
 #define IDE_IGNORE  ((void *)-1)
 
-#ifdef CONFIG_BLK_DEV_AEC62XX
-extern unsigned int pci_init_aec62xx(struct pci_dev *, const char *);
-extern unsigned int ata66_aec62xx(ide_hwif_t *);
-extern void ide_init_aec62xx(ide_hwif_t *);
-extern void ide_dmacapable_aec62xx(ide_hwif_t *, unsigned long);
-#define PCI_AEC62XX &pci_init_aec62xx
-#define ATA66_AEC62XX   &ata66_aec62xx
-#define INIT_AEC62XX    &ide_init_aec62xx
-#define DMA_AEC62XX &ide_dmacapable_aec62xx
-#else
 #define PCI_AEC62XX NULL
 #define ATA66_AEC62XX   NULL
 #define INIT_AEC62XX    NULL
 #define DMA_AEC62XX NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_ALI15X3
-extern unsigned int pci_init_ali15x3(struct pci_dev *, const char *);
-extern unsigned int ata66_ali15x3(ide_hwif_t *);
-extern void ide_init_ali15x3(ide_hwif_t *);
-extern void ide_dmacapable_ali15x3(ide_hwif_t *, unsigned long);
-#define PCI_ALI15X3 &pci_init_ali15x3
-#define ATA66_ALI15X3   &ata66_ali15x3
-#define INIT_ALI15X3    &ide_init_ali15x3
-#define DMA_ALI15X3 &ide_dmacapable_ali15x3
-#else
 #define PCI_ALI15X3 NULL
 #define ATA66_ALI15X3   NULL
 #define INIT_ALI15X3    NULL
 #define DMA_ALI15X3 NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_AMD74XX
-extern unsigned int pci_init_amd74xx(struct pci_dev *, const char *);
-extern unsigned int ata66_amd74xx(ide_hwif_t *);
-extern void ide_init_amd74xx(ide_hwif_t *);
-extern void ide_dmacapable_amd74xx(ide_hwif_t *, unsigned long);
-#define PCI_AMD74XX &pci_init_amd74xx
-#define ATA66_AMD74XX   &ata66_amd74xx
-#define INIT_AMD74XX    &ide_init_amd74xx
-#define DMA_AMD74XX &ide_dmacapable_amd74xx
-#else
 #define PCI_AMD74XX NULL
 #define ATA66_AMD74XX   NULL
 #define INIT_AMD74XX    NULL
 #define DMA_AMD74XX NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_CMD64X
-extern unsigned int pci_init_cmd64x(struct pci_dev *, const char *);
-extern unsigned int ata66_cmd64x(ide_hwif_t *);
-extern void ide_init_cmd64x(ide_hwif_t *);
-extern void ide_dmacapable_cmd64x(ide_hwif_t *, unsigned long);
-#define PCI_CMD64X  &pci_init_cmd64x
-#define ATA66_CMD64X    &ata66_cmd64x
-#define INIT_CMD64X &ide_init_cmd64x
-#else
 #define PCI_CMD64X  NULL
 #define ATA66_CMD64X    NULL
-#ifdef __sparc_v9__
-#define INIT_CMD64X IDE_IGNORE
-#else
 #define INIT_CMD64X NULL
-#endif
-#endif
 
-#ifdef CONFIG_BLK_DEV_CY82C693
-extern unsigned int pci_init_cy82c693(struct pci_dev *, const char *);
-extern void ide_init_cy82c693(ide_hwif_t *);
-#define PCI_CY82C693    &pci_init_cy82c693
-#define INIT_CY82C693   &ide_init_cy82c693
-#else
 #define PCI_CY82C693    NULL
 #define INIT_CY82C693   NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_CS5530
-extern unsigned int pci_init_cs5530(struct pci_dev *, const char *);
-extern void ide_init_cs5530(ide_hwif_t *);
-#define PCI_CS5530  &pci_init_cs5530
-#define INIT_CS5530 &ide_init_cs5530
-#else
 #define PCI_CS5530  NULL
 #define INIT_CS5530 NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_HPT34X
-extern unsigned int pci_init_hpt34x(struct pci_dev *, const char *);
-extern void ide_init_hpt34x(ide_hwif_t *);
-#define PCI_HPT34X  &pci_init_hpt34x
-#define INIT_HPT34X &ide_init_hpt34x
-#else
 #define PCI_HPT34X  NULL
 #define INIT_HPT34X IDE_IGNORE
-#endif
 
-#ifdef CONFIG_BLK_DEV_HPT366
-extern byte hpt363_shared_irq;
-extern byte hpt363_shared_pin;
-extern unsigned int pci_init_hpt366(struct pci_dev *, const char *);
-extern unsigned int ata66_hpt366(ide_hwif_t *);
-extern void ide_init_hpt366(ide_hwif_t *);
-extern void ide_dmacapable_hpt366(ide_hwif_t *, unsigned long);
-#define PCI_HPT366  &pci_init_hpt366
-#define ATA66_HPT366    &ata66_hpt366
-#define INIT_HPT366 &ide_init_hpt366
-#define DMA_HPT366  &ide_dmacapable_hpt366
-#else
 static byte hpt363_shared_irq;
 static byte hpt363_shared_pin;
 #define PCI_HPT366  NULL
 #define ATA66_HPT366    NULL
 #define INIT_HPT366 NULL
 #define DMA_HPT366  NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_NS87415
-extern void ide_init_ns87415(ide_hwif_t *);
-#define INIT_NS87415    &ide_init_ns87415
-#else
 #define INIT_NS87415    IDE_IGNORE
-#endif
 
-#ifdef CONFIG_BLK_DEV_OPTI621
-extern void ide_init_opti621(ide_hwif_t *);
-#define INIT_OPTI621    &ide_init_opti621
-#else
 #define INIT_OPTI621    NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_PDC_ADMA
-extern unsigned int pci_init_pdcadma(struct pci_dev *, const char *);
-extern unsigned int ata66_pdcadma(ide_hwif_t *);
-extern void ide_init_pdcadma(ide_hwif_t *);
-extern void ide_dmacapable_pdcadma(ide_hwif_t *, unsigned long);
-#define PCI_PDCADMA &pci_init_pdcadma
-#define ATA66_PDCADMA   &ata66_pdcadma
-#define INIT_PDCADMA    &ide_init_pdcadma
-#define DMA_PDCADMA &ide_dmacapable_pdcadma
-#else
 #define PCI_PDCADMA IDE_IGNORE
 #define ATA66_PDCADMA   IDE_IGNORE
 #define INIT_PDCADMA    IDE_IGNORE
 #define DMA_PDCADMA IDE_IGNORE
-#endif
 
-#ifdef CONFIG_BLK_DEV_PDC202XX
-extern unsigned int pci_init_pdc202xx(struct pci_dev *, const char *);
-extern unsigned int ata66_pdc202xx(ide_hwif_t *);
-extern void ide_init_pdc202xx(ide_hwif_t *);
-#define PCI_PDC202XX    &pci_init_pdc202xx
-#define ATA66_PDC202XX  &ata66_pdc202xx
-#define INIT_PDC202XX   &ide_init_pdc202xx
-#else
 #define PCI_PDC202XX    NULL
 #define ATA66_PDC202XX  NULL
 #define INIT_PDC202XX   NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_PIIX
-extern unsigned int pci_init_piix(struct pci_dev *, const char *);
-extern unsigned int ata66_piix(ide_hwif_t *);
-extern void ide_init_piix(ide_hwif_t *);
-#define PCI_PIIX    &pci_init_piix
-#define ATA66_PIIX  &ata66_piix
-#define INIT_PIIX   &ide_init_piix
-#else
 #define PCI_PIIX    NULL
 #define ATA66_PIIX  NULL
 #define INIT_PIIX   NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_IT8172
-extern unsigned int pci_init_it8172(struct pci_dev *, const char *);
-extern unsigned int ata66_it8172(ide_hwif_t *);
-extern void ide_init_it8172(ide_hwif_t *);
-#define PCI_IT8172  &pci_init_it8172
-#define INIT_IT8172 &ide_init_it8172
-#else
 #define PCI_IT8172  NULL
 #define ATA66_IT8172    NULL
 #define INIT_IT8172 NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_RZ1000
-extern void ide_init_rz1000(ide_hwif_t *);
-#define INIT_RZ1000 &ide_init_rz1000
-#else
 #define INIT_RZ1000 IDE_IGNORE
-#endif
 
 #define INIT_SAMURAI    NULL
 
-#ifdef CONFIG_BLK_DEV_SVWKS
-extern unsigned int pci_init_svwks(struct pci_dev *, const char *);
-extern unsigned int ata66_svwks(ide_hwif_t *);
-extern void ide_init_svwks(ide_hwif_t *);
-#define PCI_SVWKS   &pci_init_svwks
-#define ATA66_SVWKS &ata66_svwks
-#define INIT_SVWKS  &ide_init_svwks
-#else
 #define PCI_SVWKS   NULL
 #define ATA66_SVWKS NULL
 #define INIT_SVWKS  NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_SIS5513
-extern unsigned int pci_init_sis5513(struct pci_dev *, const char *);
-extern unsigned int ata66_sis5513(ide_hwif_t *);
-extern void ide_init_sis5513(ide_hwif_t *);
-#define PCI_SIS5513 &pci_init_sis5513
-#define ATA66_SIS5513   &ata66_sis5513
-#define INIT_SIS5513    &ide_init_sis5513
-#else
 #define PCI_SIS5513 NULL
 #define ATA66_SIS5513   NULL
 #define INIT_SIS5513    NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_SLC90E66
-extern unsigned int pci_init_slc90e66(struct pci_dev *, const char *);
-extern unsigned int ata66_slc90e66(ide_hwif_t *);
-extern void ide_init_slc90e66(ide_hwif_t *);
-#define PCI_SLC90E66    &pci_init_slc90e66
-#define ATA66_SLC90E66  &ata66_slc90e66
-#define INIT_SLC90E66   &ide_init_slc90e66
-#else
 #define PCI_SLC90E66    NULL
 #define ATA66_SLC90E66  NULL
 #define INIT_SLC90E66   NULL
-#endif
 
-#ifdef CONFIG_BLK_DEV_SL82C105
-extern unsigned int pci_init_sl82c105(struct pci_dev *, const char *);
-extern void dma_init_sl82c105(ide_hwif_t *, unsigned long);
-extern void ide_init_sl82c105(ide_hwif_t *);
-#define PCI_W82C105 &pci_init_sl82c105
-#define DMA_W82C105 &dma_init_sl82c105
-#define INIT_W82C105    &ide_init_sl82c105
-#else
 #define PCI_W82C105 NULL
 #define DMA_W82C105 NULL
 #define INIT_W82C105    IDE_IGNORE
-#endif
 
-#ifdef CONFIG_BLK_DEV_TRM290
-extern void ide_init_trm290(ide_hwif_t *);
-#define INIT_TRM290 &ide_init_trm290
-#else
 #define INIT_TRM290 IDE_IGNORE
-#endif
 
-#ifdef CONFIG_BLK_DEV_VIA82CXXX
-extern unsigned int pci_init_via82cxxx(struct pci_dev *, const char *);
-extern unsigned int ata66_via82cxxx(ide_hwif_t *);
-extern void ide_init_via82cxxx(ide_hwif_t *);
-extern void ide_dmacapable_via82cxxx(ide_hwif_t *, unsigned long);
-#define PCI_VIA82CXXX   &pci_init_via82cxxx
-#define ATA66_VIA82CXXX &ata66_via82cxxx
-#define INIT_VIA82CXXX  &ide_init_via82cxxx
-#define DMA_VIA82CXXX   &ide_dmacapable_via82cxxx
-#else
 #define PCI_VIA82CXXX   NULL
 #define ATA66_VIA82CXXX NULL
 #define INIT_VIA82CXXX  NULL
 #define DMA_VIA82CXXX   NULL
-#endif
 
 typedef struct ide_pci_enablebit_s
 {
@@ -393,17 +208,10 @@ static ide_pci_device_t ide_pci_chipsets[] __initdata =
     {DEVID_VIA_IDE, "VIA_IDE",  NULL,       NULL,       NULL,       NULL,       {{0x00,0x00,0x00}, {0x00,0x00,0x00}},   ON_BOARD,   0 },
     {DEVID_MR_IDE,  "VP_IDE",   PCI_VIA82CXXX,  ATA66_VIA82CXXX,INIT_VIA82CXXX, DMA_VIA82CXXX,  {{0x40,0x02,0x02}, {0x40,0x01,0x01}},   ON_BOARD,   0 },
     {DEVID_VP_IDE,  "VP_IDE",   PCI_VIA82CXXX,  ATA66_VIA82CXXX,INIT_VIA82CXXX, DMA_VIA82CXXX,  {{0x40,0x02,0x02}, {0x40,0x01,0x01}},   ON_BOARD,   0 },
-#ifdef CONFIG_PDC202XX_FORCE
-    {DEVID_PDC20246,"PDC20246", PCI_PDC202XX,   NULL,       INIT_PDC202XX,  NULL,       {{0x00,0x00,0x00}, {0x00,0x00,0x00}},   OFF_BOARD,  16 },
-    {DEVID_PDC20262,"PDC20262", PCI_PDC202XX,   ATA66_PDC202XX, INIT_PDC202XX,  NULL,       {{0x00,0x00,0x00}, {0x00,0x00,0x00}},   OFF_BOARD,  48 },
-    {DEVID_PDC20265,"PDC20265", PCI_PDC202XX,   ATA66_PDC202XX, INIT_PDC202XX,  NULL,       {{0x00,0x00,0x00}, {0x00,0x00,0x00}},   OFF_BOARD,  48 },
-    {DEVID_PDC20267,"PDC20267", PCI_PDC202XX,   ATA66_PDC202XX, INIT_PDC202XX,  NULL,       {{0x00,0x00,0x00}, {0x00,0x00,0x00}},   OFF_BOARD,  48 },
-#else /* !CONFIG_PDC202XX_FORCE */
     {DEVID_PDC20246,"PDC20246", PCI_PDC202XX,   NULL,       INIT_PDC202XX,  NULL,       {{0x50,0x02,0x02}, {0x50,0x04,0x04}},   OFF_BOARD,  16 },
     {DEVID_PDC20262,"PDC20262", PCI_PDC202XX,   ATA66_PDC202XX, INIT_PDC202XX,  NULL,       {{0x50,0x02,0x02}, {0x50,0x04,0x04}},   OFF_BOARD,  48 },
     {DEVID_PDC20265,"PDC20265", PCI_PDC202XX,   ATA66_PDC202XX, INIT_PDC202XX,  NULL,       {{0x50,0x02,0x02}, {0x50,0x04,0x04}},   OFF_BOARD,  48 },
     {DEVID_PDC20267,"PDC20267", PCI_PDC202XX,   ATA66_PDC202XX, INIT_PDC202XX,  NULL,       {{0x50,0x02,0x02}, {0x50,0x04,0x04}},   OFF_BOARD,  48 },
-#endif
     {DEVID_PDC20268,"PDC20268", PCI_PDC202XX,   ATA66_PDC202XX, INIT_PDC202XX,  NULL,       {{0x00,0x00,0x00}, {0x00,0x00,0x00}},   OFF_BOARD,  16 },
     /* Promise used a different PCI ident for the raid card apparently to try and
        prevent Linux detecting it and using our own raid code. We want to detect

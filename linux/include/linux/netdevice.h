@@ -35,9 +35,6 @@
 
 #ifdef __KERNEL__
 #include <linux/config.h>
-#ifdef CONFIG_NET_PROFILE
-#include <net/profile.h>
-#endif
 
 struct divert_blk;
 
@@ -71,21 +68,9 @@ functions are available. */
  *  used.
  */
 
-#if !defined(CONFIG_AX25) && !defined(CONFIG_AX25_MODULE) && !defined(CONFIG_TR)
 #define LL_MAX_HEADER   32
-#else
-#if defined(CONFIG_AX25) || defined(CONFIG_AX25_MODULE)
-#define LL_MAX_HEADER   96
-#else
-#define LL_MAX_HEADER   48
-#endif
-#endif
 
-#if !defined(CONFIG_IPV6) && !defined(CONFIG_IPV6_MODULE)
 #define MAX_HEADER LL_MAX_HEADER
-#else
-#define MAX_HEADER (LL_MAX_HEADER + 48)
-#endif
 
 /*
  *  Network device statistics. Akin to the 2.0 ether stats but
@@ -405,17 +390,6 @@ struct net_device
 
     /* bridge stuff */
     struct net_bridge_port  *br_port;
-
-#ifdef CONFIG_NET_FASTROUTE
-#define NETDEV_FASTROUTE_HMASK 0xF
-    /* Semi-private data. Keep it at the end of device struct. */
-    rwlock_t        fastpath_lock;
-    struct dst_entry    *fastpath[NETDEV_FASTROUTE_HMASK+1];
-#endif
-#ifdef CONFIG_NET_DIVERT
-    /* this will get initialized at each interface type init routine */
-    struct divert_blk   *divert;
-#endif /* CONFIG_NET_DIVERT */
 };
 
 
@@ -717,12 +691,6 @@ extern unsigned long    netdev_fc_xoff;
 extern atomic_t netdev_dropping;
 extern int      netdev_set_master(struct net_device *dev, struct net_device *master);
 extern struct sk_buff * skb_checksum_help(struct sk_buff *skb);
-#ifdef CONFIG_NET_FASTROUTE
-extern int      netdev_fastroute;
-extern int      netdev_fastroute_obstacles;
-extern void     dev_clear_fastroute(struct net_device *dev);
-#endif
-
 
 #endif /* __KERNEL__ */
 

@@ -1,5 +1,5 @@
-#ifndef __irq_h
-#define __irq_h
+#ifndef __IRQ_H
+#define __IRQ_H
 
 /*
  * Please do not include this file in generic code.  There is currently
@@ -10,8 +10,6 @@
  */
 
 #include <linux/config.h>
-
-#if !defined(CONFIG_ARCH_S390)
 
 #include <linux/cache.h>
 #include <linux/spinlock.h>
@@ -76,6 +74,4 @@ extern int setup_irq(unsigned int , struct irqaction * );
 extern hw_irq_controller no_irq_type;  /* needed in every arch ? */
 extern void no_action(int cpl, void *dev_id, struct pt_regs *regs);
 
-#endif
-
-#endif /* __asm_h */
+#endif /* __IRQ_H */

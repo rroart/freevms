@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -138,8 +138,7 @@ EXPORT_SYMBOL(get_gendisk);
 
 
 #ifdef CONFIG_PROC_FS
-int
-get_partition_list(char *page, char **start, off_t offset, int count)
+int get_partition_list(char *page, char **start, off_t offset, int count)
 {
     struct gendisk *gp;
     char buf[64];
@@ -177,42 +176,16 @@ out:
 
 
 extern int blk_dev_init(void);
-#ifdef CONFIG_FUSION_BOOT
-extern int fusion_init(void);
-#endif
 extern int net_dev_init(void);
 extern void console_map_init(void);
-extern int soc_probe(void);
-extern int atmdev_init(void);
-extern int i2o_init(void);
-extern int cpqarray_init(void);
 
 int __init device_init(void)
 {
     rwlock_init(&gendisk_lock);
     blk_dev_init();
     sti();
-#ifdef CONFIG_I2O
-    i2o_init();
-#endif
-#ifdef CONFIG_FUSION_BOOT
-    fusion_init();
-#endif
-#ifdef CONFIG_FC4_SOC
-    /* This has to be done before scsi_dev_init */
-    soc_probe();
-#endif
-#ifdef CONFIG_BLK_CPQ_DA
-    cpqarray_init();
-#endif
 #ifdef CONFIG_NET
-#if 1
-    // not yet? oh yes
     net_dev_init();
-#endif
-#endif
-#ifdef CONFIG_ATM
-    (void) atmdev_init();
 #endif
 #ifdef CONFIG_VT
     console_map_init();

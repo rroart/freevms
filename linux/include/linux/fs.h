@@ -1386,11 +1386,6 @@ extern char root_device_name[];
 extern void show_buffers(void);
 extern void mount_root(void);
 
-#ifdef CONFIG_BLK_DEV_INITRD
-extern unsigned int real_root_dev;
-extern int change_root(kdev_t, const char *);
-#endif
-
 extern ssize_t char_read(struct file *, char *, size_t, loff_t *);
 extern ssize_t block_read(struct file *, char *, size_t, loff_t *);
 extern int read_ahead[];

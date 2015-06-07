@@ -32,12 +32,6 @@
 #define CONFIG_SMP 1
 #undef  CONFIG_HPET_TIMER
 #undef  CONFIG_GART_IOMMU
-#ifndef CONFIG_GART_IOMMU
-#define CONFIG_DUMMY_IOMMU 1
-#endif
-#ifndef CONFIG_SMP
-#define CONFIG_X86_UP_IOAPIC 1
-#endif
 #define CONFIG_MCE 1
 #ifdef CONFIG_SMP
 #undef CONFIG_K8_NUMA
@@ -69,12 +63,6 @@
  * Memory Technology Devices (MTD)
  */
 #undef  CONFIG_MTD
-/*
- * Block devices
- */
-#undef  CONFIG_BLK_DEV_XD
-#undef  CONFIG_PARIDE
-#undef  CONFIG_BLK_CPQ_DA
 
 /*
  * ATA/IDE/MFM/RLL support

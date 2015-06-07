@@ -112,14 +112,6 @@ static inline void do_identify (ide_drive_t *drive, byte cmd)
     {
         byte type = (id->config >> 8) & 0x1f;
         printk("ATAPI ");
-#ifdef CONFIG_BLK_DEV_PDC4030
-        if (HWIF(drive)->channel == 1 && HWIF(drive)->chipset == ide_pdc4030)
-        {
-            printk(" -- not supported on 2nd Promise port\n");
-            drive->present = 0;
-            return;
-        }
-#endif /* CONFIG_BLK_DEV_PDC4030 */
         switch (type)
         {
         case ide_floppy:
@@ -221,19 +213,7 @@ static int actual_try_to_identify (ide_drive_t *drive, byte cmd)
     if ((cmd == WIN_PIDENTIFY))
         OUT_BYTE(0,IDE_FEATURE_REG);    /* disable dma & overlap */
 
-#if CONFIG_BLK_DEV_PDC4030
-    if (HWIF(drive)->chipset == ide_pdc4030)
-    {
-        /* DC4030 hosted drives need their own identify... */
-        extern int pdc4030_identify(ide_drive_t *);
-        if (pdc4030_identify(drive))
-        {
-            return 1;
-        }
-    }
-    else
-#endif /* CONFIG_BLK_DEV_PDC4030 */
-        OUT_BYTE(cmd,IDE_COMMAND_REG);      /* ask drive for ID */
+    OUT_BYTE(cmd,IDE_COMMAND_REG);      /* ask drive for ID */
     timeout = ((cmd == WIN_IDENTIFY) ? WAIT_WORSTCASE : WAIT_PIDENTIFY) / 2;
     timeout += jiffies;
     do
@@ -546,9 +526,6 @@ static void probe_hwif (ide_hwif_t *hwif)
 #endif
 
     if ((hwif->chipset != ide_4drives || !hwif->mate->present) &&
-#if CONFIG_BLK_DEV_PDC4030
-            (hwif->chipset != ide_pdc4030 || hwif->channel == 0) &&
-#endif /* CONFIG_BLK_DEV_PDC4030 */
             (hwif_check_regions(hwif)))
     {
         int msgout = 0;
@@ -786,15 +763,10 @@ static int init_irq (ide_hwif_t *hwif)
     }
     restore_flags(flags);   /* all CPUs; safe now that hwif->hwgroup is set up */
 
-#if !defined(__mc68000__) && !defined(CONFIG_APUS)
     printk("%s at 0x%03x-0x%03x,0x%03x on irq %d", hwif->name,
            hwif->io_ports[IDE_DATA_OFFSET],
            hwif->io_ports[IDE_DATA_OFFSET]+7,
            hwif->io_ports[IDE_CONTROL_OFFSET], hwif->irq);
-#else
-    printk("%s at %p on irq 0x%08x", hwif->name,
-           hwif->io_ports[IDE_DATA_OFFSET], hwif->irq);
-#endif /* __mc68000__ && CONFIG_APUS */
     if (match)
         printk(" (%sed with %s)",
                hwif->sharing_irq ? "shar" : "serializ", match->name);
@@ -837,12 +809,8 @@ static void init_gendisk (ide_hwif_t *hwif)
     for (unit = 0; unit < minors; ++unit)
     {
         *bs++ = BLOCK_SIZE;
-#ifdef CONFIG_BLK_DEV_PDC4030
-        *max_sect++ = ((hwif->chipset == ide_pdc4030) ? 127 : 255);
-#else
         /* IDE can do up to 128K per request. */
         *max_sect++ = 255;
-#endif
         *max_ra++ = 0;
     }
 

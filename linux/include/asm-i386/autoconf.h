@@ -47,12 +47,6 @@
  * Memory Technology Devices (MTD)
  */
 #undef  CONFIG_MTD
-/*
- * Block devices
- */
-#undef  CONFIG_BLK_DEV_XD
-#undef  CONFIG_PARIDE
-#undef  CONFIG_BLK_CPQ_DA
 
 /*
  * ATA/IDE/MFM/RLL support

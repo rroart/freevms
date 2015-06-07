@@ -419,7 +419,7 @@ __SYSCALL(__NR_query_module, sys_query_module)
 __SYSCALL(__NR_quotactl, sys_quotactl)
 
 #define __NR_nfsservctl                        180
-__SYSCALL(__NR_nfsservctl, sys_nfsservctl)
+__SYSCALL(__NR_nfsservctl, sys_ni_syscall)
 
 #define __NR_getpmsg                           181
 __SYSCALL(__NR_getpmsg, sys_ni_syscall)

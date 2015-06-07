@@ -190,11 +190,6 @@ struct tcp_tw_bucket
     struct tcp_bind_bucket  *tb;
     struct tcp_tw_bucket    *next_death;
     struct tcp_tw_bucket    **pprev_death;
-
-#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
-    struct in6_addr     v6_daddr;
-    struct in6_addr     v6_rcv_saddr;
-#endif
 };
 
 extern kmem_cache_t *tcp_timewait_cachep;
@@ -489,16 +484,6 @@ struct tcp_v4_open_req
     struct ip_options   *opt;
 };
 
-#if defined(CONFIG_IPV6) || defined (CONFIG_IPV6_MODULE)
-struct tcp_v6_open_req
-{
-    struct in6_addr     loc_addr;
-    struct in6_addr     rmt_addr;
-    struct sk_buff      *pktopts;
-    int         iif;
-};
-#endif
-
 /* this structure is too big */
 struct open_request
 {
@@ -526,9 +511,6 @@ struct open_request
     union
     {
         struct tcp_v4_open_req v4_req;
-#if defined(CONFIG_IPV6) || defined (CONFIG_IPV6_MODULE)
-        struct tcp_v6_open_req v6_req;
-#endif
     } af;
 };
 
@@ -544,11 +526,7 @@ static inline void tcp_openreq_free(struct open_request *req)
     tcp_openreq_fastfree(req);
 }
 
-#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
-#define TCP_INET_FAMILY(fam) ((fam) == AF_INET)
-#else
 #define TCP_INET_FAMILY(fam) 1
-#endif
 
 /*
  *  Pointers to address related TCP functions
@@ -1004,9 +982,6 @@ struct tcp_skb_cb
     union
     {
         struct inet_skb_parm    h4;
-#if defined(CONFIG_IPV6) || defined (CONFIG_IPV6_MODULE)
-        struct inet6_skb_parm   h6;
-#endif
     } header;   /* For incoming frames      */
     __u32       seq;        /* Starting sequence number */
     __u32       end_seq;    /* SEQ + FIN + SYN + datalen    */

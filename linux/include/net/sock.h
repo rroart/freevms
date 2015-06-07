@@ -38,13 +38,6 @@
 #include <linux/cache.h>
 #include <linux/in.h>       /* struct sockaddr_in */
 
-#if defined(CONFIG_IPV6) || defined (CONFIG_IPV6_MODULE)
-#include <linux/in6.h>      /* struct sockaddr_in6 */
-#include <linux/ipv6.h>     /* dest_cache, inet6_options */
-#include <linux/icmpv6.h>
-#include <net/if_inet6.h>   /* struct ipv6_mc_socklist */
-#endif
-
 #if defined(CONFIG_INET) || defined (CONFIG_INET_MODULE)
 #include <linux/icmp.h>
 #endif
@@ -53,54 +46,9 @@
 #include <linux/netdevice.h>
 #include <linux/skbuff.h>   /* struct sk_buff */
 #include <net/protocol.h>       /* struct inet_protocol */
-#if defined(CONFIG_X25) || defined(CONFIG_X25_MODULE)
-#include <net/x25.h>
-#endif
-#if defined(CONFIG_WAN_ROUTER) || defined(CONFIG_WAN_ROUTER_MODULE)
-#include <linux/if_wanpipe.h>
-#endif
-
-#if defined(CONFIG_AX25) || defined(CONFIG_AX25_MODULE)
-#include <net/ax25.h>
-#if defined(CONFIG_NETROM) || defined(CONFIG_NETROM_MODULE)
-#include <net/netrom.h>
-#endif
-#if defined(CONFIG_ROSE) || defined(CONFIG_ROSE_MODULE)
-#include <net/rose.h>
-#endif
-#endif
-
-#if defined(CONFIG_PPPOE) || defined(CONFIG_PPPOE_MODULE)
-#include <linux/if_pppox.h>
-#include <linux/ppp_channel.h>   /* struct ppp_channel */
-#endif
-
-#if defined(CONFIG_IPX) || defined(CONFIG_IPX_MODULE)
-#if defined(CONFIG_SPX) || defined(CONFIG_SPX_MODULE)
-#include <net/spx.h>
-#else
-#include <net/ipx.h>
-#endif /* CONFIG_SPX */
-#endif /* CONFIG_IPX */
-
-#if defined(CONFIG_ATALK) || defined(CONFIG_ATALK_MODULE)
-#include <linux/atalk.h>
-#endif
 
 #if defined(CONFIG_DECNET) || defined(CONFIG_DECNET_MODULE)
 #include <net/dn.h>
-#endif
-
-#if defined(CONFIG_IRDA) || defined(CONFIG_IRDA_MODULE)
-#include <net/irda/irda.h>
-#endif
-
-#if defined(CONFIG_ATM) || defined(CONFIG_ATM_MODULE)
-struct atm_vcc;
-#endif
-
-#ifdef CONFIG_FILTER
-#include <linux/filter.h>
 #endif
 
 #include <asm/atomic.h>
@@ -121,80 +69,6 @@ struct unix_opt
     rwlock_t        lock;
     wait_queue_head_t   peer_wait;
 };
-
-
-/* Once the IPX ncpd patches are in these are going into protinfo. */
-#if defined(CONFIG_IPX) || defined(CONFIG_IPX_MODULE)
-struct ipx_opt
-{
-    ipx_address     dest_addr;
-    ipx_interface       *intrfc;
-    unsigned short      port;
-#ifdef CONFIG_IPX_INTERN
-    unsigned char           node[IPX_NODE_LEN];
-#endif
-    unsigned short      type;
-    /*
-     * To handle special ncp connection-handling sockets for mars_nwe,
-     * the connection number must be stored in the socket.
-     */
-    unsigned short      ipx_ncp_conn;
-};
-#endif
-
-#if defined(CONFIG_IPV6) || defined (CONFIG_IPV6_MODULE)
-struct ipv6_pinfo
-{
-    struct in6_addr     saddr;
-    struct in6_addr     rcv_saddr;
-    struct in6_addr     daddr;
-    struct in6_addr     *daddr_cache;
-
-    __u32           flow_label;
-    __u32           frag_size;
-    int         hop_limit;
-    int         mcast_hops;
-    int         mcast_oif;
-
-    /* pktoption flags */
-    union
-    {
-        struct
-        {
-            __u8    srcrt:2,
-                    rxinfo:1,
-                    rxhlim:1,
-                    hopopts:1,
-                    dstopts:1,
-                    authhdr:1,
-                    rxflow:1;
-        } bits;
-        __u8        all;
-    } rxopt;
-
-    /* sockopt flags */
-    __u8            mc_loop:1,
-                    recverr:1,
-                    sndflow:1,
-                    pmtudisc:2;
-
-    struct ipv6_mc_socklist *ipv6_mc_list;
-    struct ipv6_fl_socklist *ipv6_fl_list;
-    __u32           dst_cookie;
-
-    struct ipv6_txoptions   *opt;
-    struct sk_buff      *pktoptions;
-};
-
-struct raw6_opt
-{
-    __u32           checksum;   /* perform checksum */
-    __u32           offset;     /* checksum offset  */
-
-    struct icmp6_filter filter;
-};
-
-#endif /* IPV6 */
 
 #if defined(CONFIG_INET) || defined(CONFIG_INET_MODULE)
 struct raw_opt
@@ -221,30 +95,6 @@ struct inet_opt
     __u32           mc_addr;
     struct ip_mc_socklist   *mc_list;       /* Group array */
 };
-#endif
-
-#if defined(CONFIG_PPPOE) || defined (CONFIG_PPPOE_MODULE)
-struct pppoe_opt
-{
-    struct net_device      *dev;      /* device associated with socket*/
-    struct pppoe_addr   pa;   /* what this socket is bound to*/
-    struct sockaddr_pppox   relay;    /* what socket data will be
-                         relayed to (PPPoE relaying) */
-};
-
-struct pppox_opt
-{
-    struct ppp_channel  chan;
-    struct sock     *sk;
-    struct pppox_opt    *next;    /* for hash table */
-    union
-    {
-        struct pppoe_opt pppoe;
-    } proto;
-};
-#define pppoe_dev   proto.pppoe.dev
-#define pppoe_pa    proto.pppoe.pa
-#define pppoe_relay proto.pppoe.relay
 #endif
 
 /* This defines a selective acknowledgement block. */
@@ -582,26 +432,12 @@ struct sock
 
     struct proto        *prot;
 
-#if defined(CONFIG_IPV6) || defined (CONFIG_IPV6_MODULE)
-    union
-    {
-        struct ipv6_pinfo   af_inet6;
-    } net_pinfo;
-#endif
-
     union
     {
         struct tcp_opt      af_tcp;
 #if defined(CONFIG_INET) || defined (CONFIG_INET_MODULE)
         struct raw_opt      tp_raw4;
 #endif
-#if defined(CONFIG_IPV6) || defined (CONFIG_IPV6_MODULE)
-        struct raw6_opt     tp_raw;
-#endif /* CONFIG_IPV6 */
-#if defined(CONFIG_SPX) || defined (CONFIG_SPX_MODULE)
-        struct spx_opt      af_spx;
-#endif /* CONFIG_SPX */
-
     } tp_pinfo;
 
     int         err, err_soft;  /* Soft holds errors that don't
@@ -619,11 +455,6 @@ struct sock
     long            rcvtimeo;
     long            sndtimeo;
 
-#ifdef CONFIG_FILTER
-    /* Socket Filtering Instructions */
-    struct sk_filter        *filter;
-#endif /* CONFIG_FILTER */
-
     /* This is where all the private (optional) areas that don't
      * overlap will eventually live.
      */
@@ -634,46 +465,13 @@ struct sock
 #if defined(CONFIG_INET) || defined (CONFIG_INET_MODULE)
         struct inet_opt af_inet;
 #endif
-#if defined(CONFIG_ATALK) || defined(CONFIG_ATALK_MODULE)
-        struct atalk_sock   af_at;
-#endif
-#if defined(CONFIG_IPX) || defined(CONFIG_IPX_MODULE)
-        struct ipx_opt      af_ipx;
-#endif
 #if defined (CONFIG_DECNET) || defined(CONFIG_DECNET_MODULE)
         struct dn_scp           dn;
 #endif
 #if defined (CONFIG_PACKET) || defined(CONFIG_PACKET_MODULE)
         struct packet_opt   *af_packet;
 #endif
-#if defined(CONFIG_X25) || defined(CONFIG_X25_MODULE)
-        x25_cb          *x25;
-#endif
-#if defined(CONFIG_AX25) || defined(CONFIG_AX25_MODULE)
-        ax25_cb         *ax25;
-#endif
-#if defined(CONFIG_NETROM) || defined(CONFIG_NETROM_MODULE)
-        nr_cb           *nr;
-#endif
-#if defined(CONFIG_ROSE) || defined(CONFIG_ROSE_MODULE)
-        rose_cb         *rose;
-#endif
-#if defined(CONFIG_PPPOE) || defined(CONFIG_PPPOE_MODULE)
-        struct pppox_opt    *pppox;
-#endif
         struct netlink_opt  *af_netlink;
-#if defined(CONFIG_ECONET) || defined(CONFIG_ECONET_MODULE)
-        struct econet_opt   *af_econet;
-#endif
-#if defined(CONFIG_ATM) || defined(CONFIG_ATM_MODULE)
-        struct atm_vcc      *af_atm;
-#endif
-#if defined(CONFIG_IRDA) || defined(CONFIG_IRDA_MODULE)
-        struct irda_sock        *irda;
-#endif
-#if defined(CONFIG_WAN_ROUTER) || defined(CONFIG_WAN_ROUTER_MODULE)
-        struct wanpipe_opt      *af_wanpipe;
-#endif
     } protinfo;
 
 
@@ -908,59 +706,6 @@ extern void sklist_remove_socket(struct sock **list, struct sock *sk);
 extern void sklist_insert_socket(struct sock **list, struct sock *sk);
 extern void sklist_destroy_socket(struct sock **list, struct sock *sk);
 
-#ifdef CONFIG_FILTER
-
-/**
- *  sk_filter - run a packet through a socket filter
- *  @skb: buffer to filter
- *  @filter: filter to apply
- *
- * Run the filter code and then cut skb->data to correct size returned by
- * sk_run_filter. If pkt_len is 0 we toss packet. If skb->len is smaller
- * than pkt_len we keep whole skb->data. This is the socket level
- * wrapper to sk_run_filter. It returns 0 if the packet should
- * be accepted or 1 if the packet should be tossed.
- */
-
-static inline int sk_filter(struct sk_buff *skb, struct sk_filter *filter)
-{
-    int pkt_len;
-
-    pkt_len = sk_run_filter(skb, filter->insns, filter->len);
-    if(!pkt_len)
-        return 1;   /* Toss Packet */
-    else
-        skb_trim(skb, pkt_len);
-
-    return 0;
-}
-
-/**
- *  sk_filter_release: Release a socket filter
- *  @sk: socket
- *  @fp: filter to remove
- *
- *  Remove a filter from a socket and release its resources.
- */
-
-static inline void sk_filter_release(struct sock *sk, struct sk_filter *fp)
-{
-    unsigned int size = sk_filter_len(fp);
-
-    atomic_sub(size, &sk->omem_alloc);
-
-    if (atomic_dec_and_test(&fp->refcnt))
-        kfree(fp);
-}
-
-static inline void sk_filter_charge(struct sock *sk, struct sk_filter *fp)
-{
-    atomic_inc(&fp->refcnt);
-    atomic_add(sk_filter_len(fp), &sk->omem_alloc);
-}
-
-#endif /* CONFIG_FILTER */
-
 /*
  * Socket reference counting postulates.
  *
@@ -1172,25 +917,6 @@ static inline int sock_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
      */
     if (atomic_read(&sk->rmem_alloc) + skb->truesize >= (unsigned)sk->rcvbuf)
         return -ENOMEM;
-
-#ifdef CONFIG_FILTER
-    if (sk->filter)
-    {
-        int err = 0;
-        struct sk_filter *filter;
-
-        /* It would be deadlock, if sock_queue_rcv_skb is used
-           with socket lock! We assume that users of this
-           function are lock free.
-         */
-        bh_lock_sock(sk);
-        if ((filter = sk->filter) != NULL && sk_filter(skb, filter))
-            err = -EPERM;
-        bh_unlock_sock(sk);
-        if (err)
-            return err; /* Toss packet */
-    }
-#endif /* CONFIG_FILTER */
 
     skb->dev = NULL;
     skb_set_owner_r(skb, sk);

@@ -40,25 +40,13 @@
 #define CONFIG_UNIX98_PTY_COUNT (256)
 
 /*
- * Block devices
- */
-#undef  CONFIG_BLK_DEV_INITRD
-
-/*
  * Networking options
  */
 #define CONFIG_PACKET 1
-#undef  CONFIG_NETFILTER
 #define CONFIG_UNIX 1
 #define CONFIG_INET 1
 #define CONFIG_IP_MULTICAST 1
 #define CONFIG_SYN_COOKIES 1
-#undef  CONFIG_ATM
-#undef  CONFIG_X25
-#undef  CONFIG_NET_DIVERT
-#undef  CONFIG_ECONET
-#undef  CONFIG_WAN_ROUTER
-#undef  CONFIG_NET_FASTROUTE
 
 /*
  * File systems

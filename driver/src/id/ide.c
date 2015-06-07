@@ -544,21 +544,13 @@ int ide_vmsinit(void)
 
 static const byte ide_hwif_to_major[] = { IDE0_MAJOR, IDE1_MAJOR, IDE2_MAJOR, IDE3_MAJOR, IDE4_MAJOR, IDE5_MAJOR, IDE6_MAJOR, IDE7_MAJOR, IDE8_MAJOR, IDE9_MAJOR };
 
-static int  idebus_parameter; /* holds the "idebus=" parameter */
-static int  system_bus_speed; /* holds what we think is VESA/PCI bus speed */
-static int  initializing;     /* set while initializing built-in drivers */
+static int  idebus_parameter = 0; /* holds the "idebus=" parameter */
+static int  system_bus_speed = 0; /* holds what we think is VESA/PCI bus speed */
+static int  initializing = 0;     /* set while initializing built-in drivers */
 
 #ifdef CONFIG_BLK_DEV_IDEPCI
-static int  ide_scan_direction; /* THIS was formerly 2.2.x pci=reverse */
+static int  ide_scan_direction = 0; /* THIS was formerly 2.2.x pci=reverse */
 #endif /* CONFIG_BLK_DEV_IDEPCI */
-
-#if defined(__mc68000__) || defined(CONFIG_APUS)
-/*
- * ide_lock is used by the Atari code to obtain access to the IDE interrupt,
- * which is shared between several drivers.
- */
-static int  ide_lock;
-#endif /* __mc68000__ || CONFIG_APUS */
 
 int noautodma = 0;
 
@@ -880,14 +872,6 @@ void atapi_input_bytes (ide_drive_t *drive, void *buffer, unsigned int bytecount
     }
 
     ++bytecount;
-#if defined(CONFIG_ATARI) || defined(CONFIG_Q40)
-    if (MACH_IS_ATARI || MACH_IS_Q40)
-    {
-        /* Atari has a byte-swapped IDE interface */
-        insw_swapw(IDE_DATA_REG, buffer, bytecount / 2);
-        return;
-    }
-#endif /* CONFIG_ATARI */
     ide_input_data (drive, buffer, bytecount / 4);
     if ((bytecount & 0x03) >= 2)
         insw (IDE_DATA_REG, ((byte *)buffer) + (bytecount & ~0x03), 1);
@@ -903,14 +887,6 @@ void atapi_output_bytes (ide_drive_t *drive, void *buffer, unsigned int bytecoun
     }
 
     ++bytecount;
-#if defined(CONFIG_ATARI) || defined(CONFIG_Q40)
-    if (MACH_IS_ATARI || MACH_IS_Q40)
-    {
-        /* Atari has a byte-swapped IDE interface */
-        outsw_swapw(IDE_DATA_REG, buffer, bytecount / 2);
-        return;
-    }
-#endif /* CONFIG_ATARI */
     ide_output_data (drive, buffer, bytecount / 4);
     if ((bytecount & 0x03) >= 2)
         outsw (IDE_DATA_REG, ((byte *)buffer) + (bytecount & ~0x03), 1);
@@ -1037,9 +1013,6 @@ void ide_geninit (ide_hwif_t *hwif)
         if (drive->media!=ide_disk && drive->media!=ide_floppy)
             continue;
         register_disk(gd,MKDEV(hwif->major,unit<<PARTN_BITS),
-#ifdef CONFIG_BLK_DEV_ISAPNP
-                      (drive->forced_geom && drive->noprobe) ? 1 :
-#endif /* CONFIG_BLK_DEV_ISAPNP */
                       1<<PARTN_BITS, ide_fops,
                       current_capacity(drive));
     }
@@ -2420,10 +2393,6 @@ int ide_do_drive_cmd (ide_drive_t *drive, struct request *rq, ide_action_t actio
     struct list_head *queue_head = &drive->queue.queue_head;
     DECLARE_COMPLETION(wait);
 
-#ifdef CONFIG_BLK_DEV_PDC4030
-    if (HWIF(drive)->chipset == ide_pdc4030 && rq->buffer != NULL)
-        return -ENOSYS;  /* special drive cmds not supported */
-#endif
     rq->errors = 0;
     rq->rq_status = RQ_ACTIVE;
     rq->rq_dev = MKDEV(major,(drive->select.b.unit)<<PARTN_BITS);
@@ -2777,13 +2746,13 @@ void ide_unregister (unsigned int index)
     else
         hwgroup->hwif = HWIF(hwgroup->drive);
 
-#if defined(CONFIG_BLK_DEV_IDEDMA) && !defined(CONFIG_DMA_NONPCI)
+#if defined(CONFIG_BLK_DEV_IDEDMA)
     if (hwif->dma_base)
     {
         (void) ide_release_dma(hwif);
         hwif->dma_base = 0;
     }
-#endif /* (CONFIG_BLK_DEV_IDEDMA) && !(CONFIG_DMA_NONPCI) */
+#endif /* (CONFIG_BLK_DEV_IDEDMA) */
 
     /*
      * Remove us from the kernel's knowledge
@@ -3131,10 +3100,6 @@ int ide_write_setting (ide_drive_t *drive, ide_settings_t *setting, int val)
 static int set_io_32bit(ide_drive_t *drive, int arg)
 {
     drive->io_32bit = arg;
-#ifdef CONFIG_BLK_DEV_DTC2278
-    if (HWIF(drive)->chipset == ide_dtc2278)
-        HWIF(drive)->drives[!drive->select.b.unit].io_32bit = arg;
-#endif /* CONFIG_BLK_DEV_DTC2278 */
     return 0;
 }
 
@@ -3846,38 +3811,6 @@ int __init ide_setup (char *s)
 
         switch (i)
         {
-#ifdef CONFIG_BLK_DEV_PDC4030
-        case -18: /* "dc4030" */
-        {
-            extern void init_pdc4030(void);
-            init_pdc4030();
-            goto done;
-        }
-#endif /* CONFIG_BLK_DEV_PDC4030 */
-#ifdef CONFIG_BLK_DEV_ALI14XX
-        case -17: /* "ali14xx" */
-        {
-            extern void init_ali14xx (void);
-            init_ali14xx();
-            goto done;
-        }
-#endif /* CONFIG_BLK_DEV_ALI14XX */
-#ifdef CONFIG_BLK_DEV_UMC8672
-        case -16: /* "umc8672" */
-        {
-            extern void init_umc8672 (void);
-            init_umc8672();
-            goto done;
-        }
-#endif /* CONFIG_BLK_DEV_UMC8672 */
-#ifdef CONFIG_BLK_DEV_DTC2278
-        case -15: /* "dtc2278" */
-        {
-            extern void init_dtc2278 (void);
-            init_dtc2278();
-            goto done;
-        }
-#endif /* CONFIG_BLK_DEV_DTC2278 */
 #ifdef CONFIG_BLK_DEV_CMD640
         case -14: /* "cmd640_vlb" */
         {
@@ -4014,66 +3947,6 @@ static void __init probe_for_hwifs (void)
         ide_probe_for_cmd640x();
     }
 #endif /* CONFIG_BLK_DEV_CMD640 */
-#ifdef CONFIG_BLK_DEV_PDC4030
-    {
-        extern int ide_probe_for_pdc4030(void);
-        (void) ide_probe_for_pdc4030();
-    }
-#endif /* CONFIG_BLK_DEV_PDC4030 */
-#ifdef CONFIG_BLK_DEV_IDE_PMAC
-    {
-        extern void pmac_ide_probe(void);
-        pmac_ide_probe();
-    }
-#endif /* CONFIG_BLK_DEV_IDE_PMAC */
-#ifdef CONFIG_BLK_DEV_IDE_ICSIDE
-    {
-        extern void icside_init(void);
-        icside_init();
-    }
-#endif /* CONFIG_BLK_DEV_IDE_ICSIDE */
-#ifdef CONFIG_BLK_DEV_IDE_RAPIDE
-    {
-        extern void rapide_init(void);
-        rapide_init();
-    }
-#endif /* CONFIG_BLK_DEV_IDE_RAPIDE */
-#ifdef CONFIG_BLK_DEV_GAYLE
-    {
-        extern void gayle_init(void);
-        gayle_init();
-    }
-#endif /* CONFIG_BLK_DEV_GAYLE */
-#ifdef CONFIG_BLK_DEV_FALCON_IDE
-    {
-        extern void falconide_init(void);
-        falconide_init();
-    }
-#endif /* CONFIG_BLK_DEV_FALCON_IDE */
-#ifdef CONFIG_BLK_DEV_MAC_IDE
-    {
-        extern void macide_init(void);
-        macide_init();
-    }
-#endif /* CONFIG_BLK_DEV_MAC_IDE */
-#ifdef CONFIG_BLK_DEV_Q40IDE
-    {
-        extern void q40ide_init(void);
-        q40ide_init();
-    }
-#endif /* CONFIG_BLK_DEV_Q40IDE */
-#ifdef CONFIG_BLK_DEV_BUDDHA
-    {
-        extern void buddha_init(void);
-        buddha_init();
-    }
-#endif /* CONFIG_BLK_DEV_BUDDHA */
-#if defined(CONFIG_BLK_DEV_ISAPNP) && defined(CONFIG_ISAPNP)
-    {
-        extern void pnpide_init(int enable);
-        pnpide_init(1);
-    }
-#endif /* CONFIG_BLK_DEV_ISAPNP */
 }
 
 void __init ide_init_builtin_drivers (void)
@@ -4084,24 +3957,9 @@ void __init ide_init_builtin_drivers (void)
     probe_for_hwifs ();
 
 #ifdef CONFIG_BLK_DEV_IDE
-#if defined(__mc68000__) || defined(CONFIG_APUS)
-    if (ide_hwifs[0].io_ports[IDE_DATA_OFFSET])
-    {
-        ide_get_lock(&ide_lock, NULL, NULL);    /* for atari only */
-        disable_irq(ide_hwifs[0].irq);  /* disable_irq_nosync ?? */
-//      disable_irq_nosync(ide_hwifs[0].irq);
-    }
-#endif /* __mc68000__ || CONFIG_APUS */
 
     (void) ideprobe_init();
 
-#if defined(__mc68000__) || defined(CONFIG_APUS)
-    if (ide_hwifs[0].io_ports[IDE_DATA_OFFSET])
-    {
-        enable_irq(ide_hwifs[0].irq);
-        ide_release_lock(&ide_lock);    /* for atari only */
-    }
-#endif /* __mc68000__ || CONFIG_APUS */
 #endif /* CONFIG_BLK_DEV_IDE */
 
     /*
@@ -4259,9 +4117,6 @@ int ide_unregister_subdriver (ide_drive_t *drive)
         restore_flags(flags);   /* all CPUs */
         return 1;
     }
-#if defined(CONFIG_BLK_DEV_ISAPNP) && defined(CONFIG_ISAPNP) && defined(MODULE)
-    pnpide_init(0);
-#endif /* CONFIG_BLK_DEV_ISAPNP */
     auto_remove_settings(drive);
     drive->driver = NULL;
     restore_flags(flags);       /* all CPUs */
@@ -4436,10 +4291,10 @@ void cleanup_module (void)
     for (index = 0; index < MAX_HWIFS; ++index)
     {
         ide_unregister(index);
-#if defined(CONFIG_BLK_DEV_IDEDMA) && !defined(CONFIG_DMA_NONPCI)
+#if defined(CONFIG_BLK_DEV_IDEDMA)
         if (ide_hwifs[index].dma_base)
             (void) ide_release_dma(&ide_hwifs[index]);
-#endif /* (CONFIG_BLK_DEV_IDEDMA) && !(CONFIG_DMA_NONPCI) */
+#endif /* (CONFIG_BLK_DEV_IDEDMA) */
     }
 
     devfs_unregister (ide_devfs_handle);

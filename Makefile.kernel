@@ -363,34 +363,8 @@ export	MODVERFILE
 
 depend dep: dep-files
 
-checkconfig:
-	find * -name '*.[hcS]' -type f -print | sort | xargs $(PERL) -w scripts/checkconfig.pl
-
-checkhelp:
-	find * -name [cC]onfig.in -print | sort | xargs $(PERL) -w scripts/checkhelp.pl
-
 checkincludes:
 	find * -name '*.[hcS]' -type f -print | sort | xargs $(PERL) -w scripts/checkincludes.pl
-
-ifdef CONFIGURATION
-..$(CONFIGURATION):
-	@echo
-	@echo "You have a bad or nonexistent" .$(CONFIGURATION) ": running 'make" $(CONFIGURATION)"'"
-	@echo
-	$(MAKE) $(CONFIGURATION)
-	@echo
-	@echo "Successful. Try re-making (ignore the error that follows)"
-	@echo
-	exit 1
-
-#dummy: ..$(CONFIGURATION)
-dummy:
-
-else
-
-dummy:
-
-endif
 
 include Rules.make
 

@@ -473,12 +473,6 @@ int __init net_dev_init(void)
         queue->completion_queue = NULL;
     }
 
-#ifdef CONFIG_NET_PROFILE
-    net_profile_init();
-    NET_PROFILE_REGISTER(dev_queue_xmit);
-    NET_PROFILE_REGISTER(softnet_process);
-#endif
-
 #ifdef OFFLINE_SAMPLE
     samp_timer.expires = jiffies + (10 * HZ);
     add_timer(&samp_timer);
@@ -499,9 +493,6 @@ int __init net_dev_init(void)
     {
         spin_lock_init(&dev->queue_lock);
         spin_lock_init(&dev->xmit_lock);
-#ifdef CONFIG_NET_FASTROUTE
-        dev->fastpath_lock = RW_LOCK_UNLOCKED;
-#endif
         dev->xmit_lock_owner = -1;
         dev->iflink = -1;
         dev_hold(dev);

@@ -247,26 +247,6 @@ void __init setup_arch(char **cmdline_p)
 
     init_memory_mapping();
 
-#ifdef CONFIG_BLK_DEV_INITRD
-    if (LOADER_TYPE && INITRD_START)
-    {
-        if (INITRD_START + INITRD_SIZE <= (end_pfn << PAGE_SHIFT))
-        {
-            initrd_start =
-                INITRD_START ? INITRD_START + PAGE_OFFSET : 0;
-            initrd_end = initrd_start+INITRD_SIZE;
-        }
-        else
-        {
-            printk(KERN_ERR "initrd extends beyond end of memory "
-                   "(0x%08lx > 0x%08lx)\ndisabling initrd\n",
-                   (unsigned long)INITRD_START + INITRD_SIZE,
-                   (unsigned long)(end_pfn << PAGE_SHIFT));
-            initrd_start = 0;
-        }
-    }
-#endif
-
 #ifdef CONFIG_DISCONTIGMEM
     numa_initmem_init(0, end_pfn);
 #else
@@ -276,11 +256,6 @@ void __init setup_arch(char **cmdline_p)
     /* Reserve direct mapping */
     reserve_bootmem_generic(table_start << PAGE_SHIFT,
                             (table_end - table_start) << PAGE_SHIFT);
-
-#ifdef CONFIG_BLK_DEV_INITRD
-    if (initrd_start)
-        reserve_bootmem_generic(INITRD_START, INITRD_SIZE);
-#endif
 
     /* Reserve BIOS data page. Some things still need it */
     reserve_bootmem_generic(0, PAGE_SIZE);

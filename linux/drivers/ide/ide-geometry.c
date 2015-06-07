@@ -49,10 +49,6 @@ void probe_cmos_for_drives (ide_hwif_t *hwif)
     int unit;
     unsigned long flags;
 
-#ifdef CONFIG_BLK_DEV_PDC4030
-    if (hwif->chipset == ide_pdc4030 && hwif->channel != 0)
-        return;
-#endif /* CONFIG_BLK_DEV_PDC4030 */
     spin_lock_irqsave(&rtc_lock, flags);
     cmos_disks = CMOS_READ(0x12);
     spin_unlock_irqrestore(&rtc_lock, flags);

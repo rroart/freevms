@@ -7,7 +7,7 @@
 
 O_TARGET := fs.o
 
-export-objs :=	filesystems.o open.o dcache.o
+export-objs :=	open.o dcache.o
 
 mod-subdirs :=	
 
@@ -15,13 +15,9 @@ obj-y :=	open.o read_write.o file_table.o \
 		super.o block_dev.o stat.o exec.o namei.o \
 		fcntl.o ioctl.o readdir.o select.o \
 		dcache.o file.o iobuf.o \
-		filesystems.o namespace.o seq_file.o
+		namespace.o seq_file.o
 
-ifeq ($(CONFIG_QUOTA),y)
-obj-y += dquot.o
-else
 obj-y += noquot.o
-endif
 
 subdir-y			+= partitions
 

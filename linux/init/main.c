@@ -53,10 +53,6 @@
 #  include <asm/mtrr.h>
 #endif
 
-#ifdef CONFIG_ISAPNP
-#include <linux/isapnp.h>
-#endif
-
 #ifdef CONFIG_X86_LOCAL_APIC
 #include <asm/smp.h>
 #endif
@@ -129,10 +125,6 @@ extern void time_init(void);
 extern void softirq_init(void);
 
 int rows, cols;
-
-#ifdef CONFIG_BLK_DEV_INITRD
-unsigned int real_root_dev; /* do_proc_dointvec cannot handle kdev_t */
-#endif
 
 int root_mountflags = MS_RDONLY;
 char *execute_command;
@@ -226,24 +218,6 @@ static struct dev_name_struct
     { "ddv", DDV_MAJOR << 8},
     { "ubd", UBD_MAJOR << 8 },
     { "jsfd",    JSFD_MAJOR << 8},
-#if defined(CONFIG_BLK_CPQ_DA) || defined(CONFIG_BLK_CPQ_DA_MODULE)
-    { "ida/c0d0p",0x4800 },
-    { "ida/c0d1p",0x4810 },
-    { "ida/c0d2p",0x4820 },
-    { "ida/c0d3p",0x4830 },
-    { "ida/c0d4p",0x4840 },
-    { "ida/c0d5p",0x4850 },
-    { "ida/c0d6p",0x4860 },
-    { "ida/c0d7p",0x4870 },
-    { "ida/c0d8p",0x4880 },
-    { "ida/c0d9p",0x4890 },
-    { "ida/c0d10p",0x48A0 },
-    { "ida/c0d11p",0x48B0 },
-    { "ida/c0d12p",0x48C0 },
-    { "ida/c0d13p",0x48D0 },
-    { "ida/c0d14p",0x48E0 },
-    { "ida/c0d15p",0x48F0 },
-#endif
     { "nftla", 0x5d00 },
     { "nftlb", 0x5d10 },
     { "nftlc", 0x5d20 },
@@ -647,15 +621,6 @@ asmlinkage void __init start_kernel(void)
 #ifdef CONFIG_PERFMON
     perfmon_init();
 #endif
-#ifdef CONFIG_BLK_DEV_INITRD
-    if (initrd_start && !initrd_below_start_ok &&
-            initrd_start < min_low_pfn << PAGE_SHIFT)
-    {
-        printk(KERN_CRIT "initrd overwritten (0x%08lx < 0x%08lx) - "
-               "disabling it.\n",initrd_start,min_low_pfn << PAGE_SHIFT);
-        initrd_start = 0;
-    }
-#endif
     mem_init();
     printk("%%KERNEL-I-DEBUG, After mem_init, before lnm_init_sys\n");
     lnm_init_sys();
@@ -689,23 +654,6 @@ asmlinkage void __init start_kernel(void)
     smp_init();
     rest_init();
 }
-
-#ifdef CONFIG_BLK_DEV_INITRD
-static int do_linuxrc(void * shell)
-{
-    static char *argv[] = { "linuxrc", NULL, };
-
-    close(0);
-    close(1);
-    close(2);
-    setsid();
-    (void) open("/dev/console",O_RDWR,0);
-    (void) dup(0);
-    (void) dup(0);
-    return execve(shell, argv, envp_init);
-}
-
-#endif
 
 struct task_struct *child_reaper = &init_task;
 
@@ -771,9 +719,6 @@ static void __init do_basic_setup(void)
 #endif
 #ifdef CONFIG_MCA
     mca_init();
-#endif
-#ifdef CONFIG_ISAPNP
-    isapnp_init();
 #endif
     do_initcalls();
     printk("%%KERNEL-I-DEBUG, After do_initcalls\n");

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -596,22 +596,6 @@ void free_initmem(void)
     }
     printk ("Freeing unused kernel memory: %luk freed\n", (&__init_end - &__init_begin) >> 10);
 }
-
-#ifdef CONFIG_BLK_DEV_INITRD
-void free_initrd_mem(unsigned long start, unsigned long end)
-{
-    if (start < (unsigned long)&_end)
-        return;
-    printk ("Freeing initrd memory: %ldk freed\n", (end - start) >> 10);
-    for (; start < end; start += PAGE_SIZE)
-    {
-        ClearPageReserved(virt_to_page(start));
-        set_page_count(virt_to_page(start), 1);
-        free_page(start);
-        totalram_pages++;
-    }
-}
-#endif
 
 void si_meminfo(struct sysinfo *val)
 {

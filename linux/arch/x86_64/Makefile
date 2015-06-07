@@ -60,9 +60,6 @@ endif
 ifdef CONFIG_MK8
 CFLAGS += $(call check_gcc,-march=k8,)
 endif
-ifdef CONFIG_MPSC
-CFLAGS += $(call check_gcc,-march=nocona,)
-endif
 
 HEAD := linux/arch/x86_64/kernel/head.o linux/arch/x86_64/kernel/head64.o linux/arch/x86_64/kernel/init_task.o
 

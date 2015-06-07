@@ -1016,26 +1016,6 @@ void __init setup_arch(char **cmdline_p)
      */
     find_smp_config();
 #endif
-#ifdef CONFIG_BLK_DEV_INITRD
-    if (LOADER_TYPE && INITRD_START)
-    {
-        if (INITRD_START + INITRD_SIZE <= (max_low_pfn << PAGE_SHIFT))
-        {
-            reserve_bootmem(INITRD_START, INITRD_SIZE);
-            initrd_start =
-                INITRD_START ? INITRD_START + PAGE_OFFSET : 0;
-            initrd_end = initrd_start+INITRD_SIZE;
-        }
-        else
-        {
-            printk(KERN_ERR "initrd extends beyond end of memory "
-                   "(0x%08lx > 0x%08lx)\ndisabling initrd\n",
-                   INITRD_START + INITRD_SIZE,
-                   max_low_pfn << PAGE_SHIFT);
-            initrd_start = 0;
-        }
-    }
-#endif
 
     /*
      * NOTE: before this point _nobody_ is allowed to allocate

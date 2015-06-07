@@ -24,7 +24,6 @@
 #include <linux/major.h>
 #include <linux/blk.h>
 #include <linux/init.h>
-#include <linux/raid/md.h>
 
 #include "check.h"
 #include "msdos.h"

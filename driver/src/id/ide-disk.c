@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -65,12 +65,6 @@
 #include <ucbdef.h>
 #include <ioc_routines.h>
 #include <misc_routines.h>
-
-#ifdef CONFIG_BLK_DEV_PDC4030
-#define IS_PDC4030_DRIVE (HWIF(drive)->chipset == ide_pdc4030)
-#else
-#define IS_PDC4030_DRIVE (0)    /* auto-NULLs out pdc4030 code */
-#endif
 
 static void idedisk_bswap_data (void *buffer, int wcount)
 {
@@ -465,13 +459,8 @@ ide_startstop_t do_rw_disk (ide_drive_t *drive, struct request *rq, unsigned lon
         OUT_BYTE(drive->ctl,IDE_CONTROL_REG);
     OUT_BYTE(0x00, IDE_FEATURE_REG);
     OUT_BYTE(rq->nr_sectors,IDE_NSECTOR_REG);
-#ifdef CONFIG_BLK_DEV_PDC4030
-    if (drive->select.b.lba || IS_PDC4030_DRIVE)
-    {
-#else /* !CONFIG_BLK_DEV_PDC4030 */
     if (drive->select.b.lba)
     {
-#endif /* CONFIG_BLK_DEV_PDC4030 */
 #ifdef DEBUG
         printk("%s: %sing: LBAsect=%ld, sectors=%ld, buffer=0x%08lx\n",
                drive->name, (rq->cmd==READ)?"read":"writ",
@@ -499,13 +488,6 @@ ide_startstop_t do_rw_disk (ide_drive_t *drive, struct request *rq, unsigned lon
                head, sect, rq->nr_sectors, (unsigned long) rq->buffer);
 #endif
     }
-#ifdef CONFIG_BLK_DEV_PDC4030
-    if (IS_PDC4030_DRIVE)
-    {
-        extern ide_startstop_t do_pdc4030_io(ide_drive_t *, struct request *);
-        return do_pdc4030_io (drive, rq);
-    }
-#endif /* CONFIG_BLK_DEV_PDC4030 */
     if (rq->cmd == READ)
     {
 #ifdef CONFIG_BLK_DEV_IDEDMA
@@ -651,22 +633,19 @@ static ide_startstop_t idedisk_special (ide_drive_t *drive)
         OUT_BYTE(drive->cyl,IDE_LCYL_REG);
         OUT_BYTE(drive->cyl>>8,IDE_HCYL_REG);
         OUT_BYTE(((drive->head-1)|drive->select.all)&0xBF,IDE_SELECT_REG);
-        if (!IS_PDC4030_DRIVE)
-            ide_cmd(drive, WIN_SPECIFY, drive->sect, &set_geometry_intr);
+        ide_cmd(drive, WIN_SPECIFY, drive->sect, &set_geometry_intr);
     }
     else if (s->b.recalibrate)
     {
         s->b.recalibrate = 0;
-        if (!IS_PDC4030_DRIVE)
-            ide_cmd(drive, WIN_RESTORE, drive->sect, &recal_intr);
+        ide_cmd(drive, WIN_RESTORE, drive->sect, &recal_intr);
     }
     else if (s->b.set_multmode)
     {
         s->b.set_multmode = 0;
         if (drive->id && drive->mult_req > drive->id->max_multsect)
             drive->mult_req = drive->id->max_multsect;
-        if (!IS_PDC4030_DRIVE)
-            ide_cmd(drive, WIN_SETMULT, drive->mult_req, &set_multmode_intr);
+        ide_cmd(drive, WIN_SETMULT, drive->mult_req, &set_multmode_intr);
     }
     else if (s->all)
     {
@@ -675,7 +654,7 @@ static ide_startstop_t idedisk_special (ide_drive_t *drive)
         printk(KERN_ERR "%s: bad special flag: 0x%02x\n", drive->name, special);
         return ide_stopped;
     }
-    return IS_PDC4030_DRIVE ? ide_stopped : ide_started;
+    return ide_started;
 }
 
 static void idedisk_pre_reset (ide_drive_t *drive)

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -51,15 +51,6 @@ static inline int bad_addr(unsigned long *addrp, unsigned long size)
         *addrp = table_end << PAGE_SHIFT;
         return 1;
     }
-    /* initrd */
-#ifdef CONFIG_BLK_DEV_INITRD
-    if (LOADER_TYPE && INITRD_START && last >= INITRD_START &&
-            addr < INITRD_START+INITRD_SIZE)
-    {
-        *addrp = INITRD_START + INITRD_SIZE;
-        return 1;
-    }
-#endif
     /* kernel code + 640k memory hole (later should not be needed, but
        be paranoid for now) */
     if (last >= 640*1024 && addr < __pa_symbol(&_end))
