@@ -47,7 +47,8 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan, unsigned int a
     struct return_values r, r2 =
         { 0, 0 };
 
-    if ((devnam == NULL) || (chan == NULL))
+    if ((devnam == NULL) || (((struct dsc$descriptor *) devnam)->dsc$a_pointer == NULL)
+            || (((struct dsc$descriptor *) devnam)->dsc$w_length == 0) || (chan == NULL))
     {
         return SS$_ACCVIO;
     }
@@ -62,7 +63,7 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan, unsigned int a
     if (status != SS$_NORMAL)
     {
         /** if error return */
-        sch$iounlock();
+        sch$iounlockw();
         return status;
     }
     c = &ctl$gl_ccbbase[*chan];
@@ -71,11 +72,18 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan, unsigned int a
     /** search for an eventual mbxnam */
     if (mbxnam != NULL)
     {
-        status = ioc$searchdev(&r2, mbxnam);
+        if ((((struct dsc$descriptor *) mbxnam)->dsc$a_pointer == NULL) || (((struct dsc$descriptor *) mbxnam)->dsc$w_length == 0))
+        {
+            status = SS$_ACCVIO;
+        }
+        else
+        {
+            status = ioc$searchdev(&r2, mbxnam);
+        }
         if (status != SS$_NORMAL)
         {
             /** if error unlock i/o db and return */
-            sch$iounlock();
+            sch$iounlockw();
             return status;
         }
     }
@@ -142,7 +150,7 @@ asmlinkage int exe$assign(void *devnam, unsigned short int *chan, unsigned int a
     /** chan was previously written */
 
     /** unlock i/o db and return normal? */
-    sch$iounlock();
+    sch$iounlockw();
     setipl(0); // simulate rei
     return status;
 

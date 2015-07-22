@@ -5,6 +5,9 @@
  * ipc helper functions (c) 1999 Manfred Spraul <manfreds@colorfullife.com>
  */
 
+#ifndef IPC_UTIL_H
+#define IPC_UTIL_H
+
 #define USHRT_MAX 0xffff
 #define SEQ_MULTIPLIER  (IPCMNI)
 
@@ -101,3 +104,5 @@ void kernel_to_ipc64_perm(struct kern_ipc_perm *in, struct ipc64_perm *out);
 void ipc64_perm_to_ipc_perm(struct ipc64_perm *in, struct ipc_perm *out);
 
 int ipc_parse_version (int *cmd);
+
+#endif /* IPC_UTIL_H */

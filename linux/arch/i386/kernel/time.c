@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -430,10 +430,6 @@ static inline void do_timer_interrupt(int irq, void *dev_id, struct pt_regs *reg
     }
 #endif
 
-#ifdef CONFIG_VISWS
-    /* Clear the interrupt */
-    co_cpu_write(CO_CPU_STAT,co_cpu_read(CO_CPU_STAT) & ~CO_STAT_TIMEINTR);
-#endif
     do_timer(regs);
     /*
      * In the SMP case we use the local APIC timer interrupt to do the
@@ -463,23 +459,6 @@ static inline void do_timer_interrupt(int irq, void *dev_id, struct pt_regs *reg
         else
             last_rtc_update = xtime.tv_sec - 600; /* do it again in 60 s */
     }
-
-#ifdef CONFIG_MCA
-    if( MCA_bus )
-    {
-        /* The PS/2 uses level-triggered interrupts.  You can't
-        turn them off, nor would you want to (any attempt to
-        enable edge-triggered interrupts usually gets intercepted by a
-        special hardware circuit).  Hence we have to acknowledge
-        the timer interrupt.  Through some incredibly stupid
-        design idea, the reset for IRQ 0 is done by setting the
-        high bit of the PPI port B (0x61).  Note that some PS/2s,
-        notably the 55SX, work fine if this is removed.  */
-
-        irq = inb_p( 0x61 );    /* read the current state */
-        outb_p( irq|0x80, 0x61 );   /* reset the IRQ */
-    }
-#endif
 }
 
 int use_tsc;
@@ -732,21 +711,5 @@ void __init time_init(void)
         }
     }
 
-#ifdef CONFIG_VISWS
-    printk("Starting Cobalt Timer system clock\n");
-
-    /* Set the countdown value */
-    co_cpu_write(CO_CPU_TIMEVAL, CO_TIME_HZ/HZ);
-
-    /* Start the timer */
-    co_cpu_write(CO_CPU_CTRL, co_cpu_read(CO_CPU_CTRL) | CO_CTRL_TIMERUN);
-
-    /* Enable (unmask) the timer interrupt */
-    co_cpu_write(CO_CPU_CTRL, co_cpu_read(CO_CPU_CTRL) & ~CO_CTRL_TIMEMASK);
-
-    /* Wire cpu IDT entry to s/w handler (and Cobalt APIC to IDT) */
-    setup_irq(CO_IRQ_TIMER, &irq0);
-#else
     setup_irq(0, &irq0);
-#endif
 }

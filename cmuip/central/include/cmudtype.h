@@ -49,6 +49,9 @@
 *******************************************************************************
 *--*/
 
+#ifndef CMUDTYPE_H
+#define CMUDTYPE_H
+
 #include <descrip.h>
 #define NUL       '\0'
 
@@ -57,3 +60,5 @@ struct cmu$text
     struct cmu$text *txt$a_flink, *txt$a_blink;
     struct dsc$descriptor *txt$q_desc;
 };
+
+#endif /* CMUDTYPE_H */

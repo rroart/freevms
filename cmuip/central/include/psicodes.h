@@ -19,6 +19,10 @@
 
     ****************************************************************
 */
+
+#ifndef PSICODES_H
+#define PSICODES_H
+
 #define psi$c_ncb_null   0
 #define psi$c_ncb_remdte   1
 #define psi$c_ncb_remsubadr   2
@@ -220,3 +224,5 @@
 #define psi$s_psi$_x29_flags   20
 #define psi$s_x29_action_flags   4
 #define psi$s_x29_action_string   16
+
+#endif /* PSICODES_H */

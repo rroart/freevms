@@ -760,7 +760,7 @@ unsigned long ioc$gl_cramh_blink;
 unsigned long ioc$gl_cramh_flink;
 unsigned long ioc$gl_cramh_pages;
 unsigned long ioc$gl_crbtmout;
-unsigned long ioc$gl_devlist = 0; ///< ddb list
+struct _ddb * ioc$gl_devlist = 0; ///< ddb list
 unsigned long ioc$gl_dptlist;
 unsigned long ioc$gl_dtn_list;
 unsigned long ioc$gl_du_cddb;

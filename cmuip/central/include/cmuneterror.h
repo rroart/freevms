@@ -49,6 +49,8 @@
 * Updated for V6.5 of CMU-OpenVMS/IP
 *******************************************************************************
 *--*/
+#ifndef CMUNETERROR_H
+#define CMUNETERROR_H
 
 globalvalue NET$_IR, NET$_IFC, NET$_IPC, NET$_UCT, NET$_IFS, NET$_ILP,
             NET$_NUC, NET$_CSE, NET$_NOPRV, NET$_CIP, NET$_CDE, NET$_CR,
@@ -65,3 +67,5 @@ globalvalue NET$_IR, NET$_IFC, NET$_IPC, NET$_UCT, NET$_IFS, NET$_ILP,
             NET$_GP_INVCLS, NET$_GP_RSBUSY, NET$_GP_NONMSR, NET$_GP_NOHINF,
             NET$_GP_NOTFND, NET$_GP_UNKMBX, NET$_GP_NOTIMP, NET$_GP_TOOBIG,
             NET$_GP_NSDOWN, NET$_NRT;
+
+#endif /* CMUNETERROR_H */

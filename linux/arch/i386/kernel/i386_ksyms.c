@@ -145,10 +145,6 @@ EXPORT_SYMBOL(smp_call_function);
 EXPORT_SYMBOL(flush_tlb_page2);
 #endif
 
-#ifdef CONFIG_MCA
-EXPORT_SYMBOL(machine_id);
-#endif
-
 #ifdef CONFIG_VT
 EXPORT_SYMBOL(screen_info);
 #endif

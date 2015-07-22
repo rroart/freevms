@@ -85,33 +85,4 @@
 #define CO_IRQ_IDE  14
 #define CO_IRQ_8259 12
 
-#ifdef CONFIG_X86_VISWS_APIC
-static __inline void co_cpu_write(unsigned long reg, unsigned long v)
-{
-    *((volatile unsigned long *)(CO_CPU_VADDR+reg))=v;
-}
-
-static __inline unsigned long co_cpu_read(unsigned long reg)
-{
-    return *((volatile unsigned long *)(CO_CPU_VADDR+reg));
-}
-
-static __inline void co_apic_write(unsigned long reg, unsigned long v)
-{
-    *((volatile unsigned long *)(CO_APIC_VADDR+reg))=v;
-}
-
-static __inline unsigned long co_apic_read(unsigned long reg)
-{
-    return *((volatile unsigned long *)(CO_APIC_VADDR+reg));
-}
-#endif
-
-extern char visws_board_type;
-
-#define VISWS_320   0
-#define VISWS_540   1
-
-extern char visws_board_rev;
-
 #endif

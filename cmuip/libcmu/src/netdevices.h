@@ -34,6 +34,9 @@
 !--
 */
 
+#ifndef NETDEVICES_H
+#define NETDEVICES_H
+
 /* IPACP max physical buffer size*/
 #define DRV$MAX_PHYSICAL_BUFSIZE (IPACP_Interface->ACPI$MPBS)
 
@@ -181,3 +184,4 @@
 #define   LOG$TVT   0x800   /* TVT (virtual terminal) activity */
 #define   LOG$IPERR 0x1000  /* IP errors (bad routing, etc.) */
 
+#endif /* NETDEVICES_H */

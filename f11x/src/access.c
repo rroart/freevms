@@ -1643,16 +1643,9 @@ unsigned mount(unsigned flags, unsigned devices, char *devnam[], char *label[],
         {
             struct dsc$descriptor dsc;
             short int chan;
-            char buf[5];
-            int sts;
-#if 0
-            dsc.dsc$a_pointer=devnam[device];
-#endif
-            dsc.dsc$w_length = strlen(devnam[device]);
-            memcpy(buf, devnam[device], dsc.dsc$w_length);
-            buf[dsc.dsc$w_length] = 0;
-            dsc.dsc$a_pointer = buf;
 
+            dsc.dsc$a_pointer = devnam[device];
+            dsc.dsc$w_length = strlen(devnam[device]);
             sts = exe$assign(&dsc, &chan, 0, 0, 0);
 
             //printk("sts %x\n",sts);

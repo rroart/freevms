@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -1131,9 +1131,7 @@ void __init smp_boot_cpus(void)
     if (!smp_found_config)
     {
         printk(KERN_NOTICE "SMP motherboard not detected.\n");
-#ifndef CONFIG_VISWS
         io_apic_irqs = 0;
-#endif
         cpu_online_map = phys_cpu_present_map = 1;
         smp_num_cpus = 1;
         if (APIC_init_uniprocessor())
@@ -1164,9 +1162,7 @@ void __init smp_boot_cpus(void)
         printk(KERN_ERR "BIOS bug, local APIC #%d not detected!...\n",
                boot_cpu_physical_apicid);
         printk(KERN_ERR "... forcing use of dummy APIC emulation. (tell your hw vendor)\n");
-#ifndef CONFIG_VISWS
         io_apic_irqs = 0;
-#endif
         cpu_online_map = phys_cpu_present_map = 1;
         smp_num_cpus = 1;
         goto smp_done;
@@ -1181,9 +1177,7 @@ void __init smp_boot_cpus(void)
     {
         smp_found_config = 0;
         printk(KERN_INFO "SMP mode deactivated, forcing use of dummy APIC emulation.\n");
-#ifndef CONFIG_VISWS
         io_apic_irqs = 0;
-#endif
         cpu_online_map = phys_cpu_present_map = 1;
         smp_num_cpus = 1;
         goto smp_done;
@@ -1233,7 +1227,6 @@ void __init smp_boot_cpus(void)
     /*
      * Cleanup possible dangling ends...
      */
-#ifndef CONFIG_VISWS
     {
         /*
          * Install writable page 0 entry to set BIOS data area.
@@ -1248,7 +1241,6 @@ void __init smp_boot_cpus(void)
 
         *((volatile long *) phys_to_virt(0x467)) = 0;
     }
-#endif
 
     /*
      * Allow the user to impress friends.
@@ -1310,14 +1302,12 @@ void __init smp_boot_cpus(void)
         }
     }
 
-#ifndef CONFIG_VISWS
     /*
      * Here we can be sure that there is an IO-APIC in the system. Let's
      * go and set it up:
      */
     if (!skip_ioapic_setup && nr_ioapics)
         setup_IO_APIC();
-#endif
 
     /*
      * Set up all local APIC timers in the system:

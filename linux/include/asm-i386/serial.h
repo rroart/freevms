@@ -113,17 +113,7 @@
 #define HUB6_SERIAL_PORT_DFNS
 #endif
 
-#ifdef CONFIG_MCA
-#define MCA_SERIAL_PORT_DFNS            \
-    { 0, BASE_BAUD, 0x3220, 3, MCA_COM_FLAGS }, \
-    { 0, BASE_BAUD, 0x3228, 3, MCA_COM_FLAGS }, \
-    { 0, BASE_BAUD, 0x4220, 3, MCA_COM_FLAGS }, \
-    { 0, BASE_BAUD, 0x4228, 3, MCA_COM_FLAGS }, \
-    { 0, BASE_BAUD, 0x5220, 3, MCA_COM_FLAGS }, \
-    { 0, BASE_BAUD, 0x5228, 3, MCA_COM_FLAGS },
-#else
 #define MCA_SERIAL_PORT_DFNS
-#endif
 
 #define SERIAL_PORT_DFNS        \
     STD_SERIAL_PORT_DEFNS       \

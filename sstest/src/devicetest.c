@@ -27,7 +27,7 @@ int call_sys$dassgn(unsigned short channel)
     return sys$dassgn(channel);
 }
 
-int call_sys$getdviw1(unsigned short int code, void *value, unsigned short *length)
+int call_sys$getdviw1(unsigned short code, void *value, unsigned short *length)
 {
     struct _ile3 item_list[] =
         {
@@ -36,7 +36,7 @@ int call_sys$getdviw1(unsigned short int code, void *value, unsigned short *leng
     return sys$getdviw(0, 0, NULL, item_list, NULL, NULL, 0, NULL);
 }
 
-int call_sys$getdviw2(unsigned short int code1, void *value1, unsigned short *length1, unsigned short int code2, void *value2,
+int call_sys$getdviw2(unsigned short code1, void *value1, unsigned short *length1, unsigned short code2, void *value2,
         unsigned short *length2)
 {
     struct _ile3 item_list[] =
@@ -60,9 +60,10 @@ void run_device_test(void)
     EXPECT_NE(strncmp(device_name, "", device_name_length), 0);
     device_name[device_name_length] = '\0';
 
-    EXPECT_EQ(call_sys$assign("", &channel, 0, NULL, 0), SS$_NOSUCHDEV);
+    EXPECT_EQ(call_sys$assign("", &channel, 0, NULL, 0), SS$_ACCVIO);
+    EXPECT_EQ(call_sys$assign("invalidDevice", &channel, 0, NULL, 0), SS$_NOSUCHDEV);
     EXPECT_EQ(call_sys$assign("DQA001", NULL, 0, NULL, 0), SS$_ACCVIO);
-    EXPECT_EQ(call_sys$assign("DQA001", &channel, 0, NULL, 0), SS$_NORMAL);
+    EXPECT_EQ(call_sys$assign("dqa001", &channel, 0, NULL, 0), SS$_NORMAL);
     EXPECT_NE(channel, 0);
 
     EXPECT_EQ(call_sys$dassgn(0), SS$_IVCHAN);

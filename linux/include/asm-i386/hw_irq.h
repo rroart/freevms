@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 #ifndef _ASM_HW_IRQ_H
@@ -211,7 +211,6 @@ extern void FASTCALL(send_IPI_self(int vector));
 #else
 extern void send_IPI_self(int vector);
 #endif
-extern void init_VISWS_APIC_irqs(void);
 extern void setup_IO_APIC(void);
 extern void disable_IO_APIC(void);
 extern void print_IO_APIC(void);

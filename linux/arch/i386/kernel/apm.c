@@ -231,10 +231,6 @@
 extern unsigned long get_cmos_time(void);
 extern void machine_real_restart(unsigned char *, int);
 
-#if defined(CONFIG_APM_DISPLAY_BLANK) && defined(CONFIG_VT)
-extern int (*console_blank_hook)(int);
-#endif
-
 /*
  * The apm_bios device is one of the misc char devices.
  * This is its minor number.
@@ -367,11 +363,7 @@ struct apm_user
 /*
  * idle percentage above which bios idle calls are done
  */
-#ifdef CONFIG_APM_CPU_IDLE
-#define DEFAULT_IDLE_THRESHOLD  95
-#else
 #define DEFAULT_IDLE_THRESHOLD  100
-#endif
 #define DEFAULT_IDLE_PERIOD (100 / 3)
 
 /*
@@ -392,13 +384,8 @@ static int          waiting_for_resume = 0;
 static int          ignore_normal_resume = 0;
 static int          bounce_interval = DEFAULT_BOUNCE_INTERVAL;
 
-#ifdef CONFIG_APM_RTC_IS_GMT
-#   define  clock_cmos_diff 0
-#   define  got_clock_diff  1
-#else
 static long         clock_cmos_diff = 0;
 static int          got_clock_diff = 0;
-#endif
 static int          debug = 0;
 static int          apm_disabled = -1;
 #ifdef CONFIG_SMP
@@ -409,11 +396,7 @@ static int          power_off = 1;
 static int          realmode_power_off = 0;
 static int          exit_kapmd = 0;
 static int          kapmd_running = 0;
-#ifdef CONFIG_APM_ALLOW_INTS
-static int          allow_ints = 1;
-#else
 static int          allow_ints = 0;
-#endif
 static int          broken_psr = 0;
 
 static DECLARE_WAIT_QUEUE_HEAD(apm_waitqueue);
@@ -943,32 +926,6 @@ action_msg:     "Power Off\n"
 };
 
 
-#ifdef CONFIG_APM_DO_ENABLE
-
-/**
- *  apm_enable_power_management - enable BIOS APM power management
- *  @enable: enable yes/no
- *
- *  Enable or disable the APM BIOS power services.
- */
-
-static int apm_enable_power_management(int enable)
-{
-    u32 eax;
-
-    if ((enable == 0) && (apm_info.bios.flags & APM_BIOS_DISENGAGED))
-        return APM_NOT_ENGAGED;
-    if (apm_bios_call_simple(APM_FUNC_ENABLE_PM, APM_DEVICE_BALL,
-                             enable, &eax))
-        return (eax >> 8) & 0xff;
-    if (enable)
-        apm_info.bios.flags &= ~APM_BIOS_DISABLED;
-    else
-        apm_info.bios.flags |= APM_BIOS_DISABLED;
-    return APM_SUCCESS;
-}
-#endif
-
 /**
  *  apm_get_power_status    -   get current power state
  *  @status: returned status
@@ -1088,41 +1045,6 @@ static void apm_error(char *str, int err)
                str, err);
 }
 
-#if defined(CONFIG_APM_DISPLAY_BLANK) && defined(CONFIG_VT)
-
-/**
- *  apm_console_blank   -   blank the display
- *  @blank: on/off
- *
- *  Attempt to blank the console, firstly by blanking just video device
- *  zero, and if that fails (some BIOSes dont support it) then it blanks
- *  all video devices. Typically the BIOS will do laptop backlight and
- *  monitor powerdown for us.
- */
-
-static int apm_console_blank(int blank)
-{
-    int error;
-    u_short state;
-
-    state = blank ? APM_STATE_STANDBY : APM_STATE_READY;
-    /* Blank the first display device */
-    error = set_power_state(0x100, state);
-    if ((error != APM_SUCCESS) && (error != APM_NO_ERROR))
-    {
-        /* try to blank them all instead */
-        error = set_power_state(0x1ff, state);
-        if ((error != APM_SUCCESS) && (error != APM_NO_ERROR))
-            /* try to blank device one instead */
-            error = set_power_state(0x101, state);
-    }
-    if ((error == APM_SUCCESS) || (error == APM_NO_ERROR))
-        return 1;
-    apm_error("set display", error);
-    return 0;
-}
-#endif
-
 static int queue_empty(struct apm_user *as)
 {
     return as->event_head == as->event_tail;
@@ -1189,7 +1111,6 @@ static void set_time(void)
 
 static void get_time_diff(void)
 {
-#ifndef CONFIG_APM_RTC_IS_GMT
     unsigned long   flags;
 
     /*
@@ -1201,7 +1122,6 @@ static void get_time_diff(void)
     clock_cmos_diff += CURRENT_TIME;
     got_clock_diff = 1;
     restore_flags(flags);
-#endif
 }
 
 static void reinit_timer(void)
@@ -1326,11 +1246,7 @@ static void check_events(void)
             break;
 
         case APM_USER_SUSPEND:
-#ifdef CONFIG_APM_IGNORE_USER_SUSPEND
-            if (apm_info.connection_version > 0x100)
-                apm_set_power_state(APM_STATE_REJECT);
             break;
-#endif
         case APM_SYS_SUSPEND:
             if (ignore_bounce)
             {
@@ -1759,23 +1675,6 @@ static int apm(void *unused)
                (apm_info.connection_version >> 8) & 0xff,
                apm_info.connection_version & 0xff);
 
-#ifdef CONFIG_APM_DO_ENABLE
-    if (apm_info.bios.flags & APM_BIOS_DISABLED)
-    {
-        /*
-         * This call causes my NEC UltraLite Versa 33/C to hang if it
-         * is booted with PM disabled but not in the docking station.
-         * Unfortunate ...
-         */
-        error = apm_enable_power_management(1);
-        if (error)
-        {
-            apm_error("enable power management", error);
-            return -1;
-        }
-    }
-#endif
-
     if ((apm_info.bios.flags & APM_BIOS_DISENGAGED)
             && (apm_info.connection_version > 0x0100))
     {
@@ -1856,13 +1755,7 @@ static int apm(void *unused)
 
     if (smp_num_cpus == 1)
     {
-#if defined(CONFIG_APM_DISPLAY_BLANK) && defined(CONFIG_VT)
-        console_blank_hook = apm_console_blank;
-#endif
         apm_mainloop();
-#if defined(CONFIG_APM_DISPLAY_BLANK) && defined(CONFIG_VT)
-        console_blank_hook = NULL;
-#endif
     }
     kapmd_running = 0;
 

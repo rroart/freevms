@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 #include <linux/config.h>
@@ -131,10 +131,6 @@ EXPORT_SYMBOL(smp_call_function);
 
 /* TLB flushing */
 EXPORT_SYMBOL(flush_tlb_page2);
-#endif
-
-#ifdef CONFIG_MCA
-EXPORT_SYMBOL(machine_id);
 #endif
 
 #ifdef CONFIG_VT

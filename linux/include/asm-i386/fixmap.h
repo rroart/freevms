@@ -56,12 +56,6 @@ enum fixed_addresses
     FIX_IO_APIC_BASE_0,
     FIX_IO_APIC_BASE_END = FIX_IO_APIC_BASE_0 + MAX_IO_APICS-1,
 #endif
-#ifdef CONFIG_X86_VISWS_APIC
-    FIX_CO_CPU, /* Cobalt timer */
-    FIX_CO_APIC,    /* Cobalt APIC Redirection Table */
-    FIX_LI_PCIA,    /* Lithium PCI Bridge A */
-    FIX_LI_PCIB,    /* Lithium PCI Bridge B */
-#endif
 #ifdef CONFIG_HIGHMEM
     FIX_KMAP_BEGIN, /* reserved pte's for temporary kernel mappings */
     FIX_KMAP_END = FIX_KMAP_BEGIN+(KM_TYPE_NR*NR_CPUS)-1,

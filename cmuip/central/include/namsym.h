@@ -19,6 +19,10 @@
 
     ****************************************************************
 */
+
+#ifndef NAMSYM_H
+#define NAMSYM_H
+
 // not yet #include 'CMUIP_SRC:[CENTRAL]NETXPORT';
 #include <cmuip/central/include/netcommon.h>
 
@@ -305,3 +309,4 @@ MACRO
 RPLY$PRUNE = BLOCK[RPLY$PRUNE_SIZE] FIELD(RPLY$PRUNE_FIELDS) %;
 #endif
 
+#endif /* NAMSYM_H */

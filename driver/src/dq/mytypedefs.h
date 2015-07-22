@@ -202,7 +202,6 @@ typedef struct _tqe  TQE ;
 typedef struct _transfer_commands  TRANSFER_COMMANDS ;
 typedef struct _tu_ucb  TU_UCB ;
 typedef struct _ucb  UCB ;
-typedef struct _ucb2  UCB2 ;
 typedef struct _va  VA ;
 typedef struct _va_flags  VA_FLAGS ;
 typedef struct _va_pte_free  VA_PTE_FREE ;

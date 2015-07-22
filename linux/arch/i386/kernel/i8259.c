@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 #include <linux/config.h>
@@ -421,9 +421,7 @@ static struct irqaction irq13 = { math_error_irq, 0, 0, "fpu", NULL, NULL };
  * IRQ2 is cascade interrupt to second interrupt controller
  */
 
-#ifndef CONFIG_VISWS
 static struct irqaction irq2 = { no_action, 0, 0, "cascade", NULL, NULL};
-#endif
 
 
 void __init init_ISA_irqs (void)
@@ -462,11 +460,7 @@ void __init init_IRQ(void)
 {
     int i;
 
-#ifndef CONFIG_X86_VISWS_APIC
     init_ISA_irqs();
-#else
-    init_VISWS_APIC_irqs();
-#endif
     /*
      * Cover the whole vector space, no vector can escape
      * us. (some of these will be overridden and become
@@ -528,9 +522,7 @@ void __init init_IRQ(void)
     outb_p(LATCH & 0xff , 0x40);    /* LSB */
     outb(LATCH >> 8 , 0x40);    /* MSB */
 
-#ifndef CONFIG_VISWS
     setup_irq(2, &irq2);
-#endif
 
     /*
      * External FPU? Set up irq13 if so, for

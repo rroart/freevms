@@ -724,7 +724,7 @@ extern unsigned long ioc$gl_cramh_blink;
 extern unsigned long ioc$gl_cramh_flink;
 extern unsigned long ioc$gl_cramh_pages;
 extern unsigned long ioc$gl_crbtmout;
-extern unsigned long ioc$gl_devlist;
+extern struct _ddb * ioc$gl_devlist;
 extern unsigned long ioc$gl_dptlist;
 extern unsigned long ioc$gl_dtn_list;
 extern unsigned long ioc$gl_du_cddb;

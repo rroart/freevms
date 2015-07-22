@@ -29,8 +29,8 @@
  *      Renamed iosb to read_iosb in FD_ENTRY structure.
  *      Added write_iosb to FD_ENTRY structure.
  */
-#ifndef __LIBCMU__
-#define __LIBCMU__
+#ifndef LIBCMU_H
+#define LIBCMU_H
 #define CMUTCP
 
 
@@ -140,4 +140,4 @@ struct ITEM_LIST
     long   itm$a_retlen;
 };
 
-#endif /* LIBCMU */
+#endif /* LIBCMU_H */

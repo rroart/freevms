@@ -48,6 +48,9 @@
 *******************************************************************************
 *--*/
 
+#ifndef LPRDEF_H
+#define LPRDEF_H
+
 /* LPR main commands and constants */
 
 #define LPR$K_Timeout       120
@@ -82,3 +85,5 @@
 
 #define LPR$K_LPDPort         515
 #define LPR$K_MaxLocalPort    1023
+
+#endif /* LPRDEF_H */

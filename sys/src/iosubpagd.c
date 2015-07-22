@@ -28,6 +28,11 @@
 #include <lnmsub.h>
 #include <lnmstrdef.h>
 
+#ifdef __x86_64__
+#define memchr kernel_memchr
+void *kernel_memchr(const void *s, int c, size_t n);
+#endif
+
 /**
  \brief find first free i/o channel - see 5.2 21.5.2.1
  \param chan return value
@@ -102,7 +107,7 @@ int ioc$search(struct return_values *r, void * devnam)
         devstr = s->dsc$a_pointer;
         devstrlen = s->dsc$w_length;
     }
-    char * device = strchr(devstr, '$');
+    char * device = memchr(devstr, '$', devstrlen);
     if (device >= (devstr + devstrlen))
         device = 0;
     if (device)
@@ -213,7 +218,7 @@ int ioc_std$trandevnam(void * descr_p, int flags, char *buf, int *outlen, void *
     *out_p=buf;
     struct dsc$descriptor * d = descr_p, descr;
     descr.dsc$a_pointer=d->dsc$a_pointer;
-    char * c = strchr(d->dsc$a_pointer,':'); // get rid of colon here
+    char * c = memchr(d->dsc$a_pointer,':',d->dsc$w_length); // get rid of colon here
     if (c)
     descr.dsc$w_length=(long)c-(long)d->dsc$a_pointer;
     else
@@ -233,11 +238,15 @@ int ioc_std$trandevnam(void * descr_p, int flags, char *buf, int *outlen, void *
     *out_p = buf;
     struct dsc$descriptor * d = descr_p, descr;
     descr.dsc$a_pointer = d->dsc$a_pointer;
-    char * c = strchr(d->dsc$a_pointer, ':'); // get rid of colon here
+    char * c = memchr(d->dsc$a_pointer, ':', d->dsc$w_length); // get rid of colon here
     if (c)
+    {
         descr.dsc$w_length = (long) c - (long) d->dsc$a_pointer;
+    }
     else
+    {
         descr.dsc$w_length = d->dsc$w_length;
+    }
     descr_p = &descr;
     struct dsc$descriptor * descr_p2 = descr_p;
     struct struct_lnm_ret ret =

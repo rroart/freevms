@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 #include <linux/linkage.h>
@@ -410,11 +410,7 @@ void __init init_IRQ(void)
 {
     int i;
 
-#ifndef CONFIG_X86_VISWS_APIC
     init_ISA_irqs();
-#else
-    init_VISWS_APIC_irqs();
-#endif
     /*
      * Cover the whole vector space, no vector can escape
      * us. (some of these will be overridden and become
@@ -471,8 +467,6 @@ void __init init_IRQ(void)
     set_intr_gate(ERROR_APIC_VECTOR, error_interrupt);
 #endif
 
-#ifndef CONFIG_VISWS
     if (!acpi_ioapic)
         setup_irq(2, &irq2);
-#endif
 }

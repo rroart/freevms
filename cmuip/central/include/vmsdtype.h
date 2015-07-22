@@ -53,6 +53,9 @@
 *******************************************************************************
 *--*/
 
+#ifndef VMSDTYPE_H
+#define VMSDTYPE_H
+
 #define NUL       '\0'
 
 struct item_list_3
@@ -68,3 +71,4 @@ struct io_status_block
     unsigned int ipacp_status;
 };
 
+#endif /* VMSDTYPE_H */

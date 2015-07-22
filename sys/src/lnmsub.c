@@ -28,6 +28,11 @@
 
 #define lnmprintf printk
 
+#ifdef __x86_64__
+#define memchr kernel_memchr
+void *kernel_memchr(const void *s, int c, size_t n);
+#endif
+
 /* << does not rotate ... ? */
 
 int lnm$hash(const int length, const unsigned char * log, const unsigned long mask, unsigned long * myhash)
@@ -511,7 +516,7 @@ int search_log_repl(char * name, char ** retname, int * retsize)
     if (sts&1) goto ret;
     sts=search_log_sys(myname,namelen,retname,retsize);
     if (sts&1) goto ret;
-    char * semi = strchr(myname,':');
+    char * semi = memchr(myname,':',namelen);
     if (semi==0) goto ret;
     * semi = 0;
     sts=search_log_prc(myname,semi-myname,retname,retsize);
@@ -531,7 +536,7 @@ found:
 #endif
     memcpy(newret,*retname,(*retsize));
     newret[*retsize]=0;
-    if (strchr(newret,':'))
+    if (memchr(newret,':',*retsize))
     {
         memcpy(newret+(*retsize),semi+1,namelen-strlen(myname)-1);
         (*retsize)--;
@@ -603,7 +608,7 @@ int search_log_repl(char * name, char ** retname, int * retsize)
     if (sts & 1)
         goto found;
 
-    semi = strchr(name, ':');
+    semi = memchr(name, ':', namelen);
     if (semi == 0)
         return sts;
 
@@ -625,7 +630,7 @@ found:
         goto ret;
 
     newret[*retsize] = 0;
-    if (strchr(newret, ':'))
+    if (memchr(newret, ':', *retsize))
     {
         memcpy(newret + (*retsize), semi + 1, namelen - (semi - name) - 1);
         (*retsize)--;

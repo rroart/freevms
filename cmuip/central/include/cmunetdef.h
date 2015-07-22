@@ -52,6 +52,9 @@
 *******************************************************************************
 *--*/
 
+#ifndef CMUNETDEF_H
+#define CMUNETDEF_H
+
 /*
 #define TCP$OPEN        IO$_CREATE
 #define TCP$CLOSE       IO$_DELETE
@@ -102,3 +105,5 @@ struct cmutcp_status_block
         int owner_pid;
     };
 */
+
+#endif /* CMUNETDEF_H */

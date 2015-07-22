@@ -24,12 +24,6 @@
 #define CONFIG_X86_IO_APIC 1
 #define CONFIG_X86_LOCAL_APIC 1
 #undef  CONFIG_PM
-#undef  CONFIG_APM_IGNORE_USER_SUSPEND
-#undef  CONFIG_APM_DO_ENABLE
-#undef  CONFIG_APM_CPU_IDLE
-#undef  CONFIG_APM_DISPLAY_BLANK
-#undef  CONFIG_APM_RTC_IS_GMT
-#undef  CONFIG_APM_ALLOW_INTS
 
 /*
  * General setup
@@ -40,13 +34,6 @@
 #define CONFIG_PCI_DIRECT 1
 #define CONFIG_PCI_NAMES 1
 #undef  CONFIG_EISA
-#undef  CONFIG_MCA
-#undef  CONFIG_HOTPLUG_PCI
-
-/*
- * Memory Technology Devices (MTD)
- */
-#undef  CONFIG_MTD
 
 /*
  * ATA/IDE/MFM/RLL support

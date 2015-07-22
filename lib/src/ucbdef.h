@@ -235,61 +235,6 @@
 #define SUD$M_FP_ON_HW_INT_PORT_QUEUE 0x4
 #define SUD$M_FP_USR_HW_INT_CPU 0x8
 
-struct _ucb2
-{
-    struct _fkb *ucb$l_fqfl;
-    struct _fkb *ucb$l_fqbl;
-    unsigned short int ucb$w_size;
-    unsigned char ucb$b_type;
-    unsigned char ucb$b_flck;
-    void (*ucb$l_fpc)(void);
-    unsigned long ucb$l_fr3;
-    unsigned long ucb$l_fr4;
-    unsigned short ucb$w_bufquo;
-    unsigned short ucb$w_iniquo;
-    struct _orb *ucb$l_orb;
-    unsigned long ucb$l_lockid;
-    struct _crb *ucb$l_crb;
-    struct _spl *ucb$l_dlck;
-    struct _ddb *ucb$l_ddb;
-    unsigned long ucb$l_pid;
-    struct _ucb *ucb$l_link;
-    struct _vcb *ucb$l_vcb;
-    unsigned long ucb$l_devchar;
-    unsigned long ucb$l_devchar2;
-    unsigned long ucb$l_affinity;
-    unsigned long reserved;
-    unsigned char ucb$b_devclass;
-    unsigned char ucb$b_devtype;
-    unsigned short ucb$w_devbufsiz;
-    unsigned long ucb$l_devdepend;
-    unsigned long ucb$l_devdepend2;
-    struct _irp *ucb$l_ioqfl;
-    struct _irp *ucb$l_ioqbl;
-    unsigned short ucb$w_unit;
-    unsigned short ucb$w_charge;
-    struct _irp *ucb$l_irp;
-    unsigned short ucb$w_refc;
-    unsigned char ucb$b_dipl;
-    unsigned char ucb$b_amod;
-    struct _ucb *ucb$l_amb;
-    unsigned long ucb$l_sts;
-    unsigned short ucb$w_devsts;
-    unsigned short ucb$w_qlen;
-    unsigned long ucb$l_duetim;
-    unsigned long ucb$l_opcnt;
-    unsigned long ucb$l_svpn;
-    void *ucb$l_svapte;
-    unsigned long ucb$l_boff;
-    unsigned long ucb$l_bcnt;
-    unsigned char ucb$b_ertcnt;
-    unsigned char ucb$b_ertmax;
-    unsigned short ucb$w_errcnt;
-    struct _pdt *ucb$l_pdt;
-    struct _ddt *ucb$l_ddt;
-    unsigned long ucb$l_media_id;
-};
-
 struct _ucb
 {
     union

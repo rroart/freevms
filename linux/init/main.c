@@ -99,8 +99,6 @@ extern void init_IRQ(void);
 extern void init_modules(void);
 extern void sock_init(void);
 extern void fork_init(unsigned long);
-extern void mca_init(void);
-extern void ppc_init(void);
 extern void sysctl_init(void);
 extern void signals_init(void);
 
@@ -716,9 +714,6 @@ static void __init do_basic_setup(void)
      */
 #ifdef CONFIG_PCI
     pci_init();
-#endif
-#ifdef CONFIG_MCA
-    mca_init();
 #endif
     do_initcalls();
     printk("%%KERNEL-I-DEBUG, After do_initcalls\n");
