@@ -140,11 +140,7 @@ extern inline void * phys_to_virt(unsigned long address)
 /*
  * Change "struct page" to physical address.
  */
-#ifdef CONFIG_DISCONTIGMEM
-#include <asm/mmzone.h>
-#else
 #define page_to_phys(page)  (((page) - mem_map) << PAGE_SHIFT)
-#endif
 
 extern void * __ioremap(unsigned long offset, unsigned long size, unsigned long flags);
 

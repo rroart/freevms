@@ -761,8 +761,6 @@ asmlinkage void math_state_restore(struct pt_regs regs)
     current->flags |= PF_USEDFPU;   /* So we fnsave on switch_to() */
 }
 
-#ifndef CONFIG_MATH_EMULATION
-
 asmlinkage void math_emulate(long arg)
 {
     printk("math-emulation not enabled and no coprocessor found.\n");
@@ -770,8 +768,6 @@ asmlinkage void math_emulate(long arg)
     force_sig(SIGFPE,current);
     schedule();
 }
-
-#endif /* CONFIG_MATH_EMULATION */
 
 #ifndef CONFIG_M686
 void __init trap_init_f00f_bug(void)
@@ -907,11 +903,6 @@ void set_ldt_desc(unsigned int n, void *addr, unsigned int size)
 
 void __init trap_init(void)
 {
-#ifdef CONFIG_EISA
-    if (isa_readl(0x0FFFD9) == 'E'+('I'<<8)+('S'<<16)+('A'<<24))
-        EISA_bus = 1;
-#endif
-
     kernel_puts("puts 6.1\n");
     set_trap_gate(0,&divide_error);
     kernel_puts("puts 6.2\n");

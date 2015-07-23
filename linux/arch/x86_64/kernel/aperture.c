@@ -38,11 +38,7 @@ extern int no_iommu, force_mmu;
 
 static u32 __init allocate_aperture(void)
 {
-#ifdef CONFIG_DISCONTIGMEM
-    pg_data_t *nd0 = NODE_DATA(0);
-#else
     pg_data_t *nd0 = &contig_page_data;
-#endif
     u32 aper_size;
     void *p;
 

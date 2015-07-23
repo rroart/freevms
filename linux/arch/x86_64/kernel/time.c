@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -519,21 +519,7 @@ void __init time_init(void)
 {
     char *timename;
 
-#ifdef HPET_HACK_ENABLE_DANGEROUS
-    if (!hpet_address)
-    {
-        printk(KERN_WARNING "time.c: WARNING: Enabling HPET base manually!\n");
-        outl(0x800038a0, 0xcf8);
-        outl(0xff000001, 0xcfc);
-        outl(0x800038a0, 0xcf8);
-        hpet_address = inl(0xcfc) & 0xfffffffe;
-        printk(KERN_WARNING "time.c: WARNING: Enabled HPET at at %#lx.\n", hpet_address);
-    }
-#endif
-
-#ifndef CONFIG_HPET_TIMER
     hpet_address = 0;
-#endif
 
     write_lock(&xtime_lock);
     xtime.tv_sec = get_cmos_time();

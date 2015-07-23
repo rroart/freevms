@@ -201,7 +201,7 @@ out:
  *  2. Accidentally out of order processors (PPro errata #51)
  */
 
-#if defined(CONFIG_X86_OOSTORE) || defined(CONFIG_X86_PPRO_FENCE)
+#if defined(CONFIG_X86_PPRO_FENCE)
 
 static inline void flush_write_buffers(void)
 {

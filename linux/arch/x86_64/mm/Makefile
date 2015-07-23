@@ -9,8 +9,6 @@
 
 O_TARGET := mm.o
 obj-y	 := init.o fault.o ioremap.o extable.o modutil.o pageattr.o
-obj-$(CONFIG_DISCONTIGMEM) += numa.o
-obj-$(CONFIG_K8_NUMA) += k8topology.o
 
 export-objs := pageattr.o
 

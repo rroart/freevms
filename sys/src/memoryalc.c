@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on page_alloc.c.
 
 #include <linux/config.h>
@@ -168,13 +168,11 @@ static void fastcall __free_pages_ok (struct page *page, unsigned int order)
     vmsunlock(&SPIN_MMG, ipl);
 }
 
-#ifndef CONFIG_DISCONTIGMEM
 struct page * fastcall _alloc_pages(unsigned int gfp_mask, unsigned int order)
 {
     return __alloc_pages(gfp_mask, order,
                          contig_page_data.node_zonelists+(gfp_mask & GFP_ZONEMASK));
 }
-#endif
 
 int inallocpfn=0;
 

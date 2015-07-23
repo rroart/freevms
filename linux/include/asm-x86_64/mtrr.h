@@ -78,43 +78,4 @@ static char *mtrr_strings[MTRR_NUM_TYPES] =
 };
 #endif
 
-#ifdef __KERNEL__
-#include <linux/types.h>
-
-/*  The following functions are for use by other drivers  */
-#ifdef CONFIG_MTRR
-extern int mtrr_add (__u64 base, __u32 size, unsigned int type, char increment);
-extern int mtrr_add_page (__u64 base, __u32 size, unsigned int type, char increment);
-extern int mtrr_del (int reg, __u64 base, __u32 size);
-extern int mtrr_del_page (int reg, __u64 base, __u32 size);
-#else
-static __inline__ int mtrr_add (__u64 base, __u32 size,
-                                unsigned int type, char increment)
-{
-    return -ENODEV;
-}
-static __inline__ int mtrr_add_page (__u64 base, __u32 size,
-                                     unsigned int type, char increment)
-{
-    return -ENODEV;
-}
-static __inline__ int mtrr_del (int reg, __u64 base, __u32 size)
-{
-    return -ENODEV;
-}
-static __inline__ int mtrr_del_page (int reg, __u64 base, __u32 size)
-{
-    return -ENODEV;
-}
-#endif
-
-/*  The following functions are for initialisation: don't use them!  */
-extern int mtrr_init (void);
-#if defined(CONFIG_SMP) && defined(CONFIG_MTRR)
-extern void mtrr_init_boot_cpu (void);
-extern void mtrr_init_secondary_cpu (void);
-#endif
-
-#endif
-
 #endif  /*  _LINUX_MTRR_H  */

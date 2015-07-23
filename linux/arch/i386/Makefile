@@ -45,11 +45,6 @@ SUBDIRS += linux/arch/i386/tools linux/arch/i386/kernel linux/arch/i386/mm linux
 CORE_FILES := linux/arch/i386/kernel/kernel.o linux/arch/i386/mm/mm.o $(CORE_FILES)
 LIBS := $(TOPDIR)/linux/arch/i386/lib/lib.a $(LIBS) $(TOPDIR)/linux/arch/i386/lib/lib.a
 
-ifdef CONFIG_MATH_EMULATION
-SUBDIRS += linux/arch/i386/math-emu
-DRIVERS += linux/arch/i386/math-emu/math.o
-endif
-
 linux/arch/i386/tools: dummy
 	$(MAKE) linuxsubdirs SUBDIRS=linux/arch/i386/tools 
 

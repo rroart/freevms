@@ -378,30 +378,6 @@ acpi_parse_nmi_src (
 
 #endif /*CONFIG_X86_IO_APIC && CONFIG_ACPI_INTERPRETER*/
 
-#ifdef CONFIG_HPET_TIMER
-static int __init
-acpi_parse_hpet (
-    unsigned long       phys_addr,
-    unsigned long       size)
-{
-    struct acpi_table_hpet *hpet_tbl;
-
-    hpet_tbl = __va(phys_addr);
-
-    if (hpet_tbl->addr.space_id != ACPI_SPACE_MEM)
-    {
-        printk(KERN_WARNING "acpi: HPET timers must be located in memory.\n");
-        return -1;
-    }
-
-    hpet_address = hpet_tbl->addr.addrl | ((long) hpet_tbl->addr.addrh << 32);
-
-    printk(KERN_INFO "acpi: HPET id: %#x base: %#lx\n", hpet_tbl->id, hpet_address);
-
-    return 0;
-}
-#endif  /* CONFIG_HPET_TIMER */
-
 #ifdef CONFIG_ACPI_BUS
 /*
  * acpi_pic_sci_set_trigger()
@@ -680,12 +656,6 @@ acpi_boot_init (void)
 
     if (acpi_lapic && acpi_ioapic)
         smp_found_config = 1;
-
-#ifdef CONFIG_HPET_TIMER
-    result = acpi_table_parse(ACPI_HPET, acpi_parse_hpet);
-    if (result < 0)
-        printk("ACPI: no HPET table found (%d).\n", result);
-#endif
 
 #endif /*CONFIG_X86_IO_APIC && CONFIG_ACPI_INTERPRETER*/
 

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -50,9 +50,6 @@
 #include <asm/irq.h>
 #include <asm/desc.h>
 #include <asm/mmu_context.h>
-#ifdef CONFIG_MATH_EMULATION
-#include <asm/math_emu.h>
-#endif
 
 #include <linux/irq.h>
 

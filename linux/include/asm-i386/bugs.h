@@ -68,11 +68,9 @@ static void __init check_fpu(void)
 {
     if (!boot_cpu_data.hard_math)
     {
-#ifndef CONFIG_MATH_EMULATION
         printk(KERN_EMERG "No coprocessor found and no math emulation present.\n");
         printk(KERN_EMERG "Giving up.\n");
         for (;;) ;
-#endif
         return;
     }
 

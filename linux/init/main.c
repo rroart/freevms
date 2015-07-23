@@ -49,10 +49,6 @@
 #include <linux/pci.h>
 #endif
 
-#ifdef CONFIG_MTRR
-#  include <asm/mtrr.h>
-#endif
-
 #ifdef CONFIG_X86_LOCAL_APIC
 #include <asm/smp.h>
 #endif
@@ -694,15 +690,6 @@ static void __init do_basic_setup(void)
      * can be found.
      */
     child_reaper = current;
-
-#if defined(CONFIG_MTRR)    /* Do this after SMP initialization */
-    /*
-     * We should probably create some architecture-dependent "fixup after
-     * everything is up" style function where this would belong better
-     * than in init/main.c..
-     */
-    mtrr_init();
-#endif
 
 #ifdef CONFIG_SYSCTL
     sysctl_init();

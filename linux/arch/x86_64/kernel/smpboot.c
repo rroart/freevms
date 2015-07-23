@@ -405,12 +405,6 @@ void __init smp_callin(void)
 
     sti();
 
-#ifdef CONFIG_MTRR
-    /*
-     * Must be done before calibration delay is computed
-     */
-    mtrr_init_secondary_cpu ();
-#endif
     /*
      * Get our bogomips.
      */
@@ -906,10 +900,6 @@ void __init smp_boot_cpus(void)
 {
     int apicid, cpu, maxcpu;
 
-#ifdef CONFIG_MTRR
-    /*  Must be done before other processors booted  */
-    mtrr_init_boot_cpu ();
-#endif
     /*
      * Initialize the logical to physical CPU number mapping
      * and the per-CPU profiling counter/multiplier

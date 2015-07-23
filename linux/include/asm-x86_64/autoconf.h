@@ -23,22 +23,11 @@
 #define CONFIG_X86_TSC 1
 #define CONFIG_X86_GOOD_APIC 1
 #undef  CONFIG_X86_CPUID
-#undef  CONFIG_MATH_EMULATION
-#undef  CONFIG_EISA
 #define CONFIG_X86_IO_APIC 1
 #define CONFIG_X86_LOCAL_APIC 1
-#undef  CONFIG_MTRR
 #define CONFIG_SMP 1
-#undef  CONFIG_HPET_TIMER
 #undef  CONFIG_GART_IOMMU
 #define CONFIG_MCE 1
-#ifdef CONFIG_SMP
-#undef CONFIG_K8_NUMA
-#ifdef CONFIG_K8_NUMA
-#define CONFIG_DISCONTIGMEM 1
-#define CONFIG_NUMA 1
-#endif
-#endif
 
 #undef  CONFIG_PM
 

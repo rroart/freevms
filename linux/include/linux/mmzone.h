@@ -132,16 +132,8 @@ extern void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 
 extern pg_data_t contig_page_data;
 
-#ifndef CONFIG_DISCONTIGMEM
-
 #define NODE_DATA(nid)      (&contig_page_data)
 #define NODE_MEM_MAP(nid)   mem_map
-
-#else /* !CONFIG_DISCONTIGMEM */
-
-#include <asm/mmzone.h>
-
-#endif /* !CONFIG_DISCONTIGMEM */
 
 #define MAP_ALIGN(x)    ((((x) % sizeof(mem_map_t)) == 0) ? (x) : ((x) + \
         sizeof(mem_map_t) - ((x) % sizeof(mem_map_t))))

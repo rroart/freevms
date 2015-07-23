@@ -14,7 +14,7 @@ all: kernel.o head.o init_task.o
 
 O_TARGET := kernel.o
 
-export-objs     := mtrr.o cpuid.o i386_ksyms.o
+export-objs     := cpuid.o i386_ksyms.o
 
 obj-y	:= process.o semaphore.o signal.o entry.o traps.o irq.o vm86.o \
 		ptrace.o i8259.o ioport.o ldt.o setup.o time.o sys_i386.o \
@@ -27,7 +27,6 @@ obj-y			+= pci-i386.o
 obj-y			+= pci-pc.o pci-irq.o
 endif
 
-obj-$(CONFIG_MTRR)		+= mtrr.o
 obj-$(CONFIG_X86_CPUID)		+= cpuid.o
 obj-$(CONFIG_APM)		+= apm.o
 obj-$(CONFIG_SMP)		+= smp.o smpboot.o trampoline.o

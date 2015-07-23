@@ -72,7 +72,7 @@ typedef struct
  * (PPro errata 66, 92)
  */
 
-#if !defined(CONFIG_X86_OOSTORE) && !defined(CONFIG_X86_PPRO_FENCE)
+#if !defined(CONFIG_X86_PPRO_FENCE)
 
 #define spin_unlock_string \
     "movb $1,%0" \

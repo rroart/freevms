@@ -78,7 +78,6 @@ int do_check_pgt_cache(int low, int high)
     return freed;
 }
 
-#ifndef CONFIG_DISCONTIGMEM
 /*
  * NOTE: pagetable_init alloc all the fixmap pagetables contiguous on the
  * physical space so we can cache the place of the first one and move
@@ -109,7 +108,6 @@ void show_mem(void)
     printk("%ld pages in page table cache\n",read_pda(pgtable_cache_sz));
     show_buffers();
 }
-#endif
 
 /* References to section boundaries */
 
@@ -445,7 +443,6 @@ void __init zap_low_mappings (void)
 {
 }
 
-#ifndef CONFIG_DISCONTIGMEM
 void __init paging_init(void)
 {
     unsigned long zones_size[MAX_NR_ZONES] = {0, 0, 0};
@@ -484,7 +481,6 @@ static inline int page_is_ram (unsigned long pagenr)
     }
     return 0;
 }
-#endif
 
 void __init mem_init(void)
 {
@@ -501,11 +497,6 @@ void __init mem_init(void)
     reservedpages = 0;
 
     /* this will put all low memory onto the freelists */
-#ifdef CONFIG_DISCONTIGMEM
-    totalram_pages += numa_free_all_bootmem();
-    tmp = 0;
-    /* should count reserved pages here for all nodes */
-#else
     if (!mem_map) BUG();
 
     totalram_pages += free_all_bootmem();
@@ -516,7 +507,6 @@ void __init mem_init(void)
          */
         if (page_is_ram(tmp) && PageReserved(mem_map+tmp))
             reservedpages++;
-#endif
 
     after_bootmem = 1;
 
@@ -612,19 +602,11 @@ void si_meminfo(struct sysinfo *val)
 void __init reserve_bootmem_generic(unsigned long phys, unsigned len)
 {
     /* Should check here against the e820 map to avoid double free */
-#ifdef CONFIG_DISCONTIGMEM
-    reserve_bootmem_node(NODE_DATA(phys_to_nid(phys)), phys, len);
-#else
     reserve_bootmem(phys, len);
-#endif
 }
 
 
 void free_bootmem_generic(unsigned long phys, unsigned len)
 {
-#ifdef CONFIG_DISCONTIGMEM
-    free_bootmem_node(NODE_DATA(phys_to_nid(phys)), phys, len);
-#else
     free_bootmem(phys, len);
-#endif
 }

@@ -84,12 +84,6 @@ void __init x86_64_start_kernel(char * real_mode_data)
     s = strstr(saved_command_line, "earlyprintk=");
     if (s != NULL)
         setup_early_printk(s+12);
-#ifdef CONFIG_DISCONTIGMEM
-    extern int numa_setup(char *);
-    s = strstr(saved_command_line, "numa=");
-    if (s != NULL)
-        numa_setup(s+5);
-#endif
     early_printk("booting x86_64 kernel... ");
     setup_boot_cpu_data();
     start_kernel();

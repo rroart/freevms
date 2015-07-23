@@ -18,11 +18,7 @@
 #include <asm/ptrace.h>
 #include <asm/uaccess.h>
 
-#ifdef CONFIG_MATH_EMULATION
-#define HAVE_HWFP (boot_cpu_data.hard_math)
-#else
 #define HAVE_HWFP 1
-#endif
 
 /*
  * The _current_ task is using the FPU for the first time

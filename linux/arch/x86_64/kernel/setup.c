@@ -201,7 +201,6 @@ static void __init probe_roms(void)
 unsigned long start_pfn, end_pfn;
 extern unsigned long table_start, table_end;
 
-#ifndef CONFIG_DISCONTIGMEM
 static void __init contig_initmem_init(void)
 {
     unsigned long bootmap_size, bootmap;
@@ -213,7 +212,6 @@ static void __init contig_initmem_init(void)
     e820_bootmem_free(&contig_page_data, 0, end_pfn << PAGE_SHIFT);
     reserve_bootmem(bootmap, bootmap_size);
 }
-#endif
 
 void __init setup_arch(char **cmdline_p)
 {
@@ -247,11 +245,7 @@ void __init setup_arch(char **cmdline_p)
 
     init_memory_mapping();
 
-#ifdef CONFIG_DISCONTIGMEM
-    numa_initmem_init(0, end_pfn);
-#else
     contig_initmem_init();
-#endif
 
     /* Reserve direct mapping */
     reserve_bootmem_generic(table_start << PAGE_SHIFT,
