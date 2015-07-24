@@ -57,10 +57,6 @@ ifneq ($(CONFIG_X86_REMOTE_DEBUG),y)
 CFLAGS += -fno-asynchronous-unwind-tables
 endif
 
-ifdef CONFIG_MK8
-CFLAGS += $(call check_gcc,-march=k8,)
-endif
-
 HEAD := linux/arch/x86_64/kernel/head.o linux/arch/x86_64/kernel/head64.o linux/arch/x86_64/kernel/init_task.o
 
 SUBDIRS := linux/arch/x86_64/tools $(SUBDIRS) linux/arch/x86_64/kernel linux/arch/x86_64/mm linux/arch/x86_64/lib

@@ -22,7 +22,6 @@
 #include <linux/kernel_stat.h>
 
 #include <asm/smp.h>
-#include <asm/mtrr.h>
 #include <asm/mpspec.h>
 #include <asm/proto.h>
 #include <asm/kdebug.h>
@@ -153,65 +152,9 @@ static int __init setup_nmi_watchdog(char *str)
 
 __setup("nmi_watchdog=", setup_nmi_watchdog);
 
-#ifdef CONFIG_PM
-
-#include <linux/pm.h>
-
-struct pm_dev *nmi_pmdev;
-
-static void disable_apic_nmi_watchdog(void)
-{
-    switch (boot_cpu_data.x86_vendor)
-    {
-    case X86_VENDOR_AMD:
-        if (strstr(boot_cpu_data.x86_model_id, "Screwdriver"))
-            return;
-        wrmsr(MSR_K7_EVNTSEL0, 0, 0);
-        break;
-    case X86_VENDOR_INTEL:
-        switch (boot_cpu_data.x86)
-        {
-        case 6:
-            wrmsr(MSR_P6_EVNTSEL0, 0, 0);
-            break;
-        case 15:
-            wrmsr(MSR_P4_IQ_CCCR0, 0, 0);
-            wrmsr(MSR_P4_CRU_ESCR0, 0, 0);
-            break;
-        }
-        break;
-    }
-}
-
-static int nmi_pm_callback(struct pm_dev *dev, pm_request_t rqst, void *data)
-{
-    switch (rqst)
-    {
-    case PM_SUSPEND:
-        disable_apic_nmi_watchdog();
-        break;
-    case PM_RESUME:
-        setup_apic_nmi_watchdog();
-        break;
-    }
-    return 0;
-}
-
-static void nmi_pm_init(void)
-{
-    if (!nmi_pmdev)
-        nmi_pmdev = apic_pm_register(PM_SYS_DEV, 0, nmi_pm_callback);
-}
-
-#define __pminit    /*empty*/
-
-#else   /* CONFIG_PM */
-
 static inline void nmi_pm_init(void) { }
 
 #define __pminit    __init
-
-#endif  /* CONFIG_PM */
 
 /*
  * Activate the NMI watchdog via the local APIC.
@@ -253,7 +196,6 @@ static void __pminit setup_k7_watchdog(void)
     wrmsr(MSR_K7_EVNTSEL0, evntsel, 0);
 }
 
-#ifndef CONFIG_MK8
 static void __pminit setup_p6_watchdog(void)
 {
     unsigned int evntsel;
@@ -305,7 +247,6 @@ static int __pminit setup_p4_watchdog(void)
     wrmsr(MSR_P4_IQ_CCCR0, P4_NMI_IQ_CCCR0, 0);
     return 1;
 }
-#endif
 
 void __pminit setup_apic_nmi_watchdog (void)
 {
@@ -318,7 +259,6 @@ void __pminit setup_apic_nmi_watchdog (void)
             return;
         setup_k7_watchdog();
         break;
-#ifndef CONFIG_MK8
     case X86_VENDOR_INTEL:
         switch (boot_cpu_data.x86)
         {
@@ -333,7 +273,6 @@ void __pminit setup_apic_nmi_watchdog (void)
             return;
         }
         break;
-#endif
     default:
         return;
     }
@@ -429,7 +368,6 @@ void nmi_watchdog_tick (struct pt_regs * regs, unsigned reason)
     }
     if (nmi_perfctr_msr)
     {
-#ifndef CONFIG_MK8
         if (nmi_perfctr_msr == MSR_P4_IQ_COUNTER0)
         {
             /*
@@ -442,7 +380,6 @@ void nmi_watchdog_tick (struct pt_regs * regs, unsigned reason)
             wrmsr(MSR_P4_IQ_CCCR0, P4_NMI_IQ_CCCR0, 0);
             apic_write(APIC_LVTPC, APIC_DM_NMI);
         }
-#endif
         wrmsr(nmi_perfctr_msr, -(cpu_khz/nmi_hz*1000), -1);
     }
 }

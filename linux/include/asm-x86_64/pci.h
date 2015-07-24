@@ -65,64 +65,6 @@ extern void *pci_alloc_consistent(struct pci_dev *hwdev, size_t size,
 extern void pci_free_consistent(struct pci_dev *hwdev, size_t size,
                                 void *vaddr, dma_addr_t dma_handle);
 
-#ifdef CONFIG_GART_IOMMU
-
-/* Map a single buffer of the indicated size for DMA in streaming mode.
- * The 32-bit bus address to use is returned.
- *
- * Once the device is given the dma address, the device owns this memory
- * until either pci_unmap_single or pci_dma_sync_single is performed.
- */
-extern dma_addr_t pci_map_single(struct pci_dev *hwdev, void *ptr,
-                                 size_t size, int direction);
-
-
-void pci_unmap_single(struct pci_dev *hwdev, dma_addr_t addr,
-                      size_t size, int direction);
-
-/*
- * pci_{map,unmap}_single_page maps a kernel page to a dma_addr_t. identical
- * to pci_map_single, but takes a struct page instead of a virtual address
- */
-
-#define pci_map_page(dev,page,offset,size,dir) \
-    pci_map_single((dev), page_address(page)+(offset), (size), (dir))
-
-#define DECLARE_PCI_UNMAP_ADDR(ADDR_NAME)   \
-    dma_addr_t ADDR_NAME;
-#define DECLARE_PCI_UNMAP_LEN(LEN_NAME)     \
-    __u32 LEN_NAME;
-#define pci_unmap_addr(PTR, ADDR_NAME)          \
-    ((PTR)->ADDR_NAME)
-#define pci_unmap_addr_set(PTR, ADDR_NAME, VAL)     \
-    (((PTR)->ADDR_NAME) = (VAL))
-#define pci_unmap_len(PTR, LEN_NAME)            \
-    ((PTR)->LEN_NAME)
-#define pci_unmap_len_set(PTR, LEN_NAME, VAL)       \
-    (((PTR)->LEN_NAME) = (VAL))
-
-static inline void pci_dma_sync_single(struct pci_dev *hwdev,
-                                       dma_addr_t dma_handle,
-                                       size_t size, int direction)
-{
-    BUG_ON(direction == PCI_DMA_NONE);
-}
-
-static inline void pci_dma_sync_sg(struct pci_dev *hwdev,
-                                   struct scatterlist *sg,
-                                   int nelems, int direction)
-{
-    BUG_ON(direction == PCI_DMA_NONE);
-}
-
-/* The PCI address space does equal the physical memory
- * address space.  The networking and block device layers use
- * this boolean for bounce buffer decisions.
- */
-#define PCI_DMA_BUS_IS_PHYS (0)
-
-
-#else
 static inline dma_addr_t pci_map_single(struct pci_dev *hwdev, void *ptr,
                                         size_t size, int direction)
 {
@@ -203,8 +145,6 @@ static inline void pci_dma_sync_sg(struct pci_dev *hwdev,
 }
 
 #define PCI_DMA_BUS_IS_PHYS 1
-
-#endif
 
 extern int pci_map_sg(struct pci_dev *hwdev, struct scatterlist *sg,
                       int nents, int direction);

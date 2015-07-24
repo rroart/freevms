@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -258,11 +258,7 @@ lockd_up(void)
         goto out;
     }
 
-    if ((error = svc_makesock(serv, IPPROTO_UDP, nlm_udpport)) < 0
-#ifdef CONFIG_NFSD_TCP
-            || (error = svc_makesock(serv, IPPROTO_TCP, nlm_tcpport)) < 0
-#endif
-       )
+    if ((error = svc_makesock(serv, IPPROTO_UDP, nlm_udpport)) < 0)
     {
         if (warned++ == 0)
             printk(KERN_WARNING

@@ -43,11 +43,7 @@
 
 char e1000_driver_name[] = "e1000";
 static char e1000_driver_string[] = "Intel(R) PRO/1000 Network Driver";
-#ifndef CONFIG_E1000_NAPI
 #define DRIVERNAPI
-#else
-#define DRIVERNAPI "-NAPI"
-#endif
 #define DRV_VERSION "7.3.20-k4"DRIVERNAPI
 char e1000_driver_version[] = DRV_VERSION;
 static char e1000_copyright[] = "Copyright (c) 1999-2006 Intel Corporation.";
@@ -174,20 +170,10 @@ static int e1000_set_mac(struct net_device *netdev, void *p);
 static irqreturn_t e1000_intr(int irq, void *data);
 static boolean_t e1000_clean_tx_irq(struct e1000_adapter *adapter,
                                     struct e1000_tx_ring *tx_ring);
-#ifdef CONFIG_E1000_NAPI
-static int e1000_clean(struct net_device *poll_dev, int *budget);
-static boolean_t e1000_clean_rx_irq(struct e1000_adapter *adapter,
-                                    struct e1000_rx_ring *rx_ring,
-                                    int *work_done, int work_to_do);
-static boolean_t e1000_clean_rx_irq_ps(struct e1000_adapter *adapter,
-                                       struct e1000_rx_ring *rx_ring,
-                                       int *work_done, int work_to_do);
-#else
 static boolean_t e1000_clean_rx_irq(struct e1000_adapter *adapter,
                                     struct e1000_rx_ring *rx_ring);
 static boolean_t e1000_clean_rx_irq_ps(struct e1000_adapter *adapter,
                                        struct e1000_rx_ring *rx_ring);
-#endif
 static void e1000_alloc_rx_buffers(struct e1000_adapter *adapter,
                                    struct e1000_rx_ring *rx_ring,
                                    int cleaned_count);
@@ -200,9 +186,6 @@ static int e1000_mii_ioctl(struct net_device *netdev, struct ifreq *ifr,
                            int cmd);
 #endif
 void e1000_set_ethtool_ops(struct net_device *netdev);
-#ifdef ETHTOOL_OPS_COMPAT
-extern int ethtool_ioctl(struct ifreq *ifr);
-#endif
 static void e1000_enter_82542_rst(struct e1000_adapter *adapter);
 static void e1000_leave_82542_rst(struct e1000_adapter *adapter);
 /*static*/
@@ -212,17 +195,7 @@ static void e1000_smartspeed(struct e1000_adapter *adapter);
 static int e1000_82547_fifo_workaround(struct e1000_adapter *adapter,
                                        struct sk_buff *skb);
 
-#ifdef NETIF_F_HW_VLAN_TX
-static void e1000_vlan_rx_register(struct net_device *netdev, struct vlan_group *grp);
-static void e1000_vlan_rx_add_vid(struct net_device *netdev, uint16_t vid);
-static void e1000_vlan_rx_kill_vid(struct net_device *netdev, uint16_t vid);
-static void e1000_restore_vlan(struct e1000_adapter *adapter);
-#endif
-
 static int e1000_suspend(struct pci_dev *pdev, pm_message_t state);
-#ifdef CONFIG_PM
-static int e1000_resume(struct pci_dev *pdev);
-#endif
 
 #ifdef CONFIG_NET_POLL_CONTROLLER
 /* for netdump / net console */
@@ -251,11 +224,6 @@ static struct pci_driver e1000_driver =
     .id_table = e1000_pci_tbl,
     .probe    = e1000_probe,
     .remove   = __devexit_p(e1000_remove),
-#ifdef CONFIG_PM
-    /* Power Managment Hooks */
-    .suspend  = e1000_suspend,
-    .resume   = e1000_resume,
-#endif
 };
 
 MODULE_AUTHOR("Intel Corporation, <linux.nics@intel.com>");
@@ -390,37 +358,6 @@ e1000_irq_enable(struct e1000_adapter *adapter)
         E1000_WRITE_FLUSH(&adapter->hw);
     }
 }
-#ifdef NETIF_F_HW_VLAN_TX
-
-static void
-e1000_update_mng_vlan(struct e1000_adapter *adapter)
-{
-    struct net_device *netdev = adapter->netdev;
-    uint16_t vid = adapter->hw.mng_cookie.vlan_id;
-    uint16_t old_vid = adapter->mng_vlan_id;
-    if (adapter->vlgrp)
-    {
-        if (!adapter->vlgrp->vlan_devices[vid])
-        {
-            if (adapter->hw.mng_cookie.status &
-                    E1000_MNG_DHCP_COOKIE_STATUS_VLAN_SUPPORT)
-            {
-                e1000_vlan_rx_add_vid(netdev, vid);
-                adapter->mng_vlan_id = vid;
-            }
-            else
-                adapter->mng_vlan_id = E1000_MNG_VLAN_NONE;
-
-            if ((old_vid != (uint16_t)E1000_MNG_VLAN_NONE) &&
-                    (vid != old_vid) &&
-                    !adapter->vlgrp->vlan_devices[old_vid])
-                e1000_vlan_rx_kill_vid(netdev, old_vid);
-        }
-        else
-            adapter->mng_vlan_id = vid;
-    }
-}
-#endif
 
 /**
  * e1000_release_hw_control - release control of the h/w to f/w
@@ -567,10 +504,6 @@ e1000_up(struct e1000_adapter *adapter)
 
     e1000_set_multi(netdev);
 
-#ifdef NETIF_F_HW_VLAN_TX
-    e1000_restore_vlan(adapter);
-#endif
-
     e1000_init_manageability(adapter);
 
     e1000_configure_tx(adapter);
@@ -588,9 +521,6 @@ e1000_up(struct e1000_adapter *adapter)
 
     adapter->tx_queue_len = netdev->tx_queue_len;
 
-#ifdef CONFIG_E1000_NAPI
-    netif_poll_enable(netdev);
-#endif
     e1000_irq_enable(adapter);
 
     clear_bit(__E1000_DOWN, &adapter->flags);
@@ -688,9 +618,6 @@ e1000_down(struct e1000_adapter *adapter)
     del_timer_sync(&adapter->watchdog_timer);
     del_timer_sync(&adapter->phy_info_timer);
 
-#ifdef CONFIG_E1000_NAPI
-    netif_poll_disable(netdev);
-#endif
     netdev->tx_queue_len = adapter->tx_queue_len;
     adapter->link_speed = 0;
     adapter->link_duplex = 0;
@@ -870,9 +797,6 @@ e1000_reset(struct e1000_adapter *adapter)
 
     if (e1000_init_hw(&adapter->hw))
         DPRINTK(PROBE, ERR, "Hardware Error\n");
-#ifdef NETIF_F_HW_VLAN_TX
-    e1000_update_mng_vlan(adapter);
-#endif
     /* if (adapter->hwflags & HWFLAGS_PHY_PWR_BIT) { */
     if (adapter->hw.mac_type >= e1000_82544 &&
             adapter->hw.mac_type <= e1000_82547_rev_2 &&
@@ -1010,15 +934,6 @@ e1000_probe(struct pci_dev *pdev,
     netdev->tx_timeout = &e1000_tx_timeout;
     netdev->watchdog_timeo = 5 * HZ;
 #endif
-#ifdef CONFIG_E1000_NAPI
-    netdev->poll = &e1000_clean;
-    netdev->weight = 64;
-#endif
-#ifdef NETIF_F_HW_VLAN_TX
-    netdev->vlan_rx_register = e1000_vlan_rx_register;
-    netdev->vlan_rx_add_vid = e1000_vlan_rx_add_vid;
-    netdev->vlan_rx_kill_vid = e1000_vlan_rx_kill_vid;
-#endif
 #ifdef CONFIG_NET_POLL_CONTROLLER
     netdev->poll_controller = e1000_netpoll;
 #endif
@@ -1054,17 +969,7 @@ e1000_probe(struct pci_dev *pdev,
 #ifdef MAX_SKB_FRAGS
     if (adapter->hw.mac_type >= e1000_82543)
     {
-#ifdef NETIF_F_HW_VLAN_TX
-        netdev->features = NETIF_F_SG |
-                           NETIF_F_HW_CSUM |
-                           NETIF_F_HW_VLAN_TX |
-                           NETIF_F_HW_VLAN_RX |
-                           NETIF_F_HW_VLAN_FILTER;
-        if (adapter->hw.mac_type == e1000_ich8lan)
-            netdev->features &= ~NETIF_F_HW_VLAN_FILTER;
-#else
         netdev->features = NETIF_F_SG | NETIF_F_HW_CSUM;
-#endif
     }
 
     if (pci_using_dac)
@@ -1263,16 +1168,8 @@ err_eeprom:
     if (adapter->hw.flash_address)
         iounmap(adapter->hw.flash_address);
 err_flashmap:
-#ifdef CONFIG_E1000_NAPI
-    for (i = 0; i < adapter->num_rx_queues; i++)
-        dev_put(&adapter->polling_netdev[i]);
-#endif
-
     kfree(adapter->tx_ring);
     kfree(adapter->rx_ring);
-#ifdef CONFIG_E1000_NAPI
-    kfree(adapter->polling_netdev);
-#endif
 err_sw_init:
     iounmap(adapter->hw.hw_addr);
 err_ioremap:
@@ -1300,9 +1197,6 @@ e1000_remove(struct pci_dev *pdev)
 {
     struct net_device *netdev = pci_get_drvdata(pdev);
     struct e1000_adapter *adapter = netdev_priv(netdev);
-#ifdef CONFIG_E1000_NAPI
-    int i;
-#endif
 
     flush_scheduled_work();
 
@@ -1313,19 +1207,12 @@ e1000_remove(struct pci_dev *pdev)
     e1000_release_hw_control(adapter);
 
     unregister_netdev(netdev);
-#ifdef CONFIG_E1000_NAPI
-    for (i = 0; i < adapter->num_rx_queues; i++)
-        dev_put(&adapter->polling_netdev[i]);
-#endif
 
     if (!e1000_check_phy_reset_block(&adapter->hw))
         e1000_phy_hw_reset(&adapter->hw);
 
     kfree(adapter->tx_ring);
     kfree(adapter->rx_ring);
-#ifdef CONFIG_E1000_NAPI
-    kfree(adapter->polling_netdev);
-#endif
 
     iounmap(adapter->hw.hw_addr);
     if (adapter->hw.flash_address)
@@ -1352,9 +1239,6 @@ e1000_sw_init(struct e1000_adapter *adapter)
     struct e1000_hw *hw = &adapter->hw;
     struct net_device *netdev = adapter->netdev;
     struct pci_dev *pdev = adapter->pdev;
-#ifdef CONFIG_E1000_NAPI
-    int i;
-#endif
 
     /* PCI config space info */
 
@@ -1417,18 +1301,6 @@ e1000_sw_init(struct e1000_adapter *adapter)
         return -ENOMEM;
     }
 
-#ifdef CONFIG_E1000_NAPI
-    for (i = 0; i < adapter->num_rx_queues; i++)
-    {
-        adapter->polling_netdev[i].priv = adapter;
-        adapter->polling_netdev[i].poll = &e1000_clean;
-        adapter->polling_netdev[i].weight = 64;
-        dev_hold(&adapter->polling_netdev[i]);
-        set_bit(__LINK_STATE_START, &adapter->polling_netdev[i].state);
-    }
-    spin_lock_init(&adapter->tx_queue_lock);
-#endif
-
     atomic_set(&adapter->irq_sem, 1);
     spin_lock_init(&adapter->stats_lock);
 
@@ -1464,18 +1336,6 @@ e1000_alloc_queues(struct e1000_adapter *adapter)
         return -ENOMEM;
     }
     memset(adapter->rx_ring, 0, size);
-
-#ifdef CONFIG_E1000_NAPI
-    size = sizeof(struct net_device) * adapter->num_rx_queues;
-    adapter->polling_netdev = kmalloc(size, GFP_KERNEL);
-    if (!adapter->polling_netdev)
-    {
-        kfree(adapter->tx_ring);
-        kfree(adapter->rx_ring);
-        return -ENOMEM;
-    }
-    memset(adapter->polling_netdev, 0, size);
-#endif
 
     return E1000_SUCCESS;
 }
@@ -1519,14 +1379,6 @@ e1000_open(struct net_device *netdev)
 
     if ((err = e1000_up(adapter)))
         goto err_up;
-#ifdef NETIF_F_HW_VLAN_TX
-    adapter->mng_vlan_id = E1000_MNG_VLAN_NONE;
-    if ((adapter->hw.mng_cookie.status &
-            E1000_MNG_DHCP_COOKIE_STATUS_VLAN_SUPPORT))
-    {
-        e1000_update_mng_vlan(adapter);
-    }
-#endif
 
     /* If AMT is enabled, let the firmware know that the network
      * interface is now open */
@@ -1576,18 +1428,6 @@ e1000_close(struct net_device *netdev)
 
     e1000_free_all_tx_resources(adapter);
     e1000_free_all_rx_resources(adapter);
-
-#ifdef NETIF_F_HW_VLAN_TX
-    /* kill manageability vlan ID if supported, but not if a vlan with
-     * the same ID is registered on the host OS (let 8021q kill it) */
-    if ((adapter->hw.mng_cookie.status &
-            E1000_MNG_DHCP_COOKIE_STATUS_VLAN_SUPPORT) &&
-            !(adapter->vlgrp &&
-              adapter->vlgrp->vlan_devices[adapter->mng_vlan_id]))
-    {
-        e1000_vlan_rx_kill_vid(netdev, adapter->mng_vlan_id);
-    }
-#endif
 
     /* If AMT is enabled, let the firmware know that the network
      * interface is now closed */
@@ -2160,11 +2000,6 @@ e1000_configure_rx(struct e1000_adapter *adapter)
         ctrl_ext = E1000_READ_REG(hw, CTRL_EXT);
         /* Reset delay timers after every interrupt */
         ctrl_ext |= E1000_CTRL_EXT_INT_TIMER_CLR;
-#ifdef CONFIG_E1000_NAPI
-        /* Auto-Mask interrupts upon ICR access */
-        ctrl_ext |= E1000_CTRL_EXT_IAME;
-        E1000_WRITE_REG(hw, IAM, 0xffffffff);
-#endif
         E1000_WRITE_REG(hw, CTRL_EXT, ctrl_ext);
         E1000_WRITE_FLUSH(hw);
     }
@@ -2756,10 +2591,6 @@ e1000_watchdog(unsigned long data)
     if (adapter->hw.mac_type == e1000_82573)
     {
         e1000_enable_tx_pkt_filtering(&adapter->hw);
-#ifdef NETIF_F_HW_VLAN_TX
-        if (adapter->mng_vlan_id != adapter->hw.mng_cookie.vlan_id)
-            e1000_update_mng_vlan(adapter);
-#endif
     }
 #endif
 
@@ -3346,15 +3177,6 @@ e1000_transfer_dhcp_info(struct e1000_adapter *adapter, struct sk_buff *skb)
 {
     struct e1000_hw *hw =  &adapter->hw;
     uint16_t length, offset;
-#ifdef NETIF_F_HW_VLAN_TX
-    if (vlan_tx_tag_present(skb))
-    {
-        if (!((vlan_tx_tag_get(skb) == adapter->hw.mng_cookie.vlan_id) &&
-                ( adapter->hw.mng_cookie.status &
-                  E1000_MNG_DHCP_COOKIE_STATUS_VLAN_SUPPORT)) )
-            return 0;
-    }
-#endif
     if (skb->len > MINIMUM_DHCP_PACKET_SIZE)
     {
         struct ethhdr *eth = (struct ethhdr *) skb->data;
@@ -3531,13 +3353,6 @@ e1000_xmit_frame(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
 #ifndef NETIF_F_LLTX
     spin_unlock_irqrestore(&tx_ring->tx_lock, flags);
 
-#endif
-#ifdef NETIF_F_HW_VLAN_TX
-    if (unlikely(adapter->vlgrp && vlan_tx_tag_present(skb)))
-    {
-        tx_flags |= E1000_TX_FLAGS_VLAN;
-        tx_flags |= (vlan_tx_tag_get(skb) << E1000_TX_FLAGS_VLAN_SHIFT);
-    }
 #endif
 
     first = tx_ring->next_to_use;
@@ -3942,26 +3757,10 @@ e1000_intr(int irq, void *data)
     struct e1000_adapter *adapter = netdev_priv(netdev);
     struct e1000_hw *hw = &adapter->hw;
     uint32_t rctl, icr = E1000_READ_REG(hw, ICR);
-#ifndef CONFIG_E1000_NAPI
     int i;
-#endif
+
     if (unlikely((!icr) || test_bit(__E1000_RESETTING, &adapter->flags)))
         return IRQ_NONE;  /* Not our interrupt */
-
-#ifdef CONFIG_E1000_NAPI
-    /* IMS will not auto-mask if INT_ASSERTED is not set, and if it is
-     * not set, then the adapter didn't send an interrupt */
-    if (unlikely(hw->mac_type >= e1000_82571 &&
-                 !(icr & E1000_ICR_INT_ASSERTED)))
-        return IRQ_NONE;
-
-    /* Interrupt Auto-Mask...upon reading ICR,
-     * interrupts are masked.  No need for the
-     * IMC write, but it does mean we should
-     * account for it ASAP. */
-    if (likely(hw->mac_type >= e1000_82571))
-        atomic_inc(&adapter->irq_sem);
-#endif
 
     if (unlikely(icr & (E1000_ICR_RXSEQ | E1000_ICR_LSC)))
     {
@@ -3983,27 +3782,6 @@ e1000_intr(int irq, void *data)
             mod_timer(&adapter->watchdog_timer, jiffies + 1);
     }
 
-#ifdef CONFIG_E1000_NAPI
-    if (hw->mac_type < e1000_82571)
-    {
-        /* disable interrupts, without the synchronize_irq bit */
-        atomic_inc(&adapter->irq_sem);
-        E1000_WRITE_REG(hw, IMC, ~0);
-        E1000_WRITE_FLUSH(hw);
-    }
-    if (likely(netif_rx_schedule_prep(netdev)))
-    {
-        adapter->total_tx_bytes = 0;
-        adapter->total_tx_packets = 0;
-        adapter->total_rx_bytes = 0;
-        adapter->total_rx_packets = 0;
-        __netif_rx_schedule(netdev);
-    }
-    else
-        /* this really should not happen! if it does it is basically a
-         * bug, but not a hard error, so enable ints and continue */
-        e1000_irq_enable(adapter);
-#else
     /* Writing IMC and IMS is needed for 82547.
      * Due to Hub Link bus being occupied, an interrupt
      * de-assertion message is not able to be sent.
@@ -4036,85 +3814,9 @@ e1000_intr(int irq, void *data)
     if (hw->mac_type == e1000_82547 || hw->mac_type == e1000_82547_rev_2)
         e1000_irq_enable(adapter);
 
-#endif
-#ifdef E1000_COUNT_ICR
-    adapter->icr_txdw += icr & 0x01;
-    icr >>= 1;
-    adapter->icr_txqe += icr & 0x01;
-    icr >>= 1;
-    adapter->icr_lsc += icr & 0x01;
-    icr >>= 1;
-    adapter->icr_rxseq += icr & 0x01;
-    icr >>= 1;
-    adapter->icr_rxdmt += icr & 0x01;
-    icr >>= 2;
-    adapter->icr_rxo += icr & 0x01;
-    icr >>= 1;
-    adapter->icr_rxt += icr & 0x01;
-    icr >>= 2;
-    adapter->icr_mdac += icr & 0x01;
-    icr >>= 1;
-    adapter->icr_rxcfg += icr & 0x01;
-    icr >>= 1;
-    adapter->icr_gpi += icr & 0x01;
-
-#endif
     return IRQ_HANDLED;
 }
 
-#ifdef CONFIG_E1000_NAPI
-/**
- * e1000_clean - NAPI Rx polling callback
- * @adapter: board private structure
- **/
-
-static int
-e1000_clean(struct net_device *poll_dev, int *budget)
-{
-    struct e1000_adapter *adapter;
-    int work_to_do = min(*budget, poll_dev->quota);
-    int tx_cleaned = 0, work_done = 0;
-
-    /* Must NOT use netdev_priv macro here. */
-    adapter = poll_dev->priv;
-
-    /* Keep link state information with original netdev */
-    if (!netif_carrier_ok(poll_dev))
-        goto quit_polling;
-
-    /* e1000_clean is called per-cpu.  This lock protects
-     * tx_ring[0] from being cleaned by multiple cpus
-     * simultaneously.  A failure obtaining the lock means
-     * tx_ring[0] is currently being cleaned anyway. */
-    if (spin_trylock(&adapter->tx_queue_lock))
-    {
-        tx_cleaned = e1000_clean_tx_irq(adapter,
-                                        &adapter->tx_ring[0]);
-        spin_unlock(&adapter->tx_queue_lock);
-    }
-
-    adapter->clean_rx(adapter, &adapter->rx_ring[0],
-                      &work_done, work_to_do);
-
-    *budget -= work_done;
-    poll_dev->quota -= work_done;
-
-    /* If no Tx and not enough Rx work done, exit the polling mode */
-    if ((tx_cleaned && (work_done < work_to_do)) ||
-            !netif_running(poll_dev))
-    {
-quit_polling:
-        if (likely(adapter->itr_setting & 3))
-            e1000_set_itr(adapter);
-        netif_rx_complete(poll_dev);
-        e1000_irq_enable(adapter);
-        return 0;
-    }
-
-    return 1;
-}
-
-#endif
 /**
  * e1000_clean_tx_irq - Reclaim resources after transmit completes
  * @adapter: board private structure
@@ -4128,9 +3830,6 @@ e1000_clean_tx_irq(struct e1000_adapter *adapter,
     struct e1000_tx_desc *tx_desc, *eop_desc;
     struct e1000_buffer *buffer_info;
     unsigned int i, eop;
-#ifdef CONFIG_E1000_NAPI
-    unsigned int count = 0;
-#endif
     boolean_t cleaned = TRUE;
     unsigned int total_tx_bytes=0, total_tx_packets=0;
 
@@ -4160,15 +3859,6 @@ e1000_clean_tx_irq(struct e1000_adapter *adapter,
 
         eop = tx_ring->buffer_info[i].next_to_watch;
         eop_desc = E1000_TX_DESC(*tx_ring, eop);
-#ifdef CONFIG_E1000_NAPI
-#define E1000_TX_WEIGHT 64
-        /* weight of a sort for tx, to avoid endless transmit cleanup */
-        if (count++ == E1000_TX_WEIGHT)
-        {
-            cleaned = FALSE;
-            break;
-        }
-#endif
     }
 
     tx_ring->next_to_clean = i;
@@ -4300,14 +3990,8 @@ e1000_rx_checksum(struct e1000_adapter *adapter,
  **/
 
 static boolean_t
-#ifdef CONFIG_E1000_NAPI
-e1000_clean_rx_irq(struct e1000_adapter *adapter,
-                   struct e1000_rx_ring *rx_ring,
-                   int *work_done, int work_to_do)
-#else
 e1000_clean_rx_irq(struct e1000_adapter *adapter,
                    struct e1000_rx_ring *rx_ring)
-#endif
 {
     struct net_device *netdev = adapter->netdev;
     struct pci_dev *pdev = adapter->pdev;
@@ -4330,11 +4014,6 @@ e1000_clean_rx_irq(struct e1000_adapter *adapter,
         struct sk_buff *skb;
         u8 status;
 
-#ifdef CONFIG_E1000_NAPI
-        if (*work_done >= work_to_do)
-            break;
-        (*work_done)++;
-#endif
         status = rx_desc->status;
         skb = buffer_info->skb;
         buffer_info->skb = NULL;
@@ -4435,39 +4114,6 @@ e1000_clean_rx_irq(struct e1000_adapter *adapter,
 
         skb->protocol = eth_type_trans(skb, netdev);
 #endif
-#ifdef CONFIG_E1000_NAPI
-#ifdef NETIF_F_HW_VLAN_TX
-        if (unlikely(adapter->vlgrp &&
-                     (status & E1000_RXD_STAT_VP)))
-        {
-            vlan_hwaccel_receive_skb(skb, adapter->vlgrp,
-                                     le16_to_cpu(rx_desc->special) &
-                                     E1000_RXD_SPC_VLAN_MASK);
-        }
-        else
-        {
-            netif_receive_skb(skb);
-        }
-#else
-#if 0
-        // check not yet
-        netif_receive_skb(skb);
-#endif
-#endif
-#else /* CONFIG_E1000_NAPI */
-#ifdef NETIF_F_HW_VLAN_TX
-        if (unlikely(adapter->vlgrp &&
-                     (status & E1000_RXD_STAT_VP)))
-        {
-            vlan_hwaccel_rx(skb, adapter->vlgrp,
-                            le16_to_cpu(rx_desc->special) &
-                            E1000_RXD_SPC_VLAN_MASK);
-        }
-        else
-        {
-            netif_rx(skb);
-        }
-#else
         // freevms change
         char * buf = rx_desc->buffer_addr;
         int pkt_len = rx_desc->length;
@@ -4485,8 +4131,6 @@ e1000_clean_rx_irq(struct e1000_adapter *adapter,
 #if 0
         netif_rx(skb);
 #endif
-#endif
-#endif /* CONFIG_E1000_NAPI */
         netdev->last_rx = jiffies;
 
 next_desc:
@@ -4520,14 +4164,8 @@ next_desc:
  **/
 
 static boolean_t
-#ifdef CONFIG_E1000_NAPI
-e1000_clean_rx_irq_ps(struct e1000_adapter *adapter,
-                      struct e1000_rx_ring *rx_ring,
-                      int *work_done, int work_to_do)
-#else
 e1000_clean_rx_irq_ps(struct e1000_adapter *adapter,
                       struct e1000_rx_ring *rx_ring)
-#endif
 {
     union e1000_rx_desc_packet_split *rx_desc, *next_rxd;
     struct net_device *netdev = adapter->netdev;
@@ -4551,11 +4189,6 @@ e1000_clean_rx_irq_ps(struct e1000_adapter *adapter,
     {
         ps_page = &rx_ring->ps_page[i];
         ps_page_dma = &rx_ring->ps_page_dma[i];
-#ifdef CONFIG_E1000_NAPI
-        if (unlikely(*work_done >= work_to_do))
-            break;
-        (*work_done)++;
-#endif
         skb = buffer_info->skb;
 
         /* in the packet split case this is header only */
@@ -4682,37 +4315,6 @@ copydone:
         if (likely(rx_desc->wb.upper.header_status &
                    cpu_to_le16(E1000_RXDPS_HDRSTAT_HDRSP)))
             adapter->rx_hdr_split++;
-#ifdef CONFIG_E1000_NAPI
-#ifdef NETIF_F_HW_VLAN_TX
-        if (unlikely(adapter->vlgrp && (staterr & E1000_RXD_STAT_VP)))
-        {
-            vlan_hwaccel_receive_skb(skb, adapter->vlgrp,
-                                     le16_to_cpu(rx_desc->wb.middle.vlan) &
-                                     E1000_RXD_SPC_VLAN_MASK);
-        }
-        else
-        {
-            netif_receive_skb(skb);
-        }
-#else
-#if 0
-        // check not yet
-        netif_receive_skb(skb);
-#endif
-#endif
-#else /* CONFIG_E1000_NAPI */
-#ifdef NETIF_F_HW_VLAN_TX
-        if (unlikely(adapter->vlgrp && (staterr & E1000_RXD_STAT_VP)))
-        {
-            vlan_hwaccel_rx(skb, adapter->vlgrp,
-                            le16_to_cpu(rx_desc->wb.middle.vlan) &
-                            E1000_RXD_SPC_VLAN_MASK);
-        }
-        else
-        {
-            netif_rx(skb);
-        }
-#else
         // freevms change
         char * buf = rx_desc->read.buffer_addr;
         int pkt_len = rx_desc->wb.middle.length0;
@@ -4730,8 +4332,6 @@ copydone:
 #if 0
         netif_rx(skb);
 #endif
-#endif
-#endif /* CONFIG_E1000_NAPI */
         netdev->last_rx = jiffies;
 
 next_desc:
@@ -5087,10 +4687,6 @@ e1000_ioctl(struct net_device *netdev, struct ifreq *ifr, int cmd)
     case SIOCSMIIREG:
         return e1000_mii_ioctl(netdev, ifr, cmd);
 #endif
-#ifdef ETHTOOL_OPS_COMPAT
-    case SIOCETHTOOL:
-        return ethtool_ioctl(ifr);
-#endif
     default:
         return -EOPNOTSUPP;
     }
@@ -5197,123 +4793,6 @@ e1000_io_write(struct e1000_hw *hw, unsigned long port, uint32_t value)
     outl(value, port);
 }
 
-#ifdef NETIF_F_HW_VLAN_TX
-static void
-e1000_vlan_rx_register(struct net_device *netdev, struct vlan_group *grp)
-{
-    struct e1000_adapter *adapter = netdev_priv(netdev);
-    uint32_t ctrl, rctl;
-
-    e1000_irq_disable(adapter);
-    adapter->vlgrp = grp;
-
-    if (grp)
-    {
-        /* enable VLAN tag insert/strip */
-        ctrl = E1000_READ_REG(&adapter->hw, CTRL);
-        ctrl |= E1000_CTRL_VME;
-        E1000_WRITE_REG(&adapter->hw, CTRL, ctrl);
-
-        if (adapter->hw.mac_type != e1000_ich8lan)
-        {
-            /* enable VLAN receive filtering */
-            rctl = E1000_READ_REG(&adapter->hw, RCTL);
-            rctl |= E1000_RCTL_VFE;
-            rctl &= ~E1000_RCTL_CFIEN;
-            E1000_WRITE_REG(&adapter->hw, RCTL, rctl);
-            e1000_update_mng_vlan(adapter);
-        }
-    }
-    else
-    {
-        /* disable VLAN tag insert/strip */
-        ctrl = E1000_READ_REG(&adapter->hw, CTRL);
-        ctrl &= ~E1000_CTRL_VME;
-        E1000_WRITE_REG(&adapter->hw, CTRL, ctrl);
-
-        if (adapter->hw.mac_type != e1000_ich8lan)
-        {
-            /* disable VLAN filtering */
-            rctl = E1000_READ_REG(&adapter->hw, RCTL);
-            rctl &= ~E1000_RCTL_VFE;
-            E1000_WRITE_REG(&adapter->hw, RCTL, rctl);
-            if (adapter->mng_vlan_id !=
-                    (uint16_t)E1000_MNG_VLAN_NONE)
-            {
-                e1000_vlan_rx_kill_vid(netdev,
-                                       adapter->mng_vlan_id);
-                adapter->mng_vlan_id = E1000_MNG_VLAN_NONE;
-            }
-        }
-    }
-
-    e1000_irq_enable(adapter);
-}
-
-static void
-e1000_vlan_rx_add_vid(struct net_device *netdev, uint16_t vid)
-{
-    struct e1000_adapter *adapter = netdev_priv(netdev);
-    uint32_t vfta, index;
-
-    if ((adapter->hw.mng_cookie.status &
-            E1000_MNG_DHCP_COOKIE_STATUS_VLAN_SUPPORT) &&
-            (vid == adapter->mng_vlan_id))
-        return;
-    /* add VID to filter table */
-    index = (vid >> 5) & 0x7F;
-    vfta = E1000_READ_REG_ARRAY(&adapter->hw, VFTA, index);
-    vfta |= (1 << (vid & 0x1F));
-    e1000_write_vfta(&adapter->hw, index, vfta);
-}
-
-static void
-e1000_vlan_rx_kill_vid(struct net_device *netdev, uint16_t vid)
-{
-    struct e1000_adapter *adapter = netdev_priv(netdev);
-    uint32_t vfta, index;
-
-    e1000_irq_disable(adapter);
-
-    if (adapter->vlgrp)
-        adapter->vlgrp->vlan_devices[vid] = NULL;
-
-    e1000_irq_enable(adapter);
-
-    if ((adapter->hw.mng_cookie.status &
-            E1000_MNG_DHCP_COOKIE_STATUS_VLAN_SUPPORT) &&
-            (vid == adapter->mng_vlan_id))
-    {
-        /* release control to f/w */
-        e1000_release_hw_control(adapter);
-        return;
-    }
-
-    /* remove VID from filter table */
-    index = (vid >> 5) & 0x7F;
-    vfta = E1000_READ_REG_ARRAY(&adapter->hw, VFTA, index);
-    vfta &= ~(1 << (vid & 0x1F));
-    e1000_write_vfta(&adapter->hw, index, vfta);
-}
-
-static void
-e1000_restore_vlan(struct e1000_adapter *adapter)
-{
-    e1000_vlan_rx_register(adapter->netdev, adapter->vlgrp);
-
-    if (adapter->vlgrp)
-    {
-        uint16_t vid;
-        for (vid = 0; vid < VLAN_GROUP_ARRAY_LEN; vid++)
-        {
-            if (!adapter->vlgrp->vlan_devices[vid])
-                continue;
-            e1000_vlan_rx_add_vid(adapter->netdev, vid);
-        }
-    }
-}
-#endif
-
 int
 e1000_set_spd_dplx(struct e1000_adapter *adapter, uint16_t spddplx)
 {
@@ -5353,59 +4832,6 @@ e1000_set_spd_dplx(struct e1000_adapter *adapter, uint16_t spddplx)
     return 0;
 }
 
-#ifdef CONFIG_PM
-/* Save/restore 16 or 64 dwords of PCI config space depending on which
- * bus we're on (PCI(X) vs. PCI-E)
- */
-#define PCIE_CONFIG_SPACE_LEN 256
-#define PCI_CONFIG_SPACE_LEN 64
-static int
-e1000_pci_save_state(struct e1000_adapter *adapter)
-{
-    struct pci_dev *dev = adapter->pdev;
-    int size;
-    int i;
-
-    if (adapter->hw.mac_type >= e1000_82571)
-        size = PCIE_CONFIG_SPACE_LEN;
-    else
-        size = PCI_CONFIG_SPACE_LEN;
-
-    WARN_ON(adapter->config_space != NULL);
-
-    adapter->config_space = kmalloc(size, GFP_KERNEL);
-    if (!adapter->config_space)
-    {
-        DPRINTK(PROBE, ERR, "unable to allocate %d bytes\n", size);
-        return -ENOMEM;
-    }
-    for (i = 0; i < (size / 4); i++)
-        pci_read_config_dword(dev, i * 4, &adapter->config_space[i]);
-    return 0;
-}
-
-static void
-e1000_pci_restore_state(struct e1000_adapter *adapter)
-{
-    struct pci_dev *dev = adapter->pdev;
-    int size;
-    int i;
-
-    if (adapter->config_space == NULL)
-        return;
-
-    if (adapter->hw.mac_type >= e1000_82571)
-        size = PCIE_CONFIG_SPACE_LEN;
-    else
-        size = PCI_CONFIG_SPACE_LEN;
-    for (i = 0; i < (size / 4); i++)
-        pci_write_config_dword(dev, i * 4, adapter->config_space[i]);
-    kfree(adapter->config_space);
-    adapter->config_space = NULL;
-    return;
-}
-#endif /* CONFIG_PM */
-
 /* only want to do this for 2.4 kernels? */
 static int
 e1000_notify_reboot(struct notifier_block *nb, unsigned long event, void *p)
@@ -5433,9 +4859,6 @@ e1000_suspend(struct pci_dev *pdev, pm_message_t state)
     struct e1000_adapter *adapter = netdev_priv(netdev);
     uint32_t ctrl, ctrl_ext, rctl, status;
     uint32_t wufc = adapter->wol;
-#ifdef CONFIG_PM
-    int retval = 0;
-#endif
 
     netif_device_detach(netdev);
 
@@ -5447,14 +4870,6 @@ e1000_suspend(struct pci_dev *pdev, pm_message_t state)
 #endif
         e1000_down(adapter);
     }
-
-#ifdef CONFIG_PM
-    /* Implement our own version of pci_save_state(pdev) because pci-
-     * express adapters have 256-byte config spaces. */
-    retval = e1000_pci_save_state(adapter);
-    if (retval)
-        return retval;
-#endif
 
     status = E1000_READ_REG(&adapter->hw, STATUS);
     if (status & E1000_STATUS_LU)
@@ -5536,52 +4951,6 @@ e1000_suspend(struct pci_dev *pdev, pm_message_t state)
     return 0;
 }
 
-#ifdef CONFIG_PM
-static int
-e1000_resume(struct pci_dev *pdev)
-{
-    struct net_device *netdev = pci_get_drvdata(pdev);
-    struct e1000_adapter *adapter = netdev_priv(netdev);
-    uint32_t err;
-
-    pci_set_power_state(pdev, PCI_D0);
-    e1000_pci_restore_state(adapter);
-    if ((err = pci_enable_device(pdev)))
-    {
-        printk(KERN_ERR "e1000: Cannot enable PCI device from suspend\n");
-        return err;
-    }
-    pci_set_master(pdev);
-
-    pci_enable_wake(pdev, PCI_D3hot, 0);
-    pci_enable_wake(pdev, PCI_D3cold, 0);
-
-    if (netif_running(netdev) && (err = e1000_request_irq(adapter)))
-        return err;
-
-    e1000_power_up_phy(adapter);
-    e1000_reset(adapter);
-    E1000_WRITE_REG(&adapter->hw, WUS, ~0);
-
-    e1000_init_manageability(adapter);
-
-    if (netif_running(netdev))
-        e1000_up(adapter);
-
-    netif_device_attach(netdev);
-
-    /* If the controller is 82573 and f/w is AMT, do not set
-     * DRV_LOAD until the interface is up.  For all other cases,
-     * let the f/w know that the h/w is now under the control
-     * of the driver. */
-    if (adapter->hw.mac_type != e1000_82573 ||
-            !e1000_check_mng_mode(&adapter->hw))
-        e1000_get_hw_control(adapter);
-
-    return 0;
-}
-#endif
-
 #ifdef CONFIG_NET_POLL_CONTROLLER
 /*
  * Polling 'interrupt' - used by things like netconsole to send skbs
@@ -5596,9 +4965,7 @@ e1000_netpoll(struct net_device *netdev)
     disable_irq(adapter->pdev->irq);
     e1000_intr(adapter->pdev->irq, netdev);
     e1000_clean_tx_irq(adapter, adapter->tx_ring);
-#ifndef CONFIG_E1000_NAPI
     adapter->clean_rx(adapter, adapter->rx_ring);
-#endif
     enable_irq(adapter->pdev->irq);
 }
 #endif

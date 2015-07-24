@@ -125,42 +125,8 @@ static inline int acpi_irq_balance_set(char *str)
 }
 #endif
 
-#ifdef CONFIG_ACPI_BOOT
-extern int acpi_lapic;
-extern int acpi_ioapic;
-extern int acpi_strict;
-extern int acpi_disabled;
-extern int acpi_ht;
-extern int acpi_skip_timer_override;
-static inline void disable_acpi(void)
-{
-    acpi_disabled = 1;
-    acpi_ht = 0;
-    acpi_disable_pci();
-}
-
-/* Fixmap pages to reserve for ACPI boot-time tables (see fixmap.h) */
-#define FIX_ACPI_PAGES 4
-
-#else   /* !CONFIG_ACPI_BOOT */
 #define acpi_lapic 0
 #define acpi_ioapic 0
-#endif  /* !CONFIG_ACPI_BOOT */
-
-
-#ifdef CONFIG_ACPI_SLEEP
-
-/* routines for saving/restoring kernel state */
-extern int acpi_save_state_mem(void);
-extern int acpi_save_state_disk(void);
-extern void acpi_restore_state_mem(void);
-
-extern unsigned long acpi_wakeup_address;
-
-/* early initialization routine */
-extern void acpi_reserve_bootmem(void);
-
-#endif /*CONFIG_ACPI_SLEEP*/
 
 #define boot_cpu_physical_apicid boot_cpu_id
 

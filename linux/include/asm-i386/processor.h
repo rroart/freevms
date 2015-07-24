@@ -14,7 +14,6 @@
 #define __ASM_I386_PROCESSOR_H
 
 #include <asm/vm86.h>
-#include <asm/math_emu.h>
 #include <asm/segment.h>
 #include <asm/page.h>
 #include <asm/types.h>

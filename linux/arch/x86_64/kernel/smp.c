@@ -19,7 +19,6 @@
 #include <linux/kernel_stat.h>
 #include <linux/mc146818rtc.h>
 
-#include <asm/mtrr.h>
 #include <asm/pgalloc.h>
 
 #include <smp_routines.h>

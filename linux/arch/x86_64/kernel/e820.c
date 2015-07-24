@@ -28,10 +28,6 @@
 extern unsigned long table_start, table_end;
 extern char _end[];
 
-#ifdef  CONFIG_ACPI_BOOT
-extern acpi_interrupt_flags acpi_sci_flags;
-#endif
-
 extern struct resource code_resource, data_resource, vram_resource;
 
 /* Check for some hardcoded bad areas that early boot is not allowed to touch */
@@ -581,12 +577,6 @@ void __init parse_mem_cmdline (char ** cmdline_p)
             end_user_pfn = memparse(from+4, &from) + HIGH_MEMORY;
             end_user_pfn >>= PAGE_SHIFT;
         }
-#ifdef CONFIG_GART_IOMMU
-        else if (!memcmp(from,"iommu=",6))
-        {
-            iommu_setup(from+6);
-        }
-#endif
 #ifdef  CONFIG_SMP
         /*
          * If the BIOS enumerates physical processors before logical,
@@ -600,29 +590,6 @@ void __init parse_mem_cmdline (char ** cmdline_p)
         }
 #endif
 
-#ifdef  CONFIG_ACPI_BOOT
-        else if (!memcmp(from, "acpi=off", 8))
-            disable_acpi();
-
-        /* acpi=strict disables out-of-spec workarounds */
-        else if (!memcmp(from, "acpi=strict", 11))
-        {
-            acpi_strict = 1;
-        }
-
-        else if (!memcmp(from, "pci=noacpi", 10))
-            acpi_disable_pci();
-        else if (!memcmp(from, "acpi=noirq", 10))
-            acpi_noirq_set();
-        else if (!memcmp(from, "acpi_sci=edge", 13))
-            acpi_sci_flags.trigger =  1;
-        else if (!memcmp(from, "acpi_sci=level", 14))
-            acpi_sci_flags.trigger = 3;
-        else if (!memcmp(from, "acpi_sci=high", 13))
-            acpi_sci_flags.polarity = 1;
-        else if (!memcmp(from, "acpi_sci=low", 12))
-            acpi_sci_flags.polarity = 3;
-#endif
         else if (!memcmp(from,"maxcpus=0",9))
         {
             disable_ioapic_setup();

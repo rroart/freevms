@@ -18,7 +18,6 @@ obj-y     = dma.o fork.o exec_domain.o panic.o printk.o \
 
 obj-$(CONFIG_UID16) += uid16.o
 obj-$(CONFIG_MODULES) += ksyms.o
-obj-$(CONFIG_PM) += pm.o
 
 ifneq ($(CONFIG_IA64),y)
 # According to Alan Modra <alan@linuxcare.com.au>, the -fno-omit-frame-pointer is

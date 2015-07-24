@@ -104,7 +104,6 @@
 #include <linux/seq_file.h>
 #include <asm/processor.h>
 #include <linux/console.h>
-#include <asm/mtrr.h>
 #include <asm/uaccess.h>
 #include <asm/system.h>
 #include <asm/io.h>

@@ -9,7 +9,4 @@
 extern void *module_map(unsigned long);
 extern void module_unmap(void *);
 
-#define module_arch_init(x) (0)
-#define arch_init_modules(x)    do { } while (0)
-
 #endif

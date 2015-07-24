@@ -259,18 +259,6 @@ static void put_mod_name(char *buf);
 struct module *find_module(const char *name);
 void free_module(struct module *, int tag_freed);
 
-
-/*
- * Called at boot time
- */
-
-void __init init_modules(void)
-{
-    kernel_module.nsyms = __stop___ksymtab - __start___ksymtab;
-
-    arch_init_modules(&kernel_module);
-}
-
 /*
  * Copy the name of a module from user space.
  */
@@ -549,9 +537,6 @@ sys_init_module(const char *name_user, struct module *mod_user)
         error = -EFAULT;
         goto err3;
     }
-
-    if (module_arch_init(mod))
-        goto err3;
 
     /* On some machines it is necessary to do something here
        to make the I and D caches consistent.  */

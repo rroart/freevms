@@ -26,10 +26,7 @@
 #define CONFIG_X86_IO_APIC 1
 #define CONFIG_X86_LOCAL_APIC 1
 #define CONFIG_SMP 1
-#undef  CONFIG_GART_IOMMU
 #define CONFIG_MCE 1
-
-#undef  CONFIG_PM
 
 /*
  * General setup
@@ -96,7 +93,6 @@
  * Ethernet (1000 Mbit)
  */
 #define CONFIG_E1000
-#undef CONFIG_E1000_NAPI
 
 /*
  * Character devices

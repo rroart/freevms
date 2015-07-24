@@ -40,7 +40,6 @@
 #include <asm/processor.h>
 #include <linux/console.h>
 #include <linux/seq_file.h>
-#include <asm/mtrr.h>
 #include <asm/uaccess.h>
 #include <asm/system.h>
 #include <asm/io.h>
@@ -269,12 +268,6 @@ void __init setup_arch(char **cmdline_p)
     kernel_end = round_up(__pa_symbol(&_end), PAGE_SIZE);
     reserve_bootmem_generic(HIGH_MEMORY, kernel_end - HIGH_MEMORY);
 
-#ifdef CONFIG_ACPI_SLEEP
-    /*
-     * Reserve low memory region for sleep support.
-     */
-    acpi_reserve_bootmem();
-#endif
 #ifdef CONFIG_X86_LOCAL_APIC
     /*
      * Find and reserve possible boot-time SMP configuration:
@@ -293,12 +286,6 @@ void __init setup_arch(char **cmdline_p)
     check_ioapic();
 #endif
 
-#ifdef CONFIG_ACPI_BOOT
-    /*
-     * Parse the ACPI tables for possible boot-time SMP configuration.
-     */
-    acpi_boot_init();
-#endif
 #ifdef CONFIG_X86_LOCAL_APIC
     /*
      * get boot-time SMP configuration:
@@ -325,10 +312,6 @@ void __init setup_arch(char **cmdline_p)
 
     /* Tell the PCI layer not to allocate too close to the RAM area.. */
     pci_mem_start = IOMAP_START;
-
-#ifdef CONFIG_GART_IOMMU
-    iommu_hole_init();
-#endif
 
 #ifdef CONFIG_VT
 #if defined(CONFIG_VGA_CONSOLE)

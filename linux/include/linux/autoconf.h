@@ -14,11 +14,6 @@
 #include <asm/autoconf.h>
 
 /*
- * Code maturity level options
- */
-#define CONFIG_EXPERIMENTAL 1
-
-/*
  * Loadable module support
  */
 #define CONFIG_MODULES 1
@@ -59,20 +54,6 @@
 /*
  * Partition Types
  */
-#define CONFIG_PARTITION_ADVANCED 1
-#undef  CONFIG_ACORN_PARTITION
-#undef  CONFIG_OSF_PARTITION
-#undef  CONFIG_AMIGA_PARTITION
-#undef  CONFIG_ATARI_PARTITION
-#undef  CONFIG_MAC_PARTITION
 #define CONFIG_MSDOS_PARTITION 1
-#undef  CONFIG_BSD_DISKLABEL
-#undef  CONFIG_MINIX_SUBPARTITION
-#undef  CONFIG_SOLARIS_X86_PARTITION
-#undef  CONFIG_UNIXWARE_DISKLABEL
-#undef  CONFIG_LDM_PARTITION
-#undef  CONFIG_SGI_PARTITION
-#undef  CONFIG_ULTRIX_PARTITION
-#undef  CONFIG_SUN_PARTITION
 
 #endif

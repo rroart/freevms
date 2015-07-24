@@ -21,7 +21,6 @@
 #include <linux/kernel_stat.h>
 
 #include <asm/smp.h>
-#include <asm/mtrr.h>
 #include <asm/mpspec.h>
 #include <asm/timex.h>
 
@@ -108,54 +107,9 @@ static int __init setup_nmi_watchdog(char *str)
 
 __setup("nmi_watchdog=", setup_nmi_watchdog);
 
-#ifdef CONFIG_PM
-
-#include <linux/pm.h>
-
-struct pm_dev *nmi_pmdev;
-
-static void disable_apic_nmi_watchdog(void)
-{
-    switch (boot_cpu_data.x86_vendor)
-    {
-    case X86_VENDOR_AMD:
-        wrmsr(MSR_K7_EVNTSEL0, 0, 0);
-        break;
-    case X86_VENDOR_INTEL:
-        wrmsr(MSR_IA32_EVNTSEL0, 0, 0);
-        break;
-    }
-}
-
-static int nmi_pm_callback(struct pm_dev *dev, pm_request_t rqst, void *data)
-{
-    switch (rqst)
-    {
-    case PM_SUSPEND:
-        disable_apic_nmi_watchdog();
-        break;
-    case PM_RESUME:
-        setup_apic_nmi_watchdog();
-        break;
-    }
-    return 0;
-}
-
-static void nmi_pm_init(void)
-{
-    if (!nmi_pmdev)
-        nmi_pmdev = apic_pm_register(PM_SYS_DEV, 0, nmi_pm_callback);
-}
-
-#define __pminit    /*empty*/
-
-#else   /* CONFIG_PM */
-
 static inline void nmi_pm_init(void) { }
 
 #define __pminit    __init
-
-#endif  /* CONFIG_PM */
 
 /*
  * Activate the NMI watchdog via the local APIC.

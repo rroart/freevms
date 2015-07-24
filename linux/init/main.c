@@ -92,7 +92,6 @@ extern char *linux_banner;
 static int init(void *);
 
 extern void init_IRQ(void);
-extern void init_modules(void);
 extern void sock_init(void);
 extern void fork_init(unsigned long);
 extern void sysctl_init(void);
@@ -104,9 +103,6 @@ extern void ecard_init(void);
 
 #if defined(CONFIG_SYSVIPC)
 extern void ipc_init(void);
-#endif
-#ifdef CONFIG_PERFMON
-extern void perfmon_init(void);
 #endif
 
 /*
@@ -590,11 +586,6 @@ asmlinkage void __init start_kernel(void)
     kernel_puts("puts 14\n");
     console_init();
     kernel_puts("puts 15\n");
-#ifdef CONFIG_MODULES
-#if 0
-    init_modules();
-#endif
-#endif
     if (prof_shift)
     {
         unsigned int size;
@@ -612,9 +603,6 @@ asmlinkage void __init start_kernel(void)
     pgtable_cache_init();
 
     calibrate_delay();
-#ifdef CONFIG_PERFMON
-    perfmon_init();
-#endif
     mem_init();
     printk("%%KERNEL-I-DEBUG, After mem_init, before lnm_init_sys\n");
     lnm_init_sys();

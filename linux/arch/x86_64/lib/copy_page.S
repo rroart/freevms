@@ -13,10 +13,6 @@ copy_page:
 
     prefetcht0 (%rsi) 
     prefetcht0 1*64(%rsi)
-#ifdef CONFIG_MK8	
-	prefetchw (%rdi) 
-	prefetchw 1*64(%rdi) 
-#endif	
 
 	subq	$3*8,%rsp
 	movq	%rbx,(%rsp)
@@ -47,10 +43,6 @@ copy_page:
 	movq     %r10, 40 (%rdi)
 	movq     %r11, 48 (%rdi)
 	movq     %r12, 56 (%rdi)
-
-#ifdef CONFIG_MK8
-	prefetchw 5*64(%rdi)
-#endif	
 
 	leaq    64 (%rsi), %rsi
 	leaq    64 (%rdi), %rdi

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -41,10 +41,6 @@
 
 #include "check.h"
 #include "msdos.h"
-
-#if CONFIG_BLK_DEV_MD
-extern void md_autodetect_dev(kdev_t dev);
-#endif
 
 /*
  * Many architectures don't like unaligned accesses, which is
@@ -173,12 +169,6 @@ static void extended_partition(struct gendisk *hd, struct block_device *bdev,
             }
 
             add_gd_partition(hd, *current_minor, next, size);
-#if CONFIG_BLK_DEV_MD
-            if (SYS_IND(p) == LINUX_RAID_PARTITION)
-            {
-                md_autodetect_dev(MKDEV(hd->major,*current_minor));
-            }
-#endif
 
             (*current_minor)++;
             loopct = 0;
@@ -218,165 +208,21 @@ static void
 solaris_x86_partition(struct gendisk *hd, struct block_device *bdev,
                       int minor, int *current_minor)
 {
-
-#ifdef CONFIG_SOLARIS_X86_PARTITION
-    long offset = hd->part[minor].start_sect;
-    Sector sect;
-    struct solaris_x86_vtoc *v;
-    struct solaris_x86_slice *s;
-    int mask = (1 << hd->minor_shift) - 1;
-    int i;
-    char buf[40];
-
-    v = (struct solaris_x86_vtoc *)read_dev_sector(bdev, offset+1, &sect);
-    if (!v)
-        return;
-    if (le32_to_cpu(v->v_sanity) != SOLARIS_X86_VTOC_SANE)
-    {
-        put_dev_sector(sect);
-        return;
-    }
-    printk(" %s: <solaris:", partition_name(hd, minor, buf));
-    if (le32_to_cpu(v->v_version) != 1)
-    {
-        printk("  cannot handle version %d vtoc>\n",
-               le32_to_cpu(v->v_version));
-        put_dev_sector(sect);
-        return;
-    }
-    for (i=0; i<SOLARIS_X86_NUMSLICE; i++)
-    {
-        if ((*current_minor & mask) == 0)
-            break;
-        s = &v->v_slice[i];
-
-        if (s->s_size == 0)
-            continue;
-        printk(" [s%d]", i);
-        /* solaris partitions are relative to current MS-DOS
-         * one but add_gd_partition starts relative to sector
-         * zero of the disk.  Therefore, must add the offset
-         * of the current partition */
-        add_gd_partition(hd, *current_minor,
-                         le32_to_cpu(s->s_start)+offset,
-                         le32_to_cpu(s->s_size));
-        (*current_minor)++;
-    }
-    put_dev_sector(sect);
-    printk(" >\n");
-#endif
 }
-
-#ifdef CONFIG_BSD_DISKLABEL
-static void
-check_and_add_bsd_partition(struct gendisk *hd, struct bsd_partition *bsd_p,
-                            int baseminor, int *current_minor)
-{
-    int i, bsd_start, bsd_size;
-
-    bsd_start = le32_to_cpu(bsd_p->p_offset);
-    bsd_size = le32_to_cpu(bsd_p->p_size);
-
-    /* check relative position of already allocated partitions */
-    for (i = baseminor+1; i < *current_minor; i++)
-    {
-        int start = hd->part[i].start_sect;
-        int size = hd->part[i].nr_sects;
-
-        if (start+size <= bsd_start || start >= bsd_start+bsd_size)
-            continue;   /* no overlap */
-
-        if (start == bsd_start && size == bsd_size)
-            return;     /* equal -> no need to add */
-
-        if (start <= bsd_start && start+size >= bsd_start+bsd_size)
-        {
-            /* bsd living within dos partition */
-#ifdef DEBUG_BSD_DISKLABEL
-            printk("w: %d %ld+%ld,%d+%d",
-                   i, start, size, bsd_start, bsd_size);
-#endif
-            break;      /* ok */
-        }
-
-        /* ouch: bsd and linux overlap */
-#ifdef DEBUG_BSD_DISKLABEL
-        printk("???: %d %ld+%ld,%d+%d",
-               i, start, size, bsd_start, bsd_size);
-#endif
-        printk("???");
-        return;
-    }
-
-    add_gd_partition(hd, *current_minor, bsd_start, bsd_size);
-    (*current_minor)++;
-}
-
-/*
- * Create devices for BSD partitions listed in a disklabel, under a
- * dos-like partition. See extended_partition() for more information.
- */
-static void do_bsd_partition(struct gendisk *hd, struct block_device *bdev,
-                             int minor, int *current_minor, char *name, int max_partitions)
-{
-    long offset = hd->part[minor].start_sect;
-    Sector sect;
-    struct bsd_disklabel *l;
-    struct bsd_partition *p;
-    int mask = (1 << hd->minor_shift) - 1;
-    int baseminor = (minor & ~mask);
-    char buf[40];
-
-    l = (struct bsd_disklabel *)read_dev_sector(bdev, offset+1, &sect);
-    if (!l)
-        return;
-    if (le32_to_cpu(l->d_magic) != BSD_DISKMAGIC)
-    {
-        put_dev_sector(sect);
-        return;
-    }
-    printk(" %s: <%s:", partition_name(hd, minor, buf), name);
-
-    if (le16_to_cpu(l->d_npartitions) < max_partitions)
-        max_partitions = le16_to_cpu(l->d_npartitions);
-    for (p = l->d_partitions; p - l->d_partitions <  max_partitions; p++)
-    {
-        if ((*current_minor & mask) == 0)
-            break;
-        if (p->p_fstype == BSD_FS_UNUSED)
-            continue;
-        check_and_add_bsd_partition(hd, p, baseminor, current_minor);
-    }
-    put_dev_sector(sect);
-    printk(" >\n");
-}
-#endif
 
 static void bsd_partition(struct gendisk *hd, struct block_device *bdev,
                           int minor, int *current_minor)
 {
-#ifdef CONFIG_BSD_DISKLABEL
-    do_bsd_partition(hd, bdev, minor, current_minor, "bsd",
-                     BSD_MAXPARTITIONS);
-#endif
 }
 
 static void netbsd_partition(struct gendisk *hd, struct block_device *bdev,
                              int minor, int *current_minor)
 {
-#ifdef CONFIG_BSD_DISKLABEL
-    do_bsd_partition(hd, bdev, minor, current_minor, "netbsd",
-                     BSD_MAXPARTITIONS);
-#endif
 }
 
 static void openbsd_partition(struct gendisk *hd, struct block_device *bdev,
                               int minor, int *current_minor)
 {
-#ifdef CONFIG_BSD_DISKLABEL
-    do_bsd_partition(hd, bdev, minor, current_minor,
-                     "openbsd", OPENBSD_MAXPARTITIONS);
-#endif
 }
 
 /*
@@ -386,42 +232,6 @@ static void openbsd_partition(struct gendisk *hd, struct block_device *bdev,
 static void unixware_partition(struct gendisk *hd, struct block_device *bdev,
                                int minor, int *current_minor)
 {
-#ifdef CONFIG_UNIXWARE_DISKLABEL
-    long offset = hd->part[minor].start_sect;
-    Sector sect;
-    struct unixware_disklabel *l;
-    struct unixware_slice *p;
-    int mask = (1 << hd->minor_shift) - 1;
-    char buf[40];
-
-    l = (struct unixware_disklabel *)read_dev_sector(bdev, offset+29, &sect);
-    if (!l)
-        return;
-    if (le32_to_cpu(l->d_magic) != UNIXWARE_DISKMAGIC ||
-            le32_to_cpu(l->vtoc.v_magic) != UNIXWARE_DISKMAGIC2)
-    {
-        put_dev_sector(sect);
-        return;
-    }
-    printk(" %s: <unixware:", partition_name(hd, minor, buf));
-    p = &l->vtoc.v_slice[1];
-    /* I omit the 0th slice as it is the same as whole disk. */
-    while (p - &l->vtoc.v_slice[0] < UNIXWARE_NUMSLICE)
-    {
-        if ((*current_minor & mask) == 0)
-            break;
-
-        if (p->s_label != UNIXWARE_FS_UNUSED)
-        {
-            add_gd_partition(hd, *current_minor, START_SECT(p),
-                             NR_SECTS(p));
-            (*current_minor)++;
-        }
-        p++;
-    }
-    put_dev_sector(sect);
-    printk(" >\n");
-#endif
 }
 
 /*
@@ -432,45 +242,6 @@ static void unixware_partition(struct gendisk *hd, struct block_device *bdev,
 static void minix_partition(struct gendisk *hd, struct block_device *bdev,
                             int minor, int *current_minor)
 {
-#ifdef CONFIG_MINIX_SUBPARTITION
-    long offset = hd->part[minor].start_sect;
-    Sector sect;
-    unsigned char *data;
-    struct partition *p;
-    int mask = (1 << hd->minor_shift) - 1;
-    int i;
-    char buf[40];
-
-    data = read_dev_sector(bdev, offset, &sect);
-    if (!data)
-        return;
-
-    p = (struct partition *)(data + 0x1be);
-
-    /* The first sector of a Minix partition can have either
-     * a secondary MBR describing its subpartitions, or
-     * the normal boot sector. */
-    if (msdos_magic_present (data + 510) &&
-            SYS_IND(p) == MINIX_PARTITION)   /* subpartition table present */
-    {
-
-        printk(" %s: <minix:", partition_name(hd, minor, buf));
-        for (i = 0; i < MINIX_NR_SUBPARTITIONS; i++, p++)
-        {
-            if ((*current_minor & mask) == 0)
-                break;
-            /* add each partition in use */
-            if (SYS_IND(p) == MINIX_PARTITION)
-            {
-                add_gd_partition(hd, *current_minor,
-                                 START_SECT(p), NR_SECTS(p));
-                (*current_minor)++;
-            }
-        }
-        printk(" >\n");
-    }
-    put_dev_sector(sect);
-#endif /* CONFIG_MINIX_SUBPARTITION */
 }
 
 static struct
@@ -614,12 +385,6 @@ int msdos_partition(struct gendisk *hd, struct block_device *bdev,
         add_gd_partition(hd, minor,
                          first_sector+START_SECT(p)*sector_size,
                          NR_SECTS(p)*sector_size);
-#if CONFIG_BLK_DEV_MD
-        if (SYS_IND(p) == LINUX_RAID_PARTITION)
-        {
-            md_autodetect_dev(MKDEV(hd->major,minor));
-        }
-#endif
         if (is_extended_partition(p))
         {
             unsigned long size = hd->part[minor].nr_sects;

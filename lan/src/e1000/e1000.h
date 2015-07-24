@@ -69,9 +69,6 @@
 #ifdef SIOCETHTOOL
 #include <linux/ethtool.h>
 #endif
-#ifdef NETIF_F_HW_VLAN_TX
-#include <linux/if_vlan.h>
-#endif
 
 #define BAR_0       0
 #define BAR_1       1
@@ -151,9 +148,6 @@ struct e1000_adapter;
 #define E1000_MASTER_SLAVE  e1000_ms_hw_default
 #endif
 
-#ifdef NETIF_F_HW_VLAN_TX
-#define E1000_MNG_VLAN_NONE -1
-#endif
 /* Number of packet split data buffers (not including the header buffer) */
 #define PS_PAGE_BUFFERS MAX_PS_BUFFERS-1
 
@@ -251,10 +245,6 @@ struct e1000_adapter
     struct timer_list tx_fifo_stall_timer;
     struct timer_list watchdog_timer;
     struct timer_list phy_info_timer;
-#ifdef NETIF_F_HW_VLAN_TX
-    struct vlan_group *vlgrp;
-    uint16_t mng_vlan_id;
-#endif
     uint32_t bd_number;
     uint32_t rx_buffer_len;
     uint32_t wol;
@@ -263,9 +253,6 @@ struct e1000_adapter
     uint16_t link_speed;
     uint16_t link_duplex;
     spinlock_t stats_lock;
-#ifdef CONFIG_E1000_NAPI
-    spinlock_t tx_queue_lock;
-#endif
     atomic_t irq_sem;
     unsigned int total_tx_bytes;
     unsigned int total_tx_packets;
@@ -279,11 +266,6 @@ struct e1000_adapter
 
     struct work_struct reset_task;
     uint8_t fc_autoneg;
-
-#ifdef ETHTOOL_PHYS_ID
-    struct timer_list blink_timer;
-    unsigned long led_status;
-#endif
 
     /* TX */
     struct e1000_tx_ring *tx_ring;      /* One per active queue */
@@ -306,21 +288,12 @@ struct e1000_adapter
     boolean_t detect_tx_hung;
 
     /* RX */
-#ifdef CONFIG_E1000_NAPI
-    boolean_t (*clean_rx) (struct e1000_adapter *adapter,
-                           struct e1000_rx_ring *rx_ring,
-                           int *work_done, int work_to_do);
-#else
     boolean_t (*clean_rx) (struct e1000_adapter *adapter,
                            struct e1000_rx_ring *rx_ring);
-#endif
     void (*alloc_rx_buf) (struct e1000_adapter *adapter,
                           struct e1000_rx_ring *rx_ring,
                           int cleaned_count);
     struct e1000_rx_ring *rx_ring;      /* One per active queue */
-#ifdef CONFIG_E1000_NAPI
-    struct net_device *polling_netdev;  /* One per active queue */
-#endif
     int num_tx_queues;
     int num_rx_queues;
 
@@ -347,25 +320,6 @@ struct e1000_adapter
     struct e1000_hw_stats stats;
     struct e1000_phy_info phy_info;
     struct e1000_phy_stats phy_stats;
-
-#ifdef ETHTOOL_TEST
-    uint32_t test_icr;
-    struct e1000_tx_ring test_tx_ring;
-    struct e1000_rx_ring test_rx_ring;
-#endif
-
-#ifdef E1000_COUNT_ICR
-    uint64_t icr_txdw;
-    uint64_t icr_txqe;
-    uint64_t icr_lsc;
-    uint64_t icr_rxseq;
-    uint64_t icr_rxdmt;
-    uint64_t icr_rxo;
-    uint64_t icr_rxt;
-    uint64_t icr_mdac;
-    uint64_t icr_rxcfg;
-    uint64_t icr_gpi;
-#endif
 
     uint32_t *config_space;
     int msg_enable;

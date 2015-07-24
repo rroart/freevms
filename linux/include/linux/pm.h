@@ -109,49 +109,6 @@ struct pm_dev
     struct list_head entry;
 };
 
-#ifdef CONFIG_PM
-
-extern int pm_active;
-
-#define PM_IS_ACTIVE() (pm_active != 0)
-
-/*
- * Register a device with power management
- */
-struct pm_dev *pm_register(pm_dev_t type,
-                           unsigned long id,
-                           pm_callback callback);
-
-/*
- * Unregister a device with power management
- */
-void pm_unregister(struct pm_dev *dev);
-
-/*
- * Unregister all devices with matching callback
- */
-void pm_unregister_all(pm_callback callback);
-
-/*
- * Send a request to a single device
- */
-int pm_send(struct pm_dev *dev, pm_request_t rqst, void *data);
-
-/*
- * Send a request to all devices
- */
-int pm_send_all(pm_request_t rqst, void *data);
-
-/*
- * Find a device
- */
-struct pm_dev *pm_find(pm_dev_t type, struct pm_dev *from);
-
-static inline void pm_access(struct pm_dev *dev) {}
-static inline void pm_dev_idle(struct pm_dev *dev) {}
-
-#else /* CONFIG_PM */
-
 #define PM_IS_ACTIVE() 0
 
 static inline struct pm_dev *pm_register(pm_dev_t type,
@@ -182,8 +139,6 @@ static inline struct pm_dev *pm_find(pm_dev_t type, struct pm_dev *from)
 
 static inline void pm_access(struct pm_dev *dev) {}
 static inline void pm_dev_idle(struct pm_dev *dev) {}
-
-#endif /* CONFIG_PM */
 
 extern void (*pm_idle)(void);
 extern void (*pm_power_off)(void);

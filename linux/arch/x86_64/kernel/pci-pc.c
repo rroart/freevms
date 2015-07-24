@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -673,10 +673,6 @@ void __devinit pcibios_init(void)
     }
 
     pcibios_resource_survey();
-
-#ifdef CONFIG_GART_IOMMU
-    pci_iommu_init();
-#endif
 }
 
 char * __devinit pcibios_setup(char *str)

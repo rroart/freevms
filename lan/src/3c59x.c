@@ -1364,40 +1364,6 @@ static int compaq_ioaddr, compaq_irq, compaq_device_id = 0x5900;
 
 static int vortex_cards_found;
 
-#ifdef CONFIG_PM
-
-static int vortex_suspend (struct pci_dev *pdev, u32 state)
-{
-    struct net_device *dev = pci_get_drvdata(pdev);
-
-    if (dev && dev->priv)
-    {
-        if (netif_running(dev))
-        {
-            netif_device_detach(dev);
-            vortex_down(dev);
-        }
-    }
-    return 0;
-}
-
-static int vortex_resume (struct pci_dev *pdev)
-{
-    struct net_device *dev = pci_get_drvdata(pdev);
-
-    if (dev && dev->priv)
-    {
-        if (netif_running(dev))
-        {
-            vortex_up(dev);
-            netif_device_attach(dev);
-        }
-    }
-    return 0;
-}
-
-#endif /* CONFIG_PM */
-
 /* returns count found (>= 0), or negative on error */
 static int __init vortex_eisa_init (void)
 {
@@ -3747,12 +3713,6 @@ remove:
     __devexit_p(vortex_remove_one),
 id_table:
     vortex_pci_tbl,
-#ifdef CONFIG_PM
-suspend:
-    vortex_suspend,
-resume:
-    vortex_resume,
-#endif
 };
 
 

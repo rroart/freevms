@@ -21,7 +21,6 @@
 #define CONFIG_X86_GOOD_APIC 1
 #define CONFIG_X86_IO_APIC 1
 #define CONFIG_X86_LOCAL_APIC 1
-#undef  CONFIG_PM
 
 /*
  * General setup
@@ -88,7 +87,6 @@
  * Ethernet (1000 Mbit)
  */
 #define CONFIG_E1000
-#undef CONFIG_E1000_NAPI
 
 /*
  * Character devices

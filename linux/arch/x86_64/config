@@ -15,11 +15,6 @@ CONFIG_X86_CMPXCHG=y
 CONFIG_EARLY_PRINTK=y
 
 #
-# Code maturity level options
-#
-CONFIG_EXPERIMENTAL=y
-
-#
 # Loadable module support
 #
 CONFIG_MODULES=y
@@ -53,7 +48,6 @@ CONFIG_X86_GOOD_APIC=y
 CONFIG_X86_IO_APIC=y
 CONFIG_X86_LOCAL_APIC=y
 CONFIG_SMP=y
-# CONFIG_GART_IOMMU is not set
 CONFIG_MCE=y
 
 #
@@ -72,7 +66,6 @@ CONFIG_KCORE_ELF=y
 CONFIG_BINFMT_AOUT=y
 CONFIG_BINFMT_ELF=y
 CONFIG_BINFMT_MISC=y
-# CONFIG_PM is not set
 
 #
 # Block devices
@@ -157,7 +150,6 @@ CONFIG_8139TOO=y
 # Ethernet (1000 Mbit)
 #
 CONFIG_E1000=y
-# CONFIG_E1000_NAPI is not set
 
 #
 # Character devices
@@ -180,7 +172,6 @@ CONFIG_EXT2_FS=y
 #
 # Partition Types
 #
-# CONFIG_PARTITION_ADVANCED is not set
 CONFIG_MSDOS_PARTITION=y
 
 #

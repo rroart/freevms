@@ -23,7 +23,6 @@
 #include <linux/mc146818rtc.h>
 
 #include <asm/smp.h>
-#include <asm/mtrr.h>
 #include <asm/mpspec.h>
 #include <asm/pgalloc.h>
 

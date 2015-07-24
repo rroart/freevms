@@ -44,7 +44,6 @@
 
 #include <linux/delay.h>
 #include <linux/mc146818rtc.h>
-#include <asm/mtrr.h>
 #include <asm/pgalloc.h>
 #include <asm/desc.h>
 #include <asm/kdebug.h>

@@ -62,9 +62,6 @@ bad_to_user:
 	.p2align 4
 copy_user_generic:	
 	prefetcht0 (%rsi)
-#ifdef CONFIG_MK8
-	prefetchw (%rdi)
-#endif
 	pushq %rbx
 	xorl %eax,%eax		/*zero for the exception handler */
 

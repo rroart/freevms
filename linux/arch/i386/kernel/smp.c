@@ -19,7 +19,6 @@
 #include <linux/mc146818rtc.h>
 #include <linux/cache.h>
 
-#include <asm/mtrr.h>
 #include <asm/pgalloc.h>
 #include <asm/smpboot.h>
 
