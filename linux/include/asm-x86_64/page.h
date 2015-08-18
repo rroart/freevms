@@ -101,7 +101,7 @@ extern unsigned long vm_force_exec32;
 /* See Documentation/X86_64/mm.txt for a description of the layout. */
 #define __START_KERNEL      0xffffffff80100000
 #define __START_KERNEL_map  0xffffffff80000000
-#define __PAGE_OFFSET           0x0000010000000000
+#define __PAGE_OFFSET       0x0000010000000000
 
 #ifndef __ASSEMBLY__
 
@@ -173,7 +173,6 @@ extern __inline__ int get_order(unsigned long size)
 #define VM_DATA_DEFAULT_FLAGS \
     ((current->thread.flags & THREAD_IA32) ? vm_data_default_flags32 : \
       vm_data_default_flags)
-#define VM_STACK_FLAGS  vm_stack_flags
 
 #endif /* __KERNEL__ */
 

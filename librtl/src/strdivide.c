@@ -42,7 +42,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <values.h>
 #include "descrip.h"
 #include <stdlib.h>
 #include "strdef.h"

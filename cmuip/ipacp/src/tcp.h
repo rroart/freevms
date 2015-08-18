@@ -70,6 +70,9 @@ Modification history:
 
 */
 
+#ifndef TCP_H
+#define TCP_H
+
 // not yet #include "netxport.h"
 #include "netcommon.h"
 #include "netvms.h"
@@ -351,3 +354,5 @@ struct  wks_structure
 
 #define WKS_BLOCK_SIZE sizeof(struct  wks_structure)
 #define WKS_TABLE_SIZE 20
+
+#endif /* TCP_H */

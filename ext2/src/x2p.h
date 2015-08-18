@@ -99,7 +99,7 @@ unsigned exttwo_search_ent(struct _fcb * fcb,
 int exttwo_read_writevb(struct _irp * i);
 unsigned exttwo_create(struct _vcb *vcb,struct _irp * i);
 unsigned exttwo_delete(struct _vcb * vcb,struct _irp * irp);
-exttwo_modify(struct _vcb * vcb, struct _irp * irp);
+unsigned exttwo_modify(struct _vcb * vcb, struct _irp * irp);
 int exttwo_io_done(struct _irp * i);
 void exttwo_translate_fid (struct _vcb * vcb, struct _fiddef * fid);
 void exttwo_translate_ino (struct _vcb * vcb, struct _fiddef * fid);

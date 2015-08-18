@@ -2438,7 +2438,7 @@ int ide_revalidate_disk (kdev_t i_rdev)
     ide_drive_t *drive;
     ide_hwgroup_t *hwgroup;
     unsigned int p, major, minor;
-    long flags;
+    unsigned long flags;
 
     if ((drive = get_info_ptr(i_rdev)) == NULL)
         return -ENODEV;

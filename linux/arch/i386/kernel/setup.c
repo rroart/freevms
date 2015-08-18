@@ -2673,11 +2673,11 @@ void __init cpu_init (void)
      */
     atomic_inc(&init_mm.mm_count);
     if (nr == smp$gl_primid) kernel_puts("puts 6_6\n");
-    init_task_union.task.active_mm = &init_mm; // was: cur_task
+    init_task_union.task.active_mm = &init_mm; // was: current
     if (nr == smp$gl_primid) kernel_puts("puts 6_7\n");
 #if 0
 // not wrong anymore?
-    if(init_task_union.task.mm) // was: cur_task
+    if(init_task_union.task.mm) // was: current
         BUG();
 #endif
     if (nr == smp$gl_primid) kernel_puts("puts 6_8\n");

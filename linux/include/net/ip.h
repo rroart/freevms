@@ -29,6 +29,7 @@
 #include <linux/netdevice.h>
 #include <linux/inetdevice.h>
 #include <linux/in_route.h>
+#include <linux/rtnetlink.h>
 #include <net/route.h>
 #include <net/arp.h>
 

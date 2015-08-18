@@ -1,6 +1,8 @@
 #ifndef CMUIP_H
 #define CMUIP_H
 
+#include <stddef.h>
+
 struct tcb_structure;
 BLISSIF(int i);
 BLISSIFNOT(int i);
@@ -113,30 +115,14 @@ unsigned long remque(void * entry, void * addr);
 int VMS_IO$POST(long IOSB$ADRS, long IRP$ADRS, long UCB$ADRS);
 
 // from string.h, which inclusion make type overlap. needed due to tcpmacros.h
-#ifdef __x86_64__
-unsigned long strlen(const char *s);
+size_t strlen(const char *s);
 #ifndef memcpy
-void *memcpy(void *dest, const void *src, unsigned long n);
+void *memcpy(void *dest, const void *src, size_t n);
 #endif
-#ifndef memset
-void *memset(void *s, int c, unsigned long n);
-#endif
-#else
-unsigned int strlen(const char *s);
-#ifndef memcpy
-void *memcpy(void *dest, const void *src, unsigned int n);
-#endif
-#ifndef memset
-void *memset(void *s, int c, unsigned int n);
-#endif
-#endif
+
 // from stdlib.h, which inclusion make type overlap
 void free(void *ptr);
-#ifdef __x86_64__
-void *malloc(unsigned long size);
-#else
-void *malloc(unsigned int size);
-#endif
+void *malloc(size_t size);
 
 #ifdef __i386__
 //externals of cmuip

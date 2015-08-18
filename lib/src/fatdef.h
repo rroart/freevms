@@ -49,7 +49,7 @@ Inverted format field. The high- and low-order 16 bits are transposed for compat
 
 static inline unsigned long pdp_invert(unsigned long l)
 {
-    unsigned short * s=&l;
+    unsigned short * s = (unsigned short *) &l;
     return (s[0]<<16) + s[1];
 }
 

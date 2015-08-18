@@ -261,10 +261,8 @@ static inline unsigned long __cmpxchg(volatile void *ptr, unsigned long old,
 #define set_mb(var, value) do { (void) xchg(&var, value); } while (0)
 #define set_wmb(var, value) do { var = value; wmb(); } while (0)
 
-#define warn_if_not_ulong(x) do { unsigned long foo; (void) (&(x) == &foo); } while (0)
-
 /* interrupt control.. */
-#define __save_flags(x)     do { warn_if_not_ulong(x); __asm__ __volatile__("# save_flags \n\t pushfq ; popq %q0":"=g" (x): /* no input */ :"memory"); } while (0)
+#define __save_flags(x)     do { __asm__ __volatile__("# save_flags \n\t pushfq ; popq %q0":"=g" (x): /* no input */ :"memory"); } while (0)
 #define __restore_flags(x)  __asm__ __volatile__("# restore_flags \n\t pushq %0 ; popfq": /* no output */ :"g" (x):"memory", "cc")
 #define __cli()         __asm__ __volatile__("cli": : :"memory")
 #define __sti()         __asm__ __volatile__("sti": : :"memory")
@@ -275,8 +273,8 @@ static inline unsigned long __cmpxchg(volatile void *ptr, unsigned long old,
 #define __save_and_sti(x)      do { __save_flags(x); __sti(); } while(0)
 
 /* For spinlocks etc */
-#define local_irq_save(x)   do { warn_if_not_ulong(x); __asm__ __volatile__("# local_irq_save \n\t pushfq ; popq %0 ; cli":"=g" (x): /* no input */ :"memory"); } while (0)
-#define local_irq_set(x)    do { warn_if_not_ulong(x); __asm__ __volatile__("# local_irq_set \n\t pushfq ; popq %0 ; sti":"=g" (x): /* no input */ :"memory"); } while (0)
+#define local_irq_save(x)   do { __asm__ __volatile__("# local_irq_save \n\t pushfq ; popq %0 ; cli":"=g" (x): /* no input */ :"memory"); } while (0)
+#define local_irq_set(x)    do { __asm__ __volatile__("# local_irq_set \n\t pushfq ; popq %0 ; sti":"=g" (x): /* no input */ :"memory"); } while (0)
 #define local_irq_restore(x)    __asm__ __volatile__("# local_irq_restore \n\t pushq %0 ; popfq": /* no output */ :"g" (x):"memory")
 #define local_irq_disable() __cli()
 #define local_irq_enable()  __sti()

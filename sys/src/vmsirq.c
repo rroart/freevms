@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on irq.c.
 
 /*
@@ -379,7 +379,7 @@ static inline void get_irqlock(int cpu)
  */
 void vms___global_cli(void)
 {
-    unsigned int flags;
+    unsigned long flags;
 
     __save_flags(flags);
     if (flags & (1 << EFLAGS_IF_SHIFT))

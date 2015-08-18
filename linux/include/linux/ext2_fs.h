@@ -580,7 +580,7 @@ enum
 #if 0
 #define FCB_DEV(fcb)            (fcb->fcb$w_fid_dirnum)
 #endif
-void * exttwo_get_current_vcb();
+void * exttwo_get_current_vcb(void);
 
 #ifdef __KERNEL__
 /*

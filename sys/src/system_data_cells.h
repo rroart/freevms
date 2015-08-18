@@ -132,7 +132,7 @@ extern unsigned long ctl$c_clidatasz;
 extern unsigned long ctl$c_krp_count;
 extern unsigned long ctl$c_krp_size;
 extern unsigned long ctl$c_p1ptr_size;
-extern struct _ccb ctl$ga_ccb_table[];
+extern struct _ccb   ctl$ga_ccb_table[];
 extern struct _ccb * ctl$gl_ccbbase;
 extern unsigned long ctl$ga_les_process;
 extern unsigned char ctl$gb_deflang;

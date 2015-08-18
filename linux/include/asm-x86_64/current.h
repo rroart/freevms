@@ -8,7 +8,7 @@ struct task_struct;
 
 #include <system_data_cells.h>
 
-static inline struct task_struct *get_current(void)
+static struct task_struct *get_current(void)
 {
     return ctl$gl_pcb; // check
     struct task_struct *t = read_pda(pcurrent);
@@ -18,7 +18,7 @@ static inline struct task_struct *get_current(void)
 
 #if 0
 // not yet. smp
-static inline struct task_struct *stack_current(void)
+static struct task_struct *stack_current(void)
 {
     // check
     struct task_struct *current;
@@ -27,12 +27,11 @@ static inline struct task_struct *stack_current(void)
     return current;
 }
 #else
-static inline struct task_struct *stack_current(void)
+static struct task_struct *stack_current(void)
 {
     return ctl$gl_pcb;
 }
 #endif
-
 
 #define current get_current()
 

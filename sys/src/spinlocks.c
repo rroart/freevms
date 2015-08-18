@@ -85,7 +85,7 @@ again:
         }
 #if 0
         // check where the book wanted these
-        int intr;
+        unsigned long intr;
         local_irq_save(intr);
         local_irq_disable();
         local_irq_restore(intr);

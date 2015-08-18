@@ -976,9 +976,6 @@ e1000_probe(struct pci_dev *pdev,
         netdev->features |= NETIF_F_HIGHDMA;
 
 #endif
-#ifdef NETIF_F_LLTX
-    netdev->features |= NETIF_F_LLTX;
-#endif
 
     adapter->en_mng_pt = e1000_enable_mng_pass_thru(&adapter->hw);
 
@@ -3316,17 +3313,7 @@ e1000_xmit_frame(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
         e1000_transfer_dhcp_info(adapter, skb);
 #endif
 
-#ifdef NETIF_F_LLTX
-    local_irq_save(flags);
-    if (!spin_trylock(&tx_ring->tx_lock))
-    {
-        /* Collision - tell upper layer to requeue */
-        local_irq_restore(flags);
-        return NETDEV_TX_LOCKED;
-    }
-#else
     spin_lock_irqsave(&tx_ring->tx_lock, flags);
-#endif
 
     /* need: count + 2 desc gap to keep tail from touching
      * head, otherwise try next time */
@@ -3350,10 +3337,7 @@ e1000_xmit_frame(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
     }
 #endif
 
-#ifndef NETIF_F_LLTX
     spin_unlock_irqrestore(&tx_ring->tx_lock, flags);
-
-#endif
 
     first = tx_ring->next_to_use;
 
@@ -3363,11 +3347,6 @@ e1000_xmit_frame(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
     if (tso < 0)
     {
         dev_kfree_skb_any(skb);
-#ifdef NETIF_F_LLTX
-#if 0
-        spin_unlock_irqrestore(&tx_ring->tx_lock, flags);
-#endif
-#endif
         return NETDEV_TX_OK;
     }
 #else
@@ -3402,14 +3381,6 @@ e1000_xmit_frame(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb 
 
     netdev->trans_start = jiffies;
 
-#ifdef NETIF_F_LLTX
-    /* Make sure there is space in the ring for the next send. */
-    e1000_maybe_stop_tx(netdev, tx_ring, MAX_SKB_FRAGS + 2);
-
-#if 0
-    spin_unlock_irqrestore(&tx_ring->tx_lock, flags);
-#endif
-#endif
     return NETDEV_TX_OK;
 }
 

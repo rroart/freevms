@@ -322,7 +322,7 @@ Fatal_Error(S,ERRCODE) =
 
 #define $$KCALL KCALL
 
-        static int inline $$KCALL(int (*func)(), ...)
+static int inline $$KCALL(int (*func)(), ...)
 {
     va_list args;
     long argv[16],argc=1;

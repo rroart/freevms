@@ -2,7 +2,10 @@
 #define MISC_ROUTINES_H
 
 #include <linux/types.h>
+#include <linux/ext2_fs.h>
 #include <linux/kdev_t.h>
+#include <linux/netdevice.h>
+#include <linux/skbuff.h>
 
 #include <atrdef.h>
 #include <cdtdef.h>
@@ -21,6 +24,7 @@
 #include <scsdef.h>
 #include <ucbdef.h>
 #include <ucbnidef.h>
+#include <ttyvecdef.h>
 
 #include <../../f11x/src/xqp.h>
 
@@ -118,7 +122,7 @@ void set_rtc_mmss(unsigned long nowtime);
 int set_rtc_mmss(unsigned long nowtime);
 #endif
 void fixup_hib_pc(void * dummy);
-mycheckaddr(unsigned int ctl);
+void mycheckaddr(unsigned int ctl);
 int task_on_comqueue(struct _pcb *p);
 int cwps$forcex(unsigned int *pidadr, void *prcnam, unsigned int code);
 void * find_a_cdt(int a);
@@ -237,7 +241,7 @@ int ext2_delete_entry2 (struct _vcb * vcb, struct ext2_dir_entry_2 * dir, struct
 void *exttwo_fcb_create(struct _fcb * inode, int i_ino, unsigned *retsts);
 int exttwo_read_writevb(struct _irp * i);
 unsigned exttwo_delete(struct _vcb * vcb,struct _irp * irp);
-exttwo_modify(struct _vcb * vcb, struct _irp * irp);
+unsigned exttwo_modify(struct _vcb * vcb, struct _irp * irp);
 int exttwo_io_done(struct _irp * i);
 unsigned exttwo_create(struct _vcb *vcb,struct _irp * i);
 struct _ucb * finducb(struct _fcb * fcb);

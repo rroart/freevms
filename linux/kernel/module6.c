@@ -2756,11 +2756,11 @@ const void *inter_module_get_request(const char *im_name, const char *modname)
 
 // move to iogen dir
 
-int iogen$load()
+int iogen$load(void)
 {
 }
 
-int iogen$connect()
+int iogen$connect(void)
 {
 }
 
@@ -2770,7 +2770,7 @@ int iogen$init_db(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt, struc
     ddt->ddt$l_fdt = fdt;
 }
 
-int iogen$init_mapping()
+int iogen$init_mapping(void)
 {
 }
 

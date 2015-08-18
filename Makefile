@@ -7,8 +7,6 @@ VMSSUBDIRS3 = cmuip/ipacp/src/
 
 export BLISS = $(TOPDIR)/bliss/bin/gcc
 
-TMPARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ -e s/arm.*/arm/ -e s/sa110/arm/)
-
 export LIBGCC = $(shell gcc -print-libgcc-file-name)
 export LIBGCC_EH = $(shell gcc -print-file-name=libgcc_eh.a)
 export LIBGCC += $(LIBGCC_EH)
@@ -51,7 +49,7 @@ export OLDLIBELF_AMD64 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_amd64/usr/lib/lib
 
 export LINKER = $(TOPDIR)/linker/src/linker
 
-SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ -e s/arm.*/arm/ -e s/sa110/arm/)
+SUBARCH := $(shell uname -m | sed -e s/i.86/i386/)
 ARCH := $(SUBARCH)
 export LINKPRE = -Bstatic
 #export LINKPRE = -Bstatic -s 

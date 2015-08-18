@@ -89,7 +89,7 @@ void exttwo_init2(void * vcb)
     x2p->current_vcb = vcb;
 }
 
-void * exttwo_get_current_vcb()
+void * exttwo_get_current_vcb(void)
 {
     return x2p->current_vcb;
 }
@@ -181,7 +181,7 @@ create:
 }
 
 #if 0
-exttwo_create(struct _vcb *vcb,struct _irp * i)
+unsigned exttwo_create(struct _vcb *vcb,struct _irp * i)
 {
     struct dsc$descriptor * fibdsc=i->irp$l_qio_p1;
     struct dsc$descriptor * filedsc=i->irp$l_qio_p2;
@@ -266,7 +266,7 @@ struct readdir_callback2
 };
 
 #if 0
-exttwo_delete(struct _vcb * vcb,struct _irp * irp)
+unsigned exttwo_delete(struct _vcb * vcb,struct _irp * irp)
 {
     struct _iosb iosb;
     struct _fcb *fcb;
@@ -359,7 +359,7 @@ exttwo_delete(struct _vcb * vcb,struct _irp * irp)
 }
 #endif
 
-exttwo_modify(struct _vcb * vcb, struct _irp * irp)
+unsigned exttwo_modify(struct _vcb * vcb, struct _irp * irp)
 {
     struct _iosb iosb;
     unsigned sts=SS$_NORMAL;

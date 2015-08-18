@@ -106,7 +106,7 @@ int exe$allocate_pool(int requestsize, int pooltype, int alignment, unsigned int
     return sts;
 }
 
-void exe$deallocate_pool(void * returnblock, int pooltype, int size)
+int exe$deallocate_pool(void * returnblock, int pooltype, int size)
 {
     void * pool=returnblock;
     if (size&63)
@@ -133,21 +133,21 @@ void exe$deallocate_pool(void * returnblock, int pooltype, int size)
     return SS$_NORMAL;
 }
 
-exe$extend_npp(void * pool)
+int exe$extend_npp(void * pool)
 {
     // 4 axppages is 8 386pages
     printk("exe$extendpool/npp not yet implemented (not so difficult?\n");
     return SS$_INSFMEM;
 }
 
-exe$extendpool(void * pool)
+int exe$extendpool(void * pool)
 {
     return exe$extend_npp(pool);
 }
 
 static int trim=1;
 
-exe$trim_pool_list(int percentage, void * listhead, void * basepool)
+int exe$trim_pool_list(int percentage, void * listhead, void * basepool)
 {
 
     struct _myhead * hd = listhead;

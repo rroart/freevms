@@ -93,7 +93,7 @@ int mydebug6 = 1;
    \brief check content ok
 */
 
-mycheckaddr(unsigned int ctl)
+void mycheckaddr(unsigned int ctl)
 {
 #if 1
     int nr0=nr_running;

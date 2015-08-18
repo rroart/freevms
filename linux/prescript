@@ -23,7 +23,6 @@ cd ..
 	(cd drivers/ide; ln -s ../../../driver/src/id/ide-dma.c myide-dma.c )
 
 (cd ../debian; for X in lib*.deb; do dpkg -x $X `echo $X | sed -e "s/.deb//"`; done)
-#(cd ../debian; for X in *3.3*.deb; do dpkg -x $X gcc-3.3; done)
 #(cd ../debian; dpkg -x binutils_2.17-3+etch1_amd64.deb binutils-2.17)
 
 echo you have read the HOWTO and done a make in ..?

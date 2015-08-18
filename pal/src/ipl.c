@@ -576,7 +576,8 @@ long inline mycli(void)
 {
 #if 0
     // can not have cli instr with mode 1
-    long flags, retval;
+    unsigned long flags;
+    long retval;
     //printk("mycli\n");
     __save_flags(flags);
     __cli();

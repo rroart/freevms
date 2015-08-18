@@ -36,8 +36,7 @@ int isshar(void * a)
     return 1;
 }
 
-asmlinkage sys_$CRELNM();
-asmlinkage exe$crelnm(unsigned int *attr, void *tabnam, void *lognam,
+asmlinkage int exe$crelnm(unsigned int *attr, void *tabnam, void *lognam,
                       unsigned char *acmode, void *itmlst)
 {
     int status;
@@ -121,7 +120,6 @@ asmlinkage exe$crelnm(unsigned int *attr, void *tabnam, void *lognam,
     return status;
 }
 
-asmlinkage sys_$CRELNT();
 /*asmlinkage sys$crelnt  (unsigned int *attr, void *resnam, unsigned
  short int *reslen, unsigned int *quota,
  unsigned short int *promsk, void *tabnam, void
@@ -294,11 +292,7 @@ asmlinkage int exe$crelnt(unsigned int *attr, void *resnam,
     return status;
 }
 
-asmlinkage sys_$DELLNM()
-{
-    ;
-}
-asmlinkage exe$dellnm(void *tabnam, void *lognam, unsigned char *acmode)
+asmlinkage int exe$dellnm(void *tabnam, void *lognam, unsigned char *acmode)
 {
 
 #if 0
@@ -311,11 +305,7 @@ asmlinkage exe$dellnm(void *tabnam, void *lognam, unsigned char *acmode)
 
 }
 
-asmlinkage sys_$TRNLNM()
-{
-    ;
-}
-asmlinkage exe$trnlnm(unsigned int *attr, void *tabnam, void *lognam,
+asmlinkage int exe$trnlnm(unsigned int *attr, void *tabnam, void *lognam,
                       unsigned char *acmode, void *itmlst)
 {
     int status;

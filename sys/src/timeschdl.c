@@ -153,11 +153,7 @@ skip:
     /** call one_sec */
     sch$one_sec();
     /** 4 sch$ravail() - MISSING */
-#ifdef __i386__
-    if (exetimeout) printk("exe$timeout %x %x %x\n",cur_task->pcb$l_pid,current->pcb$l_pid,current->thread.eip);
-#else
     if (exetimeout) printk("exe$timeout %x\n",current->pcb$l_pid);
-#endif
 }
 
 extern int vmstimerconf;

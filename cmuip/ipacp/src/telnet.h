@@ -56,6 +56,9 @@ Modification history:
     Added TVT$HOLD bit
 */
 
+#ifndef TELNET_H
+#define TELNET_H
+
 // not yet #include <starlet.h> // VMS system definitions
 // not yet #include 'CMUIP_SRC:[CENTRAL]NETXPORT';
 #include <iosbdef.h>
@@ -380,3 +383,5 @@ TVT$BLOCK = BLOCK[TVT$SIZE] FIELD(TVT$FIELDS) %;
 #define     TVT$STATE_DONT   5      // IAC DONT seen
 #define     TVT$STATE_MIN   TVT$STATE_NORMAL
 #define     TVT$STATE_MAX   TVT$STATE_DONT
+
+#endif /* TELNET_H */
