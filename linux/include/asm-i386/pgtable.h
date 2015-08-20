@@ -85,12 +85,7 @@ extern unsigned long pgkern_mask;
     } while (0)
 #endif
 
-#ifndef CONFIG_X86_INVLPG
 #define __flush_tlb_one(addr) __flush_tlb()
-#else
-#define __flush_tlb_one(addr) \
-__asm__ __volatile__("invlpg %0": :"m" (*(char *) addr))
-#endif
 
 /*
  * ZERO_PAGE is a global shared page that is always zero: used

@@ -25,18 +25,6 @@
 /* Retain screen contents when switching modes */
 #define CONFIG_VIDEO_RETAIN
 
-/* Enable local mode list */
-#undef CONFIG_VIDEO_LOCAL
-
-/* Force 400 scan lines for standard modes (hack to fix bad BIOS behaviour */
-#undef CONFIG_VIDEO_400_HACK
-
-/* Hack that lets you force specific BIOS mode ID and specific dimensions */
-#undef CONFIG_VIDEO_GFX_HACK
-#define VIDEO_GFX_BIOS_AX 0x4f02	/* 800x600 on ThinkPad */
-#define VIDEO_GFX_BIOS_BX 0x0102
-#define VIDEO_GFX_DUMMY_RESOLUTION 0x6425	/* 100x37 */
-
 /* This code uses an extended set of video mode numbers. These include:
  * Aliases for standard modes
  *	NORMAL_VGA (-1)
@@ -610,11 +598,6 @@ spec_inits:
 set_80x25:
 	movw	$0x5019, force_size		# Override possibly broken BIOS
 use_80x25:
-#ifdef CONFIG_VIDEO_400_HACK
-	movw	$0x1202, %ax			# Force 400 scan lines
-	movb	$0x30, %bl
-	int	$0x10
-#else
 	movb	$0x0f, %ah			# Get current mode ID
 	int	$0x10
 	cmpw	$0x5007, %ax	# Mode 7 (80x25 mono) is the only one available
@@ -632,7 +615,6 @@ st80:	cmpb	$0, adapter	# CGA/MDA/HGA => mode 3/7 is always 80x25
 	
 	cmpb	$24, %al		# It's hopefully correct
 	jz	set80
-#endif /* CONFIG_VIDEO_400_HACK */
 force3:	DO_STORE
 	movw	$0x0003, %ax			# Forced set
 	int	$0x10
@@ -900,10 +882,6 @@ mtabv:	leaw	vga_modes, %si			# All modes for std VGA
 	
 	call	mode_scan
 mscan1:
-
-#ifdef CONFIG_VIDEO_LOCAL
-	call	local_modes
-#endif /* CONFIG_VIDEO_LOCAL */
 
 #ifdef CONFIG_VIDEO_VESA
 	call	vesa_modes			# Detect VESA VGA modes
@@ -1767,34 +1745,6 @@ realtek_md:
 	.byte	0
 
 #endif	/* CONFIG_VIDEO_SVGA */
-
-# User-defined local mode table (VGA only)
-#ifdef CONFIG_VIDEO_LOCAL
-local_modes:
-	leaw	local_mode_table, %si
-locm1:	lodsw
-	orw	%ax, %ax
-	jz	locm2
-	
-	stosw
-	movsw
-	jmp	locm1
-
-locm2:	ret
-
-# This is the table of local video modes which can be supplied manually
-# by the user. Each entry consists of mode ID (word) and dimensions
-# (byte for column count and another byte for row count). These modes
-# are placed before all SVGA and VESA modes and override them if table
-# compacting is enabled. The table must end with a zero word followed
-# by NUL-terminated video adapter name.
-local_mode_table:
-	.word	0x0100				# Example: 40x25
-	.byte	25,40
-	.word	0
-	.ascii	"Local"
-	.byte	0
-#endif	/* CONFIG_VIDEO_LOCAL */
 
 # Read a key and return the ASCII code in al, scan code in ah
 getkey:	xorb	%ah, %ah

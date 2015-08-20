@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -835,75 +835,3 @@ unsigned long ext2_bg_num_gdb(struct _vcb * vcb, int group)
     return (EXT2_GROUPS_COUNT(sb) + EXT2_DESC_PER_BLOCK(sb) - 1) / EXT2_DESC_PER_BLOCK(sb);
 #endif
 }
-
-#ifdef CONFIG_EXT2_CHECK
-/* Called at mount-time, super-block is locked */
-void ext2_check_blocks_bitmap (struct _vcb * vcb)
-{
-    struct buffer_head * bh;
-    struct ext2_super_block * es;
-    unsigned long desc_count, bitmap_count, x, j;
-    unsigned long desc_blocks;
-    int bitmap_nr;
-    struct ext2_group_desc * gdp;
-    int i;
-    struct ext2_super_block * sb = vcb->vcb$l_cache;
-
-    es = sb;
-    desc_count = 0;
-    bitmap_count = 0;
-    gdp = NULL;
-    for (i = 0; i < EXT2_GROUPS_COUNT(sb); i++)
-    {
-        gdp = ext2_get_group_desc (vcb, i, NULL);
-        if (!gdp)
-            continue;
-        desc_count += le16_to_cpu(gdp->bg_free_blocks_count);
-        bitmap_nr = load_block_bitmap (sb, i);
-        if (bitmap_nr < 0)
-            continue;
-
-        bh = EXT2_SB(sb)->s_block_bitmap[bitmap_nr];
-
-        if (ext2_bg_has_super(sb, i) && !ext2_test_bit(0, bh->b_data))
-            ext2_error (vcb, __FUNCTION__,
-                        "Superblock in group %d is marked free", i);
-
-        desc_blocks = ext2_bg_num_gdb(sb, i);
-        for (j = 0; j < desc_blocks; j++)
-            if (!ext2_test_bit(j + 1, bh->b_data))
-                ext2_error (vcb, __FUNCTION__,
-                            "Descriptor block #%ld in group "
-                            "%d is marked free", j, i);
-
-        if (!block_in_use (le32_to_cpu(gdp->bg_block_bitmap), sb, bh->b_data))
-            ext2_error (vcb, "ext2_check_blocks_bitmap",
-                        "Block bitmap for group %d is marked free",
-                        i);
-
-        if (!block_in_use (le32_to_cpu(gdp->bg_inode_bitmap), sb, bh->b_data))
-            ext2_error (vcb, "ext2_check_blocks_bitmap",
-                        "Inode bitmap for group %d is marked free",
-                        i);
-
-        for (j = 0; j < sb->s_itb_per_group; j++)
-            if (!block_in_use (le32_to_cpu(gdp->bg_inode_table) + j, sb, bh->b_data))
-                ext2_error (vcb, "ext2_check_blocks_bitmap",
-                            "Block #%ld of the inode table in "
-                            "group %d is marked free", j, i);
-
-        x = ext2_count_free (bh, sb->s_blocksize);
-        if (le16_to_cpu(gdp->bg_free_blocks_count) != x)
-            ext2_error (vcb, "ext2_check_blocks_bitmap",
-                        "Wrong free blocks count for group %d, "
-                        "stored = %d, counted = %lu", i,
-                        le16_to_cpu(gdp->bg_free_blocks_count), x);
-        bitmap_count += x;
-    }
-    if (le32_to_cpu(es->s_free_blocks_count) != bitmap_count)
-        ext2_error (vcb, "ext2_check_blocks_bitmap",
-                    "Wrong free blocks count in super block, "
-                    "stored = %lu, counted = %lu",
-                    (unsigned long) le32_to_cpu(es->s_free_blocks_count), bitmap_count);
-}
-#endif

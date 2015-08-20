@@ -34,6 +34,9 @@
  */
 /* ip_icmp.h 6.1 83/07/29 */
 
+#ifndef IP_ICMP_H
+#define IP_ICMP_H
+
 /*
  * Interface Control Message Protocol Definitions.
  * Per RFC 792, September 1981.
@@ -139,3 +142,4 @@ struct icmp
     (type) == ICMP_IREQ || (type) == ICMP_IREQREPLY || \
     (type) == ICMP_MASKREQ || (type) == ICMP_MASKREPLY)
 
+#endif /* IP_ICMP_H */

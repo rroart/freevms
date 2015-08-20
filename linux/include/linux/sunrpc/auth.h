@@ -92,9 +92,6 @@ struct rpc_credops
 
 extern struct rpc_authops   authunix_ops;
         extern struct rpc_authops   authnull_ops;
-#ifdef CONFIG_SUNRPC_SECURE
-            extern struct rpc_authops   authdes_ops;
-#endif
 
         int         rpcauth_register(struct rpc_authops *);
         int         rpcauth_unregister(struct rpc_authops *);

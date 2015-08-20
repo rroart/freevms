@@ -94,14 +94,6 @@ static int __init dmi_iterate(void (*decode)(struct dmi_header *))
     long fp=0xE0000L;
     fp -= 16;
 
-#ifdef CONFIG_SIMNOW
-    /*
-     *  Skip on x86/64 with simnow. Will eventually go away
-     *  If you see this ifdef in 2.6pre mail me !
-     */
-    return -1;
-#endif
-
     while( fp < 0xFFFFF)
     {
         fp+=16;

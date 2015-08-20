@@ -23,13 +23,6 @@ enum
     NLM_LCK_DENIED_NOLOCKS      = 2,
     NLM_LCK_BLOCKED         = 3,
     NLM_LCK_DENIED_GRACE_PERIOD = 4,
-#ifdef CONFIG_LOCKD_V4
-    NLM_DEADLCK         = 5,
-    NLM_ROFS            = 6,
-    NLM_STALE_FH            = 7,
-    NLM_FBIG            = 8,
-    NLM_FAILED          = 9,
-#endif
 };
 
 #define NLM_PROGRAM     100021

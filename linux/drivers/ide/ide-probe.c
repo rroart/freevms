@@ -459,10 +459,6 @@ static int hwif_check_regions (ide_hwif_t *hwif)
 
     if (hwif->io_ports[IDE_CONTROL_OFFSET])
         region_errors += ide_check_region(hwif->io_ports[IDE_CONTROL_OFFSET], 1);
-#if defined(CONFIG_AMIGA) || defined(CONFIG_MAC)
-    if (hwif->io_ports[IDE_IRQ_OFFSET])
-        region_errors += ide_check_region(hwif->io_ports[IDE_IRQ_OFFSET], 1);
-#endif /* (CONFIG_AMIGA) || (CONFIG_MAC) */
     /*
      * If any errors are return, we drop the hwif interface.
      */
@@ -499,10 +495,6 @@ static void hwif_register (ide_hwif_t *hwif)
 jump_straight8:
     if (hwif->io_ports[IDE_CONTROL_OFFSET])
         ide_request_region(hwif->io_ports[IDE_CONTROL_OFFSET], 1, hwif->name);
-#if defined(CONFIG_AMIGA) || defined(CONFIG_MAC)
-    if (hwif->io_ports[IDE_IRQ_OFFSET])
-        ide_request_region(hwif->io_ports[IDE_IRQ_OFFSET], 1, hwif->name);
-#endif /* (CONFIG_AMIGA) || (CONFIG_MAC) */
 }
 
 /*
@@ -722,11 +714,7 @@ static int init_irq (ide_hwif_t *hwif)
      */
     if (!match || match->irq != hwif->irq)
     {
-#ifdef CONFIG_IDEPCI_SHARE_IRQ
-        int sa = IDE_CHIPSET_IS_PCI(hwif->chipset) ? SA_SHIRQ : SA_INTERRUPT;
-#else /* !CONFIG_IDEPCI_SHARE_IRQ */
         int sa = IDE_CHIPSET_IS_PCI(hwif->chipset) ? SA_INTERRUPT|SA_SHIRQ : SA_INTERRUPT;
-#endif /* CONFIG_IDEPCI_SHARE_IRQ */
         if (ide_request_irq(hwif->irq, &ide_intr, sa, hwif->name, hwgroup))
         {
             if (!match)
@@ -859,13 +847,6 @@ static int hwif_init (ide_hwif_t *hwif)
             return (hwif->present = 0);
         }
     }
-#ifdef CONFIG_BLK_DEV_HD
-    if (hwif->irq == HD_IRQ && hwif->io_ports[IDE_DATA_OFFSET] != HD_DATA)
-    {
-        printk("%s: CANNOT SHARE IRQ WITH OLD HARDDISK DRIVER (hd.c)\n", hwif->name);
-        return (hwif->present = 0);
-    }
-#endif /* CONFIG_BLK_DEV_HD */
 
     hwif->present = 0; /* we set it back to 1 if all is ok below */
 

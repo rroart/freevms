@@ -164,16 +164,6 @@ static void __init check_popad(void)
 static void __init check_config(void)
 {
     /*
-     * We'd better not be a i386 if we're configured to use some
-     * i486+ only features! (WP works in supervisor mode and the
-     * new "invlpg" and "bswap" instructions)
-     */
-#if defined(CONFIG_X86_WP_WORKS_OK) || defined(CONFIG_X86_INVLPG) || defined(CONFIG_X86_BSWAP)
-    if (boot_cpu_data.x86 == 3)
-        panic("Kernel requires i486+ for 'invlpg' and other features");
-#endif
-
-    /*
      * If we configured ourselves for a TSC, we'd better have one!
      */
 #ifdef CONFIG_X86_TSC

@@ -50,16 +50,12 @@
 /*
  * Please see Documentation/ide.txt for help/info on IDE drives
  */
-#undef  CONFIG_BLK_DEV_HD_IDE
-#undef  CONFIG_BLK_DEV_HD
 #define CONFIG_BLK_DEV_IDEDISK 1
 #define CONFIG_IDEDISK_MULTI_MODE 1
 
 /*
  * IDE chipset support/bugfixes
  */
-#undef  CONFIG_BLK_DEV_TRM290
-#undef  CONFIG_BLK_DEV_VIA82CXXX
 #define CONFIG_BLK_DEV_IDEPCI 1
 #define CONFIG_BLK_DEV_IDEDMA_PCI 1
 #define CONFIG_IDEDMA_PCI_AUTO 1

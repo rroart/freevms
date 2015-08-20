@@ -5,6 +5,9 @@
  * Per RFC793, September, 1981.
  */
 
+#ifndef TCP_FSM_H
+#define TCP_FSM_H
+
 #define TCP_NSTATES 11
 
 #define TCPS_CLOSED     0   /* closed */
@@ -52,3 +55,5 @@ char *tcpstates[] =
     "LAST_ACK", "FIN_WAIT_2",   "TIME_WAIT",
 };
 #endif
+
+#endif /* TCP_FSM_H */

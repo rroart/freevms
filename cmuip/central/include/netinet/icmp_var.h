@@ -48,6 +48,9 @@
  *  icmp_var.h  6.3 (Berkeley) 6/8/85
  */
 
+#ifndef ICMP_VAR_H
+#define ICMP_VAR_H
+
 /*
  * Variables related to this implementation
  * of the internet control message protocol.
@@ -71,3 +74,5 @@ struct  icmpstat
 #ifdef KERNEL
 struct  icmpstat icmpstat;
 #endif
+
+#endif /* ICMP_VAR_H */

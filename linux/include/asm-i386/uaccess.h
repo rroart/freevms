@@ -48,18 +48,10 @@ extern int __verify_write(const void *, unsigned long);
         :"1" (addr),"g" ((int)(size)),"g" (current->addr_limit.seg)); \
     flag; })
 
-#ifdef CONFIG_X86_WP_WORKS_OK
-
-#define access_ok(type,addr,size) (__range_ok(addr,size) == 0)
-
-#else
-
 #define access_ok(type,addr,size) ( (__range_ok(addr,size) == 0) && \
              ((type) == VERIFY_READ || boot_cpu_data.wp_works_ok || \
              segment_eq(get_fs(),KERNEL_DS) || \
               __verify_write((void *)(addr),(size))))
-
-#endif
 
 static inline int verify_area(int type, const void * addr, unsigned long size)
 {

@@ -9,24 +9,6 @@
 #include <linux/init.h>
 #include <linux/netlink.h>
 
-extern int dmascc_init(void);
-
-extern int awc4500_pci_probe(void);
-extern int awc4500_isa_probe(void);
-extern int awc4500_pnp_probe(void);
-extern int awc4500_365_probe(void);
-extern int arcnet_init(void);
-extern int scc_enet_init(void);
-extern int fec_enet_init(void);
-extern int dlci_setup(void);
-extern int sdla_setup(void);
-extern int sdla_c_setup(void);
-extern int comx_init(void);
-extern int lmc_setup(void);
-
-extern int madgemc_probe(void);
-extern int uml_net_probe(void);
-
 /* Pad device name to IFNAMSIZ=16. F.e. __PAD6 is string of 9 zeros. */
 #define __PAD6 "\0\0\0\0\0\0\0\0\0"
 #define __PAD5 __PAD6 "\0"
@@ -51,61 +33,7 @@ static struct net_probe pci_probes[] __initdata =
     /*
      *  Early setup devices
      */
-
-#if defined(CONFIG_DMASCC)
-    {dmascc_init, 0},
-#endif
-#if defined(CONFIG_DLCI)
-    {dlci_setup, 0},
-#endif
-#if defined(CONFIG_SDLA)
-    {sdla_c_setup, 0},
-#endif
-#if defined(CONFIG_ARCNET)
-    {arcnet_init, 0},
-#endif
-#if defined(CONFIG_SCC_ENET)
-    {scc_enet_init, 0},
-#endif
-#if defined(CONFIG_FEC_ENET)
-    {fec_enet_init, 0},
-#endif
-#if defined(CONFIG_COMX)
-    {comx_init, 0},
-#endif
-
-#if defined(CONFIG_LANMEDIA)
-    {lmc_setup, 0},
-#endif
-
-    /*
-    *
-    *   Wireless non-HAM
-    *
-    */
-#ifdef CONFIG_AIRONET4500_NONCS
-
-#ifdef CONFIG_AIRONET4500_PCI
-    {awc4500_pci_probe,0},
-#endif
-
-#ifdef CONFIG_AIRONET4500_PNP
-    {awc4500_pnp_probe,0},
-#endif
-
-#endif
-
-    /*
-     *  Token Ring Drivers
-     */
-#ifdef CONFIG_MADGEMC
-    {madgemc_probe, 0},
-#endif
-#ifdef CONFIG_UML_NET
-    {uml_net_probe, 0},
-#endif
-
-    {NULL, 0},
+    {NULL, 0}
 };
 
 
@@ -137,16 +65,6 @@ static void __init network_ldisc_init(void)
 
 static void __init special_device_init(void)
 {
-#ifdef CONFIG_NET_SB1000
-    {
-        extern int sb1000_probe(struct net_device *dev);
-        static struct net_device sb1000_dev =
-        {
-            "cm0" __PAD3, 0x0, 0x0, 0x0, 0x0, 0, 0, 0, 0, 0, NULL, sb1000_probe
-        };
-        register_netdev(&sb1000_dev);
-    }
-#endif
 }
 
 /*

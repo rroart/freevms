@@ -212,9 +212,7 @@ EXPORT_SYMBOL(add_timer);
 EXPORT_SYMBOL(del_timer);
 EXPORT_SYMBOL(request_irq);
 EXPORT_SYMBOL(free_irq);
-#if !defined(CONFIG_IA64)   /* irq_stat is part of struct cpuinfo_ia64 */
 EXPORT_SYMBOL(irq_stat);
-#endif
 
 /* waitqueue handling */
 EXPORT_SYMBOL(add_wait_queue);

@@ -32,6 +32,9 @@ static  char    *sccsid = "@(#)udp_var.h    4.1.1.1 (ULTRIX)    1/20/88";
  ************************************************************************/
 /*  udp_var.h   6.1 83/07/29    */
 
+#ifndef UDP_VAR_H
+#define UDP_VAR_H
+
 /*
  * UDP kernel structures and variables.
  */
@@ -67,3 +70,5 @@ struct  udpstat
 struct  inpcb udb;
 struct  udpstat udpstat;
 #endif
+
+#endif /* UDP_VAR_H */

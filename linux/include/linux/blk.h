@@ -16,7 +16,6 @@ extern spinlock_t io_request_lock;
 /*
  * Initialization functions.
  */
-extern int hd_init(void);
 extern int ide_init(void);
 
 extern void set_device_ro(kdev_t dev,int flag);

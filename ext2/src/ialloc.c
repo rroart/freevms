@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -588,42 +588,3 @@ unsigned long ext2_count_free_inodes (struct _vcb * vcb)
     return le32_to_cpu(sb->s_free_inodes_count);
 #endif
 }
-
-#ifdef CONFIG_EXT2_CHECK
-/* Called at mount-time, super-block is locked */
-void ext2_check_inodes_bitmap (struct _vcb * vcb)
-{
-    struct ext2_super_block * sb = vcb->vcb$l_cache;
-    struct ext2_super_block * es = sb;
-    unsigned long desc_count = 0, bitmap_count = 0;
-    int i;
-
-    for (i = 0; i < EXT2_GROUPS_COUNT(sb); i++)
-    {
-        struct ext2_group_desc *desc = ext2_get_group_desc (vcb, i, NULL);
-        struct buffer_head *bh;
-        unsigned x;
-
-        if (!desc)
-            continue;
-        desc_count += le16_to_cpu(desc->bg_free_inodes_count);
-        bh = load_inode_bitmap (sb, i);
-        if (IS_ERR(bh))
-            continue;
-
-        x = ext2_count_free (bh, EXT2_INODES_PER_GROUP(sb) / 8);
-        if (le16_to_cpu(desc->bg_free_inodes_count) != x)
-            ext2_error (vcb, "ext2_check_inodes_bitmap",
-                        "Wrong free inodes count in group %d, "
-                        "stored = %d, counted = %lu", i,
-                        le16_to_cpu(desc->bg_free_inodes_count), x);
-        bitmap_count += x;
-    }
-    if (le32_to_cpu(es->s_free_inodes_count) != bitmap_count)
-        ext2_error (vcb, "ext2_check_inodes_bitmap",
-                    "Wrong free inodes count in super block, "
-                    "stored = %lu, counted = %lu",
-                    (unsigned long)le32_to_cpu(es->s_free_inodes_count),
-                    bitmap_count);
-}
-#endif

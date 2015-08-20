@@ -197,11 +197,6 @@ static int e1000_82547_fifo_workaround(struct e1000_adapter *adapter,
 
 static int e1000_suspend(struct pci_dev *pdev, pm_message_t state);
 
-#ifdef CONFIG_NET_POLL_CONTROLLER
-/* for netdump / net console */
-static void e1000_netpoll (struct net_device *netdev);
-#endif
-
 extern void e1000_check_options(struct e1000_adapter *adapter);
 
 #define COPYBREAK_DEFAULT 256
@@ -933,9 +928,6 @@ e1000_probe(struct pci_dev *pdev,
 #ifdef HAVE_TX_TIMEOUT
     netdev->tx_timeout = &e1000_tx_timeout;
     netdev->watchdog_timeo = 5 * HZ;
-#endif
-#ifdef CONFIG_NET_POLL_CONTROLLER
-    netdev->poll_controller = e1000_netpoll;
 #endif
     strncpy(netdev->name, pci_name(pdev), sizeof(netdev->name) - 1);
 
@@ -4921,24 +4913,5 @@ e1000_suspend(struct pci_dev *pdev, pm_message_t state)
 
     return 0;
 }
-
-#ifdef CONFIG_NET_POLL_CONTROLLER
-/*
- * Polling 'interrupt' - used by things like netconsole to send skbs
- * without having to re-enable interrupts. It's not called while
- * the interrupt routine is executing.
- */
-static void
-e1000_netpoll(struct net_device *netdev)
-{
-    struct e1000_adapter *adapter = netdev_priv(netdev);
-
-    disable_irq(adapter->pdev->irq);
-    e1000_intr(adapter->pdev->irq, netdev);
-    e1000_clean_tx_irq(adapter, adapter->tx_ring);
-    adapter->clean_rx(adapter, adapter->rx_ring);
-    enable_irq(adapter->pdev->irq);
-}
-#endif
 
 /* e1000_main.c */

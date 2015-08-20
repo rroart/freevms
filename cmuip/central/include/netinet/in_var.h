@@ -49,6 +49,9 @@
  *  @(#)in_var.h    6.2 (Berkeley) 6/8/85
  */
 
+#ifndef IN_VAR_H
+#define IN_VAR_H
+
 /*
  * Interface address, internet version.  One of these structures
  * is allocated for each interface with an internet address.
@@ -84,3 +87,5 @@ struct in_ifaddr
 extern  struct in_ifaddr *in_ifaddr;
 extern  struct in_ifaddr *in_iaonnetof();
 #endif
+
+#endif /* IN_VAR_H */

@@ -393,21 +393,12 @@ static struct svc_version   nlmsvc_version3 =
 {
     3, 24, nlmsvc_procedures, NULL
 };
-#ifdef CONFIG_LOCKD_V4
-static struct svc_version   nlmsvc_version4 =
-{
-    4, 24, nlmsvc_procedures4, NULL
-};
-#endif
 static struct svc_version * nlmsvc_version[] =
 {
     NULL,
     &nlmsvc_version1,
     NULL,
     &nlmsvc_version3,
-#ifdef CONFIG_LOCKD_V4
-    &nlmsvc_version4,
-#endif
 };
 
 static struct svc_stat      nlmsvc_stats;

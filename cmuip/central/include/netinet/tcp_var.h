@@ -47,6 +47,9 @@
  *  @(#)tcp_var.h   6.3 (Berkeley) 6/8/85
  */
 
+#ifndef TCP_VAR_H
+#define TCP_VAR_H
+
 /*
  * Kernel variables for tcp.
  */
@@ -187,3 +190,5 @@ struct  tcpiphdr *tcp_template();
 struct  tcpcb *tcp_close(), *tcp_drop();
 struct  tcpcb *tcp_timers(), *tcp_disconnect(), *tcp_usrclosed();
 #endif
+
+#endif /* TCP_VAR_H */

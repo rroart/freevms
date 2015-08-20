@@ -343,10 +343,10 @@ struct hd_driveid
  */
 #include <linux/config.h>
 
-#if defined(CONFIG_BLK_DEV_IDE) || defined(CONFIG_BLK_DEV_IDE_MODULE)
+#if defined(CONFIG_BLK_DEV_IDE)
 int ide_register(int io_port, int ctl_port, int irq);
 void ide_unregister(unsigned int);
-#endif /* CONFIG_BLK_DEV_IDE || CONFIG_BLK_DEV_IDE_MODULE */
+#endif /* CONFIG_BLK_DEV_IDE */
 
 #endif  /* __KERNEL__ */
 

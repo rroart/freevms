@@ -340,11 +340,7 @@ static struct gendisk ubd_gendisk = INIT_GENDISK(MAJOR_NR, "ubd", ubd_part,
 static struct gendisk fake_gendisk = INIT_GENDISK(0, "ubd", ubd_part,
                                      sizes, MAX_DEV, &ubd_blops);
 
-#ifdef CONFIG_BLK_DEV_UBD_SYNC
-#define OPEN_FLAGS O_RDWR | O_SYNC
-#else
 #define OPEN_FLAGS O_RDWR
-#endif
 
 static int global_openflags = OPEN_FLAGS;
 

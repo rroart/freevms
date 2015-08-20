@@ -612,10 +612,6 @@ static void init_hwif_data (unsigned int index)
     memcpy(&hwif->hw, &hw, sizeof(hw));
     memcpy(hwif->io_ports, hw.io_ports, sizeof(hw.io_ports));
     hwif->noprobe   = !hwif->io_ports[IDE_DATA_OFFSET];
-#ifdef CONFIG_BLK_DEV_HD
-    if (hwif->io_ports[IDE_DATA_OFFSET] == HD_DATA)
-        hwif->noprobe = 1; /* may be overridden by ide_setup() */
-#endif /* CONFIG_BLK_DEV_HD */
     hwif->major = ide_hwif_to_major[index];
     hwif->name[0]   = 'i';
     hwif->name[1]   = 'd';
@@ -904,18 +900,7 @@ static inline int drive_is_ready (ide_drive_t *drive)
     udelay(1);  /* need to guarantee 400ns since last command was issued */
 #endif
 
-#ifdef CONFIG_IDEPCI_SHARE_IRQ
-    /*
-     * We do a passive status test under shared PCI interrupts on
-     * cards that truly share the ATA side interrupt, but may also share
-     * an interrupt with another pci card/device.  We make no assumptions
-     * about possible isa-pnp and pci-pnp issues yet.
-     */
-    if (IDE_CONTROL_REG)
-        stat = GET_ALTSTAT();
-    else
-#endif /* CONFIG_IDEPCI_SHARE_IRQ */
-        stat = GET_STAT();  /* Note: this may clear a pending IRQ!! */
+    stat = GET_STAT();  /* Note: this may clear a pending IRQ!! */
 
     if (stat & BUSY_STAT)
         return 0;   /* drive busy:  definitely not interrupting */
@@ -2630,10 +2615,6 @@ void hwif_unregister (ide_hwif_t *hwif)
 jump_eight:
     if (hwif->io_ports[IDE_CONTROL_OFFSET])
         ide_release_region(hwif->io_ports[IDE_CONTROL_OFFSET], 1);
-#if defined(CONFIG_AMIGA) || defined(CONFIG_MAC)
-    if (hwif->io_ports[IDE_IRQ_OFFSET])
-        ide_release_region(hwif->io_ports[IDE_IRQ_OFFSET], 1);
-#endif /* (CONFIG_AMIGA) || (CONFIG_MAC) */
 }
 
 void ide_unregister (unsigned int index)
@@ -2797,9 +2778,7 @@ void ide_unregister (unsigned int index)
     hwif->config_data   = old_hwif.config_data;
     hwif->select_data   = old_hwif.select_data;
     hwif->proc      = old_hwif.proc;
-#ifndef CONFIG_BLK_DEV_IDECS
     hwif->irq       = old_hwif.irq;
-#endif /* CONFIG_BLK_DEV_IDECS */
     hwif->major     = old_hwif.major;
     hwif->chipset       = old_hwif.chipset;
     hwif->autodma       = old_hwif.autodma;
@@ -2835,11 +2814,6 @@ void ide_setup_ports (  hw_regs_t *hw,
             case IDE_CONTROL_OFFSET:
                 hw->io_ports[i] = ctrl;
                 break;
-#if defined(CONFIG_AMIGA) || defined(CONFIG_MAC)
-            case IDE_IRQ_OFFSET:
-                hw->io_ports[i] = intr;
-                break;
-#endif /* (CONFIG_AMIGA) || (CONFIG_MAC) */
             default:
                 hw->io_ports[i] = 0;
                 break;
@@ -3184,12 +3158,7 @@ int ide_wait_cmd_task (ide_drive_t *drive, byte *buf)
  */
 void ide_delay_50ms (void)
 {
-#ifndef CONFIG_BLK_DEV_IDECS
     mdelay(50);
-#else
-    __set_current_state(TASK_UNINTERRUPTIBLE);
-    schedule_timeout(HZ/20);
-#endif /* CONFIG_BLK_DEV_IDECS */
 }
 
 int system_bus_clock (void)
@@ -3638,17 +3607,6 @@ int __init ide_setup (char *s)
     printk("ide_setup: %s", s);
     init_ide_data ();
 
-#ifdef CONFIG_BLK_DEV_IDEDOUBLER
-    if (!strcmp(s, "ide=doubler"))
-    {
-        extern int ide_doubler;
-
-        printk(" : Enabled support for IDE doublers\n");
-        ide_doubler = 1;
-        return 1;
-    }
-#endif /* CONFIG_BLK_DEV_IDEDOUBLER */
-
     if (!strcmp(s, "ide=nodma"))
     {
         printk("IDE: Prevented DMA\n");
@@ -3819,34 +3777,6 @@ int __init ide_setup (char *s)
             goto done;
         }
 #endif /* CONFIG_BLK_DEV_CMD640 */
-#ifdef CONFIG_BLK_DEV_HT6560B
-        case -13: /* "ht6560b" */
-        {
-            extern void init_ht6560b (void);
-            init_ht6560b();
-            goto done;
-        }
-#endif /* CONFIG_BLK_DEV_HT6560B */
-#if CONFIG_BLK_DEV_QD65XX
-        case -12: /* "qd65xx" */
-        {
-            extern void init_qd65xx (void);
-            init_qd65xx();
-            goto done;
-        }
-#endif /* CONFIG_BLK_DEV_QD65XX */
-#ifdef CONFIG_BLK_DEV_4DRIVES
-        case -11: /* "four" drives on one set of ports */
-        {
-            ide_hwif_t *mate = &ide_hwifs[hw^1];
-            mate->drives[0].select.all ^= 0x20;
-            mate->drives[1].select.all ^= 0x20;
-            hwif->chipset = mate->chipset = ide_4drives;
-            mate->irq = hwif->irq;
-            memcpy(mate->io_ports, hwif->io_ports, sizeof(hwif->io_ports));
-            goto do_serialize;
-        }
-#endif /* CONFIG_BLK_DEV_4DRIVES */
         case -10: /* minus10 */
         case -9: /* minus9 */
         case -8: /* minus8 */
@@ -3935,12 +3865,6 @@ static void __init probe_for_hwifs (void)
     }
 #endif /* CONFIG_PCI */
 
-#ifdef CONFIG_ETRAX_IDE
-    {
-        extern void init_e100_ide(void);
-        init_e100_ide();
-    }
-#endif /* CONFIG_ETRAX_IDE */
 #ifdef CONFIG_BLK_DEV_CMD640
     {
         extern void ide_probe_for_cmd640x(void);

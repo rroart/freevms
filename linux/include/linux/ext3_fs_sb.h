@@ -70,10 +70,6 @@ struct ext3_sb_info
     struct list_head s_orphan;
     unsigned long s_commit_interval;
     struct block_device *journal_bdev;
-#ifdef CONFIG_JBD_DEBUG
-    struct timer_list turn_ro_timer;    /* For turning read-only (crash simulation) */
-    wait_queue_head_t ro_wait_queue;    /* For people waiting for the fs to go read-only */
-#endif
 };
 
 #endif  /* _LINUX_EXT3_FS_SB */

@@ -43,7 +43,7 @@
 
 extern spinlock_t rtc_lock;
 
-#if defined(CONFIG_BLK_DEV_IDE) || defined(CONFIG_BLK_DEV_HD) || defined(CONFIG_BLK_DEV_IDE_MODULE) || defined(CONFIG_BLK_DEV_HD_MODULE)
+#if defined(CONFIG_BLK_DEV_IDE)
 extern struct drive_info_struct drive_info;
 EXPORT_SYMBOL(drive_info);
 #endif

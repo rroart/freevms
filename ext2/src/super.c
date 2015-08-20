@@ -240,11 +240,7 @@ static int parse_options (char * options, unsigned long * sb_block,
             if (!value || !*value || !strcmp (value, "none"))
                 clear_opt (*mount_options, CHECK);
             else
-#ifdef CONFIG_EXT2_CHECK
-                set_opt (*mount_options, CHECK);
-#else
                 printk("EXT2 Check option not supported\n");
-#endif
         }
         else if (!strcmp (this_char, "debug"))
             set_opt (*mount_options, DEBUG);
@@ -397,13 +393,6 @@ static int ext2_setup_super (struct ext2_super_block * sb,
                 EXT2_BLOCKS_PER_GROUP(sb),
                 EXT2_INODES_PER_GROUP(sb),
                 sb->s_mount_opt);
-#ifdef CONFIG_EXT2_CHECK
-    if (test_opt (sb, CHECK))
-    {
-        ext2_check_blocks_bitmap (sb);
-        ext2_check_inodes_bitmap (sb);
-    }
-#endif
     return res;
 }
 #endif

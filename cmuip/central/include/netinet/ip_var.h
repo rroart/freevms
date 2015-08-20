@@ -48,6 +48,9 @@
  *  ip_var.h    6.4 (Berkeley) 6/8/85
  */
 
+#ifndef IP_VAR_H
+#define IP_VAR_H
+
 /*
  * Overlay for ip header used by other protocols (tcp, udp).
  */
@@ -142,3 +145,5 @@ u_short ip_id;              /* ip packet ctr, for ids */
 
 struct mbuf *ip_srcroute();
 #endif
+
+#endif /* IP_VAR_H */

@@ -1,5 +1,8 @@
 /*  tcp_debug.h 6.1 83/07/29    */
 
+#ifndef TCP_DEBUG_H
+#define TCP_DEBUG_H
+
 struct  tcp_debug
 {
     n_time  td_time;
@@ -25,3 +28,5 @@ char    *tanames[] =
 #define TCP_NDEBUG 100
 struct  tcp_debug tcp_debug[TCP_NDEBUG];
 int tcp_debx;
+
+#endif TCP_DEBUG_H

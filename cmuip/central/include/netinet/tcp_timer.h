@@ -48,6 +48,9 @@
  *  tcp_timer.h 7.3 (Berkeley) 6/30/87
  */
 
+#ifndef TCP_TIMER_H
+#define TCP_TIMER_H
+
 /*
  * Definitions of the TCP timers.  These timers are counted
  * down PR_SLOWHZ times a second.
@@ -136,3 +139,5 @@ char *tcptimers[] =
 #ifdef KERNEL
 extern int tcp_backoff[];
 #endif
+
+#endif /* TCP_TIMER_H */

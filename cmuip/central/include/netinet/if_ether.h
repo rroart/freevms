@@ -48,6 +48,9 @@
  *  if_ether.h  6.5 (Berkeley) 6/8/85
  */
 
+#ifndef IF_ETHER_H
+#define IF_ETHER_H
+
 /*
  * Structure of a 10Mb/s Ethernet header.
  */
@@ -132,3 +135,5 @@ struct  arptab *arptnew();
 extern int nETHER; /* defined conf.c */
 char *ether_sprintf();
 #endif
+
+#endif /* IF_ETHER_H */

@@ -46,6 +46,9 @@
  *  @(#)in_pcb.h    6.2 (Berkeley) 6/8/85
  */
 
+#ifndef IN_PCB_H
+#define IN_PCB_H
+
 /*
  * Common structure pcb for internet protocol implementation.
  * Here are stored pointers to local and foreign host table
@@ -77,3 +80,5 @@ struct inpcb
 #ifdef KERNEL
 struct  inpcb *in_pcblookup();
 #endif
+
+#endif /* IN_PCB_H */

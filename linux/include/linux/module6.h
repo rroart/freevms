@@ -211,13 +211,8 @@ void *__symbol_get_gpl(const char *symbol);
     __EXPORT_SYMBOL(sym, "_gpl_future")
 
 
-#ifdef CONFIG_UNUSED_SYMBOLS
-#define EXPORT_UNUSED_SYMBOL(sym) __EXPORT_SYMBOL(sym, "_unused")
-#define EXPORT_UNUSED_SYMBOL_GPL(sym) __EXPORT_SYMBOL(sym, "_unused_gpl")
-#else
 #define EXPORT_UNUSED_SYMBOL(sym)
 #define EXPORT_UNUSED_SYMBOL_GPL(sym)
-#endif
 
 #endif
 
@@ -327,20 +322,6 @@ struct module
     /* Am I GPL-compatible */
     int license_gplok;
 
-#ifdef CONFIG_MODULE_UNLOAD
-    /* Reference counts */
-    struct module_ref ref[NR_CPUS];
-
-    /* What modules depend on me? */
-    struct list_head modules_which_use_me;
-
-    /* Who is waiting for us to be unloaded */
-    struct task_struct *waiter;
-
-    /* Destruction function. */
-    void (*exit)(void);
-#endif
-
 #ifdef CONFIG_KALLSYMS
     /* We keep the symbol and string tables for kallsyms. */
     Elf_Sym *symtab;
@@ -386,54 +367,6 @@ extern void __module_put_and_exit(struct module *mod, long code)
 __attribute__((noreturn));
 #define module_put_and_exit(code) __module_put_and_exit(THIS_MODULE, code);
 
-#ifdef CONFIG_MODULE_UNLOAD
-unsigned int module_refcount(struct module *mod);
-void __symbol_put(const char *symbol);
-#define symbol_put(x) __symbol_put(MODULE_SYMBOL_PREFIX #x)
-void symbol_put_addr(void *addr);
-
-/* Sometimes we know we already have a refcount, and it's easier not
-   to handle the error case (which only happens with rmmod --wait). */
-static inline void __module_get(struct module *module)
-{
-    if (module)
-    {
-        BUG_ON(module_refcount(module) == 0);
-        local_inc(&module->ref[get_cpu()].count);
-        put_cpu();
-    }
-}
-
-static inline int try_module_get(struct module *module)
-{
-    int ret = 1;
-
-    if (module)
-    {
-        unsigned int cpu = get_cpu();
-        if (likely(module_is_live(module)))
-            local_inc(&module->ref[cpu].count);
-        else
-            ret = 0;
-        put_cpu();
-    }
-    return ret;
-}
-
-static inline void module_put(struct module *module)
-{
-    if (module)
-    {
-        unsigned int cpu = get_cpu();
-        local_dec(&module->ref[cpu].count);
-        /* Maybe they're waiting for us to drop reference? */
-        if (unlikely(!module_is_live(module)))
-            wake_up_process(module->waiter);
-        put_cpu();
-    }
-}
-
-#else /*!CONFIG_MODULE_UNLOAD*/
 static inline int try_module_get(struct module *module)
 {
     return !module || module_is_live(module);
@@ -446,8 +379,6 @@ static inline void __module_get(struct module *module)
 }
 #define symbol_put(x) do { } while(0)
 #define symbol_put_addr(p) do { } while(0)
-
-#endif /* CONFIG_MODULE_UNLOAD */
 
 /* This is a #define so the string doesn't get put in every .o file */
 #define module_name(mod)            \

@@ -38,6 +38,9 @@ static  char    *sccsid = "@(#)tcp_seq.h    4.1.1.1 (ULTRIX)    1/20/88";
  */
 /*  tcp_seq.h   6.1 83/07/29    */
 
+#ifndef TCP_SEQ_H
+#define TCP_SEQ_H
+
 /*
  * TCP sequence numbers are 32 bit integers operated
  * on with modular arithmetic.  These macros can be
@@ -65,3 +68,5 @@ static  char    *sccsid = "@(#)tcp_seq.h    4.1.1.1 (ULTRIX)    1/20/88";
 #ifdef KERNEL
 tcp_seq tcp_iss;        /* tcp initial send seq # */
 #endif
+
+#endif /* TCP_SEQ_H */

@@ -568,10 +568,8 @@ unsigned int __init ata66_piix (ide_hwif_t *hwif)
 
 void __init ide_init_piix (ide_hwif_t *hwif)
 {
-#ifndef CONFIG_IA64
     if (!hwif->irq)
         hwif->irq = hwif->channel ? 15 : 14;
-#endif /* CONFIG_IA64 */
 
     if (hwif->pci_dev->device == PCI_DEVICE_ID_INTEL_82371MX)
     {

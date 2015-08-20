@@ -65,11 +65,7 @@
 #endif
 
 #ifndef mmiowb
-#ifdef CONFIG_IA64
-#define mmiowb() asm volatile ("mf.a" ::: "memory")
-#else
 #define mmiowb()
-#endif
 #endif
 
 #ifndef IRQ_HANDLED
@@ -84,10 +80,6 @@
 
 #ifndef HAVE_FREE_NETDEV
 #define free_netdev(x)  kfree(x)
-#endif
-
-#ifdef HAVE_POLL_CONTROLLER
-#define CONFIG_NET_POLL_CONTROLLER
 #endif
 
 #ifndef NETDEV_TX_OK

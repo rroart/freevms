@@ -895,11 +895,7 @@ int ide_replace_subdriver(ide_drive_t *drive, const char *driver);
 #ifdef CONFIG_BLK_DEV_IDEPCI
 #define ON_BOARD        1
 #define NEVER_BOARD     0
-#ifdef CONFIG_BLK_DEV_OFFBOARD
-#  define OFF_BOARD     ON_BOARD
-#else /* CONFIG_BLK_DEV_OFFBOARD */
-#  define OFF_BOARD     NEVER_BOARD
-#endif /* CONFIG_BLK_DEV_OFFBOARD */
+#define OFF_BOARD     NEVER_BOARD
 
 unsigned long ide_find_free_region (unsigned short size) __init;
 void ide_scan_pcibus (int scan_direction) __init;

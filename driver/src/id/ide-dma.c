@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2007.
 
 /*
@@ -321,11 +321,6 @@ static int ide_build_sglist (ide_hwif_t *hwif, struct request *rq)
 int ide_build_dmatable (ide_drive_t *drive, ide_dma_action_t func)
 {
     unsigned int *table = HWIF(drive)->dmatable_cpu;
-#ifdef CONFIG_BLK_DEV_TRM290
-    unsigned int is_trm290_chipset = (HWIF(drive)->chipset == ide_trm290);
-#else
-    const int is_trm290_chipset = 0;
-#endif
     unsigned int count = 0;
     int i;
     struct scatterlist *sg;
@@ -365,8 +360,6 @@ int ide_build_dmatable (ide_drive_t *drive, ide_dma_action_t func)
                     bcount = cur_len;
                 *table++ = cpu_to_le32(cur_addr);
                 xcount = bcount & 0xffff;
-                if (is_trm290_chipset)
-                    xcount = ((xcount >> 2) - 1) << 16;
                 if (xcount == 0x0000)
                 {
                     /*
@@ -395,8 +388,7 @@ int ide_build_dmatable (ide_drive_t *drive, ide_dma_action_t func)
 
     if (count)
     {
-        if (!is_trm290_chipset)
-            *--table |= cpu_to_le32(0x80000000);
+        *--table |= cpu_to_le32(0x80000000);
         return count;
     }
     printk("%s: empty DMA table?\n", drive->name);
@@ -549,7 +541,6 @@ static int config_drive_for_dma (ide_drive_t *drive)
     return hwif->dmaproc(ide_dma_off_quietly, drive);
 }
 
-#ifndef CONFIG_BLK_DEV_IDEDMA_TIMEOUT
 /*
  * 1 dmaing, 2 error, 4 intr
  */
@@ -574,30 +565,6 @@ static int dma_timer_expiry (ide_drive_t *drive)
         return WAIT_CMD;
     return 0;
 }
-#else /* CONFIG_BLK_DEV_IDEDMA_TIMEOUT */
-static ide_startstop_t ide_dma_timeout_revovery (ide_drive_t *drive)
-{
-    ide_hwgroup_t *hwgroup  = HWGROUP(drive);
-    ide_hwif_t *hwif    = HWIF(drive);
-    int enable_dma      = drive->using_dma;
-    unsigned long flags;
-    ide_startstop_t startstop;
-
-    spin_lock_irqsave(&io_request_lock, flags);
-    hwgroup->handler = NULL;
-    del_timer(&hwgroup->timer);
-    spin_unlock_irqrestore(&io_request_lock, flags);
-
-    drive->waiting_for_dma = 0;
-
-    startstop = ide_do_reset(drive);
-
-    if ((enable_dma) && !(drive->using_dma))
-        (void) hwif->dmaproc(ide_dma_on, drive);
-
-    return startstop;
-}
-#endif /* CONFIG_BLK_DEV_IDEDMA_TIMEOUT */
 
 /*
  * ide_dmaproc() initiates/aborts DMA read/write operations on a drive.
@@ -649,11 +616,7 @@ int ide_dmaproc (ide_dma_action_t func, ide_drive_t *drive)
         drive->waiting_for_dma = 1;
         if (drive->media != ide_disk)
             return 0;
-#ifdef CONFIG_BLK_DEV_IDEDMA_TIMEOUT
-        ide_set_handler(drive, &ide_dma_intr, WAIT_CMD, NULL);  /* issue cmd to drive */
-#else /* !CONFIG_BLK_DEV_IDEDMA_TIMEOUT */
         ide_set_handler(drive, &ide_dma_intr, WAIT_CMD, dma_timer_expiry);  /* issue cmd to drive */
-#endif /* CONFIG_BLK_DEV_IDEDMA_TIMEOUT */
         OUT_BYTE(reading ? WIN_READDMA : WIN_WRITEDMA, IDE_COMMAND_REG);
     case ide_dma_begin:
         /* Note that this is done *after* the cmd has
@@ -686,39 +649,6 @@ int ide_dmaproc (ide_dma_action_t func, ide_drive_t *drive)
     case ide_dma_verbose:
         return report_drive_dmaing(drive);
     case ide_dma_timeout:
-        // FIXME: Many IDE chipsets do not permit command file register access
-        // FIXME: while the bus-master function is still active.
-        // FIXME: To prevent deadlock with those chipsets, we must be extremely
-        // FIXME: careful here (and in ide_intr() as well) to NOT access any
-        // FIXME: registers from the 0x1Fx/0x17x sets before terminating the
-        // FIXME: bus-master operation via the bus-master control reg.
-        // FIXME: Otherwise, chipset deadlock will occur, and some systems will
-        // FIXME: lock up completely!!
-#ifdef CONFIG_BLK_DEV_IDEDMA_TIMEOUT
-        /*
-         * Have to issue an abort and requeue the request
-         * DMA engine got turned off by a goofy ASIC, and
-         * we have to clean up the mess, and here is as good
-         * as any.  Do it globally for all chipsets.
-         */
-        outb(0x00, dma_base);       /* stop DMA */
-        dma_stat = inb(dma_base+2); /* get DMA status */
-        outb(dma_stat|6, dma_base+2);   /* clear the INTR & ERROR bits */
-        printk("%s: %s: Lets do it again!" \
-               "stat = 0x%02x, dma_stat = 0x%02x\n",
-               drive->name, ide_dmafunc_verbose(func),
-               GET_STAT(), dma_stat);
-
-        if (dma_stat & 0xF0)
-            return ide_dma_timeout_revovery(drive);
-
-        printk("%s: %s: (restart_request) Lets do it again!" \
-               "stat = 0x%02x, dma_stat = 0x%02x\n",
-               drive->name, ide_dmafunc_verbose(func),
-               GET_STAT(), dma_stat);
-
-        return restart_request(drive);  // BUG: return types do not match!!
-#endif /* CONFIG_BLK_DEV_IDEDMA_TIMEOUT */
     case ide_dma_retune:
     case ide_dma_lostirq:
         printk("ide_dmaproc: chipset supported %s func only: %d\n", ide_dmafunc_verbose(func),  func);
@@ -810,12 +740,6 @@ unsigned long __init ide_get_or_set_dma_base (ide_hwif_t *hwif, int extra, const
     unsigned long   dma_base = 0;
     struct pci_dev  *dev = hwif->pci_dev;
 
-#ifdef CONFIG_BLK_DEV_IDEDMA_FORCED
-    int second_chance = 0;
-
-second_chance_to_dma:
-#endif /* CONFIG_BLK_DEV_IDEDMA_FORCED */
-
     if (hwif->mate && hwif->mate->dma_base)
     {
         dma_base = hwif->mate->dma_base - (hwif->channel ? 0 : 8);
@@ -829,30 +753,6 @@ second_chance_to_dma:
             dma_base = 0;
         }
     }
-
-#ifdef CONFIG_BLK_DEV_IDEDMA_FORCED
-    if ((!dma_base) && (!second_chance))
-    {
-        unsigned long set_bmiba = 0;
-        second_chance++;
-        switch(dev->vendor)
-        {
-        case PCI_VENDOR_ID_AL:
-            set_bmiba = DEFAULT_BMALIBA;
-            break;
-        case PCI_VENDOR_ID_VIA:
-            set_bmiba = DEFAULT_BMCRBA;
-            break;
-        case PCI_VENDOR_ID_INTEL:
-            set_bmiba = DEFAULT_BMIBA;
-            break;
-        default:
-            return dma_base;
-        }
-        pci_write_config_dword(dev, 0x20, set_bmiba|1);
-        goto second_chance_to_dma;
-    }
-#endif /* CONFIG_BLK_DEV_IDEDMA_FORCED */
 
     if (dma_base)
     {
