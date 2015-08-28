@@ -51,6 +51,9 @@
  *  in.h    6.5 (Berkeley) 6/8/85
  */
 
+#ifndef NETINET_IN_H
+#define NETINET_IN_H
+
 /*
  * Constants and structures defined by the internet system,
  * Per RFC 790, September 1981.
@@ -201,3 +204,5 @@ struct  in_addr in_makeaddr();
 extern  int nINET;
 u_long        in_netof(), in_lnaof();
 #endif
+
+#endif /* NETINET_IN_H */

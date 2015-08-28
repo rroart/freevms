@@ -1948,12 +1948,12 @@ struct lnmhshp lnmhshp;
 
 struct _tqe tqe, tqe2;
 
-struct _cpu vmscpus[32]; /* max. this number should be defined */
+struct _cpu vmscpus[32]; /* FIXME max. this number should be defined */
 
 //long long forklistheads[32][6];
 
 struct _rsb * reshashtbl[2 * RESHASHTBL];
-unsigned long lockidtbl[LOCKIDTBL];
+struct _lkb * lockidtbl[LOCKIDTBL];
 unsigned long lockmaxid;
 unsigned long locknxtid;
 

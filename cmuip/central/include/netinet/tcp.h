@@ -46,6 +46,9 @@
  *  @(#)tcp.h   6.3 (Berkeley) 6/8/85
  */
 
+#ifndef NETINET_TCP_H
+#define NETINET_TCP_H
+
 #define TCPLOOPBACK
 typedef u_long  tcp_seq;
 /*
@@ -91,3 +94,4 @@ struct tcphdr
 #define TCP_NODELAY     0x01    /* don't delay send to coalesce packets */
 #define TCP_MAXSEG      0x02    /* set maximum segment size */
 
+#endif /* NETINET_TCP_H */

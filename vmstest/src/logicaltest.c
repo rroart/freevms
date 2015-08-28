@@ -67,9 +67,9 @@ int call_sys$trnlnm(char *table_name, char *logical_name, char *value_list, unsi
     unsigned short value_length;
     struct _ile3 item_list[] =
     {
-        { 4, LNM$_INDEX, &item_index, NULL },
+        { sizeof(item_index), LNM$_INDEX, &item_index, NULL },
         { 0, LNM$_STRING, NULL, &value_length },
-        { 4, LNM$_MAX_INDEX, &max_item_index, NULL },
+        { sizeof(max_item_index), LNM$_MAX_INDEX, &max_item_index, NULL },
         { 0, 0, NULL, NULL }
     };
 

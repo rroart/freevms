@@ -1,5 +1,5 @@
-#ifndef __SOCKET_LOADED
-#define __SOCKET_LOADED 1
+#ifndef CMU_SOCKET_H
+#define CMU_SOCKET_H
 
 /*
  * Copyright (c) 1982 Regents of the University of California.
@@ -200,4 +200,4 @@ int getsockopt( int sd, int level, int optname, char *optval, int *optlen);
 int setsockopt( int sd, int level, int optname, char *optval, int optlen);
 int vaxc$get_sdc( int descrip_no);
 
-#endif                  /* __SOCKET_LOADED */
+#endif /* CMU_SOCKET_H */

@@ -1,5 +1,8 @@
 /*  tcpip.h 6.1 83/07/29    */
 
+#ifndef TCPIP_H
+#define TCPIP_H
+
 /*
  * Tcp+ip header, after ip options removed.
  */
@@ -25,3 +28,5 @@ struct tcpiphdr
 #define ti_win      ti_t.th_win
 #define ti_sum      ti_t.th_sum
 #define ti_urp      ti_t.th_urp
+
+#endif /* TCPIP_H */

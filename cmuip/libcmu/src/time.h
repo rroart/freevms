@@ -1,5 +1,5 @@
-#ifndef __TIME_LOADED
-#define __TIME_LOADED   1
+#ifndef CMU_TIME_H
+#define CMU_TIME_H
 
 /*  TIME - V3.0 - Localtime() RTL Routine Return Structure Definition   */
 /*
@@ -102,4 +102,4 @@ double vaxc$ddifftime(time_t time2, time_t time1);
 #endif
 #endif
 
-#endif                  /* __TIME_LOADED */
+#endif /* CMU_TIME_H */

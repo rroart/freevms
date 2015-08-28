@@ -106,10 +106,10 @@ int sys$dassgn(unsigned short chan);
 
 int sys$assign(void *devnam, unsigned short *chan, unsigned int acmode, void *mbxnam, unsigned int flags);
 
-int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb, void (*astadr)(__unknown_params),
+int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb, void (*astadr)(),
         long astprm, void *p1, long p2, long p3, long p4, long p5, long p6);
 
-int sys$qio(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb, void (*astadr)(__unknown_params),
+int sys$qio(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb, void (*astadr)(),
         long astprm, void *p1, long p2, long p3, long p4, long p5, long p6);
 
 int sys$clrast(void);
@@ -208,7 +208,7 @@ int sys$set_security(void *clsnam, void *objnam, unsigned int *objhan, unsigned 
 int sys$fao(void * ctrstr, short int * outlen, void * outbuf, ...);
 int sys$faol(void * ctrstr, short int * outlen, void * outbuf, int * prmlst);
 int sys$getuai(unsigned int efn, unsigned int *contxt, void *usrnam, void *itmlst, struct _iosb *iosb,
-        void (*astadr)(__unknown_params), int astprm);
+        void (*astadr)(), int astprm);
 int sys$wake(unsigned long *pidadr, void *prcnam);
 int sys$find_held(struct _generic_64 *holder, unsigned int *id, unsigned int *attrib, unsigned int *contxt);
 int sys$asctoid(void *name, unsigned int *id, unsigned int *attrib);

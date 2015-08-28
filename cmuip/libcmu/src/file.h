@@ -1,5 +1,5 @@
-#ifndef __FILE_LOADED
-#define __FILE_LOADED   1
+#ifndef CMU_FILE_H
+#define CMU_FILE_H
 
 /*  FILE - V3.0 */
 
@@ -63,4 +63,4 @@
 #define F_SETOWN 6  /* Set owner */
 #endif
 
-#endif                  /* __FILE_LOADED */
+#endif /* CMU_FILE_H */

@@ -1,5 +1,8 @@
 /*  udp.h   6.1 83/07/29    */
 
+#ifndef NETINET_UDP_H
+#define NETINET_UDP_H
+
 /*
  * Udp protocol header.
  * Per RFC 768, September, 1981.
@@ -11,3 +14,5 @@ struct udphdr
     short   uh_ulen;        /* udp length */
     u_short uh_sum;         /* udp checksum */
 };
+
+#endif /* NETINET_UDP_H */

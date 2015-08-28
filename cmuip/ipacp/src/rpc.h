@@ -20,9 +20,13 @@
     ****************************************************************
 */
 
+#ifndef RPC_H
+#define RPC_H
+
 /* Define well-known RPC programs */
 #define RPCPROG_PMAP        100000
 #define RPCPROG_NFS     100003
 #define RPCPROG_MOUNT       100005
 #define RPCPROG_PCNFSD      150001
 
+#endif /* RPC_H */

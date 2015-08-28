@@ -21,8 +21,8 @@
 /*
  * Ioctl definitions
  */
-#ifndef _IOCTL_
-#define _IOCTL_
+#ifndef CMU_IOCTL_H
+#define CMU_IOCTL_H
 
 #ifndef VMS /* tty*.h aren't needed on OpenVMS systems [today] */
 #ifdef KERNEL
@@ -298,4 +298,5 @@ struct ttysize
 
 #define HYSETROUTE  _IOW(i, 0x80, struct hyrsetget) /* set hy routes */
 #define HYGETROUTE  _IOW(i, 0x81, struct hyrsetget) /* get hy routes */
-#endif
+
+#endif /* CMU_IOCTL_H */

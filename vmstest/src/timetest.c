@@ -50,4 +50,7 @@ void run_time_test(void)
     EXPECT_EQ(call_sys$bintim(time_name, &date_time_copy), SS$_NORMAL);
     EXPECT_EQ(memcmp(&date_time, &date_time_copy, sizeof(date_time)), 0);
     EXPECT_EQ(call_sys$numtim(time_vector, &date_time_copy), SS$_NORMAL);
+
+    EXPECT_EQ(call_sys$bintim("17-NOV-1858 00:01:23.45", &date_time), SS$_NORMAL);
+    EXPECT_EQ((long)(date_time - ((((60 * 1) + 23) * 1000) + 450) * 1000 * 10), 0);
 }

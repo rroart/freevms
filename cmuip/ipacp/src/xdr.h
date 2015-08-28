@@ -56,8 +56,8 @@
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
-#ifndef __XDR_HEADER__
-#define __XDR_HEADER__
+#ifndef XDR_H
+#define XDR_H
 
 /*
  * XDR provides a conventional way for converting between C data
@@ -293,4 +293,4 @@ extern bool_t xdrrec_endofrecord(); /* make end of xdr record */
 extern bool_t xdrrec_skiprecord();  /* move to beginning of next record */
 extern bool_t xdrrec_eof();     /* true if no more input */
 
-#endif !__XDR_HEADER__
+#endif /* XDR_H */

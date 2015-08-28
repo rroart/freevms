@@ -47,6 +47,9 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
+#ifndef ASN1_H
+#define ASN1_H
+
 #ifndef EIGHTBIT_SUBIDS
 typedef u_long  oid;
 #define MAX_SUBID   0xFFFFFFFF
@@ -95,3 +98,5 @@ u_char  *asn_parse_objid();
 u_char  *asn_build_objid();
 u_char  *asn_parse_null();
 u_char  *asn_build_null();
+
+#endif /* ASN1_H */

@@ -57,6 +57,9 @@
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
+#ifndef RPC_MSG_H
+#define RPC_MSG_H
+
 #define RPC_MSG_VERSION     ((u_long) 2)
 #define RPC_SERVICE_PORT    ((u_short) 2048)
 
@@ -222,3 +225,5 @@ extern bool_t   xdr_replymsg();
  *  struct rpc_err *error;
  */
 extern void _seterr_reply();
+
+#endif /* RPC_MSG_H */

@@ -25,6 +25,8 @@
 
 //Sbttl   'XE Driver Literals'
 
+#ifndef XEDRV_H
+#define XEDRV_H
 
 #define     XE_IP_type    0x800 //Ethernet IP packet type
 #define     XE_ARP_type   0x806 //Ethernet ARP packet type
@@ -322,3 +324,5 @@ MACRO XERCV_structure = BLOCK[XESND_len] FIELD(XE_recv)%;
 #define drv$seg_get(Size) IPACP_Interface->ACPI$Seg_Get(Size)
 
 #define drv$device_error IPACP_Interface->ACPI$Device_Error
+
+#endif /* XEDRV_H */

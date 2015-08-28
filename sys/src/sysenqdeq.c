@@ -71,7 +71,7 @@ int dlminit(void)
 }
 
 extern struct _rsb * reshashtbl[];
-extern unsigned long lockidtbl[];
+extern struct _lkb * lockidtbl[];
 
 static int dlmconnected=0;
 
@@ -137,7 +137,7 @@ void insert_reshashtbl(struct _rsb *res)
 int insert_lck(struct _lkb * lck)
 {
     int i;
-    for(i=1; i<LOCKIDTBL && (lockidtbl[i]&0xffff0000); i++) ;
+    for(i=1; i<LOCKIDTBL && ((unsigned long)lockidtbl[i] & 0xffff0000); i++) ;
     lockidtbl[i]=lck;
     /* index pointer not implemented yet */
     return i;
@@ -493,6 +493,7 @@ int lck$deqlock(struct _lkb *lck, int flags, unsigned int lkid)
         kfree(res);
     }
     vmsunlock(&SPIN_SCS,IPL$_ASTDEL);
+    return SS$_NORMAL; /* FIXME */
 }
 
 asmlinkage int exe$deq(unsigned int lkid, void *valblk, unsigned int acmode, unsigned int flags)
@@ -626,7 +627,7 @@ endblockchk:
             lck->lkb$l_ast=lck->lkb$l_cplastadr;
         }
 
-        if (lck->lkb$l_status&LKB$M_ASYNC || (lck->lkb$b_rmod&LKB$M_PKAST))
+        if ((lck->lkb$l_status&LKB$M_ASYNC) || (lck->lkb$b_rmod&LKB$M_PKAST))
         {
             if (0==(lck->lkb$b_rmod&LKB$M_PKAST))
             {

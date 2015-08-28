@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "devicetest.h"
+#include "locktest.h"
 #include "logicaltest.h"
 #include "processtest.h"
 #include "systemtest.h"
@@ -13,6 +14,7 @@ int main(void)
 {
     printf("Running system services tests ...\n");
     run_device_test();
+    run_lock_test();
     run_logical_test();
     run_process_test();
     run_system_test();

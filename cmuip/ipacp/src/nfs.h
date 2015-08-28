@@ -20,6 +20,9 @@
     ****************************************************************
 */
 
+#ifndef NFS_H
+#define NFS_H
+
 #define FIDSIZE     (16+6)
 
 #define MAXDATA     8192
@@ -27,8 +30,6 @@
 #define MAXNAMLEN    255
 #define COOKIESIZE     4
 #define FHSIZE        32
-
-
 
 /*
 2.3.1.  stat
@@ -62,8 +63,6 @@ typedef enum
     NFSERR_WFLUSH       = 99
 } nfs_stat;
 
-
-
 /*
     2.3.2.  ftype
 
@@ -84,8 +83,6 @@ typedef enum
 } ftype;
 
 
-
-
 /*
     2.3.3.  fhandle
 
@@ -96,8 +93,6 @@ typedef enum
 */
 
 typedef unsigned char fhandle[FHSIZE];
-
-
 
 /*
 2.3.4.  timeval
@@ -113,9 +108,6 @@ typedef struct
     unsigned int seconds;
     unsigned int useconds;
 } timeval;
-
-
-
 
 /*
     2.3.5.  fattr
@@ -156,8 +148,6 @@ typedef struct
     timeval      ctime;
 } fattr;
 
-
-
 /*
     2.3.6.  sattr
 
@@ -177,8 +167,6 @@ typedef struct
     timeval      mtime;
 } sattr;
 
-
-
 /*
     2.3.7.  filename
 
@@ -191,8 +179,6 @@ typedef struct
     unsigned long length;
     unsigned char data[MAXNAMLEN];
 } filename;
-
-
 
 /*
     2.3.8.  path
@@ -208,8 +194,6 @@ typedef struct
     unsigned char data[MAXPATHLEN];
 } path;
 
-
-
 /*
     2.3.9.  attrstat
 
@@ -224,8 +208,6 @@ typedef struct
     fattr attributes;
 } attrstat;
 
-
-
 /*
     2.3.10.  diropargs
 
@@ -239,8 +221,6 @@ typedef struct
     fhandle  dir;
     filename name;
 } diropargs;
-
-
 
 /*
     2.3.11.  diropres
@@ -258,8 +238,6 @@ typedef struct
     fattr   attributes;
 } diropres ;
 
-
-
 /* This structure is passed to NFSPROC_READDIR (#16) */
 
 typedef struct
@@ -269,10 +247,10 @@ typedef struct
     unsigned count;
 } readdirargs;
 
-
-
 typedef struct
 {
     unsigned length;
     unsigned data[];
 } nfsdata;
+
+#endif /* NFS_H */

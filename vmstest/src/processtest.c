@@ -54,10 +54,10 @@ void run_process_test(void)
 
     EXPECT_EQ(call_sys$getjpiw1(JPI$_PRCNAM, NULL, &process_name_length), SS$_ACCVIO);
     EXPECT_EQ(call_sys$getjpiw2(JPI$_PRCNAM, process_name, &process_name_length, JPI$_PID, &extended_process_id, &extended_process_id_len), SS$_NORMAL);
-    EXPECT_EQ(strncmp(process_name, "sstest", process_name_length), 0);
+    EXPECT_EQ(strncmp(process_name, "vmstest", process_name_length), 0);
     EXPECT_EQ(extended_process_id_len, sizeof(extended_process_id));
     EXPECT_EQ(call_sys$getjpiw1(9999, process_name, &process_name_length), SS$_BADPARAM);
     //EXPECT_EQ(call_sys$setpri(&extended_process_id, 11), SS$_NORMAL);
     //EXPECT_EQ(call_sys$setpri(NULL, 5), SS$_NORMAL);
-    EXPECT_EQ(call_sys$setprn("my_sstest"), SS$_NORMAL);
+    EXPECT_EQ(call_sys$setprn("my_vmstest"), SS$_NORMAL);
 }

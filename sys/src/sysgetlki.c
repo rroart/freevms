@@ -39,9 +39,9 @@ int exe_lkiscan_next_id(void ** p, int * id)
     return 1;
 }
 
-asmlinkage int exe$getlki(unsigned long efn, unsigned long *lkidadr,void *itmlst, struct _iosb *iosb, void (*astadr)(), long astprm,unsigned long reserved)
+asmlinkage int exe$getlki(unsigned long efn, unsigned long *lkidadr, void *itmlst, struct _iosb *iosb, void (*astadr)(), long astprm, unsigned long reserved)
 {
-    struct item_list_3 * it=itmlst;
+    struct item_list_3 * it = itmlst;
     struct _lkb * l;
     unsigned int id;
     int sts = exe_lkiscan_next_id ( &l, &id );
@@ -61,7 +61,8 @@ asmlinkage int exe$getlki(unsigned long efn, unsigned long *lkidadr,void *itmlst
             break;
 #endif
         case LKI$_RESNAM:
-            memcpy(it->bufaddr, &l->lkb$l_rsb->rsb$t_resnam, 12);
+            memcpy(it->bufaddr, &l->lkb$l_rsb->rsb$t_resnam, l->lkb$l_rsb->rsb$b_rsnlen);
+            *((unsigned short *)it->retlenaddr) = l->lkb$l_rsb->rsb$b_rsnlen;
             break;
         case LKI$_LKID:
             memcpy(it->bufaddr, &id, sizeof(int));

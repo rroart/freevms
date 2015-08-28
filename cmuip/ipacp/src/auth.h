@@ -59,6 +59,8 @@
  * "sessions".
  */
 
+#ifndef AUTH_H
+#define AUTH_H
 
 #define MAX_AUTH_BYTES  400
 #define MAXNETNAMELEN   255 /* maximum length of network user's name */
@@ -191,3 +193,5 @@ extern AUTH *authdes_create();
 #define AUTH_UNIX   1       /* unix style (uid, gids) */
 #define AUTH_SHORT  2       /* short hand unix style */
 #define AUTH_DES    3       /* des style (encrypted timestamps) */
+
+#endif /* AUTH_H */

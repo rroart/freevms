@@ -44,6 +44,9 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
+#ifndef MIB_H
+#define MIB_H
+
 struct  mib_system
 {
     char    sysDescr[32];   /* textual description */
@@ -287,5 +290,4 @@ struct  mib_egpNeighEntry
 #define MIB_EGPNEIGHSTATE_UP        4
 #define MIB_EGPNEIGHSTATE_CEASE     5
 
-
-
+#endif /* MIB_H */

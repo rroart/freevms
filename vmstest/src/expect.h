@@ -9,8 +9,8 @@ extern unsigned int failed;
 
 #define EXPECT_EQ(x, y)\
     {\
-        int xx = x;\
-        int yy = y;\
+        long xx = x;\
+        long yy = y;\
         if ((xx) == (yy))\
         {\
             passed++;\
@@ -18,15 +18,15 @@ extern unsigned int failed;
         else\
         {\
             failed++;\
-            printf("FAIL %s:%d\n\texpected " #x " == " #y "\n\tgot %d (0x%x) != %d (0x%x)\n",\
-                    __FILE__, __LINE__, xx, (unsigned int)xx, yy, (unsigned int)yy);\
+            printf("FAIL %s:%d\n\texpected " #x " == " #y "\n\tgot %ld (0x%lx) != %ld (0x%lx)\n",\
+                    __FILE__, __LINE__, xx, (unsigned long)xx, yy, (unsigned long)yy);\
         }\
     }
 
 #define EXPECT_NE(x, y)\
     {\
-        int xx = x;\
-        int yy = y;\
+        long xx = x;\
+        long yy = y;\
         if ((xx) != (yy))\
         {\
             passed++;\
@@ -34,15 +34,15 @@ extern unsigned int failed;
         else\
         {\
             failed++;\
-            printf("FAIL %s:%d\n\texpected " #x " != " #y "\n\tgot %d (0x%x)\n",\
-                    __FILE__, __LINE__, xx, (unsigned int)xx);\
+            printf("FAIL %s:%d\n\texpected " #x " != " #y "\n\tgot %ld (0x%lx)\n",\
+                    __FILE__, __LINE__, xx, (unsigned long)xx);\
         }\
     }
 
 #define EXPECT_GE(x, y)\
     {\
-        int xx = x;\
-        int yy = y;\
+        long xx = x;\
+        long yy = y;\
         if ((xx) >= (yy))\
         {\
             passed++;\
@@ -50,15 +50,15 @@ extern unsigned int failed;
         else\
         {\
             failed++;\
-            printf("FAIL %s:%d\n\texpected " #x " >= " #y "\n\tgot %d (0x%x) < %d (0x%x)\n",\
-                    __FILE__, __LINE__, xx, (unsigned int)xx, yy, (unsigned int)yy);\
+            printf("FAIL %s:%d\n\texpected " #x " >= " #y "\n\tgot %ld (0x%lx) < %ld (0x%lx)\n",\
+                    __FILE__, __LINE__, xx, (unsigned long)xx, yy, (unsigned long)yy);\
         }\
     }
 
 #define EXPECT_GT(x, y)\
     {\
-        int xx = x;\
-        int yy = y;\
+        long xx = x;\
+        long yy = y;\
         if ((xx) > (yy))\
         {\
             passed++;\
@@ -66,15 +66,15 @@ extern unsigned int failed;
         else\
         {\
             failed++;\
-            printf("FAIL %s:%d\n\texpected " #x " > " #y "\n\tgot %d (0x%x) <= %d (0x%x)\n",\
-                    __FILE__, __LINE__, xx, (unsigned int)xx, yy, (unsigned int)yy);\
+            printf("FAIL %s:%d\n\texpected " #x " > " #y "\n\tgot %ld (0x%lx) <= %ld (0x%lx)\n",\
+                    __FILE__, __LINE__, xx, (unsigned long)xx, yy, (unsigned long)yy);\
         }\
     }
 
 #define EXPECT_LE(x, y)\
     {\
-        int xx = x;\
-        int yy = y;\
+        long xx = x;\
+        long yy = y;\
         if ((xx) <= (yy))\
         {\
             passed++;\
@@ -82,15 +82,15 @@ extern unsigned int failed;
         else\
         {\
             failed++;\
-            printf("FAIL %s:%d\n\texpected " #x " <= " #y "\n\tgot %d (0x%x) > %d (0x%x)\n",\
-                    __FILE__, __LINE__, xx, (unsigned int)xx, yy, (unsigned int)yy);\
+            printf("FAIL %s:%d\n\texpected " #x " <= " #y "\n\tgot %ld (0x%lx) > %ld (0x%lx)\n",\
+                    __FILE__, __LINE__, xx, (unsigned long)xx, yy, (unsigned long)yy);\
         }\
     }
 
 #define EXPECT_LT(x, y)\
     {\
-        int xx = x;\
-        int yy = y;\
+        long xx = x;\
+        long yy = y;\
         if ((xx) < (yy))\
         {\
             passed++;\
@@ -98,8 +98,8 @@ extern unsigned int failed;
         else\
         {\
             failed++;\
-            printf("FAIL %s:%d\n\texpected " #x " < " #y "\n\tgot %d (0x%x) >= %d (0x%x)\n",\
-                    __FILE__, __LINE__, xx, (unsigned int)xx, yy, (unsigned int)yy);\
+            printf("FAIL %s:%d\n\texpected " #x " < " #y "\n\tgot %ld (0x%lx) >= %ld (0x%lx)\n",\
+                    __FILE__, __LINE__, xx, (unsigned long)xx, yy, (unsigned long)yy);\
         }\
     }
 

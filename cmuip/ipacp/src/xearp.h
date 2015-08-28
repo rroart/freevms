@@ -31,6 +31,9 @@
 //
 // not yet LIBRARY 'CMUIP_SRC:[central]NETXPORT';       // VMS specifics
 
+#ifndef XEARP_H
+#define XEARP_H
+
 #define     AR$OP_REQUEST   1       // Request function
 #define     AR$OP_REPLY   2     // Reply function
 
@@ -105,4 +108,4 @@ XE_ARP_STRUCTURE = BLOCK[XE_ARP_LEN] FIELD(XE_ARP_FIELDS*/;
 
 #define     MAX_RCV_BUF   8
 
-
+#endif /* XEARP_H */

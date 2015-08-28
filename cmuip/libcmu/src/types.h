@@ -1,5 +1,5 @@
-#ifndef __TYPES_LOADED
-#define __TYPES_LOADED  1
+#ifndef CMU_TYPES_H
+#define CMU_TYPES_H
 
 typedef unsigned long int time_t;
 
@@ -87,4 +87,4 @@ fd_mask     fds_bits[howmany(FD_SETSIZE, NFDBITS)];
 #ifndef _FD_SETUP_
 #define fd_set "fd_set not defined in header file sys/types.h"
 #endif
-#endif                  /* __TYPES_LOADED */
+#endif /* CMU_TYPES_H */

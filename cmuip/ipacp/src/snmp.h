@@ -46,6 +46,9 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
+#ifndef SNMP_H
+#define SNMP_H
+
 #define SNMP_PORT       161
 #define SNMP_TRAP_PORT      162
 
@@ -315,3 +318,5 @@ struct TCP_MIB_struct
 #define UDPINNOPORTS     2
 #define UDPINERRORS      3
 #define UDPOUTDATAGRAMS 4
+
+#endif /* SNMP_H */
