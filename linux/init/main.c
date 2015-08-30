@@ -23,7 +23,6 @@
 #include <descrip.h>
 #include <prcdef.h>
 
-#include <linux/config.h>
 #include <linux/types.h>
 #ifdef __x86_64__
 #include <linux/sched.h>
@@ -34,7 +33,6 @@
 #include <linux/delay.h>
 #include <linux/utsname.h>
 #include <linux/ioport.h>
-#include <linux/init.h>
 #include <linux/smp_lock.h>
 #include <linux/blk.h>
 #include <linux/hdreg.h>

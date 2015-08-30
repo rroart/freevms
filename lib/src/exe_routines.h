@@ -14,14 +14,11 @@
 #include <fiddef.h>
 #include <fkbdef.h>
 #include <iosbdef.h>
-#include <irpdef.h>
 #include <jibdef.h>
 #include <kpbdef.h>
 #include <mmgdef.h>
-#include <orbdef.h>
 #include <pcbdef.h>
 #include <rabdef.h>
-#include <tqedef.h>
 #include <ucbdef.h>
 #include <va_rangedef.h>
 

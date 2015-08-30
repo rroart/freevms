@@ -7,7 +7,6 @@
  *    -- C. Scott Ananian <cananian@alumni.princeton.edu>, 14-Jan-1998
  */
 
-#include <linux/config.h>
 #include <linux/module.h>   /* For EXPORT_SYMBOL */
 
 #include <linux/errno.h>
@@ -16,14 +15,11 @@
 #include <linux/tty.h>
 #include <linux/tty_flip.h>
 #include <linux/fcntl.h>
-#include <linux/string.h>
 #include <linux/major.h>
 #include <linux/mm.h>
 #include <linux/init.h>
 
 #include <asm/uaccess.h>
-#include <asm/system.h>
-#include <asm/bitops.h>
 
 #define BUILDING_PTY_C 1
 

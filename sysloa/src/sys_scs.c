@@ -34,7 +34,6 @@
 #include <linux/init.h>
 #include <linux/poll.h>
 #include <linux/vmalloc.h>
-#include <linux/errno.h>
 
 #include <cdldef.h>
 #include <cdrpdef.h>

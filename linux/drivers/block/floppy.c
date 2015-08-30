@@ -183,8 +183,6 @@ static int slow_floppy;
 
 #include <asm/dma.h>
 #include <asm/irq.h>
-#include <asm/system.h>
-#include <asm/io.h>
 #include <asm/uaccess.h>
 
 static int FLOPPY_IRQ=6;

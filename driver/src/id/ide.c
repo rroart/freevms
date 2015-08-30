@@ -517,9 +517,7 @@ int ide_vmsinit(void)
 #ifndef MODULE
 #include <linux/init.h>
 #endif /* MODULE */
-#include <linux/pci.h>
 #include <linux/delay.h>
-#include <linux/ide.h>
 #include <linux/completion.h>
 
 #include <asm/byteorder.h>

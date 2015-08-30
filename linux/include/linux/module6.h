@@ -14,10 +14,6 @@
 #include <linux/cache.h>
 #include <linux/kmod.h>
 #include <linux/elf.h>
-#include <linux/stringify.h>
-#if 0
-#include <asm/local.h>
-#endif
 
 #include <asm/module.h>
 

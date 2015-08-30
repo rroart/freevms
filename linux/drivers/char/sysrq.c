@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /* -*- linux-c -*-
@@ -18,27 +18,19 @@
  *  based upon discusions in irc://irc.openprojects.net/#kernelnewbies
  */
 
-#include <linux/config.h>
 #include <linux/sched.h>
 #include <linux/interrupt.h>
 #include <linux/mm.h>
 #include <linux/fs.h>
 #include <linux/tty.h>
 #include <linux/mount.h>
-#include <linux/kdev_t.h>
 #include <linux/major.h>
 #include <linux/reboot.h>
 #include <linux/sysrq.h>
 #include <linux/kbd_kern.h>
 #include <linux/quotaops.h>
-#include <linux/smp_lock.h>
 #include <linux/module.h>
 
-#include <linux/spinlock.h>
-
-#include <asm/ptrace.h>
-
-#include <linux/sched.h>
 #include <system_data_cells.h>
 
 extern void reset_vc(unsigned int);

@@ -5,7 +5,6 @@
 #include <stdarg.h>
 
 #include <iledef.h>
-#include <iosbdef.h>
 #include <ssdef.h>
 
 inline int _is_itmlst64(const void *item_list)

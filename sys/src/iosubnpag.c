@@ -26,8 +26,6 @@
 #include <ioc_routines.h>
 #include <smp_routines.h>
 
-#include <linux/sched.h>
-
 #undef MYDEB_REQCOM
 #define MYDEB_REQCOM
 

@@ -16,7 +16,6 @@
 #include <linux/spinlock.h>
 #include <linux/list.h>
 #include <asm/bitops.h>
-#include <asm/system.h>
 
 /*
  * New proposed "bottom half" handlers:

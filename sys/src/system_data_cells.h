@@ -4,7 +4,6 @@
 /* cut'n paste and etc from .c */
 
 #include <lnmstrdef.h>
-#include <cpudef.h>
 #include <tqedef.h>
 #include <wqhdef.h>
 #include <rsbdef.h>

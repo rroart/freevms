@@ -1,11 +1,5 @@
 #include <linux/sched.h>
-#include <linux/kernel.h>
 #include <linux/kernel_stat.h>
-#include <linux/errno.h>
-#include <linux/string.h>
-#include <linux/config.h>
-#include <linux/locks.h>
-#include <linux/mm.h>
 #include <linux/init.h>
 #include <linux/smp_lock.h>
 #include <linux/completion.h>
@@ -13,7 +7,6 @@
 #include <asm/system.h>
 #include <asm/io.h>
 #include <linux/blk.h>
-#include <linux/highmem.h>
 #include <linux/slab.h>
 #include <linux/module.h>
 

@@ -14,7 +14,6 @@
  * This function is used through-out the kernel (including mm and fs)
  * to indicate a major problem.
  */
-#include <linux/config.h>
 #include <linux/sched.h>
 #include <linux/delay.h>
 #include <linux/reboot.h>

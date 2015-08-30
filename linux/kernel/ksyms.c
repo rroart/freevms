@@ -15,7 +15,6 @@
  *   by Bjorn Ekwall <bj0rn@blox.se>
  */
 
-#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/blkdev.h>
@@ -35,7 +34,6 @@
 #include <linux/sysctl.h>
 #include <linux/hdreg.h>
 #include <linux/skbuff.h>
-#include <linux/genhd.h>
 #include <linux/blkpg.h>
 #include <linux/ctype.h>
 #include <linux/file.h>
@@ -47,8 +45,6 @@
 #include <linux/capability.h>
 #include <linux/highuid.h>
 #include <linux/brlock.h>
-#include <linux/fs.h>
-#include <linux/tty.h>
 #include <linux/in6.h>
 #include <linux/completion.h>
 #include <linux/seq_file.h>

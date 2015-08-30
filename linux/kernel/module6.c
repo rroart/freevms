@@ -43,32 +43,9 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
-#include <linux/elf.h>
 #include <linux/seq_file.h>
-#if 0
-#include <linux/syscalls.h>
-#include <linux/fcntl.h>
-#include <linux/rcupdate.h>
-#include <linux/capability.h>
-#include <linux/cpu.h>
-#endif
-#include <linux/errno.h>
-#if 0
-#include <linux/notifier.h>
-#endif
 #include <linux/string.h>
-#include <linux/sched.h>
-#if 0
-#include <linux/mutex.h>
-#endif
 #include <asm/uaccess.h>
-#include <asm/semaphore.h>
-#if 0
-#include <asm/cacheflush.h>
-#endif
-#if 0
-#include <linux/license.h>
-#endif
 
 #include <crbdef.h>
 #include <ddbdef.h>

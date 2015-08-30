@@ -17,7 +17,6 @@
 #include <phddef.h>
 #include <ipl.h>
 #include <linux/linkage.h>
-#include <linux/sched.h>
 
 #include <linux/errno.h>
 #include <linux/sched.h>

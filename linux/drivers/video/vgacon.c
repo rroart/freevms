@@ -33,17 +33,13 @@
  *  more details.
  */
 
-#include <linux/config.h>
 #include <linux/module.h>
-#include <linux/types.h>
 #include <linux/sched.h>
 #include <linux/fs.h>
 #include <linux/kernel.h>
 #include <linux/tty.h>
 #include <linux/console.h>
 #include <linux/console_struct.h>
-#include <linux/string.h>
-#include <linux/kd.h>
 #include <linux/slab.h>
 #include <linux/vt_kern.h>
 #include <linux/selection.h>
@@ -285,7 +281,8 @@ no_vga:
 
     /*
      *  Find out if there is a graphics card present.
-     *  Are there smarter methods around?
+     *  Are there smarter method#include <linux/config.h>
+     *  s around?
      */
     p = (volatile u16 *)vga_vram_base;
     saved1 = scr_readw(p);

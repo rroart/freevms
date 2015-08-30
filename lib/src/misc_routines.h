@@ -1,7 +1,6 @@
 #ifndef MISC_ROUTINES_H
 #define MISC_ROUTINES_H
 
-#include <linux/types.h>
 #include <linux/ext2_fs.h>
 #include <linux/kdev_t.h>
 #include <linux/netdevice.h>

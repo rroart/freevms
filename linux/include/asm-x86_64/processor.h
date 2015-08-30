@@ -17,7 +17,6 @@
 #include <asm/msr.h>
 #include <asm/current.h>
 #include <asm/system.h>
-#include <asm/cpufeature.h>
 
 #define TF_MASK     0x00000100
 #define IF_MASK     0x00000200

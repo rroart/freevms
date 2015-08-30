@@ -80,7 +80,6 @@ static int options[MAX_UNITS];
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/errno.h>
-#include <linux/pci.h>
 #include <linux/init.h>
 #include <linux/ethtool.h>
 

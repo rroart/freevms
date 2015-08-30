@@ -1,14 +1,13 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004
 
 /* interrupt.h */
 #ifndef _LINUX_INTERRUPT_H
 #define _LINUX_INTERRUPT_H
 
-#include <linux/config.h>
 #include <linux/kernel.h>
 #include <linux/smp.h>
 #include <linux/cache.h>

@@ -11,7 +11,6 @@
 #include <ssdef.h>
 #include <starlet.h>
 #include <sysdep.h>
-#include <iosbdef.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
 

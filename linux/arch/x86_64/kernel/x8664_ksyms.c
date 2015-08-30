@@ -18,7 +18,6 @@
 #include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/tty.h>
-#include <linux/string.h>
 #include <linux/nmi.h>
 
 #include <asm/ioctl32.h>
@@ -36,7 +35,6 @@
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
 #include <asm/kdebug.h>
-#include <asm/pgtable.h>
 #include <asm/proto.h>
 #define __KERNEL_SYSCALLS__ 1
 #include <asm/unistd.h>

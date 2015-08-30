@@ -28,7 +28,6 @@
 #include <sch_routines.h>
 #include <internals.h>
 
-#include <linux/sched.h>
 #include <linux/slab.h>
 
 #include <asm/uaccess.h>

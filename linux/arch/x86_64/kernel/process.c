@@ -45,7 +45,6 @@
 #include <linux/reboot.h>
 #include <linux/init.h>
 #include <linux/ctype.h>
-#include <linux/slab.h>
 
 #include <asm/uaccess.h>
 #include <asm/pgtable.h>

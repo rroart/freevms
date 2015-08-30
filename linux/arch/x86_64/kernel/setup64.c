@@ -17,7 +17,6 @@
 #include <linux/sched.h>
 #include <linux/string.h>
 #include <asm/pda.h>
-#include <asm/pda.h>
 #include <asm/processor.h>
 #include <asm/desc.h>
 #include <asm/bitops.h>

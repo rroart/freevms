@@ -7,15 +7,14 @@
 #ifndef _LINUX_SCHED_H
 #define _LINUX_SCHED_H
 
-#include <asm/param.h>  /* for HZ */
-
 extern unsigned long event;
 
-#include <linux/config.h>
+#include <linux/param.h>
+#include <linux/resource.h>
+#include <linux/timer.h>
+
 #include <linux/binfmts.h>
 #include <linux/threads.h>
-#include <linux/kernel.h>
-#include <linux/types.h>
 #include <linux/times.h>
 #include <linux/rbtree.h>
 
@@ -24,6 +23,7 @@ extern unsigned long event;
 #include <asm/page.h>
 #include <asm/ptrace.h>
 #include <asm/mmu.h>
+#include <asm/processor.h>
 
 #include <linux/smp.h>
 #include <linux/tty.h>
@@ -84,14 +84,6 @@ extern unsigned long avenrun[];     /* Load averages */
 
 extern int nr_running, nr_threads;
 extern int last_pid;
-
-#include <linux/fs.h>
-#include <linux/time.h>
-#include <linux/param.h>
-#include <linux/resource.h>
-#include <linux/timer.h>
-
-#include <asm/processor.h>
 
 #define TASK_RUNNING        0
 #define TASK_INTERRUPTIBLE  1

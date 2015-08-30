@@ -1,11 +1,9 @@
 #ifndef _LINUX_BLKDEV_H
 #define _LINUX_BLKDEV_H
 
-#include <linux/major.h>
 #include <linux/sched.h>
 #include <linux/genhd.h>
 #include <linux/tqueue.h>
-#include <linux/list.h>
 
 struct request_queue;
 typedef struct request_queue request_queue_t;

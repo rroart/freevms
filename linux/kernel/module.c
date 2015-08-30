@@ -1,5 +1,3 @@
-#include <linux/config.h>
-#include <linux/mm.h>
 #include <linux/module.h>
 #include <asm/module.h>
 #include <asm/uaccess.h>

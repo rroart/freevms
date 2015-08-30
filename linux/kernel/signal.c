@@ -12,7 +12,6 @@
  *  1997-11-02  Modified for POSIX.1b signals by Richard Henderson
  */
 
-#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/unistd.h>

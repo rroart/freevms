@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004
 
 /*
@@ -17,7 +17,6 @@
  * management can be a bitch. See 'mm/memory.c': 'copy_page_range()'
  */
 
-#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/init.h>
 #include <linux/unistd.h>
@@ -27,12 +26,10 @@
 #include <linux/completion.h>
 #include <linux/personality.h>
 
-#include <asm/pgtable.h>
 #include <asm/pgalloc.h>
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
 
-#include <sysgen.h>
 #include <phddef.h>
 #include <pridef.h>
 #include <rdedef.h>

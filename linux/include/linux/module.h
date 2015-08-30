@@ -7,7 +7,6 @@
 #ifndef _LINUX_MODULE_H
 #define _LINUX_MODULE_H
 
-#include <linux/config.h>
 #include <linux/spinlock.h>
 #include <linux/list.h>
 

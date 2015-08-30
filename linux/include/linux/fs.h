@@ -9,7 +9,6 @@
 #include <linux/config.h>
 #include <linux/linkage.h>
 #include <linux/limits.h>
-#include <linux/wait.h>
 #include <linux/types.h>
 #include <linux/net.h>
 #include <linux/kdev_t.h>
@@ -18,7 +17,6 @@
 #include <linux/dcache.h>
 #include <linux/stat.h>
 #include <linux/cache.h>
-#include <linux/stddef.h>
 #include <linux/string.h>
 
 #include <asm/atomic.h>
