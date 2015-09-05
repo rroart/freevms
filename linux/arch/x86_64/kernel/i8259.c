@@ -4,9 +4,6 @@
 // Author. Roar Thron�s.
 // Modified Linux source file, 2001-2006
 
-#include <linux/linkage.h>
-#include <linux/config.h>
-#include <linux/ptrace.h>
 #include <linux/errno.h>
 #include <linux/signal.h>
 #include <linux/sched.h>
@@ -20,12 +17,8 @@
 #include <linux/kernel_stat.h>
 
 #include <asm/acpi.h>
-#include <asm/atomic.h>
 #include <asm/system.h>
 #include <asm/io.h>
-#include <asm/irq.h>
-#include <asm/hw_irq.h>
-#include <asm/bitops.h>
 #include <asm/pgtable.h>
 #include <asm/delay.h>
 #include <asm/desc.h>

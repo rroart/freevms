@@ -136,8 +136,6 @@ struct icmp6_filter
 #ifdef __KERNEL__
 
 #include <linux/netdevice.h>
-#include <linux/skbuff.h>
-
 
 extern void             icmpv6_send(struct sk_buff *skb,
                                     int type, int code,

@@ -1,8 +1,7 @@
 /*
  * Written by Kanoj Sarcar, SGI, Aug 1999
  */
-#include <linux/config.h>
-#include <linux/kernel.h>
+
 #include <linux/mm.h>
 #include <linux/init.h>
 #include <linux/bootmem.h>

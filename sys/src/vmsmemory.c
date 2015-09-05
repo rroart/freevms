@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on memory.c.
 
 /*
@@ -42,7 +42,6 @@
  *      (Gerhard.Wichert@pdb.siemens.de)
  */
 
-#include <linux/config.h>
 #include <linux/mm.h>
 #include <linux/mman.h>
 #include <linux/smp_lock.h>

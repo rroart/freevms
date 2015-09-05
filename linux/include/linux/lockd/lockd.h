@@ -18,7 +18,6 @@
 #include <linux/nfsd/nfsfh.h>
 #include <linux/lockd/bind.h>
 #include <linux/lockd/xdr.h>
-#include <linux/lockd/debug.h>
 
 /*
  * Version string

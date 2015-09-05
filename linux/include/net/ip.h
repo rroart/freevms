@@ -22,14 +22,10 @@
 #ifndef _IP_H
 #define _IP_H
 
-#include <linux/config.h>
 #include <linux/types.h>
 #include <linux/socket.h>
-#include <linux/ip.h>
 #include <linux/netdevice.h>
 #include <linux/inetdevice.h>
-#include <linux/in_route.h>
-#include <linux/rtnetlink.h>
 #include <net/route.h>
 #include <net/arp.h>
 

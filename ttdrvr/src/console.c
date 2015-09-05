@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004
 
 /*
@@ -99,7 +99,6 @@
 #include <linux/consolemap.h>
 #include <linux/timer.h>
 #include <linux/interrupt.h>
-#include <linux/config.h>
 #include <linux/version.h>
 #include <linux/tqueue.h>
 #include <linux/bootmem.h>

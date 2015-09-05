@@ -34,8 +34,6 @@
 #include <asm/byteorder.h>
 
 #ifdef __KERNEL__
-#include <linux/config.h>
-
 struct divert_blk;
 
 #define HAVE_ALLOC_NETDEV       /* feature macro: alloc_xxxdev

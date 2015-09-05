@@ -26,7 +26,6 @@
 #include <system_data_cells.h>
 
 #include <iafdef.h>
-#include <ihddef.h>
 #include <shldef.h>
 
 #include <ssdef.h>

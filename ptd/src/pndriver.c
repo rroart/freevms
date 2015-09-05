@@ -321,7 +321,6 @@ LIB.MLB/
 #include <ttydefs.h>            // DEFINE TERMINAL DRIVER SYMBOLS
 #include <ttymacs.h>            // DEFINE TERMINAL DRIVER MACROS
 #endif
-#include <ucbdef.h>             // DEFINE UCB
 #include <vecdef.h>             // DEFINE VECTOR FOR CRB
 #if 0
 .CROSS
@@ -1794,23 +1793,12 @@ PN$END:
 .END
 #endif
 
-#include <crbdef.h>
 #include <cdtdef.h>
-#include <dcdef.h>
-#include <ddtdef.h>
 #include <dptdef.h>
 #include <fdtdef.h>
 #include <pdtdef.h>
 #include <idbdef.h>
-#include <irpdef.h>
-#include <ucbdef.h>
-#include <ddbdef.h>
 #include <ipldef.h>
-#include <dyndef.h>
-#include <ssdef.h>
-#include <iodef.h>
-#include <devdef.h>
-#include <system_data_cells.h>
 #include <ipl.h>
 #include <linux/pci.h>
 #include <system_service_setup.h>

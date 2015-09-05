@@ -3,7 +3,6 @@
 
 #include <linux/sched.h>
 #include <linux/mm.h>
-#include <linux/spinlock.h>
 
 #include <asm/pgtable.h>
 

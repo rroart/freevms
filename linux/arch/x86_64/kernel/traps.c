@@ -20,12 +20,9 @@
  * 'Traps.c' handles hardware traps and faults after we have saved some
  * state in 'entry.S'.
  */
-#include <linux/config.h>
 #include <linux/sched.h>
-#include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/errno.h>
-#include <linux/ptrace.h>
 #include <linux/timer.h>
 #include <linux/mm.h>
 #include <linux/init.h>

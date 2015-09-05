@@ -33,12 +33,9 @@
 #include <signal.h>
 #include <tt2def.h>
 #include <iodef.h>
-#if 1
 #include <syidef.h>
 #include <misc.h>
-#endif
 #include <starlet.h>
-#include <smg$routines.h>
 #include "smgdef2.h"
 
 #include "dfu.h"

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -20,7 +20,6 @@
  * the dcache entry is deleted or garbage collected.
  */
 
-#include <linux/config.h>
 #include <linux/string.h>
 #include <linux/mm.h>
 #include <linux/fs.h>

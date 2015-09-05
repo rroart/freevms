@@ -3,7 +3,6 @@
 
 // Author. Roar Thron�s.
 
-#include <descrip.h>
 #include <ssdef.h>
 #include <lib$routines.h>
 #include <cli$routines.h>

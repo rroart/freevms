@@ -19,8 +19,6 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
-#include <linux/errno.h>
-#include <linux/ioport.h>
 #include <linux/cache.h>
 #include <linux/slab.h>
 

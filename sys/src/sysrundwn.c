@@ -3,7 +3,6 @@
 
 // Author. Roar Thron�s.
 
-#include <linux/config.h>
 #include <linux/linkage.h>
 
 #include <ssdef.h>

@@ -69,10 +69,7 @@ MODULE IP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 
 // Include standard definition files
 
-#ifdef __i386__
 #include <net/checksum.h>
-#endif
-//LIBRARY "SYS$LIBRARY:STARLET";
 #include <starlet.h>
 // not yet #include "SYS$LIBRARY:LIB";
 #include <cmuip/central/include/neterror.h>
@@ -88,10 +85,6 @@ MODULE IP_User (IDENT="1.0c",LANGUAGE(BLISS32),
 #include <descrip.h>
 #include <ucbdef.h>
 
-#undef TCP_DATA_OFFSET
-#ifdef __x86_64__
-#include <net/checksum.h>
-#endif
 #define Calc_Checksum(x,y) ip_compute_csum(y,x)
 
 //*** Special literals from USER.BLI ***

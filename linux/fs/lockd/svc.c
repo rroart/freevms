@@ -41,7 +41,6 @@
 #include <linux/lockd/lockd.h>
 #include <linux/nfs.h>
 
-#define NLMDBG_FACILITY     NLMDBG_SVC
 #define LOCKD_BUFSIZE       (1024 + NLMSSVC_XDRSIZE)
 #define ALLOWED_SIGS        (sigmask(SIGKILL))
 

@@ -69,9 +69,7 @@ MODULE ICMP(IDENT="1.0B",LANGUAGE(BLISS32),
             OPTIMIZE,OPTLEVEL=3,ZIP)=
 #endif
 
-#ifdef __i386__
 #include <net/checksum.h>
-#endif
 #include <starlet.h>    // VMS system definitions
 #include <cmuip/central/include/netcommon.h>    // Common decls
 // not yet #include "CMUIP_SRC:[CENTRAL]NETXPORT";      // BLISS transportablity package
@@ -84,10 +82,6 @@ MODULE ICMP(IDENT="1.0B",LANGUAGE(BLISS32),
 
 #include <descrip.h>
 
-#undef TCP_DATA_OFFSET
-#ifdef __x86_64__
-#include <net/checksum.h>
-#endif
 #define Calc_Checksum(x,y) ip_compute_csum(y,x)
 
 // Memgr.bli

@@ -22,7 +22,6 @@
 #include <fiddef.h>
 #include <uicdef.h>
 #include <fh2def.h>
-#include <iosbdef.h>
 #include <misc.h>
 #include <namdef.h>
 #include <ssdef.h>

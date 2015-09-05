@@ -1,14 +1,13 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file sys_affinity.c
    \brief system service affinities
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
-#include <linux/config.h>
 #include <linux/linkage.h>
 #include <far_pointers.h>
 #include <linux/sched.h>

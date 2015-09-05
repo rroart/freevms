@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -22,7 +22,6 @@
  * Copyright (C) 1999 Ingo Molnar <mingo@redhat.com>
  */
 
-#include <linux/mm.h>
 #include <linux/pagemap.h>
 #include <linux/highmem.h>
 #include <linux/swap.h>

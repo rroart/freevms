@@ -47,7 +47,6 @@
 #include <vmstime.h>
 
 #include <pridef.h>
-#include <iodef.h>
 #include <misc.h>
 
 #include <fibdef.h>

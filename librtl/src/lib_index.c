@@ -17,7 +17,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "descrip.h"
 #include "strdef.h"
 #include "libdef.h"
 #include "lib$routines.h"

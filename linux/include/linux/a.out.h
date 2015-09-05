@@ -3,60 +3,11 @@
 
 #define __GNU_EXEC_MACROS__
 
-#ifndef __STRUCT_EXEC_OVERRIDE__
-
 #include <asm/a.out.h>
-
-#endif /* __STRUCT_EXEC_OVERRIDE__ */
-
-/* these go in the N_MACHTYPE field */
-enum machine_type
-{
-#if defined (M_OLDSUN2)
-    M__OLDSUN2 = M_OLDSUN2,
-#else
-    M_OLDSUN2 = 0,
-#endif
-#if defined (M_68010)
-    M__68010 = M_68010,
-#else
-    M_68010 = 1,
-#endif
-#if defined (M_68020)
-    M__68020 = M_68020,
-#else
-    M_68020 = 2,
-#endif
-#if defined (M_SPARC)
-    M__SPARC = M_SPARC,
-#else
-    M_SPARC = 3,
-#endif
-    /* skip a bunch so we don't run into any of sun's numbers */
-    M_386 = 100,
-    M_MIPS1 = 151,  /* MIPS R3000/R3000 binary */
-    M_MIPS2 = 152       /* MIPS R6000/R4000 binary */
-};
 
 #if !defined (N_MAGIC)
 #define N_MAGIC(exec) ((exec).a_info & 0xffff)
 #endif
-#define N_MACHTYPE(exec) ((enum machine_type)(((exec).a_info >> 16) & 0xff))
-#define N_FLAGS(exec) (((exec).a_info >> 24) & 0xff)
-#define N_SET_INFO(exec, magic, type, flags) \
-    ((exec).a_info = ((magic) & 0xffff) \
-     | (((int)(type) & 0xff) << 16) \
-     | (((flags) & 0xff) << 24))
-#define N_SET_MAGIC(exec, magic) \
-    ((exec).a_info = (((exec).a_info & 0xffff0000) | ((magic) & 0xffff)))
-
-#define N_SET_MACHTYPE(exec, machtype) \
-    ((exec).a_info = \
-     ((exec).a_info&0xff00ffff) | ((((int)(machtype))&0xff) << 16))
-
-#define N_SET_FLAGS(exec, flags) \
-    ((exec).a_info = \
-     ((exec).a_info&0x00ffffff) | (((flags) & 0xff) << 24))
 
 /* Code indicating object file or impure executable.  */
 #define OMAGIC 0407
@@ -114,23 +65,16 @@ enum machine_type
 /* Address of data segment in memory after it is loaded.
    Note that it is up to you to define SEGMENT_SIZE
    on machines not listed here.  */
-#if defined(vax) || defined(hp300) || defined(pyr)
+#if defined(vax) || defined(pyr)
 #define SEGMENT_SIZE page_size
 #endif
-#ifdef  sony
-#define SEGMENT_SIZE    0x2000
-#endif  /* Sony.  */
 #ifdef is68k
 #define SEGMENT_SIZE 0x20000
-#endif
-#if defined(m68k) && defined(PORTAR)
-#define PAGE_SIZE 0x400
-#define SEGMENT_SIZE PAGE_SIZE
 #endif
 
 #ifdef linux
 #include <asm/page.h>
-#if defined(__i386__) || defined(__mc68000__)
+#if defined(__i386__)
 #define SEGMENT_SIZE    1024
 #else
 #ifndef SEGMENT_SIZE
@@ -228,44 +172,5 @@ struct nlist
 
 /* This is output from LD.  */
 #define N_SETV  0x1C        /* Pointer to set vector in data area.  */
-
-#if !defined (N_RELOCATION_INFO_DECLARED)
-/* This structure describes a single relocation to be performed.
-   The text-relocation section of the file is a vector of these structures,
-   all of which apply to the text section.
-   Likewise, the data-relocation section applies to the data section.  */
-
-struct relocation_info
-{
-    /* Address (within segment) to be relocated.  */
-    int r_address;
-    /* The meaning of r_symbolnum depends on r_extern.  */
-    unsigned int r_symbolnum:24;
-    /* Nonzero means value is a pc-relative offset
-       and it should be relocated for changes in its own address
-       as well as for changes in the symbol or section specified.  */
-    unsigned int r_pcrel:1;
-    /* Length (as exponent of 2) of the field to be relocated.
-       Thus, a value of 2 indicates 1<<2 bytes.  */
-    unsigned int r_length:2;
-    /* 1 => relocate with value of symbol.
-            r_symbolnum is the index of the symbol
-      in file's the symbol table.
-       0 => relocate with the address of a segment.
-            r_symbolnum is N_TEXT, N_DATA, N_BSS or N_ABS
-      (the N_EXT bit may be set also, but signifies nothing).  */
-    unsigned int r_extern:1;
-    /* Four bits that aren't used, but when writing an object file
-       it is desirable to clear them.  */
-#ifdef NS32K
-    unsigned r_bsr:1;
-    unsigned r_disp:1;
-    unsigned r_pad:2;
-#else
-    unsigned int r_pad:4;
-#endif
-};
-#endif /* no N_RELOCATION_INFO_DECLARED.  */
-
 
 #endif /* __A_OUT_GNU_H__ */

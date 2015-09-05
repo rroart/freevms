@@ -10,7 +10,6 @@
 #include <ssdef.h>
 #include <misc.h>
 #include <descrip.h>
-#include <lnmstrdef.h>
 #include <orbdef.h>
 #include <ipldef.h>
 #include <dyndef.h>

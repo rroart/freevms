@@ -20,7 +20,6 @@
 #include <asm/sigcontext.h>
 #include <asm/cpufeature.h>
 #include <linux/cache.h>
-#include <linux/config.h>
 #include <linux/threads.h>
 
 /*

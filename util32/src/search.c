@@ -44,10 +44,6 @@
  *
  */
 
-/*  This version will compile and run using normal VMS I/O by
-    defining VMSIO
-*/
-
 /*  This is the top level set of routines. It is fairly
     simple minded asking the user for a command, doing some
     primitive command parsing, and then calling a set of routines
@@ -58,49 +54,11 @@
     (sorry! - could be easily fixed though!)
 */
 
-#ifdef VMS
-#ifdef __DECC
-#pragma module MODULE_NAME MODULE_IDENT
-#else
-#ifdef vaxc
-#module MODULE_NAME MODULE_IDENT
-#endif /* vaxc */
-#endif /* __DECC */
-#endif /* VMS */
-
-#define DEBUGx on
-#define VMSIOx on
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
-
-#ifdef VMSIO
-#include <ssdef.h>
-#include <descrip.h>
-#include <starlet.h>
-#include <rms.h>
-#include <fiddef.h>
-#define sys_parse       sys$parse
-#define sys_search      sys$search
-#define sys_open        sys$open
-#define sys_close       sys$close
-#define sys_connect     sys$connect
-#define sys_disconnect  sys$disconnect
-#define sys_get         sys$get
-#define sys_put         sys$put
-#define sys_create      sys$create
-#define sys_erase       sys$erase
-#define sys_extend      sys$extend
-#define sys_asctim      sys$asctim
-#define sys_setddir     sys$setddir
-#define dsc_descriptor  dsc$descriptor
-#define dsc_w_length    dsc$w_length
-#define dsc_a_pointer   dsc$a_pointer
-
-#else
 #include <mytypes.h>
 #include <descrip.h>
 #include <fabdef.h>
@@ -121,7 +79,6 @@
 #include <starlet.h>
 #include <cli$routines.h>
 //#include "rms.h"
-#endif
 
 //extern struct _nam cc$rms_nam;
 //extern struct _fab cc$rms_fab;

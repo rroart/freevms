@@ -33,7 +33,6 @@
 #ifndef _SOCK_H
 #define _SOCK_H
 
-#include <linux/config.h>
 #include <linux/timer.h>
 #include <linux/cache.h>
 #include <linux/in.h>       /* struct sockaddr_in */

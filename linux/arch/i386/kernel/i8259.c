@@ -4,8 +4,6 @@
 // Author. Roar Thron�s.
 // Modified Linux source file, 2001-2004.
 
-#include <linux/config.h>
-#include <linux/ptrace.h>
 #include <linux/errno.h>
 #include <linux/signal.h>
 #include <linux/sched.h>

@@ -4,19 +4,15 @@
 // Author. Roar Thron�s.
 
 #include <linux/config.h>
-#include <linux/linkage.h>
 #include <linux/sched.h>
 
 #include <ssdef.h>
 #include <va_rangedef.h>
 #include <system_data_cells.h>
-#include <rdedef.h>
-#include <phddef.h>
 #include <queue.h>
 #include <mmg_routines.h>
 #include <exe_routines.h>
 #include <linux/slab.h>
-#include <secdef.h>
 
 #define DEBUG_LEAK
 #undef DEBUG_LEAK

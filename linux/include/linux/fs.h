@@ -6,7 +6,6 @@
  * structures etc.
  */
 
-#include <linux/config.h>
 #include <linux/linkage.h>
 #include <linux/limits.h>
 #include <linux/types.h>

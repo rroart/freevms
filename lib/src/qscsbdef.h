@@ -4,7 +4,6 @@
 #include <cdrpdef.h>
 #include <irpdef.h>
 #include <qscpbdef.h>
-#include <qscsbdef.h>
 #include <qscsedef.h>
 #include <qscubdef.h>
 

@@ -60,7 +60,6 @@
 #include <misc_routines.h>
 #include <cpbdef.h>
 #include <rsndef.h>
-#include <statedef.h>
 
 #undef DEBUG_SCHED
 

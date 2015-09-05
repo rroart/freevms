@@ -30,7 +30,6 @@
 #include <ucbdef.h>
 #include <wcbdef.h>
 #include <scsidef.h>
-#include <wwiddef.h>
 
 int       ioc$add_adp (struct _adp *parent_adp, struct _adp *new_adp, int ba_index);
 int       ioc$add_device_type (const char *, const int32, struct _ucb *, struct _dtn **);

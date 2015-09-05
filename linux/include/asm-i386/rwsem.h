@@ -40,7 +40,6 @@
 
 #include <linux/list.h>
 #include <linux/spinlock.h>
-#include <linux/stringify.h>
 
 struct rwsem_waiter;
 

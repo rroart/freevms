@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on buffer.c.
 
 /*
@@ -34,7 +34,6 @@
 
 /* async buffer flushing, 1999 Andrea Arcangeli <andrea@suse.de> */
 
-#include <linux/config.h>
 #include <linux/sched.h>
 #include <linux/fs.h>
 #include <linux/slab.h>

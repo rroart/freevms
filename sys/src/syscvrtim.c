@@ -44,7 +44,6 @@
 #include <linux/time.h>               /* C header for $GETTIM to find time */
 #include <linux/string.h>
 #include <ssdef.h>
-#include <descrip.h>
 #include <lib$routines.h>   /* LIB$ Header File */
 
 #define TIMEBASE 100000         /* 10 millisecond units in quadword */

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on bootmem.c.
 
 /*
@@ -15,7 +15,6 @@
  *  system memory and memory holes as well.
  */
 
-#include <linux/config.h>
 #include <linux/mm.h>
 #include <linux/kernel_stat.h>
 #include <linux/interrupt.h>

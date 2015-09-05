@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <descrip.h>
 #include <ddbdef.h>
@@ -15,7 +15,6 @@
 #include <msgdef.h>
 #include <ssdef.h>
 
-#include <ddbdef.h>
 #include <com_routines.h>
 #include <exe_routines.h>
 #include <misc_routines.h>

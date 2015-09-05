@@ -31,7 +31,6 @@
 
 #ifdef __KERNEL__
 
-#include <linux/skbuff.h>
 #include <linux/netdevice.h>
 #include <linux/icmpv6.h>
 #include <net/neighbour.h>

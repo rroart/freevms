@@ -52,7 +52,6 @@
 #include <linux/kernel.h>
 #include <linux/fs.h>
 #include <linux/sched.h>
-#include <linux/types.h>
 #include <linux/string.h>
 #include <linux/fcntl.h>
 #include <linux/stat.h>

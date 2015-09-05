@@ -8,8 +8,6 @@
    \author Roar Thron�s
 */
 
-#include <linux/config.h>
-
 #include <starlet.h>
 #include <ddtdef.h>
 #include <iodef.h>

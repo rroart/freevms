@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -9,14 +9,10 @@
  *
  *  Copyright (C) 1994  Linus Torvalds
  */
-#include <linux/errno.h>
 #include <linux/sched.h>
-#include <linux/kernel.h>
 #include <linux/signal.h>
 #include <linux/string.h>
-#include <linux/ptrace.h>
 #include <linux/mm.h>
-#include <linux/smp.h>
 #include <linux/smp_lock.h>
 
 #include <asm/uaccess.h>

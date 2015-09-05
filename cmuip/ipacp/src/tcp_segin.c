@@ -335,12 +335,10 @@ MODULE SEGIN(IDENT="6.7",LANGUAGE(BLISS32),
              OPTIMIZE,OPTLEVEL=3,ZIP)=
 #endif
 
-#ifdef __i386__
 #include <net/checksum.h>
-#endif
 #include <starlet.h>    // VMS system definitions
 
-                 // not yet #include <cmuip/central/include/netxport.h> // BLISS transportablity package
+// not yet #include <cmuip/central/include/netxport.h> // BLISS transportablity package
 #include <cmuip/central/include/neterror.h> // Network error codes
 #include "netvms.h" // VMS specifics
 #include <cmuip/central/include/netcommon.h>// Network common defs
@@ -355,11 +353,6 @@ MODULE SEGIN(IDENT="6.7",LANGUAGE(BLISS32),
 #include <ssdef.h>
 #include <descrip.h>
 
-#undef TCP_DATA_OFFSET
-#ifdef __x86_64__
-#include <net/checksum.h>
-#endif
-#define TCP_DATA_OFFSET 5
 #define Calc_Checksum(x,y) ip_compute_csum(y,x)
 #define Gen_Checksum(a,b,c,d,e) csum_tcpudp_magic(c,d,a,e,csum_partial(b,a,0))
 
@@ -1835,7 +1828,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 
 // Process segment options, if any.
 
-                if (seg->sh$data_offset > TCP_DATA_OFFSET)
+                if (seg->sh$data_offset > TCP_HEADER_FIELDS)
                     read_tcp_options(TCB,seg);
 
 // Fill in any unspecified Foreign Host or Port
@@ -1992,7 +1985,7 @@ struct queue_blk_structure(qb_nr_fields) * QB;
 
 // Process segment options, if any.
 
-                if (seg->sh$data_offset > TCP_DATA_OFFSET)
+                if (seg->sh$data_offset > TCP_HEADER_FIELDS)
                     read_tcp_options(TCB,seg);
             };
         };

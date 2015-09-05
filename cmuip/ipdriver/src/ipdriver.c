@@ -123,7 +123,6 @@
 #include <dptdef.h>
 #include <fdtdef.h>
 #include <bufiodef.h>
-#include <dyndef.h>
 
 #include <system_data_cells.h>
 #include <internals.h>

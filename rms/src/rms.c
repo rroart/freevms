@@ -27,7 +27,6 @@
 #define DEBUGx x
 
 #include <linux/config.h>
-#include <linux/linkage.h>
 #include <linux/mm.h>
 
 #include <linux/ctype.h>
@@ -39,7 +38,6 @@
 #include <atrdef.h>
 #include <fatdef.h>
 #include <iodef.h>
-#include <iosbdef.h>
 #include <vcbdef.h>
 #include <wcbdef.h>
 #include <descrip.h>
@@ -47,13 +45,9 @@
 #include <ssdef.h>
 #include <uicdef.h>
 #include <namdef.h>
-#include <fabdef.h>
-#include <rabdef.h>
 #include <fibdef.h>
-#include <fiddef.h>
 #include <rmsdef.h>
 #include <sbkdef.h>
-#include <ucbdef.h>
 #include <xabdef.h>
 #include <xabdatdef.h>
 #include <xabfhcdef.h>

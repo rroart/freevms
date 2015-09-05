@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /* ptrace.c */
@@ -16,16 +16,11 @@
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/mm.h>
-#include <linux/smp.h>
 #include <linux/smp_lock.h>
-#include <linux/errno.h>
-#include <linux/ptrace.h>
 #include <linux/user.h>
 
 #include <asm/uaccess.h>
 #include <asm/pgtable.h>
-#include <asm/system.h>
-#include <asm/processor.h>
 #include <asm/i387.h>
 #include <asm/debugreg.h>
 #include <misc_routines.h>

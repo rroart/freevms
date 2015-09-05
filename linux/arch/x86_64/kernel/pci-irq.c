@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -10,8 +10,6 @@
  *  (c) 1999--2000 Martin Mares <mj@ucw.cz>
  */
 
-#include <linux/config.h>
-#include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/pci.h>
 #include <linux/init.h>

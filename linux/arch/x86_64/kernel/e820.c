@@ -9,10 +9,7 @@
  * The functions here do the job until bootmem takes over.
  * $Id$
  */
-#include <linux/config.h>
 #include <linux/kernel.h>
-#include <linux/types.h>
-#include <linux/init.h>
 #include <linux/acpi.h>
 #include <linux/bootmem.h>
 #include <linux/ioport.h>

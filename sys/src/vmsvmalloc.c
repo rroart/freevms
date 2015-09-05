@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on vmalloc.c.
 
 /*
@@ -15,7 +15,6 @@
 #include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
-#include <linux/spinlock.h>
 #include <linux/highmem.h>
 #include <linux/smp_lock.h>
 

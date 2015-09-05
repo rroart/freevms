@@ -5,18 +5,13 @@
 // Contains some modified Linux sources, 2001-2004
 
 #include <cxbdef.h>
-#include <crbdef.h>
 #include <cdtdef.h>
 #include <dcdef.h>
-#include <ddtdef.h>
 #include <dptdef.h>
 #include <fdtdef.h>
-#include <pdtdef.h>
 #include <idbdef.h>
-#include <irpdef.h>
 #include <ucbdef.h>
 #include <ucbnidef.h>
-#include <ddbdef.h>
 #include <ipldef.h>
 #include <dyndef.h>
 #include <ssdef.h>

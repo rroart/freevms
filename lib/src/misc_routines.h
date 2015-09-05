@@ -21,7 +21,6 @@
 #include <pfndef.h>
 #include <rabdef.h>
 #include <scsdef.h>
-#include <ucbdef.h>
 #include <ucbnidef.h>
 #include <ttyvecdef.h>
 

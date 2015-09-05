@@ -15,7 +15,6 @@
  */
 
 #include <stdarg.h>
-#include <linux/types.h>
 #include <linux/string.h>
 #include <linux/ctype.h>
 #include <linux/kernel.h>

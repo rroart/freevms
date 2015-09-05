@@ -29,7 +29,6 @@
 #include <linux/string.h>
 #include <linux/file.h>
 #include <linux/fcntl.h>
-#include <linux/ptrace.h>
 #include <linux/slab.h>
 #include <linux/personality.h>
 #include <linux/elfcore.h>
@@ -180,9 +179,6 @@ create_elf_tables(char *p, int argc, int envc,
     sp = (elf_addr_t *)(~15UL & (unsigned long)(u_platform));
     csp = sp;
     csp -= (1+DLINFO_ITEMS)*2 + (k_platform ? 2 : 0);
-#ifdef DLINFO_ARCH_ITEMS
-    csp -= DLINFO_ARCH_ITEMS*2;
-#endif
     csp -= envc+1;
     csp -= argc+1;
     csp -= (!ibcs ? 3 : 1); /* argc itself */

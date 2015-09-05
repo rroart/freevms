@@ -19,7 +19,6 @@
 #include <ssdef.h>
 #include <iodef.h>
 #include <devdef.h>
-#include <dyndef.h>
 #include <system_data_cells.h>
 #include <ipl.h>
 #include <linux/vmalloc.h>

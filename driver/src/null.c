@@ -14,14 +14,11 @@
 #include <fdtdef.h>
 #include <pdtdef.h>
 #include <idbdef.h>
-#include <irpdef.h>
-#include <ucbdef.h>
 #include <ddbdef.h>
 #include <ipldef.h>
 #include <dyndef.h>
 #include <ssdef.h>
 #include <iodef.h>
-#include <devdef.h>
 #include <system_data_cells.h>
 #include <ipl.h>
 #include <linux/vmalloc.h>

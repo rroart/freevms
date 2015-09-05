@@ -6,7 +6,6 @@
 
 #define ETH_P_MYSCS 0x6009
 
-//#if 0
 #include <linux/config.h>
 #define CONFIG_DECNET
 #include <linux/module.h>
@@ -20,7 +19,6 @@
 #include <linux/string.h>
 #include <linux/sockios.h>
 #include <linux/net.h>
-#include <linux/netdevice.h>
 #include <linux/inet.h>
 #include <linux/route.h>
 #include <linux/netfilter.h>
@@ -37,18 +35,10 @@
 
 #include <cdldef.h>
 #include <cdrpdef.h>
-#include <cdtdef.h>
 #include <chdef.h>
 #include <cwpsdef.h>
-#include <ddbdef.h>
-#include <ddtdef.h>
-#include <dptdef.h>
 #include <dyndef.h>
-#include <fdtdef.h>
 #include <iodef.h>
-#include <iosbdef.h>
-#include <mscpdef.h> // does not belong here
-#include <nisca.h>
 #include <pbdef.h>
 #include <pdtdef.h>
 #include <prcpoldef.h>
@@ -56,10 +46,8 @@
 #include <rdtdef.h>
 #include <sbdef.h>
 #include <sbnbdef.h>
-#include <scsdef.h>
 #include <ssdef.h>
 #include <system_data_cells.h>
-#include <ucbdef.h>
 #include <vcdef.h>
 #include <starlet.h>
 #include <queue.h>
@@ -549,8 +537,6 @@ static void __exit scs_exit(void)
 {
     scs_dev_cleanup();
 }
-
-//#endif /* #if 0 second one */
 
 int scs_std$reqdata(struct _pdt *pdt_p, struct _cdrp *cdrp_p,
                     void (*complete)())

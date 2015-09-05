@@ -1,6 +1,5 @@
 #include <lib/src/acbdef.h>
 #include <lib/src/cwpsdef.h>
-#include <lib/src/cwpsdef.h>
 #include <lib/src/ftrddef.h>
 #include <lib/src/irpdef.h>
 #include <lib/src/lkbdef.h>

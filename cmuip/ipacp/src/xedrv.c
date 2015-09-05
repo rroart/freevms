@@ -222,7 +222,6 @@ MODULE XE_DRIVER(IDENT="5.0a",LANGUAGE(BLISS32),
 #include <iodef.h>
 #include <ssdef.h>
 #include <nmadef.h>
-#include <descrip.h>
 #include <xmdef.h>
 #include <starlet.h>
 

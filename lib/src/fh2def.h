@@ -16,8 +16,8 @@
 */
 
 #define NO_DOLLAR
-#include "mytypes.h"
 
+#include <mytypes.h>
 #include <fatdef.h>
 #include <fiddef.h>
 #include <uicdef.h>

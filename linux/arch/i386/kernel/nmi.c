@@ -10,7 +10,6 @@
  *  Mikael Pettersson   : Power Management for local APIC NMI watchdog.
  */
 
-#include <linux/config.h>
 #include <linux/mm.h>
 #include <linux/irq.h>
 #include <linux/delay.h>

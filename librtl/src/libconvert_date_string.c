@@ -51,9 +51,9 @@
 
 #include "lib$routines.h"
 #include "libdef.h"
-#include "descrip.h"
 #include <stdlib.h>
 #include <assert.h>
+
 //prototypes
 void load_default_values (unsigned long flag, unsigned char date[8] );
 void check_reserved_bits ( unsigned long flag);

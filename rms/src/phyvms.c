@@ -40,7 +40,6 @@
 #include <dvidef.h>
 #include <mntdef.h>
 #include <devdef.h>
-#include <ssdef.h>
 
 #ifdef __GNUC__
 unsigned sys$assign();

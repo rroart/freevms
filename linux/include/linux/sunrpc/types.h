@@ -11,7 +11,6 @@
 
 #include <linux/timer.h>
 #include <linux/tqueue.h>
-#include <linux/sunrpc/debug.h>
 
 /*
  * These are the RPC list manipulation primitives used everywhere.

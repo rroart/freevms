@@ -41,7 +41,6 @@
 #include <asm/rwlock.h>
 #include <linux/wait.h>
 #include <linux/rwsem.h>
-#include <linux/stringify.h>
 
 struct semaphore
 {

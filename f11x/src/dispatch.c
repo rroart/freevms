@@ -6,21 +6,17 @@
 
 #include <linux/config.h>
 
-#include <mytypes.h>
 #include <ccbdef.h>
 #include <cpudef.h>
 #include <descrip.h>
-#include <fatdef.h>
 #include <fcbdef.h>
 #include <fibdef.h>
-#include <fiddef.h>
 #include <iodef.h>
 #include <iosbdef.h>
 #include <ipldef.h>
 #include <irpdef.h>
 #include <ssdef.h>
 #include <ucbdef.h>
-#include <uicdef.h>
 #include <vcbdef.h>
 #include <fh2def.h>
 #include "xqp.h"

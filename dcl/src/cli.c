@@ -45,7 +45,6 @@
 #include <descrip.h>
 #include <starlet.h>
 #include <va_rangedef.h>
-#include <starlet.h>
 #include <cli$routines.h>
 #include <lib$routines.h>
 #include <ihddef.h>

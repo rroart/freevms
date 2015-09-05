@@ -4,7 +4,6 @@
 // Author. Roar Thron�s.
 
 #include <linux/linkage.h>
-#include <linux/sched.h>
 #include <linux/vmalloc.h>
 #include <system_data_cells.h>
 #include <descrip.h>

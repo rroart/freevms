@@ -16,7 +16,6 @@
 #include <linux/smp_lock.h>
 #include <linux/init.h>
 #include <linux/file.h>
-#include <linux/fs.h>
 #include <linux/personality.h>
 
 #include <asm/uaccess.h>

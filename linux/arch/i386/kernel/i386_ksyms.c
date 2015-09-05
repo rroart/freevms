@@ -1,17 +1,14 @@
-#include <linux/config.h>
 #include <linux/module.h>
 #include <linux/smp.h>
 #include <linux/user.h>
 #include <linux/elfcore.h>
 #include <linux/mca.h>
 #include <linux/sched.h>
-#include <linux/in6.h>
 #include <linux/interrupt.h>
 #include <linux/smp_lock.h>
 #include <linux/pm.h>
 #include <linux/pci.h>
 #include <linux/apm_bios.h>
-#include <linux/kernel.h>
 #include <linux/string.h>
 #include <linux/tty.h>
 
@@ -21,7 +18,6 @@
 #include <asm/uaccess.h>
 #include <asm/checksum.h>
 #include <asm/io.h>
-#include <asm/hardirq.h>
 #include <asm/delay.h>
 #include <asm/irq.h>
 #include <asm/mmx.h>

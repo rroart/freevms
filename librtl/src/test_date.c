@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "descrip.h"
 #include "lib$routines.h"
 
 int main()

@@ -9,7 +9,6 @@
 #include <lnmsub.h>
 #include <system_data_cells.h>
 #include <queue.h>
-#include <lnmdef.h>
 #include <lnmstrdef.h>
 #include <ssdef.h>
 #include <descrip.h>

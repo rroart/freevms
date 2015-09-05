@@ -13,11 +13,9 @@
 #include <linux/mm.h>
 #include <linux/irq.h>
 #include <linux/delay.h>
-#include <linux/spinlock.h>
 #include <linux/smp_lock.h>
 #include <linux/kernel_stat.h>
 #include <linux/mc146818rtc.h>
-#include <linux/cache.h>
 
 #include <asm/pgalloc.h>
 #include <asm/smpboot.h>

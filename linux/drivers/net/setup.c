@@ -3,7 +3,6 @@
  *  New style setup code for the network devices
  */
 
-#include <linux/config.h>
 #include <linux/netdevice.h>
 #include <linux/errno.h>
 #include <linux/init.h>

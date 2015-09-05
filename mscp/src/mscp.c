@@ -8,7 +8,6 @@
 
 #include <acbdef.h>
 #include <aqbdef.h>
-#include <cdrpdef.h>
 #include <ddbdef.h>
 #include <dyndef.h>
 #include <descrip.h>

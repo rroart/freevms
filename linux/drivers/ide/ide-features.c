@@ -14,7 +14,6 @@
  *  May be copied or modified under the terms of the GNU General Public License
  */
 
-#include <linux/config.h>
 #define __NO_VERSION__
 #include <linux/module.h>
 #include <linux/types.h>

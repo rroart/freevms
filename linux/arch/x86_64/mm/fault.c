@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -11,27 +11,21 @@
  *  Copyright (C) 2001,2002 Andi Kleen, SuSE Labs.
  */
 
-#include <linux/signal.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
-#include <linux/errno.h>
 #include <linux/string.h>
 #include <linux/types.h>
-#include <linux/ptrace.h>
 #include <linux/mman.h>
 #include <linux/mm.h>
 #include <linux/smp.h>
 #include <linux/smp_lock.h>
 #include <linux/interrupt.h>
 #include <linux/init.h>
-#include <linux/tty.h>
 #include <linux/vt_kern.h>      /* For unblank_screen() */
 #include <linux/compiler.h>
 
-#include <asm/system.h>
 #include <asm/uaccess.h>
 #include <asm/pgalloc.h>
-#include <asm/hardirq.h>
 #include <asm/smp.h>
 #include <asm/proto.h>
 #include <asm/kdebug.h>

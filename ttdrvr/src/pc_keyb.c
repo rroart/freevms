@@ -12,8 +12,6 @@
 #include <fdtdef.h>
 #include <pdtdef.h>
 #include <idbdef.h>
-#include <irpdef.h>
-#include <ucbdef.h>
 #include <ttyucbdef.h>
 #include <ttydef.h>
 #include <ddbdef.h>

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -28,11 +28,9 @@
  */
 
 #include <linux/fs.h>
-#include <linux/ext2_fs.h>
 #include <linux/pagemap.h>
 
 #include <misc_routines.h>
-#include <fcbdef.h>
 #include <vcbdef.h>
 
 typedef struct ext2_dir_entry_2 ext2_dirent;

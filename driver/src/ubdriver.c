@@ -276,7 +276,6 @@ int ubd$init_tables()
  */
 
 #define MAJOR_NR UBD_MAJOR
-#include "linux/config.h"
 #include "linux/blk.h"
 #include "linux/blkdev.h"
 #include "linux/hdreg.h"
@@ -287,7 +286,6 @@ int ubd$init_tables()
 #include "linux/ctype.h"
 #include "linux/capability.h"
 #include "linux/mm.h"
-#include "linux/vmalloc.h"
 #include "linux/blkpg.h"
 #include "asm/segment.h"
 #include "asm/uaccess.h"

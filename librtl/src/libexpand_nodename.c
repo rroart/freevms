@@ -41,7 +41,7 @@
  *  Mar 20, 2004 - Andrew Allison
  *      Initial program creation
  */
-#include "descrip.h"
+
 #include "lib$routines.h"
 
 

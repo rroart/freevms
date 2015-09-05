@@ -37,7 +37,6 @@
 #include <cdldef.h>
 #include <cdtdef.h>
 #include <cdrpdef.h>
-#include <cdtdef.h>
 #include <chdef.h>
 #include <ddbdef.h>
 #include <descrip.h>

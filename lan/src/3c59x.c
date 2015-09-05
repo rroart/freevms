@@ -13,8 +13,6 @@
 #include <fdtdef.h>
 #include <pdtdef.h>
 #include <idbdef.h>
-#include <irpdef.h>
-#include <ucbdef.h>
 #include <ucbnidef.h>
 #include <ddbdef.h>
 #include <ipldef.h>

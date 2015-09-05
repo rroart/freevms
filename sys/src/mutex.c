@@ -21,7 +21,6 @@
 #include <asm/bitops.h>
 #include <statedef.h>
 #include <queue.h>
-#include <sch_routines.h>
 
 #define ioc$gq_mutex ioc_spin
 static struct _mtx ioc_spin = { 65535 /* mtx$w_sts : 1, mtx$w_owncnt : -1 */ };

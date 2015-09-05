@@ -9,22 +9,18 @@
 
 #include <linux/ctype.h>
 
-#include <mytypes.h>
 #include <aqbdef.h>
 #include <atrdef.h>
-#include <fatdef.h>
 #include <iodef.h>
 #include <iosbdef.h>
 #include <vcbdef.h>
 #include <wcbdef.h>
 #include <descrip.h>
 #include <ssdef.h>
-#include <uicdef.h>
 #include <namdef.h>
 #include <fabdef.h>
 #include <rabdef.h>
 #include <fibdef.h>
-#include <fiddef.h>
 #include <rmsdef.h>
 #include <sbkdef.h>
 #include <ucbdef.h>

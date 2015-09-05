@@ -2,7 +2,6 @@
  * Dynamic DMA mapping support. Common code
  */
 
-#include <linux/types.h>
 #include <linux/mm.h>
 #include <linux/string.h>
 #include <linux/pci.h>

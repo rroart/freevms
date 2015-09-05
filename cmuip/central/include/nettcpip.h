@@ -433,18 +433,6 @@ Modification History:
 //////HACK////// What a hack//////  Get rid of this.  Calculate it at run time//
 #define    DEVICE_HEADER    68
 
-#define TCP_DATA_OFFSET 5           // in 32-bit words.
-#define TCP_HEADER_SIZE (TCP_DATA_OFFSET*4) // in bytes.
-//    Default_Data_Size = 1392,         // default: max size of user
-#define DEFAULT_DATA_SIZE 536           // default: max size of user
-// data per segment.
-
-// segment option parameters
-
-#define OPT$SEG_DATASIZE 2          // MSS option value
-#define OPT$MAX_RECV_DATASIZE 1392      // MSS default value
-
-
 /*
     ****************************************************************
 
@@ -654,7 +642,7 @@ Modification History:
 #define    TCP_PORT_AT_RMTP    201  // AppleTalk Routing Maintenance
 #define    TCP_PORT_AT_NBP     202  // AppleTalk Name Binding
 #define    TCP_PORT_AT_3       203  // AppleTalk Unused
-#define    TCP_PORT_AT_ECHO    204  // AppleTalk Echo
+#define    TCP_PORT_UDPKT_LENGTHAT_ECHO    204  // AppleTalk Echo
 #define    TCP_PORT_AT_5       205  // AppleTalk Unused
 #define    TCP_PORT_AT_ZIS     206  // AppleTalk Zone Information
 #define    TCP_PORT_AT_7       207  // AppleTalk Unused
@@ -1009,8 +997,8 @@ struct tcp$opt_block
 
 // TCP Segment: header & data sizes.
 
-#define    TCP_DATA_OFFSET  5           // in 32-bit words.
-#define    TCP_HEADER_SIZE  TCP_DATA_OFFSET*4   // in bytes.
+#define    TCP_HEADER_FIELDS  5           // in 32-bit words.
+#define    TCP_HEADER_SIZE  TCP_HEADER_FIELDS*4   // in bytes.
 //    Default_Data_Size = 1392,         // default: max size of user
 #define    DEFAULT_DATA_SIZE  536           // default: max size of user
 // data per segment.

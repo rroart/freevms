@@ -21,12 +21,10 @@
 #include <internals.h>
 #include <iodef.h>
 #include <ipldef.h>
-#include <irpdef.h>
 #include <pridef.h>
 #include <ssdef.h>
 #include <starlet.h>
 #include <system_data_cells.h>
-#include <ucbdef.h>
 #include <vcbdef.h>
 
 #include <linux/vmalloc.h>

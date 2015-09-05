@@ -9,7 +9,6 @@
 #include <starlet.h>
 #include <misc.h>
 #include <cli$routines.h>
-#include <starlet.h>
 
 #include <stdlib.h>
 #include <string.h>

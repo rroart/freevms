@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -63,7 +63,6 @@
  * (c) 2001 Red Hat Inc <alan@redhat.com>
  */
 
-#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
 #include <linux/init.h>

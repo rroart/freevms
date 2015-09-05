@@ -16,7 +16,6 @@
 #include <linux/vmalloc.h>
 #include <ucbdef.h>
 #include <ddbdef.h>
-#include <ssdef.h>
 #include <ioc_routines.h>
 #include <queue.h>
 #include <linux/slab.h>

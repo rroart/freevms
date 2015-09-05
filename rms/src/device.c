@@ -34,7 +34,6 @@
 #include <fatdef.h>
 #include <vcbdef.h>
 #include <descrip.h>
-#include <ssdef.h>
 #include <uicdef.h>
 #include <namdef.h>
 #include <fabdef.h>

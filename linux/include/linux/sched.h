@@ -21,7 +21,6 @@ extern unsigned long event;
 #include <asm/system.h>
 #include <asm/semaphore.h>
 #include <asm/page.h>
-#include <asm/ptrace.h>
 #include <asm/mmu.h>
 #include <asm/processor.h>
 
@@ -34,7 +33,6 @@ extern unsigned long event;
 
 #include <pcbdef.h>
 #include <asmlink.h>
-
 #include <sysgen.h>
 
 struct exec_domain;
@@ -117,14 +115,6 @@ extern int last_pid;
 #define SCHED_OTHER     0
 #define SCHED_FIFO      1
 #define SCHED_RR        2
-
-#define PCB$K_SCHED_OTHER   0
-#define PCB$K_SCHED_FIFO    1
-#define PCB$K_SCHED_RR          2
-
-#define KTB$K_SCHED_OTHER   0
-#define KTB$K_SCHED_FIFO    1
-#define KTB$K_SCHED_RR          2
 
 /*
  * This is an additional bit set when we want to

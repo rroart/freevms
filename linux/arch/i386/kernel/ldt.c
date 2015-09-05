@@ -5,16 +5,13 @@
  * Copyright (C) 1999 Ingo Molnar <mingo@redhat.com>
  */
 
-#include <linux/errno.h>
 #include <linux/sched.h>
 #include <linux/string.h>
 #include <linux/mm.h>
-#include <linux/smp.h>
 #include <linux/smp_lock.h>
 #include <linux/vmalloc.h>
 
 #include <asm/uaccess.h>
-#include <asm/system.h>
 #include <asm/ldt.h>
 #include <asm/desc.h>
 

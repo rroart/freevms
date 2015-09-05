@@ -8,23 +8,17 @@
    \author Roar Thron�s
 */
 
-#include <linux/config.h>
 #include <linux/unistd.h>
-#include <linux/linkage.h>
 #include <linux/sched.h>
 #include <linux/vmalloc.h>
 #include <system_data_cells.h>
 #include <linux/mm.h>
 #include <ipldef.h>
 #include <mmgdef.h>
-#include <pfndef.h>
-#include <phddef.h>
-#include <rdedef.h>
 #include <ssdef.h>
 #include <starlet.h>
 #include <va_rangedef.h>
 #include <vmspte.h>
-#include <wsldef.h>
 #include <ipl.h>
 #include <queue.h>
 #include <mmg_functions.h>
