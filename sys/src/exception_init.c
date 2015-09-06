@@ -14,7 +14,6 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 
-#include <linux/linkage.h>
 #include <asm/unistd.h>
 
 /**

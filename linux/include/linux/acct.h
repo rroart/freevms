@@ -73,13 +73,8 @@ struct acct
 
 #ifdef __KERNEL__
 
-#ifdef CONFIG_BSD_PROCESS_ACCT
-extern void acct_auto_close(kdev_t dev);
-extern int acct_process(long exitcode);
-#else
 #define acct_auto_close(x)  do { } while (0)
 #define acct_process(x)     do { } while (0)
-#endif
 
 #endif  /* __KERNEL */
 

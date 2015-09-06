@@ -16,8 +16,6 @@
    consoles 16 and higher (since it returns a short) */
 
 #ifdef __KERNEL__
-#include <linux/config.h>
-#include <linux/fs.h>
 #include <linux/major.h>
 #include <linux/termios.h>
 #include <linux/tqueue.h>
@@ -382,9 +380,6 @@ extern void start_tty(struct tty_struct * tty);
 extern int tty_register_ldisc(int disc, struct tty_ldisc *new_ldisc);
 extern int tty_register_driver(struct tty_driver *driver);
 extern int tty_unregister_driver(struct tty_driver *driver);
-extern void tty_register_devfs (struct tty_driver *driver, unsigned int flags,
-                                unsigned minor);
-extern void tty_unregister_devfs (struct tty_driver *driver, unsigned minor);
 extern int tty_read_raw_data(struct tty_struct *tty, unsigned char *bufp,
                              int buflen);
 extern void tty_write_message(struct tty_struct *tty, char *msg);

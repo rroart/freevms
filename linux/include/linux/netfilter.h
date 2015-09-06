@@ -8,7 +8,6 @@
 #include <linux/net.h>
 #include <linux/if.h>
 #include <linux/wait.h>
-#include <linux/list.h>
 #endif
 
 /* Responses from hook functions. */
@@ -24,7 +23,6 @@
 #define NFC_UNKNOWN 0x4000
 
 #ifdef __KERNEL__
-#include <linux/config.h>
 #ifdef CONFIG_NETFILTER
 
 extern void netfilter_init(void);

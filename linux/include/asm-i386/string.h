@@ -295,45 +295,10 @@ __asm__ __volatile__( \
 
 #define __HAVE_ARCH_MEMCPY
 
-#ifdef CONFIG_X86_USE_3DNOW
-
-#include <asm/mmx.h>
-
-/*
- *  This CPU favours 3DNow strongly (eg AMD Athlon)
- */
-
-static inline void * __constant_memcpy3d(void * to, const void * from, size_t len)
-{
-    if (len < 512)
-        return __constant_memcpy(to, from, len);
-    return _mmx_memcpy(to, from, len);
-}
-
-static __inline__ void *__memcpy3d(void *to, const void *from, size_t len)
-{
-    if (len < 512)
-        return __memcpy(to, from, len);
-    return _mmx_memcpy(to, from, len);
-}
-
-#define memcpy(t, f, n) \
-(__builtin_constant_p(n) ? \
- __constant_memcpy3d((t),(f),(n)) : \
- __memcpy3d((t),(f),(n)))
-
-#else
-
-/*
- *  No 3D Now!
- */
-
 #define memcpy(t, f, n) \
 (__builtin_constant_p(n) ? \
  __constant_memcpy((t),(f),(n)) : \
  __memcpy((t),(f),(n)))
-
-#endif
 
 /*
  * struct_cpy(x,y), copy structure *x into (matching structure) *y.

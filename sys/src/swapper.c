@@ -1,24 +1,20 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on *swap*.c.
 
-#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/kernel_stat.h>
 #include <linux/smp_lock.h>
 #include <linux/pagemap.h>
 #include <linux/init.h>
-#include <linux/highmem.h>
 #include <linux/file.h>
-#include <linux/compiler.h>
 
 #include <asm/pgalloc.h>
 
 #include <system_service_setup.h>
 #include <system_data_cells.h>
-#include <lnmstrdef.h>
 #include <dyndef.h>
 #include <lnmdef.h>
 #include <descrip.h>

@@ -17,7 +17,6 @@
  *  Added needed MAJORS for new pairs, {hdi,hdj}, {hdk,hdl}
  */
 
-#include <linux/config.h>
 #include <linux/fs.h>
 #include <linux/genhd.h>
 #include <linux/kernel.h>
@@ -149,21 +148,15 @@ char *disk_name (struct gendisk *hd, int minor, char *buf)
  */
 void add_gd_partition(struct gendisk *hd, int minor, int start, int size)
 {
-#ifndef CONFIG_DEVFS_FS
     char buf[40];
-#endif
 
     hd->part[minor].start_sect = start;
     hd->part[minor].nr_sects   = size;
-#ifdef CONFIG_DEVFS_FS
-    printk(" p%d", (minor & ((1 << hd->minor_shift) - 1)));
-#else
     if ((hd->major >= COMPAQ_SMART2_MAJOR+0 && hd->major <= COMPAQ_SMART2_MAJOR+7) ||
             (hd->major >= COMPAQ_CISS_MAJOR+0 && hd->major <= COMPAQ_CISS_MAJOR+7))
         printk(" p%d", (minor & ((1 << hd->minor_shift) - 1)));
     else
         printk(" %s", disk_name(hd, minor, buf));
-#endif
 }
 
 static void check_partition(struct gendisk *hd, kdev_t dev, int first_part_minor)

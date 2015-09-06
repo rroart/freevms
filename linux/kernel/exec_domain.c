@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -13,16 +13,12 @@
  * 2001-05-06   Complete rewrite,  Christoph Hellwig (hch@infradead.org)
  */
 
-#include <linux/config.h>
 #include <linux/init.h>
-#include <linux/kernel.h>
 #include <linux/kmod.h>
 #include <linux/module.h>
 #include <linux/personality.h>
 #include <linux/sched.h>
 #include <linux/sysctl.h>
-#include <linux/types.h>
-
 
 static void default_handler(int, struct pt_regs *);
 
@@ -96,7 +92,6 @@ lookup_exec_domain(u_long personality)
                 goto out;
     }
 
-#ifdef CONFIG_KMOD
     read_unlock(&exec_domains_lock);
     {
         char buffer[30];
@@ -111,7 +106,6 @@ lookup_exec_domain(u_long personality)
             if (try_inc_mod_count(ep->module))
                 goto out;
     }
-#endif
 
     ep = &default_exec_domain;
 out:

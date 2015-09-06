@@ -9,8 +9,6 @@
  * Thanks. --rmk
  */
 
-#include <linux/config.h>
-
 #include <linux/cache.h>
 #include <linux/spinlock.h>
 

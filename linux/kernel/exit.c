@@ -19,9 +19,6 @@
 #include <linux/completion.h>
 #include <linux/personality.h>
 #include <linux/tty.h>
-#ifdef CONFIG_BSD_PROCESS_ACCT
-#include <linux/acct.h>
-#endif
 
 #include <asm/uaccess.h>
 #include <asm/pgtable.h>
@@ -491,9 +488,6 @@ NORET_TYPE void do_exit(long code)
     del_timer_sync(&tsk->real_timer);
 
 fake_volatile:
-#ifdef CONFIG_BSD_PROCESS_ACCT
-    acct_process(code);
-#endif
     __exit_mm(tsk);
     kfree(tsk->pcb$l_phd->phd$l_wslist);
     kfree(tsk->pcb$l_phd->phd$l_wslock);

@@ -351,44 +351,11 @@ static inline void * __memcpy_g(void * to, const void * from, size_t n)
 
 #include <linux/config.h>
 
-#ifdef CONFIG_X86_USE_3DNOW
-
-#include <asm/mmx.h>
-
-/*
-**      This CPU favours 3DNow strongly (eg AMD K6-II, K6-III, Athlon)
-*/
-
-static inline void * __constant_memcpy3d(void * to, const void * from, size_t len)
-{
-    if (len < 512)
-        return __memcpy_c(to, from, len);
-    return _mmx_memcpy(to, from, len);
-}
-
-static inline void *__memcpy3d(void *to, const void *from, size_t len)
-{
-    if(len < 512)
-        return __memcpy_g(to, from, len);
-    return _mmx_memcpy(to, from, len);
-}
-
-#define memcpy(d, s, count) \
-(__builtin_constant_p(count) ? \
- __constant_memcpy3d((d),(s),(count)) : \
- __memcpy3d((d),(s),(count)))
-
-#else /* CONFIG_X86_USE_3DNOW */
-
 /*
 **  Generic routines
 */
 
-
 #define memcpy(d, s, count) __memcpy(d, s, count)
-
-#endif /* CONFIG_X86_USE_3DNOW */
-
 
 extern void __struct_cpy_bug( void );
 

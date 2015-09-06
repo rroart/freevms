@@ -373,7 +373,6 @@ static int print_unex=1;
 #include <linux/ioport.h>
 #include <linux/interrupt.h>
 #include <linux/init.h>
-#include <linux/devfs_fs_kernel.h>
 
 /*
  * PS/2 floppies have much slower step rates than regular floppies.

@@ -9,11 +9,9 @@
 #ifndef _NET_INETPEER_H
 #define _NET_INETPEER_H
 
-#include <linux/types.h>
 #include <linux/init.h>
 #include <linux/sched.h>
 #include <linux/spinlock.h>
-#include <asm/atomic.h>
 
 struct inet_peer
 {

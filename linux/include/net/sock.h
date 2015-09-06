@@ -33,7 +33,6 @@
 #ifndef _SOCK_H
 #define _SOCK_H
 
-#include <linux/timer.h>
 #include <linux/cache.h>
 #include <linux/in.h>       /* struct sockaddr_in */
 
@@ -50,7 +49,6 @@
 #include <net/dn.h>
 #endif
 
-#include <asm/atomic.h>
 #include <net/dst.h>
 
 
@@ -697,9 +695,6 @@ extern ssize_t          sock_no_sendpage(struct socket *sock,
  */
 
 extern void sock_def_destruct(struct sock *);
-
-/* Initialise core socket variables */
-extern void sock_init_data(struct socket *sock, struct sock *sk);
 
 extern void sklist_remove_socket(struct sock **list, struct sock *sk);
 extern void sklist_insert_socket(struct sock **list, struct sock *sk);

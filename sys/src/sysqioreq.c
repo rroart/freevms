@@ -8,16 +8,11 @@
    \author Roar Thron�s
 */
 
-#include <linux/spinlock.h>
 #include <asm/unistd.h>
 
-#include <acbdef.h>
 #include <aqbdef.h>
-#include <cdrpdef.h>
-#include <ddtdef.h>
 #include <dyndef.h>
 #include <fdtdef.h>
-#include <ipl.h>
 #include <internals.h>
 #include <iodef.h>
 #include <ipldef.h>
@@ -28,10 +23,9 @@
 #include <vcbdef.h>
 
 #include <linux/vmalloc.h>
-#include <linux/linkage.h>
 #include <linux/kernel.h>
 #include <asm/hw_irq.h>
-#include "../../starlet/src/sysdep.h"
+#include <sysdep.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
 #include <sch_routines.h>

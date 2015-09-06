@@ -9,7 +9,6 @@
  *  Copyright 1997 -- 2000 Martin Mares <mj@ucw.cz>
  */
 
-#include <linux/config.h>
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kernel.h>
@@ -18,7 +17,6 @@
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/ioport.h>
-#include <linux/spinlock.h>
 #include <linux/pm.h>
 #include <linux/kmod.h>     /* for hotplug_path */
 #include <linux/bitops.h>

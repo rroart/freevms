@@ -13,19 +13,13 @@
 
 #ifdef __KERNEL__
 
-#include <linux/config.h>
-#include <linux/types.h>
 #include <linux/kernel.h>
 #include <asm/system.h>
 #include <asm/atomic.h>
 
 struct rw_semaphore;
 
-#ifdef CONFIG_RWSEM_GENERIC_SPINLOCK
 #include <linux/rwsem-spinlock.h> /* use a generic implementation */
-#else
-#include <asm/rwsem.h> /* use an arch-specific implementation */
-#endif
 
 #ifndef rwsemtrace
 #if RWSEM_DEBUG

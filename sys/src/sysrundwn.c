@@ -3,8 +3,6 @@
 
 // Author. Roar Thron�s.
 
-#include <linux/linkage.h>
-
 #include <ssdef.h>
 #include <asm/atomic.h>
 #include <linux/tqueue.h>

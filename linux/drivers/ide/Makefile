@@ -10,7 +10,7 @@
 
 O_TARGET := idedriver.o
 
-export-objs             := myide.o ide-features.o
+export-objs     := myide.o ide-features.o
 
 list-multi		:= ide-mod.o ide-probe-mod.o
 

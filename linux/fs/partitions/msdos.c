@@ -25,7 +25,6 @@
  *  Re-organised Feb 1998 Russell King
  */
 
-#include <linux/config.h>
 #include <linux/fs.h>
 #include <linux/genhd.h>
 #include <linux/kernel.h>
@@ -33,9 +32,7 @@
 #include <linux/string.h>
 #include <linux/blk.h>
 
-#ifdef CONFIG_BLK_DEV_IDE
 #include <linux/ide.h>  /* IDE xlate */
-#endif /* CONFIG_BLK_DEV_IDE */
 
 #include <asm/system.h>
 
@@ -76,12 +73,7 @@ static inline int is_extended_partition(struct partition *p)
 static char __attribute__ ((unused))
 *partition_name (struct gendisk *hd, int minor, char *buf)
 {
-#ifdef CONFIG_DEVFS_FS
-    sprintf(buf, "p%d", (minor & ((1 << hd->minor_shift) - 1)));
-    return buf;
-#else
     return disk_name(hd, minor, buf);
-#endif
 }
 
 #define MSDOS_LABEL_MAGIC1  0x55

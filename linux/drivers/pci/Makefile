@@ -15,10 +15,6 @@ export-objs := pci.o
 
 obj-$(CONFIG_PCI) += pci.o quirks.o compat.o names.o setup-res.o
 
-ifndef CONFIG_X86
-obj-y += syscall.o
-endif
-
 include $(TOPDIR)/Rules.make
 
 names.o: names.c devlist.h classlist.h

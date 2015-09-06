@@ -74,30 +74,16 @@ void open_tty(void);
 int mscp(void);
 void early_printk(const char *fmt, ...);
 
-/*
- * Versions of gcc older than that listed below may actually compile
- * and link okay, but the end product can have subtle run time bugs.
- * To avoid associated bogus bug reports, we flatly refuse to compile
- * with a gcc that is known to be too old from the very beginning.
- */
-#if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 91)
-#error Sorry, your GCC is too old. It builds incorrect kernels.
-#endif
-
 extern char _stext, _etext;
-extern char *linux_banner;
 
 static int init(void *);
 
 extern void init_IRQ(void);
-extern void sock_init(void);
 extern void fork_init(unsigned long);
 extern void sysctl_init(void);
 extern void signals_init(void);
 
 extern void free_initmem(void);
-
-extern void ecard_init(void);
 
 #if defined(CONFIG_SYSVIPC)
 extern void ipc_init(void);
@@ -549,8 +535,6 @@ asmlinkage void __init start_kernel(void)
     kernel_puts("puts 1\n");
     lock_kernel();
 #endif
-    kernel_puts("puts 2\n");
-    printk(linux_banner);
     kernel_puts("puts 3\n");
     setup_arch(&command_line);
     kernel_puts("puts 4\n");

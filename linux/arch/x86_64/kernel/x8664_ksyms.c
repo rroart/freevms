@@ -4,11 +4,9 @@
 // Author. Roar Thron�s.
 // Modified Linux source file, 2001-2006
 
-#include <linux/config.h>
 #include <linux/module.h>
 #include <linux/smp.h>
 #include <linux/user.h>
-#include <linux/mca.h>
 #include <linux/sched.h>
 #include <linux/in6.h>
 #include <linux/interrupt.h>
@@ -59,10 +57,6 @@ EXPORT_SYMBOL(kernel_thread);
 EXPORT_SYMBOL(pm_idle);
 EXPORT_SYMBOL(pm_power_off);
 EXPORT_SYMBOL(sys_ioctl);
-
-#ifdef CONFIG_IO_DEBUG
-EXPORT_SYMBOL(__io_virt_debug);
-#endif
 
 EXPORT_SYMBOL_NOVERS(__down_failed);
 EXPORT_SYMBOL_NOVERS(__down_failed_interruptible);
@@ -171,12 +165,6 @@ EXPORT_SYMBOL_NOVERS(strchr);
 EXPORT_SYMBOL_NOVERS(strcat);
 EXPORT_SYMBOL_NOVERS(strcmp);
 EXPORT_SYMBOL_NOVERS(strncat);
-#if 0
-#ifdef __x86_64__
-#define memchr kernel_memchr
-#endif
-EXPORT_SYMBOL_NOVERS(memchr);
-#endif
 EXPORT_SYMBOL_NOVERS(strrchr);
 EXPORT_SYMBOL_NOVERS(strnlen);
 EXPORT_SYMBOL_NOVERS(memcmp);
@@ -184,10 +172,6 @@ EXPORT_SYMBOL_NOVERS(memscan);
 EXPORT_SYMBOL_NOVERS(bcopy);
 
 EXPORT_SYMBOL(empty_zero_page);
-
-#ifdef CONFIG_HAVE_DEC_LOCK
-EXPORT_SYMBOL(atomic_dec_and_lock);
-#endif
 
 EXPORT_SYMBOL(die_chain);
 

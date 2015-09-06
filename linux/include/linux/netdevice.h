@@ -125,7 +125,6 @@ enum
 
 extern const char *if_port_text[];
 
-#include <linux/cache.h>
 #include <linux/skbuff.h>
 
 struct neighbour;

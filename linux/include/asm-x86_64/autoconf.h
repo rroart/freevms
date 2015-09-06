@@ -5,7 +5,6 @@
 #define CONFIG_X86 1
 #undef  CONFIG_ISA
 #undef  CONFIG_UID16
-#define CONFIG_RWSEM_GENERIC_SPINLOCK 1
 #define CONFIG_X86_CMPXCHG 1
 #define ONFIG_EARLY_PRINTK 1
 
@@ -13,7 +12,7 @@
  * Processor type and features
  */
 #define CONFIG_GENERIC_CPU 1
-#if (defined CONFIG_GENERIC_CPU) || (defined CONFIG_MPSC)
+#if (defined CONFIG_GENERIC_CPU)
 #define CONFIG_X86_L1_CACHE_BYTES (128)
 #define CONFIG_X86_L1_CACHE_SHIFT (7)
 #else
@@ -32,7 +31,6 @@
  * General setup
  */
 #define CONFIG_PCI 1
-#undef  CONFIG_PCI_GOANY
 #undef  CONFIG_PCI_BIOS
 #define CONFIG_PCI_DIRECT 1
 #undef  CONFIG_PCI_NAMES
@@ -108,11 +106,7 @@
  * Kernel hacking
  */
 #define CONFIG_DEBUG_KERNEL 1
-#undef  CONFIG_DEBUG_HIGHMEM
-#undef  CONFIG_DEBUG_SLAB
-#undef  CONFIG_DEBUG_IOVIRT
 #define CONFIG_MAGIC_SYSRQ 1
-#undef  CONFIG_DEBUG_SPINLOCK
 #define CONFIG_DEBUG_BUGVERBOSE 1
 
 #endif

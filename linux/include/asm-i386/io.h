@@ -49,15 +49,8 @@
  * Temporary debugging check to catch old code using
  * unmapped ISA addresses. Will be removed in 2.4.
  */
-#if CONFIG_DEBUG_IOVIRT
-extern void *__io_virt_debug(unsigned long x, const char *file, int line);
-extern unsigned long __io_phys_debug(unsigned long x, const char *file, int line);
-#define __io_virt(x) __io_virt_debug((unsigned long)(x), __FILE__, __LINE__)
-//#define __io_phys(x) __io_phys_debug((unsigned long)(x), __FILE__, __LINE__)
-#else
 #define __io_virt(x) ((void *)(x))
 //#define __io_phys(x) __pa(x)
-#endif
 
 /*
  * Change virtual addresses to physical addresses and vv.

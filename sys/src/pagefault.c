@@ -4,42 +4,31 @@
 // Author. Roar Thron�s.
 // Modified Linux source, 2001-2004. Parts from fault.c and trap_kern.c
 
-#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/mman.h>
 #include <linux/pagemap.h>
 #include <linux/smp_lock.h>
 #include <linux/init.h>
 #include <linux/file.h>
-#include <linux/fs.h>
 #include <linux/personality.h>
+#include <linux/vmalloc.h>
 
 #include <asm/uaccess.h>
 #include <asm/pgalloc.h>
 
 #include <linux/unistd.h>
-#include <linux/linkage.h>
-#include <linux/sched.h>
 #include <system_data_cells.h>
 #include <linux/mm.h>
 #include <acbdef.h>
 #include <fcbdef.h>
-#include <ipl.h>
 #include <ipldef.h>
 #include <mmgdef.h>
-#include <pfndef.h>
-#include <phddef.h>
-#include <rdedef.h>
-#include <secdef.h>
 #include <ssdef.h>
 #include <vmspte.h>
 #include <wcbdef.h>
-#include <wsldef.h>
 #include <va_rangedef.h>
 #include <pfldef.h>
 #include <mmg_functions.h>
-
-#include <linux/vmalloc.h>
 
 #ifdef __x86_64__
 #include <asm/hardirq.h>

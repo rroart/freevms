@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -21,7 +21,6 @@
  * (c) 1999 Manfred Spraul <manfreds@colorfullife.com>
  */
 
-#include <linux/config.h>
 #include <linux/slab.h>
 #include <linux/msg.h>
 #include <linux/spinlock.h>

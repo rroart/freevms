@@ -2,7 +2,6 @@
 #include <linux/smp.h>
 #include <linux/user.h>
 #include <linux/elfcore.h>
-#include <linux/mca.h>
 #include <linux/sched.h>
 #include <linux/interrupt.h>
 #include <linux/smp_lock.h>
@@ -49,7 +48,6 @@ extern unsigned long get_cmos_time(void);
 
 /* platform dependent support */
 EXPORT_SYMBOL(boot_cpu_data);
-EXPORT_SYMBOL(MCA_bus);
 EXPORT_SYMBOL(__verify_write);
 EXPORT_SYMBOL(dump_thread);
 EXPORT_SYMBOL(dump_fpu);
@@ -66,10 +64,6 @@ EXPORT_SYMBOL(pm_power_off);
 EXPORT_SYMBOL(get_cmos_time);
 EXPORT_SYMBOL(apm_info);
 EXPORT_SYMBOL(gdt);
-
-#ifdef CONFIG_DEBUG_IOVIRT
-EXPORT_SYMBOL(__io_virt_debug);
-#endif
 
 EXPORT_SYMBOL_NOVERS(__down_failed);
 EXPORT_SYMBOL_NOVERS(__down_failed_interruptible);
@@ -111,12 +105,6 @@ EXPORT_SYMBOL(pcibios_set_irq_routing);
 EXPORT_SYMBOL(pcibios_get_irq_routing_table);
 #endif
 
-#ifdef CONFIG_X86_USE_3DNOW
-EXPORT_SYMBOL(_mmx_memcpy);
-EXPORT_SYMBOL(mmx_clear_page);
-EXPORT_SYMBOL(mmx_copy_page);
-#endif
-
 #ifdef CONFIG_SMP
 EXPORT_SYMBOL(cpu_data);
 EXPORT_SYMBOL(kernel_flag);
@@ -152,10 +140,6 @@ extern void * memset(void *,int,__kernel_size_t);
 extern void * memcpy(void *,const void *,__kernel_size_t);
 EXPORT_SYMBOL_NOVERS(memcpy);
 EXPORT_SYMBOL_NOVERS(memset);
-
-#ifdef CONFIG_HAVE_DEC_LOCK
-EXPORT_SYMBOL(atomic_dec_and_lock);
-#endif
 
 #ifdef CONFIG_DEBUG_BUGVERBOSE
 EXPORT_SYMBOL(do_BUG);

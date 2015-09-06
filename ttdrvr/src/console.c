@@ -132,8 +132,6 @@ const struct consw *conswitchp;
 #define DEFAULT_BELL_PITCH  750
 #define DEFAULT_BELL_DURATION   (HZ/8)
 
-extern void vcs_make_devfs (unsigned int index, int unregister);
-
 #ifndef MIN
 #define MIN(a,b)    ((a) < (b) ? (a) : (b))
 #endif
@@ -2626,10 +2624,6 @@ static int con_open(struct _tty_ucb *tty, struct file * filp)
     if (!tty->ucb$w_tt_desize)
         tty->ucb$w_tt_desize = video_num_lines;
 #endif
-#if 0
-    if (tty->count == 1)
-        vcs_make_devfs (currcons, 0);
-#endif
     return 0;
 }
 
@@ -2639,9 +2633,6 @@ static void con_close(struct _ucb *tty, struct file * filp)
         return;
 #if 0
     if (tty->count != 1) return;
-#endif
-#if 0
-    vcs_make_devfs (MINOR (tty->device) - tty->driver.minor_start, 1);
 #endif
 #if 0
     tty->driver_data = 0;
@@ -2865,21 +2856,6 @@ static void set_vesa_blanking(unsigned long arg)
     unsigned int mode;
     if (get_user(mode, argp) == 0)
         vesa_blank_mode = (mode < 4) ? mode : 0;
-}
-
-/* We can't register the console with devfs during con_init(), because it
- * is called before kmalloc() works.  This function is called later to
- * do the registration.
- */
-void __init con_init_devfs (void)
-{
-    int i;
-
-#if 0
-    for (i = 0; i < console_driver.num; i++)
-        tty_register_devfs (&console_driver, DEVFS_FL_AOPEN_NOTIFY,
-                            console_driver.minor_start + i);
-#endif
 }
 
 /*

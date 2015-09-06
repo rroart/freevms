@@ -106,14 +106,6 @@ struct arpreq
     char            arp_dev[16];
 };
 
-struct arpreq_old
-{
-    struct sockaddr arp_pa;     /* protocol address     */
-    struct sockaddr arp_ha;     /* hardware address     */
-    int         arp_flags;  /* flags            */
-    struct sockaddr       arp_netmask;    /* netmask (only for proxy arps) */
-};
-
 /* ARP Flag values. */
 #define ATF_COM     0x02        /* completed entry (ha valid)   */
 #define ATF_PERM    0x04        /* permanent entry      */

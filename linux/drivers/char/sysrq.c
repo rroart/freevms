@@ -18,11 +18,8 @@
  *  based upon discusions in irc://irc.openprojects.net/#kernelnewbies
  */
 
-#include <linux/sched.h>
-#include <linux/interrupt.h>
 #include <linux/mm.h>
 #include <linux/fs.h>
-#include <linux/tty.h>
 #include <linux/mount.h>
 #include <linux/major.h>
 #include <linux/reboot.h>

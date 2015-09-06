@@ -1,16 +1,15 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 /**
    \file exsubrout.c
    \brief subroutines
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
 */
 
 #include <system_data_cells.h>
 #include <ipldef.h>
-#include <ipl.h>
 #include <internals.h>
 #include <ssdef.h>
 #include <queue.h>

@@ -21,8 +21,7 @@ obj-y	 += pty.o
 # All of the (potential) objects that export symbols.
 # This list comes from 'grep -l EXPORT_SYMBOL *.[hc]'.
 
-export-objs     :=	sysrq.o \
-			pty.o
+export-objs     :=	sysrq.o pty.o
 
 mod-subdirs	:=	
 
@@ -39,8 +38,6 @@ obj-$(CONFIG_MAGIC_SYSRQ) += sysrq.o
 
 include $(TOPDIR)/Rules.make
 
-fastdep:
-
 conmakehash: conmakehash.c
 	$(HOSTCC) $(HOSTCFLAGS) -o conmakehash conmakehash.c
 
@@ -52,7 +49,4 @@ consolemap_deftbl.o: consolemap_deftbl.c $(TOPDIR)/linux/include/linux/types.h
 .DELETE_ON_ERROR:
 
 defkeymap.c: defkeymap.map
-	set -e ; loadkeys --mktable $< | sed -e 's/^static *//' > $@
-
-qtronixmap.c: qtronixmap.map
 	set -e ; loadkeys --mktable $< | sed -e 's/^static *//' > $@

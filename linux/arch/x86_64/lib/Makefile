@@ -15,7 +15,4 @@ obj-y  = csum-partial.o csum-copy.o csum-wrappers.o delay.o \
 	thunk.o io.o clear_page.o copy_page.o copy_user.o \
 	memcpy.o memset.o memmove.o bitstr.o
 
-obj-$(CONFIG_IO_DEBUG) += iodebug.o
-obj-$(CONFIG_HAVE_DEC_LOCK) += dec_and_lock.o
-
 include $(TOPDIR)/Rules.make

@@ -50,9 +50,7 @@
 #include <linux/seq_file.h>
 #include <asm/checksum.h>
 
-#ifdef CONFIG_KMOD
 #include <linux/kmod.h>
-#endif
 
 extern void set_device_ro(kdev_t dev,int flag);
 
@@ -91,7 +89,6 @@ EXPORT_SYMBOL(exit_sighand);
 /* internal kernel memory management */
 EXPORT_SYMBOL(_alloc_pages);
 EXPORT_SYMBOL(__alloc_pages);
-EXPORT_SYMBOL(alloc_pages_node);
 EXPORT_SYMBOL(__get_free_pages);
 EXPORT_SYMBOL(get_zeroed_page);
 EXPORT_SYMBOL(__free_pages);

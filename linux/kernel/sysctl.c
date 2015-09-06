@@ -67,10 +67,6 @@ extern int msg_ctlmni;
 extern int sem_ctls[];
 #endif
 
-#ifdef CONFIG_BSD_PROCESS_ACCT
-extern int acct_parm[];
-#endif
-
 extern int pgt_cache_water[];
 
 static int parse_table(int *, int, void *, size_t *, void *, size_t,
@@ -183,12 +179,6 @@ static ctl_table kern_table[] =
     {
         KERN_MODPROBE, "modprobe", &modprobe_path, 256,
         0644, NULL, &proc_dostring, &sysctl_string
-    },
-#endif
-#ifdef CONFIG_BSD_PROCESS_ACCT
-    {
-        KERN_ACCT, "acct", &acct_parm, 3*sizeof(int),
-        0644, NULL, &proc_dointvec
     },
 #endif
     {

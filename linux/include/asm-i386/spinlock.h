@@ -11,11 +11,7 @@
  * initialize their spinlocks properly, tsk tsk.
  * Remember to turn this off in 2.4. -ben
  */
-#if defined(CONFIG_DEBUG_SPINLOCK)
-#define SPINLOCK_DEBUG  1
-#else
 #define SPINLOCK_DEBUG  0
-#endif
 
 /*
  * Your basic SMP spinlocks, allowing only a single CPU anywhere

@@ -3,15 +3,12 @@
 
 // Author. Roar Thron�s.
 
-#include <linux/linkage.h>
-#include <linux/sched.h>
 #include <linux/completion.h>
 #include <linux/personality.h>
 #include <linux/mm.h>
 #include <linux/module.h>
 
 #include <system_data_cells.h>
-#include <descrip.h>
 #include <dyndef.h>
 #include <ipldef.h>
 #include <phddef.h>

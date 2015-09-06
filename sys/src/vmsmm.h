@@ -311,7 +311,6 @@ extern mem_map_t * mem_map;
  */
 extern struct page * FASTCALL(_alloc_pages(unsigned int gfp_mask, unsigned int order));
 extern struct page * FASTCALL(__alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_t *zonelist));
-extern struct page * alloc_pages_node(int nid, unsigned int gfp_mask, unsigned int order);
 
 static inline struct page * alloc_pages(unsigned int gfp_mask, unsigned int order)
 {
@@ -443,9 +442,6 @@ extern int check_pgt_cache(void);
         NULL: pte_offset_kernel(pmd, address))
 
 extern void free_area_init(unsigned long * zones_size);
-extern void free_area_init_node(int nid, pg_data_t *pgdat, struct page *pmap,
-                                unsigned long * zones_size, unsigned long zone_start_paddr,
-                                unsigned long *zholes_size);
 extern void mem_init(void);
 extern void show_mem(void);
 extern void si_meminfo(struct sysinfo * val);

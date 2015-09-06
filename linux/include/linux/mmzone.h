@@ -113,7 +113,6 @@ typedef struct pglist_data
     struct pglist_data *node_next;
 } pg_data_t;
 
-extern int numnodes;
 extern pg_data_t *pgdat_list;
 
 #define memclass(pgzone, classzone) (((pgzone)->zone_pgdat == (classzone)->zone_pgdat) \
@@ -130,9 +129,6 @@ extern void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
                                 struct page *pmap);
 
 extern pg_data_t contig_page_data;
-
-#define NODE_DATA(nid)      (&contig_page_data)
-#define NODE_MEM_MAP(nid)   mem_map
 
 #define MAP_ALIGN(x)    ((((x) % sizeof(mem_map_t)) == 0) ? (x) : ((x) + \
         sizeof(mem_map_t) - ((x) % sizeof(mem_map_t))))

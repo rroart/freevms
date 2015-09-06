@@ -115,12 +115,6 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 
-#ifdef CONFIG_VT
-#if 1
-extern void con_init_devfs (void);
-#endif
-#endif
-
 #define CONSOLE_DEV MKDEV(TTY_MAJOR,0)
 #define TTY_DEV MKDEV(TTYAUX_MAJOR,0)
 #define SYSCONS_DEV MKDEV(TTYAUX_MAJOR,1)
@@ -1210,15 +1204,7 @@ retry_open:
 ptmx_found:
         set_bit(TTY_PTY_LOCK, &tty->flags); /* LOCK THE SLAVE */
         minor -= driver->minor_start;
-#if 0
-        devpts_pty_new(driver->other->name_base + minor, MKDEV(driver->other->major, minor + driver->other->minor_start));
-#else
         printk("no new pts\n");
-#endif
-#if 0
-        tty_register_devfs(&pts_driver[major], DEVFS_FL_DEFAULT,
-                           pts_driver[major].minor_start + minor);
-#endif
         noctty = 1;
         goto init_dev_done;
 
@@ -1743,63 +1729,6 @@ void tty_default_put_char(struct tty_struct *tty, unsigned char ch)
 }
 
 /*
- * Register a tty device described by <driver>, with minor number <minor>.
- */
-void tty_register_devfs (struct tty_driver *driver, unsigned int flags, unsigned minor)
-{
-#ifdef CONFIG_DEVFS_FS
-    umode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
-    kdev_t device = MKDEV (driver->major, minor);
-    int idx = minor - driver->minor_start;
-    char buf[32];
-
-    switch (device)
-    {
-    case TTY_DEV:
-    case PTMX_DEV:
-        mode |= S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-        break;
-    default:
-        if (driver->major == PTY_MASTER_MAJOR)
-            mode |= S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-        break;
-    }
-    if ( (minor <  driver->minor_start) ||
-            (minor >= driver->minor_start + driver->num) )
-    {
-        printk(KERN_ERR "Attempt to register invalid minor number "
-               "with devfs (%d:%d).\n", (int)driver->major,(int)minor);
-        return;
-    }
-#  ifdef CONFIG_UNIX98_PTYS
-    if ( (driver->major >= UNIX98_PTY_SLAVE_MAJOR) &&
-            (driver->major < UNIX98_PTY_SLAVE_MAJOR + UNIX98_NR_MAJORS) )
-        flags |= DEVFS_FL_CURRENT_OWNER;
-#  endif
-    sprintf(buf, driver->name, idx + driver->name_base);
-    devfs_register (NULL, buf, flags | DEVFS_FL_DEFAULT,
-                    driver->major, minor, mode, &tty_fops, NULL);
-#endif /* CONFIG_DEVFS_FS */
-}
-
-void tty_unregister_devfs (struct tty_driver *driver, unsigned minor)
-{
-#ifdef CONFIG_DEVFS_FS
-    void * handle;
-    int idx = minor - driver->minor_start;
-    char buf[32];
-
-    sprintf(buf, driver->name, idx + driver->name_base);
-    handle = devfs_find_handle (NULL, buf, driver->major, minor,
-                                DEVFS_SPECIAL_CHR, 0);
-    devfs_unregister (handle);
-#endif /* CONFIG_DEVFS_FS */
-}
-
-EXPORT_SYMBOL(tty_register_devfs);
-EXPORT_SYMBOL(tty_unregister_devfs);
-
-/*
  * Called by a tty driver to register itself.
  */
 int tty_register_driver(struct tty_driver *driver)
@@ -1810,9 +1739,6 @@ int tty_register_driver(struct tty_driver *driver)
     if (driver->flags & TTY_DRIVER_INSTALLED)
         return 0;
 
-#if 0
-    error = devfs_register_chrdev(driver->major, driver->name, &tty_fops);
-#endif
     if (error < 0)
         return error;
     else if(driver->major == 0)
@@ -1826,14 +1752,6 @@ int tty_register_driver(struct tty_driver *driver)
     if (tty_drivers) tty_drivers->prev = driver;
     tty_drivers = driver;
 
-#if 0
-    if ( !(driver->flags & TTY_DRIVER_NO_DEVFS) )
-    {
-        for(i = 0; i < driver->num; i++)
-            tty_register_devfs(driver, 0, driver->minor_start + i);
-    }
-    proc_tty_register_driver(driver);
-#endif
     return error;
 }
 
@@ -1862,17 +1780,6 @@ int tty_unregister_driver(struct tty_driver *driver)
     if (!found)
         return -ENOENT;
 
-#if 0
-    if (othername == NULL)
-    {
-        retval = devfs_unregister_chrdev(driver->major, driver->name);
-        if (retval)
-            return retval;
-    }
-    else
-        devfs_register_chrdev(driver->major, othername, &tty_fops);
-#endif
-
     if (driver->prev)
         driver->prev->next = driver->next;
     else
@@ -1900,13 +1807,7 @@ int tty_unregister_driver(struct tty_driver *driver)
             driver->termios_locked[i] = NULL;
             kfree(tp);
         }
-#if 0
-        tty_unregister_devfs(driver, driver->minor_start + i);
-#endif
     }
-#if 0
-    proc_tty_unregister_driver(driver);
-#endif
     return 0;
 }
 
@@ -1995,13 +1896,6 @@ void __init tty_init(void)
 
     if (tty_register_driver(&dev_syscons_driver))
         panic("Couldn't register /dev/console driver\n");
-
-    /* console calls tty_register_driver() before kmalloc() works.
-     * Thus, we can't devfs_register() then.  Do so now, instead.
-     */
-#ifdef CONFIG_VT
-    con_init_devfs();
-#endif
 
     con_vmsinit();
 

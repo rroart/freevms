@@ -5,41 +5,8 @@
  * Copyright 1997 Andi Kleen <ak@muc.de>
  * Copyright 1997 Linus Torvalds
  */
-#include <linux/config.h>
 #include <asm/uaccess.h>
 #include <asm/mmx.h>
-
-#ifdef CONFIG_X86_USE_3DNOW_AND_WORKS
-
-unsigned long
-__generic_copy_to_user(void *to, const void *from, unsigned long n)
-{
-    if (access_ok(VERIFY_WRITE, to, n))
-    {
-        if(n<512)
-            __copy_user(to,from,n);
-        else
-            mmx_copy_user(to,from,n);
-    }
-    return n;
-}
-
-unsigned long
-__generic_copy_from_user(void *to, const void *from, unsigned long n)
-{
-    if (access_ok(VERIFY_READ, from, n))
-    {
-        if(n<512)
-            __copy_user_zeroing(to,from,n);
-        else
-            mmx_copy_user_zeroing(to, from, n);
-    }
-    else
-        memset(to, 0, n);
-    return n;
-}
-
-#else
 
 unsigned long
 __generic_copy_to_user(void *to, const void *from, unsigned long n)
@@ -60,8 +27,6 @@ __generic_copy_from_user(void *to, const void *from, unsigned long n)
         memset(to, 0, n);
     return n;
 }
-
-#endif
 
 /*
  * Copy a null terminated string from userspace.

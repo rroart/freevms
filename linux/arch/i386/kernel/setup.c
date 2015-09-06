@@ -128,11 +128,6 @@ struct cpuinfo_x86 boot_cpu_data = { 0, 0, 0, 0, -1, 1, 0, 0, -1 };
 
 unsigned long mmu_cr4_features;
 
-/*
- * Bus types ..
- */
-int MCA_bus;
-
 /* for MCA, but anyone else can use it if they want */
 unsigned int machine_id;
 unsigned int machine_submodel_id;
@@ -709,7 +704,6 @@ void __init setup_arch(char **cmdline_p)
     apm_info.bios = APM_BIOS_INFO;
     if( SYS_DESC_TABLE.length != 0 )
     {
-        MCA_bus = SYS_DESC_TABLE.table[3] &0x2;
         machine_id = SYS_DESC_TABLE.table[0];
         machine_submodel_id = SYS_DESC_TABLE.table[1];
         BIOS_revision = SYS_DESC_TABLE.table[2];
