@@ -9,7 +9,6 @@
 
 #include <linux/string.h>
 
-#include <mytypes.h>
 #include <aqbdef.h>
 #include <fatdef.h>
 #include <ucbdef.h>
@@ -33,7 +32,6 @@
 #include <xabfhcdef.h>
 #include <xabprodef.h>
 #include <fcbdef.h>
-#include <vmstime.h>
 
 #include "x2p.h"
 
@@ -55,13 +53,8 @@ unsigned exttwo_extend(struct _fcb *fcb, unsigned blocks, unsigned contig);
 /* Bitmaps get accesses in 'WORK_UNITs' which can be an integer
  on a little endian machine but must be a byte on a big endian system */
 
-#ifdef FREEVMS_BIG_ENDIAN
-#define WORK_UNIT unsigned char
-#define WORK_MASK 0xff
-#else
 #define WORK_UNIT unsigned int
 #define WORK_MASK 0xffffffff
-#endif
 #define WORK_BITS (sizeof(WORK_UNIT) * 8)
 
 #if 0
@@ -386,15 +379,15 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
                     if ((work_val & (1 << bit_no)) == 0)
                     {
                         unsigned idxblk = head_no +
-                                          VMSWORD(vcbdev->vcb$l_ibmapvbn) +
-                                          VMSWORD(vcbdev->vcb$l_ibmapsize);
+                                          vcbdev->vcb$l_ibmapvbn +
+                                          vcbdev->vcb$l_ibmapsize;
                         sts = exttwo_accesschunk(getidxfcb(vcbdev),idxblk,(char **) headbuff,NULL,1,0);
                         if (sts & 1)
                         {
                             *work_ptr |= 1 << bit_no;
                             modify_flag = 1;
                             if (*headbuff && (*headbuff)->fh2$w_checksum != 0 && (*headbuff)->fh2$w_fid.fid$w_num != 0 &&
-                                    (VMSLONG((*headbuff)->fh2$l_filechar) & FH2$M_MARKDEL) == 0)
+                                    ((*headbuff)->fh2$l_filechar & FH2$M_MARKDEL) == 0)
                             {
                                 sts = deaccesschunk(0,0,0);
                                 writechunk(getidxfcb(vcbdev),idxblk,*headbuff);
@@ -457,7 +450,7 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
         writechunk(getidxfcb(vcbdev),map_block,bitmap);
         if ((sts & 1) == 0) break;
     }
-    while (head_no < VMSLONG(vcbdev->vcb$l_maxfiles));
+    while (head_no < vcbdev->vcb$l_maxfiles);
     return sts;
 }
 
@@ -522,8 +515,8 @@ unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
     memcpy(id->fi2$q_expdate,id->fi2$q_credate,sizeof(id->fi2$q_credate));
     head->fh2$w_recattr.fat$l_efblk = VMSSWAP(1);
     {
-        unsigned short check = checksum((vmsword *) head);
-        head->fh2$w_checksum = VMSWORD(check);
+        unsigned short check = checksum((_uword *) head);
+        head->fh2$w_checksum = check;
     }
     writechunk(getidxfcb(vcbdev),*idxblk,head);
     *rethead=head;

@@ -7,7 +7,6 @@
 #include <linux/linkage.h>
 #include <linux/mm.h>
 
-#include <mytypes.h>
 #include <misc.h>
 #include <fiddef.h>
 #include <uicdef.h>

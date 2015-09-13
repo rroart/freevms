@@ -48,9 +48,9 @@ void do_checksum(unsigned char *line)
     for(i=0; i<255; i++)
     {
         data=*p++;
-        checksum=checksum+VMSWORD(data);
+        checksum=checksum+data;
     }
-    *p = VMSWORD(checksum);
+    *p = checksum;
 }
 
 void do_checksum_count(unsigned char *line, int count)
@@ -63,9 +63,9 @@ void do_checksum_count(unsigned char *line, int count)
     for(i=0; i<count; i++)
     {
         data=*p++;
-        checksum=checksum+VMSWORD(data);
+        checksum=checksum+data;
     }
-    *p = VMSWORD(checksum);
+    *p = checksum;
 }
 
 void create_ods2(FILE *fout, char *volname, int volsize)
@@ -119,11 +119,11 @@ void create_ods2(FILE *fout, char *volname, int volsize)
     pHM2$->hm2$w_altidxvbn=clustersize*3+1;
     pHM2$->hm2$w_struclev=2*256+1;
     pHM2$->hm2$w_cluster=clustersize;
-    pHM2$->hm2$w_ibmapvbn=VMSWORD(clustersize*4+1);
-    pHM2$->hm2$l_ibmaplbn=VMSLONG(clustersize*4);
+    pHM2$->hm2$w_ibmapvbn=clustersize*4+1;
+    pHM2$->hm2$l_ibmaplbn=clustersize*4;
     ibmaplbn=pHM2$->hm2$l_ibmaplbn;
     pHM2$->hm2$l_maxfiles=(maxfiles);
-    pHM2$->hm2$w_ibmapsize=VMSWORD(roundup( ( (double) pHM2$->hm2$l_maxfiles)/4096 ));
+    pHM2$->hm2$w_ibmapsize=roundup( ( (double) pHM2$->hm2$l_maxfiles)/4096 );
     ibmapsize=pHM2$->hm2$w_ibmapsize;
     pHM2$->hm2$w_resfiles=10;
     do_checksum_count(out_line,(short *)&pHM2$->hm2$w_checksum1-(short*)pHM2$);
@@ -208,8 +208,8 @@ void create_ods2(FILE *fout, char *volname, int volsize)
     pFH2->fh2$b_rsoffset=255;
     pFH2->fh2$w_seg_num=0;
     pFH2->fh2$w_struclev=2*256+1;
-    pFH2->fh2$w_fid.fid$w_num=VMSWORD(1);
-    pFH2->fh2$w_fid.fid$w_seq=VMSWORD(1);
+    pFH2->fh2$w_fid.fid$w_num=1;
+    pFH2->fh2$w_fid.fid$w_seq=1;
     pFH2->fh2$w_fid.fid$b_rvn=0;
     pFH2->fh2$w_backlink.fid$w_num=4;
     pFH2->fh2$w_backlink.fid$w_seq=4;
@@ -232,11 +232,11 @@ void create_ods2(FILE *fout, char *volname, int volsize)
     pFH2->fh2$b_map_inuse=2*2;
     //file attribs
     pFH2->fh2$w_recattr.fat$b_rtype=1;
-    pFH2->fh2$w_recattr.fat$w_rsize=VMSWORD(512);
+    pFH2->fh2$w_recattr.fat$w_rsize=512;
     pFH2->fh2$w_recattr.fat$l_hiblk=VMSSWAP(indexfilesize);
     pFH2->fh2$w_recattr.fat$l_efblk=VMSSWAP(indexfilesize-diffsizeindexf+1); //not sure
-    pFH2->fh2$l_highwater=VMSLONG(indexfilesize+1);
-    pFH2->fh2$w_recattr.fat$w_maxrec=VMSWORD(512);
+    pFH2->fh2$l_highwater=indexfilesize+1;
+    pFH2->fh2$w_recattr.fat$w_maxrec=512;
     do_checksum(out_line);
     write_blk(out_line, fout, "Index file header"); //write down index file header
 
@@ -272,7 +272,7 @@ void create_ods2(FILE *fout, char *volname, int volsize)
     pFH2->fh2$w_recattr.fat$w_rsize=512;
     pFH2->fh2$w_recattr.fat$l_hiblk=VMSSWAP(bitmapfilesize);
     pFH2->fh2$w_recattr.fat$l_efblk=VMSSWAP(bitmapfilesize-diffsizebitmap+1);
-    pFH2->fh2$l_highwater=VMSLONG(bitmapfilesize);
+    pFH2->fh2$l_highwater=bitmapfilesize;
     pFH2->fh2$w_recattr.fat$w_maxrec=512;
     do_checksum(out_line);
     write_blk(out_line, fout, "bitmap.sys header"); //write down bitmap file header

@@ -30,7 +30,6 @@
 #include <xabprodef.h>
 #include <fh2def.h>
 #include <fcbdef.h>
-#include <vmstime.h>
 #include <xabkeydef.h>
 #include <keydef.h>
 #include <bktdef.h>

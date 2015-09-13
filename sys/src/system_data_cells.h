@@ -149,7 +149,7 @@ extern unsigned long ctl$gl_clintown;
 extern unsigned long ctl$gl_cmsupr;
 extern unsigned long ctl$gl_cmuser;
 extern unsigned long ctl$gl_creprc_flags;
-extern unsigned long ctl$gl_ctlbasva;
+extern void * ctl$gl_ctlbasva;
 extern unsigned long ctl$gl_cur_xscb;
 extern unsigned long ctl$gl_dclprsown;
 extern unsigned long ctl$gl_def_arb_support;
@@ -157,22 +157,22 @@ extern unsigned long ctl$gl_dnsptr;
 extern unsigned long ctl$gl_f11bxqp;
 extern unsigned long ctl$gl_fcb_listhead;
 extern unsigned long ctl$gl_finalsts;
-extern unsigned long ctl$gl_fixuplnk;
+extern struct _iaf * ctl$gl_fixuplnk;
 extern unsigned long ctl$gl_fred;
 extern unsigned long ctl$gl_free_index;
 extern unsigned long ctl$gl_getmsg;
 extern unsigned long ctl$gl_iafexe;
 extern unsigned long ctl$gl_iaflast;
 extern unsigned long ctl$gl_iaflink;
-extern unsigned long ctl$gl_iaflnkptr;
+extern struct _iaf * ctl$gl_iaflnkptr;
 extern unsigned long ctl$gl_iafperm;
 extern unsigned long ctl$gl_ibiocnt;
 extern unsigned long ctl$gl_icputim;
 extern unsigned long ctl$gl_idiocnt;
 extern unsigned long ctl$gl_ifaultio;
 extern unsigned long ctl$gl_ifaults;
-extern unsigned long ctl$gl_imghdrbf;
-extern unsigned long ctl$gl_imglstptr;
+extern struct _ihd * ctl$gl_imghdrbf;
+extern struct _imcb * ctl$gl_imglstptr;
 extern unsigned long ctl$gl_imgreg_size;
 extern unsigned long ctl$gl_initial_epid;
 extern unsigned long ctl$gl_initial_ktb;
@@ -187,9 +187,9 @@ extern unsigned long ctl$gl_kt_area_pages;
 extern unsigned long ctl$gl_kt_count;
 extern unsigned long ctl$gl_kt_high;
 extern unsigned long ctl$gl_license_cnt;
-extern unsigned long ctl$gl_lnmdirect;
+extern struct _lnmb * ctl$gl_lnmdirect;
 extern unsigned long ctl$gl_lnmdirseq;
-extern unsigned long ctl$gl_lnmhash;
+extern struct lnmhshp * ctl$gl_lnmhash;
 extern unsigned long ctl$gl_logfails;
 extern unsigned long ctl$gl_login_flags;
 extern unsigned long ctl$gl_multithread;
@@ -208,7 +208,7 @@ extern unsigned long ctl$gl_persona_maxindex;
 extern unsigned long ctl$gl_persona_usercount;
 extern unsigned long ctl$gl_pfaultio;
 extern unsigned long ctl$gl_pfaults;
-extern unsigned long ctl$gl_phd;
+extern struct _phd * ctl$gl_phd;
 extern unsigned long ctl$gl_pimgcnt;
 extern unsigned long ctl$gl_posix_1;
 extern unsigned long ctl$gl_posix_2;
@@ -234,7 +234,7 @@ extern unsigned long ctl$gl_security_exec_2;
 extern unsigned long ctl$gl_sitespec;
 extern unsigned long ctl$gl_subsys_rights;
 extern unsigned long ctl$gl_thcount[3];
-extern unsigned long ctl$gl_thexec;
+extern struct _exh * ctl$gl_thexec;
 extern unsigned long ctl$gl_thsupr;
 extern unsigned long ctl$gl_uaf_flags;
 extern unsigned long ctl$gl_uaictx;
@@ -1941,29 +1941,29 @@ extern struct _spl SPIN_IOPOST;
 #define P1PP_UNIT 0x8
 
 #define ctl$gl_pcb (*((struct _pcb **)(((long)P1PP_BASE) + 0)))
-#define ctl$gl_phd (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 1)))
+#define ctl$gl_phd (*((struct _phd **)(((long)P1PP_BASE) + P1PP_UNIT * 1)))
 #define ctl$gw_nmioch (*((unsigned short *)(((long)P1PP_BASE) + P1PP_UNIT * 2)))
 #define ctl$gl_chindx (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 3)))
-#define ctl$gl_lnmhash (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 4)))
-#define ctl$gl_lnmdirect (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 5)))
+#define ctl$gl_lnmhash (*((struct lnmhshp **)(((long)P1PP_BASE) + P1PP_UNIT * 4)))
+#define ctl$gl_lnmdirect (*((struct _lnmb **)(((long)P1PP_BASE) + P1PP_UNIT * 5)))
 #define ctl$al_stack (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 6)))
 #define ctl$gq_lnmtbl_cache (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 10)))
 #define ctl$gl_cmsupr (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 12)))
 #define ctl$gl_cmuser (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 13)))
 #define ctl$gl_cmhandler (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 14)))
 #define ctl$aq_excvec (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 15)))
-#define ctl$gl_thexec (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 23)))
+#define ctl$gl_thexec (*((struct _exh **)(((long)P1PP_BASE) + P1PP_UNIT * 23)))
 #define ctl$gl_thsupr (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 24)))
 #define ctl$gq_common (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 25)))
 #define ctl$gl_getmsg (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 27)))
 #define ctl$al_stacklim (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 28)))
-#define ctl$gl_ctlbasva (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 32)))
-#define ctl$gl_imghdrbf (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 33)))
-#define ctl$gl_imglstptr (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 34)))
+#define ctl$gl_ctlbasva (*((void **)(((long)P1PP_BASE) + P1PP_UNIT * 32)))
+#define ctl$gl_imghdrbf (*((struct _ihd **)(((long)P1PP_BASE) + P1PP_UNIT * 33)))
+#define ctl$gl_imglstptr (*((struct _imcb **)(((long)P1PP_BASE) + P1PP_UNIT * 34)))
 #define ctl$gq_allocreg (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 35)))
 #define ctl$gq_mountlst (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 37)))
-#define ctl$t_username (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 39)))
-#define ctl$t_account (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 41)))
+#define ctl$t_username (*((unsigned char **)(((long)P1PP_BASE) + P1PP_UNIT * 39)))
+#define ctl$t_account (*((unsigned char **)(((long)P1PP_BASE) + P1PP_UNIT * 41)))
 #define ctl$gq_login (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 42)))
 #define ctl$gl_finalsts (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 44)))
 #define ctl$gl_wspeak (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 45)))
@@ -1978,9 +1978,9 @@ extern struct _spl SPIN_IOPOST;
 #define ctl$gl_idiocnt (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 56)))
 #define ctl$gl_ibiocnt (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 57)))
 #define ctl$gl_ivolumes (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 58)))
-#define ctl$t_nodeaddr (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 59)))
-#define ctl$t_nonename (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 60)))
-#define ctl$t_remoteid (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 61)))
+#define ctl$t_nodeaddr (*((unsigned char **)(((long)P1PP_BASE) + P1PP_UNIT * 59)))
+#define ctl$t_nonename (*((unsigned char **)(((long)P1PP_BASE) + P1PP_UNIT * 60)))
+#define ctl$t_remoteid (*((unsigned char **)(((long)P1PP_BASE) + P1PP_UNIT * 61)))
 #define ctl$gq_procpriv (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 62)))
 #define ctl$gl_usrchmk (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 63)))
 #define ctl$gl_usrchme (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 64)))
@@ -1989,10 +1989,10 @@ extern struct _spl SPIN_IOPOST;
 #define ctl$gb_ssfilter (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 67)))
 #define ctl$gb_reenable_asts (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 68)))
 #define ctl$al_finalexc (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 69)
-#define ctl$gl_ccbbase (*((struct _ccb * *)(((long)P1PP_BASE) + P1PP_UNIT * 73)))
+#define ctl$gl_ccbbase (*((struct _ccb **)(((long)P1PP_BASE) + P1PP_UNIT * 73)))
 #define ctl$gq_dbgarea (*((unsigned long long *)(((long)P1PP_BASE) + P1PP_UNIT * 74)))
 #define ctl$gl_rmsbase (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 75)))
-#define ctl$gl_ppmsg (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 76)))
+#define ctl$gl_ppmsg (*((unsigned long **)(((long)P1PP_BASE) + P1PP_UNIT * 76)))
 #define ctl$gb_msgmask (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 78)))
 #define ctl$gb_deflang (*((unsigned char *)(((long)P1PP_BASE) + P1PP_UNIT * 79)))
 #define ctl$gw_ppmsgchn (*((unsigned short *)(((long)P1PP_BASE) + P1PP_UNIT * 80)))
@@ -2023,8 +2023,8 @@ extern struct _spl SPIN_IOPOST;
 #define ctl$gl_prcprm_kdata2 (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 117)))
 #define ctl$gl_usrundwn_exec (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 118)))
 #define ctl$ag_clidata (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 119)))
-#define ctl$gl_fixuplnk (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 120)))
-#define ctl$gl_iaflnkptr (*((unsigned long *)(((long)P1PP_BASE) + P1PP_UNIT * 121)))
+#define ctl$gl_fixuplnk (*((struct _iaf **)(((long)P1PP_BASE) + P1PP_UNIT * 120)))
+#define ctl$gl_iaflnkptr (*((struct _iaf **)(((long)P1PP_BASE) + P1PP_UNIT * 121)))
 #endif
 #endif
 

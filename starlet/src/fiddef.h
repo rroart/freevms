@@ -15,21 +15,19 @@
     Originally part of access.h
 */
 
-#define NO_DOLLAR
-
-#include <mytypes.h>
+#include <vms_types.h>
 
 struct _fiddef
 {
-    vmsword fid$w_num;
-    vmsword fid$w_seq;
+    _uword fid$w_num;
+    _uword fid$w_seq;
     union
     {
-        vmsword fid$w_rvn;
+        _uword fid$w_rvn;
         struct
         {
-            vmsbyte fid$b_rvn;
-            vmsbyte fid$b_nmx;
+            _ubyte fid$b_rvn;
+            _ubyte fid$b_nmx;
         };
     };
 };

@@ -187,10 +187,10 @@ unsigned f11b_modify(struct _vcb * vcb, struct _irp * irp)
         struct _fcb * fcb=xqp->primary_fcb;
         head = f11b_read_header (vcb, 0, fcb, &iosb);
         sts=iosb.iosb$w_status;
-        if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY)
+        if (head->fh2$l_filechar & FH2$M_DIRECTORY)
         {
             unsigned eofblk = VMSSWAP(head->fh2$w_recattr.fat$l_efblk);
-            if (VMSWORD(head->fh2$w_recattr.fat$w_ffbyte) == 0) --eofblk;
+            if (head->fh2$w_recattr.fat$w_ffbyte == 0) --eofblk;
             sts = search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
         }
         else

@@ -9,7 +9,6 @@
 
 #include <linux/string.h>
 
-#include <mytypes.h>
 #include <aqbdef.h>
 #include <fatdef.h>
 #include <ucbdef.h>
@@ -36,7 +35,6 @@
 #include <fi2def.h>
 #include <hm2def.h>
 #include <fcbdef.h>
-#include <vmstime.h>
 
 #include "xqp.h"
 
@@ -60,13 +58,8 @@ unsigned f11b_extend(struct _fcb *fcb, unsigned blocks, unsigned contig);
 /* Bitmaps get accesses in 'WORK_UNITs' which can be an integer
  on a little endian machine but must be a byte on a big endian system */
 
-#ifdef FREEVMS_BIG_ENDIAN
-#define WORK_UNIT unsigned char
-#define WORK_MASK 0xff
-#else
 #define WORK_UNIT unsigned int
 #define WORK_MASK 0xffffffff
-#endif
 #define WORK_BITS (sizeof(WORK_UNIT) * 8)
 
 /* update_freecount() to read the device cluster bitmap and compute
@@ -409,8 +402,8 @@ unsigned update_findhead(struct _vcb *vcbdev, unsigned *rethead_no,
                     if ((work_val & (1 << bit_no)) == 0)
                     {
                         unsigned idxblk = head_no
-                                          + VMSWORD(vcbdev->vcb$l_ibmapvbn)
-                                          + VMSWORD(vcbdev->vcb$l_ibmapsize);
+                                          + vcbdev->vcb$l_ibmapvbn
+                                          + vcbdev->vcb$l_ibmapsize;
                         sts = accesschunk(getidxfcb(vcbdev), idxblk,
                                           (char **) headbuff, NULL, 1, 0);
                         if (sts & 1)
@@ -419,7 +412,7 @@ unsigned update_findhead(struct _vcb *vcbdev, unsigned *rethead_no,
                             modify_flag = 1;
                             if (*headbuff && (*headbuff)->fh2$w_checksum != 0
                                     && (*headbuff)->fh2$w_fid.fid$w_num != 0
-                                    && (VMSLONG((*headbuff)->fh2$l_filechar)
+                                    && ((*headbuff)->fh2$l_filechar
                                         & FH2$M_MARKDEL) == 0)
                             {
                                 sts = deaccesschunk(0, 0, 0);
@@ -505,7 +498,7 @@ unsigned update_findhead(struct _vcb *vcbdev, unsigned *rethead_no,
         if ((sts & 1) == 0)
             break;
     }
-    while (head_no < VMSLONG(vcbdev->vcb$l_maxfiles));
+    while (head_no < vcbdev->vcb$l_maxfiles);
     return sts;
 }
 
@@ -573,8 +566,8 @@ unsigned update_addhead(struct _vcb *vcb, char *filename, struct _fiddef *back,
     memcpy(id->fi2$q_expdate, id->fi2$q_credate, sizeof(id->fi2$q_credate));
     head->fh2$w_recattr.fat$l_efblk = VMSSWAP(1);
     {
-        unsigned short check = checksum((vmsword *) head);
-        head->fh2$w_checksum = VMSWORD(check);
+        unsigned short check = checksum((_uword *) head);
+        head->fh2$w_checksum = check;
     }
     writechunk(getidxfcb(vcbdev), *idxblk, head);
     *rethead = head;
@@ -900,10 +893,10 @@ unsigned f11b_delete(struct _vcb * vcb, struct _irp * irp)
             fcb = f11b_search_fcb(vcb, &fib->fib$w_did_num);
         head = f11b_read_header(vcb, 0, fcb, &iosb);
         sts = iosb.iosb$w_status;
-        if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY)
+        if (head->fh2$l_filechar & FH2$M_DIRECTORY)
         {
             unsigned eofblk = VMSSWAP(head->fh2$w_recattr.fat$l_efblk);
-            if (VMSWORD(head->fh2$w_recattr.fat$w_ffbyte) == 0)
+            if (head->fh2$w_recattr.fat$w_ffbyte == 0)
                 --eofblk;
             sts = search_ent(fcb, fibdsc, filedsc, reslen, resdsc, eofblk,
                              action);

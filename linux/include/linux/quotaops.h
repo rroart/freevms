@@ -7,8 +7,8 @@
  * Version: $Id$
  *
  */
-#ifndef _LINUX_QUOTAOPS_
-#define _LINUX_QUOTAOPS_
+#ifndef _LINUX_QUOTAOPS_H
+#define _LINUX_QUOTAOPS_H
 
 #include <linux/smp_lock.h>
 
@@ -65,4 +65,4 @@ extern __inline__ void DQUOT_FREE_BLOCK(struct inode *inode, int nr)
     mark_inode_dirty(inode);
 }
 
-#endif /* _LINUX_QUOTAOPS_ */
+#endif /* _LINUX_QUOTAOPS_H */

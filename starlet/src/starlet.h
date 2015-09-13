@@ -232,7 +232,7 @@ struct struct_setpri
     void *prcnam;
     unsigned int pri;
     unsigned int *prvpri;
-    unsigned int*pol;
+    unsigned int *pol;
     unsigned int *prvpol;
 };
 
@@ -265,7 +265,6 @@ struct struct_enq
     void (*blkastadr)(void);
     unsigned int acmode;
     unsigned int rsdm_id;
-    unsigned long null_arg;
 };
 
 struct struct_getlki

@@ -1,11 +1,11 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
-#ifndef __irq_cpustat_h
-#define __irq_cpustat_h
+#ifndef __IRQ_CPUSTAT_H
+#define __IRQ_CPUSTAT_H
 
 /*
  * Contains default mappings for irq_cpustat_t, used by almost every
@@ -40,4 +40,4 @@ extern irq_cpustat_t irq_stat[];            /* defined in asm/hardirq.h */
 /* arch dependent irq_stat fields */
 #define nmi_count(cpu)      __IRQ_STAT((cpu), __nmi_count)      /* i386, ia64 */
 
-#endif  /* __irq_cpustat_h */
+#endif  /* __IRQ_CPUSTAT_H */

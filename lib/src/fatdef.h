@@ -15,7 +15,7 @@
     Originally part of access.h
 */
 
-#define NO_DOLLAR
+#include <vms_types.h>
 
 #define     FAT$C_UNDEFINED     0
 #define     FAT$C_FIXED     1
@@ -42,32 +42,23 @@
 #define     FAT$C_LENGTH        32
 #define     FAT$S_FATDEF        32
 
-/*      handling funny byte order */
-/* socalled
-Inverted format field. The high- and low-order 16 bits are transposed for compatibility with PDP-11 software.
-*/
-
-static inline unsigned long pdp_invert(unsigned long l)
-{
-    unsigned short * s = (unsigned short *) &l;
-    return (s[0]<<16) + s[1];
-}
+#define VMSSWAP(l) ((l & 0xffff) << 16 | l >> 16)
 
 struct _fatdef
 {
-    vmsbyte fat$b_rtype;
-    vmsbyte fat$b_rattrib;
-    vmsword fat$w_rsize;
-    vmsswap fat$l_hiblk; /* funny byte order */
-    vmsswap fat$l_efblk; /* funny byte order */
-    vmsword fat$w_ffbyte;
-    vmsbyte fat$b_bktsize;
-    vmsbyte fat$b_vfcsize;
-    vmsword fat$w_maxrec;
-    vmsword fat$w_defext;
-    vmsword fat$w_gbc;
-    vmsbyte fat$_UU0[8];
-    vmsword fat$w_versions;
+    _ubyte fat$b_rtype;
+    _ubyte fat$b_rattrib;
+    _uword fat$w_rsize;
+    _ulongword fat$l_hiblk; /* funny byte order */
+    _ulongword fat$l_efblk; /* funny byte order */
+    _uword fat$w_ffbyte;
+    _ubyte fat$b_bktsize;
+    _ubyte fat$b_vfcsize;
+    _uword fat$w_maxrec;
+    _uword fat$w_defext;
+    _uword fat$w_gbc;
+    _ubyte fat$_UU0[8];
+    _uword fat$w_versions;
 };
 
 #endif

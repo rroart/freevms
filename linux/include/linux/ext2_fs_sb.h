@@ -13,8 +13,8 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
-#ifndef _LINUX_EXT2_FS_SB
-#define _LINUX_EXT2_FS_SB
+#ifndef _LINUX_EXT2_FS_SB_H
+#define _LINUX_EXT2_FS_SB_H
 
 /*
  * The following is not needed anymore since the descriptors buffer
@@ -59,4 +59,4 @@ struct ext2_sb_info
     int s_first_ino;
 };
 
-#endif  /* _LINUX_EXT2_FS_SB */
+#endif  /* _LINUX_EXT2_FS_SB_H */

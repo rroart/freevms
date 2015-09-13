@@ -4,7 +4,6 @@
 // Author. Paul Nankervis.
 // Author. Roar Thron�s.
 
-#include <linux/config.h>
 #include <linux/fs.h>
 #include <linux/ext2_fs.h>
 
@@ -18,7 +17,6 @@
 
 #include <system_data_cells.h>
 
-#include <mytypes.h>
 #include <aqbdef.h>
 #include <atrdef.h>
 #include <fatdef.h>
@@ -44,7 +42,6 @@
 #include <fcbdef.h>
 #include <scbdef.h>
 #include <wcbdef.h>
-#include <vmstime.h>
 
 #include <pridef.h>
 #include <misc.h>
@@ -1108,7 +1105,7 @@ void *exttwo_fcb_create(struct _fcb * inode, int i_ino, unsigned *retsts)
 
     exttwo_wcb_create_all(vcb, fcb);
 
-    //  fcb->fcb$l_hdlbn=f11b_map_idxvbn(vcb,head->fh2$w_fid.fid$w_num + (head->fh2$w_fid.fid$b_nmx << 16) - 1 + VMSWORD(vcb->vcb$l_ibmapvbn) + VMSWORD(vcb->vcb$l_ibmapsize));
+    //  fcb->fcb$l_hdlbn=f11b_map_idxvbn(vcb,head->fh2$w_fid.fid$w_num + (head->fh2$w_fid.fid$b_nmx << 16) - 1 + vcb->vcb$l_ibmapvbn + vcb->vcb$l_ibmapsize);
 
     *retsts=SS$_NORMAL;
     if (FCB_FID_TO_INO(inode)!=2) return fcb;

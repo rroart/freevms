@@ -13,8 +13,8 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
-#ifndef _LINUX_EXT3_FS_SB
-#define _LINUX_EXT3_FS_SB
+#ifndef _LINUX_EXT3_FS_SB_H
+#define _LINUX_EXT3_FS_SB_H
 
 #ifdef __KERNEL__
 #include <linux/timer.h>
@@ -72,4 +72,4 @@ struct ext3_sb_info
     struct block_device *journal_bdev;
 };
 
-#endif  /* _LINUX_EXT3_FS_SB */
+#endif  /* _LINUX_EXT3_FS_SB_H */

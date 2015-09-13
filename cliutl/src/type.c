@@ -91,9 +91,9 @@ struct _xabdatdef cc$rms_xabdat =
 {
     XAB$C_DAT,0,
     0, 0, 0, 0,
-    VMSTIME_ZERO, VMSTIME_ZERO,
-    VMSTIME_ZERO, VMSTIME_ZERO,
-    VMSTIME_ZERO, VMSTIME_ZERO
+    0, 0,
+    0, 0,
+    0, 0
 };
 struct _xabfhcdef cc$rms_xabfhc =
     {   XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};

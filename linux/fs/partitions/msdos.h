@@ -1,3 +1,6 @@
+#ifndef _LINUX_FS_MSDOS_H
+#define _LINUX_FS_CHECK_H
+
 /*
  *  fs/partitions/msdos.h
  */
@@ -7,3 +10,4 @@
 int msdos_partition(struct gendisk *hd, struct block_device *bdev,
                     unsigned long first_sector, int first_part_minor);
 
+#endif /* _LINUX_FS_CHECK_H */

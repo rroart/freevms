@@ -62,24 +62,12 @@
 #define N_TXTADDR(x) (N_MAGIC(x) == QMAGIC ? PAGE_SIZE : 0)
 #endif
 
-/* Address of data segment in memory after it is loaded.
-   Note that it is up to you to define SEGMENT_SIZE
-   on machines not listed here.  */
-#if defined(vax) || defined(pyr)
-#define SEGMENT_SIZE page_size
-#endif
-#ifdef is68k
-#define SEGMENT_SIZE 0x20000
-#endif
-
-#ifdef linux
 #include <asm/page.h>
 #if defined(__i386__)
 #define SEGMENT_SIZE    1024
 #else
 #ifndef SEGMENT_SIZE
 #define SEGMENT_SIZE    PAGE_SIZE
-#endif
 #endif
 #endif
 

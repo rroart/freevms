@@ -23,14 +23,12 @@
  'RMS' routines.
  */
 
-#include <linux/config.h>
 #include <linux/linkage.h>
 #include <linux/mm.h>
 #include <linux/pagemap.h>
 
 #include <linux/string.h>
 
-#include <mytypes.h>
 #include <aqbdef.h>
 #include <atrdef.h>
 #include <ccbdef.h>
@@ -61,7 +59,6 @@
 #include <fcbdef.h>
 #include <scbdef.h>
 #include <wcbdef.h>
-#include <vmstime.h>
 #include "x2p.h"
 #include <misc.h>
 #include <starlet.h>
@@ -813,7 +810,7 @@ struct ext2_inode *premap_indexf(struct _fcb *fcb,struct _ucb *ucb,unsigned *ret
         struct _hm2 home;
         sts = sys$qiow(EXT2_EF,irp->irp$w_chan,IO$_READLBLK,&iosb,0,0,(char *) &home,sizeof(struct _hm2),vcbdev->vcb$l_homelbn,0,0,0);
 #endif
-        *retsts = sys$qiow(EXT2_EF,x2p->io_channel,IO$_READLBLK,&iosb,0,0, (char *) head,sizeof(struct ext2_inode),VMSLONG(vcbdev->vcb$l_ibmaplbn) + VMSWORD(vcbdev->vcb$l_ibmapsize),((struct _ucb *)vcbdev->vcb$l_rvt)->ucb$w_fill_0,0,0);
+        *retsts = sys$qiow(EXT2_EF,x2p->io_channel,IO$_READLBLK,&iosb,0,0, (char *) head,sizeof(struct ext2_inode),vcbdev->vcb$l_ibmaplbn + vcbdev->vcb$l_ibmapsize,((struct _ucb *)vcbdev->vcb$l_rvt)->ucb$w_fill_0,0,0);
         *retsts = iosb.iosb$w_status;
         if (!(*retsts & 1))
         {

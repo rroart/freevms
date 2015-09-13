@@ -13,8 +13,8 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
-#ifndef _LINUX_EXT3_FS_I
-#define _LINUX_EXT3_FS_I
+#ifndef _LINUX_EXT3_FS_I_H
+#define _LINUX_EXT3_FS_I_H
 
 #include <linux/rwsem.h>
 
@@ -76,4 +76,4 @@ struct ext3_inode_info
     struct rw_semaphore truncate_sem;
 };
 
-#endif  /* _LINUX_EXT3_FS_I */
+#endif  /* _LINUX_EXT3_FS_I_H */

@@ -15,14 +15,12 @@
     Originally part of access.h
 */
 
-#define NO_DOLLAR
-
-#include <mytypes.h>
+#include <vms_types.h>
 
 struct _uicdef
 {
-    vmsword uic$w_mem;
-    vmsword uic$w_grp;
+    _uword uic$w_mem;
+    _uword uic$w_grp;
 };
 
 #endif

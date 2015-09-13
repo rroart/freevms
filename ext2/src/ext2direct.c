@@ -19,12 +19,10 @@
 /*  This module does all directory file handling - mostly
  lookups of filenames in directory files... */
 
-#include <linux/config.h>
 #include <linux/mm.h>
 #include <linux/ctype.h>
 #include <linux/string.h>
 
-#include <mytypes.h>
 #include <atrdef.h>
 #include <ccbdef.h>
 #include <fcbdef.h>
@@ -48,7 +46,6 @@
 #include <xabdatdef.h>
 #include <xabfhcdef.h>
 #include <xabprodef.h>
-#include <vmstime.h>
 #include "x2p.h"
 #include <linux/slab.h>
 #include <misc_routines.h>

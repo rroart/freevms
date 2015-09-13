@@ -26,14 +26,11 @@
 
 #define DEBUGx x
 
-#include <linux/config.h>
 #include <linux/mm.h>
 
 #include <linux/ctype.h>
 
-#define NO_DOLLAR
 #define RMS$INITIALIZE          /* used by rms.h to create templates */
-#include <mytypes.h>
 #include <aqbdef.h>
 #include <atrdef.h>
 #include <fatdef.h>
@@ -54,7 +51,6 @@
 #include <xabprodef.h>
 #include <fh2def.h>
 #include <fcbdef.h>
-#include <vmstime.h>
 #include <xabkeydef.h>
 #include <xaballdef.h>
 #include <keydef.h>
@@ -1121,7 +1117,7 @@ unsigned exe$get(struct _rabdef *rab)
 
         eofblk = VMSSWAP(recattr.fat$l_efblk);
         if (block > eofblk
-                || (block == eofblk && offset >= VMSWORD(recattr.fat$w_ffbyte)))
+                || (block == eofblk && offset >= recattr.fat$w_ffbyte))
             return RMS$_EOF;
     }
     int alosize;
@@ -1147,8 +1143,8 @@ unsigned exe$get(struct _rabdef *rab)
 
     if (rfm == FAB$C_VAR || rfm == FAB$C_VFC)
     {
-        vmsword *lenptr = (vmsword *) (buffer + offset);
-        reclen = VMSWORD(*lenptr);
+        _uword *lenptr = (_uword *) (buffer + offset);
+        reclen = *lenptr;
         offset += 2;
         if (reclen > rab->rab$w_usz)
         {
@@ -1378,7 +1374,7 @@ unsigned exe$read(struct _rabdef *rab)
 
         eofblk = VMSSWAP(recattr.fat$l_efblk);
         if (block > eofblk
-                || (block == eofblk && offset >= VMSWORD(recattr.fat$w_ffbyte)))
+                || (block == eofblk && offset >= recattr.fat$w_ffbyte))
             return RMS$_EOF;
     }
     int alosize;
@@ -1418,8 +1414,8 @@ unsigned exe$read(struct _rabdef *rab)
     // check get diff
     if (rfm == FAB$C_VAR || rfm == FAB$C_VFC)
     {
-        vmsword *lenptr = (vmsword *) (buffer + offset);
-        reclen = VMSWORD(*lenptr);
+        _uword *lenptr = (_uword *) (buffer + offset);
+        reclen = *lenptr;
         offset += 2;
         if (reclen > rab->rab$w_usz)
         {
@@ -1695,7 +1691,7 @@ unsigned exe$put(struct _rabdef *rab)
 
 #if 0
     block = VMSSWAP(recattr.fat$l_efblk);
-    offset = VMSWORD(recattr.fat$w_ffbyte);
+    offset = recattr.fat$w_ffbyte;
 #endif
 
 #if 1
@@ -1718,8 +1714,8 @@ unsigned exe$put(struct _rabdef *rab)
 
     if (rfm == FAB$C_VAR || rfm == FAB$C_VFC)
     {
-        vmsword *lenptr = (vmsword *) (buffer + offset);
-        *lenptr = VMSWORD(reclen);
+        _uword *lenptr = (_uword *) (buffer + offset);
+        *lenptr = reclen;
         offset += 2;
     }
 
@@ -1830,10 +1826,10 @@ unsigned exe$put(struct _rabdef *rab)
     block += offset / 512;
     offset %= 512;
 
-    if ((block > VMSSWAP(recattr.fat$l_efblk))|| ( (block == VMSSWAP(recattr.fat$l_efblk)) && (offset > VMSWORD(recattr.fat$w_ffbyte))))
+    if ((block > VMSSWAP(recattr.fat$l_efblk))|| ( (block == VMSSWAP(recattr.fat$l_efblk)) && (offset > recattr.fat$w_ffbyte)))
     {
         recattr.fat$l_efblk = VMSSWAP(block);
-        recattr.fat$w_ffbyte = VMSWORD(offset);
+        recattr.fat$w_ffbyte = offset;
 
         if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)==0)
         {
@@ -1944,7 +1940,7 @@ unsigned exe$write(struct _rabdef *rab)
 
 #if 0
     block = VMSSWAP(recattr.fat$l_efblk);
-    offset = VMSWORD(recattr.fat$w_ffbyte);
+    offset = recattr.fat$w_ffbyte;
 #endif
 
 #if 1
@@ -1969,8 +1965,8 @@ unsigned exe$write(struct _rabdef *rab)
     // check put diff
     if (rfm == FAB$C_VAR || rfm == FAB$C_VFC)
     {
-        vmsword *lenptr = (vmsword *) (buffer + offset);
-        *lenptr = VMSWORD(reclen);
+        _uword *lenptr = (_uword *) (buffer + offset);
+        *lenptr = reclen;
         offset += 2;
     }
 #endif
@@ -2095,10 +2091,10 @@ unsigned exe$write(struct _rabdef *rab)
     block += offset / 512;
     offset %= 512;
 
-    if ((block > VMSSWAP(recattr.fat$l_efblk))|| ( (block == VMSSWAP(recattr.fat$l_efblk)) && (offset > VMSWORD(recattr.fat$w_ffbyte))))
+    if ((block > VMSSWAP(recattr.fat$l_efblk))|| ( (block == VMSSWAP(recattr.fat$l_efblk)) && (offset > recattr.fat$w_ffbyte)))
     {
         recattr.fat$l_efblk = VMSSWAP(block);
-        recattr.fat$w_ffbyte = VMSWORD(offset);
+        recattr.fat$w_ffbyte = offset;
 
         if ((ifb_table[ifi_no]->ifb$l_devchar&DEV$M_TRM)==0)
         {
@@ -2179,10 +2175,10 @@ unsigned exe$display(struct _fabdef *fab)
         return RMS$_IFI;
     fab->fab$l_alq = VMSSWAP(recattr.fat$l_hiblk);
     fab->fab$b_bks = recattr.fat$b_bktsize;
-    fab->fab$w_deq = VMSWORD(recattr.fat$w_defext);
+    fab->fab$w_deq = recattr.fat$w_defext;
     fab->fab$b_fsz = recattr.fat$b_vfcsize;
-    fab->fab$w_gbc = VMSWORD(recattr.fat$w_gbc);
-    fab->fab$w_mrs = VMSWORD(recattr.fat$w_maxrec);
+    fab->fab$w_gbc = recattr.fat$w_gbc;
+    fab->fab$w_mrs = recattr.fat$w_maxrec;
     fab->fab$b_org = recattr.fat$b_rtype & 0xf0;
     fab->fab$b_rfm = recattr.fat$b_rtype & 0x0f;
     fab->fab$b_rat = recattr.fat$b_rattrib;
@@ -2202,26 +2198,26 @@ unsigned exe$display(struct _fabdef *fab)
             struct _xabfhcdef *fhc = (struct _xabfhcdef *) xab;
             fhc->xab$b_atr = recattr.fat$b_rattrib;
             fhc->xab$b_bkz = recattr.fat$b_bktsize;
-            fhc->xab$w_dxq = VMSWORD(recattr.fat$w_defext);
+            fhc->xab$w_dxq = recattr.fat$w_defext;
             fhc->xab$l_ebk = VMSSWAP(recattr.fat$l_efblk);
-            fhc->xab$w_ffb = VMSWORD(recattr.fat$w_ffbyte);
+            fhc->xab$w_ffb = recattr.fat$w_ffbyte;
             if (fhc->xab$l_ebk == 0)
             {
                 fhc->xab$l_ebk = fab->fab$l_alq;
                 if (fhc->xab$w_ffb == 0)
                     fhc->xab$l_ebk++;
             }
-            fhc->xab$w_gbc = VMSWORD(recattr.fat$w_gbc);
+            fhc->xab$w_gbc = recattr.fat$w_gbc;
             fhc->xab$l_hbk = VMSSWAP(recattr.fat$l_hiblk);
             fhc->xab$b_hsz = recattr.fat$b_vfcsize;
-            fhc->xab$w_lrl = VMSWORD(recattr.fat$w_maxrec);
-            fhc->xab$w_verlimit = VMSWORD(recattr.fat$w_versions);
+            fhc->xab$w_lrl = recattr.fat$w_maxrec;
+            fhc->xab$w_verlimit = recattr.fat$w_versions;
         }
         break;
         case XAB$C_PRO:
         {
             struct _xabprodef1 *pro = (struct _xabprodef1 *) xab;
-            pro->xab$w_pro = VMSWORD(fileprot);
+            pro->xab$w_pro = fileprot;
             memcpy(&pro->xab$l_uic, &fileowner, 4);
         }
         }
@@ -2610,10 +2606,10 @@ unsigned exe$create(struct _fabdef *fab)
         memset(&recattr, 0, sizeof(recattr));
         // alq set by extend?
         recattr.fat$b_bktsize = fab->fab$b_bks;
-        recattr.fat$w_defext = VMSWORD(fab->fab$w_deq);
+        recattr.fat$w_defext = fab->fab$w_deq;
         recattr.fat$b_vfcsize = fab->fab$b_fsz;
-        recattr.fat$w_gbc = VMSWORD(fab->fab$w_gbc);
-        recattr.fat$w_maxrec = VMSWORD(fab->fab$w_mrs);
+        recattr.fat$w_gbc = fab->fab$w_gbc;
+        recattr.fat$w_maxrec = fab->fab$w_mrs;
         recattr.fat$b_rtype = fab->fab$b_rfm | fab->fab$b_org;
         recattr.fat$b_rattrib = fab->fab$b_rat;
 

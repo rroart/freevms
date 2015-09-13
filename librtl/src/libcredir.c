@@ -3,8 +3,6 @@
 
 // Author. Roar Thron�s.
 
-#include <mytypes.h>
-
 #include <fiddef.h>
 #include <atrdef.h>
 #include <descrip.h>

@@ -27,7 +27,6 @@
 #include <linux/ctype.h>
 #include <ssdef.h>
 
-#include <mytypes.h>
 #include <aqbdef.h>
 #include <ccbdef.h>
 #include <ddbdef.h>
@@ -49,7 +48,6 @@
 #include <fh2def.h>
 #include <hm2def.h>
 #include <fcbdef.h>
-#include <vmstime.h>
 
 #include "cache.h"
 #if 0

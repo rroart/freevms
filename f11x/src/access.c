@@ -23,14 +23,11 @@
  'RMS' routines.
  */
 
-#include <linux/config.h>
 #include <linux/linkage.h>
 #include <linux/mm.h>
 #include <linux/pagemap.h>
-
 #include <linux/string.h>
 
-#include <mytypes.h>
 #include <acedef.h>
 #include <acldef.h>
 #include <aqbdef.h>
@@ -67,7 +64,6 @@
 #include <rvtdef.h>
 #include <scbdef.h>
 #include <wcbdef.h>
-#include <vmstime.h>
 #include "xqp.h"
 #if 0
 #include "cache.h"
@@ -658,8 +654,8 @@ void f11b_write_attrib(struct _fcb * fcb, struct _atrdef * atrp)
         atrp++;
     }
     {
-        unsigned short check = checksum((vmsword *) head);
-        head->fh2$w_checksum = VMSWORD(check);
+        unsigned short check = checksum((_uword *) head);
+        head->fh2$w_checksum = check;
     }
     writehead(fcb, head);
     kfree(head);
@@ -735,7 +731,7 @@ struct _fcb * getmapfcb(struct _vcb * vcb)
 
 /* checksum() to produce header checksum values... */
 
-unsigned short checksum(vmsword *block)
+unsigned short checksum(_uword *block)
 {
     int count = 255;
     unsigned result = 0;
@@ -743,7 +739,7 @@ unsigned short checksum(vmsword *block)
     do
     {
         unsigned data = *ptr++;
-        result += VMSWORD(data);
+        result += data;
     }
     while (--count > 0);
     return result;
@@ -761,8 +757,8 @@ struct _vcb *rvn_to_dev(struct _vcb *vcb, unsigned rvn)
 
 void fid_copy(struct _fiddef *dst, struct _fiddef *src, unsigned rvn)
 {
-    dst->fid$w_num = VMSWORD(src->fid$w_num);
-    dst->fid$w_seq = VMSWORD(src->fid$w_seq);
+    dst->fid$w_num = src->fid$w_num;
+    dst->fid$w_seq = src->fid$w_seq;
     if (src->fid$b_rvn == 0)
     {
         dst->fid$b_rvn = rvn;
@@ -780,8 +776,8 @@ unsigned deaccesshead(struct _fh2 *head, unsigned idxblk)
 {
     if (head && idxblk)
     {
-        unsigned short check = checksum((vmsword *) head);
-        head->fh2$w_checksum = VMSWORD(check);
+        unsigned short check = checksum((_uword *) head);
+        head->fh2$w_checksum = check;
     }
     return deaccesschunk(idxblk, 1, 1);
 }
@@ -842,14 +838,14 @@ unsigned writehead(struct _fcb * fcb, struct _fh2 *headbuff)
     else
         ucb = vcb->vcb$l_rvt;
     struct _fiddef * fid = &headbuff->fh2$w_fid.fid$w_num;
-    unsigned short check = checksum((vmsword *) headbuff);
+    unsigned short check = checksum((_uword *) headbuff);
     int vbn =
         fid->fid$w_num + (fid->fid$b_nmx << 16)
         - 1+
-        VMSWORD(ucb->ucb$l_vcb->vcb$l_ibmapvbn) + VMSWORD(ucb->ucb$l_vcb->vcb$l_ibmapsize);
+        ucb->ucb$l_vcb->vcb$l_ibmapvbn + ucb->ucb$l_vcb->vcb$l_ibmapsize;
     ;
-    //if (headbuff->fh2$w_checksum == VMSWORD(check)) return 1;
-    headbuff->fh2$w_checksum = VMSWORD(check);
+    //if (headbuff->fh2$w_checksum == check) return 1;
+    headbuff->fh2$w_checksum = check;
     return writechunk(getidxfcb(ucb->ucb$l_vcb), vbn, headbuff);
 
 }
@@ -881,7 +877,7 @@ void * f11b_read_header(struct _vcb *vcb, struct _fiddef *fid,
     else
     {
         idxvblk = fid->fid$w_num + (fid->fid$b_nmx << 16) - 1+
-                  VMSWORD(vcbdev->vcb$l_ibmapvbn) + VMSWORD(vcbdev->vcb$l_ibmapsize);
+                  vcbdev->vcb$l_ibmapvbn + vcbdev->vcb$l_ibmapsize;
         idxlblk = f11b_map_idxvbn(vcb, idxvblk);
         locfid = fid;
     }
@@ -909,9 +905,9 @@ void * f11b_read_header(struct _vcb *vcb, struct _fiddef *fid,
     if (sts & 1)
     {
         struct _fh2 *head = headbuff;
-        if (VMSWORD(head->fh2$w_fid.fid$w_num) != locfid->fid$w_num
+        if (head->fh2$w_fid.fid$w_num != locfid->fid$w_num
                 || head->fh2$w_fid.fid$b_nmx != locfid->fid$b_nmx
-                || VMSWORD(head->fh2$w_fid.fid$w_seq) != locfid->fid$w_seq
+                || head->fh2$w_fid.fid$w_seq != locfid->fid$w_seq
                 || (head->fh2$w_fid.fid$b_rvn != locfid->fid$b_rvn
                     && head->fh2$w_fid.fid$b_rvn != 0))
         {
@@ -926,13 +922,13 @@ void * f11b_read_header(struct _vcb *vcb, struct _fiddef *fid,
                     head->fh2$b_mpoffset > head->fh2$b_acoffset ||
                     head->fh2$b_acoffset > head->fh2$b_rsoffset ||
                     head->fh2$b_map_inuse > head->fh2$b_acoffset - head->fh2$b_mpoffset ||
-                    checksum((vmsword *) head) != VMSWORD(head->fh2$w_checksum))
+                    checksum((_uword *) head) != head->fh2$w_checksum)
             {
                 sts = SS$_DATACHECK;
             }
             else
             {
-                //if (VMSWORD(head->fh2$w_seg_num) != seg_num) sts = SS$_FILESEQCHK;
+                //if (head->fh2$w_seg_num != seg_num) sts = SS$_FILESEQCHK;
             }
         }
         if ((sts & 1) == 0)
@@ -989,8 +985,8 @@ struct _fh2 *premap_indexf(struct _fcb *fcb, struct _ucb *ucb, unsigned *retsts)
             ucb = vcb->vcb$l_rvt;
         *retsts = sys$qiow(XQP_EF, xqp->io_channel, IO$_READLBLK, &iosb, 0, 0,
                            (char *) head, sizeof(struct _fh2),
-                           VMSLONG(vcbdev->vcb$l_ibmaplbn)
-                           + VMSWORD(vcbdev->vcb$l_ibmapsize), ucb->ucb$w_fill_0,
+                           vcbdev->vcb$l_ibmaplbn
+                           + vcbdev->vcb$l_ibmapsize, ucb->ucb$w_fill_0,
                            0, 0);
         *retsts = iosb.iosb$w_status;
         if (!(*retsts & 1))
@@ -1000,11 +996,11 @@ struct _fh2 *premap_indexf(struct _fcb *fcb, struct _ucb *ucb, unsigned *retsts)
         }
         else
         {
-            if (VMSWORD(head->fh2$w_fid.fid$w_num) != 1
-                    || head->fh2$w_fid.fid$b_nmx != 0
-                    || VMSWORD(head->fh2$w_fid.fid$w_seq) != 1
-                    || VMSWORD(head->fh2$w_checksum)
-                    != checksum((unsigned short *) head))
+            if ((head->fh2$w_fid.fid$w_num != 1)
+                    || (head->fh2$w_fid.fid$b_nmx != 0)
+                    || (head->fh2$w_fid.fid$w_seq != 1)
+                    || (head->fh2$w_checksum
+                    != checksum((unsigned short *) head)))
             {
                 *retsts = SS$_DATACHECK;
                 kfree(head);
@@ -1021,26 +1017,27 @@ int get_fm2_val(unsigned short ** mpp, unsigned int * phyblk,
     unsigned short *mp = *mpp;
     if (phyblk == 0 || phylen == 0)
         return SS$_BADPARAM;
-    switch (VMSWORD(*mp) >> 14)
+    switch (*mp >> 14)
     {
     case FM2$C_PLACEMENT:
         *phylen = 0;
         (*mpp)++;
         break;
     case FM2$C_FORMAT1:
-        *phylen = (VMSWORD(*mp) & 0377) + 1;
-        *phyblk = ((VMSWORD(*mp) & 037400) << 8) | VMSWORD(mp[1]);
+        *phylen = (*mp & 0377) + 1;
+        *phyblk = ((*mp & 037400) << 8) | mp[1];
         (*mpp) += 2;
         break;
     case FM2$C_FORMAT2:
-        *phylen = (VMSWORD(*mp) & 037777) + 1;
-        *phyblk = (VMSWORD(mp[2]) << 16) | VMSWORD(mp[1]);
+        *phylen = (*mp & 037777) + 1;
+        *phyblk = (mp[2] << 16) | mp[1];
         (*mpp) += 3;
         break;
     case FM2$C_FORMAT3:
-        *phylen = ((VMSWORD(*mp) & 037777) << 16) + VMSWORD(mp[1]) + 1;
-        *phyblk = (VMSWORD(mp[3]) << 16) | VMSWORD(mp[2]);
+        *phylen = ((*mp & 037777) << 16) + mp[1] + 1;
+        *phyblk = (mp[3] << 16) | mp[2];
         (*mpp) += 4;
+        break;
     default:
         return SS$_FORMAT;
     }
@@ -1345,7 +1342,7 @@ unsigned deaccessfile(struct _fcb *fcb)
     head = f11b_read_header(fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb,
                             &iosb);
     sts = iosb.iosb$w_status;
-    if (VMSLONG(head->fh2$l_filechar) & FH2$M_MARKDEL)
+    if (head->fh2$l_filechar & FH2$M_MARKDEL)
     {
         kfree(head);
         return deallocfile(fcb);
@@ -1400,7 +1397,7 @@ void *fcb_create2(struct _fh2 * head, unsigned *retsts)
     fcb->fcb$l_efblk = VMSSWAP(head->fh2$w_recattr.fat$l_hiblk);
     if (head->fh2$b_idoffset > 39)
     {
-        fcb->fcb$l_highwater = VMSLONG(head->fh2$l_highwater);
+        fcb->fcb$l_highwater = head->fh2$l_highwater;
     }
     else
     {
@@ -1408,7 +1405,7 @@ void *fcb_create2(struct _fh2 * head, unsigned *retsts)
     }
     fcb->fcb$l_filesize = (VMSSWAP(head->fh2$w_recattr.fat$l_efblk)) << 9; // fix filesize use later
 
-    if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY)
+    if (head->fh2$l_filechar & FH2$M_DIRECTORY)
         fcb->fcb$v_dir = 1;
 
     wcb_create_all(fcb, head);
@@ -1423,7 +1420,7 @@ void *fcb_create2(struct _fh2 * head, unsigned *retsts)
         f11b_map_idxvbn(vcb,
                         head->fh2$w_fid.fid$w_num
                         + (head->fh2$w_fid.fid$b_nmx << 16)
-                        - 1+ VMSWORD(vcb->vcb$l_ibmapvbn) + VMSWORD(vcb->vcb$l_ibmapsize));
+                        - 1+ vcb->vcb$l_ibmapvbn + vcb->vcb$l_ibmapsize);
 
     *retsts = SS$_NORMAL;
     return fcb;
@@ -1479,10 +1476,10 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
             fcb = f11b_search_fcb(vcb, &fib->fib$w_did_num);
         head = f11b_read_header(vcb, 0, fcb, &iosb);
         sts = iosb.iosb$w_status;
-        if (VMSLONG(head->fh2$l_filechar) & FH2$M_DIRECTORY)
+        if (head->fh2$l_filechar & FH2$M_DIRECTORY)
         {
             unsigned eofblk = VMSSWAP(head->fh2$w_recattr.fat$l_efblk);
-            if (VMSWORD(head->fh2$w_recattr.fat$w_ffbyte) == 0)
+            if (head->fh2$w_recattr.fat$w_ffbyte == 0)
                 --eofblk;
             sts = search_ent(fcb, fibdsc, filedsc, reslen, resdsc, eofblk,
                              action);
@@ -1725,7 +1722,7 @@ unsigned mount(unsigned flags, unsigned devices, char *devnam[], char *label[],
 #endif
                 if (!(sts & 1))
                     break;
-                if (hba == VMSLONG(home.hm2$l_homelbn)
+                if ((hba == home.hm2$l_homelbn)
                         && memcmp(home.hm2$t_format, "DECFILE11B  ", 12) == 0)
                     break;
                 sts = SS$_DATACHECK;
@@ -1735,15 +1732,15 @@ unsigned mount(unsigned flags, unsigned devices, char *devnam[], char *label[],
 #endif
             if (sts & 1)
             {
-                if (VMSWORD(home.hm2$w_checksum2)
+                if (home.hm2$w_checksum2
                         != checksum((unsigned short *) &home))
                 {
                     sts = SS$_DATACHECK;
                 }
                 else
                 {
-                    if (VMSWORD(home.hm2$w_rvn) != device + 1)
-                        if (VMSWORD(home.hm2$w_rvn) > 1 || device != 0)
+                    if (home.hm2$w_rvn != device + 1)
+                        if (home.hm2$w_rvn > 1 || device != 0)
                             sts = SS$_UNSUPVOLSET;
 #if 0
                     move this
@@ -1812,8 +1809,8 @@ unsigned mount(unsigned flags, unsigned devices, char *devnam[], char *label[],
                 idxfid.fid$b_rvn = device + 1;
                 //sts = accessfile(vcb,&idxfid,&idxfcb,flags & 1);
                 idxhd = f11b_read_block(vcbdev,
-                                        VMSLONG(vcbdev->vcb$l_ibmaplbn)
-                                        + VMSWORD(vcbdev->vcb$l_ibmapsize), 1, &iosb);
+                                        vcbdev->vcb$l_ibmaplbn
+                                        + vcbdev->vcb$l_ibmapsize, 1, &iosb);
                 idxfcb = fcb_create2(idxhd, &sts);
                 kfree(idxhd);
 #if 0

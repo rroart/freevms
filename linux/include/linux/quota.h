@@ -36,8 +36,8 @@
  * Version: $Id$
  */
 
-#ifndef _LINUX_QUOTA_
-#define _LINUX_QUOTA_
+#ifndef _LINUX_QUOTA_H
+#define _LINUX_QUOTA_H
 
 #include <linux/errno.h>
 
@@ -199,4 +199,4 @@ long quotactl __P ((int, const char *, int, caddr_t));
 __END_DECLS
 
 #endif /* __KERNEL__ */
-#endif /* _QUOTA_ */
+#endif /* _LINUX_QUOTA_H */

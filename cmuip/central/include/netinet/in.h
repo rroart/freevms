@@ -187,7 +187,6 @@ struct sockaddr_in
  */
 #define IP_OPTIONS      1               /* set/get IP per-packet options */
 
-#if !defined(vax)
 /*
  * Macros for number representation conversion.
  */
@@ -195,7 +194,6 @@ struct sockaddr_in
 #define ntohs(x)    (x)
 #define htonl(x)    (x)
 #define htons(x)    (x)
-#endif
 
 #ifdef KERNEL
 extern  struct domain inetdomain;

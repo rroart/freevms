@@ -1,3 +1,6 @@
+#ifndef _LINUX_FS_CHECK_H
+#define _LINUX_FS_CHECK_H
+
 /*
  * add_partition adds a partitions details to the devices partition
  * description.
@@ -17,3 +20,5 @@ static inline void put_dev_sector(Sector p)
 }
 
 extern int warn_no_part;
+
+#endif /* _LINUX_FS_CHECK_H */

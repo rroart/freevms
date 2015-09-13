@@ -59,7 +59,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <mytypes.h>
 #include <descrip.h>
 #include <fabdef.h>
 #include <uicdef.h>
@@ -88,9 +87,9 @@ struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
 struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
 struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
            0, 0, 0, 0,
-           VMSTIME_ZERO, VMSTIME_ZERO,
-           VMSTIME_ZERO, VMSTIME_ZERO,
-           VMSTIME_ZERO, VMSTIME_ZERO
+           0, 0,
+           0, 0,
+           0, 0
 };
 struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
 struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};

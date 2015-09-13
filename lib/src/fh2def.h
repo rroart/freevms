@@ -15,9 +15,6 @@
     Originally part of access.h
 */
 
-#define NO_DOLLAR
-
-#include <mytypes.h>
 #include <fatdef.h>
 #include <fiddef.h>
 #include <uicdef.h>
@@ -30,30 +27,30 @@
 
 struct _fh2
 {
-    vmsbyte fh2$b_idoffset;
-    vmsbyte fh2$b_mpoffset;
-    vmsbyte fh2$b_acoffset;
-    vmsbyte fh2$b_rsoffset;
-    vmsword fh2$w_seg_num;
-    vmsword fh2$w_struclev;
+    _ubyte fh2$b_idoffset;
+    _ubyte fh2$b_mpoffset;
+    _ubyte fh2$b_acoffset;
+    _ubyte fh2$b_rsoffset;
+    _uword fh2$w_seg_num;
+    _uword fh2$w_struclev;
     struct _fiddef fh2$w_fid;
     struct _fiddef fh2$w_ext_fid;
     struct _fatdef fh2$w_recattr;
-    vmslong fh2$l_filechar;
-    vmsword fh2$w_reserved1;
-    vmsbyte fh2$b_map_inuse;
-    vmsbyte fh2$b_acc_mode;
+    _ulongword fh2$l_filechar;
+    _uword fh2$w_reserved1;
+    _ubyte fh2$b_map_inuse;
+    _ubyte fh2$b_acc_mode;
     struct _uicdef fh2$l_fileowner;
-    vmsword fh2$w_fileprot;
+    _uword fh2$w_fileprot;
     struct _fiddef fh2$w_backlink;
-    vmsbyte fh2$b_journal;
-    vmsbyte fh2$b_ru_active;
-    vmsword fh2$w_reserved2;
-    vmslong fh2$l_highwater;
-    vmsbyte fh2$b_reserved3[8];
-    vmsbyte fh2$r_class_prot[20];
-    vmsbyte fh2$r_restofit[402];
-    vmsword fh2$w_checksum;
+    _ubyte fh2$b_journal;
+    _ubyte fh2$b_ru_active;
+    _uword fh2$w_reserved2;
+    _ulongword fh2$l_highwater;
+    _ubyte fh2$b_reserved3[8];
+    _ubyte fh2$r_class_prot[20];
+    _ubyte fh2$r_restofit[402];
+    _uword fh2$w_checksum;
 };
 
 #endif

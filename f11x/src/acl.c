@@ -16,7 +16,6 @@
 #include <iledef.h>
 #include <iodef.h>
 #include <iosbdef.h>
-#include <mytypes.h>
 #include <fatdef.h>
 #include <fibdef.h>
 #include <fiddef.h>

@@ -53,7 +53,6 @@
 #include <stdio.h>
 #include "cache.h"
 
-#include <mytypes.h>
 #include <fatdef.h>
 #include <vcbdef.h>
 #include <descrip.h>
@@ -70,7 +69,6 @@
 #include <xabfhcdef.h>
 #include <xabprodef.h>
 #include <fh2def.h>
-#include <vmstime.h>
 
 #define DEBUG                   /* Debug mode? */
 #define IMBALANCE 5             /* Tree imbalance limit */

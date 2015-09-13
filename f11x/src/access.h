@@ -20,18 +20,6 @@
 #include <irpdef.h>
 #include <vcbdef.h>
 
-#define NO_DOLLAR
-
-#ifdef FREEVMS_BIG_ENDIAN
-#define VMSLONG(l) ((l & 0xff) << 24 | (l & 0xff00) << 8 | (l & 0xff0000) >> 8 | l >> 24)
-#define VMSWORD(w) ((w & 0xff) << 8 | w >> 8)
-#define VMSSWAP(l) ((l & 0xff0000) << 8 | (l & 0xff000000) >> 8 |(l & 0xff) << 8 | (l & 0xff00) >> 8)
-#else
-#define VMSLONG(l) l
-#define VMSWORD(w) w
-#define VMSSWAP(l) ((l & 0xffff) << 16 | l >> 16)
-#endif
-
 void fid_copy(struct _fiddef *dst, struct _fiddef *src, unsigned rvn);
 
 unsigned dismount(struct _vcb *vcb);
@@ -46,7 +34,7 @@ unsigned access_extend(struct _fcb *fcb, unsigned blocks, unsigned contig);
 unsigned update_freecount(struct _vcb *vcbdev, unsigned *retcount);
 unsigned update_create(struct _vcb *vcb, struct _irp * i);
 unsigned update_extend(struct _fcb *fcb, unsigned blocks, unsigned contig);
-unsigned short checksum(vmsword *block);
+unsigned short checksum(_uword *block);
 
 void * f11b_read_block(struct _vcb * vcb, unsigned long lbn,
                        unsigned long count, struct _iosb * iosb);

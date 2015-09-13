@@ -15,16 +15,16 @@
     Originally part of access.h
 */
 
-#define NO_DOLLAR
+#include <vms_types.h>
 
 struct _fi2
 {
     char fi2$t_filename[20];
-    vmsword fi2$w_revision;
-    VMSTIME fi2$q_credate;
-    VMSTIME fi2$q_revdate;
-    VMSTIME fi2$q_expdate;
-    VMSTIME fi2$q_bakdate;
+    _uword fi2$w_revision;
+    _vms_time fi2$q_credate;
+    _vms_time fi2$q_revdate;
+    _vms_time fi2$q_expdate;
+    _vms_time fi2$q_bakdate;
     char fi2$t_filenamext[66];
 };
 

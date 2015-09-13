@@ -4,6 +4,9 @@
  * Copyright 2000 (C) Stephen Rothwell
  */
 
+#ifndef _LINUX_DNOTIFY_H
+#define _LINUX_DNOTIFY_H
+
 struct dnotify_struct
 {
     struct dnotify_struct * dn_next;
@@ -44,3 +47,5 @@ static inline void dnotify_parent(struct dentry *dentry, unsigned long event)
     else
         spin_unlock(&dcache_lock);
 }
+
+#endif /* _LINUX_DNOTIFY_H */

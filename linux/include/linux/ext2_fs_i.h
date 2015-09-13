@@ -13,8 +13,8 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
-#ifndef _LINUX_EXT2_FS_I
-#define _LINUX_EXT2_FS_I
+#ifndef _LINUX_EXT2_FS_I_H
+#define _LINUX_EXT2_FS_I_H
 
 /*
  * second extended file system inode data in memory
@@ -39,4 +39,4 @@ struct ext2_inode_info
     int i_new_inode:1;  /* Is a freshly allocated inode */
 };
 
-#endif  /* _LINUX_EXT2_FS_I */
+#endif  /* _LINUX_EXT2_FS_I_H */

@@ -15,25 +15,26 @@
     Originally part of access.h
 */
 
-#define NO_DOLLAR
+#include <vms_types.h>
+
 struct _scbdef
 {
-    vmsword scb$w_struclev;
-    vmsword scb$w_cluster;
-    vmslong scb$l_volsize;
-    vmslong scb$l_blksize;
-    vmslong scb$l_sectors;
-    vmslong scb$l_tracks;
-    vmslong scb$l_cylinders;
-    vmslong scb$l_status;
-    vmslong scb$l_status2;
-    vmsword scb$w_writecnt;
+    _uword scb$w_struclev;
+    _uword scb$w_cluster;
+    _ulongword scb$l_volsize;
+    _ulongword scb$l_blksize;
+    _ulongword scb$l_sectors;
+    _ulongword scb$l_tracks;
+    _ulongword scb$l_cylinders;
+    _ulongword scb$l_status;
+    _ulongword scb$l_status2;
+    _uword scb$w_writecnt;
     char scb$t_volockname[12];
-    VMSTIME scb$q_mounttime;
-    vmsword scb$w_backrev;
-    vmslong scb$q_genernum[2]; /* error? */
+    _vms_time scb$q_mounttime;
+    _uword scb$w_backrev;
+    _ulongword scb$q_genernum[2]; /* error? */
     char scb$b_reserved[446];
-    vmsword scb$w_checksum;
+    _uword scb$w_checksum;
 };
 
 #endif
