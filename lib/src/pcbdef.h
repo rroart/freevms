@@ -1,6 +1,8 @@
 #ifndef PCBDEF_H
 #define PCBDEF_H
 
+#include <vms_types.h>
+
 #define PCB$M_RES 0x1
 #define PCB$M_DELPEN 0x2
 #define PCB$M_FORCPEN 0x4
@@ -138,16 +140,16 @@
 struct _pcb {
   struct _pcb *pcb$l_sqfl;
   struct _pcb *pcb$l_sqbl;
-  unsigned short int pcb$w_size;
-  unsigned char pcb$b_type;
-  unsigned char pcb$b_fill_1;
-  unsigned int pcb$l_ast_pending;
-  unsigned long long pcb$q_phypcb;
+  UINT16 pcb$w_size;
+  UINT8 pcb$b_type;
+  UINT8 pcb$b_fill_1;
+  UINT32 pcb$l_ast_pending;
+  UINT64 pcb$q_phypcb;
   union  {
-    unsigned long long pcb$q_lefc_swapped;
+    UINT64 pcb$q_lefc_swapped;
     struct  {
-      unsigned int pcb$l_lefc_0_swapped;
-      unsigned int pcb$l_lefc_1_swapped;
+      UINT32 pcb$l_lefc_0_swapped;
+      UINT32 pcb$l_lefc_1_swapped;
     };
   };
   struct _acb *pcb$l_astqfl_spk;
@@ -160,19 +162,19 @@ struct _pcb {
   struct _acb *pcb$l_astqbl_s;
   struct _acb *pcb$l_astqfl_u;
   struct _acb *pcb$l_astqbl_u;
-  int pcb$l_prvcpu;
-  int pcb$l_cpu_id;
-  unsigned long long pcb$q_prvasn;
-  unsigned long long pcb$q_prvasnseq;
-  unsigned long long pcb$q_oncpucnt;
-  unsigned int pcb$l_astact;
-  unsigned int pcb$l_state;
-  unsigned int pcb$l_pri;
-  unsigned int pcb$l_prib;
-  unsigned int pcb$l_affinity_skip;
-  unsigned int pcb$l_owner;
+  INT32 pcb$l_prvcpu;
+  INT32 pcb$l_cpu_id;
+  UINT64 pcb$q_prvasn;
+  UINT64 pcb$q_prvasnseq;
+  UINT64 pcb$q_oncpucnt;
+  UINT32 pcb$l_astact;
+  UINT32 pcb$l_state;
+  UINT32 pcb$l_pri;
+  UINT32 pcb$l_prib;
+  UINT32 pcb$l_affinity_skip;
+  UINT32 pcb$l_owner;
   union  {
-    unsigned int pcb$l_sts;
+    UINT32 pcb$l_sts;
     struct  {
       unsigned pcb$v_res : 1;
       unsigned pcb$v_delpen : 1;
@@ -209,7 +211,7 @@ struct _pcb {
     };
   };
   union  {
-    unsigned int pcb$l_sts2;
+    UINT32 pcb$l_sts2;
     struct  {
       unsigned pcb$v_quantum_resched : 1;
       unsigned pcb$v_disable_preempt_pkta_lock : 1;
@@ -236,38 +238,38 @@ struct _pcb {
       unsigned pcb$v_soft_single_thread : 1;
     };
   };
-  unsigned int pcb$l_prisav;
-  unsigned int pcb$l_pribsav;
-  unsigned int pcb$l_authpri;
-  unsigned int pcb$l_onqtime;
+  UINT32 pcb$l_prisav;
+  UINT32 pcb$l_pribsav;
+  UINT32 pcb$l_authpri;
+  UINT32 pcb$l_onqtime;
 
-  unsigned int pcb$l_waitime;
-  unsigned int pcb$l_astcnt;
-  unsigned int pcb$l_biocnt;
-  unsigned int pcb$l_biolm;
-  int pcb$l_diocnt;
-  int pcb$l_diolm;
-  unsigned int pcb$l_prccnt;
+  UINT32 pcb$l_waitime;
+  UINT32 pcb$l_astcnt;
+  UINT32 pcb$l_biocnt;
+  UINT32 pcb$l_biolm;
+  INT32 pcb$l_diocnt;
+  INT32 pcb$l_diolm;
+  UINT32 pcb$l_prccnt;
   char pcb$t_terminal [8];
 
-  unsigned int pcb$l_wefc;
-  unsigned int pcb$l_efwm;
-  unsigned int pcb$l_efcs;
-  unsigned int pcb$l_efcu;
+  UINT32 pcb$l_wefc;
+  UINT32 pcb$l_efwm;
+  UINT32 pcb$l_efcs;
+  UINT32 pcb$l_efcu;
   union  {
     struct  {
-      int pcb$l_efc2p;
-      int pcb$l_efc3p;
+      INT32 pcb$l_efc2p;
+      INT32 pcb$l_efc3p;
     };
     struct  {
-      unsigned short int pcb$w_pgflchar;
-      unsigned char pcb$b_pgflindex;
+      UINT16 pcb$w_pgflchar;
+      UINT8 pcb$b_pgflindex;
     };
   };
-  unsigned int pcb$l_pid;
+  UINT32 pcb$l_pid;
 
   union  {
-    unsigned int pcb$l_epid;
+    UINT32 pcb$l_epid;
     struct  {
       unsigned pcb$v_epid_proc : 21;
       unsigned pcb$v_epid_node_idx : 8;
@@ -276,127 +278,127 @@ struct _pcb {
     };
   };
 
-  unsigned int pcb$l_eowner;
-  unsigned int pcb$l_aptcnt;
-  unsigned int pcb$l_mtxcnt;
-  unsigned int pcb$l_gpgcnt;
-  unsigned int pcb$l_ppgcnt;
+  UINT32 pcb$l_eowner;
+  UINT32 pcb$l_aptcnt;
+  UINT32 pcb$l_mtxcnt;
+  UINT32 pcb$l_gpgcnt;
+  UINT32 pcb$l_ppgcnt;
   void *pcb$l_wsswp;
-  unsigned int pcb$l_swapsize;
+  UINT32 pcb$l_swapsize;
   struct _phd *pcb$l_phd;
   struct _jib *pcb$l_jib;
   struct  {
-    unsigned long long pcb$q_priv;
+    UINT64 pcb$q_priv;
     struct _arb *pcb$l_arb;
-    char pcb$$$_arb_fill_1 [48];
+    INT8 pcb$$$_arb_fill_1 [48];
     union  {
-      unsigned int pcb$l_uic;
+      UINT32 pcb$l_uic;
       struct  {
-    unsigned short int pcb$w_mem;
-    unsigned short int pcb$w_grp;
+    UINT16 pcb$w_mem;
+    UINT16 pcb$w_grp;
       };
     };
-    char pcb$$$_arb_fill_2 [60];
+    INT8 pcb$$$_arb_fill_2 [60];
   };
   struct _orb *pcb$l_orb;
-  unsigned int pcb$l_tmbu;
-  unsigned int pcb$l_home_rad;
-  char pcb$b_spare_1 [4];
-  int pcb$l_dlckpri;
-  unsigned int pcb$l_defprot;
+  UINT32 pcb$l_tmbu;
+  UINT32 pcb$l_home_rad;
+  INT8 pcb$b_spare_1 [4];
+  INT32 pcb$l_dlckpri;
+  UINT32 pcb$l_defprot;
   struct _pmb *pcb$l_pmb;
-  int pcb$l_affinity;
-  unsigned int pcb$l_capability;
-  unsigned int pcb$l_cputim;
+  INT32 pcb$l_affinity;
+  UINT32 pcb$l_capability;
+  UINT32 pcb$l_cputim;
   char pcb$t_lname [16];
   struct _pdb *pcb$l_prcpdb;
 
-  unsigned int pcb$l_pixhist;
-  int pcb$l_affinity_callback;
-  unsigned int pcb$l_permanent_capability;
-  int pcb$l_permanent_cpu_affinity;
-  unsigned long long pcb$q_cwpssrv_queue;
-  unsigned int pcb$l_current_affinity;
-  int pcb$l_capability_seq;
-  unsigned long long pcb$q_bufobj_list;
-  unsigned int pcb$l_ast_blocked;
+  UINT32 pcb$l_pixhist;
+  INT32 pcb$l_affinity_callback;
+  UINT32 pcb$l_permanent_capability;
+  INT32 pcb$l_permanent_cpu_affinity;
+  UINT64 pcb$q_cwpssrv_queue;
+  UINT32 pcb$l_current_affinity;
+  INT32 pcb$l_capability_seq;
+  UINT64 pcb$q_bufobj_list;
+  UINT32 pcb$l_ast_blocked;
   void *pcb$l_class_quant;
-  unsigned short int pcb$w_class_extra_ticks;
-  unsigned char pcb$b_pkta_lock;
-  unsigned char pcb$b_fill_2;
+  UINT16 pcb$w_class_extra_ticks;
+  UINT8 pcb$b_pkta_lock;
+  UINT8 pcb$b_fill_2;
   void *pcb$a_current_tx;
   void *pcb$a_current_cd;
   void *pcb$a_current_vertex;
   union  {
-    unsigned long long pcb$q_xscb_que;
+    UINT64 pcb$q_xscb_que;
     struct  {
       struct _xscb *pcb$a_xscb_flink;
       struct _xscb *pcb$a_xscb_blink;
     };
   };
   union  {
-    unsigned long long pcb$q_rmcb_que;
+    UINT64 pcb$q_rmcb_que;
     struct  {
       struct _rmcb *pcb$a_rmcb_flink;
       struct _rmcb *pcb$a_rmcb_blink;
     };
   };
   union  {
-    unsigned long long pcb$q_cd_que;
+    UINT64 pcb$q_cd_que;
     struct  {
       struct _cde *pcb$a_cd_flink;
       struct _cde *pcb$a_cd_blink;
     };
   };
-  unsigned int pcb$l_dpc;
-  unsigned int pcb$l_cputime_ref;
-  unsigned int pcb$l_acc_waitime;
-  int pcb$l_prcstr;
+  UINT32 pcb$l_dpc;
+  UINT32 pcb$l_cputime_ref;
+  UINT32 pcb$l_acc_waitime;
+  INT32 pcb$l_prcstr;
   void *pcb$l_xpcb;
-  unsigned int pcb$l_psx_fork_status;
+  UINT32 pcb$l_psx_fork_status;
   union  {
-    unsigned int pcb$l_psx_flags;
+    UINT32 pcb$l_psx_flags;
     struct  {
       unsigned pcb$v_fork : 1;
       unsigned pcb$v_psx_flags_fill : 31;
     };
   };
   void (*pcb$l_psx_actrtn)(void);
-  unsigned long long pcb$q_psx_actprm;
-  unsigned int pcb$l_kernel_counter;
-  unsigned int pcb$l_exec_counter;
-  unsigned int pcb$l_super_counter;
-  unsigned int pcb$l_user_counter;
-  unsigned int pcb$l_sched_policy;
+  UINT64 pcb$q_psx_actprm;
+  UINT32 pcb$l_kernel_counter;
+  UINT32 pcb$l_exec_counter;
+  UINT32 pcb$l_super_counter;
+  UINT32 pcb$l_user_counter;
+  UINT32 pcb$l_sched_policy;
   int (*pcb$a_frewsle_callout)(void);
   union  {
-    unsigned int pcb$l_frewsle_param;
-    int pcb$l_pqb;
+    UINT32 pcb$l_frewsle_param;
+    INT32 pcb$l_pqb;
 
   };
-  unsigned int pcb$l_bufobj_cnt;
-  unsigned int pcb$l_noaudit;
-  unsigned int pcb$l_source_epid;
+  UINT32 pcb$l_bufobj_cnt;
+  UINT32 pcb$l_noaudit;
+  UINT32 pcb$l_source_epid;
   union  {
-    unsigned long long pcb$q_rdpb_que;
+    UINT64 pcb$q_rdpb_que;
     struct  {
       struct _rdpb *pcb$a_rdpb_flink;
       struct _rdpb *pcb$a_rdpb_blink;
     };
   };
-  unsigned long long pcb$q_files_64;
-  long long pcb$q_keep_in_ws;
-  long long pcb$q_keep_in_ws2;
-  unsigned int pcb$l_active_cpus;
-  unsigned int pcb$l_tquantum;
-  unsigned int pcb$l_multithread;
-  unsigned int pcb$l_kt_count;
-  unsigned int pcb$l_kt_high;
+  UINT64 pcb$q_files_64;
+  INT64 pcb$q_keep_in_ws;
+  INT64 pcb$q_keep_in_ws2;
+  UINT32 pcb$l_active_cpus;
+  UINT32 pcb$l_tquantum;
+  UINT32 pcb$l_multithread;
+  UINT32 pcb$l_kt_count;
+  UINT32 pcb$l_kt_high;
   void *pcb$l_ktbvec;
   struct _acb *pcb$l_wake_acb;
-  unsigned int pcb$l_st_ack_count;
+  UINT32 pcb$l_st_ack_count;
   union  {
-    unsigned int pcb$l_thread_events;
+    UINT32 pcb$l_thread_events;
     struct  {
       unsigned pcb$v_event_no_flag : 1;
       unsigned pcb$v_fill_20_ : 7;
@@ -404,14 +406,14 @@ struct _pcb {
   };
   struct _acb *pcb$l_postef_acb;
   union  {
-    unsigned long long pcb$q_postef;
+    UINT64 pcb$q_postef;
     struct  {
-      unsigned int pcb$l_postef1;
-      unsigned int pcb$l_postef2;
+      UINT32 pcb$l_postef1;
+      UINT32 pcb$l_postef2;
     };
   };
-  unsigned int pcb$l_swp_seq;
-  unsigned int pcb$l_swp_kt;
+  UINT32 pcb$l_swp_seq;
+  UINT32 pcb$l_swp_kt;
   struct _acb *pcb$l_im_astqfl_spk;
   struct _acb *pcb$l_im_astqbl_spk;
   struct _acb *pcb$l_im_astqfl_k;
@@ -419,26 +421,26 @@ struct _pcb {
   struct _acb *pcb$l_im_astqfl_e;
   struct _acb *pcb$l_im_astqbl_e;
   void *pcb$ps_ccbsva;
-  unsigned int pcb$l_maxfix;
+  UINT32 pcb$l_maxfix;
   void *pcb$ps_fandle;
-  unsigned long long pcb$q_st_kt_array;
+  UINT64 pcb$q_st_kt_array;
   struct _psb *pcb$ar_natural_psb;
-  char pcb$b_spare_2 [4];
+  INT8 pcb$b_spare_2 [4];
   union  {
     struct _ktb *pcb$l_initial_ktb;
     struct _pcb *pcb$l_pcb;
   };
-  char pcb$b_ktb_padding_1 [116];
+  INT8 pcb$b_ktb_padding_1 [116];
   void *pcb$l_ctx_waitq;
   struct _lkb *pcb$q_lockqfl;
   struct _lkb *pcb$q_lockqbl;
-  char pcb$b_ktb_padding_2 [40];
+  INT8 pcb$b_ktb_padding_2 [40];
   struct _pcb *pcb$l_class_link;
   void *pcb$l_session_id;
   void *pcb$l_process_group;
-  unsigned int pcb$l_creator;
-  unsigned int pcb$l_lckrq;
-  char pcb$b_fill_21_ [4];
+  UINT32 pcb$l_creator;
+  UINT32 pcb$l_lckrq;
+  INT8 pcb$b_fill_21_ [4];
 };
 */
 
@@ -448,12 +450,12 @@ struct _pcb {
 struct ktb {
   struct _ktb *ktb$l_sqfl;
   struct _ktb *ktb$l_sqbl;
-  unsigned short int ktb$w_size;
-  unsigned char ktb$b_type;
-  unsigned char ktb$b_fill_1;
-  unsigned int ktb$l_ast_pending;
-  unsigned long long ktb$q_phypcb;
-  char ktb$b_pcb_padding_1 [8];
+  UINT16 ktb$w_size;
+  UINT8 ktb$b_type;
+  UINT8 ktb$b_fill_1;
+  UINT32 ktb$l_ast_pending;
+  UINT64 ktb$q_phypcb;
+  INT8 ktb$b_pcb_padding_1 [8];
   struct _acb *ktb$l_astqfl_spk;
   struct _acb *ktb$l_astqbl_spk;
   struct _acb *ktb$l_astqfl_k;
@@ -464,17 +466,17 @@ struct ktb {
   struct _acb *ktb$l_astqbl_s;
   struct _acb *ktb$l_astqfl_u;
   struct _acb *ktb$l_astqbl_u;
-  char ktb$b_pcb_padding_2 [4];
-  int ktb$l_cpu_id;
-  char ktb$b_pcb_padding_3 [24];
-  unsigned int ktb$l_astact;
-  unsigned int ktb$l_state;
-  unsigned int ktb$l_pri;
-  unsigned int ktb$l_prib;
-  unsigned int ktb$l_affinity_skip;
-  unsigned int ktb$l_owner;
+  INT8 ktb$b_pcb_padding_2 [4];
+  INT32 ktb$l_cpu_id;
+  INT8 ktb$b_pcb_padding_3 [24];
+  UINT32 ktb$l_astact;
+  UINT32 ktb$l_state;
+  UINT32 ktb$l_pri;
+  UINT32 ktb$l_prib;
+  UINT32 ktb$l_affinity_skip;
+  UINT32 ktb$l_owner;
   union  {
-    unsigned int ktb$l_sts;
+    UINT32 ktb$l_sts;
     struct  {
       unsigned ktb$v_res : 1;
       unsigned ktb$v_delpen : 1;
@@ -511,7 +513,7 @@ struct ktb {
     };
   };
   union  {
-    unsigned int ktb$l_sts2;
+    UINT32 ktb$l_sts2;
     struct  {
       unsigned ktb$v_quantum_resched : 1;
       unsigned ktb$v_fill_2 : 2;
@@ -536,20 +538,20 @@ struct ktb {
       unsigned ktb$v_fill_36_ : 2;
     };
   };
-  unsigned int ktb$l_prisav;
-  unsigned int ktb$l_pribsav;
-  unsigned int ktb$l_authpri;
-  unsigned int ktb$l_onqtime;
+  UINT32 ktb$l_prisav;
+  UINT32 ktb$l_pribsav;
+  UINT32 ktb$l_authpri;
+  UINT32 ktb$l_onqtime;
 
-  unsigned int ktb$l_waitime;
-  char ktb$b_pcb_padding_4 [32];
-  unsigned int ktb$l_wefc;
-  unsigned int ktb$l_efwm;
-  char ktb$b_pcb_padding_5 [16];
-  unsigned int ktb$l_pid;
+  UINT32 ktb$l_waitime;
+  INT8 ktb$b_pcb_padding_4 [32];
+  UINT32 ktb$l_wefc;
+  UINT32 ktb$l_efwm;
+  INT8 ktb$b_pcb_padding_5 [16];
+  UINT32 ktb$l_pid;
 
   union  {
-    unsigned int ktb$l_epid;
+    UINT32 ktb$l_epid;
     struct  {
       unsigned ktb$v_epid_proc : 21;
       unsigned ktb$v_epid_node_idx : 8;
@@ -558,36 +560,36 @@ struct ktb {
     };
   };
 
-  char ktb$b_pcb_padding_6 [8];
-  unsigned int ktb$l_mtxcnt;
-  char ktb$b_pcb_padding_7 [16];
+  INT8 ktb$b_pcb_padding_6 [8];
+  UINT32 ktb$l_mtxcnt;
+  INT8 ktb$b_pcb_padding_7 [16];
   struct _phd *ktb$l_phd;
   struct _jib *ktb$l_jib;
-  char ktb$b_pcb_padding_8 [132];
-  unsigned int ktb$l_home_rad;
-  unsigned int ktb$l_sra_skip_count;
-  char ktb$b_pcb_padding_81 [12];
-  int ktb$l_affinity;
-  unsigned int ktb$l_capability;
-  char ktb$b_pcb_padding_9 [32];
-  unsigned int ktb$l_permanent_capability;
-  int ktb$l_permanent_cpu_affinity;
-  char ktb$b_pcb_padding_10 [8];
-  unsigned int ktb$l_current_affinity;
-  int ktb$l_capability_seq;
-  char ktb$b_pcb_padding_11 [8];
-  unsigned int ktb$l_ast_blocked;
+  INT8 ktb$b_pcb_padding_8 [132];
+  UINT32 ktb$l_home_rad;
+  UINT32 ktb$l_sra_skip_count;
+  INT8 ktb$b_pcb_padding_81 [12];
+  INT32 ktb$l_affinity;
+  UINT32 ktb$l_capability;
+  INT8 ktb$b_pcb_padding_9 [32];
+  UINT32 ktb$l_permanent_capability;
+  INT32 ktb$l_permanent_cpu_affinity;
+  INT8 ktb$b_pcb_padding_10 [8];
+  UINT32 ktb$l_current_affinity;
+  INT32 ktb$l_capability_seq;
+  INT8 ktb$b_pcb_padding_11 [8];
+  UINT32 ktb$l_ast_blocked;
   void *ktb$l_class_quant;
-  unsigned short int ktb$w_class_extra_ticks;
-  char ktb$b_pcb_padding_12 [94];
-  unsigned int ktb$l_sched_policy;
-  char ktb$b_pcb_padding_13 [160];
+  UINT16 ktb$w_class_extra_ticks;
+  INT8 ktb$b_pcb_padding_12 [94];
+  UINT32 ktb$l_sched_policy;
+  INT8 ktb$b_pcb_padding_13 [160];
   union  {
     struct _pcb *ktb$l_pcb;
     struct _ktb *ktb$l_initial_ktb;
   };
   union  {
-    unsigned int ktb$l_flags;
+    UINT32 ktb$l_flags;
     struct  {
       unsigned ktb$v_delete_pending : 1;
       unsigned ktb$v_sched_context_saved : 1;
@@ -602,54 +604,54 @@ struct ktb {
   };
   void *ktb$l_per_kt_area;
   struct _acb *ktb$l_tquant_acb;
-  unsigned int ktb$l_tquant;
-  unsigned int ktb$l_quant;
+  UINT32 ktb$l_tquant;
+  UINT32 ktb$l_quant;
   void *ktb$l_tm_callbacks;
-  unsigned int ktb$l_callback_err;
+  UINT32 ktb$l_callback_err;
   union  {
-    unsigned long long ktb$q_capabilities;
+    UINT64 ktb$q_capabilities;
     struct  {
-      unsigned int ktb$l_capabilities;
-      unsigned int ktb$l_affinities;
+      UINT32 ktb$l_capabilities;
+      UINT32 ktb$l_affinities;
     };
   };
   union  {
-    unsigned long long ktb$q_permanent_capabilities;
+    UINT64 ktb$q_permanent_capabilities;
     struct  {
-      unsigned int ktb$l_permanent_capabilities;
-      unsigned int ktb$l_permanent_affinities;
+      UINT32 ktb$l_permanent_capabilities;
+      UINT32 ktb$l_permanent_affinities;
     };
   };
   union  {
-    unsigned long long ktb$q_saved_capabilities;
+    UINT64 ktb$q_saved_capabilities;
     struct  {
-      unsigned int ktb$l_saved_capabilities;
-      unsigned int ktb$l_saved_affinities;
+      UINT32 ktb$l_saved_capabilities;
+      UINT32 ktb$l_saved_affinities;
     };
   };
-  unsigned int ktb$l_bias_cell;
-  unsigned int ktb$l_persona_id;
+  UINT32 ktb$l_bias_cell;
+  UINT32 ktb$l_persona_id;
   struct _psb *ktb$ar_psb;
-  unsigned int ktb$l_swp_seq;
-  long long ktb$q_vol_waits;
-  int ktb$l_curr_vol_waits;
-  int ktb$l_qend_count;
-  unsigned long long ktb$q_comq_wait;
+  UINT32 ktb$l_swp_seq;
+  INT64 ktb$q_vol_waits;
+  INT32 ktb$l_curr_vol_waits;
+  INT32 ktb$l_qend_count;
+  UINT64 ktb$q_comq_wait;
 
-  unsigned long long ktb$q_runtime_start;
-  unsigned long long ktb$q_inttime_start;
+  UINT64 ktb$q_runtime_start;
+  UINT64 ktb$q_inttime_start;
 
-  int ktb$l_soft_broken;
-  char ktb$b_pcb_padding_14 [20];
-  unsigned long long ktb$q_acc_run;
-  unsigned long long ktb$q_acc_wait;
-  unsigned long long ktb$q_acc_interrupt;
-  int ktb$l_run_count;
-  unsigned int ktb$l_glock_wait_status;
-  unsigned long long ktb$q_glock;
-  char ktb$b_pcb_padding_15 [16];
-  unsigned int ktb$l_lckrq;
-  char ktb$b_fill_37_ [4];
+  INT32 ktb$l_soft_broken;
+  INT8 ktb$b_pcb_padding_14 [20];
+  UINT64 ktb$q_acc_run;
+  UINT64 ktb$q_acc_wait;
+  UINT64 ktb$q_acc_interrupt;
+  INT32 ktb$l_run_count;
+  UINT32 ktb$l_glock_wait_status;
+  UINT64 ktb$q_glock;
+  INT8 ktb$b_pcb_padding_15 [16];
+  UINT32 ktb$l_lckrq;
+  INT8 ktb$b_fill_37_ [4];
 };
 */
 

@@ -1,6 +1,8 @@
 #ifndef JIBDEF_H
 #define JIBDEF_H
 
+#include <vms_types.h>
+
 #define JIB$C_DETACHED 0
 #define JIB$C_NETWORK 1
 #define JIB$C_BATCH 2
@@ -17,39 +19,39 @@ struct _jib
 {
     struct _mtl *jib$l_mtlfl;
     struct _mtl *jib$l_mtlbl;
-    unsigned short int jib$w_size;
-    unsigned char jib$b_type;
-    unsigned char jib$b_daytypes;
+    UINT16 jib$w_size;
+    UINT8 jib$b_type;
+    UINT8 jib$b_daytypes;
     char jib$t_username [12];
     char jib$t_account [8];
-    unsigned int jib$l_bytcnt;
-    unsigned int jib$l_bytlm;
-    unsigned int jib$l_pbytcnt;
-    unsigned int jib$l_pbytlim;
-    unsigned int jib$l_filcnt;
-    unsigned int jib$l_fillm;
-    unsigned int jib$l_tqcnt;
-    unsigned int jib$l_tqlm;
-    unsigned int jib$l_pgflquota;
-    int jib$l_pgflcnt;
-    unsigned int jib$l_cpulim;
-    unsigned int jib$l_prccnt;
-    unsigned int jib$l_prclim;
-    unsigned short int jib$w_shrfcnt;
-    unsigned short int jib$w_shrflim;
-    unsigned int jib$l_enqcnt;
-    unsigned int jib$l_enqlm;
-    unsigned short int jib$w_maxjobs;
-    unsigned short int jib$w_maxdetach;
-    unsigned int jib$l_mpid;
+    UINT32 jib$l_bytcnt;
+    UINT32 jib$l_bytlm;
+    UINT32 jib$l_pbytcnt;
+    UINT32 jib$l_pbytlim;
+    UINT32 jib$l_filcnt;
+    UINT32 jib$l_fillm;
+    UINT32 jib$l_tqcnt;
+    UINT32 jib$l_tqlm;
+    UINT32 jib$l_pgflquota;
+    INT32 jib$l_pgflcnt;
+    UINT32 jib$l_cpulim;
+    UINT32 jib$l_prccnt;
+    UINT32 jib$l_prclim;
+    UINT16 jib$w_shrfcnt;
+    UINT16 jib$w_shrflim;
+    UINT32 jib$l_enqcnt;
+    UINT32 jib$l_enqlm;
+    UINT16 jib$w_maxjobs;
+    UINT16 jib$w_maxdetach;
+    UINT32 jib$l_mpid;
     void *jib$l_jlnamfl;
     void *jib$l_jlnambl;
-    unsigned int jib$l_pdayhours;
-    unsigned int jib$l_odayhours;
-    unsigned int jib$l_jobtype;
+    UINT32 jib$l_pdayhours;
+    UINT32 jib$l_odayhours;
+    UINT32 jib$l_jobtype;
     union
     {
-        unsigned int jib$l_flags;
+        UINT32 jib$l_flags;
         struct
         {
             unsigned jib$v_bytcnt_waiters : 1;
@@ -57,9 +59,9 @@ struct _jib
             unsigned jib$v_fill_0_ : 6;
         };
     };
-    unsigned int jib$l_org_bytlm;
-    unsigned int jib$l_org_pbytlm;
-    unsigned int jib$l_jtquota;
+    UINT32 jib$l_org_bytlm;
+    UINT32 jib$l_org_pbytlm;
+    UINT32 jib$l_jtquota;
 };
 
 #endif

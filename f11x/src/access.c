@@ -654,7 +654,7 @@ void f11b_write_attrib(struct _fcb * fcb, struct _atrdef * atrp)
         atrp++;
     }
     {
-        unsigned short check = checksum((_uword *) head);
+        unsigned short check = checksum((UINT16 *) head);
         head->fh2$w_checksum = check;
     }
     writehead(fcb, head);
@@ -731,7 +731,7 @@ struct _fcb * getmapfcb(struct _vcb * vcb)
 
 /* checksum() to produce header checksum values... */
 
-unsigned short checksum(_uword *block)
+unsigned short checksum(UINT16 *block)
 {
     int count = 255;
     unsigned result = 0;
@@ -776,7 +776,7 @@ unsigned deaccesshead(struct _fh2 *head, unsigned idxblk)
 {
     if (head && idxblk)
     {
-        unsigned short check = checksum((_uword *) head);
+        unsigned short check = checksum((UINT16 *) head);
         head->fh2$w_checksum = check;
     }
     return deaccesschunk(idxblk, 1, 1);
@@ -838,7 +838,7 @@ unsigned writehead(struct _fcb * fcb, struct _fh2 *headbuff)
     else
         ucb = vcb->vcb$l_rvt;
     struct _fiddef * fid = &headbuff->fh2$w_fid.fid$w_num;
-    unsigned short check = checksum((_uword *) headbuff);
+    unsigned short check = checksum((UINT16 *) headbuff);
     int vbn =
         fid->fid$w_num + (fid->fid$b_nmx << 16)
         - 1+
@@ -922,7 +922,7 @@ void * f11b_read_header(struct _vcb *vcb, struct _fiddef *fid,
                     head->fh2$b_mpoffset > head->fh2$b_acoffset ||
                     head->fh2$b_acoffset > head->fh2$b_rsoffset ||
                     head->fh2$b_map_inuse > head->fh2$b_acoffset - head->fh2$b_mpoffset ||
-                    checksum((_uword *) head) != head->fh2$w_checksum)
+                    checksum((UINT16 *) head) != head->fh2$w_checksum)
             {
                 sts = SS$_DATACHECK;
             }

@@ -1,6 +1,8 @@
 #ifndef UAFDEF_H
 #define UAFDEF_H
 
+#include <vms_types.h>
+
 #define     UAF$C_USER_ID           1
 #define     UAF$C_VERSION1          1
 #define     UAF$C_KEYED_PART        52
@@ -26,29 +28,29 @@
 
 struct _uaf
 {
-    unsigned char uaf$b_rtype;
-    unsigned char uaf$b_version;
-    unsigned short int uaf$w_usrdatoff;
+    UINT8 uaf$b_rtype;
+    UINT8 uaf$b_version;
+    UINT16 uaf$w_usrdatoff;
     union
     {
         char uaf$t_username [32];
         struct
         {
-            char uaf$t_fill_0 [31];
+            INT8 uaf$t_fill_0 [31];
             char uaf$t_username_tag;
         };
     };
     union
     {
-        unsigned int uaf$l_uic;
+        UINT32 uaf$l_uic;
         struct
         {
-            unsigned short int uaf$w_mem;
-            unsigned short int uaf$w_grp;
+            UINT16 uaf$w_mem;
+            UINT16 uaf$w_grp;
         };
     };
-    unsigned int uaf$l_sub_id;
-    unsigned long long uaf$q_parent_id;
+    UINT32 uaf$l_sub_id;
+    UINT64 uaf$q_parent_id;
     char uaf$t_account [32];
     char uaf$t_owner [32];
     char uaf$t_defdev [32];
@@ -58,38 +60,38 @@ struct _uaf
     char uaf$t_clitables [32];
     union
     {
-        unsigned long long uaf$q_pwd;
+        UINT64 uaf$q_pwd;
         struct
         {
-            unsigned int uaf$l_pwd;
+            UINT32 uaf$l_pwd;
         };
     };
-    unsigned long long uaf$q_pwd2;
-    unsigned short int uaf$w_logfails;
-    unsigned short int uaf$w_salt;
-    unsigned char uaf$b_encrypt;
-    unsigned char uaf$b_encrypt2;
-    unsigned char uaf$b_pwd_length;
-    char uaf$$$_fill_1 [1];
-    unsigned long long uaf$q_expiration;
-    unsigned long long uaf$q_pwd_lifetime;
-    unsigned long long uaf$q_pwd_date;
-    unsigned long long uaf$q_pwd2_date;
-    unsigned long long uaf$q_lastlogin_i;
-    unsigned long long uaf$q_lastlogin_n;
-    unsigned long long uaf$q_priv;
-    unsigned long long uaf$q_def_priv;
+    UINT64 uaf$q_pwd2;
+    UINT16 uaf$w_logfails;
+    UINT16 uaf$w_salt;
+    UINT8 uaf$b_encrypt;
+    UINT8 uaf$b_encrypt2;
+    UINT8 uaf$b_pwd_length;
+    INT8 uaf$$$_fill_1 [1];
+    UINT64 uaf$q_expiration;
+    UINT64 uaf$q_pwd_lifetime;
+    UINT64 uaf$q_pwd_date;
+    UINT64 uaf$q_pwd2_date;
+    UINT64 uaf$q_lastlogin_i;
+    UINT64 uaf$q_lastlogin_n;
+    UINT64 uaf$q_priv;
+    UINT64 uaf$q_def_priv;
     struct
     {
-        char uaf$b_fill_2 [20];
+        INT8 uaf$b_fill_2 [20];
     };
     struct
     {
-        char uaf$b_fill_3 [20];
+        INT8 uaf$b_fill_3 [20];
     };
     union
     {
-        unsigned int uaf$l_flags;
+        UINT32 uaf$l_flags;
         struct
         {
             unsigned uaf$v_disctly          : 1;
@@ -120,20 +122,20 @@ struct _uaf
             unsigned uaf$v_fill_10_         : 7;
         };
     };
-    unsigned char uaf$b_network_access_p [3];
-    unsigned char uaf$b_network_access_s [3];
-    unsigned char uaf$b_batch_access_p [3];
-    unsigned char uaf$b_batch_access_s [3];
-    unsigned char uaf$b_local_access_p [3];
-    unsigned char uaf$b_local_access_s [3];
-    unsigned char uaf$b_dialup_access_p [3];
-    unsigned char uaf$b_dialup_access_s [3];
-    unsigned char uaf$b_remote_access_p [3];
-    unsigned char uaf$b_remote_access_s [3];
-    char uaf$$$_fill_4 [12];
+    UINT8 uaf$b_network_access_p [3];
+    UINT8 uaf$b_network_access_s [3];
+    UINT8 uaf$b_batch_access_p [3];
+    UINT8 uaf$b_batch_access_s [3];
+    UINT8 uaf$b_local_access_p [3];
+    UINT8 uaf$b_local_access_s [3];
+    UINT8 uaf$b_dialup_access_p [3];
+    UINT8 uaf$b_dialup_access_s [3];
+    UINT8 uaf$b_remote_access_p [3];
+    UINT8 uaf$b_remote_access_s [3];
+    UINT8 uaf$$$_fill_4 [12];
     union
     {
-        unsigned char uaf$b_primedays;
+        UINT8 uaf$b_primedays;
         struct
         {
             unsigned uaf$v_monday       : 1;
@@ -146,38 +148,38 @@ struct _uaf
             unsigned uaf$v_fill_11_     : 1;
         };
     };
-    char uaf$$$_fill_5 [1];
-    unsigned char uaf$b_pri;
-    unsigned char uaf$b_quepri;
-    unsigned short int uaf$w_maxjobs;
-    unsigned short int uaf$w_maxacctjobs;
-    unsigned short int uaf$w_maxdetach;
-    unsigned short int uaf$w_prccnt;
-    unsigned short int uaf$w_biolm;
-    unsigned short int uaf$w_diolm;
-    unsigned short int uaf$w_tqcnt;
-    unsigned short int uaf$w_astlm;
-    unsigned short int uaf$w_enqlm;
-    unsigned short int uaf$w_fillm;
-    unsigned short int uaf$w_shrfillm;
-    unsigned int uaf$l_wsquota;
-    unsigned int uaf$l_dfwscnt;
-    unsigned int uaf$l_wsextent;
-    unsigned int uaf$l_pgflquota;
-    unsigned int uaf$l_cputim;
-    unsigned int uaf$l_bytlm;
-    unsigned int uaf$l_pbytlm;
-    unsigned int uaf$l_jtquota;
-    unsigned short int uaf$w_proxy_lim;
-    unsigned short int uaf$w_proxies;
-    unsigned short int uaf$w_account_lim;
-    unsigned short int uaf$w_accounts;
+    UINT8 uaf$$$_fill_5 [1];
+    UINT8 uaf$b_pri;
+    UINT8 uaf$b_quepri;
+    UINT16 uaf$w_maxjobs;
+    UINT16 uaf$w_maxacctjobs;
+    UINT16 uaf$w_maxdetach;
+    UINT16 uaf$w_prccnt;
+    UINT16 uaf$w_biolm;
+    UINT16 uaf$w_diolm;
+    UINT16 uaf$w_tqcnt;
+    UINT16 uaf$w_astlm;
+    UINT16 uaf$w_enqlm;
+    UINT16 uaf$w_fillm;
+    UINT16 uaf$w_shrfillm;
+    UINT32 uaf$l_wsquota;
+    UINT32 uaf$l_dfwscnt;
+    UINT32 uaf$l_wsextent;
+    UINT32 uaf$l_pgflquota;
+    UINT32 uaf$l_cputim;
+    UINT32 uaf$l_bytlm;
+    UINT32 uaf$l_pbytlm;
+    UINT32 uaf$l_jtquota;
+    UINT16 uaf$w_proxy_lim;
+    UINT16 uaf$w_proxies;
+    UINT16 uaf$w_account_lim;
+    UINT16 uaf$w_accounts;
     struct
     {
-        char uaf$b_fill_6 [20];
+        UINT8 uaf$b_fill_6 [20];
     };
-    char uaf$$$_fill_99 [44];
-    char uaf$$$_fill_100 [768];
+    UINT8 uaf$$$_fill_99 [44];
+    UINT8 uaf$$$_fill_100 [768];
 };
 
 #endif

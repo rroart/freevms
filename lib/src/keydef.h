@@ -1,6 +1,8 @@
 #ifndef KEYDEF_H
 #define KEYDEF_H
 
+#include <vms_types.h>
+
 #define     KEY$M_DUPKEYS       0x1
 #define     KEY$M_CHGKEYS       0x2
 #define     KEY$M_NULKEYS       0x4
@@ -43,18 +45,18 @@
 
 struct _prologue_key
 {
-    unsigned int key$l_idxfl;
-    unsigned short key$w_noff;
-    unsigned char key$b_ianum;
-    unsigned char key$b_lanum;
-    unsigned char key$b_danum;
-    unsigned char key$b_rootlev;
-    unsigned char key$b_idxbktsz;
-    unsigned char key$b_datbktsz;
-    unsigned int key$l_rootvbn;
+    UINT32 key$l_idxfl;
+    UINT16 key$w_noff;
+    UINT8 key$b_ianum;
+    UINT8 key$b_lanum;
+    UINT8 key$b_danum;
+    UINT8 key$b_rootlev;
+    UINT8 key$b_idxbktsz;
+    UINT8 key$b_datbktsz;
+    UINT32 key$l_rootvbn;
     union
     {
-        unsigned char key$b_flags;
+        UINT8 key$b_flags;
 #if 0
         // gcc bitfield problems
         struct
@@ -80,52 +82,52 @@ struct _prologue_key
         };
 #endif
     };
-    unsigned char key$b_datatype;
-    unsigned char key$b_segments;
-    unsigned char key$b_nullchar;
-    unsigned char key$b_keysz;
-    unsigned char key$b_keyref;
-    unsigned short key$w_minrecsz;
-    unsigned short key$w_idxfill;
-    unsigned short key$w_datfill;
+    UINT8 key$b_datatype;
+    UINT8 key$b_segments;
+    UINT8 key$b_nullchar;
+    UINT8 key$b_keysz;
+    UINT8 key$b_keyref;
+    UINT16 key$w_minrecsz;
+    UINT16 key$w_idxfill;
+    UINT16 key$w_datfill;
     union
     {
-        unsigned short key$w_position;
-        unsigned short key$w_position0;
+        UINT16 key$w_position;
+        UINT16 key$w_position0;
     };
-    unsigned short key$w_position1;
-    unsigned short key$w_position2;
-    unsigned short key$w_position3;
-    unsigned short key$w_position4;
-    unsigned short key$w_position5;
-    unsigned short key$w_position6;
-    unsigned short key$w_position7;
+    UINT16 key$w_position1;
+    UINT16 key$w_position2;
+    UINT16 key$w_position3;
+    UINT16 key$w_position4;
+    UINT16 key$w_position5;
+    UINT16 key$w_position6;
+    UINT16 key$w_position7;
     union
     {
-        unsigned char key$b_size;
-        unsigned char key$b_size0;
+        UINT8 key$b_size;
+        UINT8 key$b_size0;
     };
-    unsigned char key$b_size1;
-    unsigned char key$b_size2;
-    unsigned char key$b_size3;
-    unsigned char key$b_size4;
-    unsigned char key$b_size5;
-    unsigned char key$b_size6;
-    unsigned char key$b_size7;
+    UINT8 key$b_size1;
+    UINT8 key$b_size2;
+    UINT8 key$b_size3;
+    UINT8 key$b_size4;
+    UINT8 key$b_size5;
+    UINT8 key$b_size6;
+    UINT8 key$b_size7;
     char key$t_keynam [32];
-    unsigned int key$l_ldvbn;
+    UINT32 key$l_ldvbn;
     union
     {
-        unsigned char key$b_type;
-        unsigned char key$b_type0;
+        UINT8 key$b_type;
+        UINT8 key$b_type0;
     };
-    unsigned char key$b_type1;
-    unsigned char key$b_type2;
-    unsigned char key$b_type3;
-    unsigned char key$b_type4;
-    unsigned char key$b_type5;
-    unsigned char key$b_type6;
-    unsigned char key$b_type7;
+    UINT8 key$b_type1;
+    UINT8 key$b_type2;
+    UINT8 key$b_type3;
+    UINT8 key$b_type4;
+    UINT8 key$b_type5;
+    UINT8 key$b_type6;
+    UINT8 key$b_type7;
 };
 
 #endif

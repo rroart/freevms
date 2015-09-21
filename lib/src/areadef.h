@@ -1,6 +1,8 @@
 #ifndef AREADEF_H
 #define AREADEF_H
 
+#include <vms_types.h>
+
 #define AREA$C_CYL 1
 #define AREA$C_LBN 2
 #define AREA$C_VBN 3
@@ -15,15 +17,15 @@
 
 struct _prologue_area
 {
-    char area$$_fill_1;
-    unsigned char area$b_flags;
-    unsigned char area$b_areaid;
-    unsigned char area$b_arbktsz;
-    unsigned short int area$w_volume;
-    unsigned char area$b_aln;
+    INT8 area$$_fill_1;
+    UINT8 area$b_flags;
+    UINT8 area$b_areaid;
+    UINT8 area$b_arbktsz;
+    UINT16 area$w_volume;
+    UINT8 area$b_aln;
     union
     {
-        unsigned char area$b_aop;
+        UINT8 area$b_aop;
 #if 0
         // offset probs
         struct
@@ -37,20 +39,20 @@ struct _prologue_area
         };
 #endif
     };
-    unsigned int area$l_avail;
-    unsigned int area$l_cvbn;
-    unsigned int area$l_cnblk;
-    unsigned int area$l_used;
-    unsigned int area$l_nxtvbn;
-    unsigned int area$l_nxt;
-    unsigned int area$l_nxblk;
-    unsigned short int area$w_deq;
-    char area$$_fill_4 [2];
-    unsigned int area$l_loc;
-    unsigned short int area$w_rfi [3];
-    unsigned int area$l_total_alloc;
-    char area$$_fill_5 [8];
-    unsigned short int area$w_check;
+    UINT32 area$l_avail;
+    UINT32 area$l_cvbn;
+    UINT32 area$l_cnblk;
+    UINT32 area$l_used;
+    UINT32 area$l_nxtvbn;
+    UINT32 area$l_nxt;
+    UINT32 area$l_nxblk;
+    UINT16 area$w_deq;
+    INT8 area$$_fill_4 [2];
+    UINT32 area$l_loc;
+    UINT16 area$w_rfi [3];
+    UINT32 area$l_total_alloc;
+    INT8 area$$_fill_5 [8];
+    UINT16 area$w_check;
 };
 
 #endif

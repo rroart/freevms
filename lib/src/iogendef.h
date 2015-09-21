@@ -1,6 +1,8 @@
 #ifndef IOGENDEF_H
 #define IOGENDEF_H
 
+#include <vms_types.h>
+
 #define IOGEN$_LOAD 1
 #define IOGEN$_RELOAD 2
 #define IOGEN$_CONNECT 3
@@ -21,8 +23,8 @@ typedef struct _iogen
     {
         struct
         {
-            unsigned short int iogen$w_fcode;
-            unsigned short int iogen$w_modifiers;
+            UINT16 iogen$w_fcode;
+            UINT16 iogen$w_modifiers;
         };
         struct
         {
@@ -72,7 +74,7 @@ struct _autocfg
 {
     union
     {
-        unsigned int iogen$l_autocfg_flags;
+        UINT32 iogen$l_autocfg_flags;
         struct
         {
             unsigned iogen$v_ac_log : 1;

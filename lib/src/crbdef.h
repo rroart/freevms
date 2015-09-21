@@ -1,6 +1,8 @@
 #ifndef CRBDEF_H
 #define CRBDEF_H
 
+#include <vms_types.h>
+
 #define CRB$M_XZA_CHAN0 0x1
 #define CRB$M_XZA_CHAN1 0x2
 #define CRB$M_XZA_ADPERR 0x4
@@ -16,9 +18,9 @@ struct _crb
 {
     struct _fkb *crb$l_fqfl;
     struct _fkb *crb$l_fqbl;
-    unsigned short int crb$w_size;
-    unsigned char crb$b_type;
-    unsigned char crb$b_flck;
+    UINT16 crb$w_size;
+    UINT8 crb$b_type;
+    UINT8 crb$b_flck;
     void (*crb$l_fpc)(void);
     unsigned long crb$l_fr3;
     unsigned long crb$l_fr4;
@@ -28,10 +30,10 @@ struct _crb
     {
         union
         {
-            unsigned char crb$b_tt_type;
-            unsigned int crb$l_tt_type;
+            UINT8 crb$b_tt_type;
+            UINT32 crb$l_tt_type;
         };
-        unsigned int crb$l_xza_sts;
+        UINT32 crb$l_xza_sts;
         struct
         {
             unsigned crb$v_xza_chan0 : 1;
@@ -42,13 +44,13 @@ struct _crb
     };
     union
     {
-        unsigned int crb$l_refc;
-        unsigned short int crb$w_refc;
+        UINT32 crb$l_refc;
+        UINT16 crb$w_refc;
     };
     union
     {
-        unsigned char crb$b_mask;
-        unsigned int crb$l_mask;
+        UINT8 crb$b_mask;
+        UINT32 crb$l_mask;
         struct
         {
             unsigned crb$v_bsy : 1;
@@ -59,20 +61,20 @@ struct _crb
     void *crb$ps_busarray;
     union
     {
-        long long crb$q_auxstruc;
-        unsigned int crb$l_auxstruc;
+        INT64 crb$q_auxstruc;
+        UINT32 crb$l_auxstruc;
         void *crb$ps_auxstruc;
     };
     union
     {
-        long long crb$q_lan_struc;
-        unsigned int crb$l_lan_struc;
+        INT64 crb$q_lan_struc;
+        UINT32 crb$l_lan_struc;
         void *crb$ps_lan_struc;
     };
     union
     {
-        long long crb$q_scs_struc;
-        unsigned int crb$l_scs_struc;
+        INT64 crb$q_scs_struc;
+        UINT32 crb$l_scs_struc;
         void *crb$ps_scs_struc;
     };
     union
@@ -80,26 +82,26 @@ struct _crb
         struct _crb *crb$l_timelink;
         void *crb$l_tt_modem;
     };
-    unsigned int crb$l_node;
+    UINT32 crb$l_node;
     union
     {
-        unsigned int crb$l_duetime;
+        UINT32 crb$l_duetime;
         void *crb$ps_sysg_dblk;
     };
     union
     {
         void (*crb$l_toutrout)(void);
-        unsigned int crb$l_tt_timrefc;
+        UINT32 crb$l_tt_timrefc;
     };
     struct _spl *crb$ps_dlck;
     struct _crb *crb$ps_crb_link;
     union
     {
-        long long crb$q_ctrlr_shutdown;
+        INT64 crb$q_ctrlr_shutdown;
         int (*crb$ps_ctrlr_shutdown)(void);
     };
-    unsigned int crb$l_intd [4];
-    unsigned int crb$l_intd2 [4];
+    UINT32 crb$l_intd [4];
+    UINT32 crb$l_intd2 [4];
 };
 
 #endif

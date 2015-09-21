@@ -19,15 +19,15 @@
 
 struct _fiddef
 {
-    _uword fid$w_num;
-    _uword fid$w_seq;
+    UINT16 fid$w_num;
+    UINT16 fid$w_seq;
     union
     {
-        _uword fid$w_rvn;
+        UINT16 fid$w_rvn;
         struct
         {
-            _ubyte fid$b_rvn;
-            _ubyte fid$b_nmx;
+            UINT8 fid$b_rvn;
+            UINT8 fid$b_nmx;
         };
     };
 };

@@ -1,6 +1,8 @@
 #ifndef FI5DEF_H
 #define FI5DEF_H
 
+#include <vms_types.h>
+
 #define FI5$C_ODS2 0
 #define FI5$C_ISL1 1
 #define FI5$$_TYPE_RESERVED 2
@@ -14,7 +16,7 @@ struct _fi5
 {
     union
     {
-        unsigned char fi5$b_control;
+        UINT8 fi5$b_control;
 #if 0
         // aaah damn bugger bugs. seems control_fields counts as 2 bytes
         // and b_namelen as 2
@@ -27,19 +29,19 @@ struct _fi5
         } fi5$r_control_fields;
 #endif
     } fi5$r_control_overlay;
-    unsigned char fi5$b_namelen;
-    unsigned short int fi5$w_revision;
-    unsigned long long fi5$q_credate;
-    unsigned long long fi5$q_revdate;
-    unsigned long long fi5$q_expdate;
-    unsigned long long fi5$q_bakdate;
-    unsigned long long fi5$q_accdate;
-    unsigned long long fi5$q_attdate;
-    unsigned long long fi5$q_ex_recattr;
+    UINT8 fi5$b_namelen;
+    UINT16 fi5$w_revision;
+    UINT64 fi5$q_credate;
+    UINT64 fi5$q_revdate;
+    UINT64 fi5$q_expdate;
+    UINT64 fi5$q_bakdate;
+    UINT64 fi5$q_accdate;
+    UINT64 fi5$q_attdate;
+    UINT64 fi5$q_ex_recattr;
     struct
     {
-        unsigned long long fi5$q_hint_lo_qw;
-        unsigned long long fi5$q_hint_hi_qw;
+        UINT64 fi5$q_hint_lo_qw;
+        UINT64 fi5$q_hint_hi_qw;
     } fi5$r_length_hint;
     char fi5$t_filename [44];
     char fi5$t_filenamext [204];

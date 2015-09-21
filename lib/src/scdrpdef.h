@@ -93,26 +93,26 @@ struct _scdrp
 {
     struct _fkb *scdrp$l_fqfl;
     struct _fkb *scdrp$l_fqbl;
-    unsigned short int scdrp$w_scdrpsize;
-    unsigned char scdrp$b_cd_type;
-    unsigned char scdrp$b_flck;
+    UINT16 scdrp$w_scdrpsize;
+    UINT8 scdrp$b_cd_type;
+    UINT8 scdrp$b_flck;
     void (*scdrp$l_fpc)(void);
     unsigned long scdrp$l_fr3;
     unsigned long scdrp$l_fr4;
     struct _ucb *scdrp$l_port_ucb;
     struct _ucb *scdrp$l_ucb;
-    unsigned int scdrp$l_func;
-    unsigned int scdrp$l_boff;
+    UINT32 scdrp$l_func;
+    UINT32 scdrp$l_boff;
     unsigned int scdrp$is_sts;
     struct _pte *scdrp$l_svapte;
-    unsigned int scdrp$l_bcnt;
+    UINT32 scdrp$l_bcnt;
     void *scdrp$l_media;
-    unsigned int scdrp$l_abcnt;
-    int (*scdrp$l_savd_rtn)(void);
+    UINT32 scdrp$l_abcnt;
+    INT32 (*scdrp$l_savd_rtn)(void);
     void *scdrp$l_msg_buf;
-    unsigned int scdrp$l_rspid;
+    UINT32 scdrp$l_rspid;
     struct _cdt *scdrp$l_cdt;
-    short int *scdrp$l_rwcptr;
+    short INT32 *scdrp$l_rwcptr;
     union
     {
         struct
@@ -123,12 +123,12 @@ struct _scdrp
             struct _spdt *scdrp$ps_spdt;
             void *scdrp$l_sva_user;
             void *scdrp$l_cmd_buf;
-            unsigned int scdrp$l_cmd_buf_len;
+            UINT32 scdrp$l_cmd_buf_len;
             char *scdrp$l_cmd_ptr;
-            int *scdrp$l_sts_ptr;
+            INT32 *scdrp$l_sts_ptr;
             union
             {
-                unsigned int scdrp$l_scsi_flags;
+                UINT32 scdrp$l_scsi_flags;
                 struct
                 {
                     unsigned scdrp$v_flag_s0buf : 1;
@@ -173,27 +173,27 @@ struct _scdrp
                 };
             };
             void *scdrp$l_datacheck;
-            unsigned int scdrp$l_cl_retry;
-            unsigned int scdrp$l_dma_timeout;
-            unsigned int scdrp$l_discon_timeout;
-            unsigned int scdrp$l_addnl_info;
-            unsigned char scdrp$b_sense_key;
+            UINT32 scdrp$l_cl_retry;
+            UINT32 scdrp$l_dma_timeout;
+            UINT32 scdrp$l_discon_timeout;
+            UINT32 scdrp$l_addnl_info;
+            UINT8 scdrp$b_sense_key;
             char scdrp$t_scdrp_align_0 [3];
-            unsigned int scdrp$l_pad_bcnt;
+            UINT32 scdrp$l_pad_bcnt;
             void *scdrp$l_sva_dma;
             int scdrp$is_cmd_slot;
             struct _pte *scdrp$l_sva_spte;
             void *scdrp$ps_port_dma_va;
             struct _pte *scdrp$l_port_svapte;
-            unsigned int scdrp$l_port_boff;
+            UINT32 scdrp$l_port_boff;
             void *scdrp$ps_mode_args;
             void *scdrp$l_scsimsgo_ptr;
             void *scdrp$l_scsimsgi_ptr;
-            char scdrp$b_scsimsgo_buf [8];
-            char scdrp$b_scsimsgi_buf [8];
+            INT8 scdrp$b_scsimsgo_buf [8];
+            INT8 scdrp$b_scsimsgi_buf [8];
             union
             {
-                unsigned int scdrp$l_msgo_pending;
+                UINT32 scdrp$l_msgo_pending;
                 struct
                 {
                     unsigned scdrp$v_msgo_identify : 1;
@@ -212,22 +212,22 @@ struct _scdrp
             };
             union
             {
-                unsigned int scdrp$l_msgi_pending;
+                UINT32 scdrp$l_msgi_pending;
                 struct
                 {
                     unsigned scdrp$v_msgi_sync_in : 1;
                     unsigned scdrp$v_fill_17_ : 7;
                 };
             };
-            unsigned char scdrp$b_last_msgo;
+            UINT8 scdrp$b_last_msgo;
             char scdrp$t_scdrp_align_1 [3];
             void *scdrp$l_data_ptr;
-            unsigned int scdrp$l_trans_cnt;
-            unsigned int scdrp$l_save_data_cnt;
-            unsigned int scdrp$l_save_data_ptr;
-            unsigned int scdrp$l_sdp_data_cnt;
+            UINT32 scdrp$l_trans_cnt;
+            UINT32 scdrp$l_save_data_cnt;
+            UINT32 scdrp$l_save_data_ptr;
+            UINT32 scdrp$l_sdp_data_cnt;
             void *scdrp$l_sdp_data_ptr;
-            unsigned int scdrp$l_duetime;
+            UINT32 scdrp$l_duetime;
             unsigned int scdrp$is_cmd_bcnt;
             unsigned int scdrp$is_busy_retry_cnt;
             unsigned int scdrp$is_arb_retry_cnt;
@@ -235,11 +235,11 @@ struct _scdrp
             unsigned int scdrp$is_cmd_retry_cnt;
             unsigned int scdrp$is_sel_tqe_retry_cnt;
             unsigned int scdrp$is_dma_long;
-            long long scdrp$q_time_stamp;
+            INT64 scdrp$q_time_stamp;
             union
             {
                 unsigned int scdrp$is_queue_tag;
-                unsigned long long scdrp$q_queue_tag;
+                UINT64 scdrp$q_queue_tag;
             };
             unsigned int scdrp$is_queue_char;
             void *scdrp$ps_pqfl;
@@ -319,9 +319,9 @@ struct _scdrp
         };
     };
     void *scdrp$ps_qio_p6;
-    unsigned long long scdrp$q_port_specific;
-    int scdrp$l_rsvd_long [11];
-    int scdrp$l_qfull_sts_cnt;
+    UINT64 scdrp$q_port_specific;
+    INT32 scdrp$l_rsvd_long [11];
+    INT32 scdrp$l_qfull_sts_cnt;
     union
     {
         void *scdrp$ps_scsi_rbun_p;

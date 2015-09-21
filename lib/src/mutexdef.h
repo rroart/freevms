@@ -11,12 +11,12 @@ struct _mutex
 {
     union
     {
-        unsigned short int mutex$w_sts;
+        UINT16 mutex$w_sts;
         unsigned mutex$v_wrt : 1;
         unsigned mutex$v_interlock : 1;
     };
-    unsigned short int mutex$w_fill_2;
-    unsigned int mutex$l_owncnt;
+    UINT16 mutex$w_fill_2;
+    UINT32 mutex$l_owncnt;
 };
 
 #define MTXDBG$K_REV1 1
@@ -60,19 +60,19 @@ struct _mutex
 struct _mtxdbg
 {
     struct _mtxtrh *mtxdbg$q_trace_buffer;
-    unsigned short int mtxdbg$w_mbo;
-    unsigned char mtxdbg$b_type;
-    unsigned char mtxdbg$b_subtype;
-    unsigned int mtxdbg$l_revision;
-    long long mtxdbg$q_size;
-    int (*mtxdbg$l_start_trace)(void);
-    int (*mtxdbg$l_stop_trace)(void);
+    UINT16 mtxdbg$w_mbo;
+    UINT8 mtxdbg$b_type;
+    UINT8 mtxdbg$b_subtype;
+    UINT32 mtxdbg$l_revision;
+    INT64 mtxdbg$q_size;
+    INT32 (*mtxdbg$l_start_trace)(void);
+    INT32 (*mtxdbg$l_stop_trace)(void);
     void (*mtxdbg$l_trace_mutex)(void);
     void (*mtxdbg$l_trace_mutex_wait)(void);
     void (*mtxdbg$l_debug_print)(void);
     union
     {
-        unsigned int mtxdbg$l_trace_flags;
+        UINT32 mtxdbg$l_trace_flags;
         struct
         {
             unsigned mtxdbg$v_mutex : 1;
@@ -80,41 +80,41 @@ struct _mtxdbg
             unsigned mtxdbg$v_fill_0_ : 6;
         };
     };
-    unsigned int mtxdbg$l_mtx_flags;
-    int mtxdbg$l_cpu_flags;
-    unsigned int mtxdbg$l_trace_run;
-    char mtxdbg$b_fill_1_ [4];
-    unsigned long long mtxdbg$q_reserved1;
-    unsigned long long mtxdbg$q_reserved2;
-    unsigned long long mtxdbg$q_reserved3;
-    unsigned long long mtxdbg$q_reserved4;
-    unsigned long long mtxdbg$q_scc [32];
-    unsigned long long mtxdbg$q_systime [32];
+    UINT32 mtxdbg$l_mtx_flags;
+    INT32 mtxdbg$l_cpu_flags;
+    UINT32 mtxdbg$l_trace_run;
+    INT8 mtxdbg$b_fill_1_ [4];
+    UINT64 mtxdbg$q_reserved1;
+    UINT64 mtxdbg$q_reserved2;
+    UINT64 mtxdbg$q_reserved3;
+    UINT64 mtxdbg$q_reserved4;
+    UINT64 mtxdbg$q_scc [32];
+    UINT64 mtxdbg$q_systime [32];
 };
 
 #define MTXTRE$K_LENGTH 32
 
 struct _mtxtre
 {
-    unsigned long long mtxtre$q_timestamp;
-    unsigned int mtxtre$l_pc;
-    unsigned int mtxtre$l_cpuid;
-    unsigned int mtxtre$l_mode;
-    unsigned int mtxtre$l_flag;
-    unsigned int mtxtre$l_mutex;
+    UINT64 mtxtre$q_timestamp;
+    UINT32 mtxtre$l_pc;
+    UINT32 mtxtre$l_cpuid;
+    UINT32 mtxtre$l_mode;
+    UINT32 mtxtre$l_flag;
+    UINT32 mtxtre$l_mutex;
     struct _pcb *mtxtre$l_pcb;
 };
 #define MTXTRH$K_LENGTH 64
 
 struct _mtxtrh
 {
-    int mtxtrh$l_idx;
-    unsigned int mtxtrh$l_max_idx;
-    unsigned short int mtxtrh$w_mbo;
-    unsigned char mtxtrh$b_type;
-    unsigned char mtxtrh$b_subtype;
-    unsigned int mtxtrh$l_fill1;
-    long long mtxtrh$q_size;
+    INT32 mtxtrh$l_idx;
+    UINT32 mtxtrh$l_max_idx;
+    UINT16 mtxtrh$w_mbo;
+    UINT8 mtxtrh$b_type;
+    UINT8 mtxtrh$b_subtype;
+    UINT32 mtxtrh$l_fill1;
+    INT64 mtxtrh$q_size;
     struct _mtxtre *mtxtrh$q_entry_ptr;
     struct _mtxtre mtxtrh$r_entry [1];
 };

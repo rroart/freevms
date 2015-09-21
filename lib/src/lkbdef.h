@@ -1,6 +1,8 @@
 #ifndef LKBDEF_H
 #define LKBDEF_H
 
+#include <vms_types.h>
+
 #define LKB$M_FLAGS_VALID 0x4
 #define LKB$M_PKAST 0x10
 #define LKB$M_NODELETE 0x20
@@ -58,41 +60,41 @@ struct _lkb
 {
     struct _acb *lkb$l_astqfl;
     struct _acb *lkb$l_astqbl;
-    unsigned short int lkb$w_size;
-    unsigned char lkb$b_type;
-    unsigned char lkb$b_rmod;
+    UINT16 lkb$w_size;
+    UINT8 lkb$b_type;
+    UINT8 lkb$b_rmod;
     unsigned long lkb$l_pid;
     unsigned long lkb$l_ast;
     unsigned long lkb$l_astprm;
     unsigned long lkb$l_kast;
     unsigned long lkb$l_cplastadr;
     unsigned long lkb$l_blkastadr;
-    unsigned int lkb$l_flags;
-    unsigned int lkb$l_status;
-    unsigned int lkb$l_lkst1;
-    unsigned int lkb$l_lkst2;
-    unsigned char lkb$b_rqmode;
-    unsigned char lkb$b_grmode;
-    unsigned char lkb$b_state;
-    unsigned char lkb$b_efn;
+    UINT32 lkb$l_flags;
+    UINT32 lkb$l_status;
+    UINT32 lkb$l_lkst1;
+    UINT32 lkb$l_lkst2;
+    UINT8 lkb$b_rqmode;
+    UINT8 lkb$b_grmode;
+    UINT8 lkb$b_state;
+    UINT8 lkb$b_efn;
     void *lkb$l_sqfl;
     void *lkb$l_sqbl;
     void *lkb$l_ownqfl;
     void *lkb$l_ownqbl;
     struct _lkb *lkb$l_parent;
-    unsigned short lkb$w_refcnt;
-    unsigned char lkb$b_tslt;
-    unsigned char lib$b_res;
+    UINT16 lkb$w_refcnt;
+    UINT8 lkb$b_tslt;
+    UINT8 lib$b_res;
     struct _rsb *lkb$l_rsb;
     unsigned long lkb$l_lksb;
-    unsigned int lkb$l_remlkid;
+    UINT32 lkb$l_remlkid;
     union
     {
-        unsigned int lkb$l_csid;
+        UINT32 lkb$l_csid;
         unsigned long lkb$l_oldastprm;
     };
     int (*lkb$pq_oldblkast)(void);
-    unsigned int lkb$l_duetime;
+    UINT32 lkb$l_duetime;
 };
 
 #endif

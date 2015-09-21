@@ -1,6 +1,8 @@
 #ifndef FCBDEF_H
 #define FCBDEF_H
 
+#include <vms_types.h>
+
 #define     FCB$M_FILE_ATTRIBUTES       0xF
 #define     FCB$M_FILE_CONTENTS     0xF0
 #define     FCB$M_FLUSH_ON_CLOSE        0xF00
@@ -20,20 +22,20 @@ struct _fcb
 {
     struct _fcb *fcb$l_fcbfl;
     struct _fcb *fcb$l_fcbbl;
-    unsigned short int fcb$w_size;
-    unsigned char fcb$b_type;
-    unsigned char fcb$b_acclkmode;
+    UINT16 fcb$w_size;
+    UINT8 fcb$b_type;
+    UINT8 fcb$b_acclkmode;
     void *fcb$l_exfcb;
     struct _wcb *fcb$l_wlfl;
     struct _wcb *fcb$l_wlbl;
-    unsigned int fcb$l_refcnt;
-    unsigned int fcb$l_acnt;
-    unsigned int fcb$l_wcnt;
-    unsigned int fcb$l_lcnt;
-    unsigned int fcb$l_tcnt;
+    UINT32 fcb$l_refcnt;
+    UINT32 fcb$l_acnt;
+    UINT32 fcb$l_wcnt;
+    UINT32 fcb$l_lcnt;
+    UINT32 fcb$l_tcnt;
     union
     {
-        unsigned int fcb$l_status;
+        UINT32 fcb$l_status;
         struct
         {
             unsigned fcb$v_dir : 1;
@@ -56,50 +58,50 @@ struct _fcb
     };
     union
     {
-        unsigned short int fcb$w_fid [3];
+        UINT16 fcb$w_fid [3];
         struct
         {
-            unsigned short int fcb$w_fid_num;
-            unsigned short int fcb$w_fid_seq;
+            UINT16 fcb$w_fid_num;
+            UINT16 fcb$w_fid_seq;
             union
             {
-                unsigned short int fcb$w_fid_rvn;
+                UINT16 fcb$w_fid_rvn;
                 struct
                 {
-                    unsigned char fcb$b_fid_rvn;
-                    unsigned char fcb$b_fid_nmx;
+                    UINT8 fcb$b_fid_rvn;
+                    UINT8 fcb$b_fid_nmx;
                 } fcb_fid_3;
             } fcb_fid_2;
         } fcb_fid_1_1;
         struct    // this is supposedly for 9660. can be used anyway
         {
-            unsigned short int fcb$w_fid_dirnum;
-            unsigned int fcb$l_fid_recnum;
+            UINT16 fcb$w_fid_dirnum;
+            UINT32 fcb$l_fid_recnum;
         } fcb_fid_1_2;
     } fcb_fid_0;
-    unsigned short int fcb$w_segn;
-    unsigned int fcb$l_stvbn;
-    unsigned int fcb$l_stlbn;
-    unsigned int fcb$l_hdlbn;
-    unsigned int fcb$l_filesize;
-    unsigned int fcb$l_efblk;
-    unsigned int fcb$l_versions;
-    unsigned int fcb$l_dirseq;
-    unsigned int fcb$l_dirindx;
-    unsigned int fcb$l_acclkid;
-    unsigned int fcb$l_lockbasis;
+    UINT16 fcb$w_segn;
+    UINT32 fcb$l_stvbn;
+    UINT32 fcb$l_stlbn;
+    UINT32 fcb$l_hdlbn;
+    UINT32 fcb$l_filesize;
+    UINT32 fcb$l_efblk;
+    UINT32 fcb$l_versions;
+    UINT32 fcb$l_dirseq;
+    UINT32 fcb$l_dirindx;
+    UINT32 fcb$l_acclkid;
+    UINT32 fcb$l_lockbasis;
     union
     {
-        unsigned int fcb$l_truncvbn;
-        unsigned int fcb$l_numextents;
+        UINT32 fcb$l_truncvbn;
+        UINT32 fcb$l_numextents;
     };
-    unsigned int fcb$l_cachelkid;
-    unsigned int fcb$l_highwater;
-    unsigned int fcb$l_newhighwater;
-    unsigned int fcb$l_hwm_update;
-    unsigned int fcb$l_hwm_erase;
-    unsigned int fcb$l_hwm_partial;
-    unsigned int fcb$l_revision;
+    UINT32 fcb$l_cachelkid;
+    UINT32 fcb$l_highwater;
+    UINT32 fcb$l_newhighwater;
+    UINT32 fcb$l_hwm_update;
+    UINT32 fcb$l_hwm_erase;
+    UINT32 fcb$l_hwm_partial;
+    UINT32 fcb$l_revision;
     union
     {
         struct
@@ -117,62 +119,62 @@ struct _fcb
     {
         union
         {
-            unsigned int fcb$l_fileowner;
+            UINT32 fcb$l_fileowner;
             struct
             {
-                unsigned short int fcb$w_uicmember;
-                unsigned short int fcb$w_uicgroup;
+                UINT16 fcb$w_uicmember;
+                UINT16 fcb$w_uicgroup;
             };
         };
-        unsigned int fcb$l_fill_5;
-        unsigned int fcb$l_fill_3;
-        unsigned int fcb$l_fill_6;
-        unsigned long long fcb$q_acmode;
+        UINT32 fcb$l_fill_5;
+        UINT32 fcb$l_fill_3;
+        UINT32 fcb$l_fill_6;
+        UINT64 fcb$q_acmode;
         union
         {
-            unsigned int fcb$l_sys_prot;
+            UINT32 fcb$l_sys_prot;
             struct
             {
-                unsigned short int fcb$w_fileprot;
-                unsigned short int fcb$w_fill_4;
+                UINT16 fcb$w_fileprot;
+                UINT16 fcb$w_fill_4;
             };
         };
-        unsigned int fcb$l_own_prot;
-        unsigned int fcb$l_grp_prot;
-        unsigned int fcb$l_wor_prot;
+        UINT32 fcb$l_own_prot;
+        UINT32 fcb$l_grp_prot;
+        UINT32 fcb$l_wor_prot;
         void *fcb$l_aclfl;
         void *fcb$l_aclbl;
         struct
         {
-            char fcb$b_fill_1 [20];
+            INT8 fcb$b_fill_1 [20];
         };
         struct
         {
-            char fcb$b_fill_2 [20];
+            INT8 fcb$b_fill_2 [20];
         };
-        unsigned short int fcb$w_name_length;
-        short int fcb$w_fill_7;
+        UINT16 fcb$w_name_length;
+        INT16 fcb$w_fill_7;
         void *fcb$l_name_pointer;
         struct _ocb *fcb$l_ocb;
         struct _orb *fcb$l_template_orb;
-        unsigned int fcb$l_object_specific;
+        UINT32 fcb$l_object_specific;
         struct _orb *fcb$l_original_orb;
-        unsigned short int fcb$w_updseq;
-        unsigned short int fcb$w_fill_8;
-        unsigned int fcb$l_reserve1;
-        unsigned int fcb$l_reserve2;
+        UINT16 fcb$w_updseq;
+        UINT16 fcb$w_fill_8;
+        UINT32 fcb$l_reserve1;
+        UINT32 fcb$l_reserve2;
     };
-    char fcb$b_fill_9 [4];
+    INT8 fcb$b_fill_9 [4];
     union
     {
-        char fcb$b_fill_10 [40];
+        INT8 fcb$b_fill_10 [40];
         struct
         {
-            char fcb$b_fill_11 [24];
-            unsigned long long fcb$q_cfb;
+            INT8 fcb$b_fill_11 [24];
+            UINT64 fcb$q_cfb;
             union
             {
-                unsigned int fcb$l_caching_options;
+                UINT32 fcb$l_caching_options;
                 struct
                 {
                     unsigned fcb$v_file_attributes : 4;
@@ -183,7 +185,7 @@ struct _fcb
             };
             union
             {
-                unsigned int fcb$l_status2;
+                UINT32 fcb$l_status2;
                 struct
                 {
                     unsigned fcb$v_vcc_state : 3;
@@ -195,7 +197,7 @@ struct _fcb
     struct _orb *fcb$l_orb;
     void *fcb$l_cfcb;
     struct _fcb *fcb$l_primfcb;
-    unsigned int fcb$l_dirlckid;
+    UINT32 fcb$l_dirlckid;
 };
 
 #define fcb$w_fid fcb_fid_0.fcb$w_fid

@@ -1,6 +1,8 @@
 #ifndef IMCBDEF_H
 #define IMCBDEF_H
 
+#include <vms_types.h>
+
 #define     IMCB$K_IMCB_TYPE_CODE       127
 #define     IMCB$K_MAIN_PROGRAM     1
 #define     IMCB$K_MERGED_IMAGE     2
@@ -43,15 +45,15 @@ struct _imcb
 {
     struct _imcb *imcb$l_flink;
     struct _imcb *imcb$l_blink;
-    unsigned short int imcb$w_size;
-    unsigned char imcb$b_type;
-    char imcb$b_imcb_1;
-    unsigned char imcb$b_access_mode;
-    unsigned char imcb$b_act_code;
-    unsigned short int imcb$w_chan;
+    UINT16 imcb$w_size;
+    UINT8 imcb$b_type;
+    INT8 imcb$b_imcb_1;
+    UINT8 imcb$b_access_mode;
+    UINT8 imcb$b_act_code;
+    UINT16 imcb$w_chan;
     union
     {
-        unsigned int imcb$l_flags;
+        UINT32 imcb$l_flags;
         struct
         {
             unsigned imcb$v_expreg      : 1;
@@ -85,15 +87,15 @@ struct _imcb
         };
     };
     char imcb$t_image_name [40];
-    unsigned int imcb$l_symbol_vector_size;
+    UINT32 imcb$l_symbol_vector_size;
     union
     {
-        unsigned long long imcb$q_ident;
+        UINT64 imcb$q_ident;
         struct
         {
             union
             {
-                unsigned int imcb$l_match_control;
+                UINT32 imcb$l_match_control;
                 struct
                 {
                     unsigned imcb$v_match_control       : 3;
@@ -102,7 +104,7 @@ struct _imcb
             };
             union
             {
-                unsigned int imcb$l_version;
+                UINT32 imcb$l_version;
                 struct
                 {
                     unsigned imcb$v_minor_id        : 24;
@@ -113,7 +115,7 @@ struct _imcb
     };
     union
     {
-        unsigned long long imcb$q_address_range;
+        UINT64 imcb$q_address_range;
         struct
         {
             void *imcb$l_starting_address;
@@ -125,10 +127,10 @@ struct _imcb
     void *imcb$l_context;
     void *imcb$l_base_address;
     void (*imcb$l_initialize)(void);
-    unsigned int imcb$l_active_sons;
+    UINT32 imcb$l_active_sons;
     union
     {
-        long long imcb$q_fixup_vector_address;
+        INT64 imcb$q_fixup_vector_address;
         struct
         {
             struct _eiaf *imcb$ps_fixup_vector_address;
@@ -136,7 +138,7 @@ struct _imcb
     };
     union
     {
-        long long imcb$q_symbol_vector_address;
+        INT64 imcb$q_symbol_vector_address;
         struct
         {
             void *imcb$ps_symbol_vector_address;
@@ -144,7 +146,7 @@ struct _imcb
     };
     union
     {
-        long long imcb$q_plv_address;
+        INT64 imcb$q_plv_address;
         struct
         {
             struct _plv *imcb$ps_plv_address;
@@ -152,7 +154,7 @@ struct _imcb
     };
     union
     {
-        long long imcb$q_cmod_kernel_address;
+        INT64 imcb$q_cmod_kernel_address;
         struct
         {
             void *imcb$ps_cmod_kernel_address;
@@ -160,7 +162,7 @@ struct _imcb
     };
     union
     {
-        long long imcb$q_cmod_exec_address;
+        INT64 imcb$q_cmod_exec_address;
         struct
         {
             void *imcb$ps_cmod_exec_address;
@@ -168,7 +170,7 @@ struct _imcb
     };
     union
     {
-        long long imcb$q_ssi_plv;
+        INT64 imcb$q_ssi_plv;
         struct
         {
             struct _plv *imcb$ps_ssi_plv;
@@ -177,13 +179,13 @@ struct _imcb
     struct _kferes *imcb$l_kferes_ptr;
     char imcb$t_log_image_name [40];
     char imcb$t_dvi [16];
-    unsigned short int imcb$w_fid [3];
-    char imcb$b_risig [32];
-    short int imcb$w_fill1;
+    UINT16 imcb$w_fid [3];
+    INT8 imcb$b_risig [32];
+    INT16 imcb$w_fill1;
     struct _kferes *imcb$l_kferes64_ptr;
     void *imcb$pq_starting_address_64;
     void *imcb$pq_end_address_64;
-    unsigned long long imcb$q_linktime;
+    UINT64 imcb$q_linktime;
 };
 
 #endif

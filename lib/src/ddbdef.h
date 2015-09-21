@@ -1,6 +1,8 @@
 #ifndef DDBDEF_H
 #define DDBDEF_H
 
+#include <vms_types.h>
+
 #define DDB$M_NO_TIMEOUT 0x1
 #define DDB$M_PAC 0x2
 #define DDB$K_PACK 1
@@ -17,8 +19,8 @@ struct _ddb
 {
     union
     {
-        int ddb$l_link;
-        int ddb$l_blink;
+        INT32 ddb$l_link;
+        INT32 ddb$l_blink;
         struct
         {
             struct _ddb *ddb$ps_link;
@@ -27,7 +29,7 @@ struct _ddb
     };
     union
     {
-        int ddb$l_ucb;
+        INT32 ddb$l_ucb;
         struct
         {
             struct _ucb *ddb$ps_ucb;
@@ -35,15 +37,15 @@ struct _ddb
     };
     union
     {
-        unsigned short int ddb$w_size;
+        UINT16 ddb$w_size;
         struct
         {
-            unsigned short int ddb$iw_size;
+            UINT16 ddb$iw_size;
         };
     };
     union
     {
-        unsigned char ddb$b_type;
+        UINT8 ddb$b_type;
         struct
         {
             unsigned char ddb$ib_type;
@@ -51,7 +53,7 @@ struct _ddb
     };
     union
     {
-        unsigned char ddb$b_flags;
+        UINT8 ddb$b_flags;
         struct
         {
             unsigned ddb$v_no_timeout : 1;
@@ -61,7 +63,7 @@ struct _ddb
     };
     union
     {
-        int ddb$l_ddt;
+        INT32 ddb$l_ddt;
         struct
         {
             struct _ddt *ddb$ps_ddt;
@@ -69,17 +71,17 @@ struct _ddb
     };
     union
     {
-        unsigned int ddb$l_acpd;
-        unsigned int ddb$il_acpd;
+        UINT32 ddb$l_acpd;
+        UINT32 ddb$il_acpd;
         struct
         {
-            char ddbdef$$_fill_4 [3];
+            INT8 ddbdef$$_fill_4 [3];
             union
             {
-                unsigned char ddb$b_acpclass;
+                UINT8 ddb$b_acpclass;
                 struct
                 {
-                    unsigned char ddb$ib_acpclass;
+                    UINT8 ddb$ib_acpclass;
                 };
             };
         };
@@ -91,10 +93,10 @@ struct _ddb
         {
             union
             {
-                unsigned char ddb$b_name_len;
+                UINT8 ddb$b_name_len;
                 struct
                 {
-                    unsigned char ddb$ib_name_len;
+                    UINT8 ddb$ib_name_len;
                 };
             };
             char ddb$t_name_str [15];
@@ -104,15 +106,15 @@ struct _ddb
     struct _ddb *ddb$ps_drvlink;
     union
     {
-        int ddb$l_sb;
+        unsigned long ddb$l_sb;
         struct
         {
-            int ddb$ps_sb;
+            struct _sb *ddb$ps_sb;
         };
     };
     union
     {
-        int ddb$l_conlink;
+        unsigned long ddb$l_conlink;
         struct
         {
             struct _ddb *ddb$ps_conlink;
@@ -120,10 +122,10 @@ struct _ddb
     };
     union
     {
-        unsigned int ddb$l_allocls;
+        UINT32 ddb$l_allocls;
         struct
         {
-            unsigned int ddb$il_allocls;
+            UINT32 ddb$il_allocls;
         };
     };
     union
@@ -134,13 +136,13 @@ struct _ddb
     };
     union
     {
-        unsigned int ddb$l_port_id;
+        UINT32 ddb$l_port_id;
         struct
         {
             char ddb$t_port_id [1];
         };
     };
-    unsigned int ddb$l_class_lkid;
+    UINT32 ddb$l_class_lkid;
     void *ddb$ps_2p_ddb;
 };
 

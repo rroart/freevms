@@ -1,14 +1,16 @@
 #ifndef KPBDEF_H
 #define KPBDEF_H
 
+#include <vms_types.h>
+
 #define KPBDBG$K_PC_VEC_CNT 8
 
 struct _kpbdbg
 {
-    unsigned int kpbdbg$is_start_time;
-    unsigned int kpbdbg$is_start_count;
-    unsigned int kpbdbg$is_restart_count;
-    unsigned int kpbdbg$is_vec_index;
+    UINT32 kpbdbg$is_start_time;
+    UINT32 kpbdbg$is_start_count;
+    UINT32 kpbdbg$is_restart_count;
+    UINT32 kpbdbg$is_vec_index;
     int (*kpbdbg$is_pc_vec [8])(void);
 };
 
@@ -35,29 +37,29 @@ struct _kpbsch
         {
             struct _fkb *kpbsch$ps_fqfl;
             struct _fkb *kpbsch$ps_fqbl;
-            unsigned short int kpbsch$iw_fkb_size;
-            unsigned char kpbsch$ib_fkb_type;
-            unsigned char kpbsch$ib_flck;
+            UINT16 kpbsch$iw_fkb_size;
+            UINT8 kpbsch$ib_fkb_type;
+            UINT8 kpbsch$ib_flck;
             void (*kpbsch$ps_fpc)(void);
-            long long kpbsch$q_fr3;
-            long long kpbsch$q_fr4;
+            INT64 kpbsch$q_fr3;
+            INT64 kpbsch$q_fr4;
         };
         struct
         {
             struct _tqe *kpbsch$ps_tqfl;
             struct _tqe *kpbsch$ps_tqbl;
-            unsigned short int kpbsch$iw_tqe_size;
-            unsigned char kpbsch$ib_tqe_type;
-            unsigned char kpbsch$ib_rqtype;
+            UINT16 kpbsch$iw_tqe_size;
+            UINT8 kpbsch$ib_tqe_type;
+            UINT8 kpbsch$ib_rqtype;
             void (*kpbsch$ps_tqe_fpc)(void);
-            long long kpbsch$q_tqe_fr3;
-            long long kpbsch$q_tqe_fr4;
-            long long kpbsch$iq_time;
-            long long kpbsch$q_fill_delta;
-            int kpbsch$l_fill_rmod;
-            int kpbsch$l_fill_efn;
-            int kpbsch$l_fill_rqpid;
-            int kpbsch$l_fill_cputim;
+            INT64 kpbsch$q_tqe_fr3;
+            INT64 kpbsch$q_tqe_fr4;
+            INT64 kpbsch$iq_time;
+            INT64 kpbsch$q_fill_delta;
+            INT32 kpbsch$l_fill_rmod;
+            INT32 kpbsch$l_fill_efn;
+            INT32 kpbsch$l_fill_rqpid;
+            INT32 kpbsch$l_fill_cputim;
         };
     };
 };
@@ -75,7 +77,7 @@ struct _kpflags
 {
     union
     {
-        int kp$is_flags;
+        UINT32 kp$is_flags;
         struct
         {
             unsigned kp$v_fill1 : 2;
@@ -128,15 +130,15 @@ struct _kpb
 {
     struct _kpb *kpb$ps_flink;
     struct _kpb *kpb$ps_blink;
-    unsigned short int kpb$iw_size;
-    unsigned char kpb$ib_type;
-    unsigned char kpb$ib_subtype;
-    unsigned int kpb$is_stack_size;
+    UINT16 kpb$iw_size;
+    UINT8 kpb$ib_type;
+    UINT8 kpb$ib_subtype;
+    UINT32 kpb$is_stack_size;
     union
     {
         union
         {
-            unsigned int kpb$is_flags;
+            UINT32 kpb$is_flags;
             struct
             {
                 unsigned kpb$v_valid : 1;
@@ -156,14 +158,14 @@ struct _kpb
         };
     };
     void *kpb$ps_saved_sp;
-    unsigned int kpb$is_reg_mask;
+    UINT32 kpb$is_reg_mask;
     void *kpb$ps_stack_base;
     void *kpb$ps_stack_sp;
     void *kpb$ps_sch_ptr;
     void *kpb$ps_spl_ptr;
     void *kpb$ps_dbg_ptr;
     void *kpb$ps_prm_ptr;
-    unsigned int kpb$is_prm_length;
+    UINT32 kpb$is_prm_length;
 
     void (*kpb$ps_sch_stall_rtn)(void);
     void (*kpb$ps_sch_restrt_rtn)(void);
@@ -176,29 +178,29 @@ struct _kpb
         {
             struct _fkb *kpb$ps_fqfl;
             struct _fkb *kpb$ps_fqbl;
-            unsigned short int kpb$iw_fkb_size;
-            unsigned char kpb$ib_fkb_type;
-            unsigned char kpb$ib_flck;
+            UINT16 kpb$iw_fkb_size;
+            UINT8 kpb$ib_fkb_type;
+            UINT8 kpb$ib_flck;
             void (*kpb$ps_fpc)(void);
-            long long kpb$q_fr3;
-            long long kpb$q_fr4;
+            INT64 kpb$q_fr3;
+            INT64 kpb$q_fr4;
         };
         struct
         {
             struct _tqe *kpb$ps_tqfl;
             struct _tqe *kpb$ps_tqbl;
-            unsigned short int kpb$iw_tqe_size;
-            unsigned char kpb$ib_tqe_type;
-            unsigned char kpb$ib_rqtype;
+            UINT16 kpb$iw_tqe_size;
+            UINT8 kpb$ib_tqe_type;
+            UINT8 kpb$ib_rqtype;
             void (*kpb$ps_tqe_fpc)(void);
-            long long kpb$q_tqe_fr3;
-            long long kpb$q_tqe_fr4;
-            long long kpb$iq_time;
-            long long kpb$q_fill_delta;
-            int kpb$l_fill_rmod;
-            int kpb$l_fill_efn;
-            int kpb$l_fill_rqpid;
-            int kpb$l_fill_cputim;
+            INT64 kpb$q_tqe_fr3;
+            INT64 kpb$q_tqe_fr4;
+            INT64 kpb$iq_time;
+            INT64 kpb$q_fill_delta;
+            INT32 kpb$l_fill_rmod;
+            INT32 kpb$l_fill_efn;
+            INT32 kpb$l_fill_rqpid;
+            INT32 kpb$l_fill_cputim;
         };
     };
 
@@ -211,9 +213,9 @@ struct _kpb
 
             struct
             {
-                unsigned int kpb$is_timeout_time;
-                unsigned int kpb$is_restore_ipl;
-                unsigned int kpb$is_channel_data;
+                UINT32 kpb$is_timeout_time;
+                UINT32 kpb$is_restore_ipl;
+                UINT32 kpb$is_channel_data;
             };
             struct
             {
@@ -223,8 +225,8 @@ struct _kpb
             };
             struct
             {
-                unsigned int kpb$is_timeout;
-                unsigned int kpb$is_newipl;
+                UINT32 kpb$is_timeout;
+                UINT32 kpb$is_newipl;
                 struct _spl *kpb$ps_dlck;
             };
         };

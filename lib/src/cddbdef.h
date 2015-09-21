@@ -1,6 +1,8 @@
 #ifndef CDDBDEF_H
 #define CDDBDEF_H
 
+#include <vms_types.h>
+
 #define     CDDB$M_SNGLSTRM     0x1
 #define     CDDB$M_IMPEND       0x2
 #define     CDDB$M_INITING      0x4
@@ -30,13 +32,13 @@ struct _cddb
 {
     struct _cdrp *cddb$l_cdrpqfl;
     struct _cdrp *cddb$l_cdrpqbl;
-    unsigned short int cddb$w_size;
-    unsigned char cddb$b_type;
-    unsigned char cddb$b_subtype;
-    unsigned char cddb$b_systemid [8];
+    UINT16 cddb$w_size;
+    UINT8 cddb$b_type;
+    UINT8 cddb$b_subtype;
+    UINT8 cddb$b_systemid [8];
     union
     {
-        unsigned int cddb$l_status;
+        UINT32 cddb$l_status;
         struct
         {
             unsigned cddb$v_snglstrm    : 1;
@@ -67,43 +69,43 @@ struct _cddb
     struct _ddb *cddb$l_ddb;
     union
     {
-        unsigned long long cddb$q_cntrlid;
+        UINT64 cddb$q_cntrlid;
         struct
         {
-            char cddbdef$$_fill_2 [6];
-            unsigned char cddb$b_cntrlmdl;
-            unsigned char cddb$b_cntrlcls;
+            INT8 cddbdef$$_fill_2 [6];
+            UINT8 cddb$b_cntrlmdl;
+            UINT8 cddb$b_cntrlcls;
         };
     };
-    unsigned short int cddb$w_cntrlflgs;
-    unsigned short int cddb$w_cntrltmo;
-    unsigned int cddb$l_oldrspid;
-    unsigned int cddb$l_oldcmdsts;
+    UINT16 cddb$w_cntrlflgs;
+    UINT16 cddb$w_cntrltmo;
+    UINT32 cddb$l_oldrspid;
+    UINT32 cddb$l_oldcmdsts;
     struct _cdrp *cddb$l_rstrtcdrp;
-    unsigned int cddb$l_retrycnt;
-    unsigned int cddb$l_dapcount;
-    unsigned int cddb$l_rstrtcnt;
+    UINT32 cddb$l_retrycnt;
+    UINT32 cddb$l_dapcount;
+    UINT32 cddb$l_rstrtcnt;
     struct _cdrp *cddb$l_rstrtqfl;
     struct _cdrp *cddb$l_rstrtqbl;
     void (*cddb$l_saved_pc)(void);
     void (*cddb$l_saved_pc1)(void);
     struct _ucb *cddb$l_ucbchain;
     struct _ucb *cddb$l_origucb;
-    unsigned int cddb$l_allocls;
+    UINT32 cddb$l_allocls;
     struct _cdrp *cddb$l_dapcdrp;
     struct _cddb *cddb$l_cddblink;
-    unsigned int cddb$l_fover_ctr;
-    unsigned int cddb$l_wtucbctr;
-    unsigned int cddb$l_maxbcnt;
-    unsigned int cddb$l_ctrltr_mask;
-    unsigned int cddb$l_cpyseqnum;
-    unsigned int cddb$l_dap_limit;
-    unsigned char cddb$b_csvrsn;
-    unsigned char cddb$b_chvrsn;
-    unsigned short int cddb$w_load_avail;
-    unsigned int cddb$l_counter;
-    unsigned int cddb$l_conid;
-    unsigned int cddb$l_cdt;
+    UINT32 cddb$l_fover_ctr;
+    UINT32 cddb$l_wtucbctr;
+    UINT32 cddb$l_maxbcnt;
+    UINT32 cddb$l_ctrltr_mask;
+    UINT32 cddb$l_cpyseqnum;
+    UINT32 cddb$l_dap_limit;
+    UINT8 cddb$b_csvrsn;
+    UINT8 cddb$b_chvrsn;
+    UINT16 cddb$w_load_avail;
+    UINT32 cddb$l_counter;
+    UINT32 cddb$l_conid;
+    UINT32 cddb$l_cdt;
     struct _cdrp *cddb$l_prmcdrp;
 };
 

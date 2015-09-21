@@ -1,6 +1,8 @@
 #ifndef NMADEF_H
 #define NMADEF_H
 
+#include <vms_types.h>
+
 #define     NMA$C_OBJ_NIC       19
 
 #define     NMA$C_FNC_LOA       15
@@ -877,7 +879,7 @@ struct _nma1
 {
     union
     {
-        unsigned short int nma$w_node;
+        UINT16 nma$w_node;
         struct
         {
             unsigned nma$v_addr     : 10;
@@ -918,7 +920,7 @@ struct _nma2
 {
     union
     {
-        char nma$$_fill_8;
+        INT8 nma$$_fill_8;
         struct
         {
             unsigned nma$$_fill_9       : 3;
@@ -937,7 +939,7 @@ struct _nma3
 {
     union
     {
-        char nma$$_fill_10;
+        INT8 nma$$_fill_10;
         struct
         {
             unsigned nma$$_fill_11      : 3;
@@ -954,7 +956,7 @@ struct _nma4
 {
     union
     {
-        char nma$$_fill_12;
+        INT8 nma$$_fill_12;
         struct
         {
             unsigned nma$$_fill_13      : 2;
@@ -971,7 +973,7 @@ struct _nma5
 {
     union
     {
-        char nma$$_fill_14;
+        INT8 nma$$_fill_14;
         struct
         {
             unsigned nma$$_fill_15      : 2;
@@ -989,7 +991,7 @@ struct _nma6
 {
     union
     {
-        char nma$$_fill_16;
+        INT8 nma$$_fill_16;
         struct
         {
             unsigned nma$$_fill_17      : 4;
@@ -1723,7 +1725,7 @@ struct _nma7
 {
     union
     {
-        char nma$$_fill_18;
+        INT8 nma$$_fill_18;
         struct
         {
             unsigned nma$$_fill_19      : 2;

@@ -4,8 +4,10 @@
 /**
    \file acbdef.h
    \brief AST Control Block - see 5.2 7.2.2
-   \author Roar Thronæs
+   \author Roar Thronï¿½s
  */
+
+#include <vms_types.h>
 
 #define ACB$M_FLAGS_VALID   0x4
 #define ACB$M_POSIX_ACB 0x8
@@ -44,9 +46,9 @@ struct _acb
 {
     struct _acb *acb$l_astqfl; /** link acb into pcbs ast queue */
     struct _acb *acb$l_astqbl;
-    unsigned short int acb$w_size;
-    unsigned char acb$b_type;
-    unsigned char acb$b_rmod; /** field contents above, bit 0:1 access mode, 4 pkast, 5 nodelete, 6 quota, 7 kast */
+    UINT16 acb$w_size;
+    UINT8 acb$b_type;
+    UINT8 acb$b_rmod; /** field contents above, bit 0:1 access mode, 4 pkast, 5 nodelete, 6 quota, 7 kast */
     unsigned long acb$l_pid; /** associated process id */
     void (*acb$l_ast)(unsigned long);
     unsigned long acb$l_astprm;

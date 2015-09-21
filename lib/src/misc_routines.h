@@ -78,8 +78,8 @@ int init_ddb(struct _ddb * ddb, struct _ddt * ddt, struct _ucb * ucb, char * sdd
 int init_ucb(struct _ucb * ucb, struct _ddb * ddb,struct _ddt * ddt, struct _crb *crb);
 int init_crb(struct _crb * crb);
 void insertdevlist(struct _ddb *d);
-void registerdevchan(unsigned long dev,unsigned short chan);
-unsigned short dev2chan(kdev_t dev);
+void registerdevchan(unsigned long dev,UINT16 chan);
+UINT16 dev2chan(kdev_t dev);
 int path_unix_to_vms(char * new, char * old);
 int convert_soname(char * name);
 unsigned long get_x2p_prim_fcb(void);
@@ -214,7 +214,7 @@ int scs_startdev ( scs_int2 , setflag , setaddr);
 unsigned long inline buffer_offset(unsigned long buffer, unsigned long offset);
 int rms$get_idx(struct _rabdef * rab);
 int search_log_repl(char * name, char ** retname, int * retsize);
-unsigned search_ent(struct _fcb * fcb,struct dsc$descriptor * fibdsc,struct dsc$descriptor * filedsc, unsigned short *reslen,struct dsc$descriptor * resdsc,unsigned eofblk,unsigned action);
+unsigned search_ent(struct _fcb * fcb,struct dsc$descriptor * fibdsc,struct dsc$descriptor * filedsc, UINT16 *reslen,struct dsc$descriptor * resdsc,unsigned eofblk,unsigned action);
 signed int f11b_map_vbn(unsigned int vbn,struct _wcb *wcb);
 void f11b_write_attrib(struct _fcb * fcb,struct _atrdef * atrp);
 signed int f11b_map_idxvbn(struct _vcb * vcb, unsigned int vbn);
@@ -252,8 +252,8 @@ int tty$putnextchar(int * chr, int * CC, struct _ucb * u);
 void con$startio(int R3, struct _ucb * u, signed int CC);
 
 #include <linux/linkage.h>
-asmlinkage int exe$qiow (unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
-asmlinkage int exe$qio (unsigned int efn, unsigned short int chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
+asmlinkage int exe$qiow (unsigned int efn, UINT16 chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
+asmlinkage int exe$qio (unsigned int efn, UINT16 chan,unsigned int func, struct _iosb *iosb, void(*astadr)(__unknown_params), long  astprm, void*p1, long p2, long  p3, long p4, long p5, long p6);
 asmlinkage int cmod$astexit(void);
 asmlinkage long sys_unlink(const char * pathname);
 asmlinkage long sys_reboot(int magic1, int magic2, unsigned int cmd, void * arg);

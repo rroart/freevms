@@ -1,13 +1,15 @@
 #ifndef MTXDEF_H
 #define MTXDEF_H
 
+#include <vms_types.h>
+
 #define MTX$S_MTXDEF 4
 
 struct _mtx
 {
     union
     {
-        int mtxdef$$_fill_1;
+        INT32 mtxdef$$_fill_1;
         struct
         {
             unsigned mtxdef$$_fill_2 : 16;
@@ -17,8 +19,8 @@ struct _mtx
         };
         struct
         {
-            unsigned short int mtx$w_owncnt;
-            unsigned short int mtx$w_sts;
+            UINT16 mtx$w_owncnt;
+            UINT16 mtx$w_sts;
         };
     };
 };

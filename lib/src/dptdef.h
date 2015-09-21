@@ -1,6 +1,8 @@
 #ifndef DPTDEF_H
 #define DPTDEF_H
 
+#include <vms_types.h>
+
 #define DPT$S_DPTDEF 160
 
 #define     DPT$K_STEP_1        1
@@ -45,18 +47,18 @@ struct _dpt
 {
     struct _dpt *dpt$ps_flink;
     struct _dpt *dpt$ps_blink;
-    unsigned short int dpt$w_size;
-    unsigned char dpt$b_type;
-    unsigned char dpt$b_refc;
-    unsigned short int dpt$iw_step;
-    unsigned short int dpt$iw_stepver;
-    unsigned char dpt$b_adptype;
-    unsigned char dpt$b_res;
-    unsigned short int dpt$w_ucbsize;
-    unsigned int dpt$l_flags;
+    UINT16 dpt$w_size;
+    UINT8 dpt$b_type;
+    UINT8 dpt$b_refc;
+    UINT16 dpt$iw_step;
+    UINT16 dpt$iw_stepver;
+    UINT8 dpt$b_adptype;
+    UINT8 dpt$b_res;
+    UINT16 dpt$w_ucbsize;
+    UINT32 dpt$l_flags;
 
-    unsigned short int dpt$w_defunits;
-    unsigned short int dpt$w_maxunits;
+    UINT16 dpt$w_defunits;
+    UINT16 dpt$w_maxunits;
     void (*dpt$ps_init_pd)(void);
     void (*dpt$ps_reinit_pd)(void);
     int (*dpt$ps_deliver_2)(void);
@@ -66,7 +68,7 @@ struct _dpt
     int dpt$is_btorder;
     union
     {
-        int dpt$l_vector;
+        unsigned long dpt$l_vector;
         struct
         {
             void *dpt$ps_vector;
@@ -77,47 +79,47 @@ struct _dpt
         char dpt$t_name [16];
         struct
         {
-            unsigned char dpt$b_name_len;
+            UINT8 dpt$b_name_len;
             char dpt$t_name_str [15];
         };
     };
     union
     {
-        unsigned int dpt$l_ecolevel;
+        UINT32 dpt$l_ecolevel;
         struct
         {
-            unsigned int dpt$il_ecolevel;
+            UINT32 dpt$il_ecolevel;
         };
     };
-    unsigned int dpt$l_ucode;
-    unsigned long long dpt$q_linktime;
+    UINT32 dpt$l_ucode;
+    UINT64 dpt$q_linktime;
     union
     {
-        unsigned long long dpt$iq_image_name;
+        UINT64 dpt$iq_image_name;
         struct
         {
-            unsigned short int dpt$iw_iname_len;
-            unsigned char dpt$ib_iname_type;
-            unsigned char dpt$ib_iname_class;
+            UINT16 dpt$iw_iname_len;
+            UINT8 dpt$ib_iname_type;
+            UINT8 dpt$ib_iname_class;
             void *dpt$ps_iname_ptr;
         };
     };
-    unsigned int dpt$il_loader_handle [4];
+    UINT32 dpt$il_loader_handle [4];
     union
     {
-        int dpt$l_decw_sname;
+        unsigned long dpt$l_decw_sname;
         struct
         {
             void *dpt$ps_decw_sname;
         };
     };
     void *dpt$ps_customer;
-    unsigned int dpt$il_devpath_size;
-    unsigned int dpt$il_devpath_ucb_ofs;
-    unsigned int dpt$il_dsplypath_size;
-    unsigned int dpt$il_dsplypath_ucb_ofs;
+    UINT32 dpt$il_devpath_size;
+    UINT32 dpt$il_devpath_ucb_ofs;
+    UINT32 dpt$il_dsplypath_size;
+    UINT32 dpt$il_dsplypath_ucb_ofs;
     unsigned char dpt$t_image_name;
-    char dpt$b_fill_23_ [7];
+    INT8 dpt$b_fill_23_ [7];
 };
 
 #if 0

@@ -1,6 +1,8 @@
 #ifndef EIHDDEF_H
 #define EIHDDEF_H
 
+#include <vms_types.h>
+
 #define EIHD$K_MAJORID 3
 #define EIHD$K_MINORID 0
 #define EIHD$K_MINORID_64 1
@@ -44,35 +46,35 @@ struct _eihd
 {
     struct
     {
-        unsigned int eihd$l_majorid;
-        unsigned int eihd$l_minorid;
+        UINT32 eihd$l_majorid;
+        UINT32 eihd$l_minorid;
     };
-    unsigned int eihd$l_size;
-    unsigned int eihd$l_isdoff;
-    unsigned int eihd$l_activoff;
-    unsigned int eihd$l_symdbgoff;
-    unsigned int eihd$l_imgidoff;
-    unsigned int eihd$l_patchoff;
+    UINT32 eihd$l_size;
+    UINT32 eihd$l_isdoff;
+    UINT32 eihd$l_activoff;
+    UINT32 eihd$l_symdbgoff;
+    UINT32 eihd$l_imgidoff;
+    UINT32 eihd$l_patchoff;
     union
     {
         void *eihd$l_iafva;
-        long long eihd$q_iafva;
+        INT64 eihd$q_iafva;
     };
     union
     {
         void *eihd$l_symvva;
-        long long eihd$q_symvva;
+        INT64 eihd$q_symvva;
     };
-    unsigned int eihd$l_version_array_off;
-    unsigned int eihd$l_imgtype;
-    unsigned int eihd$l_subtype;
-    unsigned int eihd$l_imgiocnt;
-    unsigned int eihd$l_iochancnt;
-    unsigned long long eihd$q_privreqs;
-    unsigned int eihd$l_hdrblkcnt;
+    UINT32 eihd$l_version_array_off;
+    UINT32 eihd$l_imgtype;
+    UINT32 eihd$l_subtype;
+    UINT32 eihd$l_imgiocnt;
+    UINT32 eihd$l_iochancnt;
+    UINT64 eihd$q_privreqs;
+    UINT32 eihd$l_hdrblkcnt;
     union
     {
-        unsigned int eihd$l_lnkflags;
+        UINT32 eihd$l_lnkflags;
         struct
         {
             unsigned eihd$v_lnkdebug        : 1;
@@ -92,21 +94,21 @@ struct _eihd
             unsigned eihd$v_fill_0_     : 2;
         };
     };
-    unsigned int eihd$l_ident;
-    unsigned int eihd$l_sysver;
+    UINT32 eihd$l_ident;
+    UINT32 eihd$l_sysver;
     struct
     {
-        unsigned char eihd$b_matchctl;
-        unsigned char eihd$b_fill_1;
-        unsigned char eihd$b_fill_2;
-        unsigned char eihd$b_fill_3;
-        unsigned int eihd$l_symvect_size;
-        unsigned int eihd$l_virt_mem_block_size;
+        UINT8 eihd$b_matchctl;
+        UINT8 eihd$b_fill_1;
+        UINT8 eihd$b_fill_2;
+        UINT8 eihd$b_fill_3;
+        UINT32 eihd$l_symvect_size;
+        UINT32 eihd$l_virt_mem_block_size;
     };
-    unsigned int eihd$l_ext_fixup_off;
-    unsigned int eihd$l_noopt_psect_off;
+    UINT32 eihd$l_ext_fixup_off;
+    UINT32 eihd$l_noopt_psect_off;
     char eihd$t_skip [398];
-    unsigned short int eihd$w_alias;
+    UINT16 eihd$w_alias;
 };
 
 #endif

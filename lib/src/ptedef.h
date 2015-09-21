@@ -1,6 +1,8 @@
 #ifndef PTEDEF_H
 #define PTEDEF_H
 
+#include <vms_types.h>
+
 #define PTE$C_BYTES_PER_PTE 8
 #define PTE$C_SHIFT_SIZE 3
 #define PTE$M_VALID 0x1
@@ -164,17 +166,17 @@ struct _pte
 
 struct _va_pte_free
 {
-    unsigned long long pte$q_index;
+    UINT64 pte$q_index;
 
     int pte$$_filler_14;
-    unsigned int pte$l_free_count;
+    UINT32 pte$l_free_count;
 };
 
 struct _ptelist
 {
-    unsigned long long ptelist$q_head;
-    unsigned long long ptelist$q_tail;
-    long long ptelist$q_count;
+    UINT64 ptelist$q_head;
+    UINT64 ptelist$q_tail;
+    INT64 ptelist$q_count;
 };
 
 typedef struct _pte * PTE_PQ;
@@ -183,15 +185,6 @@ typedef struct _ptelist * PTELIST_PQ;
 typedef struct _ptelist ** PTELIST_PPQ;
 typedef struct _va_pte_free * VA_PTE_FREE_PQ;
 typedef struct _va_pte_free ** VA_PTE_FREE_PPQ;
-
-#if 0
-typedef unsigned long long PTE_PQ;
-typedef unsigned long long PTE_PPQ;
-typedef unsigned long long PTELIST_PQ;
-typedef unsigned long long PTELIST_PPQ;
-typedef unsigned long long VA_PTE_FREE_PQ;
-typedef unsigned long long VA_PTE_FREE_PPQ;
-#endif
 
 #endif
 

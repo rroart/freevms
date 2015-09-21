@@ -2665,7 +2665,7 @@ int datacheck(DQ_UCB *ucb);
 int diagnose(DQ_UCB *ucb);
 int diagnose_fdt(IRP *irp, PCB *pcb, DQ_UCB *ucb, CCB *ccb);
 int dq_wfikpch(KPB *kpb, int orig_ipl, int erl_param);
-int dq_qsrv_helper(int action, IRP *irp, uint32 *dqqh_iost1, uint32 *dqqh_iost2);
+int dq_qsrv_helper(int action, IRP *irp, UINT32 *dqqh_iost1, UINT32 *dqqh_iost2);
 void dq_qsrv_unit_init_comp(IRP *irp);
 void dq_qsrv_unit_init_strt(UCB *ucb);
 int driver$init_tables();
@@ -2725,7 +2725,7 @@ int write_atapi_2K_seg(DQ_UCB *ucb, int xfer_req, int *xfer_cnt, int dma_flag);
 int write_dispatcher(DQ_UCB *ucb, int xfer_req, int *xfer_cnt);
 
 /* following is a modified prototype for exe_std$alononpaged in [lib_h]exe_routines.h   */
-int exe$alononpaged_aln(int reqsize, int align, void **pool_p, int32 *alosize_p);
+int exe$alononpaged_aln(int reqsize, int align, void **pool_p, INT32 *alosize_p);
 
 
 #ifdef TRACE_PER_DRIVE
@@ -3439,7 +3439,7 @@ void unit_init_fork(void *fr3, IDB *idb, DQ_UCB *ucb)
     uint64 q_nul = 0; /* A quadword of zeroes */
     uint64 q_dma_csr_base; /* A quadword of dma register address */
     IRP *irp; /* Pointer to the IRP we'll build */
-    int32 size; /* The size of several structures we'll allocate */
+    INT32 size; /* The size of several structures we'll allocate */
     PTE *svapte; /* Pointer to PTE that maps our VA */
 
     BREAK( 0x00060000, (int) ucb, (int) idb, 0 );/* BREAK: unit_init_fork called --- Can't TRACE yet */
@@ -3942,7 +3942,7 @@ void dq_qsrv_unit_init_strt(UCB *ucb)
     IRP *irp;
     IRP *scratch_irp;
     UCB *scratch_ucb;
-    int32 size;
+    INT32 size;
     unsigned int status;
 
     status = exe_std$qioserver_new_unit(ucb);
@@ -8379,14 +8379,14 @@ void outl(DQ_UCB *ucb, int reg, int data)
  *---
  */
 
-int dq_qsrv_helper(int action, IRP *irp, uint32 *iost1, uint32 *iost2)
+int dq_qsrv_helper(int action, IRP *irp, UINT32 *iost1, UINT32 *iost2)
 {
     BUFIO *buffer;
     DT_UCB *dt_ucb;
     DTN *dtn;
     QSRV_PACKACK *qp;
     DTN *scratch_dtn;
-    __int32 size;
+    UINT32 size;
     unsigned int status;
     UCB *ucb;
 

@@ -1,6 +1,8 @@
 #ifndef CNCTDEF_H
 #define CNCTDEF_H
 
+#include <vms_types.h>
+
 #define CNCT$K_ECOLEVEL                0x00
 #define CNCT$K_INITIAL                 0x01
 #define CNCT$K_RECONNECT               0x02
@@ -22,17 +24,17 @@
 struct _cnct
 {
 
-    unsigned char cnct$b_ecolvl;
-    unsigned char cnct$b_vernum;
-    unsigned char cnct$b_type;
-    unsigned char cnct$b_acklim;
-    unsigned short cnct$w_quorum;
-    unsigned short cnct$w_votes;
-    unsigned short cnct$w_nodes;
-    unsigned char cnct$b_clssts;
-    unsigned char cnct$b_cnxsts;
-    unsigned short cnct$w_rcvdseqnm;
-    unsigned char cnct$b_cluver;
+    UINT8 cnct$b_ecolvl;
+    UINT8 cnct$b_vernum;
+    UINT8 cnct$b_type;
+    UINT8 cnct$b_acklim;
+    UINT16 cnct$w_quorum;
+    UINT16 cnct$w_votes;
+    UINT16 cnct$w_nodes;
+    UINT8 cnct$b_clssts;
+    UINT8 cnct$b_cnxsts;
+    UINT16 cnct$w_rcvdseqnm;
+    UINT8 cnct$b_cluver;
 
 }
 

@@ -1,6 +1,8 @@
 #ifndef KFEDEF_H
 #define kfedef_H
 
+#include <vms_types.h>
+
 #define     KFE$M_PROTECT       0x1
 #define     KFE$M_LIM       0x2
 #define     KFE$M_PROCPRIV      0x4
@@ -29,13 +31,13 @@ struct _kfe
 {
     void *kfe$l_hshlnk;
     struct _kfe *kfe$l_kfelink;
-    unsigned short int kfe$w_size;
-    unsigned char kfe$b_type;
-    unsigned char kfe$b_hshidx;
+    UINT16 kfe$w_size;
+    UINT8 kfe$b_type;
+    UINT8 kfe$b_hshidx;
     struct _kfd *kfe$l_kfd;
     union
     {
-        unsigned short int kfe$w_flags;
+        UINT16 kfe$w_flags;
         struct
         {
             unsigned kfe$v_protect      : 1;
@@ -56,8 +58,8 @@ struct _kfe
             unsigned kfe$v_data_resident    : 1;
         };
     };
-    unsigned short int kfe$w_gblseccnt;
-    unsigned int kfe$l_usecnt;
+    UINT16 kfe$w_gblseccnt;
+    UINT32 kfe$l_usecnt;
     union
     {
         struct _wcb *kfe$l_wcb;
@@ -65,34 +67,34 @@ struct _kfe
         {
             union
             {
-                unsigned short int kfe$w_fid;
-                unsigned short int kfe$w_fid_num;
+                UINT16 kfe$w_fid;
+                UINT16 kfe$w_fid_num;
             };
-            unsigned short int kfe$w_fid_seq;
+            UINT16 kfe$w_fid_seq;
         };
     };
     union
     {
         struct _ihd *kfe$l_imghdr;
-        unsigned short int kfe$w_fid_rvn;
+        UINT16 kfe$w_fid_rvn;
     };
-    unsigned long long kfe$q_procpriv;
-    unsigned char kfe$b_matchctl;
-    char kfedef$$_fill_4;
-    unsigned short int kfe$w_amecod;
-    unsigned int kfe$l_ident;
+    UINT64 kfe$q_procpriv;
+    UINT8 kfe$b_matchctl;
+    INT8 kfedef$$_fill_4;
+    UINT16 kfe$w_amecod;
+    UINT32 kfe$l_ident;
     struct _orb *kfe$l_orb;
-    unsigned short int kfe$w_shrcnt;
-    unsigned short int kfe$w_maxshrisd;
+    UINT16 kfe$w_shrcnt;
+    UINT16 kfe$w_maxshrisd;
     struct _kferes *kfe$l_kferes_ptr;
-    unsigned int kfe$l_ref_count;
-    unsigned int kfe$l_priv_isd_cnt;
-    unsigned int kfe$l_image_size;
-    unsigned int kfe$l_obsolete_1;
-    unsigned int kfe$l_imagename_offset;
+    UINT32 kfe$l_ref_count;
+    UINT32 kfe$l_priv_isd_cnt;
+    UINT32 kfe$l_image_size;
+    UINT32 kfe$l_obsolete_1;
+    UINT32 kfe$l_imagename_offset;
     union
     {
-        unsigned int kfe$l_flags2;
+        UINT32 kfe$l_flags2;
         struct
         {
             unsigned kfe$v_authpriv     : 1;
@@ -102,11 +104,11 @@ struct _kfe
     };
     void *kfe$ar_authrights;
     void *kfe$ar_rights;
-    unsigned int kfe$l_arb_support;
-    unsigned long long kfe$q_authpriv;
-    unsigned int kfe$l_risig_offset;
-    unsigned short int kfe$w_filver;
-    short int kfedef$$_fill_5;
+    UINT32 kfe$l_arb_support;
+    UINT64 kfe$q_authpriv;
+    UINT32 kfe$l_risig_offset;
+    UINT16 kfe$w_filver;
+    INT16 kfedef$$_fill_5;
 };
 
 #endif

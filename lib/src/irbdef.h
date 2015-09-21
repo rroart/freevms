@@ -2,12 +2,13 @@
 #define IRBDEF_H
 
 // Author. Roar Thron�s.
-
 // based on / taken from rmsint2.doc
+
+#include <vms_types.h>
 
 struct _irbdef
 {
-    unsigned char irb$b_id; // block id (11)
+    UINT8 irb$b_id; // block id (11)
     struct
     {
         unsigned irb$v_busy : 1; // stream is busy
@@ -31,16 +32,16 @@ struct _irbdef
     unsigned long irb$l_ifab_lnk ;
     unsigned long irb$l_curbdb ;
     unsigned long irb$l_nxtbdb ;
-    unsigned long long irb$q_nrp ;
-    unsigned char irb$b_rp_id;
-    unsigned char irb$b_rp_kref;
-    unsigned short irb$w_offset;
-    unsigned char irb$b_rrv_id;
-    unsigned char irb$b_bcnt;
-    unsigned short irb$w_mbc;
+    UINT64 irb$q_nrp ;
+    UINT8 irb$b_rp_id;
+    UINT8 irb$b_rp_kref;
+    UINT16 irb$w_offset;
+    UINT8 irb$b_rrv_id;
+    UINT8 irb$b_bcnt;
+    UINT16 irb$w_mbc;
     unsigned long irb$l_rrv;
     unsigned long irb$l_nkad;
-    unsigned short irb$w_spos;
+    UINT16 irb$w_spos;
 };
 
 #endif /* IRBDEF_H */

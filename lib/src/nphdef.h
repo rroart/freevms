@@ -1,6 +1,8 @@
 #ifndef NPHDEF_H
 #define NPHDEF_H
 
+#include <vms_types.h>
+
 #define     NPH$C_ALONONPAGED       0
 #define     NPH$C_ALONPAGVAR        1
 #define     NPH$C_DEANONPAGED       2
@@ -28,28 +30,28 @@ struct _nph
 {
     union
     {
-        unsigned unsigned long long nph$q_addr;
+        unsigned UINT64 nph$q_addr;
         struct
         {
-            unsigned int nph$l_addr_low;
-            unsigned int nph$l_addr_high;
+            UINT32 nph$l_addr_low;
+            UINT32 nph$l_addr_high;
         };
     };
-    int (*nph$l_pc)(void);
-    unsigned short int nph$w_function;
-    unsigned char nph$b_type;
-    unsigned char nph$b_rmod;
-    unsigned int nph$l_size;
-    unsigned char nph$b_ipl;
-    unsigned char nph$b_cpu;
-    unsigned short int nph$w_unused;
+    INT32 (*nph$l_pc)(void);
+    UINT16 nph$w_function;
+    UINT8 nph$b_type;
+    UINT8 nph$b_rmod;
+    UINT32 nph$l_size;
+    UINT8 nph$b_ipl;
+    UINT8 nph$b_cpu;
+    UINT16 nph$w_unused;
     union
     {
-        unsigned long long nph$q_time;
+        UINT64 nph$q_time;
         struct
         {
-            unsigned int nph$l_time_low;
-            unsigned int nph$l_time_high;
+            UINT32 nph$l_time_low;
+            UINT32 nph$l_time_high;
         };
     };
 };

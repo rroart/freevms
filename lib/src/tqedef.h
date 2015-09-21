@@ -1,6 +1,8 @@
 #ifndef TQEDEF_H
 #define TQEDEF_H
 
+#include <vms_types.h>
+
 #define TQE$M_TQTYPE 0x3
 #define TQE$M_REPEAT 0x4
 #define TQE$M_ABSOLUTE 0x8
@@ -21,9 +23,9 @@ struct _tqe
 {
     struct _tqe *tqe$l_tqfl;
     struct _tqe *tqe$l_tqbl;
-    unsigned short int tqe$w_size;
-    unsigned char tqe$b_type;
-    unsigned char tqe$b_rqtype;
+    UINT16 tqe$w_size;
+    UINT8 tqe$b_type;
+    UINT8 tqe$b_rqtype;
     union
     {
         unsigned long tqe$l_pid;
@@ -42,13 +44,13 @@ struct _tqe
             unsigned long tqe$l_fr4;
         };
     };
-    unsigned long long tqe$q_time;
-    unsigned long long tqe$q_delta;
-    unsigned char tqe$b_rmod;
-    unsigned char tqe$b_efn;
-    unsigned short tqe$w_res;
-    unsigned int tqe$l_rqpid;
-    unsigned int tqe$l_cputim;
+    UINT64 tqe$q_time;
+    UINT64 tqe$q_delta;
+    UINT8 tqe$b_rmod;
+    UINT8 tqe$b_efn;
+    UINT16 tqe$w_res;
+    UINT32 tqe$l_rqpid;
+    UINT32 tqe$l_cputim;
 };
 
 #endif

@@ -61,7 +61,7 @@ struct _mmg
         unsigned mmg$v_no_overmap : 1;
         unsigned mmg$v_jsb_altsubr : 1;
     };
-    char mmgdef$$_fill_2;
+    INT8 mmgdef$$_fill_2;
 };
 
 #define MMG$M_RES_MEM_ZERO 0x1
@@ -73,7 +73,7 @@ struct _res_mem
 {
     union
     {
-        unsigned int mmg$l_res_mem_flags;
+        UINT32 mmg$l_res_mem_flags;
         struct
         {
             unsigned mmg$v_res_mem_zero : 1;
@@ -95,7 +95,7 @@ struct _page_color
 {
     union
     {
-        unsigned int mmg$l_page_color_flags;
+        UINT32 mmg$l_page_color_flags;
         struct
         {
             unsigned mmg$v_color_must : 1;

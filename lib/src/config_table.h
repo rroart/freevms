@@ -7,10 +7,10 @@ struct _config_header
     {
         struct
         {
-            unsigned int iogen_cfg_tbl$l_hw_id_mask_lo;
-            unsigned int iogen_cfg_tbl$l_hw_id_mask_hi;
+            UINT32 iogen_cfg_tbl$l_hw_id_mask_lo;
+            UINT32 iogen_cfg_tbl$l_hw_id_mask_hi;
         };
-        unsigned long long iogen_cfg_tbl$q_hw_id_mask;
+        UINT64 iogen_cfg_tbl$q_hw_id_mask;
     };
 };
 
@@ -19,13 +19,13 @@ struct _config_header
 struct _config_memdsc
 {
     char *config_memdsc$ps_fragment;
-    short int config_memdsc$w_free;
-    char config_memdsc$b_refcnt;
-    char config_memdsc$b_fill;
-    short int config_memdsc$w_size;
-    char config_memdsc$b_type;
-    char config_memdsc$b_subtype;
-    int config_memdsc$l_actual_size;
+    INT16 config_memdsc$w_free;
+    INT8 config_memdsc$b_refcnt;
+    INT8 config_memdsc$b_fill;
+    INT16 config_memdsc$w_size;
+    INT8 config_memdsc$b_type;
+    INT8 config_memdsc$b_subtype;
+    INT32 config_memdsc$l_actual_size;
 };
 
 #define IOGEN_CFG_TBL$M_MSCP 0x1
@@ -61,20 +61,20 @@ struct _iogen_cfg_tbl
     {
         struct
         {
-            unsigned int iogen_cfg_tbl$l_hw_id_lo;
-            unsigned int iogen_cfg_tbl$l_hw_id_hi;
+            UINT32 iogen_cfg_tbl$l_hw_id_lo;
+            UINT32 iogen_cfg_tbl$l_hw_id_hi;
         };
-        unsigned long long iogen_cfg_tbl$q_hw_id;
-        char iogen_cfg_tbl$b_hw_id_string [8];
+        UINT64 iogen_cfg_tbl$q_hw_id;
+        INT8 iogen_cfg_tbl$b_hw_id_string [8];
     };
     void *iogen_cfg_tbl$ps_driver_name;
     char *iogen_cfg_tbl$ps_devnam;
-    unsigned int iogen_cfg_tbl$l_vector_cnt;
-    unsigned int iogen_cfg_tbl$l_vector_align;
-    unsigned int iogen_cfg_tbl$l_num_units;
+    UINT32 iogen_cfg_tbl$l_vector_cnt;
+    UINT32 iogen_cfg_tbl$l_vector_align;
+    UINT32 iogen_cfg_tbl$l_num_units;
     union
     {
-        unsigned int iogen_cfg_tbl$l_flags;
+        UINT32 iogen_cfg_tbl$l_flags;
         struct
         {
             unsigned iogen_cfg_tbl$v_mscp : 1;
@@ -99,13 +99,13 @@ struct _iogen_cfg_tbl
         };
     };
     char *iogen_cfg_tbl$ps_description;
-    unsigned int iogen_cfg_tbl$l_adp_type;
+    UINT32 iogen_cfg_tbl$l_adp_type;
     char *iogen_cfg_tbl$ps_assoc_drv;
     char *iogen_cfg_tbl$ps_dtype;
     char *iogen_cfg_tbl$ps_boot_class;
     union
     {
-        unsigned int iogen_cfg_tbl$l_boot_flags;
+        UINT32 iogen_cfg_tbl$l_boot_flags;
         struct
         {
             unsigned iogen_cfg_tbl$v_sys_dev : 1;
@@ -119,9 +119,9 @@ struct _iogen_cfg_tbl
         };
     };
     char *iogen_cfg_tbl$ps_private;
-    int iogen_cfg_tbl$l_avail;
-    int iogen_cfg_tbl$l_avail2;
-    char iogen_cfg_tbl$b_fill_1_ [4];
+    INT32 iogen_cfg_tbl$l_avail;
+    INT32 iogen_cfg_tbl$l_avail2;
+    INT8 iogen_cfg_tbl$b_fill_1_ [4];
 };
 
 #define IOGEN_CFG_TBL$K_ENTRY_SIZE 72

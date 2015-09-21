@@ -46,19 +46,19 @@
 
 struct _fatdef
 {
-    _ubyte fat$b_rtype;
-    _ubyte fat$b_rattrib;
-    _uword fat$w_rsize;
-    _ulongword fat$l_hiblk; /* funny byte order */
-    _ulongword fat$l_efblk; /* funny byte order */
-    _uword fat$w_ffbyte;
-    _ubyte fat$b_bktsize;
-    _ubyte fat$b_vfcsize;
-    _uword fat$w_maxrec;
-    _uword fat$w_defext;
-    _uword fat$w_gbc;
-    _ubyte fat$_UU0[8];
-    _uword fat$w_versions;
+    UINT8 fat$b_rtype;
+    UINT8 fat$b_rattrib;
+    UINT16 fat$w_rsize;
+    UINT32 fat$l_hiblk; /* funny byte order */
+    UINT32 fat$l_efblk; /* funny byte order */
+    UINT16 fat$w_ffbyte;
+    UINT8 fat$b_bktsize;
+    UINT8 fat$b_vfcsize;
+    UINT16 fat$w_maxrec;
+    UINT16 fat$w_defext;
+    UINT16 fat$w_gbc;
+    UINT8 fat$_UU0[8];
+    UINT16 fat$w_versions;
 };
 
 #endif

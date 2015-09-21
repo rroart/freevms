@@ -1,6 +1,8 @@
 #ifndef CCBDEF_H
 #define CCBDEF_H
 
+#include <vms_types.h>
+
 #define CCB$M_AMB        0x1
 #define CCB$M_IMGTMP     0x2
 #define CCB$M_RDCHKDON   0x4
@@ -23,7 +25,7 @@ struct _ccb
     struct _wcb *ccb$l_wind;
     union
     {
-        unsigned int ccb$l_sts;
+        UINT32 ccb$l_sts;
         struct
         {
             unsigned ccb$v_amb        : 1;
@@ -38,17 +40,17 @@ struct _ccb
             unsigned ccb$v_fillme     : 7;
         };
     };
-    char ccb$b_amod;
-    unsigned char ccb$b_spare_1;
-    unsigned short int ccb$w_spare_2;
-    unsigned int ccb$l_ioc;
+    INT8 ccb$b_amod;
+    UINT8 ccb$b_spare_1;
+    UINT16 ccb$w_spare_2;
+    UINT32 ccb$l_ioc;
     struct _irp *ccb$l_dirp;
     union
     {
-        int ccb$l_chan;
-        unsigned short int ccb$w_chan;
+        INT32 ccb$l_chan;
+        UINT16 ccb$w_chan;
     };
-    int ccb$l_reserved;
+    INT32 ccb$l_reserved;
 };
 
 #endif

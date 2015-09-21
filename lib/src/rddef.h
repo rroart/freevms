@@ -1,6 +1,8 @@
 #ifndef RDDEF_H
 #define RDDEF_H
 
+#include <vms_types.h>
+
 #define RD$K_LENGTH 8
 #define RD$C_LENGTH 8
 #define RD$S_RDDEF 8
@@ -14,7 +16,7 @@ struct _scs_rd
     } rd$r_cdrp_ovl;
     union
     {
-        unsigned short int rd$w_state;
+        UINT16 rd$w_state;
         struct
         {
             unsigned rd$v_busy    : 1;
@@ -22,7 +24,7 @@ struct _scs_rd
             unsigned rd$v_fill_0_ : 6;
         } rd$r_state_bits;
     } rd$r_state_ovl;
-    unsigned short int rd$w_seqnum;
+    UINT16 rd$w_seqnum;
 };
 
 #define     rd$l_cdrp       rd$r_cdrp_ovl.rd$l_cdrp

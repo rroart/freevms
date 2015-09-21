@@ -1,6 +1,8 @@
 #ifndef CRCTXDEF_H
 #define CRCTXDEF_H
 
+#include <vms_types.h>
+
 #define CRCTX$M_HIGH_PRIO 0x1
 #define CRCTX$M_ITEM_VALID 0x2
 
@@ -13,18 +15,18 @@ struct _crctx
 {
     struct _crctx *crctx$l_flink;
     struct _crctx *crctx$l_blink;
-    unsigned short int crctx$w_size;
-    unsigned char crctx$b_type;
-    unsigned char crctx$b_subtype;
+    UINT16 crctx$w_size;
+    UINT8 crctx$b_type;
+    UINT8 crctx$b_subtype;
     struct _crab *crctx$l_crab;
     union
     {
-        unsigned char crctx$b_flck;
-        unsigned int crctx$l_flck;
+        UINT8 crctx$b_flck;
+        UINT32 crctx$l_flck;
     };
     union
     {
-        int crctx$l_flags;
+        INT32 crctx$l_flags;
         struct
         {
             unsigned crctx$v_high_prio : 1;
@@ -36,50 +38,50 @@ struct _crctx
     void *crctx$l_wqbl;
     union
     {
-        int crctx$l_context1;
-        long long crctx$q_context1;
+        INT32 crctx$l_context1;
+        INT64 crctx$q_context1;
     };
     union
     {
-        int crctx$l_context2;
-        long long crctx$q_context2;
+        INT32 crctx$l_context2;
+        INT64 crctx$q_context2;
     };
     union
     {
-        int crctx$l_context3;
-        long long crctx$q_context3;
+        INT32 crctx$l_context3;
+        INT64 crctx$q_context3;
     };
-    int crctx$l_item_cnt;
-    int crctx$l_item_num;
-    int crctx$l_up_bound;
-    int crctx$l_low_bound;
-    int (*crctx$l_callback)(void);
-    int (*crctx$l_saved_callback)(void);
+    INT32 crctx$l_item_cnt;
+    INT32 crctx$l_item_num;
+    INT32 crctx$l_up_bound;
+    INT32 crctx$l_low_bound;
+    INT32 (*crctx$l_callback)(void);
+    INT32 (*crctx$l_saved_callback)(void);
     void *crctx$l_aux_context;
-    int crctx$l_reserved1;
-    int crctx$l_dma_adr;
+    INT32 crctx$l_reserved1;
+    INT32 crctx$l_dma_adr;
     void *crctx$ps_caller_pc;
 };
 
 struct _crctx_buf
 {
-    unsigned int crctx_buf$l_xaction;
-    unsigned int crctx_buf$l_item_num;
-    unsigned int crctx_buf$l_item_cnt;
+    UINT32 crctx_buf$l_xaction;
+    UINT32 crctx_buf$l_item_num;
+    UINT32 crctx_buf$l_item_cnt;
     struct _crctx *crctx_buf$ps_crctx;
     void *crctx_buf$ps_caller_pc;
-    unsigned int crctx_buf$l_status;
-    unsigned int crctx_buf$l_dma_addr;
-    unsigned int crctx_buf$l_count;
+    UINT32 crctx_buf$l_status;
+    UINT32 crctx_buf$l_dma_addr;
+    UINT32 crctx_buf$l_count;
 };
 
 struct _crctx_buf_h
 {
-    long long crctx_buf_h$q_free;
-    unsigned int crctx_buf_h$l_size;
-    int crctx_buf_h$l_reserved;
-    int crctx_buf_h$l_count;
-    int crctx_buf_h$l_reserved2;
+    INT64 crctx_buf_h$q_free;
+    UINT32 crctx_buf_h$l_size;
+    INT32 crctx_buf_h$l_reserved;
+    INT32 crctx_buf_h$l_count;
+    INT32 crctx_buf_h$l_reserved2;
 };
 
 #endif

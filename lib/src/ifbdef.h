@@ -9,7 +9,7 @@
 
 struct _ifbdef
 {
-    unsigned char ifb$b_bid; // block id (13)
+    UINT8 ifb$b_bid; // block id (13)
     struct
     {
         unsigned ifb$v_busy : 1; // stream busy
@@ -23,15 +23,15 @@ struct _ifbdef
     };
     unsigned long ifb$l_irab_lnk ;
     void * ifb$l_nirb; // next
-    unsigned char ifb$b_ubsz ; // user buffer size
-    unsigned short ifb$w_chnl ; // channel
-    unsigned char ifb$b_facc; // file access
-    unsigned char ifb$b_dvch; // device characteristics
-    unsigned int ifb$l_devchar;
-    unsigned int ifb$l_devchar2;
+    UINT8 ifb$b_ubsz ; // user buffer size
+    UINT16 ifb$w_chnl ; // channel
+    UINT8 ifb$b_facc; // file access
+    UINT8 ifb$b_dvch; // device characteristics
+    UINT32 ifb$l_devchar;
+    UINT32 ifb$l_devchar2;
     unsigned long ifb$l_bdb;
     unsigned long ifb$l_ifab_lnk ;
-    unsigned long long ifb$q_pool ;
+    UINT64 ifb$q_pool ;
     unsigned long ifb$l_mrn;
 
     struct _fatdef ifb$w_recattr;

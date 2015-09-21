@@ -2,26 +2,28 @@
 #define VMS_TYPES_H
 
 /* integer types */
-typedef signed char _byte;
-typedef unsigned char _ubyte;
+typedef signed char INT8;
+typedef unsigned char UINT8;
 
-typedef signed short _word;
-typedef unsigned short _uword;
+typedef signed short INT16;
+typedef unsigned short UINT16;
 
-typedef signed int _longword;
-typedef unsigned int _ulongword;
+typedef signed int INT32;
+typedef unsigned int UINT32;
 
 #if defined(__i386__)
-typedef signed long long _quadword;
-typedef unsigned long long _uquadword;
+typedef signed long long INT64;
+typedef unsigned long long UINT64;
 #elif defined(__x86_64__)
-typedef signed long _quadword;
-typedef unsigned long _uquadword;
+typedef signed long INT64;
+typedef unsigned long UINT64;
 #endif
 
+/* other types */
 typedef unsigned long _address;
-typedef unsigned int _status;
+typedef int _status;
 
-typedef _quadword _vms_time;
+/* TODO: merge with struct TIME into struct _generic_64 */
+typedef INT64 _vms_time;
 
 #endif /* VMS_TYPES_H */

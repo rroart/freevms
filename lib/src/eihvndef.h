@@ -1,15 +1,17 @@
 #ifndef EIHVNDEF_H
 #define EIHVNDEF_H
 
+#include <vms_types.h>
+
 #define EIHVN$M_SUBVERSION_MINOR_ID 0xFFFF
 #define EIHVN$M_SUBVERSION_MAJOR_ID 0xFFFF0000
 
 struct _eimg_version_array
 {
-    unsigned int eihvn$l_subsystem_mask;
+    UINT32 eihvn$l_subsystem_mask;
     union
     {
-        unsigned int eihvn$l_subversion_array;
+        UINT32 eihvn$l_subversion_array;
         struct
         {
             unsigned eihvn$v_subversion_minor_id : 16;
@@ -25,7 +27,7 @@ struct _eimg_overall_version
 {
     union
     {
-        int eihvn$l_version_bits;
+        INT32 eihvn$l_version_bits;
         struct
         {
             unsigned eihvn$v_version_minor_id : 24;

@@ -1,6 +1,8 @@
 #ifndef IDBDEF_H
 #define IDBDEF_H
 
+#include <vms_types.h>
+
 #define     IDB$M_CRAM_ALLOC    0x1
 #define     IDB$M_VLE       0x2
 #define     IDB$M_NORESIZE      0x4
@@ -17,19 +19,19 @@
 
 struct _idb
 {
-    unsigned long long idb$q_csr;
-    unsigned short int idb$w_size;
-    unsigned char idb$b_type;
-    char idb$b_spare;
-    unsigned short int idb$w_units;
-    unsigned short int idb$w_tt_enable;
+    UINT64 idb$q_csr;
+    UINT16 idb$w_size;
+    UINT8 idb$b_type;
+    INT8 idb$b_spare;
+    UINT16 idb$w_units;
+    UINT16 idb$w_tt_enable;
     struct _ucb *idb$ps_owner;
     struct _cram *idb$ps_cram;
     struct _spl *idb$ps_spl;
     struct _adp *idb$ps_adp;
     union
     {
-        unsigned int idb$l_flags;
+        UINT32 idb$l_flags;
         struct
         {
             unsigned idb$v_cram_alloc      : 1;
@@ -42,11 +44,11 @@ struct _idb
             unsigned idb$v_fill_0_         : 1;
         };
     };
-    unsigned int idb$l_device_specific;
-    int idb$l_vector;
+    UINT32 idb$l_device_specific;
+    INT32 idb$l_vector;
     void *idb$ps_auxstruc;
-    unsigned int idb$l_interrupt_cpu;
-    unsigned int idb$l_reserved;
+    UINT32 idb$l_interrupt_cpu;
+    UINT32 idb$l_reserved;
     struct _ucb *idb$l_ucblst [8];
 };
 

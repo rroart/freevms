@@ -1,6 +1,8 @@
 #ifndef GSDDEF_H
 #define GSDDEF_H
 
+#include <vms_types.h>
+
 #define GSD$K_LENGTH 49
 #define GSD$C_LENGTH 49
 #define GSD$K_EXTGSDLNG 61
@@ -12,43 +14,43 @@ struct _gsd
 {
     struct _gsd *gsd$l_gsdfl;
     struct _gsd *gsd$l_gsdbl;
-    unsigned short int gsd$w_size;
-    unsigned char gsd$b_type;
-    unsigned char gsd$b_fill;
-    unsigned int gsd$l_hash;
+    UINT16 gsd$w_size;
+    UINT8 gsd$b_type;
+    UINT8 gsd$b_fill;
+    UINT32 gsd$l_hash;
     union
     {
-        unsigned int gsd$l_pcbuic;
+        UINT32 gsd$l_pcbuic;
         struct
         {
             char gsddef$$_filler [2];
-            unsigned short int gsd$w_pcbgrp;
+            UINT16 gsd$w_pcbgrp;
         };
     };
-    unsigned int gsd$l_filuic;
-    unsigned int gsd$l_prot;
-    unsigned int gsd$l_gstx;
-    unsigned int gsd$l_ident;
+    UINT32 gsd$l_filuic;
+    UINT32 gsd$l_prot;
+    UINT32 gsd$l_gstx;
+    UINT32 gsd$l_ident;
     struct _orb *gsd$l_orb;
     union
     {
-        unsigned int gsd$l_ipid;
-        unsigned int gsd$l_related_gstx;
+        UINT32 gsd$l_ipid;
+        UINT32 gsd$l_related_gstx;
     };
-    unsigned int gsd$l_flags;
+    UINT32 gsd$l_flags;
     union
     {
         struct
         {
             char gsd$t_gsdnam;
-            char gsd$b_fillme2 [3];
+            INT8 gsd$b_fillme2 [3];
         };
-        unsigned int gsd$l_basepfn;
+        UINT32 gsd$l_basepfn;
     };
-    unsigned int gsd$l_pages;
-    unsigned int gsd$l_refcnt;
+    UINT32 gsd$l_pages;
+    UINT32 gsd$l_refcnt;
     char gsd$t_pfngsdnam;
-    char gsd$b_fillme [3];
+    INT8 gsd$b_fillme [3];
 };
 
 #endif

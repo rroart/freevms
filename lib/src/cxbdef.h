@@ -1,6 +1,8 @@
 #ifndef CXBDEF_H
 #define CXBDEF_H
 
+#include <vms_types.h>
+
 #define     CXB$M_RESP      0x1
 #define     CXB$L_NI_ALTXMT     28
 #define     CXB$C_AGENT_SCRATCH_LEN 52
@@ -44,45 +46,45 @@ struct _cxb
             void *cxb$ps_uva32;
         };
     };
-    unsigned short int cxb$w_size;
-    unsigned char cxb$b_type;
+    UINT16 cxb$w_size;
+    UINT8 cxb$b_type;
     union
     {
-        unsigned char cxb$b_flag;
+        UINT8 cxb$b_flag;
         struct
         {
             unsigned cxb$v_resp : 1;
             unsigned cxb$v_fill_16_ : 7;
         };
     };
-    unsigned short int cxb$w_boff;
-    unsigned short int cxb$w_bcnt;
+    UINT16 cxb$w_boff;
+    UINT16 cxb$w_bcnt;
     void *cxb$l_data_chain;
-    unsigned long long cxb$q_station;
-    unsigned short int cxb$w_ctl;
-    unsigned char cxb$b_ctl_size;
-    unsigned char cxb$b_dsap;
-    unsigned long long cxb$q_reserved;
+    UINT64 cxb$q_station;
+    UINT16 cxb$w_ctl;
+    UINT8 cxb$b_ctl_size;
+    UINT8 cxb$b_dsap;
+    UINT64 cxb$q_reserved;
     union
     {
-        char cxb$t_agent_scratch [52];
+        UINT8 cxb$t_agent_scratch [52];
         union
         {
-            unsigned char cxb$t_agent_decnet [52];
+            UINT8 cxb$t_agent_decnet [52];
             struct
             {
-                unsigned short int cxb$w_length;
-                unsigned short int cxb$w_offset;
-                unsigned char cxb$b_code;
-                unsigned char cxb$b_sts;
-                unsigned short int cxb$w_channel;
+                UINT16 cxb$w_length;
+                UINT16 cxb$w_offset;
+                UINT8 cxb$b_code;
+                UINT8 cxb$b_sts;
+                UINT16 cxb$w_channel;
                 void *cxb$l_link;
                 struct _irp *cxb$l_irp;
-                int (*cxb$l_end_action)(void);
+                INT32 (*cxb$l_end_action)(void);
                 void *cxb$l_r_nsp_msg;
-                unsigned int cxb$l_r_data_size;
-                unsigned short int cxb$w_r_seg_num;
-                short int cxb$w_filler_1;
+                UINT32 cxb$l_r_data_size;
+                UINT16 cxb$w_r_seg_num;
+                INT16 cxb$w_filler_1;
                 struct _irp *cxb$l_user_irp;
                 struct _dcb *cxb$l_last_dcb;
                 void *cxb$pq_uva64;
@@ -91,34 +93,34 @@ struct _cxb
     };
     union
     {
-        char cxb$t_dll [52];
+        UINT8 cxb$t_dll [52];
         union
         {
-            unsigned char cxb$t_dll_ni802 [52];
+            UINT8 cxb$t_dll_ni802 [52];
             struct
             {
-                unsigned char cxb$b_ni_func;
-                unsigned char cxb$b_r_flags;
+                UINT8 cxb$b_ni_func;
+                UINT8 cxb$b_r_flags;
                 union
                 {
-                    unsigned short int cxb$w_ni_rid;
+                    UINT16 cxb$w_ni_rid;
                     struct
                     {
-                        unsigned char cxb$b_ni_slot;
-                        unsigned char cxb$b_ni_ring;
+                        UINT8 cxb$b_ni_slot;
+                        UINT8 cxb$b_ni_ring;
                     };
                 };
                 struct _irp *cxb$l_t_irp;
-                unsigned short int cxb$w_r_nchain;
-                unsigned short int cxb$w_r_lenerr;
+                UINT16 cxb$w_r_nchain;
+                UINT16 cxb$w_r_lenerr;
                 struct _ucb *cxb$l_r_ucb;
-                unsigned short int cxb$w_hdr_size;
-                unsigned char cxb$b_r_fmt;
+                UINT16 cxb$w_hdr_size;
+                UINT8 cxb$b_r_fmt;
                 union
                 {
                     union
                     {
-                        unsigned char cxb$b_r_filter;
+                        UINT8 cxb$b_r_filter;
                         struct
                         {
                             unsigned cxb$v_fltr_mca : 1;
@@ -129,7 +131,7 @@ struct _cxb
                     };
                     union
                     {
-                        unsigned char cxb$b_t_filter;
+                        UINT8 cxb$b_t_filter;
                         struct
                         {
                             unsigned cxb$v_fltr_startup : 1;
@@ -142,29 +144,29 @@ struct _cxb
         };
         union
         {
-            unsigned char cxb$t_dll_ni802xmt [52];
+            UINT8 cxb$t_dll_ni802xmt [52];
             struct
             {
-                char cxbdef$$_nixmt_fill [38];
-                unsigned char cxb$t_t_data [14];
+                UINT8 cxbdef$$_nixmt_fill [38];
+                UINT8 cxb$t_t_data [14];
             };
         };
         union
         {
-            unsigned char cxb$t_dll_ni802rcv [52];
+            UINT8 cxb$t_dll_ni802rcv [52];
             struct
             {
                 char cxbdef$$_nircv_fill1 [36];
-                unsigned short int cxb$g_r_dest [3];
-                unsigned short int cxb$g_r_src [3];
-                unsigned short int cxb$w_r_ptype;
-                unsigned char cxb$b_r_dsap;
-                unsigned char cxb$b_r_ssap;
+                UINT16 cxb$g_r_dest [3];
+                UINT16 cxb$g_r_src [3];
+                UINT16 cxb$w_r_ptype;
+                UINT8 cxb$b_r_dsap;
+                UINT8 cxb$b_r_ssap;
             };
         };
     };
-    int cxbdef$$_fill_1;
-    char cxb$b_fill_19_ [4];
+    INT32 cxbdef$$_fill_1;
+    INT8 cxb$b_fill_19_ [4];
 };
 
 #define CXB$S_CXBDEF 152

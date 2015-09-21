@@ -1,6 +1,8 @@
 #ifndef CPBDEF_H
 #define CPBDEF_H
 
+#include <vms_types.h>
+
 #define     CPB$C_PRIMARY       0
 #define     CPB$C_NS        1
 #define     CPB$C_QUORUM        2
@@ -39,7 +41,7 @@ struct _cpb
 {
     union
     {
-        unsigned int cpb$l_cpb;
+        UINT32 cpb$l_cpb;
         struct
         {
             unsigned cpb$v_primary      : 1;

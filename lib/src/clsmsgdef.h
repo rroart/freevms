@@ -61,11 +61,11 @@
 
 struct _clsmsgdef
 {
-    unsigned short clsmsg$w_seqnum;
-    unsigned short clsmsg$w_ackseq;
+    UINT16 clsmsg$w_seqnum;
+    UINT16 clsmsg$w_ackseq;
     unsigned long clsmsg$l_rspid;
-    unsigned char clsmsg$b_facility;
-    unsigned char clsmsg$b_func;
+    UINT8 clsmsg$b_facility;
+    UINT8 clsmsg$b_func;
     /* two missing? */
     unsigned long clsmsg$l_reqr_bufh;
     /* more? */

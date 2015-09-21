@@ -240,8 +240,8 @@ struct _ucb
     union
     {
         struct _fkb *ucb$l_fqfl;
-        unsigned short int ucb$w_unit_seed;
-        unsigned short int ucb$w_mb_seed;
+        UINT16 ucb$w_unit_seed;
+        UINT16 ucb$w_mb_seed;
         void *ucb$l_rqfl;
         void *ucb$l_mb_msgqfl;
     };
@@ -251,13 +251,13 @@ struct _ucb
         void *ucb$l_rqbl;
         void *ucb$l_mb_msgqbl;
     };
-    unsigned short int ucb$w_size;
-    unsigned char ucb$b_type;
-    unsigned char ucb$b_flck;
+    UINT16 ucb$w_size;
+    UINT16 ucb$b_type;
+    UINT16 ucb$b_flck;
     union
     {
         void (*ucb$l_fpc)(struct _irp * i, struct _ucb * u);
-        int ucb$l_astqfl;
+        INT32 ucb$l_astqfl;
         struct _acb *ucb$l_mb_w_ast;
         char ucb$t_partner;
     };
@@ -272,135 +272,135 @@ struct _ucb
         unsigned long ucb$l_fr4;
         struct
         {
-            unsigned short int ucb$w_msgmax;
-            unsigned short int ucb$w_msgcnt;
+            UINT16 ucb$w_msgmax;
+            UINT16 ucb$w_msgcnt;
         };
-        int ucb$l_first;
+        INT32 ucb$l_first;
     };
     union
     {
-        unsigned short int ucb$w_bufquo;
-        unsigned short int ucb$w_dstaddr;
+        UINT16 ucb$w_bufquo;
+        UINT16 ucb$w_dstaddr;
     };
     union
     {
-        unsigned short int ucb$w_iniquo;
-        unsigned short int ucb$w_srcaddr;
+        UINT16 ucb$w_iniquo;
+        UINT16 ucb$w_srcaddr;
     };
     struct _orb *ucb$l_orb;
     union
     {
-        unsigned int ucb$l_lockid;
-        unsigned int ucb$l_cpid;
+        UINT32 ucb$l_lockid;
+        UINT32 ucb$l_cpid;
     };
     struct _cram *ucb$ps_cram;
     struct _crb *ucb$l_crb;
     struct _spl *ucb$l_dlck;
     struct _ddb *ucb$l_ddb;
-    unsigned int ucb$l_pid;
+    UINT32 ucb$l_pid;
     struct _ucb *ucb$l_link;
     struct _vcb *ucb$l_vcb;
     union
     {
-        unsigned long long ucb$q_devchar;
+        UINT64 ucb$q_devchar;
         struct
         {
-            unsigned int ucb$l_devchar;
-            unsigned int ucb$l_devchar2;
+            UINT32 ucb$l_devchar;
+            UINT32 ucb$l_devchar2;
         };
     };
-    unsigned int ucb$l_affinity;
+    UINT32 ucb$l_affinity;
     union
     {
-        unsigned int ucb$l_xtra;
-        int ucb$l_altiowq;
+        UINT32 ucb$l_xtra;
+        INT32 ucb$l_altiowq;
 
     };
-    unsigned char ucb$b_devclass;
-    unsigned char ucb$b_devtype;
-    unsigned short int ucb$w_devbufsiz;
+    UINT16 ucb$b_devclass;
+    UINT16 ucb$b_devtype;
+    UINT16 ucb$w_devbufsiz;
     union
     {
-        unsigned long long ucb$q_devdepend;
+        UINT64 ucb$q_devdepend;
         struct
         {
             union
             {
-                unsigned int ucb$l_devdepend;
+                UINT32 ucb$l_devdepend;
                 struct
                 {
-                    unsigned char ucb$b_sectors;
-                    unsigned char ucb$b_tracks;
-                    unsigned short int ucb$w_cylinders;
+                    UINT16 ucb$b_sectors;
+                    UINT16 ucb$b_tracks;
+                    UINT16 ucb$w_cylinders;
                 };
                 struct
                 {
                     char ucbdef$$_term_devdepend_fill [3];
-                    unsigned char ucb$b_vertsz;
+                    UINT16 ucb$b_vertsz;
                 };
                 struct
                 {
-                    unsigned char ucb$b_locsrv;
-                    unsigned char ucb$b_remsrv;
-                    unsigned short int ucb$w_bytestogo;
+                    UINT16 ucb$b_locsrv;
+                    UINT16 ucb$b_remsrv;
+                    UINT16 ucb$w_bytestogo;
                 };
             };
             union
             {
-                unsigned int ucb$l_devdepnd2;
-                unsigned int ucb$l_tt_devdp1;
-                unsigned short int ucb$w_tu_formenu;
+                UINT32 ucb$l_devdepnd2;
+                UINT32 ucb$l_tt_devdp1;
+                UINT16 ucb$w_tu_formenu;
             };
         };
     };
     union
     {
-        unsigned long long ucb$q_devdepend2;
+        UINT64 ucb$q_devdepend2;
         struct
         {
             union
             {
-                unsigned int ucb$l_devdepnd3;
+                UINT32 ucb$l_devdepnd3;
             };
             union
             {
-                unsigned int ucb$l_devdepnd4;
+                UINT32 ucb$l_devdepnd4;
             };
         };
         struct
         {
-            unsigned short int ucb$w_tmv_bcnt1;
-            unsigned short int ucb$w_tmv_bcnt2;
-            unsigned short int ucb$w_tmv_bcnt3;
-            unsigned short int ucb$w_tmv_bcnt4;
+            UINT16 ucb$w_tmv_bcnt1;
+            UINT16 ucb$w_tmv_bcnt2;
+            UINT16 ucb$w_tmv_bcnt3;
+            UINT16 ucb$w_tmv_bcnt4;
         };
     };
     struct _irp *ucb$l_ioqfl;
     struct _irp *ucb$l_ioqbl;
-    unsigned short int ucb$w_unit;
+    UINT16 ucb$w_unit;
     union
     {
-        unsigned short int ucb$w_charge;
-        unsigned short int ucb$w_rwaitcnt;
+        UINT16 ucb$w_charge;
+        UINT16 ucb$w_rwaitcnt;
         struct
         {
-            unsigned char ucb$b_cm1;
-            unsigned char ucb$b_cm2;
+            UINT16 ucb$b_cm1;
+            UINT16 ucb$b_cm2;
         };
     };
     struct _irp *ucb$l_irp;
-    unsigned int ucb$l_refc;
+    UINT32 ucb$l_refc;
     union
     {
-        unsigned char ucb$b_dipl;
-        unsigned char ucb$b_state;
+        UINT16 ucb$b_dipl;
+        UINT16 ucb$b_state;
     };
-    unsigned char ucb$b_amod;
-    short int ucb$w_fill_0;
+    UINT16 ucb$b_amod;
+    INT16 ucb$w_fill_0;
     struct _ucb *ucb$l_amb;
     union
     {
-        unsigned int ucb$l_sts;
+        UINT32 ucb$l_sts;
         struct
         {
             unsigned ucb$v_tim : 1;
@@ -439,7 +439,7 @@ struct _ucb
     };
     union
     {
-        unsigned int ucb$l_devsts;
+        UINT32 ucb$l_devsts;
         struct
         {
             unsigned ucb$v_job : 1;
@@ -563,28 +563,28 @@ struct _ucb
             unsigned ucb$v_fill_5_ : 3;
         };
     };
-    int ucb$l_qlen;
+    INT32 ucb$l_qlen;
     struct _ucb *ucb$ps_start_aff_qfl;
     struct _ucb *ucb$ps_start_aff_qbl;
     struct _cpu *ucb$l_port_cpudb;
     int (*ucb$ps_io_counters)(void);
-    unsigned int ucb$l_duetim;
-    unsigned int ucb$l_opcnt;
-    unsigned int ucb$l_svpn;
+    UINT32 ucb$l_duetim;
+    UINT32 ucb$l_opcnt;
+    UINT32 ucb$l_svpn;
     void *ucb$l_svapte;
     unsigned long ucb$l_bcnt;
     unsigned long ucb$l_boff;
-    unsigned int ucb$l_softerrcnt;
-    unsigned int ucb$l_ertcnt;
-    unsigned int ucb$l_ertmax;
-    unsigned int ucb$l_errcnt;
+    UINT32 ucb$l_softerrcnt;
+    UINT32 ucb$l_ertcnt;
+    UINT32 ucb$l_ertmax;
+    UINT32 ucb$l_errcnt;
     struct _pdt *ucb$l_pdt;
     struct _ddt *ucb$l_ddt;
     struct _adp *ucb$ps_adp;
     struct _crctx *ucb$ps_crctx;
     union
     {
-        unsigned int ucb$l_media_id;
+        UINT32 ucb$l_media_id;
         struct
         {
             unsigned ucb$v_media_id_nn : 7;
@@ -599,16 +599,16 @@ struct _ucb
     struct _ucb *ucb$ps_dtn_link;
     void (*ucb$ps_toutrout)(void);
     struct _sud *ucb$ps_sud;
-    unsigned char ucb$b_second_time_in_startio;
-    unsigned char ucb$b_third_time_in_startio;
+    UINT16 ucb$b_second_time_in_startio;
+    UINT16 ucb$b_third_time_in_startio;
 };
 
 struct _mb_ucb
 {
 
     struct _ucb ucb$r_ucb;
-    unsigned int ucb$l_mb_readerrefc;
-    unsigned int ucb$l_mb_writerrefc;
+    UINT32 ucb$l_mb_readerrefc;
+    UINT32 ucb$l_mb_writerrefc;
     struct _irp *ucb$l_mb_readqfl;
     struct _irp *ucb$l_mb_readqbl;
     long ucb$l_mb_writerwaitqfl;
@@ -635,10 +635,10 @@ struct _erl_ucb
 
     struct _ucb ucb$r_ucb;
     void *ucb$l_emb;
-    unsigned int ucb$l_func;
+    UINT32 ucb$l_func;
     void (*ucb$l_dpc)(void);
-    unsigned short int ucb$w_mt3_density;
-    char ucb$b_fill_8_ [2];
+    UINT16 ucb$w_mt3_density;
+    INT8 ucb$b_fill_8_ [2];
 };
 
 struct _dp_ucb
@@ -660,7 +660,7 @@ struct _dp_ucb
             struct _ucb *ucb$l_2p_altucb;
         };
     };
-    char ucb$b_fill_9_ [4];
+    INT8 ucb$b_fill_9_ [4];
 };
 
 struct _dt_ucb
@@ -669,40 +669,40 @@ struct _dt_ucb
     struct _dp_ucb ucb$r_dpucb;
     union
     {
-        unsigned short int ucb$w_dirseq;
+        UINT16 ucb$w_dirseq;
         struct
         {
             unsigned ucb$v_filler : 15;
             unsigned ucb$v_ast_armed : 1;
         };
     };
-    unsigned char ucb$b_onlcnt;
+    UINT16 ucb$b_onlcnt;
     union
     {
         struct
         {
-            char ucb$b_reserved;
-            unsigned int ucb$l_maxblock;
-            unsigned int ucb$l_maxbcnt;
-            int ucb$l_dccb;
-            unsigned int ucb$l_qlenacc;
-            unsigned int ucb$l_usn;
+            INT8 ucb$b_reserved;
+            UINT32 ucb$l_maxblock;
+            UINT32 ucb$l_maxbcnt;
+            INT32 ucb$l_dccb;
+            UINT32 ucb$l_qlenacc;
+            UINT32 ucb$l_usn;
             void *ucb$ps_mount_list;
             char ucb$t_mscp_dsply_path [8];
         };
         struct
         {
-            unsigned char ucb$b_prev_record;
-            unsigned int ucb$l_record;
-            int ucb$l_reserved;
-            unsigned int ucb$l_tmv_record;
-            unsigned short int ucb$w_tmv_crc1;
-            unsigned short int ucb$w_tmv_crc2;
-            unsigned short int ucb$w_tmv_crc3;
-            unsigned short int ucb$w_tmv_crc4;
+            UINT16 ucb$b_prev_record;
+            UINT32 ucb$l_record;
+            INT32 ucb$l_reserved;
+            UINT32 ucb$l_tmv_record;
+            UINT16 ucb$w_tmv_crc1;
+            UINT16 ucb$w_tmv_crc2;
+            UINT16 ucb$w_tmv_crc3;
+            UINT16 ucb$w_tmv_crc4;
         };
     };
-    unsigned int ucb$l_alloclass;
+    UINT32 ucb$l_alloclass;
 };
 
 struct _mscp_ucb
@@ -715,53 +715,53 @@ struct _mscp_ucb
     struct _cdt *ucb$l_cdt;
     struct _cddb *ucb$l_wait_cddb;
     struct _cddb *ucb$l_pref_cddb;
-    unsigned long long ucb$q_unit_id;
-    unsigned short int ucb$w_mscpunit;
-    unsigned short int ucb$w_unit_flags;
-    unsigned short int ucb$w_lcl_mscpunit;
-    unsigned short int ucb$w_srv_mscpunit;
-    unsigned int ucb$l_mscpdevparam;
-    unsigned char ucb$b_freecap;
-    unsigned char ucb$b_fail_mutex;
-    unsigned short int ucb$w_mscp_resvdw;
-    int ucb$l_shad;
-    unsigned int ucb$l_dutufkblink;
+    UINT64 ucb$q_unit_id;
+    UINT16 ucb$w_mscpunit;
+    UINT16 ucb$w_unit_flags;
+    UINT16 ucb$w_lcl_mscpunit;
+    UINT16 ucb$w_srv_mscpunit;
+    UINT32 ucb$l_mscpdevparam;
+    UINT16 ucb$b_freecap;
+    UINT16 ucb$b_fail_mutex;
+    UINT16 ucb$w_mscp_resvdw;
+    INT32 ucb$l_shad;
+    UINT32 ucb$l_dutufkblink;
 };
 
 struct _du_ucb
 {
 
     struct _mscp_ucb ucb$r_mscpucb;
-    unsigned int ucb$l_du_volser;
+    UINT32 ucb$l_du_volser;
 
-    unsigned int ucb$l_du_usize;
+    UINT32 ucb$l_du_usize;
 
-    unsigned int ucb$l_du_totsz;
+    UINT32 ucb$l_du_totsz;
 
-    unsigned short int ucb$w_du_rctsize;
-    unsigned char ucb$b_du_rctcpys;
-    unsigned char ucb$b_du_rbnptrk;
-    unsigned short int ucb$w_du_lbnptrk;
-    unsigned short int ucb$w_du_trkpgrp;
-    unsigned short int ucb$w_du_grppcyl;
-    unsigned short int ucb$w_du_muntc;
-    unsigned char ucb$b_du_usvr;
-    unsigned char ucb$b_du_uhvr;
-    char ucb$b_fill_12_ [6];
+    UINT16 ucb$w_du_rctsize;
+    UINT16 ucb$b_du_rctcpys;
+    UINT16 ucb$b_du_rbnptrk;
+    UINT16 ucb$w_du_lbnptrk;
+    UINT16 ucb$w_du_trkpgrp;
+    UINT16 ucb$w_du_grppcyl;
+    UINT16 ucb$w_du_muntc;
+    UINT16 ucb$b_du_usvr;
+    UINT16 ucb$b_du_uhvr;
+    INT8 ucb$b_fill_12_ [6];
 };
 
 struct _tu_ucb
 {
 
     struct _mscp_ucb ucb$r_mscpucb;
-    unsigned int ucb$l_tu_maxwrcnt;
-    unsigned short int ucb$w_tu_format;
-    unsigned short int ucb$w_tu_speed;
-    unsigned short int ucb$w_tu_noise;
-    unsigned char ucb$b_tu_softerr;
+    UINT32 ucb$l_tu_maxwrcnt;
+    UINT16 ucb$w_tu_format;
+    UINT16 ucb$w_tu_speed;
+    UINT16 ucb$w_tu_noise;
+    UINT16 ucb$b_tu_softerr;
     union
     {
-        unsigned char ucb$b_tu_softflags;
+        UINT16 ucb$b_tu_softflags;
         struct
         {
             unsigned ucb$v_tu_rptreq : 1;
@@ -770,11 +770,11 @@ struct _tu_ucb
             unsigned ucb$v_fill_13_ : 5;
         };
     };
-    int ucb$l_tracebeg;
-    int ucb$l_traceptr;
-    int ucb$l_tracend;
-    int ucb$l_trace_next_slot;
-    char ucb$b_fill_14_ [4];
+    INT32 ucb$l_tracebeg;
+    INT32 ucb$l_traceptr;
+    INT32 ucb$l_tracend;
+    INT32 ucb$l_trace_next_slot;
+    INT8 ucb$b_fill_14_ [4];
 };
 
 struct _scsi_ucb
@@ -797,7 +797,7 @@ struct _scsi_ucb
         char ucb$ib_pk_inifkblk [32];
         struct _kpb *ucb$ps_pk_inikpb;
     };
-    char ucb$b_fill_18_ [4];
+    INT8 ucb$b_fill_18_ [4];
 };
 
 struct _net_ucb
@@ -806,10 +806,10 @@ struct _net_ucb
     struct _ucb ucb$r_ucb;
     void *ucb$l_nt_datssb;
     void *ucb$l_nt_intssb;
-    unsigned short int ucb$w_nt_chan;
+    UINT16 ucb$w_nt_chan;
     union
     {
-        short int ucbdef$$_fill_3;
+        INT16 ucbdef$$_fill_3;
         struct
         {
             unsigned ucb$v_ltype : 2;
@@ -821,7 +821,7 @@ struct _net_ucb
         };
 
     };
-    char ucb$b_fill_19_ [4];
+    INT8 ucb$b_fill_19_ [4];
 };
 
 struct _ni_ucb
@@ -843,17 +843,17 @@ struct _pa_ucb
 {
 
     //  ERL_struct _ucb ucb$r_erlucb; not yet
-    unsigned int ucb$l_inifkblk [8];
+    UINT32 ucb$l_inifkblk [8];
 
-    unsigned int ucb$l_mfqefkblk [8];
-    unsigned short int ucb$w_incarn;
-    short int ucb$w_fill1;
+    UINT32 ucb$l_mfqefkblk [8];
+    UINT16 ucb$w_incarn;
+    INT16 ucb$w_fill1;
     struct _adp *ucb$l_adp;
-    unsigned int ucb$l_inireturn;
+    UINT32 ucb$l_inireturn;
 
-    int ucb$l_fill2;
-    unsigned int ucb$l_ndt;
-    unsigned char ucb$b_dt;
+    INT32 ucb$l_fill2;
+    UINT32 ucb$l_ndt;
+    UINT16 ucb$b_dt;
     union
     {
         struct
@@ -865,84 +865,84 @@ struct _pa_ucb
             unsigned ucb$v_storage : 1;
             unsigned ucb$v_fill_20_ : 3;
         };
-        unsigned char ucb$b_ini_flags;
+        UINT16 ucb$b_ini_flags;
     };
-    short int ucb$w_fill3;
-    unsigned char ucb$b_msg_typ;
-    unsigned char ucb$b_pdt_type;
-    unsigned short int ucb$w_pdt_size;
-    unsigned int ucb$l_ppd_size;
+    INT16 ucb$w_fill3;
+    UINT16 ucb$b_msg_typ;
+    UINT16 ucb$b_pdt_type;
+    UINT16 ucb$w_pdt_size;
+    UINT32 ucb$l_ppd_size;
     void *ucb$l_lsindx;
-    unsigned int ucb$l_lslength;
+    UINT32 ucb$l_lslength;
     void *ucb$l_pmc;
-    unsigned int ucb$l_rev_table;
-    int (*ucb$l_power_fail)(void);
-    int (*ucb$l_init_pdt)(void);
-    int (*ucb$l_start_ucode)(void);
-    int (*ucb$l_enb_int)(void);
-    int (*ucb$l_format_rev)(void);
-    int (*ucb$l_timer)(void);
-    int (*ucb$l_poke_port)(void);
-    int (*ucb$l_interrupt)(void);
-    int (*ucb$l_stop_ucode)(void);
-    int (*ucb$l_unmap_pdt)(void);
-    int (*ucb$l_reg_dump)(void);
-    int (*ucb$l_reg_disp)(void);
-    int (*ucb$l_mem_dump)(void);
-    int (*ucb$l_release_ps)(void);
-    int ucb$l_fill4;
-    unsigned int ucb$l_ins_comql;
-    unsigned int ucb$l_ins_comqh;
-    unsigned int ucb$l_ins_dfreq;
-    unsigned int ucb$l_ins_mfreq;
-    unsigned int ucb$l_ins_comqm;
-    unsigned int ucb$l_init_ablk;
-    unsigned int ucb$l_cmpl_int;
-    unsigned int ucb$l_misc_int2;
-    int ucb$l_fill5 [2];
-    unsigned int ucb$l_msgfkblk [8];
+    UINT32 ucb$l_rev_table;
+    INT32 (*ucb$l_power_fail)(void);
+    INT32 (*ucb$l_init_pdt)(void);
+    INT32 (*ucb$l_start_ucode)(void);
+    INT32 (*ucb$l_enb_int)(void);
+    INT32 (*ucb$l_format_rev)(void);
+    INT32 (*ucb$l_timer)(void);
+    INT32 (*ucb$l_poke_port)(void);
+    INT32 (*ucb$l_interrupt)(void);
+    INT32 (*ucb$l_stop_ucode)(void);
+    INT32 (*ucb$l_unmap_pdt)(void);
+    INT32 (*ucb$l_reg_dump)(void);
+    INT32 (*ucb$l_reg_disp)(void);
+    INT32 (*ucb$l_mem_dump)(void);
+    INT32 (*ucb$l_release_ps)(void);
+    INT32 ucb$l_fill4;
+    UINT32 ucb$l_ins_comql;
+    UINT32 ucb$l_ins_comqh;
+    UINT32 ucb$l_ins_dfreq;
+    UINT32 ucb$l_ins_mfreq;
+    UINT32 ucb$l_ins_comqm;
+    UINT32 ucb$l_init_ablk;
+    UINT32 ucb$l_cmpl_int;
+    UINT32 ucb$l_misc_int2;
+    INT32 ucb$l_fill5 [2];
+    UINT32 ucb$l_msgfkblk [8];
 
     unsigned int ucb$t_opa0_temp [6];
-    unsigned char ucb$b_lmest;
-    unsigned char ucb$b_lmet;
-    unsigned char ucb$b_lmertcnt;
-    unsigned char ucb$b_lmertmax;
-    unsigned short int ucb$w_lmerrcnt;
-    short int ucb$w_fill6;
-    unsigned char ucb$n_lsaddr [6];
-    unsigned char ucb$n_lsid [6];
-    unsigned char ucb$n_rsaddr [6];
-    unsigned char ucb$n_rsid [6];
-    unsigned int ucb$l_cicmd;
-    unsigned short int ucb$w_msgbytcnt;
-    unsigned short int ucb$w_msgppdtyp;
-    unsigned char ucb$t_msgdata [64];
-    char ucb$b_fill7 [116];
-    int ucb$l_fill8 [2];
-    char ucb$b_align_1 [16];
-    unsigned int ucb$l_rspfkblk [8];
+    UINT16 ucb$b_lmest;
+    UINT16 ucb$b_lmet;
+    UINT16 ucb$b_lmertcnt;
+    UINT16 ucb$b_lmertmax;
+    UINT16 ucb$w_lmerrcnt;
+    INT16 ucb$w_fill6;
+    UINT16 ucb$n_lsaddr [6];
+    UINT16 ucb$n_lsid [6];
+    UINT16 ucb$n_rsaddr [6];
+    UINT16 ucb$n_rsid [6];
+    UINT32 ucb$l_cicmd;
+    UINT16 ucb$w_msgbytcnt;
+    UINT16 ucb$w_msgppdtyp;
+    UINT16 ucb$t_msgdata [64];
+    INT8 ucb$b_fill7 [116];
+    INT32 ucb$l_fill8 [2];
+    INT8 ucb$b_align_1 [16];
+    UINT32 ucb$l_rspfkblk [8];
 
     union
     {
-        unsigned int ucb$l_rsp_sts;
+        UINT32 ucb$l_rsp_sts;
         struct
         {
             unsigned ucb$v_rsp_fkb_in_use : 1;
             unsigned ucb$v_fill_21_ : 7;
         };
     };
-    int ucb$l_reserved2 [7];
+    INT32 ucb$l_reserved2 [7];
 };
 
 struct _pi_ucb
 {
 
     struct _pa_ucb ucb$r_paucb;
-    unsigned char ucb$b_pi_fkb [32];
-    unsigned char ucb$b_pi_tqe [64];
+    UINT16 ucb$b_pi_fkb [32];
+    UINT16 ucb$b_pi_tqe [64];
     union
     {
-        unsigned long long ucb$q_pi_tfq;
+        UINT64 ucb$q_pi_tfq;
         struct
         {
             void *ucb$l_pi_tfq_flink;
@@ -951,7 +951,7 @@ struct _pi_ucb
     };
     union
     {
-        unsigned long long ucb$q_pi_tq;
+        UINT64 ucb$q_pi_tq;
         struct
         {
             void *ucb$l_pi_tq_flink;
@@ -960,7 +960,7 @@ struct _pi_ucb
     };
     union
     {
-        unsigned long long ucb$q_pi_ifq;
+        UINT64 ucb$q_pi_ifq;
         struct
         {
             void *ucb$l_pi_ifq_flink;
@@ -969,28 +969,28 @@ struct _pi_ucb
     };
     union
     {
-        unsigned long long ucb$q_pi_iq;
+        UINT64 ucb$q_pi_iq;
         struct
         {
             void *ucb$l_pi_iq_flink;
             void *ucb$l_pi_iq_blink;
         };
     };
-    unsigned int ucb$l_pi_sva;
-    unsigned int ucb$l_pi_svpn;
-    unsigned int ucb$l_pi_script;
-    unsigned int ucb$l_pi_tgt_script;
-    unsigned int ucb$l_pi_dat_script;
-    unsigned int ucb$l_pi_ini_script;
-    unsigned int ucb$l_pi_rl_stat;
-    unsigned int ucb$l_pi_wl_dsp;
-    unsigned int ucb$l_pi_tgt_c710d;
-    unsigned int ucb$l_pi_ini_c710d;
-    unsigned int ucb$l_pi_curr_script;
-    unsigned int ucb$l_pi_dsa;
-    unsigned int ucb$l_pi_dsps;
-    unsigned int ucb$l_pi_scratch;
-    unsigned int ucb$l_pi_exp_int;
+    UINT32 ucb$l_pi_sva;
+    UINT32 ucb$l_pi_svpn;
+    UINT32 ucb$l_pi_script;
+    UINT32 ucb$l_pi_tgt_script;
+    UINT32 ucb$l_pi_dat_script;
+    UINT32 ucb$l_pi_ini_script;
+    UINT32 ucb$l_pi_rl_stat;
+    UINT32 ucb$l_pi_wl_dsp;
+    UINT32 ucb$l_pi_tgt_c710d;
+    UINT32 ucb$l_pi_ini_c710d;
+    UINT32 ucb$l_pi_curr_script;
+    UINT32 ucb$l_pi_dsa;
+    UINT32 ucb$l_pi_dsps;
+    UINT32 ucb$l_pi_scratch;
+    UINT32 ucb$l_pi_exp_int;
     union
     {
         struct
@@ -1000,9 +1000,9 @@ struct _pi_ucb
             unsigned ucb$v_pi_tqe_busy : 1;
             unsigned ucb$v_fill_30_ : 5;
         };
-        unsigned char ucb$b_pi_flags;
+        UINT16 ucb$b_pi_flags;
     };
-    char ucb$b_fill_31_ [3];
+    INT8 ucb$b_fill_31_ [3];
 };
 
 
@@ -1018,22 +1018,22 @@ struct _pb_ucb
     struct _ucb *ucb$ps_pb_template_ucb;
     //  SHM_ID ucb$r_pb_smci_section_id;   // not yet
 
-    unsigned int ucb$l_pb_status;
+    UINT32 ucb$l_pb_status;
     struct _tqe *ucb$ps_pb_tqe;
     struct _idb *ucb$ps_pb_idb;
     struct _ucb *ucb$ps_pb_admin_ucb;
     struct _tqe *ucb$ps_pb_discovery_tqe;
-    unsigned int ucb$l_pb_remote_gnode;
-    unsigned long long ucb$q_pb_incarnation;
+    UINT32 ucb$l_pb_remote_gnode;
+    UINT64 ucb$q_pb_incarnation;
 
     union
     {
-        unsigned int ucb$l_pb_chansts;
+        UINT32 ucb$l_pb_chansts;
         struct
         {
             union
             {
-                unsigned short int ucb$w_pb_chansts;
+                UINT16 ucb$w_pb_chansts;
                 struct
                 {
                     unsigned ucb$v_pb_open : 1;
@@ -1045,7 +1045,7 @@ struct _pb_ucb
             };
             union
             {
-                unsigned short int ucb$w_pb_chanerr;
+                UINT16 ucb$w_pb_chanerr;
                 struct
                 {
                     unsigned ucb$v_pb_aborted : 1;
@@ -1058,31 +1058,31 @@ struct _pb_ucb
             };
         };
     };
-    unsigned int ucb$l_pb_lnode_idx;
-    unsigned int ucb$l_pb_rnode_idx;
+    UINT32 ucb$l_pb_lnode_idx;
+    UINT32 ucb$l_pb_rnode_idx;
     void *ucb$ps_pb_fkb;
     void *ucb$pq_pb_nb;
 
-    int ucb$l_pb_nb_len;
+    INT32 ucb$l_pb_nb_len;
     void *ucb$ps_pb_smh;
     void *ucb$ps_pb_smh_self;
-    unsigned int ucb$l_pb_gnode [2];
-    unsigned int ucb$l_pb_node_block [2];
-    unsigned int ucb$l_pb_workq [4];
-    unsigned int ucb$l_pb_freeq;
+    UINT32 ucb$l_pb_gnode [2];
+    UINT32 ucb$l_pb_node_block [2];
+    UINT32 ucb$l_pb_workq [4];
+    UINT32 ucb$l_pb_freeq;
     //  SHM_ID ucb$r_pb_reg_id; not yet
 
-    unsigned int ucb$l_pb_msg_nworkq;
-    unsigned int ucb$l_pb_msg_buffers;
-    unsigned int ucb$l_pb_msg_dg_size;
-    unsigned int ucb$l_pb_msg_scshdr_size;
-    unsigned int ucb$l_pb_msg_smwe_size;
-    unsigned int ucb$l_pb_msg_smch_size;
-    unsigned int ucb$l_pb_msg_smnd_size;
-    unsigned int ucb$l_pb_msg_netsize;
-    unsigned int ucb$l_pb_channel_add;
-    unsigned int ucb$l_dbg [30];
-    char ucb$b_fill_34_ [4];
+    UINT32 ucb$l_pb_msg_nworkq;
+    UINT32 ucb$l_pb_msg_buffers;
+    UINT32 ucb$l_pb_msg_dg_size;
+    UINT32 ucb$l_pb_msg_scshdr_size;
+    UINT32 ucb$l_pb_msg_smwe_size;
+    UINT32 ucb$l_pb_msg_smch_size;
+    UINT32 ucb$l_pb_msg_smnd_size;
+    UINT32 ucb$l_pb_msg_netsize;
+    UINT32 ucb$l_pb_channel_add;
+    UINT32 ucb$l_dbg [30];
+    INT8 ucb$b_fill_34_ [4];
 };
 
 struct _sd_ucb
@@ -1090,29 +1090,30 @@ struct _sd_ucb
 
     struct _dt_ucb ucb$r_dtucb;
 
-    unsigned long long ucb$q_sd_export_queue;
+    UINT64 ucb$q_sd_export_queue;
     void *ucb$ps_sd_sdcb;
     void *ucb$ps_sd_pool_config;
-    unsigned int ucb$l_sd_family_number;
-    unsigned int ucb$l_sd_snap_number;
-    unsigned int ucb$l_sd_dev_lockid;
-    unsigned int ucb$l_sd_uid_lockid;
-    unsigned int ucb$l_sd_spare1;
-    unsigned int ucb$l_sd_spare2;
-    unsigned int ucb$l_sd_spare3;
-    unsigned int ucb$l_sd_spare4;
+    UINT32 ucb$l_sd_family_number;
+    UINT32 ucb$l_sd_snap_number;
+    UINT32 ucb$l_sd_dev_lockid;
+    UINT32 ucb$l_sd_uid_lockid;
+    UINT32 ucb$l_sd_spare1;
+    UINT32 ucb$l_sd_spare2;
+    UINT32 ucb$l_sd_spare3;
+    UINT32 ucb$l_sd_spare4;
 };
+
 struct _sud
 {
     struct _ucb *sud$ps_ucblink;
     void *sud$ps_aux_sud;
-    unsigned short int sud$w_size;
-    unsigned char sud$b_type;
-    unsigned char sud$b_subtype;
+    UINT16 sud$w_size;
+    UINT16 sud$b_type;
+    UINT16 sud$b_subtype;
 
     union
     {
-        unsigned int sud$l_flags;
+        UINT32 sud$l_flags;
         struct
         {
             unsigned sud$v_aux_sud_alloc : 1;
@@ -1121,7 +1122,7 @@ struct _sud
     };
     union
     {
-        unsigned int sud$l_sts;
+        UINT32 sud$l_sts;
         struct
         {
             unsigned sud$v_path_available : 1;
@@ -1141,7 +1142,7 @@ struct _sud
     };
     union
     {
-        unsigned int sud$l_devchar3;
+        UINT32 sud$l_devchar3;
         struct
         {
             unsigned sud$v_wwid_present : 1;
@@ -1150,25 +1151,25 @@ struct _sud
             unsigned sud$v_fill_42_ : 5;
         };
     };
-    unsigned long long sud$q_scssystemid;
-    unsigned int sud$l_qslun;
+    UINT64 sud$q_scssystemid;
+    UINT32 sud$l_qslun;
     struct _qscub *sud$ps_qscub_ptr;
     struct _qssub *sud$ps_qssub_ptr;
-    unsigned int sud$l_qsrv_path_prio;
-    unsigned int sud$l_wwid_offset;
-    unsigned int sud$l_wwid_length;
+    UINT32 sud$l_qsrv_path_prio;
+    UINT32 sud$l_wwid_offset;
+    UINT32 sud$l_wwid_length;
     struct _mpdev *sud$ps_mpdev;
     struct _ucb *sud$ps_mpdev_primary_ucb;
     struct _ucb *sud$ps_mpdev_next_ucb;
-    char sud$b_fill_43_ [4];
-    unsigned long long sud$q_mpdev_switch_to_time;
-    unsigned long long sud$q_mpdev_switch_from_time;
+    INT8 sud$b_fill_43_ [4];
+    UINT64 sud$q_mpdev_switch_to_time;
+    UINT64 sud$q_mpdev_switch_from_time;
     struct _mpdev_ppb *sud$ps_mpdev_ppb;
     union
     {
         struct
         {
-            unsigned int sud$l_fp_flags;
+            UINT32 sud$l_fp_flags;
         };
         struct
         {
@@ -1191,24 +1192,24 @@ struct _sud
     void *sud$l_fp_asgn_hw_int_ports_fl;
     void *sud$l_fp_asgn_hw_int_ports_bl;
 
-    int sud$l_fp_spare1;
-    int sud$l_fp_spare2;
-    int sud$l_fp_spare3;
-    int sud$l_fp_spare4;
+    INT32 sud$l_fp_spare1;
+    INT32 sud$l_fp_spare2;
+    INT32 sud$l_fp_spare3;
+    INT32 sud$l_fp_spare4;
 
-    unsigned int sud$l_mpdev_pv_iost1;
-    unsigned int sud$l_mpdev_pv_abstim;
-    unsigned int sud$l_mpdev_tracking_start;
-    unsigned int sud$l_mpdev_tracking_count;
-    unsigned int sud$l_mpdev_pv_duration;
-    int sud$l_mpdev_spare_4;
-    int sud$l_mpdev_spare_5;
-    int sud$l_mpdev_spare_6;
-    int sud$l_mpdev_path_id;
+    UINT32 sud$l_mpdev_pv_iost1;
+    UINT32 sud$l_mpdev_pv_abstim;
+    UINT32 sud$l_mpdev_tracking_start;
+    UINT32 sud$l_mpdev_tracking_count;
+    UINT32 sud$l_mpdev_pv_duration;
+    INT32 sud$l_mpdev_spare_4;
+    INT32 sud$l_mpdev_spare_5;
+    INT32 sud$l_mpdev_spare_6;
+    INT32 sud$l_mpdev_path_id;
     struct _fc_wwid_64b *sud$ps_fc_port_name;
     struct _fc_wwid_64b *sud$ps_fc_node_name;
     struct _irp *sud$l_busy_bit_irp_p;
-    char sud$b_fill_45_ [4];
+    UINT8 sud$b_fill_45_ [4];
 };
 
 #define ucb$r_mscp_ucb ucb$r_dtucb.ucb$r_dpucb.ucb$r_erlucb.ucb$r_ucb

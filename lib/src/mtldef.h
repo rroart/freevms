@@ -1,6 +1,8 @@
 #ifndef MTLDEF_H
 #define MTLDEF_H
 
+#include <vms_types.h>
+
 #define MTL$K_LENGTH 32
 #define MTL$C_LENGTH 32
 #define MTL$S_MTLDEF 32
@@ -9,11 +11,11 @@ struct _mtl
 {
     struct _mtl *mtl$l_mtlfl;
     struct _mtl *mtl$l_mtlbl;
-    unsigned short int mtl$w_size;
-    unsigned char mtl$b_type;
+    UINT16 mtl$w_size;
+    UINT8 mtl$b_type;
     union
     {
-        unsigned char mtl$b_status;
+        UINT8 mtl$b_status;
         struct
         {
             unsigned mtl$v_volset : 1;
@@ -24,8 +26,8 @@ struct _mtl
     struct _ucb *mtl$l_ucb;
     void *mtl$l_logname;
     void *mtl$l_lognam2;
-    int mtldef$$_fill_1;
-    unsigned int mtl$l_uic;
+    INT32 mtldef$$_fill_1;
+    UINT32 mtl$l_uic;
 };
 
 #endif

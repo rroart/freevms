@@ -15,14 +15,14 @@
 struct _ft_ucb
 {
     struct _tty_ucb ucb$r_ttyucb;
-    unsigned int ucb$l_ft_ipid;
+    UINT32 ucb$l_ft_ipid;
     void *ucb$l_ft_1st_page;
     void *ucb$l_ft_lst_page;
     void *ucb$l_ft_s0_page;
-    unsigned long long ucb$q_ft_buffer_handle;
+    UINT64 ucb$q_ft_buffer_handle;
     union
     {
-        unsigned short int ucb$w_ft_sts;
+        UINT16 ucb$w_ft_sts;
         struct
         {
             unsigned ucb$v_ft_bsy       : 1;
@@ -32,7 +32,7 @@ struct _ft_ucb
             unsigned ucb$v_fill_0_      : 4;
         };
     };
-    unsigned short int ucb$w_ft_chan;
+    UINT16 ucb$w_ft_chan;
     struct _ftrd *ucb$l_ft_readqfl;
     struct _ftrd *ucb$l_ft_readqbl;
     struct _ftrd *ucb$l_ft_curr_read;
@@ -56,12 +56,12 @@ struct _ft_ucb
         {
             struct _fkb *ucb$l_ft_fqfl;
             struct _fkb *ucb$l_ft_fqbl;
-            unsigned short int ucb$w_ft_frksize;
-            unsigned char ucb$b_ft_frk_type;
-            unsigned char ucb$b_ft_flck;
+            UINT16 ucb$w_ft_frksize;
+            UINT8 ucb$b_ft_frk_type;
+            UINT8 ucb$b_ft_flck;
             void (*ucb$l_ft_fpc)(void);
-            unsigned long long ucb$q_ft_fr3;
-            unsigned long long ucb$q_ft_fr4;
+            UINT64 ucb$q_ft_fr3;
+            UINT64 ucb$q_ft_fr4;
         };
     };
 };

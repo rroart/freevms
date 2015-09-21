@@ -126,9 +126,9 @@ struct _irp
 {
     struct _irp *irp$l_ioqfl;
     struct _irp *irp$l_ioqbl;
-    unsigned short int irp$w_size;
-    unsigned char irp$b_type;
-    unsigned char irp$b_rmod;
+    UINT16 irp$w_size;
+    UINT8 irp$b_type;
+    UINT8 irp$b_rmod;
     unsigned long irp$l_pid;
     unsigned long irp$l_ast;
     unsigned long irp$l_astprm;
@@ -143,10 +143,10 @@ struct _irp
             unsigned irp$v_fmod :10;
         };
     };
-    unsigned char irp$b_efn;
-    unsigned char irp$b_pri;
+    UINT8 irp$b_efn;
+    UINT8 irp$b_pri;
     unsigned long irp$l_iosb;
-    unsigned short irp$w_chan;
+    UINT16 irp$w_chan;
     union
     {
         unsigned long irp$l_svapte;
@@ -155,9 +155,9 @@ struct _irp
     /* temporary work-around */
     unsigned long useraddress; /* do not know the pte/buffer stuff yet */
     unsigned long irp$l_boff;
-    unsigned short irp$w_empty;
+    UINT16 irp$w_empty;
     unsigned long irp$l_bcnt;
-    unsigned short irp$w_emptyagain;
+    UINT16 irp$w_emptyagain;
     union
     {
         unsigned long irp$l_iost1;
@@ -182,12 +182,12 @@ struct _irp
 
     union
     {
-        unsigned long long irp$q_status;
+        UINT64 irp$q_status;
         struct
         {
             union
             {
-                unsigned int irp$l_sts;
+                UINT32 irp$l_sts;
                 struct
                 {
                     unsigned irp$v_bufio :1;
@@ -226,7 +226,7 @@ struct _irp
             };
             union
             {
-                unsigned int irp$l_sts2;
+                UINT32 irp$l_sts2;
                 struct
                 {
                     unsigned irp$v_start_past_hwm :1;
@@ -267,7 +267,7 @@ struct _irp
     // put at back to avoid recompile this time
     // sort in right later
 
-    unsigned long long irp$q_tt_state;
+    UINT64 irp$q_tt_state;
 
 };
 

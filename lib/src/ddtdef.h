@@ -1,6 +1,8 @@
 #ifndef DDTDEF_H
 #define DDTDEF_H
 
+#include <vms_types.h>
+
 #define DDT$M_DIAGBUF64 32768
 #define DDT$K_ITCLVL_DRVR 0
 #define DDT$K_ITCLVL_MPDEV 4096
@@ -14,10 +16,10 @@
 
 struct _ddt
 {
-    unsigned short int ddt$w_size;
-    unsigned char ddt$b_type;
-    unsigned char ddt$b_subtype;
-    short int ddt$w_intercept_level;
+    UINT16 ddt$w_size;
+    UINT8 ddt$b_type;
+    UINT8 ddt$b_subtype;
+    INT16 ddt$w_intercept_level;
     unsigned long ddt$l_start;
     unsigned long ddt$l_unsolint;
     struct _fdt * ddt$l_fdt; /* functb */
@@ -29,8 +31,8 @@ struct _ddt
     unsigned long ddt$l_altstart;
     unsigned long ddt$l_mntver;
     unsigned long ddt$l_cloneducb;
-    unsigned short int ddt$w_fdtsize;
-    unsigned short int ddt$w_reserved;
+    UINT16 ddt$w_fdtsize;
+    UINT16 ddt$w_reserved;
     void (*ddt$ps_start_2)(void);
     void (*ddt$ps_start_jsb)(void);
     int (*ddt$ps_ctrlinit_2)(void);

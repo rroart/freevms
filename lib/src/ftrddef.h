@@ -9,18 +9,18 @@ struct _ftrd
 {
     void *ftrd$l_astqfl;
     void *ftrd$l_astqbl;
-    unsigned short int ftrd$w_size;
-    unsigned char ftrd$b_type;
-    unsigned char ftrd$b_rmod;
-    unsigned int ftrd$l_pid;
-    int (*ftrd$l_ast)(void);
-    unsigned int ftrd$l_astprm;
-    unsigned char ftrd$b_efn;
-    unsigned char ftrd$b_unused;
-    unsigned short int ftrd$w_read_size;
+    UINT16 ftrd$w_size;
+    UINT8 ftrd$b_type;
+    UINT8 ftrd$b_rmod;
+    UINT32 ftrd$l_pid;
+    INT32 (*ftrd$l_ast)(void);
+    UINT32 ftrd$l_astprm;
+    UINT8 ftrd$b_efn;
+    UINT8 ftrd$b_unused;
+    UINT16 ftrd$w_read_size;
     void *ftrd$l_buff_addr;
     void *ftrd$l_char_addr;
-    unsigned int ftrd$l_chars_read;
+    UINT32 ftrd$l_chars_read;
 };
 
 #endif

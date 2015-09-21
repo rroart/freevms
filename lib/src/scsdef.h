@@ -1,6 +1,8 @@
 #ifndef SCSDEF_H
 #define SCSDEF_H
 
+#include <vms_types.h>
+
 #define SCS$C_OVHD 14
 #define SCS$C_CON_REQL 66
 #define SCS$C_CON_RSPL 22
@@ -50,22 +52,22 @@ struct _scs
 {
     union
     {
-        unsigned char scs$b_ppd[16];
+        UINT8 scs$b_ppd[16];
     };
-    unsigned short scs$w_length;
+    UINT16 scs$w_length;
     short fill;
-    unsigned short scs$w_mtype;
-    unsigned short scs$w_credit;
+    UINT16 scs$w_mtype;
+    UINT16 scs$w_credit;
     unsigned long scs$l_dst_conid;
     unsigned long scs$l_src_conid;
-    unsigned short int scs$w_min_cr;
-    unsigned short int scs$w_status;
+    UINT16 scs$w_min_cr;
+    UINT16 scs$w_status;
     char scs$t_dst_proc [16];
-    unsigned char scs$b_subnode;
-    unsigned char scs$b_pgrp;
-    unsigned short int scs$w_rsv;
+    UINT8 scs$b_subnode;
+    UINT8 scs$b_pgrp;
+    UINT16 scs$w_rsv;
     char scs$t_src_proc [16];
-    unsigned char scs$b_con_dat [16];
+    UINT8 scs$b_con_dat [16];
 };
 
 #define SCS$S_SCSDEF1 28
@@ -76,9 +78,9 @@ struct _scs1
     unsigned long scs$l_rspid;
     unsigned long scs$l_xct_len;
     unsigned long scs$l_snd_name;
-    unsigned int scs$l_snd_boff;
-    unsigned int scs$l_rec_name;
-    unsigned int scs$l_rec_boff;
+    UINT32 scs$l_snd_boff;
+    UINT32 scs$l_rec_name;
+    UINT32 scs$l_rec_boff;
 } ;
 
 #define PPD$C_CNFREC                     0x0023
@@ -177,102 +179,102 @@ struct _ppd
     };
     union
     {
-        unsigned short ppd$w_qsize;
-        unsigned short ppd$w_size;
+        UINT16 ppd$w_qsize;
+        UINT16 ppd$w_size;
     };
     union
     {
-        unsigned char ppd$b_qtype;
-        unsigned char ppd$b_type;
+        UINT8 ppd$b_qtype;
+        UINT8 ppd$b_type;
     };
     union
     {
-        unsigned char ppd$b_spare;
-        unsigned char ppd$b_swflag;
+        UINT8 ppd$b_spare;
+        UINT8 ppd$b_swflag;
     };
     union
     {
         struct
         {
-            unsigned char ppd$b_port;
-            unsigned char ppd$b_status;
+            UINT8 ppd$b_port;
+            UINT8 ppd$b_status;
         };
-        unsigned short ppd$w_lcb_len7;
+        UINT16 ppd$w_lcb_len7;
     };
     union
     {
-        unsigned char ppd$b_lcb_port;
-        unsigned char ppd$b_opc;
+        UINT8 ppd$b_lcb_port;
+        UINT8 ppd$b_opc;
     };
     union
     {
-        unsigned char ppd$b_flags;
-        unsigned char ppd$b_lcb_nport;
+        UINT8 ppd$b_flags;
+        UINT8 ppd$b_lcb_nport;
     };
     // two next are tmp
-    unsigned short ppd$w_length;
-    unsigned short ppd$w_mtype;
+    UINT16 ppd$w_length;
+    UINT16 ppd$w_mtype;
 #if 0
-    10 unsigned long long ppd$q_xct_id
-    10 unsigned char ppd$b_d_snode
-    10 unsigned char ppd$b_lcb_lport
+    10 UINT64 ppd$q_xct_id
+    10 UINT8 ppd$b_d_snode
+    10 UINT8 ppd$b_lcb_lport
     10 unsigned long ppd$l_p0_ack
-    10 unsigned short ppd$w_d_xport
-    10 unsigned short ppd$w_length
-    10 unsigned short ppd$w_mask
-    11 unsigned char ppd$b_d_pgrp
-    11 unsigned char ppd$b_lcb_opc
-    12 unsigned char ppd$b_lbdata
-    12 unsigned char ppd$b_lcb_0
-    12 unsigned char ppd$b_s_snode
-    12 unsigned short ppd$w_mtype
-    12 unsigned short ppd$w_s_xport
-    13 unsigned char ppd$b_s_pgrp
-    14 unsigned char ppd$b_systemid
+    10 UINT16 ppd$w_d_xport
+    10 UINT16 ppd$w_length
+    10 UINT16 ppd$w_mask
+    11 UINT8 ppd$b_d_pgrp
+    11 UINT8 ppd$b_lcb_opc
+    12 UINT8 ppd$b_lbdata
+    12 UINT8 ppd$b_lcb_0
+    12 UINT8 ppd$b_s_snode
+    12 UINT16 ppd$w_mtype
+    12 UINT16 ppd$w_s_xport
+    13 UINT8 ppd$b_s_pgrp
+    14 UINT8 ppd$b_systemid
     14 unsigned long ppd$l_p0_nak
     14 unsigned long ppd$l_rsvd_test
-    14 unsigned short ppd$w_m_val
+    14 UINT16 ppd$w_m_val
     18 unsigned long ppd$l_in_vcd
     18 unsigned long ppd$l_p0_nrsp
     18 unsigned long ppd$l_rport_typ
     18 unsigned long ppd$l_st_addr
     18 unsigned long ppd$l_xct_len
-    1a unsigned char ppd$b_protocol
-    1c unsigned char ppd$b_def_st
+    1a UINT8 ppd$b_protocol
+    1c UINT8 ppd$b_def_st
     1c unsigned long ppd$l_p1_ack
     1c unsigned long ppd$l_rport_rev
     1c unsigned long ppd$l_snd_name
-    1c unsigned short ppd$w_maxdg
-    1e unsigned short ppd$w_maxmsg
+    1c UINT16 ppd$w_maxdg
+    1e UINT16 ppd$w_maxmsg
     20 unsigned long ppd$l_p1_nak
     20 unsigned long ppd$l_rport_fcn
     20 unsigned long ppd$l_snd_boff
     20 unsigned char ppd$t_swtype[4]
-    24 unsigned char ppd$b_rst_port
+    24 UINT8 ppd$b_rst_port
     24 unsigned long ppd$l_p1_nrsp
     24 unsigned long ppd$l_rec_name
     24 unsigned char ppd$t_swvers
-    25 unsigned char ppd$b_rstate
+    25 UINT8 ppd$b_rstate
     28 unsigned long ppd$l_dg_disc
     28 unsigned long ppd$l_port_fcn_ext
     28 unsigned long ppd$l_rec_boff
-    28 unsigned long long ppd$q_swincarn
-    2c unsigned char ppd$b_prtctr_len
+    28 UINT64 ppd$q_swincarn
+    2c UINT8 ppd$b_prtctr_len
     2c unsigned long ppd$l_port_fcn_ext2
-    2d unsigned char ppd$b_impctr_len
+    2d UINT8 ppd$b_impctr_len
     30 unsigned long ppd$l_spare1_cnt
-    30 unsigned long long ppd$q_sub_map
+    30 UINT64 ppd$q_sub_map
     30 unsigned char ppd$t_hwtype[4]
-    34 unsigned char ppd$b_hwvers
+    34 UINT8 ppd$b_hwvers
     34 unsigned long ppd$l_spare2_cnt
     38 unsigned long ppd$l_spare3_cnt
     3c unsigned long ppd$l_spare4_cnt
     40 unsigned long ppd$l_snddat_oper_snt
-    40 unsigned long long ppd$q_nodename
+    40 UINT64 ppd$q_nodename
     42 unsigned long ppd$l_lbcrc
     44 unsigned long ppd$l_snddat_data_snt
     48 unsigned long ppd$l_snddat_bodies_snt
-    48 unsigned long long ppd$q_curtime
+    48 UINT64 ppd$q_curtime
     4c unsigned long ppd$l_reqdat_oper_snt
     50 unsigned long ppd$l_retdat_data_rcv
     54 unsigned long ppd$l_retdat_bodies_rcv
@@ -291,24 +293,24 @@ struct _ppd
     78 unsigned long ppd$l_msg_snt
     78 unsigned long ppd$l_pckt_rcrc
     7c unsigned long ppd$l_msg_txt_snt
-    7c unsigned short ppd$w_rspr_wpe
-    7e unsigned short ppd$w_mbpb_wpe
-    7e unsigned short ppd$w_mbpb_wpe
+    7c UINT16 ppd$w_rspr_wpe
+    7e UINT16 ppd$w_mbpb_wpe
+    7e UINT16 ppd$w_mbpb_wpe
     80 unsigned long ppd$l_misc_snt
-    80 unsigned short ppd$w_cmdr_wpe
-    82 unsigned short ppd$w_intr_wpe
+    80 UINT16 ppd$w_cmdr_wpe
+    82 UINT16 ppd$w_intr_wpe
     84 unsigned long ppd$l_dg_rec
-    84 unsigned short ppd$w_mar_wpe
-    86 unsigned short ppd$w_mbr_wpe
+    84 UINT16 ppd$w_mar_wpe
+    86 UINT16 ppd$w_mbr_wpe
     88 unsigned long ppd$l_dg_txtrec
-    88 unsigned short ppd$w_mpb_rpe
-    8a unsigned short ppd$w_tbuf_pe
+    88 UINT16 ppd$w_mpb_rpe
+    8a UINT16 ppd$w_tbuf_pe
     8c unsigned long ppd$l_msg_rec
-    8c unsigned short ppd$w_mib_pe
-    8e unsigned short ppd$w_mcwi_pe
+    8c UINT16 ppd$w_mib_pe
+    8e UINT16 ppd$w_mcwi_pe
     90 unsigned long ppd$l_msg_txt_rec
-    90 unsigned short ppd$w_yreg_pe
-    92 unsigned short ppd$w_xreg_pe
+    90 UINT16 ppd$w_yreg_pe
+    92 UINT16 ppd$w_xreg_pe
     94 unsigned long ppd$l_misc_rec
 #endif
 };

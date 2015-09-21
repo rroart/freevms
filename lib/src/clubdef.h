@@ -1,6 +1,8 @@
 #ifndef CLUBDEF_H
 #define CLUBDEF_H
 
+#include <vms_types.h>
+
 #define     CLUBFKB$M_FKB_BUSY      0x1
 #define     CLUBFKB$M_FORKQ             0x2
 #define     CLUBFKB$C_LENGTH        40
@@ -77,11 +79,11 @@
 
 struct _clubfkb
 {
-    char clubfkb$b_fork_block [32];
-    unsigned int clubfkb$l_pc2;
+    INT8 clubfkb$b_fork_block [32];
+    UINT32 clubfkb$l_pc2;
     union
     {
-        unsigned int clubfkb$l_status;
+        UINT32 clubfkb$l_status;
         struct
         {
             unsigned clubfkb$v_fkb_busy : 1;
@@ -93,12 +95,12 @@ struct _clubfkb
 
 struct _clubpwf
 {
-    char clubpwf$b_fork_block [32];
+    INT8 clubpwf$b_fork_block [32];
 
 
     union
     {
-        unsigned int clubpwf$l_status;
+        UINT32 clubpwf$l_status;
         struct
         {
             unsigned clubpwf$v_busy : 1;
@@ -111,12 +113,12 @@ struct _clubpwf
 
 struct _clufcb
 {
-    char clufcb$b_fork_block [32];
-    unsigned int clufcb$l_step;
-    unsigned int clufcb$l_id;
+    INT8 clufcb$b_fork_block [32];
+    UINT32 clufcb$l_step;
+    UINT32 clufcb$l_id;
     union
     {
-        unsigned int clufcb$l_status;
+        UINT32 clufcb$l_status;
         struct
         {
             unsigned clufcb$v_active : 1;
@@ -130,9 +132,9 @@ struct _clufcb
         };
     };
     struct _csb *clufcb$l_sync_csb;
-    char clufcb$b_nodemap [32];
-    char clufcb$b_respmap [32];
-    unsigned int clufcb$l_index;
+    INT8 clufcb$b_nodemap [32];
+    INT8 clufcb$b_respmap [32];
+    UINT32 clufcb$l_index;
     struct _fkb *clufcb$l_aux_fkb;
 };
 
@@ -140,16 +142,16 @@ struct _club
 {
     struct _csb *club$l_csbqfl;
     struct _csb *club$l_csbqbl;
-    unsigned short int club$w_size;
-    unsigned char club$b_type;
-    unsigned char club$b_subtype;
-    unsigned int club$l_poll_ctx;
+    UINT16 club$w_size;
+    UINT8 club$b_type;
+    UINT8 club$b_subtype;
+    UINT32 club$l_poll_ctx;
     struct _csb *club$l_local_csb;
     struct _acb *club$l_astqfl;
     struct _acb *club$l_astqbl;
     union
     {
-        unsigned int club$l_flags;
+        UINT32 club$l_flags;
         struct
         {
             unsigned club$v_cluster : 1;
@@ -187,7 +189,7 @@ struct _club
     };
     union
     {
-        unsigned int club$l_lk_flags;
+        UINT32 club$l_lk_flags;
         struct
         {
             unsigned club$v_fill_10 : 1;
@@ -208,11 +210,11 @@ struct _club
             unsigned club$v_lk_shut_ip : 1;
         };
     };
-    unsigned short int club$w_rseqnum;
-    unsigned short int club$w_dirseqnum;
+    UINT16 club$w_rseqnum;
+    UINT16 club$w_dirseqnum;
     union
     {
-        unsigned char club$b_qstatus;
+        UINT8 club$b_qstatus;
         struct
         {
             unsigned club$v_no_fquorum : 1;
@@ -222,116 +224,116 @@ struct _club
             unsigned club$v_fill_03 : 4;
         };
     };
-    char club$b_fill_2;
-    unsigned short int club$w_qdvotes;
-    unsigned short int club$w_quorum;
-    unsigned short int club$w_votes;
-    unsigned short int club$w_cevotes;
-    unsigned short int club$w_adj_cevotes;
-    unsigned short int club$w_nodes;
-    char club$b_fsysid [6];
-    long long club$q_ftime;
-    unsigned int club$l_lst_xtn;
-    unsigned int club$l_lst_coord;
-    long long club$q_lst_time;
-    unsigned char club$b_lst_code;
-    unsigned char club$b_lst_phase;
-    unsigned short int club$w_newqdvotes;
-    unsigned int club$l_cur_xtn;
-    unsigned int club$l_cur_coord;
-    long long club$q_cur_time;
-    unsigned char club$b_cur_code;
-    unsigned char club$b_cur_phase;
-    unsigned short int club$w_msgcnt;
+    INT8 club$b_fill_2;
+    UINT16 club$w_qdvotes;
+    UINT16 club$w_quorum;
+    UINT16 club$w_votes;
+    UINT16 club$w_cevotes;
+    UINT16 club$w_adj_cevotes;
+    UINT16 club$w_nodes;
+    INT8 club$b_fsysid [6];
+    INT64 club$q_ftime;
+    UINT32 club$l_lst_xtn;
+    UINT32 club$l_lst_coord;
+    INT64 club$q_lst_time;
+    UINT8 club$b_lst_code;
+    UINT8 club$b_lst_phase;
+    UINT16 club$w_newqdvotes;
+    UINT32 club$l_cur_xtn;
+    UINT32 club$l_cur_coord;
+    INT64 club$q_cur_time;
+    UINT8 club$b_cur_code;
+    UINT8 club$b_cur_phase;
+    UINT16 club$w_msgcnt;
     struct _csb *club$l_coord;
     union
     {
-        unsigned int club$l_local_csid;
+        UINT32 club$l_local_csid;
         struct
         {
-            unsigned short int club$w_local_csid_idx;
-            unsigned short int club$w_local_csid_seq;
+            UINT16 club$w_local_csid_idx;
+            UINT16 club$w_local_csid_seq;
         };
     };
-    unsigned short int club$w_next_csid;
-    unsigned short int club$w_first_index;
-    unsigned int club$l_max_xtn;
-    unsigned int club$l_retrycnt;
-    unsigned int club$l_ctx0;
-    unsigned int club$l_ret1;
-    unsigned int club$l_ctx1;
-    unsigned int club$l_ret2;
-    unsigned int club$l_ctx2;
+    UINT16 club$w_next_csid;
+    UINT16 club$w_first_index;
+    UINT32 club$l_max_xtn;
+    UINT32 club$l_retrycnt;
+    UINT32 club$l_ctx0;
+    UINT32 club$l_ret1;
+    UINT32 club$l_ctx1;
+    UINT32 club$l_ret2;
+    UINT32 club$l_ctx2;
     struct _tqe *club$l_tqe;
-    unsigned int club$l_cspipid;
-    unsigned long long club$q_newtime;
-    unsigned long long club$q_newtime_ref;
-    unsigned short int club$w_newquorum;
-    unsigned short int club$w_newcevotes;
-    unsigned int club$l_fmerit;
+    UINT32 club$l_cspipid;
+    UINT64 club$q_newtime;
+    UINT64 club$q_newtime_ref;
+    UINT16 club$w_newquorum;
+    UINT16 club$w_newcevotes;
+    UINT32 club$l_fmerit;
     union
     {
-        unsigned int club$l_e_memseq;
+        UINT32 club$l_e_memseq;
         struct
         {
-            unsigned short int club$w_memseq;
-            short int club$w_fill_1;
+            UINT16 club$w_memseq;
+            INT16 club$w_fill_1;
         };
     };
-    unsigned int club$l_random;
+    UINT32 club$l_random;
     struct _cludcb *club$l_cludcb;
     char club$t_qdname [16];
     struct _cluicb *club$l_cluicb;
-    unsigned int club$l_foreign_cluster;
-    unsigned int club$l_enbl_verbose;
-    unsigned int club$l_qlost_clugen;
-    unsigned int club$l_stg_join_clugen;
-    unsigned int club$l_join_clugen;
-    unsigned short int club$w_stg_join_flags;
+    UINT32 club$l_foreign_cluster;
+    UINT32 club$l_enbl_verbose;
+    UINT32 club$l_qlost_clugen;
+    UINT32 club$l_stg_join_clugen;
+    UINT32 club$l_join_clugen;
+    UINT16 club$w_stg_join_flags;
     union
     {
-        unsigned short int club$w_join_flags;
+        UINT16 club$w_join_flags;
         struct
         {
             unsigned club$v_clugen_valid : 1;
             unsigned club$v_fill_04 : 15;
         };
     };
-    unsigned int club$l_rm_quota;
-    unsigned long long club$q_cspq;
-    char club$b_fork_block [40];
-    char club$b_nodemap [32];
-    char club$b_clufcb [120];
-    char club$b_hang_fkb [32];
-    char club$b_clubpwf [40];
-    unsigned int club$l_reslocktmo;
-    unsigned int club$l_reslockcsid;
-    unsigned int club$l_locktime;
-    unsigned short int club$w_merge_cnt;
-    unsigned short int club$w_parseqnum;
-    unsigned char club$b_newrbld_req;
-    unsigned char club$b_rbld_clu;
-    unsigned char club$b_rbld_loc;
-    char club$b_fill_21;
+    UINT32 club$l_rm_quota;
+    UINT64 club$q_cspq;
+    INT8 club$b_fork_block [40];
+    INT8 club$b_nodemap [32];
+    INT8 club$b_clufcb [120];
+    INT8 club$b_hang_fkb [32];
+    INT8 club$b_clubpwf [40];
+    UINT32 club$l_reslocktmo;
+    UINT32 club$l_reslockcsid;
+    UINT32 club$l_locktime;
+    UINT16 club$w_merge_cnt;
+    UINT16 club$w_parseqnum;
+    UINT8 club$b_newrbld_req;
+    UINT8 club$b_rbld_clu;
+    UINT8 club$b_rbld_loc;
+    INT8 club$b_fill_21;
     struct _clurcb *club$l_clurcbfl;
     struct _clurcb *club$l_clurcbbl;
-    unsigned short int club$w_rbld_inhib;
-    short int club$w_fill_22;
-    unsigned short int club$w_ncnid;
-    unsigned short int club$w_newncnid;
-    unsigned int club$l_toff;
-    unsigned int club$l_ton;
+    UINT16 club$w_rbld_inhib;
+    INT16 club$w_fill_22;
+    UINT16 club$w_ncnid;
+    UINT16 club$w_newncnid;
+    UINT32 club$l_toff;
+    UINT32 club$l_ton;
     void *club$l_tbls;
     struct _tqe *club$l_qtqe;
-    unsigned int club$l_sync_step;
-    unsigned long long club$q_tdf;
-    unsigned long long club$q_block_seq;
+    UINT32 club$l_sync_step;
+    UINT64 club$q_tdf;
+    UINT64 club$q_block_seq;
 
-    char club$b_lckmgr_fork_block [40];
-    unsigned int club$l_rmbuf_link;
-    unsigned int club$l_max_rmbufs;
-    unsigned int club$l_cached_rmbufs;
-    unsigned int club$l_tot_rmbufs;
+    INT8 club$b_lckmgr_fork_block [40];
+    UINT32 club$l_rmbuf_link;
+    UINT32 club$l_max_rmbufs;
+    UINT32 club$l_cached_rmbufs;
+    UINT32 club$l_tot_rmbufs;
 };
 
 #endif

@@ -20,7 +20,7 @@
 struct _fi2
 {
     char fi2$t_filename[20];
-    _uword fi2$w_revision;
+    UINT16 fi2$w_revision;
     _vms_time fi2$q_credate;
     _vms_time fi2$q_revdate;
     _vms_time fi2$q_expdate;

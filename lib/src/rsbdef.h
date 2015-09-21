@@ -1,6 +1,8 @@
 #ifndef RSBDEF_H
 #define RSBDEF_H
 
+#include <vms_types.h>
+
 #define RSB$M_DIRENTRY 0x1
 #define RSB$M_VALINVLD 0x2
 #define RSB$M_DIR_RQD 0x4
@@ -35,21 +37,21 @@ struct _rsb
     void *rsb$l_hshchn;
     void *rsb$l_hshchnbk;
 
-    unsigned short int rsb$w_size;
-    unsigned char rsb$b_type;
-    unsigned char rsb$b_depth;
-    unsigned char rsb$b_fgmode;
-    unsigned char rsb$b_ggmode;
-    unsigned char rsb$b_cgmode;
-    unsigned int rsb$l_status;
-    unsigned int rsb$l_refcnt;
+    UINT16 rsb$w_size;
+    UINT8 rsb$b_type;
+    UINT8 rsb$b_depth;
+    UINT8 rsb$b_fgmode;
+    UINT8 rsb$b_ggmode;
+    UINT8 rsb$b_cgmode;
+    UINT32 rsb$l_status;
+    UINT32 rsb$l_refcnt;
     void *rsb$l_grqfl;
     void *rsb$l_grqbl;
     void *rsb$l_cvtqfl;
     void *rsb$l_cvtqbl;
     void *rsb$l_wtqfl;
     void *rsb$l_wtqbl;
-    unsigned long long rsb$q_valblk;
+    UINT64 rsb$q_valblk;
     unsigned long rsb$l_csid;
     void *rsb$l_rrsfl;
     void *rsb$l_rrsbl;
@@ -58,17 +60,17 @@ struct _rsb
     unsigned long rsb$l_rm_csid;
     struct _rsb *rsb$l_rtrsb;
     struct _clurcb *rsb$l_clurcb;
-    unsigned short int rsb$w_activity;
-    unsigned short int rsb$w_lckcnt;
-    unsigned int rsb$l_valseqnum;
-    unsigned short int rsb$w_refcnt;
-    unsigned short int rsb$w_blkastcnt;
-    unsigned short int rsb$w_hashval;
-    unsigned short int rsb$w_rqseqnm;
+    UINT16 rsb$w_activity;
+    UINT16 rsb$w_lckcnt;
+    UINT32 rsb$l_valseqnum;
+    UINT16 rsb$w_refcnt;
+    UINT16 rsb$w_blkastcnt;
+    UINT16 rsb$w_hashval;
+    UINT16 rsb$w_rqseqnm;
     struct _rsb *rsb$l_parent;
-    unsigned short int rsb$w_group;
-    unsigned char rsb$b_rmod;
-    unsigned char rsb$b_rsnlen;
+    UINT16 rsb$w_group;
+    UINT8 rsb$b_rmod;
+    UINT8 rsb$b_rsnlen;
     char rsb$t_resnam [32];
 };
 

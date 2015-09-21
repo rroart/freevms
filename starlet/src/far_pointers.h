@@ -1,38 +1,33 @@
 #ifndef FAR_POINTERS_H
 #define FAR_POINTERS_H
 
-/* these few does not belong here really */
-typedef int int32;
-typedef short int int16;
-typedef unsigned int uint32;
-typedef unsigned short int uint16;
+#include <vms_types.h>
 
-typedef int          * INT_PQ;
-typedef unsigned int     * UINT_PQ;
-typedef unsigned int     * UINT32_PQ;
-typedef void             * VOID_PQ;
-typedef void            ** VOID_PPQ;
-typedef long long          * INT64_PQ;
-typedef unsigned long long * UINT64_PQ;
-typedef unsigned long long ** UINT64_PPQ;
-typedef char         * CHAR_PQ;
-typedef char        ** CHAR_PPQ;
-typedef short        * SHORT_PQ;
-typedef unsigned short   * USHORT_PQ;
+typedef void * VOID_PQ;
+typedef void ** VOID_PPQ;
 
-#if 0
-typedef unsigned long long   INT_PQ;
-typedef unsigned long long   UINT_PQ;
-typedef unsigned long long   UINT32_PQ;
-typedef unsigned long long   VOID_PQ;
-typedef unsigned long long   VOID_PPQ;
-typedef unsigned long long   INT64_PQ;
-typedef unsigned long long   UINT64_PQ;
-typedef unsigned long long   UINT64_PPQ;
-typedef unsigned long long   CHAR_PQ;
-typedef unsigned long long   CHAR_PPQ;
-typedef unsigned long long   SHORT_PQ;
-typedef unsigned long long   USHORT_PQ;
-#endif
+typedef char * CHAR_PQ;
+typedef char ** CHAR_PPQ;
+typedef int * INT_PQ;
+
+typedef INT8 * INT8_PQ;
+typedef INT8 ** INT8_PPQ;
+typedef UINT8 * UINT8_PQ;
+typedef UINT8 ** UINT8_PPQ;
+
+typedef INT16 * INT16_PQ;
+typedef INT16 ** INT16_PPQ;
+typedef UINT16 * UINT16_PQ;
+typedef UINT16 ** UINT16_PPQ;
+
+typedef INT32 * INT32_PQ;
+typedef INT32 ** INT32_PPQ;
+typedef UINT32 * UINT32_PQ;
+typedef UINT32 ** UINT32_PPQ;
+
+typedef INT64 * INT64_PQ;
+typedef INT64 ** INT64_PPQ;
+typedef UINT64 * UINT64_PQ;
+typedef UINT64 ** UINT64_PPQ;
 
 #endif

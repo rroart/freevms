@@ -34,7 +34,7 @@ unsigned access_extend(struct _fcb *fcb, unsigned blocks, unsigned contig);
 unsigned update_freecount(struct _vcb *vcbdev, unsigned *retcount);
 unsigned update_create(struct _vcb *vcb, struct _irp * i);
 unsigned update_extend(struct _fcb *fcb, unsigned blocks, unsigned contig);
-unsigned short checksum(_uword *block);
+unsigned short checksum(UINT16 *block);
 
 void * f11b_read_block(struct _vcb * vcb, unsigned long lbn,
                        unsigned long count, struct _iosb * iosb);

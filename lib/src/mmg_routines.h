@@ -31,30 +31,30 @@ int   mmg_std$alloc_pfn_64 (PFN_PPQ pfndbe_p);
 int       mmg$alloc_pfn_algnd_64 (uint64 vpn, PFN_PPQ pfndbe_p);
 int   mmg_std$alloc_zero_pfn_64 (PFN_PPQ pfndbe_p);
 int       mmg$alloc_zero_algnd_64 (uint64 vpn, PFN_PPQ pfndbe_p);
-int   mmg_std$allo_contig (uint32 pfn_count);
-int   mmg_std$allo_contig_pfn (uint32 pfn_count, uint32 max_pfn);
+int   mmg_std$allo_contig (UINT32 pfn_count);
+int   mmg_std$allo_contig_pfn (UINT32 pfn_count, UINT32 max_pfn);
 
-int   mmg_std$allo_contig_a (uint32 pfn_count, uint32 byte_align);
-int   mmg_std$allo_contig_pfn_a (uint32 pfn_count, uint32 byte_align, uint32 max_pfn);
+int   mmg_std$allo_contig_a (UINT32 pfn_count, UINT32 byte_align);
+int   mmg_std$allo_contig_pfn_a (UINT32 pfn_count, UINT32 byte_align, UINT32 max_pfn);
 #ifndef MMG_STD$ALLOC_CTG_PFN_MAP_SVA_SRC
 int   mmg_std$alloc_ctg_pfn_map_sva (
     const int proto_pte,
     const int page_count,
-    const uint32 refcnt,
+    const UINT32 refcnt,
     VOID_PQ sva,
-    const uint32 max_pfn,
+    const UINT32 max_pfn,
     ...
 
 );
 #endif
-void  mmg_std$dalloc_contig_pfn (uint32 pfn, uint32 pfn_count);
+void  mmg_std$dalloc_contig_pfn (UINT32 pfn, UINT32 pfn_count);
 void  mmg_std$dalloc_pfn_64 (int pfn, PFN_PQ pfndbe);
 void  mmg_std$dalloc_zero_pfn_64 (int pfn, PFN_PQ pfndbe);
 void  mmg_std$del_contents_pfn_64 (int pfn, PFN_PQ pfndbe);
 int   mmg_std$alloc_gpt (const int req_pages, PTE_PPQ gpte_p);
 int   mmg_std$dealloc_gpt (const int page_count, const PTE_PQ gpte);
 void  mmg_std$decptref_pfndb (PFN_PQ const pfndbe);
-void  mmg_std$deref_bufobj (int32 object_handle_1, int32 object_handle_2);
+void  mmg_std$deref_bufobj (INT32 object_handle_1, INT32 object_handle_2);
 int   mmg_std$iolock_buf (VOID_PQ const buf, const int bufsiz,
                           const int is_read, struct _pcb *const pcb,
                           PTE_PPQ va_pte_p, VOID_PPQ fault_va_p);
@@ -62,7 +62,7 @@ void  mmg_std$iounlock_buf (const int npages, PTE_PQ const va_pte);
 void  mmg_std$lockpgtb_64 (PTE_PQ const va_pte, struct _phd *const phd);
 void  mmg_std$svaptechk (VOID_PQ va, struct _pcb *pcb, struct _phd *phd, struct _pte **svapte_p);
 void      mmg$tbi_all (void);
-int   mmg_std$ref_bufobj (int32 object_handle_1, int32 object_handle_2, ...);
+int   mmg_std$ref_bufobj (INT32 object_handle_1, INT32 object_handle_2, ...);
 void      mmg$tbi_single (VOID_PQ va);
 void      mmg$tbi_single_threads (VOID_PQ va);
 void  mmg_std$tbi_data_64 (VOID_PQ va);
@@ -121,11 +121,11 @@ void  mmg_std$perform_audit(struct _gsd *gsd, int status);
 void  mmg_std$delgblwcb(struct _pcb *pcb);
 void  mmg_std$movgsdnam(char *dest_p, char *source_p, struct _gsd *gsd);
 int   mmg_std$sec_privchk(char *gs_string_p, int flags);
-int   mmg_std$lckulkpag(VOID_PQ start_va, int acmode, int flags, struct _pcb *pcb,
+INT32   mmg_std$lckulkpag(VOID_PQ start_va, int acmode, int flags, struct _pcb *pcb,
                         struct _phd *phd, struct _wsl * wsl); // was: WSL_PQ
 void  mmg_std$purgwspag_64(VOID_PQ start_va, int acmode, uint64 pages_1,
                            int page_inc);
-int   mmg_std$lckbufobjpag(VOID_PQ start_va, int acmode, int page_inc,
+INT32   mmg_std$lckbufobjpag(VOID_PQ start_va, int acmode, int page_inc,
                            struct _bod *bod, PTE_PPQ va_pte_p);
 void  mmg_std$delbufobjpages(struct _bod *bod, struct _pcb *pcb);
 int   mmg_std$setprtpag_64(struct _rde *rde, VOID_PQ start_va, int acmode,
@@ -145,12 +145,12 @@ int mmg$alloc_pfn_map_sva (int proto_pte, int page_count, int refcnt,
 
 #ifndef MMG_STD$ALLOC_SYSTEM_VA_MAP_SRC
 int mmg_std$alloc_system_va_map (const int proto_pte, const int page_count,
-                                 const uint32 refcnt, const uint32 system_region, VOID_PPQ sva, ...);
+                                 const UINT32 refcnt, const UINT32 system_region, VOID_PPQ sva, ...);
 #endif
 
 #ifndef MMG_STD$ALLOC_PFN_MAP_SYSTEM_VA_SRC
 int mmg_std$alloc_pfn_map_system_va (const int proto_pte, const int page_count,
-                                     const uint32 refcnt, VOID_PQ sva, ...);
+                                     const UINT32 refcnt, VOID_PQ sva, ...);
 #endif
 
 int mmg_std$dealloc_sva (int page_count, VOID_PQ sva);
@@ -159,40 +159,40 @@ int mmg_std$get_pte_for_va (VOID_PQ const va, struct _phd *const phd, PTE_PQ pte
 void mmg_std$rem_pfn_64 (int pfn, int list, PFN_PQ pfndbe_p);
 void mmg_std$ins_pfnh_64 (int pfn, int list, PFN_PQ pfndbe_p);
 
-int mmg_std$use_res_mem (uint32 page_count, uint32 char_count, char *name, uint32 flags, uint32 group,
-                         uint32 *return_pfn, uint32 *reserved_pages);
-int mmg_std$free_res_mem (uint32 char_count, char *name, uint32 flags, uint32 group, uint32 *freed_pages);
-int mmg_std$return_res_mem (uint32 page_count, uint32 char_count, char *name, uint32 flags, uint32 group, ...);
-int mmg_std$copy_rmd (uint32 rmd_count, uint32 char_count, char *name, uint32 flags, uint32 group, struct _rmd *copy_address);
-int mmg$test_page(uint32 *pfn_count_p);
+int mmg_std$use_res_mem (UINT32 page_count, UINT32 char_count, char *name, UINT32 flags, UINT32 group,
+                         UINT32 *return_pfn, UINT32 *reserved_pages);
+int mmg_std$free_res_mem (UINT32 char_count, char *name, UINT32 flags, UINT32 group, UINT32 *freed_pages);
+int mmg_std$return_res_mem (UINT32 page_count, UINT32 char_count, char *name, UINT32 flags, UINT32 group, ...);
+int mmg_std$copy_rmd (UINT32 rmd_count, UINT32 char_count, char *name, UINT32 flags, UINT32 group, struct _rmd *copy_address);
+int mmg$test_page(UINT32 *pfn_count_p);
 int mmg_std$rem_pfnh_64(int list, PFN_PPQ pfndbe_p);
-void mmg$compute_mem_checksum(struct _pmreg *pmr, int32 bitmap_size, uint32 flag);
+void mmg$compute_mem_checksum(struct _pmreg *pmr, INT32 bitmap_size, UINT32 flag);
 
-int mmg_std$map_pfns_gh (uint32 first_pfn, uint32 pfn_count, uint32 protection, VOID_PQ sva);
-int mmg_std$alloc_map_pfns (uint32 pfn_count, uint32 protection, VOID_PQ sva);
+int mmg_std$map_pfns_gh (UINT32 first_pfn, UINT32 pfn_count, UINT32 protection, VOID_PQ sva);
+int mmg_std$alloc_map_pfns (UINT32 pfn_count, UINT32 protection, VOID_PQ sva);
 
 int mmg_std$establish_freepte_list (PTELIST_PQ pte_list, VOID_PQ sva, uint64 pte_count);
 int mmg_std$insque_free_pte (PTELIST_PQ pte_list, VOID_PQ sva, uint64 pte_count);
 int mmg_std$remque_free_pte (PTELIST_PQ pte_list, uint64 pte_count);
-int mmg_std$establish_freepfn_list (uint32 count, void (*callback_routine)(PRVPFN_PQ pfn_list), uint32 priority, PRVPFN_PPQ prvpfn, UINT32_PQ return_count);
-int mmg_std$insque_free_pfn (PRVPFN_PQ pfn_list, uint32 count, UINT32_PQ return_count);
-int mmg_std$remque_free_pfn (PRVPFN_PQ pfn_list, uint32 count);
-int mmg_std$map_from_lists (PTELIST_PQ pte_list, PRVPFN_PQ prvpfn, uint32 protection, VOID_PPQ sva);
+int mmg_std$establish_freepfn_list (UINT32 count, void (*callback_routine)(PRVPFN_PQ pfn_list), UINT32 priority, PRVPFN_PPQ prvpfn, UINT32_PQ return_count);
+int mmg_std$insque_free_pfn (PRVPFN_PQ pfn_list, UINT32 count, UINT32_PQ return_count);
+int mmg_std$remque_free_pfn (PRVPFN_PQ pfn_list, UINT32 count);
+int mmg_std$map_from_lists (PTELIST_PQ pte_list, PRVPFN_PQ prvpfn, UINT32 protection, VOID_PPQ sva);
 int mmg_std$unmap_to_lists (VOID_PQ sva, PTELIST_PQ pte_list, PRVPFN_PQ prvpfn);
 
-int mmg$pfncheck (uint32 pfn, UINT32_PQ which_list);
-int mmg$pfncheck_range (uint32 pfn, uint32 page_count);
+int mmg$pfncheck (UINT32 pfn, UINT32_PQ which_list);
+int mmg$pfncheck_range (UINT32 pfn, UINT32 page_count);
 int mmg$ptecheckw_process (void);
 int mmg$ptecheckw_system (void);
 void mmg$ptecheckw_process_ast(struct _pcb *pcb, struct _acb *acb);
 
 int mmg$mem_config_info (UINT32_PQ max_mem_desc_nodes_p, UINT32_PQ max_frag_per_node_p);
 
-int mmg$mem_config_pfn (uint32 pfn, INT_PQ page_type_p, UINT64_PQ part_id_p, UINT64_PQ comm_id_p);
+int mmg$mem_config_pfn (UINT32 pfn, INT_PQ page_type_p, UINT64_PQ part_id_p, UINT64_PQ comm_id_p);
 
-int mmg$alloc_pfn_color_64 (uint32 flags, uint64 vpn, uint32 rad, PFN_PPQ pfndbe_p);
-int mmg$alloc_zero_color_64 (uint32 flags, uint64 vpn, uint32 rad, PFN_PPQ pfndbe_p);
-int mmg$alloc_contig_color_a (uint32 pfn_count, uint32 flags, uint32 byte_align, uint32 rad, UINT32_PQ largest_chunk_p);
+int mmg$alloc_pfn_color_64 (UINT32 flags, uint64 vpn, UINT32 rad, PFN_PPQ pfndbe_p);
+int mmg$alloc_zero_color_64 (UINT32 flags, uint64 vpn, UINT32 rad, PFN_PPQ pfndbe_p);
+int mmg$alloc_contig_color_a (UINT32 pfn_count, UINT32 flags, UINT32 byte_align, UINT32 rad, UINT32_PQ largest_chunk_p);
 
 int mmg$va_to_rad (VOID_PQ va, UINT32_PQ rad_p);
 

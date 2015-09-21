@@ -1,15 +1,17 @@
 #ifndef IHVNDEF_H
 #define IHVNDEF_H
 
+#include <vms_types.h>
+
 #define IHVN$M_SUBVERSION_MINOR_ID 0xFFFF
 #define IHVN$M_SUBVERSION_MAJOR_ID 0xFFFF0000
 
 struct _img_version_array
 {
-    unsigned int ihvn$l_subsystem_mask;
+    UINT32 ihvn$l_subsystem_mask;
     union
     {
-        unsigned int ihvn$l_subversion_array;
+        UINT32 ihvn$l_subversion_array;
         struct
         {
             unsigned ihvn$v_subversion_minor_id : 16;
@@ -25,7 +27,7 @@ struct _img_overall_version
 {
     union
     {
-        int ihvn$l_version_bits;
+        INT32 ihvn$l_version_bits;
         struct
         {
             unsigned ihvn$v_version_minor_id : 24;

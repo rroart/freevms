@@ -1,6 +1,8 @@
 #ifndef EISDDEF_H
 #define EISDDEF_H
 
+#include <vms_types.h>
+
 #define EISD$K_MAJORID 1
 #define EISD$K_MINORID 1
 #define EISD$M_GBL 0x1
@@ -45,14 +47,14 @@ struct _eisd
 {
     struct
     {
-        unsigned int eisd$l_majorid;
-        unsigned int eisd$l_minorid;
+        UINT32 eisd$l_majorid;
+        UINT32 eisd$l_minorid;
     };
-    unsigned int eisd$l_eisdsize;
-    unsigned int eisd$l_secsize;
+    UINT32 eisd$l_eisdsize;
+    UINT32 eisd$l_secsize;
     union
     {
-        unsigned long long eisd$q_virt_addr;
+        UINT64 eisd$q_virt_addr;
         void *eisd$l_virt_addr;
         struct
         {
@@ -63,7 +65,7 @@ struct _eisd
     };
     union
     {
-        unsigned int eisd$l_flags;
+        UINT32 eisd$l_flags;
         struct
         {
             unsigned eisd$v_gbl : 1;
@@ -84,19 +86,19 @@ struct _eisd
             unsigned eisd$v_fill_0_ : 1;
         };
     };
-    unsigned int eisd$l_vbn;
+    UINT32 eisd$l_vbn;
     struct
     {
-        unsigned char eisd$b_pfc;
-        unsigned char eisd$b_matchctl;
-        unsigned char eisd$b_type;
-        unsigned char eisd$b_fill_1;
+        UINT8 eisd$b_pfc;
+        UINT8 eisd$b_matchctl;
+        UINT8 eisd$b_type;
+        UINT8 eisd$b_fill_1;
     };
-    unsigned int eisd$l_ident;
+    UINT32 eisd$l_ident;
     union
     {
         char eisd$t_gblnam [44];
-        unsigned long long eisd$q_secsize;
+        UINT64 eisd$q_secsize;
     };
 };
 

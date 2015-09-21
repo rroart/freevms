@@ -20,13 +20,13 @@
 struct _diobm
 {
     struct _diobm *diobm$ps_aux_diobm;
-    unsigned int diobm$l_pte_count;
-    unsigned short int diobm$w_size;
-    unsigned char diobm$b_type;
-    unsigned char diobm$b_subtype;
+    UINT32 diobm$l_pte_count;
+    UINT16 diobm$w_size;
+    UINT8 diobm$b_type;
+    UINT8 diobm$b_subtype;
     union
     {
-        unsigned int diobm$l_flags;
+        UINT32 diobm$l_flags;
         struct
         {
             unsigned diobm$v_rel_dealloc : 1;

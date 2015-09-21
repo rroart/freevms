@@ -9,9 +9,9 @@ struct _fkb
 {
     struct _fkb *fkb$l_fqfl;
     struct _fkb *fkb$l_fqbl;
-    unsigned short fkb$w_size;
-    unsigned char fkb$b_type;
-    unsigned char fkb$b_flck;
+    UINT16 fkb$w_size;
+    UINT8 fkb$b_type;
+    UINT8 fkb$b_flck;
     void (*fkb$l_fpc)(void);
     unsigned long fkb$l_fr3;
     unsigned long fkb$l_fr4;

@@ -74,7 +74,7 @@
 #include <linux/slab.h>
 
 int rms_std$deanonpgdsiz(void *pool, int size);
-int rms_std$alononpaged(int reqsize, int32 *alosize_p, void **pool_p);
+int rms_std$alononpaged(int reqsize, INT32 *alosize_p, void **pool_p);
 
 #if 0
 struct _namdef cc$rms_nam =
@@ -1143,7 +1143,7 @@ unsigned exe$get(struct _rabdef *rab)
 
     if (rfm == FAB$C_VAR || rfm == FAB$C_VFC)
     {
-        _uword *lenptr = (_uword *) (buffer + offset);
+        UINT16 *lenptr = (UINT16 *) (buffer + offset);
         reclen = *lenptr;
         offset += 2;
         if (reclen > rab->rab$w_usz)
@@ -1414,7 +1414,7 @@ unsigned exe$read(struct _rabdef *rab)
     // check get diff
     if (rfm == FAB$C_VAR || rfm == FAB$C_VFC)
     {
-        _uword *lenptr = (_uword *) (buffer + offset);
+        UINT16 *lenptr = (UINT16 *) (buffer + offset);
         reclen = *lenptr;
         offset += 2;
         if (reclen > rab->rab$w_usz)
@@ -1714,7 +1714,7 @@ unsigned exe$put(struct _rabdef *rab)
 
     if (rfm == FAB$C_VAR || rfm == FAB$C_VFC)
     {
-        _uword *lenptr = (_uword *) (buffer + offset);
+        UINT16 *lenptr = (UINT16 *) (buffer + offset);
         *lenptr = reclen;
         offset += 2;
     }
@@ -1965,7 +1965,7 @@ unsigned exe$write(struct _rabdef *rab)
     // check put diff
     if (rfm == FAB$C_VAR || rfm == FAB$C_VFC)
     {
-        _uword *lenptr = (_uword *) (buffer + offset);
+        UINT16 *lenptr = (UINT16 *) (buffer + offset);
         *lenptr = reclen;
         offset += 2;
     }

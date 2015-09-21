@@ -18,13 +18,13 @@ struct _tast
 {
     int tastdef$$filler1 [9];
     struct _tast *tast$l_flink;
-    int (*tast$l_ast)(void);
-    unsigned int tast$l_astprm;
-    unsigned int tast$l_pid;
-    unsigned char tast$b_rmod;
+    INT32 (*tast$l_ast)(void);
+    UINT32 tast$l_astprm;
+    UINT32 tast$l_pid;
+    UINT8 tast$b_rmod;
     union
     {
-        unsigned char tast$b_ctrl;
+        UINT8 tast$b_ctrl;
         struct
         {
             unsigned tast$v_mask_dsbl       : 1;
@@ -36,15 +36,15 @@ struct _tast
             unsigned tast$v_fill_0_     : 2;
         };
     };
-    unsigned short int tast$w_chan;
-    unsigned int tast$l_mask;
+    UINT16 tast$w_chan;
+    UINT32 tast$l_mask;
     struct
     {
         unsigned tast$v_fill    : 14;
         unsigned tast$v_abo     : 1;
         unsigned tast$v_inc     : 1;
     };
-    char tast$b_filler1[2];
+    INT8 tast$b_filler1[2];
 };
 
 #endif

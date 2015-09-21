@@ -1,20 +1,22 @@
 #ifndef CSDTDEF_H
 #define CSDTDEF_H
 
+#include <vms_types.h>
+
 #define CSDTE$C_LENGTH   64
 #define CSDTE$K_LENGTH   64
 #define CSDTE$S_CSDTEDEF 64
 
 struct _csdte
 {
-    unsigned long long csdte$q_req_iq;
-    unsigned long long csdte$q_waitq;
-    unsigned int csdte$l_ipid;
-    unsigned int csdte$l_queued;
-    unsigned int csdte$l_requests;
-    unsigned int csdte$l_waitcnt;
-    unsigned int csdte$l_maxactive;
-    unsigned int csdte$l_active;
+    UINT64 csdte$q_req_iq;
+    UINT64 csdte$q_waitq;
+    UINT32 csdte$l_ipid;
+    UINT32 csdte$l_queued;
+    UINT32 csdte$l_requests;
+    UINT32 csdte$l_waitcnt;
+    UINT32 csdte$l_maxactive;
+    UINT32 csdte$l_active;
     char csdte$t_fillme_4 [24];
 };
 
@@ -25,11 +27,11 @@ struct _csdte
 
 typedef struct _csdt
 {
-    int csdt$l_filler_1;
-    int csdt$l_filler_2;
-    unsigned short int csdt$w_size;
-    unsigned char csdt$b_type;
-    unsigned char csdt$b_subtype;
+    INT32 csdt$l_filler_1;
+    INT32 csdt$l_filler_2;
+    UINT16 csdt$w_size;
+    UINT8 csdt$b_type;
+    UINT8 csdt$b_subtype;
     char csdt$t_align [4];
 };
 

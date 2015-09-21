@@ -1,6 +1,8 @@
 #ifndef CLUDCBDEF_H
 #define CLUDCBDEF_H
 
+#include <vms_types.h>
+
 /* as if this will be used in ages... */
 
 #define CLUDCB$M_QS_REM_INA 0x1
@@ -33,20 +35,20 @@ struct _cludcb
 {
     struct _cludcb *cludcb$l_cludcbfl;
     struct _cludcb *cludcb$l_cludcbbl;
-    unsigned short int cludcb$w_size;
-    unsigned char cludcb$b_type;
-    unsigned char cludcb$b_subtype;
+    UINT16 cludcb$w_size;
+    UINT8 cludcb$b_type;
+    UINT8 cludcb$b_subtype;
     struct _ucb *cludcb$l_ucb;
     struct _irp *cludcb$l_irp;
     struct _tqe *cludcb$l_tqe;
-    unsigned int cludcb$l_watcher_csid;
-    unsigned int cludcb$l_act_count;
+    UINT32 cludcb$l_watcher_csid;
+    UINT32 cludcb$l_act_count;
 
-    unsigned int cludcb$l_qflbn;
+    UINT32 cludcb$l_qflbn;
     char cludcb$t_align2 [4];
     union
     {
-        unsigned short int cludcb$w_state;
+        UINT16 cludcb$w_state;
         struct
         {
             unsigned cludcb$v_qs_rem_ina : 1;
@@ -59,10 +61,10 @@ struct _cludcb
             unsigned cludcb$v_fill_6_ : 1;
         };
     };
-    short int cludcb$w_fill_1;
+    INT16 cludcb$w_fill_1;
     union
     {
-        unsigned short int cludcb$w_flags;
+        UINT16 cludcb$w_flags;
         struct
         {
             unsigned cludcb$v_qf_inqtmo : 1;
@@ -77,12 +79,12 @@ struct _cludcb
             unsigned cludcb$v_fill_7_ : 7;
         };
     };
-    short int cludcb$w_fill_2;
+    INT16 cludcb$w_fill_2;
 
 
     union
     {
-        unsigned short int cludcb$w_csp_flags;
+        UINT16 cludcb$w_csp_flags;
         struct
         {
             unsigned cludcb$v_csp_ack : 1;
@@ -92,8 +94,8 @@ struct _cludcb
         };
     };
     char cludcb$t_align4 [6];
-    unsigned char cludcb$b_counter;
-    char cludcb$b_fill_3 [3];
+    UINT8 cludcb$b_counter;
+    INT8 cludcb$b_fill_3 [3];
     char cludcb$t_align5 [4];
 
     char cludcb$t_buffer [516];

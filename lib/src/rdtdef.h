@@ -1,19 +1,21 @@
 #ifndef RDTDEF_H
 #define RDTDEF_H
 
+#include <vms_types.h>
+
 #define RDT$S_RDTDEF 24
 
 struct _rdt
 {
-    unsigned char rdt$b_scs_maint_block [16];
+    UINT8 rdt$b_scs_maint_block [16];
     void *rdt$l_waitfl;
     void *rdt$l_waitbl;
-    unsigned short int rdt$w_size;
-    unsigned char rdt$b_type;
-    unsigned char rdt$b_subtyp;
+    UINT16 rdt$w_size;
+    UINT8 rdt$b_type;
+    UINT8 rdt$b_subtyp;
     void *rdt$l_freerd;
-    unsigned int rdt$l_maxrdidx;
-    unsigned int rdt$l_qrdt_cnt;
+    UINT32 rdt$l_maxrdidx;
+    UINT32 rdt$l_qrdt_cnt;
 };
 
 #endif

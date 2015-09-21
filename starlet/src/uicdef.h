@@ -19,8 +19,8 @@
 
 struct _uicdef
 {
-    _uword uic$w_mem;
-    _uword uic$w_grp;
+    UINT16 uic$w_mem;
+    UINT16 uic$w_grp;
 };
 
 #endif

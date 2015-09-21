@@ -17,16 +17,16 @@
 
 struct _dir
 {
-    _uword dir$w_size;
-    _uword dir$w_verlimit;
-    _ubyte dir$b_flags;
-    _ubyte dir$b_namecount;
+    UINT16 dir$w_size;
+    UINT16 dir$w_verlimit;
+    UINT8 dir$b_flags;
+    UINT8 dir$b_namecount;
     char dir$t_name[1];
 };
 
 struct _dir1
 {
-    _uword dir$w_version;
+    UINT16 dir$w_version;
     struct _fiddef dir$fid;
 };
 

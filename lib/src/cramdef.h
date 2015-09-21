@@ -1,6 +1,8 @@
 #ifndef CRAMDEF_H
 #define CRAMDEF_H
 
+#include <vms_types.h>
+
 #define CRAM$M_IN_USE 0x1
 #define CRAM$M_DER 0x2
 #define CRAM$M_CMD_VAL 0x3FFFFFFF
@@ -49,21 +51,21 @@ struct _cram
 {
     struct _cram *cram$l_flink;
     struct _cram *cram$l_blink;
-    unsigned short int cram$w_size;
-    unsigned char cram$b_type;
-    unsigned char cram$b_subtype;
+    UINT16 cram$w_size;
+    UINT8 cram$b_type;
+    UINT8 cram$b_subtype;
     void *cram$l_mbpr;
-    unsigned long long cram$q_hw_mbx;
-    unsigned long long cram$q_queue_time;
-    unsigned long long cram$q_wait_time;
-    unsigned int cram$l_driver;
+    UINT64 cram$q_hw_mbx;
+    UINT64 cram$q_queue_time;
+    UINT64 cram$q_wait_time;
+    UINT32 cram$l_driver;
     struct _idb *cram$l_idb;
     struct _ucb *cram$l_ucb;
     union
     {
         union
         {
-            unsigned int cram$l_cram_flags;
+            UINT32 cram$l_cram_flags;
             struct
             {
                 unsigned cram$v_in_use : 1;
@@ -73,14 +75,14 @@ struct _cram
         };
     };
     struct _adp *cram$l_adp;
-    char cram$b_filler1 [4];
+    INT8 cram$b_filler1 [4];
 
     union
     {
-        unsigned int cram$l_command;
+        UINT32 cram$l_command;
         union
         {
-            unsigned int cram$l_cmd_bits;
+            UINT32 cram$l_cmd_bits;
             struct
             {
                 unsigned cram$v_cmd_val : 30;
@@ -89,31 +91,31 @@ struct _cram
             };
         };
     };
-    unsigned char cram$b_byte_mask;
-    unsigned char cram$b_filler2;
-    unsigned char cram$b_hose;
-    unsigned char cram$b_filler3;
-    unsigned long long cram$q_rbadr;
+    UINT8 cram$b_byte_mask;
+    UINT8 cram$b_filler2;
+    UINT8 cram$b_hose;
+    UINT8 cram$b_filler3;
+    UINT64 cram$q_rbadr;
     union
     {
-        unsigned long long cram$q_wdata;
-        unsigned int cram$l_wdata;
-        unsigned short int cram$w_wdata;
-        unsigned char cram$b_wdata;
+        UINT64 cram$q_wdata;
+        UINT32 cram$l_wdata;
+        UINT16 cram$w_wdata;
+        UINT8 cram$b_wdata;
     };
-    unsigned long long cram$q_filler4;
+    UINT64 cram$q_filler4;
     union
     {
-        unsigned long long cram$q_rdata;
-        unsigned int cram$l_rdata;
-        unsigned short int cram$w_rdata;
-        unsigned char cram$b_rdata;
+        UINT64 cram$q_rdata;
+        UINT32 cram$l_rdata;
+        UINT16 cram$w_rdata;
+        UINT8 cram$b_rdata;
     };
     union
     {
         union
         {
-            unsigned short int cram$w_mbx_flags;
+            UINT16 cram$w_mbx_flags;
             struct
             {
                 unsigned cram$v_mbx_done : 1;
@@ -122,26 +124,26 @@ struct _cram
             };
         };
     };
-    unsigned short int cram$w_error_bits [3];
-    unsigned long long cram$q_filler5 [2];
+    UINT16 cram$w_error_bits [3];
+    UINT64 cram$q_filler5 [2];
 };
 
 struct _hw_cram
 {
-    unsigned int hw_cram$l_command;
-    unsigned char hw_cram$b_byte_mask;
-    unsigned char hw_cram$b_filler6;
-    unsigned char hw_cram$b_hose;
-    unsigned char hw_cram$b_filler7;
-    unsigned long long hw_cram$q_rbadr;
-    unsigned long long hw_cram$q_wdata;
-    unsigned long long hw_cram$q_filler8;
-    unsigned long long hw_cram$q_rdata;
+    UINT32 hw_cram$l_command;
+    UINT8 hw_cram$b_byte_mask;
+    UINT8 hw_cram$b_filler6;
+    UINT8 hw_cram$b_hose;
+    UINT8 hw_cram$b_filler7;
+    UINT64 hw_cram$q_rbadr;
+    UINT64 hw_cram$q_wdata;
+    UINT64 hw_cram$q_filler8;
+    UINT64 hw_cram$q_rdata;
     union
     {
         union
         {
-            unsigned short int hw_cram$w_mbx_flags;
+            UINT16 hw_cram$w_mbx_flags;
             struct
             {
                 unsigned hw_cram$v_mbx_done : 1;
@@ -150,42 +152,42 @@ struct _hw_cram
             };
         };
     };
-    unsigned short int hw_cram$w_error_bits [3];
-    unsigned long long hw_cram$q_filler9 [2];
+    UINT16 hw_cram$w_error_bits [3];
+    UINT64 hw_cram$q_filler9 [2];
 };
 
 struct _cmdtable
 {
     struct _adp *cmdtable$ps_adp;
-    unsigned int cmdtable$l_bus_type;
-    unsigned short int cmdtable$w_size;
-    unsigned char cmdtable$b_type;
-    unsigned char cmdtable$b_subtype;
+    UINT32 cmdtable$l_bus_type;
+    UINT16 cmdtable$w_size;
+    UINT8 cmdtable$b_type;
+    UINT8 cmdtable$b_subtype;
     //  char cmdtable$l_cmd_vector[];
 #define cmdtable$l_cmd_vector cmdtable$r_cmdarray
     struct
     {
-        unsigned int cramcmd$l_fill2;
-        unsigned int cramcmd$l_rdquad32;
-        unsigned int cramcmd$l_rdlong32;
-        unsigned int cramcmd$l_rdword32;
-        unsigned int cramcmd$l_rdbyte32;
-        unsigned int cramcmd$l_wtquad32;
-        unsigned int cramcmd$l_wtlong32;
-        unsigned int cramcmd$l_wtword32;
-        unsigned int cramcmd$l_wtbyte32;
-        unsigned int cramcmd$l_rdquad64;
-        unsigned int cramcmd$l_rdlong64;
-        unsigned int cramcmd$l_rdword64;
-        unsigned int cramcmd$l_rdbyte64;
-        unsigned int cramcmd$l_wtquad64;
-        unsigned int cramcmd$l_wtlong64;
-        unsigned int cramcmd$l_wtword64;
-        unsigned int cramcmd$l_wtbyte64;
-        unsigned int cramcmd$l_rdtribyte32;
-        unsigned int cramcmd$l_wttribyte32;
-        unsigned int cramcmd$l_rdtribyte64;
-        unsigned int cramcmd$l_wttribyte64;
+        UINT32 cramcmd$l_fill2;
+        UINT32 cramcmd$l_rdquad32;
+        UINT32 cramcmd$l_rdlong32;
+        UINT32 cramcmd$l_rdword32;
+        UINT32 cramcmd$l_rdbyte32;
+        UINT32 cramcmd$l_wtquad32;
+        UINT32 cramcmd$l_wtlong32;
+        UINT32 cramcmd$l_wtword32;
+        UINT32 cramcmd$l_wtbyte32;
+        UINT32 cramcmd$l_rdquad64;
+        UINT32 cramcmd$l_rdlong64;
+        UINT32 cramcmd$l_rdword64;
+        UINT32 cramcmd$l_rdbyte64;
+        UINT32 cramcmd$l_wtquad64;
+        UINT32 cramcmd$l_wtlong64;
+        UINT32 cramcmd$l_wtword64;
+        UINT32 cramcmd$l_wtbyte64;
+        UINT32 cramcmd$l_rdtribyte32;
+        UINT32 cramcmd$l_wttribyte32;
+        UINT32 cramcmd$l_rdtribyte64;
+        UINT32 cramcmd$l_wttribyte64;
     } cmdtable$r_cmdarray;;
 };
 

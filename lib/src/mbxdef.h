@@ -1,6 +1,8 @@
 #ifndef MBXDEF_H
 #define MBXDEF_H
 
+#include <vms_types.h>
+
 #define MBX$M_ALLOC 0x1
 #define MBX$M_VALID 0x2
 #define MBX$M_DELPEND 0x4
@@ -11,12 +13,12 @@
 
 struct _mbx
 {
-    unsigned long long mbx$q_msg;
-    //  unsigned short int mbx$w_size;
-    //  unsigned char mbx$b_type;
+    UINT64 mbx$q_msg;
+    //  UINT16 mbx$w_size;
+    //  UINT8 mbx$b_type;
     union
     {
-        unsigned char mbx$b_flags;
+        UINT8 mbx$b_flags;
         struct
         {
             unsigned mbx$v_alloc : 1;
@@ -26,17 +28,17 @@ struct _mbx
             unsigned mbx$v_fill_0_ : 4;
         };
     };
-    unsigned char mbx$b_creatport;
-    unsigned short int mbx$w_unit;
-    unsigned short int mbx$w_ref;
-    unsigned short int mbx$w_reader;
-    unsigned short int mbx$w_readast;
-    unsigned short int mbx$w_writast;
-    unsigned short int mbx$w_maxmsg;
-    unsigned short int mbx$w_msgcnt;
-    unsigned short int mbx$w_buffquo;
-    unsigned short int mbx$w_prot;
-    unsigned int mbx$l_ownuic;
+    UINT8 mbx$b_creatport;
+    UINT16 mbx$w_unit;
+    UINT16 mbx$w_ref;
+    UINT16 mbx$w_reader;
+    UINT16 mbx$w_readast;
+    UINT16 mbx$w_writast;
+    UINT16 mbx$w_maxmsg;
+    UINT16 mbx$w_msgcnt;
+    UINT16 mbx$w_buffquo;
+    UINT16 mbx$w_prot;
+    UINT32 mbx$l_ownuic;
     char mbx$t_name [16];
 };
 

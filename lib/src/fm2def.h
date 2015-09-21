@@ -16,7 +16,7 @@ struct _fm2
 {
     union
     {
-        unsigned short int fm2$w_word0;
+        UINT16 fm2$w_word0;
         struct
         {
             unsigned fm2$$_fill_1 : 14;
@@ -42,9 +42,9 @@ struct _fm2
             unsigned fm2$v_count2 : 14;
             unsigned fm2$v_fill_5_ : 2;
         };
-        unsigned char fm2$b_count1;
+        UINT8 fm2$b_count1;
     };
-    unsigned short int fm2$w_lowlbn;
+    UINT16 fm2$w_lowlbn;
 };
 
 #define FM2$K_LENGTH2 6
@@ -53,8 +53,8 @@ struct _fm2
 
 struct _fm2_1
 {
-    char fm2$$_fill_4 [2];
-    unsigned int fm2$l_lbn2;
+    INT8 fm2$$_fill_4 [2];
+    UINT32 fm2$l_lbn2;
 };
 
 #define FM2$K_LENGTH3 8
@@ -63,9 +63,9 @@ struct _fm2_1
 
 struct _fm2_2
 {
-    char fm2$$_fill_5 [2];
-    unsigned short int fm2$w_lowcount;
-    unsigned int fm2$l_lbn3;
+    INT8 fm2$$_fill_5 [2];
+    UINT16 fm2$w_lowcount;
+    UINT32 fm2$l_lbn3;
 };
 
 #endif

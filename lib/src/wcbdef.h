@@ -1,6 +1,8 @@
 #ifndef WCBDEF_H
 #define WCBDEF_H
 
+#include <vms_types.h>
+
 #define     WCB$M_READ      0x1
 #define     WCB$M_WRITE     0x2
 #define     WCB$M_NOTFCP        0x4
@@ -21,11 +23,11 @@ struct _wcb
 {
     struct _wcb *wcb$l_wlfl;
     struct _wcb *wcb$l_wlbl;
-    unsigned short int wcb$w_size;
-    unsigned char wcb$b_type;
+    UINT16 wcb$w_size;
+    UINT8 wcb$b_type;
     union
     {
-        unsigned char wcb$b_access;
+        UINT8 wcb$b_access;
         struct
         {
             unsigned wcb$v_read : 1;
@@ -38,12 +40,12 @@ struct _wcb
             unsigned wcb$v_expire : 1;
         };
     };
-    unsigned int wcb$l_pid;
-    unsigned int wcb$l_refcnt;
+    UINT32 wcb$l_pid;
+    UINT32 wcb$l_refcnt;
     struct _ucb *wcb$l_orgucb;
     union
     {
-        unsigned short wcb$w_acon;
+        UINT16 wcb$w_acon;
         struct
         {
             unsigned wcb$v_nowrite : 1;
@@ -70,35 +72,35 @@ struct _wcb
             unsigned wcb$v_write_turn : 1;
         };
     };
-    unsigned short wcb$w_nmap;
+    UINT16 wcb$w_nmap;
     struct _fcb *wcb$l_fcb;
     struct _rvt *wcb$l_rvt;
     void *wcb$l_link;
-    unsigned int wcb$l_reads;
-    unsigned int wcb$l_writes;
-    unsigned int wcb$l_stvbn;
+    UINT32 wcb$l_reads;
+    UINT32 wcb$l_writes;
+    UINT32 wcb$l_stvbn;
     union
     {
         struct
         {
-            unsigned short int wcb$w_p1_count;
-            char wcb$b_fill_8 [10];
+            UINT16 wcb$w_p1_count;
+            INT8 wcb$b_fill_8 [10];
         };
         struct
         {
-            unsigned int wcb$l_p1_count;
-            unsigned int wcb$l_p1_lbn;
-            unsigned int wcb$l_p1_rvn;
+            UINT32 wcb$l_p1_count;
+            UINT32 wcb$l_p1_lbn;
+            UINT32 wcb$l_p1_rvn;
         };
         struct
         {
-            unsigned long long wcb$q_deliq;
-            char wcb$b_fill_7 [4];
+            UINT64 wcb$q_deliq;
+            INT8 wcb$b_fill_7 [4];
         };
     };
-    unsigned int wcb$l_p2_count;
-    unsigned int wcb$l_p2_lbn;
-    unsigned int wcb$l_p2_rvn;
+    UINT32 wcb$l_p2_count;
+    UINT32 wcb$l_p2_lbn;
+    UINT32 wcb$l_p2_rvn;
 
     // borrowing until I understand wcb better
 
@@ -119,16 +121,16 @@ struct _wcb
 
 struct _wcb1
 {
-    unsigned int wcb$l_count;
-    unsigned int wcb$l_lbn;
-    unsigned int wcb$l_rvn;
+    UINT32 wcb$l_count;
+    UINT32 wcb$l_lbn;
+    UINT32 wcb$l_rvn;
 };
 
 #define WCB$S_WCBDEF2 13
 
 struct _wcb2
 {
-    char wcb$$_fill_6;
+    INT8 wcb$$_fill_6;
 };
 
 #endif

@@ -96,22 +96,22 @@ struct _pb
 {
     struct _pb *pb$l_flink;
     struct _pb *pb$l_blink;
-    unsigned short int pb$w_size;
-    unsigned char pb$b_type;
-    unsigned char pb$b_subtyp;
-    unsigned char pb$b_rstation [6];
-    unsigned short int pb$w_state;
-    unsigned int pb$l_rport_typ;
-    unsigned int pb$l_rport_rev;
-    unsigned int pb$l_rport_fcn;
-    unsigned char pb$b_rst_port;
-    unsigned char pb$b_rstate;
-    unsigned short int pb$w_retry;
+    UINT16 pb$w_size;
+    UINT8 pb$b_type;
+    UINT8 pb$b_subtyp;
+    UINT8 pb$b_rstation [6];
+    UINT16 pb$w_state;
+    UINT32 pb$l_rport_typ;
+    UINT32 pb$l_rport_rev;
+    UINT32 pb$l_rport_fcn;
+    UINT8 pb$b_rst_port;
+    UINT8 pb$b_rstate;
+    UINT16 pb$w_retry;
     char pb$t_lport_name [4];
-    unsigned char pb$b_cbl_sts;
-    unsigned char pb$b_p0_sts;
-    unsigned char pb$b_p1_sts;
-    char pb$$_fill_1;
+    UINT8 pb$b_cbl_sts;
+    UINT8 pb$b_p0_sts;
+    UINT8 pb$b_p1_sts;
+    INT8 pb$$_fill_1;
     void *pb$l_pdt;
     struct _sb *pb$l_sblink;
     struct _cdt *pb$l_cdtlst;
@@ -119,23 +119,23 @@ struct _pb
     union
     {
         void *pb$l_waitqbl;
-        unsigned int pb$l_duetime;
+        UINT32 pb$l_duetime;
     };
     void *pb$l_scsmsg;
-    unsigned short int pb$w_sts;
-    unsigned short int pb$w_vcfail_rsn;
-    unsigned char pb$b_protocol;
-    char pb$$_fill_2 [3];
-    unsigned int pb$l_rport_mult;
-    unsigned int pb$l_time_stamp;
+    UINT16 pb$w_sts;
+    UINT16 pb$w_vcfail_rsn;
+    UINT8 pb$b_protocol;
+    INT8 pb$$_fill_2 [3];
+    UINT32 pb$l_rport_mult;
+    UINT32 pb$l_time_stamp;
     struct _pb *pb$l_share_flink;
     struct _pb *pb$l_share_blink;
-    int pb$l_load_class;
-    int pb$l_priority;
-    int pb$l_mgt_priority;
-    //  unsigned int pb$l_vc_addr;
+    INT32 pb$l_load_class;
+    INT32 pb$l_priority;
+    INT32 pb$l_mgt_priority;
+    //  UINT32 pb$l_vc_addr;
     struct _vcdef * pb$l_vc_addr;
-    int pb$$_fill_3 [2];
+    INT32 pb$$_fill_3 [2];
 };
 
 #endif

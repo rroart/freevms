@@ -1,6 +1,8 @@
 #ifndef PCIDEF_H
 #define PCIDEF_H
 
+#include <vms_types.h>
+
 #define PCI$K_VENDOR_ID 0
 #define PCI$K_DEVICE_ID 2
 #define PCI$K_COMMAND 4
@@ -120,11 +122,11 @@
 
 struct _pci
 {
-    short int pci$w_vendor_id;
-    short int pci$w_device_id;
+    INT16 pci$w_vendor_id;
+    INT16 pci$w_device_id;
     union
     {
-        short int pci$w_command;
+        INT16 pci$w_command;
         struct
         {
             unsigned pci$v_io_enable : 1;
@@ -142,7 +144,7 @@ struct _pci
     };
     union
     {
-        short int pci$w_status;
+        INT16 pci$w_status;
         struct
         {
             unsigned pci$v_status_fill : 7;
@@ -156,37 +158,37 @@ struct _pci
             unsigned pci$v_detect_pe : 1;
         };
     };
-    char pci$b_revision_id;
-    char pci$b_programming_if;
-    char pci$b_sub_class;
-    char pci$b_base_class;
-    char pci$b_cache_line_size;
-    char pci$b_latency_timer;
-    char pci$b_header_type;
-    char pci$b_bist;
-    int pci$l_base_address_0;
-    int pci$l_base_address_1;
-    int pci$l_base_address_2;
-    int pci$l_base_address_3;
-    int pci$l_base_address_4;
-    int pci$l_base_address_5;
-    int pci$l_cardbus_cis;
-    short int pci$w_sub_vndr;
-    short int pci$w_sub_id;
-    int pci$l_exp_rom_base;
-    int pci$l_reserved_3;
-    int pci$l_reserved_4;
-    char pci$b_intr_line;
-    char pci$b_intr_pin;
-    char pci$b_min_gnt;
-    char pci$b_max_lat;
+    INT8 pci$b_revision_id;
+    INT8 pci$b_programming_if;
+    INT8 pci$b_sub_class;
+    INT8 pci$b_base_class;
+    INT8 pci$b_cache_line_size;
+    INT8 pci$b_latency_timer;
+    INT8 pci$b_header_type;
+    INT8 pci$b_bist;
+    INT32 pci$l_base_address_0;
+    INT32 pci$l_base_address_1;
+    INT32 pci$l_base_address_2;
+    INT32 pci$l_base_address_3;
+    INT32 pci$l_base_address_4;
+    INT32 pci$l_base_address_5;
+    INT32 pci$l_cardbus_cis;
+    INT16 pci$w_sub_vndr;
+    INT16 pci$w_sub_id;
+    INT32 pci$l_exp_rom_base;
+    INT32 pci$l_reserved_3;
+    INT32 pci$l_reserved_4;
+    INT8 pci$b_intr_line;
+    INT8 pci$b_intr_pin;
+    INT8 pci$b_min_gnt;
+    INT8 pci$b_max_lat;
 };
 
 struct _base_address
 {
     union
     {
-        int pci$l_base_address;
+        INT32 pci$l_base_address;
         struct
         {
             unsigned pci$v_base_address_mem_io : 1;
@@ -201,7 +203,7 @@ struct _pci_node_number
 {
     union
     {
-        int pci$l_pci_node_number;
+        INT32 pci$l_pci_node_number;
         struct
         {
             unsigned pci$v_pci_node_number_function : 3;
@@ -216,18 +218,18 @@ struct _pci_busarray_hardware_id
 {
     union
     {
-        long long pci$q_pci_hardware_id;
+        INT64 pci$q_pci_hardware_id;
         struct
         {
-            short int pci$w_pci_hardware_id_vendor;
-            short int pci$w_pci_hardware_id_device;
+            INT16 pci$w_pci_hardware_id_vendor;
+            INT16 pci$w_pci_hardware_id_device;
             union
             {
-                int pci$l_pci_hardware_id_fill;
+                INT32 pci$l_pci_hardware_id_fill;
                 struct
                 {
-                    short int pci$w_pci_hardware_id_sub_vndr;
-                    short int pci$w_pci_hardware_id_sub_id;
+                    INT16 pci$w_pci_hardware_id_sub_vndr;
+                    INT16 pci$w_pci_hardware_id_sub_id;
                 };
             };
         };
@@ -238,9 +240,9 @@ struct _pcierr
 {
     unsigned pcierr$v_fill1 : 11;
     unsigned pcierr$v_device_number : 5;
-    unsigned char pcierr$b_bus_number;
-    unsigned char pcierr$b_fill2;
-    unsigned int pcierr$l_frame_size;
+    UINT8 pcierr$b_bus_number;
+    UINT8 pcierr$b_fill2;
+    UINT32 pcierr$l_frame_size;
     struct _pci pcierr$r_pci;
 };
 
@@ -250,7 +252,7 @@ struct _pciflags
     {
         struct
         {
-            unsigned char pciflags$b_pciflags;
+            UINT8 pciflags$b_pciflags;
             unsigned pciflags$v_fill1 : 24;
         };
         struct

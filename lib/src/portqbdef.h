@@ -1,20 +1,22 @@
 #ifndef PORTQBDEF_H
 #define PORTQBDEF_H
 
+#include <vms_types.h>
+
 struct _portqb
 {
-    unsigned long long portqb$r_cmdq_fill[8];
-    unsigned long long portqb$q_rspq_fill;
+    UINT64 portqb$r_cmdq_fill[8];
+    UINT64 portqb$q_rspq_fill;
     unsigned long portqb$l_dfqhdr;
     unsigned long portqb$l_mfqhdr;
-    unsigned short portqb$w_dqelen;
-    unsigned short portqb$w_dqelenhi;
-    unsigned short portqb$w_mqelen;
-    unsigned short portqb$w_mqelenhi;
+    UINT16 portqb$w_dqelen;
+    UINT16 portqb$w_dqelenhi;
+    UINT16 portqb$w_mqelen;
+    UINT16 portqb$w_mqelenhi;
     unsigned long portqb$l_vportqb;
     unsigned long portqb$l_vbdt;
-    unsigned short portqb$_wbdtlen;
-    unsigned short portqb$w_bdtlenhi;
+    UINT16 portqb$_wbdtlen;
+    UINT16 portqb$w_bdtlenhi;
     unsigned long portqb$l_sptbase;
     unsigned long portqb$l_sptlen;
     unsigned long portqb$l_gptbase;

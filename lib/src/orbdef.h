@@ -1,6 +1,8 @@
 #ifndef ORBDEF_H
 #define ORBDEF_H
 
+#include <vms_types.h>
+
 #define ORB$M_PROT_16 0x1
 #define ORB$M_ACL_QUEUE 0x2
 #define ORB$M_MODE_VECTOR 0x4
@@ -26,32 +28,32 @@ struct _orb
 {
     union
     {
-        unsigned int orb$l_owner;
+        UINT32 orb$l_owner;
         struct
         {
-            unsigned short int orb$w_uicmember;
-            unsigned short int orb$w_uicgroup;
+            UINT16 orb$w_uicmember;
+            UINT16 orb$w_uicgroup;
         };
     };
-    unsigned int orb$l_acl_mutex;
-    unsigned short int orb$w_size;
-    unsigned char orb$b_type;
-    unsigned char orb$b_subtype;
+    UINT32 orb$l_acl_mutex;
+    UINT16 orb$w_size;
+    UINT8 orb$b_type;
+    UINT8 orb$b_subtype;
     union
     {
         union
         {
-            unsigned short int orb$w_flags;
+            UINT16 orb$w_flags;
             struct
             {
-                unsigned char orb$b_flags_1;
-                unsigned char orb$b_flags_2;
+                UINT8 orb$b_flags_1;
+                UINT8 orb$b_flags_2;
             };
         };
-        unsigned char orb$b_flags;
+        UINT8 orb$b_flags;
         union
         {
-            unsigned short int orb$w_flag_bits;
+            UINT16 orb$w_flag_bits;
             struct
             {
                 unsigned orb$v_prot_16      : 1;
@@ -73,32 +75,32 @@ struct _orb
             };
         };
     };
-    unsigned short int orb$w_refcount;
+    UINT16 orb$w_refcount;
     union
     {
         union
         {
-            unsigned long long orb$q_mode_prot;
+            UINT64 orb$q_mode_prot;
             struct
             {
-                unsigned int orb$l_mode_protl;
-                unsigned int orb$l_mode_proth;
+                UINT32 orb$l_mode_protl;
+                UINT32 orb$l_mode_proth;
             };
         };
-        unsigned int orb$l_mode;
+        UINT32 orb$l_mode;
     };
     union
     {
-        unsigned int orb$l_sys_prot;
-        unsigned short int orb$w_prot;
+        UINT32 orb$l_sys_prot;
+        UINT16 orb$w_prot;
     };
-    unsigned int orb$l_own_prot;
-    unsigned int orb$l_grp_prot;
-    unsigned int orb$l_wor_prot;
+    UINT32 orb$l_own_prot;
+    UINT32 orb$l_grp_prot;
+    UINT32 orb$l_wor_prot;
     union
     {
         struct _ace *orb$l_aclfl;
-        unsigned int orb$l_acl_count;
+        UINT32 orb$l_acl_count;
     };
     union
     {
@@ -107,22 +109,22 @@ struct _orb
     };
     struct
     {
-        char orb$b_fill_2 [20];
+        INT8 orb$b_fill_2 [20];
     };
     struct
     {
-        char orb$b_fill_3 [20];
+        INT8 orb$b_fill_3 [20];
     };
-    unsigned short int orb$w_name_length;
-    short int orb$w_fill_3;
+    UINT16 orb$w_name_length;
+    INT16 orb$w_fill_3;
     void *orb$l_name_pointer;
     struct _ocb *orb$l_ocb;
     struct _orb *orb$l_template_orb;
-    int orb$l_object_specific;
+    INT32 orb$l_object_specific;
     struct _orb *orb$l_original_orb;
-    unsigned int orb$l_updseq;
+    UINT32 orb$l_updseq;
     void *orb$l_mutex_address;
-    int orb$l_reserve2;
+    INT32 orb$l_reserve2;
     char orb$t_object_name;
 };
 

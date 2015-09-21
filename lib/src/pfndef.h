@@ -63,19 +63,19 @@
 
 struct _pmap
 {
-    unsigned int pmap$l_start_pfn;
-    unsigned int pmap$l_pfn_count;
+    UINT32 pmap$l_start_pfn;
+    UINT32 pmap$l_pfn_count;
 };
 
 struct _plnk
 {
     union
     {
-        unsigned long long plnk$q_pfn_list_link;
+        UINT64 plnk$q_pfn_list_link;
         struct
         {
-            unsigned int plnk$l_next_pfn;
-            unsigned int plnk$l_pfn_count;
+            UINT32 plnk$l_next_pfn;
+            UINT32 plnk$l_pfn_count;
         };
     };
 };
@@ -91,20 +91,20 @@ typedef struct page
         {
             union
             {
-                unsigned int pfn$l_flink;
-                unsigned int pfn$l_shrcnt;
+                UINT32 pfn$l_flink;
+                UINT32 pfn$l_shrcnt;
             };
             union
             {
-                unsigned int pfn$l_blink;
-                unsigned int pfn$l_wslx_qw;
-                unsigned int pfn$l_gbl_lck_cnt;
+                UINT32 pfn$l_blink;
+                UINT32 pfn$l_wslx_qw;
+                UINT32 pfn$l_gbl_lck_cnt;
             };
         };
     };
     union
     {
-        unsigned int pfn$l_page_state;
+        UINT32 pfn$l_page_state;
         struct
         {
             unsigned pfn$v_pagtyp       : 3;
@@ -127,16 +127,16 @@ typedef struct page
     };
     union
     {
-        unsigned int pfn$l_pt_pfn;
-        unsigned int pfn$l_shm_cpp_id;
+        UINT32 pfn$l_pt_pfn;
+        UINT32 pfn$l_shm_cpp_id;
     };
     union
     {
-        unsigned long long pfn$q_pte_index;
+        UINT64 pfn$q_pte_index;
         struct
         {
-            int pfn$l_refcnt_fill1;
-            //      short int pfn$w_refcnt_fill2;
+            INT32 pfn$l_refcnt_fill1;
+            //      INT16 pfn$w_refcnt_fill2;
             union
             {
                 unsigned long npfn$l_refcnt; // was w_, changed because of atomic stuff
@@ -151,12 +151,12 @@ typedef struct page
     };
     union
     {
-        unsigned long long pfn$q_bak;
+        UINT64 pfn$q_bak;
         struct _phd *pfn$l_phd;
         struct
         {
-            unsigned int pfn$l_color_flink;
-            unsigned int pfn$l_color_blink;
+            UINT32 pfn$l_color_flink;
+            UINT32 pfn$l_color_blink;
         };
         struct
         {
@@ -193,17 +193,17 @@ typedef struct page
             unsigned pfn$v_fill_12      : 32;
             unsigned pfn$v_gptx     : 32;
         };
-        unsigned long long pfn$q_bak_prvpfn;
+        UINT64 pfn$q_bak_prvpfn;
     };
     union
     {
-        unsigned short int pfn$w_swppag;
-        unsigned short int pfn$w_bo_refc;
-        unsigned short int pfn$w_io_sts;
+        UINT16 pfn$w_swppag;
+        UINT16 pfn$w_bo_refc;
+        UINT16 pfn$w_io_sts;
     };
-    unsigned short int pfn$w_pt_val_cnt;
-    unsigned short int pfn$w_pt_lck_cnt;
-    unsigned short int pfn$w_pt_win_cnt;
+    UINT16 pfn$w_pt_val_cnt;
+    UINT16 pfn$w_pt_lck_cnt;
+    UINT16 pfn$w_pt_win_cnt;
 
     struct list_head list;  /* for slab */  /* ->mapping has some page lists. */
 #if 0
@@ -231,15 +231,15 @@ struct _prvpfn
 {
     struct _prvpfn *prvpfn$l_sqfl;
     struct _prvpfn *prvpfn$l_sqbl;
-    unsigned short int prvpfn$w_size;
-    unsigned char prvpfn$b_type;
-    unsigned char prvpfn$b_subtype;
-    unsigned int prvpfn$l_count;
-    unsigned int prvpfn$l_head;
-    unsigned int prvpfn$l_tail;
-    unsigned int prvpfn$l_reclaimable;
-    unsigned int prvpfn$l_reclaimed;
-    int prvpfn$l_priority;
+    UINT16 prvpfn$w_size;
+    UINT8 prvpfn$b_type;
+    UINT8 prvpfn$b_subtype;
+    UINT32 prvpfn$l_count;
+    UINT32 prvpfn$l_head;
+    UINT32 prvpfn$l_tail;
+    UINT32 prvpfn$l_reclaimable;
+    UINT32 prvpfn$l_reclaimed;
+    INT32 prvpfn$l_priority;
     void (*prvpfn$a_callback)(void);
 };
 

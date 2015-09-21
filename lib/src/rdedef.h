@@ -1,6 +1,8 @@
 #ifndef RDEDEF_H
 #define RDEDEF_H
 
+#include <vms_types.h>
+
 #define REGPRT$M_OWNER_MODE         0xF
 #define REGPRT$M_CREATE_MODE        0xF0
 #define REGPRT$M_RESERVED_PROT_BITS 0xFFFFFF00
@@ -23,7 +25,7 @@
 
 union _region_prot
 {
-    int regprt$l_region_prot;
+    INT32 regprt$l_region_prot;
     struct
     {
         unsigned regprt$v_owner_mode         : 4;
@@ -36,13 +38,13 @@ struct _rde
 {
     struct _rde *rde$ps_va_list_flink;
     struct _rde *rde$ps_va_list_blink;
-    unsigned short rde$w_size;
-    unsigned char rde$b_type;
-    unsigned char rde$b_subtype;
+    UINT16 rde$w_size;
+    UINT8 rde$b_type;
+    UINT8 rde$b_subtype;
     struct _rde *rde$ps_table_link;
     union
     {
-        unsigned int rde$l_flags;
+        UINT32 rde$l_flags;
         struct
         {
             unsigned rde$v_descend          : 1;
@@ -56,7 +58,7 @@ struct _rde
         };
     };
     union _region_prot rde$r_regprot;
-    unsigned long long rde$q_region_id;
+    UINT64 rde$q_region_id;
     union
     {
         void *rde$pq_start_va;
@@ -64,8 +66,8 @@ struct _rde
     };
     union
     {
-        unsigned long long rde$q_region_size;
-        unsigned int rde$l_region_size;
+        UINT64 rde$q_region_size;
+        UINT32 rde$l_region_size;
     };
     union
     {

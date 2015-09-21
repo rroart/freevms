@@ -31,10 +31,10 @@ struct _qsrv_packack
 {
     union
     {
-        unsigned int qsrv_packack$l_controls;
+        UINT32 qsrv_packack$l_controls;
         union
         {
-            unsigned int qsrv_packack$l_ctrl_bits;
+            UINT32 qsrv_packack$l_ctrl_bits;
             struct
             {
                 unsigned qsrv_packack$v_orig_bufio : 1;
@@ -45,37 +45,37 @@ struct _qsrv_packack
     };
     union
     {
-        unsigned int qsrv_packack$l_driver_version;
+        UINT32 qsrv_packack$l_driver_version;
         struct
         {
-            unsigned short int qsrv_packack$w_major_vers;
-            unsigned short int qsrv_packack$w_minor_vers;
+            UINT16 qsrv_packack$w_major_vers;
+            UINT16 qsrv_packack$w_minor_vers;
         };
     };
     struct
     {
         union
         {
-            unsigned long long qsrv_packack$q_devchar;
+            UINT64 qsrv_packack$q_devchar;
             struct
             {
-                unsigned int qsrv_packack$l_devchar;
-                unsigned int qsrv_packack$l_devchar2;
+                UINT32 qsrv_packack$l_devchar;
+                UINT32 qsrv_packack$l_devchar2;
             };
         };
-        unsigned long long qsrv_packack$q_devdepend;
-        unsigned long long qsrv_packack$q_devdepend2;
-        unsigned char qsrv_packack$b_devclass;
-        unsigned char qsrv_packack$b_devtype;
-        unsigned short int qsrv_packack$w_devbufsize;
-        unsigned int qsrv_packack$l_sts;
-        unsigned int qsrv_packack$l_devsts;
-        unsigned int qsrv_packack$l_media_id;
+        UINT64 qsrv_packack$q_devdepend;
+        UINT64 qsrv_packack$q_devdepend2;
+        UINT8 qsrv_packack$b_devclass;
+        UINT8 qsrv_packack$b_devtype;
+        UINT16 qsrv_packack$w_devbufsize;
+        UINT32 qsrv_packack$l_sts;
+        UINT32 qsrv_packack$l_devsts;
+        UINT32 qsrv_packack$l_media_id;
     };
     struct
     {
-        unsigned short int qsrv_packack$w_mt3_density;
-        unsigned short int qsrv_packack$w_spare_1;
+        UINT16 qsrv_packack$w_mt3_density;
+        UINT16 qsrv_packack$w_spare_1;
     };
     struct
     {
@@ -83,18 +83,18 @@ struct _qsrv_packack
         {
             struct
             {
-                unsigned int qsrv_packack$l_maxblock;
-                unsigned int qsrv_packack$l_maxbcnt;
+                UINT32 qsrv_packack$l_maxblock;
+                UINT32 qsrv_packack$l_maxbcnt;
             };
             struct
             {
-                unsigned int qsrv_packack$l_record;
+                UINT32 qsrv_packack$l_record;
             };
         };
-        unsigned int qsrv_packack$l_alloclass;
+        UINT32 qsrv_packack$l_alloclass;
     };
-    unsigned int qsrv_packack$l_devchar3;
-    unsigned int qsrv_packack$l_wwid_length;
+    UINT32 qsrv_packack$l_devchar3;
+    UINT32 qsrv_packack$l_wwid_length;
     struct _dtn qsrv_packack$r_dtn;
     char qsrv_packack$t_wwid [280];
 };

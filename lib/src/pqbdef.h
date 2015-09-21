@@ -1,6 +1,8 @@
 #ifndef PQBDEF_H
 #define PQBDEF_H
 
+#include <vms_types.h>
+
 #define PQB$M_IMGDMP         0x1
 #define PQB$M_DEBUG          0x2
 #define PQB$M_DBGTRU         0x4
@@ -11,27 +13,27 @@
 
 struct _pqb
 {
-    unsigned long long pqb$q_prvmsk;
-    unsigned short int pqb$w_size;
-    unsigned char pqb$b_type;
-    unsigned char pqb$b_sts;
-    unsigned int pqb$l_astlm;
-    unsigned int pqb$l_biolm;
-    unsigned int pqb$l_bytlm;
-    unsigned int pqb$l_cpulm;
-    unsigned int pqb$l_diolm;
-    unsigned int pqb$l_fillm;
-    unsigned int pqb$l_pgflquota;
-    unsigned int pqb$l_prclm;
-    unsigned int pqb$l_tqelm;
-    unsigned int pqb$l_wsquota;
-    unsigned int pqb$l_wsdefault;
-    unsigned int pqb$l_enqlm;
-    unsigned int pqb$l_wsextent;
-    unsigned int pqb$l_jtquota;
+    UINT64 pqb$q_prvmsk;
+    UINT16 pqb$w_size;
+    UINT8 pqb$b_type;
+    UINT8 pqb$b_sts;
+    UINT32 pqb$l_astlm;
+    UINT32 pqb$l_biolm;
+    UINT32 pqb$l_bytlm;
+    UINT32 pqb$l_cpulm;
+    UINT32 pqb$l_diolm;
+    UINT32 pqb$l_fillm;
+    UINT32 pqb$l_pgflquota;
+    UINT32 pqb$l_prclm;
+    UINT32 pqb$l_tqelm;
+    UINT32 pqb$l_wsquota;
+    UINT32 pqb$l_wsdefault;
+    UINT32 pqb$l_enqlm;
+    UINT32 pqb$l_wsextent;
+    UINT32 pqb$l_jtquota;
     union
     {
-        unsigned short int pqb$w_flags;
+        UINT16 pqb$w_flags;
         struct
         {
             unsigned pqb$v_imgdmp       : 1;
@@ -41,22 +43,22 @@ struct _pqb
             unsigned pqb$v_fill_2_      : 4;
         };
     };
-    unsigned char pqb$b_msgmask;
-    unsigned char pqb$b_fill_1;
-    unsigned int pqb$l_uaf_flags;
-    unsigned int pqb$l_creprc_flags;
+    UINT8 pqb$b_msgmask;
+    UINT8 pqb$b_fill_1;
+    UINT32 pqb$l_uaf_flags;
+    UINT32 pqb$l_creprc_flags;
     struct
     {
-        unsigned char pqb$$$_fill_2 [20];
+        UINT8 pqb$$$_fill_2 [20];
     };
     struct
     {
-        unsigned char pqb$$$_fill_3 [20];
+        UINT8 pqb$$$_fill_3 [20];
     };
-    unsigned int pqb$l_input_att;
-    unsigned int pqb$l_output_att;
-    unsigned int pqb$l_error_att;
-    unsigned int pqb$l_disk_att;
+    UINT32 pqb$l_input_att;
+    UINT32 pqb$l_output_att;
+    UINT32 pqb$l_error_att;
+    UINT32 pqb$l_disk_att;
     char pqb$t_cli_name [32];
     char pqb$t_cli_table [256];
     char pqb$t_spawn_cli [32];
@@ -68,8 +70,8 @@ struct _pqb
     char pqb$t_ddstring [256];
     char pqb$t_image [256];
     char pqb$t_account [8];
-    unsigned int pqb$l_arb_support;
-    unsigned int pqb$l_rms_lcs;
+    UINT32 pqb$l_arb_support;
+    UINT32 pqb$l_rms_lcs;
 };
 
 #endif

@@ -2,7 +2,7 @@
 
 int sys$cmkrnl(int (*routin)(), unsigned int *arglst);
 
-int   rms_std$alononpaged (int reqsize, int32 *alosize_p, void **pool_p)
+int   rms_std$alononpaged (int reqsize, INT32 *alosize_p, void **pool_p)
 {
     long arglst[4];
     arglst[0] = 3;

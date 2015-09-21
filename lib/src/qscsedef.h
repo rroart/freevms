@@ -8,12 +8,12 @@ struct _qscse
 {
     struct _qscse *qscse$ps_flink;
     struct _qscse *qscse$ps_blink;
-    unsigned short int qscse$w_size;
-    unsigned char qscse$b_type;
-    unsigned char qscse$b_subtype;
-    unsigned int qscse$l_flags;
+    UINT16 qscse$w_size;
+    UINT8 qscse$b_type;
+    UINT8 qscse$b_subtype;
+    UINT32 qscse$l_flags;
     void *qscse$ps_item;
-    char qscse$b_fill_0_ [4];
+    INT8 qscse$b_fill_0_ [4];
 };
 
 #define QSCSE$C_LENGTH 24

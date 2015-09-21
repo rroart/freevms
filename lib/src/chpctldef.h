@@ -1,6 +1,8 @@
 #ifndef CHPCTLDEF_H
 #define CHPCTLDEF_H
 
+#include <vms_types.h>
+
 #define CHPCTL$M_READ 0x1
 #define CHPCTL$M_WRITE 0x2
 #define CHPCTL$M_USEREADALL 0x4
@@ -18,10 +20,10 @@
 
 struct _chpctl
 {
-    unsigned int chpctl$l_access;
+    UINT32 chpctl$l_access;
     union
     {
-        unsigned int chpctl$l_flags;
+        UINT32 chpctl$l_flags;
         struct
         {
             unsigned chpctl$v_read : 1;
@@ -39,10 +41,10 @@ struct _chpctl
             unsigned chpctl$v_fill_2_ : 4;
         };
     };
-    unsigned int chpctl$l_mode;
+    UINT32 chpctl$l_mode;
     void *chpctl$l_audit_list;
-    int chpctl$l_deaccess_key;
-    unsigned int chpctl$l_message;
+    INT32 chpctl$l_deaccess_key;
+    UINT32 chpctl$l_message;
     union
     {
         struct _arb *chpctl$l_arb;

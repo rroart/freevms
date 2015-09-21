@@ -1,6 +1,8 @@
 #ifndef CPUDEF_H
 #define CPUDEF_H
 
+#include <vms_types.h>
+
 #define     CPU$C_MAX_CPUS      32
 #define     CPU$C_RESERVED      0
 #define     CPU$C_INIT      1
@@ -74,30 +76,30 @@ struct _cpu
 {
     struct _pcb *cpu$l_curpcb;
     // struct _ktb *cpu$l_curktb;
-    unsigned char cpu$b_ipl; /* some cpus lack something. what is the connnection to PSL IPL? */
-    unsigned short cpu$w_sisr; /* some cpus lacks... pending interrupts */
-    unsigned char iplnr;
-    unsigned char previpl[32];
+    UINT8 cpu$b_ipl; /* some cpus lack something. what is the connnection to PSL IPL? */
+    UINT16 cpu$w_sisr; /* some cpus lacks... pending interrupts */
+    UINT8 iplnr;
+    UINT8 previpl[32];
     struct
     {
-        unsigned char interrupt;
-        unsigned char at_level;
+        UINT8 interrupt;
+        UINT8 at_level;
         void * address;
     } cpu$t_ipending[256];
 
-    //  unsigned char cpu$b_astlvl; /* some cpus lack something. pcb stuff. */
-    unsigned char cpu$b_intstk; /* PSL IS. not yet used */
-    unsigned char cpu$b_cur_mod; /* PSL CUR_MOD */
-    unsigned char cpu$b_prv_mod; /* PSL PRV_MOD */
+    //  UINT8 cpu$b_astlvl; /* some cpus lack something. pcb stuff. */
+    UINT8 cpu$b_intstk; /* PSL IS. not yet used */
+    UINT8 cpu$b_cur_mod; /* PSL CUR_MOD */
+    UINT8 cpu$b_prv_mod; /* PSL PRV_MOD */
 
     unsigned long cpu$l_realstack;
-    unsigned short int cpu$w_size;
-    unsigned char cpu$b_type;
-    unsigned char cpu$b_subtype;
-    unsigned char cpu$b_busywait;
-    unsigned char cpu$b_state;
-    unsigned char cpu$b_cpumtx;
-    unsigned char cpu$b_cur_pri;
+    UINT16 cpu$w_size;
+    UINT8 cpu$b_type;
+    UINT8 cpu$b_subtype;
+    UINT8 cpu$b_busywait;
+    UINT8 cpu$b_state;
+    UINT8 cpu$b_cpumtx;
+    UINT8 cpu$b_cur_pri;
     unsigned long cpu$l_work_req;
     unsigned long cpu$l_percpuva;
     unsigned long cpu$l_saved_ap;
@@ -115,7 +117,7 @@ struct _cpu
     unsigned long cpu$l_mchk_mask;
     unsigned long cpu$l_mchk_sp;
     unsigned long cpu$l_p0pt_page;
-    unsigned long long cpu$q_swiqfl [6];
+    UINT64 cpu$q_swiqfl [6];
     unsigned long cpu$l_psfl;
     unsigned long cpu$l_psbl;
     unsigned long cpu$l_boot_time;
@@ -130,11 +132,11 @@ struct _cpu
 
 struct _sched_ds
 {
-    unsigned long long cpu$q_acc_run;
-    unsigned long long cpu$q_proc_count;
-    unsigned long long cpu$q_acc_interrupt;
-    unsigned long long cpu$q_acc_waitime;
-    unsigned long long cpu$q_sched_flags;
+    UINT64 cpu$q_acc_run;
+    UINT64 cpu$q_proc_count;
+    UINT64 cpu$q_acc_interrupt;
+    UINT64 cpu$q_acc_waitime;
+    UINT64 cpu$q_sched_flags;
 };
 
 #endif

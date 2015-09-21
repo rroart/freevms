@@ -1,6 +1,8 @@
 #ifndef CWPSDEF_H
 #define CWPSDEF_H
 
+#include <vms_types.h>
+
 #define     CWPSSRV$M_BTX_DONE      0x1
 #define     CWPSSRV$M_SEC_CLASS     0x1
 #define     CWPSSRV$M_JPIBUF        0x2
@@ -48,32 +50,32 @@
 
 struct _cwpssrv
 {
-    unsigned int cwpssrv$l_send_length;
-    unsigned int cwpssrv$l_return_length;
-    unsigned short int cwpssrv$w_size;
-    unsigned char cwpssrv$b_type;
-    unsigned char cwpssrv$b_subtype;
-    unsigned short int cwpssrv$w_btx_status;
+    UINT32 cwpssrv$l_send_length;
+    UINT32 cwpssrv$l_return_length;
+    UINT16 cwpssrv$w_size;
+    UINT8 cwpssrv$b_type;
+    UINT8 cwpssrv$b_subtype;
+    UINT16 cwpssrv$w_btx_status;
     union
     {
-        unsigned char cwpssrv$b_btx_flags;
+        UINT8 cwpssrv$b_btx_flags;
         struct
         {
             unsigned cwpssrv$v_btx_done     : 1;
             unsigned cwpssrv$v_fill_4_      : 7;
         };
     };
-    unsigned char cwpssrv$b_func;
-    unsigned short int cwpssrv$w_srv_maj_vers;
-    unsigned short int cwpssrv$w_srv_min_vers;
-    unsigned short int cwpssrv$w_ext_maj_vers;
-    unsigned short int cwpssrv$w_ext_min_vers;
-    unsigned int cwpssrv$l_status;
-    unsigned int cwpssrv$l_bxfr_status;
-    unsigned int cwpssrv$l_maximum_length;
+    UINT8 cwpssrv$b_func;
+    UINT16 cwpssrv$w_srv_maj_vers;
+    UINT16 cwpssrv$w_srv_min_vers;
+    UINT16 cwpssrv$w_ext_maj_vers;
+    UINT16 cwpssrv$w_ext_min_vers;
+    UINT32 cwpssrv$l_status;
+    UINT32 cwpssrv$l_bxfr_status;
+    UINT32 cwpssrv$l_maximum_length;
     union
     {
-        unsigned int cwpssrv$l_flags;
+        UINT32 cwpssrv$l_flags;
         struct
         {
             unsigned cwpssrv$v_sec_class        : 1;
@@ -86,26 +88,26 @@ struct _cwpssrv
             unsigned cwpssrv$v_oper_priv        : 1;
         };
     };
-    unsigned int cwpssrv$l_ext_offset;
+    UINT32 cwpssrv$l_ext_offset;
     void *cwpssrv$a_post_routine;
-    unsigned int cwpssrv$l_rqstr_csid;
-    unsigned int cwpssrv$l_rqstr_pid;
-    unsigned int cwpssrv$l_rqstr_epid;
-    unsigned int cwpssrv$l_rqstr_imgcnt;
-    unsigned int cwpssrv$l_rqstr_rightslen;
-    unsigned int cwpssrv$l_rqstr_rightsoff;
+    UINT32 cwpssrv$l_rqstr_csid;
+    UINT32 cwpssrv$l_rqstr_pid;
+    UINT32 cwpssrv$l_rqstr_epid;
+    UINT32 cwpssrv$l_rqstr_imgcnt;
+    UINT32 cwpssrv$l_rqstr_rightslen;
+    UINT32 cwpssrv$l_rqstr_rightsoff;
     void *cwpssrv$l_rqstr_pidadr;
-    unsigned int cwpssrv$l_partner_csid;
-    unsigned int cwpssrv$l_sought_epid;
-    unsigned int cwpssrv$l_return_epid;
-    unsigned short int cwpssrv$w_prcnamlen;
-    unsigned short int cwpssrv$w_prcnamoff;
-    unsigned int cwpssrv$l_free_offset;
-    unsigned int cwpssrv$l_spare1;
-    unsigned short int cwpssrv$w_spare2;
-    unsigned char cwpssrv$b_spare3;
-    unsigned char cwpssrv$b_retries_left;
-    unsigned long long cwpssrv$q_time;
+    UINT32 cwpssrv$l_partner_csid;
+    UINT32 cwpssrv$l_sought_epid;
+    UINT32 cwpssrv$l_return_epid;
+    UINT16 cwpssrv$w_prcnamlen;
+    UINT16 cwpssrv$w_prcnamoff;
+    UINT32 cwpssrv$l_free_offset;
+    UINT32 cwpssrv$l_spare1;
+    UINT16 cwpssrv$w_spare2;
+    UINT8 cwpssrv$b_spare3;
+    UINT8 cwpssrv$b_retries_left;
+    UINT64 cwpssrv$q_time;
 };
 
 #define     CWPS$_ENABLED       1
@@ -123,7 +125,7 @@ struct _cwpssrv
 
 struct _cwpsfex
 {
-    unsigned int cwpsfex$l_code;
+    UINT32 cwpsfex$l_code;
 };
 
 #define     CWPSSRV$K_SETPRI_MIN_VERS2  2
@@ -133,11 +135,11 @@ struct _cwpsfex
 struct _cwpspri
 {
     void *cwpspri$l_user_prvpri;
-    unsigned int cwpspri$l_pri;
-    unsigned int cwpspri$l_prvpri;
+    UINT32 cwpspri$l_pri;
+    UINT32 cwpspri$l_prvpri;
     void *cwpspri$l_user_prvpol;
-    unsigned int cwpspri$l_pol;
-    unsigned int cwpspri$l_prvpol;
+    UINT32 cwpspri$l_pol;
+    UINT32 cwpspri$l_prvpol;
 };
 
 #define     CWPSSWK$K_LENGTH        16
@@ -145,8 +147,8 @@ struct _cwpspri
 
 struct _cwpsswk
 {
-    unsigned long long cwpsswk$q_daytim;
-    unsigned long long cwpsswk$q_reptim;
+    UINT64 cwpsswk$q_daytim;
+    UINT64 cwpsswk$q_reptim;
 };
 
 #define     CWPSJPI$K_LENGTH        60
@@ -154,23 +156,23 @@ struct _cwpsswk
 
 struct _cwpsjpi
 {
-    unsigned int cwpsjpi$l_pscan_off;
-    unsigned int cwpsjpi$l_itmoff;
-    unsigned int cwpsjpi$l_bufoff;
-    unsigned int cwpsjpi$l_vecoff;
-    unsigned int cwpsjpi$l_acboff;
+    UINT32 cwpsjpi$l_pscan_off;
+    UINT32 cwpsjpi$l_itmoff;
+    UINT32 cwpsjpi$l_bufoff;
+    UINT32 cwpsjpi$l_vecoff;
+    UINT32 cwpsjpi$l_acboff;
     void *cwpsjpi$l_itmlst;
-    unsigned int cwpsjpi$l_buflen;
+    UINT32 cwpsjpi$l_buflen;
     void *cwpsjpi$l_iosbadr;
-    unsigned long long cwpsjpi$q_iosb;
+    UINT64 cwpsjpi$q_iosb;
     void (*cwpsjpi$l_astadr)(void);
-    unsigned int cwpsjpi$l_astprm;
+    UINT32 cwpsjpi$l_astprm;
     void *cwpsjpi$l_pscanctx_addr;
-    unsigned short int cwpsjpi$w_pscan_seqnum;
-    unsigned char cwpsjpi$b_efn;
-    unsigned char cwpsjpi$b_acmode;
-    unsigned short int cwpsjpi$w_ctlflags;
-    unsigned short int cwpsjpi$w_spare0;
+    UINT16 cwpsjpi$w_pscan_seqnum;
+    UINT8 cwpsjpi$b_efn;
+    UINT8 cwpsjpi$b_acmode;
+    UINT16 cwpsjpi$w_ctlflags;
+    UINT16 cwpsjpi$w_spare0;
 };
 
 #define CWPSJPI_64$K_LENGTH 40
@@ -193,43 +195,43 @@ struct _cwpsjpi_64
 
 struct _cwpscreprc
 {
-    unsigned int cwpscre$l_base_offset;
-    unsigned int cwpscre$l_acboff;
-    unsigned long long cwpscre$q_prvmsk;
-    unsigned long long cwpscre$q_iosb;
-    unsigned int cwpscre$l_priority;
-    unsigned int cwpscre$l_uic;
-    unsigned int cwpscre$l_defprot;
-    unsigned int cwpscre$l_tmbu;
-    unsigned int cwpscre$l_spare1;
-    unsigned int cwpscre$l_spare2;
-    unsigned short int cwpscre$w_maxjobs;
-    unsigned short int cwpscre$w_maxdetach;
-    unsigned int cwpscre$l_astlm;
-    unsigned int cwpscre$l_biolm;
-    unsigned int cwpscre$l_bytlm;
-    unsigned int cwpscre$l_cpulm;
-    unsigned int cwpscre$l_diolm;
-    unsigned int cwpscre$l_fillm;
-    unsigned int cwpscre$l_pgflquota;
-    unsigned int cwpscre$l_prclm;
-    unsigned int cwpscre$l_tqelm;
-    unsigned int cwpscre$l_wsquota;
-    unsigned int cwpscre$l_wsdefault;
-    unsigned int cwpscre$l_enqlm;
-    unsigned int cwpscre$l_wsextent;
-    unsigned int cwpscre$l_jtquota;
-    unsigned int cwpscre$l_spare_quota1;
-    unsigned int cwpscre$l_spare_quota2;
-    unsigned int cwpscre$l_input_att;
-    unsigned int cwpscre$l_output_att;
-    unsigned int cwpscre$l_error_att;
-    unsigned int cwpscre$l_msgmask;
-    unsigned int cwpscre$l_uaf_flags;
-    unsigned int cwpscre$l_creprc_flags;
+    UINT32 cwpscre$l_base_offset;
+    UINT32 cwpscre$l_acboff;
+    UINT64 cwpscre$q_prvmsk;
+    UINT64 cwpscre$q_iosb;
+    UINT32 cwpscre$l_priority;
+    UINT32 cwpscre$l_uic;
+    UINT32 cwpscre$l_defprot;
+    UINT32 cwpscre$l_tmbu;
+    UINT32 cwpscre$l_spare1;
+    UINT32 cwpscre$l_spare2;
+    UINT16 cwpscre$w_maxjobs;
+    UINT16 cwpscre$w_maxdetach;
+    UINT32 cwpscre$l_astlm;
+    UINT32 cwpscre$l_biolm;
+    UINT32 cwpscre$l_bytlm;
+    UINT32 cwpscre$l_cpulm;
+    UINT32 cwpscre$l_diolm;
+    UINT32 cwpscre$l_fillm;
+    UINT32 cwpscre$l_pgflquota;
+    UINT32 cwpscre$l_prclm;
+    UINT32 cwpscre$l_tqelm;
+    UINT32 cwpscre$l_wsquota;
+    UINT32 cwpscre$l_wsdefault;
+    UINT32 cwpscre$l_enqlm;
+    UINT32 cwpscre$l_wsextent;
+    UINT32 cwpscre$l_jtquota;
+    UINT32 cwpscre$l_spare_quota1;
+    UINT32 cwpscre$l_spare_quota2;
+    UINT32 cwpscre$l_input_att;
+    UINT32 cwpscre$l_output_att;
+    UINT32 cwpscre$l_error_att;
+    UINT32 cwpscre$l_msgmask;
+    UINT32 cwpscre$l_uaf_flags;
+    UINT32 cwpscre$l_creprc_flags;
     union
     {
-        unsigned int cwpscre$l_flags;
+        UINT32 cwpscre$l_flags;
         struct
         {
             unsigned cwpscre$v_imgdmp       : 1;
@@ -250,11 +252,11 @@ struct _cwpscreprc
     char cwpscre$t_pqb_account [8];
     struct
     {
-        unsigned char cwpscre$$$_fill_2 [20];
+        UINT8 cwpscre$$$_fill_2 [20];
     };
     struct
     {
-        unsigned char cwpscre$$$_fill_3 [20];
+        UINT8 cwpscre$$$_fill_3 [20];
     };
     char cwpscre$t_cli_name [32];
     char cwpscre$t_cli_table [32];
@@ -267,11 +269,11 @@ struct _cwpscreprc
 
 struct _cwpsterm
 {
-    unsigned int cwpsterm$l_base_offset;
-    unsigned int cwpsterm$l_acboff;
-    unsigned long long cwpsterm$q_iosb;
-    unsigned int cwpsterm$l_deleted_proc_epid;
-    unsigned int cwpsterm$l_spare;
+    UINT32 cwpsterm$l_base_offset;
+    UINT32 cwpsterm$l_acboff;
+    UINT64 cwpsterm$q_iosb;
+    UINT32 cwpsterm$l_deleted_proc_epid;
+    UINT32 cwpsterm$l_spare;
     char cwpsterm$t_term_msg [84];
 };
 
@@ -285,14 +287,14 @@ struct _cwpsvec
     void *cwpsvec$pq_usr_lenadr;
     union
     {
-        unsigned int cwpsvec$l_flags;
+        UINT32 cwpsvec$l_flags;
         struct
         {
             unsigned cwpsvec$v_64_bit_ile       : 1;
             unsigned cwpsvec$v_fill_10_     : 7;
         };
     };
-    int cwpsvec$l_fill_1;
+    INT32 cwpsvec$l_fill_1;
 };
 
 #define     CWPSACB$K_ACB_LENGTH        36
@@ -303,27 +305,27 @@ struct _cwpsacb
 {
     struct _acb *cwpsacb$l_astqfl;
     struct _acb *cwpsacb$l_astqbl;
-    unsigned short cwpsacb$w_size;
-    unsigned char cwpsacb$b_type;
-    unsigned char cwpsacb$b_rmod;
-    unsigned int cwpsacb$l_pid;
+    UINT16 cwpsacb$w_size;
+    UINT8 cwpsacb$b_type;
+    UINT8 cwpsacb$b_rmod;
+    UINT32 cwpsacb$l_pid;
     void (*cwpsacb$l_ast)(void);
-    unsigned int cwpsacb$l_astprm;
-    int cwpsacb$l_fkb_fill [2];
+    UINT32 cwpsacb$l_astprm;
+    INT32 cwpsacb$l_fkb_fill [2];
     void (*cwpsacb$l_kast)(void);
     void *cwpsacb$l_bufadr;
-    unsigned int cwpsacb$l_buflen;
+    UINT32 cwpsacb$l_buflen;
     void *cwpsacb$l_msgbuf;
     struct _csb *cwpsacb$l_csb;
     struct _cdrp *cwpsacb$l_cdrp;
-    unsigned int cwpsacb$l_read_length;
-    unsigned int cwpsacb$l_write_length;
-    unsigned int cwpsacb$l_rightsdesc [2];
-    unsigned char cwpsacb$b_func;
-    unsigned char cwpsacb$b_spare0;
-    unsigned short cwpsacb$w_spare1;
+    UINT32 cwpsacb$l_read_length;
+    UINT32 cwpsacb$l_write_length;
+    UINT32 cwpsacb$l_rightsdesc [2];
+    UINT8 cwpsacb$b_func;
+    UINT8 cwpsacb$b_spare0;
+    UINT16 cwpsacb$w_spare1;
     struct _psb *cwpsacb$ar_remote_psb;
-    unsigned char cwpsacb$b_trojan_pcb;
+    UINT8 cwpsacb$b_trojan_pcb;
 };
 
 #define CWPSSQH$K_LENGTH      32
@@ -333,14 +335,14 @@ struct _cwpssqh
 {
     struct _cwpssqh *cwpssqh$l_flink;
     struct _cwpssqh *cwpssqh$l_blink;
-    unsigned short cwpssqh$w_size;
-    unsigned char cwpssqh$b_type;
-    unsigned char cwpssqh$b_subtype;
-    unsigned int cwpssqh$l_alloc_length;
-    unsigned int cwpssqh$l_mpid;
-    unsigned int cwpssqh$l_spare0;
-    unsigned int cwpssqh$l_spare1;
-    unsigned int cwpssqh$l_spare3;
+    UINT16 cwpssqh$w_size;
+    UINT8 cwpssqh$b_type;
+    UINT8 cwpssqh$b_subtype;
+    UINT32 cwpssqh$l_alloc_length;
+    UINT32 cwpssqh$l_mpid;
+    UINT32 cwpssqh$l_spare0;
+    UINT32 cwpssqh$l_spare1;
+    UINT32 cwpssqh$l_spare3;
 };
 
 #define CWPSNODIH$K_HEADER        16
@@ -350,11 +352,11 @@ struct _cwpsnodih
 {
     struct _cwpsnodih *cwpsnodih$l_flink;
     struct _cwpsnodih *cwpsnodih$l_blink;
-    unsigned short cwpsnodih$w_size;
-    unsigned char cwpsnodih$b_type;
-    unsigned char cwpsnodih$b_subtype;
-    unsigned int cwpsnodih$l_count;
-    unsigned char cwpsnodih$b_node_list;
+    UINT16 cwpsnodih$w_size;
+    UINT8 cwpsnodih$b_type;
+    UINT8 cwpsnodih$b_subtype;
+    UINT32 cwpsnodih$l_count;
+    UINT8 cwpsnodih$b_node_list;
 };
 
 #define CWPSNODI$K_LENGTH       32
@@ -362,11 +364,11 @@ struct _cwpsnodih
 
 struct _cwpsnodi
 {
-    unsigned int cwpsnodi$l_hwtype;
-    unsigned short cwpsnodi$w_hw_model;
-    unsigned short cwpsnodi$w_sparew;
-    unsigned int cwpsnodi$l_csid;
-    unsigned char cwpsnodi$b_name [16];
+    UINT32 cwpsnodi$l_hwtype;
+    UINT16 cwpsnodi$w_hw_model;
+    UINT16 cwpsnodi$w_sparew;
+    UINT32 cwpsnodi$l_csid;
+    UINT8 cwpsnodi$b_name [16];
     struct _sb *cwpsnodi$l_sb;
 };
 

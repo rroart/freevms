@@ -1,6 +1,8 @@
 #ifndef CDRPDEF_H
 #define CDRPDEF_H
 
+#include <vms_types.h>
+
 #define CDRP$M_WLE_REUSE 0x1
 #define CDRP$M_WLE_SUPWL 0x2
 #define CDRP$K_CDRPBASE 0
@@ -99,51 +101,51 @@ struct _cdrp
 {
     struct _cdrp *cdrp$l_fqfl;
     struct _cdrp *cdrp$l_fqbl;
-    unsigned short int cdrp$w_cdrpsize;
-    unsigned char cdrp$b_cd_type;
-    unsigned char cdrp$b_flck;
+    UINT16 cdrp$w_cdrpsize;
+    UINT8 cdrp$b_cd_type;
+    UINT8 cdrp$b_flck;
     void (*cdrp$l_fpc)(void);
     unsigned long cdrp$l_fr3;
     unsigned long cdrp$l_fr4;
     void (*cdrp$l_savd_rtn)(void);
     void *cdrp$l_msg_buf;
-    unsigned int cdrp$l_rspid;
+    UINT32 cdrp$l_rspid;
     struct _cdt *cdrp$l_cdt;
-    short int *cdrp$l_rwcptr;
+    INT16 *cdrp$l_rwcptr;
 
     union
     {
         struct
         {
             void *cdrp$l_lbufh_ad;
-            unsigned int cdrp$l_lboff;
+            UINT32 cdrp$l_lboff;
             void *cdrp$l_rbufh_ad;
-            unsigned int cdrp$l_rboff;
-            unsigned int cdrp$l_xct_len;
+            UINT32 cdrp$l_rboff;
+            UINT32 cdrp$l_xct_len;
         };
         struct
         {
             unsigned long something;
             char cdrp$t_lbufhndl [12];
-            unsigned int cdrp$l_ubarsrce;
-            unsigned int cdrp$l_dutuflags;
-            unsigned short int cdrp$w_dutucntr;
-            unsigned short int cdrp$w_endmsgsiz;
+            UINT32 cdrp$l_ubarsrce;
+            UINT32 cdrp$l_dutuflags;
+            UINT16 cdrp$w_dutucntr;
+            UINT16 cdrp$w_endmsgsiz;
         };
         struct
         {
-            unsigned int cdrp$l_val1;
-            unsigned int cdrp$l_val2;
-            unsigned int cdrp$l_val3;
-            unsigned int cdrp$l_val4;
-            unsigned int cdrp$l_val5;
-            unsigned int cdrp$l_val6;
-            unsigned int cdrp$l_val7;
-            unsigned int cdrp$l_val8;
-            unsigned int cdrp$l_val9;
-            unsigned int cdrp$l_val10;
-            unsigned int cdrp$l_val11;
-            unsigned int cdrp$l_val12;
+            UINT32 cdrp$l_val1;
+            UINT32 cdrp$l_val2;
+            UINT32 cdrp$l_val3;
+            UINT32 cdrp$l_val4;
+            UINT32 cdrp$l_val5;
+            UINT32 cdrp$l_val6;
+            UINT32 cdrp$l_val7;
+            UINT32 cdrp$l_val8;
+            UINT32 cdrp$l_val9;
+            UINT32 cdrp$l_val10;
+            UINT32 cdrp$l_val11;
+            UINT32 cdrp$l_val12;
         };
     };
 };

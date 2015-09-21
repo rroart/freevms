@@ -566,7 +566,7 @@ unsigned update_addhead(struct _vcb *vcb, char *filename, struct _fiddef *back,
     memcpy(id->fi2$q_expdate, id->fi2$q_credate, sizeof(id->fi2$q_credate));
     head->fh2$w_recattr.fat$l_efblk = VMSSWAP(1);
     {
-        unsigned short check = checksum((_uword *) head);
+        unsigned short check = checksum((UINT16 *) head);
         head->fh2$w_checksum = check;
     }
     writechunk(getidxfcb(vcbdev), *idxblk, head);

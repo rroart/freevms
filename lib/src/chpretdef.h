@@ -1,6 +1,8 @@
 #ifndef CHPRETDEF_H
 #define CHPRETDEF_H
 
+#include <vms_types.h>
+
 #define CHPRET$M_ACMODE 0x1
 #define CHPRET$M_MAC 0x2
 #define CHPRET$M_DAC 0x4
@@ -13,19 +15,19 @@
 
 struct _chpret
 {
-    unsigned int chpret$l_auditlen;
+    UINT32 chpret$l_auditlen;
     void *chpret$l_audit;
     void *chpret$l_auditret;
-    unsigned int chpret$l_alarmlen;
+    UINT32 chpret$l_alarmlen;
     void *chpret$l_alarm;
     void *chpret$l_alarmret;
-    unsigned int chpret$l_matched_acelen;
+    UINT32 chpret$l_matched_acelen;
     void *chpret$l_matched_ace;
     void *chpret$l_matched_aceret;
     void *chpret$l_privs_used;
     union
     {
-        unsigned int chpret$l_progress;
+        UINT32 chpret$l_progress;
         struct
         {
             unsigned chpret$v_acmode : 1;

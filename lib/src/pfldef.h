@@ -1,6 +1,8 @@
 #ifndef PFLDEF_H
 #define PFLDEF_H
 
+#include <vms_types.h>
+
 #define PFL$M_INITED 0x1
 #define PFL$M_PAGFILFUL 0x2
 #define PFL$M_SWPFILFUL 0x4
@@ -23,35 +25,35 @@ struct _pfl
 {
     struct _pfl *pfl$l_flink;
     struct _pfl *pfl$l_blink;
-    unsigned short int pfl$w_size;
-    unsigned char pfl$b_type;
-    unsigned char pfl$b_fill_3;
-    unsigned int pfl$l_pfc;
+    UINT16 pfl$w_size;
+    UINT8 pfl$b_type;
+    UINT8 pfl$b_fill_3;
+    UINT32 pfl$l_pfc;
     struct _wcb *pfl$l_window;
-    unsigned int pfl$l_vbn;
-    unsigned int pfl$l_bitmapsiz;
-    unsigned int pfl$l_frepagcnt;
+    UINT32 pfl$l_vbn;
+    UINT32 pfl$l_bitmapsiz;
+    UINT32 pfl$l_frepagcnt;
     union
     {
         void *pfl$pq_bitmap;
         struct
         {
             void *pfl$l_bitmap;
-            unsigned int pfl$l_bitmap_hi;
+            UINT32 pfl$l_bitmap_hi;
         };
     };
     void *pfl$pq_bitmap_dir;
-    unsigned long long pfl$q_last_dir_quad;
-    unsigned int pfl$l_allocsiz;
-    unsigned int pfl$l_rsrvpagcnt;
-    unsigned int pfl$l_swprefcnt;
-    int pfl$l_poolbytes;
-    int pfl$l_s2pages;
-    unsigned int pfl$l_minfrepagcnt;
-    unsigned int pfl$l_pgflx;
+    UINT64 pfl$q_last_dir_quad;
+    UINT32 pfl$l_allocsiz;
+    UINT32 pfl$l_rsrvpagcnt;
+    UINT32 pfl$l_swprefcnt;
+    INT32 pfl$l_poolbytes;
+    INT32 pfl$l_s2pages;
+    UINT32 pfl$l_minfrepagcnt;
+    UINT32 pfl$l_pgflx;
     union
     {
-        unsigned int pfl$l_flags;
+        UINT32 pfl$l_flags;
         struct
         {
             unsigned pfl$v_inited : 1;
@@ -63,17 +65,17 @@ struct _pfl
             unsigned pfl$v_stopper : 1;
         };
     };
-    unsigned int pfl$l_refcnt;
-    unsigned int pfl$l_maxvbn;
-    int pfl$l_startbyte;
-    int pfl$l_max_alloc_expo;
-    int pfl$l_cur_alloc_expo;
-    int pfl$l_bitmap_quads;
-    int pfl$l_dir_quads;
-    int pfl$l_dir_cluster [8];
-    char pfl$b_fill_0_ [4];
-    unsigned int pfl$l_bitmaploc;
-    char pfl$b_fill_1_ [4];
+    UINT32 pfl$l_refcnt;
+    UINT32 pfl$l_maxvbn;
+    INT32 pfl$l_startbyte;
+    INT32 pfl$l_max_alloc_expo;
+    INT32 pfl$l_cur_alloc_expo;
+    INT32 pfl$l_bitmap_quads;
+    INT32 pfl$l_dir_quads;
+    INT32 pfl$l_dir_cluster [8];
+    INT8 pfl$b_fill_0_ [4];
+    UINT32 pfl$l_bitmaploc;
+    INT8 pfl$b_fill_1_ [4];
 };
 
 typedef struct PFL * PFL_PQ;

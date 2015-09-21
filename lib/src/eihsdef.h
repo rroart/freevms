@@ -1,6 +1,8 @@
 #ifndef EIHSDEF_H
 #define EIHSDEF_H
 
+#include <vms_types.h>
+
 #define EIHS$K_MAJORID 1
 #define EIHS$K_MINORID 1
 #define EIHS$K_LENGTH 32
@@ -11,15 +13,15 @@ struct _eihs
 {
     struct
     {
-        unsigned int eihs$l_majorid;
-        unsigned int eihs$l_minorid;
+        UINT32 eihs$l_majorid;
+        UINT32 eihs$l_minorid;
     };
-    unsigned int eihs$l_dstvbn;
-    unsigned int eihs$l_dstsize;
-    unsigned int eihs$l_gstvbn;
-    unsigned int eihs$l_gstsize;
-    unsigned int eihs$l_dmtvbn;
-    unsigned int eihs$l_dmtbytes;
+    UINT32 eihs$l_dstvbn;
+    UINT32 eihs$l_dstsize;
+    UINT32 eihs$l_gstvbn;
+    UINT32 eihs$l_gstsize;
+    UINT32 eihs$l_dmtvbn;
+    UINT32 eihs$l_dmtbytes;
 };
 
 #endif

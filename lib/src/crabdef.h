@@ -9,37 +9,37 @@ struct _crab
 {
     struct _crab *crab$l_flink;
     struct _crab *crab$l_blink;
-    unsigned short int crab$w_size;
-    unsigned char crab$b_type;
-    unsigned char crab$b_subtype;
+    UINT16 crab$w_size;
+    UINT8 crab$b_type;
+    UINT8 crab$b_subtype;
     struct _spl *crab$l_spinlock;
     void *crab$l_wqfl;
     void *crab$l_wqbl;
     struct _adp *crab$ps_adp;
-    unsigned int crab$l_total_items;
-    unsigned int crab$l_alloc_gran_mask;
+    UINT32 crab$l_total_items;
+    UINT32 crab$l_alloc_gran_mask;
     struct _spl *crab$l_nosync_spinlock;
     void (*crab$ps_dealloc_cb)(void);
     void *crab$ps_ringbuffer;
 
-    unsigned int crab$l_base_item;
-    unsigned int crab$l_valid_desc_cnt;
+    UINT32 crab$l_base_item;
+    UINT32 crab$l_valid_desc_cnt;
     struct _fkb *crab$l_fqfl;
     struct _fkb *crab$l_fqbl;
-    unsigned short int crab$w_fsize;
-    unsigned char crab$b_ftype;
-    unsigned char crab$b_flck;
+    UINT16 crab$w_fsize;
+    UINT8 crab$b_ftype;
+    UINT8 crab$b_flck;
     void (*crab$l_fpc)(void);
-    long long crab$q_fr3;
-    long long crab$q_fr4;
-    unsigned int crab$l_alloc_array;
-    char crab$b_fill_0_ [4];
+    INT64 crab$q_fr3;
+    INT64 crab$q_fr4;
+    UINT32 crab$l_alloc_array;
+    INT8 crab$b_fill_0_ [4];
 };
 
 struct _crab_array
 {
-    unsigned int crab_array$l_num;
-    unsigned int crab_array$l_cnt;
+    UINT32 crab_array$l_num;
+    UINT32 crab_array$l_cnt;
 };
 
 #endif

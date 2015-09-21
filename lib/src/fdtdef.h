@@ -1,6 +1,8 @@
 #ifndef FDTDEF_H
 #define FDTDEF_H
 
+#include <vms_types.h>
+
 #include <ccbdef.h>
 #include <irpdef.h>
 #include <pcbdef.h>
@@ -10,12 +12,12 @@
 
 struct __fdt
 {
-    unsigned long long fdt$q_valid;
-    //    unsigned long long fdt$q_ok64bit;
-    unsigned long long fdt$q_buffered;
+    UINT64 fdt$q_valid;
+    //    UINT64 fdt$q_ok64bit;
+    UINT64 fdt$q_buffered;
     struct
     {
-        unsigned long long fdt$q_mask;
+        UINT64 fdt$q_mask;
         int (*fdt$ps_func_rtn)(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
     } f[64];
     //    int (*fdt$ps_func_rtn [64])(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
@@ -24,8 +26,8 @@ struct __fdt
 
 struct _fdt
 {
-    unsigned long long fdt$q_valid;
-    unsigned long long fdt$q_buffered;
+    UINT64 fdt$q_valid;
+    UINT64 fdt$q_buffered;
     int (*fdt$ps_func_rtn [64])(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 };
 

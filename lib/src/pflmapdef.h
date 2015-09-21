@@ -20,12 +20,12 @@ struct _pflmapentry
 
 struct _pflmap
 {
-    unsigned int pflmap$l_pagecnt;
-    int pflmap$$_fill_2;
-    unsigned short int pflmap$w_size;
-    unsigned char pflmap$b_type;
-    unsigned char pflmap$b_actptrs;
-    int pflmap$$_fill_3;
+    UINT32 pflmap$l_pagecnt;
+    INT32 pflmap$$_fill_2;
+    UINT16 pflmap$w_size;
+    UINT8 pflmap$b_type;
+    UINT8 pflmap$b_actptrs;
+    INT32 pflmap$$_fill_3;
     struct _pflmapentry pflmap$q_ptr [65];
 };
 

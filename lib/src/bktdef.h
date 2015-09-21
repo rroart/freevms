@@ -1,6 +1,8 @@
 #ifndef BKTDEF_H
 #define BKTDEF_H
 
+#include <vms_types.h>
+
 #define BKT$K_OVERHDSZ 14
 #define BKT$C_OVERHDSZ 14
 #define BKT$M_LASTBKT 0x1
@@ -17,32 +19,32 @@
 
 struct _bkt
 {
-    unsigned char bkt$b_checkchar;
+    UINT8 bkt$b_checkchar;
     union
     {
-        unsigned char bkt$b_areano;
-        unsigned char bkt$b_indexno;
+        UINT8 bkt$b_areano;
+        UINT8 bkt$b_indexno;
     };
-    unsigned short int bkt$w_adrsample;
+    UINT16 bkt$w_adrsample;
     union
     {
-        unsigned short int bkt$w_freespace;
-        unsigned short int bkt$w_keyfrespc;
+        UINT16 bkt$w_freespace;
+        UINT16 bkt$w_keyfrespc;
     };
     union
     {
-        unsigned short int bkt$w_nxtrecid;
+        UINT16 bkt$w_nxtrecid;
         struct
         {
-            unsigned char bkt$b_nxtrecid;
-            unsigned char bkt$b_lstrecid;
+            UINT8 bkt$b_nxtrecid;
+            UINT8 bkt$b_lstrecid;
         };
     };
-    unsigned int bkt$l_nxtbkt;
-    unsigned char bkt$b_level;
+    UINT32 bkt$l_nxtbkt;
+    UINT8 bkt$b_level;
     union
     {
-        unsigned char bkt$b_bktcb;
+        UINT8 bkt$b_bktcb;
 #if 0
         // offset probs
         struct

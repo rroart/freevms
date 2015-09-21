@@ -1,6 +1,8 @@
 #ifndef ISDDEF_H
 #define ISDDEF_H
 
+#include <vms_types.h>
+
 #define ISD$K_LENDZRO 12
 #define ISD$C_LENDZRO 12
 #define ISD$M_GBL 0x1
@@ -38,11 +40,11 @@
 
 struct _isd
 {
-    unsigned short int isd$w_size;
-    unsigned short int isd$w_pagcnt;
+    UINT16 isd$w_size;
+    UINT16 isd$w_pagcnt;
     union
     {
-        unsigned int isd$l_vpnpfc;
+        UINT32 isd$l_vpnpfc;
         struct
         {
             unsigned isd$v_vpn : 21;
@@ -58,13 +60,13 @@ struct _isd
         };
         struct
         {
-            char isddef$$_fill_4 [3];
-            unsigned char isd$b_pfc;
+            INT8 isddef$$_fill_4 [3];
+            UINT8 isd$b_pfc;
         };
     };
     union
     {
-        unsigned int isd$l_flags;
+        UINT32 isd$l_flags;
         struct
         {
             unsigned isd$v_gbl : 1;
@@ -84,12 +86,12 @@ struct _isd
         };
         struct
         {
-            char isddef$$_fill_5 [3];
-            unsigned char isd$b_type;
+            INT8 isddef$$_fill_5 [3];
+            UINT8 isd$b_type;
         };
     };
-    unsigned int isd$l_vbn;
-    unsigned int isd$l_ident;
+    UINT32 isd$l_vbn;
+    UINT32 isd$l_ident;
     char isd$t_gblnam [44];
 };
 

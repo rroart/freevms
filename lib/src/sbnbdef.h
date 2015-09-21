@@ -9,13 +9,13 @@ struct _sbnb
 {
     struct _sbnb *sbnb$l_flink;
     struct _sbnb *sbnb$l_blink;
-    unsigned short int sbnb$w_size;
-    unsigned char sbnb$b_type;
-    unsigned char sbnb$b_subtyp;
-    unsigned int sbnb$l_discon_count;
-    unsigned char sbnb$b_procnam [16];
-    unsigned short int sbnb$w_local_index;
-    unsigned short int sbnb$w_unused_1;
+    UINT16 sbnb$w_size;
+    UINT8 sbnb$b_type;
+    UINT8 sbnb$b_subtyp;
+    UINT32 sbnb$l_discon_count;
+    UINT8 sbnb$b_procnam [16];
+    UINT16 sbnb$w_local_index;
+    UINT16 sbnb$w_unused_1;
 };
 
 #endif

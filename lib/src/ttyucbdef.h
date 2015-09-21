@@ -8,17 +8,17 @@ struct _ltrm_ucb
     struct _ucb ucb$r_ucb;
     struct _acb *ucb$l_tl_ctrly;
     struct _acb *ucb$l_tl_ctrlc;
-    unsigned int ucb$l_tl_outband;
+    UINT32 ucb$l_tl_outband;
     long ucb$l_tl_bandque;
     struct _ucb *ucb$l_tl_phyucb;
-    unsigned int ucb$l_tl_ctlpid;
-    unsigned long long ucb$q_tl_brkthru;
+    UINT32 ucb$l_tl_ctlpid;
+    UINT64 ucb$q_tl_brkthru;
     void *ucb$l_tl_posix_data;
     void *ucb$l_tl_asian_data;
     union
     {
-        unsigned char ucb$b_tl_a_mode;
-        unsigned int ucb$l_tl_a_charset;
+        UINT8 ucb$b_tl_a_mode;
+        UINT32 ucb$l_tl_a_charset;
     };
     void *ucb$l_tl_a_fi_ucb;
 };
@@ -107,16 +107,16 @@ struct _ltrm_ucb
 struct _tty_ucb
 {
     struct _ltrm_ucb ucb$r_ltrmucb;
-    unsigned int ucb$l_tt_rdue;
+    UINT32 ucb$l_tt_rdue;
     void (*ucb$l_tt_rtimou)(void);
     union
     {
-        unsigned long long ucb$q_tt_state;
+        UINT64 ucb$q_tt_state;
         struct
         {
             union
             {
-                unsigned int ucb$l_tt_state1;
+                UINT32 ucb$l_tt_state1;
                 struct
                 {
                     unsigned tty$v_st_power : 1;
@@ -142,7 +142,7 @@ struct _tty_ucb
             };
             union
             {
-                unsigned int ucb$l_tt_state2;
+                UINT32 ucb$l_tt_state2;
                 struct
                 {
                     unsigned tty$v_st_ctrlo : 1;
@@ -182,40 +182,40 @@ struct _tty_ucb
         };
     };
     struct _ucb *ucb$l_tt_logucb;
-    unsigned int ucb$l_tt_dechar;
-    unsigned int ucb$l_tt_decha1;
-    unsigned int ucb$l_tt_decha2;
-    unsigned int ucb$l_tt_decha3;
+    UINT32 ucb$l_tt_dechar;
+    UINT32 ucb$l_tt_decha1;
+    UINT32 ucb$l_tt_decha2;
+    UINT32 ucb$l_tt_decha3;
     struct _twp *ucb$l_tt_wflink;
     struct _twp *ucb$l_tt_wblink;
     struct _twp *ucb$l_tt_wrtbuf;
     void *ucb$l_tt_multi;
-    unsigned short int ucb$w_tt_multilen;
-    unsigned short int ucb$w_tt_smltlen;
+    UINT16 ucb$w_tt_multilen;
+    UINT16 ucb$w_tt_smltlen;
     void *ucb$l_tt_smlt;
-    unsigned short int ucb$w_tt_despee;
-    unsigned char ucb$b_tt_decrf;
-    unsigned char ucb$b_tt_delff;
-    unsigned char ucb$b_tt_depari;
-    unsigned char ucb$b_tt_defspe_spare1;
-    unsigned short int ucb$w_tt_defspe_spare2;
-    unsigned short int ucb$w_tt_desize;
-    unsigned char ucb$b_tt_detype;
-    unsigned char ucb$b_tt_spare1;
+    UINT16 ucb$w_tt_despee;
+    UINT8 ucb$b_tt_decrf;
+    UINT8 ucb$b_tt_delff;
+    UINT8 ucb$b_tt_depari;
+    UINT8 ucb$b_tt_defspe_spare1;
+    UINT16 ucb$w_tt_defspe_spare2;
+    UINT16 ucb$w_tt_desize;
+    UINT8 ucb$b_tt_detype;
+    UINT8 ucb$b_tt_spare1;
     union
     {
-        unsigned short int ucb$w_tt_speed;
+        UINT16 ucb$w_tt_speed;
         struct
         {
-            unsigned char ucb$b_tt_tspeed;
-            unsigned char ucb$b_tt_rspeed;
+            UINT8 ucb$b_tt_tspeed;
+            UINT8 ucb$b_tt_rspeed;
         };
     };
-    unsigned char ucb$b_tt_crfill;
-    unsigned char ucb$b_tt_lffill;
+    UINT8 ucb$b_tt_crfill;
+    UINT8 ucb$b_tt_lffill;
     union
     {
-        unsigned char ucb$b_tt_parity;
+        UINT8 ucb$b_tt_parity;
         struct
         {
             unsigned ucb$v_tt_xxparity  : 1;
@@ -227,24 +227,24 @@ struct _tty_ucb
             unsigned ucb$v_tt_odd       : 1;
         };
     };
-    unsigned char ucb$b_tt_par_spare1;
-    unsigned short int ucb$w_tt_par_spare2;
+    UINT8 ucb$b_tt_par_spare1;
+    UINT16 ucb$w_tt_par_spare2;
     void *ucb$l_tt_typahd;
-    unsigned short int ucb$w_tt_cursor;
-    unsigned char ucb$b_tt_line;
-    unsigned char ucb$b_tt_lastc;
-    unsigned short int ucb$w_tt_bsplen;
-    unsigned char ucb$b_tt_fill;
-    unsigned char ucb$b_tt_esc;
-    unsigned char ucb$b_tt_esc_o;
-    unsigned char ucb$b_tt_intcnt;
-    unsigned short int ucb$w_tt_unitbit;
+    UINT16 ucb$w_tt_cursor;
+    UINT8 ucb$b_tt_line;
+    UINT8 ucb$b_tt_lastc;
+    UINT16 ucb$w_tt_bsplen;
+    UINT8 ucb$b_tt_fill;
+    UINT8 ucb$b_tt_esc;
+    UINT8 ucb$b_tt_esc_o;
+    UINT8 ucb$b_tt_intcnt;
+    UINT16 ucb$w_tt_unitbit;
     union
     {
-        unsigned short int ucb$w_tt_hold;
+        UINT16 ucb$w_tt_hold;
         struct
         {
-            unsigned char tty$b_tank_char;
+            UINT8 tty$b_tank_char;
             unsigned tty$v_tank_prempt  : 1;
             unsigned tty$v_tank_stop        : 1;
             unsigned tty$v_tank_hold        : 1;
@@ -253,17 +253,17 @@ struct _tty_ucb
             unsigned tty$v_fill_2_      : 3;
         };
     };
-    unsigned char ucb$b_tt_prempt;
-    char ucb$b_tt_outype;
-    int (*ucb$l_tt_getnxt)(int * chr, int * CC, struct _ucb * u);
-    int (*ucb$l_tt_putnxt)(int * chr, int * CC, struct _ucb * u);
-    int ucb$l_tt_class;
-    int ucb$l_tt_port;
+    UINT8 ucb$b_tt_prempt;
+    INT8 ucb$b_tt_outype;
+    INT32 (*ucb$l_tt_getnxt)(int * chr, int * CC, struct _ucb * u);
+    INT32 (*ucb$l_tt_putnxt)(int * chr, int * CC, struct _ucb * u);
+    INT32 ucb$l_tt_class;
+    INT32 ucb$l_tt_port;
     void *ucb$l_tt_outadr;
-    unsigned short int ucb$w_tt_outlen;
+    UINT16 ucb$w_tt_outlen;
     union
     {
-        unsigned short int ucb$w_tt_prtctl;
+        UINT16 ucb$w_tt_prtctl;
         struct
         {
             unsigned tty$v_pc_notime        : 1;
@@ -284,37 +284,37 @@ struct _tty_ucb
             unsigned tty$v_pc_multisession  : 1;
         };
     };
-    unsigned int ucb$l_tt_ds_st;
-    unsigned char ucb$b_tt_ds_rcv;
-    unsigned char ucb$b_tt_ds_tx;
-    unsigned short int ucb$w_tt_ds_tim;
+    UINT32 ucb$l_tt_ds_st;
+    UINT8 ucb$b_tt_ds_rcv;
+    UINT8 ucb$b_tt_ds_tx;
+    UINT16 ucb$w_tt_ds_tim;
     union
     {
-        unsigned char ucb$b_tt_maint;
+        UINT8 ucb$b_tt_maint;
         struct
         {
             unsigned ucb$v_tt_maint_fill    : 7;
             unsigned ucb$v_tt_dsbl      : 1;
         };
     };
-    unsigned char ucb$b_tt_oldcpzorg;
-    unsigned short int ucb$w_tt_fillrup;
+    UINT8 ucb$b_tt_oldcpzorg;
+    UINT16 ucb$w_tt_fillrup;
     void *ucb$l_tt_fbk;
     void *ucb$l_tt_rdverify;
-    unsigned int ucb$l_tt_class1;
-    unsigned int ucb$l_tt_class2;
+    UINT32 ucb$l_tt_class1;
+    UINT32 ucb$l_tt_class2;
     void *ucb$l_tt_accpornam;
     void *ucb$l_tt_a_gcbadr;
-    unsigned short int ucb$w_tt_a_edsts;
-    unsigned char ucb$b_tt_a_state;
-    unsigned char ucb$b_tt_a_parse;
-    unsigned char ucb$b_tt_a_trans;
-    unsigned char ucb$b_tt_a_xedsts;
-    unsigned short int ucb$w_tt_a_resrv1;
+    UINT16 ucb$w_tt_a_edsts;
+    UINT8 ucb$b_tt_a_state;
+    UINT8 ucb$b_tt_a_parse;
+    UINT8 ucb$b_tt_a_trans;
+    UINT8 ucb$b_tt_a_xedsts;
+    UINT16 ucb$w_tt_a_resrv1;
     union
     {
-        unsigned char ucb$b_tt_a_char;
-        unsigned int ucb$l_tt_a_dechset;
+        UINT8 ucb$b_tt_a_char;
+        UINT32 ucb$l_tt_a_dechset;
     };
 };
 
@@ -328,10 +328,10 @@ struct _tty_ucb
 struct _tpd_ucb
 {
     struct _tty_ucb ucb$r_ttyucb;
-    int ucb$l_tp_map;
+    INT32 ucb$l_tp_map;
     union
     {
-        unsigned char ucb$b_tp_stat;
+        UINT8 ucb$b_tp_stat;
         struct
         {
             unsigned tty$v_tp_abort : 1;
@@ -340,8 +340,8 @@ struct _tpd_ucb
             unsigned tty$v_fill_3_  : 5;
         };
     };
-    unsigned char ucb$b_tp_spare1;
-    unsigned short int ucb$w_tp_spare2;
+    UINT8 ucb$b_tp_spare1;
+    UINT16 ucb$w_tp_spare2;
 };
 
 #define UCB$C_TP_LENGTH 468
@@ -443,19 +443,19 @@ struct _rtt_ucb
         struct _irp *ucb$l_rtt_irpfl;
         struct _irp *ucb$l_rtt_irpbl;
         struct _irp *ucb$l_rtt_netirp;
-        int ucb$l_rtt_bandincl;
-        unsigned int ucb$l_rtt_bandinmsk;
-        unsigned int ucb$l_rtt_bandexcl;
-        unsigned int ucb$l_rtt_bandexmsk;
-        unsigned char ucb$b_rtt_provrs;
-        unsigned char ucb$b_rtt_proeco;
-        unsigned short int ucb$w_rtt_link;
-        unsigned char ucb$b_rtt_obj;
-        unsigned short int ucb$w_rtt_systype;
-        unsigned char ucb$b_rtt_fillbyte;
+        INT32 ucb$l_rtt_bandincl;
+        UINT32 ucb$l_rtt_bandinmsk;
+        UINT32 ucb$l_rtt_bandexcl;
+        UINT32 ucb$l_rtt_bandexmsk;
+        UINT8 ucb$b_rtt_provrs;
+        UINT8 ucb$b_rtt_proeco;
+        UINT16 ucb$w_rtt_link;
+        UINT8 ucb$b_rtt_obj;
+        UINT16 ucb$w_rtt_systype;
+        UINT8 ucb$b_rtt_fillbyte;
         union
         {
-            unsigned int ucb$l_ct_flags;
+            UINT32 ucb$l_ct_flags;
             struct
             {
                 unsigned flg$v_ctrlo        : 1;
@@ -488,25 +488,25 @@ struct _rtt_ucb
         struct _irp *ucb$l_ct_readqbl;
         struct _dcb *ucb$l_ct_wrtdcb;
         struct _dcb *ucb$l_ct_curdcb;
-        unsigned short int ucb$w_ct_remsiz;
-        short int ucb$w_ct_qdcbcnt;
-        unsigned short int ucb$w_ct_maxmsg;
-        unsigned short int ucb$w_ct_maxread;
-        unsigned int ucb$l_ct_legalmsg;
-        unsigned char ucb$b_ct_version;
-        unsigned char ucb$b_ct_eco;
-        unsigned short int ucb$w_ct_speed;
-        unsigned char ucb$b_ct_crfill;
-        unsigned char ucb$b_ct_lffill;
-        unsigned short int ucb$w_ct_parity;
-        unsigned int ucb$l_ct_include;
-        unsigned int ucb$l_ct_exclude;
-        unsigned int ucb$l_ct_abort;
-        unsigned char ucb$b_ct_oob_char;
-        unsigned char ucb$b_ct_fill_byte;
-        unsigned short int ucb$w_ct_prtctl;
-        unsigned long long ucb$q_ct_isupport;
-        unsigned int ucb$l_ct_fill_longword;
+        UINT16 ucb$w_ct_remsiz;
+        INT16 ucb$w_ct_qdcbcnt;
+        UINT16 ucb$w_ct_maxmsg;
+        UINT16 ucb$w_ct_maxread;
+        UINT32 ucb$l_ct_legalmsg;
+        UINT8 ucb$b_ct_version;
+        UINT8 ucb$b_ct_eco;
+        UINT16 ucb$w_ct_speed;
+        UINT8 ucb$b_ct_crfill;
+        UINT8 ucb$b_ct_lffill;
+        UINT16 ucb$w_ct_parity;
+        UINT32 ucb$l_ct_include;
+        UINT32 ucb$l_ct_exclude;
+        UINT32 ucb$l_ct_abort;
+        UINT8 ucb$b_ct_oob_char;
+        UINT8 ucb$b_ct_fill_byte;
+        UINT16 ucb$w_ct_prtctl;
+        UINT64 ucb$q_ct_isupport;
+        UINT32 ucb$l_ct_fill_longword;
     };
 };
 

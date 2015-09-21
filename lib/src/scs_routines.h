@@ -153,7 +153,7 @@ int   scs_std$init_bdlt( struct _pdt *pdt_p );
 int   scs_std$initialize_pdt( struct _pdt *pdt_p );
 
 
-int   scs_std$listen ( void (*msgadr_p)(void *msg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
+INT32   scs_std$listen ( void (*msgadr_p)(void *msg_buf_p, struct _cdt *cdt_p, struct _pdt *pdt_p ),
                        void (*erradr_p)( unsigned int err_status, unsigned int reason, struct _cdt *cdt_p, struct _pdt *pdt_p),
                        void *lprnam_p,
                        void *prinfo_p,

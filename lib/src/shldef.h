@@ -13,13 +13,13 @@ struct _shl
     void *shl$l_baseva;
     struct _shl *shl$l_shlptr;
 
-    unsigned int shl$l_ident;
+    UINT32 shl$l_ident;
     void *shl$l_permctx;
-    char shl$b_shl_size;
-    short int shldef$$_fill_1;
+    INT8 shl$b_shl_size;
+    INT16 shldef$$_fill_1;
     union
     {
-        unsigned char shl$b_flags;
+        UINT8 shl$b_flags;
         struct
         {
             unsigned shl$v_fixup    : 1;
@@ -30,7 +30,7 @@ struct _shl
     union
     {
         char shl$t_imgnam [40];
-        char shl$b_namlng;
+        INT8 shl$b_namlng;
     };
 };
 

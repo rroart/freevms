@@ -1,6 +1,8 @@
 #ifndef IRCDEF_H
 #define IRCDEF_H
 
+#include <vms_types.h>
+
 #define     IRC$M_PTRSZ     0x3
 #define     IRC$M_RECORDCB      0xFC
 #define     IRC$M_DELETED       0x4
@@ -41,7 +43,7 @@ struct _irc
 {
     union
     {
-        unsigned char irc$b_control;
+        UINT8 irc$b_control;
 #if 0
         struct
         {
@@ -78,7 +80,7 @@ struct _irc
         };
         struct
         {
-            char irc$$_fill_7;
+            INT8 irc$$_fill_7;
         };
 #endif
     };
@@ -87,15 +89,15 @@ struct _irc
 struct _irc1
 {
     struct _irc irc$r_irc;
-    unsigned char irc$b_id;
-    unsigned char irc$b_rrv_id;
+    UINT8 irc$b_id;
+    UINT8 irc$b_rrv_id;
 };
 
 struct _irc2
 {
     struct _irc irc$r_irc;
-    unsigned short int irc$w_id;
-    unsigned short int irc$w_rrv_id;
+    UINT16 irc$w_id;
+    UINT16 irc$w_rrv_id;
 };
 
 // making my own
@@ -105,12 +107,12 @@ struct _irc2
 
 struct _irc_idx
 {
-    unsigned short int irc$w_id;
-    unsigned short int irc$w_rrv_id;
+    UINT16 irc$w_id;
+    UINT16 irc$w_rrv_id;
     unsigned long irc$l_vbn;
-    unsigned short int irc$w_addnxtid; // add this to the the keylen offset
+    UINT16 irc$w_addnxtid; // add this to the the keylen offset
     // to find the next idx
-    unsigned short int irc$w_keylen;
+    UINT16 irc$w_keylen;
 };
 
 #endif

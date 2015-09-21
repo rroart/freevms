@@ -1,6 +1,8 @@
 #ifndef VCBDEF_H
 #define VCBDEF_H
 
+#include <vms_types.h>
+
 #define     VCB$K_MRKLEN        11
 #define     VCB$C_MRKLEN        11
 #define     VCB$M_WRITE_IF      0x1
@@ -72,15 +74,15 @@ struct _vcb
         void *vcb$l_blockbl;
         struct _ucb *vcb$l_memqbl;
     };
-    unsigned short int vcb$w_size;
-    unsigned char vcb$b_type;
+    UINT16 vcb$w_size;
+    UINT8 vcb$b_type;
     union
     {
         struct
         {
             union
             {
-                unsigned char vcb$b_status;
+                UINT8 vcb$b_status;
                 struct
                 {
                     unsigned vcb$v_write_if : 1;
@@ -125,8 +127,8 @@ struct _vcb
                     unsigned vcb$v_packacked : 1;
                 };
             };
-            unsigned int vcb$l_trans;
-            unsigned int vcb$l_rvn;
+            UINT32 vcb$l_trans;
+            UINT32 vcb$l_rvn;
             struct _aqb *vcb$l_aqb;
             char vcb$t_volname [12];
             void *vcb$l_rvt;
@@ -134,30 +136,30 @@ struct _vcb
             {
                 struct
                 {
-                    unsigned int vcb$l_homelbn;
-                    unsigned int vcb$l_home2lbn;
-                    unsigned int vcb$l_ixhdr2lbn;
-                    unsigned int vcb$l_ibmaplbn;
-                    unsigned int vcb$l_sbmaplbn;
-                    unsigned int vcb$l_ibmapsize;
-                    unsigned int vcb$l_ibmapvbn;
-                    unsigned int vcb$l_sbmapsize;
-                    unsigned int vcb$l_sbmapvbn;
-                    unsigned int vcb$l_cluster;
-                    unsigned int vcb$l_extend;
-                    unsigned int vcb$l_free;
-                    unsigned int vcb$l_maxfiles;
-                    unsigned int vcb$l_window;
-                    unsigned int vcb$l_lru_lim;
-                    unsigned int vcb$l_fileprot;
-                    unsigned int vcb$l_mcount;
-                    unsigned int vcb$l_eofdelta;
-                    unsigned int vcb$l_resfiles;
-                    unsigned int vcb$l_recordsz;
-                    unsigned int vcb$l_blockfact;
+                    UINT32 vcb$l_homelbn;
+                    UINT32 vcb$l_home2lbn;
+                    UINT32 vcb$l_ixhdr2lbn;
+                    UINT32 vcb$l_ibmaplbn;
+                    UINT32 vcb$l_sbmaplbn;
+                    UINT32 vcb$l_ibmapsize;
+                    UINT32 vcb$l_ibmapvbn;
+                    UINT32 vcb$l_sbmapsize;
+                    UINT32 vcb$l_sbmapvbn;
+                    UINT32 vcb$l_cluster;
+                    UINT32 vcb$l_extend;
+                    UINT32 vcb$l_free;
+                    UINT32 vcb$l_maxfiles;
+                    UINT32 vcb$l_window;
+                    UINT32 vcb$l_lru_lim;
+                    UINT32 vcb$l_fileprot;
+                    UINT32 vcb$l_mcount;
+                    UINT32 vcb$l_eofdelta;
+                    UINT32 vcb$l_resfiles;
+                    UINT32 vcb$l_recordsz;
+                    UINT32 vcb$l_blockfact;
                     union
                     {
-                        unsigned char vcb$b_status2;
+                        UINT8 vcb$b_status2;
                         struct
                         {
                             unsigned vcb$v_writethru : 1;
@@ -169,17 +171,17 @@ struct _vcb
                             unsigned vcb$v_cluslock : 1;
                             unsigned vcb$v_subset0 : 1;
                         };
-                        char vcb$b_fill_6 [4];
+                        INT8 vcb$b_fill_6 [4];
                     };
                     struct _fcb *vcb$l_quotafcb;
                     void *vcb$l_cache;
                     void *vcb$l_quocache;
-                    unsigned int vcb$l_quosize;
-                    unsigned int vcb$l_penderr;
-                    unsigned int vcb$l_serialnum;
+                    UINT32 vcb$l_quosize;
+                    UINT32 vcb$l_penderr;
+                    UINT32 vcb$l_serialnum;
                     union
                     {
-                        unsigned int vcb$l_status3;
+                        UINT32 vcb$l_status3;
                         struct
                         {
                             unsigned vcb$v_subsystem : 1;
@@ -187,35 +189,35 @@ struct _vcb
                             unsigned vcb$v_fill_3_ : 6;
                         };
                     };
-                    unsigned int vcb$l_vollkid;
+                    UINT32 vcb$l_vollkid;
                     char vcb$t_volcknam [12];
-                    unsigned int vcb$l_blockid;
-                    unsigned long long vcb$q_retainmin;
-                    unsigned long long vcb$q_retainmax;
-                    unsigned long long vcb$q_mounttime;
+                    UINT32 vcb$l_blockid;
+                    UINT64 vcb$q_retainmin;
+                    UINT64 vcb$q_retainmax;
+                    UINT64 vcb$q_mounttime;
                     struct _vcb *vcb$l_memhdfl;
                     struct _vcb *vcb$l_memhdbl;
-                    char vcb$b_fill_7 [3];
-                    unsigned char vcb$b_shad_sts;
-                    unsigned int vcb$l_activity;
-                    unsigned int vcb$l_spl_cnt;
-                    unsigned int vcb$l_shad_lkid;
-                    unsigned char vcb$b_acb [36];
+                    INT8 vcb$b_fill_7 [3];
+                    UINT8 vcb$b_shad_sts;
+                    UINT32 vcb$l_activity;
+                    UINT32 vcb$l_spl_cnt;
+                    UINT32 vcb$l_shad_lkid;
+                    UINT8 vcb$b_acb [36];
                     struct
                     {
                         union
                         {
-                            char vcb$b_fill_2 [20];
+                            UINT8 vcb$b_fill_2 [20];
                             struct _orb *vcb$l_orb;
                         };
                         struct
                         {
-                            char vcb$b_fill_3 [20];
+                            INT8 vcb$b_fill_3 [20];
                         };
                     };
                     union
                     {
-                        unsigned int vcb$l_caching_options;
+                        UINT32 vcb$l_caching_options;
                         struct
                         {
                             unsigned vcb$v_file_attributes : 4;
@@ -230,64 +232,64 @@ struct _vcb
                     struct _ucb *vcb$l_mem_ucb;
                     struct _ucb *vcb$l_mast_ucb;
                     struct _vcb *vcb$l_mast_vcb;
-                    unsigned short int vcb$w_copy_type;
-                    unsigned short int vcb$w_cpyseqnum;
-                    int vcb$l_fill_1;
-                    unsigned long long vcb$q_work;
-                    unsigned long long vcb$q_shdm_resv;
+                    UINT16 vcb$w_copy_type;
+                    UINT16 vcb$w_cpyseqnum;
+                    INT32 vcb$l_fill_1;
+                    UINT64 vcb$q_work;
+                    UINT64 vcb$q_shdm_resv;
                 };
                 struct
                 {
-                    unsigned int vcb$l_voldesc;
+                    UINT32 vcb$l_voldesc;
                     struct _vcb *vcb$l_orphaned_vcb;
                     void *vcb$l_ptvector;
                     void *vcb$l_lbncache;
-                    unsigned int vcb$l_ptindex;
-                    unsigned int vcb$l_lbsize;
-                    unsigned int vcb$l_mxdirnm;
-                    unsigned int vcb$l_lbblocks;
-                    unsigned int vcb$l_minread;
-                    unsigned int vcb$l_rdbytes;
-                    unsigned int vcb$l_lastgrp;
-                    unsigned int vcb$l_cd_free;
-                    unsigned int vcb$l_cd_maxfiles;
-                    unsigned int vcb$l_cd_window;
-                    unsigned int vcb$l_cd_lru_lim;
-                    unsigned int vcb$l_ptrvn;
-                    unsigned int vcb$l_cd_mcount;
-                    unsigned int vcb$l_fat_rfm;
-                    unsigned int vcb$l_fat_rat;
-                    unsigned int vcb$l_fat_mrs;
-                    unsigned int vcb$l_sectors;
+                    UINT32 vcb$l_ptindex;
+                    UINT32 vcb$l_lbsize;
+                    UINT32 vcb$l_mxdirnm;
+                    UINT32 vcb$l_lbblocks;
+                    UINT32 vcb$l_minread;
+                    UINT32 vcb$l_rdbytes;
+                    UINT32 vcb$l_lastgrp;
+                    UINT32 vcb$l_cd_free;
+                    UINT32 vcb$l_cd_maxfiles;
+                    UINT32 vcb$l_cd_window;
+                    UINT32 vcb$l_cd_lru_lim;
+                    UINT32 vcb$l_ptrvn;
+                    UINT32 vcb$l_cd_mcount;
+                    UINT32 vcb$l_fat_rfm;
+                    UINT32 vcb$l_fat_rat;
+                    UINT32 vcb$l_fat_mrs;
+                    UINT32 vcb$l_sectors;
                     union
                     {
-                        unsigned char vcb$b_cd_status2;
-                        char vcb$b_fill_8 [4];
+                        UINT8 vcb$b_cd_status2;
+                        INT8 vcb$b_fill_8 [4];
                     };
                 };
                 struct
                 {
                     union
                     {
-                        unsigned int vcb$l_cur_fid;
+                        UINT32 vcb$l_cur_fid;
                         struct
                         {
-                            unsigned short int vcb$w_cur_num;
-                            unsigned short int vcb$w_cur_seq;
+                            UINT16 vcb$w_cur_num;
+                            UINT16 vcb$w_cur_seq;
                         };
                     };
                     union
                     {
-                        unsigned int vcb$l_start_fid;
+                        UINT32 vcb$l_start_fid;
                         struct
                         {
-                            unsigned short int vcb$w_start_num;
-                            unsigned short int vcb$w_start_seq;
+                            UINT16 vcb$w_start_num;
+                            UINT16 vcb$w_start_seq;
                         };
                     };
                     union
                     {
-                        unsigned short int vcb$w_mode;
+                        UINT16 vcb$w_mode;
                         struct
                         {
                             unsigned vcb$v_ovrexp : 1;
@@ -308,23 +310,23 @@ struct _vcb
                             unsigned vcb$v_fill_4_ : 1;
                         };
                     };
-                    unsigned char vcb$b_tm;
-                    unsigned char vcb$b_cur_rvn;
-                    unsigned int vcb$l_st_record;
+                    UINT8 vcb$b_tm;
+                    UINT8 vcb$b_cur_rvn;
+                    UINT32 vcb$l_st_record;
                     struct _mvl *vcb$l_mvl;
                     struct _wcb *vcb$l_wcb;
                     void *vcb$l_vpfl;
                     void *vcb$l_vpbl;
                     struct _acb *vcb$l_usrlblast;
-                    unsigned char vcb$b_lblcnt;
-                    char vcb$t_fill_5 [99];
-                    unsigned long long vcb$q_exp_date;
+                    UINT8 vcb$b_lblcnt;
+                    UINT8 vcb$t_fill_5 [99];
+                    UINT64 vcb$q_exp_date;
                 };
             } vcb_1_2_1;
         } vcb_1_2;
         struct
         {
-            unsigned char vcb$b_qnamecnt;
+            UINT8 vcb$b_qnamecnt;
             char vcb$t_qname [20];
         } vcb_1_1;
     } vcb_0;

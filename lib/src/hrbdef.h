@@ -1,6 +1,8 @@
 #ifndef HRBDEF_H
 #define HRBDEF_H
 
+#include <vms_types.h>
+
 #define HRB$M_STATE_INVALID 0x8000
 #define HRB$M_ABORT 0x1
 #define HRB$M_ABORTWS 0x2
@@ -33,14 +35,14 @@ struct _hrb
 {
     void *hrb$l_flink;
     void *hrb$l_blink;
-    unsigned short int hrb$w_size;
-    unsigned char hrb$b_type;
-    unsigned char hrb$b_subtype;
-    int (*hrb$l_respc)(void);
-    int (*hrb$l_savd_rtn)(void);
+    UINT16 hrb$w_size;
+    UINT8 hrb$b_type;
+    UINT8 hrb$b_subtype;
+    INT32 (*hrb$l_respc)(void);
+    INT32 (*hrb$l_savd_rtn)(void);
     union
     {
-        unsigned short int hrb$w_state;
+        UINT16 hrb$w_state;
         struct
         {
             unsigned hrb$v_filler : 15;
@@ -50,7 +52,7 @@ struct _hrb
 
     union
     {
-        unsigned short int hrb$w_flags;
+        UINT16 hrb$w_flags;
         struct
         {
             unsigned hrb$v_abort : 1;
@@ -71,33 +73,33 @@ struct _hrb
     };
     struct _mscp *hrb$l_msgbuf;
     struct _cdrp *hrb$l_irp_cdrp;
-    unsigned char hrb$b_lbuff [12];
+    UINT8 hrb$b_lbuff [12];
     void *hrb$l_bd_addr;
-    unsigned int hrb$l_buflen;
+    UINT32 hrb$l_buflen;
     void *hrb$l_bufadr;
-    unsigned int hrb$l_lbn;
-    unsigned int hrb$l_obcnt;
-    unsigned int hrb$l_abcnt;
-    unsigned int hrb$l_svapte;
-    unsigned int hrb$l_bcnt;
-    unsigned short int hrb$w_boff;
-    unsigned short int hrb$w_reserved;
+    UINT32 hrb$l_lbn;
+    UINT32 hrb$l_obcnt;
+    UINT32 hrb$l_abcnt;
+    UINT32 hrb$l_svapte;
+    UINT32 hrb$l_bcnt;
+    UINT16 hrb$w_boff;
+    UINT16 hrb$w_reserved;
     void *hrb$l_wait_fl;
     void *hrb$l_wait_bl;
     struct _hqb *hrb$l_hqb;
     struct _uqb *hrb$l_uqb;
     struct _pdt *hrb$l_pdt;
-    unsigned int hrb$l_cmd_sts;
-    unsigned int hrb$l_object_skip;
-    unsigned int hrb$l_current_skip;
-    unsigned int hrb$l_io_time;
+    UINT32 hrb$l_cmd_sts;
+    UINT32 hrb$l_object_skip;
+    UINT32 hrb$l_current_skip;
+    UINT32 hrb$l_io_time;
 
     void *hrb$l_cache_fl;
     void *hrb$l_cache_bl;
     void *hrb$l_memw_fl;
     void *hrb$l_memw_bl;
-    unsigned int hrb$l_record;
-    unsigned int hrb$l_cmd_time;
+    UINT32 hrb$l_record;
+    UINT32 hrb$l_cmd_time;
 };
 
 

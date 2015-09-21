@@ -48,40 +48,40 @@ typedef char SCS_NAME_LEN [16];
 
 struct _embhd_nonfixed
 {
-    unsigned int emb$l_hd_sid;
-    unsigned short int emb$w_hd_hdr_rev;
+    UINT32 emb$l_hd_sid;
+    UINT16 emb$w_hd_hdr_rev;
     union
     {
-        unsigned int emb$l_hd_systype;
+        UINT32 emb$l_hd_systype;
         struct
         {
-            unsigned short int emb$w_hd_xsid_rsv;
-            unsigned char emb$b_hd_xsid_rev;
-            unsigned char emb$b_hd_xsid_typ;
+            UINT16 emb$w_hd_xsid_rsv;
+            UINT8 emb$b_hd_xsid_rev;
+            UINT8 emb$b_hd_xsid_typ;
         };
     };
-    unsigned int emb$l_cpuid;
-    unsigned char emb$b_dev_class;
-    unsigned char emb$b_dev_type;
+    UINT32 emb$l_cpuid;
+    UINT8 emb$b_dev_class;
+    UINT8 emb$b_dev_type;
     SCS_NAME_LEN emb$t_scs_name;
-    unsigned short int emb$w_flags;
-    unsigned char emb$b_os_id;
-    unsigned char emb$b_hdrsz;
+    UINT16 emb$w_flags;
+    UINT8 emb$b_os_id;
+    UINT8 emb$b_hdrsz;
     union
     {
-        unsigned short int emb$w_hd_entry;
+        UINT16 emb$w_hd_entry;
         struct
         {
-            unsigned char emb$b_devtyp;
-            unsigned char emb$b_devcls;
+            UINT8 emb$b_devtyp;
+            UINT8 emb$b_devcls;
         };
     };
-    unsigned long long emb$q_hd_time;
-    unsigned short int emb$w_hd_errseq;
-    unsigned long long emb$q_hd_swvers;
-    unsigned int emb$l_hd_errmsk;
-    unsigned int emb$l_hd_abstim;
-    unsigned char emb$b_hd_hw_name_len;
+    UINT64 emb$q_hd_time;
+    UINT16 emb$w_hd_errseq;
+    UINT64 emb$q_hd_swvers;
+    UINT32 emb$l_hd_errmsk;
+    UINT32 emb$l_hd_abstim;
+    UINT8 emb$b_hd_hw_name_len;
     char emb$t_hd_hw_name [31];
 };
 
@@ -92,18 +92,18 @@ struct _embhd
 
 struct _embtrailer
 {
-    int emb$l_tr_spare1;
-    int emb$l_tr_spare2;
-    int emb$l_tr_spare3;
-    int emb$l_tr_actual_size;
-    unsigned int emb$l_tr_active_cpus;
-    unsigned int emb$l_tr_logging_cpu;
-    unsigned long long emb$q_tr_tdf;
+    INT32 emb$l_tr_spare1;
+    INT32 emb$l_tr_spare2;
+    INT32 emb$l_tr_spare3;
+    INT32 emb$l_tr_actual_size;
+    UINT32 emb$l_tr_active_cpus;
+    UINT32 emb$l_tr_logging_cpu;
+    UINT64 emb$q_tr_tdf;
 };
 
 union _errmsk_fields
 {
-    int emb$l_errmsk;
+    INT32 emb$l_errmsk;
     struct
     {
         unsigned emb$v_em_bus : 1;
@@ -119,7 +119,7 @@ union _errmsk_fields
 
 union _flags_fields
 {
-    int emb$l_flags;
+    INT32 emb$l_flags;
     struct
     {
         unsigned emb$v_fl_ddr : 1;

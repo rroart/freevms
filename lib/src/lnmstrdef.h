@@ -3,6 +3,8 @@
 
 /* Author: Roar Thron�s */
 
+#include <vms_types.h>
+
 #include <sysgen.h>
 #include <linux/linkage.h>
 
@@ -51,9 +53,9 @@ struct _lnmc
 {
     struct _lnmc * lnmc$l_flink;
     struct _lnmc * lnmc$l_blink;
-    unsigned short lnmc$w_size;
-    unsigned char lnmc$b_type;
-    unsigned char lnmc$b_mode;
+    UINT16 lnmc$w_size;
+    UINT8 lnmc$b_type;
+    UINT8 lnmc$b_mode;
     unsigned long lnmc$l_cacheindx;
     void * lnmc$l_tbladdr;
     unsigned long lnmc$l_procdirseq;
@@ -67,8 +69,8 @@ struct _lnmx
     unsigned long lnmx$l_index;
     unsigned long lnmx$l_hash;
     struct _lnmx *lnmx$l_next;
-    unsigned int lnmx$l_pad;
-    unsigned int lnmx$l_xlen;
+    UINT32 lnmx$l_pad;
+    UINT32 lnmx$l_xlen;
     char lnmx$t_xlation[252];
 };
 
@@ -76,15 +78,15 @@ struct _lnmb
 {
     struct _lnmb * lnmb$l_flink;
     struct _lnmb * lnmb$l_blink;
-    unsigned short lnmb$w_size;
-    unsigned char lnmb$b_type;
+    UINT16 lnmb$w_size;
+    UINT8 lnmb$b_type;
     char empty;
-    unsigned char lnmb$b_acmode;
+    UINT8 lnmb$b_acmode;
     struct _lnmth * lnmb$l_table;
     struct _lnmx * lnmb$l_lnmx;
 
-    unsigned char lnmb$b_flags; /* lnmdef is supposed to go here */
-    unsigned char lnmb$b_count;
+    UINT8 lnmb$b_flags; /* lnmdef is supposed to go here */
+    UINT8 lnmb$b_count;
     unsigned char lnmb$t_name[254];
 };
 
@@ -94,8 +96,8 @@ struct lnmhshp
     struct lnmhsh * lnmhsh$l_blink;
     unsigned long lnmhsh$l_mask;
     unsigned long reserved;
-    unsigned short lnmhsh$w_size;
-    unsigned char lnmhsh$b_type;
+    UINT16 lnmhsh$w_size;
+    UINT8 lnmhsh$b_type;
     unsigned char reserved2;
     void * entry[2*LNMPHASHTBL];
 };
@@ -106,19 +108,19 @@ struct lnmhshs
     struct lnmhsh * lnmhsh$l_blink;
     unsigned long lnmhsh$l_mask;
     unsigned long reserved;
-    unsigned short lnmhsh$w_size;
-    unsigned char lnmhsh$b_type;
+    UINT16 lnmhsh$w_size;
+    UINT8 lnmhsh$b_type;
     unsigned char reserved2;
     void * entry[2*LNMSHASHTBL];
 };
 
 struct _lnmhsh
 {
-    unsigned int lnmhsh$l_mask;
-    int lnmhsh$l_fill_1;
-    unsigned short int lnmhsh$w_size;
-    unsigned char lnmhsh$b_type;
-    char lnmhsh$b_fill_2;
+    UINT32 lnmhsh$l_mask;
+    INT32 lnmhsh$l_fill_1;
+    UINT16 lnmhsh$w_size;
+    UINT8 lnmhsh$b_type;
+    INT8 lnmhsh$b_fill_2;
 };
 
 struct struct_nt

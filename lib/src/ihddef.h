@@ -1,6 +1,8 @@
 #ifndef IHDDEF_H
 #define IHDDEF_H
 
+#include <vms_types.h>
+
 #define IHD$K_MAJORID 12848
 #define IHD$K_MINORID 13616
 #define IHD$K_EXE 1
@@ -38,23 +40,23 @@
 
 struct _ihd
 {
-    unsigned short int ihd$w_size;
-    unsigned short int ihd$w_activoff;
-    unsigned short int ihd$w_symdbgoff;
-    unsigned short int ihd$w_imgidoff;
-    unsigned short int ihd$w_patchoff;
-    unsigned short int ihd$w_version_array_off;
-    unsigned short int ihd$w_majorid;
-    unsigned short int ihd$w_minorid;
-    unsigned char ihd$b_hdrblkcnt;
-    unsigned char ihd$b_imgtype;
-    short int ihddef$$_fill_2;
-    unsigned long long ihd$q_privreqs;
-    unsigned short int ihd$w_iochancnt;
-    unsigned short int ihd$w_imgiocnt;
+    UINT16 ihd$w_size;
+    UINT16 ihd$w_activoff;
+    UINT16 ihd$w_symdbgoff;
+    UINT16 ihd$w_imgidoff;
+    UINT16 ihd$w_patchoff;
+    UINT16 ihd$w_version_array_off;
+    UINT16 ihd$w_majorid;
+    UINT16 ihd$w_minorid;
+    UINT8 ihd$b_hdrblkcnt;
+    UINT8 ihd$b_imgtype;
+    INT16 ihddef$$_fill_2;
+    UINT64 ihd$q_privreqs;
+    UINT16 ihd$w_iochancnt;
+    UINT16 ihd$w_imgiocnt;
     union
     {
-        unsigned int ihd$l_lnkflags;
+        UINT32 ihd$l_lnkflags;
         struct
         {
             unsigned ihd$v_lnkdebug : 1;
@@ -71,11 +73,11 @@ struct _ihd
             unsigned ihd$v_fill_0_  : 5;
         };
     };
-    unsigned int ihd$l_ident;
-    unsigned int ihd$l_sysver;
+    UINT32 ihd$l_ident;
+    UINT32 ihd$l_sysver;
     void *ihd$l_iafva;
     char ihd$t_skip [462];
-    unsigned short int ihd$w_alias;
+    UINT16 ihd$w_alias;
 };
 
 #endif
