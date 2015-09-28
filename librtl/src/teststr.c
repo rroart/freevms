@@ -74,48 +74,42 @@ int main()
     Test1.dsc$a_pointer = NULL;
 
     testanal("Pre Test1", &GlobalString1);
-    printf("get1dx = %ld\n", str$get1_dx(&ten, &Test1));
-    memcpy(Test1.dsc$a_pointer, "qwertyuiop", 10);  /* Force out garbage */
+    printf("get1dx = %d\n", str$get1_dx(&ten, &Test1));
+    memcpy(Test1.dsc$a_pointer, "qwertyuiop", 10); /* Force out garbage */
     testanal("get1_dx test", &Test1);
 
     /*
      * Let's try an append while we have a dynamic string
      */
-    printf("str$append = %ld\n", str$append(&Test1, &GlobalString1));
+    printf("str$append = %d\n", str$append(&Test1, &GlobalString1));
     testanal("appended", &Test1);
 
     /*
      * Now test dupl_char
      */
-    printf("dupl_char = %ld\n",
-           str$dupl_char(&Test1, &seventeen, &TextChar));
+    printf("dupl_char = %d\n", str$dupl_char(&Test1, &seventeen, &TextChar));
     testanal("dupl", &Test1);
 
-    printf("left = %ld\n",
-           str$left(&Test1, &GlobalString2, &eight));
+    printf("left = %d\n", str$left(&Test1, &GlobalString2, &eight));
     testanal("left", &Test1);
 
-    printf("right = %ld\n",
-           str$right(&Test1, &GlobalString2, &eight));
+    printf("right = %d\n", str$right(&Test1, &GlobalString2, &eight));
     testanal("right", &Test1);
 
-    printf("upcase = %ld\n",
-           str$upcase(&Test1, &GlobalString2));
+    printf("upcase = %d\n", str$upcase(&Test1, &GlobalString2));
     testanal("upcase", &Test1);
 
-    printf("trim = %ld",
-           str$trim(&Test1, &GlobalString3, &answer1));
+    printf("trim = %d", str$trim(&Test1, &GlobalString3, &answer1));
     printf(" (%d)\n", answer1);
     testanal("trim", &Test1);
 
-    printf("pos_extr = %ld",
-           str$pos_extr(&Test1, &GlobalString2, &eight, &eight));
+    printf("pos_extr = %d", str$pos_extr(&Test1, &GlobalString2, &eight, &eight));
     testanal("pos_extr", &Test1);
 
     /*
      * Free1_dx
      */
-    printf("free1dx = %ld\n", str$free1_dx(&Test1));
+    printf("free1dx = %d\n", str$free1_dx(&Test1));
     testanal("free1_dx test", &Test1);
 
     /*
@@ -124,56 +118,40 @@ int main()
     testanal("Global1", &GlobalString1);
     testanal("Global2", &GlobalString2);
 
-    printf("str$compare(1,1) = %ld\n",
-           str$compare(&GlobalString1, &GlobalString1));
-    printf("str$compare(1,2) = %ld\n",
-           str$compare(&GlobalString1, &GlobalString2));
-    printf("str$compare(2,1) = %ld\n",
-           str$compare(&GlobalString2, &GlobalString1));
-    printf("str$compare(2,2) = %ld\n",
-           str$compare(&GlobalString2, &GlobalString2));
-    printf("str$compare(3,4) = %ld\n",
-           str$compare(&GlobalString3, &GlobalString4));
-    printf("str$compare(4,3) = %ld\n",
-           str$compare(&GlobalString4, &GlobalString3));
-    printf("str$compare(2,4) = %ld\n",
-           str$compare(&GlobalString2, &GlobalString4));
+    printf("str$compare(1,1) = %d\n", str$compare(&GlobalString1, &GlobalString1));
+    printf("str$compare(1,2) = %d\n", str$compare(&GlobalString1, &GlobalString2));
+    printf("str$compare(2,1) = %d\n", str$compare(&GlobalString2, &GlobalString1));
+    printf("str$compare(2,2) = %d\n", str$compare(&GlobalString2, &GlobalString2));
+    printf("str$compare(3,4) = %d\n", str$compare(&GlobalString3, &GlobalString4));
+    printf("str$compare(4,3) = %d\n", str$compare(&GlobalString4, &GlobalString3));
+    printf("str$compare(2,4) = %d\n", str$compare(&GlobalString2, &GlobalString4));
 
     printf("\n");
 
-    printf("str$compare_eql(1,1) = %ld\n",
-           str$compare_eql(&GlobalString1, &GlobalString1));
-    printf("str$compare_eql(1,2) = %ld\n",
-           str$compare_eql(&GlobalString1, &GlobalString2));
-    printf("str$compare_eql(2,1) = %ld\n",
-           str$compare_eql(&GlobalString2, &GlobalString1));
-    printf("str$compare_eql(2,2) = %ld\n",
-           str$compare_eql(&GlobalString2, &GlobalString2));
+    printf("str$compare_eql(1,1) = %d\n", str$compare_eql(&GlobalString1, &GlobalString1));
+    printf("str$compare_eql(1,2) = %d\n", str$compare_eql(&GlobalString1, &GlobalString2));
+    printf("str$compare_eql(2,1) = %d\n", str$compare_eql(&GlobalString2, &GlobalString1));
+    printf("str$compare_eql(2,2) = %d\n", str$compare_eql(&GlobalString2, &GlobalString2));
     printf("\n");
 
-
-    printf("str$case_blind_compare(1,1) = %ld\n",
-           str$case_blind_compare(&GlobalString1, &GlobalString1));
-    printf("str$case_blind_compare(1,2) = %ld\n",
-           str$case_blind_compare(&GlobalString1, &GlobalString2));
-    printf("str$case_blind_compare(2,1) = %ld\n",
-           str$case_blind_compare(&GlobalString2, &GlobalString1));
-    printf("str$case_blind_compare(2,2) = %ld\n",
-           str$case_blind_compare(&GlobalString2, &GlobalString2));
+    printf("str$case_blind_compare(1,1) = %d\n", str$case_blind_compare(&GlobalString1, &GlobalString1));
+    printf("str$case_blind_compare(1,2) = %d\n", str$case_blind_compare(&GlobalString1, &GlobalString2));
+    printf("str$case_blind_compare(2,1) = %d\n", str$case_blind_compare(&GlobalString2, &GlobalString1));
+    printf("str$case_blind_compare(2,2) = %d\n", str$case_blind_compare(&GlobalString2, &GlobalString2));
     printf("\n");
 
-    printf("Copy_r = %ld\n", str$copy_r(&Test1, &ten, &"A Test String"));
+    printf("Copy_r = %d\n", str$copy_r(&Test1, &ten, &"A Test String"));
     testanal("Test1", &Test1);
 
     Test3.dsc$w_length = 20;
     Test3.dsc$b_class = DSC$K_CLASS_S;
     Test3.dsc$b_dtype = DSC$K_DTYPE_T;
-    Test3.dsc$a_pointer = (char*)malloc(20);
-    printf("Copy_r = %ld\n", str$copy_r(&Test3, &ten, &"A Test String"));
+    Test3.dsc$a_pointer = (char*) malloc(20);
+    printf("Copy_r = %d\n", str$copy_r(&Test3, &ten, &"A Test String"));
     testanal("Test3", &Test3);
     testanal("Global3", &GlobalString2);
 
-    printf("copy_dx = %ld\n", str$copy_dx(&Test3, &GlobalString2));
+    printf("copy_dx = %d\n", str$copy_dx(&Test3, &GlobalString2));
     testanal("Test3", &Test3);
 
     return EXIT_SUCCESS;
@@ -181,8 +159,8 @@ int main()
 
 void testanal(char* Title, struct dsc$descriptor_s* strptr)
 {
-    char* s1_ptr;           /* Pointer to first string */
-    unsigned short s1_length;   /* Length of first string */
+    char* s1_ptr; /* Pointer to first string */
+    unsigned short s1_length; /* Length of first string */
 
     printf("Analyzing '%s':\n", Title);
 

@@ -30,12 +30,11 @@
  * str$upcase
  *
  */
-unsigned long str$upcase(struct dsc$descriptor_s* destination_string,
-                         const struct dsc$descriptor_s* source_string)
+int str$upcase(struct dsc$descriptor_s* destination_string, const struct dsc$descriptor_s* source_string)
 {
-    char* s1_ptr;               /* Pointer to string */
-    unsigned short s1_length;       /* Length of string */
-    unsigned long result;           /* Working result */
+    char* s1_ptr; /* Pointer to string */
+    unsigned short s1_length; /* Length of string */
+    int result; /* Working result */
 
     /*
      * Copy over the string, retaining original case
@@ -55,7 +54,7 @@ unsigned long str$upcase(struct dsc$descriptor_s* destination_string,
         /*
          * Transform it to upper case
          */
-        while(s1_length > 0)
+        while (s1_length > 0)
         {
             *s1_ptr = toupper(*s1_ptr);
             s1_ptr++;

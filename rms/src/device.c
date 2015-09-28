@@ -131,12 +131,13 @@ extern int myfilelistptr;
 extern char root_device_name[];
 extern struct _ccb ctl$ga_ccb_table[];
 
-unsigned device_lookup(unsigned devlen, char *devnam, int create,
+int device_lookup(unsigned devlen, char *devnam, int create,
                        short int *retchan)
 {
     struct _ucb *dev;
     int i;
-    unsigned sts = 1, devsiz = 0;
+    int sts = 1;
+    unsigned devsiz = 0;
     char * colon;
     int chan = 0;
     struct dsc$descriptor d;

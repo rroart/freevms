@@ -75,16 +75,14 @@
  *      0 if equal
  *      1 if first > second
  */
-long str$compare(
-    const struct dsc$descriptor_s* first_source_string,
-    const struct dsc$descriptor_s* second_source_string)
+int str$compare(const struct dsc$descriptor_s* first_source_string, const struct dsc$descriptor_s* second_source_string)
 {
-    char* s1_ptr;           /* Pointer to first string */
-    unsigned short s1_length;   /* Length of first string */
-    char* s2_ptr;           /* Pointer to second string */
-    unsigned short s2_length;   /* Length of second string */
-    unsigned short min_length;  /* length of shortest string */
-    long result;            /* Result of comparison */
+    char* s1_ptr; /* Pointer to first string */
+    unsigned short s1_length; /* Length of first string */
+    char* s2_ptr; /* Pointer to second string */
+    unsigned short s2_length; /* Length of second string */
+    unsigned short min_length; /* length of shortest string */
+    int result; /* Result of comparison */
 
     result = 0;
     /*
@@ -103,7 +101,7 @@ long str$compare(
      * Use 'memcmp' instead of 'strncmp' because we may have NULL's
      * in our strings.
      */
-    if ( min_length != 0 )
+    if (min_length != 0)
         result = memcmp(s1_ptr, s2_ptr, min_length);
     /*
      * Work on the result in case of equal in first part, but

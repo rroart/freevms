@@ -355,10 +355,10 @@ unsigned exttwo_delete(struct _vcb * vcb,struct _irp * irp)
 }
 #endif
 
-unsigned exttwo_modify(struct _vcb * vcb, struct _irp * irp)
+int exttwo_modify(struct _vcb * vcb, struct _irp * irp)
 {
     struct _iosb iosb;
-    unsigned sts=SS$_NORMAL;
+    int sts=SS$_NORMAL;
     unsigned wrtflg=1;
     struct _fcb *fcb;
     //struct _fh2 *head;
@@ -1275,7 +1275,7 @@ void exttwo_translate_ino (struct _vcb * vcb, struct _fiddef * fid)
     }
 }
 
-void * exttwo_search_fcb2(struct _vcb * vcb,struct _fiddef * fid)
+struct _fcb * exttwo_search_fcb2(struct _vcb * vcb,struct _fiddef * fid)
 {
     struct _fcb * head = &vcb->vcb$l_fcbfl;
     struct _fcb * tmp = head->fcb$l_fcbfl;

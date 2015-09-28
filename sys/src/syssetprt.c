@@ -20,8 +20,6 @@
 #include <va_rangedef.h>
 #include <vmspte.h>
 
-int mmg$pteref_64 (void * va, struct _rde *rde, void ** va_pte);
-
 int mmg$setprtpag (int acmode, void * va, struct _pcb * p, signed int pagedirection, struct _rde * rde, unsigned long newpte)
 {
 step1:

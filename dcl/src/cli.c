@@ -809,7 +809,8 @@ unsigned long main(int argc, char *argv[])
     char cmdbuf[CMDSIZ], *p;
     gcmdbuf = cmdbuf;
     int i;
-    unsigned long cmdlen, sts;
+    unsigned long cmdlen;
+    int sts;
     unsigned long h_event;
     Symbol *symbol;
 
@@ -928,7 +929,7 @@ unsigned long main(int argc, char *argv[])
     sts = sys$assign( "timer", &h_timer,PSL$C_KERNEL,0,0);
     if (sts != SS$_NORMAL)
     {
-        fprintf (h_s_error, "oz_cli: error %u assigning channel to timer\n", sts);
+        fprintf (h_s_error, "oz_cli: error %d assigning channel to timer\n", sts);
         h_timer = 0;
     }
 #endif
@@ -972,14 +973,14 @@ unsigned long main(int argc, char *argv[])
     sts = lib$get_ef(&h_event);
     if (sts != SS$_NORMAL)
     {
-        fprintf(h_s_error, "cli: error %u creating event flag\n", sts);
+        fprintf(h_s_error, "cli: error %d creating event flag\n", sts);
         return (sts);
     }
 
     sts = lib$get_ef(&h_event_ctrly);
     if (sts != SS$_NORMAL)
     {
-        fprintf(h_s_error, "cli: error %u creating event flag\n", sts);
+        fprintf(h_s_error, "cli: error %d creating event flag\n", sts);
         return (sts);
     }
 
@@ -1114,8 +1115,7 @@ do_again:
         {
             if (sts != SS$_ENDOFFILE) /* error message if not end-of-file */
             {
-                fprintf(h_s_error, "oz_cli: error %u reading from input\n",
-                        sts);
+                fprintf(h_s_error, "oz_cli: error %d reading from input\n", sts);
                 symbol->ivalue = sts; /* ... and set the error status */
             }
             exit_script(); /* in any case, pop script level */

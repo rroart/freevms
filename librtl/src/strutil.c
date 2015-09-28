@@ -1,4 +1,3 @@
-
 /*
  *  strutil.c
  *  Miscellaneous string routines
@@ -52,7 +51,6 @@
 #define MAXCSTR16   65535
 #define TRUE        1
 #define FALSE       0
-
 
 /************************************************/
 /*
@@ -112,15 +110,15 @@ const unsigned long str$_wronumarg = STR$_WRONUMARG;
  *  2004    Jan     Andrew Allison  Initial write
  */
 
-int str$$iszero (const struct dsc$descriptor_s *sd1)
+int str$$iszero(const struct dsc$descriptor_s *sd1)
 {
     int i, c_not_zero;
-    char    *s1_ptr;
+    char *s1_ptr;
     unsigned short s1_len;
 
-    str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
+    str$analyze_sdesc(sd1, &s1_len, &s1_ptr);
     c_not_zero = FALSE;
-    for (i=0; i < s1_len; i++)
+    for (i = 0; i < s1_len; i++)
         if (s1_ptr[i] != '0')
             c_not_zero = TRUE;
 
@@ -142,23 +140,23 @@ int str$$iszero (const struct dsc$descriptor_s *sd1)
  *  2004    Jan     Andrew Allison  Initial write
  */
 
-int str$$lzerotrim (struct dsc$descriptor_s *sd1)
+int str$$lzerotrim(struct dsc$descriptor_s *sd1)
 {
-    int i,j,count;
-    char    *s1_ptr;
+    int i, j, count;
+    char *s1_ptr;
     unsigned short s1_len;
 
-    str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
+    str$analyze_sdesc(sd1, &s1_len, &s1_ptr);
     i = 0;
-    while ( (s1_ptr[i] == '0') && ( i < s1_len-1 ) ) // while leading zero
+    while ((s1_ptr[i] == '0') && (i < s1_len - 1)) // while leading zero
     {
-        if (s1_ptr[i] == '0' )          // have leading zero
+        if (s1_ptr[i] == '0')          // have leading zero
         {
             for (j = i; j < s1_len; j++)    // shuffle string
             {
-                s1_ptr[j] = s1_ptr[j+1];
+                s1_ptr[j] = s1_ptr[j + 1];
             }
-            i=0;
+            i = 0;
             s1_len--;
             count--;
         }
@@ -169,7 +167,7 @@ int str$$lzerotrim (struct dsc$descriptor_s *sd1)
     }
 
 //  Resize descriptor if needed
-    str$get1_dx (&s1_len, &*sd1);
+    str$get1_dx(&s1_len, &*sd1);
     return count;
 }
 
@@ -185,32 +183,31 @@ int str$$lzerotrim (struct dsc$descriptor_s *sd1)
  *  2004    Jan     Andrew Allison  Initial program creation
  */
 
-int str$$iszerotrim (struct dsc$descriptor_s *sd1, long *exp)
+int str$$iszerotrim(struct dsc$descriptor_s *sd1, long *exp)
 {
     int i, status, is_zero;
-    char    *s1_ptr;
+    char *s1_ptr;
     unsigned short s1_len;
 
     is_zero = TRUE;
-    status = str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
-    if ( s1_ptr != NULL )
+    status = str$analyze_sdesc(sd1, &s1_len, &s1_ptr);
+    if (s1_ptr != NULL)
     {
-        for ( i = 0; i < s1_len; i++)
+        for (i = 0; i < s1_len; i++)
         {
-            if (s1_ptr[i] != '0' )
+            if (s1_ptr[i] != '0')
             {
                 is_zero = FALSE;
             }
         }
 
-        if ( is_zero )
+        if (is_zero)
         {
             *exp = 0;
         }
     }
     return status;
 }
-
 
 /***********************************************/
 /*  str$$rzerotrim
@@ -227,17 +224,17 @@ int str$$iszerotrim (struct dsc$descriptor_s *sd1, long *exp)
  *
  */
 
-int str$$rzerotrim (struct dsc$descriptor_s *sd1, long *exp)
+int str$$rzerotrim(struct dsc$descriptor_s *sd1, long *exp)
 {
     int i, status;
-    char    *s1_ptr;
+    char *s1_ptr;
     unsigned short s1_len;
 
-    status = str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
-    i = s1_len-1;
-    while ( (s1_ptr[i] == '0') && (i > 0 ) )
+    status = str$analyze_sdesc(sd1, &s1_len, &s1_ptr);
+    i = s1_len - 1;
+    while ((s1_ptr[i] == '0') && (i > 0))
     {
-        if (s1_ptr[i] == '0' )
+        if (s1_ptr[i] == '0')
         {
             s1_ptr[i] = ' ';
             (*exp)++;
@@ -247,11 +244,10 @@ int str$$rzerotrim (struct dsc$descriptor_s *sd1, long *exp)
     }
 
 //  Resize descriptor
-    status = str$get1_dx (&s1_len, sd1);
-    str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
+    status = str$get1_dx(&s1_len, sd1);
+    str$analyze_sdesc(sd1, &s1_len, &s1_ptr);
     return status;
 }
-
 
 /************************************************/
 /*  str$$ncompare
@@ -270,33 +266,32 @@ int str$$rzerotrim (struct dsc$descriptor_s *sd1, long *exp)
  *
  */
 
-int str$$ncompare ( struct dsc$descriptor_s *sd1,
-                    struct dsc$descriptor_s *sd2)
+int str$$ncompare(struct dsc$descriptor_s *sd1, struct dsc$descriptor_s *sd2)
 {
-    unsigned short  s1_len,  s2_len;
-    char        *s1_ptr, *s2_ptr;
-    int     min_len, max_len, i;
+    unsigned short s1_len, s2_len;
+    char *s1_ptr, *s2_ptr;
+    int min_len, max_len, i;
 
-    str$$lzerotrim (sd1);
-    str$$lzerotrim (sd2);
+    str$$lzerotrim(sd1);
+    str$$lzerotrim(sd2);
 
-    str$analyze_sdesc (&*sd1,&s1_len, &s1_ptr);
-    str$analyze_sdesc (&*sd2,&s2_len, &s2_ptr);
+    str$analyze_sdesc(&*sd1, &s1_len, &s1_ptr);
+    str$analyze_sdesc(&*sd2, &s2_len, &s2_ptr);
 
-    min_len = ( s1_len < s2_len) ? s1_len : s2_len;
-    max_len = ( s1_len > s2_len) ? s1_len : s2_len;
+    min_len = (s1_len < s2_len) ? s1_len : s2_len;
+    max_len = (s1_len > s2_len) ? s1_len : s2_len;
 
-    if ( s1_len > s2_len )
-        return  1;
-    if ( s1_len < s2_len )
+    if (s1_len > s2_len)
+        return 1;
+    if (s1_len < s2_len)
         return -1;
 
 //  The string are of equal length
     for (i = 0; i < max_len; i++)
     {
-        if ( s1_ptr[i] > s2_ptr[i] )
-            return  1;
-        if ( s1_ptr[i] < s2_ptr[i] )
+        if (s1_ptr[i] > s2_ptr[i])
+            return 1;
+        if (s1_ptr[i] < s2_ptr[i])
             return -1;
     }
 
@@ -317,38 +312,37 @@ int str$$ncompare ( struct dsc$descriptor_s *sd1,
  *
  */
 
-void    str$$print_sd (const struct dsc$descriptor_s *sd1 )
+void str$$print_sd(const struct dsc$descriptor_s *sd1)
 {
-    unsigned short  s1_len;
-    char        *s1_ptr;
-    int     i, qmark;
+    unsigned short s1_len;
+    char *s1_ptr;
+    int i, qmark;
 
     qmark = '?';
-    str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
-    if ( s1_len >= 65500 )
+    str$analyze_sdesc(sd1, &s1_len, &s1_ptr);
+    if (s1_len >= 65500)
     {
-        printf ("%.20s ... %20s",s1_ptr,&s1_ptr[s1_len-20]);
+        printf("%.20s ... %20s", s1_ptr, &s1_ptr[s1_len - 20]);
         return;
     }
-    if ( ( s1_len == 0) && ( s1_ptr == NULL ))
+    if ((s1_len == 0) && (s1_ptr == NULL))
     {
-        printf ("null");
+        printf("null");
         return;
     }
 
-    for (i = 0; i < s1_len; i++ )
+    for (i = 0; i < s1_len; i++)
     {
-        if (isprint (s1_ptr[i]) )
-            putchar (s1_ptr[i]);
-        else if ( s1_ptr[i] == '\t' )
-            putchar ('\t');
+        if (isprint(s1_ptr[i]))
+            putchar(s1_ptr[i]);
+        else if (s1_ptr[i] == '\t')
+            putchar('\t');
         else
-            putchar (qmark);
+            putchar(qmark);
     }
     return;
 
 }
-
 
 /************************************************/
 /*  str$$malloc_sd
@@ -364,70 +358,69 @@ void    str$$print_sd (const struct dsc$descriptor_s *sd1 )
  *
  */
 
-
 void str$$malloc_sd(struct dsc$descriptor_s *temp_sd, char *string)
 {
     int i;
     unsigned short temp_len;
-    char    maxstring [MAXCSTR16], temp_string[5];
+    char maxstring[MAXCSTR16], temp_string[5];
 
-    if ( strcmp(string,"NULL") == 0 )
+    if (strcmp(string, "NULL") == 0)
     {
-        temp_sd->dsc$w_length  = 0;
-        temp_sd->dsc$b_class   = DSC$K_CLASS_D;
-        temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
+        temp_sd->dsc$w_length = 0;
+        temp_sd->dsc$b_class = DSC$K_CLASS_D;
+        temp_sd->dsc$b_dtype = DSC$K_DTYPE_T;
         temp_sd->dsc$a_pointer = NULL;
     }
 // make the largest number possible 65535 9's
-    else if ( strcmp(string,"MAXCSTR16") == 0 )
+    else if (strcmp(string, "MAXCSTR16") == 0)
     {
-        for (i=0; i < MAXCSTR16; i++)
+        for (i = 0; i < MAXCSTR16; i++)
             maxstring[i] = '9';
-        temp_sd->dsc$w_length  = 0;
-        temp_sd->dsc$b_class   = DSC$K_CLASS_D;
-        temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
+        temp_sd->dsc$w_length = 0;
+        temp_sd->dsc$b_class = DSC$K_CLASS_D;
+        temp_sd->dsc$b_dtype = DSC$K_DTYPE_T;
         temp_sd->dsc$a_pointer = NULL;
 
         temp_len = MAXCSTR16;
-        str$get1_dx (&temp_len, temp_sd);
-        str$copy_r  (temp_sd, &temp_len, maxstring);
+        str$get1_dx(&temp_len, temp_sd);
+        str$copy_r(temp_sd, &temp_len, maxstring);
 
     }
-    else if ( strcmp(string,"BLANK") == 0 )
+    else if (strcmp(string, "BLANK") == 0)
     {
-        temp_sd->dsc$w_length  = 0;
-        temp_sd->dsc$b_class   = DSC$K_CLASS_D;
-        temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
+        temp_sd->dsc$w_length = 0;
+        temp_sd->dsc$b_class = DSC$K_CLASS_D;
+        temp_sd->dsc$b_dtype = DSC$K_DTYPE_T;
         temp_sd->dsc$a_pointer = NULL;
 
         temp_len = 1;
         temp_string[0] = ' ';
-        str$get1_dx (&temp_len, temp_sd);
-        str$copy_r  (temp_sd, &temp_len,temp_string);
+        str$get1_dx(&temp_len, temp_sd);
+        str$copy_r(temp_sd, &temp_len, temp_string);
     }
-    else if ( strcmp(string,"TAB") == 0 )
+    else if (strcmp(string, "TAB") == 0)
     {
-        temp_sd->dsc$w_length  = 0;
-        temp_sd->dsc$b_class   = DSC$K_CLASS_D;
-        temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
+        temp_sd->dsc$w_length = 0;
+        temp_sd->dsc$b_class = DSC$K_CLASS_D;
+        temp_sd->dsc$b_dtype = DSC$K_DTYPE_T;
         temp_sd->dsc$a_pointer = NULL;
 
         temp_len = 1;
         temp_string[0] = '\t';
-        str$get1_dx (&temp_len, temp_sd);
-        str$copy_r  (temp_sd, &temp_len,temp_string);
+        str$get1_dx(&temp_len, temp_sd);
+        str$copy_r(temp_sd, &temp_len, temp_string);
     }
     else
     {
         /*  default action copy string value in */
-        temp_sd->dsc$w_length  = 0;
-        temp_sd->dsc$b_class   = DSC$K_CLASS_D;
-        temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
+        temp_sd->dsc$w_length = 0;
+        temp_sd->dsc$b_class = DSC$K_CLASS_D;
+        temp_sd->dsc$b_dtype = DSC$K_DTYPE_T;
         temp_sd->dsc$a_pointer = NULL;
 
-        temp_len = strlen (string);
-        str$get1_dx (&temp_len, temp_sd);
-        str$copy_r  (temp_sd, &temp_len,string);
+        temp_len = strlen(string);
+        str$get1_dx(&temp_len, temp_sd);
+        str$copy_r(temp_sd, &temp_len, string);
 
     }
     return;
@@ -451,25 +444,23 @@ void str$$malloc_sd(struct dsc$descriptor_s *temp_sd, char *string)
  *  Mar 10, 2004 - Andrew Allison
  *      Added code to skip memcopy if source was NULL
  */
-unsigned long str$$copy_fill(char *dest_ptr, unsigned short dest_length,
-                             const char *source_ptr, unsigned short source_length, char fill)
+int str$$copy_fill(char *dest_ptr, unsigned short dest_length, const char *source_ptr, unsigned short source_length, char fill)
 {
     unsigned short max_copy;
     int fill_loop;
-
 
     /*
      * Copy over however much can.
      */
     max_copy = min(dest_length, source_length);
-    if (  source_ptr !=  NULL )
+    if (source_ptr != NULL)
     {
         memcpy(dest_ptr, source_ptr, max_copy);
     }
     /*
      * Fill in the rest
      */
-    if ( max_copy < dest_length )
+    if (max_copy < dest_length)
         for (fill_loop = max_copy; fill_loop < dest_length; fill_loop++)
         {
             dest_ptr[fill_loop] = fill;
@@ -510,10 +501,10 @@ unsigned long str$$copy_fill(char *dest_ptr, unsigned short dest_length,
  *      Changed unsigned short to int to quiet compiler complaints
  */
 
-unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
+int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
 {
-    unsigned long result = STR$_NORMAL;
-    unsigned short  usize;
+    int result = STR$_NORMAL;
+    unsigned short usize;
     int resize;
 
     usize = (unsigned short) size;
@@ -521,7 +512,7 @@ unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
      * Generate the proper memory to store the result in.
      * Dependent on the type of string.
      */
-    switch(dest->dsc$b_class)
+    switch (dest->dsc$b_class)
     {
     case DSC$K_CLASS_Z:
     case DSC$K_CLASS_S:
@@ -556,7 +547,7 @@ unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
             result = STR$_FATINTERR;
         }
         resize = min(dest->dsc$w_length, usize);
-        *((unsigned short int*)dest->dsc$a_pointer) = resize;
+        *((unsigned short int*) dest->dsc$a_pointer) = resize;
         break;
 
     default:
@@ -566,7 +557,6 @@ unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
 
     return result;
 }
-
 
 /************************************************/
 /*  str$$is_string_class
@@ -586,7 +576,7 @@ unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
  *  Oct 10, 1996 - Kevin Handy  Preliminary design.
  *
  */
-unsigned long str$$is_string_class(const struct dsc$descriptor_s* test_string)
+int str$$is_string_class(const struct dsc$descriptor_s* test_string)
 {
     /*
      * Did we get passed anything?

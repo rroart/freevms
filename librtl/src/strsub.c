@@ -131,16 +131,15 @@
 #define TRUE 1
 #define MALLOC_CHECK_ 0
 
-unsigned long str$sub(const unsigned long *asign, const long *aexp,
-                      const struct dsc$descriptor_s *adigits, const unsigned long *bsign,
-                      const long *bexp, const struct dsc$descriptor_s *bdigits,
-                      unsigned long *csign, long *cexp, struct dsc$descriptor_s *cdigits)
+int str$sub(const unsigned long *asign, const long *aexp, const struct dsc$descriptor_s *adigits, const unsigned long *bsign,
+        const long *bexp, const struct dsc$descriptor_s *bdigits, unsigned long *csign, long *cexp,
+        struct dsc$descriptor_s *cdigits)
 {
     unsigned short s1_len, s2_len, s3_len, c_len;
     char *s1_ptr, *s2_ptr, *s3_ptr;
     unsigned long index, max_len, min_len;
     int i, j, k, l;
-    unsigned long status;
+    int status;
     signed long min_exp, max_exp, a_size, b_size, max_size, min_size;
     char ctemp;
     int sum, borrow, order, result;
@@ -158,15 +157,15 @@ unsigned long str$sub(const unsigned long *asign, const long *aexp,
     b = (char *) calloc(MAXSTR, 1);
     c = (char *) calloc(MAXSTR, 1);
 
-    if (a == NULL )
+    if (a == NULL)
     {
         status = STR$_INSVIRMEM;
     }
-    if (b == NULL )
+    if (b == NULL)
     {
         status = STR$_INSVIRMEM;
     }
-    if (c == NULL )
+    if (c == NULL)
     {
         status = STR$_INSVIRMEM;
     }
@@ -280,8 +279,7 @@ unsigned long str$sub(const unsigned long *asign, const long *aexp,
         if ((*asign == NEG) && (*bsign == POS))
         {
             plus_sign = 0;
-            status = str$add(&plus_sign, aexp, adigits, bsign, bexp, bdigits,
-                             csign, cexp, cdigits);
+            status = str$add(&plus_sign, aexp, adigits, bsign, bexp, bdigits, csign, cexp, cdigits);
             *csign = NEG;
             free(a);
             free(b);
@@ -301,8 +299,7 @@ unsigned long str$sub(const unsigned long *asign, const long *aexp,
         if ((*asign == POS) && (*bsign == NEG))
         {
             plus_sign = 0;
-            status = str$add(asign, aexp, adigits, &plus_sign, bexp, bdigits,
-                             csign, cexp, cdigits);
+            status = str$add(asign, aexp, adigits, &plus_sign, bexp, bdigits, csign, cexp, cdigits);
             *csign = POS;
             free(a);
             free(b);
@@ -313,8 +310,7 @@ unsigned long str$sub(const unsigned long *asign, const long *aexp,
         if ((*asign == NEG) && (*bsign == POS))
         {
             plus_sign = 0;
-            status = str$add(&plus_sign, aexp, adigits, bsign, bexp, bdigits,
-                             csign, cexp, cdigits);
+            status = str$add(&plus_sign, aexp, adigits, bsign, bexp, bdigits, csign, cexp, cdigits);
             *csign = NEG;
             free(a);
             free(b);
@@ -347,8 +343,7 @@ unsigned long str$sub(const unsigned long *asign, const long *aexp,
         if ((*asign == NEG) && (*bsign == POS))
         {
             plus_sign = 0;
-            status = str$add(&plus_sign, aexp, adigits, bsign, bexp, bdigits,
-                             csign, cexp, cdigits);
+            status = str$add(&plus_sign, aexp, adigits, bsign, bexp, bdigits, csign, cexp, cdigits);
             *csign = NEG;
             free(a);
             free(b);
@@ -359,8 +354,7 @@ unsigned long str$sub(const unsigned long *asign, const long *aexp,
         if ((*asign == POS) && (*bsign == NEG))
         {
             plus_sign = 0;
-            status = str$add(asign, aexp, adigits, &plus_sign, bexp, bdigits,
-                             csign, cexp, cdigits);
+            status = str$add(asign, aexp, adigits, &plus_sign, bexp, bdigits, csign, cexp, cdigits);
             *csign = POS;
             free(a);
             free(b);

@@ -58,20 +58,12 @@
 #define SYS$GETDVIW sys$getdviw
 #define CLI$DCL_PARSE cli$dcl_parse
 #define CLI$DISPATCH cli$dispatch
-#if 0
-unsigned long lib$init_timer()
-{
-    return SS$_NORMAL;
-}
-unsigned long lib$show_timer()
-{
-    return SS$_NORMAL;
-}
-#endif
+
 int SYS$DCLEXH()
 {
     return SS$_NORMAL;
 }
+
 int SYS$CANEXH()
 {
     return SS$_NORMAL;

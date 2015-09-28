@@ -32,7 +32,7 @@
  *  the descriptor as no string at all (dsc$a_pointer = 0,
  *  dsc$w_length = 0).
  */
-unsigned long str$free1_dx(struct dsc$descriptor_s* string_descriptor)
+int str$free1_dx(struct dsc$descriptor_s* string_descriptor)
 {
     /*
      * Validate class
@@ -68,5 +68,4 @@ unsigned long str$free1_dx(struct dsc$descriptor_s* string_descriptor)
      */
     return STR$_NORMAL;
 }
-
 

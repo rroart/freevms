@@ -22,41 +22,12 @@
 #include <libdef.h>                     /* lib messages */
 #include <ssdef.h>                      /* system messages */
 
-#ifndef __vms                           /* Real VMS? */
 #if 0
 #include <string.h>                     /* Needed for ffsll */
 #endif
 #include <linux/bitops.h>                   /* Need Atomic bit operations */
 extern int ffsll(unsigned long long bits);          /* BUG?  should be in string.h */
 
-#else                               /* for testing on real VMS */
-#include <builtins.h>
-int test_and_clear_bit(int pos, volatile void *bits)        /* Atomic test and clear bit */
-{
-    return !__INTERLOCKED_TESTBITCC_QUAD(bits,pos);     /* Returns the complement of the bit!!! */
-//  return !_BBCCI(pos, bits);                  /* Also works even if pos > 32 */
-}
-int test_and_set_bit(int pos, volatile void *bits)      /* Atomic test and set bit */
-{
-    return __INTERLOCKED_TESTBITSS_QUAD(bits,pos);
-//  return _BBSSI(pos, bits);                   /* Also works even if pos > 32 */
-}
-/* Returns the first set bit position+1, or zero if non found in quadward bit mask */
-int ffsll(unsigned long long bits)
-{
-    int pos = 0;
-    for (int i = 0; i < 64; i++)
-    {
-        if (bits & 0x01)
-        {
-            pos = i+1;
-            break;
-        }
-        bits = bits >> 1;
-    }
-    return pos;
-}
-#endif
 
 /*
 ** Local bit mask of reserved event flags:  0 = reserved, 1 = free.
@@ -81,7 +52,7 @@ static volatile unsigned long long efn_flags = 0x00000000ffffffffULL;
 **                LIB$INSEF - If no more event flags available for allocation.
 */
 
-unsigned int lib$get_ef(unsigned int *efn)          /* allocate an event flag */
+int lib$get_ef(unsigned int *efn)          /* allocate an event flag */
 {
     *efn = (unsigned int)-1;                    /* get_ef return -1 if not allocated */
     int bit;
@@ -112,10 +83,10 @@ unsigned int lib$get_ef(unsigned int *efn)          /* allocate an event flag */
 **          This is returned if efn is outside the ranges of 1-23 and 32-63.
 */
 
-unsigned int lib$free_ef(const unsigned int *efn)       /* Free an event flag */
+int lib$free_ef(const unsigned int *efn)       /* Free an event flag */
 {
-    unsigned int status = LIB$_EF_RESSYS;           /* Event flag reserved to system */
-    int ef = *efn;
+    int status = LIB$_EF_RESSYS;           /* Event flag reserved to system */
+    unsigned int ef = *efn;
     if ((ef >= 1 && ef <= 23) || (ef >= 32 && ef <= 63))    /* Make sure it's in range */
     {
         status = SS$_NORMAL;                    /* Assume success */
@@ -137,10 +108,10 @@ unsigned int lib$free_ef(const unsigned int *efn)       /* Free an event flag */
 **          This is returned if efn is outside the ranges of 1-23 and 32-63.
 */
 
-unsigned int lib$reserve_ef(const unsigned int *efn)
+int lib$reserve_ef(const unsigned int *efn)
 {
-    unsigned int status = LIB$_EF_RESSYS;           /* Event flag reserved to system */
-    int ef = *efn;
+    int status = LIB$_EF_RESSYS;           /* Event flag reserved to system */
+    unsigned int ef = *efn;
     if ((ef >= 1 && ef <= 23) || (ef >= 32 && ef <= 63))    /* Make sure it's in range */
     {
         status = SS$_NORMAL;                    /* Assume success */

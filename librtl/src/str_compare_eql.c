@@ -35,14 +35,12 @@
  *  Compares two strings for equality, in both length
  *  and contents.
  */
-long str$compare_eql(
-    const struct dsc$descriptor_s* first_source_string,
-    const struct dsc$descriptor_s* second_source_string)
+int str$compare_eql(const struct dsc$descriptor_s* first_source_string, const struct dsc$descriptor_s* second_source_string)
 {
-    char* s1_ptr;           /* Pointer to first string */
-    unsigned short s1_length;   /* Length of first string */
-    char* s2_ptr;           /* Pointer to second string */
-    unsigned short s2_length;   /* Length of second string */
+    char* s1_ptr; /* Pointer to first string */
+    unsigned short s1_length; /* Length of first string */
+    char* s2_ptr; /* Pointer to second string */
+    unsigned short s2_length; /* Length of second string */
 
     /*
      * Analyze source strings
@@ -71,5 +69,4 @@ long str$compare_eql(
      */
     return 0;
 }
-
 

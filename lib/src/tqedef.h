@@ -28,7 +28,7 @@ struct _tqe
     UINT8 tqe$b_rqtype;
     union
     {
-        unsigned long tqe$l_pid;
+        UINT32 tqe$l_pid;
         long tqe$l_fpc;
     };
     union

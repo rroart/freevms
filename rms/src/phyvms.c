@@ -64,7 +64,7 @@ void phyio_show(void)
 }
 
 
-unsigned phyio_init(int devlen,char *devnam,unsigned *handle,struct phyio_info *info)
+int phyio_init(int devlen,char *devnam,unsigned *handle,struct phyio_info *info)
 {
     struct dsc$descriptor devdsc;
     unsigned long devclass, status;
@@ -132,13 +132,13 @@ unsigned phyio_init(int devlen,char *devnam,unsigned *handle,struct phyio_info *
 }
 
 
-unsigned phyio_close(unsigned handle)
+int phyio_close(unsigned handle)
 {
     return sys$dassgn(handle);
 }
 
 
-unsigned phyio_read(unsigned handle,unsigned block,unsigned length,char *buffer)
+int phyio_read(unsigned handle,unsigned block,unsigned length,char *buffer)
 {
 #ifdef DEBUG
     printf("Phyio read block: %d into %x (%d bytes)\n",block,buffer,length);
@@ -148,7 +148,7 @@ unsigned phyio_read(unsigned handle,unsigned block,unsigned length,char *buffer)
 }
 
 
-unsigned phyio_write(unsigned handle,unsigned block,unsigned length,char *buffer)
+int phyio_write(unsigned handle,unsigned block,unsigned length,char *buffer)
 {
 #ifdef DEBUG
     printf("Phyio write block: %d from %x (%d bytes)\n",block,buffer,length);

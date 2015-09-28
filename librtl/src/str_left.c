@@ -27,16 +27,13 @@
  * str$left
  *
  */
-unsigned long str$left(struct dsc$descriptor_s* destination_string,
-                       const struct dsc$descriptor_s* source_string,
-                       const long* end_position)
+int str$left(struct dsc$descriptor_s* destination_string, const struct dsc$descriptor_s* source_string, const long* end_position)
 {
-    char* s2_ptr;           /* Pointer to second string */
-    unsigned short s2_length;   /* Length of second string */
-    int final_length;       /* Signed final length */
+    char* s2_ptr; /* Pointer to second string */
+    unsigned short s2_length; /* Length of second string */
+    int final_length; /* Signed final length */
     unsigned short real_final_length; /* Usable final length */
-    unsigned long result;   /* Result */
-    unsigned long second_result = STR$_NORMAL;
+    int result; /* Result */
 
     /*
      * Determine how much we can use
@@ -47,7 +44,7 @@ unsigned long str$left(struct dsc$descriptor_s* destination_string,
     if (final_length < 0)
     {
         real_final_length = 0;
-        second_result = STR$_STRTOOLON;
+        return STR$_STRTOOLON;
     }
     else
     {

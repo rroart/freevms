@@ -42,7 +42,7 @@ struct TIME
     unsigned char time[8];
 };
 
-unsigned long lib$sub_times(const void *time1a, const void *time2a,
+int lib$sub_times(const void *time1a, const void *time2a,
                             void *resulta)
 {
     const struct TIME *time1 = (const struct TIME *)time1a;

@@ -38,7 +38,7 @@
 #include "ssdef.h"
 
 
-unsigned long lib$mult_delta_time(const long *multiple, void *timadr)
+int lib$mult_delta_time(const long *multiple, void *timadr)
 {
     unsigned count = 8,carry = 0;
     long factor = *multiple;

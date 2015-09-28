@@ -1,4 +1,3 @@
-
 /*
  *  LIB$BUILD_NODESPEC
  *
@@ -51,75 +50,73 @@
 #include "lib$routines.h"
 #include "str$routines.h"
 
-unsigned long lib$build_nodespec(const  struct  dsc$descriptor_s *primary,
-                                 struct dsc$descriptor_s *nodespec,
-                                 const  struct  dsc$descriptor_s *acs,
-                                 const  struct  dsc$descriptor_s *secondary,
-                                 unsigned short *nodespec_length )
+int lib$build_nodespec(const struct dsc$descriptor_s *primary, struct dsc$descriptor_s *nodespec,
+        const struct dsc$descriptor_s *acs, const struct dsc$descriptor_s *secondary, unsigned short *nodespec_length)
 {
-    unsigned long   result_code, max_length;
-    unsigned short  primary_length;
-    signed long quote_pos, start_pos;
-    char        *primary_ptr;
-    struct dsc$descriptor_s  temp, quote, double_quote;
+    int result_code;
+    unsigned long max_length;
+    unsigned short primary_length;
+    long quote_pos, start_pos;
+    char *primary_ptr;
+    struct dsc$descriptor_s temp, quote, double_quote;
 
     result_code = SS$_NORMAL;
-    max_length  = 1024;
-    start_pos   = 0;
+    max_length = 1024;
+    start_pos = 0;
 
-    str$analyze_sdesc (primary, &primary_length, &primary_ptr);
+    str$analyze_sdesc(primary, &primary_length, &primary_ptr);
 
-    if ( primary_ptr == NULL )
+    if (primary_ptr == NULL)
         return LIB$_INVARG;
 
 //if ( primary_length > 1024 )
 //  return LIB$_NODTOOLNG;
 
 //create descriptors containing 1 and 2 double quotes
-    str$$malloc_sd (&temp,"NULL");
-    str$$malloc_sd (&quote,"\"");
-    str$$malloc_sd (&double_quote, "\"\"");
+    str$$malloc_sd(&temp, "NULL");
+    str$$malloc_sd(&quote, "\"");
+    str$$malloc_sd(&double_quote, "\"\"");
 
 //copy primary node name to output - nodespec
-    str$copy_dx (nodespec,primary);
+    str$copy_dx(nodespec, primary);
 
 //duplicate quotation marks
-    quote_pos = str$position (nodespec,&quote,&start_pos);
-    if ( quote_pos != 0 )
-        str$replace (&temp,nodespec,&quote_pos,&quote_pos,&double_quote);
+    quote_pos = str$position(nodespec, &quote, &start_pos);
+    if (quote_pos != 0)
+        str$replace(&temp, nodespec, &quote_pos, &quote_pos, &double_quote);
 
 // add 2 -- to get past the one's we put in
     quote_pos += 2;
-    quote_pos = str$position (&temp,&quote,&quote_pos);
+    quote_pos = str$position(&temp, &quote, &quote_pos);
 
-    if ( quote_pos != 0 )
-        str$replace(nodespec,&temp,&quote_pos,&quote_pos,&double_quote);
+    if (quote_pos != 0)
+        str$replace(nodespec, &temp, &quote_pos, &quote_pos, &double_quote);
 
 //  Append access control string to primary node name
-    if ( (unsigned int) acs != (unsigned int) NULL )
-        str$append (nodespec,acs);
+    if (acs != NULL)
+        str$append(nodespec, acs);
 
 //  Append secondary node name
-    if ( (unsigned int) secondary != (unsigned int) NULL )
-        str$append (nodespec,secondary);
+    if ((unsigned int) secondary != (unsigned int) NULL)
+        str$append(nodespec, secondary);
 
 // Truncate node name to 1024 characters
-    str$analyze_sdesc (primary, &primary_length, &primary_ptr);
-    if ( primary_length > 1024 )
+    str$analyze_sdesc(primary, &primary_length, &primary_ptr);
+    if (primary_length > 1024)
     {
         result_code = LIB$_STRTRU;
-        str$left (nodespec, primary,&max_length);
+        str$left(nodespec, primary, &max_length);
     }
 
 //  Set nodespec length
-    if ( nodespec_length != NULL )
+    if (nodespec_length != NULL)
     {
-        str$analyze_sdesc (nodespec, &primary_length, &primary_ptr);
+        str$analyze_sdesc(nodespec, &primary_length, &primary_ptr);
         *nodespec_length = primary_length;
     }
 
-    str$free1_dx (&quote);
-    str$free1_dx (&double_quote);
+    str$free1_dx(&quote);
+    str$free1_dx(&double_quote);
 
     return result_code;
 }

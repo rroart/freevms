@@ -74,22 +74,19 @@
  *      0 if equal
  *      1 if first > second
  */
-long str$compare_multi( const struct dsc$descriptor_s* first_source_string,
-                        const struct dsc$descriptor_s *second_source_string,
-                        const unsigned long *flags,
-                        const unsigned long *language)
+int str$compare_multi(const struct dsc$descriptor_s* first_source_string, const struct dsc$descriptor_s *second_source_string,
+        const unsigned long *flags, const unsigned long *language)
 {
-    unsigned long   case_sensitive,  character_set;
-    char        *s1_ptr, *s2_ptr;
-    unsigned short  s1_length, s2_length;
-    unsigned short  min_length;
-    long        result;
-
+    unsigned long case_sensitive, character_set;
+    char *s1_ptr, *s2_ptr;
+    unsigned short s1_length, s2_length;
+    unsigned short min_length;
+    int result;
 
     case_sensitive = 1;         // default case sensitive comparision
-    if ( (unsigned long) flags != 0 )
+    if ((unsigned long) flags != 0)
     {
-        switch ( *flags)
+        switch (*flags)
         {
         case 0:
             case_sensitive = 1; // comparision is case sensitive
@@ -104,9 +101,9 @@ long str$compare_multi( const struct dsc$descriptor_s* first_source_string,
     }
 
     character_set = 1;
-    if ( (unsigned long) language != 0 )
+    if ((unsigned long) language != 0)
     {
-        switch ( *language )
+        switch (*language)
         {
         case 1:
             character_set = 1;  // multinational
@@ -147,7 +144,7 @@ long str$compare_multi( const struct dsc$descriptor_s* first_source_string,
      * Use 'memcmp' instead of 'strncmp' because we may have NULL's
      * in our strings.
      */
-    if ( min_length != 0 )
+    if (min_length != 0)
         result = memcmp(s1_ptr, s2_ptr, min_length);
 
     /*
@@ -170,7 +167,7 @@ long str$compare_multi( const struct dsc$descriptor_s* first_source_string,
         {
             if (s1_length > s2_length)
             {
-                while ((min_length < s1_length) &&(result == 0))
+                while ((min_length < s1_length) && (result == 0))
                 {
                     if (s1_ptr[min_length++] != ' ')
                         result = 1;

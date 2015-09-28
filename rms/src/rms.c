@@ -157,7 +157,7 @@ struct _irbdef *irb_table[] =
 
 /* Routine to find size of file name components */
 
-unsigned name_delim(char *str, int len, int size[5])
+int name_delim(char *str, int len, int size[5])
 {
     unsigned ch = 0;
     char *curptr = str;
@@ -272,7 +272,7 @@ unsigned name_delim(char *str, int len, int size[5])
 
 /* Routine to find directory name in cache... NOT CURRENTLY IN USE!!! */
 
-unsigned dircache(struct _vcb *vcb, char *dirnam, int dirlen,
+int dircache(struct _vcb *vcb, char *dirnam, int dirlen,
                   struct _fiddef *dirid)
 {
     struct DIRCACHE *dir;
@@ -286,7 +286,7 @@ unsigned dircache(struct _vcb *vcb, char *dirnam, int dirlen,
     }
     else
     {
-        unsigned sts;
+        int sts;
         dir = NULL;
         //        dir = cache_find((void *) &vcb->dircache,dirlen,dirnam,&sts,dircmp,NULL);
 #if 0
@@ -324,7 +324,7 @@ void cleanup_wcf(struct WCCFILE *wccfile)
 
 /* Function to perform an RMS search... */
 
-unsigned do_search(struct _fabdef *fab, struct WCCFILE *wccfile)
+int do_search(struct _fabdef *fab, struct WCCFILE *wccfile)
 {
     struct _iosb iosb =
         { 0 };
@@ -571,7 +571,7 @@ unsigned do_search(struct _fabdef *fab, struct WCCFILE *wccfile)
 
 /* External entry for search function... */
 
-unsigned exe$search(struct _fabdef *fab)
+int exe$search(struct _fabdef *fab)
 {
     int sts;
     struct _namdef *nam = fab->fab$l_nam;
@@ -642,7 +642,7 @@ int set_ifab(struct _fabdef * fab, int size, char * name)
 
 /* Function to perform RMS parse.... */
 
-unsigned do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
+int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
 {
     int sts;
     struct WCCFILE *wccfile = 0;
@@ -952,7 +952,7 @@ unsigned do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
 
 /* External entry for parse function... */
 
-unsigned exe$parse(struct _fabdef *fab)
+int exe$parse(struct _fabdef *fab)
 {
     int sts;
     struct _namdef *nam = fab->fab$l_nam;
@@ -971,12 +971,12 @@ unsigned exe$parse(struct _fabdef *fab)
 
 /* Function to set default directory (heck we can sneak in the device...)  */
 
-unsigned exe$setddir(struct dsc$descriptor *newdir, unsigned short *oldlen,
+int exe$setddir(struct dsc$descriptor *newdir, unsigned short *oldlen,
                      struct dsc$descriptor *olddir)
 {
     struct _iosb iosb =
         { 0 };
-    unsigned sts = 1;
+    int sts = 1;
     if (oldlen != NULL )
     {
         int retlen = default_size[0] + default_size[1];
@@ -1013,7 +1013,7 @@ unsigned exe$setddir(struct dsc$descriptor *newdir, unsigned short *oldlen,
 
 /* This version of connect only resets record pointer */
 
-unsigned exe$connect(struct _rabdef *rab)
+int exe$connect(struct _rabdef *rab)
 {
     struct _iosb iosb =
         { 0 };
@@ -1036,7 +1036,7 @@ unsigned exe$connect(struct _rabdef *rab)
 
 /* Disconnect is even more boring */
 
-unsigned exe$disconnect(struct _rabdef *rab)
+int exe$disconnect(struct _rabdef *rab)
 {
     struct _iosb iosb =
         { 0 };
@@ -1045,7 +1045,7 @@ unsigned exe$disconnect(struct _rabdef *rab)
 
 /* get for sequential files */
 
-unsigned exe$get(struct _rabdef *rab)
+int exe$get(struct _rabdef *rab)
 {
     struct _iosb iosb =
         { 0 };
@@ -1292,7 +1292,7 @@ out:
 
 /* read for sequential files */
 
-unsigned exe$read(struct _rabdef *rab)
+int exe$read(struct _rabdef *rab)
 {
     struct _iosb iosb =
         { 0 };
@@ -1306,7 +1306,8 @@ unsigned exe$read(struct _rabdef *rab)
     unsigned delim,rfm,sts = 1;
 #else
     // check get diff
-    unsigned rfm, sts = 1;
+    unsigned rfm;
+    int sts = 1;
 #endif
     struct _fabdef * fab = rab->rab$l_fab;
     int ifi_no = fab->fab$w_ifi;
@@ -1603,7 +1604,7 @@ out:
 
 /* put for sequential files */
 
-unsigned exe$put(struct _rabdef *rab)
+int exe$put(struct _rabdef *rab)
 {
     struct _iosb iosb =
         { 0 };
@@ -1613,7 +1614,8 @@ unsigned exe$put(struct _rabdef *rab)
     struct _fatdef recattr;
     unsigned block = 0, blocks, offset;
     unsigned cpylen, reclen;
-    unsigned delim, rfm, sts = 1;
+    unsigned delim, rfm;
+    int sts = 1;
     struct _fabdef * fab = rab->rab$l_fab;
     int ifi_no = fab->fab$w_ifi;
     if (ifi_no < 1 || ifi_no >= IFI_MAX)
@@ -1848,7 +1850,7 @@ unsigned exe$put(struct _rabdef *rab)
 
 /* write for sequential files */
 
-unsigned exe$write(struct _rabdef *rab)
+int exe$write(struct _rabdef *rab)
 {
     struct _iosb iosb =
         { 0 };
@@ -1862,7 +1864,8 @@ unsigned exe$write(struct _rabdef *rab)
     unsigned delim,rfm,sts = 1;
 #else
     // check put diff
-    unsigned rfm, sts = 1;
+    unsigned rfm;
+    int sts = 1;
 #endif
     struct _fabdef * fab = rab->rab$l_fab;
     int ifi_no = fab->fab$w_ifi;
@@ -2113,7 +2116,7 @@ unsigned exe$write(struct _rabdef *rab)
 
 /* display to fill fab & xabs with info from the file header... */
 
-unsigned exe$display(struct _fabdef *fab)
+int exe$display(struct _fabdef *fab)
 {
     struct _iosb iosb =
         { 0 };
@@ -2229,7 +2232,7 @@ unsigned exe$display(struct _fabdef *fab)
 
 /* close a file */
 
-unsigned exe$close(struct _fabdef *fab)
+int exe$close(struct _fabdef *fab)
 {
     int sts = SS$_NORMAL;
     int ifi_no = fab->fab$w_ifi;
@@ -2255,11 +2258,11 @@ unsigned exe$close(struct _fabdef *fab)
 
 /* open a file */
 
-unsigned exe$open(struct _fabdef *fab)
+int exe$open(struct _fabdef *fab)
 {
     struct _iosb iosb =
         { 0 };
-    unsigned sts = 1;
+    int sts = 1;
     int ifi_no = 1;
     int wcc_flag = 0;
     struct WCCFILE *wccfile = NULL;
@@ -2441,11 +2444,11 @@ unsigned exe$open(struct _fabdef *fab)
 
 /* blow away a file */
 
-unsigned exe$erase(struct _fabdef *fab)
+int exe$erase(struct _fabdef *fab)
 {
     struct _iosb iosb =
         { 0 };
-    unsigned sts;
+    int sts;
     int ifi_no = 1;
     int wcc_flag = 0;
     struct WCCFILE *wccfile = NULL;
@@ -2532,11 +2535,11 @@ unsigned exe$erase(struct _fabdef *fab)
     return sts;
 }
 
-unsigned exe$create(struct _fabdef *fab)
+int exe$create(struct _fabdef *fab)
 {
     struct _iosb iosb =
         { 0 };
-    unsigned sts;
+    int sts;
     int ifi_no = 1;
     int wcc_flag = 0;
     struct WCCFILE *wccfile = NULL;
@@ -2638,12 +2641,12 @@ go:
     return sts;
 }
 
-unsigned exe$extend(struct _fabdef *fab)
+int exe$extend(struct _fabdef *fab)
 {
     int ifi_no = fab->fab$w_ifi;
     struct _iosb iosb =
         { 0 };
-    unsigned sts;
+    int sts;
     int wcc_flag = 0;
     struct _fibdef fibblk;
     memset(&fibblk, 0, sizeof(struct _fibdef));

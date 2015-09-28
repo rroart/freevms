@@ -30,25 +30,25 @@
  */
 
 /*
-*   Code for VAX STR$GET1_DX routine
-*
-* Description:
-*
-*
-* Bugs:
-*
-*
-* History
-*
-*   Oct 10, 1996 - Kevin Handy
-*       Preliminary design.
-*
-*   Feb 4, 1997 - Kevin Handy
-*       Include "stdlib.h" to lose warnings with '-Wall'.
-*
-*   Feb 26, 2004 - Andrew Allison
-*       Added GNU License
-*/
+ *   Code for VAX STR$GET1_DX routine
+ *
+ * Description:
+ *
+ *
+ * Bugs:
+ *
+ *
+ * History
+ *
+ *   Oct 10, 1996 - Kevin Handy
+ *       Preliminary design.
+ *
+ *   Feb 4, 1997 - Kevin Handy
+ *       Include "stdlib.h" to lose warnings with '-Wall'.
+ *
+ *   Feb 26, 2004 - Andrew Allison
+ *       Added GNU License
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,8 +70,7 @@
  *  asked for, the space will be deallocated before it
  *  allocates new space.
  */
-unsigned long str$get1_dx_64 (unsigned short* word_integer_length,
-                              struct dsc$descriptor_s* character_string)
+int str$get1_dx_64(unsigned short* word_integer_length, struct dsc$descriptor_s* character_string)
 {
     char* new_memory;
     /*
@@ -80,7 +79,7 @@ unsigned long str$get1_dx_64 (unsigned short* word_integer_length,
     if (character_string->dsc$b_class != DSC$K_CLASS_D)
     {
         DOSIGNAL(STR$_ILLSTRCLA);
-        return(STR$_ILLSTRCLA);
+        return (STR$_ILLSTRCLA);
     }
     /*
      * If memory is already allocated, redo the allocation
@@ -98,7 +97,7 @@ unsigned long str$get1_dx_64 (unsigned short* word_integer_length,
              */
 //          new_memory = (char*)realloc(character_string->dsc$a_pointer, *word_integer_length);
             *word_integer_length++;
-            new_memory = (char*)calloc(1,*word_integer_length);
+            new_memory = (char*) calloc(1, *word_integer_length);
             *word_integer_length--;
 
             if (new_memory == NULL)
@@ -106,12 +105,12 @@ unsigned long str$get1_dx_64 (unsigned short* word_integer_length,
                 DOSIGNAL(STR$_INSVIRMEM);
                 return STR$_INSVIRMEM;
             }
-            for (i=0; i < *word_integer_length; i++)
+            for (i = 0; i < *word_integer_length; i++)
                 new_memory[i] = character_string->dsc$a_pointer[i];
 
             free(character_string->dsc$a_pointer);
             character_string->dsc$a_pointer = new_memory;
-            character_string->dsc$w_length  = *word_integer_length;
+            character_string->dsc$w_length = *word_integer_length;
         }
     }
     else
@@ -119,8 +118,7 @@ unsigned long str$get1_dx_64 (unsigned short* word_integer_length,
         /*
          * Allocate some new memory
          */
-        character_string->dsc$a_pointer =
-            (char*)calloc(1,*word_integer_length);
+        character_string->dsc$a_pointer = (char*) calloc(1, *word_integer_length);
         if (character_string->dsc$a_pointer == NULL)
         {
             DOSIGNAL(STR$_INSVIRMEM);
@@ -134,5 +132,4 @@ unsigned long str$get1_dx_64 (unsigned short* word_integer_length,
      */
     return STR$_NORMAL;
 }
-
 

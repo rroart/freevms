@@ -30,25 +30,25 @@
  */
 
 /* str_right.c
-*
-*   Code for VAX STR$POS_EXTR routine
-*
-* Description:
-*
-*
-* Bugs:
-*
-* History
-*
-*   Oct 15, 1996 - Kevin Handy
-*       Preliminary design.
-*
-*   Feb 7, 1997 - Christof Zeile
-*       Change 'short' to 'unsigned short' in several places
-*
-*   Feb 26, 2004 - Andrew Allison
-*       Added GNU License
-*/
+ *
+ *   Code for VAX STR$POS_EXTR routine
+ *
+ * Description:
+ *
+ *
+ * Bugs:
+ *
+ * History
+ *
+ *   Oct 15, 1996 - Kevin Handy
+ *       Preliminary design.
+ *
+ *   Feb 7, 1997 - Christof Zeile
+ *       Change 'short' to 'unsigned short' in several places
+ *
+ *   Feb 26, 2004 - Andrew Allison
+ *       Added GNU License
+ */
 
 #include <stdio.h>
 #include <assert.h>
@@ -60,17 +60,15 @@
  * str$pos_extr
  *
  */
-unsigned long str$pos_extr(struct dsc$descriptor_s* destination_string,
-                           const struct dsc$descriptor_s* source_string,
-                           const long* start_position,
-                           const long* end_position)
+int str$pos_extr(struct dsc$descriptor_s* destination_string, const struct dsc$descriptor_s* source_string,
+        const long* start_position, const long* end_position)
 {
-    char* s2_ptr;               /* Pointer to second string */
-    unsigned short s2_length;       /* Length of second string */
-    int final_length;           /* Signed final length */
-    unsigned short real_final_length;   /* Usable final length */
-    unsigned long result;           /* Result */
-    unsigned long second_result = STR$_NORMAL; /* Another possible result */
+    char* s2_ptr; /* Pointer to second string */
+    unsigned short s2_length; /* Length of second string */
+    int final_length; /* Signed final length */
+    unsigned short real_final_length; /* Usable final length */
+    int result; /* Result */
+    int second_result = STR$_NORMAL; /* Another possible result */
     int start_offset = *start_position; /* Real start character */
 
     /*
@@ -93,8 +91,7 @@ unsigned long str$pos_extr(struct dsc$descriptor_s* destination_string,
      */
     if (final_length > *end_position - *start_position + 1)
     {
-        final_length =
-            (*end_position - *start_position + 1);
+        final_length = (*end_position - *start_position + 1);
     }
 
     /*
@@ -114,8 +111,7 @@ unsigned long str$pos_extr(struct dsc$descriptor_s* destination_string,
      * Move over the left part of the string
      */
     s2_ptr += start_offset - 1;
-    result = str$copy_r(destination_string,
-                        &real_final_length, s2_ptr);
+    result = str$copy_r(destination_string, &real_final_length, s2_ptr);
 
     /*
      * Done

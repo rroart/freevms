@@ -2,7 +2,6 @@
 #define SCS_ROUTINES_H
 
 #if 0
-#include <ints.h>
 #include <bddef.h>
 #include <bdlptrdef.h>
 #include <bnamdef.h>

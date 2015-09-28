@@ -32,15 +32,13 @@
  *      0 if not found, otherwise returns the
  *      relative position.
  */
-unsigned long lib$index(
-    const struct dsc$descriptor_s* first_source_string,
-    const struct dsc$descriptor_s* second_source_string)
+unsigned int lib$index(const struct dsc$descriptor_s* first_source_string, const struct dsc$descriptor_s* second_source_string)
 {
-    char* s1_ptr;           /* Pointer to first string */
-    unsigned short s1_length;   /* Length of first string */
-    char* s2_ptr;           /* Pointer to second string */
-    unsigned short s2_length;   /* Length of second string */
-    unsigned long loop;         /* Outer loopp */
+    char* s1_ptr; /* Pointer to first string */
+    unsigned short s1_length; /* Length of first string */
+    char* s2_ptr; /* Pointer to second string */
+    unsigned short s2_length; /* Length of second string */
+    unsigned int loop; /* Outer loop */
 
     /*
      * Analyze source strings
@@ -52,8 +50,7 @@ unsigned long lib$index(
      * We loop from the start position to the end of the
      * last possible match position in the string.
      */
-    for (loop = 0;
-            loop <= s1_length - s2_length; loop++)
+    for (loop = 0; loop <= s1_length - s2_length; loop++)
     {
         /*
          * Inner loop does the actual comparison

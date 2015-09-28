@@ -1,4 +1,3 @@
-
 /*
  *  LIB$COMPARE_NODENAME
  *
@@ -48,47 +47,43 @@
 #include "lib$routines.h"
 
 //Prototype
-int not_valid_node_name (const struct dsc$descriptor_s *nodename);
+int not_valid_node_name(const struct dsc$descriptor_s *nodename);
 
-unsigned long lib$expand_nodename (const struct dsc$descriptor_s *name,
-                                   struct dsc$descriptor_s  *xname,
-                                   unsigned short *xname_len);
+int lib$expand_nodename(const struct dsc$descriptor_s *name, struct dsc$descriptor_s *xname, unsigned short *xname_len);
 
 // LIB$COMPARE_NODENAME
-unsigned long lib$compare_nodename (const struct dsc$descriptor_s *nodename1,
-                                    const struct dsc$descriptor_s *nodename2,
-                                    unsigned long *result)
+int lib$compare_nodename(const struct dsc$descriptor_s *nodename1, const struct dsc$descriptor_s *nodename2, unsigned long *result)
 {
-    unsigned short  name1_len, name2_len, expandlen;
-    unsigned long   result_code;
-    char        *name1_ptr, *name2_ptr;
+    unsigned short name1_len, name2_len, expandlen;
+    int result_code = LIB$_NORMAL;
+    char *name1_ptr, *name2_ptr;
     struct dsc$descriptor_s node1, node2;
 
-    str$analyze_sdesc (nodename1,&name1_len, &name1_ptr);
+    str$analyze_sdesc(nodename1, &name1_len, &name1_ptr);
 
-    if ( name1_len > 1024 )
+    if (name1_len > 1024)
         return LIB$_INVSTRDES;
-    if ( not_valid_node_name (nodename1) )
+    if (not_valid_node_name(nodename1))
         return LIB$_INVARG;
 
-    str$analyze_sdesc (nodename2,&name2_len, &name2_ptr);
+    str$analyze_sdesc(nodename2, &name2_len, &name2_ptr);
 
-    if ( name2_len > 1024 )
+    if (name2_len > 1024)
         return LIB$_INVSTRDES;
-    if ( not_valid_node_name (nodename2) )
+    if (not_valid_node_name(nodename2))
         return LIB$_INVARG;
 
-    lib$expand_nodename (nodename1, &node1, &expandlen);
-    lib$expand_nodename (nodename2, &node2, &expandlen);
+    lib$expand_nodename(nodename1, &node1, &expandlen);
+    lib$expand_nodename(nodename2, &node2, &expandlen);
 
-    *result = (unsigned long) str$compare (&node1, &node2 );
+    *result = (unsigned long) str$compare(&node1, &node2);
 
     return result_code;
 }
 
 // *******************************
 
-int not_valid_node_name (const struct dsc$descriptor_s *nodename)
+int not_valid_node_name(const struct dsc$descriptor_s *nodename)
 {
 //  Put code to test node name her
     return 0;

@@ -128,10 +128,6 @@ pic/%.o: %.c
 	$(CC) -fpic -fPIC $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -I$(HPATH) -c -o $@ $<
 
 str.o : str.c ../../starlet/src/strdef.h
-str__const.o : str__const.c ../../starlet/src/strdef.h
-str__is_string_class.o : str__is_string_class.c ../../starlet/src/strdef.h
-str__copy_fill.o : str__copy_fill.c ../../starlet/src/strdef.h
-str__resize.o : str__resize.c ../../starlet/src/strdef.h
 str_analyze_sdesc.o : str_analyze_sdesc.c ../../starlet/src/strdef.h
 str_append.o : str_append.c ../../starlet/src/strdef.h
 str_blind_compare.o : str_blind_compare.c ../../starlet/src/strdef.h

@@ -34,14 +34,13 @@
  *  consisting of a single character followed by trailing
  *  spaces, if needed.
  */
-unsigned long lib$char(struct dsc$descriptor_s* destination_string,
-                       const char* ascii_character)
+int lib$char(struct dsc$descriptor_s* destination_string, const char* ascii_character)
 {
-    char* s1_ptr;           /* Pointer to first string */
-    unsigned short s1_length;   /* Length of first string */
-    unsigned long result = STR$_NORMAL;
-    char UseChar = ' ';     /* Character to use for duplication */
-    unsigned long alt_result;
+    char* s1_ptr; /* Pointer to first string */
+    unsigned short s1_length; /* Length of first string */
+    int result = STR$_NORMAL;
+    char UseChar = ' '; /* Character to use for duplication */
+    int alt_result;
 
     /*
      * Check out the source string. It better have one
@@ -67,7 +66,7 @@ unsigned long lib$char(struct dsc$descriptor_s* destination_string,
          */
         str$analyze_sdesc(destination_string, &s1_length, &s1_ptr);
         *s1_ptr = UseChar;
-        memset(s1_ptr + 1, ' ', (size_t)(s1_length - 1));
+        memset(s1_ptr + 1, ' ', (size_t) (s1_length - 1));
 
         /*
          * Did we truncate?

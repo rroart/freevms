@@ -49,7 +49,7 @@ struct _acb
     UINT16 acb$w_size;
     UINT8 acb$b_type;
     UINT8 acb$b_rmod; /** field contents above, bit 0:1 access mode, 4 pkast, 5 nodelete, 6 quota, 7 kast */
-    unsigned long acb$l_pid; /** associated process id */
+    UINT32 acb$l_pid; /** associated process id */
     void (*acb$l_ast)(unsigned long);
     unsigned long acb$l_astprm;
     void (*acb$l_kast)(unsigned long);

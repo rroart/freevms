@@ -1,4 +1,3 @@
-
 /*
  *  LIB$EXPAND_NODENAME
  *
@@ -44,12 +43,7 @@
 
 #include "lib$routines.h"
 
-
-unsigned long lib$expand_nodename (const struct dsc$descriptor_s *name,
-                                   struct dsc$descriptor_s  *xname,
-                                   unsigned short *xname_len)
-
+int lib$expand_nodename(const struct dsc$descriptor_s *name, struct dsc$descriptor_s *xname, unsigned short *xname_len)
 {
-
     return 0;
 }

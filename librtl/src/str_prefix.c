@@ -30,16 +30,15 @@
  * str$prefix
  *
  */
-unsigned long str$prefix(struct dsc$descriptor_s* destination_string,
-                         const struct dsc$descriptor_s* source_string)
+int str$prefix(struct dsc$descriptor_s* destination_string, const struct dsc$descriptor_s* source_string)
 {
-    char* s1_ptr;           /* Pointer to first string */
-    unsigned short s1_length;   /* Length of first string */
-    char* s2_ptr;           /* Pointer to second string */
-    unsigned short s2_length;   /* Length of second string */
-    unsigned short final_length;    /* Final sstring length */
-    char* work;         /* Working area */
-    unsigned long result = STR$_NORMAL; /* Result */
+    char* s1_ptr; /* Pointer to first string */
+    unsigned short s1_length; /* Length of first string */
+    char* s2_ptr; /* Pointer to second string */
+    unsigned short s2_length; /* Length of second string */
+    unsigned short final_length; /* Final sstring length */
+    char* work; /* Working area */
+    int result = STR$_NORMAL; /* Result */
 
     /*
      * Destination MUST be a dynamic string
@@ -60,7 +59,7 @@ unsigned long str$prefix(struct dsc$descriptor_s* destination_string,
     /*
      * Create a sufficiently large work area
      */
-    work = (char*)malloc((unsigned)final_length);
+    work = (char*) malloc((unsigned) final_length);
     if (work == NULL)
     {
         return STR$_INSVIRMEM;
@@ -69,8 +68,8 @@ unsigned long str$prefix(struct dsc$descriptor_s* destination_string,
     /*
      * Concatinate the strings
      */
-    memcpy(work, s1_ptr, (size_t)s1_length);
-    memcpy(work + s1_length, s2_ptr, (size_t)s2_length);
+    memcpy(work, s1_ptr, (size_t) s1_length);
+    memcpy(work + s1_length, s2_ptr, (size_t) s2_length);
 
     /*
      * Save the result

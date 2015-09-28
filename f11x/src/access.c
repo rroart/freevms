@@ -772,7 +772,7 @@ void fid_copy(struct _fiddef *dst, struct _fiddef *src, unsigned rvn)
 
 /* deaccesshead() release header from INDEXF... */
 
-unsigned deaccesshead(struct _fh2 *head, unsigned idxblk)
+int deaccesshead(struct _fh2 *head, unsigned idxblk)
 {
     if (head && idxblk)
     {
@@ -782,7 +782,7 @@ unsigned deaccesshead(struct _fh2 *head, unsigned idxblk)
     return deaccesschunk(idxblk, 1, 1);
 }
 
-unsigned writechunk(struct _fcb * fcb, unsigned long vblock, char * buff)
+int writechunk(struct _fcb * fcb, unsigned long vblock, char * buff)
 {
     struct _iosb iosb;
     struct _vcb * vcb = xqp->current_vcb;
@@ -802,7 +802,7 @@ unsigned writechunk(struct _fcb * fcb, unsigned long vblock, char * buff)
     return iosb.iosb$w_status;
 }
 
-static unsigned gethead(struct _fcb * fcb, struct _fh2 **headbuff)
+int gethead(struct _fcb * fcb, struct _fh2 **headbuff)
 {
     struct _iosb iosb;
     struct _vcb * vcb = xqp->current_vcb;
@@ -825,7 +825,7 @@ static unsigned gethead(struct _fcb * fcb, struct _fh2 **headbuff)
     return iosb.iosb$w_status;
 }
 
-unsigned writehead(struct _fcb * fcb, struct _fh2 *headbuff)
+int writehead(struct _fcb * fcb, struct _fh2 *headbuff)
 {
     struct _vcb * vcb = xqp->current_vcb;
     struct _ucb * ucb;
@@ -843,7 +843,6 @@ unsigned writehead(struct _fcb * fcb, struct _fh2 *headbuff)
         fid->fid$w_num + (fid->fid$b_nmx << 16)
         - 1+
         ucb->ucb$l_vcb->vcb$l_ibmapvbn + ucb->ucb$l_vcb->vcb$l_ibmapsize;
-    ;
     //if (headbuff->fh2$w_checksum == check) return 1;
     headbuff->fh2$w_checksum = check;
     return writechunk(getidxfcb(ucb->ucb$l_vcb), vbn, headbuff);
@@ -1184,11 +1183,11 @@ void set_ccb_wind(short int channel, struct _fcb * fcb)
 
 /* getwindow() find a window to map VBN to LBN ... */
 
-unsigned getwindow(struct _fcb * fcb, unsigned vbn, struct _vcb **devptr,
+int getwindow(struct _fcb * fcb, unsigned vbn, struct _vcb **devptr,
                    unsigned *phyblk, unsigned *phylen, struct _fiddef *hdrfid,
                    unsigned *hdrseq)
 {
-    unsigned sts = SS$_NORMAL;
+    int sts = SS$_NORMAL;
     struct _wcb *wcb;
 #ifdef DEBUG
     printk("Accessing window for vbn %d, file (%x)\n",vbn,fcb->cache.hashval);
@@ -1214,7 +1213,7 @@ unsigned getwindow(struct _fcb * fcb, unsigned vbn, struct _vcb **devptr,
 
 /* deaccesschunk() to deaccess a VIOC (chunk of a file) */
 
-unsigned deaccesschunk(unsigned wrtvbn, int wrtblks, int reuse)
+int deaccesschunk(unsigned wrtvbn, int wrtblks, int reuse)
 {
 #ifdef DEBUG
     printk("Deaccess chunk %8x\n",vioc->cache.hashval);
@@ -1299,10 +1298,10 @@ void *f11b_readvblock(struct _fcb * fcb, unsigned curvbn, unsigned *retsts)
 
 /* accesschunk() return pointer to a 'chunk' of a file ... */
 
-unsigned accesschunk(struct _fcb *fcb, unsigned vbn, char **retbuff,
+int accesschunk(struct _fcb *fcb, unsigned vbn, char **retbuff,
                      unsigned *retblocks, unsigned wrtblks, struct _irp * irp)
 {
-    unsigned sts;
+    int sts;
     int blocks;
     if (!fcb)
         fcb = xqp->primary_fcb;
@@ -1327,11 +1326,9 @@ unsigned accesschunk(struct _fcb *fcb, unsigned vbn, char **retbuff,
 #endif
 }
 
-unsigned deallocfile(struct _fcb *fcb);
-
 /* deaccessfile() finish accessing a file.... */
 
-unsigned deaccessfile(struct _fcb *fcb)
+int deaccessfile(struct _fcb *fcb)
 {
     struct _iosb iosb;
     int sts;
@@ -1428,10 +1425,10 @@ void *fcb_create2(struct _fh2 * head, unsigned *retsts)
 
 /* accessfile() open up file for access... */
 
-unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
+int f11b_access(struct _vcb * vcb, struct _irp * irp)
 {
     struct _iosb iosb;
-    unsigned sts = SS$_NORMAL;
+    int sts = SS$_NORMAL;
     unsigned wrtflg = 1;
     struct _fcb *fcb;
     struct _fh2 *head;
@@ -1547,10 +1544,11 @@ unsigned f11b_access(struct _vcb * vcb, struct _irp * irp)
 
 /* dismount() finish processing on a volume */
 
-unsigned dismount(struct _vcb * vcb)
+int dismount(struct _vcb * vcb)
 {
 #if 0
-    unsigned sts,device;
+    int sts;
+    unsigned device;
     struct _vcb *vcbdev;
     int expectfiles = vcb->devices;
     int openfiles = cache_refcount(&vcb->fcb->cache);
@@ -1604,11 +1602,11 @@ unsigned dismount(struct _vcb * vcb)
 
 /* mount() make disk volume available for processing... */
 
-unsigned mount(unsigned flags, unsigned devices, char *devnam[], char *label[],
-               struct _vcb **retvcb)
+int mount(unsigned flags, unsigned devices, char *devnam[], char *label[], struct _vcb **retvcb)
 {
     struct _iosb iosb;
-    unsigned device, sts;
+    unsigned device;
+    int sts;
     struct _vcb *vcb = 0;
     struct _vcb *vcbdev;
     struct _ucb *ucb;

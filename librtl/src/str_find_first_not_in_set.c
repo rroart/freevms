@@ -73,17 +73,16 @@
  *      in the source string where the first match is found.
  *
  */
-long str$find_first_not_in_set(
-    const struct dsc$descriptor_s* first_source_string,
-    const struct dsc$descriptor_s* second_source_string)
+int str$find_first_not_in_set(const struct dsc$descriptor_s* first_source_string,
+        const struct dsc$descriptor_s* second_source_string)
 {
-    char* s1_ptr;           /* Pointer to first string */
-    unsigned short s1_length;   /* Length of first string */
-    char* s2_ptr;           /* Pointer to second string */
-    unsigned short s2_length;   /* Length of second string */
-    int loop1;          /* Outer loop */
-    int loop2;          /* Inner loop */
-    int result;         /* Partial result */
+    char* s1_ptr; /* Pointer to first string */
+    unsigned short s1_length; /* Length of first string */
+    char* s2_ptr; /* Pointer to second string */
+    unsigned short s2_length; /* Length of second string */
+    int loop1; /* Outer loop */
+    int loop2; /* Inner loop */
+    int result; /* Partial result */
 
     /*
      * Analyze source strings
@@ -94,7 +93,7 @@ long str$find_first_not_in_set(
     /*
      * Quick exit when goofy stuff passed
      */
-    if (s1_length == 0 )
+    if (s1_length == 0)
     {
         return 1;
     }
@@ -148,5 +147,4 @@ long str$find_first_not_in_set(
      */
     return 0;
 }
-
 

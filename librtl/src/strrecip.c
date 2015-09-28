@@ -81,23 +81,17 @@
 #define TRUE        1
 #define FALSE       0
 
-
-unsigned long str$recip (   const unsigned  long *asign,
-                            const           long *aexp,
-                            const struct    dsc$descriptor_s *adigits,
-                            const unsigned  long *bsign,
-                            const       long *bexp,
-                            const struct    dsc$descriptor_s *bdigits,
-                            unsigned    long *csign,
-                            long *cexp,
-                            struct  dsc$descriptor_s *cdigits)
+int str$recip(const unsigned long *asign, const long *aexp, const struct dsc$descriptor_s *adigits, const unsigned long *bsign,
+        const long *bexp, const struct dsc$descriptor_s *bdigits, unsigned long *csign, long *cexp,
+        struct dsc$descriptor_s *cdigits)
 {
-    int     c_not_zero;
-    int     i, outlen;
-    char        *s1_ptr, *s2_ptr, *s3_ptr;
-    signed   long   oneexp, rti, td;
-    unsigned long   onesign, status;
-    unsigned short  s1_len,  s2_len,  s3_len;
+    int c_not_zero;
+    int i, outlen;
+    char *s1_ptr, *s2_ptr, *s3_ptr;
+    signed long oneexp, rti, td;
+    unsigned long onesign;
+    int status;
+    unsigned short s1_len, s2_len, s3_len;
     struct dsc$descriptor_s one;
 
     status = STR$_NORMAL;
@@ -105,12 +99,12 @@ unsigned long str$recip (   const unsigned  long *asign,
     rti = 0;    // round truncate indicator  1 = round 0 = truncate
 
 //  Check the sign field is 1 or 0
-    if ( *asign == 1 || *asign == 0 )
+    if (*asign == 1 || *asign == 0)
         ;
     else
         status = LIB$_INVARG;
 
-    if ( *bsign == 1  || *bsign == 0)
+    if (*bsign == 1 || *bsign == 0)
         ;
     else
         status = LIB$_INVARG;
@@ -119,20 +113,20 @@ unsigned long str$recip (   const unsigned  long *asign,
     *csign = *asign;
 
 //  Get the length of the input strings and how much room for the output
-    str$analyze_sdesc (adigits, &s1_len, &s1_ptr);
-    str$analyze_sdesc (bdigits, &s2_len, &s2_ptr);
-    str$analyze_sdesc (cdigits, &s3_len, &s3_ptr);
-    strcpy (s3_ptr,"0");
+    str$analyze_sdesc(adigits, &s1_len, &s1_ptr);
+    str$analyze_sdesc(bdigits, &s2_len, &s2_ptr);
+    str$analyze_sdesc(cdigits, &s3_len, &s3_ptr);
+    strcpy(s3_ptr, "0");
 
-    td = atol (s2_ptr);
+    td = atol(s2_ptr);
 
 //  Check that we are not dividing by zero
     c_not_zero = FALSE;
-    for (i=0; i < s1_len; i++)
-        if ( s1_ptr[i] != '0')
+    for (i = 0; i < s1_len; i++)
+        if (s1_ptr[i] != '0')
             c_not_zero = TRUE;
 
-    if ( c_not_zero == FALSE )
+    if (c_not_zero == FALSE)
     {
         status = STR$_DIVBY_ZER;
     }
@@ -145,21 +139,21 @@ unsigned long str$recip (   const unsigned  long *asign,
 
 //  Check that the precision is not zero.
     c_not_zero = FALSE;
-    for (i=0; i < s2_len; i++)
-        if ( s2_ptr[i] != '0')
+    for (i = 0; i < s2_len; i++)
+        if (s2_ptr[i] != '0')
             c_not_zero = TRUE;
 
-    if ( c_not_zero == FALSE )
+    if (c_not_zero == FALSE)
     {
         status = STR$_NORMAL;
         return status;
     }
 
 //  Create the numeric 1 numerator
-    one.dsc$w_length  = 1;
-    one.dsc$b_class   = DSC$K_CLASS_D;
-    one.dsc$b_dtype   = DSC$K_DTYPE_T;
-    one.dsc$a_pointer = calloc (1,1);
+    one.dsc$w_length = 1;
+    one.dsc$b_class = DSC$K_CLASS_D;
+    one.dsc$b_dtype = DSC$K_DTYPE_T;
+    one.dsc$a_pointer = calloc(1, 1);
     *one.dsc$a_pointer = '1';
 
 //  set the sign and exponent for the one
@@ -168,9 +162,7 @@ unsigned long str$recip (   const unsigned  long *asign,
 
 //divide asign,aexp,adigit,bsign,bexp,bdigit,td,rti,csign,cexp,cdigit
 
-    str$divide (&onesign,&oneexp,&one, asign,aexp,adigits, &td,&rti, csign, cexp, cdigits);
-
-
+    str$divide(&onesign, &oneexp, &one, asign, aexp, adigits, &td, &rti, csign, cexp, cdigits);
 
     return status;
 }

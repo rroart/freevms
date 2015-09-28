@@ -1,4 +1,3 @@
-
 /*
  *  str$replace
  *
@@ -40,7 +39,7 @@
  * Bugs
  *
  *
-*/
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -52,59 +51,55 @@
 
 /************************************/
 
-unsigned long str$replace(  struct dsc$descriptor_s *destin,
-                            const   struct dsc$descriptor_s *source,
-                            const   long *begin, const long *finish,
-                            const   struct dsc$descriptor_s *sub)
-
+int str$replace(struct dsc$descriptor_s *destin, const struct dsc$descriptor_s *source, const long *begin, const long *finish,
+        const struct dsc$descriptor_s *sub)
 {
     int status;
-    char    *s1_ptr;
-    unsigned short  s1_len, temp_len;
-    long    start,end,newstart,newend;
+    char *s1_ptr;
+    unsigned short s1_len, temp_len;
+    long start, end, newstart, newend;
     struct dsc$descriptor_s temp;
 
-
     start = *begin;
-    end   = *finish;
+    end = *finish;
     temp_len = 0;
     status = SS$_NORMAL;
 
-    str$analyze_sdesc (source,&s1_len,&s1_ptr);
-    if ( start < 1 )
+    str$analyze_sdesc(source, &s1_len, &s1_ptr);
+    if (start < 1)
         start = 1;
 
-    if ( end > s1_len )
+    if (end > s1_len)
         end = s1_len;
 
-    if ( start <= end )
+    if (start <= end)
     {
-        str$$malloc_sd(&temp,"NULL");
+        str$$malloc_sd(&temp, "NULL");
         start--;
-        str$left   (destin,source,&start);  // move over 1'st part
-        str$append (destin,sub);        // copy in replacement
+        str$left(destin, source, &start);  // move over 1'st part
+        str$append(destin, sub);        // copy in replacement
         end++;
-        str$right  (&temp, source,&end);    // append rest of source
-        str$append (destin,&temp);
-        str$free1_dx (&temp);
+        str$right(&temp, source, &end);    // append rest of source
+        str$append(destin, &temp);
+        str$free1_dx(&temp);
     }
     else
     {
         // start is after end
         status = STR$_ILLSTRPOS;
         newstart = end;
-        newend   = start;
+        newend = start;
         newstart--;
-        str$left   (destin,source,&newstart);   // move over 1'st part
-        str$$malloc_sd(&temp,"NULL");
+        str$left(destin, source, &newstart);   // move over 1'st part
+        str$$malloc_sd(&temp, "NULL");
         newstart++;
-        str$pos_extr (&temp,source,&newstart,&newend); //extract overlap
-        str$append   (destin,&temp);        // insert overlap twice
-        str$append   (destin,&temp);
+        str$pos_extr(&temp, source, &newstart, &newend); //extract overlap
+        str$append(destin, &temp);        // insert overlap twice
+        str$append(destin, &temp);
         newend++;
-        str$right  (&temp, source,&newend); // append rest of source
-        str$append (destin,&temp);
-        str$free1_dx (&temp);
+        str$right(&temp, source, &newend); // append rest of source
+        str$append(destin, &temp);
+        str$free1_dx(&temp);
     }
 
     return status;

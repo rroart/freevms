@@ -63,7 +63,7 @@ struct _lkb
     UINT16 lkb$w_size;
     UINT8 lkb$b_type;
     UINT8 lkb$b_rmod;
-    unsigned long lkb$l_pid;
+    UINT32 lkb$l_pid;
     unsigned long lkb$l_ast;
     unsigned long lkb$l_astprm;
     unsigned long lkb$l_kast;

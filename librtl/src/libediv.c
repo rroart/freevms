@@ -33,7 +33,7 @@
  *              replaced by zero
  *
  */
-unsigned long lib$ediv( const   signed long int *divisor,
+int lib$ediv( const   signed long int *divisor,
                         const   signed long long *dividend,
                         signed long int *quotient,
                         signed long int *remainder )

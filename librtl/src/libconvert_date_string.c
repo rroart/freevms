@@ -60,7 +60,7 @@ void check_reserved_bits ( unsigned long flag);
 
 /********************************************/
 
-unsigned long lib$convert_date_string (const struct dsc$descriptor_s *time_name,
+int lib$convert_date_string (const struct dsc$descriptor_s *time_name,
                                        long long *date_time,
                                        unsigned long *user_context,
                                        unsigned long *field_flags,
@@ -68,7 +68,7 @@ unsigned long lib$convert_date_string (const struct dsc$descriptor_s *time_name,
                                        unsigned long *default_fields )
 
 {
-    unsigned long result_code;
+    int result_code = LIB$_NORMAL;
     unsigned long context, flags, defaults, fields;
     unsigned char date[8];
 

@@ -1,4 +1,3 @@
-
 /*
  *  LIB$DIGIT_SEP
  *
@@ -46,21 +45,18 @@
 #include "str$routines.h"
 #include <stdlib.h>
 
-unsigned long lib$digit_sep (struct dsc$descriptor_s *digit_sep,
-                             unsigned short *result_length)
+int lib$digit_sep(struct dsc$descriptor_s *digit_sep, unsigned short *result_length)
 {
-    char    *s1_ptr;
-    unsigned long result;
+    char *s1_ptr;
+    int result = 1;
     unsigned short s1_len;
 
-    result = 1;
-
-    str$analyze_sdesc (digit_sep, &s1_len, &s1_ptr);
+    str$analyze_sdesc(digit_sep, &s1_len, &s1_ptr);
 
     s1_len = 1;
-    str$copy_r (digit_sep,&s1_len,",");
+    str$copy_r(digit_sep, &s1_len, ",");
 
-    if ( result_length != NULL )
+    if (result_length != NULL)
         *result_length = s1_len;
 
     return result;

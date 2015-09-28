@@ -3,11 +3,8 @@
 
 #include <scs_routines.h>
 
-#define scs_init_cdrp( cdrp_p )
-((struct _cdrp *) cdrp_p)->cdrp$q_res_wait_state = 0;
-\
-((struct _cdrp *) cdrp_p)->cdrp$l_bd_addr = 0;
-\
+#define scs_init_cdrp( cdrp_p ) ((struct _cdrp *) cdrp_p)->cdrp$q_res_wait_state = 0;\
+((struct _cdrp *) cdrp_p)->cdrp$l_bd_addr = 0;\
 ((struct _cdrp *) cdrp_p)->cdrp$l_rbun = 0;
 
 #define scs_stall( stall_condition_code, cdt_p, pdt_p, cdrp_p, ravail_p ) \

@@ -3,10 +3,15 @@
 
 #include "../../pal/src/queue.h"
 
-unsigned long lib$insque(void * entry, void * header)
+int lib$insqhi(void * entry, void * header)
 {
 #if 0
     insqhi(entry,header);
 #endif
+    return SS$_NORMAL;
+}
+
+int lib$insqti(void * entry, void * header)
+{
     return SS$_NORMAL;
 }

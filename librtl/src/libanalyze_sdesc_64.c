@@ -65,7 +65,7 @@
  *  string descriptor classes
  *  type 0 = 32 bit  1 = 64 bit
  */
-unsigned long lib$analyze_sdesc_64 (const struct dsc$descriptor_s* descrip,
+int lib$analyze_sdesc_64 (const struct dsc$descriptor_s* descrip,
                                     unsigned short  *word_integer_length,
                                     char        **data_address,
                                     unsigned long   *descriptor_type )

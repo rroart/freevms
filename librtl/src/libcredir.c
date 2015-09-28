@@ -21,9 +21,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "lib$routines.h"
+
 // change to w_[df]id_rvn from b_ later
 
-unsigned long lib$create_dir(const void * v)
+int lib$create_dir(const void * v)
 {
     struct dsc$descriptor * d = v;
     int sts;
@@ -113,7 +115,7 @@ unsigned long lib$create_dir(const void * v)
 #define RAB _rabdef
 #define fibdef _fibdef
 
-unsigned long lib$create_dir2 (char *crea_file, int all_size)
+int lib$create_dir2 (char *crea_file, int all_size)
 /*
    Create a new directory with a preallocated size
 */

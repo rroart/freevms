@@ -109,7 +109,7 @@ int exe$kp_stall_general(struct _kpb *kpb);
 int exe$kp_start(struct _kpb *kpb, void (*rout)(struct _kpb *kpb), long long regmask);
 void exe_std$kp_startio(struct _irp *irp, struct _ucb *ucb);
 int exe$kp_tqe_wait(struct _kpb *kpb, long long *ticks, int spnlidx);
-INT32 exe_std$lcldskvalid(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
+int exe_std$lcldskvalid(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
 void exe_std$lock_err_cleanup(struct _irp *irp);
 int exe_std$maxacmode(int acmode);
 void exe$lal_insert_first(void *packet, void *listhead);
@@ -170,30 +170,30 @@ int exe$clear_memtest_env(void);
 
 void exe$event_notify(unsigned long long event_mask);
 
-void * exe$ipid_to_pcb(unsigned long pid); // check int
-void * exe$epid_to_pcb(unsigned long pid);
+struct _pcb * exe$ipid_to_pcb(unsigned long pid); // check int
+struct _pcb * exe$epid_to_pcb(unsigned long pid);
 int exe$epid_to_ipid(unsigned long pid);
 int exe$ipid_to_epid(unsigned long pid);
 int exe$a_pid_to_ipid(unsigned long pid);
 void exe$iofork(struct _irp * i, struct _ucb * u);
-unsigned name_delim(char *str, int len, int size[5]);
-unsigned dircache(struct _vcb *vcb, char *dirnam, int dirlen, struct _fiddef *dirid);
-unsigned do_search(struct _fabdef *fab, struct WCCFILE *wccfile);
-unsigned exe$search(struct _fabdef *fab);
-unsigned do_parse(struct _fabdef *fab, struct WCCFILE **wccret);
-unsigned exe$parse(struct _fabdef *fab);
-unsigned exe$setddir(struct dsc$descriptor *newdir, UINT16 *oldlen, struct dsc$descriptor *olddir);
-unsigned exe$connect(struct _rabdef *rab);
-unsigned exe$disconnect(struct _rabdef *rab);
-unsigned exe$get(struct _rabdef *rab);
-unsigned exe$read(struct _rabdef *rab);
-unsigned exe$put(struct _rabdef *rab);
-unsigned exe$display(struct _fabdef *fab);
-unsigned exe$close(struct _fabdef *fab);
-unsigned exe$open(struct _fabdef *fab);
-unsigned exe$erase(struct _fabdef *fab);
-unsigned exe$create(struct _fabdef *fab);
-unsigned exe$extend(struct _fabdef *fab);
+int name_delim(char *str, int len, int size[5]);
+int dircache(struct _vcb *vcb, char *dirnam, int dirlen, struct _fiddef *dirid);
+int do_search(struct _fabdef *fab, struct WCCFILE *wccfile);
+int exe$search(struct _fabdef *fab);
+int do_parse(struct _fabdef *fab, struct WCCFILE **wccret);
+int exe$parse(struct _fabdef *fab);
+int exe$setddir(struct dsc$descriptor *newdir, UINT16 *oldlen, struct dsc$descriptor *olddir);
+int exe$connect(struct _rabdef *rab);
+int exe$disconnect(struct _rabdef *rab);
+int exe$get(struct _rabdef *rab);
+int exe$read(struct _rabdef *rab);
+int exe$put(struct _rabdef *rab);
+int exe$display(struct _fabdef *fab);
+int exe$close(struct _fabdef *fab);
+int exe$open(struct _fabdef *fab);
+int exe$erase(struct _fabdef *fab);
+int exe$create(struct _fabdef *fab);
+int exe$extend(struct _fabdef *fab);
 int exe$nampid(struct _pcb *p, unsigned long *pidadr, void *prcnam, struct _pcb ** retpcb, unsigned long * retipid,
         unsigned long *retepid);
 void exe$instimq(struct _tqe * t);
@@ -253,6 +253,8 @@ asmlinkage int exe$imgsta(void * transfer, void * parseinfo, void * header, void
         unsigned long clistatus);
 asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned long imgctl, unsigned long long * inadr,
         unsigned long long * retadr, unsigned long long * ident, unsigned long acmode);
+asmlinkage int exe$mgblsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam,
+        struct _secid *ident, unsigned int relpag);
 asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam,
         unsigned long long * ident, unsigned int relpag, unsigned /*short*/long chan, unsigned int pagcnt, unsigned int vbn,
         unsigned int prot, unsigned int pfc);

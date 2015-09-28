@@ -36,16 +36,14 @@
  * str$dupl_char
  *
  */
-unsigned long str$dupl_char(struct dsc$descriptor_s* destination_string,
-                            const long* repetition_count,
-                            const char* ascii_character)
+int str$dupl_char(struct dsc$descriptor_s* destination_string, const long* repetition_count, const char* ascii_character)
 {
-    char* s1_ptr;           /* Pointer to first string */
-    unsigned short s1_length;   /* Length of first string */
-    unsigned long result = STR$_NORMAL;
-    char UseChar = ' ';     /* Character to use for duplication */
+    char* s1_ptr; /* Pointer to first string */
+    unsigned short s1_length; /* Length of first string */
+    int result = STR$_NORMAL;
+    char UseChar = ' '; /* Character to use for duplication */
     unsigned short UseCount;
-    unsigned long alt_result;
+    int alt_result;
 
     /*
      * Get the repitition count
@@ -103,7 +101,7 @@ unsigned long str$dupl_char(struct dsc$descriptor_s* destination_string,
          * Now, see what we've got for a destination
          */
         str$analyze_sdesc(destination_string, &s1_length, &s1_ptr);
-        memset(s1_ptr, UseChar, (size_t)min(s1_length, UseCount));
+        memset(s1_ptr, UseChar, (size_t) min(s1_length, UseCount));
 
         /*
          * Did we truncate?

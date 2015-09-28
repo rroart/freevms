@@ -664,12 +664,13 @@ skip:
 
 /* search_ent() - search for a directory entry */
 
-unsigned exttwo_search_ent(struct _fcb * fcb, struct dsc$descriptor * fibdsc,
+int exttwo_search_ent(struct _fcb * fcb, struct dsc$descriptor * fibdsc,
                            struct dsc$descriptor * filedsc, unsigned short *reslen,
                            struct dsc$descriptor * resdsc, unsigned eofblk, unsigned action)
 {
     struct _iosb iosb;
-    unsigned sts, curblk;
+    int sts;
+    unsigned curblk;
     char *searchspec, *buffer = 0;
     int searchlen, version, wildcard, wcc_flag;
     struct _fibdef *fib = (struct _fibdef *) fibdsc->dsc$a_pointer;

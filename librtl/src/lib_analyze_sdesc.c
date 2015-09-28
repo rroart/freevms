@@ -64,7 +64,7 @@
  *  starting address of the data for a variety of
  *  string descriptor classes
  */
-unsigned long lib$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
+int lib$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
                                 unsigned short* word_integer_length, char** data_address)
 {
     /*

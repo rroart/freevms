@@ -21,13 +21,11 @@
 
 #include "lib$routines.h"
 
-unsigned long lib$locc(const struct dsc$descriptor_s* char_string,
-                       const struct dsc$descriptor_s* source_string)
+unsigned int lib$locc(const struct dsc$descriptor_s* char_string, const struct dsc$descriptor_s* source_string)
 {
-
     char *s1_ptr, *s2_ptr;
     unsigned short s1_len, s2_len;
-    unsigned long i;
+    unsigned int i;
 
     lib$analyze_sdesc(char_string, &s1_len, &s1_ptr);
     lib$analyze_sdesc(source_string, &s2_len, &s2_ptr);

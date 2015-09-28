@@ -56,7 +56,7 @@ void phyio_show(void)
            read_count, write_count);
 }
 
-unsigned phyio_init(int devlen, char *devnam, struct file **handle,
+int phyio_init(int devlen, char *devnam, struct file **handle,
                     struct phyio_info *info, struct _dt_ucb * ucb)
 {
     struct file * vmsfd;
@@ -79,13 +79,13 @@ unsigned phyio_init(int devlen, char *devnam, struct file **handle,
     return SS$_NORMAL;
 }
 
-unsigned phyio_close(struct file * handle)
+int phyio_close(struct file * handle)
 {
     filp_close(handle, NULL);
     return SS$_NORMAL;
 }
 
-unsigned phyio_read(struct file * handle, unsigned block, unsigned length,
+int phyio_read(struct file * handle, unsigned block, unsigned length,
                     char *buffer)
 {
     mm_segment_t fs;
@@ -109,7 +109,7 @@ error:
     return SS$_PARITY;
 }
 
-unsigned phyio_write(struct file * handle, unsigned block, unsigned length,
+int phyio_write(struct file * handle, unsigned block, unsigned length,
                      char *buffer)
 {
     mm_segment_t fs;

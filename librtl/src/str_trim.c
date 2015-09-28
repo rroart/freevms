@@ -35,13 +35,12 @@
  * str$trim
  *
  */
-unsigned long str$trim(struct dsc$descriptor_s* destination_string,
-                       const struct dsc$descriptor_s* source_string,
-                       unsigned short* resultant_length)
+int str$trim(struct dsc$descriptor_s* destination_string, const struct dsc$descriptor_s* source_string,
+        unsigned short* resultant_length)
 {
-    char* s2_ptr;               /* Pointer to string */
-    unsigned short s2_length;       /* Length of string */
-    unsigned long result;           /* Result */
+    char* s2_ptr; /* Pointer to string */
+    unsigned short s2_length; /* Length of string */
+    int result; /* Result */
 
     /*
      * Look at the original string
@@ -51,8 +50,7 @@ unsigned long str$trim(struct dsc$descriptor_s* destination_string,
     /*
      * Determine the end of the string
      */
-    while ((s2_length > 0) &&
-            ((s2_ptr[s2_length-1] == ' ') || (s2_ptr[s2_length-1] == '\t')))
+    while ((s2_length > 0) && ((s2_ptr[s2_length - 1] == ' ') || (s2_ptr[s2_length - 1] == '\t')))
     {
         s2_length--;
     }
@@ -68,5 +66,4 @@ unsigned long str$trim(struct dsc$descriptor_s* destination_string,
      */
     return result;
 }
-
 

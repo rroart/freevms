@@ -30,11 +30,10 @@
  *
  */
 #undef str$concat
-unsigned long str$concat(struct dsc$descriptor_s* destination_string,
-                         ...)
+int str$concat(struct dsc$descriptor_s* destination_string, ...)
 {
     va_list vlist;
-    unsigned long result;
+    int result;
     struct dsc$descriptor_s* Item;
 
     /*
@@ -50,8 +49,7 @@ unsigned long str$concat(struct dsc$descriptor_s* destination_string,
     /*
      * Loop until we get a null (BUG)
      */
-    while((Item = va_arg(vlist, struct dsc$descriptor_s*), Item != NULL) &&
-            (result == STR$_NORMAL))
+    while ((Item = va_arg(vlist, struct dsc$descriptor_s*), Item != NULL) && (result == STR$_NORMAL))
     {
         result = str$append(destination_string, Item);
     }
@@ -66,5 +64,4 @@ unsigned long str$concat(struct dsc$descriptor_s* destination_string,
      */
     return result;
 }
-
 

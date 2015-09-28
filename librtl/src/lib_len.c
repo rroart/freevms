@@ -28,7 +28,7 @@
  */
 unsigned short lib$len(const struct dsc$descriptor_s* input_descriptor)
 {
-    short word_integer_length;  /* Length of source string */
+    unsigned short word_integer_length;  /* Length of source string */
     char* data_address;     /* Address of actual data */
 
     /*

@@ -1,4 +1,3 @@
-
 /*
  *  strmul.c
  *
@@ -124,68 +123,65 @@
 #define TRUE        1
 #define FALSE       0
 
-
 /***********************************************/
 
-unsigned long str$mul (const unsigned long *asign,
-                       const          long *aexp,
-                       const struct dsc$descriptor_s *adigits,
-                       const unsigned long *bsign,
-                       const          long *bexp,
-                       const struct dsc$descriptor_s *bdigits,
-                       unsigned       long *csign,
-                       long *cexp,
-                       struct dsc$descriptor_s *cdigits)
+int str$mul(const unsigned long *asign, const long *aexp, const struct dsc$descriptor_s *adigits, const unsigned long *bsign,
+        const long *bexp, const struct dsc$descriptor_s *bdigits, unsigned long *csign, long *cexp,
+        struct dsc$descriptor_s *cdigits)
 {
-    unsigned short  s1_len,  s2_len,  s3_len, temp_len;
-    char        *s1_ptr, *s2_ptr, *s3_ptr;
-    unsigned long   index, max_len, min_len;
-    int     i,j,k;
-    unsigned long   status;
-    int     sum,carry;
-    char        *a,*b,*c;
+    unsigned short s1_len, s2_len, s3_len, temp_len;
+    char *s1_ptr, *s2_ptr, *s3_ptr;
+    unsigned long index, max_len, min_len;
+    int i, j, k;
+    int status;
+    int sum, carry;
+    char *a, *b, *c;
 
     status = STR$_NORMAL;
     index = 0;
 
-    a = (char *) calloc(MAXSTR,1);
-    b = (char *) calloc(MAXSTR,1);
-    c = (char *) calloc(MAXSTR,1);
+    a = (char *) calloc(MAXSTR, 1);
+    b = (char *) calloc(MAXSTR, 1);
+    c = (char *) calloc(MAXSTR, 1);
 
-    if ( a == NULL )
+    if (a == NULL)
     {
         status = STR$_INSVIRMEM;
     }
-    if ( b == NULL )
+    if (b == NULL)
     {
         status = STR$_INSVIRMEM;
     }
-    if ( c == NULL )
+    if (c == NULL)
     {
         status = STR$_INSVIRMEM;
     }
 
 //  Check the sign field is 1 or 0
-    if ( *asign == 1 || *asign == 0 )
+    if (*asign == 1 || *asign == 0)
         ;
     else
         status = LIB$_INVARG;
 
-    if ( *bsign == 1  || *bsign == 0)
+    if (*bsign == 1 || *bsign == 0)
         ;
     else
         status = LIB$_INVARG;
 
-    if (( *asign == 0 ) && ( *bsign == 0 )) *csign = 0;
-    if (( *asign == 0 ) && ( *bsign == 1 )) *csign = 1;
-    if (( *asign == 1 ) && ( *bsign == 0 )) *csign = 1;
-    if (( *asign == 1 ) && ( *bsign == 1 )) *csign = 0;
+    if ((*asign == 0) && (*bsign == 0))
+        *csign = 0;
+    if ((*asign == 0) && (*bsign == 1))
+        *csign = 1;
+    if ((*asign == 1) && (*bsign == 0))
+        *csign = 1;
+    if ((*asign == 1) && (*bsign == 1))
+        *csign = 0;
 
 //  Get the length of the input strings and how much room for the output
-    str$analyze_sdesc (adigits, &s1_len, &s1_ptr);
-    str$analyze_sdesc (bdigits, &s2_len, &s2_ptr);
-    str$analyze_sdesc (cdigits, &s3_len, &s3_ptr);
-    strcpy (s3_ptr,"0");
+    str$analyze_sdesc(adigits, &s1_len, &s1_ptr);
+    str$analyze_sdesc(bdigits, &s2_len, &s2_ptr);
+    str$analyze_sdesc(cdigits, &s3_len, &s3_ptr);
+    strcpy(s3_ptr, "0");
 
 //  Quick abort
     if (status != STR$_NORMAL)
@@ -194,7 +190,7 @@ unsigned long str$mul (const unsigned long *asign,
     }
 
 //  zero out the accumulator
-    for (i=0; i < MAXSTR; i++ )
+    for (i = 0; i < MAXSTR; i++)
     {
         a[i] = '0';
         b[i] = '0';
@@ -204,15 +200,15 @@ unsigned long str$mul (const unsigned long *asign,
 //  Move in the largest number - we need to keep the alignment correct
 //  char string is "right to left" alignment
 //  start at location specified by the exponent
-    max_len = ( s1_len > s2_len ) ? s1_len : s2_len;
-    min_len = ( s1_len > s2_len) ? s2_len : s1_len;
+    max_len = (s1_len > s2_len) ? s1_len : s2_len;
+    min_len = (s1_len > s2_len) ? s2_len : s1_len;
 
 //  Copy input strings to working storage
-    for (i = 0; i < s1_len; i++ )
+    for (i = 0; i < s1_len; i++)
     {
         a[i] = s1_ptr[i];
     }
-    for (i = 0; i < s2_len; i++ )
+    for (i = 0; i < s2_len; i++)
     {
         b[i] = s2_ptr[i];
     }
@@ -227,19 +223,19 @@ unsigned long str$mul (const unsigned long *asign,
     for (j = s2_len; j > 0; j--)
     {
         k = max_len - s2_len + j;
-        for ( i = s1_len; i > 0; i-- )
+        for (i = s1_len; i > 0; i--)
         {
-            sum = ( b[j-1] - '0' ) * ( a[i-1] - '0');
+            sum = (b[j - 1] - '0') * (a[i - 1] - '0');
             sum += carry;
             carry = 0;
-            c[k]  += sum % 10;
-            if (c[k] > 9 )
+            c[k] += sum % 10;
+            if (c[k] > 9)
             {
-                c[k]   -= 10;
-                c[k-1] += 1;
+                c[k] -= 10;
+                c[k - 1] += 1;
             }
-            sum   -= sum % 10;
-            carry  = sum / 10;
+            sum -= sum % 10;
+            carry = sum / 10;
             sum = 0;
             k--;
         }
@@ -247,33 +243,32 @@ unsigned long str$mul (const unsigned long *asign,
     c[k] = carry;
 
 //  Truncate output sum string to 65536 MAXUINT16
-    if ( max_len > MAXUINT16 )
+    if (max_len > MAXUINT16)
     {
         status = STR$_TRU;
         max_len = MAXUINT16;
     }
 
 //  Free any memory that is passed into us.
-    str$free1_dx (cdigits);
+    str$free1_dx(cdigits);
     temp_len = (unsigned short) max_len + 1;
     str$get1_dx(&temp_len, cdigits);
-    str$analyze_sdesc (cdigits,&s3_len, &s3_ptr);
+    str$analyze_sdesc(cdigits, &s3_len, &s3_ptr);
 
     for (i = 0; i <= max_len; i++)
     {
         s3_ptr[i] = (c[i] + '0');
     }
 
-    free (a);
-    free (b);
-    free (c);
+    free(a);
+    free(b);
+    free(c);
 
-    str$$lzerotrim (cdigits);
-    str$$rzerotrim (cdigits,cexp);
-    str$$iszerotrim(cdigits,cexp);
+    str$$lzerotrim(cdigits);
+    str$$rzerotrim(cdigits, cexp);
+    str$$iszerotrim(cdigits, cexp);
 
     return status;
 }
-
 
 /*************************************************************/

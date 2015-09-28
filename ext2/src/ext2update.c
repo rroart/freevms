@@ -40,15 +40,14 @@
 
 #include <linux/ext2_fs.h>
 
-unsigned deaccesshead(struct ext2_inode *head, unsigned idxblk);
-unsigned accesshead(struct _vcb *vcb, struct _fiddef *fid, unsigned seg_num,
-                    struct ext2_inode **headbuff, unsigned *retidxblk, unsigned wrtflg);
-unsigned getwindow(struct _fcb * fcb, unsigned vbn, struct _vcb **devptr,
-                   unsigned *phyblk, unsigned *phylen, struct _fiddef *hdrfid,
-                   unsigned *hdrseq);
+int deaccesshead(struct ext2_inode *head, unsigned idxblk);
+int accesshead(struct _vcb *vcb, struct _fiddef *fid, unsigned seg_num, struct ext2_inode **headbuff, unsigned *retidxblk,
+        unsigned wrtflg);
+int getwindow(struct _fcb * fcb, unsigned vbn, struct _vcb **devptr, unsigned *phyblk, unsigned *phylen, struct _fiddef *hdrfid,
+        unsigned *hdrseq);
 struct _vcb *rvn_to_dev(struct _vcb *vcb, unsigned rvn);
 
-unsigned exttwo_extend(struct _fcb *fcb, unsigned blocks, unsigned contig);
+int exttwo_extend(struct _fcb *fcb, unsigned blocks, unsigned contig);
 
 /* Bitmaps get accesses in 'WORK_UNITs' which can be an integer
  on a little endian machine but must be a byte on a big endian system */
@@ -61,9 +60,9 @@ unsigned exttwo_extend(struct _fcb *fcb, unsigned blocks, unsigned contig);
 /* update_freecount() to read the device cluster bitmap and compute
  the number of un-used clusters */
 
-unsigned update_freecount(struct _vcb *vcbdev,unsigned *retcount)
+int update_freecount(struct _vcb *vcbdev,unsigned *retcount)
 {
-    unsigned sts;
+    int sts;
     unsigned free_clusters = 0;
     unsigned map_block, map_end;
     struct _scbdef * scb;
@@ -107,10 +106,10 @@ unsigned update_freecount(struct _vcb *vcbdev,unsigned *retcount)
 /* bitmap_modify() will either set or release a block of bits in the
  device cluster bitmap */
 
-unsigned bitmap_modify(struct _vcb *vcbdev,unsigned cluster,unsigned count,
+int bitmap_modify(struct _vcb *vcbdev,unsigned cluster,unsigned count,
                        unsigned release_flag)
 {
-    unsigned sts;
+    int sts;
     unsigned clust_count = count;
     unsigned map_block = cluster / 4096 + 2;
     unsigned block_offset = cluster % 4096;
@@ -202,9 +201,9 @@ unsigned bitmap_modify(struct _vcb *vcbdev,unsigned cluster,unsigned count,
 /* bitmap_search() is a routine to find a pool of free clusters in the
  device cluster bitmap */
 
-unsigned bitmap_search(struct _vcb *vcbdev,unsigned *position,unsigned *count)
+int bitmap_search(struct _vcb *vcbdev,unsigned *position,unsigned *count)
 {
-    unsigned sts;
+    int sts;
     unsigned map_block,block_offset;
     unsigned search_words,needed;
     unsigned run = 0,cluster,ret_cluster, first_bit=0;
@@ -325,10 +324,10 @@ out_of_here:
 /* headmap_clear() will release a header from the indexf.sys file header
  bitmap */
 
-unsigned headmap_clear(struct _vcb *vcbdev,unsigned head_no)
+int headmap_clear(struct _vcb *vcbdev,unsigned head_no)
 {
     WORK_UNIT *bitmap;
-    unsigned sts;
+    int sts;
     unsigned map_block;
 
     map_block = head_no / 4096 + vcbdev->vcb$l_cluster * 4 + 1;
@@ -345,12 +344,12 @@ unsigned headmap_clear(struct _vcb *vcbdev,unsigned head_no)
 
 /* update_findhead() will locate a free header from indexf.sys */
 
-unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
+int update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
                          struct ext2_inode **headbuff,
                          unsigned *retidxblk)
 {
     unsigned head_no = 0;
-    unsigned sts;
+    int sts;
     do
     {
         int modify_flag = 0;
@@ -454,13 +453,14 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
     return sts;
 }
 
-unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
+int update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
                         unsigned seg_num,struct _fiddef *fid,
                         struct ext2_inode **rethead,
                         unsigned *idxblk)
 {
     unsigned free_space = 0;
-    unsigned device,rvn,sts;
+    unsigned device,rvn;
+    int sts;
     unsigned head_no;
     struct _fi2 *id;
     struct ext2_inode *head;
@@ -526,7 +526,7 @@ unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
 
 /* update_create() will create a new file... */
 
-unsigned exttwo_create(struct _vcb *vcb, struct _irp * i)
+int exttwo_create(struct _vcb *vcb, struct _irp * i)
 {
     struct dsc$descriptor * fibdsc = i->irp$l_qio_p1;
     struct dsc$descriptor * filedsc = i->irp$l_qio_p2;
@@ -536,7 +536,7 @@ unsigned exttwo_create(struct _vcb *vcb, struct _irp * i)
     char *filename = filedsc->dsc$a_pointer;
     struct ext2_inode *head;
     unsigned idxblk;
-    unsigned sts;
+    int sts;
     struct _fcb *fcb;
     struct _iosb iosb;
 #if 0
@@ -619,10 +619,10 @@ unsigned exttwo_create(struct _vcb *vcb, struct _irp * i)
     return sts;
 }
 
-unsigned exttwo_extend(struct _fcb *fcb, unsigned blocks, unsigned contig)
+int exttwo_extend(struct _fcb *fcb, unsigned blocks, unsigned contig)
 {
     struct _iosb iosb;
-    unsigned sts = 1;
+    int sts = 1;
     struct _vcb *vcbdev;
     struct _fh2 *head;
     unsigned headvbn;
@@ -653,10 +653,10 @@ unsigned exttwo_extend(struct _fcb *fcb, unsigned blocks, unsigned contig)
  So DON'T use mount/write!!!  */
 
 #if 0
-unsigned deallocfile(struct _fcb *fcb)
+int deallocfile(struct _fcb *fcb)
 {
     struct _iosb iosb;
-    unsigned sts = 1;
+    int sts = 1;
     /*
      First mark all file clusters as free in BITMAP.SYS
      */
@@ -745,7 +745,7 @@ unsigned deallocfile(struct _fcb *fcb)
 #endif
 /* accesserase: delete a file... */
 
-unsigned exttwo_delete(struct _vcb * vcb, struct _irp * irp)
+int exttwo_delete(struct _vcb * vcb, struct _irp * irp)
 {
     struct _iosb iosb;
     struct _fcb *fcb;

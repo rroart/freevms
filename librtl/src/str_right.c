@@ -63,16 +63,14 @@
  * str$right
  *
  */
-unsigned long str$right(struct dsc$descriptor_s* destination_string,
-                        const struct dsc$descriptor_s* source_string,
-                        const long* start_position)
+int str$right(struct dsc$descriptor_s* destination_string, const struct dsc$descriptor_s* source_string, const long* start_position)
 {
-    char* s2_ptr;               /* Pointer to second string */
-    unsigned short s2_length;       /* Length of second string */
-    int final_length;           /* Signed final length */
-    unsigned short real_final_length;   /* Usable final length */
-    unsigned long result;           /* Result */
-    unsigned long second_result = STR$_NORMAL; /* Another possible result */
+    char* s2_ptr; /* Pointer to second string */
+    unsigned short s2_length; /* Length of second string */
+    int final_length; /* Signed final length */
+    unsigned short real_final_length; /* Usable final length */
+    int result; /* Result */
+    int second_result = STR$_NORMAL; /* Another possible result */
     int start_offset = *start_position - 1; /* Real start character */
 
     /*
@@ -90,9 +88,9 @@ unsigned long str$right(struct dsc$descriptor_s* destination_string,
     str$analyze_sdesc(source_string, &s2_length, &s2_ptr);
 
 //  Is start position past end of source string
-    if ( *start_position > s2_length )
+    if (*start_position > s2_length)
     {
-        str$free1_dx (destination_string);
+        str$free1_dx(destination_string);
         return STR$_ILLSTRPOS;
     }
 

@@ -64,33 +64,31 @@
  * str$translate
  *
  */
-unsigned long str$translate(struct dsc$descriptor_s* destination_string,
-                            const struct dsc$descriptor_s* source_string,
-                            const struct dsc$descriptor_s* translation_string,
-                            const struct dsc$descriptor_s* match_string)
+int str$translate(struct dsc$descriptor_s* destination_string, const struct dsc$descriptor_s* source_string,
+        const struct dsc$descriptor_s* translation_string, const struct dsc$descriptor_s* match_string)
 {
-    char* s2_ptr;           /* Pointer to second string */
-    unsigned short s2_length;   /* Length of second string */
-    char* s3_ptr;           /* Pointer to third string */
-    unsigned short s3_length;   /* Length of third string */
-    char* s4_ptr;           /* Pointer to forth string */
-    unsigned short s4_length;   /* Length of forth string */
-    char* OutputString;     /* Work Area */
-    int loop1;          /* Outer Loop */
-    int loop2;          /* Inner loop */
-    char ch;            /* Character being looked at */
+    char* s2_ptr; /* Pointer to second string */
+    unsigned short s2_length; /* Length of second string */
+    char* s3_ptr; /* Pointer to third string */
+    unsigned short s3_length; /* Length of third string */
+    char* s4_ptr; /* Pointer to forth string */
+    unsigned short s4_length; /* Length of forth string */
+    char* OutputString; /* Work Area */
+    int loop1; /* Outer Loop */
+    int loop2; /* Inner loop */
+    char ch; /* Character being looked at */
 
     /*
      * Determine how much we can use
      */
-    str$analyze_sdesc (source_string,      &s2_length, &s2_ptr);
-    str$analyze_sdesc (translation_string, &s3_length, &s3_ptr);
-    str$analyze_sdesc (match_string,       &s4_length, &s4_ptr);
+    str$analyze_sdesc(source_string, &s2_length, &s2_ptr);
+    str$analyze_sdesc(translation_string, &s3_length, &s3_ptr);
+    str$analyze_sdesc(match_string, &s4_length, &s4_ptr);
 
     /*
      * Allocate memory for output string
      */
-    OutputString = (char*)malloc(s2_length);
+    OutputString = (char*) malloc(s2_length);
     if (OutputString == NULL)
     {
         return STR$_INSVIRMEM;
@@ -120,7 +118,7 @@ unsigned long str$translate(struct dsc$descriptor_s* destination_string,
                  * copy it over, else convert it to a
                  * space
                  */
-                if (loop2 < s3_length )
+                if (loop2 < s3_length)
                 {
                     ch = s3_ptr[loop2];
                 }

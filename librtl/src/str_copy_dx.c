@@ -27,12 +27,11 @@
  * str$copy_dx
  *
  */
-unsigned long str$copy_dx(struct dsc$descriptor_s* destination_string,
-                          const struct dsc$descriptor_s* source_string)
+int str$copy_dx(struct dsc$descriptor_s* destination_string, const struct dsc$descriptor_s* source_string)
 {
-    char* s1_ptr;           /* Pointer to first string */
-    unsigned short s1_length;   /* Length of first string */
-    unsigned long result = STR$_NORMAL; /* Working result */
+    char* s1_ptr; /* Pointer to first string */
+    unsigned short s1_length; /* Length of first string */
+    int result = STR$_NORMAL; /* Working result */
 
     /*
      * Get information about source string
@@ -42,8 +41,7 @@ unsigned long str$copy_dx(struct dsc$descriptor_s* destination_string,
     /*
      * Now, we can copy things over using str$copy_r
      */
-    result = str$copy_r(destination_string,
-                        &s1_length, s1_ptr);
+    result = str$copy_r(destination_string, &s1_length, s1_ptr);
 
     /*
      * If we get here, it must have worked

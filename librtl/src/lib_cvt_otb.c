@@ -26,28 +26,28 @@
  * str$trim
  *
  */
-unsigned long lib$cvt_otb(int byte_count, const char* source_string,
+int lib$cvt_otb(int byte_count, const char* source_string,
                           long* result)
 {
-    int Loop;           /* Loop for characters */
+    int loop;           /* Loop for characters */
     long answer = 0;        /* Result returned back */
-    unsigned long status = 1;   /* Exit status */
+    int status = 1;   /* Exit status */
 
     /*
      * Loop through all the characters passed
      */
-    for (Loop = 0; Loop < byte_count; Loop++)
+    for (loop = 0; loop < byte_count; loop++)
     {
         /*
          * Make sure it is a valid character
          */
-        if (isdigit(source_string[Loop]))
+        if (isdigit(source_string[loop]))
         {
             /*
              * Lose '8' and '9'
              */
-            if ((source_string[Loop] == '8') ||
-                    (source_string[Loop] == '9'))
+            if ((source_string[loop] == '8') ||
+                    (source_string[loop] == '9'))
             {
                 status = 0;
             }
@@ -55,7 +55,7 @@ unsigned long lib$cvt_otb(int byte_count, const char* source_string,
             /*
              * Add one more digit to result
              */
-            answer = answer * 8 + source_string[Loop] - '0';
+            answer = answer * 8 + source_string[loop] - '0';
         }
         else
         {

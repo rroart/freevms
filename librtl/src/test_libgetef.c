@@ -15,7 +15,7 @@ int main(void)
     /* Test out initial freeing of event flags */
 
     unsigned int efn = 0;
-    unsigned int status = lib$free_ef(&efn);
+    int status = lib$free_ef(&efn);
     if (status != LIB$_EF_RESSYS) printf("Broken: Can never free event flag %d, status %u\n",efn,status);
     for (efn = 1; efn <= 23; efn++)
     {

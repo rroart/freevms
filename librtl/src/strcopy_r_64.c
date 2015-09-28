@@ -62,20 +62,18 @@
 #include "strdef.h"
 #include "str$routines.h"
 
-
 /*************************************************************
  * str$copy_r_64
  *
  */
-unsigned long str$copy_r_64(struct dsc$descriptor_s* destination_string,
-                            const unsigned short* word_integer_source_length,
-                            const void *source_string_address)
+int str$copy_r_64(struct dsc$descriptor_s* destination_string, const unsigned short* word_integer_source_length,
+        const void *source_string_address)
 {
     unsigned short s1_length;
-    unsigned long length;   /* Length of first string */
+    unsigned long length; /* Length of first string */
     int s2_length;
-    unsigned long result = STR$_NORMAL; /* Working result */
-    char* s1_ptr;           /* Pointer to first string */
+    int result = STR$_NORMAL; /* Working result */
+    char* s1_ptr; /* Pointer to first string */
 
     s2_length = strlen(source_string_address);
     /*
@@ -103,8 +101,7 @@ unsigned long str$copy_r_64(struct dsc$descriptor_s* destination_string,
         /*
          * Jam in the text
          */
-        result = str$$copy_fill(s1_ptr,(unsigned int) s1_length,
-                                source_string_address, (unsigned int) s2_length,' ' );
+        result = str$$copy_fill(s1_ptr, (unsigned int) s1_length, source_string_address, (unsigned int) s2_length, ' ');
     }
 
     /*

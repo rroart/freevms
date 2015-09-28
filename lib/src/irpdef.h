@@ -129,7 +129,7 @@ struct _irp
     UINT16 irp$w_size;
     UINT8 irp$b_type;
     UINT8 irp$b_rmod;
-    unsigned long irp$l_pid;
+    UINT32 irp$l_pid;
     unsigned long irp$l_ast;
     unsigned long irp$l_astprm;
     unsigned long irp$l_wind;

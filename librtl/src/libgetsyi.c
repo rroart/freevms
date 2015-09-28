@@ -15,7 +15,7 @@ int lib$getsyi(signed int * item_code, void * resultant_value, void * resultant_
     struct dsc$descriptor * dsc;
     struct dsc$descriptor * res = resultant_string;
     int sts;
-    int efn;
+    unsigned int efn;
 
     sts = lib$get_ef(&efn);
     if ((sts&1)==0)

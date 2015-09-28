@@ -5,7 +5,8 @@
 #include <lib$routines.h>
 #include <starlet.h>
 
-int lib$getjpi(signed int * item_code, unsigned int * process_id, void * process_name, signed int * longword_integer_value, void * resultant_string, unsigned short * resultant_length)
+int lib$getjpi(signed int * item_code, unsigned int * process_id, void * process_name, signed int * longword_integer_value,
+        void * resultant_string, unsigned short * resultant_length)
 {
     struct _iosb iosb;
     struct item_list_3 itmlst[2];
@@ -16,10 +17,10 @@ int lib$getjpi(signed int * item_code, unsigned int * process_id, void * process
     struct dsc$descriptor * dsc;
     struct dsc$descriptor * res = resultant_string;
     int sts;
-    int efn;
+    unsigned int efn;
 
     sts = lib$get_ef(&efn);
-    if ((sts&1)==0)
+    if ((sts & 1) == 0)
         return sts;
 
     // doing some approximations since I can not now decide the return type
@@ -48,19 +49,19 @@ int lib$getjpi(signed int * item_code, unsigned int * process_id, void * process
             retlenaddr = &retlen;
     }
 
-    itmlst[0].item_code=*item_code;
-    itmlst[0].buflen=buflen;
-    itmlst[0].retlenaddr=retlenaddr;
-    itmlst[0].bufaddr=bufaddr;
-    itmlst[1].item_code=0;
+    itmlst[0].item_code = *item_code;
+    itmlst[0].buflen = buflen;
+    itmlst[0].retlenaddr = retlenaddr;
+    itmlst[0].bufaddr = bufaddr;
+    itmlst[1].item_code = 0;
 
-    sts=sys$getjpiw(efn,process_id,process_name,itmlst,&iosb,0,0);
+    sts = sys$getjpiw(efn, process_id, process_name, itmlst, &iosb, 0, 0);
 
-    if ((sts&1)==0)
+    if ((sts & 1) == 0)
         return sts;
 
     sts = lib$free_ef(&efn);
-    if ((sts&1)==0)
+    if ((sts & 1) == 0)
         return sts;
 
     return sts;

@@ -58,27 +58,27 @@ static int xtoi(char ch)
  * str$trim
  *
  */
-unsigned long lib$cvt_htb(int byte_count, const char* source_string,
+int lib$cvt_htb(int byte_count, const char* source_string,
                           long* result)
 {
-    int Loop;           /* Loop for characters */
+    int loop;           /* Loop for characters */
     long answer = 0;        /* Result returned back */
-    unsigned long status = 1;   /* Exit status */
+    int status = 1;   /* Exit status */
 
     /*
      * Loop through all the characters passed
      */
-    for (Loop = 0; Loop < byte_count; Loop++)
+    for (loop = 0; loop < byte_count; loop++)
     {
         /*
          * Make sure it is a valid character
          */
-        if (isxdigit(source_string[Loop]))
+        if (isxdigit(source_string[loop]))
         {
             /*
              * Add one more digit to result
              */
-            answer = answer * 10 + xtoi(source_string[Loop]);
+            answer = answer * 10 + xtoi(source_string[loop]);
         }
         else
         {

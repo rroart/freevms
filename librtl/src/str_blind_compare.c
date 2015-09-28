@@ -47,16 +47,14 @@ static int str__memicmp(const char* str1, const char* str2, size_t length);
  *  0 = str1 == str2
  *  1 = str1 > str2
  */
-long str$case_blind_compare(
-    const struct dsc$descriptor_s* first_source_string,
-    const struct dsc$descriptor_s* second_source_string)
+int str$case_blind_compare(const struct dsc$descriptor_s* first_source_string, const struct dsc$descriptor_s* second_source_string)
 {
-    char* s1_ptr;           /* Pointer to first string */
-    unsigned short s1_length;   /* Length of first string */
-    char* s2_ptr;           /* Pointer to second string */
-    unsigned short s2_length;   /* Length of second string */
-    unsigned short min_length;  /* length of shortest string */
-    long result;            /* Result of comparison */
+    char* s1_ptr; /* Pointer to first string */
+    unsigned short s1_length; /* Length of first string */
+    char* s2_ptr; /* Pointer to second string */
+    unsigned short s2_length; /* Length of second string */
+    unsigned short min_length; /* length of shortest string */
+    int result; /* Result of comparison */
 
     /*
      * Analyze source strings
@@ -135,7 +133,7 @@ static int str__memicmp(const char* str1, const char* str2, size_t length)
     /*
      * Do the comparison
      */
-    while((length != 0) && (result == 0))
+    while ((length != 0) && (result == 0))
     {
         result = tolower(*str1++) - tolower(*str2++);
         length--;
@@ -146,5 +144,4 @@ static int str__memicmp(const char* str1, const char* str2, size_t length)
      */
     return result;
 }
-
 

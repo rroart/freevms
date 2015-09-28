@@ -29,7 +29,7 @@
 
 /* Author: Roar Thron�s */
 
-unsigned long maxprocesscnt=MAXPROCESSCNT;
+unsigned long maxprocesscnt = MAXPROCESSCNT;
 
 /**
    \brief determine whether request process has privs to examine or modify
@@ -42,7 +42,7 @@ int exe$process_check_priv(struct _pcb * p)
     /** if on the same job tree, success - MISSING */
     /** if the same uic, success - MISSING */
     /** if WORLD priv, success TODO fix this */
-    if (p != ctl$gl_pcb && (priv & PRV$M_WORLD) == 0)
+    if ((p != ctl$gl_pcb) && ((priv & PRV$M_WORLD) == 0))
     {
         return SS$_NOPRIV;
         /** if group priv and group, success - MISSING */
@@ -68,20 +68,20 @@ int inline process_seq_mask()
 int alloc_ipid()
 {
     int i;
-    unsigned long *vec=sch$gl_pcbvec;
-    unsigned long *seq=sch$gl_seqvec;
-    for (i=2; i<MAXPROCESSCNT; i++)
+    unsigned long *vec = sch$gl_pcbvec;
+    unsigned long *seq = sch$gl_seqvec;
+    for (i = 2; i < MAXPROCESSCNT; i++)
     {
-        if (vec[i]==0)   // change to nullpcb later
+        if (vec[i] == 0)   // change to nullpcb later
         {
-            return i| ((seq[i]++)<<16);
+            return i | ((seq[i]++) << 16);
         }
     }
     printk(KERN_EMERG "alloc_ipid 0\n");
     return 0;
 }
 
-void * exe$ipid_to_pcb(unsigned long pid)
+struct _pcb * exe$ipid_to_pcb(unsigned long pid)
 {
     int i;
     if ((pid&0xffff)>MAXPROCESSCNT) printk(KERN_EMERG "EXE %x\n",pid);
@@ -98,12 +98,13 @@ void * exe$ipid_to_pcb(unsigned long pid)
     return find_process_by_pid(pid); // linux pid compatibility? may bug...
 }
 
-void * exe$epid_to_pcb(unsigned long pid)
+struct _pcb * exe$epid_to_pcb(unsigned long pid)
 {
     int ipid=exe$epid_to_ipid(pid);
     if (ipid) return exe$ipid_to_pcb(ipid);
     return 0;
 }
+
 extern long csid;
 int exe$epid_to_ipid(unsigned long pid)
 {
@@ -360,10 +361,11 @@ asmlinkage int exe$wake(unsigned long *pidadr, void *prcnam)
         sch$wake(p->pcb$l_pid);
         /** unlock spin sched */
         vmsunlock(&SPIN_SCHED,IPL$_ASTDEL);
-        return;
+        return SS$_NORMAL;
     }
     /** cwps stuff - MISSING */
     setipl(0);
+    return SS$_REMOTE_PROC;
 }
 
 /**

@@ -385,7 +385,7 @@ void * exttwo_write_block(struct _vcb * vcb, unsigned char * buf,
     return buf;
 }
 
-void * exttwo_search_fcb(struct _vcb * vcb, struct _fiddef * fid)
+struct _fcb * exttwo_search_fcb(struct _vcb * vcb, struct _fiddef * fid)
 {
     struct _fcb * head = &vcb->vcb$l_fcbfl;
     struct _fcb * tmp = head->fcb$l_fcbfl;
@@ -611,12 +611,12 @@ struct _vcb *exttwo_rvn_to_dev(struct _vcb *vcb, unsigned rvn)
 
 /* deaccesshead() release header from INDEXF... */
 
-unsigned exttwo_deaccesshead(struct ext2_inode *head, unsigned idxblk)
+int exttwo_deaccesshead(struct ext2_inode *head, unsigned idxblk)
 {
     return deaccesschunk(idxblk, 1, 1);
 }
 
-unsigned exttwo_writechunk(struct _fcb * fcb, unsigned long vblock, char * buff)
+int exttwo_writechunk(struct _fcb * fcb, unsigned long vblock, char * buff)
 {
     struct _iosb iosb;
     struct _vcb * vcb = x2p->current_vcb;
@@ -628,7 +628,7 @@ unsigned exttwo_writechunk(struct _fcb * fcb, unsigned long vblock, char * buff)
     return iosb.iosb$w_status;
 }
 
-static unsigned gethead(struct _fcb * fcb, struct ext2_inode **headbuff)
+int exttwo_gethead(struct _fcb * fcb, struct ext2_inode **headbuff)
 {
     struct _iosb iosb;
     struct _vcb * vcb = x2p->current_vcb;
@@ -643,7 +643,7 @@ static unsigned gethead(struct _fcb * fcb, struct ext2_inode **headbuff)
     return iosb.iosb$w_status;
 }
 
-unsigned exttwo_writehead(struct _fcb * fcb, struct ext2_inode *headbuff)
+int exttwo_writehead(struct _fcb * fcb, struct ext2_inode *headbuff)
 {
     struct _vcb * vcb = x2p->current_vcb;
     struct _ucb * ucb = ((struct _ucb *) vcb->vcb$l_rvt); //was:  struct _ucb * ucb=finducb(fcb);
@@ -1137,10 +1137,10 @@ void *exttwo_readvblock(struct _fcb * fcb, unsigned curvbn, unsigned *retsts)
 
 /* accesschunk() return pointer to a 'chunk' of a file ... */
 
-unsigned exttwo_accesschunk(struct _fcb *fcb, unsigned vbn, char **retbuff,
+int exttwo_accesschunk(struct _fcb *fcb, unsigned vbn, char **retbuff,
                             unsigned *retblocks, unsigned wrtblks, struct _irp * irp)
 {
-    unsigned sts;
+    int sts;
     int blocks;
     if (!fcb)
         fcb = x2p->primary_fcb;
@@ -1165,11 +1165,11 @@ unsigned exttwo_accesschunk(struct _fcb *fcb, unsigned vbn, char **retbuff,
 #endif
 }
 
-unsigned deallocfile(struct _fcb *fcb);
+int deallocfile(struct _fcb *fcb);
 
 /* deaccessfile() finish accessing a file.... */
 
-unsigned exttwo_deaccessfile(struct _fcb *fcb)
+int exttwo_deaccessfile(struct _fcb *fcb)
 {
     struct _iosb iosb;
     int sts;
@@ -1247,7 +1247,7 @@ void *exttwo_fcb_create2(struct ext2_inode * head, int i_ino, unsigned *retsts)
 
 /* accessfile() open up file for access... */
 
-unsigned exttwo_access(struct _vcb * vcb, struct _irp * irp)
+int exttwo_access(struct _vcb * vcb, struct _irp * irp)
 {
     struct _iosb iosb;
     unsigned sts = SS$_NORMAL;
@@ -1443,11 +1443,12 @@ unsigned ext2_dismount(struct _vcb * vcb)
 
 /* mount() make disk volume available for processing... */
 
-unsigned mounte2(unsigned flags, unsigned devices, char *devnam[],
+int mounte2(unsigned flags, unsigned devices, char *devnam[],
                  char *label[], struct _vcb **retvcb)
 {
     struct _iosb iosb;
-    unsigned device, sts = SS$_NORMAL;
+    unsigned device;
+    int sts = SS$_NORMAL;
     struct _vcb *vcb = 0;
     struct _vcb *vcbdev;
     struct _ucb *ucb;
