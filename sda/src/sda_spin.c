@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <stdio.h>
 #include <string.h>
@@ -21,7 +21,7 @@ static int print_spin(char * name, void * addr)
 {
     struct _spl spl;
     sda$getmem(addr, &spl, sizeof(spl));
-    printf("%15s                        Address        %8x\n", name, addr);
+    printf("%15s                        Address        %8lx\n", name, (unsigned long) addr);
     printf("Owner CPU ID       %8x            IPL            %8x\n", spl.spl$l_own_cpu, spl.spl$l_ipl);
     printf("Ownership Depth    %8x            Rank           %8x\n", spl.spl$l_own_cnt, spl.spl$l_rank);
 #if 0

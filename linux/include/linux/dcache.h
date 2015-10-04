@@ -257,18 +257,6 @@ return dentry;
 
 extern struct dentry * dget_locked(struct dentry *);
 
-/**
-*   d_unhashed -    is dentry hashed
-*   @dentry: entry to check
-*
-*   Returns true if the dentry passed is not currently hashed.
-*/
-
-static __inline__ int d_unhashed(struct dentry *dentry)
-{
-return list_empty(&dentry->d_hash);
-}
-
 extern void dput(struct dentry *);
 
 static __inline__ int d_mountpoint(struct dentry *dentry)

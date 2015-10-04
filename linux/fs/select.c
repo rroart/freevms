@@ -253,29 +253,7 @@ int do_select(int n, fd_set_bits *fds, long *timeout)
     return retval;
 }
 
-static void *select_bits_alloc(int size)
-{
-    return kmalloc(6 * size, GFP_KERNEL);
-}
-
-static void select_bits_free(void *bits, int size)
-{
-    kfree(bits);
-}
-
-/*
- * We can actually return ERESTARTSYS instead of EINTR, but I'd
- * like to be certain this leads to no problems. So I return
- * EINTR just for safety.
- *
- * Update: ERESTARTSYS breaks at least the xview clock binary, so
- * I'm trying ERESTARTNOHAND which restart only when you want to.
- */
-#define MAX_SELECT_SECONDS \
-    ((unsigned long) (MAX_SCHEDULE_TIMEOUT / HZ)-1)
-
-asmlinkage long
-sys_select(int n, fd_set *inp, fd_set *outp, fd_set *exp, struct timeval *tvp)
+asmlinkage long sys_select(int n, fd_set *inp, fd_set *outp, fd_set *exp, struct timeval *tvp)
 {
     printk("no select\n");
     return -EINVAL;

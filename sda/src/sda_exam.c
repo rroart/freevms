@@ -118,7 +118,7 @@ int sda$examine(int mask)
         printf("\n");
         printf("%s", name);
         if (offset)
-            printf("+%x", offset);
+            printf("+%lx", offset);
         char str[size+1];
         str[size]=0;
         stringify(buf, str, size);

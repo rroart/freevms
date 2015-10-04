@@ -87,13 +87,6 @@
 // Modification History:
 //
 
-//++
-// For VAX-VMS V4 systems, uncomment the following line
-//--
-
-//;;;;VMS_V4=1
-
-
 //  .SBTTL  External and local symbol definitions
 
 //
@@ -1118,9 +1111,7 @@ int queue_2_acp(struct _irp * i, struct _pcb * p, struct _ucb * u)
     struct _vcb * v = u->ucb$l_vcb; // get address of VCB
 
 #if 0
-    // .IF DEFINED VMS_V4
     SetIPL  #IPL$_SYNCH     // synchronize with VMS
-    // .ENDC
 #endif
     v->vcb$l_trans++;       // include this IRP
     //  movl    #42,IRP$L_EXTEND(R3) // Mark this...
@@ -2359,11 +2350,8 @@ int getbuf(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *c, vo
 #if 0
     // check. drop this until it gets implemented
     pushr   #^M<R1,R3>
-    // .IF  DEFINED VMS_V4
     JSB G^EXE$BufQuoPrc     // Can we afford the buffer?
-    // .IF_FALSE
     JSB G^EXE$DEBIT_BYTCNT_ALO
-    // .ENDC
     popr    #^M<R1,R3>
     Blbs    R0,l10;
 
@@ -2375,7 +2363,6 @@ int getbuf(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *c, vo
     // Quota OK
 
 l10:
-    // .IF  DEFINED VMS_V4
     pushl   R3          // save IRP address
     JSB G^EXE$ALLOCBUF      // get a buffer
     popl    R3
@@ -2637,7 +2624,6 @@ int ip_cancel(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
     // don't step on others with the cancel bit.
 
 #if 0
-    // .IF  DEFINED VMS_V4
     if (test_and_clear_bit(UCB$V_Cancel,u->UCB$L_STS)) goto Finish_Cancel; // bbsc
     if (test_bit(DEV$V_AVL,&u->UCB$L_DEVCHAR)==0) goto Finish_Cancel; // bbc
 #endif
@@ -2674,12 +2660,7 @@ int ip_cancel(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c
     movl    R2,R3               // for insertirp.
     movl    UCB$L_VCB(R5),R2        // VCB adrs
     movl    VCB$L_AQB(R2),R2        // asrs of ACP Q listhead.
-    // .IF  DEFINED VMS_V4
     exe$insertirp(u,i);         // Q it!
-    // .IF_FALSE
-    // Warning: V5 change! EXE$INSERTIPR no longer works! ACP queues are
-    // now self-relative!
-    //  exe$insertirp(u,i);         // Q it!
 #endif
     int R0 = 0;
 
@@ -2699,20 +2680,12 @@ l8:
     panic("badqhdr\n");
 
 l9:
-    // .ENDC
     if (wasempty) goto  Finish_Cancel;
 
     // Wake ACP
-
-#if 0
-    // .IF  DEFINED VMS_V4
-    JSB G^SCH$WAKE
-    // .IF_FALSE
-#endif
     vmslock(&SPIN_SCHED,IPL$_SCHED);
     sch$wake(u->ucb$l_vcb->vcb$l_aqb->aqb$l_acppid);
     vmsunlock(&SPIN_SCHED,0);
-    // .ENDC
 
 Finish_Cancel:
     return SS$_NORMAL;                  // Return
@@ -2745,13 +2718,3 @@ int netacp_alive(struct _ucb * u)
         return SS$_NORMAL;
     return exe_std$abortio(u->ucb$l_irp, ctl$gl_pcb, u, SS$_MEDOFL);
 }
-
-//++
-// Label that marks the end of the driver
-//--
-
-#if 0
-IP_END:             // Last location in driver
-.END
-
-#endif

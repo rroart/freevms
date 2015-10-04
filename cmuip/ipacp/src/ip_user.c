@@ -536,7 +536,7 @@ leave_x:
 
 //    LIB$GET_VM(%REF(IPCB_Size*4),IPCB);
     RC = LIB$GET_VM_PAGE(/*%REF*/(((IPCB_Size) / 512) + 1),&IPCB);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         FATAL$FAO("IPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
 
 // Clear it out and set it in the table
@@ -578,7 +578,7 @@ void ipcb_free(long IPCBIX,struct IPCB_Structure * IPCB)
 
 //    LIB$FREE_VM(/*%REF*/(IPCB_Size*4),IPCB);
     RC = LIB$FREE_VM_PAGE(/*%REF*/(((IPCB_Size) / 512) + 1),IPCB);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         FATAL$FAO("IPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     IPCB_Count = IPCB_Count-1;
 }
@@ -811,7 +811,7 @@ struct IPCB_Structure * IPCB;
 //!!HACK!!// Should we do this or not??
 //    RC = USER$CHECK_ACCESS(IPCB->ipcb$user_id,IPCB->ipcb$local_host,
 //            0,IPCB->ipcb$foreign_host,0);
-//    if (BLISSIFNOT(RC))
+//    if (!(RC & 1))
 //  UOP_ERROR(RC);
 
 // Set the foreign host name in the IPCB

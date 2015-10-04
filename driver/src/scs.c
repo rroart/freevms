@@ -76,7 +76,7 @@ extern struct _rdt rdt;
 extern struct _scs_rd rdtl[128];
 extern struct _cdl cdl;
 
-scs_startio ( int dummy );
+int scs_startio ( int dummy );
 int scs_rcv2(char * bufh, char * buf);
 
 #define NF_SCS_HELLO              5
@@ -226,8 +226,6 @@ static void scs_send_brd_hello(struct net_device *dev)
 {
     scs_send_endnode_hello(dev);
 }
-
-static do_once=0;
 
 static void scs_dev_set_timer();
 
@@ -1048,7 +1046,7 @@ struct scs_rcv_qb_structure
 
 void scs_receive ( int i);
 
-scs_startio ( int dummy )
+int scs_startio ( int dummy )
 {
     signed long i, sts;
     struct scs_rcv_qb_structure * buff;
@@ -1186,7 +1184,7 @@ void scs_receive ( int i)
     // is known to get wedged, and the driver gives back SS$_DEVINACT when this
     // happens.
 
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         if (RC == SS$_DEVINACT)
         {

@@ -34,17 +34,3 @@ void pci_free_consistent(struct pci_dev *hwdev, size_t size,
 {
     free_pages((unsigned long)vaddr, get_order(size));
 }
-
-
-static void __init check_ram(void)
-{
-    if (end_pfn >= 0xffffffff>>PAGE_SHIFT)
-    {
-        printk(KERN_ERR "WARNING more than 4GB of memory but no IOMMU.\n"
-               KERN_ERR "WARNING 32bit PCI may malfunction.\n");
-        /* Could play with highmem_start_page here to trick some subsystems
-           into bounce buffers. Unfortunately that would require setting
-           CONFIG_HIGHMEM too.
-         */
-    }
-}

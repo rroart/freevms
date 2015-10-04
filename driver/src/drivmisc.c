@@ -54,7 +54,7 @@ int clone_ddb(struct _ddb * ddb)
 }
 
 // check. overhaul CLASS_UNIT_INIT
-inline CLASS_UNIT_INIT(struct _ucb * ucb,struct _tt_port * port_vector)
+void CLASS_UNIT_INIT(struct _ucb * ucb,struct _tt_port * port_vector)
 {
     struct _tty_ucb * tty = ucb;
     struct _dpt * glob_dpt = tty$gl_dpt;
@@ -70,8 +70,6 @@ inline CLASS_UNIT_INIT(struct _ucb * ucb,struct _tt_port * port_vector)
         tty->ucb$l_tt_putnxt=ttc->class_putnxt;
         // maybe initialize parity and speeds here?
     }
-    return;
-    printk("CLASS_UNIT_INIT not impl\n");
 }
 
 #if 0
@@ -134,7 +132,6 @@ void registerdevchan(unsigned long dev,unsigned short chan)
     //{ int i; for(i=0;i<10000000;i++) ; }
 }
 
-#if 1
 unsigned short dev2chan(kdev_t dev)
 {
     int i;
@@ -142,13 +139,11 @@ unsigned short dev2chan(kdev_t dev)
     for (i=0; i<256; i++)
         if (devchan[i]==dev) return i;
     //    if (devchan[i]==MAJOR(dev)) return i;
-mypanic:
     printk("dev2chan failed\n");
     for (i=0; i<4; i++)
         printk("%x %x\n",devchan[i],dev);
     panic("dev2chan\n");
 }
-#endif
 
 #if 0
 kdev_t chan2dev(unsigned short chan)
@@ -180,7 +175,7 @@ int ucb2chan(unsigned long dev,  unsigned short * chan)
         }
     //    if (devchan[i]==MAJOR(dev)) return i;
     return 0;
-mypanic:
+
     printk("ucb2chan failed\n");
     for (i=0; i<4; i++)
         printk("%x %x\n",devchan[i],dev);

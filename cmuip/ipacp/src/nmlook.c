@@ -282,13 +282,13 @@ struct dsc$descriptor   * QUOTAS;
 // Setup the descriptor of for the image name and allocate the string
 
     RC = STR$COPY_DX (SRVIMGNAME, IMNAME);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         FATAL$FAO("NML$CONFIG - failed to allocate string, RC = !XL",RC);
 
 // Allocate the block for the process quota list
 
     RC = LIB$GET_VM(/*%REF*/(QUOTAS->dsc$w_length),&QUOPTR);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         FATAL$FAO("NML$CONFIG - failed to allocate quolst, RC = !XL",RC);
     CH$MOVE(QUOTAS->dsc$w_length,QUOTAS->dsc$a_pointer,QUOPTR);
     SRVQUOTAS = QUOPTR;
@@ -342,7 +342,7 @@ void NML$INIT (void)
 #else
     RC = 1;
 #endif
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         ERROR$FAO("Failed to create ACP mailbox, RC = !XL",RC);
         return;
@@ -366,7 +366,7 @@ void NML$INIT (void)
                     0 /* not yet: ASCID("LNM$TEMPORARY_MAILBOX") */,
                     MYMBXNAM, 0,
                     ITMLIST);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         ERROR$FAO("$TRNLNM failed for ACP mailbox, RC = !XL",RC);
         return;
@@ -389,7 +389,7 @@ void NML$INIT (void)
     RC = sys$crelnm(0 , SYSTABNAM,
                     ACPMBXNAM, 0,
                     ITMLIST);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         ERROR$FAO("$CRELNM failed for ACP mailbox, RC = !XL",RC);
         return;
@@ -403,7 +403,7 @@ void NML$INIT (void)
                  RCVBUF,
                  RCVBUF->MB$DATA,
                  MSGMAX, 0, 0, 0, 0);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         ERROR$FAO("Queued read failed for mailbox, RC = !XL",RC);
         return;
@@ -438,7 +438,7 @@ void NML$INIT (void)
                         myuic,
                         0, SRVSTATUS/*, 0, 0, 0*/
                        );
-        if (BLISSIFNOT(RC))
+        if (!(RC & 1))
         {
             ERROR$FAO("$CREPRC for NAMRES failed, RC = !XL",RC);
             return;
@@ -477,7 +477,7 @@ int (*ASTADR)();
 // Allocate and initialize a request block for us
 
     RC = NQE_ALLOC(&NQE);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         (ASTADR)(ASTPRM,RC);
         return;
@@ -535,7 +535,7 @@ int (*ASTADR)();
 // Allocate and initialize a request block for us
 
     RC = NQE_ALLOC(&NQE);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         (ASTADR)(ASTPRM,RC);
         return;
@@ -584,7 +584,7 @@ int (*ASTADR)();
 // Allocate and initialize a request block for us
 
     RC = NQE_ALLOC(&NQE);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         (ASTADR)(ASTPRM,RC);
         return;
@@ -700,13 +700,13 @@ void NML$PURGE(STATUS)
 
     RC = sys$dellnm(SYSTABNAM,
                     ACPMBXNAM, 0);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         ERROR$FAO("$DELLNM failed for !AS, RC = !XL",ACPMBXNAM,RC);
 
 // Delete our mailbox
 
     RC = sys$delmbx(ACPMBXCHN);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         ERROR$FAO("$DELMBX failed for ACP mailbox, RC = !XL",RC);
 
 // Walk the queue, purging all requests
@@ -795,7 +795,7 @@ void SEND_CONTROL(CCODE,CVALUE)
     RC = sys$qio(0, SRVMBXCHN,  IO$_WRITEVBLK | IO$M_NOW, 0,
                  MSBUF,
                  CONTROL_MSGSIZE, 0, 0, 0, 0, 0, 0);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         ERROR$FAO("Failed to send NAMRES control message, RC = !XL",RC);
 }
 
@@ -845,7 +845,7 @@ struct NQENTRY * NQE;
 
 //    RC = LIB$FREE_VM(%REF(NQE_MAXSIZE),NQE);
     RC = LIB$FREE_VM_PAGE(/*%REF*/((NQE_MAXSIZE / 512) + 1),NQE);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         FATAL$FAO("NQE_DEALLOC - LIB$FREE_VM failure, RC = !XL",RC);
     XQL$FAO(LOG$MSG,"!%T NQE_DEALLOC, NQE = !XL!/",0,NQE);
 
@@ -941,7 +941,7 @@ struct NQENTRY * NQE;
 // Check the state of the send. We should probably do something useful here if
 // it fails (like shutdown the name service and report the error to the opr).
 
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         XQL$FAO(LOG$MSG,"!%T NQE_XMIT failed, RC=!XL, NQE=!XL, ID=!XL!/",
                 0,RC,NQE,NQE->NQE$ID);
@@ -1018,7 +1018,7 @@ struct MAIL$BUF * MBUF;
 
 // Check error
 
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         FATAL$FAO("Mailbox read failure, RC = !XL",RC);
         return;
@@ -1041,7 +1041,7 @@ struct MAIL$BUF * MBUF;
                  MBUF,
                  RCVMSG,
                  MSGMAX, 0, 0, 0, 0);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         ERROR$FAO("Queued read failed for mailbox, RC = !XL",RC);
         return;
@@ -1248,7 +1248,7 @@ CHECK_SERVER (void)
 
     RC = sys$assign( SRVMBXNAM,
                      &DEVCHN, 0, 0, 0);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         return FALSE;
 
 // Now, look for a process with the name "NAMRES"
@@ -1264,7 +1264,7 @@ CHECK_SERVER (void)
 
     RC = sys$getjpiw(0, 0, SRVPRCNAM,
                      ITMLIST, 0, 0, 0);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         sys$dassgn(DEVCHN);
         return FALSE;

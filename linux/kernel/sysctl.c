@@ -69,8 +69,6 @@ extern int sem_ctls[];
 
 extern int pgt_cache_water[];
 
-static int parse_table(int *, int, void *, size_t *, void *, size_t,
-                       ctl_table *, void **);
 static int proc_doutsstring(ctl_table *table, int write, struct file *filp,
                             void *buffer, size_t *lenp);
 
@@ -276,8 +274,6 @@ static ctl_table dev_table[] =
     {0}
 };
 
-extern void init_irq_proc (void);
-
 void __init sysctl_init(void)
 {
 }
@@ -306,49 +302,6 @@ static int test_perm(int mode, int op)
 static inline int ctl_perm(ctl_table *table, int op)
 {
     return test_perm(table->mode, op);
-}
-
-static int parse_table(int *name, int nlen,
-                       void *oldval, size_t *oldlenp,
-                       void *newval, size_t newlen,
-                       ctl_table *table, void **context)
-{
-    int n;
-repeat:
-    if (!nlen)
-        return -ENOTDIR;
-    if (get_user(n, name))
-        return -EFAULT;
-    for ( ; table->ctl_name; table++)
-    {
-        if (n == table->ctl_name || table->ctl_name == CTL_ANY)
-        {
-            int error;
-            if (table->child)
-            {
-                if (ctl_perm(table, 001))
-                    return -EPERM;
-                if (table->strategy)
-                {
-                    error = table->strategy(
-                                table, name, nlen,
-                                oldval, oldlenp,
-                                newval, newlen, context);
-                    if (error)
-                        return error;
-                }
-                name++;
-                nlen--;
-                table = table->child;
-                goto repeat;
-            }
-            error = do_sysctl_strategy(table, name, nlen,
-                                       oldval, oldlenp,
-                                       newval, newlen, context);
-            return error;
-        }
-    }
-    return -ENOTDIR;
 }
 
 /* Perform the actual read/write of a sysctl table entry. */

@@ -983,7 +983,7 @@ leave_x:
 
 //    LIB$GET_VM(%REF(UDPCB_Size*4),UDPCB);
     RC = LIB$GET_VM_PAGE(/*%REF*/(((UDPCB_Size) / 512) + 1),&UDPCB);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         FATAL$FAO("UDPCB_GET - LIB$GET_VM failure, RC=!XL",RC);
 
 // Clear it out and set it in the table
@@ -1024,7 +1024,7 @@ void udpcb_free(long UDPCBIX,struct UDPCB_Structure * UDPCB)
 
 //    LIB$FREE_VM(/*%REF*/(UDPCB_Size*4),UDPCB);
     RC = LIB$FREE_VM_PAGE(/*%REF*/(((UDPCB_Size) / 512) + 1),UDPCB);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         FATAL$FAO("UDPCB_FREE - LIB$FREE_VM failure, RC=!XL",RC);
     UDPCB_Count = UDPCB_Count-1;
 }
@@ -1282,7 +1282,7 @@ struct UDPCB_Structure * UDPCB;
 // Finish up the common part of the open
 
     RC = UDP_COPEN_DONE(UDPCB,ADRCNT,ADRLST);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         UOP_ERROR(RC);
 
 // Verify that we have access to the host/port set
@@ -1290,7 +1290,7 @@ struct UDPCB_Structure * UDPCB;
     RC = user$check_access(UDPCB->udpcb$user_id,UDPCB->udpcb$local_host,
                            UDPCB->udpcb$local_port,UDPCB->udpcb$foreign_host,
                            UDPCB->udpcb$foreign_port);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
         UOP_ERROR(RC);
 
 // Set the foreign host name in the UDPCB

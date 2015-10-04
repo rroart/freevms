@@ -70,19 +70,13 @@
    interruptible_sleep_on_timeout sleep_on sleep_on_timeout
 */
 
-extern void timer_bh(void);
-extern void tqueue_bh(void);
-extern void immediate_bh(void);
-
-int done_init_idle=0;
+int done_init_idle = 0;
 
 /*
  * scheduler variables
  */
 
 unsigned securebits = SECUREBITS_DEFAULT; /* systemwide security settings */
-
-extern void mem_use(void);
 
 int mydebug4 = 0;
 int mydebug5 = 0;
@@ -1024,8 +1018,7 @@ gethead:
 #endif
         //    if(*(unsigned long *)qhead == qhead)
         //  if(*(unsigned long *)qhead == 0)
-        if (mydebug5) printk("comq3 %x %x %x\n",tmppri,sch$gl_comqs,(~(1 << tmppri)));
-        //    printk("sch %x\n",sch$gl_comqs);
+        if (mydebug5) printk("comq3 %x %lx %x\n", tmppri, sch$gl_comqs, (~(1 << tmppri)));
     }
 
     if(next==0)
@@ -1037,9 +1030,9 @@ gethead:
 
     /* bvs qempty not needed, it might panic on gen prot? */
 
-    if (mydebug4) printk("eq qhead %x %x %x %x\n",
-                             (unsigned long *)qhead,(unsigned long *)(qhead+4),
-                             *(unsigned long *)qhead,*(unsigned long *)(qhead+4));
+    if (mydebug4)
+        printk("eq qhead %lx %lx %lx %lx\n", (unsigned long) qhead, (unsigned long) (qhead + 4), *(unsigned long *) qhead,
+                *(unsigned long *) (qhead + 4));
     /* No DYN check yet */
 check_pcb_ok:
 #if 0
@@ -1158,8 +1151,8 @@ skip_cap:
 #ifdef DEBUG_SCHED
     if (mydebug5)
     {
-        printk("pri %x %x %x %x %x %x\n",curpcb,curpcb->pcb$l_pid,curpcb->pcb$b_pri,next,next->pcb$l_pid,next->pcb$b_pri);
-        printk("cpusch %x %x\n",cpu->cpu$b_cur_pri,sch$gl_comqs);
+        printk("pri %lx %x %x %lx %x %x\n", (unsigned long)curpcb, curpcb->pcb$l_pid, curpcb->pcb$b_pri, (unsigned long)next, next->pcb$l_pid, next->pcb$b_pri);
+        printk("cpusch %x %lx\n", cpu->cpu$b_cur_pri, sch$gl_comqs);
         printcom();
     }
 #endif
@@ -1228,7 +1221,7 @@ skip_cap:
         {
             if (next->active_mm)
             {
-                printk("bu %x %x %x\n",next,next->pcb$l_pid,next->pcb$b_pri);
+                printk("bu %lx %x %x\n", (unsigned long) next, next->pcb$l_pid, next->pcb$b_pri);
                 {
                     int j;
                     for(j=0; j<1000000000; j++) ;
@@ -1949,18 +1942,18 @@ void __init sched_init(void)
 
     init_task.pcb$b_type = DYN$C_PCB;
 
-    init_task.pcb$b_pri=31;
-    init_task.pcb$b_prib=31;
+    init_task.pcb$b_pri = 31;
+    init_task.pcb$b_prib = 31;
     qhead_init(&init_task.pcb$l_astqfl);
-    cpu->cpu$l_curpcb=&init_task;
-    cpu->cpu$b_cur_pri=31;
+    cpu->cpu$l_curpcb = &init_task;
+    cpu->cpu$b_cur_pri = 31;
 
-    sch$gl_pcbvec=pcbvec;
-    sch$gl_seqvec=seqvec;
-    memset(sch$gl_pcbvec,0,(unsigned long)MAXPROCESSCNT*sizeof(unsigned long));
-    memset(sch$gl_seqvec,0,(unsigned long)MAXPROCESSCNT*sizeof(unsigned long));
+    sch$gl_pcbvec = pcbvec;
+    sch$gl_seqvec = seqvec;
+    memset(sch$gl_pcbvec, 0, (unsigned long) MAXPROCESSCNT * sizeof(unsigned long));
+    memset(sch$gl_seqvec, 0, (unsigned long) MAXPROCESSCNT * sizeof(unsigned long));
 
-    printk("pid 0 here %x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl);
+    printk("pid 0 here %lx %lx\n", (unsigned long)init_task.pcb$l_astqfl, (unsigned long)&init_task.pcb$l_astqfl);
     //  { int i,j; for(j=0;j<2;j++) for(i=0;i<1000000000;i++); }
 
     init_timervecs();

@@ -53,9 +53,6 @@
 #include <dptdef.h>
 #include <ucbdef.h>
 
-#if 0
-#define num_syms nsyms
-#endif
 #define ALIGN(x,a) (((x)+(a)-1)&~((a)-1))
 #define PERCPU_ENOUGH_ROOM 32768
 spinlock_t modlist_lock = SPIN_LOCK_UNLOCKED;
@@ -79,28 +76,8 @@ spinlock_t modlist_lock = SPIN_LOCK_UNLOCKED;
 /* If this is set, the section belongs in the init part of the module */
 #define INIT_OFFSET_MASK (1UL << (BITS_PER_LONG-1))
 
-/* Protects module list */
-static DEFINE_SPINLOCK(modlist_lock);
-
-/* List of modules, protected by module_mutex AND modlist_lock */
-static DEFINE_MUTEX(module_mutex);
+/* List of modules */
 static LIST_HEAD(modules);
-
-static BLOCKING_NOTIFIER_HEAD(module_notify_list);
-
-#if 0
-int register_module_notifier(struct notifier_block * nb)
-{
-    return blocking_notifier_chain_register(&module_notify_list, nb);
-}
-EXPORT_SYMBOL(register_module_notifier);
-
-int unregister_module_notifier(struct notifier_block * nb)
-{
-    return blocking_notifier_chain_unregister(&module_notify_list, nb);
-}
-EXPORT_SYMBOL(unregister_module_notifier);
-#endif
 
 /* We require a truly strong try_module_get() */
 static inline int strong_try_module_get(struct module *mod)
@@ -111,19 +88,6 @@ static inline int strong_try_module_get(struct module *mod)
 #endif
     return try_module_get(mod);
 }
-
-/* A thread that wants to hold a reference to a module only while it
- * is running can call ths to safely exit.
- * nfsd and lockd use this.
- */
-void __module_put_and_exit(struct module *mod, long code)
-{
-    module_put(mod);
-    do_exit(code);
-}
-#if 0
-EXPORT_SYMBOL(__module_put_and_exit);
-#endif
 
 /* Find a module section: 0 means not found. */
 static unsigned int find_sec(Elf_Ehdr *hdr,
@@ -1463,9 +1427,6 @@ static struct module *load_module(void __user *umod,
     versindex = find_sec(hdr, sechdrs, secstrings, "__versions");
     infoindex = find_sec(hdr, sechdrs, secstrings, ".modinfo");
     pcpuindex = find_pcpusec(hdr, sechdrs, secstrings);
-#ifdef ARCH_UNWIND_SECTION_NAME
-    unwindex = find_sec(hdr, sechdrs, secstrings, ARCH_UNWIND_SECTION_NAME);
-#endif
 
     /* Don't keep modinfo section */
     sechdrs[infoindex].sh_flags &= ~(unsigned long)SHF_ALLOC;
@@ -1839,10 +1800,7 @@ static int __link_module(void *_mod)
 }
 
 /* This is where the real work happens */
-asmlinkage long
-sys_init_module(void __user *umod,
-                unsigned long len,
-                const char __user *uargs)
+asmlinkage long sys_init_module(void __user *umod, unsigned long len, const char __user *uargs)
 {
     struct module *mod;
     int ret = 0;
@@ -1888,12 +1846,12 @@ sys_init_module(void __user *umod,
     if (mod->init != NULL)
         ret = mod->init();
 #else
-    printk("did mod->init at %x %x\n",mod,mod->init);
+    printk("did mod->init at %lx %lx\n", (unsigned long)mod, (unsigned long)mod->init);
     if (mod->init != NULL)
     {
 #if 0
         ret = mod->init();
-        printk("did mod->init at %x %x\n",mod,mod->init);
+        printk("did mod->init at %lx %lx\n", (unsigned long)mod, (unsigned long)mod->init);
 #endif
         struct _ddt * ddt;
         struct _dpt * dpt;
@@ -1901,7 +1859,7 @@ sys_init_module(void __user *umod,
         ddt = mod_find_symname (mod, "driver$ddt");
         dpt = mod_find_symname (mod, "driver$dpt");
         fdt = mod_find_symname (mod, "driver$fdt");
-        printk("ddt dpt %x %x\n", ddt, dpt);
+        printk("ddt dpt %lx %lx\n", (unsigned long)ddt, (unsigned long)dpt);
         int load_driver_inner(int (*init_tables)(), struct _ddt * ddt, struct _dpt * dpt, struct _fdt * fdt);
         load_driver_inner(mod->init, ddt, dpt, fdt);
     }
@@ -1960,16 +1918,6 @@ static inline int within(unsigned long addr, void *start, unsigned long size)
 }
 
 #ifdef CONFIG_KALLSYMS
-/*
- * This ignores the intensely annoying "mapping symbols" found
- * in ARM ELF files: $a, $t and $d.
- */
-static inline int is_arm_mapping_symbol(const char *str)
-{
-    return str[0] == '$' && strchr("atd", str[1])
-           && (str[2] == '\0' || str[2] == '.');
-}
-
 static const char *get_ksymbol(struct module *mod,
                                unsigned long addr,
                                unsigned long *size,
@@ -1995,13 +1943,11 @@ static const char *get_ksymbol(struct module *mod,
          * and inserted at a whim. */
         if (mod->symtab[i].st_value <= addr
                 && mod->symtab[i].st_value > mod->symtab[best].st_value
-                && *(mod->strtab + mod->symtab[i].st_name) != '\0'
-                && !is_arm_mapping_symbol(mod->strtab + mod->symtab[i].st_name))
+                && *(mod->strtab + mod->symtab[i].st_name) != '\0')
             best = i;
         if (mod->symtab[i].st_value > addr
                 && mod->symtab[i].st_value < nextval
-                && *(mod->strtab + mod->symtab[i].st_name) != '\0'
-                && !is_arm_mapping_symbol(mod->strtab + mod->symtab[i].st_name))
+                && *(mod->strtab + mod->symtab[i].st_name) != '\0')
             nextval = mod->symtab[i].st_value;
     }
 
@@ -2319,28 +2265,24 @@ void struct_module(struct module *mod)
 EXPORT_SYMBOL(struct_module);
 #endif
 
-asmlinkage unsigned long
-sys_create_module(const char *name_user, size_t size)
+asmlinkage unsigned long sys_create_module(const char *name_user, size_t size)
 {
     return -ENOSYS;
 }
 
 #if 0
-asmlinkage long
-sys_init_module(const char *name_user, struct module *mod_user)
+asmlinkage long sys_init_module(const char *name_user, struct module *mod_user)
 {
     return -ENOSYS;
 }
 #endif
 
-asmlinkage long
-sys_delete_module(const char *name_user)
+asmlinkage long sys_delete_module(const char *name_user)
 {
     return -ENOSYS;
 }
 
-asmlinkage long
-sys_query_module(const char *name_user, int which, char *buf, size_t bufsize,
+asmlinkage long sys_query_module(const char *name_user, int which, char *buf, size_t bufsize,
                  size_t *ret)
 {
     /* Let the program know about the new interface.  Not that
@@ -2351,8 +2293,7 @@ sys_query_module(const char *name_user, int which, char *buf, size_t bufsize,
     return -ENOSYS;
 }
 
-asmlinkage long
-sys_get_kernel_syms(struct kernel_sym *table)
+asmlinkage long sys_get_kernel_syms(struct kernel_sym *table)
 {
     return -ENOSYS;
 }

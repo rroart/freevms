@@ -1,24 +1,24 @@
 /*
-    ****************************************************************
+ ****************************************************************
 
-        Copyright (c) 1992, Carnegie Mellon University
+ Copyright (c) 1992, Carnegie Mellon University
 
-        All Rights Reserved
+ All Rights Reserved
 
-    Permission  is  hereby  granted   to  use,  copy,  modify,  and
-    distribute  this software  provided  that the  above  copyright
-    notice appears in  all copies and that  any distribution be for
-    noncommercial purposes.
+ Permission  is  hereby  granted   to  use,  copy,  modify,  and
+ distribute  this software  provided  that the  above  copyright
+ notice appears in  all copies and that  any distribution be for
+ noncommercial purposes.
 
-    Carnegie Mellon University disclaims all warranties with regard
-    to this software.  In no event shall Carnegie Mellon University
-    be liable for  any special, indirect,  or consequential damages
-    or any damages whatsoever  resulting from loss of use, data, or
-    profits  arising  out of  or in  connection  with  the  use  or
-    performance of this software.
+ Carnegie Mellon University disclaims all warranties with regard
+ to this software.  In no event shall Carnegie Mellon University
+ be liable for  any special, indirect,  or consequential damages
+ or any damages whatsoever  resulting from loss of use, data, or
+ profits  arising  out of  or in  connection  with  the  use  or
+ performance of this software.
 
-    ****************************************************************
-*/
+ ****************************************************************
+ */
 //TITLE "Input/Output Utilities"
 //++
 //
@@ -102,18 +102,17 @@
 //
 //--
 
-
 #if 0
 MODULE IOUTIL(IDENT="2.2",LANGUAGE(BLISS32),
-              ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
-                              NONEXTERNAL=LONG_RELATIVE),
-              LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
-              OPTIMIZE,OPTLEVEL=3,ZIP)=
+        ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
+                NONEXTERNAL=LONG_RELATIVE),
+        LIST(NOREQUIRE,ASSEMBLY,OBJECT,BINARY),
+        OPTIMIZE,OPTLEVEL=3,ZIP)=
 #endif
 
-                  extern    void OPR_FAO(long, ...);
-extern  void ERROR_FAO(long, ...);
-extern  void FATAL_FAO(long, ...);
+extern void OPR_FAO(long, ...);
+extern void ERROR_FAO(long, ...);
+extern void FATAL_FAO(long, ...);
 
 #include <starlet.h>
 //LIBRARY "SYS$LIBRARY:LIB";            // JC
@@ -157,8 +156,6 @@ extern  void FATAL_FAO(long, ...);
 #define kmalloc malloc
 #endif
 
-
-
 #define APPCHR(CHR,DPTR,DCNT,OCNT) \
     if ((DCNT=DCNT-1) > 0) \
     { \
@@ -174,12 +171,9 @@ extern  void FATAL_FAO(long, ...);
     D->dsc$a_pointer    = 0;\
     };
 
-signed long
-act_threshold    = 512,
-log_threshold  = 512 ;
+signed long act_threshold = 512, log_threshold = 512;
 
-
-void APPEND_DEC(DPTR,DCNT,NUM,OUTCNT)
+void APPEND_DEC(DPTR, DCNT, NUM, OUTCNT)
 
 // Append a decimal value to a string
 //   DPTR - Address of pointer to destination string (updated on return)
@@ -187,114 +181,103 @@ void APPEND_DEC(DPTR,DCNT,NUM,OUTCNT)
 //   NUM - Value to output
 //   OUTCNT - Address of count of bytes output (updated)
 
-long * OUTCNT;
-long * DPTR;
-long * DCNT;
+    long * OUTCNT;long * DPTR;long * DCNT;
 {
-    signed long
-    DIV,DIG,REM,VAL,FLAG;
+    signed long DIV, DIG, REM, VAL, FLAG;
     if (NUM == 0)
     {
-        APPCHR('0',(*DPTR),*DCNT,*OUTCNT);
+        APPCHR('0', (*DPTR), *DCNT, *OUTCNT);
         return;
     };
     DIV = 1000000000;           // Highest pwr of 10 in 32 bits
     VAL = NUM;
     if (VAL < 0)
     {
-        VAL = -1*VAL;
-        APPCHR('-',(*DPTR),*DCNT,*OUTCNT);
+        VAL = -1 * VAL;
+        APPCHR('-', (*DPTR), *DCNT, *OUTCNT);
     };
     FLAG = 0;
     while (DIV > 0)
     {
-        DIG = VAL/DIV;
+        DIG = VAL / DIV;
         REM = VAL % DIV;
-        DIV = DIV/10;
+        DIV = DIV / 10;
         if ((DIG != 0) || (FLAG != 0))
         {
-            FLAG = FLAG+1;
-            APPCHR(DIG+'0',(*DPTR),*DCNT,*OUTCNT);
+            FLAG = FLAG + 1;
+            APPCHR(DIG + '0', (*DPTR), *DCNT, *OUTCNT);
         };
         VAL = REM;
     };
 }
 
-void ASCII_DEC_BYTES(DESC,COUNT,SOURCE,LEN)
+void ASCII_DEC_BYTES(DESC, COUNT, SOURCE, LEN)
 
 // Write a string of decimal bytes to a string descriptor.
 
-struct dsc$descriptor * DESC;
-long * LEN;
+    struct dsc$descriptor * DESC;long * LEN;
 {
-    signed long I,
-           CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
+    signed long I, CPTR, CURBYTE, DPTR, DCNT, OUTCNT;
     OUTCNT = 0;
-    CPTR = CH$PTR(&SOURCE,0);
+    CPTR = CH$PTR(&SOURCE, 0);
     DCNT = DESC->dsc$w_length;
-    DPTR = CH$PTR(DESC->dsc$a_pointer,0);
-    for (I=(COUNT-1); I>=0; I--)
+    DPTR = CH$PTR(DESC->dsc$a_pointer, 0);
+    for (I = (COUNT - 1); I >= 0; I--)
     {
         CURBYTE = CH$RCHAR_A(CPTR);
-        APPEND_DEC(&DPTR,&DCNT,CURBYTE,&OUTCNT);
+        APPEND_DEC(&DPTR, &DCNT, CURBYTE, &OUTCNT);
         if (I != 0)
-            APPCHR('.',DPTR,DCNT,OUTCNT);
+            APPCHR('.', DPTR, DCNT, OUTCNT);
     };
     if (*LEN != 0)
-        *LEN = MIN(OUTCNT,DESC->dsc$w_length);
+        *LEN = MIN(OUTCNT, DESC->dsc$w_length);
 }
 
-APPEND_HEX(DPTR,DCNT,NUM,OUTCNT,SIZE)
+APPEND_HEX(DPTR, DCNT, NUM, OUTCNT, SIZE)
 
 // Append a hexidecimal value to a string
 
-long * DPTR;
-long * DCNT;
-long * OUTCNT;
+    long * DPTR;long * DCNT;long * OUTCNT;
 {
-    signed long I,
-           DIG,VAL;
-    VAL = ROT(NUM,(8-SIZE)*4); // Position first digit
-    for (I=(SIZE-1); I>=0; I--)
+    signed long I, DIG, VAL;
+    VAL = ROT(NUM, (8 - SIZE) * 4); // Position first digit
+    for (I = (SIZE - 1); I >= 0; I--)
     {
-        VAL = ROT(VAL,4);   // Rotate highest order 4 bits to lowest
-        DIG = VAL&0xf;  // Get the digit
+        VAL = ROT(VAL, 4);   // Rotate highest order 4 bits to lowest
+        DIG = VAL & 0xf;  // Get the digit
         if (DIG <= 9)
-            DIG = '0'+DIG;
+            DIG = '0' + DIG;
         else
-            DIG = 'A'+DIG-10;
-        APPCHR(DIG,(*DPTR),*DCNT,*OUTCNT);
+            DIG = 'A' + DIG - 10;
+        APPCHR(DIG, (*DPTR), *DCNT, *OUTCNT);
     }
 }
 
-void ASCII_HEX_BYTES(DESC,COUNT,SOURCE,LEN)
+void ASCII_HEX_BYTES(DESC, COUNT, SOURCE, LEN)
 
 // Write a string of hexidecimal bytes to a string descriptor.
 
-struct dsc$descriptor * DESC;
-long * LEN;
+    struct dsc$descriptor * DESC;long * LEN;
 {
-    signed long I,
-           CPTR,CURBYTE,DPTR,DCNT,OUTCNT;
-    CPTR = CH$PTR(&SOURCE,0);
+    signed long I, CPTR, CURBYTE, DPTR, DCNT, OUTCNT;
+    CPTR = CH$PTR(&SOURCE, 0);
     DCNT = DESC->dsc$w_length;
-    DPTR = CH$PTR(DESC->dsc$a_pointer,0);
+    DPTR = CH$PTR(DESC->dsc$a_pointer, 0);
     OUTCNT = 0;
-    for (I=(COUNT-1); I>=0; I--)
+    for (I = (COUNT - 1); I >= 0; I--)
     {
         CURBYTE = CH$RCHAR_A(CPTR);
-        APPEND_HEX(&DPTR,&DCNT,CURBYTE,&OUTCNT,2);
+        APPEND_HEX(&DPTR, &DCNT, CURBYTE, &OUTCNT, 2);
         if (I != 0)
-            APPCHR('-',DPTR,DCNT,OUTCNT);
+            APPCHR('-', DPTR, DCNT, OUTCNT);
     };
     if (*LEN != 0)
-        *LEN = MIN(OUTCNT,DESC->dsc$w_length);
+        *LEN = MIN(OUTCNT, DESC->dsc$w_length);
 }
-
 
 GET_DEC_NUM();
 
-GET_IP_ADDR(CPTR,VAL)
+GET_IP_ADDR(CPTR, VAL)
 
 // Convert an text internet address (a.b.c.d) into binary form.
 // CPTR contains the address of a pointer to the text.
@@ -302,16 +285,15 @@ GET_IP_ADDR(CPTR,VAL)
 // Returns -1 on failure, or terminating character (GEQ 0)
 // N.B. Assumes that Internet addresses are 4 bytes long.
 
-char ** CPTR;
+    char ** CPTR;
 {
-    signed long I,
-           DPTR,NVAL,CHR;
-    DPTR = CH$PTR(VAL,0);
-    for (I=3; I>=0; I--)
+    signed long I, DPTR, NVAL, CHR;
+    DPTR = CH$PTR(VAL, 0);
+    for (I = 3; I >= 0; I--)
     {
-        if ((CHR = GET_DEC_NUM(CPTR,&NVAL)) < 0)
+        if ((CHR = GET_DEC_NUM(CPTR, &NVAL)) < 0)
             return -1;
-        CH$WCHAR_A(NVAL,DPTR);
+        CH$WCHAR_A(NVAL, DPTR);
         if (I != 0)
             if (CH$RCHAR_A(*CPTR) != '.')
                 return -1;
@@ -319,7 +301,7 @@ char ** CPTR;
     return CHR;
 }
 
-GET_DEC_NUM(CPTR,VAL)
+GET_DEC_NUM(CPTR, VAL)
 
 // Read a decimal number from a string into binary form.
 // CPTR is the address of a string pointer to the numeric text.
@@ -330,11 +312,9 @@ GET_DEC_NUM(CPTR,VAL)
 // CPTR is updated to point at the terminating character.
 // Currently only handles unsigned decimal values.
 
-char ** CPTR;
-int * VAL;
+    char ** CPTR;int * VAL;
 {
-    signed long
-    CHR,RVAL,LPTR;
+    signed long CHR, RVAL, LPTR;
     LPTR = *CPTR;
     do
     {
@@ -346,7 +326,7 @@ int * VAL;
     RVAL = 0;
     while ((CHR >= '0') && (CHR <= '9'))
     {
-        RVAL = RVAL*10+(CHR-'0');
+        RVAL = RVAL * 10 + (CHR - '0');
         *CPTR = LPTR;
         CHR = CH$RCHAR_A(LPTR);
     };
@@ -354,10 +334,9 @@ int * VAL;
     return CHR;
 }
 
-
 GET_HEX_NUM();
 
-GET_HEX_BYTES(NUMBYT,CPTR,DEST)
+GET_HEX_BYTES( NUMBYT, CPTR, DEST)
 
 // Read a hexidecimal byte string.
 // Returns -1 on failure, or terminating character. CPTR updated to point
@@ -365,17 +344,13 @@ GET_HEX_BYTES(NUMBYT,CPTR,DEST)
 // Octets must be separated by the character "-"
 
 {
-    signed long I,
-           CVAL,
-           LPTR,
-           TCHR,
-           DPTR;
-    DPTR = CH$PTR(DEST,0);
-    for (I=(NUMBYT-1); I>=0; I--)
+    signed long I, CVAL, LPTR, TCHR, DPTR;
+    DPTR = CH$PTR(DEST, 0);
+    for (I = (NUMBYT - 1); I >= 0; I--)
     {
-        if ((TCHR=GET_HEX_NUM(CPTR,&CVAL)) < 0)
+        if ((TCHR = GET_HEX_NUM(CPTR, &CVAL)) < 0)
             return -1;
-        CH$WCHAR_A(CVAL,DPTR);
+        CH$WCHAR_A(CVAL, DPTR);
         if (I != 0)
             if (CH$RCHAR_A(CPTR) != '-')
                 return -1;
@@ -383,7 +358,7 @@ GET_HEX_BYTES(NUMBYT,CPTR,DEST)
     return TCHR;
 }
 
-GET_HEX_NUM(INPTR,VAL)
+GET_HEX_NUM(INPTR, VAL)
 
 // Read a hexidecimal number from a string into binary form.
 // CPTR is the address of a string pointer to the numeric text.
@@ -393,11 +368,9 @@ GET_HEX_NUM(INPTR,VAL)
 //   >=0 on success, returning the terminating character.
 // INPTR is updated to point to the termiating character.
 
-long * INPTR;
-long * VAL;
+    long * INPTR;long * VAL;
 {
-    signed long
-    CHR,RVAL,NCHR,CPTR;
+    signed long CHR, RVAL, NCHR, CPTR;
     CPTR = INPTR;
     do
     {
@@ -408,18 +381,17 @@ long * VAL;
     NCHR = 0;
     while ((0 == 0))
     {
-        signed long
-        CVAL;
+        signed long CVAL;
         if ((CHR >= '0') && (CHR <= '9'))
-            CVAL = CHR-'0';
+            CVAL = CHR - '0';
         else if ((CHR >= 'a') && (CHR <= 'f'))
-            CVAL = CHR-'a'+10;
+            CVAL = CHR - 'a' + 10;
         else if ((CHR >= 'A') && (CHR <= 'F'))
-            CVAL = CHR-'A'+10;
+            CVAL = CHR - 'A' + 10;
         else
             break;
-        NCHR = NCHR+1;
-        RVAL = (RVAL<<4)+*VAL;
+        NCHR = NCHR + 1;
+        RVAL = (RVAL << 4) + *VAL;
         *INPTR = CPTR;
         CHR = CH$RCHAR_A(CPTR);
     };
@@ -429,74 +401,69 @@ long * VAL;
     return CHR;
 }
 
-
 //SBTTL "Log file handling routines"
 
-struct _fabdef    LOGFAB_ = {   fab$l_fna : "INET$LOG:"
-    ,
+struct _fabdef LOGFAB_ =
+    { fab$l_fna : "INET$LOG:",
     // not yet ; buggy gcc      fab$b_fac : FAB$M_PUT,
     // not yet  fab$b_shr : FAB$M_GET,
     // not yet  fab$l_fop : (FAB$M_SQO),
-fab$b_rfm :
-    FAB$C_STMLF,            // JC
-    /* not yet fab$b_org : FAB$C_SEQ */
-}, *LOGFAB=&LOGFAB_;
-struct _rabdef    LOGRAB_ = { rab$l_fab:
-    &LOGFAB_
-}, *LOGRAB=&LOGRAB_;
+        fab$b_rfm :
+        FAB$C_STMLF,            // JC
+        /* not yet fab$b_org : FAB$C_SEQ */
+        }, *LOGFAB = &LOGFAB_;
+struct _rabdef LOGRAB_ =
+    { rab$l_fab:
+    &LOGFAB_ }, *LOGRAB = &LOGRAB_;
 
-signed long
-log_state  = 0;
+signed long log_state = 0;
 
 #define    TRUE (0 == 0)
 #define    FALSE (0 == 1)
 
-LOG_OPEN (void)
+LOG_OPEN(void)
 
 // Open the log/trace file for debug & trace recording.
 // Output: LOGFAB setup for stream output.
 // Returns: TRUE if successfully opened.
 
 {
-    signed long
-    RC;
+    signed long RC;
 #if 0
     // not yet
     RC = sys$create( LOGFAB,0,0);
 #else
     RC = 0;
 #endif
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
-        OPR$FAO("Log file $CREATE failed, RC = !XL, STV = !XL",
-                RC, LOGFAB->fab$l_stv);
+        OPR$FAO("Log file $CREATE failed, RC = !XL, STV = !XL", RC, LOGFAB->fab$l_stv);
         return FALSE;
     };
-    RC = sys$connect( LOGRAB,0,0);
-    if (BLISSIFNOT(RC))
+    RC = sys$connect(LOGRAB, 0, 0);
+    if (!(RC & 1))
     {
-        OPR$FAO("Log file $CONNECT failed, RC = !XL, STV = !XL",
-                RC, LOGRAB->rab$l_stv);
+        OPR$FAO("Log file $CONNECT failed, RC = !XL, STV = !XL", RC, LOGRAB->rab$l_stv);
         return FALSE;
     };
     return TRUE;
 }
 
-LOG_CLOSE (void)
+LOG_CLOSE(void)
 {
     if (log_state != 0)
     {
-        sys$disconnect( LOGRAB,0,0);
-        sys$close( LOGFAB,0,0);
+        sys$disconnect(LOGRAB, 0, 0);
+        sys$close(LOGFAB, 0, 0);
         return TRUE;
     }
     else
         return FALSE;
 }
 
-void    LOG_FAO();
+void LOG_FAO();
 
-void LOG_CHANGE(STATE)
+void LOG_CHANGE( STATE)
 {
     if (STATE != 0)
     {
@@ -507,10 +474,10 @@ void LOG_CHANGE(STATE)
             if (LOG_OPEN())
             {
                 log_state = STATE;
-                LOG$FAO("!%T Logging enabled!/",0);
+                LOG$FAO("!%T Logging enabled!/", 0);
             };
         };
-        LOG$FAO("!%T Log event mask set to !XL!/",0,STATE);
+        LOG$FAO("!%T Log event mask set to !XL!/", 0, STATE);
     }
     else
     {
@@ -518,7 +485,7 @@ void LOG_CHANGE(STATE)
         if (log_state != 0)
         {
             // It's open - close it now
-            LOG$FAO("!%T Logging disabled!/",0);
+            LOG$FAO("!%T Logging disabled!/", 0);
             LOG_CLOSE();
             log_state = STATE;  // Set new log state
         };
@@ -530,18 +497,16 @@ void LOG_OUTPUT(OUTDESC)
 // Output a string to the log file.
 // OUTDESC is the address of a string descriptor.
 
-struct dsc$descriptor * OUTDESC;
+    struct dsc$descriptor * OUTDESC;
 {
-    static
-    logcount=0 ;
+    static logcount = 0;
     if (log_state != 0)
     {
-        signed long
-        RC;
+        signed long RC;
 
         LOGRAB->rab$w_rsz = OUTDESC->dsc$w_length;
         LOGRAB->rab$l_rbf = OUTDESC->dsc$a_pointer;
-        logcount = logcount + OUTDESC->dsc$w_length ;
+        logcount = logcount + OUTDESC->dsc$w_length;
 #if 0
         printk("L %s\n",OUTDESC->dsc$a_pointer);
 #endif
@@ -549,36 +514,32 @@ struct dsc$descriptor * OUTDESC;
         // not yet. no write support, and rms don't work here
         RC = sys$put( LOGRAB);
 //!!HACK!!// Take out this Flush!
-        if ((   (logcount > log_threshold)
-                ||  (log_state & LOG$FLUSH) ))  // JC
+        if (( (logcount > log_threshold)
+                        || (log_state & LOG$FLUSH) ))// JC
         {
             RC = sys$flush(LOGRAB);
-            logcount = 0 ;
-        } ;
+            logcount = 0;
+        };
 #endif
     };
 }
 
 void LOG_FAO(CSTR, args)
-va_list args;
+    va_list args;
 // Do output to log file using $FAO to format parameters.
 
 {
-    signed long
-    RC;
-    DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
+    signed long RC;
+    DESC$STR_ALLOC(OUTDESC, 250); // was: 1000 stack-smasher
 
-    RC = sys$faol(CSTR,
-                  &OUTDESC->dsc$w_length,
-                  OUTDESC,
-                  &args); // check. was ap+8
-    if (BLISSIF(RC))
+    RC = sys$faol(CSTR, &OUTDESC->dsc$w_length, OUTDESC, &args); // check. was ap+8
+    if (RC & 1)
         LOG_OUTPUT(OUTDESC);
     else
-        OPR$FAO("LOG_FAO failure, error code is !XL",RC);
+        OPR$FAO("LOG_FAO failure, error code is !XL", RC);
 }
 
-void LOG_Time_Stamp (void)
+void LOG_Time_Stamp(void)
 
 // Output to the LOG device/file the current time.  Char string ends
 // in a space (no crlf).
@@ -586,71 +547,67 @@ void LOG_Time_Stamp (void)
 // Exit:    none
 
 {
-    LOG$FAO("!%T ",0);
+    LOG$FAO("!%T ", 0);
 }
-
-
 
 //SBTTL "Activity file handling routines"
 
-struct _fabdef    ACTFAB_ = { fab$l_fna : "INET$ACTIVITY:"
-    ,
+struct _fabdef ACTFAB_ =
+    { fab$l_fna : "INET$ACTIVITY:",
     // not yet ; buggy gcc fab$b_fac : FAB$M_PUT,
     // not yet fab$b_shr : FAB$M_GET,
     // not yet fab$l_fop : (FAB$M_SQO),
-    /* not yet fab$b_org : FAB$C_SEQ*/
-}, *ACTFAB=&ACTFAB_;
-struct _rabdef     ACTRAB_ = {rab$l_fab :
-    &ACTFAB_
-}, *ACTRAB = &ACTRAB_;
+        /* not yet fab$b_org : FAB$C_SEQ*/
+        }, *ACTFAB = &ACTFAB_;
+struct _rabdef ACTRAB_ =
+    { rab$l_fab :
+    &ACTFAB_ }, *ACTRAB = &ACTRAB_;
 
-signed long
-act_state  = 0;
+signed long act_state = 0;
 
-ACT_OPEN (void)
+ACT_OPEN(void)
 
 // Open the activity file for event recording.
 // Output: ACTFAB setup for stream output.
 // Returns: TRUE if successfully opened.
 
 {
-    signed long
-    RC;
+    signed long RC;
 #if 0
     // not yet
     RC = sys$create( ACTFAB,0,0);
 #else
     RC = 0;
 #endif
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
-        OPR$FAO("Activity file $CREATE failed, RC = !XL",RC);
+        OPR$FAO("Activity file $CREATE failed, RC = !XL", RC);
         return FALSE;
     };
-    RC = sys$connect(ACTRAB,0,0);
-    if (BLISSIFNOT(RC))
+    RC = sys$connect(ACTRAB, 0, 0);
+    if (!(RC & 1))
     {
-        OPR$FAO("Activity file $CONNECT failed, RC = !XL",RC);
+        OPR$FAO("Activity file $CONNECT failed, RC = !XL", RC);
         return FALSE;
     };
     return TRUE;
 }
 
-ACT_CLOSE (void)
+ACT_CLOSE(void)
 {
     if (act_state != 0)
     {
-        sys$disconnect(ACTRAB,0,0);
-        sys$close(ACTFAB,0,0);
+        sys$disconnect(ACTRAB, 0, 0);
+        sys$close(ACTFAB, 0, 0);
         return TRUE;
     }
     else
         return FALSE;
 }
 
-void    ACT_FAO();
+void ACT_FAO();
 
-void ACT_CHANGE(STATE)
+void ACT_CHANGE( STATE)
 {
     if (STATE != 0)
     {
@@ -661,10 +618,10 @@ void ACT_CHANGE(STATE)
             if (ACT_OPEN())
             {
                 act_state = STATE;
-                ACT$FAO("!%T Logging enabled!/",0);
+                ACT$FAO("!%T Logging enabled!/", 0);
             };
         };
-        ACT$FAO("!%T Log event mask set to !XL!/",0,STATE);
+        ACT$FAO("!%T Log event mask set to !XL!/", 0, STATE);
     }
     else
     {
@@ -672,7 +629,7 @@ void ACT_CHANGE(STATE)
         if (act_state != 0)
         {
             // It's open - close it now
-            ACT$FAO("!%T Logging disabled!/",0);
+            ACT$FAO("!%T Logging disabled!/", 0);
             ACT_CLOSE();
             act_state = STATE;  // Set new log state
         };
@@ -684,17 +641,15 @@ void ACT_OUTPUT(OUTDESC)
 // Output a string to the activity log file.
 // OUTDESC is the address of a string descriptor.
 
-struct dsc$descriptor * OUTDESC;
+    struct dsc$descriptor * OUTDESC;
 {
-    static
-    ACTCOUNT     = 0 ;
+    static ACTCOUNT = 0;
     if (act_state != 0)
     {
-        signed long
-        RC;
+        signed long RC;
         ACTRAB->rab$w_rsz = OUTDESC->dsc$w_length;
         ACTRAB->rab$l_rbf = OUTDESC->dsc$a_pointer;
-        ACTCOUNT = ACTCOUNT + OUTDESC->dsc$w_length ;
+        ACTCOUNT = ACTCOUNT + OUTDESC->dsc$w_length;
 
 #if 0
         // not yet. no write support, and rms don't work here
@@ -702,32 +657,28 @@ struct dsc$descriptor * OUTDESC;
         if ((ACTCOUNT > act_threshold))
         {
             RC = sys$flush(ACTRAB);
-            ACTCOUNT = 0 ;
-        } ;
+            ACTCOUNT = 0;
+        };
 #endif
     };
 }
 
 void ACT_FAO(CSTR, args)
-va_list args;
+    va_list args;
 // Do output to activity log file using $FAO to format parameters.
 
 {
-    signed long
-    RC;
-    DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
+    signed long RC;
+    DESC$STR_ALLOC(OUTDESC, 250); // was: 1000 stack-smasher
 
-    RC = sys$faol(CSTR,
-                  &OUTDESC->dsc$w_length,
-                  OUTDESC,
-                  &args); // check. was ap+8
-    if (BLISSIF(RC))
+    RC = sys$faol(CSTR, &OUTDESC->dsc$w_length, OUTDESC, &args); // check. was ap+8
+    if (RC & 1)
         ACT_OUTPUT(OUTDESC);
     else
-        OPR$FAO("ACT_FAO failure, error code is !XL",RC);
+        OPR$FAO("ACT_FAO failure, error code is !XL", RC);
 }
 
-void ACT_Time_Stamp (void)
+void ACT_Time_Stamp(void)
 
 // Output to the activity log device/file the current time.  Char string ends
 // in a space (no crlf).
@@ -735,55 +686,50 @@ void ACT_Time_Stamp (void)
 // Exit:    none
 
 {
-    ACT$FAO("!%T ",0);
+    ACT$FAO("!%T ", 0);
 }
 
 //sbttl "Send messages to the Central VMS operator"
 /*
 
-Function:
+ Function:
 
-    Send messages to the operators console & those terminals defined
-    as operators.  used by network device interface code to tell the
-    world about devices going offline etc.  Message sent to operator
-    is prefixed with network name as derrived from "tcp$network_name"
-    logical name.
+ Send messages to the operators console & those terminals defined
+ as operators.  used by network device interface code to tell the
+ world about devices going offline etc.  Message sent to operator
+ is prefixed with network name as derrived from "tcp$network_name"
+ logical name.
 
-Inputs:
+ Inputs:
 
-    Text = address of mesage descriptor(vms string descriptor).
+ Text = address of mesage descriptor(vms string descriptor).
 
-Implicit Inputs:
+ Implicit Inputs:
 
-    MYname = initialized string-desc for network name.
-Outputs:
+ MYname = initialized string-desc for network name.
+ Outputs:
 
-    lbc (low bit clear) = success
-    otherwise $sndopr error return.
+ lbc (low bit clear) = success
+ otherwise $sndopr error return.
 
-Side Effects:
+ Side Effects:
 
-    operator terminals will receive the xmitted messages.
-    if message_length > 128-size(tcp$network_name) then message will
-    be truncated.
-*/
+ operator terminals will receive the xmitted messages.
+ if message_length > 128-size(tcp$network_name) then message will
+ be truncated.
+ */
 
 send_2_operator(TEXT)
-struct dsc$descriptor * TEXT;
+    struct dsc$descriptor * TEXT;
 {
-    extern struct dsc$descriptor *  myname;
-    static
-    Request_ID = 0;
+    extern struct dsc$descriptor * myname;
+    static Request_ID = 0;
 #define MAXCHR 1024
-    signed long
-    MSGLEN,
-    PTR;
-    struct dsc$descriptor MSG_, *MSG=&MSG_;
-    struct _opcdef MSGBUF_, * MSGBUF=&MSGBUF_ ;
+    signed long MSGLEN, PTR;
+    struct dsc$descriptor MSG_, *MSG = &MSG_;
+    struct _opcdef MSGBUF_, *MSGBUF = &MSGBUF_;
     char *MSGTEXT = &MSGBUF->opc$l_ms_text;
-    signed long
-    NAMPTR = myname->dsc$a_pointer,
-    NAMLEN = myname->dsc$w_length;
+    signed long NAMPTR = myname->dsc$a_pointer, NAMLEN = myname->dsc$w_length;
 
     MSGBUF->opc$b_ms_type = OPC$_RQ_RQST;
     MSGBUF->opc$b_ms_target = OPC$M_NM_CENTRL;
@@ -792,8 +738,8 @@ struct dsc$descriptor * TEXT;
     MSGLEN = TEXT->dsc$w_length;
     if (MSGLEN > MAXCHR)
         MSGLEN = MAXCHR; // check should be *MSGLEN ?
-    CH$MOVE(MSGLEN,TEXT->dsc$a_pointer,MSGTEXT);
-    MSG->dsc$w_length = 8+MSGLEN;
+    CH$MOVE(MSGLEN, TEXT->dsc$a_pointer, MSGTEXT);
+    MSG->dsc$w_length = 8 + MSGLEN;
     MSG->dsc$b_class = DSC$K_CLASS_Z;
     MSG->dsc$b_dtype = DSC$K_DTYPE_Z;
     MSG->dsc$a_pointer = MSGBUF;
@@ -804,48 +750,44 @@ void OPR_FAO(long CSTR, ...)
 // Send a message to the VMS operator, using $FAO for output formatting.
 
 {
-    signed long
-    RC;
-    DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
-    DESC$STR_ALLOC(OPRDESC,250); // was: 1000 stack-smasher
+    signed long RC;
+    DESC$STR_ALLOC(OUTDESC, 250); // was: 1000 stack-smasher
+            DESC$STR_ALLOC(OPRDESC,250);// was: 1000 stack-smasher
 
 #ifdef __i386__
-    va_list args;
-    va_start(args,CSTR);
-    RC = sys$faol(CSTR,
-                  &OUTDESC->dsc$w_length,
-                  OUTDESC,
-                  args); // check. was ap+8
-    va_end(args);
+            va_list args;
+            va_start(args,CSTR);
+            RC = sys$faol(CSTR,
+                    &OUTDESC->dsc$w_length,
+                    OUTDESC,
+                    args); // check. was ap+8
+            va_end(args);
 #else
-    va_list args;
-    long argv[16],argc=0;
-    va_start(args,CSTR);
-    while(argc<15)   // check. should be 17.
+            va_list args;
+            long argv[16],
+    argc = 0;
+    va_start(args, CSTR);
+    while (argc < 15)   // check. should be 17.
     {
-        argv[argc]=va_arg(args,long);
+        argv[argc] = va_arg(args, long);
         argc++;
     }
     va_end(args);
-    RC = sys$faol(CSTR,
-                  &OUTDESC->dsc$w_length,
-                  OUTDESC,
-                  argv); // check. was ap+8
+    RC = sys$faol(CSTR, &OUTDESC->dsc$w_length, OUTDESC, argv); // check. was ap+8
 #endif
-    if (BLISSIFNOT(RC))
-        sys$exit( RC);
+    if (!(RC & 1))
+        sys$exit(RC);
 
 // Reformat for console output
 
-    $DESCRIPTOR(ctr,"IPACP: !AS");
-    RC = sys$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
-    if (BLISSIFNOT(RC))
-        sys$exit( RC);
+    $DESCRIPTOR(ctr, "IPACP: !AS");
+    RC = sys$fao(&ctr, &OPRDESC->dsc$w_length, OPRDESC, OUTDESC);
+    if (!(RC & 1))
+        sys$exit(RC);
     send_2_operator(OPRDESC);
 }
 
-signed long
-PRINT_MSG = OPR_FAO;    // Synonym for host table module to use
+signed long PRINT_MSG = OPR_FAO;    // Synonym for host table module to use
 
 //SBTTL "Error processing routines - ERROR_FAO, FATAL_FAO"
 
@@ -854,58 +796,54 @@ void ERROR_FAO(long CSTR, ...)
 // Send a message to the console & log the error (OPR_FAO + LOG_FAO)
 //
 {
-    signed long
-    RC,
-    OLDSTATE;
-    DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
-    DESC$STR_ALLOC(OPRDESC,250); // was: 1000 stack-smasher
-    DESC$STR_ALLOC(LOGDESC,250); // was: 1000 stack-smasher
+    signed long RC, OLDSTATE;
+    DESC$STR_ALLOC(OUTDESC, 250); // was: 1000 stack-smasher
+            DESC$STR_ALLOC(OPRDESC,250);// was: 1000 stack-smasher
+            DESC$STR_ALLOC(LOGDESC,250);// was: 1000 stack-smasher
 
 // Format the message string
 
 #ifdef __i386__
-    va_list args;
-    va_start(args,CSTR);
-    RC = sys$faol(CSTR,
-                  &OUTDESC->dsc$w_length,
-                  OUTDESC,
-                  args); // check. was ap+8
-    va_end(args);
+            va_list args;
+            va_start(args,CSTR);
+            RC = sys$faol(CSTR,
+                    &OUTDESC->dsc$w_length,
+                    OUTDESC,
+                    args); // check. was ap+8
+            va_end(args);
 #else
-    va_list args;
-    long argv[16],argc=0;
-    va_start(args,CSTR);
-    while(argc<15)   // check. should be 17.
+            va_list args;
+            long argv[16],
+    argc = 0;
+    va_start(args, CSTR);
+    while (argc < 15)   // check. should be 17.
     {
-        argv[argc]=va_arg(args,long);
+        argv[argc] = va_arg(args, long);
         argc++;
     }
     va_end(args);
-    RC = sys$faol(CSTR,
-                  &OUTDESC->dsc$w_length,
-                  OUTDESC,
-                  argv); // check. was ap+8
+    RC = sys$faol(CSTR, &OUTDESC->dsc$w_length, OUTDESC, argv); // check. was ap+8
 #endif
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
-        OPR$FAO("ERROR_FAO failure, RC = !XL",RC);
-        sys$exit( RC);
+        OPR$FAO("ERROR_FAO failure, RC = !XL", RC);
+        sys$exit(RC);
     };
 
 // Format and send message to the operator
 
-    $DESCRIPTOR(ctr,"?IPACP: !AS");
-    RC = sys$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
-    if (BLISSIFNOT(RC))
-        sys$exit( RC);
+    $DESCRIPTOR(ctr, "?IPACP: !AS");
+    RC = sys$fao(&ctr, &OPRDESC->dsc$w_length, OPRDESC, OUTDESC);
+    if (!(RC & 1))
+        sys$exit(RC);
     send_2_operator(OPRDESC);
 
 // Format the message for logging - add time+date and EOL
 
-    $DESCRIPTOR(ctr2,"!%T !AS!/");
-    RC = sys$fao(&ctr2,&LOGDESC->dsc$w_length,LOGDESC,0,OUTDESC);
-    if (BLISSIFNOT(RC))
-        sys$exit( RC);
+    $DESCRIPTOR(ctr2, "!%T !AS!/");
+    RC = sys$fao(&ctr2, &LOGDESC->dsc$w_length, LOGDESC, 0, OUTDESC);
+    if (!(RC & 1))
+        sys$exit(RC);
 
 // Make sure we are logging something & log it
 
@@ -915,64 +853,58 @@ void ERROR_FAO(long CSTR, ...)
     LOG_CHANGE(OLDSTATE);
 }
 
-
 void FATAL_FAO(long CSTR, ...)
 //
 // Same as above, except also exit the ACP.
 //
 {
-    signed long
-    RC,
-    OLDSTATE;
-    DESC$STR_ALLOC(OUTDESC,250); // was: 1000 stack-smasher
-    DESC$STR_ALLOC(OPRDESC,250); // was: 1000 stack-smasher
-    DESC$STR_ALLOC(LOGDESC,250); // was: 1000 stack-smasher
+    signed long RC, OLDSTATE;
+    DESC$STR_ALLOC(OUTDESC, 250); // was: 1000 stack-smasher
+            DESC$STR_ALLOC(OPRDESC,250);// was: 1000 stack-smasher
+            DESC$STR_ALLOC(LOGDESC,250);// was: 1000 stack-smasher
 
 // Format the output string
 
 #ifdef __i386__
-    va_list args;
-    va_start(args,CSTR);
-    RC = sys$faol(CSTR,
-                  &OUTDESC->dsc$w_length,
-                  OUTDESC,
-                  args); // check. was ap+8
-    va_end(args);
+            va_list args;
+            va_start(args,CSTR);
+            RC = sys$faol(CSTR,
+                    &OUTDESC->dsc$w_length,
+                    OUTDESC,
+                    args); // check. was ap+8
+            va_end(args);
 #else
-    va_list args;
-    long argv[16],argc=0;
-    va_start(args,CSTR);
-    while(argc<15)   // check. should be 17.
+            va_list args;
+            long argv[16],
+    argc = 0;
+    va_start(args, CSTR);
+    while (argc < 15)   // check. should be 17.
     {
-        argv[argc]=va_arg(args,long);
+        argv[argc] = va_arg(args, long);
         argc++;
     }
     va_end(args);
-    RC = sys$faol(CSTR,
-                  &OUTDESC->dsc$w_length,
-                  OUTDESC,
-                  argv); // check. was ap+8
+    RC = sys$faol(CSTR, &OUTDESC->dsc$w_length, OUTDESC, argv); // check. was ap+8
 #endif
 
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
-        OPR$FAO("FATAL_FAO failure, RC = !XL",RC);
-        sys$exit( RC);
+        OPR$FAO("FATAL_FAO failure, RC = !XL", RC);
+        sys$exit(RC);
     };
 
 // Format & send message to the operator
 
-    $DESCRIPTOR(ctr,"?IPACP: !AS");
-    RC = sys$fao(&ctr,&OPRDESC->dsc$w_length,OPRDESC,OUTDESC);
-    if (BLISSIFNOT(RC))
-        sys$exit( RC);
+    $DESCRIPTOR(ctr, "?IPACP: !AS");
+    RC = sys$fao(&ctr, &OPRDESC->dsc$w_length, OPRDESC, OUTDESC);
+    if (!(RC & 1))
+        sys$exit(RC);
     send_2_operator(OPRDESC);
 
 // Format it for logging
 
-    $DESCRIPTOR(ctr2,"!%T !AS!/");
-    RC = sys$fao(&ctr2,&LOGDESC->dsc$w_length,LOGDESC,
-                 0,OUTDESC);
+    $DESCRIPTOR(ctr2, "!%T !AS!/");
+    RC = sys$fao(&ctr2, &LOGDESC->dsc$w_length, LOGDESC, 0, OUTDESC);
 
 // Make sure we are logging something & log it
 
@@ -985,17 +917,17 @@ void FATAL_FAO(long CSTR, ...)
 
 //SBTTL "Queued message processing"
 /*
-    In order to debug timing-related problems, it is often necessary to log
-    information from within AST routines. However, the very act of doing this
-    logging can alter timing significantly. To avoid this problem, AST routine
-    log messages are queued and later written in non-AST context.
-*/
+ In order to debug timing-related problems, it is often necessary to log
+ information from within AST routines. However, the very act of doing this
+ logging can alter timing significantly. To avoid this problem, AST routine
+ log messages are queued and later written in non-AST context.
+ */
 
 struct QB$ERRMSG
 {
-    void *     EMQ$NEXT ;   // Next item on queue
-    void *     EMQ$LAST ;   // Previous item on queue
-    long long    EMQ$MDSC   ;   // Message descriptor
+    void * EMQ$NEXT;   // Next item on queue
+    void * EMQ$LAST;   // Previous item on queue
+    long long EMQ$MDSC;   // Message descriptor
 };
 
 #define    QB$ERRMSG_SIZE sizeof(struct QB$ERRMSG)
@@ -1006,8 +938,8 @@ QB$ERRMSG = BLOCK->QB$ERRMSG_SIZE FIELD(QB$ERRMSG_FIELDS) %;
 
 struct QH$ERRHDR
 {
-    void *     EM$QHEAD ;
-    void *    EM$QTAIL;
+    void * EM$QHEAD;
+    void * EM$QTAIL;
 };
 
 #define ERRHDR_SIZE sizeof(struct QH$ERRHDR)
@@ -1016,26 +948,22 @@ MACRO
 QH$ERRHDR = BLOCK->QH$ERRHDR_SIZE FIELD(QH$ERRHDR_FIELDS) %;
 #endif
 
-static struct QH$ERRHDR
-ERR_MSG_Q_ = { EM$QHEAD :
-    &ERR_MSG_Q_,
-EM$QTAIL:
-    & ERR_MSG_Q_
-},*ERR_MSG_Q=&ERR_MSG_Q_;
+static struct QH$ERRHDR ERR_MSG_Q_ =
+    { EM$QHEAD :
+    &ERR_MSG_Q_, EM$QTAIL:
+    &ERR_MSG_Q_ }, *ERR_MSG_Q = &ERR_MSG_Q_;
 
 void QL_FAO(CSTR, args)
-va_list args;
+    va_list args;
 //
 // Format and queue an error message using $FAO and the message queue.
 //
 {
-    extern
-    sleeping;
-    extern  mm$qblk_get();
-    extern void mm$qblk_free ();
-    extern  LIB$SYS_FAOL ();
-    signed long
-    RC;
+    extern sleeping;
+    extern mm$qblk_get();
+    extern void mm$qblk_free();
+    extern LIB$SYS_FAOL();
+    signed long RC;
     struct dsc$descriptor * MDSC;
     struct queue_blk_structure(QB$ERRMSG) * QB;
 
@@ -1057,40 +985,41 @@ va_list args;
     // not yet
     RC = LIB$SYS_FAOL(CSTR, MDSC->dsc$w_length, MDSC, /*AP+*/8);
 #else
-    MDSC->dsc$a_pointer=malloc(256);
+    MDSC->dsc$a_pointer = malloc(256);
     RC = sys$faol(CSTR, &MDSC->dsc$w_length, MDSC, &args); // check. was AP+etc
 #endif
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
-        OPR$FAO("QL_FAO failure, RC = !XL",RC);
+        OPR$FAO("QL_FAO failure, RC = !XL", RC);
         mm$qblk_free(QB);
         return;
     };
 
 // Insert the entry onto the queue
 
-    INSQUE(QB,ERR_MSG_Q->EM$QTAIL);
+    INSQUE(QB, ERR_MSG_Q->EM$QTAIL);
 
 // If the ACP is sleeping, issue a wakeup so messages will be written at the
 // next interval.
 
-    $ACPWAKE;
+    $ACPWAKE
+    ;
 }
 
-void CHECK_ERRMSG_Q (void)
+void CHECK_ERRMSG_Q(void)
 //
 // Write all of the messages pending on the error message queue.
 // Called from main TCP processing loop after all useful work has been done.
 //
 {
-    extern      void    mm$qblk_free ();
-    extern  STR$FREE1_DX ();
+    extern void mm$qblk_free();
+    extern STR$FREE1_DX();
     struct queue_blk_structure(QB$ERRMSG) * QB;
     struct dsc$descriptor * MDSC;
 
 // Scan the error message queue, writing each entry to the log file.
 
-    while (REMQUE(ERR_MSG_Q->EM$QHEAD,&QB) != EMPTY_QUEUE)
+    while (REMQUE(ERR_MSG_Q->EM$QHEAD, &QB) != EMPTY_QUEUE)
     {
         MDSC = &QB->EMQ$MDSC;
         LOG_OUTPUT(MDSC);
@@ -1102,29 +1031,29 @@ void CHECK_ERRMSG_Q (void)
 //Sbttl "VMS Exit Handler"
 /*
 
-Function:
+ Function:
 
-    Double check that all user IO has been posted otherwise user process
-    will hang in MWAIT waiting for the outstanding IO to complete.  Catch
-    is the system dynamic memory used in the user's IO request (IRP).
+ Double check that all user IO has been posted otherwise user process
+ will hang in MWAIT waiting for the outstanding IO to complete.  Catch
+ is the system dynamic memory used in the user's IO request (IRP).
 
-Inputs:
+ Inputs:
 
-    None.
+ None.
 
-Outputs:
+ Outputs:
 
-    None.
+ None.
 
-Side Effects:
+ Side Effects:
 
-    All user IO is posted with the TCP error "TCP is Exiting".
-*/
+ All user IO is posted with the TCP error "TCP is Exiting".
+ */
 
-void Exit_Handler (void)
+void Exit_Handler(void)
 {
-    extern      void    user$purge_all_io ();
-    extern void RESET_PROCNAME() ;
+    extern void user$purge_all_io();
+    extern void RESET_PROCNAME();
 
     ERROR$FAO("Exit handler: Exit requested, cleaning up...");
 
@@ -1145,33 +1074,33 @@ void Exit_Handler (void)
 //Sbttl "VMS Exception Handler"
 /*
 
-Function:
+ Function:
 
-    Catch those nasty Exceptions which might might cause TCP to crash
-    & forget about user IO requests thus leaving the user jobs stuck
-    in MWAIT state waiting for their IO to complete.
+ Catch those nasty Exceptions which might might cause TCP to crash
+ & forget about user IO requests thus leaving the user jobs stuck
+ in MWAIT state waiting for their IO to complete.
 
-Inputs:
+ Inputs:
 
-    None.
+ None.
 
-Outputs:
+ Outputs:
 
-    SS$_Resignal, indicate we want to bomb.
+ SS$_Resignal, indicate we want to bomb.
 
-Side Effects:
+ Side Effects:
 
-    All user IO is posted with the TCP error "TCP is Exiting".
-*/
+ All user IO is posted with the TCP error "TCP is Exiting".
+ */
 
-Exception_Handler(SIG,MECH)
-struct  _chfdef1 * SIG;
+Exception_Handler(SIG, MECH)
+    struct _chfdef1 * SIG;
 {
-    extern void user$purge_all_io ();
+    extern void user$purge_all_io();
 
-    ERROR$FAO("Exception handler: signal name !XL",SIG->chf$l_sig_name);
+    ERROR$FAO("Exception handler: signal name !XL", SIG->chf$l_sig_name);
     user$purge_all_io();
-    sys$flush( LOGRAB, 0, 0);
-    sys$flush( ACTRAB, 0, 0);
-    return(SS$_RESIGNAL);
+    sys$flush(LOGRAB, 0, 0);
+    sys$flush(ACTRAB, 0, 0);
+    return (SS$_RESIGNAL);
 }

@@ -488,7 +488,7 @@ int testlibaddx(FILE *fptr, int *fstatus, char *cont)
     for (i = array2_size - 1; i >= 0; i--)
         printf("%.8lX ", array2[i]);
     printf("\n");
-    printf("Input   Array Size  %ld \n", array_length);
+    printf("Input   Array Size  %d \n", array_length);
 
     printf("Input   Sum         ");
     for (i = array3_size - 1; i >= 0; i--)
@@ -510,7 +510,7 @@ int testlibaddx(FILE *fptr, int *fstatus, char *cont)
         printf("%.8lX ", array2[i]);
     printf("\n");
 
-    printf("Output  Array Size  %ld \n", array_length);
+    printf("Output  Array Size  %d \n", array_length);
     printf("\n");
 
     printf("Output  Sum         ");
@@ -1006,7 +1006,7 @@ int testlibcrc (FILE *fptr, int *fstatus, char *cont)
 // do crc check
     result_code = lib$crc (crc_table, &initial_crc, stream);
 
-    printf ("Output  Result  %ld \n",result_code);
+    printf ("Output  Result  %d \n",result_code);
 
     for ( i = 0; i < 16; i++ )
     {
@@ -1751,7 +1751,7 @@ int testlibmatchc(FILE *fptr, int *fstatus, char *cont)
         *cont = 'P';
     }
 
-    printf("Output Result %ld \n", result_code);
+    printf("Output Result %d \n", result_code);
     printf("\n");
     printf("Output Character ");
     str$$print_sd(&char_string);

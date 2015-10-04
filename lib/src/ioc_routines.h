@@ -158,7 +158,7 @@ int ioc_std$searchcont(int unit, int scslen, struct _ucb *ucb, struct _ddb *ddb,
 int ioc_std$searchdev(VOID_PQ descr_p, struct _ucb **ucb_p, struct _ddb **ddb_p, struct _sb **sb_p);
 int ioc_std$searchint(int unit, int scslen, int devnamlen, char *devnam, int flags, struct _ucb **ucb_p, struct _ddb **ddb_p,
         struct _sb **sb_p, void **lock_val_p);
-int ioc$search_device_type(const char *, const int32, struct _dtn **);
+int ioc$search_device_type(const char *, const INT32, struct _dtn **);
 int ioc_std$sensedisk(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
 void ioc$setup_ucb_dipl(struct _ucb *ucb);
 void ioc_std$sever_ucb(struct _ucb *ucb);
@@ -184,7 +184,7 @@ int ioc$write_pci_config(struct _adp *adp, int pci_node, int offset, int length,
 int ioc_std$getsyi_cpu_specific(int getsyi_code, unsigned char *buffer, int *buffer_length);
 
 void ioc$reqcom(int iosb1, int iosb2, struct _ucb * u);
-ioc$bufpost(struct _irp * i);
+void ioc$bufpost(struct _irp * i);
 void ioc$initiate(struct _irp * i, struct _ucb * u);
 extern int ioc$searchdev(struct return_values *r, void * devnam);
 int ioc$search(struct return_values *r, void * devnam);

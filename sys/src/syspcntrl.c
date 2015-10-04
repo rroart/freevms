@@ -83,12 +83,10 @@ int alloc_ipid()
 
 struct _pcb * exe$ipid_to_pcb(unsigned long pid)
 {
-    int i;
     if ((pid&0xffff)>MAXPROCESSCNT) printk(KERN_EMERG "EXE %x\n",pid);
     if ((pid&0xffff)>MAXPROCESSCNT)
     {
-        unsigned long * x=&i;
-        printk(KERN_EMERG "FIND2 %d %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x\n",pid,pid,x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16]);
+        printk(KERN_EMERG "FIND2 %d %x\n",pid,pid);
     }
     if ((pid&0xffff)>sch$gl_maxpix) return 0;
     unsigned long *vec=sch$gl_pcbvec;
@@ -100,8 +98,9 @@ struct _pcb * exe$ipid_to_pcb(unsigned long pid)
 
 struct _pcb * exe$epid_to_pcb(unsigned long pid)
 {
-    int ipid=exe$epid_to_ipid(pid);
-    if (ipid) return exe$ipid_to_pcb(ipid);
+    int ipid = exe$epid_to_ipid(pid);
+    if (ipid)
+        return exe$ipid_to_pcb(ipid);
     return 0;
 }
 

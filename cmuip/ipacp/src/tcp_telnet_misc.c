@@ -594,7 +594,7 @@ void Line_Changed_AST (Parm)
                    &PTY_Char,
                    QCB$K_SIZE,
                    0,0,0,0);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         XLOG$FAO(LOG$TELERR
                  ,"!%T Set_LINE_Change_AST: SENSEMODE status=!UL!/",0,RC);
@@ -631,7 +631,7 @@ void Line_Changed_AST (Parm)
              3,
              0,
              0);
-    if (BLISSIFNOT(RC))
+    if (!(RC & 1))
     {
         XLOG$FAO(LOG$TELERR
                  ,"!%T Set_LINE_Change_AST: SETMODE status=!UL!/",0,RC);

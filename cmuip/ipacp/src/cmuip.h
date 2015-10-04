@@ -4,8 +4,6 @@
 #include <stddef.h>
 
 struct tcb_structure;
-BLISSIF(int i);
-BLISSIFNOT(int i);
 ACT_OPEN (void);
 LOG_OPEN (void);
 long long tcp$service_connections (void);
@@ -55,7 +53,7 @@ int CH$NEQ(long n1, long ptr1, long n2, long ptr2);
 int CH$EQL(long n1, long ptr1, long n2, long ptr2);
 long CH$PTR(long X);
 #ifndef CH$PLUS
-CH$PLUS(long x, long y);
+long CH$PLUS(long x, long y);
 #endif
 UPLIT();
 ch$move(long a, long b, long c);
@@ -100,10 +98,10 @@ get_community(sessionid);
 shift_array(begin, length, shift_amount);
 setVariable(var_val, var_val_type, var_val_len, statP, statLen);
 goodValue(inType, inLen, actualType, actualLen);
-SCH$IOLOCKW();
-SCH$IOUNLOCK();
-FORKLOCK();
-FORKUNLOCK();
+int SCH$IOLOCKW();
+int SCH$IOUNLOCK();
+void FORKLOCK();
+void FORKUNLOCK();
 int find_ucb(R1, U);
 int Dismount();
 unlock_iodb(long * R4);

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <ssdef.h>
 #include <descrip.h>
@@ -44,18 +44,18 @@ int sda$show_process(int mask)
     $DESCRIPTOR(i, "index");
     char c[80];
     struct dsc$descriptor o;
-    o.dsc$a_pointer=c;
-    o.dsc$w_length=80;
-    memset (c, 0, 80);
+    o.dsc$a_pointer = c;
+    o.dsc$w_length = 80;
+    memset(c, 0, 80);
     int sts = cli$present(&p);
-    if (sts&1)
+    if (sts & 1)
     {
         sts = cli$get_value(&p, &o, &retlen);
-        o.dsc$w_length=retlen;
+        o.dsc$w_length = retlen;
     }
     int index = 2;
     sts = cli$present(&i);
-    if (sts&1)
+    if (sts & 1)
     {
         sts = cli$get_value(&i, &o, &retlen);
         index = strtol(c, 0, 16);
@@ -67,7 +67,7 @@ int sda$show_process(int mask)
 
 #ifdef __x86_64__
     // do it like this until address perms set
-    unsigned long *vecp=&sch$gl_pcbvec;
+    unsigned long *vecp = &sch$gl_pcbvec;
     unsigned long *vec;
     sda$getmemlong(vecp, &vec);
 #else
@@ -76,7 +76,7 @@ int sda$show_process(int mask)
     struct _pcb * pcb_p;
     struct _pcb pcb;
     sda$getmemlong(&vec[index], &pcb_p);
-    sda$getmem(pcb_p, &pcb, sizeof (pcb));
+    sda$getmem(pcb_p, &pcb, sizeof(pcb));
 
     printf("  Process index: %4x   Name: %15s  Extended PID: %8x\n", index, pcb.pcb$t_lname, pcb.pcb$l_epid);
     printf("--------------------------------------------------------------------\n");
@@ -85,8 +85,8 @@ int sda$show_process(int mask)
     printf("        status2:         %8x\n\n", pcb.pcb$l_sts2);
 #endif
 #ifdef __x86_64__
-    printf("PCB address      %16lx    JIB address              %16lx\n",pcb_p,pcb.pcb$l_jib);
-    printf("PHD address      %16lx    Swapfile disk address    %16lx\n",pcb.pcb$l_phd,0);
+    printf("PCB address      %16lx    JIB address              %16lx\n", (unsigned long) pcb_p, pcb.pcb$l_jib);
+    printf("PHD address      %16lx    Swapfile disk address    %16lx\n", (unsigned long) pcb.pcb$l_phd, 0UL);
 #else
     printf("PCB address              %8x    JIB address              %8x\n",pcb_p,pcb.pcb$l_jib);
     printf("PHD address              %8x    Swapfile disk address    %8x\n",pcb.pcb$l_phd,0);

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -1224,8 +1224,3 @@ static void register_irq_proc (unsigned int irq)
 }
 
 unsigned long prof_cpu_mask = -1;
-
-void init_irq_proc (void)
-{
-}
-

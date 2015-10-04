@@ -455,8 +455,8 @@ struct task_struct
     unsigned short pcb$w_pgflchar;
     unsigned char pcb$b_pgflindex;
     unsigned char pcb$reserved1;
-    unsigned long pcb$l_pid;
-    unsigned long pcb$l_epid;
+    UINT32 pcb$l_pid;
+    UINT32 pcb$l_epid;
     unsigned long pcb$l_eowner;
     // not ready for this yet?
     struct _phd * pcb$l_phd;          //note overlapping stuff. move it.

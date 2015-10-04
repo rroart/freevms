@@ -1423,7 +1423,7 @@ void net$dump(struct debug_dump_args * uargs)
             rc = (dev_config_tab[uargs->du$device_idx].dc_rtn_Dump)
                  (uargs->du$device_idx, uargs->du$arg1, uargs->du$arg2,
                   RB, bufsize);
-            if (BLISSIFNOT(rc))
+            if (!(rc & 1))
                 Error = USER$Err(uargs,NET$_EPD); // error processing dump
         }
         else

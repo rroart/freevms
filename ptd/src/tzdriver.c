@@ -23,11 +23,6 @@
 .TITLE  TZDRIVER - Pseudo terminal driver for Front End and ethernet
 .IDENT  'V06-003'
 #endif
-//
-// Comment out the following line if NOT building for VMS V4 (in other
-// words comment out if you want a V5 driver).
-//
-//;;    VMS_V4 = 1
 
 //++
 // FACILITY:
@@ -365,12 +360,8 @@ END=TZ_END,-        // End and offset to INIT's vectors
                                       DPT_STORE INIT
                                       DPT_STORE UCB,UCB$W_UNIT_SEED,W,0 // SET UNIT # SEED TO ZERO
 
-#if defined VMS_V4
-                                      DPT_STORE UCB,UCB$B_FIPL,B,8      // FORK IPL
-#else
                                       DPT_STORE UCB,UCB$B_FLCK,B,SPL$C_IOLOCK8 ;
-FORK LOCK
-#endif
+                                      FORK LOCK
 
                                       DPT_STORE UCB,UCB$L_DEVCHAR,L,<-;
 CHARACTERISTICS
@@ -432,7 +423,7 @@ DDTAB   DEVNAM  = TZ,-      // Dummy TZ port Driver Dispatch table
 // The offset definitions are defined by the ttydefs.
 #endif
 
-                                    void SET_FORCED_CHARS(struct _ucb * ucb);
+void SET_FORCED_CHARS(struct _ucb * ucb);
 
 //
 // TZ specific dispatch table

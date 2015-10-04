@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -24,10 +24,6 @@
 #include <misc_routines.h>
 
 #include <vfddef.h>
-
-extern int sock_fcntl (struct file *, unsigned int cmd, unsigned long arg);
-extern int fcntl_setlease(unsigned int fd, struct file *filp, long arg);
-extern int fcntl_getlease(struct file *filp);
 
 /* Expand files.  Return <0 on error; 0 nothing done; 1 files expanded,
  * we may have blocked.
@@ -209,60 +205,6 @@ asmlinkage long sys_dup(unsigned int fildes)
     if (file)
         ret = dupfd(file, 0);
     return ret;
-}
-
-#define SETFL_MASK (O_APPEND | O_NONBLOCK | O_NDELAY | FASYNC | O_DIRECT)
-
-static int setfl(int fd, struct file * filp, unsigned long arg)
-{
-    struct inode * inode = filp->f_dentry->d_inode;
-    int error;
-
-    /*
-     * In the case of an append-only file, O_APPEND
-     * cannot be cleared
-     */
-    if (!(arg & O_APPEND) && IS_APPEND(inode))
-        return -EPERM;
-
-    /* Did FASYNC state change? */
-    if ((arg ^ filp->f_flags) & FASYNC)
-    {
-        if (filp->f_op && filp->f_op->fasync)
-        {
-            error = filp->f_op->fasync(fd, filp, (arg & FASYNC) != 0);
-            if (error < 0)
-                return error;
-        }
-    }
-
-    if (arg & O_DIRECT)
-    {
-        /*
-         * alloc_kiovec() can sleep and we are only serialized by
-         * the big kernel lock here, so abuse the i_sem to serialize
-         * this case too. We of course wouldn't need to go deep down
-         * to the inode layer, we could stay at the file layer, but
-         * we don't want to pay for the memory of a semaphore in each
-         * file structure too and we use the inode semaphore that we just
-         * pay for anyways.
-         */
-        error = 0;
-        down(&inode->i_sem);
-        if (!filp->f_iobuf)
-            error = alloc_kiovec(1, &filp->f_iobuf);
-        up(&inode->i_sem);
-        if (error < 0)
-            return error;
-    }
-
-    /* required for strict SunOS emulation */
-    if (O_NONBLOCK != O_NDELAY)
-        if (arg & O_NDELAY)
-            arg |= O_NONBLOCK;
-
-    filp->f_flags = (arg & SETFL_MASK) | (filp->f_flags & ~SETFL_MASK);
-    return 0;
 }
 
 static long do_fcntl(unsigned int fd, unsigned int cmd,

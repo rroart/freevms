@@ -316,7 +316,6 @@ void mm_release(void)
     }
 }
 
-extern int mydebug6;
 extern int mydebug4;
 
 static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
@@ -330,7 +329,7 @@ static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
 
     if (mydebug4)
     {
-        printk("copy_mm %x %x %x %x\n",tsk,tsk->pcb$l_pid,tsk->mm,tsk->active_mm);
+        printk("copy_mm %lx %x %lx %lx\n",(unsigned long)tsk,tsk->pcb$l_pid,(unsigned long)tsk->mm,(unsigned long)tsk->active_mm);
         {
             int j;
             for(j=0; j<1000000000; j++) ;

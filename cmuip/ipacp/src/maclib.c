@@ -21,11 +21,6 @@
 //
 //  .Title  MACLIB - Macro level VMS I/O Interface Routines.
 //  .Ident  '2.4-1'
-//
-// Comment out the following line if NOT building for VMS V4 (in other
-// words comment out if you want a V5 driver).
-//
-//  VMS_V4 = 1
 
 #if 0
 .Enable SUP
@@ -204,9 +199,7 @@ LIB.MLB/
 #include <ucbdef.h>     // Unit Control Block
 #include <vcbdef.h>     // Volume Control Block.
 
-#ifndef     VMS_V4
 #include <cpudef.h>     // VMS Version 5.0 SMP
-#endif
 #include <crbdef.h>     // channel request block
 #include <dcdef.h>      // device classes and types
 #include <ddbdef.h>     // device data block
@@ -457,25 +450,15 @@ Begin_Lock:
 
     R0 = lock_iodb(0);
 
-#ifdef VMS_V4
-    SETIPL  #IPL$_SYNCH     // synchronize with VMS
-#else
     FORKLOCK(R5->ucb$b_flck,-1);            // R5->UCB$B_FLCK
-#endif
 
     R2->aqb$l_acppid = R4->pcb$l_pid;   // set new owner PID.
     mypid = R4->pcb$l_pid;  // save for net$dump rtn.
     R1 = R4->pcb$l_arb; // adrs of ARB
     // not yet myuic = ((struct _arb *)R1)->arb$l_uic;  // save my UIC.
 
-#ifndef VMS_V4
     FORKUNLOCK(R5->ucb$b_flck,-1);          // R5->ucb$b_flck
-#endif
     R0 = unlock_iodb(0);
-
-#ifdef VMS_V4
-    SETIPL  #0              // timeshare
-#endif
 
 all_done:
 
@@ -485,32 +468,22 @@ all_done:
     // avail.
     // R5 = UCB adrs
 
-#ifdef VMS_V4
-    DSBINT  R5->UCB$B_FIPL          // synch with VMS
-#endif
 l10:
-#ifndef VMS_V4
 #if 0
     DEVICELOCK  -           ;
     SAVIPL=-(SP),-          ;
     PRESERVE=NO         ;
 #endif
-#endif
     R5->ucb$l_sts |= UCB$M_ONLINE;
     R5->ucb$l_devchar |= DEV$M_AVL|DEV$M_MNT;
     R1 = R5->ucb$l_link;        // Get next UCB
-#ifndef VMS_V4
 #if 0
     DEVICEUNLOCK -
     NEWIPL=(SP)+, -
            PRESERVE=NO
 #endif
-#endif
                     R5 = R1;
     if (R5) goto    l10;
-#ifdef VMS_V4
-    ENBINT                  // reset IPL
-#endif
     R0 = SS$_NORMAL;
 bye:
     return R0;
@@ -594,9 +567,6 @@ unlock_iodb(long * R4)
     // not yet R4 = ctl$gl_pcb;
     *R4=ctl$gl_pcb;
     R0 = SCH$IOUNLOCK();            // unlock I/O database
-#ifdef VMS_V4
-    SETIPL  #0              // timeshare
-#endif
     return R0;
 }
 
@@ -707,14 +677,9 @@ struct _ucb * R5;
     R2->aqb$b_acptype = AQB$K_NET;  // say its a Network AQB
     R2->aqb$b_class = 0;            // ACP class (noclass...)
     R2->aqb$b_status = AQB$M_UNIQUE;    // ACP unique to this device.
-#ifdef VMS_V4
-    R2->aqb$l_acpqfl = R2;      // set IRP queue ptrs.
-    R2->aqb$l_acpqbl = R2;      // & back link.
-#else
     // WARNING: V5 change! V5 uses self-relative ACP queues!
     R2->aqb$l_acpqfl = 0;       // Init IRP queue ptrs
     R2->aqb$l_acpqbl = 0;       // & back link.
-#endif
 #ifdef __x86_64__
     {
         void qhead_init(void * l);
@@ -731,11 +696,7 @@ struct _ucb * R5;
     R8 = R2;                // save AQB adrs
 
     R0 = lock_iodb(&R4);            // lock IO datbase
-#ifdef VMS_V4
-    SETIPL  #IPL$_SYNCH         // Synchronize with VMS
-#else
     FORKLOCK(R5->ucb$b_flck,-1);            ;
-#endif
 
     R2->aqb$l_acppid = R4->pcb$l_pid;   // set owner PID
     mypid = R4->pcb$l_pid;      // save for net$dump rtn.
@@ -747,9 +708,7 @@ struct _ucb * R5;
 
     R1 = R4->pcb$l_arb;     // addres ARB
     // not yet myuic = R1->arb$l_uic;       // my uic.
-#ifndef VMS_V4
     FORKUNLOCK(R5->ucb$b_flck,-1);
-#endif
     R0 = unlock_iodb(&R4);          // unlock & return
     return R0;
 }
@@ -865,32 +824,22 @@ int set_ip_device_offline(long UCB_Adrs)
     struct _ucb * R5;
     R5 = UCB_Adrs;          // adrs of ip0: (base device).
     if (R5>=0)  goto l15;               // good UCB address? must be system address
-#ifdef VMS_V4
-    DSBINT  R5->UCB$B_DIPL          // synch UCB access.
-#endif
 l10:
-#ifndef VMS_V4
 #if 0
     DEVICELOCK      -       ;
     SAVIPL=-(SP),-          ;
     PRESERVE=NO         ;
 #endif
-#endif
     R5->ucb$l_sts &= ~UCB$M_ONLINE; // for show dev, mark offline.
     R5->ucb$l_devchar &= ~DEV$M_AVL;
     R1 = R5->ucb$l_link;        // get next UCB
-#ifndef VMS_V4
 #if 0
     DEVICEUNLOCK -
     NEWIPL=(SP)+, -
            PRESERVE=NO
 #endif
-#endif
                     R5 = R1;
     if (R5) goto    l10;
-#ifdef VMS_V4
-    ENBINT                  // restore previous IPL.
-#endif
 l15:
     return R0;
 }
@@ -929,29 +878,20 @@ int Dismount()
     struct _ucb * R5;
     struct _aqb * R0,* R8;
 DISMOUNT:
-    /*PUSHL R0*/            // save the return code
-#ifdef VMS_V4
-    DSBINT  R5->ucb$b_dipl      // Save IPL & set new IPL to Device IPL.
-#else
 #if 0
     DEVICELOCK      -       ;
     SAVIPL=-(SP),-          ;
     PRESERVE=NO         ;
-#endif
 #endif
     R5->ucb$l_devchar&=~(DEV$M_MNT|DEV$M_AVL);  // clear Avail & mounted.
     R5->ucb$l_refc = 0;     // no references
     //  R5->ucb$l_ownuic = 0;
     R5->ucb$l_pid = 0;
     R5->ucb$l_vcb = 0;      // clean up UCB link
-#ifdef VMS_V4
-    ENBINT              // reset IPL level.
-#else
 #if 0
     DEVICEUNLOCK            -   ;
     NEWIPL=(SP)+,       -   ;
     PRESERVE=NO
-#endif
 #endif
     R0 = vcb_adrs;      // get VCB adrs
     if (R0)         // OK ?
@@ -974,11 +914,7 @@ DISMOUNT:
     // AQB list is a singly linked list.
 
     R0 = lock_iodb(&R4);        // lock IO database
-#ifdef VMS_V4
-    DSBINT  #IPL$_SYNCH     // Save Current IPL & set new IPL.
-#else
     FORKLOCK(R5->ucb$b_flck,-1);
-#endif
     R1 = ioc$gl_aqblist;    // system AQB list head
     R0 = (R1);          // 1st AQB pointer.
     if  (R8!=R0)            // 1st AQB?
@@ -1005,9 +941,6 @@ l70:
 l80:
     R0->aqb$l_link = R8->aqb$l_link;    // relink
 l90:
-#ifdef VMS_V4
-    ENBINT              // restore IPL
-#endif
     R0 = R8;            // for deallocation rtn.
 #ifdef __x86_64__
     int exe_std$deanonpaged (void *pool);
@@ -1016,9 +949,7 @@ l90:
 #else
     R0 = exe$deanonpaged(R0);
 #endif
-#ifndef VMS_V4
     FORKUNLOCK(R5->ucb$b_flck,-1);
-#endif
     R0 = unlock_iodb(&R4);      // unlock IO database.
     // all done
 
@@ -1081,9 +1012,6 @@ Try_Again:
     R0 = acp_qb_adrs;       // Network AQB address
     if (((long)R0)>=0)          // Valid system address? < 0 = OK.
         return 0;
-#ifdef VMS_V4
-    REMQUE  @R0->aqb$l_acpqfl,R2
-#else
 #ifdef __x86_64__
     int aqempty(void * q);
     int (*fn)()=aqempty;
@@ -1096,7 +1024,6 @@ Try_Again:
 #endif
     R2 = R0->aqb$l_acpqfl;
     remque(R2, 0); // change to relative later
-#endif
     if (wasempty)
 
         // Queue was empty, return false(0)
@@ -1279,16 +1206,12 @@ int VMS_IO$POST(long IOSB$ADRS, long IRP$ADRS, long UCB$ADRS)
     {
 
         // set actual bytes number transfered if this is a read function
-
         if  (1==(IRP$M_FUNC&R1->irp$l_sts))
             R1->irp$l_bcnt= ((short *) &R1->irp$l_iost1)[1];  // set bytes to give user.
     }
 
     // insert IRP into I/O post process queue.
 
-#ifdef VMS_V4
-    INSQUE  (R1),@L^IOC$GL_PSBL // in it goes
-#else
     find_cpu_data(&R2);
 #ifdef __x86_64__
     int aqempty(void * q);
@@ -1298,11 +1221,9 @@ int VMS_IO$POST(long IOSB$ADRS, long IRP$ADRS, long UCB$ADRS)
     int wasempty=aqempty(((struct _cpu *)R2)->cpu$l_psbl);
 #endif
     INSQUE  ((R1),((struct _cpu *)R2)->cpu$l_psbl); // in it goes
-#endif
     if (wasempty)           // Neq = not 1st in queue
 
         // 1st IRP in queue, request IOPOST interrupt
-
         SOFTINT_IOPOST_VECTOR;
 
     return R0;

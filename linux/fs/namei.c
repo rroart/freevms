@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004
 
 /*
@@ -186,25 +186,6 @@ asmlinkage long sys_mkdir(const char * pathname, int mode)
     return -EPERM;
 }
 
-/*
- * We try to drop the dentry early: we should have
- * a usage count of 2 if we're the only user of this
- * dentry, and if that is true (possibly after pruning
- * the dcache), then we drop the dentry now.
- *
- * A low-level filesystem can, if it choses, legally
- * do a
- *
- *  if (!d_unhashed(dentry))
- *      return -EBUSY;
- *
- * if it cannot handle the case of removing a directory
- * that is still in use by something else..
- */
-static void d_unhash(struct dentry *dentry)
-{
-}
-
 asmlinkage long sys_rmdir(const char * pathname)
 {
     return -EPERM;
@@ -238,26 +219,3 @@ asmlinkage long sys_rename(const char * oldname, const char * newname)
 {
     return -EPERM;
 }
-
-/* get the link contents into pagecache */
-static char *page_getlink(struct dentry * dentry, struct page **ppage)
-{
-    struct page * page;
-    struct address_space *mapping = dentry->d_inode->i_mapping;
-    page = alloc_pages(GFP_KERNEL, 0);
-
-    block_read_full_page2(dentry->d_inode,page,0);
-
-    if (IS_ERR(page))
-        goto sync_fail;
-    *ppage = page;
-    return kmap(page);
-
-async_fail:
-    page_cache_release(page);
-    return ERR_PTR(-EIO);
-
-sync_fail:
-    return (char*)page;
-}
-

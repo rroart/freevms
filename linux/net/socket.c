@@ -88,93 +88,6 @@
 #include <net/scm.h>
 #include <linux/netfilter.h>
 
-static int sock_no_open(struct inode *irrelevant, struct file *dontcare);
-static loff_t sock_lseek(struct file *file, loff_t offset, int whence);
-static ssize_t sock_read(struct file *file, char *buf,
-                         size_t size, loff_t *ppos);
-static ssize_t sock_write(struct file *file, const char *buf,
-                          size_t size, loff_t *ppos);
-static int sock_mmap(struct file *file, struct vm_area_struct * vma);
-
-static int sock_close(struct inode *inode, struct file *file);
-static unsigned int sock_poll(struct file *file,
-                              struct poll_table_struct *wait);
-static int sock_ioctl(struct inode *inode, struct file *file,
-                      unsigned int cmd, unsigned long arg);
-static int sock_fasync(int fd, struct file *filp, int on);
-static ssize_t sock_readv(struct file *file, const struct iovec *vector,
-                          unsigned long count, loff_t *ppos);
-static ssize_t sock_writev(struct file *file, const struct iovec *vector,
-                           unsigned long count, loff_t *ppos);
-static ssize_t sock_sendpage(struct file *file, struct page *page,
-                             int offset, size_t size, loff_t *ppos, int more);
-
-
-/*
- *  The protocol list. Each protocol is registered in here.
- */
-
-static struct net_proto_family *net_families[NPROTO];
-
-#ifdef CONFIG_SMP
-static atomic_t net_family_lockct = ATOMIC_INIT(0);
-static spinlock_t net_family_lock = SPIN_LOCK_UNLOCKED;
-
-/* The strategy is: modifications net_family vector are short, do not
-   sleep and veeery rare, but read access should be free of any exclusive
-   locks.
- */
-
-static void net_family_write_lock(void)
-{
-    spin_lock(&net_family_lock);
-    while (atomic_read(&net_family_lockct) != 0)
-    {
-        spin_unlock(&net_family_lock);
-
-        //      current->policy |= SCHED_YIELD;
-        //      current->need_resched=1;
-        //      schedule();
-        SOFTINT_RESCHED_VECTOR;
-
-        spin_lock(&net_family_lock);
-    }
-}
-
-static __inline__ void net_family_write_unlock(void)
-{
-    spin_unlock(&net_family_lock);
-}
-
-static __inline__ void net_family_read_lock(void)
-{
-    atomic_inc(&net_family_lockct);
-    spin_unlock_wait(&net_family_lock);
-}
-
-static __inline__ void net_family_read_unlock(void)
-{
-    atomic_dec(&net_family_lockct);
-}
-
-#else
-#define net_family_write_lock() do { } while(0)
-#define net_family_write_unlock() do { } while(0)
-#define net_family_read_lock() do { } while(0)
-#define net_family_read_unlock() do { } while(0)
-#endif
-
-
-/*
- *  Statistics counters of the socket lists
- */
-
-static union
-{
-    int counter;
-    char    __pad[SMP_CACHE_BYTES];
-} sockets_in_use[NR_CPUS] __cacheline_aligned = {{0}};
-
 /*
  *  Support routines. Move socket addresses back and forth across the kernel/user
  *  divide and look after the messy bits.
@@ -189,27 +102,27 @@ static union
                         :unix_mkname()).
                       */
 
-                      /**
-                       *    move_addr_to_kernel -   copy a socket address into kernel space
-                       *    @uaddr: Address in user space
-                       *    @kaddr: Address in kernel space
-                       *    @ulen: Length in user space
-                       *
-                       *    The address is copied into kernel space. If the provided address is
-                       *    too long an error code of -EINVAL is returned. If the copy gives
-                       *    invalid addresses -EFAULT is returned. On a success 0 is returned.
-                       */
+/**
+ *    move_addr_to_kernel -   copy a socket address into kernel space
+ *    @uaddr: Address in user space
+ *    @kaddr: Address in kernel space
+ *    @ulen: Length in user space
+ *
+ *    The address is copied into kernel space. If the provided address is
+ *    too long an error code of -EINVAL is returned. If the copy gives
+ *    invalid addresses -EFAULT is returned. On a success 0 is returned.
+ */
 
-                      int move_addr_to_kernel(void *uaddr, int ulen, void *kaddr)
-            {
-                if(ulen<0||ulen>MAX_SOCK_ADDR)
-                    return -EINVAL;
-                if(ulen==0)
-                    return 0;
-                if(copy_from_user(kaddr,uaddr,ulen))
-                    return -EFAULT;
-                return 0;
-            }
+int move_addr_to_kernel(void *uaddr, int ulen, void *kaddr)
+{
+    if (ulen < 0 || ulen > MAX_SOCK_ADDR)
+        return -EINVAL;
+    if (ulen == 0)
+        return 0;
+    if (copy_from_user(kaddr, uaddr, ulen))
+        return -EFAULT;
+    return 0;
+}
 
 /**
  *  move_addr_to_user   -   copy an address to user space
@@ -233,15 +146,15 @@ int move_addr_to_user(void *kaddr, int klen, void *uaddr, int *ulen)
     int err;
     int len;
 
-    if((err=get_user(len, ulen)))
+    if ((err = get_user(len, ulen)))
         return err;
-    if(len>klen)
-        len=klen;
-    if(len<0 || len> MAX_SOCK_ADDR)
+    if (len > klen)
+        len = klen;
+    if (len < 0 || len > MAX_SOCK_ADDR)
         return -EINVAL;
-    if(len)
+    if (len)
     {
-        if(copy_to_user(uaddr,kaddr,len))
+        if (copy_to_user(uaddr, kaddr, len))
             return -EFAULT;
     }
     /*
@@ -260,7 +173,6 @@ int sock_recvmsg(struct socket *sock, struct msghdr *msg, int size, int flags)
 {
 }
 
-
 /*
  *  Create a pair of connected sockets.
  */
@@ -270,13 +182,10 @@ asmlinkage long sys_socketpair(int family, int type, int protocol, int usockvec[
     return -EAFNOSUPPORT;
 }
 
-
 /* Argument list sizes for sys_socketcall */
 #define AL(x) ((x) * sizeof(unsigned long))
-static unsigned char nargs[18]= {AL(0),AL(3),AL(3),AL(3),AL(2),AL(3),
-                                 AL(3),AL(3),AL(4),AL(4),AL(4),AL(6),
-                                 AL(6),AL(2),AL(5),AL(5),AL(3),AL(3)
-                                };
+static unsigned char nargs[18] =
+    { AL(0), AL(3), AL(3), AL(3), AL(2), AL(3), AL(3), AL(3), AL(4), AL(4), AL(4), AL(6), AL(6), AL(2), AL(5), AL(5), AL(3), AL(3) };
 #undef AL
 
 /*
@@ -307,67 +216,65 @@ asmlinkage int sys_recvmsg();
 asmlinkage long sys_socketcall(int call, unsigned long *args)
 {
     unsigned long a[6];
-    unsigned long a0,a1;
+    unsigned long a0, a1;
     int err;
 
-    if(call<1||call>SYS_RECVMSG)
+    if (call < 1 || call > SYS_RECVMSG)
         return -EINVAL;
 
     /* copy_from_user should be SMP safe. */
     if (copy_from_user(a, args, nargs[call]))
         return -EFAULT;
 
-    a0=a[0];
-    a1=a[1];
+    a0 = a[0];
+    a1 = a[1];
 
-    switch(call)
+    switch (call)
     {
     case SYS_SOCKET:
-        err = sys_socket(a0,a1,a[2]);
+        err = sys_socket(a0, a1, a[2]);
         break;
     case SYS_BIND:
-        err = sys_bind(a0,(struct sockaddr *)a1, a[2]);
+        err = sys_bind(a0, (struct sockaddr *) a1, a[2]);
         break;
     case SYS_CONNECT:
-        err = sys_connect(a0, (struct sockaddr *)a1, a[2]);
+        err = sys_connect(a0, (struct sockaddr *) a1, a[2]);
         break;
     case SYS_LISTEN:
-        err = sys_listen(a0,a1);
+        err = sys_listen(a0, a1);
         break;
     case SYS_ACCEPT:
-        err = sys_accept(a0,(struct sockaddr *)a1, (int *)a[2]);
+        err = sys_accept(a0, (struct sockaddr *) a1, (int *) a[2]);
         break;
     case SYS_GETSOCKNAME:
-        err = sys_getsockname(a0,(struct sockaddr *)a1, (int *)a[2]);
+        err = sys_getsockname(a0, (struct sockaddr *) a1, (int *) a[2]);
         break;
     case SYS_GETPEERNAME:
-        err = sys_getpeername(a0, (struct sockaddr *)a1, (int *)a[2]);
+        err = sys_getpeername(a0, (struct sockaddr *) a1, (int *) a[2]);
         break;
     case SYS_SOCKETPAIR:
-        err = sys_socketpair(a0,a1, a[2], (int *)a[3]);
+        err = sys_socketpair(a0, a1, a[2], (int *) a[3]);
         break;
     case SYS_SEND:
-        err = sys_send(a0, (void *)a1, a[2], a[3]);
+        err = sys_send(a0, (void *) a1, a[2], a[3]);
         break;
     case SYS_SENDTO:
-        err = sys_sendto(a0,(void *)a1, a[2], a[3],
-                         (struct sockaddr *)a[4], a[5]);
+        err = sys_sendto(a0, (void *) a1, a[2], a[3], (struct sockaddr *) a[4], a[5]);
         break;
     case SYS_RECV:
-        err = sys_recv(a0, (void *)a1, a[2], a[3]);
+        err = sys_recv(a0, (void *) a1, a[2], a[3]);
         break;
     case SYS_RECVFROM:
-        err = sys_recvfrom(a0, (void *)a1, a[2], a[3],
-                           (struct sockaddr *)a[4], (int *)a[5]);
+        err = sys_recvfrom(a0, (void *) a1, a[2], a[3], (struct sockaddr *) a[4], (int *) a[5]);
         break;
     case SYS_SHUTDOWN:
-        err = sys_shutdown(a0,a1);
+        err = sys_shutdown(a0, a1);
         break;
     case SYS_SETSOCKOPT:
-        err = sys_setsockopt(a0, a1, a[2], (char *)a[3], a[4]);
+        err = sys_setsockopt(a0, a1, a[2], (char *) a[3], a[4]);
         break;
     case SYS_GETSOCKOPT:
-        err = sys_getsockopt(a0, a1, a[2], (char *)a[3], (int *)a[4]);
+        err = sys_getsockopt(a0, a1, a[2], (char *) a[3], (int *) a[4]);
         break;
 #ifndef __KERNEL__
     case SYS_SENDMSG:
@@ -377,8 +284,8 @@ asmlinkage long sys_socketcall(int call, unsigned long *args)
         err = sys_recvmsg(a0, (struct msghdr *) a1, a[2]);
         break;
 #else
-    case SYS_SENDMSG:
-    case SYS_RECVMSG:
+        case SYS_SENDMSG:
+        case SYS_RECVMSG:
         err = -EAFNOSUPPORT;
         break;
 #endif

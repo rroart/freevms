@@ -43,7 +43,8 @@ int show_device()
     for (; kddb; kddb=ddb.ddb$ps_link)
     {
         sts = sda$getmem(kddb, &ddb, sizeof (struct _ddb));
-        printf("  %8x    %10s        %26s       %8x\n",kddb,&ddb.ddb$t_name[1],"",ddb.ddb$ps_dpt);
+        printf("  %8lx    %10s        %26s       %8lx\n", (unsigned long) kddb, &ddb.ddb$t_name[1], "",
+                (unsigned long) ddb.ddb$ps_dpt);
     }
     return sts;
 }

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <ssdef.h>
 
@@ -41,7 +41,6 @@ CH$FILL(long ch, long size, long addr)
 {
     memset(addr,ch, size);
     return addr+size;
-    printk("CH$FILL not implemented\n");
 }
 
 CH$RCHAR_A()
@@ -89,7 +88,6 @@ struct dsc$descriptor * x, *y;
     x->dsc$a_pointer=s;
     x->dsc$w_length=x->dsc$w_length+y->dsc$w_length;
     return SS$_NORMAL;
-    printk("STR$APPEND not implemented\n");
 }
 
 long CH$PTR(long X)
@@ -129,14 +127,12 @@ long CH$MOVE(long size, long src, long addr)
 {
     memcpy(addr,src, size);
     return addr+size;
-    printk("CH$MOVE not implemented\n");
 }
 
 INSQUE(long x, long y)
 {
     insque(x,y);
     return SS$_NORMAL;
-    printk("INSQUE not implemented\n");
 }
 
 REMQUE(long * e, long * a)
@@ -147,25 +143,21 @@ REMQUE(long * e, long * a)
     if (e[0]==e[1]) retval|=2;
     *a=e;
     return retval;
-    printk("REMQUE not implemented\n");
 }
 
 MIN(x,y)
 {
     return (x<y ? x :  y);
-    printk("MIN not implemented\n");
 }
 
 MAX(x,y)
 {
     return (x>y ? x :  y);
-    printk("MAX not implemented\n");
 }
 
 MINU(x,y)
 {
     return MIN(x,y);
-    printk("MINU not implemented\n");
 }
 
 XLOG$FAO()
@@ -177,13 +169,11 @@ XLOG$FAO()
 MAXU(x,y)
 {
     return MAX(x,y);
-    printk("MAXU not implemented\n");
 }
 
 ROT(x,y)
 {
     return x>>y;
-    printk("ROT not implemented\n");
 }
 
 QL$FAO()
@@ -284,25 +274,23 @@ LIB$FREE_VM_PAGE(long size, long addr)
 #endif
     kfree(addr);
     return SS$_NORMAL;
-    printk("LIB$FREE_VM_PAGE not implemented\n");
 }
 
-FORKLOCK()
+void FORKLOCK()
 {
-    return;
     printk("FORKLOCK not implemented\n");
+    return;
 }
 
-FORKUNLOCK ()
+void FORKUNLOCK()
 {
-    return;
     printk("FORKUNLOCK not implemented\n");
+    return;
 }
 
 ch$move(long a, long b, long c)
 {
     return CH$MOVE(a,b,c);
-    printk("ch$move not implemented\n");
 }
 
 LIB$CREATE_VM_ZONE()
@@ -335,10 +323,9 @@ Begin_Lock()
     printk("Begin_Lock not implemented\n");
 }
 
-CH$PLUS(long x, long y)
+long CH$PLUS(long x, long y)
 {
     return x+y;
-    printk("CH$PLUS not implemented\n");
 }
 
 LIB$ASN_WTH_MBX()
@@ -346,13 +333,13 @@ LIB$ASN_WTH_MBX()
     printk("LIB$ASN_WTH_MBX not implemented\n");
 }
 
-SCH$IOLOCKW()
+int SCH$IOLOCKW()
 {
     printk("SCH$IOLOCKW not implemented\n");
     return SS$_NORMAL;
 }
 
-SCH$IOUNLOCK()
+int SCH$IOUNLOCK()
 {
     printk("SCH$IOUNLOCK not implemented\n");
     return SS$_NORMAL;
@@ -362,17 +349,6 @@ STR$FREE1_DX(struct dsc$descriptor * d)
 {
     kfree(d->dsc$a_pointer);
     return;
-    printk("STR$FREE1_DX not implemented\n");
-}
-
-UNlock_IODB()
-{
-    printk("UNlock_IODB not implemented\n");
-}
-
-Unlock_IODB()
-{
-    printk("Unlock_IODB not implemented\n");
 }
 
 Subm()
@@ -474,26 +450,16 @@ swapbytesseghdr(long x, long y)
     swapbytes(3,y+14);
 }
 
-inline BLISSIF(int i)
+void DEVICELOCK()
 {
-    return i&1;
-}
-
-inline BLISSIFNOT(int i)
-{
-    return BLISSIF(i)==0;
-}
-
-inline DEVICELOCK()
-{
-    return;
     printk("DEVICELOCK not impl\n");
+    return;
 }
 
-inline DEVICEUNLOCK()
+void DEVICEUNLOCK()
 {
-    return;
     printk("DEVICEUNLOCK not impl\n");
+    return;
 }
 
 #include "libasnmbx.c"

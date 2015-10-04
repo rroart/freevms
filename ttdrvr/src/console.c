@@ -280,8 +280,7 @@ static void scrup(int currcons, unsigned int t, unsigned int b, int nr)
     scr_memsetw(d + (b-t-nr) * video_num_columns, video_erase_char, video_size_row*nr);
 }
 
-static void
-scrdown(int currcons, unsigned int t, unsigned int b, int nr)
+static void scrdown(int currcons, unsigned int t, unsigned int b, int nr)
 {
     unsigned short *s;
     unsigned int step;

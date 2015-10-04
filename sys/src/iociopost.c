@@ -358,16 +358,9 @@ bufio:
    \details needed by end of file system dispatcher
  */
 
-ioc$bufpost(struct _irp * i)
+void ioc$bufpost(struct _irp * i)
 {
     i->irp$b_rmod|=ACB$M_KAST; // think this belongs here too
     i->irp$l_wind=bufpost; // really acb$l_kast;
     i->irp$l_astprm=i; // think this belongs here too
 }
-
-#if 0
-void ioc$myiopost(struct _pcb * p,unsigned long priclass)
-{
-    sch$postef(p->pcb$l_pid,priclass,0);
-}
-#endif

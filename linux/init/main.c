@@ -650,7 +650,6 @@ static void __init do_initcalls(void)
  */
 static void __init do_basic_setup(void)
 {
-
     /*
      * Tell the world that we're going to be the grim
      * reaper of innocent orphaned children.
@@ -722,7 +721,7 @@ static int init(void * unused)
 #if 0
     sys_open("opa0:", 0, 0);
 #else
-    void sys_open_term();
+    void sys_open_term(char * name);
     sys_open_term("opa0:");
 #endif
 #endif
@@ -747,7 +746,7 @@ static int init(void * unused)
     init_cwps();
 #endif
 
-    extern void job_control();
+    extern int job_control(void *unused);
     kernel_thread(job_control, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
     extern void Main(void);
     extern char * mydevice;

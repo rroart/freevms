@@ -27,30 +27,6 @@
 
 #include <queue.h>
 
-#define MAX_BUF_PER_PAGE (PAGE_CACHE_SIZE / 512)
-
-static unsigned long max_block(kdev_t dev)
-{
-    unsigned int retval = ~0U;
-    int major = MAJOR(dev);
-
-    if (blk_size[major])
-    {
-        int minor = MINOR(dev);
-        unsigned int blocks = blk_size[major][minor];
-        if (blocks)
-        {
-            unsigned int size = block_size(dev);
-            unsigned int sizebits = blksize_bits(size);
-            blocks += (size-1) >> BLOCK_SIZE_BITS;
-            retval = blocks << (BLOCK_SIZE_BITS - sizebits);
-            if (sizebits > BLOCK_SIZE_BITS)
-                retval = blocks >> (sizebits - BLOCK_SIZE_BITS);
-        }
-    }
-    return retval;
-}
-
 static loff_t blkdev_size(kdev_t dev)
 {
     unsigned int blocks = ~0U;
@@ -111,76 +87,6 @@ int set_blocksize(kdev_t dev, int size)
     return 0;
 }
 
-static int blkdev_get_block(struct inode * inode, long iblock, struct buffer_head * bh, int create)
-{
-    if (iblock >= max_block(inode->i_rdev))
-        return -EIO;
-
-    bh->b_dev = inode->i_rdev;
-    bh->b_blocknr = iblock;
-    bh->b_state |= 1UL << BH_Mapped;
-    return 0;
-}
-
-static int blkdev_direct_IO(int rw, struct inode * inode, struct kiobuf * iobuf, unsigned long blocknr, int blocksize)
-{
-    return generic_direct_IO(rw, inode, iobuf, blocknr, blocksize, blkdev_get_block);
-}
-
-static int blkdev_writepage(struct page * page)
-{
-    panic("ai blkdev wr\n");
-}
-
-static int blkdev_readpage(struct file * file, struct page * page)
-{
-    panic("ai blkdev rd\n");
-}
-
-static int blkdev_prepare_write(struct file *file, struct page *page, unsigned from, unsigned to)
-{
-    panic("uh-oh. prep write\n");
-}
-
-static int blkdev_commit_write(struct file *file, struct page *page, unsigned from, unsigned to)
-{
-    printk("uh-oh. commit write\n");
-}
-
-/*
- * private llseek:
- * for a block special file file->f_dentry->d_inode->i_size is zero
- * so we compute the size by hand (just as in block_read/write above)
- */
-static loff_t block_llseek(struct file *file, loff_t offset, int origin)
-{
-    /* ewww */
-    loff_t size = file->f_dentry->d_inode->i_bdev->bd_inode->i_size;
-    loff_t retval;
-
-    switch (origin)
-    {
-    case 2:
-        offset += size;
-        break;
-    case 1:
-        offset += file->f_pos;
-    }
-    retval = -EINVAL;
-    if (offset >= 0 && offset <= size)
-    {
-        if (offset != file->f_pos)
-        {
-            file->f_pos = offset;
-            file->f_reada = 0;
-            file->f_version = ++event;
-        }
-        retval = offset;
-    }
-    return retval;
-}
-
-
 static int __block_fsync(struct inode * inode)
 {
     int ret, err;
@@ -197,21 +103,8 @@ static int __block_fsync(struct inode * inode)
 }
 
 /*
- *  Filp may be NULL when we are called by an msync of a vma
- *  since the vma has no handle.
- */
-
-static int block_fsync(struct file *filp, struct dentry *dentry, int datasync)
-{
-    struct inode * inode = dentry->d_inode;
-
-    return __block_fsync(inode);
-}
-
-/*
  * pseudo-fs
  */
-
 static struct super_block *bd_read_super(struct super_block *sb, void *data, int silent)
 {
     return 0;
@@ -233,22 +126,7 @@ static struct list_head bdev_hashtable[HASH_SIZE];
 static spinlock_t bdev_lock __cacheline_aligned_in_smp = SPIN_LOCK_UNLOCKED;
 static kmem_cache_t * bdev_cachep;
 
-//#define alloc_bdev() \
-((struct block_device *) kmem_cache_alloc(bdev_cachep, SLAB_KERNEL))
 #define destroy_bdev(bdev) kfree(bdev)
-
-static void init_once(void * foo, kmem_cache_t * cachep, unsigned long flags)
-{
-    struct block_device * bdev = (struct block_device *) foo;
-
-    if ((flags & (SLAB_CTOR_VERIFY|SLAB_CTOR_CONSTRUCTOR)) ==
-            SLAB_CTOR_CONSTRUCTOR)
-    {
-        memset(bdev, 0, sizeof(*bdev));
-        sema_init(&bdev->bd_sem, 1);
-        INIT_LIST_HEAD(&bdev->bd_inodes);
-    }
-}
 
 /*
  * Most likely _very_ bad one - but then it's hardly critical for small
@@ -506,14 +384,6 @@ int blkdev_put(struct block_device *bdev, int kind)
     up(&bdev->bd_sem);
     bdput(bdev);
     return ret;
-}
-
-static int blkdev_ioctl(struct inode *inode, struct file *file, unsigned cmd,
-                        unsigned long arg)
-{
-    if (inode->i_bdev->bd_op->ioctl)
-        return inode->i_bdev->bd_op->ioctl(inode, file, cmd, arg);
-    return -EINVAL;
 }
 
 const char * bdevname(kdev_t dev)

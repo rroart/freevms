@@ -359,10 +359,6 @@ unsigned long module_kallsyms_lookup_name(const char *name);
 
 int is_exported(const char *name, const struct module *mod);
 
-extern void __module_put_and_exit(struct module *mod, long code)
-__attribute__((noreturn));
-#define module_put_and_exit(code) __module_put_and_exit(THIS_MODULE, code);
-
 static inline int try_module_get(struct module *module)
 {
     return !module || module_is_live(module);
@@ -401,9 +397,6 @@ const char *module_address_lookup(unsigned long addr,
 
 /* For extable.c to search modules' exception tables. */
 const struct exception_table_entry *search_module_extables(unsigned long addr);
-
-int register_module_notifier(struct notifier_block * nb);
-int unregister_module_notifier(struct notifier_block * nb);
 
 extern void print_modules(void);
 
@@ -490,19 +483,6 @@ static inline int is_exported(const char *name, const struct module *mod)
 {
     return 0;
 }
-
-static inline int register_module_notifier(struct notifier_block * nb)
-{
-    /* no events will happen anyway, so this can always succeed */
-    return 0;
-}
-
-static inline int unregister_module_notifier(struct notifier_block * nb)
-{
-    return 0;
-}
-
-#define module_put_and_exit(code) do_exit(code)
 
 static inline void print_modules(void)
 {
