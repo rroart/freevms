@@ -43,7 +43,9 @@
 
 #include <linux/time.h>               /* C header for $GETTIM to find time */
 #include <linux/string.h>
+
 #include <ssdef.h>
+#include <exe_routines.h>
 #include <lib$routines.h>   /* LIB$ Header File */
 
 #define TIMEBASE 100000         /* 10 millisecond units in quadword */
@@ -66,19 +68,12 @@
 /* combine_date_time() is an internal routine to put date and time into a
  quadword - basically the opposite of lib_day() .... */
 
-struct TIME
-{
-    unsigned char time[8];
-};
-
-#include <exe_routines.h>
-
 const char month_names[] = "-JAN-FEB-MAR-APR-MAY-JUN-JUL-AUG-SEP-OCT-NOV-DEC-";
 
 static const unsigned short month_end[] =
     { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 };
 
-int sys$__combine_date_time(int days, struct TIME *timadr, int day_time)
+int sys$__combine_date_time(int days, struct _generic_64 *timadr, int day_time)
 {
     if (day_time >= TIMESIZE)
     {
@@ -87,11 +82,12 @@ int sys$__combine_date_time(int days, struct TIME *timadr, int day_time)
     else
     {
         /* Put days into quad timbuf... */
-        unsigned long count, time;
+        int count;
+        UINT64 time;
         unsigned char *ptr;
 
         count = 8;
-        ptr = timadr->time;
+        ptr = timadr->gen64$r_quad_overlay.gen64$b_byte;
         time = days;
         do
         {
@@ -101,9 +97,8 @@ int sys$__combine_date_time(int days, struct TIME *timadr, int day_time)
         while (--count > 0);
 
         /* Factor in the time... */
-
         count = 8;
-        ptr = timadr->time;
+        ptr = timadr->gen64$r_quad_overlay.gen64$b_byte;
         time = day_time;
         do
         {
@@ -115,7 +110,7 @@ int sys$__combine_date_time(int days, struct TIME *timadr, int day_time)
 
         /* Factor by time base... */
         count = 8;
-        ptr = timadr->time;
+        ptr = timadr->gen64$r_quad_overlay.gen64$b_byte;
         time = 0;
         do
         {
@@ -132,37 +127,36 @@ int sys$__combine_date_time(int days, struct TIME *timadr, int day_time)
 /* borrowed... -Roar Thron�s */
 
 /* lib_day() is a routine to crack quadword into day number and time */
-int lib$day(long *days, const void *timadra, int *day_time)
+int lib$day(long *days, const struct _generic_64 *timadr, int *day_time)
 {
-    const struct TIME *timadr = (const struct TIME *) timadra;
-
-    register unsigned date, time, count;
-    register const unsigned char *srcptr;
-    register unsigned char *dstptr;
-    struct TIME wrktim;
+    unsigned int date, time;
+    int count;
+    const unsigned char *srcptr;
+    unsigned char *dstptr;
+    struct _generic_64 wrktim;
     int delta;
 
     /* If no time specified get current using gettim() */
     if (timadr == NULL)
     {
-        register int sts = exe$gettim(&wrktim);
+        int sts = exe$gettim(&wrktim);
         if ((sts & 1) == 0)
         {
             return sts;
         }
         delta = 0;
-        srcptr = wrktim.time + 7;
+        srcptr = wrktim.gen64$r_quad_overlay.gen64$b_byte + 7;
     }
     else
     {
         /* Check specified time for delta... */
-        srcptr = timadr->time + 7;
+        srcptr = timadr->gen64$r_quad_overlay.gen64$b_byte + 7;
         if ((delta = (*srcptr & 0x80)))
         {
             /* We have to 2's complement delta times - sigh!! */
             count = 8;
-            srcptr = timadr->time;
-            dstptr = wrktim.time;
+            srcptr = timadr->gen64$r_quad_overlay.gen64$b_byte;
+            dstptr = wrktim.gen64$r_quad_overlay.gen64$b_byte;
             time = 1;
             do
             {
@@ -171,13 +165,13 @@ int lib$day(long *days, const void *timadra, int *day_time)
                 time = (time >> 8);
             }
             while (--count > 0);
-            srcptr = wrktim.time + 7;
+            srcptr = wrktim.gen64$r_quad_overlay.gen64$b_byte + 7;
         }
     }
 
     /* Throw away the unrequired time precision */
     count = 8;
-    dstptr = wrktim.time + 7;
+    dstptr = wrktim.gen64$r_quad_overlay.gen64$b_byte + 7;
     time = 0;
     do
     {
@@ -189,7 +183,7 @@ int lib$day(long *days, const void *timadra, int *day_time)
 
     /* Seperate the date and time */
     date = time = 0;
-    srcptr = wrktim.time + 7;
+    srcptr = wrktim.gen64$r_quad_overlay.gen64$b_byte + 7;
     count = 8;
     do
     {
@@ -217,14 +211,11 @@ int lib$day(long *days, const void *timadra, int *day_time)
 }
 
 /* more borrowed... */
-int lib$cvt_vectim(const void* timbufa, void *timadra)
+int lib$cvt_vectim(const unsigned short *timbuf, struct _generic_64 *timadr)
 {
-    const unsigned short * timbuf = (const unsigned short *) timbufa;
-    struct TIME *timadr = (struct TIME *) timadra;
-
     int delta = 0;
-    register unsigned sts, days, day_time;
-    sts = SS$_NORMAL;
+    unsigned int days, day_time;
+    int sts = SS$_NORMAL;
 
     /* lib_cvt_vectim packs the seven date/time components into a quadword... */
 
@@ -235,7 +226,7 @@ int lib$cvt_vectim(const void* timbufa, void *timadra)
     }
     else
     {
-        register leap = 0, year = timbuf[0], month = timbuf[1];
+        unsigned int leap = 0, year = timbuf[0], month = timbuf[1];
         if (month >= 2)
         {
             if ((year % 4) == 0)
@@ -285,10 +276,11 @@ int lib$cvt_vectim(const void* timbufa, void *timadra)
         if (delta)
         {
             /* We have to 2's complement delta times - sigh!! */
-            register unsigned count, time;
-            register unsigned char *ptr;
+            int count;
+            unsigned int time;
+            unsigned char *ptr;
             count = 8;
-            ptr = timadr->time;
+            ptr = timadr->gen64$r_quad_overlay.gen64$b_byte;
             time = 1;
             do
             {
@@ -303,9 +295,8 @@ int lib$cvt_vectim(const void* timbufa, void *timadra)
 }
 
 /* sys_asctim() converts quadword to ascii... */
-int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf, const void *timadra, unsigned long cvtflg)
+int exe$asctim(UINT16 *timlen, struct dsc$descriptor *timbuf, const struct _generic_64 *timadr, unsigned long cvtflg)
 {
-    const struct TIME *timadr = (const struct TIME *) timadra;
     long count, timval;
     unsigned short wrktim[7];
     long length = timbuf->dsc$w_length;
@@ -320,8 +311,7 @@ int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf, const void
 #endif
     /* First use sys_numtim to get the date/time fields... */
     {
-        register unsigned sts;
-        sts = exe$numtim(wrktim, timadr);
+        int sts = exe$numtim(wrktim, timadr);
         if ((sts & 1) == 0)
         {
             return sts;
@@ -446,12 +436,10 @@ int exe$asctim(unsigned short *timlen, struct dsc$descriptor *timbuf, const void
 
 static const char time_sep[] = "::.";
 
-int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
+int exe$bintim(struct dsc$descriptor *timbuf, struct _generic_64 *timadr)
 {
-    struct TIME *timadr = (struct TIME *) timadra;
-
-    register length = timbuf->dsc$w_length;
-    register char *chrptr = timbuf->dsc$a_pointer;
+    unsigned int length = timbuf->dsc$w_length;
+    char *chrptr = timbuf->dsc$a_pointer;
     unsigned short wrktim[7];
     int num, tf;
 
@@ -596,16 +584,14 @@ int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra)
 static const unsigned char month_days[] =
     { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-int exe$numtim(unsigned short timbuf[7], struct TIME *timadra)
+int exe$numtim(UINT16 timbuf[7], struct _generic_64 *timadr)
 {
-    struct TIME *timadr = (struct TIME *) timadra;
-    register int date, time;
+    int date, time;
 
     /* Use lib_day to crack time into date/time... */
     {
         int days, day_time;
-        register int sts;
-        sts = lib$day(&days, timadr, &day_time);
+        int sts = lib$day(&days, timadr, &day_time);
         if ((sts & 1) == 0)
         {
             return sts;
@@ -626,7 +612,7 @@ int exe$numtim(unsigned short timbuf[7], struct TIME *timadra)
     else
     {
         /* Date... */
-        register int year, month;
+        int year, month;
         date += OFFSET_DAYS;
         year = BASE_YEAR + (date / QUAD_CENTURY_DAYS) * 400;
         date %= QUAD_CENTURY_DAYS;

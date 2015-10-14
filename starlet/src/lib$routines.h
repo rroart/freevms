@@ -6,10 +6,11 @@
 #define _LIB$ROUTINES_H
 
 #include <descrip.h>
+#include <gen64def.h>
 
 int lib$adawi(const short *, short *, short *);
 
-int lib$add_times(const void *, const void *, void *);
+int lib$add_times(const struct _generic_64 *, const struct _generic_64 *, struct _generic_64 *);
 
 int lib$addx(const void *, const void *, void *, const unsigned int *);
 
@@ -70,7 +71,11 @@ void lib$crf_output(const void *, const long *, const long *, const long *, cons
 
 int lib$currency(void *, ...);
 
-int lib$cvt_dtb(int, const char *, long *), lib$cvt_htb(int, const char *, long *), lib$cvt_otb(int, const char *, long *);
+int lib$cvt_dtb(int, const char *, long *);
+
+int lib$cvt_htb(int, const char *, long *);
+
+int lib$cvt_otb(int, const char *, long *);
 
 int lib$cvt_dx_dx(const void *, void *, ...);
 
@@ -82,7 +87,7 @@ int lib$cvt_to_internal_time(const unsigned long *, const long *, void *);
 
 int lib$cvtf_to_internal_time(const unsigned long *, const float *, void *);
 
-int lib$cvt_vectim(const void *, void *);
+int lib$cvt_vectim(const unsigned short *, struct _generic_64 *);
 
 #if 0
 // not now
@@ -91,9 +96,9 @@ int lib$date_time(void *);
 int lib$date_time(struct dsc$descriptor_s *);
 #endif
 
-int lib$day(long *, const void*, int*);
+int lib$day(long *, const struct _generic_64*, int*);
 
-int lib$day_of_week(const void *, int *);
+int lib$day_of_week(const struct _generic_64*, int *);
 
 int lib$dec_over(const unsigned long *);
 
@@ -324,7 +329,7 @@ int lib$stat_vm_zone(const unsigned long *, const int *, void *);
 
 void lib$stop(unsigned long, ...);
 
-int lib$sub_times(const void *, const void *, void *);
+int lib$sub_times(const struct _generic_64 *, const struct _generic_64 *, struct _generic_64 *);
 
 int lib$subx(const void *, const void *, void*, const unsigned int *);
 
@@ -352,7 +357,7 @@ int lib$uid_to_ascii(void);
 
 int lib$verify_vm_zone(const unsigned long *);
 
-int lib$wait(float);
+int lib$wait(double *seconds, int flags, int float_type);
 
 int lib$$ncompare(char *s1, char *s2);
 

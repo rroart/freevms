@@ -335,45 +335,18 @@ MODULE USER(IDENT="6.7a",LANGUAGE(BLISS32),
 #define    UCB$L_CBID   ucb$l_devdepnd2 // Control Block associated with UCB
 #define    UCB$L_EXTRA  ucb$l_devdepnd3 // Extra longword for later expansion
 
-                extern signed long
-                log_state,
-                Time_2_Exit,
-                mypid;          // maclib.mar
+extern signed long Time_2_Exit, mypid;          // maclib.mar
 extern struct dsc$descriptor  Local_Name;
 extern Device_Configuration_Entry dev_config_tab[];
 
 // Memory manager dynamic allocation counts (defined in memgr.bli)
 
-extern signed long
-qb_gets,
-ua_gets,
-min_gets,
-max_gets,
-qb_max,
-ua_max,
-min_max,
-max_max,
+extern signed long qb_gets, ua_gets, min_gets, max_gets, qb_max, ua_max, min_max, max_max,
 
 // TCP statistics counters (see tcp.bli global defs).
 
-ts$uir,
-ts$aco,
-ts$pco,
-ts$dbx,
-ts$dbr,
-ts$sr,
-ts$sx,
-ts$duplicate_segs,
-ts$retrans_segs,
-ts$rpz_rxq,
-ts$oorw_segs,
-ts$future_rcvd,
-ts$future_used,
-ts$future_dropped,
-ts$future_dups,
-ts$seg_bad_cksum,
-ts$badseq,
-ts$servers_forked;
+        ts$uir, ts$aco, ts$pco, ts$dbx, ts$dbr, ts$sr, ts$sx, ts$duplicate_segs, ts$retrans_segs, ts$rpz_rxq, ts$oorw_segs,
+        ts$future_rcvd, ts$future_used, ts$future_dropped, ts$future_dups, ts$seg_bad_cksum, ts$badseq, ts$servers_forked;
 
 // Rtns from MEMGR.BLI
 
@@ -382,8 +355,8 @@ extern     mm$uarg_free();
 // IOUTIL.BLI
 
 extern  void    ACT_OUTPUT();
-extern     LOG_CHANGE();
-extern     ACT_CHANGE();
+extern  void    LOG_CHANGE();
+extern  void    ACT_CHANGE();
 extern  void    LOG_OUTPUT();
 extern  void    LOG_TIME_STAMP();
 extern  void    ACT_FAO();
@@ -395,8 +368,8 @@ extern  void    OPR_FAO();
 // Routines From:  MACLIB.MAR
 
 extern     void set_ip_device_offline();
-extern     user_requests_avail();
-extern      VMS_IO$POST();
+extern     int  user_requests_avail();
+extern     int  VMS_IO$POST();
 extern     void MOVBYT();
 extern     void SwapBytes();
 
@@ -410,7 +383,7 @@ extern  void    NML$STEP();
 
 // IP.BLI
 
-extern     ip_islocal();
+extern int ip_islocal();
 
 
 // User Network(TCP) I/O Request arg blk Function Codes.
@@ -636,7 +609,7 @@ Side Effects:
 
 */
 
-USER$Err (struct user_default_args * Arg, long Err)
+int USER$Err (struct user_default_args * Arg, long Err)
 {
     netio_status_block IOSB_ , * IOSB = & IOSB_;
 
@@ -775,7 +748,7 @@ void user$net_connection_info(struct user_info_args * uargs,
 
 //Exit: returns clock based integer.
 
-user$clock_base (void)
+long user$clock_base (void)
 {
     signed int
     Now[2];
@@ -806,15 +779,11 @@ Side Effects:
 */
 
 
-signed long
-TCP_User_LP,
-UDP_User_LP;
+signed long TCP_User_LP, UDP_User_LP;
 
-user$get_local_port(Pbase)
-long * Pbase;
+long user$get_local_port(long * Pbase)
 {
-    signed long
-    rval;
+    signed long rval;
 
     *Pbase = *Pbase+1; // check
     rval = *Pbase % USER_LP_END; // check
@@ -823,7 +792,7 @@ long * Pbase;
     return rval & 0x7FFF;
 }
 
-void    ACCESS_INIT();
+void ACCESS_INIT();
 
 void user$init_routines (void)
 {
@@ -1095,8 +1064,7 @@ void user$purge_all_io (void)
     extern  void udp$purge_all_io();
     extern  void icmp$purge_all_io();
     extern  void ipu$purge_all_io();
-    register
-    qb;
+    int qb;
     signed long
     expr[2];
     struct user_default_args * uargs;
@@ -1178,7 +1146,7 @@ Side Effects:
 
 void    GTHST_CANCEL();
 
-user$brk (void)
+int user$brk (void)
 {
     return    SS$_NORMAL;
 }
@@ -1256,7 +1224,6 @@ void net$dump(struct debug_dump_args * uargs)
 {
     extern  CALCULATE_UPTIME();
     extern  TEK$sys_uptime;
-    register
     struct queue_blk_structure(qb_ur_fields) * QB;  // queue block pointer.
 #define RBBYTES D$User_Return_Blk_Max_Size
 #define RBSIZE (RBBYTES+3)/4        // Largest dump block, in alloc units
@@ -1310,6 +1277,7 @@ void net$dump(struct debug_dump_args * uargs)
         rb->dm$dmsfr = min_seg_count;
         rb->dm$nmfr = max_seg_count;
         bufsize = D$MA_BLKSIZE;
+        break;
     };
 
     case DU$TCP_STATS:
@@ -1343,6 +1311,7 @@ void net$dump(struct debug_dump_args * uargs)
         ch$move(8,TEK$sys_uptime,rb->dm$uptime);
 
         bufsize = D$TS_BLKSIZE; // byte size of return blk.
+        break;
     };
 
 // Return all active local-connection-id's otherwise known as the address of the
@@ -1355,6 +1324,7 @@ void net$dump(struct debug_dump_args * uargs)
         void        tcp$connection_list();
         tcp$connection_list(RB);
         bufsize = D$LC_ID_BLKSIZE;
+        break;
     };
 
 // Dump out a TCB
@@ -1366,6 +1336,7 @@ void net$dump(struct debug_dump_args * uargs)
             bufsize = D$TCB_DUMP_BLKSIZE;
         else
             Error = USER$Err(uargs,NET$_CDE);
+        break;
     };
 
 // Return all UDP connections (as D$Local_Connection_ID above)
@@ -1375,6 +1346,7 @@ void net$dump(struct debug_dump_args * uargs)
         void        udp$connection_list();
         udp$connection_list(RB);
         bufsize = D$UDP_LIST_BLKSIZE;
+        break;
     };
 
 // Dump out a UDPCB
@@ -1386,6 +1358,7 @@ void net$dump(struct debug_dump_args * uargs)
             bufsize = D$UDPCB_DUMP_BLKSIZE;
         else
             Error = USER$Err(uargs,NET$_CDE);
+        break;
     };
 
 // Return all ICMP connections (as D$Local_Connection_ID above)
@@ -1406,6 +1379,7 @@ void net$dump(struct debug_dump_args * uargs)
             bufsize = D$ICMPCB_DUMP_BLKSIZE;
         else
             Error = USER$Err(uargs,NET$_CDE);
+        break;
     };
 
 // Get device-depandent dump from device driver module
@@ -1428,6 +1402,7 @@ void net$dump(struct debug_dump_args * uargs)
         }
         else
             Error = USER$Err(uargs,NET$_BDI); // error: bad device index
+        break;
     };
 
 // Dump out ARP cache entries.
@@ -1457,6 +1432,7 @@ void net$dump(struct debug_dump_args * uargs)
 //      if (bufsize < 0)
 //      Error = USER$Err(uargs,NET$_DAE);
 //      };
+        break;
     };
 
 // Get list of device indexes.
@@ -1465,6 +1441,7 @@ void net$dump(struct debug_dump_args * uargs)
     {
         extern      cnf$device_list();
         bufsize = cnf$device_list(RB);
+        break;
     };
 
     case DU$DEVICE_STAT:
@@ -1476,12 +1453,14 @@ void net$dump(struct debug_dump_args * uargs)
             Error = USER$Err(uargs,NET$_DAE);
         else
             bufsize = D$DEV_DUMP_BLKSIZE;
+        break;
     };
 
 // Undefined function code - give error
 
     default:
         Error = USER$Err(uargs,NET$_IFC); // Illegal Function code.
+        break;
     };
 
 // Did we have an Error or Illegal Dump directive code?
@@ -1556,7 +1535,7 @@ MACRO
 GETJPI_BLOCK = BLOCK->GETJPI_SIZE FIELD(GETJPI_FIELDS) %;
 #endif
 
-user$privileged(PID)
+int user$privileged(int PID)
 //
 // Verify the user has privileges to use a well-known local port. User must
 // have PHY_IO privilege.
@@ -1585,7 +1564,7 @@ user$privileged(PID)
 }
 
 
-check_id(PID,ID)
+int check_id(int PID, int ID)
 //
 // Check that a user holds a given rights identifier. The identifiers of
 // interest to us are ARPANET_ACCESS and ARPANET_WIZARD.
@@ -1635,7 +1614,7 @@ check_id(PID,ID)
 
 #define WKS$SMTP 25     // Well known port number for SMTP
 
-user$check_access(PID,LCLHST,LCLPRT,FRNHST,FRNPRT)
+int user$check_access(int PID, int LCLHST, int LCLPRT, int FRNHST, int FRNPRT)
 //
 // Main routine to check for network access.
 // Returns SS$_NORMAL if access is granted, or error code.
@@ -1685,7 +1664,7 @@ leave_x:
 }
 
 
-void user$access_config(HOSTNUM,HOSTMASK)
+void user$access_config(int HOSTNUM, int HOSTMASK)
 //
 // Add an entry to the list of allowed local hosts. Called by CONFIG when
 // LOCAL_HOST entry seen in the config file.

@@ -529,7 +529,7 @@ NOVALUE;
 
 //EXTERNAL
 // TCP_MECH.BLI
-extern unsigned long long Start_Time;   // Quadword time IPACP started.
+extern struct _generic_64 Start_Time;   // Quadword time IPACP started.
 extern unsigned long log_state, act_state, Begin_Lock,         // start & end address of process pages which
         End_Lock;           // are locked in the working set; see maclib.mar
 
@@ -722,7 +722,7 @@ void wait_for_something_2_do(unsigned long long nxtime)
     unsigned long long now;
     unsigned rto, delay;
     char Big_Sleep = FALSE;
-    unsigned long long BTime;   // Binary rep of time.
+    struct _generic_64 BTime;   // Binary rep of time.
 
 // Skip this snooze if we have network segments to process or IP has datagrams
 // to send or it's Time to exit.
@@ -758,8 +758,7 @@ void wait_for_something_2_do(unsigned long long nxtime)
                 XLOG$FAO(LOG$TCBCHECK, "!%T WFS2D: Short sleep, RTO=!UL!/", 0, rto);
             }
 
-            ((int *) &BTime)[1] = -1;    // make it delta time.
-            ((int *) &BTime)[0] = rto * CSEC_TIMER_DELTA; // nap size.
+            BTime.gen64$r_quad_overlay.gen64$q_quadword =  -1 * rto * CSEC_TIMER_DELTA; // make it delta time, nap size.
         }
         else            // No TCB's
         {
@@ -1047,7 +1046,7 @@ void ip4acp_main(void)
     int eqv_len;
     $DESCRIPTOR(tabnam, "LNM$SYSTEM_TABLE"); // cut _TABLE some time
     $DESCRIPTOR(lognam, "INET$NETWORK_NAME");
-    unsigned long long Start_Time;
+    struct _generic_64 Start_Time;
     struct dsc$descriptor myname;
 
     items[0].item_code = LNM$_STRING;

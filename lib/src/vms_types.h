@@ -19,14 +19,4 @@ typedef signed long INT64;
 typedef unsigned long UINT64;
 #endif
 
-/* other types */
-typedef unsigned long ADDRESS; /* address/pointer value (TODO: is this really needed?) */
-typedef int _STATUS; /* return status */
-
-typedef UINT32 PID; /* process id */
-typedef UINT16 CHAN_NUM; /* channel number */
-
-/* TODO: merge with struct TIME into struct _generic_64 */
-typedef INT64 _vms_time;
-
 #endif /* VMS_TYPES_H */

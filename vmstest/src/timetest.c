@@ -7,26 +7,26 @@
 #include "expect.h"
 #include "timetest.h"
 
-int call_sys$asctim(unsigned short *time_name_len, char *time_name, unsigned long long *date_time)
+int call_sys$asctim(unsigned short *time_name_len, char *time_name, struct _generic_64 *date_time)
 {
     struct dsc$descriptor_s time_name_desc =
         { *time_name_len, DSC$K_DTYPE_T, DSC$K_CLASS_S, time_name };
     return sys$asctim(time_name_len, &time_name_desc, date_time, 0);
 }
 
-int call_sys$bintim(char *time_name, unsigned long long *date_time)
+int call_sys$bintim(char *time_name, struct _generic_64 *date_time)
 {
     struct dsc$descriptor_s time_name_desc =
         { (unsigned short) strlen(time_name), DSC$K_DTYPE_T, DSC$K_CLASS_S, time_name };
     return sys$bintim(&time_name_desc, date_time);
 }
 
-int call_sys$gettim(unsigned long long *date_time)
+int call_sys$gettim(struct _generic_64 *date_time)
 {
     return sys$gettim(date_time);
 }
 
-int call_sys$numtim(unsigned short *time_vector, unsigned long long *date_time)
+int call_sys$numtim(unsigned short *time_vector, struct _generic_64 *date_time)
 {
     return sys$numtim(time_vector, date_time);
 }
@@ -35,11 +35,14 @@ int call_sys$numtim(unsigned short *time_vector, unsigned long long *date_time)
 
 void run_time_test(void)
 {
-    unsigned long long date_time = 0;
-    unsigned long long date_time_copy = 0;
+    struct _generic_64 date_time;
+    struct _generic_64 date_time_copy;
     unsigned short time_name_length = MAX_TIME_NAME_LEN;
     char time_name[MAX_TIME_NAME_LEN + 1];
     unsigned short time_vector[7];
+
+    date_time.gen64$r_quad_overlay.gen64$q_quadword = 0;
+    date_time_copy.gen64$r_quad_overlay.gen64$q_quadword = 0;
 
     EXPECT_EQ(call_sys$gettim(&date_time), SS$_NORMAL);
     EXPECT_NE(memcmp(&date_time, &date_time_copy, sizeof(date_time)), 0);
@@ -52,5 +55,5 @@ void run_time_test(void)
     EXPECT_EQ(call_sys$numtim(time_vector, &date_time_copy), SS$_NORMAL);
 
     EXPECT_EQ(call_sys$bintim("17-NOV-1858 00:01:23.45", &date_time), SS$_NORMAL);
-    EXPECT_EQ((long)(date_time - ((((60 * 1) + 23) * 1000) + 450) * 1000 * 10), 0);
+    EXPECT_EQ((long)(date_time.gen64$r_quad_overlay.gen64$q_quadword - ((((60 * 1) + 23) * 1000) + 450) * 1000 * 10), 0);
 }

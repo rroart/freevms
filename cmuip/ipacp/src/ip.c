@@ -661,7 +661,7 @@ ip$isme(IPADDR, STRICT)
     return -1;
 }
 
-int (*    ip_islocal)(int) = ip_find_dev;
+int (* ip_islocal)(int) = ip_find_dev;
 
 void IP$SET_HOSTS(ADRCNT,ADRLST,LCLPTR,FRNPTR)
 //

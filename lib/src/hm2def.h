@@ -42,13 +42,13 @@ struct _hm2
     UINT16 hm2$w_fileprot;
     UINT16 hm2$w_reserved2;
     UINT16 hm2$w_checksum1;
-    _vms_time hm2$q_credate;
+    UINT64 hm2$q_credate;
     UINT8 hm2$b_window;
     UINT8 hm2$b_lru_lim;
     UINT16 hm2$w_extend;
-    _vms_time hm2$q_retainmin;
-    _vms_time hm2$q_retainmax;
-    _vms_time hm2$q_revdate;
+    UINT64 hm2$q_retainmin;
+    UINT64 hm2$q_retainmax;
+    UINT64 hm2$q_revdate;
     UINT8 hm2$r_min_class[20];
     UINT8 hm2$r_max_class[20];
     UINT8 hm2$t_reserved3[320];

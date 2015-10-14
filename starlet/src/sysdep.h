@@ -554,7 +554,7 @@ extern int kernel_errno;
     __set_errno (INTERNAL_SYSCALL_ERRNO (resultvar, ));           \
     resultvar = (unsigned long) -1;                       \
       }                                       \
-    (long) resultvar; })
+    (int) resultvar; })
 
 #undef INTERNAL_SYSCALL_DECL
 #define INTERNAL_SYSCALL_DECL(err) do { } while (0)
@@ -570,7 +570,7 @@ extern int kernel_errno;
     "int $0x81\n\t"                               \
     : "=a" (resultvar)                                \
     : "i" (__NR_##name) ASM_ARGS_##nr : "memory", "cc", "r11", "cx");         \
-    (long) resultvar; })
+    (int) resultvar; })
 
 #define INLINE_SYSCALL1(name, nr, args...) \
   ({                                          \
@@ -581,7 +581,7 @@ extern int kernel_errno;
     "int $0x82\n\t"                               \
     : "=a" (resultvar)                                \
     : "i" (__NR_##name) ASM_ARGS_##nr : "memory", "cc", "r11", "cx");         \
-    (long) resultvar; })
+    (int) resultvar; })
 
 #define INLINE_SYSCALL3(name, nr, args...) \
   ({                                          \
@@ -592,7 +592,7 @@ extern int kernel_errno;
     "int $0x84\n\t"                               \
     : "=a" (resultvar)                                \
     : "i" (__NR_##name) ASM_ARGS_##nr : "memory", "cc", "r11", "cx");         \
-    (long) resultvar; })
+    (int) resultvar; })
 
 #undef INTERNAL_SYSCALL_ERROR_P
 #define INTERNAL_SYSCALL_ERROR_P(val, err) \

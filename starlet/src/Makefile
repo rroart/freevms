@@ -32,10 +32,10 @@ vmsopt.a:	vmsopt.o
 		rm vmsopt.a; ar q vmsopt.a vmsopt.o; ranlib vmsopt.a
 
 vmsopt.o:	vmsopt.c
-		gcc $(CFLAGS) ${OLDINCLUDE} -O2 -o vmsopt.o -c vmsopt.c
+		gcc $(CFLAGS) $(OLDINCLUDE) -O2 -o vmsopt.o -c vmsopt.c
 
 pic/%.o: %.c
 		install -d pic
-		gcc -fpic -fPIC -c -I. $< -o $@
+		gcc -fpic -fPIC $(CFLAGS) -c $< -o $@
 
 include $(TOPDIR)/Rules.make.freevms

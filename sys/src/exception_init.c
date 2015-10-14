@@ -57,14 +57,9 @@ int exe$clrast(void)
 #endif
 }
 
-extern asmlinkage int exe$qio(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb,
-        void (*astadr)(__unknown_params), long astprm, void*p1, long p2, long p3, long p4, long p5, long p6);
-extern asmlinkage int exe$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb,
-        void (*astadr)(__unknown_params), long astprm, void*p1, long p2, long p3, long p4, long p5, long p6);
-
 #if (defined __i386__) || (defined __x86_64__)
-int sys$qio(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb, void (*astadr)(__unknown_params),
-        long astprm, void*p1, long p2, long p3, long p4, long p5, long p6)
+int sys$qio(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb,
+        void (*astadr)(void *, unsigned long, void *), long astprm, void*p1, long p2, long p3, long p4, long p5, long p6)
 {
     struct struct_qio s;
     s.efn = efn;
@@ -83,8 +78,8 @@ int sys$qio(unsigned int efn, unsigned short int chan, unsigned int func, struct
     return INLINE_SYSCALL($qio, 1, &s);
 }
 
-int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb, void (*astadr)(__unknown_params),
-        long astprm, void*p1, long p2, long p3, long p4, long p5, long p6)
+int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb,
+        void (*astadr)(void *, unsigned long, void *), long astprm, void*p1, long p2, long p3, long p4, long p5, long p6)
 {
     struct struct_qio s;
     s.efn = efn;
@@ -113,7 +108,7 @@ int sys$hiber(void)
     return INLINE_SYSCALL($hiber, 0);
 }
 
-int sys$dclast(void (*astadr)(__unknown_params), unsigned long astprm, unsigned int acmode)
+int sys$dclast(void (*astadr)(), unsigned long astprm, unsigned int acmode)
 {
     return INLINE_SYSCALL($dclast, 3, astadr, astprm, acmode);
 }

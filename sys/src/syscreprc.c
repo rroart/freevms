@@ -29,33 +29,28 @@
 
 #include <asm/uaccess.h>
 
-struct _generic_64
-{
-    long long l;
-};
-
-asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr, unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, unsigned short int mbxunt, unsigned int stsflg,...);
-
 asmlinkage int exe$creprc_wrap(struct struct_args *s)
 {
-    return exe$creprc(s->s1,s->s2,s->s3,s->s4,s->s5,s->s6,s->s7,s->s8,s->s9,s->s10,s->s11,s->s12);
+    return exe$creprc(s->s1, s->s2, s->s3, s->s4, s->s5, s->s6, s->s7, s->s8, s->s9, s->s10, s->s11, s->s12);
 }
 
-asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr, unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, unsigned short int mbxunt, unsigned int stsflg,...)
+asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr,
+        unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, UINT16 mbxunt, unsigned int stsflg,
+        ...)
 {
     unsigned long stack_here;
-    struct _pcb * p, * cur;
+    struct _pcb * p, *cur;
     int retval;
 
-    struct dsc$descriptor * imd = image, * ind = input, * oud = output, * erd = error;
+    struct dsc$descriptor * imd = image, *ind = input, *oud = output, *erd = error;
 
-    unsigned long clone_flags=CLONE_VFORK;
+    unsigned long clone_flags = CLONE_VFORK;
     //check pidadr
 
     ctl$gl_creprc_flags = stsflg;
     // check for PRC$M_NOUAF sometime
 
-    if (stsflg&PRC$M_DETACH)
+    if (stsflg & PRC$M_DETACH)
     {
 
     }
@@ -64,12 +59,12 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 
     }
     //setipl(IPL$_ASTDEL);//postpone this?
-    cur=ctl$gl_pcb;
+    cur = ctl$gl_pcb;
     vmslock(&SPIN_SCHED, IPL$_SCHED);
     vmslock(&SPIN_MMG, IPL$_MMG);
     p = alloc_task_struct();
     //bzero(p,sizeof(struct _pcb));//not wise?
-    memset(p,0,sizeof(struct _pcb));
+    memset(p, 0, sizeof(struct _pcb));
 
     // check more
     // compensate for no struct clone/copy
@@ -81,11 +76,11 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 
     p->pcb$b_type = DYN$C_PCB;
 
-    p->pcb$b_asten=15;
-    p->phd$b_astlvl=4;
-    p->pr_astlvl=4;
-    p->psl=0;
-    p->pslindex=0;
+    p->pcb$b_asten = 15;
+    p->phd$b_astlvl = 4;
+    p->pr_astlvl = 4;
+    p->psl = 0;
+    p->pslindex = 0;
 
     qhead_init(&p->pcb$l_lockqfl);
     // set capabilities
@@ -98,41 +93,41 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
     // from setprn:
     if (prcnam)
     {
-        struct dsc$descriptor *s=prcnam;
-        strncpy(p->pcb$t_lname,s->dsc$a_pointer,s->dsc$w_length);
+        struct dsc$descriptor *s = prcnam;
+        strncpy(p->pcb$t_lname, s->dsc$a_pointer, s->dsc$w_length);
     }
     // set priv
-    p->pcb$l_priv=ctl$gl_pcb->pcb$l_priv;
+    p->pcb$l_priv = ctl$gl_pcb->pcb$l_priv;
     // set pris
-    p->pcb$b_prib=31-baspri;
-    p->pcb$b_pri=31-baspri-6;
+    p->pcb$b_prib = 31 - baspri;
+    p->pcb$b_pri = 31 - baspri - 6;
     //  if (p->pcb$b_pri<16) p->pcb$b_pri=16;
-    p->pcb$w_quant=-QUANTUM;
+    p->pcb$w_quant = -QUANTUM;
 
     // set uic
-    p->pcb$l_uic=ctl$gl_pcb->pcb$l_uic;
+    p->pcb$l_uic = ctl$gl_pcb->pcb$l_uic;
     // set vms pid
     // check process name
     // do something with pqb
 
-    p->pcb$l_pqb=kmalloc(sizeof(struct _pqb),GFP_KERNEL);
-    memset(p->pcb$l_pqb,0,sizeof(struct _pqb));
+    p->pcb$l_pqb = kmalloc(sizeof(struct _pqb), GFP_KERNEL);
+    memset(p->pcb$l_pqb, 0, sizeof(struct _pqb));
 
     struct _pqb * pqb = p->pcb$l_pqb;
 
     pqb->pqb$q_prvmsk = ctl$gq_procpriv;
 
     if (imd)
-        memcpy(pqb->pqb$t_image,imd->dsc$a_pointer,imd->dsc$w_length);
+        memcpy(pqb->pqb$t_image, imd->dsc$a_pointer, imd->dsc$w_length);
     if (ind)
-        memcpy(pqb->pqb$t_input,ind->dsc$a_pointer,ind->dsc$w_length);
+        memcpy(pqb->pqb$t_input, ind->dsc$a_pointer, ind->dsc$w_length);
     if (oud)
-        memcpy(pqb->pqb$t_output,oud->dsc$a_pointer,oud->dsc$w_length);
+        memcpy(pqb->pqb$t_output, oud->dsc$a_pointer, oud->dsc$w_length);
     if (erd)
-        memcpy(pqb->pqb$t_error,erd->dsc$a_pointer,erd->dsc$w_length);
+        memcpy(pqb->pqb$t_error, erd->dsc$a_pointer, erd->dsc$w_length);
 
     if (oud) // temp measure
-        memcpy(p->pcb$t_terminal,oud->dsc$a_pointer,oud->dsc$w_length);
+        memcpy(p->pcb$t_terminal, oud->dsc$a_pointer, oud->dsc$w_length);
 
     // translate some logicals
     // copy security clearance
@@ -149,12 +144,12 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
     // and store it
 #endif
     // make ipid and epid
-    p->pcb$l_pid=alloc_ipid();
+    p->pcb$l_pid = alloc_ipid();
     {
-        unsigned long *vec=sch$gl_pcbvec;
-        vec[p->pcb$l_pid&0xffff]=p;
+        unsigned long *vec = sch$gl_pcbvec;
+        vec[p->pcb$l_pid & 0xffff] = p;
     }
-    p->pcb$l_epid=exe$ipid_to_epid(p->pcb$l_pid);
+    p->pcb$l_epid = exe$ipid_to_epid(p->pcb$l_pid);
     // should invoke sch$chse, put this at bottom?
     // setipl(0) and return
 
@@ -170,7 +165,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 #if 0
     if (atomic_read(&p->user->processes) >= p->rlim[RLIMIT_NPROC].rlim_cur
             && !capable(CAP_SYS_ADMIN) && !capable(CAP_SYS_RESOURCE))
-        goto bad_fork_free;
+    goto bad_fork_free;
 
     atomic_inc(&p->user->__count);
     atomic_inc(&p->user->processes);
@@ -210,11 +205,11 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
     init_timer(&p->real_timer);
     p->real_timer.data = (unsigned long) p;
 
-    p->leader = 0;      /* session leadership doesn't inherit */
+    p->leader = 0; /* session leadership doesn't inherit */
     p->tty_old_pgrp = 0;
     p->times.tms_utime = p->times.tms_stime = 0;
     p->times.tms_cutime = p->times.tms_cstime = 0;
-    p->lock_depth = -1;     /* -1 = no lock */
+    p->lock_depth = -1; /* -1 = no lock */
     p->start_time = jiffies;
 
     INIT_LIST_HEAD(&p->local_pages);
@@ -231,9 +226,7 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
     if (copy_sighand(clone_flags, p))
         goto bad_fork_cleanup_fs;
 
-bad_fork_cleanup:
-bad_fork_cleanup_files:
-bad_fork_cleanup_fs:
+    bad_fork_cleanup: bad_fork_cleanup_files: bad_fork_cleanup_fs:
 
     // now a hole
 
@@ -280,7 +273,6 @@ bad_fork_cleanup_fs:
     //  wake_up_process2(p,PRI$_TICOM);     /* do this last */
     //goto fork_out;//??
 
-
     // now something from exec
 
     // wait, better do execve itself
@@ -306,17 +298,17 @@ bad_fork_cleanup_fs:
 
     // To be moved to shell.c and swp$shelinit later
 
-    p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
+    p->pcb$l_phd = kmalloc(sizeof(struct _phd), GFP_KERNEL);
     init_phd(p->pcb$l_phd);
 
-    init_fork_p1pp(p,p->pcb$l_phd,ctl$gl_pcb,ctl$gl_pcb->pcb$l_phd);
+    init_fork_p1pp(p, p->pcb$l_phd, ctl$gl_pcb, ctl$gl_pcb->pcb$l_phd);
 #ifdef __x86_64__
-    shell_init_other(p,ctl$gl_pcb,0x7ff80000-0x1000,0x7fffe000);
-    shell_init_other(p,ctl$gl_pcb,0x7ff80000-0x2000,0x7fffe000);
-    shell_init_other(p,ctl$gl_pcb,0x7ff90000-0x1000,0x7fffe000);
-    shell_init_other(p,ctl$gl_pcb,0x7ff90000-0x2000,0x7fffe000);
-    shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x1000,0x7fffe000);
-    shell_init_other(p,ctl$gl_pcb,0x7ffa0000-0x2000,0x7fffe000);
+    shell_init_other(p, ctl$gl_pcb, 0x7ff80000 - 0x1000, 0x7fffe000);
+    shell_init_other(p, ctl$gl_pcb, 0x7ff80000 - 0x2000, 0x7fffe000);
+    shell_init_other(p, ctl$gl_pcb, 0x7ff90000 - 0x1000, 0x7fffe000);
+    shell_init_other(p, ctl$gl_pcb, 0x7ff90000 - 0x2000, 0x7fffe000);
+    shell_init_other(p, ctl$gl_pcb, 0x7ffa0000 - 0x1000, 0x7fffe000);
+    shell_init_other(p, ctl$gl_pcb, 0x7ffa0000 - 0x2000, 0x7fffe000);
 #else
     shell_init_other(p,ctl$gl_pcb,0x7ff80000-0x1000,0x7fffe000);
     shell_init_other(p,ctl$gl_pcb,0x7ff80000-0x2000,0x7fffe000);
@@ -328,14 +320,14 @@ bad_fork_cleanup_fs:
     //printk("newthread %x\n",p),
     retval = new_thread(0, clone_flags, 0, 0, p, 0);
 
-    int eip=0,esp=0;
+    int eip = 0, esp = 0;
 
     //  start_thread(regs,eip,esp);
 
     sch$chse(p, PRI$_TICOM);
 
-    vmsunlock(&SPIN_MMG,-1);
-    vmsunlock(&SPIN_SCHED,0);
+    vmsunlock(&SPIN_MMG, -1);
+    vmsunlock(&SPIN_SCHED, 0);
 
     return SS$_NORMAL;
 
@@ -360,7 +352,7 @@ bad_fork_cleanup_fs:
 
         retval = PTR_ERR(file);
         if (IS_ERR(file))
-            return retval;
+        return retval;
 
         bprm.p = PAGE_SIZE*MAX_ARG_PAGES-sizeof(void *);
         memset(bprm.page, 0, MAX_ARG_PAGES*sizeof(bprm.page[0]));
@@ -389,51 +381,49 @@ bad_fork_cleanup_fs:
         retval = prepare_binprm(&bprm);
         //printk("here 4\n");
         if (retval < 0)
-            goto out;
+        goto out;
 
         retval = copy_strings_kernel(1, &bprm.filename, &bprm);
         //printk("here 3\n");
         if (retval < 0)
-            goto out;
+        goto out;
 
         bprm.exec = bprm.p;
         retval = copy_strings(bprm.envc, envp, &bprm);
         //printk("here 2\n");
         if (retval < 0)
-            goto out;
+        goto out;
 
         retval = copy_strings(bprm.argc, argv, &bprm);
         //printk("here 1\n");
         if (retval < 0)
-            goto out;
+        goto out;
 
         retval = search_binary_handler(&bprm,regs);
         if (retval >= 0)
-            /* execve success */
-            return retval;
+        /* execve success */
+        return retval;
 
-out:
+        out:
         /* Something went wrong, return the inode and free the argument pages*/
         allow_write_access(bprm.file);
         if (bprm.file)
-            fput(bprm.file);
+        fput(bprm.file);
 
-        for (i = 0 ; i < MAX_ARG_PAGES ; i++)
+        for (i = 0; i < MAX_ARG_PAGES; i++)
         {
             struct page * page = bprm.page[i];
             if (page)
-                __free_page(page);
+            __free_page(page);
         }
 
         return retval;
     }
 #endif
 
-fork_out:
-    return retval;
+    fork_out: return retval;
 
-bad_fork_free:
-    free_task_struct(p);
+    bad_fork_free: free_task_struct(p);
     goto fork_out;
 
 }

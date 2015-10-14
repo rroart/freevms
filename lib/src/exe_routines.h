@@ -23,6 +23,7 @@
 #include <va_rangedef.h>
 
 #include <descrip.h>
+#include <gen64def.h>
 
 int exe_std$abortio(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, int qio_sts);
 int exe_std$alloc_bufio_32(struct _irp *irp, struct _pcb *pcb, void *uva32, int pktdatsiz);
@@ -203,7 +204,7 @@ int exe$qiodrvpkt(struct _irp * i, struct _pcb * p, struct _ucb * u);
 int exe$finishio(long status1, long status2, struct _irp * i, struct _pcb * p, struct _ucb * u);
 int exe$finishioc(long status, struct _irp * i, struct _pcb * p, struct _ucb * u);
 void com$post(struct _irp * i, struct _ucb * u);
-int exe$asctim(UINT16 *timlen, struct dsc$descriptor *timbuf, const void *timadra, unsigned long cvtflg);
+int exe$asctim(UINT16 *timlen, struct dsc$descriptor *timbuf, const struct _generic_64 *timadr, unsigned long cvtflg);
 int exe$imgact_elf(void * name, void * hdrbuf);
 int exe$pscan_next_id(struct _pcb ** p);
 int exe$alophycntg(unsigned long * va, unsigned long num);
@@ -232,18 +233,18 @@ int exe$prober_simple(void * addr);
 
 asmlinkage int exe$assign(void *devnam, UINT16 *chan, unsigned int acmode, void *mbxnam, int flags);
 asmlinkage int exe$exit(unsigned int code);
-asmlinkage int exe$setpri(unsigned int *pidadr, void *prcnam, unsigned int pri, unsigned int *prvpri, unsigned int*pol,
+asmlinkage int exe$setpri(unsigned int *pidadr, void *prcnam, unsigned int pri, unsigned int *prvpri, unsigned int *pol,
         unsigned int *prvpol);
-asmlinkage int exe$setimr(unsigned int efn, signed long long *daytim, void (*astadr)(long), unsigned long reqidt,
+asmlinkage int exe$setimr(unsigned int efn, struct _generic_64 *daytim, void (*astadr)(long), unsigned long reqidt,
         unsigned int flags);
 asmlinkage int exe$clref(unsigned int efn);
-asmlinkage int exe$gettim(unsigned long long *timadr);
-int exe$numtim(UINT16 timbuf[7], struct TIME *timadra);
-int exe$bintim(struct dsc$descriptor *timbuf, struct TIME *timadra);
+asmlinkage int exe$gettim(struct _generic_64 *timadr);
+int exe$numtim(UINT16 timbuf[7], struct _generic_64 *timadr);
+int exe$bintim(struct dsc$descriptor *timbuf, struct _generic_64 *timadr);
 asmlinkage int exe$cancel(UINT16 chan);
 asmlinkage int exe$crelnm(unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
-asmlinkage int exe$crelnt(unsigned int *attr, void *resnam, unsigned int *reslen, unsigned int *quota, UINT16 *promsk,
-        void *tabnam, void *partab, unsigned char *acmode);
+asmlinkage int exe$crelnt(unsigned int *attr, void *resnam, unsigned int *reslen, unsigned int *quota, UINT16 *promsk, void *tabnam,
+        void *partab, unsigned char *acmode);
 asmlinkage int exe$dellnm(void *tabnam, void *lognam, unsigned char *acmode);
 asmlinkage int exe$trnlnm(unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
 asmlinkage int exe$create_region_32(unsigned long length, unsigned int region_prot, unsigned int flags,
@@ -258,17 +259,17 @@ asmlinkage int exe$mgblsc(struct _va_range *inadr, struct _va_range *retadr, uns
 asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam,
         unsigned long long * ident, unsigned int relpag, unsigned /*short*/long chan, unsigned int pagcnt, unsigned int vbn,
         unsigned int prot, unsigned int pfc);
-asmlinkage int exe$schdwk(unsigned int *pidadr, void *prcnam, signed long long * daytim, signed long long * reptim);
+asmlinkage int exe$schdwk(unsigned int *pidadr, void *prcnam, struct _generic_64 * daytim, signed long long * reptim);
 asmlinkage int exe$cretva(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode);
 asmlinkage int exe$dassgn(UINT16 chan);
 int exe$insioq(struct _irp * i, struct _ucb * u);
 asmlinkage int exe$forcex(unsigned int *pidadr, void *prcnam, unsigned int code);
 asmlinkage int exe$mount(void *itmlst);
 asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *output, void *error, struct _generic_64 *prvadr,
-        unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, UINT16 mbxunt, unsigned int stsflg,
-        ...);
+        unsigned int *quota, void*prcnam, unsigned int baspri, unsigned int uic, UINT16 mbxunt, unsigned int stsflg, ...);
 asmlinkage int exe$crembx(char prmflg, UINT16 *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk,
         unsigned int acmode, void *lognam, long flags, ...);
 asmlinkage int exe$setprn(struct dsc$descriptor *s);
+asmlinkage int exe$setprv(char enbflg, struct _generic_64 *prvadr, char prmflg, struct _generic_64 *prvprv);
 
 #endif

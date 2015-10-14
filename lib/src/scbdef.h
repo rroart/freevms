@@ -30,7 +30,7 @@ struct _scbdef
     UINT32 scb$l_status2;
     UINT16 scb$w_writecnt;
     char scb$t_volockname[12];
-    _vms_time scb$q_mounttime;
+    UINT64 scb$q_mounttime;
     UINT16 scb$w_backrev;
     UINT32 scb$q_genernum[2]; /* error? */
     UINT8 scb$b_reserved[446];

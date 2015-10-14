@@ -35,7 +35,7 @@
    \param d buffer
 */
 
-kfreebuf(void * d)
+void kfreebuf(void * d)
 {
     struct _bufio * bd = d;
     struct _cxb * cx = d;
@@ -68,7 +68,7 @@ kfreebuf(void * d)
    \param i irp containing the buffer
 */
 
-movbuf(struct _irp * i)
+void movbuf(struct _irp * i)
 {
     // still skipping access checks and such
     if (i->irp$l_svapte==&i->irp$l_svapte)
@@ -116,7 +116,7 @@ end:
    \details TODO restructure
  */
 
-dirpost(struct _irp * i)
+void dirpost(struct _irp * i)
 {
     printk("doing dirpost\n");
 }
@@ -127,7 +127,7 @@ dirpost(struct _irp * i)
    \param i irp
 */
 
-bufpost(struct _irp * i)
+void bufpost(struct _irp * i)
 {
     struct _acb * a=(struct _acb *) i;
     struct _pcb * pcb = ctl$gl_pcb;

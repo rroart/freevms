@@ -7,6 +7,7 @@
 #include <linux/sched.h>
 
 #include <ssdef.h>
+#include <exe_routines.h>
 #include <system_data_cells.h>
 
 asmlinkage int exe$setprv(char enbflg, struct _generic_64 *prvadr, char prmflg, struct _generic_64 *prvprv)
@@ -16,13 +17,13 @@ asmlinkage int exe$setprv(char enbflg, struct _generic_64 *prvadr, char prmflg, 
     struct _pcb * pcb = ctl$gl_pcb;
     long long * p = prvprv;
     if (p)
-        *p=pcb->pcb$l_priv;
-    long long * l = *(long long*)prvadr;
+        *p = pcb->pcb$l_priv;
+    long long * l = *(long long*) prvadr;
     p = prvadr;
     if (enbflg)
-        pcb->pcb$l_priv|=*p;
+        pcb->pcb$l_priv |= *p;
     else
-        pcb->pcb$l_priv&=~*p;
+        pcb->pcb$l_priv &= ~*p;
 
     return SS$_NORMAL;
 }

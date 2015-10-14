@@ -529,7 +529,7 @@ int testlibadd_times(FILE *fptr, int *fstatus, char *cont)
     int result_code;
     char pt1[10], pv1[10];
     char pt2[10], pv2[10], presult[50];
-    char time1[8], time2[8], time_result[8];
+    struct _generic_64 time1, time2, time_result;
 
     *fstatus = fscanf(fptr, scan5, pt1, pv1, pt2, pv2, presult);
 

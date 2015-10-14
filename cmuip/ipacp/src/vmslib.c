@@ -194,7 +194,7 @@ long mymi=0;
 long myms[1024];
 #endif
 
-LIB$GET_VM_PAGE(size, addr)
+int LIB$GET_VM_PAGE(size, addr)
 long * addr;
 {
 #if 0
@@ -245,7 +245,7 @@ ERROR$FAO()
     printk("ERROR$FAO not implemented\n");
 }
 
-LIB$GET_VM(size, addr)
+int LIB$GET_VM(size, addr)
 long * addr;
 {
 #ifdef IPMEMDEB
@@ -265,7 +265,7 @@ CH$DIFF()
     printk("CH$DIFF not implemented\n");
 }
 
-LIB$FREE_VM_PAGE(long size, long addr)
+int LIB$FREE_VM_PAGE(long size, long addr)
 {
 #ifdef IPMEMDEB
     myms[mymi++]=size*512+1;

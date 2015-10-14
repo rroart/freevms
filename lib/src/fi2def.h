@@ -21,10 +21,10 @@ struct _fi2
 {
     char fi2$t_filename[20];
     UINT16 fi2$w_revision;
-    _vms_time fi2$q_credate;
-    _vms_time fi2$q_revdate;
-    _vms_time fi2$q_expdate;
-    _vms_time fi2$q_bakdate;
+    UINT64 fi2$q_credate;
+    UINT64 fi2$q_revdate;
+    UINT64 fi2$q_expdate;
+    UINT64 fi2$q_bakdate;
     char fi2$t_filenamext[66];
 };
 

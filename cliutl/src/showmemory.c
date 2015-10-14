@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <stdio.h>
 #include <ssdef.h>
@@ -18,15 +18,15 @@ show_memory()
     extern int sch$gl_freecnt;
     extern int max_mapnr;
     extern int pagefile;
-    int user_mapnr=0;
+    int user_mapnr = 0;
     int user_freecnt;
-    int user_pagefile=0;
+    int user_pagefile = 0;
 
-    unsigned long long now;
+    struct _generic_64 now;
     char timestr[23];
     $DESCRIPTOR(atimenow, timestr);
     sys$gettim(&now);
-    sys$asctim(0,&atimenow,&now,0);
+    sys$asctim(0, &atimenow, &now, 0);
 
     sts = cliutl$getmem(&sch$gl_freecnt, &user_freecnt, 0);
     sts = cliutl$getmem(&max_mapnr, &user_mapnr, 0);
@@ -37,7 +37,8 @@ show_memory()
     printf("              System Memory Resources on %s\n", timestr);
     printf("\n");
     printf("Physical Memory Usage (pages):     Total        Free      In Use    Modified\n");
-    printf("  Main Memory (%6dMB)           %5d        %5d      %5d       %5d\n",user_mapnr>>8,user_mapnr,user_freecnt,user_mapnr-user_freecnt,0);
+    printf("  Main Memory (%6dMB)           %5d        %5d      %5d       %5d\n", user_mapnr >> 8, user_mapnr, user_freecnt,
+            user_mapnr - user_freecnt, 0);
     printf("\n");
 #if 0
     printf("Extended File Cache  (Time of last reset:  1-DEC-2005 16:47:44.98)\n");
@@ -89,7 +90,7 @@ show_memory()
     printf("                                                   1        1024        1280\n");
     printf("\n");
 #endif
-    if (user_pagefile==0)
+    if (user_pagefile == 0)
         goto skip;
     printf("Paging File Usage (4KB pages):                 Index        Free        Size\n");
     // when run, this is in a memory page leak, not too important too fix yet
@@ -99,7 +100,7 @@ show_memory()
     printf("  Total committed paging file usage:                                   12653\n");
 #endif
     printf("\n");
-skip:
+    skip:
 #if 0
     printf("Of the physical pages in use, 4825 pages are permanently allocated to FreeVMS.\n");
     printf("\n");

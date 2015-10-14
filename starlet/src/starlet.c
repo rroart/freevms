@@ -1,4 +1,3 @@
-#define sys$filescan sys$filescan_not
 #include "starlet.h"
 #include "sysdep.h"
 #include "../../linux/include/asm-i386/unistd.h"
@@ -87,12 +86,12 @@ int sys$clref(unsigned int efn)
     return INLINE_SYSCALL($clref, 1, efn);
 }
 
-int sys$setime(unsigned long long *timadr)
+int sys$setime(struct _generic_64 *timadr)
 {
     return INLINE_SYSCALL($setime, 1, timadr);
 }
 
-int sys$setimr(unsigned int efn, signed long long *daytim, void (*astadr)(long), unsigned long reqidt, unsigned int flags)
+int sys$setimr(unsigned int efn, struct _generic_64 *daytim, void (*astadr)(long), unsigned long reqidt, unsigned int flags)
 {
     return INLINE_SYSCALL($setimr, 5, efn, daytim, astadr, reqidt, flags);
 }
@@ -102,12 +101,12 @@ int sys$cantim(unsigned long long reqidt, unsigned int acmode)
     return INLINE_SYSCALL($cantim, 2, (long )reqidt, acmode); /* fix this */
 }
 
-int sys$numtim(unsigned short int timbuf[7], unsigned long long * timadr)
+int sys$numtim(unsigned short int timbuf[7], struct _generic_64 * timadr)
 {
     return INLINE_SYSCALL($numtim, 2, timbuf, timadr);
 }
 
-int sys$schdwk(unsigned int *pidadr, void *prcnam, signed long long * daytim, signed long long * reptim)
+int sys$schdwk(unsigned int *pidadr, void *prcnam, struct _generic_64 * daytim, signed long long * reptim)
 {
     return INLINE_SYSCALL($schdwk, 4, pidadr, prcnam, daytim, reptim);
 }
@@ -117,7 +116,7 @@ int sys$canwak(unsigned int *pidadr, void *prcnam)
     return INLINE_SYSCALL($canwak, 2, pidadr, prcnam);
 }
 
-int sys$gettim(unsigned long long * timadr)
+int sys$gettim(struct _generic_64 * timadr)
 {
     return INLINE_SYSCALL($gettim, 1, timadr);
 }
@@ -168,7 +167,7 @@ int sys$synch(unsigned int efn, struct _iosb *iosb)
 }
 
 int sys$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid,
-        void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id)
+        void (*astadr)(void), unsigned long astprm, void (*blkastadr)(void), unsigned int acmode, unsigned int rsdm_id)
 {
     struct struct_args s;
     s.s1 = efn;
@@ -187,7 +186,7 @@ int sys$enq(unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned 
 }
 
 int sys$enqw(unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid,
-        void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id)
+        void (*astadr)(void), unsigned long astprm, void (*blkastadr)(void), unsigned int acmode, unsigned int rsdm_id)
 {
     struct struct_args s;
     s.s1 = efn;
@@ -270,8 +269,8 @@ static int exe$synch(unsigned int efn, struct _iosb *iosb)
     }
 }
 
-int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb, void (*astadr)(__unknown_params),
-        long astprm, void*p1, long p2, long p3, long p4, long p5, long p6)
+int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb,
+        void (*astadr)(void *, unsigned long, void *), long astprm, void *p1, long p2, long p3, long p4, long p5, long p6)
 {
     struct struct_qio s;
     s.efn = efn;
@@ -294,8 +293,8 @@ int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struc
     return exe$synch(efn, iosb);
 }
 
-int sys$qio(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb, void (*astadr)(__unknown_params),
-        long astprm, void*p1, long p2, long p3, long p4, long p5, long p6)
+int sys$qio(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb,
+        void (*astadr)(void *, unsigned long, void *), long astprm, void *p1, long p2, long p3, long p4, long p5, long p6)
 {
     struct struct_qio s;
     s.efn = efn;
@@ -339,7 +338,7 @@ int sys$dlcefc(void *name)
 }
 
 int sys$crembx(char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk,
-        unsigned int acmode, void *lognam, long flags, ...)
+        unsigned int acmode, void *lognam, long flags)
 {
     struct struct_crembx s;
     s.prmflg = prmflg;
@@ -425,7 +424,7 @@ int sys$create_region_32(unsigned long length, unsigned int region_prot, unsigne
     return INLINE_SYSCALL($create_region_32, 1, &s);
 }
 
-int sys$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(),
+int sys$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(void),
         unsigned long long astprm)
 {
     struct struct_getjpi s;
@@ -439,7 +438,7 @@ int sys$getjpi(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itml
     return INLINE_SYSCALL($getjpi, 1, &s);
 }
 
-int sys$getjpiw(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(),
+int sys$getjpiw(unsigned int efn, unsigned int *pidadr, void * prcnam, void *itmlst, struct _iosb *iosb, void (*astadr)(void),
         unsigned long long astprm)
 {
     struct struct_getjpi s;
@@ -496,7 +495,7 @@ int sys$process_capabilities(unsigned int *pidadr, void *prcnam, struct _generic
     return INLINE_SYSCALL($process_capabilities, 1, &s);
 }
 
-int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(),
+int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(void),
         int astprm, unsigned long long *nullarg)
 {
     struct struct_getdvi s;
@@ -511,7 +510,7 @@ int sys$getdvi(unsigned int efn, unsigned short int chan, void *devnam, void *it
     return INLINE_SYSCALL($getdvi, 1, &s);
 }
 
-int sys$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(),
+int sys$getdviw(unsigned int efn, unsigned short int chan, void *devnam, void *itmlst, struct _iosb *iosb, void (*astadr)(void),
         int astprm, unsigned long long *nullarg)
 {
     struct struct_getdvi s;
@@ -639,7 +638,7 @@ int sys$creprc(unsigned int *pidadr, void *image, void *input, void *output, voi
     return INLINE_SYSCALL($creprc, 1, &s);
 }
 
-int sys$getsyi(unsigned int efn, unsigned int *csidadr, void *nodename, void *itmlst, struct _iosb *iosb, void (*astadr)(),
+int sys$getsyi(unsigned int efn, unsigned int *csidadr, void *nodename, void *itmlst, struct _iosb *iosb, void (*astadr)(void),
         unsigned long astprm)
 {
     struct struct_args s;
@@ -653,7 +652,7 @@ int sys$getsyi(unsigned int efn, unsigned int *csidadr, void *nodename, void *it
     return INLINE_SYSCALL($getsyi, 1, &s);
 }
 
-int sys$getsyiw(unsigned int efn, unsigned int *csidadr, void *nodename, void *itmlst, struct _iosb *iosb, void (*astadr)(),
+int sys$getsyiw(unsigned int efn, unsigned int *csidadr, void *nodename, void *itmlst, struct _iosb *iosb, void (*astadr)(void),
         unsigned long astprm)
 {
     struct struct_args s;
@@ -845,7 +844,6 @@ int sys$write(struct _fab * fab, void * err, void * suc)
 {
     return INLINE_SYSCALL1($write, 3, fab, err, suc);
 }
-#undef sys$filescan
 int sys$filescan(void *srcstr, void *valuelst, unsigned int *fldflags, void *auxout, unsigned short int *retlen)
 {
     return INLINE_SYSCALL1($filescan, 5, srcstr, valuelst, fldflags, auxout, retlen);
@@ -867,8 +865,8 @@ int sys$rmsrundwn(struct _fab * fab, void * err, void * suc)
     return INLINE_SYSCALL1($rmsrundwn, 3, fab, err, suc);
 }
 
-int sys$getuai(unsigned int efn, unsigned int *contxt, void *usrnam, void *itmlst, struct _iosb *iosb,
-        void (*astadr)(__unknown_params), int astprm)
+int sys$getuai(unsigned int efn, unsigned int *contxt, void *usrnam, void *itmlst, struct _iosb *iosb, void (*astadr)(void),
+        int astprm)
 {
     struct struct_args s;
     s.s1 = (unsigned long) efn;
@@ -881,12 +879,12 @@ int sys$getuai(unsigned int efn, unsigned int *contxt, void *usrnam, void *itmls
     return INLINE_SYSCALL($getuai, 1, &s);
 }
 
-int sys$asctim(unsigned short int *timlen, void *timbuf, unsigned long long *timadr, char cvtflg)
+int sys$asctim(unsigned short int *timlen, void *timbuf, struct _generic_64 *timadr, char cvtflg)
 {
     return INLINE_SYSCALL3($asctim, 4, timlen, timbuf, timadr, (unsigned long )cvtflg);
 }
 
-int sys$bintim(void *timbuf, unsigned long long *timadr)
+int sys$bintim(void *timbuf, struct _generic_64 *timadr)
 {
     return INLINE_SYSCALL3($bintim, 2, timbuf, timadr);
 }

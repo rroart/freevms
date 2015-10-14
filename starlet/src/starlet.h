@@ -1,6 +1,7 @@
 #ifndef STARLET_H
 #define STARLET_H
 
+#include <gen64def.h>
 #include <iosbdef.h>
 #include <lksbdef.h>
 #include <zarg.h>
@@ -8,10 +9,6 @@
 /*
  ** System Service Entry Points.
  */
-
-struct _generic_64;
-
-#define __unknown_params
 
 /*
  ** sys$setprn() - set process name.
@@ -51,17 +48,17 @@ int sys$wflor(unsigned int efn, unsigned int mask);
 
 int sys$clref(unsigned int efn);
 
-int sys$setime(unsigned long long *timadr);
+int sys$setime(struct _generic_64 *timadr);
 
-int sys$setimr(unsigned int efn, signed long long *daytim, void (*astadr)(long), unsigned long reqidt, unsigned int flags);
+int sys$setimr(unsigned int efn, struct _generic_64 *daytim, void (*astadr)(long), unsigned long reqidt, unsigned int flags);
 
 int sys$cantim(unsigned long long reqidt, unsigned int acmode);
 
-int sys$numtim(unsigned short timbuf[7], unsigned long long * timadr);
+int sys$numtim(unsigned short timbuf[7], struct _generic_64 * timadr);
 
-int sys$gettim(unsigned long long * timadr);
+int sys$gettim(struct _generic_64 * timadr);
 
-int sys$schdwk(unsigned int *pidadr, void *prcnam, signed long long * daytim, signed long long * reptim);
+int sys$schdwk(unsigned int *pidadr, void *prcnam, struct _generic_64 * daytim, signed long long * reptim);
 
 int sys$resume(unsigned int *pidadr, void *prcnam);
 
@@ -89,14 +86,14 @@ int sys$getlki(unsigned int efn, unsigned int *lkidadr, void *itmlst, struct _io
 int sys$getlkiw(unsigned int efn, unsigned int *lkidadr, void *itmlst, struct _iosb *iosb, void (*astadr)(int), int astprm,
         unsigned int reserved);
 
-int sys$asctim(unsigned short int *timlen, void *timbuf, unsigned long long *timadr, char cvtflg);
+int sys$asctim(unsigned short int *timlen, void *timbuf, struct _generic_64 *timadr, char cvtflg);
 
-int sys$bintim(void *timbuf, unsigned long long *timadr);
+int sys$bintim(void *timbuf, struct _generic_64 *timadr);
 
 int sys$crelnm(unsigned int *attr, void *tabnam, void *lognam, unsigned char *acmode, void *itmlst);
 
-int sys$crelnt(unsigned int *attr, void *resnam, unsigned
-int *reslen, unsigned int *quota, unsigned short *promsk, void *tabnam, void *partab, unsigned char *acmode);
+int sys$crelnt(unsigned int *attr, void *resnam, unsigned int *reslen, unsigned int *quota, unsigned short *promsk, void *tabnam,
+        void *partab, unsigned char *acmode);
 
 int sys$dellnm(void *tabnam, void *lognam, unsigned char *acmode);
 
@@ -106,11 +103,11 @@ int sys$dassgn(unsigned short chan);
 
 int sys$assign(void *devnam, unsigned short *chan, unsigned int acmode, void *mbxnam, unsigned int flags);
 
-int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb, void (*astadr)(),
-        long astprm, void *p1, long p2, long p3, long p4, long p5, long p6);
+int sys$qiow(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb,
+        void (*astadr)(void *, unsigned long, void *), long astprm, void *p1, long p2, long p3, long p4, long p5, long p6);
 
-int sys$qio(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb, void (*astadr)(),
-        long astprm, void *p1, long p2, long p3, long p4, long p5, long p6);
+int sys$qio(unsigned int efn, unsigned short int chan, unsigned int func, struct _iosb *iosb,
+        void (*astadr)(void *, unsigned long, void *), long astprm, void *p1, long p2, long p3, long p4, long p5, long p6);
 
 int sys$clrast(void);
 
@@ -123,7 +120,7 @@ int sys$dacefc(unsigned int efn);
 int sys$dlcefc(void *name);
 
 int sys$crembx(char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk,
-        unsigned int acmode, void *lognam, long flags, ...);
+        unsigned int acmode, void *lognam, long flags);
 
 int sys$delmbx(unsigned short int chan);
 
@@ -168,8 +165,7 @@ int sys$truncate(struct _fab * fab, void * err, void * suc);
 int sys$update(struct _fab * fab, void * err, void * suc);
 int sys$wait(struct _fab * fab, void * err, void * suc);
 int sys$write(struct _fab * fab, void * err, void * suc);
-int sys$filescan(void *srcstr, void *valuelst, ...);
-#define sys$filescan(...) sys$filescan(_buildargz5(__VA_ARGS__))
+int sys$filescan(void *srcstr, void *valuelst, unsigned int *fldflags, void *auxout, unsigned short int *retlen);
 int sys$setddir2(struct _fab * fab, void * err, void * suc);
 int sys$setdfprot(struct _fab * fab, void * err, void * suc);
 int sys$ssvexc(struct _fab * fab, void * err, void * suc);
@@ -207,8 +203,8 @@ int sys$set_security(void *clsnam, void *objnam, unsigned int *objhan, unsigned 
         unsigned int *acmode);
 int sys$fao(void * ctrstr, short int * outlen, void * outbuf, ...);
 int sys$faol(void * ctrstr, short int * outlen, void * outbuf, int * prmlst);
-int sys$getuai(unsigned int efn, unsigned int *contxt, void *usrnam, void *itmlst, struct _iosb *iosb,
-        void (*astadr)(), int astprm);
+int sys$getuai(unsigned int efn, unsigned int *contxt, void *usrnam, void *itmlst, struct _iosb *iosb, void (*astadr)(void),
+        int astprm);
 int sys$wake(unsigned long *pidadr, void *prcnam);
 int sys$find_held(struct _generic_64 *holder, unsigned int *id, unsigned int *attrib, unsigned int *contxt);
 int sys$asctoid(void *name, unsigned int *id, unsigned int *attrib);

@@ -38,19 +38,11 @@
 #include "libdef.h"
 #include "lib$routines.h"   /* Our header file! */
 
-struct TIME
+int lib$add_times(const struct _generic_64 *time1, const struct _generic_64 *time2, struct _generic_64 *result)
 {
-    unsigned char time[8];
-};
-
-int lib$add_times(const void *time1a, const void *time2a, void *result)
-{
-    const struct TIME* time1 = (const struct TIME*) time1a;
-    const struct TIME* time2 = (const struct TIME*) time2a;
-
-    if (time1->time[7] & 0x80)
+    if (time1->gen64$r_quad_overlay.gen64$b_byte[7] & 0x80)
     {
-        if (time2->time[7] & 0x80)
+        if (time2->gen64$r_quad_overlay.gen64$b_byte[7] & 0x80)
         {
             return lib$addx(time1, time2, result, NULL);
         }
@@ -61,7 +53,7 @@ int lib$add_times(const void *time1a, const void *time2a, void *result)
     }
     else
     {
-        if (time2->time[7] & 0x80)
+        if (time2->gen64$r_quad_overlay.gen64$b_byte[7] & 0x80)
         {
             return lib$subx(time1, time2, result, NULL);
         }

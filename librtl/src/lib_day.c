@@ -1,38 +1,38 @@
 /*
 
-       VMSTIME.C  v1.1
+ VMSTIME.C  v1.1
 
-       Author: Paul Nankervis
+ Author: Paul Nankervis
 
-       Please send bug reports or requests for enhancement
-       or improvement via email to:     PaulNank@au1.ibm.com
+ Please send bug reports or requests for enhancement
+ or improvement via email to:     PaulNank@au1.ibm.com
 
 
-       This module contains versions of the VMS time routines
-       sys$numtim(), sys$asctim() and friends... They are
-       intended to be compatible with the routines of the same
-       name on a VMS system (so descriptors feature regularly!)
+ This module contains versions of the VMS time routines
+ sys$numtim(), sys$asctim() and friends... They are
+ intended to be compatible with the routines of the same
+ name on a VMS system (so descriptors feature regularly!)
 
-       This code relies on being able to manipluate day numbers
-       and times using 32 bit arithmetic to crack a VMS quadword
-       byte by byte. If your C compiler doesn't have 32 bit int
-       fields give up now! On a 64 bit systems this code could
-       be modified to do 64 bit operations directly....
+ This code relies on being able to manipluate day numbers
+ and times using 32 bit arithmetic to crack a VMS quadword
+ byte by byte. If your C compiler doesn't have 32 bit int
+ fields give up now! On a 64 bit systems this code could
+ be modified to do 64 bit operations directly....
 
-       One advantage of doing arihmetic byte by byte is that
-       the code does not depend on what 'endian' the target
-       machine is - it will always treat bytes in the same order!
-       (Hopefully VMS time bytes will always be in the same order!)
+ One advantage of doing arihmetic byte by byte is that
+ the code does not depend on what 'endian' the target
+ machine is - it will always treat bytes in the same order!
+ (Hopefully VMS time bytes will always be in the same order!)
 
-       A couple of stupid questions to go on with:-
-           o OK, I give up! What is the difference between a zero
-             date and a zero delta time?
-           o Anyone notice that the use of 16 bit words in
-             sys$numtim restricts delta times to 65535 days?
+ A couple of stupid questions to go on with:-
+ o OK, I give up! What is the difference between a zero
+ date and a zero delta time?
+ o Anyone notice that the use of 16 bit words in
+ sys$numtim restricts delta times to 65535 days?
 
-                                       Paul Nankervis
+ Paul Nankervis
 
-*/
+ */
 
 #include <stdlib.h>
 #include <ssdef.h>
@@ -53,54 +53,46 @@
 /*   365        */
 #define OFFSET_DAYS     94187
 /*   ((1858_1601)*365) + ((1858_1601)/4) - ((1858_1601)/100)
-   + ((1858_1601)/400) + 320
-        OFFSET FROM 1/1/1601 TO 17/11/1858  */
+ + ((1858_1601)/400) + 320
+ OFFSET FROM 1/1/1601 TO 17/11/1858  */
 #define BASE_YEAR       1601
 
-
-struct TIME
-{
-    unsigned char time[8];
-};
-
-
 /* lib_day() is a routine to crack quadword into day number and time */
-int lib$day(long *days, const void *timadra, int *day_time)
+int lib$day(long *days, const struct _generic_64 *timadr, int *day_time)
 {
-    const struct TIME *timadr = (const struct TIME *)timadra;
-
-    register unsigned date,time,count;
-    register const unsigned char *srcptr;
-    register unsigned char *dstptr;
-    struct TIME wrktim;
+    unsigned int date, time;
+    int count;
+    const unsigned char *srcptr;
+    unsigned char *dstptr;
+    struct _generic_64 wrktim;
     int delta;
 
     /* If no time specified get current using gettim() */
 
     if (timadr == NULL)
     {
-        register int sts = sys$gettim(&wrktim);
+        int sts = sys$gettim(&wrktim);
         if ((sts & 1) == 0)
         {
             return sts;
         }
         delta = 0;
-        srcptr = wrktim.time + 7;
+        srcptr = wrktim.gen64$r_quad_overlay.gen64$b_byte + 7;
     }
     else
     {
 
         /* Check specified time for delta... */
 
-        srcptr = timadr->time + 7;
+        srcptr = timadr->gen64$r_quad_overlay.gen64$b_byte + 7;
         if ((delta = (*srcptr & 0x80)))
         {
 
             /* We have to 2's complement delta times - sigh!! */
 
             count = 8;
-            srcptr = timadr->time;
-            dstptr = wrktim.time;
+            srcptr = timadr->gen64$r_quad_overlay.gen64$b_byte;
+            dstptr = wrktim.gen64$r_quad_overlay.gen64$b_byte;
             time = 1;
             do
             {
@@ -109,15 +101,14 @@ int lib$day(long *days, const void *timadra, int *day_time)
                 time = (time >> 8);
             }
             while (--count > 0);
-            srcptr = wrktim.time + 7;
+            srcptr = wrktim.gen64$r_quad_overlay.gen64$b_byte + 7;
         }
     }
-
 
     /* Throw away the unrequired time precision */
 
     count = 8;
-    dstptr = wrktim.time + 7;
+    dstptr = wrktim.gen64$r_quad_overlay.gen64$b_byte + 7;
     time = 0;
     do
     {
@@ -127,11 +118,10 @@ int lib$day(long *days, const void *timadra, int *day_time)
     }
     while (--count > 0);
 
-
     /* Seperate the date and time */
 
     date = time = 0;
-    srcptr = wrktim.time + 7;
+    srcptr = wrktim.gen64$r_quad_overlay.gen64$b_byte + 7;
     count = 8;
     do
     {
@@ -146,12 +136,14 @@ int lib$day(long *days, const void *timadra, int *day_time)
     if (delta)
     {
         *days = -(int) date;
-        if (day_time != NULL) *day_time = -(int) time;
+        if (day_time != NULL)
+            *day_time = -(int) time;
     }
     else
     {
         *days = date;
-        if (day_time != NULL) *day_time = time;
+        if (day_time != NULL)
+            *day_time = time;
     }
 
     return SS$_NORMAL;

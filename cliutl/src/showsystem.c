@@ -46,11 +46,14 @@ void show_system(void)
     unsigned short diriolen;
     unsigned int bufio;
     unsigned short bufiolen;
+    unsigned long long cputime;
+    unsigned short cputimelen;
+
     int sts;
     int jpistatus;
     int retscsnodelen;
 
-    unsigned long long now;
+    struct _generic_64 now;
     char timestr[23];
     $DESCRIPTOR(atimenow, timestr);
     char timestr2[23];
@@ -76,8 +79,8 @@ void show_system(void)
 
     sts = sys$getsyi(0, 0, 0, syilst, 0, 0, 0);
 
-    unsigned long long delta = boottime - now;
-    int deltalen;
+    struct _generic_64 delta;
+    delta.gen64$r_quad_overlay.gen64$q_quadword = boottime - now.gen64$r_quad_overlay.gen64$q_quadword;
     sys$asctim(0, &atimenow2, &delta, 0);
 
 #ifdef __x86_64__
@@ -135,16 +138,16 @@ void show_system(void)
         lst[9].item_code = JPI$_BUFIO;
         lst[9].bufaddr = &bufio;
         lst[9].retlenaddr = &bufiolen;
-        lst[10].buflen = sizeof(delta);
+        lst[10].buflen = sizeof(cputime);
         lst[10].item_code = JPI$_CPUTIM;
-        lst[10].bufaddr = &delta;
-        lst[10].retlenaddr = &deltalen;
+        lst[10].bufaddr = &cputime;
+        lst[10].retlenaddr = &cputimelen;
         lst[11].buflen = 0;
         lst[11].item_code = 0;
         jpistatus = sys$getjpi(0, 0, 0, lst, 0, 0, 0);
         if (jpistatus == SS$_NORMAL)
         {
-            delta = -delta * 100000; // check multiplication
+            delta.gen64$r_quad_overlay.gen64$q_quadword = -cputime * 100000; // check multiplication
             unsigned short timelen2 = 0;
             memset(timestr2, 0, 23);
             sts = sys$asctim(&timelen2, &atimenow2, &delta, 0);
