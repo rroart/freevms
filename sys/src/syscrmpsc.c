@@ -84,7 +84,9 @@ asmlinkage int exe$mgblsc(struct _va_range *inadr, struct _va_range *retadr, uns
 */
 
 /** no short int yet*/
-asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam, unsigned long long * ident, unsigned int relpag, unsigned /*short*/ long chan, unsigned int pagcnt, unsigned int vbn, unsigned int prot,unsigned int pfc)
+asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam,
+        unsigned long long * ident, unsigned int relpag, unsigned short int chan, unsigned int pagcnt, unsigned int vbn,
+        unsigned int prot, unsigned int pfc)
 {
     // we will just have to pretend this fd is chan and offset i vbn (mmap)?
     // fd -> file, have a version with file = fget(fd);

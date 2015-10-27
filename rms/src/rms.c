@@ -58,8 +58,8 @@
 #include <areadef.h>
 #include <ifbdef.h>
 #include <irbdef.h>
+#include <wccdef.h>
 
-//#include "rms.h"
 #include "cache.h"
 #if 0
 #include "access.h"
@@ -67,6 +67,7 @@
 #endif
 
 #include "rmsmisc.h"
+
 #include <starlet.h>
 #include <exe_routines.h>
 #include <misc_routines.h>
@@ -115,7 +116,7 @@ char char_delim[] =
     0, 1, 0, 0, 0, 0
 };
 
-struct WCCFILE *ifi_table[] =
+struct _wccfile *ifi_table[] =
 {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -300,20 +301,20 @@ int dircache(struct _vcb *vcb, char *dirnam, int dirlen,
     }
 }
 
-/* Function to remove WCCFILE and WCCDIR structures when not required */
+/* Function to remove _wccfile and _wccdir structures when not required */
 
-void cleanup_wcf(struct WCCFILE *wccfile)
+void cleanup_wcf(struct _wccfile *wccfile)
 {
     if (wccfile != NULL )
     {
-        struct WCCDIR *wcc = wccfile->wcf_wcd.wcd_next;
+        struct _wccdir *wcc = wccfile->wcf_wcd.wcd_next;
         wccfile->wcf_wcd.wcd_next = NULL;
         wccfile->wcf_wcd.wcd_prev = NULL;
         /* should deaccess volume */
-        int sts = rms_std$deanonpgdsiz(wccfile, sizeof(struct WCCFILE) + 256);
+        int sts = rms_std$deanonpgdsiz(wccfile, sizeof(struct _wccfile) + 256);
         while (wcc != NULL )
         {
-            struct WCCDIR *next = wcc->wcd_next;
+            struct _wccdir *next = wcc->wcd_next;
             wcc->wcd_next = NULL;
             wcc->wcd_prev = NULL;
             int sts = rms_std$deanonpgdsiz(wcc, wcc->wcd_size);
@@ -324,7 +325,7 @@ void cleanup_wcf(struct WCCFILE *wccfile)
 
 /* Function to perform an RMS search... */
 
-int do_search(struct _fabdef *fab, struct WCCFILE *wccfile)
+int do_search(struct _fabdef *fab, struct _wccfile *wccfile)
 {
     struct _iosb iosb =
         { 0 };
@@ -332,7 +333,7 @@ int do_search(struct _fabdef *fab, struct WCCFILE *wccfile)
     unsigned short dummy;
     struct _fibdef fibblk;
     memset(&fibblk, 0, sizeof(struct _fibdef));
-    struct WCCDIR *wcc;
+    struct _wccdir *wcc;
     struct dsc$descriptor fibdsc, resdsc;
     struct _namdef *nam = fab->fab$l_nam;
     wcc = &wccfile->wcf_wcd;
@@ -340,9 +341,9 @@ int do_search(struct _fabdef *fab, struct WCCFILE *wccfile)
     if (ifb_table[ifi_no]->ifb$l_devchar & DEV$M_TRM)
         return SS$_NORMAL;
 
-    /* if first time through position at top directory... WCCDIR */
+    /* if first time through position at top directory... _wccdir */
 
-    while ((wcc->wcd_status & STATUS_INIT) == 0 && wcc->wcd_next != NULL )
+    while ((wcc->wcd_status & WCC_STATUS_INIT) == 0 && wcc->wcd_next != NULL )
     {
         wcc = wcc->wcd_next;
     }
@@ -350,9 +351,9 @@ int do_search(struct _fabdef *fab, struct WCCFILE *wccfile)
     fibdsc.dsc$a_pointer = (char *) &fibblk;
     while (1)
     {
-        if ((wcc->wcd_status & STATUS_INIT) == 0 || wcc->wcd_wcc != 0)
+        if ((wcc->wcd_status & WCC_STATUS_INIT) == 0 || wcc->wcd_wcc != 0)
         {
-            wcc->wcd_status |= STATUS_INIT;
+            wcc->wcd_status |= WCC_STATUS_INIT;
             resdsc.dsc$w_length = 256 - wcc->wcd_prelen;
             resdsc.dsc$a_pointer = wccfile->wcf_result + wcc->wcd_prelen;
             memcpy(&fibblk.fib$w_did_num, &wcc->wcd_dirid,
@@ -469,18 +470,18 @@ int do_search(struct _fabdef *fab, struct WCCFILE *wccfile)
             {
                 if (wcc->wcd_next != NULL )
                 {
-                    if (wcc->wcd_next->wcd_status & STATUS_INIT)
+                    if (wcc->wcd_next->wcd_status & WCC_STATUS_INIT)
                         sts = SS$_NOMOREFILES;
                 }
             }
             if (sts == SS$_NOMOREFILES)
             {
-                wcc->wcd_status &= ~STATUS_INIT;
+                wcc->wcd_status &= ~WCC_STATUS_INIT;
                 wcc->wcd_wcc = 0;
                 wcc->wcd_reslen = 0;
-                if (wcc->wcd_status & STATUS_TMPDIR)
+                if (wcc->wcd_status & WCC_STATUS_TMPDIR)
                 {
-                    struct WCCDIR *savwcc = wcc;
+                    struct _wccdir *savwcc = wcc;
                     if (wcc->wcd_next != NULL )
                         wcc->wcd_next->wcd_prev = wcc->wcd_prev;
                     if (wcc->wcd_prev != NULL )
@@ -490,22 +491,22 @@ int do_search(struct _fabdef *fab, struct WCCFILE *wccfile)
                         wccfile->wcf_result + wcc->wcd_prelen
                         + wcc->wcd_reslen - 6, ".DIR;1", 6);
                     int sts = rms_std$deanonpgdsiz(savwcc,
-                                                   sizeof(struct WCCFILE) + 256);
+                                                   sizeof(struct _wccfile) + 256);
                 }
                 else
                 {
-                    if ((wccfile->wcf_status & STATUS_RECURSE)
+                    if ((wccfile->wcf_status & WCC_STATUS_RECURSE)
                             && wcc->wcd_prev == NULL )
                     {
-                        struct WCCDIR *newwcc;
+                        struct _wccdir *newwcc;
                         int alosize;
-                        int sts = rms_std$alononpaged(sizeof(struct WCCDIR) + 8,
+                        int sts = rms_std$alononpaged(sizeof(struct _wccdir) + 8,
                                                       &alosize, &newwcc);
-                        memset(newwcc, 0, sizeof(struct WCCDIR) + 8);
+                        memset(newwcc, 0, sizeof(struct _wccdir) + 8);
                         newwcc->wcd_next = wcc->wcd_next;
                         newwcc->wcd_prev = wcc;
                         newwcc->wcd_wcc = 0;
-                        newwcc->wcd_status = STATUS_TMPDIR;
+                        newwcc->wcd_status = WCC_STATUS_TMPDIR;
                         newwcc->wcd_reslen = 0;
                         if (wcc->wcd_next != NULL )
                         {
@@ -575,10 +576,10 @@ int exe$search(struct _fabdef *fab)
 {
     int sts;
     struct _namdef *nam = fab->fab$l_nam;
-    struct WCCFILE *wccfile;
+    struct _wccfile *wccfile;
     if (nam == NULL )
         return RMS$_NAM;
-    wccfile = (struct WCCFILE *) nam->nam$l_wcc;
+    wccfile = (struct _wccfile *) nam->nam$l_wcc;
     if (wccfile == NULL )
         return RMS$_WCC;
     if (fab->fab$w_ifi != 0)
@@ -642,10 +643,10 @@ int set_ifab(struct _fabdef * fab, int size, char * name)
 
 /* Function to perform RMS parse.... */
 
-int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
+int do_parse(struct _fabdef *fab, struct _wccfile **wccret)
 {
     int sts;
-    struct WCCFILE *wccfile = 0;
+    struct _wccfile *wccfile = 0;
     char *fna = 0;
     int fns;
     sts = search_log_repl(fab->fab$l_fna, &fna, &fns);
@@ -664,7 +665,7 @@ int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
     if (nam != NULL )
         if (nam->nam$l_wcc == 0)
         {
-            cleanup_wcf((struct WCCFILE *) nam->nam$l_wcc);
+            cleanup_wcf((struct _wccfile *) nam->nam$l_wcc);
             nam->nam$l_wcc = 0;
         }
     /* Break up file specifications... */
@@ -678,7 +679,7 @@ int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
         if ((sts & 1) == 0)
             return sts;
     }
-    /* Make WCCFILE entry for rest of processing */
+    /* Make _wccfile entry for rest of processing */
 
     if (nam != NULL )
         wccfile = nam->nam$l_wcc;
@@ -686,12 +687,12 @@ int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
     if (wccfile == 0)
     {
         int alosize;
-        int sts = rms_std$alononpaged(sizeof(struct WCCFILE) + 256, &alosize,
+        int sts = rms_std$alononpaged(sizeof(struct _wccfile) + 256, &alosize,
                                       &wccfile);
-        memset(wccfile, 0, sizeof(struct WCCFILE) + 256);
+        memset(wccfile, 0, sizeof(struct _wccfile) + 256);
         if (wccfile == NULL )
             return SS$_INSFMEM;
-        memset(wccfile, 0, sizeof(struct WCCFILE) + 256);
+        memset(wccfile, 0, sizeof(struct _wccfile) + 256);
         wccfile->wcf_fab = fab;
         wccfile->wcf_status = 0;
         wccfile->wcf_wcd.wcd_status = 0;
@@ -700,7 +701,7 @@ int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
     /* Combine file specifications */
 
     {
-        int field, ess = MAX_FILELEN;
+        int field, ess = WCC_MAX_FILELEN;
         char *esa, *def = default_name;
         esa = wccfile->wcf_result;
         for (field = 0; field < 5; field++)
@@ -796,7 +797,7 @@ int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
                 char ch;
                 *esa++ = ch = *src++;
                 if (ch == '*' || ch == '%')
-                    wccfile->wcf_status |= STATUS_WILDCARD;
+                    wccfile->wcf_status |= WCC_STATUS_WILDCARD;
             }
         }
         /* Pass back results... */
@@ -814,7 +815,7 @@ int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
             nam->nam$b_ver = fna_size[4];
             nam->nam$b_esl = esa - wccfile->wcf_result;
             nam->nam$l_fnb = 0;
-            if (wccfile->wcf_status & STATUS_WILDCARD)
+            if (wccfile->wcf_status & WCC_STATUS_WILDCARD)
                 nam->nam$l_fnb = NAM$M_WILDCARD;
             if (nam->nam$b_esl <= nam->nam$b_ess)
             {
@@ -835,7 +836,7 @@ int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
 
     if (sts)
     {
-        struct WCCDIR *wcc;
+        struct _wccdir *wcc;
         int dirlen, dirsiz;
         char *dirnam;
 
@@ -870,9 +871,9 @@ int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
         {
             if (memcmp(dirnam + dirlen - 3, "...", 3) == 0)
             {
-                wccfile->wcf_status |= STATUS_RECURSE;
+                wccfile->wcf_status |= WCC_STATUS_RECURSE;
                 dirlen -= 3;
-                wccfile->wcf_status |= STATUS_WILDCARD;
+                wccfile->wcf_status |= WCC_STATUS_WILDCARD;
             }
         }
         /* see if we can find directory in cache... */
@@ -898,7 +899,7 @@ int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
         {
             int seglen = 0;
             char *dirptr = dirnam + dirsiz;
-            struct WCCDIR *wcd;
+            struct _wccdir *wcd;
             do
             {
                 if (char_delim[*dirptr++ & 127])
@@ -907,10 +908,10 @@ int do_parse(struct _fabdef *fab, struct WCCFILE **wccret)
             }
             while (dirsiz + seglen < dirlen);
             int alosize;
-            int sts = rms_std$alononpaged(sizeof(struct WCCDIR) + seglen + 8,
+            int sts = rms_std$alononpaged(sizeof(struct _wccdir) + seglen + 8,
                                           &alosize, &wcd);
-            memset(wcd, 0, sizeof(struct WCCDIR) + seglen + 8);
-            wcd->wcd_size = sizeof(struct WCCDIR) + seglen + 8;
+            memset(wcd, 0, sizeof(struct _wccdir) + seglen + 8);
+            wcd->wcd_size = sizeof(struct _wccdir) + seglen + 8;
             wcd->wcd_wcc = 0;
             wcd->wcd_status = 0;
             wcd->wcd_prelen = 0;
@@ -956,7 +957,7 @@ int exe$parse(struct _fabdef *fab)
 {
     int sts;
     struct _namdef *nam = fab->fab$l_nam;
-    if (nam == NULL )
+    if (nam == NULL)
         return RMS$_NAM;
     if (fab->fab$w_ifi != 0)
         return RMS$_IFI;
@@ -977,7 +978,7 @@ int exe$setddir(struct dsc$descriptor *newdir, unsigned short *oldlen,
     struct _iosb iosb =
         { 0 };
     int sts = 1;
-    if (oldlen != NULL )
+    if (oldlen != NULL)
     {
         int retlen = default_size[0] + default_size[1];
         if (retlen > olddir->dsc$w_length)
@@ -1729,7 +1730,7 @@ int exe$put(struct _rabdef *rab)
             seglen = reclen - cpylen;
         if (rfm == FAB$C_VFC && cpylen < rab->rab$l_fab->fab$b_fsz)
         {
-            unsigned fsz = rab->rab$l_fab->fab$b_fsz - cpylen;
+            unsigned int fsz = rab->rab$l_fab->fab$b_fsz - cpylen;
             if (fsz > seglen)
                 fsz = seglen;
             if (rab->rab$l_rhb)
@@ -1861,12 +1862,10 @@ int exe$write(struct _rabdef *rab)
     unsigned block = 0, blocks, offset;
     unsigned cpylen, reclen;
 #if 0
-    unsigned delim,rfm,sts = 1;
-#else
-    // check put diff
-    unsigned rfm;
-    int sts = 1;
+    unsigned int delim, rfm;
 #endif
+    // check put diff
+    int sts = 1;
     struct _fabdef * fab = rab->rab$l_fab;
     int ifi_no = fab->fab$w_ifi;
     if (ifi_no < 1 || ifi_no >= IFI_MAX)
@@ -2136,7 +2135,6 @@ int exe$display(struct _fabdef *fab)
     memset(&recattr, 0, sizeof(struct _fatdef));
 
     int ifi_no = fab->fab$w_ifi;
-    unsigned short *pp;
     unsigned short fileprot;
     unsigned long fileowner;
     struct dsc$descriptor fibdsc;
@@ -2241,7 +2239,7 @@ int exe$close(struct _fabdef *fab)
     //sts = deaccessfile(0);
     if (sts & 1)
     {
-        if (ifi_table[ifi_no]->wcf_status & STATUS_TMPWCC)
+        if (ifi_table[ifi_no]->wcf_status & WCC_STATUS_TMPWCC)
         {
             cleanup_wcf(ifi_table[ifi_no]);
             if (fab->fab$l_nam != NULL )
@@ -2265,7 +2263,7 @@ int exe$open(struct _fabdef *fab)
     int sts = 1;
     int ifi_no = 1;
     int wcc_flag = 0;
-    struct WCCFILE *wccfile = NULL;
+    struct _wccfile *wccfile = NULL;
     struct _namdef *nam = fab->fab$l_nam;
     struct dsc$descriptor fibdsc;
     struct _atrdef atr[2];
@@ -2281,7 +2279,7 @@ int exe$open(struct _fabdef *fab)
     ifi_no = fab->fab$w_ifi;
     if (nam != NULL )
     {
-        wccfile = (struct WCCFILE *) nam->nam$l_wcc;
+        wccfile = (struct _wccfile *) nam->nam$l_wcc;
     }
     if (wccfile == NULL )
     {
@@ -2289,7 +2287,7 @@ int exe$open(struct _fabdef *fab)
         if (sts & 1)
         {
             wcc_flag = 1;
-            if (wccfile->wcf_status & STATUS_WILDCARD)
+            if (wccfile->wcf_status & WCC_STATUS_WILDCARD)
             {
                 sts = RMS$_WLD;
             }
@@ -2297,7 +2295,7 @@ int exe$open(struct _fabdef *fab)
             {
                 sts = do_search(fab, wccfile);
             }
-            wccfile->wcf_status |= STATUS_TMPWCC;
+            wccfile->wcf_status |= WCC_STATUS_TMPWCC;
         }
     }
     else
@@ -2323,7 +2321,7 @@ int exe$open(struct _fabdef *fab)
     {
         ifi_table[ifi_no] = wccfile;
         if (fab->fab$w_ifi && fab->fab$w_ifi != ifi_no)
-            printk("help %x %x %x\n", fab, fab->fab$w_ifi, ifi_no);
+            printk("help %lx %x %x\n", (unsigned long)fab, fab->fab$w_ifi, ifi_no);
         fab->fab$w_ifi = ifi_no;
         // if (head.fh2$w_recattr.fat$b_rtype == 0) head.fh2$w_recattr.fat$b_rtype = FAB$C_STMLF; // of no use now?
         exe$display(fab);
@@ -2451,7 +2449,7 @@ int exe$erase(struct _fabdef *fab)
     int sts;
     int ifi_no = 1;
     int wcc_flag = 0;
-    struct WCCFILE *wccfile = NULL;
+    struct _wccfile *wccfile = NULL;
     struct _namdef *nam = fab->fab$l_nam;
     if (fab->fab$w_ifi != 0)
         return RMS$_IFI;
@@ -2461,7 +2459,7 @@ int exe$erase(struct _fabdef *fab)
     ifi_no = fab->fab$w_ifi;
     if (nam != NULL )
     {
-        wccfile = (struct WCCFILE *) fab->fab$l_nam->nam$l_wcc;
+        wccfile = (struct _wccfile *) fab->fab$l_nam->nam$l_wcc;
     }
     if (wccfile == NULL )
     {
@@ -2469,7 +2467,7 @@ int exe$erase(struct _fabdef *fab)
         if (sts & 1)
         {
             wcc_flag = 1;
-            if (wccfile->wcf_status & STATUS_WILDCARD)
+            if (wccfile->wcf_status & WCC_STATUS_WILDCARD)
             {
                 sts = RMS$_WLD;
             }
@@ -2542,7 +2540,7 @@ int exe$create(struct _fabdef *fab)
     int sts;
     int ifi_no = 1;
     int wcc_flag = 0;
-    struct WCCFILE *wccfile = NULL;
+    struct _wccfile *wccfile = NULL;
     struct _namdef *nam = fab->fab$l_nam;
     struct _atrdef atr[2];
     struct _fatdef recattr;
@@ -2554,7 +2552,7 @@ int exe$create(struct _fabdef *fab)
     ifi_no = fab->fab$w_ifi;
     if (nam != NULL )
     {
-        wccfile = (struct WCCFILE *) fab->fab$l_nam->nam$l_wcc;
+        wccfile = (struct _wccfile *) fab->fab$l_nam->nam$l_wcc;
     }
     if (wccfile == NULL )
     {
@@ -2562,7 +2560,7 @@ int exe$create(struct _fabdef *fab)
         if (sts & 1)
         {
             wcc_flag = 1;
-            if (wccfile->wcf_status & STATUS_WILDCARD)
+            if (wccfile->wcf_status & WCC_STATUS_WILDCARD)
             {
                 sts = RMS$_WLD;
             }
@@ -2653,7 +2651,7 @@ int exe$extend(struct _fabdef *fab)
     struct dsc$descriptor fibdsc, serdsc;
     struct _atrdef atr[2];
     struct _fatdef recattr;
-    struct WCCFILE *wccfile = NULL;
+    struct _wccfile *wccfile = NULL;
     struct _namdef *nam = fab->fab$l_nam;
     if (fab->fab$w_ifi != 0)
         return RMS$_IFI;
@@ -2663,7 +2661,7 @@ int exe$extend(struct _fabdef *fab)
     ifi_no = fab->fab$w_ifi;
     if (nam != NULL )
     {
-        wccfile = (struct WCCFILE *) fab->fab$l_nam->nam$l_wcc;
+        wccfile = (struct _wccfile *) fab->fab$l_nam->nam$l_wcc;
     }
     if (wccfile == NULL )
     {
@@ -2671,7 +2669,7 @@ int exe$extend(struct _fabdef *fab)
         if (sts & 1)
         {
             wcc_flag = 1;
-            if (wccfile->wcf_status & STATUS_WILDCARD)
+            if (wccfile->wcf_status & WCC_STATUS_WILDCARD)
             {
                 sts = RMS$_WLD;
             }
@@ -2733,6 +2731,6 @@ int get_ifb_table_chan(int ifi_no)
 
 void * get_wccfile_fib(struct _fabdef * fab)
 {
-    struct WCCFILE * wccfile = (struct WCCFILE *) fab->fab$l_nam->nam$l_wcc;
+    struct _wccfile * wccfile = (struct _wccfile *) fab->fab$l_nam->nam$l_wcc;
     return &wccfile->wcf_fib;
 }

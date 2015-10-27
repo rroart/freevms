@@ -40,18 +40,11 @@
 #include <dvidef.h>
 #include <mntdef.h>
 #include <devdef.h>
+#include <phyio.h>
 
-#ifdef __GNUC__
-unsigned sys$assign();
-unsigned sys$qiow();
-unsigned sys$dassgn();
-#else
 #include <starlet.h>
-#endif
 
-#include "phyio.h"
-
-#define chk(sts)  {register chksts; if (((chksts = sts) & 1) == 0) lib$stop(chksts);}
+#define chk(sts)  {int chksts; if (((chksts = sts) & 1) == 0) lib$stop(chksts);}
 
 unsigned init_count = 0;
 unsigned read_count = 0;

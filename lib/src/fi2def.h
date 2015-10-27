@@ -19,13 +19,13 @@
 
 struct _fi2
 {
-    char fi2$t_filename[20];
-    UINT16 fi2$w_revision;
-    UINT64 fi2$q_credate;
-    UINT64 fi2$q_revdate;
-    UINT64 fi2$q_expdate;
-    UINT64 fi2$q_bakdate;
-    char fi2$t_filenamext[66];
+    char fi2$t_filename[20]; /* First 20 bytes of filename */
+    UINT16 fi2$w_revision; /* # times file was changed */
+    UINT64 fi2$q_credate; /* Creation date */
+    UINT64 fi2$q_revdate; /* Last revision date */
+    UINT64 fi2$q_expdate; /* Expiration date */
+    UINT64 fi2$q_bakdate; /* Date of last backup/record */
+    char fi2$t_filenamext[66]; /* Rest of filename */
 };
 
 #endif

@@ -81,7 +81,38 @@ struct _scs1
     UINT32 scs$l_snd_boff;
     UINT32 scs$l_rec_name;
     UINT32 scs$l_rec_boff;
-} ;
+};
+
+struct scs_interface_structure
+{
+    void * sei$dev_config;
+    unsigned long sei$io_chan;
+    unsigned long sei$arp_io_chan;
+    void * sei$rcvhdrs;
+    void * sei$recv_qhead;
+    void * sei$recv_qtail;
+    void * sei$arp_buffer;
+    void * sei$arp_block;
+    unsigned short sei$phy_size;
+    unsigned char sei$phy_addr[6];
+    unsigned long sei$restart_time;
+    unsigned short sei$restart_count;
+    unsigned short sei$retry_count;
+    unsigned short sei$max_retry;
+    unsigned short sei$mpbs;
+    unsigned short sei$curhdr;
+    union
+    {
+        unsigned short sei$flags;
+        struct
+        {
+            unsigned sei$need_2_free :1;   // XEshutdown buf free pending
+            unsigned sei$io_queued :1;   // XE I/O has been started
+            unsigned sei$xe_decnet :1;   // XE DECNET address seen
+            unsigned sei$xe_started :1;   // XE started at least once
+        };
+    };
+};
 
 #define PPD$C_CNFREC                     0x0023
 #define PPD$C_CNFWMREC                   0x003D

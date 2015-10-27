@@ -17,20 +17,16 @@
 
  */
 
-#ifndef VAXC
-#pragma message disable(ALIGNEXT)
-#pragma message disable(GLOBALEXT)
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "file_hdr.h"
-#include "home2def.h"
 #include <ssdef.h>
 #include <descrip.h>
-#include "fibdef.h"
+#include <fh2def.h>
+#include <fi2def.h>
+#include <fibdef.h>
+#include <hm2def.h>
 #include <starlet.h>
 #include <clidef.h>
 #include <climsgdef.h>
@@ -49,7 +45,6 @@
 #include <strdef.h>
 #include <trmdef.h>
 #include <smgdef.h>
-#include "smgdef2.h"
 
 #include "dfu.h"
 
@@ -144,7 +139,7 @@ static struct _ibmap
     char block[512];
 } bitmap[257]; /* Space for index file bitmap */
 
-static struct HM2_Struct home[33]; /* 32 home blocks */
+static struct _hm2 home[33]; /* 32 home blocks */
 
 static struct _vol /* Structure for relative volume table */
 {
@@ -173,14 +168,13 @@ static struct
 static struct
 {
     unsigned int i, starti, endi, thread;
-    struct header_area_struct *hdr;
-    struct ident_area_struct *id;
+    struct _fh2 *hdr;
+    struct _fi2 *id;
     Boolean end;
 } ctx;
 
 static int efn[2]; /* Event flags */
 
-static unsigned short map_ptr[4];
 static Boolean progress_ind;
 
 static struct _dr
@@ -240,8 +234,8 @@ int search_command(int mask)
 
 {
     static char dummy_item[80], name[86], dir[200], fname[80], ident[30], date_s[23];
-    struct header_area_struct *hdr;
-    struct ident_area_struct *id;
+    struct _fh2 *hdr;
+    struct _fi2 *id;
     short keybuf[5] =
         { 1, DSC$K_DTYPE_T, 0, 0, 255 };
     int reclen = 255;
@@ -532,7 +526,10 @@ int search_command(int mask)
     size = 1;
     ctx.end = FALSE;
     if (smg$enable)
-        SMG$SET_CURSOR_MODE(&paste_id, &SMG$M_CURSOR_OFF);
+    {
+        int flags = SMG$M_CURSOR_OFF;
+        smg$set_cursor_mode(&paste_id, &flags);
+    }
     while ((curvol <= maxvol) && (!ctx.end))
     {
         ctx.i = -1; /* Clear context */
@@ -559,15 +556,15 @@ int search_command(int mask)
             /* Display home block info if needed */
             if (mathome == TRUE)
             {
-                sprintf(outbuf, "\nVolume name       :  %.12s", home[curvol].volname);
+                sprintf(outbuf, "\nVolume name       :  %.12s", home[curvol].hm2$t_volname);
                 put_disp();
-                sprintf(outbuf, "Volume owner      :  %.12s", home[curvol].ownername);
+                sprintf(outbuf, "Volume owner      :  %.12s", home[curvol].hm2$t_ownername);
                 put_disp();
-                sprintf(outbuf, "Structure name    :  %.12s", home[curvol].strucname);
+                sprintf(outbuf, "Structure name    :  %.12s", home[curvol].hm2$t_strucname);
                 put_disp();
-                sprintf(outbuf, "Cluster size      :  %d", home[curvol].cluster);
+                sprintf(outbuf, "Cluster size      :  %d", home[curvol].hm2$w_cluster);
                 put_disp();
-                sprintf(outbuf, "Maximum # files   :  %d", home[curvol].maxfiles);
+                sprintf(outbuf, "Maximum # files   :  %d", home[curvol].hm2$l_maxfiles);
                 put_disp();
                 sprintf(outbuf, "Header count      :  %d", rvt[curvol].if_size);
                 put_disp();
@@ -608,7 +605,7 @@ int search_command(int mask)
                     goto nexti;
                 rvn = curvol;
                 if (matlbn == FALSE)
-                    if (hdr->seg_num != 0)
+                    if (hdr->fh2$w_seg_num != 0)
                         goto nexti;
                 /* Skip extension header */
                 rtvptr = 0;
@@ -619,7 +616,7 @@ int search_command(int mask)
 
                 /* Check marked for delete files, skip unless explicitly requested */
                 if (matmark == FALSE)
-                    if ((hdr->filechar & FH2$M_MARKDEL) == FH2$M_MARKDEL)
+                    if ((hdr->fh2$l_filechar & FH2$M_MARKDEL) == FH2$M_MARKDEL)
                         goto nexti;
 
                 /*  We have a valid file header.
@@ -630,8 +627,8 @@ int search_command(int mask)
                 if (matlbn == TRUE)
                 {
                     found = FALSE;
-                    offset = hdr->mpoffset; /* Start of map area */
-                    map_words = hdr->map_inuse;
+                    offset = hdr->fh2$b_mpoffset; /* Start of map area */
+                    map_words = hdr->fh2$b_map_inuse;
                     for (j = offset; j < (offset + map_words);)
                     {
                         disass_map_ptr(hdr, &j);
@@ -643,13 +640,13 @@ int search_command(int mask)
                     }
                     if (!found)
                         goto nexti;
-                    if (hdr->seg_num > 0) /* read backlink for primary header */
+                    if (hdr->fh2$w_seg_num > 0) /* read backlink for primary header */
                     {
-                        rvn = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_rvn;
+                        rvn = hdr->fh2$w_backlink.fid$b_rvn;
                         if (rvn == 0)
                             rvn = curvol;
-                        fidnum = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_nmx << 16;
-                        fidnum += hdr->bk_fid_overlay.backlink[0];
+                        fidnum = hdr->fh2$w_backlink.fid$b_nmx << 16;
+                        fidnum += hdr->fh2$w_backlink.fid$w_num;
                         ivbn = rvt[rvn].vbn_file_1 + fidnum - 1;
                         status = SYS$QIOW(0, rvt[rvn].channel, IO$_READVBLK, &iostat[iocnt], 0, 0, &header[ctx.i], 512, ivbn, 0, 0,
                                 0);
@@ -670,19 +667,23 @@ int search_command(int mask)
                 }
 
                 /* Get size fields (NOTE : they are stored in reverse order ! */
-                a_size = hdr->hiblk_overlay.hiblk_fields.hiblkh << 16;
-                a_size += hdr->hiblk_overlay.hiblk_fields.hiblkl;
-                r_size = hdr->efblk_overlay.efblk_fields.efblkh << 16;
-                r_size += hdr->efblk_overlay.efblk_fields.efblkl;
+                a_size = hdr->fh2$w_recattr.fat$w_hiblkh << 16;
+                a_size += hdr->fh2$w_recattr.fat$w_hiblkl;
+                r_size = hdr->fh2$w_recattr.fat$w_efblkh << 16;
+                r_size += hdr->fh2$w_recattr.fat$w_efblkl;
                 if (r_size > 0)
-                    if (hdr->ffbyte == 0)
+                {
+                    if (hdr->fh2$w_recattr.fat$w_ffbyte == 0)
+                    {
                         r_size--; /* Correct size on block boundary*/
+                    }
+                }
 
                 /* Check for 'placed' files */
                 if (matplaced)
                 {
-                    j = hdr->mpoffset; /* Start of map area */
-                    if (hdr->map_inuse == 0)
+                    j = hdr->fh2$b_mpoffset; /* Start of map area */
+                    if (hdr->fh2$b_map_inuse == 0)
                         goto nexti;
                     /* Skip empty files */
                     disass_map_ptr(hdr, &j);
@@ -693,31 +694,37 @@ int search_command(int mask)
                 /* Check file characteristics */
                 if (matchars == TRUE)
                 {
-                    setchar = (hdr->filechar & chars);
+                    setchar = (hdr->fh2$l_filechar & chars);
                     if (mator == FALSE)
+                    {
                         if (setchar != chars)
+                        {
                             goto nexti;
+                        }
                         else if (setchar == 0)
+                        {
                             goto nexti;
+                        }
+                    }
                 }
 
                 /* Check files with backlink id */
                 if (matbakfid == TRUE)
                 {
-                    fidnum = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_nmx << 16;
-                    fidnum += hdr->bk_fid_overlay.bk_fid_fields.bk_fid_num;
+                    fidnum = hdr->fh2$w_backlink.fid$b_nmx << 16;
+                    fidnum += hdr->fh2$w_backlink.fid$w_num;
                     if (fidnum != bakfid)
                         goto nexti;
                 }
 
                 /* Check multiheader files */
                 if (matmult == TRUE)
-                    if (hdr->ext_fid_overlay.ext_fid[0] == 0)
+                    if (hdr->fh2$w_ext_fid.fid$w_num == 0)
                         goto nexti;
 
                 /* Check the UIC */
                 if (matuic == TRUE)
-                    if (uic != hdr->fileowner_overlay.fileowner)
+                    if (uic != hdr->fh2$l_fileowner.uic$l_owner)
                         goto nexti;
 
                 /* Check fragmentation */
@@ -726,7 +733,7 @@ int search_command(int mask)
                 if (matfragment == TRUE)
                 {
                     get_map_pointers(hdr, &rtvptr);
-                    if (hdr->ext_fid_overlay.ext_fid[0] != 0)
+                    if (hdr->fh2$w_ext_fid.fid$w_num != 0)
                         status = follow_extents(hdr, &rtvptr, &hdrs);
                     if (rtvptr < retr_min)
                         goto nexti;
@@ -738,9 +745,9 @@ int search_command(int mask)
                 /* Check the file name */
                 if (matname || matexcl || matversion)
                 {
-                    memcpy(&name[0], id->filename, 20);
+                    memcpy(&name[0], id->fi2$t_filename, 20);
                     if (name[19] != ' ')
-                        memcpy(&name[20], id->filenamext, 66);
+                        memcpy(&name[20], id->fi2$t_filenamext, 66);
                     name_descr.dsc$w_length = strindex(name, " ", 86);
                 }
                 if (matname == TRUE)
@@ -795,63 +802,63 @@ int search_command(int mask)
                 /* Check date/time options */
                 if (matbefcreated == TRUE)
                 {
-                    status = lib$subx(&cre_bef, &id->credate[0], &diff, 0);
+                    status = lib$subx(&cre_bef, &id->fi2$q_credate, &diff, 0);
                     if (diff.date[1] <= 0)
                         goto nexti;
                 }
                 if (matsincreated == TRUE)
                 {
-                    status = lib$subx(&cre_sin, &id->credate[0], &diff, 0);
+                    status = lib$subx(&cre_sin, &id->fi2$q_credate, &diff, 0);
                     if (diff.date[1] > 0)
                         goto nexti;
                 }
                 if (matbefmodified == TRUE)
                 {
-                    status = lib$subx(&mod_bef, &id->revdate[0], &diff, 0);
+                    status = lib$subx(&mod_bef, &id->fi2$q_revdate, &diff, 0);
                     if (diff.date[1] <= 0)
                         goto nexti;
                 }
                 if (matsinmodified == TRUE)
                 {
-                    status = lib$subx(&mod_sin, &id->revdate[0], &diff, 0);
+                    status = lib$subx(&mod_sin, &id->fi2$q_revdate, &diff, 0);
                     if (diff.date[1] > 0)
                         goto nexti;
                 }
                 if (matbefbackup == TRUE)
                 /* Skip files without backup date */
                 {
-                    if (id->bakdate[0] == 0 && id->bakdate[1] == 0)
+                    if (id->fi2$q_bakdate == 0)
                         goto nexti;
-                    status = lib$subx(&bak_bef, &id->bakdate[0], &diff, 0);
+                    status = lib$subx(&bak_bef, &id->fi2$q_bakdate, &diff, 0);
                     if (diff.date[1] <= 0)
                         goto nexti;
                 }
                 if (matsinbackup == TRUE)
                 {
-                    status = lib$subx(&bak_sin, &id->bakdate[0], &diff, 0);
+                    status = lib$subx(&bak_sin, &id->fi2$q_bakdate, &diff, 0);
                     if (diff.date[1] > 0)
                         goto nexti;
                 }
                 if (matbefexpired == TRUE)
                 /* Skip files without expiration date */
                 {
-                    if (id->expdate[0] == 0 && id->expdate[1] == 0)
+                    if (id->fi2$q_expdate == 0)
                         goto nexti;
-                    status = lib$subx(&exp_bef, &id->expdate[0], &diff, 0);
+                    status = lib$subx(&exp_bef, &id->fi2$q_expdate, &diff, 0);
                     if (diff.date[1] <= 0)
                         goto nexti;
                 }
                 if (matsinexpired == TRUE)
                 {
-                    status = lib$subx(&exp_sin, &id->expdate[0], &diff, 0);
+                    status = lib$subx(&exp_sin, &id->fi2$q_expdate, &diff, 0);
                     if (diff.date[1] > 0)
                         goto nexti;
                 }
                 if (matnonebackup == TRUE)
-                    if (id->bakdate[0] > 0 || id->bakdate[1] > 0)
+                    if (id->fi2$q_bakdate > 0)
                         goto nexti;
                 if (matnoneexpired == TRUE)
-                    if (id->expdate[0] > 0 || id->expdate[1] > 0)
+                    if (id->fi2$q_expdate > 0)
                         goto nexti;
 
                 /* Check file sizes */
@@ -922,39 +929,39 @@ int search_command(int mask)
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
-                    fidnum = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_nmx << 16;
-                    fidnum += hdr->bk_fid_overlay.bk_fid_fields.bk_fid_num;
+                    fidnum = hdr->fh2$w_backlink.fid$b_nmx << 16;
+                    fidnum += hdr->fh2$w_backlink.fid$w_num;
                     sprintf(outbuf, "Directory: %.*s , Backlink ID (%d,%d,%d)", x, &dirrec.dirnam[0], fidnum,
-                            hdr->bk_fid_overlay.bk_fid_fields.bk_fid_seq, hdr->bk_fid_overlay.bk_fid_fields.bk_fid_rvn);
+                            hdr->fh2$w_backlink.fid$w_seq, hdr->fh2$w_backlink.fid$b_rvn);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
-                    status = SYS$FAO(&ctrstr0, &id_descr.dsc$w_length, &id_descr, hdr->fileowner_overlay.fileowner,
-                            hdr->fileowner_overlay.fileowner);
-                    fidnum = hdr->fid_overlay.fid_fields.fid_nmx << 16;
-                    fidnum += hdr->fid_overlay.fid[0];
+                    status = SYS$FAO(&ctrstr0, &id_descr.dsc$w_length, &id_descr, hdr->fh2$l_fileowner.uic$l_owner,
+                            hdr->fh2$l_fileowner.uic$l_owner);
+                    fidnum = hdr->fh2$w_fid.fid$b_nmx << 16;
+                    fidnum += hdr->fh2$w_fid.fid$w_num;
                     ivbn = rvt[curvol].vbn_file_1 + fidnum - 1;
-                    sprintf(outbuf, "VBN : %d , File ID (%d,%d,%d) , UIC : %.*s", ivbn, fidnum, hdr->fid_overlay.fid[1],
-                            hdr->fid_overlay.fid_fields.fid_rvn, id_descr.dsc$w_length, ident);
+                    sprintf(outbuf, "VBN : %d , File ID (%d,%d,%d) , UIC : %.*s", ivbn, fidnum, hdr->fh2$w_fid.fid$w_seq,
+                            hdr->fh2$w_fid.fid$b_rvn, id_descr.dsc$w_length, ident);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
                     id_descr.dsc$w_length = 30;
-                    sprintf(outbuf, "Size : %d/%d,     Revision count : %d", r_size, a_size, id->revision);
+                    sprintf(outbuf, "Size : %d/%d,     Revision count : %d", r_size, a_size, id->fi2$w_revision);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
-                    status = SYS$ASCTIM(&date_descr.dsc$w_length, &date_descr, &id->credate, 0);
+                    status = SYS$ASCTIM(&date_descr.dsc$w_length, &date_descr, &id->fi2$q_credate, 0);
                     sprintf(outbuf, "Created : %.*s", date_descr.dsc$w_length, date_s);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
-                    status = SYS$ASCTIM(&date_descr.dsc$w_length, &date_descr, &id->revdate, 0);
+                    status = SYS$ASCTIM(&date_descr.dsc$w_length, &date_descr, &id->fi2$q_revdate, 0);
                     sprintf(outbuf, "Revised : %.*s", date_descr.dsc$w_length, date_s);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
-                    if (id->expdate[0] == 0 && id->expdate[1] == 0)
+                    if (id->fi2$q_expdate == 0)
                     {
                         strcpy(date_s, "<None specified>");
                         sprintf(outbuf, "Expired : %s", date_s);
@@ -964,13 +971,13 @@ int search_command(int mask)
                     }
                     else
                     {
-                        status = SYS$ASCTIM(&date_descr.dsc$w_length, &date_descr, &id->expdate, 0);
+                        status = SYS$ASCTIM(&date_descr.dsc$w_length, &date_descr, &id->fi2$q_expdate, 0);
                         sprintf(outbuf, "Expired : %.*s", date_descr.dsc$w_length, date_s);
                         put_disp();
                         if (matoutput)
                             fprintf(fp, "%s\n", outbuf);
                     }
-                    if (id->bakdate[0] == 0 && id->bakdate[1] == 0)
+                    if (id->fi2$q_bakdate == 0)
                     {
                         strcpy(date_s, "<No backup recorded>");
                         sprintf(outbuf, "Backup  : %s\n", date_s);
@@ -980,7 +987,7 @@ int search_command(int mask)
                     }
                     else
                     {
-                        status = SYS$ASCTIM(&date_descr.dsc$w_length, &date_descr, &id->bakdate, 0);
+                        status = SYS$ASCTIM(&date_descr.dsc$w_length, &date_descr, &id->fi2$q_bakdate, 0);
                         sprintf(outbuf, "Backup  : %.*s\n", date_descr.dsc$w_length, date_s);
                         put_disp();
                         if (matoutput)
@@ -1070,7 +1077,7 @@ int report_command(int mask)
 {
     static char dummy_item[80], fname[80], bfile[255];
     Boolean dummy, matoutput, matgraph, matusage, matstat, matnoindex;
-    struct header_area_struct *hdr;
+    struct _fh2 *hdr;
     register int i;
     unsigned short badfid[3];
     float a, b, avefrag, scale;
@@ -1151,7 +1158,10 @@ int report_command(int mask)
     size = 1;
     ctx.end = FALSE;
     if (smg$enable)
-        SMG$SET_CURSOR_MODE(&paste_id, &SMG$M_CURSOR_OFF);
+    {
+        int flags = SMG$M_CURSOR_OFF;
+        smg$set_cursor_mode(&paste_id, &flags);
+    }
     while ((curvol <= maxvol) && (!ctx.end))
     {
         ctx.i = -1; /* Clear context */
@@ -1195,23 +1205,23 @@ int report_command(int mask)
             put_disp();
             if (matoutput)
                 fprintf(fp, "%s\n", outbuf);
-            sprintf(outbuf, " Volume name                      :  %.12s", home[curvol].volname);
+            sprintf(outbuf, " Volume name                      :  %.12s", home[curvol].hm2$t_volname);
             put_disp();
             if (matoutput)
                 fprintf(fp, "%s\n", outbuf);
-            sprintf(outbuf, " Volume owner                     :  %.12s", home[curvol].ownername);
+            sprintf(outbuf, " Volume owner                     :  %.12s", home[curvol].hm2$t_ownername);
             put_disp();
             if (matoutput)
                 fprintf(fp, "%s\n", outbuf);
-            sprintf(outbuf, " Structure name                   :  %.12s", home[curvol].strucname);
+            sprintf(outbuf, " Structure name                   :  %.12s", home[curvol].hm2$t_strucname);
             put_disp();
             if (matoutput)
                 fprintf(fp, "%s\n", outbuf);
-            sprintf(outbuf, " Cluster size                     :  %d", home[curvol].cluster);
+            sprintf(outbuf, " Cluster size                     :  %d", home[curvol].hm2$w_cluster);
             put_disp();
             if (matoutput)
                 fprintf(fp, "%s\n", outbuf);
-            sprintf(outbuf, " Maximum # files                  :  %d", home[curvol].maxfiles);
+            sprintf(outbuf, " Maximum # files                  :  %d", home[curvol].hm2$l_maxfiles);
             put_disp();
             if (matoutput)
                 fprintf(fp, "%s\n", outbuf);
@@ -1244,7 +1254,7 @@ int report_command(int mask)
                 if (status == LIB$_NOTFOU)
                     goto next_rep;
                 rvn = curvol;
-                if (hdr->seg_num != 0)
+                if (hdr->fh2$w_seg_num != 0)
                     goto next_rep;
                 /* Skip extension header */
                 status = verify_header(hdr);
@@ -1255,17 +1265,17 @@ int report_command(int mask)
                 fcount += 1;
                 if (headers == 1)
                 {
-                    map_in_use = hdr->map_inuse;
-                    map_prc = (100 * map_in_use) / (hdr->acoffset - hdr->mpoffset);
+                    map_in_use = hdr->fh2$b_map_inuse;
+                    map_prc = (100 * map_in_use) / (hdr->fh2$b_acoffset - hdr->fh2$b_mpoffset);
                 }
 
                 /* Get size fields (NOTE : they are stored in reverse order ! */
-                a_size = hdr->hiblk_overlay.hiblk_fields.hiblkh << 16;
-                a_size += hdr->hiblk_overlay.hiblk_fields.hiblkl;
-                r_size = hdr->efblk_overlay.efblk_fields.efblkh << 16;
-                r_size += hdr->efblk_overlay.efblk_fields.efblkl;
+                a_size = hdr->fh2$w_recattr.fat$w_hiblkh << 16;
+                a_size += hdr->fh2$w_recattr.fat$w_hiblkl;
+                r_size = hdr->fh2$w_recattr.fat$w_efblkh << 16;
+                r_size += hdr->fh2$w_recattr.fat$w_efblkl;
                 if (r_size > 0)
-                    if (hdr->ffbyte == 0)
+                    if (hdr->fh2$w_recattr.fat$w_ffbyte == 0)
                         r_size--; /* Correct size on block boundary*/
                 if (a_size > 0)
                     acount++;
@@ -1273,20 +1283,20 @@ int report_command(int mask)
                 tot_a_size += a_size;
 
                 /* Increment counters */
-                if ((hdr->filechar & FH2$M_MARKDEL) == FH2$M_MARKDEL)
+                if ((hdr->fh2$l_filechar & FH2$M_MARKDEL) == FH2$M_MARKDEL)
                 {
                     mcount++;
                     mark_r_size += r_size;
                     mark_a_size += a_size;
                 }
-                if ((hdr->filechar & FH2$M_DIRECTORY) == FH2$M_DIRECTORY)
+                if ((hdr->fh2$l_filechar & FH2$M_DIRECTORY) == FH2$M_DIRECTORY)
                     dcount++;
 
                 /* Get fragmentation info */
                 hdrs = 1;
                 rtvptr = 0;
                 get_map_pointers(hdr, &rtvptr);
-                if (hdr->ext_fid_overlay.ext_fid[0] != 0)
+                if (hdr->fh2$w_ext_fid.fid$w_num != 0)
                 {
                     ucount++;
                     status = follow_extents(hdr, &rtvptr, &hdrs);
@@ -1318,16 +1328,16 @@ int report_command(int mask)
                     totfrag += rtvptr;
                 if (rtvptr > badrtv)
                 {
-                    badfid[0] = hdr->fid_overlay.fid[0];
-                    badfid[1] = hdr->fid_overlay.fid[1];
-                    badfid[2] = curvol + (hdr->fid_overlay.fid_fields.fid_nmx << 16);
+                    badfid[0] = hdr->fh2$w_fid.fid$w_num;
+                    badfid[1] = hdr->fh2$w_fid.fid$w_seq;
+                    badfid[2] = curvol + (hdr->fh2$w_fid.fid$b_nmx << 16);
                     badrtv = rtvptr;
                     bad_r_size = r_size;
                     bad_a_size = a_size;
                 }
                 /* Update usage table */
                 if ((matusage == TRUE) && (headers > 3))
-                    add_usage(&usage_table, hdr->fileowner_overlay.fileowner, r_size, a_size, hdrs);
+                    add_usage(&usage_table, hdr->fh2$l_fileowner.uic$l_owner, r_size, a_size, hdrs);
                 /* Next header */
                 next_rep: status = get_next_header();
                 if ((status & 1) != 1)
@@ -1395,7 +1405,7 @@ int report_command(int mask)
             if (matoutput)
                 fprintf(fp, "%s\n", outbuf);
             a = mmp_hdr;
-            b = mmp_blks / home[curvol].cluster;
+            b = mmp_blks / home[curvol].hm2$w_cluster;
             avefrag = (avefrag * avefrag) - 1;
             if (b > 0)
                 avefrag += (a / b * 10);
@@ -1446,7 +1456,7 @@ int report_command(int mask)
                 cleanup();
                 return (status);
             }
-            page_cnt = (rvt[curvol].maxblocks / home[curvol].cluster);
+            page_cnt = (rvt[curvol].maxblocks / home[curvol].hm2$w_cluster);
             for (i = 1; i <= 70; i++)
                 table[i - 1] = 100;
             status = scan_bitmap(rvt[curvol].bchan, page_cnt, rvt[curvol].wlk, &freeext, &largest, &freeblocks, &large_lbn, &table);
@@ -1454,9 +1464,9 @@ int report_command(int mask)
             {
                 sprintf(outbuf, "     Progress : 100%%     Status : READY");
                 put_status(1);
-                largest = largest * home[curvol].cluster; /* Adjust for cluster size */
-                freeblocks = freeblocks * home[curvol].cluster;
-                large_lbn = large_lbn * home[curvol].cluster;
+                largest = largest * home[curvol].hm2$w_cluster; /* Adjust for cluster size */
+                freeblocks = freeblocks * home[curvol].hm2$w_cluster;
+                large_lbn = large_lbn * home[curvol].hm2$w_cluster;
                 sprintf(outbuf, "      ***** Free space statistics (from BITMAP.SYS) *****");
                 put_disp();
                 if (matoutput)
@@ -1488,7 +1498,7 @@ int report_command(int mask)
                 if (matoutput)
                     fprintf(fp, "%s\n", outbuf);
                 a = freeext - 1;
-                b = (freeblocks / home[curvol].cluster - 1);
+                b = (freeblocks / home[curvol].hm2$w_cluster - 1);
                 avefrag = (a > 0) ? a / b * 100 : 0;
                 strcpy(dummy_item, " (poor) ");
                 if (avefrag < 3.0)
@@ -1591,8 +1601,8 @@ int undel_command(int mask)
 
 {
     static char dummy_item[80], fname[86], name[86], ans[4], ident[30], *tmp;
-    struct header_area_struct *hdr, *oldhdr;
-    struct ident_area_struct *id;
+    struct _fh2 *hdr, *oldhdr;
+    struct _fi2 *id;
     struct _hd
     {
         unsigned short block[256];
@@ -1601,11 +1611,11 @@ int undel_command(int mask)
     {
         int pagecnt;
     } bmap[33];
-    static struct fibdef fib; /* File information block */
+    static struct _fibdef fib; /* File information block */
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
     struct f_id lost_fid;
     Boolean dummy, matstat, matname, matlist, matuic, matnoconfirm, matoutput, found;
@@ -1736,7 +1746,7 @@ int undel_command(int mask)
         cleanup();
         return (1);
     }
-    if (home[1].volchar_overlay.volchar_bits.erase == 1) /*Erase on delete */
+    if (home[1].hm2$v_erase == 1) /*Erase on delete */
     {
         sprintf(outbuf, "%%DFU-E-ERASED, Cannot undelete ; erase-on-delete set on device");
         put_disp();
@@ -1781,7 +1791,7 @@ int undel_command(int mask)
         }
         clean_flags.expreg = 1;
         rvt[x].bmap_addr[0] = 0;
-        bmap[x].pagecnt = rvt[x].maxblocks / home[x].cluster;
+        bmap[x].pagecnt = rvt[x].maxblocks / home[x].hm2$w_cluster;
         bmap[x].pagecnt = (bmap[x].pagecnt + 4095) / 4096;
         status = SYS$EXPREG(bmap[x].pagecnt, &rvt[x].bmap_addr[0], 0, 0);
         if ((status & 1) != 1)
@@ -1802,7 +1812,10 @@ int undel_command(int mask)
 
     /* Loop for all volumes in the set */
     if (smg$enable)
-        SMG$SET_CURSOR_MODE(&paste_id, &SMG$M_CURSOR_OFF);
+    {
+        int flags = SMG$M_CURSOR_OFF;
+        smg$set_cursor_mode(&paste_id, &flags);
+    }
     while ((curvol <= maxvol) && (!ctx.end))
     {
         ctx.i = -1;
@@ -1834,7 +1847,7 @@ int undel_command(int mask)
                 hdr = ctx.hdr;
                 id = ctx.id;
                 rvn = curvol;
-                if (hdr->seg_num != 0)
+                if (hdr->fh2$w_seg_num != 0)
                     goto next_und;
                 /* Skip extension header */
 
@@ -1842,20 +1855,20 @@ int undel_command(int mask)
                 if ((header[ctx.i].block[510] != 0) || (header[ctx.i].block[511] != 0))
                     goto next_und;
                 /* Checksum must be zero */
-                if (hdr->fid_overlay.fid_fields.fid_num != 0)
+                if (hdr->fh2$w_fid.fid$w_num != 0)
                     goto next_und;
-                if ((hdr->filechar & FH2$M_MARKDEL) != FH2$M_MARKDEL)
+                if ((hdr->fh2$l_filechar & FH2$M_MARKDEL) != FH2$M_MARKDEL)
                     goto next_und;
-                if ((hdr->filechar & FH2$M_ERASE) == FH2$M_ERASE) /*Skip erased file*/
+                if ((hdr->fh2$l_filechar & FH2$M_ERASE) == FH2$M_ERASE) /*Skip erased file*/
                     goto next_und;
 
                 if (matuic == TRUE)
-                    if (uic != hdr->fileowner_overlay.fileowner)
+                    if (uic != hdr->fh2$l_fileowner.uic$l_owner)
                         goto next_und;
                 /* get the file name and check if we requested this name */
-                memcpy(&name[0], id->filename, 20);
+                memcpy(&name[0], id->fi2$t_filename, 20);
                 if (name[19] != ' ')
-                    memcpy(&name[20], id->filenamext, 66);
+                    memcpy(&name[20], id->fi2$t_filenamext, 66);
                 if (strlen(name) == 0)
                     goto next_und;
                 /* Unused file header */
@@ -1869,26 +1882,26 @@ int undel_command(int mask)
                 found = TRUE;
                 oldhdr = hdr;
                 /* Reset fid_num and fid_nmx field */
-                hdr->fid_overlay.fid_fields.fid_num = (headers % 65536);
-                hdr->fid_overlay.fid_fields.fid_nmx = headers / 65536;
+                hdr->fh2$w_fid.fid$w_num = (headers % 65536);
+                hdr->fh2$w_fid.fid$b_nmx = headers / 65536;
                 while (found)
                 {
-                    status = rebuild_bitmap(hdr, rvt[rvn].bmap_addr[0], home[rvn].cluster, curvol, TRUE);
+                    status = rebuild_bitmap(hdr, rvt[rvn].bmap_addr[0], home[rvn].hm2$w_cluster, curvol, TRUE);
                     if ((status & 1) != 1)
                         found = FALSE;
-                    if (hdr->ext_fid_overlay.ext_fid[0] == 0)
+                    if (hdr->fh2$w_ext_fid.fid$w_num == 0)
                         found = FALSE;
                     /* Read in extension header */
                     if (found)
                     {
                         x = 0;
-                        rvn = hdr->ext_fid_overlay.ext_fid_fields.ext_fid_rvn;
+                        rvn = hdr->fh2$w_ext_fid.fid$b_rvn;
                         if (rvn == 0)
                             rvn = curvol;
-                        fidnum = hdr->ext_fid_overlay.ext_fid_fields.ext_fid_nmx << 16;
-                        fidnum += hdr->ext_fid_overlay.ext_fid[0];
+                        fidnum = hdr->fh2$w_ext_fid.fid$b_nmx << 16;
+                        fidnum += hdr->fh2$w_ext_fid.fid$w_num;
                         ivbn = rvt[rvn].vbn_file_1 + fidnum - 1;
-                        hdr = (struct header_area_struct *) &header[x];
+                        hdr = (struct _fh2 *) &header[x];
                         status = SYS$QIOW(0, rvt[rvn].channel, IO$_READVBLK, &iostat[iocnt], 0, 0, &header[0], 512, ivbn, 0, 0, 0);
                         if ((status & 1) == 1)
                             status = iostat[iocnt].iosb_1;
@@ -1897,9 +1910,9 @@ int undel_command(int mask)
                         /* Check if this header is valid */
                         if (found)
                         {
-                            if ((hdr->bk_fid_overlay.bk_fid_fields.bk_fid_num != oldhdr->fid_overlay.fid_fields.fid_num)
-                                    || (hdr->bk_fid_overlay.bk_fid_fields.bk_fid_seq != oldhdr->fid_overlay.fid_fields.fid_seq)
-                                    || (hdr->bk_fid_overlay.bk_fid_fields.bk_fid_nmx != oldhdr->fid_overlay.fid_fields.fid_nmx))
+                            if ((hdr->fh2$w_backlink.fid$w_num != oldhdr->fh2$w_fid.fid$w_num)
+                                    || (hdr->fh2$w_backlink.fid$w_seq != oldhdr->fh2$w_fid.fid$w_seq)
+                                    || (hdr->fh2$w_backlink.fid$b_nmx != oldhdr->fh2$w_fid.fid$b_nmx))
                             {
                                 found = FALSE;
                                 status = 0;
@@ -1913,11 +1926,11 @@ int undel_command(int mask)
                 rvn = curvol;
 
                 /* get the full directory name */
-                if (hdr->bk_fid_overlay.bk_fid_fields.bk_fid_num == 0)
+                if (hdr->fh2$w_backlink.fid$w_num == 0)
                     strcpy(dirrec.dirnam, "[]");
                 else
                 {
-                    copy_fid(&fib.fib$w_fid[0], &hdr->bk_fid_overlay.bk_fid_fields.bk_fid_num, TRUE);
+                    copy_fid(&fib.fib$w_fid[0], &hdr->fh2$w_backlink.fid$w_num, TRUE);
                     fib.fib$w_did[0] = 0;
                     fib.fib$w_did[1] = 0;
                     fib.fib$w_did[2] = 0;
@@ -1962,14 +1975,15 @@ int undel_command(int mask)
                     {
                         if (smg$enable)
                         {
-                            SMG$SET_CURSOR_MODE(&paste_id, &SMG$M_CURSOR_ON);
-                            status = SMG$READ_COMPOSED_LINE(&keyb_id, 0, &answer,
-                                    &prompt, &k, &disp1_id, &modifiers, 0,0,0,0,0);
-                            SMG$SET_CURSOR_MODE(&paste_id, &SMG$M_CURSOR_OFF);
+                            int flags = SMG$M_CURSOR_ON;
+                            smg$set_cursor_mode(&paste_id, &flags);
+                            status = smg$read_composed_line(&keyb_id, 0, &answer, &prompt, &k, &disp1_id, &modifiers, 0, 0, 0, 0,
+                                    0);
+                            flags = SMG$M_CURSOR_OFF;
+                            smg$set_cursor_mode(&paste_id, &flags);
                         }
                         else
-                            status = SMG$READ_COMPOSED_LINE(&keyb_id, 0, &answer,
-                                    &prompt, &k, 0, &modifiers, 0,0,0,0,0);
+                            status = smg$read_composed_line(&keyb_id, 0, &answer, &prompt, &k, 0, &modifiers, 0, 0, 0, 0, 0);
                     }
                     else
                         strcpy(ans, "Y");
@@ -1989,9 +2003,9 @@ int undel_command(int mask)
 
                      Save size and uic for possible quota processing */
 
-                    a_size = hdr->hiblk_overlay.hiblk_fields.hiblkh << 16;
-                    a_size += hdr->hiblk_overlay.hiblk_fields.hiblkl;
-                    s_uic = hdr->fileowner_overlay.fileowner;
+                    a_size = hdr->fh2$w_recattr.fat$w_hiblkh << 16;
+                    a_size += hdr->fh2$w_recattr.fat$w_hiblkl;
+                    s_uic = hdr->fh2$l_fileowner.uic$l_owner;
                     found = TRUE;
                     hdrs = 0;
                     x = i;
@@ -2003,7 +2017,7 @@ int undel_command(int mask)
                         /* Now rebuild the mapping pointers into the bitmap.
                          If any multiple allocated blocks are discovered we break
                          off the whole undelete process */
-                        status = rebuild_bitmap(hdr, rvt[rvn].bmap_addr[0], home[rvn].cluster, curvol, FALSE);
+                        status = rebuild_bitmap(hdr, rvt[rvn].bmap_addr[0], home[rvn].hm2$w_cluster, curvol, FALSE);
                         if ((status & 1) != 1)
                         {
                             sprintf(outbuf, "%%DFU-E-NOTUNDEL, File cannot be undeleted");
@@ -2012,19 +2026,19 @@ int undel_command(int mask)
                             curvol = maxvol;
                             goto next_und;
                         }
-                        if (hdr->ext_fid_overlay.ext_fid[0] == 0)
+                        if (hdr->fh2$w_ext_fid.fid$w_num == 0)
                             found = FALSE;
                         else
                         /* Read in extension header */
                         {
                             x = 0;
-                            rvn = hdr->ext_fid_overlay.ext_fid_fields.ext_fid_rvn;
+                            rvn = hdr->fh2$w_ext_fid.fid$b_rvn;
                             if (rvn == 0)
                                 rvn = curvol;
-                            fidnum = hdr->ext_fid_overlay.ext_fid_fields.ext_fid_nmx << 16;
-                            fidnum += hdr->ext_fid_overlay.ext_fid[0];
+                            fidnum = hdr->fh2$w_ext_fid.fid$b_nmx << 16;
+                            fidnum += hdr->fh2$w_ext_fid.fid$w_num;
                             ivbn = rvt[rvn].vbn_file_1 + fidnum - 1;
-                            hdr = (struct header_area_struct *) &header[x];
+                            hdr = (struct _fh2 *) &header[x];
                             status = SYS$QIOW(0, rvt[rvn].channel, IO$_READVBLK, &iostat[iocnt], 0, 0, &header[0], 512, ivbn, 0, 0,
                                     0);
                             if ((status & 1) == 1)
@@ -2041,9 +2055,9 @@ int undel_command(int mask)
                                 goto next_und;
                             }
                             /* Check if this header is valid */
-                            if ((hdr->bk_fid_overlay.bk_fid_fields.bk_fid_num != oldhdr->fid_overlay.fid_fields.fid_num)
-                                    || (hdr->bk_fid_overlay.bk_fid_fields.bk_fid_seq != oldhdr->fid_overlay.fid_fields.fid_seq)
-                                    || (hdr->bk_fid_overlay.bk_fid_fields.bk_fid_nmx != oldhdr->fid_overlay.fid_fields.fid_nmx))
+                            if ((hdr->fh2$w_backlink.fid$w_num != oldhdr->fh2$w_fid.fid$w_num)
+                                    || (hdr->fh2$w_backlink.fid$w_seq != oldhdr->fh2$w_fid.fid$w_seq)
+                                    || (hdr->fh2$w_backlink.fid$b_nmx != oldhdr->fh2$w_fid.fid$b_nmx))
                             {
                                 sprintf(outbuf, "%%DFU-E-BADEXTHDR, Extension header linkage broken");
                                 put_disp();
@@ -2084,18 +2098,18 @@ int undel_command(int mask)
                     rvn = curvol;
                     found = TRUE;
                     bytes = 512;
-                    hdr = (struct header_area_struct *) &header[x];
-                    fidnum = hdr->fid_overlay.fid_fields.fid_nmx << 16;
-                    fidnum += hdr->fid_overlay.fid[0];
+                    hdr = (struct _fh2 *) &header[x];
+                    fidnum = hdr->fh2$w_fid.fid$b_nmx << 16;
+                    fidnum += hdr->fh2$w_fid.fid$w_num;
                     while (found)
                     {
-                        hdr->fid_overlay.fid_fields.fid_rvn = 0;
-                        hdr->filechar = hdr->filechar & ~(FH2$M_MARKDEL);
+                        hdr->fh2$w_fid.fid$b_rvn = 0;
+                        hdr->fh2$l_filechar = hdr->fh2$l_filechar & ~(FH2$M_MARKDEL);
                         /* Check if we are dealing with a directory file */
-                        if (((hdr->rattrib & FAT$M_NOSPAN) == FAT$M_NOSPAN) || (strstr(name, ".DIR;1") != 0))
+                        if (((hdr->fh2$w_recattr.fat$b_rattrib & FAT$M_NOSPAN) == FAT$M_NOSPAN) || (strstr(name, ".DIR;1") != 0))
                         {
-                            hdr->filechar = hdr->filechar | FH2$M_DIRECTORY;
-                            hdr->filechar = hdr->filechar | FH2$M_CONTIG;
+                            hdr->fh2$l_filechar = hdr->fh2$l_filechar | FH2$M_DIRECTORY;
+                            hdr->fh2$l_filechar = hdr->fh2$l_filechar | FH2$M_CONTIG;
                         }
                         head = (struct _hd *) hdr;
                         head->block[255] = 0;
@@ -2117,26 +2131,26 @@ int undel_command(int mask)
                             curvol = maxvol;
                             goto next_und;
                         }
-                        if (hdr->ext_fid_overlay.ext_fid[0] == 0)
+                        if (hdr->fh2$w_ext_fid.fid$w_num == 0)
                             found = FALSE;
                         else
                         /* Read in extension header */
                         {
                             x = 0;
-                            rvn = hdr->ext_fid_overlay.ext_fid_fields.ext_fid_rvn;
+                            rvn = hdr->fh2$w_ext_fid.fid$b_rvn;
                             if (rvn == 0)
                                 rvn = curvol;
-                            fidnum = hdr->ext_fid_overlay.ext_fid_fields.ext_fid_nmx << 16;
-                            fidnum += hdr->ext_fid_overlay.ext_fid[0];
+                            fidnum = hdr->fh2$w_ext_fid.fid$b_nmx << 16;
+                            fidnum += hdr->fh2$w_ext_fid.fid$w_num;
                             ivbn = rvt[rvn].vbn_file_1 + fidnum - 1;
-                            hdr = (struct header_area_struct *) &header[x];
+                            hdr = (struct _fh2 *) &header[x];
                             status = SYS$QIOW(0, rvt[rvn].channel, IO$_READVBLK, &iostat[iocnt], 0, 0, &header[0], 512, ivbn, 0, 0,
                                     0);
-                            hdr->fid_overlay.fid_fields.fid_num = fidnum % 65536;
-                            hdr->fid_overlay.fid_fields.fid_nmx = fidnum / 65536;
+                            hdr->fh2$w_fid.fid$w_num = fidnum % 65536;
+                            hdr->fh2$w_fid.fid$b_nmx = fidnum / 65536;
                         }
                     } /* End while */
-                    hdr = (struct header_area_struct *) &header[ctx.i];
+                    hdr = (struct _fh2 *) &header[ctx.i];
                     sprintf(outbuf, "%%DFU-S-RECOVER, File succesfully recovered");
                     put_disp();
                     /* Rewrite the indexf bitmap bit */
@@ -2146,7 +2160,7 @@ int undel_command(int mask)
                     j = 1;
                     lib$insv(&j, &bitval, &j, &bitmap[bitblk + 1].block[bitje * 4]);
                     bytes = 512;
-                    vbn = home[curvol].ibmapvbn + bitblk;
+                    vbn = home[curvol].hm2$l_ibmaplbn + bitblk;
                     status = SYS$QIOW(0, rvt[curvol].channel, IO$_WRITEVBLK, &iostat[iocnt], 0, 0, &bitmap[bitblk + 1], bytes, vbn,
                             0, 0, 0);
                     /* Add quota if needed */
@@ -2163,14 +2177,14 @@ int undel_command(int mask)
                     sprintf(outbuf, " ");
                     put_disp();
                     /* Set up work entry for entering file in directory */
-                    if (hdr->bk_fid_overlay.bk_fid_fields.bk_fid_num == 0)
+                    if (hdr->fh2$w_backlink.fid$w_num == 0)
                     {
                         sprintf(outbuf, "%%DFU-E-INVBAKFID, Invalid backlink, file cannot be entered in directory");
                         put_disp();
                     }
                     else
                     {
-                        rvn = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_rvn;
+                        rvn = hdr->fh2$w_backlink.fid$b_rvn;
                         if (rvn == 0)
                             rvn = curvol;
                         if (first == NULL)
@@ -2185,13 +2199,13 @@ int undel_command(int mask)
                         }
                         /* File in Directory and File id */
                         list->rvn = rvn;
-                        copy_fid(&list->did_num, &hdr->bk_fid_overlay.bk_fid_fields.bk_fid_num, FALSE);
+                        copy_fid(&list->did_num, &hdr->fh2$w_backlink.fid$w_num, FALSE);
                         /* Special case for MFD */
                         if (headers == 4)
                             list->did_rvn = 0;
                         else
-                            list->did_rvn = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_rvn;
-                        copy_fid(&list->fid_num, &hdr->fid_overlay.fid_fields.fid_num,
+                            list->did_rvn = hdr->fh2$w_backlink.fid$b_rvn;
+                        copy_fid(&list->fid_num, &hdr->fh2$w_fid.fid$w_num,
                         FALSE);
                         list->fid_rvn = curvol;
                         list->next = NULL;
@@ -2320,7 +2334,7 @@ int make_syslost(struct f_id *l_fid)
     short empty = -1;
     static unsigned int uchar, uic;
     static short attrib[16], fpro, l_chan;
-    static struct fibdef lost_fib;
+    static struct _fibdef lost_fib;
     static struct
     {
         unsigned short iosb_1;
@@ -2341,7 +2355,7 @@ int make_syslost(struct f_id *l_fid)
     static struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
 
     fname_descr.dsc$w_length = strlen(fname);
@@ -2416,8 +2430,8 @@ int verify_command(int mask)
 
 {
     static char dummy_item[80], fname[80], name[86];
-    struct header_area_struct *hdr;
-    struct ident_area_struct *id;
+    struct _fh2 *hdr;
+    struct _fi2 *id;
     Boolean dummy, matoutput, matstat, matlock, bitset, matfix, matreb, trigger;
     register int i;
     int ivbn, bitblk, bitje, bitval, find, rvn, x, y, k, size, free_hdr, a_size, r_size, hdrs, namelen, rtvptr;
@@ -2432,11 +2446,11 @@ int verify_command(int mask)
         int own_uic, flag, rsize, asize, hdr;
     } usage_table[750];
     struct f_id lost_fid;
-    static struct fibdef fib; /* File information block */
+    static struct _fibdef fib; /* File information block */
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
     /* Set up list for mutiple allocated blocks */
     struct mult
@@ -2563,7 +2577,10 @@ int verify_command(int mask)
     size = 1;
     ctx.end = FALSE;
     if (smg$enable)
-        SMG$SET_CURSOR_MODE(&paste_id, &SMG$M_CURSOR_OFF);
+    {
+        int flags = SMG$M_CURSOR_OFF;
+        smg$set_cursor_mode(&paste_id, &flags);
+    }
     multalloc = FALSE;
     while ((curvol <= maxvol) && (!ctx.end))
     {
@@ -2602,7 +2619,7 @@ int verify_command(int mask)
             }
             clean_flags.expreg = 1;
             dyn_array = (struct _da *) rvt[curvol].addr[0];
-            page_cnt = (rvt[curvol].maxblocks / home[curvol].cluster);
+            page_cnt = (rvt[curvol].maxblocks / home[curvol].hm2$w_cluster);
             page_cnt = (page_cnt + 4095) / 4096;
             status = SYS$EXPREG(page_cnt, &rvt[curvol].bmap_addr[0], 0, 0);
             if ((status & 1) != 1)
@@ -2613,9 +2630,9 @@ int verify_command(int mask)
             }
 
             /* Report home block info */
-            if ((home[curvol].altidxlbn != 0) && (home[curvol].altidxvbn != 0) && (home[curvol].cluster != 0)
-                    && (home[curvol].homevbn != 0) && (home[curvol].ibmapvbn != 0) && (home[curvol].ibmaplbn != 0)
-                    && (home[curvol].maxfiles != 0) && (home[curvol].ibmapsize != 0) && (home[curvol].resfiles != 0))
+            if ((home[curvol].hm2$l_altidxlbn != 0) && (home[curvol].hm2$w_altidxvbn != 0) && (home[curvol].hm2$w_cluster != 0)
+                    && (home[curvol].hm2$w_homevbn != 0) && (home[curvol].hm2$w_ibmapvbn != 0) && (home[curvol].hm2$l_ibmaplbn != 0)
+                    && (home[curvol].hm2$l_maxfiles != 0) && (home[curvol].hm2$w_ibmapsize != 0) && (home[curvol].hm2$w_resfiles != 0))
                 sprintf(outbuf, "%%DFU-S-CHKHOME, Home block info verified OK");
             else
                 sprintf(outbuf, "%%DFU-E-ERRHOME, Home block info not OK");
@@ -2634,8 +2651,8 @@ int verify_command(int mask)
                 hdr = ctx.hdr;
                 id = ctx.id;
                 /* Setup fields in dynamic array */
-                bakfid = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_nmx << 16;
-                bakfid += hdr->bk_fid_overlay.bk_fid_fields.bk_fid_num;
+                bakfid = hdr->fh2$w_backlink.fid$b_nmx << 16;
+                bakfid += hdr->fh2$w_backlink.fid$w_num;
                 (dyn_array + headers)->bitje = 0;
                 (dyn_array + headers)->bakfid = bakfid;
 
@@ -2655,7 +2672,7 @@ int verify_command(int mask)
                     if (bitset == TRUE)
                     {
                         sprintf(outbuf, "%%DFU-W-NOBITCLR, file (%d,%d,%d) deleted file header marked BUSY in Index File bitmap",
-                                headers, hdr->fid_overlay.fid_fields.fid_seq, curvol);
+                                headers, hdr->fh2$w_fid.fid$w_seq, curvol);
                         put_disp();
                         if (matoutput)
                             fprintf(fp, "%s\n", outbuf);
@@ -2672,33 +2689,34 @@ int verify_command(int mask)
 
                 /* We have a valid header, proceed...*/
                 /* Set up new bitmap and report multiple allocated blocks */
-                new_bitmap(rvt[curvol].bmap_addr[0], hdr, home[curvol].cluster, curvol, fp, 1, &m_list, &multalloc, matoutput);
+                new_bitmap(rvt[curvol].bmap_addr[0], hdr, home[curvol].hm2$w_cluster, curvol, fp, 1, &m_list, &multalloc,
+                        matoutput);
                 m_list->next = NULL;
-                if (hdr->seg_num != 0)
+                if (hdr->fh2$w_seg_num != 0)
                     goto next_ver;
                 /* Skip extension header */
                 /*Set lost file bit */
                 (dyn_array + headers)->bitje = (dyn_array + headers)->bitje | 1;
                 /* Get size fields (NOTE : they are stored in reverse order ! */
-                a_size = hdr->hiblk_overlay.hiblk_fields.hiblkh << 16;
-                a_size += hdr->hiblk_overlay.hiblk_fields.hiblkl;
-                r_size = hdr->efblk_overlay.efblk_fields.efblkh << 16;
-                r_size += hdr->efblk_overlay.efblk_fields.efblkl;
+                a_size = hdr->fh2$w_recattr.fat$w_hiblkh << 16;
+                a_size += hdr->fh2$w_recattr.fat$w_hiblkl;
+                r_size = hdr->fh2$w_recattr.fat$w_efblkh << 16;
+                r_size += hdr->fh2$w_recattr.fat$w_efblkl;
                 if (r_size > 0)
-                    if (hdr->ffbyte == 0)
+                    if (hdr->fh2$w_recattr.fat$w_ffbyte == 0)
                         r_size--; /* Correct size on block boundary*/
                 /* Get name */
-                memcpy(&name[0], id->filename, 20);
+                memcpy(&name[0], id->fi2$t_filename, 20);
                 if (name[19] != ' ')
-                    memcpy(&name[20], id->filenamext, 66);
+                    memcpy(&name[20], id->fi2$t_filenamext, 66);
                 namelen = strindex(&name[0], " ", 86);
 
                 /* Check marked for delete bit */
-                if ((hdr->filechar & FH2$M_MARKDEL) == FH2$M_MARKDEL)
+                if ((hdr->fh2$l_filechar & FH2$M_MARKDEL) == FH2$M_MARKDEL)
                 {
                     (dyn_array + headers)->bitje = 0;
-                    sprintf(outbuf, "%%DFU-W-DELETED, file (%d,%d,%d) %.*s marked for delete", headers,
-                            hdr->fid_overlay.fid_fields.fid_seq, curvol, namelen, name);
+                    sprintf(outbuf, "%%DFU-W-DELETED, file (%d,%d,%d) %.*s marked for delete", headers, hdr->fh2$w_fid.fid$w_seq,
+                            curvol, namelen, name);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
@@ -2716,7 +2734,7 @@ int verify_command(int mask)
                             list = list->next;
                         }
                         /* Fill in File id */
-                        copy_fid(&list->fid_num, &hdr->fid_overlay.fid_fields.fid_num,
+                        copy_fid(&list->fid_num, &hdr->fh2$w_fid.fid$w_num,
                         FALSE);
                         list->fid_rvn = 1;
                         list->function = 1;
@@ -2727,32 +2745,32 @@ int verify_command(int mask)
                 }
 
                 /* Check locked bit */
-                if ((hdr->filechar & FH2$M_LOCKED) == FH2$M_LOCKED)
+                if ((hdr->fh2$l_filechar & FH2$M_LOCKED) == FH2$M_LOCKED)
                 {
-                    sprintf(outbuf, "%%DFU-W-LOCKED, file (%d,%d,%d) %.*s is deaccess locked ", headers,
-                            hdr->fid_overlay.fid_fields.fid_seq, curvol, namelen, name);
+                    sprintf(outbuf, "%%DFU-W-LOCKED, file (%d,%d,%d) %.*s is deaccess locked ", headers, hdr->fh2$w_fid.fid$w_seq,
+                            curvol, namelen, name);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
                 }
 
                 /* Check badblock bit */
-                if ((hdr->filechar & FH2$M_BADBLOCK) == FH2$M_BADBLOCK)
+                if ((hdr->fh2$l_filechar & FH2$M_BADBLOCK) == FH2$M_BADBLOCK)
                 {
                     sprintf(outbuf, "%%DFU-W-BADBLOCK, file (%d,%d,%d) %.*s has suspected bad blocks", headers,
-                            hdr->fid_overlay.fid_fields.fid_seq, curvol, namelen, name);
+                            hdr->fh2$w_fid.fid$w_seq, curvol, namelen, name);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
                 }
 
                 /* Check directory bit */
-                if ((hdr->filechar & FH2$M_DIRECTORY) == FH2$M_DIRECTORY)
+                if ((hdr->fh2$l_filechar & FH2$M_DIRECTORY) == FH2$M_DIRECTORY)
                 {
                     (dyn_array + headers)->bitje = (dyn_array + headers)->bitje | 4;
                     if (maxvol > 1)
                     {
-                        y = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_rvn;
+                        y = hdr->fh2$w_backlink.fid$b_rvn;
                         if ((bakfid == 4) && (y > 1))
                         {
                             sprintf(outbuf, "%%DFU-W-BADMFDLNK, directory %.*s has backlink to 000000.DIR on RVN %d", namelen, name,
@@ -2769,7 +2787,7 @@ int verify_command(int mask)
                 if (bitset == FALSE)
                 {
                     sprintf(outbuf, "%%DFU-W-NOBITSET, file (%d,%d,%d) %.*s Index File bitmap bit not set", headers,
-                            hdr->fid_overlay.fid_fields.fid_seq, curvol, namelen, name);
+                            hdr->fh2$w_fid.fid$w_seq, curvol, namelen, name);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
@@ -2783,10 +2801,10 @@ int verify_command(int mask)
                 }
 
                 /* Check file owner */
-                if (hdr->fileowner_overlay.fileowner == 0)
+                if (hdr->fh2$l_fileowner.uic$l_owner == 0)
                 {
-                    sprintf(outbuf, "%%DFU-W-NOOWNER, file (%d,%d,%d) %.*s has no owner", headers,
-                            hdr->fid_overlay.fid_fields.fid_seq, curvol, namelen, name);
+                    sprintf(outbuf, "%%DFU-W-NOOWNER, file (%d,%d,%d) %.*s has no owner", headers, hdr->fh2$w_fid.fid$w_seq, curvol,
+                            namelen, name);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
@@ -2796,7 +2814,7 @@ int verify_command(int mask)
                 if ((bakfid == 0) || ((headers == 4) && (bakfid != 4)))
                 {
                     sprintf(outbuf, "%%DFU-E-INVBAKFID, file (%d,%d,%d) %.*s has invalid backlink", headers,
-                            hdr->fid_overlay.fid_fields.fid_seq, curvol, namelen, name);
+                            hdr->fh2$w_fid.fid$w_seq, curvol, namelen, name);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
@@ -2816,7 +2834,7 @@ int verify_command(int mask)
                             list = list->next;
                         }
                         /* Fill in File id */
-                        copy_fid(&list->fid_num, &hdr->fid_overlay.fid_fields.fid_num, FALSE);
+                        copy_fid(&list->fid_num, &hdr->fh2$w_fid.fid$w_num, FALSE);
                         list->fid_rvn = curvol;
                         list->function = 2;
                         list->next = NULL;
@@ -2825,10 +2843,10 @@ int verify_command(int mask)
                 }
                 if ((bakfid == headers) && (headers != 4)) /* File backlinks to itself */
                     /* need to check volume set*/
-                    if (hdr->fid_overlay.fid_fields.fid_rvn == hdr->bk_fid_overlay.bk_fid_fields.bk_fid_rvn)
+                    if (hdr->fh2$w_fid.fid$b_rvn == hdr->fh2$w_backlink.fid$b_rvn)
                     {
                         sprintf(outbuf, "%%DFU-E-SLFBAKFID, file (%d,%d,%d) %.*s backlink points to itself", headers,
-                                hdr->fid_overlay.fid_fields.fid_seq, curvol, namelen, name);
+                                hdr->fh2$w_fid.fid$w_seq, curvol, namelen, name);
                         put_disp();
                         if (matoutput)
                             fprintf(fp, "%s\n", outbuf);
@@ -2845,7 +2863,7 @@ int verify_command(int mask)
                                 list = list->next;
                             }
                             /* Fill in File id */
-                            copy_fid(&list->fid_num, &hdr->fid_overlay.fid_fields.fid_num, FALSE);
+                            copy_fid(&list->fid_num, &hdr->fh2$w_fid.fid$w_num, FALSE);
                             list->fid_rvn = curvol;
                             list->function = 4;
                             list->next = NULL;
@@ -2853,20 +2871,20 @@ int verify_command(int mask)
                         }
                     }
                 /* If backlink points to other disk we must save this RVN */
-                if (hdr->bk_fid_overlay.bk_fid_fields.bk_fid_rvn == 0)
-                    hdr->bk_fid_overlay.bk_fid_fields.bk_fid_rvn = curvol;
-                if (hdr->bk_fid_overlay.bk_fid_fields.bk_fid_rvn != curvol)
+                if (hdr->fh2$w_backlink.fid$b_rvn == 0)
+                    hdr->fh2$w_backlink.fid$b_rvn = curvol;
+                if (hdr->fh2$w_backlink.fid$b_rvn != curvol)
                 {
-                    (dyn_array + headers)->rvn = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_rvn;
+                    (dyn_array + headers)->rvn = hdr->fh2$w_backlink.fid$b_rvn;
                     (dyn_array + headers)->bitje = (dyn_array + headers)->bitje | 8;
                 }
                 add_usage: hdrs = 1;
                 rtvptr = 0;
-                if (hdr->ext_fid_overlay.ext_fid[0] != 0)
+                if (hdr->fh2$w_ext_fid.fid$w_num != 0)
                     status = follow_extents(hdr, &rtvptr, &hdrs);
                 /* Update usage table */
                 if (headers > 3) /* Skip first 3 reserved files */
-                    add_usage(&usage_table, hdr->fileowner_overlay.fileowner, r_size, a_size, hdrs);
+                    add_usage(&usage_table, hdr->fh2$l_fileowner.uic$l_owner, r_size, a_size, hdrs);
                 /* Next header */
                 next_ver: status = get_next_header();
                 if ((status & 1) != 1)
@@ -2889,7 +2907,7 @@ int verify_command(int mask)
                 fprintf(fp, "%s\n", outbuf);
             status = SYS$DELTVA(&rvt[curvol].bmap_addr[0], &rvt[curvol].bmap_addr[0], 0);
             rvt[curvol].bmap_addr[0] = 0;
-            page_cnt = (rvt[curvol].maxblocks / home[curvol].cluster);
+            page_cnt = (rvt[curvol].maxblocks / home[curvol].hm2$w_cluster);
             page_cnt = (page_cnt + 4095) / 4096;
             status = SYS$EXPREG(page_cnt, &rvt[curvol].bmap_addr[0], 0, 0);
             if ((status & 1) != 1)
@@ -2902,7 +2920,7 @@ int verify_command(int mask)
             while (m_first->next != NULL)
             {
                 m_list = m_first;
-                set_bitmap(rvt[curvol].bmap_addr[0], home[curvol].cluster, m_list->lbnstart, m_list->lbnend, TRUE);
+                set_bitmap(rvt[curvol].bmap_addr[0], home[curvol].hm2$w_cluster, m_list->lbnstart, m_list->lbnend, TRUE);
                 m_first = m_list->next;
                 free(m_list);
             }
@@ -2923,7 +2941,7 @@ int verify_command(int mask)
 
                 /* We have a valid header, proceed...*/
                 /* Set up new bitmap and report multiple allocated blocks */
-                new_bitmap(rvt[curvol].bmap_addr[0], hdr, home[curvol].cluster, curvol, fp, 2, NULL, &multalloc, matoutput);
+                new_bitmap(rvt[curvol].bmap_addr[0], hdr, home[curvol].hm2$w_cluster, curvol, fp, 2, NULL, &multalloc, matoutput);
                 next_ver2: status = get_next_header();
                 if ((status & 1) != 1)
                     return (status);
@@ -2936,8 +2954,8 @@ int verify_command(int mask)
             if ((matreb) && (trigger))
             /* Rewrite the indexf bitmap at this point */
             {
-                bytes = 512 * home[curvol].ibmapsize;
-                status = SYS$QIOW(0, rvt[curvol].channel, IO$_WRITEVBLK, &iostat[0], 0, 0, &bitmap[1], bytes, home[curvol].ibmapvbn,
+                bytes = 512 * home[curvol].hm2$w_ibmapsize;
+                status = SYS$QIOW(0, rvt[curvol].channel, IO$_WRITEVBLK, &iostat[0], 0, 0, &bitmap[1], bytes, home[curvol].hm2$w_ibmapvbn,
                         0, 0, 0);
                 if ((status & 1) == 1)
                     status = iostat[0].iosb_1;
@@ -2973,9 +2991,9 @@ int verify_command(int mask)
             }
             sprintf(outbuf, "     Progress :   0%%     Status : Processing BITMAP.SYS");
             put_status(1);
-            page_cnt = (rvt[curvol].maxblocks / home[curvol].cluster);
+            page_cnt = (rvt[curvol].maxblocks / home[curvol].hm2$w_cluster);
             /* Check for incorrect blocks in BITMAP.SYS and rebuild on request */
-            status = compare_bitmap(rvt[curvol].bchan, rvt[curvol].bmap_addr[0], page_cnt, rvt[curvol].wlk, home[curvol].cluster,
+            status = compare_bitmap(rvt[curvol].bchan, rvt[curvol].bmap_addr[0], page_cnt, rvt[curvol].wlk, home[curvol].hm2$w_cluster,
                     fp, matreb, matoutput);
             sprintf(outbuf, "     Progress : 100%%     Status : READY");
             put_status(1);
@@ -3110,8 +3128,8 @@ void report_lost_files(Boolean matfix, Boolean matoutput)
         int bakfid;
         char rvn, bitje;
     }*dyn_array, *temp;
-    struct header_area_struct *hdr, *hdr1;
-    struct ident_area_struct *id;
+    struct _fh2 *hdr, *hdr1;
+    struct _fi2 *id;
     register int i;
     int j, k, maxi, rvn, xrvn, status, namelen, dirlen;
     char name[86], dirname[86];
@@ -3120,8 +3138,8 @@ void report_lost_files(Boolean matfix, Boolean matoutput)
     put_disp();
     if (matoutput)
         fprintf(fp, "%s\n", outbuf);
-    hdr = (struct header_area_struct *) &header[0];
-    hdr1 = (struct header_area_struct *) &header[1];
+    hdr = (struct _fh2 *) &header[0];
+    hdr1 = (struct _fh2 *) &header[1];
     for (j = 1; j <= maxvol; j++)
     {
         dyn_array = (struct _da *) rvt[j].addr[0]; /* Pointer to correct table */
@@ -3155,13 +3173,13 @@ void report_lost_files(Boolean matfix, Boolean matoutput)
             {
                 vbn = i - 1 + rvt[j].vbn_file_1; /*Read this header */
                 status = SYS$QIOW(0, rvt[j].channel, IO$_READVBLK, &iostat[0], 0, 0, &header[0], 512, vbn, 0, 0, 0);
-                id = (struct ident_area_struct *) &header[0].block[2 * (hdr->idoffset)]; /* Ident area */
-                memcpy(&name[0], id->filename, 20);
+                id = (struct _fi2 *) &header[0].block[2 * (hdr->fh2$b_idoffset)]; /* Ident area */
+                memcpy(&name[0], id->fi2$t_filename, 20);
                 if (name[19] != ' ')
-                    memcpy(&name[20], id->filenamext, 66);
+                    memcpy(&name[20], id->fi2$t_filenamext, 66);
                 namelen = strindex(&name[0], " ", 86);
                 sprintf(outbuf, "%%DFU-W-LOSTHDR1, file (%d,%d,%d) %.*s found in nonexistent directory", i,
-                        hdr->fid_overlay.fid_fields.fid_seq, j, namelen, name);
+                        hdr->fh2$w_fid.fid$w_seq, j, namelen, name);
                 put_disp();
                 if (matoutput)
                     fprintf(fp, "%s\n", outbuf);
@@ -3174,26 +3192,24 @@ void report_lost_files(Boolean matfix, Boolean matoutput)
                 {
                     vbn = i - 1 + rvt[j].vbn_file_1; /*Read this header */
                     status = SYS$QIOW(0, rvt[j].channel, IO$_READVBLK, &iostat[0], 0, 0, &header[0], 512, vbn, 0, 0, 0);
-                    id = (struct ident_area_struct *) &header[0].block[2 * (hdr->idoffset)]; /* Ident area */
-                    memcpy(&name[0], id->filename, 20);
+                    id = (struct _fi2 *) &header[0].block[2 * (hdr->fh2$b_idoffset)]; /* Ident area */
+                    memcpy(&name[0], id->fi2$t_filename, 20);
                     if (name[19] != ' ')
-                        memcpy(&name[20], id->filenamext, 66);
+                        memcpy(&name[20], id->fi2$t_filenamext, 66);
                     namelen = strindex(&name[0], " ", 86);
                     vbn = k - 1 + rvt[xrvn].vbn_file_1; /*Read backlink header */
                     status = SYS$QIOW(0, rvt[xrvn].channel, IO$_READVBLK, &iostat[0], 0, 0, &header[1], 512, vbn, 0, 0, 0);
-                    id = (struct ident_area_struct *) &header[1].block[2 * (hdr1->idoffset)]; /* Ident area */
-                    memcpy(&dirname[0], id->filename, 20);
+                    id = (struct _fi2 *) &header[1].block[2 * (hdr1->fh2$b_idoffset)]; /* Ident area */
+                    memcpy(&dirname[0], id->fi2$t_filename, 20);
                     if (dirname[19] != ' ')
-                        memcpy(&dirname[20], id->filenamext, 66);
+                        memcpy(&dirname[20], id->fi2$t_filenamext, 66);
                     dirlen = strindex(&dirname[0], " ", 86);
                     if ((temp->bitje & 2) == 2)
                         sprintf(outbuf, "%%DFU-W-LOSTHDR2, file (%d,%d,%d) %.*s in directory with bad backlink (%d,%d,%d) %.*s", i,
-                                hdr->fid_overlay.fid_fields.fid_seq, j, namelen, name, k, hdr1->fid_overlay.fid_fields.fid_seq,
-                                xrvn, dirlen, dirname);
+                                hdr->fh2$w_fid.fid$w_seq, j, namelen, name, k, hdr1->fh2$w_fid.fid$w_seq, xrvn, dirlen, dirname);
                     else
                         sprintf(outbuf, "%%DFU-W-LOSTHDR3, file (%d,%d,%d) %.*s found in invalid directory (%d,%d,%d) %.*s", i,
-                                hdr->fid_overlay.fid_fields.fid_seq, j, namelen, name, k, hdr1->fid_overlay.fid_fields.fid_seq,
-                                xrvn, dirlen, dirname);
+                                hdr->fh2$w_fid.fid$w_seq, j, namelen, name, k, hdr1->fh2$w_fid.fid$w_seq, xrvn, dirlen, dirname);
                     put_disp();
                     if (matoutput)
                         fprintf(fp, "%s\n", outbuf);
@@ -3215,7 +3231,7 @@ void report_lost_files(Boolean matfix, Boolean matoutput)
                  next we enter the file in syslost */
                 list->fid_rvn = 1;
                 list->fid_num = i % 65536;
-                list->fid_seq = hdr->fid_overlay.fid_fields.fid_seq;
+                list->fid_seq = hdr->fh2$w_fid.fid$w_seq;
                 list->fid_nmx = i / 65536;
                 list->function = 3;
                 list->next = NULL;
@@ -3224,7 +3240,7 @@ void report_lost_files(Boolean matfix, Boolean matoutput)
 
                 list->fid_rvn = j;
                 list->fid_num = i % 65536;
-                list->fid_seq = hdr->fid_overlay.fid_fields.fid_seq;
+                list->fid_seq = hdr->fh2$w_fid.fid$w_seq;
                 list->fid_nmx = i / 65536;
                 list->function = 2;
                 list->next = NULL;
@@ -3248,8 +3264,8 @@ int build_dir_table(char *dev_str, Boolean matoutput)
 
 {
     static char dummy_item[80], name[86];
-    struct header_area_struct *hdr;
-    struct ident_area_struct *id;
+    struct _fh2 *hdr;
+    struct _fi2 *id;
     Boolean dummy, bitset;
     register int i;
     int ivbn, bitblk, bitje, bitval, find, rvn, x, maxdir, k, size, free_hdr, a_size, r_size, hdrs, namelen, rtvptr;
@@ -3298,7 +3314,10 @@ int build_dir_table(char *dev_str, Boolean matoutput)
     size = 1;
     ctx.end = FALSE;
     if (smg$enable)
-        SMG$SET_CURSOR_MODE(&paste_id, &SMG$M_CURSOR_OFF);
+    {
+        int flags = SMG$M_CURSOR_OFF;
+        smg$set_cursor_mode(&paste_id, &flags);
+    }
     while ((curvol <= maxvol) && (!ctx.end))
     {
         ctx.i = -1;
@@ -3346,39 +3365,39 @@ int build_dir_table(char *dev_str, Boolean matoutput)
                 if (status != SS$_NORMAL)
                     goto next_file;
                 /* Setup fields in dynamic array */
-                (dyn_array + headers)->fid[0] = hdr->fid_overlay.fid[0];
-                (dyn_array + headers)->fid[1] = hdr->fid_overlay.fid[1];
-                (dyn_array + headers)->fid[2] = hdr->fid_overlay.fid[2];
-                bakfid = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_nmx << 16;
-                bakfid += hdr->bk_fid_overlay.bk_fid_fields.bk_fid_num;
+                (dyn_array + headers)->fid[0] = hdr->fh2$w_fid.fid$w_num;
+                (dyn_array + headers)->fid[1] = hdr->fh2$w_fid.fid$w_seq;
+                (dyn_array + headers)->fid[2] = hdr->fh2$w_fid.fid$w_rvn;
+                bakfid = hdr->fh2$w_backlink.fid$b_nmx << 16;
+                bakfid += hdr->fh2$w_backlink.fid$w_num;
                 (dyn_array + headers)->bakfid = bakfid;
                 (dyn_array + headers)->a_size = 0;
-                a_size = hdr->hiblk_overlay.hiblk_fields.hiblkh << 16;
-                a_size += hdr->hiblk_overlay.hiblk_fields.hiblkl;
+                a_size = hdr->fh2$w_recattr.fat$w_hiblkh << 16;
+                a_size += hdr->fh2$w_recattr.fat$w_hiblkl;
                 (dyn_array + headers)->a_size = a_size;
 
                 /* We have a valid header, proceed...*/
-                if (hdr->seg_num != 0)
+                if (hdr->fh2$w_seg_num != 0)
                     goto next_file;
                 /* Skip extension header */
 
                 /* Check marked for delete bit */
-                if ((hdr->filechar & FH2$M_MARKDEL) == FH2$M_MARKDEL)
+                if ((hdr->fh2$l_filechar & FH2$M_MARKDEL) == FH2$M_MARKDEL)
                     goto next_file;
 
                 /* Use bit 1 as a valid file indicator */
                 (dyn_array + headers)->bitje = (dyn_array + headers)->bitje | 1;
 
                 /* Check if this is a directory and if yes set bit 4 */
-                if ((hdr->filechar & FH2$M_DIRECTORY) == FH2$M_DIRECTORY)
+                if ((hdr->fh2$l_filechar & FH2$M_DIRECTORY) == FH2$M_DIRECTORY)
                 {
-                    if ((hdr->filechar & FH2$M_CONTIG) != FH2$M_CONTIG)
+                    if ((hdr->fh2$l_filechar & FH2$M_CONTIG) != FH2$M_CONTIG)
                         goto next_file;
-                    if ((hdr->rattrib & FAT$M_NOSPAN) != FAT$M_NOSPAN)
+                    if ((hdr->fh2$w_recattr.fat$b_rattrib & FAT$M_NOSPAN) != FAT$M_NOSPAN)
                         goto next_file;
-                    memcpy(&name[0], id->filename, 20);
+                    memcpy(&name[0], id->fi2$t_filename, 20);
                     if (name[19] != ' ')
-                        memcpy(&name[20], id->filenamext, 66);
+                        memcpy(&name[20], id->fi2$t_filenamext, 66);
                     if (strstr(name, ".DIR;1") == 0)
                         goto next_file;
                     (dyn_array + headers)->bitje = (dyn_array + headers)->bitje | 4;
@@ -3600,13 +3619,13 @@ void fid_to_name(char * ret_dir)
  */
 {
     Boolean error;
-    struct header_area_struct *hdr;
-    struct ident_area_struct *id;
-    static struct fibdef fib; /* File information block */
+    struct _fh2 *hdr;
+    struct _fi2 *id;
+    static struct _fibdef fib; /* File information block */
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
     int x, bakfid, rrvn;
     char name[86], *tmp;
@@ -3617,9 +3636,9 @@ void fid_to_name(char * ret_dir)
 
     error = FALSE;
     hdr = ctx.hdr;
-    bakfid = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_nmx << 16;
-    bakfid += hdr->bk_fid_overlay.bk_fid_fields.bk_fid_num;
-    rrvn = hdr->bk_fid_overlay.bk_fid_fields.bk_fid_rvn;
+    bakfid = hdr->fh2$w_backlink.fid$b_nmx << 16;
+    bakfid += hdr->fh2$w_backlink.fid$w_num;
+    rrvn = hdr->fh2$w_backlink.fid$b_rvn;
     if (rrvn == 0)
         rrvn = curvol;
     if (bakfid == 0)
@@ -3627,7 +3646,7 @@ void fid_to_name(char * ret_dir)
         error = TRUE;
     else /* Get the full file name via an ACP call */
     {
-        copy_fid(&fib.fib$w_fid[0], &hdr->fid_overlay.fid_fields.fid_num,
+        copy_fid(&fib.fib$w_fid[0], &hdr->fh2$w_fid.fid$w_num,
         TRUE);
         fib.fib$w_did[0] = 0;
         fib.fib$w_did[1] = 0;
@@ -3657,9 +3676,9 @@ void fid_to_name(char * ret_dir)
     if (error)
     {
         id = ctx.id;
-        memcpy(&name[0], id->filename, 20);
+        memcpy(&name[0], id->fi2$t_filename, 20);
         if (name[19] != ' ')
-            memcpy(&name[20], id->filenamext, 66);
+            memcpy(&name[20], id->fi2$t_filenamext, 66);
         tmp = (char *) strstr(&name, " ");
         if (tmp != NULL)
             *tmp = 0;
@@ -3680,15 +3699,15 @@ int open_device(struct dsc$descriptor *device_descr, int flag)
 
 {
     register int i;
-    static struct fibdef if_fib; /* File information block */
+    static struct _fibdef if_fib; /* File information block */
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
     struct _it3 item_list[9];
     int bytes, stat, devclass, devchar, func_code, efblk, volnum, devtype;
-    struct header_area_struct *hdr_area;
+    struct _fh2 *hdr_area;
 
     /* Fill in FIB */
     fibdescr.fiblen = 10; /* Short FIB */
@@ -3850,7 +3869,7 @@ int open_device(struct dsc$descriptor *device_descr, int flag)
             cleanup();
             return (stat);
         }
-        if (home[i].struclev_overlay.strucver_fields.struclev != 2)
+        if (home[i].hm2$b_struclev != 2)
         {
             /* Not an ODS2 disk */
             sprintf(outbuf, "%%DFU-NOTODS2, Device is not an ODS2 disk");
@@ -3859,7 +3878,7 @@ int open_device(struct dsc$descriptor *device_descr, int flag)
             return (1);
         }
         /* read in Indexf.Sys header, we need the file size */
-        rvt[i].vbn_file_1 = home[i].ibmapvbn + home[i].ibmapsize;
+        rvt[i].vbn_file_1 = home[i].hm2$w_ibmapvbn + home[i].hm2$w_ibmapsize;
         stat = SYS$QIOW(0, rvt[i].channel, IO$_READVBLK, &iostat[0], 0, 0, block, 512, rvt[i].vbn_file_1, 0, 0, 0);
         if ((stat & 1) == 1)
             stat = iostat[0].iosb_1;
@@ -3869,9 +3888,9 @@ int open_device(struct dsc$descriptor *device_descr, int flag)
             cleanup();
             return (stat);
         }
-        hdr_area = (struct header_area_struct *) &block[0];
-        efblk = hdr_area->efblk_overlay.efblk_fields.efblkh << 16;
-        efblk += hdr_area->efblk_overlay.efblk_fields.efblkl;
+        hdr_area = (struct _fh2 *) &block[0];
+        efblk = hdr_area->fh2$w_recattr.fat$w_efblkh << 16;
+        efblk += hdr_area->fh2$w_recattr.fat$w_efblkl;
         rvt[i].if_size = efblk - rvt[i].vbn_file_1;
         i++;
         if (i <= maxvol) /*Next volume in set */
@@ -3931,8 +3950,8 @@ void read_indexf_bitmap(int *free_hdr)
     unsigned long int stat;
     Boolean found;
 
-    bytes = 512 * home[curvol].ibmapsize;
-    stat = SYS$QIOW(0, rvt[curvol].channel, IO$_READVBLK, &iostat[0], 0, 0, &bitmap[1], bytes, home[curvol].ibmapvbn, 0, 0, 0);
+    bytes = 512 * home[curvol].hm2$w_ibmapsize;
+    stat = SYS$QIOW(0, rvt[curvol].channel, IO$_READVBLK, &iostat[0], 0, 0, &bitmap[1], bytes, home[curvol].hm2$w_ibmapvbn, 0, 0, 0);
     endi = 1 + rvt[curvol].if_size / 4096; /* Maximum # of blocks used in bitmap */
     *free_hdr = 0;
     for (i = 1; i <= endi; i++) /* All blocks */
@@ -4137,8 +4156,8 @@ int get_next_header()
             ctx.end = TRUE;
             return (1);
         }
-        ctx.hdr = (struct header_area_struct *) &header[ctx.i];
-        ctx.id = (struct ident_area_struct *) &header[ctx.i].block[2 * ((ctx.hdr)->idoffset)];
+        ctx.hdr = (struct _fh2 *) &header[ctx.i];
+        ctx.id = (struct _fi2 *) &header[ctx.i].block[2 * ((ctx.hdr)->fh2$b_idoffset)];
     }
     return (1);
 }
@@ -4218,7 +4237,7 @@ void copy_fid(struct f_id *target, struct f_id *from, Boolean check_rvn)
             p1->fid_rvn = curvol;
 }
 
-int verify_header(struct header_area_struct *fh2)
+int verify_header(struct _fh2 *fh2)
 /*
  Validate if a file header is valid. See File System
  Internals for the definition of a valid file header.
@@ -4226,28 +4245,28 @@ int verify_header(struct header_area_struct *fh2)
  */
 {
     int highwater = 76; /* from $FH2DEF */
-    if (fh2->struclev_overlay.struclev_fields.struclev != 2)
+    if (fh2->fh2$b_struclev != 2)
         return (SS$_BADFILEHDR);
-    if (fh2->struclev_overlay.struclev_fields.strucver < 1)
+    if (fh2->fh2$b_strucver < 1)
         return (SS$_BADFILEHDR);
-    if (fh2->idoffset < (highwater / 2))
+    if (fh2->fh2$b_idoffset < (highwater / 2))
         return (SS$_BADFILEHDR);
-    if (fh2->idoffset > fh2->mpoffset)
+    if (fh2->fh2$b_idoffset > fh2->fh2$b_mpoffset)
         return (SS$_BADFILEHDR);
-    if (fh2->mpoffset > fh2->acoffset)
+    if (fh2->fh2$b_mpoffset > fh2->fh2$b_acoffset)
         return (SS$_BADFILEHDR);
-    if (fh2->acoffset > fh2->rsoffset)
+    if (fh2->fh2$b_acoffset > fh2->fh2$b_rsoffset)
         return (SS$_BADFILEHDR);
-    if (fh2->map_inuse > (fh2->acoffset - fh2->mpoffset))
+    if (fh2->fh2$b_map_inuse > (fh2->fh2$b_acoffset - fh2->fh2$b_mpoffset))
         return (SS$_BADFILEHDR);
-    if (fh2->fid_overlay.fid_fields.fid_num == 0)
+    if (fh2->fh2$w_fid.fid$w_num == 0)
         return (SS$_BADFILEHDR);
-    if (fh2->fid_overlay.fid_fields.fid_seq == 0)
+    if (fh2->fh2$w_fid.fid$w_seq == 0)
         return (SS$_BADFILEHDR);
     return (SS$_NORMAL);
 }
 
-void get_map_pointers(struct header_area_struct *hdr, unsigned int *ptrs)
+void get_map_pointers(struct _fh2 *hdr, unsigned int *ptrs)
 /*
  Count retrieval pointers in file header
  Do not count a placement pointer a s a real pointer
@@ -4260,8 +4279,8 @@ void get_map_pointers(struct header_area_struct *hdr, unsigned int *ptrs)
     }*head;
 
     head = (struct _hd *) hdr; /* We can now view the header as a 256 word strcuture */
-    offset = hdr->mpoffset;
-    map_bytes = hdr->map_inuse;
+    offset = hdr->fh2$b_mpoffset;
+    map_bytes = hdr->fh2$b_map_inuse;
     size = 0;
     *ptrs = 0;
     for (i = offset; i < offset + map_bytes;)
@@ -4291,7 +4310,7 @@ void get_map_pointers(struct header_area_struct *hdr, unsigned int *ptrs)
     }
 }
 
-void disass_map_ptr(struct header_area_struct *hdr, int *j)
+void disass_map_ptr(struct _fh2 *hdr, int *j)
 /*
  Disassemble mapping pointer. Return start lbn, count and offset to
  next ptr.
@@ -4329,25 +4348,23 @@ void disass_map_ptr(struct header_area_struct *hdr, int *j)
     *j = *j + format + 1;
 }
 
-int follow_extents(struct header_area_struct *hdr, int *rtv, int *num_hdrs)
+int follow_extents(struct _fh2 *hdr, int *rtv, int *num_hdrs)
 /*
  Follow extension links and get the retrieval pointers
  */
 
 {
     unsigned int rtvptr, ivbn, rvn, fidnum;
-    static struct header_area_struct head;
+    static struct _fh2 head;
 
-    head.ext_fid_overlay.ext_fid[0] = hdr->ext_fid_overlay.ext_fid[0];
-    head.ext_fid_overlay.ext_fid[1] = hdr->ext_fid_overlay.ext_fid[1];
-    head.ext_fid_overlay.ext_fid[2] = hdr->ext_fid_overlay.ext_fid[2];
-    while (head.ext_fid_overlay.ext_fid[0] != 0)
+    memcpy(&head.fh2$w_ext_fid, &hdr->fh2$w_ext_fid, sizeof(struct _fiddef));
+    while (head.fh2$w_ext_fid.fid$w_num != 0)
     {
-        rvn = head.ext_fid_overlay.ext_fid_fields.ext_fid_rvn;
+        rvn = head.fh2$w_ext_fid.fid$b_rvn;
         if (rvn == 0)
             rvn = curvol;
-        fidnum = head.ext_fid_overlay.ext_fid_fields.ext_fid_nmx << 16;
-        fidnum += head.ext_fid_overlay.ext_fid[0];
+        fidnum = head.fh2$w_ext_fid.fid$b_nmx << 16;
+        fidnum += head.fh2$w_ext_fid.fid$w_num;
         ivbn = rvt[rvn].vbn_file_1 + fidnum - 1;
         status = SYS$QIOW(0, rvt[rvn].channel, IO$_READVBLK, &iostat[iocnt], 0, 0, &head, 512, ivbn, 0, 0, 0);
         if ((status & 1) == 1)
@@ -4357,7 +4374,7 @@ int follow_extents(struct header_area_struct *hdr, int *rtv, int *num_hdrs)
             sprintf(outbuf, "%%DFU-E-READERR, Error reading extension header,");
             put_disp();
             singlemsg(0, status);
-            head.ext_fid_overlay.ext_fid[0] = 0;
+            head.fh2$w_ext_fid.fid$w_num = 0;
             return (status);
         }
         else
@@ -4374,11 +4391,11 @@ void dfu_handler()
 /* Exit handler to unlock volume */
 
 {
-    static struct fibdef i_fib; /* File information block */
+    static struct _fibdef i_fib; /* File information block */
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
     int stat;
 

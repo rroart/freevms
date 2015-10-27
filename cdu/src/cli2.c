@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 
 #include <descrip.h>
 #include <climsgdef.h>
@@ -108,7 +108,7 @@ int my_cdu_search_next_deep(int i, int type, char * s, int size, int * retval)
     return 0;
 }
 
-unsigned int cli$get_value(void *entity_desc, void *retdesc,short * retlen)
+int cli$get_value(void *entity_desc, void *retdesc,short * retlen)
 {
     struct _cdu * my_cdu_root = *my_cdu;
 
@@ -179,7 +179,7 @@ end:
         return CLI$_ABSENT;
 }
 
-unsigned int cli$present(void *entity_desc)
+int cli$present(void *entity_desc)
 {
     struct _cdu * my_cdu_root = *my_cdu;
 

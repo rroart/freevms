@@ -1,96 +1,102 @@
 #include <linux/kernel.h>
 
-struct _fab;
+#include <fabdef.h>
+#include <rabdef.h>
 
-int  exe$delete  (struct _fab * fab, void * err, void * suc)
+int  exe$delete  (struct _rabdef * rab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  exe$enter  (struct _fab * fab, void * err, void * suc)
+int  exe$enter  (struct _fabdef * fab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-//int  exe$erase  (struct _fab * fab, void * err, void * suc) { printk("not implemented\n"); }
-int  exe$find  (struct _fab * fab, void * err, void * suc)
+int  exe$find  (struct _rabdef * rab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  exe$flush  (struct _fab * fab, void * err, void * suc)
+int  exe$flush  (struct _rabdef * rab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  exe$free  (struct _fab * fab, void * err, void * suc)
+int  exe$free  (struct _rabdef * rab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  exe$modify  (struct _fab * fab, void * err, void * suc)
+int  exe$modify  (struct _fabdef * fab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  exe$nxtvol  (struct _fab * fab, void * err, void * suc)
+int  exe$nxtvol  (struct _rabdef * rab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-#if 0
-int  exe$read  (struct _fab * fab, void * err, void * suc)
+int  exe$release  (struct _rabdef * rab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-#endif
-int  exe$release  (struct _fab * fab, void * err, void * suc)
+int  exe$remove  (struct _fabdef * fab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  exe$remove  (struct _fab * fab, void * err, void * suc)
+int  exe$rename  (struct _fabdef * oldfab, void * err, void * suc, struct _fabdef * newfab)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  exe$rename  (struct _fab * fab, void * err, void * suc)
+int  exe$rewind  (struct _rabdef * rab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  exe$rewind  (struct _fab * fab, void * err, void * suc)
+int  exe$space  (struct _rabdef * rab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  exe$space  (struct _fab * fab, void * err, void * suc)
+int  exe$truncate  (struct _rabdef * rab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  exe$truncate  (struct _fab * fab, void * err, void * suc)
+int  exe$update  (struct _rabdef * rab, void * err, void * suc)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  exe$update  (struct _fab * fab, void * err, void * suc)
+int  rms$wait  (void * control_block)
 {
     printk("not implemented\n");
+    return 0;
 }
-int  rms$wait  (struct _fab * fab, void * err, void * suc)
+int  exe$filescan  (void *srcstr, void *valuelst, unsigned int *fldflags, void *auxout, unsigned short int *retlen)
 {
     printk("not implemented\n");
+    return 0;
 }
-#if 0
-int  exe$write  (struct _fab * fab, void * err, void * suc)
+int  exe$setdfprot  (unsigned short int *newdefprotaddr, unsigned short int *curdefprotaddr)
 {
     printk("not implemented\n");
+    return 0;
 }
-#endif
-int  exe$filescan  (struct _fab * fab, void * err, void * suc)
+int  exe$ssvexc  (void)
 {
     printk("not implemented\n");
+    return 0;
 }
-//int  exe$setddir  (struct _fab * fab, void * err, void * suc) { printk("not implemented\n"); }
-int  exe$setdfprot  (struct _fab * fab, void * err, void * suc)
+int  exe$rmsrundwn  (void *buffer_address, unsigned char *type_value)
 {
     printk("not implemented\n");
-}
-int  exe$ssvexc  (struct _fab * fab, void * err, void * suc)
-{
-    printk("not implemented\n");
-}
-int  exe$rmsrundwn  (struct _fab * fab, void * err, void * suc)
-{
-    printk("not implemented\n");
+    return 0;
 }
 
 // workaround for bug or something

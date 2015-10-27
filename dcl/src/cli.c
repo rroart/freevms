@@ -451,170 +451,170 @@ static struct
 static Script *scripts;
 static Symbol *symbols;
 
-static void startendmsg(const char *name);
-static void ctrly_enable(void);
-static void ctrly_ast(void *dummy, unsigned long status, void *mchargs);
-static void ctrlt_enable(void);
-static void ctrlt_ast(void *dummy, unsigned long status, void *mchargs);
-static void exit_script(void);
-static char *proclabels(char *cmdbuf);
-static unsigned long execute(char *cmdbuf);
-static unsigned long exechopped(int argc, const char *argv[], const char *input, const char *output, int nowait);
-static unsigned long substitute(char *inbuf, char **outbuf_r);
-static unsigned long eval_handle(char *inbuf, char **inbuf_r, unsigned long *outval_r, char *objtype, char termch);
-static unsigned long eval_integer(char *inbuf, char **inbuf_r, unsigned long *outval_r, char termch);
-static unsigned long eval_string(char *inbuf, char **inbuf_r, char **outbuf_r, char termch);
-static unsigned long evaluate(char *inbuf, char **inbuf_r, Symbol **symbol_r, char termch);
-static unsigned long get_operand(char *inbuf, char **inbuf_r, Symbol **symbol_r);
-static Optype get_operator(char *inbuf, char **inbuf_r);
-static char *cvt_sym_to_str(Symbol *symbol);
-static unsigned long func_collapse(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_compress(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_event_inc(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_event_set(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_field(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_h_info(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_len(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_lnm_attrs(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_lnm_lookup(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_lnm_nvalues(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_lnm_object(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_lnm_string(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_loc(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_lowercase(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_process(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_sub(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_thread(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_trim(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_uppercase(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long func_verify(Symbol *symbol, char *strp, char **rtnp, void *valuep);
-static unsigned long decode_objtype_string(const char *s_objtype, unsigned char *b_objtype_r);
-static const char *encode_objtype_string(unsigned char b_objtype);
-static void def_func(char *name, unsigned long (*func)(Symbol *symbol, char *strp, char **rtnp, void *valuep), Symtype symtype,
+void startendmsg(const char *name);
+void ctrly_enable(void);
+void ctrly_ast(void *dummy, unsigned long status, void *mchargs);
+void ctrlt_enable(void);
+void ctrlt_ast(void *dummy, unsigned long status, void *mchargs);
+void exit_script(void);
+char *proclabels(char *cmdbuf);
+int execute(char *cmdbuf);
+int exechopped(int argc, const char *argv[], const char *input, const char *output, int nowait);
+int substitute(char *inbuf, char **outbuf_r);
+int eval_handle(char *inbuf, char **inbuf_r, unsigned long *outval_r, char *objtype, char termch);
+int eval_integer(char *inbuf, char **inbuf_r, unsigned long *outval_r, char termch);
+int eval_string(char *inbuf, char **inbuf_r, char **outbuf_r, char termch);
+int evaluate(char *inbuf, char **inbuf_r, Symbol **symbol_r, char termch);
+int get_operand(char *inbuf, char **inbuf_r, Symbol **symbol_r);
+Optype get_operator(char *inbuf, char **inbuf_r);
+char *cvt_sym_to_str(Symbol *symbol);
+int func_collapse(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_compress(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_event_inc(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_event_set(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_field(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_h_info(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_len(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_lnm_attrs(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_lnm_lookup(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_lnm_nvalues(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_lnm_object(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_lnm_string(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_loc(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_lowercase(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_process(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_sub(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_thread(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_trim(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_uppercase(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int func_verify(Symbol *symbol, char *strp, char **rtnp, void *valuep);
+int decode_objtype_string(const char *s_objtype, unsigned char *b_objtype_r);
+const char *encode_objtype_string(unsigned char b_objtype);
+void def_func(char *name, unsigned long (*func)(Symbol *symbol, char *strp, char **rtnp, void *valuep), Symtype symtype,
         char *help);
-static void setscriptsyms(int argc, const char *argv[]);
-static void insert_symbol(Symbol *symbol, unsigned long (*func)(Symbol *symbol, char *strp, char **rtnp, void *valuep),
+void setscriptsyms(int argc, const char *argv[]);
+void insert_symbol(Symbol *symbol, unsigned long (*func)(Symbol *symbol, char *strp, char **rtnp, void *valuep),
         unsigned long level);
-static Symbol *lookup_symbol(const char *name, unsigned long level, unsigned long *level_r);
-static Command *decode_command(int argc, const char **argv, Command *cmdtbl, int *argc_r);
-static int cmpcmdname(int argc, const char **argv, char *name);
-static unsigned long logname_getobj(const char *name, unsigned char objtype, unsigned long *h_object_r);
-static unsigned long logname_creobj(const char *name, unsigned char objtype, unsigned long h_object);
-static unsigned long delete_logical(unsigned long h_error, const char *default_table_name, int argc, const char *argv[]);
-static unsigned long extcommand(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+Symbol *lookup_symbol(const char *name, unsigned long level, unsigned long *level_r);
+Command *decode_command(int argc, const char **argv, Command *cmdtbl, int *argc_r);
+int cmpcmdname(int argc, const char **argv, char *name);
+int logname_getobj(const char *name, unsigned char objtype, unsigned long *h_object_r);
+int logname_creobj(const char *name, unsigned char objtype, unsigned long h_object);
+int delete_logical(unsigned long h_error, const char *default_table_name, int argc, const char *argv[]);
+int extcommand(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long runimage(unsigned long h_error, Runopts *runopts, const char *image, int argc, const char *argv[]);
-static unsigned long decode_runopts(const char *input, const char *output, int nowait, unsigned long h_input,
+int runimage(unsigned long h_error, Runopts *runopts, const char *image, int argc, const char *argv[]);
+int decode_runopts(const char *input, const char *output, int nowait, unsigned long h_input,
         unsigned long h_output, unsigned long h_error, int *argc_r, const char ***argv_r, Runopts *runopts);
-static unsigned long finish_runopts(unsigned long h_error, Runopts *runopts)
+int finish_runopts(unsigned long h_error, Runopts *runopts)
 {
 }
-static unsigned long crepipepair(unsigned long *h_read_r, unsigned long *h_write_r);
-static void cleanup_runopts(Runopts *runopts)
+int crepipepair(unsigned long *h_read_r, unsigned long *h_write_r);
+void cleanup_runopts(Runopts *runopts)
 {
 }
-static void start_ersym_read(Runopts *runopts);
-static void ersym_read_ast(void *pipebufv, unsigned long status, void *mchargs);
-static void start_insym_write(Runopts *runopts);
-static void insym_write_ast(void *runoptsv, unsigned long status, void *mchargs);
-static void start_outsym_read(Runopts *runopts);
-static void outsym_read_ast(void *pipebufv, unsigned long status, void *mchargs);
-static void deferoutsym(const char *sym_name, Pipebuf *pipebuf_qh);
-static unsigned long show_device_bylogical(unsigned long h_output, unsigned long h_error, const char *logical,
+void start_ersym_read(Runopts *runopts);
+void ersym_read_ast(void *pipebufv, unsigned long status, void *mchargs);
+void start_insym_write(Runopts *runopts);
+void insym_write_ast(void *runoptsv, unsigned long status, void *mchargs);
+void start_outsym_read(Runopts *runopts);
+void outsym_read_ast(void *pipebufv, unsigned long status, void *mchargs);
+void deferoutsym(const char *sym_name, Pipebuf *pipebuf_qh);
+int show_device_bylogical(unsigned long h_output, unsigned long h_error, const char *logical,
         unsigned long *showopts);
-static unsigned long show_device_byhandle(unsigned long h_output, unsigned long h_error, unsigned long h_device,
+int show_device_byhandle(unsigned long h_output, unsigned long h_error, unsigned long h_device,
         unsigned long *showopts);
-static unsigned long show_iochan_bylogical(unsigned long h_output, unsigned long h_error, const char *logical,
+int show_iochan_bylogical(unsigned long h_output, unsigned long h_error, const char *logical,
         unsigned long *showopts);
-static unsigned long show_iochan_byhandle(unsigned long h_output, unsigned long h_error, unsigned long h_iochan,
+int show_iochan_byhandle(unsigned long h_output, unsigned long h_error, unsigned long h_iochan,
         unsigned long *showopts);
-static unsigned long show_job_bylogical(unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts);
-static unsigned long show_job_byhandle(unsigned long h_output, unsigned long h_error, unsigned long h_job, unsigned long *showopts);
-static unsigned long show_logical_table(unsigned long h_output, unsigned long h_error, int level, unsigned long sholnmflg,
+int show_job_bylogical(unsigned long h_output, unsigned long h_error, const char *logical, unsigned long *showopts);
+int show_job_byhandle(unsigned long h_output, unsigned long h_error, unsigned long h_job, unsigned long *showopts);
+int show_logical_table(unsigned long h_output, unsigned long h_error, int level, unsigned long sholnmflg,
         unsigned long logtblatr, const char *table_name, unsigned long h_table)
 {
 }
-static unsigned long show_logical_name(unsigned long h_output, unsigned long h_error, int level, unsigned long sholnmflg, int table,
+int show_logical_name(unsigned long h_output, unsigned long h_error, int level, unsigned long sholnmflg, int table,
         unsigned long h_logname);
-static unsigned long show_process_bylogical(unsigned long h_output, unsigned long h_error, const char *logical,
+int show_process_bylogical(unsigned long h_output, unsigned long h_error, const char *logical,
         unsigned long *showopts);
-static unsigned long show_process_byhandle(unsigned long h_output, unsigned long h_error, unsigned long h_process,
+int show_process_byhandle(unsigned long h_output, unsigned long h_error, unsigned long h_process,
         unsigned long *showopts);
-//static unsigned long show_system (unsigned long h_output, unsigned long h_error, unsigned long *showopts);
+//int show_system (unsigned long h_output, unsigned long h_error, unsigned long *showopts);
 int show_system();
 int show_symbol();
 int delete_symbol();
-static void show_secattr(unsigned long h_output, unsigned long h_object, unsigned long secattrcode, int prefix_w,
+void show_secattr(unsigned long h_output, unsigned long h_object, unsigned long secattrcode, int prefix_w,
         const char *prefix);
-static void *secmalloc(void *dummy, unsigned long osize, void *obuff, unsigned long nsize);
-static unsigned long show_user_bylogical(unsigned long h_output, unsigned long h_error, const char *logical,
+void *secmalloc(void *dummy, unsigned long osize, void *obuff, unsigned long nsize);
+int show_user_bylogical(unsigned long h_output, unsigned long h_error, const char *logical,
         unsigned long *showopts);
-static unsigned long show_user_byhandle(unsigned long h_output, unsigned long h_error, unsigned long h_user,
+int show_user_byhandle(unsigned long h_output, unsigned long h_error, unsigned long h_user,
         unsigned long *showopts);
-static unsigned long wait_events(unsigned long nevents, unsigned long *h_events);
+int wait_events(unsigned long nevents, unsigned long *h_events);
 
 /* Internal command declarations */
 
-static unsigned long int_allocate_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_allocate_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[]);
-static unsigned long int_change_password(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_change_password(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[]);
-static unsigned long int_create_logical_name(int userarg);
-static unsigned long int_open(int userarg);
-static unsigned long int_close(int userarg);
-static unsigned long int_write(int userarg);
-static unsigned long int_read(int userarg);
-static unsigned long int_create_logical_table(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_create_logical_name(int userarg);
+int int_open(int userarg);
+int int_close(int userarg);
+int int_write(int userarg);
+int int_read(int userarg);
+int int_create_logical_table(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[]);
-static unsigned long int_create_symbol(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_create_symbol(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[]);
-static unsigned long int_deallocate_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_deallocate_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[]);
-static unsigned long int_delete_logical_name(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_delete_logical_name(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[]);
-static unsigned long int_delete_logical_table(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_delete_logical_table(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[]);
-static unsigned long int_exit(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_exit(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_logout(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_logout(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_goto(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_goto(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_help(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_help(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_if(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc,
+int int_if(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc,
         const char *argv[]);
-static unsigned long int_endif(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_endif(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_else(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_else(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_then(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_then(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_script(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_script(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_set_default(int userarg);
-static unsigned long int_set_prompt(int userarg);
-static unsigned long int_set_process(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_set_default(int userarg);
+int int_set_prompt(int userarg);
+int int_set_process(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long set_security(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int set_security(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_set_working_set(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_set_working_set(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[]);
-static unsigned long int_stop(int userarg);
-static unsigned long show_status(int userarg);
-static unsigned long int_show_datetime(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_stop(int userarg);
+int show_status(int userarg);
+int int_show_datetime(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[]);
-static unsigned long int_show_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_show_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_show_default(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_show_default(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_show_working_set(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_show_working_set(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[]);
-static unsigned long int_show_job(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_show_job(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[]);
-static unsigned long int_show_logical_name(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_show_logical_name(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[]);
-//static unsigned long int_show_system          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
+//int int_show_system          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 
 static Command intcmd[] =
     { 0, "logout", int_logout, NULL, "[<status>]", 0, "exit", int_exit, NULL, "[<status>]", 0, "goto", int_goto, NULL, "<label>", 0,
@@ -721,8 +721,7 @@ extern int skip_mode;
 extern int do_skip;
 extern int if_mode;
 
-unsigned long main(int argc, char *argv[])
-
+int main(int argc, char *argv[])
 {
     char cmdbuf[CMDSIZ], *p;
     gcmdbuf = cmdbuf;
@@ -1197,7 +1196,7 @@ typedef struct
     unsigned char *ctrlchar; /* where to return the character */
 } OZ_IO_console_ctrlchar;
 
-static void startendmsg(const char *name)
+void startendmsg(const char *name)
 {
     struct _generic_64 now;
     char buf[64];
@@ -1217,7 +1216,7 @@ static void startendmsg(const char *name)
 /*                                  */
 /************************************************************************/
 
-static void ctrly_enable(void)
+void ctrly_enable(void)
 {
     int sts;
     OZ_IO_console_ctrlchar ctrly;
@@ -1235,8 +1234,7 @@ static void ctrly_enable(void)
 /* This routine gets called when ctrl-Y is pressed.                                                          */
 /* It also gets called when the thread exits, because the main program calls oz_sys_io_abort on the channel. */
 
-static void ctrly_ast(void *dummy, unsigned long status, void *mchargs)
-
+void ctrly_ast(void *dummy, unsigned long status, void *mchargs)
 {
     if (status == SS$_NORMAL)
     {
@@ -1256,8 +1254,7 @@ static void ctrly_ast(void *dummy, unsigned long status, void *mchargs)
 /*                                  */
 /************************************************************************/
 
-static void ctrlt_enable(void)
-
+void ctrlt_enable(void)
 {
     int sts;
     OZ_IO_console_ctrlchar ctrlt;
@@ -1275,8 +1272,7 @@ static void ctrlt_enable(void)
 /* This routine gets called when ctrl-T is pressed.                                                          */
 /* It also gets called when the thread exits, because the main program calls oz_sys_io_abort on the channel. */
 
-static void ctrlt_ast(void *dummy, unsigned long status, void *mchargs)
-
+void ctrlt_ast(void *dummy, unsigned long status, void *mchargs)
 {
     char t_name[OZ_THREAD_NAMESIZE], u_quota[256];
     char state[16];
@@ -1428,8 +1424,7 @@ static void ctrlt_ast(void *dummy, unsigned long status, void *mchargs)
 /*                                  */
 /************************************************************************/
 
-static void exit_script(void)
-
+void exit_script(void)
 {
     Label *label;
     Script *script;
@@ -1478,8 +1473,7 @@ static void exit_script(void)
 /*                                  */
 /************************************************************************/
 
-static char *proclabels(char *cmdbuf)
-
+char *proclabels(char *cmdbuf)
 {
     char c, labelname[MAXSYMNAM], *p, *q;
     Label *label;
@@ -1558,13 +1552,12 @@ static char *proclabels(char *cmdbuf)
 /*                                  */
 /************************************************************************/
 
-static unsigned long execute(char *cmdbuf)
-
+int execute(char *cmdbuf)
 {
     char c, *input, *newbuf, pipei[OZ_DEVUNIT_NAMESIZE], pipeo[OZ_DEVUNIT_NAMESIZE];
     const char **v;
     int dq, i, j, n, s, sq;
-    unsigned long sts;
+    int sts;
     unsigned long h_pipei, h_pipeo;
 
     /* Substitute in variables */
@@ -1640,7 +1633,6 @@ static unsigned long execute(char *cmdbuf)
     /* Return completion status */
 
     return (sts);
-
 }
 
 /************************************************************************/
@@ -1668,14 +1660,13 @@ typedef struct
     signed long refcount;
 } Tc;
 
-static void threadcommandexit(void *tcv, unsigned long status);
+void threadcommandexit(void *tcv, unsigned long status);
 
-static unsigned long exechopped(int argc, const char *argv[], const char *input, const char *output, int nowait)
-
+int exechopped(int argc, const char *argv[], const char *input, const char *output, int nowait)
 {
     const char **aargv;
     int aargc, i;
-    unsigned long sts;
+    int sts;
     Tc *tc;
     char reallyext = 0;
 
@@ -1803,13 +1794,12 @@ static unsigned long exechopped(int argc, const char *argv[], const char *input,
 /*                                  */
 /************************************************************************/
 
-static unsigned long substitute(char *inbuf, char **outbuf_r)
-
+int substitute(char *inbuf, char **outbuf_r)
 {
     char c, *evalbuf, *outbuf, *p;
     int i, j, l, m, o, q;
     Symbol *symbol;
-    unsigned long sts;
+    int sts;
 
     *outbuf_r = NULL;
 
@@ -1925,11 +1915,10 @@ static unsigned long substitute(char *inbuf, char **outbuf_r)
 /*                                  */
 /************************************************************************/
 
-static unsigned long eval_handle(char *inbuf, char **inbuf_r, unsigned long *outval_r, char *objtype, char termch)
-
+int eval_handle(char *inbuf, char **inbuf_r, unsigned long *outval_r, char *objtype, char termch)
 {
     int usedup;
-    unsigned long sts;
+    int sts;
     Symbol *symbol;
 
     sts = evaluate(inbuf, inbuf_r, &symbol, termch);
@@ -1984,11 +1973,10 @@ static unsigned long eval_handle(char *inbuf, char **inbuf_r, unsigned long *out
 /*                                  */
 /************************************************************************/
 
-static unsigned long eval_integer(char *inbuf, char **inbuf_r, unsigned long *outval_r, char termch)
-
+int eval_integer(char *inbuf, char **inbuf_r, unsigned long *outval_r, char termch)
 {
     int usedup;
-    unsigned long sts;
+    int sts;
     Symbol *symbol;
 
     sts = evaluate(inbuf, inbuf_r, &symbol, termch);
@@ -2038,10 +2026,9 @@ static unsigned long eval_integer(char *inbuf, char **inbuf_r, unsigned long *ou
 /*                                  */
 /************************************************************************/
 
-static unsigned long eval_string(char *inbuf, char **inbuf_r, char **outbuf_r, char termch)
-
+int eval_string(char *inbuf, char **inbuf_r, char **outbuf_r, char termch)
 {
-    unsigned long sts;
+    int sts;
     Symbol *symbol;
 
     sts = evaluate(inbuf, inbuf_r, &symbol, termch);
@@ -2073,8 +2060,7 @@ static unsigned long eval_string(char *inbuf, char **inbuf_r, char **outbuf_r, c
 /*                                  */
 /************************************************************************/
 
-static unsigned long evaluate(char *inbuf, char **inbuf_r, Symbol **symbol_r, char termch)
-
+int evaluate(char *inbuf, char **inbuf_r, Symbol **symbol_r, char termch)
 {
     char *p, *q;
     int cmpstr;
@@ -2352,8 +2338,7 @@ static unsigned long evaluate(char *inbuf, char **inbuf_r, Symbol **symbol_r, ch
 /*                                  */
 /************************************************************************/
 
-static unsigned long get_operand(char *inbuf, char **inbuf_r, Symbol **symbol_r)
-
+int get_operand(char *inbuf, char **inbuf_r, Symbol **symbol_r)
 {
     char c, d, *p, *q, *svalue;
     int usedup;
@@ -2503,8 +2488,7 @@ static unsigned long get_operand(char *inbuf, char **inbuf_r, Symbol **symbol_r)
 /*                                  */
 /************************************************************************/
 
-static Optype get_operator(char *inbuf, char **inbuf_r)
-
+Optype get_operator(char *inbuf, char **inbuf_r)
 {
     char c, *p;
     int i;
@@ -2547,8 +2531,7 @@ static Optype get_operator(char *inbuf, char **inbuf_r)
 /*                                  */
 /************************************************************************/
 
-static char *cvt_sym_to_str(Symbol *symbol)
-
+char *cvt_sym_to_str(Symbol *symbol)
 {
     char *p;
 
@@ -2602,11 +2585,10 @@ static char *cvt_sym_to_str(Symbol *symbol)
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_collapse(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_collapse(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char c, *p, *q, *string;
-    unsigned long sts;
+    int sts;
 
     while ((*strp != 0) && (*strp <= ' '))
         strp++; /* skip spaces */
@@ -2638,12 +2620,11 @@ static unsigned long func_collapse(Symbol *symbol, char *strp, char **rtnp, void
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_compress(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_compress(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char c, *p, *q, *string;
     int s;
-    unsigned long sts;
+    int sts;
 
     while ((*strp != 0) && (*strp <= ' '))
         strp++; /* skip spaces */
@@ -2684,8 +2665,7 @@ static unsigned long func_compress(Symbol *symbol, char *strp, char **rtnp, void
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_field(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_field(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char *p, *q, *separator, *string;
     int l;
@@ -2745,11 +2725,10 @@ static unsigned long func_field(Symbol *symbol, char *strp, char **rtnp, void *v
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_len(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_len(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char *svalue;
-    unsigned long sts;
+    int sts;
 
     while ((*strp != 0) && (*strp <= ' '))
         strp++; /* skip spaces */
@@ -2775,8 +2754,7 @@ static unsigned long func_len(Symbol *symbol, char *strp, char **rtnp, void *val
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_lnm_attrs(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_lnm_attrs(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char *out;
     int i;
@@ -2835,11 +2813,10 @@ static unsigned long func_lnm_attrs(Symbol *symbol, char *strp, char **rtnp, voi
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_lnm_lookup(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_lnm_lookup(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char *logname, *procmode, *out;
-    unsigned long sts;
+    int sts;
     unsigned long h_logname, h_table;
     unsigned long b_procmode;
 
@@ -2909,10 +2886,9 @@ static unsigned long func_lnm_lookup(Symbol *symbol, char *strp, char **rtnp, vo
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_lnm_nvalues(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_lnm_nvalues(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
-    unsigned long sts;
+    int sts;
     unsigned long h_logname;
 
     while ((*strp != 0) && (*strp <= ' '))
@@ -2944,8 +2920,7 @@ static unsigned long func_lnm_nvalues(Symbol *symbol, char *strp, char **rtnp, v
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_lnm_object(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_lnm_object(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char *out, *s_objtype;
     unsigned long index, sts;
@@ -3001,8 +2976,7 @@ static unsigned long func_lnm_object(Symbol *symbol, char *strp, char **rtnp, vo
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_lnm_string(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_lnm_string(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char *out;
     unsigned long index, rlen, sts;
@@ -3052,11 +3026,10 @@ static unsigned long func_lnm_string(Symbol *symbol, char *strp, char **rtnp, vo
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_loc(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_loc(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char *haystack, *needle, *p;
-    unsigned long sts;
+    int sts;
 
     while ((*strp != 0) && (*strp <= ' '))
         strp++; /* skip spaces */
@@ -3093,11 +3066,10 @@ static unsigned long func_loc(Symbol *symbol, char *strp, char **rtnp, void *val
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_lowercase(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_lowercase(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char c, *p, *string;
-    unsigned long sts;
+    int sts;
 
     while ((*strp != 0) && (*strp <= ' '))
         strp++; /* skip spaces */
@@ -3125,13 +3097,12 @@ static unsigned long func_lowercase(Symbol *symbol, char *strp, char **rtnp, voi
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_process(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_process(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char *out;
     unsigned long h_process;
     unsigned long processid;
-    unsigned long sts;
+    int sts;
 
     while ((*strp != 0) && (*strp <= ' '))
         strp++; /* skip spaces */
@@ -3170,8 +3141,7 @@ static unsigned long func_process(Symbol *symbol, char *strp, char **rtnp, void 
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_sub(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_sub(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char *string = 0;
     char *substring = 0;
@@ -3215,11 +3185,10 @@ static unsigned long func_sub(Symbol *symbol, char *strp, char **rtnp, void *val
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_trim(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_trim(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char c, *p, *q, *string;
-    unsigned long sts;
+    int sts;
 
     while ((*strp != 0) && (*strp <= ' '))
         strp++; /* skip spaces */
@@ -3252,11 +3221,10 @@ static unsigned long func_trim(Symbol *symbol, char *strp, char **rtnp, void *va
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_uppercase(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_uppercase(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     char c, *p, *string;
-    unsigned long sts;
+    int sts;
 
     while ((*strp != 0) && (*strp <= ' '))
         strp++; /* skip spaces */
@@ -3284,8 +3252,7 @@ static unsigned long func_uppercase(Symbol *symbol, char *strp, char **rtnp, voi
 /*                                  */
 /************************************************************************/
 
-static unsigned long func_verify(Symbol *symbol, char *strp, char **rtnp, void *valuep)
-
+int func_verify(Symbol *symbol, char *strp, char **rtnp, void *valuep)
 {
     unsigned long newverify, sts;
 
@@ -3317,8 +3284,7 @@ static struct
         OZ_OBJTYPE_JOB, "job", OZ_OBJTYPE_LOGNAME, "logname", OZ_OBJTYPE_PROCESS, "process", OZ_OBJTYPE_THREAD, "thread",
         OZ_OBJTYPE_USER, "user", 0, NULL };
 
-static unsigned long decode_objtype_string(const char *s_objtype, unsigned char *b_objtype_r)
-
+int decode_objtype_string(const char *s_objtype, unsigned char *b_objtype_r)
 {
     int i;
 
@@ -3334,8 +3300,7 @@ static unsigned long decode_objtype_string(const char *s_objtype, unsigned char 
     return (SS$_BADPARAM);
 }
 
-static const char *encode_objtype_string(unsigned char b_objtype)
-
+const char *encode_objtype_string(unsigned char b_objtype)
 {
     int i;
 
@@ -3361,9 +3326,8 @@ static const char *encode_objtype_string(unsigned char b_objtype)
 /*                                  */
 /************************************************************************/
 
-static void def_func(char *name, unsigned long (*func)(Symbol *symbol, char *strp, char **rtnp, void *valuep), Symtype symtype,
+void def_func(char *name, unsigned long (*func)(Symbol *symbol, char *strp, char **rtnp, void *valuep), Symtype symtype,
         char *help)
-
 {
     Symbol *symbol;
 
@@ -3386,8 +3350,7 @@ static void def_func(char *name, unsigned long (*func)(Symbol *symbol, char *str
 /*                                  */
 /************************************************************************/
 
-static void setscriptsyms(int argc, const char *argv[])
-
+void setscriptsyms(int argc, const char *argv[])
 {
     int i;
     Symbol *symbol;
@@ -3443,9 +3406,8 @@ static void setscriptsyms(int argc, const char *argv[])
 /*                                  */
 /************************************************************************/
 
-static void insert_symbol(Symbol *symbol, unsigned long (*func)(Symbol *symbol, char *strp, char **rtnp, void *valuep),
+void insert_symbol(Symbol *symbol, unsigned long (*func)(Symbol *symbol, char *strp, char **rtnp, void *valuep),
         unsigned long level)
-
 {
     int i;
     Script *script;
@@ -3498,8 +3460,7 @@ static void insert_symbol(Symbol *symbol, unsigned long (*func)(Symbol *symbol, 
 /*                                  */
 /************************************************************************/
 
-static Symbol *lookup_symbol(const char *name, unsigned long level, unsigned long *level_r)
-
+Symbol *lookup_symbol(const char *name, unsigned long level, unsigned long *level_r)
 {
     unsigned long levr;
     Script *script;
@@ -3558,8 +3519,7 @@ static Symbol *lookup_symbol(const char *name, unsigned long level, unsigned lon
 /*                                  */
 /************************************************************************/
 
-static Command *decode_command(int argc, const char **argv, Command *cmdtbl, int *argc_r)
-
+Command *decode_command(int argc, const char **argv, Command *cmdtbl, int *argc_r)
 {
     char *p;
     Command *cmd1;
@@ -3608,8 +3568,7 @@ static Command *decode_command(int argc, const char **argv, Command *cmdtbl, int
 /*                                  */
 /************************************************************************/
 
-static int cmpcmdname(int argc, const char **argv, char *name)
-
+int cmpcmdname(int argc, const char **argv, char *name)
 {
     char *p;
     int j, l;
@@ -3665,10 +3624,9 @@ static int cmpcmdname(int argc, const char **argv, char *name)
 /*                                  */
 /************************************************************************/
 
-static unsigned long logname_getobj(const char *name, unsigned char objtype, unsigned long *h_object_r)
-
+int logname_getobj(const char *name, unsigned char objtype, unsigned long *h_object_r)
 {
-    unsigned long sts;
+    int sts;
     unsigned long h_logname, h_table;
 
     sts = sys$trnlnm(0, 0, defaulttables, PSL$C_USER, &h_table); /* look up table in default directories */
@@ -3702,10 +3660,9 @@ static unsigned long logname_getobj(const char *name, unsigned char objtype, uns
 /*                                  */
 /************************************************************************/
 
-static unsigned long logname_creobj(const char *name, unsigned char objtype, unsigned long h_object)
-
+int logname_creobj(const char *name, unsigned char objtype, unsigned long h_object)
 {
-    unsigned long sts;
+    int sts;
     unsigned long h_table;
     OZ_Logvalue logvalue;
 
@@ -3722,13 +3679,13 @@ static unsigned long logname_creobj(const char *name, unsigned char objtype, uns
     return (sts);
 }
 
-static unsigned long int_allocate_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_allocate_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[])
 
 {
     const char *devname;
     int i;
-    unsigned long sts;
+    int sts;
     unsigned char objtype;
 
     devname = NULL;
@@ -3805,15 +3762,14 @@ static unsigned long int_allocate_device(unsigned long h_input, unsigned long h_
 /*                                  */
 /************************************************************************/
 
-static unsigned long readpromptne(const char *prompt, int bufsiz, char *buffer);
+int readpromptne(const char *prompt, int bufsiz, char *buffer);
 
-static unsigned long int_change_password(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_change_password(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[])
-
 {
     char againbuf[OZ_PASSWORD_MAX], newpwbuf[OZ_PASSWORD_MAX], oldpwbuf[OZ_PASSWORD_MAX];
     const char *newpw, *oldpw;
-    unsigned long sts;
+    int sts;
 
     if (argc > 2)
     {
@@ -3858,8 +3814,7 @@ static unsigned long int_change_password(unsigned long h_input, unsigned long h_
 
 /* Read with prompt but/and no echo */
 
-static unsigned long readpromptne(const char *prompt, int bufsiz, char *buffer)
-
+int readpromptne(const char *prompt, int bufsiz, char *buffer)
 {
     OZ_IO_console_read console_read;
     OZ_IO_console_write console_write;
@@ -3903,12 +3858,11 @@ typedef struct Handleclose
     unsigned long handle;
 } Handleclose;
 
-static unsigned long crelognam(unsigned long cprocmode, void *crelognamparv);
+int crelognam(unsigned long cprocmode, void *crelognamparv);
 
-static unsigned long int_create_logical_name(int userarg)
-
+int int_create_logical_name(int userarg)
 {
-    unsigned long sts;
+    int sts;
     char * default_table = "LNM$PROCESS_TABLE";
     char * table;
     struct dsc$descriptor mytabnam, mynam;
@@ -3979,11 +3933,11 @@ static unsigned long int_create_logical_name(int userarg)
 
 /* Create the logical name, either in kernel or user mode */
 
-static unsigned long crelognam(unsigned long cprocmode, void *crelognamparv)
+int crelognam(unsigned long cprocmode, void *crelognamparv)
 
 {
     Crelognampar *p;
-    unsigned long sts;
+    int sts;
 
     p = crelognamparv;
     sts = sys$crelnm(0, p->h_table, PSL$C_KERNEL, p->logical_name, NULL);
@@ -4006,14 +3960,13 @@ typedef struct
     unsigned long lognamatr;
 } Crelogtblpar;
 
-static unsigned long crelogtbl(unsigned long cprocmode, void *crelogtblparv);
+int crelogtbl(unsigned long cprocmode, void *crelogtblparv);
 
-static unsigned long int_create_logical_table(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_create_logical_table(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[])
-
 {
     int i, kernel;
-    unsigned long sts;
+    int sts;
 
     struct dsc$descriptor mypartab, mytabnam;
 
@@ -4066,11 +4019,10 @@ static unsigned long int_create_logical_table(unsigned long h_input, unsigned lo
     return (sts);
 }
 
-static unsigned long crelogtbl(unsigned long cprocmode, void *crelogtblparv)
-
+int crelogtbl(unsigned long cprocmode, void *crelogtblparv)
 {
     Crelogtblpar *p;
-    unsigned long sts;
+    int sts;
 
     p = crelogtblparv;
     sts = sys$crelnm(0, 0, PSL$C_KERNEL, p->table_name, NULL);
@@ -4088,14 +4040,13 @@ static unsigned long crelogtbl(unsigned long cprocmode, void *crelogtblparv)
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_create_symbol(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_create_symbol(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[])
-
 {
     char *p, *paramval, *strvalue;
     const char *symbol_name;
     int eval, first_value, i, l, level, usedup;
-    unsigned long sts;
+    int sts;
     Symbol *symbol;
     Symtype symtype;
 
@@ -4248,11 +4199,10 @@ static unsigned long int_create_symbol(unsigned long h_input, unsigned long h_ou
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_deallocate_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_deallocate_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[])
-
 {
-    unsigned long sts;
+    int sts;
 
     if (argc != 1)
     {
@@ -4273,26 +4223,23 @@ static unsigned long int_deallocate_device(unsigned long h_input, unsigned long 
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_delete_logical_name(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_delete_logical_name(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[])
-
 {
     return (delete_logical(h_error, defaulttables, argc, argv));
 }
 
-static unsigned long int_delete_logical_table(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_delete_logical_table(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[])
-
 {
     return (delete_logical(h_error, NULL, argc, argv));
 }
 
-static unsigned long delete_logical(unsigned long h_error, const char *default_table_name, int argc, const char *argv[])
-
+int delete_logical(unsigned long h_error, const char *default_table_name, int argc, const char *argv[])
 {
     const char *logical_name;
     int i;
-    unsigned long sts;
+    int sts;
     unsigned long h_logname, h_table;
 
     logical_name = NULL;
@@ -4339,9 +4286,9 @@ static unsigned long delete_logical(unsigned long h_error, const char *default_t
     return (sts);
 }
 
-static unsigned long int_open(int userarg)
+int int_open(int userarg)
 {
-    unsigned long sts;
+    int sts;
     short int chan;
 
     $DESCRIPTOR(p, "p1");
@@ -4399,9 +4346,9 @@ static unsigned long int_open(int userarg)
     return sts;
 }
 
-static unsigned long int_close(int userarg)
+int int_close(int userarg)
 {
-    unsigned long sts;
+    int sts;
     short int chan;
 
     $DESCRIPTOR(p, "p1");
@@ -4450,9 +4397,9 @@ static unsigned long int_close(int userarg)
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_write(int userarg)
+int int_write(int userarg)
 {
-    unsigned long sts;
+    int sts;
     short int chan;
 
     $DESCRIPTOR(p, "p1");
@@ -4541,9 +4488,9 @@ static unsigned long int_write(int userarg)
     return (sts);
 }
 
-static unsigned long int_read(int userarg)
+int int_read(int userarg)
 {
-    unsigned long sts;
+    int sts;
     short int chan;
 
     $DESCRIPTOR(p, "p1");
@@ -4608,9 +4555,8 @@ static unsigned long int_read(int userarg)
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_logout(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_logout(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
-
 {
     int i, usedup;
     unsigned long exitst;
@@ -4653,9 +4599,8 @@ static unsigned long int_logout(unsigned long h_input, unsigned long h_output, u
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_goto(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_goto(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
-
 {
     Label *label;
 
@@ -4696,12 +4641,11 @@ static unsigned long int_goto(unsigned long h_input, unsigned long h_output, uns
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_help(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_help(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
-
 {
     Command *command;
-    unsigned long sts;
+    int sts;
 
     fprintf(h_output, "\nInternal commands:\n");
 
@@ -4754,9 +4698,8 @@ static unsigned long int_help(unsigned long h_input, unsigned long h_output, uns
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_if(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc,
+int int_if(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc,
         const char *argv[])
-
 {
     int usedup;
     unsigned long exp, sts;
@@ -4804,9 +4747,8 @@ static unsigned long int_if(unsigned long h_input, unsigned long h_output, unsig
     return (sts);
 }
 
-static unsigned long int_else(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_else(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
-
 {
     skip_mode = get_prev_cond_stack() | !get_cond_stack();
     //fprintf(stderr,"pel %s\n",yytext); fflush(stderr);
@@ -4814,17 +4756,15 @@ static unsigned long int_else(unsigned long h_input, unsigned long h_output, uns
     //fprintf(stderr,"pel2 %s\n",yytext); fflush(stderr);
 }
 
-static unsigned long int_endif(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_endif(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
-
 {
     pop_cond_stack();
     pop_cond_stack();
 }
 
-static unsigned long int_then(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_then(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
-
 {
     // nothing yet
 }
@@ -4853,9 +4793,8 @@ static unsigned long int_then(unsigned long h_input, unsigned long h_output, uns
 /*                                  */
 /************************************************************************/
 
-static unsigned long extcommand(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int extcommand(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
-
 {
     char command[256], image[256];
     const char *imagep;
@@ -4943,7 +4882,7 @@ static unsigned long extcommand(unsigned long h_input, unsigned long h_output, u
 /************************************************************************/
 
 #if 0
-static int myfunc(int (*func)(),void * start, int count)
+int myfunc(int (*func)(),void * start, int count)
 {
 #ifdef __i386__
     __asm__ __volatile__(
@@ -4985,7 +4924,7 @@ static int myfunc(int (*func)(),void * start, int count)
 #endif
 }
 
-static int mymyfunc(int dummy,int (*func)(),void * start, int count)
+int mymyfunc(int dummy,int (*func)(),void * start, int count)
 {
 #ifdef __i386__
     long * ret = &func;
@@ -5003,7 +4942,7 @@ static int mymyfunc(int dummy,int (*func)(),void * start, int count)
     return myfunc(*func,start,count);
 }
 
-static int mymymyfunc(int (*func)(),void * start, int count)
+int mymymyfunc(int (*func)(),void * start, int count)
 {
     register int __res;
 #ifdef __i386__
@@ -5022,10 +4961,9 @@ static int mymymyfunc(int (*func)(),void * start, int count)
 }
 #endif
 
-static unsigned long runimage(unsigned long h_error, Runopts *runopts, const char *image, int argc, const char *argv[])
-
+int runimage(unsigned long h_error, Runopts *runopts, const char *image, int argc, const char *argv[])
 {
-    unsigned long sts;
+    int sts;
     struct dsc$descriptor aname;
     struct dsc$descriptor dflnam;
     struct file * f;
@@ -5253,9 +5191,8 @@ static unsigned long runimage(unsigned long h_error, Runopts *runopts, const cha
 /*                                  */
 /************************************************************************/
 
-static unsigned long decode_runopts(const char *input, const char *output, int nowait, unsigned long h_input,
+int decode_runopts(const char *input, const char *output, int nowait, unsigned long h_input,
         unsigned long h_output, unsigned long h_error, int *argc_r, const char ***argv_r, Runopts *runopts)
-
 {
     const char **argv;
     int argc, i;
@@ -5513,11 +5450,10 @@ static unsigned long decode_runopts(const char *input, const char *output, int n
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_script(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_script(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
-
 {
-    unsigned long sts;
+    int sts;
     unsigned long h_script;
     //  OZ_IO_fs_open fs_open;
     int fd;
@@ -5581,10 +5517,9 @@ static unsigned long int_script(unsigned long h_input, unsigned long h_output, u
     return (SS$_NORMAL);
 }
 
-static unsigned long int_set_prompt(int userarg)
-
+int int_set_prompt(int userarg)
 {
-    unsigned long sts;
+    int sts;
 
     $DESCRIPTOR(p, "p1");
 
@@ -5611,11 +5546,10 @@ static unsigned long int_set_prompt(int userarg)
     return SS$_NORMAL;
 }
 
-static unsigned long int_set_process(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_set_process(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
-
 {
-    unsigned long sts;
+    int sts;
 
     /* We should have exactly one argument - the process name */
 
@@ -5630,10 +5564,9 @@ static unsigned long int_set_process(unsigned long h_input, unsigned long h_outp
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_set_default(int userarg)
-
+int int_set_default(int userarg)
 {
-    unsigned long sts;
+    int sts;
 
     $DESCRIPTOR(p, "p1");
 
@@ -5664,7 +5597,7 @@ static unsigned long int_set_default(int userarg)
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_show_datetime(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_show_datetime(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[])
 {
     struct _generic_64 now;
@@ -5689,7 +5622,7 @@ static unsigned long int_show_datetime(unsigned long h_input, unsigned long h_ou
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_show_default(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_show_default(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
 {
     const char *xargv[1];
@@ -5713,8 +5646,7 @@ static unsigned long int_show_default(unsigned long h_input, unsigned long h_out
     return (sts);
 }
 
-static unsigned long show_status(int userarg)
-
+int show_status(int userarg)
 {
     int status;
     struct _generic_64 now;
@@ -5755,7 +5687,7 @@ static unsigned long show_status(int userarg)
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_show_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_show_device(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
 // eventually move something to showdevice.c
 {
@@ -5820,9 +5752,8 @@ static unsigned long int_show_device(unsigned long h_input, unsigned long h_outp
 /*                                  */
 /************************************************************************/
 
-static unsigned long int_show_logical_name(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_show_logical_name(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[])
-
 {
     const char *logical_name;
     int i;
@@ -5843,8 +5774,7 @@ static unsigned long int_show_logical_name(unsigned long h_input, unsigned long 
 /*                                  */
 /************************************************************************/
 #if 0
-static unsigned long int_show_system (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-
+int int_show_system (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 {
     int i;
     unsigned long sts, showopts;
@@ -5856,10 +5786,9 @@ static unsigned long int_show_system (unsigned long h_input, unsigned long h_out
 }
 #endif
 
-static unsigned long int_stop(int userarg)
-
+int int_stop(int userarg)
 {
-    unsigned long sts;
+    int sts;
 
     $DESCRIPTOR(p, "p1");
     $DESCRIPTOR(d, "identification");
@@ -5895,9 +5824,8 @@ static unsigned long int_stop(int userarg)
     return SS$_NORMAL;
 }
 
-static unsigned long int_set_working_set(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_set_working_set(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[])
-
 {
     int i;
     unsigned long sts, showopts;
@@ -5908,9 +5836,8 @@ static unsigned long int_set_working_set(unsigned long h_input, unsigned long h_
     return (sts);
 }
 
-static unsigned long int_show_working_set(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
+int int_show_working_set(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name,
         void *dummy, int argc, const char *argv[])
-
 {
     int i;
     unsigned long sts, showopts;
@@ -5921,7 +5848,7 @@ static unsigned long int_show_working_set(unsigned long h_input, unsigned long h
     return (sts);
 }
 
-static unsigned long int_exit(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
+int int_exit(unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy,
         int argc, const char *argv[])
 {
     int i, usedup;

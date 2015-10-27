@@ -15,12 +15,6 @@
 
 */
 
-#ifndef VAXC
-#pragma message disable(ALIGNEXT)
-#pragma message disable(GLOBALEXT)
-#pragma message disable(INCOMPARRY)
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,8 +27,7 @@
 #include <syidef.h>
 #include <rms.h>
 #include <starlet.h>
-#include "fibdef.h"
-#include "file_hdr.h"
+#include <fibdef.h>
 #include <iodef.h>
 #include <sor$routines.h>
 #include <cli$routines.h>
@@ -45,7 +38,6 @@
 #ifndef IO$M_MOVEFILE
 #define IO$M_MOVEFILE 4096
 #endif
-#include "smgdef2.h"
 
 #include "dfu.h"
 
@@ -123,11 +115,11 @@ int set_command(mask)
 {
     struct FAB fab;
     struct NAM nam;
-    static struct fibdef fib;
+    static struct _fibdef fib;
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
     static struct _quad
     {
@@ -378,10 +370,10 @@ int set_command(mask)
                 x = 4;
                 prompt.dsc$w_length = strlen(outbuf);
                 if (smg$enable)
-                    status = SMG$READ_COMPOSED_LINE(&keyb_id, 0, &answer,
+                    status = smg$read_composed_line(&keyb_id, 0, &answer,
                                                     &prompt , &x, &disp1_id, &modifiers, 0,0,0,0,0);
                 else
-                    status = SMG$READ_COMPOSED_LINE(&keyb_id, 0, &answer,
+                    status = smg$read_composed_line(&keyb_id, 0, &answer,
                                                     &prompt , &x, 0 , &modifiers, 0,0,0,0,0);
                 if ((ans[0] == 'a') || (ans[0] == 'A'))
                 {
@@ -511,7 +503,7 @@ int delete_file(unsigned short id[3], unsigned short dchan,
 
 {
     static char file[86];
-    static struct fibdef dfib;
+    static struct _fibdef dfib;
     static unsigned short back[3];
     static unsigned int uchar;
     unsigned int tmp, status2;
@@ -527,7 +519,7 @@ int delete_file(unsigned short id[3], unsigned short dchan,
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } dfib_descr;
     unsigned int func;
 
@@ -618,12 +610,12 @@ int remove_file(unsigned short id[3], unsigned short did[3],
 */
 
 {
-    static struct fibdef dfib;
+    static struct _fibdef dfib;
     unsigned int tmp, status2;
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } dfib_descr;
     unsigned int func;
 
@@ -660,7 +652,7 @@ int delete_directory(unsigned int dchan, unsigned short f_id[3],
         progress, num_files, lastsize;
     static unsigned int uchar;
     static short attrib[16];
-    static struct fibdef fib;
+    static struct _fibdef fib;
     static struct
     {
         unsigned short atr_size, atr_type;
@@ -673,7 +665,7 @@ int delete_directory(unsigned int dchan, unsigned short f_id[3],
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fib_descr;
     struct _d_e *dir_entry;
     struct _f_e *fid_entry;
@@ -1320,11 +1312,11 @@ int move_to_lbn(unsigned short * from, unsigned int lbn_to,
 */
 
 {
-    static struct fibdef m_fib;
+    static struct _fibdef m_fib;
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
     unsigned int func;
 
@@ -1366,11 +1358,11 @@ int movefile(char *defr_file, int flag)
 {
     struct FAB fab;
     struct NAM nam;
-    static struct fibdef m_fib;
+    static struct _fibdef m_fib;
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
     static char res_str[255], exp_str[255], devnam[15];
     unsigned int func;
@@ -1663,12 +1655,12 @@ void create_dir (char *crea_file, int all_size)
    Create a new directory with a preallocated size
 */
 {
-    static struct fibdef fib;
+    static struct _fibdef fib;
     char res_str[255], exp_str[255];
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
     static int uchar;
     struct FAB fab;
@@ -1754,7 +1746,7 @@ int compdir (char *comp_file, Boolean matoutput)
     struct _f_e *fid_entry;
     unsigned short chan, func, fid_num;
     Boolean found;
-    static struct fibdef fib;
+    static struct _fibdef fib;
     static short attrib[16];
     static unsigned int uchar;
     static struct
@@ -1769,7 +1761,7 @@ int compdir (char *comp_file, Boolean matoutput)
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
     static char res_str[255], exp_str[255], devnam[15];
     int i, j, k, n, nr, newi, newj, vbn, e_blk, h_blk, oldeblk, lastsize, limit;
@@ -2151,11 +2143,11 @@ int scan_directories(int *rvt, int rvn, int cnt, int max, Boolean matoutput)
         char block[512];
     } *i_dir; /* Pointer to shared memory */
     char *tmp;
-    static struct fibdef fib;
+    static struct _fibdef fib;
     struct
     {
         int fiblen;
-        struct fibdef *fibadr;
+        struct _fibdef *fibadr;
     } fibdescr;
     static short attrib[16];
     static struct

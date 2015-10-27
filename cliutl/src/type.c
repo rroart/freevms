@@ -80,7 +80,7 @@
 //#include "rms.h"
 
 //extern struct _nam cc$rms_nam;
-//extern struct _fab cc$rms_fab;
+//extern struct _fabdef cc$rms_fab;
 
 #if 0
 struct _fabdef cc$rms_fab =

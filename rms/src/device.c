@@ -56,13 +56,6 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 
-struct phyio_info
-{
-    unsigned status;
-    unsigned sectors;
-    unsigned sectorsize;
-};
-
 /* device_create() creates a device object... */
 
 void *device_create(unsigned devsiz, void *keyval, unsigned *retsts)
@@ -183,4 +176,3 @@ end:
 
     return sts;
 }
-

@@ -99,10 +99,8 @@ void __init fork_init(unsigned long mempages)
 /* Protects next_safe and last_pid. */
 spinlock_t lastpid_lock = SPIN_LOCK_UNLOCKED;
 
-/*static*/
-inline int dup_mmap(struct mm_struct * mm)
+int dup_mmap(struct mm_struct * mm)
 {
-    struct vm_area_struct * mpnt, *tmp, **pprev;
     int retval;
 
     flush_cache_mm(current->mm);
@@ -113,7 +111,6 @@ inline int dup_mmap(struct mm_struct * mm)
     mm->rss = 0;
     mm->cpu_vm_mask = 0;
     mm->swap_address = 0;
-    pprev = &mm->mmap;
 
     /*
      * Add it to the mmlist after the parent.
@@ -130,12 +127,11 @@ inline int dup_mmap(struct mm_struct * mm)
 
     retval = 0;
 
-fail_nomem:
     flush_tlb_mm(current->mm);
     return retval;
 }
 
-static inline int dup_phd(struct _pcb * p, struct _pcb * old)
+void dup_phd(struct _pcb * p, struct _pcb * old)
 {
     p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
     if (old->pcb$l_phd)
@@ -173,7 +169,7 @@ static inline int dup_phd(struct _pcb * p, struct _pcb * old)
     }
 }
 
-inline int dup_stuff(struct mm_struct * mm, struct _phd * phd)
+int dup_stuff(struct mm_struct * mm, struct _phd * phd)
 {
     struct _rde * mpnt, *tmp, **pprev;
     int retval;
@@ -189,8 +185,6 @@ inline int dup_stuff(struct mm_struct * mm, struct _phd * phd)
 
     for (mpnt = current->pcb$l_phd->phd$ps_p0_va_list_flink ; mpnt!=&current->pcb$l_phd->phd$ps_p0_va_list_flink ; mpnt = mpnt->rde$ps_va_list_flink)
     {
-        struct file *file;
-
         retval = -ENOMEM;
         if(mpnt->rde$l_flags & VM_DONTCOPY)
             continue;
@@ -226,7 +220,7 @@ int mmlist_nr;
 #define allocate_mm()   (kmem_cache_alloc(mm_cachep, SLAB_KERNEL))
 #define free_mm(mm) (kmem_cache_free(mm_cachep, (mm)))
 
-/*static*/ struct mm_struct * mm_init(struct mm_struct * mm)
+struct mm_struct * mm_init(struct mm_struct * mm)
 {
     atomic_set(&mm->mm_users, 1);
     atomic_set(&mm->mm_count, 1);
@@ -262,7 +256,7 @@ struct mm_struct * mm_alloc(void)
  * is dropped: either by a lazy thread or by
  * mmput. Free the page directory and the mm.
  */
-inline void fastcall __mmdrop(struct mm_struct *mm)
+void fastcall __mmdrop(struct mm_struct *mm)
 {
     if (mm == &init_mm) BUG();
     pgd_free(mm->pgd);
@@ -318,7 +312,7 @@ void mm_release(void)
 
 extern int mydebug4;
 
-static int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
+int copy_mm(unsigned long clone_flags, struct task_struct * tsk)
 {
     struct mm_struct * mm, *oldmm;
     int retval;
@@ -392,7 +386,7 @@ fail_nomem:
     return retval;
 }
 
-/*static*/ inline struct fs_struct *__copy_fs_struct(struct fs_struct *old)
+struct fs_struct *__copy_fs_struct(struct fs_struct *old)
 {
     struct fs_struct *fs = kmem_cache_alloc(fs_cachep, GFP_KERNEL);
     /* We don't need to lock fs - think why ;-) */
@@ -426,7 +420,7 @@ struct fs_struct *copy_fs_struct(struct fs_struct *old)
     return __copy_fs_struct(old);
 }
 
-/*static*/ inline int copy_fs(unsigned long clone_flags, struct task_struct * tsk)
+int copy_fs(unsigned long clone_flags, struct task_struct * tsk)
 {
     if (clone_flags & CLONE_FS)
     {
@@ -439,7 +433,7 @@ struct fs_struct *copy_fs_struct(struct fs_struct *old)
     return 0;
 }
 
-static int count_open_files(struct files_struct *files, int size)
+int count_open_files(struct files_struct *files, int size)
 {
     int i;
 
@@ -453,7 +447,7 @@ static int count_open_files(struct files_struct *files, int size)
     return i;
 }
 
-/*static*/ int copy_files(unsigned long clone_flags, struct task_struct * tsk)
+int copy_files(unsigned long clone_flags, struct task_struct * tsk)
 {
     struct files_struct *oldf, *newf;
     struct file **old_fds, **new_fds;
@@ -568,7 +562,7 @@ out_release:
     goto out;
 }
 
-/*static*/ inline int copy_sighand(unsigned long clone_flags, struct task_struct * tsk)
+int copy_sighand(unsigned long clone_flags, struct task_struct * tsk)
 {
     struct signal_struct *sig;
 
@@ -587,7 +581,7 @@ out_release:
     return 0;
 }
 
-static inline void copy_flags(unsigned long clone_flags, struct task_struct *p)
+void copy_flags(unsigned long clone_flags, struct task_struct *p)
 {
     unsigned long new_flags = p->flags;
 

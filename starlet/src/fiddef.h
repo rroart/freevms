@@ -19,15 +19,15 @@
 
 struct _fiddef
 {
-    UINT16 fid$w_num;
-    UINT16 fid$w_seq;
+    UINT16 fid$w_num; /* File number          */
+    UINT16 fid$w_seq; /* File sequence number */
     union
     {
-        UINT16 fid$w_rvn;
+        UINT16 fid$w_rvn; /* Long form RVN field */
         struct
         {
-            UINT8 fid$b_rvn;
-            UINT8 fid$b_nmx;
+            UINT8 fid$b_rvn; /* Short form RVN field */
+            UINT8 fid$b_nmx; /* RVN extension field  */
         };
     };
 };

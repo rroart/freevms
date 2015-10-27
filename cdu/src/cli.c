@@ -39,15 +39,15 @@
 int is_user_mode()
 {
     __asm__ __volatile__ (
-        "movw %cs, %ax\n\t"
-        "andw $0x3, %ax\n\t"
-        "cmpw $0x3, %ax\n\t"
-        "je 1f\n\t"
-        "movl $0, %eax\n\t"
-        "jmp 2f\n\t"
-        "1:\n\t"
-        "movl $1, %eax\n\t"
-        "2:\n\t"
+            "movw %cs, %ax\n\t"
+            "andw $0x3, %ax\n\t"
+            "cmpw $0x3, %ax\n\t"
+            "je 1f\n\t"
+            "movl $0, %eax\n\t"
+            "jmp 2f\n\t"
+            "1:\n\t"
+            "movl $1, %eax\n\t"
+            "2:\n\t"
     );
 }
 
@@ -108,8 +108,7 @@ int cdu_search_next(int i, int type, char * s, int size, int * retval)
         default:
             printf("oops not found\n");
         }
-        if (cdu_root[i].cdu$b_type == type
-                && strncmp(name->cdu$t_name, s, size) == 0)
+        if (cdu_root[i].cdu$b_type == type && strncmp(name->cdu$t_name, s, size) == 0)
         {
             if (retval)
                 *retval = i;
@@ -144,8 +143,7 @@ int cdu_search_incr(int i, int type, char * s, int size, int * retval)
         default:
             printf("oops not found\n");
         }
-        if (cdu_root[i].cdu$b_type == type
-                && strncmp(name->cdu$t_name, s, size) == 0)
+        if (cdu_root[i].cdu$b_type == type && strncmp(name->cdu$t_name, s, size) == 0)
         {
             if (retval)
                 *retval = i;
@@ -159,16 +157,14 @@ int cdu_search_incr(int i, int type, char * s, int size, int * retval)
 
 static int mm_done = 0;
 
-unsigned int cli$dcl_parse(void * command_string, void * table,
-                           void * param_routine, void * prompt_routine, void * prompt_string)
+int cli$dcl_parse(void * command_string, void * table, void * param_routine, void * prompt_routine, void * prompt_string)
 {
-
     my_cdu_free = 0;
     if (mm_done == 0)
     {
         mm_done = 1;
         mmap(0x3f000000, 4, PROT_READ | PROT_WRITE,
-             MAP_FIXED | MAP_ANONYMOUS | MAP_SHARED, 0, 0);
+        MAP_FIXED | MAP_ANONYMOUS | MAP_SHARED, 0, 0);
     }
 
     struct dsc$descriptor * com = command_string;
@@ -181,20 +177,16 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
 
     char * end = line + len;
 
-#if 1
     cli_scan_bytes(line, len);
-#endif
-#if 1
     initparser();
-#endif
 
     int i;
 #if 0
     for (i=len; i; i--)
-        if (line[i]>='A' && line[i]<='Z') line[i]+=32;
+    if (line[i]>='A' && line[i]<='Z') line[i]+=32;
 
     while (*line==' ')
-        line++;
+    line++;
 
     int charno=(long)line-(long)com->dsc$a_pointer;
     char * endverb = line;
@@ -202,7 +194,7 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
     while (endverb<(line+len))
     {
         if (*endverb<'a' || *endverb>'z')
-            break;
+        break;
         endverb++;
     }
     //printf("line %x %s\n",line,line);
@@ -249,7 +241,7 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
 
 #if 0
         while (*line==' ')
-            line++;
+        line++;
 #endif
 
 #if 0
@@ -263,7 +255,7 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
             line++;
             endunit++;
             while (*endunit!=' ' && *endunit!='/' && *endunit!='=' && endunit < end)
-                endunit++;
+            endunit++;
 #endif
             int q = my_alloc_cdu(CDU$C_QUALIFIER);
             int n = my_alloc_cdu(CDU$C_NAME);
@@ -282,8 +274,7 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
             if (s)
             {
                 int i;
-                found = cdu_search_next(0, CDU$C_SYNTAX, cdu_root[s].cdu$t_name,
-                                        strlen(cdu_root[s].cdu$t_name), &i);
+                found = cdu_search_next(0, CDU$C_SYNTAX, cdu_root[s].cdu$t_name, strlen(cdu_root[s].cdu$t_name), &i);
                 if (found)
                     *cur_cdu = &cdu_root[i];
             }
@@ -291,7 +282,7 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
 #if 0
             line = endunit;
             while (*line==' ')
-                line++;
+            line++;
             endunit = line;
 #endif
 
@@ -305,7 +296,7 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
                 line++;
                 endunit++;
                 while (*endunit!=' ' && *endunit!='/' && endunit < end)
-                    endunit++;
+                endunit++;
 #endif
                 toktype = cli_token(token, &toklen);
 
@@ -318,8 +309,7 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
                     int v = my_alloc_cdu(CDU$C_NAME);
                     my_cdu_root[q].cdu$l_value = k;
                     my_cdu_root[k].cdu$l_name = v;
-                    my_cdu_root[q].cdu$l_flags =
-                        cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
+                    my_cdu_root[q].cdu$l_flags = cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
                     struct _cdu * np = &my_cdu_root[v];
                     memcpy(np->cdu$t_name, token, toklen);
 
@@ -348,8 +338,7 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
                         my_cdu_root[q].cdu$l_value=k2;
 #endif
                         my_cdu_root[k2].cdu$l_name = v2;
-                        my_cdu_root[q].cdu$l_flags =
-                            cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags; // check
+                        my_cdu_root[q].cdu$l_flags = cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags; // check
                         struct _cdu * np = &my_cdu_root[v2];
                         memcpy(np->cdu$t_name, token, toklen);
 
@@ -382,8 +371,7 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
                                 my_cdu_root[q].cdu$l_value=k3;
 #endif
                                 my_cdu_root[k3].cdu$l_name = v4;
-                                my_cdu_root[q].cdu$l_flags =
-                                    cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags; // check
+                                my_cdu_root[q].cdu$l_flags = cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags; // check
                                 struct _cdu * np = &my_cdu_root[v4];
                                 memcpy(np->cdu$t_name, token, toklen);
 
@@ -394,7 +382,7 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
                                     goto out_of_inner;
 #if 0
                                 if (toktype == '+')
-                                    continue;
+                                continue;
 #endif
                                 if (toktype != '+' && toktype != '=')
                                     return 0;
@@ -403,7 +391,7 @@ unsigned int cli$dcl_parse(void * command_string, void * table,
                             }
                         }
                         toktype = cli_token(token, &toklen);
-out_of_inner:
+                        out_of_inner:
                         {
                         }
                     }
@@ -416,8 +404,7 @@ out_of_inner:
                     int v = my_alloc_cdu(CDU$C_NAME);
                     my_cdu_root[q].cdu$l_value = k;
                     my_cdu_root[k].cdu$l_name = v;
-                    my_cdu_root[q].cdu$l_flags =
-                        cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
+                    my_cdu_root[q].cdu$l_flags = cdu_root[cdu_root[q2].cdu$l_value].cdu$l_flags;
                     struct _cdu * np = &my_cdu_root[v];
                     memcpy(np->cdu$t_name, token, toklen);
                 }
@@ -433,7 +420,7 @@ out_of_inner:
             // later do a refined thingie with $infile, $rest etc
 #if 0
             while (*endunit!=' ' && *endunit!='/' && endunit < end)
-                endunit++;
+            endunit++;
 #endif
 
             struct _cdu * cdu = (*cur_cdu);
@@ -451,24 +438,18 @@ out_of_inner:
             {
                 i = 0;
 
-                found = cdu_search_next(0, CDU$C_TYPE, cdu_root[t].cdu$t_name,
-                                        strlen(cdu_root[t].cdu$t_name), &i);
+                found = cdu_search_next(0, CDU$C_TYPE, cdu_root[t].cdu$t_name, strlen(cdu_root[t].cdu$t_name), &i);
 
                 int type = i;
 
                 int keyw = cdu_root[type].cdu$l_keywords;
-                found = cdu_search_next(keyw, CDU$C_KEYWORD, token, toklen,
-                                        &keyw);
+                found = cdu_search_next(keyw, CDU$C_KEYWORD, token, toklen, &keyw);
 
                 if (cdu_root[keyw].cdu$l_syntax)
                 {
 
-                    found =
-                        cdu_search_next(0, CDU$C_SYNTAX,
-                                        cdu_root[cdu_root[keyw].cdu$l_syntax].cdu$t_name,
-                                        strlen(
-                                            cdu_root[cdu_root[keyw].cdu$l_syntax].cdu$t_name),
-                                        &i);
+                    found = cdu_search_next(0, CDU$C_SYNTAX, cdu_root[cdu_root[keyw].cdu$l_syntax].cdu$t_name,
+                            strlen(cdu_root[cdu_root[keyw].cdu$l_syntax].cdu$t_name), &i);
                     if (found)
                         *cur_cdu = &cdu_root[i];
 
@@ -560,7 +541,7 @@ signed int bfd_getl_signed_32(void * dummy, const void *p)
     v |= (unsigned long) addr[1] << 8;
     v |= (unsigned long) addr[2] << 16;
     v |= (unsigned long) addr[3] << 24;
-    return COERCE32 (v);
+    return COERCE32(v);
 }
 
 #define bfd_h_get_32 bfd_getl32
@@ -569,8 +550,7 @@ signed int bfd_getl_signed_32(void * dummy, const void *p)
 #define H_GET_S32 bfd_h_get_signed_32
 #define H_GET_WORD                H_GET_32
 #define H_GET_SIGNED_WORD H_GET_S32
-void nisse_swap_symbol_in(void *abfd, const void *psrc, const void *pshn,
-                          asymbol /*Elf_Internal_Sym*/*dst)
+void nisse_swap_symbol_in(void *abfd, const void *psrc, const void *pshn, asymbol /*Elf_Internal_Sym*/*dst)
 {
     const Elf_External_Sym *src = psrc;
     //  int signed_vma = get_nisse_backend_data (abfd)->sign_extend_vma;
@@ -585,13 +565,13 @@ void nisse_swap_symbol_in(void *abfd, const void *psrc, const void *pshn,
 
 extern int vms_mm;
 
-unsigned int cli$dispatch(int userarg)
+int cli$dispatch(int userarg)
 {
     char * mainp = "main";
     char * routine = mainp;
     char * myp1 = "";
     char * myargv[4] =
-    { "", myp1, myp1, myp1 };
+        { "", myp1, myp1, myp1 };
     char image[256];
     char * path;
     int pathlen = 0;
@@ -635,8 +615,7 @@ unsigned int cli$dispatch(int userarg)
         goto skipthis;
     if (vms_mm == 0 || 0 == strncmp("_ele", imagebase + len - 4, 4))
     {
-skipthis:
-        if (vms_mm)
+        skipthis: if (vms_mm)
             image[pathlen + len - 4] = 0;
         is_ele = 1;
     }
@@ -708,8 +687,7 @@ skipthis:
 
     struct _isd * section = (unsigned long) buffer + ehdr32->ihd$w_size;
 
-    long symtab = 0, symtabsize = 0, symtabvbn = 0, symstr = 0, symstrsize = 0,
-         symstrvbn = 0;
+    long symtab = 0, symtabsize = 0, symtabvbn = 0, symstr = 0, symstrsize = 0, symstrvbn = 0;
 
     while (section < (buffer + 512 * ehdr32->ihd$b_hdrblkcnt))
     {
@@ -767,12 +745,11 @@ skipthis:
     if (value)
         func = value + 0x10000;
     else
-        printf("routine %s not found, going for main in %x tfradr\n", routine,
-               func);
+        printf("routine %s not found, going for main in %x tfradr\n", routine, func);
 
     goto skip;
 
-ele:
+    ele:
     {
     }
 
@@ -785,7 +762,7 @@ ele:
         func = elf_get_symbol(image, routine);
         goto skip;
     }
-skip_if_mm:
+    skip_if_mm:
 
     memcpy(image + pathlen + len, ".ele", 4);
     image[pathlen + len + 4] = 0;
@@ -809,10 +786,10 @@ skip_if_mm:
         return 0;
     }
 
-skip:
+    skip:
 #if 0
     if (handle==0)
-        printf("entering image? %x\n",func);
+    printf("entering image? %x\n",func);
 #endif
 
     // not yet  func(userarg);
@@ -839,7 +816,7 @@ skip:
     else
         // check. related to CLI supervisor
         mymymyuserfunc(func, userarg, myargv, 0, 0);
-no_func:
+    no_func:
     //func(argc,argv++);
     if (!internal)
     {
@@ -885,31 +862,31 @@ static int userfunc(long (*func)(), long argc, long argv)
 {
 #ifdef __i386__
     __asm__ __volatile__ (
-        "movl $0x7ffdfff0, %edx\n\t"
-        "movl $0, 0(%edx)\n\t"
-        "movl 8(%esp), %eax\n\t"
-        "movl %eax, 4(%edx)\n\t"
-        "movl 12(%esp), %eax\n\t"
-        "movl %eax, 8(%edx)\n\t"
-        "movl 16(%esp), %eax\n\t"
-        "movl %eax, 12(%edx)\n\t"
-        "int $0xb4\n\t"
-        "movl 0x7ffff0a8, %eax\n\t"
-        "movl $0xf, 2032(%eax)\n\t" /* psl */
-        "movl 2124(%eax), %eax\n\t" /* ipr_sp[3] */
-        "movl %esp, %edx\n\t"
-        "addl $-0x14, %edx\n\t"
-        "movl $do_userfunc, 0x0(%edx)\n\t"
-        "movl $0x23, 0x4(%edx)\n\t"
-        "movl $0x202, 0x8(%edx)\n\t" // check
-        "movl $0x7ffdfff0, 0xc(%edx)\n\t"
-        "movl $0x2b, 0x10(%edx)\n\t"
-        "addl $-0x14, %esp\n\t"
-        "movl $0x2b, %eax\n\t"
-        "movl %eax, %ds\n\t"
-        "movl %eax, %es\n\t"
-        "int $0xb5\n\t"
-        "iret\n\t"
+            "movl $0x7ffdfff0, %edx\n\t"
+            "movl $0, 0(%edx)\n\t"
+            "movl 8(%esp), %eax\n\t"
+            "movl %eax, 4(%edx)\n\t"
+            "movl 12(%esp), %eax\n\t"
+            "movl %eax, 8(%edx)\n\t"
+            "movl 16(%esp), %eax\n\t"
+            "movl %eax, 12(%edx)\n\t"
+            "int $0xb4\n\t"
+            "movl 0x7ffff0a8, %eax\n\t"
+            "movl $0xf, 2032(%eax)\n\t" /* psl */
+            "movl 2124(%eax), %eax\n\t" /* ipr_sp[3] */
+            "movl %esp, %edx\n\t"
+            "addl $-0x14, %edx\n\t"
+            "movl $do_userfunc, 0x0(%edx)\n\t"
+            "movl $0x23, 0x4(%edx)\n\t"
+            "movl $0x202, 0x8(%edx)\n\t" // check
+            "movl $0x7ffdfff0, 0xc(%edx)\n\t"
+            "movl $0x2b, 0x10(%edx)\n\t"
+            "addl $-0x14, %esp\n\t"
+            "movl $0x2b, %eax\n\t"
+            "movl %eax, %ds\n\t"
+            "movl %eax, %es\n\t"
+            "int $0xb5\n\t"
+            "iret\n\t"
     );
 #endif
 }
@@ -946,8 +923,8 @@ int mymymyuserfunc(int (*func)(), void * start, long count, int dum0, int dum1)
 #endif
 #ifdef __x86_64__
     __asm__ __volatile__ (
-        "movq %rbp,%rax\n\t"
-        "pushq %rax\n\t"
+            "movq %rbp,%rax\n\t"
+            "pushq %rax\n\t"
     );
     mymyuserfunc(__res, *func, start, count);
     __asm__ ( "movq (%rsp),%rbp\n\t" );

@@ -24,27 +24,13 @@
 #include <linux/errno.h>
 #include <linux/kernel.h>
 
+#include <asm/uaccess.h>
+
+#include <phyio.h>
 #include <ssdef.h>
 #include <ucbdef.h>
 
-#include <asm/uaccess.h>
-
-struct phyio_info
-{
-    unsigned status;
-    unsigned sectors;
-    unsigned sectorsize;
-};
-
-#if defined(__digital__) && defined(__unix__)
-#define DEV_PREFIX "/devices/rdisk/%s"
-#else
-#ifdef sun
-#define DEV_PREFIX "/dev/dsk/%s"
-#else
 #define DEV_PREFIX "/dev/%s"
-#endif
-#endif
 
 unsigned init_count = 0;
 unsigned read_count = 0;
@@ -52,12 +38,10 @@ unsigned write_count = 0;
 
 void phyio_show(void)
 {
-    printk("PHYIO_SHOW Initializations: %d Reads: %d Writes: %d\n", init_count,
-           read_count, write_count);
+    printk("PHYIO_SHOW Initializations: %d Reads: %d Writes: %d\n", init_count, read_count, write_count);
 }
 
-int phyio_init(int devlen, char *devnam, struct file **handle,
-                    struct phyio_info *info, struct _dt_ucb * ucb)
+int phyio_init(int devlen, char *devnam, struct file **handle, struct phyio_info *info, struct _dt_ucb * ucb)
 {
     struct file * vmsfd;
     char *cp, devbuf[200];
@@ -85,11 +69,9 @@ int phyio_close(struct file * handle)
     return SS$_NORMAL;
 }
 
-int phyio_read(struct file * handle, unsigned block, unsigned length,
-                    char *buffer)
+int phyio_read(struct file * handle, unsigned block, unsigned length, char *buffer)
 {
     mm_segment_t fs;
-    int res;
 #ifdef DEBUG
     printk("Phyio read block: %d into %x (%d bytes)\n",block,buffer,length);
 #endif
@@ -104,13 +86,11 @@ int phyio_read(struct file * handle, unsigned block, unsigned length,
     set_fs(fs);
 
     return SS$_NORMAL;
-error:
-    set_fs(fs);
+    error: set_fs(fs);
     return SS$_PARITY;
 }
 
-int phyio_write(struct file * handle, unsigned block, unsigned length,
-                     char *buffer)
+int phyio_write(struct file * handle, unsigned block, unsigned length, char *buffer)
 {
     mm_segment_t fs;
 #ifdef DEBUG
@@ -129,7 +109,6 @@ int phyio_write(struct file * handle, unsigned block, unsigned length,
     set_fs(fs);
 
     return SS$_NORMAL;
-error:
-    set_fs(fs);
+    error: set_fs(fs);
     return SS$_PARITY;
 }

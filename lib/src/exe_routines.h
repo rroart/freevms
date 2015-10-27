@@ -9,21 +9,22 @@
 #include <chpctldef.h>
 #include <chpretdef.h>
 #include <cpudef.h>
+#include <descrip.h>
 #include <fabdef.h>
 #include <far_pointers.h>
 #include <fiddef.h>
 #include <fkbdef.h>
+#include <gen64def.h>
 #include <iosbdef.h>
 #include <jibdef.h>
 #include <kpbdef.h>
 #include <mmgdef.h>
 #include <pcbdef.h>
 #include <rabdef.h>
+#include <seciddef.h>
 #include <ucbdef.h>
 #include <va_rangedef.h>
-
-#include <descrip.h>
-#include <gen64def.h>
+#include <wccdef.h>
 
 int exe_std$abortio(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, int qio_sts);
 int exe_std$alloc_bufio_32(struct _irp *irp, struct _pcb *pcb, void *uva32, int pktdatsiz);
@@ -179,9 +180,9 @@ int exe$a_pid_to_ipid(unsigned long pid);
 void exe$iofork(struct _irp * i, struct _ucb * u);
 int name_delim(char *str, int len, int size[5]);
 int dircache(struct _vcb *vcb, char *dirnam, int dirlen, struct _fiddef *dirid);
-int do_search(struct _fabdef *fab, struct WCCFILE *wccfile);
+int do_search(struct _fabdef *fab, struct _wccfile *wccfile);
 int exe$search(struct _fabdef *fab);
-int do_parse(struct _fabdef *fab, struct WCCFILE **wccret);
+int do_parse(struct _fabdef *fab, struct _wccfile **wccret);
 int exe$parse(struct _fabdef *fab);
 int exe$setddir(struct dsc$descriptor *newdir, UINT16 *oldlen, struct dsc$descriptor *olddir);
 int exe$connect(struct _rabdef *rab);
@@ -257,7 +258,7 @@ asmlinkage int exe$imgact(void * name, void * dflnam, void * hdrbuf, unsigned lo
 asmlinkage int exe$mgblsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam,
         struct _secid *ident, unsigned int relpag);
 asmlinkage int exe$crmpsc(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode, unsigned int flags, void *gsdnam,
-        unsigned long long * ident, unsigned int relpag, unsigned /*short*/long chan, unsigned int pagcnt, unsigned int vbn,
+        unsigned long long * ident, unsigned int relpag, unsigned short int chan, unsigned int pagcnt, unsigned int vbn,
         unsigned int prot, unsigned int pfc);
 asmlinkage int exe$schdwk(unsigned int *pidadr, void *prcnam, struct _generic_64 * daytim, signed long long * reptim);
 asmlinkage int exe$cretva(struct _va_range *inadr, struct _va_range *retadr, unsigned int acmode);

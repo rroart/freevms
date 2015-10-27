@@ -6,6 +6,7 @@
 #include <linux/netdevice.h>
 #include <linux/skbuff.h>
 
+#include <descrip.h>
 #include <atrdef.h>
 #include <cdtdef.h>
 #include <crbdef.h>
@@ -19,14 +20,14 @@
 #include <mscpdef.h>
 #include <nisca.h>
 #include <pfndef.h>
+#include <phyio.h>
 #include <rabdef.h>
 #include <scsdef.h>
-#include <ucbnidef.h>
 #include <ttyvecdef.h>
+#include <ucbnidef.h>
+#include <wccdef.h>
 
 #include <../../f11x/src/xqp.h>
-
-#include <descrip.h>
 
 char * do_translate(char * from);
 struct _fcb * exttwo_search_fcb(struct _vcb * vcb, struct _fiddef * fid);
@@ -164,8 +165,6 @@ signed long e2_map_vbn(struct _fcb * fcb, signed long vbn);
 void myqio(long rw, long data, long size, long blocknr, kdev_t dev, long block_factor);
 int block_read_full_page3(struct _fcb * fcb, struct page *page, unsigned long pageno);
 int block_write_full_page3(struct _fcb * fcb, struct page *page, unsigned long pageno);
-int phyio_read(unsigned handle, unsigned block, unsigned length, char *buffer);
-int phyio_write(unsigned handle, unsigned block, unsigned length, char *buffer);
 int du_readblk(struct _irp * i, struct _ucb * u, struct _mscp_basic_pkt * m);
 int du_writeblk(struct _irp * i, struct _ucb * u, struct _mscp_basic_pkt * m);
 int du_rw(struct _irp * i, struct _mscp_ucb * u, struct _transfer_commands * m);
@@ -183,7 +182,6 @@ long ide_iodbunit_vmsinit(struct _ddb * ddb, int unitno, void * dsc);
 void * find_free_cdt(void);
 char * do_file_translate(char * from);
 void __fl_init(void);
-int phyio_init(int devlen, char *devnam, struct file **handle, struct phyio_info *info, struct _dt_ucb * ucb);
 void * du_init(char *s);
 struct _ucb * fl_init(char * s);
 void __du_init(void);
@@ -201,8 +199,7 @@ void scs_msg_fill(char * buf, struct _cdt * cdt, unsigned char msgflg, struct _s
 void scs_msg_fill_more(char * buf, struct _cdt * cdt, struct _cdrp * cdrp, int bufsiz);
 void scs_receive(int i);
 inline void scs_nsp_send2(char * buf, int len);
-int scs_startdev(scs_int2, setflag, setaddr);
-//scs_startdev ( long, long, long);
+int scs_startdev(struct scs_interface_structure * scs_int2, int setflag, unsigned long setaddr);
 inline unsigned long buffer_offset(unsigned long buffer, unsigned long offset);
 int rms$get_idx(struct _rabdef * rab);
 int search_log_repl(char * name, char ** retname, int * retsize);

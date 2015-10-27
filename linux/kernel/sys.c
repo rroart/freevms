@@ -35,9 +35,10 @@ asmlinkage void do_test_code(void)
     //  __asm__ __volatile__ ("iret\n");
 }
 
-asmlinkage int sys_$testtest(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k, int l, int m, int n, int o)
+asmlinkage int sys_$testtest(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k, int l, int m, int n,
+        int o)
 {
-    printk("testtest %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x\n",a,b,c,d,e,f,g,h,i,j,k,l,m,n,o);
+    printk("testtest %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x\n", a, b, c, d, e, f, g, h, i, j, k, l, m, n, o);
     return 1;
 }
 
@@ -64,7 +65,6 @@ int fs_overflowgid = DEFAULT_FS_OVERFLOWUID;
 int C_A_D = INIT_PID;
 int cad_pid = INIT_PID;
 
-
 /*
  *  Notifier list for kernel code which wants to be called
  *  at shutdown. This is used to stop any idling DMA operations
@@ -72,7 +72,8 @@ int cad_pid = INIT_PID;
  */
 
 static struct notifier_block *reboot_notifier_list;
-rwlock_t notifier_lock = RW_LOCK_UNLOCKED;
+rwlock_t notifier_lock = RW_LOCK_UNLOCKED
+;
 
 /**
  *  notifier_chain_register - Add notifier to a notifier chain
@@ -87,14 +88,14 @@ rwlock_t notifier_lock = RW_LOCK_UNLOCKED;
 int notifier_chain_register(struct notifier_block **list, struct notifier_block *n)
 {
     write_lock(&notifier_lock);
-    while(*list)
+    while (*list)
     {
-        if(n->priority > (*list)->priority)
+        if (n->priority > (*list)->priority)
             break;
-        list= &((*list)->next);
+        list = &((*list)->next);
     }
     n->next = *list;
-    *list=n;
+    *list = n;
     write_unlock(&notifier_lock);
     return 0;
 }
@@ -112,15 +113,15 @@ int notifier_chain_register(struct notifier_block **list, struct notifier_block 
 int notifier_chain_unregister(struct notifier_block **nl, struct notifier_block *n)
 {
     write_lock(&notifier_lock);
-    while((*nl)!=NULL)
+    while ((*nl) != NULL)
     {
-        if((*nl)==n)
+        if ((*nl) == n)
         {
-            *nl=n->next;
+            *nl = n->next;
             write_unlock(&notifier_lock);
             return 0;
         }
-        nl=&((*nl)->next);
+        nl = &((*nl)->next);
     }
     write_unlock(&notifier_lock);
     return -ENOENT;
@@ -144,17 +145,17 @@ int notifier_chain_unregister(struct notifier_block **nl, struct notifier_block 
 
 int notifier_call_chain(struct notifier_block **n, unsigned long val, void *v)
 {
-    int ret=NOTIFY_DONE;
+    int ret = NOTIFY_DONE;
     struct notifier_block *nb = *n;
 
-    while(nb)
+    while (nb)
     {
-        ret=nb->notifier_call(nb,val,v);
-        if(ret&NOTIFY_STOP_MASK)
+        ret = nb->notifier_call(nb, val, v);
+        if (ret & NOTIFY_STOP_MASK)
         {
             return ret;
         }
-        nb=nb->next;
+        nb = nb->next;
     }
     return ret;
 }
@@ -215,24 +216,24 @@ asmlinkage long sys_$ni_syscall4(void)
     return -ENOSYS;
 }
 
-static int proc_sel(struct task_struct *p, int which, int who)
+int proc_sel(struct task_struct *p, int which, int who)
 {
-    if(p->pcb$l_pid)
+    if (p->pcb$l_pid)
     {
         switch (which)
         {
         case PRIO_PROCESS:
             if (!who && p == current)
                 return 1;
-            return(p->pcb$l_pid == who);
+            return (p->pcb$l_pid == who);
         case PRIO_PGRP:
             if (!who)
                 who = current->pgrp;
-            return(p->pgrp == who);
+            return (p->pgrp == who);
         case PRIO_USER:
             if (!who)
                 who = current->uid;
-            return(p->uid == who);
+            return (p->uid == who);
         }
     }
     return 0;
@@ -260,8 +261,7 @@ asmlinkage long sys_setpriority(int which, int who, int niceval)
     {
         if (!proc_sel(p, which, who))
             continue;
-        if (p->uid != current->euid &&
-                p->uid != current->uid && !capable(CAP_SYS_NICE))
+        if (p->uid != current->euid && p->uid != current->uid && !capable(CAP_SYS_NICE))
         {
             error = -EPERM;
             continue;
@@ -292,7 +292,7 @@ asmlinkage long sys_getpriority(int which, int who)
         return -EINVAL;
 
     read_lock(&tasklist_lock);
-    for_each_task_pre1 (p)
+    for_each_task_pre1(p)
     {
         long niceval;
         if (!proc_sel(p, which, who))
@@ -306,7 +306,6 @@ asmlinkage long sys_getpriority(int which, int who)
 
     return retval;
 }
-
 
 /*
  * Reboot system call: for obvious reasons only root may call it,
@@ -325,9 +324,8 @@ asmlinkage long sys_reboot(int magic1, int magic2, unsigned int cmd, void * arg)
         return -EPERM;
 
     /* For safety, we require "magic" arguments. */
-    if (magic1 != LINUX_REBOOT_MAGIC1 ||
-            (magic2 != LINUX_REBOOT_MAGIC2 && magic2 != LINUX_REBOOT_MAGIC2A &&
-             magic2 != LINUX_REBOOT_MAGIC2B))
+    if (magic1 != LINUX_REBOOT_MAGIC1
+            || (magic2 != LINUX_REBOOT_MAGIC2 && magic2 != LINUX_REBOOT_MAGIC2A && magic2 != LINUX_REBOOT_MAGIC2B))
         return -EINVAL;
 
     lock_kernel();
@@ -362,7 +360,7 @@ asmlinkage long sys_reboot(int magic1, int magic2, unsigned int cmd, void * arg)
         break;
 
     case LINUX_REBOOT_CMD_RESTART2:
-        if (strncpy_from_user(&buffer[0], (char *)arg, sizeof(buffer) - 1) < 0)
+        if (strncpy_from_user(&buffer[0], (char *) arg, sizeof(buffer) - 1) < 0)
         {
             unlock_kernel();
             return -EFAULT;
@@ -382,12 +380,6 @@ asmlinkage long sys_reboot(int magic1, int magic2, unsigned int cmd, void * arg)
     return 0;
 }
 
-static void deferred_cad(void *dummy)
-{
-    notifier_call_chain(&reboot_notifier_list, SYS_RESTART, NULL);
-    machine_restart(NULL);
-}
-
 /*
  * This function gets called by ctrl-alt-del - ie the keyboard interrupt.
  * As it's called within an interrupt, it may NOT sync: the only choice
@@ -395,15 +387,8 @@ static void deferred_cad(void *dummy)
  */
 void ctrl_alt_del(void)
 {
-    static struct tq_struct cad_tq =
-    {
-routine:
-        deferred_cad,
-    };
-
     kill_proc(cad_pid, SIGINT, 1);
 }
-
 
 /*
  * Unprivileged users may change the real gid to the effective gid
@@ -432,19 +417,14 @@ asmlinkage long sys_setregid(gid_t rgid, gid_t egid)
 
     if (rgid != (gid_t) -1)
     {
-        if ((old_rgid == rgid) ||
-                (current->egid==rgid) ||
-                capable(CAP_SETGID))
+        if ((old_rgid == rgid) || (current->egid == rgid) || capable(CAP_SETGID))
             new_rgid = rgid;
         else
             return -EPERM;
     }
     if (egid != (gid_t) -1)
     {
-        if ((old_rgid == egid) ||
-                (current->egid == egid) ||
-                (current->sgid == egid) ||
-                capable(CAP_SETGID))
+        if ((old_rgid == egid) || (current->egid == egid) || (current->sgid == egid) || capable(CAP_SETGID))
             new_egid = egid;
         else
         {
@@ -456,8 +436,7 @@ asmlinkage long sys_setregid(gid_t rgid, gid_t egid)
         current->mm->dumpable = 0;
         wmb();
     }
-    if (rgid != (gid_t) -1 ||
-            (egid != (gid_t) -1 && egid != old_rgid))
+    if (rgid != (gid_t) -1 || (egid != (gid_t) -1 && egid != old_rgid))
         current->sgid = new_egid;
     current->fsgid = new_egid;
     current->egid = new_egid;
@@ -476,18 +455,18 @@ asmlinkage long sys_setgid(gid_t gid)
 
     if (capable(CAP_SETGID))
     {
-        if(old_egid != gid)
+        if (old_egid != gid)
         {
-            current->mm->dumpable=0;
+            current->mm->dumpable = 0;
             wmb();
         }
         current->gid = current->egid = current->sgid = current->fsgid = gid;
     }
     else if ((gid == current->gid) || (gid == current->sgid))
     {
-        if(old_egid != gid)
+        if (old_egid != gid)
         {
-            current->mm->dumpable=0;
+            current->mm->dumpable = 0;
             wmb();
         }
         current->egid = current->fsgid = gid;
@@ -526,12 +505,10 @@ asmlinkage long sys_setgid(gid_t gid)
  * files..
  * Thanks to Olaf Kirch and Peter Benie for spotting this.
  */
-static inline void cap_emulate_setxuid(int old_ruid, int old_euid,
-                                       int old_suid)
+void cap_emulate_setxuid(int old_ruid, int old_euid, int old_suid)
 {
-    if ((old_ruid == 0 || old_euid == 0 || old_suid == 0) &&
-            (current->uid != 0 && current->euid != 0 && current->suid != 0) &&
-            !current->keep_capabilities)
+    if ((old_ruid == 0 || old_euid == 0 || old_suid == 0) && (current->uid != 0 && current->euid != 0 && current->suid != 0)
+            && !current->keep_capabilities)
     {
         cap_clear(current->cap_permitted);
         cap_clear(current->cap_effective);
@@ -546,7 +523,7 @@ static inline void cap_emulate_setxuid(int old_ruid, int old_euid,
     }
 }
 
-static int set_user(uid_t new_ruid, int dumpclear)
+int set_user(uid_t new_ruid, int dumpclear)
 {
     struct user_struct *new_user, *old_user;
 
@@ -562,7 +539,7 @@ static int set_user(uid_t new_ruid, int dumpclear)
     atomic_dec(&old_user->processes);
     atomic_inc(&new_user->processes);
 
-    if(dumpclear)
+    if (dumpclear)
     {
         current->mm->dumpable = 0;
         wmb();
@@ -599,19 +576,14 @@ asmlinkage long sys_setreuid(uid_t ruid, uid_t euid)
     if (ruid != (uid_t) -1)
     {
         new_ruid = ruid;
-        if ((old_ruid != ruid) &&
-                (current->euid != ruid) &&
-                !capable(CAP_SETUID))
+        if ((old_ruid != ruid) && (current->euid != ruid) && !capable(CAP_SETUID))
             return -EPERM;
     }
 
     if (euid != (uid_t) -1)
     {
         new_euid = euid;
-        if ((old_ruid != euid) &&
-                (current->euid != euid) &&
-                (current->suid != euid) &&
-                !capable(CAP_SETUID))
+        if ((old_ruid != euid) && (current->euid != euid) && (current->suid != euid) && !capable(CAP_SETUID))
             return -EPERM;
     }
 
@@ -620,12 +592,11 @@ asmlinkage long sys_setreuid(uid_t ruid, uid_t euid)
 
     if (new_euid != old_euid)
     {
-        current->mm->dumpable=0;
+        current->mm->dumpable = 0;
         wmb();
     }
     current->fsuid = current->euid = new_euid;
-    if (ruid != (uid_t) -1 ||
-            (euid != (uid_t) -1 && euid != old_ruid))
+    if (ruid != (uid_t) -1 || (euid != (uid_t) -1 && euid != old_ruid))
         current->suid = current->euid;
     current->fsuid = current->euid;
 
@@ -636,8 +607,6 @@ asmlinkage long sys_setreuid(uid_t ruid, uid_t euid)
 
     return 0;
 }
-
-
 
 /*
  * setuid() is implemented like SysV with SAVED_IDS
@@ -684,7 +653,6 @@ asmlinkage long sys_setuid(uid_t uid)
     return 0;
 }
 
-
 /*
  * This function implements a generic ability to update ruid, euid,
  * and suid.  This allows you to implement the 4.4 compatible seteuid().
@@ -697,14 +665,11 @@ asmlinkage long sys_setresuid(uid_t ruid, uid_t euid, uid_t suid)
 
     if (!capable(CAP_SETUID))
     {
-        if ((ruid != (uid_t) -1) && (ruid != current->uid) &&
-                (ruid != current->euid) && (ruid != current->suid))
+        if ((ruid != (uid_t) -1) && (ruid != current->uid) && (ruid != current->euid) && (ruid != current->suid))
             return -EPERM;
-        if ((euid != (uid_t) -1) && (euid != current->uid) &&
-                (euid != current->euid) && (euid != current->suid))
+        if ((euid != (uid_t) -1) && (euid != current->uid) && (euid != current->euid) && (euid != current->suid))
             return -EPERM;
-        if ((suid != (uid_t) -1) && (suid != current->uid) &&
-                (suid != current->euid) && (suid != current->suid))
+        if ((suid != (uid_t) -1) && (suid != current->uid) && (suid != current->euid) && (suid != current->suid))
             return -EPERM;
     }
     if (ruid != (uid_t) -1)
@@ -737,8 +702,7 @@ asmlinkage long sys_getresuid(uid_t *ruid, uid_t *euid, uid_t *suid)
 {
     int retval;
 
-    if (!(retval = put_user(current->uid, ruid)) &&
-            !(retval = put_user(current->euid, euid)))
+    if (!(retval = put_user(current->uid, ruid)) && !(retval = put_user(current->euid, euid)))
         retval = put_user(current->suid, suid);
 
     return retval;
@@ -751,14 +715,11 @@ asmlinkage long sys_setresgid(gid_t rgid, gid_t egid, gid_t sgid)
 {
     if (!capable(CAP_SETGID))
     {
-        if ((rgid != (gid_t) -1) && (rgid != current->gid) &&
-                (rgid != current->egid) && (rgid != current->sgid))
+        if ((rgid != (gid_t) -1) && (rgid != current->gid) && (rgid != current->egid) && (rgid != current->sgid))
             return -EPERM;
-        if ((egid != (gid_t) -1) && (egid != current->gid) &&
-                (egid != current->egid) && (egid != current->sgid))
+        if ((egid != (gid_t) -1) && (egid != current->gid) && (egid != current->egid) && (egid != current->sgid))
             return -EPERM;
-        if ((sgid != (gid_t) -1) && (sgid != current->gid) &&
-                (sgid != current->egid) && (sgid != current->sgid))
+        if ((sgid != (gid_t) -1) && (sgid != current->gid) && (sgid != current->egid) && (sgid != current->sgid))
             return -EPERM;
     }
     if (egid != (gid_t) -1)
@@ -782,13 +743,11 @@ asmlinkage long sys_getresgid(gid_t *rgid, gid_t *egid, gid_t *sgid)
 {
     int retval;
 
-    if (!(retval = put_user(current->gid, rgid)) &&
-            !(retval = put_user(current->egid, egid)))
+    if (!(retval = put_user(current->gid, rgid)) && !(retval = put_user(current->egid, egid)))
         retval = put_user(current->sgid, sgid);
 
     return retval;
 }
-
 
 /*
  * "setfsuid()" sets the fsuid - the uid used for filesystem checks. This
@@ -801,9 +760,7 @@ asmlinkage long sys_setfsuid(uid_t uid)
     int old_fsuid;
 
     old_fsuid = current->fsuid;
-    if (uid == current->uid || uid == current->euid ||
-            uid == current->suid || uid == current->fsuid ||
-            capable(CAP_SETUID))
+    if (uid == current->uid || uid == current->euid || uid == current->suid || uid == current->fsuid || capable(CAP_SETUID))
     {
         if (uid != old_fsuid)
         {
@@ -830,8 +787,7 @@ asmlinkage long sys_setfsuid(uid_t uid)
         }
         if (old_fsuid != 0 && current->fsuid == 0)
         {
-            cap_t(current->cap_effective) |=
-                (cap_t(current->cap_permitted) & CAP_FS_MASK);
+            cap_t(current->cap_effective) |= (cap_t(current->cap_permitted) & CAP_FS_MASK);
         }
     }
 
@@ -846,9 +802,7 @@ asmlinkage long sys_setfsgid(gid_t gid)
     int old_fsgid;
 
     old_fsgid = current->fsgid;
-    if (gid == current->gid || gid == current->egid ||
-            gid == current->sgid || gid == current->fsgid ||
-            capable(CAP_SETGID))
+    if (gid == current->gid || gid == current->egid || gid == current->sgid || gid == current->fsgid || capable(CAP_SETGID))
     {
         if (gid != old_fsgid)
         {
@@ -926,20 +880,18 @@ asmlinkage long sys_setpgid(pid_t pid, pid_t pgid)
     if (pgid != pid)
     {
         struct task_struct * tmp;
-        for_each_task_pre1 (tmp)
+        for_each_task_pre1(tmp)
         {
-            if (tmp->pgrp == pgid &&
-                    tmp->session == current->session)
+            if (tmp->pgrp == pgid && tmp->session == current->session)
                 goto ok_pgid;
         }
         for_each_task_post1(tmp);
         goto out;
     }
 
-ok_pgid:
-    p->pgrp = pgid;
+    ok_pgid: p->pgrp = pgid;
     err = 0;
-out:
+    out:
     /* All paths lead to here, thus we are safe. -DaveM */
     read_unlock(&tasklist_lock);
     return err;
@@ -988,7 +940,7 @@ asmlinkage long sys_getsid(pid_t pid)
         p = find_task_by_pid(pid);
 
         retval = -ESRCH;
-        if(p)
+        if (p)
             retval = p->session;
         read_unlock(&tasklist_lock);
         return retval;
@@ -1013,7 +965,7 @@ asmlinkage long sys_setsid(void)
     current->tty = NULL;
     current->tty_old_pgrp = 0;
     err = current->pgrp;
-out:
+    out:
     read_unlock(&tasklist_lock);
     return err;
 }
@@ -1037,7 +989,7 @@ asmlinkage long sys_getgroups(int gidsetsize, gid_t *grouplist)
     {
         if (i > gidsetsize)
             return -EINVAL;
-        if (copy_to_user(grouplist, current->groups, sizeof(gid_t)*i))
+        if (copy_to_user(grouplist, current->groups, sizeof(gid_t) * i))
             return -EFAULT;
     }
     return i;
@@ -1054,13 +1006,13 @@ asmlinkage long sys_setgroups(int gidsetsize, gid_t *grouplist)
         return -EPERM;
     if ((unsigned) gidsetsize > NGROUPS)
         return -EINVAL;
-    if(copy_from_user(current->groups, grouplist, gidsetsize * sizeof(gid_t)))
+    if (copy_from_user(current->groups, grouplist, gidsetsize * sizeof(gid_t)))
         return -EFAULT;
     current->ngroups = gidsetsize;
     return 0;
 }
 
-static int supplemental_group_member(gid_t grp)
+int supplemental_group_member(gid_t grp)
 {
     int i = current->ngroups;
 
@@ -1098,14 +1050,14 @@ int in_egroup_p(gid_t grp)
     return retval;
 }
 
-DECLARE_RWSEM(uts_sem);
+DECLARE_RWSEM( uts_sem);
 
 asmlinkage long sys_newuname(struct new_utsname * name)
 {
     int errno = 0;
 
     down_read(&uts_sem);
-    if (copy_to_user(name,&system_utsname,sizeof *name))
+    if (copy_to_user(name, &system_utsname, sizeof *name))
         errno = -EFAULT;
     up_read(&uts_sem);
     return errno;
@@ -1176,8 +1128,7 @@ asmlinkage long sys_getrlimit(unsigned int resource, struct rlimit *rlim)
     if (resource >= RLIM_NLIMITS)
         return -EINVAL;
     else
-        return copy_to_user(rlim, current->rlim + resource, sizeof(*rlim))
-               ? -EFAULT : 0;
+        return copy_to_user(rlim, current->rlim + resource, sizeof(*rlim)) ? -EFAULT : 0;
 }
 
 /*
@@ -1191,11 +1142,11 @@ asmlinkage long sys_old_getrlimit(unsigned int resource, struct rlimit *rlim)
         return -EINVAL;
 
     memcpy(&x, current->rlim + resource, sizeof(*rlim));
-    if(x.rlim_cur > 0x7FFFFFFF)
+    if (x.rlim_cur > 0x7FFFFFFF)
         x.rlim_cur = 0x7FFFFFFF;
-    if(x.rlim_max > 0x7FFFFFFF)
+    if (x.rlim_max > 0x7FFFFFFF)
         x.rlim_max = 0x7FFFFFFF;
-    return copy_to_user(rlim, &x, sizeof(x))?-EFAULT:0;
+    return copy_to_user(rlim, &x, sizeof(x)) ? -EFAULT : 0;
 }
 
 asmlinkage long sys_setrlimit(unsigned int resource, struct rlimit *rlim)
@@ -1204,12 +1155,10 @@ asmlinkage long sys_setrlimit(unsigned int resource, struct rlimit *rlim)
 
     if (resource >= RLIM_NLIMITS)
         return -EINVAL;
-    if(copy_from_user(&new_rlim, rlim, sizeof(*rlim)))
+    if (copy_from_user(&new_rlim, rlim, sizeof(*rlim)))
         return -EFAULT;
     old_rlim = current->rlim + resource;
-    if (((new_rlim.rlim_cur > old_rlim->rlim_max) ||
-            (new_rlim.rlim_max > old_rlim->rlim_max)) &&
-            !capable(CAP_SYS_RESOURCE))
+    if (((new_rlim.rlim_cur > old_rlim->rlim_max) || (new_rlim.rlim_max > old_rlim->rlim_max)) && !capable(CAP_SYS_RESOURCE))
         return -EPERM;
     if (resource == RLIMIT_NOFILE)
     {
@@ -1288,8 +1237,7 @@ asmlinkage long sys_umask(int mask)
     return mask;
 }
 
-asmlinkage long sys_prctl(int option, unsigned long arg2, unsigned long arg3,
-                          unsigned long arg4, unsigned long arg5)
+asmlinkage long sys_prctl(int option, unsigned long arg2, unsigned long arg3, unsigned long arg4, unsigned long arg5)
 {
     int error = 0;
     int sig;
@@ -1306,7 +1254,7 @@ asmlinkage long sys_prctl(int option, unsigned long arg2, unsigned long arg3,
         current->pdeath_signal = sig;
         break;
     case PR_GET_PDEATHSIG:
-        error = put_user(current->pdeath_signal, (int *)arg2);
+        error = put_user(current->pdeath_signal, (int *) arg2);
         break;
     case PR_GET_DUMPABLE:
         if (current->mm->dumpable)
@@ -1321,35 +1269,19 @@ asmlinkage long sys_prctl(int option, unsigned long arg2, unsigned long arg3,
         current->mm->dumpable = arg2;
         break;
     case PR_SET_UNALIGN:
-#ifdef SET_UNALIGN_CTL
-        error = SET_UNALIGN_CTL(current, arg2);
-#else
         error = -EINVAL;
-#endif
         break;
 
     case PR_GET_UNALIGN:
-#ifdef GET_UNALIGN_CTL
-        error = GET_UNALIGN_CTL(current, arg2);
-#else
         error = -EINVAL;
-#endif
         break;
 
     case PR_SET_FPEMU:
-#ifdef SET_FPEMU_CTL
-        error = SET_FPEMU_CTL(current, arg2);
-#else
         error = -EINVAL;
-#endif
         break;
 
     case PR_GET_FPEMU:
-#ifdef GET_FPEMU_CTL
-        error = GET_FPEMU_CTL(current, arg2);
-#else
         error = -EINVAL;
-#endif
         break;
 
     case PR_GET_KEEPCAPS:

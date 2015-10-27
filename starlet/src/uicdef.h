@@ -19,8 +19,15 @@
 
 struct _uicdef
 {
-    UINT16 uic$w_mem;
-    UINT16 uic$w_grp;
+    union
+    {
+        UINT32 uic$l_owner; /* File owner's UIC */
+        struct
+        {
+            UINT16 uic$w_mem; /* UIC member field */
+            UINT16 uic$w_grp; /* UIC group field */
+        };
+    };
 };
 
 #endif

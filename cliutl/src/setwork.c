@@ -22,8 +22,7 @@ int SYS$EXPREG(int pagcnt, long ret[2], int a, int b);
 set_working_set(int argc, char**argv)
 {
     int pid = 1;
-
-    unsigned long sts;
+    int sts;
 
     $DESCRIPTOR(p, "p1");
     $DESCRIPTOR(d, "quota");

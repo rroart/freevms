@@ -47,7 +47,7 @@ extern long inst_parse[];
 
 int do_ret = 0;
 
-main()
+int main()
 {
     printf("\nFreeVMS install utility\n\n");
 

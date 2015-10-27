@@ -745,10 +745,10 @@ static inline struct sk_buff *skb_dequeue_tail(struct sk_buff_head *list)
 
 static inline int skb_is_nonlinear(const struct sk_buff *skb)
 {
-    return skb->data_len;
+    return (skb->data_len > 0);
 }
 
-static inline int skb_headlen(const struct sk_buff *skb)
+static inline unsigned int skb_headlen(const struct sk_buff *skb)
 {
     return skb->len - skb->data_len;
 }
@@ -881,7 +881,7 @@ static inline int pskb_may_pull(struct sk_buff *skb, unsigned int len)
  *  Return the number of bytes of free space at the head of an &sk_buff.
  */
 
-static inline int skb_headroom(const struct sk_buff *skb)
+static inline unsigned int skb_headroom(const struct sk_buff *skb)
 {
     return skb->data-skb->head;
 }
