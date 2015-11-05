@@ -214,7 +214,6 @@ struct fliststruct
         { "str$translate", &teststrtranslate },
         { "str$trim", &teststrtrim },
         { "str$upcase", &teststrupcase },
-        { "sys$asctim", &testsysasctim}
     };
 
 /*************** MAIN *************************/
@@ -3024,25 +3023,3 @@ int teststrupcase(FILE *fptr, int *fstatus, char *cont)
 
     return result_code;
 }
-
-/*************************************/
-
-int testsysasctim(void)
-{
-    int status;
-
-    struct dsc$descriptor return_date;
-    char date_buffer[64];
-
-    return_date.dsc$w_length = sizeof(date_buffer);
-    return_date.dsc$b_dtype = DSC$K_DTYPE_T;
-    return_date.dsc$b_class = DSC$K_CLASS_S;
-    return_date.dsc$a_pointer = date_buffer;
-
-    status = sys$asctim(&return_date.dsc$w_length, &return_date, NULL, 0);
-
-    printf("Todays date:  %-32.32s\n", date_buffer);
-
-    return status;
-}
-

@@ -122,13 +122,13 @@ unsigned dodismount(int argc,char *argv[],int qualc,char *qualv[])
 }
 #endif
 
-void main()
+int main()
 {
     printf("main is a dummy\n");
     return 1;
 }
 
-unsigned domount(int userarg)
+int domount(int userarg)
 {
     setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts;
