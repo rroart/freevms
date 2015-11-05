@@ -775,14 +775,12 @@ void __init setup_arch(char **cmdline_p)
         else
             printk(KERN_WARNING "Use a HIGHMEM enabled kernel.\n");
 #else /* !CONFIG_HIGHMEM */
-#ifndef CONFIG_X86_PAE
         if (max_pfn > MAX_NONPAE_PFN)
         {
             max_pfn = MAX_NONPAE_PFN;
             printk(KERN_WARNING "Warning only 4GB will be used.\n");
             printk(KERN_WARNING "Use a PAE enabled kernel.\n");
         }
-#endif /* !CONFIG_X86_PAE */
 #endif /* !CONFIG_HIGHMEM */
     }
 
@@ -1695,13 +1693,10 @@ extern void trap_init_f00f_bug(void);
 
 static void __init init_intel(struct cpuinfo_x86 *c)
 {
-#ifndef CONFIG_M686
     static int f00f_workaround_enabled = 0;
-#endif
     char *p = NULL;
     unsigned int l1i = 0, l1d = 0, l2 = 0, l3 = 0; /* Cache sizes */
 
-#ifndef CONFIG_M686
     /*
      * All current models of Pentium and Pentium with MMX technology CPUs
      * have the F0 0F bug, which lets nonpriviledged users lock up the system.
@@ -1718,7 +1713,6 @@ static void __init init_intel(struct cpuinfo_x86 *c)
             f00f_workaround_enabled = 1;
         }
     }
-#endif
 
 
     if (c->cpuid_level > 1)
@@ -1834,12 +1828,17 @@ static void __init init_intel(struct cpuinfo_x86 *c)
             }
         }
         if ( l1i || l1d )
-            printk(KERN_INFO "CPU: L1 I cache: %dK, L1 D cache: %dK\n",
-                   l1i, l1d);
+        {
+            printk(KERN_INFO "CPU: L1 I cache: %dK, L1 D cache: %dK\n", l1i, l1d);
+        }
         if ( l2 )
+        {
             printk(KERN_INFO "CPU: L2 cache: %dK\n", l2);
+        }
         if ( l3 )
+        {
             printk(KERN_INFO "CPU: L3 cache: %dK\n", l3);
+        }
 
         /*
          * This assumes the L3 cache is shared; it typically lives in

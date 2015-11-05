@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 #ifndef _I386_PGALLOC_H
@@ -43,46 +43,6 @@ static inline void pte_free(struct page *pte)
 
 #define __pte_free_tlb(tlb,pte) tlb_remove_page((tlb),(pte))
 
-#if defined (CONFIG_X86_PAE)
-/*
- * We can't include <linux/slab.h> here, thus these uglinesses.
- */
-struct kmem_cache_s;
-
-extern struct kmem_cache_s *pae_pgd_cachep;
-extern void *kmem_cache_alloc(struct kmem_cache_s *, int);
-extern void kmem_cache_free(struct kmem_cache_s *, void *);
-
-
-static inline pgd_t *get_pgd_slow(void)
-{
-    int i;
-    pgd_t *pgd = kmem_cache_alloc(pae_pgd_cachep, GFP_KERNEL);
-
-    if (pgd)
-    {
-        for (i = 0; i < USER_PTRS_PER_PGD; i++)
-        {
-            unsigned long pmd = __get_free_page(GFP_KERNEL);
-            if (!pmd)
-                goto out_oom;
-            clear_page(pmd);
-            set_pgd(pgd + i, __pgd(1 + __pa(pmd)));
-        }
-        memcpy(pgd + USER_PTRS_PER_PGD,
-               swapper_pg_dir + USER_PTRS_PER_PGD,
-               (PTRS_PER_PGD - USER_PTRS_PER_PGD) * sizeof(pgd_t));
-    }
-    return pgd;
-out_oom:
-    for (i--; i >= 0; i--)
-        free_page((unsigned long)__va(pgd_val(pgd[i])-1));
-    kmem_cache_free(pae_pgd_cachep, pgd);
-    return NULL;
-}
-
-#else
-
 static inline pgd_t *get_pgd_slow(void)
 {
     pgd_t *pgd = (pgd_t *)__get_free_page(GFP_KERNEL);
@@ -96,8 +56,6 @@ static inline pgd_t *get_pgd_slow(void)
     }
     return pgd;
 }
-
-#endif /* CONFIG_X86_PAE */
 
 static inline pgd_t *get_pgd_fast(void)
 {
@@ -123,15 +81,7 @@ static inline void free_pgd_fast(pgd_t *pgd)
 
 static inline void free_pgd_slow(pgd_t *pgd)
 {
-#if defined(CONFIG_X86_PAE)
-    int i;
-
-    for (i = 0; i < USER_PTRS_PER_PGD; i++)
-        free_page((unsigned long)__va(pgd_val(pgd[i])-1));
-    kmem_cache_free(pae_pgd_cachep, pgd);
-#else
     free_page((unsigned long)pgd);
-#endif
 }
 
 static inline pte_t *pte_alloc_one(struct mm_struct *mm, unsigned long address)

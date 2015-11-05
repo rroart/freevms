@@ -77,10 +77,7 @@
 #include <linux/cache.h>
 #include <linux/module.h>
 #include <linux/highmem.h>
-
-#if defined(CONFIG_KMOD) && defined(CONFIG_NET)
 #include <linux/kmod.h>
-#endif
 
 #include <asm/uaccess.h>
 

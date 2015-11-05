@@ -409,11 +409,6 @@ unsigned char pckbd_sysrq_xlate[128] =
 
 static void kbd_write_command_w(int data);
 static void kbd_write_output_w(int data);
-#ifdef CONFIG_PSMOUSE
-static void aux_write_ack(int val);
-static void __aux_write_ack(int val);
-static int aux_reconnect = 0;
-#endif
 
 static spinlock_t kbd_controller_lock = SPIN_LOCK_UNLOCKED;
 static unsigned char handle_kbd_event(void);
@@ -423,27 +418,6 @@ static volatile unsigned char reply_expected;
 static volatile unsigned char acknowledge;
 static volatile unsigned char resend;
 
-
-#if defined CONFIG_PSMOUSE
-/*
- *  PS/2 Auxiliary Device
- */
-
-static int __init psaux_init(void);
-
-#define AUX_RECONNECT1 0xaa /* scancode1 when ps2 device is plugged (back) in */
-#define AUX_RECONNECT2 0x00 /* scancode2 when ps2 device is plugged (back) in */
-
-static struct aux_queue *queue; /* Mouse data buffer. */
-static int aux_count;
-/* used when we send commands to the mouse that expect an ACK. */
-static unsigned char mouse_reply_expected;
-
-#define AUX_INTS_OFF (KBD_MODE_KCC | KBD_MODE_DISABLE_MOUSE | KBD_MODE_SYS | KBD_MODE_KBD_INT)
-#define AUX_INTS_ON  (KBD_MODE_KCC | KBD_MODE_SYS | KBD_MODE_MOUSE_INT | KBD_MODE_KBD_INT)
-
-#define MAX_RETRIES 60      /* some aux operations take long time*/
-#endif /* CONFIG_PSMOUSE */
 
 /*
  * Wait for keyboard controller input buffer to drain.
@@ -771,74 +745,12 @@ char pckbd_unexpected_up(unsigned char keycode)
 
 int pckbd_pm_resume(struct pm_dev *dev, pm_request_t rqst, void *data)
 {
-#if defined CONFIG_PSMOUSE
-    unsigned long flags;
-
-    if (rqst == PM_RESUME)
-    {
-        if (queue)                      /* Aux port detected */
-        {
-            if (aux_count == 0)     /* Mouse not in use */
-            {
-                spin_lock_irqsave(&kbd_controller_lock, flags);
-                /*
-                * Dell Lat. C600 A06 enables mouse after resume.
-                * When user touches the pad, it posts IRQ 12
-                * (which we do not process), thus holding keyboard.
-                */
-                kbd_write_command(KBD_CCMD_MOUSE_DISABLE);
-                /* kbd_write_cmd(AUX_INTS_OFF); */ /* Config & lock */
-                kb_wait();
-                kbd_write_command(KBD_CCMD_WRITE_MODE);
-                kb_wait();
-                kbd_write_output(AUX_INTS_OFF);
-                spin_unlock_irqrestore(&kbd_controller_lock, flags);
-            }
-        }
-    }
-#endif
     return 0;
 }
 
 
 static inline void handle_mouse_event(unsigned char scancode)
 {
-#ifdef CONFIG_PSMOUSE
-    static unsigned char prev_code;
-    if (mouse_reply_expected)
-    {
-        if (scancode == AUX_ACK)
-        {
-            mouse_reply_expected--;
-            return;
-        }
-        mouse_reply_expected = 0;
-    }
-    else if(scancode == AUX_RECONNECT2 && prev_code == AUX_RECONNECT1
-            && aux_reconnect)
-    {
-        printk (KERN_INFO "PS/2 mouse reconnect detected\n");
-        queue->head = queue->tail = 0;  /* Flush input queue */
-        __aux_write_ack(AUX_ENABLE_DEV);  /* ping the mouse :) */
-        return;
-    }
-
-    prev_code = scancode;
-    add_mouse_randomness(scancode);
-    if (aux_count)
-    {
-        int head = queue->head;
-
-        queue->buf[head] = scancode;
-        head = (head + 1) & (AUX_BUF_SIZE-1);
-        if (head != queue->tail)
-        {
-            queue->head = head;
-            kill_fasync(&queue->fasync, SIGIO, POLL_IN);
-            wake_up_interruptible(&queue->proc_list);
-        }
-    }
-#endif
 }
 
 static unsigned char kbd_exists = 1;
@@ -1153,20 +1065,6 @@ static int kbd_write_output_w_and_wait(int data)
     return kbd_wait_for_input();
 }
 
-#if defined CONFIG_PSMOUSE
-static void kbd_write_cmd(int cmd)
-{
-    unsigned long flags;
-
-    spin_lock_irqsave(&kbd_controller_lock, flags);
-    kb_wait();
-    kbd_write_command(KBD_CCMD_WRITE_MODE);
-    kb_wait();
-    kbd_write_output(cmd);
-    spin_unlock_irqrestore(&kbd_controller_lock, flags);
-}
-#endif /* CONFIG_PSMOUSE */
-
 static char * __init initialize_kbd(void)
 {
     int status;
@@ -1277,304 +1175,13 @@ void __init pckbd_init_hw(void)
     {
         char *msg = initialize_kbd();
         if (msg)
+        {
             printk(KERN_WARNING "initialize_kbd: %s\n", msg);
+        }
     }
-
-#if defined CONFIG_PSMOUSE
-    psaux_init();
-#endif
 
     kbd_rate = pckbd_rate;
 
     /* Ok, finally allocate the IRQ, and off we go.. */
     kbd_request_irq(keyboard_interrupt);
 }
-
-#if defined CONFIG_PSMOUSE
-
-static int __init aux_reconnect_setup (char *str)
-{
-    aux_reconnect = 1;
-    return 1;
-}
-
-__setup("psaux-reconnect", aux_reconnect_setup);
-
-/*
- * Check if this is a dual port controller.
- */
-static int __init detect_auxiliary_port(void)
-{
-    unsigned long flags;
-    int loops = 10;
-    int retval = 0;
-
-    /* Check if the BIOS detected a device on the auxiliary port. */
-    if (aux_device_present == 0xaa)
-        return 1;
-
-    spin_lock_irqsave(&kbd_controller_lock, flags);
-
-    /* Put the value 0x5A in the output buffer using the "Write
-     * Auxiliary Device Output Buffer" command (0xD3). Poll the
-     * Status Register for a while to see if the value really
-     * turns up in the Data Register. If the KBD_STAT_MOUSE_OBF
-     * bit is also set to 1 in the Status Register, we assume this
-     * controller has an Auxiliary Port (a.k.a. Mouse Port).
-     */
-    kb_wait();
-    kbd_write_command(KBD_CCMD_WRITE_AUX_OBUF);
-
-    kb_wait();
-    kbd_write_output(0x5a); /* 0x5a is a random dummy value. */
-
-    do
-    {
-        unsigned char status = kbd_read_status();
-
-        if (status & KBD_STAT_OBF)
-        {
-            (void) kbd_read_input();
-            if (status & KBD_STAT_MOUSE_OBF)
-            {
-                printk(KERN_INFO "Detected PS/2 Mouse Port.\n");
-                retval = 1;
-            }
-            break;
-        }
-        mdelay(1);
-    }
-    while (--loops);
-    spin_unlock_irqrestore(&kbd_controller_lock, flags);
-
-    return retval;
-}
-
-/*
- * Send a byte to the mouse.
- */
-static void aux_write_dev(int val)
-{
-    unsigned long flags;
-
-    spin_lock_irqsave(&kbd_controller_lock, flags);
-    kb_wait();
-    kbd_write_command(KBD_CCMD_WRITE_MOUSE);
-    kb_wait();
-    kbd_write_output(val);
-    spin_unlock_irqrestore(&kbd_controller_lock, flags);
-}
-
-/*
- * Send a byte to the mouse & handle returned ack
- */
-static void __aux_write_ack(int val)
-{
-    kb_wait();
-    kbd_write_command(KBD_CCMD_WRITE_MOUSE);
-    kb_wait();
-    kbd_write_output(val);
-    /* we expect an ACK in response. */
-    mouse_reply_expected++;
-    kb_wait();
-}
-
-static void aux_write_ack(int val)
-{
-    unsigned long flags;
-
-    spin_lock_irqsave(&kbd_controller_lock, flags);
-    __aux_write_ack(val);
-    spin_unlock_irqrestore(&kbd_controller_lock, flags);
-}
-
-static unsigned char get_from_queue(void)
-{
-    unsigned char result;
-    unsigned long flags;
-
-    spin_lock_irqsave(&kbd_controller_lock, flags);
-    result = queue->buf[queue->tail];
-    queue->tail = (queue->tail + 1) & (AUX_BUF_SIZE-1);
-    spin_unlock_irqrestore(&kbd_controller_lock, flags);
-    return result;
-}
-
-
-static inline int queue_empty(void)
-{
-    return queue->head == queue->tail;
-}
-
-static int fasync_aux(int fd, struct file *filp, int on)
-{
-    int retval;
-
-    retval = fasync_helper(fd, filp, on, &queue->fasync);
-    if (retval < 0)
-        return retval;
-    return 0;
-}
-
-
-/*
- * Random magic cookie for the aux device
- */
-#define AUX_DEV ((void *)queue)
-
-static int release_aux(struct inode * inode, struct file * file)
-{
-    lock_kernel();
-    fasync_aux(-1, file, 0);
-    if (--aux_count)
-    {
-        unlock_kernel();
-        return 0;
-    }
-    kbd_write_cmd(AUX_INTS_OFF);                /* Disable controller ints */
-    kbd_write_command_w(KBD_CCMD_MOUSE_DISABLE);
-    aux_free_irq(AUX_DEV);
-    unlock_kernel();
-    return 0;
-}
-
-/*
- * Install interrupt handler.
- * Enable auxiliary device.
- */
-
-static int open_aux(struct inode * inode, struct file * file)
-{
-    if (aux_count++)
-    {
-        return 0;
-    }
-    queue->head = queue->tail = 0;      /* Flush input queue */
-    if (aux_request_irq(keyboard_interrupt, AUX_DEV))
-    {
-        aux_count--;
-        return -EBUSY;
-    }
-    kbd_write_command_w(KBD_CCMD_MOUSE_ENABLE); /* Enable the
-                               auxiliary port on
-                               controller. */
-    aux_write_ack(AUX_ENABLE_DEV); /* Enable aux device */
-    kbd_write_cmd(AUX_INTS_ON); /* Enable controller ints */
-
-    mdelay(2);          /* Ensure we follow the kbc access delay rules.. */
-
-    send_data(KBD_CMD_ENABLE);  /* try to workaround toshiba4030cdt problem */
-
-    return 0;
-}
-
-/*
- * Put bytes from input queue to buffer.
- */
-
-static ssize_t read_aux(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
-{
-    char * buffer = i->irp$l_qio_p1;
-    size_t count = i->irp$l_qio_p2;
-    ssize_t i = count;
-    unsigned char c;
-
-    if (queue_empty())
-    {
-repeat:
-        set_current_state(TASK_INTERRUPTIBLE);
-        if (queue_empty() /*&& !signal_pending(current)*/)
-        {
-            exe$waitfr(1);
-            goto repeat;
-        }
-        current->state = TASK_RUNNING;
-        remove_wait_queue(&queue->proc_list, &wait);
-    }
-    while (i > 0 && !queue_empty())
-    {
-        c = get_from_queue();
-        put_user(c, buffer++);
-        i--;
-    }
-    return 0;
-}
-
-/*
- * Write to the aux device.
- */
-
-static ssize_t write_aux(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
-{
-    const char * buffer = i->irp$l_qio_p1;
-    size_t count = i->irp$l_qio_p2;
-    ssize_t retval = 0;
-
-    if (count)
-    {
-        ssize_t written = 0;
-
-        if (count > 32)
-            count = 32; /* Limit to 32 bytes. */
-        do
-        {
-            char c;
-            get_user(c, buffer++);
-            aux_write_dev(c);
-            written++;
-        }
-        while (--count);
-        retval = -EIO;
-        if (written)
-        {
-            retval = written;
-        }
-    }
-
-    return retval;
-}
-
-/* No kernel lock held - fine */
-static unsigned int aux_poll(struct file *file, poll_table * wait)
-{
-    poll_wait(file, &queue->proc_list, wait);
-    if (!queue_empty())
-        return POLLIN | POLLRDNORM;
-    return 0;
-}
-
-/*
- * Initialize driver.
- */
-static int __init psaux_init(void)
-{
-    int retval;
-
-    if (!detect_auxiliary_port())
-        return -EIO;
-
-    queue = (struct aux_queue *) kmalloc(sizeof(*queue), GFP_KERNEL);
-    if (queue == NULL)
-    {
-        printk(KERN_ERR "psaux_init(): out of memory\n");
-        return -ENOMEM;
-    }
-    memset(queue, 0, sizeof(*queue));
-    queue->head = queue->tail = 0;
-    init_waitqueue_head(&queue->proc_list);
-
-#ifdef INITIALIZE_MOUSE
-    kbd_write_command_w(KBD_CCMD_MOUSE_ENABLE); /* Enable Aux. */
-    aux_write_ack(AUX_SET_SAMPLE);
-    aux_write_ack(100);         /* 100 samples/sec */
-    aux_write_ack(AUX_SET_RES);
-    aux_write_ack(3);           /* 8 counts per mm */
-    aux_write_ack(AUX_SET_SCALE21);     /* 2:1 scaling */
-#endif /* INITIALIZE_MOUSE */
-    kbd_write_command(KBD_CCMD_MOUSE_DISABLE); /* Disable aux device. */
-    kbd_write_cmd(AUX_INTS_OFF); /* Disable controller ints. */
-
-    return 0;
-}
-
-#endif /* CONFIG_PSMOUSE */

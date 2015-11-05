@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Bertrand Joël.
+// Author. Bertrand Joï¿½l.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -129,10 +129,6 @@ static uch *high_buffer_start /* = (uch *)(((ulg)&end) + HEAP_SIZE)*/;
 static char *vidmem = (char *)0xb8000;
 static int vidport;
 static int lines, cols;
-
-#ifdef CONFIG_MULTIQUAD
-static void *xquad_portio = NULL;
-#endif
 
 #include "../../../../lib/inflate.c"
 

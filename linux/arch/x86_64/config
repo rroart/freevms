@@ -11,7 +11,6 @@ CONFIG_X86=y
 CONFIG_ISA=n
 # CONFIG_UID16 is not set
 CONFIG_X86_CMPXCHG=y
-CONFIG_EARLY_PRINTK=y
 
 #
 # Loadable module support
@@ -24,8 +23,6 @@ CONFIG_KMOD=y
 # Processor type and features
 #
 # CONFIG_M386 is not set
-# CONFIG_M686 is not set
-# CONFIG_MPENTIUMIII is not set
 CONFIG_GENERIC_CPU=y
 ifeq ($(CONFIG_GENERIC_CPU),y)
 CONFIG_X86_L1_CACHE_BYTES=128
@@ -149,13 +146,7 @@ CONFIG_UNIX98_PTY_COUNT=256
 # File systems
 #
 CONFIG_PROC_FS=y
-CONFIG_DEVPTS_FS=y
 CONFIG_EXT2_FS=y
-
-#
-# Partition Types
-#
-CONFIG_MSDOS_PARTITION=y
 
 #
 # Console drivers

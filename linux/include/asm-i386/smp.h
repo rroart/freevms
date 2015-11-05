@@ -22,26 +22,16 @@
 #endif
 
 #ifdef CONFIG_SMP
-# ifdef CONFIG_MULTIQUAD
-#  define TARGET_CPUS 0xf     /* all CPUs in *THIS* quad */
-#  define INT_DELIVERY_MODE 0     /* physical delivery on LOCAL quad */
-# else
-#  define TARGET_CPUS cpu_online_map
-#  define INT_DELIVERY_MODE 1     /* logical delivery broadcast to all procs */
-# endif
+# define TARGET_CPUS cpu_online_map
+# define INT_DELIVERY_MODE 1     /* logical delivery broadcast to all procs */
 #else
 # define INT_DELIVERY_MODE 1     /* logical delivery */
 # define TARGET_CPUS 0x01
 #endif
 
 #ifndef clustered_apic_mode
-#ifdef CONFIG_MULTIQUAD
-#define clustered_apic_mode (1)
-#define esr_disable (1)
-#else /* !CONFIG_MULTIQUAD */
 #define clustered_apic_mode (0)
 #define esr_disable (0)
-#endif /* CONFIG_MULTIQUAD */
 #endif
 
 #ifdef CONFIG_SMP

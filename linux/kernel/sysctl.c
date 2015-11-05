@@ -57,9 +57,6 @@ extern int cad_pid;
 static int maxolduid = 65535;
 static int minolduid;
 
-#ifdef CONFIG_KMOD
-extern char modprobe_path[];
-#endif
 #ifdef CONFIG_SYSVIPC
 extern int msg_ctlmax;
 extern int msg_ctlmnb;
@@ -118,8 +115,6 @@ static ctl_table root_table[] =
 {
     {CTL_KERN, "kernel", NULL, 0, 0555, kern_table},
     {CTL_VM, "vm", NULL, 0, 0555, vm_table},
-#ifdef CONFIG_NET
-#endif
     {CTL_PROC, "proc", NULL, 0, 0555, proc_table},
     {CTL_FS, "fs", NULL, 0, 0555, fs_table},
     {CTL_DEBUG, "debug", NULL, 0, 0555, debug_table},
@@ -173,12 +168,6 @@ static ctl_table kern_table[] =
         KERN_PRINTK, "printk", &console_loglevel, 4*sizeof(int),
         0644, NULL, &proc_dointvec
     },
-#ifdef CONFIG_KMOD
-    {
-        KERN_MODPROBE, "modprobe", &modprobe_path, 256,
-        0644, NULL, &proc_dostring, &sysctl_string
-    },
-#endif
     {
         KERN_RTSIGNR, "rtsig-nr", &nr_queued_signals, sizeof(int),
         0444, NULL, &proc_dointvec

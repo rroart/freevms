@@ -26,21 +26,6 @@
 /*
  * These are used to make use of C type-checking..
  */
-#if CONFIG_X86_PAE
-typedef struct
-{
-    unsigned long pte_low, pte_high;
-} pte_t;
-typedef struct
-{
-    unsigned long long pmd;
-} pmd_t;
-typedef struct
-{
-    unsigned long long pgd;
-} pgd_t;
-#define pte_val(x)  ((x).pte_low | ((unsigned long long)(x).pte_high << 32))
-#else
 typedef struct
 {
     unsigned long pte_low;
@@ -50,7 +35,6 @@ typedef struct
     unsigned long pgd;
 } pgd_t;
 #define pte_val(x)  ((x).pte_low)
-#endif
 #define PTE_MASK    PAGE_MASK
 
 typedef struct

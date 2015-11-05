@@ -9,8 +9,6 @@
  * Processor type and features
  */
 #define CONFIG_M386 1
-#undef  CONFIG_M686
-#undef  CONFIG_MPENTIUMIII
 #undef  CONFIG_X86_CMPXCHG
 #define CONFIG_X86_L1_CACHE_SHIFT (4)
 #define CONFIG_X86_PPRO_FENCE 1

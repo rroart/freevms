@@ -30,14 +30,6 @@ ifdef CONFIG_M386
 CFLAGS += -march=i386
 endif
 
-ifdef CONFIG_M686
-CFLAGS += -march=i686
-endif
-
-ifdef CONFIG_MPENTIUMIII
-CFLAGS += -march=i686
-endif
-
 HEAD := linux/arch/i386/kernel/head.o linux/arch/i386/kernel/init_task.o
 
 SUBDIRS += linux/arch/i386/tools linux/arch/i386/kernel linux/arch/i386/mm linux/arch/i386/lib

@@ -21,8 +21,6 @@ CONFIG_KMOD=y
 # Processor type and features
 #
 CONFIG_M386=y
-# CONFIG_M686 is not set
-# CONFIG_MPENTIUMIII is not set
 # CONFIG_X86_CMPXCHG is not set
 CONFIG_X86_L1_CACHE_SHIFT=4
 CONFIG_X86_PPRO_FENCE=y
@@ -140,13 +138,7 @@ CONFIG_UNIX98_PTY_COUNT=256
 # File systems
 #
 CONFIG_PROC_FS=y
-CONFIG_DEVPTS_FS=y
 CONFIG_EXT2_FS=y
-
-#
-# Partition Types
-#
-CONFIG_MSDOS_PARTITION=y
 
 #
 # Console drivers

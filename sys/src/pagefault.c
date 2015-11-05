@@ -1159,24 +1159,6 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
     if (regs->eflags & X86_EFLAGS_IF)
         __sti();
 
-#ifdef CONFIG_CHECKING
-    if (1 ||page_fault_trace)
-        printk("pagefault rip:%lx rsp:%lx cs:%lu ss:%lu address %lx error %lx\n",
-               regs->rip,regs->rsp,regs->cs,regs->ss,address,error_code);
-
-
-    {
-        unsigned long gs;
-        struct x8664_pda *pda = cpu_pda + safe_smp_processor_id();
-        rdmsrl(MSR_GS_BASE, gs);
-        if (gs != (unsigned long)pda)
-        {
-            wrmsrl(MSR_GS_BASE, pda);
-            printk("page_fault: wrong gs %lx expected %p\n", gs, pda);
-        }
-    }
-#endif
-
     //check if ipl>2 bugcheck
 
     if (address==0x5a5a5a5a)

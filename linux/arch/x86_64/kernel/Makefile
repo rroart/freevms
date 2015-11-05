@@ -20,13 +20,12 @@ obj-y	:= process.o semaphore.o signal.o entry.o traps.o irq.o \
 		ptrace.o i8259.o ioport.o ldt.o setup.o time.o sys_x86_64.o \
 		pci-dma.o x8664_ksyms.o i387.o syscall.o vsyscall.o \
 		setup64.o e820.o warmreboot.o module.o pci-x86_64.o pci-pc.o \
-		pci-irq.o pci-nommu.o
+		pci-irq.o pci-nommu.o early_printk.o
 
 obj-$(CONFIG_X86_CPUID)	+= cpuid.o
 obj-$(CONFIG_SMP)	+= smp.o smpboot.o trampoline.o
 obj-$(CONFIG_X86_LOCAL_APIC)	+= apic.o  nmi.o
 obj-$(CONFIG_X86_IO_APIC)	+= io_apic.o mpparse.o
-obj-$(CONFIG_EARLY_PRINTK) +=  early_printk.o
 obj-$(CONFIG_MCE) += bluesmoke.o
 
 

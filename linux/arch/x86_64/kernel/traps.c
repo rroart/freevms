@@ -451,19 +451,6 @@ static void do_trap(int trapnr, int signr, char *str,
 {
     conditional_sti(regs);
 
-#if defined(CONFIG_CHECKING) && defined(CONFIG_LOCAL_APIC)
-    {
-        unsigned long gs;
-        struct x8664_pda *pda = cpu_pda + safe_smp_processor_id();
-        rdmsrl(MSR_GS_BASE, gs);
-        if (gs != (unsigned long)pda)
-        {
-            wrmsrl(MSR_GS_BASE, pda);
-            printk("%s: wrong gs %lx expected %p\n", str, gs, pda);
-        }
-    }
-#endif
-
     if ((regs->cs & 3)  != 0)
     {
         struct task_struct *tsk = current;
@@ -537,25 +524,6 @@ extern void dump_pagetable(unsigned long);
 asmlinkage void do_general_protection(struct pt_regs * regs, long error_code)
 {
     conditional_sti(regs);
-
-#ifdef CONFIG_CHECKING
-    {
-        unsigned long gs;
-        struct x8664_pda *pda = cpu_pda + safe_smp_processor_id();
-        rdmsrl(MSR_GS_BASE, gs);
-        if (gs != (unsigned long)pda)
-        {
-            wrmsrl(MSR_GS_BASE, pda);
-            /* Avoid wakeup in printk in case this was triggered
-               by the segment reloads in __switch_to. Otherwise
-               the wake_up could deadlock on scheduler locks. */
-            oops_in_progress++;
-            printk(KERN_EMERG
-                   "general protection handler: wrong gs %lx expected %p\n", gs, pda);
-            oops_in_progress--;
-        }
-    }
-#endif
 
     if (regs->cs & 3)
     {
@@ -666,20 +634,6 @@ asmlinkage void do_debug(struct pt_regs * regs, long error_code)
     asm("movq %%db6,%0" : "=r" (condition));
 
     conditional_sti(regs);
-
-#ifdef CONFIG_CHECKING
-    {
-        /* XXX: interaction with debugger - could destroy gs */
-        unsigned long gs;
-        struct x8664_pda *pda = cpu_pda + safe_smp_processor_id();
-        rdmsrl(MSR_GS_BASE, gs);
-        if (gs != (unsigned long)pda)
-        {
-            wrmsrl(MSR_GS_BASE, pda);
-            printk(KERN_EMERG "debug handler: wrong gs %lx expected %p\n", gs, pda);
-        }
-    }
-#endif
 
     /* Mask out spurious debug traps due to lazy DR7 setting */
     if (condition & (DR_TRAP0|DR_TRAP1|DR_TRAP2|DR_TRAP3))

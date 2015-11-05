@@ -96,7 +96,6 @@ extern void ipc_init(void);
 #define MAX_INIT_ENVS 8
 
 extern void time_init(void);
-extern void softirq_init(void);
 
 int rows, cols;
 

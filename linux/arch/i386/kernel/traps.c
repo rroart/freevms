@@ -769,7 +769,6 @@ asmlinkage void math_emulate(long arg)
     schedule();
 }
 
-#ifndef CONFIG_M686
 void __init trap_init_f00f_bug(void)
 {
     unsigned long page;
@@ -800,7 +799,6 @@ void __init trap_init_f00f_bug(void)
     idt = (struct desc_struct *)page;
     __asm__ __volatile__("lidt %0": "=m" (idt_descr));
 }
-#endif
 
 #define _set_gate(gate_addr,type,dpl,addr) \
 do { \

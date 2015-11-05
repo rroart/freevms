@@ -35,9 +35,7 @@
 
 #include <asm/uaccess.h>
 
-#ifdef CONFIG_MULTIQUAD
-#define LOG_BUF_LEN (65536)
-#elif defined(CONFIG_SMP)
+#if defined(CONFIG_SMP)
 #define LOG_BUF_LEN (32768)
 #else
 #define LOG_BUF_LEN (16384)         /* This must be a power of two */

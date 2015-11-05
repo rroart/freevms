@@ -45,13 +45,6 @@
  * File systems
  */
 #define CONFIG_PROC_FS 1
-#define CONFIG_DEVPTS_FS 1
-
 #define CONFIG_EXTTWO_FS 1
-
-/*
- * Partition Types
- */
-#define CONFIG_MSDOS_PARTITION 1
 
 #endif

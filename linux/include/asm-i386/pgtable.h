@@ -118,13 +118,7 @@ void paging_init(void);
  * implements both the traditional 2-level x86 page tables and the
  * newer 3-level PAE-mode page tables.
  */
-#ifdef CONFIG_X86_PAE
-# include <asm/pgtable-3level-defs.h>
-# define PMD_SIZE   (1UL << PMD_SHIFT)
-# define PMD_MASK   (~(PMD_SIZE-1))
-#else
 # include <asm/pgtable-2level-defs.h>
-#endif
 
 #endif /* ASSEMBLY */
 
@@ -202,11 +196,7 @@ void paging_init(void);
 #define _PAGE_FILE  0x040   /* nonlinear file mapping, saved PTE; unset:swap */
 #define _PAGE_PROTNONE  0x080   /* if the user mapped it with PROT_NONE;
 pte_present gives true */
-#ifdef CONFIG_X86_PAE
-#define _PAGE_NX    (1ULL<<_PAGE_BIT_NX)
-#else
 #define _PAGE_NX    0
-#endif
 
 #define _PAGE_TABLE (_PAGE_PRESENT | _PAGE_RW | _PAGE_USER | _PAGE_ACCESSED | _PAGE_DIRTY)
 #define _KERNPG_TABLE   (_PAGE_PRESENT | _PAGE_RW | _PAGE_ACCESSED | _PAGE_DIRTY)
@@ -389,11 +379,7 @@ static inline pte_t pte_mkhuge(pte_t pte)
     return pte;
 }
 
-#ifdef CONFIG_X86_PAE
-# include <asm/pgtable-3level.h>
-#else
-# include <asm/pgtable-2level.h>
-#endif
+#include <asm/pgtable-2level.h>
 
 static inline int ptep_test_and_clear_dirty(pte_t *ptep)
 {
@@ -465,15 +451,6 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 {
     pte.pte_low &= _PAGE_CHG_MASK;
     pte.pte_low |= pgprot_val(newprot);
-#ifdef CONFIG_X86_PAE
-    /*
-     * Chop off the NX bit (if present), and add the NX portion of
-     * the newprot (if present):
-     */
-    pte.pte_high &= ~(1 << (_PAGE_BIT_NX - 32));
-    pte.pte_high |= (pgprot_val(newprot) >> 32) & \
-                    (__supported_pte_mask >> 32);
-#endif
     return pte;
 }
 
@@ -540,14 +517,10 @@ extern pte_t *lookup_address(unsigned long address);
  * is used to restore the previous state). Used by the SMP bootup code.
  * NOTE: this is an __init function for security reasons.
  */
-#ifdef CONFIG_X86_PAE
-extern int set_kernel_exec(unsigned long vaddr, int enable);
-#else
 static inline int set_kernel_exec(unsigned long vaddr, int enable)
 {
     return 0;
 }
-#endif
 
 extern void noexec_setup(const char *str);
 

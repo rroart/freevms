@@ -78,8 +78,7 @@ default_handler(int segment, struct pt_regs *regp)
         send_sig(SIGSEGV, current, 1);
 }
 
-static struct exec_domain *
-lookup_exec_domain(u_long personality)
+static struct exec_domain * lookup_exec_domain(u_long personality)
 {
     struct exec_domain *    ep;
     u_long          pers = personality(personality);
@@ -113,8 +112,7 @@ out:
     return (ep);
 }
 
-int
-register_exec_domain(struct exec_domain *ep)
+int register_exec_domain(struct exec_domain *ep)
 {
     struct exec_domain  *tmp;
     int         err = -EBUSY;

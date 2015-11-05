@@ -18,7 +18,6 @@
 #include <linux/slab.h>
 #include <linux/ioport.h>
 #include <linux/pm.h>
-#include <linux/kmod.h>     /* for hotplug_path */
 #include <linux/bitops.h>
 #include <linux/delay.h>
 

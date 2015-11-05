@@ -194,18 +194,7 @@ static void __init fixrange_init (unsigned long start, unsigned long end, pgd_t 
 
     for ( ; (i < PTRS_PER_PGD) && (vaddr != end); pgd++, i++)
     {
-#if CONFIG_X86_PAE
-        if (pgd_none(*pgd))
-        {
-            pmd = (pmd_t *) alloc_bootmem_low_pages(PAGE_SIZE);
-            set_pgd(pgd, __pgd(__pa(pmd) + 0x1));
-            if (pmd != pmd_offset(pgd, 0))
-                printk("PAE BUG #02!\n");
-        }
-        pmd = pmd_offset(pgd, vaddr);
-#else
         pmd = (pmd_t *)pgd;
-#endif
         for (; (j < PTRS_PER_PMD) && (vaddr != end); pmd++, j++)
         {
             if (pmd_none(*pmd))
@@ -236,10 +225,6 @@ static void __init pagetable_init (void)
     end = (unsigned long)__va(max_low_pfn*PAGE_SIZE);
 
     pgd_base = swapper_pg_dir;
-#if CONFIG_X86_PAE
-    for (i = 0; i < PTRS_PER_PGD; i++)
-        set_pgd(pgd_base + i, __pgd(1 + __pa(empty_zero_page)));
-#endif
     i = __pgd_offset(PAGE_OFFSET);
     pgd = pgd_base + i;
 
@@ -248,12 +233,7 @@ static void __init pagetable_init (void)
         vaddr = i*PGDIR_SIZE;
         if (end && (vaddr >= end))
             break;
-#if CONFIG_X86_PAE
-        pmd = (pmd_t *) alloc_bootmem_low_pages(PAGE_SIZE);
-        set_pgd(pgd, __pgd(__pa(pmd) + 0x1));
-#else
         pmd = (pmd_t *)pgd;
-#endif
         if (pmd != pmd_offset(pgd, 0))
             BUG();
         for (j = 0; j < PTRS_PER_PMD; pmd++, j++)
@@ -313,17 +293,6 @@ static void __init pagetable_init (void)
     pte = pte_offset(pmd, vaddr);
     pkmap_page_table = pte;
 #endif
-
-#if CONFIG_X86_PAE
-    /*
-     * Add low memory identity-mappings - SMP needs it when
-     * starting up on an AP from real-mode. In the non-PAE
-     * case we already have these mappings through head.S.
-     * All user-space mappings are explicitly cleared after
-     * SMP startup.
-     */
-    pgd_base[0] = pgd_base[USER_PTRS_PER_PGD];
-#endif
 }
 
 void __init zap_low_mappings (void)
@@ -336,11 +305,9 @@ void __init zap_low_mappings (void)
      * us, because pgd_clear() is a no-op on i386.
      */
     for (i = 0; i < USER_PTRS_PER_PGD - 1; i++) // don't clobber P1
-#if CONFIG_X86_PAE
-        set_pgd(swapper_pg_dir+i, __pgd(1 + __pa(empty_zero_page)));
-#else
+    {
         set_pgd(swapper_pg_dir+i, __pgd(0));
-#endif
+    }
     flush_tlb_all();
 }
 
@@ -356,15 +323,6 @@ void __init paging_init(void)
     pagetable_init();
 
     __asm__( "movl %%ecx,%%cr3\n" ::"c"(__pa(swapper_pg_dir)));
-
-#if CONFIG_X86_PAE
-    /*
-     * We will bail out later - printk doesnt work right now so
-     * the user would just see a hanging kernel.
-     */
-    if (cpu_has_pae)
-        set_in_cr4(X86_CR4_PAE);
-#endif
 
     __flush_tlb_all();
 
@@ -540,10 +498,6 @@ void __init mem_init(void)
            (unsigned long) (totalhigh_pages << (PAGE_SHIFT-10))
           );
 
-#if CONFIG_X86_PAE
-    if (!cpu_has_pae)
-        panic("cannot execute a PAE-enabled kernel on a PAE-less CPU!");
-#endif
     if (boot_cpu_data.wp_works_ok < 0)
         test_wp_bit();
 
@@ -609,17 +563,3 @@ void si_meminfo(struct sysinfo *val)
     val->mem_unit = PAGE_SIZE;
     return;
 }
-
-#if defined(CONFIG_X86_PAE)
-struct kmem_cache_s *pae_pgd_cachep;
-void __init pgtable_cache_init(void)
-{
-    /*
-     * PAE pgds must be 16-byte aligned:
-     */
-    pae_pgd_cachep = kmem_cache_create("pae_pgd", 32, 0,
-                                       SLAB_HWCACHE_ALIGN | SLAB_MUST_HWCACHE_ALIGN, NULL, NULL);
-    if (!pae_pgd_cachep)
-        panic("init_pae(): Cannot alloc pae_pgd SLAB cache");
-}
-#endif /* CONFIG_X86_PAE */
