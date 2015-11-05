@@ -38,21 +38,20 @@
  * Prototypes
  */
 void testanal(char* Title, struct dsc$descriptor_s* strptr);
-void anacond(unsigned long condcode);
+void anacond(int condcode);
 
 /*
  * Some local constants
  */
 $DESCRIPTOR(GlobalStrElem, "**First(2)*Second(3)***Third(6)*VeryLongOne**");
-$DESCRIPTOR(GlobalStrDelimOk,"*");
-$DESCRIPTOR(GlobalStrDelimNull,"");
-$DESCRIPTOR(GlobalStrDelimLong,"**");
-
+$DESCRIPTOR(GlobalStrDelimOk, "*");
+$DESCRIPTOR(GlobalStrDelimNull, "");
+$DESCRIPTOR(GlobalStrDelimLong, "**");
 
 int main()
 {
-    long elemnumb;
-    long retrnval;
+    int elemnumb;
+    int retrnval;
     struct dsc$descriptor_s Test1;
     struct dsc$descriptor_s Test3;
 
@@ -69,63 +68,63 @@ int main()
     Test3.dsc$w_length = 8;
     Test3.dsc$b_class = DSC$K_CLASS_S;
     Test3.dsc$b_dtype = DSC$K_DTYPE_T;
-    Test3.dsc$a_pointer = (char*)malloc(20);
+    Test3.dsc$a_pointer = (char*) malloc(20);
 
     /*
      * Testing with correct delimiter string for various element numbers
      * Start with negative element number and end with too high number,
      * just to see what happens (check error messages).
-         */
-    for (elemnumb=-1;  elemnumb<12;  elemnumb++)
+     */
+    for (elemnumb = -1; elemnumb < 12; elemnumb++)
     {
         printf("\n-----------------\n");
-        printf("\nelement number %ld\n",elemnumb);
-        retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimOk,&GlobalStrElem);
-        printf("return value %ld : ",retrnval);
-        anacond((unsigned long) retrnval);
-        printf("\nelement number %ld\n",elemnumb);
-        testanal("str$element, delimiter ok",&Test1);
+        printf("\nelement number %d\n", elemnumb);
+        retrnval = str$element(&Test1, &elemnumb, &GlobalStrDelimOk, &GlobalStrElem);
+        printf("return value %d : ", retrnval);
+        anacond(retrnval);
+        printf("\nelement number %d\n", elemnumb);
+        testanal("str$element, delimiter ok", &Test1);
     }
     /*
      * Testing with empty delimiter string
      */
     printf("\n=================\n");
-    elemnumb=2;
-    printf("\nelement number %ld\n",elemnumb);
-    retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimNull,&GlobalStrElem);
-    printf("return value %ld : ",retrnval);
-    anacond((unsigned long) retrnval);
-    printf("\nelement number %ld\n",elemnumb);
-    testanal("str$element, delimiter null",&Test1);
+    elemnumb = 2;
+    printf("\nelement number %d\n", elemnumb);
+    retrnval = str$element(&Test1, &elemnumb, &GlobalStrDelimNull, &GlobalStrElem);
+    printf("return value %d : ", retrnval);
+    anacond(retrnval);
+    printf("\nelement number %d\n", elemnumb);
+    testanal("str$element, delimiter null", &Test1);
     /*
      * Testing with 2-character delimiter string
      */
     printf("\n=================\n");
-    elemnumb=2;
-    printf("\nelement number %ld\n",elemnumb);
-    retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimLong,&GlobalStrElem);
-    printf("return value %ld : ",retrnval);
-    anacond((unsigned long) retrnval);
-    printf("\nelement number %ld\n",elemnumb);
-    testanal("str$element, delimiter long",&Test1);
+    elemnumb = 2;
+    printf("\nelement number %d\n", elemnumb);
+    retrnval = str$element(&Test1, &elemnumb, &GlobalStrDelimLong, &GlobalStrElem);
+    printf("return value %d : ", retrnval);
+    anacond(retrnval);
+    printf("\nelement number %d\n", elemnumb);
+    testanal("str$element, delimiter long", &Test1);
     /*
      * Testing truncation of destination string
      */
     printf("\n=================\n");
-    elemnumb=7;
-    printf("\nelement number %ld\n",elemnumb);
-    retrnval=str$element(&Test3,&elemnumb,&GlobalStrDelimOk,&GlobalStrElem);
-    printf("return value %ld : ",retrnval);
-    anacond((unsigned long) retrnval);
-    printf("\nelement number %ld\n",elemnumb);
-    testanal("str$element, delimiter ok, dest string short",&Test3);
+    elemnumb = 7;
+    printf("\nelement number %d\n", elemnumb);
+    retrnval = str$element(&Test3, &elemnumb, &GlobalStrDelimOk, &GlobalStrElem);
+    printf("return value %d : ", retrnval);
+    anacond(retrnval);
+    printf("\nelement number %d\n", elemnumb);
+    testanal("str$element, delimiter ok, dest string short", &Test3);
     return EXIT_SUCCESS;
 }
 
 void testanal(char* Title, struct dsc$descriptor_s* strptr)
 {
-    char* s1_ptr;           /* Pointer to first string */
-    unsigned short s1_length;        /* Length of first string */
+    char* s1_ptr; /* Pointer to first string */
+    unsigned short s1_length; /* Length of first string */
 
     printf("Analyzing '%s':\n", Title);
 
@@ -141,7 +140,7 @@ void testanal(char* Title, struct dsc$descriptor_s* strptr)
     printf("\n");
 }
 
-void anacond(unsigned long condcode)
+void anacond(int condcode)
 {
     switch (condcode)
     {

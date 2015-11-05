@@ -98,7 +98,7 @@ struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
 
 #define PRINT_ATTR (FAB$M_CR | FAB$M_PRN | FAB$M_FTN)
 
-void main()
+int main()
 {
     printf("main is a dummy\n");
     return 1;
@@ -108,7 +108,7 @@ void main()
 
 /* search: a simple file search routine */
 
-unsigned search(int userarg)
+int search(int userarg)
 {
     setvbuf(stdout, NULL, _IONBF, 0);      // need this to see i/o at all
     int sts;
@@ -139,9 +139,9 @@ unsigned search(int userarg)
     char res[NAM$C_MAXRSS + 1],rsa[NAM$C_MAXRSS + 1];
     struct _namdef nam = cc$rms_nam;
     struct _fabdef fab = cc$rms_fab;
-    register char *searstr = c2;
-    register char firstch = tolower(*searstr++);
-    register char *searend = searstr + strlen(searstr);
+    char *searstr = c2;
+    char firstch = tolower(*searstr++);
+    char *searend = searstr + strlen(searstr);
     {
         char *str = searstr;
         while (str < searend)
@@ -185,18 +185,18 @@ unsigned search(int userarg)
                     rab.rab$w_usz = MAXREC;
                     while ((sts = sys$get(&rab, 0, 0)) & 1)
                     {
-                        register char *strng = rec;
-                        register char *strngend = strng + (rab.rab$w_rsz - (searend - searstr));
+                        char *strng = rec;
+                        char *strngend = strng + (rab.rab$w_rsz - (searend - searstr));
                         while (strng < strngend)
                         {
-                            register char ch = *strng++;
+                            char ch = *strng++;
                             if (ch == firstch || (ch >= 'A' && ch <= 'Z' && ch + 32 == firstch))
                             {
-                                register char *str = strng;
-                                register char *cmp = searstr;
+                                char *str = strng;
+                                char *cmp = searstr;
                                 while (cmp < searend)
                                 {
-                                    register char ch2 = *str++;
+                                    char ch2 = *str++;
                                     ch = *cmp;
                                     if (ch2 != ch && (ch2 < 'A' || ch2 > 'Z' || ch2 + 32 != ch)) break;
                                     cmp++;

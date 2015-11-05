@@ -25,7 +25,7 @@
  *
  */
 int str$len_extr(struct dsc$descriptor_s* destination_string, const struct dsc$descriptor_s* source_string,
-        const long* start_position, const long* longword_integer_length)
+        const int* start_position, const int* longword_integer_length)
 {
     char* s2_ptr; /* Pointer to second string */
     unsigned short s2_length; /* Length of second string */

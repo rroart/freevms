@@ -81,15 +81,14 @@
 #define TRUE        1
 #define FALSE       0
 
-int str$recip(const unsigned long *asign, const long *aexp, const struct dsc$descriptor_s *adigits, const unsigned long *bsign,
-        const long *bexp, const struct dsc$descriptor_s *bdigits, unsigned long *csign, long *cexp,
-        struct dsc$descriptor_s *cdigits)
+int str$recip(const unsigned int *asign, const int *aexp, const struct dsc$descriptor_s *adigits, const unsigned int *bsign,
+        const int *bexp, const struct dsc$descriptor_s *bdigits, unsigned int *csign, int *cexp, struct dsc$descriptor_s *cdigits)
 {
     int c_not_zero;
     int i, outlen;
     char *s1_ptr, *s2_ptr, *s3_ptr;
-    signed long oneexp, rti, td;
-    unsigned long onesign;
+    int oneexp, rti, td;
+    unsigned int onesign;
     int status;
     unsigned short s1_len, s2_len, s3_len;
     struct dsc$descriptor_s one;
@@ -118,7 +117,7 @@ int str$recip(const unsigned long *asign, const long *aexp, const struct dsc$des
     str$analyze_sdesc(cdigits, &s3_len, &s3_ptr);
     strcpy(s3_ptr, "0");
 
-    td = atol(s2_ptr);
+    td = atoi(s2_ptr);
 
 //  Check that we are not dividing by zero
     c_not_zero = FALSE;

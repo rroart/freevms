@@ -119,26 +119,23 @@
  *      STR$_WRONUMARG  Wrong number of arguments
  */
 #define MAXSTR      132000
-#define MAXUINT16   65536
+#define MAXUINT16   65535
 #define TRUE        1
 #define FALSE       0
 
 /***********************************************/
 
-int str$mul(const unsigned long *asign, const long *aexp, const struct dsc$descriptor_s *adigits, const unsigned long *bsign,
-        const long *bexp, const struct dsc$descriptor_s *bdigits, unsigned long *csign, long *cexp,
-        struct dsc$descriptor_s *cdigits)
+int str$mul(const unsigned int *asign, const int *aexp, const struct dsc$descriptor_s *adigits, const unsigned int *bsign,
+        const int *bexp, const struct dsc$descriptor_s *bdigits, unsigned int *csign, int *cexp, struct dsc$descriptor_s *cdigits)
 {
-    unsigned short s1_len, s2_len, s3_len, temp_len;
+    unsigned short s1_len, s2_len, s3_len, temp_len, max_len;
     char *s1_ptr, *s2_ptr, *s3_ptr;
-    unsigned long index, max_len, min_len;
     int i, j, k;
     int status;
     int sum, carry;
     char *a, *b, *c;
 
     status = STR$_NORMAL;
-    index = 0;
 
     a = (char *) calloc(MAXSTR, 1);
     b = (char *) calloc(MAXSTR, 1);
@@ -201,7 +198,6 @@ int str$mul(const unsigned long *asign, const long *aexp, const struct dsc$descr
 //  char string is "right to left" alignment
 //  start at location specified by the exponent
     max_len = (s1_len > s2_len) ? s1_len : s2_len;
-    min_len = (s1_len > s2_len) ? s2_len : s1_len;
 
 //  Copy input strings to working storage
     for (i = 0; i < s1_len; i++)
@@ -242,7 +238,7 @@ int str$mul(const unsigned long *asign, const long *aexp, const struct dsc$descr
     }
     c[k] = carry;
 
-//  Truncate output sum string to 65536 MAXUINT16
+//  Truncate output sum string to 65535 MAXUINT16
     if (max_len > MAXUINT16)
     {
         status = STR$_TRU;
@@ -251,7 +247,7 @@ int str$mul(const unsigned long *asign, const long *aexp, const struct dsc$descr
 
 //  Free any memory that is passed into us.
     str$free1_dx(cdigits);
-    temp_len = (unsigned short) max_len + 1;
+    temp_len = max_len + 1;
     str$get1_dx(&temp_len, cdigits);
     str$analyze_sdesc(cdigits, &s3_len, &s3_ptr);
 

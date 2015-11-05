@@ -62,7 +62,6 @@
 #include <linux/config.h>
 
 #include <asm/fixmap.h>
-#include <asm/cobalt.h>
 
 /*
  * for x86_do_profile()

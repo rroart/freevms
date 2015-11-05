@@ -75,17 +75,11 @@
  * Prototypes
  */
 
-void testanal(char* Title, struct dsc$descriptor_s* strptr);
 int testsysasctim(void);
-int test_array(void);
-void test_compare(void);
-void test_analyze(void);
-int test_analyze2(void);
 void print_result_code(char *presult, int result_code, char *cont);
 void print_desc_compare(char *title, struct dsc$descriptor_s *s1, struct dsc$descriptor_s *s2, char *cont);
-void print_lu_compare(char *title, unsigned long v1, unsigned long v2, char *cont);
-void print_ls_compare(char *title, long v1, long v2, char *cont);
 void print_int_compare(char *title, int v1, int v2, char *cont);
+void print_uint_compare(char *title, unsigned int v1, unsigned int v2, char *cont);
 
 /*************************************************************/
 /*
@@ -135,9 +129,6 @@ int teststriszerotrim(FILE *fptr, int *fstatus, char *cont);
 int teststrlzerotrim(FILE *fptr, int *fstatus, char *cont);
 int teststrrzerotrim(FILE *fptr, int *fstatus, char *cont);
 int teststrncompare(FILE *fptr, int *fstatus, char *cont);
-
-void testdate(void);
-int tempf(void);
 
 int get_fun_num(char *functionname);
 void call_test_function(int which_fun, char *fname, char *cont, FILE *fptr);
@@ -223,9 +214,7 @@ struct fliststruct
         { "str$translate", &teststrtranslate },
         { "str$trim", &teststrtrim },
         { "str$upcase", &teststrupcase },
-#if 0
-        {   "sys$asctim", &testsysasctim}
-#endif
+        { "sys$asctim", &testsysasctim}
     };
 
 /*************** MAIN *************************/
@@ -238,10 +227,6 @@ int main(void)
     char functionname[FNameSize];
     FILE *fptr;
     char cont[5];
-
-#if i386
-    system ("clear");
-#endif
 
     fptr = fopen("test_str_rtl.dat", "r");
     if (fptr == NULL)
@@ -440,14 +425,26 @@ void print_int_compare(char *title, int v1, int v2, char *cont)
 
 }
 
+void print_uint_compare(char *title, unsigned int v1, unsigned int v2, char *cont)
+{
+    if (v1 != v2)
+    {
+        printf("FAILED - %10s\n", title);
+        strcpy(cont, "P");
+    }
+    else
+        printf("%-10s ......OK \n", title);
+
+}
+
 /********************************************/
 
 int teststradd(FILE *fptr, int *fstatus, char *cont)
 {
     int result_code;
     struct dsc$descriptor_s s1, s2, s3, s4;
-    unsigned long asign, bsign, csign, rsign;
-    signed long aexp, bexp, cexp, rexp;
+    unsigned int asign, bsign, csign, rsign;
+    signed int aexp, bexp, cexp, rexp;
     char pt1[10], pv1[50];
     char pt2[10], pv2[50];
     char pt3[10], pv3[50];
@@ -475,46 +472,46 @@ int teststradd(FILE *fptr, int *fstatus, char *cont)
     strcpy(pv9, "NULL");
     if (strncmp(pt9, "cd", 2) == 0)
         str$$malloc_sd(&s3, pv9);
-    asign = atol(pv1);
-    bsign = atol(pv4);
-    csign = atol(pv7);
+    asign = atoi(pv1);
+    bsign = atoi(pv4);
+    csign = atoi(pv7);
     rsign = csign;
 
-    aexp = atol(pv2);
-    bexp = atol(pv5);
-    cexp = atol(pv8);
+    aexp = atoi(pv2);
+    bexp = atoi(pv5);
+    cexp = atoi(pv8);
     rexp = cexp;
 
     printf("Testing str$add \n");
     printf("A + B = C\n\n\n");
-    printf("Input A sign %lu value ", asign);
+    printf("Input A sign %u value ", asign);
     str$$print_sd(&s1);
-    printf(" exp %ld\n", aexp);
-    printf("Input B sign %lu value ", bsign);
+    printf(" exp %d\n", aexp);
+    printf("Input B sign %u value ", bsign);
     str$$print_sd(&s2);
-    printf(" exp %ld\n", bexp);
-    printf("Input C sign %lu value ", csign);
+    printf(" exp %d\n", bexp);
+    printf("Input C sign %u value ", csign);
     str$$print_sd(&s3);
-    printf(" exp %ld\n", cexp);
+    printf(" exp %d\n", cexp);
     printf("\n");
 
     result_code = str$add(&asign, &aexp, &s1, &bsign, &bexp, &s2, &csign, &cexp, &s3);
 
     print_result_code(presult, result_code, cont);
-    print_ls_compare("Exponent", cexp, rexp, cont);
-    print_lu_compare("Sign", csign, rsign, cont);
+    print_int_compare("Exponent", cexp, rexp, cont);
+    print_uint_compare("Sign", csign, rsign, cont);
     print_desc_compare("Digits", &s3, &s4, cont);
 
     printf("\n\n");
-    printf("Output A sign %lu value ", asign);
+    printf("Output A sign %u value ", asign);
     str$$print_sd(&s1);
-    printf(" exp %ld\n", aexp);
-    printf("Output B sign %lu value ", bsign);
+    printf(" exp %d\n", aexp);
+    printf("Output B sign %u value ", bsign);
     str$$print_sd(&s2);
-    printf(" exp %ld\n", bexp);
-    printf("Output C sign %lu value ", csign);
+    printf(" exp %d\n", bexp);
+    printf("Output C sign %u value ", csign);
     str$$print_sd(&s3);
-    printf(" exp %ld\n", cexp);
+    printf(" exp %d\n", cexp);
 
     str$free1_dx(&s1);
     str$free1_dx(&s2);
@@ -602,7 +599,7 @@ int teststranalyze_64(FILE *fptr, int *fstatus, char *cont)
         str$$malloc_sd(&s1, pv1);
     if (strncmp(pt1, "cd", 2) == 0)
         str$$malloc_sd(&sr, pv1);
-    type = atol(pv2);
+    type = atoi(pv2);
 
     if (strncmp(pv1, "NULL", 4) == 0)
         input_length = 0;
@@ -773,7 +770,7 @@ int teststrcase_blind_compare(FILE *fptr, int *fstatus, char *cont)
     print_desc_compare("String 2     ", &sd2, &sr2, cont);
 
     printf("\n\n");
-    printf("Output Result Code  %ld \n", result_code);
+    printf("Output Result Code  %d \n", result_code);
     printf("Output String 1     ");
     str$$print_sd(&sd1);
     printf("\n");
@@ -825,7 +822,7 @@ int teststrcompare(FILE *fptr, int *fstatus, char *cont)
     print_desc_compare("String 2", &sr2, &s2, cont);
 
     printf("\n\n");
-    printf("Output Result    %ld \n", result_code);
+    printf("Output Result    %d \n", result_code);
     printf("Output A         ");
     str$$print_sd(&s1);
     printf("\n");
@@ -877,7 +874,7 @@ int teststrcompare_eql(FILE *fptr, int *fstatus, char *cont)
     print_desc_compare("String 2", &sr2, &s2, cont);
 
     printf("\n\n");
-    printf("Output Result    %ld \n", result_code);
+    printf("Output Result    %d \n", result_code);
     printf("Output A         ");
     str$$print_sd(&s1);
     printf("\n");
@@ -904,7 +901,7 @@ int teststrcompare_multi(FILE *fptr, int *fstatus, char *cont)
     char presult[MAXSTRING];
     struct dsc$descriptor_s sd1, sd2;
     struct dsc$descriptor_s sr1, sr2;   // saved result
-    unsigned long flags, language;
+    unsigned int flags, language;
     int result;
     char *s1_ptr, *s2_ptr; /* Pointer to strings */
     unsigned short s1_len, s2_len; /* Length of strings */
@@ -924,8 +921,8 @@ int teststrcompare_multi(FILE *fptr, int *fstatus, char *cont)
     if (strncmp(pt2, "cd", 2) == 0)
         str$$malloc_sd(&sr2, pv2);
 
-    flags = atol(pv3);
-    language = atol(pv4);
+    flags = atoi(pv3);
+    language = atoi(pv4);
 
     str$analyze_sdesc(&sd1, &s1_len, &s1_ptr);
     str$analyze_sdesc(&sd2, &s2_len, &s2_ptr);
@@ -935,7 +932,7 @@ int teststrcompare_multi(FILE *fptr, int *fstatus, char *cont)
 
     printf("Input String    %s \n", pv1);
     printf("Input String    %s \n", pv2);
-    printf("Case flag       %lu  ", flags);
+    printf("Case flag       %d  ", flags);
     switch (flags)
     {
     case 0:
@@ -948,7 +945,7 @@ int teststrcompare_multi(FILE *fptr, int *fstatus, char *cont)
         printf("Invalid Flag  \n");
     }
 
-    printf("Language        %lu  ", language);
+    printf("Language        %d  ", language);
     switch (language)
     {
     case 1:
@@ -987,8 +984,8 @@ int teststrcompare_multi(FILE *fptr, int *fstatus, char *cont)
     printf("Output String 2 ");
     str$$print_sd(&sd2);
     printf("\n");
-    printf("Output Flag     %lu\n", flags);
-    printf("Output Language %lu\n", language);
+    printf("Output Flag     %u\n", flags);
+    printf("Output Language %u\n", language);
     printf("\n");
 
     str$free1_dx(&sd1);
@@ -1187,7 +1184,7 @@ int teststrcopy_fill(FILE *fptr, int *fstatus, char *cont)
     else
     {
         strcpy(destin, pv1);
-        dlen = atol(pv2);
+        dlen = atoi(pv2);
     }
 
     if (strncmp(pv3, "NULL", 4) == 0)
@@ -1199,7 +1196,7 @@ int teststrcopy_fill(FILE *fptr, int *fstatus, char *cont)
     else
     {
         strcpy(source, pv3);
-        slen = atol(pv4);
+        slen = atoi(pv4);
     }
 
     fillchar = pv5[0];
@@ -1249,7 +1246,7 @@ int teststrcopy_r(FILE *fptr, int *fstatus, char *cont)
     if (strncmp(pt1, "cd", 2) == 0)
         str$$malloc_sd(&s1, pv1);
 
-    len = (unsigned short) atol(pv2);
+    len = (unsigned short) atoi(pv2);
     if (strncmp(pv3, "NULL", 4) == 0)
         string[0] = '0';
     else
@@ -1304,7 +1301,7 @@ int teststrcopy_r_64(FILE *fptr, int *fstatus, char *cont)
     if (strncmp(pt1, "cd", 2) == 0)
         str$$malloc_sd(&s1, pv1);
 
-    len = (unsigned short) atol(pv2);
+    len = (unsigned short) atoi(pv2);
     if (strncmp(pv3, "NULL", 4) == 0)
         string[0] = '0';
     else
@@ -1347,8 +1344,8 @@ int teststrdiv(FILE *fptr, int *fstatus, char *cont)
 {
     int result_code;
     struct dsc$descriptor_s s1, s2, s3, s4;
-    unsigned long asign, bsign, csign, rsign, rt;
-    signed long aexp, bexp, cexp, rexp, td;
+    unsigned int asign, bsign, csign, rsign, rt;
+    signed int aexp, bexp, cexp, rexp, td;
     char pt1[10], pv1[10];
     char pt2[10], pv2[10];
     char pt3[10], pv3[10];
@@ -1369,21 +1366,21 @@ int teststrdiv(FILE *fptr, int *fstatus, char *cont)
     *fstatus = fscanf(fptr, scan23, pt1, pv1, pt2, pv2, pt3, pv3, pt4, pv4, pt5, pv5, pt6, pv6, pt7, pv7, pt8, pv8, pt9, pv9, pt10,
             pv10, pt11, pv11, presult);
 
-    asign = atol(pv1);
-    aexp = atol(pv2);
+    asign = atoi(pv1);
+    aexp = atoi(pv2);
     if (strncmp(pt3, "cd", 2) == 0)
         str$$malloc_sd(&s1, pv3);
 
-    bsign = atol(pv4);
-    bexp = atol(pv5);
+    bsign = atoi(pv4);
+    bexp = atoi(pv5);
     if (strncmp(pt6, "cd", 2) == 0)
         str$$malloc_sd(&s2, pv6);
 
-    td = atol(pv7);
-    rt = atol(pv8);
+    td = atoi(pv7);
+    rt = atoi(pv8);
 
-    csign = atol(pv9);
-    cexp = atol(pv10);
+    csign = atoi(pv9);
+    cexp = atoi(pv10);
     if (strncmp(pt11, "cd", 2) == 0)
         str$$malloc_sd(&s3, pv11);
     if (strncmp(pt11, "cd", 2) == 0)
@@ -1394,16 +1391,16 @@ int teststrdiv(FILE *fptr, int *fstatus, char *cont)
 
     printf("C = A / B \n\n");
     printf("Sign 0 Positive 1 Negative \n");
-    printf("Input A  sign %lu value ", asign);
+    printf("Input A  sign %u value ", asign);
     str$$print_sd(&s1);
-    printf(" exp %ld\n", aexp);
-    printf("Input B  sign %lu value ", bsign);
+    printf(" exp %d\n", aexp);
+    printf("Input B  sign %u value ", bsign);
     str$$print_sd(&s2);
-    printf(" exp %ld\n", bexp);
-    printf("Input C  sign %lu value ", csign);
+    printf(" exp %d\n", bexp);
+    printf("Input C  sign %u value ", csign);
     str$$print_sd(&s3);
-    printf(" exp %ld\n", cexp);
-    printf("Total digits  %ld Mask  %lu ", td, rt);
+    printf(" exp %d\n", cexp);
+    printf("Total digits  %d Mask  %u ", td, rt);
     switch (rt)
     {
     case 0:
@@ -1422,20 +1419,20 @@ int teststrdiv(FILE *fptr, int *fstatus, char *cont)
     result_code = str$divide(&asign, &aexp, &s1, &bsign, &bexp, &s2, &td, &rt, &csign, &cexp, &s3);
 
     print_result_code(presult, result_code, cont);
-    print_ls_compare("Exponent", cexp, rexp, cont);
-    print_lu_compare("Sign", csign, rsign, cont);
+    print_int_compare("Exponent", cexp, rexp, cont);
+    print_uint_compare("Sign", csign, rsign, cont);
     print_desc_compare("Numeric", &s3, &s4, cont);
 
     printf("\n\n");
-    printf("OUTPUT A sign %lu value ", asign);
+    printf("OUTPUT A sign %u value ", asign);
     str$$print_sd(&s1);
-    printf(" exp %ld\n", aexp);
-    printf("OUTPUT B sign %lu value ", bsign);
+    printf(" exp %d\n", aexp);
+    printf("OUTPUT B sign %u value ", bsign);
     str$$print_sd(&s2);
-    printf(" exp %ld\n", bexp);
-    printf("OUTPUT C sign %lu value ", csign);
+    printf(" exp %d\n", bexp);
+    printf("OUTPUT C sign %u value ", csign);
     str$$print_sd(&s3);
-    printf(" exp %ld\n", cexp);
+    printf(" exp %d\n", cexp);
 
     str$free1_dx(&s1);
     str$free1_dx(&s2);
@@ -1454,7 +1451,7 @@ int teststrdupl_char(FILE *fptr, int *fstatus, char *cont)
     char pt3[20], pv3[20];
     struct dsc$descriptor_s sd1;
     int result;
-    signed long rep;
+    int rep;
     char dupchar;
 
     *fstatus = fscanf(fptr, scan7, pt1, pv1, pt2, pv2, pt3, pv3, presult);
@@ -1470,7 +1467,7 @@ int teststrdupl_char(FILE *fptr, int *fstatus, char *cont)
     if (pv2[0] == '0')
         rep = 1;
     else
-        rep = atol(pv2);
+        rep = atoi(pv2);
 
     printf("Testing  str$dupl_char \n");
     printf("Duplcicat char n times \n\n\n");
@@ -1492,7 +1489,7 @@ int teststrdupl_char(FILE *fptr, int *fstatus, char *cont)
         printf("Output Char        Blank \n");
     else
         printf("Output Char        %c  \n", dupchar);
-    printf("Output Repetion    %ld \n", rep);
+    printf("Output Repetion    %d \n", rep);
     printf("\n\n");
     printf("\n\n");
 
@@ -1507,7 +1504,7 @@ int teststrelement(FILE *fptr, int *fstatus, char *cont)
     char pt2[20], pv2[20];
     char pt3[20], pv3[20];
     char pt4[20], pv4[20];
-    long element_number;
+    int element_number;
     int result_code;
     struct dsc$descriptor_s destin, delimiter, source;
 
@@ -1538,7 +1535,7 @@ int teststrelement(FILE *fptr, int *fstatus, char *cont)
     printf("Output Descriptor Destin    ");
     str$$print_sd(&destin);
     printf("\n");
-    printf("Output Element Number       %ld \n", element_number);
+    printf("Output Element Number       %d \n", element_number);
     printf("Output Descriptor Delimiter ");
     str$$print_sd(&delimiter);
     printf("\n");
@@ -1560,7 +1557,7 @@ int teststrelement(FILE *fptr, int *fstatus, char *cont)
 
 int teststrfind_first_in_set(FILE *fptr, int *fstatus, char *cont)
 {
-    long expect_result, result_position;
+    int expect_result, result_position;
     struct dsc$descriptor_s s1, s2;
     char pt1[10], pv1[10];
     char pt2[10], pv2[10];
@@ -1571,7 +1568,7 @@ int teststrfind_first_in_set(FILE *fptr, int *fstatus, char *cont)
         str$$malloc_sd(&s1, pv1);
     if (strncmp(pt1, "cd", 2) == 0)
         str$$malloc_sd(&s2, pv2);
-    expect_result = atol(result);
+    expect_result = atoi(result);
 
     printf("Testing str$find_first_in_set \n");
     printf("Returns position of first character matched\n\n\n");
@@ -1586,7 +1583,7 @@ int teststrfind_first_in_set(FILE *fptr, int *fstatus, char *cont)
     print_int_compare("Position", expect_result, result_position, cont);
 
     printf("\n\n");
-    printf("Output Position       %ld \n", result_position);
+    printf("Output Position       %d \n", result_position);
     printf("Output Source         ");
     str$$print_sd(&s1);
     printf("\n");
@@ -1604,7 +1601,7 @@ int teststrfind_first_in_set(FILE *fptr, int *fstatus, char *cont)
 
 int teststrfind_first_not_in_set(FILE *fptr, int *fstatus, char *cont)
 {
-    long expect_result, result_position;
+    int expect_result, result_position;
     struct dsc$descriptor_s s1, s2;
     char pt1[10], pv1[10];
     char pt2[10], pv2[10];
@@ -1615,7 +1612,7 @@ int teststrfind_first_not_in_set(FILE *fptr, int *fstatus, char *cont)
         str$$malloc_sd(&s1, pv1);
     if (strncmp(pt1, "cd", 2) == 0)
         str$$malloc_sd(&s2, pv2);
-    expect_result = atol(result);
+    expect_result = atoi(result);
 
     printf("Testing str$find_first_not_in_set \n");
     printf("Returns position of first character not matched\n\n\n");
@@ -1632,7 +1629,7 @@ int teststrfind_first_not_in_set(FILE *fptr, int *fstatus, char *cont)
     printf("\n\n");
     if (result_position == 0)
         printf("Output is 0 all match \n");
-    printf("Output Position       %ld \n", result_position);
+    printf("Output Position       %d \n", result_position);
     printf("Output Source         ");
     str$$print_sd(&s1);
     printf("\n");
@@ -1655,7 +1652,7 @@ int teststrfind_first_substring(FILE *fptr, int *fstatus, char *cont)
     struct dsc$descriptor_s sd[MAX_ARRAY];
     int i, num;
     int result, expect_result;
-    signed long index, subindex, saveindex, savesubindex;
+    int index, subindex, saveindex, savesubindex;
     char *sptr[MAX_ARRAY]; /* Pointer to first string */
     unsigned short slen[MAX_ARRAY]; /* Length of first string */
 
@@ -1687,8 +1684,8 @@ int teststrfind_first_substring(FILE *fptr, int *fstatus, char *cont)
     switch (num)
     {
     case 4:
-        saveindex = atol(pv[1]);
-        savesubindex = atol(pv[2]);
+        saveindex = atoi(pv[1]);
+        savesubindex = atoi(pv[2]);
         printf("Input String     %s \n", pv[0]);
         printf("Input Index      %s \n", pv[1]);
         printf("Input Subindex   %s \n", pv[2]);
@@ -1697,16 +1694,16 @@ int teststrfind_first_substring(FILE *fptr, int *fstatus, char *cont)
 
         result = str$find_first_substring(&sd[0], &index, &subindex, &sd[3], 0);
 
-        print_lu_compare("Return", expect_result, result, cont);
-        print_ls_compare("Index", index, saveindex, cont);
-        print_ls_compare("SubIndex", subindex, savesubindex, cont);
+        print_uint_compare("Return", expect_result, result, cont);
+        print_int_compare("Index", index, saveindex, cont);
+        print_int_compare("SubIndex", subindex, savesubindex, cont);
         printf("\n");
 
         printf("Output String     ");
         str$$print_sd(&sd[0]);
         printf("\n");
-        printf("Output Index      %ld \n", index);
-        printf("Output Subindex   %ld \n", subindex);
+        printf("Output Index      %d \n", index);
+        printf("Output Subindex   %d \n", subindex);
         printf("Output Substring  ");
         str$$print_sd(&sd[3]);
         printf("\n");
@@ -1714,8 +1711,8 @@ int teststrfind_first_substring(FILE *fptr, int *fstatus, char *cont)
 
         break;
     case 5:
-        saveindex = atol(pv[1]);
-        savesubindex = atol(pv[2]);
+        saveindex = atoi(pv[1]);
+        savesubindex = atoi(pv[2]);
         printf("Input String    %s \n", pv[0]);
         printf("Input Index     %s \n", pv[1]);
         printf("Input Subindex  %s \n", pv[2]);
@@ -1725,16 +1722,16 @@ int teststrfind_first_substring(FILE *fptr, int *fstatus, char *cont)
 
         result = str$find_first_substring(&sd[0], &index, &subindex, &sd[3], &sd[4], 0);
 
-        print_lu_compare("Result", expect_result, result, cont);
-        print_ls_compare("Index", index, saveindex, cont);
-        print_ls_compare("SubIndex", subindex, savesubindex, cont);
+        print_int_compare("Result", expect_result, result, cont);
+        print_int_compare("Index", index, saveindex, cont);
+        print_int_compare("SubIndex", subindex, savesubindex, cont);
         printf("\n");
 
         printf("Output String    ");
         str$$print_sd(&sd[0]);
         printf("\n");
-        printf("Output Index     %ld \n", index);
-        printf("Output Subindex  %ld \n", subindex);
+        printf("Output Index     %d \n", index);
+        printf("Output Subindex  %d \n", subindex);
         printf("Output Substring ");
         str$$print_sd(&sd[3]);
         printf("\n");
@@ -1745,8 +1742,8 @@ int teststrfind_first_substring(FILE *fptr, int *fstatus, char *cont)
 
         break;
     case 6:
-        saveindex = atol(pv[1]);
-        savesubindex = atol(pv[2]);
+        saveindex = atoi(pv[1]);
+        savesubindex = atoi(pv[2]);
         printf("Input String    %s \n", pv[0]);
         printf("Input Index     %s \n", pv[1]);
         printf("Input Subindex  %s \n", pv[2]);
@@ -1757,16 +1754,16 @@ int teststrfind_first_substring(FILE *fptr, int *fstatus, char *cont)
 
         result = str$find_first_substring(&sd[0], &index, &subindex, &sd[3], &sd[4], &sd[5], 0);
 
-        print_lu_compare("Result", expect_result, result, cont);
-        print_ls_compare("Index", index, saveindex, cont);
-        print_ls_compare("SubIndex", subindex, savesubindex, cont);
+        print_int_compare("Result", expect_result, result, cont);
+        print_int_compare("Index", index, saveindex, cont);
+        print_int_compare("SubIndex", subindex, savesubindex, cont);
         printf("\n");
 
         printf("Output String    ");
         str$$print_sd(&sd[0]);
         printf("\n");
-        printf("Output Index     %ld \n", index);
-        printf("Output Subindex  %ld \n", subindex);
+        printf("Output Index     %d \n", index);
+        printf("Output Subindex  %d \n", subindex);
         printf("Output Substring ");
         str$$print_sd(&sd[3]);
         printf("\n");
@@ -1842,7 +1839,7 @@ int teststrget1_dx(FILE *fptr, int *fstatus, char *cont)
 
     *fstatus = fscanf(fptr, scan5, pt1, pv1, pt2, pv2, presult);
 
-    len = atol(pv1);
+    len = atoi(pv1);
     if (strncmp(pt2, "cd", 2) == 0)
         str$$malloc_sd(&sd1, pv2);
 
@@ -1889,7 +1886,7 @@ int teststrget1_dx_64(FILE *fptr, int *fstatus, char *cont)
 
     *fstatus = fscanf(fptr, scan5, pt1, pv1, pt2, pv2, presult);
 
-    len = atol(pv1);
+    len = atoi(pv1);
     if (strncmp(pt2, "cd", 2) == 0)
         str$$malloc_sd(&sd1, pv2);
 
@@ -1966,20 +1963,20 @@ int teststriszerotrim(FILE *fptr, int *fstatus, char *cont)
     char pt2[6], pv2[6];
     struct dsc$descriptor_s sd1;
     int result_code;
-    long exponent;
+    int exponent;
 
     *fstatus = fscanf(fptr, scan5, pt1, pv1, pt2, pv2, presult);
 
     if (strncmp(pt1, "cd", 2) == 0)
         str$$malloc_sd(&sd1, pv1);
-    exponent = atol(pv2);
+    exponent = atoi(pv2);
 
     printf("Testing str$$iszerotrim \n");
     printf("Test if a descriptor is zero \n");
     printf("\n\n");
 
     printf("Input String   %s \n", pv1);
-    printf("Input Exponent %ld \n", exponent);
+    printf("Input Exponent %d \n", exponent);
 
     result_code = str$$iszerotrim(&sd1, &exponent);
 
@@ -1989,7 +1986,7 @@ int teststriszerotrim(FILE *fptr, int *fstatus, char *cont)
     printf("Output String   ");
     str$$print_sd(&sd1);
     printf("\n");
-    printf("Output Exponent %ld \n", exponent);
+    printf("Output Exponent %d \n", exponent);
 
     str$free1_dx(&sd1);
 
@@ -2002,7 +1999,7 @@ int teststrleft(FILE *fptr, int *fstatus, char *cont)
 {
     int result_code;
     struct dsc$descriptor_s s1, s2, sr;
-    signed long endpos;
+    signed int endpos;
     unsigned short s1_len;
     char pt1[10], pv1[10];
     char pt2[10], pv2[10];
@@ -2017,14 +2014,14 @@ int teststrleft(FILE *fptr, int *fstatus, char *cont)
         str$$malloc_sd(&s2, pv2);
     if (strncmp(pt1, "cd", 2) == 0)
         str$$malloc_sd(&sr, pv1);
-    endpos = atol(pv3);
+    endpos = atoi(pv3);
 
     printf("Testing str$left \n");
     printf("Extract left substring \n\n\n");
 
     printf("Input A          %s \n", pv1);
     printf("Input B          %s \n", pv2);
-    printf("Input End Point  %ld   \n", endpos);
+    printf("Input End Point  %d   \n", endpos);
     printf("\n");
 
     result_code = str$left(&s1, &s2, &endpos);
@@ -2041,7 +2038,7 @@ int teststrleft(FILE *fptr, int *fstatus, char *cont)
     printf("Output B         [");
     str$$print_sd(&s2);
     printf("]\n");
-    printf("Output End Point %ld   \n", endpos);
+    printf("Output End Point %d   \n", endpos);
 
     str$free1_dx(&s1);
     str$free1_dx(&s2);
@@ -2056,7 +2053,7 @@ int teststrlen_extr(FILE *fptr, int *fstatus, char *cont)
 {
     int result_code;
     struct dsc$descriptor_s s1, s2, sr;
-    signed long startpos, len;
+    int startpos, len;
     char pt1[10], pv1[10];
     char pt2[10], pv2[10];
     char pt3[10], pv3[10];
@@ -2071,16 +2068,16 @@ int teststrlen_extr(FILE *fptr, int *fstatus, char *cont)
         str$$malloc_sd(&s2, pv2);
     if (strncmp(pt1, "cd", 2) == 0)
         str$$malloc_sd(&sr, pv1);
-    startpos = atol(pv3);
-    len = atol(pv4);
+    startpos = atoi(pv3);
+    len = atoi(pv4);
 
     printf("Testing str$len_extr \n");
     printf("Extract a substring by length \n\n\n");
 
     printf("Input Destination    %s \n", pv1);
     printf("Input Source         %s \n", pv2);
-    printf("Input Start Point    %ld \n", startpos);
-    printf("Input Length         %ld \n", len);
+    printf("Input Start Point    %d \n", startpos);
+    printf("Input Length         %d \n", len);
     printf("\n\n");
 
     result_code = str$len_extr(&s1, &s2, &startpos, &len);
@@ -2095,8 +2092,8 @@ int teststrlen_extr(FILE *fptr, int *fstatus, char *cont)
     printf("Output Source        ");
     str$$print_sd(&s2);
     printf("\n");
-    printf("Output Start Point   %ld \n", startpos);
-    printf("Output Length        %ld \n", len);
+    printf("Output Start Point   %d \n", startpos);
+    printf("Output Length        %d \n", len);
 
     str$free1_dx(&s1);
     str$free1_dx(&s2);
@@ -2186,8 +2183,8 @@ int teststrmul(FILE *fptr, int *fstatus, char *cont)
 {
     int result_code;
     struct dsc$descriptor_s s1, s2, s3, sr;
-    unsigned long asign, bsign, csign, rsign;
-    signed long aexp, bexp, cexp, rexp;
+    unsigned int asign, bsign, csign, rsign;
+    signed int aexp, bexp, cexp, rexp;
     char pt1[10], pv1[10];
     char pt2[10], pv2[10];
     char pt3[10], pv3[10];
@@ -2215,46 +2212,46 @@ int teststrmul(FILE *fptr, int *fstatus, char *cont)
     if (strncmp(pt9, "cd", 2) == 0)
         str$$malloc_sd(&sr, pv9);
 
-    asign = atol(pv1);
-    bsign = atol(pv4);
-    csign = atol(pv7);
+    asign = atoi(pv1);
+    bsign = atoi(pv4);
+    csign = atoi(pv7);
     rsign = csign;
 
-    aexp = atol(pv2);
-    bexp = atol(pv5);
-    cexp = atol(pv8);
+    aexp = atoi(pv2);
+    bexp = atoi(pv5);
+    cexp = atoi(pv8);
     rexp = cexp;
 
     printf("Testing str$mul \n");
     printf("C = A * B \n\n\n");
-    printf("Input A sign %lu value ", asign);
+    printf("Input A sign %u value ", asign);
     str$$print_sd(&s1);
-    printf(" exp %ld\n", aexp);
-    printf("Input B sign %lu value ", bsign);
+    printf(" exp %d\n", aexp);
+    printf("Input B sign %u value ", bsign);
     str$$print_sd(&s2);
-    printf(" exp %ld\n", bexp);
-    printf("Input C sign %lu value ", csign);
+    printf(" exp %d\n", bexp);
+    printf("Input C sign %u value ", csign);
     str$$print_sd(&s3);
-    printf(" exp %ld\n", cexp);
+    printf(" exp %d\n", cexp);
     printf("\n");
 
     result_code = str$mul(&asign, &aexp, &s1, &bsign, &bexp, &s2, &csign, &cexp, &s3);
 
     print_result_code(presult, result_code, cont);
-    print_ls_compare("Exponent", cexp, rexp, cont);
-    print_lu_compare("Sign", csign, rsign, cont);
+    print_int_compare("Exponent", cexp, rexp, cont);
+    print_uint_compare("Sign", csign, rsign, cont);
     print_desc_compare("Digits", &s3, &sr, cont);
 
     printf("\n\n");
-    printf("Output A sign %lu value ", asign);
+    printf("Output A sign %u value ", asign);
     str$$print_sd(&s1);
-    printf(" exp %ld\n", aexp);
-    printf("Output B sign %lu value ", bsign);
+    printf(" exp %d\n", aexp);
+    printf("Output B sign %u value ", bsign);
     str$$print_sd(&s2);
-    printf(" exp %ld\n", bexp);
-    printf("Output C sign %lu value ", csign);
+    printf(" exp %d\n", bexp);
+    printf("Output C sign %u value ", csign);
     str$$print_sd(&s3);
-    printf(" exp %ld\n", cexp);
+    printf(" exp %d\n", cexp);
 
     str$free1_dx(&s1);
     str$free1_dx(&s2);
@@ -2311,7 +2308,7 @@ int teststrpos_extr(FILE *fptr, int *fstatus, char *cont)
 {
     int result;
     struct dsc$descriptor_s s1, s2, sr;
-    signed long startpos, endpos;
+    int startpos, endpos;
     char pt1[10], pv1[10];
     char pt2[10], pv2[10];
     char pt3[10], pv3[10];
@@ -2326,16 +2323,16 @@ int teststrpos_extr(FILE *fptr, int *fstatus, char *cont)
         str$$malloc_sd(&s2, pv2);
     if (strncmp(pt1, "cd", 2) == 0)
         str$$malloc_sd(&sr, pv1);
-    startpos = atol(pv3);
-    endpos = atol(pv4);
+    startpos = atoi(pv3);
+    endpos = atoi(pv4);
 
     printf("Testing str$pos_extr \n");
     printf("Extract a substring by position\n\n\n");
 
     printf("Input Destination      %s \n", pv1);
     printf("Input Source           %s \n", pv2);
-    printf("Input Start Position   %ld \n", startpos);
-    printf("Input End Position     %ld \n", endpos);
+    printf("Input Start Position   %d \n", startpos);
+    printf("Input End Position     %d \n", endpos);
     printf("\n");
 
     result = str$pos_extr(&s1, &s2, &startpos, &endpos);
@@ -2349,8 +2346,8 @@ int teststrpos_extr(FILE *fptr, int *fstatus, char *cont)
     printf("Output Source           ");
     str$$print_sd(&s2);
     printf("\n");
-    printf("Output Start Position   %ld \n", startpos);
-    printf("Output End Position     %lu \n", endpos);
+    printf("Output Start Position   %d \n", startpos);
+    printf("Output End Position     %u \n", endpos);
 
     str$free1_dx(&s1);
     str$free1_dx(&s2);
@@ -2368,7 +2365,7 @@ int teststrposition(FILE *fptr, int *fstatus, char *cont)
     char pt3[20], pv3[20];
     struct dsc$descriptor_s sd1, sd2;
     int result, expected_result;
-    signed long startpos;
+    int startpos;
 
     *fstatus = fscanf(fptr, scan7, pt1, pv1, pt2, pv2, pt3, pv3, presult);
 
@@ -2376,7 +2373,7 @@ int teststrposition(FILE *fptr, int *fstatus, char *cont)
         str$$malloc_sd(&sd1, pv1);
     if (strncmp(pt2, "cd", 2) == 0)
         str$$malloc_sd(&sd2, pv2);
-    startpos = atol(pv3);
+    startpos = atoi(pv3);
     expected_result = atoi(presult);
 
     printf("Testing  str$position \n");
@@ -2384,12 +2381,12 @@ int teststrposition(FILE *fptr, int *fstatus, char *cont)
 
     printf("Input Source String      %s \n", pv1);
     printf("Input Substring          %s \n", pv2);
-    printf("Input Start Position     %ld \n", startpos);
+    printf("Input Start Position     %d \n", startpos);
     printf("\n\n");
 
     result = str$position(&sd1, &sd2, &startpos);
 
-    printf("Output Results Position  %ld \n", result);
+    printf("Output Results Position  %d \n", result);
     printf("\n");
 
     print_int_compare("Position", (signed) expected_result, (signed) result, cont);
@@ -2401,7 +2398,7 @@ int teststrposition(FILE *fptr, int *fstatus, char *cont)
     printf("Output Substring         ");
     str$$print_sd(&sd2);
     printf("\n");
-    printf("Output Start Position    %ld \n", startpos);
+    printf("Output Start Position    %d \n", startpos);
     printf("\n\n");
 
     str$free1_dx(&sd1);
@@ -2459,8 +2456,8 @@ int teststrrecip(FILE *fptr, int *fstatus, char *cont)
 {
     int result_code;
     struct dsc$descriptor_s s1, s2, s3, sr;
-    unsigned long asign, bsign, csign, rsign;
-    signed long aexp, bexp, cexp, rexp;
+    unsigned int asign, bsign, csign, rsign;
+    signed int aexp, bexp, cexp, rexp;
     char presult[30];
     char pt1[10], pv1[10];
     char pt2[10], pv2[10];
@@ -2486,47 +2483,47 @@ int teststrrecip(FILE *fptr, int *fstatus, char *cont)
     if (strncmp(pt9, "cd", 2) == 0)
         str$$malloc_sd(&sr, pv9);
 
-    asign = atol(pv1);
-    bsign = atol(pv4);
-    csign = atol(pv7);
+    asign = atoi(pv1);
+    bsign = atoi(pv4);
+    csign = atoi(pv7);
 
-    aexp = atol(pv2);
-    bexp = atol(pv5);
-    cexp = atol(pv8);
+    aexp = atoi(pv2);
+    bexp = atoi(pv5);
+    cexp = atoi(pv8);
 
     rexp = cexp;       // Save expected return exponent
     rsign = csign;      // Save expected return sign
 
     printf("Testing str$recip \n");
     printf("C = 1 / A \n\n\n");
-    printf("Input A    sign %lu value ", asign);
+    printf("Input A    sign %u value ", asign);
     str$$print_sd(&s1);
-    printf(" exp %ld\n", aexp);
-    printf("Precision  sign %lu value ", bsign);
+    printf(" exp %d\n", aexp);
+    printf("Precision  sign %u value ", bsign);
     str$$print_sd(&s2);
-    printf(" exp %ld\n", bexp);
-    printf("Input C    sign %lu value ", csign);
+    printf(" exp %d\n", bexp);
+    printf("Input C    sign %u value ", csign);
     str$$print_sd(&s3);
-    printf(" exp %ld\n", cexp);
+    printf(" exp %d\n", cexp);
     printf("\n");
 
     result_code = str$recip(&asign, &aexp, &s1, &bsign, &bexp, &s2, &csign, &cexp, &s3);
 
     print_result_code(presult, result_code, cont);
-    print_ls_compare("Exponent", cexp, rexp, cont);
-    print_lu_compare("Sign", csign, rsign, cont);
+    print_int_compare("Exponent", cexp, rexp, cont);
+    print_uint_compare("Sign", csign, rsign, cont);
     print_desc_compare("Digits", &s3, &sr, cont);
 
     printf("\n\n");
-    printf("OUTPUT A sign %lu value ", asign);
+    printf("OUTPUT A sign %u value ", asign);
     str$$print_sd(&s1);
-    printf(" exp %ld\n", aexp);
-    printf("OUTPUT B sign %lu value ", bsign);
+    printf(" exp %d\n", aexp);
+    printf("OUTPUT B sign %u value ", bsign);
     str$$print_sd(&s2);
-    printf(" exp %ld\n", bexp);
-    printf("OUTPUT C sign %lu value ", csign);
+    printf(" exp %d\n", bexp);
+    printf("OUTPUT C sign %u value ", csign);
     str$$print_sd(&s3);
-    printf(" exp %ld\n", cexp);
+    printf(" exp %d\n", cexp);
 
     str$free1_dx(&s1);
     str$free1_dx(&s2);
@@ -2542,7 +2539,7 @@ int teststrreplace(FILE *fptr, int *fstatus, char *cont)
 {
     int result_code;
     struct dsc$descriptor_s s1, s2, s3, sr;
-    signed long start, end;
+    signed int start, end;
     char presult[30];
     char pt1[50], pv1[50];
     char pt2[50], pv2[50];
@@ -2556,8 +2553,8 @@ int teststrreplace(FILE *fptr, int *fstatus, char *cont)
         str$$malloc_sd(&s1, pv1);
     if (strncmp(pt2, "cd", 2) == 0)
         str$$malloc_sd(&s2, pv2);
-    start = atol(pv3);
-    end = atol(pv4);
+    start = atoi(pv3);
+    end = atoi(pv4);
     if (strncmp(pt5, "cd", 2) == 0)
         str$$malloc_sd(&s3, pv5);
     if (strncmp(pt1, "cd", 2) == 0)
@@ -2570,7 +2567,7 @@ int teststrreplace(FILE *fptr, int *fstatus, char *cont)
     printf("       Source      ");
     str$$print_sd(&s2);
     printf(" \n");
-    printf("       Positions   %ld : %ld \n", start, end);
+    printf("       Positions   %d : %d \n", start, end);
     printf("       Replacement ");
     str$$print_sd(&s3);
     printf("\n");
@@ -2606,7 +2603,7 @@ int teststrright(FILE *fptr, int *fstatus, char *cont)
 
 {
     int result_code;
-    long startpos;
+    int startpos;
     struct dsc$descriptor_s s1, s2, sr;
     char pt1[10], pv1[10];
     char pt2[10], pv2[10];
@@ -2615,7 +2612,7 @@ int teststrright(FILE *fptr, int *fstatus, char *cont)
 
     *fstatus = fscanf(fptr, scan7, pt1, pv1, pt2, pv2, pt3, pv3, presult);
 
-    startpos = atol(pv3);
+    startpos = atoi(pv3);
 
     if (strncmp(pt1, "cd", 2) == 0)
         str$$malloc_sd(&s1, pv1);
@@ -2628,7 +2625,7 @@ int teststrright(FILE *fptr, int *fstatus, char *cont)
     printf("Return right portion of a string \n\n");
     printf("Input Source      [%.10s]\n", pv2);
     printf("Input Destination [%.10s]\n", pv1);
-    printf("Input Start pos   [%ld]  \n\n\n", startpos);
+    printf("Input Start pos   [%d]  \n\n\n", startpos);
 
     result_code = str$right(&s1, &s2, &startpos);
 
@@ -2642,7 +2639,7 @@ int teststrright(FILE *fptr, int *fstatus, char *cont)
     printf("Output Destination  ");
     str$$print_sd(&s1);
     printf("\n");
-    printf("Output Start pos   [%ld]  \n\n\n", startpos);
+    printf("Output Start pos   [%d]  \n\n\n", startpos);
 
     return result_code;
 }
@@ -2661,37 +2658,37 @@ int teststrround(FILE *fptr, int *fstatus, char *cont)
     char pt7[10], pv7[10];
     char pt8[10], pv8[10];
     char presult[30];
-    unsigned long asign, csign, flags;
+    unsigned int asign, csign, flags;
     int result_code;
-    signed long aexp, cexp, places;
+    signed int aexp, cexp, places;
     struct dsc$descriptor_s adigits, cdigits, sr;
 
     *fstatus = fscanf(fptr, scan17, pt1, pv1, pt2, pv2, pt3, pv3, pt4, pv4, pt5, pv5, pt6, pv6, pt7, pv7, pt8, pv8, presult);
 
-    places = atol(pv1);
-    flags = atol(pv2);
-    asign = atol(pv3);
-    aexp = atol(pv4);
+    places = atoi(pv1);
+    flags = atoi(pv2);
+    asign = atoi(pv3);
+    aexp = atoi(pv4);
     if (strncmp(pt5, "cd", 2) == 0)
         str$$malloc_sd(&adigits, pv5);
     if (strncmp(pt5, "cd", 2) == 0)
         str$$malloc_sd(&sr, pv5);
-    csign = atol(pv6);
-    cexp = atol(pv7);
+    csign = atoi(pv6);
+    cexp = atoi(pv7);
     if (strncmp(pt8, "cd", 2) == 0)
         str$$malloc_sd(&cdigits, pv8);
 
     printf("Testing str$round \n");
     printf("Round a value\n\n");
-    printf("Input Source       sign %lu value  ", asign);
+    printf("Input Source       sign %u value  ", asign);
     str$$print_sd(&adigits);
-    printf(" exp %ld\n", aexp);
+    printf(" exp %d\n", aexp);
 
-    printf("Input Destination  sign %lu value  ", csign);
+    printf("Input Destination  sign %u value  ", csign);
     str$$print_sd(&cdigits);
-    printf(" exp %ld\n", cexp);
+    printf(" exp %d\n", cexp);
 
-    printf("Input Precision  %lu ", places);
+    printf("Input Precision  %u ", places);
 
     switch (flags)
     {
@@ -2702,7 +2699,7 @@ int teststrround(FILE *fptr, int *fstatus, char *cont)
         printf(" Flags 1  (Truncate) \n");
         break;
     default:
-        printf("Unknown Flag type %lu \n", flags);
+        printf("Unknown Flag type %u \n", flags);
     }
     printf("\n");
 
@@ -2712,15 +2709,15 @@ int teststrround(FILE *fptr, int *fstatus, char *cont)
     print_desc_compare("Digits", &sr, &adigits, cont);
 
     printf("\n\n");
-    printf("Output Source        sign %lu value ", asign);
+    printf("Output Source        sign %u value ", asign);
     str$$print_sd(&adigits);
-    printf(" exp %ld\n", aexp);
+    printf(" exp %d\n", aexp);
 
-    printf("Output Destination   sign %lu value ", csign);
+    printf("Output Destination   sign %u value ", csign);
     str$$print_sd(&cdigits);
-    printf(" exp %ld\n", cexp);
+    printf(" exp %d\n", cexp);
 
-    printf("Output Precision  %lu ", places);
+    printf("Output Precision  %u ", places);
 
     switch (flags)
     {
@@ -2731,7 +2728,7 @@ int teststrround(FILE *fptr, int *fstatus, char *cont)
         printf(" Flags 1  (Truncate) \n");
         break;
     default:
-        printf("Unknown Flag type %lu \n", flags);
+        printf("Unknown Flag type %u \n", flags);
     }
 
     str$free1_dx(&adigits);
@@ -2749,13 +2746,13 @@ int teststrrzerotrim(FILE *fptr, int *fstatus, char *cont)
     char pt1[6], pv1[6], pt2[255], pv2[255], presult[50];
     struct dsc$descriptor_s sd1;
     int result;
-    signed long exp;
+    signed int exp;
 
     *fstatus = fscanf(fptr, scan5, pt1, pv1, pt2, pv2, presult);
 
     if (strncmp(pt1, "cd", 2) == 0)
         str$$malloc_sd(&sd1, pv1);
-    exp = atol(pv2);
+    exp = atoi(pv2);
 
     printf("Testing str$$xtrailzero \n");
     printf("Remove trailing zero's and increment exponent \n");
@@ -2771,7 +2768,7 @@ int teststrrzerotrim(FILE *fptr, int *fstatus, char *cont)
     printf("Output String ");
     str$$print_sd(&sd1);
     printf("\n");
-    printf("Output Exponent %ld \n", exp);
+    printf("Output Exponent %d \n", exp);
 
     str$free1_dx(&sd1);
 
@@ -2784,8 +2781,8 @@ int teststrsub(FILE *fptr, int *fstatus, char *cont)
 {
     int result_code;
     struct dsc$descriptor_s s1, s2, s3, sr;
-    unsigned long asign, bsign, csign, rsign;
-    signed long aexp, bexp, cexp, rexp;
+    unsigned int asign, bsign, csign, rsign;
+    signed int aexp, bexp, cexp, rexp;
     char pt1[10], pv1[10];
     char pt2[10], pv2[10];
     char pt3[10], pv3[10];
@@ -2813,46 +2810,46 @@ int teststrsub(FILE *fptr, int *fstatus, char *cont)
     if (strncmp(pt9, "cd", 2) == 0)
         str$$malloc_sd(&sr, pv9);
 
-    asign = atol(pv1);
-    bsign = atol(pv4);
-    csign = atol(pv7);
+    asign = atoi(pv1);
+    bsign = atoi(pv4);
+    csign = atoi(pv7);
     rsign = csign;
 
-    aexp = atol(pv2);
-    bexp = atol(pv5);
-    cexp = atol(pv8);
+    aexp = atoi(pv2);
+    bexp = atoi(pv5);
+    cexp = atoi(pv8);
     rexp = cexp;
 
     printf("Testing str$sub \n");
     printf("C = A - B \n\n\n");
-    printf("Input A  sign %lu value ", asign);
+    printf("Input A  sign %u value ", asign);
     str$$print_sd(&s1);
-    printf(" exp %ld\n", aexp);
-    printf("Input B  sign %lu value ", bsign);
+    printf(" exp %d\n", aexp);
+    printf("Input B  sign %u value ", bsign);
     str$$print_sd(&s2);
-    printf(" exp %ld\n", bexp);
-    printf("Input C  sign %lu value ", csign);
+    printf(" exp %d\n", bexp);
+    printf("Input C  sign %u value ", csign);
     str$$print_sd(&s3);
-    printf(" exp %ld\n", cexp);
+    printf(" exp %d\n", cexp);
     printf("\n");
 
     result_code = str$sub(&asign, &aexp, &s1, &bsign, &bexp, &s2, &csign, &cexp, &s3);
 
     print_result_code(presult, result_code, cont);
-    print_ls_compare("Exponent", cexp, rexp, cont);
-    print_lu_compare("Sign", csign, rsign, cont);
+    print_int_compare("Exponent", cexp, rexp, cont);
+    print_uint_compare("Sign", csign, rsign, cont);
     print_desc_compare("Digits", &s3, &sr, cont);
 
     printf("\n\n");
-    printf("Output A sign %lu value ", asign);
+    printf("Output A sign %u value ", asign);
     str$$print_sd(&s1);
-    printf(" exp %ld\n", aexp);
-    printf("Output B sign %lu value ", bsign);
+    printf(" exp %d\n", aexp);
+    printf("Output B sign %u value ", bsign);
     str$$print_sd(&s2);
-    printf(" exp %ld\n", bexp);
-    printf("Output C sign %lu value ", csign);
+    printf(" exp %d\n", bexp);
+    printf("Output C sign %u value ", csign);
     str$$print_sd(&s3);
-    printf(" exp %ld\n", cexp);
+    printf(" exp %d\n", cexp);
 
     str$free1_dx(&s1);
     str$free1_dx(&s2);
@@ -2943,7 +2940,7 @@ int teststrtrim(FILE *fptr, int *fstatus, char *cont)
     str$$malloc_sd(&sd2, pv2);
     str$$malloc_sd(&sd_blank, "BLANK");
     str$$malloc_sd(&sd_tab, "TAB");
-    length = atol(pv3);
+    length = atoi(pv3);
 
     if (pv2[0] == 'B')
         str$append(&sd2, &sd_blank);
@@ -3030,13 +3027,12 @@ int teststrupcase(FILE *fptr, int *fstatus, char *cont)
 
 /*************************************/
 
-#if 0
 int testsysasctim(void)
 {
+    int status;
 
     struct dsc$descriptor return_date;
     char date_buffer[64];
-    unsigned long status;
 
     return_date.dsc$w_length = sizeof(date_buffer);
     return_date.dsc$b_dtype = DSC$K_DTYPE_T;
@@ -3049,5 +3045,4 @@ int testsysasctim(void)
 
     return status;
 }
-#endif
 

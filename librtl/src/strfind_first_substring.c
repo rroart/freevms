@@ -83,10 +83,9 @@
 /************************************/
 
 #undef str$find_first_substring
-int str$find_first_substring(const struct dsc$descriptor_s *s1, long *index, long *subindex, struct dsc$descriptor_s *sub, ...)
+int str$find_first_substring(const struct dsc$descriptor_s *s1, int *index, int *subindex, struct dsc$descriptor_s *sub, ...)
 {
-    int i, status, result;
-    long j;
+    int i, j, status, result;
     char *s1_ptr, *s2_ptr;
     struct dsc$descriptor_s *sd_ptr, temp_sd, temp2_sd;
     unsigned short s1_len, s2_len, temp_len;

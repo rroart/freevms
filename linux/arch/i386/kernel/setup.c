@@ -108,7 +108,6 @@
 #include <asm/system.h>
 #include <asm/io.h>
 #include <asm/smp.h>
-#include <asm/cobalt.h>
 #include <asm/msr.h>
 #include <asm/desc.h>
 #include <asm/e820.h>

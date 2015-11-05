@@ -75,7 +75,7 @@
  *      1 if first > second
  */
 int str$compare_multi(const struct dsc$descriptor_s* first_source_string, const struct dsc$descriptor_s *second_source_string,
-        const unsigned long *flags, const unsigned long *language)
+        const unsigned int *flags, const unsigned int *language)
 {
     unsigned long case_sensitive, character_set;
     char *s1_ptr, *s2_ptr;
@@ -84,7 +84,7 @@ int str$compare_multi(const struct dsc$descriptor_s* first_source_string, const 
     int result;
 
     case_sensitive = 1;         // default case sensitive comparision
-    if ((unsigned long) flags != 0)
+    if (flags != NULL)
     {
         switch (*flags)
         {
@@ -101,7 +101,7 @@ int str$compare_multi(const struct dsc$descriptor_s* first_source_string, const 
     }
 
     character_set = 1;
-    if ((unsigned long) language != 0)
+    if (language != NULL)
     {
         switch (*language)
         {

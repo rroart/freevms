@@ -51,13 +51,13 @@
 
 /************************************/
 
-int str$replace(struct dsc$descriptor_s *destin, const struct dsc$descriptor_s *source, const long *begin, const long *finish,
+int str$replace(struct dsc$descriptor_s *destin, const struct dsc$descriptor_s *source, const int *begin, const int *finish,
         const struct dsc$descriptor_s *sub)
 {
     int status;
     char *s1_ptr;
     unsigned short s1_len, temp_len;
-    long start, end, newstart, newend;
+    int start, end, newstart, newend;
     struct dsc$descriptor_s temp;
 
     start = *begin;

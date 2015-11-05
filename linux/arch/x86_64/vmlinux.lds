@@ -1,7 +1,7 @@
 /* ld script to make x86-64 Linux kernel
  * Written by Martin Mares <mj@atrey.karlin.mff.cuni.cz>;
  */
-OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64", "elf64-x86-64")
+OUTPUT_FORMAT("elf64-x86-64")
 OUTPUT_ARCH(i386:x86-64)
 ENTRY(_start)
 SECTIONS
@@ -28,10 +28,6 @@ SECTIONS
   __start___ksymtab = .;	/* Kernel symbol table */
   __ksymtab : { *(__ksymtab) }
   __stop___ksymtab = .;
-
-  __start___kallsyms = .;	/* All kernel symbols */
-  __kallsyms : { *(__kallsyms) }
-  __stop___kallsyms = .;
 
   .data : {			/* Data */
 	*(.data)
@@ -108,7 +104,7 @@ SECTIONS
 
   .comment 0 : { *(.comment) }
 
-p1pp 0x7ffff000 (NOLOAD): {
+p1pp 0xffffffff7ffff000 (NOLOAD): {
 *(p1pp)
 }
 }

@@ -39,7 +39,7 @@
 #include "str$routines.h"
 
 #define MAXSTR      132000
-#define MAXUINT16   65536
+#define MAXUINT16   65535
 #define TRUE        1
 #define FALSE       0
 

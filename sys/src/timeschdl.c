@@ -44,9 +44,6 @@
 #include <linux/config.h>
 
 #include <asm/fixmap.h>
-#ifdef __i386__
-#include <asm/cobalt.h>
-#endif
 
 /*
  * for x86_do_profile()

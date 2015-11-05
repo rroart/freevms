@@ -27,7 +27,7 @@
  * str$left
  *
  */
-int str$left(struct dsc$descriptor_s* destination_string, const struct dsc$descriptor_s* source_string, const long* end_position)
+int str$left(struct dsc$descriptor_s* destination_string, const struct dsc$descriptor_s* source_string, const int* end_position)
 {
     char* s2_ptr; /* Pointer to second string */
     unsigned short s2_length; /* Length of second string */

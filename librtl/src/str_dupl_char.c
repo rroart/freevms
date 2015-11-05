@@ -36,7 +36,7 @@
  * str$dupl_char
  *
  */
-int str$dupl_char(struct dsc$descriptor_s* destination_string, const long* repetition_count, const char* ascii_character)
+int str$dupl_char(struct dsc$descriptor_s* destination_string, const int* repetition_count, const char* ascii_character)
 {
     char* s1_ptr; /* Pointer to first string */
     unsigned short s1_length; /* Length of first string */

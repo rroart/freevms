@@ -54,9 +54,9 @@ int lib$build_nodespec(const struct dsc$descriptor_s *primary, struct dsc$descri
         const struct dsc$descriptor_s *acs, const struct dsc$descriptor_s *secondary, unsigned short *nodespec_length)
 {
     int result_code;
-    unsigned long max_length;
+    unsigned int max_length;
     unsigned short primary_length;
-    long quote_pos, start_pos;
+    int quote_pos, start_pos;
     char *primary_ptr;
     struct dsc$descriptor_s temp, quote, double_quote;
 
@@ -81,15 +81,15 @@ int lib$build_nodespec(const struct dsc$descriptor_s *primary, struct dsc$descri
     str$copy_dx(nodespec, primary);
 
 //duplicate quotation marks
-    quote_pos = str$position(nodespec, &quote, &start_pos);
-    if (quote_pos != 0)
+    quote_pos = (int) str$position(nodespec, &quote, &start_pos);
+    if (quote_pos > 0)
         str$replace(&temp, nodespec, &quote_pos, &quote_pos, &double_quote);
 
 // add 2 -- to get past the one's we put in
     quote_pos += 2;
-    quote_pos = str$position(&temp, &quote, &quote_pos);
+    quote_pos = (int) str$position(&temp, &quote, &quote_pos);
 
-    if (quote_pos != 0)
+    if (quote_pos > 0)
         str$replace(nodespec, &temp, &quote_pos, &quote_pos, &double_quote);
 
 //  Append access control string to primary node name

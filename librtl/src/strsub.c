@@ -118,11 +118,11 @@
  *      STR$_WRONUMARG  Wrong number of arguments
  *  Bugs
  *      You could create a much more elegant solution seeing if
- *      the numbers actually overlap befor going down the brute
+ *      the numbers actually overlap before going down the brute
  *      force road
  */
 #define MAXSTR 132000
-#define MAXUINT16   65536
+#define MAXUINT16   65535
 #define POS 0
 #define NEG 1
 #define REV 0
@@ -131,27 +131,23 @@
 #define TRUE 1
 #define MALLOC_CHECK_ 0
 
-int str$sub(const unsigned long *asign, const long *aexp, const struct dsc$descriptor_s *adigits, const unsigned long *bsign,
-        const long *bexp, const struct dsc$descriptor_s *bdigits, unsigned long *csign, long *cexp,
-        struct dsc$descriptor_s *cdigits)
+int str$sub(const unsigned int *asign, const int *aexp, const struct dsc$descriptor_s *adigits, const unsigned int *bsign,
+        const int *bexp, const struct dsc$descriptor_s *bdigits, unsigned int *csign, int *cexp, struct dsc$descriptor_s *cdigits)
 {
-    unsigned short s1_len, s2_len, s3_len, c_len;
+    unsigned short s1_len, s2_len, s3_len, c_len, max_len;
     char *s1_ptr, *s2_ptr, *s3_ptr;
-    unsigned long index, max_len, min_len;
     int i, j, k, l;
     int status;
-    signed long min_exp, max_exp, a_size, b_size, max_size, min_size;
+    int min_exp, a_size, b_size;
     char ctemp;
-    int sum, borrow, order, result;
-    int a_not_zero, b_not_zero, c_not_zero;
-    unsigned long plus_sign;
+    int sum, order, result;
+    int a_not_zero, b_not_zero;
+    unsigned int plus_sign;
     char *a, *b, *c;
 
     status = STR$_NORMAL;
-    index = 0;
     a_not_zero = FALSE;
     b_not_zero = FALSE;
-    c_not_zero = FALSE;
 
     a = (char *) calloc(MAXSTR, 1);
     b = (char *) calloc(MAXSTR, 1);
@@ -186,7 +182,6 @@ int str$sub(const unsigned long *asign, const long *aexp, const struct dsc$descr
     str$analyze_sdesc(adigits, &s1_len, &s1_ptr);
     str$analyze_sdesc(bdigits, &s2_len, &s2_ptr);
     str$analyze_sdesc(cdigits, &s3_len, &s3_ptr);
-//  strcpy (s3_ptr,"0");
     str$free1_dx(cdigits);
 
 //  Quick abort
@@ -198,14 +193,10 @@ int str$sub(const unsigned long *asign, const long *aexp, const struct dsc$descr
         return status;
     }
 
-    max_exp = (*aexp > *bexp) ? *aexp : *bexp;
     min_exp = (*aexp > *bexp) ? *bexp : *aexp;
     max_len = (s1_len > s2_len) ? s1_len : s2_len;
-    min_len = (s1_len > s2_len) ? s2_len : s1_len;
     a_size = (*aexp + s1_len);
     b_size = (*bexp + s2_len);
-    max_size = (a_size > b_size) ? a_size : b_size;
-    min_size = (a_size > b_size) ? b_size : a_size;
 
     str$analyze_sdesc(adigits, &s1_len, &s1_ptr);
     str$analyze_sdesc(bdigits, &s2_len, &s2_ptr);
@@ -370,7 +361,6 @@ int str$sub(const unsigned long *asign, const long *aexp, const struct dsc$descr
     }
 
     sum = 0;
-    borrow = 0;
     ctemp = '0';
 
 //  New max string length
@@ -446,7 +436,7 @@ int str$sub(const unsigned long *asign, const long *aexp, const struct dsc$descr
         }
     }
 
-//  Truncate output sum string to 65536 MAXUINT16
+//  Truncate output sum string to 65535 MAXUINT16
     if (max_len > MAXUINT16)
     {
         status = STR$_TRU;

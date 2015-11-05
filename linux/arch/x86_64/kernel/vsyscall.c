@@ -126,17 +126,7 @@ static time_t __vsyscall(1) vtime(time_t * tp)
     return tv.tv_sec;
 }
 
-static long __vsyscall(2) venosys_0(void)
-{
-    return -ENOSYS;
-}
-
-static long __vsyscall(3) venosys_1(void)
-{
-    return -ENOSYS;
-}
-
-extern char vsyscall_syscall[], __vsyscall_0[];
+extern char __vsyscall_0[];
 
 static void __init map_vsyscall(void)
 {

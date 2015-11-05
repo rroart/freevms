@@ -47,7 +47,7 @@
 #include "str$routines.h"
 
 #define MAXSTR      132000
-#define MAXUINT16   65536
+#define MAXUINT16   65535
 #define MAXCSTR16   65535
 #define TRUE        1
 #define FALSE       0
@@ -183,7 +183,7 @@ int str$$lzerotrim(struct dsc$descriptor_s *sd1)
  *  2004    Jan     Andrew Allison  Initial program creation
  */
 
-int str$$iszerotrim(struct dsc$descriptor_s *sd1, long *exp)
+int str$$iszerotrim(struct dsc$descriptor_s *sd1, int *exp)
 {
     int i, status, is_zero;
     char *s1_ptr;
@@ -224,7 +224,7 @@ int str$$iszerotrim(struct dsc$descriptor_s *sd1, long *exp)
  *
  */
 
-int str$$rzerotrim(struct dsc$descriptor_s *sd1, long *exp)
+int str$$rzerotrim(struct dsc$descriptor_s *sd1, int *exp)
 {
     int i, status;
     char *s1_ptr;

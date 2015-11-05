@@ -81,23 +81,22 @@
  *      STR$_WRONUMARG  Wrong number of arguments
  */
 #define MAXSTR      132000
-#define MAXUINT16   65536
+#define MAXUINT16   65535
 #define TRUE        1
 #define FALSE       0
 
-int str$divide(const unsigned long *asign, const long *aexp, const struct dsc$descriptor_s *adigits, const unsigned long *bsign,
-        const long *bexp, const struct dsc$descriptor_s *bdigits, const long *tdigits, const unsigned long *rti,
-        unsigned long *csign, long *cexp, struct dsc$descriptor_s *cdigits)
+int str$divide(const unsigned int *asign, const int *aexp, const struct dsc$descriptor_s *adigits, const unsigned int *bsign,
+        const int *bexp, const struct dsc$descriptor_s *bdigits, const int *tdigits, const unsigned int *rti, unsigned int *csign,
+        int *cexp, struct dsc$descriptor_s *cdigits)
 {
     int c_not_zero;
     int i, j, k, leading_zero_count;
     int status;
-    unsigned int temp_len, outlen;
+    unsigned short temp_len, outlen;
     char *s1_ptr, *s2_ptr, *s3_ptr;
     char *qa_ptr, *qb_ptr, *result_ptr;
-    signed long dexp, eexp, lpos, precision, temp_exp;
-//signed    long    outlenlong;
-    unsigned long dsign, esign, max_len, min_len, temp_rti;
+    int dexp, eexp, lpos, precision, temp_exp;
+    unsigned int dsign, esign, max_len, temp_rti;
     unsigned short s1_len, s2_len, s3_len, result_len;
     unsigned short uspos, qa_len, qb_len, result_temp_len;
     struct dsc$descriptor_s quotient, divisor, result, temp, quotient_a, quotient_b;
@@ -166,7 +165,6 @@ int str$divide(const unsigned long *asign, const long *aexp, const struct dsc$de
 //  char string is "right to left" alignment
 //  start at location specified by the exponent
     max_len = (s1_len > s2_len) ? s1_len : s2_len;
-    min_len = (s1_len > s2_len) ? s2_len : s1_len;
 
 //  Set the output exponent
     *cexp = *aexp - *bexp;
@@ -360,7 +358,7 @@ int str$divide(const unsigned long *asign, const long *aexp, const struct dsc$de
 //  Free any memory that is passed into us.
     str$free1_dx(cdigits);
 
-//  Truncate output sum string to 65536 MAXUINT16
+//  Truncate output sum string to 65535 MAXUINT16
     if (max_len > MAXUINT16)
     {
         status = STR$_TRU;
@@ -374,9 +372,6 @@ int str$divide(const unsigned long *asign, const long *aexp, const struct dsc$de
 
 //  trim leading zero's
     str$$lzerotrim(&result);
-
-//  outlenlong = outlen;
-//  str$left (cdigits,&result,&outlenlong);
 
 //  Who designed this - 2 routines flags are opposite
 //  str$divide 1 == round,    0 == truncate

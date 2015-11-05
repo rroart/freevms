@@ -146,7 +146,7 @@ void do_settimeofday(struct timeval *tv)
  * sheet for details.
  */
 
-/*static*/ void set_rtc_mmss(unsigned long nowtime)
+void set_rtc_mmss(unsigned long nowtime)
 {
     int real_seconds, real_minutes, cmos_minutes;
     unsigned char control, freq_select;
@@ -207,105 +207,6 @@ void do_settimeofday(struct timeval *tv)
     CMOS_WRITE(freq_select, RTC_FREQ_SELECT);
 
     spin_unlock(&rtc_lock);
-}
-
-static void timer_interrupt_not(int irq, void *dev_id, struct pt_regs *regs)
-{
-    static unsigned long rtc_update = 0;
-
-    /*
-     * Here we are in the timer irq handler. We have irqs locally disabled (so we
-     * don't need spin_lock_irqsave()) but we don't know if the timer_bh is running
-     * on the other CPU, so we need a lock. We also need to lock the vsyscall
-     * variables, because both do_timer() and us change them -arca+vojtech
-     */
-
-    write_lock(&xtime_lock);
-    vxtime_lock();
-
-    {
-        long tsc;
-        int delay, offset = 0;
-
-        if (hpet_address)
-        {
-
-            offset = hpet_readl(HPET_T0_CMP) - hpet_tick;
-            delay = hpet_readl(HPET_COUNTER) - offset;
-
-        }
-        else
-        {
-
-            spin_lock(&i8253_lock);
-            outb_p(0x00, 0x43);
-            delay = inb_p(0x40);
-            delay |= inb(0x40) << 8;
-            spin_unlock(&i8253_lock);
-            delay = LATCH - 1 - delay;
-        }
-
-        rdtscll_sync(&tsc);
-
-        if (vxtime.mode == VXTIME_HPET)
-        {
-
-            if (offset - vxtime.last > hpet_tick)
-            {
-                if (report_lost_ticks)
-                    printk(KERN_WARNING "time.c: Lost %d timer tick(s)! (rip %016lx)\n",
-                           (offset - vxtime.last) / hpet_tick - 1, regs->rip);
-                jiffies += (offset - vxtime.last) / hpet_tick - 1;
-            }
-
-            vxtime.last = offset;
-
-        }
-        else
-        {
-
-            offset = (((tsc - vxtime.last_tsc) * vxtime.tsc_quot) >> 32) - tick;
-
-            if (offset > tick)
-            {
-                if (report_lost_ticks)
-                    printk(KERN_WARNING "time.c: lost %ld tick(s) (rip %016lx)\n",
-                           offset / tick, regs->rip);
-                jiffies += offset / tick;
-                offset %= tick;
-            }
-
-            vxtime.last_tsc = tsc - vxtime.quot * delay / vxtime.tsc_quot;
-
-            if ((((tsc - vxtime.last_tsc) * vxtime.tsc_quot) >> 32) < offset)
-                vxtime.last_tsc = tsc - (((long)offset << 32) / vxtime.tsc_quot) - 1;
-
-        }
-    }
-
-    /*
-     * Do the timer stuff.
-     */
-
-    do_timer(regs);
-
-    /*
-     * If we have an externally synchronized Linux clock, then update CMOS clock
-     * accordingly every ~11 minutes. set_rtc_mmss() will be called in the jiffy
-     * closest to exactly 500 ms before the next second. If the update fails, we
-     * don'tcare, as it'll be updated on the next turn, and the problem (time way
-     * off) isn't likely to go away much sooner anyway.
-     */
-
-    if ((~time_status & STA_UNSYNC) && xtime.tv_sec > rtc_update &&
-            abs(xtime.tv_usec - 500000) <= tick / 2)
-    {
-        set_rtc_mmss(xtime.tv_sec);
-        rtc_update = xtime.tv_sec + 660;
-    }
-
-    vxtime_unlock();
-    write_unlock(&xtime_lock);
 }
 
 static unsigned long get_cmos_time(void)

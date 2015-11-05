@@ -127,7 +127,6 @@ pic/%.o: %.c
 	install -d pic
 	$(CC) -fpic -fPIC $(CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS_$@) -I$(HPATH) -c -o $@ $<
 
-str.o : str.c ../../starlet/src/strdef.h
 str_analyze_sdesc.o : str_analyze_sdesc.c ../../starlet/src/strdef.h
 str_append.o : str_append.c ../../starlet/src/strdef.h
 str_blind_compare.o : str_blind_compare.c ../../starlet/src/strdef.h

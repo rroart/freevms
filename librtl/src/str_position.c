@@ -72,7 +72,7 @@
  *      relative position.
  */
 unsigned int str$position(const struct dsc$descriptor_s* first_source_string, const struct dsc$descriptor_s *second_source_string,
-        const long *start_position)
+        const int *start_position)
 {
     char* s1_ptr; /* Pointer to first string */
     unsigned short s1_length; /* Length of first string */

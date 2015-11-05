@@ -49,8 +49,8 @@ int main()
     struct dsc$descriptor_s Test1;
     struct dsc$descriptor_s Test3;
     unsigned short ten = 10;
-    long seventeen = 17;
-    long eight = 8;
+    int seventeen = 17;
+    int eight = 8;
     char TextChar = 'R';
     short answer1;
 

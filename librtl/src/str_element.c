@@ -69,7 +69,7 @@
  * str$element
  *
  */
-int str$element(struct dsc$descriptor_s* destination_string, const long* find_element_number,
+int str$element(struct dsc$descriptor_s* destination_string, const int* find_element_number,
         const struct dsc$descriptor_s* delimiter_string, const struct dsc$descriptor_s* source_string)
 {
     char* s1_ptr; /*Pointer to first string */
@@ -85,7 +85,7 @@ int str$element(struct dsc$descriptor_s* destination_string, const long* find_el
     int result = STR$_NORMAL; /* Result */
     int element_number;
 
-    element_number = (int) *find_element_number;
+    element_number = *find_element_number;
 
 //  Did we get a numeric value
     if ( isdigit((char) element_number + '0') == 0)

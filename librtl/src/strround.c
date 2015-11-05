@@ -99,10 +99,10 @@
  *      STR$_WRONUMARG  Wrong number of arguments
  */
 #define MAXSTR      132000
-#define MAXUINT16   65536
+#define MAXUINT16   65535
 
-int str$round(const long *tdigits, const unsigned long *rti, const unsigned long *asign, const long *aexp,
-        const struct dsc$descriptor_s *adigits, unsigned long *csign, long *cexp, struct dsc$descriptor_s *cdigits)
+int str$round(const int *tdigits, const unsigned int *rti, const unsigned int *asign, const int *aexp,
+        const struct dsc$descriptor_s *adigits, unsigned int *csign, int *cexp, struct dsc$descriptor_s *cdigits)
 
 {
     char *s1_ptr, *one_ptr, *temp_ptr, rounding_char;

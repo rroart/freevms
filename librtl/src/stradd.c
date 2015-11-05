@@ -95,27 +95,25 @@
 #include "libdef.h"
 #include "str$routines.h"
 #include "stdint.h"
+
 #define MAXSTR      132000
-#define MAXUINT16   65536
+#define MAXUINT16   65535
 
 /*****************************/
 
-int str$add(const unsigned long *asign, const long *aexp, const struct dsc$descriptor_s *adigits, const unsigned long *bsign,
-        const long *bexp, const struct dsc$descriptor_s *bdigits, unsigned long *csign, long *cexp,
-        struct dsc$descriptor_s *cdigits)
+int str$add(const unsigned int *asign, const int *aexp, const struct dsc$descriptor_s *adigits, const unsigned int *bsign,
+        const int *bexp, const struct dsc$descriptor_s *bdigits, unsigned int *csign, int *cexp, struct dsc$descriptor_s *cdigits)
 {
-    unsigned short s1_len, s2_len, s3_len, temp_len;
+    unsigned short s1_len, s2_len, s3_len, temp_len, max_len;
     char *s1_ptr, *s2_ptr, *s3_ptr;
-    unsigned long index, max_len, min_len;
     int i, j, k;
     int status;
-    signed long min_exp, max_exp, a_size, b_size, max_size, min_size;
+    int min_exp, max_exp, a_size, b_size, max_size, min_size;
     char ctemp;
     int sum, carry;
     char *a, *b, *c;
 
     status = STR$_NORMAL;
-    index = 0;
 
     a = (char *) calloc(MAXSTR, 1);
     b = (char *) calloc(MAXSTR, 1);
@@ -187,7 +185,6 @@ int str$add(const unsigned long *asign, const long *aexp, const struct dsc$descr
     max_exp = (*aexp > *bexp) ? *aexp : *bexp;    // get largest exp
     min_exp = (*aexp > *bexp) ? *bexp : *aexp;
     max_len = (s1_len > s2_len) ? s1_len : s2_len;
-    min_len = (s1_len > s2_len) ? s2_len : s1_len;
     a_size = (*aexp + s1_len);
     b_size = (*bexp + s2_len);
     max_size = (a_size > b_size) ? a_size : b_size;
@@ -271,7 +268,7 @@ int str$add(const unsigned long *asign, const long *aexp, const struct dsc$descr
     }
     if (carry == 1)
     {
-        for (i = max_len - 1; i >= 0; i--)
+        for (i = max_len - 1; (int)i >= 0; i--)
         {
             c[i + 1] = c[i];
         }
@@ -279,7 +276,7 @@ int str$add(const unsigned long *asign, const long *aexp, const struct dsc$descr
         max_len++;
     }
 
-//  Truncate output sum string to 65536 MAXUINT16
+//  Truncate output sum string to 65535 MAXUINT16
     if (max_len > MAXUINT16)
     {
         status = STR$_TRU;
