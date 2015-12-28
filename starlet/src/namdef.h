@@ -1,6 +1,8 @@
 #ifndef NAMDEF_H
 #define NAMDEF_H
 
+#include <fiddef.h>
+
 #define     NAM$C_BID       2
 #define     NAM$C_MAXRSS        255
 #define     NAM$C_MAXRSSLCL     255
@@ -221,379 +223,311 @@
 
 struct _namdef
 {
-    unsigned char nam$b_bid;
-    unsigned char nam$b_bln;
-    unsigned char nam$b_rss;
-    unsigned char nam$b_rsl;
+    UINT8 nam$b_bid;
+    UINT8 nam$b_bln;
+    UINT8 nam$b_rss;
+    UINT8 nam$b_rsl;
     char *nam$l_rsa;
     union
     {
-        unsigned char nam$b_nop;
+        UINT8 nam$b_nop;
         struct
         {
-            unsigned nam$v_pwd      : 1;
-            unsigned nam$v_fill_1       : 1;
-            unsigned nam$v_fill_2       : 1;
-            unsigned nam$v_synchk       : 1;
-            unsigned nam$v_noconceal        : 1;
-            unsigned nam$v_slparse      : 1;
-            unsigned nam$v_srchxabs     : 1;
-            unsigned nam$v_no_short_upcase  : 1;
+            UINT8 nam$v_pwd :1;
+            UINT8 nam$v_fill_1 :1;
+            UINT8 nam$v_fill_2 :1;
+            UINT8 nam$v_synchk :1;
+            UINT8 nam$v_noconceal :1;
+            UINT8 nam$v_slparse :1;
+            UINT8 nam$v_srchxabs :1;
+            UINT8 nam$v_no_short_upcase :1;
         };
     };
-    unsigned char nam$b_rfs;
-    unsigned char nam$b_ess;
-    unsigned char nam$b_esl;
+    UINT8 nam$b_rfs;
+    UINT8 nam$b_ess;
+    UINT8 nam$b_esl;
     char *nam$l_esa;
     union
     {
         struct _namdef *nam$l_rlf;
         struct _namldef *nam$l_rlf_naml;
     };
-    char nam$t_dvi [16];
-    union
-    {
-        unsigned short int nam$w_fid [3];
-        struct
-        {
-            unsigned short int nam$w_fid_num;
-            unsigned short int nam$w_fid_seq;
-            union
-            {
-                unsigned short int nam$w_fid_rvn;
-                struct
-                {
-                    unsigned char nam$b_fid_rvn;
-                    unsigned char nam$b_fid_nmx;
-                };
-            };
-        };
-    };
-    union
-    {
-        unsigned short int nam$w_did [3];
-        struct
-        {
-            unsigned short int nam$w_did_num;
-            unsigned short int nam$w_did_seq;
-            union
-            {
-                unsigned short int nam$w_did_rvn;
-                struct
-                {
-                    unsigned char nam$b_did_rvn;
-                    unsigned char nam$b_did_nmx;
-                };
-            };
-        };
-    };
+    char nam$t_dvi[16];
+    struct _fiddef nam$w_fid;
+    struct _fiddef nam$w_did;
     union
     {
         unsigned long nam$l_wcc; // check. is index. drop long later. was int.
         struct
         {
-            unsigned namdef$$_fill_1        : 16;
-            unsigned nam$v_ifi      : 1;
-            unsigned namdef$$_fill_2        : 13;
-            unsigned nam$v_srchnmf      : 1;
-            unsigned nam$v_svctx        : 1;
+            UINT32 namdef$$_fill_1 :16;
+            UINT32 nam$v_ifi :1;
+            UINT32 namdef$$_fill_2 :13;
+            UINT32 nam$v_srchnmf :1;
+            UINT32 nam$v_svctx :1;
         };
     };
     union
     {
-        unsigned int nam$l_fnb;
+        UINT32 nam$l_fnb;
         struct
         {
-            unsigned nam$v_exp_ver      : 1;
-            unsigned nam$v_exp_type     : 1;
-            unsigned nam$v_exp_name     : 1;
-            unsigned nam$v_wild_ver     : 1;
-            unsigned nam$v_wild_type        : 1;
-            unsigned nam$v_wild_name        : 1;
-            unsigned nam$v_exp_dir      : 1;
-            unsigned nam$v_exp_dev      : 1;
-            unsigned nam$v_wildcard     : 1;
-            unsigned nam$v_dir_lvls_g7  : 1;
-            unsigned nam$v_wild_sfdg7       : 1;
-            unsigned nam$v_search_list  : 1;
-            unsigned nam$v_cncl_dev     : 1;
-            unsigned nam$v_root_dir     : 1;
-            unsigned nam$v_lowver       : 1;
-            unsigned nam$v_highver      : 1;
-            unsigned nam$v_ppf      : 1;
-            unsigned nam$v_node     : 1;
-            unsigned nam$v_quoted       : 1;
-            unsigned nam$v_grp_mbr      : 1;
-            unsigned nam$v_wild_dir     : 1;
-            unsigned nam$v_dir_lvls     : 3;
+            UINT32 nam$v_exp_ver :1;
+            UINT32 nam$v_exp_type :1;
+            UINT32 nam$v_exp_name :1;
+            UINT32 nam$v_wild_ver :1;
+            UINT32 nam$v_wild_type :1;
+            UINT32 nam$v_wild_name :1;
+            UINT32 nam$v_exp_dir :1;
+            UINT32 nam$v_exp_dev :1;
+            UINT32 nam$v_wildcard :1;
+            UINT32 nam$v_dir_lvls_g7 :1;
+            UINT32 nam$v_wild_sfdg7 :1;
+            UINT32 nam$v_search_list :1;
+            UINT32 nam$v_cncl_dev :1;
+            UINT32 nam$v_root_dir :1;
+            UINT32 nam$v_lowver :1;
+            UINT32 nam$v_highver :1;
+            UINT32 nam$v_ppf :1;
+            UINT32 nam$v_node :1;
+            UINT32 nam$v_quoted :1;
+            UINT32 nam$v_grp_mbr :1;
+            UINT32 nam$v_wild_dir :1;
+            UINT32 nam$v_dir_lvls :3;
         };
         struct
         {
-            unsigned namdef$$_fill_4        : 24;
-            unsigned nam$v_wild_ufd     : 1;
-            unsigned nam$v_wild_sfd1        : 1;
-            unsigned nam$v_wild_sfd2        : 1;
-            unsigned nam$v_wild_sfd3        : 1;
-            unsigned nam$v_wild_sfd4        : 1;
-            unsigned nam$v_wild_sfd5        : 1;
-            unsigned nam$v_wild_sfd6        : 1;
-            unsigned nam$v_wild_sfd7        : 1;
+            UINT32 namdef$$_fill_4 :24;
+            UINT32 nam$v_wild_ufd :1;
+            UINT32 nam$v_wild_sfd1 :1;
+            UINT32 nam$v_wild_sfd2 :1;
+            UINT32 nam$v_wild_sfd3 :1;
+            UINT32 nam$v_wild_sfd4 :1;
+            UINT32 nam$v_wild_sfd5 :1;
+            UINT32 nam$v_wild_sfd6 :1;
+            UINT32 nam$v_wild_sfd7 :1;
         };
         struct
         {
-            unsigned namdef$$_fill_5        : 24;
-            unsigned nam$v_wild_grp     : 1;
-            unsigned nam$v_wild_mbr     : 1;
-            unsigned nam$v_fill_5_      : 6;
+            UINT32 namdef$$_fill_5 :24;
+            UINT32 nam$v_wild_grp :1;
+            UINT32 nam$v_wild_mbr :1;
+            UINT32 nam$v_fill_5_ :6;
         };
     };
-    unsigned char nam$b_node;
-    unsigned char nam$b_dev;
-    unsigned char nam$b_dir;
-    unsigned char nam$b_name;
-    unsigned char nam$b_type;
-    unsigned char nam$b_ver;
+    UINT8 nam$b_node;
+    UINT8 nam$b_dev;
+    UINT8 nam$b_dir;
+    UINT8 nam$b_name;
+    UINT8 nam$b_type;
+    UINT8 nam$b_ver;
     union
     {
-        unsigned char nam$b_nmc;
+        UINT8 nam$b_nmc;
         struct
         {
-            unsigned nam$v_did      : 1;
-            unsigned nam$v_fid      : 1;
-            unsigned nam$v_res_did      : 1;
-            unsigned nam$v_res_fid      : 1;
-            unsigned nam$v_res_escape       : 1;
-            unsigned nam$v_res_unicode  : 1;
-            unsigned namdef$$_fill_3        : 2;
+            UINT8 nam$v_did :1;
+            UINT8 nam$v_fid :1;
+            UINT8 nam$v_res_did :1;
+            UINT8 nam$v_res_fid :1;
+            UINT8 nam$v_res_escape :1;
+            UINT8 nam$v_res_unicode :1;
+            UINT8 namdef$$_fill_3 :2;
         };
     };
-    char namdef$$_fill_6 [1];
+    UINT8 namdef$$_fill_6;
     char *nam$l_node;
     char *nam$l_dev;
     char *nam$l_dir;
     char *nam$l_name;
     char *nam$l_type;
     char *nam$l_ver;
-    unsigned short int nam$w_first_wild_dir;
-    unsigned short int nam$w_long_dir_levels;
-    unsigned int namdef$$_fill_7 [1];
+    UINT16 nam$w_first_wild_dir;
+    UINT16 nam$w_long_dir_levels;
+    UINT32 namdef$$_fill_7;
 };
 
 struct _namldef
 {
-    unsigned char naml$b_bid;
-    unsigned char naml$b_bln;
-    unsigned char naml$b_rss;
-    unsigned char naml$b_rsl;
+    UINT8 naml$b_bid;
+    UINT8 naml$b_bln;
+    UINT8 naml$b_rss;
+    UINT8 naml$b_rsl;
     char *naml$l_rsa;
     union
     {
-        unsigned char naml$b_nop;
+        UINT8 naml$b_nop;
         struct
         {
-            unsigned naml$v_pwd     : 1;
-            unsigned naml$v_fill_1      : 1;
-            unsigned naml$v_fill_2      : 1;
-            unsigned naml$v_synchk      : 1;
-            unsigned naml$v_noconceal       : 1;
-            unsigned naml$v_slparse     : 1;
-            unsigned naml$v_srchxabs        : 1;
-            unsigned naml$v_no_short_upcase : 1;
+            UINT8 naml$v_pwd :1;
+            UINT8 naml$v_fill_1 :1;
+            UINT8 naml$v_fill_2 :1;
+            UINT8 naml$v_synchk :1;
+            UINT8 naml$v_noconceal :1;
+            UINT8 naml$v_slparse :1;
+            UINT8 naml$v_srchxabs :1;
+            UINT8 naml$v_no_short_upcase :1;
         };
     };
-    unsigned char naml$b_rfs;
-    unsigned char naml$b_ess;
-    unsigned char naml$b_esl;
+    UINT8 naml$b_rfs;
+    UINT8 naml$b_ess;
+    UINT8 naml$b_esl;
     char *naml$l_esa;
     union
     {
         struct _namdef *naml$l_rlf;
         struct _namldef *naml$l_rlf_naml;
     };
-    char naml$t_dvi [16];
+    char naml$t_dvi[16];
+    struct _fiddef naml$w_fid;
+    struct _fiddef naml$w_did;
     union
     {
-        unsigned short int naml$w_fid [3];
+        UINT32 naml$l_wcc;
         struct
         {
-            unsigned short int naml$w_fid_num;
-            unsigned short int naml$w_fid_seq;
-            union
-            {
-                unsigned short int naml$w_fid_rvn;
-                struct
-                {
-                    unsigned char naml$b_fid_rvn;
-                    unsigned char naml$b_fid_nmx;
-                };
-            };
+            UINT32 namldef$$_fill_1 :16;
+            UINT32 naml$v_ifi :1;
+            UINT32 namldef$$_fill_2 :13;
+            UINT32 naml$v_srchnmf :1;
+            UINT32 naml$v_svctx :1;
         };
     };
     union
     {
-        unsigned short int naml$w_did [3];
+        UINT32 naml$l_fnb;
         struct
         {
-            unsigned short int naml$w_did_num;
-            unsigned short int naml$w_did_seq;
-            union
-            {
-                unsigned short int naml$w_did_rvn;
-                struct
-                {
-                    unsigned char naml$b_did_rvn;
-                    unsigned char naml$b_did_nmx;
-                };
-            };
+            UINT32 naml$v_exp_ver :1;
+            UINT32 naml$v_exp_type :1;
+            UINT32 naml$v_exp_name :1;
+            UINT32 naml$v_wild_ver :1;
+            UINT32 naml$v_wild_type :1;
+            UINT32 naml$v_wild_name :1;
+            UINT32 naml$v_exp_dir :1;
+            UINT32 naml$v_exp_dev :1;
+            UINT32 naml$v_wildcard :1;
+            UINT32 naml$v_dir_lvls_g7 :1;
+            UINT32 naml$v_wild_sfdg7 :1;
+            UINT32 naml$v_search_list :1;
+            UINT32 naml$v_cncl_dev :1;
+            UINT32 naml$v_root_dir :1;
+            UINT32 naml$v_lowver :1;
+            UINT32 naml$v_highver :1;
+            UINT32 naml$v_ppf :1;
+            UINT32 naml$v_node :1;
+            UINT32 naml$v_quoted :1;
+            UINT32 naml$v_grp_mbr :1;
+            UINT32 naml$v_wild_dir :1;
+            UINT32 naml$v_dir_lvls :3;
+        };
+        struct
+        {
+            UINT32 namldef$$_fill_4 :24;
+            UINT32 naml$v_wild_ufd :1;
+            UINT32 naml$v_wild_sfd1 :1;
+            UINT32 naml$v_wild_sfd2 :1;
+            UINT32 naml$v_wild_sfd3 :1;
+            UINT32 naml$v_wild_sfd4 :1;
+            UINT32 naml$v_wild_sfd5 :1;
+            UINT32 naml$v_wild_sfd6 :1;
+            UINT32 naml$v_wild_sfd7 :1;
+        };
+        struct
+        {
+            UINT32 namldef$$_fill_5 :24;
+            UINT32 naml$v_wild_grp :1;
+            UINT32 naml$v_wild_mbr :1;
+            UINT32 naml$v_fill_6_ :6;
         };
     };
+    UINT8 naml$b_node;
+    UINT8 naml$b_dev;
+    UINT8 naml$b_dir;
+    UINT8 naml$b_name;
+    UINT8 naml$b_type;
+    UINT8 naml$b_ver;
     union
     {
-        unsigned int naml$l_wcc;
+        UINT8 naml$b_nmc;
         struct
         {
-            unsigned namldef$$_fill_1       : 16;
-            unsigned naml$v_ifi     : 1;
-            unsigned namldef$$_fill_2       : 13;
-            unsigned naml$v_srchnmf     : 1;
-            unsigned naml$v_svctx       : 1;
+            UINT8 naml$v_did :1;
+            UINT8 naml$v_fid :1;
+            UINT8 naml$v_res_did :1;
+            UINT8 naml$v_res_fid :1;
+            UINT8 naml$v_res_escape :1;
+            UINT8 naml$v_res_unicode :1;
+            UINT8 namldef$$_fill_3 :2;
         };
     };
-    union
-    {
-        unsigned int naml$l_fnb;
-        struct
-        {
-            unsigned naml$v_exp_ver     : 1;
-            unsigned naml$v_exp_type        : 1;
-            unsigned naml$v_exp_name        : 1;
-            unsigned naml$v_wild_ver        : 1;
-            unsigned naml$v_wild_type       : 1;
-            unsigned naml$v_wild_name       : 1;
-            unsigned naml$v_exp_dir     : 1;
-            unsigned naml$v_exp_dev     : 1;
-            unsigned naml$v_wildcard        : 1;
-            unsigned naml$v_dir_lvls_g7 : 1;
-            unsigned naml$v_wild_sfdg7  : 1;
-            unsigned naml$v_search_list : 1;
-            unsigned naml$v_cncl_dev        : 1;
-            unsigned naml$v_root_dir        : 1;
-            unsigned naml$v_lowver      : 1;
-            unsigned naml$v_highver     : 1;
-            unsigned naml$v_ppf     : 1;
-            unsigned naml$v_node        : 1;
-            unsigned naml$v_quoted      : 1;
-            unsigned naml$v_grp_mbr     : 1;
-            unsigned naml$v_wild_dir        : 1;
-            unsigned naml$v_dir_lvls        : 3;
-        };
-        struct
-        {
-            unsigned namldef$$_fill_4       : 24;
-            unsigned naml$v_wild_ufd        : 1;
-            unsigned naml$v_wild_sfd1       : 1;
-            unsigned naml$v_wild_sfd2       : 1;
-            unsigned naml$v_wild_sfd3       : 1;
-            unsigned naml$v_wild_sfd4       : 1;
-            unsigned naml$v_wild_sfd5       : 1;
-            unsigned naml$v_wild_sfd6       : 1;
-            unsigned naml$v_wild_sfd7       : 1;
-        };
-        struct
-        {
-            unsigned namldef$$_fill_5       : 24;
-            unsigned naml$v_wild_grp        : 1;
-            unsigned naml$v_wild_mbr        : 1;
-            unsigned naml$v_fill_6_     : 6;
-        };
-    };
-    unsigned char naml$b_node;
-    unsigned char naml$b_dev;
-    unsigned char naml$b_dir;
-    unsigned char naml$b_name;
-    unsigned char naml$b_type;
-    unsigned char naml$b_ver;
-    union
-    {
-        unsigned char naml$b_nmc;
-        struct
-        {
-            unsigned naml$v_did     : 1;
-            unsigned naml$v_fid     : 1;
-            unsigned naml$v_res_did     : 1;
-            unsigned naml$v_res_fid     : 1;
-            unsigned naml$v_res_escape  : 1;
-            unsigned naml$v_res_unicode : 1;
-            unsigned namldef$$_fill_3       : 2;
-        };
-    };
-    char namldef$$_fill_6 [1];
+    UINT8 namldef$$_fill_6;
     char *naml$l_node;
     char *naml$l_dev;
     char *naml$l_dir;
     char *naml$l_name;
     char *naml$l_type;
     char *naml$l_ver;
-    unsigned short int naml$w_first_wild_dir;
-    unsigned short int naml$w_long_dir_levels;
-    unsigned int namldef$$_fill_7 [1];
-    unsigned int naml$l_long_defname_size;
+    UINT16 naml$w_first_wild_dir;
+    UINT16 naml$w_long_dir_levels;
+    UINT32 namldef$$_fill_7;
+    UINT32 naml$l_long_defname_size;
     char *naml$l_long_defname;
-    unsigned int naml$l_long_filename_size;
+    UINT32 naml$l_long_filename_size;
     char *naml$l_long_filename;
-    unsigned int naml$l_long_node_size;
+    UINT32 naml$l_long_node_size;
     char *naml$l_long_node;
-    unsigned int naml$l_long_dev_size;
+    UINT32 naml$l_long_dev_size;
     char *naml$l_long_dev;
-    unsigned int naml$l_long_dir_size;
+    UINT32 naml$l_long_dir_size;
     char *naml$l_long_dir;
-    unsigned int naml$l_long_name_size;
+    UINT32 naml$l_long_name_size;
     char *naml$l_long_name;
-    unsigned int naml$l_long_type_size;
+    UINT32 naml$l_long_type_size;
     char *naml$l_long_type;
-    unsigned int naml$l_long_ver_size;
+    UINT32 naml$l_long_ver_size;
     char *naml$l_long_ver;
-    unsigned int naml$l_long_expand_size;
+    UINT32 naml$l_long_expand_size;
     char *naml$l_long_expand;
-    unsigned int naml$l_long_expand_alloc;
-    int naml$l_reserved_mbz_9;
-    unsigned int naml$l_long_result_size;
+    UINT32 naml$l_long_expand_alloc;
+    UINT32 naml$l_reserved_mbz_9;
+    UINT32 naml$l_long_result_size;
     char *naml$l_long_result;
-    unsigned int naml$l_long_result_alloc;
-    int naml$l_reserved_mbz_8;
-    unsigned int naml$l_filesys_name_size;
+    UINT32 naml$l_long_result_alloc;
+    UINT32 naml$l_reserved_mbz_8;
+    UINT32 naml$l_filesys_name_size;
     char *naml$l_filesys_name;
-    unsigned int naml$l_filesys_name_alloc;
+    UINT32 naml$l_filesys_name_alloc;
     union
     {
-        unsigned int naml$l_output_flags;
+        UINT32 naml$l_output_flags;
         struct
         {
-            unsigned naml$v_long_result_escape  : 1;
-            unsigned naml$v_filesys_name_ucs2       : 1;
-            unsigned naml$v_long_result_did     : 1;
-            unsigned naml$v_long_result_fid     : 1;
-            unsigned naml$v_long_result_unicode : 1;
-            unsigned naml$v_fill_7_     : 3;
+            UINT32 naml$v_long_result_escape :1;
+            UINT32 naml$v_filesys_name_ucs2 :1;
+            UINT32 naml$v_long_result_did :1;
+            UINT32 naml$v_long_result_fid :1;
+            UINT32 naml$v_long_result_unicode :1;
+            UINT32 naml$v_fill_7_ :3;
         };
     };
     union
     {
-        unsigned int naml$l_input_flags;
+        UINT32 naml$l_input_flags;
         struct
         {
-            unsigned naml$v_no_short_output : 1;
-            unsigned naml$v_fill_8_     : 7;
+            UINT32 naml$v_no_short_output :1;
+            UINT32 naml$v_fill_8_ :7;
         };
     };
-    int naml$l_reserved_mbz_7;
-    unsigned long long naml$q_user_context;
-    int naml$l_reserved_mbz_6;
-    int naml$l_reserved_mbz_5;
-    int naml$l_reserved_mbz_4;
-    int naml$l_reserved_mbz_3;
-    int naml$l_reserved_mbz_2;
-    int naml$l_reserved_mbz_1;
+    UINT32 naml$l_reserved_mbz_7;
+    UINT64 naml$q_user_context;
+    UINT32 naml$l_reserved_mbz_6;
+    UINT32 naml$l_reserved_mbz_5;
+    UINT32 naml$l_reserved_mbz_4;
+    UINT32 naml$l_reserved_mbz_3;
+    UINT32 naml$l_reserved_mbz_2;
+    UINT32 naml$l_reserved_mbz_1;
 };
 
 extern struct _namdef cc$rms_nam;

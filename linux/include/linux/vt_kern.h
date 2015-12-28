@@ -6,7 +6,6 @@
  * with information needed by the vt package
  */
 
-#include <linux/config.h>
 #include <linux/vt.h>
 #include <linux/kd.h>
 
@@ -18,19 +17,17 @@
  * fixed.  The linux/Documentation directory includes a code snippet
  * to save and restore the text font.
  */
-#ifdef CONFIG_VGA_CONSOLE
 #define BROKEN_GRAPHICS_PROGRAMS 1
-#endif
 
 extern struct vt_struct
 {
-    int vc_num;             /* The console number */
-    unsigned char   vc_mode;        /* KD_TEXT, ... */
-    struct vt_mode  vt_mode;
-    int     vt_pid;
-    int     vt_newvt;
+    int vc_num; /* The console number */
+    unsigned char vc_mode; /* KD_TEXT, ... */
+    struct vt_mode vt_mode;
+    int vt_pid;
+    int vt_newvt;
     wait_queue_head_t paste_wait;
-} *vt_cons[MAX_NR_CONSOLES];
+}*vt_cons[MAX_NR_CONSOLES];
 
 extern void (*kd_mksound)(unsigned int hz, unsigned int ticks);
 extern int (*kbd_rate)(struct kbd_repeat *rep);
@@ -41,8 +38,7 @@ struct console_font_op;
 
 int vc_allocate(unsigned int console);
 int vc_cons_allocated(unsigned int console);
-int vc_resize(unsigned int lines, unsigned int cols,
-              unsigned int first, unsigned int last);
+int vc_resize(unsigned int lines, unsigned int cols, unsigned int first, unsigned int last);
 #define vc_resize_all(l, c) vc_resize(l, c, 0, MAX_NR_CONSOLES-1)
 #define vc_resize_con(l, c, x) vc_resize(l, c, x, x)
 void vc_disallocate(unsigned int console);

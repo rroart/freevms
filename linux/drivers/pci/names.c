@@ -117,8 +117,7 @@ static char *pci_class_names[] =
 #include "classlist.h"
 };
 
-char *
-pci_class_name(u32 class)
+char * pci_class_name(u32 class)
 {
     int i;
 
@@ -134,8 +133,7 @@ void __init pci_name_device(struct pci_dev *dev)
 {
 }
 
-char *
-pci_class_name(u32 class)
+char * pci_class_name(u32 class)
 {
     return NULL;
 }

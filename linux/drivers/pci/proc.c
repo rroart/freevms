@@ -579,6 +579,7 @@ static int proc_bus_pci_dev_open(struct inode *inode, struct file *file)
 {
     return seq_open(file, &proc_bus_pci_devices_op);
 }
+
 static struct file_operations proc_bus_pci_dev_operations =
 {
 open:
@@ -590,10 +591,12 @@ llseek:
 release:
     seq_release,
 };
+
 static int proc_pci_open(struct inode *inode, struct file *file)
 {
     return seq_open(file, &proc_pci_op);
 }
+
 static struct file_operations proc_pci_operations =
 {
 open:

@@ -47,8 +47,7 @@ LIST_HEAD( pci_devices);
  * is found, a pointer to its data structure is returned.  If no
  * device is found, %NULL is returned.
  */
-struct pci_dev *
-pci_find_slot(unsigned int bus, unsigned int devfn)
+struct pci_dev * pci_find_slot(unsigned int bus, unsigned int devfn)
 {
     struct pci_dev *dev;
 
@@ -57,7 +56,7 @@ pci_find_slot(unsigned int bus, unsigned int devfn)
         if (dev->bus->number == bus && dev->devfn == devfn)
             return dev;
     }
-    return NULL ;
+    return NULL;
 }
 
 /**
@@ -74,26 +73,21 @@ pci_find_slot(unsigned int bus, unsigned int devfn)
  * A new search is initiated by passing %NULL to the @from argument.
  * Otherwise if @from is not %NULL, searches continue from next device on the global list.
  */
-struct pci_dev *
-pci_find_subsys(unsigned int vendor, unsigned int device,
-                unsigned int ss_vendor, unsigned int ss_device,
-                const struct pci_dev *from)
+struct pci_dev * pci_find_subsys(unsigned int vendor, unsigned int device, unsigned int ss_vendor, unsigned int ss_device,
+        const struct pci_dev *from)
 {
     struct list_head *n = from ? from->global_list.next : pci_devices.next;
 
     while (n != &pci_devices)
     {
         struct pci_dev *dev = pci_dev_g(n);
-        if ((vendor == PCI_ANY_ID || dev->vendor == vendor)
-                && (device == PCI_ANY_ID || dev->device == device)
-                && (ss_vendor == PCI_ANY_ID
-                    || dev->subsystem_vendor == ss_vendor)
-                && (ss_device == PCI_ANY_ID
-                    || dev->subsystem_device == ss_device))
+        if ((vendor == PCI_ANY_ID || dev->vendor == vendor) && (device == PCI_ANY_ID || dev->device == device)
+                && (ss_vendor == PCI_ANY_ID || dev->subsystem_vendor == ss_vendor)
+                && (ss_device == PCI_ANY_ID || dev->subsystem_device == ss_device))
             return dev;
         n = n->next;
     }
-    return NULL ;
+    return NULL;
 }
 
 /**
@@ -108,9 +102,7 @@ pci_find_subsys(unsigned int vendor, unsigned int device,
  * A new search is initiated by passing %NULL to the @from argument.
  * Otherwise if @from is not %NULL, searches continue from next device on the global list.
  */
-struct pci_dev *
-pci_find_device(unsigned int vendor, unsigned int device,
-                const struct pci_dev *from)
+struct pci_dev * pci_find_device(unsigned int vendor, unsigned int device, const struct pci_dev *from)
 {
     return pci_find_subsys(vendor, device, PCI_ANY_ID, PCI_ANY_ID, from);
 }
@@ -127,8 +119,7 @@ pci_find_device(unsigned int vendor, unsigned int device,
  * Otherwise if @from is not %NULL, searches continue from next device
  * on the global list.
  */
-struct pci_dev *
-pci_find_class(unsigned int class, const struct pci_dev *from)
+struct pci_dev * pci_find_class(unsigned int class, const struct pci_dev *from)
 {
     struct list_head *n = from ? from->global_list.next : pci_devices.next;
 
@@ -139,7 +130,7 @@ pci_find_class(unsigned int class, const struct pci_dev *from)
             return dev;
         n = n->next;
     }
-    return NULL ;
+    return NULL;
 }
 
 /**
@@ -207,8 +198,7 @@ int pci_find_capability(struct pci_dev *dev, int cap)
  *  region of parent bus the given region is contained in or where
  *  it should be allocated from.
  */
-struct resource *
-pci_find_parent_resource(const struct pci_dev *dev, struct resource *res)
+struct resource * pci_find_parent_resource(const struct pci_dev *dev, struct resource *res)
 {
     const struct pci_bus *bus = dev->bus;
     int i;
@@ -225,8 +215,7 @@ pci_find_parent_resource(const struct pci_dev *dev, struct resource *res)
             continue; /* Wrong type */
         if (!((res->flags ^ r->flags) & IORESOURCE_PREFETCH))
             return r; /* Exact match */
-        if ((res->flags & IORESOURCE_PREFETCH)
-                && !(r->flags & IORESOURCE_PREFETCH))
+        if ((res->flags & IORESOURCE_PREFETCH) && !(r->flags & IORESOURCE_PREFETCH))
             best = r; /* Approximating prefetchable by non-prefetchable */
     }
     return best;
@@ -357,8 +346,7 @@ int pci_restore_state(struct pci_dev *dev, u32 *buffer)
     else
     {
         for (i = 0; i < 6; i++)
-            pci_write_config_dword(dev, PCI_BASE_ADDRESS_0 + (i * 4),
-                                   dev->resource[i].start);
+            pci_write_config_dword(dev, PCI_BASE_ADDRESS_0 + (i * 4), dev->resource[i].start);
         pci_write_config_byte(dev, PCI_INTERRUPT_LINE, dev->irq);
     }
     return 0;
@@ -486,12 +474,10 @@ void pci_release_regions(struct pci_dev *pdev)
             continue;
 
         if (pci_resource_flags(pdev, i) & IORESOURCE_IO)
-            release_region(pci_resource_start(pdev, i),
-                           pci_resource_len(pdev, i));
+            release_region(pci_resource_start(pdev, i), pci_resource_len(pdev, i));
 
         else if (pci_resource_flags(pdev, i) & IORESOURCE_MEM)
-            release_mem_region(pci_resource_start(pdev, i),
-                               pci_resource_len(pdev, i));
+            release_mem_region(pci_resource_start(pdev, i), pci_resource_len(pdev, i));
     }
 }
 
@@ -519,15 +505,13 @@ int pci_request_regions(struct pci_dev *pdev, char *res_name)
 
         if (pci_resource_flags(pdev, i) & IORESOURCE_IO)
         {
-            if (!request_region(pci_resource_start(pdev, i),
-                                pci_resource_len(pdev, i), res_name))
+            if (!request_region(pci_resource_start(pdev, i), pci_resource_len(pdev, i), res_name))
                 goto err_out;
         }
 
         else if (pci_resource_flags(pdev, i) & IORESOURCE_MEM)
         {
-            if (!request_mem_region(pci_resource_start(pdev, i),
-                                    pci_resource_len(pdev, i), res_name))
+            if (!request_mem_region(pci_resource_start(pdev, i), pci_resource_len(pdev, i), res_name))
                 goto err_out;
         }
     }
@@ -559,22 +543,18 @@ static LIST_HEAD( pci_drivers);
  * system is in its list of supported devices.Returns the matching
  * pci_device_id structure or %NULL if there is no match.
  */
-const struct pci_device_id *
-pci_match_device(const struct pci_device_id *ids, const struct pci_dev *dev)
+const struct pci_device_id * pci_match_device(const struct pci_device_id *ids, const struct pci_dev *dev)
 {
     while (ids->vendor || ids->subvendor || ids->class_mask)
     {
-        if ((ids->vendor == PCI_ANY_ID || ids->vendor == dev->vendor)
-                && (ids->device == PCI_ANY_ID || ids->device == dev->device)
-                && (ids->subvendor == PCI_ANY_ID
-                    || ids->subvendor == dev->subsystem_vendor)
-                && (ids->subdevice == PCI_ANY_ID
-                    || ids->subdevice == dev->subsystem_device)
+        if ((ids->vendor == PCI_ANY_ID || ids->vendor == dev->vendor) && (ids->device == PCI_ANY_ID || ids->device == dev->device)
+                && (ids->subvendor == PCI_ANY_ID || ids->subvendor == dev->subsystem_vendor)
+                && (ids->subdevice == PCI_ANY_ID || ids->subdevice == dev->subsystem_device)
                 && !((ids->class ^ dev->class) & ids->class_mask))
             return ids;
         ids++;
     }
-    return NULL ;
+    return NULL;
 }
 
 static int pci_announce_device(struct pci_driver *drv, struct pci_dev *dev)
@@ -601,8 +581,7 @@ static int pci_announce_device(struct pci_driver *drv, struct pci_dev *dev)
         ret = 1;
     }
     dev_probe_unlock();
-out:
-    return ret;
+    out: return ret;
 }
 
 /**
@@ -655,9 +634,7 @@ void pci_unregister_driver(struct pci_driver *drv)
 }
 
 static struct pci_driver pci_compat_driver =
-{
-name: "compat"
-};
+    { name: "compat" };
 
 /**
  * pci_dev_driver - get the pci_driver of a device
@@ -666,8 +643,7 @@ name: "compat"
  * Returns the appropriate pci_driver structure or %NULL if there is no
  * registered driver for the device.
  */
-struct pci_driver *
-pci_dev_driver(const struct pci_dev *dev)
+struct pci_driver * pci_dev_driver(const struct pci_dev *dev)
 {
     if (dev->driver)
         return dev->driver;
@@ -678,7 +654,7 @@ pci_dev_driver(const struct pci_dev *dev)
             if (dev->resource[i].flags & IORESOURCE_BUSY)
                 return &pci_compat_driver;
     }
-    return NULL ;
+    return NULL;
 }
 
 /*
@@ -686,8 +662,7 @@ pci_dev_driver(const struct pci_dev *dev)
  * configuration space.
  */
 
-static spinlock_t pci_lock = SPIN_LOCK_UNLOCKED
-                             ;
+static spinlock_t pci_lock = SPIN_LOCK_UNLOCKED;
 
 /*
  *  Wrappers for all PCI configuration access functions.  They just check
@@ -828,8 +803,8 @@ static void pci_read_bases(struct pci_dev *dev, unsigned int howmany, int rom)
             pci_read_config_dword(dev, reg+4, &sz);
             pci_write_config_dword(dev, reg+4, l);
             if (~sz)
-                res->end = res->start + 0xffffffff +
-                           (((unsigned long) ~sz) << 32);
+            res->end = res->start + 0xffffffff +
+            (((unsigned long) ~sz) << 32);
 #else
             if (l)
             {
@@ -853,9 +828,8 @@ static void pci_read_bases(struct pci_dev *dev, unsigned int howmany, int rom)
             l = 0;
         if (sz && sz != 0xffffffff)
         {
-            res->flags = (l & PCI_ROM_ADDRESS_ENABLE) | IORESOURCE_MEM
-                         | IORESOURCE_PREFETCH | IORESOURCE_READONLY
-                         | IORESOURCE_CACHEABLE;
+            res->flags = (l & PCI_ROM_ADDRESS_ENABLE) | IORESOURCE_MEM | IORESOURCE_PREFETCH | IORESOURCE_READONLY
+                    | IORESOURCE_CACHEABLE;
             res->start = l & PCI_ROM_ADDRESS_MASK;
             sz = pci_size(sz, PCI_ROM_ADDRESS_MASK);
             res->end = res->start + (unsigned long) sz;
@@ -918,8 +892,7 @@ void __devinit pci_read_bridge_bases(struct pci_bus *child)
     limit = (mem_limit_lo & PCI_MEMORY_RANGE_MASK) << 16;
     if (base && base <= limit)
     {
-        res->flags =
-            (mem_base_lo & PCI_MEMORY_RANGE_TYPE_MASK) | IORESOURCE_MEM;
+        res->flags = (mem_base_lo & PCI_MEMORY_RANGE_TYPE_MASK) | IORESOURCE_MEM;
         res->start = base;
         res->end = limit + 0xfffff;
         res->name = child->name;
@@ -955,8 +928,7 @@ void __devinit pci_read_bridge_bases(struct pci_bus *child)
     }
     if (base && base <= limit)
     {
-        res->flags = (mem_base_lo & PCI_MEMORY_RANGE_TYPE_MASK) | IORESOURCE_MEM
-                     | IORESOURCE_PREFETCH;
+        res->flags = (mem_base_lo & PCI_MEMORY_RANGE_TYPE_MASK) | IORESOURCE_MEM | IORESOURCE_PREFETCH;
         res->start = base;
         res->end = limit + 0xfffff;
         res->name = child->name;
@@ -983,8 +955,7 @@ static struct pci_bus * __devinit pci_alloc_bus(void)
     return b;
 }
 
-struct pci_bus * __devinit pci_add_new_bus(struct pci_bus *parent,
-        struct pci_dev *dev, int busnr)
+struct pci_bus * __devinit pci_add_new_bus(struct pci_bus *parent, struct pci_dev *dev, int busnr)
 {
     struct pci_bus *child;
     int i;
@@ -1028,8 +999,7 @@ unsigned int __devinit pci_do_scan_bus(struct pci_bus *bus);
  * them, we proceed to assigning numbers to the remaining buses in
  * order to avoid overlaps between old and new bus numbers.
  */
-static int __devinit pci_scan_bridge(struct pci_bus *bus, struct pci_dev * dev,
-                                     int max, int pass)
+static int __devinit pci_scan_bridge(struct pci_bus *bus, struct pci_dev * dev, int max, int pass)
 {
     unsigned int buses;
     unsigned short cr;
@@ -1078,8 +1048,7 @@ static int __devinit pci_scan_bridge(struct pci_bus *bus, struct pci_dev * dev,
         pci_write_config_word(dev, PCI_STATUS, 0xffff);
 
         child = pci_add_new_bus(bus, dev, ++max);
-        buses = (buses & 0xff000000) | ((unsigned int) (child->primary) << 0)
-                | ((unsigned int) (child->secondary) << 8)
+        buses = (buses & 0xff000000) | ((unsigned int) (child->primary) << 0) | ((unsigned int) (child->secondary) << 8)
                 | ((unsigned int) (child->subordinate) << 16);
         /*
          * We need to blast all three values with a single write.
@@ -1106,8 +1075,7 @@ static int __devinit pci_scan_bridge(struct pci_bus *bus, struct pci_dev * dev,
         pci_write_config_byte(dev, PCI_SUBORDINATE_BUS, max);
         pci_write_config_word(dev, PCI_COMMAND, cr);
     }
-    sprintf(child->name, (is_cardbus ? "PCI CardBus #%02x" : "PCI Bus #%02x"),
-            child->number);
+    sprintf(child->name, (is_cardbus ? "PCI CardBus #%02x" : "PCI Bus #%02x"), child->number);
     return max;
 }
 
@@ -1139,8 +1107,7 @@ int pci_setup_device(struct pci_dev * dev)
 {
     u32 class;
 
-    sprintf(dev->slot_name, "%02x:%02x.%d", dev->bus->number,
-            PCI_SLOT(dev->devfn), PCI_FUNC(dev->devfn));
+    sprintf(dev->slot_name, "%02x:%02x.%d", dev->bus->number, PCI_SLOT(dev->devfn), PCI_FUNC(dev->devfn));
     sprintf(dev->name, "PCI device %04x:%04x", dev->vendor, dev->device);
 
     pci_read_config_dword(dev, PCI_CLASS_REVISION, &class);
@@ -1154,15 +1121,14 @@ int pci_setup_device(struct pci_dev * dev)
     dev->current_state = 4;
 
     switch (dev->hdr_type)
-        /* header type */
+    /* header type */
     {
     case PCI_HEADER_TYPE_NORMAL: /* standard header */
         if (class == PCI_CLASS_BRIDGE_PCI)
             goto bad;
         pci_read_irq(dev);
         pci_read_bases(dev, 6, PCI_ROM_ADDRESS);
-        pci_read_config_word(dev, PCI_SUBSYSTEM_VENDOR_ID,
-                             &dev->subsystem_vendor);
+        pci_read_config_word(dev, PCI_SUBSYSTEM_VENDOR_ID, &dev->subsystem_vendor);
         pci_read_config_word(dev, PCI_SUBSYSTEM_ID, &dev->subsystem_device);
         break;
 
@@ -1177,19 +1143,18 @@ int pci_setup_device(struct pci_dev * dev)
             goto bad;
         pci_read_irq(dev);
         pci_read_bases(dev, 1, 0);
-        pci_read_config_word(dev, PCI_CB_SUBSYSTEM_VENDOR_ID,
-                             &dev->subsystem_vendor);
+        pci_read_config_word(dev, PCI_CB_SUBSYSTEM_VENDOR_ID, &dev->subsystem_vendor);
         pci_read_config_word(dev, PCI_CB_SUBSYSTEM_ID, &dev->subsystem_device);
         break;
 
     default: /* unknown header */
         printk(KERN_ERR "PCI: device %s has unknown header type %02x, ignoring.\n",
-               dev->slot_name, dev->hdr_type);
+                dev->slot_name, dev->hdr_type);
         return -1;
 
-bad:
+        bad:
         printk(KERN_ERR "PCI: %s: class %x doesn't match header type %02x. Ignoring class.\n",
-               dev->slot_name, class, dev->hdr_type);
+                dev->slot_name, class, dev->hdr_type);
         dev->class = PCI_CLASS_NOT_DEFINED;
     }
 
@@ -1207,16 +1172,15 @@ struct pci_dev * __devinit pci_scan_device(struct pci_dev *temp)
     u32 l;
 
     if (pci_read_config_dword(temp, PCI_VENDOR_ID, &l))
-        return NULL ;
+        return NULL;
 
     /* some broken boards return 0 or ~0 if a slot is empty: */
-    if (l == 0xffffffff || l == 0x00000000 || l == 0x0000ffff
-            || l == 0xffff0000)
-        return NULL ;
+    if (l == 0xffffffff || l == 0x00000000 || l == 0x0000ffff || l == 0xffff0000)
+        return NULL;
 
     dev = kmalloc(sizeof(*dev), GFP_KERNEL);
     if (!dev)
-        return NULL ;
+        return NULL;
 
     memcpy(dev, temp, sizeof(*dev));
     dev->vendor = l & 0xffff;
@@ -1304,8 +1268,7 @@ unsigned int __devinit pci_do_scan_bus(struct pci_bus *bus)
         for (ln = bus->devices.next; ln != &bus->devices; ln = ln->next)
         {
             dev = pci_dev_b(ln);
-            if (dev->hdr_type == PCI_HEADER_TYPE_BRIDGE
-                    || dev->hdr_type == PCI_HEADER_TYPE_CARDBUS)
+            if (dev->hdr_type == PCI_HEADER_TYPE_BRIDGE || dev->hdr_type == PCI_HEADER_TYPE_CARDBUS)
                 max = pci_scan_bridge(bus, dev, max, pass);
         }
 
@@ -1341,7 +1304,7 @@ struct pci_bus * __devinit pci_alloc_primary_bus(int bus)
     {
         /* If we already got to this bus through a different bridge, ignore it */
         DBG("PCI: Bus %02x already known\n", bus);
-        return NULL ;
+        return NULL;
     }
 
     b = pci_alloc_bus();
@@ -1353,8 +1316,7 @@ struct pci_bus * __devinit pci_alloc_primary_bus(int bus)
     return b;
 }
 
-struct pci_bus * __devinit pci_scan_bus(int bus, struct pci_ops *ops,
-                                        void *sysdata)
+struct pci_bus * __devinit pci_scan_bus(int bus, struct pci_ops *ops, void *sysdata)
 {
     struct pci_bus *b = pci_alloc_primary_bus(bus);
     if (b)
@@ -1420,8 +1382,7 @@ struct pci_page /* cacheable header for 'allocation' bytes */
  * boundaries of 4KBytes.
  */
 struct pci_pool *
-pci_pool_create(const char *name, struct pci_dev *pdev, size_t size,
-                size_t align, size_t allocation, int flags)
+pci_pool_create(const char *name, struct pci_dev *pdev, size_t size, size_t align, size_t allocation, int flags)
 {
     struct pci_pool *retval;
 
@@ -1549,7 +1510,7 @@ void pci_pool_destroy(struct pci_pool *pool)
     {
         struct pci_page *page;
         page = list_entry (pool->page_list.next,
-                           struct pci_page, page_list);
+                struct pci_page, page_list);
         if (is_page_busy(pool->blocks_per_page, page->bitmap))
         {
             printk (KERN_ERR "pci_pool_destroy %s/%s, %p busy\n",
@@ -1576,8 +1537,7 @@ void pci_pool_destroy(struct pci_pool *pool)
  * and reports its dma address through the handle.
  * If such a memory block can't be allocated, null is returned.
  */
-void *
-pci_pool_alloc(struct pci_pool *pool, int mem_flags, dma_addr_t *handle)
+void * pci_pool_alloc(struct pci_pool *pool, int mem_flags, dma_addr_t *handle)
 {
     unsigned long flags;
     struct list_head *entry;
@@ -1586,15 +1546,14 @@ pci_pool_alloc(struct pci_pool *pool, int mem_flags, dma_addr_t *handle)
     size_t offset;
     void *retval;
 
-restart:
+    restart:
     spin_lock_irqsave(&pool->lock, flags);
     list_for_each(entry, &pool->page_list)
     {
         int i;
         page = list_entry (entry, struct pci_page, page_list);
         /* only cachable accesses here ... */
-        for (map = 0, i = 0; i < pool->blocks_per_page;
-                i += BITS_PER_LONG, map++)
+        for (map = 0, i = 0; i < pool->blocks_per_page; i += BITS_PER_LONG, map++)
         {
             if (page->bitmap[map] == 0)
                 continue;
@@ -1630,16 +1589,14 @@ restart:
 
     clear_bit(0, &page->bitmap[0]);
     offset = 0;
-ready:
-    retval = offset + page->vaddr;
+    ready: retval = offset + page->vaddr;
     *handle = offset + page->dma;
-done:
+    done:
     spin_unlock_irqrestore(&pool->lock, flags);
     return retval;
 }
 
-static struct pci_page *
-pool_find_page(struct pci_pool *pool, dma_addr_t dma)
+static struct pci_page * pool_find_page(struct pci_pool *pool, dma_addr_t dma)
 {
     unsigned long flags;
     struct list_head *entry;
@@ -1655,7 +1612,7 @@ pool_find_page(struct pci_pool *pool, dma_addr_t dma)
             goto done;
     }
     page = 0;
-done:
+    done:
     spin_unlock_irqrestore(&pool->lock, flags);
     return page;
 }
@@ -1743,11 +1700,11 @@ static int __devinit pci_setup(char *str)
         if (*str && (str = pcibios_setup(str)) && *str)
         {
             /* PCI layer options should be handled here */
-            printk(KERN_ERR "PCI: Unknown option `%s'\n", str);
-        }
-        str = k;
+        printk(KERN_ERR "PCI: Unknown option `%s'\n", str);
     }
-    return 1;
+    str = k;
+}
+return 1;
 }
 
 __setup("pci=", pci_setup);
