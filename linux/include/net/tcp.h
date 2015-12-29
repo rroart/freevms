@@ -645,13 +645,6 @@ extern int          tcp_rcv_established(struct sock *sk,
                                         struct tcphdr *th,
                                         unsigned len);
 
-enum tcp_ack_state_t
-{
-    TCP_ACK_SCHED = 1,
-    TCP_ACK_TIMER = 2,
-    TCP_ACK_PUSHED= 4
-};
-
 static inline void tcp_schedule_ack(struct tcp_opt *tp)
 {
     tp->ack.pending |= TCP_ACK_SCHED;

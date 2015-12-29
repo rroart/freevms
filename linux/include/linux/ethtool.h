@@ -53,13 +53,6 @@ struct ethtool_wolinfo
     u8  sopass[SOPASS_MAX]; /* SecureOn(tm) password */
 };
 
-/* for passing single values */
-struct ethtool_value
-{
-    u32 cmd;
-    u32 data;
-};
-
 /* for passing big chunks of data */
 struct ethtool_regs
 {

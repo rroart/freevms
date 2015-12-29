@@ -1,9 +1,6 @@
 #ifndef __NET_PKT_CLS_H
 #define __NET_PKT_CLS_H
 
-
-#include <linux/pkt_cls.h>
-
 struct rtattr;
 struct tcmsg;
 
@@ -78,11 +75,7 @@ static inline int tc_classify(struct sk_buff *skb, struct tcf_proto *tp, struct 
     return -1;
 }
 
-
-
 extern int register_tcf_proto_ops(struct tcf_proto_ops *ops);
 extern int unregister_tcf_proto_ops(struct tcf_proto_ops *ops);
-
-
 
 #endif

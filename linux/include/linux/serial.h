@@ -10,27 +10,6 @@
 #ifndef _LINUX_SERIAL_H
 #define _LINUX_SERIAL_H
 
-#ifdef __KERNEL__
-#include <asm/page.h>
-
-/*
- * Counters of the input lines (CTS, DSR, RI, CD) interrupts
- */
-
-struct async_icount
-{
-    __u32   cts, dsr, rng, dcd, tx, rx;
-    __u32   frame, parity, overrun, brk;
-    __u32   buf_overrun;
-};
-
-/*
- * The size of the serial xmit buffer is 1 page, or 4096 bytes
- */
-#define SERIAL_XMIT_SIZE PAGE_SIZE
-
-#endif
-
 struct serial_struct
 {
     int type;
@@ -84,17 +63,6 @@ struct serial_struct
 #define SERIAL_IO_MEM   2
 #define SERIAL_IO_GSC   3
 
-struct serial_uart_config
-{
-    char    *name;
-    int dfl_xmit_fifo_size;
-    int flags;
-};
-
-#define UART_CLEAR_FIFO     0x01
-#define UART_USE_FIFO       0x02
-#define UART_STARTECH       0x04
-
 /*
  * Definitions for async_struct (and serial_struct) flags field
  */
@@ -147,38 +115,6 @@ on the callout port */
 #define ASYNC_BOOT_ONLYMCA  0x00400000 /* Probe only if MCA bus */
 #define ASYNC_INTERNAL_FLAGS    0xFFC00000 /* Internal flags */
 
-/*
- * Multiport serial configuration structure --- external structure
- */
-struct serial_multiport_struct
-{
-    int     irq;
-    int     port1;
-    unsigned char   mask1, match1;
-    int     port2;
-    unsigned char   mask2, match2;
-    int     port3;
-    unsigned char   mask3, match3;
-    int     port4;
-    unsigned char   mask4, match4;
-    int     port_monitor;
-    int reserved[32];
-};
-
-/*
- * Serial input interrupt line counters -- external structure
- * Four lines can interrupt: CTS, DSR, RI, DCD
- */
-struct serial_icounter_struct
-{
-    int cts, dsr, rng, dcd;
-    int rx, tx;
-    int frame, overrun, parity, brk;
-    int buf_overrun;
-    int reserved[9];
-};
-
-
 #ifdef __KERNEL__
 /* Export to allow PCMCIA to use this - Dave Hinds */
 extern int register_serial(struct serial_struct *req);
@@ -186,12 +122,6 @@ extern void unregister_serial(int line);
 
 /* Allow complicated architectures to specify rs_table[] at run time */
 extern int early_serial_setup(struct serial_struct *req);
-
-#ifdef CONFIG_ACPI
-/* tty ports reserved for the ACPI serial console port and debug port */
-#define ACPI_SERIAL_CONSOLE_PORT        4
-#define ACPI_SERIAL_DEBUG_PORT          5
-#endif
 
 #endif /* __KERNEL__ */
 #endif /* _LINUX_SERIAL_H */

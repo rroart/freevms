@@ -7,8 +7,6 @@
 #ifndef _LINUX_NFS_H
 #define _LINUX_NFS_H
 
-#include <linux/sunrpc/msg_prot.h>
-
 #define NFS_PROGRAM 100003
 #define NFS_PORT    2049
 #define NFS_MAXDATA 8192
@@ -74,44 +72,4 @@ enum nfs_stat
     NFSERR_JUKEBOX = 10008      /*    v3 */
 };
 
-/* NFSv2 file types - beware, these are not the same in NFSv3 */
-
-enum nfs_ftype
-{
-    NFNON = 0,
-    NFREG = 1,
-    NFDIR = 2,
-    NFBLK = 3,
-    NFCHR = 4,
-    NFLNK = 5,
-    NFSOCK = 6,
-    NFBAD = 7,
-    NFFIFO = 8
-};
-
-#if defined(__KERNEL__)
-/*
- * This is the kernel NFS client file handle representation
- */
-#define NFS_MAXFHSIZE       64
-struct nfs_fh
-{
-    unsigned short      size;
-    unsigned char       data[NFS_MAXFHSIZE];
-};
-
-/*
- * This is really a general kernel constant, but since nothing like
- * this is defined in the kernel headers, I have to do it here.
- */
-#define NFS_OFFSET_MAX      ((__s64)((~(__u64)0) >> 1))
-
-
-enum nfs3_stable_how
-{
-    NFS_UNSTABLE = 0,
-    NFS_DATA_SYNC = 1,
-    NFS_FILE_SYNC = 2
-};
-#endif /* __KERNEL__ */
 #endif /* _LINUX_NFS_H */

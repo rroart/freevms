@@ -132,18 +132,6 @@ struct dqblk
 
 #define dqoff(UID)      ((loff_t)((UID) * sizeof (struct dqblk)))
 
-struct dqstats
-{
-    __u32 lookups;
-    __u32 drops;
-    __u32 reads;
-    __u32 writes;
-    __u32 cache_hits;
-    __u32 allocated_dquots;
-    __u32 free_dquots;
-    __u32 syncs;
-};
-
 #ifdef __KERNEL__
 
 extern int nr_dquots, nr_free_dquots;
@@ -192,7 +180,7 @@ struct dquot
 
 #else
 
-# /* nodep */ include <sys/cdefs.h>
+#include <sys/cdefs.h>
 
 __BEGIN_DECLS
 long quotactl __P ((int, const char *, int, caddr_t));

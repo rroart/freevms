@@ -21,24 +21,6 @@
 #define __PUSH(x) "pushq %%" __STR(x) "\n\t"
 #define __POP(x)  "popq  %%" __STR(x) "\n\t"
 
-struct save_context_frame
-{
-    unsigned long rbp;
-    unsigned long rbx;
-    unsigned long r11;
-    unsigned long r10;
-    unsigned long r9;
-    unsigned long r8;
-    unsigned long rcx;
-    unsigned long rdx;
-    unsigned long r15;
-    unsigned long r14;
-    unsigned long r13;
-    unsigned long r12;
-    unsigned long rdi;
-    unsigned long rsi;
-};
-
 /* frame pointer must be last for get_wchan */
 #define SAVE_CONTEXT \
     __PUSH(rsi) __PUSH(rdi) \
@@ -67,7 +49,7 @@ struct save_context_frame
              RESTORE_CONTEXT                    \
              :"=m" (prev->thread.rsp),"=m" (prev->thread.rip), "=a" (l) \
              :"m" (next->thread.rsp),"m" (next->thread.rip),    \
-"c" (pgtp),"d" (pgt), \
+              "c" (pgtp),"d" (pgt), \
               "S" (next), "D" (prev)                \
              :"memory","cc");                   \
     last = l;                           \

@@ -13,10 +13,6 @@
 #undef KBD_REPORT_ERR           /* Report keyboard errors */
 #define KBD_REPORT_UNKN         /* Report unknown scan codes */
 #define KBD_REPORT_TIMEOUTS     /* Report keyboard timeouts */
-#undef KBD_IS_FOCUS_9000        /* We have the brain-damaged FOCUS-9000 keyboard */
-#undef INITIALIZE_MOUSE         /* Define if your PS/2 mouse needs initialization. */
-
-
 
 #define KBD_INIT_TIMEOUT 1000       /* Timeout in ms for initializing the keyboard */
 #define KBC_TIMEOUT 250         /* Timeout in ms for sending to keyboard controller */
@@ -86,8 +82,6 @@ initiated by the auxiliary device */
 #define KBD_STAT_GTO        0x40    /* General receive/xmit timeout */
 #define KBD_STAT_PERR       0x80    /* Parity error */
 
-#define AUX_STAT_OBF (KBD_STAT_OBF | KBD_STAT_MOUSE_OBF)
-
 /*
  *  Controller Mode Register Bits
  */
@@ -100,32 +94,3 @@ initiated by the auxiliary device */
 #define KBD_MODE_DISABLE_MOUSE  0x20    /* Disable mouse interface */
 #define KBD_MODE_KCC        0x40    /* Scan code conversion to PC format */
 #define KBD_MODE_RFU        0x80
-
-/*
- *  Mouse Commands
- */
-
-#define AUX_SET_RES     0xE8    /* Set resolution */
-#define AUX_SET_SCALE11     0xE6    /* Set 1:1 scaling */
-#define AUX_SET_SCALE21     0xE7    /* Set 2:1 scaling */
-#define AUX_GET_SCALE       0xE9    /* Get scaling factor */
-#define AUX_SET_STREAM      0xEA    /* Set stream mode */
-#define AUX_SET_SAMPLE      0xF3    /* Set sample rate */
-#define AUX_ENABLE_DEV      0xF4    /* Enable aux device */
-#define AUX_DISABLE_DEV     0xF5    /* Disable aux device */
-#define AUX_RESET       0xFF    /* Reset aux device */
-#define AUX_ACK         0xFA    /* Command byte ACK. */
-
-#define AUX_BUF_SIZE        2048    /* This might be better divisible by
-three to make overruns stay in sync
-but then the read function would need
-a lock etc - ick */
-
-struct aux_queue
-{
-    unsigned long head;
-    unsigned long tail;
-    wait_queue_head_t proc_list;
-    struct fasync_struct *fasync;
-    unsigned char buf[AUX_BUF_SIZE];
-};

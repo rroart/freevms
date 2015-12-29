@@ -272,13 +272,6 @@ void __init check_ioapic(void)
                 case PCI_VENDOR_ID_VIA:
                     return;
                 case PCI_VENDOR_ID_NVIDIA:
-#ifdef CONFIG_ACPI
-                    /* All timer overrides on Nvidia
-                       seem to be wrong. Skip them. */
-                    acpi_skip_timer_override = 1;
-                    printk(KERN_INFO
-                           "Nvidia board detected. Ignoring ACPI timer override.\n");
-#endif
                     /* RED-PEN skip them on mptables too? */
                     return;
                 }

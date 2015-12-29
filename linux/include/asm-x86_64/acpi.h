@@ -100,20 +100,6 @@ __acpi_release_global_lock (unsigned int *lock)
         "rcrl   $1,%3;"             \
         :"=r"(n_hi), "=r"(n_lo)     \
         :"0"(n_hi), "1"(n_lo))
-#ifdef CONFIG_ACPI_PCI
-extern int acpi_noirq;
-extern int acpi_pci_disabled;
-static inline void acpi_noirq_set(void)
-{
-    acpi_noirq = 1;
-}
-static inline void acpi_disable_pci(void)
-{
-    acpi_pci_disabled = 1;
-    acpi_noirq_set();
-}
-extern int acpi_irq_balance_set(char *str);
-#else
 static inline void acpi_noirq_set(void) { }
 static inline void acpi_disable_pci(void)
 {
@@ -123,7 +109,6 @@ static inline int acpi_irq_balance_set(char *str)
 {
     return 0;
 }
-#endif
 
 #define acpi_lapic 0
 #define acpi_ioapic 0

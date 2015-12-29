@@ -88,14 +88,6 @@ struct module
     const char *kernel_data;    /* Reserved for kernel internal use */
 };
 
-struct module_info
-{
-    unsigned long addr;
-    unsigned long size;
-    unsigned long flags;
-    long usecount;
-};
-
 /* Bits of module.flags.  */
 
 #define MOD_UNINITIALIZED   0
@@ -106,17 +98,6 @@ struct module_info
 #define MOD_USED_ONCE       16
 #define MOD_JUST_FREED      32
 #define MOD_INITIALIZING    64
-
-/* Values for query_module's which.  */
-
-#define QM_MODULES  1
-#define QM_DEPS     2
-#define QM_REFS     3
-#define QM_SYMBOLS  4
-#define QM_INFO     5
-
-/* Can the module be queried? */
-#define MOD_CAN_QUERY(mod) (((mod)->flags & (MOD_RUNNING | MOD_INITIALIZING)) && !((mod)->flags & MOD_DELETED))
 
 /* When struct module is extended, we must test whether the new member
    is present in the header received from insmod before we can use it.
@@ -175,20 +156,11 @@ struct module_info
  */
 
 #ifdef __KERNEL__
-#define HAVE_INTER_MODULE
 extern void inter_module_register(const char *, struct module *, const void *);
 extern void inter_module_unregister(const char *);
 extern const void *inter_module_get(const char *);
 extern const void *inter_module_get_request(const char *, const char *);
 extern void inter_module_put(const char *);
-
-struct inter_module_entry
-{
-    struct list_head list;
-    const char *im_name;
-    struct module *owner;
-    const void *userdata;
-};
 
 extern int try_inc_mod_count(struct module *mod);
 #endif /* __KERNEL__ */

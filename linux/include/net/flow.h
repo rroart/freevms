@@ -89,16 +89,6 @@ struct pkt_filter
 #define FLR_INPUT       1
 #define FLR_OUTPUT      2
 
-struct flow_filter
-{
-    int             type;
-    union
-    {
-        struct pkt_filter   *filter;
-        struct sock     *sk;
-    } u;
-};
-
 struct flow_rule
 {
     struct flow_rule_ops        *ops;

@@ -50,9 +50,6 @@ struct rt_key
     __u32           src;
     int         iif;
     int         oif;
-#ifdef CONFIG_IP_ROUTE_FWMARK
-    __u32           fwmark;
-#endif
     __u8            tos;
     __u8            scope;
 };
@@ -82,11 +79,6 @@ struct rtable
     /* Miscellaneous cached information */
     __u32           rt_spec_dst; /* RFC1122 specific destination */
     struct inet_peer    *peer; /* long-living peer info */
-
-#ifdef CONFIG_IP_ROUTE_NAT
-    __u32           rt_src_map;
-    __u32           rt_dst_map;
-#endif
 };
 
 struct ip_rt_acct
@@ -97,20 +89,6 @@ struct ip_rt_acct
     __u32   i_packets;
 };
 
-struct rt_cache_stat
-{
-    unsigned int in_hit;
-    unsigned int in_slow_tot;
-    unsigned int in_slow_mc;
-    unsigned int in_no_route;
-    unsigned int in_brd;
-    unsigned int in_martian_dst;
-    unsigned int in_martian_src;
-    unsigned int out_hit;
-    unsigned int out_slow_tot;
-    unsigned int out_slow_mc;
-} ____cacheline_aligned_in_smp;
-
 extern struct ip_rt_acct *ip_rt_acct;
 
 struct in_device;
@@ -118,7 +96,6 @@ extern void     ip_rt_init(void);
 extern void     ip_rt_redirect(u32 old_gw, u32 dst, u32 new_gw,
                                u32 src, u8 tos, struct net_device *dev);
 extern void     ip_rt_advice(struct rtable **rp, int advice);
-extern void     rt_cache_flush(int how);
 extern int      ip_route_output_key(struct rtable **, const struct rt_key *key);
 extern int      ip_route_input(struct sk_buff*, u32 dst, u32 src, u8 tos, struct net_device *devin);
 extern unsigned short   ip_rt_frag_needed(struct iphdr *iph, unsigned short new_mtu);
@@ -126,7 +103,6 @@ extern void     ip_rt_update_pmtu(struct dst_entry *dst, unsigned mtu);
 extern void     ip_rt_send_redirect(struct sk_buff *skb);
 
 extern unsigned     inet_addr_type(u32 addr);
-extern void     ip_rt_multicast_event(struct in_device *);
 extern int      ip_rt_ioctl(unsigned int cmd, void *arg);
 extern void     ip_rt_get_source(u8 *src, struct rtable *rt);
 extern int      ip_rt_dump(struct sk_buff *skb,  struct netlink_callback *cb);

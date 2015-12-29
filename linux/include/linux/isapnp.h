@@ -105,14 +105,6 @@ struct isapnp_mem32
     struct isapnp_mem32 *next;  /* next 32-bit memory resource */
 };
 
-struct isapnp_fixup
-{
-    unsigned short vendor;      /* matching vendor */
-    unsigned short device;      /* matching device */
-    void (*quirk_function)(struct pci_dev *dev);    /* fixup function */
-};
-
-
 #define ISAPNP_RES_PRIORITY_PREFERRED   0
 #define ISAPNP_RES_PRIORITY_ACCEPTABLE  1
 #define ISAPNP_RES_PRIORITY_FUNCTIONAL  2

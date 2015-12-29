@@ -656,10 +656,6 @@ void __devinit pcibios_init(void)
     }
 
     printk(KERN_INFO "PCI: Probing PCI hardware\n");
-#ifdef CONFIG_ACPI_PCI
-    if (!acpi_disabled && !acpi_noirq && !acpi_pci_irq_init())
-        pci_using_acpi_prt = 1;
-#endif
     if (!pci_using_acpi_prt)
     {
         pci_root_bus = pcibios_scan_root(0);
@@ -746,14 +742,6 @@ int pcibios_enable_device(struct pci_dev *dev/* not yet:, int mask*/)
 
     if ((err = pcibios_enable_resources(dev, mask)) < 0)
         return err;
-
-#ifdef CONFIG_ACPI_PCI
-    if (!acpi_noirq && pci_using_acpi_prt)
-    {
-        acpi_pci_irq_enable(dev);
-        return 0;
-    }
-#endif
 
     pcibios_enable_irq(dev);
 

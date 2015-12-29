@@ -4,33 +4,12 @@
 #include <linux/in6.h>
 #include <asm/byteorder.h>
 
-/* The latest drafts declared increase in minimal mtu up to 1280. */
-
-#define IPV6_MIN_MTU    1280
-
 /*
  *  Advanced API
  *  source interface/address selection, source routing, etc...
  *  *under construction*
  */
 
-
-struct in6_pktinfo
-{
-    struct in6_addr ipi6_addr;
-    int     ipi6_ifindex;
-};
-
-
-struct in6_ifreq
-{
-    struct in6_addr ifr6_addr;
-    __u32       ifr6_prefixlen;
-    int     ifr6_ifindex;
-};
-
-#define IPV6_SRCRT_STRICT   0x01    /* this hop must be a neighbor  */
-#define IPV6_SRCRT_TYPE_0   0   /* IPv6 type 0 Routing Header   */
 
 /*
  *  routing header
@@ -66,19 +45,6 @@ struct ipv6_opt_hdr
 #endif
 
 /*
- *  routing header type 0 (used in cmsghdr struct)
- */
-
-struct rt0_hdr
-{
-    struct ipv6_rt_hdr  rt_hdr;
-    __u32           bitmap;     /* strict/loose bit map */
-    struct in6_addr     addr[0];
-
-#define rt0_type        rt_hdr.type;
-};
-
-/*
  *  IPv6 fixed header
  *
  *  BEWARE, it is incorrect. The first 4 bits of flow_lbl
@@ -105,25 +71,5 @@ struct ipv6hdr
     struct  in6_addr    saddr;
     struct  in6_addr    daddr;
 };
-
-#ifdef __KERNEL__
-
-/*
-   This structure contains results of exthdrs parsing
-   as offsets from skb->nh.
- */
-
-struct inet6_skb_parm
-{
-    int         iif;
-    __u16           ra;
-    __u16           hop;
-    __u16           auth;
-    __u16           dst0;
-    __u16           srcrt;
-    __u16           dst1;
-};
-
-#endif
 
 #endif

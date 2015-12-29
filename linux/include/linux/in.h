@@ -78,38 +78,6 @@ struct in_addr
 #define IP_PMTUDISC_WANT        1   /* Use per route hints  */
 #define IP_PMTUDISC_DO          2   /* Always DF        */
 
-#define IP_MULTICAST_IF         32
-#define IP_MULTICAST_TTL        33
-#define IP_MULTICAST_LOOP       34
-#define IP_ADD_MEMBERSHIP       35
-#define IP_DROP_MEMBERSHIP      36
-
-/* These need to appear somewhere around here */
-#define IP_DEFAULT_MULTICAST_TTL        1
-#define IP_DEFAULT_MULTICAST_LOOP       1
-
-/* Request struct for multicast socket ops */
-
-struct ip_mreq
-{
-    struct in_addr imr_multiaddr;   /* IP multicast address of group */
-    struct in_addr imr_interface;   /* local IP address of interface */
-};
-
-struct ip_mreqn
-{
-    struct in_addr  imr_multiaddr;      /* IP multicast address of group */
-    struct in_addr  imr_address;        /* local IP address of interface */
-    int     imr_ifindex;        /* Interface index */
-};
-
-struct in_pktinfo
-{
-    int     ipi_ifindex;
-    struct in_addr  ipi_spec_dst;
-    struct in_addr  ipi_addr;
-};
-
 /* Structure describing an Internet (IP) socket address. */
 #define __SOCK_SIZE__   16      /* sizeof(struct sockaddr)  */
 struct sockaddr_in

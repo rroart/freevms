@@ -78,10 +78,6 @@ struct in_ifaddr
  * return a pointer to the addr as a sockadd_in.
  */
 #define IA_SIN(ia) ((struct sockaddr_in *)(&((struct in_ifaddr *)ia)->ia_addr))
-/*
- * ia_flags
- */
-#define IFA_ROUTE   0x01        /* routing entry installed */
 
 #ifdef  KERNEL
 extern  struct in_ifaddr *in_ifaddr;

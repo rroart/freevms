@@ -104,15 +104,6 @@ static __inline__ int bad_mask(u32 mask, u32 addr)
     return 0;
 }
 
-#define for_primary_ifa(in_dev) { struct in_ifaddr *ifa; \
-  for (ifa = (in_dev)->ifa_list; ifa && !(ifa->ifa_flags&IFA_F_SECONDARY); ifa = ifa->ifa_next)
-
-#define for_ifa(in_dev) { struct in_ifaddr *ifa; \
-  for (ifa = (in_dev)->ifa_list; ifa; ifa = ifa->ifa_next)
-
-
-#define endfor_ifa(in_dev) }
-
 extern rwlock_t inetdev_lock;
 
 

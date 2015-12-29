@@ -73,18 +73,6 @@
 #define IPV6_ADDR_MAPPED    0x1000U
 #define IPV6_ADDR_RESERVED  0x2000U /* reserved address space */
 
-/*
- *  fragmentation header
- */
-
-struct frag_hdr
-{
-    unsigned char   nexthdr;
-    unsigned char   reserved;
-    unsigned short  frag_off;
-    __u32       identification;
-};
-
 #ifdef __KERNEL__
 
 #include <net/sock.h>

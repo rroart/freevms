@@ -38,18 +38,6 @@
 #endif
 
 /*
- * The event structure itself
- */
-
-struct input_event
-{
-    struct timeval time;
-    unsigned short type;
-    unsigned short code;
-    unsigned int value;
-};
-
-/*
  * Protocol version.
  */
 

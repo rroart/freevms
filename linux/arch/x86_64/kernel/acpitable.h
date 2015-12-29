@@ -103,12 +103,6 @@ struct acpi_table_rsdt
     u32 entry[0];
 } __attribute__ ((packed));
 
-struct acpi_table_xsdt
-{
-    struct acpi_table_header header;
-    u64 entry[0];
-} __attribute__ ((packed));
-
 struct acpi_madt_entry_header
 {
     u8 type;
@@ -207,30 +201,6 @@ struct acpi_table_plat_int_src
     u8 iosapic_vector;
     u32 global_irq;
     u32 reserved;
-} __attribute__ ((packed));
-
-#define ACPI_SPACE_MEM      0
-#define ACPI_SPACE_IO       1
-#define ACPI_SPACE_PCICONF  2
-
-struct acpi_gen_regaddr
-{
-    u8  space_id;
-    u8  bit_width;
-    u8  bit_offset;
-    u8  resv;
-    u32 addrl;
-    u32 addrh;
-} __attribute__ ((packed));
-
-struct acpi_table_hpet
-{
-    struct acpi_table_header header;
-    u32 id;
-    struct acpi_gen_regaddr addr;
-    u8 number;
-    u16 min_tick;
-    u8 page_protect;
 } __attribute__ ((packed));
 
 #endif

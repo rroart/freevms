@@ -19,12 +19,6 @@ struct sockaddr
     char        sa_data[14];    /* 14 bytes of protocol address */
 };
 
-struct linger
-{
-    int     l_onoff;    /* Linger active        */
-    int     l_linger;   /* How long to linger for   */
-};
-
 /*
  *  As we do 4.4BSD message passing we use a 4.4BSD message passing
  *  system, not 4.3. Thus msg_accrights(len) are now missing. They

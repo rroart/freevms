@@ -27,7 +27,6 @@
 
 #include <linux/if.h>
 #include <linux/if_ether.h>
-#include <linux/if_packet.h>
 
 #include <asm/atomic.h>
 #include <asm/cache.h>

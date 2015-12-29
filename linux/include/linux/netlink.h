@@ -15,14 +15,6 @@
 
 #define MAX_LINKS 32
 
-struct sockaddr_nl
-{
-    sa_family_t nl_family;  /* AF_NETLINK   */
-    unsigned short  nl_pad;     /* zero     */
-    __u32       nl_pid;     /* process pid  */
-    __u32       nl_groups;  /* multicast groups mask */
-};
-
 struct nlmsghdr
 {
     __u32       nlmsg_len;  /* Length of message including header */
@@ -75,12 +67,6 @@ struct nlmsghdr
 #define NLMSG_ERROR     0x2 /* Error        */
 #define NLMSG_DONE      0x3 /* End of a dump    */
 #define NLMSG_OVERRUN       0x4 /* Data lost        */
-
-struct nlmsgerr
-{
-    int     error;
-    struct nlmsghdr msg;
-};
 
 #define NET_MAJOR 36        /* Major 36 is reserved for networking                      */
 
