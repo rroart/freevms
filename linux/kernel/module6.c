@@ -646,15 +646,6 @@ static inline int check_modstruct_version(Elf_Shdr *sechdrs,
                          crc);
 }
 
-#if 0
-/* First part is kernel version, which we ignore. */
-static inline int same_magic(const char *amagic, const char *bmagic)
-{
-    amagic += strcspn(amagic, " ");
-    bmagic += strcspn(bmagic, " ");
-    return strcmp(amagic, bmagic) == 0;
-}
-#endif
 #else
 static inline int check_version(Elf_Shdr *sechdrs,
                                 unsigned int versindex,

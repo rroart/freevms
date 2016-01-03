@@ -120,12 +120,6 @@ extern void do_settimeofday(struct timeval *tv);
 #define ITIMER_VIRTUAL  1
 #define ITIMER_PROF 2
 
-struct  itimerspec
-{
-    struct  timespec it_interval;    /* timer period */
-    struct  timespec it_value;       /* timer expiration */
-};
-
 struct  itimerval
 {
     struct  timeval it_interval;    /* timer interval */

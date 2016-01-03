@@ -71,19 +71,15 @@ struct vm_area_struct;
 extern unsigned long pgkern_mask;
 
 /*
- * Do not check the PGE bit unnecesserily if this is a PPro+ kernel.
+ * Do not check the PGE bit unnecessarily if this is a PPro+ kernel.
  */
-#ifdef CONFIG_X86_PGE
-# define __flush_tlb_all() __flush_tlb_global()
-#else
-# define __flush_tlb_all()                      \
+#define __flush_tlb_all()                      \
     do {                                \
         if (cpu_has_pge)                    \
             __flush_tlb_global();               \
         else                            \
             __flush_tlb();                  \
     } while (0)
-#endif
 
 #define __flush_tlb_one(addr) __flush_tlb()
 
@@ -101,10 +97,6 @@ extern unsigned long empty_zero_page[1024];
 #define ZERO_PAGE(vaddr) (virt_to_page(empty_zero_page))
 extern unsigned long empty_zero_page[1024];
 extern pgd_t swapper_pg_dir[1024];
-extern kmem_cache_t *pgd_cache;
-extern kmem_cache_t *pmd_cache;
-extern spinlock_t pgd_lock;
-extern struct page *pgd_list;
 
 void pmd_ctor(void *, kmem_cache_t *, unsigned long);
 void pgd_ctor(void *, kmem_cache_t *, unsigned long);
@@ -522,22 +514,11 @@ static inline int set_kernel_exec(unsigned long vaddr, int enable)
     return 0;
 }
 
-extern void noexec_setup(const char *str);
-
-#if defined(CONFIG_HIGHPTE)
-#define pte_offset_map(dir, address) \
-    ((pte_t *)kmap_atomic(pmd_page(*(dir)),KM_PTE0) + pte_index(address))
-#define pte_offset_map_nested(dir, address) \
-    ((pte_t *)kmap_atomic(pmd_page(*(dir)),KM_PTE1) + pte_index(address))
-#define pte_unmap(pte) kunmap_atomic(pte, KM_PTE0)
-#define pte_unmap_nested(pte) kunmap_atomic(pte, KM_PTE1)
-#else
 #define pte_offset_map(dir, address) \
     ((pte_t *)page_address(pmd_page(*(dir))) + pte_index(address))
 #define pte_offset_map_nested(dir, address) pte_offset_map(dir, address)
 #define pte_unmap(pte) do { } while (0)
 #define pte_unmap_nested(pte) do { } while (0)
-#endif
 
 #define page_pte(page) page_pte_prot(page, __pgprot(0))
 
@@ -586,10 +567,6 @@ extern void noexec_setup(const char *str);
     } while (0)
 
 #endif /* !__ASSEMBLY__ */
-
-#ifdef CONFIG_FLATMEM
-#define kern_addr_valid(addr)   (1)
-#endif /* CONFIG_FLATMEM */
 
 #define io_remap_pfn_range(vma, vaddr, pfn, size, prot)     \
         remap_pfn_range(vma, vaddr, pfn, size, prot)

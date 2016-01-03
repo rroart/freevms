@@ -28,9 +28,6 @@
 
 #ifdef __KERNEL__
 
-#define COMPILER_DEPENDENT_INT64   long long
-#define COMPILER_DEPENDENT_UINT64  unsigned long long
-
 /*
  * Calling conventions:
  *
@@ -46,8 +43,6 @@
 
 /* Asm macros */
 
-#define ACPI_ASM_MACROS
-#define BREAKPOINT3
 #define ACPI_DISABLE_IRQS() __cli()
 #define ACPI_ENABLE_IRQS()  __sti()
 #define ACPI_FLUSH_CPU_CACHE()  wbinvd()

@@ -23,10 +23,6 @@
 
 #include <linux/types.h>
 #include <linux/ioctl.h>
-#ifdef __KERNEL__
-#include <linux/sched.h>
-#include <linux/wait.h>
-#endif /* __KERNEL__ */
 
 /*
  * Device states
@@ -165,17 +161,6 @@ enum
 };
 
 #define ACPI_SLP_TYP_DISABLED   (~0UL)
-
-#ifdef __KERNEL__
-
-/* routines for saving/restoring kernel state */
-FASTCALL(extern unsigned long acpi_save_state_mem(unsigned long return_point));
-FASTCALL(extern int acpi_save_state_disk(unsigned long return_point));
-extern void acpi_restore_state(void);
-
-extern unsigned long acpi_wakeup_address;
-
-#endif /* __KERNEL__ */
 
 int acpi_init(void);
 

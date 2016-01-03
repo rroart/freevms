@@ -19,7 +19,6 @@
 #include <linux/string.h>
 #include <linux/sockios.h>
 #include <linux/net.h>
-#include <linux/inet.h>
 #include <linux/route.h>
 #include <linux/netfilter.h>
 #include <net/sock.h>

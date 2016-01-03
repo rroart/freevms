@@ -68,28 +68,6 @@ typedef struct
  * (PPro errata 66, 92)
  */
 
-#if !defined(CONFIG_X86_PPRO_FENCE)
-
-#define spin_unlock_string \
-    "movb $1,%0" \
-        :"=m" (lock->lock) : : "memory"
-
-
-static inline void spin_unlock(spinlock_t *lock)
-{
-#if SPINLOCK_DEBUG
-    if (lock->magic != SPINLOCK_MAGIC)
-        BUG();
-    if (!spin_is_locked(lock))
-        BUG();
-#endif
-    __asm__ __volatile__(
-        spin_unlock_string
-    );
-}
-
-#else
-
 #define spin_unlock_string \
     "xchgb %b0, %1" \
         :"=q" (oldval), "=m" (lock->lock) \
@@ -108,8 +86,6 @@ static inline void spin_unlock(spinlock_t *lock)
         spin_unlock_string
     );
 }
-
-#endif
 
 static inline int spin_trylock(spinlock_t *lock)
 {

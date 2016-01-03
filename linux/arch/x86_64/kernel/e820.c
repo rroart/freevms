@@ -537,8 +537,6 @@ void __init setup_memory_region(void)
 }
 
 extern char command_line[], saved_command_line[];
-extern int fallback_aper_order;
-extern int iommu_setup(char *opt);
 
 void __init parse_mem_cmdline (char ** cmdline_p)
 {

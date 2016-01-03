@@ -25,7 +25,6 @@
 #include <linux/fs.h>
 #include <linux/quotaops.h>
 #include <linux/pagemap.h>
-#include <linux/dnotify.h>
 #include <linux/smp_lock.h>
 #include <linux/personality.h>
 

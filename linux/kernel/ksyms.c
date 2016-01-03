@@ -25,7 +25,6 @@
 #include <linux/utsname.h>
 #include <linux/interrupt.h>
 #include <linux/ioport.h>
-#include <linux/serial.h>
 #include <linux/locks.h>
 #include <linux/delay.h>
 #include <linux/random.h>

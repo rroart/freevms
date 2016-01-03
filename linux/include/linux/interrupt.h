@@ -205,10 +205,6 @@ static inline void tasklet_hi_enable(struct tasklet_struct *t)
     atomic_dec(&t->count);
 }
 
-extern void tasklet_kill(struct tasklet_struct *t);
-extern void tasklet_init(struct tasklet_struct *t,
-                         void (*func)(unsigned long), unsigned long data);
-
 #ifdef CONFIG_SMP
 
 #define SMP_TIMER_NAME(name) name##__thr
@@ -239,9 +235,6 @@ static inline void mark_bh(int nr)
 {
     tasklet_hi_schedule(bh_task_vec+nr);
 }
-
-extern void init_bh(int nr, void (*routine)(void));
-extern void remove_bh(int nr);
 
 
 /*

@@ -21,26 +21,6 @@
 #define pgd_populate(mm, pgd, pud) \
         set_pgd(pgd, __pgd(_PAGE_TABLE | __pa(pud)))
 
-extern __inline__ pmd_t *get_pmd_slow(void)
-{
-    return (pmd_t *)get_zeroed_page(GFP_KERNEL);
-}
-
-extern __inline__ pmd_t *get_pmd_fast(void)
-{
-    unsigned long *ret;
-
-    if ((ret = read_pda(pmd_quick)) != NULL)
-    {
-        write_pda(pmd_quick, (unsigned long *)(*ret));
-        ret[0] = 0;
-        dec_pgcache_size();
-    }
-    else
-        ret = (unsigned long *)get_pmd_slow();
-    return (pmd_t *)ret;
-}
-
 extern __inline__ void pmd_free(pmd_t *pmd)
 {
     *(unsigned long *)pmd = (unsigned long) read_pda(pmd_quick);

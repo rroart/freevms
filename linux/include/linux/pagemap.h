@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004
 
 #ifndef _LINUX_PAGEMAP_H
@@ -47,53 +47,12 @@ static inline struct page *page_cache_alloc(struct address_space *x)
  */
 #define page_cache_entry(x) virt_to_page(x)
 
-extern unsigned int page_hash_bits;
-#define PAGE_HASH_BITS (page_hash_bits)
-#define PAGE_HASH_SIZE (1 << PAGE_HASH_BITS)
-
 extern atomic_t page_cache_size; /* # of pages currently in the hash table */
-extern struct page **page_hash_table;
 
 extern void page_cache_init(unsigned long);
 
-/*
- * We use a power-of-two hash table to avoid a modulus,
- * and get a reasonable hash by knowing roughly how the
- * inode pointer and indexes are distributed (ie, we
- * roughly know which bits are "significant")
- *
- * For the time being it will work for struct address_space too (most of
- * them sitting inside the inodes). We might want to change it later.
- */
-static inline unsigned long _page_hashfn(struct address_space * mapping, unsigned long index)
-{
-#define i (((unsigned long) mapping)/(sizeof(struct inode) & ~ (sizeof(struct inode) - 1)))
-#define s(x) ((x)+((x)>>PAGE_HASH_BITS))
-    return s(i+index) & (PAGE_HASH_SIZE-1);
-#undef i
-#undef s
-}
-
-#define page_hash(mapping,index) (page_hash_table+_page_hashfn(mapping,index))
-
-extern struct page * __find_get_page(struct address_space *mapping,
-                                     unsigned long index, struct page **hash);
-#define find_get_page(mapping, index) \
-    __find_get_page(mapping, index, page_hash(mapping, index))
-extern struct page * __find_lock_page (struct address_space * mapping,
-                                       unsigned long index, struct page **hash);
-extern struct page * find_or_create_page(struct address_space *mapping,
-        unsigned long index, unsigned int gfp_mask);
-
 extern void FASTCALL(lock_page(struct page *page));
 extern void FASTCALL(unlock_page(struct page *page));
-#define find_lock_page(mapping, index) \
-    __find_lock_page(mapping, index, page_hash(mapping, index))
-extern struct page *find_trylock_page(struct address_space *, unsigned long);
-
-extern void add_to_page_cache(struct page * page, struct address_space *mapping, unsigned long index);
-extern void add_to_page_cache_locked(struct page * page, struct address_space *mapping, unsigned long index);
-extern int add_to_page_cache_unique(struct page * page, struct address_space *mapping, unsigned long index, struct page **hash);
 
 extern void ___wait_on_page(struct page *);
 
@@ -104,7 +63,6 @@ static inline void wait_on_page(struct page * page)
 }
 
 extern struct page * grab_cache_page (struct address_space *, unsigned long);
-extern struct page * grab_cache_page_nowait (struct address_space *, unsigned long);
 
 typedef int filler_t(void *, struct page*);
 

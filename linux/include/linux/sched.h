@@ -158,8 +158,6 @@ asmlinkage void schedule(void);
 
 extern int schedule_task(struct tq_struct *task);
 extern void flush_scheduled_tasks(void);
-extern int start_context_thread(void);
-extern int current_is_keventd(void);
 
 /*
  * The default fd array needs to be at least BITS_PER_LONG,
@@ -662,8 +660,6 @@ extern void free_uid(struct user_struct *);
 #include <asm/current.h>
 
 extern unsigned long volatile jiffies;
-extern unsigned long itimer_ticks;
-extern unsigned long itimer_next;
 extern struct timeval xtime;
 extern void do_timer(struct pt_regs *);
 

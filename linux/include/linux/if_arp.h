@@ -111,8 +111,7 @@ struct arpreq
 #define ATF_PERM    0x04        /* permanent entry      */
 #define ATF_PUBL    0x08        /* publish entry        */
 #define ATF_USETRAILERS 0x10        /* has requested trailers   */
-#define ATF_NETMASK     0x20            /* want to use a netmask (only
-for proxy entries) */
+#define ATF_NETMASK     0x20            /* want to use a netmask (only for proxy entries) */
 #define ATF_DONTPUB 0x40        /* don't answer this addresses  */
 
 /*

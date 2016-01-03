@@ -100,9 +100,6 @@ extern struct gendisk *get_gendisk(kdev_t dev);
 
 char *disk_name (struct gendisk *hd, int minor, char *buf);
 
-extern void devfs_register_partitions (struct gendisk *dev, int minor,
-                                       int unregister);
-
 /*
  * FIXME: this should use genhd->minor_shift, but that is slow to look up.
  */

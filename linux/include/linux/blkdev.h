@@ -152,18 +152,12 @@ extern struct sec_size * blk_sec[MAX_BLKDEV];
 extern struct blk_dev_struct blk_dev[MAX_BLKDEV];
 extern void grok_partitions(struct gendisk *dev, int drive, unsigned minors, long size);
 extern void register_disk(struct gendisk *dev, kdev_t first, unsigned minors, struct block_device_operations *ops, long size);
-extern void generic_make_request(int rw, struct buffer_head * bh);
-extern inline request_queue_t *blk_get_queue(kdev_t dev);
-extern void blkdev_release_request(struct request *);
 
 /*
  * Access functions for manipulating queue properties
  */
 extern void blk_init_queue(request_queue_t *, request_fn_proc *);
 extern void blk_cleanup_queue(request_queue_t *);
-extern void blk_queue_headactive(request_queue_t *, int);
-extern void blk_queue_make_request(request_queue_t *, make_request_fn *);
-extern void generic_unplug_device(void *);
 
 extern int * blk_size[MAX_BLKDEV];
 
@@ -187,9 +181,6 @@ extern int * max_segments[MAX_BLKDEV];
 #define blkdev_entry_prev_request(entry) blkdev_entry_to_request((entry)->prev)
 #define blkdev_next_request(req) blkdev_entry_to_request((req)->queue.next)
 #define blkdev_prev_request(req) blkdev_entry_to_request((req)->queue.prev)
-
-extern void drive_stat_acct (kdev_t dev, int rw,
-                             unsigned long nr_sectors, int new_io);
 
 static inline int get_hardsect_size(kdev_t dev)
 {

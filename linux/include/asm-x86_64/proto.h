@@ -18,7 +18,6 @@ extern void calibrate_delay(void);
 extern void cpu_idle(void);
 extern void sys_ni_syscall(void);
 extern void config_acpi_tables(void);
-extern void iommu_hole_init(void);
 extern void syscall_init(void);
 
 extern void do_softirq_thunk(void);
@@ -26,18 +25,12 @@ extern void do_softirq_thunk(void);
 extern int setup_early_printk(char *);
 extern void early_printk(const char *fmt, ...) __attribute__((format(printf,1,2)));
 
-extern int k8_scan_nodes(unsigned long start, unsigned long end);
-
-extern int numa_initmem_init(unsigned long start_pfn, unsigned long end_pfn);
-extern unsigned long numa_free_all_bootmem(void);
-
 extern void reserve_bootmem_generic(unsigned long phys, unsigned len);
 extern void free_bootmem_generic(unsigned long phys, unsigned len);
 
 extern void check_efer(void);
 
 extern unsigned long start_pfn, end_pfn, end_pfn_map;
-extern int iommu_aperture;
 
 extern void show_stack(unsigned long * rsp);
 extern void show_trace(unsigned long *stack);

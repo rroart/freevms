@@ -8,9 +8,6 @@
 #ifndef _NET_DST_H
 #define _NET_DST_H
 
-#include <linux/config.h>
-#include <net/neighbour.h>
-
 /*
  * 0 - no debugging messages
  * 1 - rare events and bugs (default)
@@ -51,15 +48,10 @@ struct dst_entry
 
     int         error;
 
-    struct neighbour    *neighbour;
     struct hh_cache     *hh;
 
     int         (*input)(struct sk_buff*);
     int         (*output)(struct sk_buff*);
-
-#ifdef CONFIG_NET_CLS_ROUTE
-    __u32           tclassid;
-#endif
 
     struct  dst_ops         *ops;
 
@@ -93,67 +85,17 @@ static inline void dst_hold(struct dst_entry * dst)
     atomic_inc(&dst->__refcnt);
 }
 
-static inline
-struct dst_entry * dst_clone(struct dst_entry * dst)
+static inline struct dst_entry * dst_clone(struct dst_entry * dst)
 {
     if (dst)
         atomic_inc(&dst->__refcnt);
     return dst;
 }
 
-static inline
-void dst_release(struct dst_entry * dst)
+static inline void dst_release(struct dst_entry * dst)
 {
     if (dst)
         atomic_dec(&dst->__refcnt);
-}
-
-extern void * dst_alloc(struct dst_ops * ops);
-extern void __dst_free(struct dst_entry * dst);
-extern void dst_destroy(struct dst_entry * dst);
-
-static inline
-void dst_free(struct dst_entry * dst)
-{
-    if (dst->obsolete > 1)
-        return;
-    if (!atomic_read(&dst->__refcnt))
-    {
-        dst_destroy(dst);
-        return;
-    }
-    __dst_free(dst);
-}
-
-static inline void dst_confirm(struct dst_entry *dst)
-{
-    if (dst)
-        neigh_confirm(dst->neighbour);
-}
-
-static inline void dst_negative_advice(struct dst_entry **dst_p)
-{
-    struct dst_entry * dst = *dst_p;
-    if (dst && dst->ops->negative_advice)
-        *dst_p = dst->ops->negative_advice(dst);
-}
-
-static inline void dst_link_failure(struct sk_buff *skb)
-{
-    struct dst_entry * dst = skb->dst;
-    if (dst && dst->ops && dst->ops->link_failure)
-        dst->ops->link_failure(skb);
-}
-
-static inline void dst_set_expires(struct dst_entry *dst, int timeout)
-{
-    unsigned long expires = jiffies + timeout;
-
-    if (expires == 0)
-        expires = 1;
-
-    if (dst->expires == 0 || (long)(dst->expires - expires) > 0)
-        dst->expires = expires;
 }
 
 extern void     dst_init(void);

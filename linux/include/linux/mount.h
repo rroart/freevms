@@ -38,8 +38,6 @@ static inline struct vfsmount *mntget(struct vfsmount *mnt)
     return mnt;
 }
 
-extern void __mntput(struct vfsmount *mnt);
-
 static inline void mntput(struct vfsmount *mnt)
 {
 }

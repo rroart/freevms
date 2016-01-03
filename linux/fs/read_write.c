@@ -10,7 +10,6 @@
 #include <linux/file.h>
 #include <linux/uio.h>
 #include <linux/smp_lock.h>
-#include <linux/dnotify.h>
 
 #include <asm/uaccess.h>
 #include <dyndef.h>

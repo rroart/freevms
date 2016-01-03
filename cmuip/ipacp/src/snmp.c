@@ -45,16 +45,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
-#ifdef KINETICS
-#include "gw.h"
-#include "ab.h"
-#include "inet.h"
-#include "fp4/cmdmacro.h"
-#include "fp4/pbuf.h"
-#include "glob.h"
-#endif
-
-#if (defined(unix) && !defined(KINETICS))
+#if defined(unix)
 #include <sys/types.h>
 #include <netinet/in.h>
 #ifndef NULL

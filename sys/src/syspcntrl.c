@@ -135,7 +135,6 @@ int exe$epid_to_ipid(unsigned long pid)
 
 int exe$ipid_to_epid(unsigned long pid)
 {
-    int i;
     unsigned long *vec=sch$gl_pcbvec;
     unsigned long *seq=sch$gl_seqvec;
     long shift = process_bit_shift();
@@ -146,7 +145,6 @@ int exe$ipid_to_epid(unsigned long pid)
 
 int exe$a_pid_to_ipid(unsigned long pid)  // remove this
 {
-    int i;
     unsigned long *vec=sch$gl_pcbvec;
     unsigned long *seq=sch$gl_seqvec;
     long shift = process_bit_shift();
@@ -374,6 +372,7 @@ asmlinkage int exe$wake(unsigned long *pidadr, void *prcnam)
 asmlinkage int exe$suspnd(unsigned int *pidadr, void *prcnam, unsigned int flags )
 {
     /** MISSING */
+    return SS$_NOTHINGDONE; /* temp. result */
 }
 
 /**
@@ -394,7 +393,7 @@ asmlinkage int exe$resume (unsigned int *pidadr, void *prcnam)
         /** if found */
         /** report scheduling event */
         sch$rse(p,PRI$_RESAVL,EVT$_RESUME);
-        return;
+        return SS$_NORMAL;
     }
     /** cwps - MISSING */
     return SS$_NORMAL;
@@ -424,6 +423,6 @@ inline void *find_task_by_pid(int pid)
     tsk=exe$ipid_to_pcb(pid);
     if (tsk) return tsk;
     long *x=&tsk;
-    printk(KERN_EMERG "FIND %d %x %x %x %x %x %x %x %x %x %x\n",pid,pid,x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8]);
+    printk(KERN_EMERG "FIND %d %x %lx %lx %lx %lx %lx %lx %lx %lx\n",pid,pid,x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8]);
     return 0;
 }

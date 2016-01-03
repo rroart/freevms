@@ -205,7 +205,7 @@ int exe$qiodrvpkt(struct _irp * i, struct _pcb * p, struct _ucb * u);
 int exe$finishio(long status1, long status2, struct _irp * i, struct _pcb * p, struct _ucb * u);
 int exe$finishioc(long status, struct _irp * i, struct _pcb * p, struct _ucb * u);
 void com$post(struct _irp * i, struct _ucb * u);
-int exe$asctim(UINT16 *timlen, struct dsc$descriptor *timbuf, const struct _generic_64 *timadr, unsigned long cvtflg);
+int exe$asctim(UINT16 *timlen, struct dsc$descriptor *timbuf, struct _generic_64 *timadr, unsigned long cvtflg);
 int exe$imgact_elf(void * name, void * hdrbuf);
 int exe$pscan_next_id(struct _pcb ** p);
 int exe$alophycntg(unsigned long * va, unsigned long num);

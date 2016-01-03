@@ -1,7 +1,7 @@
 #ifndef _LINUX_LIST_H
 #define _LINUX_LIST_H
 
-#if defined(__KERNEL__) || defined(_LVM_H_INCLUDE)
+#if defined(__KERNEL__)
 
 #include <linux/prefetch.h>
 
@@ -174,6 +174,6 @@ static __inline__ void list_splice(struct list_head *list, struct list_head *hea
             pos = pos->prev, prefetch(pos->prev))
 
 
-#endif /* __KERNEL__ || _LVM_H_INCLUDE */
+#endif /* __KERNEL__ */
 
 #endif

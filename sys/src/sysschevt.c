@@ -103,7 +103,7 @@ asmlinkage int exe$schdwk(unsigned int *pidadr, void *prcnam, struct _generic_64
     /** maybe cwps - MISSING */
     if (!p)
     {
-        return;
+        return sts;
     }
     else
     {

@@ -570,8 +570,6 @@ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 
 #endif /* !__ASSEMBLY__ */
 
-extern int kern_addr_valid(unsigned long addr);
-
 #define io_remap_pfn_range(vma, vaddr, pfn, size, prot)     \
         remap_pfn_range(vma, vaddr, pfn, size, prot)
 

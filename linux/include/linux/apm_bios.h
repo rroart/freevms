@@ -184,31 +184,6 @@ extern struct apm_info  apm_info;
 #define APM_DEVICE_CLASS    0x00ff
 #define APM_DEVICE_MASK     0xff00
 
-#ifdef __KERNEL__
-/*
- * This is the "All Devices" ID communicated to the BIOS
- */
-#define APM_DEVICE_BALL     ((apm_info.connection_version > 0x0100) ? \
-                 APM_DEVICE_ALL : APM_DEVICE_OLD_ALL)
-#endif
-
-/*
- * Battery status
- */
-#define APM_MAX_BATTERIES   2
-
-/*
- * APM defined capability bit flags
- */
-#define APM_CAP_GLOBAL_STANDBY      0x0001
-#define APM_CAP_GLOBAL_SUSPEND      0x0002
-#define APM_CAP_RESUME_STANDBY_TIMER    0x0004 /* Timer resume from standby */
-#define APM_CAP_RESUME_SUSPEND_TIMER    0x0008 /* Timer resume from suspend */
-#define APM_CAP_RESUME_STANDBY_RING 0x0010 /* Resume on Ring fr standby */
-#define APM_CAP_RESUME_SUSPEND_RING 0x0020 /* Resume on Ring fr suspend */
-#define APM_CAP_RESUME_STANDBY_PCMCIA   0x0040 /* Resume on PCMCIA Ring */
-#define APM_CAP_RESUME_SUSPEND_PCMCIA   0x0080 /* Resume on PCMCIA Ring */
-
 /*
  * ioctl operations
  */

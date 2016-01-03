@@ -82,19 +82,6 @@
 #define NET_CALLER(arg) __builtin_return_address(0)
 #endif
 
-#ifdef CONFIG_NETFILTER
-struct nf_conntrack
-{
-    atomic_t use;
-    void (*destroy)(struct nf_conntrack *);
-};
-
-struct nf_ct_info
-{
-    struct nf_conntrack *master;
-};
-#endif
-
 struct sk_buff_head
 {
     /* These two members must be first. */
@@ -198,17 +185,6 @@ struct sk_buff
     unsigned char   *end;           /* End pointer                  */
 
     void        (*destructor)(struct sk_buff *);    /* Destruct function        */
-#ifdef CONFIG_NETFILTER
-    /* Can be used for communication between hooks. */
-    unsigned long   nfmark;
-    /* Cache info */
-    __u32       nfcache;
-    /* Associated connection, if any */
-    struct nf_ct_info *nfct;
-#ifdef CONFIG_NETFILTER_DEBUG
-    unsigned int nf_debug;
-#endif
-#endif /*CONFIG_NETFILTER*/
 };
 
 #define SK_WMEM_MAX 65535
@@ -227,13 +203,6 @@ extern struct sk_buff *     alloc_skb(unsigned int size, int priority);
 extern void         kfree_skbmem(struct sk_buff *skb);
 extern struct sk_buff *     skb_clone(struct sk_buff *skb, int priority);
 extern struct sk_buff *     skb_copy(const struct sk_buff *skb, int priority);
-extern struct sk_buff *     pskb_copy(struct sk_buff *skb, int gfp_mask);
-extern int          pskb_expand_head(struct sk_buff *skb, int nhead, int ntail, int gfp_mask);
-extern struct sk_buff *     skb_realloc_headroom(struct sk_buff *skb, unsigned int headroom);
-extern struct sk_buff *     skb_copy_expand(const struct sk_buff *skb,
-        int newheadroom,
-        int newtailroom,
-        int priority);
 #define dev_kfree_skb(a)    kfree_skb(a)
 extern void skb_over_panic(struct sk_buff *skb, int len, void *here);
 extern void skb_under_panic(struct sk_buff *skb, int len, void *here);
@@ -1060,97 +1029,6 @@ static inline struct sk_buff *dev_alloc_skb(unsigned int length)
 {
     return __dev_alloc_skb(length, GFP_ATOMIC);
 }
-
-/**
- *  skb_cow - copy header of skb when it is required
- *  @skb: buffer to cow
- *  @headroom: needed headroom
- *
- *  If the skb passed lacks sufficient headroom or its data part
- *  is shared, data is reallocated. If reallocation fails, an error
- *  is returned and original skb is not changed.
- *
- *  The result is skb with writable area skb->head...skb->tail
- *  and at least @headroom of space at head.
- */
-
-static inline int
-skb_cow(struct sk_buff *skb, unsigned int headroom)
-{
-    int delta = (headroom > 16 ? headroom : 16) - skb_headroom(skb);
-
-    if (delta < 0)
-        delta = 0;
-
-    if (delta || skb_cloned(skb))
-        return pskb_expand_head(skb, (delta+15)&~15, 0, GFP_ATOMIC);
-    return 0;
-}
-
-/**
- *  skb_linearize - convert paged skb to linear one
- *  @skb: buffer to linarize
- *  @gfp: allocation mode
- *
- *  If there is no free memory -ENOMEM is returned, otherwise zero
- *  is returned and the old skb data released.  */
-int skb_linearize(struct sk_buff *skb, int gfp);
-
-static inline void *kmap_skb_frag(const skb_frag_t *frag)
-{
-#ifdef CONFIG_HIGHMEM
-    if (in_irq())
-        BUG();
-
-    local_bh_disable();
-#endif
-    return kmap_atomic(frag->page, KM_SKB_DATA_SOFTIRQ);
-}
-
-static inline void kunmap_skb_frag(void *vaddr)
-{
-    kunmap_atomic(vaddr, KM_SKB_DATA_SOFTIRQ);
-#ifdef CONFIG_HIGHMEM
-    local_bh_enable();
-#endif
-}
-
-#define skb_queue_walk(queue, skb) \
-        for (skb = (queue)->next;           \
-             (skb != (struct sk_buff *)(queue));    \
-             skb=skb->next)
-
-
-extern struct sk_buff *     skb_recv_datagram(struct sock *sk,unsigned flags,int noblock, int *err);
-extern unsigned int     datagram_poll(struct file *file, struct socket *sock, struct poll_table_struct *wait);
-extern int          skb_copy_datagram(const struct sk_buff *from, int offset, char *to,int size);
-extern int          skb_copy_datagram_iovec(const struct sk_buff *from, int offset, struct iovec *to,int size);
-extern int          skb_copy_and_csum_datagram(const struct sk_buff *skb, int offset, u8 *to, int len, unsigned int *csump);
-extern int          skb_copy_and_csum_datagram_iovec(const struct sk_buff *skb, int hlen, struct iovec *iov);
-extern void         skb_free_datagram(struct sock * sk, struct sk_buff *skb);
-
-extern unsigned int     skb_checksum(const struct sk_buff *skb, int offset, int len, unsigned int csum);
-extern int          skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len);
-extern unsigned int     skb_copy_and_csum_bits(const struct sk_buff *skb, int offset, u8 *to, int len, unsigned int csum);
-extern void         skb_copy_and_csum_dev(const struct sk_buff *skb, u8 *to);
-
-extern void skb_init(void);
-extern void skb_add_mtu(int mtu);
-
-#ifdef CONFIG_NETFILTER
-static inline void
-nf_conntrack_put(struct nf_ct_info *nfct)
-{
-    if (nfct && atomic_dec_and_test(&nfct->master->use))
-        nfct->master->destroy(nfct->master);
-}
-static inline void
-nf_conntrack_get(struct nf_ct_info *nfct)
-{
-    if (nfct)
-        atomic_inc(&nfct->master->use);
-}
-#endif
 
 #endif  /* __KERNEL__ */
 #endif  /* _LINUX_SKBUFF_H */

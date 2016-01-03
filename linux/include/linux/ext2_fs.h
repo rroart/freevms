@@ -603,7 +603,6 @@ extern int ext2_new_block (struct _vcb *, struct _fcb *, unsigned long,
 extern void ext2_free_blocks (struct _vcb * vcb, struct _fcb *, unsigned long,
                               unsigned long);
 extern unsigned long ext2_count_free_blocks (struct _vcb *);
-extern void ext2_check_blocks_bitmap (struct _vcb *);
 extern struct ext2_group_desc * ext2_get_group_desc(struct _vcb * vcb,
         unsigned int block_group,
         struct buffer_head ** bh);
@@ -626,7 +625,6 @@ extern int ext2_fsync_inode (struct _fcb *, int);
 extern struct _fcb * ext2_new_inode (struct _vcb * vcb, const struct _fcb *, int);
 extern void ext2_free_inode (struct _vcb *, struct _fcb *);
 extern unsigned long ext2_count_free_inodes (struct _vcb *);
-extern void ext2_check_inodes_bitmap (struct _vcb *);
 extern unsigned long ext2_count_free (struct buffer_head *, unsigned);
 
 /* inode.c */

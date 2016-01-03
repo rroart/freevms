@@ -156,7 +156,7 @@ extern int vmstimerconf;
 
 void printtq(struct _tqe * t)
 {
-    printk("%x %x %x %x\n",t,t->tqe$l_tqfl,t->tqe$q_delta,t->tqe$q_time);
+    printk("%x %lx %lx %lx\n",t,t->tqe$l_tqfl,t->tqe$q_delta,t->tqe$q_time);
 }
 
 /**

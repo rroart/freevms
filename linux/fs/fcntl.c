@@ -13,7 +13,6 @@
 #include <linux/init.h>
 #include <linux/mm.h>
 #include <linux/file.h>
-#include <linux/dnotify.h>
 #include <linux/smp_lock.h>
 #include <linux/slab.h>
 #include <linux/iobuf.h>

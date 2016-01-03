@@ -96,14 +96,6 @@ struct Qdisc
     char            data[0];
 };
 
-struct qdisc_rate_table
-{
-    struct tc_ratespec rate;
-    u32     data[256];
-    struct qdisc_rate_table *next;
-    int     refcnt;
-};
-
 static inline void sch_tree_lock(struct Qdisc *q)
 {
     write_lock(&qdisc_tree_lock);
@@ -356,79 +348,9 @@ extern int psched_tod_diff(int delta_sec, int bound);
 
 #endif
 
-struct tcf_police
-{
-    struct tcf_police *next;
-    int     refcnt;
-    u32     index;
-
-    int     action;
-    int     result;
-    u32     ewma_rate;
-    u32     burst;
-    u32     mtu;
-
-    u32     toks;
-    u32     ptoks;
-    psched_time_t   t_c;
-    spinlock_t  lock;
-    struct qdisc_rate_table *R_tab;
-    struct qdisc_rate_table *P_tab;
-
-    struct tc_stats stats;
-};
-
-extern int qdisc_copy_stats(struct sk_buff *skb, struct tc_stats *st);
-extern void tcf_police_destroy(struct tcf_police *p);
-extern struct tcf_police * tcf_police_locate(struct rtattr *rta, struct rtattr *est);
-extern int tcf_police_dump(struct sk_buff *skb, struct tcf_police *p);
-extern int tcf_police(struct sk_buff *skb, struct tcf_police *p);
-
-static inline void tcf_police_release(struct tcf_police *p)
-{
-    if (p && --p->refcnt == 0)
-        tcf_police_destroy(p);
-}
-
-extern struct Qdisc noop_qdisc;
-extern struct Qdisc_ops noop_qdisc_ops;
-extern struct Qdisc_ops pfifo_qdisc_ops;
-extern struct Qdisc_ops bfifo_qdisc_ops;
-
-int register_qdisc(struct Qdisc_ops *qops);
-int unregister_qdisc(struct Qdisc_ops *qops);
-struct Qdisc *qdisc_lookup(struct net_device *dev, u32 handle);
-struct Qdisc *qdisc_lookup_class(struct net_device *dev, u32 handle);
 void dev_init_scheduler(struct net_device *dev);
 void dev_shutdown(struct net_device *dev);
 void dev_activate(struct net_device *dev);
 void dev_deactivate(struct net_device *dev);
-void qdisc_reset(struct Qdisc *qdisc);
-void qdisc_destroy(struct Qdisc *qdisc);
-struct Qdisc * qdisc_create_dflt(struct net_device *dev, struct Qdisc_ops *ops);
-int qdisc_new_estimator(struct tc_stats *stats, struct rtattr *opt);
-void qdisc_kill_estimator(struct tc_stats *stats);
-struct qdisc_rate_table *qdisc_get_rtab(struct tc_ratespec *r, struct rtattr *tab);
-void qdisc_put_rtab(struct qdisc_rate_table *tab);
-int teql_init(void);
-int tc_filter_init(void);
-
-extern int qdisc_restart(struct net_device *dev);
-
-static inline void qdisc_run(struct net_device *dev)
-{
-    while (!netif_queue_stopped(dev) &&
-            qdisc_restart(dev)<0)
-        /* NOTHING */;
-}
-
-/* Calculate maximal size of packet seen by hard_start_xmit
-   routine of this device.
- */
-static inline unsigned psched_mtu(struct net_device *dev)
-{
-    unsigned mtu = dev->mtu;
-    return dev->hard_header ? mtu + dev->hard_header_len : mtu;
-}
 
 #endif

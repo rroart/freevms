@@ -349,24 +349,9 @@ extern int kmsg_redirect;
 extern void con_init(void);
 extern void console_init(void);
 
-extern int lp_init(void);
 extern int pty_init(void);
 extern void tty_init(void);
-extern int mxser_init(void);
-extern int moxa_init(void);
-extern int ip2_init(void);
-extern int pcxe_init(void);
 extern int pc_init(void);
-extern int vcs_init(void);
-extern int rp_init(void);
-extern int cy_init(void);
-extern int stl_init(void);
-extern int stli_init(void);
-extern int specialix_init(void);
-extern int espserial_init(void);
-extern int macserial_init(void);
-extern int stdio_init(void);
-extern int a2232board_init(void);
 
 extern int tty_paranoia_check(struct tty_struct *tty, kdev_t device,
                               const char *routine);
@@ -378,21 +363,14 @@ extern void start_tty(struct tty_struct * tty);
 extern int tty_register_ldisc(int disc, struct tty_ldisc *new_ldisc);
 extern int tty_register_driver(struct tty_driver *driver);
 extern int tty_unregister_driver(struct tty_driver *driver);
-extern int tty_read_raw_data(struct tty_struct *tty, unsigned char *bufp,
-                             int buflen);
 extern void tty_write_message(struct tty_struct *tty, char *msg);
 
 extern int is_orphaned_pgrp(int pgrp);
 extern int is_ignored(int sig);
-extern int tty_signal(int sig, struct tty_struct *tty);
 extern void tty_hangup(struct tty_struct * tty);
 extern void tty_vhangup(struct tty_struct * tty);
-extern void tty_unhangup(struct file *filp);
-extern int tty_hung_up_p(struct file * filp);
 extern void do_SAK(struct tty_struct *tty);
 extern void disassociate_ctty(int priv);
-extern void tty_flip_buffer_push(struct tty_struct *tty);
-extern int tty_get_baud_rate(struct tty_struct *tty);
 
 /* n_tty.c */
 extern struct tty_ldisc tty_ldisc_N_TTY;
@@ -404,10 +382,6 @@ extern int n_tty_ioctl(struct tty_struct * tty, struct file * file,
 /* serial.c */
 
 extern void serial_console_init(void);
-
-/* pcxx.c */
-
-extern int pcxe_open(struct tty_struct *tty, struct file *filp);
 
 /* printk.c */
 

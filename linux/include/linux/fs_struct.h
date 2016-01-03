@@ -19,7 +19,6 @@ struct fs_struct
 }
 
 extern void exit_fs(struct task_struct *);
-extern void set_fs_altroot(void);
 
 /*
  * Replace the fs->{rootmnt,root} with {mnt,dentry}. Put the old values.

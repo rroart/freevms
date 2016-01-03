@@ -44,43 +44,43 @@
 #include "../../cmuip/central/include/netconfig.h"
 #include <ioc_routines.h>
 
-config_in_dev(struct in_device ** in);
+#include "common.h"
 
 char * mydevice = 0;
 
 #define LAN_DEBUG
 #undef LAN_DEBUG
 
-static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv,
-                                      char *mask, void (*setup)(struct net_device *));
+static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv, char *mask, void (*setup)(struct net_device *));
 static struct net_device *init_alloc_dev(int sizeof_priv);
 
 static check_dup(struct _ucb * u, long * l)
 {
-    long len=l[0]/(2*sizeof(long));
+    long len = l[0] / (2 * sizeof(long));
     long *addr = l[1];
-    long proto=0;
-    for(; len; len--)
+    long proto = 0;
+    for (; len; len--)
     {
         switch (*addr++)
         {
         case NMA$C_PCLI_PTY:
             //lsb->lsb$l_valid_pty=*addr++;
-            proto=htons(*addr++);
+            proto = htons(*addr++);
             break;
         default:
         {
         }
         }
     }
-    struct _ucb * head=u ;
-    struct _ucb * tmp=head->ucb$l_link;
+    struct _ucb * head = u;
+    struct _ucb * tmp = head->ucb$l_link;
     struct _ucbnidef * ni = 0;
     while (tmp)
     {
         ni = tmp;
-        if (proto == ni->ucb$l_ni_pty) break;
-        tmp=tmp->ucb$l_link;
+        if (proto == ni->ucb$l_ni_pty)
+            break;
+        tmp = tmp->ucb$l_link;
     }
     return (proto == ni->ucb$l_ni_pty);
 }
@@ -89,40 +89,41 @@ extern struct net_device * scs_default_device;
 
 int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
 {
-    switch (i->irp$l_func&IO$M_FMODIFIERS)
+    switch (i->irp$l_func & IO$M_FMODIFIERS)
     {
-    case IO$M_CTRL|IO$M_STARTUP:
+    case IO$M_CTRL | IO$M_STARTUP:
     {
-        struct dsc$descriptor * d=i->irp$l_qio_p2;
-        long * l=d;
-        long len=l[0]/(2*sizeof(long));
+        struct dsc$descriptor * d = i->irp$l_qio_p2;
+        long * l = d;
+        long len = l[0] / (2 * sizeof(long));
         long *addr = d->dsc$a_pointer;
 
         unsigned short int chan;
         struct _ucbnidef * newucb;
 
-        if (check_dup(u->ucb$l_ddb->ddb$ps_ucb,d)) goto dup;
+        if (check_dup(u->ucb$l_ddb->ddb$ps_ucb, d))
+            goto dup;
 
-        ioc_std$clone_ucb(u->ucb$l_ddb->ddb$ps_ucb /*&er$ucb*/,&newucb);
+        ioc_std$clone_ucb(u->ucb$l_ddb->ddb$ps_ucb /*&er$ucb*/, &newucb);
         //    exe$assign(dsc,&chan,0,0,0);
 
-        c->ccb$l_ucb=newucb;
+        c->ccb$l_ucb = newucb;
 
-        struct _ucbnidef * ni=newucb;
+        struct _ucbnidef * ni = newucb;
 
-        struct net_device * dev = ni -> ucb$l_extra_l_1;
+        struct net_device * dev = ni->ucb$l_extra_l_1;
 
         scs_default_device = dev;
 
         //struct _lsbdef * lsb=kmalloc(sizeof(struct _lsbdef),GFP_KERNEL);
         //bzero(lsb,sizeof(struct _lsbdef));
-        for(; len; len--)
+        for (; len; len--)
         {
             switch (*addr++)
             {
             case NMA$C_PCLI_PTY:
                 //lsb->lsb$l_valid_pty=*addr++;
-                ni->ucb$l_ni_pty=htons(*addr++);
+                ni->ucb$l_ni_pty = htons(*addr++);
                 break;
             default:
             {
@@ -148,14 +149,13 @@ int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb *
         set_bit(__LINK_STATE_START, &dev->state);
         //dev_mc_upload(dev);
 #if 1
-        if (ni->ucb$l_ni_pty==0x6009 || ni->ucb$l_ni_pty==0x0960)
+        if (ni->ucb$l_ni_pty == 0x6009 || ni->ucb$l_ni_pty == 0x0960)
             dev_set_allmulti(dev, 1);
 #endif
     }
-dup:
-    break;
+        dup: break;
 
-    case IO$M_CTRL|IO$M_SHUTDOWN:
+    case IO$M_CTRL | IO$M_SHUTDOWN:
         // not yet; doing a dup check above first
         break;
 
@@ -173,70 +173,75 @@ dup:
 
 int lan$sensemode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
 {
-    if ((i->irp$l_func&(IO$M_CTRL))==(IO$M_CTRL))
+    if ((i->irp$l_func & (IO$M_CTRL)) == (IO$M_CTRL))
     {
-        struct dsc$descriptor * d=i->irp$l_qio_p2;
-        long * l=d;
-        long len=l[0]/(2*sizeof(long));
+        struct dsc$descriptor * d = i->irp$l_qio_p2;
+        long * l = d;
+        long len = l[0] / (2 * sizeof(long));
 
         char *addr = d->dsc$a_pointer;
-        struct XE_Sense * sense=addr;
+        struct XE_Sense * sense = addr;
 
-        struct _ucbnidef * ni=u;
+        struct _ucbnidef * ni = u;
 
-        struct net_device * dev = ni -> ucb$l_extra_l_1;
+        struct net_device * dev = ni->ucb$l_extra_l_1;
 
         sense->XE_Sense_Param = NMA$C_PCLI_HWA;
         sense->XE_Sense_Type = 1;
-        sense->XE_Sense_Length=6;
+        sense->XE_Sense_Length = 6;
 
-        memcpy(sense->XE_Sense_String,dev->dev_addr,6);
+        memcpy(sense->XE_Sense_String, dev->dev_addr, 6);
 
 #ifdef __i386__
         sense=(long)sense+10+2; // 2 because of gcc feature/bug
 #else
-        sense=(long)sense+10+2; // 2 because of gcc feature/bug
+        sense = (long) sense + 10 + 2; // 2 because of gcc feature/bug
 #endif
 
         sense->XE_Sense_Param = NMA$C_PCLI_PHA;
         sense->XE_Sense_Type = 1;
-        sense->XE_Sense_Length=6;
+        sense->XE_Sense_Length = 6;
 
-        signed long bc[3] = { -1, -1 , -1};
+        signed long bc[3] =
+            { -1, -1, -1 };
 
-        memcpy(sense->XE_Sense_String,bc,6);
+        memcpy(sense->XE_Sense_String, bc, 6);
 
     }
     if (i->irp$l_iosb)
     {
         struct XE_iosb_structure * iosb = i->irp$l_iosb;
-        iosb->xe$tran_size=2*(4+6+2); // 2 from gcc bug / feature
-        iosb->xe$vms_code=SS$_NORMAL;
+        iosb->xe$tran_size = 2 * (4 + 6 + 2); // 2 from gcc bug / feature
+        iosb->xe$vms_code = SS$_NORMAL;
     }
     return SS$_NORMAL;
 }
 
-int lan$setchar(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) { }
+int lan$setchar(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
+{
+}
 
-int lan$sensechar(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c) { }
+int lan$sensechar(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
+{
+}
 
-int lan$eth_type_trans(struct _ucb * u, void * data )
+int lan$eth_type_trans(struct _ucb * u, void * data)
 {
     struct _ucbnidef * ni = u;
-    struct net_device * dev = ni -> ucb$l_extra_l_1;
+    struct net_device * dev = ni->ucb$l_extra_l_1;
 
     struct ethhdr *eth;
     unsigned char *rawp;
 
-    eth= data;
+    eth = data;
 
-    if(*eth->h_dest&1)
+    if (*eth->h_dest & 1)
     {
 #if 0
         if(memcmp(eth->h_dest,dev->broadcast, ETH_ALEN)==0)
-            skb->pkt_type=PACKET_BROADCAST;
+        skb->pkt_type=PACKET_BROADCAST;
         else
-            skb->pkt_type=PACKET_MULTICAST;
+        skb->pkt_type=PACKET_MULTICAST;
 #endif
     }
 
@@ -248,11 +253,11 @@ int lan$eth_type_trans(struct _ucb * u, void * data )
      *  seems to set IFF_PROMISC.
      */
 
-    else if(1 /*dev->flags&IFF_PROMISC*/)
+    else if (1 /*dev->flags&IFF_PROMISC*/)
     {
 #if 0
         if(memcmp(eth->h_dest,dev->dev_addr, ETH_ALEN))
-            skb->pkt_type=PACKET_OTHERHOST;
+        skb->pkt_type=PACKET_OTHERHOST;
 #endif
     }
 
@@ -271,7 +276,7 @@ int lan$eth_type_trans(struct _ucb * u, void * data )
      *  layer. We look for FFFF which isn't a used 802.2 SSAP/DSAP. This
      *  won't work for fault tolerant netware but does for the rest.
      */
-    if (*(unsigned short *)rawp == 0xFFFF)
+    if (*(unsigned short *) rawp == 0xFFFF)
         return htons(ETH_P_802_3);
 
     /*
@@ -284,12 +289,12 @@ int lan$netif_rx(struct _ucb * u, void * bdsc)
 {
     struct _cxb * cb1 = bdsc;
     struct _cxb * cb2 = cb1->cxb$l_link;
-    int proto=ntohs(lan$eth_type_trans(u, cb1->cxb$ps_pktdata));
+    int proto = ntohs(lan$eth_type_trans(u, cb1->cxb$ps_pktdata));
     struct _ucbnidef * ni = 0;
-    struct _ucb * head=u;
-    struct _ucb * tmp=u->ucb$l_link;
+    struct _ucb * head = u;
+    struct _ucb * tmp = u->ucb$l_link;
 
-    if (proto==ETH_P_IPV6)
+    if (proto == ETH_P_IPV6)
     {
         kfreebuf(cb1);
 #ifdef LAN_DEBUG
@@ -300,8 +305,9 @@ int lan$netif_rx(struct _ucb * u, void * bdsc)
     while (tmp)
     {
         ni = tmp;
-        if (proto == ni->ucb$l_ni_pty) break;
-        tmp=tmp->ucb$l_link;
+        if (proto == ni->ucb$l_ni_pty)
+            break;
+        tmp = tmp->ucb$l_link;
     }
     if (proto != ni->ucb$l_ni_pty)
     {
@@ -322,52 +328,52 @@ int lan$netif_rx(struct _ucb * u, void * bdsc)
     }
 
     struct _irp * i = remque(tmp->ucb$l_ioqfl, 0);
-    i->irp$l_bcnt=i->irp$l_qio_p2;
+    i->irp$l_bcnt = i->irp$l_qio_p2;
     i->irp$l_svapte = cb1;
-    cb1->cxb$ps_uva32=i->irp$l_qio_p5;
-    cb2->cxb$ps_uva32=i->irp$l_qio_p1;
-    i->irp$l_iost1=SS$_NORMAL|(cb2->cxb$w_length<<16);
-    i->irp$l_iost2=0x0800;
-    com$post(i,tmp);
+    cb1->cxb$ps_uva32 = i->irp$l_qio_p5;
+    cb2->cxb$ps_uva32 = i->irp$l_qio_p1;
+    i->irp$l_iost1 = SS$_NORMAL | (cb2->cxb$w_length << 16);
+    i->irp$l_iost2 = 0x0800;
+    com$post(i, tmp);
     return SS$_NORMAL;
 }
 
 int lan$readblk(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c)
 {
-    int savipl=forklock(u->ucb$b_flck,u->ucb$b_flck);
-    exe$insertirp(u,i);
-    forkunlock(u->ucb$b_flck,savipl);
+    int savipl = forklock(u->ucb$b_flck, u->ucb$b_flck);
+    exe$insertirp(u, i);
+    forkunlock(u->ucb$b_flck, savipl);
     return SS$_NORMAL;
 }
 
 void * lan$alloc_cxb(int len)
 {
-    struct _cxb * cb1 = kmalloc(sizeof(struct _cxb),GFP_KERNEL);
-    struct _cxb * cb2 = kmalloc(sizeof(struct _cxb),GFP_KERNEL);
+    struct _cxb * cb1 = kmalloc(sizeof(struct _cxb), GFP_KERNEL);
+    struct _cxb * cb2 = kmalloc(sizeof(struct _cxb), GFP_KERNEL);
     memset(cb1, 0, sizeof(struct _cxb));
     memset(cb2, 0, sizeof(struct _cxb));
-    char * buf1 = kmalloc(14,GFP_KERNEL);
-    char * buf2 = kmalloc(len-14,GFP_KERNEL);
-    cb1->cxb$b_type=DYN$C_CXB;
-    cb2->cxb$b_type=DYN$C_CXB;
-    cb1->cxb$w_length=14;
-    cb2->cxb$w_length=len-14;
-    cb1->cxb$ps_pktdata=buf1;
-    cb2->cxb$ps_pktdata=buf2;
-    cb1->cxb$l_link=cb2;
-    cb2->cxb$l_link=0;
+    char * buf1 = kmalloc(14, GFP_KERNEL);
+    char * buf2 = kmalloc(len - 14, GFP_KERNEL);
+    cb1->cxb$b_type = DYN$C_CXB;
+    cb2->cxb$b_type = DYN$C_CXB;
+    cb1->cxb$w_length = 14;
+    cb2->cxb$w_length = len - 14;
+    cb1->cxb$ps_pktdata = buf1;
+    cb2->cxb$ps_pktdata = buf2;
+    cb1->cxb$l_link = cb2;
+    cb2->cxb$l_link = 0;
     return cb1;
 }
 
 void * lan$alloc_xmit_buf(struct _irp * i, struct _ucbnidef * u, char *dest)
 {
-    char * buf=kmalloc(4096, GFP_KERNEL);
+    char * buf = kmalloc(4096, GFP_KERNEL);
     unsigned short pty = htons(u->ucb$l_ni_pty);
     unsigned short * pty_p = &buf[12];
-    memcpy(buf,i->irp$l_qio_p5,6);
-    memcpy(&buf[6],dest,6);
-    *pty_p=pty; // maybe it should be done before qio instead? -> above 6 -> 8
-    memcpy(&buf[14],i->irp$l_qio_p1,i->irp$l_qio_p2);
+    memcpy(buf, i->irp$l_qio_p5, 6);
+    memcpy(&buf[6], dest, 6);
+    *pty_p = pty; // maybe it should be done before qio instead? -> above 6 -> 8
+    memcpy(&buf[14], i->irp$l_qio_p1, i->irp$l_qio_p2);
     return buf;
 }
 
@@ -378,40 +384,40 @@ init_etherdev()
 }
 #endif
 
-int              register_netdevice(struct net_device *dev)
+int register_netdevice(struct net_device *dev)
 {
     printk("reg net not impl\n");
     return 0;
 }
 
-int              unregister_netdevice(struct net_device *dev)
+int unregister_netdevice(struct net_device *dev)
 {
-    printk ("unreg netdev not impl\n");
+    printk("unreg netdev not impl\n");
     return 0;
 }
 
-int              register_netdev(struct net_device *dev)
+int register_netdev(struct net_device *dev)
 {
     printk("reg net not impl\n");
     return 0;
 }
 
-void              unregister_netdev(struct net_device *dev)
+void unregister_netdev(struct net_device *dev)
 {
-    printk ("unreg netdev not impl\n");
+    printk("unreg netdev not impl\n");
 }
 
-register_inetaddr_notifier(struct notifier_block *nb)
+int register_inetaddr_notifier(struct notifier_block *nb)
 {
     printk(" register_inetaddr_notifie not impl\n");
 }
 
-int              dev_close(struct net_device *dev)
+int dev_close(struct net_device *dev)
 {
     printk("dev close not impol\n");
 }
 
-__u32 in_aton(const char *str)
+UINT32 in_aton(const char *str)
 {
     unsigned long l;
     unsigned int val;
@@ -435,9 +441,8 @@ __u32 in_aton(const char *str)
                 str++;
         }
     }
-    return(htonl(l));
+    return (htonl(l));
 }
-
 
 /*
  *       Callers must hold the rtnl semaphore.  See the comment at the
@@ -450,7 +455,7 @@ int __init net_dev_init(void)
     int i;
 
     if (!dev_boot_phase)
-        return 0;
+    return 0;
 
     /*
      *  Initialise the packet receive queues.
@@ -498,7 +503,7 @@ int __init net_dev_init(void)
          */
 #if 0
         if (strchr(dev->name, '%'))
-            dev_alloc_name(dev, dev->name);
+        dev_alloc_name(dev, dev->name);
 #endif
 
         /*
@@ -521,9 +526,9 @@ int __init net_dev_init(void)
             dp = &dev->next;
             dev->ifindex = dev_new_index();
             if (dev->iflink == -1)
-                dev->iflink = dev->ifindex;
+            dev->iflink = dev->ifindex;
             if (dev->rebuild_header == NULL)
-                dev->rebuild_header = default_rebuild_header;
+            dev->rebuild_header = default_rebuild_header;
             dev_init_scheduler(dev);
             set_bit(__LINK_STATE_PRESENT, &dev->state);
         }
@@ -555,9 +560,6 @@ int __init net_dev_init(void)
 #ifdef CONFIG_PROC_FS
     proc_net_create("dev", 0, dev_get_info);
     create_proc_read_entry("net/softnet_stat", 0, 0, dev_proc_stats, NULL);
-#ifdef WIRELESS_EXT
-    proc_net_create("wireless", 0, dev_get_wireless_info);
-#endif  /* WIRELESS_EXT */
 #endif  /* CONFIG_PROC_FS */
 
     dev_boot_phase = 0;
@@ -609,8 +611,7 @@ struct net_device *init_etherdev(struct net_device *dev, int sizeof_priv)
  *  setup.
  */
 
-static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv,
-                                      char *mask, void (*setup)(struct net_device *))
+static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv, char *mask, void (*setup)(struct net_device *))
 {
     int new_device = 0;
 
@@ -620,8 +621,8 @@ static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv,
 
     if (dev == NULL)
     {
-        dev=init_alloc_dev(sizeof_priv);
-        if(dev==NULL)
+        dev = init_alloc_dev(sizeof_priv);
+        if (dev == NULL)
             return NULL;
         new_device = 1;
     }
@@ -637,7 +638,7 @@ static struct net_device *init_netdev(struct net_device *dev, int sizeof_priv,
         if (dev_alloc_name(dev, mask)<0)
         {
             if (new_device)
-                kfree(dev);
+            kfree(dev);
             return NULL;
         }
     }
@@ -679,9 +680,9 @@ static struct net_device *init_alloc_dev(int sizeof_priv)
     int alloc_size;
 
     /* ensure 32-byte alignment of the private area */
-    alloc_size = sizeof (*dev) + sizeof_priv + 31;
+    alloc_size = sizeof(*dev) + sizeof_priv + 31;
 
-    dev = (struct net_device *) kmalloc (alloc_size, GFP_KERNEL);
+    dev = (struct net_device *) kmalloc(alloc_size, GFP_KERNEL);
     if (dev == NULL)
     {
         printk(KERN_ERR "alloc_dev: Unable to allocate device memory.\n");
@@ -691,7 +692,7 @@ static struct net_device *init_alloc_dev(int sizeof_priv)
     memset(dev, 0, alloc_size);
 
     if (sizeof_priv)
-        dev->priv = (void *) (((long)(dev + 1) + 31) & ~31);
+        dev->priv = (void *) (((long) (dev + 1) + 31) & ~31);
 
     return dev;
 }
@@ -699,32 +700,32 @@ static struct net_device *init_alloc_dev(int sizeof_priv)
 void ether_setup(struct net_device *dev)
 {
     /* Fill in the fields of the device structure with ethernet-generic values.
-       This should be in a common file instead of per-driver.  */
+     This should be in a common file instead of per-driver.  */
 
 #if 0
-    dev->change_mtu     = eth_change_mtu;
-    dev->hard_header    = eth_header;
-    dev->rebuild_header     = eth_rebuild_header;
-    dev->set_mac_address    = eth_mac_addr;
-    dev->hard_header_cache  = eth_header_cache;
+    dev->change_mtu = eth_change_mtu;
+    dev->hard_header = eth_header;
+    dev->rebuild_header = eth_rebuild_header;
+    dev->set_mac_address = eth_mac_addr;
+    dev->hard_header_cache = eth_header_cache;
     dev->header_cache_update= eth_header_cache_update;
-    dev->hard_header_parse  = eth_header_parse;
+    dev->hard_header_parse = eth_header_parse;
 #endif
 
 #define ARPHRD_ETHER       1
 
-    dev->type       = ARPHRD_ETHER;
-    dev->hard_header_len    = ETH_HLEN;
-    dev->mtu        = 1500; /* eth_mtu */
-    dev->addr_len       = ETH_ALEN;
-    dev->tx_queue_len   = 100;  /* Ethernet wants good queues */
+    dev->type = ARPHRD_ETHER;
+    dev->hard_header_len = ETH_HLEN;
+    dev->mtu = 1500; /* eth_mtu */
+    dev->addr_len = ETH_ALEN;
+    dev->tx_queue_len = 100; /* Ethernet wants good queues */
 
-    memset(dev->broadcast,0xFF, ETH_ALEN);
+    memset(dev->broadcast, 0xFF, ETH_ALEN);
 
     /* New-style flags. */
-    dev->flags      = IFF_BROADCAST|IFF_MULTICAST;
+    dev->flags = IFF_BROADCAST | IFF_MULTICAST;
 }
-EXPORT_SYMBOL(ether_setup);
+EXPORT_SYMBOL( ether_setup);
 
 /* Boot time configuration table */
 static struct netdev_boot_setup dev_boot_setup[NETDEV_BOOT_SETUP_MAX];
@@ -746,30 +747,32 @@ int netdev_boot_setup_check(struct net_device *dev)
     s = dev_boot_setup;
     for (i = 0; i < NETDEV_BOOT_SETUP_MAX; i++)
     {
-        if (s[i].name[0] != '\0' && s[i].name[0] != ' ' &&
-                !strncmp(dev->name, s[i].name, strlen(s[i].name)))
+        if (s[i].name[0] != '\0' && s[i].name[0] != ' ' && !strncmp(dev->name, s[i].name, strlen(s[i].name)))
         {
-            dev->irq    = s[i].map.irq;
-            dev->base_addr  = s[i].map.base_addr;
-            dev->mem_start  = s[i].map.mem_start;
-            dev->mem_end    = s[i].map.mem_end;
+            dev->irq = s[i].map.irq;
+            dev->base_addr = s[i].map.base_addr;
+            dev->mem_start = s[i].map.mem_start;
+            dev->mem_end = s[i].map.mem_end;
             return 1;
         }
     }
     return 0;
 }
 
-config_in_dev(struct in_device ** in)
+void config_in_dev(struct in_device ** in)
 {
     extern Device_Configuration_Entry dev_config_tab[];
+    *in = NULL;
     struct in_ifaddr *in_ifa = kmalloc(sizeof(*in_ifa), GFP_KERNEL);
     struct in_device *in_dev = kmalloc(sizeof(*in_dev), GFP_KERNEL);
+    if ((in_ifa == NULL) || (in_dev == NULL))
+    {
+        return;
+    }
     memset(in_dev, 0, sizeof(*in_dev));
     memset(in_ifa, 0, sizeof(*in_ifa));
-    *in=in_dev;
-    in_dev->ifa_list=in_ifa;
-    if (!in_dev)
-        return NULL;
+    *in = in_dev;
+    in_dev->ifa_list = in_ifa;
 #if 0
     in_ifa-> ifa_address = dev_config_tab[0].dc_ip_address;
     in_ifa-> ifa_mask = dev_config_tab[0].dc_ip_netmask;
@@ -792,16 +795,15 @@ void probe_units(void)
 #endif
 }
 
-static struct net_device *alloc_netdev(int sizeof_priv, const char *mask,
-                                       void (*setup)(struct net_device *))
+static struct net_device *alloc_netdev(int sizeof_priv, const char *mask, void (*setup)(struct net_device *))
 {
     struct net_device *dev;
     int alloc_size;
 
     /* ensure 32-byte alignment of the private area */
-    alloc_size = sizeof (*dev) + sizeof_priv + 31;
+    alloc_size = sizeof(*dev) + sizeof_priv + 31;
 
-    dev = (struct net_device *) kmalloc (alloc_size, GFP_KERNEL);
+    dev = (struct net_device *) kmalloc(alloc_size, GFP_KERNEL);
     if (dev == NULL)
     {
         printk(KERN_ERR "alloc_dev: Unable to allocate device memory.\n");
@@ -811,7 +813,7 @@ static struct net_device *alloc_netdev(int sizeof_priv, const char *mask,
     memset(dev, 0, alloc_size);
 
     if (sizeof_priv)
-        dev->priv = (void *) (((long)(dev + 1) + 31) & ~31);
+        dev->priv = (void *) (((long) (dev + 1) + 31) & ~31);
 
     setup(dev);
     strcpy(dev->name, mask);
@@ -831,7 +833,7 @@ void dev_set_allmulti(struct net_device *dev, int inc)
     dev->flags |= IFF_ALLMULTI;
     if ((dev->allmulti += inc) == 0)
         dev->flags &= ~IFF_ALLMULTI;
-    if (dev->flags^old_flags)
+    if (dev->flags ^ old_flags)
         dev_mc_upload(dev);
 }
 
@@ -842,7 +844,7 @@ static void __dev_mc_upload(struct net_device *dev)
      * stay sane]
      */
 
-    if (!(dev->flags&IFF_UP))
+    if (!(dev->flags & IFF_UP))
         return;
 
     /*
@@ -850,8 +852,7 @@ static void __dev_mc_upload(struct net_device *dev)
      *  detached don't get set.
      */
 
-    if (dev->set_multicast_list == NULL ||
-            !netif_device_present(dev))
+    if (dev->set_multicast_list == NULL || !netif_device_present(dev))
         return;
 
     dev->set_multicast_list(dev);

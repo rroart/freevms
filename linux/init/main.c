@@ -674,9 +674,6 @@ static void __init do_basic_setup(void)
     printk("%%KERNEL-I-DEBUG, After do_initcalls\n");
 }
 
-extern void rd_load(void);
-extern void initrd_load(void);
-
 extern int mydebug5;
 extern int mydebug6;
 

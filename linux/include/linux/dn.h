@@ -110,43 +110,4 @@ struct accessdata_dn
     unsigned char       acc_user[DN_MAXACCL];
 };
 
-/*
- * DECnet logical link information structure
- */
-struct linkinfo_dn
-{
-    unsigned short  idn_segsize;    /* Segment size for link */
-    unsigned char   idn_linkstate;  /* Logical link state    */
-};
-
-/*
- * Ethernet address format (for DECnet)
- */
-union etheraddress
-{
-    unsigned char dne_addr[6];             /* Full ethernet address */
-    struct
-    {
-        unsigned char dne_hiord[4];    /* DECnet HIORD prefix   */
-        unsigned char dne_nodeaddr[2]; /* DECnet node address   */
-    } dne_remote;
-};
-
-
-/*
- * DECnet physical socket address format
- */
-struct dn_addr
-{
-    unsigned short dna_family;      /* AF_DECnet               */
-    union etheraddress dna_netaddr; /* DECnet ethernet address */
-};
-
-#define DECNET_IOCTL_BASE 0x89 /* PROTOPRIVATE range */
-
-#define SIOCSNETADDR  _IOW(DECNET_IOCTL_BASE, 0xe0, struct dn_naddr)
-#define SIOCGNETADDR  _IOR(DECNET_IOCTL_BASE, 0xe1, struct dn_naddr)
-#define OSIOCSNETADDR _IOW(DECNET_IOCTL_BASE, 0xe0, int)
-#define OSIOCGNETADDR _IOR(DECNET_IOCTL_BASE, 0xe1, int)
-
 #endif /* _LINUX_DN_H */

@@ -34,11 +34,7 @@ struct e8390_pkt_hdr
     unsigned short count; /* header + packet length in bytes */
 };
 
-#ifdef notdef
-extern int ei_debug;
-#else
 #define ei_debug 1
-#endif
 
 #ifndef HAVE_AUTOIRQ
 /* From auto_irq.c */

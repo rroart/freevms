@@ -269,12 +269,8 @@ unsigned char *read_dev_sector(struct block_device *bdev, unsigned long n, Secto
 #if 0
     block_read_full_page2(bdev->bd_inode,page,n/sect);
 #else
-#if 0
-    myqio(0, page_address(page), 4096, n, to_kdev_t(bdev->bd_dev), 2);
-#else
-    unsigned long long iosb;
+    struct _iosb iosb;
     int sts = exe$qiow(0,(unsigned short)dev2chan(to_kdev_t(bdev->bd_dev)),IO$_READPBLK,&iosb,0,0, page_address(page),4096,n*2,0,0,0);
-#endif
 #endif
 
     if (!IS_ERR(page))

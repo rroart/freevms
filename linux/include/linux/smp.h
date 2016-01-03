@@ -61,20 +61,6 @@ extern int smp_threads_ready;
 
 extern int smp_num_cpus;
 
-extern volatile unsigned long smp_msg_data;
-extern volatile int smp_src_cpu;
-extern volatile int smp_msg_id;
-
-#define MSG_ALL_BUT_SELF    0x8000  /* Assume <32768 CPU's */
-#define MSG_ALL         0x8001
-
-#define MSG_INVALIDATE_TLB  0x0001  /* Remote processor TLB invalidate */
-#define MSG_STOP_CPU        0x0002  /* Sent to shut down slave CPU's
-* when rebooting
-*/
-#define MSG_RESCHEDULE      0x0003  /* Reschedule request from master CPU*/
-#define MSG_CALL_FUNCTION       0x0004  /* Call function on all other CPUs */
-
 #else
 
 /*

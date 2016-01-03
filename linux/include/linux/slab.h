@@ -70,10 +70,7 @@ extern int slabinfo_write_proc(struct file *file, const char *buffer,
 /* System wide caches */
 extern kmem_cache_t *vm_area_cachep;
 extern kmem_cache_t *mm_cachep;
-extern kmem_cache_t *names_cachep;
 extern kmem_cache_t *files_cachep;
-extern kmem_cache_t *filp_cachep;
-extern kmem_cache_t *dquot_cachep;
 extern kmem_cache_t *bh_cachep;
 extern kmem_cache_t *fs_cachep;
 extern kmem_cache_t *sigact_cachep;

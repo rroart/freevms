@@ -403,18 +403,11 @@ struct packet_type
 #include <linux/interrupt.h>
 #include <linux/notifier.h>
 
-extern struct net_device        loopback_dev;       /* The loopback */
 extern struct net_device        *dev_base;      /* All devices */
 extern rwlock_t             dev_base_lock;      /* Device list lock */
 
-extern int          netdev_boot_setup_add(char *name, struct ifmap *map);
 extern int          netdev_boot_setup_check(struct net_device *dev);
-extern struct net_device    *dev_getbyhwaddr(unsigned short type, char *hwaddr);
-extern void     dev_add_pack(struct packet_type *pt);
-extern void     dev_remove_pack(struct packet_type *pt);
 extern int      dev_get(const char *name);
-extern struct net_device    *dev_get_by_name(const char *name);
-extern struct net_device    *__dev_get_by_name(const char *name);
 extern struct net_device    *dev_alloc(const char *name, int *err);
 extern int      dev_alloc_name(struct net_device *dev, const char *name);
 extern int      dev_open(struct net_device *dev);
@@ -422,19 +415,7 @@ extern int      dev_close(struct net_device *dev);
 extern int      dev_queue_xmit(struct sk_buff *skb);
 extern int      register_netdevice(struct net_device *dev);
 extern int      unregister_netdevice(struct net_device *dev);
-extern int      register_netdevice_notifier(struct notifier_block *nb);
-extern int      unregister_netdevice_notifier(struct notifier_block *nb);
 extern int      dev_new_index(void);
-extern struct net_device    *dev_get_by_index(int ifindex);
-extern struct net_device    *__dev_get_by_index(int ifindex);
-extern int      dev_restart(struct net_device *dev);
-
-typedef int gifconf_func_t(struct net_device * dev, char * bufptr, int len);
-extern int      register_gifconf(unsigned int family, gifconf_func_t * gifconf);
-static inline int unregister_gifconf(unsigned int family)
-{
-    return register_gifconf(family, 0);
-}
 
 /*
  * Incoming packets are placed on per-cpu queues so that
@@ -532,16 +513,11 @@ static inline void dev_kfree_skb_any(struct sk_buff *skb)
         dev_kfree_skb(skb);
 }
 
-extern void     net_call_rx_atomic(void (*fn)(void));
 #define HAVE_NETIF_RX 1
 extern int      netif_rx(struct sk_buff *skb);
 extern int      dev_ioctl(unsigned int cmd, void *);
-extern int      dev_change_flags(struct net_device *, unsigned);
-extern void     dev_queue_xmit_nit(struct sk_buff *skb, struct net_device *dev);
 
 extern void     dev_init(void);
-
-extern int      netdev_nit;
 
 /* Post buffer to the network code from _non interrupt_ context.
  * see net/core/dev.c for netif_rx description.
@@ -552,11 +528,6 @@ static inline int netif_rx_ni(struct sk_buff *skb)
     if (softirq_pending(smp_processor_id()))
         do_softirq();
     return err;
-}
-
-static inline void dev_init_buffers(struct net_device *dev)
-{
-    /* WILL BE REMOVED IN 2.5.0 */
 }
 
 extern int netdev_finish_unregister(struct net_device *dev);
@@ -662,31 +633,13 @@ enum
 /* These functions live elsewhere (drivers/net/net_init.c, but related) */
 
 extern void     ether_setup(struct net_device *dev);
-extern void     fddi_setup(struct net_device *dev);
-extern void     tr_setup(struct net_device *dev);
-extern void     fc_setup(struct net_device *dev);
-extern void     fc_freedev(struct net_device *dev);
 /* Support for loadable net-drivers */
 extern int      register_netdev(struct net_device *dev);
 extern void     unregister_netdev(struct net_device *dev);
 /* Functions used for multicast support */
 extern void     dev_mc_upload(struct net_device *dev);
-extern int      dev_mc_delete(struct net_device *dev, void *addr, int alen, int all);
-extern int      dev_mc_add(struct net_device *dev, void *addr, int alen, int newonly);
-extern void     dev_mc_discard(struct net_device *dev);
-extern void     dev_set_promiscuity(struct net_device *dev, int inc);
 extern void     dev_set_allmulti(struct net_device *dev, int inc);
-extern void     netdev_state_change(struct net_device *dev);
-/* Load a device via the kmod */
-extern void     dev_load(const char *name);
 extern void     dev_mcast_init(void);
-extern int      netdev_register_fc(struct net_device *dev, void (*stimul)(struct net_device *dev));
-extern void     netdev_unregister_fc(int bit);
-extern int      netdev_max_backlog;
-extern unsigned long    netdev_fc_xoff;
-extern atomic_t netdev_dropping;
-extern int      netdev_set_master(struct net_device *dev, struct net_device *master);
-extern struct sk_buff * skb_checksum_help(struct sk_buff *skb);
 
 #endif /* __KERNEL__ */
 

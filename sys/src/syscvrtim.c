@@ -295,7 +295,7 @@ int lib$cvt_vectim(const unsigned short *timbuf, struct _generic_64 *timadr)
 }
 
 /* sys_asctim() converts quadword to ascii... */
-int exe$asctim(UINT16 *timlen, struct dsc$descriptor *timbuf, const struct _generic_64 *timadr, unsigned long cvtflg)
+int exe$asctim(UINT16 *timlen, struct dsc$descriptor *timbuf, struct _generic_64 *timadr, unsigned long cvtflg)
 {
     long count, timval;
     unsigned short wrktim[7];

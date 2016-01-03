@@ -173,9 +173,4 @@ static inline void disable_ioapic_setup(void)
 
 #endif  /* !CONFIG_X86_IO_APIC */
 
-extern int io_apic_get_unique_id (int ioapic, int apic_id);
-extern int io_apic_get_version (int ioapic);
-extern int io_apic_get_redir_entries (int ioapic);
-extern int io_apic_set_pci_routing (int ioapic, int pin, int irq, int, int);
-
 #endif
