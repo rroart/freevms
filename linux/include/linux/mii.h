@@ -104,16 +104,17 @@
 #define NWAYTEST_RESV2          0xfe00  /* Unused...                   */
 
 
-struct mii_if_info {
-	int phy_id;
-	int advertising;
+struct mii_if_info
+{
+    int phy_id;
+    int advertising;
 
-	unsigned int full_duplex : 1;
-	unsigned int duplex_lock : 1;
+    unsigned int full_duplex : 1;
+    unsigned int duplex_lock : 1;
 
-	struct net_device *dev;
-	int (*mdio_read) (struct net_device *dev, int phy_id, int location);
-	void (*mdio_write) (struct net_device *dev, int phy_id, int location, int val);
+    struct net_device *dev;
+    int (*mdio_read) (struct net_device *dev, int phy_id, int location);
+    void (*mdio_write) (struct net_device *dev, int phy_id, int location, int val);
 };
 
 struct ethtool_cmd;
@@ -125,11 +126,12 @@ int mii_ethtool_sset(struct mii_if_info *mii, struct ethtool_cmd *ecmd);
 
 
 /* This structure is used in all SIOCxMIIxxx ioctl calls */
-struct mii_ioctl_data {
-	u16		phy_id;
-	u16		reg_num;
-	u16		val_in;
-	u16		val_out;
+struct mii_ioctl_data
+{
+    u16		phy_id;
+    u16		reg_num;
+    u16		val_in;
+    u16		val_out;
 };
 
 
@@ -149,20 +151,20 @@ struct mii_ioctl_data {
  */
 static inline unsigned int mii_nway_result (unsigned int negotiated)
 {
-	unsigned int ret;
+    unsigned int ret;
 
-	if (negotiated & LPA_100FULL)
-		ret = LPA_100FULL;
-	else if (negotiated & LPA_100BASE4)
-		ret = LPA_100BASE4;
-	else if (negotiated & LPA_100HALF)
-		ret = LPA_100HALF;
-	else if (negotiated & LPA_10FULL)
-		ret = LPA_10FULL;
-	else
-		ret = LPA_10HALF;
+    if (negotiated & LPA_100FULL)
+        ret = LPA_100FULL;
+    else if (negotiated & LPA_100BASE4)
+        ret = LPA_100BASE4;
+    else if (negotiated & LPA_100HALF)
+        ret = LPA_100HALF;
+    else if (negotiated & LPA_10FULL)
+        ret = LPA_10FULL;
+    else
+        ret = LPA_10HALF;
 
-	return ret;
+    return ret;
 }
 
 /**
@@ -175,13 +177,13 @@ static inline unsigned int mii_nway_result (unsigned int negotiated)
  * returns zero otherwise.
  */
 static inline unsigned int mii_duplex (unsigned int duplex_lock,
-				       unsigned int negotiated)
+                                       unsigned int negotiated)
 {
-	if (duplex_lock)
-		return 1;
-	if (mii_nway_result(negotiated) & LPA_DUPLEX)
-		return 1;
-	return 0;
+    if (duplex_lock)
+        return 1;
+    if (mii_nway_result(negotiated) & LPA_DUPLEX)
+        return 1;
+    return 0;
 }
 
 

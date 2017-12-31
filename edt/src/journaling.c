@@ -52,56 +52,59 @@
 String *jnl_readprompt (const char *prompt)
 
 {
-  char *buff, header[16], *p;
-  String *string;
-  uLong strln;
+    char *buff, header[16], *p;
+    String *string;
+    uLong strln;
 
-  /* If recovery file open, read from it, otherwise read from terminal */
+    /* If recovery file open, read from it, otherwise read from terminal */
 
-  if (recover_file == NULL) goto readterminal;
-  if (fgets (header, sizeof header, recover_file) == NULL) goto closerecovery;
-  if (header[0] != '*') goto badrecovery;
-  if (strcmp (header + 1, "EOF\n") == 0) {
-    string = NULL;
+    if (recover_file == NULL) goto readterminal;
+    if (fgets (header, sizeof header, recover_file) == NULL) goto closerecovery;
+    if (header[0] != '*') goto badrecovery;
+    if (strcmp (header + 1, "EOF\n") == 0)
+    {
+        string = NULL;
+        goto writejournal;
+    }
+    strln = strtoul (header + 1, &p, 10);
+    if (*p != '\n') goto badrecovery;
+    buff = malloc (strln + 1);
+    if (fread (buff, strln, 1, recover_file) == 0) goto closerecovery;
+    string = string_create (strln, buff);
+    buff[strln] = 0;
+    outfmt (strlen (prompt) + strlen (buff), "%s%s\n", prompt, buff);
+    free (buff);
     goto writejournal;
-  }
-  strln = strtoul (header + 1, &p, 10);
-  if (*p != '\n') goto badrecovery;
-  buff = malloc (strln + 1);
-  if (fread (buff, strln, 1, recover_file) == 0) goto closerecovery;
-  string = string_create (strln, buff);
-  buff[strln] = 0;
-  outfmt (strlen (prompt) + strlen (buff), "%s%s\n", prompt, buff);
-  free (buff);
-  goto writejournal;
 
 badrecovery:
-  outerr (strlen (header), "bad recovery file format at %s\n", header);
+    outerr (strlen (header), "bad recovery file format at %s\n", header);
 closerecovery:
-  fclose (recover_file);
-  recover_file = NULL;
+    fclose (recover_file);
+    recover_file = NULL;
 
-  /* Read from terminal screen after flushing any output */
+    /* Read from terminal screen after flushing any output */
 
 readterminal:
-  output ();
-  string = os_readprompt (prompt);
+    output ();
+    string = os_readprompt (prompt);
 
-  /* Write journal record */
+    /* Write journal record */
 
 writejournal:
-  if (journal_file != NULL) {
-    if (string == NULL) fprintf (journal_file, "*EOF\n");
-    else {
-      strln = string_getlen (string);
-      fprintf (journal_file, "*%u\n", strln);
-      fwrite (string_getval (string), strln, 1, journal_file);
+    if (journal_file != NULL)
+    {
+        if (string == NULL) fprintf (journal_file, "*EOF\n");
+        else
+        {
+            strln = string_getlen (string);
+            fprintf (journal_file, "*%u\n", strln);
+            fwrite (string_getval (string), strln, 1, journal_file);
+        }
     }
-  }
 
-  /* Return pointer to string (NULL for eof) */
+    /* Return pointer to string (NULL for eof) */
 
-  return (string);
+    return (string);
 }
 
 /************************************************************************/
@@ -118,55 +121,58 @@ writejournal:
 int jnl_readkeyseq (String *keystring)
 
 {
-  char *buff, header[16], *p;
-  int ok;
-  uLong origlen, strln;
+    char *buff, header[16], *p;
+    int ok;
+    uLong origlen, strln;
 
-  origlen = string_getlen (keystring);
+    origlen = string_getlen (keystring);
 
-  /* If recovery file open, read from it, otherwise read from terminal */
+    /* If recovery file open, read from it, otherwise read from terminal */
 
-  if (recover_file == NULL) goto readterminal;
-  ok = 1;
-  if (fgets (header, sizeof header, recover_file) == NULL) goto closerecovery;
-  if (header[0] != '*') goto badrecovery;
-  if (strcmp (header + 1, "EOF\n") == 0) {
-    ok = 0;
+    if (recover_file == NULL) goto readterminal;
+    ok = 1;
+    if (fgets (header, sizeof header, recover_file) == NULL) goto closerecovery;
+    if (header[0] != '*') goto badrecovery;
+    if (strcmp (header + 1, "EOF\n") == 0)
+    {
+        ok = 0;
+        goto writejournal;
+    }
+    strln = strtoul (header + 1, &p, 10);
+    if (*p != '\n') goto badrecovery;
+    buff = malloc (strln);
+    if (fread (buff, strln, 1, recover_file) == 0) goto closerecovery;
+    string_concat (keystring, strln, buff);
+    free (buff);
     goto writejournal;
-  }
-  strln = strtoul (header + 1, &p, 10);
-  if (*p != '\n') goto badrecovery;
-  buff = malloc (strln);
-  if (fread (buff, strln, 1, recover_file) == 0) goto closerecovery;
-  string_concat (keystring, strln, buff);
-  free (buff);
-  goto writejournal;
 
 badrecovery:
-  outerr (strlen (header), "bad recovery file format at %s\n", header);
+    outerr (strlen (header), "bad recovery file format at %s\n", header);
 closerecovery:
-  fclose (recover_file);
-  recover_file = NULL;
+    fclose (recover_file);
+    recover_file = NULL;
 
-  /* Read from terminal screen after flushing any output */
+    /* Read from terminal screen after flushing any output */
 
 readterminal:
-  output ();
-  ok = os_readkeyseq (keystring);
+    output ();
+    ok = os_readkeyseq (keystring);
 
-  /* Write journal record */
+    /* Write journal record */
 
 writejournal:
-  if (journal_file != NULL) {
-    if (!ok) fprintf (journal_file, "*EOF\n");
-    else {
-      strln = string_getlen (keystring) - origlen;
-      fprintf (journal_file, "*%u\n", strln);
-      fwrite (string_getval (keystring) + origlen, strln, 1, journal_file);
+    if (journal_file != NULL)
+    {
+        if (!ok) fprintf (journal_file, "*EOF\n");
+        else
+        {
+            strln = string_getlen (keystring) - origlen;
+            fprintf (journal_file, "*%u\n", strln);
+            fwrite (string_getval (keystring) + origlen, strln, 1, journal_file);
+        }
     }
-  }
 
-  return (ok);
+    return (ok);
 }
 
 /************************************************************************/
@@ -178,13 +184,15 @@ writejournal:
 void jnl_flush (void)
 
 {
-  if (journal_file != NULL) {
-    if (fflush (journal_file) < 0) {
-      outerr (strlen (strerror (errno)), "error flushing journal file: %s\n", strerror (errno));
-      fclose (journal_file);
-      journal_file = NULL;
+    if (journal_file != NULL)
+    {
+        if (fflush (journal_file) < 0)
+        {
+            outerr (strlen (strerror (errno)), "error flushing journal file: %s\n", strerror (errno));
+            fclose (journal_file);
+            journal_file = NULL;
+        }
     }
-  }
 }
 
 /************************************************************************/
@@ -196,11 +204,13 @@ void jnl_flush (void)
 void jnl_close (int del)
 
 {
-  if (journal_file != NULL) {
-    if (fclose (journal_file) < 0) outerr (strlen (strerror (errno)), "error closing journal file: %s\n", strerror (errno));
-    journal_file = NULL;
-  }
-  if (del && (journal_name != NULL) && (journal_name[0] != 0) && (unlink (journal_name) < 0)) {
-    outerr (strlen (journal_name) + strlen (strerror (errno)), "error deleting journal file %s: %s\n", journal_name, strerror (errno));
-  }
+    if (journal_file != NULL)
+    {
+        if (fclose (journal_file) < 0) outerr (strlen (strerror (errno)), "error closing journal file: %s\n", strerror (errno));
+        journal_file = NULL;
+    }
+    if (del && (journal_name != NULL) && (journal_name[0] != 0) && (unlink (journal_name) < 0))
+    {
+        outerr (strlen (journal_name) + strlen (strerror (errno)), "error deleting journal file %s: %s\n", journal_name, strerror (errno));
+    }
 }

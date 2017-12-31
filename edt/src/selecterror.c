@@ -37,13 +37,13 @@
 uLong oz_sys_callknl (uLong (*entry) (OZ_Procmode cprocmode, void *param), void *param)
 
 {
-  return (oz_hw_syscall (OZ_SYSCALL_CALLKNL, entry, param));
+    return (oz_hw_syscall (OZ_SYSCALL_CALLKNL, entry, param));
 }
 
 uLong oz_syscall_callknl (OZ_Procmode cprocmode, uLong (*entry) (OZ_Procmode cprocmode, void *param), void *param)
 
 {
-  /* ?? check privs ?? */
+    /* ?? check privs ?? */
 
-  return ((*entry) (cprocmode, param));
+    return ((*entry) (cprocmode, param));
 }

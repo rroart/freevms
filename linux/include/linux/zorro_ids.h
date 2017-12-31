@@ -538,9 +538,9 @@
 #define  ZORRO_PROD_COMBITEC_SRAM				ZORRO_ID(COMBITEC_2, 0x2B, 0)
 
 
-    /*
-     *  Test and illegal Manufacturer IDs.
-     */
+/*
+ *  Test and illegal Manufacturer IDs.
+ */
 
 #define ZORRO_MANUF_HACKER					0x07DB
 #define  ZORRO_PROD_GENERAL_PROTOTYPE				ZORRO_ID(HACKER, 0x00, 0)

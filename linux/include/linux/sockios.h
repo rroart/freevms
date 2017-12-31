@@ -52,7 +52,7 @@
 #define SIOCSIFNAME	0x8923		/* set interface name */
 #define	SIOCSIFHWADDR	0x8924		/* set hardware address 	*/
 #define SIOCGIFENCAP	0x8925		/* get/set encapsulations       */
-#define SIOCSIFENCAP	0x8926		
+#define SIOCSIFENCAP	0x8926
 #define SIOCGIFHWADDR	0x8927		/* Get hardware address		*/
 #define SIOCGIFSLAVE	0x8929		/* Driver slaving support	*/
 #define SIOCSIFSLAVE	0x8930
@@ -82,7 +82,7 @@
 #define SIOCSMIIREG	0x8949		/* Write MII PHY register.	*/
 
 /* ARP cache control calls. */
-		    /*  0x8950 - 0x8952  * obsolete calls, don't re-use */
+/*  0x8950 - 0x8952  * obsolete calls, don't re-use */
 #define SIOCDARP	0x8953		/* delete ARP table entry	*/
 #define SIOCGARP	0x8954		/* get ARP table entry		*/
 #define SIOCSARP	0x8955		/* set ARP table entry		*/
@@ -113,7 +113,7 @@
 #define SIOCBONDSLAVEINFOQUERY 0x8993   /* rtn info about slave state   */
 #define SIOCBONDINFOQUERY      0x8994	/* rtn info about bond state    */
 #define SIOCBONDCHANGEACTIVE   0x8995   /* update to a new active slave */
-			
+
 /* Device private ioctl calls */
 
 /*
@@ -124,12 +124,12 @@
  *
  *	THESE IOCTLS ARE _DEPRECATED_ AND WILL DISAPPEAR IN 2.5.X -DaveM
  */
- 
+
 #define SIOCDEVPRIVATE	0x89F0	/* to 89FF */
 
 /*
  *	These 16 ioctl calls are protocol private
  */
- 
+
 #define SIOCPROTOPRIVATE 0x89E0 /* to 89EF */
 #endif	/* _LINUX_SOCKIOS_H */

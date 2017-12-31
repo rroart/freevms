@@ -35,35 +35,37 @@
 
 struct gameport;
 
-struct gameport {
+struct gameport
+{
 
-	void *private;
+    void *private;
 
-	int number;
+    int number;
 
-	int io;
-	int speed;
-	int fuzz;
+    int io;
+    int speed;
+    int fuzz;
 
-	void (*trigger)(struct gameport *);
-	unsigned char (*read)(struct gameport *);
-	int (*cooked_read)(struct gameport *, int *, int *);
-	int (*calibrate)(struct gameport *, int *, int *);
-	int (*open)(struct gameport *, int);
-	void (*close)(struct gameport *);
+    void (*trigger)(struct gameport *);
+    unsigned char (*read)(struct gameport *);
+    int (*cooked_read)(struct gameport *, int *, int *);
+    int (*calibrate)(struct gameport *, int *, int *);
+    int (*open)(struct gameport *, int);
+    void (*close)(struct gameport *);
 
-	struct gameport_dev *dev;
-	struct gameport *next;
+    struct gameport_dev *dev;
+    struct gameport *next;
 };
 
-struct gameport_dev {
+struct gameport_dev
+{
 
-	void *private;
+    void *private;
 
-	void (*connect)(struct gameport *, struct gameport_dev *dev);
-	void (*disconnect)(struct gameport *);
+    void (*connect)(struct gameport *, struct gameport_dev *dev);
+    void (*disconnect)(struct gameport *);
 
-	struct gameport_dev *next;
+    struct gameport_dev *next;
 };
 
 int gameport_open(struct gameport *gameport, struct gameport_dev *dev, int mode);
@@ -74,8 +76,14 @@ void gameport_rescan(struct gameport *gameport);
 void gameport_register_port(struct gameport *gameport);
 void gameport_unregister_port(struct gameport *gameport);
 #else
-static void __inline__ gameport_register_port(struct gameport *gameport) { return; }
-static void __inline__ gameport_unregister_port(struct gameport *gameport) { return; }
+static void __inline__ gameport_register_port(struct gameport *gameport)
+{
+    return;
+}
+static void __inline__ gameport_unregister_port(struct gameport *gameport)
+{
+    return;
+}
 #endif
 
 void gameport_register_device(struct gameport_dev *dev);
@@ -97,45 +105,45 @@ void gameport_unregister_device(struct gameport_dev *dev);
 
 static __inline__ void gameport_trigger(struct gameport *gameport)
 {
-	if (gameport->trigger)
-		gameport->trigger(gameport);
-	else
-		outb(0xff, gameport->io);
+    if (gameport->trigger)
+        gameport->trigger(gameport);
+    else
+        outb(0xff, gameport->io);
 }
 
 static __inline__ unsigned char gameport_read(struct gameport *gameport)
 {
-	if (gameport->read)
-		return gameport->read(gameport);
-	else
-		return inb(gameport->io);
+    if (gameport->read)
+        return gameport->read(gameport);
+    else
+        return inb(gameport->io);
 }
 
 static __inline__ int gameport_cooked_read(struct gameport *gameport, int *axes, int *buttons)
 {
-	if (gameport->cooked_read)
-		return gameport->cooked_read(gameport, axes, buttons);
-	else
-		return -1;
+    if (gameport->cooked_read)
+        return gameport->cooked_read(gameport, axes, buttons);
+    else
+        return -1;
 }
 
 static __inline__ int gameport_calibrate(struct gameport *gameport, int *axes, int *max)
 {
-	if (gameport->calibrate)
-		return gameport->calibrate(gameport, axes, max);
-	else
-		return -1;
+    if (gameport->calibrate)
+        return gameport->calibrate(gameport, axes, max);
+    else
+        return -1;
 }
 
 static __inline__ int gameport_time(struct gameport *gameport, int time)
 {
-	return (time * gameport->speed) / 1000;
+    return (time * gameport->speed) / 1000;
 }
 
 static __inline__ void wait_ms(unsigned int ms)
 {
-	current->state = TASK_UNINTERRUPTIBLE;
-	schedule_timeout(1 + ms * HZ / 1000);
+    current->state = TASK_UNINTERRUPTIBLE;
+    schedule_timeout(1 + ms * HZ / 1000);
 }
 
 #endif

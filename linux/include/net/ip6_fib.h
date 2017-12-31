@@ -1,8 +1,8 @@
 /*
- *	Linux INET6 implementation 
+ *	Linux INET6 implementation
  *
  *	Authors:
- *	Pedro Roque		<roque@di.fc.ul.pt>	
+ *	Pedro Roque		<roque@di.fc.ul.pt>
  *
  *	This program is free software; you can redistribute it and/or
  *      modify it under the terms of the GNU General Public License
@@ -25,17 +25,17 @@ struct rt6_info;
 
 struct fib6_node
 {
-	struct fib6_node	*parent;
-	struct fib6_node	*left;
-	struct fib6_node	*right;
+    struct fib6_node	*parent;
+    struct fib6_node	*left;
+    struct fib6_node	*right;
 
-	struct fib6_node	*subtree;
+    struct fib6_node	*subtree;
 
-	struct rt6_info		*leaf;
+    struct rt6_info		*leaf;
 
-	__u16			fn_bit;		/* bit key */
-	__u16			fn_flags;
-	__u32			fn_sernum;
+    __u16			fn_bit;		/* bit key */
+    __u16			fn_flags;
+    __u32			fn_sernum;
 };
 
 
@@ -46,51 +46,53 @@ struct fib6_node
 
 struct rt6key
 {
-	struct in6_addr	addr;
-	int		plen;
+    struct in6_addr	addr;
+    int		plen;
 };
 
 struct rt6_info
 {
-	union {
-		struct dst_entry	dst;
-		struct rt6_info		*next;
-	} u;
+    union
+    {
+        struct dst_entry	dst;
+        struct rt6_info		*next;
+    } u;
 
 #define rt6i_dev			u.dst.dev
 #define rt6i_nexthop			u.dst.neighbour
 #define rt6i_expires			u.dst.expires
 
-	struct fib6_node		*rt6i_node;
+    struct fib6_node		*rt6i_node;
 
-	struct in6_addr			rt6i_gateway;
-	
-	u32				rt6i_flags;
-	u32				rt6i_metric;
-	u8				rt6i_hoplimit;
-	atomic_t			rt6i_ref;
+    struct in6_addr			rt6i_gateway;
 
-	union {
-		struct flow_rule	*rt6iu_flowr;
-		struct flow_filter	*rt6iu_filter;
-	} flow_u;
+    u32				rt6i_flags;
+    u32				rt6i_metric;
+    u8				rt6i_hoplimit;
+    atomic_t			rt6i_ref;
+
+    union
+    {
+        struct flow_rule	*rt6iu_flowr;
+        struct flow_filter	*rt6iu_filter;
+    } flow_u;
 
 #define rt6i_flowr			flow_u.rt6iu_flowr
 #define rt6i_filter			flow_u.rt6iu_filter
 
-	struct rt6key			rt6i_dst;
-	struct rt6key			rt6i_src;
+    struct rt6key			rt6i_dst;
+    struct rt6key			rt6i_src;
 };
 
 struct fib6_walker_t
 {
-	struct fib6_walker_t *prev, *next;
-	struct fib6_node *root, *node;
-	struct rt6_info *leaf;
-	unsigned char state;
-	unsigned char prune;
-	int (*func)(struct fib6_walker_t *);
-	void *args;
+    struct fib6_walker_t *prev, *next;
+    struct fib6_node *root, *node;
+    struct rt6_info *leaf;
+    unsigned char state;
+    unsigned char prune;
+    int (*func)(struct fib6_walker_t *);
+    void *args;
 };
 
 extern struct fib6_walker_t fib6_walker_list;
@@ -98,29 +100,30 @@ extern rwlock_t fib6_walker_lock;
 
 static inline void fib6_walker_link(struct fib6_walker_t *w)
 {
-	write_lock_bh(&fib6_walker_lock);
-	w->next = fib6_walker_list.next;
-	w->prev = &fib6_walker_list;
-	w->next->prev = w;
-	w->prev->next = w;
-	write_unlock_bh(&fib6_walker_lock);
+    write_lock_bh(&fib6_walker_lock);
+    w->next = fib6_walker_list.next;
+    w->prev = &fib6_walker_list;
+    w->next->prev = w;
+    w->prev->next = w;
+    write_unlock_bh(&fib6_walker_lock);
 }
 
 static inline void fib6_walker_unlink(struct fib6_walker_t *w)
 {
-	write_lock_bh(&fib6_walker_lock);
-	w->next->prev = w->prev;
-	w->prev->next = w->next;
-	w->prev = w->next = w;
-	write_unlock_bh(&fib6_walker_lock);
+    write_lock_bh(&fib6_walker_lock);
+    w->next->prev = w->prev;
+    w->prev->next = w->next;
+    w->prev = w->next = w;
+    write_unlock_bh(&fib6_walker_lock);
 }
 
-struct rt6_statistics {
-	__u32		fib_nodes;
-	__u32		fib_route_nodes;
-	__u32		fib_rt_alloc;		/* permanet routes	*/
-	__u32		fib_rt_entries;		/* rt entries in table	*/
-	__u32		fib_rt_cache;		/* cache routes		*/
+struct rt6_statistics
+{
+    __u32		fib_nodes;
+    __u32		fib_route_nodes;
+    __u32		fib_rt_alloc;		/* permanet routes	*/
+    __u32		fib_rt_entries;		/* rt entries in table	*/
+    __u32		fib_rt_cache;		/* cache routes		*/
 };
 
 #define RTN_TL_ROOT	0x0001
@@ -153,22 +156,22 @@ extern struct fib6_node		ip6_routing_table;
  */
 
 extern struct fib6_node		*fib6_lookup(struct fib6_node *root,
-					     struct in6_addr *daddr,
-					     struct in6_addr *saddr);
+        struct in6_addr *daddr,
+        struct in6_addr *saddr);
 
 struct fib6_node		*fib6_locate(struct fib6_node *root,
-					     struct in6_addr *daddr, int dst_len,
-					     struct in6_addr *saddr, int src_len);
+                                     struct in6_addr *daddr, int dst_len,
+                                     struct in6_addr *saddr, int src_len);
 
 extern void			fib6_clean_tree(struct fib6_node *root,
-						int (*func)(struct rt6_info *, void *arg),
-						int prune, void *arg);
+                                    int (*func)(struct rt6_info *, void *arg),
+                                    int prune, void *arg);
 
 extern int			fib6_walk(struct fib6_walker_t *w);
 extern int			fib6_walk_continue(struct fib6_walker_t *w);
 
 extern int			fib6_add(struct fib6_node *root,
-					 struct rt6_info *rt);
+                             struct rt6_info *rt);
 
 extern int			fib6_del(struct rt6_info *rt);
 

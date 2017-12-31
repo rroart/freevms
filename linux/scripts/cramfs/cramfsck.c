@@ -89,33 +89,35 @@ z_stream stream;
 /* Input status of 0 to print help and exit without an error. */
 static void usage(int status)
 {
-	FILE *stream = status ? stderr : stdout;
+    FILE *stream = status ? stderr : stdout;
 
-	fprintf(stream, "usage: %s [-hv] [-x dir] file\n"
-		" -h         print this help\n"
-		" -x dir     extract into dir\n"
-		" -v         be more verbose\n"
-		" file       file to test\n", progname);
+    fprintf(stream, "usage: %s [-hv] [-x dir] file\n"
+            " -h         print this help\n"
+            " -x dir     extract into dir\n"
+            " -v         be more verbose\n"
+            " file       file to test\n", progname);
 
-	exit(status);
+    exit(status);
 }
 
 #ifdef INCLUDE_FS_TESTS
 void print_node(char type, struct cramfs_inode *i, char *name)
 {
-	char info[10];
+    char info[10];
 
-	if (S_ISCHR(i->mode) || (S_ISBLK(i->mode))) {
-		/* major/minor numbers can be as high as 2^12 or 4096 */
-		snprintf(info, 10, "%4d,%4d", major(i->size), minor(i->size));
-	}
-	else {
-		/* size be as high as 2^24 or 16777216 */
-		snprintf(info, 10, "%9d", i->size);
-	}
+    if (S_ISCHR(i->mode) || (S_ISBLK(i->mode)))
+    {
+        /* major/minor numbers can be as high as 2^12 or 4096 */
+        snprintf(info, 10, "%4d,%4d", major(i->size), minor(i->size));
+    }
+    else
+    {
+        /* size be as high as 2^24 or 16777216 */
+        snprintf(info, 10, "%9d", i->size);
+    }
 
-	printf("%c %04o %s %5d:%-3d %s\n",
-	       type, i->mode & ~S_IFMT, info, i->uid, i->gid, name);
+    printf("%c %04o %s %5d:%-3d %s\n",
+           type, i->mode & ~S_IFMT, info, i->uid, i->gid, name);
 }
 
 /*
@@ -123,30 +125,31 @@ void print_node(char type, struct cramfs_inode *i, char *name)
  */
 static void *romfs_read(unsigned long offset)
 {
-	unsigned int block = offset >> ROMBUFFER_BITS;
-	if (block != read_buffer_block) {
-		read_buffer_block = block;
-		lseek(fd, block << ROMBUFFER_BITS, SEEK_SET);
-		read(fd, read_buffer, ROMBUFFERSIZE * 2);
-	}
-	return read_buffer + (offset & ROMBUFFERMASK);
+    unsigned int block = offset >> ROMBUFFER_BITS;
+    if (block != read_buffer_block)
+    {
+        read_buffer_block = block;
+        lseek(fd, block << ROMBUFFER_BITS, SEEK_SET);
+        read(fd, read_buffer, ROMBUFFERSIZE * 2);
+    }
+    return read_buffer + (offset & ROMBUFFERMASK);
 }
 
 static struct cramfs_inode *cramfs_iget(struct cramfs_inode * i)
 {
-	struct cramfs_inode *inode = malloc(sizeof(struct cramfs_inode));
-	*inode = *i;
-	return inode;
+    struct cramfs_inode *inode = malloc(sizeof(struct cramfs_inode));
+    *inode = *i;
+    return inode;
 }
 
 static struct cramfs_inode *iget(unsigned int ino)
 {
-	return cramfs_iget(romfs_read(ino));
+    return cramfs_iget(romfs_read(ino));
 }
 
 void iput(struct cramfs_inode *inode)
 {
-	free(inode);
+    free(inode);
 }
 
 /*
@@ -155,434 +158,504 @@ void iput(struct cramfs_inode *inode)
  */
 static struct cramfs_inode *read_super(void)
 {
-	unsigned long offset;
+    unsigned long offset;
 
-	offset = super->root.offset << 2;
-	if (super->magic != CRAMFS_MAGIC)
-		return NULL;
-	if (memcmp(super->signature, CRAMFS_SIGNATURE, sizeof(super->signature)) != 0)
-		return NULL;
-	if (offset < sizeof(super))
-		return NULL;
-	return cramfs_iget(&super->root);
+    offset = super->root.offset << 2;
+    if (super->magic != CRAMFS_MAGIC)
+        return NULL;
+    if (memcmp(super->signature, CRAMFS_SIGNATURE, sizeof(super->signature)) != 0)
+        return NULL;
+    if (offset < sizeof(super))
+        return NULL;
+    return cramfs_iget(&super->root);
 }
 
 static int uncompress_block(void *src, int len)
 {
-	int err;
+    int err;
 
-	stream.next_in = src;
-	stream.avail_in = len;
+    stream.next_in = src;
+    stream.avail_in = len;
 
-	stream.next_out = (unsigned char *) outbuffer;
-	stream.avail_out = PAGE_CACHE_SIZE*2;
+    stream.next_out = (unsigned char *) outbuffer;
+    stream.avail_out = PAGE_CACHE_SIZE*2;
 
-	inflateReset(&stream);
+    inflateReset(&stream);
 
-	err = inflate(&stream, Z_FINISH);
-	if (err != Z_STREAM_END) {
-		fprintf(stderr, "%s: error %d while decompressing! %p(%d)\n",
-			filename, err, src, len);
-		exit(4);
-	}
-	return stream.total_out;
+    err = inflate(&stream, Z_FINISH);
+    if (err != Z_STREAM_END)
+    {
+        fprintf(stderr, "%s: error %d while decompressing! %p(%d)\n",
+                filename, err, src, len);
+        exit(4);
+    }
+    return stream.total_out;
 }
 
 static void change_file_status(char *path, struct cramfs_inode *i)
 {
-	struct utimbuf epoch = { 0, 0 };
+    struct utimbuf epoch = { 0, 0 };
 
-	if (euid == 0) {
-		if (lchown(path, i->uid, i->gid) < 0) {
-			perror(path);
-			exit(8);
-		}
-		if (S_ISLNK(i->mode))
-			return;
-		if ((S_ISUID | S_ISGID) & i->mode) {
-			if (chmod(path, i->mode) < 0) {
-				perror(path);
-				exit(8);
-			}
-		}
-	}
-	if (S_ISLNK(i->mode))
-		return;
-	if (utime(path, &epoch) < 0) {
-		perror(path);
-		exit(8);
-	}
+    if (euid == 0)
+    {
+        if (lchown(path, i->uid, i->gid) < 0)
+        {
+            perror(path);
+            exit(8);
+        }
+        if (S_ISLNK(i->mode))
+            return;
+        if ((S_ISUID | S_ISGID) & i->mode)
+        {
+            if (chmod(path, i->mode) < 0)
+            {
+                perror(path);
+                exit(8);
+            }
+        }
+    }
+    if (S_ISLNK(i->mode))
+        return;
+    if (utime(path, &epoch) < 0)
+    {
+        perror(path);
+        exit(8);
+    }
 }
 
 static void do_symlink(char *path, struct cramfs_inode *i)
 {
-	unsigned long offset = i->offset << 2;
-	unsigned long curr = offset + 4;
-	unsigned long next = *(u32 *) romfs_read(offset);
-	unsigned long size;
+    unsigned long offset = i->offset << 2;
+    unsigned long curr = offset + 4;
+    unsigned long next = *(u32 *) romfs_read(offset);
+    unsigned long size;
 
-	if (next > end_data) {
-		end_data = next;
-	}
+    if (next > end_data)
+    {
+        end_data = next;
+    }
 
-	size = uncompress_block(romfs_read(curr), next - curr);
-	if (size != i->size) {
-		fprintf(stderr, "%s: size error in symlink `%s'\n",
-			filename, path);
-		exit(4);
-	}
-	outbuffer[size] = 0;
-	if (opt_verbose) {
-		char *str;
+    size = uncompress_block(romfs_read(curr), next - curr);
+    if (size != i->size)
+    {
+        fprintf(stderr, "%s: size error in symlink `%s'\n",
+                filename, path);
+        exit(4);
+    }
+    outbuffer[size] = 0;
+    if (opt_verbose)
+    {
+        char *str;
 
-		str = malloc(strlen(outbuffer) + strlen(path) + 5);
-		strcpy(str, path);
-		strncat(str, " -> ", 4);
-		strncat(str, outbuffer, size);
+        str = malloc(strlen(outbuffer) + strlen(path) + 5);
+        strcpy(str, path);
+        strncat(str, " -> ", 4);
+        strncat(str, outbuffer, size);
 
-		print_node('l', i, str);
-		if (opt_verbose > 1) {
-			printf("  uncompressing block at %ld to %ld (%ld)\n", curr, next, next - curr);
-		}
-	}
-	if (opt_extract) {
-		symlink(outbuffer, path);
-		change_file_status(path, i);
-	}
+        print_node('l', i, str);
+        if (opt_verbose > 1)
+        {
+            printf("  uncompressing block at %ld to %ld (%ld)\n", curr, next, next - curr);
+        }
+    }
+    if (opt_extract)
+    {
+        symlink(outbuffer, path);
+        change_file_status(path, i);
+    }
 }
 
 static void do_special_inode(char *path, struct cramfs_inode *i)
 {
-	dev_t devtype = 0;
-	char type;
+    dev_t devtype = 0;
+    char type;
 
-	if (S_ISCHR(i->mode)) {
-		devtype = i->size;
-		type = 'c';
-	}
-	else if (S_ISBLK(i->mode)) {
-		devtype = i->size;
-		type = 'b';
-	}
-	else if (S_ISFIFO(i->mode))
-		type = 'p';
-	else if (S_ISSOCK(i->mode))
-		type = 's';
-	else {
-		fprintf(stderr, "%s: bogus mode on `%s' (%o)\n", filename, path, i->mode);
-		exit(4);
-	}
+    if (S_ISCHR(i->mode))
+    {
+        devtype = i->size;
+        type = 'c';
+    }
+    else if (S_ISBLK(i->mode))
+    {
+        devtype = i->size;
+        type = 'b';
+    }
+    else if (S_ISFIFO(i->mode))
+        type = 'p';
+    else if (S_ISSOCK(i->mode))
+        type = 's';
+    else
+    {
+        fprintf(stderr, "%s: bogus mode on `%s' (%o)\n", filename, path, i->mode);
+        exit(4);
+    }
 
-	if (opt_verbose) {
-		print_node(type, i, path);
-	}
+    if (opt_verbose)
+    {
+        print_node(type, i, path);
+    }
 
-	if (opt_extract) {
-		if (mknod(path, i->mode, devtype) < 0) {
-			perror(path);
-			exit(8);
-		}
-		change_file_status(path, i);
-	}
+    if (opt_extract)
+    {
+        if (mknod(path, i->mode, devtype) < 0)
+        {
+            perror(path);
+            exit(8);
+        }
+        change_file_status(path, i);
+    }
 }
 
 static void do_uncompress(int fd, unsigned long offset, unsigned long size)
 {
-	unsigned long curr = offset + 4 * ((size + PAGE_CACHE_SIZE - 1) / PAGE_CACHE_SIZE);
+    unsigned long curr = offset + 4 * ((size + PAGE_CACHE_SIZE - 1) / PAGE_CACHE_SIZE);
 
-	do {
-		unsigned long out = PAGE_CACHE_SIZE;
-		unsigned long next = *(u32 *) romfs_read(offset);
+    do
+    {
+        unsigned long out = PAGE_CACHE_SIZE;
+        unsigned long next = *(u32 *) romfs_read(offset);
 
-		if (next > end_data) {
-			end_data = next;
-		}
+        if (next > end_data)
+        {
+            end_data = next;
+        }
 
-		offset += 4;
-		if (curr == next) {
-			if (opt_verbose > 1) {
-				printf("  hole at %ld (%d)\n", curr, PAGE_CACHE_SIZE);
-			}
-			if (size < PAGE_CACHE_SIZE)
-				out = size;
-			memset(outbuffer, 0x00, out);
-		}
-		else {
-			if (opt_verbose > 1) {
-				printf("  uncompressing block at %ld to %ld (%ld)\n", curr, next, next - curr);
-			}
-			out = uncompress_block(romfs_read(curr), next - curr);
-		}
-		if (size >= PAGE_CACHE_SIZE) {
-			if (out != PAGE_CACHE_SIZE) {
-				fprintf(stderr, "%s: Non-block (%ld) bytes\n", filename, out);
-				exit(4);
-			}
-		} else {
-			if (out != size) {
-				fprintf(stderr, "%s: Non-size (%ld vs %ld) bytes\n", filename, out, size);
-				exit(4);
-			}
-		}
-		size -= out;
-		if (opt_extract) {
-			write(fd, outbuffer, out);
-		}
-		curr = next;
-	} while (size);
+        offset += 4;
+        if (curr == next)
+        {
+            if (opt_verbose > 1)
+            {
+                printf("  hole at %ld (%d)\n", curr, PAGE_CACHE_SIZE);
+            }
+            if (size < PAGE_CACHE_SIZE)
+                out = size;
+            memset(outbuffer, 0x00, out);
+        }
+        else
+        {
+            if (opt_verbose > 1)
+            {
+                printf("  uncompressing block at %ld to %ld (%ld)\n", curr, next, next - curr);
+            }
+            out = uncompress_block(romfs_read(curr), next - curr);
+        }
+        if (size >= PAGE_CACHE_SIZE)
+        {
+            if (out != PAGE_CACHE_SIZE)
+            {
+                fprintf(stderr, "%s: Non-block (%ld) bytes\n", filename, out);
+                exit(4);
+            }
+        }
+        else
+        {
+            if (out != size)
+            {
+                fprintf(stderr, "%s: Non-size (%ld vs %ld) bytes\n", filename, out, size);
+                exit(4);
+            }
+        }
+        size -= out;
+        if (opt_extract)
+        {
+            write(fd, outbuffer, out);
+        }
+        curr = next;
+    }
+    while (size);
 }
 
 static void expand_fs(int pathlen, char *path, struct cramfs_inode *inode)
 {
-	if (S_ISDIR(inode->mode)) {
-		int count = inode->size;
-		unsigned long offset = inode->offset << 2;
-		char *newpath = malloc(pathlen + 256);
+    if (S_ISDIR(inode->mode))
+    {
+        int count = inode->size;
+        unsigned long offset = inode->offset << 2;
+        char *newpath = malloc(pathlen + 256);
 
-		if (count > 0 && offset < start_inode) {
-			start_inode = offset;
-		}
-		/* XXX - need to check end_inode for empty case? */
-		memcpy(newpath, path, pathlen);
-		newpath[pathlen] = '/';
-		pathlen++;
-		if (opt_verbose) {
-			print_node('d', inode, path);
-		}
-		if (opt_extract) {
-			mkdir(path, inode->mode);
-			change_file_status(path, inode);
-		}
-		while (count > 0) {
-			struct cramfs_inode *child = iget(offset);
-			int size;
-			int newlen = child->namelen << 2;
+        if (count > 0 && offset < start_inode)
+        {
+            start_inode = offset;
+        }
+        /* XXX - need to check end_inode for empty case? */
+        memcpy(newpath, path, pathlen);
+        newpath[pathlen] = '/';
+        pathlen++;
+        if (opt_verbose)
+        {
+            print_node('d', inode, path);
+        }
+        if (opt_extract)
+        {
+            mkdir(path, inode->mode);
+            change_file_status(path, inode);
+        }
+        while (count > 0)
+        {
+            struct cramfs_inode *child = iget(offset);
+            int size;
+            int newlen = child->namelen << 2;
 
-			size = sizeof(struct cramfs_inode) + newlen;
-			count -= size;
+            size = sizeof(struct cramfs_inode) + newlen;
+            count -= size;
 
-			offset += sizeof(struct cramfs_inode);
+            offset += sizeof(struct cramfs_inode);
 
-			memcpy(newpath + pathlen, romfs_read(offset), newlen);
-			newpath[pathlen + newlen] = 0;
-			if ((pathlen + newlen) - strlen(newpath) > 3) {
-				fprintf(stderr, "%s: invalid cramfs--bad path length\n", filename);
-				exit(4);
-			}
-			expand_fs(strlen(newpath), newpath, child);
+            memcpy(newpath + pathlen, romfs_read(offset), newlen);
+            newpath[pathlen + newlen] = 0;
+            if ((pathlen + newlen) - strlen(newpath) > 3)
+            {
+                fprintf(stderr, "%s: invalid cramfs--bad path length\n", filename);
+                exit(4);
+            }
+            expand_fs(strlen(newpath), newpath, child);
 
-			offset += newlen;
+            offset += newlen;
 
-			if (offset > end_inode) {
-				end_inode = offset;
-			}
-		}
-		return;
-	}
-	if (S_ISREG(inode->mode)) {
-		int fd = 0;
-		unsigned long offset = inode->offset << 2;
+            if (offset > end_inode)
+            {
+                end_inode = offset;
+            }
+        }
+        return;
+    }
+    if (S_ISREG(inode->mode))
+    {
+        int fd = 0;
+        unsigned long offset = inode->offset << 2;
 
-		if (offset > 0 && offset < start_data) {
-			start_data = offset;
-		}
-		if (opt_verbose) {
-			print_node('f', inode, path);
-		}
-		if (opt_extract) {
-			fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, inode->mode);
-		}
-		if (inode->size) {
-			do_uncompress(fd, offset, inode->size);
-		}
-		if (opt_extract) {
-			close(fd);
-			change_file_status(path, inode);
-		}
-		return;
-	}
-	if (S_ISLNK(inode->mode)) {
-		unsigned long offset = inode->offset << 2;
+        if (offset > 0 && offset < start_data)
+        {
+            start_data = offset;
+        }
+        if (opt_verbose)
+        {
+            print_node('f', inode, path);
+        }
+        if (opt_extract)
+        {
+            fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, inode->mode);
+        }
+        if (inode->size)
+        {
+            do_uncompress(fd, offset, inode->size);
+        }
+        if (opt_extract)
+        {
+            close(fd);
+            change_file_status(path, inode);
+        }
+        return;
+    }
+    if (S_ISLNK(inode->mode))
+    {
+        unsigned long offset = inode->offset << 2;
 
-		if (offset < start_data) {
-			start_data = offset;
-		}
-		do_symlink(path, inode);
-		return;
-	}
-	else {
-		do_special_inode(path, inode);
-		return;
-	}
+        if (offset < start_data)
+        {
+            start_data = offset;
+        }
+        do_symlink(path, inode);
+        return;
+    }
+    else
+    {
+        do_special_inode(path, inode);
+        return;
+    }
 }
 #endif /* INCLUDE_FS_TESTS */
 
 int main(int argc, char **argv)
 {
-	void *buf;
-	size_t length;
-	struct stat st;
-	u32 crc_old, crc_new;
+    void *buf;
+    size_t length;
+    struct stat st;
+    u32 crc_old, crc_new;
 #ifdef INCLUDE_FS_TESTS
-	struct cramfs_inode *root;
+    struct cramfs_inode *root;
 #endif /* INCLUDE_FS_TESTS */
-	int c;			/* for getopt */
-	int start = 0;
+    int c;			/* for getopt */
+    int start = 0;
 
-	if (argc)
-		progname = argv[0];
+    if (argc)
+        progname = argv[0];
 
-	/* command line options */
-	while ((c = getopt(argc, argv, "hx:v")) != EOF) {
-		switch (c) {
-		case 'h':
-			usage(0);
-		case 'x':
+    /* command line options */
+    while ((c = getopt(argc, argv, "hx:v")) != EOF)
+    {
+        switch (c)
+        {
+        case 'h':
+            usage(0);
+        case 'x':
 #ifdef INCLUDE_FS_TESTS
-			opt_extract = 1;
-			extract_dir = malloc(strlen(optarg) + 1);
-			strcpy(extract_dir, optarg);
-			break;
+            opt_extract = 1;
+            extract_dir = malloc(strlen(optarg) + 1);
+            strcpy(extract_dir, optarg);
+            break;
 #else /*  not INCLUDE_FS_TESTS */
-			fprintf(stderr, "%s: compiled without -x support\n",
-				progname);
-			exit(16);
+            fprintf(stderr, "%s: compiled without -x support\n",
+                    progname);
+            exit(16);
 #endif /* not INCLUDE_FS_TESTS */
-		case 'v':
-			opt_verbose++;
-			break;
-		}
-	}
+        case 'v':
+            opt_verbose++;
+            break;
+        }
+    }
 
-	if ((argc - optind) != 1)
-		usage(16);
-	filename = argv[optind];
+    if ((argc - optind) != 1)
+        usage(16);
+    filename = argv[optind];
 
-	/* find the physical size of the file or block device */
-	if (lstat(filename, &st) < 0) {
-		perror(filename);
-		exit(8);
-	}
-	fd = open(filename, O_RDONLY);
-	if (fd < 0) {
-		perror(filename);
-		exit(8);
-	}
-	if (S_ISBLK(st.st_mode)) {
-		if (ioctl(fd, BLKGETSIZE, &length) < 0) {
-			fprintf(stderr, "%s: warning--unable to determine filesystem size \n", filename);
-			exit(4);
-		}
-		length = length * 512;
-	}
-	else if (S_ISREG(st.st_mode)) {
-		length = st.st_size;
-	}
-	else {
-		fprintf(stderr, "%s is not a block device or file\n", filename);
-		exit(8);
-	}
+    /* find the physical size of the file or block device */
+    if (lstat(filename, &st) < 0)
+    {
+        perror(filename);
+        exit(8);
+    }
+    fd = open(filename, O_RDONLY);
+    if (fd < 0)
+    {
+        perror(filename);
+        exit(8);
+    }
+    if (S_ISBLK(st.st_mode))
+    {
+        if (ioctl(fd, BLKGETSIZE, &length) < 0)
+        {
+            fprintf(stderr, "%s: warning--unable to determine filesystem size \n", filename);
+            exit(4);
+        }
+        length = length * 512;
+    }
+    else if (S_ISREG(st.st_mode))
+    {
+        length = st.st_size;
+    }
+    else
+    {
+        fprintf(stderr, "%s is not a block device or file\n", filename);
+        exit(8);
+    }
 
-	if (length < sizeof(struct cramfs_super)) {
-		fprintf(stderr, "%s: invalid cramfs--file length too short\n", filename);
-		exit(4);
-	}
+    if (length < sizeof(struct cramfs_super))
+    {
+        fprintf(stderr, "%s: invalid cramfs--file length too short\n", filename);
+        exit(4);
+    }
 
-	if (S_ISBLK(st.st_mode)) {
-		/* nasty because mmap of block devices fails */
-		buf = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-		read(fd, buf, length);
-	}
-	else {
-		/* nice and easy */
-		buf = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-	}
+    if (S_ISBLK(st.st_mode))
+    {
+        /* nasty because mmap of block devices fails */
+        buf = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        read(fd, buf, length);
+    }
+    else
+    {
+        /* nice and easy */
+        buf = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+    }
 
-	/* XXX - this could be cleaner... */
-	if (((struct cramfs_super *) buf)->magic == CRAMFS_MAGIC) {
-		start = 0;
-		super = (struct cramfs_super *) buf;
-	}
-	else if (length >= (PAD_SIZE + sizeof(struct cramfs_super)) &&
-		 ((((struct cramfs_super *) (buf + PAD_SIZE))->magic == CRAMFS_MAGIC)))
-	{
-		start = PAD_SIZE;
-		super = (struct cramfs_super *) (buf + PAD_SIZE);
-	}
-	else {
-		fprintf(stderr, "%s: invalid cramfs--wrong magic\n", filename);
-		exit(4);
-	}
+    /* XXX - this could be cleaner... */
+    if (((struct cramfs_super *) buf)->magic == CRAMFS_MAGIC)
+    {
+        start = 0;
+        super = (struct cramfs_super *) buf;
+    }
+    else if (length >= (PAD_SIZE + sizeof(struct cramfs_super)) &&
+             ((((struct cramfs_super *) (buf + PAD_SIZE))->magic == CRAMFS_MAGIC)))
+    {
+        start = PAD_SIZE;
+        super = (struct cramfs_super *) (buf + PAD_SIZE);
+    }
+    else
+    {
+        fprintf(stderr, "%s: invalid cramfs--wrong magic\n", filename);
+        exit(4);
+    }
 
-	if (super->flags & CRAMFS_FLAG_FSID_VERSION_2) {
-		/* length test */
-		if (length < super->size) {
-			fprintf(stderr, "%s: invalid cramfs--file length too short\n", filename);
-			exit(4);
-		}
-		else if (length > super->size) {
-			fprintf(stderr, "%s: warning--file length too long, padded image?\n", filename);
-		}
+    if (super->flags & CRAMFS_FLAG_FSID_VERSION_2)
+    {
+        /* length test */
+        if (length < super->size)
+        {
+            fprintf(stderr, "%s: invalid cramfs--file length too short\n", filename);
+            exit(4);
+        }
+        else if (length > super->size)
+        {
+            fprintf(stderr, "%s: warning--file length too long, padded image?\n", filename);
+        }
 
-		/* CRC test */
-		crc_old = super->fsid.crc;
-		super->fsid.crc = crc32(0L, Z_NULL, 0);
-		crc_new = crc32(0L, Z_NULL, 0);
-		crc_new = crc32(crc_new, (unsigned char *) buf+start, super->size - start);
-		if (crc_new != crc_old) {
-			fprintf(stderr, "%s: invalid cramfs--crc error\n", filename);
-			exit(4);
-		}
-	}
-	else {
-		fprintf(stderr, "%s: warning--old cramfs image, no CRC\n",
-			filename);
-	}
+        /* CRC test */
+        crc_old = super->fsid.crc;
+        super->fsid.crc = crc32(0L, Z_NULL, 0);
+        crc_new = crc32(0L, Z_NULL, 0);
+        crc_new = crc32(crc_new, (unsigned char *) buf+start, super->size - start);
+        if (crc_new != crc_old)
+        {
+            fprintf(stderr, "%s: invalid cramfs--crc error\n", filename);
+            exit(4);
+        }
+    }
+    else
+    {
+        fprintf(stderr, "%s: warning--old cramfs image, no CRC\n",
+                filename);
+    }
 
 #ifdef INCLUDE_FS_TESTS
-	super = (struct cramfs_super *) malloc(sizeof(struct cramfs_super));
-	if (((struct cramfs_super *) buf)->magic == CRAMFS_MAGIC) {
-		memcpy(super, buf, sizeof(struct cramfs_super));
-	}
-	else if (length >= (PAD_SIZE + sizeof(struct cramfs_super)) &&
-		 ((((struct cramfs_super *) (buf + PAD_SIZE))->magic == CRAMFS_MAGIC)))
-	{
-		memcpy(super, (buf + PAD_SIZE), sizeof(struct cramfs_super));
-	}
+    super = (struct cramfs_super *) malloc(sizeof(struct cramfs_super));
+    if (((struct cramfs_super *) buf)->magic == CRAMFS_MAGIC)
+    {
+        memcpy(super, buf, sizeof(struct cramfs_super));
+    }
+    else if (length >= (PAD_SIZE + sizeof(struct cramfs_super)) &&
+             ((((struct cramfs_super *) (buf + PAD_SIZE))->magic == CRAMFS_MAGIC)))
+    {
+        memcpy(super, (buf + PAD_SIZE), sizeof(struct cramfs_super));
+    }
 
-	munmap(buf, length);
+    munmap(buf, length);
 
-	/* file format test, uses fake "blocked" accesses */
-	root = read_super();
-	umask(0);
-	euid = geteuid();
-	if (!root) {
-		fprintf(stderr, "%s: invalid cramfs--bad superblock\n",
-			filename);
-		exit(4);
-	}
-	stream.next_in = NULL;
-	stream.avail_in = 0;
-	inflateInit(&stream);
+    /* file format test, uses fake "blocked" accesses */
+    root = read_super();
+    umask(0);
+    euid = geteuid();
+    if (!root)
+    {
+        fprintf(stderr, "%s: invalid cramfs--bad superblock\n",
+                filename);
+        exit(4);
+    }
+    stream.next_in = NULL;
+    stream.avail_in = 0;
+    inflateInit(&stream);
 
-	if (!extract_dir) {
-		extract_dir = "root";
-	}
+    if (!extract_dir)
+    {
+        extract_dir = "root";
+    }
 
-	expand_fs(strlen(extract_dir), extract_dir, root);
-	inflateEnd(&stream);
+    expand_fs(strlen(extract_dir), extract_dir, root);
+    inflateEnd(&stream);
 
-	if (start_data != 1 << 28  && end_inode != start_data) {
-		fprintf(stderr, "%s: invalid cramfs--directory data end (%ld) != file data start (%ld)\n", filename, end_inode, start_data);
-		exit(4);
-	}
-	if (super->flags & CRAMFS_FLAG_FSID_VERSION_2) {
-		if (end_data > super->size) {
-			fprintf(stderr, "%s: invalid cramfs--invalid file data offset\n", filename);
-			exit(4);
-		}
-	}
+    if (start_data != 1 << 28  && end_inode != start_data)
+    {
+        fprintf(stderr, "%s: invalid cramfs--directory data end (%ld) != file data start (%ld)\n", filename, end_inode, start_data);
+        exit(4);
+    }
+    if (super->flags & CRAMFS_FLAG_FSID_VERSION_2)
+    {
+        if (end_data > super->size)
+        {
+            fprintf(stderr, "%s: invalid cramfs--invalid file data offset\n", filename);
+            exit(4);
+        }
+    }
 #endif /* INCLUDE_FS_TESTS */
 
-	exit(0);
+    exit(0);
 }

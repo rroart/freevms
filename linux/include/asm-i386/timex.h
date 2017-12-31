@@ -32,7 +32,7 @@
  * We only use the low 32 bits, and we'd simply better make sure
  * that we reschedule before that wraps. Scheduling at least every
  * four billion cycles just basically sounds like a good idea,
- * regardless of how fast the machine is. 
+ * regardless of how fast the machine is.
  */
 typedef unsigned long long cycles_t;
 
@@ -41,12 +41,12 @@ extern cycles_t cacheflush_time;
 static inline cycles_t get_cycles (void)
 {
 #ifndef CONFIG_X86_TSC
-	return 0;
+    return 0;
 #else
-	unsigned long long ret;
+    unsigned long long ret;
 
-	rdtscll(ret);
-	return ret;
+    rdtscll(ret);
+    return ret;
 #endif
 }
 

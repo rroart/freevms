@@ -1,20 +1,21 @@
 #ifndef IEEE_802_11
-#define IEEE_802_11  
+#define IEEE_802_11
 
 #include <linux/types.h>
 
-enum ieee_802_11_link_status_failure_reason {
-	reserved0, Unspecified=1, Previous_not_valid, 
-	Sender_Quits_ESS_or_IBSS,
-	Due_Inactivity, AP_Overload, 
-	Class_2_from_NonAuth,
-	Class_3_from_NonAuth,
-	Sender_Quits_BSS,
-	Association_requester_not_authenticated,
-	Reserved10 
+enum ieee_802_11_link_status_failure_reason
+{
+    reserved0, Unspecified=1, Previous_not_valid,
+    Sender_Quits_ESS_or_IBSS,
+    Due_Inactivity, AP_Overload,
+    Class_2_from_NonAuth,
+    Class_3_from_NonAuth,
+    Sender_Quits_BSS,
+    Association_requester_not_authenticated,
+    Reserved10
 };
-	
-	
+
+
 #define IEEE_802_11_LINK_STATUS_FAILURE_REASON_STRINGS \
 {	\
         {reserved0,		0xff," Reserved reason "},\
@@ -33,58 +34,63 @@ enum ieee_802_11_link_status_failure_reason {
 
 
 
-struct ieee_802_11_header {
-	u16	frame_control;// needs to be subtyped
-	u16	duration;
-	u8	mac1[6];
-	u8	mac2[6];
-	u8	mac3[6];
-	u16	SeqCtl;
-	u8	mac4[6];
-	u16	gapLen;
-	u8	gap[8];
+struct ieee_802_11_header
+{
+    u16	frame_control;// needs to be subtyped
+    u16	duration;
+    u8	mac1[6];
+    u8	mac2[6];
+    u8	mac3[6];
+    u16	SeqCtl;
+    u8	mac4[6];
+    u16	gapLen;
+    u8	gap[8];
 };
 
 
-struct ieee_802_3_header {
+struct ieee_802_3_header
+{
 
-	u16	status;
-	u16	payload_length;
-	u8	dst_mac[6];
-	u8	src_mac[6];
-	
+    u16	status;
+    u16	payload_length;
+    u8	dst_mac[6];
+    u8	src_mac[6];
+
 };
 
 #define P80211_OUI_LEN 3
 
-struct ieee_802_11_snap_header { 
+struct ieee_802_11_snap_header
+{
 
-	u8    dsap;   /* always 0xAA */
-	u8    ssap;   /* always 0xAA */
-	u8    ctrl;   /* always 0x03 */
-	u8    oui[P80211_OUI_LEN];    /* organizational universal id */
+    u8    dsap;   /* always 0xAA */
+    u8    ssap;   /* always 0xAA */
+    u8    ctrl;   /* always 0x03 */
+    u8    oui[P80211_OUI_LEN];    /* organizational universal id */
 
 } __attribute__ ((packed));
 
 #define P80211_LLC_OUI_LEN 3
 
-struct ieee_802_11_802_1H_header {
+struct ieee_802_11_802_1H_header
+{
 
-	u8    dsap;   
-	u8    ssap;   /* always 0xAA */
-	u8    ctrl;   /* always 0x03 */
-	u8    oui[P80211_OUI_LEN];    /* organizational universal id */
-	u16    unknown1;      /* packet type ID fields */
-	u16    unknown2;		/* here is something like length in some cases */
+    u8    dsap;
+    u8    ssap;   /* always 0xAA */
+    u8    ctrl;   /* always 0x03 */
+    u8    oui[P80211_OUI_LEN];    /* organizational universal id */
+    u16    unknown1;      /* packet type ID fields */
+    u16    unknown2;		/* here is something like length in some cases */
 } __attribute__ ((packed));
 
-struct ieee_802_11_802_2_header {
+struct ieee_802_11_802_2_header
+{
 
-	u8    dsap;   
-	u8    ssap;   /* always 0xAA */
-	u8    ctrl;   /* always 0x03 */
-	u8    oui[P80211_OUI_LEN];    /* organizational universal id */
-	u8    type;      /* packet type ID field. i guess,  */
+    u8    dsap;
+    u8    ssap;   /* always 0xAA */
+    u8    ctrl;   /* always 0x03 */
+    u8    oui[P80211_OUI_LEN];    /* organizational universal id */
+    u8    type;      /* packet type ID field. i guess,  */
 
 } __attribute__ ((packed));
 
@@ -152,11 +158,12 @@ struct ieee_802_11_802_2_header {
 	{ ieee_802_11_frame_subtype_CFAck_CFPoll,	0xF,"y7  CF-Ack + CF-Poll (no data)"},\
 	{ 0,0,NULL}\
 }
-struct ieee_802_11_frame_subtype_class {
-	u8	subtype;
-	u8	mask;
-	u8	class;
-	u8	type;
+struct ieee_802_11_frame_subtype_class
+{
+    u8	subtype;
+    u8	mask;
+    u8	class;
+    u8	type;
 };
 #define ieee_802_11_frame_subtype_classes {\
 	{ ieee_802_11_frame_subtype_Association_Req,	0xF,2,ieee_802_11_frame_type_Management},\

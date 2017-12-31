@@ -6,9 +6,10 @@
 
 #ifndef _STRUCT_TIMESPEC
 #define _STRUCT_TIMESPEC
-struct timespec {
-	time_t	tv_sec;		/* seconds */
-	long	tv_nsec;	/* nanoseconds */
+struct timespec
+{
+    time_t	tv_sec;		/* seconds */
+    long	tv_nsec;	/* nanoseconds */
 };
 #endif /* _STRUCT_TIMESPEC */
 
@@ -31,21 +32,21 @@ struct timespec {
 static __inline__ unsigned long
 timespec_to_jiffies(struct timespec *value)
 {
-	unsigned long sec = value->tv_sec;
-	long nsec = value->tv_nsec;
+    unsigned long sec = value->tv_sec;
+    long nsec = value->tv_nsec;
 
-	if (sec >= (MAX_JIFFY_OFFSET / HZ))
-		return MAX_JIFFY_OFFSET;
-	nsec += 1000000000L / HZ - 1;
-	nsec /= 1000000000L / HZ;
-	return HZ * sec + nsec;
+    if (sec >= (MAX_JIFFY_OFFSET / HZ))
+        return MAX_JIFFY_OFFSET;
+    nsec += 1000000000L / HZ - 1;
+    nsec /= 1000000000L / HZ;
+    return HZ * sec + nsec;
 }
 
 static __inline__ void
 jiffies_to_timespec(unsigned long jiffies, struct timespec *value)
 {
-	value->tv_nsec = (jiffies % HZ) * (1000000000L / HZ);
-	value->tv_sec = jiffies / HZ;
+    value->tv_nsec = (jiffies % HZ) * (1000000000L / HZ);
+    value->tv_sec = jiffies / HZ;
 }
 
 
@@ -66,33 +67,36 @@ jiffies_to_timespec(unsigned long jiffies, struct timespec *value)
  */
 static inline unsigned long
 mktime (unsigned int year, unsigned int mon,
-	unsigned int day, unsigned int hour,
-	unsigned int min, unsigned int sec)
+        unsigned int day, unsigned int hour,
+        unsigned int min, unsigned int sec)
 {
-	if (0 >= (int) (mon -= 2)) {	/* 1..12 -> 11,12,1..10 */
-		mon += 12;		/* Puts Feb last since it has leap day */
-		year -= 1;
-	}
+    if (0 >= (int) (mon -= 2))  	/* 1..12 -> 11,12,1..10 */
+    {
+        mon += 12;		/* Puts Feb last since it has leap day */
+        year -= 1;
+    }
 
-	return (((
-		(unsigned long) (year/4 - year/100 + year/400 + 367*mon/12 + day) +
-			year*365 - 719499
-	    )*24 + hour /* now have hours */
-	  )*60 + min /* now have minutes */
-	)*60 + sec; /* finally seconds */
+    return (((
+                 (unsigned long) (year/4 - year/100 + year/400 + 367*mon/12 + day) +
+                 year*365 - 719499
+             )*24 + hour /* now have hours */
+            )*60 + min /* now have minutes */
+           )*60 + sec; /* finally seconds */
 }
 
 #endif /* __KERNEL__ */
 
 
-struct timeval {
-	time_t		tv_sec;		/* seconds */
-	suseconds_t	tv_usec;	/* microseconds */
+struct timeval
+{
+    time_t		tv_sec;		/* seconds */
+    suseconds_t	tv_usec;	/* microseconds */
 };
 
-struct timezone {
-	int	tz_minuteswest;	/* minutes west of Greenwich */
-	int	tz_dsttime;	/* type of dst correction */
+struct timezone
+{
+    int	tz_minuteswest;	/* minutes west of Greenwich */
+    int	tz_dsttime;	/* type of dst correction */
 };
 
 #define NFDBITS			__NFDBITS
@@ -116,14 +120,16 @@ extern void do_settimeofday(struct timeval *tv);
 #define	ITIMER_VIRTUAL	1
 #define	ITIMER_PROF	2
 
-struct  itimerspec {
-        struct  timespec it_interval;    /* timer period */
-        struct  timespec it_value;       /* timer expiration */
+struct  itimerspec
+{
+    struct  timespec it_interval;    /* timer period */
+    struct  timespec it_value;       /* timer expiration */
 };
 
-struct	itimerval {
-	struct	timeval it_interval;	/* timer interval */
-	struct	timeval it_value;	/* current value */
+struct	itimerval
+{
+    struct	timeval it_interval;	/* timer interval */
+    struct	timeval it_value;	/* current value */
 };
 
 #endif

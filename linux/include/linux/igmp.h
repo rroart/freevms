@@ -26,10 +26,10 @@
 
 struct igmphdr
 {
-	__u8 type;
-	__u8 code;		/* For newer IGMP */
-	__u16 csum;
-	__u32 group;
+    __u8 type;
+    __u8 code;		/* For newer IGMP */
+    __u16 csum;
+    __u32 group;
 };
 
 #define IGMP_HOST_MEMBERSHIP_QUERY	0x11	/* From RFC1112 */
@@ -57,14 +57,14 @@ struct igmphdr
 #define IGMP_MINLEN			8
 
 #define IGMP_MAX_HOST_REPORT_DELAY	10	/* max delay for response to */
-						/* query (in seconds)	*/
+/* query (in seconds)	*/
 
 #define IGMP_TIMER_SCALE		10	/* denotes that the igmphdr->timer field */
-						/* specifies time in 10th of seconds	 */
+/* specifies time in 10th of seconds	 */
 
 #define IGMP_AGE_THRESHOLD		400	/* If this host don't hear any IGMP V1	*/
-						/* message in this period of time,	*/
-						/* revert to IGMP v2 router.		*/
+/* message in this period of time,	*/
+/* revert to IGMP v2 router.		*/
 
 #define IGMP_ALL_HOSTS		htonl(0xE0000001L)
 #define IGMP_ALL_ROUTER 	htonl(0xE0000002L)
@@ -83,24 +83,24 @@ struct igmphdr
 
 struct ip_mc_socklist
 {
-	struct ip_mc_socklist	*next;
-	int			count;
-	struct ip_mreqn		multi;
+    struct ip_mc_socklist	*next;
+    int			count;
+    struct ip_mreqn		multi;
 };
 
 struct ip_mc_list
 {
-	struct in_device	*interface;
-	unsigned long		multiaddr;
-	struct ip_mc_list	*next;
-	struct timer_list	timer;
-	int			users;
-	atomic_t		refcnt;
-	spinlock_t		lock;
-	char			tm_running;
-	char			reporter;
-	char			unsolicit_count;
-	char			loaded;
+    struct in_device	*interface;
+    unsigned long		multiaddr;
+    struct ip_mc_list	*next;
+    struct timer_list	timer;
+    int			users;
+    atomic_t		refcnt;
+    spinlock_t		lock;
+    char			tm_running;
+    char			reporter;
+    char			unsolicit_count;
+    char			loaded;
 };
 
 extern int ip_check_mc(struct in_device *dev, u32 mc_addr);

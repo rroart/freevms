@@ -95,8 +95,8 @@ static int options[MAX_UNITS];
 
 /* These identify the driver base version and may not be removed. */
 static char version[] __devinitdata =
-KERN_INFO DRV_NAME ".c:v" DRV_VERSION " " DRV_RELDATE " D. Becker/P. Gortmaker\n"
-KERN_INFO "  http://www.scyld.com/network/ne2k-pci.html\n";
+    KERN_INFO DRV_NAME ".c:v" DRV_VERSION " " DRV_RELDATE " D. Becker/P. Gortmaker\n"
+    KERN_INFO "  http://www.scyld.com/network/ne2k-pci.html\n";
 
 #if defined(__powerpc__)
 #define inl_le(addr)  le32_to_cpu(inl(addr))
@@ -129,57 +129,62 @@ MODULE_PARM_DESC(full_duplex, "PCI NE2000 full duplex setting(s) (1)");
 /* Flags.  We rename an existing ei_status field to store flags! */
 /* Thus only the low 8 bits are usable for non-init-time flags. */
 #define ne2k_flags reg0
-enum {
-	ONLY_16BIT_IO=8, ONLY_32BIT_IO=4,	/* Chip can do only 16/32-bit xfers. */
-	FORCE_FDX=0x20,						/* User override. */
-	REALTEK_FDX=0x40, HOLTEK_FDX=0x80,
-	STOP_PG_0x60=0x100,
+enum
+{
+    ONLY_16BIT_IO=8, ONLY_32BIT_IO=4,	/* Chip can do only 16/32-bit xfers. */
+    FORCE_FDX=0x20,						/* User override. */
+    REALTEK_FDX=0x40, HOLTEK_FDX=0x80,
+    STOP_PG_0x60=0x100,
 };
 
-enum ne2k_pci_chipsets {
-	CH_RealTek_RTL_8029 = 0,
-	CH_Winbond_89C940,
-	CH_Compex_RL2000,
-	CH_KTI_ET32P2,
-	CH_NetVin_NV5000SC,
-	CH_Via_86C926,
-	CH_SureCom_NE34,
-	CH_Winbond_W89C940F,
-	CH_Holtek_HT80232,
-	CH_Holtek_HT80229,
-};
-
-
-static struct {
-	char *name;
-	int flags;
-} pci_clone_list[] __devinitdata = {
-	{"RealTek RTL-8029", REALTEK_FDX},
-	{"Winbond 89C940", 0},
-	{"Compex RL2000", 0},
-	{"KTI ET32P2", 0},
-	{"NetVin NV5000SC", 0},
-	{"Via 86C926", ONLY_16BIT_IO},
-	{"SureCom NE34", 0},
-	{"Winbond W89C940F", 0},
-	{"Holtek HT80232", ONLY_16BIT_IO | HOLTEK_FDX},
-	{"Holtek HT80229", ONLY_32BIT_IO | HOLTEK_FDX | STOP_PG_0x60 },
-	{0,}
+enum ne2k_pci_chipsets
+{
+    CH_RealTek_RTL_8029 = 0,
+    CH_Winbond_89C940,
+    CH_Compex_RL2000,
+    CH_KTI_ET32P2,
+    CH_NetVin_NV5000SC,
+    CH_Via_86C926,
+    CH_SureCom_NE34,
+    CH_Winbond_W89C940F,
+    CH_Holtek_HT80232,
+    CH_Holtek_HT80229,
 };
 
 
-static struct pci_device_id ne2k_pci_tbl[] __devinitdata = {
-	{ 0x10ec, 0x8029, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_RealTek_RTL_8029 },
-	{ 0x1050, 0x0940, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Winbond_89C940 },
-	{ 0x11f6, 0x1401, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Compex_RL2000 },
-	{ 0x8e2e, 0x3000, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_KTI_ET32P2 },
-	{ 0x4a14, 0x5000, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_NetVin_NV5000SC },
-	{ 0x1106, 0x0926, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Via_86C926 },
-	{ 0x10bd, 0x0e34, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_SureCom_NE34 },
-	{ 0x1050, 0x5a5a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Winbond_W89C940F },
-	{ 0x12c3, 0x0058, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Holtek_HT80232 },
-	{ 0x12c3, 0x5598, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Holtek_HT80229 },
-	{ 0, }
+static struct
+{
+    char *name;
+    int flags;
+} pci_clone_list[] __devinitdata =
+{
+    {"RealTek RTL-8029", REALTEK_FDX},
+    {"Winbond 89C940", 0},
+    {"Compex RL2000", 0},
+    {"KTI ET32P2", 0},
+    {"NetVin NV5000SC", 0},
+    {"Via 86C926", ONLY_16BIT_IO},
+    {"SureCom NE34", 0},
+    {"Winbond W89C940F", 0},
+    {"Holtek HT80232", ONLY_16BIT_IO | HOLTEK_FDX},
+    {"Holtek HT80229", ONLY_32BIT_IO | HOLTEK_FDX | STOP_PG_0x60 },
+    {0,}
+};
+
+
+static struct pci_device_id ne2k_pci_tbl[] __devinitdata =
+{
+    { 0x10ec, 0x8029, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_RealTek_RTL_8029 },
+    { 0x1050, 0x0940, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Winbond_89C940 },
+    { 0x11f6, 0x1401, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Compex_RL2000 },
+    { 0x8e2e, 0x3000, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_KTI_ET32P2 },
+    { 0x4a14, 0x5000, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_NetVin_NV5000SC },
+    { 0x1106, 0x0926, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Via_86C926 },
+    { 0x10bd, 0x0e34, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_SureCom_NE34 },
+    { 0x1050, 0x5a5a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Winbond_W89C940F },
+    { 0x12c3, 0x0058, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Holtek_HT80232 },
+    { 0x12c3, 0x5598, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CH_Holtek_HT80229 },
+    { 0, }
 };
 MODULE_DEVICE_TABLE(pci, ne2k_pci_tbl);
 
@@ -201,20 +206,21 @@ static int ne2k_pci_close(struct net_device *dev);
 
 static void ne2k_pci_reset_8390(struct net_device *dev);
 static void ne2k_pci_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr,
-			  int ring_page);
+                                  int ring_page);
 static void ne2k_pci_block_input(struct net_device *dev, int count,
-			  char *buf, int ring_offset);
+                                 char *buf, int ring_offset);
 static void ne2k_pci_block_output(struct net_device *dev, const int count,
-		const unsigned char *buf, const int start_page);
+                                  const unsigned char *buf, const int start_page);
 static int netdev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd);
 
 
 
 /* There is no room in the standard 8390 structure for extra info we need,
    so we build a meta/outer-wrapper structure.. */
-struct ne2k_pci_card {
-	struct net_device *dev;
-	struct pci_dev *pci_dev;
+struct ne2k_pci_card
+{
+    struct net_device *dev;
+    struct pci_dev *pci_dev;
 };
 
 
@@ -234,240 +240,258 @@ struct ne2k_pci_card {
 
 
 static int __devinit ne2k_pci_init_one (struct pci_dev *pdev,
-				     const struct pci_device_id *ent)
+                                        const struct pci_device_id *ent)
 {
-	struct net_device *dev;
-	int i;
-	unsigned char SA_prom[32];
-	int start_page, stop_page;
-	int irq, reg0, chip_idx = ent->driver_data;
-	static unsigned int fnd_cnt;
-	long ioaddr;
-	int flags = pci_clone_list[chip_idx].flags;
+    struct net_device *dev;
+    int i;
+    unsigned char SA_prom[32];
+    int start_page, stop_page;
+    int irq, reg0, chip_idx = ent->driver_data;
+    static unsigned int fnd_cnt;
+    long ioaddr;
+    int flags = pci_clone_list[chip_idx].flags;
 
-/* when built into the kernel, we only print version if device is found */
+    /* when built into the kernel, we only print version if device is found */
 #ifndef MODULE
-	static int printed_version;
-	if (!printed_version++)
-		printk(version);
+    static int printed_version;
+    if (!printed_version++)
+        printk(version);
 #endif
 
-	fnd_cnt++;
+    fnd_cnt++;
 
-	i = pci_enable_device (pdev);
-	if (i)
-		return i;
+    i = pci_enable_device (pdev);
+    if (i)
+        return i;
 
-	ioaddr = pci_resource_start (pdev, 0);
-	irq = pdev->irq;
+    ioaddr = pci_resource_start (pdev, 0);
+    irq = pdev->irq;
 
-	if (!ioaddr || ((pci_resource_flags (pdev, 0) & IORESOURCE_IO) == 0)) {
-		printk (KERN_ERR PFX "no I/O resource at PCI BAR #0\n");
-		return -ENODEV;
-	}
+    if (!ioaddr || ((pci_resource_flags (pdev, 0) & IORESOURCE_IO) == 0))
+    {
+        printk (KERN_ERR PFX "no I/O resource at PCI BAR #0\n");
+        return -ENODEV;
+    }
 
-	if (request_region (ioaddr, NE_IO_EXTENT, DRV_NAME) == NULL) {
-		printk (KERN_ERR PFX "I/O resource 0x%x @ 0x%lx busy\n",
-			NE_IO_EXTENT, ioaddr);
-		return -EBUSY;
-	}
+    if (request_region (ioaddr, NE_IO_EXTENT, DRV_NAME) == NULL)
+    {
+        printk (KERN_ERR PFX "I/O resource 0x%x @ 0x%lx busy\n",
+                NE_IO_EXTENT, ioaddr);
+        return -EBUSY;
+    }
 
-	reg0 = inb(ioaddr);
-	if (reg0 == 0xFF)
-		goto err_out_free_res;
+    reg0 = inb(ioaddr);
+    if (reg0 == 0xFF)
+        goto err_out_free_res;
 
-	/* Do a preliminary verification that we have a 8390. */
-	{
-		int regd;
-		outb(E8390_NODMA+E8390_PAGE1+E8390_STOP, ioaddr + E8390_CMD);
-		regd = inb(ioaddr + 0x0d);
-		outb(0xff, ioaddr + 0x0d);
-		outb(E8390_NODMA+E8390_PAGE0, ioaddr + E8390_CMD);
-		inb(ioaddr + EN0_COUNTER0); /* Clear the counter by reading. */
-		if (inb(ioaddr + EN0_COUNTER0) != 0) {
-			outb(reg0, ioaddr);
-			outb(regd, ioaddr + 0x0d);	/* Restore the old values. */
-			goto err_out_free_res;
-		}
-	}
+    /* Do a preliminary verification that we have a 8390. */
+    {
+        int regd;
+        outb(E8390_NODMA+E8390_PAGE1+E8390_STOP, ioaddr + E8390_CMD);
+        regd = inb(ioaddr + 0x0d);
+        outb(0xff, ioaddr + 0x0d);
+        outb(E8390_NODMA+E8390_PAGE0, ioaddr + E8390_CMD);
+        inb(ioaddr + EN0_COUNTER0); /* Clear the counter by reading. */
+        if (inb(ioaddr + EN0_COUNTER0) != 0)
+        {
+            outb(reg0, ioaddr);
+            outb(regd, ioaddr + 0x0d);	/* Restore the old values. */
+            goto err_out_free_res;
+        }
+    }
 
-	dev = alloc_etherdev(0);
-	if (!dev) {
-		printk (KERN_ERR PFX "cannot allocate ethernet device\n");
-		goto err_out_free_res;
-	}
-	SET_MODULE_OWNER(dev);
+    dev = alloc_etherdev(0);
+    if (!dev)
+    {
+        printk (KERN_ERR PFX "cannot allocate ethernet device\n");
+        goto err_out_free_res;
+    }
+    SET_MODULE_OWNER(dev);
 
-	/* Reset card. Who knows what dain-bramaged state it was left in. */
-	{
-		unsigned long reset_start_time = jiffies;
+    /* Reset card. Who knows what dain-bramaged state it was left in. */
+    {
+        unsigned long reset_start_time = jiffies;
 
-		outb(inb(ioaddr + NE_RESET), ioaddr + NE_RESET);
+        outb(inb(ioaddr + NE_RESET), ioaddr + NE_RESET);
 
-		/* This looks like a horrible timing loop, but it should never take
-		   more than a few cycles.
-		*/
-		while ((inb(ioaddr + EN0_ISR) & ENISR_RESET) == 0)
-			/* Limit wait: '2' avoids jiffy roll-over. */
-			if (jiffies - reset_start_time > 2) {
-				printk(KERN_ERR PFX "Card failure (no reset ack).\n");
-				goto err_out_free_netdev;
-			}
+        /* This looks like a horrible timing loop, but it should never take
+           more than a few cycles.
+        */
+        while ((inb(ioaddr + EN0_ISR) & ENISR_RESET) == 0)
+            /* Limit wait: '2' avoids jiffy roll-over. */
+            if (jiffies - reset_start_time > 2)
+            {
+                printk(KERN_ERR PFX "Card failure (no reset ack).\n");
+                goto err_out_free_netdev;
+            }
 
-		outb(0xff, ioaddr + EN0_ISR);		/* Ack all intr. */
-	}
+        outb(0xff, ioaddr + EN0_ISR);		/* Ack all intr. */
+    }
 
-	/* Read the 16 bytes of station address PROM.
-	   We must first initialize registers, similar to NS8390_init(eifdev, 0).
-	   We can't reliably read the SAPROM address without this.
-	   (I learned the hard way!). */
-	{
-		struct {unsigned char value, offset; } program_seq[] = {
-			{E8390_NODMA+E8390_PAGE0+E8390_STOP, E8390_CMD}, /* Select page 0*/
-			{0x49,	EN0_DCFG},	/* Set word-wide access. */
-			{0x00,	EN0_RCNTLO},	/* Clear the count regs. */
-			{0x00,	EN0_RCNTHI},
-			{0x00,	EN0_IMR},	/* Mask completion irq. */
-			{0xFF,	EN0_ISR},
-			{E8390_RXOFF, EN0_RXCR},	/* 0x20  Set to monitor */
-			{E8390_TXOFF, EN0_TXCR},	/* 0x02  and loopback mode. */
-			{32,	EN0_RCNTLO},
-			{0x00,	EN0_RCNTHI},
-			{0x00,	EN0_RSARLO},	/* DMA starting at 0x0000. */
-			{0x00,	EN0_RSARHI},
-			{E8390_RREAD+E8390_START, E8390_CMD},
-		};
-		for (i = 0; i < sizeof(program_seq)/sizeof(program_seq[0]); i++)
-			outb(program_seq[i].value, ioaddr + program_seq[i].offset);
+    /* Read the 16 bytes of station address PROM.
+       We must first initialize registers, similar to NS8390_init(eifdev, 0).
+       We can't reliably read the SAPROM address without this.
+       (I learned the hard way!). */
+    {
+        struct
+        {
+            unsigned char value, offset;
+        } program_seq[] =
+        {
+            {E8390_NODMA+E8390_PAGE0+E8390_STOP, E8390_CMD}, /* Select page 0*/
+            {0x49,	EN0_DCFG},	/* Set word-wide access. */
+            {0x00,	EN0_RCNTLO},	/* Clear the count regs. */
+            {0x00,	EN0_RCNTHI},
+            {0x00,	EN0_IMR},	/* Mask completion irq. */
+            {0xFF,	EN0_ISR},
+            {E8390_RXOFF, EN0_RXCR},	/* 0x20  Set to monitor */
+            {E8390_TXOFF, EN0_TXCR},	/* 0x02  and loopback mode. */
+            {32,	EN0_RCNTLO},
+            {0x00,	EN0_RCNTHI},
+            {0x00,	EN0_RSARLO},	/* DMA starting at 0x0000. */
+            {0x00,	EN0_RSARHI},
+            {E8390_RREAD+E8390_START, E8390_CMD},
+        };
+        for (i = 0; i < sizeof(program_seq)/sizeof(program_seq[0]); i++)
+            outb(program_seq[i].value, ioaddr + program_seq[i].offset);
 
-	}
+    }
 
-	/* Note: all PCI cards have at least 16 bit access, so we don't have
-	   to check for 8 bit cards.  Most cards permit 32 bit access. */
-	if (flags & ONLY_32BIT_IO) {
-		for (i = 0; i < 4 ; i++)
-			((u32 *)SA_prom)[i] = le32_to_cpu(inl(ioaddr + NE_DATAPORT));
-	} else
-		for(i = 0; i < 32 /*sizeof(SA_prom)*/; i++)
-			SA_prom[i] = inb(ioaddr + NE_DATAPORT);
+    /* Note: all PCI cards have at least 16 bit access, so we don't have
+       to check for 8 bit cards.  Most cards permit 32 bit access. */
+    if (flags & ONLY_32BIT_IO)
+    {
+        for (i = 0; i < 4 ; i++)
+            ((u32 *)SA_prom)[i] = le32_to_cpu(inl(ioaddr + NE_DATAPORT));
+    }
+    else
+        for(i = 0; i < 32 /*sizeof(SA_prom)*/; i++)
+            SA_prom[i] = inb(ioaddr + NE_DATAPORT);
 
-	/* We always set the 8390 registers for word mode. */
-	outb(0x49, ioaddr + EN0_DCFG);
-	start_page = NESM_START_PG;
+    /* We always set the 8390 registers for word mode. */
+    outb(0x49, ioaddr + EN0_DCFG);
+    start_page = NESM_START_PG;
 
-	stop_page = flags & STOP_PG_0x60 ? 0x60 : NESM_STOP_PG;
+    stop_page = flags & STOP_PG_0x60 ? 0x60 : NESM_STOP_PG;
 
-	/* Set up the rest of the parameters. */
-	dev->irq = irq;
-	dev->base_addr = ioaddr;
-	pci_set_drvdata(pdev, dev);
+    /* Set up the rest of the parameters. */
+    dev->irq = irq;
+    dev->base_addr = ioaddr;
+    pci_set_drvdata(pdev, dev);
 
-	/* Allocate dev->priv and fill in 8390 specific dev fields. */
-	if (ethdev_init(dev)) {
-		printk (KERN_ERR "ne2kpci(%s): unable to get memory for dev->priv.\n",
-			pdev->slot_name);
-		goto err_out_free_netdev;
-	}
+    /* Allocate dev->priv and fill in 8390 specific dev fields. */
+    if (ethdev_init(dev))
+    {
+        printk (KERN_ERR "ne2kpci(%s): unable to get memory for dev->priv.\n",
+                pdev->slot_name);
+        goto err_out_free_netdev;
+    }
 
-	ei_status.name = pci_clone_list[chip_idx].name;
-	ei_status.tx_start_page = start_page;
-	ei_status.stop_page = stop_page;
-	ei_status.word16 = 1;
-	ei_status.ne2k_flags = flags;
-	if (fnd_cnt < MAX_UNITS) {
-		if (full_duplex[fnd_cnt] > 0  ||  (options[fnd_cnt] & FORCE_FDX))
-			ei_status.ne2k_flags |= FORCE_FDX;
-	}
+    ei_status.name = pci_clone_list[chip_idx].name;
+    ei_status.tx_start_page = start_page;
+    ei_status.stop_page = stop_page;
+    ei_status.word16 = 1;
+    ei_status.ne2k_flags = flags;
+    if (fnd_cnt < MAX_UNITS)
+    {
+        if (full_duplex[fnd_cnt] > 0  ||  (options[fnd_cnt] & FORCE_FDX))
+            ei_status.ne2k_flags |= FORCE_FDX;
+    }
 
-	ei_status.rx_start_page = start_page + TX_PAGES;
+    ei_status.rx_start_page = start_page + TX_PAGES;
 #ifdef PACKETBUF_MEMSIZE
-	/* Allow the packet buffer size to be overridden by know-it-alls. */
-	ei_status.stop_page = ei_status.tx_start_page + PACKETBUF_MEMSIZE;
+    /* Allow the packet buffer size to be overridden by know-it-alls. */
+    ei_status.stop_page = ei_status.tx_start_page + PACKETBUF_MEMSIZE;
 #endif
 
-	ei_status.reset_8390 = &ne2k_pci_reset_8390;
-	ei_status.block_input = &ne2k_pci_block_input;
-	ei_status.block_output = &ne2k_pci_block_output;
-	ei_status.get_8390_hdr = &ne2k_pci_get_8390_hdr;
-	ei_status.priv = (unsigned long) pdev;
-	dev->open = &ne2k_pci_open;
-	dev->stop = &ne2k_pci_close;
-	dev->do_ioctl = &netdev_ioctl;
-	NS8390_init(dev, 0);
+    ei_status.reset_8390 = &ne2k_pci_reset_8390;
+    ei_status.block_input = &ne2k_pci_block_input;
+    ei_status.block_output = &ne2k_pci_block_output;
+    ei_status.get_8390_hdr = &ne2k_pci_get_8390_hdr;
+    ei_status.priv = (unsigned long) pdev;
+    dev->open = &ne2k_pci_open;
+    dev->stop = &ne2k_pci_close;
+    dev->do_ioctl = &netdev_ioctl;
+    NS8390_init(dev, 0);
 
-	i = register_netdev(dev);
-	if (i)
-		goto err_out_free_8390;
+    i = register_netdev(dev);
+    if (i)
+        goto err_out_free_8390;
 
-	printk("%s: %s found at %#lx, IRQ %d, ",
-		   dev->name, pci_clone_list[chip_idx].name, ioaddr, dev->irq);
-	for(i = 0; i < 6; i++) {
-		printk("%2.2X%s", SA_prom[i], i == 5 ? ".\n": ":");
-		dev->dev_addr[i] = SA_prom[i];
-	}
+    printk("%s: %s found at %#lx, IRQ %d, ",
+           dev->name, pci_clone_list[chip_idx].name, ioaddr, dev->irq);
+    for(i = 0; i < 6; i++)
+    {
+        printk("%2.2X%s", SA_prom[i], i == 5 ? ".\n": ":");
+        dev->dev_addr[i] = SA_prom[i];
+    }
 
-	er_vmsinit(dev);
+    er_vmsinit(dev);
 
-	return 0;
+    return 0;
 
 err_out_free_8390:
-	kfree(dev->priv);
+    kfree(dev->priv);
 err_out_free_netdev:
-	kfree (dev);
+    kfree (dev);
 err_out_free_res:
-	release_region (ioaddr, NE_IO_EXTENT);
-	pci_set_drvdata (pdev, NULL);
-	return -ENODEV;
+    release_region (ioaddr, NE_IO_EXTENT);
+    pci_set_drvdata (pdev, NULL);
+    return -ENODEV;
 
 }
 
 static int ne2k_pci_open(struct net_device *dev)
 {
-	int ret = request_irq(dev->irq, ei_interrupt, SA_SHIRQ, dev->name, dev);
-	if (ret)
-		return ret;
+    int ret = request_irq(dev->irq, ei_interrupt, SA_SHIRQ, dev->name, dev);
+    if (ret)
+        return ret;
 
-	/* Set full duplex for the chips that we know about. */
-	if (ei_status.ne2k_flags & FORCE_FDX) {
-		long ioaddr = dev->base_addr;
-		if (ei_status.ne2k_flags & REALTEK_FDX) {
-			outb(0xC0 + E8390_NODMA, ioaddr + NE_CMD); /* Page 3 */
-			outb(inb(ioaddr + 0x20) | 0x80, ioaddr + 0x20);
-		} else if (ei_status.ne2k_flags & HOLTEK_FDX)
-			outb(inb(ioaddr + 0x20) | 0x80, ioaddr + 0x20);
-	}
-	ei_open(dev);
-	return 0;
+    /* Set full duplex for the chips that we know about. */
+    if (ei_status.ne2k_flags & FORCE_FDX)
+    {
+        long ioaddr = dev->base_addr;
+        if (ei_status.ne2k_flags & REALTEK_FDX)
+        {
+            outb(0xC0 + E8390_NODMA, ioaddr + NE_CMD); /* Page 3 */
+            outb(inb(ioaddr + 0x20) | 0x80, ioaddr + 0x20);
+        }
+        else if (ei_status.ne2k_flags & HOLTEK_FDX)
+            outb(inb(ioaddr + 0x20) | 0x80, ioaddr + 0x20);
+    }
+    ei_open(dev);
+    return 0;
 }
 
 static int ne2k_pci_close(struct net_device *dev)
 {
-	ei_close(dev);
-	free_irq(dev->irq, dev);
-	return 0;
+    ei_close(dev);
+    free_irq(dev->irq, dev);
+    return 0;
 }
 
 /* Hard reset the card.  This used to pause for the same period that a
    8390 reset command required, but that shouldn't be necessary. */
 static void ne2k_pci_reset_8390(struct net_device *dev)
 {
-	unsigned long reset_start_time = jiffies;
+    unsigned long reset_start_time = jiffies;
 
-	if (debug > 1) printk("%s: Resetting the 8390 t=%ld...",
-						  dev->name, jiffies);
+    if (debug > 1) printk("%s: Resetting the 8390 t=%ld...",
+                              dev->name, jiffies);
 
-	outb(inb(NE_BASE + NE_RESET), NE_BASE + NE_RESET);
+    outb(inb(NE_BASE + NE_RESET), NE_BASE + NE_RESET);
 
-	ei_status.txing = 0;
-	ei_status.dmaing = 0;
+    ei_status.txing = 0;
+    ei_status.dmaing = 0;
 
-	/* This check _should_not_ be necessary, omit eventually. */
-	while ((inb(NE_BASE+EN0_ISR) & ENISR_RESET) == 0)
-		if (jiffies - reset_start_time > 2) {
-			printk("%s: ne2k_pci_reset_8390() did not complete.\n", dev->name);
-			break;
-		}
-	outb(ENISR_RESET, NE_BASE + EN0_ISR);	/* Ack intr. */
+    /* This check _should_not_ be necessary, omit eventually. */
+    while ((inb(NE_BASE+EN0_ISR) & ENISR_RESET) == 0)
+        if (jiffies - reset_start_time > 2)
+        {
+            printk("%s: ne2k_pci_reset_8390() did not complete.\n", dev->name);
+            break;
+        }
+    outb(ENISR_RESET, NE_BASE + EN0_ISR);	/* Ack intr. */
 }
 
 /* Grab the 8390 specific header. Similar to the block_input routine, but
@@ -477,33 +501,37 @@ static void ne2k_pci_reset_8390(struct net_device *dev)
 static void ne2k_pci_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr, int ring_page)
 {
 
-	long nic_base = dev->base_addr;
+    long nic_base = dev->base_addr;
 
-	/* This *shouldn't* happen. If it does, it's the last thing you'll see */
-	if (ei_status.dmaing) {
-		printk("%s: DMAing conflict in ne2k_pci_get_8390_hdr "
-			   "[DMAstat:%d][irqlock:%d].\n",
-			   dev->name, ei_status.dmaing, ei_status.irqlock);
-		return;
-	}
+    /* This *shouldn't* happen. If it does, it's the last thing you'll see */
+    if (ei_status.dmaing)
+    {
+        printk("%s: DMAing conflict in ne2k_pci_get_8390_hdr "
+               "[DMAstat:%d][irqlock:%d].\n",
+               dev->name, ei_status.dmaing, ei_status.irqlock);
+        return;
+    }
 
-	ei_status.dmaing |= 0x01;
-	outb(E8390_NODMA+E8390_PAGE0+E8390_START, nic_base+ NE_CMD);
-	outb(sizeof(struct e8390_pkt_hdr), nic_base + EN0_RCNTLO);
-	outb(0, nic_base + EN0_RCNTHI);
-	outb(0, nic_base + EN0_RSARLO);		/* On page boundary */
-	outb(ring_page, nic_base + EN0_RSARHI);
-	outb(E8390_RREAD+E8390_START, nic_base + NE_CMD);
+    ei_status.dmaing |= 0x01;
+    outb(E8390_NODMA+E8390_PAGE0+E8390_START, nic_base+ NE_CMD);
+    outb(sizeof(struct e8390_pkt_hdr), nic_base + EN0_RCNTLO);
+    outb(0, nic_base + EN0_RCNTHI);
+    outb(0, nic_base + EN0_RSARLO);		/* On page boundary */
+    outb(ring_page, nic_base + EN0_RSARHI);
+    outb(E8390_RREAD+E8390_START, nic_base + NE_CMD);
 
-	if (ei_status.ne2k_flags & ONLY_16BIT_IO) {
-		insw(NE_BASE + NE_DATAPORT, hdr, sizeof(struct e8390_pkt_hdr)>>1);
-	} else {
-		*(u32*)hdr = le32_to_cpu(inl(NE_BASE + NE_DATAPORT));
-		le16_to_cpus(&hdr->count);
-	}
+    if (ei_status.ne2k_flags & ONLY_16BIT_IO)
+    {
+        insw(NE_BASE + NE_DATAPORT, hdr, sizeof(struct e8390_pkt_hdr)>>1);
+    }
+    else
+    {
+        *(u32*)hdr = le32_to_cpu(inl(NE_BASE + NE_DATAPORT));
+        le16_to_cpus(&hdr->count);
+    }
 
-	outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
-	ei_status.dmaing &= ~0x01;
+    outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+    ei_status.dmaing &= ~0x01;
 }
 
 /* Block input and output, similar to the Crynwr packet driver.  If you
@@ -512,193 +540,214 @@ static void ne2k_pci_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *
    the packet out through the "remote DMA" dataport using outb. */
 
 static void ne2k_pci_block_input(struct net_device *dev, int count,
-				 char *buf, int ring_offset)
+                                 char *buf, int ring_offset)
 {
-	long nic_base = dev->base_addr;
+    long nic_base = dev->base_addr;
 
-	/* This *shouldn't* happen. If it does, it's the last thing you'll see */
-	if (ei_status.dmaing) {
-		printk("%s: DMAing conflict in ne2k_pci_block_input "
-			   "[DMAstat:%d][irqlock:%d].\n",
-			   dev->name, ei_status.dmaing, ei_status.irqlock);
-		return;
-	}
-	ei_status.dmaing |= 0x01;
-	if (ei_status.ne2k_flags & ONLY_32BIT_IO)
-		count = (count + 3) & 0xFFFC;
-	outb(E8390_NODMA+E8390_PAGE0+E8390_START, nic_base+ NE_CMD);
-	outb(count & 0xff, nic_base + EN0_RCNTLO);
-	outb(count >> 8, nic_base + EN0_RCNTHI);
-	outb(ring_offset & 0xff, nic_base + EN0_RSARLO);
-	outb(ring_offset >> 8, nic_base + EN0_RSARHI);
-	outb(E8390_RREAD+E8390_START, nic_base + NE_CMD);
+    /* This *shouldn't* happen. If it does, it's the last thing you'll see */
+    if (ei_status.dmaing)
+    {
+        printk("%s: DMAing conflict in ne2k_pci_block_input "
+               "[DMAstat:%d][irqlock:%d].\n",
+               dev->name, ei_status.dmaing, ei_status.irqlock);
+        return;
+    }
+    ei_status.dmaing |= 0x01;
+    if (ei_status.ne2k_flags & ONLY_32BIT_IO)
+        count = (count + 3) & 0xFFFC;
+    outb(E8390_NODMA+E8390_PAGE0+E8390_START, nic_base+ NE_CMD);
+    outb(count & 0xff, nic_base + EN0_RCNTLO);
+    outb(count >> 8, nic_base + EN0_RCNTHI);
+    outb(ring_offset & 0xff, nic_base + EN0_RSARLO);
+    outb(ring_offset >> 8, nic_base + EN0_RSARHI);
+    outb(E8390_RREAD+E8390_START, nic_base + NE_CMD);
 
-	if (ei_status.ne2k_flags & ONLY_16BIT_IO) {
-		insw(NE_BASE + NE_DATAPORT,buf,count>>1);
-		if (count & 0x01) {
-			buf[count-1] = inb(NE_BASE + NE_DATAPORT);
-		}
-	} else {
-		insl(NE_BASE + NE_DATAPORT, buf, count>>2);
-		if (count & 3) {
-			buf += count & ~3;
-			if (count & 2) {
-			  u16 *b = (u16 *)buf;
-			  *b++ = le16_to_cpu(inw(NE_BASE + NE_DATAPORT));
-			  buf = (char *)b;
-			}
-			if (count & 1)
-				*buf = inb(NE_BASE + NE_DATAPORT);
-		}
-	}
+    if (ei_status.ne2k_flags & ONLY_16BIT_IO)
+    {
+        insw(NE_BASE + NE_DATAPORT,buf,count>>1);
+        if (count & 0x01)
+        {
+            buf[count-1] = inb(NE_BASE + NE_DATAPORT);
+        }
+    }
+    else
+    {
+        insl(NE_BASE + NE_DATAPORT, buf, count>>2);
+        if (count & 3)
+        {
+            buf += count & ~3;
+            if (count & 2)
+            {
+                u16 *b = (u16 *)buf;
+                *b++ = le16_to_cpu(inw(NE_BASE + NE_DATAPORT));
+                buf = (char *)b;
+            }
+            if (count & 1)
+                *buf = inb(NE_BASE + NE_DATAPORT);
+        }
+    }
 
-	outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
-	ei_status.dmaing &= ~0x01;
+    outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+    ei_status.dmaing &= ~0x01;
 }
 
 static void ne2k_pci_block_output(struct net_device *dev, int count,
-				  const unsigned char *buf, const int start_page)
+                                  const unsigned char *buf, const int start_page)
 {
-	long nic_base = NE_BASE;
-	unsigned long dma_start;
+    long nic_base = NE_BASE;
+    unsigned long dma_start;
 
-	/* On little-endian it's always safe to round the count up for
-	   word writes. */
-	if (ei_status.ne2k_flags & ONLY_32BIT_IO)
-		count = (count + 3) & 0xFFFC;
-	else
-		if (count & 0x01)
-			count++;
+    /* On little-endian it's always safe to round the count up for
+       word writes. */
+    if (ei_status.ne2k_flags & ONLY_32BIT_IO)
+        count = (count + 3) & 0xFFFC;
+    else if (count & 0x01)
+        count++;
 
-	/* This *shouldn't* happen. If it does, it's the last thing you'll see */
-	if (ei_status.dmaing) {
-		printk("%s: DMAing conflict in ne2k_pci_block_output."
-			   "[DMAstat:%d][irqlock:%d]\n",
-			   dev->name, ei_status.dmaing, ei_status.irqlock);
-		return;
-	}
-	ei_status.dmaing |= 0x01;
-	/* We should already be in page 0, but to be safe... */
-	outb(E8390_PAGE0+E8390_START+E8390_NODMA, nic_base + NE_CMD);
+    /* This *shouldn't* happen. If it does, it's the last thing you'll see */
+    if (ei_status.dmaing)
+    {
+        printk("%s: DMAing conflict in ne2k_pci_block_output."
+               "[DMAstat:%d][irqlock:%d]\n",
+               dev->name, ei_status.dmaing, ei_status.irqlock);
+        return;
+    }
+    ei_status.dmaing |= 0x01;
+    /* We should already be in page 0, but to be safe... */
+    outb(E8390_PAGE0+E8390_START+E8390_NODMA, nic_base + NE_CMD);
 
 #ifdef NE8390_RW_BUGFIX
-	/* Handle the read-before-write bug the same way as the
-	   Crynwr packet driver -- the NatSemi method doesn't work.
-	   Actually this doesn't always work either, but if you have
-	   problems with your NEx000 this is better than nothing! */
-	outb(0x42, nic_base + EN0_RCNTLO);
-	outb(0x00, nic_base + EN0_RCNTHI);
-	outb(0x42, nic_base + EN0_RSARLO);
-	outb(0x00, nic_base + EN0_RSARHI);
-	outb(E8390_RREAD+E8390_START, nic_base + NE_CMD);
+    /* Handle the read-before-write bug the same way as the
+       Crynwr packet driver -- the NatSemi method doesn't work.
+       Actually this doesn't always work either, but if you have
+       problems with your NEx000 this is better than nothing! */
+    outb(0x42, nic_base + EN0_RCNTLO);
+    outb(0x00, nic_base + EN0_RCNTHI);
+    outb(0x42, nic_base + EN0_RSARLO);
+    outb(0x00, nic_base + EN0_RSARHI);
+    outb(E8390_RREAD+E8390_START, nic_base + NE_CMD);
 #endif
-	outb(ENISR_RDC, nic_base + EN0_ISR);
+    outb(ENISR_RDC, nic_base + EN0_ISR);
 
-   /* Now the normal output. */
-	outb(count & 0xff, nic_base + EN0_RCNTLO);
-	outb(count >> 8,   nic_base + EN0_RCNTHI);
-	outb(0x00, nic_base + EN0_RSARLO);
-	outb(start_page, nic_base + EN0_RSARHI);
-	outb(E8390_RWRITE+E8390_START, nic_base + NE_CMD);
-	if (ei_status.ne2k_flags & ONLY_16BIT_IO) {
-		outsw(NE_BASE + NE_DATAPORT, buf, count>>1);
-	} else {
-		outsl(NE_BASE + NE_DATAPORT, buf, count>>2);
-		if (count & 3) {
-			buf += count & ~3;
-			if (count & 2) {
-			  u16 *b = (u16 *)buf;
-			  outw(cpu_to_le16(*b++), NE_BASE + NE_DATAPORT);
-			  buf = (char *)b;
-			}
-		}
-	}
+    /* Now the normal output. */
+    outb(count & 0xff, nic_base + EN0_RCNTLO);
+    outb(count >> 8,   nic_base + EN0_RCNTHI);
+    outb(0x00, nic_base + EN0_RSARLO);
+    outb(start_page, nic_base + EN0_RSARHI);
+    outb(E8390_RWRITE+E8390_START, nic_base + NE_CMD);
+    if (ei_status.ne2k_flags & ONLY_16BIT_IO)
+    {
+        outsw(NE_BASE + NE_DATAPORT, buf, count>>1);
+    }
+    else
+    {
+        outsl(NE_BASE + NE_DATAPORT, buf, count>>2);
+        if (count & 3)
+        {
+            buf += count & ~3;
+            if (count & 2)
+            {
+                u16 *b = (u16 *)buf;
+                outw(cpu_to_le16(*b++), NE_BASE + NE_DATAPORT);
+                buf = (char *)b;
+            }
+        }
+    }
 
-	dma_start = jiffies;
+    dma_start = jiffies;
 
-	while ((inb(nic_base + EN0_ISR) & ENISR_RDC) == 0)
-		if (jiffies - dma_start > 2) {			/* Avoid clock roll-over. */
-			printk(KERN_WARNING "%s: timeout waiting for Tx RDC.\n", dev->name);
-			ne2k_pci_reset_8390(dev);
-			NS8390_init(dev,1);
-			break;
-		}
+    while ((inb(nic_base + EN0_ISR) & ENISR_RDC) == 0)
+        if (jiffies - dma_start > 2)  			/* Avoid clock roll-over. */
+        {
+            printk(KERN_WARNING "%s: timeout waiting for Tx RDC.\n", dev->name);
+            ne2k_pci_reset_8390(dev);
+            NS8390_init(dev,1);
+            break;
+        }
 
-	outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
-	ei_status.dmaing &= ~0x01;
-	return;
+    outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+    ei_status.dmaing &= ~0x01;
+    return;
 }
 
 static int netdev_ethtool_ioctl(struct net_device *dev, void *useraddr)
 {
-	struct ei_device *ei = dev->priv;
-	struct pci_dev *pci_dev = (struct pci_dev *) ei->priv;
-	u32 ethcmd;
-		
-	if (copy_from_user(&ethcmd, useraddr, sizeof(ethcmd)))
-		return -EFAULT;
+    struct ei_device *ei = dev->priv;
+    struct pci_dev *pci_dev = (struct pci_dev *) ei->priv;
+    u32 ethcmd;
 
-        switch (ethcmd) {
-        case ETHTOOL_GDRVINFO: {
-		struct ethtool_drvinfo info = {ETHTOOL_GDRVINFO};
-		strcpy(info.driver, DRV_NAME);
-		strcpy(info.version, DRV_VERSION);
-		strcpy(info.bus_info, pci_dev->slot_name);
-		if (copy_to_user(useraddr, &info, sizeof(info)))
-			return -EFAULT;
-		return 0;
-	}
+    if (copy_from_user(&ethcmd, useraddr, sizeof(ethcmd)))
+        return -EFAULT;
 
-        }
-	
-	return -EOPNOTSUPP;
+    switch (ethcmd)
+    {
+    case ETHTOOL_GDRVINFO:
+    {
+        struct ethtool_drvinfo info = {ETHTOOL_GDRVINFO};
+        strcpy(info.driver, DRV_NAME);
+        strcpy(info.version, DRV_VERSION);
+        strcpy(info.bus_info, pci_dev->slot_name);
+        if (copy_to_user(useraddr, &info, sizeof(info)))
+            return -EFAULT;
+        return 0;
+    }
+
+    }
+
+    return -EOPNOTSUPP;
 }
 
 static int netdev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 {
-	switch(cmd) {
-	case SIOCETHTOOL:
-		return netdev_ethtool_ioctl(dev, (void *) rq->ifr_data);
-	default:
-		return -EOPNOTSUPP;
-	}
+    switch(cmd)
+    {
+    case SIOCETHTOOL:
+        return netdev_ethtool_ioctl(dev, (void *) rq->ifr_data);
+    default:
+        return -EOPNOTSUPP;
+    }
 }
 
 static void __devexit ne2k_pci_remove_one (struct pci_dev *pdev)
 {
-	struct net_device *dev = pci_get_drvdata(pdev);
+    struct net_device *dev = pci_get_drvdata(pdev);
 
-	if (!dev)
-		BUG();
+    if (!dev)
+        BUG();
 
-	unregister_netdev(dev);
-	release_region(dev->base_addr, NE_IO_EXTENT);
-	kfree(dev);
-	pci_set_drvdata(pdev, NULL);
+    unregister_netdev(dev);
+    release_region(dev->base_addr, NE_IO_EXTENT);
+    kfree(dev);
+    pci_set_drvdata(pdev, NULL);
 }
 
 
-static struct pci_driver ne2k_driver = {
-	name:		DRV_NAME,
-	probe:		ne2k_pci_init_one,
-	remove:		__devexit_p(ne2k_pci_remove_one),
-	id_table:	ne2k_pci_tbl,
+static struct pci_driver ne2k_driver =
+{
+name:
+    DRV_NAME,
+probe:
+    ne2k_pci_init_one,
+remove:
+    __devexit_p(ne2k_pci_remove_one),
+id_table:
+    ne2k_pci_tbl,
 };
 
 
 static int __init ne2k_pci_init(void)
 {
-/* when a module, this is printed whether or not devices are found in probe */
+    /* when a module, this is printed whether or not devices are found in probe */
 #ifdef MODULE
-	printk(version);
+    printk(version);
 #endif
-	return pci_module_init (&ne2k_driver);
+    return pci_module_init (&ne2k_driver);
 }
 
 
 static void __exit ne2k_pci_cleanup(void)
 {
-	pci_unregister_driver (&ne2k_driver);
+    pci_unregister_driver (&ne2k_driver);
 }
 
 module_init(ne2k_pci_init);

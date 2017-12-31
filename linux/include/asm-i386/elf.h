@@ -36,7 +36,7 @@ typedef struct user_fxsr_struct elf_fpxregset_t;
    This provides a mean for the dynamic linker to call DT_FINI functions for
    shared libraries that have been loaded before the code runs.
 
-   A value of 0 tells we have no such handler. 
+   A value of 0 tells we have no such handler.
 
    We might as well make sure everything else is cleared too (except for %esp),
    just to make things more deterministic.

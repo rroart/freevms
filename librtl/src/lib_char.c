@@ -35,52 +35,52 @@
  *	spaces, if needed.
  */
 unsigned long lib$char(struct dsc$descriptor_s* destination_string,
-	const char* ascii_character)
+                       const char* ascii_character)
 {
-	char* s1_ptr;			/* Pointer to first string */
-	unsigned short s1_length;	/* Length of first string */
-	unsigned long result = STR$_NORMAL;
-	char UseChar = ' ';		/* Character to use for duplication */
-	unsigned long alt_result;
+    char* s1_ptr;			/* Pointer to first string */
+    unsigned short s1_length;	/* Length of first string */
+    unsigned long result = STR$_NORMAL;
+    char UseChar = ' ';		/* Character to use for duplication */
+    unsigned long alt_result;
 
-	/*
-	 * Check out the source string. It better have one
-	 * single character in it.
-	 */
-	if (ascii_character != NULL)
-	{
-		UseChar = *ascii_character;
-	}
+    /*
+     * Check out the source string. It better have one
+     * single character in it.
+     */
+    if (ascii_character != NULL)
+    {
+        UseChar = *ascii_character;
+    }
 
-	/*
-	 * Resize the destination string
-	 */
-	alt_result = str$$resize(destination_string, 1);
-	if (alt_result != STR$_NORMAL)
-	{
-		result = alt_result;
-	}
-	else
-	{
-		/*
-	 	 * Now, see what we've got for a destination
-	 	 */
-		str$analyze_sdesc(destination_string, &s1_length, &s1_ptr);
-		*s1_ptr = UseChar;
-		memset(s1_ptr + 1, ' ', (size_t)(s1_length - 1));
+    /*
+     * Resize the destination string
+     */
+    alt_result = str$$resize(destination_string, 1);
+    if (alt_result != STR$_NORMAL)
+    {
+        result = alt_result;
+    }
+    else
+    {
+        /*
+         * Now, see what we've got for a destination
+         */
+        str$analyze_sdesc(destination_string, &s1_length, &s1_ptr);
+        *s1_ptr = UseChar;
+        memset(s1_ptr + 1, ' ', (size_t)(s1_length - 1));
 
-		/*
-		 * Did we truncate?
-		 */
-		if (s1_length < 1)
-		{
-			result = STR$_TRU;
-		}
-	}
+        /*
+         * Did we truncate?
+         */
+        if (s1_length < 1)
+        {
+            result = STR$_TRU;
+        }
+    }
 
-	/*
-	 * Done!
-	 */
-	return result;
+    /*
+     * Done!
+     */
+    return result;
 }
 

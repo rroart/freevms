@@ -62,7 +62,8 @@ typedef unsigned char BYTE;             /* Define a BYTE (8 bits) */
 
 #pragma member_alignment save
 #pragma nomember_alignment
-typedef struct {
+typedef struct
+{
     WORD	config;			/* 0 - Configuration information */
     WORD	cyls;			/* 1 - Number of cylinders */
     WORD	rsvd2;			/* 2 - Reserved word */
@@ -96,7 +97,7 @@ typedef struct {
     WORD	rsvd64[64];		/* 64-127 - Reserved */
     WORD	unique128[32];		/* 128-159 - Vendor unique */
     WORD	rsvd160[96];		/* 160-255 - Reserved */
-    } ID_PAGE;
+} ID_PAGE;
 
 ID_PAGE	buffer;				/* Data buffer */
 
@@ -104,29 +105,32 @@ ID_PAGE	buffer;				/* Data buffer */
 
 /* Define what an IOSB looks like */
 
-typedef struct {				/* Standard I/O status block */
+typedef struct  				/* Standard I/O status block */
+{
     short int   status;				/* Status word */
     short int   byte_cnt;			/* Transferred byte count */
     int     unused;				/* Unused */
-    } IOSB_T;
+} IOSB_T;
 
-void copy(char *out, char *in,int nchar) {
+void copy(char *out, char *in,int nchar)
+{
 
-/* This routine is used to copy a string with byte swapping		*/
-/*									*/
-/* Input:								*/
-/*	out	pointer to destination					*/
-/*	in	pointer to source					*/
-/*	nchar	number of characters to copy				*/
-/*									*/
-/* Output:								*/
-/*	none								*/
+    /* This routine is used to copy a string with byte swapping		*/
+    /*									*/
+    /* Input:								*/
+    /*	out	pointer to destination					*/
+    /*	in	pointer to source					*/
+    /*	nchar	number of characters to copy				*/
+    /*									*/
+    /* Output:								*/
+    /*	none								*/
 
-int	i;				/* Loop index */
+    int	i;				/* Loop index */
 
-/* Move all the characters two at a time and swap them */
+    /* Move all the characters two at a time and swap them */
 
-    for (i=0; i<nchar; i+=2) {
+    for (i=0; i<nchar; i+=2)
+    {
         out[i] = in[i+1];
         out[i+1] = in[i];
     }
@@ -134,61 +138,69 @@ int	i;				/* Loop index */
     out[nchar] = 0;			/* Terminate the string */
 }
 
-int main (int argc, char *argv[]) {
+int main (int argc, char *argv[])
+{
 
-int	status;				/* Routine status */
-int	chan;				/* Device channel */
-int	efn;				/* Event flag */
-char	dev_name[31];			/* Device name string */
-char	string[128];			/* Buffer for ID strings */
-IOSB_T	iosb;				/* I/O status block for QIO call */
-int	debug_info[128];		/* Define debug information buffer */
-int	i;				/* Loop counter */
-int	tmo_time;			/* Timeout time */
+    int	status;				/* Routine status */
+    int	chan;				/* Device channel */
+    int	efn;				/* Event flag */
+    char	dev_name[31];			/* Device name string */
+    char	string[128];			/* Buffer for ID strings */
+    IOSB_T	iosb;				/* I/O status block for QIO call */
+    int	debug_info[128];		/* Define debug information buffer */
+    int	i;				/* Loop counter */
+    int	tmo_time;			/* Timeout time */
 
-struct dsc$descriptor_d			/* Define a string descriptor */
-        dev_dsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+    struct dsc$descriptor_d			/* Define a string descriptor */
+            dev_dsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
 
-/* Get device name */
+    /* Get device name */
 
-    if (argc == 2) {			/* Is there one argument ? */
+    if (argc == 2)  			/* Is there one argument ? */
+    {
         ++argv;				/* Move to second argument */
         strcpy(dev_name,*argv);		/* Get the device name */
-    } else {
+    }
+    else
+    {
         printf("\nUsage: ide-info <device-name>\n");
         exit(SS$_INSFARG);		/* Exit */
     }
-/* Assign a channel to the device */
+    /* Assign a channel to the device */
 
     dev_dsc.dsc$w_length = strlen(dev_name);    /* Set string length */
     dev_dsc.dsc$a_pointer= dev_name;	/* Point to the string */
     status = sys$assign(&dev_dsc,&chan,0,0,0);	/* Assign the channel */
-    if (!$VMS_STATUS_SUCCESS(status)) {	/* Check for success */
+    if (!$VMS_STATUS_SUCCESS(status))  	/* Check for success */
+    {
         printf("? Failed to assign channel, status is %X\n",status);
         exit(status);			/* Exit with status */
     }
 
-/* Get an EFN to use */
+    /* Get an EFN to use */
 
     status = lib$get_ef(&efn);		/* Acquire an EFN */
-    if (!$VMS_STATUS_SUCCESS(status)) {	/* Check for success */
+    if (!$VMS_STATUS_SUCCESS(status))  	/* Check for success */
+    {
         printf("? Failed to acquire EFN, status = %X\n",status);
         exit(status);			/* Exit with status */
     }
 
-/* Ask for the ID page from the drive */
+    /* Ask for the ID page from the drive */
 
     status = sys$qiow(efn,chan,IO$_READRCT,&iosb,0,0,&buffer,512,0,0,0,0);
-    if (!$VMS_STATUS_SUCCESS(status)) {
+    if (!$VMS_STATUS_SUCCESS(status))
+    {
         printf("? QIO service call failed, status is %X\n",status);
         exit(status);			/* Exit with failure status */
     }
-    if (!$VMS_STATUS_SUCCESS(iosb.status)) {
+    if (!$VMS_STATUS_SUCCESS(iosb.status))
+    {
         printf("? QIO operation failed, IOSB status is %X\n",iosb.status);
         exit(iosb.status);		/* Exit with status */
     }
 
-/* Print the information obtained from the page */
+    /* Print the information obtained from the page */
 
     printf("ID Page information for %s:\n\n",dev_name);
     copy(string,buffer.model_number,MODEL_LENGTH);
@@ -220,31 +232,36 @@ struct dsc$descriptor_d			/* Define a string descriptor */
     printf("Sectors %d  ",buffer.curr_sectors);
     printf("Maximum sector number %d\n",buffer.max_sectors);
     printf("Current sectors/interrupt setting: %d valid: %d\n",buffer.multiple_sectors&0xFF,
-            ((buffer.multiple_sectors&0x100)>>8));
+           ((buffer.multiple_sectors&0x100)>>8));
     printf("LBA mode maximum block number: %d\n",buffer.lba_maxblock);
     printf("Single word DMA info: %d\n",buffer.single_word_dma);
     printf("Multi word DMA info: %d\n",buffer.multi_word_dma);
 
-/* Ask for the debug information from the driver */
+    /* Ask for the debug information from the driver */
 
     printf("\n\nDebug Information:\n\n");
     status = sys$qiow(efn,chan,IO$_RDSTATS,&iosb,0,0,&debug_info,
                       sizeof(debug_info),0,0,0,0);
-    if (!$VMS_STATUS_SUCCESS(status)) {
-            printf("? QIO service call failed, status is %X\n",status);
-            exit(status);		/* Exit with failure status */
+    if (!$VMS_STATUS_SUCCESS(status))
+    {
+        printf("? QIO service call failed, status is %X\n",status);
+        exit(status);		/* Exit with failure status */
     }
-    if (!$VMS_STATUS_SUCCESS(iosb.status)) {
-        if (iosb.status == SS$_NODATA) {
+    if (!$VMS_STATUS_SUCCESS(iosb.status))
+    {
+        if (iosb.status == SS$_NODATA)
+        {
             printf("\t%% DEBUG driver is not loaded\n");
             exit(SS$_NORMAL);		/* Just exit at this point */
-        } else {
+        }
+        else
+        {
             printf("? QIO operation failed, IOSB status is %X\n",iosb.status);
             exit(iosb.status);		/* Exit with status */
-       }
+        }
     }
 
-/* Print out the debug information */
+    /* Print out the debug information */
 
     printf("Total interrupts: %d",debug_info[0]);
     printf("\tTotal unexpected interrupts: %d\n",debug_info[1]);
@@ -256,8 +273,9 @@ struct dsc$descriptor_d			/* Define a string descriptor */
     printf("Timeout time: %d seconds\n",tmo_time);
     printf("\n\tSeconds\tCount\n");
 
-        for (i=0; i<=tmo_time; i++) {
-            printf("\t%d\t%d\n",i,debug_info[7+i]);
-        }
+    for (i=0; i<=tmo_time; i++)
+    {
+        printf("\t%d\t%d\n",i,debug_info[7+i]);
+    }
     printf("\t>%d\t%d\n",tmo_time,debug_info[7+tmo_time+1]);
 }

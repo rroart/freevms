@@ -1,8 +1,8 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
-// Modified Linux source file, 2001-2004  
+// Author. Roar Thronï¿½s.
+// Modified Linux source file, 2001-2004
 
 #ifndef _LINUX_SCHED_H
 #define _LINUX_SCHED_H
@@ -35,7 +35,6 @@ extern unsigned long event;
 #include <pcbdef.h>
 #include <asmlink.h>
 
-#include <system_data_cells.h>
 #include <sysgen.h>
 
 struct exec_domain;
@@ -141,8 +140,9 @@ extern int last_pid;
  */
 #define SCHED_YIELD		0x10
 
-struct sched_param {
-	int sched_priority;
+struct sched_param
+{
+    int sched_priority;
 };
 
 struct completion;
@@ -168,7 +168,7 @@ extern void cpu_init (void);
 extern void trap_init(void);
 extern void update_process_times(int user);
 extern void update_one_process(struct task_struct *p, unsigned long user,
-			       unsigned long system, int cpu);
+                               unsigned long system, int cpu);
 
 #define	MAX_SCHEDULE_TIMEOUT	LONG_MAX
 extern signed long FASTCALL(schedule_timeout(signed long timeout));
@@ -188,18 +188,19 @@ extern int current_is_keventd(void);
 /*
  * Open file table structure
  */
-struct files_struct {
-	atomic_t count;
-	rwlock_t file_lock;	/* Protects all the below members.  Nests inside tsk->alloc_lock */
-	int max_fds;
-	int max_fdset;
-	int next_fd;
-	struct file ** fd;	/* current fd array */
-	fd_set *close_on_exec;
-	fd_set *open_fds;
-	fd_set close_on_exec_init;
-	fd_set open_fds_init;
-	struct file * fd_array[NR_OPEN_DEFAULT];
+struct files_struct
+{
+    atomic_t count;
+    rwlock_t file_lock;	/* Protects all the below members.  Nests inside tsk->alloc_lock */
+    int max_fds;
+    int max_fdset;
+    int next_fd;
+    struct file ** fd;	/* current fd array */
+    fd_set *close_on_exec;
+    fd_set *open_fds;
+    fd_set close_on_exec_init;
+    fd_set open_fds_init;
+    struct file * fd_array[NR_OPEN_DEFAULT];
 };
 
 #define INIT_FILES \
@@ -220,34 +221,35 @@ struct files_struct {
 /* Maximum number of active map areas.. This is a random (large) number */
 #define MAX_MAP_COUNT	(65536)
 
-struct mm_struct {
-	struct vm_area_struct * mmap;		/* list of VMAs */
-	rb_root_t mm_rb;
-	struct vm_area_struct * mmap_cache;	/* last find_vma result */
-	pgd_t * pgd;
-	atomic_t mm_users;			/* How many users with user space? */
-	atomic_t mm_count;			/* How many references to "struct mm_struct" (users count as 1) */
-	int map_count;				/* number of VMAs */
-	struct rw_semaphore mmap_sem;
-	spinlock_t page_table_lock;		/* Protects task page tables and mm->rss */
+struct mm_struct
+{
+    struct vm_area_struct * mmap;		/* list of VMAs */
+    rb_root_t mm_rb;
+    struct vm_area_struct * mmap_cache;	/* last find_vma result */
+    pgd_t * pgd;
+    atomic_t mm_users;			/* How many users with user space? */
+    atomic_t mm_count;			/* How many references to "struct mm_struct" (users count as 1) */
+    int map_count;				/* number of VMAs */
+    struct rw_semaphore mmap_sem;
+    spinlock_t page_table_lock;		/* Protects task page tables and mm->rss */
 
-	struct list_head mmlist;		/* List of all active mm's.  These are globally strung
+    struct list_head mmlist;		/* List of all active mm's.  These are globally strung
 						 * together off init_mm.mmlist, and are protected
 						 * by mmlist_lock
 						 */
 
-	unsigned long start_code, end_code, start_data, end_data;
-	unsigned long start_brk, brk, start_stack;
-	unsigned long arg_start, arg_end, env_start, env_end;
-	unsigned long rss, total_vm, locked_vm;
-	unsigned long def_flags;
-	unsigned long cpu_vm_mask;
-	unsigned long swap_address;
+    unsigned long start_code, end_code, start_data, end_data;
+    unsigned long start_brk, brk, start_stack;
+    unsigned long arg_start, arg_end, env_start, env_end;
+    unsigned long rss, total_vm, locked_vm;
+    unsigned long def_flags;
+    unsigned long cpu_vm_mask;
+    unsigned long swap_address;
 
-	unsigned dumpable:1;
+    unsigned dumpable:1;
 
-	/* Architecture-specific MM context */
-	mm_context_t context;
+    /* Architecture-specific MM context */
+    mm_context_t context;
 };
 
 extern int mmlist_nr;
@@ -263,10 +265,11 @@ extern int mmlist_nr;
 	mmlist:		LIST_HEAD_INIT(name.mmlist),	\
 }
 
-struct signal_struct {
-	atomic_t		count;
-	struct k_sigaction	action[_NSIG];
-	spinlock_t		siglock;
+struct signal_struct
+{
+    atomic_t		count;
+    struct k_sigaction	action[_NSIG];
+    spinlock_t		siglock;
 };
 
 
@@ -279,14 +282,15 @@ struct signal_struct {
 /*
  * Some day this will be a full-fledged user tracking system..
  */
-struct user_struct {
-	atomic_t __count;	/* reference count */
-	atomic_t processes;	/* How many processes does this user have? */
-	atomic_t files;		/* How many open files does this user have? */
+struct user_struct
+{
+    atomic_t __count;	/* reference count */
+    atomic_t processes;	/* How many processes does this user have? */
+    atomic_t files;		/* How many open files does this user have? */
 
-	/* Hash table maintenance information */
-	struct user_struct *next, **pprev;
-	uid_t uid;
+    /* Hash table maintenance information */
+    struct user_struct *next, **pprev;
+    uid_t uid;
 };
 
 #define get_current_user() ({ 				\
@@ -299,259 +303,264 @@ extern struct user_struct root_user;
 
 #define _pcb task_struct
 #define _ktb task_struct
-struct task_struct {
-  struct _pcb *pcb$l_sqfl;
-  struct _pcb *pcb$l_sqbl;            
-  unsigned short pcb$w_size;
-  unsigned char pcb$b_type;
-  unsigned char pcb$b_wefc;
+struct task_struct
+{
+    struct _pcb *pcb$l_sqfl;
+    struct _pcb *pcb$l_sqbl;
+    unsigned short pcb$w_size;
+    unsigned char pcb$b_type;
+    unsigned char pcb$b_wefc;
 
-	/*
-	 * offsets of these are hardcoded elsewhere - touch with care
-	 * meaning entry.S and getuser.S -roar this is offset 12
-	 */
-	volatile long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
-	unsigned long flags;	/* per process flags, defined below */
-	int sigpending;
-	mm_segment_t addr_limit;	/* thread address space:
+    /*
+     * offsets of these are hardcoded elsewhere - touch with care
+     * meaning entry.S and getuser.S -roar this is offset 12
+     */
+    volatile long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
+    unsigned long flags;	/* per process flags, defined below */
+    int sigpending;
+    mm_segment_t addr_limit;	/* thread address space:
 					 	0-0xBFFFFFFF for user-thead
 						0-0xFFFFFFFF for kernel-thread
 					 */
-	struct exec_domain *exec_domain;
-	volatile long need_resched_not;
-	unsigned long ptrace;
+    struct exec_domain *exec_domain;
+    volatile long need_resched_not;
+    unsigned long ptrace;
 
-	int lock_depth;		/* Lock depth */
+    int lock_depth;		/* Lock depth */
 
-/*
- * offset 32 begins here on 32-bit platforms. We keep
- * all fields in a single cacheline that are needed for
- * the goodness() loop in schedule().
- */
-	struct mm_struct *mm;
-	int processor_not;
-	/*
-	 * cpus_runnable is ~0 if the process is not running on any
-	 * CPU. It's (1 << cpu) if it's running on a CPU. This mask
-	 * is updated under the runqueue lock.
-	 *
-	 * To determine whether a process might run on a CPU, this
-	 * mask is AND-ed with cpus_allowed.
-	 */
-	unsigned long cpus_runnable, cpus_allowed;
-	/*
-	 * (only the 'next' pointer fits into the cacheline, but
-	 * that's just fine.)
-	 */
-	struct list_head run_list;
-	unsigned long sleep_time;
+    /*
+     * offset 32 begins here on 32-bit platforms. We keep
+     * all fields in a single cacheline that are needed for
+     * the goodness() loop in schedule().
+     */
+    struct mm_struct *mm;
+    int processor_not;
+    /*
+     * cpus_runnable is ~0 if the process is not running on any
+     * CPU. It's (1 << cpu) if it's running on a CPU. This mask
+     * is updated under the runqueue lock.
+     *
+     * To determine whether a process might run on a CPU, this
+     * mask is AND-ed with cpus_allowed.
+     */
+    unsigned long cpus_runnable, cpus_allowed;
+    /*
+     * (only the 'next' pointer fits into the cacheline, but
+     * that's just fine.)
+     */
+    struct list_head run_list;
+    unsigned long sleep_time;
 
-	struct task_struct *next_task_not, *prev_task_not; // remember to remove these
-	struct mm_struct *active_mm;
-	struct list_head local_pages;
-	unsigned int allocation_order, nr_local_pages;
+    struct task_struct *next_task_not, *prev_task_not; // remember to remove these
+    struct mm_struct *active_mm;
+    struct list_head local_pages;
+    unsigned int allocation_order, nr_local_pages;
 
-/* task state */
-	struct linux_binfmt *binfmt;
-	int exit_code, exit_signal;
-	int pdeath_signal;  /*  The signal sent when the parent dies  */
-	/* ??? */
-	unsigned long personality;
-	int did_exec:1;
-  //pid_t pid;
-	pid_t pgrp;
-	pid_t tty_old_pgrp;
-	pid_t session;
-  //pid_t tgid;
-	/* boolean value for session group leader */
-	int leader;
-	/* 
-	 * pointers to (original) parent process, youngest child, younger sibling,
-	 * older sibling, respectively.  (p->father can be replaced with 
-	 * p->p_pptr->pid)
-	 */
-	struct task_struct *p_opptr, *p_pptr, *p_cptr, *p_ysptr, *p_osptr;
-	struct list_head thread_group;
+    /* task state */
+    struct linux_binfmt *binfmt;
+    int exit_code, exit_signal;
+    int pdeath_signal;  /*  The signal sent when the parent dies  */
+    /* ??? */
+    unsigned long personality;
+    int did_exec:1;
+    //pid_t pid;
+    pid_t pgrp;
+    pid_t tty_old_pgrp;
+    pid_t session;
+    //pid_t tgid;
+    /* boolean value for session group leader */
+    int leader;
+    /*
+     * pointers to (original) parent process, youngest child, younger sibling,
+     * older sibling, respectively.  (p->father can be replaced with
+     * p->p_pptr->pid)
+     */
+    struct task_struct *p_opptr, *p_pptr, *p_cptr, *p_ysptr, *p_osptr;
+    struct list_head thread_group;
 
-	/* PID hash table linkage. */
-	struct task_struct *pidhash_next;
-	struct task_struct **pidhash_pprev;
+    /* PID hash table linkage. */
+    struct task_struct *pidhash_next;
+    struct task_struct **pidhash_pprev;
 
-	wait_queue_head_t wait_chldexit;	/* for wait4() */
-	struct completion *vfork_done;		/* for vfork() */
-	unsigned long rt_priority_not;
-	unsigned long it_real_value, it_prof_value, it_virt_value;
-	unsigned long it_real_incr, it_prof_incr, it_virt_incr;
-	struct timer_list real_timer;
-	struct tms times;
-	unsigned long start_time;
-	long per_cpu_utime[NR_CPUS], per_cpu_stime[NR_CPUS];
-/* mm fault and swap info: this can arguably be seen as either mm-specific or thread-specific */
-	unsigned long min_flt, maj_flt, nswap, cmin_flt, cmaj_flt, cnswap;
-	int swappable:1;
-/* process credentials */
-	uid_t uid,euid,suid,fsuid;
-	gid_t gid,egid,sgid,fsgid;
-	int ngroups;
-	gid_t	groups[NGROUPS];
-	kernel_cap_t   cap_effective, cap_inheritable, cap_permitted;
-	int keep_capabilities:1;
-	struct user_struct *user;
-/* limits */
-	struct rlimit rlim[RLIM_NLIMITS];
-	unsigned short used_math;
-  //	char comm[16];
-/* file system info */
-	int link_count, total_link_count;
-	struct tty_struct *tty; /* NULL if no tty */
-	unsigned int locks; /* How many file locks are being held */
-/* ipc stuff */
-	struct sem_undo *semundo;
-	struct sem_queue *semsleeping;
-/* CPU-specific state of this task */
-	struct thread_struct thread;
-/* filesystem information */
-	struct fs_struct *fs;
-/* open file information */
-	struct files_struct *files;
-/* signal handlers */
-	spinlock_t sigmask_lock;	/* Protects signal and blocked */
-	struct signal_struct *sig;
+    wait_queue_head_t wait_chldexit;	/* for wait4() */
+    struct completion *vfork_done;		/* for vfork() */
+    unsigned long rt_priority_not;
+    unsigned long it_real_value, it_prof_value, it_virt_value;
+    unsigned long it_real_incr, it_prof_incr, it_virt_incr;
+    struct timer_list real_timer;
+    struct tms times;
+    unsigned long start_time;
+    long per_cpu_utime[NR_CPUS], per_cpu_stime[NR_CPUS];
+    /* mm fault and swap info: this can arguably be seen as either mm-specific or thread-specific */
+    unsigned long min_flt, maj_flt, nswap, cmin_flt, cmaj_flt, cnswap;
+    int swappable:1;
+    /* process credentials */
+    uid_t uid,euid,suid,fsuid;
+    gid_t gid,egid,sgid,fsgid;
+    int ngroups;
+    gid_t	groups[NGROUPS];
+    kernel_cap_t   cap_effective, cap_inheritable, cap_permitted;
+    int keep_capabilities:1;
+    struct user_struct *user;
+    /* limits */
+    struct rlimit rlim[RLIM_NLIMITS];
+    unsigned short used_math;
+    //	char comm[16];
+    /* file system info */
+    int link_count, total_link_count;
+    struct tty_struct *tty; /* NULL if no tty */
+    unsigned int locks; /* How many file locks are being held */
+    /* ipc stuff */
+    struct sem_undo *semundo;
+    struct sem_queue *semsleeping;
+    /* CPU-specific state of this task */
+    struct thread_struct thread;
+    /* filesystem information */
+    struct fs_struct *fs;
+    /* open file information */
+    struct files_struct *files;
+    /* signal handlers */
+    spinlock_t sigmask_lock;	/* Protects signal and blocked */
+    struct signal_struct *sig;
 
-	sigset_t blocked;
-	struct sigpending pending;
+    sigset_t blocked;
+    struct sigpending pending;
 
-	unsigned long sas_ss_sp;
-	size_t sas_ss_size;
-	int (*notifier)(void *priv);
-	void *notifier_data;
-	sigset_t *notifier_mask;
-	
-/* Thread group tracking */
-   	u32 parent_exec_id;
-   	u32 self_exec_id;
-/* Protection of (de-)allocation: mm, files, fs, tty */
-	spinlock_t alloc_lock;
+    unsigned long sas_ss_sp;
+    size_t sas_ss_size;
+    int (*notifier)(void *priv);
+    void *notifier_data;
+    sigset_t *notifier_mask;
 
-/* journalling filesystem info */
-	void *journal_info;
+    /* Thread group tracking */
+    u32 parent_exec_id;
+    u32 self_exec_id;
+    /* Protection of (de-)allocation: mm, files, fs, tty */
+    spinlock_t alloc_lock;
 
-  unsigned long pcb$l_phypcb;
-  struct _acb * pcb$l_astqfl;
-  struct _acb * pcb$l_astqbl;
-  unsigned char pcb$b_astact;
-  unsigned char pcb$b_asten;
-  unsigned short pcb$w_state;
-  unsigned char pcb$b_pri;             
-  unsigned char pcb$b_prib;
-  unsigned char pcb$b_reserved_b1;
-  unsigned char pcb$b_affinity_skip;
-  unsigned long pcb$l_owner;
-  unsigned long pcb$l_sts;
-  unsigned long pcb$l_sts2;
-  unsigned long pcb$l_wtime;         
-  unsigned long pcb$l_onqtime;         
-  unsigned long pcb$l_waitime;         
-  unsigned short pcb$w_astcnt;          
-  unsigned short pcb$w_biocnt;          
-  unsigned short pcb$w_biolm;           
-  short pcb$w_diocnt;                   
-  short pcb$w_diolm;                    
-  unsigned short pcb$w_prccnt;          
-  char pcb$t_terminal [8];            
-  unsigned long pcb$l_efwm;            
-  unsigned long pcb$l_efcs;            
-  unsigned long pcb$l_efcu;            
-  unsigned long pcb$l_efc2p;            
-  unsigned long pcb$l_efc3p;            
-  /* why do the next 3 overlap with efc? */
-  unsigned short pcb$w_pgflchar;
-  unsigned char pcb$b_pgflindex;
-  unsigned char pcb$reserved1;
-  unsigned long pcb$l_pid;             
-  unsigned long pcb$l_epid;             
-  unsigned long pcb$l_eowner;
-  // not ready for this yet? 
-  struct _phd * pcb$l_phd;          //note overlapping stuff. move it.
+    /* journalling filesystem info */
+    void *journal_info;
 
-  unsigned short pcb$w_aptcnt;
-  unsigned short pcb$w_mtxcnt;
-  unsigned long pcb$l_gpgcnt;
-  unsigned long pcb$l_ppgcnt;
-  unsigned long pcb$l_jib;
-  unsigned long pcb$l_wsswp;
-  unsigned long pcb$l_swapsize;
+    unsigned long pcb$l_phypcb;
+    struct _acb * pcb$l_astqfl;
+    struct _acb * pcb$l_astqbl;
+    unsigned char pcb$b_astact;
+    unsigned char pcb$b_asten;
+    unsigned short pcb$w_state;
+    unsigned char pcb$b_pri;
+    unsigned char pcb$b_prib;
+    unsigned char pcb$b_reserved_b1;
+    unsigned char pcb$b_affinity_skip;
+    unsigned long pcb$l_owner;
+    unsigned long pcb$l_sts;
+    unsigned long pcb$l_sts2;
+    unsigned long pcb$l_wtime;
+    unsigned long pcb$l_onqtime;
+    unsigned long pcb$l_waitime;
+    unsigned short pcb$w_astcnt;
+    unsigned short pcb$w_biocnt;
+    unsigned short pcb$w_biolm;
+    short pcb$w_diocnt;
+    short pcb$w_diolm;
+    unsigned short pcb$w_prccnt;
+    char pcb$t_terminal [8];
+    unsigned long pcb$l_efwm;
+    unsigned long pcb$l_efcs;
+    unsigned long pcb$l_efcu;
+    unsigned long pcb$l_efc2p;
+    unsigned long pcb$l_efc3p;
+    /* why do the next 3 overlap with efc? */
+    unsigned short pcb$w_pgflchar;
+    unsigned char pcb$b_pgflindex;
+    unsigned char pcb$reserved1;
+    unsigned long pcb$l_pid;
+    unsigned long pcb$l_epid;
+    unsigned long pcb$l_eowner;
+    // not ready for this yet?
+    struct _phd * pcb$l_phd;          //note overlapping stuff. move it.
 
-  unsigned long pcb$l_priv;
-  unsigned long pcb$l_arb;
-  unsigned char pcb$t_res1[48];
-unsigned long pcb$l_uic;
-  unsigned char pcb$t_res2[60];
-unsigned long pcb$l_orb;
-  unsigned short pcb$w_res3;
-  unsigned short pcb$w_tmbu;
-struct _lkb * pcb$l_lockqfl;
-struct _lkb * pcb$l_lockqbl;
-unsigned long pcb$l_dlckpri;
-unsigned long pcb$l_ipast;
-unsigned long pcb$l_defprot;
-unsigned long pcb$l_pmb;
-unsigned long pcb$l_affinity;
-unsigned long pcb$l_sched_spare;
-unsigned long pcb$l_capability;
-unsigned long pcb$l_cpu_id;
-unsigned long pcb$l_cputim;
-  unsigned char pcb$t_lname[16];
-unsigned long pcb$l_prcpdb;
-unsigned long pcb$l_pixhist;
-unsigned long pcb$l_ns_reserved_q1;
-unsigned long pcb$l_affinity_callback;
-unsigned long pcb$l_permanent_capability;
-unsigned long pcb$l_permanent_cpu_affinity;
-unsigned long pcb$l_cwpssrv_queue;
-unsigned long pcb$l_current_affinity;
-unsigned long pcb$l_capability_seq;
-  unsigned char pcb$b_prisav;
-  unsigned char pcb$b_pribsav;
-  unsigned char pcb$nothing;
-  unsigned char pcb$b_authpri;
+    unsigned short pcb$w_aptcnt;
+    unsigned short pcb$w_mtxcnt;
+    unsigned long pcb$l_gpgcnt;
+    unsigned long pcb$l_ppgcnt;
+    unsigned long pcb$l_jib;
+    unsigned long pcb$l_wsswp;
+    unsigned long pcb$l_swapsize;
 
-/*	long counter; temp */
-/*	long nice; temp */
-  unsigned long pcb$l_sched_policy;
-  // more phd
+    unsigned long pcb$l_priv;
+    unsigned long pcb$l_arb;
+    unsigned char pcb$t_res1[48];
+    unsigned long pcb$l_uic;
+    unsigned char pcb$t_res2[60];
+    unsigned long pcb$l_orb;
+    unsigned short pcb$w_res3;
+    unsigned short pcb$w_tmbu;
+    struct _lkb * pcb$l_lockqfl;
+    struct _lkb * pcb$l_lockqbl;
+    unsigned long pcb$l_dlckpri;
+    unsigned long pcb$l_ipast;
+    unsigned long pcb$l_defprot;
+    unsigned long pcb$l_pmb;
+    unsigned long pcb$l_affinity;
+    unsigned long pcb$l_sched_spare;
+    unsigned long pcb$l_capability;
+    unsigned long pcb$l_cpu_id;
+    unsigned long pcb$l_cputim;
+    unsigned char pcb$t_lname[16];
+    unsigned long pcb$l_prcpdb;
+    unsigned long pcb$l_pixhist;
+    unsigned long pcb$l_ns_reserved_q1;
+    unsigned long pcb$l_affinity_callback;
+    unsigned long pcb$l_permanent_capability;
+    unsigned long pcb$l_permanent_cpu_affinity;
+    unsigned long pcb$l_cwpssrv_queue;
+    unsigned long pcb$l_current_affinity;
+    unsigned long pcb$l_capability_seq;
+    unsigned char pcb$b_prisav;
+    unsigned char pcb$b_pribsav;
+    unsigned char pcb$nothing;
+    unsigned char pcb$b_authpri;
 
-  signed short pcb$w_quant; /* really belongs in phd, but seems to have moved. ktb stuff? */
-  unsigned short phd$w_prclm; /* ditto? */
+    /*	long counter; temp */
+    /*	long nice; temp */
+    unsigned long pcb$l_sched_policy;
+    // more phd
 
-  unsigned long pdg$l_pcb;
-  unsigned char phd$b_astlvl; /* some cpus lack something */
-  unsigned char pr_astlvl; /* some cpus lack something */
+    signed short pcb$w_quant; /* really belongs in phd, but seems to have moved. ktb stuff? */
+    unsigned short phd$w_prclm; /* ditto? */
 
-  union {
-    struct {
-      unsigned psl_cur_mod:2;
-      unsigned psl_prv_mod:2;
-      unsigned psl_ipl:5;
-      unsigned psl_is:1;
-      unsigned psl_intr:1;
+    unsigned long pdg$l_pcb;
+    unsigned char phd$b_astlvl; /* some cpus lack something */
+    unsigned char pr_astlvl; /* some cpus lack something */
+
+    union
+    {
+        struct
+        {
+            unsigned psl_cur_mod:2;
+            unsigned psl_prv_mod:2;
+            unsigned psl_ipl:5;
+            unsigned psl_is:1;
+            unsigned psl_intr:1;
+        };
+        unsigned short psl;
     };
-    unsigned short psl;
-  };
-  union {
-    struct {
-      unsigned oldpsl_cur_mod:2;
-      unsigned oldpsl_prv_mod:2;
-      unsigned oldpsl_ipl:5;
-      unsigned oldpsl_is:1;
-      unsigned oldpsl_intr:1;
+    union
+    {
+        struct
+        {
+            unsigned oldpsl_cur_mod:2;
+            unsigned oldpsl_prv_mod:2;
+            unsigned oldpsl_ipl:5;
+            unsigned oldpsl_is:1;
+            unsigned oldpsl_intr:1;
+        };
+        unsigned short oldpsl;
     };
-    unsigned short oldpsl;
-  };
-  unsigned short pslstk[32];
-  unsigned char pslindex;
-  long pcb$l_pqb;
-  long ipr_sp[4];
+    unsigned short pslstk[32];
+    unsigned char pslindex;
+    long pcb$l_pqb;
+    long ipr_sp[4];
 };
 /* will need a PCB. PCB is a null PCB placeholder */
 
@@ -559,7 +568,7 @@ unsigned long pcb$l_capability_seq;
  * Per process flags
  */
 #define PF_ALIGNWARN	0x00000001	/* Print alignment warning msgs */
-					/* Not implemented yet, only for 486*/
+/* Not implemented yet, only for 486*/
 #define PF_STARTING	0x00000002	/* being created */
 #define PF_EXITING	0x00000004	/* getting shut down */
 #define PF_FORKNOEXEC	0x00000040	/* forked but didn't exec */
@@ -603,7 +612,7 @@ extern struct exec_domain	default_exec_domain;
  *  INIT_TASK is used to set up the first task table, touch at
  * your own risk!. Base=0, limit=0x1fffff (=2MB)
  */
-/*    counter:		DEF_COUNTER,					
+/*    counter:		DEF_COUNTER,
     nice:		DEF_NICE,          */
 #define INIT_TASK(tsk)	\
 {									\
@@ -651,9 +660,10 @@ extern struct exec_domain	default_exec_domain;
 # define INIT_TASK_SIZE	2048*sizeof(long)
 #endif
 
-union task_union {
-	struct task_struct task;
-	unsigned long stack[INIT_TASK_SIZE/sizeof(long)];
+union task_union
+{
+    struct task_struct task;
+    unsigned long stack[INIT_TASK_SIZE/sizeof(long)];
 };
 
 extern union task_union init_task_union;
@@ -685,20 +695,20 @@ extern void FASTCALL(__wake_up(wait_queue_head_t *q, unsigned int mode, int nr))
 extern void FASTCALL(__wake_up_sync(wait_queue_head_t *q, unsigned int mode, int nr));
 extern void FASTCALL(sleep_on(wait_queue_head_t *q));
 extern long FASTCALL(sleep_on_timeout(wait_queue_head_t *q,
-				      signed long timeout));
+                                      signed long timeout));
 extern void FASTCALL(interruptible_sleep_on(wait_queue_head_t *q));
 extern long FASTCALL(interruptible_sleep_on_timeout(wait_queue_head_t *q,
-						    signed long timeout));
+                     signed long timeout));
 extern int FASTCALL(wake_up_process(struct task_struct * tsk));
 
 extern void FASTCALL(__wake_up2(wait_queue_head_t *q, unsigned int mode, int nr,int priclass));
 extern void FASTCALL(__wake_up_sync2(wait_queue_head_t *q, unsigned int mode, int nr, int priclass));
 extern void FASTCALL(sleep_on(wait_queue_head_t *q));
 extern long FASTCALL(sleep_on_timeout(wait_queue_head_t *q,
-				      signed long timeout));
+                                      signed long timeout));
 extern void FASTCALL(interruptible_sleep_on(wait_queue_head_t *q));
 extern long FASTCALL(interruptible_sleep_on_timeout(wait_queue_head_t *q,
-						    signed long timeout));
+                     signed long timeout));
 extern int FASTCALL(wake_up_process2(struct task_struct * tsk,int priclass));
 
 #define wake_up(x)			__wake_up((x),TASK_UNINTERRUPTIBLE | TASK_INTERRUPTIBLE, 1)
@@ -735,7 +745,7 @@ extern void flush_signals(struct task_struct *);
 extern void flush_signal_handlers(struct task_struct *);
 extern int dequeue_signal(sigset_t *, siginfo_t *);
 extern void block_all_signals(int (*notifier)(void *priv), void *priv,
-			      sigset_t *mask);
+                              sigset_t *mask);
 extern void unblock_all_signals(void);
 extern int send_sig_info(int, struct siginfo *, struct task_struct *);
 extern int force_sig_info(int, struct siginfo *, struct task_struct *);
@@ -754,7 +764,7 @@ extern int do_sigaltstack(const stack_t *, stack_t *, unsigned long);
 
 static inline int signal_pending(struct task_struct *p)
 {
-	return (p->sigpending != 0);
+    return (p->sigpending != 0);
 }
 
 /*
@@ -763,28 +773,32 @@ static inline int signal_pending(struct task_struct *p)
  */
 static inline int has_pending_signals(sigset_t *signal, sigset_t *blocked)
 {
-	unsigned long ready;
-	long i;
+    unsigned long ready;
+    long i;
 
-	switch (_NSIG_WORDS) {
-	default:
-		for (i = _NSIG_WORDS, ready = 0; --i >= 0 ;)
-			ready |= signal->sig[i] &~ blocked->sig[i];
-		break;
+    switch (_NSIG_WORDS)
+    {
+    default:
+        for (i = _NSIG_WORDS, ready = 0; --i >= 0 ;)
+            ready |= signal->sig[i] &~ blocked->sig[i];
+        break;
 
-	case 4: ready  = signal->sig[3] &~ blocked->sig[3];
-		ready |= signal->sig[2] &~ blocked->sig[2];
-		ready |= signal->sig[1] &~ blocked->sig[1];
-		ready |= signal->sig[0] &~ blocked->sig[0];
-		break;
+    case 4:
+        ready  = signal->sig[3] &~ blocked->sig[3];
+        ready |= signal->sig[2] &~ blocked->sig[2];
+        ready |= signal->sig[1] &~ blocked->sig[1];
+        ready |= signal->sig[0] &~ blocked->sig[0];
+        break;
 
-	case 2: ready  = signal->sig[1] &~ blocked->sig[1];
-		ready |= signal->sig[0] &~ blocked->sig[0];
-		break;
+    case 2:
+        ready  = signal->sig[1] &~ blocked->sig[1];
+        ready |= signal->sig[0] &~ blocked->sig[0];
+        break;
 
-	case 1: ready  = signal->sig[0] &~ blocked->sig[0];
-	}
-	return ready !=	0;
+    case 1:
+        ready  = signal->sig[0] &~ blocked->sig[0];
+    }
+    return ready !=	0;
 }
 
 /* Reevaluate whether the task has signals pending delivery.
@@ -793,25 +807,25 @@ static inline int has_pending_signals(sigset_t *signal, sigset_t *blocked)
 
 static inline void recalc_sigpending(struct task_struct *t)
 {
-	t->sigpending = has_pending_signals(&t->pending.signal, &t->blocked);
+    t->sigpending = has_pending_signals(&t->pending.signal, &t->blocked);
 }
 
 /* True if we are on the alternate signal stack.  */
 
 static inline int on_sig_stack(unsigned long sp)
 {
-	return (sp - current->sas_ss_sp < current->sas_ss_size);
+    return (sp - current->sas_ss_sp < current->sas_ss_size);
 }
 
 static inline int sas_ss_flags(unsigned long sp)
 {
-	return (current->sas_ss_size == 0 ? SS_DISABLE
-		: on_sig_stack(sp) ? SS_ONSTACK : 0);
+    return (current->sas_ss_size == 0 ? SS_DISABLE
+            : on_sig_stack(sp) ? SS_ONSTACK : 0);
 }
 
 extern int request_irq(unsigned int,
-		       void (*handler)(int, void *, struct pt_regs *),
-		       unsigned long, const char *, void *);
+                       void (*handler)(int, void *, struct pt_regs *),
+                       unsigned long, const char *, void *);
 extern void free_irq(unsigned int, void *);
 
 /*
@@ -825,29 +839,31 @@ extern void free_irq(unsigned int, void *);
  * fsuser(). This is done, along with moving fsuser() checks to be
  * last.
  *
- * These will be removed, but in the mean time, when the SECURE_NOROOT 
+ * These will be removed, but in the mean time, when the SECURE_NOROOT
  * flag is set, uids don't grant privilege.
  */
 static inline int suser(void)
 {
-	if (!issecure(SECURE_NOROOT) && current->euid == 0) { 
-		current->flags |= PF_SUPERPRIV;
-		return 1;
-	}
-	return 0;
+    if (!issecure(SECURE_NOROOT) && current->euid == 0)
+    {
+        current->flags |= PF_SUPERPRIV;
+        return 1;
+    }
+    return 0;
 }
 
 static inline int fsuser(void)
 {
-	if (!issecure(SECURE_NOROOT) && current->fsuid == 0) {
-		current->flags |= PF_SUPERPRIV;
-		return 1;
-	}
-	return 0;
+    if (!issecure(SECURE_NOROOT) && current->fsuid == 0)
+    {
+        current->flags |= PF_SUPERPRIV;
+        return 1;
+    }
+    return 0;
 }
 
 /*
- * capable() checks for a particular capability.  
+ * capable() checks for a particular capability.
  * New privilege checks should use this interface, rather than suser() or
  * fsuser(). See include/linux/capability.h for defined capabilities.
  */
@@ -855,15 +871,15 @@ static inline int fsuser(void)
 static inline int capable(int cap)
 {
 #if 1 /* ok now */
-	if (cap_raised(current->cap_effective, cap))
+    if (cap_raised(current->cap_effective, cap))
 #else
-	if (cap_is_fs_cap(cap) ? current->fsuid == 0 : current->euid == 0)
+    if (cap_is_fs_cap(cap) ? current->fsuid == 0 : current->euid == 0)
 #endif
-	{
-		current->flags |= PF_SUPERPRIV;
-		return 1;
-	}
-	return 0;
+    {
+        current->flags |= PF_SUPERPRIV;
+        return 1;
+    }
+    return 0;
 }
 
 /*
@@ -878,8 +894,8 @@ extern void end_lazy_tlb(struct mm_struct *mm);
 extern inline void FASTCALL(__mmdrop(struct mm_struct *));
 static inline void mmdrop(struct mm_struct * mm)
 {
-	if (atomic_dec_and_test(&mm->mm_count))
-		__mmdrop(mm);
+    if (atomic_dec_and_test(&mm->mm_count))
+        __mmdrop(mm);
 }
 
 /* mmput gets rid of the mappings and all user-space */
@@ -959,7 +975,7 @@ do {									\
 	current->state = TASK_RUNNING;					\
 	remove_wait_queue(&wq, &__wait);				\
 } while (0)
-	
+
 #define wait_event_interruptible(wq, condition)				\
 ({									\
 	int __ret = 0;							\
@@ -1015,19 +1031,19 @@ extern unsigned long pcbvec[];
 /* Protects ->fs, ->files, ->mm, and synchronises with wait4().  Nests inside tasklist_lock */
 static inline void task_lock(struct task_struct *p)
 {
-	spin_lock(&p->alloc_lock);
+    spin_lock(&p->alloc_lock);
 }
 
 static inline void task_unlock(struct task_struct *p)
 {
-	spin_unlock(&p->alloc_lock);
+    spin_unlock(&p->alloc_lock);
 }
 
 /* write full pathname into buffer and return start of pathname */
 static inline char * d_path(struct dentry *dentry, struct vfsmount *vfsmnt,
-				char *buf, int buflen)
+                            char *buf, int buflen)
 {
-	return 0;
+    return 0;
 }
 
 #endif /* __KERNEL__ */

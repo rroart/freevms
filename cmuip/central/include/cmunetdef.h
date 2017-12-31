@@ -60,7 +60,7 @@
 #define TCP$ABORT       IO$_DEACCESS
 #define TCP$STATUS      IO$_ACPCONTROL
 #define TCP$INFO        IO$_MODIFY
-#define IP_HOSTNAME_SIZE 
+#define IP_HOSTNAME_SIZE
                         128
 #define Passive_Open    0
 #define Active_Open     1

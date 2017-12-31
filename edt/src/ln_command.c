@@ -34,27 +34,29 @@ static void cmd_ambiguous (char *cp);
 int ln_command (const char *cmdstr)
 
 {
-  char *cmdbuf, *cmdpnt;
-  int i, l;
+    char *cmdbuf, *cmdpnt;
+    int i, l;
 
-  cmdbuf = strdup (cmdstr);					/* copy const string to writable */
-  cmdpnt = skipspaces (cmdbuf);					/* skip leading spaces */
-  for (l = 0; cmdpnt[l] != 0; l ++) if ((cmdpnt[l] < 'A') || (cmdpnt[l] > 'z') || (cmdpnt[l] > 'Z' && cmdpnt[l] < 'a')) break;
-  if (l == 0) cmd_type (cmdpnt);				/* no alphabetics means 'type <whatever>' */
-  else {
-    for (i = 0; cmdtbl[i].name != NULL; i ++) if (strncasecmp (cmdtbl[i].name, cmdpnt, l) == 0) break;
-    if (cmdtbl[i].name == NULL) outerr (l, "unknown command: %*.*s\n", l, l, cmdpnt);
-    else {
-      cmdpnt = skipspaces (cmdpnt + l);				/* ok, skip spaces following command name */
-      (*(cmdtbl[i].entry)) (cmdpnt);				/* execute the command */
+    cmdbuf = strdup (cmdstr);					/* copy const string to writable */
+    cmdpnt = skipspaces (cmdbuf);					/* skip leading spaces */
+    for (l = 0; cmdpnt[l] != 0; l ++) if ((cmdpnt[l] < 'A') || (cmdpnt[l] > 'z') || (cmdpnt[l] > 'Z' && cmdpnt[l] < 'a')) break;
+    if (l == 0) cmd_type (cmdpnt);				/* no alphabetics means 'type <whatever>' */
+    else
+    {
+        for (i = 0; cmdtbl[i].name != NULL; i ++) if (strncasecmp (cmdtbl[i].name, cmdpnt, l) == 0) break;
+        if (cmdtbl[i].name == NULL) outerr (l, "unknown command: %*.*s\n", l, l, cmdpnt);
+        else
+        {
+            cmdpnt = skipspaces (cmdpnt + l);				/* ok, skip spaces following command name */
+            (*(cmdtbl[i].entry)) (cmdpnt);				/* execute the command */
+        }
     }
-  }
-  free (cmdbuf);						/* free off writable copy */
-  return (1);
+    free (cmdbuf);						/* free off writable copy */
+    return (1);
 }
 
 static void cmd_ambiguous (char *cmdpnt)
 
 {
-  outerr (0, "ambiguous command\n");
+    outerr (0, "ambiguous command\n");
 }

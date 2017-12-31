@@ -7,7 +7,8 @@
 #define IP6T_OWNER_PID	0x04
 #define IP6T_OWNER_SID	0x08
 
-struct ip6t_owner_info {
+struct ip6t_owner_info
+{
     uid_t uid;
     gid_t gid;
     pid_t pid;

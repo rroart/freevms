@@ -23,31 +23,36 @@
 #define		NPH$C_EXPAND_BAP		19
 #define		NPH$C_MAX_FUNC_TYPE		20
 #define		NPH$S_NPHDEF			32
-	
-struct _nph {
-  union  {
-    unsigned unsigned long long nph$q_addr;
-    struct  {
-      unsigned int nph$l_addr_low;
-      unsigned int nph$l_addr_high;
+
+struct _nph
+{
+    union
+    {
+        unsigned unsigned long long nph$q_addr;
+        struct
+        {
+            unsigned int nph$l_addr_low;
+            unsigned int nph$l_addr_high;
+        };
     };
-  };
-  int (*nph$l_pc)();
-  unsigned short int nph$w_function;
-  unsigned char nph$b_type;
-  unsigned char nph$b_rmod;
-  unsigned int nph$l_size;
-  unsigned char nph$b_ipl;
-  unsigned char nph$b_cpu;
-  unsigned short int nph$w_unused;
-  union  {
-    unsigned long long nph$q_time;
-    struct  {
-      unsigned int nph$l_time_low;
-      unsigned int nph$l_time_high;
+    int (*nph$l_pc)();
+    unsigned short int nph$w_function;
+    unsigned char nph$b_type;
+    unsigned char nph$b_rmod;
+    unsigned int nph$l_size;
+    unsigned char nph$b_ipl;
+    unsigned char nph$b_cpu;
+    unsigned short int nph$w_unused;
+    union
+    {
+        unsigned long long nph$q_time;
+        struct
+        {
+            unsigned int nph$l_time_low;
+            unsigned int nph$l_time_high;
+        };
     };
-  };
 };
- 
+
 #endif
- 
+

@@ -14,14 +14,14 @@
  *                      Universite Pierre et Marie Curie (Paris VI)
  *  from
  *  linux/fs/minix/truncate.c   Copyright (C) 1991, 1992  Linus Torvalds
- * 
+ *
  *  ext2fs fsync primitive
  *
  *  Big-endian to little-endian byte-swapping/bitmaps by
  *        David S. Miller (davem@caip.rutgers.edu), 1995
- * 
+ *
  *  Removed unnecessary code duplication for little endian machines
- *  and excessive __inline__s. 
+ *  and excessive __inline__s.
  *        Andi Kleen, 1997
  *
  * Major simplications and cleanup - we only need to do the metadata, because
@@ -42,24 +42,24 @@
 #if 0
 int ext2_sync_file(struct file * file, struct dentry *dentry, int datasync)
 {
-	struct inode *inode = dentry->d_inode;
-	return ext2_fsync_inode(inode, datasync);
+    struct inode *inode = dentry->d_inode;
+    return ext2_fsync_inode(inode, datasync);
 }
 #endif
 
 #if 0
 int ext2_fsync_inode(struct inode *inode, int datasync)
 {
-	int err=0;
-	
-	err  = fsync_inode_buffers(inode);
-	err |= fsync_inode_data_buffers(inode);
-	if (!(inode->i_state & I_DIRTY))
-		return err;
-	if (datasync && !(inode->i_state & I_DIRTY_DATASYNC))
-		return err;
-	
-	err |= ext2_sync_inode(inode);
-	return err ? -EIO : 0;
+    int err=0;
+
+    err  = fsync_inode_buffers(inode);
+    err |= fsync_inode_data_buffers(inode);
+    if (!(inode->i_state & I_DIRTY))
+        return err;
+    if (datasync && !(inode->i_state & I_DIRTY_DATASYNC))
+        return err;
+
+    err |= ext2_sync_inode(inode);
+    return err ? -EIO : 0;
 }
 #endif

@@ -62,9 +62,10 @@ typedef unsigned char u_char;
 /*
  * Structure used for manipulating linger option.
  */
-struct	linger {
-	int	l_onoff;		/* option on/off */
-	int	l_linger;		/* linger time */
+struct	linger
+{
+    int	l_onoff;		/* option on/off */
+    int	l_linger;		/* linger time */
 };
 
 /*
@@ -101,18 +102,20 @@ struct	linger {
  * Structure used by kernel to store most
  * addresses.
  */
-struct sockaddr {
-	u_short	sa_family;		/* address family */
-	char	sa_data[14];		/* up to 14 bytes of direct address */
+struct sockaddr
+{
+    u_short	sa_family;		/* address family */
+    char	sa_data[14];		/* up to 14 bytes of direct address */
 };
 
 /*
  * Structure used by kernel to pass protocol
  * information in raw sockets.
  */
-struct sockproto {
-	u_short	sp_family;		/* address family */
-	u_short	sp_protocol;		/* protocol */
+struct sockproto
+{
+    u_short	sp_family;		/* address family */
+    u_short	sp_protocol;		/* protocol */
 };
 
 /*
@@ -150,22 +153,24 @@ struct sockproto {
 /*
  * I/O buffer element.
  */
-struct iovec {
-	caddr_t	iov_base;
-	int	iov_len;
+struct iovec
+{
+    caddr_t	iov_base;
+    int	iov_len;
 };
 #endif /* _UIO_ */
 
 /*
  * Message header for recvmsg and sendmsg calls.
  */
-struct msghdr {
-	caddr_t	msg_name;		/* optional address */
-	int	msg_namelen;		/* size of address */
-	struct	iovec *msg_iov;		/* scatter/gather array */
-	int	msg_iovlen;		/* # elements in msg_iov */
-	caddr_t	msg_accrights;		/* access rights sent/received */
-	int	msg_accrightslen;
+struct msghdr
+{
+    caddr_t	msg_name;		/* optional address */
+    int	msg_namelen;		/* size of address */
+    struct	iovec *msg_iov;		/* scatter/gather array */
+    int	msg_iovlen;		/* # elements in msg_iov */
+    caddr_t	msg_accrights;		/* access rights sent/received */
+    int	msg_accrightslen;
 };
 
 #define	MSG_OOB		0x1		/* process out-of-band data */

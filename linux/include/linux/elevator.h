@@ -2,11 +2,11 @@
 #define _LINUX_ELEVATOR_H
 
 typedef void (elevator_fn) (struct request *, elevator_t *,
-			    struct list_head *,
-			    struct list_head *, int);
+                            struct list_head *,
+                            struct list_head *, int);
 
 typedef int (elevator_merge_fn) (request_queue_t *, struct request **, struct list_head *,
-				 struct buffer_head *, int, int);
+                                 struct buffer_head *, int, int);
 
 typedef void (elevator_merge_cleanup_fn) (request_queue_t *, struct request *, int);
 
@@ -14,14 +14,14 @@ typedef void (elevator_merge_req_fn) (struct request *, struct request *);
 
 struct elevator_s
 {
-	int read_latency;
-	int write_latency;
+    int read_latency;
+    int write_latency;
 
-	elevator_merge_fn *elevator_merge_fn;
-	elevator_merge_cleanup_fn *elevator_merge_cleanup_fn;
-	elevator_merge_req_fn *elevator_merge_req_fn;
+    elevator_merge_fn *elevator_merge_fn;
+    elevator_merge_cleanup_fn *elevator_merge_cleanup_fn;
+    elevator_merge_req_fn *elevator_merge_req_fn;
 
-	unsigned int queue_ID;
+    unsigned int queue_ID;
 };
 
 int elevator_noop_merge(request_queue_t *, struct request **, struct list_head *, struct buffer_head *, int, int);
@@ -32,11 +32,12 @@ int elevator_linus_merge(request_queue_t *, struct request **, struct list_head 
 void elevator_linus_merge_cleanup(request_queue_t *, struct request *, int);
 void elevator_linus_merge_req(struct request *, struct request *);
 
-typedef struct blkelv_ioctl_arg_s {
-	int queue_ID;
-	int read_latency;
-	int write_latency;
-	int max_bomb_segments;
+typedef struct blkelv_ioctl_arg_s
+{
+    int queue_ID;
+    int read_latency;
+    int write_latency;
+    int max_bomb_segments;
 } blkelv_ioctl_arg_t;
 
 #define BLKELVGET   _IOR(0x12,106,sizeof(blkelv_ioctl_arg_t))
@@ -72,13 +73,13 @@ extern void elevator_init(elevator_t *, elevator_t);
 
 static inline int elevator_request_latency(elevator_t * elevator, int rw)
 {
-	int latency;
+    int latency;
 
-	latency = elevator->read_latency;
-	if (rw != READ)
-		latency = elevator->write_latency;
+    latency = elevator->read_latency;
+    if (rw != READ)
+        latency = elevator->write_latency;
 
-	return latency;
+    return latency;
 }
 
 #define ELEVATOR_NOOP							\

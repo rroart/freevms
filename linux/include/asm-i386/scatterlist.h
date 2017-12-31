@@ -1,7 +1,8 @@
 #ifndef _I386_SCATTERLIST_H
 #define _I386_SCATTERLIST_H
 
-struct scatterlist {
+struct scatterlist
+{
     char *  address;    /* Location data is to be transferred to, NULL for
 			 * highmem page */
     struct page * page; /* Location for highmem page, if any */

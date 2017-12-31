@@ -27,10 +27,11 @@
 #define ETHER_ADDR_LEN 6
 
 /* The 8390 specific per-packet-header format. */
-struct e8390_pkt_hdr {
-  unsigned char status; /* status */
-  unsigned char next;   /* pointer to next packet. */
-  unsigned short count; /* header + packet length in bytes */
+struct e8390_pkt_hdr
+{
+    unsigned char status; /* status */
+    unsigned char next;   /* pointer to next packet. */
+    unsigned short count; /* header + packet length in bytes */
 };
 
 #ifdef notdef
@@ -54,33 +55,34 @@ extern void ei_interrupt(int irq, void *dev_id, struct pt_regs *regs);
 /* Most of these entries should be in 'struct net_device' (or most of the
    things in there should be here!) */
 /* You have one of these per-board */
-struct ei_device {
-	const char *name;
-	void (*reset_8390)(struct net_device *);
-	void (*get_8390_hdr)(struct net_device *, struct e8390_pkt_hdr *, int);
-	void (*block_output)(struct net_device *, int, const unsigned char *, int);
-	void (*block_input)(struct net_device *, int, struct sk_buff *, int);
-	unsigned char mcfilter[8];
-	unsigned open:1;
-	unsigned word16:1;  		/* We have the 16-bit (vs 8-bit) version of the card. */
-	unsigned bigendian:1;		/* 16-bit big endian mode. Do NOT */
-					/* set this on random 8390 clones! */
-	unsigned txing:1;		/* Transmit Active */
-	unsigned irqlock:1;		/* 8390's intrs disabled when '1'. */
-	unsigned dmaing:1;		/* Remote DMA Active */
-	unsigned char tx_start_page, rx_start_page, stop_page;
-	unsigned char current_page;	/* Read pointer in buffer  */
-	unsigned char interface_num;	/* Net port (AUI, 10bT.) to use. */
-	unsigned char txqueue;		/* Tx Packet buffer queue length. */
-	short tx1, tx2;			/* Packet lengths for ping-pong tx. */
-	short lasttx;			/* Alpha version consistency check. */
-	unsigned char reg0;		/* Register '0' in a WD8013 */
-	unsigned char reg5;		/* Register '5' in a WD8013 */
-	unsigned char saved_irq;	/* Original dev->irq value. */
-	struct net_device_stats stat;	/* The new statistics table. */
-	u32 *reg_offset;		/* Register mapping table */
-	spinlock_t page_lock;		/* Page register locks */
-	unsigned long priv;		/* Private field to store bus IDs etc. */
+struct ei_device
+{
+    const char *name;
+    void (*reset_8390)(struct net_device *);
+    void (*get_8390_hdr)(struct net_device *, struct e8390_pkt_hdr *, int);
+    void (*block_output)(struct net_device *, int, const unsigned char *, int);
+    void (*block_input)(struct net_device *, int, struct sk_buff *, int);
+    unsigned char mcfilter[8];
+    unsigned open:1;
+    unsigned word16:1;  		/* We have the 16-bit (vs 8-bit) version of the card. */
+    unsigned bigendian:1;		/* 16-bit big endian mode. Do NOT */
+    /* set this on random 8390 clones! */
+    unsigned txing:1;		/* Transmit Active */
+    unsigned irqlock:1;		/* 8390's intrs disabled when '1'. */
+    unsigned dmaing:1;		/* Remote DMA Active */
+    unsigned char tx_start_page, rx_start_page, stop_page;
+    unsigned char current_page;	/* Read pointer in buffer  */
+    unsigned char interface_num;	/* Net port (AUI, 10bT.) to use. */
+    unsigned char txqueue;		/* Tx Packet buffer queue length. */
+    short tx1, tx2;			/* Packet lengths for ping-pong tx. */
+    short lasttx;			/* Alpha version consistency check. */
+    unsigned char reg0;		/* Register '0' in a WD8013 */
+    unsigned char reg5;		/* Register '5' in a WD8013 */
+    unsigned char saved_irq;	/* Original dev->irq value. */
+    struct net_device_stats stat;	/* The new statistics table. */
+    u32 *reg_offset;		/* Register mapping table */
+    spinlock_t page_lock;		/* Page register locks */
+    unsigned long priv;		/* Private field to store bus IDs etc. */
 };
 
 /* The maximum number of 8390 interrupt service routines called per IRQ. */
@@ -113,7 +115,7 @@ struct ei_device {
 /*
  *	Only generate indirect loads given a machine that needs them.
  */
- 
+
 #if defined(CONFIG_MAC) || defined(CONFIG_AMIGA_PCMCIA) || \
     defined(CONFIG_ARIADNE2) || defined(CONFIG_ARIADNE2_MODULE) || \
     defined(CONFIG_HYDRA) || defined(CONFIG_HYDRA_MODULE) || \

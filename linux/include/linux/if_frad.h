@@ -33,34 +33,35 @@
 
 struct dlci_add
 {
-   char  devname[IFNAMSIZ];
-   short dlci;
+    char  devname[IFNAMSIZ];
+    short dlci;
 };
 
 #define DLCI_GET_CONF	(SIOCDEVPRIVATE + 2)
 #define DLCI_SET_CONF	(SIOCDEVPRIVATE + 3)
 
-/* 
- * These are related to the Sangoma SDLA and should remain in order. 
- * Code within the SDLA module is based on the specifics of this 
+/*
+ * These are related to the Sangoma SDLA and should remain in order.
+ * Code within the SDLA module is based on the specifics of this
  * structure.  Change at your own peril.
  */
-struct dlci_conf {
-   short flags;
-   short CIR_fwd;
-   short Bc_fwd;
-   short Be_fwd;
-   short CIR_bwd;
-   short Bc_bwd;
-   short Be_bwd; 
+struct dlci_conf
+{
+    short flags;
+    short CIR_fwd;
+    short Bc_fwd;
+    short Be_fwd;
+    short CIR_bwd;
+    short Bc_bwd;
+    short Be_bwd;
 
-/* these are part of the status read */
-   short Tc_fwd;
-   short Tc_bwd;
-   short Tf_max;
-   short Tb_max;
+    /* these are part of the status read */
+    short Tc_fwd;
+    short Tc_bwd;
+    short Tf_max;
+    short Tb_max;
 
-/* add any new fields here above is a mirror of sdla_dlci_conf */
+    /* add any new fields here above is a mirror of sdla_dlci_conf */
 };
 
 #define DLCI_GET_SLAVE	(SIOCDEVPRIVATE + 4)
@@ -84,30 +85,30 @@ struct dlci_conf {
 #define FRAD_LAST_IOCTL	FRAD_SET_CONF
 
 /*
- * Based on the setup for the Sangoma SDLA.  If changes are 
- * necessary to this structure, a routine will need to be 
+ * Based on the setup for the Sangoma SDLA.  If changes are
+ * necessary to this structure, a routine will need to be
  * added to that module to copy fields.
  */
-struct frad_conf 
+struct frad_conf
 {
-   short station;
-   short flags;
-   short kbaud;
-   short clocking;
-   short mtu;
-   short T391;
-   short T392;
-   short N391;
-   short N392;
-   short N393;
-   short CIR_fwd;
-   short Bc_fwd;
-   short Be_fwd;
-   short CIR_bwd;
-   short Bc_bwd;
-   short Be_bwd;
+    short station;
+    short flags;
+    short kbaud;
+    short clocking;
+    short mtu;
+    short T391;
+    short T392;
+    short N391;
+    short N392;
+    short N393;
+    short CIR_fwd;
+    short Bc_fwd;
+    short Be_fwd;
+    short CIR_bwd;
+    short Bc_bwd;
+    short Be_bwd;
 
-/* Add new fields here, above is a mirror of the sdla_conf */
+    /* Add new fields here, above is a mirror of the sdla_conf */
 
 };
 
@@ -131,16 +132,16 @@ struct frad_conf
 /* these are the fields of an RFC 1490 header */
 struct frhdr
 {
-   unsigned char  control	__attribute__((packed));
+    unsigned char  control	__attribute__((packed));
 
-   /* for IP packets, this can be the NLPID */
-   unsigned char  pad		__attribute__((packed)); 
+    /* for IP packets, this can be the NLPID */
+    unsigned char  pad		__attribute__((packed));
 
-   unsigned char  NLPID		__attribute__((packed));
-   unsigned char  OUI[3]	__attribute__((packed));
-   unsigned short PID		__attribute__((packed));
+    unsigned char  NLPID		__attribute__((packed));
+    unsigned char  OUI[3]	__attribute__((packed));
+    unsigned short PID		__attribute__((packed));
 
-#define IP_NLPID pad 
+#define IP_NLPID pad
 };
 
 /* see RFC 1490 for the definition of the following */
@@ -154,39 +155,39 @@ struct frhdr
 
 struct dlci_local
 {
-   struct net_device_stats stats;
-   struct net_device          *slave;
-   struct dlci_conf       config;
-   int                    configured;
+    struct net_device_stats stats;
+    struct net_device          *slave;
+    struct dlci_conf       config;
+    int                    configured;
 
-   /* callback function */
-   void              (*receive)(struct sk_buff *skb, struct net_device *);
+    /* callback function */
+    void              (*receive)(struct sk_buff *skb, struct net_device *);
 };
 
 struct frad_local
 {
-   struct net_device_stats stats;
+    struct net_device_stats stats;
 
-   /* devices which this FRAD is slaved to */
-   struct net_device     *master[CONFIG_DLCI_MAX];
-   short             dlci[CONFIG_DLCI_MAX];
+    /* devices which this FRAD is slaved to */
+    struct net_device     *master[CONFIG_DLCI_MAX];
+    short             dlci[CONFIG_DLCI_MAX];
 
-   struct frad_conf  config;
-   int               configured;	/* has this device been configured */
-   int               initialized;	/* mem_start, port, irq set ? */
+    struct frad_conf  config;
+    int               configured;	/* has this device been configured */
+    int               initialized;	/* mem_start, port, irq set ? */
 
-   /* callback functions */
-   int               (*activate)(struct net_device *, struct net_device *);
-   int               (*deactivate)(struct net_device *, struct net_device *);
-   int               (*assoc)(struct net_device *, struct net_device *);
-   int               (*deassoc)(struct net_device *, struct net_device *);
-   int               (*dlci_conf)(struct net_device *, struct net_device *, int get);
+    /* callback functions */
+    int               (*activate)(struct net_device *, struct net_device *);
+    int               (*deactivate)(struct net_device *, struct net_device *);
+    int               (*assoc)(struct net_device *, struct net_device *);
+    int               (*deassoc)(struct net_device *, struct net_device *);
+    int               (*dlci_conf)(struct net_device *, struct net_device *, int get);
 
-   /* fields that are used by the Sangoma SDLA cards */
-   struct timer_list timer;
-   int               type;		/* adapter type */
-   int               state;		/* state of the S502/8 control latch */
-   int               buffer;		/* current buffer for S508 firmware */
+    /* fields that are used by the Sangoma SDLA cards */
+    struct timer_list timer;
+    int               type;		/* adapter type */
+    int               state;		/* state of the S502/8 control latch */
+    int               buffer;		/* current buffer for S508 firmware */
 };
 
 int register_frad(const char *name);

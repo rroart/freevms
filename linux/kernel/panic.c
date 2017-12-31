@@ -32,8 +32,8 @@ struct notifier_block *panic_notifier_list;
 
 static int __init panic_setup(char *str)
 {
-	panic_timeout = simple_strtoul(str, NULL, 0);
-	return 1;
+    panic_timeout = simple_strtoul(str, NULL, 0);
+    return 1;
 }
 
 __setup("panic=", panic_setup);
@@ -47,67 +47,72 @@ __setup("panic=", panic_setup);
  *
  *	This function never returns.
  */
- 
+
 NORET_TYPE void panic(const char * fmt, ...)
 {
-	static char buf[1024];
-	va_list args;
+    static char buf[1024];
+    va_list args;
 #if defined(CONFIG_ARCH_S390)
-        unsigned long caller = (unsigned long) __builtin_return_address(0);
+    unsigned long caller = (unsigned long) __builtin_return_address(0);
 #endif
 
-	bust_spinlocks(1);
-	va_start(args, fmt);
-	vsprintf(buf, fmt, args);
-	va_end(args);
-	printk(KERN_EMERG "Kernel panic: %s\n",buf);
-	if (in_interrupt()) {
-		printk(KERN_EMERG "In interrupt handler - not syncing\n");
-		printk(KERN_EMERG "Kernel panic: %s\n",buf);
-	}
-	else if (!current->pcb$l_pid)
-		printk(KERN_EMERG "In idle task - not syncing\n");
-	else
-		sys_sync();
-	bust_spinlocks(0);
+    bust_spinlocks(1);
+    va_start(args, fmt);
+    vsprintf(buf, fmt, args);
+    va_end(args);
+    printk(KERN_EMERG "Kernel panic: %s\n",buf);
+    if (in_interrupt())
+    {
+        printk(KERN_EMERG "In interrupt handler - not syncing\n");
+        printk(KERN_EMERG "Kernel panic: %s\n",buf);
+    }
+    else if (!current->pcb$l_pid)
+        printk(KERN_EMERG "In idle task - not syncing\n");
+    else
+        sys_sync();
+    bust_spinlocks(0);
 
 #ifdef CONFIG_SMP
-	smp_send_stop();
+    smp_send_stop();
 #endif
 
-	notifier_call_chain(&panic_notifier_list, 0, NULL);
+    notifier_call_chain(&panic_notifier_list, 0, NULL);
 
-	if (panic_timeout > 0)
-	{
-		/*
-	 	 * Delay timeout seconds before rebooting the machine. 
-		 * We can't use the "normal" timers since we just panicked..
-	 	 */
-		printk(KERN_EMERG "Rebooting in %d seconds..",panic_timeout);
-		mdelay(panic_timeout*1000);
-		/*
-		 *	Should we run the reboot notifier. For the moment Im
-		 *	choosing not too. It might crash, be corrupt or do
-		 *	more harm than good for other reasons.
-		 */
-		machine_restart(NULL);
-	}
+    if (panic_timeout > 0)
+    {
+        /*
+         * Delay timeout seconds before rebooting the machine.
+         * We can't use the "normal" timers since we just panicked..
+         */
+        printk(KERN_EMERG "Rebooting in %d seconds..",panic_timeout);
+        mdelay(panic_timeout*1000);
+        /*
+         *	Should we run the reboot notifier. For the moment Im
+         *	choosing not too. It might crash, be corrupt or do
+         *	more harm than good for other reasons.
+         */
+        machine_restart(NULL);
+    }
 #ifdef __sparc__
-	{
-		extern int stop_a_enabled;
-		/* Make sure the user can actually press L1-A */
-		stop_a_enabled = 1;
-		printk("Press L1-A to return to the boot prom\n");
-	}
+    {
+        extern int stop_a_enabled;
+        /* Make sure the user can actually press L1-A */
+        stop_a_enabled = 1;
+        printk("Press L1-A to return to the boot prom\n");
+    }
 #endif
 #if defined(CONFIG_ARCH_S390)
-        disabled_wait(caller);
+    disabled_wait(caller);
 #endif
-	{ int i,j; for(j=0;j<20;j++) for(i=0;i<1000000000;i++); }
-	sti();
-	for(;;) {
-		CHECK_EMERGENCY_SYNC
-	}
+    {
+        int i,j;
+        for(j=0; j<20; j++) for(i=0; i<1000000000; i++);
+    }
+    sti();
+    for(;;)
+    {
+        CHECK_EMERGENCY_SYNC
+    }
 }
 
 /**
@@ -115,18 +120,19 @@ NORET_TYPE void panic(const char * fmt, ...)
  *
  *	The string is overwritten by the next call to print_taint().
  */
- 
+
 const char *print_tainted()
 {
-	static char buf[20];
-	if (tainted) {
-		snprintf(buf, sizeof(buf), "Tainted: %c%c",
-			tainted & 1 ? 'P' : 'G',
-			tainted & 2 ? 'F' : ' ');
-	}
-	else
-		snprintf(buf, sizeof(buf), "Not tainted");
-	return(buf);
+    static char buf[20];
+    if (tainted)
+    {
+        snprintf(buf, sizeof(buf), "Tainted: %c%c",
+                 tainted & 1 ? 'P' : 'G',
+                 tainted & 2 ? 'F' : ' ');
+    }
+    else
+        snprintf(buf, sizeof(buf), "Not tainted");
+    return(buf);
 }
 
 int tainted = 0;
@@ -142,11 +148,11 @@ int tainted = 0;
 
 void __out_of_line_bug(int line)
 {
-	printk("kernel BUG in header file at line %d\n", line);
+    printk("kernel BUG in header file at line %d\n", line);
 
-	BUG();
+    BUG();
 
-	/* Satisfy __attribute__((noreturn)) */
-	for ( ; ; )
-		;
+    /* Satisfy __attribute__((noreturn)) */
+    for ( ; ; )
+        ;
 }

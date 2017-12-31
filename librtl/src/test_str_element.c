@@ -51,114 +51,114 @@ $DESCRIPTOR(GlobalStrDelimLong,"**");
 
 int main()
 {
-	long elemnumb;
-	long retrnval;
-	struct dsc$descriptor_s Test1;
-	struct dsc$descriptor_s Test3;
+    long elemnumb;
+    long retrnval;
+    struct dsc$descriptor_s Test1;
+    struct dsc$descriptor_s Test3;
 
-	/*
-	 * Lets prove we started
-	 */
-	printf("Starting tests . . .\n");
+    /*
+     * Lets prove we started
+     */
+    printf("Starting tests . . .\n");
 
-	Test1.dsc$w_length = 0;
-	Test1.dsc$b_class = DSC$K_CLASS_D;
-	Test1.dsc$b_dtype = DSC$K_DTYPE_T;
-	Test1.dsc$a_pointer = NULL;
+    Test1.dsc$w_length = 0;
+    Test1.dsc$b_class = DSC$K_CLASS_D;
+    Test1.dsc$b_dtype = DSC$K_DTYPE_T;
+    Test1.dsc$a_pointer = NULL;
 
-	Test3.dsc$w_length = 8;
-	Test3.dsc$b_class = DSC$K_CLASS_S;
-	Test3.dsc$b_dtype = DSC$K_DTYPE_T;
-	Test3.dsc$a_pointer = (char*)malloc(20);
+    Test3.dsc$w_length = 8;
+    Test3.dsc$b_class = DSC$K_CLASS_S;
+    Test3.dsc$b_dtype = DSC$K_DTYPE_T;
+    Test3.dsc$a_pointer = (char*)malloc(20);
 
-	/*
-	 * Testing with correct delimiter string for various element numbers
-	 * Start with negative element number and end with too high number,
-	 * just to see what happens (check error messages).
+    /*
+     * Testing with correct delimiter string for various element numbers
+     * Start with negative element number and end with too high number,
+     * just to see what happens (check error messages).
          */
-	for (elemnumb=-1;  elemnumb<12;  elemnumb++)
-	{
-	    printf("\n-----------------\n");
-	    printf("\nelement number %ld\n",elemnumb);
-	    retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimOk,&GlobalStrElem);
-	    printf("return value %ld : ",retrnval);
-	    anacond((unsigned long) retrnval);
-	    printf("\nelement number %ld\n",elemnumb);
-	    testanal("str$element, delimiter ok",&Test1);
-	}
-	/*
-	 * Testing with empty delimiter string
-	 */
-	printf("\n=================\n");
-	elemnumb=2;
-	printf("\nelement number %ld\n",elemnumb);
-	retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimNull,&GlobalStrElem);
-	printf("return value %ld : ",retrnval);
-	anacond((unsigned long) retrnval);
-	printf("\nelement number %ld\n",elemnumb);
-	testanal("str$element, delimiter null",&Test1);
-	/*
-	 * Testing with 2-character delimiter string
-	 */
-	printf("\n=================\n");
-	elemnumb=2;
-	printf("\nelement number %ld\n",elemnumb);
-	retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimLong,&GlobalStrElem);
-	printf("return value %ld : ",retrnval);
-	anacond((unsigned long) retrnval);
-	printf("\nelement number %ld\n",elemnumb);
-	testanal("str$element, delimiter long",&Test1);
-	/*
-	 * Testing truncation of destination string
-	 */
-	printf("\n=================\n");
-	elemnumb=7;
-	printf("\nelement number %ld\n",elemnumb);
-	retrnval=str$element(&Test3,&elemnumb,&GlobalStrDelimOk,&GlobalStrElem);
-	printf("return value %ld : ",retrnval);
-	anacond((unsigned long) retrnval);
-	printf("\nelement number %ld\n",elemnumb);
-	testanal("str$element, delimiter ok, dest string short",&Test3);
-	return EXIT_SUCCESS;
+    for (elemnumb=-1;  elemnumb<12;  elemnumb++)
+    {
+        printf("\n-----------------\n");
+        printf("\nelement number %ld\n",elemnumb);
+        retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimOk,&GlobalStrElem);
+        printf("return value %ld : ",retrnval);
+        anacond((unsigned long) retrnval);
+        printf("\nelement number %ld\n",elemnumb);
+        testanal("str$element, delimiter ok",&Test1);
+    }
+    /*
+     * Testing with empty delimiter string
+     */
+    printf("\n=================\n");
+    elemnumb=2;
+    printf("\nelement number %ld\n",elemnumb);
+    retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimNull,&GlobalStrElem);
+    printf("return value %ld : ",retrnval);
+    anacond((unsigned long) retrnval);
+    printf("\nelement number %ld\n",elemnumb);
+    testanal("str$element, delimiter null",&Test1);
+    /*
+     * Testing with 2-character delimiter string
+     */
+    printf("\n=================\n");
+    elemnumb=2;
+    printf("\nelement number %ld\n",elemnumb);
+    retrnval=str$element(&Test1,&elemnumb,&GlobalStrDelimLong,&GlobalStrElem);
+    printf("return value %ld : ",retrnval);
+    anacond((unsigned long) retrnval);
+    printf("\nelement number %ld\n",elemnumb);
+    testanal("str$element, delimiter long",&Test1);
+    /*
+     * Testing truncation of destination string
+     */
+    printf("\n=================\n");
+    elemnumb=7;
+    printf("\nelement number %ld\n",elemnumb);
+    retrnval=str$element(&Test3,&elemnumb,&GlobalStrDelimOk,&GlobalStrElem);
+    printf("return value %ld : ",retrnval);
+    anacond((unsigned long) retrnval);
+    printf("\nelement number %ld\n",elemnumb);
+    testanal("str$element, delimiter ok, dest string short",&Test3);
+    return EXIT_SUCCESS;
 }
 
 void testanal(char* Title, struct dsc$descriptor_s* strptr)
 {
-	char* s1_ptr;           /* Pointer to first string */
-	unsigned short s1_length;        /* Length of first string */
+    char* s1_ptr;           /* Pointer to first string */
+    unsigned short s1_length;        /* Length of first string */
 
-	printf("Analyzing '%s':\n", Title);
+    printf("Analyzing '%s':\n", Title);
 
-	str$analyze_sdesc(strptr, &s1_length, &s1_ptr);
+    str$analyze_sdesc(strptr, &s1_length, &s1_ptr);
 
-	printf("  Type: %d\n", strptr->dsc$b_dtype);
-	printf("  Class: %d\n", strptr->dsc$b_class);
-	printf("  Length: %d\n", s1_length);
-	if (s1_ptr != NULL)
-	{
-		printf("  Value: '%*.*s'\n", s1_length, s1_length, s1_ptr);
-	}
-	printf("\n");
+    printf("  Type: %d\n", strptr->dsc$b_dtype);
+    printf("  Class: %d\n", strptr->dsc$b_class);
+    printf("  Length: %d\n", s1_length);
+    if (s1_ptr != NULL)
+    {
+        printf("  Value: '%*.*s'\n", s1_length, s1_length, s1_ptr);
+    }
+    printf("\n");
 }
 
 void anacond(unsigned long condcode)
 {
-	switch (condcode)
-	{
-	    case STR$_NORMAL:
-	    	printf("SS$_NORMAL\n");
-		break;
-	    case STR$_INVDELIM:
-	    	printf("STR$_INVDELIM\n");
-		break;
-	    case STR$_NOELEM:
-	    	printf("STR$_NOELEM\n");
-		break;
-	    case STR$_TRU:
-	    	printf("STR$_TRU\n");
-		break;
-	    default:
-	    	printf("Unknown condition code");
-	}
+    switch (condcode)
+    {
+    case STR$_NORMAL:
+        printf("SS$_NORMAL\n");
+        break;
+    case STR$_INVDELIM:
+        printf("STR$_INVDELIM\n");
+        break;
+    case STR$_NOELEM:
+        printf("STR$_NOELEM\n");
+        break;
+    case STR$_TRU:
+        printf("STR$_TRU\n");
+        break;
+    default:
+        printf("Unknown condition code");
+    }
 }
 

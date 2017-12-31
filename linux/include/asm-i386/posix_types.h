@@ -36,11 +36,12 @@ typedef unsigned short	__kernel_old_gid_t;
 typedef long long	__kernel_loff_t;
 #endif
 
-typedef struct {
+typedef struct
+{
 #if defined(__KERNEL__) || defined(__USE_ALL)
-	int	val[2];
+    int	val[2];
 #else /* !defined(__KERNEL__) && !defined(__USE_ALL) */
-	int	__val[2];
+    int	__val[2];
 #endif /* !defined(__KERNEL__) && !defined(__USE_ALL) */
 } __kernel_fsid_t;
 

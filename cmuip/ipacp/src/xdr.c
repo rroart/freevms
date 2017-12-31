@@ -83,7 +83,7 @@ typedef unsigned char BYTE;
 */
 
 XDR$ntov_int (in,out)
-    BYTE *in,*out;
+BYTE *in,*out;
 {
     BYTE tmp[4];
 
@@ -101,7 +101,7 @@ XDR$ntov_int (in,out)
 }
 
 XDR$vton_int (in,out)
-    BYTE *in,*out;
+BYTE *in,*out;
 {
     XDR$ntov_int(in,out);
 }
@@ -117,7 +117,7 @@ XDR$vton_int (in,out)
 */
 
 XDR$ntov_uint (in,out)
-    BYTE *in,*out;
+BYTE *in,*out;
 {
     BYTE tmp[4];
 
@@ -135,7 +135,7 @@ XDR$ntov_uint (in,out)
 }
 
 XDR$vton_uint (in,out)
-    BYTE *in,*out;
+BYTE *in,*out;
 {
     XDR$ntov_int(in,out);
 }

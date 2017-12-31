@@ -1,6 +1,6 @@
 /*
  * $Id$
- * 
+ *
  * Derived from (and probably identical to):
  * ftl.h 1.7 1999/10/25 20:23:17
  *
@@ -12,7 +12,7 @@
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
  * the License for the specific language governing rights and
- * limitations under the License. 
+ * limitations under the License.
  *
  * The initial developer of the original code is David A. Hinds
  * <dhinds@pcmcia.sourceforge.org>.  Portions created by David A. Hinds
@@ -33,7 +33,8 @@
 #ifndef _LINUX_FTL_H
 #define _LINUX_FTL_H
 
-typedef struct erase_unit_header_t {
+typedef struct erase_unit_header_t
+{
     u_int8_t	LinkTargetTuple[5];
     u_int8_t	DataOrgTuple[10];
     u_int8_t	NumTransferUnits;

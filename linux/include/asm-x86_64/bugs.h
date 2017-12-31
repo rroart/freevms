@@ -18,17 +18,17 @@
 
 static inline void check_fpu(void)
 {
-	extern void __bad_fxsave_alignment(void);
-	if (offsetof(struct task_struct, thread.i387.fxsave) & 15)
-		__bad_fxsave_alignment();
+    extern void __bad_fxsave_alignment(void);
+    if (offsetof(struct task_struct, thread.i387.fxsave) & 15)
+        __bad_fxsave_alignment();
 
-	/* This should not be here */	
-	set_in_cr4(X86_CR4_OSFXSR);
-	set_in_cr4(X86_CR4_OSXMMEXCPT);
+    /* This should not be here */
+    set_in_cr4(X86_CR4_OSFXSR);
+    set_in_cr4(X86_CR4_OSXMMEXCPT);
 }
 
 static void __init check_bugs(void)
 {
-	identify_cpu(&boot_cpu_data);
-	check_fpu();
+    identify_cpu(&boot_cpu_data);
+    check_fpu();
 }

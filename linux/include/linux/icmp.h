@@ -63,21 +63,25 @@
 #define ICMP_EXC_FRAGTIME	1	/* Fragment Reass time exceeded	*/
 
 
-struct icmphdr {
-  __u8		type;
-  __u8		code;
-  __u16		checksum;
-  union {
-	struct {
-		__u16	id;
-		__u16	sequence;
-	} echo;
-	__u32	gateway;
-	struct {
-		__u16	__unused;
-		__u16	mtu;
-	} frag;
-  } un;
+struct icmphdr
+{
+    __u8		type;
+    __u8		code;
+    __u16		checksum;
+    union
+    {
+        struct
+        {
+            __u16	id;
+            __u16	sequence;
+        } echo;
+        __u32	gateway;
+        struct
+        {
+            __u16	__unused;
+            __u16	mtu;
+        } frag;
+    } un;
 };
 
 /*
@@ -86,8 +90,9 @@ struct icmphdr {
 
 #define ICMP_FILTER			1
 
-struct icmp_filter {
-	__u32		data;
+struct icmp_filter
+{
+    __u32		data;
 };
 
 

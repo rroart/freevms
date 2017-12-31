@@ -271,7 +271,7 @@
 #define __NR_$suspnd           19
 #define __NR_$resume           20
 #define __NR_$exit             21
-#define __NR_$forcex           22 
+#define __NR_$forcex           22
 #define __NR_$setrwm           23
 #define __NR_$delprc           24
 #define __NR_$readef           25
@@ -465,7 +465,7 @@ __asm__ volatile ("int $0x80" \
 	: "0" (__NR_##name),"b" ((long)(arg1)),"c" ((long)(arg2)), \
 	  "d" ((long)(arg3)),"S" ((long)(arg4))); \
 __syscall_return(type,__res); \
-} 
+}
 
 #define _syscall5(type,name,type1,arg1,type2,arg2,type3,arg3,type4,arg4, \
 	  type5,arg5) \
@@ -523,7 +523,7 @@ static inline _syscall1(int,delete_module,const char *,name)
 
 static inline pid_t wait(int * wait_stat)
 {
-	return waitpid(-1,wait_stat,0);
+    return waitpid(-1,wait_stat,0);
 }
 
 #endif

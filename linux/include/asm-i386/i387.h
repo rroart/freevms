@@ -68,21 +68,21 @@ extern int restore_i387( struct _fpstate *buf );
  * ptrace request handers...
  */
 extern int get_fpregs( struct user_i387_struct *buf,
-		       struct task_struct *tsk );
+                       struct task_struct *tsk );
 extern int set_fpregs( struct task_struct *tsk,
-		       struct user_i387_struct *buf );
+                       struct user_i387_struct *buf );
 
 extern int get_fpxregs( struct user_fxsr_struct *buf,
-			struct task_struct *tsk );
+                        struct task_struct *tsk );
 extern int set_fpxregs( struct task_struct *tsk,
-			struct user_fxsr_struct *buf );
+                        struct user_fxsr_struct *buf );
 
 /*
  * FPU state for core dumps...
  */
 extern int dump_fpu( struct pt_regs *regs,
-		     struct user_i387_struct *fpu );
+                     struct user_i387_struct *fpu );
 extern int dump_extended_fpu( struct pt_regs *regs,
-			      struct user_fxsr_struct *fpu );
+                              struct user_fxsr_struct *fpu );
 
 #endif /* __ASM_I386_I387_H */

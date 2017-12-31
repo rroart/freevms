@@ -19,14 +19,14 @@
 			    : "=a" (a__), "=d" (b__) \
 			    : "c" (msr)); \
        val = a__ | (b__<<32); \
-} while(0); 
+} while(0);
 
 #define wrmsr(msr,val1,val2) \
      __asm__ __volatile__("wrmsr" \
 			  : /* no outputs */ \
 			  : "c" (msr), "a" (val1), "d" (val2))
 
-#define wrmsrl(msr,val) wrmsr(msr,(__u32)((__u64)(val)),((__u64)(val))>>32) 
+#define wrmsrl(msr,val) wrmsr(msr,(__u32)((__u64)(val)),((__u64)(val))>>32)
 
 /* wrmsrl with exception handling */
 #define checking_wrmsrl(msr,val) ({ int ret__;					\
@@ -69,7 +69,7 @@
 
 #endif
 
-/* AMD/K8 specific MSRs */ 
+/* AMD/K8 specific MSRs */
 #define MSR_EFER 0xc0000080		/* extended feature register */
 #define MSR_STAR 0xc0000081		/* legacy mode SYSCALL target */
 #define MSR_LSTAR 0xc0000082 		/* long mode SYSCALL target */
@@ -77,8 +77,8 @@
 #define MSR_SYSCALL_MASK 0xc0000084	/* EFLAGS mask for syscall */
 #define MSR_FS_BASE 0xc0000100		/* 64bit GS base */
 #define MSR_GS_BASE 0xc0000101		/* 64bit FS base */
-#define MSR_KERNEL_GS_BASE  0xc0000102	/* SwapGS GS shadow (or USER_GS from kernel) */ 
-/* EFER bits: */ 
+#define MSR_KERNEL_GS_BASE  0xc0000102	/* SwapGS GS shadow (or USER_GS from kernel) */
+/* EFER bits: */
 #define _EFER_SCE 0  /* SYSCALL/SYSRET */
 #define _EFER_LME 8  /* Long mode enable */
 #define _EFER_LMA 10 /* Long mode active (read-only) */
@@ -145,7 +145,7 @@
 #define MSR_K7_PERFCTR3            0xC0010007
 #define MSR_K8_TOP_MEM1		   0xC001001A
 #define MSR_K8_TOP_MEM2		   0xC001001D
-#define MSR_K8_SYSCFG		   0xC0000010	
+#define MSR_K8_SYSCFG		   0xC0000010
 
 /* K6 MSRs */
 #define MSR_K6_EFER			0xC0000080

@@ -40,26 +40,27 @@
    The error values are derived from UNIX error numbers.
 */
 
-typedef enum {
-		NFS_OK 			=  0,
-		NFSERR_PERM		=  1,
-		NFSERR_NOENT		=  2,
-		NFSERR_IO		=  5,
-		NFSERR_NXIO		=  6,
-		NFSERR_ACCES		= 13,
-		NFSERR_EXIST		= 17,
-		NFSERR_NODEV		= 19,
-		NFSERR_NOTDIR		= 20,
-		NFSERR_ISDIR		= 21,
-		NFSERR_FBIG		= 27,
-		NFSERR_NOSPC		= 28,
-		NFSERR_ROFS		= 30,
-		NFSERR_NAMETOOLONG	= 63,
-		NFSERR_NOTEMPTY		= 66,
-		NFSERR_DQUOT		= 69,
-		NFSERR_STALE		= 70,
-		NFSERR_WFLUSH		= 99
-	} nfs_stat;
+typedef enum
+{
+    NFS_OK 			=  0,
+    NFSERR_PERM		=  1,
+    NFSERR_NOENT		=  2,
+    NFSERR_IO		=  5,
+    NFSERR_NXIO		=  6,
+    NFSERR_ACCES		= 13,
+    NFSERR_EXIST		= 17,
+    NFSERR_NODEV		= 19,
+    NFSERR_NOTDIR		= 20,
+    NFSERR_ISDIR		= 21,
+    NFSERR_FBIG		= 27,
+    NFSERR_NOSPC		= 28,
+    NFSERR_ROFS		= 30,
+    NFSERR_NAMETOOLONG	= 63,
+    NFSERR_NOTEMPTY		= 66,
+    NFSERR_DQUOT		= 69,
+    NFSERR_STALE		= 70,
+    NFSERR_WFLUSH		= 99
+} nfs_stat;
 
 
 
@@ -72,14 +73,15 @@ typedef enum {
       special device, and NFLNK is a symbolic link.
 */
 
-typedef enum {
-	NFNON = 0,
-	NFREG = 1,
-	NFDIR = 2,
-	NFBLK = 3,
-	NFCHR = 4,
-	NFLNK = 5
-	} ftype;
+typedef enum
+{
+    NFNON = 0,
+    NFREG = 1,
+    NFDIR = 2,
+    NFBLK = 3,
+    NFCHR = 4,
+    NFLNK = 5
+} ftype;
 
 
 
@@ -106,10 +108,11 @@ typedef unsigned char fhandle[FHSIZE];
 
 */
 
-typedef struct {
+typedef struct
+{
     unsigned int seconds;
     unsigned int useconds;
-    } timeval;
+} timeval;
 
 
 
@@ -135,22 +138,23 @@ typedef struct {
       size of the file changes.
 */
 
-typedef struct {
-	enum ftype   type;
-	unsigned int mode;
-	unsigned int nlink;
-	unsigned int uid;
-	unsigned int gid;
-	unsigned int size;
-	unsigned int blocksize;
-	unsigned int rdev;
-	unsigned int blocks;
-	unsigned int fsid;
-	unsigned int fileid;
-	timeval      atime;
-	timeval      mtime;
-	timeval      ctime;
-	} fattr;
+typedef struct
+{
+    enum ftype   type;
+    unsigned int mode;
+    unsigned int nlink;
+    unsigned int uid;
+    unsigned int gid;
+    unsigned int size;
+    unsigned int blocksize;
+    unsigned int rdev;
+    unsigned int blocks;
+    unsigned int fsid;
+    unsigned int fileid;
+    timeval      atime;
+    timeval      mtime;
+    timeval      ctime;
+} fattr;
 
 
 
@@ -163,14 +167,15 @@ typedef struct {
       value of -1 indicates a field that should be ignored.
 */
 
-typedef struct {
-              unsigned int mode;
-              unsigned int uid;
-              unsigned int gid;
-              unsigned int size;
-              timeval      atime;
-              timeval      mtime;
-          } sattr;
+typedef struct
+{
+    unsigned int mode;
+    unsigned int uid;
+    unsigned int gid;
+    unsigned int size;
+    timeval      atime;
+    timeval      mtime;
+} sattr;
 
 
 
@@ -181,10 +186,11 @@ typedef struct {
       components.
 */
 
-typedef struct {
-	unsigned long length;
-	unsigned char data[MAXNAMLEN];
-	} filename;
+typedef struct
+{
+    unsigned long length;
+    unsigned char data[MAXNAMLEN];
+} filename;
 
 
 
@@ -196,10 +202,11 @@ typedef struct {
 	name of a node in a filesystem tree.
 */
 
-typedef struct {
-	unsigned long length;
-	unsigned char data[MAXPATHLEN];
-	} path;
+typedef struct
+{
+    unsigned long length;
+    unsigned char data[MAXPATHLEN];
+} path;
 
 
 
@@ -211,10 +218,11 @@ typedef struct {
       the attributes of the file on which the operation was done.
 */
 
-typedef struct {
-	nfs_stat status;
-	fattr attributes;
-	} attrstat;
+typedef struct
+{
+    nfs_stat status;
+    fattr attributes;
+} attrstat;
 
 
 
@@ -226,10 +234,11 @@ typedef struct {
       A directory operation is one in which the directory is affected.
 */
 
-typedef struct {
-	fhandle  dir;
-	filename name;
-	} diropargs;
+typedef struct
+{
+    fhandle  dir;
+    filename name;
+} diropargs;
 
 
 
@@ -242,25 +251,28 @@ typedef struct {
       the "status".
 */
 
-typedef struct {
-	nfs_stat status;
-	fhandle file;
-	fattr   attributes;
-	} diropres ;
+typedef struct
+{
+    nfs_stat status;
+    fhandle file;
+    fattr   attributes;
+} diropres ;
 
 
 
 /* This structure is passed to NFSPROC_READDIR (#16) */
 
-typedef struct {
+typedef struct
+{
     fhandle dir;
     unsigned cookie;
     unsigned count;
-    } readdirargs;
+} readdirargs;
 
 
 
-typedef struct {
+typedef struct
+{
     unsigned length;
     unsigned data[];
-    } nfsdata;
+} nfsdata;

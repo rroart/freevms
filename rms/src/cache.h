@@ -20,7 +20,8 @@
 #define signed
 #endif
 
-struct CACHE {
+struct CACHE
+{
     struct CACHE *nextlru;	/* next object on least recently used list */
     struct CACHE *lastlru;	/* last object on least recently used list */
     struct CACHE *left;		/* left branch of binary tree */

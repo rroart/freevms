@@ -6,7 +6,7 @@
  *
  * Delay routines calling functions in arch/i386/lib/delay.c
  */
- 
+
 extern void __bad_udelay(void);
 
 extern void __udelay(unsigned long usecs);

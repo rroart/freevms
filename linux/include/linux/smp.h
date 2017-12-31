@@ -16,7 +16,7 @@
 /*
  * main cross-CPU interfaces, handles INIT, TLB flush, STOP, etc.
  * (defined in asm header):
- */ 
+ */
 
 /*
  * stops all CPUs but the current one:
@@ -52,7 +52,7 @@ extern void smp_commence(void);
  * Call a function on all other processors
  */
 extern int smp_call_function (void (*func) (void *info), void *info,
-			      int retry, int wait);
+                              int retry, int wait);
 
 /*
  * True once the per process idle is forked
@@ -70,8 +70,8 @@ extern volatile int smp_msg_id;
 
 #define MSG_INVALIDATE_TLB	0x0001	/* Remote processor TLB invalidate */
 #define MSG_STOP_CPU		0x0002	/* Sent to shut down slave CPU's
-					 * when rebooting
-					 */
+* when rebooting
+*/
 #define MSG_RESCHEDULE		0x0003	/* Reschedule request from master CPU*/
 #define MSG_CALL_FUNCTION       0x0004  /* Call function on all other CPUs */
 
@@ -80,7 +80,7 @@ extern volatile int smp_msg_id;
 /*
  *	These macros fold the SMP functionality into a single CPU system
  */
- 
+
 #define smp_num_cpus				1
 #define smp_processor_id()			0
 #define hard_smp_processor_id()			0

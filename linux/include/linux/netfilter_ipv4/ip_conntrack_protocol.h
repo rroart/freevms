@@ -5,45 +5,45 @@
 
 struct ip_conntrack_protocol
 {
-	/* Next pointer. */
-	struct list_head list;
+    /* Next pointer. */
+    struct list_head list;
 
-	/* Protocol number. */
-	u_int8_t proto;
+    /* Protocol number. */
+    u_int8_t proto;
 
-	/* Protocol name */
-	const char *name;
+    /* Protocol name */
+    const char *name;
 
-	/* Try to fill in the third arg; return true if possible. */
-	int (*pkt_to_tuple)(const void *datah, size_t datalen,
-			    struct ip_conntrack_tuple *tuple);
+    /* Try to fill in the third arg; return true if possible. */
+    int (*pkt_to_tuple)(const void *datah, size_t datalen,
+                        struct ip_conntrack_tuple *tuple);
 
-	/* Invert the per-proto part of the tuple: ie. turn xmit into reply.
-	 * Some packets can't be inverted: return 0 in that case.
-	 */
-	int (*invert_tuple)(struct ip_conntrack_tuple *inverse,
-			    const struct ip_conntrack_tuple *orig);
+    /* Invert the per-proto part of the tuple: ie. turn xmit into reply.
+     * Some packets can't be inverted: return 0 in that case.
+     */
+    int (*invert_tuple)(struct ip_conntrack_tuple *inverse,
+                        const struct ip_conntrack_tuple *orig);
 
-	/* Print out the per-protocol part of the tuple. */
-	unsigned int (*print_tuple)(char *buffer,
-				    const struct ip_conntrack_tuple *);
+    /* Print out the per-protocol part of the tuple. */
+    unsigned int (*print_tuple)(char *buffer,
+                                const struct ip_conntrack_tuple *);
 
-	/* Print out the private part of the conntrack. */
-	unsigned int (*print_conntrack)(char *buffer,
-					const struct ip_conntrack *);
+    /* Print out the private part of the conntrack. */
+    unsigned int (*print_conntrack)(char *buffer,
+                                    const struct ip_conntrack *);
 
-	/* Returns verdict for packet, or -1 for invalid. */
-	int (*packet)(struct ip_conntrack *conntrack,
-		      struct iphdr *iph, size_t len,
-		      enum ip_conntrack_info ctinfo);
+    /* Returns verdict for packet, or -1 for invalid. */
+    int (*packet)(struct ip_conntrack *conntrack,
+                  struct iphdr *iph, size_t len,
+                  enum ip_conntrack_info ctinfo);
 
-	/* Called when a new connection for this protocol found;
-	 * returns TRUE if it's OK.  If so, packet() called next. */
-	int (*new)(struct ip_conntrack *conntrack, struct iphdr *iph,
-		   size_t len);
+    /* Called when a new connection for this protocol found;
+     * returns TRUE if it's OK.  If so, packet() called next. */
+    int (*new)(struct ip_conntrack *conntrack, struct iphdr *iph,
+               size_t len);
 
-	/* Module (if any) which this is connected to. */
-	struct module *me;
+    /* Module (if any) which this is connected to. */
+    struct module *me;
 };
 
 /* Protocol registration. */

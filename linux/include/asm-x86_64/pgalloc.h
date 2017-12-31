@@ -23,179 +23,185 @@
 
 extern __inline__ pmd_t *get_pmd_slow(void)
 {
-	return (pmd_t *)get_zeroed_page(GFP_KERNEL);
+    return (pmd_t *)get_zeroed_page(GFP_KERNEL);
 }
 
 extern __inline__ pmd_t *get_pmd_fast(void)
 {
-	unsigned long *ret;
+    unsigned long *ret;
 
-	if ((ret = read_pda(pmd_quick)) != NULL) {
-		write_pda(pmd_quick, (unsigned long *)(*ret));
-		ret[0] = 0;
-		dec_pgcache_size();
-	} else
-		ret = (unsigned long *)get_pmd_slow();
-	return (pmd_t *)ret;
+    if ((ret = read_pda(pmd_quick)) != NULL)
+    {
+        write_pda(pmd_quick, (unsigned long *)(*ret));
+        ret[0] = 0;
+        dec_pgcache_size();
+    }
+    else
+        ret = (unsigned long *)get_pmd_slow();
+    return (pmd_t *)ret;
 }
 
 extern __inline__ void pmd_free(pmd_t *pmd)
 {
-	*(unsigned long *)pmd = (unsigned long) read_pda(pmd_quick);
-	write_pda(pmd_quick,(unsigned long *) pmd);
-	inc_pgcache_size();
+    *(unsigned long *)pmd = (unsigned long) read_pda(pmd_quick);
+    write_pda(pmd_quick,(unsigned long *) pmd);
+    inc_pgcache_size();
 }
 
 extern __inline__ void pmd_free_slow(pmd_t *pmd)
 {
-	if ((unsigned long)pmd & (PAGE_SIZE-1)) 
-		out_of_line_bug(); 
-	free_page((unsigned long)pmd);
+    if ((unsigned long)pmd & (PAGE_SIZE-1))
+        out_of_line_bug();
+    free_page((unsigned long)pmd);
 }
 
 static inline pmd_t *pmd_alloc_one_fast (struct mm_struct *mm, unsigned long addr)
 {
-	unsigned long *ret = (unsigned long *)read_pda(pmd_quick);
+    unsigned long *ret = (unsigned long *)read_pda(pmd_quick);
 
-	if (ret != NULL) {
-		write_pda(pmd_quick, (unsigned long *)(*ret));
-		ret[0] = 0;
-		dec_pgcache_size();
-	}
-	return (pmd_t *)ret;
+    if (ret != NULL)
+    {
+        write_pda(pmd_quick, (unsigned long *)(*ret));
+        ret[0] = 0;
+        dec_pgcache_size();
+    }
+    return (pmd_t *)ret;
 }
 
 static inline pmd_t *pmd_alloc_one (struct mm_struct *mm, unsigned long addr)
 {
-	return (pmd_t *)get_zeroed_page(GFP_KERNEL); 
+    return (pmd_t *)get_zeroed_page(GFP_KERNEL);
 }
 
 static inline pmd_t *pud_alloc_one_fast (struct mm_struct *mm, unsigned long addr)
 {
-	unsigned long *ret = (unsigned long *)read_pda(pud_quick);
+    unsigned long *ret = (unsigned long *)read_pda(pud_quick);
 
-	if (ret != NULL) {
-		write_pda(pud_quick, (unsigned long *)(*ret));
-		ret[0] = 0;
-		dec_pgcache_size();
-	}
-	return (pud_t *)ret;
+    if (ret != NULL)
+    {
+        write_pda(pud_quick, (unsigned long *)(*ret));
+        ret[0] = 0;
+        dec_pgcache_size();
+    }
+    return (pud_t *)ret;
 }
 
 static inline pud_t *pud_alloc_one (struct mm_struct *mm, unsigned long addr)
 {
-	return (pud_t *)get_zeroed_page(GFP_KERNEL); 
+    return (pud_t *)get_zeroed_page(GFP_KERNEL);
 }
 
 static inline void pud_free (pud_t *pud)
 {
-	BUG_ON((unsigned long)pud & (PAGE_SIZE-1));
-	free_page((unsigned long)pud);
+    BUG_ON((unsigned long)pud & (PAGE_SIZE-1));
+    free_page((unsigned long)pud);
 }
 
 static inline pgd_t *pgd_alloc_one_fast (void)
 {
-	unsigned long *ret = read_pda(pgd_quick);
+    unsigned long *ret = read_pda(pgd_quick);
 
-	if (ret) {
-		write_pda(pgd_quick,(unsigned long *)(*ret));
-		ret[0] = 0;
-		dec_pgcache_size();
-	}
-	return (pgd_t *) ret;
+    if (ret)
+    {
+        write_pda(pgd_quick,(unsigned long *)(*ret));
+        ret[0] = 0;
+        dec_pgcache_size();
+    }
+    return (pgd_t *) ret;
 }
 
 #if 0
 static inline pgd_t *pgd_alloc (struct mm_struct *mm)
 {
-	/* the VM system never calls pgd_alloc_one_fast(), so we do it here. */
-	pgd_t *pgd = pgd_alloc_one_fast();
+    /* the VM system never calls pgd_alloc_one_fast(), so we do it here. */
+    pgd_t *pgd = pgd_alloc_one_fast();
 
-	if (pgd == NULL)
-		pgd = (pgd_t *)get_zeroed_page(GFP_KERNEL); 
-	return pgd;
+    if (pgd == NULL)
+        pgd = (pgd_t *)get_zeroed_page(GFP_KERNEL);
+    return pgd;
 }
 #else
 static inline pgd_t *pgd_alloc(struct mm_struct *mm)
 {
-	unsigned boundary;
-	pgd_t *pgd = (pgd_t *)__get_free_page(GFP_KERNEL/*|__GFP_REPEAT*/);
-	if (!pgd)
-		return NULL;
-	/*
-	 * Copy kernel pointers in from init.
-	 * Could keep a freelist or slab cache of those because the kernel
-	 * part never changes.
-	 */
-	boundary = pgd_index(__PAGE_OFFSET);
-	memset(pgd, 0, boundary * sizeof(pgd_t));
-	memcpy(pgd + boundary,
-	       init_level4_pgt + boundary,
-	       (PTRS_PER_PGD - boundary) * sizeof(pgd_t));
-	return pgd;
+    unsigned boundary;
+    pgd_t *pgd = (pgd_t *)__get_free_page(GFP_KERNEL/*|__GFP_REPEAT*/);
+    if (!pgd)
+        return NULL;
+    /*
+     * Copy kernel pointers in from init.
+     * Could keep a freelist or slab cache of those because the kernel
+     * part never changes.
+     */
+    boundary = pgd_index(__PAGE_OFFSET);
+    memset(pgd, 0, boundary * sizeof(pgd_t));
+    memcpy(pgd + boundary,
+           init_level4_pgt + boundary,
+           (PTRS_PER_PGD - boundary) * sizeof(pgd_t));
+    return pgd;
 }
 #endif
 
 #if 0
 static inline void pgd_free (pgd_t *pgd)
 {
-	*(unsigned long *)pgd = (unsigned long) read_pda(pgd_quick);
-	write_pda(pgd_quick,(unsigned long *) pgd);
-	inc_pgcache_size();
+    *(unsigned long *)pgd = (unsigned long) read_pda(pgd_quick);
+    write_pda(pgd_quick,(unsigned long *) pgd);
+    inc_pgcache_size();
 }
 #else
 static inline void pgd_free (pgd_t *pgd)
 {
 #if 0
-	BUG_ON((unsigned long)pgd & (PAGE_SIZE-1));
+    BUG_ON((unsigned long)pgd & (PAGE_SIZE-1));
 #endif
-	free_page((unsigned long)pgd);
+    free_page((unsigned long)pgd);
 }
 #endif
 
 static inline void pgd_free_slow (pgd_t *pgd)
 {
-	if ((unsigned long)pgd & (PAGE_SIZE-1)) 
-		out_of_line_bug(); 
-	free_page((unsigned long)pgd);
+    if ((unsigned long)pgd & (PAGE_SIZE-1))
+        out_of_line_bug();
+    free_page((unsigned long)pgd);
 }
 
 #if 0
 static inline pte_t *pte_alloc_one(struct mm_struct *mm, unsigned long address)
 {
-	return (pte_t *)get_zeroed_page(GFP_KERNEL); 
+    return (pte_t *)get_zeroed_page(GFP_KERNEL);
 }
 #endif
 
 extern __inline__ pte_t *pte_alloc_one_fast(struct mm_struct *mm, unsigned long address)
 {
-	unsigned long *ret;
+    unsigned long *ret;
 
-	if ((ret = read_pda(pte_quick)) != NULL) {  
-		write_pda(pte_quick, (unsigned long *)(*ret));
-		ret[0] = ret[1];
-		dec_pgcache_size();
-	}
-	return (pte_t *)ret;
+    if ((ret = read_pda(pte_quick)) != NULL)
+    {
+        write_pda(pte_quick, (unsigned long *)(*ret));
+        ret[0] = ret[1];
+        dec_pgcache_size();
+    }
+    return (pte_t *)ret;
 }
 
-/* Should really implement gc for free page table pages. This could be done with 
+/* Should really implement gc for free page table pages. This could be done with
    a reference count in struct page. */
 
 #if 0
 extern __inline__ void pte_free(pte_t *pte)
-{	
-	*(unsigned long *)pte = (unsigned long) read_pda(pte_quick);
-	write_pda(pte_quick, (unsigned long *) pte); 
-	inc_pgcache_size();
+{
+    *(unsigned long *)pte = (unsigned long) read_pda(pte_quick);
+    write_pda(pte_quick, (unsigned long *) pte);
+    inc_pgcache_size();
 }
 #endif
 
 extern __inline__ void pte_free_slow(pte_t *pte)
 {
-	if ((unsigned long)pte & (PAGE_SIZE-1))
-		out_of_line_bug();
-	free_page((unsigned long)pte); 
+    if ((unsigned long)pte & (PAGE_SIZE-1))
+        out_of_line_bug();
+    free_page((unsigned long)pte);
 }
 
 
@@ -220,22 +226,22 @@ extern int do_check_pgt_cache(int, int);
 
 static inline void flush_tlb_mm(struct mm_struct *mm)
 {
-	if (mm == current->active_mm)
-		__flush_tlb();
+    if (mm == current->active_mm)
+        __flush_tlb();
 }
 
 static inline void flush_tlb_page2(struct mm_struct *mm,
-	unsigned long addr)
+                                   unsigned long addr)
 {
-	if (mm == current->active_mm)
-		__flush_tlb_one(addr);
+    if (mm == current->active_mm)
+        __flush_tlb_one(addr);
 }
 
 static inline void flush_tlb_range(struct mm_struct *mm,
-	unsigned long start, unsigned long end)
+                                   unsigned long start, unsigned long end)
 {
-	if (mm == current->active_mm)
-		__flush_tlb();
+    if (mm == current->active_mm)
+        __flush_tlb();
 }
 
 #else
@@ -255,7 +261,7 @@ extern void flush_tlb_page2(struct mm_struct *, unsigned long);
 
 static inline void flush_tlb_range(struct mm_struct * mm, unsigned long start, unsigned long end)
 {
-	flush_tlb_mm(mm);
+    flush_tlb_mm(mm);
 }
 
 #define TLBSTATE_OK	1
@@ -263,8 +269,8 @@ static inline void flush_tlb_range(struct mm_struct * mm, unsigned long start, u
 
 struct tlb_state
 {
-	struct mm_struct *active_mm;
-	int state;
+    struct mm_struct *active_mm;
+    int state;
 } ____cacheline_aligned;
 extern struct tlb_state cpu_tlbstate[NR_CPUS];
 
@@ -272,9 +278,9 @@ extern struct tlb_state cpu_tlbstate[NR_CPUS];
 #endif
 
 extern inline void flush_tlb_pgtables(struct mm_struct *mm,
-				      unsigned long start, unsigned long end)
+                                      unsigned long start, unsigned long end)
 {
-	flush_tlb_mm(mm);
+    flush_tlb_mm(mm);
 }
 
 #if 1
@@ -283,16 +289,16 @@ extern inline void flush_tlb_pgtables(struct mm_struct *mm,
 
 static inline pte_t *pte_alloc_one_kernel(struct mm_struct *mm, unsigned long address)
 {
-	return (pte_t *)get_zeroed_page(GFP_KERNEL|__GFP_REPEAT);
+    return (pte_t *)get_zeroed_page(GFP_KERNEL|__GFP_REPEAT);
 }
 
 static inline struct page *pte_alloc_one(struct mm_struct *mm, unsigned long address)
 {
-	void *p = (void *)get_zeroed_page(GFP_KERNEL|__GFP_REPEAT);
-	if (!p)
-		return NULL;
-	return p;
-	return virt_to_page(p);
+    void *p = (void *)get_zeroed_page(GFP_KERNEL|__GFP_REPEAT);
+    if (!p)
+        return NULL;
+    return p;
+    return virt_to_page(p);
 }
 
 /* Should really implement gc for free page table pages. This could be
@@ -300,14 +306,14 @@ static inline struct page *pte_alloc_one(struct mm_struct *mm, unsigned long add
 
 static inline void pte_free_kernel(pte_t *pte)
 {
-	BUG_ON((unsigned long)pte & (PAGE_SIZE-1));
-	free_page((unsigned long)pte); 
+    BUG_ON((unsigned long)pte & (PAGE_SIZE-1));
+    free_page((unsigned long)pte);
 }
 
 static inline void pte_free(struct page *pte)
 {
-	__free_page(pte);
-} 
+    __free_page(pte);
+}
 
 #define __pte_free_tlb(tlb,pte) tlb_remove_page((tlb),(pte))
 

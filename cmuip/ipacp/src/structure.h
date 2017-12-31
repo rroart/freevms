@@ -117,7 +117,7 @@ Modification History:
 	host alias table.
 */
 
-  // not yet#include "cmuip/central/netxport.h"	// Get the transportablity library
+// not yet#include "cmuip/central/netxport.h"	// Get the transportablity library
 #include "../../central/include/netcommon.h" // System-wide definitions
 
 // Define some standard literals
@@ -170,10 +170,10 @@ Modification History:
 	void * N##enqp;	/* Pointer to last byte on queue*/\
 	void * N##deqp;	/* Pointer to first byte on queue*/
 
-struct cq_fields 
-    {
+struct cq_fields
+{
     CQF$DEF(cq$)		// Define the queue fields
-    };
+};
 
 #define    CQ_SIZE sizeof(struct cq_fields)
 
@@ -205,20 +205,22 @@ send data eg.
 
 struct qb_send_fields
 {
-  void *     sn$next;		// Forward Queue Link (Flink).
-  void *     sn$last;		// Backwards queue link (Blink).
-  signed  int     sn$size;	// # of bytes to send.
-  void *     sn$data ;		// Start of data buffer.
-  void *     sn$uargs;		// Address of user arg blk.
-  unsigned long long    sn$timeout;	// connection timeout (time).
-  union {
-    signed char     sn$flags;
-    struct {
-      unsigned 	sn$eol		 : 1;		// End Of Letter Boolean.
-      unsigned 	sn$urg		 : 1;		// Urgent data boolean.
-      unsigned 	sn$user		 : 1;	// On if seg is in user space
+    void *     sn$next;		// Forward Queue Link (Flink).
+    void *     sn$last;		// Backwards queue link (Blink).
+    signed  int     sn$size;	// # of bytes to send.
+    void *     sn$data ;		// Start of data buffer.
+    void *     sn$uargs;		// Address of user arg blk.
+    unsigned long long    sn$timeout;	// connection timeout (time).
+    union
+    {
+        signed char     sn$flags;
+        struct
+        {
+            unsigned 	sn$eol		 : 1;		// End Of Letter Boolean.
+            unsigned 	sn$urg		 : 1;		// Urgent data boolean.
+            unsigned 	sn$user		 : 1;	// On if seg is in user space
+        };
     };
-  };
 };
 
 #define    QB_SN_SIZE sizeof(struct qb_send_fields)
@@ -227,18 +229,18 @@ struct qb_send_fields
 
 struct qb_rt_fields
 {
-  void *     rt$next;		// FLink.
-  void *     rt$last;		// Blink.
-  void *     rt$buf;		// segment buffer start adrs
-  signed short int     rt$bufsize;	// byte size of buffer.
-  signed short int     rt$segsize;	// Byte size of segment.
-  void *     rt$seg;		// Start address of segment.
-  signed int     rt$dest_adrs;		// Destination network adrs.
-  signed int     rt$timeout;		// Retransmission timeout
-  signed int     rt$maxtimeout;		// expiration time on RX queue
-  signed int     rt$start_xmit_time;		// base for round trip calc.
-  signed int     rt$xmit_count;		// # of transmissions.
-  signed int     rt$seq_end;		// Last sequence # in segment
+    void *     rt$next;		// FLink.
+    void *     rt$last;		// Blink.
+    void *     rt$buf;		// segment buffer start adrs
+    signed short int     rt$bufsize;	// byte size of buffer.
+    signed short int     rt$segsize;	// Byte size of segment.
+    void *     rt$seg;		// Start address of segment.
+    signed int     rt$dest_adrs;		// Destination network adrs.
+    signed int     rt$timeout;		// Retransmission timeout
+    signed int     rt$maxtimeout;		// expiration time on RX queue
+    signed int     rt$start_xmit_time;		// base for round trip calc.
+    signed int     rt$xmit_count;		// # of transmissions.
+    signed int     rt$seq_end;		// Last sequence # in segment
 };
 
 #define    QB_RT_SIZE sizeof(struct qb_rt_fields)
@@ -247,39 +249,43 @@ struct qb_rt_fields
 
 struct qb_nr_fields
 {
-  void *     nr$next;		// FLINK.
-  void *     nr$last;		// BLink.
-  signed int     nr$buf_size;	// byte size of read buffer.
-  void *     nr$buf;		// Read buffer start.
-  signed int     nr$size;	// Byte size of TCP segment.
-  void *     nr$seg;		// start of TCP segment.
-  signed int     nr$data_size;	// # of data bytes available.
-  void *     nr$uptr;		// pointer to new data
-  signed int     nr$ucount;	// count of new data
-  signed long long     nr$timeout;
-  signed int     nr$src_adrs;	// Internet address.
-  signed int     nr$dest_adrs;	// Internet address.
-  signed short     nr$src_port;		// SYN wait list: Source Port
-  signed short     nr$dest_port;		// SYN wait list: Dest port.
-  union {
-    signed int     nr$seq_start;		// First usable seqence #
-    struct { 			// Reuse for ICMP messages
-      signed char 	nr$icm_type;		// ICMP msg type
-      signed char 	nr$icm_code;		// ICMP code field
-      signed short 	nr$icm_ex;		// ICMP extra data
-    };  
-    void * 	nr$fragptr;		// IP fragment flag/pointer
-  };
-  signed int     nr$seq_end;		// Segment's last sequence #.
-  signed int     nr$seq_count;		// Count of usable sequence #s
-  union {
-    signed char     nr$flags;
-    struct {
-      unsigned 	nr$eol		 : 1;		// End Of Letter boolean
-      unsigned 	nr$urg		 : 1;		// Urgent data boolean.
-      unsigned 	nr$icmp		 : 1;	// Really an ICMP message
+    void *     nr$next;		// FLINK.
+    void *     nr$last;		// BLink.
+    signed int     nr$buf_size;	// byte size of read buffer.
+    void *     nr$buf;		// Read buffer start.
+    signed int     nr$size;	// Byte size of TCP segment.
+    void *     nr$seg;		// start of TCP segment.
+    signed int     nr$data_size;	// # of data bytes available.
+    void *     nr$uptr;		// pointer to new data
+    signed int     nr$ucount;	// count of new data
+    signed long long     nr$timeout;
+    signed int     nr$src_adrs;	// Internet address.
+    signed int     nr$dest_adrs;	// Internet address.
+    signed short     nr$src_port;		// SYN wait list: Source Port
+    signed short     nr$dest_port;		// SYN wait list: Dest port.
+    union
+    {
+        signed int     nr$seq_start;		// First usable seqence #
+        struct   			// Reuse for ICMP messages
+        {
+            signed char 	nr$icm_type;		// ICMP msg type
+            signed char 	nr$icm_code;		// ICMP code field
+            signed short 	nr$icm_ex;		// ICMP extra data
+        };
+        void * 	nr$fragptr;		// IP fragment flag/pointer
     };
-  };
+    signed int     nr$seq_end;		// Segment's last sequence #.
+    signed int     nr$seq_count;		// Count of usable sequence #s
+    union
+    {
+        signed char     nr$flags;
+        struct
+        {
+            unsigned 	nr$eol		 : 1;		// End Of Letter boolean
+            unsigned 	nr$urg		 : 1;		// Urgent data boolean.
+            unsigned 	nr$icmp		 : 1;	// Really an ICMP message
+        };
+    };
 };
 
 #define    QB_NR_SIZE sizeof(struct qb_nr_fields)
@@ -288,27 +294,30 @@ struct qb_nr_fields
 
 struct qb_ur_fields
 {
-  void *     ur$next;		// FLINK.
-  void *     ur$last;		// Blink
-  signed int     ur$size;	// # of bytes requested by user.
-  void *     ur$data;		// Start of data buffer.
-  union {
-    struct {
-      void *     ur$irp_adrs;		// IO request adrs.
-      void *     ur$ucb_adrs;		// Unit Control Blk adrs.
+    void *     ur$next;		// FLINK.
+    void *     ur$last;		// Blink
+    signed int     ur$size;	// # of bytes requested by user.
+    void *     ur$data;		// Start of data buffer.
+    union
+    {
+        struct
+        {
+            void *     ur$irp_adrs;		// IO request adrs.
+            void *     ur$ucb_adrs;		// Unit Control Blk adrs.
+        };
+        struct
+        {
+            int ( * 	ur$astadr)();		// AST address for internal conn
+            void *	ur$astprm;		// AST param for internal conn
+        };
     };
-    struct {
-      int ( * 	ur$astadr)();		// AST address for internal conn
-      void *	ur$astprm;		// AST param for internal conn
-    };
-  };
-  void *     ur$uargs;		// Address of user arg blk.
+    void *     ur$uargs;		// Address of user arg blk.
 };
 
 #define    QB_UR_SIZE sizeof(struct qb_ur_fields)
 
 #define qb_size 0
-      // check $MAXLIT(QB_Size,QB_SN_SIZE,QB_RT_SIZE,QB_NR_SIZE,QB_UR_SIZE);
+// check $MAXLIT(QB_Size,QB_SN_SIZE,QB_RT_SIZE,QB_NR_SIZE,QB_UR_SIZE);
 
 #define	queue_blk_structure(F) F
 //MESSAGE(%NUMBER(qb_size),' Longwords allocated per Queue Block')
@@ -323,8 +332,8 @@ has verified the datagram.
 
 struct si_fields
 {
-struct si_fields *     si_qhead;
-struct si_fields *     si_qtail;
+    struct si_fields *     si_qhead;
+    struct si_fields *     si_qtail;
 };
 
 #define    SI_Qheader_Size sizeof(struct si_fields)
@@ -338,8 +347,8 @@ struct si_fields *     si_qtail;
 
 struct sw_fields
 {
-  void *     sw_qhead;
-  void *     sw_qtail;
+    void *     sw_qhead;
+    void *     sw_qtail;
 };
 
 
@@ -388,7 +397,7 @@ char NM##$b_data[0];
 
 struct user_default_args
 {
-  Static_Fields(ud);			// Only the standard fields
+    Static_Fields(ud);			// Only the standard fields
 };
 
 #define    UD_SIZE sizeof(struct user_default_args)
@@ -397,31 +406,35 @@ struct user_default_args
 
 struct user_open_args
 {
-  Static_Fields(op);			// Define the standard fields
-  unsigned char    op$protohdrblk[0];
-  unsigned int     op$src_host;
-  unsigned int     op$dst_host;
-  unsigned int     op$ext1;	// Protocol header extension info
-  unsigned int     op$ext2;	// Protocol header extension info
-  union {
-    unsigned short     op$flags;	// Open flags
-    struct {
-      union {
-	unsigned 	op$mode		 : 1;	// Open mode, 1=Active, 0=Passive
-	unsigned 	op$active_open	 : 1;	// Alias for the above
-      };
-      // UDP: 1=ADDRMODE 
-      unsigned 	op$nowait	 : 1;	// 1=No wait, 0=wait
-      unsigned 	op$addr_flag	 : 1;	// 1=Address, 0=String (Foreign_Host)
+    Static_Fields(op);			// Define the standard fields
+    unsigned char    op$protohdrblk[0];
+    unsigned int     op$src_host;
+    unsigned int     op$dst_host;
+    unsigned int     op$ext1;	// Protocol header extension info
+    unsigned int     op$ext2;	// Protocol header extension info
+    union
+    {
+        unsigned short     op$flags;	// Open flags
+        struct
+        {
+            union
+            {
+                unsigned 	op$mode		 : 1;	// Open mode, 1=Active, 0=Passive
+                unsigned 	op$active_open	 : 1;	// Alias for the above
+            };
+            // UDP: 1=ADDRMODE
+            unsigned 	op$nowait	 : 1;	// 1=No wait, 0=wait
+            unsigned 	op$addr_flag	 : 1;	// 1=Address, 0=String (Foreign_Host)
+        };
     };
-  };
-  signed short     op$timeout;	// Inactivity timeout in seconds.
-  signed short     op$piochan;	// user's IO channel
-  unsigned short     op$foreign_hlen; 	// Length of foreign host name
-  union {
-    signed char    op$foreign_host[MAX_HNAME]; // ASCIZ FH name
-    signed int      op$foreign_address;	// FH address if OP$ADDR_FLAG set
-  };
+    signed short     op$timeout;	// Inactivity timeout in seconds.
+    signed short     op$piochan;	// user's IO channel
+    unsigned short     op$foreign_hlen; 	// Length of foreign host name
+    union
+    {
+        signed char    op$foreign_host[MAX_HNAME]; // ASCIZ FH name
+        signed int      op$foreign_address;	// FH address if OP$ADDR_FLAG set
+    };
 };
 
 #define    OPEN_ARG_LENGTH sizeof(struct user_open_args)
@@ -440,24 +453,26 @@ struct user_open_args
 
 struct user_send_args
 {
-  Static_Fields(se);			// Define the standard fields
-  unsigned char    se$protohdrblk[0];
-  unsigned int     se$src_host;
-  unsigned int     se$dst_host;
-  unsigned int     se$ext1;	// Protocol header extension info
-  unsigned int     se$ext2;	// Protocol header extension info
-  union {
-    unsigned short     se$flags;
-    struct {
-      unsigned 	se$opm		 : 1;	// Used in "OPEN" processing.
-      unsigned 	se$eol		 : 1;	// End Of Letter flag.
-      unsigned 	se$urg		 : 1;	// Urgent data sent.
+    Static_Fields(se);			// Define the standard fields
+    unsigned char    se$protohdrblk[0];
+    unsigned int     se$src_host;
+    unsigned int     se$dst_host;
+    unsigned int     se$ext1;	// Protocol header extension info
+    unsigned int     se$ext2;	// Protocol header extension info
+    union
+    {
+        unsigned short     se$flags;
+        struct
+        {
+            unsigned 	se$opm		 : 1;	// Used in "OPEN" processing.
+            unsigned 	se$eol		 : 1;	// End Of Letter flag.
+            unsigned 	se$urg		 : 1;	// Urgent data sent.
+        };
     };
-  };
-  signed short     se$timeout;	// Send timeout (obsolete)
-  void *     se$local_conn_id;	// Connection ID
-  signed short     se$buf_size;	// Send buffer size
-  signed char    se$data;	// User data start
+    signed short     se$timeout;	// Send timeout (obsolete)
+    void *     se$local_conn_id;	// Connection ID
+    signed short     se$buf_size;	// Send buffer size
+    signed char    se$data;	// User data start
 };
 
 #define    SEND_ARG_LENGTH sizeof(struct user_send_args)
@@ -467,19 +482,19 @@ struct user_send_args
 
 struct user_recv_args
 {
-  Static_Fields(re);			// Define the standard fields
-  unsigned char     re$protohdrblkp[0];
-  unsigned int     re$src_host;	// Source Host
-  unsigned int     re$dst_host;	// Destination Host
-  unsigned int     re$ext1;	// Protocol header extension info
-  unsigned int     re$ext2;	// Protocol header extension info
-  unsigned short     re$flags;	// No flags defined
-  signed short     re$timeout;	// Obsolete, unused
-  void *     re$local_conn_id;
-  void *     re$alt_io;	// Alternate IO entry point
-  void *     re$ph_buff;	// P0 Proto hdr buff pntr
-  signed short     re$buf_size;
-  signed char    re$data;
+    Static_Fields(re);			// Define the standard fields
+    unsigned char     re$protohdrblkp[0];
+    unsigned int     re$src_host;	// Source Host
+    unsigned int     re$dst_host;	// Destination Host
+    unsigned int     re$ext1;	// Protocol header extension info
+    unsigned int     re$ext2;	// Protocol header extension info
+    unsigned short     re$flags;	// No flags defined
+    signed short     re$timeout;	// Obsolete, unused
+    void *     re$local_conn_id;
+    void *     re$alt_io;	// Alternate IO entry point
+    void *     re$ph_buff;	// P0 Proto hdr buff pntr
+    signed short     re$buf_size;
+    signed char    re$data;
 };
 
 #define    RECV_ARG_LENGTH sizeof(struct user_recv_args)
@@ -489,16 +504,18 @@ struct user_recv_args
 
 struct user_close_args
 {
-  Static_Fields(cl);			// Define the standard fields
-  union {
-    unsigned short     cl$flags;
-    struct {
-      unsigned 	cl$abort	 : 1;	// 1=Abort
-      unsigned 	cl$nowait	 : 1;	// 1=No wait, 0=wait
+    Static_Fields(cl);			// Define the standard fields
+    union
+    {
+        unsigned short     cl$flags;
+        struct
+        {
+            unsigned 	cl$abort	 : 1;	// 1=Abort
+            unsigned 	cl$nowait	 : 1;	// 1=No wait, 0=wait
+        };
     };
-  };
-  signed short     cl$timeout;	// Not used.
-  void *    cl$local_conn_id;	// Connection ID
+    signed short     cl$timeout;	// Not used.
+    void *    cl$local_conn_id;	// Connection ID
 };
 
 #define    CLOSE_ARG_LENGTH sizeof(struct user_close_args)
@@ -509,11 +526,11 @@ struct user_close_args
 
 struct user_status_args
 {
-  Static_Fields(st);			// Define the standard fields
-  unsigned short     st$flags;	// Not used.
-  signed short     st$timeout;	// Not used.
-  void *     st$local_conn_id;	// Connection ID
-  signed short    st$buf_size;
+    Static_Fields(st);			// Define the standard fields
+    unsigned short     st$flags;	// Not used.
+    signed short     st$timeout;	// Not used.
+    void *     st$local_conn_id;	// Connection ID
+    signed short    st$buf_size;
 };
 
 #define    STATUS_ARG_LENGTH sizeof(struct user_status_args)
@@ -523,12 +540,12 @@ struct user_status_args
 
 struct status_return_arg_blk
 {
-  signed short     sr$bytes_avail;
-  signed char     sr$state;
-  signed char     sr$last_state;
-  signed int     sr$send_window;
-  signed int     sr$recv_window;
-  signed int     sr$user_id;
+    signed short     sr$bytes_avail;
+    signed char     sr$state;
+    signed char     sr$last_state;
+    signed int     sr$send_window;
+    signed int     sr$recv_window;
+    signed int     sr$user_id;
 };
 
 #define    SR_BLK_SIZE sizeof(struct status_return_arg_blk)
@@ -537,11 +554,11 @@ struct status_return_arg_blk
 
 struct user_info_args
 {
-  Static_Fields(if);			// Define the standard fields
-  unsigned short     if$flags;	// Not used.
-  signed short     if$timeout;	// Not used.
-  void *     if$local_conn_id;	// Connection ID
-  signed short     if$buf_size;// Size of returned data buffer
+    Static_Fields(if);			// Define the standard fields
+    unsigned short     if$flags;	// Not used.
+signed short     if$timeout;	// Not used.
+void *     if$local_conn_id;	// Connection ID
+signed short     if$buf_size;// Size of returned data buffer
 };
 
 #define    INFO_ARG_LENGTH sizeof(struct user_info_args)
@@ -550,10 +567,10 @@ struct user_info_args
 
 struct user_abort_args
 {
-  Static_Fields(ab);			// Define the standard fields
-  unsigned short     ab$flags;	// None defined
-  signed short     ab$timeout;	// Not used.
-  void *    ab$local_conn_id;
+Static_Fields(ab);			// Define the standard fields
+    unsigned short     ab$flags;	// None defined
+    signed short     ab$timeout;	// Not used.
+    void *    ab$local_conn_id;
 };
 
 #define    ABORT_ARG_LENGTH sizeof(struct user_abort_args)
@@ -573,10 +590,10 @@ unsigned short 	NM##$arg2size;	/* Size of argument*/\
  unsigned short  NM##$hstlen;	\
 }
 
-struct gthst_args 
+struct gthst_args
 {
-  Static_Fields(gh);			// Define the standard fields
-  GTHST_Static(gh);			// Define the standard fields
+    Static_Fields(gh);			// Define the standard fields
+    GTHST_Static(gh);			// Define the standard fields
 };
 
 #define    GTHST_ARG_LENGTH sizeof(struct U$GTHST_FIELDS)
@@ -585,33 +602,33 @@ struct gthst_args
 
 // Name to address function
 
-struct gthst_nmlook_args 
+struct gthst_nmlook_args
 {
-  Static_Fields(ghn);			// Define the standard fields
-  GTHST_Static(ghn);			// and the standard GTHST fields
-  char ghn$hstnam[HOST_NAME_MAX_SIZE];
+    Static_Fields(ghn);			// Define the standard fields
+    GTHST_Static(ghn);			// and the standard GTHST fields
+    char ghn$hstnam[HOST_NAME_MAX_SIZE];
 };
 
 #define    GTHST_NMLOOK_ARGS_LENGTH sizeof(struct gthst_nmlook_args)
 
 // Address to name subfunction
 
-struct gthst_adlook_args 
+struct gthst_adlook_args
 {
-  Static_Fields(gha);			// Define the standard fields
-  GTHST_Static(gha);			// and the standard GTHST fields
-  signed int    gha$ipaddr;
+    Static_Fields(gha);			// Define the standard fields
+    GTHST_Static(gha);			// and the standard GTHST fields
+    signed int    gha$ipaddr;
 };
 
 #define    GTHST_ADLOOK_ARGS_LENGTH sizeof(struct gthst_adlook_args)
 
 // Name to RR function
 
-struct gthst_rrlook_args 
+struct gthst_rrlook_args
 {
-  Static_Fields(grr);			// Define the standard fields
-  GTHST_Static(grr);			// and the standard GTHST fields
-  char grr$hstnam[HOST_NAME_MAX_SIZE];
+    Static_Fields(grr);			// Define the standard fields
+    GTHST_Static(grr);			// and the standard GTHST fields
+    char grr$hstnam[HOST_NAME_MAX_SIZE];
 };
 
 #define    GTHST_RRLOOK_ARGS_LENGTH sizeof(struct GTHST_RRLOOK_Fields)
@@ -620,47 +637,48 @@ struct gthst_rrlook_args
 
 struct debug_dump_args
 {
-  Static_Fields(du);			// Define the standard fields
-  unsigned short     du$dump_directive;	// Dump function code.
-  signed short     du$timeout;	// Not used.
-  union {
-    unsigned int     du$arg0;	// Argument #0
-    void * 	du$local_conn_id;	// TCB/UDPCB index, DU$TCB_DUMP
-    signed char 	du$device_idx;	// device index, DU$DEVICE_DUMP
-    signed short 	du$start_index;	// ARP cache index, DU$ARP_CACHE
-  };
-  unsigned int     du$arg1;	// Argument #1
-  unsigned int     du$arg2;	// Argument #2
-  signed short     du$buf_size;	// Size of returned data block
-  signed char     du$data;	// Start of return data buffer.
+    Static_Fields(du);			// Define the standard fields
+    unsigned short     du$dump_directive;	// Dump function code.
+    signed short     du$timeout;	// Not used.
+    union
+    {
+        unsigned int     du$arg0;	// Argument #0
+        void * 	du$local_conn_id;	// TCB/UDPCB index, DU$TCB_DUMP
+        signed char 	du$device_idx;	// device index, DU$DEVICE_DUMP
+        signed short 	du$start_index;	// ARP cache index, DU$ARP_CACHE
+    };
+    unsigned int     du$arg1;	// Argument #1
+    unsigned int     du$arg2;	// Argument #2
+    signed short     du$buf_size;	// Size of returned data block
+    signed char     du$data;	// Start of return data buffer.
 };
 
 #define    Dump_Arg_Length sizeof(struct M$DUMP_Fields)
 #define DU$BLK_SIZE (&((struct debug_dump_args *)0)->du$data)
 #define DU$MAX_SIZE (DU$BLK_SIZE+8192)	// Maximum buffer size
-	
+
 // Maintenance Call : SNMP
 
 struct snmp_args
 {
-  Static_Fields(snmp);			// Define the standard fields
-  unsigned short     snmp$function;	// SNMP sub-function code.
-  signed short     snmp$misc;	// Size of returned data block
-  signed short     snmp$wbuf_size;	// Size of VAR data block
-  signed short     snmp$rbuf_size;	// Size of returned data block
-  signed char      snmp$data;	// Start of UArg data buffer.
+    Static_Fields(snmp);			// Define the standard fields
+    unsigned short     snmp$function;	// SNMP sub-function code.
+    signed short     snmp$misc;	// Size of returned data block
+    signed short     snmp$wbuf_size;	// Size of VAR data block
+    signed short     snmp$rbuf_size;	// Size of returned data block
+    signed char      snmp$data;	// Start of UArg data buffer.
 };
 
 #define    SNMP_Arg_Length sizeof(struct M$SNMP_Fields)
-	
+
 // Maintenance Call: EXIT
- 
+
 struct debug_exit_args
 {
-  Static_Fields(ex);			// Define the standard fields
-  unsigned short     ex$flags;	// Not used.
-  signed short     ex$timeout;	// Not used.
-  void *     ex$local_conn_id;	// Not used.
+    Static_Fields(ex);			// Define the standard fields
+    unsigned short     ex$flags;	// Not used.
+    signed short     ex$timeout;	// Not used.
+    void *     ex$local_conn_id;	// Not used.
 };
 
 #define    Exit_arg_Length sizeof(struct M$EXIT_Fields)
@@ -669,10 +687,10 @@ struct debug_exit_args
 
 struct debug_panic_args
 {
-  Static_Fields(pa);			// Define the standard fields
-  unsigned short     pa$flags;	// Not Used.
-  signed short     pa$timeout;	// Not used.
-  void *     pa$local_conn_id;	// Not used.
+    Static_Fields(pa);			// Define the standard fields
+    unsigned short     pa$flags;	// Not Used.
+    signed short     pa$timeout;	// Not used.
+    void *     pa$local_conn_id;	// Not used.
 };
 
 #define    Panic_arg_Length sizeof(struct M$PANIC_Fields)
@@ -681,10 +699,10 @@ struct debug_panic_args
 
 struct debug_args
 {
-  Static_Fields(de);			// Define the standard fields
-  unsigned int     de$level;	// Debug level mask
-  unsigned int     de$local_conn_id;	// Connection-ID (NYI)
-  unsigned int     de$group;// glag cluster (DEBUG or ACTIVITY)
+    Static_Fields(de);			// Define the standard fields
+    unsigned int     de$level;	// Debug level mask
+    unsigned int     de$local_conn_id;	// Connection-ID (NYI)
+    unsigned int     de$group;// glag cluster (DEBUG or ACTIVITY)
 };
 
 #define    Debug_Arg_Length sizeof(struct M$DEBUG_Fields)
@@ -693,9 +711,9 @@ struct debug_args
 
 struct event_args
 {
-  Static_Fields(ev);			// Define the standard fields
-  signed short     ev$buf_size;	// Event buffer size
-  signed char ev$data;	// User data start
+    Static_Fields(ev);			// Define the standard fields
+    signed short     ev$buf_size;	// Event buffer size
+    signed char ev$data;	// User data start
 };
 
 #define    Event_Arg_Length sizeof(struct M$EVENT_Fields)
@@ -710,9 +728,9 @@ struct event_args
 
 struct vms$cancel_args
 {
-  Static_Fields(vc);		// Define the standard fields
-  signed short     vc$piochan;	// Process IO channel (from IRP)
-  signed int    vc$conn_id;	// Connection ID
+    Static_Fields(vc);		// Define the standard fields
+    signed short     vc$piochan;	// Process IO channel (from IRP)
+    signed int    vc$conn_id;	// Connection ID
 };
 
 #define    Cancel_Arg_Length sizeof(struct M$VMS_Cancel_Fields)

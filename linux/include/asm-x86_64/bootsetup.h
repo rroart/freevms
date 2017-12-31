@@ -28,6 +28,6 @@ extern char x86_boot_params[2048];
 
 #define RAMDISK_IMAGE_START_MASK  	0x07FF
 #define RAMDISK_PROMPT_FLAG		0x8000
-#define RAMDISK_LOAD_FLAG		0x4000	
+#define RAMDISK_LOAD_FLAG		0x4000
 
 #endif

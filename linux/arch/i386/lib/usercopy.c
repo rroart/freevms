@@ -1,4 +1,4 @@
-/* 
+/*
  * User address space access functions.
  * The non inlined parts of asm-i386/uaccess.h are here.
  *
@@ -14,29 +14,29 @@
 unsigned long
 __generic_copy_to_user(void *to, const void *from, unsigned long n)
 {
-	if (access_ok(VERIFY_WRITE, to, n))
-	{
-		if(n<512)
-			__copy_user(to,from,n);
-		else
-			mmx_copy_user(to,from,n);
-	}
-	return n;
+    if (access_ok(VERIFY_WRITE, to, n))
+    {
+        if(n<512)
+            __copy_user(to,from,n);
+        else
+            mmx_copy_user(to,from,n);
+    }
+    return n;
 }
 
 unsigned long
 __generic_copy_from_user(void *to, const void *from, unsigned long n)
 {
-	if (access_ok(VERIFY_READ, from, n))
-	{
-		if(n<512)
-			__copy_user_zeroing(to,from,n);
-		else
-			mmx_copy_user_zeroing(to, from, n);
-	}
-	else
-		memset(to, 0, n);
-	return n;
+    if (access_ok(VERIFY_READ, from, n))
+    {
+        if(n<512)
+            __copy_user_zeroing(to,from,n);
+        else
+            mmx_copy_user_zeroing(to, from, n);
+    }
+    else
+        memset(to, 0, n);
+    return n;
 }
 
 #else
@@ -44,21 +44,21 @@ __generic_copy_from_user(void *to, const void *from, unsigned long n)
 unsigned long
 __generic_copy_to_user(void *to, const void *from, unsigned long n)
 {
-	prefetch(from);
-	if (access_ok(VERIFY_WRITE, to, n))
-		__copy_user(to,from,n);
-	return n;
+    prefetch(from);
+    if (access_ok(VERIFY_WRITE, to, n))
+        __copy_user(to,from,n);
+    return n;
 }
 
 unsigned long
 __generic_copy_from_user(void *to, const void *from, unsigned long n)
 {
-	prefetchw(to);
-	if (access_ok(VERIFY_READ, from, n))
-		__copy_user_zeroing(to,from,n);
-	else
-		memset(to, 0, n);
-	return n;
+    prefetchw(to);
+    if (access_ok(VERIFY_READ, from, n))
+        __copy_user_zeroing(to,from,n);
+    else
+        memset(to, 0, n);
+    return n;
 }
 
 #endif
@@ -98,18 +98,18 @@ do {									   \
 long
 __strncpy_from_user(char *dst, const char *src, long count)
 {
-	long res;
-	__do_strncpy_from_user(dst, src, count, res);
-	return res;
+    long res;
+    __do_strncpy_from_user(dst, src, count, res);
+    return res;
 }
 
 long
 strncpy_from_user(char *dst, const char *src, long count)
 {
-	long res = -EFAULT;
-	if (access_ok(VERIFY_READ, src, 1))
-		__do_strncpy_from_user(dst, src, count, res);
-	return res;
+    long res = -EFAULT;
+    if (access_ok(VERIFY_READ, src, 1))
+        __do_strncpy_from_user(dst, src, count, res);
+    return res;
 }
 
 
@@ -141,16 +141,16 @@ do {									\
 unsigned long
 clear_user(void *to, unsigned long n)
 {
-	if (access_ok(VERIFY_WRITE, to, n))
-		__do_clear_user(to, n);
-	return n;
+    if (access_ok(VERIFY_WRITE, to, n))
+        __do_clear_user(to, n);
+    return n;
 }
 
 unsigned long
 __clear_user(void *to, unsigned long n)
 {
-	__do_clear_user(to, n);
-	return n;
+    __do_clear_user(to, n);
+    return n;
 }
 
 /*
@@ -161,30 +161,30 @@ __clear_user(void *to, unsigned long n)
 
 long strnlen_user(const char *s, long n)
 {
-	unsigned long mask = -__addr_ok(s);
-	unsigned long res, tmp;
+    unsigned long mask = -__addr_ok(s);
+    unsigned long res, tmp;
 
-	__asm__ __volatile__(
-		"	testl %0, %0\n"
-		"	jz 3f\n"
-		"	andl %0,%%ecx\n"
-		"0:	repne; scasb\n"
-		"	setne %%al\n"
-		"	subl %%ecx,%0\n"
-		"	addl %0,%%eax\n"
-		"1:\n"
-		".section .fixup,\"ax\"\n"
-		"2:	xorl %%eax,%%eax\n"
-		"	jmp 1b\n"
-		"3:	movb $1,%%al\n"
-		"	jmp 1b\n"
-		".previous\n"
-		".section __ex_table,\"a\"\n"
-		"	.align 4\n"
-		"	.long 0b,2b\n"
-		".previous"
-		:"=r" (n), "=D" (s), "=a" (res), "=c" (tmp)
-		:"0" (n), "1" (s), "2" (0), "3" (mask)
-		:"cc");
-	return res & mask;
+    __asm__ __volatile__(
+        "	testl %0, %0\n"
+        "	jz 3f\n"
+        "	andl %0,%%ecx\n"
+        "0:	repne; scasb\n"
+        "	setne %%al\n"
+        "	subl %%ecx,%0\n"
+        "	addl %0,%%eax\n"
+        "1:\n"
+        ".section .fixup,\"ax\"\n"
+        "2:	xorl %%eax,%%eax\n"
+        "	jmp 1b\n"
+        "3:	movb $1,%%al\n"
+        "	jmp 1b\n"
+        ".previous\n"
+        ".section __ex_table,\"a\"\n"
+        "	.align 4\n"
+        "	.long 0b,2b\n"
+        ".previous"
+        :"=r" (n), "=D" (s), "=a" (res), "=c" (tmp)
+        :"0" (n), "1" (s), "2" (0), "3" (mask)
+        :"cc");
+    return res & mask;
 }

@@ -1,7 +1,8 @@
 #ifndef _X8664_SCATTERLIST_H
 #define _X8664_SCATTERLIST_H
 
-struct scatterlist {
+struct scatterlist
+{
     char *  address;    /* Location data is to be transferred to, NULL for
 			 * highmem page */
     struct page * page; /* Location for highmem page, if any */
@@ -14,4 +15,4 @@ struct scatterlist {
 
 #define ISA_DMA_THRESHOLD (0x00ffffff)
 
-#endif 
+#endif

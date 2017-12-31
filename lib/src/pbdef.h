@@ -1,6 +1,6 @@
 #ifndef pbdef_h
 #define pbdef_h
-	
+
 #define PB$C_CLOSED 0
 #define PB$C_ST_SENT 1
 #define PB$C_ST_REC 2
@@ -91,50 +91,52 @@
 #define PB$K_LENGTH 116
 #define PB$C_LENGTH 116
 #define PB$S_PBDEF 116
-	
-struct _pb {
-  struct _pb *pb$l_flink;
-  struct _pb *pb$l_blink;
-  unsigned short int pb$w_size;
-  unsigned char pb$b_type;
-  unsigned char pb$b_subtyp;
-  unsigned char pb$b_rstation [6];
-  unsigned short int pb$w_state;
-  unsigned int pb$l_rport_typ;
-  unsigned int pb$l_rport_rev;
-  unsigned int pb$l_rport_fcn;
-  unsigned char pb$b_rst_port;
-  unsigned char pb$b_rstate;
-  unsigned short int pb$w_retry;
-  char pb$t_lport_name [4];
-  unsigned char pb$b_cbl_sts;
-  unsigned char pb$b_p0_sts;
-  unsigned char pb$b_p1_sts;
-  char pb$$_fill_1;
-  void *pb$l_pdt;
-  struct _sb *pb$l_sblink;
-  struct _cdt *pb$l_cdtlst;
-  void *pb$l_waitqfl;
-  union  {
-    void *pb$l_waitqbl;
-    unsigned int pb$l_duetime;
-  };
-  void *pb$l_scsmsg;
-  unsigned short int pb$w_sts;
-  unsigned short int pb$w_vcfail_rsn;
-  unsigned char pb$b_protocol;
-  char pb$$_fill_2 [3];
-  unsigned int pb$l_rport_mult;
-  unsigned int pb$l_time_stamp;
-  struct _pb *pb$l_share_flink;
-  struct _pb *pb$l_share_blink;
-  int pb$l_load_class;
-  int pb$l_priority;
-  int pb$l_mgt_priority;
-  //  unsigned int pb$l_vc_addr;
-  struct _vcdef * pb$l_vc_addr;
-  int pb$$_fill_3 [2];
+
+struct _pb
+{
+    struct _pb *pb$l_flink;
+    struct _pb *pb$l_blink;
+    unsigned short int pb$w_size;
+    unsigned char pb$b_type;
+    unsigned char pb$b_subtyp;
+    unsigned char pb$b_rstation [6];
+    unsigned short int pb$w_state;
+    unsigned int pb$l_rport_typ;
+    unsigned int pb$l_rport_rev;
+    unsigned int pb$l_rport_fcn;
+    unsigned char pb$b_rst_port;
+    unsigned char pb$b_rstate;
+    unsigned short int pb$w_retry;
+    char pb$t_lport_name [4];
+    unsigned char pb$b_cbl_sts;
+    unsigned char pb$b_p0_sts;
+    unsigned char pb$b_p1_sts;
+    char pb$$_fill_1;
+    void *pb$l_pdt;
+    struct _sb *pb$l_sblink;
+    struct _cdt *pb$l_cdtlst;
+    void *pb$l_waitqfl;
+    union
+    {
+        void *pb$l_waitqbl;
+        unsigned int pb$l_duetime;
+    };
+    void *pb$l_scsmsg;
+    unsigned short int pb$w_sts;
+    unsigned short int pb$w_vcfail_rsn;
+    unsigned char pb$b_protocol;
+    char pb$$_fill_2 [3];
+    unsigned int pb$l_rport_mult;
+    unsigned int pb$l_time_stamp;
+    struct _pb *pb$l_share_flink;
+    struct _pb *pb$l_share_blink;
+    int pb$l_load_class;
+    int pb$l_priority;
+    int pb$l_mgt_priority;
+    //  unsigned int pb$l_vc_addr;
+    struct _vcdef * pb$l_vc_addr;
+    int pb$$_fill_3 [2];
 };
- 
+
 #endif
- 
+

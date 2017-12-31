@@ -18,9 +18,10 @@
 #define MAX_ORDER CONFIG_FORCE_MAX_ZONEORDER
 #endif
 
-typedef struct free_area_struct {
-	struct list_head	free_list;
-	unsigned long		*map;
+typedef struct free_area_struct
+{
+    struct list_head	free_list;
+    unsigned long		*map;
 } free_area_t;
 
 struct pglist_data;
@@ -33,33 +34,34 @@ struct pglist_data;
  * ZONE_NORMAL	16-896 MB	direct mapped by the kernel
  * ZONE_HIGHMEM	 > 896 MB	only page cache and user processes
  */
-typedef struct zone_struct {
-	/*
-	 * Commonly accessed fields:
-	 */
-	spinlock_t		lock;
-	unsigned long		free_pages;
-	unsigned long		pages_min, pages_low, pages_high;
-	int			need_balance;
+typedef struct zone_struct
+{
+    /*
+     * Commonly accessed fields:
+     */
+    spinlock_t		lock;
+    unsigned long		free_pages;
+    unsigned long		pages_min, pages_low, pages_high;
+    int			need_balance;
 
-	/*
-	 * free areas of different sizes
-	 */
-	free_area_t		free_area[MAX_ORDER];
+    /*
+     * free areas of different sizes
+     */
+    free_area_t		free_area[MAX_ORDER];
 
-	/*
-	 * Discontig memory support fields.
-	 */
-	struct pglist_data	*zone_pgdat;
-	struct page		*zone_mem_map;
-	unsigned long		zone_start_paddr;
-	unsigned long		zone_start_mapnr;
+    /*
+     * Discontig memory support fields.
+     */
+    struct pglist_data	*zone_pgdat;
+    struct page		*zone_mem_map;
+    unsigned long		zone_start_paddr;
+    unsigned long		zone_start_mapnr;
 
-	/*
-	 * rarely used fields:
-	 */
-	char			*name;
-	unsigned long		size;
+    /*
+     * rarely used fields:
+     */
+    char			*name;
+    unsigned long		size;
 } zone_t;
 
 #define ZONE_DMA		0
@@ -78,8 +80,9 @@ typedef struct zone_struct {
  * so despite the zonelist table being relatively big, the cache
  * footprint of this construct is very small.
  */
-typedef struct zonelist_struct {
-	zone_t * zones [MAX_NR_ZONES+1]; // NULL delimited
+typedef struct zonelist_struct
+{
+    zone_t * zones [MAX_NR_ZONES+1]; // NULL delimited
 } zonelist_t;
 
 #define GFP_ZONEMASK	0x0f
@@ -96,18 +99,19 @@ typedef struct zonelist_struct {
  *      into the pg_data_t to properly support NUMA.
  */
 struct bootmem_data;
-typedef struct pglist_data {
-	zone_t node_zones[MAX_NR_ZONES];
-	zonelist_t node_zonelists[GFP_ZONEMASK+1];
-	int nr_zones;
-	struct page *node_mem_map;
-	unsigned long *valid_addr_bitmap;
-	struct bootmem_data *bdata;
-	unsigned long node_start_paddr;
-	unsigned long node_start_mapnr;
-	unsigned long node_size;
-	int node_id;
-	struct pglist_data *node_next;
+typedef struct pglist_data
+{
+    zone_t node_zones[MAX_NR_ZONES];
+    zonelist_t node_zonelists[GFP_ZONEMASK+1];
+    int nr_zones;
+    struct page *node_mem_map;
+    unsigned long *valid_addr_bitmap;
+    struct bootmem_data *bdata;
+    unsigned long node_start_paddr;
+    unsigned long node_start_mapnr;
+    unsigned long node_size;
+    int node_id;
+    struct pglist_data *node_next;
 } pg_data_t;
 
 extern int numnodes;
@@ -123,8 +127,8 @@ extern pg_data_t *pgdat_list;
 struct page;
 extern void show_free_areas_core(pg_data_t *pgdat);
 extern void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
-  unsigned long *zones_size, unsigned long paddr, unsigned long *zholes_size,
-  struct page *pmap);
+                                unsigned long *zones_size, unsigned long paddr, unsigned long *zholes_size,
+                                struct page *pmap);
 
 extern pg_data_t contig_page_data;
 

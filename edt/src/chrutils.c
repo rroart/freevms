@@ -22,22 +22,22 @@
 char *skipspaces (char *s)
 
 {
-  while (*s != 0 && *s <= ' ') s ++;
-  return (s);
+    while (*s != 0 && *s <= ' ') s ++;
+    return (s);
 }
 
 char *uptospace (char *s)
 
 {
-  while (*s != 0 && *s > ' ') s ++;
-  return (s);
+    while (*s != 0 && *s > ' ') s ++;
+    return (s);
 }
 
 int eoltest (char *s)
 
 {
-  s = skipspaces (s);
-  if (*s == 0) return (1);
-  outerr (strlen (s), "extra data at end of command: %s\n", s);
-  return (0);
+    s = skipspaces (s);
+    if (*s == 0) return (1);
+    outerr (strlen (s), "extra data at end of command: %s\n", s);
+    return (0);
 }

@@ -1,7 +1,7 @@
 
 /*
  *	strutil.c
- *	Miscellaneous string routines 
+ *	Miscellaneous string routines
  *
  *	Copyright (C) 2003 Andrew Allison
  *
@@ -26,7 +26,7 @@
  *				Andrew Allison
  *				50 Denlaw Road
  *				London, Ont
- *				Canada 
+ *				Canada
  *				N6G 3L4
  *
  *	Kevin Handy		Unknown
@@ -106,7 +106,7 @@ const unsigned long str$_wronumarg = STR$_WRONUMARG;
  *
  *	Returns True if string is equal to zero
  *		False if string is not equal to zero
- *	
+ *
  * Bugs:
  *
  * History
@@ -115,17 +115,17 @@ const unsigned long str$_wronumarg = STR$_WRONUMARG;
 
 int	str$$iszero (const struct dsc$descriptor_s *sd1)
 {
-int	i, c_not_zero;
-char	*s1_ptr;
-unsigned short s1_len;
+    int	i, c_not_zero;
+    char	*s1_ptr;
+    unsigned short s1_len;
 
-	str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
-	c_not_zero = FALSE;
-	for (i=0; i < s1_len; i++)
-		if (s1_ptr[i] != '0')
-			c_not_zero = TRUE;
+    str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
+    c_not_zero = FALSE;
+    for (i=0; i < s1_len; i++)
+        if (s1_ptr[i] != '0')
+            c_not_zero = TRUE;
 
-	return c_not_zero;
+    return c_not_zero;
 }
 
 /************************************************/
@@ -145,33 +145,33 @@ unsigned short s1_len;
 
 int	str$$lzerotrim (struct dsc$descriptor_s *sd1)
 {
-int	i,j,count;
-char	*s1_ptr;
-unsigned short s1_len;
+    int	i,j,count;
+    char	*s1_ptr;
+    unsigned short s1_len;
 
-	str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
-	i = 0;
-	while ( (s1_ptr[i] == '0') && ( i < s1_len-1 ) ) // while leading zero
-	{
-		if (s1_ptr[i] == '0' )			// have leading zero
-		{
-			for (j = i; j < s1_len; j++)	// shuffle string
-			{
-				s1_ptr[j] = s1_ptr[j+1];
-			}
-			i=0;
-			s1_len--;
-			count--;
-		}
-		else
-		{
-			i++;
-		}
-	}
+    str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
+    i = 0;
+    while ( (s1_ptr[i] == '0') && ( i < s1_len-1 ) ) // while leading zero
+    {
+        if (s1_ptr[i] == '0' )			// have leading zero
+        {
+            for (j = i; j < s1_len; j++)	// shuffle string
+            {
+                s1_ptr[j] = s1_ptr[j+1];
+            }
+            i=0;
+            s1_len--;
+            count--;
+        }
+        else
+        {
+            i++;
+        }
+    }
 
 //	Resize descriptor if needed
-	str$get1_dx (&s1_len, &*sd1);
-	return count;
+    str$get1_dx (&s1_len, &*sd1);
+    return count;
 }
 
 /***********************************************/
@@ -188,26 +188,28 @@ unsigned short s1_len;
 
 int	str$$iszerotrim (struct dsc$descriptor_s *sd1, long *exp)
 {
-int	i, status, is_zero;
-char	*s1_ptr;
-unsigned short s1_len;
+    int	i, status, is_zero;
+    char	*s1_ptr;
+    unsigned short s1_len;
 
-	is_zero = TRUE;
-	status = str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
-	if ( s1_ptr != NULL )
-	{
-		for ( i = 0; i < s1_len; i++)
-		{
-			if (s1_ptr[i] != '0' )
-			{	is_zero = FALSE;
-			}
-		}
+    is_zero = TRUE;
+    status = str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
+    if ( s1_ptr != NULL )
+    {
+        for ( i = 0; i < s1_len; i++)
+        {
+            if (s1_ptr[i] != '0' )
+            {
+                is_zero = FALSE;
+            }
+        }
 
-		if ( is_zero )
-		{	*exp = 0;
-		}
-	}
-	return status;
+        if ( is_zero )
+        {
+            *exp = 0;
+        }
+    }
+    return status;
 }
 
 
@@ -215,7 +217,7 @@ unsigned short s1_len;
 /*	str$$rzerotrim
  *
  * Description:
- *	When passed a string descriptor remove 
+ *	When passed a string descriptor remove
  *	trailing 0 and incerement exponent
  *	i.e. Normallize the number
  *
@@ -228,26 +230,27 @@ unsigned short s1_len;
 
 int	str$$rzerotrim (struct dsc$descriptor_s *sd1, long *exp)
 {
-int	i, status;
-char	*s1_ptr;
-unsigned short s1_len;
+    int	i, status;
+    char	*s1_ptr;
+    unsigned short s1_len;
 
-	status = str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
-	i = s1_len-1;
-	while ( (s1_ptr[i] == '0') && (i > 0 ) )
-	{
-		if (s1_ptr[i] == '0' )
-		{	s1_ptr[i] = ' ';
-			(*exp)++;
-			s1_len--;
-		}
-		i--;
-	}
+    status = str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
+    i = s1_len-1;
+    while ( (s1_ptr[i] == '0') && (i > 0 ) )
+    {
+        if (s1_ptr[i] == '0' )
+        {
+            s1_ptr[i] = ' ';
+            (*exp)++;
+            s1_len--;
+        }
+        i--;
+    }
 
 //	Resize descriptor
-	status = str$get1_dx (&s1_len, sd1);
-	str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
-	return status;
+    status = str$get1_dx (&s1_len, sd1);
+    str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
+    return status;
 }
 
 
@@ -268,36 +271,37 @@ unsigned short s1_len;
  *
  */
 
-int str$$ncompare (	struct dsc$descriptor_s *sd1, 
-			struct dsc$descriptor_s *sd2)
+int str$$ncompare (	struct dsc$descriptor_s *sd1,
+                    struct dsc$descriptor_s *sd2)
 {
-unsigned short	s1_len,  s2_len;
-char		*s1_ptr, *s2_ptr;
-int	 	min_len, max_len, i;
+    unsigned short	s1_len,  s2_len;
+    char		*s1_ptr, *s2_ptr;
+    int	 	min_len, max_len, i;
 
-	str$$lzerotrim (sd1);
-	str$$lzerotrim (sd2);
+    str$$lzerotrim (sd1);
+    str$$lzerotrim (sd2);
 
-	str$analyze_sdesc (&*sd1,&s1_len, &s1_ptr);
-	str$analyze_sdesc (&*sd2,&s2_len, &s2_ptr);
+    str$analyze_sdesc (&*sd1,&s1_len, &s1_ptr);
+    str$analyze_sdesc (&*sd2,&s2_len, &s2_ptr);
 
-	min_len = ( s1_len < s2_len) ? s1_len : s2_len;
-	max_len = ( s1_len > s2_len) ? s1_len : s2_len;
+    min_len = ( s1_len < s2_len) ? s1_len : s2_len;
+    max_len = ( s1_len > s2_len) ? s1_len : s2_len;
 
-	if ( s1_len > s2_len )
-		return  1;
-	if ( s1_len < s2_len )
-		return -1;
+    if ( s1_len > s2_len )
+        return  1;
+    if ( s1_len < s2_len )
+        return -1;
 
 //	The string are of equal length
-	for (i = 0; i < max_len; i++)
-	{	if ( s1_ptr[i] > s2_ptr[i] )
-			return  1;
-		if ( s1_ptr[i] < s2_ptr[i] )
-			return -1;
-	}
+    for (i = 0; i < max_len; i++)
+    {
+        if ( s1_ptr[i] > s2_ptr[i] )
+            return  1;
+        if ( s1_ptr[i] < s2_ptr[i] )
+            return -1;
+    }
 
-	return 0;
+    return 0;
 }
 
 /************************************************/
@@ -316,31 +320,33 @@ int	 	min_len, max_len, i;
 
 void	str$$print_sd (const struct dsc$descriptor_s *sd1 )
 {
-unsigned short	s1_len;
-char		*s1_ptr;
-int		i, qmark;
+    unsigned short	s1_len;
+    char		*s1_ptr;
+    int		i, qmark;
 
-qmark = '?';
-str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
-if ( s1_len >= 65500 )
-{	printf ("%.20s ... %20s",s1_ptr,&s1_ptr[s1_len-20]);
-	return;
-}
-if ( ( s1_len == 0) && ( s1_ptr == NULL ))
-{	printf ("null");
-	return;
-}
+    qmark = '?';
+    str$analyze_sdesc (sd1,&s1_len, &s1_ptr);
+    if ( s1_len >= 65500 )
+    {
+        printf ("%.20s ... %20s",s1_ptr,&s1_ptr[s1_len-20]);
+        return;
+    }
+    if ( ( s1_len == 0) && ( s1_ptr == NULL ))
+    {
+        printf ("null");
+        return;
+    }
 
-for (i = 0; i < s1_len; i++ )
-{
-	if (isprint (s1_ptr[i]) )
-		putchar (s1_ptr[i]);
-	else if ( s1_ptr[i] == '\t' )
-		putchar ('\t');
-	else
-		putchar (qmark);
-}
-return;
+    for (i = 0; i < s1_len; i++ )
+    {
+        if (isprint (s1_ptr[i]) )
+            putchar (s1_ptr[i]);
+        else if ( s1_ptr[i] == '\t' )
+            putchar ('\t');
+        else
+            putchar (qmark);
+    }
+    return;
 
 }
 
@@ -362,70 +368,70 @@ return;
 
 void str$$malloc_sd(struct dsc$descriptor_s *temp_sd, char *string)
 {
-int i;
-unsigned short temp_len;
-char	maxstring [MAXCSTR16], temp_string[5];
+    int i;
+    unsigned short temp_len;
+    char	maxstring [MAXCSTR16], temp_string[5];
 
-if ( strcmp(string,"NULL") == 0 )
-{
-	temp_sd->dsc$w_length  = 0;
-	temp_sd->dsc$b_class   = DSC$K_CLASS_D;
-	temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
-	temp_sd->dsc$a_pointer = NULL;
-}
+    if ( strcmp(string,"NULL") == 0 )
+    {
+        temp_sd->dsc$w_length  = 0;
+        temp_sd->dsc$b_class   = DSC$K_CLASS_D;
+        temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
+        temp_sd->dsc$a_pointer = NULL;
+    }
 // make the largest number possible 65535 9's
-else if ( strcmp(string,"MAXCSTR16") == 0 )
-{
-	for (i=0; i < MAXCSTR16; i++)
-		maxstring[i] = '9';
-	temp_sd->dsc$w_length  = 0;
-	temp_sd->dsc$b_class   = DSC$K_CLASS_D;
-	temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
-	temp_sd->dsc$a_pointer = NULL;
-	
-	temp_len = MAXCSTR16;
-	str$get1_dx (&temp_len, temp_sd);
-	str$copy_r  (temp_sd, &temp_len, maxstring);
+    else if ( strcmp(string,"MAXCSTR16") == 0 )
+    {
+        for (i=0; i < MAXCSTR16; i++)
+            maxstring[i] = '9';
+        temp_sd->dsc$w_length  = 0;
+        temp_sd->dsc$b_class   = DSC$K_CLASS_D;
+        temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
+        temp_sd->dsc$a_pointer = NULL;
 
-}
-else if ( strcmp(string,"BLANK") == 0 )
-{
-	temp_sd->dsc$w_length  = 0;
-	temp_sd->dsc$b_class   = DSC$K_CLASS_D;
-	temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
-	temp_sd->dsc$a_pointer = NULL;
+        temp_len = MAXCSTR16;
+        str$get1_dx (&temp_len, temp_sd);
+        str$copy_r  (temp_sd, &temp_len, maxstring);
 
-	temp_len = 1;
-	temp_string[0] = ' ';
-	str$get1_dx (&temp_len, temp_sd);
-	str$copy_r  (temp_sd, &temp_len,temp_string);
-}
-else if ( strcmp(string,"TAB") == 0 )
-{
-	temp_sd->dsc$w_length  = 0;
-	temp_sd->dsc$b_class   = DSC$K_CLASS_D;
-	temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
-	temp_sd->dsc$a_pointer = NULL;
+    }
+    else if ( strcmp(string,"BLANK") == 0 )
+    {
+        temp_sd->dsc$w_length  = 0;
+        temp_sd->dsc$b_class   = DSC$K_CLASS_D;
+        temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
+        temp_sd->dsc$a_pointer = NULL;
 
-	temp_len = 1;
-	temp_string[0] = '\t';
-	str$get1_dx (&temp_len, temp_sd);
-	str$copy_r  (temp_sd, &temp_len,temp_string);
-}
-else
-{
-/*	default action copy string value in */
-	temp_sd->dsc$w_length  = 0;
-	temp_sd->dsc$b_class   = DSC$K_CLASS_D;
-	temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
-	temp_sd->dsc$a_pointer = NULL;
+        temp_len = 1;
+        temp_string[0] = ' ';
+        str$get1_dx (&temp_len, temp_sd);
+        str$copy_r  (temp_sd, &temp_len,temp_string);
+    }
+    else if ( strcmp(string,"TAB") == 0 )
+    {
+        temp_sd->dsc$w_length  = 0;
+        temp_sd->dsc$b_class   = DSC$K_CLASS_D;
+        temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
+        temp_sd->dsc$a_pointer = NULL;
 
-	temp_len = strlen (string);
-	str$get1_dx (&temp_len, temp_sd);
-	str$copy_r  (temp_sd, &temp_len,string);
-	
-}
-return;
+        temp_len = 1;
+        temp_string[0] = '\t';
+        str$get1_dx (&temp_len, temp_sd);
+        str$copy_r  (temp_sd, &temp_len,temp_string);
+    }
+    else
+    {
+        /*	default action copy string value in */
+        temp_sd->dsc$w_length  = 0;
+        temp_sd->dsc$b_class   = DSC$K_CLASS_D;
+        temp_sd->dsc$b_dtype   = DSC$K_DTYPE_T;
+        temp_sd->dsc$a_pointer = NULL;
+
+        temp_len = strlen (string);
+        str$get1_dx (&temp_len, temp_sd);
+        str$copy_r  (temp_sd, &temp_len,string);
+
+    }
+    return;
 }
 
 /***********************************************/
@@ -447,40 +453,40 @@ return;
  *		Added code to skip memcopy if source was NULL
  */
 unsigned long str$$copy_fill(char *dest_ptr, unsigned short dest_length,
-	const char *source_ptr, unsigned short source_length, char fill)
+                             const char *source_ptr, unsigned short source_length, char fill)
 {
-unsigned short max_copy;
-int fill_loop;
+    unsigned short max_copy;
+    int fill_loop;
 
 
-	/*
-	 * Copy over however much can.
-	 */
-	max_copy = min(dest_length, source_length);
-	if (  source_ptr !=  NULL )
-	{
-		memcpy(dest_ptr, source_ptr, max_copy);
-	}
-	/*
-	 * Fill in the rest
-	 */
-	if ( max_copy < dest_length )
-		for (fill_loop = max_copy; fill_loop < dest_length; fill_loop++)
-		{
-			dest_ptr[fill_loop] = fill;
-		}
+    /*
+     * Copy over however much can.
+     */
+    max_copy = min(dest_length, source_length);
+    if (  source_ptr !=  NULL )
+    {
+        memcpy(dest_ptr, source_ptr, max_copy);
+    }
+    /*
+     * Fill in the rest
+     */
+    if ( max_copy < dest_length )
+        for (fill_loop = max_copy; fill_loop < dest_length; fill_loop++)
+        {
+            dest_ptr[fill_loop] = fill;
+        }
 
-	/*
-	 * Figure out what to return
-	 */
-	if (source_length > dest_length)
-	{
-		return STR$_TRU;
-	}
-	else
-	{
-		return STR$_NORMAL;
-	}
+    /*
+     * Figure out what to return
+     */
+    if (source_length > dest_length)
+    {
+        return STR$_TRU;
+    }
+    else
+    {
+        return STR$_NORMAL;
+    }
 
 }
 
@@ -507,59 +513,59 @@ int fill_loop;
 
 unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
 {
-	unsigned long result = STR$_NORMAL;
-	unsigned short	usize;
-	int resize;
+    unsigned long result = STR$_NORMAL;
+    unsigned short	usize;
+    int resize;
 
-	usize = (unsigned short) size;
-	/*
-	 * Generate the proper memory to store the result in.
-	 * Dependent on the type of string.
-	 */
-	switch(dest->dsc$b_class)
-	{
-	case DSC$K_CLASS_Z:
-	case DSC$K_CLASS_S:
-	case DSC$K_CLASS_SD:
-	case DSC$K_CLASS_A:
-	case DSC$K_CLASS_NCA:
-		/*
-		 * We can't change the size of this. Live with
-		 * whatever we've got.
-		 */
-		if (dest->dsc$a_pointer == 0)
-		{
-			DOSIGNAL(STR$_FATINTERR);
-			result = STR$_FATINTERR;
-		}
-		break;
+    usize = (unsigned short) size;
+    /*
+     * Generate the proper memory to store the result in.
+     * Dependent on the type of string.
+     */
+    switch(dest->dsc$b_class)
+    {
+    case DSC$K_CLASS_Z:
+    case DSC$K_CLASS_S:
+    case DSC$K_CLASS_SD:
+    case DSC$K_CLASS_A:
+    case DSC$K_CLASS_NCA:
+        /*
+         * We can't change the size of this. Live with
+         * whatever we've got.
+         */
+        if (dest->dsc$a_pointer == 0)
+        {
+            DOSIGNAL(STR$_FATINTERR);
+            result = STR$_FATINTERR;
+        }
+        break;
 
-	case DSC$K_CLASS_D:
-		/*
-		 * Try to allocate a different size
-		 */
-		result = str$get1_dx(&usize, dest);
-		break;
+    case DSC$K_CLASS_D:
+        /*
+         * Try to allocate a different size
+         */
+        result = str$get1_dx(&usize, dest);
+        break;
 
-	case DSC$K_CLASS_VS:
-		/*
-		 * Better be pointing at something
-		 */
-                if (dest->dsc$a_pointer == 0)
-                {
-                        DOSIGNAL(STR$_FATINTERR);
-                        result = STR$_FATINTERR;
-                }
-		resize = min(dest->dsc$w_length, usize);
-		*((unsigned short int*)dest->dsc$a_pointer) = resize;
-		break;
+    case DSC$K_CLASS_VS:
+        /*
+         * Better be pointing at something
+         */
+        if (dest->dsc$a_pointer == 0)
+        {
+            DOSIGNAL(STR$_FATINTERR);
+            result = STR$_FATINTERR;
+        }
+        resize = min(dest->dsc$w_length, usize);
+        *((unsigned short int*)dest->dsc$a_pointer) = resize;
+        break;
 
-	default:
-		DOSIGNAL(STR$_ILLSTRCLA);
-		result = STR$_ILLSTRCLA;
-	}
+    default:
+        DOSIGNAL(STR$_ILLSTRCLA);
+        result = STR$_ILLSTRCLA;
+    }
 
-	return result;
+    return result;
 }
 
 
@@ -583,33 +589,33 @@ unsigned int str$$resize(struct dsc$descriptor_s* dest, unsigned short size)
  */
 unsigned long str$$is_string_class(const struct dsc$descriptor_s* test_string)
 {
-	/*
-	 * Did we get passed anything?
-	 */
-	if (test_string == NULL)
-	{
-		return STR$_FATINTERR;
-	}
+    /*
+     * Did we get passed anything?
+     */
+    if (test_string == NULL)
+    {
+        return STR$_FATINTERR;
+    }
 
-	/*
-	 * Make sure it is a atring class we can handle
-	 */
-	switch (test_string->dsc$b_class)
-	{
-	case DSC$K_CLASS_Z:
-	case DSC$K_CLASS_S:
-	case DSC$K_CLASS_SD:
-	case DSC$K_CLASS_VS:
-	case DSC$K_CLASS_D:
-	case DSC$K_CLASS_A:
-	case DSC$K_CLASS_NCA:
-		break;
+    /*
+     * Make sure it is a atring class we can handle
+     */
+    switch (test_string->dsc$b_class)
+    {
+    case DSC$K_CLASS_Z:
+    case DSC$K_CLASS_S:
+    case DSC$K_CLASS_SD:
+    case DSC$K_CLASS_VS:
+    case DSC$K_CLASS_D:
+    case DSC$K_CLASS_A:
+    case DSC$K_CLASS_NCA:
+        break;
 
-	default:
-		return STR$_ILLSTRCLA;
-	}
+    default:
+        return STR$_ILLSTRCLA;
+    }
 
-	return STR$_NORMAL;
+    return STR$_NORMAL;
 }
 
 /************************************************/

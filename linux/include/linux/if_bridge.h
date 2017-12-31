@@ -47,51 +47,51 @@
 
 struct __bridge_info
 {
-	__u64 designated_root;
-	__u64 bridge_id;
-	__u32 root_path_cost;
-	__u32 max_age;
-	__u32 hello_time;
-	__u32 forward_delay;
-	__u32 bridge_max_age;
-	__u32 bridge_hello_time;
-	__u32 bridge_forward_delay;
-	__u8 topology_change;
-	__u8 topology_change_detected;
-	__u8 root_port;
-	__u8 stp_enabled;
-	__u32 ageing_time;
-	__u32 gc_interval;
-	__u32 hello_timer_value;
-	__u32 tcn_timer_value;
-	__u32 topology_change_timer_value;
-	__u32 gc_timer_value;
+    __u64 designated_root;
+    __u64 bridge_id;
+    __u32 root_path_cost;
+    __u32 max_age;
+    __u32 hello_time;
+    __u32 forward_delay;
+    __u32 bridge_max_age;
+    __u32 bridge_hello_time;
+    __u32 bridge_forward_delay;
+    __u8 topology_change;
+    __u8 topology_change_detected;
+    __u8 root_port;
+    __u8 stp_enabled;
+    __u32 ageing_time;
+    __u32 gc_interval;
+    __u32 hello_timer_value;
+    __u32 tcn_timer_value;
+    __u32 topology_change_timer_value;
+    __u32 gc_timer_value;
 };
 
 struct __port_info
 {
-	__u64 designated_root;
-	__u64 designated_bridge;
-	__u16 port_id;
-	__u16 designated_port;
-	__u32 path_cost;
-	__u32 designated_cost;
-	__u8 state;
-	__u8 top_change_ack;
-	__u8 config_pending;
-	__u8 unused0;
-	__u32 message_age_timer_value;
-	__u32 forward_delay_timer_value;
-	__u32 hold_timer_value;
+    __u64 designated_root;
+    __u64 designated_bridge;
+    __u16 port_id;
+    __u16 designated_port;
+    __u32 path_cost;
+    __u32 designated_cost;
+    __u8 state;
+    __u8 top_change_ack;
+    __u8 config_pending;
+    __u8 unused0;
+    __u32 message_age_timer_value;
+    __u32 forward_delay_timer_value;
+    __u32 hold_timer_value;
 };
 
 struct __fdb_entry
 {
-	__u8 mac_addr[6];
-	__u8 port_no;
-	__u8 is_local;
-	__u32 ageing_timer_value;
-	__u32 unused;
+    __u8 mac_addr[6];
+    __u8 port_no;
+    __u8 is_local;
+    __u32 ageing_timer_value;
+    __u32 unused;
 };
 
 #ifdef __KERNEL__

@@ -22,7 +22,7 @@
 /*
 !++
 ! NETDEVICES.H	Copyright (c) 1990	Carnegie Mellon University
-! 
+!
 ! Description:
 !
 !	Supporting declarations for IP Transport device modules
@@ -82,10 +82,10 @@
 ! to the device module's IPACP Information Structure.
 */
 
-   /* Conditionally do something according to LOG_STATE flags */
+/* Conditionally do something according to LOG_STATE flags */
 #define $$LOGF(LOGF) (((*IPACP_Interface->ACPI$LOG_STATE) & (LOGF)) != 0)
 
-    /* Write a message to the IPACP log file. */
+/* Write a message to the IPACP log file. */
 /*#define DRV$LOG_FAO (.IPACP_Interface[ACPI$LOG_FAO]) */
 /*! Queue a message to the IPACP log file. */
 

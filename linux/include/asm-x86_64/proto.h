@@ -3,18 +3,18 @@
 
 /* misc architecture specific prototypes */
 
-struct cpuinfo_x86; 
+struct cpuinfo_x86;
 struct pt_regs;
 
 extern void get_cpu_vendor(struct cpuinfo_x86*);
 extern void start_kernel(void);
-extern void pda_init(int); 
+extern void pda_init(int);
 
 extern void mcheck_init(struct cpuinfo_x86 *c);
 extern void init_memory_mapping(void);
 
-extern void system_call(void); 
-extern void ia32_cstar_target(void); 
+extern void system_call(void);
+extern void ia32_cstar_target(void);
 extern void calibrate_delay(void);
 extern void cpu_idle(void);
 extern void sys_ni_syscall(void);
@@ -27,7 +27,7 @@ extern void do_softirq_thunk(void);
 
 extern void swiotlb_init(void);
 
-extern int setup_early_printk(char *); 
+extern int setup_early_printk(char *);
 extern void early_printk(const char *fmt, ...) __attribute__((format(printf,1,2)));
 
 extern int k8_scan_nodes(unsigned long start, unsigned long end);
@@ -40,7 +40,7 @@ extern void free_bootmem_generic(unsigned long phys, unsigned len);
 
 extern void check_efer(void);
 
-extern unsigned long start_pfn, end_pfn, end_pfn_map; 
+extern unsigned long start_pfn, end_pfn, end_pfn_map;
 extern int iommu_aperture;
 
 extern void show_stack(unsigned long * rsp);

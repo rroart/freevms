@@ -111,98 +111,104 @@
 
 
 
-typedef struct {
-	unsigned ea1  : 1;
-	unsigned cr   : 1;
-	unsigned dlcih: 6;
-  
-	unsigned ea2  : 1;
-	unsigned de   : 1;
-	unsigned becn : 1;
-	unsigned fecn : 1;
-	unsigned dlcil: 4;
-}__attribute__ ((packed)) fr_hdr;
+typedef struct
+{
+    unsigned ea1  : 1;
+    unsigned cr   : 1;
+    unsigned dlcih: 6;
+
+    unsigned ea2  : 1;
+    unsigned de   : 1;
+    unsigned becn : 1;
+    unsigned fecn : 1;
+    unsigned dlcil: 4;
+} __attribute__ ((packed)) fr_hdr;
 
 
 
-typedef struct {		/* Used in Cisco and PPP mode */
-	u8 address;
-	u8 control;
-	u16 protocol;
-}__attribute__ ((packed)) hdlc_header;
+typedef struct  		/* Used in Cisco and PPP mode */
+{
+    u8 address;
+    u8 control;
+    u16 protocol;
+} __attribute__ ((packed)) hdlc_header;
 
 
 
-typedef struct {
-	u32 type;		/* code */
-	u32 par1;
-	u32 par2;
-	u16 rel;		/* reliability */
-	u32 time;
-}__attribute__ ((packed)) cisco_packet;
+typedef struct
+{
+    u32 type;		/* code */
+    u32 par1;
+    u32 par2;
+    u16 rel;		/* reliability */
+    u32 time;
+} __attribute__ ((packed)) cisco_packet;
 #define	CISCO_PACKET_LEN	18
 #define	CISCO_BIG_PACKET_LEN	20
 
 
 
-typedef struct pvc_device_struct {
-	struct net_device netdev; /* PVC net device - must be first */
-	struct net_device_stats stats;
-	struct hdlc_device_struct *master;
-	struct pvc_device_struct *next;
+typedef struct pvc_device_struct
+{
+    struct net_device netdev; /* PVC net device - must be first */
+    struct net_device_stats stats;
+    struct hdlc_device_struct *master;
+    struct pvc_device_struct *next;
 
-	u8 state;
-	u8 newstate;
-}pvc_device;
-
-
-
-typedef struct {
-	u32 last_errors;	/* last errors bit list */
-	int last_poll;		/* ! */
-	u8 T391;		/* ! link integrity verification polling timer */
-	u8 T392;		/* ! polling verification timer */
-	u8 N391;		/* full status polling counter */
-	u8 N392;		/* error threshold */
-	u8 N393;		/* monitored events count */
-	u8 N391cnt;
-
-	u8 state;		/* ! */
-	u32 txseq;		/* ! TX sequence number - Cisco uses 4 bytes */
-	u32 rxseq;		/* ! RX sequence number */
-}fr_lmi;			/* ! means used in Cisco HDLC as well */
+    u8 state;
+    u8 newstate;
+} pvc_device;
 
 
-typedef struct hdlc_device_struct {
-	/* to be initialized by hardware driver: */
-	struct net_device netdev; /* master net device - must be first */
-	struct net_device_stats stats;
 
-	struct ppp_device pppdev;
-	struct ppp_device *syncppp_ptr;
+typedef struct
+{
+    u32 last_errors;	/* last errors bit list */
+    int last_poll;		/* ! */
+    u8 T391;		/* ! link integrity verification polling timer */
+    u8 T392;		/* ! polling verification timer */
+    u8 N391;		/* full status polling counter */
+    u8 N392;		/* error threshold */
+    u8 N393;		/* monitored events count */
+    u8 N391cnt;
 
-	/* set_mode may be NULL if HDLC-only board */
-	int (*set_mode)(struct hdlc_device_struct *hdlc, int mode);
-	int (*open)(struct hdlc_device_struct *hdlc);
-	void (*close)(struct hdlc_device_struct *hdlc);
-	int (*xmit)(struct hdlc_device_struct *hdlc, struct sk_buff *skb);
-	int (*ioctl)(struct hdlc_device_struct *hdlc, struct ifreq *ifr,
-		     int cmd);
-  
-	/* Only in "hardware" FR modes etc. - may be NULL */
-	int (*create_pvc)(pvc_device *pvc);
-	void (*destroy_pvc)(pvc_device *pvc);
-	int (*open_pvc)(pvc_device *pvc);
-	void (*close_pvc)(pvc_device *pvc);
+    u8 state;		/* ! */
+    u32 txseq;		/* ! TX sequence number - Cisco uses 4 bytes */
+    u32 rxseq;		/* ! RX sequence number */
+} fr_lmi;			/* ! means used in Cisco HDLC as well */
 
-	/* for hdlc.c internal use only */
-	pvc_device *first_pvc;
-	u16 pvc_count;
-	int mode;
 
-	struct timer_list timer;
-	fr_lmi lmi;
-}hdlc_device;
+typedef struct hdlc_device_struct
+{
+    /* to be initialized by hardware driver: */
+    struct net_device netdev; /* master net device - must be first */
+    struct net_device_stats stats;
+
+    struct ppp_device pppdev;
+    struct ppp_device *syncppp_ptr;
+
+    /* set_mode may be NULL if HDLC-only board */
+    int (*set_mode)(struct hdlc_device_struct *hdlc, int mode);
+    int (*open)(struct hdlc_device_struct *hdlc);
+    void (*close)(struct hdlc_device_struct *hdlc);
+    int (*xmit)(struct hdlc_device_struct *hdlc, struct sk_buff *skb);
+    int (*ioctl)(struct hdlc_device_struct *hdlc, struct ifreq *ifr,
+                 int cmd);
+
+    /* Only in "hardware" FR modes etc. - may be NULL */
+    int (*create_pvc)(pvc_device *pvc);
+    void (*destroy_pvc)(pvc_device *pvc);
+    int (*open_pvc)(pvc_device *pvc);
+    void (*close_pvc)(pvc_device *pvc);
+
+    /* for hdlc.c internal use only */
+    pvc_device *first_pvc;
+    u16 pvc_count;
+    int mode;
+
+    struct timer_list timer;
+    fr_lmi lmi;
+} hdlc_device;
 
 
 int register_hdlc_device(hdlc_device *hdlc);
@@ -212,123 +218,126 @@ void hdlc_netif_rx(hdlc_device *hdlc, struct sk_buff *skb);
 
 static __inline__ struct net_device* hdlc_to_dev(hdlc_device *hdlc)
 {
-	return &hdlc->netdev;
+    return &hdlc->netdev;
 }
 
 
 static __inline__ hdlc_device* dev_to_hdlc(struct net_device *dev)
 {
-	return (hdlc_device*)dev;
+    return (hdlc_device*)dev;
 }
 
 
 static __inline__ struct net_device* pvc_to_dev(pvc_device *pvc)
 {
-	return &pvc->netdev;
+    return &pvc->netdev;
 }
 
 
 static __inline__ pvc_device* dev_to_pvc(struct net_device *dev)
 {
-	return (pvc_device*)dev;
+    return (pvc_device*)dev;
 }
 
 
 static __inline__ const char *hdlc_to_name(hdlc_device *hdlc)
 {
-	return hdlc_to_dev(hdlc)->name;
+    return hdlc_to_dev(hdlc)->name;
 }
 
 
 static __inline__ const char *pvc_to_name(pvc_device *pvc)
 {
-	return pvc_to_dev(pvc)->name;
+    return pvc_to_dev(pvc)->name;
 }
 
 
 static __inline__ u16 status_to_dlci(hdlc_device *hdlc, u8 *status, u8 *state)
 {
-	*state &= ~(PVC_STATE_ACTIVE | PVC_STATE_NEW);
-	if (status[2] & 0x08)
-		*state |= PVC_STATE_NEW;
-	else if (status[2] & 0x02)
-		*state |= PVC_STATE_ACTIVE;
+    *state &= ~(PVC_STATE_ACTIVE | PVC_STATE_NEW);
+    if (status[2] & 0x08)
+        *state |= PVC_STATE_NEW;
+    else if (status[2] & 0x02)
+        *state |= PVC_STATE_ACTIVE;
 
-	return ((status[0] & 0x3F)<<4) | ((status[1] & 0x78)>>3);
+    return ((status[0] & 0x3F)<<4) | ((status[1] & 0x78)>>3);
 }
 
 
 static __inline__ void dlci_to_status(hdlc_device *hdlc, u16 dlci, u8 *status,
-				      u8 state)
+                                      u8 state)
 {
-	status[0] = (dlci>>4) & 0x3F;
-	status[1] = ((dlci<<3) & 0x78) | 0x80;
-	status[2] = 0x80;
+    status[0] = (dlci>>4) & 0x3F;
+    status[1] = ((dlci<<3) & 0x78) | 0x80;
+    status[2] = 0x80;
 
-	if (state & PVC_STATE_NEW)
-		status[2] |= 0x08;
-	else if (state & PVC_STATE_ACTIVE)
-		status[2] |= 0x02;
+    if (state & PVC_STATE_NEW)
+        status[2] |= 0x08;
+    else if (state & PVC_STATE_ACTIVE)
+        status[2] |= 0x02;
 }
 
 
 
 static __inline__ u16 netdev_dlci(struct net_device *dev)
 {
-	return ntohs(*(u16*)dev->dev_addr);
+    return ntohs(*(u16*)dev->dev_addr);
 }
 
 
 
 static __inline__ u16 q922_to_dlci(u8 *hdr)
 {
-	return ((hdr[0] & 0xFC)<<2) | ((hdr[1] & 0xF0)>>4);
+    return ((hdr[0] & 0xFC)<<2) | ((hdr[1] & 0xF0)>>4);
 }
 
 
 
 static __inline__ void dlci_to_q922(u8 *hdr, u16 dlci)
 {
-	hdr[0] = (dlci>>2) & 0xFC;
-	hdr[1] = ((dlci<<4) & 0xF0) | 0x01;
+    hdr[0] = (dlci>>2) & 0xFC;
+    hdr[1] = ((dlci<<4) & 0xF0) | 0x01;
 }
 
 
 
 static __inline__ int mode_is(hdlc_device *hdlc, int mask)
 {
-	return (hdlc->mode & mask) == mask;
+    return (hdlc->mode & mask) == mask;
 }
 
 
 
 static __inline__ pvc_device* find_pvc(hdlc_device *hdlc, u16 dlci)
 {
-	pvc_device *pvc=hdlc->first_pvc;
-	
-	while (pvc) {
-		if (netdev_dlci(&pvc->netdev) == dlci)
-			return pvc;
-		pvc=pvc->next;
-	}
+    pvc_device *pvc=hdlc->first_pvc;
 
-	return NULL;
+    while (pvc)
+    {
+        if (netdev_dlci(&pvc->netdev) == dlci)
+            return pvc;
+        pvc=pvc->next;
+    }
+
+    return NULL;
 }
 
 
 
 static __inline__ void debug_frame(const struct sk_buff *skb)
 {
-	int i;
+    int i;
 
-	for (i=0; i<skb->len; i++) {
-		if (i == 100) {
-			printk("...\n");
-			return;
-		}
-		printk(" %02X", skb->data[i]);
-	}
-	printk("\n");
+    for (i=0; i<skb->len; i++)
+    {
+        if (i == 100)
+        {
+            printk("...\n");
+            return;
+        }
+        printk(" %02X", skb->data[i]);
+    }
+    printk("\n");
 }
 
 

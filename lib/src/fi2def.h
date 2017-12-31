@@ -17,7 +17,8 @@
 
 #define NO_DOLLAR
 
-struct _fi2 {
+struct _fi2
+{
     char fi2$t_filename[20];
     vmsword fi2$w_revision;
     VMSTIME fi2$q_credate;

@@ -1,6 +1,6 @@
 /*
  * include/linux/nfsd/export.h
- * 
+ *
  * Public declarations for NFS exports. The definitions for the
  * syscall interface are in nfsctl.h
  *
@@ -47,28 +47,30 @@
 /* The following are hashtable sizes and must be powers of 2 */
 #define NFSCLNT_EXPMAX		16
 
-struct svc_client {
-	struct svc_client *	cl_next;
-	char			cl_ident[NFSCLNT_IDMAX];
-	int			cl_idlen;
-	int			cl_naddr;
-	struct in_addr		cl_addr[NFSCLNT_ADDRMAX];
-	struct svc_uidmap *	cl_umap;
-	struct svc_export *	cl_export[NFSCLNT_EXPMAX];
+struct svc_client
+{
+    struct svc_client *	cl_next;
+    char			cl_ident[NFSCLNT_IDMAX];
+    int			cl_idlen;
+    int			cl_naddr;
+    struct in_addr		cl_addr[NFSCLNT_ADDRMAX];
+    struct svc_uidmap *	cl_umap;
+    struct svc_export *	cl_export[NFSCLNT_EXPMAX];
 };
 
-struct svc_export {
-	struct svc_export *	ex_next;
-	char			ex_path[NFS_MAXPATHLEN+1];
-	struct svc_export *	ex_parent;
-	struct svc_client *	ex_client;
-	int			ex_flags;
-	struct vfsmount *	ex_mnt;
-	struct dentry *		ex_dentry;
-	kdev_t			ex_dev;
-	ino_t			ex_ino;
-	uid_t			ex_anon_uid;
-	gid_t			ex_anon_gid;
+struct svc_export
+{
+    struct svc_export *	ex_next;
+    char			ex_path[NFS_MAXPATHLEN+1];
+    struct svc_export *	ex_parent;
+    struct svc_client *	ex_client;
+    int			ex_flags;
+    struct vfsmount *	ex_mnt;
+    struct dentry *		ex_dentry;
+    kdev_t			ex_dev;
+    ino_t			ex_ino;
+    uid_t			ex_anon_uid;
+    gid_t			ex_anon_gid;
 };
 
 #define EX_SECURE(exp)		(!((exp)->ex_flags & NFSEXP_INSECURE_PORT))
@@ -91,7 +93,7 @@ struct svc_client *	exp_getclient(struct sockaddr_in *sin);
 void			exp_putclient(struct svc_client *clp);
 struct svc_export *	exp_get(struct svc_client *clp, kdev_t dev, ino_t ino);
 int			exp_rootfh(struct svc_client *, kdev_t, ino_t,
-					char *path, struct knfsd_fh *, int maxsize);
+                       char *path, struct knfsd_fh *, int maxsize);
 int			nfserrno(int errno);
 void			exp_nlmdetach(void);
 

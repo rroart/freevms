@@ -40,9 +40,9 @@ extern void FASTCALL(rwsemtrace(struct rw_semaphore *sem, const char *str));
  */
 static inline void down_read(struct rw_semaphore *sem)
 {
-	rwsemtrace(sem,"Entering down_read");
-	__down_read(sem);
-	rwsemtrace(sem,"Leaving down_read");
+    rwsemtrace(sem,"Entering down_read");
+    __down_read(sem);
+    rwsemtrace(sem,"Leaving down_read");
 }
 
 /*
@@ -50,9 +50,9 @@ static inline void down_read(struct rw_semaphore *sem)
  */
 static inline void down_write(struct rw_semaphore *sem)
 {
-	rwsemtrace(sem,"Entering down_write");
-	__down_write(sem);
-	rwsemtrace(sem,"Leaving down_write");
+    rwsemtrace(sem,"Entering down_write");
+    __down_write(sem);
+    rwsemtrace(sem,"Leaving down_write");
 }
 
 /*
@@ -60,9 +60,9 @@ static inline void down_write(struct rw_semaphore *sem)
  */
 static inline void up_read(struct rw_semaphore *sem)
 {
-	rwsemtrace(sem,"Entering up_read");
-	__up_read(sem);
-	rwsemtrace(sem,"Leaving up_read");
+    rwsemtrace(sem,"Entering up_read");
+    __up_read(sem);
+    rwsemtrace(sem,"Leaving up_read");
 }
 
 /*
@@ -70,9 +70,9 @@ static inline void up_read(struct rw_semaphore *sem)
  */
 static inline void up_write(struct rw_semaphore *sem)
 {
-	rwsemtrace(sem,"Entering up_write");
-	__up_write(sem);
-	rwsemtrace(sem,"Leaving up_write");
+    rwsemtrace(sem,"Entering up_write");
+    __up_write(sem);
+    rwsemtrace(sem,"Leaving up_write");
 }
 
 

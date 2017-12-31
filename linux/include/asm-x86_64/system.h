@@ -21,21 +21,22 @@
 #define __PUSH(x) "pushq %%" __STR(x) "\n\t"
 #define __POP(x)  "popq  %%" __STR(x) "\n\t"
 
-struct save_context_frame { 
-        unsigned long rbp; 
-        unsigned long rbx;
-	unsigned long r11;
-	unsigned long r10;
-	unsigned long r9;
-	unsigned long r8;
-	unsigned long rcx;
-	unsigned long rdx;
-	unsigned long r15;
-	unsigned long r14;
-	unsigned long r13;
-	unsigned long r12;
-	unsigned long rdi;
-	unsigned long rsi;
+struct save_context_frame
+{
+    unsigned long rbp;
+    unsigned long rbx;
+    unsigned long r11;
+    unsigned long r10;
+    unsigned long r9;
+    unsigned long r8;
+    unsigned long rcx;
+    unsigned long rdx;
+    unsigned long r15;
+    unsigned long r14;
+    unsigned long r13;
+    unsigned long r12;
+    unsigned long rdi;
+    unsigned long rsi;
 };
 
 /* frame pointer must be last for get_wchan */
@@ -43,7 +44,7 @@ struct save_context_frame {
 	__PUSH(rsi) __PUSH(rdi) \
     __PUSH(r12) __PUSH(r13) __PUSH(r14) __PUSH(r15)  \
 	__PUSH(rdx) __PUSH(rcx) __PUSH(r8) __PUSH(r9) __PUSH(r10) __PUSH(r11)  \
-	__PUSH(rbx) __PUSH(rbp) 
+	__PUSH(rbx) __PUSH(rbp)
 #define RESTORE_CONTEXT \
 	__POP(rbp) __POP(rbx) \
 	__POP(r11) __POP(r10) __POP(r9) __POP(r8) __POP(rcx) __POP(rdx) \
@@ -71,8 +72,8 @@ struct save_context_frame {
 		     :"memory","cc");					\
 	last = l; 							\
 } while(0)
-		     
-extern void load_gs_index(unsigned); 
+
+extern void load_gs_index(unsigned);
 
 /*
  * Load a segment. Fall back on loading the zero
@@ -140,7 +141,7 @@ extern void load_gs_index(unsigned);
 
 extern inline void set_64bit(volatile unsigned long *ptr, unsigned long val)
 {
-	*ptr = val;
+    *ptr = val;
 }
 
 #define _set_64bit set_64bit
@@ -152,33 +153,34 @@ extern inline void set_64bit(volatile unsigned long *ptr, unsigned long val)
  */
 static inline unsigned long __xchg(unsigned long x, volatile void * ptr, int size)
 {
-	switch (size) {
-		case 1:
-			__asm__ __volatile__("xchgb %b0,%1"
-				:"=q" (x)
-				:"m" (*__xg(ptr)), "0" (x)
-				:"memory");
-			break;
-		case 2:
-			__asm__ __volatile__("xchgw %w0,%1"
-				:"=r" (x)
-				:"m" (*__xg(ptr)), "0" (x)
-				:"memory");
-			break;
-		case 4:
-			__asm__ __volatile__("xchgl %k0,%1"
-				:"=r" (x)
-				:"m" (*__xg(ptr)), "0" (x)
-				:"memory");
-			break;
-		case 8:
-			__asm__ __volatile__("xchgq %0,%1"
-				:"=r" (x)
-				:"m" (*__xg(ptr)), "0" (x)
-				:"memory");
-			break;
-	}
-	return x;
+    switch (size)
+    {
+    case 1:
+        __asm__ __volatile__("xchgb %b0,%1"
+                             :"=q" (x)
+                             :"m" (*__xg(ptr)), "0" (x)
+                             :"memory");
+        break;
+    case 2:
+        __asm__ __volatile__("xchgw %w0,%1"
+                             :"=r" (x)
+                             :"m" (*__xg(ptr)), "0" (x)
+                             :"memory");
+        break;
+    case 4:
+        __asm__ __volatile__("xchgl %k0,%1"
+                             :"=r" (x)
+                             :"m" (*__xg(ptr)), "0" (x)
+                             :"memory");
+        break;
+    case 8:
+        __asm__ __volatile__("xchgq %0,%1"
+                             :"=r" (x)
+                             :"m" (*__xg(ptr)), "0" (x)
+                             :"memory");
+        break;
+    }
+    return x;
 }
 
 /*
@@ -190,36 +192,37 @@ static inline unsigned long __xchg(unsigned long x, volatile void * ptr, int siz
 #define __HAVE_ARCH_CMPXCHG 1
 
 static inline unsigned long __cmpxchg(volatile void *ptr, unsigned long old,
-				      unsigned long new, int size)
+                                      unsigned long new, int size)
 {
-	unsigned long prev;
-	switch (size) {
-	case 1:
-		__asm__ __volatile__(LOCK_PREFIX "cmpxchgb %b1,%2"
-				     : "=a"(prev)
-				     : "q"(new), "m"(*__xg(ptr)), "0"(old)
-				     : "memory");
-		return prev;
-	case 2:
-		__asm__ __volatile__(LOCK_PREFIX "cmpxchgw %w1,%2"
-				     : "=a"(prev)
-				     : "q"(new), "m"(*__xg(ptr)), "0"(old)
-				     : "memory");
-		return prev;
-	case 4:
-		__asm__ __volatile__(LOCK_PREFIX "cmpxchgl %k1,%2"
-				     : "=a"(prev)
-				     : "q"(new), "m"(*__xg(ptr)), "0"(old)
-				     : "memory");
-		return prev;
-	case 8:
-		__asm__ __volatile__(LOCK_PREFIX "cmpxchgq %1,%2"
-				     : "=a"(prev)
-				     : "q"(new), "m"(*__xg(ptr)), "0"(old)
-				     : "memory");
-		return prev;
-	}
-	return old;
+    unsigned long prev;
+    switch (size)
+    {
+    case 1:
+        __asm__ __volatile__(LOCK_PREFIX "cmpxchgb %b1,%2"
+                             : "=a"(prev)
+                             : "q"(new), "m"(*__xg(ptr)), "0"(old)
+                             : "memory");
+        return prev;
+    case 2:
+        __asm__ __volatile__(LOCK_PREFIX "cmpxchgw %w1,%2"
+                             : "=a"(prev)
+                             : "q"(new), "m"(*__xg(ptr)), "0"(old)
+                             : "memory");
+        return prev;
+    case 4:
+        __asm__ __volatile__(LOCK_PREFIX "cmpxchgl %k1,%2"
+                             : "=a"(prev)
+                             : "q"(new), "m"(*__xg(ptr)), "0"(old)
+                             : "memory");
+        return prev;
+    case 8:
+        __asm__ __volatile__(LOCK_PREFIX "cmpxchgq %1,%2"
+                             : "=a"(prev)
+                             : "q"(new), "m"(*__xg(ptr)), "0"(old)
+                             : "memory");
+        return prev;
+    }
+    return old;
 }
 
 #define cmpxchg(ptr,o,n)\
@@ -237,7 +240,7 @@ static inline unsigned long __cmpxchg(volatile void *ptr, unsigned long old,
 #define smp_wmb()	barrier()
 #endif
 
-    
+
 /*
  * Force strict CPU ordering.
  * And yes, this is required on UP too when we're talking

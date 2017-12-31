@@ -26,9 +26,9 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 typedef struct ht_identifier ht_identifier;
 struct ht_identifier GTY(())
 {
-  const unsigned char *str;
-  unsigned int len;
-  unsigned int hash_value;
+    const unsigned char *str;
+    unsigned int len;
+    unsigned int hash_value;
 };
 
 #define HT_LEN(NODE) ((NODE)->len)
@@ -42,22 +42,22 @@ enum ht_lookup_option {HT_NO_INSERT = 0, HT_ALLOC, HT_ALLOCED};
 /* An identifier hash table for cpplib and the front ends.  */
 struct ht
 {
-  /* Identifiers are allocated from here.  */
-  struct obstack stack;
+    /* Identifiers are allocated from here.  */
+    struct obstack stack;
 
-  hashnode *entries;
-  /* Call back.  */
-  hashnode (*alloc_node) (hash_table *);
+    hashnode *entries;
+    /* Call back.  */
+    hashnode (*alloc_node) (hash_table *);
 
-  unsigned int nslots;		/* Total slots in the entries array.  */
-  unsigned int nelements;	/* Number of live elements.  */
+    unsigned int nslots;		/* Total slots in the entries array.  */
+    unsigned int nelements;	/* Number of live elements.  */
 
-  /* Link to reader, if any.  For the benefit of cpplib.  */
-  struct cpp_reader *pfile;
+    /* Link to reader, if any.  For the benefit of cpplib.  */
+    struct cpp_reader *pfile;
 
-  /* Table usage statistics.  */
-  unsigned int searches;
-  unsigned int collisions;
+    /* Table usage statistics.  */
+    unsigned int searches;
+    unsigned int collisions;
 };
 
 /* Initialize the hashtable with 2 ^ order entries.  */
@@ -67,7 +67,7 @@ extern hash_table *ht_create (unsigned int order);
 extern void ht_destroy (hash_table *);
 
 extern hashnode ht_lookup (hash_table *, const unsigned char *,
-			   size_t, enum ht_lookup_option);
+                           size_t, enum ht_lookup_option);
 
 /* For all nodes in TABLE, make a callback.  The callback takes
    TABLE->PFILE, the node, and a PTR, and the callback sequence stops

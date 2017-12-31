@@ -55,15 +55,16 @@
 #define		ACL$S_RESERVED_ITEM_3	255
 #define		ACL$C_MAX_SEGMENT_SIZE	512
 #define		ACL$K_MAX_SEGMENT_SIZE	512
-	
-struct _acldef {
-  unsigned int acl$l_flink;
-  unsigned int acl$l_blink;
-  unsigned short int acl$w_size;
-  unsigned char acl$b_type;
-  char acldef$$_fill_1;
-  unsigned int acl$l_list;
+
+struct _acldef
+{
+    unsigned int acl$l_flink;
+    unsigned int acl$l_blink;
+    unsigned short int acl$w_size;
+    unsigned char acl$b_type;
+    char acldef$$_fill_1;
+    unsigned int acl$l_list;
 };
- 
+
 #endif
- 
+

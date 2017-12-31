@@ -5,7 +5,7 @@
  */
 
 #ifndef _NETROM_H
-#define _NETROM_H 
+#define _NETROM_H
 #include <linux/netrom.h>
 
 #define	NR_NETWORK_LEN			15
@@ -26,11 +26,12 @@
 #define	NR_MORE_FLAG			0x20
 
 /* Define Link State constants. */
-enum {
-	NR_STATE_0,
-	NR_STATE_1,
-	NR_STATE_2,
-	NR_STATE_3
+enum
+{
+    NR_STATE_0,
+    NR_STATE_1,
+    NR_STATE_2,
+    NR_STATE_3
 };
 
 #define	NR_COND_ACK_PENDING		0x01
@@ -54,52 +55,56 @@ enum {
 #define NR_MAX_WINDOW_SIZE		127			/* Maximum Window Allowable - 127 */
 #define	NR_MAX_PACKET_SIZE		236			/* Maximum Packet Length - 236 */
 
-typedef struct {
-	ax25_address		user_addr, source_addr, dest_addr;
-	struct net_device		*device;
-	unsigned char		my_index,   my_id;
-	unsigned char		your_index, your_id;
-	unsigned char		state, condition, bpqext, window;
-	unsigned short		vs, vr, va, vl;
-	unsigned char		n2, n2count;
-	unsigned long		t1, t2, t4, idle;
-	unsigned short		fraglen;
-	struct timer_list	t1timer;
-	struct timer_list	t2timer;
-	struct timer_list	t4timer;
-	struct timer_list	idletimer;
-	struct sk_buff_head	ack_queue;
-	struct sk_buff_head	reseq_queue;
-	struct sk_buff_head	frag_queue;
-	struct sock		*sk;		/* Backlink to socket */
+typedef struct
+{
+    ax25_address		user_addr, source_addr, dest_addr;
+    struct net_device		*device;
+    unsigned char		my_index,   my_id;
+    unsigned char		your_index, your_id;
+    unsigned char		state, condition, bpqext, window;
+    unsigned short		vs, vr, va, vl;
+    unsigned char		n2, n2count;
+    unsigned long		t1, t2, t4, idle;
+    unsigned short		fraglen;
+    struct timer_list	t1timer;
+    struct timer_list	t2timer;
+    struct timer_list	t4timer;
+    struct timer_list	idletimer;
+    struct sk_buff_head	ack_queue;
+    struct sk_buff_head	reseq_queue;
+    struct sk_buff_head	frag_queue;
+    struct sock		*sk;		/* Backlink to socket */
 } nr_cb;
 
-struct nr_neigh {
-	struct nr_neigh *next;
-	ax25_address    callsign;
-	ax25_digi       *digipeat;
-	ax25_cb		*ax25;
-	struct net_device   *dev;
-	unsigned char   quality;
-	unsigned char   locked;
-	unsigned short  count;
-	unsigned int    number;
-	unsigned char	failed;
+struct nr_neigh
+{
+    struct nr_neigh *next;
+    ax25_address    callsign;
+    ax25_digi       *digipeat;
+    ax25_cb		*ax25;
+    struct net_device   *dev;
+    unsigned char   quality;
+    unsigned char   locked;
+    unsigned short  count;
+    unsigned int    number;
+    unsigned char	failed;
 };
 
-struct nr_route {
-	unsigned char   quality;
-	unsigned char   obs_count;
-	struct nr_neigh *neighbour;
+struct nr_route
+{
+    unsigned char   quality;
+    unsigned char   obs_count;
+    struct nr_neigh *neighbour;
 };
 
-struct nr_node {
-	struct nr_node  *next;
-	ax25_address    callsign;
-	char		mnemonic[7];
-	unsigned char   which;
-	unsigned char   count;
-	struct nr_route routes[3];
+struct nr_node
+{
+    struct nr_node  *next;
+    ax25_address    callsign;
+    char		mnemonic[7];
+    unsigned char   which;
+    unsigned char   count;
+    struct nr_route routes[3];
 };
 
 /* af_netrom.c */

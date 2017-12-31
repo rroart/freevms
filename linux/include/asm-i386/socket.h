@@ -54,10 +54,10 @@
 #define SOCK_RDM	4		/* reliably-delivered message	*/
 #define SOCK_SEQPACKET	5		/* sequential packet socket	*/
 #define SOCK_PACKET	10		/* linux specific way of	*/
-					/* getting packets at the dev	*/
-					/* level.  For writing rarp and	*/
-					/* other similar things on the	*/
-					/* user level.			*/
+/* getting packets at the dev	*/
+/* level.  For writing rarp and	*/
+/* other similar things on the	*/
+/* user level.			*/
 #define	SOCK_MAX	(SOCK_PACKET+1)
 #endif
 

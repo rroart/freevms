@@ -3,20 +3,22 @@
  * its configuration program.
  */
 
-struct rocket_config {
-	int	line;
-	int	flags;
-	int	closing_wait;
-	int	close_delay;
-	int	port;
-	int	reserved[32];
+struct rocket_config
+{
+    int	line;
+    int	flags;
+    int	closing_wait;
+    int	close_delay;
+    int	port;
+    int	reserved[32];
 };
 
-struct rocket_ports {
-	int	tty_major;
-	int	callout_major;
-	int	port_bitmap[4];
-	int	reserved[32];
+struct rocket_ports
+{
+    int	tty_major;
+    int	callout_major;
+    int	port_bitmap[4];
+    int	reserved[32];
 };
 
 /*
@@ -34,11 +36,11 @@ struct rocket_ports {
 #define ROCKET_SAK		0x00000080
 #define ROCKET_SESSION_LOCKOUT	0x00000100
 #define ROCKET_PGRP_LOCKOUT	0x00000200
-	
+
 #define ROCKET_FLAGS		0x000003FF
 
 #define ROCKET_USR_MASK 0x0071	/* Legal flags that non-privileged
-				 * users can set or reset */
+* users can set or reset */
 
 /*
  * For closing_wait and closing_wait2

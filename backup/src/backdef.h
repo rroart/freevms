@@ -12,39 +12,41 @@
  *
  */
 
-struct bbh {
-	unsigned char	bbh$w_size[2];
-	unsigned char	bbh$w_opsys[2];
-	unsigned char	bbh$w_subsys[2];
-	unsigned char	bbh$w_applic[2];
-	unsigned char	bbh$l_number[4];
-	char	bbh$t_spare_1[20];
-	unsigned char	bbh$w_struclev[2];
-	unsigned char	bbh$w_volnum[2];
-	unsigned char	bbh$l_crc[4];
-	unsigned char	bbh$l_blocksize[4];
-	unsigned char	bbh$l_flags[4];
-	char	bbh$t_ssname[32];
-	unsigned char	bbh$w_fid[3][2];
-	unsigned char	bbh$w_did[3][2];
-	char	bbh$t_filename[128];
-	char	bbh$b_rtype;
-	char	bbh$b_rattrib;
-	unsigned char	bbh$w_rsize[2];
-	char	bbh$b_bktsize;
-	char	bbh$b_vfcsize;
-	unsigned char	bbh$w_maxrec[2];
-	unsigned char	bbh$l_filesize[4];
-	char	bbh$t_spare_2[22];
-	unsigned char	bbh$w_checksum[2];
+struct bbh
+{
+    unsigned char	bbh$w_size[2];
+    unsigned char	bbh$w_opsys[2];
+    unsigned char	bbh$w_subsys[2];
+    unsigned char	bbh$w_applic[2];
+    unsigned char	bbh$l_number[4];
+    char	bbh$t_spare_1[20];
+    unsigned char	bbh$w_struclev[2];
+    unsigned char	bbh$w_volnum[2];
+    unsigned char	bbh$l_crc[4];
+    unsigned char	bbh$l_blocksize[4];
+    unsigned char	bbh$l_flags[4];
+    char	bbh$t_ssname[32];
+    unsigned char	bbh$w_fid[3][2];
+    unsigned char	bbh$w_did[3][2];
+    char	bbh$t_filename[128];
+    char	bbh$b_rtype;
+    char	bbh$b_rattrib;
+    unsigned char	bbh$w_rsize[2];
+    char	bbh$b_bktsize;
+    char	bbh$b_vfcsize;
+    unsigned char	bbh$w_maxrec[2];
+    unsigned char	bbh$l_filesize[4];
+    char	bbh$t_spare_2[22];
+    unsigned char	bbh$w_checksum[2];
 };
 
-struct brh {
-	unsigned char	brh$w_rsize[2];
-	unsigned char	brh$w_rtype[2];
-	unsigned char	brh$l_flags[4];
-	unsigned char	brh$l_address[4];
-	unsigned char	brh$l_spare[4];
+struct brh
+{
+    unsigned char	brh$w_rsize[2];
+    unsigned char	brh$w_rtype[2];
+    unsigned char	brh$l_flags[4];
+    unsigned char	brh$l_address[4];
+    unsigned char	brh$l_spare[4];
 };
 
 /* define record types */
@@ -58,10 +60,11 @@ struct brh {
 #define brh$k_lbn	6
 #define	brh$k_fid	7
 
-struct bsa {
-	unsigned char	bsa$w_size[2];
-	unsigned char	bsa$w_type[2];
-	char	bsa$t_text[1];
+struct bsa
+{
+    unsigned char	bsa$w_size[2];
+    unsigned char	bsa$w_type[2];
+    char	bsa$t_text[1];
 };
 
 #define			FAB$C_UDF	0	/* undefined */

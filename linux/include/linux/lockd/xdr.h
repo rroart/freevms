@@ -24,37 +24,39 @@
 #define	nlm_lck_denied_grace_period	__constant_htonl(NLM_LCK_DENIED_GRACE_PERIOD)
 
 /* Lock info passed via NLM */
-struct nlm_lock {
-	char *			caller;
-	int			len; 	/* length of "caller" */
-	struct nfs_fh		fh;
-	struct xdr_netobj	oh;
-	struct file_lock	fl;
+struct nlm_lock
+{
+    char *			caller;
+    int			len; 	/* length of "caller" */
+    struct nfs_fh		fh;
+    struct xdr_netobj	oh;
+    struct file_lock	fl;
 };
 
 /*
  *	NLM cookies. Technically they can be 1K, Nobody uses over 8 bytes
  *	however.
  */
- 
+
 struct nlm_cookie
 {
-	unsigned char data[8];
-	unsigned int len;
+    unsigned char data[8];
+    unsigned int len;
 };
 
 /*
  * Generic lockd arguments for all but sm_notify
  */
-struct nlm_args {
-	struct nlm_cookie	cookie;
-	struct nlm_lock		lock;
-	u32			block;
-	u32			reclaim;
-	u32			state;
-	u32			monitor;
-	u32			fsm_access;
-	u32			fsm_mode;
+struct nlm_args
+{
+    struct nlm_cookie	cookie;
+    struct nlm_lock		lock;
+    u32			block;
+    u32			reclaim;
+    u32			state;
+    u32			monitor;
+    u32			fsm_access;
+    u32			fsm_mode;
 };
 
 typedef struct nlm_args nlm_args;
@@ -62,20 +64,22 @@ typedef struct nlm_args nlm_args;
 /*
  * Generic lockd result
  */
-struct nlm_res {
-	struct nlm_cookie	cookie;
-	u32			status;
-	struct nlm_lock		lock;
+struct nlm_res
+{
+    struct nlm_cookie	cookie;
+    u32			status;
+    struct nlm_lock		lock;
 };
 
 /*
  * statd callback when client has rebooted
  */
-struct nlm_reboot {
-	char *		mon;
-	int		len;
-	u32		state;
-	u32		addr;
+struct nlm_reboot
+{
+    char *		mon;
+    int		len;
+    u32		state;
+    u32		addr;
 };
 
 /*

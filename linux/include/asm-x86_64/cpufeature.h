@@ -36,7 +36,7 @@
 #define X86_FEATURE_ACPI	(0*32+22) /* ACPI via MSR */
 #define X86_FEATURE_MMX		(0*32+23) /* Multimedia Extensions */
 #define X86_FEATURE_FXSR	(0*32+24) /* FXSAVE and FXRSTOR instructions (fast save and restore */
-				          /* of FPU context), and CR4.OSFXSR available */
+/* of FPU context), and CR4.OSFXSR available */
 #define X86_FEATURE_XMM		(0*32+25) /* Streaming SIMD Extensions */
 #define X86_FEATURE_XMM2	(0*32+26) /* Streaming SIMD Extensions-2 */
 #define X86_FEATURE_SELFSNOOP	(0*32+27) /* CPU self snoop */
@@ -95,7 +95,7 @@
 #define cpu_has_fxsr 1
 #define cpu_has_xmm 1
 #define cpu_has_apic 		boot_cpu_has(X86_FEATURE_APIC)
-#define cpu_has_ht 		boot_cpu_has(X86_FEATURE_HT) 
+#define cpu_has_ht 		boot_cpu_has(X86_FEATURE_HT)
 #define cpu_has_mp             boot_cpu_has(X86_FEATURE_MP)
 #define cpu_has_k6_mtrr 0
 #define cpu_has_cyrix_arr 0
@@ -105,7 +105,7 @@
 
 #endif /* __ASM_X8664_CPUFEATURE_H */
 
-/* 
+/*
  * Local Variables:
  * mode:c
  * comment-column:42

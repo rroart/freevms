@@ -69,33 +69,36 @@
 #define PMU_ENV_LID_CLOSED	0x01	/* The lid is closed */
 
 /* Kind of PMU (model) */
-enum {
-	PMU_UNKNOWN,
-	PMU_OHARE_BASED,	/* 2400, 3400, 3500 (old G3 powerbook) */
-	PMU_HEATHROW_BASED,	/* PowerBook G3 series */
-	PMU_PADDINGTON_BASED,	/* 1999 PowerBook G3 */
-	PMU_KEYLARGO_BASED,	/* Core99 motherboard (PMU99) */
+enum
+{
+    PMU_UNKNOWN,
+    PMU_OHARE_BASED,	/* 2400, 3400, 3500 (old G3 powerbook) */
+    PMU_HEATHROW_BASED,	/* PowerBook G3 series */
+    PMU_PADDINGTON_BASED,	/* 1999 PowerBook G3 */
+    PMU_KEYLARGO_BASED,	/* Core99 motherboard (PMU99) */
 };
 
 /* PMU PMU_POWER_EVENTS commands */
-enum {
-	PMU_PWR_GET_POWERUP_EVENTS	= 0x00,
-	PMU_PWR_SET_POWERUP_EVENTS	= 0x01,
-	PMU_PWR_CLR_POWERUP_EVENTS	= 0x02,
-	PMU_PWR_GET_WAKEUP_EVENTS	= 0x03,
-	PMU_PWR_SET_WAKEUP_EVENTS	= 0x04,
-	PMU_PWR_CLR_WAKEUP_EVENTS	= 0x05,
+enum
+{
+    PMU_PWR_GET_POWERUP_EVENTS	= 0x00,
+    PMU_PWR_SET_POWERUP_EVENTS	= 0x01,
+    PMU_PWR_CLR_POWERUP_EVENTS	= 0x02,
+    PMU_PWR_GET_WAKEUP_EVENTS	= 0x03,
+    PMU_PWR_SET_WAKEUP_EVENTS	= 0x04,
+    PMU_PWR_CLR_WAKEUP_EVENTS	= 0x05,
 };
 
 /* Power events wakeup bits */
-enum {
-	PMU_PWR_WAKEUP_KEY		= 0x01,	/* Wake on key press */
-	PMU_PWR_WAKEUP_AC_INSERT	= 0x02, /* Wake on AC adapter plug */
-	PMU_PWR_WAKEUP_AC_CHANGE	= 0x04,
-	PMU_PWR_WAKEUP_LID_OPEN		= 0x08,
-	PMU_PWR_WAKEUP_RING		= 0x10,
+enum
+{
+    PMU_PWR_WAKEUP_KEY		= 0x01,	/* Wake on key press */
+    PMU_PWR_WAKEUP_AC_INSERT	= 0x02, /* Wake on AC adapter plug */
+    PMU_PWR_WAKEUP_AC_CHANGE	= 0x04,
+    PMU_PWR_WAKEUP_LID_OPEN		= 0x08,
+    PMU_PWR_WAKEUP_RING		= 0x10,
 };
-	
+
 /*
  * Ioctl commands for the /dev/pmu device
  */
@@ -110,9 +113,9 @@ enum {
 /* out param: u32*	PMU model */
 #define PMU_IOC_GET_MODEL	_IOR('B', 3, sizeof(__u32*))
 /* out param: u32*	has_adb: 0 or 1 */
-#define PMU_IOC_HAS_ADB		_IOR('B', 4, sizeof(__u32*)) 
+#define PMU_IOC_HAS_ADB		_IOR('B', 4, sizeof(__u32*))
 /* out param: u32*	can_sleep: 0 or 1 */
-#define PMU_IOC_CAN_SLEEP	_IOR('B', 5, sizeof(__u32*)) 
+#define PMU_IOC_CAN_SLEEP	_IOR('B', 5, sizeof(__u32*))
 
 #ifdef __KERNEL__
 
@@ -120,7 +123,7 @@ extern int find_via_pmu(void);
 extern int via_pmu_start(void);
 
 extern int pmu_request(struct adb_request *req,
-		void (*done)(struct adb_request *), int nbytes, ...);
+                       void (*done)(struct adb_request *), int nbytes, ...);
 
 extern void pmu_poll(void);
 
@@ -147,9 +150,9 @@ extern int pmu_get_model(void);
 
 struct pmu_sleep_notifier
 {
-	int (*notifier_call)(struct pmu_sleep_notifier *self, int when);
-	int priority;
-	struct list_head list;
+    int (*notifier_call)(struct pmu_sleep_notifier *self, int when);
+    int priority;
+    struct list_head list;
 };
 
 /* Code values for calling sleep/wakeup handlers
@@ -191,12 +194,12 @@ int pmu_unregister_sleep_notifier(struct pmu_sleep_notifier* notifier);
 
 struct pmu_battery_info
 {
-	unsigned int	flags;
-	unsigned int	charge;		/* current charge */
-	unsigned int	max_charge;	/* maximum charge */
-	signed int	current;	/* current, positive if charging */
-	unsigned int	voltage;	/* voltage */
-	unsigned int	time_remaining;	/* remaining time */
+    unsigned int	flags;
+    unsigned int	charge;		/* current charge */
+    unsigned int	max_charge;	/* maximum charge */
+    signed int	current;	/* current, positive if charging */
+    unsigned int	voltage;	/* voltage */
+    unsigned int	time_remaining;	/* remaining time */
 };
 
 extern int pmu_battery_count;

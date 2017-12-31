@@ -22,23 +22,23 @@
 
 static __inline void apic_write(unsigned long reg, unsigned int v)
 {
-	*((volatile unsigned int *)(APIC_BASE+reg)) = v;
-	barrier();
+    *((volatile unsigned int *)(APIC_BASE+reg)) = v;
+    barrier();
 }
 
 static __inline void apic_write_atomic(unsigned long reg, unsigned int v)
 {
-	(void) xchg((volatile unsigned int *)(APIC_BASE+reg), v);
+    (void) xchg((volatile unsigned int *)(APIC_BASE+reg), v);
 }
 
 static __inline unsigned int apic_read(unsigned long reg)
 {
-	return *((volatile unsigned int *)(APIC_BASE+reg));
+    return *((volatile unsigned int *)(APIC_BASE+reg));
 }
 
 static __inline__ void apic_wait_icr_idle(void)
 {
-	while ( apic_read( APIC_ICR ) & APIC_ICR_BUSY );
+    while ( apic_read( APIC_ICR ) & APIC_ICR_BUSY );
 }
 
 #ifdef CONFIG_X86_GOOD_APIC
@@ -53,15 +53,15 @@ static __inline__ void apic_wait_icr_idle(void)
 
 static inline void ack_APIC_irq(void)
 {
-	/*
-	 * ack_APIC_irq() actually gets compiled as a single instruction:
-	 * - a single rmw on Pentium/82489DX
-	 * - a single write on P6+ cores (CONFIG_X86_GOOD_APIC)
-	 * ... yummie.
-	 */
+    /*
+     * ack_APIC_irq() actually gets compiled as a single instruction:
+     * - a single rmw on Pentium/82489DX
+     * - a single write on P6+ cores (CONFIG_X86_GOOD_APIC)
+     * ... yummie.
+     */
 
-	/* Docs say use 0 for future compatibility */
-	apic_write_around(APIC_EOI, 0);
+    /* Docs say use 0 for future compatibility */
+    apic_write_around(APIC_EOI, 0);
 }
 
 extern int get_maxlvt (void);

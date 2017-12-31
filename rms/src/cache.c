@@ -108,7 +108,8 @@ void cache_show(void)
 int cache_refcount(struct CACHE *cacheobj)
 {
     register int refcount = 0;
-    if (cacheobj != NULL) {
+    if (cacheobj != NULL)
+    {
         refcount = cacheobj->refcount;
         if (cacheobj->left != NULL) refcount += cache_refcount(cacheobj->left);
         if (cacheobj->right != NULL) refcount += cache_refcount(cacheobj->right);
@@ -122,7 +123,8 @@ int cache_refcount(struct CACHE *cacheobj)
 
 struct CACHE *cache_delete(struct CACHE *cacheobj)
 {
-    while (cacheobj->objmanager != NULL) {
+    while (cacheobj->objmanager != NULL)
+    {
         register struct CACHE *proxyobj;
         cachedeleteing = 1;
         proxyobj = (*cacheobj->objmanager) (cacheobj,0);
@@ -134,32 +136,45 @@ struct CACHE *cache_delete(struct CACHE *cacheobj)
 #ifdef DEBUG
     if (cachedeleteing != 0) printk("CACHE deletion while delete in progress\n");
 #endif
-    if (cacheobj->refcount != 0) {
+    if (cacheobj->refcount != 0)
+    {
 #ifdef DEBUG
         printk("CACHE attempt to delete referenced object %d:%d\n",
-                cacheobj->objtype,cacheobj->hashval);
+               cacheobj->objtype,cacheobj->hashval);
 #endif
         return NULL;
     }
     cacheobj->lastlru->nextlru = cacheobj->nextlru;
     cacheobj->nextlru->lastlru = cacheobj->lastlru;
-    if (cacheobj->left == NULL) {
-        if (cacheobj->right == NULL) {
+    if (cacheobj->left == NULL)
+    {
+        if (cacheobj->right == NULL)
+        {
             *(cacheobj->parent) = NULL;
-        } else {
+        }
+        else
+        {
             cacheobj->right->parent = cacheobj->parent;
             *(cacheobj->parent) = cacheobj->right;
         }
-    } else {
-        if (cacheobj->right == NULL) {
+    }
+    else
+    {
+        if (cacheobj->right == NULL)
+        {
             cacheobj->left->parent = cacheobj->parent;
             *(cacheobj->parent) = cacheobj->left;
-        } else {
+        }
+        else
+        {
             register struct CACHE *path = cacheobj->right;
-            if (path->left != NULL) {
-                do {
+            if (path->left != NULL)
+            {
+                do
+                {
                     path = path->left;
-                } while (path->left != NULL);
+                }
+                while (path->left != NULL);
                 *(path->parent) = path->right;
                 if (path->right != NULL) path->right->parent = path->parent;
                 path->right = cacheobj->right;
@@ -195,21 +210,27 @@ struct CACHE *cache_delete(struct CACHE *cacheobj)
 
 void cache_purge(void)
 {
-    if (cachedeleteing == 0) {
+    if (cachedeleteing == 0)
+    {
         register struct CACHE *cacheobj = lrulist.lastlru;
         cachepurges++;
-        while (cachefreecount > CACHEGOAL && cacheobj != &lrulist) {
+        while (cachefreecount > CACHEGOAL && cacheobj != &lrulist)
+        {
             register struct CACHE *lastobj = cacheobj->lastlru;
 #ifdef DEBUG
             if (cacheobj->lastlru->nextlru != cacheobj ||
-                cacheobj->nextlru->lastlru != cacheobj ||
-                *(cacheobj->parent) != cacheobj) {
+                    cacheobj->nextlru->lastlru != cacheobj ||
+                    *(cacheobj->parent) != cacheobj)
+            {
                 printk("CACHE pointers in bad shape!\n");
             }
 #endif
-            if (cacheobj->refcount == 0) {
+            if (cacheobj->refcount == 0)
+            {
                 if (cache_delete(cacheobj) != lastobj) cacheobj = lastobj;
-            } else {
+            }
+            else
+            {
                 cacheobj = lastobj;
             }
         }
@@ -223,8 +244,10 @@ void cache_purge(void)
 void cache_flush(void)
 {
     register struct CACHE *cacheobj = lrulist.lastlru;
-    while (cacheobj != &lrulist) {
-        if (cacheobj->objmanager != NULL) {
+    while (cacheobj != &lrulist)
+    {
+        if (cacheobj->objmanager != NULL)
+        {
             (*cacheobj->objmanager) (cacheobj,1);
         }
         cacheobj = cacheobj->lastlru;
@@ -236,14 +259,18 @@ void cache_flush(void)
 
 void cache_remove(struct CACHE *cacheobj)
 {
-    if (cacheobj != NULL) {
+    if (cacheobj != NULL)
+    {
         if (cacheobj->left != NULL) cache_remove(cacheobj->left);
         if (cacheobj->right != NULL) cache_remove(cacheobj->right);
-        if (cacheobj->refcount == 0) {
+        if (cacheobj->refcount == 0)
+        {
             struct CACHE *delobj;
-            do {
+            do
+            {
                 delobj = cache_delete(cacheobj);
-            } while (delobj != NULL && delobj != cacheobj);
+            }
+            while (delobj != NULL && delobj != cacheobj);
         }
     }
 }
@@ -252,9 +279,11 @@ void cache_remove(struct CACHE *cacheobj)
 
 void cache_touch(struct CACHE *cacheobj)
 {
-    if (cacheobj->refcount++ == 0) {
+    if (cacheobj->refcount++ == 0)
+    {
 #ifdef DEBUG
-        if (cacheobj->nextlru == NULL || cacheobj->lastlru == NULL) {
+        if (cacheobj->nextlru == NULL || cacheobj->lastlru == NULL)
+        {
             printk("CACHE LRU pointers corrupt!\n");
         }
 #endif
@@ -270,20 +299,26 @@ void cache_touch(struct CACHE *cacheobj)
 
 void cache_untouch(struct CACHE *cacheobj,int recycle)
 {
-    if (cacheobj->refcount > 0) {
-        if (--cacheobj->refcount == 0) {
+    if (cacheobj->refcount > 0)
+    {
+        if (--cacheobj->refcount == 0)
+        {
             if (++cachefreecount >= CACHELIM) cache_purge();
 #ifdef DEBUG
-            if (cacheobj->nextlru != NULL || cacheobj->lastlru != NULL) {
+            if (cacheobj->nextlru != NULL || cacheobj->lastlru != NULL)
+            {
                 printk("CACHE LRU pointers corrupt\n");
             }
 #endif
-            if (recycle) {
+            if (recycle)
+            {
                 cacheobj->nextlru = lrulist.nextlru;
                 cacheobj->lastlru = &lrulist;
                 cacheobj->nextlru->lastlru = cacheobj;
                 lrulist.nextlru = cacheobj;
-            } else {
+            }
+            else
+            {
                 cacheobj->lastlru = lrulist.lastlru;
                 cacheobj->nextlru = &lrulist;
                 cacheobj->lastlru->nextlru = cacheobj;
@@ -291,7 +326,9 @@ void cache_untouch(struct CACHE *cacheobj,int recycle)
             }
         }
 #ifdef DEBUG
-    } else {
+    }
+    else
+    {
         printk("CACHE untouch limit exceeded\n");
 #endif
     }
@@ -315,23 +352,28 @@ void *cache_find(void **root,unsigned hashval,void *keyval,unsigned *retsts,
 {
     register struct CACHE *cacheobj,**parent = (struct CACHE **) root;
     cachefinds++;
-    while ((cacheobj = *parent) != NULL) {
+    while ((cacheobj = *parent) != NULL)
+    {
         register int cmp = hashval - cacheobj->hashval;
 #ifdef DEBUG
-        if (cacheobj->parent != parent) {
+        if (cacheobj->parent != parent)
+        {
             printk("CACHE Parent pointer is corrupt\n");
         }
 #endif
         if (cmp == 0 && compare_func != NULL) cmp = (*compare_func) (hashval,keyval,cacheobj);
-        if (cmp == 0) {
+        if (cmp == 0)
+        {
             cache_touch(cacheobj);
             if (retsts != NULL) *retsts = SS$_NORMAL;
             return cacheobj;
         }
-        if (cmp < 0) {
+        if (cmp < 0)
+        {
 #ifdef IMBALANCE
             register struct CACHE *left_path = cacheobj->left;
-            if (left_path != NULL && cacheobj->balance-- < -IMBALANCE) {
+            if (left_path != NULL && cacheobj->balance-- < -IMBALANCE)
+            {
                 cacheobj->left = left_path->right;
                 if (cacheobj->left != NULL) cacheobj->left->parent = &cacheobj->left;
                 left_path->right = cacheobj;
@@ -339,12 +381,17 @@ void *cache_find(void **root,unsigned hashval,void *keyval,unsigned *retsts,
                 *parent = left_path;
                 left_path->parent = parent;
                 cacheobj->balance = 0;
-            } else {
+            }
+            else
+            {
                 parent = &cacheobj->left;
             }
-        } else {
+        }
+        else
+        {
             register struct CACHE *right_path = cacheobj->right;
-            if (right_path != NULL && cacheobj->balance++ > IMBALANCE) {
+            if (right_path != NULL && cacheobj->balance++ > IMBALANCE)
+            {
                 cacheobj->right = right_path->left;
                 if (cacheobj->right != NULL) cacheobj->right->parent = &cacheobj->right;
                 right_path->left = cacheobj;
@@ -352,21 +399,29 @@ void *cache_find(void **root,unsigned hashval,void *keyval,unsigned *retsts,
                 *parent = right_path;
                 right_path->parent = parent;
                 cacheobj->balance = 0;
-            } else {
+            }
+            else
+            {
                 parent = &cacheobj->right;
             }
 #else
             parent = &cacheobj->left;
-        } else {
+        }
+        else
+        {
             parent = &cacheobj->right;
 #endif
         }
     }
-    if (create_func == NULL) {
+    if (create_func == NULL)
+    {
         if (retsts != NULL) *retsts = SS$_ITEMNOTFOUND;
-    } else {
+    }
+    else
+    {
         cacheobj = (*create_func) (hashval,keyval,retsts);
-        if (cacheobj != NULL) {
+        if (cacheobj != NULL)
+        {
             cacheobj->nextlru = NULL;
             cacheobj->lastlru = NULL;
             cacheobj->left = NULL;

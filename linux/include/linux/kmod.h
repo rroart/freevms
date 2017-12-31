@@ -25,7 +25,10 @@
 #ifdef CONFIG_KMOD
 extern int request_module(const char * name);
 #else
-static inline int request_module(const char * name) { return -ENOSYS; }
+static inline int request_module(const char * name)
+{
+    return -ENOSYS;
+}
 #endif
 
 extern int exec_usermodehelper(char *program_path, char *argv[], char *envp[]);

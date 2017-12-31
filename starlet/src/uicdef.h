@@ -17,7 +17,10 @@
 
 #define NO_DOLLAR
 
-struct _uicdef {
+#include <mytypes.h>
+
+struct _uicdef
+{
     vmsword uic$w_mem;
     vmsword uic$w_grp;
 };

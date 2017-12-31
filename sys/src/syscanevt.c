@@ -24,9 +24,10 @@
    \param acmode access mode
 */
 
-asmlinkage int exe$cantim(unsigned long reqidt, unsigned int acmode){
-  exe_std$rmvtimq(acmode,reqidt,0,0);
-  return SS$_NORMAL;
+asmlinkage int exe$cantim(unsigned long reqidt, unsigned int acmode)
+{
+    exe_std$rmvtimq(acmode,reqidt,0,0);
+    return SS$_NORMAL;
 }
 
 /**
@@ -35,9 +36,10 @@ asmlinkage int exe$cantim(unsigned long reqidt, unsigned int acmode){
    \param prcnam process name
 */
 
-asmlinkage int exe$canwak(unsigned int *pidadr, void *prcnam){
-  /** TODO also handle prcnam - MISSING */
-  int ipid=ctl$gl_pcb->pcb$l_pid;
-  exe_std$rmvtimq(0,0,TQE$C_WKSNGL,ipid);
-  return SS$_NORMAL;
+asmlinkage int exe$canwak(unsigned int *pidadr, void *prcnam)
+{
+    /** TODO also handle prcnam - MISSING */
+    int ipid=ctl$gl_pcb->pcb$l_pid;
+    exe_std$rmvtimq(0,0,TQE$C_WKSNGL,ipid);
+    return SS$_NORMAL;
 }

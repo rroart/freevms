@@ -52,10 +52,11 @@
  *	protection - since "write" code only needs to change the head, and
  *	interrupt code only needs to change the tail.
  */
-typedef struct {
-	char	*buf;
-	char	*head;
-	char	*tail;
+typedef struct
+{
+    char	*buf;
+    char	*head;
+    char	*tail;
 } stlrq_t;
 
 /*
@@ -67,86 +68,89 @@ typedef struct {
  *	is associated with, this makes it (fairly) easy to get back to the
  *	board/panel info for a port.
  */
-typedef struct stlport {
-	unsigned long		magic;
-	int			portnr;
-	int			panelnr;
-	int			brdnr;
-	int			ioaddr;
-	int			uartaddr;
-	int			pagenr;
-	long			istate;
-	int			flags;
-	int			baud_base;
-	int			custom_divisor;
-	int			close_delay;
-	int			closing_wait;
-	int			refcount;
-	int			openwaitcnt;
-	int			brklen;
-	long			session;
-	long			pgrp;
-	unsigned int		sigs;
-	unsigned int		rxignoremsk;
-	unsigned int		rxmarkmsk;
-	unsigned int		imr;
-	unsigned int		crenable;
-	unsigned long		clk;
-	unsigned long		hwid;
-	void			*uartp;
-	struct tty_struct	*tty;
+typedef struct stlport
+{
+    unsigned long		magic;
+    int			portnr;
+    int			panelnr;
+    int			brdnr;
+    int			ioaddr;
+    int			uartaddr;
+    int			pagenr;
+    long			istate;
+    int			flags;
+    int			baud_base;
+    int			custom_divisor;
+    int			close_delay;
+    int			closing_wait;
+    int			refcount;
+    int			openwaitcnt;
+    int			brklen;
+    long			session;
+    long			pgrp;
+    unsigned int		sigs;
+    unsigned int		rxignoremsk;
+    unsigned int		rxmarkmsk;
+    unsigned int		imr;
+    unsigned int		crenable;
+    unsigned long		clk;
+    unsigned long		hwid;
+    void			*uartp;
+    struct tty_struct	*tty;
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,0))
-	struct wait_queue	*open_wait;
-	struct wait_queue	*close_wait;
+    struct wait_queue	*open_wait;
+    struct wait_queue	*close_wait;
 #else
-	wait_queue_head_t	open_wait;
-	wait_queue_head_t	close_wait;
+    wait_queue_head_t	open_wait;
+    wait_queue_head_t	close_wait;
 #endif
-	struct termios		normaltermios;
-	struct termios		callouttermios;
-	struct tq_struct	tqueue;
-	comstats_t		stats;
-	stlrq_t			tx;
+    struct termios		normaltermios;
+    struct termios		callouttermios;
+    struct tq_struct	tqueue;
+    comstats_t		stats;
+    stlrq_t			tx;
 } stlport_t;
 
-typedef struct stlpanel {
-	unsigned long	magic;
-	int		panelnr;
-	int		brdnr;
-	int		pagenr;
-	int		nrports;
-	int		iobase;
-	void		*uartp;
-	void		(*isr)(struct stlpanel *panelp, unsigned int iobase);
-	unsigned int	hwid;
-	unsigned int	ackmask;
-	stlport_t	*ports[STL_PORTSPERPANEL];
+typedef struct stlpanel
+{
+    unsigned long	magic;
+    int		panelnr;
+    int		brdnr;
+    int		pagenr;
+    int		nrports;
+    int		iobase;
+    void		*uartp;
+    void		(*isr)(struct stlpanel *panelp, unsigned int iobase);
+    unsigned int	hwid;
+    unsigned int	ackmask;
+    stlport_t	*ports[STL_PORTSPERPANEL];
 } stlpanel_t;
 
-typedef struct stlbrd {
-	unsigned long	magic;
-	int		brdnr;
-	int		brdtype;
-	int		state;
-	int		nrpanels;
-	int		nrports;
-	int		nrbnks;
-	int		irq;
-	int		irqtype;
-	void		(*isr)(struct stlbrd *brdp);
-	unsigned int	ioaddr1;
-	unsigned int	ioaddr2;
-	unsigned int	iosize1;
-	unsigned int	iosize2;
-	unsigned int	iostatus;
-	unsigned int	ioctrl;
-	unsigned int	ioctrlval;
-	unsigned int	hwid;
-	unsigned long	clk;
-	unsigned int	bnkpageaddr[STL_MAXBANKS];
-	unsigned int	bnkstataddr[STL_MAXBANKS];
-	stlpanel_t	*bnk2panel[STL_MAXBANKS];
-	stlpanel_t	*panels[STL_MAXPANELS];
+typedef struct stlbrd
+{
+    unsigned long	magic;
+    int		brdnr;
+    int		brdtype;
+    int		state;
+    int		nrpanels;
+    int		nrports;
+    int		nrbnks;
+    int		irq;
+    int		irqtype;
+    void		(*isr)(struct stlbrd *brdp);
+    unsigned int	ioaddr1;
+    unsigned int	ioaddr2;
+    unsigned int	iosize1;
+    unsigned int	iosize2;
+    unsigned int	iostatus;
+    unsigned int	ioctrl;
+    unsigned int	ioctrlval;
+    unsigned int	hwid;
+    unsigned long	clk;
+    unsigned int	bnkpageaddr[STL_MAXBANKS];
+    unsigned int	bnkstataddr[STL_MAXBANKS];
+    stlpanel_t	*bnk2panel[STL_MAXBANKS];
+    stlpanel_t	*panels[STL_MAXPANELS];
 } stlbrd_t;
 
 

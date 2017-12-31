@@ -11,42 +11,48 @@
  * structs for the IOCTL commands
  */
 
-struct sm_debug_data {
-	unsigned int int_rate;
-	unsigned int mod_cycles;
-	unsigned int demod_cycles;
-	unsigned int dma_residue;
+struct sm_debug_data
+{
+    unsigned int int_rate;
+    unsigned int mod_cycles;
+    unsigned int demod_cycles;
+    unsigned int dma_residue;
 };
 
-struct sm_diag_data {
-	unsigned int mode;
-	unsigned int flags;
-	unsigned int samplesperbit;
-	unsigned int datalen;
-	short *data;
+struct sm_diag_data
+{
+    unsigned int mode;
+    unsigned int flags;
+    unsigned int samplesperbit;
+    unsigned int datalen;
+    short *data;
 };
 
-struct sm_mixer_data {
-	unsigned int mixer_type;
-	unsigned int sample_rate;
-	unsigned int bit_rate;
-	unsigned int reg;
-	unsigned int data;
+struct sm_mixer_data
+{
+    unsigned int mixer_type;
+    unsigned int sample_rate;
+    unsigned int bit_rate;
+    unsigned int reg;
+    unsigned int data;
 };
 
-struct sm_config {
-	int hardware;
-	int mode;
+struct sm_config
+{
+    int hardware;
+    int mode;
 };
 
-struct sm_ioctl {
-	int cmd;
-	union {
-		struct sm_config cfg;
-		struct sm_diag_data diag;	
-		struct sm_mixer_data mix;
-		struct sm_debug_data dbg;
-	} data;
+struct sm_ioctl
+{
+    int cmd;
+    union
+    {
+        struct sm_config cfg;
+        struct sm_diag_data diag;
+        struct sm_mixer_data mix;
+        struct sm_debug_data dbg;
+    } data;
 };
 
 /* -------------------------------------------------------------------- */

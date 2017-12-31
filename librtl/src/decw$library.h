@@ -5,13 +5,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts,
 
 			All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -209,14 +209,16 @@ typedef void (*XtActionProc)(
 
 typedef XtActionProc* XtBoundActions;
 
-typedef struct _XtActionsRec{
+typedef struct _XtActionsRec
+{
     String	 string;
     XtActionProc proc;
 } XtActionsRec;
 
-typedef enum {
-/* address mode		parameter representation    */
-/* ------------		------------------------    */
+typedef enum
+{
+    /* address mode		parameter representation    */
+    /* ------------		------------------------    */
     XtAddress,		/* address		    */
     XtBaseOffset,	/* offset		    */
     XtImmediate,	/* constant		    */
@@ -226,7 +228,8 @@ typedef enum {
     XtProcedureArg	/* procedure to invoke	    */
 } XtAddressMode;
 
-typedef struct {
+typedef struct
+{
     XtAddressMode   address_mode;
     XtPointer	    address_id;
     Cardinal	    size;
@@ -240,7 +243,8 @@ typedef void (*XtConvertArgProc)(
 #endif
 );
 
-typedef struct {
+typedef struct
+{
     XtGeometryMask request_mode;
     Position x, y;
     Dimension width, height, border_width;
@@ -366,7 +370,8 @@ typedef void (*XtSignalCallbackProc)(
 #endif
 );
 
-typedef struct {
+typedef struct
+{
     String	name;
     XtArgVal	value;
 } Arg, *ArgList;
@@ -381,18 +386,21 @@ typedef void (*XtCallbackProc)(
 #endif
 );
 
-typedef struct _XtCallbackRec {
+typedef struct _XtCallbackRec
+{
     XtCallbackProc  callback;
     XtPointer	    closure;
 } XtCallbackRec, *XtCallbackList;
 
-typedef enum {
-	XtCallbackNoList,
-	XtCallbackHasNone,
-	XtCallbackHasSome
+typedef enum
+{
+    XtCallbackNoList,
+    XtCallbackHasNone,
+    XtCallbackHasSome
 } XtCallbackStatus;
 
-typedef enum  {
+typedef enum
+{
     XtGeometryYes,	  /* Request accepted. */
     XtGeometryNo,	  /* Request denied. */
     XtGeometryAlmost,	  /* Request denied, but willing to take replyBox. */
@@ -401,12 +409,14 @@ typedef enum  {
 
 typedef enum {XtGrabNone, XtGrabNonexclusive, XtGrabExclusive} XtGrabKind;
 
-typedef struct {
+typedef struct
+{
     Widget  shell_widget;
     Widget  enable_widget;
 } XtPopdownIDRec, *XtPopdownID;
 
-typedef struct _XtResource {
+typedef struct _XtResource
+{
     String	resource_name;	/* Resource name			    */
     String	resource_class;	/* Resource class			    */
     String	resource_type;	/* Representation type desired		    */
@@ -445,7 +455,7 @@ typedef void (*XtErrorMsgHandler)(
 
 typedef void (*XtErrorHandler)(
 #if NeedFunctionPrototypes
-  String		/* msg */
+    String		/* msg */
 #endif
 );
 
@@ -461,14 +471,15 @@ typedef Boolean (*XtWorkProc)(
 #endif
 );
 
-typedef struct {
+typedef struct
+{
     char match;
     String substitution;
 } SubstitutionRec, *Substitution;
 
 typedef Boolean (*XtFilePredicate)(
 #if NeedFunctionPrototypes
-   String /* filename */
+    String /* filename */
 #endif
 );
 
@@ -2091,7 +2102,8 @@ extern void XtGetConstraintResourceList(
  *
  ************************************************************/
 
-typedef struct _XtCheckpointTokenRec {
+typedef struct _XtCheckpointTokenRec
+{
     int		save_type;
     int		interact_style;
     Boolean	shutdown;
@@ -2323,7 +2335,7 @@ extern char *_XtMalloc( /* implementation-private */
     Cardinal	/* size */,
     char *	/* file */,
     int	        /* line */
-#endif		       
+#endif
 );
 
 extern char *_XtRealloc( /* implementation-private */
@@ -2492,7 +2504,7 @@ extern String XtResolvePathname(
  *****************************************************************/
 
 #define XT_CONVERT_FAIL (Atom)0x80000001
-    
+
 extern void XtDisownSelection(
 #if NeedFunctionPrototypes
     Widget 		/* widget */,
@@ -2745,34 +2757,39 @@ extern Widget XtHooksOfDisplay(
 #endif
 );
 
-typedef struct {
+typedef struct
+{
     String type;
     Widget widget;
     ArgList args;
     Cardinal num_args;
 } XtCreateHookDataRec, *XtCreateHookData;
 
-typedef struct {
+typedef struct
+{
     String type;
     Widget widget;
     XtPointer event_data;
     Cardinal num_event_data;
 } XtChangeHookDataRec, *XtChangeHookData;
 
-typedef struct {
+typedef struct
+{
     Widget old, req;
     ArgList args;
     Cardinal num_args;
 } XtChangeHookSetValuesDataRec, *XtChangeHookSetValuesData;
 
-typedef struct {
+typedef struct
+{
     String type;
     Widget widget;
     XtGeometryMask changeMask;
     XWindowChanges changes;
 } XtConfigureHookDataRec, *XtConfigureHookData;
 
-typedef struct {
+typedef struct
+{
     String type;
     Widget widget;
     XtWidgetGeometry* request;
@@ -2780,7 +2797,8 @@ typedef struct {
     XtGeometryResult result;
 } XtGeometryHookDataRec, *XtGeometryHookData;
 
-typedef struct {
+typedef struct
+{
     String type;
     Widget widget;
 } XtDestroyHookDataRec, *XtDestroyHookData;
@@ -2834,7 +2852,7 @@ extern Boolean XtCvtStringToAcceleratorTable(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2845,7 +2863,7 @@ extern Boolean XtCvtStringToAtom(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* Display */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2856,7 +2874,7 @@ extern Boolean XtCvtStringToBool(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2867,7 +2885,7 @@ extern Boolean XtCvtStringToBoolean(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2878,7 +2896,7 @@ extern Boolean XtCvtStringToCommandArgArray(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2889,7 +2907,7 @@ extern Boolean XtCvtStringToCursor(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* Display */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2900,7 +2918,7 @@ extern Boolean XtCvtStringToDimension(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2911,7 +2929,7 @@ extern Boolean XtCvtStringToDirectoryString(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2922,7 +2940,7 @@ extern Boolean XtCvtStringToDisplay(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2933,7 +2951,7 @@ extern Boolean XtCvtStringToFile(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2944,7 +2962,7 @@ extern Boolean XtCvtStringToFloat(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2955,7 +2973,7 @@ extern Boolean XtCvtStringToFont(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* Display */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2966,7 +2984,7 @@ extern Boolean XtCvtStringToFontSet(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* Display, locale */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2977,7 +2995,7 @@ extern Boolean XtCvtStringToFontStruct(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* Display */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2988,7 +3006,7 @@ extern Boolean XtCvtStringToGravity(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -2999,7 +3017,7 @@ extern Boolean XtCvtStringToInitialState(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3010,7 +3028,7 @@ extern Boolean XtCvtStringToInt(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3021,7 +3039,7 @@ extern Boolean XtCvtStringToPixel(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* Screen, Colormap */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3034,7 +3052,7 @@ extern Boolean XtCvtStringToRestartStyle(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3045,7 +3063,7 @@ extern Boolean XtCvtStringToShort(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3056,7 +3074,7 @@ extern Boolean XtCvtStringToTranslationTable(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3067,7 +3085,7 @@ extern Boolean XtCvtStringToUnsignedChar(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3078,7 +3096,7 @@ extern Boolean XtCvtStringToVisual(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* Screen, depth */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3091,7 +3109,7 @@ extern Boolean XtCvtIntToBool(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3102,7 +3120,7 @@ extern Boolean XtCvtIntToBoolean(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3113,7 +3131,7 @@ extern Boolean XtCvtIntToColor(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* Screen, Colormap */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3126,7 +3144,7 @@ extern Boolean XtCvtIntToFloat(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3137,7 +3155,7 @@ extern Boolean XtCvtIntToFont(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3148,7 +3166,7 @@ extern Boolean XtCvtIntToPixel(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3159,7 +3177,7 @@ extern Boolean XtCvtIntToPixmap(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3172,7 +3190,7 @@ extern Boolean XtCvtIntToShort(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3183,7 +3201,7 @@ extern Boolean XtCvtIntToUnsignedChar(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3196,7 +3214,7 @@ extern Boolean XtCvtColorToPixel(
 #if NeedFunctionPrototypes
     Display*	/* dpy */,
     XrmValuePtr /* args */,	/* none */
-    Cardinal*   /* num_args */,	
+    Cardinal*   /* num_args */,
     XrmValuePtr	/* fromVal */,
     XrmValuePtr	/* toVal */,
     XtPointer*	/* closure_ret */
@@ -3244,13 +3262,13 @@ Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -3272,7 +3290,8 @@ SOFTWARE.
  * Type long is used instead of XrmQuark here because XrmQuark and String
  * are not the same size on all systems.
  */
-typedef struct {
+typedef struct
+{
     long	xrm_name;	  /* Resource name quark		*/
     long	xrm_class;	  /* Resource class quark		*/
     long	xrm_type;	  /* Resource representation type quark */
@@ -3403,7 +3422,8 @@ typedef void (*XtStringProc)(
 #endif
 );
 
-typedef struct {
+typedef struct
+{
     String	name;	/* resource name */
     String	type;	/* representation type name */
     XtArgVal	value;	/* representation */
@@ -3433,7 +3453,8 @@ typedef void (*XtDeallocateProc)(
 
 struct _XtStateRec;	/* Forward declare before use for C++ */
 
-typedef struct _XtTMRec {
+typedef struct _XtTMRec
+{
     XtTranslations  translations;	/* private to Translation Manager    */
     XtBoundActions  proc_table;		/* procedure bindings for actions    */
     struct _XtStateRec *current_state;  /* Translation Manager state ptr     */

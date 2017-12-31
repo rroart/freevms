@@ -1,7 +1,7 @@
 #ifndef tcpmacros_h
 #define tcpmacros_h
 
-#if 0 
+#if 0
 /*
 	****************************************************************
 
@@ -85,155 +85,166 @@ COMPILETIME NO_CrLf = 1;	// For message macros
 FIELD VB$FIELDS =
     SET
     VB$LEN = [0,0,16,0],	// Varying string - current length
-    VB$DAT = [0,16,8,0]		// First byte of data
-    TES;
+       VB$DAT = [0,16,8,0]		// First byte of data
+                TES;
 
 MACRO
-    REPEAT = DO%,		// Extend bliss for Repeat until lovers.
+REPEAT = DO%,		// Extend bliss for Repeat until lovers.
 
 // Generate a pointer to a character string descriptor quadword.
 
-    ASCII_C(S) = uplit(%CharCount(S),uplit(%ascii S))%,
+ASCII_C(S) = uplit(%CharCount(S),uplit(%ascii S))%,
 
 // Generate a carriage-return Line-feed sequence for use in %string lex function.
 
-    CrLf = %STRING(%Char(13),%Char(10))%,
+CrLf = %STRING(%Char(13),%Char(10))%,
 
 // String descriptor handling macros
 
-    VBUF(NCHR) = BLOCK[CH$ALLOCATION(NCHR+2)] FIELD(VB$FIELDS) %,
-    DESC$VSTR = BLOCK[DESC$STR_LEN,BYTE] %,
-    DESC$VSTR_ALLOC(NAME,MAXLEN) =
-	%IF NOT %NULL(MAXLEN) %THEN
-	    %NAME(NAME,'_BUF') : VBUF(MAXLEN) PRESET([VB$LEN] = 0),
-	%FI
-	NAME : DESC$VSTR
-	%IF NOT %NULL(MAXLEN) %THEN
-	    PRESET([DSC$B_CLASS] = DSC$K_CLASS_VS,
-		   [DSC$B_DTYPE] = DSC$K_DTYPE_VT,
-		   [DSC$W_MAXSTRLEN] = MAXLEN,
-		   [DSC$A_POINTER] = %NAME(NAME,'_BUF'))
-	%FI
-	%,
-    DESC$STR_INIT(DESC,STRLEN,STRPTR) =
-	BEGIN
-	DESC[DSC$B_CLASS] = DSC$K_CLASS_Z;
-	DESC[DSC$B_DTYPE] = DSC$K_DTYPE_Z;
-	DESC[DSC$W_LENGTH] = CH$ALLOCATION(STRLEN);
-	DESC[DSC$A_POINTER] = STRPTR;
-	END %,
+VBUF(NCHR) = BLOCK[CH$ALLOCATION(NCHR+2)] FIELD(VB$FIELDS) %,
+DESC$VSTR = BLOCK[DESC$STR_LEN,BYTE] %,
+     DESC$VSTR_ALLOC(NAME,MAXLEN) =
+         %IF NOT %NULL(MAXLEN) %THEN
+         %NAME(NAME,'_BUF') : VBUF(MAXLEN) PRESET([VB$LEN] = 0),
+             %FI
+             NAME :
+             DESC$VSTR
+             %IF NOT %NULL(MAXLEN) %THEN
+             PRESET([DSC$B_CLASS] = DSC$K_CLASS_VS,
+                    [DSC$B_DTYPE] = DSC$K_DTYPE_VT,
+                    [DSC$W_MAXSTRLEN] = MAXLEN,
+                    [DSC$A_POINTER] = %NAME(NAME,'_BUF'))
+             %FI
+             %,
+             DESC$STR_INIT(DESC,STRLEN,STRPTR) =
+                 BEGIN
+                 DESC[DSC$B_CLASS] = DSC$K_CLASS_Z;
+DESC[DSC$B_DTYPE] = DSC$K_DTYPE_Z;
+DESC[DSC$W_LENGTH] = CH$ALLOCATION(STRLEN);
+DESC[DSC$A_POINTER] = STRPTR;
+END %,
     DESC$VSTR_INIT(DESC,MAXLEN,STRPTR) =
-	BEGIN
-	DESC[DSC$B_CLASS] = DSC$K_CLASS_VS;
-	DESC[DSC$B_DTYPE] = DSC$K_DTYPE_VT;
-	DESC[DSC$W_MAXSTRLEN] = MAXLEN;
-	DESC[DSC$A_POINTER] = STRPTR;
-	END %,
+        BEGIN
+        DESC[DSC$B_CLASS] = DSC$K_CLASS_VS;
+DESC[DSC$B_DTYPE] = DSC$K_DTYPE_VT;
+DESC[DSC$W_MAXSTRLEN] = MAXLEN;
+DESC[DSC$A_POINTER] = STRPTR;
+END %,
 
 // Handle string descriptor.
 // If argument is a quoted string, return created descriptor
 // else, just return the argument.
 
     $$STR(ARG) =
-	%IF %ISSTRING(ARG) %THEN %ASCID ARG %ELSE ARG %FI %,
+        %IF %ISSTRING(ARG) %THEN %ASCID ARG %ELSE ARG %FI %,
 
 // Declare something external if it isn't already declared
 
-    $QEXT(NAME,MODIF) =
-	%IF NOT %DECLARED(NAME) %THEN
-	    EXTERNAL NAME  %IF NOT %NULL(MODIF) %THEN : MODIF %FI;
-	%FI
-    %,
-    $QEXTR(NAME,MODIF) =
-	%IF NOT %DECLARED(NAME) %THEN
-	    EXTERNAL ROUTINE NAME  %IF NOT %NULL(MODIF) %THEN : MODIF %FI;
-	%FI
-    %,
+        $QEXT(NAME,MODIF) =
+            %IF NOT %DECLARED(NAME) %THEN
+            EXTERNAL NAME  %IF NOT %NULL(MODIF) %THEN :
+            MODIF %FI;
+%FI
+%,
+$QEXTR(NAME,MODIF) =
+    %IF NOT %DECLARED(NAME) %THEN
+    EXTERNAL ROUTINE NAME  %IF NOT %NULL(MODIF) %THEN :
+    MODIF %FI;
+%FI
+%,
 #endif
-	   
+
 extern 	void OPR_FAO(long, ...);
 extern 	void ERROR_FAO(long, ...);
 extern 	void FATAL_FAO(long, ...);
 
 // Write a message to the console operator
 
-static int inline OPR$FAO(char *c, ...) {
-  struct dsc$descriptor d;
-  d.dsc$w_length=strlen(c);
-  d.dsc$a_pointer=c;
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,c);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  OPR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+static int inline OPR$FAO(char *c, ...)
+{
+    struct dsc$descriptor d;
+    d.dsc$w_length=strlen(c);
+    d.dsc$a_pointer=c;
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,c);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    OPR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
-static int inline ERROR$FAO(char *c, ...) {
-  struct dsc$descriptor d;
-  d.dsc$w_length=strlen(c);
-  d.dsc$a_pointer=c;
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,c);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+static int inline ERROR$FAO(char *c, ...)
+{
+    struct dsc$descriptor d;
+    d.dsc$w_length=strlen(c);
+    d.dsc$a_pointer=c;
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,c);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
-static int inline WARN$FAO(char *c, ...) {
-  struct dsc$descriptor d;
-  d.dsc$w_length=strlen(c);
-  d.dsc$a_pointer=c;
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,c);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+static int inline WARN$FAO(char *c, ...)
+{
+    struct dsc$descriptor d;
+    d.dsc$w_length=strlen(c);
+    d.dsc$a_pointer=c;
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,c);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    ERROR_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
-static int inline FATAL$FAO(char *c, ...) {
-  struct dsc$descriptor d;
-  d.dsc$w_length=strlen(c);
-  d.dsc$a_pointer=c;
-  va_list args;
-  long argv[18],argc=0;
-  va_start(args,c);
-  while(argc<18) {
-    argv[argc]=va_arg(args,long);
-    argc++;
-  }
-  va_end(args);
-  FATAL_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
+static int inline FATAL$FAO(char *c, ...)
+{
+    struct dsc$descriptor d;
+    d.dsc$w_length=strlen(c);
+    d.dsc$a_pointer=c;
+    va_list args;
+    long argv[18],argc=0;
+    va_start(args,c);
+    while(argc<18)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
+    FATAL_FAO(&d,argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15],argv[16],argv[17]);
 }
 
 #if 0
 // Obsolete error processing macros - special cases of above.
 
-    Fatal_Error(S,ERRCODE) =
-	%IF %NULL(ERRCODE) %THEN
-	    FATAL$FAO(S)
-	%ELSE
-	    FATAL$FAO(%STRING(S,', EC = //XL'),ERRCODE)
-	%FI
-	%,
+Fatal_Error(S,ERRCODE) =
+    %IF %NULL(ERRCODE) %THEN
+    FATAL$FAO(S)
+    %ELSE
+    FATAL$FAO(%STRING(S,', EC = //XL'),ERRCODE)
+    %FI
+    %,
     Warn_Error(S,RETVALUE) =
-	%IF %NULL(RETVALUE) %THEN
-	    WARN$FAO(S)
-	%ELSE
-	    WARN$FAO(%STRING(S,', EC = //XL'),RETVALUE)
-	%FI
-	%,
+        %IF %NULL(RETVALUE) %THEN
+        WARN$FAO(S)
+        %ELSE
+        WARN$FAO(%STRING(S,', EC = //XL'),RETVALUE)
+        %FI
+        %,
 
 #endif
 
@@ -311,46 +322,50 @@ static int inline FATAL$FAO(char *c, ...) {
 
 #define $$KCALL KCALL
 
-static int inline $$KCALL(int (*func)(), ...) {
-	  va_list args;
-	  long argv[16],argc=1;
-	  argv[0]=15;
-	  va_start(args,func);
-	  while(argc<16) {
-	    argv[argc]=va_arg(args,long);
-	    argc++;
-	  }
-	  va_end(args);
+        static int inline $$KCALL(int (*func)(), ...)
+{
+    va_list args;
+    long argv[16],argc=1;
+    argv[0]=15;
+    va_start(args,func);
+    while(argc<16)
+    {
+        argv[argc]=va_arg(args,long);
+        argc++;
+    }
+    va_end(args);
 #ifndef NOKERNEL
-          return func(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15]);
+    return func(argv[0],argv[1],argv[2],argv[3],argv[4],argv[5],argv[6],argv[7],argv[8],argv[9],argv[10],argv[11],argv[12],argv[13],argv[14],argv[15]);
 #else
-	  return sys$cmkrnl(func, &argv[0]);
+    return sys$cmkrnl(func, &argv[0]);
 #endif
 }
 
 #if 0
-    $$KARGS(ANAME)[NAME] =
-	ANAME[%COUNT+1] = NAME; %,
+$$KARGS(ANAME)[NAME] =
+    ANAME[%COUNT+1] = NAME;
+%,
 
 // Macro to setup and call routine via $CMKRNL.
-    $$KCALL(RTN)[] =
-	%IF %LENGTH EQL 1 %THEN
-	    $CMKRNL(ROUTIN=RTN)
-	%ELSE
-	    BEGIN
-	    LOCAL
-		CMKARG : VECTOR[%LENGTH];
-	    CMKARG[0] = %LENGTH-1;
-	    $$KARGS(CMKARG,%REMAINING)
-	    $CMKRNL(ROUTIN=RTN,ARGLST=CMKARG);
-	    END
-	%FI
-    %,
+$$KCALL(RTN)[] =
+    %IF %LENGTH EQL 1 %THEN
+    $CMKRNL(ROUTIN=RTN)
+    %ELSE
+    BEGIN
+    LOCAL
+    CMKARG :
+    VECTOR[%LENGTH];
+CMKARG[0] = %LENGTH-1;
+$$KARGS(CMKARG,%REMAINING)
+$CMKRNL(ROUTIN=RTN,ARGLST=CMKARG);
+END
+%FI
+%,
 
 #endif
 #ifdef LOGSWITCH		// Want the logging macros
-//know how to implement these, but delay it   
-   // Conditionally do something according to LOG_STATE flags
+//know how to implement these, but delay it
+// Conditionally do something according to LOG_STATE flags
 
 #define   $$LOGF(logf) \
 	((log_state & (logf)) != 0)
@@ -358,66 +373,69 @@ static int inline $$KCALL(int (*func)(), ...) {
 #if 0
 // Macros for output to log and opr and the activity log.
 
-    LOG$OUT(XSTR) =
-	LOG_OUTPUT(%ASCID %STRING(XSTR)) %,
+LOG$OUT(XSTR) =
+    LOG_OUTPUT(%ASCID %STRING(XSTR)) %,
     XLOG$OUT(LOGF) =
-	BEGIN
-	IF $$LOGF(LOGF) THEN
-	    LOG$OUT(%REMAINING)
-	END
-        %,
-    LOG$FAO(CST) =
-	BEGIN
-	%IF NOT %DECLARED(LOG_FAO) %THEN
-	    EXTERNAL ROUTINE LOG_FAO : NOVALUE;
-	%FI
-	%IF %NULL(%REMAINING) %THEN
-	    LOG_FAO(%ASCID %STRING(CST))
-	%ELSE
-	    LOG_FAO(%ASCID %STRING(CST),%REMAINING)
-	%FI
-	END
-	%,
-#endif
-#if 0
-    XLOG$FAO(LOGF) =
-	BEGIN
-	IF $$LOGF(LOGF) THEN
-	    LOG$FAO(%REMAINING)
+        BEGIN
+        IF $$LOGF(LOGF) THEN
+        LOG$OUT(%REMAINING)
         END
         %,
+        LOG$FAO(CST) =
+            BEGIN
+            %IF NOT %DECLARED(LOG_FAO) %THEN
+            EXTERNAL ROUTINE LOG_FAO :
+            NOVALUE;
+%FI
+%IF %NULL(%REMAINING) %THEN
+LOG_FAO(%ASCID %STRING(CST))
+%ELSE
+LOG_FAO(%ASCID %STRING(CST),%REMAINING)
+%FI
+END
+%,
+#endif
+#if 0
+XLOG$FAO(LOGF) =
+    BEGIN
+    IF $$LOGF(LOGF) THEN
+    LOG$FAO(%REMAINING)
+    END
+    %,
     ACT$OUT(XSTR) =
-	LOG_OUTPUT(%ASCID %STRING(XSTR)) %,
-    ACT$FAO(CST) =
-	BEGIN
-	%IF NOT %DECLARED(ACT_FAO) %THEN
-	    EXTERNAL ROUTINE ACT_FAO : NOVALUE;
-	%FI
-	%IF %NULL(%REMAINING) %THEN
-	    ACT_FAO(%ASCID %STRING(CST))
-	%ELSE
-	    ACT_FAO(%ASCID %STRING(CST),%REMAINING)
-	%FI
-	END
-	%,
-    QL$FAO(CST) =
-	BEGIN
-	%IF NOT %DECLARED(QL_FAO) %THEN
-	    EXTERNAL ROUTINE QL_FAO : NOVALUE;
-	%FI
-	%IF %NULL(%REMAINING) %THEN
-	    QL_FAO(%ASCID %STRING(CST));
-	%ELSE
-	    QL_FAO(%ASCID %STRING(CST),%REMAINING);
-	%FI
-	END
-	%,
-    XQL$FAO(LOGF) =
-	BEGIN
-	IF $$LOGF(LOGF) THEN
-	    QL$FAO(%REMAINING)
-	END
-        %;
+        LOG_OUTPUT(%ASCID %STRING(XSTR)) %,
+        ACT$FAO(CST) =
+            BEGIN
+            %IF NOT %DECLARED(ACT_FAO) %THEN
+            EXTERNAL ROUTINE ACT_FAO :
+            NOVALUE;
+%FI
+%IF %NULL(%REMAINING) %THEN
+ACT_FAO(%ASCID %STRING(CST))
+%ELSE
+ACT_FAO(%ASCID %STRING(CST),%REMAINING)
+%FI
+END
+%,
+QL$FAO(CST) =
+    BEGIN
+    %IF NOT %DECLARED(QL_FAO) %THEN
+    EXTERNAL ROUTINE QL_FAO :
+    NOVALUE;
+%FI
+%IF %NULL(%REMAINING) %THEN
+QL_FAO(%ASCID %STRING(CST));
+%ELSE
+QL_FAO(%ASCID %STRING(CST),%REMAINING);
+%FI
+END
+%,
+XQL$FAO(LOGF) =
+    BEGIN
+    IF $$LOGF(LOGF) THEN
+    QL$FAO(%REMAINING)
+    END
+    %;
 #endif
 
 #else				// Don't want logging macros - make them null
@@ -429,13 +447,13 @@ static inline    $$LOGF(/*LOGF*/)  { } ;		// $$LOGF always fails
 #define $$LOGF(dummy) 0
 #endif
 static inline    LOG$OUT(/*XSTR*/)  { } ;	// LOG$OUT does nothing
-static inline    XLOG$OUT(/*LOGF*/)  { } ;	// XLOG$OUT 
-static inline    LOG$FAO(/*CST*/)  { } ;		// LOG$FAO 
+static inline    XLOG$OUT(/*LOGF*/)  { } ;	// XLOG$OUT
+static inline    LOG$FAO(/*CST*/)  { } ;		// LOG$FAO
 static inline    ACT$OUT(/*XSTR*/)  { } ;	// ACT$OUT does nothing
-static inline    ACT$FAO(/*CST*/) { } ;		// ACT$FAO 
-static inline    XLOG$FAO(/*LOGF*/)  { };	// XLOG$FAO 
-static inline    QL$FAO(/*CST*/) { } ;		// QL$FAO 
-static inline    XQL$FAO(/*LOGF*/) { } ;	// XQL$FAO 
+static inline    ACT$FAO(/*CST*/) { } ;		// ACT$FAO
+static inline    XLOG$FAO(/*LOGF*/)  { };	// XLOG$FAO
+static inline    QL$FAO(/*CST*/) { } ;		// QL$FAO
+static inline    XQL$FAO(/*LOGF*/) { } ;	// XQL$FAO
 #endif
 
 // Network logger flag bits - determine what events to log
@@ -474,21 +492,22 @@ static inline    XQL$FAO(/*LOGF*/) { } ;	// XQL$FAO
 // Conditional coding for debugging
 
 %IF QDEBUG %THEN
-    MACRO
-	XQDEFINE =
-	    EXTERNAL ROUTINE
-		MEM_INSQUE, MEM_REMQUE; %,
-	XINSQUE(QH,QB,QRTN,QID,QVAL) =
-	    MEM_INSQUE(QH,QB,QRTN,QID,QVAL) %,
-	XREMQUE(QH,QB,QRTN,QID,QVAL) =
-	    MEM_REMQUE(QH,QB,QRTN,QID,QVAL) %;
+MACRO
+XQDEFINE =
+    EXTERNAL ROUTINE
+    MEM_INSQUE, MEM_REMQUE;
+%,
+XINSQUE(QH,QB,QRTN,QID,QVAL) =
+    MEM_INSQUE(QH,QB,QRTN,QID,QVAL) %,
+    XREMQUE(QH,QB,QRTN,QID,QVAL) =
+        MEM_REMQUE(QH,QB,QRTN,QID,QVAL) %;
 %ELSE
-    MACRO
-	XQDEFINE = %,
-	XINSQUE(QH,QB,QRTN,QID,QVAL) =
-	    INSQUE(QH,QB) %,
-	XREMQUE(QH,QB,QRTN,QID,QVAL) =
-	    REMQUE(QH,QB) %;
+MACRO
+XQDEFINE = %,
+XINSQUE(QH,QB,QRTN,QID,QVAL) =
+    INSQUE(QH,QB) %,
+    XREMQUE(QH,QB,QRTN,QID,QVAL) =
+        REMQUE(QH,QB) %;
 %FI
 
 #endif
@@ -499,11 +518,12 @@ static inline    XQL$FAO(/*LOGF*/) { } ;	// XQL$FAO
 #define CH$PLUS(X,Y) ((long)X+(long)Y)
 //#define CH$WCHAR_A(X,Y) { char * localc=Y; *localc++=X; Y=localc; } // was: *(char*)Y++=X
 #define CH$WCHAR_A(X,Y) *(char*)Y++=X
-   //#define CH$RCHAR_A(X) *(((char *)X)++)  // not yet? *((*(char **)X)++) 
-   static inline unsigned char ch$rchar_a(unsigned char **c) {
-  return *(*c)++;
+//#define CH$RCHAR_A(X) *(((char *)X)++)  // not yet? *((*(char **)X)++)
+static inline unsigned char ch$rchar_a(unsigned char **c)
+{
+    return *(*c)++;
 }
-#define CH$RCHAR_A(X) ch$rchar_a(&X)   
+#define CH$RCHAR_A(X) ch$rchar_a(&X)
 
 #define LIB$CALLG(X,Y) Y()
 

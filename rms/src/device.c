@@ -64,10 +64,11 @@
 #include <exe_routines.h>
 #include <misc_routines.h>
 
-struct phyio_info {
-  unsigned status;
-  unsigned sectors;
-  unsigned sectorsize;
+struct phyio_info
+{
+    unsigned status;
+    unsigned sectors;
+    unsigned sectorsize;
 };
 
 /* device_create() creates a device object... */
@@ -80,21 +81,27 @@ void *device_create(unsigned devsiz,void *keyval,unsigned *retsts)
     int chan;
     dsc.dsc$w_length=strlen(devnam);
     dsc.dsc$a_pointer=devnam;
-    if (dev == NULL) {
+    if (dev == NULL)
+    {
         *retsts = SS$_INSFMEM;
-    } else {
+    }
+    else
+    {
         unsigned sts;
         struct phyio_info info;
         sts = phyio_init(devsiz + 1,&dev->ucb$l_ddb->ddb$t_name[1],&dev->ucb$l_vcb->vcb$l_aqb->aqb$l_mount_count,&info,0); // check
         *retsts = sts;
-        if (sts & 1) {
+        if (sts & 1)
+        {
             dev->ucb$l_vcb = NULL;
             dev->ucb$b_state = info.status;
             dev->ucb$b_sectors = info.sectors;
-	    sts=exe$assign(&dsc,&chan,0,0,0);
-	    dev->ucb$ps_adp=chan; //wrong field and use, but....
-	    //            dev->sectorsize = info.sectorsize;
-        } else {
+            sts=exe$assign(&dsc,&chan,0,0,0);
+            dev->ucb$ps_adp=chan; //wrong field and use, but....
+            //            dev->sectorsize = info.sectorsize;
+        }
+        else
+        {
             vfree(dev);
             dev = NULL;
         }
@@ -111,7 +118,8 @@ int device_compare(unsigned keylen,void *keyval,void *node)
     int len = keylen;
     char *keynam = (char *) keyval;
     char *devnam = &devnode->ucb$l_ddb->ddb$t_name[1];
-    while (len-- > 0) {
+    while (len-- > 0)
+    {
         cmp = toupper(*keynam++) - toupper(*devnam++);
         if (cmp != 0) break;
     }
@@ -137,15 +145,17 @@ unsigned device_lookup(unsigned devlen,char *devnam,int create,short int *retcha
     int chan=0;
     struct dsc$descriptor d;
 
-    if (*devnam=='_') {
-      devnam++;
+    if (*devnam=='_')
+    {
+        devnam++;
     }
     colon=strchr(devnam,':');
     if (colon) devlen=colon-devnam;
 
-    for (i=0;i<myfilelistptr;i++) {
-      dev=myfilelist[i];
-      if (strlen(myfilelists[i])==devlen && strncmp(myfilelists[i],devnam,devlen)==0) goto end;
+    for (i=0; i<myfilelistptr; i++)
+    {
+        dev=myfilelist[i];
+        if (strlen(myfilelists[i])==devlen && strncmp(myfilelists[i],devnam,devlen)==0) goto end;
     }
 
     // real disk
@@ -153,19 +163,22 @@ unsigned device_lookup(unsigned devlen,char *devnam,int create,short int *retcha
     d.dsc$a_pointer=do_translate(devnam);
     int sys$assign(void *devnam, unsigned short int *chan,unsigned int acmode, void *mbxnam,int flags);
     if (ctl$gl_pcb->psl_cur_mod)
-      sts=sys$assign(&d,&chan,0,0,0);
+        sts=sys$assign(&d,&chan,0,0,0);
     else
-      sts=exe$assign(&d,&chan,0,0,0);
+        sts=exe$assign(&d,&chan,0,0,0);
     dev= ctl$ga_ccb_table[chan].ccb$l_ucb;
-    
- end:
-    if (dev == NULL) {
+
+end:
+    if (dev == NULL)
+    {
         if (sts == SS$_ITEMNOTFOUND) sts = SS$_NOSUCHDEV;
-    } else {
+    }
+    else
+    {
         *retchan = chan;
         sts = SS$_NORMAL;
     }
-    
+
     return sts;
 }
 

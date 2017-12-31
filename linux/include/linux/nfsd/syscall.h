@@ -14,7 +14,7 @@
 # include <linux/config.h>
 # include <linux/types.h>
 # include <linux/in.h>
-#endif 
+#endif
 #include <linux/posix_types.h>
 #include <linux/nfsd/const.h>
 #include <linux/nfsd/export.h>
@@ -40,79 +40,88 @@
 #define	NFSCTL_GETFS		8	/* get an fh by path with max FH len */
 
 /* SVC */
-struct nfsctl_svc {
-	unsigned short		svc_port;
-	int			svc_nthreads;
+struct nfsctl_svc
+{
+    unsigned short		svc_port;
+    int			svc_nthreads;
 };
 
 /* ADDCLIENT/DELCLIENT */
-struct nfsctl_client {
-	char			cl_ident[NFSCLNT_IDMAX+1];
-	int			cl_naddr;
-	struct in_addr		cl_addrlist[NFSCLNT_ADDRMAX];
-	int			cl_fhkeytype;
-	int			cl_fhkeylen;
-	unsigned char		cl_fhkey[NFSCLNT_KEYMAX];
+struct nfsctl_client
+{
+    char			cl_ident[NFSCLNT_IDMAX+1];
+    int			cl_naddr;
+    struct in_addr		cl_addrlist[NFSCLNT_ADDRMAX];
+    int			cl_fhkeytype;
+    int			cl_fhkeylen;
+    unsigned char		cl_fhkey[NFSCLNT_KEYMAX];
 };
 
 /* EXPORT/UNEXPORT */
-struct nfsctl_export {
-	char			ex_client[NFSCLNT_IDMAX+1];
-	char			ex_path[NFS_MAXPATHLEN+1];
-	__kernel_dev_t		ex_dev;
-	__kernel_ino_t		ex_ino;
-	int			ex_flags;
-	__kernel_uid_t		ex_anon_uid;
-	__kernel_gid_t		ex_anon_gid;
+struct nfsctl_export
+{
+    char			ex_client[NFSCLNT_IDMAX+1];
+    char			ex_path[NFS_MAXPATHLEN+1];
+    __kernel_dev_t		ex_dev;
+    __kernel_ino_t		ex_ino;
+    int			ex_flags;
+    __kernel_uid_t		ex_anon_uid;
+    __kernel_gid_t		ex_anon_gid;
 };
 
 /* UGIDUPDATE */
-struct nfsctl_uidmap {
-	char *			ug_ident;
-	__kernel_uid_t		ug_uidbase;
-	int			ug_uidlen;
-	__kernel_uid_t *	ug_udimap;
-	__kernel_gid_t		ug_gidbase;
-	int			ug_gidlen;
-	__kernel_gid_t *	ug_gdimap;
+struct nfsctl_uidmap
+{
+    char *			ug_ident;
+    __kernel_uid_t		ug_uidbase;
+    int			ug_uidlen;
+    __kernel_uid_t *	ug_udimap;
+    __kernel_gid_t		ug_gidbase;
+    int			ug_gidlen;
+    __kernel_gid_t *	ug_gdimap;
 };
 
 /* GETFH */
-struct nfsctl_fhparm {
-	struct sockaddr		gf_addr;
-	__kernel_dev_t		gf_dev;
-	__kernel_ino_t		gf_ino;
-	int			gf_version;
+struct nfsctl_fhparm
+{
+    struct sockaddr		gf_addr;
+    __kernel_dev_t		gf_dev;
+    __kernel_ino_t		gf_ino;
+    int			gf_version;
 };
 
 /* GETFD */
-struct nfsctl_fdparm {
-	struct sockaddr		gd_addr;
-	char			gd_path[NFS_MAXPATHLEN+1];
-	int			gd_version;
+struct nfsctl_fdparm
+{
+    struct sockaddr		gd_addr;
+    char			gd_path[NFS_MAXPATHLEN+1];
+    int			gd_version;
 };
 
 /* GETFS - GET Filehandle with Size */
-struct nfsctl_fsparm {
-	struct sockaddr		gd_addr;
-	char			gd_path[NFS_MAXPATHLEN+1];
-	int			gd_maxlen;
+struct nfsctl_fsparm
+{
+    struct sockaddr		gd_addr;
+    char			gd_path[NFS_MAXPATHLEN+1];
+    int			gd_maxlen;
 };
 
 /*
  * This is the argument union.
  */
-struct nfsctl_arg {
-	int			ca_version;	/* safeguard */
-	union {
-		struct nfsctl_svc	u_svc;
-		struct nfsctl_client	u_client;
-		struct nfsctl_export	u_export;
-		struct nfsctl_uidmap	u_umap;
-		struct nfsctl_fhparm	u_getfh;
-		struct nfsctl_fdparm	u_getfd;
-		struct nfsctl_fsparm	u_getfs;
-	} u;
+struct nfsctl_arg
+{
+    int			ca_version;	/* safeguard */
+    union
+    {
+        struct nfsctl_svc	u_svc;
+        struct nfsctl_client	u_client;
+        struct nfsctl_export	u_export;
+        struct nfsctl_uidmap	u_umap;
+        struct nfsctl_fhparm	u_getfh;
+        struct nfsctl_fdparm	u_getfd;
+        struct nfsctl_fsparm	u_getfs;
+    } u;
 #define ca_svc		u.u_svc
 #define ca_client	u.u_client
 #define ca_export	u.u_export
@@ -123,9 +132,10 @@ struct nfsctl_arg {
 #define ca_authd	u.u_authd
 };
 
-union nfsctl_res {
-	__u8			cr_getfh[NFS_FHSIZE];
-	struct knfsd_fh		cr_getfs;
+union nfsctl_res
+{
+    __u8			cr_getfh[NFS_FHSIZE];
+    struct knfsd_fh		cr_getfs;
 };
 
 #ifdef __KERNEL__

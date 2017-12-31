@@ -124,22 +124,23 @@
 
 #ifndef HAVE_NETIF_MSG
 #define HAVE_NETIF_MSG 1
-enum {
-	NETIF_MSG_DRV		= 0x0001,
-	NETIF_MSG_PROBE		= 0x0002,
-	NETIF_MSG_LINK		= 0x0004,
-	NETIF_MSG_TIMER		= 0x0008,
-	NETIF_MSG_IFDOWN	= 0x0010,
-	NETIF_MSG_IFUP		= 0x0020,
-	NETIF_MSG_RX_ERR	= 0x0040,
-	NETIF_MSG_TX_ERR	= 0x0080,
-	NETIF_MSG_TX_QUEUED	= 0x0100,
-	NETIF_MSG_INTR		= 0x0200,
-	NETIF_MSG_TX_DONE	= 0x0400,
-	NETIF_MSG_RX_STATUS	= 0x0800,
-	NETIF_MSG_PKTDATA	= 0x1000,
-	NETIF_MSG_HW		= 0x2000,
-	NETIF_MSG_WOL		= 0x4000,
+enum
+{
+    NETIF_MSG_DRV		= 0x0001,
+    NETIF_MSG_PROBE		= 0x0002,
+    NETIF_MSG_LINK		= 0x0004,
+    NETIF_MSG_TIMER		= 0x0008,
+    NETIF_MSG_IFDOWN	= 0x0010,
+    NETIF_MSG_IFUP		= 0x0020,
+    NETIF_MSG_RX_ERR	= 0x0040,
+    NETIF_MSG_TX_ERR	= 0x0080,
+    NETIF_MSG_TX_QUEUED	= 0x0100,
+    NETIF_MSG_INTR		= 0x0200,
+    NETIF_MSG_TX_DONE	= 0x0400,
+    NETIF_MSG_RX_STATUS	= 0x0800,
+    NETIF_MSG_PKTDATA	= 0x1000,
+    NETIF_MSG_HW		= 0x2000,
+    NETIF_MSG_WOL		= 0x4000,
 };
 
 #else
@@ -170,7 +171,10 @@ enum {
 /* 2.5.28 => 2.4.23 */
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,5,28) )
 
-static inline void _kc_synchronize_irq(void) { synchronize_irq(); }
+static inline void _kc_synchronize_irq(void)
+{
+    synchronize_irq();
+}
 #undef synchronize_irq
 #define synchronize_irq(X) _kc_synchronize_irq()
 
@@ -201,7 +205,7 @@ extern void _kc_skb_fill_page_desc(struct sk_buff *skb, int i, struct page *page
 #define pci_dma_mapping_error _kc_pci_dma_mapping_error
 static inline int _kc_pci_dma_mapping_error(dma_addr_t dma_addr)
 {
-	return dma_addr == 0;
+    return dma_addr == 0;
 }
 #endif
 
@@ -226,7 +230,7 @@ static inline int _kc_pci_dma_mapping_error(dma_addr_t dma_addr)
 #define if_mii _kc_if_mii
 static inline struct mii_ioctl_data *_kc_if_mii(struct ifreq *rq)
 {
-	return (struct mii_ioctl_data *) &rq->ifr_ifru;
+    return (struct mii_ioctl_data *) &rq->ifr_ifru;
 }
 #endif /* < 2.6.7 */
 
@@ -245,36 +249,37 @@ static inline struct mii_ioctl_data *_kc_if_mii(struct ifreq *rq)
 static inline unsigned int _kc_jiffies_to_msecs(const unsigned long j)
 {
 #if HZ <= MSEC_PER_SEC && !(MSEC_PER_SEC % HZ)
-	return (MSEC_PER_SEC / HZ) * j;
+    return (MSEC_PER_SEC / HZ) * j;
 #elif HZ > MSEC_PER_SEC && !(HZ % MSEC_PER_SEC)
-	return (j + (HZ / MSEC_PER_SEC) - 1)/(HZ / MSEC_PER_SEC);
+    return (j + (HZ / MSEC_PER_SEC) - 1)/(HZ / MSEC_PER_SEC);
 #else
-	return (j * MSEC_PER_SEC) / HZ;
+    return (j * MSEC_PER_SEC) / HZ;
 #endif
 }
 static inline unsigned long _kc_msecs_to_jiffies(const unsigned int m)
 {
-	if (m > _kc_jiffies_to_msecs(MAX_JIFFY_OFFSET))
-		return MAX_JIFFY_OFFSET;
+    if (m > _kc_jiffies_to_msecs(MAX_JIFFY_OFFSET))
+        return MAX_JIFFY_OFFSET;
 #if HZ <= MSEC_PER_SEC && !(MSEC_PER_SEC % HZ)
-	return (m + (MSEC_PER_SEC / HZ) - 1) / (MSEC_PER_SEC / HZ);
+    return (m + (MSEC_PER_SEC / HZ) - 1) / (MSEC_PER_SEC / HZ);
 #elif HZ > MSEC_PER_SEC && !(HZ % MSEC_PER_SEC)
-	return m * (HZ / MSEC_PER_SEC);
+    return m * (HZ / MSEC_PER_SEC);
 #else
-	return (m * HZ + MSEC_PER_SEC - 1) / MSEC_PER_SEC;
+    return (m * HZ + MSEC_PER_SEC - 1) / MSEC_PER_SEC;
 #endif
 }
 
 #define msleep_interruptible _kc_msleep_interruptible
 static unsigned inline long _kc_msleep_interruptible(unsigned int msecs)
 {
-	unsigned long timeout = _kc_msecs_to_jiffies(msecs) + 1;
+    unsigned long timeout = _kc_msecs_to_jiffies(msecs) + 1;
 
-	while (timeout && !signal_pending(current)) {
-		__set_current_state(TASK_INTERRUPTIBLE);
-		timeout = schedule_timeout(timeout);
-	}
-	return _kc_jiffies_to_msecs(timeout);
+    while (timeout && !signal_pending(current))
+    {
+        __set_current_state(TASK_INTERRUPTIBLE);
+        timeout = schedule_timeout(timeout);
+    }
+    return _kc_jiffies_to_msecs(timeout);
 }
 #endif /* < 2.6.9 */
 
@@ -378,7 +383,7 @@ extern void *_kc_kzalloc(size_t size, int flags);
 #ifndef netdev_alloc_skb
 #define netdev_alloc_skb _kc_netdev_alloc_skb
 extern struct sk_buff *_kc_netdev_alloc_skb(struct net_device *dev,
-                                            unsigned int length);
+        unsigned int length);
 #endif
 
 #endif /* < 2.6.18 */
@@ -389,8 +394,8 @@ typedef void (*irq_handler_t)(int, void*, struct pt_regs *);
 typedef void (*new_handler_t)(int, void*);
 static inline int _kc_request_irq(unsigned int irq, new_handler_t handler, unsigned long flags, const char *devname, void *dev_id)
 {
-	irq_handler_t new_handler = (irq_handler_t) handler;
-	return request_irq(irq, new_handler, flags, devname, dev_id);
+    irq_handler_t new_handler = (irq_handler_t) handler;
+    return request_irq(irq, new_handler, flags, devname, dev_id);
 }
 
 #undef request_irq

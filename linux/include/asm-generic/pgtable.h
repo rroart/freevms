@@ -4,47 +4,47 @@
 #ifndef __HAVE_ARCH_PTEP_TEST_AND_CLEAR_YOUNG
 static inline int ptep_test_and_clear_young(pte_t *ptep)
 {
-	pte_t pte = *ptep;
-	if (!pte_young(pte))
-		return 0;
-	set_pte(ptep, pte_mkold(pte));
-	return 1;
+    pte_t pte = *ptep;
+    if (!pte_young(pte))
+        return 0;
+    set_pte(ptep, pte_mkold(pte));
+    return 1;
 }
 #endif
 
 #ifndef __HAVE_ARCH_PTEP_TEST_AND_CLEAR_DIRTY
 static inline int ptep_test_and_clear_dirty(pte_t *ptep)
 {
-	pte_t pte = *ptep;
-	if (!pte_dirty(pte))
-		return 0;
-	set_pte(ptep, pte_mkclean(pte));
-	return 1;
+    pte_t pte = *ptep;
+    if (!pte_dirty(pte))
+        return 0;
+    set_pte(ptep, pte_mkclean(pte));
+    return 1;
 }
 #endif
 
 #ifndef __HAVE_ARCH_PTEP_GET_AND_CLEAR
 static inline pte_t ptep_get_and_clear(pte_t *ptep)
 {
-	pte_t pte = *ptep;
-	pte_clear(42, 42, ptep); // check
-	return pte;
+    pte_t pte = *ptep;
+    pte_clear(42, 42, ptep); // check
+    return pte;
 }
 #endif
 
 #ifndef __HAVE_ARCH_PTEP_SET_WRPROTECT
 static inline void ptep_set_wrprotect(pte_t *ptep)
 {
-	pte_t old_pte = *ptep;
-	set_pte(ptep, pte_wrprotect(old_pte));
+    pte_t old_pte = *ptep;
+    set_pte(ptep, pte_wrprotect(old_pte));
 }
 #endif
 
 #ifndef __ASSEMBLY__
 static inline void ptep_mkdirty(pte_t *ptep)
 {
-	pte_t old_pte = *ptep;
-	set_pte(ptep, pte_mkdirty(old_pte));
+    pte_t old_pte = *ptep;
+    set_pte(ptep, pte_mkdirty(old_pte));
 }
 #endif
 
@@ -89,35 +89,38 @@ void pmd_clear_bad(pmd_t *);
 
 static inline int pgd_none_or_clear_bad(pgd_t *pgd)
 {
-	if (pgd_none(*pgd))
-		return 1;
-	if (unlikely(pgd_bad(*pgd))) {
-		pgd_clear_bad(pgd);
-		return 1;
-	}
-	return 0;
+    if (pgd_none(*pgd))
+        return 1;
+    if (unlikely(pgd_bad(*pgd)))
+    {
+        pgd_clear_bad(pgd);
+        return 1;
+    }
+    return 0;
 }
 
 static inline int pud_none_or_clear_bad(pud_t *pud)
 {
-	if (pud_none(*pud))
-		return 1;
-	if (unlikely(pud_bad(*pud))) {
-		pud_clear_bad(pud);
-		return 1;
-	}
-	return 0;
+    if (pud_none(*pud))
+        return 1;
+    if (unlikely(pud_bad(*pud)))
+    {
+        pud_clear_bad(pud);
+        return 1;
+    }
+    return 0;
 }
 
 static inline int pmd_none_or_clear_bad(pmd_t *pmd)
 {
-	if (pmd_none(*pmd))
-		return 1;
-	if (unlikely(pmd_bad(*pmd))) {
-		pmd_clear_bad(pmd);
-		return 1;
-	}
-	return 0;
+    if (pmd_none(*pmd))
+        return 1;
+    if (unlikely(pmd_bad(*pmd)))
+    {
+        pmd_clear_bad(pmd);
+        return 1;
+    }
+    return 0;
 }
 #endif /* !__ASSEMBLY__ */
 

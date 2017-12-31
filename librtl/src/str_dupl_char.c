@@ -37,84 +37,86 @@
  *
  */
 unsigned long str$dupl_char(struct dsc$descriptor_s* destination_string,
-	const long* repetition_count,
-	const char* ascii_character)
+                            const long* repetition_count,
+                            const char* ascii_character)
 {
-	char* s1_ptr;			/* Pointer to first string */
-	unsigned short s1_length;	/* Length of first string */
-	unsigned long result = STR$_NORMAL;
-	char UseChar = ' ';		/* Character to use for duplication */
-	unsigned short UseCount;
-	unsigned long alt_result;
+    char* s1_ptr;			/* Pointer to first string */
+    unsigned short s1_length;	/* Length of first string */
+    unsigned long result = STR$_NORMAL;
+    char UseChar = ' ';		/* Character to use for duplication */
+    unsigned short UseCount;
+    unsigned long alt_result;
 
-	/*
-	 * Get the repitition count
-	 */
-	if (repetition_count == NULL)
-	{
-		UseCount = 1;
-	}
-	else
-	{
-		UseCount = *repetition_count;
-	}
+    /*
+     * Get the repitition count
+     */
+    if (repetition_count == NULL)
+    {
+        UseCount = 1;
+    }
+    else
+    {
+        UseCount = *repetition_count;
+    }
 
-	/*
-	 * Check out the source string. It better have one
-	 * single character in it.
-	 */
-	if (ascii_character != NULL)
-	{
-		UseChar = *ascii_character;
-	} else {
-		UseChar = ' ';
-	}
+    /*
+     * Check out the source string. It better have one
+     * single character in it.
+     */
+    if (ascii_character != NULL)
+    {
+        UseChar = *ascii_character;
+    }
+    else
+    {
+        UseChar = ' ';
+    }
 
-	/*
-	 * Validate the repitition count
-	 */
+    /*
+     * Validate the repitition count
+     */
 #if 0	/* Not possible with unsigned */
-	if (UseCount < 0)
-	{
-		UseCount = 0;
-		result = STR$_NEGSTRLEN;
-	}
+    if (UseCount < 0)
+    {
+        UseCount = 0;
+        result = STR$_NEGSTRLEN;
+    }
 #endif
 
-	if (UseCount > 65535L)
-	{
-		DOSIGNAL(STR$_STRTOOLON);
-		return STR$_STRTOOLON;
-	}
+    if (UseCount > 65535L)
+    {
+        DOSIGNAL(STR$_STRTOOLON);
+        return STR$_STRTOOLON;
+    }
 
-	/*
-	 * Resize the destination string
-	 */
-	alt_result = str$$resize(destination_string, UseCount);
-	if (alt_result != STR$_NORMAL)
-	{
-		result = alt_result;
-	}
-	else
-	{
-		/*
-	 	 * Now, see what we've got for a destination
-	 	 */
-		str$analyze_sdesc(destination_string, &s1_length, &s1_ptr);
-		memset(s1_ptr, UseChar, (size_t)min(s1_length, UseCount));
+    /*
+     * Resize the destination string
+     */
+    alt_result = str$$resize(destination_string, UseCount);
+    if (alt_result != STR$_NORMAL)
+    {
+        result = alt_result;
+    }
+    else
+    {
+        /*
+         * Now, see what we've got for a destination
+         */
+        str$analyze_sdesc(destination_string, &s1_length, &s1_ptr);
+        memset(s1_ptr, UseChar, (size_t)min(s1_length, UseCount));
 
-		/*
-		 * Did we truncate?
-		 */
-		if (UseCount > s1_length)
-		{
-			result = STR$_TRU;
-		}
-	}
+        /*
+         * Did we truncate?
+         */
+        if (UseCount > s1_length)
+        {
+            result = STR$_TRU;
+        }
+    }
 
-	/*
-	 * Done!
-	 */
-	return result;
+    /*
+     * Done!
+     */
+    return result;
 }
 

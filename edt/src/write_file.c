@@ -41,29 +41,32 @@
 int write_file (const char *out_name, Line *beg_line, Line *end_line)
 
 {
-  FILE *out_file;
-  Line *line;
-  uLong count;
+    FILE *out_file;
+    Line *line;
+    uLong count;
 
-  out_file = os_crenewfile (out_name);
-  if (out_file == NULL) return (0);
+    out_file = os_crenewfile (out_name);
+    if (out_file == NULL) return (0);
 
-  count = 0;
-  for (line = beg_line; line != NULL; line = line_next (line)) {
-    if (fputs (string_getval (line_string (line)), out_file) < 0) {
-      outerr (strlen (out_name) + strlen (strerror (errno)), "error writing file %s: %s\n", out_name, strerror (errno));
-      fclose (out_file);
-      return (0);
+    count = 0;
+    for (line = beg_line; line != NULL; line = line_next (line))
+    {
+        if (fputs (string_getval (line_string (line)), out_file) < 0)
+        {
+            outerr (strlen (out_name) + strlen (strerror (errno)), "error writing file %s: %s\n", out_name, strerror (errno));
+            fclose (out_file);
+            return (0);
+        }
+        count ++;
+        if (line == end_line) break;
     }
-    count ++;
-    if (line == end_line) break;
-  }
 
-  if (fclose (out_file) < 0) {
-    outerr (strlen (out_name) + strlen (strerror (errno)), "error closing file %s: %s\n", out_name, strerror (errno));
-    return (0);
-  }
+    if (fclose (out_file) < 0)
+    {
+        outerr (strlen (out_name) + strlen (strerror (errno)), "error closing file %s: %s\n", out_name, strerror (errno));
+        return (0);
+    }
 
-  outerr (strlen (out_name) + 12, "%s %u line%s\n", out_name, count, (count != 1) ? "s" : "");
-  return (1);
+    outerr (strlen (out_name) + 12, "%s %u line%s\n", out_name, count, (count != 1) ? "s" : "");
+    return (1);
 }

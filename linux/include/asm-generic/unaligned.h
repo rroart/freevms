@@ -3,7 +3,7 @@
 
 /*
  * For the benefit of those who are trying to port Linux to another
- * architecture, here are some C-language equivalents. 
+ * architecture, here are some C-language equivalents.
  */
 
 #include <asm/string.h>

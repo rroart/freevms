@@ -85,17 +85,18 @@
 #define MS_MSE_INT_ON()  {outb(MS_MSE_COMMAND_MODE, MS_MSE_CONTROL_PORT); \
 			    outb(MS_MSE_ENABLE_INTERRUPTS, MS_MSE_DATA_PORT);}
 
- 
-struct mouse_status {
-	unsigned char	buttons;
-	unsigned char	latch_buttons;
-	int		dx;
-	int		dy;	
-	int 		present;
-	int		ready;
-	int		active;
-	wait_queue_head_t wait;
-	struct fasync_struct *fasyncptr;
+
+struct mouse_status
+{
+    unsigned char	buttons;
+    unsigned char	latch_buttons;
+    int		dx;
+    int		dy;
+    int 		present;
+    int		ready;
+    int		active;
+    wait_queue_head_t wait;
+    struct fasync_struct *fasyncptr;
 };
 
 /* Function Prototypes */

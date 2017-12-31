@@ -14,7 +14,7 @@
  *
  *   20-OCT-2003	Zakaria Yassine <zakaria@sympatico.ca>
  *	some bugs corrected. support write. add params: device-size (in blocks), volume-label
- *		Usage: init /dev/hdb4 VOLNAME 40000 
+ *		Usage: init /dev/hdb4 VOLNAME 40000
  *
  * Report Bugs:
  *   To: FreeVMS project mailing list <http://freevms.nvg.org/>
@@ -26,34 +26,39 @@
 
 int curVBN=0;
 
-void read_blk(unsigned char *blk, FILE *fin){
+void read_blk(unsigned char *blk, FILE *fin)
+{
     int i;
-    for(i=0;i<512;i++) blk[i]=fgetc(fin);
+    for(i=0; i<512; i++) blk[i]=fgetc(fin);
 }
 
-unsigned int roundup(double y){  //instead of ceil?
+unsigned int roundup(double y)   //instead of ceil?
+{
     unsigned int x;
     x=y;
     if(x<y) x++;
     return(x);
 }
 
-void write_blk(unsigned char *blk, FILE *fout, char * strmsg){
+void write_blk(unsigned char *blk, FILE *fout, char * strmsg)
+{
     int i;
     curVBN++;
 #ifdef DEBUG
     if (strlen(strmsg)!=0) printf("Writing %s at %d\n", strmsg, curVBN);
 #endif
-    for(i=0;i<512;i++) fputc(blk[i],fout);
+    for(i=0; i<512; i++) fputc(blk[i],fout);
 }
 
-int getClusterSizehomeblock(unsigned char *in_HM2){
+int getClusterSizehomeblock(unsigned char *in_HM2)
+{
     struct _hm2 *pHM2;
     pHM2 = (struct _hm2 *) in_HM2;
     return pHM2->hm2$w_cluster;
 }
 
-int getIBMAPSIZE(unsigned char *in_HM2){
+int getIBMAPSIZE(unsigned char *in_HM2)
+{
     struct _hm2 *pHM2;
     pHM2 = (struct _hm2 *) in_HM2;
     return pHM2->hm2$w_ibmapsize;

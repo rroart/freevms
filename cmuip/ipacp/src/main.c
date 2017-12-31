@@ -365,26 +365,36 @@ Module Modification History:
 %sbttl 'Module Environment & Definition.'
 
 MODULE IPACP
-	   (MAIN=Main,IDENT='8.1',LANGUAGE(BLISS32),
-	   ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
-			   NONEXTERNAL=LONG_RELATIVE),
-	   LIST(REQUIRE,ASSEMBLY,OBJECT,BINARY),
-	   OPTIMIZE,OPTLEVEL=3,ZIP)=
-BEGIN
+(MAIN=Main,IDENT='8.1',LANGUAGE(BLISS32),
+ ADDRESSING_MODE(EXTERNAL=LONG_RELATIVE,
+                 NONEXTERNAL=LONG_RELATIVE),
+ LIST(REQUIRE,ASSEMBLY,OBJECT,BINARY),
+ OPTIMIZE,OPTLEVEL=3,ZIP)=
+     BEGIN
 
-! Include System libraries.
+     ! Include System libraries.
 
-LIBRARY 'SYS$LIBRARY:STARLET';	! VMS system definitions
-LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';	! Bliss transportable library defs.
-LIBRARY 'CMUIP_SRC:[central]NETERROR';	! Network error codes
-LIBRARY 'CMUIP_SRC:[CENTRAL]NETVMS';	! Include Local OS Dependent stuff.
-LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';! Include common stuff.
-LIBRARY 'CMUIP_SRC:[CENTRAL]NETTCPIP'; ! TCP/IP definition
+     LIBRARY 'SYS$LIBRARY:STARLET';
+! VMS system definitions
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETXPORT';
+! Bliss transportable library defs.
+LIBRARY 'CMUIP_SRC:[central]NETERROR';
+! Network error codes
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETVMS';
+! Include Local OS Dependent stuff.
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETCOMMON';
+! Include common stuff.
+LIBRARY 'CMUIP_SRC:[CENTRAL]NETTCPIP';
+! TCP/IP definition
 
-LIBRARY 'Structure';		! Structure Definitions
-!LIBRARY 'TCP';			! TCP Related definitions
-LIBRARY 'TCPMacros';		! Local (tcp) Macro defintions.
-LIBRARY 'TCPMOD';		! Modification history/version
+LIBRARY 'Structure';
+! Structure Definitions
+!LIBRARY 'TCP';
+! TCP Related definitions
+LIBRARY 'TCPMacros';
+! Local (tcp) Macro defintions.
+LIBRARY 'TCPMOD';
+! Modification history/version
 
 
 %SBTTL 'External Routines'
@@ -396,64 +406,87 @@ EXTERNAL ROUTINE
 #endif
 extern     mount_ip_device();
 #if 0
-    Time_Stamp,
-    User_Requests_Avail,
+Time_Stamp,
+User_Requests_Avail,
 
 ! IOUTIL.BLI
 
-    FATAL_FAO : NOVALUE,
-    OPR_FAO : NOVALUE,
-    LOG_FAO : NOVALUE,
-    LOG_OUTPUT : NOVALUE,
-    Exit_Handler : NOVALUE,
-    Exception_Handler : NOVALUE,
-    CHECK_ERRMSG_Q : NOVALUE,
+FATAL_FAO :
+NOVALUE,
+OPR_FAO :
+NOVALUE,
+LOG_FAO :
+NOVALUE,
+LOG_OUTPUT :
+NOVALUE,
+Exit_Handler :
+NOVALUE,
+Exception_Handler :
+NOVALUE,
+CHECK_ERRMSG_Q :
+NOVALUE,
 
 ! RPC.C
 
-    RPC$INIT,
+RPC$INIT,
 
 ! CONFIG.BLI
 
-    CNF$Check_Devices : NOVALUE,
-    CNF$Define_IPACP_Interface : NOVALUE,
-    CNF$Configure_ACP : NOVALUE,
-    CNF$Get_Local_IP_addr,
-    CNF$Net_Device_init : NOVALUE,
+CNF$Check_Devices :
+NOVALUE,
+CNF$Define_IPACP_Interface :
+NOVALUE,
+CNF$Configure_ACP :
+NOVALUE,
+CNF$Get_Local_IP_addr,
+CNF$Net_Device_init :
+NOVALUE,
 
 ! USER.BLI
 
-    USER$Purge_All_IO : NOVALUE,
-    TCP$Purge_Send_Queue : NOVALUE,
-    USER$Process_User_Requests : NOVALUE,
-    USER$Init_Routines : NOVALUE,
+USER$Purge_All_IO :
+NOVALUE,
+TCP$Purge_Send_Queue :
+NOVALUE,
+USER$Process_User_Requests :
+NOVALUE,
+USER$Init_Routines :
+NOVALUE,
 
 ! MEMGR.BLI
 
-    MM$Init : NOVALUE,
+MM$Init :
+NOVALUE,
 
 ! TCP_SEGIN.BLI
 
-    SEG$Process_Received_Segments : NOVALUE,
+SEG$Process_Received_Segments :
+NOVALUE,
 
 ! IP.BLI
 
-    IP$Init : NOVALUE,
+IP$Init :
+NOVALUE,
 
 ! TCP.BLI
 
-    TCP$Init : NOVALUE,
-    TCP$Service_Connections,
+TCP$Init :
+NOVALUE,
+TCP$Service_Connections,
 
 ! NMLOOK.BLI
 
-    NML$INIT : NOVALUE,
-    NML$PURGE : NOVALUE,
-    NML$GETNAME : NOVALUE,
+NML$INIT :
+NOVALUE,
+NML$PURGE :
+NOVALUE,
+NML$GETNAME :
+NOVALUE,
 
 ! MEM.BLI
 
-    Make_Zone	:	NOVALUE ;
+Make_Zone	:
+NOVALUE ;
 
 
 
@@ -500,13 +533,13 @@ extern     mount_ip_device();
 #endif
 
 //EXTERNAL
-    // TCP_MECH.BLI
+// TCP_MECH.BLI
 extern unsigned long long Start_Time;	// Quadword time IPACP started.
-extern unsigned long 
-    log_state,
-    act_state,
-    Begin_Lock,			// start & end address of process pages which
-    End_Lock;			// are locked in the working set; see maclib.mar
+extern unsigned long
+log_state,
+act_state,
+Begin_Lock,			// start & end address of process pages which
+End_Lock;			// are locked in the working set; see maclib.mar
 
 
 //%SBTTL 'Literals'
@@ -517,53 +550,65 @@ extern unsigned long
 //%SBTTL 'Global Data Declarations.'
 
 static char mynamestr[128],
-local_namestr[MAX_HNAME];
+       local_namestr[MAX_HNAME];
 
 //GLOBAL
-    signed long bogus1[512],
-    intdf=-1,	// Interrupt-defer count (-1 means OKINT)
-    bogus2[512],
-    ast_in_progress=FALSE, // AST service rtn executing.
-    Time_2_Exit=FALSE,// Main processing loop control.
-    sleeping=FALSE;	// Nap control.
-    struct dsc$descriptor myname_ = {
-dsc$w_length : 128,
-dsc$a_pointer : mynamestr };
+signed long bogus1[512],
+       intdf=-1,	// Interrupt-defer count (-1 means OKINT)
+       bogus2[512],
+       ast_in_progress=FALSE, // AST service rtn executing.
+       Time_2_Exit=FALSE,// Main processing loop control.
+       sleeping=FALSE;	// Nap control.
+struct dsc$descriptor myname_ =
+{
+    dsc$w_length : 128,
+dsc$a_pointer :
+    mynamestr
+};
 struct dsc$descriptor * myname = &myname_;
-    struct dsc$descriptor Local_Name= {
-dsc$w_length:MAX_HNAME,
-dsc$a_pointer:local_namestr};
+struct dsc$descriptor Local_Name=
+{
+dsc$w_length:
+    MAX_HNAME,
+dsc$a_pointer:
+    local_namestr
+};
 #if 0
-    DESC$STR_ALLOC(MyName,128), // eqv for logical "tek$network_name"
-    DESC$STR_ALLOC(Local_Name,MAX_HNAME),
+DESC$STR_ALLOC(MyName,128), // eqv for logical "tek$network_name"
+     DESC$STR_ALLOC(Local_Name,MAX_HNAME),
 #endif
-    signed long
-    max_recv_datasize =OPT$MAX_RECV_DATASIZE,	// Max segment size
-    default_mss	=DEFAULT_DATA_SIZE,		// Max segment size
-    max_physical_bufsize,	// Max size of device receive buffer
-    min_physical_bufsize;	// Minimum size of device send buffer
+     signed long
+     max_recv_datasize =OPT$MAX_RECV_DATASIZE,	// Max segment size
+     default_mss	=DEFAULT_DATA_SIZE,		// Max segment size
+     max_physical_bufsize,	// Max size of device receive buffer
+     min_physical_bufsize;	// Minimum size of device send buffer
 
 // Segment Input from IP Queue header.
 // Initialize Queue header to point at itself (ie, empty state).
 
-   struct queue_header_structure(si_fields) segin_ = { 
-    si_qhead: &segin_,
-    si_qtail: &segin_
-   }, * segin = &segin_;
+struct queue_header_structure(si_fields) segin_ =
+{
+si_qhead:
+    &segin_,
+si_qtail:
+    &segin_
+}, * segin = &segin_;
 
 // Storage for original process name
 
 static signed long
-    myprcname [MAXPRCLEN],
-    myprclen;
+myprcname [MAXPRCLEN],
+          myprclen;
 
 
 
-void MAIN$NOINT(void) {
+void MAIN$NOINT(void)
+{
     NOINT
 }
 
-void MAIN$OKINT(void) {
+void MAIN$OKINT(void)
+{
     OKINT
 }
 
@@ -597,28 +642,29 @@ Side Effects:
 
 extern	void ACPINI_ADLOOK_DONE();
 
-	void Initialize_ACP(void) {
+void Initialize_ACP(void)
+{
     int
-	cidx,
-	lclnlen;
+    cidx,
+    lclnlen;
 
     if (log_state > 0 )		// Open log, if requested
-      if (! LOG_OPEN() )
-	log_state = 0;
+        if (! LOG_OPEN() )
+            log_state = 0;
     if (act_state > 0 )		// Open activity log, if requested
-      if (! ACT_OPEN() )
-	act_state = 0;
+        if (! ACT_OPEN() )
+            act_state = 0;
 
 // Calculate standard buffer sizes. The MAX_PHYSICAL_BUFSIZE is the size of all
 // allocated receive buffers and is the maximum size of the IP fragmentation
 // buffer.
 
-    max_physical_bufsize = DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+ 
-			   OPT$MAX_RECV_DATASIZE;
+    max_physical_bufsize = DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+
+                           OPT$MAX_RECV_DATASIZE;
 //    IF (.MAX_PHYSICAL_BUFSIZE MOD 4) NEQ 0 THEN
 //	FATAL$FAO('Initialize_ACP - Max buffer size not divisible by 4');
-    min_physical_bufsize = DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+ 
-			    DEFAULT_DATA_SIZE;
+    min_physical_bufsize = DEVICE_HEADER+TCP_HEADER_SIZE+IP_HDR_BYTE_SIZE+
+                           DEFAULT_DATA_SIZE;
 
     // First define the IPACP interface for any other modules we may load...
     CNF$Define_IPACP_Interface();
@@ -640,22 +686,23 @@ extern	void ACPINI_ADLOOK_DONE();
 // Get the local host name
 
     NML$GETNAME(CNF$Get_Local_IP_addr(),ACPINI_ADLOOK_DONE,0);
-	}
+}
 
 //SBTTL 'ACPINI_ADLOOK_DONE - Set local host name when name lookup finished'
 
-	void ACPINI_ADLOOK_DONE(DUMMY,STATUS,NAMLEN,NAMPTR) {
+void ACPINI_ADLOOK_DONE(DUMMY,STATUS,NAMLEN,NAMPTR)
+{
 
 // Check the status
 
-	  if (! STATUS )
-	    return;
+    if (! STATUS )
+        return;
 
 // Copy the name into the local name buffer
 
     Local_Name.dsc$w_length = NAMLEN;
     memcpy(Local_Name.dsc$a_pointer,NAMPTR,NAMLEN);
-	}
+}
 
 //SBTTL 'Wait-For-Something-2-DO: Snooze if we have the time.'
 /*
@@ -683,69 +730,82 @@ Side Effects:
 	set before hibernation to reduce system impact.
 */
 
-	void  wait_for_something_2_do(unsigned long long nxtime) {
-	  //    BIND
-	// Range of pages to purge from WS.
+void  wait_for_something_2_do(unsigned long long nxtime)
+{
+    //    BIND
+    // Range of pages to purge from WS.
 #if 0
-	PageRange0 = UPlit(1,Begin_lock-%O'1000'),
-  	PageRange1 = UPlit(End_Lock+%O'1000',%X'7FFFFFFF'),
+    PageRange0 = UPlit(1,Begin_lock-%O'1000'),
+    PageRange1 = UPlit(End_Lock+%O'1000',%X'7FFFFFFF'),
 #endif
-	$DESCRIPTOR(Long_Nap,"0 12:0:0.0");		// hours.
+    $DESCRIPTOR(Long_Nap,"0 12:0:0.0");		// hours.
     //    LITERAL
 #define	SHORT_NAP (20*CSEC)
 #define	SHORTER_NAP (2*CSEC)
     extern
-	tcb_count;
+    tcb_count;
 #if 0
     REGISTER
-	qb: REF Queue_Blk_Structure(QB_RT_Fields);
+qb:
+    REF Queue_Blk_Structure(QB_RT_Fields);
 #endif
     //    LOCAL
     unsigned long long now;
-	  unsigned rto,
-	  delay;
-      char Big_Sleep = FALSE;
-	unsigned long long BTime;	// Binary rep of time.
+    unsigned rto,
+             delay;
+    char Big_Sleep = FALSE;
+    unsigned long long BTime;	// Binary rep of time.
 
 // Skip this snooze if we have network segments to process or IP has datagrams
 // to send or it's Time to exit.
 
-	if (queue_empty(&segin->si_qhead) && (! Time_2_Exit)) {
+    if (queue_empty(&segin->si_qhead) && (! Time_2_Exit))
+    {
 
 // Any valid Connections around? (TCB_Count > 0). If none take a restful nap.
 // Otherwise, use next TCB service time provided by TCB scan.
 
-	  if (tcb_count > 0) {
-	    now = Time_Stamp();
+        if (tcb_count > 0)
+        {
+            now = Time_Stamp();
 //	    RTO = MINU(SHORT_NAP,nxtime-now);
-	    if (nxtime > now) {
-	      delay = nxtime - now;
-	    } else {
+            if (nxtime > now)
+            {
+                delay = nxtime - now;
+            }
+            else
+            {
 //		Delay = 100 ;
-		delay = 0 ;
-	    }
-	    rto = MINU(SHORTER_NAP,delay) ;
-	    if (rto <= 0) {
-		XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: No sleep, RTO=!UL!/",0,rto);
-		rto = 0;
-	    } else {
-		XLOG$FAO(LOG$DEBUG,"!%T WFS2D: Short sleep, RTO=!UL!/",
-			 0,rto);
-		XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: Short sleep, RTO=!UL!/",
-			 0,rto);
-	    }
+                delay = 0 ;
+            }
+            rto = MINU(SHORTER_NAP,delay) ;
+            if (rto <= 0)
+            {
+                XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: No sleep, RTO=!UL!/",0,rto);
+                rto = 0;
+            }
+            else
+            {
+                XLOG$FAO(LOG$DEBUG,"!%T WFS2D: Short sleep, RTO=!UL!/",
+                         0,rto);
+                XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: Short sleep, RTO=!UL!/",
+                         0,rto);
+            }
 
-	    ((int *)&BTime)[1] = -1;	// make it delta time.
-	    ((int *)&BTime)[0] = rto*CSEC_TIMER_DELTA; // nap size.
-	} else {			// No TCB's
-	    sys$bintim(&Long_Nap,&BTime);
-	    Big_Sleep = TRUE;
-	    XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: Long sleep!/",0);
-	}
+            ((int *)&BTime)[1] = -1;	// make it delta time.
+            ((int *)&BTime)[0] = rto*CSEC_TIMER_DELTA; // nap size.
+        }
+        else  			// No TCB's
+        {
+            sys$bintim(&Long_Nap,&BTime);
+            Big_Sleep = TRUE;
+            XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: Long sleep!/",0);
+        }
 
 // Check again for segment arrival & no TCB actions
 
-	    if (queue_empty(&segin->si_qhead) && (((int *)&BTime)[0] != 0)) {
+        if (queue_empty(&segin->si_qhead) && (((int *)&BTime)[0] != 0))
+        {
 
 
 // If we are doing a BIG sleep then purge the working set to reduce system impact.
@@ -758,9 +818,9 @@ Side Effects:
 
 // Snoooooozzzzzz!!!!!!!!!!!!
 
-	    sys$schdwk(0,0,&BTime,0); // Schedule a wake-up.
-	    sleeping = TRUE;	// So AST Handler can wake us.
-	    sys$hiber();
+            sys$schdwk(0,0,&BTime,0); // Schedule a wake-up.
+            sleeping = TRUE;	// So AST Handler can wake us.
+            sys$hiber();
 
 // If we received an Attention AST from the PI device (network mesg avail)
 // Then sleeping will be set to false.  This implies that there is still an
@@ -770,12 +830,14 @@ Side Effects:
 // kind of timing related nonsense between AST delivery & XPORT/RMS output
 // processing.
 
-	    sleeping = FALSE;
-	    sys$canwak(0, 0);
-	    } else {
-	    XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: Not sleeping!/",0);
-	    }
-	}
+            sleeping = FALSE;
+            sys$canwak(0, 0);
+        }
+        else
+        {
+            XLOG$FAO(LOG$TCBCHECK,"!%T WFS2D: Not sleeping!/",0);
+        }
+    }
 }
 
 
@@ -784,88 +846,96 @@ Side Effects:
 void    INIT_PROCNAME(void);
 
 #ifdef NOKERNEL
-void main (void) {
+void main (void)
+{
 #else
-void Main (void) {
+void Main (void)
+{
 #endif
 #ifndef NOKERNEL
-  //current->pslstk[current->pslindex-1]|=(3<<2 | 3);
-  setpslmod(3); // check. pretend user mode
+    //current->pslstk[current->pslindex-1]|=(3<<2 | 3);
+    setpslmod(3); // check. pretend user mode
 #endif
-  $DESCRIPTOR(logical_netname_,"INET$NETWORK_NAME");
+    $DESCRIPTOR(logical_netname_,"INET$NETWORK_NAME");
 #if 0
     BUILTIN
-	fp;			// VAX Frame Pointer.
+    fp;			// VAX Frame Pointer.
     MAP
-	fp: REF VECTOR[1];
+fp:
+    REF VECTOR[1];
 #endif
     long
-      rc;
-	unsigned char eqv_name[255];
-	unsigned short 	eqv_len;
-	struct item_list_3 items[2]= { {
-	  255,// output buffer length
-	  LNM$_STRING, // item code
-	  eqv_name, // output buffer
-	  &eqv_len, // word for translated string length
-		} , {0,0,0,0}};	// list terminator.
-	long exitblk[4],	// exit handler arg blk.
-	exit_status;		// exit status code( SS$_xxxxxx).
-	$DESCRIPTOR(tabnam_,"LNM$SYSTEM_TABLE"); //check shorten later
-	struct dsc$descriptor * logical_netname = &logical_netname_, * tabnam = &tabnam_; 
+    rc;
+    unsigned char eqv_name[255];
+    unsigned short 	eqv_len;
+    struct item_list_3 items[2]= { {
+            255,// output buffer length
+            LNM$_STRING, // item code
+            eqv_name, // output buffer
+            &eqv_len, // word for translated string length
+        } , {0,0,0,0}
+    };	// list terminator.
+    long exitblk[4],	// exit handler arg blk.
+         exit_status;		// exit status code( SS$_xxxxxx).
+    $DESCRIPTOR(tabnam_,"LNM$SYSTEM_TABLE"); //check shorten later
+    struct dsc$descriptor * logical_netname = &logical_netname_, * tabnam = &tabnam_;
 
 #ifndef NOKERNEL
-	// some extra temp stuff here
-	xqp_init2();
-	extern void * global_e2_vcb;
-	exttwo_init2(global_e2_vcb);
+    // some extra temp stuff here
+    xqp_init2();
+    extern void * global_e2_vcb;
+    exttwo_init2(global_e2_vcb);
 #endif
-	if (1) {
-	  int sts;
-	  $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
-	  struct dsc$descriptor * mytabnam = &mytabnam_;
-	  $DESCRIPTOR(dev_, "INET$DEVICE");
-	  $DESCRIPTOR(pty_, "INET$PTY");
-	  $DESCRIPTOR(pty_term_, "INET$PTY_TERM");
-	  struct dsc$descriptor * dev = &dev_;
-	  struct dsc$descriptor * pty = &pty_;
-	  struct dsc$descriptor * pty_term = &pty_term_;
-	  struct item_list_3 itm[2];
+    if (1)
+    {
+        int sts;
+        $DESCRIPTOR(mytabnam_, "LNM$SYSTEM_TABLE");
+        struct dsc$descriptor * mytabnam = &mytabnam_;
+        $DESCRIPTOR(dev_, "INET$DEVICE");
+        $DESCRIPTOR(pty_, "INET$PTY");
+        $DESCRIPTOR(pty_term_, "INET$PTY_TERM");
+        struct dsc$descriptor * dev = &dev_;
+        struct dsc$descriptor * pty = &pty_;
+        struct dsc$descriptor * pty_term = &pty_term_;
+        struct item_list_3 itm[2];
 #ifndef NOKERNEL
-	  lnm_init_prc(ctl$gl_pcb); // needs this extra one
+        lnm_init_prc(ctl$gl_pcb); // needs this extra one
 #endif
 
-	  itm[0].item_code=LNM$_STRING;
-	  itm[0].buflen=4;
-	  itm[0].bufaddr="ipa0";
-	  bzero(&itm[1],sizeof(struct item_list_3));
-	  sts=sys$crelnm(0,mytabnam,dev,0,itm);
+        itm[0].item_code=LNM$_STRING;
+        itm[0].buflen=4;
+        itm[0].bufaddr="ipa0";
+        bzero(&itm[1],sizeof(struct item_list_3));
+        sts=sys$crelnm(0,mytabnam,dev,0,itm);
 
-	  itm[0].item_code=LNM$_STRING;
-	  itm[0].buflen=4;
-	  itm[0].bufaddr="pna0";
-	  sts=sys$crelnm(0,mytabnam,pty,0,itm);
+        itm[0].item_code=LNM$_STRING;
+        itm[0].buflen=4;
+        itm[0].bufaddr="pna0";
+        sts=sys$crelnm(0,mytabnam,pty,0,itm);
 
-	  itm[0].item_code=LNM$_STRING;
-	  itm[0].buflen=3; // should be 2
-	  itm[0].bufaddr="tza"; // should be tz
-	  sts=sys$crelnm(0,mytabnam,pty_term,0,itm);
+        itm[0].item_code=LNM$_STRING;
+        itm[0].buflen=3; // should be 2
+        itm[0].bufaddr="tza"; // should be tz
+        sts=sys$crelnm(0,mytabnam,pty_term,0,itm);
 
-	}
-	// end of extra temp stuff
+    }
+    // end of extra temp stuff
 
 // Translate logical network name to equivalence string (myname_buf,desc=myname)
 // provide a default name in case tcp$network_name is undefined.
 
 //    Make_Zone() ;
     rc = sys$trnlnm(0,tabnam,logical_netname, 0,items);
-    if (rc == SS$_NOLOGNAM ||  !rc) {
-	myname->dsc$w_length = 14; // set the proper length since fixed string.
+    if (rc == SS$_NOLOGNAM ||  !rc)
+    {
+        myname->dsc$w_length = 14; // set the proper length since fixed string.
         myname->dsc$a_pointer = "Noname Network";
-   } else {
-	myname->dsc$w_length  = eqv_len;
+    }
+    else
+    {
+        myname->dsc$w_length  = eqv_len;
         myname->dsc$a_pointer = eqv_name;
-   }
+    }
 
 // Record starting time.
 
@@ -903,7 +973,7 @@ void Main (void) {
 
     char s[256];
     sprintf(s,"%s%s%s%s%s%s\n",IPACP_Version_String,"[",IPACP_Who_String,"/",
-		    IPACP_Date_String,"] starting");
+            IPACP_Date_String,"] starting");
     OPR$FAO(s);
 
 //    OPR$FAO("NET$_CC = !XL",NET$_CC);
@@ -913,7 +983,7 @@ void Main (void) {
 // Mount the network virtual device "IP".
 
     if (! (rc=$$KCALL(mount_ip_device)))
-	FATAL$FAO("Failed to mount virtual device IP ,RC = %x\n",rc);
+        FATAL$FAO("Failed to mount virtual device IP ,RC = %x\n",rc);
 
 // Perform tcp/acp initialization
 
@@ -924,17 +994,19 @@ void Main (void) {
     OPR$FAO("Network online");
 
 // Main processing loop....till forever or time 2 Exit.
-    do {
-	    long long nxtime ;
+    do
+    {
+        long long nxtime ;
 
-	SEG$Process_Received_Segments();
-	user$process_user_requests();
-	if (intdf < -1)
-	    OPR$FAO("Intdf went negative...");
-	nxtime = tcp$service_connections();
-	CHECK_ERRMSG_Q();
-	wait_for_something_2_do(nxtime);
-    } while (Time_2_Exit==0);
+        SEG$Process_Received_Segments();
+        user$process_user_requests();
+        if (intdf < -1)
+            OPR$FAO("Intdf went negative...");
+        nxtime = tcp$service_connections();
+        CHECK_ERRMSG_Q();
+        wait_for_something_2_do(nxtime);
+    }
+    while (Time_2_Exit==0);
 
 // Exit in an orderly fashion.
 
@@ -947,18 +1019,19 @@ void Main (void) {
 
 //SBTTL 'Set and reset process name'
 
-void INIT_PROCNAME (void) {
+void INIT_PROCNAME (void)
+{
 //
 // Set our process name to the special IPACP version name. If duplicate name
 // is found, we will punt, assuming another ACP already exists. We also save
 // our original name so that it can be restored when we exit.
 //
-  signed long
+    signed long
     rc;
-  struct item_list_3 itmlist[2] = { { MAXPRCLEN,JPI$_PRCNAM,myprcname,&myprclen}, {0,0,0,0}};
+    struct item_list_3 itmlist[2] = { { MAXPRCLEN,JPI$_PRCNAM,myprcname,&myprclen}, {0,0,0,0}};
 #if 0
     BIND
-	PROCESS_NAME = IPACP_Version_Name; // see tcp.mod file.
+    PROCESS_NAME = IPACP_Version_Name; // see tcp.mod file.
 #endif
     $DESCRIPTOR(process_name_,"IPACP");
     struct dsc$descriptor * process_name = &process_name_;
@@ -966,24 +1039,27 @@ void INIT_PROCNAME (void) {
 // First, obtain our original process name
 
     rc = sys$getjpiw(0,0,0, &itmlist, 0,0,0);
-    if ( BLISSIFNOT(rc)) {
-	myprclen = 0;
-	WARN$FAO("$GETJPIW failure for process name, RC = %x",rc);
+    if ( BLISSIFNOT(rc))
+    {
+        myprclen = 0;
+        WARN$FAO("$GETJPIW failure for process name, RC = %x",rc);
     }
 
 // Now, try to set our name as the IPACP.
 
     rc = sys$setprn(process_name);
-    if (BLISSIFNOT(rc)) {
-      if ( rc == SS$_DUPLNAM )
-	FATAL$FAO("Duplicate network ACP -- exiting");
-      else
-	FATAL$FAO("$SETPRN failure, RC = %x",rc);
+    if (BLISSIFNOT(rc))
+    {
+        if ( rc == SS$_DUPLNAM )
+            FATAL$FAO("Duplicate network ACP -- exiting");
+        else
+            FATAL$FAO("$SETPRN failure, RC = %x",rc);
     }
 }
 
-void RESET_PROCNAME (void) {
-  struct dsc$descriptor namdsc;
+void RESET_PROCNAME (void)
+{
+    struct dsc$descriptor namdsc;
 
 // Build descriptor for our original name buffer.
 
@@ -997,32 +1073,36 @@ void RESET_PROCNAME (void) {
     sys$setprn(&namdsc);
 }
 
-void ip4acp_main(void) {
-  int sts;
-  struct item_list_3 items[2];
-  int rc;
-  char eqv_name[LNM$C_NAMLENGTH];
-int eqv_len;
-$DESCRIPTOR(tabnam,"LNM$SYSTEM_TABLE"); // cut _TABLE some time
-$DESCRIPTOR(lognam,"INET$NETWORK_NAME");
-unsigned long long Start_Time;
-struct dsc$descriptor myname;
+void ip4acp_main(void)
+{
+    int sts;
+    struct item_list_3 items[2];
+    int rc;
+    char eqv_name[LNM$C_NAMLENGTH];
+    int eqv_len;
+    $DESCRIPTOR(tabnam,"LNM$SYSTEM_TABLE"); // cut _TABLE some time
+    $DESCRIPTOR(lognam,"INET$NETWORK_NAME");
+    unsigned long long Start_Time;
+    struct dsc$descriptor myname;
 
-  items[0].item_code=LNM$_STRING;
-  items[0].buflen=LNM$C_NAMLENGTH;
-  items[0].bufaddr=eqv_name;
-  items[0].retlenaddr=&eqv_len;
-  bzero(&items[1],sizeof(struct item_list_3));
+    items[0].item_code=LNM$_STRING;
+    items[0].buflen=LNM$C_NAMLENGTH;
+    items[0].bufaddr=eqv_name;
+    items[0].retlenaddr=&eqv_len;
+    bzero(&items[1],sizeof(struct item_list_3));
 
-  rc = sys$trnlnm(0,&tabnam,&lognam,0,items);
+    rc = sys$trnlnm(0,&tabnam,&lognam,0,items);
 
-  if (rc == SS$_NOLOGNAM || rc==0) {
-	myname.dsc$w_length = 14; // set the proper length since fixed string.
+    if (rc == SS$_NOLOGNAM || rc==0)
+    {
+        myname.dsc$w_length = 14; // set the proper length since fixed string.
         myname.dsc$a_pointer="Noname Network";
-   } else {
-	myname.dsc$w_length  = eqv_len;
+    }
+    else
+    {
+        myname.dsc$w_length  = eqv_len;
         myname.dsc$a_pointer = eqv_name;
-}
+    }
 
 // Record starting time.
 
@@ -1053,7 +1133,7 @@ struct dsc$descriptor myname;
 
 #if 0
     OPR$FAO(%STRING(IPACP_Version_String," [',IPACP_Who_String,'/",
-		    IPACP_Date_String,"] starting"));
+                    IPACP_Date_String,"] starting"));
 #endif
 
 //    OPR$FAO("NET$_CC = !XL",NET$_CC);
@@ -1065,7 +1145,7 @@ struct dsc$descriptor myname;
 #if 0
 //check wait check
     IF NOT(rc=$$KCALL(mount_ip_device)) THEN
-	FATAL$FAO("Failed to mount virtual device IP ,RC = %x\n",rc);
+    FATAL$FAO("Failed to mount virtual device IP ,RC = %x\n",rc);
 #endif
 
 // Perform tcp/acp initialization
@@ -1078,17 +1158,19 @@ struct dsc$descriptor myname;
 
 // Main processing loop....till forever or time 2 Exit.
 
-    do {
-	    unsigned long long nxtime;
+    do
+    {
+        unsigned long long nxtime;
 
-	SEG$Process_Received_Segments();
-	user$process_user_requests();
-	if (intdf <= -1)
-	    OPR$FAO("Intdf went negative...\n");
-	nxtime = tcp$service_connections();
-	CHECK_ERRMSG_Q();
-	wait_for_something_2_do(nxtime);
-    } while (Time_2_Exit==0);
+        SEG$Process_Received_Segments();
+        user$process_user_requests();
+        if (intdf <= -1)
+            OPR$FAO("Intdf went negative...\n");
+        nxtime = tcp$service_connections();
+        CHECK_ERRMSG_Q();
+        wait_for_something_2_do(nxtime);
+    }
+    while (Time_2_Exit==0);
 
 // Exit in an orderly fashion.
 

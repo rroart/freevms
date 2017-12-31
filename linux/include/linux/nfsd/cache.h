@@ -17,42 +17,46 @@
  * Representation of a reply cache entry. The first two members *must*
  * be hash_next and hash_prev.
  */
-struct svc_cacherep {
-	struct svc_cacherep *	c_hash_next;
-	struct svc_cacherep *	c_hash_prev;
-	struct svc_cacherep *	c_lru_next;
-	struct svc_cacherep *	c_lru_prev;
-	unsigned char		c_state,	/* unused, inprog, done */
-				c_type,		/* status, buffer */
-				c_secure : 1;	/* req came from port < 1024 */
-	struct sockaddr_in	c_addr;
-	u32			c_xid;
-	u32			c_prot;
-	u32			c_proc;
-	u32			c_vers;
-	unsigned long		c_timestamp;
-	union {
-		struct svc_buf	u_buffer;
-		u32		u_status;
-	}			c_u;
+struct svc_cacherep
+{
+    struct svc_cacherep *	c_hash_next;
+    struct svc_cacherep *	c_hash_prev;
+    struct svc_cacherep *	c_lru_next;
+    struct svc_cacherep *	c_lru_prev;
+    unsigned char		c_state,	/* unused, inprog, done */
+                  c_type,		/* status, buffer */
+                  c_secure : 1;	/* req came from port < 1024 */
+    struct sockaddr_in	c_addr;
+    u32			c_xid;
+    u32			c_prot;
+    u32			c_proc;
+    u32			c_vers;
+    unsigned long		c_timestamp;
+    union
+    {
+        struct svc_buf	u_buffer;
+        u32		u_status;
+    }			c_u;
 };
 
 #define c_replbuf		c_u.u_buffer
 #define c_replstat		c_u.u_status
 
 /* cache entry states */
-enum {
-	RC_UNUSED,
-	RC_INPROG,
-	RC_DONE
+enum
+{
+    RC_UNUSED,
+    RC_INPROG,
+    RC_DONE
 };
 
 /* return values */
-enum {
-	RC_DROPIT,
-	RC_REPLY,
-	RC_DOIT,
-	RC_INTR
+enum
+{
+    RC_DROPIT,
+    RC_REPLY,
+    RC_DOIT,
+    RC_INTR
 };
 
 /*
@@ -61,10 +65,11 @@ enum {
  * attrstat replies. Using cache entries with fixed length instead
  * of buffer pointers may be more efficient.
  */
-enum {
-	RC_NOCACHE,
-	RC_REPLSTAT,
-	RC_REPLBUFF,
+enum
+{
+    RC_NOCACHE,
+    RC_REPLSTAT,
+    RC_REPLBUFF,
 };
 
 /*

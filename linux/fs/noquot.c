@@ -11,5 +11,5 @@ int max_dquots;
 
 asmlinkage long sys_quotactl(int cmd, const char *special, int id, caddr_t addr)
 {
-	return(-ENOSYS);
+    return(-ENOSYS);
 }

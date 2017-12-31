@@ -108,7 +108,7 @@
 #define		TT$M_DS_CARRIER		0x20
 #define		TT$M_DS_RING		0x40
 #define		TT$M_DS_DSR		0x80
-	
+
 #define		TT$V_PASSALL		0x00
 #define		TT$V_NOECHO		0x01
 #define		TT$V_NOTYPEAHD		0x02
@@ -149,64 +149,69 @@
 #define		TT$V_DS_CARRIER		0x05
 #define		TT$V_DS_RING		0x06
 #define		TT$V_DS_DSR		0x07
- 
-union _ttdef {
-  struct  {
-    unsigned tt$v_passall		: 1;
-    unsigned tt$v_noecho		: 1;
-    unsigned tt$v_notypeahd		: 1;
-    unsigned tt$v_escape		: 1;
-    unsigned tt$v_hostsync		: 1;
-    unsigned tt$v_ttsync		: 1;
-    unsigned tt$v_script		: 1;
-    unsigned tt$v_lower			: 1;
-    unsigned tt$v_mechtab		: 1;
-    unsigned tt$v_wrap			: 1;
-    unsigned tt$v_crfill		: 1;
-    unsigned tt$v_lffill		: 1;
-    unsigned tt$v_scope			: 1;
-    unsigned tt$v_remote		: 1;
-    unsigned tt$v_reserved		: 1;
-    unsigned tt$v_eightbit		: 1;
-    unsigned tt$v_mbxdsabl		: 1;
-    unsigned tt$v_nobrdcst		: 1;
-    unsigned tt$v_readsync		: 1;
-    unsigned tt$v_mechform		: 1;
-    unsigned tt$v_halfdup		: 1;
-    unsigned tt$v_modem			: 1;
-    unsigned tt$v_oper			: 1;
-    unsigned ttdef$$_fill_1		: 1;
-    unsigned tt$v_page			: 8;
-  };
-  struct  {
-    unsigned ttdef$$_fill_2		: 4;
-    unsigned tt$v_altframe		: 1;
-    unsigned tt$v_altrpar		: 1;
-    unsigned tt$v_parity		: 1;
-    unsigned tt$v_odd			: 1;
-    unsigned tt$v_twostop		: 1;
-    unsigned tt$v_disparerr		: 1;
-    unsigned tt$v_altdispar		: 1;
-    unsigned tt$v_break			: 1;
-    unsigned tt$v_fill_43_		: 4;
-  };
-  struct  {
-    unsigned ttdef$$_fill_3		: 1;
-    unsigned tt$v_ds_dtr		: 1;
-    unsigned ttdef$$_fill_4		: 1;
-    unsigned tt$v_ds_sectx		: 1;
-    unsigned tt$v_ds_rts		: 1;
-    unsigned tt$v_fill_44_		: 3;
-  };
-  struct  {
-    unsigned ttdef$$_fill_5		: 3;
-    unsigned tt$v_ds_secrec		: 1;
-    unsigned tt$v_ds_cts		: 1;
-    unsigned tt$v_ds_carrier		: 1;
-    unsigned tt$v_ds_ring		: 1;
-    unsigned tt$v_ds_dsr		: 1;
-  };
+
+union _ttdef
+{
+    struct
+    {
+        unsigned tt$v_passall		: 1;
+        unsigned tt$v_noecho		: 1;
+        unsigned tt$v_notypeahd		: 1;
+        unsigned tt$v_escape		: 1;
+        unsigned tt$v_hostsync		: 1;
+        unsigned tt$v_ttsync		: 1;
+        unsigned tt$v_script		: 1;
+        unsigned tt$v_lower			: 1;
+        unsigned tt$v_mechtab		: 1;
+        unsigned tt$v_wrap			: 1;
+        unsigned tt$v_crfill		: 1;
+        unsigned tt$v_lffill		: 1;
+        unsigned tt$v_scope			: 1;
+        unsigned tt$v_remote		: 1;
+        unsigned tt$v_reserved		: 1;
+        unsigned tt$v_eightbit		: 1;
+        unsigned tt$v_mbxdsabl		: 1;
+        unsigned tt$v_nobrdcst		: 1;
+        unsigned tt$v_readsync		: 1;
+        unsigned tt$v_mechform		: 1;
+        unsigned tt$v_halfdup		: 1;
+        unsigned tt$v_modem			: 1;
+        unsigned tt$v_oper			: 1;
+        unsigned ttdef$$_fill_1		: 1;
+        unsigned tt$v_page			: 8;
+    };
+    struct
+    {
+        unsigned ttdef$$_fill_2		: 4;
+        unsigned tt$v_altframe		: 1;
+        unsigned tt$v_altrpar		: 1;
+        unsigned tt$v_parity		: 1;
+        unsigned tt$v_odd			: 1;
+        unsigned tt$v_twostop		: 1;
+        unsigned tt$v_disparerr		: 1;
+        unsigned tt$v_altdispar		: 1;
+        unsigned tt$v_break			: 1;
+        unsigned tt$v_fill_43_		: 4;
+    };
+    struct
+    {
+        unsigned ttdef$$_fill_3		: 1;
+        unsigned tt$v_ds_dtr		: 1;
+        unsigned ttdef$$_fill_4		: 1;
+        unsigned tt$v_ds_sectx		: 1;
+        unsigned tt$v_ds_rts		: 1;
+        unsigned tt$v_fill_44_		: 3;
+    };
+    struct
+    {
+        unsigned ttdef$$_fill_5		: 3;
+        unsigned tt$v_ds_secrec		: 1;
+        unsigned tt$v_ds_cts		: 1;
+        unsigned tt$v_ds_carrier		: 1;
+        unsigned tt$v_ds_ring		: 1;
+        unsigned tt$v_ds_dsr		: 1;
+    };
 };
- 
+
 #endif
- 
+

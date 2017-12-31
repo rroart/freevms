@@ -5,9 +5,10 @@
  * The i386 doesn't have a mmu context, but
  * we put the segment information here.
  */
-typedef struct { 
-	void *segments;
-	unsigned long cpuvalid;
+typedef struct
+{
+    void *segments;
+    unsigned long cpuvalid;
 } mm_context_t;
 
 #endif

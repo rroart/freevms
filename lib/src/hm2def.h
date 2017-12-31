@@ -17,7 +17,8 @@
 
 #define NO_DOLLAR
 
-struct _hm2 {
+struct _hm2
+{
     vmslong hm2$l_homelbn;
     vmslong hm2$l_alhomelbn;
     vmslong hm2$l_altidxlbn;

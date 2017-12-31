@@ -12,7 +12,10 @@
  * us to conceptually access the pud entry that this pmd is folded into
  * without casting.
  */
-typedef struct { pud_t pud; } pmd_t;
+typedef struct
+{
+    pud_t pud;
+} pmd_t;
 
 #define PMD_SHIFT	PUD_SHIFT
 #define PTRS_PER_PMD	1
@@ -24,9 +27,18 @@ typedef struct { pud_t pud; } pmd_t;
  * setup: the pmd is never bad, and a pmd always exists (as it's folded
  * into the pud entry)
  */
-static inline int pud_none(pud_t pud)		{ return 0; }
-static inline int pud_bad(pud_t pud)		{ return 0; }
-static inline int pud_present(pud_t pud)	{ return 1; }
+static inline int pud_none(pud_t pud)
+{
+    return 0;
+}
+static inline int pud_bad(pud_t pud)
+{
+    return 0;
+}
+static inline int pud_present(pud_t pud)
+{
+    return 1;
+}
 static inline void pud_clear(pud_t *pud)	{ }
 #define pmd_ERROR(pmd)				(pud_ERROR((pmd).pud))
 
@@ -40,7 +52,7 @@ static inline void pud_clear(pud_t *pud)	{ }
 
 static inline pmd_t * pmd_offset(pud_t * pud, unsigned long address)
 {
-	return (pmd_t *)pud;
+    return (pmd_t *)pud;
 }
 
 #define pmd_val(x)				(pud_val((x).pud))

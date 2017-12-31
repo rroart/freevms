@@ -22,7 +22,7 @@
  *	Andrew Allison
  *	50 Denlaw Road
  *	London, Ont
- *	Canada 
+ *	Canada
  *	N6G 3L4
  *
  */
@@ -79,17 +79,17 @@
 #include "stdint.h"
 
 /*************************************************************
- * str$round 
+ * str$round
  *
  *	Either round or truncate a string to a desired number of digits
  *
  *
  *       Format
- *       places, flags, insign,inexp, indigits, outsign,outexp,outdigits 
- *       
+ *       places, flags, insign,inexp, indigits, outsign,outexp,outdigits
+ *
  * 	Input
  *
- *	Returns	
+ *	Returns
  * 		STR$_NORMAL
  *		STR_TRU		Truncation
  *	Signal
@@ -97,90 +97,93 @@
  *		STR$_FATINTERR  Internal Error
  * 		STR$_ILLSTRCLA	Illegal string Class
  *		STR$_INSVIRMEM	Insufficient virtual memory
- *		STR$_WRONUMARG	Wrong number of arguments	
+ *		STR$_WRONUMARG	Wrong number of arguments
  */
 #define MAXSTR 		132000
 #define MAXUINT16	65536
 
 unsigned long str$round (	const 		long *tdigits,
-		      		const unsigned	long *rti,
-				const unsigned	long *asign, 
-                      		const         	long *aexp, 
-	              		const struct 	dsc$descriptor_s *adigits,
-                      		      unsigned	long *csign,
-                      				long *cexp, 
-                      		      struct 	dsc$descriptor_s *cdigits)
+                            const unsigned	long *rti,
+                            const unsigned	long *asign,
+                            const         	long *aexp,
+                            const struct 	dsc$descriptor_s *adigits,
+                            unsigned	long *csign,
+                            long *cexp,
+                            struct 	dsc$descriptor_s *cdigits)
 
 {
-char	*s1_ptr, *one_ptr, *temp_ptr, rounding_char;
-unsigned short	s1_len, one_len, new_length, temp_len;
-unsigned long status;
-struct dsc$descriptor_s one, temp_sd;
-	
-	status = STR$_NORMAL;
-	new_length = *tdigits;
+    char	*s1_ptr, *one_ptr, *temp_ptr, rounding_char;
+    unsigned short	s1_len, one_len, new_length, temp_len;
+    unsigned long status;
+    struct dsc$descriptor_s one, temp_sd;
 
-	if ( ( *asign != 0 ) && ( *asign != 1) )
-		return LIB$_INVARG;
+    status = STR$_NORMAL;
+    new_length = *tdigits;
 
-	if ( ( *csign != 0 ) && ( *csign != 1) )
-		return LIB$_INVARG;
+    if ( ( *asign != 0 ) && ( *asign != 1) )
+        return LIB$_INVARG;
 
-	if ( ( *rti != 0 ) && ( *rti != 1) )
-		return LIB$_INVARG;
+    if ( ( *csign != 0 ) && ( *csign != 1) )
+        return LIB$_INVARG;
+
+    if ( ( *rti != 0 ) && ( *rti != 1) )
+        return LIB$_INVARG;
 
 //	Create a descriptor with the string value of 1 so we can round up
-	str$$malloc_sd (&one,"1"); 
-	str$analyze_sdesc (&one, &one_len, &one_ptr);
+    str$$malloc_sd (&one,"1");
+    str$analyze_sdesc (&one, &one_len, &one_ptr);
 
 // 	Get the length of the input string
-	str$analyze_sdesc (adigits, &s1_len, &s1_ptr);
+    str$analyze_sdesc (adigits, &s1_len, &s1_ptr);
 //	Is there even enough digits to do a rounding or truncation
-	if ( s1_len <= *tdigits )
-	{
-		str$copy_dx (cdigits, adigits);	// Nope just copy to output
-	}
-	else
-	{
-		if ( ( *rti == 0 ) && ( s1_ptr[*tdigits] >= 0 ) )
-		{
-			str$analyze_sdesc (adigits,&temp_len,&temp_ptr);
+    if ( s1_len <= *tdigits )
+    {
+        str$copy_dx (cdigits, adigits);	// Nope just copy to output
+    }
+    else
+    {
+        if ( ( *rti == 0 ) && ( s1_ptr[*tdigits] >= 0 ) )
+        {
+            str$analyze_sdesc (adigits,&temp_len,&temp_ptr);
 
 // 			correct the multiplier we are changing the string length
-			if ( (*cexp) <= 0 )
-			{	(*cexp) += temp_len - *tdigits;
-			}
-			else 
-			{	(*cexp) -= temp_len - *tdigits;
-			}
-			
-			rounding_char = temp_ptr[*tdigits];
-			str$get1_dx ( &s1_len, cdigits );	//make same size
-			str$copy_dx ( cdigits, adigits);	// copy
-			str$get1_dx ( &new_length, cdigits );	// resize
-			str$$malloc_sd (&temp_sd, s1_ptr);
-			str$copy_dx (&temp_sd, cdigits);
-			str$analyze_sdesc (&temp_sd,&temp_len,&temp_ptr);
+            if ( (*cexp) <= 0 )
+            {
+                (*cexp) += temp_len - *tdigits;
+            }
+            else
+            {
+                (*cexp) -= temp_len - *tdigits;
+            }
 
-			if ( rounding_char >= '5' )
-			{	str$add	(asign, aexp, &temp_sd,	// round up
-					 asign, aexp, &one,
-					 csign, cexp, cdigits );
-			}
-		}
-		else		// Just truncate
-		{	
-			str$copy_dx ( cdigits,  adigits);
-			str$get1_dx ( &new_length, cdigits );
-			if ( (*cexp) <= 0 )
-				(*cexp) += s1_len - *tdigits;
-			else 
-				(*cexp) -= s1_len - *tdigits;
-		
-		}
-	}
+            rounding_char = temp_ptr[*tdigits];
+            str$get1_dx ( &s1_len, cdigits );	//make same size
+            str$copy_dx ( cdigits, adigits);	// copy
+            str$get1_dx ( &new_length, cdigits );	// resize
+            str$$malloc_sd (&temp_sd, s1_ptr);
+            str$copy_dx (&temp_sd, cdigits);
+            str$analyze_sdesc (&temp_sd,&temp_len,&temp_ptr);
 
-	return status;
+            if ( rounding_char >= '5' )
+            {
+                str$add	(asign, aexp, &temp_sd,	// round up
+                         asign, aexp, &one,
+                         csign, cexp, cdigits );
+            }
+        }
+        else		// Just truncate
+        {
+            str$copy_dx ( cdigits,  adigits);
+            str$get1_dx ( &new_length, cdigits );
+            if ( (*cexp) <= 0 )
+                (*cexp) += s1_len - *tdigits;
+            else
+                (*cexp) -= s1_len - *tdigits;
+
+        }
+    }
+
+    return status;
 }
 
 /*************************************************************/

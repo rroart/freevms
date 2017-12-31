@@ -79,7 +79,7 @@
 #define ARPHRD_FCAL	785		/* Fibrechannel arbitrated loop */
 #define ARPHRD_FCPL	786		/* Fibrechannel public loop	*/
 #define ARPHRD_FCFABRIC	787		/* Fibrechannel fabric		*/
-	/* 787->799 reserved for fibrechannel media types */
+/* 787->799 reserved for fibrechannel media types */
 #define ARPHRD_IEEE802_TR 800		/* Magic type ident for TR	*/
 #define ARPHRD_IEEE80211 801		/* IEEE 802.11			*/
 #define ARPHRD_IEEE80211_PRISM 802	/* IEEE 802.11 + Prism2 header  */
@@ -97,19 +97,21 @@
 
 
 /* ARP ioctl request. */
-struct arpreq {
-  struct sockaddr	arp_pa;		/* protocol address		*/
-  struct sockaddr	arp_ha;		/* hardware address		*/
-  int			arp_flags;	/* flags			*/
-  struct sockaddr       arp_netmask;    /* netmask (only for proxy arps) */
-  char			arp_dev[16];
+struct arpreq
+{
+    struct sockaddr	arp_pa;		/* protocol address		*/
+    struct sockaddr	arp_ha;		/* hardware address		*/
+    int			arp_flags;	/* flags			*/
+    struct sockaddr       arp_netmask;    /* netmask (only for proxy arps) */
+    char			arp_dev[16];
 };
 
-struct arpreq_old {
-  struct sockaddr	arp_pa;		/* protocol address		*/
-  struct sockaddr	arp_ha;		/* hardware address		*/
-  int			arp_flags;	/* flags			*/
-  struct sockaddr       arp_netmask;    /* netmask (only for proxy arps) */
+struct arpreq_old
+{
+    struct sockaddr	arp_pa;		/* protocol address		*/
+    struct sockaddr	arp_ha;		/* hardware address		*/
+    int			arp_flags;	/* flags			*/
+    struct sockaddr       arp_netmask;    /* netmask (only for proxy arps) */
 };
 
 /* ARP Flag values. */
@@ -118,7 +120,7 @@ struct arpreq_old {
 #define	ATF_PUBL	0x08		/* publish entry		*/
 #define	ATF_USETRAILERS	0x10		/* has requested trailers	*/
 #define ATF_NETMASK     0x20            /* want to use a netmask (only
-					   for proxy entries) */
+for proxy entries) */
 #define ATF_DONTPUB	0x40		/* don't answer this addresses	*/
 
 /*
@@ -127,22 +129,22 @@ struct arpreq_old {
 
 struct arphdr
 {
-	unsigned short	ar_hrd;		/* format of hardware address	*/
-	unsigned short	ar_pro;		/* format of protocol address	*/
-	unsigned char	ar_hln;		/* length of hardware address	*/
-	unsigned char	ar_pln;		/* length of protocol address	*/
-	unsigned short	ar_op;		/* ARP opcode (command)		*/
+    unsigned short	ar_hrd;		/* format of hardware address	*/
+    unsigned short	ar_pro;		/* format of protocol address	*/
+    unsigned char	ar_hln;		/* length of hardware address	*/
+    unsigned char	ar_pln;		/* length of protocol address	*/
+    unsigned short	ar_op;		/* ARP opcode (command)		*/
 
 #if 0
-	 /*
-	  *	 Ethernet looks like this : This bit is variable sized however...
-	  */
-	unsigned char		ar_sha[ETH_ALEN];	/* sender hardware address	*/
-	unsigned char		ar_sip[4];		/* sender IP address		*/
-	unsigned char		ar_tha[ETH_ALEN];	/* target hardware address	*/
-	unsigned char		ar_tip[4];		/* target IP address		*/
+    /*
+     *	 Ethernet looks like this : This bit is variable sized however...
+     */
+    unsigned char		ar_sha[ETH_ALEN];	/* sender hardware address	*/
+        unsigned char		ar_sip[4];		/* sender IP address		*/
+        unsigned char		ar_tha[ETH_ALEN];	/* target hardware address	*/
+        unsigned char		ar_tip[4];		/* target IP address		*/
 #endif
 
-};
+    };
 
 #endif	/* _LINUX_IF_ARP_H */

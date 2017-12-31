@@ -18,57 +18,59 @@
 #ifdef __KERNEL__
 
 /* Possible states of device */
-enum {
-	Lo_unbound,
-	Lo_bound,
-	Lo_rundown,
+enum
+{
+    Lo_unbound,
+    Lo_bound,
+    Lo_rundown,
 };
 
-struct loop_device {
-	int		lo_number;
-	int		lo_refcnt;
-	kdev_t		lo_device;
-	int		lo_offset;
-	int		lo_encrypt_type;
-	int		lo_encrypt_key_size;
-	int		lo_flags;
-	int		(*transfer)(struct loop_device *, int cmd,
-				    char *raw_buf, char *loop_buf, int size,
-				    int real_block);
-	char		lo_name[LO_NAME_SIZE];
-	char		lo_encrypt_key[LO_KEY_SIZE];
-	__u32           lo_init[2];
-	uid_t		lo_key_owner;	/* Who set the key */
-	int		(*ioctl)(struct loop_device *, int cmd, 
-				 unsigned long arg); 
+struct loop_device
+{
+    int		lo_number;
+    int		lo_refcnt;
+    kdev_t		lo_device;
+    int		lo_offset;
+    int		lo_encrypt_type;
+    int		lo_encrypt_key_size;
+    int		lo_flags;
+    int		(*transfer)(struct loop_device *, int cmd,
+                        char *raw_buf, char *loop_buf, int size,
+                        int real_block);
+    char		lo_name[LO_NAME_SIZE];
+    char		lo_encrypt_key[LO_KEY_SIZE];
+    __u32           lo_init[2];
+    uid_t		lo_key_owner;	/* Who set the key */
+    int		(*ioctl)(struct loop_device *, int cmd,
+                     unsigned long arg);
 
-	struct file *	lo_backing_file;
-	void		*key_data; 
-	char		key_reserved[48]; /* for use by the filter modules */
+    struct file *	lo_backing_file;
+    void		*key_data;
+    char		key_reserved[48]; /* for use by the filter modules */
 
-	int		old_gfp_mask;
+    int		old_gfp_mask;
 
-	spinlock_t		lo_lock;
-	struct buffer_head	*lo_bh;
-	struct buffer_head	*lo_bhtail;
-	int			lo_state;
-	struct semaphore	lo_sem;
-	struct semaphore	lo_ctl_mutex;
-	struct semaphore	lo_bh_mutex;
-	atomic_t		lo_pending;
+    spinlock_t		lo_lock;
+    struct buffer_head	*lo_bh;
+    struct buffer_head	*lo_bhtail;
+    int			lo_state;
+    struct semaphore	lo_sem;
+    struct semaphore	lo_ctl_mutex;
+    struct semaphore	lo_bh_mutex;
+    atomic_t		lo_pending;
 };
 
 typedef	int (* transfer_proc_t)(struct loop_device *, int cmd,
-				char *raw_buf, char *loop_buf, int size,
-				int real_block);
+                                char *raw_buf, char *loop_buf, int size,
+                                int real_block);
 
 static inline int lo_do_transfer(struct loop_device *lo, int cmd, char *rbuf,
-				 char *lbuf, int size, int rblock)
+                                 char *lbuf, int size, int rblock)
 {
-	if (!lo->transfer)
-		return 0;
+    if (!lo->transfer)
+        return 0;
 
-	return lo->transfer(lo, cmd, rbuf, lbuf, size, rblock);
+    return lo->transfer(lo, cmd, rbuf, lbuf, size, rblock);
 }
 #endif /* __KERNEL__ */
 
@@ -79,34 +81,35 @@ static inline int lo_do_transfer(struct loop_device *lo, int cmd, char *rbuf,
 #define LO_FLAGS_READ_ONLY	2
 #define LO_FLAGS_BH_REMAP	4
 
-/* 
+/*
  * Note that this structure gets the wrong offsets when directly used
  * from a glibc program, because glibc has a 32bit dev_t.
- * Prevent people from shooting in their own foot.  
+ * Prevent people from shooting in their own foot.
  */
 #if __GLIBC__ >= 2 && !defined(dev_t)
 #error "Wrong dev_t in loop.h"
-#endif 
+#endif
 
 /*
  *	This uses kdev_t because glibc currently has no appropiate
- *	conversion version for the loop ioctls. 
- * 	The situation is very unpleasant	
+ *	conversion version for the loop ioctls.
+ * 	The situation is very unpleasant
  */
 
-struct loop_info {
-	int		lo_number;	/* ioctl r/o */
-	dev_t		lo_device; 	/* ioctl r/o */
-	unsigned long	lo_inode; 	/* ioctl r/o */
-	dev_t		lo_rdevice; 	/* ioctl r/o */
-	int		lo_offset;
-	int		lo_encrypt_type;
-	int		lo_encrypt_key_size; 	/* ioctl w/o */
-	int		lo_flags;	/* ioctl r/o */
-	char		lo_name[LO_NAME_SIZE];
-	unsigned char	lo_encrypt_key[LO_KEY_SIZE]; /* ioctl w/o */
-	unsigned long	lo_init[2];
-	char		reserved[4];
+struct loop_info
+{
+    int		lo_number;	/* ioctl r/o */
+    dev_t		lo_device; 	/* ioctl r/o */
+    unsigned long	lo_inode; 	/* ioctl r/o */
+    dev_t		lo_rdevice; 	/* ioctl r/o */
+    int		lo_offset;
+    int		lo_encrypt_type;
+    int		lo_encrypt_key_size; 	/* ioctl w/o */
+    int		lo_flags;	/* ioctl r/o */
+    char		lo_name[LO_NAME_SIZE];
+    unsigned char	lo_encrypt_key[LO_KEY_SIZE]; /* ioctl w/o */
+    unsigned long	lo_init[2];
+    char		reserved[4];
 };
 
 /*
@@ -126,21 +129,22 @@ struct loop_info {
 
 #ifdef __KERNEL__
 /* Support for loadable transfer modules */
-struct loop_func_table {
-	int number; 	/* filter type */ 
-	int (*transfer)(struct loop_device *lo, int cmd, char *raw_buf,
-			char *loop_buf, int size, int real_block);
-	int (*init)(struct loop_device *, struct loop_info *); 
-	/* release is called from loop_unregister_transfer or clr_fd */
-	int (*release)(struct loop_device *); 
-	int (*ioctl)(struct loop_device *, int cmd, unsigned long arg);
-	/* lock and unlock manage the module use counts */ 
-	void (*lock)(struct loop_device *);
-	void (*unlock)(struct loop_device *);
-}; 
+struct loop_func_table
+{
+    int number; 	/* filter type */
+    int (*transfer)(struct loop_device *lo, int cmd, char *raw_buf,
+                    char *loop_buf, int size, int real_block);
+    int (*init)(struct loop_device *, struct loop_info *);
+    /* release is called from loop_unregister_transfer or clr_fd */
+    int (*release)(struct loop_device *);
+    int (*ioctl)(struct loop_device *, int cmd, unsigned long arg);
+    /* lock and unlock manage the module use counts */
+    void (*lock)(struct loop_device *);
+    void (*unlock)(struct loop_device *);
+};
 
 int  loop_register_transfer(struct loop_func_table *funcs);
-int loop_unregister_transfer(int number); 
+int loop_unregister_transfer(int number);
 
 #endif
 /*

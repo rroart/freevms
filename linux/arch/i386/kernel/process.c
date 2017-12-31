@@ -72,12 +72,12 @@ void (*pm_power_off)(void);
 
 void disable_hlt(void)
 {
-	hlt_counter++;
+    hlt_counter++;
 }
 
 void enable_hlt(void)
 {
-	hlt_counter--;
+    hlt_counter--;
 }
 
 /*
@@ -86,18 +86,19 @@ void enable_hlt(void)
  */
 void default_idle(void)
 {
-	if (current_cpu_data.hlt_works_ok && !hlt_counter) {
-		__cli();
+    if (current_cpu_data.hlt_works_ok && !hlt_counter)
+    {
+        __cli();
 #if 0
-		if (!current->need_resched)
-			safe_halt();
+        if (!current->need_resched)
+            safe_halt();
 #else
-		if (sch$gl_idle_cpus & (1 << current->pcb$l_cpu_id))
-		  safe_halt();
+        if (sch$gl_idle_cpus & (1 << current->pcb$l_cpu_id))
+            safe_halt();
 #endif
-		else
-			__sti();
-	}
+        else
+            __sti();
+    }
 }
 
 #if 0
@@ -108,23 +109,23 @@ void default_idle(void)
  */
 static void poll_idle (void)
 {
-	int oldval;
+    int oldval;
 
-	__sti();
+    __sti();
 
-	/*
-	 * Deal with another CPU just having chosen a thread to
-	 * run here:
-	 */
-	oldval = xchg(&current->need_resched, -1);
+    /*
+     * Deal with another CPU just having chosen a thread to
+     * run here:
+     */
+    oldval = xchg(&current->need_resched, -1);
 
-	if (!oldval)
-		asm volatile(
-			"2:"
-			"cmpl $-1, %0;"
-			"rep; nop;"
-			"je 2b;"
-				: :"m" (current->need_resched));
+    if (!oldval)
+        asm volatile(
+            "2:"
+            "cmpl $-1, %0;"
+            "rep; nop;"
+            "je 2b;"
+            : :"m" (current->need_resched));
 }
 #endif
 
@@ -141,64 +142,71 @@ unsigned long round_and_round;
 
 void cpu_idle (void)
 {
-	/* endless idle loop with no priority at all */
-	init_idle();
-	printk("id %x\n",current->pcb$l_pid);	
-	printk("idle %x %x %x\n",done_init_idle,current,&init_task);
-  printk("pid 0 here again%x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl); 
+    /* endless idle loop with no priority at all */
+    init_idle();
+    printk("id %x\n",current->pcb$l_pid);
+    printk("idle %x %x %x\n",done_init_idle,current,&init_task);
+    printk("pid 0 here again%x %x\n",init_task.pcb$l_astqfl,&init_task.pcb$l_astqfl);
 #if 0
-	{ int i; for(i=0;i<10000000;i++) ; }
+    {
+        int i;
+        for(i=0; i<10000000; i++) ;
+    }
 #endif
-	if (current->pcb$l_pid==0) { /* just to be sure */
-	  	  current->pcb$b_prib  = 24;
-	  	  current->pcb$b_pri   = 24;
-	  current->pcb$b_prib  = 31;
-	  current->pcb$b_pri   = 31;
-	  current->pcb$w_quant = 0;
-	} /* we might not need these settings */
+    if (current->pcb$l_pid==0)   /* just to be sure */
+    {
+        current->pcb$b_prib  = 24;
+        current->pcb$b_pri   = 24;
+        current->pcb$b_prib  = 31;
+        current->pcb$b_pri   = 31;
+        current->pcb$w_quant = 0;
+    } /* we might not need these settings */
 
-	while (1) {
-	  int myvar=0;
-		void (*idle)(void) = pm_idle;
-		//		 printk("cpu_idle\n");
-		if (!idle)
-			idle = default_idle;
-		// printk("bef while\n");
-		in_idle_while=1;
-		//		while (!current->need_resched)
-		//  idle();
-		while (sch$gl_idle_cpus & (1 << current->pcb$l_cpu_id)) {
-		  myvar++;
-		  //if (myvar>100) printk("idlingg\n");
-		  idle();
-		}
-		myvar=0;
-		//round_and_round=1;
-		//while (!current->need_resched && round_and_round++)
-		//			idle();
-		//if (!round_and_round)
-		//  printk("enough idling\n");
-		in_idle_while=0;
-		//cli();
-		//{ int i; for(i=0;i<1000000;i++) ; }
-		//sti();
-		// printk("aft while\n");
-		//schedule();
-		SOFTINT_RESCHED_VECTOR;
-		//sch$resched();
-		check_pgt_cache();
-	}
+    while (1)
+    {
+        int myvar=0;
+        void (*idle)(void) = pm_idle;
+        //		 printk("cpu_idle\n");
+        if (!idle)
+            idle = default_idle;
+        // printk("bef while\n");
+        in_idle_while=1;
+        //		while (!current->need_resched)
+        //  idle();
+        while (sch$gl_idle_cpus & (1 << current->pcb$l_cpu_id))
+        {
+            myvar++;
+            //if (myvar>100) printk("idlingg\n");
+            idle();
+        }
+        myvar=0;
+        //round_and_round=1;
+        //while (!current->need_resched && round_and_round++)
+        //			idle();
+        //if (!round_and_round)
+        //  printk("enough idling\n");
+        in_idle_while=0;
+        //cli();
+        //{ int i; for(i=0;i<1000000;i++) ; }
+        //sti();
+        // printk("aft while\n");
+        //schedule();
+        SOFTINT_RESCHED_VECTOR;
+        //sch$resched();
+        check_pgt_cache();
+    }
 }
 
 #if 0
 static int __init idle_setup (char *str)
 {
-	if (!strncmp(str, "poll", 4)) {
-		printk("using polling idle threads.\n");
-		pm_idle = poll_idle;
-	}
+    if (!strncmp(str, "poll", 4))
+    {
+        printk("using polling idle threads.\n");
+        pm_idle = poll_idle;
+    }
 
-	return 1;
+    return 1;
 }
 
 __setup("idle=", idle_setup);
@@ -215,40 +223,43 @@ static int reboot_cpu = -1;
 #endif
 static int __init reboot_setup(char *str)
 {
-	while(1) {
-		switch (*str) {
-		case 'w': /* "warm" reboot (no memory testing etc) */
-			reboot_mode = 0x1234;
-			break;
-		case 'c': /* "cold" reboot (with memory testing etc) */
-			reboot_mode = 0x0;
-			break;
-		case 'b': /* "bios" reboot by jumping through the BIOS */
-			reboot_thru_bios = 1;
-			break;
-		case 'h': /* "hard" reboot by toggling RESET and/or crashing the CPU */
-			reboot_thru_bios = 0;
-			break;
+    while(1)
+    {
+        switch (*str)
+        {
+        case 'w': /* "warm" reboot (no memory testing etc) */
+            reboot_mode = 0x1234;
+            break;
+        case 'c': /* "cold" reboot (with memory testing etc) */
+            reboot_mode = 0x0;
+            break;
+        case 'b': /* "bios" reboot by jumping through the BIOS */
+            reboot_thru_bios = 1;
+            break;
+        case 'h': /* "hard" reboot by toggling RESET and/or crashing the CPU */
+            reboot_thru_bios = 0;
+            break;
 #ifdef CONFIG_SMP
-		case 's': /* "smp" reboot by executing reset on BSP or other CPU*/
-			reboot_smp = 1;
-			if (is_digit(*(str+1))) {
-				reboot_cpu = (int) (*(str+1) - '0');
-				if (is_digit(*(str+2))) 
-					reboot_cpu = reboot_cpu*10 + (int)(*(str+2) - '0');
-			}
-				/* we will leave sorting out the final value 
-				when we are ready to reboot, since we might not
- 				have set up boot_cpu_id or smp_num_cpu */
-			break;
+        case 's': /* "smp" reboot by executing reset on BSP or other CPU*/
+            reboot_smp = 1;
+            if (is_digit(*(str+1)))
+            {
+                reboot_cpu = (int) (*(str+1) - '0');
+                if (is_digit(*(str+2)))
+                    reboot_cpu = reboot_cpu*10 + (int)(*(str+2) - '0');
+            }
+            /* we will leave sorting out the final value
+            when we are ready to reboot, since we might not
+            have set up boot_cpu_id or smp_num_cpu */
+            break;
 #endif
-		}
-		if((str = strchr(str,',')) != NULL)
-			str++;
-		else
-			break;
-	}
-	return 1;
+        }
+        if((str = strchr(str,',')) != NULL)
+            str++;
+        else
+            break;
+    }
+    return 1;
 }
 
 __setup("reboot=", reboot_setup);
@@ -263,19 +274,19 @@ __setup("reboot=", reboot_setup);
 static unsigned long long
 real_mode_gdt_entries [3] =
 {
-	0x0000000000000000ULL,	/* Null descriptor */
-	0x00009a000000ffffULL,	/* 16-bit real-mode 64k code at 0x00000000 */
-	0x000092000100ffffULL	/* 16-bit real-mode 64k data at 0x00000100 */
+    0x0000000000000000ULL,	/* Null descriptor */
+    0x00009a000000ffffULL,	/* 16-bit real-mode 64k code at 0x00000000 */
+    0x000092000100ffffULL	/* 16-bit real-mode 64k data at 0x00000100 */
 };
 
 static struct
 {
-	unsigned short       size __attribute__ ((packed));
-	unsigned long long * base __attribute__ ((packed));
+    unsigned short       size __attribute__ ((packed));
+    unsigned long long * base __attribute__ ((packed));
 }
 real_mode_gdt = { sizeof (real_mode_gdt_entries) - 1, real_mode_gdt_entries },
-  real_mode_idt = { 0x3ff, 0 },
-    no_idt = { 0, 0 };
+real_mode_idt = { 0x3ff, 0 },
+no_idt = { 0, 0 };
 
 /* This is 16-bit protected mode code to disable paging and the cache,
    switch to real mode and jump to the BIOS reset code.
@@ -298,30 +309,30 @@ real_mode_gdt = { sizeof (real_mode_gdt_entries) - 1, real_mode_gdt_entries },
 
 static unsigned char real_mode_switch [] =
 {
-	0x66, 0x0f, 0x20, 0xc0,			/*    movl  %cr0,%eax        */
-	0x66, 0x83, 0xe0, 0x11,			/*    andl  $0x00000011,%eax */
-	0x66, 0x0d, 0x00, 0x00, 0x00, 0x60,	/*    orl   $0x60000000,%eax */
-	0x66, 0x0f, 0x22, 0xc0,			/*    movl  %eax,%cr0        */
-	0x66, 0x0f, 0x22, 0xd8,			/*    movl  %eax,%cr3        */
-	0x66, 0x0f, 0x20, 0xc3,			/*    movl  %cr0,%ebx        */
-	0x66, 0x81, 0xe3, 0x00, 0x00, 0x00, 0x60,	/*    andl  $0x60000000,%ebx */
-	0x74, 0x02,				/*    jz    f                */
-	0x0f, 0x08,				/*    invd                   */
-	0x24, 0x10,				/* f: andb  $0x10,al         */
-	0x66, 0x0f, 0x22, 0xc0			/*    movl  %eax,%cr0        */
+    0x66, 0x0f, 0x20, 0xc0,			/*    movl  %cr0,%eax        */
+    0x66, 0x83, 0xe0, 0x11,			/*    andl  $0x00000011,%eax */
+    0x66, 0x0d, 0x00, 0x00, 0x00, 0x60,	/*    orl   $0x60000000,%eax */
+    0x66, 0x0f, 0x22, 0xc0,			/*    movl  %eax,%cr0        */
+    0x66, 0x0f, 0x22, 0xd8,			/*    movl  %eax,%cr3        */
+    0x66, 0x0f, 0x20, 0xc3,			/*    movl  %cr0,%ebx        */
+    0x66, 0x81, 0xe3, 0x00, 0x00, 0x00, 0x60,	/*    andl  $0x60000000,%ebx */
+    0x74, 0x02,				/*    jz    f                */
+    0x0f, 0x08,				/*    invd                   */
+    0x24, 0x10,				/* f: andb  $0x10,al         */
+    0x66, 0x0f, 0x22, 0xc0			/*    movl  %eax,%cr0        */
 };
 static unsigned char jump_to_bios [] =
 {
-	0xea, 0x00, 0x00, 0xff, 0xff		/*    ljmp  $0xffff,$0x0000  */
+    0xea, 0x00, 0x00, 0xff, 0xff		/*    ljmp  $0xffff,$0x0000  */
 };
 
 static inline void kb_wait(void)
 {
-	int i;
+    int i;
 
-	for (i=0; i<0x10000; i++)
-		if ((inb_p(0x64) & 0x02) == 0)
-			break;
+    for (i=0; i<0x10000; i++)
+        if ((inb_p(0x64) & 0x02) == 0)
+            break;
 }
 
 /*
@@ -331,148 +342,153 @@ static inline void kb_wait(void)
  */
 void machine_real_restart(unsigned char *code, int length)
 {
-	unsigned long flags;
+    unsigned long flags;
 
-	cli();
+    cli();
 
-	/* Write zero to CMOS register number 0x0f, which the BIOS POST
-	   routine will recognize as telling it to do a proper reboot.  (Well
-	   that's what this book in front of me says -- it may only apply to
-	   the Phoenix BIOS though, it's not clear).  At the same time,
-	   disable NMIs by setting the top bit in the CMOS address register,
-	   as we're about to do peculiar things to the CPU.  I'm not sure if
-	   `outb_p' is needed instead of just `outb'.  Use it to be on the
-	   safe side.  (Yes, CMOS_WRITE does outb_p's. -  Paul G.)
-	 */
+    /* Write zero to CMOS register number 0x0f, which the BIOS POST
+       routine will recognize as telling it to do a proper reboot.  (Well
+       that's what this book in front of me says -- it may only apply to
+       the Phoenix BIOS though, it's not clear).  At the same time,
+       disable NMIs by setting the top bit in the CMOS address register,
+       as we're about to do peculiar things to the CPU.  I'm not sure if
+       `outb_p' is needed instead of just `outb'.  Use it to be on the
+       safe side.  (Yes, CMOS_WRITE does outb_p's. -  Paul G.)
+     */
 
-	spin_lock_irqsave(&rtc_lock, flags);
-	CMOS_WRITE(0x00, 0x8f);
-	spin_unlock_irqrestore(&rtc_lock, flags);
+    spin_lock_irqsave(&rtc_lock, flags);
+    CMOS_WRITE(0x00, 0x8f);
+    spin_unlock_irqrestore(&rtc_lock, flags);
 
-	/* Remap the kernel at virtual address zero, as well as offset zero
-	   from the kernel segment.  This assumes the kernel segment starts at
-	   virtual address PAGE_OFFSET. */
+    /* Remap the kernel at virtual address zero, as well as offset zero
+       from the kernel segment.  This assumes the kernel segment starts at
+       virtual address PAGE_OFFSET. */
 
-	memcpy (swapper_pg_dir, swapper_pg_dir + USER_PGD_PTRS,
-		sizeof (swapper_pg_dir [0]) * KERNEL_PGD_PTRS);
+    memcpy (swapper_pg_dir, swapper_pg_dir + USER_PGD_PTRS,
+            sizeof (swapper_pg_dir [0]) * KERNEL_PGD_PTRS);
 
-	/* Make sure the first page is mapped to the start of physical memory.
-	   It is normally not mapped, to trap kernel NULL pointer dereferences. */
+    /* Make sure the first page is mapped to the start of physical memory.
+       It is normally not mapped, to trap kernel NULL pointer dereferences. */
 
-	pg0[0] = _PAGE_RW | _PAGE_PRESENT;
+    pg0[0] = _PAGE_RW | _PAGE_PRESENT;
 
-	/*
-	 * Use `swapper_pg_dir' as our page directory.
-	 */
-	asm volatile("movl %0,%%cr3": :"r" (__pa(swapper_pg_dir)));
+    /*
+     * Use `swapper_pg_dir' as our page directory.
+     */
+    asm volatile("movl %0,%%cr3": :"r" (__pa(swapper_pg_dir)));
 
-	/* Write 0x1234 to absolute memory location 0x472.  The BIOS reads
-	   this on booting to tell it to "Bypass memory test (also warm
-	   boot)".  This seems like a fairly standard thing that gets set by
-	   REBOOT.COM programs, and the previous reset routine did this
-	   too. */
+    /* Write 0x1234 to absolute memory location 0x472.  The BIOS reads
+       this on booting to tell it to "Bypass memory test (also warm
+       boot)".  This seems like a fairly standard thing that gets set by
+       REBOOT.COM programs, and the previous reset routine did this
+       too. */
 
-	*((unsigned short *)0x472) = reboot_mode;
+    *((unsigned short *)0x472) = reboot_mode;
 
-	/* For the switch to real mode, copy some code to low memory.  It has
-	   to be in the first 64k because it is running in 16-bit mode, and it
-	   has to have the same physical and virtual address, because it turns
-	   off paging.  Copy it near the end of the first page, out of the way
-	   of BIOS variables. */
+    /* For the switch to real mode, copy some code to low memory.  It has
+       to be in the first 64k because it is running in 16-bit mode, and it
+       has to have the same physical and virtual address, because it turns
+       off paging.  Copy it near the end of the first page, out of the way
+       of BIOS variables. */
 
-	memcpy ((void *) (0x1000 - sizeof (real_mode_switch) - 100),
-		real_mode_switch, sizeof (real_mode_switch));
-	memcpy ((void *) (0x1000 - 100), code, length);
+    memcpy ((void *) (0x1000 - sizeof (real_mode_switch) - 100),
+            real_mode_switch, sizeof (real_mode_switch));
+    memcpy ((void *) (0x1000 - 100), code, length);
 
-	/* Set up the IDT for real mode. */
+    /* Set up the IDT for real mode. */
 
-	__asm__ __volatile__ ("lidt %0" : : "m" (real_mode_idt));
+    __asm__ __volatile__ ("lidt %0" : : "m" (real_mode_idt));
 
-	/* Set up a GDT from which we can load segment descriptors for real
-	   mode.  The GDT is not used in real mode; it is just needed here to
-	   prepare the descriptors. */
+    /* Set up a GDT from which we can load segment descriptors for real
+       mode.  The GDT is not used in real mode; it is just needed here to
+       prepare the descriptors. */
 
-	__asm__ __volatile__ ("lgdt %0" : : "m" (real_mode_gdt));
+    __asm__ __volatile__ ("lgdt %0" : : "m" (real_mode_gdt));
 
-	/* Load the data segment registers, and thus the descriptors ready for
-	   real mode.  The base address of each segment is 0x100, 16 times the
-	   selector value being loaded here.  This is so that the segment
-	   registers don't have to be reloaded after switching to real mode:
-	   the values are consistent for real mode operation already. */
+    /* Load the data segment registers, and thus the descriptors ready for
+       real mode.  The base address of each segment is 0x100, 16 times the
+       selector value being loaded here.  This is so that the segment
+       registers don't have to be reloaded after switching to real mode:
+       the values are consistent for real mode operation already. */
 
-	__asm__ __volatile__ ("movl $0x0010,%%eax\n"
-				"\tmovl %%eax,%%ds\n"
-				"\tmovl %%eax,%%es\n"
-				"\tmovl %%eax,%%fs\n"
-				"\tmovl %%eax,%%gs\n"
-				"\tmovl %%eax,%%ss" : : : "eax");
+    __asm__ __volatile__ ("movl $0x0010,%%eax\n"
+                          "\tmovl %%eax,%%ds\n"
+                          "\tmovl %%eax,%%es\n"
+                          "\tmovl %%eax,%%fs\n"
+                          "\tmovl %%eax,%%gs\n"
+                          "\tmovl %%eax,%%ss" : : : "eax");
 
-	/* Jump to the 16-bit code that we copied earlier.  It disables paging
-	   and the cache, switches to real mode, and jumps to the BIOS reset
-	   entry point. */
+    /* Jump to the 16-bit code that we copied earlier.  It disables paging
+       and the cache, switches to real mode, and jumps to the BIOS reset
+       entry point. */
 
-	__asm__ __volatile__ ("ljmp $0x0008,%0"
-				:
-				: "i" ((void *) (0x1000 - sizeof (real_mode_switch) - 100)));
+    __asm__ __volatile__ ("ljmp $0x0008,%0"
+                          :
+                          : "i" ((void *) (0x1000 - sizeof (real_mode_switch) - 100)));
 }
 
 void machine_restart(char * __unused)
 {
 #if CONFIG_SMP
-	int cpuid;
-	
-	cpuid = GET_APIC_ID(apic_read(APIC_ID));
+    int cpuid;
 
-	if (reboot_smp) {
+    cpuid = GET_APIC_ID(apic_read(APIC_ID));
 
-		/* check to see if reboot_cpu is valid 
-		   if its not, default to the BSP */
-		if ((reboot_cpu == -1) ||  
-		      (reboot_cpu > (NR_CPUS -1))  || 
-		      !(phys_cpu_present_map & (1<<cpuid))) 
-			reboot_cpu = boot_cpu_physical_apicid;
+    if (reboot_smp)
+    {
 
-		reboot_smp = 0;  /* use this as a flag to only go through this once*/
-		/* re-run this function on the other CPUs
-		   it will fall though this section since we have 
-		   cleared reboot_smp, and do the reboot if it is the
-		   correct CPU, otherwise it halts. */
-		if (reboot_cpu != cpuid)
-			smp_call_function((void *)machine_restart , NULL, 1, 0);
-	}
+        /* check to see if reboot_cpu is valid
+           if its not, default to the BSP */
+        if ((reboot_cpu == -1) ||
+                (reboot_cpu > (NR_CPUS -1))  ||
+                !(phys_cpu_present_map & (1<<cpuid)))
+            reboot_cpu = boot_cpu_physical_apicid;
 
-	/* if reboot_cpu is still -1, then we want a tradional reboot, 
-	   and if we are not running on the reboot_cpu,, halt */
-	if ((reboot_cpu != -1) && (cpuid != reboot_cpu)) {
-		for (;;)
-		__asm__ __volatile__ ("hlt");
-	}
-	/*
-	 * Stop all CPUs and turn off local APICs and the IO-APIC, so
-	 * other OSs see a clean IRQ state.
-	 */
-	smp_send_stop();
-	disable_IO_APIC();
+        reboot_smp = 0;  /* use this as a flag to only go through this once*/
+        /* re-run this function on the other CPUs
+           it will fall though this section since we have
+           cleared reboot_smp, and do the reboot if it is the
+           correct CPU, otherwise it halts. */
+        if (reboot_cpu != cpuid)
+            smp_call_function((void *)machine_restart , NULL, 1, 0);
+    }
+
+    /* if reboot_cpu is still -1, then we want a tradional reboot,
+       and if we are not running on the reboot_cpu,, halt */
+    if ((reboot_cpu != -1) && (cpuid != reboot_cpu))
+    {
+        for (;;)
+            __asm__ __volatile__ ("hlt");
+    }
+    /*
+     * Stop all CPUs and turn off local APICs and the IO-APIC, so
+     * other OSs see a clean IRQ state.
+     */
+    smp_send_stop();
+    disable_IO_APIC();
 #endif
 
-	if(!reboot_thru_bios) {
-		/* rebooting needs to touch the page at absolute addr 0 */
-		*((unsigned short *)__va(0x472)) = reboot_mode;
-		for (;;) {
-			int i;
-			for (i=0; i<100; i++) {
-				kb_wait();
-				udelay(50);
-				outb(0xfe,0x64);         /* pulse reset low */
-				udelay(50);
-			}
-			/* That didn't work - force a triple fault.. */
-			__asm__ __volatile__("lidt %0": :"m" (no_idt));
-			__asm__ __volatile__("int3");
-		}
-	}
+    if(!reboot_thru_bios)
+    {
+        /* rebooting needs to touch the page at absolute addr 0 */
+        *((unsigned short *)__va(0x472)) = reboot_mode;
+        for (;;)
+        {
+            int i;
+            for (i=0; i<100; i++)
+            {
+                kb_wait();
+                udelay(50);
+                outb(0xfe,0x64);         /* pulse reset low */
+                udelay(50);
+            }
+            /* That didn't work - force a triple fault.. */
+            __asm__ __volatile__("lidt %0": :"m" (no_idt));
+            __asm__ __volatile__("int3");
+        }
+    }
 
-	machine_real_restart(jump_to_bios, sizeof(jump_to_bios));
+    machine_real_restart(jump_to_bios, sizeof(jump_to_bios));
 }
 
 void machine_halt(void)
@@ -481,41 +497,41 @@ void machine_halt(void)
 
 void machine_power_off(void)
 {
-	if (pm_power_off)
-		pm_power_off();
+    if (pm_power_off)
+        pm_power_off();
 }
 
 extern void show_trace(unsigned long* esp);
 
 void show_regs(struct pt_regs * regs)
 {
-	unsigned long cr0 = 0L, cr2 = 0L, cr3 = 0L, cr4 = 0L;
+    unsigned long cr0 = 0L, cr2 = 0L, cr3 = 0L, cr4 = 0L;
 
-	printk(KERN_EMERG "\n");
-	printk(KERN_EMERG "Pid: %d, comm: %20s\n", current->pcb$l_pid, current->pcb$t_lname);
-	printk(KERN_EMERG "EIP: %04x:[<%08lx>] CPU: %d",0xffff & regs->xcs,regs->eip, smp_processor_id());
-	if (regs->xcs & 3)
-		printk(KERN_EMERG " ESP: %04x:%08lx",0xffff & regs->xss,regs->esp);
-	printk(KERN_EMERG " EFLAGS: %08lx    %s\n",regs->eflags, print_tainted());
-	printk(KERN_EMERG "EAX: %08lx EBX: %08lx ECX: %08lx EDX: %08lx\n",
-		regs->eax,regs->ebx,regs->ecx,regs->edx);
-	printk(KERN_EMERG "ESI: %08lx EDI: %08lx EBP: %08lx",
-		regs->esi, regs->edi, regs->ebp);
-	printk(KERN_EMERG " DS: %04x ES: %04x\n",
-		0xffff & regs->xds,0xffff & regs->xes);
+    printk(KERN_EMERG "\n");
+    printk(KERN_EMERG "Pid: %d, comm: %20s\n", current->pcb$l_pid, current->pcb$t_lname);
+    printk(KERN_EMERG "EIP: %04x:[<%08lx>] CPU: %d",0xffff & regs->xcs,regs->eip, smp_processor_id());
+    if (regs->xcs & 3)
+        printk(KERN_EMERG " ESP: %04x:%08lx",0xffff & regs->xss,regs->esp);
+    printk(KERN_EMERG " EFLAGS: %08lx    %s\n",regs->eflags, print_tainted());
+    printk(KERN_EMERG "EAX: %08lx EBX: %08lx ECX: %08lx EDX: %08lx\n",
+           regs->eax,regs->ebx,regs->ecx,regs->edx);
+    printk(KERN_EMERG "ESI: %08lx EDI: %08lx EBP: %08lx",
+           regs->esi, regs->edi, regs->ebp);
+    printk(KERN_EMERG " DS: %04x ES: %04x\n",
+           0xffff & regs->xds,0xffff & regs->xes);
 
-	__asm__("movl %%cr0, %0": "=r" (cr0));
-	__asm__("movl %%cr2, %0": "=r" (cr2));
-	__asm__("movl %%cr3, %0": "=r" (cr3));
-	/* This could fault if %cr4 does not exist */
-	__asm__("1: movl %%cr4, %0		\n"
-		"2:				\n"
-		".section __ex_table,\"a\"	\n"
-		".long 1b,2b			\n"
-		".previous			\n"
-		: "=r" (cr4): "0" (0));
-	printk(KERN_EMERG "CR0: %08lx CR2: %08lx CR3: %08lx CR4: %08lx\n", cr0, cr2, cr3, cr4);
-	show_trace(&regs->esp);
+    __asm__("movl %%cr0, %0": "=r" (cr0));
+    __asm__("movl %%cr2, %0": "=r" (cr2));
+    __asm__("movl %%cr3, %0": "=r" (cr3));
+    /* This could fault if %cr4 does not exist */
+    __asm__("1: movl %%cr4, %0		\n"
+            "2:				\n"
+            ".section __ex_table,\"a\"	\n"
+            ".long 1b,2b			\n"
+            ".previous			\n"
+            : "=r" (cr4): "0" (0));
+    printk(KERN_EMERG "CR0: %08lx CR2: %08lx CR3: %08lx CR4: %08lx\n", cr0, cr2, cr3, cr4);
+    show_trace(&regs->esp);
 }
 
 /*
@@ -523,16 +539,17 @@ void show_regs(struct pt_regs * regs)
  */
 void release_segments(struct mm_struct *mm)
 {
-	void * ldt = mm->context.segments;
+    void * ldt = mm->context.segments;
 
-	/*
-	 * free the LDT
-	 */
-	if (ldt) {
-		mm->context.segments = NULL;
-		clear_LDT();
-		vfree(ldt);
-	}
+    /*
+     * free the LDT
+     */
+    if (ldt)
+    {
+        mm->context.segments = NULL;
+        clear_LDT();
+        vfree(ldt);
+    }
 }
 
 /*
@@ -540,28 +557,28 @@ void release_segments(struct mm_struct *mm)
  */
 int kernel_thread(int (*fn)(void *), void * arg, unsigned long flags)
 {
-	long retval, d0;
+    long retval, d0;
 
-	__asm__ __volatile__(
-		"movl %%esp,%%esi\n\t"
-		"int $0x80\n\t"		/* Linux/i386 system call */
-		"cmpl %%esp,%%esi\n\t"	/* child or parent? */
-		"je 1f\n\t"		/* parent - jump */
-		/* Load the argument into eax, and push it.  That way, it does
-		 * not matter whether the called function is compiled with
-		 * -mregparm or not.  */
-		"movl %4,%%eax\n\t"
-		"pushl %%eax\n\t"		
-		"call *%5\n\t"		/* call fn */
-		"movl %3,%0\n\t"	/* exit */
-		"int $0x80\n"
-		"1:\t"
-		:"=&a" (retval), "=&S" (d0)
-		:"0" (__NR_clone), "i" (__NR_exit),
-		 "r" (arg), "r" (fn),
-		"b" (flags | 0x00010000 /*| CLONE_VM*/)
-		: "memory");
-	return retval;
+    __asm__ __volatile__(
+        "movl %%esp,%%esi\n\t"
+        "int $0x80\n\t"		/* Linux/i386 system call */
+        "cmpl %%esp,%%esi\n\t"	/* child or parent? */
+        "je 1f\n\t"		/* parent - jump */
+        /* Load the argument into eax, and push it.  That way, it does
+         * not matter whether the called function is compiled with
+         * -mregparm or not.  */
+        "movl %4,%%eax\n\t"
+        "pushl %%eax\n\t"
+        "call *%5\n\t"		/* call fn */
+        "movl %3,%0\n\t"	/* exit */
+        "int $0x80\n"
+        "1:\t"
+        :"=&a" (retval), "=&S" (d0)
+        :"0" (__NR_clone), "i" (__NR_exit),
+        "r" (arg), "r" (fn),
+        "b" (flags | 0x00010000 /*| CLONE_VM*/)
+        : "memory");
+    return retval;
 }
 
 /*
@@ -569,35 +586,37 @@ int kernel_thread(int (*fn)(void *), void * arg, unsigned long flags)
  */
 void exit_thread(void)
 {
-	/* nothing to do ... */
+    /* nothing to do ... */
 }
 
 void flush_thread(void)
 {
-	struct task_struct *tsk = current;
+    struct task_struct *tsk = current;
 
-	memset(tsk->thread.debugreg, 0, sizeof(unsigned long)*8);
-	/*
-	 * Forget coprocessor state..
-	 */
-	clear_fpu(tsk);
-	tsk->used_math = 0;
+    memset(tsk->thread.debugreg, 0, sizeof(unsigned long)*8);
+    /*
+     * Forget coprocessor state..
+     */
+    clear_fpu(tsk);
+    tsk->used_math = 0;
 }
 
 void release_thread(struct task_struct *dead_task)
 {
-	if (dead_task->mm) {
-		void * ldt = dead_task->mm->context.segments;
+    if (dead_task->mm)
+    {
+        void * ldt = dead_task->mm->context.segments;
 
-		// temporary debugging check
-		if (ldt) {
-			printk("WARNING: dead process %8s still has LDT? <%p>\n",
-					dead_task->pcb$t_lname, ldt);
-			BUG();
-		}
-	}
+        // temporary debugging check
+        if (ldt)
+        {
+            printk("WARNING: dead process %8s still has LDT? <%p>\n",
+                   dead_task->pcb$t_lname, ldt);
+            BUG();
+        }
+    }
 
-	release_x86_irqs(dead_task);
+    release_x86_irqs(dead_task);
 }
 
 /*
@@ -606,23 +625,24 @@ void release_thread(struct task_struct *dead_task)
  */
 void copy_segments(struct task_struct *p, struct mm_struct *new_mm)
 {
-	struct mm_struct * old_mm;
-	void *old_ldt, *ldt;
+    struct mm_struct * old_mm;
+    void *old_ldt, *ldt;
 
-	ldt = NULL;
-	old_mm = current->mm;
-	if (old_mm && (old_ldt = old_mm->context.segments) != NULL) {
-		/*
-		 * Completely new LDT, we initialize it from the parent:
-		 */
-		ldt = vmalloc(LDT_ENTRIES*LDT_ENTRY_SIZE);
-		if (!ldt)
-			printk(KERN_WARNING "ldt allocation failed\n");
-		else
-			memcpy(ldt, old_ldt, LDT_ENTRIES*LDT_ENTRY_SIZE);
-	}
-	new_mm->context.segments = ldt;
-	new_mm->context.cpuvalid = ~0UL;	/* valid on all CPU's - they can't have stale data */
+    ldt = NULL;
+    old_mm = current->mm;
+    if (old_mm && (old_ldt = old_mm->context.segments) != NULL)
+    {
+        /*
+         * Completely new LDT, we initialize it from the parent:
+         */
+        ldt = vmalloc(LDT_ENTRIES*LDT_ENTRY_SIZE);
+        if (!ldt)
+            printk(KERN_WARNING "ldt allocation failed\n");
+        else
+            memcpy(ldt, old_ldt, LDT_ENTRIES*LDT_ENTRY_SIZE);
+    }
+    new_mm->context.segments = ldt;
+    new_mm->context.cpuvalid = ~0UL;	/* valid on all CPU's - they can't have stale data */
 }
 
 /*
@@ -635,63 +655,63 @@ void copy_segments(struct task_struct *p, struct mm_struct *new_mm)
 	asm volatile("mov %%" #seg ",%0":"=rm" (value))
 
 int copy_thread(int nr, unsigned long clone_flags, unsigned long esp,
-	unsigned long unused,
-	struct task_struct * p, struct pt_regs * regs)
+                unsigned long unused,
+                struct task_struct * p, struct pt_regs * regs)
 {
-	struct pt_regs * childregs;
+    struct pt_regs * childregs;
 
-	childregs = ((struct pt_regs *) (THREAD_SIZE + (unsigned long) p)) - 1;
-	struct_cpy(childregs, regs);
-	childregs->eax = 0;
-	childregs->esp = esp;
+    childregs = ((struct pt_regs *) (THREAD_SIZE + (unsigned long) p)) - 1;
+    struct_cpy(childregs, regs);
+    childregs->eax = 0;
+    childregs->esp = esp;
 
-	p->thread.esp = (unsigned long) childregs;
-	p->thread.esp0 = (unsigned long) (childregs+1);
-	p->ipr_sp[1] = 0x7ff90000; // PAL
-	p->ipr_sp[2] = 0x7ff80000; // PAL
+    p->thread.esp = (unsigned long) childregs;
+    p->thread.esp0 = (unsigned long) (childregs+1);
+    p->ipr_sp[1] = 0x7ff90000; // PAL
+    p->ipr_sp[2] = 0x7ff80000; // PAL
 
-	p->thread.eip = (unsigned long) ret_from_fork;
+    p->thread.eip = (unsigned long) ret_from_fork;
 
-	savesegment(fs,p->thread.fs);
-	savesegment(gs,p->thread.gs);
+    savesegment(fs,p->thread.fs);
+    savesegment(gs,p->thread.gs);
 
-	unlazy_fpu(current);
-	struct_cpy(&p->thread.i387, &current->thread.i387);
+    unlazy_fpu(current);
+    struct_cpy(&p->thread.i387, &current->thread.i387);
 
-	return 0;
+    return 0;
 }
 
 int exe$procstrt(struct _pcb * p);
 
 int new_thread(int nr, unsigned long clone_flags, unsigned long esp,
-	unsigned long unused,
-	struct task_struct * p, struct pt_regs * regs)
+               unsigned long unused,
+               struct task_struct * p, struct pt_regs * regs)
 {
-	struct pt_regs * childregs;
+    struct pt_regs * childregs;
 
-	childregs = ((struct pt_regs *) (THREAD_SIZE + (unsigned long) p)) - 1;
+    childregs = ((struct pt_regs *) (THREAD_SIZE + (unsigned long) p)) - 1;
 #if 0
-	struct_cpy(childregs, regs);
+    struct_cpy(childregs, regs);
 #else
-	memset(childregs,0,sizeof(*childregs));
+    memset(childregs,0,sizeof(*childregs));
 #endif
-	childregs->eax = 0;
-	childregs->esp = esp;
+    childregs->eax = 0;
+    childregs->esp = esp;
 
-	p->thread.esp = (unsigned long) childregs;
-	p->thread.esp0 = (unsigned long) (childregs+1);
-	p->ipr_sp[1] = 0x7ff90000; // PAL
-	p->ipr_sp[2] = 0x7ff80000; // PAL
+    p->thread.esp = (unsigned long) childregs;
+    p->thread.esp0 = (unsigned long) (childregs+1);
+    p->ipr_sp[1] = 0x7ff90000; // PAL
+    p->ipr_sp[2] = 0x7ff80000; // PAL
 
-	p->thread.eip = (unsigned long) exe$procstrt; // or like ret_from_fork;
+    p->thread.eip = (unsigned long) exe$procstrt; // or like ret_from_fork;
 
-	savesegment(fs,p->thread.fs);
-	savesegment(gs,p->thread.gs);
+    savesegment(fs,p->thread.fs);
+    savesegment(gs,p->thread.gs);
 
-	unlazy_fpu(current);
-	struct_cpy(&p->thread.i387, &current->thread.i387);
+    unlazy_fpu(current);
+    struct_cpy(&p->thread.i387, &current->thread.i387);
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -699,41 +719,41 @@ int new_thread(int nr, unsigned long clone_flags, unsigned long esp,
  */
 void dump_thread(struct pt_regs * regs, struct user * dump)
 {
-	int i;
+    int i;
 
-/* changed the size calculations - should hopefully work better. lbt */
-	dump->magic = CMAGIC;
-	dump->start_code = 0;
-	dump->start_stack = regs->esp & ~(PAGE_SIZE - 1);
-	dump->u_tsize = ((unsigned long) current->mm->end_code) >> PAGE_SHIFT;
-	dump->u_dsize = ((unsigned long) (current->mm->brk + (PAGE_SIZE-1))) >> PAGE_SHIFT;
-	dump->u_dsize -= dump->u_tsize;
-	dump->u_ssize = 0;
-	for (i = 0; i < 8; i++)
-		dump->u_debugreg[i] = current->thread.debugreg[i];  
+    /* changed the size calculations - should hopefully work better. lbt */
+    dump->magic = CMAGIC;
+    dump->start_code = 0;
+    dump->start_stack = regs->esp & ~(PAGE_SIZE - 1);
+    dump->u_tsize = ((unsigned long) current->mm->end_code) >> PAGE_SHIFT;
+    dump->u_dsize = ((unsigned long) (current->mm->brk + (PAGE_SIZE-1))) >> PAGE_SHIFT;
+    dump->u_dsize -= dump->u_tsize;
+    dump->u_ssize = 0;
+    for (i = 0; i < 8; i++)
+        dump->u_debugreg[i] = current->thread.debugreg[i];
 
-	if (dump->start_stack < TASK_SIZE)
-		dump->u_ssize = ((unsigned long) (TASK_SIZE - dump->start_stack)) >> PAGE_SHIFT;
+    if (dump->start_stack < TASK_SIZE)
+        dump->u_ssize = ((unsigned long) (TASK_SIZE - dump->start_stack)) >> PAGE_SHIFT;
 
-	dump->regs.ebx = regs->ebx;
-	dump->regs.ecx = regs->ecx;
-	dump->regs.edx = regs->edx;
-	dump->regs.esi = regs->esi;
-	dump->regs.edi = regs->edi;
-	dump->regs.ebp = regs->ebp;
-	dump->regs.eax = regs->eax;
-	dump->regs.ds = regs->xds;
-	dump->regs.es = regs->xes;
-	savesegment(fs,dump->regs.fs);
-	savesegment(gs,dump->regs.gs);
-	dump->regs.orig_eax = regs->orig_eax;
-	dump->regs.eip = regs->eip;
-	dump->regs.cs = regs->xcs;
-	dump->regs.eflags = regs->eflags;
-	dump->regs.esp = regs->esp;
-	dump->regs.ss = regs->xss;
+    dump->regs.ebx = regs->ebx;
+    dump->regs.ecx = regs->ecx;
+    dump->regs.edx = regs->edx;
+    dump->regs.esi = regs->esi;
+    dump->regs.edi = regs->edi;
+    dump->regs.ebp = regs->ebp;
+    dump->regs.eax = regs->eax;
+    dump->regs.ds = regs->xds;
+    dump->regs.es = regs->xes;
+    savesegment(fs,dump->regs.fs);
+    savesegment(gs,dump->regs.gs);
+    dump->regs.orig_eax = regs->orig_eax;
+    dump->regs.eip = regs->eip;
+    dump->regs.cs = regs->xcs;
+    dump->regs.eflags = regs->eflags;
+    dump->regs.esp = regs->esp;
+    dump->regs.ss = regs->xss;
 
-	dump->u_fpvalid = dump_fpu (regs, &dump->i387);
+    dump->u_fpvalid = dump_fpu (regs, &dump->i387);
 }
 
 /*
@@ -769,85 +789,89 @@ void dump_thread(struct pt_regs * regs, struct user * dump)
  */
 void fastcall __switch_to(struct task_struct *prev_p, struct task_struct *next_p)
 {
-	struct thread_struct *prev = &prev_p->thread,
-				 *next = &next_p->thread;
-	struct tss_struct *tss = init_tss + smp_processor_id();
+    struct thread_struct *prev = &prev_p->thread,
+                                  *next = &next_p->thread;
+struct tss_struct *tss = init_tss + smp_processor_id();
 
-	unlazy_fpu(prev_p);
+    unlazy_fpu(prev_p);
 
-	prev->esp0 = tss->esp0; // PAL
-	/*
-	 * Reload esp0, LDT and the page table pointer:
-	 */
-	tss->esp0 = next->esp0;
-	tss->esp1 = next_p->ipr_sp[1]; // PAL
-	tss->esp2 = next_p->ipr_sp[2]; // PAL
+    prev->esp0 = tss->esp0; // PAL
+    /*
+     * Reload esp0, LDT and the page table pointer:
+     */
+    tss->esp0 = next->esp0;
+    tss->esp1 = next_p->ipr_sp[1]; // PAL
+    tss->esp2 = next_p->ipr_sp[2]; // PAL
 
-	/*
-	 * Save away %fs and %gs. No need to save %es and %ds, as
-	 * those are always kernel segments while inside the kernel.
-	 */
-	asm volatile("mov %%fs,%0":"=rm" (*(int *)&prev->fs));
-	asm volatile("mov %%gs,%0":"=rm" (*(int *)&prev->gs));
+    /*
+     * Save away %fs and %gs. No need to save %es and %ds, as
+     * those are always kernel segments while inside the kernel.
+     */
+    asm volatile("mov %%fs,%0":"=rm" (*(int *)&prev->fs));
+    asm volatile("mov %%gs,%0":"=rm" (*(int *)&prev->gs));
 
-	/*
-	 * Restore %fs and %gs.
-	 */
-	loadsegment(fs, next->fs);
-	loadsegment(gs, next->gs);
+    /*
+     * Restore %fs and %gs.
+     */
+    loadsegment(fs, next->fs);
+    loadsegment(gs, next->gs);
 
-	/*
-	 * Now maybe reload the debug registers
-	 */
-	if (next->debugreg[7]){
-		loaddebug(next, 0);
-		loaddebug(next, 1);
-		loaddebug(next, 2);
-		loaddebug(next, 3);
-		/* no 4 and 5 */
-		loaddebug(next, 6);
-		loaddebug(next, 7);
-	}
+    /*
+     * Now maybe reload the debug registers
+     */
+    if (next->debugreg[7])
+    {
+        loaddebug(next, 0);
+        loaddebug(next, 1);
+        loaddebug(next, 2);
+        loaddebug(next, 3);
+        /* no 4 and 5 */
+        loaddebug(next, 6);
+        loaddebug(next, 7);
+    }
 
-	if (prev->ioperm || next->ioperm) {
-		if (next->ioperm) {
-			/*
-			 * 4 cachelines copy ... not good, but not that
-			 * bad either. Anyone got something better?
-			 * This only affects processes which use ioperm().
-			 * [Putting the TSSs into 4k-tlb mapped regions
-			 * and playing VM tricks to switch the IO bitmap
-			 * is not really acceptable.]
-			 */
-			memcpy(tss->io_bitmap, next->io_bitmap,
-				 IO_BITMAP_SIZE*sizeof(unsigned long));
-			tss->bitmap = IO_BITMAP_OFFSET;
-		} else
-			/*
-			 * a bitmap offset pointing outside of the TSS limit
-			 * causes a nicely controllable SIGSEGV if a process
-			 * tries to use a port IO instruction. The first
-			 * sys_ioperm() call sets up the bitmap properly.
-			 */
-			tss->bitmap = INVALID_IO_BITMAP_OFFSET;
-	}
+    if (prev->ioperm || next->ioperm)
+    {
+        if (next->ioperm)
+        {
+            /*
+             * 4 cachelines copy ... not good, but not that
+             * bad either. Anyone got something better?
+             * This only affects processes which use ioperm().
+             * [Putting the TSSs into 4k-tlb mapped regions
+             * and playing VM tricks to switch the IO bitmap
+             * is not really acceptable.]
+             */
+            memcpy(tss->io_bitmap, next->io_bitmap,
+                   IO_BITMAP_SIZE*sizeof(unsigned long));
+            tss->bitmap = IO_BITMAP_OFFSET;
+        }
+        else
+            /*
+             * a bitmap offset pointing outside of the TSS limit
+             * causes a nicely controllable SIGSEGV if a process
+             * tries to use a port IO instruction. The first
+             * sys_ioperm() call sets up the bitmap properly.
+             */
+            tss->bitmap = INVALID_IO_BITMAP_OFFSET;
+    }
 }
 
 asmlinkage int sys_fork(struct pt_regs regs)
 {
-	return do_fork(SIGCHLD, regs.esp, &regs, 0);
+    return do_fork(SIGCHLD, regs.esp, &regs, 0);
 }
 
 asmlinkage int sys_clone(struct pt_regs regs)
 {
-	unsigned long clone_flags;
-	unsigned long newsp;
+    unsigned long clone_flags;
+    unsigned long newsp;
 
-	clone_flags = regs.ebx;
-	newsp = regs.ecx;
-	if (!newsp)
-		newsp = regs.esp;
-	return do_fork(clone_flags, newsp, &regs, 0);
+    clone_flags = regs.ebx;
+    newsp = regs.ecx;
+    if (!newsp)
+        newsp = regs.esp;
+    return do_fork(clone_flags, newsp, &regs, 0);
 }
 
 /*
@@ -862,7 +886,7 @@ asmlinkage int sys_clone(struct pt_regs regs)
  */
 asmlinkage int sys_vfork(struct pt_regs regs)
 {
-	return do_fork(CLONE_VFORK | CLONE_VM | SIGCHLD, regs.esp, &regs, 0);
+    return do_fork(CLONE_VFORK | CLONE_VM | SIGCHLD, regs.esp, &regs, 0);
 }
 
 /*
@@ -870,19 +894,19 @@ asmlinkage int sys_vfork(struct pt_regs regs)
  */
 asmlinkage int sys_execve(struct pt_regs regs)
 {
-	int error;
-	char * filename;
+    int error;
+    char * filename;
 
-	filename = getname((char *) regs.ebx);
-	error = PTR_ERR(filename);
-	if (IS_ERR(filename))
-		goto out;
-	error = do_execve(filename, (char **) regs.ecx, (char **) regs.edx, &regs);
-	if (error == 0)
-		current->ptrace &= ~PT_DTRACE;
-	putname(filename);
+    filename = getname((char *) regs.ebx);
+    error = PTR_ERR(filename);
+    if (IS_ERR(filename))
+        goto out;
+    error = do_execve(filename, (char **) regs.ecx, (char **) regs.edx, &regs);
+    if (error == 0)
+        current->ptrace &= ~PT_DTRACE;
+    putname(filename);
 out:
-	return error;
+    return error;
 }
 
 /*
@@ -895,26 +919,28 @@ extern void scheduling_functions_end_here(void);
 
 unsigned long get_wchan(struct task_struct *p)
 {
-	unsigned long ebp, esp, eip;
-	unsigned long stack_page;
-	int count = 0;
-	if (!p || p == current || p->state == TASK_RUNNING)
-		return 0;
-	stack_page = (unsigned long)p;
-	esp = p->thread.esp;
-	if (!stack_page || esp < stack_page || esp > 8188+stack_page)
-		return 0;
-	/* include/asm-i386/system.h:switch_to() pushes ebp last. */
-	ebp = *(unsigned long *) esp;
-	do {
-		if (ebp < stack_page || ebp > 8184+stack_page)
-			return 0;
-		eip = *(unsigned long *) (ebp+4);
-		if (eip < first_sched || eip >= last_sched)
-			return eip;
-		ebp = *(unsigned long *) ebp;
-	} while (count++ < 16);
-	return 0;
+    unsigned long ebp, esp, eip;
+    unsigned long stack_page;
+    int count = 0;
+    if (!p || p == current || p->state == TASK_RUNNING)
+        return 0;
+    stack_page = (unsigned long)p;
+    esp = p->thread.esp;
+    if (!stack_page || esp < stack_page || esp > 8188+stack_page)
+        return 0;
+    /* include/asm-i386/system.h:switch_to() pushes ebp last. */
+    ebp = *(unsigned long *) esp;
+    do
+    {
+        if (ebp < stack_page || ebp > 8184+stack_page)
+            return 0;
+        eip = *(unsigned long *) (ebp+4);
+        if (eip < first_sched || eip >= last_sched)
+            return eip;
+        ebp = *(unsigned long *) ebp;
+    }
+    while (count++ < 16);
+    return 0;
 }
 #undef last_sched
 #undef first_sched

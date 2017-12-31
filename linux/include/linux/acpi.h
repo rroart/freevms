@@ -31,20 +31,22 @@
 /*
  * Device states
  */
-typedef enum {
-	ACPI_D0, /* fully-on */
-	ACPI_D1, /* partial-on */
-	ACPI_D2, /* partial-on */
-	ACPI_D3, /* fully-off */
+typedef enum
+{
+    ACPI_D0, /* fully-on */
+    ACPI_D1, /* partial-on */
+    ACPI_D2, /* partial-on */
+    ACPI_D3, /* fully-off */
 } acpi_dstate_t;
 
-typedef enum {
-	ACPI_S0, /* working state */
-	ACPI_S1, /* power-on suspend */
-	ACPI_S2, /* suspend to ram, with devices */
-	ACPI_S3, /* suspend to ram */
-	ACPI_S4, /* suspend to disk */
-	ACPI_S5, /* soft-off */
+typedef enum
+{
+    ACPI_S0, /* working state */
+    ACPI_S1, /* power-on suspend */
+    ACPI_S2, /* suspend to ram, with devices */
+    ACPI_S3, /* suspend to ram */
+    ACPI_S4, /* suspend to disk */
+    ACPI_S5, /* soft-off */
 } acpi_sstate_t;
 
 /* RSDP location */
@@ -130,36 +132,36 @@ typedef enum {
 
 enum
 {
-	CTL_ACPI = 10
+    CTL_ACPI = 10
 };
 
 enum
 {
-	ACPI_FADT = 1,
-	ACPI_DSDT,
-	ACPI_PM1_ENABLE,
-	ACPI_GPE_ENABLE,
-	ACPI_GPE_LEVEL,
-	ACPI_EVENT,
-	ACPI_P_BLK,
-	ACPI_ENTER_LVL2_LAT,
-	ACPI_ENTER_LVL3_LAT,
-	ACPI_P_LVL2_LAT,
-	ACPI_P_LVL3_LAT,
-	ACPI_C1_TIME,
-	ACPI_C2_TIME,
-	ACPI_C3_TIME,
-	ACPI_C1_COUNT,
-	ACPI_C2_COUNT,
-	ACPI_C3_COUNT,
-	ACPI_S0_SLP_TYP,
-	ACPI_S1_SLP_TYP,
-	ACPI_S5_SLP_TYP,
-	ACPI_SLEEP,
-	ACPI_FACS,
-	ACPI_XSDT,
-	ACPI_PMTIMER,
-	ACPI_BATT,
+    ACPI_FADT = 1,
+    ACPI_DSDT,
+    ACPI_PM1_ENABLE,
+    ACPI_GPE_ENABLE,
+    ACPI_GPE_LEVEL,
+    ACPI_EVENT,
+    ACPI_P_BLK,
+    ACPI_ENTER_LVL2_LAT,
+    ACPI_ENTER_LVL3_LAT,
+    ACPI_P_LVL2_LAT,
+    ACPI_P_LVL3_LAT,
+    ACPI_C1_TIME,
+    ACPI_C2_TIME,
+    ACPI_C3_TIME,
+    ACPI_C1_COUNT,
+    ACPI_C2_COUNT,
+    ACPI_C3_COUNT,
+    ACPI_S0_SLP_TYP,
+    ACPI_S1_SLP_TYP,
+    ACPI_S5_SLP_TYP,
+    ACPI_SLEEP,
+    ACPI_FACS,
+    ACPI_XSDT,
+    ACPI_PMTIMER,
+    ACPI_BATT,
 };
 
 #define ACPI_SLP_TYP_DISABLED	(~0UL)

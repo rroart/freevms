@@ -12,18 +12,18 @@
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or 
+ * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- * 
+ *
  * Should you need to contact me, the author, you can do so either by
  * e-mail - mail your message to <vojtech@suse.cz>, or by paper mail:
  * Vojtech Pavlik, Ucitelska 1576, Prague 8, 182 00 Czech Republic
@@ -46,11 +46,12 @@
 #define JS_EVENT_AXIS		0x02	/* joystick moved */
 #define JS_EVENT_INIT		0x80	/* initial state of device */
 
-struct js_event {
-	__u32 time;	/* event timestamp in milliseconds */
-	__s16 value;	/* value */
-	__u8 type;	/* event type */
-	__u8 number;	/* axis/button number */
+struct js_event
+{
+    __u32 time;	/* event timestamp in milliseconds */
+    __s16 value;	/* value */
+    __u8 type;	/* event type */
+    __u8 number;	/* axis/button number */
 };
 
 /*
@@ -78,10 +79,11 @@ struct js_event {
 #define JS_CORR_NONE		0x00	/* returns raw values */
 #define JS_CORR_BROKEN		0x01	/* broken line */
 
-struct js_corr {
-	__s32 coef[8];
-	__s16 prec;
-	__u16 type;
+struct js_corr
+{
+    __s32 coef[8];
+    __s16 prec;
+    __u16 type;
 };
 
 /*
@@ -110,19 +112,21 @@ struct js_corr {
 #define JS_GET_ALL		7
 #define JS_SET_ALL		8
 
-struct JS_DATA_TYPE {
-	int buttons;
-	int x;
-	int y;
+struct JS_DATA_TYPE
+{
+    int buttons;
+    int x;
+    int y;
 };
 
-struct JS_DATA_SAVE_TYPE {
-	int JS_TIMEOUT;
-	int BUSY;
-	long JS_EXPIRETIME;
-	long JS_TIMELIMIT;
-	struct JS_DATA_TYPE JS_SAVE;
-	struct JS_DATA_TYPE JS_CORR;
+struct JS_DATA_SAVE_TYPE
+{
+    int JS_TIMEOUT;
+    int BUSY;
+    long JS_EXPIRETIME;
+    long JS_TIMELIMIT;
+    struct JS_DATA_TYPE JS_SAVE;
+    struct JS_DATA_TYPE JS_CORR;
 };
 
 #endif /* _LINUX_JOYSTICK_H */

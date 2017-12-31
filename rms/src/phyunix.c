@@ -39,10 +39,11 @@
 
 #include <asm/uaccess.h>
 
-struct phyio_info {
-  unsigned status;
-  unsigned sectors;
-  unsigned sectorsize;
+struct phyio_info
+{
+    unsigned status;
+    unsigned sectors;
+    unsigned sectorsize;
 };
 
 #if defined(__digital__) && defined(__unix__)
@@ -80,7 +81,7 @@ unsigned phyio_init(int devlen,char *devnam,struct file **handle,struct phyio_in
     vmsfd = -1;
     //    putname(tmpname);
     if (IS_ERR(vmsfd))
-      return SS$_NOSUCHDEV;
+        return SS$_NOSUCHDEV;
     *handle = vmsfd;
     ucb->ucb$l_maxblock=vmsfd->f_dentry->d_inode->i_size>>9; // block size
     return SS$_NORMAL;
@@ -95,7 +96,7 @@ unsigned phyio_close(struct file * handle)
 
 unsigned phyio_read(struct file * handle,unsigned block,unsigned length,char *buffer)
 {
-  mm_segment_t fs;
+    mm_segment_t fs;
     int res;
 #ifdef DEBUG
     printk("Phyio read block: %d into %x (%d bytes)\n",block,buffer,length);
@@ -107,9 +108,9 @@ unsigned phyio_read(struct file * handle,unsigned block,unsigned length,char *bu
     if (generic_file_llseek(handle,block*512,0) < 0) goto error;
     if (handle->f_op->read(handle, buffer, length, &handle->f_pos) != length) goto error;
     set_fs(fs);
-    
+
     return SS$_NORMAL;
- error:
+error:
     set_fs(fs);
     return SS$_PARITY;
 }
@@ -117,7 +118,7 @@ unsigned phyio_read(struct file * handle,unsigned block,unsigned length,char *bu
 
 unsigned phyio_write(struct file * handle,unsigned block,unsigned length,char *buffer)
 {
-  mm_segment_t fs;
+    mm_segment_t fs;
 #ifdef DEBUG
     printk("Phyio write block: %d from %x (%d bytes)\n",block,buffer,length);
 #endif
@@ -130,9 +131,9 @@ unsigned phyio_write(struct file * handle,unsigned block,unsigned length,char *b
     if (generic_file_llseek(handle,block*512,0) < 0) goto error;
     if (handle->f_op->write(handle, buffer, length, &handle->f_pos) != length) goto error;
     set_fs(fs);
-    
+
     return SS$_NORMAL;
- error:
+error:
     set_fs(fs);
     return SS$_PARITY;
 }

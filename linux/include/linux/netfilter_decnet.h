@@ -1,7 +1,7 @@
 #ifndef __LINUX_DECNET_NETFILTER_H
 #define __LINUX_DECNET_NETFILTER_H
 
-/* DECnet-specific defines for netfilter. 
+/* DECnet-specific defines for netfilter.
  * This file (C) Steve Whitehouse 1999 derived from the
  * ipv4 netfilter header file which is
  * (C)1998 Rusty Russell -- This code is GPL.
@@ -36,19 +36,21 @@
 #define NF_DN_ROUTE		6
 #define NF_DN_NUMHOOKS		7
 
-enum nf_dn_hook_priorities {
-	NF_DN_PRI_FIRST = INT_MIN,
-	NF_DN_PRI_CONNTRACK = -200,
-	NF_DN_PRI_MANGLE = -150,
-	NF_DN_PRI_NAT_DST = -100,
-	NF_DN_PRI_FILTER = 0,
-	NF_DN_PRI_NAT_SRC = 100,
-	NF_DN_PRI_DNRTMSG = 200,
-	NF_DN_PRI_LAST = INT_MAX,
+enum nf_dn_hook_priorities
+{
+    NF_DN_PRI_FIRST = INT_MIN,
+    NF_DN_PRI_CONNTRACK = -200,
+    NF_DN_PRI_MANGLE = -150,
+    NF_DN_PRI_NAT_DST = -100,
+    NF_DN_PRI_FILTER = 0,
+    NF_DN_PRI_NAT_SRC = 100,
+    NF_DN_PRI_DNRTMSG = 200,
+    NF_DN_PRI_LAST = INT_MAX,
 };
 
-struct nf_dn_rtmsg {
-	int nfdn_ifindex;
+struct nf_dn_rtmsg
+{
+    int nfdn_ifindex;
 };
 
 #define NFDN_RTMSG(r) ((unsigned char *)(r) + NLMSG_ALIGN(sizeof(struct nf_dn_rtmsg)))

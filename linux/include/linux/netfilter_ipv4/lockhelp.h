@@ -12,15 +12,15 @@
 #ifdef CONFIG_NETFILTER_DEBUG
 struct spinlock_debug
 {
-	spinlock_t l;
-	atomic_t locked_by;
+    spinlock_t l;
+    atomic_t locked_by;
 };
 
 struct rwlock_debug
 {
-	rwlock_t l;
-	long read_locked_map;
-	long write_locked_map;
+    rwlock_t l;
+    long read_locked_map;
+    long write_locked_map;
 };
 
 #define DECLARE_LOCK(l) 						\

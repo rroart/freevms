@@ -29,7 +29,7 @@ const char *backtitle = NULL;
 
 const char *dialog_result;
 
-/* 
+/*
  * Attribute values, default is for mono display
  */
 chtype attributes[] =
@@ -83,8 +83,10 @@ int color_table[][3] =
     {BUTTON_KEY_ACTIVE_FG, BUTTON_KEY_ACTIVE_BG, BUTTON_KEY_ACTIVE_HL},
     {BUTTON_KEY_INACTIVE_FG, BUTTON_KEY_INACTIVE_BG, BUTTON_KEY_INACTIVE_HL},
     {BUTTON_LABEL_ACTIVE_FG, BUTTON_LABEL_ACTIVE_BG, BUTTON_LABEL_ACTIVE_HL},
-    {BUTTON_LABEL_INACTIVE_FG, BUTTON_LABEL_INACTIVE_BG,
-     BUTTON_LABEL_INACTIVE_HL},
+    {
+        BUTTON_LABEL_INACTIVE_FG, BUTTON_LABEL_INACTIVE_BG,
+        BUTTON_LABEL_INACTIVE_HL
+    },
     {INPUTBOX_FG, INPUTBOX_BG, INPUTBOX_HL},
     {INPUTBOX_BORDER_FG, INPUTBOX_BORDER_BG, INPUTBOX_BORDER_HL},
     {SEARCHBOX_FG, SEARCHBOX_BG, SEARCHBOX_HL},
@@ -114,10 +116,11 @@ attr_clear (WINDOW * win, int height, int width, chtype attr)
     int i, j;
 
     wattrset (win, attr);
-    for (i = 0; i < height; i++) {
-	wmove (win, i, 0);
-	for (j = 0; j < width; j++)
-	    waddch (win, ' ');
+    for (i = 0; i < height; i++)
+    {
+        wmove (win, i, 0);
+        for (j = 0; j < width; j++)
+            waddch (win, ' ');
     }
     touchwin (win);
 }
@@ -126,7 +129,8 @@ void dialog_clear (void)
 {
     attr_clear (stdscr, LINES, COLS, screen_attr);
     /* Display background title if it exists ... - SLH */
-    if (backtitle != NULL) {
+    if (backtitle != NULL)
+    {
         int i;
 
         wattrset (stdscr, screen_attr);
@@ -151,7 +155,7 @@ init_dialog (void)
 
 
     if (use_colors)	/* Set up colors */
-	color_setup ();
+        color_setup ();
 
 
     dialog_clear ();
@@ -165,16 +169,17 @@ color_setup (void)
 {
     int i;
 
-    if (has_colors ()) {	/* Terminal supports color? */
-	start_color ();
+    if (has_colors ())  	/* Terminal supports color? */
+    {
+        start_color ();
 
-	/* Initialize color pairs */
-	for (i = 0; i < ATTRIBUTE_COUNT; i++)
-	    init_pair (i + 1, color_table[i][0], color_table[i][1]);
+        /* Initialize color pairs */
+        for (i = 0; i < ATTRIBUTE_COUNT; i++)
+            init_pair (i + 1, color_table[i][0], color_table[i][1]);
 
-	/* Setup color attributes */
-	for (i = 0; i < ATTRIBUTE_COUNT; i++)
-	    attributes[i] = C_ATTR (color_table[i][2], i + 1);
+        /* Setup color attributes */
+        for (i = 0; i < ATTRIBUTE_COUNT; i++)
+            attributes[i] = C_ATTR (color_table[i][2], i + 1);
     }
 }
 
@@ -204,50 +209,58 @@ print_autowrap (WINDOW * win, const char *prompt, int width, int y, int x)
     strcpy (tempstr, prompt);
 
     prompt_len = strlen(tempstr);
-	
+
     /*
      * Remove newlines
      */
-    for(i=0; i<prompt_len; i++) {
-	if(tempstr[i] == '\n') tempstr[i] = ' ';
+    for(i=0; i<prompt_len; i++)
+    {
+        if(tempstr[i] == '\n') tempstr[i] = ' ';
     }
 
-    if (prompt_len <= width - x * 2) {	/* If prompt is short */
-	wmove (win, y, (width - prompt_len) / 2);
-	waddstr (win, tempstr);
-    } else {
-	cur_x = x;
-	cur_y = y;
-	newl = 1;
-	word = tempstr;
-	while (word && *word) {
-	    sp = index(word, ' ');
-	    if (sp)
-	        *sp++ = 0;
+    if (prompt_len <= width - x * 2)  	/* If prompt is short */
+    {
+        wmove (win, y, (width - prompt_len) / 2);
+        waddstr (win, tempstr);
+    }
+    else
+    {
+        cur_x = x;
+        cur_y = y;
+        newl = 1;
+        word = tempstr;
+        while (word && *word)
+        {
+            sp = index(word, ' ');
+            if (sp)
+                *sp++ = 0;
 
-	    /* Wrap to next line if either the word does not fit,
-	       or it is the first word of a new sentence, and it is
-	       short, and the next word does not fit. */
-	    room = width - cur_x;
-	    wlen = strlen(word);
-	    if (wlen > room ||
-	       (newl && wlen < 4 && sp && wlen+1+strlen(sp) > room
-		     && (!(sp2 = index(sp, ' ')) || wlen+1+(sp2-sp) > room))) {
-		cur_y++;
-		cur_x = x;
-	    }
-	    wmove (win, cur_y, cur_x);
-	    waddstr (win, word);
-	    getyx (win, cur_y, cur_x);
-	    cur_x++;
-	    if (sp && *sp == ' ') {
-	        cur_x++;	/* double space */
-		while (*++sp == ' ');
-		newl = 1;
-	    } else
-	        newl = 0;
-	    word = sp;
-	}
+            /* Wrap to next line if either the word does not fit,
+               or it is the first word of a new sentence, and it is
+               short, and the next word does not fit. */
+            room = width - cur_x;
+            wlen = strlen(word);
+            if (wlen > room ||
+                    (newl && wlen < 4 && sp && wlen+1+strlen(sp) > room
+                     && (!(sp2 = index(sp, ' ')) || wlen+1+(sp2-sp) > room)))
+            {
+                cur_y++;
+                cur_x = x;
+            }
+            wmove (win, cur_y, cur_x);
+            waddstr (win, word);
+            getyx (win, cur_y, cur_x);
+            cur_x++;
+            if (sp && *sp == ' ')
+            {
+                cur_x++;	/* double space */
+                while (*++sp == ' ');
+                newl = 1;
+            }
+            else
+                newl = 0;
+            word = sp;
+        }
     }
 }
 
@@ -265,14 +278,14 @@ print_button (WINDOW * win, const char *label, int y, int x, int selected)
     temp = strspn (label, " ");
     label += temp;
     wattrset (win, selected ? button_label_active_attr
-	      : button_label_inactive_attr);
+              : button_label_inactive_attr);
     for (i = 0; i < temp; i++)
-	waddch (win, ' ');
+        waddch (win, ' ');
     wattrset (win, selected ? button_key_active_attr
-	      : button_key_inactive_attr);
+              : button_key_inactive_attr);
     waddch (win, label[0]);
     wattrset (win, selected ? button_label_active_attr
-	      : button_label_inactive_attr);
+              : button_label_inactive_attr);
     waddstr (win, (char *)label + 1);
     wattrset (win, selected ? button_active_attr : button_inactive_attr);
     waddstr (win, ">");
@@ -284,32 +297,33 @@ print_button (WINDOW * win, const char *label, int y, int x, int selected)
  */
 void
 draw_box (WINDOW * win, int y, int x, int height, int width,
-	  chtype box, chtype border)
+          chtype box, chtype border)
 {
     int i, j;
 
     wattrset (win, 0);
-    for (i = 0; i < height; i++) {
-	wmove (win, y + i, x);
-	for (j = 0; j < width; j++)
-	    if (!i && !j)
-		waddch (win, border | ACS_ULCORNER);
-	    else if (i == height - 1 && !j)
-		waddch (win, border | ACS_LLCORNER);
-	    else if (!i && j == width - 1)
-		waddch (win, box | ACS_URCORNER);
-	    else if (i == height - 1 && j == width - 1)
-		waddch (win, box | ACS_LRCORNER);
-	    else if (!i)
-		waddch (win, border | ACS_HLINE);
-	    else if (i == height - 1)
-		waddch (win, box | ACS_HLINE);
-	    else if (!j)
-		waddch (win, border | ACS_VLINE);
-	    else if (j == width - 1)
-		waddch (win, box | ACS_VLINE);
-	    else
-		waddch (win, box | ' ');
+    for (i = 0; i < height; i++)
+    {
+        wmove (win, y + i, x);
+        for (j = 0; j < width; j++)
+            if (!i && !j)
+                waddch (win, border | ACS_ULCORNER);
+            else if (i == height - 1 && !j)
+                waddch (win, border | ACS_LLCORNER);
+            else if (!i && j == width - 1)
+                waddch (win, box | ACS_URCORNER);
+            else if (i == height - 1 && j == width - 1)
+                waddch (win, box | ACS_LRCORNER);
+            else if (!i)
+                waddch (win, border | ACS_HLINE);
+            else if (i == height - 1)
+                waddch (win, box | ACS_HLINE);
+            else if (!j)
+                waddch (win, border | ACS_VLINE);
+            else if (j == width - 1)
+                waddch (win, box | ACS_VLINE);
+            else
+                waddch (win, box | ' ');
     }
 }
 
@@ -322,17 +336,19 @@ draw_shadow (WINDOW * win, int y, int x, int height, int width)
 {
     int i;
 
-    if (has_colors ()) {	/* Whether terminal supports color? */
-	wattrset (win, shadow_attr);
-	wmove (win, y + height, x + 2);
-	for (i = 0; i < width; i++)
-	    waddch (win, winch (win) & A_CHARTEXT);
-	for (i = y + 1; i < y + height + 1; i++) {
-	    wmove (win, i, x + width);
-	    waddch (win, winch (win) & A_CHARTEXT);
-	    waddch (win, winch (win) & A_CHARTEXT);
-	}
-	wnoutrefresh (win);
+    if (has_colors ())  	/* Whether terminal supports color? */
+    {
+        wattrset (win, shadow_attr);
+        wmove (win, y + height, x + 2);
+        for (i = 0; i < width; i++)
+            waddch (win, winch (win) & A_CHARTEXT);
+        for (i = y + 1; i < y + height + 1; i++)
+        {
+            wmove (win, i, x + width);
+            waddch (win, winch (win) & A_CHARTEXT);
+            waddch (win, winch (win) & A_CHARTEXT);
+        }
+        wnoutrefresh (win);
     }
 }
 
@@ -342,18 +358,19 @@ draw_shadow (WINDOW * win, int y, int x, int height, int width)
 int
 first_alpha(const char *string, const char *exempt)
 {
-	int i, in_paren=0, c;
+    int i, in_paren=0, c;
 
-	for (i = 0; i < strlen(string); i++) {
-		c = tolower(string[i]);
+    for (i = 0; i < strlen(string); i++)
+    {
+        c = tolower(string[i]);
 
-		if (strchr("<[(", c)) ++in_paren;
-		if (strchr(">])", c)) --in_paren;
+        if (strchr("<[(", c)) ++in_paren;
+        if (strchr(">])", c)) --in_paren;
 
-		if ((! in_paren) && isalpha(c) && 
-		     strchr(exempt, c) == 0)
-			return i;
-	}
+        if ((! in_paren) && isalpha(c) &&
+                strchr(exempt, c) == 0)
+            return i;
+    }
 
-	return 0;
+    return 0;
 }

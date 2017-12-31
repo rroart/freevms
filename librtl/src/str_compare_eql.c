@@ -36,40 +36,40 @@
  *	and contents.
  */
 long str$compare_eql(
-	const struct dsc$descriptor_s* first_source_string,
-	const struct dsc$descriptor_s* second_source_string)
+    const struct dsc$descriptor_s* first_source_string,
+    const struct dsc$descriptor_s* second_source_string)
 {
-	char* s1_ptr;			/* Pointer to first string */
-	unsigned short s1_length;	/* Length of first string */
-	char* s2_ptr;			/* Pointer to second string */
-	unsigned short s2_length;	/* Length of second string */
+    char* s1_ptr;			/* Pointer to first string */
+    unsigned short s1_length;	/* Length of first string */
+    char* s2_ptr;			/* Pointer to second string */
+    unsigned short s2_length;	/* Length of second string */
 
-	/*
-	 * Analyze source strings
-	 */
-	str$analyze_sdesc(first_source_string, &s1_length, &s1_ptr);
-	str$analyze_sdesc(second_source_string, &s2_length, &s2_ptr);
+    /*
+     * Analyze source strings
+     */
+    str$analyze_sdesc(first_source_string, &s1_length, &s1_ptr);
+    str$analyze_sdesc(second_source_string, &s2_length, &s2_ptr);
 
-	/*
-	 * Failure if not same length
-	 */
-	if (s1_length != s2_length)
-	{
-		return 1;
-	}
+    /*
+     * Failure if not same length
+     */
+    if (s1_length != s2_length)
+    {
+        return 1;
+    }
 
-	/*
-	 * Failure if not identical contents
-	 */
-	if (memcmp(s1_ptr, s2_ptr, s2_length) != 0)
-	{
-		return 1;
-	}
+    /*
+     * Failure if not identical contents
+     */
+    if (memcmp(s1_ptr, s2_ptr, s2_length) != 0)
+    {
+        return 1;
+    }
 
-	/*
-	 * Must be equal
-	 */
-	return 0;
+    /*
+     * Must be equal
+     */
+    return 0;
 }
 
 

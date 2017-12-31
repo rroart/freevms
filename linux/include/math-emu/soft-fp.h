@@ -55,7 +55,7 @@
 #define FP_EX_OVERFLOW		0
 #endif
 #ifndef FP_EX_UNDERFLOW
-#define FP_EX_UNDERFLOW		
+#define FP_EX_UNDERFLOW
 #endif
 #ifndef FP_EX_DIVZERO
 #define FP_EX_DIVZERO		0
@@ -74,7 +74,7 @@
 #else
 #define FP_DECL_EX int _fex = 0
 #endif
-  
+
 #ifndef FP_INIT_ROUNDMODE
 #define FP_INIT_ROUNDMODE do {} while (0)
 #endif
@@ -99,7 +99,7 @@
 
 #define FP_SET_EXCEPTION(ex)				\
   _fex |= (ex)
-  
+
 #define FP_UNSET_EXCEPTION(ex)				\
   _fex &= ~(ex)
 

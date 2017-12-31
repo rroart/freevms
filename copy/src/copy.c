@@ -130,10 +130,11 @@
 struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
 struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
 struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
-				   0, 0, 0, 0,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO};
+           0, 0, 0, 0,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO
+};
 struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
 struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};
 struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
@@ -141,9 +142,10 @@ struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
 
 #define PRINT_ATTR (FAB$M_CR | FAB$M_PRN | FAB$M_FTN)
 
-void main() {
-  printf("main is a dummy\n");
-  return 1;
+void main()
+{
+    printf("main is a dummy\n");
+    return 1;
 }
 
 /* copy: a file copy routine */
@@ -168,10 +170,10 @@ unsigned copy(int userarg)
     memset (c2, 0, 80);
     sts = cli$present(&p1);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     sts = cli$present(&p2);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     int retlen;
     sts = cli$get_value(&p1, &o1, &retlen);
     sts = cli$get_value(&p2, &o2, &retlen);
@@ -190,81 +192,100 @@ unsigned copy(int userarg)
     ofab.fab$b_fns = strlen(ofab.fab$l_fna);
 
     sts = sys$parse(&ifab, 0, 0);
-    if (sts & 1) {
+    if (sts & 1)
+    {
         inam.nam$l_rsa = rsa;
         inam.nam$b_rss = NAM$C_MAXRSS;
         ifab.fab$l_fop = FAB$M_NAM;
-        while ((sts = sys$search(&ifab, 0, 0)) & 1) {
-	  sts = sys$open(&ifab, 0, 0);
-            if ((sts & 1) == 0) {
+        while ((sts = sys$search(&ifab, 0, 0)) & 1)
+        {
+            sts = sys$open(&ifab, 0, 0);
+            if ((sts & 1) == 0)
+            {
                 printf("%%COPY-F-OPENFAIL, Open error: %d\n",sts);
                 perror("-COPY-F-ERR ");
-            } else {
+            }
+            else
+            {
                 struct _rabdef irab = cc$rms_rab;
                 irab.rab$l_fab = &ifab;
-                if ((sts = sys$connect(&irab, 0, 0)) & 1) {
-		  char name[NAM$C_MAXRSS + 1];
-		  unsigned records = 0;
+                if ((sts = sys$connect(&irab, 0, 0)) & 1)
+                {
+                    char name[NAM$C_MAXRSS + 1];
+                    unsigned records = 0;
 
-		  ofab.fab$b_org=ifab.fab$b_org;
-		  ofab.fab$b_rat=ifab.fab$b_rat;
-		  ofab.fab$b_rfm=ifab.fab$b_rfm;
-		  ofab.fab$w_mrs=ifab.fab$w_mrs;
-		  ofab.fab$l_alq=ifab.fab$l_alq;
+                    ofab.fab$b_org=ifab.fab$b_org;
+                    ofab.fab$b_rat=ifab.fab$b_rat;
+                    ofab.fab$b_rfm=ifab.fab$b_rfm;
+                    ofab.fab$w_mrs=ifab.fab$w_mrs;
+                    ofab.fab$l_alq=ifab.fab$l_alq;
 
-		  memcpy(name,c2,strlen(c2));
+                    memcpy(name,c2,strlen(c2));
 
-		  if ((sts = sys$create(&ofab, 0, 0)) & 1) {
-		    struct _rabdef orab = cc$rms_rab;
-		    orab.rab$l_fab = &ofab;
-		    if ((sts = sys$connect(&orab, 0, 0)) & 1) {
-		      char rec[MAXREC + 2];
-		      orab.rab$l_rbf = rec;
-		      orab.rab$w_usz = MAXREC;
+                    if ((sts = sys$create(&ofab, 0, 0)) & 1)
+                    {
+                        struct _rabdef orab = cc$rms_rab;
+                        orab.rab$l_fab = &ofab;
+                        if ((sts = sys$connect(&orab, 0, 0)) & 1)
+                        {
+                            char rec[MAXREC + 2];
+                            orab.rab$l_rbf = rec;
+                            orab.rab$w_usz = MAXREC;
 
-		      if ((sts & 1) == 0) {
-			printf("%%COPY-F-OPENOUT, Could not open %s\n",name);
-			perror("-COPY-F-ERR ");
-		      } else {
-                        filecount++;
-                        irab.rab$l_ubf = rec;
-                        irab.rab$w_usz = MAXREC;
-                        while ((sts = sys$get(&irab, 0, 0)) & 1) {
-			  orab.rab$l_rbf = irab.rab$l_rbf;
-			  orab.rab$w_rsz = irab.rab$w_rsz;
-			  sts = sys$put(&orab, 0, 0);
-			  if ((sts & 1) == 0) {
-			    printf("%%COPY-F- fwrite error!!\n");
-			    perror("-COPY-F-ERR ");
-			    break;
-			  }
-			  records++;
+                            if ((sts & 1) == 0)
+                            {
+                                printf("%%COPY-F-OPENOUT, Could not open %s\n",name);
+                                perror("-COPY-F-ERR ");
+                            }
+                            else
+                            {
+                                filecount++;
+                                irab.rab$l_ubf = rec;
+                                irab.rab$w_usz = MAXREC;
+                                while ((sts = sys$get(&irab, 0, 0)) & 1)
+                                {
+                                    orab.rab$l_rbf = irab.rab$l_rbf;
+                                    orab.rab$w_rsz = irab.rab$w_rsz;
+                                    sts = sys$put(&orab, 0, 0);
+                                    if ((sts & 1) == 0)
+                                    {
+                                        printf("%%COPY-F- fwrite error!!\n");
+                                        perror("-COPY-F-ERR ");
+                                        break;
+                                    }
+                                    records++;
+                                }
+                            }
+                            rsa[inam.nam$b_rsl] = '\0';
+                            if (sts == RMS$_EOF)
+                            {
+                                printf("%%COPY-S-COPIED, %s copied to %s (%d record%s)\n",
+                                       rsa,name,records,(records == 1 ? "" : "s"));
+                            }
+                            else
+                            {
+                                printf("%%COPY-F-ERROR Status: %d for %s\n",sts,rsa);
+                                sts = 1;
+                            }
+                            sys$disconnect(&orab, 0, 0);
                         }
-		      }
-		      rsa[inam.nam$b_rsl] = '\0';
-		      if (sts == RMS$_EOF) {
-                        printf("%%COPY-S-COPIED, %s copied to %s (%d record%s)\n",
-                               rsa,name,records,(records == 1 ? "" : "s"));
-		      } else {
-                        printf("%%COPY-F-ERROR Status: %d for %s\n",sts,rsa);
-                        sts = 1;
-		      }
-		      sys$disconnect(&orab, 0, 0);
-		    }
-		    sys$close(&ofab, 0, 0);
-		  }
-		  sys$disconnect(&irab, 0, 0);
-		}
-		sys$close(&ifab, 0, 0);
-	    }
-	}
-	if (sts == RMS$_NMF) sts = 1;
+                        sys$close(&ofab, 0, 0);
+                    }
+                    sys$disconnect(&irab, 0, 0);
+                }
+                sys$close(&ifab, 0, 0);
+            }
+        }
+        if (sts == RMS$_NMF) sts = 1;
     }
-    if (sts & 1) {
-      if (filecount > 0) printf("%%COPY-S-NEWFILES, %d file%s created\n",
-				filecount,(filecount == 1 ? "" : "s"));
-    } else {
-      printf("%%COPY-F-ERROR Status: %d\n",sts);
+    if (sts & 1)
+    {
+        if (filecount > 0) printf("%%COPY-S-NEWFILES, %d file%s created\n",
+                                      filecount,(filecount == 1 ? "" : "s"));
+    }
+    else
+    {
+        printf("%%COPY-F-ERROR Status: %d\n",sts);
     }
     return sts;
 }
@@ -290,10 +311,10 @@ unsigned export(int userarg)
     memset (c2, 0, 80);
     sts = cli$present(&p1);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     sts = cli$present(&p2);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     int binary_sts = cli$present(&q1);
     int retlen;
     sts = cli$get_value(&p1, &o1, &retlen);
@@ -309,41 +330,57 @@ unsigned export(int userarg)
     fab.fab$l_fna = c1;
     fab.fab$b_fns = strlen(fab.fab$l_fna);
     sts = sys$parse(&fab, 0, 0);
-    if (sts & 1) {
+    if (sts & 1)
+    {
         nam.nam$l_rsa = rsa;
         nam.nam$b_rss = NAM$C_MAXRSS;
         fab.fab$l_fop = FAB$M_NAM;
-        while ((sts = sys$search(&fab, 0, 0)) & 1) {
-	  sts = sys$open(&fab, 0, 0);
-            if ((sts & 1) == 0) {
+        while ((sts = sys$search(&fab, 0, 0)) & 1)
+        {
+            sts = sys$open(&fab, 0, 0);
+            if ((sts & 1) == 0)
+            {
                 printf("%%EXPORT-F-OPENFAIL, Open error: %d\n",sts);
                 perror("-EXPORT-F-ERR ");
-            } else {
+            }
+            else
+            {
                 struct _rabdef rab = cc$rms_rab;
                 rab.rab$l_fab = &fab;
-                if ((sts = sys$connect(&rab, 0, 0)) & 1) {
+                if ((sts = sys$connect(&rab, 0, 0)) & 1)
+                {
                     FILE *tof;
                     char name[NAM$C_MAXRSS + 1];
                     unsigned records = 0;
                     {
                         char *out = name,*inp = c2;
                         int dot = 0;
-                        while (*inp != '\0') {
-                            if (*inp == '*') {
+                        while (*inp != '\0')
+                        {
+                            if (*inp == '*')
+                            {
                                 inp++;
-                                if (dot) {
+                                if (dot)
+                                {
                                     memcpy(out,nam.nam$l_type + 1,nam.nam$b_type - 1);
                                     out += nam.nam$b_type - 1;
-                                } else {
+                                }
+                                else
+                                {
                                     unsigned length = nam.nam$b_name;
                                     if (*inp == '\0') length += nam.nam$b_type;
                                     memcpy(out,nam.nam$l_name,length);
                                     out += length;
                                 }
-                            } else {
-                                if (*inp == '.') {
+                            }
+                            else
+                            {
+                                if (*inp == '.')
+                                {
                                     dot = 1;
-                                } else {
+                                }
+                                else
+                                {
                                     if (strchr(":]\\/",*inp)) dot = 0;
                                 }
                                 *out++ = *inp++;
@@ -354,43 +391,57 @@ unsigned export(int userarg)
 #ifndef _WIN32
                     tof = fopen(name,"w");
 #else
-		    if ((binary_sts & 1) == 0 && fab.fab$b_rat & PRINT_ATTR) {
+                    if ((binary_sts & 1) == 0 && fab.fab$b_rat & PRINT_ATTR)
+                    {
                         tof = fopen(name,"w");
-		    } else {
-		        tof = fopen(name,"wb");
-		    }
+                    }
+                    else
+                    {
+                        tof = fopen(name,"wb");
+                    }
 #endif
-                    if (tof == NULL) {
+                    if (tof == NULL)
+                    {
                         printf("%%EXPORT-F-OPENOUT, Could not open %s\n",name);
                         perror("-EXPORT-F-ERR ");
-                    } else {
+                    }
+                    else
+                    {
                         char rec[MAXREC + 2];
                         filecount++;
                         rab.rab$l_ubf = rec;
                         rab.rab$w_usz = MAXREC;
-                        while ((sts = sys$get(&rab, 0, 0)) & 1) {
+                        while ((sts = sys$get(&rab, 0, 0)) & 1)
+                        {
                             unsigned rsz = rab.rab$w_rsz;
                             if ((binary_sts & 1) == 0 &&
-                                 fab.fab$b_rat & PRINT_ATTR) rec[rsz++] = '\n';
-                            if (fwrite(rec,rsz,1,tof) == 1) {
+                                    fab.fab$b_rat & PRINT_ATTR) rec[rsz++] = '\n';
+                            if (fwrite(rec,rsz,1,tof) == 1)
+                            {
                                 records++;
-                            } else {
+                            }
+                            else
+                            {
                                 printf("%%EXPORT-F- fwrite error!!\n");
                                 perror("-EXPORT-F-ERR ");
                                 break;
                             }
                         }
-                        if (fclose(tof)) {
+                        if (fclose(tof))
+                        {
                             printf("%%EXPORT-F- fclose error!!\n");
                             perror("-EXPORT-F-ERR ");
                         }
                     }
                     sys$disconnect(&rab, 0, 0);
                     rsa[nam.nam$b_rsl] = '\0';
-                    if (sts == RMS$_EOF) {
+                    if (sts == RMS$_EOF)
+                    {
                         printf("%%EXPORT-S-COPIED, %s copied to %s (%d record%s)\n",
                                rsa,name,records,(records == 1 ? "" : "s"));
-                    } else {
+                    }
+                    else
+                    {
                         printf("%%EXPORT-F-ERROR Status: %d for %s\n",sts,rsa);
                         sts = 1;
                     }
@@ -400,10 +451,13 @@ unsigned export(int userarg)
         }
         if (sts == RMS$_NMF) sts = 1;
     }
-    if (sts & 1) {
+    if (sts & 1)
+    {
         if (filecount > 0) printf("%%EXPORT-S-NEWFILES, %d file%s created\n",
-                                  filecount,(filecount == 1 ? "" : "s"));
-    } else {
+                                      filecount,(filecount == 1 ? "" : "s"));
+    }
+    else
+    {
         printf("%%EXPORT-F-ERROR Status: %d\n",sts);
     }
     return sts;
@@ -429,28 +483,32 @@ unsigned import(int userarg)
     memset (c2, 0, 80);
     sts = cli$present(&p1);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     sts = cli$present(&p2);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     int retlen;
     sts = cli$get_value(&p1, &o1, &retlen);
     sts = cli$get_value(&p2, &o2, &retlen);
 
     FILE *fromf;
     fromf = fopen(c1,"r");
-    if (fromf != NULL) {
+    if (fromf != NULL)
+    {
         struct _fabdef fab = cc$rms_fab;
         fab.fab$l_fna = c2;
         fab.fab$b_fns = strlen(fab.fab$l_fna);
-        if ((sts = sys$create(&fab, 0, 0)) & 1) {
+        if ((sts = sys$create(&fab, 0, 0)) & 1)
+        {
             struct _rabdef rab = cc$rms_rab;
             rab.rab$l_fab = &fab;
-            if ((sts = sys$connect(&rab, 0, 0)) & 1) {
+            if ((sts = sys$connect(&rab, 0, 0)) & 1)
+            {
                 char rec[MAXREC + 2];
                 rab.rab$l_rbf = rec;
                 rab.rab$w_usz = MAXREC;
-                while (fgets(rec,sizeof(rec),fromf) != NULL) {
+                while (fgets(rec,sizeof(rec),fromf) != NULL)
+                {
                     rab.rab$w_rsz = strlen(rec);
                     sts = sys$put(&rab, 0, 0);
                     if ((sts & 1) == 0) break;
@@ -460,10 +518,13 @@ unsigned import(int userarg)
             sys$close(&fab, 0, 0);
         }
         fclose(fromf);
-        if (!(sts & 1)) {
+        if (!(sts & 1))
+        {
             printf("%%IMPORT-F-ERROR Status: %d\n",sts);
         }
-    } else {
+    }
+    else
+    {
         printf("Can't open %s\n",c1);
     }
     return sts;

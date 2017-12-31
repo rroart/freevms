@@ -15,7 +15,7 @@
 #define	SCH$C_COM	12
 #define	SCH$C_COMO	13
 #define	SCH$C_CUR	14
- 
+
 #endif
 
 

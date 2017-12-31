@@ -18,7 +18,7 @@
  *    2 of the License, or (at your option) any later version.
  *
  * Author:          Ed Okerson, <eokerson@quicknet.net>
- *    
+ *
  * Contributors:    Greg Herlein, <gherlein@quicknet.net>
  *                  David W. Erhart, <derhart@quicknet.net>
  *                  John Sellers, <jsellers@quicknet.net>
@@ -37,7 +37,7 @@
  * QUICKNET TECHNOLOGIES, INC. SPECIFICALLY DISCLAIMS ANY WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
  * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
- * ON AN "AS IS" BASIS, AND QUICKNET TECHNOLOGIES, INC. HAS NO OBLIGATION 
+ * ON AN "AS IS" BASIS, AND QUICKNET TECHNOLOGIES, INC. HAS NO OBLIGATION
  * TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  *
  *****************************************************************************/
@@ -109,34 +109,37 @@ static char ixjuser_h_rcsid[] = "$Id$";
 #define IXJCTL_REC_VOLUME		PHONE_REC_VOLUME
 #define IXJCTL_REC_LEVEL		PHONE_REC_LEVEL
 
-typedef enum {
-	f300_640 = 4, f300_500, f1100, f350, f400, f480, f440, f620, f20_50,
-	f133_200, f300, f300_420, f330, f300_425, f330_440, f340, f350_400,
-	f350_440, f350_450, f360, f380_420, f392, f400_425, f400_440, f400_450,
-	f420, f425, f425_450, f425_475, f435, f440_450, f440_480, f445, f450,
-	f452, f475, f480_620, f494, f500, f520, f523, f525, f540_660, f587,
-	f590, f600, f660, f700, f740, f750, f750_1450, f770, f800, f816, f850,
-	f857_1645, f900, f900_1300, f935_1215, f941_1477, f942, f950, f950_1400,
-	f975, f1000, f1020, f1050, f1100_1750, f1140, f1200, f1209, f1330, f1336,
-	lf1366, f1380, f1400, f1477, f1600, f1633_1638, f1800, f1860
+typedef enum
+{
+    f300_640 = 4, f300_500, f1100, f350, f400, f480, f440, f620, f20_50,
+    f133_200, f300, f300_420, f330, f300_425, f330_440, f340, f350_400,
+    f350_440, f350_450, f360, f380_420, f392, f400_425, f400_440, f400_450,
+    f420, f425, f425_450, f425_475, f435, f440_450, f440_480, f445, f450,
+    f452, f475, f480_620, f494, f500, f520, f523, f525, f540_660, f587,
+    f590, f600, f660, f700, f740, f750, f750_1450, f770, f800, f816, f850,
+    f857_1645, f900, f900_1300, f935_1215, f941_1477, f942, f950, f950_1400,
+    f975, f1000, f1020, f1050, f1100_1750, f1140, f1200, f1209, f1330, f1336,
+    lf1366, f1380, f1400, f1477, f1600, f1633_1638, f1800, f1860
 } IXJ_FILTER_FREQ;
 
-typedef struct {
-	unsigned int filter;
-	IXJ_FILTER_FREQ freq;
-	char enable;
+typedef struct
+{
+    unsigned int filter;
+    IXJ_FILTER_FREQ freq;
+    char enable;
 } IXJ_FILTER;
 
-typedef struct {
-	char enable;
-	char en_filter;
-	unsigned int filter;
-	unsigned int on1;
-	unsigned int off1;
-	unsigned int on2;
-	unsigned int off2;
-	unsigned int on3;
-	unsigned int off3;
+typedef struct
+{
+    char enable;
+    char en_filter;
+    unsigned int filter;
+    unsigned int on1;
+    unsigned int off1;
+    unsigned int on2;
+    unsigned int off2;
+    unsigned int on3;
+    unsigned int off3;
 } IXJ_FILTER_CADENCE;
 
 #define IXJCTL_SET_FILTER		_IOW ('q', 0xC7, IXJ_FILTER *)
@@ -168,135 +171,138 @@ typedef struct {
 *
 ******************************************************************************/
 
-typedef enum {
-	hz20 = 0x7ffa,
-	hz50 = 0x7fe5,
-	hz133 = 0x7f4c,
-	hz200 = 0x7e6b,
-	hz261 = 0x7d50,		/* .63 C1  */
-	hz277 = 0x7cfa,		/* .18 CS1 */
-	hz293 = 0x7c9f,		/* .66 D1  */
-	hz300 = 0x7c75,
-	hz311 = 0x7c32,		/* .13 DS1 */
-	hz329 = 0x7bbf,		/* .63 E1  */
-	hz330 = 0x7bb8,
-	hz340 = 0x7b75,
-	hz349 = 0x7b37,		/* .23 F1  */
-	hz350 = 0x7b30,
-	hz360 = 0x7ae9,
-	hz369 = 0x7aa8,		/* .99 FS1 */
-	hz380 = 0x7a56,
-	hz392 = 0x79fa,		/* .00 G1  */
-	hz400 = 0x79bb,
-	hz415 = 0x7941,		/* .30 GS1 */
-	hz420 = 0x7918,
-	hz425 = 0x78ee,
-	hz435 = 0x7899,
-	hz440 = 0x786d,		/* .00 A1  */
-	hz445 = 0x7842,
-	hz450 = 0x7815,
-	hz452 = 0x7803,
-	hz466 = 0x7784,		/* .16 AS1 */
-	hz475 = 0x7731,
-	hz480 = 0x7701,
-	hz493 = 0x7685,		/* .88 B1  */
-	hz494 = 0x767b,
-	hz500 = 0x7640,
-	hz520 = 0x7578,
-	hz523 = 0x7559,		/* .25 C2  */
-	hz525 = 0x7544,
-	hz540 = 0x74a7,
-	hz554 = 0x7411,		/* .37 CS2 */
-	hz587 = 0x72a1,		/* .33 D2  */
-	hz590 = 0x727f,
-	hz600 = 0x720b,
-	hz620 = 0x711e,
-	hz622 = 0x7106,		/* .25 DS2 */
-	hz659 = 0x6f3b,		/* .26 E2  */
-	hz660 = 0x6f2e,
-	hz698 = 0x6d3d,		/* .46 F2  */
-	hz700 = 0x6d22,
-	hz739 = 0x6b09,		/* .99 FS2 */
-	hz740 = 0x6afa,
-	hz750 = 0x6a6c,
-	hz770 = 0x694b,
-	hz783 = 0x688b,		/* .99 G2  */
-	hz800 = 0x678d,
-	hz816 = 0x6698,
-	hz830 = 0x65bf,		/* .61 GS2 */
-	hz850 = 0x6484,
-	hz857 = 0x6414,
-	hz880 = 0x629f,		/* .00 A2  */
-	hz900 = 0x6154,
-	hz932 = 0x5f35,		/* .33 AS2 */
-	hz935 = 0x5f01,
-	hz941 = 0x5e9a,
-	hz942 = 0x5e88,
-	hz950 = 0x5dfd,
-	hz975 = 0x5c44,
-	hz1000 = 0x5a81,
-	hz1020 = 0x5912,
-	hz1050 = 0x56e2,
-	hz1100 = 0x5320,
-	hz1140 = 0x5007,
-	hz1200 = 0x4b3b,
-	hz1209 = 0x4a80,
-	hz1215 = 0x4a02,
-	hz1250 = 0x471c,
-	hz1300 = 0x42e0,
-	hz1330 = 0x4049,
-	hz1336 = 0x3fc4,
-	hz1366 = 0x3d22,
-	hz1380 = 0x3be4,
-	hz1400 = 0x3a1b,
-	hz1450 = 0x3596,
-	hz1477 = 0x331c,
-	hz1500 = 0x30fb,
-	hz1600 = 0x278d,
-	hz1633 = 0x2462,
-	hz1638 = 0x23e7,
-	hz1645 = 0x233a,
-	hz1750 = 0x18f8,
-	hz1800 = 0x1405,
-	hz1860 = 0xe0b,
-	hz2100 = 0xf5f6,
-	hz2130 = 0xf2f5,
-	hz2450 = 0xd3b3,
-	hz2750 = 0xb8e4
+typedef enum
+{
+    hz20 = 0x7ffa,
+    hz50 = 0x7fe5,
+    hz133 = 0x7f4c,
+    hz200 = 0x7e6b,
+    hz261 = 0x7d50,		/* .63 C1  */
+    hz277 = 0x7cfa,		/* .18 CS1 */
+    hz293 = 0x7c9f,		/* .66 D1  */
+    hz300 = 0x7c75,
+    hz311 = 0x7c32,		/* .13 DS1 */
+    hz329 = 0x7bbf,		/* .63 E1  */
+    hz330 = 0x7bb8,
+    hz340 = 0x7b75,
+    hz349 = 0x7b37,		/* .23 F1  */
+    hz350 = 0x7b30,
+    hz360 = 0x7ae9,
+    hz369 = 0x7aa8,		/* .99 FS1 */
+    hz380 = 0x7a56,
+    hz392 = 0x79fa,		/* .00 G1  */
+    hz400 = 0x79bb,
+    hz415 = 0x7941,		/* .30 GS1 */
+    hz420 = 0x7918,
+    hz425 = 0x78ee,
+    hz435 = 0x7899,
+    hz440 = 0x786d,		/* .00 A1  */
+    hz445 = 0x7842,
+    hz450 = 0x7815,
+    hz452 = 0x7803,
+    hz466 = 0x7784,		/* .16 AS1 */
+    hz475 = 0x7731,
+    hz480 = 0x7701,
+    hz493 = 0x7685,		/* .88 B1  */
+    hz494 = 0x767b,
+    hz500 = 0x7640,
+    hz520 = 0x7578,
+    hz523 = 0x7559,		/* .25 C2  */
+    hz525 = 0x7544,
+    hz540 = 0x74a7,
+    hz554 = 0x7411,		/* .37 CS2 */
+    hz587 = 0x72a1,		/* .33 D2  */
+    hz590 = 0x727f,
+    hz600 = 0x720b,
+    hz620 = 0x711e,
+    hz622 = 0x7106,		/* .25 DS2 */
+    hz659 = 0x6f3b,		/* .26 E2  */
+    hz660 = 0x6f2e,
+    hz698 = 0x6d3d,		/* .46 F2  */
+    hz700 = 0x6d22,
+    hz739 = 0x6b09,		/* .99 FS2 */
+    hz740 = 0x6afa,
+    hz750 = 0x6a6c,
+    hz770 = 0x694b,
+    hz783 = 0x688b,		/* .99 G2  */
+    hz800 = 0x678d,
+    hz816 = 0x6698,
+    hz830 = 0x65bf,		/* .61 GS2 */
+    hz850 = 0x6484,
+    hz857 = 0x6414,
+    hz880 = 0x629f,		/* .00 A2  */
+    hz900 = 0x6154,
+    hz932 = 0x5f35,		/* .33 AS2 */
+    hz935 = 0x5f01,
+    hz941 = 0x5e9a,
+    hz942 = 0x5e88,
+    hz950 = 0x5dfd,
+    hz975 = 0x5c44,
+    hz1000 = 0x5a81,
+    hz1020 = 0x5912,
+    hz1050 = 0x56e2,
+    hz1100 = 0x5320,
+    hz1140 = 0x5007,
+    hz1200 = 0x4b3b,
+    hz1209 = 0x4a80,
+    hz1215 = 0x4a02,
+    hz1250 = 0x471c,
+    hz1300 = 0x42e0,
+    hz1330 = 0x4049,
+    hz1336 = 0x3fc4,
+    hz1366 = 0x3d22,
+    hz1380 = 0x3be4,
+    hz1400 = 0x3a1b,
+    hz1450 = 0x3596,
+    hz1477 = 0x331c,
+    hz1500 = 0x30fb,
+    hz1600 = 0x278d,
+    hz1633 = 0x2462,
+    hz1638 = 0x23e7,
+    hz1645 = 0x233a,
+    hz1750 = 0x18f8,
+    hz1800 = 0x1405,
+    hz1860 = 0xe0b,
+    hz2100 = 0xf5f6,
+    hz2130 = 0xf2f5,
+    hz2450 = 0xd3b3,
+    hz2750 = 0xb8e4
 } IXJ_FREQ;
 
-typedef enum {
-	C1 = hz261,
-	CS1 = hz277,
-	D1 = hz293,
-	DS1 = hz311,
-	E1 = hz329,
-	F1 = hz349,
-	FS1 = hz369,
-	G1 = hz392,
-	GS1 = hz415,
-	A1 = hz440,
-	AS1 = hz466,
-	B1 = hz493,
-	C2 = hz523,
-	CS2 = hz554,
-	D2 = hz587,
-	DS2 = hz622,
-	E2 = hz659,
-	F2 = hz698,
-	FS2 = hz739,
-	G2 = hz783,
-	GS2 = hz830,
-	A2 = hz880,
-	AS2 = hz932,
+typedef enum
+{
+    C1 = hz261,
+    CS1 = hz277,
+    D1 = hz293,
+    DS1 = hz311,
+    E1 = hz329,
+    F1 = hz349,
+    FS1 = hz369,
+    G1 = hz392,
+    GS1 = hz415,
+    A1 = hz440,
+    AS1 = hz466,
+    B1 = hz493,
+    C2 = hz523,
+    CS2 = hz554,
+    D2 = hz587,
+    DS2 = hz622,
+    E2 = hz659,
+    F2 = hz698,
+    FS2 = hz739,
+    G2 = hz783,
+    GS2 = hz830,
+    A2 = hz880,
+    AS2 = hz932,
 } IXJ_NOTE;
 
-typedef struct {
-	int tone_index;
-	int freq0;
-	int gain0;
-	int freq1;
-	int gain1;
+typedef struct
+{
+    int tone_index;
+    int freq0;
+    int gain0;
+    int freq1;
+    int gain1;
 } IXJ_TONE;
 
 #define IXJCTL_INIT_TONE		_IOW ('q', 0xC9, IXJ_TONE *)
@@ -331,26 +337,29 @@ typedef struct {
 *
 ******************************************************************************/
 
-typedef struct {
-	int index;
-	int tone_on_time;
-	int tone_off_time;
-	int freq0;
-	int gain0;
-	int freq1;
-	int gain1;
+typedef struct
+{
+    int index;
+    int tone_on_time;
+    int tone_off_time;
+    int freq0;
+    int gain0;
+    int freq1;
+    int gain1;
 } IXJ_CADENCE_ELEMENT;
 
-typedef enum {
-	PLAY_ONCE,
-	REPEAT_LAST_ELEMENT,
-	REPEAT_ALL
+typedef enum
+{
+    PLAY_ONCE,
+    REPEAT_LAST_ELEMENT,
+    REPEAT_ALL
 } IXJ_CADENCE_TERM;
 
-typedef struct {
-	int elements_used;
-	IXJ_CADENCE_TERM termination;
-	IXJ_CADENCE_ELEMENT *ce;
+typedef struct
+{
+    int elements_used;
+    IXJ_CADENCE_TERM termination;
+    IXJ_CADENCE_ELEMENT *ce;
 } IXJ_CADENCE;
 
 #define IXJCTL_TONE_CADENCE		_IOW ('q', 0xCA, IXJ_CADENCE *)
@@ -424,11 +433,11 @@ typedef struct {
 #define IXJCTL_MIXER			_IOW ('q', 0xCF, int)
 
 /******************************************************************************
-* 
+*
 * The master volume controls use attenuation with 32 levels from 0 to -62dB
 * with steps of 2dB each, the defines should be OR'ed together then sent
 * as the parameter to the mixer command to change the mixer settings.
-* 
+*
 ******************************************************************************/
 #define MIXER_MASTER_L		0x0000
 #define MIXER_MASTER_R		0x0100
@@ -467,11 +476,11 @@ typedef struct {
 #define MASTER_MUTE		0x80
 
 /******************************************************************************
-* 
+*
 * The input volume controls use gain with 32 levels from +12dB to -50dB
 * with steps of 2dB each, the defines should be OR'ed together then sent
 * as the parameter to the mixer command to change the mixer settings.
-* 
+*
 ******************************************************************************/
 #define MIXER_PORT_CD_L		0x0600
 #define MIXER_PORT_CD_R		0x0700
@@ -515,11 +524,11 @@ typedef struct {
 #define INPUT_MUTE		0x80
 
 /******************************************************************************
-* 
+*
 * The POTS volume control use attenuation with 8 levels from 0dB to -28dB
 * with steps of 4dB each, the defines should be OR'ed together then sent
 * as the parameter to the mixer command to change the mixer settings.
-* 
+*
 ******************************************************************************/
 #define MIXER_PORT_POTS_PLAY	0x0F00
 
@@ -534,11 +543,11 @@ typedef struct {
 #define POTS_MUTE		0x80
 
 /******************************************************************************
-* 
+*
 * The DAA controls the interface to the PSTN port.  The driver loads the
 * US coefficients by default, so if you live in a different country you
 * need to load the set for your countries phone system.
-* 
+*
 ******************************************************************************/
 #define IXJCTL_DAA_COEFF_SET		_IOW ('q', 0xD0, int)
 
@@ -550,12 +559,12 @@ typedef struct {
 #define DAA_JAPAN	6
 
 /******************************************************************************
-* 
+*
 * Use IXJCTL_PORT to set or query the port the card is set to.  If the
 * argument is set to PORT_QUERY, the return value of the ioctl will
 * indicate which port is currently in use, otherwise it will change the
 * port.
-* 
+*
 ******************************************************************************/
 #define IXJCTL_PORT			_IOW ('q', 0xD1, int)
 
@@ -574,11 +583,11 @@ typedef struct {
 #define PSTN_PULSE_DIAL	3
 
 /******************************************************************************
-* 
-* The DAA Analog GAIN sets 2 parameters at one time, the receive gain (AGRR), 
+*
+* The DAA Analog GAIN sets 2 parameters at one time, the receive gain (AGRR),
 * and the transmit gain (AGX).  OR together the components and pass them
 * as the parameter to IXJCTL_DAA_AGAIN.  The default setting is both at 0dB.
-* 
+*
 ******************************************************************************/
 #define IXJCTL_DAA_AGAIN		_IOW ('q', 0xD2, int)
 
@@ -597,23 +606,23 @@ typedef struct {
 #define IXJCTL_VMWI			_IOR ('q', 0xD8, int)
 #define IXJCTL_CIDCW			_IOW ('q', 0xD9, PHONE_CID *)
 /******************************************************************************
-* 
-* The wink duration is tunable with this ioctl.  The default wink duration  
+*
+* The wink duration is tunable with this ioctl.  The default wink duration
 * is 320ms.  You do not need to use this ioctl if you do not require a
 * different wink duration.
-* 
+*
 ******************************************************************************/
 #define IXJCTL_WINK_DURATION		PHONE_WINK_DURATION
 
 /******************************************************************************
-* 
+*
 * This ioctl will connect the POTS port to the PSTN port on the LineJACK
 * In order for this to work properly the port selection should be set to
 * the PSTN port with IXJCTL_PORT prior to calling this ioctl.  This will
 * enable conference calls between PSTN callers and network callers.
 * Passing a 1 to this ioctl enables the POTS<->PSTN connection while
 * passing a 0 turns it back off.
-* 
+*
 ******************************************************************************/
 #define IXJCTL_POTS_PSTN		_IOW ('q', 0xD5, int)
 
@@ -656,29 +665,31 @@ typedef struct {
 * they occur.  To disable signals for an event set the signal to 0.
 *
 ******************************************************************************/
-typedef enum {
-	SIG_DTMF_READY,
-	SIG_HOOKSTATE,
-	SIG_FLASH,
-	SIG_PSTN_RING,
-	SIG_CALLER_ID,
-	SIG_PSTN_WINK,
-	SIG_F0, SIG_F1, SIG_F2, SIG_F3,
-	SIG_FC0, SIG_FC1, SIG_FC2, SIG_FC3,
-	SIG_READ_READY = 33,
-	SIG_WRITE_READY = 34
+typedef enum
+{
+    SIG_DTMF_READY,
+    SIG_HOOKSTATE,
+    SIG_FLASH,
+    SIG_PSTN_RING,
+    SIG_CALLER_ID,
+    SIG_PSTN_WINK,
+    SIG_F0, SIG_F1, SIG_F2, SIG_F3,
+    SIG_FC0, SIG_FC1, SIG_FC2, SIG_FC3,
+    SIG_READ_READY = 33,
+    SIG_WRITE_READY = 34
 } IXJ_SIGEVENT;
 
-typedef struct {
-	unsigned int event;
-	int signal;
+typedef struct
+{
+    unsigned int event;
+    int signal;
 } IXJ_SIGDEF;
 
 #define IXJCTL_SIGCTL			_IOW ('q', 0xE9, IXJ_SIGDEF *)
 
 /******************************************************************************
 *
-* These ioctls allow the user application to change the gain in the 
+* These ioctls allow the user application to change the gain in the
 * Smart Cable of the Internet Phone Card.  Sending -1 as a value will cause
 * return value to be the current setting.  Valid values to set are 0x00 - 0x1F
 *
@@ -713,10 +724,11 @@ typedef struct {
  *
  ******************************************************************************/
 
-typedef struct {
-	unsigned int filter;
-	char enable;
-	unsigned int coeff[19];
+typedef struct
+{
+    unsigned int filter;
+    char enable;
+    unsigned int coeff[19];
 } IXJ_FILTER_RAW;
 
 #endif

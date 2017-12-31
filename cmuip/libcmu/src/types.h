@@ -4,8 +4,8 @@
 typedef unsigned long int time_t;
 
 #define makedev yes	/* this is not a proper definition, however it is used
-			 * to test if types is loaded.
-			 */
+* to test if types is loaded.
+*/
 
 typedef unsigned int uid_t;
 typedef unsigned int gid_t;
@@ -71,9 +71,10 @@ typedef	fd_mask fd_set;
  */
 typedef	unsigned short fd_channel;
 
-typedef	struct fd_set {
-	fd_mask		fds_bits[howmany(FD_SETSIZE, NFDBITS)];
-	fd_channel	fds_chan[howmany(FD_SETSIZE, NFDBITS)][NFDBITS];
+typedef	struct fd_set
+{
+fd_mask		fds_bits[howmany(FD_SETSIZE, NFDBITS)];
+    fd_channel	fds_chan[howmany(FD_SETSIZE, NFDBITS)][NFDBITS];
 } fd_set;
 
 #define	FD_SET(n, p)	_$fdset(n, p)

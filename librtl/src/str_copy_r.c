@@ -24,7 +24,7 @@
  *				Andrew Allison
  *				50 Denlaw Road
  *				London, Ont
- *				Canada 
+ *				Canada
  *				N6G 3L4
  *
  */
@@ -68,52 +68,52 @@
  *
  */
 unsigned long str$copy_r(struct dsc$descriptor_s* destination_string,
-	const unsigned short* word_integer_source_length,
-	const void *source_string_address)
+                         const unsigned short* word_integer_source_length,
+                         const void *source_string_address)
 {
-unsigned short s1_length;
-int	s2_length;
-unsigned long length;	/* Length of first string */
-unsigned long result = STR$_NORMAL;	/* Working result */
-char* s1_ptr;			/* Pointer to first string */
+    unsigned short s1_length;
+    int	s2_length;
+    unsigned long length;	/* Length of first string */
+    unsigned long result = STR$_NORMAL;	/* Working result */
+    char* s1_ptr;			/* Pointer to first string */
 
 
-if (source_string_address != NULL )
-	s2_length = * word_integer_source_length;
-else
-	s2_length = 0;
-	/*
-	 * Do the normal sort of tests
-	 */
-	if ((result = str$$is_string_class(destination_string)) != STR$_NORMAL)
-	{
-		DOSIGNAL(result);
-		return result;
-	}
+    if (source_string_address != NULL )
+        s2_length = * word_integer_source_length;
+    else
+        s2_length = 0;
+    /*
+     * Do the normal sort of tests
+     */
+    if ((result = str$$is_string_class(destination_string)) != STR$_NORMAL)
+    {
+        DOSIGNAL(result);
+        return result;
+    }
 
-	/*
-	 * Try to resize the destination
-	 */
+    /*
+     * Try to resize the destination
+     */
 
-	length = *word_integer_source_length;
-	result = str$$resize(destination_string, *word_integer_source_length);
+    length = *word_integer_source_length;
+    result = str$$resize(destination_string, *word_integer_source_length);
 
-	if (result == STR$_NORMAL)
-	{
-		/*
-		 * Analyze the string we now have
-		 */
-		str$analyze_sdesc(destination_string, &s1_length, &s1_ptr);
-		/*
-		 * Jam in the text
-		 */
-		result = str$$copy_fill(s1_ptr,(unsigned int) s1_length,
- source_string_address, (unsigned int) s2_length,' ' );
-	}
+    if (result == STR$_NORMAL)
+    {
+        /*
+         * Analyze the string we now have
+         */
+        str$analyze_sdesc(destination_string, &s1_length, &s1_ptr);
+        /*
+         * Jam in the text
+         */
+        result = str$$copy_fill(s1_ptr,(unsigned int) s1_length,
+                                source_string_address, (unsigned int) s2_length,' ' );
+    }
 
-	/*
-	 * If we get here, it must have worked
-	 */
-	return result;
+    /*
+     * If we get here, it must have worked
+     */
+    return result;
 }
 

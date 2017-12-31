@@ -38,10 +38,10 @@
 #define DoC_Mil_CDSN_IO 	0x0800
 #define DoC_2k_CDSN_IO 		0x1800
 
-/* How to access the device? 
- * On ARM, it'll be mmap'd directly with 32-bit wide accesses. 
+/* How to access the device?
+ * On ARM, it'll be mmap'd directly with 32-bit wide accesses.
  * On PPC, it's mmap'd and 16-bit wide.
- * Others use readb/writeb 
+ * Others use readb/writeb
  */
 #if defined(__arm__)
 #define ReadDOC_(adr, reg)      ((unsigned char)(*(__u32 *)(((unsigned long)adr)+((reg)<<2))))
@@ -97,11 +97,12 @@
 #define DOC_ECC_EN (DOC_ECC__EN | DOC_ECC_RESV)
 #define DOC_ECC_DIS (DOC_ECC_RESV)
 
-struct Nand {
-	char floor, chip;
-	unsigned long curadr;
-	unsigned char curmode;
-	/* Also some erase/write/pipeline info when we get that far */
+struct Nand
+{
+    char floor, chip;
+    unsigned long curadr;
+    unsigned char curmode;
+    /* Also some erase/write/pipeline info when we get that far */
 };
 
 #define MAX_FLOORS 4
@@ -114,27 +115,28 @@ struct Nand {
 #define ADDR_PAGE 2
 #define ADDR_COLUMN_PAGE 3
 
-struct DiskOnChip {
-	unsigned long physadr;
-	unsigned long virtadr;
-	unsigned long totlen;
-	char ChipID; /* Type of DiskOnChip */
-	int ioreg;
-	
-	unsigned long mfr; /* Flash IDs - only one type of flash per device */
-	unsigned long id;
-	int chipshift;
-	char page256;
-	char pageadrlen;
-	unsigned long erasesize;
-	
-	int curfloor;
-	int curchip;
-	
-	int numchips;
-	struct Nand *chips;
-	struct mtd_info *nextdoc;
-	struct semaphore lock;
+struct DiskOnChip
+{
+    unsigned long physadr;
+    unsigned long virtadr;
+    unsigned long totlen;
+    char ChipID; /* Type of DiskOnChip */
+    int ioreg;
+
+    unsigned long mfr; /* Flash IDs - only one type of flash per device */
+    unsigned long id;
+    int chipshift;
+    char page256;
+    char pageadrlen;
+    unsigned long erasesize;
+
+    int curfloor;
+    int curchip;
+
+    int numchips;
+    struct Nand *chips;
+    struct mtd_info *nextdoc;
+    struct semaphore lock;
 };
 
 int doc_decode_ecc(unsigned char sector[512], unsigned char ecc1[6]);

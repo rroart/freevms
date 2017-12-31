@@ -180,62 +180,63 @@
                                     (FOO < SOUND_MIXER_NRDEVICES) && \
                                     (CODEC)->supported_mixers & (1<<FOO) )
 
-struct ac97_codec {
-	/* AC97 controller connected with */
-	void *private_data;
+struct ac97_codec
+{
+    /* AC97 controller connected with */
+    void *private_data;
 
-	char *name;
-	int id;
-	int dev_mixer; 
-	int type;
+    char *name;
+    int id;
+    int dev_mixer;
+    int type;
 
-	struct ac97_ops *codec_ops;
+    struct ac97_ops *codec_ops;
 
-	/* controller specific lower leverl ac97 accessing routines */
-	u16  (*codec_read)  (struct ac97_codec *codec, u8 reg);
-	void (*codec_write) (struct ac97_codec *codec, u8 reg, u16 val);
+    /* controller specific lower leverl ac97 accessing routines */
+    u16  (*codec_read)  (struct ac97_codec *codec, u8 reg);
+    void (*codec_write) (struct ac97_codec *codec, u8 reg, u16 val);
 
-	/* Wait for codec-ready.  Ok to sleep here.  */
-	void  (*codec_wait)  (struct ac97_codec *codec);
+    /* Wait for codec-ready.  Ok to sleep here.  */
+    void  (*codec_wait)  (struct ac97_codec *codec);
 
-	/* OSS mixer masks */
-	int modcnt;
-	int supported_mixers;
-	int stereo_mixers;
-	int record_sources;
+    /* OSS mixer masks */
+    int modcnt;
+    int supported_mixers;
+    int stereo_mixers;
+    int record_sources;
 
-	int bit_resolution;
+    int bit_resolution;
 
-	/* OSS mixer interface */
-	int  (*read_mixer) (struct ac97_codec *codec, int oss_channel);
-	void (*write_mixer)(struct ac97_codec *codec, int oss_channel,
-			    unsigned int left, unsigned int right);
-	int  (*recmask_io) (struct ac97_codec *codec, int rw, int mask);
-	int  (*mixer_ioctl)(struct ac97_codec *codec, unsigned int cmd, unsigned long arg);
+    /* OSS mixer interface */
+    int  (*read_mixer) (struct ac97_codec *codec, int oss_channel);
+    void (*write_mixer)(struct ac97_codec *codec, int oss_channel,
+                        unsigned int left, unsigned int right);
+    int  (*recmask_io) (struct ac97_codec *codec, int rw, int mask);
+    int  (*mixer_ioctl)(struct ac97_codec *codec, unsigned int cmd, unsigned long arg);
 
-	/* saved OSS mixer states */
-	unsigned int mixer_state[SOUND_MIXER_NRDEVICES];
+    /* saved OSS mixer states */
+    unsigned int mixer_state[SOUND_MIXER_NRDEVICES];
 
-	/* Software Modem interface */
-	int  (*modem_ioctl)(struct ac97_codec *codec, unsigned int cmd, unsigned long arg);
+    /* Software Modem interface */
+    int  (*modem_ioctl)(struct ac97_codec *codec, unsigned int cmd, unsigned long arg);
 };
 
 /*
  *	Operation structures for each known AC97 chip
  */
- 
+
 struct ac97_ops
 {
-	/* Initialise */
-	int (*init)(struct ac97_codec *c);
-	/* Amplifier control */
-	int (*amplifier)(struct ac97_codec *codec, int on);
-	/* Digital mode control */
-	int (*digital)(struct ac97_codec *codec, int format);
+    /* Initialise */
+    int (*init)(struct ac97_codec *c);
+    /* Amplifier control */
+    int (*amplifier)(struct ac97_codec *codec, int on);
+    /* Digital mode control */
+    int (*digital)(struct ac97_codec *codec, int format);
 };
 
 extern int ac97_read_proc (char *page_out, char **start, off_t off,
-			   int count, int *eof, void *data);
+                           int count, int *eof, void *data);
 extern int ac97_probe_codec(struct ac97_codec *);
 extern unsigned int ac97_set_adc_rate(struct ac97_codec *codec, unsigned int rate);
 extern unsigned int ac97_set_dac_rate(struct ac97_codec *codec, unsigned int rate);

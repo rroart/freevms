@@ -54,20 +54,27 @@
 
 union _FP_UNION_D
 {
-  double flt;
-  struct {
+    double flt;
+    struct
+    {
 #if __BYTE_ORDER == __BIG_ENDIAN
-    unsigned sign  : 1;
-    unsigned exp   : _FP_EXPBITS_D;
-    unsigned frac1 : _FP_FRACBITS_D - (_FP_IMPLBIT_D != 0) - _FP_W_TYPE_SIZE;
-    unsigned frac0 : _FP_W_TYPE_SIZE;
+        unsigned sign  : 1;
+unsigned exp   :
+        _FP_EXPBITS_D;
+unsigned frac1 :
+        _FP_FRACBITS_D - (_FP_IMPLBIT_D != 0) - _FP_W_TYPE_SIZE;
+unsigned frac0 :
+        _FP_W_TYPE_SIZE;
 #else
-    unsigned frac0 : _FP_W_TYPE_SIZE;
-    unsigned frac1 : _FP_FRACBITS_D - (_FP_IMPLBIT_D != 0) - _FP_W_TYPE_SIZE;
-    unsigned exp   : _FP_EXPBITS_D;
-    unsigned sign  : 1;
+unsigned frac0 :
+        _FP_W_TYPE_SIZE;
+unsigned frac1 :
+        _FP_FRACBITS_D - (_FP_IMPLBIT_D != 0) - _FP_W_TYPE_SIZE;
+unsigned exp   :
+        _FP_EXPBITS_D;
+        unsigned sign  : 1;
 #endif
-  } bits __attribute__((packed));
+    } bits __attribute__((packed));
 };
 
 #define FP_DECL_D(X)		_FP_DECL(2,X)
@@ -128,18 +135,23 @@ union _FP_UNION_D
 
 union _FP_UNION_D
 {
-  double flt;
-  struct {
+    double flt;
+    struct
+    {
 #if __BYTE_ORDER == __BIG_ENDIAN
-    unsigned sign : 1;
-    unsigned exp  : _FP_EXPBITS_D;
-    unsigned long frac : _FP_FRACBITS_D - (_FP_IMPLBIT_D != 0);
+        unsigned sign : 1;
+unsigned exp  :
+        _FP_EXPBITS_D;
+unsigned long frac :
+        _FP_FRACBITS_D - (_FP_IMPLBIT_D != 0);
 #else
-    unsigned long frac : _FP_FRACBITS_D - (_FP_IMPLBIT_D != 0);
-    unsigned exp  : _FP_EXPBITS_D;
-    unsigned sign : 1;
+unsigned long frac :
+        _FP_FRACBITS_D - (_FP_IMPLBIT_D != 0);
+unsigned exp  :
+        _FP_EXPBITS_D;
+        unsigned sign : 1;
 #endif
-  } bits __attribute__((packed));
+    } bits __attribute__((packed));
 };
 
 #define FP_DECL_D(X)		_FP_DECL(1,X)

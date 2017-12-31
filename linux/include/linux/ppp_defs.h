@@ -103,7 +103,8 @@ typedef __u32		ext_accm[8];
 /*
  * What to do with network protocol (NP) packets.
  */
-enum NPmode {
+enum NPmode
+{
     NPMODE_PASS,		/* pass the packet through */
     NPMODE_DROP,		/* silently drop the packet */
     NPMODE_ERROR,		/* return an error */
@@ -113,7 +114,8 @@ enum NPmode {
 /*
  * Statistics for LQRP and pppstats
  */
-struct pppstat	{
+struct pppstat
+{
     __u32	ppp_discards;	/* # frames discarded */
 
     __u32	ppp_ibytes;	/* bytes received */
@@ -125,11 +127,12 @@ struct pppstat	{
     __u32	ppp_obytes;	/* raw bytes sent */
     __u32	ppp_ooctects;	/* frame bytes sent */
     __u32	ppp_opackets;	/* packets sent */
-    __u32	ppp_oerrors;	/* transmit errors */ 
+    __u32	ppp_oerrors;	/* transmit errors */
     __u32	ppp_olqrs;	/* # LQR frames sent */
 };
 
-struct vjstat {
+struct vjstat
+{
     __u32	vjs_packets;	/* outbound packets */
     __u32	vjs_compressed;	/* outbound compressed packets */
     __u32	vjs_searches;	/* searches for connection state */
@@ -140,7 +143,8 @@ struct vjstat {
     __u32	vjs_tossed;	/* inbound packets tossed because of error */
 };
 
-struct compstat {
+struct compstat
+{
     __u32	unc_bytes;	/* total uncompressed bytes */
     __u32	unc_packets;	/* total uncompressed packets */
     __u32	comp_bytes;	/* compressed bytes */
@@ -155,12 +159,14 @@ struct compstat {
     double	ratio;		/* not computed in kernel. */
 };
 
-struct ppp_stats {
+struct ppp_stats
+{
     struct pppstat	p;	/* basic PPP statistics */
     struct vjstat	vj;	/* VJ header compression statistics */
 };
 
-struct ppp_comp_stats {
+struct ppp_comp_stats
+{
     struct compstat	c;	/* packet compression statistics */
     struct compstat	d;	/* packet decompression statistics */
 };
@@ -169,7 +175,8 @@ struct ppp_comp_stats {
  * The following structure records the time in seconds since
  * the last NP packet was sent or received.
  */
-struct ppp_idle {
+struct ppp_idle
+{
     time_t xmit_idle;		/* time since last NP packet sent */
     time_t recv_idle;		/* time since last NP packet received */
 };

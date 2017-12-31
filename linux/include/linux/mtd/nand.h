@@ -52,12 +52,13 @@ extern int nand_scan (struct mtd_info *mtd);
 /*
  * Enumeration for NAND flash chip state
  */
-typedef enum {
-	FL_READY,
-	FL_READING,
-	FL_WRITING,
-	FL_ERASING,
-	FL_SYNCING
+typedef enum
+{
+    FL_READY,
+    FL_READING,
+    FL_WRITING,
+    FL_ERASING,
+    FL_SYNCING
 } nand_state_t;
 
 /*
@@ -91,20 +92,21 @@ typedef enum {
  *  reserved - padding to make structure fall on word boundary if
  *             when ECC is in use
  */
-struct nand_chip {
-	unsigned long IO_ADDR;
-	unsigned long CTRL_ADDR;
-	unsigned int CLE;
-	unsigned int ALE;
-	unsigned int NCE;
-	spinlock_t chip_lock;
-	wait_queue_head_t wq;
-	nand_state_t state;
-	int page_shift;
-	u_char *data_buf;
+struct nand_chip
+{
+    unsigned long IO_ADDR;
+    unsigned long CTRL_ADDR;
+    unsigned int CLE;
+    unsigned int ALE;
+    unsigned int NCE;
+    spinlock_t chip_lock;
+    wait_queue_head_t wq;
+    nand_state_t state;
+    int page_shift;
+    u_char *data_buf;
 #ifdef CONFIG_MTD_NAND_ECC
-	u_char ecc_code_buf[6];
-	u_char reserved[2];
+    u_char ecc_code_buf[6];
+    u_char reserved[2];
 #endif
 };
 
@@ -141,14 +143,15 @@ struct nand_chip {
  *
  *  erasesize - size of an erase block in the flash device.
  */
-struct nand_flash_dev {
-	char * name;
-	int manufacture_id;
-	int model_id;
-	int chipshift;
-	char page256;
-	char pageadrlen;
-	unsigned long erasesize;
+struct nand_flash_dev
+{
+    char * name;
+    int manufacture_id;
+    int model_id;
+    int chipshift;
+    char page256;
+    char pageadrlen;
+    unsigned long erasesize;
 };
 
 #endif /* __LINUX_MTD_NAND_H */

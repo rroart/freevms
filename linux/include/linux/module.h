@@ -30,21 +30,21 @@ struct exception_table_entry;
 /* Used by get_kernel_syms, which is obsolete.  */
 struct kernel_sym
 {
-	unsigned long value;
-	char name[60];		/* should have been 64-sizeof(long); oh well */
+    unsigned long value;
+    char name[60];		/* should have been 64-sizeof(long); oh well */
 };
 
 struct module_symbol
 {
-	unsigned long value;
-	const char *name;
+    unsigned long value;
+    const char *name;
 };
 
 struct module_ref
 {
-	struct module *dep;	/* "parent" pointer */
-	struct module *ref;	/* "child" pointer */
-	struct module_ref *next_ref;
+    struct module *dep;	/* "parent" pointer */
+    struct module *ref;	/* "child" pointer */
+    struct module_ref *next_ref;
 };
 
 /* TBD */
@@ -52,52 +52,52 @@ struct module_persist;
 
 struct module
 {
-	unsigned long size_of_struct;	/* == sizeof(module) */
-	struct module *next;
-	const char *name;
-	unsigned long size;
+    unsigned long size_of_struct;	/* == sizeof(module) */
+    struct module *next;
+    const char *name;
+    unsigned long size;
 
-	union
-	{
-		atomic_t usecount;
-		long pad;
-	} uc;				/* Needs to keep its size - so says rth */
+    union
+    {
+        atomic_t usecount;
+        long pad;
+    } uc;				/* Needs to keep its size - so says rth */
 
-	unsigned long flags;		/* AUTOCLEAN et al */
+    unsigned long flags;		/* AUTOCLEAN et al */
 
-	unsigned nsyms;
-	unsigned ndeps;
+    unsigned nsyms;
+    unsigned ndeps;
 
-	struct module_symbol *syms;
-	struct module_ref *deps;
-	struct module_ref *refs;
-	int (*init)(void);
-	void (*cleanup)(void);
-	const struct exception_table_entry *ex_table_start;
-	const struct exception_table_entry *ex_table_end;
+    struct module_symbol *syms;
+    struct module_ref *deps;
+    struct module_ref *refs;
+    int (*init)(void);
+    void (*cleanup)(void);
+    const struct exception_table_entry *ex_table_start;
+    const struct exception_table_entry *ex_table_end;
 #ifdef __alpha__
-	unsigned long gp;
+    unsigned long gp;
 #endif
-	/* Members past this point are extensions to the basic
-	   module support and are optional.  Use mod_member_present()
-	   to examine them.  */
-	const struct module_persist *persist_start;
-	const struct module_persist *persist_end;
-	int (*can_unload)(void);
-	int runsize;			/* In modutils, not currently used */
-	const char *kallsyms_start;	/* All symbols for kernel debugging */
-	const char *kallsyms_end;
-	const char *archdata_start;	/* arch specific data for module */
-	const char *archdata_end;
-	const char *kernel_data;	/* Reserved for kernel internal use */
+    /* Members past this point are extensions to the basic
+       module support and are optional.  Use mod_member_present()
+       to examine them.  */
+    const struct module_persist *persist_start;
+    const struct module_persist *persist_end;
+    int (*can_unload)(void);
+    int runsize;			/* In modutils, not currently used */
+    const char *kallsyms_start;	/* All symbols for kernel debugging */
+    const char *kallsyms_end;
+    const char *archdata_start;	/* arch specific data for module */
+    const char *archdata_end;
+    const char *kernel_data;	/* Reserved for kernel internal use */
 };
 
 struct module_info
 {
-	unsigned long addr;
-	unsigned long size;
-	unsigned long flags;
-	long usecount;
+    unsigned long addr;
+    unsigned long size;
+    unsigned long flags;
+    long usecount;
 };
 
 /* Bits of module.flags.  */
@@ -123,7 +123,7 @@ struct module_info
 #define MOD_CAN_QUERY(mod) (((mod)->flags & (MOD_RUNNING | MOD_INITIALIZING)) && !((mod)->flags & MOD_DELETED))
 
 /* When struct module is extended, we must test whether the new member
-   is present in the header received from insmod before we can use it.  
+   is present in the header received from insmod before we can use it.
    This function returns true if the member is present.  */
 
 #define mod_member_present(mod,member) 					\
@@ -138,7 +138,7 @@ struct module_info
 	(((unsigned long)(&((type *)0L)->member) +			\
 	  sizeof(((type *)0L)->member)) <=				\
 	 ((mod)->archdata_end - (mod)->archdata_start))
-	 
+
 
 /* Check if an address p with number of entries n is within the body of module m */
 #define mod_bound(p, n, m) ((unsigned long)(p) >= ((unsigned long)(m) + ((m)->size_of_struct)) && \
@@ -186,11 +186,12 @@ extern const void *inter_module_get(const char *);
 extern const void *inter_module_get_request(const char *, const char *);
 extern void inter_module_put(const char *);
 
-struct inter_module_entry {
-	struct list_head list;
-	const char *im_name;
-	struct module *owner;
-	const void *userdata;
+struct inter_module_entry
+{
+    struct list_head list;
+    const char *im_name;
+    struct module *owner;
+    const void *userdata;
 };
 
 extern int try_inc_mod_count(struct module *mod);
@@ -277,12 +278,12 @@ static const struct gtype##_id * __module_##gtype##_table \
  * is a GPL combined work.
  *
  * This exists for several reasons
- * 1.	So modinfo can show license info for users wanting to vet their setup 
+ * 1.	So modinfo can show license info for users wanting to vet their setup
  *	is free
  * 2.	So the community can ignore bug reports including proprietary modules
  * 3.	So vendors can do likewise based on their own policies
  */
- 
+
 #define MODULE_LICENSE(license) 	\
 static const char __module_license[] __attribute__((section(".modinfo"))) =   \
 "license=" license
@@ -297,10 +298,10 @@ extern struct module __this_module;
 
 #include <linux/version.h>
 static const char __module_kernel_version[] __attribute__((section(".modinfo"))) =
-"kernel_version=" UTS_RELEASE;
+    "kernel_version=" UTS_RELEASE;
 #ifdef MODVERSIONS
 static const char __module_using_checksums[] __attribute__((section(".modinfo"))) =
-"using_checksums=1";
+    "using_checksums=1";
 #endif
 
 #else /* MODULE */

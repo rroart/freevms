@@ -42,7 +42,8 @@ struct e1000_hw_stats;
 
 /* Enumerated types specific to the e1000 hardware */
 /* Media Access Controlers */
-typedef enum {
+typedef enum
+{
     e1000_undefined = 0,
     e1000_82542_rev2_0,
     e1000_82542_rev2_1,
@@ -65,7 +66,8 @@ typedef enum {
     e1000_num_macs
 } e1000_mac_type;
 
-typedef enum {
+typedef enum
+{
     e1000_eeprom_uninitialized = 0,
     e1000_eeprom_spi,
     e1000_eeprom_microwire,
@@ -76,27 +78,31 @@ typedef enum {
 } e1000_eeprom_type;
 
 /* Media Types */
-typedef enum {
+typedef enum
+{
     e1000_media_type_copper = 0,
     e1000_media_type_fiber = 1,
     e1000_media_type_internal_serdes = 2,
     e1000_num_media_types
 } e1000_media_type;
 
-typedef enum {
+typedef enum
+{
     e1000_10_half = 0,
     e1000_10_full = 1,
     e1000_100_half = 2,
     e1000_100_full = 3
 } e1000_speed_duplex_type;
 
-struct e1000_shadow_ram {
+struct e1000_shadow_ram
+{
     uint16_t    eeprom_word;
     boolean_t   modified;
 };
 
 /* PCI bus types */
-typedef enum {
+typedef enum
+{
     e1000_bus_type_unknown = 0,
     e1000_bus_type_pci,
     e1000_bus_type_pcix,
@@ -105,7 +111,8 @@ typedef enum {
 } e1000_bus_type;
 
 /* PCI bus speeds */
-typedef enum {
+typedef enum
+{
     e1000_bus_speed_unknown = 0,
     e1000_bus_speed_33,
     e1000_bus_speed_66,
@@ -117,7 +124,8 @@ typedef enum {
 } e1000_bus_speed;
 
 /* PCI bus widths */
-typedef enum {
+typedef enum
+{
     e1000_bus_width_unknown = 0,
     /* These PCIe values should literally match the possible return values
      * from config space */
@@ -130,7 +138,8 @@ typedef enum {
 } e1000_bus_width;
 
 /* PHY status info structure and supporting enums */
-typedef enum {
+typedef enum
+{
     e1000_cable_length_50 = 0,
     e1000_cable_length_50_80,
     e1000_cable_length_80_110,
@@ -139,14 +148,16 @@ typedef enum {
     e1000_cable_length_undefined = 0xFF
 } e1000_cable_length;
 
-typedef enum {
+typedef enum
+{
     e1000_gg_cable_length_60 = 0,
     e1000_gg_cable_length_60_115 = 1,
     e1000_gg_cable_length_115_150 = 2,
     e1000_gg_cable_length_150 = 4
 } e1000_gg_cable_length;
 
-typedef enum {
+typedef enum
+{
     e1000_igp_cable_length_10  = 10,
     e1000_igp_cable_length_20  = 20,
     e1000_igp_cable_length_30  = 30,
@@ -168,37 +179,43 @@ typedef enum {
     e1000_igp_cable_length_180 = 180
 } e1000_igp_cable_length;
 
-typedef enum {
+typedef enum
+{
     e1000_10bt_ext_dist_enable_normal = 0,
     e1000_10bt_ext_dist_enable_lower,
     e1000_10bt_ext_dist_enable_undefined = 0xFF
 } e1000_10bt_ext_dist_enable;
 
-typedef enum {
+typedef enum
+{
     e1000_rev_polarity_normal = 0,
     e1000_rev_polarity_reversed,
     e1000_rev_polarity_undefined = 0xFF
 } e1000_rev_polarity;
 
-typedef enum {
+typedef enum
+{
     e1000_downshift_normal = 0,
     e1000_downshift_activated,
     e1000_downshift_undefined = 0xFF
 } e1000_downshift;
 
-typedef enum {
+typedef enum
+{
     e1000_smart_speed_default = 0,
     e1000_smart_speed_on,
     e1000_smart_speed_off
 } e1000_smart_speed;
 
-typedef enum {
+typedef enum
+{
     e1000_polarity_reversal_enabled = 0,
     e1000_polarity_reversal_disabled,
     e1000_polarity_reversal_undefined = 0xFF
 } e1000_polarity_reversal;
 
-typedef enum {
+typedef enum
+{
     e1000_auto_x_mode_manual_mdi = 0,
     e1000_auto_x_mode_manual_mdix,
     e1000_auto_x_mode_auto1,
@@ -206,13 +223,15 @@ typedef enum {
     e1000_auto_x_mode_undefined = 0xFF
 } e1000_auto_x_mode;
 
-typedef enum {
+typedef enum
+{
     e1000_1000t_rx_status_not_ok = 0,
     e1000_1000t_rx_status_ok,
     e1000_1000t_rx_status_undefined = 0xFF
 } e1000_1000t_rx_status;
 
-typedef enum {
+typedef enum
+{
     e1000_phy_m88 = 0,
     e1000_phy_igp,
     e1000_phy_igp_2,
@@ -222,27 +241,31 @@ typedef enum {
     e1000_phy_undefined = 0xFF
 } e1000_phy_type;
 
-typedef enum {
+typedef enum
+{
     e1000_ms_hw_default = 0,
     e1000_ms_force_master,
     e1000_ms_force_slave,
     e1000_ms_auto
 } e1000_ms_type;
 
-typedef enum {
+typedef enum
+{
     e1000_ffe_config_enabled = 0,
     e1000_ffe_config_active,
     e1000_ffe_config_blocked
 } e1000_ffe_config;
 
-typedef enum {
+typedef enum
+{
     e1000_dsp_config_disabled = 0,
     e1000_dsp_config_enabled,
     e1000_dsp_config_activated,
     e1000_dsp_config_undefined = 0xFF
 } e1000_dsp_config;
 
-struct e1000_phy_info {
+struct e1000_phy_info
+{
     e1000_cable_length cable_length;
     e1000_10bt_ext_dist_enable extended_10bt_distance;
     e1000_rev_polarity cable_polarity;
@@ -253,12 +276,14 @@ struct e1000_phy_info {
     e1000_1000t_rx_status remote_rx;
 };
 
-struct e1000_phy_stats {
+struct e1000_phy_stats
+{
     uint32_t idle_errors;
     uint32_t receive_errors;
 };
 
-struct e1000_eeprom_info {
+struct e1000_eeprom_info
+{
     e1000_eeprom_type type;
     uint16_t word_size;
     uint16_t opcode_bits;
@@ -272,7 +297,8 @@ struct e1000_eeprom_info {
 /* Flex ASF Information */
 #define E1000_HOST_IF_MAX_SIZE  2048
 
-typedef enum {
+typedef enum
+{
     e1000_byte_align = 0,
     e1000_word_align = 1,
     e1000_dword_align = 2
@@ -345,7 +371,8 @@ uint32_t e1000_enable_mng_pass_thru(struct e1000_hw *hw);
 #define E1000_VFTA_ENTRY_MASK                        0x7F
 #define E1000_VFTA_ENTRY_BIT_SHIFT_MASK              0x1F
 
-struct e1000_host_mng_command_header {
+struct e1000_host_mng_command_header
+{
     uint8_t command_id;
     uint8_t checksum;
     uint16_t reserved1;
@@ -353,12 +380,14 @@ struct e1000_host_mng_command_header {
     uint16_t command_length;
 };
 
-struct e1000_host_mng_command_info {
+struct e1000_host_mng_command_info
+{
     struct e1000_host_mng_command_header command_header;  /* Command Head/Command Result Head has 4 bytes */
     uint8_t command_data[E1000_HI_MAX_MNG_DATA_LENGTH];   /* Command data can length 0..0x658*/
 };
 #ifdef E1000_BIG_ENDIAN
-struct e1000_host_mng_dhcp_cookie{
+struct e1000_host_mng_dhcp_cookie
+{
     uint32_t signature;
     uint16_t vlan_id;
     uint8_t reserved0;
@@ -369,7 +398,8 @@ struct e1000_host_mng_dhcp_cookie{
     uint16_t reserved2;
 };
 #else
-struct e1000_host_mng_dhcp_cookie{
+struct e1000_host_mng_dhcp_cookie
+{
     uint32_t signature;
     uint8_t status;
     uint8_t reserved0;
@@ -587,7 +617,8 @@ int32_t e1000_check_phy_reset_block(struct e1000_hw *hw);
 #define MAX_NUMBER_OF_DESCRIPTORS  0xFFF8
 
 /* Receive Descriptor */
-struct e1000_rx_desc {
+struct e1000_rx_desc
+{
     uint64_t buffer_addr; /* Address of the descriptor's data buffer */
     uint16_t length;     /* Length of data DMAed into data buffer */
     uint16_t csum;       /* Packet checksum */
@@ -597,23 +628,30 @@ struct e1000_rx_desc {
 };
 
 /* Receive Descriptor - Extended */
-union e1000_rx_desc_extended {
-    struct {
+union e1000_rx_desc_extended
+{
+    struct
+    {
         uint64_t buffer_addr;
         uint64_t reserved;
     } read;
-    struct {
-        struct {
+    struct
+    {
+        struct
+        {
             uint32_t mrq;              /* Multiple Rx Queues */
-            union {
+            union
+            {
                 uint32_t rss;          /* RSS Hash */
-                struct {
+                struct
+                {
                     uint16_t ip_id;    /* IP id */
                     uint16_t csum;     /* Packet Checksum */
                 } csum_ip;
             } hi_dword;
         } lower;
-        struct {
+        struct
+        {
             uint32_t status_error;     /* ext status/error */
             uint16_t length;
             uint16_t vlan;             /* VLAN tag */
@@ -623,28 +661,36 @@ union e1000_rx_desc_extended {
 
 #define MAX_PS_BUFFERS 4
 /* Receive Descriptor - Packet Split */
-union e1000_rx_desc_packet_split {
-    struct {
+union e1000_rx_desc_packet_split
+{
+    struct
+    {
         /* one buffer for protocol header(s), three data buffers */
         uint64_t buffer_addr[MAX_PS_BUFFERS];
     } read;
-    struct {
-        struct {
+    struct
+    {
+        struct
+        {
             uint32_t mrq;              /* Multiple Rx Queues */
-            union {
+            union
+            {
                 uint32_t rss;          /* RSS Hash */
-                struct {
+                struct
+                {
                     uint16_t ip_id;    /* IP id */
                     uint16_t csum;     /* Packet Checksum */
                 } csum_ip;
             } hi_dword;
         } lower;
-        struct {
+        struct
+        {
             uint32_t status_error;     /* ext status/error */
             uint16_t length0;          /* length of buffer 0 */
             uint16_t vlan;             /* VLAN tag */
         } middle;
-        struct {
+        struct
+        {
             uint16_t header_status;
             uint16_t length[3];        /* length of buffers 1-3 */
         } upper;
@@ -707,19 +753,24 @@ union e1000_rx_desc_packet_split {
 
 
 /* Transmit Descriptor */
-struct e1000_tx_desc {
+struct e1000_tx_desc
+{
     uint64_t buffer_addr;       /* Address of the descriptor's data buffer */
-    union {
+    union
+    {
         uint32_t data;
-        struct {
+        struct
+        {
             uint16_t length;    /* Data buffer length */
             uint8_t cso;        /* Checksum offset */
             uint8_t cmd;        /* Descriptor control */
         } flags;
     } lower;
-    union {
+    union
+    {
         uint32_t data;
-        struct {
+        struct
+        {
             uint8_t status;     /* Descriptor status */
             uint8_t css;        /* Checksum start */
             uint16_t special;
@@ -750,27 +801,34 @@ struct e1000_tx_desc {
 #define E1000_TXD_STAT_TC    0x00000004 /* Tx Underrun */
 
 /* Offload Context Descriptor */
-struct e1000_context_desc {
-    union {
+struct e1000_context_desc
+{
+    union
+    {
         uint32_t ip_config;
-        struct {
+        struct
+        {
             uint8_t ipcss;      /* IP checksum start */
             uint8_t ipcso;      /* IP checksum offset */
             uint16_t ipcse;     /* IP checksum end */
         } ip_fields;
     } lower_setup;
-    union {
+    union
+    {
         uint32_t tcp_config;
-        struct {
+        struct
+        {
             uint8_t tucss;      /* TCP checksum start */
             uint8_t tucso;      /* TCP checksum offset */
             uint16_t tucse;     /* TCP checksum end */
         } tcp_fields;
     } upper_setup;
     uint32_t cmd_and_length;    /* */
-    union {
+    union
+    {
         uint32_t data;
-        struct {
+        struct
+        {
             uint8_t status;     /* Descriptor status */
             uint8_t hdr_len;    /* Header length */
             uint16_t mss;       /* Maximum segment size */
@@ -779,19 +837,24 @@ struct e1000_context_desc {
 };
 
 /* Offload data descriptor */
-struct e1000_data_desc {
+struct e1000_data_desc
+{
     uint64_t buffer_addr;       /* Address of the descriptor's buffer address */
-    union {
+    union
+    {
         uint32_t data;
-        struct {
+        struct
+        {
             uint16_t length;    /* Data buffer length */
             uint8_t typ_len_ext;        /* */
             uint8_t cmd;        /* */
         } flags;
     } lower;
-    union {
+    union
+    {
         uint32_t data;
-        struct {
+        struct
+        {
             uint8_t status;     /* Descriptor status */
             uint8_t popts;      /* Packet Options */
             uint16_t special;   /* */
@@ -809,7 +872,8 @@ struct e1000_data_desc {
 
 
 /* Receive Address Register */
-struct e1000_rar {
+struct e1000_rar
+{
     volatile uint32_t low;      /* receive address low */
     volatile uint32_t high;     /* receive address high */
 };
@@ -819,7 +883,8 @@ struct e1000_rar {
 #define E1000_NUM_MTA_REGISTERS_ICHXLAN 32
 
 /* IPv4 Address Table Entry */
-struct e1000_ipv4_at_entry {
+struct e1000_ipv4_at_entry
+{
     volatile uint32_t ipv4_addr;        /* IP Address (RW) */
     volatile uint32_t reserved;
 };
@@ -831,24 +896,28 @@ struct e1000_ipv4_at_entry {
 #define E1000_IP6AT_SIZE                  1
 
 /* IPv6 Address Table Entry */
-struct e1000_ipv6_at_entry {
+struct e1000_ipv6_at_entry
+{
     volatile uint8_t ipv6_addr[16];
 };
 
 /* Flexible Filter Length Table Entry */
-struct e1000_fflt_entry {
+struct e1000_fflt_entry
+{
     volatile uint32_t length;   /* Flexible Filter Length (RW) */
     volatile uint32_t reserved;
 };
 
 /* Flexible Filter Mask Table Entry */
-struct e1000_ffmt_entry {
+struct e1000_ffmt_entry
+{
     volatile uint32_t mask;     /* Flexible Filter Mask (RW) */
     volatile uint32_t reserved;
 };
 
 /* Flexible Filter Value Table Entry */
-struct e1000_ffvt_entry {
+struct e1000_ffvt_entry
+{
     volatile uint32_t value;    /* Flexible Filter Value (RW) */
     volatile uint32_t reserved;
 };
@@ -1123,7 +1192,7 @@ struct e1000_ffvt_entry {
 #define E1000_82542_RDH0     E1000_82542_RDH
 #define E1000_82542_RDT0     E1000_82542_RDT
 #define E1000_82542_SRRCTL(_n) (0x280C + ((_n) << 8)) /* Split and Replication
-                                                       * RX Control - RW */
+* RX Control - RW */
 #define E1000_82542_DCA_RXCTRL(_n) (0x02814 + ((_n) << 8))
 #define E1000_82542_RDBAH3   0x02B04 /* RX Desc Base High Queue 3 - RW */
 #define E1000_82542_RDBAL3   0x02B00 /* RX Desc Low Queue 3 - RW */
@@ -1304,7 +1373,8 @@ struct e1000_ffvt_entry {
 #define E1000_82542_MANC2H      E1000_MANC2H
 
 /* Statistics counters collected by the MAC */
-struct e1000_hw_stats {
+struct e1000_hw_stats
+{
     uint64_t crcerrs;
     uint64_t algnerrc;
     uint64_t symerrs;
@@ -1375,7 +1445,8 @@ struct e1000_hw_stats {
 };
 
 /* Structure containing variables used by the shared code (e1000_hw.c) */
-struct e1000_hw {
+struct e1000_hw
+{
     uint8_t *hw_addr;
     uint8_t *flash_address;
     e1000_mac_type mac_type;
@@ -1524,7 +1595,7 @@ struct e1000_hw {
 #define E1000_STATUS_SPEED_100  0x00000040      /* Speed 100Mb/s */
 #define E1000_STATUS_SPEED_1000 0x00000080      /* Speed 1000Mb/s */
 #define E1000_STATUS_LAN_INIT_DONE 0x00000200   /* Lan Init Completion
-                                                   by EEPROM/Flash */
+by EEPROM/Flash */
 #define E1000_STATUS_ASDV       0x00000300      /* Auto speed detect value */
 #define E1000_STATUS_DOCK_CI    0x00000800      /* Change in Dock/Undock state. Clear on write '0'. */
 #define E1000_STATUS_GIO_MASTER_ENABLE 0x00080000 /* Status of Master requests. */
@@ -1563,7 +1634,7 @@ struct e1000_hw {
 #define E1000_EECD_PRES      0x00000100 /* EEPROM Present */
 #define E1000_EECD_SIZE      0x00000200 /* EEPROM Size (0=64 word 1=256 word) */
 #define E1000_EECD_ADDR_BITS 0x00000400 /* EEPROM Addressing bits based on type
-                                         * (0-small, 1-large) */
+* (0-small, 1-large) */
 #define E1000_EECD_TYPE      0x00002000 /* EEPROM Type (1-SPI, 0-Microwire) */
 #ifndef E1000_EEPROM_GRANT_ATTEMPTS
 #define E1000_EEPROM_GRANT_ATTEMPTS 1000 /* EEPROM # attempts to gain grant */
@@ -1985,7 +2056,7 @@ struct e1000_hw {
 #define E1000_TXDCTL_LWTHRESH 0xFE000000 /* TXDCTL Low Threshold */
 #define E1000_TXDCTL_FULL_TX_DESC_WB 0x01010000 /* GRAN=1, WTHRESH=1 */
 #define E1000_TXDCTL_COUNT_DESC 0x00400000 /* Enable the counting of desc.
-                                              still to be processed. */
+still to be processed. */
 /* Transmit Configuration Word */
 #define E1000_TXCW_FD         0x00000020        /* TXCW full duplex */
 #define E1000_TXCW_HD         0x00000040        /* TXCW half duplex */
@@ -2097,7 +2168,7 @@ struct e1000_hw {
 #define E1000_MANC_SNAP_EN       0x00001000 /* Accept LLC/SNAP */
 #define E1000_MANC_ARP_EN        0x00002000 /* Enable ARP Request Filtering */
 #define E1000_MANC_NEIGHBOR_EN   0x00004000 /* Enable Neighbor Discovery
-                                             * Filtering */
+* Filtering */
 #define E1000_MANC_ARP_RES_EN    0x00008000 /* Enable ARP response Filtering */
 #define E1000_MANC_TCO_RESET     0x00010000 /* TCO Reset Occurred */
 #define E1000_MANC_RCV_TCO_EN    0x00020000 /* Receive TCO Packets Enabled */
@@ -2105,11 +2176,11 @@ struct e1000_hw {
 #define E1000_MANC_RCV_ALL       0x00080000 /* Receive All Enabled */
 #define E1000_MANC_BLK_PHY_RST_ON_IDE   0x00040000 /* Block phy resets */
 #define E1000_MANC_EN_MAC_ADDR_FILTER   0x00100000 /* Enable MAC address
-                                                    * filtering */
+* filtering */
 #define E1000_MANC_EN_MNG2HOST   0x00200000 /* Enable MNG packets to host
-                                             * memory */
+* memory */
 #define E1000_MANC_EN_IP_ADDR_FILTER    0x00400000 /* Enable IP address
-                                                    * filtering */
+* filtering */
 #define E1000_MANC_EN_XSUM_FILTER   0x00800000 /* Enable checksum filtering */
 #define E1000_MANC_BR_EN         0x01000000 /* Enable broadcast filtering */
 #define E1000_MANC_SMB_REQ       0x01000000 /* SMBus Request */
@@ -2145,7 +2216,8 @@ struct e1000_hw {
 /* FFLT Debug Register */
 #define E1000_FFLT_DBG_INVC     0x00100000 /* Invalid /C/ code handling */
 
-typedef enum {
+typedef enum
+{
     e1000_mng_mode_none     = 0,
     e1000_mng_mode_asf,
     e1000_mng_mode_pt,
@@ -2156,7 +2228,7 @@ typedef enum {
 /* Host Inteface Control Register */
 #define E1000_HICR_EN           0x00000001  /* Enable Bit - RO */
 #define E1000_HICR_C            0x00000002  /* Driver sets this bit when done
-                                             * to put command in RAM */
+* to put command in RAM */
 #define E1000_HICR_SV           0x00000004  /* Status Validity */
 #define E1000_HICR_FWR          0x00000080  /* FW reset. Set by the Host */
 
@@ -2166,13 +2238,15 @@ typedef enum {
 #define E1000_HI_MAX_BLOCK_DWORD_LENGTH  448 /* Number of dwords in range */
 #define E1000_HI_COMMAND_TIMEOUT         500 /* Time in ms to process HI command */
 
-struct e1000_host_command_header {
+struct e1000_host_command_header
+{
     uint8_t command_id;
     uint8_t command_length;
     uint8_t command_options;   /* I/F bits for command, status for return */
     uint8_t checksum;
 };
-struct e1000_host_command_info {
+struct e1000_host_command_info
+{
     struct e1000_host_command_header command_header;  /* Command Head/Command Result Head has 4 bytes */
     uint8_t command_data[E1000_HI_MAX_DATA_LENGTH];   /* Command data can length 0..252 */
 };
@@ -2778,47 +2852,47 @@ struct e1000_host_command_info {
 /* Next Page TX Register */
 #define NPTX_MSG_CODE_FIELD 0x0001 /* NP msg code or unformatted data */
 #define NPTX_TOGGLE         0x0800 /* Toggles between exchanges
-                                    * of different NP
-                                    */
+* of different NP
+*/
 #define NPTX_ACKNOWLDGE2    0x1000 /* 1 = will comply with msg
-                                    * 0 = cannot comply with msg
-                                    */
+* 0 = cannot comply with msg
+      */
 #define NPTX_MSG_PAGE       0x2000 /* formatted(1)/unformatted(0) pg */
 #define NPTX_NEXT_PAGE      0x8000 /* 1 = addition NP will follow
-                                    * 0 = sending last NP
-                                    */
+      * 0 = sending last NP
+            */
 
-/* Link Partner Next Page Register */
+            /* Link Partner Next Page Register */
 #define LP_RNPR_MSG_CODE_FIELD 0x0001 /* NP msg code or unformatted data */
 #define LP_RNPR_TOGGLE         0x0800 /* Toggles between exchanges
-                                       * of different NP
-                                       */
+            * of different NP
+            */
 #define LP_RNPR_ACKNOWLDGE2    0x1000 /* 1 = will comply with msg
-                                       * 0 = cannot comply with msg
-                                       */
+            * 0 = cannot comply with msg
+                  */
 #define LP_RNPR_MSG_PAGE       0x2000  /* formatted(1)/unformatted(0) pg */
 #define LP_RNPR_ACKNOWLDGE     0x4000  /* 1 = ACK / 0 = NO ACK */
 #define LP_RNPR_NEXT_PAGE      0x8000  /* 1 = addition NP will follow
-                                        * 0 = sending last NP
-                                        */
+                  * 0 = sending last NP
+                        */
 
-/* 1000BASE-T Control Register */
+                        /* 1000BASE-T Control Register */
 #define CR_1000T_ASYM_PAUSE      0x0080 /* Advertise asymmetric pause bit */
 #define CR_1000T_HD_CAPS         0x0100 /* Advertise 1000T HD capability */
 #define CR_1000T_FD_CAPS         0x0200 /* Advertise 1000T FD capability  */
 #define CR_1000T_REPEATER_DTE    0x0400 /* 1=Repeater/switch device port */
-                                        /* 0=DTE device */
+                        /* 0=DTE device */
 #define CR_1000T_MS_VALUE        0x0800 /* 1=Configure PHY as Master */
-                                        /* 0=Configure PHY as Slave */
+                        /* 0=Configure PHY as Slave */
 #define CR_1000T_MS_ENABLE       0x1000 /* 1=Master/Slave manual config value */
-                                        /* 0=Automatic Master/Slave config */
+                        /* 0=Automatic Master/Slave config */
 #define CR_1000T_TEST_MODE_NORMAL 0x0000 /* Normal Operation */
 #define CR_1000T_TEST_MODE_1     0x2000 /* Transmit Waveform test */
 #define CR_1000T_TEST_MODE_2     0x4000 /* Master Transmit Jitter test */
 #define CR_1000T_TEST_MODE_3     0x6000 /* Slave Transmit Jitter test */
 #define CR_1000T_TEST_MODE_4     0x8000 /* Transmitter Distortion test */
 
-/* 1000BASE-T Status Register */
+                        /* 1000BASE-T Status Register */
 #define SR_1000T_IDLE_ERROR_CNT   0x00FF /* Num idle errors since last read */
 #define SR_1000T_ASYM_PAUSE_DIR   0x0100 /* LP asymmetric pause direction bit */
 #define SR_1000T_LP_HD_CAPS       0x0400 /* LP is 1000T HD capable */
@@ -2833,7 +2907,7 @@ struct e1000_host_command_info {
 #define FFE_IDLE_ERR_COUNT_TIMEOUT_20            20
 #define FFE_IDLE_ERR_COUNT_TIMEOUT_100           100
 
-/* Extended Status Register */
+                        /* Extended Status Register */
 #define IEEE_ESR_1000T_HD_CAPS 0x1000 /* 1000T HD capable */
 #define IEEE_ESR_1000T_FD_CAPS 0x2000 /* 1000T FD capable */
 #define IEEE_ESR_1000X_HD_CAPS 0x4000 /* 1000X HD capable */
@@ -2843,32 +2917,32 @@ struct e1000_host_command_info {
 #define PHY_TX_NORMAL_POLARITY 0      /* register 10h bit 8 (normal polarity) */
 
 #define AUTO_POLARITY_DISABLE  0x0010 /* register 11h bit 4 */
-                                      /* (0=enable, 1=disable) */
+                        /* (0=enable, 1=disable) */
 
-/* M88E1000 PHY Specific Control Register */
+                        /* M88E1000 PHY Specific Control Register */
 #define M88E1000_PSCR_JABBER_DISABLE    0x0001 /* 1=Jabber Function disabled */
 #define M88E1000_PSCR_POLARITY_REVERSAL 0x0002 /* 1=Polarity Reversal enabled */
 #define M88E1000_PSCR_SQE_TEST          0x0004 /* 1=SQE Test enabled */
 #define M88E1000_PSCR_CLK125_DISABLE    0x0010 /* 1=CLK125 low,
-                                                * 0=CLK125 toggling
-                                                */
+                        * 0=CLK125 toggling
+                            */
 #define M88E1000_PSCR_MDI_MANUAL_MODE  0x0000  /* MDI Crossover Mode bits 6:5 */
-                                               /* Manual MDI configuration */
+                            /* Manual MDI configuration */
 #define M88E1000_PSCR_MDIX_MANUAL_MODE 0x0020  /* Manual MDIX configuration */
 #define M88E1000_PSCR_AUTO_X_1000T     0x0040  /* 1000BASE-T: Auto crossover,
-                                                *  100BASE-TX/10BASE-T:
-                                                *  MDI Mode
-                                                */
+                            *  100BASE-TX/10BASE-T:
+                            *  MDI Mode
+                            */
 #define M88E1000_PSCR_AUTO_X_MODE      0x0060  /* Auto crossover enabled
-                                                * all speeds.
-                                                */
+                            * all speeds.
+                            */
 #define M88E1000_PSCR_10BT_EXT_DIST_ENABLE 0x0080
-                                        /* 1=Enable Extended 10BASE-T distance
-                                         * (Lower 10BASE-T RX Threshold)
-                                         * 0=Normal 10BASE-T RX Threshold */
+                            /* 1=Enable Extended 10BASE-T distance
+                             * (Lower 10BASE-T RX Threshold)
+                             * 0=Normal 10BASE-T RX Threshold */
 #define M88E1000_PSCR_MII_5BIT_ENABLE      0x0100
-                                        /* 1=5-Bit interface in 100BASE-TX
-                                         * 0=MII interface in 100BASE-TX */
+                            /* 1=5-Bit interface in 100BASE-TX
+                             * 0=MII interface in 100BASE-TX */
 #define M88E1000_PSCR_SCRAMBLER_DISABLE    0x0200 /* 1=Scrambler disable */
 #define M88E1000_PSCR_FORCE_LINK_GOOD      0x0400 /* 1=Force link good */
 #define M88E1000_PSCR_ASSERT_CRS_ON_TX     0x0800 /* 1=Assert CRS on Transmit */
@@ -2877,13 +2951,13 @@ struct e1000_host_command_info {
 #define M88E1000_PSCR_AUTO_X_MODE_SHIFT          5
 #define M88E1000_PSCR_10BT_EXT_DIST_ENABLE_SHIFT 7
 
-/* M88E1000 PHY Specific Status Register */
+                            /* M88E1000 PHY Specific Status Register */
 #define M88E1000_PSSR_JABBER             0x0001 /* 1=Jabber */
 #define M88E1000_PSSR_REV_POLARITY       0x0002 /* 1=Polarity reversed */
 #define M88E1000_PSSR_DOWNSHIFT          0x0020 /* 1=Downshifted */
 #define M88E1000_PSSR_MDIX               0x0040 /* 1=MDIX; 0=MDI */
 #define M88E1000_PSSR_CABLE_LENGTH       0x0380 /* 0=<50M;1=50-80M;2=80-110M;
-                                            * 3=110-140M;4=>140M */
+                            * 3=110-140M;4=>140M */
 #define M88E1000_PSSR_LINK               0x0400 /* 1=Link up, 0=Link down */
 #define M88E1000_PSSR_SPD_DPLX_RESOLVED  0x0800 /* 1=Speed & Duplex resolved */
 #define M88E1000_PSSR_PAGE_RCVD          0x1000 /* 1=Page received */
@@ -2901,10 +2975,10 @@ struct e1000_host_command_info {
 /* M88E1000 Extended PHY Specific Control Register */
 #define M88E1000_EPSCR_FIBER_LOOPBACK 0x4000 /* 1=Fiber loopback */
 #define M88E1000_EPSCR_DOWN_NO_IDLE   0x8000 /* 1=Lost lock detect enabled.
-                                              * Will assert lost lock and bring
-                                              * link down if idle not seen
-                                              * within 1ms in 1000BASE-T
-                                              */
+* Will assert lost lock and bring
+* link down if idle not seen
+* within 1ms in 1000BASE-T
+*/
 /* Number of times we will attempt to autonegotiate before downshifting if we
  * are the master */
 #define M88E1000_EPSCR_MASTER_DOWNSHIFT_MASK 0x0C00
@@ -3017,7 +3091,7 @@ struct e1000_host_command_info {
 
 /* IGP01E1000 GMII FIFO Register */
 #define IGP01E1000_GMII_FLEX_SPD               0x10 /* Enable flexible speed
-                                                     * on Link-Up */
+* on Link-Up */
 #define IGP01E1000_GMII_SPD                    0x20 /* Enable SPD */
 
 /* IGP01E1000 Analog Register */
@@ -3113,12 +3187,12 @@ struct e1000_host_command_info {
 
 /* DSP Distance Register (Page 5, Register 26) */
 #define GG82563_DSPD_CABLE_LENGTH               0x0007 /* 0 = <50M;
-                                                          1 = 50-80M;
-                                                          2 = 80-110M;
-                                                          3 = 110-140M;
-                                                          4 = >140M */
+1 = 50-80M;
+2 = 80-110M;
+3 = 110-140M;
+4 = >140M */
 
-/* Kumeran Mode Control Register (Page 193, Register 16) */
+    /* Kumeran Mode Control Register (Page 193, Register 16) */
 #define GG82563_KMCR_PHY_LEDS_EN                    0x0020 /* 1=PHY LEDs, 0=Kumeran Inband LEDs */
 #define GG82563_KMCR_FORCE_LINK_UP                  0x0040 /* 1=Force Link Up */
 #define GG82563_KMCR_SUPPRESS_SGMII_EPD_EXT         0x0080
@@ -3126,7 +3200,7 @@ struct e1000_host_command_info {
 #define GG82563_KMCR_MDIO_BUS_SPEED_SELECT          0x0400 /* 1=6.25MHz, 0=0.8MHz */
 #define GG82563_KMCR_PASS_FALSE_CARRIER             0x0800
 
-/* Power Management Control Register (Page 193, Register 20) */
+    /* Power Management Control Register (Page 193, Register 20) */
 #define GG82563_PMCR_ENABLE_ELECTRICAL_IDLE         0x0001 /* 1=Enalbe SERDES Electrical Idle */
 #define GG82563_PMCR_DISABLE_PORT                   0x0002 /* 1=Disable Port */
 #define GG82563_PMCR_DISABLE_SERDES                 0x0004 /* 1=Disable SERDES */
@@ -3141,14 +3215,14 @@ struct e1000_host_command_info {
 #define GG82563_PMCR_PROGRAMMED_POWER_STATE_D0A     0x0200 /* 10=D0a */
 #define GG82563_PMCR_PROGRAMMED_POWER_STATE_D3      0x0300 /* 11=D3 */
 
-/* In-Band Control Register (Page 194, Register 18) */
+    /* In-Band Control Register (Page 194, Register 18) */
 #define GG82563_ICR_DIS_PADDING                     0x0010 /* Disable Padding Use */
 
 
-/* Bit definitions for valid PHY IDs. */
-/* I = Integrated
- * E = External
- */
+    /* Bit definitions for valid PHY IDs. */
+    /* I = Integrated
+     * E = External
+     */
 #define M88_VENDOR         0x0141
 #define M88E1000_E_PHY_ID  0x01410C50
 #define M88E1000_I_PHY_ID  0x01410C30
@@ -3162,10 +3236,10 @@ struct e1000_host_command_info {
 #define GG82563_E_PHY_ID   0x01410CA0
 
 
-/* Bits...
- * 15-5: page
- * 4-0: register offset
- */
+    /* Bits...
+     * 15-5: page
+     * 4-0: register offset
+     */
 #define PHY_PAGE_SHIFT        5
 #define PHY_REG(page, reg)    \
         (((page) << PHY_PAGE_SHIFT) | ((reg) & MAX_PHY_REG_ADDRESS))
@@ -3195,7 +3269,7 @@ struct e1000_host_command_info {
 #define IGP3_CAPABILITY \
         PHY_REG(776, 19) /* IGP3 Capability Register */
 
-/* Capabilities for SKU Control  */
+    /* Capabilities for SKU Control  */
 #define IGP3_CAP_INITIATE_TEAM       0x0001 /* Able to initiate a team */
 #define IGP3_CAP_WFM                 0x0002 /* Support WoL and PXE */
 #define IGP3_CAP_ASF                 0x0004 /* Support ASF */
@@ -3310,72 +3384,78 @@ struct e1000_host_command_info {
 #define ICH_GFPREG_BASE_MASK       0x1FFF
 #define ICH_FLASH_LINEAR_ADDR_MASK 0x00FFFFFF
 
-/* ICH8 GbE Flash Hardware Sequencing Flash Status Register bit breakdown */
-/* Offset 04h HSFSTS */
-union ich8_hws_flash_status {
-    struct ich8_hsfsts {
+    /* ICH8 GbE Flash Hardware Sequencing Flash Status Register bit breakdown */
+    /* Offset 04h HSFSTS */
+    union ich8_hws_flash_status
+{
+struct ich8_hsfsts
+{
 #ifdef E1000_BIG_ENDIAN
-        uint16_t reserved2      :6;
-        uint16_t fldesvalid     :1;
-        uint16_t flockdn        :1;
-        uint16_t flcdone        :1;
-        uint16_t flcerr         :1;
-        uint16_t dael           :1;
-        uint16_t berasesz       :2;
-        uint16_t flcinprog      :1;
-        uint16_t reserved1      :2;
+    uint16_t reserved2      :6;
+    uint16_t fldesvalid     :1;
+    uint16_t flockdn        :1;
+    uint16_t flcdone        :1;
+    uint16_t flcerr         :1;
+    uint16_t dael           :1;
+    uint16_t berasesz       :2;
+    uint16_t flcinprog      :1;
+    uint16_t reserved1      :2;
 #else
-        uint16_t flcdone        :1;   /* bit 0 Flash Cycle Done */
-        uint16_t flcerr         :1;   /* bit 1 Flash Cycle Error */
-        uint16_t dael           :1;   /* bit 2 Direct Access error Log */
-        uint16_t berasesz       :2;   /* bit 4:3 Block/Sector Erase Size */
-        uint16_t flcinprog      :1;   /* bit 5 flash SPI cycle in Progress */
-        uint16_t reserved1      :2;   /* bit 13:6 Reserved */
-        uint16_t reserved2      :6;   /* bit 13:6 Reserved */
-        uint16_t fldesvalid     :1;   /* bit 14 Flash Descriptor Valid */
-        uint16_t flockdn        :1;   /* bit 15 Flash Configuration Lock-Down */
+    uint16_t flcdone        :1;   /* bit 0 Flash Cycle Done */
+    uint16_t flcerr         :1;   /* bit 1 Flash Cycle Error */
+    uint16_t dael           :1;   /* bit 2 Direct Access error Log */
+    uint16_t berasesz       :2;   /* bit 4:3 Block/Sector Erase Size */
+    uint16_t flcinprog      :1;   /* bit 5 flash SPI cycle in Progress */
+    uint16_t reserved1      :2;   /* bit 13:6 Reserved */
+    uint16_t reserved2      :6;   /* bit 13:6 Reserved */
+    uint16_t fldesvalid     :1;   /* bit 14 Flash Descriptor Valid */
+    uint16_t flockdn        :1;   /* bit 15 Flash Configuration Lock-Down */
 #endif
-    } hsf_status;
-    uint16_t regval;
+} hsf_status;
+uint16_t regval;
 };
 
 /* ICH8 GbE Flash Hardware Sequencing Flash control Register bit breakdown */
 /* Offset 06h FLCTL */
-union ich8_hws_flash_ctrl {
-    struct ich8_hsflctl {
+union ich8_hws_flash_ctrl
+{
+struct ich8_hsflctl
+{
 #ifdef E1000_BIG_ENDIAN
-        uint16_t fldbcount      :2;
-        uint16_t flockdn        :6;
-        uint16_t flcgo          :1;
-        uint16_t flcycle        :2;
-        uint16_t reserved       :5;
+    uint16_t fldbcount      :2;
+    uint16_t flockdn        :6;
+    uint16_t flcgo          :1;
+    uint16_t flcycle        :2;
+    uint16_t reserved       :5;
 #else
-        uint16_t flcgo          :1;   /* 0 Flash Cycle Go */
-        uint16_t flcycle        :2;   /* 2:1 Flash Cycle */
-        uint16_t reserved       :5;   /* 7:3 Reserved  */
-        uint16_t fldbcount      :2;   /* 9:8 Flash Data Byte Count */
-        uint16_t flockdn        :6;   /* 15:10 Reserved */
+    uint16_t flcgo          :1;   /* 0 Flash Cycle Go */
+    uint16_t flcycle        :2;   /* 2:1 Flash Cycle */
+    uint16_t reserved       :5;   /* 7:3 Reserved  */
+    uint16_t fldbcount      :2;   /* 9:8 Flash Data Byte Count */
+    uint16_t flockdn        :6;   /* 15:10 Reserved */
 #endif
-    } hsf_ctrl;
-    uint16_t regval;
+} hsf_ctrl;
+uint16_t regval;
 };
 
 /* ICH8 Flash Region Access Permissions */
-union ich8_hws_flash_regacc {
-    struct ich8_flracc {
+union ich8_hws_flash_regacc
+{
+struct ich8_flracc
+{
 #ifdef E1000_BIG_ENDIAN
-        uint32_t gmwag          :8;
-        uint32_t gmrag          :8;
-        uint32_t grwa           :8;
-        uint32_t grra           :8;
+    uint32_t gmwag          :8;
+    uint32_t gmrag          :8;
+    uint32_t grwa           :8;
+    uint32_t grra           :8;
 #else
-        uint32_t grra           :8;   /* 0:7 GbE region Read Access */
-        uint32_t grwa           :8;   /* 8:15 GbE region Write Access */
-        uint32_t gmrag          :8;   /* 23:16 GbE Master Read Access Grant  */
-        uint32_t gmwag          :8;   /* 31:24 GbE Master Write Access Grant */
+    uint32_t grra           :8;   /* 0:7 GbE region Read Access */
+    uint32_t grwa           :8;   /* 8:15 GbE region Write Access */
+    uint32_t gmrag          :8;   /* 23:16 GbE Master Read Access Grant  */
+    uint32_t gmwag          :8;   /* 31:24 GbE Master Write Access Grant */
 #endif
-    } hsf_flregacc;
-    uint16_t regval;
+} hsf_flregacc;
+uint16_t regval;
 };
 
 /* Miscellaneous PHY bit definitions. */

@@ -4,7 +4,7 @@
 
 /*
  * Cobalt is the system ASIC on the SGI 320 and 540 Visual Workstations
- */ 
+ */
 
 #define	CO_CPU_PHYS		0xc2000000
 #define	CO_APIC_PHYS		0xc4000000
@@ -88,22 +88,22 @@
 #ifdef CONFIG_X86_VISWS_APIC
 static __inline void co_cpu_write(unsigned long reg, unsigned long v)
 {
-	*((volatile unsigned long *)(CO_CPU_VADDR+reg))=v;
+    *((volatile unsigned long *)(CO_CPU_VADDR+reg))=v;
 }
 
 static __inline unsigned long co_cpu_read(unsigned long reg)
 {
-	return *((volatile unsigned long *)(CO_CPU_VADDR+reg));
-}            
-             
+    return *((volatile unsigned long *)(CO_CPU_VADDR+reg));
+}
+
 static __inline void co_apic_write(unsigned long reg, unsigned long v)
 {
-	*((volatile unsigned long *)(CO_APIC_VADDR+reg))=v;
-}            
-             
+    *((volatile unsigned long *)(CO_APIC_VADDR+reg))=v;
+}
+
 static __inline unsigned long co_apic_read(unsigned long reg)
 {
-	return *((volatile unsigned long *)(CO_APIC_VADDR+reg));
+    return *((volatile unsigned long *)(CO_APIC_VADDR+reg));
 }
 #endif
 

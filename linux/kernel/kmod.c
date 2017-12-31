@@ -44,7 +44,7 @@ extern int max_threads;
 
 int exec_usermodehelper(char *program_path, char *argv[], char *envp[])
 {
-	return 0;
+    return 0;
 }
 
 #ifdef CONFIG_KMOD
@@ -56,17 +56,18 @@ char modprobe_path[256] = "/sbin/modprobe";
 
 static int exec_modprobe(void * module_name)
 {
-	static char * envp[] = { "HOME=/", "TERM=linux", "PATH=/sbin:/usr/sbin:/bin:/usr/bin", NULL };
-	char *argv[] = { modprobe_path, "-s", "-k", "--", (char*)module_name, NULL };
-	int ret;
+    static char * envp[] = { "HOME=/", "TERM=linux", "PATH=/sbin:/usr/sbin:/bin:/usr/bin", NULL };
+    char *argv[] = { modprobe_path, "-s", "-k", "--", (char*)module_name, NULL };
+    int ret;
 
-	ret = exec_usermodehelper(modprobe_path, argv, envp);
-	if (ret) {
-		printk(KERN_ERR
-		       "kmod: failed to exec %s -s -k %s, errno = %d\n",
-		       modprobe_path, (char*) module_name, errno);
-	}
-	return ret;
+    ret = exec_usermodehelper(modprobe_path, argv, envp);
+    if (ret)
+    {
+        printk(KERN_ERR
+               "kmod: failed to exec %s -s -k %s, errno = %d\n",
+               modprobe_path, (char*) module_name, errno);
+    }
+    return ret;
 }
 
 /**
@@ -84,70 +85,74 @@ static int exec_modprobe(void * module_name)
  */
 int request_module(const char * module_name)
 {
-	pid_t pid;
-	int waitpid_result;
-	sigset_t tmpsig;
-	int i;
-	static atomic_t kmod_concurrent = ATOMIC_INIT(0);
+    pid_t pid;
+    int waitpid_result;
+    sigset_t tmpsig;
+    int i;
+    static atomic_t kmod_concurrent = ATOMIC_INIT(0);
 #define MAX_KMOD_CONCURRENT 50	/* Completely arbitrary value - KAO */
-	static int kmod_loop_msg;
+    static int kmod_loop_msg;
 
-	/* Don't allow request_module() before the root fs is mounted!  */
-	if ( ! current->fs->root ) {
-		printk(KERN_ERR "request_module[%s]: Root fs not mounted\n",
-			module_name);
-		return -EPERM;
-	}
+    /* Don't allow request_module() before the root fs is mounted!  */
+    if ( ! current->fs->root )
+    {
+        printk(KERN_ERR "request_module[%s]: Root fs not mounted\n",
+               module_name);
+        return -EPERM;
+    }
 
-	/* If modprobe needs a service that is in a module, we get a recursive
-	 * loop.  Limit the number of running kmod threads to max_threads/2 or
-	 * MAX_KMOD_CONCURRENT, whichever is the smaller.  A cleaner method
-	 * would be to run the parents of this process, counting how many times
-	 * kmod was invoked.  That would mean accessing the internals of the
-	 * process tables to get the command line, proc_pid_cmdline is static
-	 * and it is not worth changing the proc code just to handle this case. 
-	 * KAO.
-	 */
-	i = max_threads/2;
-	if (i > MAX_KMOD_CONCURRENT)
-		i = MAX_KMOD_CONCURRENT;
-	atomic_inc(&kmod_concurrent);
-	if (atomic_read(&kmod_concurrent) > i) {
-		if (kmod_loop_msg++ < 5)
-			printk(KERN_ERR
-			       "kmod: runaway modprobe loop assumed and stopped\n");
-		atomic_dec(&kmod_concurrent);
-		return -ENOMEM;
-	}
+    /* If modprobe needs a service that is in a module, we get a recursive
+     * loop.  Limit the number of running kmod threads to max_threads/2 or
+     * MAX_KMOD_CONCURRENT, whichever is the smaller.  A cleaner method
+     * would be to run the parents of this process, counting how many times
+     * kmod was invoked.  That would mean accessing the internals of the
+     * process tables to get the command line, proc_pid_cmdline is static
+     * and it is not worth changing the proc code just to handle this case.
+     * KAO.
+     */
+    i = max_threads/2;
+    if (i > MAX_KMOD_CONCURRENT)
+        i = MAX_KMOD_CONCURRENT;
+    atomic_inc(&kmod_concurrent);
+    if (atomic_read(&kmod_concurrent) > i)
+    {
+        if (kmod_loop_msg++ < 5)
+            printk(KERN_ERR
+                   "kmod: runaway modprobe loop assumed and stopped\n");
+        atomic_dec(&kmod_concurrent);
+        return -ENOMEM;
+    }
 
-	pid = kernel_thread(exec_modprobe, (void*) module_name, 0);
-	if (pid < 0) {
-		printk(KERN_ERR "request_module[%s]: fork failed, errno %d\n", module_name, -pid);
-		atomic_dec(&kmod_concurrent);
-		return pid;
-	}
+    pid = kernel_thread(exec_modprobe, (void*) module_name, 0);
+    if (pid < 0)
+    {
+        printk(KERN_ERR "request_module[%s]: fork failed, errno %d\n", module_name, -pid);
+        atomic_dec(&kmod_concurrent);
+        return pid;
+    }
 
-	/* Block everything but SIGKILL/SIGSTOP */
-	spin_lock_irq(&current->sigmask_lock);
-	tmpsig = current->blocked;
-	siginitsetinv(&current->blocked, sigmask(SIGKILL) | sigmask(SIGSTOP));
-	recalc_sigpending(current);
-	spin_unlock_irq(&current->sigmask_lock);
+    /* Block everything but SIGKILL/SIGSTOP */
+    spin_lock_irq(&current->sigmask_lock);
+    tmpsig = current->blocked;
+    siginitsetinv(&current->blocked, sigmask(SIGKILL) | sigmask(SIGSTOP));
+    recalc_sigpending(current);
+    spin_unlock_irq(&current->sigmask_lock);
 
-	waitpid_result = waitpid(pid, NULL, __WCLONE);
-	atomic_dec(&kmod_concurrent);
+    waitpid_result = waitpid(pid, NULL, __WCLONE);
+    atomic_dec(&kmod_concurrent);
 
-	/* Allow signals again.. */
-	spin_lock_irq(&current->sigmask_lock);
-	current->blocked = tmpsig;
-	recalc_sigpending(current);
-	spin_unlock_irq(&current->sigmask_lock);
+    /* Allow signals again.. */
+    spin_lock_irq(&current->sigmask_lock);
+    current->blocked = tmpsig;
+    recalc_sigpending(current);
+    spin_unlock_irq(&current->sigmask_lock);
 
-	if (waitpid_result != pid) {
-		printk(KERN_ERR "request_module[%s]: waitpid(%d,...) failed, errno %d\n",
-		       module_name, pid, -waitpid_result);
-	}
-	return 0;
+    if (waitpid_result != pid)
+    {
+        printk(KERN_ERR "request_module[%s]: waitpid(%d,...) failed, errno %d\n",
+               module_name, pid, -waitpid_result);
+    }
+    return 0;
 }
 #endif /* CONFIG_KMOD */
 
@@ -175,12 +180,13 @@ EXPORT_SYMBOL(hotplug_path);
 
 #endif /* CONFIG_HOTPLUG */
 
-struct subprocess_info {
-	struct completion *complete;
-	char *path;
-	char **argv;
-	char **envp;
-	pid_t retval;
+struct subprocess_info
+{
+    struct completion *complete;
+    char *path;
+    char **argv;
+    char **envp;
+    pid_t retval;
 };
 
 /*
@@ -188,16 +194,16 @@ struct subprocess_info {
  */
 static int ____call_usermodehelper(void *data)
 {
-	struct subprocess_info *sub_info = data;
-	int retval;
+    struct subprocess_info *sub_info = data;
+    int retval;
 
-	retval = -EPERM;
-	if (current->fs->root)
-		retval = exec_usermodehelper(sub_info->path, sub_info->argv, sub_info->envp);
+    retval = -EPERM;
+    if (current->fs->root)
+        retval = exec_usermodehelper(sub_info->path, sub_info->argv, sub_info->envp);
 
-	/* Exec failed? */
-	sub_info->retval = (pid_t)retval;
-	do_exit(0);
+    /* Exec failed? */
+    sub_info->retval = (pid_t)retval;
+    do_exit(0);
 }
 
 /*
@@ -205,17 +211,17 @@ static int ____call_usermodehelper(void *data)
  */
 static void __call_usermodehelper(void *data)
 {
-	struct subprocess_info *sub_info = data;
-	pid_t pid;
+    struct subprocess_info *sub_info = data;
+    pid_t pid;
 
-	/*
-	 * CLONE_VFORK: wait until the usermode helper has execve'd successfully
-	 * We need the data structures to stay around until that is done.
-	 */
-	pid = kernel_thread(____call_usermodehelper, sub_info, CLONE_VFORK | SIGCHLD);
-	if (pid < 0)
-		sub_info->retval = pid;
-	complete(sub_info->complete);
+    /*
+     * CLONE_VFORK: wait until the usermode helper has execve'd successfully
+     * We need the data structures to stay around until that is done.
+     */
+    pid = kernel_thread(____call_usermodehelper, sub_info, CLONE_VFORK | SIGCHLD);
+    if (pid < 0)
+        sub_info->retval = pid;
+    complete(sub_info->complete);
 }
 
 /**
@@ -233,25 +239,33 @@ static void __call_usermodehelper(void *data)
  */
 int call_usermodehelper(char *path, char **argv, char **envp)
 {
-	DECLARE_COMPLETION(work);
-	struct subprocess_info sub_info = {
-		complete:	&work,
-		path:		path,
-		argv:		argv,
-		envp:		envp,
-		retval:		0,
-	};
-	struct tq_struct tqs = {
-		routine:	__call_usermodehelper,
-		data:		&sub_info,
-	};
+    DECLARE_COMPLETION(work);
+    struct subprocess_info sub_info =
+    {
+complete:
+        &work,
+path:
+        path,
+argv:
+        argv,
+envp:
+        envp,
+        retval:		0,
+    };
+    struct tq_struct tqs =
+    {
+routine:
+        __call_usermodehelper,
+data:
+        &sub_info,
+    };
 
-	if (path[0] == '\0')
-		goto out;
+    if (path[0] == '\0')
+        goto out;
 
-		__call_usermodehelper(&sub_info);
+    __call_usermodehelper(&sub_info);
 out:
-	return sub_info.retval;
+    return sub_info.retval;
 }
 
 /*
@@ -262,12 +276,12 @@ static DECLARE_MUTEX(dev_probe_sem);
 
 void dev_probe_lock(void)
 {
-	down(&dev_probe_sem);
+    down(&dev_probe_sem);
 }
 
 void dev_probe_unlock(void)
 {
-	up(&dev_probe_sem);
+    up(&dev_probe_sem);
 }
 
 EXPORT_SYMBOL(exec_usermodehelper);

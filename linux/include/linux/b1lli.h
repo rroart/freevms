@@ -12,40 +12,46 @@
 #ifndef _B1LLI_H_
 #define _B1LLI_H_
 /*
- * struct for loading t4 file 
+ * struct for loading t4 file
  */
-typedef struct avmb1_t4file {
-	int len;
-	unsigned char *data;
+typedef struct avmb1_t4file
+{
+    int len;
+    unsigned char *data;
 } avmb1_t4file;
 
-typedef struct avmb1_loaddef {
-	int contr;
-	avmb1_t4file t4file;
+typedef struct avmb1_loaddef
+{
+    int contr;
+    avmb1_t4file t4file;
 } avmb1_loaddef;
 
-typedef struct avmb1_loadandconfigdef {
-	int contr;
-	avmb1_t4file t4file;
-        avmb1_t4file t4config; 
+typedef struct avmb1_loadandconfigdef
+{
+    int contr;
+    avmb1_t4file t4file;
+    avmb1_t4file t4config;
 } avmb1_loadandconfigdef;
 
-typedef struct avmb1_resetdef {
-	int contr;
+typedef struct avmb1_resetdef
+{
+    int contr;
 } avmb1_resetdef;
 
-typedef struct avmb1_getdef {
-	int contr;
-	int cardtype;
-	int cardstate;
+typedef struct avmb1_getdef
+{
+    int contr;
+    int cardtype;
+    int cardstate;
 } avmb1_getdef;
 
 /*
- * struct for adding new cards 
+ * struct for adding new cards
  */
-typedef struct avmb1_carddef {
-	int port;
-	int irq;
+typedef struct avmb1_carddef
+{
+    int port;
+    int irq;
 } avmb1_carddef;
 
 #define AVM_CARDTYPE_B1		0
@@ -53,11 +59,12 @@ typedef struct avmb1_carddef {
 #define AVM_CARDTYPE_M1		2
 #define AVM_CARDTYPE_M2		3
 
-typedef struct avmb1_extcarddef {
-	int port;
-	int irq;
-        int cardtype;
-        int cardnr;  /* for HEMA/T1 */
+typedef struct avmb1_extcarddef
+{
+    int port;
+    int irq;
+    int cardtype;
+    int cardnr;  /* for HEMA/T1 */
 } avmb1_extcarddef;
 
 #define	AVMB1_LOAD		0	/* load image to card */

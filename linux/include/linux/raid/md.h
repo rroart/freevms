@@ -4,15 +4,15 @@
           Copyright (C) 1994-96 Marc ZYNGIER
 	  <zyngier@ufr-info-p7.ibp.fr> or
 	  <maz@gloups.fdn.fr>
-	  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-   
+
    You should have received a copy of the GNU General Public License
    (for example /usr/src/linux/COPYING); if not, write to the Free
-   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
+   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #ifndef _MD_H
@@ -67,7 +67,7 @@ extern char * partition_name (kdev_t dev);
 extern int register_md_personality (int p_num, mdk_personality_t *p);
 extern int unregister_md_personality (int p_num);
 extern mdk_thread_t * md_register_thread (void (*run) (void *data),
-				void *data, const char *name);
+        void *data, const char *name);
 extern void md_unregister_thread (mdk_thread_t *thread);
 extern void md_wakeup_thread(mdk_thread_t *thread);
 extern void md_interrupt_thread (mdk_thread_t *thread);
@@ -78,7 +78,7 @@ extern void md_sync_acct(kdev_t dev, unsigned long nr_sectors);
 extern void md_recover_arrays (void);
 extern int md_check_ordering (mddev_t *mddev);
 extern int md_notify_reboot(struct notifier_block *this,
-					unsigned long code, void *x);
+                            unsigned long code, void *x);
 extern int md_error (mddev_t *mddev, kdev_t rdev);
 extern int md_run_setup(void);
 
@@ -86,5 +86,5 @@ extern void md_print_devices (void);
 
 #define MD_BUG(x...) { printk("md: bug in file %s, line %d\n", __FILE__, __LINE__); md_print_devices(); }
 
-#endif 
+#endif
 

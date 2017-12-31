@@ -31,27 +31,28 @@
 #define DBG1( a... )
 #endif
 
-struct tun_struct {
-	char 			*name;
-	unsigned long 		flags;
-	int			attached;
-	uid_t			owner;
+struct tun_struct
+{
+    char 			*name;
+    unsigned long 		flags;
+    int			attached;
+    uid_t			owner;
 
-	wait_queue_head_t	read_wait;
-	struct sk_buff_head	readq;
+    wait_queue_head_t	read_wait;
+    struct sk_buff_head	readq;
 
-	struct net_device	dev;
-	struct net_device_stats	stats;
+    struct net_device	dev;
+    struct net_device_stats	stats;
 
-	struct fasync_struct    *fasync;
+    struct fasync_struct    *fasync;
 
-#ifdef TUN_DEBUG	
-	int debug;
-#endif  
+#ifdef TUN_DEBUG
+    int debug;
+#endif
 };
 
 #ifndef MIN
-#define MIN(a,b) ( (a)<(b) ? (a):(b) ) 
+#define MIN(a,b) ( (a)<(b) ? (a):(b) )
 #endif
 
 #endif /* __KERNEL__ */
@@ -60,7 +61,7 @@ struct tun_struct {
 #define TUN_READQ_SIZE	10
 
 /* TUN device flags */
-#define TUN_TUN_DEV 	0x0001	
+#define TUN_TUN_DEV 	0x0001
 #define TUN_TAP_DEV	0x0002
 #define TUN_TYPE_MASK   0x000f
 
@@ -68,13 +69,13 @@ struct tun_struct {
 #define TUN_NOCHECKSUM	0x0020
 #define TUN_NO_PI	0x0040
 #define TUN_ONE_QUEUE	0x0080
-#define TUN_PERSIST 	0x0100	
+#define TUN_PERSIST 	0x0100
 
 /* Ioctl defines */
-#define TUNSETNOCSUM  _IOW('T', 200, int) 
-#define TUNSETDEBUG   _IOW('T', 201, int) 
-#define TUNSETIFF     _IOW('T', 202, int) 
-#define TUNSETPERSIST _IOW('T', 203, int) 
+#define TUNSETNOCSUM  _IOW('T', 200, int)
+#define TUNSETDEBUG   _IOW('T', 201, int)
+#define TUNSETIFF     _IOW('T', 202, int)
+#define TUNSETPERSIST _IOW('T', 203, int)
 #define TUNSETOWNER   _IOW('T', 204, int)
 
 /* TUNSETIFF ifr flags */
@@ -83,9 +84,10 @@ struct tun_struct {
 #define IFF_NO_PI	0x1000
 #define IFF_ONE_QUEUE	0x2000
 
-struct tun_pi {
-	unsigned short flags;
-	unsigned short proto;
+struct tun_pi
+{
+    unsigned short flags;
+    unsigned short proto;
 };
 #define TUN_PKT_STRIP	0x0001
 

@@ -1,6 +1,6 @@
 /*
  * n_tty.c --- implements the N_TTY line discipline.
- * 
+ *
  * This code used to be in tty_io.c, but things are getting hairy
  * enough that it made sense to split things off.  (The N_TTY
  * processing has changed so much that it's hardly recognizable,
@@ -8,19 +8,19 @@
  *
  * Note that the open routine for N_TTY is guaranteed never to return
  * an error.  This is because Linux will fall back to setting a line
- * to N_TTY if it can not switch to any other line discipline.  
+ * to N_TTY if it can not switch to any other line discipline.
  *
  * Written by Theodore Ts'o, Copyright 1994.
- * 
+ *
  * This file also contains code originally written by Linus Torvalds,
  * Copyright 1991, 1992, 1993, and by Julian Cowley, Copyright 1994.
- * 
+ *
  * This file may be redistributed under the terms of the GNU General Public
  * License.
  *
  * Reduced memory usage for older ARM systems  - Russell King.
  *
- * 2000/01/20   Fixed SMP locking on put_tty_queue using bits of 
+ * 2000/01/20   Fixed SMP locking on put_tty_queue using bits of
  *		the patch by Andrew J. Kroll <ag784@freenet.buffalo.edu>
  *		who actually finally proved there really was a race.
  */
@@ -71,26 +71,27 @@
 
 int is_ignored(int sig)
 {
-	return (sigismember(&current->blocked, sig) ||
-	        current->sig->action[sig-1].sa.sa_handler == SIG_IGN);
+    return (sigismember(&current->blocked, sig) ||
+            current->sig->action[sig-1].sa.sa_handler == SIG_IGN);
 }
 
-struct tty_ldisc tty_ldisc_N_TTY = {
-	TTY_LDISC_MAGIC,	/* magic */
-	"n_tty",		/* name */
-	0,			/* num */
-	0,			/* flags */
-	0,		/* open */
-	0,		/* close */
-	0,	/* flush_buffer */
-	0,	/* chars_in_buffer */
-	0,		/* read */
-	0,		/* write */
-	0,		/* ioctl */
-	0,	/* set_termios */
-	0,		/* poll */
-	0,	/* receive_buf */
-	0,	/* receive_room */
-	0			/* write_wakeup */
+struct tty_ldisc tty_ldisc_N_TTY =
+{
+    TTY_LDISC_MAGIC,	/* magic */
+    "n_tty",		/* name */
+    0,			/* num */
+    0,			/* flags */
+    0,		/* open */
+    0,		/* close */
+    0,	/* flush_buffer */
+    0,	/* chars_in_buffer */
+    0,		/* read */
+    0,		/* write */
+    0,		/* ioctl */
+    0,	/* set_termios */
+    0,		/* poll */
+    0,	/* receive_buf */
+    0,	/* receive_room */
+    0			/* write_wakeup */
 };
 

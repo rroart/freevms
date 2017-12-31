@@ -11,66 +11,72 @@
 
 
 /* This should work for both 32 and 64 bit userland. */
-struct ethtool_cmd {
-	u32	cmd;
-	u32	supported;	/* Features this interface supports */
-	u32	advertising;	/* Features this interface advertises */
-	u16	speed;		/* The forced speed, 10Mb, 100Mb, gigabit */
-	u8	duplex;		/* Duplex, half or full */
-	u8	port;		/* Which connector port */
-	u8	phy_address;
-	u8	transceiver;	/* Which tranceiver to use */
-	u8	autoneg;	/* Enable or disable autonegotiation */
-	u32	maxtxpkt;	/* Tx pkts before generating tx int */
-	u32	maxrxpkt;	/* Rx pkts before generating rx int */
-	u32	reserved[4];
+struct ethtool_cmd
+{
+    u32	cmd;
+    u32	supported;	/* Features this interface supports */
+    u32	advertising;	/* Features this interface advertises */
+    u16	speed;		/* The forced speed, 10Mb, 100Mb, gigabit */
+    u8	duplex;		/* Duplex, half or full */
+    u8	port;		/* Which connector port */
+    u8	phy_address;
+    u8	transceiver;	/* Which tranceiver to use */
+    u8	autoneg;	/* Enable or disable autonegotiation */
+    u32	maxtxpkt;	/* Tx pkts before generating tx int */
+    u32	maxrxpkt;	/* Rx pkts before generating rx int */
+    u32	reserved[4];
 };
 
 #define ETHTOOL_BUSINFO_LEN	32
 /* these strings are set to whatever the driver author decides... */
-struct ethtool_drvinfo {
-	u32	cmd;
-	char	driver[32];	/* driver short name, "tulip", "eepro100" */
-	char	version[32];	/* driver version string */
-	char	fw_version[32];	/* firmware version string, if applicable */
-	char	bus_info[ETHTOOL_BUSINFO_LEN];	/* Bus info for this IF. */
-				/* For PCI devices, use pci_dev->slot_name. */
-	char	reserved1[32];
-	char	reserved2[24];
-	u32	eedump_len;	/* Size of data from ETHTOOL_GEEPROM (bytes) */
-	u32	regdump_len;	/* Size of data from ETHTOOL_GREGS (bytes) */
+struct ethtool_drvinfo
+{
+    u32	cmd;
+    char	driver[32];	/* driver short name, "tulip", "eepro100" */
+    char	version[32];	/* driver version string */
+    char	fw_version[32];	/* firmware version string, if applicable */
+    char	bus_info[ETHTOOL_BUSINFO_LEN];	/* Bus info for this IF. */
+    /* For PCI devices, use pci_dev->slot_name. */
+    char	reserved1[32];
+    char	reserved2[24];
+    u32	eedump_len;	/* Size of data from ETHTOOL_GEEPROM (bytes) */
+    u32	regdump_len;	/* Size of data from ETHTOOL_GREGS (bytes) */
 };
 
 #define SOPASS_MAX	6
 /* wake-on-lan settings */
-struct ethtool_wolinfo {
-	u32	cmd;
-	u32	supported;
-	u32	wolopts;
-	u8	sopass[SOPASS_MAX]; /* SecureOn(tm) password */
+struct ethtool_wolinfo
+{
+    u32	cmd;
+    u32	supported;
+    u32	wolopts;
+    u8	sopass[SOPASS_MAX]; /* SecureOn(tm) password */
 };
 
 /* for passing single values */
-struct ethtool_value {
-	u32	cmd;
-	u32	data;
+struct ethtool_value
+{
+    u32	cmd;
+    u32	data;
 };
 
 /* for passing big chunks of data */
-struct ethtool_regs {
-	u32	cmd;
-	u32	version; /* driver-specific, indicates different chips/revs */
-	u32	len; /* bytes */
-	u8	data[0];
+struct ethtool_regs
+{
+    u32	cmd;
+    u32	version; /* driver-specific, indicates different chips/revs */
+    u32	len; /* bytes */
+    u8	data[0];
 };
 
 /* for passing EEPROM chunks */
-struct ethtool_eeprom {
-	u32	cmd;
-	u32	magic;
-	u32	offset; /* in bytes */
-	u32	len; /* in bytes */
-	u8	data[0];
+struct ethtool_eeprom
+{
+    u32	cmd;
+    u32	magic;
+    u32	offset; /* in bytes */
+    u32	len; /* in bytes */
+    u8	data[0];
 };
 /* CMDs currently supported */
 #define ETHTOOL_GSET		0x00000001 /* Get settings. */

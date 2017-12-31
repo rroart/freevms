@@ -1,6 +1,6 @@
 
 /*
- *	
+ *
  * libanaalyze_sdesc.c
  *
  *	Copyright (C) 2003 Andrew Allison
@@ -26,7 +26,7 @@
  *				Andrew Allison
  *				50 Denlaw Road
  *				London, Ont
- *				Canada 
+ *				Canada
  *				N6G 3L4
  *
  */
@@ -65,47 +65,47 @@
  *	string descriptor classes
  */
 unsigned long lib$analyze_sdesc(const struct dsc$descriptor_s* input_descriptor,
-		unsigned short* word_integer_length, char** data_address)
+                                unsigned short* word_integer_length, char** data_address)
 {
-	/*
-	 * Only allow for strings
-	 */
-	if (str$$is_string_class(input_descriptor) != STR$_NORMAL)
-	{
-	  //DOSIGNAL(STR$_ILLSTRCLA);
-		*word_integer_length = 0;
-		*data_address = NULL;
-		return LIB$_INVSTRDES;
-	}
+    /*
+     * Only allow for strings
+     */
+    if (str$$is_string_class(input_descriptor) != STR$_NORMAL)
+    {
+        //DOSIGNAL(STR$_ILLSTRCLA);
+        *word_integer_length = 0;
+        *data_address = NULL;
+        return LIB$_INVSTRDES;
+    }
 
-	/*
-	 * Nothing stored here right now
-	 */
-	if (input_descriptor->dsc$a_pointer == NULL)
-	{
+    /*
+     * Nothing stored here right now
+     */
+    if (input_descriptor->dsc$a_pointer == NULL)
+    {
 //		assert(input_descriptor->dsc$w_length == 0);
-		*word_integer_length = 0;
-		*data_address = NULL;
-	}
+        *word_integer_length = 0;
+        *data_address = NULL;
+    }
 
-	/*
-	 * Handle weirdness of VS (varying-length) string
-	 */
-	if (input_descriptor->dsc$b_class == DSC$K_CLASS_VS)
-	{
-		/*
-		 * VS String
-		 */
-		*word_integer_length = 
-			(unsigned short)*(input_descriptor->dsc$a_pointer);
-		*data_address = input_descriptor->dsc$a_pointer + 2;
-		assert(*word_integer_length <= input_descriptor->dsc$w_length);
-	}
-	else
-	{
-		*word_integer_length = input_descriptor->dsc$w_length;
-		*data_address = input_descriptor->dsc$a_pointer;
-	}
-	return SS$_NORMAL;
+    /*
+     * Handle weirdness of VS (varying-length) string
+     */
+    if (input_descriptor->dsc$b_class == DSC$K_CLASS_VS)
+    {
+        /*
+         * VS String
+         */
+        *word_integer_length =
+            (unsigned short)*(input_descriptor->dsc$a_pointer);
+        *data_address = input_descriptor->dsc$a_pointer + 2;
+        assert(*word_integer_length <= input_descriptor->dsc$w_length);
+    }
+    else
+    {
+        *word_integer_length = input_descriptor->dsc$w_length;
+        *data_address = input_descriptor->dsc$a_pointer;
+    }
+    return SS$_NORMAL;
 }
 

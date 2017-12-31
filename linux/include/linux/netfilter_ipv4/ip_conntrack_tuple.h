@@ -13,60 +13,68 @@
    network order! */
 union ip_conntrack_manip_proto
 {
-	/* Add other protocols here. */
-	u_int16_t all;
+    /* Add other protocols here. */
+    u_int16_t all;
 
-	struct {
-		u_int16_t port;
-	} tcp;
-	struct {
-		u_int16_t port;
-	} udp;
-	struct {
-		u_int16_t id;
-	} icmp;
+    struct
+    {
+        u_int16_t port;
+    } tcp;
+    struct
+    {
+        u_int16_t port;
+    } udp;
+    struct
+    {
+        u_int16_t id;
+    } icmp;
 };
 
 /* The manipulable part of the tuple. */
 struct ip_conntrack_manip
 {
-	u_int32_t ip;
-	union ip_conntrack_manip_proto u;
+    u_int32_t ip;
+    union ip_conntrack_manip_proto u;
 };
 
 /* This contains the information to distinguish a connection. */
 struct ip_conntrack_tuple
 {
-	struct ip_conntrack_manip src;
+    struct ip_conntrack_manip src;
 
-	/* These are the parts of the tuple which are fixed. */
-	struct {
-		u_int32_t ip;
-		union {
-			/* Add other protocols here. */
-			u_int16_t all;
+    /* These are the parts of the tuple which are fixed. */
+    struct
+    {
+        u_int32_t ip;
+        union
+        {
+            /* Add other protocols here. */
+            u_int16_t all;
 
-			struct {
-				u_int16_t port;
-			} tcp;
-			struct {
-				u_int16_t port;
-			} udp;
-			struct {
-				u_int8_t type, code;
-			} icmp;
-		} u;
+            struct
+            {
+                u_int16_t port;
+            } tcp;
+            struct
+            {
+                u_int16_t port;
+            } udp;
+            struct
+            {
+                u_int8_t type, code;
+            } icmp;
+        } u;
 
-		/* The protocol. */
-		u_int16_t protonum;
-	} dst;
+        /* The protocol. */
+        u_int16_t protonum;
+    } dst;
 };
 
 enum ip_conntrack_dir
 {
-	IP_CT_DIR_ORIGINAL,
-	IP_CT_DIR_REPLY,
-	IP_CT_DIR_MAX
+    IP_CT_DIR_ORIGINAL,
+    IP_CT_DIR_REPLY,
+    IP_CT_DIR_MAX
 };
 
 #ifdef __KERNEL__
@@ -85,47 +93,47 @@ DEBUGP("tuple %p: %u %u.%u.%u.%u:%hu -> %u.%u.%u.%u:%hu\n",	\
 /* Connections have two entries in the hash table: one for each way */
 struct ip_conntrack_tuple_hash
 {
-	struct list_head list;
+    struct list_head list;
 
-	struct ip_conntrack_tuple tuple;
+    struct ip_conntrack_tuple tuple;
 
-	/* this == &ctrack->tuplehash[DIRECTION(this)]. */
-	struct ip_conntrack *ctrack;
+    /* this == &ctrack->tuplehash[DIRECTION(this)]. */
+    struct ip_conntrack *ctrack;
 };
 
 #endif /* __KERNEL__ */
 
 static inline int ip_ct_tuple_src_equal(const struct ip_conntrack_tuple *t1,
-				        const struct ip_conntrack_tuple *t2)
+                                        const struct ip_conntrack_tuple *t2)
 {
-	return t1->src.ip == t2->src.ip
-		&& t1->src.u.all == t2->src.u.all;
+    return t1->src.ip == t2->src.ip
+           && t1->src.u.all == t2->src.u.all;
 }
 
 static inline int ip_ct_tuple_dst_equal(const struct ip_conntrack_tuple *t1,
-				        const struct ip_conntrack_tuple *t2)
+                                        const struct ip_conntrack_tuple *t2)
 {
-	return t1->dst.ip == t2->dst.ip
-		&& t1->dst.u.all == t2->dst.u.all
-		&& t1->dst.protonum == t2->dst.protonum;
+    return t1->dst.ip == t2->dst.ip
+           && t1->dst.u.all == t2->dst.u.all
+           && t1->dst.protonum == t2->dst.protonum;
 }
 
 static inline int ip_ct_tuple_equal(const struct ip_conntrack_tuple *t1,
-				    const struct ip_conntrack_tuple *t2)
+                                    const struct ip_conntrack_tuple *t2)
 {
-	return ip_ct_tuple_src_equal(t1, t2) && ip_ct_tuple_dst_equal(t1, t2);
+    return ip_ct_tuple_src_equal(t1, t2) && ip_ct_tuple_dst_equal(t1, t2);
 }
 
 static inline int ip_ct_tuple_mask_cmp(const struct ip_conntrack_tuple *t,
-				       const struct ip_conntrack_tuple *tuple,
-				       const struct ip_conntrack_tuple *mask)
+                                       const struct ip_conntrack_tuple *tuple,
+                                       const struct ip_conntrack_tuple *mask)
 {
-	return !(((t->src.ip ^ tuple->src.ip) & mask->src.ip)
-		 || ((t->dst.ip ^ tuple->dst.ip) & mask->dst.ip)
-		 || ((t->src.u.all ^ tuple->src.u.all) & mask->src.u.all)
-		 || ((t->dst.u.all ^ tuple->dst.u.all) & mask->dst.u.all)
-		 || ((t->dst.protonum ^ tuple->dst.protonum)
-		     & mask->dst.protonum));
+    return !(((t->src.ip ^ tuple->src.ip) & mask->src.ip)
+             || ((t->dst.ip ^ tuple->dst.ip) & mask->dst.ip)
+             || ((t->src.u.all ^ tuple->src.u.all) & mask->src.u.all)
+             || ((t->dst.u.all ^ tuple->dst.u.all) & mask->dst.u.all)
+             || ((t->dst.protonum ^ tuple->dst.protonum)
+                 & mask->dst.protonum));
 }
 
 #endif /* _IP_CONNTRACK_TUPLE_H */

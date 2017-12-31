@@ -1,8 +1,8 @@
 #ifndef csbdef_h
 #define csbdef_h
-	
+
 #include <fkbdef.h>
-	
+
 #define CSB$M_CAP_VCC 0x2
 #define CSB$M_CAP_EXT_STATUS 0x8
 #define CSB$M_CAP_CWCREPRC 0x10
@@ -52,86 +52,88 @@
 #define CSB$C_LENGTH 456
 #define CSB$K_LENGTH 456
 #define CSB$S_CSBDEF 456
-	
-struct _csb {
-  void *csb$l_sysqfl;
-  void *csb$l_sysqbl;
-  unsigned short int csb$w_size;
-  unsigned char csb$b_type;
-  unsigned char csb$b_subtype;
-  unsigned char csb$b_cluver;
-  unsigned char csb$b_ecolvl;
-  unsigned char csb$b_vernum;
-  unsigned int csb$l_cache_protocol_ver;
-  unsigned short int csb$w_lckdirwt;
-  unsigned short int csb$w_votes;
-  unsigned short int csb$w_evotes;
-  unsigned short int csb$w_qdvotes;
-  unsigned short int csb$w_quorum;
-  unsigned short int csb$w_nodes;
-  char csb$b_cnct [16];
-  char csb$b_nodemap [32];
-  char csb$b_hwname [61];
-  char csb$b_hwname_pad [3]; 
-  char csb$t_sw_version [8];
-  unsigned long long csb$q_swincarn;
-  unsigned long long csb$q_reftime;
-  unsigned long long csb$q_lnm_seqnum;  
-  unsigned int csb$wil_cnx_sts_r0;
-  unsigned short int csb$w_cnx_sts_r0;
-  unsigned int csb$wil_cnx_sts_r1;
-  unsigned short int csb$w_cnx_sts_r1; 
-  struct _fkb csb$r_resend_msgs_fkb;
-  struct _fkb csb$r_scs2lckmgr_fkb;
-  struct _cdt *csb$l_cdt;
-  struct _pdt *csb$l_pdt;
-  struct _club *csb$l_club;
-  struct _sb *csb$l_sb;
-  struct _tqe *csb$l_tqe;
-  unsigned int csb$l_timeout;
-  unsigned int csb$l_rmax_vctmo;
-  int csb$l_abstim_offset;
-  unsigned int csb$l_csid;
-  unsigned short int csb$w_csid_idx;
-  unsigned short int csb$w_csid_seq;
-  unsigned int csb$wil_cnid;
-  unsigned short int csb$w_cnid;
-  long long csb$q_partnerq;
-  void *csb$l_partnerqfl;
-  void *csb$l_partnerqbl;
-  long long csb$q_warmcdrpq;
-  struct _cdrp *csb$l_warmcdrpqfl;
-  struct _cdrp *csb$l_warmcdrpqbl;
-  unsigned long long csb$q_rm_ctxq;
-  unsigned int csb$l_rm_ctxqfl;
-  unsigned int csb$l_rm_ctxqbl;
-  void *csb$l_sentqbl;  void *csb$l_resendqfl;
-  void *csb$l_resendqbl;
-  unsigned int csb$l_capability;
-  unsigned int csb$l_status;
-  unsigned int csb$l_state;
-  struct _cdrp *csb$l_currcdrp;
-  unsigned int csb$l_refcnt;
-  unsigned int csb$l_unackedmsgs;
-  unsigned int csb$l_remacklim;  
-  unsigned int csb$wil_sendseqnm;
-  unsigned short int csb$w_sendseqnm;
-  unsigned int csb$wil_rcvdseqnm;
-  unsigned short int csb$w_rcvdseqnm;
-  unsigned int csb$wil_ackrseqnm;
-  unsigned short int csb$w_ackrseqnm;
-  unsigned int csb$wil_lastsent;
-  unsigned short int csb$w_lastsent;
-  unsigned int csb$wil_pass_cntr;
-  unsigned short int csb$w_pass_cntr;
-  unsigned int csb$wil_act_cntr;
-  unsigned short int csb$w_act_cntr;
-  unsigned int csb$wil_err_cntr;
-  unsigned short int csb$w_err_cntr;
-  unsigned int csb$l_scs2lckmgr_msgcnt;
-  int csb$l_scs2lckmgr_msgarray;
-  long long csb$q_scs2lckmgr_pad;
+
+struct _csb
+{
+    void *csb$l_sysqfl;
+    void *csb$l_sysqbl;
+    unsigned short int csb$w_size;
+    unsigned char csb$b_type;
+    unsigned char csb$b_subtype;
+    unsigned char csb$b_cluver;
+    unsigned char csb$b_ecolvl;
+    unsigned char csb$b_vernum;
+    unsigned int csb$l_cache_protocol_ver;
+    unsigned short int csb$w_lckdirwt;
+    unsigned short int csb$w_votes;
+    unsigned short int csb$w_evotes;
+    unsigned short int csb$w_qdvotes;
+    unsigned short int csb$w_quorum;
+    unsigned short int csb$w_nodes;
+    char csb$b_cnct [16];
+    char csb$b_nodemap [32];
+    char csb$b_hwname [61];
+    char csb$b_hwname_pad [3];
+    char csb$t_sw_version [8];
+    unsigned long long csb$q_swincarn;
+    unsigned long long csb$q_reftime;
+    unsigned long long csb$q_lnm_seqnum;
+    unsigned int csb$wil_cnx_sts_r0;
+    unsigned short int csb$w_cnx_sts_r0;
+    unsigned int csb$wil_cnx_sts_r1;
+    unsigned short int csb$w_cnx_sts_r1;
+    struct _fkb csb$r_resend_msgs_fkb;
+    struct _fkb csb$r_scs2lckmgr_fkb;
+    struct _cdt *csb$l_cdt;
+    struct _pdt *csb$l_pdt;
+    struct _club *csb$l_club;
+    struct _sb *csb$l_sb;
+    struct _tqe *csb$l_tqe;
+    unsigned int csb$l_timeout;
+    unsigned int csb$l_rmax_vctmo;
+    int csb$l_abstim_offset;
+    unsigned int csb$l_csid;
+    unsigned short int csb$w_csid_idx;
+    unsigned short int csb$w_csid_seq;
+    unsigned int csb$wil_cnid;
+    unsigned short int csb$w_cnid;
+    long long csb$q_partnerq;
+    void *csb$l_partnerqfl;
+    void *csb$l_partnerqbl;
+    long long csb$q_warmcdrpq;
+    struct _cdrp *csb$l_warmcdrpqfl;
+    struct _cdrp *csb$l_warmcdrpqbl;
+    unsigned long long csb$q_rm_ctxq;
+    unsigned int csb$l_rm_ctxqfl;
+    unsigned int csb$l_rm_ctxqbl;
+    void *csb$l_sentqbl;
+    void *csb$l_resendqfl;
+    void *csb$l_resendqbl;
+    unsigned int csb$l_capability;
+    unsigned int csb$l_status;
+    unsigned int csb$l_state;
+    struct _cdrp *csb$l_currcdrp;
+    unsigned int csb$l_refcnt;
+    unsigned int csb$l_unackedmsgs;
+    unsigned int csb$l_remacklim;
+    unsigned int csb$wil_sendseqnm;
+    unsigned short int csb$w_sendseqnm;
+    unsigned int csb$wil_rcvdseqnm;
+    unsigned short int csb$w_rcvdseqnm;
+    unsigned int csb$wil_ackrseqnm;
+    unsigned short int csb$w_ackrseqnm;
+    unsigned int csb$wil_lastsent;
+    unsigned short int csb$w_lastsent;
+    unsigned int csb$wil_pass_cntr;
+    unsigned short int csb$w_pass_cntr;
+    unsigned int csb$wil_act_cntr;
+    unsigned short int csb$w_act_cntr;
+    unsigned int csb$wil_err_cntr;
+    unsigned short int csb$w_err_cntr;
+    unsigned int csb$l_scs2lckmgr_msgcnt;
+    int csb$l_scs2lckmgr_msgarray;
+    long long csb$q_scs2lckmgr_pad;
 };
- 
+
 #endif
- 
+

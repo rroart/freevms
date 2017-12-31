@@ -180,11 +180,12 @@
 #define ATR$S_LENGTH_HINT 16
 #define ATR$S_EX_RECATTR 8
 #define ATR$S_EXTFLAGS 2
-	
-struct _atrdef {
-  unsigned short int atr$w_size;
-  unsigned short int atr$w_type;
-  void *atr$l_addr;
+
+struct _atrdef
+{
+    unsigned short int atr$w_size;
+    unsigned short int atr$w_type;
+    void *atr$l_addr;
 };
 
 #define ATR$M_FILE_ATTRIBUTES 0xF
@@ -197,22 +198,24 @@ struct _atrdef {
 #define ATR$C_FLUSH 1
 #define ATR$C_NOFLUSH 2
 #define ATR$M_CACHING_OPTIONS_MBZ 0xFFFFF000
-	
-struct _atr_caching_options_flags {
-  unsigned atr$v_file_attributes : 4;
-  unsigned atr$v_file_contents : 4;
-  unsigned atr$v_flush_on_close : 4;
-  unsigned atr$v_caching_options_mbz : 20;
+
+struct _atr_caching_options_flags
+{
+    unsigned atr$v_file_attributes : 4;
+    unsigned atr$v_file_contents : 4;
+    unsigned atr$v_flush_on_close : 4;
+    unsigned atr$v_caching_options_mbz : 20;
 };
 
 #define ATR$C_ODS1 1
 #define ATR$C_ODS2 2
 #define ATR$C_ODS64 64
-	
-struct _atr_filesystem_info_fields {
-  unsigned char atr$b_strucver;
-  unsigned char atr$b_struclev;
+
+struct _atr_filesystem_info_fields
+{
+    unsigned char atr$b_strucver;
+    unsigned char atr$b_struclev;
 };
 
 #endif
- 
+

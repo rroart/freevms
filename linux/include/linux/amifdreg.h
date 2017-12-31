@@ -46,7 +46,7 @@
 #define ADK_WORDSYNC    (1<<10)     /* enable DSKSYNC auto DMA */
 #define ADK_MSBSYNC     (1<<9)      /* when 1, enable sync on MSbit (for GCR) */
 #define ADK_FAST        (1<<8)      /* bit cell: 0=2us (GCR), 1=1us (MFM) */
- 
+
 /*
 ** DSKLEN bits
 */
@@ -63,7 +63,7 @@
 /*
 ** Misc
 */
- 
+
 #define MFM_SYNC    0x4489          /* standard MFM sync value */
 
 /* Values for FD_COMMAND */

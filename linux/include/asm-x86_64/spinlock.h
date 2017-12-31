@@ -4,11 +4,8 @@
 #include <asm/atomic.h>
 #include <asm/rwlock.h>
 #include <asm/page.h>
-#include <linux/kernel.h>
 #include <linux/config.h>
-
-extern int printk(const char * fmt, ...)
-	__attribute__ ((format (printf, 1, 2)));
+#include <linux/kernel.h>
 
 /* It seems that people are forgetting to
  * initialize their spinlocks properly, tsk tsk.
@@ -24,10 +21,11 @@ extern int printk(const char * fmt, ...)
  * Your basic SMP spinlocks, allowing only a single CPU anywhere
  */
 
-typedef struct {
-	volatile unsigned int lock;
+typedef struct
+{
+    volatile unsigned int lock;
 #if SPINLOCK_DEBUG
-	unsigned magic;
+    unsigned magic;
 #endif
 } spinlock_t;
 
@@ -73,40 +71,41 @@ typedef struct {
 
 static inline int spin_trylock(spinlock_t *lock)
 {
-	char oldval;
-	__asm__ __volatile__(
-		"xchgb %b0,%1"
-		:"=q" (oldval), "=m" (lock->lock)
-		:"0" (0) : "memory");
-	return oldval > 0;
+    char oldval;
+    __asm__ __volatile__(
+        "xchgb %b0,%1"
+        :"=q" (oldval), "=m" (lock->lock)
+        :"0" (0) : "memory");
+    return oldval > 0;
 }
 
 static inline void spin_lock(spinlock_t *lock)
 {
 #if SPINLOCK_DEBUG
-	__label__ here;
+    __label__ here;
 here:
-	if (lock->magic != SPINLOCK_MAGIC) {
-printk("eip: %p\n", &&here);
-		out_of_line_bug();
-	}
+    if (lock->magic != SPINLOCK_MAGIC)
+    {
+        printk("eip: %p\n", &&here);
+        out_of_line_bug();
+    }
 #endif
-	__asm__ __volatile__(
-		spin_lock_string
-		:"=m" (lock->lock) : : "memory");
+    __asm__ __volatile__(
+        spin_lock_string
+        :"=m" (lock->lock) : : "memory");
 }
 
 static inline void spin_unlock(spinlock_t *lock)
 {
 #if SPINLOCK_DEBUG
-	if (lock->magic != SPINLOCK_MAGIC)
-		out_of_line_bug();
-	if (!spin_is_locked(lock))
-		out_of_line_bug();
+    if (lock->magic != SPINLOCK_MAGIC)
+        out_of_line_bug();
+    if (!spin_is_locked(lock))
+        out_of_line_bug();
 #endif
-	__asm__ __volatile__(
-		spin_unlock_string
-		:"=m" (lock->lock) : : "memory");
+    __asm__ __volatile__(
+        spin_unlock_string
+        :"=m" (lock->lock) : : "memory");
 }
 
 /*
@@ -119,10 +118,11 @@ static inline void spin_unlock(spinlock_t *lock)
  * irq-safe write-lock, but readers can get non-irqsafe
  * read-locks.
  */
-typedef struct {
-	volatile unsigned int lock;
+typedef struct
+{
+    volatile unsigned int lock;
 #if SPINLOCK_DEBUG
-	unsigned magic;
+    unsigned magic;
 #endif
 } rwlock_t;
 
@@ -152,19 +152,19 @@ typedef struct {
 extern inline void read_lock(rwlock_t *rw)
 {
 #if SPINLOCK_DEBUG
-	if (rw->magic != RWLOCK_MAGIC)
-		out_of_line_bug();
+    if (rw->magic != RWLOCK_MAGIC)
+        out_of_line_bug();
 #endif
-	__build_read_lock(rw, "__read_lock_failed");
+    __build_read_lock(rw, "__read_lock_failed");
 }
 
 static inline void write_lock(rwlock_t *rw)
 {
 #if SPINLOCK_DEBUG
-	if (rw->magic != RWLOCK_MAGIC)
-		out_of_line_bug();
+    if (rw->magic != RWLOCK_MAGIC)
+        out_of_line_bug();
 #endif
-	__build_write_lock(rw, "__write_lock_failed");
+    __build_write_lock(rw, "__write_lock_failed");
 }
 
 #define read_unlock(rw)		asm volatile("lock ; incl %0" :"=m" ((rw)->lock) : : "memory")
@@ -172,11 +172,11 @@ static inline void write_lock(rwlock_t *rw)
 
 static inline int write_trylock(rwlock_t *lock)
 {
-	atomic_t *count = (atomic_t *)lock;
-	if (atomic_sub_and_test(RW_LOCK_BIAS, count))
-		return 1;
-	atomic_add(RW_LOCK_BIAS, count);
-	return 0;
+    atomic_t *count = (atomic_t *)lock;
+    if (atomic_sub_and_test(RW_LOCK_BIAS, count))
+        return 1;
+    atomic_add(RW_LOCK_BIAS, count);
+    return 0;
 }
 
 #endif /* __ASM_SPINLOCK_H */

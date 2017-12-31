@@ -26,14 +26,14 @@
 
 #ifdef __KERNEL__
 extern int		fddi_header(struct sk_buff *skb,
-				    struct net_device *dev,
-				    unsigned short type,
-				    void *daddr,
-				    void *saddr,
-				    unsigned len);
+                            struct net_device *dev,
+                            unsigned short type,
+                            void *daddr,
+                            void *saddr,
+                            unsigned len);
 extern int		fddi_rebuild_header(struct sk_buff *skb);
 extern unsigned short	fddi_type_trans(struct sk_buff *skb,
-				struct net_device *dev);
+                                        struct net_device *dev);
 extern struct net_device *init_fddidev(struct net_device *dev, int sizeof_priv);
 extern struct net_device *alloc_fddidev(int sizeof_priv);
 #endif

@@ -20,25 +20,26 @@
 #define SS   16
 #define FRAME_SIZE 17
 
-/* this struct defines the way the registers are stored on the 
+/* this struct defines the way the registers are stored on the
    stack during a system call. */
 
-struct pt_regs {
-	long ebx;
-	long ecx;
-	long edx;
-	long esi;
-	long edi;
-	long ebp;
-	long eax;
-	int  xds;
-	int  xes;
-	long orig_eax;
-	long eip;
-	int  xcs;
-	long eflags;
-	long esp;
-	int  xss;
+struct pt_regs
+{
+    long ebx;
+    long ecx;
+    long edx;
+    long esi;
+    long edi;
+    long ebp;
+    long eax;
+    int  xds;
+    int  xes;
+    long orig_eax;
+    long eip;
+    int  xcs;
+    long eflags;
+    long esp;
+    int  xss;
 };
 
 /* Arbitrarily choose the same ptrace numbers as used by the Sparc code. */

@@ -1,11 +1,12 @@
-#include <ssdef.h> 
-#include <descrip.h> 
+#include <ssdef.h>
+#include <descrip.h>
 
-main(){
-int flag ;
+main()
+{
+    int flag ;
 
-sys$setef(51);
+    sys$setef(51);
 
-sys$readef(51,&flag);
+    sys$readef(51,&flag);
 
 }

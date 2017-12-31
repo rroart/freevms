@@ -1,15 +1,16 @@
 #ifndef _LINUX_VIDEO_DECODER_H
 #define _LINUX_VIDEO_DECODER_H
 
-struct video_decoder_capability { /* this name is too long */
-	__u32	flags;
+struct video_decoder_capability   /* this name is too long */
+{
+    __u32	flags;
 #define	VIDEO_DECODER_PAL	1	/* can decode PAL signal */
 #define	VIDEO_DECODER_NTSC	2	/* can decode NTSC */
 #define	VIDEO_DECODER_SECAM	4	/* can decode SECAM */
 #define	VIDEO_DECODER_AUTO	8	/* can autosense norm */
 #define	VIDEO_DECODER_CCIR	16	/* CCIR-601 pixel rate (720 pixels per line) instead of square pixel rate */
-	int	inputs;			/* number of inputs */
-	int	outputs;		/* number of outputs */
+    int	inputs;			/* number of inputs */
+    int	outputs;		/* number of outputs */
 };
 
 /*

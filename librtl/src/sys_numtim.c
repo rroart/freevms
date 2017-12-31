@@ -38,7 +38,8 @@
 #include "lib$routines.h"	/* LIB$ Header File */
 #include "ssdef.h"
 
-struct TIME {
+struct TIME
+{
     unsigned char time[8];
 };
 
@@ -73,7 +74,8 @@ unsigned long sys$numtim(unsigned short timbuf[7], struct TIME *timadra)
         int days,day_time;
         register unsigned sts;
         sts = lib$day(&days, timadr, &day_time);
-        if ((sts & 1) == 0) {
+        if ((sts & 1) == 0)
+        {
             return sts;
         }
         date = days;
@@ -82,13 +84,16 @@ unsigned long sys$numtim(unsigned short timbuf[7], struct TIME *timadra)
 
     /* Delta or date... */
 
-    if (date < 0 || time < 0) {
+    if (date < 0 || time < 0)
+    {
         timbuf[2] = -date;      /* Days */
         timbuf[1] = 0;          /* Month */
         timbuf[0] = 0;          /* Year */
         time = -time;
 
-    } else {
+    }
+    else
+    {
 
         /* Date... */
 
@@ -115,10 +120,14 @@ unsigned long sys$numtim(unsigned short timbuf[7], struct TIME *timadra)
 
         /* Adjust for years which have no Feb 29th */
 
-        if (date++ > 58) {
-            if (month != 3) {
+        if (date++ > 58)
+        {
+            if (month != 3)
+            {
                 date++;
-            } else {
+            }
+            else
+            {
                 if ((year % 100) == 0 && (year % 400) != 0) date++;
             }
         }
@@ -127,7 +136,8 @@ unsigned long sys$numtim(unsigned short timbuf[7], struct TIME *timadra)
         {
             unsigned char *mthptr = month_days;
             month = 1;
-            while (date > *mthptr) {
+            while (date > *mthptr)
+            {
                 date -= *mthptr++;
                 month++;
             }

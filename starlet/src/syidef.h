@@ -603,6 +603,6 @@
 #define SYI$K_ENV_STATUS_OK 1
 #define SYI$K_ENV_STATUS_NOT_PRESENT 255
 #define SYI$K_ENV_STATUS_UNKNOWN 254
- 
+
 #endif
- 
+

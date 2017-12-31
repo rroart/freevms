@@ -15,16 +15,16 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
- * 
+ *
  * lvm is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with GNU CC; see the file COPYING.  If not, write to
  * the Free Software Foundation, 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA. 
+ * Boston, MA 02111-1307, USA.
  *
  */
 
@@ -53,7 +53,7 @@
  *    01/01/2000 - extended lv_v2 core structure by wait_queue member
  *    12/02/2000 - integrated Andrea Arcagnelli's snapshot work
  *    14/02/2001 - changed LVM_SNAPSHOT_MIN_CHUNK to 1 page
- *    18/02/2000 - seperated user and kernel space parts by 
+ *    18/02/2000 - seperated user and kernel space parts by
  *                 #ifdef them with __KERNEL__
  *    08/03/2000 - implemented cluster/shared bits for vg_access
  *    26/06/2000 - implemented snapshot persistency and resizing support
@@ -125,7 +125,7 @@
 #undef	BLOCK_SIZE
 #endif
 
-#ifdef CONFIG_ARCH_S390 
+#ifdef CONFIG_ARCH_S390
 #define BLOCK_SIZE	4096
 #else
 #define BLOCK_SIZE	1024
@@ -349,32 +349,36 @@
 #define	UUID_LEN		32	/* don't change!!! */
 
 /* copy on write tables in disk format */
-typedef struct lv_COW_table_disk_v1 {
-	uint64_t pv_org_number;
-	uint64_t pv_org_rsector;
-	uint64_t pv_snap_number;
-	uint64_t pv_snap_rsector;
+typedef struct lv_COW_table_disk_v1
+{
+    uint64_t pv_org_number;
+    uint64_t pv_org_rsector;
+    uint64_t pv_snap_number;
+    uint64_t pv_snap_rsector;
 } lv_COW_table_disk_t;
 
 /* remap physical sector/rdev pairs including hash */
-typedef struct lv_block_exception_v1 {
-	struct list_head hash;
-	uint32_t rsector_org;
-	kdev_t   rdev_org;
-	uint32_t rsector_new;
-	kdev_t   rdev_new;
+typedef struct lv_block_exception_v1
+{
+    struct list_head hash;
+    uint32_t rsector_org;
+    kdev_t   rdev_org;
+    uint32_t rsector_new;
+    kdev_t   rdev_new;
 } lv_block_exception_t;
 
 /* disk stored pe information */
-typedef struct {
-	uint16_t lv_num;
-	uint16_t le_num;
+typedef struct
+{
+    uint16_t lv_num;
+    uint16_t le_num;
 } pe_disk_t;
 
 /* disk stored PV, VG, LV and PE size and offset information */
-typedef struct {
-	uint32_t base;
-	uint32_t size;
+typedef struct
+{
+    uint32_t base;
+    uint32_t size;
 } lvm_disk_data_t;
 
 
@@ -383,61 +387,63 @@ typedef struct {
  */
 
 /* core */
-typedef struct pv_v2 {
-	char id[2];		/* Identifier */
-	unsigned short version;	/* HM lvm version */
-	lvm_disk_data_t pv_on_disk;
-	lvm_disk_data_t vg_on_disk;
-	lvm_disk_data_t pv_uuidlist_on_disk;
-	lvm_disk_data_t lv_on_disk;
-	lvm_disk_data_t pe_on_disk;
-	char pv_name[NAME_LEN];
-	char vg_name[NAME_LEN];
-	char system_id[NAME_LEN];	/* for vgexport/vgimport */
-	kdev_t pv_dev;
-	uint pv_number;
-	uint pv_status;
-	uint pv_allocatable;
-	uint pv_size;		/* HM */
-	uint lv_cur;
-	uint pe_size;
-	uint pe_total;
-	uint pe_allocated;
-	uint pe_stale;		/* for future use */
-	pe_disk_t *pe;		/* HM */
-	struct block_device *bd;
-	char pv_uuid[UUID_LEN+1];
+typedef struct pv_v2
+{
+    char id[2];		/* Identifier */
+    unsigned short version;	/* HM lvm version */
+    lvm_disk_data_t pv_on_disk;
+    lvm_disk_data_t vg_on_disk;
+    lvm_disk_data_t pv_uuidlist_on_disk;
+    lvm_disk_data_t lv_on_disk;
+    lvm_disk_data_t pe_on_disk;
+    char pv_name[NAME_LEN];
+    char vg_name[NAME_LEN];
+    char system_id[NAME_LEN];	/* for vgexport/vgimport */
+    kdev_t pv_dev;
+    uint pv_number;
+    uint pv_status;
+    uint pv_allocatable;
+    uint pv_size;		/* HM */
+    uint lv_cur;
+    uint pe_size;
+    uint pe_total;
+    uint pe_allocated;
+    uint pe_stale;		/* for future use */
+    pe_disk_t *pe;		/* HM */
+    struct block_device *bd;
+    char pv_uuid[UUID_LEN+1];
 
 #ifndef __KERNEL__
-	uint32_t pe_start;	/* in sectors */
+    uint32_t pe_start;	/* in sectors */
 #endif
 } pv_t;
 
 
 /* disk */
-typedef struct pv_disk_v2 {
-	uint8_t id[2];		/* Identifier */
-	uint16_t version;		/* HM lvm version */
-	lvm_disk_data_t pv_on_disk;
-	lvm_disk_data_t vg_on_disk;
-	lvm_disk_data_t pv_uuidlist_on_disk;
-	lvm_disk_data_t lv_on_disk;
-	lvm_disk_data_t pe_on_disk;
-	uint8_t pv_uuid[NAME_LEN];
-	uint8_t vg_name[NAME_LEN];
-	uint8_t system_id[NAME_LEN];	/* for vgexport/vgimport */
-	uint32_t pv_major;
-	uint32_t pv_number;
-	uint32_t pv_status;
-	uint32_t pv_allocatable;
-	uint32_t pv_size;		/* HM */
-	uint32_t lv_cur;
-	uint32_t pe_size;
-	uint32_t pe_total;
-	uint32_t pe_allocated;
-	
-	/* new in struct version 2 */
-	uint32_t pe_start;	        /* in sectors */
+typedef struct pv_disk_v2
+{
+    uint8_t id[2];		/* Identifier */
+    uint16_t version;		/* HM lvm version */
+    lvm_disk_data_t pv_on_disk;
+    lvm_disk_data_t vg_on_disk;
+    lvm_disk_data_t pv_uuidlist_on_disk;
+    lvm_disk_data_t lv_on_disk;
+    lvm_disk_data_t pe_on_disk;
+    uint8_t pv_uuid[NAME_LEN];
+    uint8_t vg_name[NAME_LEN];
+    uint8_t system_id[NAME_LEN];	/* for vgexport/vgimport */
+    uint32_t pv_major;
+    uint32_t pv_number;
+    uint32_t pv_status;
+    uint32_t pv_allocatable;
+    uint32_t pv_size;		/* HM */
+    uint32_t lv_cur;
+    uint32_t pe_size;
+    uint32_t pe_total;
+    uint32_t pe_allocated;
+
+    /* new in struct version 2 */
+    uint32_t pe_start;	        /* in sectors */
 
 } pv_disk_t;
 
@@ -447,24 +453,27 @@ typedef struct pv_disk_v2 {
  */
 
 /* core PE information */
-typedef struct {
-	kdev_t dev;
-	uint32_t pe;		/* to be changed if > 2TB */
-	uint32_t reads;
-	uint32_t writes;
+typedef struct
+{
+    kdev_t dev;
+    uint32_t pe;		/* to be changed if > 2TB */
+    uint32_t reads;
+    uint32_t writes;
 } pe_t;
 
-typedef struct {
-	char lv_name[NAME_LEN];
-	kdev_t old_dev;
-	kdev_t new_dev;
-	uint32_t old_pe;
-	uint32_t new_pe;
+typedef struct
+{
+    char lv_name[NAME_LEN];
+    kdev_t old_dev;
+    kdev_t new_dev;
+    uint32_t old_pe;
+    uint32_t new_pe;
 } le_remap_req_t;
 
-typedef struct lv_bmap {
-	uint32_t lv_block;
-	dev_t lv_dev;
+typedef struct lv_bmap
+{
+    uint32_t lv_block;
+    dev_t lv_dev;
 } lv_bmap_t;
 
 /*
@@ -472,77 +481,79 @@ typedef struct lv_bmap {
  */
 
 /* core */
-typedef struct lv_v5 {
-	char lv_name[NAME_LEN];
-	char vg_name[NAME_LEN];
-	uint lv_access;
-	uint lv_status;
-	uint lv_open;		/* HM */
-	kdev_t lv_dev;		/* HM */
-	uint lv_number;		/* HM */
-	uint lv_mirror_copies;	/* for future use */
-	uint lv_recovery;	/*       "        */
-	uint lv_schedule;	/*       "        */
-	uint lv_size;
-	pe_t *lv_current_pe;	/* HM */
-	uint lv_current_le;	/* for future use */
-	uint lv_allocated_le;
-	uint lv_stripes;
-	uint lv_stripesize;
-	uint lv_badblock;	/* for future use */
-	uint lv_allocation;
-	uint lv_io_timeout;	/* for future use */
-	uint lv_read_ahead;
+typedef struct lv_v5
+{
+    char lv_name[NAME_LEN];
+    char vg_name[NAME_LEN];
+    uint lv_access;
+    uint lv_status;
+    uint lv_open;		/* HM */
+    kdev_t lv_dev;		/* HM */
+    uint lv_number;		/* HM */
+    uint lv_mirror_copies;	/* for future use */
+    uint lv_recovery;	/*       "        */
+    uint lv_schedule;	/*       "        */
+    uint lv_size;
+    pe_t *lv_current_pe;	/* HM */
+    uint lv_current_le;	/* for future use */
+    uint lv_allocated_le;
+    uint lv_stripes;
+    uint lv_stripesize;
+    uint lv_badblock;	/* for future use */
+    uint lv_allocation;
+    uint lv_io_timeout;	/* for future use */
+    uint lv_read_ahead;
 
-	/* delta to version 1 starts here */
-       struct lv_v5 *lv_snapshot_org;
-       struct lv_v5 *lv_snapshot_prev;
-       struct lv_v5 *lv_snapshot_next;
-	lv_block_exception_t *lv_block_exception;
-	uint lv_remap_ptr;
-	uint lv_remap_end;
-	uint lv_chunk_size;
-	uint lv_snapshot_minor;
+    /* delta to version 1 starts here */
+    struct lv_v5 *lv_snapshot_org;
+    struct lv_v5 *lv_snapshot_prev;
+    struct lv_v5 *lv_snapshot_next;
+    lv_block_exception_t *lv_block_exception;
+    uint lv_remap_ptr;
+    uint lv_remap_end;
+    uint lv_chunk_size;
+    uint lv_snapshot_minor;
 #ifdef __KERNEL__
-	struct kiobuf *lv_iobuf;
-	struct kiobuf *lv_COW_table_iobuf;
-	struct rw_semaphore lv_lock;
-	struct list_head *lv_snapshot_hash_table;
-	uint32_t lv_snapshot_hash_table_size;
-	uint32_t lv_snapshot_hash_mask;
-	wait_queue_head_t lv_snapshot_wait;
-	int	lv_snapshot_use_rate;
-	struct vg_v3	*vg;
+    struct kiobuf *lv_iobuf;
+    struct kiobuf *lv_COW_table_iobuf;
+    struct rw_semaphore lv_lock;
+    struct list_head *lv_snapshot_hash_table;
+    uint32_t lv_snapshot_hash_table_size;
+    uint32_t lv_snapshot_hash_mask;
+    wait_queue_head_t lv_snapshot_wait;
+    int	lv_snapshot_use_rate;
+    struct vg_v3	*vg;
 
-	uint lv_allocated_snapshot_le;
+    uint lv_allocated_snapshot_le;
 #else
-	char dummy[200];
+    char dummy[200];
 #endif
 } lv_t;
 
 /* disk */
-typedef struct lv_disk_v3 {
-	uint8_t lv_name[NAME_LEN];
-	uint8_t vg_name[NAME_LEN];
-	uint32_t lv_access;
-	uint32_t lv_status;
-	uint32_t lv_open;		/* HM */
-	uint32_t lv_dev;		/* HM */
-	uint32_t lv_number;	/* HM */
-	uint32_t lv_mirror_copies;	/* for future use */
-	uint32_t lv_recovery;	/*       "        */
-	uint32_t lv_schedule;	/*       "        */
-	uint32_t lv_size;
-	uint32_t lv_snapshot_minor;/* minor number of original */
-	uint16_t lv_chunk_size;	/* chunk size of snapshot */
-	uint16_t dummy;
-	uint32_t lv_allocated_le;
-	uint32_t lv_stripes;
-	uint32_t lv_stripesize;
-	uint32_t lv_badblock;	/* for future use */
-	uint32_t lv_allocation;
-	uint32_t lv_io_timeout;	/* for future use */
-	uint32_t lv_read_ahead;	/* HM */
+typedef struct lv_disk_v3
+{
+    uint8_t lv_name[NAME_LEN];
+    uint8_t vg_name[NAME_LEN];
+    uint32_t lv_access;
+    uint32_t lv_status;
+    uint32_t lv_open;		/* HM */
+    uint32_t lv_dev;		/* HM */
+    uint32_t lv_number;	/* HM */
+    uint32_t lv_mirror_copies;	/* for future use */
+    uint32_t lv_recovery;	/*       "        */
+    uint32_t lv_schedule;	/*       "        */
+    uint32_t lv_size;
+    uint32_t lv_snapshot_minor;/* minor number of original */
+    uint16_t lv_chunk_size;	/* chunk size of snapshot */
+    uint16_t dummy;
+    uint32_t lv_allocated_le;
+    uint32_t lv_stripes;
+    uint32_t lv_stripesize;
+    uint32_t lv_badblock;	/* for future use */
+    uint32_t lv_allocation;
+    uint32_t lv_io_timeout;	/* for future use */
+    uint32_t lv_read_ahead;	/* HM */
 } lv_disk_t;
 
 /*
@@ -550,56 +561,58 @@ typedef struct lv_disk_v3 {
  */
 
 /* core */
-typedef struct vg_v3 {
-	char vg_name[NAME_LEN];	/* volume group name */
-	uint vg_number;		/* volume group number */
-	uint vg_access;		/* read/write */
-	uint vg_status;		/* active or not */
-	uint lv_max;		/* maximum logical volumes */
-	uint lv_cur;		/* current logical volumes */
-	uint lv_open;		/* open    logical volumes */
-	uint pv_max;		/* maximum physical volumes */
-	uint pv_cur;		/* current physical volumes FU */
-	uint pv_act;		/* active physical volumes */
-	uint dummy;		/* was obsolete max_pe_per_pv */
-	uint vgda;		/* volume group descriptor arrays FU */
-	uint pe_size;		/* physical extent size in sectors */
-	uint pe_total;		/* total of physical extents */
-	uint pe_allocated;	/* allocated physical extents */
-	uint pvg_total;		/* physical volume groups FU */
-	struct proc_dir_entry *proc;
-	pv_t *pv[ABS_MAX_PV + 1];	/* physical volume struct pointers */
-	lv_t *lv[ABS_MAX_LV + 1];	/* logical  volume struct pointers */
-	char vg_uuid[UUID_LEN+1];	/* volume group UUID */
+typedef struct vg_v3
+{
+    char vg_name[NAME_LEN];	/* volume group name */
+    uint vg_number;		/* volume group number */
+    uint vg_access;		/* read/write */
+    uint vg_status;		/* active or not */
+    uint lv_max;		/* maximum logical volumes */
+    uint lv_cur;		/* current logical volumes */
+    uint lv_open;		/* open    logical volumes */
+    uint pv_max;		/* maximum physical volumes */
+    uint pv_cur;		/* current physical volumes FU */
+    uint pv_act;		/* active physical volumes */
+    uint dummy;		/* was obsolete max_pe_per_pv */
+    uint vgda;		/* volume group descriptor arrays FU */
+    uint pe_size;		/* physical extent size in sectors */
+    uint pe_total;		/* total of physical extents */
+    uint pe_allocated;	/* allocated physical extents */
+    uint pvg_total;		/* physical volume groups FU */
+    struct proc_dir_entry *proc;
+    pv_t *pv[ABS_MAX_PV + 1];	/* physical volume struct pointers */
+    lv_t *lv[ABS_MAX_LV + 1];	/* logical  volume struct pointers */
+    char vg_uuid[UUID_LEN+1];	/* volume group UUID */
 #ifdef __KERNEL__
-	struct proc_dir_entry *vg_dir_pde;
-	struct proc_dir_entry *lv_subdir_pde;
-	struct proc_dir_entry *pv_subdir_pde;
+    struct proc_dir_entry *vg_dir_pde;
+    struct proc_dir_entry *lv_subdir_pde;
+    struct proc_dir_entry *pv_subdir_pde;
 #else
-	char dummy1[200];
+    char dummy1[200];
 #endif
 } vg_t;
 
 
 /* disk */
-typedef struct vg_disk_v2 {
-	uint8_t vg_uuid[UUID_LEN];	/* volume group UUID */
-	uint8_t vg_name_dummy[NAME_LEN-UUID_LEN];	/* rest of v1 VG name */
-	uint32_t vg_number;	/* volume group number */
-	uint32_t vg_access;	/* read/write */
-	uint32_t vg_status;	/* active or not */
-	uint32_t lv_max;		/* maximum logical volumes */
-	uint32_t lv_cur;		/* current logical volumes */
-	uint32_t lv_open;		/* open    logical volumes */
-	uint32_t pv_max;		/* maximum physical volumes */
-	uint32_t pv_cur;		/* current physical volumes FU */
-	uint32_t pv_act;		/* active physical volumes */
-	uint32_t dummy;
-	uint32_t vgda;		/* volume group descriptor arrays FU */
-	uint32_t pe_size;		/* physical extent size in sectors */
-	uint32_t pe_total;		/* total of physical extents */
-	uint32_t pe_allocated;	/* allocated physical extents */
-	uint32_t pvg_total;	/* physical volume groups FU */
+typedef struct vg_disk_v2
+{
+    uint8_t vg_uuid[UUID_LEN];	/* volume group UUID */
+    uint8_t vg_name_dummy[NAME_LEN-UUID_LEN];	/* rest of v1 VG name */
+    uint32_t vg_number;	/* volume group number */
+    uint32_t vg_access;	/* read/write */
+    uint32_t vg_status;	/* active or not */
+    uint32_t lv_max;		/* maximum logical volumes */
+    uint32_t lv_cur;		/* current logical volumes */
+    uint32_t lv_open;		/* open    logical volumes */
+    uint32_t pv_max;		/* maximum physical volumes */
+    uint32_t pv_cur;		/* current physical volumes FU */
+    uint32_t pv_act;		/* active physical volumes */
+    uint32_t dummy;
+    uint32_t vgda;		/* volume group descriptor arrays FU */
+    uint32_t pe_size;		/* physical extent size in sectors */
+    uint32_t pe_total;		/* total of physical extents */
+    uint32_t pe_allocated;	/* allocated physical extents */
+    uint32_t pvg_total;	/* physical volume groups FU */
 } vg_disk_t;
 
 
@@ -608,89 +621,102 @@ typedef struct vg_disk_v2 {
  */
 
 /* Request structure PV_STATUS_BY_NAME... */
-typedef struct {
-	char pv_name[NAME_LEN];
-	pv_t *pv;
+typedef struct
+{
+    char pv_name[NAME_LEN];
+    pv_t *pv;
 } pv_status_req_t, pv_change_req_t;
 
 /* Request structure PV_FLUSH */
-typedef struct {
-	char pv_name[NAME_LEN];
-	kdev_t pv_dev;
+typedef struct
+{
+    char pv_name[NAME_LEN];
+    kdev_t pv_dev;
 } pv_flush_req_t;
 
 
 /* Request structure PE_MOVE */
-typedef struct {
-	enum {
-		LOCK_PE, UNLOCK_PE
-	} lock;
-	struct {
-		kdev_t lv_dev;
-		kdev_t pv_dev;
-		uint32_t pv_offset;
-	} data;
+typedef struct
+{
+    enum
+    {
+        LOCK_PE, UNLOCK_PE
+    } lock;
+    struct
+    {
+        kdev_t lv_dev;
+        kdev_t pv_dev;
+        uint32_t pv_offset;
+    } data;
 } pe_lock_req_t;
 
 
 /* Request structure LV_STATUS_BYNAME */
-typedef struct {
-	char lv_name[NAME_LEN];
-	lv_t *lv;
+typedef struct
+{
+    char lv_name[NAME_LEN];
+    lv_t *lv;
 } lv_status_byname_req_t, lv_req_t;
 
 /* Request structure LV_STATUS_BYINDEX */
-typedef struct {
-	uint32_t lv_index;
-	lv_t *lv;
-	/* Transfer size because user space and kernel space differ */
-	ushort size;
+typedef struct
+{
+    uint32_t lv_index;
+    lv_t *lv;
+    /* Transfer size because user space and kernel space differ */
+    ushort size;
 } lv_status_byindex_req_t;
 
 /* Request structure LV_STATUS_BYDEV... */
-typedef struct {
-	dev_t dev;
-	lv_t *lv;
+typedef struct
+{
+    dev_t dev;
+    lv_t *lv;
 } lv_status_bydev_req_t;
 
 
 /* Request structure LV_SNAPSHOT_USE_RATE */
-typedef struct {
-	int	block;
-	int	rate;
+typedef struct
+{
+    int	block;
+    int	rate;
 } lv_snapshot_use_rate_req_t;
 
 
 /* useful inlines */
-static inline ulong round_up(ulong n, ulong size) {
-	size--;
-	return (n + size) & ~size;
+static inline ulong round_up(ulong n, ulong size)
+{
+    size--;
+    return (n + size) & ~size;
 }
 
-static inline ulong div_up(ulong n, ulong size) {
-	return round_up(n, size) / size;
+static inline ulong div_up(ulong n, ulong size)
+{
+    return round_up(n, size) / size;
 }
 
-static int inline LVM_GET_COW_TABLE_CHUNKS_PER_PE(vg_t *vg, lv_t *lv) {
-	return vg->pe_size / lv->lv_chunk_size;
+static int inline LVM_GET_COW_TABLE_CHUNKS_PER_PE(vg_t *vg, lv_t *lv)
+{
+    return vg->pe_size / lv->lv_chunk_size;
 }
 
-static int inline LVM_GET_COW_TABLE_ENTRIES_PER_PE(vg_t *vg, lv_t *lv) {
-	ulong chunks = vg->pe_size / lv->lv_chunk_size;
-	ulong entry_size = sizeof(lv_COW_table_disk_t);
-	ulong chunk_size = lv->lv_chunk_size * SECTOR_SIZE;
-	ulong entries = (vg->pe_size * SECTOR_SIZE) /
-		(entry_size + chunk_size);
+static int inline LVM_GET_COW_TABLE_ENTRIES_PER_PE(vg_t *vg, lv_t *lv)
+{
+    ulong chunks = vg->pe_size / lv->lv_chunk_size;
+    ulong entry_size = sizeof(lv_COW_table_disk_t);
+    ulong chunk_size = lv->lv_chunk_size * SECTOR_SIZE;
+    ulong entries = (vg->pe_size * SECTOR_SIZE) /
+                    (entry_size + chunk_size);
 
-	if(chunks < 2)
-		return 0;
+    if(chunks < 2)
+        return 0;
 
-	for(; entries; entries--)
-		if((div_up(entries * entry_size, chunk_size) + entries) <=
-		   chunks)
-			break;
+    for(; entries; entries--)
+        if((div_up(entries * entry_size, chunk_size) + entries) <=
+                chunks)
+            break;
 
-	return entries;
+    return entries;
 }
 
 #endif				/* #ifndef _LVM_H_INCLUDE */

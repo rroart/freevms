@@ -29,46 +29,47 @@
 #define RSB$K_LENGTH 256
 #define RSB$C_LENGTH 256
 #define RSB$S_RSBDEF 256
-	
-struct _rsb {
-  void *rsb$l_hshchn;
-  void *rsb$l_hshchnbk;
 
-  unsigned short int rsb$w_size;
-  unsigned char rsb$b_type;
-  unsigned char rsb$b_depth;
-  unsigned char rsb$b_fgmode;
-  unsigned char rsb$b_ggmode;
-  unsigned char rsb$b_cgmode;
-  unsigned int rsb$l_status;
-  unsigned int rsb$l_refcnt;
-  void *rsb$l_grqfl;
-  void *rsb$l_grqbl;
-  void *rsb$l_cvtqfl;
-  void *rsb$l_cvtqbl;
-  void *rsb$l_wtqfl;
-  void *rsb$l_wtqbl;
-  unsigned long long rsb$q_valblk;
-  unsigned long rsb$l_csid;
-  void *rsb$l_rrsfl;
-  void *rsb$l_rrsbl;
-  void *rsb$l_srsfl;
-  void *rsb$l_srsbl;
-  unsigned long rsb$l_rm_csid;
-  struct _rsb *rsb$l_rtrsb;
-  struct _clurcb *rsb$l_clurcb;
-  unsigned short int rsb$w_activity;
-  unsigned short int rsb$w_lckcnt;
-  unsigned int rsb$l_valseqnum;
-  unsigned short int rsb$w_refcnt;
-  unsigned short int rsb$w_blkastcnt;
-  unsigned short int rsb$w_hashval;
-  unsigned short int rsb$w_rqseqnm;
-  struct _rsb *rsb$l_parent;
-  unsigned short int rsb$w_group;
-  unsigned char rsb$b_rmod;
-  unsigned char rsb$b_rsnlen;
-  char rsb$t_resnam [32];
+struct _rsb
+{
+    void *rsb$l_hshchn;
+    void *rsb$l_hshchnbk;
+
+    unsigned short int rsb$w_size;
+    unsigned char rsb$b_type;
+    unsigned char rsb$b_depth;
+    unsigned char rsb$b_fgmode;
+    unsigned char rsb$b_ggmode;
+    unsigned char rsb$b_cgmode;
+    unsigned int rsb$l_status;
+    unsigned int rsb$l_refcnt;
+    void *rsb$l_grqfl;
+    void *rsb$l_grqbl;
+    void *rsb$l_cvtqfl;
+    void *rsb$l_cvtqbl;
+    void *rsb$l_wtqfl;
+    void *rsb$l_wtqbl;
+    unsigned long long rsb$q_valblk;
+    unsigned long rsb$l_csid;
+    void *rsb$l_rrsfl;
+    void *rsb$l_rrsbl;
+    void *rsb$l_srsfl;
+    void *rsb$l_srsbl;
+    unsigned long rsb$l_rm_csid;
+    struct _rsb *rsb$l_rtrsb;
+    struct _clurcb *rsb$l_clurcb;
+    unsigned short int rsb$w_activity;
+    unsigned short int rsb$w_lckcnt;
+    unsigned int rsb$l_valseqnum;
+    unsigned short int rsb$w_refcnt;
+    unsigned short int rsb$w_blkastcnt;
+    unsigned short int rsb$w_hashval;
+    unsigned short int rsb$w_rqseqnm;
+    struct _rsb *rsb$l_parent;
+    unsigned short int rsb$w_group;
+    unsigned char rsb$b_rmod;
+    unsigned char rsb$b_rsnlen;
+    char rsb$t_resnam [32];
 };
- 
+
 #endif

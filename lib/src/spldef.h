@@ -1,93 +1,102 @@
 #ifndef spldef_h
 #define spldef_h
 
-#include <cpudef.h>           
+#include <cpudef.h>
 
-#define SPL$C_SPL_SPINLOCK 1            
-#define SPL$C_SPL_FORKLOCK 2            
-#define SPL$C_SPL_DEVICELOCK 3          
-#define SPL$C_SPL_PORTLOCK_TEMPLATE 4   
-#define SPL$C_SPL_PORTLOCK 5            
+#define SPL$C_SPL_SPINLOCK 1
+#define SPL$C_SPL_FORKLOCK 2
+#define SPL$C_SPL_DEVICELOCK 3
+#define SPL$C_SPL_PORTLOCK_TEMPLATE 4
+#define SPL$C_SPL_PORTLOCK 5
 #define SPL$M_INTERLOCK 0x1
-#define SPL$K_PC_VEC_CNT 16             
-	
-struct _spl {
-  long spl$l_own_cpu;                  
-  long spl$l_own_cnt;                  
-  unsigned short int spl$w_size;      
-  unsigned char spl$b_type;           
-  unsigned char spl$b_subtype;        
-  union  {
-    unsigned int spl$l_spinlock;    
-    struct  {
-      unsigned spl$v_interlock : 1; 
-      unsigned spl$v_fill_2_ : 7;
-    };
-  };
-  int spl$l_rank;                     
-  union  {                          
-    unsigned int spl$l_ipl;         
-    struct  {
-      unsigned char spl$b_ipl;    
-      char spl$b_fill1 [3];       
-    };
-  };
-  int spl$l_rls_pc;                   
-  unsigned int spl$l_busy_waits;      
-  int spl$l_wait_cpus;                
-  int spl$l_wait_pc;                  
-  long long spl$q_spins;                
-  unsigned long long spl$q_acq_count;   
-  unsigned int spl$l_timo_int;        
-  void *spl$ps_share_array;           
-  void *spl$ps_share_link;            
+#define SPL$K_PC_VEC_CNT 16
 
-  char spl$t_name [12];               
-  char spl$t_align [108];             
-  int spl$l_vec_inx;                  
-  int spl$l_own_pc_vec [16];          
+struct _spl
+{
+    long spl$l_own_cpu;
+    long spl$l_own_cnt;
+    unsigned short int spl$w_size;
+    unsigned char spl$b_type;
+    unsigned char spl$b_subtype;
+    union
+    {
+        unsigned int spl$l_spinlock;
+        struct
+        {
+            unsigned spl$v_interlock : 1;
+            unsigned spl$v_fill_2_ : 7;
+        };
+    };
+    int spl$l_rank;
+    union
+    {
+        unsigned int spl$l_ipl;
+        struct
+        {
+            unsigned char spl$b_ipl;
+            char spl$b_fill1 [3];
+        };
+    };
+    int spl$l_rls_pc;
+    unsigned int spl$l_busy_waits;
+    int spl$l_wait_cpus;
+    int spl$l_wait_pc;
+    long long spl$q_spins;
+    unsigned long long spl$q_acq_count;
+    unsigned int spl$l_timo_int;
+    void *spl$ps_share_array;
+    void *spl$ps_share_link;
+
+    char spl$t_name [12];
+    char spl$t_align [108];
+    int spl$l_vec_inx;
+    int spl$l_own_pc_vec [16];
 };
- 
-#define SPL$K_LENGTH 256                
-#define SPL$C_LENGTH 256                
-#define SPL$S_SPLDEF 256                
 
-#define SPL_SHR$K_LENGTH 128            
-#define SPL_SHR$C_LENGTH 128            
-	
-struct _spl_shr {
-  unsigned int spl_shr$l_link;        
-  int spl_shr$l_share_count;          
-  unsigned short int spl_shr$w_mbo;   
-  unsigned char spl_shr$b_type;       
-  unsigned char spl_shr$b_subtype;    
-  int spl_shr$l_cpu_id;               
-  long long spl_shr$q_size;             
-  long long spl_shr$q_timeout_int;      
-  char spl_shr$t_align [96];          
+#define SPL$K_LENGTH 256
+#define SPL$C_LENGTH 256
+#define SPL$S_SPLDEF 256
+
+#define SPL_SHR$K_LENGTH 128
+#define SPL_SHR$C_LENGTH 128
+
+struct _spl_shr
+{
+    unsigned int spl_shr$l_link;
+    int spl_shr$l_share_count;
+    unsigned short int spl_shr$w_mbo;
+    unsigned char spl_shr$b_type;
+    unsigned char spl_shr$b_subtype;
+    int spl_shr$l_cpu_id;
+    long long spl_shr$q_size;
+    long long spl_shr$q_timeout_int;
+    char spl_shr$t_align [96];
 };
 
 #define SPLBLK$M_DYNAMIC_THRESHOLD 0x1
 #define SPLBLK$C_LENGTH 256
 #define SPLBLK$K_LENGTH 256
 #define SPLBLK$C_SHIFT 8
-	
-struct _splblk {
-  unsigned long long splblk$q_abuse_bitmask; 
-  unsigned int splblk$l_spares_1 [30]; 
-  unsigned long long splblk$q_release_count; 
-  unsigned long long splblk$q_history_bitmask; 
-  unsigned long long splblk$q_abuse_threshold; 
-  union  {
-    unsigned long long splblk$q_flags; 
-    struct  {
-      unsigned splblk$v_dynamic_threshold : 1; 
-      unsigned splblk$v_fill_5_ : 7;
+
+struct _splblk
+{
+    unsigned long long splblk$q_abuse_bitmask;
+    unsigned int splblk$l_spares_1 [30];
+    unsigned long long splblk$q_release_count;
+    unsigned long long splblk$q_history_bitmask;
+    unsigned long long splblk$q_abuse_threshold;
+    union
+    {
+        unsigned long long splblk$q_flags;
+        struct
+        {
+            unsigned splblk$v_dynamic_threshold : 1;
+            unsigned splblk$v_fill_5_ : 7;
+        };
     };
-  };
-  unsigned int splblk$l_spares_2 [24]; 
+    unsigned int splblk$l_spares_2 [24];
 };
- 
+
 
 
 #define SPLDBG$K_REV1 1
@@ -133,75 +142,81 @@ struct _splblk {
 #define SPLDBG$M_LCKMGR 0x8
 #define SPLDBG$M_FORKDSPTH 0x10
 #define SPLDBG$M_FORKEND 0x20
-#define SPLDBG$K_LENGTH 616             
-#define SPLDBG$C_LENGTH 616             
-	
-struct _spldbg {
-  struct _spltrh *spldbg$q_trace_buffer; 
-  unsigned short int spldbg$w_mbo;    
-  unsigned char spldbg$b_type;        
-  unsigned char spldbg$b_subtype;     
-  unsigned int spldbg$l_revision;     
-  long long spldbg$q_size;              
-  int (*spldbg$l_start_trace)();      
-  int (*spldbg$l_stop_trace)();       
-  void (*spldbg$l_trace_acquire)();   
-  void (*spldbg$l_trace_release)();   
-  void (*spldbg$l_trace_spinwait)();  
-  void (*spldbg$l_trace_forkdspth)(); 
-  void (*spldbg$l_trace_forkend)();   
-  union  {
-    unsigned int spldbg$l_trace_flags; 
-    struct  {
-      unsigned spldbg$v_acquire : 1;
-      unsigned spldbg$v_release : 1;
-      unsigned spldbg$v_spinwait : 1;
-      unsigned spldbg$v_lckmgr : 1;
-      unsigned spldbg$v_forkdspth : 1;
-      unsigned spldbg$v_forkend : 1;
-      unsigned spldbg$v_fill_6_ : 2;
+#define SPLDBG$K_LENGTH 616
+#define SPLDBG$C_LENGTH 616
+
+struct _spldbg
+{
+    struct _spltrh *spldbg$q_trace_buffer;
+    unsigned short int spldbg$w_mbo;
+    unsigned char spldbg$b_type;
+    unsigned char spldbg$b_subtype;
+    unsigned int spldbg$l_revision;
+    long long spldbg$q_size;
+    int (*spldbg$l_start_trace)(void);
+    int (*spldbg$l_stop_trace)(void);
+    void (*spldbg$l_trace_acquire)(void);
+    void (*spldbg$l_trace_release)(void);
+    void (*spldbg$l_trace_spinwait)(void);
+    void (*spldbg$l_trace_forkdspth)(void);
+    void (*spldbg$l_trace_forkend)(void);
+    union
+    {
+        unsigned int spldbg$l_trace_flags;
+        struct
+        {
+            unsigned spldbg$v_acquire : 1;
+            unsigned spldbg$v_release : 1;
+            unsigned spldbg$v_spinwait : 1;
+            unsigned spldbg$v_lckmgr : 1;
+            unsigned spldbg$v_forkdspth : 1;
+            unsigned spldbg$v_forkend : 1;
+            unsigned spldbg$v_fill_6_ : 2;
+        };
     };
-  };
-  unsigned int spldbg$l_spl_flags;    
-  int spldbg$l_cpu_flags;             
-  unsigned int spldbg$l_frk_flags;    
-  unsigned int spldbg$l_trace_run;    
-  unsigned long long spldbg$q_reserved1;
-  unsigned long long spldbg$q_reserved2;
-  unsigned long long spldbg$q_reserved3;
-  unsigned long long spldbg$q_reserved4;
-  unsigned long long spldbg$q_scc [32]; 
-  unsigned long long spldbg$q_systime [32]; 
-};
- 
-#define SPLTRE$K_LENGTH 32              
-	
-struct _spltre {
-  unsigned long long spltre$q_timestamp; 
-  unsigned int spltre$l_pc;           
-  unsigned int spltre$l_cpuid;        
-  unsigned int spltre$l_mode;         
-  unsigned int spltre$l_flag;         
-  union  {
-    struct _spl *spltre$l_spl_addr; 
-    unsigned int spltre$l_flck;     
-  };
-  struct _pcb *spltre$l_pcb;          
-};
- 
-#define SPLTRH$K_LENGTH 64              
-	
-struct _spltrh {
-  int spltrh$l_idx;                   
-  unsigned int spltrh$l_max_idx;      
-  unsigned short int spltrh$w_mbo;    
-  unsigned char spltrh$b_type;        
-  unsigned char spltrh$b_subtype;     
-  unsigned int spltrh$l_fill1;
-  long long spltrh$q_size;              
-  struct _spltre *spltrh$q_entry_ptr; 
-  struct _spltre spltrh$r_entry [1];          
+    unsigned int spldbg$l_spl_flags;
+    int spldbg$l_cpu_flags;
+    unsigned int spldbg$l_frk_flags;
+    unsigned int spldbg$l_trace_run;
+    unsigned long long spldbg$q_reserved1;
+    unsigned long long spldbg$q_reserved2;
+    unsigned long long spldbg$q_reserved3;
+    unsigned long long spldbg$q_reserved4;
+    unsigned long long spldbg$q_scc [32];
+    unsigned long long spldbg$q_systime [32];
 };
 
-#endif 
- 
+#define SPLTRE$K_LENGTH 32
+
+struct _spltre
+{
+    unsigned long long spltre$q_timestamp;
+    unsigned int spltre$l_pc;
+    unsigned int spltre$l_cpuid;
+    unsigned int spltre$l_mode;
+    unsigned int spltre$l_flag;
+    union
+    {
+        struct _spl *spltre$l_spl_addr;
+        unsigned int spltre$l_flck;
+    };
+    struct _pcb *spltre$l_pcb;
+};
+
+#define SPLTRH$K_LENGTH 64
+
+struct _spltrh
+{
+    int spltrh$l_idx;
+    unsigned int spltrh$l_max_idx;
+    unsigned short int spltrh$w_mbo;
+    unsigned char spltrh$b_type;
+    unsigned char spltrh$b_subtype;
+    unsigned int spltrh$l_fill1;
+    long long spltrh$q_size;
+    struct _spltre *spltrh$q_entry_ptr;
+    struct _spltre spltrh$r_entry [1];
+};
+
+#endif
+

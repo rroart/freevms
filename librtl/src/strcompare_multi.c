@@ -24,7 +24,7 @@
  *				Andrew Allison
  *				50 Denlaw Road
  *				London, Ont
- *				Canada 
+ *				Canada
  *				N6G 3L4
  *
  */
@@ -75,116 +75,126 @@
  *		1 if first > second
  */
 long str$compare_multi( const struct dsc$descriptor_s* first_source_string,
-			const struct dsc$descriptor_s *second_source_string,
-			const unsigned long *flags,
-			const unsigned long *language)
+                        const struct dsc$descriptor_s *second_source_string,
+                        const unsigned long *flags,
+                        const unsigned long *language)
 {
-unsigned long 	case_sensitive,  character_set;
-char 		*s1_ptr, *s2_ptr;
-unsigned short 	s1_length, s2_length;
-unsigned short 	min_length;
-long 		result;	
+    unsigned long 	case_sensitive,  character_set;
+    char 		*s1_ptr, *s2_ptr;
+    unsigned short 	s1_length, s2_length;
+    unsigned short 	min_length;
+    long 		result;
 
 
-	case_sensitive = 1; 		// default case sensitive comparision
-	if ( (unsigned long) flags != 0 )
-	{	switch ( *flags)
-		{
-		case 0:	case_sensitive = 1;	// comparision is case sensitive
-			break;
-		case 1: case_sensitive = 0;	// ignore case
-			break;
-		default:
-			result = LIB$_INVARG;
-			return result;
-		}
-	}
+    case_sensitive = 1; 		// default case sensitive comparision
+    if ( (unsigned long) flags != 0 )
+    {
+        switch ( *flags)
+        {
+        case 0:
+            case_sensitive = 1;	// comparision is case sensitive
+            break;
+        case 1:
+            case_sensitive = 0;	// ignore case
+            break;
+        default:
+            result = LIB$_INVARG;
+            return result;
+        }
+    }
 
-	character_set = 1;
-	if ( (unsigned long) language != 0 )
-	{	switch ( *language )
-		{
-		case 1:	character_set = 1;	// multinational
-			break;
-		case 2:	character_set = 2;	// Danish
-			break;
-		case 3:	character_set = 3;	// Finish Swedish
-			break;
-		case 4:	character_set = 4;	// German
-			break;
-		case 5:	character_set = 5; 	// Norwegian
-			break;
-		case 6:	character_set = 6;	// Spanish
-			break;
-		default:
-			result = LIB$_INVARG;
-			return result;
-		}
-	}
-	/*
-	 * Analyze source strings
-	 */
-	str$analyze_sdesc(first_source_string, &s1_length, &s1_ptr);
-	str$analyze_sdesc(second_source_string, &s2_length, &s2_ptr);
+    character_set = 1;
+    if ( (unsigned long) language != 0 )
+    {
+        switch ( *language )
+        {
+        case 1:
+            character_set = 1;	// multinational
+            break;
+        case 2:
+            character_set = 2;	// Danish
+            break;
+        case 3:
+            character_set = 3;	// Finish Swedish
+            break;
+        case 4:
+            character_set = 4;	// German
+            break;
+        case 5:
+            character_set = 5; 	// Norwegian
+            break;
+        case 6:
+            character_set = 6;	// Spanish
+            break;
+        default:
+            result = LIB$_INVARG;
+            return result;
+        }
+    }
+    /*
+     * Analyze source strings
+     */
+    str$analyze_sdesc(first_source_string, &s1_length, &s1_ptr);
+    str$analyze_sdesc(second_source_string, &s2_length, &s2_ptr);
 
-	/*
-	 * Calculate length to compare
-	 */
-	min_length = (s1_length < s2_length) ? s1_length : s2_length;
+    /*
+     * Calculate length to compare
+     */
+    min_length = (s1_length < s2_length) ? s1_length : s2_length;
 
-	/*
-	 * Compare the two strings.
-	 * Use 'memcmp' instead of 'strncmp' because we may have NULL's
-	 * in our strings.
-	 */
-	if ( min_length != 0 ) 
-		result = memcmp(s1_ptr, s2_ptr, min_length);
+    /*
+     * Compare the two strings.
+     * Use 'memcmp' instead of 'strncmp' because we may have NULL's
+     * in our strings.
+     */
+    if ( min_length != 0 )
+        result = memcmp(s1_ptr, s2_ptr, min_length);
 
-	/*
-	 * Work on the result in case of equal in first part, but
-	 * different total lengths.
-	 */
-	if (result == 0)
-	{
-		if (s1_length < s2_length)
-		{
-			while ((min_length < s2_length) && (result == 0))
-			{
-				if (s2_ptr[min_length++] != ' ')
-				{
-					result = -1;
-				}
-			}
-		}
-		else
-		{
-			if (s1_length > s2_length)
-			{
-				while ((min_length < s1_length) &&(result == 0))
-				{
-					if (s1_ptr[min_length++] != ' ')
-					result = 1;
-				}
-			}
-		}
-	}
+    /*
+     * Work on the result in case of equal in first part, but
+     * different total lengths.
+     */
+    if (result == 0)
+    {
+        if (s1_length < s2_length)
+        {
+            while ((min_length < s2_length) && (result == 0))
+            {
+                if (s2_ptr[min_length++] != ' ')
+                {
+                    result = -1;
+                }
+            }
+        }
+        else
+        {
+            if (s1_length > s2_length)
+            {
+                while ((min_length < s1_length) &&(result == 0))
+                {
+                    if (s1_ptr[min_length++] != ' ')
+                        result = 1;
+                }
+            }
+        }
+    }
 
-	/*
-	 * Normalize the result
-	 */
-	if (result < -1)
-	{
-		result = -1;
-	}
+    /*
+     * Normalize the result
+     */
+    if (result < -1)
+    {
+        result = -1;
+    }
 
-	if (result > 1)
-	{
-		result = 1;
-	}
+    if (result > 1)
+    {
+        result = 1;
+    }
 
-	/*
-	 * Return the answer
-	 */
-	return result;
+    /*
+     * Return the answer
+     */
+    return result;
 }
 

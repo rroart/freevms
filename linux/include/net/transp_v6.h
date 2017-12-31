@@ -20,17 +20,17 @@ extern void				udpv6_init(void);
 extern void				tcpv6_init(void);
 
 extern int				udpv6_connect(struct sock *sk,
-						      struct sockaddr *uaddr,
-						      int addr_len);
+                                      struct sockaddr *uaddr,
+                                      int addr_len);
 
 extern int			datagram_recv_ctl(struct sock *sk,
-						  struct msghdr *msg,
-						  struct sk_buff *skb);
+                                      struct msghdr *msg,
+                                      struct sk_buff *skb);
 
 extern int			datagram_send_ctl(struct msghdr *msg,
-						  struct flowi *fl,
-						  struct ipv6_txoptions *opt,
-						  int *hlimit);
+                                      struct flowi *fl,
+                                      struct ipv6_txoptions *opt,
+                                      int *hlimit);
 
 #define		LOOPBACK4_IPV6		__constant_htonl(0x7f000006)
 

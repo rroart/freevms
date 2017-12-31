@@ -1,9 +1,9 @@
 /* $Id$
- * 
+ *
  * Kernel CAPI 2.0 Interface for Linux
- * 
+ *
  * (c) Copyright 1997 by Carsten Paeth (calle@calle.in-berlin.de)
- * 
+ *
  * This software may be used and distributed according to the terms
  * of the GNU General Public License, incorporated herein by reference.
  *
@@ -17,24 +17,26 @@
 #define CAPI_MAXDATAWINDOW	8
 
 
-typedef struct kcapi_flagdef {
-	int contr;
-	int flag;
+typedef struct kcapi_flagdef
+{
+    int contr;
+    int flag;
 } kcapi_flagdef;
 
-typedef struct kcapi_carddef {
-	char		driver[32];
-	unsigned int	port;
-	unsigned	irq;
-	unsigned int	membase;
-	int		cardnr;
+typedef struct kcapi_carddef
+{
+    char		driver[32];
+    unsigned int	port;
+    unsigned	irq;
+    unsigned int	membase;
+    int		cardnr;
 } kcapi_carddef;
 
 /* new ioctls >= 10 */
 #define KCAPI_CMD_TRACE		10
 #define KCAPI_CMD_ADDCARD	11	/* add card to named driver */
 
-/* 
+/*
  * flag > 2 => trace also data
  * flag & 1 => show trace
  */
@@ -47,31 +49,33 @@ typedef struct kcapi_carddef {
 
 #ifdef __KERNEL__
 
-struct capi_interface {
-	__u16 (*capi_isinstalled) (void);
+struct capi_interface
+{
+    __u16 (*capi_isinstalled) (void);
 
-	__u16 (*capi_register) (capi_register_params * rparam, __u16 * applidp);
-	__u16 (*capi_release) (__u16 applid);
-	__u16 (*capi_put_message) (__u16 applid, struct sk_buff * msg);
-	__u16 (*capi_get_message) (__u16 applid, struct sk_buff ** msgp);
-	__u16 (*capi_set_signal) (__u16 applid,
-			      void (*signal) (__u16 applid, void *param),
-				  void *param);
-	__u16 (*capi_get_manufacturer) (__u32 contr, __u8 buf[CAPI_MANUFACTURER_LEN]);
-	__u16 (*capi_get_version) (__u32 contr, struct capi_version * verp);
-	 __u16(*capi_get_serial) (__u32 contr, __u8 serial[CAPI_SERIAL_LEN]);
-	 __u16(*capi_get_profile) (__u32 contr, struct capi_profile * profp);
+    __u16 (*capi_register) (capi_register_params * rparam, __u16 * applidp);
+    __u16 (*capi_release) (__u16 applid);
+    __u16 (*capi_put_message) (__u16 applid, struct sk_buff * msg);
+    __u16 (*capi_get_message) (__u16 applid, struct sk_buff ** msgp);
+    __u16 (*capi_set_signal) (__u16 applid,
+                              void (*signal) (__u16 applid, void *param),
+                              void *param);
+    __u16 (*capi_get_manufacturer) (__u32 contr, __u8 buf[CAPI_MANUFACTURER_LEN]);
+    __u16 (*capi_get_version) (__u32 contr, struct capi_version * verp);
+    __u16(*capi_get_serial) (__u32 contr, __u8 serial[CAPI_SERIAL_LEN]);
+    __u16(*capi_get_profile) (__u32 contr, struct capi_profile * profp);
 
-	/*
-	 * to init controllers, data is always in user memory
-	 */
-	int (*capi_manufacturer) (unsigned int cmd, void *data);
+    /*
+     * to init controllers, data is always in user memory
+     */
+    int (*capi_manufacturer) (unsigned int cmd, void *data);
 
 };
 
-struct capi_ncciinfo {
-	__u16 applid;
-	__u32 ncci;
+struct capi_ncciinfo
+{
+    __u16 applid;
+    __u32 ncci;
 };
 
 #define	KCI_CONTRUP	0	/* struct capi_profile */
@@ -79,11 +83,12 @@ struct capi_ncciinfo {
 #define	KCI_NCCIUP	2	/* struct capi_ncciinfo */
 #define	KCI_NCCIDOWN	3	/* struct capi_ncciinfo */
 
-struct capi_interface_user {
-	char name[20];
-	void (*callback) (unsigned int cmd, __u32 contr, void *data);
-	/* internal */
-	struct capi_interface_user *next;
+struct capi_interface_user
+{
+    char name[20];
+    void (*callback) (unsigned int cmd, __u32 contr, void *data);
+    /* internal */
+    struct capi_interface_user *next;
 };
 
 struct capi_interface *attach_capi_interface(struct capi_interface_user *);
@@ -116,45 +121,49 @@ int detach_capi_interface(struct capi_interface_user *);
 #define CAPI_MSGCTRLERNOTSUPPORTEXTEQUIP  0x110a
 #define CAPI_MSGCTRLERONLYSUPPORTEXTEQUIP 0x110b
 
-typedef enum {
-        CapiMessageNotSupportedInCurrentState = 0x2001,
-        CapiIllContrPlciNcci                  = 0x2002,
-        CapiNoPlciAvailable                   = 0x2003,
-        CapiNoNcciAvailable                   = 0x2004,
-        CapiNoListenResourcesAvailable        = 0x2005,
-        CapiNoFaxResourcesAvailable           = 0x2006,
-        CapiIllMessageParmCoding              = 0x2007,
+typedef enum
+{
+    CapiMessageNotSupportedInCurrentState = 0x2001,
+    CapiIllContrPlciNcci                  = 0x2002,
+    CapiNoPlciAvailable                   = 0x2003,
+    CapiNoNcciAvailable                   = 0x2004,
+    CapiNoListenResourcesAvailable        = 0x2005,
+    CapiNoFaxResourcesAvailable           = 0x2006,
+    CapiIllMessageParmCoding              = 0x2007,
 } RESOURCE_CODING_PROBLEM;
 
-typedef enum {
-        CapiB1ProtocolNotSupported                      = 0x3001,
-        CapiB2ProtocolNotSupported                      = 0x3002,
-        CapiB3ProtocolNotSupported                      = 0x3003,
-        CapiB1ProtocolParameterNotSupported             = 0x3004,
-        CapiB2ProtocolParameterNotSupported             = 0x3005,
-        CapiB3ProtocolParameterNotSupported             = 0x3006,
-        CapiBProtocolCombinationNotSupported            = 0x3007,
-        CapiNcpiNotSupported                            = 0x3008,
-        CapiCipValueUnknown                             = 0x3009,
-        CapiFlagsNotSupported                           = 0x300a,
-        CapiFacilityNotSupported                        = 0x300b,
-        CapiDataLengthNotSupportedByCurrentProtocol     = 0x300c,
-        CapiResetProcedureNotSupportedByCurrentProtocol = 0x300d,
-        CapiTeiAssignmentFailed                         = 0x300e,
+typedef enum
+{
+    CapiB1ProtocolNotSupported                      = 0x3001,
+    CapiB2ProtocolNotSupported                      = 0x3002,
+    CapiB3ProtocolNotSupported                      = 0x3003,
+    CapiB1ProtocolParameterNotSupported             = 0x3004,
+    CapiB2ProtocolParameterNotSupported             = 0x3005,
+    CapiB3ProtocolParameterNotSupported             = 0x3006,
+    CapiBProtocolCombinationNotSupported            = 0x3007,
+    CapiNcpiNotSupported                            = 0x3008,
+    CapiCipValueUnknown                             = 0x3009,
+    CapiFlagsNotSupported                           = 0x300a,
+    CapiFacilityNotSupported                        = 0x300b,
+    CapiDataLengthNotSupportedByCurrentProtocol     = 0x300c,
+    CapiResetProcedureNotSupportedByCurrentProtocol = 0x300d,
+    CapiTeiAssignmentFailed                         = 0x300e,
 } REQUESTED_SERVICES_PROBLEM;
 
-typedef enum {
-	CapiSuccess                                     = 0x0000,
-	CapiSupplementaryServiceNotSupported            = 0x300e,
-	CapiRequestNotAllowedInThisState                = 0x3010,
+typedef enum
+{
+    CapiSuccess                                     = 0x0000,
+    CapiSupplementaryServiceNotSupported            = 0x300e,
+    CapiRequestNotAllowedInThisState                = 0x3010,
 } SUPPLEMENTARY_SERVICE_INFO;
 
-typedef enum {
-	CapiProtocolErrorLayer1                         = 0x3301,
-	CapiProtocolErrorLayer2                         = 0x3302,
-	CapiProtocolErrorLayer3                         = 0x3303,
-	CapiTimeOut                                     = 0x3303, // SuppServiceReason
-	CapiCallGivenToOtherApplication                 = 0x3304,
+typedef enum
+{
+    CapiProtocolErrorLayer1                         = 0x3301,
+    CapiProtocolErrorLayer2                         = 0x3302,
+    CapiProtocolErrorLayer3                         = 0x3303,
+    CapiTimeOut                                     = 0x3303, // SuppServiceReason
+    CapiCallGivenToOtherApplication                 = 0x3304,
 } CAPI_REASON;
 
 #endif				/* __KERNEL__ */

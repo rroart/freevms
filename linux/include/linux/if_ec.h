@@ -7,23 +7,23 @@
 
 struct ec_addr
 {
-  unsigned char station;		/* Station number.  */
-  unsigned char net;			/* Network number.  */
+    unsigned char station;		/* Station number.  */
+    unsigned char net;			/* Network number.  */
 };
 
 struct sockaddr_ec
 {
-  unsigned short sec_family;
-  unsigned char port;			/* Port number.  */
-  unsigned char cb;			/* Control/flag byte.  */
-  unsigned char type;			/* Type of message.  */
-  struct ec_addr addr;
-  unsigned long cookie;
+    unsigned short sec_family;
+    unsigned char port;			/* Port number.  */
+    unsigned char cb;			/* Control/flag byte.  */
+    unsigned char type;			/* Type of message.  */
+    struct ec_addr addr;
+    unsigned long cookie;
 };
 
 #define ECTYPE_PACKET_RECEIVED		0	/* Packet received */
 #define ECTYPE_TRANSMIT_STATUS		0x10	/* Transmit completed, 
-						   low nibble holds status */
+low nibble holds status */
 
 #define ECTYPE_TRANSMIT_OK		1
 #define ECTYPE_TRANSMIT_NOT_LISTENING	2
@@ -37,27 +37,27 @@ struct sockaddr_ec
 #define EC_HLEN				6
 
 /* This is what an Econet frame looks like on the wire. */
-struct ec_framehdr 
+struct ec_framehdr
 {
-  unsigned char dst_stn;
-  unsigned char dst_net;
-  unsigned char src_stn;
-  unsigned char src_net;
-  unsigned char cb;
-  unsigned char port;
+    unsigned char dst_stn;
+    unsigned char dst_net;
+    unsigned char src_stn;
+    unsigned char src_net;
+    unsigned char cb;
+    unsigned char port;
 };
 
 struct econet_opt
 {
-  unsigned char cb;
-  unsigned char port;
-  unsigned char station;
-  unsigned char net;
+    unsigned char cb;
+    unsigned char port;
+    unsigned char station;
+    unsigned char net;
 };
 
 struct ec_device
 {
-  unsigned char station, net;		/* Econet protocol address */
+    unsigned char station, net;		/* Econet protocol address */
 };
 
 #endif

@@ -158,33 +158,43 @@
  * syscall interface - used (mainly by NTP daemon)
  * to discipline kernel clock oscillator
  */
-struct timex {
-	unsigned int modes;	/* mode selector */
-	long offset;		/* time offset (usec) */
-	long freq;		/* frequency offset (scaled ppm) */
-	long maxerror;		/* maximum error (usec) */
-	long esterror;		/* estimated error (usec) */
-	int status;		/* clock command/status */
-	long constant;		/* pll time constant */
-	long precision;		/* clock precision (usec) (read only) */
-	long tolerance;		/* clock frequency tolerance (ppm)
+struct timex
+{
+    unsigned int modes;	/* mode selector */
+    long offset;		/* time offset (usec) */
+    long freq;		/* frequency offset (scaled ppm) */
+    long maxerror;		/* maximum error (usec) */
+    long esterror;		/* estimated error (usec) */
+    int status;		/* clock command/status */
+    long constant;		/* pll time constant */
+    long precision;		/* clock precision (usec) (read only) */
+    long tolerance;		/* clock frequency tolerance (ppm)
 				 * (read only)
 				 */
-	struct timeval time;	/* (read only) */
-	long tick;		/* (modified) usecs between clock ticks */
+    struct timeval time;	/* (read only) */
+    long tick;		/* (modified) usecs between clock ticks */
 
-	long ppsfreq;           /* pps frequency (scaled ppm) (ro) */
-	long jitter;            /* pps jitter (us) (ro) */
-	int shift;              /* interval duration (s) (shift) (ro) */
-	long stabil;            /* pps stability (scaled ppm) (ro) */
-	long jitcnt;            /* jitter limit exceeded (ro) */
-	long calcnt;            /* calibration intervals (ro) */
-	long errcnt;            /* calibration errors (ro) */
-	long stbcnt;            /* stability limit exceeded (ro) */
+    long ppsfreq;           /* pps frequency (scaled ppm) (ro) */
+    long jitter;            /* pps jitter (us) (ro) */
+    int shift;              /* interval duration (s) (shift) (ro) */
+    long stabil;            /* pps stability (scaled ppm) (ro) */
+    long jitcnt;            /* jitter limit exceeded (ro) */
+    long calcnt;            /* calibration intervals (ro) */
+    long errcnt;            /* calibration errors (ro) */
+    long stbcnt;            /* stability limit exceeded (ro) */
 
-	int  :32; int  :32; int  :32; int  :32;
-	int  :32; int  :32; int  :32; int  :32;
-	int  :32; int  :32; int  :32; int  :32;
+    int  :32;
+    int  :32;
+    int  :32;
+    int  :32;
+    int  :32;
+    int  :32;
+    int  :32;
+    int  :32;
+    int  :32;
+    int  :32;
+    int  :32;
+    int  :32;
 };
 
 /*

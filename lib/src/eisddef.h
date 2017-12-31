@@ -40,57 +40,65 @@
 #define EISD$K_PRVPIC 4
 #define EISD$K_USRSTACK 253
 #define EISD$S_EISDDEF 84
-	
-struct _eisd {
-  struct  {
-    unsigned int eisd$l_majorid;
-    unsigned int eisd$l_minorid;
-  };
-  unsigned int eisd$l_eisdsize;
-  unsigned int eisd$l_secsize;
-  union  {
-    unsigned long long eisd$q_virt_addr;
-    void *eisd$l_virt_addr;
-    struct  {
-      unsigned eisd$v_vaddr : 30;
-      unsigned eisd$v_p1 : 1;
-      unsigned eisd$v_system : 1;
+
+struct _eisd
+{
+    struct
+    {
+        unsigned int eisd$l_majorid;
+        unsigned int eisd$l_minorid;
     };
-  };
-  union  {
-    unsigned int eisd$l_flags;
-    struct  {
-      unsigned eisd$v_gbl : 1;
-      unsigned eisd$v_crf : 1;
-      unsigned eisd$v_dzro : 1;
-      unsigned eisd$v_wrt : 1;
-      unsigned eisd$v_initalcode : 1;
-      unsigned eisd$v_based : 1;
-      unsigned eisd$v_fixupvec : 1;
-      unsigned eisd$v_resident : 1;
-      unsigned eisd$v_vector : 1;
-      unsigned eisd$v_protect : 1;
-      unsigned eisd$v_lastclu : 1;
-      unsigned eisd$v_exe : 1;
-      unsigned eisd$v_nonshradr : 1;
-      unsigned eisd$v_quad_length : 1;
-      unsigned eisd$v_alloc_64bit : 1;
-      unsigned eisd$v_fill_0_ : 1;
+    unsigned int eisd$l_eisdsize;
+    unsigned int eisd$l_secsize;
+    union
+    {
+        unsigned long long eisd$q_virt_addr;
+        void *eisd$l_virt_addr;
+        struct
+        {
+            unsigned eisd$v_vaddr : 30;
+            unsigned eisd$v_p1 : 1;
+            unsigned eisd$v_system : 1;
+        };
     };
-  };
-  unsigned int eisd$l_vbn;
-  struct  {
-    unsigned char eisd$b_pfc;
-    unsigned char eisd$b_matchctl;
-    unsigned char eisd$b_type;
-    unsigned char eisd$b_fill_1;
-  };
-  unsigned int eisd$l_ident;
-  union  {
-    char eisd$t_gblnam [44];
-    unsigned long long eisd$q_secsize;
-  };
+    union
+    {
+        unsigned int eisd$l_flags;
+        struct
+        {
+            unsigned eisd$v_gbl : 1;
+            unsigned eisd$v_crf : 1;
+            unsigned eisd$v_dzro : 1;
+            unsigned eisd$v_wrt : 1;
+            unsigned eisd$v_initalcode : 1;
+            unsigned eisd$v_based : 1;
+            unsigned eisd$v_fixupvec : 1;
+            unsigned eisd$v_resident : 1;
+            unsigned eisd$v_vector : 1;
+            unsigned eisd$v_protect : 1;
+            unsigned eisd$v_lastclu : 1;
+            unsigned eisd$v_exe : 1;
+            unsigned eisd$v_nonshradr : 1;
+            unsigned eisd$v_quad_length : 1;
+            unsigned eisd$v_alloc_64bit : 1;
+            unsigned eisd$v_fill_0_ : 1;
+        };
+    };
+    unsigned int eisd$l_vbn;
+    struct
+    {
+        unsigned char eisd$b_pfc;
+        unsigned char eisd$b_matchctl;
+        unsigned char eisd$b_type;
+        unsigned char eisd$b_fill_1;
+    };
+    unsigned int eisd$l_ident;
+    union
+    {
+        char eisd$t_gblnam [44];
+        unsigned long long eisd$q_secsize;
+    };
 };
- 
+
 #endif
- 
+

@@ -1,8 +1,8 @@
 /*
- *	Linux INET6 implementation 
+ *	Linux INET6 implementation
  *
  *	Authors:
- *	Pedro Roque		<roque@di.fc.ul.pt>	
+ *	Pedro Roque		<roque@di.fc.ul.pt>
  *
  *	This program is free software; you can redistribute it and/or
  *      modify it under the terms of the GNU General Public License
@@ -15,8 +15,8 @@
 
 enum
 {
-	RTA_IPV6_UNSPEC,
-	RTA_IPV6_HOPLIMIT,
+    RTA_IPV6_UNSPEC,
+    RTA_IPV6_HOPLIMIT,
 };
 
 #define	RTA_IPV6_MAX RTA_IPV6_HOPLIMIT
@@ -35,17 +35,18 @@ enum
 
 #define RTF_LOCAL	0x80000000
 
-struct in6_rtmsg {
-	struct in6_addr		rtmsg_dst;
-	struct in6_addr		rtmsg_src;
-	struct in6_addr		rtmsg_gateway;
-	__u32			rtmsg_type;
-	__u16			rtmsg_dst_len;
-	__u16			rtmsg_src_len;
-	__u32			rtmsg_metric;
-	unsigned long		rtmsg_info;
-        __u32			rtmsg_flags;
-	int			rtmsg_ifindex;
+struct in6_rtmsg
+{
+    struct in6_addr		rtmsg_dst;
+    struct in6_addr		rtmsg_src;
+    struct in6_addr		rtmsg_gateway;
+    __u32			rtmsg_type;
+    __u16			rtmsg_dst_len;
+    __u16			rtmsg_src_len;
+    __u32			rtmsg_metric;
+    unsigned long		rtmsg_info;
+    __u32			rtmsg_flags;
+    int			rtmsg_ifindex;
 };
 
 #define RTMSG_NEWDEVICE		0x11

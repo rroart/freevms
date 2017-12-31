@@ -74,11 +74,11 @@ typedef unsigned int u_int;
 extern int nfs_int();
 
 
-    /* The IPACP_Interface tells us all about the IPACP.  It gives us   */
-    /* entry points, literals and global pointers.  See NETDEVICES.REQ  */
-    /* for a complete explaination of this structure.                   */
-    /* Note: This pointer must be named "IPACP_Interface"               */
-    IPACP_Info_Structure *IPACP_Interface;
+/* The IPACP_Interface tells us all about the IPACP.  It gives us   */
+/* entry points, literals and global pointers.  See NETDEVICES.REQ  */
+/* for a complete explaination of this structure.                   */
+/* Note: This pointer must be named "IPACP_Interface"               */
+IPACP_Info_Structure *IPACP_Interface;
 
 
 
@@ -98,35 +98,46 @@ extern int nfs_int();
 
 /* Basic data types */
 
-typedef struct {
-	unsigned long length;
-	char data[MNTPATHLEN];
-	} dirpath;
+typedef struct
+{
+    unsigned long length;
+    char data[MNTPATHLEN];
+} dirpath;
 
-typedef struct {
-	unsigned long length;
-	char data[MNTNAMLEN];
-	} name;
+typedef struct
+{
+    unsigned long length;
+    char data[MNTNAMLEN];
+} name;
 
-typedef struct {
+typedef struct
+{
     struct mount_record	*next,*prev;
     char	*hostname, *rempath;
     fhandle	hand;
-    } mount_record;
+} mount_record;
 
-struct { mount_record *head,*tail; } mount_queue;
+struct
+{
+    mount_record *head,*tail;
+} mount_queue;
 
 /* Mount specific declarations */
 
 int ((*(mnt_proc_vector[NPROCS]))());
 
-int mnt_int(int x) { int y; XDR$ntov_int(&x,&y); return(y); }
+int mnt_int(int x)
+{
+    int y;
+    XDR$ntov_int(&x,&y);
+    return(y);
+}
 
 
 
 convert_filename_to_fid(fname,fid)
-    char *fname;
-    fhandle fid;
+char *fname;
+fhandle fid;
 {
     enum nfs_stat status;
     struct FAB fab;
@@ -139,7 +150,7 @@ convert_filename_to_fid(fname,fid)
     fab.fab$b_fac = FAB$M_GET | FAB$M_PUT;	/* whatever...           */
     fab.fab$l_fna = fname;
     fab.fab$b_fns = strlen(fname);
-    
+
     nam = cc$rms_nam;
     nam.nam$l_rsa = rsbuff;
     nam.nam$l_esa = esbuff;
@@ -148,18 +159,18 @@ convert_filename_to_fid(fname,fid)
 
     status = sys$open (&fab, 0, 0);
     if (status != RMS$_NORMAL)
-	return(NFSERR_ACCES);
+        return(NFSERR_ACCES);
 
     esbuff[nam.nam$b_esl] = 0;
 
-    memset(fid,0,FHSIZE);    
+    memset(fid,0,FHSIZE);
     memcpy(fid,&nam.nam$t_dvi,FIDSIZE);
 
     status = sys$close (&fab, 0, 0);
     if (status != RMS$_NORMAL)
-	return(NFSERR_ACCES);
+        return(NFSERR_ACCES);
 
-   return(NFS_OK);
+    return(NFS_OK);
 }
 
 
@@ -171,12 +182,12 @@ convert_filename_to_fid(fname,fid)
 */
 
 int MNT$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *cbody,*areply;
-    int *len;
-    unsigned int prog,vers,proc;
+unsigned uic;
+char *hname;
+char *username;
+long *cbody,*areply;
+int *len;
+unsigned int prog,vers,proc;
 {
     long flavor;
     int result_len;
@@ -187,27 +198,35 @@ int MNT$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
     *len = 2*BYTES_PER_XDR_UNIT;
 
     /* Is the program available? */
-    if (prog != RPCPROG_MOUNT) {
-	XDR$vton_int(&PROG_UNAVAIL,areply++);		*len += 4;
-	return(1);
-	}
+    if (prog != RPCPROG_MOUNT)
+    {
+        XDR$vton_int(&PROG_UNAVAIL,areply++);
+        *len += 4;
+        return(1);
+    }
 
     /* is the procedure number reasonable? */
-    if ((proc >= NPROCS) || (proc <0)) {
-	XDR$vton_int(&PROC_UNAVAIL,areply++);		*len += 4;
-	return(1);
-	}
+    if ((proc >= NPROCS) || (proc <0))
+    {
+        XDR$vton_int(&PROC_UNAVAIL,areply++);
+        *len += 4;
+        return(1);
+    }
 
     /* Is he requesting the right version? */
     /* !!!HACK!!! should this check be a bound instead of inequality? */
-    if (vers != MNT_VERSION) {
-	XDR$vton_int(&PROG_MISMATCH,areply++);		*len += 4;
-	XDR$vton_int(&MNT_VERSION_LOW,areply++);	*len += 4;
-	XDR$vton_int(&MNT_VERSION_HIGH,areply++);	*len += 4;
-	return(1);
-	}
+    if (vers != MNT_VERSION)
+    {
+        XDR$vton_int(&PROG_MISMATCH,areply++);
+        *len += 4;
+        XDR$vton_int(&MNT_VERSION_LOW,areply++);
+        *len += 4;
+        XDR$vton_int(&MNT_VERSION_HIGH,areply++);
+        *len += 4;
+        return(1);
+    }
 
-/* We're good to go */
+    /* We're good to go */
     cbody += 4;		/* jump over rpc_vers,prog,vers, and proc */
 
     /* ignore credentials */
@@ -217,15 +236,18 @@ int MNT$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
     /* ignore verifier */
     flavor = mnt_int(*cbody++);
     cbody += ((RNDUP(mnt_int(*cbody))/4) +1);
-    
+
     result_len = (*mnt_proc_vector[proc])(areply+1,cbody,hname);
-    if (result_len < 0) {
-	XDR$vton_int(&GARBAGE_ARGS,areply++);		*len += 4;
-	return(1);
-	}
+    if (result_len < 0)
+    {
+        XDR$vton_int(&GARBAGE_ARGS,areply++);
+        *len += 4;
+        return(1);
+    }
 
     /* it worked! */
-    XDR$vton_int(&SUCCESS,areply++);		*len += 4;
+    XDR$vton_int(&SUCCESS,areply++);
+    *len += 4;
     *len += result_len;
     return 1;
 }
@@ -233,38 +255,39 @@ int MNT$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
 
 
 mount_record *find_mr(str)
-    char *str;
+char *str;
 {
     mount_record *mrp;
 
     mrp = mount_queue.head;
     while (mrp != &mount_queue.head)
-	if (!strcmp(&mrp->rempath,str)) return mrp;
-	else mrp = mrp->next;
+        if (!strcmp(&mrp->rempath,str)) return mrp;
+        else mrp = mrp->next;
 
     return NULL;
 }
 
 insert_mr(mrp)
-    mount_record *mrp;
+mount_record *mrp;
 {
     _INSQUE(mrp,&mount_queue.head);
 }
 
 remove_mr(mrp)
-    mount_record *mrp;
+mount_record *mrp;
 {
-    if (_REMQUE(mrp,&mrp) < 2) {
-	free(mrp->rempath);
-	free(mrp->hostname);
+    if (_REMQUE(mrp,&mrp) < 2)
+    {
+        free(mrp->rempath);
+        free(mrp->hostname);
         free(mrp);
     }
 }
 
 mount_record *new_mr(rempath, vmspath, hostname)
-    char *rempath;
-    char *vmspath;
-    char *hostname;
+char *rempath;
+char *vmspath;
+char *hostname;
 {
     int RC;
     mount_record *mrp;
@@ -272,10 +295,10 @@ mount_record *new_mr(rempath, vmspath, hostname)
     mrp = (mount_record *)malloc(sizeof(*mrp));
     if (!mrp)
         return NULL;
-	
+
     RC = convert_filename_to_fid(vmspath,&mrp->hand);
     if (RC != NFS_OK)
-	return NULL;
+        return NULL;
 
     /* fill out the mount record */
     mrp->rempath = (char *)malloc(strlen(rempath) + 1);
@@ -287,17 +310,18 @@ mount_record *new_mr(rempath, vmspath, hostname)
 }
 
 mount_record *get_mr(rempath, vmspath, hostname)
-    char *rempath;
-    char *vmspath;
-    char *hostname;
+char *rempath;
+char *vmspath;
+char *hostname;
 {
     mount_record *mrp;
 
     mrp = find_mr(rempath);
-    if (mrp == NULL) {
-	mrp = new_mr(rempath, vmspath, hostname);
-	if ((mrp==NULL) || (!insert_mr(mrp))) return NULL;
-	}
+    if (mrp == NULL)
+    {
+        mrp = new_mr(rempath, vmspath, hostname);
+        if ((mrp==NULL) || (!insert_mr(mrp))) return NULL;
+    }
 
     return mrp;
 }
@@ -311,7 +335,7 @@ MNT procedure #0	- Do nothing
 */
 
 int MNTPROC_NULL(reply)
-    char *reply;
+char *reply;
 {
     return 0;
 }
@@ -325,9 +349,9 @@ MNT procedure #1	- Add Mount Entry
 */
 
 int MNTPROC_MNT(reply,args,remhost)
-    long *reply;
-    char *args;
-    char *remhost;
+long *reply;
+char *args;
+char *remhost;
 {
     dirpath dir;
     int i,size;
@@ -335,7 +359,7 @@ int MNTPROC_MNT(reply,args,remhost)
     fhandle fid;
     mount_record *mrp;
     char mountpath[MNTPATHLEN+1], vmspath[MNTPATHLEN+1], *convptr,
-        *vmsptr;
+         *vmsptr;
 
     /* Load arguments into dir */
     XDR$ntov_arb(&args, &dir.length, sizeof(dir.length));
@@ -345,47 +369,49 @@ int MNTPROC_MNT(reply,args,remhost)
     /* produce C string */
     XDR$ntov_uint(&dir.length,&size);
     strcpy(mountpath, dir.data);
-    
+
     if (check_export(mountpath, remhost))
     {
-	strcpy(mountpath, dir.data);		    /* Clear out upcasing */
+        strcpy(mountpath, dir.data);		    /* Clear out upcasing */
 
         convptr = strchr(mountpath + 1, '/');	    /* Skip leading `/' */
-	if (!convptr)
-	{
-	    strcat(mountpath, "/000000");
-	    convptr = strchr(mountpath + 1, '/');
-	}
-	strncpy(vmspath, mountpath + 1, (convptr - (mountpath + 1)));
-	vmspath[(convptr - (mountpath + 1))] = 0;
-	strcat(vmspath, ":[000000.");
-	strtok(mountpath + 1, "/");	/* Skip the first element (device) */
-	vmsptr = vmspath + strlen(vmspath);
-	while (convptr = strtok(NULL, "/"))
-	{
-	    vmsptr += FNAME_NET_TO_VMS(convptr, strlen(convptr), vmsptr, 1);
+        if (!convptr)
+        {
+            strcat(mountpath, "/000000");
+            convptr = strchr(mountpath + 1, '/');
         }
-	*(vmsptr - 1) = 0;
-	vmsptr = strrchr(vmspath, '.');
-	if (vmsptr)
-	    *vmsptr = ']';
+        strncpy(vmspath, mountpath + 1, (convptr - (mountpath + 1)));
+        vmspath[(convptr - (mountpath + 1))] = 0;
+        strcat(vmspath, ":[000000.");
+        strtok(mountpath + 1, "/");	/* Skip the first element (device) */
+        vmsptr = vmspath + strlen(vmspath);
+        while (convptr = strtok(NULL, "/"))
+        {
+            vmsptr += FNAME_NET_TO_VMS(convptr, strlen(convptr), vmsptr, 1);
+        }
+        *(vmsptr - 1) = 0;
+        vmsptr = strrchr(vmspath, '.');
+        if (vmsptr)
+            *vmsptr = ']';
 
-	strcat(vmspath, ".DIR");
-	mrp = get_mr(&dir.data, &vmspath, remhost);
-	if (mrp==NULL) {
-	    XDR$ntov_uint(&NFSERR_NOENT,reply);
-	    return 4;
-	    }
+        strcat(vmspath, ".DIR");
+        mrp = get_mr(&dir.data, &vmspath, remhost);
+        if (mrp==NULL)
+        {
+            XDR$ntov_uint(&NFSERR_NOENT,reply);
+            return 4;
+        }
 
-	/* return results */
-	XDR$ntov_uint(&NFS_OK,reply++);
-	memset(reply,0,FHSIZE);
-	memcpy(reply,&mrp->hand,FIDSIZE);
-	return 4+FHSIZE;
+        /* return results */
+        XDR$ntov_uint(&NFS_OK,reply++);
+        memset(reply,0,FHSIZE);
+        memcpy(reply,&mrp->hand,FIDSIZE);
+        return 4+FHSIZE;
     }
-    else {
-	XDR$ntov_uint(&NFSERR_ACCES,reply++);
-	return 4;
+    else
+    {
+        XDR$ntov_uint(&NFSERR_ACCES,reply++);
+        return 4;
     }
 }
 
@@ -397,9 +423,9 @@ MNT procedure #2	- Return Mount Entries
 
 */
 MNTPROC_DUMP(reply, args, remhost)
-    char *reply;
-    char *args;
-    char *remhost;
+char *reply;
+char *args;
+char *remhost;
 {
     /* Simply dump the queue of mounted directories to the network... (isn't
        this a bit on the under-secure side)? */
@@ -409,30 +435,34 @@ MNTPROC_DUMP(reply, args, remhost)
 
     while (curmrp != &mount_queue.head)
     {
-	XDR$vton_uint(&1, reply);	/* Mark there as being some data */
-	reply += 4;	len += 4;
+        XDR$vton_uint(&1, reply);	/* Mark there as being some data */
+        reply += 4;
+        len += 4;
 
-	stringlen = strlen(curmrp->hostname);
+        stringlen = strlen(curmrp->hostname);
         XDR$vton_uint(&stringlen, reply);
-	reply += 4;	len += 4;
-	memset(reply, 0, RNDUP(stringlen));
-	memcpy(reply, curmrp->hostname, stringlen);
-	reply += RNDUP(stringlen);
-	len += RNDUP(stringlen);
-	
-	stringlen = strlen(curmrp->rempath);
-	XDR$vton_uint(&stringlen, reply);
-	reply += 4;	len += 4;
-	memset(reply, 0, RNDUP(stringlen));
-	memcpy(reply, curmrp->rempath, stringlen);
-	reply += RNDUP(stringlen);
-	len += RNDUP(stringlen);
+        reply += 4;
+        len += 4;
+        memset(reply, 0, RNDUP(stringlen));
+        memcpy(reply, curmrp->hostname, stringlen);
+        reply += RNDUP(stringlen);
+        len += RNDUP(stringlen);
 
-	curmrp = curmrp->next;
+        stringlen = strlen(curmrp->rempath);
+        XDR$vton_uint(&stringlen, reply);
+        reply += 4;
+        len += 4;
+        memset(reply, 0, RNDUP(stringlen));
+        memcpy(reply, curmrp->rempath, stringlen);
+        reply += RNDUP(stringlen);
+        len += RNDUP(stringlen);
+
+        curmrp = curmrp->next;
     }
-    
+
     XDR$vton_uint(&0, reply);		/* No more data available */
-    reply += 4;	    len += 4;
+    reply += 4;
+    len += 4;
     return len;
 }
 
@@ -444,9 +474,9 @@ MNT procedure #3	- Remove Mount Entry
 
 */
 int MNTPROC_UMNT(reply,args,remhost)
-    long *reply;
-    char *args;
-    char *remhost;
+long *reply;
+char *args;
+char *remhost;
 {
     dirpath dir;
     int i,size;
@@ -461,7 +491,7 @@ int MNTPROC_UMNT(reply,args,remhost)
     /* find the mount record */
     mrp = find_mr(&dir.data);
     if (mrp==NULL)
-	return 0;
+        return 0;
 
     /* fill out the mount record */
     remove_mr(mrp);
@@ -478,23 +508,23 @@ MNT procedure #4	- Remove All Mount Entries (for this host)
 
 */
 MNTPROC_UMNTALL(reply,args,remhost)
-    char *reply;
-    char *args;
-    char *remhost;
+char *reply;
+char *args;
+char *remhost;
 {
     mount_record *nextmrp, *curmrp = mount_queue.head;
 
     while (curmrp != &mount_queue.head)
     {
-	nextmrp = curmrp->next;
+        nextmrp = curmrp->next;
 
         if (!strcmp(remhost, curmrp->hostname))
-	{
-	    nextmrp = curmrp->next;
-	    remove_mr(curmrp);
-	}
+        {
+            nextmrp = curmrp->next;
+            remove_mr(curmrp);
+        }
 
-	curmrp = nextmrp;
+        curmrp = nextmrp;
     }
 
     return 0;		/* All OK (we hope; at least we tried) */
@@ -508,9 +538,9 @@ MNT procedure #5	- Return Export List
 
 */
 MNTPROC_EXPORT(reply,args,remhost)
-    char *reply;
-    char *args;
-    char *remhost;
+char *reply;
+char *args;
+char *remhost;
 {
     char exportlist[8192], *curexport, *curgroup;
     int len = 0, stringlen;
@@ -521,36 +551,42 @@ MNTPROC_EXPORT(reply,args,remhost)
     while (curexport)
     {
         XDR$vton_uint(&1, reply);
-	reply += 4;	len += 4;
-	stringlen = strlen(curexport);
-	XDR$vton_uint(&stringlen, reply);
-	reply += 4;	len += 4;
-	memset(reply, 0, RNDUP(stringlen));
-	memcpy(reply, curexport, stringlen);
-	reply += RNDUP(stringlen);
-	len += RNDUP(stringlen);
+        reply += 4;
+        len += 4;
+        stringlen = strlen(curexport);
+        XDR$vton_uint(&stringlen, reply);
+        reply += 4;
+        len += 4;
+        memset(reply, 0, RNDUP(stringlen));
+        memcpy(reply, curexport, stringlen);
+        reply += RNDUP(stringlen);
+        len += RNDUP(stringlen);
 
-	curgroup = strtok(NULL, ":");
-	while (curgroup && (stringlen = strlen(curgroup)) &&
-	    strcmp(curgroup, " "))
-	{
-	    XDR$vton_uint(&1, reply);
-	    reply += 4;	    len += 4;
-	    XDR$vton_uint(&stringlen, reply);
-	    reply += 4;	    len += 4;
-	    memset(reply, 0, RNDUP(stringlen));
-	    memcpy(reply, curgroup, stringlen);
-	    reply += RNDUP(stringlen);
-	    len += RNDUP(stringlen);
+        curgroup = strtok(NULL, ":");
+        while (curgroup && (stringlen = strlen(curgroup)) &&
+                strcmp(curgroup, " "))
+        {
+            XDR$vton_uint(&1, reply);
+            reply += 4;
+            len += 4;
+            XDR$vton_uint(&stringlen, reply);
+            reply += 4;
+            len += 4;
+            memset(reply, 0, RNDUP(stringlen));
+            memcpy(reply, curgroup, stringlen);
+            reply += RNDUP(stringlen);
+            len += RNDUP(stringlen);
 
-	    curgroup = strtok(NULL, ":");
-	}
-	XDR$vton_uint(&0, reply);
-	reply += 4;	len += 4;
-	curexport = strtok(NULL, ":");
+            curgroup = strtok(NULL, ":");
+        }
+        XDR$vton_uint(&0, reply);
+        reply += 4;
+        len += 4;
+        curexport = strtok(NULL, ":");
     }
     XDR$vton_uint(&0, reply);
-    reply += 4;	    len += 4;
+    reply += 4;
+    len += 4;
 
     return len;
 }
@@ -559,7 +595,7 @@ MNTPROC_EXPORT(reply,args,remhost)
 
 /* Initialize the module.  This should be an entry point. */
 int MNT$INIT(IPACP_Int)
-   char *IPACP_Int;
+char *IPACP_Int;
 {
     int i;
 

@@ -28,17 +28,20 @@
 
 static int ext2_readlink(struct dentry *dentry, char *buffer, int buflen)
 {
-	char *s = (char *)dentry->d_inode->u.ext2_i.i_data;
-	return vfs_readlink(dentry, buffer, buflen, s);
+    char *s = (char *)dentry->d_inode->u.ext2_i.i_data;
+    return vfs_readlink(dentry, buffer, buflen, s);
 }
 
 static int ext2_follow_link(struct dentry *dentry, struct nameidata *nd)
 {
-	char *s = (char *)dentry->d_inode->u.ext2_i.i_data;
-	return vfs_follow_link(nd, s);
+    char *s = (char *)dentry->d_inode->u.ext2_i.i_data;
+    return vfs_follow_link(nd, s);
 }
 
-struct inode_operations ext2_fast_symlink_inode_operations = {
-	readlink:	ext2_readlink,
-	follow_link:	ext2_follow_link,
+struct inode_operations ext2_fast_symlink_inode_operations =
+{
+readlink:
+    ext2_readlink,
+follow_link:
+    ext2_follow_link,
 };

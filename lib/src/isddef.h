@@ -35,55 +35,63 @@
 #define ISD$K_PRVPIC 4
 #define ISD$K_USRSTACK 253
 #define ISD$S_ISDDEF 64
-	
-struct _isd {
-  unsigned short int isd$w_size;
-  unsigned short int isd$w_pagcnt;
-  union  {
-    unsigned int isd$l_vpnpfc;
-    struct  {
-      unsigned isd$v_vpn : 21;
-      unsigned isd$v_p1 : 1;
-      unsigned isd$v_system : 1;
-      unsigned isddef$$_fill_1 : 1;
-      unsigned isd$v_pfc : 8;
+
+struct _isd
+{
+    unsigned short int isd$w_size;
+    unsigned short int isd$w_pagcnt;
+    union
+    {
+        unsigned int isd$l_vpnpfc;
+        struct
+        {
+            unsigned isd$v_vpn : 21;
+            unsigned isd$v_p1 : 1;
+            unsigned isd$v_system : 1;
+            unsigned isddef$$_fill_1 : 1;
+            unsigned isd$v_pfc : 8;
+        };
+        struct
+        {
+            unsigned isd$v_vpg : 23;
+            unsigned isd$v_fill_0_ : 1;
+        };
+        struct
+        {
+            char isddef$$_fill_4 [3];
+            unsigned char isd$b_pfc;
+        };
     };
-    struct  {
-      unsigned isd$v_vpg : 23;
-      unsigned isd$v_fill_0_ : 1;
+    union
+    {
+        unsigned int isd$l_flags;
+        struct
+        {
+            unsigned isd$v_gbl : 1;
+            unsigned isd$v_crf : 1;
+            unsigned isd$v_dzro : 1;
+            unsigned isd$v_wrt : 1;
+            unsigned isd$v_matchctl : 3;
+            unsigned isd$v_lastclu : 1;
+            unsigned isd$v_initalcode : 1;
+            unsigned isd$v_based : 1;
+            unsigned isd$v_fixupvec : 1;
+            unsigned isd$v_resident : 1;
+            unsigned isddef$$_fill_2 : 5;
+            unsigned isd$v_vector : 1;
+            unsigned isd$v_protect : 1;
+            unsigned isddef$$_fill_3 : 5;
+        };
+        struct
+        {
+            char isddef$$_fill_5 [3];
+            unsigned char isd$b_type;
+        };
     };
-    struct  {
-      char isddef$$_fill_4 [3];
-      unsigned char isd$b_pfc;
-    };
-  };
-  union  {
-    unsigned int isd$l_flags;
-    struct  {
-      unsigned isd$v_gbl : 1;
-      unsigned isd$v_crf : 1;
-      unsigned isd$v_dzro : 1;
-      unsigned isd$v_wrt : 1;
-      unsigned isd$v_matchctl : 3;
-      unsigned isd$v_lastclu : 1;
-      unsigned isd$v_initalcode : 1;
-      unsigned isd$v_based : 1;
-      unsigned isd$v_fixupvec : 1;
-      unsigned isd$v_resident : 1;
-      unsigned isddef$$_fill_2 : 5;
-      unsigned isd$v_vector : 1;
-      unsigned isd$v_protect : 1;
-      unsigned isddef$$_fill_3 : 5;
-    };
-    struct  {
-      char isddef$$_fill_5 [3];
-      unsigned char isd$b_type;
-    };
-  };
-  unsigned int isd$l_vbn;
-  unsigned int isd$l_ident;
-  char isd$t_gblnam [44];
+    unsigned int isd$l_vbn;
+    unsigned int isd$l_ident;
+    char isd$t_gblnam [44];
 };
- 
+
 #endif
- 
+

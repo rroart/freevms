@@ -2,7 +2,7 @@
 #define __SYSGEN_LOADED 1
 
 /* Will change name to sysparam.h */
- 
+
 /*Parameter Name            Current    Default     Min.     Max.     Unit  Dynamic */
 
 #define ACP_BASEPRIO                    8   /*        8         4        31 Priority   D */

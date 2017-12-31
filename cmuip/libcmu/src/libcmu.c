@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Mike O'Malley
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified LIBCMU source file
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -12,12 +12,12 @@
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
  * version 2 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Library General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -41,7 +41,7 @@
  *	int recvfrom(int s, char *buf, int len, int flags,
  *			struct sockaddr *from, int *fromlen)
  *	int send(int s, char *msg, int len, int flags)
- *	int sendto(int s, char *msg, int len, int flags, 
+ *	int sendto(int s, char *msg, int len, int flags,
  *			struct sockaddr *to, int tolen)
  *	int shutdown(int s, int how)
  *
@@ -120,8 +120,8 @@
  *	 8-FEB-1994 che 1.1.2
  *		Fixed accept function to return the remote host information.
  *	 4-FEB-1994 che 1.1.1
- *		Fixed problem in gethostbyaddr; it worked after called 
- *		gethostbyname but would get access violation when it was 
+ *		Fixed problem in gethostbyaddr; it worked after called
+ *		gethostbyname but would get access violation when it was
  *		called first time.
  *	18-JAN-1994 mlo 1.1.0
  *		Removed references to `sys/', `vnet/', `netinet/' from
@@ -183,9 +183,7 @@ int sys$assign();
 int sys$getsyi();
 int sys$waitfr();
 int cfree();
-int sys_recvfrom();
-int sys_sendto();
-int recv();
+int recv(int s, char *buf, int len, int flags);
 #define sys$cancel exe$cancel
 int sys$cancel();
 int lib$get_ef();
@@ -221,10 +219,11 @@ int sys$trnlnm();
 #define malloc(x) kmalloc(x, GFP_KERNEL)
 #define cfree kfree
 #define free kfree
-static inline void * calloc(int a, int b) {
-  void * v = kmalloc(a*b, GFP_KERNEL);
-  memset (v, 0, a*b);
-  return v;
+static inline void * calloc(int a, int b)
+{
+    void * v = kmalloc(a*b, GFP_KERNEL);
+    memset (v, 0, a*b);
+    return v;
 }
 #endif
 
@@ -352,16 +351,18 @@ static struct FD_ENTRY *sd[FD_SETSIZE];
  * The default interface name.
  */
 #define INET_DEVICE_NAME "INET$DEVICE"
-static readonly struct dsc$descriptor inet_device = 
-	{11, DSC$K_DTYPE_T, DSC$K_CLASS_S, INET_DEVICE_NAME };
+static readonly struct dsc$descriptor inet_device =
+    {11, DSC$K_DTYPE_T, DSC$K_CLASS_S, INET_DEVICE_NAME };
 
 /*
  * for system information call to get MAXBUF size.
  */
 static int MAXBUF;
-static struct ITEM_LIST syinfo[2] = {
-	4, SYI$_MAXBUF, &MAXBUF, 0,
-	0,           0,       0, 0  };
+static struct ITEM_LIST syinfo[2] =
+{
+    4, SYI$_MAXBUF, &MAXBUF, 0,
+    0,           0,       0, 0
+};
 
 /*
  * File descriptor mask to keep track of i/o events.
@@ -407,22 +408,23 @@ asmlinkage int sys_socket(domain,type,protocol)
 int domain,type,protocol;
 {
 
-int	s;
+    int	s;
 
     /*
      * Verify the address family (domain)
      */
-    if ( domain != AF_INET ) {
-	/*
-	 * we don't handle any other address formats.
-	 */
+    if ( domain != AF_INET )
+    {
+        /*
+         * we don't handle any other address formats.
+         */
 #ifndef __KERNEL__
-	errno = EAFNOSUPPORT;
-	return(-1);
+        errno = EAFNOSUPPORT;
+        return(-1);
 #else
-	return -EAFNOSUPPORT;
+        return -EAFNOSUPPORT;
 #endif
-    }	
+    }
 
     /*
      * Use the dup() routine to aquire a unique discriptor.
@@ -434,13 +436,14 @@ int	s;
     s = get_unused_fd();
 #endif
     if (s<0)
-	return(-1);
-    else if ((s < 0) || (s > FD_SETSIZE)) {
+        return(-1);
+    else if ((s < 0) || (s > FD_SETSIZE))
+    {
 #ifndef __KERNEL__
-	errno = ENFILE;
-	return (-1);
+        errno = ENFILE;
+        return (-1);
 #else
-	return -ENFILE;
+        return -ENFILE;
 #endif
     }
     FD_SET(s,&sys_validfds);
@@ -464,65 +467,71 @@ int	s;
     /*
      * If not specified select a default protocol
      */
-    if (protocol == IPPROTO_IP) {
-	switch(type) {
-	    case SOCK_STREAM :
-		sd[s]->protocol	= IPPROTO_TCP;
-		break;
-	    case SOCK_DGRAM :
-	    default:
-		sd[s]->protocol	= IPPROTO_UDP;
-	}
+    if (protocol == IPPROTO_IP)
+    {
+        switch(type)
+        {
+        case SOCK_STREAM :
+            sd[s]->protocol	= IPPROTO_TCP;
+            break;
+        case SOCK_DGRAM :
+        default:
+            sd[s]->protocol	= IPPROTO_UDP;
+        }
     }
     else
-	switch(protocol) {
-	    case IPPROTO_TCP:
-	    case IPPROTO_UDP:
-		sd[s]->protocol = protocol;
-		break;
-	    default:
+        switch(protocol)
+        {
+        case IPPROTO_TCP:
+        case IPPROTO_UDP:
+            sd[s]->protocol = protocol;
+            break;
+        default:
 #ifndef __KERNEL__
-		errno = EPROTONOSUPPORT;
-		return(-1);
+            errno = EPROTONOSUPPORT;
+            return(-1);
 #else
-		return -EPROTONOSUPPORT;
+            return -EPROTONOSUPPORT;
 #endif
-	}
+        }
 
 
     /*
      * grab the OpenVMS SYSGEN parameter MAXBUF and set the default buffer size
      * to the minimum of *_SO_RCVBUF_DEF or MAXBUF
      */
-    if (MAXBUF == 0) {
-	vaxc$errno = sys$getsyi( 0, 0, 0, &syinfo, 0, 0, 0);
-	if (vaxc$errno != SS$_NORMAL) {
+    if (MAXBUF == 0)
+    {
+        vaxc$errno = sys$getsyi( 0, 0, 0, &syinfo, 0, 0, 0);
+        if (vaxc$errno != SS$_NORMAL)
+        {
 #ifndef __KERNEL__
-		errno = EVMSERR;
-		return(-1);
+            errno = EVMSERR;
+            return(-1);
 #else
-		return -EVMSERR;
+            return -EVMSERR;
 #endif
-	}
+        }
     }
 
     if (sd[s]->protocol == IPPROTO_TCP)
-	sd[s]->rcvbufsize = 
-			MAXBUF < TCP_SO_RCVBUF_DEF ? MAXBUF : TCP_SO_RCVBUF_DEF;
+        sd[s]->rcvbufsize =
+            MAXBUF < TCP_SO_RCVBUF_DEF ? MAXBUF : TCP_SO_RCVBUF_DEF;
     else
-	sd[s]->rcvbufsize =
-			MAXBUF < UDP_SO_RCVBUF_DEF ? MAXBUF : UDP_SO_RCVBUF_DEF;
+        sd[s]->rcvbufsize =
+            MAXBUF < UDP_SO_RCVBUF_DEF ? MAXBUF : UDP_SO_RCVBUF_DEF;
 
     /*
      * assign a channel to the network device
      */
     vaxc$errno = sys$assign(&inet_device,&sd[s]->chan,0,0);
-    if (vaxc$errno != SS$_NORMAL) {
+    if (vaxc$errno != SS$_NORMAL)
+    {
 #ifndef __KERNEL__
-	errno = EVMSERR;
-	return(-1);
+        errno = EVMSERR;
+        return(-1);
 #else
-	return -EVMSERR;
+        return -EVMSERR;
 #endif
     }
     return(s);
@@ -555,24 +564,25 @@ int			s;	/* socket to bind to	*/
 struct sockaddr		*name;	/* name stuff		*/
 int			namelen;/* length of name stuff	*/
 {
-int	status;
-int	protocol;
-struct	sockaddr_in *my = name;
+    int	status;
+    int	protocol;
+    struct	sockaddr_in *my = name;
 
     /*
      * Verify the address family (domain)
      */
-    if ( name->sa_family != AF_INET ) {
-	/*
-	 * we don't handle any other address formats.
-	 */
+    if ( name->sa_family != AF_INET )
+    {
+        /*
+         * we don't handle any other address formats.
+         */
 #ifndef __KERNEL__
-	errno = EAFNOSUPPORT;
-	return(-1);
+        errno = EAFNOSUPPORT;
+        return(-1);
 #else
-	return -EAFNOSUPPORT;
+        return -EAFNOSUPPORT;
 #endif
-    }	
+    }
 
     /*
      * check for valid socket.
@@ -582,24 +592,26 @@ struct	sockaddr_in *my = name;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
     /*
      * see if it's already named
      */
-    if (sd[s]->flags & SD_BIND) {
+    if (sd[s]->flags & SD_BIND)
+    {
 #ifndef __KERNEL__
-	errno = EINVAL;
-	return(-1);
+        errno = EINVAL;
+        return(-1);
 #else
-	return -EINVAL;
+        return -EINVAL;
 #endif
     }
 
@@ -613,42 +625,44 @@ struct	sockaddr_in *my = name;
      * If the bind is to a connectionless mode socket (IPPORTO_UDP) then
      * TCP$OPEN the channel.
      */
-    if (sd[s]->protocol == IPPROTO_UDP) {
-	/*
-	 * Open the communication channel
-	 */
-	vaxc$errno = sys$qiow( 0, sd[s]->chan, TCP$OPEN, &sd[s]->read_iosb, 0, 0,
-		0, 0,
-		ntohs(my->sin_port),
-		(MODE_UDP_A_struct | MODE_OpenNoWait),
-		U$UDP_Protocol, 0);
+    if (sd[s]->protocol == IPPROTO_UDP)
+    {
+        /*
+         * Open the communication channel
+         */
+        vaxc$errno = sys$qiow( 0, sd[s]->chan, TCP$OPEN, &sd[s]->read_iosb, 0, 0,
+                               0, 0,
+                               ntohs(my->sin_port),
+                               (MODE_UDP_A_struct | MODE_OpenNoWait),
+                               U$UDP_Protocol, 0);
 
-	if (vaxc$errno != SS$_NORMAL) {
+        if (vaxc$errno != SS$_NORMAL)
+        {
 #ifdef __KERNEL__
-	  int errno;
+            int errno;
 #endif
-	    errno = cmu_get_errno(&sd[s]->read_iosb);
-	    sys$qio(0,sd[s]->chan,TCP$ABORT,0,0,0,0,0,0,0,0,0);
-	    FD_SET(s,&sys_exceptfds);
-	    sys$setef(sd[s]->ef);
+            errno = cmu_get_errno(&sd[s]->read_iosb);
+            sys$qio(0,sd[s]->chan,TCP$ABORT,0,0,0,0,0,0,0,0,0);
+            FD_SET(s,&sys_exceptfds);
+            sys$setef(sd[s]->ef);
 #ifndef __KERNEL__
-	    return(-1);
+            return(-1);
 #else
-	    return -errno;
+            return -errno;
 #endif
-	}
+        }
 
-	FD_SET(s,&sys_writefds);
-	FD_CLR(s,&sys_exceptfds);
+        FD_SET(s,&sys_writefds);
+        FD_CLR(s,&sys_exceptfds);
 
-	sd[s]->flags |= SD_CONNECTED;
+        sd[s]->flags |= SD_CONNECTED;
 
-	/*
-	 * queue a read to the socket
-	 */
-	status = cmu_queue_net_read(s);
-	if (status != 0)
-	    return(-1);
+        /*
+         * queue a read to the socket
+         */
+        status = cmu_queue_net_read(s);
+        if (status != 0)
+            return(-1);
     }
     sd[s]->flags |= SD_BIND;
     return(0);
@@ -680,23 +694,24 @@ int s;
 struct sockaddr *name;
 int namelen;
 {
-int	status;
-int	to_addr, to_port, my_port;
-struct	sockaddr_in *p;    
+    int	status;
+    int	to_addr, to_port, my_port;
+    struct	sockaddr_in *p;
     /*
      * Verify the address family (domain) we are to connect to.
      */
-    if ( name->sa_family != AF_INET ) {
-	/*
-	 * we don't handle any other address formats.
-	 */
+    if ( name->sa_family != AF_INET )
+    {
+        /*
+         * we don't handle any other address formats.
+         */
 #ifndef __KERNEL__
-	errno = EAFNOSUPPORT;
-	return(-1);
+        errno = EAFNOSUPPORT;
+        return(-1);
 #else
-	return -EAFNOSUPPORT;
+        return -EAFNOSUPPORT;
 #endif
-    }	
+    }
 
     /*
      * check for valid socket
@@ -706,24 +721,26 @@ struct	sockaddr_in *p;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
     /*
      * see if it's already connected
      */
-    if ((sd[s]->flags & SD_CONNECTED) != 0) {
+    if ((sd[s]->flags & SD_CONNECTED) != 0)
+    {
 #ifndef __KERNEL__
-	errno = EISCONN;
-	return(-1);
+        errno = EISCONN;
+        return(-1);
 #else
-	return -EISCONN;
+        return -EISCONN;
 #endif
     }
 
@@ -742,23 +759,23 @@ struct	sockaddr_in *p;
      * Open and connect to the remote system
      */
     if (sd[s]->protocol == IPPROTO_TCP)
-	vaxc$errno = sys$qiow( 0, sd[s]->chan,
-			TCP$OPEN, &sd[s]->read_iosb, 0, 0,
-			&to_addr,		/* host to connect to */
-			 to_port,		/* remote port	      */
-			 my_port,		/* local port         */
-			(MODE_TCP_SendSYN | MODE_OpenWait | MODE_Addr32bit),
-			U$TCP_Protocol,
-			0);
+        vaxc$errno = sys$qiow( 0, sd[s]->chan,
+                               TCP$OPEN, &sd[s]->read_iosb, 0, 0,
+                               &to_addr,		/* host to connect to */
+                               to_port,		/* remote port	      */
+                               my_port,		/* local port         */
+                               (MODE_TCP_SendSYN | MODE_OpenWait | MODE_Addr32bit),
+                               U$TCP_Protocol,
+                               0);
     else
-	vaxc$errno = sys$qiow( 0, sd[s]->chan,
-			TCP$OPEN, &sd[s]->read_iosb, 0, 0,
-			&to_addr,
-			to_port,
-			my_port,
-			(MODE_UDP_A_struct | MODE_OpenWait | MODE_Addr32bit),
-			U$UDP_Protocol,
-			0);
+        vaxc$errno = sys$qiow( 0, sd[s]->chan,
+                               TCP$OPEN, &sd[s]->read_iosb, 0, 0,
+                               &to_addr,
+                               to_port,
+                               my_port,
+                               (MODE_UDP_A_struct | MODE_OpenWait | MODE_Addr32bit),
+                               U$UDP_Protocol,
+                               0);
 
     /*
      * Now queue a read on the socket.  If the connect failed then the read
@@ -766,8 +783,8 @@ struct	sockaddr_in *p;
      * not exist).
      */
     if (vaxc$errno == SS$_NORMAL)
-	if ((cmu_queue_net_read(s)) == -1)
-	    return(-1);
+        if ((cmu_queue_net_read(s)) == -1)
+            return(-1);
 
     /*
      * could there be a timing problem here?  Will the read AST complete (on
@@ -784,17 +801,18 @@ struct	sockaddr_in *p;
     /*
      * 0 = read in progress, 1 = read complete data waiting.
      */
-    if ((vaxc$errno != 0) && (vaxc$errno != 1)) {
+    if ((vaxc$errno != 0) && (vaxc$errno != 1))
+    {
 #ifdef __KERNEL__
-      int errno;
+        int errno;
 #endif
-	errno = cmu_get_errno(&sd[s]->read_iosb);
-	FD_SET(s,&sys_exceptfds);
-	sys$setef(sd[s]->ef);
+        errno = cmu_get_errno(&sd[s]->read_iosb);
+        FD_SET(s,&sys_exceptfds);
+        sys$setef(sd[s]->ef);
 #ifndef __KERNEL__
-	return(-1);
+        return(-1);
 #else
-	return -errno;
+        return -errno;
 #endif
     }
 
@@ -806,7 +824,7 @@ struct	sockaddr_in *p;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- * 
+ *
  * int listen (int s, int backlog)
  *
  * Description:
@@ -837,21 +855,23 @@ int backlog;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
-    if ((sd[s]->protocol != IPPROTO_TCP) || (sd[s]->type != SOCK_STREAM)) {
+    if ((sd[s]->protocol != IPPROTO_TCP) || (sd[s]->type != SOCK_STREAM))
+    {
 #ifndef __KERNEL__
-	errno = EOPNOTSUPP;
-	return(-1);
+        errno = EOPNOTSUPP;
+        return(-1);
 #else
-	return -EOPNOTSUPP;
+        return -EOPNOTSUPP;
 #endif
     }
 
@@ -867,7 +887,7 @@ int backlog;
     sys$clref(accept_net_event);
 
     /*
-     * Clear the listen file descriptor 
+     * Clear the listen file descriptor
      */
     FD_CLR(s,&sys_readfds);
 
@@ -875,9 +895,9 @@ int backlog;
      * Queue the socket listen
      */
     if (cmu_queue_listen(s) == 0)
-	return(0);
+        return(0);
     else
-	return(-1);
+        return(-1);
 }
 
 
@@ -909,8 +929,8 @@ int	s;
 struct	sockaddr *addr;
 int	*addrlen;
 {
-int	ns, status;
-struct	backlogEntry *entry;
+    int	ns, status;
+    struct	backlogEntry *entry;
 
     /*
      * check for valid socket
@@ -920,24 +940,26 @@ struct	backlogEntry *entry;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
     /*
      * look see if socket is listening
      */
-    if ((sd[s]->sock_opts & SO_ACCEPTCONN) == 0) {
+    if ((sd[s]->sock_opts & SO_ACCEPTCONN) == 0)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
@@ -948,27 +970,31 @@ CHECK_QUEUE:
     /*
      * check the socket for incomming connections.
      */
-    if (!(FD_ISSET(s,&sys_readfds))) {
-	/*
-	 * block if necessary
-	 */ 
-	if ((sd[s]->ioctl_opts & O_NDELAY) == 0) {
-	    sys$waitfr(accept_net_event);
-	    /*
-	     * see if the socket was shutdown
-	     */
-	    if ((sd[s]->ioctl_opts & FREAD) != 0) {
-		return(0);
-	    }
-	}
-	else {
+    if (!(FD_ISSET(s,&sys_readfds)))
+    {
+        /*
+         * block if necessary
+         */
+        if ((sd[s]->ioctl_opts & O_NDELAY) == 0)
+        {
+            sys$waitfr(accept_net_event);
+            /*
+             * see if the socket was shutdown
+             */
+            if ((sd[s]->ioctl_opts & FREAD) != 0)
+            {
+                return(0);
+            }
+        }
+        else
+        {
 #ifndef __KERNEL__
-	    errno = EWOULDBLOCK;
-	    return(-1);
+            errno = EWOULDBLOCK;
+            return(-1);
 #else
-	    return -EWOULDBLOCK;
+            return -EWOULDBLOCK;
 #endif
-	}
+        }
     }
 
     /*
@@ -993,7 +1019,7 @@ CHECK_QUEUE:
      */
     status = cmu_queue_net_read(ns);
     if (status != 0)
-	return(-1);
+        return(-1);
 
     /*
      * fill in addr with the connecting entity information
@@ -1003,76 +1029,13 @@ CHECK_QUEUE:
     sd[ns] = vms_fd2->vfd$l_fd_p;
 #endif
     if (addr != NULL)
-    	memcpy (addr,&(sd[ns]->to), (*addrlen < sizeof(struct sockaddr)
-				   ? *addrlen : sizeof(struct sockaddr)));
+        memcpy (addr,&(sd[ns]->to), (*addrlen < sizeof(struct sockaddr)
+                                     ? *addrlen : sizeof(struct sockaddr)));
 
     /*
      * give the user a new socket descriptor
      */
     return(ns);
-}
-
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- * #include <types.h>
- * #include <socket.h>
- *
- * int recv(int s, char *buf, int len, int flags)
- *
- * Description:
- *	Receive bytes from a connected socket.
- * 
- * s	 - a valid socket descriptor
- * buf	 - address of buffer to where input data is placed
- * len	 - max size of buf
- * flags - 0 or MSG_PEEK may be specified.
- *
- * Returns:
- *	Number of bytes read from the socket, -1 on error.  Addition error
- * information is specified in the global variable errno.
- */
-#ifndef __KERNEL__
-int recv(s,buf,len,flags)
-#else
-asmlinkage int sys_recv(s,buf,len,flags)
-#endif
-int	s;
-char	*buf;
-int	len, flags;
-{
-    /*
-     * check for valid socket
-     */
-#ifdef __KERNEL__
-    struct vms_fd * vms_fd = fget(s);
-    struct FD_ENTRY *sd[FD_SETSIZE];
-    sd[s] = vms_fd->vfd$l_fd_p;
-#endif
-    if (sd[s] == NULL) {
-#ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
-#else
-	return -EBADF;
-#endif
-    }
-
-    /*
-     * Must be connected
-     */
-    if ((sd[s]->flags & SD_CONNECTED) != 0)
-#ifndef __KERNEL__
-	return(recvfrom(s,buf,len,flags,0,0));
-#else
-	return(sys_recvfrom(s,buf,len,flags,0,0));
-#endif
-    else {
-#ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
-#else
-	return -EBADF;
-#endif
-    }
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1099,18 +1062,13 @@ int	len, flags;
  * information is specified in the global variable errno.
  */
 #ifndef __KERNEL__
-int recvfrom(s,buf,len,flags,from,fromlen)
+int recvfrom(int s, char *buf, int len, int flags, struct sockaddr *from, int *fromlen)
 #else
-asmlinkage int sys_recvfrom(s,buf,len,flags,from,fromlen)
+asmlinkage int sys_recvfrom(int s, char *buf, int len, int flags, struct sockaddr *from, int *fromlen)
 #endif
-int	s;
-char	*buf;
-int	len, flags;
-struct	sockaddr *from;
-int	*fromlen;
 {
-int	size, offset;
-struct	sockaddr_in *frm;
+    int	size, offset;
+    struct	sockaddr_in *frm;
 
     /*
      * check for valid socket
@@ -1120,24 +1078,26 @@ struct	sockaddr_in *frm;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
     /*
      * make sure the socket is not shutdown
      */
-    if ((sd[s]->ioctl_opts & FREAD) != 0) {
+    if ((sd[s]->ioctl_opts & FREAD) != 0)
+    {
 #ifndef __KERNEL__
-	errno = EPIPE;
-	return(-1);
+        errno = EPIPE;
+        return(-1);
 #else
-	return -EPIPE;
+        return -EPIPE;
 #endif
     }
 
@@ -1146,44 +1106,49 @@ CHECKforDATA:
      * check for a socket error (if the socket read has completed!)
      */
     if (FD_ISSET(s,&sys_readfds))
-	if (sd[s]->read_iosb.NSB$STATUS != SS$_NORMAL) {
+        if (sd[s]->read_iosb.NSB$STATUS != SS$_NORMAL)
+        {
 #ifdef __KERNEL__
-	  int errno;
+            int errno;
 #endif
-	    errno = cmu_get_errno(&sd[s]->read_iosb);
+            errno = cmu_get_errno(&sd[s]->read_iosb);
 #ifndef __KERNEL__
-	    return(-1);
+            return(-1);
 #else
-	    return -errno;
+            return -errno;
 #endif
-	}
+        }
 
     /*
      * Check the file descriptor for data ready on the socket. Block or return
      * based on data availability.
      */
-    if (!(FD_ISSET(s,&sys_readfds))) {
-	if (sd[s]->ioctl_opts & O_NDELAY) {
+    if (!(FD_ISSET(s,&sys_readfds)))
+    {
+        if (sd[s]->ioctl_opts & O_NDELAY)
+        {
 #ifndef __KERNEL__
-	    errno = EWOULDBLOCK;
-	    return(-1);
+            errno = EWOULDBLOCK;
+            return(-1);
 #else
-	    return -EWOULDBLOCK;
+            return -EWOULDBLOCK;
 #endif
-	}
-	else {
-	    sys$waitfr(sd[s]->ef);
-	    goto CHECKforDATA;
-	}
+        }
+        else
+        {
+            sys$waitfr(sd[s]->ef);
+            goto CHECKforDATA;
+        }
     }
 
     /*
      * move the from data if the user asked for it.
      */
-    if (from != NULL) {
-	frm = from;
-	frm->sin_port = htons(sd[s]->rcvfrom.IPADR$DST_PORT);
-	frm->sin_addr.s_addr = sd[s]->rcvfrom.IPADR$DST_HOST;
+    if (from != NULL)
+    {
+        frm = from;
+        frm->sin_port = htons(sd[s]->rcvfrom.IPADR$DST_PORT);
+        frm->sin_addr.s_addr = sd[s]->rcvfrom.IPADR$DST_HOST;
     }
 
     /*
@@ -1192,8 +1157,8 @@ CHECKforDATA:
      * read or more data in the receive buffer than what would fit in the users
      * buffer.
      */
-    size = len < sd[s]->read_iosb.NSB$Byte_Count ? 
-					len : sd[s]->read_iosb.NSB$Byte_Count;
+    size = len < sd[s]->read_iosb.NSB$Byte_Count ?
+           len : sd[s]->read_iosb.NSB$Byte_Count;
     offset = sd[s]->rcvbufoffset;
 
     memcpy(buf, &sd[s]->rcvbuf[offset], size);
@@ -1203,23 +1168,24 @@ CHECKforDATA:
      * offset things.
      */
     if ((flags & MSG_PEEK) != 0)
-	return (size);
+        return (size);
 
     /*
      * now fix up the byte count in the iosb.  If there is and data left then
      * set the offset.
      */
     sd[s]->read_iosb.NSB$Byte_Count -= size;
-    if (sd[s]->read_iosb.NSB$Byte_Count == 0) {
-	/*
-	 * The receive buffer has been drained; reset the offset and
-	 * queue another read.
-	 */
-	sd[s]->rcvbufoffset = 0;
-	cmu_queue_net_read(s);
+    if (sd[s]->read_iosb.NSB$Byte_Count == 0)
+    {
+        /*
+         * The receive buffer has been drained; reset the offset and
+         * queue another read.
+         */
+        sd[s]->rcvbufoffset = 0;
+        cmu_queue_net_read(s);
     }
     else
-	sd[s]->rcvbufoffset += size;
+        sd[s]->rcvbufoffset += size;
 
     /*
      * return the number of bytes that were copied to the users buffer.
@@ -1227,6 +1193,246 @@ CHECKforDATA:
     return (size);
 }
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ * #include <types.h>
+ * #include <socket.h>
+ *
+ * int recv(int s, char *buf, int len, int flags)
+ *
+ * Description:
+ *	Receive bytes from a connected socket.
+ *
+ * s	 - a valid socket descriptor
+ * buf	 - address of buffer to where input data is placed
+ * len	 - max size of buf
+ * flags - 0 or MSG_PEEK may be specified.
+ *
+ * Returns:
+ *	Number of bytes read from the socket, -1 on error.  Addition error
+ * information is specified in the global variable errno.
+ */
+#ifndef __KERNEL__
+int recv(int s, char *buf, int len, int flags)
+#else
+asmlinkage int sys_recv(int s, char *buf, int len, int flags)
+#endif
+{
+    /*
+     * check for valid socket
+     */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
+    if (sd[s] == NULL)
+    {
+#ifndef __KERNEL__
+        errno = EBADF;
+        return(-1);
+#else
+        return -EBADF;
+#endif
+    }
+
+    /*
+     * Must be connected
+     */
+    if ((sd[s]->flags & SD_CONNECTED) != 0)
+#ifndef __KERNEL__
+        return(recvfrom(s,buf,len,flags,0,0));
+#else
+        return(sys_recvfrom(s,buf,len,flags,0,0));
+#endif
+    else
+    {
+#ifndef __KERNEL__
+        errno = EBADF;
+        return(-1);
+#else
+        return -EBADF;
+#endif
+    }
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ * #include <types.h>
+ * #include <socket.h>
+ *
+ * int sendto(int s, char *msg, int len, int flags,
+ *			struct sockaddr *to, int tolen)
+ *
+ * Description:
+ *	Send bytes through a socket to any other socket.
+ *
+ * s	 - a valid socket descriptor
+ * buf	 - address of buffer of data to be sent
+ * len	 - size of buf
+ * flags - none supported.
+ * to	 - address of sockaddr structure which contains the address of the
+	   socket which the data is to be written.
+ * tolen - length of from structure returned.
+ *
+ * Returns:
+ *	Number of bytes written to the socket, -1 on error.  Addition error
+ * information is specified in the global variable errno.
+ */
+#ifndef __KERNEL__
+int sendto(int s, char *msg, int len, int flags, struct sockaddr *to, int tolen)
+#else
+asmlinkage int sys_sendto(int s, char *msg, int len, int flags, struct sockaddr *to, int tolen)
+#endif
+{
+    struct	sockaddr_in *too;
+    IPADR$ADDRESS_BLOCK UDP_ADDR;
+#ifndef __KERNEL__
+    static int write_ef = 0;
+#else
+    static int write_ef = 17;
+#endif
+
+    /*
+     * check for valid socket
+     */
+#ifdef __KERNEL__
+    struct vms_fd * vms_fd = fget(s);
+    struct FD_ENTRY *sd[FD_SETSIZE];
+    sd[s] = vms_fd->vfd$l_fd_p;
+#endif
+    if (sd[s] == NULL)
+    {
+#ifndef __KERNEL__
+        errno = EBADF;
+        return(-1);
+#else
+        return -EBADF;
+#endif
+    }
+
+    /*
+     * make sure the socket is not shutdown
+     */
+    if ((sd[s]->ioctl_opts & FWRITE) != 0)
+    {
+#ifndef __KERNEL__
+        errno = EPIPE;
+        return(-1);
+#else
+        return -EPIPE;
+#endif
+    }
+
+    /*
+     * in a UDP environment we could get to this point without actually opening
+     * the communication channel via bind.  It might be cause the user only
+     * wants a send only channel.
+     */
+    if ((sd[s]->flags & SD_CONNECTED) == 0)
+    {
+        vaxc$errno = sys$qiow( 0, sd[s]->chan, TCP$OPEN, &sd[s]->read_iosb, 0, 0,
+                               0, 0,
+                               0,	/* my port -- not specified */
+                               (MODE_UDP_A_struct | MODE_OpenNoWait),
+                               U$UDP_Protocol, 0);
+
+        if (sd[s]->read_iosb.NSB$STATUS != SS$_NORMAL)
+        {
+#ifdef __KERNEL__
+            int errno;
+#endif
+            errno = cmu_get_errno(&sd[s]->read_iosb);
+#ifndef __KERNEL__
+            return(-1);
+#else
+            return -errno;
+#endif
+        }
+        sd[s]->flags |= SD_CONNECTED;
+
+        FD_SET(s,&sys_writefds);
+        FD_CLR(s,&sys_exceptfds);
+    }
+
+    /*
+     * check the target domain (address family)
+     */
+    if (to != NULL)
+        if (to->sa_family != AF_INET)
+        {
+#ifndef __KERNEL__
+            errno = EAFNOSUPPORT;
+            return(-1);
+#else
+            return -EAFNOSUPPORT;
+#endif
+        }
+
+    /*
+     * record who we sent it to...
+     */
+    if (to != NULL)
+    {
+        sd[s]->tolen = tolen;
+        memcpy(&sd[s]->to, to, tolen);
+    }
+
+    too = &sd[s]->to;
+
+    /*
+     * setup the UDP target address buffer
+     */
+    UDP_ADDR.IPADR$SRC_PORT = 0;
+    UDP_ADDR.IPADR$SRC_HOST = 0;
+    UDP_ADDR.IPADR$DST_PORT = ntohs(too->sin_port);
+    UDP_ADDR.IPADR$DST_HOST = too->sin_addr.s_addr;
+
+    /*
+     * get an event flag specific for writing
+     */
+#ifndef __KERNEL__
+    if (write_ef == 0)
+        lib$get_ef(&write_ef);
+#endif
+
+    /*
+     * clear the system write ready fds and queue the write
+     */
+    FD_CLR(s,&sys_writefds);
+    if (sd[s]->protocol == IPPROTO_UDP)
+        vaxc$errno = sys$qio( write_ef, sd[s]->chan, TCP$SEND, &sd[s]->write_iosb,
+                              cmu_write_ast, s,
+                              msg,	/* message buffer address */
+                              len,	/* message length */
+                              0,	/* unused */
+                              1,	/* set EXACT */
+                              4,	/* size of IP header buffer */
+                              &UDP_ADDR);	/* IP header address */
+    else
+        vaxc$errno = sys$qio( write_ef, sd[s]->chan, TCP$SEND, &sd[s]->write_iosb,
+                              cmu_write_ast, s,
+                              msg,	/* message buffer address */
+                              len,	/* message length*/
+                              0,	/* unused */
+                              0,	/* send EOL */
+                              0,	/* urgent flag (not yet implemented) */
+                              0);	/* unused in TCP */
+
+    if (vaxc$errno == SS$_NORMAL)
+        return (len);
+    else
+    {
+#ifdef __KERNEL__
+        int errno;
+#endif
+        errno = cmu_get_errno(&sd[s]->write_iosb);
+#ifndef __KERNEL__
+        return(-1);
+#else
+        return -errno;
+#endif
+    }
+}
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * #include <types.h>
  * #include <socket.h>
@@ -1246,13 +1452,10 @@ CHECKforDATA:
  * information is specified in the global variable errno.
  */
 #ifndef __KERNEL__
-int send(s,msg,len,flags)
+int send(int s, char *msg, int len, int flags)
 #else
-asmlinkage int sys_send(s,msg,len,flags)
+asmlinkage int sys_send(int s, char *msg, int len, int flags)
 #endif
-int	s;
-char	*msg;
-int	len, flags;
 {
     /*
      * check for valid socket
@@ -1262,12 +1465,13 @@ int	len, flags;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
@@ -1276,192 +1480,17 @@ int	len, flags;
      */
     if ((sd[s]->flags & SD_CONNECTED) != 0)
 #ifndef __KERNEL__
-	return(sendto(s,msg,len,flags,0,0));
+        return(sendto(s,msg,len,flags,0,0));
 #else
-	return(sys_sendto(s,msg,len,flags,0,0));
+        return(sys_sendto(s,msg,len,flags,0,0));
 #endif
-    else {
-#ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
-#else
-	return -EBADF;
-#endif
-    }
-}
-
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- * #include <types.h>
- * #include <socket.h>
- *
- * int sendto(int s, char *msg, int len, int flags, 
- *			struct sockaddr *to, int tolen)
- *
- * Description:
- *	Send bytes through a socket to any other socket.
- *
- * s	 - a valid socket descriptor
- * buf	 - address of buffer of data to be sent
- * len	 - size of buf
- * flags - none supported.
- * to	 - address of sockaddr structure which contains the address of the
-	   socket which the data is to be written.
- * tolen - length of from structure returned.
- *
- * Returns:
- *	Number of bytes written to the socket, -1 on error.  Addition error
- * information is specified in the global variable errno.
- */
-#ifndef __KERNEL__
-int sendto(s,msg,len,flags,to,tolen)
-#else
-asmlinkage int sys_sendto(s,msg,len,flags,to,tolen)
-#endif
-int	s;
-char	*msg;
-int	len, flags;
-struct	sockaddr *to;
-int	tolen;
-{
-struct	sockaddr_in *too;
-IPADR$ADDRESS_BLOCK UDP_ADDR;
-#ifndef __KERNEL__
-static int write_ef = 0;
-#else
-static int write_ef = 17;
-#endif
-
-    /*
-     * check for valid socket
-     */
-#ifdef __KERNEL__
-    struct vms_fd * vms_fd = fget(s);
-    struct FD_ENTRY *sd[FD_SETSIZE];
-    sd[s] = vms_fd->vfd$l_fd_p;
-#endif
-    if (sd[s] == NULL) {
-#ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
-#else
-	return -EBADF;
-#endif
-    }
-
-    /*
-     * make sure the socket is not shutdown
-     */
-    if ((sd[s]->ioctl_opts & FWRITE) != 0) {
-#ifndef __KERNEL__
-	errno = EPIPE;
-	return(-1);
-#else
-	return -EPIPE;
-#endif
-    }
-
-    /*
-     * in a UDP environment we could get to this point without actually opening
-     * the communication channel via bind.  It might be cause the user only
-     * wants a send only channel.
-     */
-    if ((sd[s]->flags & SD_CONNECTED) == 0) {
-	vaxc$errno = sys$qiow( 0, sd[s]->chan, TCP$OPEN, &sd[s]->read_iosb, 0, 0,
-		0, 0,
-		0,	/* my port -- not specified */
-		(MODE_UDP_A_struct | MODE_OpenNoWait),
-		U$UDP_Protocol, 0);
-
-	if (sd[s]->read_iosb.NSB$STATUS != SS$_NORMAL) {
-#ifdef __KERNEL__
-	  int errno;
-#endif
-	    errno = cmu_get_errno(&sd[s]->read_iosb);
-#ifndef __KERNEL__
-	    return(-1);
-#else
-	    return -errno;
-#endif
-	}
-	sd[s]->flags |= SD_CONNECTED;
-
-	FD_SET(s,&sys_writefds);
-	FD_CLR(s,&sys_exceptfds);
-    }
-
-    /*
-     * check the target domain (address family)
-     */
-    if (to != NULL)
-	if (to->sa_family != AF_INET) {
-#ifndef __KERNEL__
-	    errno = EAFNOSUPPORT;
-	    return(-1);
-#else
-	    return -EAFNOSUPPORT;
-#endif
-	}
-
-    /*
-     * record who we sent it to...
-     */
-    if (to != NULL) {
-	sd[s]->tolen = tolen;
-	memcpy(&sd[s]->to, to, tolen);
-    }
-
-    too = &sd[s]->to;
-
-    /*
-     * setup the UDP target address buffer
-     */
-    UDP_ADDR.IPADR$SRC_PORT = 0;
-    UDP_ADDR.IPADR$SRC_HOST = 0;
-    UDP_ADDR.IPADR$DST_PORT = ntohs(too->sin_port);
-    UDP_ADDR.IPADR$DST_HOST = too->sin_addr.s_addr;
-
-    /*
-     * get an event flag specific for writing
-     */
-#ifndef __KERNEL__
-    if (write_ef == 0)
-	lib$get_ef(&write_ef);
-#endif
-
-    /*
-     * clear the system write ready fds and queue the write
-     */
-    FD_CLR(s,&sys_writefds);
-    if (sd[s]->protocol == IPPROTO_UDP)
-	vaxc$errno = sys$qio( write_ef, sd[s]->chan, TCP$SEND, &sd[s]->write_iosb,
-		cmu_write_ast, s,
-		msg,	/* message buffer address */
-		len,	/* message length */
-		0,	/* unused */
-		1,	/* set EXACT */
-		4,	/* size of IP header buffer */
-		&UDP_ADDR);	/* IP header address */
     else
-	vaxc$errno = sys$qio( write_ef, sd[s]->chan, TCP$SEND, &sd[s]->write_iosb,
-		cmu_write_ast, s,
-		msg,	/* message buffer address */
-		len,	/* message length*/
-		0,	/* unused */
-		0,	/* send EOL */
-		0,	/* urgent flag (not yet implemented) */
-		0);	/* unused in TCP */
-
-    if (vaxc$errno == SS$_NORMAL)
-	return (len);
-    else {
-#ifdef __KERNEL__
-      int errno;
-#endif
-	errno = cmu_get_errno(&sd[s]->write_iosb);
+    {
 #ifndef __KERNEL__
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -errno;
+        return -EBADF;
 #endif
     }
 }
@@ -1497,44 +1526,47 @@ int s, how;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
     /*
      * if not connected the no need to shutdown
      */
-    if ((sd[s]->flags & SD_CONNECTED) == 0) {
+    if ((sd[s]->flags & SD_CONNECTED) == 0)
+    {
 #ifndef __KERNEL__
-	errno = ENOTCONN;
-	return(-1);
+        errno = ENOTCONN;
+        return(-1);
 #else
-	return -ENOTCONN;
+        return -ENOTCONN;
 #endif
     }
 
-    switch (how) {
-	case 2 :
-	case 1 :
-		sd[s]->ioctl_opts |= FWRITE;
-		if (how != 2) break;
-	case 0 :
-		sd[s]->ioctl_opts |= FREAD;
-		if ((sd[s]->sock_opts & SO_ACCEPTCONN) != 0)
-		    sys$setef(accept_net_event);
-		sys$cancel(sd[s]->chan);
-		break;
-	default :
+    switch (how)
+    {
+    case 2 :
+    case 1 :
+        sd[s]->ioctl_opts |= FWRITE;
+        if (how != 2) break;
+    case 0 :
+        sd[s]->ioctl_opts |= FREAD;
+        if ((sd[s]->sock_opts & SO_ACCEPTCONN) != 0)
+            sys$setef(accept_net_event);
+        sys$cancel(sd[s]->chan);
+        break;
+    default :
 #ifndef __KERNEL__
-	    errno = EINVAL;
-	    return(-1);
+        errno = EINVAL;
+        return(-1);
 #else
-	    return -EINVAL;
+        return -EINVAL;
 #endif
     }
     return(0);
@@ -1565,9 +1597,9 @@ int s, how;
  * timeout	- specifies how long to wait for a read, write, or exception
  *		  event.  If timeout argument is NULL select will block until
  *		  one of the specified descriptors is ready.
- * 
+ *
  * Returns:
- *	Number of socket descriptors ready for I/O or that have exceptions, 
+ *	Number of socket descriptors ready for I/O or that have exceptions,
  * 0 if the operation timed out, -1 on error.  Addition error information is
  * specified in the global variable errno.
  */
@@ -1580,19 +1612,19 @@ int	nfds;
 int	*readfds, *writefds, *exceptfds;
 struct	timeval *timeout;
 {
-int	i;
-int	maxfds, maxfds_mask, ready_fds, all_fds;
-int	readyfds;
+    int	i;
+    int	maxfds, maxfds_mask, ready_fds, all_fds;
+    int	readyfds;
 
-int	block, timer_ef, t[2];
-char	at[20];
-struct	tm *lt;
-struct dsc$descriptor ascii_time = 
-	{20, DSC$K_DTYPE_T, DSC$K_CLASS_S, at };
+    int	block, timer_ef, t[2];
+    char	at[20];
+    struct	tm *lt;
+    struct dsc$descriptor ascii_time =
+        {20, DSC$K_DTYPE_T, DSC$K_CLASS_S, at };
 
-int	ef_mask;
+    int	ef_mask;
 #ifdef __KERNEL__
-int errno;
+    int errno;
 #endif
 #define EF_BASE 32
 
@@ -1610,177 +1642,188 @@ int errno;
     /*
      * Don't allow more than 32 file descriptors
      */
-    if (maxfds > 32) {
-	errno = EBADF;
+    if (maxfds > 32)
+    {
+        errno = EBADF;
         readyfds = -1;
-	goto EXIT;
+        goto EXIT;
     }
 
     if (maxfds == 32)
-	maxfds_mask = 0xffffffff;
-    else {
-	maxfds_mask = 0;
-	for (i=0; i < maxfds; i++)
-	    maxfds_mask |= (1<<i);
+        maxfds_mask = 0xffffffff;
+    else
+    {
+        maxfds_mask = 0;
+        for (i=0; i < maxfds; i++)
+            maxfds_mask |= (1<<i);
     }
 
     /*
      * Clear extranious bits and check for bad file descriptors.  Gather all
      * file descriptor bits into `all_fds' for use later.
      */
-    if (exceptfds != NULL) {
-	*exceptfds &= maxfds_mask;
-	if ((*exceptfds & sys_validfds.fds_bits[0]) != *exceptfds) {
-	    /*
-	     * Set the exceptfds mask to indicate which fd was bad.
-	     */
-	    *exceptfds ^= sys_validfds.fds_bits[0];
+    if (exceptfds != NULL)
+    {
+        *exceptfds &= maxfds_mask;
+        if ((*exceptfds & sys_validfds.fds_bits[0]) != *exceptfds)
+        {
+            /*
+             * Set the exceptfds mask to indicate which fd was bad.
+             */
+            *exceptfds ^= sys_validfds.fds_bits[0];
 #ifndef __KERNEL__
-	    errno = EBADF;
-	    return(-1);
+            errno = EBADF;
+            return(-1);
 #else
-	    return -EBADF;
+            return -EBADF;
 #endif
-	}
-	all_fds = *exceptfds;
+        }
+        all_fds = *exceptfds;
     }
 
-    if (writefds != NULL) {
-	*writefds &= maxfds_mask;
-	if ((*writefds & sys_validfds.fds_bits[0]) != *writefds) {
-	    /*
-	     * Set the exceptfds mask to indicate which fd was bad.
-	     */
-	    *writefds ^= sys_validfds.fds_bits[0];
+    if (writefds != NULL)
+    {
+        *writefds &= maxfds_mask;
+        if ((*writefds & sys_validfds.fds_bits[0]) != *writefds)
+        {
+            /*
+             * Set the exceptfds mask to indicate which fd was bad.
+             */
+            *writefds ^= sys_validfds.fds_bits[0];
 #ifndef __KERNEL__
-	    errno = EBADF;
-	    return(-1);
+            errno = EBADF;
+            return(-1);
 #else
-	    return -EBADF;
+            return -EBADF;
 #endif
-	}
-	all_fds |= *writefds;
+        }
+        all_fds |= *writefds;
     }
 
-    if (readfds != NULL) {
-	*readfds &= maxfds_mask;
-	if ((*readfds & sys_validfds.fds_bits[0]) != *readfds) {
-	    /*
-	     * Set the exceptfds mask to indicate which fd was bad.
-	     */
-	    *readfds ^= sys_validfds.fds_bits[0];
+    if (readfds != NULL)
+    {
+        *readfds &= maxfds_mask;
+        if ((*readfds & sys_validfds.fds_bits[0]) != *readfds)
+        {
+            /*
+             * Set the exceptfds mask to indicate which fd was bad.
+             */
+            *readfds ^= sys_validfds.fds_bits[0];
 #ifndef __KERNEL__
-	    errno = EBADF;
-	    return(-1);
+            errno = EBADF;
+            return(-1);
 #else
-	    return -EBADF;
+            return -EBADF;
 #endif
-	}
-	all_fds |= *readfds;
+        }
+        all_fds |= *readfds;
     }
 
     /*
      * if this is a timed event then setup the timer.
      */
     if (timeout == NULL)
-	block++;
-    else
-	if (timeout->tv_sec != 0) {
-	    block++;
-	    /*
-	     * setup a timer AST to check later
-	     */
-	    if (timeout->tv_sec > 86399) { /* not grater than 24 hours */
-		errno = EINVAL;
-		readyfds = -1;
-		goto EXIT;
-	    }
+        block++;
+    else if (timeout->tv_sec != 0)
+    {
+        block++;
+        /*
+         * setup a timer AST to check later
+         */
+        if (timeout->tv_sec > 86399)   /* not grater than 24 hours */
+        {
+            errno = EINVAL;
+            readyfds = -1;
+            goto EXIT;
+        }
 #ifndef __KERNEL__
-	    lt = localtime(&timeout->tv_sec);
-	    sprintf(at,"0 %02.2d:%02.2d:%02.2d.%02.2d",
-		lt->tm_hour, lt->tm_min, lt->tm_sec, timeout->tv_usec);
-	    ascii_time.dsc$w_length = strlen(at);
-	    sys$bintim(&ascii_time,&t);
+        lt = localtime(&timeout->tv_sec);
+        sprintf(at,"0 %02.2d:%02.2d:%02.2d.%02.2d",
+                lt->tm_hour, lt->tm_min, lt->tm_sec, timeout->tv_usec);
+        ascii_time.dsc$w_length = strlen(at);
+        sys$bintim(&ascii_time,&t);
 #else
-	    long long * t_p = &t[0];
-	    *t_p = timeout->tv_sec;
-	    *t_p *= -10000000; // check
+        long long * t_p = &t[0];
+        *t_p = timeout->tv_sec;
+        *t_p *= -10000000; // check
 #endif
 #ifndef __KERNEL__
-	    lib$get_ef(&timer_ef);
+        lib$get_ef(&timer_ef);
 #endif
-	    sys$setimr(timer_ef,&t,0,timer_ef,0);
-	    FD_SET((timer_ef - EF_BASE),&ef_mask);
-	}
+        sys$setimr(timer_ef,&t,0,timer_ef,0);
+        FD_SET((timer_ef - EF_BASE),&ef_mask);
+    }
 
 CHECK_DESCRIPTORS:
     /*
      * exception file descriptors
      */
     if (exceptfds != NULL)
-	if((ready_fds = sys_exceptfds.fds_bits[0] & *exceptfds) != 0)
-	    for (i=0; i < maxfds; i++)
-		if (FD_ISSET(i,&ready_fds))
-		    readyfds++;
+        if((ready_fds = sys_exceptfds.fds_bits[0] & *exceptfds) != 0)
+            for (i=0; i < maxfds; i++)
+                if (FD_ISSET(i,&ready_fds))
+                    readyfds++;
 
     /*
      * write file descriptors
      */
     if (writefds != NULL)
-	if((ready_fds = sys_writefds.fds_bits[0] & *writefds) != 0)
-	    for (i=0; i < maxfds; i++)
-		if (FD_ISSET(i,&ready_fds))
-		    readyfds++;
+        if((ready_fds = sys_writefds.fds_bits[0] & *writefds) != 0)
+            for (i=0; i < maxfds; i++)
+                if (FD_ISSET(i,&ready_fds))
+                    readyfds++;
 
     /*
      * read file descriptors
      */
     if (readfds != NULL)
-	if((ready_fds = sys_readfds.fds_bits[0] & *readfds) != 0)
-	    for (i=0; i < maxfds; i++)
-		if (FD_ISSET(i,&ready_fds))
-		    readyfds++;
+        if((ready_fds = sys_readfds.fds_bits[0] & *readfds) != 0)
+            for (i=0; i < maxfds; i++)
+                if (FD_ISSET(i,&ready_fds))
+                    readyfds++;
 
     /*
      * See if we'er ready to exit
      */
     if (readyfds == 0)
-	if (block) {
-	    if (timer_ef != 0)
-		if (sys$clref(timer_ef) == SS$_WASSET)
-		    goto EXIT;
-	    for (i=0; i < maxfds; i++)
-		if (FD_ISSET(i,&all_fds))
+        if (block)
+        {
+            if (timer_ef != 0)
+                if (sys$clref(timer_ef) == SS$_WASSET)
+                    goto EXIT;
+            for (i=0; i < maxfds; i++)
+                if (FD_ISSET(i,&all_fds))
 #ifdef __KERNEL__
-		  {
-		    int s;
-		    struct vms_fd * vms_fd = fget(i);
-		    struct FD_ENTRY *sd[FD_SETSIZE];
-		    sd[s] = vms_fd->vfd$l_fd_p;
-		    FD_SET((sd[s]->ef - EF_BASE),&ef_mask);
+                {
+                    int s;
+                    struct vms_fd * vms_fd = fget(i);
+                    struct FD_ENTRY *sd[FD_SETSIZE];
+                    sd[s] = vms_fd->vfd$l_fd_p;
+                    FD_SET((sd[s]->ef - EF_BASE),&ef_mask);
 #else
-		    FD_SET((sd[i]->ef - EF_BASE),&ef_mask);
+                    FD_SET((sd[i]->ef - EF_BASE),&ef_mask);
 #endif __KERNEL__
 #ifdef __KERNEL__
-		  }
+                }
 #endif __KERNEL__
-	    sys$wflor(1,ef_mask);
-	    goto CHECK_DESCRIPTORS;
-	}
-	
+            sys$wflor(1,ef_mask);
+            goto CHECK_DESCRIPTORS;
+        }
+
 EXIT:
-    if (timer_ef != 0) {
-	sys$cantim(timer_ef,0);
+    if (timer_ef != 0)
+    {
+        sys$cantim(timer_ef,0);
 #ifndef __KERNEL__
-	lib$free_ef(&timer_ef);
+        lib$free_ef(&timer_ef);
 #endif
     }
     if (exceptfds != NULL)
-	*exceptfds = (sys_exceptfds.fds_bits[0] & maxfds_mask);
+        *exceptfds = (sys_exceptfds.fds_bits[0] & maxfds_mask);
     if (writefds != NULL)
-	*writefds = (sys_writefds.fds_bits[0] & maxfds_mask);
+        *writefds = (sys_writefds.fds_bits[0] & maxfds_mask);
     if (readfds != NULL)
-	*readfds = (sys_readfds.fds_bits[0] & maxfds_mask);
+        *readfds = (sys_readfds.fds_bits[0] & maxfds_mask);
     return(readyfds);
 }
 
@@ -1810,7 +1853,7 @@ int	s;
 struct	sockaddr *name;
 int	*namelen;
 {
-int	size;
+    int	size;
 
     /*
      * check for valid socket
@@ -1820,12 +1863,13 @@ int	size;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
@@ -1863,10 +1907,10 @@ int	s;
 struct	sockaddr *name;
 int	*namelen;
 {
-int	conInfoSize;
-struct sockaddr_in *from;
-NetIO_Status_Block iosb;
-Connection_Info_Return_Block conInfo;
+    int	conInfoSize;
+    struct sockaddr_in *from;
+    NetIO_Status_Block iosb;
+    Connection_Info_Return_Block conInfo;
 
     /*
      * check for valid socket
@@ -1876,24 +1920,26 @@ Connection_Info_Return_Block conInfo;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
     /*
      * Must be connected
      */
-    if ((sd[s]->flags & SD_CONNECTED) == 0) {
+    if ((sd[s]->flags & SD_CONNECTED) == 0)
+    {
 #ifndef __KERNEL__
-	errno = ENOTCONN;
-	return(-1);
+        errno = ENOTCONN;
+        return(-1);
 #else
-	return -ENOTCONN;
+        return -ENOTCONN;
 #endif
     }
 
@@ -1902,22 +1948,23 @@ Connection_Info_Return_Block conInfo;
      */
     conInfoSize = sizeof(Connection_Info_Return_Block);
     vaxc$errno = sys$qiow( 0, sd[s]->chan, TCP$INFO, &iosb, 0, 0,
-		&conInfo,		/* buffer		*/
-		conInfoSize,		/* Size of said buffer  */
-		0,0,0,0);
+                           &conInfo,		/* buffer		*/
+                           conInfoSize,		/* Size of said buffer  */
+                           0,0,0,0);
 
     /*
      * check the qio status
      */
-    if (vaxc$errno != SS$_NORMAL) {
+    if (vaxc$errno != SS$_NORMAL)
+    {
 #ifdef __KERNEL__
-      int errno;
+        int errno;
 #endif
-	errno = cmu_get_errno(&iosb);
+        errno = cmu_get_errno(&iosb);
 #ifndef __KERNEL__
-	return (-1);
+        return (-1);
 #else
-	return -errno;
+        return -errno;
 #endif
     }
 
@@ -1933,7 +1980,7 @@ Connection_Info_Return_Block conInfo;
      * determine amount of data to return to caller
      */
     conInfoSize = (sizeof(struct sockaddr) < *namelen)
-				? sizeof(struct sockaddr) : *namelen;
+                  ? sizeof(struct sockaddr) : *namelen;
     /*
      * make the copy
      */
@@ -1979,12 +2026,13 @@ int	*optlen;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
@@ -2034,12 +2082,13 @@ int	optlen;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
@@ -2109,21 +2158,22 @@ struct servent *getservbyname(name, proto)
 char	*name;
 char	*proto;
 {
-char	logical[256];
-char	port[16];
+    char	logical[256];
+    char	port[16];
 
 
     sprintf(logical,"INET$SERVICE_%s_%s",name,proto);
 
     vaxc$errno = cmu_trnlnm( "LNM$SYSTEM", &logical, "Super", &port, 16);
-    if (vaxc$errno == 0) {
-	serv.s_name = name;
-	serv.s_port = htons(atoi(&port));
-	serv.s_proto = proto;
-	return (&serv);
+    if (vaxc$errno == 0)
+    {
+        serv.s_name = name;
+        serv.s_port = htons(atoi(&port));
+        serv.s_proto = proto;
+        return (&serv);
     }
     else
-	return(NULL);
+        return(NULL);
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2156,20 +2206,21 @@ struct servent *getservbyport(port, proto)
 int	port;
 char	*proto;
 {
-char	logical[256];
-char	name[32];
+    char	logical[256];
+    char	name[32];
 
     sprintf(logical,"INET$SERVICE_%d_%s",port,proto);
 
     vaxc$errno = cmu_trnlnm( "LNM$SYSTEM", &logical, "Super", &name, 32);
-    if (vaxc$errno == 0) {
-	serv.s_name = &name;
-	serv.s_port = htons(port);
-	serv.s_proto = proto;
-	return (&serv);
+    if (vaxc$errno == 0)
+    {
+        serv.s_name = &name;
+        serv.s_port = htons(port);
+        serv.s_proto = proto;
+        return (&serv);
     }
     else
-	return(NULL);
+        return(NULL);
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2194,8 +2245,8 @@ static	int	*addrlist = inet_list.GHA$NL_ADRLST;
 struct hostent *gethostbyname(name)
 char	*name;
 {
-int	chan;
-NetIO_Status_Block iosb;
+    int	chan;
+    NetIO_Status_Block iosb;
 
     /*
      * If the first character of the hostname is numeric the quit (must be dot
@@ -2203,23 +2254,24 @@ NetIO_Status_Block iosb;
      */
 
     if (isdigit(name[0]))
-	return(NULL);
+        return(NULL);
 
     sys$assign(&inet_device,&chan,0,0);
 
     inet_list.GHA$NL_ADRCNT = 0;
     vaxc$errno = sys$qiow( 0, chan, TCP$GTHST, &iosb, 0, 0,
-		&inet_list,
-		sizeof(GTHST_NMLOOK_BLOCK),
-		GTH_NAMADR,
-		name,
-		0, 0);
+                           &inet_list,
+                           sizeof(GTHST_NMLOOK_BLOCK),
+                           GTH_NAMADR,
+                           name,
+                           0, 0);
 
     sys$dassgn(chan);
 
-    if ((iosb.NSB$STATUS != SS$_NORMAL) || (inet_list.GHA$NL_ADRCNT < 1)) {
-	errno = cmu_get_errno(&iosb);
-	return(NULL);
+    if ((iosb.NSB$STATUS != SS$_NORMAL) || (inet_list.GHA$NL_ADRCNT < 1))
+    {
+        errno = cmu_get_errno(&iosb);
+        return(NULL);
     }
 
     inet_list.GHA$NL_NAMSTR[inet_list.GHA$NL_NAMLEN] = 0;
@@ -2254,13 +2306,14 @@ struct hostent *gethostbyaddr(addr,len,type)
 char	*addr;
 int	len, type;
 {
-int	chan;
-int	laddr;
-NetIO_Status_Block iosb;
+    int	chan;
+    int	laddr;
+    NetIO_Status_Block iosb;
 
-    if (type != AF_INET) {
-	errno = EAFNOSUPPORT;
-	return(NULL);
+    if (type != AF_INET)
+    {
+        errno = EAFNOSUPPORT;
+        return(NULL);
     }
 
     sys$assign(&inet_device,&chan,0,0);
@@ -2268,17 +2321,18 @@ NetIO_Status_Block iosb;
     memcpy(&laddr, addr, 4);
 
     vaxc$errno = sys$qiow( 0, chan, TCP$GTHST, &iosb, 0, 0,
-		&inet_name,
-		sizeof(inet_name),
-		GTH_ADRNAM,
-		laddr,
-		0,0);
+                           &inet_name,
+                           sizeof(inet_name),
+                           GTH_ADRNAM,
+                           laddr,
+                           0,0);
 
     sys$dassgn(chan);
 
-    if (iosb.NSB$STATUS != SS$_NORMAL) {
-	errno = cmu_get_errno(&iosb);
-	return(NULL);
+    if (iosb.NSB$STATUS != SS$_NORMAL)
+    {
+        errno = cmu_get_errno(&iosb);
+        return(NULL);
     }
 
     inet_list.GHA$NL_ADRCNT = 1;
@@ -2312,8 +2366,8 @@ NetIO_Status_Block iosb;
  *		SIOCGIFADDR	- get ifnet addres
  *		SIOCGIFFLAGS	- get ifnet flags
  *		SIOCGIFCONF	- get ifnet list
- * argp    - address of buffer for return information		
- *		
+ * argp    - address of buffer for return information
+ *
  * Returns:
  *	0 on success, -1 on error.  Addition error information is specified in
  * the global variable errno.
@@ -2327,25 +2381,26 @@ int	s;
 int	request;
 char	*argp;
 {
-int	i;
+    int	i;
 #define BUFR_SIZE 512
-char bufr[BUFR_SIZE];
+    char bufr[BUFR_SIZE];
 
-unsigned long *n;
+    unsigned long *n;
 
-struct DU$IF_List {
-    int	cnt;		/* number of if returned  */
-    int	index[10];	/* limit of 10 interfaces */
-} du_iflist;
+    struct DU$IF_List
+    {
+        int	cnt;		/* number of if returned  */
+        int	index[10];	/* limit of 10 interfaces */
+    } du_iflist;
 
-struct ifconf *ifc;
-struct ifreq  *ifr;
+    struct ifconf *ifc;
+    struct ifreq  *ifr;
 #if 0
-struct D$Dev_Dump_Return_Blk *dd;
+    struct D$Dev_Dump_Return_Blk *dd;
 #else
-D$Dev_Dump_Return_Blk *dd;
+    D$Dev_Dump_Return_Blk *dd;
 #endif
-NetIO_Status_Block iosb;
+    NetIO_Status_Block iosb;
     /*
      * check for valid socket
      */
@@ -2354,12 +2409,13 @@ NetIO_Status_Block iosb;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
@@ -2369,122 +2425,132 @@ NetIO_Status_Block iosb;
     int errno = 0;
 #endif
 
-    switch ((request & 0x0000ff00) >> 8) {
-	case 't' :
-	case 's' :
-	case 'r' :
-	    errno = EIO;
-	    break;
-	case 'f' :
-	    switch (request & 0x000000ff) {
-		case 1 :	/* FIOCLEX - set exclusive use on socket */
-		case 2 :	/* FIONCLEX - remove exclusive use	 */
-		    sd[s]->ioctl_opts ^= FEXLOCK;
-		    break;
-		case 126 :	/* FIONBIO - set/clear non-blocking i/o  */
-		    sd[s]->ioctl_opts ^= O_NDELAY;
-		    break;
-		case 127:	/* FIONREAD - get # bytes ready to be read */
-		    n  = argp;
-		    /*
-		     * if the socket read blocked return an error
-		     */
-		    if ((sd[s]->ioctl_opts & FREAD) != 0)
-			errno = EPIPE;
-		    if (FD_ISSET(s,&sys_readfds.fds_bits[0]))
-			*n = sd[s]->read_iosb.NSB$Byte_Count;
-		    else
-			*n = 0;
-		    break;
-		default:
-		    errno = EIO;
-		    break;
-	    }
-	    break;
-	case 'i' :
-	    switch (request & 0x000000ff) {
-		case 13 : /* SIOCGIFADDR   - get ifnet address */
-		    ifr = argp;
+    switch ((request & 0x0000ff00) >> 8)
+    {
+    case 't' :
+    case 's' :
+    case 'r' :
+        errno = EIO;
+        break;
+    case 'f' :
+        switch (request & 0x000000ff)
+        {
+        case 1 :	/* FIOCLEX - set exclusive use on socket */
+        case 2 :	/* FIONCLEX - remove exclusive use	 */
+            sd[s]->ioctl_opts ^= FEXLOCK;
+            break;
+        case 126 :	/* FIONBIO - set/clear non-blocking i/o  */
+            sd[s]->ioctl_opts ^= O_NDELAY;
+            break;
+        case 127:	/* FIONREAD - get # bytes ready to be read */
+            n  = argp;
+            /*
+             * if the socket read blocked return an error
+             */
+            if ((sd[s]->ioctl_opts & FREAD) != 0)
+                errno = EPIPE;
+            if (FD_ISSET(s,&sys_readfds.fds_bits[0]))
+                *n = sd[s]->read_iosb.NSB$Byte_Count;
+            else
+                *n = 0;
+            break;
+        default:
+            errno = EIO;
+            break;
+        }
+        break;
+    case 'i' :
+        switch (request & 0x000000ff)
+        {
+        case 13 : /* SIOCGIFADDR   - get ifnet address */
+            ifr = argp;
 
-		    vaxc$errno = sys$qiow( 0, sd[s]->chan, TCP$DUMP, &iosb,
-				0, 0,
-				&du_iflist, sizeof(struct DU$IF_List),
-				DU$Device_List, 0, 0, 0);
-	
-		    if (vaxc$errno != SS$_NORMAL) {
-			errno = cmu_get_errno(&iosb);
-			break;
-		    }
+            vaxc$errno = sys$qiow( 0, sd[s]->chan, TCP$DUMP, &iosb,
+                                   0, 0,
+                                   &du_iflist, sizeof(struct DU$IF_List),
+                                   DU$Device_List, 0, 0, 0);
 
-		    for (i=0; i < du_iflist.cnt; i++) {
-			vaxc$errno = sys$qiow(0,sd[s]->chan,TCP$DUMP, &iosb,
-				0, 0,
-				bufr,BUFR_SIZE,DU$Device_Stat,
-				du_iflist.index[i],0,0);
-			if ( iosb.NSB$STATUS != SS$_NORMAL ) {
-			    errno = cmu_get_errno(&iosb);
-			    break;
-			}
-			dd = bufr;
-			if (strcmp(ifr->ifr_name, dd->DU$DevNam_Str) == 0) {
-			    memcpy(&ifr->ifr_addr.sa_data[2],
-				&dd->DU$Dev_Address, 4);
-			    ifr->ifr_data  = 0;
-			    ifr->ifr_flags = AF_INET;
-			}
-		    }
-		    break;
-		case 17 : /* SIOCGIFFLAGS  - get ifnet flags */
-		    /*
-		     * were going to fake it here and just say the interface
-		     * is IFF_UP, RUNNING and BROADCAST enabled.  We should
-		     * look at the interface and determine if it's a P-to-P
-		     * connection.
-		     */
-		    ifr = argp;
+            if (vaxc$errno != SS$_NORMAL)
+            {
+                errno = cmu_get_errno(&iosb);
+                break;
+            }
 
-		    ifr->ifr_flags = (IFF_UP | IFF_RUNNING | IFF_BROADCAST);
-		    break;
+            for (i=0; i < du_iflist.cnt; i++)
+            {
+                vaxc$errno = sys$qiow(0,sd[s]->chan,TCP$DUMP, &iosb,
+                                      0, 0,
+                                      bufr,BUFR_SIZE,DU$Device_Stat,
+                                      du_iflist.index[i],0,0);
+                if ( iosb.NSB$STATUS != SS$_NORMAL )
+                {
+                    errno = cmu_get_errno(&iosb);
+                    break;
+                }
+                dd = bufr;
+                if (strcmp(ifr->ifr_name, dd->DU$DevNam_Str) == 0)
+                {
+                    memcpy(&ifr->ifr_addr.sa_data[2],
+                           &dd->DU$Dev_Address, 4);
+                    ifr->ifr_data  = 0;
+                    ifr->ifr_flags = AF_INET;
+                }
+            }
+            break;
+        case 17 : /* SIOCGIFFLAGS  - get ifnet flags */
+            /*
+             * were going to fake it here and just say the interface
+             * is IFF_UP, RUNNING and BROADCAST enabled.  We should
+             * look at the interface and determine if it's a P-to-P
+             * connection.
+             */
+            ifr = argp;
 
-		case 20 : /* SIOCGIFCONF   - get ifnet list */
-		    ifc = argp;
-		    vaxc$errno = sys$qiow(0, sd[s]->chan, TCP$DUMP, &iosb,
-				0, 0,
-				&du_iflist, sizeof(struct DU$IF_List),
-				DU$Device_List, 0, 0, 0);
-	
-		    if (vaxc$errno != SS$_NORMAL) {
-			errno = cmu_get_errno(&iosb);
-			break;
-		    }
+            ifr->ifr_flags = (IFF_UP | IFF_RUNNING | IFF_BROADCAST);
+            break;
 
-		    ifc->ifc_len = 0;
-		    for (i=0; i < du_iflist.cnt; i++) {
-			ifr = &ifc->ifc_req[i];
-			vaxc$errno = sys$qiow(0,sd[s]->chan,TCP$DUMP, &iosb,
-				0, 0,
-				bufr, BUFR_SIZE, DU$Device_Stat,
-				du_iflist.index[i],0,0);
-			if ( vaxc$errno != SS$_NORMAL ) {
-			    errno = cmu_get_errno(&iosb);
-			    break;
-			}
-			dd = bufr;
-			memcpy(ifr->ifr_name, 
-				dd->DU$DevNam_Str, dd->DU$DevNam_Len);
-			ifr->ifr_name[dd->DU$DevNam_Len] = 0;
-			memcpy(&ifr->ifr_addr.sa_data[2],
-				&dd->DU$Dev_Address, 4);
-			ifr->ifr_data  = 0;
-			ifr->ifr_flags = AF_INET;
-			ifc->ifc_len += sizeof(struct ifreq);
-		    }
-		    break;
+        case 20 : /* SIOCGIFCONF   - get ifnet list */
+            ifc = argp;
+            vaxc$errno = sys$qiow(0, sd[s]->chan, TCP$DUMP, &iosb,
+                                  0, 0,
+                                  &du_iflist, sizeof(struct DU$IF_List),
+                                  DU$Device_List, 0, 0, 0);
 
-		default :
-		    errno = EIO;
-		    break;		
-	    }
+            if (vaxc$errno != SS$_NORMAL)
+            {
+                errno = cmu_get_errno(&iosb);
+                break;
+            }
+
+            ifc->ifc_len = 0;
+            for (i=0; i < du_iflist.cnt; i++)
+            {
+                ifr = &ifc->ifc_req[i];
+                vaxc$errno = sys$qiow(0,sd[s]->chan,TCP$DUMP, &iosb,
+                                      0, 0,
+                                      bufr, BUFR_SIZE, DU$Device_Stat,
+                                      du_iflist.index[i],0,0);
+                if ( vaxc$errno != SS$_NORMAL )
+                {
+                    errno = cmu_get_errno(&iosb);
+                    break;
+                }
+                dd = bufr;
+                memcpy(ifr->ifr_name,
+                       dd->DU$DevNam_Str, dd->DU$DevNam_Len);
+                ifr->ifr_name[dd->DU$DevNam_Len] = 0;
+                memcpy(&ifr->ifr_addr.sa_data[2],
+                       &dd->DU$Dev_Address, 4);
+                ifr->ifr_data  = 0;
+                ifr->ifr_flags = AF_INET;
+                ifc->ifc_len += sizeof(struct ifreq);
+            }
+            break;
+
+        default :
+            errno = EIO;
+            break;
+        }
     }
 
 #ifndef __KERNEL__
@@ -2527,27 +2593,29 @@ int s, request, arg;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
-    switch (request) {
-	case F_GETFL :
-	    return(sd[s]->ioctl_opts);
-	case F_SETFL :
-	    sd[s]->ioctl_opts = arg;
-	    return(0);
-	default :
+    switch (request)
+    {
+    case F_GETFL :
+        return(sd[s]->ioctl_opts);
+    case F_SETFL :
+        sd[s]->ioctl_opts = arg;
+        return(0);
+    default :
 #ifndef __KERNEL__
-	    errno = EINVAL;
-	    return(-1);
+        errno = EINVAL;
+        return(-1);
 #else
-	    return -EINVAL;
+        return -EINVAL;
 #endif
     }
 }
@@ -2586,12 +2654,13 @@ int	len;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
@@ -2600,16 +2669,17 @@ int	len;
      */
     if ((sd[s]->flags & SD_CONNECTED) != 0)
 #ifndef __KERNEL__
-	return(recvfrom(s,buf,len,0,0,0));
+        return(recvfrom(s,buf,len,0,0,0));
 #else
-	return(sys_recvfrom(s,buf,len,0,0,0));
+        return(sys_recvfrom(s,buf,len,0,0,0));
 #endif
-    else {
+    else
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 }
@@ -2644,12 +2714,13 @@ int	len;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 
@@ -2658,16 +2729,17 @@ int	len;
      */
     if ((sd[s]->flags & SD_CONNECTED) != 0)
 #ifndef __KERNEL__
-	return(sendto(s,msg,len,0,0,0));
+        return(sendto(s,msg,len,0,0,0));
 #else
-	return(sys_sendto(s,msg,len,0,0,0));
+        return(sys_sendto(s,msg,len,0,0,0));
 #endif
-    else {
+    else
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
 }
@@ -2694,7 +2766,7 @@ int	len;
 int cmu_close(s)
 int	s;
 {
-struct	backlogEntry *entry;
+    struct	backlogEntry *entry;
 
     /*
      * if this is not one of our channels then pass it on to the systems
@@ -2707,20 +2779,21 @@ struct	backlogEntry *entry;
 #endif
     if (sd[s] == NULL)
 #ifndef __KERNEL__
-	return(close(s));
+        return(close(s));
 #else
-    return(sys_close(s));
+        return(sys_close(s));
 #endif
 
     /*
      * Verify that the channel is indeed open -- in some cases it may not be.
      */
-    if ((sd[s]->flags & SD_CONNECTED) != 0) {
-	/*
-	 * close/deallocate the I/O channel
-	 */
-	sys$qiow(0, sd[s]->chan, TCP$CLOSE, &sd[s]->write_iosb, 0, 0, 0, 0, 0, 0, 0, 0);
-	sys$dalloc(sd[s]->chan);
+    if ((sd[s]->flags & SD_CONNECTED) != 0)
+    {
+        /*
+         * close/deallocate the I/O channel
+         */
+        sys$qiow(0, sd[s]->chan, TCP$CLOSE, &sd[s]->write_iosb, 0, 0, 0, 0, 0, 0, 0, 0);
+        sys$dalloc(sd[s]->chan);
     }
 
     /*
@@ -2736,33 +2809,36 @@ struct	backlogEntry *entry;
      */
     if (sd[s]->ef != 0)
 #ifndef __KERNEL__
-	lib$free_ef(&sd[s]->ef);
+        lib$free_ef(&sd[s]->ef);
 #endif
 
     if (sd[s]->rcvbuf != NULL)
-	free(sd[s]->rcvbuf);
+        free(sd[s]->rcvbuf);
 
     /*
      * was this an `accept'ed socket?
      */
-    if (sd[s]->listen_socket != 0) {
-	sd[sd[s]->listen_socket]->backlogSize--;
-	/*
-	 * requeue the listen if it was shutdown
-	 */
-	if ((sd[sd[s]->listen_socket]->flags & SD_LISTENING) == 0)
-	    cmu_queue_listen(sd[s]->listen_socket);
+    if (sd[s]->listen_socket != 0)
+    {
+        sd[sd[s]->listen_socket]->backlogSize--;
+        /*
+         * requeue the listen if it was shutdown
+         */
+        if ((sd[sd[s]->listen_socket]->flags & SD_LISTENING) == 0)
+            cmu_queue_listen(sd[s]->listen_socket);
     }
 
     /*
      * purge the listen queue if this was a listen socket
      */
-    if ((sd[s]->sock_opts & SO_ACCEPTCONN) != 0) {
-	while (sd[s]->backlogQueue != NULL) {
-	    entry = sd[s]->backlogQueue;
-	    sd[s]->backlogQueue = entry->flink;
-	    cfree(entry);
-	}
+    if ((sd[s]->sock_opts & SO_ACCEPTCONN) != 0)
+    {
+        while (sd[s]->backlogQueue != NULL)
+        {
+            entry = sd[s]->backlogQueue;
+            sd[s]->backlogQueue = entry->flink;
+            cfree(entry);
+        }
     }
 
     cfree(sd[s]);
@@ -2796,19 +2872,20 @@ struct	backlogEntry *entry;
 int *cmu_stdin_open(name)
 char	*name;
 {
-struct	dsc$descriptor dev_name;
+    struct	dsc$descriptor dev_name;
 
 #ifdef __KERNEL__
     struct vms_fd * vms_fd = fget(0);
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[0] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[0] != NULL) {
+    if (sd[0] != NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(-1);
+        errno = EBADF;
+        return(-1);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
     sd[0] = calloc( 1, sizeof(struct FD_ENTRY));
@@ -2822,14 +2899,16 @@ struct	dsc$descriptor dev_name;
     /*
      * copy the `name' to the `my' sockaddr area (seems like a logical place)
      */
-    if (strlen(name) <= 14) {
-	sd[0]->mylen = strlen(name);
-	sd[0]->my.sa_family = 0;
-	memcpy(&sd[0]->my.sa_data, name, strlen(name));
+    if (strlen(name) <= 14)
+    {
+        sd[0]->mylen = strlen(name);
+        sd[0]->my.sa_family = 0;
+        memcpy(&sd[0]->my.sa_data, name, strlen(name));
     }
-    else {
-	errno = ENAMETOOLONG;
-	goto ERROR_RETURN;
+    else
+    {
+        errno = ENAMETOOLONG;
+        goto ERROR_RETURN;
     }
 
     /*
@@ -2842,9 +2921,10 @@ struct	dsc$descriptor dev_name;
 
     vaxc$errno = sys$assign(&dev_name, &sd[0]->chan, 0, 0);
 
-    if (vaxc$errno != SS$_NORMAL) {
-	errno = EVMSERR;
-	goto ERROR_RETURN;
+    if (vaxc$errno != SS$_NORMAL)
+    {
+        errno = EVMSERR;
+        goto ERROR_RETURN;
     }
 
 #ifndef __KERNEL__
@@ -2861,7 +2941,7 @@ struct	dsc$descriptor dev_name;
 
 ERROR_RETURN:
     if (sd[0] != NULL)
-	cfree(sd[0]);
+        cfree(sd[0]);
     sd[0] = NULL;
 #ifndef __KERNEL__
     return(-1);
@@ -2908,17 +2988,17 @@ int	mask;
     FD_CLR(0, &sys_readfds.fds_bits[0]);
 
     if (prompt != NULL)
-	vaxc$errno = sys$qio( 0, sd[0]->chan, flags, &sd[0]->read_iosb,
-			cmu_read_ast,0,
-			buf, len,
-			0, mask, prompt, strlen(prompt));
+        vaxc$errno = sys$qio( 0, sd[0]->chan, flags, &sd[0]->read_iosb,
+                              cmu_read_ast,0,
+                              buf, len,
+                              0, mask, prompt, strlen(prompt));
     else
-	vaxc$errno = sys$qio( 0, sd[0]->chan, flags, &sd[0]->read_iosb,
-			cmu_read_ast,0,
-			buf, len,
-			0, 0, 0, 0);
+        vaxc$errno = sys$qio( 0, sd[0]->chan, flags, &sd[0]->read_iosb,
+                              cmu_read_ast,0,
+                              buf, len,
+                              0, 0, 0, 0);
     return(vaxc$errno);
-}				
+}
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * int cmu_get_sdc(int s)
@@ -2943,16 +3023,17 @@ int	s;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s] == NULL) {
+    if (sd[s] == NULL)
+    {
 #ifndef __KERNEL__
-	errno = EBADF;
-	return(0);
+        errno = EBADF;
+        return(0);
 #else
-	return -EBADF;
+        return -EBADF;
 #endif
     }
     else
-	return(sd[s]->chan);
+        return(sd[s]->chan);
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2981,18 +3062,18 @@ char	*mode;	/* access mode */
 char	*buff;	/* return buffer */
 int	len;	/* size of return buffer */
 {
-int	attr;
-unsigned char *acmode;
-struct	dsc$descriptor tabnam, lognam, eqvstr;
-struct	ITEM_LIST itmlst[2];
+    int	attr;
+    unsigned char *acmode;
+    struct	dsc$descriptor tabnam, lognam, eqvstr;
+    struct	ITEM_LIST itmlst[2];
 
-/* definitions for different access modes
- * See STARLET.REQ $PSLDEF
- */
-char	PSL$C_KERNEL = 0;
-char	PSL$C_EXEC   = 1;
-char	PSL$C_SUPER  = 2;
-char	PSL$C_USER   = 3;
+    /* definitions for different access modes
+     * See STARLET.REQ $PSLDEF
+     */
+    char	PSL$C_KERNEL = 0;
+    char	PSL$C_EXEC   = 1;
+    char	PSL$C_SUPER  = 2;
+    char	PSL$C_USER   = 3;
 
     tabnam.dsc$b_dtype	= DSC$K_DTYPE_T;
     tabnam.dsc$b_class	= DSC$K_CLASS_S;
@@ -3020,37 +3101,40 @@ char	PSL$C_USER   = 3;
     itmlst[1].itm$a_retlen = 0;
 
     attr = LNM$M_CASE_BLIND;
-  
 
-    switch (toupper(mode[0])) {
-	case 'K':
-	    acmode = &PSL$C_KERNEL;
-	    break;
-	case 'E':
-	    acmode = &PSL$C_EXEC;
-	    break;
-	case 'S':
-	    acmode = &PSL$C_SUPER;
-	    break;
-	case 'U':
-	    acmode = &PSL$C_USER;
-	    break;
-	default :
-	    acmode = NULL;
+
+    switch (toupper(mode[0]))
+    {
+    case 'K':
+        acmode = &PSL$C_KERNEL;
+        break;
+    case 'E':
+        acmode = &PSL$C_EXEC;
+        break;
+    case 'S':
+        acmode = &PSL$C_SUPER;
+        break;
+    case 'U':
+        acmode = &PSL$C_USER;
+        break;
+    default :
+        acmode = NULL;
     }
-	
+
     vaxc$errno = sys$trnlnm( &attr, &tabnam, &lognam, acmode, itmlst );
 
-    if(vaxc$errno == SS$_NORMAL) {
-	buff[eqvstr.dsc$w_length] = 0;
-	return(0);
+    if(vaxc$errno == SS$_NORMAL)
+    {
+        buff[eqvstr.dsc$w_length] = 0;
+        return(0);
     }
-    else {
+    else
+    {
 #ifndef __KERNEL__
-	errno = EVMSERR;
-	return(-1);
+        errno = EVMSERR;
+        return(-1);
 #else
-	return -EVMSERR;
+        return -EVMSERR;
 #endif
     }
 }
@@ -3069,262 +3153,263 @@ char	PSL$C_USER   = 3;
 int cmu_get_errno(iosb)
 NetIO_Status_Block *iosb;
 {
-int qio_errno = 0;
-int cmu_errno = 0;
+    int qio_errno = 0;
+    int cmu_errno = 0;
 
     /*
      * Choose errno based on qio status return.
      */
-    switch (iosb->NSB$STATUS) {
-	case 0:
-		qio_errno = EVMSERR;	/* use vaxc$errno */
-		break;
-	case SS$_MEDOFL:		/* INETACP has died */
-		qio_errno = ENETDOWN;
-		break;
-	case SS$_BADPARAM:		/* parameter not valid for call */
-		qio_errno = EINVAL;
-		break;
-	case SS$_EXQUOTA:		/* buffer allocation problems */
-	case SS$_INSFMEM:
-		qio_errno = EMSGSIZE;
-		break;
-	case SS$_ACCVIO:		/* buffer access problems */
-		qio_errno = EFAULT;
-		break;
-	case SS$_ILLCNTRFUNC:		/* internal ACP error */
-		qio_errno = EIO;
-	default:
-		qio_errno = 0;
-	}
+    switch (iosb->NSB$STATUS)
+    {
+    case 0:
+        qio_errno = EVMSERR;	/* use vaxc$errno */
+        break;
+    case SS$_MEDOFL:		/* INETACP has died */
+        qio_errno = ENETDOWN;
+        break;
+    case SS$_BADPARAM:		/* parameter not valid for call */
+        qio_errno = EINVAL;
+        break;
+    case SS$_EXQUOTA:		/* buffer allocation problems */
+    case SS$_INSFMEM:
+        qio_errno = EMSGSIZE;
+        break;
+    case SS$_ACCVIO:		/* buffer access problems */
+        qio_errno = EFAULT;
+        break;
+    case SS$_ILLCNTRFUNC:		/* internal ACP error */
+        qio_errno = EIO;
+    default:
+        qio_errno = 0;
+    }
 
     /*
      * Choose errno based on extended error code (this is gross!)
      */
-	/* no error */
+    /* no error */
     if      (iosb->NSB$XERROR == 0)
-	    cmu_errno = EVMSERR;
-	/* <Insufficient system resources> */
+        cmu_errno = EVMSERR;
+    /* <Insufficient system resources> */
     else if (iosb->NSB$XERROR == NET$_IR)
-	    cmu_errno = ENOMEM;
-	/* <Invalid network function code> */
+        cmu_errno = ENOMEM;
+    /* <Invalid network function code> */
     else if (iosb->NSB$XERROR == NET$_IFC)
-	    cmu_errno = EOPNOTSUPP;
-	/* <Invalid network protocol code> */
+        cmu_errno = EOPNOTSUPP;
+    /* <Invalid network protocol code> */
     else if (iosb->NSB$XERROR == NET$_IPC)
-	    cmu_errno = EPROTONOSUPPORT;
-	/* <Non-unique connection specified> */
+        cmu_errno = EPROTONOSUPPORT;
+    /* <Non-unique connection specified> */
     else if (iosb->NSB$XERROR == NET$_NUC)
-	    cmu_errno = EISCONN;
-	/* <Connection RESET by remote host> */
+        cmu_errno = EISCONN;
+    /* <Connection RESET by remote host> */
     else if (iosb->NSB$XERROR == NET$_CR)
-	    cmu_errno = ECONNRESET;
-	/* <Foreign host unspecified> */
+        cmu_errno = ECONNRESET;
+    /* <Foreign host unspecified> */
     else if (iosb->NSB$XERROR == NET$_FSU)
-	    cmu_errno = EDESTADDRREQ;
-	/* <Connection cancelled by process abort> */
+        cmu_errno = EDESTADDRREQ;
+    /* <Connection cancelled by process abort> */
     else if (iosb->NSB$XERROR == NET$_CCAN)
-	    cmu_errno = ECONNABORTED;
-	/* <IO Function in Progress> */
+        cmu_errno = ECONNABORTED;
+    /* <IO Function in Progress> */
     else if (iosb->NSB$XERROR == NET$_FIP)
-	    cmu_errno = EALREADY;
-	/* <User specified buffer is Too small> */
+        cmu_errno = EALREADY;
+    /* <User specified buffer is Too small> */
     else if (iosb->NSB$XERROR == NET$_BTS)
-	    cmu_errno = ERANGE;
-	/* <Bad device index> */
+        cmu_errno = ERANGE;
+    /* <Bad device index> */
     else if (iosb->NSB$XERROR == NET$_BDI)
-	    cmu_errno = ENODEV;
-	/* <Connection is closing - operation invalid> */
+        cmu_errno = ENODEV;
+    /* <Connection is closing - operation invalid> */
     else if (iosb->NSB$XERROR == NET$_CC)
-	    cmu_errno = ESHUTDOWN;
-	/* <Net ACP is Exiting> */
+        cmu_errno = ESHUTDOWN;
+    /* <Net ACP is Exiting> */
     else if (iosb->NSB$XERROR == NET$_TE)
-	    cmu_errno = ENETDOWN;
-	/* <Name lookup not yet complete - no host address> */
+        cmu_errno = ENETDOWN;
+    /* <Name lookup not yet complete - no host address> */
     else if (iosb->NSB$XERROR == NET$_NOADR)
-	    cmu_errno = EINPROGRESS;
-	/* <Connection killed> */
+        cmu_errno = EINPROGRESS;
+    /* <Connection killed> */
     else if (iosb->NSB$XERROR == NET$_KILL)
-	    cmu_errno = EPIPE;
-	/* <Connection refused by remote host> */
+        cmu_errno = EPIPE;
+    /* <Connection refused by remote host> */
     else if (iosb->NSB$XERROR == NET$_CREF)
-	    cmu_errno = ECONNREFUSED;
-	/* <Name lookup failure: name resolver queue is full> */
+        cmu_errno = ECONNREFUSED;
+    /* <Name lookup failure: name resolver queue is full> */
     else if (iosb->NSB$XERROR == NET$_NSQFULL)
-	    cmu_errno = ECONNREFUSED;
-	/* <Connection does not exist> */
+        cmu_errno = ECONNREFUSED;
+    /* <Connection does not exist> */
     else if (iosb->NSB$XERROR == NET$_CDE)
-	    cmu_errno = ENOTCONN;
-	/* <UDP wildcard connection not yet open> */
+        cmu_errno = ENOTCONN;
+    /* <UDP wildcard connection not yet open> */
     else if (iosb->NSB$XERROR == NET$_NOPN)
-	    cmu_errno = ENOTCONN;
-	/* <Invalid GTHST function> */
+        cmu_errno = ENOTCONN;
+    /* <Invalid GTHST function> */
     else if (iosb->NSB$XERROR == NET$_IGF)
-	    cmu_errno = EINVAL;
-	/* <NET$DUMP argument error> */
+        cmu_errno = EINVAL;
+    /* <NET$DUMP argument error> */
     else if (iosb->NSB$XERROR == NET$_DAE)
-	    cmu_errno = EINVAL;
-	/* <Invalid foreign port> */
+        cmu_errno = EINVAL;
+    /* <Invalid foreign port> */
     else if (iosb->NSB$XERROR == NET$_IFS)
-	    cmu_errno = EADDRNOTAVAIL;
-	/* <Invalid local port> */
+        cmu_errno = EADDRNOTAVAIL;
+    /* <Invalid local port> */
     else if (iosb->NSB$XERROR == NET$_ILP)
-	    cmu_errno = EADDRNOTAVAIL;
-	/* <Connection table space exhausted> */
+        cmu_errno = EADDRNOTAVAIL;
+    /* <Connection table space exhausted> */
     else if (iosb->NSB$XERROR == NET$_CSE)
-	    cmu_errno = EADDRNOTAVAIL;
-	/* <Connection TimeOut> */
+        cmu_errno = EADDRNOTAVAIL;
+    /* <Connection TimeOut> */
     else if (iosb->NSB$XERROR == NET$_CTO)
-	    cmu_errno = ETIMEDOUT;
-	/* <Time-Wait TimeOut> */
+        cmu_errno = ETIMEDOUT;
+    /* <Time-Wait TimeOut> */
     else if (iosb->NSB$XERROR == NET$_TWT)
-	    cmu_errno = ETIMEDOUT;
-	/* <User function timeout. Network event didn't happen> */
+        cmu_errno = ETIMEDOUT;
+    /* <User function timeout. Network event didn't happen> */
     else if (iosb->NSB$XERROR == NET$_FTO)
-	    cmu_errno = ETIMEDOUT;
-	/* <Unable to create TCB> */
+        cmu_errno = ETIMEDOUT;
+    /* <Unable to create TCB> */
     else if (iosb->NSB$XERROR == NET$_UCT)
-	    cmu_errno = ENOBUFS;
-	/* <Valid-TCB table full (all connections in use)> */
+        cmu_errno = ENOBUFS;
+    /* <Valid-TCB table full (all connections in use)> */
     else if (iosb->NSB$XERROR == NET$_VTF)
-	    cmu_errno = ENOBUFS;
-	/* <GTHST queue full - can't queue name/address lookup> */
+        cmu_errno = ENOBUFS;
+    /* <GTHST queue full - can't queue name/address lookup> */
     else if (iosb->NSB$XERROR == NET$_GTHFUL)
-	    cmu_errno = ENOBUFS;
-	/* <No privilege for access to well-known port> */
+        cmu_errno = ENOBUFS;
+    /* <No privilege for access to well-known port> */
     else if (iosb->NSB$XERROR == NET$_NOPRV)
-	    cmu_errno = EACCES;
-	/* <Connection illegal for this process> */
+        cmu_errno = EACCES;
+    /* <Connection illegal for this process> */
     else if (iosb->NSB$XERROR == NET$_CIP)
-	    cmu_errno = EACCES;
-	/* <Internet access not allowed> */
+        cmu_errno = EACCES;
+    /* <Internet access not allowed> */
     else if (iosb->NSB$XERROR == NET$_NOINA)
-	    cmu_errno = EACCES;
-	/* <ARPANET access not allowed> */
+        cmu_errno = EACCES;
+    /* <ARPANET access not allowed> */
     else if (iosb->NSB$XERROR == NET$_NOANA)
-	    cmu_errno = EACCES;
-	/* <Name lookup failure: name resolver is not running> */
+        cmu_errno = EACCES;
+    /* <Name lookup failure: name resolver is not running> */
     else if (iosb->NSB$XERROR == NET$_NONS)
-	    cmu_errno = EHOSTDOWN;
-	/* <Name not found in host table (domain service unavailable)> */
+        cmu_errno = EHOSTDOWN;
+    /* <Name not found in host table (domain service unavailable)> */
     else if (iosb->NSB$XERROR == NET$_DSDOWN)
-	    cmu_errno = EHOSTDOWN;
-	/* <Domain service: no domain servers could be contacted> */
+        cmu_errno = EHOSTDOWN;
+    /* <Domain service: no domain servers could be contacted> */
     else if (iosb->NSB$XERROR == NET$_DSNODS)
-	    cmu_errno = EHOSTDOWN;
-	/* <Domain service: no usable servers returned by referral> */
+        cmu_errno = EHOSTDOWN;
+    /* <Domain service: no usable servers returned by referral> */
     else if (iosb->NSB$XERROR == NET$_DSNONSRV)
-	    cmu_errno = EHOSTDOWN;
-	/* <Domain service: maximum referral limit exceeded> */
+        cmu_errno = EHOSTDOWN;
+    /* <Domain service: maximum referral limit exceeded> */
     else if (iosb->NSB$XERROR == NET$_DSREFEXC)
-	    cmu_errno = EHOSTDOWN;
-	/* <Unknown host number> */
+        cmu_errno = EHOSTDOWN;
+    /* <Unknown host number> */
     else if (iosb->NSB$XERROR == NET$_UNU)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Unknown host name> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Unknown host name> */
     else if (iosb->NSB$XERROR == NET$_UNA)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Destination Unreachable> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Destination Unreachable> */
     else if (iosb->NSB$XERROR == NET$_URC)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Invalid known host index> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Invalid known host index> */
     else if (iosb->NSB$XERROR == NET$_IHI)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Unknown network node> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Unknown network node> */
     else if (iosb->NSB$XERROR == NET$_UNN)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Domain service: name error (no such name)> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Domain service: name error (no such name)> */
     else if (iosb->NSB$XERROR == NET$_DSNAMERR)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Domain service: no addresses found for host name> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Domain service: no addresses found for host name> */
     else if (iosb->NSB$XERROR == NET$_DSNOADDR)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Domain service: no name found for IP address> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Domain service: no name found for IP address> */
     else if (iosb->NSB$XERROR == NET$_DSNONAME)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Name lookup: no name server could be found> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Name lookup: no name server could be found> */
     else if (iosb->NSB$XERROR == NET$_GP_NONMSR)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Name lookup: request host info item does not exist> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Name lookup: request host info item does not exist> */
     else if (iosb->NSB$XERROR == NET$_GP_NOHINF)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Name lookup: host name not found> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Name lookup: host name not found> */
     else if (iosb->NSB$XERROR == NET$_GP_NOTFND)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Name lookup: all name servers declared down> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Name lookup: all name servers declared down> */
     else if (iosb->NSB$XERROR == NET$_GP_NSDOWN)
-	    cmu_errno = EHOSTUNREACH;
-	/* <No route found for destination> */
+        cmu_errno = EHOSTUNREACH;
+    /* <No route found for destination> */
     else if (iosb->NSB$XERROR == NET$_NRT)
-	    cmu_errno = EHOSTUNREACH;
-	/* <Error processing device dump> */
+        cmu_errno = EHOSTUNREACH;
+    /* <Error processing device dump> */
     else if (iosb->NSB$XERROR == NET$_EPD)
-	    cmu_errno = EIO;
-	/* <User function not yet implemented> */
+        cmu_errno = EIO;
+    /* <User function not yet implemented> */
     else if (iosb->NSB$XERROR == NET$_NYI)
-	    cmu_errno = EIO;
-	/* <Host name lookup time-out> */
+        cmu_errno = EIO;
+    /* <Host name lookup time-out> */
     else if (iosb->NSB$XERROR == NET$_NMLTO)
-	    cmu_errno = EIO;
-	/* <Name lookup failure: name resolver is exiting> */
+        cmu_errno = EIO;
+    /* <Name lookup failure: name resolver is exiting> */
     else if (iosb->NSB$XERROR == NET$_NSEXIT)
-	    cmu_errno = EIO;
-	/* <Domain service: domain server error> */
+        cmu_errno = EIO;
+    /* <Domain service: domain server error> */
     else if (iosb->NSB$XERROR == NET$_DSSRVERR)
-	    cmu_errno = EIO;
-	/* <Domain service: domain server returned format error> */
+        cmu_errno = EIO;
+    /* <Domain service: domain server returned format error> */
     else if (iosb->NSB$XERROR == NET$_DSFMTERR)
-	    cmu_errno = EIO;
-	/* <Domain service: received incomplete domain server reply> */
+        cmu_errno = EIO;
+    /* <Domain service: received incomplete domain server reply> */
     else if (iosb->NSB$XERROR == NET$_DSINCOMP)
-	    cmu_errno = EIO;
-	/* <Domain service: domain server returned not implemented> */
+        cmu_errno = EIO;
+    /* <Domain service: domain server returned not implemented> */
     else if (iosb->NSB$XERROR == NET$_DSNOTIMP)
-	    cmu_errno = EIO;
-	/* <Domain service: domain server refused to resolve name> */
+        cmu_errno = EIO;
+    /* <Domain service: domain server refused to resolve name> */
     else if (iosb->NSB$XERROR == NET$_DSREFUSD)
-	    cmu_errno = EIO;
-	/* <Domain service: unknown server error> */
+        cmu_errno = EIO;
+    /* <Domain service: unknown server error> */
     else if (iosb->NSB$XERROR == NET$_DSUNKERR)
-	    cmu_errno = EIO;
-	/* <Name lookup failure, unknown error code> */
+        cmu_errno = EIO;
+    /* <Name lookup failure, unknown error code> */
     else if (iosb->NSB$XERROR == NET$_GREENERR)
-	    cmu_errno = EIO;
-	/* <Name lookup: invalid request (internal error)> */
+        cmu_errno = EIO;
+    /* <Name lookup: invalid request (internal error)> */
     else if (iosb->NSB$XERROR == NET$_GP_INVREQ)
-	    cmu_errno = EIO;
-	/* <Name lookup: invalid host info item (internal error)> */
+        cmu_errno = EIO;
+    /* <Name lookup: invalid host info item (internal error)> */
     else if (iosb->NSB$XERROR == NET$_GP_INVINF)
-	    cmu_errno = EIO;
-	/* <Name lookup: invalid domain name syntax (internal error)> */
+        cmu_errno = EIO;
+    /* <Name lookup: invalid domain name syntax (internal error)> */
     else if (iosb->NSB$XERROR == NET$_GP_INVNAM)
-	    cmu_errno = EIO;
-	/* <Name lookup: invalid address syntax (internal error)> */
+        cmu_errno = EIO;
+    /* <Name lookup: invalid address syntax (internal error)> */
     else if (iosb->NSB$XERROR == NET$_GP_INVADR)
-	    cmu_errno = EIO;
-	/* <Name lookup: invalid mailbox syntax (internal error)> */
+        cmu_errno = EIO;
+    /* <Name lookup: invalid mailbox syntax (internal error)> */
     else if (iosb->NSB$XERROR == NET$_GP_INVMBX)
-	    cmu_errno = EIO;
-	/* <Name lookup: invalid domain class (internal error)> */
+        cmu_errno = EIO;
+    /* <Name lookup: invalid domain class (internal error)> */
     else if (iosb->NSB$XERROR == NET$_GP_INVCLS)
-	    cmu_errno = EIO;
-	/* <Name lookup: resolver to busy to handle query> */
+        cmu_errno = EIO;
+    /* <Name lookup: resolver to busy to handle query> */
     else if (iosb->NSB$XERROR == NET$_GP_RSBUSY)
-	    cmu_errno = EIO;
-	/* <Name lookup: mailbox not found> */
+        cmu_errno = EIO;
+    /* <Name lookup: mailbox not found> */
     else if (iosb->NSB$XERROR == NET$_GP_UNKMBX)
-	    cmu_errno = EIO;
-	/* <Name lookup: request data too big for UDP> */
+        cmu_errno = EIO;
+    /* <Name lookup: request data too big for UDP> */
     else if (iosb->NSB$XERROR == NET$_GP_TOOBIG)
-	    cmu_errno = EIO;
-	/* <Name lookup: unimplemented request (internal error)> */
+        cmu_errno = EIO;
+    /* <Name lookup: unimplemented request (internal error)> */
     else if (iosb->NSB$XERROR == NET$_GP_NOTIMP)
-	    cmu_errno = EIO;
+        cmu_errno = EIO;
 
     if ((qio_errno != 0) || (cmu_errno != 0))
-	return(cmu_errno != 0 ? cmu_errno : qio_errno);
+        return(cmu_errno != 0 ? cmu_errno : qio_errno);
     else
-	return(EIO); /* punt! */
+        return(EIO); /* punt! */
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -3342,11 +3427,11 @@ int cmu_errno = 0;
 int cmu_listen_accept(s)
 int	s;	/* socket descriptor */
 {
-int	ns, tmp;
-struct	backlogEntry *backlogQueue;
-struct	sockaddr_in *to;
-int	conInfoSize;
-Connection_Info_Return_Block conInfo;
+    int	ns, tmp;
+    struct	backlogEntry *backlogQueue;
+    struct	sockaddr_in *to;
+    int	conInfoSize;
+    Connection_Info_Return_Block conInfo;
 
     /*
      * check the stats of the completed open
@@ -3356,12 +3441,13 @@ Connection_Info_Return_Block conInfo;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if (sd[s]->read_iosb.NSB$STATUS != SS$_NORMAL) {
-	/* 
-	 * failed; set exceptfds and event
-	 */
-	FD_SET(s,&sys_exceptfds.fds_bits[0]);
-	sys$setef(sd[s]->ef);
+    if (sd[s]->read_iosb.NSB$STATUS != SS$_NORMAL)
+    {
+        /*
+         * failed; set exceptfds and event
+         */
+        FD_SET(s,&sys_exceptfds.fds_bits[0]);
+        sys$setef(sd[s]->ef);
     }
 
     /*
@@ -3378,10 +3464,10 @@ Connection_Info_Return_Block conInfo;
      */
     conInfoSize = sizeof(Connection_Info_Return_Block);
     vaxc$errno = sys$qiow( 0, sd[s]->chan, TCP$INFO, &sd[s]->read_iosb, 0, 0,
-		&conInfo,		/* buffer		*/
-		conInfoSize,		/* Size of said buffer  */
-		0,0,0,0);
-	
+                           &conInfo,		/* buffer		*/
+                           conInfoSize,		/* Size of said buffer  */
+                           0,0,0,0);
+
     /*
      * record from port info in new socket to port info
      */
@@ -3414,21 +3500,23 @@ Connection_Info_Return_Block conInfo;
      */
     tmp		 = sd[s]->chan;
     sd[s]->chan  = sd[ns]->chan;
-    sd[ns]->chan = tmp;    
+    sd[ns]->chan = tmp;
 
     /*
      * insert this new socket into the backlog queue
      */
-    if (sd[s]->backlogQueue == NULL) {
-	sd[s]->backlogQueue = calloc(1,sizeof(struct backlogEntry));
-	backlogQueue = sd[s]->backlogQueue;
+    if (sd[s]->backlogQueue == NULL)
+    {
+        sd[s]->backlogQueue = calloc(1,sizeof(struct backlogEntry));
+        backlogQueue = sd[s]->backlogQueue;
     }
-    else {
-	backlogQueue = sd[s]->backlogQueue;
-	while (backlogQueue->flink != NULL)
-	    backlogQueue = backlogQueue->flink;
-	backlogQueue->flink = calloc(1,sizeof(struct backlogEntry));
-	backlogQueue = backlogQueue->flink;
+    else
+    {
+        backlogQueue = sd[s]->backlogQueue;
+        while (backlogQueue->flink != NULL)
+            backlogQueue = backlogQueue->flink;
+        backlogQueue->flink = calloc(1,sizeof(struct backlogEntry));
+        backlogQueue = backlogQueue->flink;
     }
     backlogQueue->sock = ns;
 
@@ -3466,7 +3554,7 @@ Connection_Info_Return_Block conInfo;
 int cmu_queue_listen(s)
 int	s;	/* socket descriptor to listen on */
 {
-struct	sockaddr_in *my;
+    struct	sockaddr_in *my;
 
 
     /*
@@ -3477,12 +3565,13 @@ struct	sockaddr_in *my;
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    if ((sd[s]->ioctl_opts & FREAD) != 0) {
+    if ((sd[s]->ioctl_opts & FREAD) != 0)
+    {
 #ifndef __KERNEL__
-	errno = ESHUTDOWN;
-	return(-1);
+        errno = ESHUTDOWN;
+        return(-1);
 #else
-	return -ESHUTDOWN;
+        return -ESHUTDOWN;
 #endif
     }
 
@@ -3490,33 +3579,36 @@ struct	sockaddr_in *my;
      * if there are already backlog number of connections then exit without
      * posting the listen.  The close routine will requeue the listen.
      */
-    if (sd[s]->backlogSize < sd[s]->backlog) {
-	sd[s]->flags |= SD_LISTENING;
-	my = &sd[s]->my;
-	vaxc$errno = sys$qio( sd[s]->ef, sd[s]->chan, TCP$OPEN, &sd[s]->read_iosb,
-		cmu_listen_accept, s,	/* ast completion routine and param */
-		0,			/* whomever			    */
-		0,			/* remote port			    */
-		ntohs(my->sin_port),	/* protocol filter		    */
-		(MODE_TCP_WaitSYN | MODE_OpenNoWait),
-		U$TCP_Protocol,		/* Protocol code		    */
-		0);			/* timeout			    */
+    if (sd[s]->backlogSize < sd[s]->backlog)
+    {
+        sd[s]->flags |= SD_LISTENING;
+        my = &sd[s]->my;
+        vaxc$errno = sys$qio( sd[s]->ef, sd[s]->chan, TCP$OPEN, &sd[s]->read_iosb,
+                              cmu_listen_accept, s,	/* ast completion routine and param */
+                              0,			/* whomever			    */
+                              0,			/* remote port			    */
+                              ntohs(my->sin_port),	/* protocol filter		    */
+                              (MODE_TCP_WaitSYN | MODE_OpenNoWait),
+                              U$TCP_Protocol,		/* Protocol code		    */
+                              0);			/* timeout			    */
 
-	if (vaxc$errno != SS$_NORMAL) {
+        if (vaxc$errno != SS$_NORMAL)
+        {
 #ifdef __KERNEL__
-	  int errno;
+            int errno;
 #endif
-	    errno = cmu_get_errno(&sd[s]->read_iosb);
+            errno = cmu_get_errno(&sd[s]->read_iosb);
 #ifndef __KERNEL__
-	    return(-1);
+            return(-1);
 #else
-	    return -errno;
+            return -errno;
 #endif
-	}
-	sd[s]->flags |= SD_CONNECTED;
+        }
+        sd[s]->flags |= SD_CONNECTED;
     }
-    else {
-	sd[s]->flags ^= SD_LISTENING;
+    else
+    {
+        sd[s]->flags ^= SD_LISTENING;
     }
 
     return(0);
@@ -3544,21 +3636,22 @@ int	s;	/* file descriptor that is ready. */
     struct FD_ENTRY *sd[FD_SETSIZE];
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
-    switch (sd[s]->read_iosb.NSB$STATUS) {
-	case SS$_NORMAL:
-	    FD_SET(s,&sys_readfds.fds_bits[0]);
-	case SS$_ABORT:
-	case SS$_CANCEL:
-	    /*
-	     * if the status code is SS$_CANCEL or SS$_ABORT then I/O on the
-	     * channel was cancled.  Don't set the exception flag in this case.
-	     */
-	    break;
-	default:
-	    /*
-	     * all other status returns indicate an error
-	     */
-	    FD_SET(s,&sys_exceptfds.fds_bits[0]);
+    switch (sd[s]->read_iosb.NSB$STATUS)
+    {
+    case SS$_NORMAL:
+        FD_SET(s,&sys_readfds.fds_bits[0]);
+    case SS$_ABORT:
+    case SS$_CANCEL:
+        /*
+         * if the status code is SS$_CANCEL or SS$_ABORT then I/O on the
+         * channel was cancled.  Don't set the exception flag in this case.
+         */
+        break;
+    default:
+        /*
+         * all other status returns indicate an error
+         */
+        FD_SET(s,&sys_exceptfds.fds_bits[0]);
     }
 
 
@@ -3566,9 +3659,10 @@ int	s;	/* file descriptor that is ready. */
      * check for socket closed by remote. If it was then make if no-read,
      * no-write, and invalid.
      */
-    if ((sd[s]->read_iosb.X.STATUS & 0x0000ff00) == 0x0600) {
-	sd[s]->ioctl_opts |= (FREAD & FWRITE);
-	FD_CLR(s,&sys_validfds.fds_bits[0]);
+    if ((sd[s]->read_iosb.X.STATUS & 0x0000ff00) == 0x0600)
+    {
+        sd[s]->ioctl_opts |= (FREAD & FWRITE);
+        FD_CLR(s,&sys_validfds.fds_bits[0]);
     }
 
     /*
@@ -3600,9 +3694,9 @@ int	s;	/* file descriptor that is ready. */
     sd[s] = vms_fd->vfd$l_fd_p;
 #endif
     if (sd[s]->write_iosb.NSB$STATUS == SS$_NORMAL)
-	FD_SET(s,&sys_writefds.fds_bits[0]);
+        FD_SET(s,&sys_writefds.fds_bits[0]);
     else
-	FD_SET(s,&sys_exceptfds.fds_bits[0]);
+        FD_SET(s,&sys_exceptfds.fds_bits[0]);
 
 }
 
@@ -3633,9 +3727,9 @@ int	s;
 #endif
     if (sd[s]->ef == 0)
 #ifndef __KERNEL__
-	lib$get_ef(&sd[s]->ef);
+        lib$get_ef(&sd[s]->ef);
 #else
-    sd[s]->ef = 32 + s; // check. very bad
+        sd[s]->ef = 32 + s; // check. very bad
 #endif
     sys$clref(sd[s]->ef);
     FD_CLR(s, &sys_readfds.fds_bits[0]);
@@ -3644,47 +3738,49 @@ int	s;
      * Allocate a receive buffer for reads
      */
     if (sd[s]->rcvbuf == NULL)
-	sd[s]->rcvbuf = malloc(sd[s]->rcvbufsize);
-    if (sd[s]->rcvbuf == NULL) {
-	sys$qio(0,sd[s]->chan,TCP$ABORT,0,0,0,0,0,0,0,0,0);
+        sd[s]->rcvbuf = malloc(sd[s]->rcvbufsize);
+    if (sd[s]->rcvbuf == NULL)
+    {
+        sys$qio(0,sd[s]->chan,TCP$ABORT,0,0,0,0,0,0,0,0,0);
 #ifndef __KERNEL__
-	errno = ENOBUFS;
-	return(-1);
+        errno = ENOBUFS;
+        return(-1);
 #else
-	return -ENOBUFS;
+        return -ENOBUFS;
 #endif
     }
 
     sys$clref(sd[s]->ef);
 
     if (sd[s]->protocol == IPPROTO_UDP)
-	vaxc$errno = sys$qio( 0, sd[s]->chan, TCP$RECEIVE, &sd[s]->read_iosb,
-		cmu_read_ast, s,	/* AST completion routine and arg */
-		sd[s]->rcvbuf,		/* receive buffer*/
-		sd[s]->rcvbufsize,	/* receive buffer size*/
-		&sd[s]->rcvfrom,	/* receive from address buffer*/
-		0,0,0);
+        vaxc$errno = sys$qio( 0, sd[s]->chan, TCP$RECEIVE, &sd[s]->read_iosb,
+                              cmu_read_ast, s,	/* AST completion routine and arg */
+                              sd[s]->rcvbuf,		/* receive buffer*/
+                              sd[s]->rcvbufsize,	/* receive buffer size*/
+                              &sd[s]->rcvfrom,	/* receive from address buffer*/
+                              0,0,0);
     else
-	vaxc$errno = sys$qio( 0, sd[s]->chan, TCP$RECEIVE, &sd[s]->read_iosb,
-		cmu_read_ast, s,	/* AST completion routine and arg */
-		sd[s]->rcvbuf,		/* receive buffer*/
-		sd[s]->rcvbufsize,	/* receive buffer size*/
-		0,0,0,0);
+        vaxc$errno = sys$qio( 0, sd[s]->chan, TCP$RECEIVE, &sd[s]->read_iosb,
+                              cmu_read_ast, s,	/* AST completion routine and arg */
+                              sd[s]->rcvbuf,		/* receive buffer*/
+                              sd[s]->rcvbufsize,	/* receive buffer size*/
+                              0,0,0,0);
 
     if (vaxc$errno == SS$_NORMAL)
-	return(0);
-    else {
+        return(0);
+    else
+    {
 #ifdef __KERNEL__
-      int errno;
+        int errno;
 #endif
-	errno = cmu_get_errno(&sd[s]->read_iosb);
-	FD_SET(s,&sys_exceptfds.fds_bits[0]);
-	sys$setef(sd[s]->ef);
-	sys$qio(0,sd[s]->chan,TCP$ABORT,0,0,0,0,0,0,0,0,0);
+        errno = cmu_get_errno(&sd[s]->read_iosb);
+        FD_SET(s,&sys_exceptfds.fds_bits[0]);
+        sys$setef(sd[s]->ef);
+        sys$qio(0,sd[s]->chan,TCP$ABORT,0,0,0,0,0,0,0,0,0);
 #ifndef __KERNEL__
-	return(-1);
+        return(-1);
 #else
-	return -errno;
+        return -errno;
 #endif
     }
 }

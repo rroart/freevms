@@ -12,7 +12,7 @@
  * 	This routine is called when a particular tty device is opened.
  * 	This routine is mandatory; if this routine is not filled in,
  * 	the attempted open will fail with ENODEV.
- *     
+ *
  * void (*close)(struct tty_struct * tty, struct file * filp);
  *
  * 	This routine is called when a particular tty device is closed.
@@ -37,22 +37,22 @@
  * void (*flush_chars)(struct tty_struct *tty);
  *
  * 	This routine is called by the kernel after it has written a
- * 	series of characters to the tty device using put_char().  
- * 
+ * 	series of characters to the tty device using put_char().
+ *
  * int  (*write_room)(struct tty_struct *tty);
  *
  * 	This routine returns the numbers of characters the tty driver
  * 	will accept for queuing to be written.  This number is subject
  * 	to change as output buffers get emptied, or if the output flow
  *	control is acted.
- * 
+ *
  * int  (*ioctl)(struct tty_struct *tty, struct file * file,
  * 	    unsigned int cmd, unsigned long arg);
  *
  * 	This routine allows the tty driver to implement
  *	device-specific ioctl's.  If the ioctl number passed in cmd
  * 	is not recognized by the driver, it should return ENOIOCTLCMD.
- * 
+ *
  * void (*set_termios)(struct tty_struct *tty, struct termios * old);
  *
  * 	This routine allows the tty driver to be notified when
@@ -64,29 +64,29 @@
  *
  * 	This routine allows the tty driver to be notified when the
  * 	device's termios settings have changed.
- * 
+ *
  * void (*throttle)(struct tty_struct * tty);
  *
  * 	This routine notifies the tty driver that input buffers for
  * 	the line discipline are close to full, and it should somehow
  * 	signal that no more characters should be sent to the tty.
- * 
+ *
  * void (*unthrottle)(struct tty_struct * tty);
  *
  * 	This routine notifies the tty drivers that it should signals
  * 	that characters can now be sent to the tty without fear of
  * 	overrunning the input buffers of the line disciplines.
- * 
+ *
  * void (*stop)(struct tty_struct *tty);
  *
  * 	This routine notifies the tty driver that it should stop
- * 	outputting characters to the tty device.  
- * 
+ * 	outputting characters to the tty device.
+ *
  * void (*start)(struct tty_struct *tty);
  *
  * 	This routine notifies the tty driver that it resume sending
  *	characters to the tty device.
- * 
+ *
  * void (*hangup)(struct tty_struct *tty);
  *
  * 	This routine notifies the tty driver that it should hangup the
@@ -105,7 +105,7 @@
  * 	driver to handle.
  *
  * void (*wait_until_sent)(struct tty_struct *tty, int timeout);
- * 
+ *
  * 	This routine waits until the device has written out all of the
  * 	characters in its transmitter FIFO.
  *
@@ -117,65 +117,66 @@
 
 #include <linux/fs.h>
 
-struct tty_driver {
-	int	magic;		/* magic number for this structure */
-	const char	*driver_name;
-	const char	*name;
-	int	name_base;	/* offset of printed name */
-	short	major;		/* major device number */
-	short	minor_start;	/* start of minor device number*/
-	short	num;		/* number of devices */
-	short	type;		/* type of tty driver */
-	short	subtype;	/* subtype of tty driver */
-	struct termios init_termios; /* Initial termios */
-	int	flags;		/* tty driver flags */
-	int	*refcount;	/* for loadable tty drivers */
-	struct proc_dir_entry *proc_entry; /* /proc fs entry */
-	struct tty_driver *other; /* only used for the PTY driver */
+struct tty_driver
+{
+    int	magic;		/* magic number for this structure */
+    const char	*driver_name;
+    const char	*name;
+    int	name_base;	/* offset of printed name */
+    short	major;		/* major device number */
+    short	minor_start;	/* start of minor device number*/
+    short	num;		/* number of devices */
+    short	type;		/* type of tty driver */
+    short	subtype;	/* subtype of tty driver */
+    struct termios init_termios; /* Initial termios */
+    int	flags;		/* tty driver flags */
+    int	*refcount;	/* for loadable tty drivers */
+    struct proc_dir_entry *proc_entry; /* /proc fs entry */
+    struct tty_driver *other; /* only used for the PTY driver */
 
-	/*
-	 * Pointer to the tty data structures
-	 */
-	struct tty_struct **table;
-	struct termios **termios;
-	struct termios **termios_locked;
-	void *driver_state;	/* only used for the PTY driver */
-	
-	/*
-	 * Interface routines from the upper tty layer to the tty
-	 * driver.
-	 */
-	int  (*open)(struct tty_struct * tty, struct file * filp);
-	void (*close)(struct tty_struct * tty, struct file * filp);
-	int  (*write)(struct tty_struct * tty, int from_user,
-		      const unsigned char *buf, int count);
-	void (*put_char)(struct tty_struct *tty, unsigned char ch);
-	void (*flush_chars)(struct tty_struct *tty);
-	int  (*write_room)(struct tty_struct *tty);
-	int  (*chars_in_buffer)(struct tty_struct *tty);
-	int  (*ioctl)(struct tty_struct *tty, struct file * file,
-		    unsigned int cmd, unsigned long arg);
-	void (*set_termios)(struct tty_struct *tty, struct termios * old);
-	void (*throttle)(struct tty_struct * tty);
-	void (*unthrottle)(struct tty_struct * tty);
-	void (*stop)(struct tty_struct *tty);
-	void (*start)(struct tty_struct *tty);
-	void (*hangup)(struct tty_struct *tty);
-	void (*break_ctl)(struct tty_struct *tty, int state);
-	void (*flush_buffer)(struct tty_struct *tty);
-	void (*set_ldisc)(struct tty_struct *tty);
-	void (*wait_until_sent)(struct tty_struct *tty, int timeout);
-	void (*send_xchar)(struct tty_struct *tty, char ch);
-	int (*read_proc)(char *page, char **start, off_t off,
-			  int count, int *eof, void *data);
-	int (*write_proc)(struct file *file, const char *buffer,
-			  unsigned long count, void *data);
+    /*
+     * Pointer to the tty data structures
+     */
+    struct tty_struct **table;
+    struct termios **termios;
+    struct termios **termios_locked;
+    void *driver_state;	/* only used for the PTY driver */
 
-	/*
-	 * linked list pointers
-	 */
-	struct tty_driver *next;
-	struct tty_driver *prev;
+    /*
+     * Interface routines from the upper tty layer to the tty
+     * driver.
+     */
+    int  (*open)(struct tty_struct * tty, struct file * filp);
+    void (*close)(struct tty_struct * tty, struct file * filp);
+    int  (*write)(struct tty_struct * tty, int from_user,
+                  const unsigned char *buf, int count);
+    void (*put_char)(struct tty_struct *tty, unsigned char ch);
+    void (*flush_chars)(struct tty_struct *tty);
+    int  (*write_room)(struct tty_struct *tty);
+    int  (*chars_in_buffer)(struct tty_struct *tty);
+    int  (*ioctl)(struct tty_struct *tty, struct file * file,
+                  unsigned int cmd, unsigned long arg);
+    void (*set_termios)(struct tty_struct *tty, struct termios * old);
+    void (*throttle)(struct tty_struct * tty);
+    void (*unthrottle)(struct tty_struct * tty);
+    void (*stop)(struct tty_struct *tty);
+    void (*start)(struct tty_struct *tty);
+    void (*hangup)(struct tty_struct *tty);
+    void (*break_ctl)(struct tty_struct *tty, int state);
+    void (*flush_buffer)(struct tty_struct *tty);
+    void (*set_ldisc)(struct tty_struct *tty);
+    void (*wait_until_sent)(struct tty_struct *tty, int timeout);
+    void (*send_xchar)(struct tty_struct *tty, char ch);
+    int (*read_proc)(char *page, char **start, off_t off,
+                     int count, int *eof, void *data);
+    int (*write_proc)(struct file *file, const char *buffer,
+                      unsigned long count, void *data);
+
+    /*
+     * linked list pointers
+     */
+    struct tty_driver *next;
+    struct tty_driver *prev;
 };
 
 /* tty driver magic number */
@@ -183,11 +184,11 @@ struct tty_driver {
 
 /*
  * tty driver flags
- * 
+ *
  * TTY_DRIVER_RESET_TERMIOS --- requests the tty layer to reset the
  * 	termios setting when the last process has closed the device.
  * 	Used for PTY's, in particular.
- * 
+ *
  * TTY_DRIVER_REAL_RAW --- if set, indicates that the driver will
  * 	guarantee never not to set any special character handling
  * 	flags if ((IGNBRK || (!BRKINT && !PARMRK)) && (IGNPAR ||

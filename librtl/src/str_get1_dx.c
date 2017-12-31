@@ -24,34 +24,34 @@
  *				Andrew Allison
  *				50 Denlaw Road
  *				London, Ont
- *				Canada 
+ *				Canada
  *				N6G 3L4
  *
  */
 
- /*
- *	Code for VAX STR$GET1_DX routine
- *
- * Description:
- *
- *
- * Bugs:
- *
- *
- * History
- *
- *	Oct 10, 1996 - Kevin Handy
- *		Preliminary design.
- *
- *	Feb 4, 1997 - Kevin Handy
- *		Include "stdlib.h" to lose warnings with '-Wall'.
- *
- *	Feb 26, 2004 - Andrew Allison
- *		Added GNU License
- *
- *	Mar 1, 2004 - Andrew Allison
- *		Fixed glitch, if asked for 0 bytes calloc return a value
- */
+/*
+*	Code for VAX STR$GET1_DX routine
+*
+* Description:
+*
+*
+* Bugs:
+*
+*
+* History
+*
+*	Oct 10, 1996 - Kevin Handy
+*		Preliminary design.
+*
+*	Feb 4, 1997 - Kevin Handy
+*		Include "stdlib.h" to lose warnings with '-Wall'.
+*
+*	Feb 26, 2004 - Andrew Allison
+*		Added GNU License
+*
+*	Mar 1, 2004 - Andrew Allison
+*		Fixed glitch, if asked for 0 bytes calloc return a value
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,78 +74,78 @@
  *	allocates new space.
  */
 unsigned long str$get1_dx(unsigned short* word_integer_length,
-	struct dsc$descriptor_s* character_string)
+                          struct dsc$descriptor_s* character_string)
 {
-char* new_memory;
+    char* new_memory;
 
-new_memory = NULL;
-/*
- * Validate string class
- */
-if (character_string->dsc$b_class != DSC$K_CLASS_D)
-{
-	DOSIGNAL(STR$_ILLSTRCLA);
-	return(STR$_ILLSTRCLA);
-}
-/*
- * If memory is already allocated, redo the allocation
- */
-if (character_string->dsc$a_pointer != NULL)
-{
-	/*
-	 * Do we really need to change anything?
-	 */
-	if (character_string->dsc$w_length != *word_integer_length)
-	{
-	int	i;
-		/*
-		 * Reallocate old memory
-		 */
-		if ( *word_integer_length == 0 )
-		{
-			free(character_string->dsc$a_pointer);
-			character_string->dsc$a_pointer = NULL;
-			character_string->dsc$w_length  = *word_integer_length;
-		}
-		else
-		{
-		new_memory = (char*)calloc(*word_integer_length,1);
+    new_memory = NULL;
+    /*
+     * Validate string class
+     */
+    if (character_string->dsc$b_class != DSC$K_CLASS_D)
+    {
+        DOSIGNAL(STR$_ILLSTRCLA);
+        return(STR$_ILLSTRCLA);
+    }
+    /*
+     * If memory is already allocated, redo the allocation
+     */
+    if (character_string->dsc$a_pointer != NULL)
+    {
+        /*
+         * Do we really need to change anything?
+         */
+        if (character_string->dsc$w_length != *word_integer_length)
+        {
+            int	i;
+            /*
+             * Reallocate old memory
+             */
+            if ( *word_integer_length == 0 )
+            {
+                free(character_string->dsc$a_pointer);
+                character_string->dsc$a_pointer = NULL;
+                character_string->dsc$w_length  = *word_integer_length;
+            }
+            else
+            {
+                new_memory = (char*)calloc(*word_integer_length,1);
 
-		if ((new_memory == NULL) && (*word_integer_length != 0))
-		{
-			DOSIGNAL(STR$_INSVIRMEM);
-			return STR$_INSVIRMEM;
-		}
-		int minlen = character_string->dsc$w_length < *word_integer_length ? character_string->dsc$w_length : *word_integer_length;
-		for (i=0; i < minlen; i++)
-		    new_memory[i] = character_string->dsc$a_pointer[i];
+                if ((new_memory == NULL) && (*word_integer_length != 0))
+                {
+                    DOSIGNAL(STR$_INSVIRMEM);
+                    return STR$_INSVIRMEM;
+                }
+                int minlen = character_string->dsc$w_length < *word_integer_length ? character_string->dsc$w_length : *word_integer_length;
+                for (i=0; i < minlen; i++)
+                    new_memory[i] = character_string->dsc$a_pointer[i];
 
-		free(character_string->dsc$a_pointer);
-		character_string->dsc$a_pointer = new_memory;
-		character_string->dsc$w_length  = *word_integer_length;
-		}
-	}
-}
-else
-{
-	/*
-	 * Allocate some new memory
-	 */
+                free(character_string->dsc$a_pointer);
+                character_string->dsc$a_pointer = new_memory;
+                character_string->dsc$w_length  = *word_integer_length;
+            }
+        }
+    }
+    else
+    {
+        /*
+         * Allocate some new memory
+         */
 
-	if (*word_integer_length != 0 )
-		character_string->dsc$a_pointer = (char*)calloc(*word_integer_length,1);
-	if ((character_string->dsc$a_pointer == NULL) && (*word_integer_length != 0 ))
-	{
-		DOSIGNAL(STR$_INSVIRMEM);
-		return STR$_INSVIRMEM;
-	}
-	character_string->dsc$w_length = *word_integer_length;
-}
+        if (*word_integer_length != 0 )
+            character_string->dsc$a_pointer = (char*)calloc(*word_integer_length,1);
+        if ((character_string->dsc$a_pointer == NULL) && (*word_integer_length != 0 ))
+        {
+            DOSIGNAL(STR$_INSVIRMEM);
+            return STR$_INSVIRMEM;
+        }
+        character_string->dsc$w_length = *word_integer_length;
+    }
 
-/*
- * Successful
- */
-return STR$_NORMAL;
+    /*
+     * Successful
+     */
+    return STR$_NORMAL;
 }
 
 

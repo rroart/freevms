@@ -41,67 +41,70 @@
  * and both the standard and SIMD floating point data can be accessed via
  * the new ptrace requests.  In either case, changes to the FPU environment
  * will be reflected in the task's state as expected.
- * 
+ *
  * x86-64 support by Andi Kleen.
  */
 
 /* This matches the 64bit FXSAVE format as defined by AMD. It is the same
    as the 32bit format defined by Intel, except that the selector:offset pairs for
-   data and eip are replaced with flat 64bit pointers. */ 
-struct user_i387_struct {
-	unsigned short	cwd;
-	unsigned short	swd;
-	unsigned short	twd; /* Note this is not the same as the 32bit/x87/FSAVE twd */
-	unsigned short	fop;
-	__u64	rip;
-	__u64	rdp;
-	__u32	mxcsr;
-	__u32	mxcsr_mask;
-	__u32	st_space[32];	/* 8*16 bytes for each FP-reg = 128 bytes */
-	__u32	xmm_space[64];	/* 16*16 bytes for each XMM-reg = 256 bytes */
-	__u32	padding[24];
+   data and eip are replaced with flat 64bit pointers. */
+struct user_i387_struct
+{
+    unsigned short	cwd;
+    unsigned short	swd;
+    unsigned short	twd; /* Note this is not the same as the 32bit/x87/FSAVE twd */
+    unsigned short	fop;
+    __u64	rip;
+    __u64	rdp;
+    __u32	mxcsr;
+    __u32	mxcsr_mask;
+    __u32	st_space[32];	/* 8*16 bytes for each FP-reg = 128 bytes */
+    __u32	xmm_space[64];	/* 16*16 bytes for each XMM-reg = 256 bytes */
+    __u32	padding[24];
 };
 
 /*
  * Segment register layout in coredumps.
  */
-struct user_regs_struct {
-	unsigned long r15,r14,r13,r12,rbp,rbx,r11,r10;
-	unsigned long r9,r8,rax,rcx,rdx,rsi,rdi,orig_rax;
-	unsigned long rip,cs,eflags;
-	unsigned long rsp,ss;
-  	unsigned long fs_base, gs_base;
-	unsigned long ds,es,fs,gs; 
-}; 
+struct user_regs_struct
+{
+    unsigned long r15,r14,r13,r12,rbp,rbx,r11,r10;
+    unsigned long r9,r8,rax,rcx,rdx,rsi,rdi,orig_rax;
+    unsigned long rip,cs,eflags;
+    unsigned long rsp,ss;
+    unsigned long fs_base, gs_base;
+    unsigned long ds,es,fs,gs;
+};
 
 /* When the kernel dumps core, it starts by dumping the user struct -
    this will be used by gdb to figure out where the data and stack segments
    are within the file, and what virtual addresses to use. */
-struct user{
-/* We start with the registers, to mimic the way that "memory" is returned
-   from the ptrace(3,...) function.  */
-  struct user_regs_struct regs;		/* Where the registers are actually stored */
-/* ptrace does not yet supply these.  Someday.... */
-  int u_fpvalid;		/* True if math co-processor being used. */
-                                /* for this mess. Not yet used. */
-  struct user_i387_struct i387;	/* Math Co-processor registers. */
-/* The rest of this junk is to help gdb figure out what goes where */
-  unsigned long int u_tsize;	/* Text segment size (pages). */
-  unsigned long int u_dsize;	/* Data segment size (pages). */
-  unsigned long int u_ssize;	/* Stack segment size (pages). */
-  unsigned long start_code;     /* Starting virtual address of text. */
-  unsigned long start_stack;	/* Starting virtual address of stack area.
+struct user
+{
+    /* We start with the registers, to mimic the way that "memory" is returned
+       from the ptrace(3,...) function.  */
+    struct user_regs_struct regs;		/* Where the registers are actually stored */
+    /* ptrace does not yet supply these.  Someday.... */
+    int u_fpvalid;		/* True if math co-processor being used. */
+    /* for this mess. Not yet used. */
+    struct user_i387_struct i387;	/* Math Co-processor registers. */
+    /* The rest of this junk is to help gdb figure out what goes where */
+    unsigned long int u_tsize;	/* Text segment size (pages). */
+    unsigned long int u_dsize;	/* Data segment size (pages). */
+    unsigned long int u_ssize;	/* Stack segment size (pages). */
+    unsigned long start_code;     /* Starting virtual address of text. */
+    unsigned long start_stack;	/* Starting virtual address of stack area.
 				   This is actually the bottom of the stack,
 				   the top of the stack is always found in the
 				   esp register.  */
-  long int signal;     		/* Signal that caused the core dump. */
-  int reserved;			/* No longer used */
-  struct user_pt_regs * u_ar0;	/* Used by gdb to help find the values for */
-				/* the registers. */
-  struct user_i387_struct* u_fpstate;	/* Math Co-processor pointer. */
-  unsigned long magic;		/* To uniquely identify a core file */
-  char u_comm[32];		/* User command that was responsible */
-  unsigned long u_debugreg[8];
+    long int signal;     		/* Signal that caused the core dump. */
+    int reserved;			/* No longer used */
+    struct user_pt_regs * u_ar0;	/* Used by gdb to help find the values for */
+    /* the registers. */
+    struct user_i387_struct* u_fpstate;	/* Math Co-processor pointer. */
+    unsigned long magic;		/* To uniquely identify a core file */
+    char u_comm[32];		/* User command that was responsible */
+    unsigned long u_debugreg[8];
 };
 #define NBPG PAGE_SIZE
 #define UPAGES 1

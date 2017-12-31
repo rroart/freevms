@@ -34,21 +34,23 @@
 #endif
 #endif
 
-struct tchars {
-	char	t_intrc;	/* interrupt */
-	char	t_quitc;	/* quit */
-	char	t_startc;	/* start output */
-	char	t_stopc;	/* stop output */
-	char	t_eofc;		/* end-of-file */
-	char	t_brkc;		/* input delimiter (like nl) */
+struct tchars
+{
+    char	t_intrc;	/* interrupt */
+    char	t_quitc;	/* quit */
+    char	t_startc;	/* start output */
+    char	t_stopc;	/* stop output */
+    char	t_eofc;		/* end-of-file */
+    char	t_brkc;		/* input delimiter (like nl) */
 };
-struct ltchars {
-	char	t_suspc;	/* stop process signal */
-	char	t_dsuspc;	/* delayed stop process signal */
-	char	t_rprntc;	/* reprint line */
-	char	t_flushc;	/* flush output (toggles) */
-	char	t_werasc;	/* word erase */
-	char	t_lnextc;	/* literal next character */
+struct ltchars
+{
+    char	t_suspc;	/* stop process signal */
+    char	t_dsuspc;	/* delayed stop process signal */
+    char	t_rprntc;	/* reprint line */
+    char	t_flushc;	/* flush output (toggles) */
+    char	t_werasc;	/* word erase */
+    char	t_lnextc;	/* literal next character */
 };
 
 /*
@@ -57,12 +59,13 @@ struct ltchars {
 
 #ifndef _SGTTYB_
 #define	_SGTTYB_
-struct sgttyb {
-	char	sg_ispeed;		/* input speed */
-	char	sg_ospeed;		/* output speed */
-	char	sg_erase;		/* erase character */
-	char	sg_kill;		/* kill character */
-	short	sg_flags;		/* mode flags */
+struct sgttyb
+{
+    char	sg_ispeed;		/* input speed */
+    char	sg_ospeed;		/* output speed */
+    char	sg_erase;		/* erase character */
+    char	sg_kill;		/* kill character */
+    short	sg_flags;		/* mode flags */
 };
 #endif
 
@@ -74,21 +77,23 @@ struct sgttyb {
  *
  * Type must be "unsigned short" so that types.h not required.
  */
-struct winsize {
-	unsigned short	ws_row;			/* rows, in characters */
-	unsigned short	ws_col;			/* columns, in characters */
-	unsigned short	ws_xpixel;		/* horizontal size, pixels */
-	unsigned short	ws_ypixel;		/* vertical size, pixels */
+struct winsize
+{
+    unsigned short	ws_row;			/* rows, in characters */
+    unsigned short	ws_col;			/* columns, in characters */
+    unsigned short	ws_xpixel;		/* horizontal size, pixels */
+    unsigned short	ws_ypixel;		/* vertical size, pixels */
 };
 
 /*
  * Pun for SUN.
  */
-struct ttysize {
-	unsigned short	ts_lines;
-	unsigned short	ts_cols;
-	unsigned short	ts_xxx;
-	unsigned short	ts_yyy;
+struct ttysize
+{
+    unsigned short	ts_lines;
+    unsigned short	ts_cols;
+    unsigned short	ts_xxx;
+    unsigned short	ts_yyy;
 };
 #define	TIOCGSIZE	TIOCGWINSZ
 #define	TIOCSSIZE	TIOCSWINSZ

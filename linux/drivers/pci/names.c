@@ -13,17 +13,19 @@
 
 #ifdef CONFIG_PCI_NAMES
 
-struct pci_device_info {
-	unsigned short device;
-	unsigned short seen;
-	const char *name;
+struct pci_device_info
+{
+    unsigned short device;
+    unsigned short seen;
+    const char *name;
 };
 
-struct pci_vendor_info {
-	unsigned short vendor;
-	unsigned short nr;
-	const char *name;
-	struct pci_device_info *devices;
+struct pci_vendor_info
+{
+    unsigned short vendor;
+    unsigned short nr;
+    const char *name;
+    struct pci_device_info *devices;
 };
 
 /*
@@ -43,7 +45,8 @@ struct pci_vendor_info {
 #define DEVICE( vendor, device, name )	{ 0x##device, 0, __devicestr_##vendor##device },
 #include "devlist.h"
 
-static struct pci_vendor_info __initdata pci_vendor_list[] = {
+static struct pci_vendor_info __initdata pci_vendor_list[] =
+{
 #define VENDOR( vendor, name )		{ 0x##vendor, sizeof(__devices_##vendor) / sizeof(struct pci_device_info), __vendorstr_##vendor, __devices_##vendor },
 #define ENDVENDOR()
 #define DEVICE( vendor, device, name )
@@ -54,56 +57,63 @@ static struct pci_vendor_info __initdata pci_vendor_list[] = {
 
 void __devinit pci_name_device(struct pci_dev *dev)
 {
-	const struct pci_vendor_info *vendor_p = pci_vendor_list;
-	int i = VENDORS;
-	char *name = dev->name;
+    const struct pci_vendor_info *vendor_p = pci_vendor_list;
+    int i = VENDORS;
+    char *name = dev->name;
 
-	do {
-		if (vendor_p->vendor == dev->vendor)
-			goto match_vendor;
-		vendor_p++;
-	} while (--i);
+    do
+    {
+        if (vendor_p->vendor == dev->vendor)
+            goto match_vendor;
+        vendor_p++;
+    }
+    while (--i);
 
-	/* Couldn't find either the vendor nor the device */
-	sprintf(name, "PCI device %04x:%04x", dev->vendor, dev->device);
-	return;
+    /* Couldn't find either the vendor nor the device */
+    sprintf(name, "PCI device %04x:%04x", dev->vendor, dev->device);
+    return;
 
-	match_vendor: {
-		struct pci_device_info *device_p = vendor_p->devices;
-		int i = vendor_p->nr;
+match_vendor:
+    {
+        struct pci_device_info *device_p = vendor_p->devices;
+        int i = vendor_p->nr;
 
-		while (i > 0) {
-			if (device_p->device == dev->device)
-				goto match_device;
-			device_p++;
-			i--;
-		}
+        while (i > 0)
+        {
+            if (device_p->device == dev->device)
+                goto match_device;
+            device_p++;
+            i--;
+        }
 
-		/* Ok, found the vendor, but unknown device */
-		sprintf(name, "PCI device %04x:%04x (%s)", dev->vendor, dev->device, vendor_p->name);
-		return;
+        /* Ok, found the vendor, but unknown device */
+        sprintf(name, "PCI device %04x:%04x (%s)", dev->vendor, dev->device, vendor_p->name);
+        return;
 
-		/* Full match */
-		match_device: {
-			char *n = name + sprintf(name, "%s %s", vendor_p->name, device_p->name);
-			int nr = device_p->seen + 1;
-			device_p->seen = nr;
-			if (nr > 1)
-				sprintf(n, " (#%d)", nr);
-		}
-	}
+        /* Full match */
+match_device:
+        {
+            char *n = name + sprintf(name, "%s %s", vendor_p->name, device_p->name);
+            int nr = device_p->seen + 1;
+            device_p->seen = nr;
+            if (nr > 1)
+                sprintf(n, " (#%d)", nr);
+        }
+    }
 }
 
 /*
  *  Class names. Not in .init section as they are needed in runtime.
  */
 
-static u16 pci_class_numbers[] = {
+static u16 pci_class_numbers[] =
+{
 #define CLASS(x,y) 0x##x,
 #include "classlist.h"
 };
 
-static char *pci_class_names[] = {
+static char *pci_class_names[] =
+{
 #define CLASS(x,y) y,
 #include "classlist.h"
 };
@@ -111,12 +121,12 @@ static char *pci_class_names[] = {
 char *
 pci_class_name(u32 class)
 {
-	int i;
+    int i;
 
-	for(i=0; i<sizeof(pci_class_numbers)/sizeof(pci_class_numbers[0]); i++)
-		if (pci_class_numbers[i] == class)
-			return pci_class_names[i];
-	return NULL;
+    for(i=0; i<sizeof(pci_class_numbers)/sizeof(pci_class_numbers[0]); i++)
+        if (pci_class_numbers[i] == class)
+            return pci_class_names[i];
+    return NULL;
 }
 
 #else
@@ -128,7 +138,7 @@ void __init pci_name_device(struct pci_dev *dev)
 char *
 pci_class_name(u32 class)
 {
-	return NULL;
+    return NULL;
 }
 
 #endif /* CONFIG_PCI_NAMES */

@@ -27,23 +27,23 @@
  * may copy or modify Sun RPC without charge, but are not authorized
  * to license or distribute it to anyone else except as part of a product or
  * program developed by the user.
- * 
+ *
  * SUN RPC IS PROVIDED AS IS WITH NO WARRANTIES OF ANY KIND INCLUDING THE
  * WARRANTIES OF DESIGN, MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE, OR ARISING FROM A COURSE OF DEALING, USAGE OR TRADE PRACTICE.
- * 
+ *
  * Sun RPC is provided with no support and without any obligation on the
  * part of Sun Microsystems, Inc. to assist in its use, correction,
  * modification or enhancement.
- * 
+ *
  * SUN MICROSYSTEMS, INC. SHALL HAVE NO LIABILITY WITH RESPECT TO THE
  * INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY PATENTS BY SUN RPC
  * OR ANY PART THEREOF.
- * 
+ *
  * In no event will Sun Microsystems, Inc. be liable for any lost revenue
  * or profits or other special, indirect and consequential damages, even if
  * Sun has been advised of the possibility of such damages.
- * 
+ *
  * Sun Microsystems, Inc.
  * 2550 Garcia Avenue
  * Mountain View, California  94043
@@ -94,10 +94,11 @@
  * XDR_FREE can be used to release the space allocated by an XDR_DECODE
  * request.
  */
-enum xdr_op {
-	XDR_ENCODE=0,
-	XDR_DECODE=1,
-	XDR_FREE=2
+enum xdr_op
+{
+    XDR_ENCODE=0,
+    XDR_DECODE=1,
+    XDR_FREE=2
 };
 
 /*
@@ -124,22 +125,24 @@ typedef	bool_t (*xdrproc_t)();
  * an operations vector for the paticular implementation (e.g. see xdr_mem.c),
  * and two private fields for the use of the particular impelementation.
  */
-typedef struct {
-	enum xdr_op	x_op;		/* operation; fast additional param */
-	struct xdr_ops {
-		bool_t	(*x_getlong)();	/* get a long from underlying stream */
-		bool_t	(*x_putlong)();	/* put a long to " */
-		bool_t	(*x_getbytes)();/* get some bytes from " */
-		bool_t	(*x_putbytes)();/* put some bytes to " */
-		u_int	(*x_getpostn)();/* returns bytes off from beginning */
-		bool_t  (*x_setpostn)();/* lets you reposition the stream */
-		long *	(*x_inline)();	/* buf quick ptr to buffered data */
-		void	(*x_destroy)();	/* free privates of this xdr_stream */
-	} *x_ops;
-	caddr_t 	x_public;	/* users' data */
-	caddr_t		x_private;	/* pointer to private data */
-	caddr_t 	x_base;		/* private used for position info */
-	int		x_handy;	/* extra private word */
+typedef struct
+{
+    enum xdr_op	x_op;		/* operation; fast additional param */
+    struct xdr_ops
+    {
+        bool_t	(*x_getlong)();	/* get a long from underlying stream */
+        bool_t	(*x_putlong)();	/* put a long to " */
+        bool_t	(*x_getbytes)();/* get some bytes from " */
+        bool_t	(*x_putbytes)();/* put some bytes to " */
+        u_int	(*x_getpostn)();/* returns bytes off from beginning */
+        bool_t  (*x_setpostn)();/* lets you reposition the stream */
+        long *	(*x_inline)();	/* buf quick ptr to buffered data */
+        void	(*x_destroy)();	/* free privates of this xdr_stream */
+    } *x_ops;
+    caddr_t 	x_public;	/* users' data */
+    caddr_t		x_private;	/* pointer to private data */
+    caddr_t 	x_base;		/* private used for position info */
+    int		x_handy;	/* extra private word */
 } XDR;
 
 /*
@@ -204,9 +207,10 @@ typedef struct {
  * If there is no match and no default routine it is an error.
  */
 #define NULL_xdrproc_t ((xdrproc_t)0)
-struct xdr_discrim {
-	int	value;
-	xdrproc_t proc;
+struct xdr_discrim
+{
+    int	value;
+    xdrproc_t proc;
 };
 
 /*
@@ -269,10 +273,11 @@ extern bool_t	xdr_wrapstring();
  * Common opaque bytes objects used by many rpc protocols;
  * declared here due to commonality.
  */
-#define MAX_NETOBJ_SZ 1024 
-struct netobj {
-	u_int	n_len;
-	char	*n_bytes;
+#define MAX_NETOBJ_SZ 1024
+struct netobj
+{
+    u_int	n_len;
+    char	*n_bytes;
 };
 typedef struct netobj netobj;
 extern bool_t   xdr_netobj();

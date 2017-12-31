@@ -1,15 +1,15 @@
 /*
    md_u.h : user <=> kernel API between Linux raidtools and RAID drivers
           Copyright (C) 1998 Ingo Molnar
-	  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-   
+
    You should have received a copy of the GNU General Public License
    (for example /usr/src/linux/COPYING); if not, write to the Free
-   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
+   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #ifndef _MD_U_H
@@ -44,74 +44,78 @@
 #define STOP_ARRAY_RO		_IO (MD_MAJOR, 0x33)
 #define RESTART_ARRAY_RW	_IO (MD_MAJOR, 0x34)
 
-typedef struct mdu_version_s {
-	int major;
-	int minor;
-	int patchlevel;
+typedef struct mdu_version_s
+{
+    int major;
+    int minor;
+    int patchlevel;
 } mdu_version_t;
 
-typedef struct mdu_array_info_s {
-	/*
-	 * Generic constant information
-	 */
-	int major_version;
-	int minor_version;
-	int patch_version;
-	int ctime;
-	int level;
-	int size;
-	int nr_disks;
-	int raid_disks;
-	int md_minor;
-	int not_persistent;
+typedef struct mdu_array_info_s
+{
+    /*
+     * Generic constant information
+     */
+    int major_version;
+    int minor_version;
+    int patch_version;
+    int ctime;
+    int level;
+    int size;
+    int nr_disks;
+    int raid_disks;
+    int md_minor;
+    int not_persistent;
 
-	/*
-	 * Generic state information
-	 */
-	int utime;		/*  0 Superblock update time		      */
-	int state;		/*  1 State bits (clean, ...)		      */
-	int active_disks;	/*  2 Number of currently active disks	      */
-	int working_disks;	/*  3 Number of working disks		      */
-	int failed_disks;	/*  4 Number of failed disks		      */
-	int spare_disks;	/*  5 Number of spare disks		      */
+    /*
+     * Generic state information
+     */
+    int utime;		/*  0 Superblock update time		      */
+    int state;		/*  1 State bits (clean, ...)		      */
+    int active_disks;	/*  2 Number of currently active disks	      */
+    int working_disks;	/*  3 Number of working disks		      */
+    int failed_disks;	/*  4 Number of failed disks		      */
+    int spare_disks;	/*  5 Number of spare disks		      */
 
-	/*
-	 * Personality information
-	 */
-	int layout;		/*  0 the array's physical layout	      */
-	int chunk_size;	/*  1 chunk size in bytes		      */
+    /*
+     * Personality information
+     */
+    int layout;		/*  0 the array's physical layout	      */
+    int chunk_size;	/*  1 chunk size in bytes		      */
 
 } mdu_array_info_t;
 
-typedef struct mdu_disk_info_s {
-	/*
-	 * configuration/status of one particular disk
-	 */
-	int number;
-	int major;
-	int minor;
-	int raid_disk;
-	int state;
+typedef struct mdu_disk_info_s
+{
+    /*
+     * configuration/status of one particular disk
+     */
+    int number;
+    int major;
+    int minor;
+    int raid_disk;
+    int state;
 
 } mdu_disk_info_t;
 
-typedef struct mdu_start_info_s {
-	/*
-	 * configuration/status of one particular disk
-	 */
-	int major;
-	int minor;
-	int raid_disk;
-	int state;
+typedef struct mdu_start_info_s
+{
+    /*
+     * configuration/status of one particular disk
+     */
+    int major;
+    int minor;
+    int raid_disk;
+    int state;
 
 } mdu_start_info_t;
 
 typedef struct mdu_param_s
 {
-	int			personality;	/* 1,2,3,4 */
-	int			chunk_size;	/* in bytes */
-	int			max_fault;	/* unused for now */
+    int			personality;	/* 1,2,3,4 */
+    int			chunk_size;	/* in bytes */
+    int			max_fault;	/* unused for now */
 } mdu_param_t;
 
-#endif 
+#endif
 

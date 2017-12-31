@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Modified Linux source file, 2001-2006  
+// Modified Linux source file, 2001-2006
 
 #include <linux/config.h>
 #include <linux/module.h>
@@ -146,7 +146,7 @@ EXPORT_SYMBOL(get_wchan);
 EXPORT_SYMBOL(rtc_lock);
 
 /* Export string functions. We normally rely on gcc builtin for most of these,
-   but gcc sometimes decides not to inline them. */    
+   but gcc sometimes decides not to inline them. */
 #undef memcpy
 #undef memset
 #undef memmove
@@ -155,8 +155,8 @@ EXPORT_SYMBOL(rtc_lock);
 #undef strcmp
 #undef strncmp
 #undef strncpy
-#undef strchr	
-#undef strcmp 
+#undef strchr
+#undef strcmp
 #undef bcopy
 extern void * memcpy(void *,const void *,__kernel_size_t);
 extern void * memset(void *,int,__kernel_size_t);
@@ -197,7 +197,7 @@ EXPORT_SYMBOL(atomic_dec_and_lock);
 
 EXPORT_SYMBOL(die_chain);
 
-extern unsigned long __supported_pte_mask; 
+extern unsigned long __supported_pte_mask;
 EXPORT_SYMBOL(__supported_pte_mask);
 
 EXPORT_SYMBOL(init_level4_pgt);
@@ -234,7 +234,7 @@ EXPORT_SYMBOL(fake_node);
 #endif
 
 extern void int_ret_from_sys_call(void);
-EXPORT_SYMBOL_NOVERS(int_ret_from_sys_call); 
+EXPORT_SYMBOL_NOVERS(int_ret_from_sys_call);
 
 EXPORT_SYMBOL(touch_nmi_watchdog);
 

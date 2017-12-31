@@ -33,16 +33,16 @@
 #if 0
 MACRO
 NAMRES_MBX = 'MBX$NAMRES' %,
-  IPACP_MBX = 'MBX$IPACP' %;
+IPACP_MBX = 'MBX$IPACP' %;
 #endif
 
 // Define the format of a mailbox IOSB
 
-struct MBX$IOSB 
+struct MBX$IOSB
 {
-  short     MI$STATUS	;	// Status of the transfer
-  short     MI$COUNT	;	// Byte count
-  long     MI$PID	;// Sending process ID
+    short     MI$STATUS	;	// Status of the transfer
+    short     MI$COUNT	;	// Byte count
+    long     MI$PID	;// Sending process ID
 };
 
 #define     MBX$IOSB_SIZE   sizeof (struct MBX$IOSB)
@@ -57,11 +57,11 @@ MBX$IOSB = BLOCK[MBX$IOSB_SIZE] FIELD(MBX$IOSB_FIELDS) %;
 #define     MSGMAX   512		// Max size mailbox message
 #define     MBNMAX   10		// Max length of return mailbox name
 
-struct MAIL$MSG 
+struct MAIL$MSG
 {
-  short     MSG$MBXNLN	;	// Length of return mailbox name (0 if none)
-  char    MSG$MBXNAM[MBNMAX]; // MBXnnn for return message
-  char     MSG$DATA	[0];// Start of mailbox data
+    short     MSG$MBXNLN	;	// Length of return mailbox name (0 if none)
+    char    MSG$MBXNAM[MBNMAX]; // MBXnnn for return message
+    char     MSG$DATA	[0];// Start of mailbox data
 };
 
 #define     MAIL$MSG_SIZE   sizeof (struct MAIL$MSG)
@@ -70,7 +70,7 @@ struct MAIL$MSG
 #if 0
 MACRO
 MAIL$MSG = BLOCK[MAIL$MSG_SIZE] FIELD(MAIL$MSG_FIELDS) %,
-  MAX_MAIL$MSG = BLOCK[MAX_MAIL$MSG_SIZE] FIELD(MAIL$MSG_FIELDS) %;
+     MAX_MAIL$MSG = BLOCK[MAX_MAIL$MSG_SIZE] FIELD(MAIL$MSG_FIELDS) %;
 #endif
 
 // Define the different types of requests and their replies.
@@ -95,10 +95,10 @@ MAIL$MSG = BLOCK[MAIL$MSG_SIZE] FIELD(MAIL$MSG_FIELDS) %,
 
 // Define the common portions of the message
 
-struct RQ$DEFAULT 
+struct RQ$DEFAULT
 {
-  short     RQ$TYPE	;	// Request type
-  unsigned short     RQ$ID	;// Request identifier
+    short     RQ$TYPE	;	// Request type
+    unsigned short     RQ$ID	;// Request identifier
 };
 
 #define     RQ$DEFAULT_SIZE   sizeof (struct RQ$DEFAULT)
@@ -107,10 +107,10 @@ MACRO
 RQ$DEFAULT = BLOCK[RQ$DEFAULT_SIZE] FIELD(RQ$DEFAULT_FIELDS) %;
 #endif
 
-struct RPLY$DEFAULT 
+struct RPLY$DEFAULT
 {
-  short     RPLY$TYPE	;	// Reply type (matches request type)
-  unsigned short     RPLY$ID	;// Reply ID
+    short     RPLY$TYPE	;	// Reply type (matches request type)
+    unsigned short     RPLY$ID	;// Reply ID
 };
 
 #define     RPLY$DEFAULT_SIZE   sizeof (struct RPLY$DEFAULT)
@@ -121,12 +121,12 @@ RPLY$DEFAULT = BLOCK[RPLY$DEFAULT_SIZE] FIELD(RPLY$DEFAULT_FIELDS) %;
 
 // Define message format for resolver control messages
 
-struct RQ$CONTROL 
+struct RQ$CONTROL
 {
-  short     RQCN$TYPE	;	// Request type
-  unsigned short     RQCN$ID	;	// Request ID
-  unsigned short     RQCN$CCODE	;	// Control code
-  long     RQCN$CVALUE	;// Control value
+    short     RQCN$TYPE	;	// Request type
+    unsigned short     RQCN$ID	;	// Request ID
+    unsigned short     RQCN$CCODE	;	// Control code
+    long     RQCN$CVALUE	;// Control value
 };
 
 #define     RQ$CONTROL_SIZE   sizeof (struct RQ$CONTROL)
@@ -136,11 +136,11 @@ MACRO
 RQ$CONTROL = BLOCK[RQ$CONTROL_SIZE] FIELD(RQ$CONTROL_FIELDS) %;
 #endif
 
-struct RPLY$CONTROL 
+struct RPLY$CONTROL
 {
-  short     RPCN$TYPE	;	// Reply type
-  unsigned short     RPCN$ID	;	// Reply ID
-  long     RPCN$STATUS	;// Return status from operation
+    short     RPCN$TYPE	;	// Reply type
+    unsigned short     RPCN$ID	;	// Reply ID
+    long     RPCN$STATUS	;// Return status from operation
 };
 
 #define     RPLY$CONTROL_SIZE   sizeof (struct RPLY$CONTROL)
@@ -162,11 +162,11 @@ RPLY$CONTROL = BLOCK[RPLY$CONTROL_SIZE] FIELD(RPLY$CONTROL_FIELDS) %;
 
 // Define mesasge format for error messages (reply only)
 
-struct RPLY$ERROR 
+struct RPLY$ERROR
 {
-  short     RPER$TYPE	;	// Reply type
-  unsigned short     RPER$ID	;	// Reply ID
-  long     RPER$ECODE	;// Error code
+    short     RPER$TYPE	;	// Reply type
+    unsigned short     RPER$ID	;	// Reply ID
+    long     RPER$ECODE	;// Error code
 };
 
 #define     RPLY$ERROR_SIZE   sizeof (struct RPLY$ERROR)
@@ -178,12 +178,12 @@ RPLY$ERROR = BLOCK[RPLY$ERROR_SIZE] FIELD(RPLY$ERROR_FIELDS) %;
 
 // Name lookup request
 
-struct RQ$NMLOOK 
+struct RQ$NMLOOK
 {
-  short     RQNM$TYPE	;	// Request type
-  unsigned short     RQNM$ID	;	// Request identifier
-  short     RQNM$NAMLEN	;	// Length of the name to lookup
-  char     RQNM$NAMSTR	[0];// Name string
+    short     RQNM$TYPE	;	// Request type
+    unsigned short     RQNM$ID	;	// Request identifier
+    short     RQNM$NAMLEN	;	// Length of the name to lookup
+    char     RQNM$NAMSTR	[0];// Name string
 };
 
 #define     RQ$NMLOOK_SIZE   sizeof (struct RQ$NMLOOK)
@@ -193,14 +193,14 @@ MACRO
 RQ$NMLOOK = BLOCK[RQ$NMLOOK_SIZE] FIELD(RQ$NMLOOK_FIELDS) %;
 #endif
 
-struct RPLY$NMLOOK 
+struct RPLY$NMLOOK
 {
-  short     RPNM$TYPE	;	// Reply type
-  unsigned short     RPNM$ID	;	// Reply ID
-  short     RPNM$ADRCNT	;	// Count of addresses
-  char    RPNM$ADRLST[4*MAX_HADDRS]; // Address list
-  short     RPNM$NAMLEN	;	// Length of official name
-  char     RPNM$NAMSTR	[0];// Official name string
+    short     RPNM$TYPE	;	// Reply type
+    unsigned short     RPNM$ID	;	// Reply ID
+    short     RPNM$ADRCNT	;	// Count of addresses
+    char    RPNM$ADRLST[4*MAX_HADDRS]; // Address list
+    short     RPNM$NAMLEN	;	// Length of official name
+    char     RPNM$NAMSTR	[0];// Official name string
 };
 
 #define     RPLY$NMLOOK_SIZE   sizeof (struct RPLY$NMLOOK)
@@ -212,11 +212,11 @@ RPLY$NMLOOK = BLOCK[RPLY$NMLOOK_SIZE] FIELD(RPLY$NMLOOK_FIELDS) %;
 
 // Address lookup request
 
-struct RQ$ADLOOK 
+struct RQ$ADLOOK
 {
-  short     RQAD$TYPE	;	// Request type
-  unsigned short     RQAD$ID	;	// Request identifier
-  long     RQAD$ADDR	;// IP address to lookup
+    short     RQAD$TYPE	;	// Request type
+    unsigned short     RQAD$ID	;	// Request identifier
+    long     RQAD$ADDR	;// IP address to lookup
 };
 
 #define     RQ$ADLOOK_SIZE   sizeof (struct RQ$ADLOOK)
@@ -226,12 +226,12 @@ MACRO
 RQ$ADLOOK = BLOCK[RQ$ADLOOK_SIZE] FIELD(RQ$ADLOOK_FIELDS) %;
 #endif
 
-struct RPLY$ADLOOK 
+struct RPLY$ADLOOK
 {
-  short     RPAD$TYPE	;	// Reply type
-  unsigned short     RPAD$ID	;	// Reply identifier
-  short     RPAD$NAMLEN	;	// Name length
-  char     RPAD$NAMSTR	[0];// Name string
+    short     RPAD$TYPE	;	// Reply type
+    unsigned short     RPAD$ID	;	// Reply identifier
+    short     RPAD$NAMLEN	;	// Name length
+    char     RPAD$NAMSTR	[0];// Name string
 };
 
 #define     RPLY$ADLOOK_SIZE   sizeof (struct RPLY$ADLOOK)
@@ -243,13 +243,13 @@ RPLY$ADLOOK = BLOCK[RPLY$ADLOOK_SIZE] FIELD(RPLY$ADLOOK_FIELDS) %;
 
 // Resource Record lookup request
 
-struct RQ$RRLOOK 
+struct RQ$RRLOOK
 {
-  short     RQRR$TYPE	;	// Request type
-  unsigned short     RQRR$ID	;	// Request identifier
-  unsigned short     RQRR$RRTYPE	;
-  short     RQRR$NAMLEN	;	// Length of the name to lookup
-  char     RQRR$NAMSTR	[0];// Name string
+    short     RQRR$TYPE	;	// Request type
+    unsigned short     RQRR$ID	;	// Request identifier
+    unsigned short     RQRR$RRTYPE	;
+    short     RQRR$NAMLEN	;	// Length of the name to lookup
+    char     RQRR$NAMSTR	[0];// Name string
 };
 
 #define     RQ$RRLOOK_SIZE   sizeof (struct RQ$RRLOOK)
@@ -259,13 +259,13 @@ MACRO
 RQ$RRLOOK = BLOCK[RQ$RRLOOK_SIZE] FIELD(RQ$RRLOOK_FIELDS) %;
 #endif
 
-struct RPLY$RRLOOK 
+struct RPLY$RRLOOK
 {
-  short     RPRR$TYPE	;	// Reply type
-  unsigned short     RPRR$ID	;	// Reply ID
-  short     RPRR$RDLEN	;	// RR size
-  //  short     RPRR$NAMLEN	;	// Length of the name to lookup
-  char     RPRR$RDATA	[0];// Address list
+    short     RPRR$TYPE	;	// Reply type
+    unsigned short     RPRR$ID	;	// Reply ID
+    short     RPRR$RDLEN	;	// RR size
+    //  short     RPRR$NAMLEN	;	// Length of the name to lookup
+    char     RPRR$RDATA	[0];// Address list
 };
 
 #define     RPLY$RRLOOK_SIZE   sizeof (struct RPLY$RRLOOK )
@@ -277,12 +277,12 @@ RPLY$RRLOOK = BLOCK[RPLY$RRLOOK_SIZE] FIELD(RPLY$RRLOOK_FIELDS) %;
 
 // Prune request
 
-struct RQ$PRUNE 
+struct RQ$PRUNE
 {
-  short     RQPR$TYPE	;	// Request type
-  unsigned short     RQPR$ID	;	// Request identifier
-  short     RQPR$NAMLEN	;	// Length of the name to lookup
-  char     RQPR$NAMSTR	[0];// Name string
+    short     RQPR$TYPE	;	// Request type
+    unsigned short     RQPR$ID	;	// Request identifier
+    short     RQPR$NAMLEN	;	// Length of the name to lookup
+    char     RQPR$NAMSTR	[0];// Name string
 };
 
 #define     RQ$PRUNE_SIZE   sizeof (struct RQ$PRUNE)
@@ -292,10 +292,10 @@ MACRO
 RQ$PRUNE = BLOCK[RQ$PRUNE_SIZE] FIELD(RQ$PRUNE_FIELDS) %;
 #endif
 
-struct RPLY$PRUNE 
+struct RPLY$PRUNE
 {
-  short     RPPR$TYPE	;	// Reply type
-  unsigned short     RPPR$ID	;// Reply ID
+    short     RPPR$TYPE	;	// Reply type
+    unsigned short     RPPR$ID	;// Reply ID
 };
 
 #define     RPLY$PRUNE_SIZE   sizeof (struct RPLY$PRUNE)

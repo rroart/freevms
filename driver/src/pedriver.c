@@ -23,22 +23,26 @@
 #include<ucbdef.h>
 #include<queue.h>
 
-int scs_std$sendmsg(struct _irp * i, struct _pdt * p) {
-  char * buf = 0;
-  printk("check this sendmsg\n");
-  insque(buf,&p->pdt$q_comqh);
+int scs_std$sendmsg(struct _irp * i, struct _pdt * p)
+{
+    char * buf = 0;
+    printk("check this sendmsg\n");
+    insque(buf,&p->pdt$q_comqh);
 }
 
-int scs_std$allocmsg(){
-
-}
-
-
-int scs_std$deallomsg(){
+int scs_std$allocmsg()
+{
 
 }
 
-int scs_std$dconnect(){
+
+int scs_std$deallomsg()
+{
+
+}
+
+int scs_std$dconnect()
+{
 
 }
 

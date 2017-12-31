@@ -28,12 +28,13 @@ struct rwsem_waiter;
  * - if activity is -1 then there is one active writer
  * - if wait_list is not empty, then there are processes waiting for the semaphore
  */
-struct rw_semaphore {
-	__s32			activity;
-	spinlock_t		wait_lock;
-	struct list_head	wait_list;
+struct rw_semaphore
+{
+    __s32			activity;
+    spinlock_t		wait_lock;
+    struct list_head	wait_list;
 #if RWSEM_DEBUG
-	int			debug;
+    int			debug;
 #endif
 };
 

@@ -154,7 +154,8 @@
 #define FIB$M_MOD_PERM 0x8
 #define FIB$M_MOD_OVER 0x10
 
-struct _fibdef {
+struct _fibdef
+{
     unsigned fib$l_acctl;
     unsigned short fib$w_fid_num;
     unsigned short fib$w_fid_seq;

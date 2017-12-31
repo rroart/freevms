@@ -30,7 +30,7 @@
 /*
  * Private routines/data
  */
- 
+
 extern void smp_alloc_memory(void);
 extern unsigned long phys_cpu_present_map;
 extern unsigned long cpu_online_map;
@@ -54,11 +54,11 @@ extern void smp_stop_cpu(void);
  */
 extern inline int cpu_logical_map(int cpu)
 {
-	return cpu;
+    return cpu;
 }
 extern inline int cpu_number_map(int cpu)
 {
-	return cpu;
+    return cpu;
 }
 
 /*
@@ -71,7 +71,7 @@ extern volatile int x86_cpu_to_apicid[NR_CPUS];
 /*
  * General functions that each host system must provide.
  */
- 
+
 extern void smp_boot_cpus(void);
 extern void smp_store_cpu_info(int id);		/* Store per CPU info (like the initial udelay numbers */
 
@@ -92,8 +92,8 @@ extern void smp_store_cpu_info(int id);		/* Store per CPU info (like the initial
 
 extern __inline int hard_smp_processor_id(void)
 {
-	/* we don't want to mark this access volatile - bad code generation */
-	return GET_APIC_ID(*(unsigned *)(APIC_BASE+APIC_ID));
+    /* we don't want to mark this access volatile - bad code generation */
+    return GET_APIC_ID(*(unsigned *)(APIC_BASE+APIC_ID));
 }
 
 extern int apic_disabled;
@@ -112,7 +112,7 @@ extern int apic_disabled;
  *	for a board with shared L2 cache it ought to decay fast as other
  *	processes are run.
  */
- 
+
 #define PROC_CHANGE_PENALTY	15		/* Schedule penalty */
 
 

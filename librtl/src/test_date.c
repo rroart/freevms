@@ -14,19 +14,19 @@
 
 int main()
 {
-	struct dsc$descriptor_s return_date;
-	char date_buffer[64];
-	unsigned long status;
+    struct dsc$descriptor_s return_date;
+    char date_buffer[64];
+    unsigned long status;
 
-	return_date.dsc$w_length = sizeof(date_buffer);
-	return_date.dsc$b_dtype = DSC$K_DTYPE_T;
-	return_date.dsc$b_class = DSC$K_CLASS_S;
-	return_date.dsc$a_pointer = date_buffer;
+    return_date.dsc$w_length = sizeof(date_buffer);
+    return_date.dsc$b_dtype = DSC$K_DTYPE_T;
+    return_date.dsc$b_class = DSC$K_CLASS_S;
+    return_date.dsc$a_pointer = date_buffer;
 
-	status = sys$asctim(&return_date.dsc$w_length, &return_date, 0, 0);
+    status = sys$asctim(&return_date.dsc$w_length, &return_date, 0, 0);
 
-	printf("Todays date: Status %ld: Text: %-32.32s\n",
-		status, date_buffer);
+    printf("Todays date: Status %ld: Text: %-32.32s\n",
+           status, date_buffer);
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

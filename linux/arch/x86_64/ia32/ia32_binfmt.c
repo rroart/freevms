@@ -2,24 +2,24 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Modified Linux source file, 2001-2006  
+// Modified Linux source file, 2001-2006
 
-/* 
- * Written 2000,2002 by Andi Kleen. 
- * 
+/*
+ * Written 2000,2002 by Andi Kleen.
+ *
  * Losely based on the sparc64 and IA64 32bit emulation loaders.
- * This tricks binfmt_elf.c into loading 32bit binaries using lots 
+ * This tricks binfmt_elf.c into loading 32bit binaries using lots
  * of ugly preprocessor tricks. Talk about very very poor man's inheritance.
- */ 
+ */
 #include <linux/types.h>
-#include <linux/config.h> 
+#include <linux/config.h>
 #include <linux/stddef.h>
 #include <linux/module.h>
 #include <linux/rwsem.h>
 #include <linux/sched.h>
 #include <linux/string.h>
 #include <linux/personality.h>
-#include <asm/segment.h> 
+#include <asm/segment.h>
 #include <asm/ptrace.h>
 #include <asm/processor.h>
 #include <asm/user32.h>
@@ -28,7 +28,7 @@
 #include <asm/i387.h>
 
 struct file;
-struct elf_phdr; 
+struct elf_phdr;
 
 #define IA32_EMULATOR 1
 
@@ -47,7 +47,7 @@ struct elf_phdr;
 
 #define USE_ELF_CORE_DUMP 1
 
-/* Overwrite elfcore.h */ 
+/* Overwrite elfcore.h */
 #define _LINUX_ELFCORE_H 1
 typedef unsigned int elf_greg_t;
 
@@ -56,9 +56,9 @@ typedef elf_greg_t elf_gregset_t[ELF_NGREG];
 
 struct elf_siginfo
 {
-	int	si_signo;			/* signal number */
-	int	si_code;			/* extra code */
-	int	si_errno;			/* errno */
+    int	si_signo;			/* signal number */
+    int	si_code;			/* extra code */
+    int	si_errno;			/* errno */
 };
 
 struct timeval32
@@ -68,37 +68,37 @@ struct timeval32
 
 struct elf_prstatus
 {
-	struct elf_siginfo pr_info;	/* Info associated with signal */
-	short	pr_cursig;		/* Current signal */
-	unsigned int pr_sigpend;	/* Set of pending signals */
-	unsigned int pr_sighold;	/* Set of held signals */
-	pid_t	pr_pid;
-	pid_t	pr_ppid;
-	pid_t	pr_pgrp;
-	pid_t	pr_sid;
-	struct timeval32 pr_utime;	/* User time */
-	struct timeval32 pr_stime;	/* System time */
-	struct timeval32 pr_cutime;	/* Cumulative user time */
-	struct timeval32 pr_cstime;	/* Cumulative system time */
-	elf_gregset_t pr_reg;	/* GP registers */
-	int pr_fpvalid;		/* True if math co-processor being used.  */
+    struct elf_siginfo pr_info;	/* Info associated with signal */
+    short	pr_cursig;		/* Current signal */
+    unsigned int pr_sigpend;	/* Set of pending signals */
+    unsigned int pr_sighold;	/* Set of held signals */
+    pid_t	pr_pid;
+    pid_t	pr_ppid;
+    pid_t	pr_pgrp;
+    pid_t	pr_sid;
+    struct timeval32 pr_utime;	/* User time */
+    struct timeval32 pr_stime;	/* System time */
+    struct timeval32 pr_cutime;	/* Cumulative user time */
+    struct timeval32 pr_cstime;	/* Cumulative system time */
+    elf_gregset_t pr_reg;	/* GP registers */
+    int pr_fpvalid;		/* True if math co-processor being used.  */
 };
 
 #define ELF_PRARGSZ	(80)	/* Number of chars for args */
 
 struct elf_prpsinfo
 {
-	char	pr_state;	/* numeric process state */
-	char	pr_sname;	/* char for pr_state */
-	char	pr_zomb;	/* zombie */
-	char	pr_nice;	/* nice val */
-	unsigned int pr_flag;	/* flags */
-	__u16	pr_uid;
-	__u16	pr_gid;
-	pid_t	pr_pid, pr_ppid, pr_pgrp, pr_sid;
-	/* Lots missing */
-	char	pr_fname[16];	/* filename of executable */
-	char	pr_psargs[ELF_PRARGSZ];	/* initial part of arg list */
+    char	pr_state;	/* numeric process state */
+    char	pr_sname;	/* char for pr_state */
+    char	pr_zomb;	/* zombie */
+    char	pr_nice;	/* nice val */
+    unsigned int pr_flag;	/* flags */
+    __u16	pr_uid;
+    __u16	pr_gid;
+    pid_t	pr_pid, pr_ppid, pr_pgrp, pr_sid;
+    /* Lots missing */
+    char	pr_fname[16];	/* filename of executable */
+    char	pr_psargs[ELF_PRARGSZ];	/* initial part of arg list */
 };
 
 #define __STR(x) #x
@@ -184,12 +184,12 @@ extern void load_gs_index(unsigned);
 	(regs)->cs = __USER32_CS; \
 	(regs)->ss = __USER32_DS; \
 	set_fs(USER_DS); \
-} while(0) 
+} while(0)
 
 
 #define elf_map elf32_map
 
-MODULE_DESCRIPTION("Binary format loader for compatibility with IA32 ELF binaries."); 
+MODULE_DESCRIPTION("Binary format loader for compatibility with IA32 ELF binaries.");
 MODULE_AUTHOR("Eric Youngdale, Andi Kleen");
 
 #undef MODULE_DESCRIPTION
@@ -201,109 +201,111 @@ MODULE_AUTHOR("Eric Youngdale, Andi Kleen");
 static void elf32_init(struct pt_regs *);
 int ia32_setup_arg_pages(struct linux_binprm *bprm);
 
-#include "../../../fs/binfmt_elf.c" 
+#include "../../../fs/binfmt_elf.c"
 
 static void elf32_init(struct pt_regs *regs)
 {
-	struct task_struct *me = current; 
-	regs->rdi = 0;
-	regs->rsi = 0;
-	regs->rdx = 0;
-	regs->rcx = 0;
-	regs->rax = 0;
-	regs->rbx = 0; 
-	regs->rbp = 0; 
-	regs->r8 = regs->r9 = regs->r10 = regs->r11 = regs->r12 = regs->r13 =
-		regs->r14 = regs->r15 = 0;	
-	me->thread.fs = 0; 
-	me->thread.gs = 0;
-	me->thread.fsindex = 0; 
-	me->thread.gsindex = 0;
-	me->thread.ds = __USER_DS; 
-	me->thread.es = __USER_DS;
-	me->thread.flags |= THREAD_IA32;
+    struct task_struct *me = current;
+    regs->rdi = 0;
+    regs->rsi = 0;
+    regs->rdx = 0;
+    regs->rcx = 0;
+    regs->rax = 0;
+    regs->rbx = 0;
+    regs->rbp = 0;
+    regs->r8 = regs->r9 = regs->r10 = regs->r11 = regs->r12 = regs->r13 =
+                                          regs->r14 = regs->r15 = 0;
+    me->thread.fs = 0;
+    me->thread.gs = 0;
+    me->thread.fsindex = 0;
+    me->thread.gsindex = 0;
+    me->thread.ds = __USER_DS;
+    me->thread.es = __USER_DS;
+    me->thread.flags |= THREAD_IA32;
 }
 
 extern void put_dirty_page(struct task_struct * tsk, struct page *page, unsigned long address);
- 
+
 
 int ia32_setup_arg_pages(struct linux_binprm *bprm)
 {
-	unsigned long stack_base;
-	struct _rde *mpnt;
-	int i, ret;
+    unsigned long stack_base;
+    struct _rde *mpnt;
+    int i, ret;
 
 #define IA32_STACK_TOP1 STACK_TOP
 #define IA32_STACK_TOP1 0x7ffffffffffe0000
-	stack_base = IA32_STACK_TOP - MAX_ARG_PAGES*PAGE_SIZE;
+    stack_base = IA32_STACK_TOP - MAX_ARG_PAGES*PAGE_SIZE;
 
-	bprm->p += stack_base;
-	if (bprm->loader)
-		bprm->loader += stack_base;
-	bprm->exec += stack_base;
+    bprm->p += stack_base;
+    if (bprm->loader)
+        bprm->loader += stack_base;
+    bprm->exec += stack_base;
 
-	mpnt = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
-	if (!mpnt) 
-		return -ENOMEM; 
-	
-	down_write(&current->mm->mmap_sem);
-	{
-		mpnt->rde$pq_start_va = PAGE_MASK & (unsigned long) bprm->p;
-		mpnt->rde$q_region_size = IA32_STACK_TOP1 - (unsigned long) mpnt->rde$pq_start_va;
-		mpnt->rde$r_regprot.regprt$l_region_prot = _PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED;//PAGE_COPY;
-		mpnt->rde$l_flags = vm_stack_flags32;
-		insrde(mpnt,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
-		//flush_tlb_range(current->mm, mpnt->rde$pq_start_va, mpnt->rde$pq_start_va + PAGE_SIZE);
-	} 
+    mpnt = kmem_cache_alloc(vm_area_cachep, SLAB_KERNEL);
+    if (!mpnt)
+        return -ENOMEM;
 
-	for (i = 0 ; i < MAX_ARG_PAGES ; i++) {
-		struct page *page = bprm->page[i];
-		if (page) {
-			bprm->page[i] = NULL;
-			current->mm->rss++;
-			put_dirty_page(current,page,stack_base);
-		}
-		stack_base += PAGE_SIZE;
-	}
-	up_write(&current->mm->mmap_sem);
-	
-	return 0;
+    down_write(&current->mm->mmap_sem);
+    {
+        mpnt->rde$pq_start_va = PAGE_MASK & (unsigned long) bprm->p;
+        mpnt->rde$q_region_size = IA32_STACK_TOP1 - (unsigned long) mpnt->rde$pq_start_va;
+        mpnt->rde$r_regprot.regprt$l_region_prot = _PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED;//PAGE_COPY;
+        mpnt->rde$l_flags = vm_stack_flags32;
+        insrde(mpnt,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
+        //flush_tlb_range(current->mm, mpnt->rde$pq_start_va, mpnt->rde$pq_start_va + PAGE_SIZE);
+    }
+
+    for (i = 0 ; i < MAX_ARG_PAGES ; i++)
+    {
+        struct page *page = bprm->page[i];
+        if (page)
+        {
+            bprm->page[i] = NULL;
+            current->mm->rss++;
+            put_dirty_page(current,page,stack_base);
+        }
+        stack_base += PAGE_SIZE;
+    }
+    up_write(&current->mm->mmap_sem);
+
+    return 0;
 }
 static unsigned long
 elf32_map (struct file *filep, unsigned long addr, struct elf_phdr *eppnt, int prot, int type)
 {
-	unsigned long map_addr;
-	struct task_struct *me = current; 
+    unsigned long map_addr;
+    struct task_struct *me = current;
 
-	if (prot & PROT_READ) 
-		prot |= PROT_EXEC; 
+    if (prot & PROT_READ)
+        prot |= PROT_EXEC;
 
-	down_write(&me->mm->mmap_sem);
-	map_addr = do_mmap(filep, ELF_PAGESTART(addr),
-			   eppnt->p_filesz + ELF_PAGEOFFSET(eppnt->p_vaddr), prot, 
-			   type|MAP_32BIT,
-			   eppnt->p_offset - ELF_PAGEOFFSET(eppnt->p_vaddr));
-	up_write(&me->mm->mmap_sem);
-	return(map_addr);
+    down_write(&me->mm->mmap_sem);
+    map_addr = do_mmap(filep, ELF_PAGESTART(addr),
+                       eppnt->p_filesz + ELF_PAGEOFFSET(eppnt->p_vaddr), prot,
+                       type|MAP_32BIT,
+                       eppnt->p_offset - ELF_PAGEOFFSET(eppnt->p_vaddr));
+    up_write(&me->mm->mmap_sem);
+    return(map_addr);
 }
 
 int dump_fpu_ia32(struct pt_regs *regs, elf_fpregset_t *fp)
 {
-	struct _fpstate_ia32 *fpu = (void*)fp; 
-	struct task_struct *tsk = current;
-	mm_segment_t oldfs = get_fs();
-	int ret;
+    struct _fpstate_ia32 *fpu = (void*)fp;
+    struct task_struct *tsk = current;
+    mm_segment_t oldfs = get_fs();
+    int ret;
 
-	if (!tsk->used_math) 
-		return 0;
-	if (!(tsk->thread.flags & THREAD_IA32))
-		BUG(); 
-	unlazy_fpu(tsk);
-	set_fs(KERNEL_DS); 
-	ret = save_i387_ia32(current, fpu, regs, 1);
-	/* Correct for i386 bug. It puts the fop into the upper 16bits of 
-	   the tag word (like FXSAVE), not into the fcs*/ 
-	fpu->cssel |= fpu->tag & 0xffff0000; 
-	set_fs(oldfs); 
-	return ret; 
+    if (!tsk->used_math)
+        return 0;
+    if (!(tsk->thread.flags & THREAD_IA32))
+        BUG();
+    unlazy_fpu(tsk);
+    set_fs(KERNEL_DS);
+    ret = save_i387_ia32(current, fpu, regs, 1);
+    /* Correct for i386 bug. It puts the fop into the upper 16bits of
+       the tag word (like FXSAVE), not into the fcs*/
+    fpu->cssel |= fpu->tag & 0xffff0000;
+    set_fs(oldfs);
+    return ret;
 }

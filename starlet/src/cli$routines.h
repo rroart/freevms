@@ -8,6 +8,6 @@ unsigned int cli$dispatch(int userarg, ...);
 unsigned int cli$get_value(void *entity_desc, void *retdesc,...);
 
 unsigned int cli$present(void *entity_desc);
- 
+
 #endif
- 
+

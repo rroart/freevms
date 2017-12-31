@@ -1,5 +1,5 @@
 
-/* Common Flash Interface structures 
+/* Common Flash Interface structures
  * See http://support.intel.com/design/flash/technote/index.htm
  * $Id$
  */
@@ -15,7 +15,7 @@
 #include <linux/mtd/cfi_endian.h>
 
 /*
- * You can optimize the code size and performance by defining only 
+ * You can optimize the code size and performance by defining only
  * the geometry(ies) available on your hardware.
  * CFIDEV_INTERLEAVE_n, where  represents the interleave (number of chips to fill the bus width)
  * CFIDEV_BUSWIDTH_n, where n is the bus width in bytes (1, 2 or 4 bytes)
@@ -65,7 +65,7 @@
  * Those macros should be used with 'if' statements.  If only one of few
  * geometry arrangements are selected, they expand to constants thus allowing
  * the compiler (most of them being 0) to optimize away all the unneeded code,
- * while still validating the syntax (which is not possible with embedded 
+ * while still validating the syntax (which is not possible with embedded
  * #if ... #endif constructs).
  */
 
@@ -149,8 +149,8 @@
 #error You must define at least one bus width to support!
 #endif
 
-/* NB: these values must represents the number of bytes needed to meet the 
- *     device type (x8, x16, x32).  Eg. a 32 bit device is 4 x 8 bytes. 
+/* NB: these values must represents the number of bytes needed to meet the
+ *     device type (x8, x16, x32).  Eg. a 32 bit device is 4 x 8 bytes.
  *     These numbers are used in calculations.
  */
 #define CFI_DEVICETYPE_X8  (8 / 8)
@@ -162,61 +162,66 @@
  */
 
 /* Basic Query Structure */
-struct cfi_ident {
-  __u8  qry[3];
-  __u16 P_ID;
-  __u16 P_ADR;
-  __u16 A_ID;
-  __u16 A_ADR;
-  __u8  VccMin;
-  __u8  VccMax;
-  __u8  VppMin;
-  __u8  VppMax;
-  __u8  WordWriteTimeoutTyp;
-  __u8  BufWriteTimeoutTyp;
-  __u8  BlockEraseTimeoutTyp;
-  __u8  ChipEraseTimeoutTyp;
-  __u8  WordWriteTimeoutMax;
-  __u8  BufWriteTimeoutMax;
-  __u8  BlockEraseTimeoutMax;
-  __u8  ChipEraseTimeoutMax;
-  __u8  DevSize;
-  __u16 InterfaceDesc;
-  __u16 MaxBufWriteSize;
-  __u8  NumEraseRegions;
-  __u32 EraseRegionInfo[0]; /* Not host ordered */
+struct cfi_ident
+{
+    __u8  qry[3];
+    __u16 P_ID;
+    __u16 P_ADR;
+    __u16 A_ID;
+    __u16 A_ADR;
+    __u8  VccMin;
+    __u8  VccMax;
+    __u8  VppMin;
+    __u8  VppMax;
+    __u8  WordWriteTimeoutTyp;
+    __u8  BufWriteTimeoutTyp;
+    __u8  BlockEraseTimeoutTyp;
+    __u8  ChipEraseTimeoutTyp;
+    __u8  WordWriteTimeoutMax;
+    __u8  BufWriteTimeoutMax;
+    __u8  BlockEraseTimeoutMax;
+    __u8  ChipEraseTimeoutMax;
+    __u8  DevSize;
+    __u16 InterfaceDesc;
+    __u16 MaxBufWriteSize;
+    __u8  NumEraseRegions;
+    __u32 EraseRegionInfo[0]; /* Not host ordered */
 } __attribute__((packed));
 
 /* Extended Query Structure for both PRI and ALT */
 
-struct cfi_extquery {
-  __u8  pri[3];
-  __u8  MajorVersion;
-  __u8  MinorVersion;
+struct cfi_extquery
+{
+    __u8  pri[3];
+    __u8  MajorVersion;
+    __u8  MinorVersion;
 } __attribute__((packed));
 
 /* Vendor-Specific PRI for Intel/Sharp Extended Command Set (0x0001) */
 
-struct cfi_pri_intelext {
-  __u8  pri[3];
-  __u8  MajorVersion;
-  __u8  MinorVersion;
-  __u32 FeatureSupport;
-  __u8  SuspendCmdSupport;
-  __u16 BlkStatusRegMask;
-  __u8  VccOptimal;
-  __u8  VppOptimal;
+struct cfi_pri_intelext
+{
+    __u8  pri[3];
+    __u8  MajorVersion;
+    __u8  MinorVersion;
+    __u32 FeatureSupport;
+    __u8  SuspendCmdSupport;
+    __u16 BlkStatusRegMask;
+    __u8  VccOptimal;
+    __u8  VppOptimal;
 } __attribute__((packed));
 
-struct cfi_pri_query {
-  __u8  NumFields;
-  __u32 ProtField[1]; /* Not host ordered */
+struct cfi_pri_query
+{
+    __u8  NumFields;
+    __u32 ProtField[1]; /* Not host ordered */
 } __attribute__((packed));
 
-struct cfi_bri_query {
-  __u8  PageModeReadCap;
-  __u8  NumFields;
-  __u32 ConfField[1]; /* Not host ordered */
+struct cfi_bri_query
+{
+    __u8  PageModeReadCap;
+    __u8  NumFields;
+    __u32 ConfField[1]; /* Not host ordered */
 } __attribute__((packed));
 
 #define P_ID_NONE 0
@@ -232,23 +237,24 @@ struct cfi_bri_query {
 #define CFI_MODE_CFI	0
 #define CFI_MODE_JEDEC	1
 
-struct cfi_private {
-	__u16 cmdset;
-	void *cmdset_priv;
-	int interleave;
-	int device_type;
-	int cfi_mode;		/* Are we a JEDEC device pretending to be CFI? */
-	int addr_unlock1;
-	int addr_unlock2;
-	int fast_prog;
-	struct mtd_info *(*cmdset_setup)(struct map_info *);
-	struct cfi_ident *cfiq; /* For now only one. We insist that all devs
+struct cfi_private
+{
+    __u16 cmdset;
+    void *cmdset_priv;
+    int interleave;
+    int device_type;
+    int cfi_mode;		/* Are we a JEDEC device pretending to be CFI? */
+    int addr_unlock1;
+    int addr_unlock2;
+    int fast_prog;
+    struct mtd_info *(*cmdset_setup)(struct map_info *);
+    struct cfi_ident *cfiq; /* For now only one. We insist that all devs
 				  must be of the same type. */
-	int mfr, id;
-	int numchips;
-	unsigned long chipshift; /* Because they're of the same type */
-	const char *im_name;	 /* inter_module name for cmdset_setup */
-	struct flchip chips[0];  /* per-chip data structure for each chip */
+    int mfr, id;
+    int numchips;
+    unsigned long chipshift; /* Because they're of the same type */
+    const char *im_name;	 /* inter_module name for cmdset_setup */
+    struct flchip chips[0];  /* per-chip data structure for each chip */
 };
 
 #define MAX_CFI_CHIPS 8 /* Entirely arbitrary to avoid realloc() */
@@ -258,7 +264,7 @@ struct cfi_private {
  */
 static inline __u32 cfi_build_cmd_addr(__u32 cmd_ofs, int interleave, int type)
 {
-	return (cmd_ofs * type) * interleave;
+    return (cmd_ofs * type) * interleave;
 }
 
 /*
@@ -266,33 +272,46 @@ static inline __u32 cfi_build_cmd_addr(__u32 cmd_ofs, int interleave, int type)
  */
 static inline __u32 cfi_build_cmd(u_char cmd, struct map_info *map, struct cfi_private *cfi)
 {
-	__u32 val = 0;
+    __u32 val = 0;
 
-	if (cfi_buswidth_is_1()) {
-		/* 1 x8 device */
-		val = cmd;
-	} else if (cfi_buswidth_is_2()) {
-		if (cfi_interleave_is_1()) {
-			/* 1 x16 device in x16 mode */
-			val = cpu_to_cfi16(cmd);
-		} else if (cfi_interleave_is_2()) {
-			/* 2 (x8, x16 or x32) devices in x8 mode */
-			val = cpu_to_cfi16((cmd << 8) | cmd);
-		}
-	} else if (cfi_buswidth_is_4()) {
-		if (cfi_interleave_is_1()) {
-			/* 1 x32 device in x32 mode */
-			val = cpu_to_cfi32(cmd);
-		} else if (cfi_interleave_is_2()) {
-			/* 2 x16 device in x16 mode */
-			val = cpu_to_cfi32((cmd << 16) | cmd);
-		} else if (cfi_interleave_is_4()) {
-			/* 4 (x8, x16 or x32) devices in x8 mode */
-			val = (cmd << 16) | cmd;
-			val = cpu_to_cfi32((val << 8) | val);
-		}
-	}
-	return val;
+    if (cfi_buswidth_is_1())
+    {
+        /* 1 x8 device */
+        val = cmd;
+    }
+    else if (cfi_buswidth_is_2())
+    {
+        if (cfi_interleave_is_1())
+        {
+            /* 1 x16 device in x16 mode */
+            val = cpu_to_cfi16(cmd);
+        }
+        else if (cfi_interleave_is_2())
+        {
+            /* 2 (x8, x16 or x32) devices in x8 mode */
+            val = cpu_to_cfi16((cmd << 8) | cmd);
+        }
+    }
+    else if (cfi_buswidth_is_4())
+    {
+        if (cfi_interleave_is_1())
+        {
+            /* 1 x32 device in x32 mode */
+            val = cpu_to_cfi32(cmd);
+        }
+        else if (cfi_interleave_is_2())
+        {
+            /* 2 x16 device in x16 mode */
+            val = cpu_to_cfi32((cmd << 16) | cmd);
+        }
+        else if (cfi_interleave_is_4())
+        {
+            /* 4 (x8, x16 or x32) devices in x8 mode */
+            val = (cmd << 16) | cmd;
+            val = cpu_to_cfi32((val << 8) | val);
+        }
+    }
+    return val;
 }
 #define CMD(x)  cfi_build_cmd((x), map, cfi)
 
@@ -302,15 +321,22 @@ static inline __u32 cfi_build_cmd(u_char cmd, struct map_info *map, struct cfi_p
 
 static inline __u32 cfi_read(struct map_info *map, __u32 addr)
 {
-	if (cfi_buswidth_is_1()) {
-		return map->read8(map, addr);
-	} else if (cfi_buswidth_is_2()) {
-		return map->read16(map, addr);
-	} else if (cfi_buswidth_is_4()) {
-		return map->read32(map, addr);
-	} else {
-		return 0;
-	}
+    if (cfi_buswidth_is_1())
+    {
+        return map->read8(map, addr);
+    }
+    else if (cfi_buswidth_is_2())
+    {
+        return map->read16(map, addr);
+    }
+    else if (cfi_buswidth_is_4())
+    {
+        return map->read32(map, addr);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 /*
@@ -319,13 +345,18 @@ static inline __u32 cfi_read(struct map_info *map, __u32 addr)
 
 static inline void cfi_write(struct map_info *map, __u32 val, __u32 addr)
 {
-	if (cfi_buswidth_is_1()) {
-		map->write8(map, val, addr);
-	} else if (cfi_buswidth_is_2()) {
-		map->write16(map, val, addr);
-	} else if (cfi_buswidth_is_4()) {
-		map->write32(map, val, addr);
-	}
+    if (cfi_buswidth_is_1())
+    {
+        map->write8(map, val, addr);
+    }
+    else if (cfi_buswidth_is_2())
+    {
+        map->write16(map, val, addr);
+    }
+    else if (cfi_buswidth_is_4())
+    {
+        map->write32(map, val, addr);
+    }
 }
 
 /*
@@ -336,57 +367,65 @@ static inline void cfi_write(struct map_info *map, __u32 val, __u32 addr)
  * before the command was written.
  */
 static inline __u32 cfi_send_gen_cmd(u_char cmd, __u32 cmd_addr, __u32 base,
-				struct map_info *map, struct cfi_private *cfi,
-				int type, __u32 *prev_val)
+                                     struct map_info *map, struct cfi_private *cfi,
+                                     int type, __u32 *prev_val)
 {
-	__u32 val;
-	__u32 addr = base + cfi_build_cmd_addr(cmd_addr, CFIDEV_INTERLEAVE, type);
+    __u32 val;
+    __u32 addr = base + cfi_build_cmd_addr(cmd_addr, CFIDEV_INTERLEAVE, type);
 
-	val = cfi_build_cmd(cmd, map, cfi);
+    val = cfi_build_cmd(cmd, map, cfi);
 
-	if (prev_val)
-		*prev_val = cfi_read(map, addr);
+    if (prev_val)
+        *prev_val = cfi_read(map, addr);
 
-	cfi_write(map, val, addr);
+    cfi_write(map, val, addr);
 
-	return addr - base;
+    return addr - base;
 }
 
 static inline __u8 cfi_read_query(struct map_info *map, __u32 addr)
 {
-	if (cfi_buswidth_is_1()) {
-		return map->read8(map, addr);
-	} else if (cfi_buswidth_is_2()) {
-		return cfi16_to_cpu(map->read16(map, addr));
-	} else if (cfi_buswidth_is_4()) {
-		return cfi32_to_cpu(map->read32(map, addr));
-	} else {
-		return 0;
-	}
+    if (cfi_buswidth_is_1())
+    {
+        return map->read8(map, addr);
+    }
+    else if (cfi_buswidth_is_2())
+    {
+        return cfi16_to_cpu(map->read16(map, addr));
+    }
+    else if (cfi_buswidth_is_4())
+    {
+        return cfi32_to_cpu(map->read32(map, addr));
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 static inline void cfi_udelay(int us)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,2,0)
-	if (current->need_resched) {
-		unsigned long t = us * HZ / 1000000;
-		if (t < 1)
-			t = 1;
-		set_current_state(TASK_UNINTERRUPTIBLE);
-		schedule_timeout(t);
-	}
-	else
+    if (current->need_resched)
+    {
+        unsigned long t = us * HZ / 1000000;
+        if (t < 1)
+            t = 1;
+        set_current_state(TASK_UNINTERRUPTIBLE);
+        schedule_timeout(t);
+    }
+    else
 #endif
-		udelay(us);
+        udelay(us);
 }
 static inline void cfi_spin_lock(spinlock_t *mutex)
 {
-	spin_lock_bh(mutex);
+    spin_lock_bh(mutex);
 }
 
 static inline void cfi_spin_unlock(spinlock_t *mutex)
 {
-	spin_unlock_bh(mutex);
+    spin_unlock_bh(mutex);
 }
 
 

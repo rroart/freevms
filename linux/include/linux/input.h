@@ -41,11 +41,12 @@
  * The event structure itself
  */
 
-struct input_event {
-	struct timeval time;
-	unsigned short type;
-	unsigned short code;
-	unsigned int value;
+struct input_event
+{
+    struct timeval time;
+    unsigned short type;
+    unsigned short code;
+    unsigned int value;
 };
 
 /*
@@ -485,82 +486,90 @@ struct input_event {
  * They are sub-structures of the actually sent structure (called ff_effect)
  */
 
-struct ff_replay {
-	__u16 length;		/* Duration of an effect */
-	__u16 delay;		/* Time to wait before to start playing an effect */
+struct ff_replay
+{
+    __u16 length;		/* Duration of an effect */
+    __u16 delay;		/* Time to wait before to start playing an effect */
 };
 
-struct ff_trigger {
-	__u16 button;		/* Number of button triggering an effect */
-	__u16 interval;		/* Time to wait before an effect can be re-triggered */
+struct ff_trigger
+{
+    __u16 button;		/* Number of button triggering an effect */
+    __u16 interval;		/* Time to wait before an effect can be re-triggered */
 };
 
-struct ff_shape {
-	__u16 attack_length;	/* Duration of attack */
-	__s16 attack_level;	/* Level at beginning of attack */
-	__u16 fade_length;	/* Duration of fade */
-	__s16 fade_level;	/* Level at end of fade */
+struct ff_shape
+{
+    __u16 attack_length;	/* Duration of attack */
+    __s16 attack_level;	/* Level at beginning of attack */
+    __u16 fade_length;	/* Duration of fade */
+    __s16 fade_level;	/* Level at end of fade */
 };
 
 /* FF_CONSTANT */
-struct ff_constant_effect {
-	__s16 level;		/* Strength of effect */
-	__u16 direction;	/* Direction of effect (see periodic effects) */
-	struct ff_shape shape;
+struct ff_constant_effect
+{
+    __s16 level;		/* Strength of effect */
+    __u16 direction;	/* Direction of effect (see periodic effects) */
+    struct ff_shape shape;
 };
 
 /* FF_SPRING of FF_FRICTION */
-struct ff_interactive_effect {
-/* Axis along which effect must be created. If null, the field named direction
- * is used
- * It is a bit array (ie to enable axes X and Y, use BIT(ABS_X) | BIT(ABS_Y)
- */
-	__u16 axis;
-	__u16 direction;
+struct ff_interactive_effect
+{
+    /* Axis along which effect must be created. If null, the field named direction
+     * is used
+     * It is a bit array (ie to enable axes X and Y, use BIT(ABS_X) | BIT(ABS_Y)
+     */
+    __u16 axis;
+    __u16 direction;
 
-	__s16 right_saturation; /* Max level when joystick is on the right */
-	__s16 left_saturation;  /* Max level when joystick in on the left */
+    __s16 right_saturation; /* Max level when joystick is on the right */
+    __s16 left_saturation;  /* Max level when joystick in on the left */
 
-	__s16 right_coeff;	/* Indicates how fast the force grows when the
+    __s16 right_coeff;	/* Indicates how fast the force grows when the
 				   joystick moves to the right */
-	__s16 left_coeff;	/* Same for left side */
+    __s16 left_coeff;	/* Same for left side */
 
-	__u16 deadband;		/* Size of area where no force is produced */
-	__s16 center;		/* Position of dead dead zone */
+    __u16 deadband;		/* Size of area where no force is produced */
+    __s16 center;		/* Position of dead dead zone */
 
 };
 
 /* FF_PERIODIC */
-struct ff_periodic_effect {
-	__u16 waveform;		/* Kind of wave (sine, square...) */
-	__u16 period;
-	__s16 magnitude;	/* Peak value */
-	__s16 offset;		/* Mean value of wave (roughly) */
-	__u16 phase;		/* 'Horizontal' shift */
-	__u16 direction;	/* Direction. 0 deg -> 0x0000
+struct ff_periodic_effect
+{
+    __u16 waveform;		/* Kind of wave (sine, square...) */
+    __u16 period;
+    __s16 magnitude;	/* Peak value */
+    __s16 offset;		/* Mean value of wave (roughly) */
+    __u16 phase;		/* 'Horizontal' shift */
+    __u16 direction;	/* Direction. 0 deg -> 0x0000
 					     90 deg -> 0x4000 */
 
-	struct ff_shape shape;
+    struct ff_shape shape;
 };
 
 /*
  * Structure sent through ioctl from the application to the driver
  */
-struct ff_effect {
-	__u16 type;
-/* Following field denotes the unique id assigned to an effect.
- * It is set by the driver.
- */
-	__s16 id;
+struct ff_effect
+{
+    __u16 type;
+    /* Following field denotes the unique id assigned to an effect.
+     * It is set by the driver.
+     */
+    __s16 id;
 
-	struct ff_trigger trigger;
-	struct ff_replay replay;
+    struct ff_trigger trigger;
+    struct ff_replay replay;
 
-	union {
-		struct ff_constant_effect constant;
-		struct ff_periodic_effect periodic;
-		struct ff_interactive_effect interactive;
-	} u;
+    union
+    {
+        struct ff_constant_effect constant;
+        struct ff_periodic_effect periodic;
+        struct ff_interactive_effect interactive;
+    } u;
 };
 
 /*
@@ -621,82 +630,85 @@ struct ff_effect {
 #define BIT(x)	(1UL<<((x)%BITS_PER_LONG))
 #define LONG(x) ((x)/BITS_PER_LONG)
 
-struct input_dev {
+struct input_dev
+{
 
-	void *private;
+    void *private;
 
-	int number;
-	char *name;
-	unsigned short idbus;
-	unsigned short idvendor;
-	unsigned short idproduct;
-	unsigned short idversion;
+    int number;
+    char *name;
+    unsigned short idbus;
+    unsigned short idvendor;
+    unsigned short idproduct;
+    unsigned short idversion;
 
-	unsigned long evbit[NBITS(EV_MAX)];
-	unsigned long keybit[NBITS(KEY_MAX)];
-	unsigned long relbit[NBITS(REL_MAX)];
-	unsigned long absbit[NBITS(ABS_MAX)];
-	unsigned long mscbit[NBITS(MSC_MAX)];
-	unsigned long ledbit[NBITS(LED_MAX)];
-	unsigned long sndbit[NBITS(SND_MAX)];
-	unsigned long ffbit[NBITS(FF_MAX)];
-	int ff_effects_max;
+    unsigned long evbit[NBITS(EV_MAX)];
+    unsigned long keybit[NBITS(KEY_MAX)];
+    unsigned long relbit[NBITS(REL_MAX)];
+    unsigned long absbit[NBITS(ABS_MAX)];
+    unsigned long mscbit[NBITS(MSC_MAX)];
+    unsigned long ledbit[NBITS(LED_MAX)];
+    unsigned long sndbit[NBITS(SND_MAX)];
+    unsigned long ffbit[NBITS(FF_MAX)];
+    int ff_effects_max;
 
-	unsigned int keycodemax;
-	unsigned int keycodesize;
-	void *keycode;
+    unsigned int keycodemax;
+    unsigned int keycodesize;
+    void *keycode;
 
-	unsigned int repeat_key;
-	struct timer_list timer;
+    unsigned int repeat_key;
+    struct timer_list timer;
 
-	int abs[ABS_MAX + 1];
-	int rep[REP_MAX + 1];
+    int abs[ABS_MAX + 1];
+    int rep[REP_MAX + 1];
 
-	unsigned long key[NBITS(KEY_MAX)];
-	unsigned long led[NBITS(LED_MAX)];
-	unsigned long snd[NBITS(SND_MAX)];
+    unsigned long key[NBITS(KEY_MAX)];
+    unsigned long led[NBITS(LED_MAX)];
+    unsigned long snd[NBITS(SND_MAX)];
 
-	int absmax[ABS_MAX + 1];
-	int absmin[ABS_MAX + 1];
-	int absfuzz[ABS_MAX + 1];
-	int absflat[ABS_MAX + 1];
+    int absmax[ABS_MAX + 1];
+    int absmin[ABS_MAX + 1];
+    int absfuzz[ABS_MAX + 1];
+    int absflat[ABS_MAX + 1];
 
-	int (*open)(struct input_dev *dev);
-	void (*close)(struct input_dev *dev);
-	int (*event)(struct input_dev *dev, unsigned int type, unsigned int code, int value);
-	int (*upload_effect)(struct input_dev *dev, struct ff_effect *effect);
-	int (*erase_effect)(struct input_dev *dev, int effect_id);
+    int (*open)(struct input_dev *dev);
+    void (*close)(struct input_dev *dev);
+    int (*event)(struct input_dev *dev, unsigned int type, unsigned int code, int value);
+    int (*upload_effect)(struct input_dev *dev, struct ff_effect *effect);
+    int (*erase_effect)(struct input_dev *dev, int effect_id);
 
-	struct input_handle *handle;
-	struct input_dev *next;
+    struct input_handle *handle;
+    struct input_dev *next;
 };
 
-struct input_handler {
+struct input_handler
+{
 
-	void *private;
+    void *private;
 
-	void (*event)(struct input_handle *handle, unsigned int type, unsigned int code, int value);
-	struct input_handle* (*connect)(struct input_handler *handler, struct input_dev *dev);
-	void (*disconnect)(struct input_handle *handle);
+    void (*event)(struct input_handle *handle, unsigned int type, unsigned int code, int value);
+    struct input_handle* (*connect)(struct input_handler *handler, struct input_dev *dev);
+    void (*disconnect)(struct input_handle *handle);
 
-	struct file_operations *fops;
-	int minor;
+    struct file_operations *fops;
+    int minor;
 
-	struct input_handle *handle;
-	struct input_handler *next;
+    struct input_handle *handle;
+    struct input_handler *next;
 };
 
-struct input_handle {
+struct input_handle
+{
 
-	void *private;
+    void *private;
 
-	int open;
+    int open;
 
-	struct input_dev *dev;
-	struct input_handler *handler;
+    struct input_dev *dev;
+    struct input_handler *handler;
 
-	struct input_handle *dnext;
-	struct input_handle *hnext;
+    struct input_handle *dnext;
+    struct input_handle *hnext;
 };
 
 void input_register_device(struct input_dev *);

@@ -25,7 +25,7 @@
  *				Andrew Allison
  *				50 Denlaw Road
  *				London, Ont
- *				Canada 
+ *				Canada
  *				N6G 3L4
  *
  *
@@ -39,7 +39,7 @@
  * History
  *
  *	Apr 12, 2004 - Andrew Allison
- * 	 	Initial program creation	
+ * 	 	Initial program creation
  */
 
 #include "lib$routines.h"
@@ -47,21 +47,21 @@
 #include <stdlib.h>
 
 unsigned long lib$digit_sep (struct dsc$descriptor_s *digit_sep,
-				unsigned short *result_length)
+                             unsigned short *result_length)
 {
-char	*s1_ptr;
-unsigned long result;
-unsigned short s1_len;
+    char	*s1_ptr;
+    unsigned long result;
+    unsigned short s1_len;
 
-result = 1;
+    result = 1;
 
-str$analyze_sdesc (digit_sep, &s1_len, &s1_ptr);
+    str$analyze_sdesc (digit_sep, &s1_len, &s1_ptr);
 
-s1_len = 1;
-str$copy_r (digit_sep,&s1_len,",");
+    s1_len = 1;
+    str$copy_r (digit_sep,&s1_len,",");
 
-if ( result_length != NULL )
-	*result_length = s1_len;
+    if ( result_length != NULL )
+        *result_length = s1_len;
 
-return result;
+    return result;
 }

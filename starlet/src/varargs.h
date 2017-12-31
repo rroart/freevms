@@ -6,7 +6,7 @@ typedef char *va_list;
 #if __GNUC__ > 1
 #define va_dcl  int va_alist; ...
 #else
-#define va_dcl  int va_alist; 
+#define va_dcl  int va_alist;
 #endif
 
 #ifdef __GNUC__

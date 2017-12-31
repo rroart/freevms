@@ -16,32 +16,34 @@
  * arp_tha and arp_tpa in that order, according to the lengths
  * specified.  Field names used correspond to RFC 826.
  */
-struct	arphdr {
-	u_short	ar_hrd;		/* format of hardware address */
+struct	arphdr
+{
+    u_short	ar_hrd;		/* format of hardware address */
 #define ARPHRD_ETHER 	1	/* ethernet hardware address */
-	u_short	ar_pro;		/* format of protocol address */
-	u_char	ar_hln;		/* length of hardware address */
-	u_char	ar_pln;		/* length of protocol address */
-	u_short	ar_op;		/* one of: */
+    u_short	ar_pro;		/* format of protocol address */
+    u_char	ar_hln;		/* length of hardware address */
+    u_char	ar_pln;		/* length of protocol address */
+    u_short	ar_op;		/* one of: */
 #define	ARPOP_REQUEST	1	/* request to resolve address */
 #define	ARPOP_REPLY	2	/* response to previous request */
-/*
- * The remaining fields are variable in size,
- * according to the sizes above.
- */
-/*	u_char	ar_sha[];	/* sender hardware address */
-/*	u_char	ar_spa[];	/* sender protocol address */
-/*	u_char	ar_tha[];	/* target hardware address */
-/*	u_char	ar_tpa[];	/* target protocol address */
+    /*
+     * The remaining fields are variable in size,
+     * according to the sizes above.
+     */
+    /*	u_char	ar_sha[];	/* sender hardware address */
+    /*	u_char	ar_spa[];	/* sender protocol address */
+    /*	u_char	ar_tha[];	/* target hardware address */
+    /*	u_char	ar_tpa[];	/* target protocol address */
 };
 
 /*
  * ARP ioctl request
  */
-struct arpreq {
-	struct	sockaddr arp_pa;		/* protocol address */
-	struct	sockaddr arp_ha;		/* hardware address */
-	int	arp_flags;			/* flags */
+struct arpreq
+{
+    struct	sockaddr arp_pa;		/* protocol address */
+    struct	sockaddr arp_ha;		/* hardware address */
+    int	arp_flags;			/* flags */
 };
 /*  arp_flags and at_flags field values */
 #define	ATF_INUSE	0x01	/* entry in use */

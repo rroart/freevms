@@ -20,24 +20,25 @@
  */
 #define NFS_MOUNT_VERSION	4
 
-struct nfs_mount_data {
-	int		version;		/* 1 */
-	int		fd;			/* 1 */
-	struct nfs2_fh	old_root;		/* 1 */
-	int		flags;			/* 1 */
-	int		rsize;			/* 1 */
-	int		wsize;			/* 1 */
-	int		timeo;			/* 1 */
-	int		retrans;		/* 1 */
-	int		acregmin;		/* 1 */
-	int		acregmax;		/* 1 */
-	int		acdirmin;		/* 1 */
-	int		acdirmax;		/* 1 */
-	struct sockaddr_in addr;		/* 1 */
-	char		hostname[256];		/* 1 */
-	int		namlen;			/* 2 */
-	unsigned int	bsize;			/* 3 */
-	struct nfs_fh	root;			/* 4 */
+struct nfs_mount_data
+{
+    int		version;		/* 1 */
+    int		fd;			/* 1 */
+    struct nfs2_fh	old_root;		/* 1 */
+    int		flags;			/* 1 */
+    int		rsize;			/* 1 */
+    int		wsize;			/* 1 */
+    int		timeo;			/* 1 */
+    int		retrans;		/* 1 */
+    int		acregmin;		/* 1 */
+    int		acregmax;		/* 1 */
+    int		acdirmin;		/* 1 */
+    int		acdirmax;		/* 1 */
+    struct sockaddr_in addr;		/* 1 */
+    char		hostname[256];		/* 1 */
+    int		namlen;			/* 2 */
+    unsigned int	bsize;			/* 3 */
+    struct nfs_fh	root;			/* 4 */
 };
 
 /* bits in the flags field */

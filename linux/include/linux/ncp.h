@@ -19,41 +19,44 @@
 #define NCP_REQUEST              (0x2222)
 #define NCP_DEALLOC_SLOT_REQUEST (0x5555)
 
-struct ncp_request_header {
-	__u16 type;
-	__u8 sequence;
-	__u8 conn_low;
-	__u8 task;
-	__u8 conn_high;
-	__u8 function;
-	__u8 data[0];
+struct ncp_request_header
+{
+    __u16 type;
+    __u8 sequence;
+    __u8 conn_low;
+    __u8 task;
+    __u8 conn_high;
+    __u8 function;
+    __u8 data[0];
 } __attribute__((packed));
 
 #define NCP_REPLY                (0x3333)
 #define NCP_POSITIVE_ACK         (0x9999)
 
-struct ncp_reply_header {
-	__u16 type;
-	__u8 sequence;
-	__u8 conn_low;
-	__u8 task;
-	__u8 conn_high;
-	__u8 completion_code;
-	__u8 connection_state;
-	__u8 data[0];
+struct ncp_reply_header
+{
+    __u16 type;
+    __u8 sequence;
+    __u8 conn_low;
+    __u8 task;
+    __u8 conn_high;
+    __u8 completion_code;
+    __u8 connection_state;
+    __u8 data[0];
 } __attribute__((packed));
 
 #define NCP_VOLNAME_LEN (16)
 #define NCP_NUMBER_OF_VOLUMES (64)
-struct ncp_volume_info {
-	__u32 total_blocks;
-	__u32 free_blocks;
-	__u32 purgeable_blocks;
-	__u32 not_yet_purgeable_blocks;
-	__u32 total_dir_entries;
-	__u32 available_dir_entries;
-	__u8 sectors_per_block;
-	char volume_name[NCP_VOLNAME_LEN + 1];
+struct ncp_volume_info
+{
+    __u32 total_blocks;
+    __u32 free_blocks;
+    __u32 purgeable_blocks;
+    __u32 not_yet_purgeable_blocks;
+    __u32 total_dir_entries;
+    __u32 available_dir_entries;
+    __u8 sectors_per_block;
+    char volume_name[NCP_VOLNAME_LEN + 1];
 };
 
 #define AR_READ      (ntohs(0x0100))
@@ -109,33 +112,34 @@ struct ncp_volume_info {
 #define AR_OPEN_COMPRESSED 0x0100
 #endif
 
-struct nw_info_struct {
-	__u32 spaceAlloc;
-	__u32 attributes;
-	__u16 flags;
-	__u32 dataStreamSize;
-	__u32 totalStreamSize;
-	__u16 numberOfStreams;
-	__u16 creationTime;
-	__u16 creationDate;
-	__u32 creatorID;
-	__u16 modifyTime;
-	__u16 modifyDate;
-	__u32 modifierID;
-	__u16 lastAccessDate;
-	__u16 archiveTime;
-	__u16 archiveDate;
-	__u32 archiverID;
-	__u16 inheritedRightsMask;
-	__u32 dirEntNum;
-	__u32 DosDirNum;
-	__u32 volNumber;
-	__u32 EADataSize;
-	__u32 EAKeyCount;
-	__u32 EAKeySize;
-	__u32 NSCreator;
-	__u8 nameLen;
-	__u8 entryName[256];
+struct nw_info_struct
+{
+    __u32 spaceAlloc;
+    __u32 attributes;
+    __u16 flags;
+    __u32 dataStreamSize;
+    __u32 totalStreamSize;
+    __u16 numberOfStreams;
+    __u16 creationTime;
+    __u16 creationDate;
+    __u32 creatorID;
+    __u16 modifyTime;
+    __u16 modifyDate;
+    __u32 modifierID;
+    __u16 lastAccessDate;
+    __u16 archiveTime;
+    __u16 archiveDate;
+    __u32 archiverID;
+    __u16 inheritedRightsMask;
+    __u32 dirEntNum;
+    __u32 DosDirNum;
+    __u32 volNumber;
+    __u32 EADataSize;
+    __u32 EAKeyCount;
+    __u32 EAKeySize;
+    __u32 NSCreator;
+    __u8 nameLen;
+    __u8 entryName[256];
 } __attribute__((packed));
 
 /* modify mask - use with MODIFY_DOS_INFO structure */
@@ -153,27 +157,29 @@ struct nw_info_struct {
 #define DM_INHERITED_RIGHTS_MASK  (ntohl(0x00100000L))
 #define DM_MAXIMUM_SPACE	  (ntohl(0x00200000L))
 
-struct nw_modify_dos_info {
-	__u32 attributes;
-	__u16 creationDate;
-	__u16 creationTime;
-	__u32 creatorID;
-	__u16 modifyDate;
-	__u16 modifyTime;
-	__u32 modifierID;
-	__u16 archiveDate;
-	__u16 archiveTime;
-	__u32 archiverID;
-	__u16 lastAccessDate;
-	__u16 inheritanceGrantMask;
-	__u16 inheritanceRevokeMask;
-	__u32 maximumSpace;
+struct nw_modify_dos_info
+{
+    __u32 attributes;
+    __u16 creationDate;
+    __u16 creationTime;
+    __u32 creatorID;
+    __u16 modifyDate;
+    __u16 modifyTime;
+    __u32 modifierID;
+    __u16 archiveDate;
+    __u16 archiveTime;
+    __u32 archiverID;
+    __u16 lastAccessDate;
+    __u16 inheritanceGrantMask;
+    __u16 inheritanceRevokeMask;
+    __u32 maximumSpace;
 } __attribute__((packed));
 
-struct nw_search_sequence {
-	__u8 volNumber;
-	__u32 dirBase;
-	__u32 sequence;
+struct nw_search_sequence
+{
+    __u8 volNumber;
+    __u32 dirBase;
+    __u32 sequence;
 } __attribute__((packed));
 
 #endif				/* _LINUX_NCP_H */

@@ -17,7 +17,7 @@
  * Serial_console ascii image can be any size,
  * but should contain %s to display the version
  */
- 
+
 #include <linux/init.h>
 #include <linux/version.h>
 

@@ -1,7 +1,7 @@
 /*****************************************************************************
-* sdla_asy.h	Header file for the Sangoma S508/S514 asynchronous code API	
+* sdla_asy.h	Header file for the Sangoma S508/S514 asynchronous code API
 *
-* Author: 	Gideon Hack 	
+* Author: 	Gideon Hack
 *
 * Copyright:	(c) 2000 Sangoma Technologies Inc.
 *
@@ -53,25 +53,26 @@
  * --------------------------------------------------------------------------*/
 
 /* the asynchronous configuration structure */
-typedef struct {
-	unsigned long baud_rate			PACKED;							/* the baud rate */	
-	unsigned short line_config_options	PACKED;	/* line configuration options */
-	unsigned short modem_config_options	PACKED;	/* modem configuration options */
-	unsigned short asy_API_options		PACKED;	/* asynchronous API options */
-	unsigned short asy_protocol_options	PACKED; /* asynchronous protocol options */
-	unsigned short Tx_bits_per_char		PACKED;	/* number of bits per tx character */
-	unsigned short Rx_bits_per_char		PACKED;	/* number of bits per received character */
-	unsigned short stop_bits		PACKED;	/* number of stop bits per character */
-	unsigned short parity			PACKED;	/* parity definition */
-	unsigned short break_timer		PACKED;	/* the break signal timer */
-	unsigned short asy_Rx_inter_char_timer	PACKED;	/* the receive inter-character timer */
-	unsigned short asy_Rx_complete_length	PACKED;	/* the receive 'buffer complete' length */
-	unsigned short XON_char			PACKED;	/* the XON character */
-	unsigned short XOFF_char		PACKED;	/* the XOFF character */
-	unsigned short asy_statistics_options	PACKED;	/* async operational stat options */
-	unsigned long ptr_shared_mem_info_struct    PACKED;/* ptr to the shared memory area information structure */
-	unsigned long ptr_asy_Tx_stat_el_cfg_struct PACKED;/* ptr to the transmit status element configuration structure */
-	unsigned long ptr_asy_Rx_stat_el_cfg_struct PACKED;/* ptr to the receive status element configuration structure */
+typedef struct
+{
+    unsigned long baud_rate			PACKED;							/* the baud rate */
+    unsigned short line_config_options	PACKED;	/* line configuration options */
+    unsigned short modem_config_options	PACKED;	/* modem configuration options */
+    unsigned short asy_API_options		PACKED;	/* asynchronous API options */
+    unsigned short asy_protocol_options	PACKED; /* asynchronous protocol options */
+    unsigned short Tx_bits_per_char		PACKED;	/* number of bits per tx character */
+    unsigned short Rx_bits_per_char		PACKED;	/* number of bits per received character */
+    unsigned short stop_bits		PACKED;	/* number of stop bits per character */
+    unsigned short parity			PACKED;	/* parity definition */
+    unsigned short break_timer		PACKED;	/* the break signal timer */
+    unsigned short asy_Rx_inter_char_timer	PACKED;	/* the receive inter-character timer */
+    unsigned short asy_Rx_complete_length	PACKED;	/* the receive 'buffer complete' length */
+    unsigned short XON_char			PACKED;	/* the XON character */
+    unsigned short XOFF_char		PACKED;	/* the XOFF character */
+    unsigned short asy_statistics_options	PACKED;	/* async operational stat options */
+    unsigned long ptr_shared_mem_info_struct    PACKED;/* ptr to the shared memory area information structure */
+    unsigned long ptr_asy_Tx_stat_el_cfg_struct PACKED;/* ptr to the transmit status element configuration structure */
+    unsigned long ptr_asy_Rx_stat_el_cfg_struct PACKED;/* ptr to the receive status element configuration structure */
 } ASY_CONFIGURATION_STRUCT;
 
 /* permitted minimum and maximum values for setting the asynchronous configuration */
@@ -113,17 +114,18 @@ typedef struct {
  * --------------------------------------------------------------------------*/
 
 /* the communications error statistics structure */
-typedef struct {
-	unsigned short Rx_overrun_err_count   	PACKED;	/* receiver overrun error count */
-	unsigned short Rx_parity_err_count	PACKED;	/* parity errors received count */
-	unsigned short Rx_framing_err_count	PACKED;	/* framing errors received count */
-	unsigned short comms_err_stat_reserved_1 PACKED;/* reserved for later use */
-	unsigned short comms_err_stat_reserved_2 PACKED;/* reserved for later use */
-	unsigned short comms_err_stat_reserved_3 PACKED;/* reserved for later use */
-	unsigned short comms_err_stat_reserved_4 PACKED;/* reserved for later use */
-	unsigned short comms_err_stat_reserved_5 PACKED;/* reserved for later use */
-	unsigned short DCD_state_change_count 	PACKED;	/* DCD state change count */
-	unsigned short CTS_state_change_count	PACKED;	/* CTS state change count */
+typedef struct
+{
+    unsigned short Rx_overrun_err_count   	PACKED;	/* receiver overrun error count */
+    unsigned short Rx_parity_err_count	PACKED;	/* parity errors received count */
+    unsigned short Rx_framing_err_count	PACKED;	/* framing errors received count */
+    unsigned short comms_err_stat_reserved_1 PACKED;/* reserved for later use */
+    unsigned short comms_err_stat_reserved_2 PACKED;/* reserved for later use */
+    unsigned short comms_err_stat_reserved_3 PACKED;/* reserved for later use */
+    unsigned short comms_err_stat_reserved_4 PACKED;/* reserved for later use */
+    unsigned short comms_err_stat_reserved_5 PACKED;/* reserved for later use */
+    unsigned short DCD_state_change_count 	PACKED;	/* DCD state change count */
+    unsigned short CTS_state_change_count	PACKED;	/* CTS state change count */
 } ASY_COMMS_ERROR_STATS_STRUCT;
 
 
@@ -133,43 +135,44 @@ typedef struct {
  * --------------------------------------------------------------------------*/
 
 /* the asynchronous operational statistics structure */
-typedef struct {
+typedef struct
+{
 
-	/* Data transmission statistics */
-	unsigned long Data_blocks_Tx_count PACKED;/* number of blocks transmitted */
-	unsigned long Data_bytes_Tx_count  PACKED;/* number of bytes transmitted */
-	unsigned long Data_Tx_throughput   PACKED;/* transmit throughput */
-	unsigned long no_ms_for_Data_Tx_thruput_comp PACKED;/* millisecond time used for the Tx throughput computation */
-	unsigned long Tx_Data_discard_lgth_err_count PACKED;/* number of Data blocks discarded (length error) */
-	unsigned long reserved_Data_frm_Tx_stat1 PACKED;/* reserved for later use */
-	unsigned long reserved_Data_frm_Tx_stat2 PACKED;/* reserved for later use */
-	unsigned long reserved_Data_frm_Tx_stat3 PACKED;/* reserved for later use */
+    /* Data transmission statistics */
+    unsigned long Data_blocks_Tx_count PACKED;/* number of blocks transmitted */
+    unsigned long Data_bytes_Tx_count  PACKED;/* number of bytes transmitted */
+    unsigned long Data_Tx_throughput   PACKED;/* transmit throughput */
+    unsigned long no_ms_for_Data_Tx_thruput_comp PACKED;/* millisecond time used for the Tx throughput computation */
+    unsigned long Tx_Data_discard_lgth_err_count PACKED;/* number of Data blocks discarded (length error) */
+    unsigned long reserved_Data_frm_Tx_stat1 PACKED;/* reserved for later use */
+    unsigned long reserved_Data_frm_Tx_stat2 PACKED;/* reserved for later use */
+    unsigned long reserved_Data_frm_Tx_stat3 PACKED;/* reserved for later use */
 
-	/* Data reception statistics */
-	unsigned long Data_blocks_Rx_count PACKED;/* number of blocks received */
-	unsigned long Data_bytes_Rx_count  PACKED;/* number of bytes received */
-	unsigned long Data_Rx_throughput   PACKED;/* receive throughput */
-	unsigned long no_ms_for_Data_Rx_thruput_comp PACKED;/* millisecond time used for the Rx throughput computation */
-	unsigned long Rx_Data_bytes_discard_count    PACKED;/* received Data bytes discarded */
-	unsigned long reserved_Data_frm_Rx_stat1     PACKED;/* reserved for later use */
+    /* Data reception statistics */
+    unsigned long Data_blocks_Rx_count PACKED;/* number of blocks received */
+    unsigned long Data_bytes_Rx_count  PACKED;/* number of bytes received */
+    unsigned long Data_Rx_throughput   PACKED;/* receive throughput */
+    unsigned long no_ms_for_Data_Rx_thruput_comp PACKED;/* millisecond time used for the Rx throughput computation */
+    unsigned long Rx_Data_bytes_discard_count    PACKED;/* received Data bytes discarded */
+    unsigned long reserved_Data_frm_Rx_stat1     PACKED;/* reserved for later use */
 
-	/* handshaking protocol statistics */
-	unsigned short XON_chars_Tx_count	PACKED;	/* number of XON characters transmitted */
-	unsigned short XOFF_chars_Tx_count	PACKED;	/* number of XOFF characters transmitted */
-	unsigned short XON_chars_Rx_count	PACKED;	/* number of XON characters received */
-	unsigned short XOFF_chars_Rx_count	PACKED;	/* number of XOFF characters received */
-	unsigned short Tx_halt_modem_low_count	PACKED; /* number of times Tx halted (modem line low) */
-	unsigned short Rx_halt_RTS_low_count	PACKED;	/* number of times Rx halted by setting RTS low */
-	unsigned long reserved_handshaking_stat1 PACKED;/* reserved for later use */
+    /* handshaking protocol statistics */
+    unsigned short XON_chars_Tx_count	PACKED;	/* number of XON characters transmitted */
+    unsigned short XOFF_chars_Tx_count	PACKED;	/* number of XOFF characters transmitted */
+    unsigned short XON_chars_Rx_count	PACKED;	/* number of XON characters received */
+    unsigned short XOFF_chars_Rx_count	PACKED;	/* number of XOFF characters received */
+    unsigned short Tx_halt_modem_low_count	PACKED; /* number of times Tx halted (modem line low) */
+    unsigned short Rx_halt_RTS_low_count	PACKED;	/* number of times Rx halted by setting RTS low */
+    unsigned long reserved_handshaking_stat1 PACKED;/* reserved for later use */
 
-	/* break statistics */
-	unsigned short break_Tx_count	PACKED;	/* number of break sequences transmitted */
-	unsigned short break_Rx_count	PACKED;	/* number of break sequences received */
-	unsigned long reserved_break_stat1 PACKED;/* reserved for later use */
+    /* break statistics */
+    unsigned short break_Tx_count	PACKED;	/* number of break sequences transmitted */
+    unsigned short break_Rx_count	PACKED;	/* number of break sequences received */
+    unsigned long reserved_break_stat1 PACKED;/* reserved for later use */
 
-	/* miscellaneous statistics */
-	unsigned long reserved_misc_stat1	PACKED;	/* reserved for later use */
-	unsigned long reserved_misc_stat2	PACKED;	/* reserved for later use */
+    /* miscellaneous statistics */
+    unsigned long reserved_misc_stat1	PACKED;	/* reserved for later use */
+    unsigned long reserved_misc_stat2	PACKED;	/* reserved for later use */
 
 } ASY_OPERATIONAL_STATS_STRUCT;
 
@@ -180,21 +183,23 @@ typedef struct {
  * --------------------------------------------------------------------------*/
 
 /* the Data block transmit status element configuration structure */
-typedef struct {
-	unsigned short number_Tx_status_elements PACKED;		/* number of transmit status elements */
-	unsigned long base_addr_Tx_status_elements PACKED;	/* base address of the transmit element list */
-	unsigned long next_Tx_status_element_to_use PACKED;	/* pointer to the next transmit element to be used */
+typedef struct
+{
+    unsigned short number_Tx_status_elements PACKED;		/* number of transmit status elements */
+    unsigned long base_addr_Tx_status_elements PACKED;	/* base address of the transmit element list */
+    unsigned long next_Tx_status_element_to_use PACKED;	/* pointer to the next transmit element to be used */
 } ASY_TX_STATUS_EL_CFG_STRUCT;
 
 
 /* the Data block transmit status element structure */
-typedef struct {
-	unsigned char opp_flag PACKED;								/* opp flag */
-	unsigned short data_length PACKED;						/* length of the block to be transmitted */
-	unsigned char reserved_1 PACKED;							/* reserved for internal use */
-	unsigned long reserved_2 PACKED;							/* reserved for internal use */
-	unsigned long reserved_3 PACKED;							/* reserved for internal use */
-	unsigned long ptr_data_bfr PACKED;						/* pointer to the data area */
+typedef struct
+{
+    unsigned char opp_flag PACKED;								/* opp flag */
+    unsigned short data_length PACKED;						/* length of the block to be transmitted */
+    unsigned char reserved_1 PACKED;							/* reserved for internal use */
+    unsigned long reserved_2 PACKED;							/* reserved for internal use */
+    unsigned long reserved_3 PACKED;							/* reserved for internal use */
+    unsigned long ptr_data_bfr PACKED;						/* pointer to the data area */
 } ASY_DATA_TX_STATUS_EL_STRUCT;
 
 
@@ -204,23 +209,25 @@ typedef struct {
  * --------------------------------------------------------------------------*/
 
 /* the Data block receive status element configuration structure */
-typedef struct {
-	unsigned short number_Rx_status_elements    PACKED;/* number of receive status elements */
-	unsigned long base_addr_Rx_status_elements  PACKED;/* base address of the receive element list */
-	unsigned long next_Rx_status_element_to_use PACKED;/* pointer to the next receive element to be used */
-	unsigned long base_addr_Rx_buffer	PACKED;/* base address of the receive data buffer */
-	unsigned long end_addr_Rx_buffer 	PACKED;/* end address of the receive data buffer */
+typedef struct
+{
+    unsigned short number_Rx_status_elements    PACKED;/* number of receive status elements */
+    unsigned long base_addr_Rx_status_elements  PACKED;/* base address of the receive element list */
+    unsigned long next_Rx_status_element_to_use PACKED;/* pointer to the next receive element to be used */
+    unsigned long base_addr_Rx_buffer	PACKED;/* base address of the receive data buffer */
+    unsigned long end_addr_Rx_buffer 	PACKED;/* end address of the receive data buffer */
 } ASY_RX_STATUS_EL_CFG_STRUCT;
 
 /* the Data block receive status element structure */
-typedef struct {
-	unsigned char opp_flag 		PACKED;	/* opp flag */
-	unsigned short data_length 	PACKED;	/* length of the received data block */
-	unsigned char reserved_1 	PACKED;	/* reserved for internal use */
-	unsigned short time_stamp 	PACKED; /* receive time stamp (HDLC_STREAMING_MODE) */
-	unsigned short data_buffered 	PACKED;	/* the number of data bytes still buffered */
-	unsigned long reserved_2 	PACKED;	/* reserved for internal use */
-	unsigned long ptr_data_bfr 	PACKED;	/* pointer to the data area */
+typedef struct
+{
+    unsigned char opp_flag 		PACKED;	/* opp flag */
+    unsigned short data_length 	PACKED;	/* length of the received data block */
+    unsigned char reserved_1 	PACKED;	/* reserved for internal use */
+    unsigned short time_stamp 	PACKED; /* receive time stamp (HDLC_STREAMING_MODE) */
+    unsigned short data_buffered 	PACKED;	/* the number of data bytes still buffered */
+    unsigned long reserved_2 	PACKED;	/* reserved for internal use */
+    unsigned long ptr_data_bfr 	PACKED;	/* pointer to the data area */
 } ASY_DATA_RX_STATUS_EL_STRUCT;
 
 #endif

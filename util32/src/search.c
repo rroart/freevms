@@ -130,10 +130,11 @@
 struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
 struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
 struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
-				   0, 0, 0, 0,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO};
+           0, 0, 0, 0,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO
+};
 struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
 struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};
 struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
@@ -141,9 +142,10 @@ struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
 
 #define PRINT_ATTR (FAB$M_CR | FAB$M_PRN | FAB$M_FTN)
 
-void main() {
-  printf("main is a dummy\n");
-  return 1;
+void main()
+{
+    printf("main is a dummy\n");
+    return 1;
 }
 
 #define MAXREC 32767
@@ -168,10 +170,10 @@ unsigned search(int userarg)
     memset (c2, 0, 80);
     sts = cli$present(&p1);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     sts = cli$present(&p2);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     int retlen;
     sts = cli$get_value(&p1, &o1, &retlen);
     sts = cli$get_value(&p2, &o2, &retlen);
@@ -181,12 +183,13 @@ unsigned search(int userarg)
     char res[NAM$C_MAXRSS + 1],rsa[NAM$C_MAXRSS + 1];
     struct _namdef nam = cc$rms_nam;
     struct _fabdef fab = cc$rms_fab;
-    register char *searstr = c2; 
+    register char *searstr = c2;
     register char firstch = tolower(*searstr++);
     register char *searend = searstr + strlen(searstr);
     {
         char *str = searstr;
-        while (str < searend) {
+        while (str < searend)
+        {
             *str = tolower(*str);
             str++;
         }
@@ -201,41 +204,53 @@ unsigned search(int userarg)
     fab.fab$l_dna = "";
     fab.fab$b_dns = strlen(fab.fab$l_dna);
     sts = sys$parse(&fab, 0, 0);
-    if (sts & 1) {
+    if (sts & 1)
+    {
         nam.nam$l_rsa = rsa;
         nam.nam$b_rss = NAM$C_MAXRSS;
         fab.fab$l_fop = FAB$M_NAM;
-        while ((sts = sys$search(&fab, 0, 0)) & 1) {
-	  sts = sys$open(&fab, 0, 0);
-            if ((sts & 1) == 0) {
+        while ((sts = sys$search(&fab, 0, 0)) & 1)
+        {
+            sts = sys$open(&fab, 0, 0);
+            if ((sts & 1) == 0)
+            {
                 printf("%%SEARCH-F-OPENFAIL, Open error: %d\n",sts);
-            } else {
+            }
+            else
+            {
                 struct _rabdef rab = cc$rms_rab;
                 rab.rab$l_fab = &fab;
-                if ((sts = sys$connect(&rab, 0, 0)) & 1) {
+                if ((sts = sys$connect(&rab, 0, 0)) & 1)
+                {
                     int printname = 1;
                     char rec[MAXREC + 2];
                     filecount++;
                     rab.rab$l_ubf = rec;
                     rab.rab$w_usz = MAXREC;
-                    while ((sts = sys$get(&rab, 0, 0)) & 1) {
+                    while ((sts = sys$get(&rab, 0, 0)) & 1)
+                    {
                         register char *strng = rec;
                         register char *strngend = strng + (rab.rab$w_rsz - (searend - searstr));
-                        while (strng < strngend) {
+                        while (strng < strngend)
+                        {
                             register char ch = *strng++;
-                            if (ch == firstch || (ch >= 'A' && ch <= 'Z' && ch + 32 == firstch)) {
+                            if (ch == firstch || (ch >= 'A' && ch <= 'Z' && ch + 32 == firstch))
+                            {
                                 register char *str = strng;
                                 register char *cmp = searstr;
-                                while (cmp < searend) {
+                                while (cmp < searend)
+                                {
                                     register char ch2 = *str++;
                                     ch = *cmp;
                                     if (ch2 != ch && (ch2 < 'A' || ch2 > 'Z' || ch2 + 32 != ch)) break;
                                     cmp++;
                                 }
-                                if (cmp >= searend) {
+                                if (cmp >= searend)
+                                {
                                     findcount++;
                                     rec[rab.rab$w_rsz] = '\0';
-                                    if (printname) {
+                                    if (printname)
+                                    {
                                         rsa[nam.nam$b_rsl] = '\0';
                                         printf("\n******************************\n%s\n\n",rsa);
                                         printname = 0;
@@ -249,7 +264,8 @@ unsigned search(int userarg)
                     }
                     sys$disconnect(&rab, 0, 0);
                 }
-                if (sts == SS$_NOTINSTALL) {
+                if (sts == SS$_NOTINSTALL)
+                {
                     printf("%%SEARCH-W-NOIMPLEM, file operation not implemented\n");
                     sts = 1;
                 }
@@ -258,13 +274,19 @@ unsigned search(int userarg)
         }
         if (sts == RMS$_NMF || sts == RMS$_FNF) sts = 1;
     }
-    if (sts & 1) {
-        if (filecount < 1) {
+    if (sts & 1)
+    {
+        if (filecount < 1)
+        {
             printf("%%SEARCH-W-NOFILES, no files found\n");
-        } else {
+        }
+        else
+        {
             if (findcount < 1) printf("%%SEARCH-I-NOMATCHES, no strings matched\n");
         }
-    } else {
+    }
+    else
+    {
         printf("%%SEARCH-F-ERROR Status: %d\n",sts);
     }
     return sts;

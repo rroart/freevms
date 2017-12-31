@@ -80,7 +80,8 @@ unsigned update_freecount(struct _vcb *vcbdev,unsigned *retcount)
     struct _scbdef * scb;
     sts = exttwo_accesschunk(getmapfcb(vcbdev),1,(char **) &scb,0,1,0);
     map_end = ((scb->scb$l_volsize/scb->scb$w_cluster) + 4095) / 4096 + 2;
-    for (map_block = 2; map_block < map_end; ) {
+    for (map_block = 2; map_block < map_end; )
+    {
         unsigned blkcount;
         WORK_UNIT *bitmap,*work_ptr;
         unsigned work_count;
@@ -89,17 +90,23 @@ unsigned update_freecount(struct _vcb *vcbdev,unsigned *retcount)
         if (blkcount > map_end - map_block) blkcount = map_end - map_block + 1;
         work_ptr = bitmap;
         work_count = blkcount * 512 / sizeof(WORK_UNIT);
-        do {
+        do
+        {
             WORK_UNIT work_val = *work_ptr++;
-            if (work_val == WORK_MASK) {
+            if (work_val == WORK_MASK)
+            {
                 free_clusters += WORK_BITS;
-            } else {
-                while (work_val != 0) {
+            }
+            else
+            {
+                while (work_val != 0)
+                {
                     if (work_val & 1) free_clusters++;
                     work_val = work_val >> 1;
                 }
             }
-        } while (--work_count > 0);
+        }
+        while (--work_count > 0);
         sts = deaccesschunk(0,0,1);
         if (!(sts & 1)) return sts;
         map_block += blkcount;
@@ -122,7 +129,8 @@ unsigned bitmap_modify(struct _vcb *vcbdev,unsigned cluster,unsigned count,
     sts = exttwo_accesschunk(getmapfcb(vcbdev),1,(char **) &scb,0,1,0);
     if (clust_count < 1) return SS$_BADPARAM;
     if (cluster + clust_count > (scb->scb$l_volsize/scb->scb$w_cluster) + 1) return SS$_BADPARAM;
-    do {
+    do
+    {
         unsigned blkcount;
         WORK_UNIT *bitmap;
         WORK_UNIT *work_ptr;
@@ -130,55 +138,75 @@ unsigned bitmap_modify(struct _vcb *vcbdev,unsigned cluster,unsigned count,
         sts = exttwo_accesschunk(getmapfcb(vcbdev),map_block,(char **) &bitmap,&blkcount,1,0);
         if (!(sts & 1)) return sts;
         work_ptr = bitmap + block_offset / WORK_BITS;
-        if (block_offset % WORK_BITS) {
+        if (block_offset % WORK_BITS)
+        {
             unsigned bit_no = block_offset % WORK_BITS;
             WORK_UNIT bit_mask = WORK_MASK;
-            if (bit_no + clust_count < WORK_BITS) {
+            if (bit_no + clust_count < WORK_BITS)
+            {
                 bit_mask = bit_mask >> (WORK_BITS - clust_count);
                 clust_count = 0;
-            } else {
+            }
+            else
+            {
                 clust_count -= WORK_BITS - bit_no;
             }
             bit_mask = bit_mask << bit_no;
-            if (release_flag) {
+            if (release_flag)
+            {
                 *work_ptr++ |= bit_mask;
-            } else {
+            }
+            else
+            {
                 *work_ptr++ &= ~bit_mask;
             }
             block_offset += WORK_BITS - bit_no;
         }
         work_count = (blkcount * 4096 - block_offset) / WORK_BITS;
-        if (work_count > clust_count / WORK_BITS) {
+        if (work_count > clust_count / WORK_BITS)
+        {
             work_count = clust_count / WORK_BITS;
             block_offset = 1;
-        } else {
+        }
+        else
+        {
             block_offset = 0;
         }
         clust_count -= work_count * WORK_BITS;
-        if (release_flag) {
-            while (clust_count-- > 0) {
+        if (release_flag)
+        {
+            while (clust_count-- > 0)
+            {
                 *work_ptr++ = WORK_MASK;
             }
-        } else {
-            while (work_count-- > 0) {
+        }
+        else
+        {
+            while (work_count-- > 0)
+            {
                 *work_ptr++ = 0;
             }
         }
-        if (clust_count != 0 && block_offset) {
+        if (clust_count != 0 && block_offset)
+        {
             WORK_UNIT bit_mask = WORK_MASK >> (WORK_BITS - clust_count);
-            if (release_flag) {
+            if (release_flag)
+            {
                 *work_ptr++ |= bit_mask;
-            } else {
+            }
+            else
+            {
                 *work_ptr++ &= ~bit_mask;
             }
             clust_count = 0;
         }
         sts = deaccesschunk(map_block,blkcount,1);
-	sts = writechunk(getmapfcb(vcbdev), map_block, bitmap);
+        sts = writechunk(getmapfcb(vcbdev), map_block, bitmap);
         if (!(sts & 1)) return sts;
         map_block += blkcount;
         block_offset = 0;
-    } while (clust_count != 0);
+    }
+    while (clust_count != 0);
     return sts;
 }
 
@@ -203,7 +231,8 @@ unsigned bitmap_search(struct _vcb *vcbdev,unsigned *position,unsigned *count)
     cluster = cluster - (cluster % WORK_BITS);
     ret_cluster = cluster;
     search_words = (scb->scb$l_volsize/scb->scb$w_cluster) / WORK_BITS;
-    do {
+    do
+    {
         unsigned blkcount;
         WORK_UNIT *bitmap;
         WORK_UNIT *work_ptr, work_val;
@@ -212,72 +241,91 @@ unsigned bitmap_search(struct _vcb *vcbdev,unsigned *position,unsigned *count)
         if ((sts & 1) == 0) return sts;
         work_ptr = bitmap + block_offset / WORK_BITS;
         work_val = *work_ptr++;
-        if (block_offset % WORK_BITS) {
+        if (block_offset % WORK_BITS)
+        {
             work_val = work_val & (WORK_MASK << block_offset % WORK_BITS);
-        }        
+        }
         work_count = (blkcount * 4096 - block_offset) / WORK_BITS;
         if (work_count > search_words) work_count = search_words;
         search_words -= work_count;
-        do {
-	    unsigned bit_no = 0;
-            if (work_val == WORK_MASK) {
+        do
+        {
+            unsigned bit_no = 0;
+            if (work_val == WORK_MASK)
+            {
                 run += WORK_BITS;
-		if (run > best_run) {
-		  best_run = run;
-		  best_cluster = cluster + bit_no;
-		}
-		if (best_run >= needed)
-		  goto out_of_here;
-            } else {
-                while (work_val != 0) {
-                    if (work_val & 1) {
+                if (run > best_run)
+                {
+                    best_run = run;
+                    best_cluster = cluster + bit_no;
+                }
+                if (best_run >= needed)
+                    goto out_of_here;
+            }
+            else
+            {
+                while (work_val != 0)
+                {
+                    if (work_val & 1)
+                    {
                         run++;
-                        if (run > best_run) {
+                        if (run > best_run)
+                        {
                             best_run = run;
                             best_cluster = cluster + bit_no;
                         }
-			if (first_bit==0)
-			  first_bit = bit_no;
-			if (best_run >= needed)
-			  goto out_of_here;
-                    } else {
-                        if (run > best_run) {
+                        if (first_bit==0)
+                            first_bit = bit_no;
+                        if (best_run >= needed)
+                            goto out_of_here;
+                    }
+                    else
+                    {
+                        if (run > best_run)
+                        {
                             best_run = run;
                             best_cluster = cluster + bit_no;
                         }
                         run = 0;
-			ret_cluster = cluster;
-			first_bit = bit_no+1;
+                        ret_cluster = cluster;
+                        first_bit = bit_no+1;
                     }
                     work_val = work_val >> 1;
                     bit_no++;
                 }
-		if (bit_no < WORK_BITS) {
-		  if (run > best_run) {
-		    best_run = run;
-		    best_cluster = cluster + bit_no;
-		  }
-		  run = 0;
-		  ret_cluster = cluster;
-		  first_bit = bit_no;
+                if (bit_no < WORK_BITS)
+                {
+                    if (run > best_run)
+                    {
+                        best_run = run;
+                        best_cluster = cluster + bit_no;
+                    }
+                    run = 0;
+                    ret_cluster = cluster;
+                    first_bit = bit_no;
                 }
             }
             cluster += WORK_BITS;
-	    if (run==0)
-	      ret_cluster=cluster;
-            if (work_count-- > 0) {
+            if (run==0)
+                ret_cluster=cluster;
+            if (work_count-- > 0)
+            {
                 work_val = *work_ptr++;
-            } else {
+            }
+            else
+            {
                 break;
             }
-        } while (best_run < needed);
+        }
+        while (best_run < needed);
         deaccesschunk(map_block,0,1);
-	writechunk(getmapfcb(vcbdev),map_block,bitmap);
+        writechunk(getmapfcb(vcbdev),map_block,bitmap);
         if ((sts & 1) == 0) break;
         map_block += blkcount;
         block_offset = 0;
-    } while (best_run < needed && search_words != 0);
- out_of_here:
+    }
+    while (best_run < needed && search_words != 0);
+out_of_here:
     best_cluster = ret_cluster + first_bit;
     if (best_run > needed) best_run = needed;
     *count = best_run;
@@ -297,10 +345,11 @@ unsigned headmap_clear(struct _vcb *vcbdev,unsigned head_no)
     map_block = head_no / 4096 + vcbdev->vcb$l_cluster * 4 + 1;
     if (head_no < 10) return 0;
     sts = exttwo_accesschunk(getidxfcb(vcbdev),map_block,(char **) &bitmap,NULL,1,0);
-    if (sts & 1) {
+    if (sts & 1)
+    {
         bitmap[(head_no % 4096) / WORK_BITS] &= ~(1 << (head_no % WORK_BITS));
         sts = deaccesschunk(map_block,1,1);
-	writechunk(getidxfcb(vcbdev),map_block,bitmap);
+        writechunk(getidxfcb(vcbdev),map_block,bitmap);
     }
     return sts;
 }
@@ -313,80 +362,92 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
 {
     unsigned head_no = 0;
     unsigned sts;
-    do {
+    do
+    {
         int modify_flag = 0;
         unsigned blkcount;
         WORK_UNIT *bitmap,*work_ptr;
         unsigned map_block,work_count;
         map_block = head_no / 4096 + vcbdev->vcb$l_cluster * 4 + 1;
         sts = exttwo_accesschunk(getidxfcb(vcbdev),map_block,
-            (char **) &bitmap,&blkcount,1,0);
+                                 (char **) &bitmap,&blkcount,1,0);
         if ((sts & 1) == 0) return sts;
         work_count = (head_no % 4096) / WORK_BITS;
         work_ptr = bitmap + work_count;
         work_count = blkcount * 512 / WORK_BITS - work_count;
-        do {
+        do
+        {
             WORK_UNIT work_val = *work_ptr;
-            if (work_val == WORK_MASK) {
+            if (work_val == WORK_MASK)
+            {
                 head_no += WORK_BITS;
-            } else {
+            }
+            else
+            {
                 unsigned bit_no = 0;
-                for (bit_no = 0; bit_no < WORK_BITS; bit_no++) {
-                    if ((work_val & (1 << bit_no)) == 0) {
+                for (bit_no = 0; bit_no < WORK_BITS; bit_no++)
+                {
+                    if ((work_val & (1 << bit_no)) == 0)
+                    {
                         unsigned idxblk = head_no +
-                            VMSWORD(vcbdev->vcb$l_ibmapvbn) +
-                            VMSWORD(vcbdev->vcb$l_ibmapsize);
+                                          VMSWORD(vcbdev->vcb$l_ibmapvbn) +
+                                          VMSWORD(vcbdev->vcb$l_ibmapsize);
                         sts = exttwo_accesschunk(getidxfcb(vcbdev),idxblk,(char **) headbuff,NULL,1,0);
-                        if (sts & 1) {
+                        if (sts & 1)
+                        {
                             *work_ptr |= 1 << bit_no;
                             modify_flag = 1;
                             if (*headbuff && (*headbuff)->fh2$w_checksum != 0 && (*headbuff)->fh2$w_fid.fid$w_num != 0 &&
-                                (VMSLONG((*headbuff)->fh2$l_filechar) & FH2$M_MARKDEL) == 0) {
+                                    (VMSLONG((*headbuff)->fh2$l_filechar) & FH2$M_MARKDEL) == 0)
+                            {
                                 sts = deaccesschunk(0,0,0);
-				writechunk(getidxfcb(vcbdev),idxblk,*headbuff);
-                            } else {
-			      signed int newvbn;
+                                writechunk(getidxfcb(vcbdev),idxblk,*headbuff);
+                            }
+                            else
+                            {
+                                signed int newvbn;
                                 *rethead_no = head_no + 1;
                                 *retidxblk = idxblk;
                                 deaccesschunk(map_block,blkcount,modify_flag);
-				writechunk(getidxfcb(vcbdev),map_block,bitmap);
-				newvbn=f11b_map_idxvbn(vcbdev,idxblk);
-				if (newvbn==-1) {
-				  writechunk(getidxfcb(vcbdev),map_block,bitmap);
-				  unsigned start_pos = 0;
-				  unsigned block_count = 1;
-				  sts = bitmap_search(vcbdev,&start_pos,&block_count);
-				  struct _fcb * fcb = getidxfcb(vcbdev);
-				  struct ext2_inode * head;
-				  struct _iosb iosb;
-				  head = exttwo_read_header (x2p->current_vcb, 0, fcb, &iosb);
-				  unsigned short *mp,*map;
-				  map = mp = (unsigned short *) head + head->fh2$b_mpoffset + head->fh2$b_map_inuse;
-				  *mp++ = (3 << 14) | ((block_count *vcbdev->vcb$l_cluster - 1) >> 16);
-				  *mp++ = (block_count * vcbdev->vcb$l_cluster - 1) & 0xffff;
-				  *mp++ = (start_pos * vcbdev->vcb$l_cluster) & 0xffff;
-				  *mp++ = (start_pos * vcbdev->vcb$l_cluster) >> 16;
-				  head->fh2$b_map_inuse += 4;
-				  add_wcb(fcb,map);
-				  fcb->fcb$l_efblk += block_count * vcbdev->vcb$l_cluster;
-				  //head2 = exttwo_read_header (x2p->current_vcb, 0, fcb, &iosb);
-				  //sts=iosb.iosb$w_status;
-				  head->fh2$w_recattr.fat$l_hiblk = VMSSWAP(fcb->fcb$l_efblk * vcbdev->vcb$l_cluster);
-				  fcb->fcb$l_highwater += block_count * vcbdev->vcb$l_cluster;;
-				  head->fh2$l_highwater += block_count * vcbdev->vcb$l_cluster;;
-				  writehead(fcb,head);
-				  sts = bitmap_modify(vcbdev,start_pos,block_count,0);
+                                writechunk(getidxfcb(vcbdev),map_block,bitmap);
+                                newvbn=f11b_map_idxvbn(vcbdev,idxblk);
+                                if (newvbn==-1)
+                                {
+                                    writechunk(getidxfcb(vcbdev),map_block,bitmap);
+                                    unsigned start_pos = 0;
+                                    unsigned block_count = 1;
+                                    sts = bitmap_search(vcbdev,&start_pos,&block_count);
+                                    struct _fcb * fcb = getidxfcb(vcbdev);
+                                    struct ext2_inode * head;
+                                    struct _iosb iosb;
+                                    head = exttwo_read_header (x2p->current_vcb, 0, fcb, &iosb);
+                                    unsigned short *mp,*map;
+                                    map = mp = (unsigned short *) head + head->fh2$b_mpoffset + head->fh2$b_map_inuse;
+                                    *mp++ = (3 << 14) | ((block_count *vcbdev->vcb$l_cluster - 1) >> 16);
+                                    *mp++ = (block_count * vcbdev->vcb$l_cluster - 1) & 0xffff;
+                                    *mp++ = (start_pos * vcbdev->vcb$l_cluster) & 0xffff;
+                                    *mp++ = (start_pos * vcbdev->vcb$l_cluster) >> 16;
+                                    head->fh2$b_map_inuse += 4;
+                                    add_wcb(fcb,map);
+                                    fcb->fcb$l_efblk += block_count * vcbdev->vcb$l_cluster;
+                                    //head2 = exttwo_read_header (x2p->current_vcb, 0, fcb, &iosb);
+                                    //sts=iosb.iosb$w_status;
+                                    head->fh2$w_recattr.fat$l_hiblk = VMSSWAP(fcb->fcb$l_efblk * vcbdev->vcb$l_cluster);
+                                    fcb->fcb$l_highwater += block_count * vcbdev->vcb$l_cluster;;
+                                    head->fh2$l_highwater += block_count * vcbdev->vcb$l_cluster;;
+                                    writehead(fcb,head);
+                                    sts = bitmap_modify(vcbdev,start_pos,block_count,0);
 #if 0
-				  int blkcount;
-				  sts = exttwo_accesschunk(idxfcb, vcb->vcb$l_ibmapvbn + vcb->vcb$l_ibmapsize, (char **) &fhi,&blkcount,1,0); // check. wrong mapsize use
-				  
-				  writechunk(idxfcb,vcb->vcb$l_ibmapvbn + vcb->vcb$l_ibmapsize, fhi);
+                                    int blkcount;
+                                    sts = exttwo_accesschunk(idxfcb, vcb->vcb$l_ibmapvbn + vcb->vcb$l_ibmapsize, (char **) &fhi,&blkcount,1,0); // check. wrong mapsize use
+
+                                    writechunk(idxfcb,vcb->vcb$l_ibmapvbn + vcb->vcb$l_ibmapsize, fhi);
 #endif
-				  //sts=exttwo_extend(getidxfcb(vcbdev),vcbdev->vcb$l_cluster,1);
+                                    //sts=exttwo_extend(getidxfcb(vcbdev),vcbdev->vcb$l_cluster,1);
 
 
-				  sts = exttwo_accesschunk(getidxfcb(vcbdev),idxblk,(char **) headbuff,NULL,1,0);
-				}
+                                    sts = exttwo_accesschunk(getidxfcb(vcbdev),idxblk,(char **) headbuff,NULL,1,0);
+                                }
                                 return SS$_NORMAL;
                             }
                         }
@@ -395,18 +456,20 @@ unsigned update_findhead(struct _vcb *vcbdev,unsigned *rethead_no,
                 }
             }
             work_ptr++;
-        } while (--work_count != 0);
+        }
+        while (--work_count != 0);
         deaccesschunk(map_block,blkcount,modify_flag);
-	writechunk(getidxfcb(vcbdev),map_block,bitmap);
+        writechunk(getidxfcb(vcbdev),map_block,bitmap);
         if ((sts & 1) == 0) break;
-    } while (head_no < VMSLONG(vcbdev->vcb$l_maxfiles));
+    }
+    while (head_no < VMSLONG(vcbdev->vcb$l_maxfiles));
     return sts;
 }
 
 unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
-                     unsigned seg_num,struct _fiddef *fid,
-                     struct ext2_inode **rethead,
-                     unsigned *idxblk)
+                        unsigned seg_num,struct _fiddef *fid,
+                        struct ext2_inode **rethead,
+                        unsigned *idxblk)
 {
     unsigned free_space = 0;
     unsigned device,rvn,sts;
@@ -426,9 +489,12 @@ unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
     fid->fid$w_num = head_no;
     fid->fid$w_seq = ++head->fh2$w_fid.fid$w_seq;
     if (fid->fid$w_seq == 0) fid->fid$w_seq = 1;
-    if (rvn > 0) {
+    if (rvn > 0)
+    {
         fid->fid$b_rvn = rvn + 1;
-    } else {
+    }
+    else
+    {
         fid->fid$b_rvn = 0;
     }
     fid->fid$b_nmx = head_no >> 16;
@@ -445,10 +511,13 @@ unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
     if (back != NULL) fid_copy(&head->fh2$w_backlink,back,0);
     id = (struct _fi2 *) ((unsigned short *) head + 40);
     memset(id->fi2$t_filenamext,' ',66);
-    if (strlen(filename) < 20) {
+    if (strlen(filename) < 20)
+    {
         memset(id->fi2$t_filename,' ',20);
         memcpy(id->fi2$t_filename,filename,strlen(filename));
-    } else {
+    }
+    else
+    {
         memcpy(id->fi2$t_filename,filename,20);
         memcpy(id->fi2$t_filenamext,filename+20,strlen(filename+20));
     }
@@ -458,8 +527,8 @@ unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
     memcpy(id->fi2$q_expdate,id->fi2$q_credate,sizeof(id->fi2$q_credate));
     head->fh2$w_recattr.fat$l_efblk = VMSSWAP(1);
     {
-      unsigned short check = checksum((vmsword *) head);
-      head->fh2$w_checksum = VMSWORD(check);
+        unsigned short check = checksum((vmsword *) head);
+        head->fh2$w_checksum = VMSWORD(check);
     }
     writechunk(getidxfcb(vcbdev),*idxblk,head);
     *rethead=head;
@@ -471,105 +540,120 @@ unsigned update_addhead(struct _vcb *vcb,char *filename,struct _fiddef *back,
 
 unsigned exttwo_create(struct _vcb *vcb,struct _irp * i)
 {
-  struct dsc$descriptor * fibdsc=i->irp$l_qio_p1;
-  struct dsc$descriptor * filedsc=i->irp$l_qio_p2;
-  struct _fibdef * fib=fibdsc->dsc$a_pointer;
-  struct _fiddef * fid=&fib->fib$w_fid_num;
-  struct _fiddef * did=&fib->fib$w_did_num;
-  char *filename=filedsc->dsc$a_pointer;
-  struct ext2_inode *head;
-  unsigned idxblk;
-  unsigned sts;
-  struct _fcb *fcb;
-  struct _iosb iosb;
+    struct dsc$descriptor * fibdsc=i->irp$l_qio_p1;
+    struct dsc$descriptor * filedsc=i->irp$l_qio_p2;
+    struct _fibdef * fib=fibdsc->dsc$a_pointer;
+    struct _fiddef * fid=&fib->fib$w_fid_num;
+    struct _fiddef * did=&fib->fib$w_did_num;
+    char *filename=filedsc->dsc$a_pointer;
+    struct ext2_inode *head;
+    unsigned idxblk;
+    unsigned sts;
+    struct _fcb *fcb;
+    struct _iosb iosb;
 #if 0
-  sts = update_addhead(vcb,filename,did,0,fid,&head,&idxblk);
+    sts = update_addhead(vcb,filename,did,0,fid,&head,&idxblk);
 #else
-  sts = 1;
-  head = ext2_new_inode(vcb, x2p->primary_fcb,0);
+    sts = 1;
+    head = ext2_new_inode(vcb, x2p->primary_fcb,0);
 #endif
-  if (!(sts & 1)) return sts;
-  //sts = deaccesshead(head,idxblk);
-  //    sts = writehead(getidxfcb(vcb),head);
+    if (!(sts & 1)) return sts;
+    //sts = deaccesshead(head,idxblk);
+    //    sts = writehead(getidxfcb(vcb),head);
 
-  if ((i->irp$l_func & IO$M_ACCESS) && (sts & 1)) {
-    unsigned short reslen;
-    char retbuf[256];
-    struct dsc$descriptor resdsc;
-    resdsc.dsc$w_length=255;
-    resdsc.dsc$a_pointer=&retbuf;
-    //fib->fib$w_did_num = 0;
-    //fib->fib$w_did_seq = 0;
-    //fib->fib$b_did_rvn = 0;
-    //fib->fib$b_did_nmx = 0;
-    sts = exttwo_access(vcb,i); // should not be, but can not implement otherwise for a while
-    if ( (sts & 1) == 0) { iosbret(i,sts); return sts; }
+    if ((i->irp$l_func & IO$M_ACCESS) && (sts & 1))
+    {
+        unsigned short reslen;
+        char retbuf[256];
+        struct dsc$descriptor resdsc;
+        resdsc.dsc$w_length=255;
+        resdsc.dsc$a_pointer=&retbuf;
+        //fib->fib$w_did_num = 0;
+        //fib->fib$w_did_seq = 0;
+        //fib->fib$b_did_rvn = 0;
+        //fib->fib$b_did_nmx = 0;
+        sts = exttwo_access(vcb,i); // should not be, but can not implement otherwise for a while
+        if ( (sts & 1) == 0)
+        {
+            iosbret(i,sts);
+            return sts;
+        }
 #if 0
-    fcb=exttwo_search_fcb(vcb,fid);
-    head = exttwo_read_header(vcb,fid,fcb,&iosb);
-    sts=iosb.iosb$w_status;
-    if (sts & 1) {
-    } else {
-      printk("Accessfile status in create %d\n",sts);
-      iosbret(i,sts);
-      return sts;
-    }
+        fcb=exttwo_search_fcb(vcb,fid);
+        head = exttwo_read_header(vcb,fid,fcb,&iosb);
+        sts=iosb.iosb$w_status;
+        if (sts & 1)
+        {
+        }
+        else
+        {
+            printk("Accessfile status in create %d\n",sts);
+            iosbret(i,sts);
+            return sts;
+        }
 
-    if (fcb==NULL) {
-      fcb=fcb_create2(head,&sts);
-    }
+        if (fcb==NULL)
+        {
+            fcb=fcb_create2(head,&sts);
+        }
 
-    if (fcb == NULL) { iosbret(i,sts); return sts; }
+        if (fcb == NULL)
+        {
+            iosbret(i,sts);
+            return sts;
+        }
 
-    x2p->primary_fcb=fcb;
-    x2p->current_window=&fcb->fcb$l_wlfl;
+        x2p->primary_fcb=fcb;
+        x2p->current_window=&fcb->fcb$l_wlfl;
 #endif
 
-  }
+    }
 
-  x2p->primary_fcb=f11b_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
+    x2p->primary_fcb=f11b_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
 
-  if ((fib->fib$w_exctl&FIB$M_EXTEND) && (sts & 1)) {
-    struct _fcb * newfcb;
-    newfcb=f11b_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
-    sts = exttwo_extend(newfcb,fib->fib$l_exsz,0);
-  }
+    if ((fib->fib$w_exctl&FIB$M_EXTEND) && (sts & 1))
+    {
+        struct _fcb * newfcb;
+        newfcb=f11b_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
+        sts = exttwo_extend(newfcb,fib->fib$l_exsz,0);
+    }
 
-  struct _fatdef * fat = ((long *)i->irp$l_qio_p5)[1];
-  fat->fat$l_efblk = VMSSWAP(1); // so this won't be changed to 0
+    struct _fatdef * fat = ((long *)i->irp$l_qio_p5)[1];
+    fat->fat$l_efblk = VMSSWAP(1); // so this won't be changed to 0
 
-  struct _fcb * newfcb=f11b_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
-  exttwo_write_attrib(newfcb, i->irp$l_qio_p5);
+    struct _fcb * newfcb=f11b_search_fcb(x2p->current_vcb,&fib->fib$w_fid_num);
+    exttwo_write_attrib(newfcb, i->irp$l_qio_p5);
 
-  printk("(%d,%d,%d) %d\n",fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn,sts);
-  return sts;
+    printk("(%d,%d,%d) %d\n",fid->fid$w_num,fid->fid$w_seq,fid->fid$b_rvn,sts);
+    return sts;
 }
 
 unsigned exttwo_extend(struct _fcb *fcb,unsigned blocks,unsigned contig)
 {
-  struct _iosb iosb;
-  unsigned sts=1;
-  struct _vcb *vcbdev;
-  struct _fh2 *head;
-  unsigned headvbn;
-  struct _fiddef hdrfid;
-  unsigned hdrseq;
-  unsigned start_pos = 0;
-  unsigned block_count = blocks;
-  if (block_count < 1) return 0;
-  int dummy;
+    struct _iosb iosb;
+    unsigned sts=1;
+    struct _vcb *vcbdev;
+    struct _fh2 *head;
+    unsigned headvbn;
+    struct _fiddef hdrfid;
+    unsigned hdrseq;
+    unsigned start_pos = 0;
+    unsigned block_count = blocks;
+    if (block_count < 1) return 0;
+    int dummy;
 
-  for (;block_count;block_count--,fcb->fcb$l_efblk++) {
-    ext2_get_block(x2p->current_vcb, fcb,fcb->fcb$l_efblk,&dummy,1,fcb);
-    short map[4];
-    map[0] = (3 << 14) | 0;
-    map[1] = 1;
-    map[2] = dummy & 0xffff;
-    map[3] = dummy >> 16;
-    add_wcb(fcb, map);
-  }
-  ext2_write_inode(x2p->current_vcb, fcb, 0);
-  return sts;
+    for (; block_count; block_count--,fcb->fcb$l_efblk++)
+    {
+        ext2_get_block(x2p->current_vcb, fcb,fcb->fcb$l_efblk,&dummy,1,fcb);
+        short map[4];
+        map[0] = (3 << 14) | 0;
+        map[1] = 1;
+        map[2] = dummy & 0xffff;
+        map[3] = dummy >> 16;
+        add_wcb(fcb, map);
+    }
+    ext2_write_inode(x2p->current_vcb, fcb, 0);
+    return sts;
 }
 
 /* This routine has bugs and does NOT work properly yet!!!!
@@ -578,15 +662,16 @@ So DON'T use mount/write!!!  */
 
 #if 0
 unsigned deallocfile(struct _fcb *fcb)
-{ 
-  struct _iosb iosb;
+{
+    struct _iosb iosb;
     unsigned sts = 1;
     /*
     First mark all file clusters as free in BITMAP.SYS
     */
     struct ext2_inode * head;
     unsigned vbn = 1;
-    while (vbn <= fcb->fcb$l_efblk) {
+    while (vbn <= fcb->fcb$l_efblk)
+    {
         unsigned sts;
         unsigned phyblk,phylen;
         struct _vcb *vcbdev;
@@ -605,28 +690,32 @@ unsigned deallocfile(struct _fcb *fcb)
         unsigned headvbn = 0;
 
         struct ext2_inode *head;
-	head = exttwo_read_header (x2p->current_vcb, 0, fcb, &iosb);
-	sts=iosb.iosb$w_status;
-        do {
+        head = exttwo_read_header (x2p->current_vcb, 0, fcb, &iosb);
+        sts=iosb.iosb$w_status;
+        do
+        {
             unsigned ext_seg_num = 0;
             struct _fiddef extfid;
             struct _vcb *vcbdev;
             unsigned *bitmap;
             unsigned filenum = (head->fh2$w_fid.fid$b_nmx << 16) +
-                head->fh2$w_fid.fid$w_num - 1;
+                               head->fh2$w_fid.fid$w_num - 1;
             unsigned idxblk;
             vcbdev = rvn_to_dev(x2p->current_vcb,rvn);
             if (vcbdev == NULL) break;
             idxblk = filenum / 4096 +
-                vcbdev->vcb$l_cluster * 4 + 1;
+                     vcbdev->vcb$l_cluster * 4 + 1;
             sts = exttwo_accesschunk(getidxfcb(vcbdev),idxblk,
-                (char **) &bitmap,NULL,1,0);
-            if (sts & 1) {
+                                     (char **) &bitmap,NULL,1,0);
+            if (sts & 1)
+            {
                 bitmap[(filenum % 4096) / WORK_BITS] &=
                     ~(1 << (filenum % WORK_BITS));
                 sts = deaccesschunk(idxblk,1,1);
-		sts = writechunk(getidxfcb(vcbdev), idxblk, bitmap);
-            } else {
+                sts = writechunk(getidxfcb(vcbdev), idxblk, bitmap);
+            }
+            else
+            {
                 break;
             }
             head->fh2$w_fid.fid$w_num = 0;
@@ -636,21 +725,28 @@ unsigned deallocfile(struct _fcb *fcb)
             ext_seg_num++;
             memcpy(&extfid,&head->fh2$w_ext_fid,sizeof(struct _fiddef));
             sts = deaccesshead(NULL,headvbn);
-	    sts = writehead(fcb,head);
+            sts = writehead(fcb,head);
             if ((sts & 1) == 0) break;
-            if (extfid.fid$b_rvn == 0) {
+            if (extfid.fid$b_rvn == 0)
+            {
                 extfid.fid$b_rvn = rvn;
-            } else {
+            }
+            else
+            {
                 rvn = extfid.fid$b_rvn;
             }
-            if (extfid.fid$w_num != 0 || extfid.fid$b_nmx != 0) {
-	      head = exttwo_read_header(x2p->current_vcb,&extfid,fcb,&iosb);
-	      sts=iosb.iosb$w_status;
-	      if ((sts & 1) == 0) break;
-            } else {
+            if (extfid.fid$w_num != 0 || extfid.fid$b_nmx != 0)
+            {
+                head = exttwo_read_header(x2p->current_vcb,&extfid,fcb,&iosb);
+                sts=iosb.iosb$w_status;
+                if ((sts & 1) == 0) break;
+            }
+            else
+            {
                 break;
             }
-        } while (1);
+        }
+        while (1);
     }
     return sts;
 }
@@ -659,47 +755,57 @@ unsigned deallocfile(struct _fcb *fcb)
 
 unsigned exttwo_delete(struct _vcb * vcb,struct _irp * irp)
 {
-  struct _iosb iosb;
-  struct _fcb *fcb;
-  struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
-  struct dsc$descriptor * filedsc=irp->irp$l_qio_p2;
-  unsigned short *reslen=irp->irp$l_qio_p3;
-  struct dsc$descriptor * resdsc=irp->irp$l_qio_p4;
-  struct _fibdef * fib=fibdsc->dsc$a_pointer;
-  struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
-  int sts=0;
-  struct ext2_inode *  head;
-  unsigned action=1;
+    struct _iosb iosb;
+    struct _fcb *fcb;
+    struct dsc$descriptor * fibdsc=irp->irp$l_qio_p1;
+    struct dsc$descriptor * filedsc=irp->irp$l_qio_p2;
+    unsigned short *reslen=irp->irp$l_qio_p3;
+    struct dsc$descriptor * resdsc=irp->irp$l_qio_p4;
+    struct _fibdef * fib=fibdsc->dsc$a_pointer;
+    struct _fiddef * fid=&((struct _fibdef *)fibdsc->dsc$a_pointer)->fib$w_fid_num;
+    int sts=0;
+    struct ext2_inode *  head;
+    unsigned action=1;
 
-  if (x2p->primary_fcb) {
-    struct _fcb * fcb = x2p->primary_fcb;
-    if (fid->fid$w_num!=fcb->fcb$w_fid_num)
-      x2p->primary_fcb=0; //f11b_search_fcb(vcb,fid);
-  }
-
-  if (fib->fib$w_did_num) {
-    struct ext2_inode * head;
-    struct _fcb * fcb=x2p->primary_fcb;
-    if (fcb==0)
-      fcb=f11b_search_fcb(vcb,&fib->fib$w_did_num);
-    head = exttwo_read_header (vcb, 0, fcb, &iosb);  
-    sts=iosb.iosb$w_status;
-    if (S_ISDIR(head->i_mode)) {
-      unsigned eofblk = head->i_blocks;
-      sts = exttwo_search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
-    } else {
-      sts = SS$_BADIRECTORY;
+    if (x2p->primary_fcb)
+    {
+        struct _fcb * fcb = x2p->primary_fcb;
+        if (fid->fid$w_num!=fcb->fcb$w_fid_num)
+            x2p->primary_fcb=0; //f11b_search_fcb(vcb,fid);
     }
-  }
 
-  if ( (sts & 1) == 0) { iosbret(irp,sts); return sts; }
+    if (fib->fib$w_did_num)
+    {
+        struct ext2_inode * head;
+        struct _fcb * fcb=x2p->primary_fcb;
+        if (fcb==0)
+            fcb=f11b_search_fcb(vcb,&fib->fib$w_did_num);
+        head = exttwo_read_header (vcb, 0, fcb, &iosb);
+        sts=iosb.iosb$w_status;
+        if (S_ISDIR(head->i_mode))
+        {
+            unsigned eofblk = head->i_blocks;
+            sts = exttwo_search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
+        }
+        else
+        {
+            sts = SS$_BADIRECTORY;
+        }
+    }
 
-  fcb=exttwo_search_fcb(vcb,fid);
+    if ( (sts & 1) == 0)
+    {
+        iosbret(irp,sts);
+        return sts;
+    }
 
-  if (sts & 1) {
-    ext2_delete_inode(vcb, fcb);
-    printk("Accesserase ... \n");
-    sts = deaccessfile(fcb);
-  }
-  return sts;
+    fcb=exttwo_search_fcb(vcb,fid);
+
+    if (sts & 1)
+    {
+        ext2_delete_inode(vcb, fcb);
+        printk("Accesserase ... \n");
+        sts = deaccessfile(fcb);
+    }
+    return sts;
 }

@@ -1,10 +1,10 @@
 #ifndef __LINUX_IP6_NETFILTER_H
 #define __LINUX_IP6_NETFILTER_H
 
-/* IPv6-specific defines for netfilter. 
+/* IPv6-specific defines for netfilter.
  * (C)1998 Rusty Russell -- This code is GPL.
  * (C)1999 David Jeffery
- *   this header was blatantly ripped from netfilter_ipv4.h 
+ *   this header was blatantly ripped from netfilter_ipv4.h
  *   it's amazing what adding a bunch of 6s can do =8^)
  */
 
@@ -54,14 +54,15 @@
 #define NF_IP6_NUMHOOKS		5
 
 
-enum nf_ip6_hook_priorities {
-	NF_IP6_PRI_FIRST = INT_MIN,
-	NF_IP6_PRI_CONNTRACK = -200,
-	NF_IP6_PRI_MANGLE = -150,
-	NF_IP6_PRI_NAT_DST = -100,
-	NF_IP6_PRI_FILTER = 0,
-	NF_IP6_PRI_NAT_SRC = 100,
-	NF_IP6_PRI_LAST = INT_MAX,
+enum nf_ip6_hook_priorities
+{
+    NF_IP6_PRI_FIRST = INT_MIN,
+    NF_IP6_PRI_CONNTRACK = -200,
+    NF_IP6_PRI_MANGLE = -150,
+    NF_IP6_PRI_NAT_DST = -100,
+    NF_IP6_PRI_FILTER = 0,
+    NF_IP6_PRI_NAT_SRC = 100,
+    NF_IP6_PRI_LAST = INT_MAX,
 };
 
 #endif /*__LINUX_IP6_NETFILTER_H*/

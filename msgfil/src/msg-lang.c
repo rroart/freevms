@@ -15,27 +15,30 @@
 
 #define DEFTREECODE(SYM, NAME, TYPE, LENGTH) TYPE,
 
-const char tree_code_type[] = {
+const char tree_code_type[] =
+{
 #include "tree.def"
-  'x',
+    'x',
 #include "msg.def"
 };
 #undef DEFTREECODE
 
 #define DEFTREECODE(SYM, NAME, TYPE, LENGTH) LENGTH,
 
-const unsigned char tree_code_length[] = {
+const unsigned char tree_code_length[] =
+{
 #include "tree.def"
-  0,
+    0,
 #include "msg.def"
 };
 #undef DEFTREECODE
 
 #define DEFTREECODE(SYM, NAME, TYPE, LEN) NAME,
 
-const char *const tree_code_name[] = {
+const char *const tree_code_name[] =
+{
 #include "tree.def"
-  "@@dummy",
+    "@@dummy",
 #include "msg.def"
 };
 #undef DEFTREECODE

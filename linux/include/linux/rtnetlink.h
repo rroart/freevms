@@ -48,7 +48,7 @@
 
 #define	RTM_MAX		(RTM_BASE+31)
 
-/* 
+/*
    Generic structure for encapsulation optional route information.
    It is reminiscent of sockaddr, but with sa_family replaced
    with attribute type.
@@ -56,8 +56,8 @@
 
 struct rtattr
 {
-	unsigned short	rta_len;
-	unsigned short	rta_type;
+    unsigned short	rta_len;
+    unsigned short	rta_type;
 };
 
 /* Macros to handle rtattributes */
@@ -82,37 +82,37 @@ struct rtattr
 
 struct rtmsg
 {
-	unsigned char		rtm_family;
-	unsigned char		rtm_dst_len;
-	unsigned char		rtm_src_len;
-	unsigned char		rtm_tos;
+    unsigned char		rtm_family;
+    unsigned char		rtm_dst_len;
+    unsigned char		rtm_src_len;
+    unsigned char		rtm_tos;
 
-	unsigned char		rtm_table;	/* Routing table id */
-	unsigned char		rtm_protocol;	/* Routing protocol; see below	*/
-	unsigned char		rtm_scope;	/* See below */	
-	unsigned char		rtm_type;	/* See below	*/
+    unsigned char		rtm_table;	/* Routing table id */
+    unsigned char		rtm_protocol;	/* Routing protocol; see below	*/
+    unsigned char		rtm_scope;	/* See below */
+    unsigned char		rtm_type;	/* See below	*/
 
-	unsigned		rtm_flags;
+    unsigned		rtm_flags;
 };
 
 /* rtm_type */
 
 enum
 {
-	RTN_UNSPEC,
-	RTN_UNICAST,		/* Gateway or direct route	*/
-	RTN_LOCAL,		/* Accept locally		*/
-	RTN_BROADCAST,		/* Accept locally as broadcast,
+    RTN_UNSPEC,
+    RTN_UNICAST,		/* Gateway or direct route	*/
+    RTN_LOCAL,		/* Accept locally		*/
+    RTN_BROADCAST,		/* Accept locally as broadcast,
 				   send as broadcast */
-	RTN_ANYCAST,		/* Accept locally as broadcast,
+    RTN_ANYCAST,		/* Accept locally as broadcast,
 				   but send as unicast */
-	RTN_MULTICAST,		/* Multicast route		*/
-	RTN_BLACKHOLE,		/* Drop				*/
-	RTN_UNREACHABLE,	/* Destination is unreachable   */
-	RTN_PROHIBIT,		/* Administratively prohibited	*/
-	RTN_THROW,		/* Not in this table		*/
-	RTN_NAT,		/* Translate this address	*/
-	RTN_XRESOLVE,		/* Use external resolver	*/
+    RTN_MULTICAST,		/* Multicast route		*/
+    RTN_BLACKHOLE,		/* Drop				*/
+    RTN_UNREACHABLE,	/* Destination is unreachable   */
+    RTN_PROHIBIT,		/* Administratively prohibited	*/
+    RTN_THROW,		/* Not in this table		*/
+    RTN_NAT,		/* Translate this address	*/
+    RTN_XRESOLVE,		/* Use external resolver	*/
 };
 
 #define RTN_MAX RTN_XRESOLVE
@@ -122,7 +122,7 @@ enum
 
 #define RTPROT_UNSPEC	0
 #define RTPROT_REDIRECT	1	/* Route installed by ICMP redirects;
-				   not used by current IPv4 */
+not used by current IPv4 */
 #define RTPROT_KERNEL	2	/* Route installed by kernel		*/
 #define RTPROT_BOOT	3	/* Route installed during boot		*/
 #define RTPROT_STATIC	4	/* Route installed by administrator	*/
@@ -154,12 +154,12 @@ enum
 
 enum rt_scope_t
 {
-	RT_SCOPE_UNIVERSE=0,
-/* User defined values  */
-	RT_SCOPE_SITE=200,
-	RT_SCOPE_LINK=253,
-	RT_SCOPE_HOST=254,
-	RT_SCOPE_NOWHERE=255
+    RT_SCOPE_UNIVERSE=0,
+    /* User defined values  */
+    RT_SCOPE_SITE=200,
+    RT_SCOPE_LINK=253,
+    RT_SCOPE_HOST=254,
+    RT_SCOPE_NOWHERE=255
 };
 
 /* rtm_flags */
@@ -172,11 +172,11 @@ enum rt_scope_t
 
 enum rt_class_t
 {
-	RT_TABLE_UNSPEC=0,
-/* User defined values */
-	RT_TABLE_DEFAULT=253,
-	RT_TABLE_MAIN=254,
-	RT_TABLE_LOCAL=255
+    RT_TABLE_UNSPEC=0,
+    /* User defined values */
+    RT_TABLE_DEFAULT=253,
+    RT_TABLE_MAIN=254,
+    RT_TABLE_LOCAL=255
 };
 #define RT_TABLE_MAX RT_TABLE_LOCAL
 
@@ -186,19 +186,19 @@ enum rt_class_t
 
 enum rtattr_type_t
 {
-	RTA_UNSPEC,
-	RTA_DST,
-	RTA_SRC,
-	RTA_IIF,
-	RTA_OIF,
-	RTA_GATEWAY,
-	RTA_PRIORITY,
-	RTA_PREFSRC,
-	RTA_METRICS,
-	RTA_MULTIPATH,
-	RTA_PROTOINFO,
-	RTA_FLOW,
-	RTA_CACHEINFO
+    RTA_UNSPEC,
+    RTA_DST,
+    RTA_SRC,
+    RTA_IIF,
+    RTA_OIF,
+    RTA_GATEWAY,
+    RTA_PRIORITY,
+    RTA_PREFSRC,
+    RTA_METRICS,
+    RTA_MULTIPATH,
+    RTA_PROTOINFO,
+    RTA_FLOW,
+    RTA_CACHEINFO
 };
 
 #define RTA_MAX RTA_CACHEINFO
@@ -217,10 +217,10 @@ enum rtattr_type_t
 
 struct rtnexthop
 {
-	unsigned short		rtnh_len;
-	unsigned char		rtnh_flags;
-	unsigned char		rtnh_hops;
-	int			rtnh_ifindex;
+    unsigned short		rtnh_len;
+    unsigned char		rtnh_flags;
+    unsigned char		rtnh_hops;
+    int			rtnh_ifindex;
 };
 
 /* rtnh_flags */
@@ -244,41 +244,41 @@ struct rtnexthop
 
 struct rta_cacheinfo
 {
-	__u32	rta_clntref;
-	__u32	rta_lastuse;
-	__s32	rta_expires;
-	__u32	rta_error;
-	__u32	rta_used;
+    __u32	rta_clntref;
+    __u32	rta_lastuse;
+    __s32	rta_expires;
+    __u32	rta_error;
+    __u32	rta_used;
 
 #define RTNETLINK_HAVE_PEERINFO 1
-	__u32	rta_id;
-	__u32	rta_ts;
-	__u32	rta_tsage;
+    __u32	rta_id;
+    __u32	rta_ts;
+    __u32	rta_tsage;
 };
 
 /* RTM_METRICS --- array of struct rtattr with types of RTAX_* */
 
 enum
 {
-	RTAX_UNSPEC,
+    RTAX_UNSPEC,
 #define RTAX_UNSPEC RTAX_UNSPEC
-	RTAX_LOCK,
+    RTAX_LOCK,
 #define RTAX_LOCK RTAX_LOCK
-	RTAX_MTU,
+    RTAX_MTU,
 #define RTAX_MTU RTAX_MTU
-	RTAX_WINDOW,
+    RTAX_WINDOW,
 #define RTAX_WINDOW RTAX_WINDOW
-	RTAX_RTT,
+    RTAX_RTT,
 #define RTAX_RTT RTAX_RTT
-	RTAX_RTTVAR,
+    RTAX_RTTVAR,
 #define RTAX_RTTVAR RTAX_RTTVAR
-	RTAX_SSTHRESH,
+    RTAX_SSTHRESH,
 #define RTAX_SSTHRESH RTAX_SSTHRESH
-	RTAX_CWND,
+    RTAX_CWND,
 #define RTAX_CWND RTAX_CWND
-	RTAX_ADVMSS,
+    RTAX_ADVMSS,
 #define RTAX_ADVMSS RTAX_ADVMSS
-	RTAX_REORDERING,
+    RTAX_REORDERING,
 #define RTAX_REORDERING RTAX_REORDERING
 };
 
@@ -292,22 +292,22 @@ enum
 
 struct ifaddrmsg
 {
-	unsigned char	ifa_family;
-	unsigned char	ifa_prefixlen;	/* The prefix length		*/
-	unsigned char	ifa_flags;	/* Flags			*/
-	unsigned char	ifa_scope;	/* See above			*/
-	int		ifa_index;	/* Link index			*/
+    unsigned char	ifa_family;
+    unsigned char	ifa_prefixlen;	/* The prefix length		*/
+    unsigned char	ifa_flags;	/* Flags			*/
+    unsigned char	ifa_scope;	/* See above			*/
+    int		ifa_index;	/* Link index			*/
 };
 
 enum
 {
-	IFA_UNSPEC,
-	IFA_ADDRESS,
-	IFA_LOCAL,
-	IFA_LABEL,
-	IFA_BROADCAST,
-	IFA_ANYCAST,
-	IFA_CACHEINFO
+    IFA_UNSPEC,
+    IFA_ADDRESS,
+    IFA_LOCAL,
+    IFA_LABEL,
+    IFA_BROADCAST,
+    IFA_ANYCAST,
+    IFA_CACHEINFO
 };
 
 #define IFA_MAX IFA_CACHEINFO
@@ -322,8 +322,8 @@ enum
 
 struct ifa_cacheinfo
 {
-	__s32	ifa_prefered;
-	__s32	ifa_valid;
+    __s32	ifa_prefered;
+    __s32	ifa_valid;
 };
 
 
@@ -344,21 +344,21 @@ struct ifa_cacheinfo
 
 struct ndmsg
 {
-	unsigned char	ndm_family;
-	unsigned char	ndm_pad1;
-	unsigned short	ndm_pad2;
-	int		ndm_ifindex;	/* Link index			*/
-	__u16		ndm_state;
-	__u8		ndm_flags;
-	__u8		ndm_type;
+    unsigned char	ndm_family;
+    unsigned char	ndm_pad1;
+    unsigned short	ndm_pad2;
+    int		ndm_ifindex;	/* Link index			*/
+    __u16		ndm_state;
+    __u8		ndm_flags;
+    __u8		ndm_type;
 };
 
 enum
 {
-	NDA_UNSPEC,
-	NDA_DST,
-	NDA_LLADDR,
-	NDA_CACHEINFO
+    NDA_UNSPEC,
+    NDA_DST,
+    NDA_LLADDR,
+    NDA_CACHEINFO
 };
 
 #define NDA_MAX NDA_CACHEINFO
@@ -392,10 +392,10 @@ enum
 
 struct nda_cacheinfo
 {
-	__u32		ndm_confirmed;
-	__u32		ndm_used;
-	__u32		ndm_updated;
-	__u32		ndm_refcnt;
+    __u32		ndm_confirmed;
+    __u32		ndm_used;
+    __u32		ndm_updated;
+    __u32		ndm_refcnt;
 };
 
 /****
@@ -404,7 +404,7 @@ struct nda_cacheinfo
 
 struct rtgenmsg
 {
-	unsigned char		rtgen_family;
+    unsigned char		rtgen_family;
 };
 
 /*****************************************************************
@@ -418,29 +418,29 @@ struct rtgenmsg
 
 struct ifinfomsg
 {
-	unsigned char	ifi_family;
-	unsigned char	__ifi_pad;
-	unsigned short	ifi_type;		/* ARPHRD_* */
-	int		ifi_index;		/* Link index	*/
-	unsigned	ifi_flags;		/* IFF_* flags	*/
-	unsigned	ifi_change;		/* IFF_* change mask */
+    unsigned char	ifi_family;
+    unsigned char	__ifi_pad;
+    unsigned short	ifi_type;		/* ARPHRD_* */
+    int		ifi_index;		/* Link index	*/
+    unsigned	ifi_flags;		/* IFF_* flags	*/
+    unsigned	ifi_change;		/* IFF_* change mask */
 };
 
 enum
 {
-	IFLA_UNSPEC,
-	IFLA_ADDRESS,
-	IFLA_BROADCAST,
-	IFLA_IFNAME,
-	IFLA_MTU,
-	IFLA_LINK,
-	IFLA_QDISC,
-	IFLA_STATS,
-	IFLA_COST,
+    IFLA_UNSPEC,
+    IFLA_ADDRESS,
+    IFLA_BROADCAST,
+    IFLA_IFNAME,
+    IFLA_MTU,
+    IFLA_LINK,
+    IFLA_QDISC,
+    IFLA_STATS,
+    IFLA_COST,
 #define IFLA_COST IFLA_COST
-	IFLA_PRIORITY,
+    IFLA_PRIORITY,
 #define IFLA_PRIORITY IFLA_PRIORITY
-	IFLA_MASTER
+    IFLA_MASTER
 #define IFLA_MASTER IFLA_MASTER
 };
 
@@ -485,23 +485,23 @@ enum
 
 struct tcmsg
 {
-	unsigned char	tcm_family;
-	unsigned char	tcm__pad1;
-	unsigned short	tcm__pad2;
-	int		tcm_ifindex;
-	__u32		tcm_handle;
-	__u32		tcm_parent;
-	__u32		tcm_info;
+    unsigned char	tcm_family;
+    unsigned char	tcm__pad1;
+    unsigned short	tcm__pad2;
+    int		tcm_ifindex;
+    __u32		tcm_handle;
+    __u32		tcm_parent;
+    __u32		tcm_info;
 };
 
 enum
 {
-	TCA_UNSPEC,
-	TCA_KIND,
-	TCA_OPTIONS,
-	TCA_STATS,
-	TCA_XSTATS,
-	TCA_RATE,
+    TCA_UNSPEC,
+    TCA_KIND,
+    TCA_OPTIONS,
+    TCA_STATS,
+    TCA_XSTATS,
+    TCA_RATE,
 };
 
 #define TCA_MAX TCA_RATE
@@ -540,8 +540,8 @@ enum
 
 static __inline__ int rtattr_strcmp(struct rtattr *rta, char *str)
 {
-	int len = strlen(str) + 1;
-	return len > rta->rta_len || memcmp(RTA_DATA(rta), str, len);
+    int len = strlen(str) + 1;
+    return len > rta->rta_len || memcmp(RTA_DATA(rta), str, len);
 }
 
 extern int rtattr_parse(struct rtattr *tb[], int maxattr, struct rtattr *rta, int len);
@@ -550,8 +550,8 @@ extern struct sock *rtnl;
 
 struct rtnetlink_link
 {
-	int (*doit)(struct sk_buff *, struct nlmsghdr*, void *attr);
-	int (*dumpit)(struct sk_buff *, struct netlink_callback *cb);
+    int (*doit)(struct sk_buff *, struct nlmsghdr*, void *attr);
+    int (*dumpit)(struct sk_buff *, struct netlink_callback *cb);
 };
 
 extern struct rtnetlink_link * rtnetlink_links[NPROTO];

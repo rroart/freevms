@@ -28,5 +28,5 @@
 void cmd_find (char *cp)
 
 {
-  if (range_single (cp, &cp, &cur_position) >= 0) eoltest (cp);
+    if (range_single (cp, &cp, &cur_position) >= 0) eoltest (cp);
 }

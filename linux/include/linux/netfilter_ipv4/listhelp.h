@@ -40,13 +40,16 @@
 })
 
 static inline int
-__list_cmp_same(const void *p1, const void *p2) { return p1 == p2; }
+__list_cmp_same(const void *p1, const void *p2)
+{
+    return p1 == p2;
+}
 
 /* Is this entry in the list? */
 static inline int
 list_inlist(struct list_head *head, const void *entry)
 {
-	return LIST_FIND(head, __list_cmp_same, void *, entry) != NULL;
+    return LIST_FIND(head, __list_cmp_same, void *, entry) != NULL;
 }
 
 /* Delete from list. */
@@ -67,16 +70,16 @@ do {									\
 static inline void
 list_append(struct list_head *head, void *new)
 {
-	ASSERT_WRITE_LOCK(head);
-	list_add((new), (head)->prev);
+    ASSERT_WRITE_LOCK(head);
+    list_add((new), (head)->prev);
 }
 
 /* Prepend. */
 static inline void
 list_prepend(struct list_head *head, void *new)
 {
-	ASSERT_WRITE_LOCK(head);
-	list_add(new, head);
+    ASSERT_WRITE_LOCK(head);
+    list_add(new, head);
 }
 
 /* Insert according to ordering function; insert before first true. */
@@ -94,18 +97,18 @@ do {								\
    can use these functions. */
 static inline int __list_cmp_name(const void *i, const char *name)
 {
-	return strcmp(name, i+sizeof(struct list_head)) == 0;
+    return strcmp(name, i+sizeof(struct list_head)) == 0;
 }
 
 /* Returns false if same name already in list, otherwise does insert. */
 static inline int
 list_named_insert(struct list_head *head, void *new)
 {
-	if (LIST_FIND(head, __list_cmp_name, void *,
-		      new + sizeof(struct list_head)))
-		return 0;
-	list_prepend(head, new);
-	return 1;
+    if (LIST_FIND(head, __list_cmp_name, void *,
+                  new + sizeof(struct list_head)))
+        return 0;
+    list_prepend(head, new);
+    return 1;
 }
 
 /* Find this named element in the list. */

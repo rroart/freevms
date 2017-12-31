@@ -38,130 +38,153 @@
 #define		IMCB$C_LENGTH		280
 #define		IMCB$K_LENGTH		280
 #define		IMCB$S_IMCB$DEF		280
-	
-struct _imcb {
-  struct _imcb *imcb$l_flink;
-  struct _imcb *imcb$l_blink;
-  unsigned short int imcb$w_size;
-  unsigned char imcb$b_type;
-  char imcb$b_imcb_1;
-  unsigned char imcb$b_access_mode;
-  unsigned char imcb$b_act_code;
-  unsigned short int imcb$w_chan;
-  union  {
-    unsigned int imcb$l_flags;
-    struct  {
-      unsigned imcb$v_expreg		: 1;
-      unsigned imcb$v_shareable		: 1;
-      unsigned imcb$v_open_for_write	: 1;
-      unsigned imcb$v_res_header	: 1;
-      unsigned imcb$v_load_image	: 1;
-      unsigned imcb$v_initialize	: 1;
-      unsigned imcb$v_done		: 1;
-      unsigned imcb$v_sys_stb		: 1;
-      unsigned imcb$v_in_circularity	: 1;
-      unsigned imcb$v_mapped		: 1;
-      unsigned imcb$v_protected		: 1;
-      unsigned imcb$v_parent_prot	: 1;
-      unsigned imcb$v_cmod_vector_mapped: 1;
-      unsigned imcb$v_xlated		: 1;
-      unsigned imcb$v_protsect		: 1;
-      unsigned imcb$v_notprotsect	: 1;
-      unsigned imcb$v_discontiguous	: 1;
-      unsigned imcb$v_forkable		: 1;
-      unsigned imcb$v_compress_datasec	: 1;
-      unsigned imcb$v_version_safe	: 1;
-      unsigned imcb$v_primary_fix	: 1;
-      unsigned imcb$v_data_resident	: 1;
-      unsigned imcb$v_share_link	: 1;
-      unsigned imcb$v_autoact		: 1;
-      unsigned imcb$v_mkthreads		: 1;
-      unsigned imcb$v_upcalls		: 1;
-      unsigned imcb$v_system_image	: 1;
-      unsigned imcb$v_fill_22_		: 5;
+
+struct _imcb
+{
+    struct _imcb *imcb$l_flink;
+    struct _imcb *imcb$l_blink;
+    unsigned short int imcb$w_size;
+    unsigned char imcb$b_type;
+    char imcb$b_imcb_1;
+    unsigned char imcb$b_access_mode;
+    unsigned char imcb$b_act_code;
+    unsigned short int imcb$w_chan;
+    union
+    {
+        unsigned int imcb$l_flags;
+        struct
+        {
+            unsigned imcb$v_expreg		: 1;
+            unsigned imcb$v_shareable		: 1;
+            unsigned imcb$v_open_for_write	: 1;
+            unsigned imcb$v_res_header	: 1;
+            unsigned imcb$v_load_image	: 1;
+            unsigned imcb$v_initialize	: 1;
+            unsigned imcb$v_done		: 1;
+            unsigned imcb$v_sys_stb		: 1;
+            unsigned imcb$v_in_circularity	: 1;
+            unsigned imcb$v_mapped		: 1;
+            unsigned imcb$v_protected		: 1;
+            unsigned imcb$v_parent_prot	: 1;
+            unsigned imcb$v_cmod_vector_mapped: 1;
+            unsigned imcb$v_xlated		: 1;
+            unsigned imcb$v_protsect		: 1;
+            unsigned imcb$v_notprotsect	: 1;
+            unsigned imcb$v_discontiguous	: 1;
+            unsigned imcb$v_forkable		: 1;
+            unsigned imcb$v_compress_datasec	: 1;
+            unsigned imcb$v_version_safe	: 1;
+            unsigned imcb$v_primary_fix	: 1;
+            unsigned imcb$v_data_resident	: 1;
+            unsigned imcb$v_share_link	: 1;
+            unsigned imcb$v_autoact		: 1;
+            unsigned imcb$v_mkthreads		: 1;
+            unsigned imcb$v_upcalls		: 1;
+            unsigned imcb$v_system_image	: 1;
+            unsigned imcb$v_fill_22_		: 5;
+        };
     };
-  };
-  char imcb$t_image_name [40];
-  unsigned int imcb$l_symbol_vector_size;
-  union  {
-    unsigned long long imcb$q_ident;
-    struct  {
-      union  {
-	unsigned int imcb$l_match_control;
-	struct  {
-	  unsigned imcb$v_match_control		: 3;
-	  unsigned imcb$v_fill_23_		: 5;
-	};
-      };
-      union  {
-	unsigned int imcb$l_version;
-	struct  {
-	  unsigned imcb$v_minor_id		: 24;
-	  unsigned imcb$v_major_id		: 8;
-	};
-      };
+    char imcb$t_image_name [40];
+    unsigned int imcb$l_symbol_vector_size;
+    union
+    {
+        unsigned long long imcb$q_ident;
+        struct
+        {
+            union
+            {
+                unsigned int imcb$l_match_control;
+                struct
+                {
+                    unsigned imcb$v_match_control		: 3;
+                    unsigned imcb$v_fill_23_		: 5;
+                };
+            };
+            union
+            {
+                unsigned int imcb$l_version;
+                struct
+                {
+                    unsigned imcb$v_minor_id		: 24;
+                    unsigned imcb$v_major_id		: 8;
+                };
+            };
+        };
     };
-  };
-  union  {
-    unsigned long long imcb$q_address_range;
-    struct  {
-      void *imcb$l_starting_address;
-      void *imcb$l_end_address;
+    union
+    {
+        unsigned long long imcb$q_address_range;
+        struct
+        {
+            void *imcb$l_starting_address;
+            void *imcb$l_end_address;
+        };
     };
-  };
-  struct _eihd *imcb$l_ihd;
-  struct _kfe *imcb$l_kfe;
-  void *imcb$l_context;
-  void *imcb$l_base_address;
-  void (*imcb$l_initialize)();
-  unsigned int imcb$l_active_sons;
-  union  {
-    long long imcb$q_fixup_vector_address;
-    struct  {
-      struct _eiaf *imcb$ps_fixup_vector_address;
+    struct _eihd *imcb$l_ihd;
+    struct _kfe *imcb$l_kfe;
+    void *imcb$l_context;
+    void *imcb$l_base_address;
+    void (*imcb$l_initialize)();
+    unsigned int imcb$l_active_sons;
+    union
+    {
+        long long imcb$q_fixup_vector_address;
+        struct
+        {
+            struct _eiaf *imcb$ps_fixup_vector_address;
+        };
     };
-  };
-  union  {
-    long long imcb$q_symbol_vector_address;
-    struct  {
-      void *imcb$ps_symbol_vector_address;
+    union
+    {
+        long long imcb$q_symbol_vector_address;
+        struct
+        {
+            void *imcb$ps_symbol_vector_address;
+        };
     };
-  };
-  union  {
-    long long imcb$q_plv_address;
-    struct  {
-      struct _plv *imcb$ps_plv_address;
+    union
+    {
+        long long imcb$q_plv_address;
+        struct
+        {
+            struct _plv *imcb$ps_plv_address;
+        };
     };
-  };
-  union  {
-    long long imcb$q_cmod_kernel_address;
-    struct  {
-      void *imcb$ps_cmod_kernel_address;
+    union
+    {
+        long long imcb$q_cmod_kernel_address;
+        struct
+        {
+            void *imcb$ps_cmod_kernel_address;
+        };
     };
-  };
-  union  {
-    long long imcb$q_cmod_exec_address;
-    struct  {
-      void *imcb$ps_cmod_exec_address;
+    union
+    {
+        long long imcb$q_cmod_exec_address;
+        struct
+        {
+            void *imcb$ps_cmod_exec_address;
+        };
     };
-  };
-  union  {
-    long long imcb$q_ssi_plv;
-    struct  {
-      struct _plv *imcb$ps_ssi_plv;
+    union
+    {
+        long long imcb$q_ssi_plv;
+        struct
+        {
+            struct _plv *imcb$ps_ssi_plv;
+        };
     };
-  };
-  struct _kferes *imcb$l_kferes_ptr;
-  char imcb$t_log_image_name [40];
-  char imcb$t_dvi [16];
-  unsigned short int imcb$w_fid [3];
-  char imcb$b_risig [32];
-  short int imcb$w_fill1;
-  struct _kferes *imcb$l_kferes64_ptr;
-  void *imcb$pq_starting_address_64;
-  void *imcb$pq_end_address_64;
-  unsigned long long imcb$q_linktime;
+    struct _kferes *imcb$l_kferes_ptr;
+    char imcb$t_log_image_name [40];
+    char imcb$t_dvi [16];
+    unsigned short int imcb$w_fid [3];
+    char imcb$b_risig [32];
+    short int imcb$w_fill1;
+    struct _kferes *imcb$l_kferes64_ptr;
+    void *imcb$pq_starting_address_64;
+    void *imcb$pq_end_address_64;
+    unsigned long long imcb$q_linktime;
 };
 
 #endif
- 
+

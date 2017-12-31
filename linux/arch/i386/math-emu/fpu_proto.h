@@ -8,7 +8,7 @@ extern void FPU_printall(void);
 asmlinkage void FPU_exception(int n);
 extern int real_1op_NaN(FPU_REG *a);
 extern int real_2op_NaN(FPU_REG const *b, u_char tagb, int deststnr,
-			FPU_REG const *defaultNaN);
+                        FPU_REG const *defaultNaN);
 extern int arith_invalid(int deststnr);
 extern int FPU_divide_by_zero(int deststnr, u_char sign);
 extern int set_precision_flag(int flags);
@@ -78,21 +78,21 @@ extern void FPU_triga(void);
 extern void FPU_trigb(void);
 /* get_address.c */
 extern void *FPU_get_address(u_char FPU_modrm, unsigned long *fpu_eip,
-			 struct address *addr, fpu_addr_modes addr_modes);
+                             struct address *addr, fpu_addr_modes addr_modes);
 extern void *FPU_get_address_16(u_char FPU_modrm, unsigned long *fpu_eip,
-			    struct address *addr, fpu_addr_modes addr_modes);
+                                struct address *addr, fpu_addr_modes addr_modes);
 /* load_store.c */
 extern int FPU_load_store(u_char type, fpu_addr_modes addr_modes,
-			    void *data_address);
+                          void *data_address);
 /* poly_2xm1.c */
 extern int poly_2xm1(u_char sign, FPU_REG *arg, FPU_REG *result);
 /* poly_atan.c */
 extern void poly_atan(FPU_REG *st0_ptr, u_char st0_tag, FPU_REG *st1_ptr,
-		      u_char st1_tag);
+                      u_char st1_tag);
 /* poly_l2.c */
 extern void poly_l2(FPU_REG *st0_ptr, FPU_REG *st1_ptr, u_char st1_sign);
 extern int poly_l2p1(u_char s0, u_char s1, FPU_REG *r0, FPU_REG *r1,
-		     FPU_REG *d);
+                     FPU_REG *d);
 /* poly_sin.c */
 extern void poly_sine(FPU_REG *st0_ptr);
 extern void poly_cos(FPU_REG *st0_ptr);
@@ -120,7 +120,7 @@ extern int FPU_load_int32(long *_s, FPU_REG *loaded_data);
 extern int FPU_load_int16(short *_s, FPU_REG *loaded_data);
 extern int FPU_load_bcd(u_char *s);
 extern int FPU_store_extended(FPU_REG *st0_ptr, u_char st0_tag,
-			      long double *d);
+                              long double *d);
 extern int FPU_store_double(FPU_REG *st0_ptr, u_char st0_tag, double *dfloat);
 extern int FPU_store_single(FPU_REG *st0_ptr, u_char st0_tag, float *single);
 extern int FPU_store_int64(FPU_REG *st0_ptr, u_char st0_tag, long long *d);

@@ -23,22 +23,26 @@
 #define		MPW$M_IDCODE		0xFF000000
 #define		MPW$M_LOLIMIT		0x100
 #define		MPW$S_MPWDEF		4
-	
-struct _mpw {
-  union  {
-    struct  {
-      unsigned mpw$v_rcode	: 8;
-      unsigned mpw$v_rmodifiers	: 8;
-      unsigned mpw$v_reserved	: 8;
-      unsigned mpw$v_idcode	: 8;
+
+struct _mpw
+{
+    union
+    {
+        struct
+        {
+            unsigned mpw$v_rcode	: 8;
+            unsigned mpw$v_rmodifiers	: 8;
+            unsigned mpw$v_reserved	: 8;
+            unsigned mpw$v_idcode	: 8;
+        };
+        struct
+        {
+            unsigned mpw$v_rcode_fill	: 8;
+            unsigned mpw$v_lolimit	: 1;
+            unsigned mpw$v_fill_0_	: 7;
+        };
     };
-    struct  {
-      unsigned mpw$v_rcode_fill	: 8;
-      unsigned mpw$v_lolimit	: 1;
-      unsigned mpw$v_fill_0_	: 7;
-    };
-  };
 };
- 
+
 #endif
- 
+

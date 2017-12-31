@@ -1,7 +1,6 @@
 #ifndef exe_routines_h
 #define exe_routines_h
 
-//#include <ints.h>
 #include <adpdef.h>
 #include <arbdef.h>
 #include <cbbdef.h>
@@ -10,7 +9,9 @@
 #include <chpctldef.h>
 #include <chpretdef.h>
 #include <cpudef.h>
+#include <fabdef.h>
 #include <far_pointers.h>
+#include <fiddef.h>
 #include <fkbdef.h>
 #include <irpdef.h>
 #include <jibdef.h>
@@ -18,8 +19,11 @@
 #include <mmgdef.h>
 #include <orbdef.h>
 #include <pcbdef.h>
+#include <rabdef.h>
 #include <tqedef.h>
 #include <ucbdef.h>
+
+#include <descrip.h>
 
 int   exe_std$abortio (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, int qio_sts);
 int   exe_std$alloc_bufio_32 (struct _irp *irp, struct _pcb *pcb, void *uva32, int pktdatsiz);
@@ -86,7 +90,7 @@ int   exe_std$debit_bytcnt (int debit, struct _pcb *pcb);
 int   exe_std$debit_bytcnt_alo (int debit, struct _pcb *pcb, int32 *alosize_p,
                                 void **pool_p);
 int   exe_std$debit_bytcnt_bytlm_alo (int debit, struct _pcb *pcb, int32 *alosize_p,
-				      void **pool_p);
+                                      void **pool_p);
 int   exe_std$debit_bytcnt_bytlm_nw (int debit, struct _pcb *pcb);
 int   exe_std$finishio (struct _irp *irp, struct _ucb *ucb);
 int       exe$illiofunc (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
@@ -96,7 +100,7 @@ void  exe_std$insioqc (struct _irp *irp, struct _ucb *ucb);
 void  exe_std$insioq_simple (struct _irp *irp, struct _ucb *ucb);
 void  exe_std$instimq (int duetim_lo, int duetim_hi, struct _tqe *tqe);
 void  exe_std$iofork_cpu (struct _fkb *fkb, struct _cpu *destcpudb);
-int   exe_std$iorsnwait (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb, 
+int   exe_std$iorsnwait (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb,
                          int qio_sts, int rsn);
 int       exe$kp_allocate_kpb (struct _kpb **kpb_p, int stksiz, int flags, int paramsiz);
 int       exe$kp_deallocate_kpb (struct _kpb *kpb);
@@ -118,27 +122,27 @@ void     *exe$lal_remove_first(void *listhead);
 void  exe_std$mntversio (void (*rout)(), struct _irp *irp, struct _ucb *ucb);
 int   exe_std$modify (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
 
-#ifdef  __INITIAL_POINTER_SIZE	
-int   exe_std$modifylock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb, 
-                          VOID_PQ buf, int bufsiz, 
-                          void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, 
-                                           struct _ccb *ccb, int errsts));
+#ifdef  __INITIAL_POINTER_SIZE
+int   exe_std$modifylock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb,
+                          VOID_PQ buf, int bufsiz,
+                          void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb,
+                                  struct _ccb *ccb, int errsts));
 #else
-int   exe_std$modifylock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb, 
-                          void *buf, int bufsiz, 
-                          void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, 
-                                           struct _ccb *ccb, int errsts));
-#endif 
+int   exe_std$modifylock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb,
+                          void *buf, int bufsiz,
+                          void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb,
+                                  struct _ccb *ccb, int errsts));
+#endif
 
 int   exe_std$mount_ver (int iost1, int iost2, struct _irp *irp, struct _ucb *ucb);
 
-#ifdef  __INITIAL_POINTER_SIZE	
+#ifdef  __INITIAL_POINTER_SIZE
 int   exe_std$nam_to_pcb(INT_PQ pid_p,VOID_PQ prcnam_p,int nsa_id,struct _pcb *pcb,
-			 int *rpid_p,struct _ktb **rktb_p,struct _pcb **rpcb_p);
+                         int *rpid_p,struct _ktb **rktb_p,struct _pcb **rpcb_p);
 #else
 int   exe_std$nam_to_pcb(int *pid_p,void *prcnam_p,int nsa_id,struct _pcb *pcb,
-			 int *rpid_p,struct _ktb **rktb_p,struct _pcb **rpcb_p);
-#endif 
+                         int *rpid_p,struct _ktb **rktb_p,struct _pcb **rpcb_p);
+#endif
 
 int   exe_std$oneparm (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
 void  exe_std$outzstring (char *string);
@@ -152,10 +156,10 @@ int   exe_std$prober_dsc (void *dsc_p);
 int   exe_std$probew (VOID_PQ buf, int bufsiz, int acmode);
 int   exe_std$probew_dsc (void *dsc_p);
 
-int   exe_std$prober_dsc64 (VOID_PQ dsc_p, UINT64_PQ ret_length, 
-			    CHAR_PPQ ret_bufadr);
+int   exe_std$prober_dsc64 (VOID_PQ dsc_p, UINT64_PQ ret_length,
+                            CHAR_PPQ ret_bufadr);
 int   exe_std$probew_dsc64 (VOID_PQ dsc_p, UINT64_PQ ret_length,
-			    CHAR_PPQ ret_bufadr);
+                            CHAR_PPQ ret_bufadr);
 
 int   exe_std$qioacppkt (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb);
 int   exe_std$qiodrvpkt (struct _irp *irp, struct _ucb *ucb);
@@ -165,23 +169,23 @@ int 	  exe$psx_resume_and_wait (struct _pcb *child_pcb);
 void	  exe$psx_set_fork_status (struct _pcb *child_pcb, int status);
 int   exe_std$read (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
 
-#ifdef  __INITIAL_POINTER_SIZE	
+#ifdef  __INITIAL_POINTER_SIZE
 int   exe_std$readchk (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, VOID_PQ buf, int bufsiz);
 #else
 int   exe_std$readchk (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, void *buf, int bufsiz);
-#endif 
+#endif
 
-#ifdef  __INITIAL_POINTER_SIZE	
-int   exe_std$readlock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb, 
-			VOID_PQ buf, int bufsiz, 
-			void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, 
-					 struct _ccb *ccb, int errsts));
+#ifdef  __INITIAL_POINTER_SIZE
+int   exe_std$readlock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb,
+                        VOID_PQ buf, int bufsiz,
+                        void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb,
+                                struct _ccb *ccb, int errsts));
 #else
-int   exe_std$readlock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb, 
-			void *buf, int bufsiz, 
-			void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, 
-					 struct _ccb *ccb, int errsts));
-#endif 
+int   exe_std$readlock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb,
+                        void *buf, int bufsiz,
+                        void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb,
+                                struct _ccb *ccb, int errsts));
+#endif
 
 int   exe_std$rmvtimq (int acmode, int reqid, int remval, int ipid);
 int   exe_std$sensemode (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
@@ -195,40 +199,40 @@ int   exe$timedwait_setup (long long *delay_nanos, long long *end_value_p);
 int   exe$timedwait_setup_10us (long long *delay_10us, long long *end_value_p);
 int   exe_std$write (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
 
-#ifdef  __INITIAL_POINTER_SIZE	
+#ifdef  __INITIAL_POINTER_SIZE
 int   exe_std$writechk (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, VOID_PQ buf, int bufsiz);
 #else
 int   exe_std$writechk (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, void *buf, int bufsiz);
-#endif 
+#endif
 
-#ifdef  __INITIAL_POINTER_SIZE	
-int   exe_std$writelock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb, 
-			 VOID_PQ buf, int bufsiz, 
-			 void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, 
-					  struct _ccb *ccb, int errsts));
+#ifdef  __INITIAL_POINTER_SIZE
+int   exe_std$writelock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb,
+                         VOID_PQ buf, int bufsiz,
+                         void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb,
+                                 struct _ccb *ccb, int errsts));
 #else
-int   exe_std$writelock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb, 
-			 void *buf, int bufsiz, 
-			 void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, 
-					  struct _ccb *ccb, int errsts));
-#endif 
+int   exe_std$writelock (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb,
+                         void *buf, int bufsiz,
+                         void (*err_rout)(struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb,
+                                 struct _ccb *ccb, int errsts));
+#endif
 
 int   exe_std$wrtmailbox (struct _mb_ucb *mb_ucb, int msgsiz, void *msg,...);
 int   exe_std$zeroparm (struct _irp *irp, struct _pcb *pcb, struct _ucb *ucb, struct _ccb *ccb);
 void  ini$brk (void);
 
 #if !defined(MEMORYALC_POOL_SRC)
-#ifdef  __INITIAL_POINTER_SIZE	
+#ifdef  __INITIAL_POINTER_SIZE
 int exe$allocate_pool(int requestSize, MMG$POOL_TYPE poolType, int alignment,
-		      UINT64_PQ allocatedSize, VOID_PPQ returnBlock,...);
+                      UINT64_PQ allocatedSize, VOID_PPQ returnBlock,...);
 void exe$deallocate_pool(VOID_PQ returnBlock, MMG$POOL_TYPE poolType, int size,...);
 int exe$trim_pool_list(int reqSize, MMG$POOL_TYPE poolType, int percent,...);
 
 int exe$register_pool_info(int (*need_memory_callback)(), MMG$POOL_TYPE poolType, unsigned long long userParam, int maxSize, int minSize,
-			   unsigned long long extra_param_1,unsigned long long extra_param_2);
+                           unsigned long long extra_param_1,unsigned long long extra_param_2);
 
 #endif
-#endif 
+#endif
 
 int	exe$lock_pkta(void);
 int	exe$unlock_pkta(void);
@@ -329,4 +333,4 @@ asmlinkage int exe$creprc(unsigned int *pidadr, void *image, void *input, void *
 asmlinkage int exe$crembx  (char prmflg, unsigned short int *chan, unsigned int maxmsg, unsigned int bufquo, unsigned int promsk, unsigned int acmode, void *lognam, long flags,...);
 asmlinkage int exe$setprn(struct dsc$descriptor *s);
 
-#endif 
+#endif

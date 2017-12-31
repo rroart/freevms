@@ -14,8 +14,9 @@
 
 #ifdef CONFIG_NFSD_MODULE
 
-extern struct nfsd_linkage {
-	long (*do_nfsservctl)(int cmd, void *argp, void *resp);
+extern struct nfsd_linkage
+{
+    long (*do_nfsservctl)(int cmd, void *argp, void *resp);
 } * nfsd_linkage;
 
 #endif

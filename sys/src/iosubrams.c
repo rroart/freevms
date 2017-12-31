@@ -36,15 +36,18 @@
    \param new_ucb_p yet unused
 */
 
-int ioc_std$mapvblk (unsigned int vbn, unsigned int numbytes, struct _wcb *wcb, struct _irp *irp, struct _ucb *ucb, unsigned int *lbn_p, unsigned *notmapped_p, struct _ucb **new_ucb_p) {
-  struct _wcb * head=wcb;
-  struct _wcb * tmp=head->wcb$l_wlfl;
-  while (tmp!=head) {
-    if (vbn>=tmp->wcb$l_stvbn && vbn<(tmp->wcb$l_stvbn+tmp->wcb$l_p1_count)) {
-      *lbn_p=tmp->wcb$l_p1_lbn+(vbn-tmp->wcb$l_stvbn);
-      return SS$_NORMAL;
+int ioc_std$mapvblk (unsigned int vbn, unsigned int numbytes, struct _wcb *wcb, struct _irp *irp, struct _ucb *ucb, unsigned int *lbn_p, unsigned *notmapped_p, struct _ucb **new_ucb_p)
+{
+    struct _wcb * head=wcb;
+    struct _wcb * tmp=head->wcb$l_wlfl;
+    while (tmp!=head)
+    {
+        if (vbn>=tmp->wcb$l_stvbn && vbn<(tmp->wcb$l_stvbn+tmp->wcb$l_p1_count))
+        {
+            *lbn_p=tmp->wcb$l_p1_lbn+(vbn-tmp->wcb$l_stvbn);
+            return SS$_NORMAL;
+        }
+        tmp=tmp->wcb$l_wlfl;
     }
-    tmp=tmp->wcb$l_wlfl;
-  }
-  return 0;
+    return 0;
 }

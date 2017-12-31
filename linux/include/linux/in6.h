@@ -1,9 +1,9 @@
 /*
- *	Types and definitions for AF_INET6 
- *	Linux INET6 implementation 
+ *	Types and definitions for AF_INET6
+ *	Linux INET6 implementation
  *
  *	Authors:
- *	Pedro Roque		<roque@di.fc.ul.pt>	
+ *	Pedro Roque		<roque@di.fc.ul.pt>
  *
  *	Sources:
  *	IPv6 Program Interfaces for BSD Systems
@@ -29,44 +29,46 @@
 
 struct in6_addr
 {
-	union 
-	{
-		__u8		u6_addr8[16];
-		__u16		u6_addr16[8];
-		__u32		u6_addr32[4];
-	} in6_u;
+    union
+    {
+        __u8		u6_addr8[16];
+        __u16		u6_addr16[8];
+        __u32		u6_addr32[4];
+    } in6_u;
 #define s6_addr			in6_u.u6_addr8
 #define s6_addr16		in6_u.u6_addr16
 #define s6_addr32		in6_u.u6_addr32
 };
 
-struct sockaddr_in6 {
-	unsigned short int	sin6_family;    /* AF_INET6 */
-	__u16			sin6_port;      /* Transport layer port # */
-	__u32			sin6_flowinfo;  /* IPv6 flow information */
-	struct in6_addr		sin6_addr;      /* IPv6 address */
-	__u32			sin6_scope_id;  /* scope id (new in RFC2553) */
+struct sockaddr_in6
+{
+    unsigned short int	sin6_family;    /* AF_INET6 */
+    __u16			sin6_port;      /* Transport layer port # */
+    __u32			sin6_flowinfo;  /* IPv6 flow information */
+    struct in6_addr		sin6_addr;      /* IPv6 address */
+    __u32			sin6_scope_id;  /* scope id (new in RFC2553) */
 };
 
-struct ipv6_mreq {
-	/* IPv6 multicast address of group */
-	struct in6_addr ipv6mr_multiaddr;
+struct ipv6_mreq
+{
+    /* IPv6 multicast address of group */
+    struct in6_addr ipv6mr_multiaddr;
 
-	/* local IPv6 address of interface */
-	int		ipv6mr_ifindex;
+    /* local IPv6 address of interface */
+    int		ipv6mr_ifindex;
 };
 
 struct in6_flowlabel_req
 {
-	struct in6_addr	flr_dst;
-	__u32	flr_label;
-	__u8	flr_action;
-	__u8	flr_share;
-	__u16	flr_flags;
-	__u16 	flr_expires;
-	__u16	flr_linger;
-	__u32	__flr_pad;
-	/* Options in format of IPV6_PKTOPTIONS */
+    struct in6_addr	flr_dst;
+    __u32	flr_label;
+    __u8	flr_action;
+    __u8	flr_share;
+    __u16	flr_flags;
+    __u16 	flr_expires;
+    __u16	flr_linger;
+    __u32	__flr_pad;
+    /* Options in format of IPV6_PKTOPTIONS */
 };
 
 #define IPV6_FL_A_GET	0
@@ -84,7 +86,7 @@ struct in6_flowlabel_req
 
 
 /*
- *	Bitmask constant declarations to help applications select out the 
+ *	Bitmask constant declarations to help applications select out the
  *	flow label and priority fields.
  *
  *	Note that this are in host byte order while the flowinfo field of

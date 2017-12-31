@@ -25,7 +25,7 @@
  *				Andrew Allison
  *				50 Denlaw Road
  *				London, Ont
- *				Canada 
+ *				Canada
  *				N6G 3L4
  *
  */
@@ -55,29 +55,30 @@ int lib$$ncompare (char *s1,char *s2);
 int lib$$ncompare (char *s1,char *s2)
 
 {
-unsigned short	s1_len,  s2_len;
-int	 	min_len, max_len, i;
+    unsigned short	s1_len,  s2_len;
+    int	 	min_len, max_len, i;
 
-	s1_len = strlen (s1);
-	s2_len = strlen (s2);
+    s1_len = strlen (s1);
+    s2_len = strlen (s2);
 
-	min_len = ( s1_len < s2_len) ? s1_len : s2_len;
-	max_len = ( s1_len > s2_len) ? s1_len : s2_len;
+    min_len = ( s1_len < s2_len) ? s1_len : s2_len;
+    max_len = ( s1_len > s2_len) ? s1_len : s2_len;
 
-	if ( s1_len > s2_len )
-		return  1;
-	if ( s1_len < s2_len )
-		return -1;
+    if ( s1_len > s2_len )
+        return  1;
+    if ( s1_len < s2_len )
+        return -1;
 
 //	The string are of equal length
-	for (i = 0; i < max_len; i++)
-	{	if ( s1[i] > s2[i] )
-			return  1;
-		if ( s1[i] < s2[i] )
-			return -1;
-	}
+    for (i = 0; i < max_len; i++)
+    {
+        if ( s1[i] > s2[i] )
+            return  1;
+        if ( s1[i] < s2[i] )
+            return -1;
+    }
 
-	return 0;
+    return 0;
 }
 
 /*************************************************************/

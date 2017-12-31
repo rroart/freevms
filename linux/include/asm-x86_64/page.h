@@ -21,7 +21,7 @@
 #define LARGE_PFN	(LARGE_PAGE_SIZE / PAGE_SIZE)
 
 #define KERNEL_TEXT_SIZE  (40UL*1024*1024)
-#define KERNEL_TEXT_START 0xffffffff80000000UL 
+#define KERNEL_TEXT_START 0xffffffff80000000UL
 
 /* Changing the next two defines should be enough to increase the kernel stack */
 /* We still hope 8K is enough, but ... */
@@ -37,7 +37,7 @@
 #ifndef __ASSEMBLY__
 
 void clear_page(void *);
-void copy_page(void *, void *); 
+void copy_page(void *, void *);
 
 #define clear_user_page(page, vaddr)	clear_page(page)
 #define copy_user_page(to, from, vaddr)	copy_page(to, from)
@@ -45,16 +45,34 @@ void copy_page(void *, void *);
 /*
  * These are used to make use of C type-checking..
  */
-typedef struct { unsigned long pte; } pte_t;
-typedef struct { unsigned long pmd; } pmd_t;
-typedef struct { unsigned long pud; } pud_t;
-typedef struct { unsigned long pgd; } pgd_t;
+typedef struct
+{
+    unsigned long pte;
+} pte_t;
+typedef struct
+{
+    unsigned long pmd;
+} pmd_t;
+typedef struct
+{
+    unsigned long pud;
+} pud_t;
+typedef struct
+{
+    unsigned long pgd;
+} pgd_t;
 #if 0
-typedef struct { unsigned long pml4; } pml4_t;
+typedef struct
+{
+    unsigned long pml4;
+} pml4_t;
 #endif
 #define PTE_MASK	PHYSICAL_PAGE_MASK
 
-typedef struct { unsigned long pgprot; } pgprot_t;
+typedef struct
+{
+    unsigned long pgprot;
+} pgprot_t;
 
 #define pte_val(x)	((x).pte)
 #define pmd_val(x)	((x).pmd)
@@ -70,7 +88,7 @@ typedef struct { unsigned long pgprot; } pgprot_t;
 #define __pud(x) ((pud_t) { (x) } )
 #define __pgd(x) ((pgd_t) { (x) } )
 #define __pgprot(x)	((pgprot_t) { (x) } )
- 
+
 extern unsigned long vm_stack_flags, vm_stack_flags32;
 extern unsigned long vm_data_default_flags, vm_data_default_flags32;
 extern unsigned long vm_force_exec32;
@@ -92,11 +110,12 @@ extern unsigned long vm_force_exec32;
 /*
  * Tell the user there is some problem.  The exception handler decodes this frame.
  */
-struct bug_frame { 
-       unsigned char ud2[2];          
-       char *filename;    /* should use 32bit offset instead, but the assembler doesn't like it */ 
-       unsigned short line; 
-} __attribute__((packed)); 
+struct bug_frame
+{
+    unsigned char ud2[2];
+    char *filename;    /* should use 32bit offset instead, but the assembler doesn't like it */
+    unsigned short line;
+} __attribute__((packed));
 #define BUG() asm volatile("ud2 ; .quad %P1 ; .short %P0" :: "i"(__LINE__), \
 		"i" (__stringify(KBUILD_BASENAME)))
 #define HEADER_BUG() asm volatile("ud2 ; .quad %P1 ; .short %P0" :: "i"(__LINE__), \
@@ -106,15 +125,17 @@ struct bug_frame {
 /* Pure 2^n version of get_order */
 extern __inline__ int get_order(unsigned long size)
 {
-	int order;
+    int order;
 
-	size = (size-1) >> (PAGE_SHIFT-1);
-	order = -1;
-	do {
-		size >>= 1;
-		order++;
-	} while (size);
-	return order;
+    size = (size-1) >> (PAGE_SHIFT-1);
+    order = -1;
+    do
+    {
+        size >>= 1;
+        order++;
+    }
+    while (size);
+    return order;
 }
 
 #endif /* __ASSEMBLY__ */
@@ -122,10 +143,10 @@ extern __inline__ int get_order(unsigned long size)
 #define PAGE_OFFSET		((unsigned long)__PAGE_OFFSET)
 
 /* Note: __pa(&symbol_visible_to_c) should be always replaced with __pa_symbol.
-   Otherwise you risk miscompilation. */ 
+   Otherwise you risk miscompilation. */
 #define __pa(x)			(((unsigned long)(x)>=__START_KERNEL_map)?(unsigned long)(x) - (unsigned long)__START_KERNEL_map:(unsigned long)(x) - PAGE_OFFSET)
-/* __pa_symbol should use for C visible symbols, but only for them. 
-   This seems to be the official gcc blessed way to do such arithmetic. */ 
+/* __pa_symbol should use for C visible symbols, but only for them.
+   This seems to be the official gcc blessed way to do such arithmetic. */
 #define __pa_symbol(x)		\
 	({unsigned long v;  \
 	  asm("" : "=r" (v) : "0" (x)); \
@@ -138,7 +159,7 @@ extern __inline__ int get_order(unsigned long size)
 #define __va(x)			((void *)((unsigned long)(x)+PAGE_OFFSET))
 #ifndef CONFIG_DISCONTIGMEM
 #define virt_to_page(kaddr)	(mem_map + (__pa(kaddr) >> PAGE_SHIFT))
-#define pfn_to_page(pfn)	(mem_map + (pfn)) 
+#define pfn_to_page(pfn)	(mem_map + (pfn))
 #define page_to_pfn(page)   ((page) - mem_map)
 #define page_to_phys(page)	(((page) - mem_map) << PAGE_SHIFT)
 #define VALID_PAGE(page)	(((page) - mem_map) < max_mapnr)
@@ -153,7 +174,7 @@ extern __inline__ int get_order(unsigned long size)
 
 #define VM_DATA_DEFAULT_FLAGS \
 	((current->thread.flags & THREAD_IA32) ? vm_data_default_flags32 : \
-	  vm_data_default_flags) 
+	  vm_data_default_flags)
 #define VM_STACK_FLAGS	vm_stack_flags
 
 #endif /* __KERNEL__ */

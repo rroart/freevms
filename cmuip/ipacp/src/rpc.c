@@ -109,21 +109,23 @@ char *strupr(char *s)
     while (*_ptr)
     {
         *_ptr = toupper(*_ptr);
-	_ptr++;
+        _ptr++;
     }
     return s;
 }
 
-struct mapping {
+struct mapping
+{
     unsigned int prog;
     unsigned int vers;
     unsigned int prot;
     unsigned int port;
-    };
+};
 
 
 
-struct service_record {
+struct service_record
+{
     struct service_record *next;
     struct service_record *prev;
     unsigned int prog;
@@ -134,7 +136,7 @@ struct service_record {
     int (*dispatch_routine)();
     char name[20];
     char image[40];
-    };
+};
 
 
 
@@ -142,7 +144,12 @@ globaldef int RPC_SERVICE = 0;
 int RPCsrv_count = 0;
 struct service_record RPCsrv_tab[DEF_MAX_RPC_SRV];
 
-int xdr_int(int x) { int y; XDR$ntov_int(&x,&y); return(y); }
+int xdr_int(int x)
+{
+    int y;
+    XDR$ntov_int(&x,&y);
+    return(y);
+}
 
 extern IPACP_Int;
 
@@ -154,7 +161,8 @@ extern IPACP_Int;
 
 **********************************************************************/
 
-typedef struct {
+typedef struct
+{
     struct uicmap_entry *next;
     int remuid, remgid;
     char *remhost;
@@ -162,7 +170,8 @@ typedef struct {
     char *localusername;
 } uicmap_entry;
 
-struct {
+struct
+{
     uicmap_entry *head, *tail;
 } UICMAP_table = {NULL, NULL};
 
@@ -170,20 +179,22 @@ struct {
 int add_uic_translation(int uid, int gid, char *hname, char *username)
 {
     struct dsc$descriptor usrnam;
-    struct {
+    struct
+    {
         unsigned short buflen, itmcod;
-	char *bufadr, *retlenadr;
-	unsigned long null;
+        char *bufadr, *retlenadr;
+        unsigned long null;
     } uailist;
     int RC;
 
     if (!UICMAP_table.head)
-        UICMAP_table.head = UICMAP_table.tail = 
-	    (uicmap_entry *)malloc(sizeof(uicmap_entry));
-    else {
-	UICMAP_table.tail->next =
-	    (uicmap_entry *)malloc(sizeof(uicmap_entry));
-	UICMAP_table.tail = UICMAP_table.tail->next;
+        UICMAP_table.head = UICMAP_table.tail =
+                                (uicmap_entry *)malloc(sizeof(uicmap_entry));
+    else
+    {
+        UICMAP_table.tail->next =
+            (uicmap_entry *)malloc(sizeof(uicmap_entry));
+        UICMAP_table.tail = UICMAP_table.tail->next;
     }
     UICMAP_table.tail->next = NULL;
     UICMAP_table.tail->remuid = uid;
@@ -194,21 +205,22 @@ int add_uic_translation(int uid, int gid, char *hname, char *username)
     strcpy(UICMAP_table.tail->localusername, username);
     if (!strcmp(username, "*"))
         UICMAP_table.tail->localuser = -1;
-    else {
-	usrnam.dsc$w_length = strlen(username);
-	usrnam.dsc$b_dtype = DSC$K_DTYPE_T;
-	usrnam.dsc$b_class = DSC$K_CLASS_S;
-	usrnam.dsc$a_pointer = username;
+    else
+    {
+        usrnam.dsc$w_length = strlen(username);
+        usrnam.dsc$b_dtype = DSC$K_DTYPE_T;
+        usrnam.dsc$b_class = DSC$K_CLASS_S;
+        usrnam.dsc$a_pointer = username;
 
-	uailist.buflen = sizeof(UICMAP_table.tail->localuser);
-	uailist.itmcod = UAI$_UIC;
-	uailist.bufadr = &UICMAP_table.tail->localuser;
-	uailist.retlenadr = 0;
-	uailist.null = 0;
+        uailist.buflen = sizeof(UICMAP_table.tail->localuser);
+        uailist.itmcod = UAI$_UIC;
+        uailist.bufadr = &UICMAP_table.tail->localuser;
+        uailist.retlenadr = 0;
+        uailist.null = 0;
 
-	RC = SYS$GETUAI(0, 0, &usrnam, &uailist, 0, 0, 0);
-	if (!(RC & 0x1))	    /* Map unknown users to -1,-1 (denied) */
-	UICMAP_table.tail->localuser = -1;
+        RC = SYS$GETUAI(0, 0, &usrnam, &uailist, 0, 0, 0);
+        if (!(RC & 0x1))	    /* Map unknown users to -1,-1 (denied) */
+            UICMAP_table.tail->localuser = -1;
     }
 
     return TRUE;
@@ -231,28 +243,30 @@ int compare_hosts(char *hostname, char *hostpattern)
      */
     if (strlen(hostpattern) < sizeof(hostcopy) - 1)
         strcpy(hostcopy, hostpattern);
-    else {
+    else
+    {
         strncpy(hostcopy, hostpattern, sizeof(hostcopy) - 1);
-	hostcopy[sizeof(hostcopy) - 1] = '\0';
+        hostcopy[sizeof(hostcopy) - 1] = '\0';
     }
 
     thispattern = strtok(hostcopy, ",");
 
-    while (thispattern) {
-	candidate.dsc$w_length = strlen(hostname);
-	pattern.dsc$w_length = strlen(thispattern);
-	candidate.dsc$b_dtype = pattern.dsc$b_dtype = DSC$K_DTYPE_T;
-	candidate.dsc$b_class = pattern.dsc$b_class = DSC$K_CLASS_S;
-	candidate.dsc$a_pointer = hostname;
-	pattern.dsc$a_pointer = thispattern;
+    while (thispattern)
+    {
+        candidate.dsc$w_length = strlen(hostname);
+        pattern.dsc$w_length = strlen(thispattern);
+        candidate.dsc$b_dtype = pattern.dsc$b_dtype = DSC$K_DTYPE_T;
+        candidate.dsc$b_class = pattern.dsc$b_class = DSC$K_CLASS_S;
+        candidate.dsc$a_pointer = hostname;
+        pattern.dsc$a_pointer = thispattern;
 
-	STR$UPCASE(&candidate, &candidate);
-	STR$UPCASE(&pattern, &pattern);
+        STR$UPCASE(&candidate, &candidate);
+        STR$UPCASE(&pattern, &pattern);
 
-	if (STR$MATCH_WILD(&candidate, &pattern) & 0x1)
-	    return 1;
+        if (STR$MATCH_WILD(&candidate, &pattern) & 0x1)
+            return 1;
 
-	thispattern = strtok(NULL, ",");
+        thispattern = strtok(NULL, ",");
     }
 
     return 0;
@@ -263,21 +277,21 @@ int compare_hosts(char *hostname, char *hostpattern)
 unsigned map_uic(unsigned *uic, int uid, int gid, char *hname)
 {
     uicmap_entry *uicptr;
-    
+
     uicptr = UICMAP_table.head;
     while (uicptr)
     {
-	/* Comparison against group removed due to problems with remote
-	   systems not necessarily having group information (such as AFS
-	   workstations) */
+        /* Comparison against group removed due to problems with remote
+           systems not necessarily having group information (such as AFS
+           workstations) */
         if (((uicptr->remuid == -2) || (uicptr->remuid == uid)) &&
-	/*  ((uicptr->remgid == -2) || (uicptr->remgid == gid)) && */
-	    (compare_hosts(hname, uicptr->remhost)))
-	{
-	    *uic = uicptr->localuser;
-	    return uicptr->localusername;
-	}
-	uicptr = uicptr->next;
+                /*  ((uicptr->remgid == -2) || (uicptr->remgid == gid)) && */
+                (compare_hosts(hname, uicptr->remhost)))
+        {
+            *uic = uicptr->localuser;
+            return uicptr->localusername;
+        }
+        uicptr = uicptr->next;
     }
     return FALSE;
 }
@@ -285,34 +299,36 @@ unsigned map_uic(unsigned *uic, int uid, int gid, char *hname)
 
 /* Translate VMS UIC (with hostname) into Unix authentification (uid,gid). */
 
-unsigned map_unix(unsigned uic, unsigned short *uid, unsigned short *gid, 
-		  char *hostname)
+unsigned map_unix(unsigned uic, unsigned short *uid, unsigned short *gid,
+                  char *hostname)
 {
     uicmap_entry *uicptr;
-    
+
     uicptr = UICMAP_table.head;
     while (uicptr)
     {
         if (((uicptr->localuser == -1) || (uic == uicptr->localuser)) &&
-	    (compare_hosts(hostname, uicptr->remhost)))
-	{
-	    *uid = uicptr->remuid;
-	    *gid = uicptr->remgid;
-	    return TRUE;
-	}
-	uicptr = uicptr->next;
+                (compare_hosts(hostname, uicptr->remhost)))
+        {
+            *uid = uicptr->remuid;
+            *gid = uicptr->remgid;
+            return TRUE;
+        }
+        uicptr = uicptr->next;
     }
     return FALSE;
 }
 
 /*  Information kept about exported filesystems  */
-typedef struct {
+typedef struct
+{
     struct export_entry *next;
     char *path, *rempath;
     char *remhost;
 } export_entry;
 
-struct {
+struct
+{
     export_entry *head, *tail;
 } EXPORT_table = { NULL, NULL };
 
@@ -322,11 +338,12 @@ add_export_path(char *path, char *remhost)
 
     if (!EXPORT_table.head)
         EXPORT_table.head = EXPORT_table.tail =
-	    (export_entry *)malloc(sizeof(export_entry));
-    else {
-	EXPORT_table.tail->next =
-	    (export_entry *)malloc(sizeof(export_entry));
-	EXPORT_table.tail = EXPORT_table.tail->next;
+                                (export_entry *)malloc(sizeof(export_entry));
+    else
+    {
+        EXPORT_table.tail->next =
+            (export_entry *)malloc(sizeof(export_entry));
+        EXPORT_table.tail = EXPORT_table.tail->next;
     }
 
     EXPORT_table.tail->next = NULL;
@@ -341,9 +358,9 @@ add_export_path(char *path, char *remhost)
     while (dirpart)
     {
         FNAME_VMS_TO_NET(dirpart, strlen(dirpart), tmpdir, 1, 1);
-	strcat(EXPORT_table.tail->rempath, "/");
-	strcat(EXPORT_table.tail->rempath, tmpdir);
-	dirpart = strtok(NULL, "/");
+        strcat(EXPORT_table.tail->rempath, "/");
+        strcat(EXPORT_table.tail->rempath, tmpdir);
+        dirpart = strtok(NULL, "/");
     }
 
     if (!*(EXPORT_table.tail->rempath))
@@ -362,9 +379,9 @@ int compare_paths(char *rempath, char *hostpath)
    as a possible abbreviation. */
 {
     if (strlen(rempath) >= strlen(hostpath))
-	return (!strncmp(hostpath, rempath, strlen(hostpath)));
+        return (!strncmp(hostpath, rempath, strlen(hostpath)));
     else
-	return FALSE;
+        return FALSE;
 }
 
 int check_export(char *path, char *remhost)
@@ -378,9 +395,9 @@ int check_export(char *path, char *remhost)
     while (exptr)
     {
         if (compare_paths(path, exptr->rempath) &&
-	    compare_hosts(remhost, exptr->remhost))
-	    return TRUE;
-	exptr = exptr->next;
+                compare_hosts(remhost, exptr->remhost))
+            return TRUE;
+        exptr = exptr->next;
     }
     return FALSE;
 }
@@ -390,36 +407,37 @@ RPC$get_exports(char *buffer)
     export_entry *exptr;
     char *curremhost;
     char remhostcopy[513];
-    
+
     *buffer = 0;
     exptr = EXPORT_table.head;
 
     while (exptr)
     {
         strcat(buffer, exptr->rempath);
-	strcat(buffer, ":");
-	/*
-	 * The original code here did strtok()'s on the live data.  Since
-	 * strtok() is destructive, this is not a real good idea.
-	 *
-	 * Tom Allebrandi (Allebrandi@Inland.Com) 11-Oct-1991
-	 */
-	if (strlen(exptr->remhost) < sizeof(remhostcopy) - 1)
-	    strcpy(remhostcopy, exptr->remhost);
-	else {
-	    strncpy(remhostcopy, exptr->remhost, sizeof(remhostcopy) - 1);
-	    remhostcopy[sizeof(remhostcopy) - 1] = '\0';
-	}
+        strcat(buffer, ":");
+        /*
+         * The original code here did strtok()'s on the live data.  Since
+         * strtok() is destructive, this is not a real good idea.
+         *
+         * Tom Allebrandi (Allebrandi@Inland.Com) 11-Oct-1991
+         */
+        if (strlen(exptr->remhost) < sizeof(remhostcopy) - 1)
+            strcpy(remhostcopy, exptr->remhost);
+        else
+        {
+            strncpy(remhostcopy, exptr->remhost, sizeof(remhostcopy) - 1);
+            remhostcopy[sizeof(remhostcopy) - 1] = '\0';
+        }
 
-	curremhost = strtok(remhostcopy, ",");
-	while (curremhost)
-	{
-	    strcat(buffer, curremhost);
-	    strcat(buffer, ":");
-	    curremhost = strtok(NULL, ",");
-	}
-	strcat(buffer, " :");
-	exptr = exptr->next;
+        curremhost = strtok(remhostcopy, ",");
+        while (curremhost)
+        {
+            strcat(buffer, curremhost);
+            strcat(buffer, ":");
+            curremhost = strtok(NULL, ",");
+        }
+        strcat(buffer, " :");
+        exptr = exptr->next;
     }
 }
 
@@ -432,18 +450,18 @@ RPC$get_exports(char *buffer)
 */
 
 int RPC$CONFIG(name_desc,prog,vers,prot,port,imname_desc)
-    struct dsc$descriptor *name_desc,*imname_desc;
-    int prog,vers,prot,port;
+struct dsc$descriptor *name_desc,*imname_desc;
+int prog,vers,prot,port;
 {
     int idx,len;
 
-/* Make sure there is room for this entry */
+    /* Make sure there is room for this entry */
 
     if (RPCsrv_count >= MAX_RPC_SRV)
-	return(-1);
+        return(-1);
     idx = RPCsrv_count++;
 
-/* Fill in the WKS entry fields */
+    /* Fill in the WKS entry fields */
 
     /* Do the numbers first */
     RPCsrv_tab[idx].prog = prog;
@@ -455,7 +473,7 @@ int RPC$CONFIG(name_desc,prog,vers,prot,port,imname_desc)
     len = name_desc->dsc$w_length;
     strncpy(&RPCsrv_tab[idx].name,name_desc->dsc$a_pointer,len);
     RPCsrv_tab[idx].name[len]=0;
-    
+
     /* Process image file */
     len = imname_desc->dsc$w_length;
     strncpy(&RPCsrv_tab[idx].image,imname_desc->dsc$a_pointer,len);
@@ -474,16 +492,16 @@ int RPC$CONFIG(name_desc,prog,vers,prot,port,imname_desc)
 */
 
 int RPC$CONFIG_AUTH(uic, uid, gid, hostname_desc)
-    struct dsc$descriptor *hostname_desc;
-    int uic,uid,gid;
+struct dsc$descriptor *hostname_desc;
+int uic,uid,gid;
 {
     char tbuff[256];	/* !!!HACK!!! hardwired constant. */
 
-/*    memcpy(hostname_desc->dsc$a_pointer,tbuff,hostname_desc->dsc$w_length);
-    tbuff[hostname_desc->dsc$w_length] = 0;
-    
-    if (!add_uic_translation(uic,uid,gid,tbuff))
-	return -1; */
+    /*    memcpy(hostname_desc->dsc$a_pointer,tbuff,hostname_desc->dsc$w_length);
+        tbuff[hostname_desc->dsc$w_length] = 0;
+
+        if (!add_uic_translation(uic,uid,gid,tbuff))
+    	return -1; */
     return 1;
 }
 
@@ -509,81 +527,84 @@ int RPC$INIT()
 
     if ((NFSconfig = fopen("NFS$CONFIG", "r")) != NULL)
     {
-	while (fgets(NFSconfigline, sizeof(NFSconfigline), NFSconfig))
-	{
-	    newline = strrchr(NFSconfigline, '\n');
-	    if (newline)
-	        *newline = 0;
-	    if ((!strlen(NFSconfigline)) || (NFSconfigline[0] == ';'))
-	        continue;
+        while (fgets(NFSconfigline, sizeof(NFSconfigline), NFSconfig))
+        {
+            newline = strrchr(NFSconfigline, '\n');
+            if (newline)
+                *newline = 0;
+            if ((!strlen(NFSconfigline)) || (NFSconfigline[0] == ';'))
+                continue;
 
-	    /* Not a comment or blank line - check for keywords */
-	    parameter = strupr(strtok(NFSconfigline, ":"));
-	    if (!strcmp(parameter, "AUTH"))
-	    {
-	        parameter = strtok(NULL, ":");
-		if (parameter == NULL)
-		    continue;
-		if (!strcmp(parameter, "*"))
-		    remuid = -2;
-		else
-		    remuid = atoi(parameter);
+            /* Not a comment or blank line - check for keywords */
+            parameter = strupr(strtok(NFSconfigline, ":"));
+            if (!strcmp(parameter, "AUTH"))
+            {
+                parameter = strtok(NULL, ":");
+                if (parameter == NULL)
+                    continue;
+                if (!strcmp(parameter, "*"))
+                    remuid = -2;
+                else
+                    remuid = atoi(parameter);
 
-		parameter = strtok(NULL, ":");
-		if (parameter == NULL)
-		    continue;
-		if (!strcmp(parameter, "*"))
-		    remgid = -2;
-		else
-		    remgid = atoi(parameter);
+                parameter = strtok(NULL, ":");
+                if (parameter == NULL)
+                    continue;
+                if (!strcmp(parameter, "*"))
+                    remgid = -2;
+                else
+                    remgid = atoi(parameter);
 
-		parameter = strtok(NULL, ":");
-		if (parameter == NULL)
-		    continue;
-		strcpy(remhost, parameter);
+                parameter = strtok(NULL, ":");
+                if (parameter == NULL)
+                    continue;
+                strcpy(remhost, parameter);
 
-		parameter = strtok(NULL, ":");
-		if (parameter == NULL)
-		    continue;
-		strcpy(locuser, parameter);
+                parameter = strtok(NULL, ":");
+                if (parameter == NULL)
+                    continue;
+                strcpy(locuser, parameter);
 
-		add_uic_translation(remuid, remgid, remhost, locuser);
-	    } else if (!strcmp(parameter, "EXPORT"))
-	    {
-	        parameter = strtok(NULL, ":");
-		if (parameter == NULL)
-		    continue;
-		strcpy(exportpath, parameter);
+                add_uic_translation(remuid, remgid, remhost, locuser);
+            }
+            else if (!strcmp(parameter, "EXPORT"))
+            {
+                parameter = strtok(NULL, ":");
+                if (parameter == NULL)
+                    continue;
+                strcpy(exportpath, parameter);
 
-		parameter = strtok(NULL, ":");
-		if (parameter == NULL)
-		    continue;
-		strcpy(remhost, parameter);
+                parameter = strtok(NULL, ":");
+                if (parameter == NULL)
+                    continue;
+                strcpy(remhost, parameter);
 
-		add_export_path(exportpath, remhost);
-	    } else if (!strcmp(parameter, "GMT_OFFSET"))
-	    {
-	        parameter = strtok(NULL, ":");
-		GMT_OFFSET = (long)(atof(parameter) * 3600.0);
-	    } else if (!strcmp(parameter, "ANONYMOUS_USER"))
-	    {
-	        parameter = strupr(strtok(NULL, ":"));
-		NFS_ANONYMOUS = (char *)malloc(strlen(parameter) + 1);
-		strcpy(NFS_ANONYMOUS, parameter);
-	    }
-	}
-	fclose(NFSconfig);
+                add_export_path(exportpath, remhost);
+            }
+            else if (!strcmp(parameter, "GMT_OFFSET"))
+            {
+                parameter = strtok(NULL, ":");
+                GMT_OFFSET = (long)(atof(parameter) * 3600.0);
+            }
+            else if (!strcmp(parameter, "ANONYMOUS_USER"))
+            {
+                parameter = strupr(strtok(NULL, ":"));
+                NFS_ANONYMOUS = (char *)malloc(strlen(parameter) + 1);
+                strcpy(NFS_ANONYMOUS, parameter);
+            }
+        }
+        fclose(NFSconfig);
     }
-    
 
-/******** internal PORT MAPPER ********************************/
+
+    /******** internal PORT MAPPER ********************************/
 
     /* Make sure there is room for this entry */
     if (RPCsrv_count >= MAX_RPC_SRV)
-	return(0);
+        return(0);
     idx = RPCsrv_count++;
 
-/* Fill in the RPC entry fields */
+    /* Fill in the RPC entry fields */
 
     /* Do the numbers first */
     RPCsrv_tab[idx].prog = RPCPROG_PMAP;
@@ -593,24 +614,24 @@ int RPC$INIT()
 
     /* Process Name */
     strncpy(RPCsrv_tab[idx].name,pmap_name,strlen(pmap_name));
-    
+
     /* Process image file */
     RPCsrv_tab[idx].name[0] = 0;
 
     RPCsrv_tab[idx].init_routine = PMAP$INIT;
-    RPCsrv_tab[idx].dispatch_routine = 
-		(*RPCsrv_tab[idx].init_routine)(&IPACP_Int);
+    RPCsrv_tab[idx].dispatch_routine =
+        (*RPCsrv_tab[idx].init_routine)(&IPACP_Int);
 
 
 
-/******** internal MOUNT ********************************/
+    /******** internal MOUNT ********************************/
 
     /* Make sure there is room for this entry */
     if (RPCsrv_count >= MAX_RPC_SRV)
-	return(0);
+        return(0);
     idx = RPCsrv_count++;
 
-/* Fill in the RPC entry fields */
+    /* Fill in the RPC entry fields */
 
     /* Do the numbers first */
     RPCsrv_tab[idx].prog = RPCPROG_MOUNT;
@@ -620,22 +641,22 @@ int RPC$INIT()
 
     /* Process Name */
     strncpy(RPCsrv_tab[idx].name,mnt_name,strlen(mnt_name));
-    
+
     /* Process image file */
     RPCsrv_tab[idx].name[0] = 0;
 
     RPCsrv_tab[idx].init_routine = MNT$INIT;
-    RPCsrv_tab[idx].dispatch_routine = 
-		(*RPCsrv_tab[idx].init_routine)(&IPACP_Int);
+    RPCsrv_tab[idx].dispatch_routine =
+        (*RPCsrv_tab[idx].init_routine)(&IPACP_Int);
 
-/******** internal NFS ********************************/
+    /******** internal NFS ********************************/
 
     /* Make sure there is room for this entry */
     if (RPCsrv_count >= MAX_RPC_SRV)
-	return(0);
+        return(0);
     idx = RPCsrv_count++;
 
-/* Fill in the RPC entry fields */
+    /* Fill in the RPC entry fields */
 
     /* Do the numbers first */
     RPCsrv_tab[idx].prog = RPCPROG_NFS;
@@ -645,22 +666,22 @@ int RPC$INIT()
 
     /* Process Name */
     strncpy(RPCsrv_tab[idx].name,nfs_name,strlen(nfs_name));
-    
+
     /* Process image file */
     RPCsrv_tab[idx].name[0] = 0;
 
     RPCsrv_tab[idx].init_routine = NFS$INIT;
-    RPCsrv_tab[idx].dispatch_routine = 
-		(*RPCsrv_tab[idx].init_routine)(&IPACP_Int);
+    RPCsrv_tab[idx].dispatch_routine =
+        (*RPCsrv_tab[idx].init_routine)(&IPACP_Int);
 
-/********   internal PCNFSD ****************************/
+    /********   internal PCNFSD ****************************/
 
     /* Make sure there is room for yet another entry */
     if (RPCsrv_count >= MAX_RPC_SRV)
         return(0);
     idx = RPCsrv_count++;
-    
-/* Fill in the RPC entry fields */
+
+    /* Fill in the RPC entry fields */
 
     /* Do the numbers first */
     RPCsrv_tab[idx].prog = RPCPROG_PCNFSD;
@@ -673,10 +694,10 @@ int RPC$INIT()
 
     /* Process image file */
     RPCsrv_tab[idx].name[0] = 0;
-    
+
     RPCsrv_tab[idx].init_routine = PCNFSD$INIT;
     RPCsrv_tab[idx].dispatch_routine =
-		(*RPCsrv_tab[idx].init_routine)(&IPACP_Int);
+        (*RPCsrv_tab[idx].init_routine)(&IPACP_Int);
 }
 
 
@@ -689,8 +710,8 @@ int RPC$CHECK_PORT(port)
     int i;
 
     for (i=0; i<RPCsrv_count; i++)
-	if (RPCsrv_tab[i].port == port)
-	    return i;
+        if (RPCsrv_tab[i].port == port)
+            return i;
     return -1;
 }
 
@@ -701,12 +722,12 @@ int RPC$CHECK_PORT(port)
 */
 
 int RPC$INPUT ( index, SrcAddr , DstAdr , SrcPrt , DstPrt ,
-		Size , Buff , out, len)
-    int index;
-    unsigned int	SrcAddr, DstAdr;
-    short unsigned int	SrcPrt, DstPrt;
-    int Size, *len;
-    struct rpc_msg *Buff,*out;
+                Size , Buff , out, len)
+int index;
+unsigned int	SrcAddr, DstAdr;
+short unsigned int	SrcPrt, DstPrt;
+int Size, *len;
+struct rpc_msg *Buff,*out;
 {
     long unsigned int xid, auth_code;
     enum msg_type direction;
@@ -718,26 +739,29 @@ int RPC$INPUT ( index, SrcAddr , DstAdr , SrcPrt , DstPrt ,
     unsigned char hname[256] = {0};
     unsigned uic;
     int checkcache;
-    static struct {
-	int RC;
-	long unsigned int xid, len;
-	int index;
-	unsigned char hname[256];
-	struct rpc_msg *out;
+    static struct
+    {
+        int RC;
+        long unsigned int xid, len;
+        int index;
+        unsigned char hname[256];
+        struct rpc_msg *out;
     } oldreplies[RPC_MAX_REPLY_CACHE];
     char *username;
     int authmechanism;
     static int nextcache, initialized = 0;
 
-    if (!initialized) {
-	int loop;
-	for (loop = 0; loop < RPC_MAX_REPLY_CACHE; loop++) {
-	    oldreplies[loop].RC, oldreplies[loop].xid, oldreplies[loop].len = 0;
-	    oldreplies[loop].index = 0;
-	    oldreplies[loop].out = NULL;
-	}
-	initialized++;
-	nextcache = 0;
+    if (!initialized)
+    {
+        int loop;
+        for (loop = 0; loop < RPC_MAX_REPLY_CACHE; loop++)
+        {
+            oldreplies[loop].RC, oldreplies[loop].xid, oldreplies[loop].len = 0;
+            oldreplies[loop].index = 0;
+            oldreplies[loop].out = NULL;
+        }
+        initialized++;
+        nextcache = 0;
     }
 
     /* decode call and set up reply */
@@ -756,158 +780,178 @@ int RPC$INPUT ( index, SrcAddr , DstAdr , SrcPrt , DstPrt ,
     XDR$ntov_uint(&call_body->cb_vers,&call_body->cb_vers);
     XDR$ntov_uint(&call_body->cb_proc,&call_body->cb_proc);
 
-    if (call_body->cb_rpcvers != RPC_VERSION) {
-	XDR$vton_int(&msg_denied,&out->rm_reply.rp_stat);	     *len += 4;
-	XDR$vton_int(&rpc_mismatch,&out->rm_reply.rp_rjct.rj_stat);  *len += 4;
-	XDR$vton_int(&RPC_VERSION_LOW, &out->rm_reply.rp_rjct.rj_vers.low);
-	XDR$vton_int(&RPC_VERSION_HIGH, &out->rm_reply.rp_rjct.rj_vers.high);
-	*len += 8;
-	return 1;
-	}
+    if (call_body->cb_rpcvers != RPC_VERSION)
+    {
+        XDR$vton_int(&msg_denied,&out->rm_reply.rp_stat);
+        *len += 4;
+        XDR$vton_int(&rpc_mismatch,&out->rm_reply.rp_rjct.rj_stat);
+        *len += 4;
+        XDR$vton_int(&RPC_VERSION_LOW, &out->rm_reply.rp_rjct.rj_vers.low);
+        XDR$vton_int(&RPC_VERSION_HIGH, &out->rm_reply.rp_rjct.rj_vers.high);
+        *len += 8;
+        return 1;
+    }
 
     body = &call_body->cb_cred;
 
     /* Check out those credentials... */
-    switch (authmechanism = xdr_int(*body++)) {
-	case AUTH_NULL : {
-		body += (RNDUP(xdr_int(*body))/4) + 1;
-		break;
-		}
+    switch (authmechanism = xdr_int(*body++))
+    {
+    case AUTH_NULL :
+    {
+        body += (RNDUP(xdr_int(*body))/4) + 1;
+        break;
+    }
 
-	case AUTH_UNIX : {
-		long *tmp;
-		unsigned int stamp,unix_len,name_len,unix_uid,unix_gid;
+    case AUTH_UNIX :
+    {
+        long *tmp;
+        unsigned int stamp,unix_len,name_len,unix_uid,unix_gid;
 
-		XDR$vton_uint(body++,&unix_len);
-		tmp = body; body += RNDUP(unix_len)/4; 
-		if (tmp==body) break;
+        XDR$vton_uint(body++,&unix_len);
+        tmp = body;
+        body += RNDUP(unix_len)/4;
+        if (tmp==body) break;
 
-		XDR$vton_uint(tmp++,&stamp);
-		XDR$vton_uint(tmp++,&name_len);
-		memcpy(hname,tmp,name_len);  hname[name_len]=0;
-		strupr(hname);
-		tmp += RNDUP(name_len)/4;		
-		XDR$vton_uint(tmp++,&unix_uid);
-		XDR$vton_uint(tmp++,&unix_gid);
-		uid=unix_uid; gid=unix_gid;
-		break;
-		}
+        XDR$vton_uint(tmp++,&stamp);
+        XDR$vton_uint(tmp++,&name_len);
+        memcpy(hname,tmp,name_len);
+        hname[name_len]=0;
+        strupr(hname);
+        tmp += RNDUP(name_len)/4;
+        XDR$vton_uint(tmp++,&unix_uid);
+        XDR$vton_uint(tmp++,&unix_gid);
+        uid=unix_uid;
+        gid=unix_gid;
+        break;
+    }
 
-	case AUTH_SHORT : {
-		body += (RNDUP(xdr_int(*body))/4) + 1;
-		break;
-		}
+    case AUTH_SHORT :
+    {
+        body += (RNDUP(xdr_int(*body))/4) + 1;
+        break;
+    }
 
-	default : {
-		XDR$vton_int(&msg_denied,&out->rm_reply.rp_stat);
-		XDR$vton_int(&auth_error,&out->rm_reply.rp_rjct.rj_stat);
-		XDR$vton_int(&auth_badcred,&out->rm_reply.rp_rjct.rj_why);
-		*len += 12;
-		return(1);
-		}
-	} 
+    default :
+    {
+        XDR$vton_int(&msg_denied,&out->rm_reply.rp_stat);
+        XDR$vton_int(&auth_error,&out->rm_reply.rp_rjct.rj_stat);
+        XDR$vton_int(&auth_badcred,&out->rm_reply.rp_rjct.rj_why);
+        *len += 12;
+        return(1);
+    }
+    }
 
     /* Check the verifier */
-    switch (xdr_int(*body++)) {
-	case AUTH_NULL : {
-		body += (RNDUP(xdr_int(*body))/4) + 1;
-		break;
-		}
+    switch (xdr_int(*body++))
+    {
+    case AUTH_NULL :
+    {
+        body += (RNDUP(xdr_int(*body))/4) + 1;
+        break;
+    }
 
-	case AUTH_UNIX : {
-		long *tmp;
-		unsigned int stamp,unix_len,name_len,unix_uid,unix_gid;
+    case AUTH_UNIX :
+    {
+        long *tmp;
+        unsigned int stamp,unix_len,name_len,unix_uid,unix_gid;
 
-		XDR$vton_uint(body++,&unix_len);
-		tmp = body; body += (RNDUP(unix_len)/4); 
-		if (tmp==body) break;
+        XDR$vton_uint(body++,&unix_len);
+        tmp = body;
+        body += (RNDUP(unix_len)/4);
+        if (tmp==body) break;
 
-		XDR$vton_uint(tmp++,&stamp);
-		XDR$vton_uint(tmp++,&name_len);
-		tmp += RNDUP(name_len)/4;
-		XDR$vton_uint(tmp++,&uid);
-		XDR$vton_uint(tmp++,&gid);
-		break;
-		}
+        XDR$vton_uint(tmp++,&stamp);
+        XDR$vton_uint(tmp++,&name_len);
+        tmp += RNDUP(name_len)/4;
+        XDR$vton_uint(tmp++,&uid);
+        XDR$vton_uint(tmp++,&gid);
+        break;
+    }
 
-	case AUTH_SHORT : {
-		body += (RNDUP(xdr_int(*body))/4) + 1;
-		break;
-		}
+    case AUTH_SHORT :
+    {
+        body += (RNDUP(xdr_int(*body))/4) + 1;
+        break;
+    }
 
-	default : {
-		XDR$vton_int(&msg_denied,&out->rm_reply.rp_stat);
-		XDR$vton_int(&auth_error,&out->rm_reply.rp_rjct.rj_stat);
-		XDR$vton_int(&auth_badverf,&out->rm_reply.rp_rjct.rj_why);
-		*len += 12;
-		return(1);
-		}
-	} 
+    default :
+    {
+        XDR$vton_int(&msg_denied,&out->rm_reply.rp_stat);
+        XDR$vton_int(&auth_error,&out->rm_reply.rp_rjct.rj_stat);
+        XDR$vton_int(&auth_badverf,&out->rm_reply.rp_rjct.rj_why);
+        *len += 12;
+        return(1);
+    }
+    }
 
     for (checkcache = 0; checkcache < RPC_MAX_REPLY_CACHE; checkcache++)
-	/*
-	 * Add test to qualify the xid based on the port index.  It looks
-	 * like the Ultrix client has a bug where it passes the same xid
-	 * for two different port values.  This causes us to reply with
-	 * a meaningless answer to the second request.
-	 *
-	 * Tom Allebrandi (Allebrandi@Inland.Com) 11-Oct-1991
-	 */
-	if ((oldreplies[checkcache].xid == xid) &&
-	    (oldreplies[checkcache].index == index) &&
-            (!strcmp(oldreplies[checkcache].hname,hname))) {
-	    *len = oldreplies[checkcache].len;
-	    memcpy(out, oldreplies[checkcache].out, *len);
-	    RC = oldreplies[checkcache].RC;
-	    return(RC);
-	}
+        /*
+         * Add test to qualify the xid based on the port index.  It looks
+         * like the Ultrix client has a bug where it passes the same xid
+         * for two different port values.  This causes us to reply with
+         * a meaningless answer to the second request.
+         *
+         * Tom Allebrandi (Allebrandi@Inland.Com) 11-Oct-1991
+         */
+        if ((oldreplies[checkcache].xid == xid) &&
+                (oldreplies[checkcache].index == index) &&
+                (!strcmp(oldreplies[checkcache].hname,hname)))
+        {
+            *len = oldreplies[checkcache].len;
+            memcpy(out, oldreplies[checkcache].out, *len);
+            RC = oldreplies[checkcache].RC;
+            return(RC);
+        }
 
     if (!(username = map_uic(&uic,uid,gid,hname)))
     {
-	struct _opcdef OPC_buffer;
-	struct dsc$descriptor OPC_descript;
+        struct _opcdef OPC_buffer;
+        struct dsc$descriptor OPC_descript;
 
-	if (authmechanism == AUTH_UNIX)
-	{
-	    /* Send an operator message telling them of the problem */
-	    OPC_buffer.opc$b_ms_type = OPC$_RQ_RQST;
-	    *((int *)&OPC_buffer.opc$b_ms_target) = OPC$M_NM_OPER12;
-	    sprintf(&OPC_buffer.opc$l_ms_text,
-		"RPC: User %d (group %d) from host %s (%d\.%d\.%d\.%d) failed \
+        if (authmechanism == AUTH_UNIX)
+        {
+            /* Send an operator message telling them of the problem */
+            OPC_buffer.opc$b_ms_type = OPC$_RQ_RQST;
+            *((int *)&OPC_buffer.opc$b_ms_target) = OPC$M_NM_OPER12;
+            sprintf(&OPC_buffer.opc$l_ms_text,
+                    "RPC: User %d (group %d) from host %s (%d\.%d\.%d\.%d) failed \
 authentication",
-		uid, gid, hname, SrcAddr & 0xff,
-		((SrcAddr & 0x0000ff00) / 0x00000100),
-		((SrcAddr & 0x00ff0000) / 0x00010000), SrcAddr / 0x01000000);
-	    OPC_descript.dsc$w_length =
-		strlen(&OPC_buffer.opc$l_ms_text) +
-		((int)&OPC_buffer.opc$l_ms_text -
-		    (int)&OPC_buffer);
-	    OPC_descript.dsc$b_class = DSC$K_CLASS_S;
-	    OPC_descript.dsc$b_dtype = DSC$K_DTYPE_T;
-	    OPC_descript.dsc$a_pointer = &OPC_buffer;
-	    RC = SYS$SNDOPR(&OPC_descript, 0);
-	}
+                    uid, gid, hname, SrcAddr & 0xff,
+                    ((SrcAddr & 0x0000ff00) / 0x00000100),
+                    ((SrcAddr & 0x00ff0000) / 0x00010000), SrcAddr / 0x01000000);
+            OPC_descript.dsc$w_length =
+                strlen(&OPC_buffer.opc$l_ms_text) +
+                ((int)&OPC_buffer.opc$l_ms_text -
+                 (int)&OPC_buffer);
+            OPC_descript.dsc$b_class = DSC$K_CLASS_S;
+            OPC_descript.dsc$b_dtype = DSC$K_DTYPE_T;
+            OPC_descript.dsc$a_pointer = &OPC_buffer;
+            RC = SYS$SNDOPR(&OPC_descript, 0);
+        }
 
         uic = -2;	/* For security - set to unused value */
     }
 
     /* ok, we've accepted it. */
-    XDR$vton_int(&msg_accepted,&out->rm_reply.rp_stat);		   *len += 4;
+    XDR$vton_int(&msg_accepted,&out->rm_reply.rp_stat);
+    *len += 4;
     RC = (*RPCsrv_tab[index].dispatch_routine)(
- 		uic,
-		hname,
-		username,
- 		call_body,
- 		&out->rm_reply.rp_acpt,&result_len,
- 		call_body->cb_prog,
- 		call_body->cb_vers,
- 		call_body->cb_proc
- 		);
+             uic,
+             hname,
+             username,
+             call_body,
+             &out->rm_reply.rp_acpt,&result_len,
+             call_body->cb_prog,
+             call_body->cb_vers,
+             call_body->cb_proc
+         );
     *len += result_len;
 
     nextcache = (nextcache + 1) % RPC_MAX_REPLY_CACHE;
-    if (oldreplies[nextcache].len != 0) {
-       free(oldreplies[nextcache].out);
+    if (oldreplies[nextcache].len != 0)
+    {
+        free(oldreplies[nextcache].out);
     }
 
     oldreplies[nextcache].xid = xid;
@@ -971,12 +1015,12 @@ int ((*(pcnfsd_proc_vector[NAUTHPROCS]))());
 */
 
 int PMAP$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *cbody,*areply;
-    int *len;
-    unsigned int prog,vers,proc;
+unsigned uic;
+char *hname;
+char *username;
+long *cbody,*areply;
+int *len;
+unsigned int prog,vers,proc;
 {
     long flavor;
     int result_len;
@@ -988,27 +1032,35 @@ int PMAP$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
     *len = 2*BYTES_PER_XDR_UNIT;
 
     /* Is the program available? */
-    if (prog != RPCPROG_PMAP) {
-	XDR$vton_int(&prog_unavail,areply++);		*len += 4;
-	return(1);
-	}
+    if (prog != RPCPROG_PMAP)
+    {
+        XDR$vton_int(&prog_unavail,areply++);
+        *len += 4;
+        return(1);
+    }
 
     /* is the procedure number reasonable? */
-    if ((proc >= NPROCS) || (proc <0)) {
-	XDR$vton_int(&proc_unavail,areply++);		*len += 4;
-	return(1);
-	}
+    if ((proc >= NPROCS) || (proc <0))
+    {
+        XDR$vton_int(&proc_unavail,areply++);
+        *len += 4;
+        return(1);
+    }
 
     /* Is he requesting the right version? */
     /* !!!HACK!!! should this check be a bound instead of inequality? */
-    if (vers != PMAP_VERSION) {
-	XDR$vton_int(&prog_mismatch,areply++);		*len += 4;
-	XDR$vton_int(&pmap_version_low,areply++);	*len += 4;
-	XDR$vton_int(&pmap_version_high,areply++);	*len += 4;
-	return(1);
-	}
+    if (vers != PMAP_VERSION)
+    {
+        XDR$vton_int(&prog_mismatch,areply++);
+        *len += 4;
+        XDR$vton_int(&pmap_version_low,areply++);
+        *len += 4;
+        XDR$vton_int(&pmap_version_high,areply++);
+        *len += 4;
+        return(1);
+    }
 
-/* We're good to go */
+    /* We're good to go */
     cbody += 4;		/* jump over rpc_vers,prog,vers, and proc */
 
     /* ignore credentials */
@@ -1018,15 +1070,18 @@ int PMAP$DISPATCH(uic,hname,username,cbody,areply,len,prog,vers,proc)
     /* ignore verifier */
     flavor = xdr_int(*cbody++);
     cbody += ((RNDUP(xdr_int(*cbody))/4) +1);
-    
+
     result_len = (*pmap_proc_vector[proc])(areply+1,cbody);
-    if (result_len < 0) {
-	XDR$vton_int(&garbage_args,areply++);		*len += 4;
-	return(1);
-	}
+    if (result_len < 0)
+    {
+        XDR$vton_int(&garbage_args,areply++);
+        *len += 4;
+        return(1);
+    }
 
     /* it worked! */
-    XDR$vton_int(&success,areply++);		*len += 4;
+    XDR$vton_int(&success,areply++);
+    *len += 4;
     *len += result_len;
     return 1;
 }
@@ -1040,7 +1095,7 @@ PMAP procedure #0	- Do nothing
 */
 
 int PMAPPROC_NULL(reply)
-    long *reply;
+long *reply;
 {
     return 0;
 }
@@ -1049,13 +1104,13 @@ int PMAPPROC_NULL(reply)
 
 /**********************************************************************
 
-PMAP procedure #1	- 
+PMAP procedure #1	-
 
 */
 
 int PMAPPROC_SET(reply,map)
-    long *reply;
-    struct mapping *map;
+long *reply;
+struct mapping *map;
 {
     return 0;
 }
@@ -1069,8 +1124,8 @@ PMAP procedure #2
 */
 
 int PMAPPROC_UNSET(reply,map)
-    long *reply;
-    struct mapping *map;
+long *reply;
+struct mapping *map;
 {
     return 0;
 }
@@ -1079,13 +1134,13 @@ int PMAPPROC_UNSET(reply,map)
 
 /**********************************************************************
 
-PMAP procedure #3	- 
+PMAP procedure #3	-
 
 */
 
 int PMAPPROC_GETPORT(reply,map)
-    long *reply;
-    struct mapping *map;
+long *reply;
+struct mapping *map;
 {
     int i;
 
@@ -1093,14 +1148,15 @@ int PMAPPROC_GETPORT(reply,map)
     XDR$ntov_uint(&map->vers,&map->vers);
     XDR$ntov_uint(&map->prot,&map->prot);
 
-    for (i=0; i<RPCsrv_count; i++) {
-	if ((RPCsrv_tab[i].prog == map->prog) &&
-	    (RPCsrv_tab[i].vers == map->vers) &&
-	    (RPCsrv_tab[i].prot == map->prot))
-	    break;
-	}
+    for (i=0; i<RPCsrv_count; i++)
+    {
+        if ((RPCsrv_tab[i].prog == map->prog) &&
+                (RPCsrv_tab[i].vers == map->vers) &&
+                (RPCsrv_tab[i].prot == map->prot))
+            break;
+    }
     if (i>=RPCsrv_count) return -1;	/* not found */
-    
+
     XDR$vton_uint(&RPCsrv_tab[i].port,reply);
     return 4;	/* size of an int */
 }
@@ -1114,21 +1170,22 @@ PMAP procedure #4	- Dump a list of known RPC services
 */
 
 int PMAPPROC_DUMP(reply)
-    long *reply;
+long *reply;
 {
     int i;
 
-    for (i=0; i<RPCsrv_count; i++) {
-	/* optional data, a one (TRUE) means there is data */
-      static const int one = 1;
-	XDR$vton_uint(&one,reply++);
+    for (i=0; i<RPCsrv_count; i++)
+    {
+        /* optional data, a one (TRUE) means there is data */
+        static const int one = 1;
+        XDR$vton_uint(&one,reply++);
 
-	/* write out a mappping */
-	XDR$vton_uint(&RPCsrv_tab[i].prog,reply++);
-	XDR$vton_uint(&RPCsrv_tab[i].vers,reply++);
-	XDR$vton_uint(&RPCsrv_tab[i].prot,reply++);
-	XDR$vton_uint(&RPCsrv_tab[i].port,reply++);
-	}
+        /* write out a mappping */
+        XDR$vton_uint(&RPCsrv_tab[i].prog,reply++);
+        XDR$vton_uint(&RPCsrv_tab[i].vers,reply++);
+        XDR$vton_uint(&RPCsrv_tab[i].prot,reply++);
+        XDR$vton_uint(&RPCsrv_tab[i].port,reply++);
+    }
     /* end the list with a 0 */
     static const int zero = 0;
     XDR$vton_uint(&zero,reply++);
@@ -1144,8 +1201,8 @@ PMAP procedure #5
 
 */
 int PMAPPROC_CALLIT(reply,call_args)
-    long *reply;
-    struct call_args *call_args;
+long *reply;
+struct call_args *call_args;
 {
     return 0;
 }
@@ -1165,21 +1222,25 @@ int PMAP$INIT()
     return(PMAP$DISPATCH);
 }
 
-enum arstat {
+enum arstat
+{
     AUTH_RES_OK, AUTH_RES_FAKE, AUTH_RES_FAIL
 };
 
-typedef struct {
+typedef struct
+{
     unsigned length;
     unsigned data[];
 } stringdata;
 
-struct auth_args {
+struct auth_args
+{
     stringdata aa_ident;
     stringdata aa_password;
 };
 
-struct auth_results {
+struct auth_results
+{
     enum arstat ar_stat;
     long        ar_uid;
     long        ar_gid;
@@ -1192,7 +1253,7 @@ scramble(char *s1, char *s2)
     while (*s1)
     {
         *s2++ = (*s1 ^ zchar) & 0x7f;
-	s1++;
+        s1++;
     }
     *s2 = 0;
 }
@@ -1208,13 +1269,13 @@ int PCNFSD$INIT()
 }
 
 int PCNFSD$DISPATCH(uic, hname, username, cbody, areply, len, prog, vers, proc)
-    unsigned uic;
-    char *hname;
-    char *username;
-    long *cbody, *areply;
-    int *len;
-    unsigned int prog, vers, proc;
-    
+unsigned uic;
+char *hname;
+char *username;
+long *cbody, *areply;
+int *len;
+unsigned int prog, vers, proc;
+
 {
     int flavor, result_len;
     XDR$vton_int(&auth_none, areply++);
@@ -1226,32 +1287,32 @@ int PCNFSD$DISPATCH(uic, hname, username, cbody, areply, len, prog, vers, proc)
     if (prog != RPCPROG_PCNFSD)
     {
         XDR$vton_int(&prog_unavail, areply++);
-	*len += 4;
-	return(1);
+        *len += 4;
+        return(1);
     }
 
     /* Is the procedure number reasonable? */
     if ((proc >= NAUTHPROCS) || (proc < 0))
     {
         XDR$vton_int(&proc_unavail, areply++);
-	*len += 4;
-	return(1);
+        *len += 4;
+        return(1);
     }
 
     /* Is he requesting the right version? */
     if ((vers < PCNFSD_VERSION_LOW) || (vers > PCNFSD_VERSION_HIGH))
     {
         XDR$vton_int(&prog_mismatch, areply++);
-	*len += 4;
-	XDR$vton_int(&pcnfsd_version_low, areply++);
-	*len += 4;
-	XDR$vton_int(&pcnfsd_version_high, areply++);
-	*len += 4;
-	return(1);
+        *len += 4;
+        XDR$vton_int(&pcnfsd_version_low, areply++);
+        *len += 4;
+        XDR$vton_int(&pcnfsd_version_high, areply++);
+        *len += 4;
+        return(1);
     }
-    
+
     cbody += 4;
-    
+
     flavor = xdr_int(*cbody++);
     cbody += ((RNDUP(xdr_int(*cbody))/4)+1);
 
@@ -1262,10 +1323,10 @@ int PCNFSD$DISPATCH(uic, hname, username, cbody, areply, len, prog, vers, proc)
     if (result_len < 0)
     {
         XDR$vton_int(&garbage_args, areply++);
-	*len += 4;
-	return(1);
+        *len += 4;
+        return(1);
     }
-    
+
     XDR$vton_int(&success, areply++);
     *len += 4;
     *len += result_len;
@@ -1283,18 +1344,18 @@ int PCNFSDPROC_AUTH(long *reply, struct auth_args *a)
     char username[32];
     char password[64];
     int c1, c2, tmplen;
-    
+
     XDR$ntov_arb(&a, &tmplen, sizeof(tmplen));
     XDR$ntov_arb(&a, &username, nfs_int(tmplen));
     username[nfs_int(tmplen)] = 0;
     XDR$ntov_arb(&a, &tmplen, sizeof(tmplen));
     XDR$ntov_arb(&a, &password, nfs_int(tmplen));
     password[nfs_int(tmplen)] = 0;
-    
+
     r.ar_stat = AUTH_RES_FAIL;
     scramble(username, username);
     scramble(password, password);
-    
+
     static const int auth_res_fail = AUTH_RES_FAIL;
     XDR$vton_uint(&auth_res_fail, reply++);
     static const int zero = 0;

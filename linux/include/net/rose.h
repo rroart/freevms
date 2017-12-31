@@ -5,7 +5,7 @@
  */
 
 #ifndef _ROSE_H
-#define _ROSE_H 
+#define _ROSE_H
 #include <linux/rose.h>
 
 #define	ROSE_ADDR_LEN			5
@@ -38,13 +38,14 @@
 
 /* Define Link State constants. */
 
-enum {
-	ROSE_STATE_0,			/* Ready */
-	ROSE_STATE_1,			/* Awaiting Call Accepted */
-	ROSE_STATE_2,			/* Awaiting Clear Confirmation */
-	ROSE_STATE_3,			/* Data Transfer */
-	ROSE_STATE_4,			/* Awaiting Reset Confirmation */
-	ROSE_STATE_5			/* Deferred Call Acceptance */
+enum
+{
+    ROSE_STATE_0,			/* Ready */
+    ROSE_STATE_1,			/* Awaiting Call Accepted */
+    ROSE_STATE_2,			/* Awaiting Clear Confirmation */
+    ROSE_STATE_3,			/* Data Transfer */
+    ROSE_STATE_4,			/* Awaiting Reset Confirmation */
+    ROSE_STATE_5			/* Deferred Call Acceptance */
 };
 
 #define ROSE_DEFAULT_T0			(180 * HZ)	/* Default T10 T20 value */
@@ -79,63 +80,67 @@ enum {
 #define	FAC_CCITT_DEST_NSAP		0xC9
 #define	FAC_CCITT_SRC_NSAP		0xCB
 
-struct rose_neigh {
-	struct rose_neigh	*next;
-	ax25_address		callsign;
-	ax25_digi		*digipeat;
-	ax25_cb			*ax25;
-	struct net_device		*dev;
-	unsigned short		count;
-	unsigned short		use;
-	unsigned int		number;
-	char			restarted;
-	char			dce_mode;
-	char			loopback;
-	struct sk_buff_head	queue;
-	struct timer_list	t0timer;
-	struct timer_list	ftimer;
+struct rose_neigh
+{
+    struct rose_neigh	*next;
+    ax25_address		callsign;
+    ax25_digi		*digipeat;
+    ax25_cb			*ax25;
+    struct net_device		*dev;
+    unsigned short		count;
+    unsigned short		use;
+    unsigned int		number;
+    char			restarted;
+    char			dce_mode;
+    char			loopback;
+    struct sk_buff_head	queue;
+    struct timer_list	t0timer;
+    struct timer_list	ftimer;
 };
 
-struct rose_node {
-	struct rose_node	*next;
-	rose_address		address;
-	unsigned short		mask;
-	unsigned char		count;
-	char			loopback;
-	struct rose_neigh	*neighbour[3];
+struct rose_node
+{
+    struct rose_node	*next;
+    rose_address		address;
+    unsigned short		mask;
+    unsigned char		count;
+    char			loopback;
+    struct rose_neigh	*neighbour[3];
 };
 
-struct rose_route {
-	struct rose_route	*next;
-	unsigned int		lci1, lci2;
-	rose_address		src_addr, dest_addr;
-	ax25_address		src_call, dest_call;
-	struct rose_neigh 	*neigh1, *neigh2;
-	unsigned int		rand;
+struct rose_route
+{
+    struct rose_route	*next;
+    unsigned int		lci1, lci2;
+    rose_address		src_addr, dest_addr;
+    ax25_address		src_call, dest_call;
+    struct rose_neigh 	*neigh1, *neigh2;
+    unsigned int		rand;
 };
 
-typedef struct {
-	rose_address		source_addr,   dest_addr;
-	ax25_address		source_call,   dest_call;
-	unsigned char		source_ndigis, dest_ndigis;
-	ax25_address		source_digis[ROSE_MAX_DIGIS];
-	ax25_address		dest_digis[ROSE_MAX_DIGIS];
-	struct rose_neigh	*neighbour;
-	struct net_device		*device;
-	unsigned int		lci, rand;
-	unsigned char		state, condition, qbitincl, defer;
-	unsigned char		cause, diagnostic;
-	unsigned short		vs, vr, va, vl;
-	unsigned long		t1, t2, t3, hb, idle;
+typedef struct
+{
+    rose_address		source_addr,   dest_addr;
+    ax25_address		source_call,   dest_call;
+    unsigned char		source_ndigis, dest_ndigis;
+    ax25_address		source_digis[ROSE_MAX_DIGIS];
+    ax25_address		dest_digis[ROSE_MAX_DIGIS];
+    struct rose_neigh	*neighbour;
+    struct net_device		*device;
+    unsigned int		lci, rand;
+    unsigned char		state, condition, qbitincl, defer;
+    unsigned char		cause, diagnostic;
+    unsigned short		vs, vr, va, vl;
+    unsigned long		t1, t2, t3, hb, idle;
 #ifdef M_BIT
-	unsigned short		fraglen;
-	struct sk_buff_head	frag_queue;
+    unsigned short		fraglen;
+    struct sk_buff_head	frag_queue;
 #endif
-	struct sk_buff_head	ack_queue;
-	struct rose_facilities_struct facilities;
-	struct timer_list	timer;
-	struct timer_list	idletimer;
-	struct sock		*sk;		/* Backlink to socket */
+    struct sk_buff_head	ack_queue;
+    struct rose_facilities_struct facilities;
+    struct timer_list	timer;
+    struct timer_list	idletimer;
+    struct sock		*sk;		/* Backlink to socket */
 } rose_cb;
 
 /* af_rose.c */

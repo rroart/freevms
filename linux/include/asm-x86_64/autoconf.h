@@ -47,7 +47,7 @@
 #ifdef CONFIG_SMP
 #undef CONFIG_K8_NUMA
 #ifdef CONFIG_K8_NUMA
-#define CONFIG_DISCONTIGMEM 1 
+#define CONFIG_DISCONTIGMEM 1
 #define CONFIG_NUMA 1
 #endif
 #endif
@@ -152,7 +152,7 @@
 #undef  CONFIG_DMA_NONPCI
 #define CONFIG_BLK_DEV_IDE_MODES 1
 #undef  CONFIG_BLK_DEV_ATARAID
-#endif 
+#endif
 
 #define CONFIG_BLK_DEV_IDEPCI 1
 #define CONFIG_BLK_DEV_IDEDMA_PCI 1

@@ -22,20 +22,22 @@ unsigned long pscan_id = 2;
    \details fix implementation. make multiuser version
 */
 
-int exe$pscan_next_id(struct _pcb ** p) {
-  int i;
-  unsigned long *vec=sch$gl_pcbvec;
-  for (i=pscan_id;i<MAXPROCESSCNT;i++) {
-    if (vec[i]==0) continue;
+int exe$pscan_next_id(struct _pcb ** p)
+{
+    int i;
+    unsigned long *vec=sch$gl_pcbvec;
+    for (i=pscan_id; i<MAXPROCESSCNT; i++)
     {
-      struct _pcb * p = vec[i];
-      if (p == init_tasks[p->pcb$l_cpu_id])
-	continue;
+        if (vec[i]==0) continue;
+        {
+            struct _pcb * p = vec[i];
+            if (p == init_tasks[p->pcb$l_cpu_id])
+                continue;
+        }
+        *p=vec[i];
+        pscan_id++;
+        return 1;
     }
-    *p=vec[i];
-    pscan_id++;
-    return 1;
-  }
-  pscan_id=2;
-  return 0;
+    pscan_id=2;
+    return 0;
 }

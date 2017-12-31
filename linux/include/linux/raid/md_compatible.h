@@ -2,15 +2,15 @@
 /*
    md.h : Multiple Devices driver compatibility layer for Linux 2.0/2.2
           Copyright (C) 1998 Ingo Molnar
-	  
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-   
+
    You should have received a copy of the GNU General Public License
    (for example /usr/src/linux/COPYING); if not, write to the Free
-   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
+   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <linux/version.h>
@@ -31,7 +31,7 @@
 /* 001 */
 static __inline__ int md_cpu_has_mmx(void)
 {
-	return test_bit(X86_FEATURE_MMX,  &boot_cpu_data.x86_capability);
+    return test_bit(X86_FEATURE_MMX,  &boot_cpu_data.x86_capability);
 }
 #else
 #define md_cpu_has_mmx(x)	(0)
@@ -55,7 +55,7 @@ static __inline__ int md_cpu_has_mmx(void)
 /* 007 */
 static inline int md_capable_admin(void)
 {
-	return capable(CAP_SYS_ADMIN);
+    return capable(CAP_SYS_ADMIN);
 }
 
 /* 008 */
@@ -64,16 +64,16 @@ static inline int md_capable_admin(void)
 /* 009 */
 static inline void md_flush_signals (void)
 {
-	spin_lock(&current->sigmask_lock);
-	flush_signals(current);
-	spin_unlock(&current->sigmask_lock);
+    spin_lock(&current->sigmask_lock);
+    flush_signals(current);
+    spin_unlock(&current->sigmask_lock);
 }
- 
+
 /* 010 */
 static inline void md_init_signals (void)
 {
-        current->exit_signal = SIGCHLD;
-        siginitsetinv(&current->blocked, sigmask(SIGKILL));
+    current->exit_signal = SIGCHLD;
+    siginitsetinv(&current->blocked, sigmask(SIGKILL));
 }
 
 /* 011 */
@@ -154,5 +154,5 @@ typedef wait_queue_head_t md_wait_queue_head_t;
 
 /* END */
 
-#endif 
+#endif
 

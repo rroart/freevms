@@ -88,25 +88,28 @@ As long as device numbers in the outside world have 16 bits only,
 we use these conversions.
 */
 
-static inline unsigned int kdev_t_to_nr(kdev_t dev) {
-	return (MAJOR(dev)<<8) | MINOR(dev);
+static inline unsigned int kdev_t_to_nr(kdev_t dev)
+{
+    return (MAJOR(dev)<<8) | MINOR(dev);
 }
 
 static inline kdev_t to_kdev_t(int dev)
 {
-	int major, minor;
+    int major, minor;
 #if 0
-	major = (dev >> 16);
-	if (!major) {
-		major = (dev >> 8);
-		minor = (dev & 0xff);
-	} else
-		minor = (dev & 0xffff);
+    major = (dev >> 16);
+    if (!major)
+    {
+        major = (dev >> 8);
+        minor = (dev & 0xff);
+    }
+    else
+        minor = (dev & 0xffff);
 #else
-	major = (dev >> 8);
-	minor = (dev & 0xff);
+    major = (dev >> 8);
+    minor = (dev & 0xff);
 #endif
-	return MKDEV(major, minor);
+    return MKDEV(major, minor);
 }
 
 #else /* __KERNEL__ || _LVM_H_INCLUDE */

@@ -53,13 +53,13 @@
 #define LDM_BLOCKSIZE		1024		/* Size of block in bytes. */
 #define LDM_DB_SIZE		2048		/* Size in sectors (= 1MiB). */
 #define LDM_FIRST_PART_OFFSET	4		/* Add this to first_part_minor
-						   to get to the first data
-						   partition device minor. */
+to get to the first data
+partition device minor. */
 
 #define OFF_PRIVHEAD1		3		/* Offset of the first privhead
-						   relative to the start of the
-						   device in units of
-						   LDM_BLOCKSIZE. */
+relative to the start of the
+device in units of
+LDM_BLOCKSIZE. */
 
 /* Offsets to structures within the LDM Database in units of LDM_BLOCKSIZE. */
 #define OFF_PRIVHEAD2		928		/* Backup private headers. */
@@ -75,7 +75,7 @@
 
 #define WIN2K_DYNAMIC_PARTITION		0x42	/* Formerly SFS (Landis). */
 #define WIN2K_EXTENDED_PARTITION	0x05	/* A standard extended
-						   partition. */
+partition. */
 
 #define TOC_BITMAP1		"config"	/* Names of the two defined */
 #define TOC_BITMAP2		"log"		/* bitmaps in the TOCBLOCK. */
@@ -101,57 +101,63 @@
 
 #define DISK_ID_SIZE		64	/* Size in bytes. */
 
-struct ldmdisk {
-	u64	obj_id;
-	u8	disk_id[DISK_ID_SIZE];
+struct ldmdisk
+{
+    u64	obj_id;
+    u8	disk_id[DISK_ID_SIZE];
 };
 
-struct privhead	{			/* Offsets and sizes are in sectors. */
-	u16	ver_major;
-	u16	ver_minor;
-	u64	logical_disk_start;
-	u64	logical_disk_size;
-	u64	config_start;
-	u64	config_size;
-	u8	disk_id[DISK_ID_SIZE];
+struct privhead	 			/* Offsets and sizes are in sectors. */
+{
+    u16	ver_major;
+    u16	ver_minor;
+    u64	logical_disk_start;
+    u64	logical_disk_size;
+    u64	config_start;
+    u64	config_size;
+    u8	disk_id[DISK_ID_SIZE];
 };
 
-struct tocblock {			/* We have exactly two bitmaps. */
-	u8	bitmap1_name[16];
-	u64	bitmap1_start;
-	u64	bitmap1_size;
-	/*u64	bitmap1_flags;*/
-	u8	bitmap2_name[16];
-	u64	bitmap2_start;
-	u64	bitmap2_size;
-	/*u64	bitmap2_flags;*/
+struct tocblock  			/* We have exactly two bitmaps. */
+{
+    u8	bitmap1_name[16];
+    u64	bitmap1_start;
+    u64	bitmap1_size;
+    /*u64	bitmap1_flags;*/
+    u8	bitmap2_name[16];
+    u64	bitmap2_start;
+    u64	bitmap2_size;
+    /*u64	bitmap2_flags;*/
 };
 
-struct vmdb {
-	u16	ver_major;
-	u16	ver_minor;
-	u32	vblk_size;
-	u32	vblk_offset;
-	u32	last_vblk_seq;
+struct vmdb
+{
+    u16	ver_major;
+    u16	ver_minor;
+    u32	vblk_size;
+    u32	vblk_offset;
+    u32	last_vblk_seq;
 };
 
-struct vblk {
-	u8	name[64];
-	u8	vblk_type;
-	u64	obj_id;
-	u64	disk_id;
-	u64	start_sector;
-	u64	num_sectors;
+struct vblk
+{
+    u8	name[64];
+    u8	vblk_type;
+    u64	obj_id;
+    u64	disk_id;
+    u64	start_sector;
+    u64	num_sectors;
 };
 
-struct ldm_part {
-	struct list_head part_list;
-	unsigned long start;
-	unsigned long size;
+struct ldm_part
+{
+    struct list_head part_list;
+    unsigned long start;
+    unsigned long size;
 };
 
 int ldm_partition(struct gendisk *hd, struct block_device *bdev,
-		unsigned long first_sector, int first_part_minor);
+                  unsigned long first_sector, int first_part_minor);
 
 #endif /* _FS_PT_LDM_H_ */
 

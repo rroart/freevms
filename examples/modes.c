@@ -70,15 +70,18 @@ resultvar = 0xffffffff;                                               \
 
 #define __NR_$setprn 1
 
-int sys$testcode(void) {
-	  return INLINE_SYSCALL($setprn,0);
+int sys$testcode(void)
+{
+    return INLINE_SYSCALL($setprn,0);
 }
 
-int sys$testcode2(void) {
-	  return INLINE_SYSCALL2($setprn,0);
+int sys$testcode2(void)
+{
+    return INLINE_SYSCALL2($setprn,0);
 }
 
-main(){
-sys$testcode();
-sys$testcode2();
+main()
+{
+    sys$testcode();
+    sys$testcode2();
 }

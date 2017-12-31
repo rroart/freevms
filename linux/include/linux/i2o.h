@@ -1,16 +1,16 @@
 /*
  * I2O kernel space accessible structures/APIs
- * 
+ *
  * (c) Copyright 1999, 2000 Red Hat Software
  *
- * This program is free software; you can redistribute it and/or 
- * modify it under the terms of the GNU General Public License 
- * as published by the Free Software Foundation; either version 
- * 2 of the License, or (at your option) any later version.  
- * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version
+ * 2 of the License, or (at your option) any later version.
+ *
  *************************************************************************
  *
- * This header file defined the I2O APIs/structures for use by 
+ * This header file defined the I2O APIs/structures for use by
  * the I2O kernel modules.
  *
  */
@@ -38,14 +38,14 @@
  */
 struct i2o_message
 {
-	u8	version_offset;
-	u8	flags;
-	u16	size;
-	u32	target_tid:12;
-	u32	init_tid:12;
-	u32	function:8;
-	u32	initiator_context;
-	/* List follows */
+    u8	version_offset;
+    u8	flags;
+    u16	size;
+    u32	target_tid:12;
+    u32	init_tid:12;
+    u32	function:8;
+    u32	initiator_context;
+    /* List follows */
 };
 
 /*
@@ -54,25 +54,25 @@ struct i2o_message
  */
 struct i2o_device
 {
-	i2o_lct_entry lct_data;		/* Device LCT information */
-	u32 flags;
-	int i2oversion;			/* I2O version supported. Actually
+    i2o_lct_entry lct_data;		/* Device LCT information */
+    u32 flags;
+    int i2oversion;			/* I2O version supported. Actually
 					 * there should be high and low
 					 * version */
 
-	struct proc_dir_entry *proc_entry;	/* /proc dir */
+    struct proc_dir_entry *proc_entry;	/* /proc dir */
 
-	/* Primary user */
-	struct i2o_handler *owner;
+    /* Primary user */
+    struct i2o_handler *owner;
 
-	/* Management users */
-	struct i2o_handler *managers[I2O_MAX_MANAGERS];
-	int num_managers;
+    /* Management users */
+    struct i2o_handler *managers[I2O_MAX_MANAGERS];
+    int num_managers;
 
-	struct i2o_controller *controller;	/* Controlling IOP */
-	struct i2o_device *next;	/* Chain */
-	struct i2o_device *prev;
-	char dev_name[8];		/* linux /dev name if available */
+    struct i2o_controller *controller;	/* Controlling IOP */
+    struct i2o_device *next;	/* Chain */
+    struct i2o_device *prev;
+    char dev_name[8];		/* linux /dev name if available */
 };
 
 /*
@@ -80,13 +80,13 @@ struct i2o_device
  */
 struct i2o_pci
 {
-	int		irq;
-	int		queue_buggy:3;	/* Don't send a lot of messages */
-	int		short_req:1;	/* Use small block sizes        */
-	int		dpt:1;		/* Don't quiesce                */
+    int		irq;
+    int		queue_buggy:3;	/* Don't send a lot of messages */
+    int		short_req:1;	/* Use small block sizes        */
+    int		dpt:1;		/* Don't quiesce                */
 #ifdef CONFIG_MTRR
-	int		mtrr_reg0;
-	int		mtrr_reg1;
+    int		mtrr_reg0;
+    int		mtrr_reg1;
 #endif
 };
 
@@ -101,62 +101,63 @@ struct i2o_pci
  */
 struct i2o_controller
 {
-	struct pci_dev *pdev;		/* PCI device */
+    struct pci_dev *pdev;		/* PCI device */
 
-	char name[16];
-	int unit;
-	int type;
-	int enabled;
+    char name[16];
+    int unit;
+    int type;
+    int enabled;
 
-	struct notifier_block *event_notifer;	/* Events */
-	atomic_t users;
-	struct i2o_device *devices;		/* I2O device chain */
-	struct i2o_controller *next;		/* Controller chain */
-	volatile u32 *post_port;		/* Inbout port */
-	volatile u32 *reply_port;		/* Outbound port */
-	volatile u32 *irq_mask;			/* Interrupt register */
+    struct notifier_block *event_notifer;	/* Events */
+    atomic_t users;
+    struct i2o_device *devices;		/* I2O device chain */
+    struct i2o_controller *next;		/* Controller chain */
+    volatile u32 *post_port;		/* Inbout port */
+    volatile u32 *reply_port;		/* Outbound port */
+    volatile u32 *irq_mask;			/* Interrupt register */
 
-	/* Dynamic LCT related data */
-	struct semaphore lct_sem;
-	int lct_pid;
-	int lct_running;
+    /* Dynamic LCT related data */
+    struct semaphore lct_sem;
+    int lct_pid;
+    int lct_running;
 
-	i2o_status_block *status_block;		/* IOP status block */
-	i2o_lct *lct;				/* Logical Config Table */
-	i2o_lct *dlct;				/* Temp LCT */
-	i2o_hrt *hrt;				/* HW Resource Table */
+    i2o_status_block *status_block;		/* IOP status block */
+    i2o_lct *lct;				/* Logical Config Table */
+    i2o_lct *dlct;				/* Temp LCT */
+    i2o_hrt *hrt;				/* HW Resource Table */
 
-	u32 mem_offset;				/* MFA offset */
-	u32 mem_phys;				/* MFA physical */
+    u32 mem_offset;				/* MFA offset */
+    u32 mem_phys;				/* MFA physical */
 
-	int battery:1;				/* Has a battery backup */
-	int io_alloc:1;				/* An I/O resource was allocated */
-	int mem_alloc:1;			/* A memory resource was allocated */
+    int battery:1;				/* Has a battery backup */
+    int io_alloc:1;				/* An I/O resource was allocated */
+    int mem_alloc:1;			/* A memory resource was allocated */
 
-	struct resource io_resource;		/* I/O resource allocated to the IOP */
-	struct resource mem_resource;		/* Mem resource allocated to the IOP */
+    struct resource io_resource;		/* I/O resource allocated to the IOP */
+    struct resource mem_resource;		/* Mem resource allocated to the IOP */
 
-	struct proc_dir_entry *proc_entry;	/* /proc dir */
+    struct proc_dir_entry *proc_entry;	/* /proc dir */
 
-	union {					/* Bus information */
-		struct i2o_pci pci;
-	} bus;
+    union  					/* Bus information */
+    {
+        struct i2o_pci pci;
+    } bus;
 
-	/* Bus specific destructor */
-	void (*destructor)(struct i2o_controller *);
+    /* Bus specific destructor */
+    void (*destructor)(struct i2o_controller *);
 
-	/* Bus specific attach/detach */
-	int (*bind)(struct i2o_controller *, struct i2o_device *);
+    /* Bus specific attach/detach */
+    int (*bind)(struct i2o_controller *, struct i2o_device *);
 
-	/* Bus specific initiator */
-	int (*unbind)(struct i2o_controller *, struct i2o_device *);
+    /* Bus specific initiator */
+    int (*unbind)(struct i2o_controller *, struct i2o_device *);
 
-	/* Bus specific enable/disable */
-	void (*bus_enable)(struct i2o_controller *);
-	void (*bus_disable)(struct i2o_controller *);
+    /* Bus specific enable/disable */
+    void (*bus_enable)(struct i2o_controller *);
+    void (*bus_disable)(struct i2o_controller *);
 
-	void *page_frame;			/* Message buffers */
-	dma_addr_t page_frame_map;		/* Cache map */
+    void *page_frame;			/* Message buffers */
+    dma_addr_t page_frame_map;		/* Cache map */
 };
 
 /*
@@ -165,28 +166,28 @@ struct i2o_controller
  * Each OSM creates at least one of these and registers it with the
  * I2O core through i2o_register_handler.  An OSM may want to
  * register more than one if it wants a fast path to a reply
- * handler by having a separate initiator context for each 
+ * handler by having a separate initiator context for each
  * class function.
  */
 struct i2o_handler
 {
-	/* Message reply handler */
-	void (*reply)(struct i2o_handler *, struct i2o_controller *,
-		      struct i2o_message *);
+    /* Message reply handler */
+    void (*reply)(struct i2o_handler *, struct i2o_controller *,
+                  struct i2o_message *);
 
-	/* New device notification handler */
-	void (*new_dev_notify)(struct i2o_controller *, struct i2o_device *);
+    /* New device notification handler */
+    void (*new_dev_notify)(struct i2o_controller *, struct i2o_device *);
 
-	/* Device deltion handler */
-	void (*dev_del_notify)(struct i2o_controller *, struct i2o_device *);
+    /* Device deltion handler */
+    void (*dev_del_notify)(struct i2o_controller *, struct i2o_device *);
 
-	/* Reboot notification handler */
-	void (*reboot_notify)(void);
+    /* Reboot notification handler */
+    void (*reboot_notify)(void);
 
-	char *name;		/* OSM name */
-	int context;		/* Low 8 bits of the transaction info */
-	u32 class;		/* I2O classes that this driver handles */
-	/* User data follows */
+    char *name;		/* OSM name */
+    int context;		/* Low 8 bits of the transaction info */
+    u32 class;		/* I2O classes that this driver handles */
+    /* User data follows */
 };
 
 #ifdef MODULE
@@ -202,12 +203,12 @@ struct i2o_handler
  */
 struct i2o_core_func_table
 {
-	int	(*install)(struct i2o_controller *);
-	int	(*activate)(struct i2o_controller *);
-	struct i2o_controller *(*find)(int);
-	void	(*unlock)(struct i2o_controller *);
-	void	(*run_queue)(struct i2o_controller * c);
-	int	(*delete)(struct i2o_controller *);
+    int	(*install)(struct i2o_controller *);
+    int	(*activate)(struct i2o_controller *);
+    struct i2o_controller *(*find)(int);
+    void	(*unlock)(struct i2o_controller *);
+    void	(*run_queue)(struct i2o_controller * c);
+    int	(*delete)(struct i2o_controller *);
 };
 #endif /* MODULE */
 
@@ -220,31 +221,31 @@ struct i2o_core_func_table
  */
 struct i2o_sys_tbl_entry
 {
-	u16	org_id;
-	u16	reserved1;
-	u32	iop_id:12;
-	u32	reserved2:20;
-	u16	seg_num:12;
-	u16	i2o_version:4;
-	u8	iop_state;
-	u8	msg_type;
-	u16	frame_size;
-	u16	reserved3;
-	u32	last_changed;
-	u32	iop_capabilities;
-	u32	inbound_low;
-	u32	inbound_high;
+    u16	org_id;
+    u16	reserved1;
+    u32	iop_id:12;
+    u32	reserved2:20;
+    u16	seg_num:12;
+    u16	i2o_version:4;
+    u8	iop_state;
+    u8	msg_type;
+    u16	frame_size;
+    u16	reserved3;
+    u32	last_changed;
+    u32	iop_capabilities;
+    u32	inbound_low;
+    u32	inbound_high;
 };
 
 struct i2o_sys_tbl
 {
-	u8	num_entries;
-	u8	version;
-	u16	reserved1;
-	u32	change_ind;
-	u32	reserved2;
-	u32	reserved3;
-	struct i2o_sys_tbl_entry iops[0];
+    u8	num_entries;
+    u8	version;
+    u16	reserved1;
+    u32	change_ind;
+    u32	reserved2;
+    u32	reserved3;
+    struct i2o_sys_tbl_entry iops[0];
 };
 
 /*
@@ -252,47 +253,47 @@ struct i2o_sys_tbl
  */
 static inline u32 I2O_POST_READ32(struct i2o_controller *c)
 {
-	return readl(c->post_port);
+    return readl(c->post_port);
 }
 
 static inline void I2O_POST_WRITE32(struct i2o_controller *c, u32 val)
 {
-	writel(val, c->post_port);
+    writel(val, c->post_port);
 }
 
 
 static inline u32 I2O_REPLY_READ32(struct i2o_controller *c)
 {
-	return readl(c->reply_port);
+    return readl(c->reply_port);
 }
 
 static inline void I2O_REPLY_WRITE32(struct i2o_controller *c, u32 val)
 {
-	writel(val, c->reply_port);
+    writel(val, c->reply_port);
 }
 
 
 static inline u32 I2O_IRQ_READ32(struct i2o_controller *c)
 {
-	return readl(c->irq_mask);
+    return readl(c->irq_mask);
 }
 
 static inline void I2O_IRQ_WRITE32(struct i2o_controller *c, u32 val)
 {
-	writel(val, c->irq_mask);
+    writel(val, c->irq_mask);
 }
 
 
 static inline void i2o_post_message(struct i2o_controller *c, u32 m)
 {
-	/* The second line isnt spurious - thats forcing PCI posting */
-	I2O_POST_WRITE32(c, m);
-	(void) I2O_IRQ_READ32(c);
+    /* The second line isnt spurious - thats forcing PCI posting */
+    I2O_POST_WRITE32(c, m);
+    (void) I2O_IRQ_READ32(c);
 }
 
 static inline void i2o_flush_reply(struct i2o_controller *c, u32 m)
 {
-	I2O_REPLY_WRITE32(c, m);
+    I2O_REPLY_WRITE32(c, m);
 }
 
 extern struct i2o_controller *i2o_find_controller(int);
@@ -308,24 +309,24 @@ extern int i2o_claim_device(struct i2o_device *, struct i2o_handler *);
 extern int i2o_release_device(struct i2o_device *, struct i2o_handler *);
 extern int i2o_device_notify_on(struct i2o_device *, struct i2o_handler *);
 extern int i2o_device_notify_off(struct i2o_device *,
-				 struct i2o_handler *);
+                                 struct i2o_handler *);
 
 extern int i2o_post_this(struct i2o_controller *, u32 *, int);
 extern int i2o_post_wait(struct i2o_controller *, u32 *, int, int);
 extern int i2o_post_wait_mem(struct i2o_controller *, u32 *, int, int,
-			     void *, void *);
+                             void *, void *);
 
 extern int i2o_query_scalar(struct i2o_controller *, int, int, int, void *,
-			    int);
+                            int);
 extern int i2o_set_scalar(struct i2o_controller *, int, int, int, void *,
-			  int);
+                          int);
 extern int i2o_query_table(int, struct i2o_controller *, int, int, int,
-			   void *, int, void *, int);
+                           void *, int, void *, int);
 extern int i2o_clear_table(struct i2o_controller *, int, int);
 extern int i2o_row_add_table(struct i2o_controller *, int, int, int,
-			     void *, int);
+                             void *, int);
 extern int i2o_issue_params(int, struct i2o_controller *, int, void *, int,
-			    void *, int);
+                            void *, int);
 
 extern int i2o_event_register(struct i2o_controller *, u32, u32, u32, u32);
 extern int i2o_event_ack(struct i2o_controller *, u32 *);
@@ -557,7 +558,7 @@ extern int i2o_delete_controller(struct i2o_controller *);
 #define TRL_MULTIPLE_FIXED_LENGTH	0x80
 
 
- /* msg header defines for MsgFlags */
+/* msg header defines for MsgFlags */
 #define MSG_STATIC	0x0100
 #define MSG_64BIT_CNTXT	0x0200
 #define MSG_MULTI_TRANS	0x1000
@@ -565,7 +566,7 @@ extern int i2o_delete_controller(struct i2o_controller *);
 #define MSG_FINAL	0x4000
 #define MSG_REPLY	0x8000
 
- /* minimum size msg */
+/* minimum size msg */
 #define THREE_WORD_MSG_SIZE	0x00030000
 #define FOUR_WORD_MSG_SIZE	0x00040000
 #define FIVE_WORD_MSG_SIZE	0x00050000

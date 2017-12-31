@@ -35,9 +35,9 @@
  */
 static int ext2_release_file (struct inode * inode, struct file * filp)
 {
-	if (filp->f_mode & FMODE_WRITE)
-		ext2_discard_prealloc (inode);
-	return 0;
+    if (filp->f_mode & FMODE_WRITE)
+        ext2_discard_prealloc (inode);
+    return 0;
 }
 
 #if 0
@@ -45,18 +45,29 @@ static int ext2_release_file (struct inode * inode, struct file * filp)
  * We have mostly NULL's here: the current defaults are ok for
  * the ext2 filesystem.
  */
-struct file_operations ext2_file_operations = {
-	llseek:		generic_file_llseek,
-	read:		generic_file_read,
-	write:		generic_file_write,
-	ioctl:		ext2_ioctl,
-	mmap:		generic_file_mmap,
-	open:		generic_file_open,
-	release:	ext2_release_file,
-	fsync:		ext2_sync_file,
+struct file_operations ext2_file_operations =
+{
+llseek:
+    generic_file_llseek,
+read:
+    generic_file_read,
+write:
+    generic_file_write,
+ioctl:
+    ext2_ioctl,
+mmap:
+    generic_file_mmap,
+open:
+    generic_file_open,
+release:
+    ext2_release_file,
+fsync:
+    ext2_sync_file,
 };
 
-struct inode_operations ext2_file_inode_operations = {
-	truncate:	ext2_truncate,
+struct inode_operations ext2_file_inode_operations =
+{
+truncate:
+    ext2_truncate,
 };
 #endif

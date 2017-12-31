@@ -38,7 +38,8 @@ static rwlock_t gendisk_lock;
  * XXX: you should _never_ access this directly.
  *	the only reason this is exported is source compatiblity.
  */
-/*static*/ struct gendisk *gendisk_head;
+/*static*/
+struct gendisk *gendisk_head;
 static struct gendisk *gendisk_array[MAX_BLKDEV];
 
 EXPORT_SYMBOL(gendisk_head);
@@ -54,29 +55,29 @@ EXPORT_SYMBOL(gendisk_head);
 void
 add_gendisk(struct gendisk *gp)
 {
-	struct gendisk *sgp;
+    struct gendisk *sgp;
 
-	write_lock(&gendisk_lock);
+    write_lock(&gendisk_lock);
 
-	/*
- 	 *	In 2.5 this will go away. Fix the drivers who rely on
- 	 *	old behaviour.
- 	 */
+    /*
+     *	In 2.5 this will go away. Fix the drivers who rely on
+     *	old behaviour.
+     */
 
-	for (sgp = gendisk_head; sgp; sgp = sgp->next)
-	{
-		if (sgp == gp)
-		{
+    for (sgp = gendisk_head; sgp; sgp = sgp->next)
+    {
+        if (sgp == gp)
+        {
 //			printk(KERN_ERR "add_gendisk: device major %d is buggy and added a live gendisk!\n",
 //				sgp->major)
-			goto out;
-		}
-	}
-	gendisk_array[gp->major] = gp;
-	gp->next = gendisk_head;
-	gendisk_head = gp;
+            goto out;
+        }
+    }
+    gendisk_array[gp->major] = gp;
+    gp->next = gendisk_head;
+    gendisk_head = gp;
 out:
-	write_unlock(&gendisk_lock);
+    write_unlock(&gendisk_lock);
 }
 
 EXPORT_SYMBOL(add_gendisk);
@@ -92,16 +93,16 @@ EXPORT_SYMBOL(add_gendisk);
 void
 del_gendisk(struct gendisk *gp)
 {
-	struct gendisk **gpp;
+    struct gendisk **gpp;
 
-	write_lock(&gendisk_lock);
-	gendisk_array[gp->major] = NULL;
-	for (gpp = &gendisk_head; *gpp; gpp = &((*gpp)->next))
-		if (*gpp == gp)
-			break;
-	if (*gpp)
-		*gpp = (*gpp)->next;
-	write_unlock(&gendisk_lock);
+    write_lock(&gendisk_lock);
+    gendisk_array[gp->major] = NULL;
+    for (gpp = &gendisk_head; *gpp; gpp = &((*gpp)->next))
+        if (*gpp == gp)
+            break;
+    if (*gpp)
+        *gpp = (*gpp)->next;
+    write_unlock(&gendisk_lock);
 }
 
 EXPORT_SYMBOL(del_gendisk);
@@ -117,20 +118,20 @@ EXPORT_SYMBOL(del_gendisk);
 struct gendisk *
 get_gendisk(kdev_t dev)
 {
-	struct gendisk *gp = NULL;
-	int maj = MAJOR(dev);
+    struct gendisk *gp = NULL;
+    int maj = MAJOR(dev);
 
-	read_lock(&gendisk_lock);
-	if ((gp = gendisk_array[maj]))
-		goto out;
+    read_lock(&gendisk_lock);
+    if ((gp = gendisk_array[maj]))
+        goto out;
 
-	/* This is needed for early 2.4 source compatiblity.  --hch */
-	for (gp = gendisk_head; gp; gp = gp->next)
-		if (gp->major == maj)
-			break;
+    /* This is needed for early 2.4 source compatiblity.  --hch */
+    for (gp = gendisk_head; gp; gp = gp->next)
+        if (gp->major == maj)
+            break;
 out:
-	read_unlock(&gendisk_lock);
-	return gp;
+    read_unlock(&gendisk_lock);
+    return gp;
 }
 
 EXPORT_SYMBOL(get_gendisk);
@@ -140,35 +141,37 @@ EXPORT_SYMBOL(get_gendisk);
 int
 get_partition_list(char *page, char **start, off_t offset, int count)
 {
-	struct gendisk *gp;
-	char buf[64];
-	int len, n;
+    struct gendisk *gp;
+    char buf[64];
+    int len, n;
 
-	len = sprintf(page, "major minor  #blocks  name\n\n");
-	read_lock(&gendisk_lock);
-	for (gp = gendisk_head; gp; gp = gp->next) {
-		for (n = 0; n < (gp->nr_real << gp->minor_shift); n++) {
-			if (gp->part[n].nr_sects == 0)
-				continue;
+    len = sprintf(page, "major minor  #blocks  name\n\n");
+    read_lock(&gendisk_lock);
+    for (gp = gendisk_head; gp; gp = gp->next)
+    {
+        for (n = 0; n < (gp->nr_real << gp->minor_shift); n++)
+        {
+            if (gp->part[n].nr_sects == 0)
+                continue;
 
-			len += snprintf(page + len, 63,
-					"%4d  %4d %10d %s\n",
-					gp->major, n, gp->sizes[n],
-					disk_name(gp, n, buf));
-			if (len < offset)
-				offset -= len, len = 0;
-			else if (len >= offset + count)
-				goto out;
-		}
-	}
+            len += snprintf(page + len, 63,
+                            "%4d  %4d %10d %s\n",
+                            gp->major, n, gp->sizes[n],
+                            disk_name(gp, n, buf));
+            if (len < offset)
+                offset -= len, len = 0;
+            else if (len >= offset + count)
+                goto out;
+        }
+    }
 
 out:
-	read_unlock(&gendisk_lock);
-	*start = page + offset;
-	len -= offset;
-	if (len < 0)
-		len = 0;
-	return len > count ? count : len;
+    read_unlock(&gendisk_lock);
+    *start = page + offset;
+    len -= offset;
+    if (len < 0)
+        len = 0;
+    return len > count ? count : len;
 }
 #endif
 
@@ -186,35 +189,35 @@ extern int cpqarray_init(void);
 
 int __init device_init(void)
 {
-	rwlock_init(&gendisk_lock);
-	blk_dev_init();
-	sti();
+    rwlock_init(&gendisk_lock);
+    blk_dev_init();
+    sti();
 #ifdef CONFIG_I2O
-	i2o_init();
+    i2o_init();
 #endif
 #ifdef CONFIG_FUSION_BOOT
-	fusion_init();
+    fusion_init();
 #endif
 #ifdef CONFIG_FC4_SOC
-	/* This has to be done before scsi_dev_init */
-	soc_probe();
+    /* This has to be done before scsi_dev_init */
+    soc_probe();
 #endif
 #ifdef CONFIG_BLK_CPQ_DA
-	cpqarray_init();
+    cpqarray_init();
 #endif
 #ifdef CONFIG_NET
 #if 1
-	// not yet? oh yes
-	net_dev_init();
+    // not yet? oh yes
+    net_dev_init();
 #endif
 #endif
 #ifdef CONFIG_ATM
-	(void) atmdev_init();
+    (void) atmdev_init();
 #endif
 #ifdef CONFIG_VT
-	console_map_init();
+    console_map_init();
 #endif
-	return 0;
+    return 0;
 }
 
 __initcall(device_init);

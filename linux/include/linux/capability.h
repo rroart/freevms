@@ -8,7 +8,7 @@
  * See here for the libcap library ("POSIX draft" compliance):
  *
  * ftp://linux.kernel.org/pub/linux/libs/security/linux-privs/kernel-2.2/
- */ 
+ */
 
 #ifndef _LINUX_CAPABILITY_H
 #define _LINUX_CAPABILITY_H
@@ -26,28 +26,31 @@
    following structure to such a composite is better handled in a user
    library since the draft standard requires the use of malloc/free
    etc.. */
- 
+
 #define _LINUX_CAPABILITY_VERSION  0x19980330
 
-typedef struct __user_cap_header_struct {
-	__u32 version;
-	int pid;
+typedef struct __user_cap_header_struct
+{
+    __u32 version;
+    int pid;
 } *cap_user_header_t;
- 
-typedef struct __user_cap_data_struct {
-        __u32 effective;
-        __u32 permitted;
-        __u32 inheritable;
+
+typedef struct __user_cap_data_struct
+{
+    __u32 effective;
+    __u32 permitted;
+    __u32 inheritable;
 } *cap_user_data_t;
-  
+
 #ifdef __KERNEL__
 
 /* #define STRICT_CAP_T_TYPECHECKS */
 
 #ifdef STRICT_CAP_T_TYPECHECKS
 
-typedef struct kernel_cap_struct {
-	__u32 cap;
+typedef struct kernel_cap_struct
+{
+    __u32 cap;
 } kernel_cap_t;
 
 #else
@@ -55,7 +58,7 @@ typedef struct kernel_cap_struct {
 typedef __u32 kernel_cap_t;
 
 #endif
-  
+
 #define _USER_CAP_HEADER_SIZE  (2*sizeof(__u32))
 #define _KERNEL_CAP_T_SIZE     (sizeof(kernel_cap_t))
 
@@ -63,7 +66,7 @@ typedef __u32 kernel_cap_t;
 
 
 /**
- ** POSIX-draft defined capabilities. 
+ ** POSIX-draft defined capabilities.
  **/
 
 /* In a system with the [_POSIX_CHOWN_RESTRICTED] option defined, this
@@ -83,7 +86,7 @@ typedef __u32 kernel_cap_t;
    defined. Excluding DAC access covered by CAP_LINUX_IMMUTABLE. */
 
 #define CAP_DAC_READ_SEARCH  2
-    
+
 /* Overrides all restrictions about allowed operations on files, where
    file owner ID must be equal to the user ID, except where CAP_FSETID
    is applicable. It doesn't override MAC and DAC restrictions. */
@@ -251,7 +254,7 @@ typedef __u32 kernel_cap_t;
 /* Override reserved space on ext2 filesystem */
 /* Modify data journaling mode on ext3 filesystem (uses journaling
    resources) */
-/* NOTE: ext2 honors fsuid when checking for resource overrides, so 
+/* NOTE: ext2 honors fsuid when checking for resource overrides, so
    you can override using fsuid too */
 /* Override size restrictions on IPC message queues */
 /* Allow more than 64hz interrupts from the real-time clock */
@@ -280,7 +283,7 @@ typedef __u32 kernel_cap_t;
 #define CAP_LEASE            28
 
 #ifdef __KERNEL__
-/* 
+/*
  * Bounding set
  */
 extern kernel_cap_t cap_bset;
@@ -288,7 +291,7 @@ extern kernel_cap_t cap_bset;
 /*
  * Internal kernel functions only
  */
- 
+
 #ifdef STRICT_CAP_T_TYPECHECKS
 
 #define to_cap_t(x) { x }
@@ -313,30 +316,30 @@ extern kernel_cap_t cap_bset;
 
 static inline kernel_cap_t cap_combine(kernel_cap_t a, kernel_cap_t b)
 {
-     kernel_cap_t dest;
-     cap_t(dest) = cap_t(a) | cap_t(b);
-     return dest;
+    kernel_cap_t dest;
+    cap_t(dest) = cap_t(a) | cap_t(b);
+    return dest;
 }
 
 static inline kernel_cap_t cap_intersect(kernel_cap_t a, kernel_cap_t b)
 {
-     kernel_cap_t dest;
-     cap_t(dest) = cap_t(a) & cap_t(b);
-     return dest;
+    kernel_cap_t dest;
+    cap_t(dest) = cap_t(a) & cap_t(b);
+    return dest;
 }
 
 static inline kernel_cap_t cap_drop(kernel_cap_t a, kernel_cap_t drop)
 {
-     kernel_cap_t dest;
-     cap_t(dest) = cap_t(a) & ~cap_t(drop);
-     return dest;
+    kernel_cap_t dest;
+    cap_t(dest) = cap_t(a) & ~cap_t(drop);
+    return dest;
 }
 
 static inline kernel_cap_t cap_invert(kernel_cap_t c)
 {
-     kernel_cap_t dest;
-     cap_t(dest) = ~cap_t(c);
-     return dest;
+    kernel_cap_t dest;
+    cap_t(dest) = ~cap_t(c);
+    return dest;
 }
 
 #define cap_isclear(c)       (!cap_t(c))

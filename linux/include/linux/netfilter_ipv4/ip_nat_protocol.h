@@ -9,41 +9,41 @@ struct ip_nat_range;
 
 struct ip_nat_protocol
 {
-	struct list_head list;
+    struct list_head list;
 
-	/* Protocol name */
-	const char *name;
+    /* Protocol name */
+    const char *name;
 
-	/* Protocol number. */
-	unsigned int protonum;
+    /* Protocol number. */
+    unsigned int protonum;
 
-	/* Do a packet translation according to the ip_nat_proto_manip
-	 * and manip type. */
-	void (*manip_pkt)(struct iphdr *iph, size_t len,
-			  const struct ip_conntrack_manip *manip,
-			  enum ip_nat_manip_type maniptype);
+    /* Do a packet translation according to the ip_nat_proto_manip
+     * and manip type. */
+    void (*manip_pkt)(struct iphdr *iph, size_t len,
+                      const struct ip_conntrack_manip *manip,
+                      enum ip_nat_manip_type maniptype);
 
-	/* Is the manipable part of the tuple between min and max incl? */
-	int (*in_range)(const struct ip_conntrack_tuple *tuple,
-			enum ip_nat_manip_type maniptype,
-			const union ip_conntrack_manip_proto *min,
-			const union ip_conntrack_manip_proto *max);
+    /* Is the manipable part of the tuple between min and max incl? */
+    int (*in_range)(const struct ip_conntrack_tuple *tuple,
+                    enum ip_nat_manip_type maniptype,
+                    const union ip_conntrack_manip_proto *min,
+                    const union ip_conntrack_manip_proto *max);
 
-	/* Alter the per-proto part of the tuple (depending on
-	   maniptype), to give a unique tuple in the given range if
-	   possible; return false if not.  Per-protocol part of tuple
-	   is initialized to the incoming packet. */
-	int (*unique_tuple)(struct ip_conntrack_tuple *tuple,
-			    const struct ip_nat_range *range,
-			    enum ip_nat_manip_type maniptype,
-			    const struct ip_conntrack *conntrack);
+    /* Alter the per-proto part of the tuple (depending on
+       maniptype), to give a unique tuple in the given range if
+       possible; return false if not.  Per-protocol part of tuple
+       is initialized to the incoming packet. */
+    int (*unique_tuple)(struct ip_conntrack_tuple *tuple,
+                        const struct ip_nat_range *range,
+                        enum ip_nat_manip_type maniptype,
+                        const struct ip_conntrack *conntrack);
 
-	unsigned int (*print)(char *buffer,
-			      const struct ip_conntrack_tuple *match,
-			      const struct ip_conntrack_tuple *mask);
+    unsigned int (*print)(char *buffer,
+                          const struct ip_conntrack_tuple *match,
+                          const struct ip_conntrack_tuple *mask);
 
-	unsigned int (*print_range)(char *buffer,
-				    const struct ip_nat_range *range);
+    unsigned int (*print_range)(char *buffer,
+                                const struct ip_nat_range *range);
 };
 
 /* Protocol registration. */

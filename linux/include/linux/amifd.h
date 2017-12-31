@@ -10,7 +10,8 @@
 
 #ifndef ASSEMBLER
 
-struct fd_data_type {
+struct fd_data_type
+{
     char *name;			/* description of data type */
     int sects;			/* sectors per track */
 #ifdef __STDC__
@@ -26,7 +27,8 @@ struct fd_data_type {
 ** Floppy type descriptions
 */
 
-struct fd_drive_type {
+struct fd_drive_type
+{
     unsigned long code;		/* code returned from drive */
     char *name;			/* description of drive */
     unsigned int tracks;	/* number of tracks */
@@ -41,7 +43,8 @@ struct fd_drive_type {
     unsigned int side_time;	/* time needed to change sides */
 };
 
-struct amiga_floppy_struct {
+struct amiga_floppy_struct
+{
     struct fd_drive_type *type;	/* type of floppy for this unit */
     struct fd_data_type *dtype;	/* type of floppy for this unit */
     int track;			/* current track (-1 == unknown) */

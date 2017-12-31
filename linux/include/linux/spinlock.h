@@ -58,7 +58,7 @@
 #include <asm/spinlock.h>
 
 #elif !defined(spin_lock_init) /* !SMP and spin_lock_init not previously
-                                  defined (e.g. by including asm/spinlock.h */
+defined (e.g. by including asm/spinlock.h */
 
 #define DEBUG_SPINLOCKS	0	/* 0 == no debugging, 1 == maintain lock state, 2 == full debug */
 
@@ -67,18 +67,21 @@
 #define atomic_dec_and_lock(atomic,lock) atomic_dec_and_test(atomic)
 #define ATOMIC_DEC_AND_LOCK
 
-/*
- * Your basic spinlocks, allowing only a single CPU anywhere
- *
- * Some older gcc versions had a nasty bug with empty initializers.
- * (XXX: could someone please confirm whether egcs 1.1 still has this bug?)
- */
+         /*
+          * Your basic spinlocks, allowing only a single CPU anywhere
+          *
+          * Some older gcc versions had a nasty bug with empty initializers.
+          * (XXX: could someone please confirm whether egcs 1.1 still has this bug?)
+          */
 #if (__GNUC__ > 2 || __GNUC_MINOR__ > 95)
-  typedef struct { } spinlock_t;
-  #define SPIN_LOCK_UNLOCKED (spinlock_t) { }
+         typedef struct { } spinlock_t;
+#define SPIN_LOCK_UNLOCKED (spinlock_t) { }
 #else
-  typedef struct { int gcc_is_buggy; } spinlock_t;
-  #define SPIN_LOCK_UNLOCKED (spinlock_t) { 0 }
+         typedef struct
+         {
+             int gcc_is_buggy;
+         } spinlock_t;
+#define SPIN_LOCK_UNLOCKED (spinlock_t) { 0 }
 #endif
 
 #define spin_lock_init(lock)	do { } while(0)
@@ -90,9 +93,10 @@
 
 #elif (DEBUG_SPINLOCKS < 2)
 
-typedef struct {
-	volatile unsigned long lock;
-} spinlock_t;
+         typedef struct
+         {
+             volatile unsigned long lock;
+         } spinlock_t;
 #define SPIN_LOCK_UNLOCKED (spinlock_t) { 0 }
 
 #define spin_lock_init(x)	do { (x)->lock = 0; } while (0)
@@ -105,11 +109,12 @@ typedef struct {
 
 #else /* (DEBUG_SPINLOCKS >= 2) */
 
-typedef struct {
-	volatile unsigned long lock;
-	volatile unsigned int babble;
-	const char *module;
-} spinlock_t;
+         typedef struct
+         {
+             volatile unsigned long lock;
+             volatile unsigned int babble;
+             const char *module;
+         } spinlock_t;
 #define SPIN_LOCK_UNLOCKED (spinlock_t) { 0, 25, __BASE_FILE__ }
 
 #include <linux/kernel.h>
@@ -124,25 +129,28 @@ typedef struct {
 
 #endif	/* DEBUG_SPINLOCKS */
 
-/*
- * Read-write spinlocks, allowing multiple readers
- * but only one writer.
- *
- * NOTE! it is quite common to have readers in interrupts
- * but no interrupt writers. For those circumstances we
- * can "mix" irq-safe locks - any writer needs to get a
- * irq-safe write-lock, but readers can get non-irqsafe
- * read-locks.
- *
- * Some older gcc versions had a nasty bug with empty initializers.
- * (XXX: could someone please confirm whether egcs 1.1 still has this bug?)
- */
+         /*
+          * Read-write spinlocks, allowing multiple readers
+          * but only one writer.
+          *
+          * NOTE! it is quite common to have readers in interrupts
+          * but no interrupt writers. For those circumstances we
+          * can "mix" irq-safe locks - any writer needs to get a
+          * irq-safe write-lock, but readers can get non-irqsafe
+          * read-locks.
+          *
+          * Some older gcc versions had a nasty bug with empty initializers.
+          * (XXX: could someone please confirm whether egcs 1.1 still has this bug?)
+          */
 #if (__GNUC__ > 2 || __GNUC_MINOR__ > 91)
-  typedef struct { } rwlock_t;
-  #define RW_LOCK_UNLOCKED (rwlock_t) { }
+         typedef struct { } rwlock_t;
+#define RW_LOCK_UNLOCKED (rwlock_t) { }
 #else
-  typedef struct { int gcc_is_buggy; } rwlock_t;
-  #define RW_LOCK_UNLOCKED (rwlock_t) { 0 }
+         typedef struct
+         {
+             int gcc_is_buggy;
+         } rwlock_t;
+#define RW_LOCK_UNLOCKED (rwlock_t) { 0 }
 #endif
 
 #define rwlock_init(lock)	do { } while(0)
@@ -162,14 +170,16 @@ extern int atomic_dec_and_lock(atomic_t *atomic, spinlock_t *lock);
 #ifdef CONFIG_SMP
 #include <linux/cache.h>
 
-typedef union {
+typedef union
+{
     spinlock_t lock;
     char fill_up[(SMP_CACHE_BYTES)];
 } spinlock_cacheline_t __attribute__ ((aligned(SMP_CACHE_BYTES)));
 
 #else	/* SMP */
 
-typedef struct {
+typedef struct
+{
     spinlock_t lock;
 } spinlock_cacheline_t;
 

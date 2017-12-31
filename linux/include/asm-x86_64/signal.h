@@ -16,8 +16,9 @@ struct siginfo;
 
 typedef unsigned long old_sigset_t;		/* at least 32 bits */
 
-typedef struct {
-	unsigned long sig[_NSIG_WORDS];
+typedef struct
+{
+    unsigned long sig[_NSIG_WORDS];
 } sigset_t;
 
 #else
@@ -132,21 +133,24 @@ typedef void (*__sighandler_t)(int);
 #define SIG_IGN	((__sighandler_t)1)	/* ignore signal */
 #define SIG_ERR	((__sighandler_t)-1)	/* error return from signal */
 
-struct sigaction {
-	__sighandler_t sa_handler;
-	unsigned long sa_flags;
-	void (*sa_restorer)(void);
-	sigset_t sa_mask;		/* mask last for extensibility */
+struct sigaction
+{
+    __sighandler_t sa_handler;
+    unsigned long sa_flags;
+    void (*sa_restorer)(void);
+    sigset_t sa_mask;		/* mask last for extensibility */
 };
 
-struct k_sigaction {
-	struct sigaction sa;
+struct k_sigaction
+{
+    struct sigaction sa;
 };
 
-typedef struct sigaltstack {
-	void *ss_sp;
-	int ss_flags;
-	size_t ss_size;
+typedef struct sigaltstack
+{
+    void *ss_sp;
+    int ss_flags;
+    size_t ss_size;
 } stack_t;
 
 #ifdef __KERNEL__
@@ -157,26 +161,26 @@ typedef struct sigaltstack {
 
 extern __inline__ void sigaddset(sigset_t *set, int _sig)
 {
-	__asm__("btsq %1,%0" : "=m"(*set) : "Ir"(_sig - 1) : "cc");
+    __asm__("btsq %1,%0" : "=m"(*set) : "Ir"(_sig - 1) : "cc");
 }
 
 extern __inline__ void sigdelset(sigset_t *set, int _sig)
 {
-	__asm__("btrq %1,%0" : "=m"(*set) : "Ir"(_sig - 1) : "cc");
+    __asm__("btrq %1,%0" : "=m"(*set) : "Ir"(_sig - 1) : "cc");
 }
 
 extern __inline__ int __const_sigismember(sigset_t *set, int _sig)
 {
-	unsigned long sig = _sig - 1;
-	return 1 & (set->sig[sig / _NSIG_BPW] >> (sig & ~(_NSIG_BPW-1)));
+    unsigned long sig = _sig - 1;
+    return 1 & (set->sig[sig / _NSIG_BPW] >> (sig & ~(_NSIG_BPW-1)));
 }
 
 extern __inline__ int __gen_sigismember(sigset_t *set, int _sig)
 {
-	int ret;
-	__asm__("btq %2,%1\n\tsbbq %0,%0"
-		: "=r"(ret) : "m"(*set), "Ir"(_sig-1) : "cc");
-	return ret;
+    int ret;
+    __asm__("btq %2,%1\n\tsbbq %0,%0"
+            : "=r"(ret) : "m"(*set), "Ir"(_sig-1) : "cc");
+    return ret;
 }
 
 #define sigismember(set,sig)			\
@@ -188,8 +192,8 @@ extern __inline__ int __gen_sigismember(sigset_t *set, int _sig)
 
 extern __inline__ int sigfindinword(unsigned long word)
 {
-	__asm__("bsfq %1,%0" : "=r"(word) : "rm"(word) : "cc");
-	return word;
+    __asm__("bsfq %1,%0" : "=r"(word) : "rm"(word) : "cc");
+    return word;
 }
 #endif
 #endif /* __KERNEL__ */

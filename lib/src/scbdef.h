@@ -16,7 +16,8 @@
 */
 
 #define NO_DOLLAR
-struct _scbdef {
+struct _scbdef
+{
     vmsword scb$w_struclev;
     vmsword scb$w_cluster;
     vmslong scb$l_volsize;

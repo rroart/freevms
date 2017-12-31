@@ -21,13 +21,13 @@
 */
 #if 0
 MODULE
-    Memory (
-	ADDRESSING_MODE (
-	    EXTERNAL	= LONG_RELATIVE,
-	    NONEXTERNAL	= LONG_RELATIVE),
-	LANGUAGE (BLISS32),
-	LIST (NOBINARY, ASSEMBLY, NOEXPAND)
-	)
+Memory (
+    ADDRESSING_MODE (
+        EXTERNAL	= LONG_RELATIVE,
+        NONEXTERNAL	= LONG_RELATIVE),
+    LANGUAGE (BLISS32),
+    LIST (NOBINARY, ASSEMBLY, NOEXPAND)
+)
 #endif
 
 //++
@@ -45,106 +45,106 @@ MODULE
 
 //LIBRARY "SYS$LIBRARY:XPORT";
 #include <starlet.h>
-#include	"tcp.h" 
+#include	"tcp.h"
 #include "cmuip.h" // needed before tcpmacros.h
-#include	"tcpmacros.h" 
+#include	"tcpmacros.h"
 
 #include <ssdef.h>
 
 extern
 LIB$GET_VM(),
-  LIB$FREE_VM(),
-  LIB$RESET_VM_ZONE(),
-  LIB$STAT_VM();
+    LIB$FREE_VM(),
+    LIB$RESET_VM_ZONE(),
+    LIB$STAT_VM();
 
 extern signed long
-    log_state ;
+log_state ;
 
 Get_Mem();
 Free_Mem();
 Reset_Mem();
- void    MEM_STAT();
+void    MEM_STAT();
 void Mem_Stat (void);
 
 void Make_Zone (void)
-    {
+{
     extern
-      LIB$CREATE_USER_VM_ZONE(),
-      LIB$CREATE_VM_ZONE(),
-      LIB$DELETE_VM_ZONE;
+    LIB$CREATE_USER_VM_ZONE(),
+        LIB$CREATE_VM_ZONE(),
+        LIB$DELETE_VM_ZONE;
     signed long
-	Real_Zone,
-	User_Zone,
-	Status;
+    Real_Zone,
+    User_Zone,
+    Status;
 
     Status = LIB$CREATE_VM_ZONE(&Real_Zone) ;
     XLOG$FAO(LOG$MEM,"!%T MAKE_ZONE: Status: !SL, Zone: !SL!/",
-	0, Status, Real_Zone) ;
+             0, Status, Real_Zone) ;
     if (! Status)
-	{
-	Signal (Status);
-	};
+    {
+        Signal (Status);
+    };
 
     Status = LIB$CREATE_USER_VM_ZONE(&User_Zone, &Real_Zone,
-	Get_Mem,
-	Free_Mem,
-	Reset_Mem,
-	LIB$DELETE_VM_ZONE) ;
+                                     Get_Mem,
+                                     Free_Mem,
+                                     Reset_Mem,
+                                     LIB$DELETE_VM_ZONE) ;
     XLOG$FAO(LOG$MEM,"!%T MAKE_ZONE: Status: !SL, Zone: !SL UZone: !SL!/",
-	0, Status, Real_Zone, User_Zone) ;
+             0, Status, Real_Zone, User_Zone) ;
     if (! Status)
-	{
-	Signal (Status);
-	};
+    {
+        Signal (Status);
+    };
     Mem_Stat();
     return (User_Zone);
-    }
+}
 
 Get_Mem (Size, Block_A, Zone)
-    {
+{
     signed long
-	Status;
+    Status;
 
     XLOG$FAO(LOG$MEM,"!%T GET_MEM: Size: !SL, Addr: !SL, Zone: !SL!/",
-	0, Size, Block_A, Zone) ;
+             0, Size, Block_A, Zone) ;
     Status = LIB$GET_VM(Size, &Block_A, Zone) ;
     XLOG$FAO(LOG$MEM,"!%T GET_MEM: Status: !SL, Size: !SL, Addr: !SL, Zone: !SL!/",
-	0, Status, Size, Block_A, Zone) ;
+             0, Status, Size, Block_A, Zone) ;
     Mem_Stat();
     return (Status);
-    }
+}
 
 Free_Mem (Size, Block_A, Zone)
-    {
+{
     signed long
-	Status;
+    Status;
 
     Status = LIB$GET_VM(Size, &Block_A, Zone) ;
     XLOG$FAO(LOG$MEM,"!%T FREE_MEM: Status: !SL, Size: !SL, Addr: !SL, Zone: !SL!/",
-	0, Status, Size, Block_A, Zone) ;
+             0, Status, Size, Block_A, Zone) ;
     Mem_Stat() ;
     return (Status);
-    }
+}
 
 Reset_Mem (Size, Block_A, Zone)
-    {
+{
     signed long
-	Status;
+    Status;
 
     Status = LIB$RESET_VM_ZONE(Zone) ;
     XLOG$FAO(LOG$MEM,"!%T RESET_MEM: Status: !SL Size: !SL, Addr: !SL, Zone: !SL!/",
-	0, Status, Size, Block_A, Zone) ;
+             0, Status, Size, Block_A, Zone) ;
     Mem_Stat() ;
     return (Status);
-    }
+}
 
 void Mem_Stat (void)
-    {
+{
     signed long
-	ngets,
-	nfrees,
-	nbytes,
-	Status;
+    ngets,
+    nfrees,
+    nbytes,
+    Status;
 
     Status = LIB$STAT_VM(/*%REF*/(1), &ngets) ;
     if (! Status) Signal (Status);
@@ -152,6 +152,6 @@ void Mem_Stat (void)
     if (! Status) Signal (Status);
     Status = LIB$STAT_VM(/*%REF*/(3), &nbytes) ;
     XLOG$FAO(LOG$MEM,"!%T MEM_STAT: Gets: !SL, Frees: !SL, Bytes: !SL!/",
-	0,ngets, nfrees, nbytes);
+             0,ngets, nfrees, nbytes);
     if (! Status) Signal (Status);
-    }
+}

@@ -10,11 +10,11 @@
  *   1 - not used
  *   2 - kernel code segment
  *   3 - kernel data segment
- *   4 - user code segment                  <-- new cacheline 
+ *   4 - user code segment                  <-- new cacheline
  *   5 - user data segment
  *   6 - not used
  *   7 - not used
- *   8 - APM BIOS support                   <-- new cacheline 
+ *   8 - APM BIOS support                   <-- new cacheline
  *   9 - APM BIOS support
  *  10 - APM BIOS support
  *  11 - APM BIOS support
@@ -22,14 +22,14 @@
  * The TSS+LDT descriptors are spread out a bit so that every CPU
  * has an exclusive cacheline for the per-CPU TSS and LDT:
  *
- *  12 - CPU#0 TSS                          <-- new cacheline 
+ *  12 - CPU#0 TSS                          <-- new cacheline
  *  13 - CPU#0 LDT
- *  14 - not used 
- *  15 - not used 
- *  16 - CPU#1 TSS                          <-- new cacheline 
+ *  14 - not used
+ *  15 - not used
+ *  16 - CPU#1 TSS                          <-- new cacheline
  *  17 - CPU#1 LDT
- *  18 - not used 
- *  19 - not used 
+ *  18 - not used
+ *  19 - not used
  *  ... NR_CPUS per-CPU TSS+LDT's if on SMP
  *
  * Entry into gdt where to find first TSS.
@@ -41,16 +41,18 @@
 #define __LDT(n) (((n)<<2) + __FIRST_LDT_ENTRY)
 
 #ifndef __ASSEMBLY__
-struct desc_struct {
-	unsigned long a,b;
+struct desc_struct
+{
+    unsigned long a,b;
 };
 
 extern struct desc_struct gdt_table[];
 extern struct desc_struct *idt, *gdt;
 
-struct Xgt_desc_struct {
-	unsigned short size;
-	unsigned long address __attribute__((packed));
+struct Xgt_desc_struct
+{
+    unsigned short size;
+    unsigned long address __attribute__((packed));
 };
 
 #define idt_descr (*(struct Xgt_desc_struct *)((char *)&idt - 2))
@@ -71,9 +73,9 @@ extern void set_tss_desc(unsigned int n, void *addr);
 
 static inline void clear_LDT(void)
 {
-	int cpu = smp_processor_id();
-	set_ldt_desc(cpu, &default_ldt[0], 5);
-	__load_LDT(cpu);
+    int cpu = smp_processor_id();
+    set_ldt_desc(cpu, &default_ldt[0], 5);
+    __load_LDT(cpu);
 }
 
 /*
@@ -81,17 +83,18 @@ static inline void clear_LDT(void)
  */
 static inline void load_LDT (struct mm_struct *mm)
 {
-	int cpu = smp_processor_id();
-	void *segments = mm->context.segments;
-	int count = LDT_ENTRIES;
+    int cpu = smp_processor_id();
+    void *segments = mm->context.segments;
+    int count = LDT_ENTRIES;
 
-	if (!segments) {
-		segments = &default_ldt[0];
-		count = 5;
-	}
-		
-	set_ldt_desc(cpu, segments, count);
-	__load_LDT(cpu);
+    if (!segments)
+    {
+        segments = &default_ldt[0];
+        count = 5;
+    }
+
+    set_ldt_desc(cpu, segments, count);
+    __load_LDT(cpu);
 }
 
 #endif /* !__ASSEMBLY__ */

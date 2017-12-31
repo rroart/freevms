@@ -3,9 +3,10 @@
 
 #include <linux/time.h>
 
-enum vsyscall_num {
-	__NR_vgettimeofday,
-	__NR_vtime,
+enum vsyscall_num
+{
+    __NR_vgettimeofday,
+    __NR_vtime,
 };
 
 #define VSYSCALL_START (-10UL << 20)
@@ -22,12 +23,13 @@ enum vsyscall_num {
 #define __section_xtime __attribute__ ((unused, __section__ (".xtime"), aligned(16)))
 #define __section_vxtime_sequence __attribute__ ((unused, __section__ (".vxtime_sequence"), aligned(16)))
 
-struct vxtime_data {
-	long last_tsc;
-	long tsc_quot;
-	long quot;
-	int last;
-	int mode;
+struct vxtime_data
+{
+    long last_tsc;
+    long tsc_quot;
+    long quot;
+    int last;
+    int mode;
 };
 
 #define VXTIME_STUPID	0

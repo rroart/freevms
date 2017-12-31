@@ -50,31 +50,33 @@
 
 struct  XE_Interface_Structure
 {
-  void *     xei$dev_config		;
-  unsigned int     xei$io_chan			;
-  unsigned int     xei$arp_io_chan		;
-  void *     XEI$rcvhdrs			;
-  void *     XEI$recv_Qhead		;
-  void *     XEI$recv_Qtail		;
-  void *     xei$arp_buffer		;
-  void *     XEI$ARP_Block		;
-  unsigned short     XEI$Phy_Size		;
-  unsigned char     xei$phy_addr		[6];
-  unsigned long long     XEI$restart_time		;
-  unsigned short     XEI$restart_count		;
-  unsigned short     XEI$retry_count		;
-  unsigned short     XEI$max_retry		;
-  unsigned short     XEI$MPBS			;
-  unsigned short     XEI$curhdr			;
-  union {
-    unsigned short     XEI$Flags			;
-    struct {
-      unsigned 	XEI$need_2_free	 : 1;	// XEshutdown buf free pending
-      unsigned 	XEI$IO_queued	 : 1;	// XE I/O has been started
-      unsigned 	XEI$XE_decnet	 : 1;	// XE DECNET address seen
-      unsigned 	XEI$XE_started	 : 1;// XE started at least once
+    void *     xei$dev_config		;
+    unsigned int     xei$io_chan			;
+    unsigned int     xei$arp_io_chan		;
+    void *     XEI$rcvhdrs			;
+    void *     XEI$recv_Qhead		;
+    void *     XEI$recv_Qtail		;
+    void *     xei$arp_buffer		;
+    void *     XEI$ARP_Block		;
+    unsigned short     XEI$Phy_Size		;
+    unsigned char     xei$phy_addr		[6];
+    unsigned long long     XEI$restart_time		;
+    unsigned short     XEI$restart_count		;
+    unsigned short     XEI$retry_count		;
+    unsigned short     XEI$max_retry		;
+    unsigned short     XEI$MPBS			;
+    unsigned short     XEI$curhdr			;
+    union
+    {
+        unsigned short     XEI$Flags			;
+        struct
+        {
+            unsigned 	XEI$need_2_free	 : 1;	// XEshutdown buf free pending
+            unsigned 	XEI$IO_queued	 : 1;	// XE I/O has been started
+            unsigned 	XEI$XE_decnet	 : 1;	// XE DECNET address seen
+            unsigned 	XEI$XE_started	 : 1;// XE started at least once
+        };
     };
-  };
 };
 
 #define  XE_Interface_size   sizeof(struct  XE_Interface_Structure)
@@ -92,20 +94,24 @@ MACRO XE_Interface_Structure = BLOCK[XE_Interface_size] FIELD(XE_Interface_Field
 
 struct  XE_addrs_structure
 {
-  union {
-    unsigned int     XE_addr_L0         ;
-    struct {
-      unsigned short        XE_addr_0        ;
-      unsigned short        XE_addr_1        ;
+    union
+    {
+        unsigned int     XE_addr_L0         ;
+        struct
+        {
+            unsigned short        XE_addr_0        ;
+            unsigned short        XE_addr_1        ;
+        };
     };
-  };
-  union {
-    unsigned int     XE_addr_L1         ;
-    struct {
-      unsigned short        XE_addr_2        ;
-      unsigned short        XE_addr_3       ;
+    union
+    {
+        unsigned int     XE_addr_L1         ;
+        struct
+        {
+            unsigned short        XE_addr_2        ;
+            unsigned short        XE_addr_3       ;
+        };
     };
-  };
 };
 
 #define  XE_Addr_size   $Field_set_size
@@ -115,13 +121,13 @@ MACRO XE_addrs_structure = BLOCK[XE_addr_size] FIELD(XE_address)%;
 
 // This structure defines the VMS I/O status block for the XE_Driver
 
-struct XE_iosb_structure 
+struct XE_iosb_structure
 {
-  unsigned short int     xe$vms_code        ;
-  unsigned short int     xe$tran_size       ;
-  unsigned short     XE$cmd_status      ;
-  unsigned char     XE$error_summary   ;
-  unsigned char     XE$iosb_unused2    ;
+    unsigned short int     xe$vms_code        ;
+    unsigned short int     xe$tran_size       ;
+    unsigned short     XE$cmd_status      ;
+    unsigned char     XE$error_summary   ;
+    unsigned char     XE$iosb_unused2    ;
 };
 
 #define  XE_iosb_len   $Field_set_size
@@ -131,35 +137,35 @@ MACRO XE_iosb_structure = BLOCK[XE_iosb_len] FIELD(XE_iosb)%;
 
 // Structure of DEC ethernet setup package
 
-struct XE_setup_structure 
+struct XE_setup_structure
 {
-  unsigned short     XE$c_pcli_bus      ;
-  unsigned long     XE$l_buffer_length ;
-  unsigned short     XE$c_pcli_bfn      ;
-  unsigned long     XE$l_number_buff   ;
-  unsigned short     XE$c_pcli_pad      ;
-  unsigned long     XE$l_padding       ;
-  unsigned short     XE$c_pcli_pty      ;
-  unsigned long     XE$l_protocol      ;
-  unsigned short     XE$c_pcli_prm      ;
-  unsigned long     XE$l_promiscuous   ;
-  unsigned short     XE$c_pcli_dch      ;
-  unsigned long     XE$l_data_chain    ;
-  unsigned short     XE$c_pcli_con      ;
-  unsigned long     XE$l_control_mode  ;
-  unsigned short     XE$c_pcli_mca      ;
-  unsigned short     XE$w_mca_length    ;
-  unsigned short     xe$w_mca_mode      ;
-  unsigned char     XE$L_mca_address   [XE_ADR_SIZE];
-  unsigned char     xe$setup_end       [0];
+    unsigned short     XE$c_pcli_bus      ;
+    unsigned long     XE$l_buffer_length ;
+    unsigned short     XE$c_pcli_bfn      ;
+    unsigned long     XE$l_number_buff   ;
+    unsigned short     XE$c_pcli_pad      ;
+    unsigned long     XE$l_padding       ;
+    unsigned short     XE$c_pcli_pty      ;
+    unsigned long     XE$l_protocol      ;
+    unsigned short     XE$c_pcli_prm      ;
+    unsigned long     XE$l_promiscuous   ;
+    unsigned short     XE$c_pcli_dch      ;
+    unsigned long     XE$l_data_chain    ;
+    unsigned short     XE$c_pcli_con      ;
+    unsigned long     XE$l_control_mode  ;
+    unsigned short     XE$c_pcli_mca      ;
+    unsigned short     XE$w_mca_length    ;
+    unsigned short     xe$w_mca_mode      ;
+    unsigned char     XE$L_mca_address   [XE_ADR_SIZE];
+    unsigned char     xe$setup_end       [0];
 
-  // Extended area for use when setting physical address
+    // Extended area for use when setting physical address
 
-  unsigned short     XE$c_pcli_pha      ;
-  unsigned short     XE$w_pcli_phlen    ;
-  unsigned short     XE$w_pcli_phmode   ;
-  unsigned char     XE$l_pcli_phaddr   [XE_ADR_SIZE];
-  unsigned char     xe$setup_pha_end[0];
+    unsigned short     XE$c_pcli_pha      ;
+    unsigned short     XE$w_pcli_phlen    ;
+    unsigned short     XE$w_pcli_phmode   ;
+    unsigned char     XE$l_pcli_phaddr   [XE_ADR_SIZE];
+    unsigned char     xe$setup_pha_end[0];
 };
 
 #define  XE_setup_len   $Field_set_size
@@ -169,8 +175,8 @@ MACRO XE_setup_structure = BLOCK[XE_setup_len] FIELD(XE_setup)%;
 
 struct XE_sdesc_structure
 {
-  unsigned long     xe$setup_length    ;
-  void *   xe$setup_address;
+    unsigned long     xe$setup_length    ;
+    void *   xe$setup_address;
 };
 
 #define  XE_sdesc_len   $Field_set_size
@@ -210,35 +216,38 @@ unsigned char //    XE$sense_end       ;
 
 struct XE_Sense // check
 {
-  unsigned     XE_Sense_Param:12;//	= [0,  0, 12, 0],
-  unsigned XE_Sense_Type:1; // 	= [0, 12,  1, 0],
-  unsigned XE_Sense_NotUsed:2;// //	= [0, 13,  2, 0],
-  unsigned XE_Sense_Zero:1;//	= [0, 15,  1, 0],
-  union {
-    // If the Type bit EQL 0
-    int XE_Sense_Value; //	= [2,  0, 32, 0],
-    // If the Type bit EQL 1
-    struct {
-      short XE_Sense_Length; //	= [2,  0, 16, 0],
-      unsigned char XE_Sense_String[0]; //	= [4,  0,  0, 0]
+    unsigned     XE_Sense_Param:12;//	= [0,  0, 12, 0],
+    unsigned XE_Sense_Type:1; // 	= [0, 12,  1, 0],
+    unsigned XE_Sense_NotUsed:2;// //	= [0, 13,  2, 0],
+    unsigned XE_Sense_Zero:1;//	= [0, 15,  1, 0],
+    union
+    {
+        // If the Type bit EQL 0
+        int XE_Sense_Value; //	= [2,  0, 32, 0],
+        // If the Type bit EQL 1
+        struct
+        {
+            short XE_Sense_Length; //	= [2,  0, 16, 0],
+            unsigned char XE_Sense_String[0]; //	= [4,  0,  0, 0]
+        };
     };
-  };
 };
 
 #define     XE_SS_BYTEOFF   4
 #define     XE_TYPE_AND_VALUE   6
 
-static    XE_Param_Size (struct XE_Sense*  Buffer) {
+static    XE_Param_Size (struct XE_Sense*  Buffer)
+{
 #ifdef __i386__
-  if ((Buffer)->XE_Sense_Type)  
-    return (Buffer->XE_Sense_Length + XE_SS_BYTEOFF) + 2; // gcc bug/feature
-  else
-    return (XE_TYPE_AND_VALUE)+2; // 2 gcc bug feature?
+    if ((Buffer)->XE_Sense_Type)
+        return (Buffer->XE_Sense_Length + XE_SS_BYTEOFF) + 2; // gcc bug/feature
+    else
+        return (XE_TYPE_AND_VALUE)+2; // 2 gcc bug feature?
 #else
-  if ((Buffer)->XE_Sense_Type)  
-    return (Buffer->XE_Sense_Length + XE_SS_BYTEOFF) + 2; // gcc bug/feature
-  else
-    return (XE_TYPE_AND_VALUE)+2; // 2 gcc bug feature?
+    if ((Buffer)->XE_Sense_Type)
+        return (Buffer->XE_Sense_Length + XE_SS_BYTEOFF) + 2; // gcc bug/feature
+    else
+        return (XE_TYPE_AND_VALUE)+2; // 2 gcc bug feature?
 #endif
 }
 
@@ -246,14 +255,14 @@ static    XE_Param_Size (struct XE_Sense*  Buffer) {
 
 struct XERCV_QB_structure
 {
-  void *     XERCV$next		;
-  void *     XERCV$last		;
-  unsigned short int     XERCV$vms_code	;
-  unsigned short int     XERCV$tran_size	;
-  unsigned short     XERCV$cmd_status	;
-  unsigned char     XERCV$error_summary	;
-  unsigned char     XERCV$iosb_unused2	;
-  unsigned char     XERCV$data		;
+    void *     XERCV$next		;
+    void *     XERCV$last		;
+    unsigned short int     XERCV$vms_code	;
+    unsigned short int     XERCV$tran_size	;
+    unsigned short     XERCV$cmd_status	;
+    unsigned char     XERCV$error_summary	;
+    unsigned char     XERCV$iosb_unused2	;
+    unsigned char     XERCV$data		;
 };
 
 #define  XERCV_QB_len   $Field_set_size
@@ -263,36 +272,40 @@ MACRO XERCV_QB_structure = BLOCK[XERCV_QB_len] FIELD(QB_XE_rcv)%;
 
 // Structure of ethernet send buffer header
 
-struct XESND_structure 
+struct XESND_structure
 {
-  union {
-    unsigned char     XESND$dest	       [6];
-    struct {
-      unsigned int 	XESND$dst1     ;
-      unsigned short 	XESND$dst2     ;
+    union
+    {
+        unsigned char     XESND$dest	       [6];
+        struct
+        {
+            unsigned int 	XESND$dst1     ;
+            unsigned short 	XESND$dst2     ;
+        };
     };
-  };
-  unsigned short    XESND$type;
+    unsigned short    XESND$type;
 };
 
 #define  XESND_len   $Field_set_size
 #if 0
 MACRO XESND_structure = BLOCK[XESND_len] FIELD(XE_send)%;
-#endif 
+#endif
 
 // Structure of ethernet receive buffer header
 
-struct XERCV_structure  
+struct XERCV_structure
 {
-  union {
-    unsigned char     XERCV$buf		[16];	// Entire buffer
-    struct {
-      unsigned char 	XERCV$dst	[6];
-      unsigned char 	XERCV$src	[6];
-      unsigned short 	XERCV$type	;
-      unsigned short 	XERCV$fill	;
+    union
+    {
+        unsigned char     XERCV$buf		[16];	// Entire buffer
+        struct
+        {
+            unsigned char 	XERCV$dst	[6];
+            unsigned char 	XERCV$src	[6];
+            unsigned short 	XERCV$type	;
+            unsigned short 	XERCV$fill	;
+        };
     };
-  };
 };
 
 #define  XERCV_LEN   sizeof(struct XERCV_structure)
@@ -302,7 +315,7 @@ MACRO XERCV_structure = BLOCK[XESND_len] FIELD(XE_recv)%;
 
 #define drv$ip_receive(Buf,Buf_size,IPHdr,devlen,dev_config) IPACP_Interface->ACPI$IP_Receive(Buf,Buf_size,IPHdr,devlen,dev_config)
 
-#define drv$qblk_free(Pntr) IPACP_Interface->ACPI$QBlk_Free(Pntr) 
+#define drv$qblk_free(Pntr) IPACP_Interface->ACPI$QBlk_Free(Pntr)
 
 #define drv$seg_free IPACP_Interface->ACPI$Seg_Free
 

@@ -1,5 +1,5 @@
 /* atmioc.h - ranges for ATM-related ioctl numbers */
- 
+
 /* Written 1995-1999 by Werner Almesberger, EPFL LRC/ICA */
 
 
@@ -13,7 +13,7 @@
 #define _LINUX_ATMIOC_H
 
 #include <asm/ioctl.h>
-		/* everybody including atmioc.h will also need _IO{,R,W,WR} */
+/* everybody including atmioc.h will also need _IO{,R,W,WR} */
 
 #define ATMIOC_PHYCOM	  0x00 /* PHY device common ioctls, globally unique */
 #define ATMIOC_PHYCOM_END 0x0f

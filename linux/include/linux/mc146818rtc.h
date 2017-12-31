@@ -53,14 +53,14 @@ extern spinlock_t rtc_lock;		/* serialize CMOS RAM access */
  */
 # define RTC_UIP		0x80
 # define RTC_DIV_CTL		0x70
-   /* divider control: refclock values 4.194 / 1.049 MHz / 32.768 kHz */
+/* divider control: refclock values 4.194 / 1.049 MHz / 32.768 kHz */
 #  define RTC_REF_CLCK_4MHZ	0x00
 #  define RTC_REF_CLCK_1MHZ	0x10
 #  define RTC_REF_CLCK_32KHZ	0x20
-   /* 2 values for divider stage reset, others for "testing purposes only" */
+/* 2 values for divider stage reset, others for "testing purposes only" */
 #  define RTC_DIV_RESET1	0x60
 #  define RTC_DIV_RESET2	0x70
-  /* Periodic intr. / Square wave rate select. 0=none, 1=32.8kHz,... 15=2Hz */
+/* Periodic intr. / Square wave rate select. 0=none, 1=32.8kHz,... 15=2Hz */
 # define RTC_RATE_SELECT 	0x0F
 
 /**********************************************************************/
@@ -87,7 +87,7 @@ extern spinlock_t rtc_lock;		/* serialize CMOS RAM access */
 # define RTC_VRT 0x80		/* valid RAM and time */
 /**********************************************************************/
 
-/* example: !(CMOS_READ(RTC_CONTROL) & RTC_DM_BINARY) 
+/* example: !(CMOS_READ(RTC_CONTROL) & RTC_DM_BINARY)
  * determines if the following two #defines are needed
  */
 #ifndef BCD_TO_BIN

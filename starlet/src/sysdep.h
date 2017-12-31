@@ -644,7 +644,7 @@ extern int kernel_errno;
 #define ASM_ARGS_6	ASM_ARGS_5, "r" (_a6)
 
 #endif	/* __ASSEMBLER__ */
-#else 
+#else
 /* For Linux we can use the system call table in the header file
 	/usr/include/asm/unistd.h
    of the kernel.  But these symbols do not follow the SYS_* syntax

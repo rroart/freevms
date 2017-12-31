@@ -94,7 +94,7 @@ struct arc_hardware
 {
     uint8_t  source,		/* source ARCnet - filled in automagically */
              dest,		/* destination ARCnet - 0 for broadcast    */
-    	     offset[2];		/* offset bytes (some weird semantics)     */
+             offset[2];		/* offset bytes (some weird semantics)     */
 };
 #define ARC_HDR_SIZE 4
 
@@ -106,13 +106,14 @@ struct archdr
 {
     /* hardware requirements */
     struct arc_hardware hard;
-     
+
     /* arcnet encapsulation-specific bits */
-    union {
-	struct arc_rfc1201   rfc1201;
-	struct arc_rfc1051   rfc1051;
-	struct arc_eth_encap eth_encap;
-	uint8_t raw[0];		/* 508 bytes				*/
+    union
+    {
+        struct arc_rfc1201   rfc1201;
+        struct arc_rfc1051   rfc1051;
+        struct arc_eth_encap eth_encap;
+        uint8_t raw[0];		/* 508 bytes				*/
     } soft;
 };
 

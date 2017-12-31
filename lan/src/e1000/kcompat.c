@@ -32,11 +32,11 @@
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0) )
 void _kc_skb_fill_page_desc(struct sk_buff *skb, int i, struct page *page, int off, int size)
 {
-	skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
-	frag->page = page;
-	frag->page_offset = off;
-	frag->size = size;
-	skb_shinfo(skb)->nr_frags = i + 1;
+    skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
+    frag->page = page;
+    frag->page_offset = off;
+    frag->size = size;
+    skb_shinfo(skb)->nr_frags = i + 1;
 }
 
 #endif /* 2.6.0 => 2.4.6 */
@@ -45,28 +45,29 @@ void _kc_skb_fill_page_desc(struct sk_buff *skb, int i, struct page *page, int o
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,14) )
 void *_kc_kzalloc(size_t size, int flags)
 {
-	void *ret = kmalloc(size, flags);
-	if (ret)
-		memset(ret, 0, size);
-	return ret;
+    void *ret = kmalloc(size, flags);
+    if (ret)
+        memset(ret, 0, size);
+    return ret;
 }
 #endif /* <= 2.6.13 */
 
 /*****************************************************************************/
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18) )
 #if 0
-    // check not yet supported
+// check not yet supported
 struct sk_buff *_kc_netdev_alloc_skb(struct net_device *dev,
                                      unsigned int length)
 {
-	/* 16 == NET_PAD_SKB */
-	struct sk_buff *skb;
-	skb = alloc_skb(length + 16, GFP_ATOMIC);
-	if (likely(skb != NULL)) {
-		skb_reserve(skb, 16);
-		skb->dev = dev;
-	}
-	return skb;
+    /* 16 == NET_PAD_SKB */
+    struct sk_buff *skb;
+    skb = alloc_skb(length + 16, GFP_ATOMIC);
+    if (likely(skb != NULL))
+    {
+        skb_reserve(skb, 16);
+        skb->dev = dev;
+    }
+    return skb;
 }
 #endif
 #endif /* <= 2.6.17 */

@@ -36,56 +36,56 @@ struct sk_buff;
 struct net_device;
 
 typedef unsigned int nf_hookfn(unsigned int hooknum,
-			       struct sk_buff **skb,
-			       const struct net_device *in,
-			       const struct net_device *out,
-			       int (*okfn)(struct sk_buff *));
+                               struct sk_buff **skb,
+                               const struct net_device *in,
+                               const struct net_device *out,
+                               int (*okfn)(struct sk_buff *));
 
 struct nf_hook_ops
 {
-	struct list_head list;
+    struct list_head list;
 
-	/* User fills in from here down. */
-	nf_hookfn *hook;
-	int pf;
-	int hooknum;
-	/* Hooks are ordered in ascending priority. */
-	int priority;
+    /* User fills in from here down. */
+    nf_hookfn *hook;
+    int pf;
+    int hooknum;
+    /* Hooks are ordered in ascending priority. */
+    int priority;
 };
 
 struct nf_sockopt_ops
 {
-	struct list_head list;
+    struct list_head list;
 
-	int pf;
+    int pf;
 
-	/* Non-inclusive ranges: use 0/0/NULL to never get called. */
-	int set_optmin;
-	int set_optmax;
-	int (*set)(struct sock *sk, int optval, void *user, unsigned int len);
+    /* Non-inclusive ranges: use 0/0/NULL to never get called. */
+    int set_optmin;
+    int set_optmax;
+    int (*set)(struct sock *sk, int optval, void *user, unsigned int len);
 
-	int get_optmin;
-	int get_optmax;
-	int (*get)(struct sock *sk, int optval, void *user, int *len);
+    int get_optmin;
+    int get_optmax;
+    int (*get)(struct sock *sk, int optval, void *user, int *len);
 
-	/* Number of users inside set() or get(). */
-	unsigned int use;
-	struct task_struct *cleanup_task;
+    /* Number of users inside set() or get(). */
+    unsigned int use;
+    struct task_struct *cleanup_task;
 };
 
 /* Each queued (to userspace) skbuff has one of these. */
 struct nf_info
 {
-	/* The ops struct which sent us to userspace. */
-	struct nf_hook_ops *elem;
-	
-	/* If we're sent to userspace, this keeps housekeeping info */
-	int pf;
-	unsigned int hook;
-	struct net_device *indev, *outdev;
-	int (*okfn)(struct sk_buff *);
+    /* The ops struct which sent us to userspace. */
+    struct nf_hook_ops *elem;
+
+    /* If we're sent to userspace, this keeps housekeeping info */
+    int pf;
+    unsigned int hook;
+    struct net_device *indev, *outdev;
+    int (*okfn)(struct sk_buff *);
 };
-                                                                                
+
 /* Function to register/unregister hook points. */
 int nf_register_hook(struct nf_hook_ops *reg);
 void nf_unregister_hook(struct nf_hook_ops *reg);
@@ -126,24 +126,24 @@ extern struct list_head nf_hooks[NPROTO][NF_MAX_HOOKS];
 #endif
 
 int nf_hook_slow(int pf, unsigned int hook, struct sk_buff *skb,
-		 struct net_device *indev, struct net_device *outdev,
-		 int (*okfn)(struct sk_buff *));
+                 struct net_device *indev, struct net_device *outdev,
+                 int (*okfn)(struct sk_buff *));
 
 /* Call setsockopt() */
-int nf_setsockopt(struct sock *sk, int pf, int optval, char *opt, 
-		  int len);
+int nf_setsockopt(struct sock *sk, int pf, int optval, char *opt,
+                  int len);
 int nf_getsockopt(struct sock *sk, int pf, int optval, char *opt,
-		  int *len);
+                  int *len);
 
 /* Packet queuing */
-typedef int (*nf_queue_outfn_t)(struct sk_buff *skb, 
+typedef int (*nf_queue_outfn_t)(struct sk_buff *skb,
                                 struct nf_info *info, void *data);
-extern int nf_register_queue_handler(int pf, 
+extern int nf_register_queue_handler(int pf,
                                      nf_queue_outfn_t outfn, void *data);
 extern int nf_unregister_queue_handler(int pf);
 extern void nf_reinject(struct sk_buff *skb,
-			struct nf_info *info,
-			unsigned int verdict);
+                        struct nf_info *info,
+                        unsigned int verdict);
 
 extern void (*ip_ct_attach)(struct sk_buff *, struct nf_ct_info *);
 

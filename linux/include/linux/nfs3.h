@@ -30,10 +30,11 @@
 #define NFS3_ACCESS_EXECUTE	0x0020
 
 /* Flags for create mode */
-enum nfs3_createmode {
-	NFS3_CREATE_UNCHECKED = 0,
-	NFS3_CREATE_GUARDED = 1,
-	NFS3_CREATE_EXCLUSIVE = 2
+enum nfs3_createmode
+{
+    NFS3_CREATE_UNCHECKED = 0,
+    NFS3_CREATE_GUARDED = 1,
+    NFS3_CREATE_EXCLUSIVE = 2
 };
 
 /* NFSv3 file system properties */
@@ -46,16 +47,17 @@ enum nfs3_createmode {
 #define NFS3_FSF_BILLYBOY	0x0018
 #define NFS3_FSF_READONLY	0x0008
 
-enum nfs3_ftype {
-	NF3NON  = 0,
-	NF3REG  = 1,
-	NF3DIR  = 2,
-	NF3BLK  = 3,
-	NF3CHR  = 4,
-	NF3LNK  = 5,
-	NF3SOCK = 6,
-	NF3FIFO = 7,	/* changed from NFSv2 (was 8) */
-	NF3BAD  = 8
+enum nfs3_ftype
+{
+    NF3NON  = 0,
+    NF3REG  = 1,
+    NF3DIR  = 2,
+    NF3BLK  = 3,
+    NF3CHR  = 4,
+    NF3LNK  = 5,
+    NF3SOCK = 6,
+    NF3FIFO = 7,	/* changed from NFSv2 (was 8) */
+    NF3BAD  = 8
 };
 
 #define NFS3_VERSION		3
@@ -88,7 +90,7 @@ enum nfs3_ftype {
 #define MOUNTPROC3_MNT		1
 #define MOUNTPROC3_UMNT		3
 #define MOUNTPROC3_UMNTALL	4
- 
+
 
 #if defined(__KERNEL__) || defined(NFS_NEED_KERNEL_TYPES)
 

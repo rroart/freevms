@@ -59,58 +59,61 @@
 /*
  * This describes a timeout strategy
  */
-struct rpc_timeout {
-	unsigned long		to_current,		/* current timeout */
-				to_initval,		/* initial timeout */
-				to_maxval,		/* max timeout */
-				to_increment,		/* if !exponential */
-				to_resrvval;		/* reserve timeout */
-	short			to_retries;		/* max # of retries */
-	unsigned char		to_exponential;
+struct rpc_timeout
+{
+    unsigned long		to_current,		/* current timeout */
+                  to_initval,		/* initial timeout */
+                  to_maxval,		/* max timeout */
+                  to_increment,		/* if !exponential */
+                  to_resrvval;		/* reserve timeout */
+    short			to_retries;		/* max # of retries */
+    unsigned char		to_exponential;
 };
 
 /*
  * This is the RPC buffer
  */
-struct rpc_iov {
-	struct iovec		io_vec[MAX_IOVEC];
-	unsigned int		io_nr;
-	unsigned int		io_len;
+struct rpc_iov
+{
+    struct iovec		io_vec[MAX_IOVEC];
+    unsigned int		io_nr;
+    unsigned int		io_len;
 };
 
 /*
  * This describes a complete RPC request
  */
-struct rpc_rqst {
-	/*
-	 * This is the user-visible part
-	 */
-	struct rpc_xprt *	rq_xprt;		/* RPC client */
-	struct rpc_timeout	rq_timeout;		/* timeout parms */
-	struct rpc_iov		rq_snd_buf;		/* send buffer */
-	struct rpc_iov		rq_rcv_buf;		/* recv buffer */
+struct rpc_rqst
+{
+    /*
+     * This is the user-visible part
+     */
+    struct rpc_xprt *	rq_xprt;		/* RPC client */
+    struct rpc_timeout	rq_timeout;		/* timeout parms */
+    struct rpc_iov		rq_snd_buf;		/* send buffer */
+    struct rpc_iov		rq_rcv_buf;		/* recv buffer */
 
-	/*
-	 * This is the private part
-	 */
-	struct rpc_task *	rq_task;	/* RPC task data */
-	__u32			rq_xid;		/* request XID */
-	struct rpc_rqst *	rq_next;	/* free list */
-	volatile unsigned char	rq_received : 1;/* receive completed */
+    /*
+     * This is the private part
+     */
+    struct rpc_task *	rq_task;	/* RPC task data */
+    __u32			rq_xid;		/* request XID */
+    struct rpc_rqst *	rq_next;	/* free list */
+    volatile unsigned char	rq_received : 1;/* receive completed */
 
-	/*
-	 * For authentication (e.g. auth_des)
-	 */
-	u32			rq_creddata[2];
-	
-	/*
-	 * Partial send handling
-	 */
-	
-	u32			rq_bytes_sent;	/* Bytes we have sent */
+    /*
+     * For authentication (e.g. auth_des)
+     */
+    u32			rq_creddata[2];
+
+    /*
+     * Partial send handling
+     */
+
+    u32			rq_bytes_sent;	/* Bytes we have sent */
 
 #ifdef RPC_PROFILE
-	unsigned long		rq_xtime;	/* when transmitted */
+    unsigned long		rq_xtime;	/* when transmitted */
 #endif
 };
 #define rq_svec			rq_snd_buf.io_vec
@@ -120,63 +123,64 @@ struct rpc_rqst {
 #define rq_rnr			rq_rcv_buf.io_nr
 #define rq_rlen			rq_rcv_buf.io_len
 
-struct rpc_xprt {
-	struct socket *		sock;		/* BSD socket layer */
-	struct sock *		inet;		/* INET layer */
+struct rpc_xprt
+{
+    struct socket *		sock;		/* BSD socket layer */
+    struct sock *		inet;		/* INET layer */
 
-	struct rpc_timeout	timeout;	/* timeout parms */
-	struct sockaddr_in	addr;		/* server address */
-	int			prot;		/* IP protocol */
+    struct rpc_timeout	timeout;	/* timeout parms */
+    struct sockaddr_in	addr;		/* server address */
+    int			prot;		/* IP protocol */
 
-	unsigned long		cong;		/* current congestion */
-	unsigned long		cwnd;		/* congestion window */
-	unsigned long		congtime;	/* hold cwnd until then */
+    unsigned long		cong;		/* current congestion */
+    unsigned long		cwnd;		/* congestion window */
+    unsigned long		congtime;	/* hold cwnd until then */
 
-	struct rpc_wait_queue	sending;	/* requests waiting to send */
-	struct rpc_wait_queue	pending;	/* requests in flight */
-	struct rpc_wait_queue	backlog;	/* waiting for slot */
-	struct rpc_rqst *	free;		/* free slots */
-	struct rpc_rqst		slot[RPC_MAXREQS];
-	unsigned long		sockstate;	/* Socket state */
-	unsigned char		shutdown   : 1,	/* being shut down */
-				nocong	   : 1,	/* no congestion control */
-				stream     : 1,	/* TCP */
-				tcp_more   : 1;	/* more record fragments */
+    struct rpc_wait_queue	sending;	/* requests waiting to send */
+    struct rpc_wait_queue	pending;	/* requests in flight */
+    struct rpc_wait_queue	backlog;	/* waiting for slot */
+    struct rpc_rqst *	free;		/* free slots */
+    struct rpc_rqst		slot[RPC_MAXREQS];
+    unsigned long		sockstate;	/* Socket state */
+    unsigned char		shutdown   : 1,	/* being shut down */
+                  nocong	   : 1,	/* no congestion control */
+                  stream     : 1,	/* TCP */
+                  tcp_more   : 1;	/* more record fragments */
 
-	/*
-	 * State of TCP reply receive stuff
-	 */
-	u32			tcp_recm;	/* Fragment header */
-	u32			tcp_xid;	/* Current XID */
-	unsigned int		tcp_reclen,	/* fragment length */
-				tcp_offset,	/* fragment offset */
-				tcp_copied;	/* copied to request */
-	struct list_head	rx_pending;	/* receive pending list */
+    /*
+     * State of TCP reply receive stuff
+     */
+    u32			tcp_recm;	/* Fragment header */
+    u32			tcp_xid;	/* Current XID */
+    unsigned int		tcp_reclen,	/* fragment length */
+                   tcp_offset,	/* fragment offset */
+                   tcp_copied;	/* copied to request */
+    struct list_head	rx_pending;	/* receive pending list */
 
-	/*
-	 * Send stuff
-	 */
-	spinlock_t		sock_lock;	/* lock socket info */
-	spinlock_t		xprt_lock;	/* lock xprt info */
-	struct rpc_task *	snd_task;	/* Task blocked in send */
+    /*
+     * Send stuff
+     */
+    spinlock_t		sock_lock;	/* lock socket info */
+    spinlock_t		xprt_lock;	/* lock xprt info */
+    struct rpc_task *	snd_task;	/* Task blocked in send */
 
 
-	void			(*old_data_ready)(struct sock *, int);
-	void			(*old_state_change)(struct sock *);
-	void			(*old_write_space)(struct sock *);
+    void			(*old_data_ready)(struct sock *, int);
+    void			(*old_state_change)(struct sock *);
+    void			(*old_write_space)(struct sock *);
 
-	wait_queue_head_t	cong_wait;
+    wait_queue_head_t	cong_wait;
 };
 
 #ifdef __KERNEL__
 
 struct rpc_xprt *	xprt_create_proto(int proto, struct sockaddr_in *addr,
-					struct rpc_timeout *toparms);
+                                      struct rpc_timeout *toparms);
 int			xprt_destroy(struct rpc_xprt *);
 void			xprt_shutdown(struct rpc_xprt *);
 void			xprt_default_timeout(struct rpc_timeout *, int);
 void			xprt_set_timeout(struct rpc_timeout *, unsigned int,
-					unsigned long);
+                                 unsigned long);
 
 int			xprt_reserve(struct rpc_task *);
 void			xprt_transmit(struct rpc_task *);
@@ -203,8 +207,8 @@ void			__rpciod_tcp_dispatcher(void);
 static inline
 void rpciod_tcp_dispatcher(void)
 {
-	if (xprt_tcp_pending())
-		__rpciod_tcp_dispatcher();
+    if (xprt_tcp_pending())
+        __rpciod_tcp_dispatcher();
 }
 
 #endif /* __KERNEL__*/

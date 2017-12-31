@@ -30,12 +30,13 @@ unsigned char in_line[512];
 int main(int argc, char *argv[])
 {
     int i;
-    if (argc>3){
+    if (argc>3)
+    {
         FILE *fout = fopen(argv[1],"wb");
         create_ods2(fout,argv[2],atoi(argv[3]));
         close(fout);
-	return 0;
+        return 0;
     }
-  return 0;
+    return 0;
 }
 

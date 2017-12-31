@@ -31,11 +31,12 @@
  */
 
 /* Register bigreader lock indices here. */
-enum brlock_indices {
-	BR_GLOBALIRQ_LOCK,
-	BR_NETPROTO_LOCK,
+enum brlock_indices
+{
+    BR_GLOBALIRQ_LOCK,
+    BR_NETPROTO_LOCK,
 
-	__BR_END
+    __BR_END
 };
 
 #include <linux/config.h>
@@ -66,8 +67,9 @@ typedef unsigned int	brlock_read_lock_t;
 extern brlock_read_lock_t __brlock_array[NR_CPUS][__BR_IDX_MAX];
 
 #ifndef __BRLOCK_USE_ATOMICS
-struct br_wrlock {
-	spinlock_t lock;
+struct br_wrlock
+{
+    spinlock_t lock;
 } __attribute__ ((__aligned__(SMP_CACHE_BYTES)));
 
 extern struct br_wrlock __br_write_locks[__BR_IDX_MAX];
@@ -79,45 +81,46 @@ extern void __br_lock_usage_bug (void);
 
 static inline void br_read_lock (enum brlock_indices idx)
 {
-	/*
-	 * This causes a link-time bug message if an
-	 * invalid index is used:
-	 */
-	if (idx >= __BR_END)
-		__br_lock_usage_bug();
+    /*
+     * This causes a link-time bug message if an
+     * invalid index is used:
+     */
+    if (idx >= __BR_END)
+        __br_lock_usage_bug();
 
-	read_lock(&__brlock_array[smp_processor_id()][idx]);
+    read_lock(&__brlock_array[smp_processor_id()][idx]);
 }
 
 static inline void br_read_unlock (enum brlock_indices idx)
 {
-	if (idx >= __BR_END)
-		__br_lock_usage_bug();
+    if (idx >= __BR_END)
+        __br_lock_usage_bug();
 
-	read_unlock(&__brlock_array[smp_processor_id()][idx]);
+    read_unlock(&__brlock_array[smp_processor_id()][idx]);
 }
 
 #else /* ! __BRLOCK_USE_ATOMICS */
 static inline void br_read_lock (enum brlock_indices idx)
 {
-	unsigned int *ctr;
-	spinlock_t *lock;
+    unsigned int *ctr;
+    spinlock_t *lock;
 
-	/*
-	 * This causes a link-time bug message if an
-	 * invalid index is used:
-	 */
-	if (idx >= __BR_END)
-		__br_lock_usage_bug();
+    /*
+     * This causes a link-time bug message if an
+     * invalid index is used:
+     */
+    if (idx >= __BR_END)
+        __br_lock_usage_bug();
 
-	ctr = &__brlock_array[smp_processor_id()][idx];
-	lock = &__br_write_locks[idx].lock;
+    ctr = &__brlock_array[smp_processor_id()][idx];
+    lock = &__br_write_locks[idx].lock;
 again:
-	(*ctr)++;
-	mb();
-	if (spin_is_locked(lock)) {
-		(*ctr)--;
-		wmb(); /*
+    (*ctr)++;
+    mb();
+    if (spin_is_locked(lock))
+    {
+        (*ctr)--;
+        wmb(); /*
 			* The release of the ctr must become visible
 			* to the other cpus eventually thus wmb(),
 			* we don't care if spin_is_locked is reordered
@@ -131,23 +134,23 @@ again:
 			* but for now this is a slow path so adding the
 			* wmb() will keep us on the safe side.
 			*/
-		while (spin_is_locked(lock))
-			barrier();
-		goto again;
-	}
+        while (spin_is_locked(lock))
+            barrier();
+        goto again;
+    }
 }
 
 static inline void br_read_unlock (enum brlock_indices idx)
 {
-	unsigned int *ctr;
+    unsigned int *ctr;
 
-	if (idx >= __BR_END)
-		__br_lock_usage_bug();
+    if (idx >= __BR_END)
+        __br_lock_usage_bug();
 
-	ctr = &__brlock_array[smp_processor_id()][idx];
+    ctr = &__brlock_array[smp_processor_id()][idx];
 
-	wmb();
-	(*ctr)--;
+    wmb();
+    (*ctr)--;
 }
 #endif /* __BRLOCK_USE_ATOMICS */
 
@@ -163,16 +166,16 @@ extern void __br_write_unlock (enum brlock_indices idx);
 
 static inline void br_write_lock (enum brlock_indices idx)
 {
-	if (idx >= __BR_END)
-		__br_lock_usage_bug();
-	__br_write_lock(idx);
+    if (idx >= __BR_END)
+        __br_lock_usage_bug();
+    __br_write_lock(idx);
 }
 
 static inline void br_write_unlock (enum brlock_indices idx)
 {
-	if (idx >= __BR_END)
-		__br_lock_usage_bug();
-	__br_write_unlock(idx);
+    if (idx >= __BR_END)
+        __br_lock_usage_bug();
+    __br_write_unlock(idx);
 }
 
 #else

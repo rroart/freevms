@@ -54,25 +54,35 @@
 
 union _FP_UNION_Q
 {
-   long double flt;
-   struct 
-   {
+    long double flt;
+    struct
+    {
 #if __BYTE_ORDER == __BIG_ENDIAN
-      unsigned sign : 1;
-      unsigned exp : _FP_EXPBITS_Q;
-      unsigned long frac3 : _FP_FRACBITS_Q - (_FP_IMPLBIT_Q != 0)-(_FP_W_TYPE_SIZE * 3);
-      unsigned long frac2 : _FP_W_TYPE_SIZE;
-      unsigned long frac1 : _FP_W_TYPE_SIZE;
-      unsigned long frac0 : _FP_W_TYPE_SIZE;
+        unsigned sign : 1;
+unsigned exp :
+        _FP_EXPBITS_Q;
+unsigned long frac3 :
+        _FP_FRACBITS_Q - (_FP_IMPLBIT_Q != 0)-(_FP_W_TYPE_SIZE * 3);
+unsigned long frac2 :
+        _FP_W_TYPE_SIZE;
+unsigned long frac1 :
+        _FP_W_TYPE_SIZE;
+unsigned long frac0 :
+        _FP_W_TYPE_SIZE;
 #else
-      unsigned long frac0 : _FP_W_TYPE_SIZE;
-      unsigned long frac1 : _FP_W_TYPE_SIZE;
-      unsigned long frac2 : _FP_W_TYPE_SIZE;
-      unsigned long frac3 : _FP_FRACBITS_Q - (_FP_IMPLBIT_Q != 0)-(_FP_W_TYPE_SIZE * 3);
-      unsigned exp : _FP_EXPBITS_Q;
-      unsigned sign : 1;
+unsigned long frac0 :
+        _FP_W_TYPE_SIZE;
+unsigned long frac1 :
+        _FP_W_TYPE_SIZE;
+unsigned long frac2 :
+        _FP_W_TYPE_SIZE;
+unsigned long frac3 :
+        _FP_FRACBITS_Q - (_FP_IMPLBIT_Q != 0)-(_FP_W_TYPE_SIZE * 3);
+unsigned exp :
+        _FP_EXPBITS_Q;
+        unsigned sign : 1;
 #endif /* not bigendian */
-   } bits __attribute__((packed));
+    } bits __attribute__((packed));
 };
 
 
@@ -133,20 +143,27 @@ union _FP_UNION_Q
 #else   /* not _FP_W_TYPE_SIZE < 64 */
 union _FP_UNION_Q
 {
-  long double flt /* __attribute__((mode(TF))) */ ;
-  struct {
+    long double flt /* __attribute__((mode(TF))) */ ;
+    struct
+    {
 #if __BYTE_ORDER == __BIG_ENDIAN
-    unsigned sign  : 1;
-    unsigned exp   : _FP_EXPBITS_Q;
-    unsigned long frac1 : _FP_FRACBITS_Q-(_FP_IMPLBIT_Q != 0)-_FP_W_TYPE_SIZE;
-    unsigned long frac0 : _FP_W_TYPE_SIZE;
+        unsigned sign  : 1;
+unsigned exp   :
+        _FP_EXPBITS_Q;
+unsigned long frac1 :
+        _FP_FRACBITS_Q-(_FP_IMPLBIT_Q != 0)-_FP_W_TYPE_SIZE;
+unsigned long frac0 :
+        _FP_W_TYPE_SIZE;
 #else
-    unsigned long frac0 : _FP_W_TYPE_SIZE;
-    unsigned long frac1 : _FP_FRACBITS_Q-(_FP_IMPLBIT_Q != 0)-_FP_W_TYPE_SIZE;
-    unsigned exp   : _FP_EXPBITS_Q;
-    unsigned sign  : 1;
+unsigned long frac0 :
+        _FP_W_TYPE_SIZE;
+unsigned long frac1 :
+        _FP_FRACBITS_Q-(_FP_IMPLBIT_Q != 0)-_FP_W_TYPE_SIZE;
+unsigned exp   :
+        _FP_EXPBITS_Q;
+        unsigned sign  : 1;
 #endif
-  } bits;
+    } bits;
 };
 
 #define FP_DECL_Q(X)		_FP_DECL(2,X)

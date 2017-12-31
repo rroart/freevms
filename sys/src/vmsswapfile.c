@@ -50,24 +50,26 @@ struct _pfl swap_info_pfl[MAX_SWAPFILES];
  */
 static int exclusive_swap_page(struct page *page)
 {
-  return  0;
+    return  0;
 #if 0
-	int retval = 0;
-	struct _pfl * p;
-	swp_entry_t entry;
+    int retval = 0;
+    struct _pfl * p;
+    swp_entry_t entry;
 
-	entry.val = page->index;
-	p = swap_info_get(entry);
-	if (p) {
-		/* Is the only swap cache user the cache itself? */
-		if (p->pfl$l_bitmap[SWP_OFFSET(entry)] == 1) {
-			/* Recheck the page count with the pagecache lock held.. */
-			if (page_count(page) - !!page->buffers == 2)
-				retval = 1;
-		}
-		swap_info_put(p);
-	}
-	return retval;
+    entry.val = page->index;
+    p = swap_info_get(entry);
+    if (p)
+    {
+        /* Is the only swap cache user the cache itself? */
+        if (p->pfl$l_bitmap[SWP_OFFSET(entry)] == 1)
+        {
+            /* Recheck the page count with the pagecache lock held.. */
+            if (page_count(page) - !!page->buffers == 2)
+                retval = 1;
+        }
+        swap_info_put(p);
+    }
+    return retval;
 #endif
 }
 
@@ -81,32 +83,33 @@ static int exclusive_swap_page(struct page *page)
  */
 int can_share_swap_page(struct page *page)
 {
-	int retval = 0;
+    int retval = 0;
 
 #if 0
-	if (!PageLocked(page))
-		BUG();
+    if (!PageLocked(page))
+        BUG();
 #endif
-	switch (page_count(page)) {
-	case 3:
+    switch (page_count(page))
+    {
+    case 3:
 #if 0
-		if (!page->buffers)
-			break;
+        if (!page->buffers)
+            break;
 #endif
-		/* Fallthrough */
-	case 2:
+        /* Fallthrough */
+    case 2:
 #if 0
-		if (!PageSwapCache(page))
-			break;
+        if (!PageSwapCache(page))
+            break;
 #endif
-		retval = exclusive_swap_page(page);
-		break;
-	case 1:
-		if (PageReserved(page))
-			break;
-		retval = 1;
-	}
-	return retval;
+        retval = exclusive_swap_page(page);
+        break;
+    case 1:
+        if (PageReserved(page))
+            break;
+        retval = 1;
+    }
+    return retval;
 }
 
 asmlinkage long sys_swapoff(const char * specialfile)
@@ -124,7 +127,7 @@ int get_swaparea_info(char *buf)
  */
 asmlinkage long sys_swapon(const char * specialfile, int swap_flags)
 {
-  // use stuff from kswapd for this
+    // use stuff from kswapd for this
 
 }
 
@@ -134,8 +137,9 @@ void si_swapinfo(struct sysinfo *val)
 
 struct address_space swapper_space;
 
-void swap_setup(void){
-  printk("swap setup does nothing\n");
+void swap_setup(void)
+{
+    printk("swap setup does nothing\n");
 }
 
 int page_cluster;

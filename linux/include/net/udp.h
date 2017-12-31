@@ -39,13 +39,14 @@ extern int udp_port_rover;
 
 static inline int udp_lport_inuse(u16 num)
 {
-	struct sock *sk = udp_hash[num & (UDP_HTABLE_SIZE - 1)];
+    struct sock *sk = udp_hash[num & (UDP_HTABLE_SIZE - 1)];
 
-	for(; sk != NULL; sk = sk->next) {
-		if(sk->num == num)
-			return 1;
-	}
-	return 0;
+    for(; sk != NULL; sk = sk->next)
+    {
+        if(sk->num == num)
+            return 1;
+    }
+    return 0;
 }
 
 /* Note: this must match 'valbool' in sock_setsockopt */
@@ -62,7 +63,7 @@ extern struct proto udp_prot;
 
 extern void	udp_err(struct sk_buff *, u32);
 extern int	udp_connect(struct sock *sk,
-			    struct sockaddr *usin, int addr_len);
+                        struct sockaddr *usin, int addr_len);
 
 extern int	udp_sendmsg(struct sock *sk, struct msghdr *msg, int len);
 

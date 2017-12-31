@@ -17,13 +17,13 @@
 
 struct ip_tunnel_parm
 {
-	char			name[IFNAMSIZ];
-	int			link;
-	__u16			i_flags;
-	__u16			o_flags;
-	__u32			i_key;
-	__u32			o_key;
-	struct iphdr		iph;
+    char			name[IFNAMSIZ];
+    int			link;
+    __u16			i_flags;
+    __u16			o_flags;
+    __u32			i_key;
+    __u32			o_key;
+    struct iphdr		iph;
 };
 
 #endif /* _IF_TUNNEL_H_ */

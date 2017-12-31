@@ -25,78 +25,99 @@
 
 static __inline__ int ide_default_irq(ide_ioreg_t base)
 {
-	switch (base) {
-		case 0x1f0: return 14;
-		case 0x170: return 15;
-		case 0x1e8: return 11;
-		case 0x168: return 10;
-		case 0x1e0: return 8;
-		case 0x160: return 12;
-		default:
-			return 0;
-	}
+    switch (base)
+    {
+    case 0x1f0:
+        return 14;
+    case 0x170:
+        return 15;
+    case 0x1e8:
+        return 11;
+    case 0x168:
+        return 10;
+    case 0x1e0:
+        return 8;
+    case 0x160:
+        return 12;
+    default:
+        return 0;
+    }
 }
 
 static __inline__ ide_ioreg_t ide_default_io_base(int index)
 {
-	switch (index) {
-		case 0:	return 0x1f0;
-		case 1:	return 0x170;
-		case 2: return 0x1e8;
-		case 3: return 0x168;
-		case 4: return 0x1e0;
-		case 5: return 0x160;
-		default:
-			return 0;
-	}
+    switch (index)
+    {
+    case 0:
+        return 0x1f0;
+    case 1:
+        return 0x170;
+    case 2:
+        return 0x1e8;
+    case 3:
+        return 0x168;
+    case 4:
+        return 0x1e0;
+    case 5:
+        return 0x160;
+    default:
+        return 0;
+    }
 }
 
 static __inline__ void ide_init_hwif_ports(hw_regs_t *hw, ide_ioreg_t data_port, ide_ioreg_t ctrl_port, int *irq)
 {
-	ide_ioreg_t reg = data_port;
-	int i;
+    ide_ioreg_t reg = data_port;
+    int i;
 
-	for (i = IDE_DATA_OFFSET; i <= IDE_STATUS_OFFSET; i++) {
-		hw->io_ports[i] = reg;
-		reg += 1;
-	}
-	if (ctrl_port) {
-		hw->io_ports[IDE_CONTROL_OFFSET] = ctrl_port;
-	} else {
-		hw->io_ports[IDE_CONTROL_OFFSET] = hw->io_ports[IDE_DATA_OFFSET] + 0x206;
-	}
-	if (irq != NULL)
-		*irq = 0;
-	hw->io_ports[IDE_IRQ_OFFSET] = 0;
+    for (i = IDE_DATA_OFFSET; i <= IDE_STATUS_OFFSET; i++)
+    {
+        hw->io_ports[i] = reg;
+        reg += 1;
+    }
+    if (ctrl_port)
+    {
+        hw->io_ports[IDE_CONTROL_OFFSET] = ctrl_port;
+    }
+    else
+    {
+        hw->io_ports[IDE_CONTROL_OFFSET] = hw->io_ports[IDE_DATA_OFFSET] + 0x206;
+    }
+    if (irq != NULL)
+        *irq = 0;
+    hw->io_ports[IDE_IRQ_OFFSET] = 0;
 }
 
 static __inline__ void ide_init_default_hwifs(void)
 {
 #ifndef CONFIG_BLK_DEV_IDEPCI
-	hw_regs_t hw;
-	int index;
+    hw_regs_t hw;
+    int index;
 
-	for(index = 0; index < MAX_HWIFS; index++) {
-		memset(&hw, 0, sizeof hw);
-		ide_init_hwif_ports(&hw, ide_default_io_base(index), 0, NULL);
-		hw.irq = ide_default_irq(ide_default_io_base(index));
-		ide_register_hw(&hw, NULL);
-	}
+    for(index = 0; index < MAX_HWIFS; index++)
+    {
+        memset(&hw, 0, sizeof hw);
+        ide_init_hwif_ports(&hw, ide_default_io_base(index), 0, NULL);
+        hw.irq = ide_default_irq(ide_default_io_base(index));
+        ide_register_hw(&hw, NULL);
+    }
 #endif /* CONFIG_BLK_DEV_IDEPCI */
 }
 
 #include <asm-generic/ide_iops.h>
 
-typedef union {
-	unsigned all			: 8;	/* all of the bits together */
-	struct {
-		unsigned head		: 4;	/* always zeros here */
-		unsigned unit		: 1;	/* drive select number, 0 or 1 */
-		unsigned bit5		: 1;	/* always 1 */
-		unsigned lba		: 1;	/* using LBA instead of CHS */
-		unsigned bit7		: 1;	/* always 1 */
-	} b;
-	} select_t;
+typedef union
+{
+    unsigned all			: 8;	/* all of the bits together */
+    struct
+    {
+        unsigned head		: 4;	/* always zeros here */
+        unsigned unit		: 1;	/* drive select number, 0 or 1 */
+        unsigned bit5		: 1;	/* always 1 */
+        unsigned lba		: 1;	/* using LBA instead of CHS */
+        unsigned bit7		: 1;	/* always 1 */
+    } b;
+} select_t;
 
 /*
  * The following are not needed for the non-m68k ports

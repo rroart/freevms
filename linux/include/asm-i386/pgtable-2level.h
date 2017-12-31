@@ -34,7 +34,7 @@
  */
 static inline int pte_exec(pte_t pte)
 {
-	return pte_user(pte);
+    return pte_user(pte);
 }
 
 /*
@@ -42,7 +42,7 @@ static inline int pte_exec(pte_t pte)
  */
 static inline int pte_exec_kernel(pte_t pte)
 {
-	return 1;
+    return 1;
 }
 
 /*

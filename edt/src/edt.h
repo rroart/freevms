@@ -32,10 +32,12 @@ typedef struct Line Line;
 typedef struct Position Position;
 typedef struct String String;
 
-struct Position { Buffer *buffer;
-                  Line *line;
-                  uLong offset;
-                };
+struct Position
+{
+    Buffer *buffer;
+    Line *line;
+    uLong offset;
+};
 
 #include <stdio.h>
 

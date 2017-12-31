@@ -13,15 +13,17 @@ typedef unsigned short	sa_family_t;
 /*
  *	1003.1g requires sa_family_t and that sa_data is char.
  */
- 
-struct sockaddr {
-	sa_family_t	sa_family;	/* address family, AF_xxx	*/
-	char		sa_data[14];	/* 14 bytes of protocol address	*/
+
+struct sockaddr
+{
+    sa_family_t	sa_family;	/* address family, AF_xxx	*/
+    char		sa_data[14];	/* 14 bytes of protocol address	*/
 };
 
-struct linger {
-	int		l_onoff;	/* Linger active		*/
-	int		l_linger;	/* How long to linger for	*/
+struct linger
+{
+    int		l_onoff;	/* Linger active		*/
+    int		l_linger;	/* How long to linger for	*/
 };
 
 /*
@@ -29,15 +31,16 @@ struct linger {
  *	system, not 4.3. Thus msg_accrights(len) are now missing. They
  *	belong in an obscure libc emulation or the bin.
  */
- 
-struct msghdr {
-	void	*	msg_name;	/* Socket name			*/
-	int		msg_namelen;	/* Length of name		*/
-	struct iovec *	msg_iov;	/* Data blocks			*/
-	__kernel_size_t	msg_iovlen;	/* Number of blocks		*/
-	void 	*	msg_control;	/* Per protocol magic (eg BSD file descriptor passing) */
-	__kernel_size_t	msg_controllen;	/* Length of cmsg list */
-	unsigned	msg_flags;
+
+struct msghdr
+{
+    void	*	msg_name;	/* Socket name			*/
+    int		msg_namelen;	/* Length of name		*/
+    struct iovec *	msg_iov;	/* Data blocks			*/
+    __kernel_size_t	msg_iovlen;	/* Number of blocks		*/
+    void 	*	msg_control;	/* Per protocol magic (eg BSD file descriptor passing) */
+    __kernel_size_t	msg_controllen;	/* Length of cmsg list */
+    unsigned	msg_flags;
 };
 
 /*
@@ -46,10 +49,11 @@ struct msghdr {
  *	(cmsghdr, cmsg_data[])
  */
 
-struct cmsghdr {
-	__kernel_size_t	cmsg_len;	/* data byte count, including hdr */
-        int		cmsg_level;	/* originating protocol */
-        int		cmsg_type;	/* protocol-specific type */
+struct cmsghdr
+{
+    __kernel_size_t	cmsg_len;	/* data byte count, including hdr */
+    int		cmsg_level;	/* originating protocol */
+    int		cmsg_type;	/* protocol-specific type */
 };
 
 /*
@@ -74,10 +78,10 @@ struct cmsghdr {
 /*
  *	This mess will go away with glibc
  */
- 
+
 #ifdef __KERNEL__
 #define __KINLINE static inline
-#elif  defined(__GNUC__) 
+#elif  defined(__GNUC__)
 #define __KINLINE static __inline__
 #elif defined(__cplusplus)
 #define __KINLINE static inline
@@ -98,22 +102,22 @@ struct cmsghdr {
  *	inside range, given by msg->msg_controllen before using
  *	ansillary object DATA.				--ANK (980731)
  */
- 
+
 __KINLINE struct cmsghdr * __cmsg_nxthdr(void *__ctl, __kernel_size_t __size,
-					       struct cmsghdr *__cmsg)
+        struct cmsghdr *__cmsg)
 {
-	struct cmsghdr * __ptr;
+    struct cmsghdr * __ptr;
 
-	__ptr = (struct cmsghdr*)(((unsigned char *) __cmsg) +  CMSG_ALIGN(__cmsg->cmsg_len));
-	if ((unsigned long)((char*)(__ptr+1) - (char *) __ctl) > __size)
-		return (struct cmsghdr *)0;
+    __ptr = (struct cmsghdr*)(((unsigned char *) __cmsg) +  CMSG_ALIGN(__cmsg->cmsg_len));
+    if ((unsigned long)((char*)(__ptr+1) - (char *) __ctl) > __size)
+        return (struct cmsghdr *)0;
 
-	return __ptr;
+    return __ptr;
 }
 
 __KINLINE struct cmsghdr * cmsg_nxthdr (struct msghdr *__msg, struct cmsghdr *__cmsg)
 {
-	return __cmsg_nxthdr(__msg->msg_control, __msg->msg_controllen, __cmsg);
+    return __cmsg_nxthdr(__msg->msg_control, __msg->msg_controllen, __cmsg);
 }
 
 /* "Socket"-level control message types: */
@@ -122,10 +126,11 @@ __KINLINE struct cmsghdr * cmsg_nxthdr (struct msghdr *__msg, struct cmsghdr *__
 #define SCM_CREDENTIALS 0x02		/* rw: struct ucred		*/
 #define SCM_CONNECT	0x03		/* rw: struct scm_connect	*/
 
-struct ucred {
-	__u32	pid;
-	__u32	uid;
-	__u32	gid;
+struct ucred
+{
+    __u32	pid;
+    __u32	uid;
+    __u32	gid;
 };
 
 /* Supported address families. */
@@ -195,10 +200,10 @@ struct ucred {
 /* Maximum queue length specifiable by listen.  */
 #define SOMAXCONN	128
 
-/* Flags we can use with send/ and recv. 
+/* Flags we can use with send/ and recv.
    Added those for 1003.1g not all are supported yet
  */
- 
+
 #define MSG_OOB		1
 #define MSG_PEEK	2
 #define MSG_DONTROUTE	4
@@ -247,12 +252,12 @@ struct ucred {
 
 #ifdef __KERNEL__
 extern int memcpy_fromiovec(unsigned char *kdata, struct iovec *iov, int len);
-extern int memcpy_fromiovecend(unsigned char *kdata, struct iovec *iov, 
-				int offset, int len);
-extern int csum_partial_copy_fromiovecend(unsigned char *kdata, 
-					  struct iovec *iov, 
-					  int offset, 
-					  unsigned int len, int *csump);
+extern int memcpy_fromiovecend(unsigned char *kdata, struct iovec *iov,
+                               int offset, int len);
+extern int csum_partial_copy_fromiovecend(unsigned char *kdata,
+        struct iovec *iov,
+        int offset,
+        unsigned int len, int *csump);
 
 extern int verify_iovec(struct msghdr *m, struct iovec *iov, char *address, int mode);
 extern int memcpy_toiovec(struct iovec *v, unsigned char *kdata, int len);

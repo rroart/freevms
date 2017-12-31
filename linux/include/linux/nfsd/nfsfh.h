@@ -30,14 +30,15 @@
  * The xino and xdev fields are currently used to transport the
  * ino/dev of the exported inode.
  */
-struct nfs_fhbase_old {
-	__u32		fb_dcookie;	/* dentry cookie - always 0xfeebbaca */
-	__u32		fb_ino;		/* our inode number */
-	__u32		fb_dirino;	/* dir inode number, 0 for directories */
-	__u32		fb_dev;		/* our device */
-	__u32		fb_xdev;
-	__u32		fb_xino;
-	__u32		fb_generation;
+struct nfs_fhbase_old
+{
+    __u32		fb_dcookie;	/* dentry cookie - always 0xfeebbaca */
+    __u32		fb_ino;		/* our inode number */
+    __u32		fb_dirino;	/* dir inode number, 0 for directories */
+    __u32		fb_dev;		/* our device */
+    __u32		fb_xdev;
+    __u32		fb_xino;
+    __u32		fb_generation;
 };
 
 /*
@@ -79,26 +80,29 @@ struct nfs_fhbase_old {
  *    2   - 32bit inode number, 32 bit generation number, 32 bit parent directory inode number.
  *
  */
-struct nfs_fhbase_new {
-	__u8		fb_version;	/* == 1, even => nfs_fhbase_old */
-	__u8		fb_auth_type;
-	__u8		fb_fsid_type;
-	__u8		fb_fileid_type;
-	__u32		fb_auth[1];
-/*	__u32		fb_fsid[0]; floating */
-/*	__u32		fb_fileid[0]; floating */
+struct nfs_fhbase_new
+{
+    __u8		fb_version;	/* == 1, even => nfs_fhbase_old */
+    __u8		fb_auth_type;
+    __u8		fb_fsid_type;
+    __u8		fb_fileid_type;
+    __u32		fb_auth[1];
+    /*	__u32		fb_fsid[0]; floating */
+    /*	__u32		fb_fileid[0]; floating */
 };
 
-struct knfsd_fh {
-	unsigned int	fh_size;	/* significant for NFSv3.
+struct knfsd_fh
+{
+    unsigned int	fh_size;	/* significant for NFSv3.
 					 * Points to the current size while building
 					 * a new file handle
 					 */
-	union {
-		struct nfs_fhbase_old	fh_old;
-		__u32			fh_pad[NFS3_FHSIZE/4];
-		struct nfs_fhbase_new	fh_new;
-	} fh_base;
+    union
+    {
+        struct nfs_fhbase_old	fh_old;
+        __u32			fh_pad[NFS3_FHSIZE/4];
+        struct nfs_fhbase_new	fh_new;
+    } fh_base;
 };
 
 #define ofh_dcookie		fh_base.fh_old.fb_dcookie
@@ -122,57 +126,58 @@ struct knfsd_fh {
  */
 static inline __u32 kdev_t_to_u32(kdev_t dev)
 {
-	return (__u32) dev;
+    return (__u32) dev;
 }
 
 static inline kdev_t u32_to_kdev_t(__u32 udev)
 {
-	return (kdev_t) udev;
+    return (kdev_t) udev;
 }
 
 static inline __u32 ino_t_to_u32(ino_t ino)
 {
-	return (__u32) ino;
+    return (__u32) ino;
 }
 
 static inline ino_t u32_to_ino_t(__u32 uino)
 {
-	return (ino_t) uino;
+    return (ino_t) uino;
 }
 
 /*
  * This is the internal representation of an NFS handle used in knfsd.
  * pre_mtime/post_version will be used to support wcc_attr's in NFSv3.
  */
-typedef struct svc_fh {
-	struct knfsd_fh		fh_handle;	/* FH data */
-	struct dentry *		fh_dentry;	/* validated dentry */
-	struct svc_export *	fh_export;	/* export pointer */
-	int			fh_maxsize;	/* max size for fh_handle */
+typedef struct svc_fh
+{
+    struct knfsd_fh		fh_handle;	/* FH data */
+    struct dentry *		fh_dentry;	/* validated dentry */
+    struct svc_export *	fh_export;	/* export pointer */
+    int			fh_maxsize;	/* max size for fh_handle */
 
-	unsigned char		fh_locked;	/* inode locked by us */
+    unsigned char		fh_locked;	/* inode locked by us */
 
 #ifdef CONFIG_NFSD_V3
-	unsigned char		fh_post_saved;	/* post-op attrs saved */
-	unsigned char		fh_pre_saved;	/* pre-op attrs saved */
+    unsigned char		fh_post_saved;	/* post-op attrs saved */
+    unsigned char		fh_pre_saved;	/* pre-op attrs saved */
 
-	/* Pre-op attributes saved during fh_lock */
-	__u64			fh_pre_size;	/* size before operation */
-	time_t			fh_pre_mtime;	/* mtime before oper */
-	time_t			fh_pre_ctime;	/* ctime before oper */
+    /* Pre-op attributes saved during fh_lock */
+    __u64			fh_pre_size;	/* size before operation */
+    time_t			fh_pre_mtime;	/* mtime before oper */
+    time_t			fh_pre_ctime;	/* ctime before oper */
 
-	/* Post-op attributes saved in fh_unlock */
-	umode_t			fh_post_mode;	/* i_mode */
-	nlink_t			fh_post_nlink;	/* i_nlink */
-	uid_t			fh_post_uid;	/* i_uid */
-	gid_t			fh_post_gid;	/* i_gid */
-	__u64			fh_post_size;	/* i_size */
-	unsigned long		fh_post_blocks; /* i_blocks */
-	unsigned long		fh_post_blksize;/* i_blksize */
-	kdev_t			fh_post_rdev;	/* i_rdev */
-	time_t			fh_post_atime;	/* i_atime */
-	time_t			fh_post_mtime;	/* i_mtime */
-	time_t			fh_post_ctime;	/* i_ctime */
+    /* Post-op attributes saved in fh_unlock */
+    umode_t			fh_post_mode;	/* i_mode */
+    nlink_t			fh_post_nlink;	/* i_nlink */
+    uid_t			fh_post_uid;	/* i_uid */
+    gid_t			fh_post_gid;	/* i_gid */
+    __u64			fh_post_size;	/* i_size */
+    unsigned long		fh_post_blocks; /* i_blocks */
+    unsigned long		fh_post_blksize;/* i_blksize */
+    kdev_t			fh_post_rdev;	/* i_rdev */
+    time_t			fh_post_atime;	/* i_atime */
+    time_t			fh_post_mtime;	/* i_mtime */
+    time_t			fh_post_ctime;	/* i_ctime */
 #endif /* CONFIG_NFSD_V3 */
 
 } svc_fh;
@@ -182,18 +187,18 @@ typedef struct svc_fh {
  */
 inline static char * SVCFH_fmt(struct svc_fh *fhp)
 {
-	struct knfsd_fh *fh = &fhp->fh_handle;
-	
-	static char buf[80];
-	sprintf(buf, "%d: %08x %08x %08x %08x %08x %08x",
-		fh->fh_size,
-		fh->fh_base.fh_pad[0],
-		fh->fh_base.fh_pad[1],
-		fh->fh_base.fh_pad[2],
-		fh->fh_base.fh_pad[3],
-		fh->fh_base.fh_pad[4],
-		fh->fh_base.fh_pad[5]);
-	return buf;
+    struct knfsd_fh *fh = &fhp->fh_handle;
+
+    static char buf[80];
+    sprintf(buf, "%d: %08x %08x %08x %08x %08x %08x",
+            fh->fh_size,
+            fh->fh_base.fh_pad[0],
+            fh->fh_base.fh_pad[1],
+            fh->fh_base.fh_pad[2],
+            fh->fh_base.fh_pad[3],
+            fh->fh_base.fh_pad[4],
+            fh->fh_base.fh_pad[5]);
+    return buf;
 }
 /*
  * Function prototypes
@@ -206,22 +211,23 @@ void	fh_put(struct svc_fh *);
 static __inline__ struct svc_fh *
 fh_copy(struct svc_fh *dst, struct svc_fh *src)
 {
-	if (src->fh_dentry || src->fh_locked) {
-		struct dentry *dentry = src->fh_dentry;
-		printk(KERN_ERR "fh_copy: copying %s/%s, already verified!\n",
-			dentry->d_parent->d_name.name, dentry->d_name.name);
-	}
-			
-	*dst = *src;
-	return dst;
+    if (src->fh_dentry || src->fh_locked)
+    {
+        struct dentry *dentry = src->fh_dentry;
+        printk(KERN_ERR "fh_copy: copying %s/%s, already verified!\n",
+               dentry->d_parent->d_name.name, dentry->d_name.name);
+    }
+
+    *dst = *src;
+    return dst;
 }
 
 static __inline__ struct svc_fh *
 fh_init(struct svc_fh *fhp, int maxsize)
 {
-	memset(fhp, 0, sizeof(*fhp));
-	fhp->fh_maxsize = maxsize;
-	return fhp;
+    memset(fhp, 0, sizeof(*fhp));
+    fhp->fh_maxsize = maxsize;
+    return fhp;
 }
 
 #ifdef CONFIG_NFSD_V3
@@ -231,15 +237,16 @@ fh_init(struct svc_fh *fhp, int maxsize)
 static inline void
 fill_pre_wcc(struct svc_fh *fhp)
 {
-	struct inode    *inode;
+    struct inode    *inode;
 
-	inode = fhp->fh_dentry->d_inode;
-	if (!fhp->fh_pre_saved) {
-		fhp->fh_pre_mtime = inode->i_mtime;
-			fhp->fh_pre_ctime = inode->i_ctime;
-			fhp->fh_pre_size  = inode->i_size;
-			fhp->fh_pre_saved = 1;
-	}
+    inode = fhp->fh_dentry->d_inode;
+    if (!fhp->fh_pre_saved)
+    {
+        fhp->fh_pre_mtime = inode->i_mtime;
+        fhp->fh_pre_ctime = inode->i_ctime;
+        fhp->fh_pre_size  = inode->i_size;
+        fhp->fh_pre_saved = 1;
+    }
 }
 
 /*
@@ -248,29 +255,32 @@ fill_pre_wcc(struct svc_fh *fhp)
 static inline void
 fill_post_wcc(struct svc_fh *fhp)
 {
-	struct inode    *inode = fhp->fh_dentry->d_inode;
+    struct inode    *inode = fhp->fh_dentry->d_inode;
 
-	if (fhp->fh_post_saved)
-		printk("nfsd: inode locked twice during operation.\n");
+    if (fhp->fh_post_saved)
+        printk("nfsd: inode locked twice during operation.\n");
 
-	fhp->fh_post_mode       = inode->i_mode;
-	fhp->fh_post_nlink      = inode->i_nlink;
-	fhp->fh_post_uid	= inode->i_uid;
-	fhp->fh_post_gid	= inode->i_gid;
-	fhp->fh_post_size       = inode->i_size;
-	if (inode->i_blksize) {
-		fhp->fh_post_blksize    = inode->i_blksize;
-		fhp->fh_post_blocks     = inode->i_blocks;
-	} else {
-		fhp->fh_post_blksize    = BLOCK_SIZE;
-		/* how much do we care for accuracy with MinixFS? */
-		fhp->fh_post_blocks     = (inode->i_size+511) >> 9;
-	}
-	fhp->fh_post_rdev       = inode->i_rdev;
-	fhp->fh_post_atime      = inode->i_atime;
-	fhp->fh_post_mtime      = inode->i_mtime;
-	fhp->fh_post_ctime      = inode->i_ctime;
-	fhp->fh_post_saved      = 1;
+    fhp->fh_post_mode       = inode->i_mode;
+    fhp->fh_post_nlink      = inode->i_nlink;
+    fhp->fh_post_uid	= inode->i_uid;
+    fhp->fh_post_gid	= inode->i_gid;
+    fhp->fh_post_size       = inode->i_size;
+    if (inode->i_blksize)
+    {
+        fhp->fh_post_blksize    = inode->i_blksize;
+        fhp->fh_post_blocks     = inode->i_blocks;
+    }
+    else
+    {
+        fhp->fh_post_blksize    = BLOCK_SIZE;
+        /* how much do we care for accuracy with MinixFS? */
+        fhp->fh_post_blocks     = (inode->i_size+511) >> 9;
+    }
+    fhp->fh_post_rdev       = inode->i_rdev;
+    fhp->fh_post_atime      = inode->i_atime;
+    fhp->fh_post_mtime      = inode->i_mtime;
+    fhp->fh_post_ctime      = inode->i_ctime;
+    fhp->fh_post_saved      = 1;
 }
 #else
 #define	fill_pre_wcc(ignored)
@@ -287,26 +297,28 @@ fill_post_wcc(struct svc_fh *fhp)
 static inline void
 fh_lock(struct svc_fh *fhp)
 {
-	struct dentry	*dentry = fhp->fh_dentry;
-	struct inode	*inode;
+    struct dentry	*dentry = fhp->fh_dentry;
+    struct inode	*inode;
 
-	dfprintk(FILEOP, "nfsd: fh_lock(%s) locked = %d\n",
-			SVCFH_fmt(fhp), fhp->fh_locked);
+    dfprintk(FILEOP, "nfsd: fh_lock(%s) locked = %d\n",
+             SVCFH_fmt(fhp), fhp->fh_locked);
 
-	if (!fhp->fh_dentry) {
-		printk(KERN_ERR "fh_lock: fh not verified!\n");
-		return;
-	}
-	if (fhp->fh_locked) {
-		printk(KERN_WARNING "fh_lock: %s/%s already locked!\n",
-			dentry->d_parent->d_name.name, dentry->d_name.name);
-		return;
-	}
+    if (!fhp->fh_dentry)
+    {
+        printk(KERN_ERR "fh_lock: fh not verified!\n");
+        return;
+    }
+    if (fhp->fh_locked)
+    {
+        printk(KERN_WARNING "fh_lock: %s/%s already locked!\n",
+               dentry->d_parent->d_name.name, dentry->d_name.name);
+        return;
+    }
 
-	inode = dentry->d_inode;
-	down(&inode->i_sem);
-	fill_pre_wcc(fhp);
-	fhp->fh_locked = 1;
+    inode = dentry->d_inode;
+    down(&inode->i_sem);
+    fill_pre_wcc(fhp);
+    fhp->fh_locked = 1;
 }
 
 /*
@@ -315,14 +327,15 @@ fh_lock(struct svc_fh *fhp)
 static inline void
 fh_unlock(struct svc_fh *fhp)
 {
-	if (!fhp->fh_dentry)
-		printk(KERN_ERR "fh_unlock: fh not verified!\n");
+    if (!fhp->fh_dentry)
+        printk(KERN_ERR "fh_unlock: fh not verified!\n");
 
-	if (fhp->fh_locked) {
-		fill_post_wcc(fhp);
-		up(&fhp->fh_dentry->d_inode->i_sem);
-		fhp->fh_locked = 0;
-	}
+    if (fhp->fh_locked)
+    {
+        fill_post_wcc(fhp);
+        up(&fhp->fh_dentry->d_inode->i_sem);
+        fhp->fh_locked = 0;
+    }
 }
 #endif /* __KERNEL__ */
 

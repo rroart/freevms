@@ -27,7 +27,7 @@ Version 2 and 3 extensions to driver:
 	- add MODULE_LICENSE("GPL") [in a 3.1.20 subversion]
 	- fix race around generic_unplug_device() [in a 3.1.20 subversion]
     Changes since 3.1.19 (20010623)
-	- add SG_GET_ACCESS_COUNT ioctl 
+	- add SG_GET_ACCESS_COUNT ioctl
 	- make open() increment and close() decrement access_count
 	- only register first 256 devices, reject subsequent devices
     Changes since 3.1.18 (20010505)
@@ -55,19 +55,19 @@ Major new features in SG 3.x driver (cf SG 2.x drivers)
 	- scatter/gather in user space, direct IO, and mmap supported
 
  The normal action of this driver is to use the adapter (HBA) driver to DMA
- data into kernel buffers and then use the CPU to copy the data into the 
- user space (vice versa for writes). That is called "indirect" IO due to 
+ data into kernel buffers and then use the CPU to copy the data into the
+ user space (vice versa for writes). That is called "indirect" IO due to
  the double handling of data. There are two methods offered to remove the
- redundant copy: 1) direct IO which uses the kernel kiobuf mechanism and 
- 2) using the mmap() system call to map the reserve buffer (this driver has 
+ redundant copy: 1) direct IO which uses the kernel kiobuf mechanism and
+ 2) using the mmap() system call to map the reserve buffer (this driver has
  one reserve buffer per fd) into the user space. Both have their advantages.
- In terms of absolute speed mmap() is faster. If speed is not a concern, 
+ In terms of absolute speed mmap() is faster. If speed is not a concern,
  indirect IO should be fine. Read the documentation for more information.
 
  ** N.B. To use direct IO 'echo 1 > /proc/scsi/sg/allow_dio' may be
          needed. That pseudo file's content is defaulted to 0. **
- 
- Historical note: this SCSI pass-through driver has been known as "sg" for 
+
+ Historical note: this SCSI pass-through driver has been known as "sg" for
  a decade. In broader kernel discussions "sg" is used to refer to scatter
  gather techniques. The context should clarify which "sg" is referred to.
 
@@ -87,7 +87,7 @@ Major new features in SG 3.x driver (cf SG 2.x drivers)
  the kernel source tree, probably at:
         /usr/src/linux/Documentation/scsi-generic.txt .
 
- Utility and test programs are available at the sg web site. They are 
+ Utility and test programs are available at the sg web site. They are
  bundled as sg_utils (for the lk 2.2 series) and sg3_utils (for the
  lk 2.4 series).
 
@@ -99,7 +99,8 @@ Major new features in SG 3.x driver (cf SG 2.x drivers)
 /* New interface introduced in the 3.x SG drivers follows */
 
 typedef struct sg_iovec /* same structure as used by readv() Linux system */
-{                       /* call. It defines one scatter-gather element. */
+{
+    /* call. It defines one scatter-gather element. */
     void * iov_base;            /* Starting address  */
     size_t iov_len;             /* Length in bytes  */
 } sg_iovec_t;
@@ -137,18 +138,18 @@ typedef struct sg_io_hdr
 #define SG_DXFER_TO_DEV (-2)    /* e.g. a SCSI WRITE command */
 #define SG_DXFER_FROM_DEV (-3)  /* e.g. a SCSI READ command */
 #define SG_DXFER_TO_FROM_DEV (-4) /* treated like SG_DXFER_FROM_DEV with the
-				   additional property than during indirect
-				   IO the user buffer is copied into the
-				   kernel buffers before the transfer */
+additional property than during indirect
+IO the user buffer is copied into the
+kernel buffers before the transfer */
 #define SG_DXFER_UNKNOWN (-5)   /* Unknown data direction */
 
 /* following flag values can be "or"-ed together */
 #define SG_FLAG_DIRECT_IO 1     /* default is indirect IO */
 #define SG_FLAG_LUN_INHIBIT 2   /* default is overwrite lun in SCSI */
-				/* command block (when <= SCSI_2) */
+/* command block (when <= SCSI_2) */
 #define SG_FLAG_MMAP_IO 4       /* request memory mapped IO */
 #define SG_FLAG_NO_DXFER 0x10000 /* no transfer of kernel buffers to/from */
-				/* user space (debug indirect IO) */
+/* user space (debug indirect IO) */
 
 /* following 'info' values are "or"-ed together */
 #define SG_INFO_OK_MASK 0x1
@@ -161,7 +162,8 @@ typedef struct sg_io_hdr
 #define SG_INFO_MIXED_IO 0x4    /* part direct, part indirect IO */
 
 
-typedef struct sg_scsi_id { /* used by SG_GET_SCSI_ID ioctl() */
+typedef struct sg_scsi_id   /* used by SG_GET_SCSI_ID ioctl() */
+{
     int host_no;        /* as in "scsi<n>" where 'n' is one of 0, 1, 2 etc */
     int channel;
     int scsi_id;        /* scsi id of target device */
@@ -172,7 +174,8 @@ typedef struct sg_scsi_id { /* used by SG_GET_SCSI_ID ioctl() */
     int unused[2];      /* probably find a good use, set 0 for now */
 } sg_scsi_id_t; /* 32 bytes long on i386 */
 
-typedef struct sg_req_info { /* used by SG_GET_REQUEST_TABLE ioctl() */
+typedef struct sg_req_info   /* used by SG_GET_REQUEST_TABLE ioctl() */
+{
     char req_state;     /* 0 -> not used, 1 -> written, 2 -> ready to read */
     char orphan;        /* 0 -> normal request, 1 -> from interruped SG_IO */
     char sg_io_owned;   /* 0 -> complete with read(), 1 -> owned by SG_IO */
@@ -194,7 +197,7 @@ typedef struct sg_req_info { /* used by SG_GET_REQUEST_TABLE ioctl() */
 /* Used to configure SCSI command transformation layer for ATAPI devices */
 /* Only supported by the ide-scsi driver */
 #define SG_SET_TRANSFORM 0x2204 /* N.B. 3rd arg is not pointer but value: */
-		      /* 3rd arg = 0 to disable transform, 1 to enable it */
+/* 3rd arg = 0 to disable transform, 1 to enable it */
 #define SG_GET_TRANSFORM 0x2205
 
 #define SG_SET_RESERVED_SIZE 0x2275  /* request a new reserved buffer size */
@@ -240,7 +243,7 @@ typedef struct sg_req_info { /* used by SG_GET_REQUEST_TABLE ioctl() */
 #define SG_GET_KEEP_ORPHAN 0x2288
 
 /* yields scsi midlevel's access_count for this SCSI device */
-#define SG_GET_ACCESS_COUNT 0x2289  
+#define SG_GET_ACCESS_COUNT 0x2289
 
 
 #define SG_SCATTER_SZ (8 * 4096)  /* PAGE_SIZE not available to user */
@@ -284,7 +287,7 @@ struct sg_header
     int pack_id;     /* [io] id number of packet (use ints >= 0) */
     int result;      /* [o] 0==ok, else (+ve) Unix errno (best ignored) */
     unsigned int twelve_byte:1;
-	/* [i] Force 12 byte command length for group 6 & 7 commands  */
+    /* [i] Force 12 byte command length for group 6 & 7 commands  */
     unsigned int target_status:5;   /* [o] scsi status from target */
     unsigned int host_status:8;     /* [o] host status (see "DID" codes) */
     unsigned int driver_status:8;   /* [o] driver status+suggestion */
@@ -314,13 +317,13 @@ struct sg_header
 #define SG_SET_DEBUG 0x227e    /* 0 -> turn off debug */
 
 #define SG_NEXT_CMD_LEN 0x2283  /* override SCSI command length with given
-		   number on the next write() on this file descriptor */
+number on the next write() on this file descriptor */
 
 
 /* Defaults, commented if they differ from original sg driver */
 #define SG_DEFAULT_TIMEOUT (60*HZ) /* HZ == 'jiffies in 1 second' */
 #define SG_DEF_COMMAND_Q 0     /* command queuing is always on when
-				  the new interface is used */
+the new interface is used */
 #define SG_DEF_UNDERRUN_FLAG 0
 
 #endif

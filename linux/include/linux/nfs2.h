@@ -25,20 +25,22 @@
 
 
 /* NFSv2 file types - beware, these are not the same in NFSv3 */
-enum nfs2_ftype {
-	NF2NON = 0,
-	NF2REG = 1,
-	NF2DIR = 2,
-	NF2BLK = 3,
-	NF2CHR = 4,
-	NF2LNK = 5,
-	NF2SOCK = 6,
-	NF2BAD = 7,
-	NF2FIFO = 8
+enum nfs2_ftype
+{
+    NF2NON = 0,
+    NF2REG = 1,
+    NF2DIR = 2,
+    NF2BLK = 3,
+    NF2CHR = 4,
+    NF2LNK = 5,
+    NF2SOCK = 6,
+    NF2BAD = 7,
+    NF2FIFO = 8
 };
 
-struct nfs2_fh {
-	char			data[NFS2_FHSIZE];
+struct nfs2_fh
+{
+    char			data[NFS2_FHSIZE];
 };
 
 /*

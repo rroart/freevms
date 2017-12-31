@@ -17,7 +17,7 @@
 
 #include <linux/types.h>
 
-/* 
+/*
  *  comp_t is a 16-bit "floating" point number with a 3-bit base 8
  *  exponent and a 13-bit fraction. See linux/kernel/acct.c for the
  *  specific encoding system used.
@@ -36,33 +36,33 @@ typedef __u16	comp_t;
 
 struct acct
 {
-	char		ac_flag;		/* Accounting Flags */
-/*
- *	No binary format break with 2.0 - but when we hit 32bit uid we'll
- *	have to bite one
- */
-	__u16		ac_uid;			/* Accounting Real User ID */
-	__u16		ac_gid;			/* Accounting Real Group ID */
-	__u16		ac_tty;			/* Accounting Control Terminal */
-	__u32		ac_btime;		/* Accounting Process Creation Time */
-	comp_t		ac_utime;		/* Accounting User Time */
-	comp_t		ac_stime;		/* Accounting System Time */
-	comp_t		ac_etime;		/* Accounting Elapsed Time */
-	comp_t		ac_mem;			/* Accounting Average Memory Usage */
-	comp_t		ac_io;			/* Accounting Chars Transferred */
-	comp_t		ac_rw;			/* Accounting Blocks Read or Written */
-	comp_t		ac_minflt;		/* Accounting Minor Pagefaults */
-	comp_t		ac_majflt;		/* Accounting Major Pagefaults */
-	comp_t		ac_swaps;		/* Accounting Number of Swaps */
-	__u32		ac_exitcode;		/* Accounting Exitcode */
-	char		ac_comm[ACCT_COMM + 1];	/* Accounting Command Name */
-	char		ac_pad[10];		/* Accounting Padding Bytes */
+    char		ac_flag;		/* Accounting Flags */
+    /*
+     *	No binary format break with 2.0 - but when we hit 32bit uid we'll
+     *	have to bite one
+     */
+    __u16		ac_uid;			/* Accounting Real User ID */
+    __u16		ac_gid;			/* Accounting Real Group ID */
+    __u16		ac_tty;			/* Accounting Control Terminal */
+    __u32		ac_btime;		/* Accounting Process Creation Time */
+    comp_t		ac_utime;		/* Accounting User Time */
+    comp_t		ac_stime;		/* Accounting System Time */
+    comp_t		ac_etime;		/* Accounting Elapsed Time */
+    comp_t		ac_mem;			/* Accounting Average Memory Usage */
+    comp_t		ac_io;			/* Accounting Chars Transferred */
+    comp_t		ac_rw;			/* Accounting Blocks Read or Written */
+    comp_t		ac_minflt;		/* Accounting Minor Pagefaults */
+    comp_t		ac_majflt;		/* Accounting Major Pagefaults */
+    comp_t		ac_swaps;		/* Accounting Number of Swaps */
+    __u32		ac_exitcode;		/* Accounting Exitcode */
+    char		ac_comm[ACCT_COMM + 1];	/* Accounting Command Name */
+    char		ac_pad[10];		/* Accounting Padding Bytes */
 };
 
 /*
  *  accounting flags
  */
-				/* bit set when the process ... */
+/* bit set when the process ... */
 #define AFORK		0x01	/* ... executed fork, but did not exec */
 #define ASU		0x02	/* ... used super-user privileges */
 #define ACOMPAT		0x04	/* ... used compatibility mode (VAX only not used) */

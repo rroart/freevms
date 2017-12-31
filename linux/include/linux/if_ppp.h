@@ -85,26 +85,30 @@
  * Ioctl definitions.
  */
 
-struct npioctl {
-	int		protocol;	/* PPP protocol, e.g. PPP_IP */
-	enum NPmode	mode;
+struct npioctl
+{
+    int		protocol;	/* PPP protocol, e.g. PPP_IP */
+    enum NPmode	mode;
 };
 
 /* Structure describing a CCP configuration option, for PPPIOCSCOMPRESS */
-struct ppp_option_data {
-	__u8	*ptr;
-	__u32	length;
-	int	transmit;
+struct ppp_option_data
+{
+    __u8	*ptr;
+    __u32	length;
+    int	transmit;
 };
 
-struct ifpppstatsreq {
-	struct ifreq	 b;
-	struct ppp_stats stats;			/* statistic information */
+struct ifpppstatsreq
+{
+    struct ifreq	 b;
+    struct ppp_stats stats;			/* statistic information */
 };
 
-struct ifpppcstatsreq {
-	struct ifreq	      b;
-	struct ppp_comp_stats stats;
+struct ifpppcstatsreq
+{
+    struct ifreq	      b;
+    struct ppp_comp_stats stats;
 };
 
 #define ifr__name       b.ifr_ifrn.ifrn_name

@@ -30,8 +30,8 @@
 
 /* The type of callback functions used in sensors_{proc,sysctl}_real */
 typedef void (*i2c_real_callback) (struct i2c_client * client,
-				       int operation, int ctl_name,
-				       int *nrels_mag, long *results);
+                                   int operation, int ctl_name,
+                                   int *nrels_mag, long *results);
 
 /* Values for the operation field in the above function type */
 #define SENSORS_PROC_REAL_INFO 1
@@ -56,11 +56,11 @@ typedef void (*i2c_real_callback) (struct i2c_client * client,
    In all cases, client points to the client we wish to interact with,
    and ctl_name is the SYSCTL id of the file we are accessing. */
 extern int i2c_sysctl_real(ctl_table * table, int *name, int nlen,
-			       void *oldval, size_t * oldlenp,
-			       void *newval, size_t newlen,
-			       void **context);
+                           void *oldval, size_t * oldlenp,
+                           void *newval, size_t newlen,
+                           void **context);
 extern int i2c_proc_real(ctl_table * ctl, int write, struct file *filp,
-			     void *buffer, size_t * lenp);
+                         void *buffer, size_t * lenp);
 
 
 
@@ -72,9 +72,9 @@ extern int i2c_proc_real(ctl_table * ctl, int write, struct file *filp,
    If any driver wants subdirectories within the newly created directory,
    these functions must be updated! */
 extern int i2c_register_entry(struct i2c_client *client,
-				  const char *prefix,
-				  ctl_table * ctl_template,
-				  struct module *controlling_mod);
+                              const char *prefix,
+                              ctl_table * ctl_template,
+                              struct module *controlling_mod);
 
 extern void i2c_deregister_entry(int id);
 
@@ -88,24 +88,25 @@ extern void i2c_deregister_entry(int id);
    fails.
    probe: insmod parameter. Initialize this list with SENSORS_I2C_END values.
      A list of pairs. The first value is a bus number (SENSORS_ISA_BUS for
-     the ISA bus, -1 for any I2C bus), the second is the address. 
+     the ISA bus, -1 for any I2C bus), the second is the address.
    kind: The kind of chip. 0 equals any chip.
 */
-struct i2c_force_data {
-	unsigned short *force;
-	unsigned short kind;
+struct i2c_force_data
+{
+    unsigned short *force;
+    unsigned short kind;
 };
 
 /* A structure containing the detect information.
    normal_i2c: filled in by the module writer. Terminated by SENSORS_I2C_END.
      A list of I2C addresses which should normally be examined.
-   normal_i2c_range: filled in by the module writer. Terminated by 
+   normal_i2c_range: filled in by the module writer. Terminated by
      SENSORS_I2C_END
      A list of pairs of I2C addresses, each pair being an inclusive range of
      addresses which should normally be examined.
    normal_isa: filled in by the module writer. Terminated by SENSORS_ISA_END.
      A list of ISA addresses which should normally be examined.
-   normal_isa_range: filled in by the module writer. Terminated by 
+   normal_isa_range: filled in by the module writer. Terminated by
      SENSORS_ISA_END
      A list of triples. The first two elements are ISA addresses, being an
      range of addresses which should normally be examined. The third is the
@@ -115,36 +116,37 @@ struct i2c_force_data {
      A list of pairs. The first value is a bus number (SENSORS_ISA_BUS for
      the ISA bus, -1 for any I2C bus), the second is the address. These
      addresses are also probed, as if they were in the 'normal' list.
-   probe_range: insmod parameter. Initialize this list with SENSORS_I2C_END 
+   probe_range: insmod parameter. Initialize this list with SENSORS_I2C_END
      values.
      A list of triples. The first value is a bus number (SENSORS_ISA_BUS for
-     the ISA bus, -1 for any I2C bus), the second and third are addresses. 
+     the ISA bus, -1 for any I2C bus), the second and third are addresses.
      These form an inclusive range of addresses that are also probed, as
      if they were in the 'normal' list.
    ignore: insmod parameter. Initialize this list with SENSORS_I2C_END values.
      A list of pairs. The first value is a bus number (SENSORS_ISA_BUS for
      the ISA bus, -1 for any I2C bus), the second is the I2C address. These
-     addresses are never probed. This parameter overrules 'normal' and 
+     addresses are never probed. This parameter overrules 'normal' and
      'probe', but not the 'force' lists.
-   ignore_range: insmod parameter. Initialize this list with SENSORS_I2C_END 
+   ignore_range: insmod parameter. Initialize this list with SENSORS_I2C_END
       values.
      A list of triples. The first value is a bus number (SENSORS_ISA_BUS for
-     the ISA bus, -1 for any I2C bus), the second and third are addresses. 
+     the ISA bus, -1 for any I2C bus), the second and third are addresses.
      These form an inclusive range of I2C addresses that are never probed.
      This parameter overrules 'normal' and 'probe', but not the 'force' lists.
    force_data: insmod parameters. A list, ending with an element of which
      the force field is NULL.
 */
-struct i2c_address_data {
-	unsigned short *normal_i2c;
-	unsigned short *normal_i2c_range;
-	unsigned int *normal_isa;
-	unsigned int *normal_isa_range;
-	unsigned short *probe;
-	unsigned short *probe_range;
-	unsigned short *ignore;
-	unsigned short *ignore_range;
-	struct i2c_force_data *forces;
+struct i2c_address_data
+{
+    unsigned short *normal_i2c;
+    unsigned short *normal_i2c_range;
+    unsigned int *normal_isa;
+    unsigned int *normal_isa_range;
+    unsigned short *probe;
+    unsigned short *probe_range;
+    unsigned short *ignore;
+    unsigned short *ignore_range;
+    struct i2c_force_data *forces;
 };
 
 /* Internal numbers to terminate lists */
@@ -176,7 +178,7 @@ struct i2c_address_data {
                           SENSORS_I2C_END, SENSORS_I2C_END, SENSORS_I2C_END, \
                           SENSORS_I2C_END, SENSORS_I2C_END, SENSORS_I2C_END}
 
-/* This is ugly. We need to evaluate SENSORS_MAX_OPTS before it is 
+/* This is ugly. We need to evaluate SENSORS_MAX_OPTS before it is
    stringified */
 #define SENSORS_MODPARM_AUX1(x) "1-" #x "h"
 #define SENSORS_MODPARM_AUX(x) SENSORS_MODPARM_AUX1(x)
@@ -216,7 +218,7 @@ struct i2c_address_data {
                                         ignore, ignore_range, \
                                         forces}
 
-/* The following functions create an enum with the chip names as elements. 
+/* The following functions create an enum with the chip names as elements.
    The first element of the enum is any_chip. These are the only macros
    a module will want to use. */
 
@@ -348,28 +350,28 @@ struct i2c_address_data {
   SENSORS_INSMOD
 
 typedef int i2c_found_addr_proc(struct i2c_adapter *adapter,
-				    int addr, unsigned short flags,
-				    int kind);
+                                int addr, unsigned short flags,
+                                int kind);
 
 /* Detect function. It iterates over all possible addresses itself. For
    SMBus addresses, it will only call found_proc if some client is connected
    to the SMBus (unless a 'force' matched); for ISA detections, this is not
    done. */
 extern int i2c_detect(struct i2c_adapter *adapter,
-			  struct i2c_address_data *address_data,
-			  i2c_found_addr_proc * found_proc);
+                      struct i2c_address_data *address_data,
+                      i2c_found_addr_proc * found_proc);
 
 
 /* This macro is used to scale user-input to sensible values in almost all
    chip drivers. */
 extern inline int SENSORS_LIMIT(long value, long low, long high)
 {
-	if (value < low)
-		return low;
-	else if (value > high)
-		return high;
-	else
-		return value;
+    if (value < low)
+        return low;
+    else if (value > high)
+        return high;
+    else
+        return value;
 }
 
 #endif				/* def __KERNEL__ */
@@ -383,13 +385,14 @@ extern inline int SENSORS_LIMIT(long value, long low, long high)
 #define DEV_SENSORS DEV_HWMON
 #else				/* ndef DEV_HWMOM */
 #define DEV_SENSORS 2		/* The id of the lm_sensors directory within the
-				   dev table */
+dev table */
 #endif				/* def DEV_HWMON */
 
 #define SENSORS_CHIPS 1
-struct i2c_chips_data {
-	int sysctl_id;
-	char name[SENSORS_PREFIX_MAX + 13];
+struct i2c_chips_data
+{
+    int sysctl_id;
+    char name[SENSORS_PREFIX_MAX + 13];
 };
 
 #endif				/* def SENSORS_SENSORS_H */

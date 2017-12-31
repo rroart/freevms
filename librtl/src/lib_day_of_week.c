@@ -37,7 +37,8 @@
 #include <stddef.h>
 #include "lib$routines.h"	/* Our header file! */
 
-struct TIME {
+struct TIME
+{
     unsigned char time[8];
 };
 
@@ -53,7 +54,8 @@ unsigned long lib$day_of_week(const void *timadra, int *weekday)
     /* Use lib_day to crack quadword... */
 
     sts = lib$day(&days,timadr,NULL);
-    if (sts & 1) {
+    if (sts & 1)
+    {
         *weekday = ((days + 2) % 7) + 1;
     }
     return sts;

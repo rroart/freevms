@@ -3,8 +3,8 @@
 
 struct ipt_ah
 {
-	u_int32_t spis[2];			/* Security Parameter Index */
-	u_int8_t  invflags;			/* Inverse flags */
+    u_int32_t spis[2];			/* Security Parameter Index */
+    u_int8_t  invflags;			/* Inverse flags */
 };
 
 

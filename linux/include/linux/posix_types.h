@@ -16,7 +16,7 @@
 
 /*
  * Those macros may have been defined in <gnu/types.h>. But we always
- * use the ones here. 
+ * use the ones here.
  */
 #undef __NFDBITS
 #define __NFDBITS	(8 * sizeof(unsigned long))
@@ -33,8 +33,9 @@
 #undef __FDMASK
 #define	__FDMASK(d)	(1UL << ((d) % __NFDBITS))
 
-typedef struct {
-	unsigned long fds_bits [__FDSET_LONGS];
+typedef struct
+{
+    unsigned long fds_bits [__FDSET_LONGS];
 } __kernel_fd_set;
 
 /* Type of a signal handler.  */

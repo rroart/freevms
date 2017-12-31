@@ -24,81 +24,90 @@
 
 #define		KFE$K_NUMBER_OF_FLAGS	18
 #define		KFE$S_KFEDEF		112
-	
-struct _kfe {
-  void *kfe$l_hshlnk;
-  struct _kfe *kfe$l_kfelink;
-  unsigned short int kfe$w_size;
-  unsigned char kfe$b_type;
-  unsigned char kfe$b_hshidx;
-  struct _kfd *kfe$l_kfd;
-  union  {
-    unsigned short int kfe$w_flags;
-    struct  {
-      unsigned kfe$v_protect		: 1;
-      unsigned kfe$v_lim		: 1;
-      unsigned kfe$v_procpriv		: 1;
-      unsigned kfe$v_open		: 1;
-      unsigned kfe$v_hdrres		: 1;
-      unsigned kfe$v_shared		: 1;
-      unsigned kfe$v_kfe_naming		: 1;
-      unsigned kfe$v_compress		: 1;
-      unsigned kfe$v_nopurge		: 1;
-      unsigned kfe$v_account		: 1;
-      unsigned kfe$v_writeable		: 1;
-      unsigned kfe$v_exeonly		: 1;
-      unsigned kfe$v_discontiguous	: 1;
-      unsigned kfe$v_delete_pend	: 1;
-      unsigned kfe$v_version_safe	: 1;
-      unsigned kfe$v_data_resident	: 1;
+
+struct _kfe
+{
+    void *kfe$l_hshlnk;
+    struct _kfe *kfe$l_kfelink;
+    unsigned short int kfe$w_size;
+    unsigned char kfe$b_type;
+    unsigned char kfe$b_hshidx;
+    struct _kfd *kfe$l_kfd;
+    union
+    {
+        unsigned short int kfe$w_flags;
+        struct
+        {
+            unsigned kfe$v_protect		: 1;
+            unsigned kfe$v_lim		: 1;
+            unsigned kfe$v_procpriv		: 1;
+            unsigned kfe$v_open		: 1;
+            unsigned kfe$v_hdrres		: 1;
+            unsigned kfe$v_shared		: 1;
+            unsigned kfe$v_kfe_naming		: 1;
+            unsigned kfe$v_compress		: 1;
+            unsigned kfe$v_nopurge		: 1;
+            unsigned kfe$v_account		: 1;
+            unsigned kfe$v_writeable		: 1;
+            unsigned kfe$v_exeonly		: 1;
+            unsigned kfe$v_discontiguous	: 1;
+            unsigned kfe$v_delete_pend	: 1;
+            unsigned kfe$v_version_safe	: 1;
+            unsigned kfe$v_data_resident	: 1;
+        };
     };
-  };
-  unsigned short int kfe$w_gblseccnt;
-  unsigned int kfe$l_usecnt;
-  union  {
-    struct _wcb *kfe$l_wcb;
-    struct  {
-      union  {
-	unsigned short int kfe$w_fid;
-	unsigned short int kfe$w_fid_num;
-      };
-      unsigned short int kfe$w_fid_seq;
+    unsigned short int kfe$w_gblseccnt;
+    unsigned int kfe$l_usecnt;
+    union
+    {
+        struct _wcb *kfe$l_wcb;
+        struct
+        {
+            union
+            {
+                unsigned short int kfe$w_fid;
+                unsigned short int kfe$w_fid_num;
+            };
+            unsigned short int kfe$w_fid_seq;
+        };
     };
-  };
-  union  {
-    struct _ihd *kfe$l_imghdr;
-    unsigned short int kfe$w_fid_rvn;
-  };
-  unsigned long long kfe$q_procpriv;
-  unsigned char kfe$b_matchctl;
-  char kfedef$$_fill_4;
-  unsigned short int kfe$w_amecod;
-  unsigned int kfe$l_ident;
-  struct _orb *kfe$l_orb;
-  unsigned short int kfe$w_shrcnt;
-  unsigned short int kfe$w_maxshrisd;
-  struct _kferes *kfe$l_kferes_ptr;
-  unsigned int kfe$l_ref_count;
-  unsigned int kfe$l_priv_isd_cnt;
-  unsigned int kfe$l_image_size;
-  unsigned int kfe$l_obsolete_1;
-  unsigned int kfe$l_imagename_offset;
-  union  {
-    unsigned int kfe$l_flags2;
-    struct  {
-      unsigned kfe$v_authpriv		: 1;
-      unsigned kfe$v_arb_support	: 1;
-      unsigned kfe$v_fill_0_		: 6;
+    union
+    {
+        struct _ihd *kfe$l_imghdr;
+        unsigned short int kfe$w_fid_rvn;
     };
-  };
-  void *kfe$ar_authrights;
-  void *kfe$ar_rights;
-  unsigned int kfe$l_arb_support;
-  unsigned long long kfe$q_authpriv;
-  unsigned int kfe$l_risig_offset;
-  unsigned short int kfe$w_filver;
-  short int kfedef$$_fill_5;
+    unsigned long long kfe$q_procpriv;
+    unsigned char kfe$b_matchctl;
+    char kfedef$$_fill_4;
+    unsigned short int kfe$w_amecod;
+    unsigned int kfe$l_ident;
+    struct _orb *kfe$l_orb;
+    unsigned short int kfe$w_shrcnt;
+    unsigned short int kfe$w_maxshrisd;
+    struct _kferes *kfe$l_kferes_ptr;
+    unsigned int kfe$l_ref_count;
+    unsigned int kfe$l_priv_isd_cnt;
+    unsigned int kfe$l_image_size;
+    unsigned int kfe$l_obsolete_1;
+    unsigned int kfe$l_imagename_offset;
+    union
+    {
+        unsigned int kfe$l_flags2;
+        struct
+        {
+            unsigned kfe$v_authpriv		: 1;
+            unsigned kfe$v_arb_support	: 1;
+            unsigned kfe$v_fill_0_		: 6;
+        };
+    };
+    void *kfe$ar_authrights;
+    void *kfe$ar_rights;
+    unsigned int kfe$l_arb_support;
+    unsigned long long kfe$q_authpriv;
+    unsigned int kfe$l_risig_offset;
+    unsigned short int kfe$w_filver;
+    short int kfedef$$_fill_5;
 };
 
 #endif
- 
+

@@ -15,9 +15,10 @@
 #define     CH_LF	  10		// Line-Feed
 #define     CH_CR	  13		// Carriage-Return
 
-struct queue_header_fields {
-struct queue_header_fields * qhead;
-struct queue_header_fields * qtail;
+struct queue_header_fields
+{
+    struct queue_header_fields * qhead;
+    struct queue_header_fields * qtail;
 };
 
 #define queue_header_structure(x) x

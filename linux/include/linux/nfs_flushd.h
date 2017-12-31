@@ -39,21 +39,22 @@ extern void		nfs_wake_flushd(void);
 /*
  * This is the per-mount writeback cache.
  */
-struct nfs_reqlist {
-	atomic_t		nr_requests;
-	unsigned long		runat;
-	wait_queue_head_t	request_wait;
+struct nfs_reqlist
+{
+    atomic_t		nr_requests;
+    unsigned long		runat;
+    wait_queue_head_t	request_wait;
 
-	/* The async RPC task that is responsible for scanning the
-	 * requests.
-	 */
-	struct rpc_task		*task;		/* request flush task */
+    /* The async RPC task that is responsible for scanning the
+     * requests.
+     */
+    struct rpc_task		*task;		/* request flush task */
 
-	/* Authentication flavor handle for this NFS client */
-	struct rpc_auth		*auth;
+    /* Authentication flavor handle for this NFS client */
+    struct rpc_auth		*auth;
 
-	/* The list of all inodes with pending writebacks.  */
-	struct inode		*inodes;
+    /* The list of all inodes with pending writebacks.  */
+    struct inode		*inodes;
 };
 
 #endif

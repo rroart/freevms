@@ -27,7 +27,8 @@
 #define STATUS_TMPDIR  2
 #define STATUS_WILDCARD 4
 
-struct WCCDIR {
+struct WCCDIR
+{
     struct WCCDIR *wcd_next;
     struct WCCDIR *wcd_prev;
     int wcd_size;
@@ -46,7 +47,8 @@ struct WCCDIR {
 
 #define MAX_FILELEN 1024
 
-struct WCCFILE {
+struct WCCFILE
+{
     struct _fabdef *wcf_fab;
     int wcf_status;
     struct _fibdef wcf_fib;

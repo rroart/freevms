@@ -58,7 +58,7 @@
 #define LOCK_SH		1	/* shared lock */
 #define LOCK_EX		2	/* exclusive lock */
 #define LOCK_NB		4	/* or'd with one of the above to prevent
-				   blocking */
+blocking */
 #define LOCK_UN		8	/* remove lock */
 
 #define LOCK_MAND	32	/* This is a mandatory flock */
@@ -66,20 +66,22 @@
 #define LOCK_WRITE	128	/* ... Which allows concurrent write operations */
 #define LOCK_RW		192	/* ... Which allows concurrent read & write ops */
 
-struct flock {
-	short l_type;
-	short l_whence;
-	off_t l_start;
-	off_t l_len;
-	pid_t l_pid;
+struct flock
+{
+    short l_type;
+    short l_whence;
+    off_t l_start;
+    off_t l_len;
+    pid_t l_pid;
 };
 
-struct flock64 {
-	short  l_type;
-	short  l_whence;
-	loff_t l_start;
-	loff_t l_len;
-	pid_t  l_pid;
+struct flock64
+{
+    short  l_type;
+    short  l_whence;
+    loff_t l_start;
+    loff_t l_len;
+    pid_t  l_pid;
 };
 
 #define F_LINUX_SPECIFIC_BASE	1024

@@ -8,14 +8,14 @@
 
 static __inline__ __attribute_const__ __u64 ___arch__swab64(__u64 x)
 {
-	__asm__("bswapq %0" : "=r" (x) : "0" (x));
-	return x;
+    __asm__("bswapq %0" : "=r" (x) : "0" (x));
+    return x;
 }
 
 static __inline__ __attribute_const__ __u32 ___arch__swab32(__u32 x)
 {
-	__asm__("bswapl %0" : "=r" (x) : "0" (x));
-	return x;
+    __asm__("bswapl %0" : "=r" (x) : "0" (x));
+    return x;
 }
 
 /* Do not define swab16.  Gcc is smart enought to recognize "C" version and

@@ -20,11 +20,11 @@
 /*----------------------------------------------------------------------------
  * Notes:
  * ------
- * 1. All structures defined in this file are byte-alined.  
+ * 1. All structures defined in this file are byte-alined.
  *
  *	Compiler	Platform
  *	--------	--------
- *	GNU C		Linux		
+ *	GNU C		Linux
  */
 
 #ifndef	PACKED
@@ -47,44 +47,49 @@
 /*----------------------------------------------------------------------------
  * PPP Command Block.
  */
-typedef struct ppp_cmd{
-	unsigned char  command	PACKED;	/* command code */
-	unsigned short length	PACKED;	/* length of data buffer */
-	unsigned char  result	PACKED;	/* return code */
-	unsigned char  rsrv[11]	PACKED;	/* reserved for future use */
+typedef struct ppp_cmd
+{
+    unsigned char  command	PACKED;	/* command code */
+    unsigned short length	PACKED;	/* length of data buffer */
+    unsigned char  result	PACKED;	/* return code */
+    unsigned char  rsrv[11]	PACKED;	/* reserved for future use */
 } ppp_cmd_t;
 
-typedef struct cblock{
-	unsigned char  opp_flag	PACKED;
-	unsigned char  command	PACKED;	/* command code */
-	unsigned short length	PACKED;	/* length of data buffer */
-	unsigned char  result	PACKED;	/* return code */
-	unsigned char  rsrv[11]	PACKED;	/* reserved for future use */
+typedef struct cblock
+{
+    unsigned char  opp_flag	PACKED;
+    unsigned char  command	PACKED;	/* command code */
+    unsigned short length	PACKED;	/* length of data buffer */
+    unsigned char  result	PACKED;	/* return code */
+    unsigned char  rsrv[11]	PACKED;	/* reserved for future use */
 } cblock_t;
 
-typedef struct ppp_udp_pkt{
-	ip_pkt_t 	ip_pkt	PACKED;
-	udp_pkt_t	udp_pkt	PACKED;
-	wp_mgmt_t	wp_mgmt PACKED;
-	cblock_t	cblock  PACKED;
-	unsigned char   data[MAX_LGTH_UDP_MGNT_PKT] PACKED;
-} ppp_udp_pkt_t;	
+typedef struct ppp_udp_pkt
+{
+    ip_pkt_t 	ip_pkt	PACKED;
+    udp_pkt_t	udp_pkt	PACKED;
+    wp_mgmt_t	wp_mgmt PACKED;
+    cblock_t	cblock  PACKED;
+    unsigned char   data[MAX_LGTH_UDP_MGNT_PKT] PACKED;
+} ppp_udp_pkt_t;
 
-typedef struct {
-	unsigned char	status		PACKED;
-	unsigned char	data_avail	PACKED;
-	unsigned short	real_length	PACKED;
-	unsigned short	time_stamp	PACKED;
-	unsigned char	data[1]		PACKED;
+typedef struct
+{
+    unsigned char	status		PACKED;
+    unsigned char	data_avail	PACKED;
+    unsigned short	real_length	PACKED;
+    unsigned short	time_stamp	PACKED;
+    unsigned char	data[1]		PACKED;
 } trace_pkt_t;
 
 
-typedef struct {
-	unsigned char 	opp_flag	PACKED;
-	unsigned char	trace_type	PACKED;
-	unsigned short 	trace_length	PACKED;
-	unsigned short 	trace_data_ptr	PACKED;
-	unsigned short  trace_time_stamp PACKED;
+typedef struct
+{
+    unsigned char 	opp_flag	PACKED;
+    unsigned char	trace_type	PACKED;
+    unsigned short 	trace_length	PACKED;
+    unsigned short 	trace_data_ptr	PACKED;
+    unsigned short  trace_time_stamp PACKED;
 } trace_element_t;
 
 /* 'command' field defines */
@@ -132,9 +137,9 @@ typedef struct {
  */
 typedef struct ppp_mbox
 {
-	unsigned char flag	PACKED;	/* 00h: command execution flag */
-	ppp_cmd_t     cmd	PACKED; /* 01h: command block */
-	unsigned char data[1]	PACKED;	/* 10h: variable length data buffer */
+    unsigned char flag	PACKED;	/* 00h: command execution flag */
+    ppp_cmd_t     cmd	PACKED; /* 01h: command block */
+    unsigned char data[1]	PACKED;	/* 10h: variable length data buffer */
 } ppp_mbox_t;
 
 /*----------------------------------------------------------------------------
@@ -144,17 +149,17 @@ typedef struct ppp_mbox
  */
 typedef struct	ppp_flags
 {
-	unsigned char iflag		PACKED;	/* 00: interrupt flag */
-	unsigned char imask		PACKED;	/* 01: interrupt mask */
-	unsigned char resrv		PACKED;
-	unsigned char mstatus		PACKED;	/* 03: modem status */
-	unsigned char lcp_state		PACKED; /* 04: LCP state */
-	unsigned char ppp_phase		PACKED;	/* 05: PPP phase */
-	unsigned char ip_state		PACKED; /* 06: IPCP state */
-	unsigned char ipx_state		PACKED; /* 07: IPXCP state */
-	unsigned char pap_state		PACKED; /* 08: PAP state */
-	unsigned char chap_state	PACKED; /* 09: CHAP state */
-	unsigned short disc_cause	PACKED;	/* 0A: disconnection cause */
+    unsigned char iflag		PACKED;	/* 00: interrupt flag */
+    unsigned char imask		PACKED;	/* 01: interrupt mask */
+    unsigned char resrv		PACKED;
+    unsigned char mstatus		PACKED;	/* 03: modem status */
+    unsigned char lcp_state		PACKED; /* 04: LCP state */
+    unsigned char ppp_phase		PACKED;	/* 05: PPP phase */
+    unsigned char ip_state		PACKED; /* 06: IPCP state */
+    unsigned char ipx_state		PACKED; /* 07: IPXCP state */
+    unsigned char pap_state		PACKED; /* 08: PAP state */
+    unsigned char chap_state	PACKED; /* 09: CHAP state */
+    unsigned short disc_cause	PACKED;	/* 0A: disconnection cause */
 } ppp_flags_t;
 
 /* 'iflag' defines */
@@ -185,13 +190,13 @@ typedef struct	ppp_flags
 #define NON_STD_ADPTR_FREQ              0x10
 #define INTERFACE_LEVEL_RS232           0x20
 #define AUTO_LINK_RECOVERY              0x100
-#define DONT_TERMINATE_LNK_MAX_CONFIG   0x200                    
+#define DONT_TERMINATE_LNK_MAX_CONFIG   0x200
 
 /* 'authentication options' defines */
 #define NO_AUTHENTICATION	0x00
 #define INBOUND_AUTH		0x80
 #define PAP_AUTH		0x01
-#define CHAP_AUTH		0x02		
+#define CHAP_AUTH		0x02
 
 /* 'ip options' defines */
 #define L_AND_R_IP_NO_ASSIG	0x00
@@ -213,16 +218,16 @@ typedef struct	ppp_flags
  */
 typedef struct	ppp508_buf_info
 {
-	unsigned short txb_num	PACKED;	/* 00: number of transmit buffers */
-	unsigned long  txb_ptr	PACKED;	/* 02: pointer to the buffer ctl. */
-	unsigned long  txb_nxt  PACKED;
-	unsigned char  rsrv1[22] PACKED;
-	unsigned short rxb_num	PACKED;	/* 20: number of receive buffers */
-	unsigned long  rxb_ptr	PACKED;	/* 22: pointer to the buffer ctl. */
-	unsigned long  rxb1_ptr	PACKED;	/* 26: pointer to the first buf.ctl. */
-	unsigned long  rxb_base	PACKED;	/* 2A: pointer to the buffer base */
-	unsigned char  rsrv2[2]	PACKED;
-	unsigned long  rxb_end	PACKED;	/* 30: pointer to the buffer end */
+    unsigned short txb_num	PACKED;	/* 00: number of transmit buffers */
+    unsigned long  txb_ptr	PACKED;	/* 02: pointer to the buffer ctl. */
+    unsigned long  txb_nxt  PACKED;
+    unsigned char  rsrv1[22] PACKED;
+    unsigned short rxb_num	PACKED;	/* 20: number of receive buffers */
+    unsigned long  rxb_ptr	PACKED;	/* 22: pointer to the buffer ctl. */
+    unsigned long  rxb1_ptr	PACKED;	/* 26: pointer to the first buf.ctl. */
+    unsigned long  rxb_base	PACKED;	/* 2A: pointer to the buffer base */
+    unsigned char  rsrv2[2]	PACKED;
+    unsigned long  rxb_end	PACKED;	/* 30: pointer to the buffer end */
 } ppp508_buf_info_t;
 
 /*----------------------------------------------------------------------------
@@ -230,17 +235,17 @@ typedef struct	ppp508_buf_info
  */
 typedef struct	ppp_buf_ctl
 {
-	unsigned char  flag		PACKED;	/* 00: 'buffer ready' flag */
-	unsigned short length		PACKED;	/* 01: length of data */
-	unsigned char  reserved1[1]	PACKED;	/* 03: */
-	unsigned char  proto		PACKED;	/* 04: protocol */
-	unsigned short timestamp	PACKED;	/* 05: time stamp (Rx only) */
-	unsigned char  reserved2[5]	PACKED;	/* 07: */
-	union
-	{
-		unsigned short o_p[2];	/* 1C: buffer offset & page (S502) */
-		unsigned long  ptr;	/* 1C: buffer pointer (S508) */
-	} buf				PACKED;
+    unsigned char  flag		PACKED;	/* 00: 'buffer ready' flag */
+    unsigned short length		PACKED;	/* 01: length of data */
+    unsigned char  reserved1[1]	PACKED;	/* 03: */
+    unsigned char  proto		PACKED;	/* 04: protocol */
+    unsigned short timestamp	PACKED;	/* 05: time stamp (Rx only) */
+    unsigned char  reserved2[5]	PACKED;	/* 07: */
+    union
+    {
+        unsigned short o_p[2];	/* 1C: buffer offset & page (S502) */
+        unsigned long  ptr;	/* 1C: buffer pointer (S508) */
+    } buf				PACKED;
 } ppp_buf_ctl_t;
 
 /*----------------------------------------------------------------------------
@@ -248,50 +253,50 @@ typedef struct	ppp_buf_ctl
  */
 typedef struct	ppp508_conf
 {
-	unsigned long  line_speed	PACKED;	/* 00: baud rate, bps */
-	unsigned short txbuf_percent	PACKED;	/* 04: % of Tx buffer */
-	unsigned short conf_flags	PACKED;	/* 06: configuration bits */
-	unsigned short mtu_local	PACKED;	/* 08: local MTU */
-	unsigned short mtu_remote	PACKED;	/* 0A: remote MTU */
-	unsigned short restart_tmr	PACKED;	/* 0C: restart timer */
-	unsigned short auth_rsrt_tmr	PACKED;	/* 0E: authentication timer */
-	unsigned short auth_wait_tmr	PACKED;	/* 10: authentication timer */
-	unsigned short mdm_fail_tmr	PACKED;	/* 12: modem failure timer */
-	unsigned short dtr_drop_tmr	PACKED;	/* 14: DTR drop timer */
-	unsigned short connect_tmout	PACKED;	/* 16: connection timeout */
-	unsigned short conf_retry	PACKED;	/* 18: max. retry */
-	unsigned short term_retry	PACKED;	/* 1A: max. retry */
-	unsigned short fail_retry	PACKED;	/* 1C: max. retry */
-	unsigned short auth_retry	PACKED;	/* 1E: max. retry */
-	unsigned char  auth_options	PACKED;	/* 20: authentication opt. */
-	unsigned char  ip_options	PACKED;	/* 21: IP options */
-	unsigned long  ip_local		PACKED;	/* 22: local IP address */
-	unsigned long  ip_remote	PACKED;	/* 26: remote IP address */
-	unsigned char  ipx_options	PACKED;	/* 2A: IPX options */
-	unsigned char  ipx_netno[4]	PACKED;	/* 2B: IPX net number */
-	unsigned char  ipx_local[6]	PACKED;	/* 2F: local IPX node number*/
-	unsigned char  ipx_remote[6]	PACKED;	/* 35: remote IPX node num.*/
-	unsigned char  ipx_router[48]	PACKED;	/* 3B: IPX router name*/
-	unsigned long  alt_cpu_clock	PACKED;	/* 6B:  */
+    unsigned long  line_speed	PACKED;	/* 00: baud rate, bps */
+    unsigned short txbuf_percent	PACKED;	/* 04: % of Tx buffer */
+    unsigned short conf_flags	PACKED;	/* 06: configuration bits */
+    unsigned short mtu_local	PACKED;	/* 08: local MTU */
+    unsigned short mtu_remote	PACKED;	/* 0A: remote MTU */
+    unsigned short restart_tmr	PACKED;	/* 0C: restart timer */
+    unsigned short auth_rsrt_tmr	PACKED;	/* 0E: authentication timer */
+    unsigned short auth_wait_tmr	PACKED;	/* 10: authentication timer */
+    unsigned short mdm_fail_tmr	PACKED;	/* 12: modem failure timer */
+    unsigned short dtr_drop_tmr	PACKED;	/* 14: DTR drop timer */
+    unsigned short connect_tmout	PACKED;	/* 16: connection timeout */
+    unsigned short conf_retry	PACKED;	/* 18: max. retry */
+    unsigned short term_retry	PACKED;	/* 1A: max. retry */
+    unsigned short fail_retry	PACKED;	/* 1C: max. retry */
+    unsigned short auth_retry	PACKED;	/* 1E: max. retry */
+    unsigned char  auth_options	PACKED;	/* 20: authentication opt. */
+    unsigned char  ip_options	PACKED;	/* 21: IP options */
+    unsigned long  ip_local		PACKED;	/* 22: local IP address */
+    unsigned long  ip_remote	PACKED;	/* 26: remote IP address */
+    unsigned char  ipx_options	PACKED;	/* 2A: IPX options */
+    unsigned char  ipx_netno[4]	PACKED;	/* 2B: IPX net number */
+    unsigned char  ipx_local[6]	PACKED;	/* 2F: local IPX node number*/
+    unsigned char  ipx_remote[6]	PACKED;	/* 35: remote IPX node num.*/
+    unsigned char  ipx_router[48]	PACKED;	/* 3B: IPX router name*/
+    unsigned long  alt_cpu_clock	PACKED;	/* 6B:  */
 } ppp508_conf_t;
 
 /*----------------------------------------------------------------------------
- * S508 Adapter Read Connection Information Block 
+ * S508 Adapter Read Connection Information Block
  *    Returned by the PPP_GET_CONNECTION_INFO command
  */
 typedef struct	ppp508_connect_info
 {
-	unsigned short 	mru		PACKED;	/* 00-01 Remote Max Rec' Unit */
-	unsigned char  	ip_options 	PACKED; /* 02: Negotiated ip options  */
-	unsigned long  	ip_local	PACKED;	/* 03-06: local IP address    */
-	unsigned long  	ip_remote	PACKED;	/* 07-0A: remote IP address   */
-	unsigned char	ipx_options	PACKED; /* 0B: Negotiated ipx options */
-	unsigned char  	ipx_netno[4]	PACKED;	/* 0C-0F: IPX net number      */
-	unsigned char  	ipx_local[6]	PACKED;	/* 10-1F: local IPX node #    */
-	unsigned char  	ipx_remote[6]	PACKED;	/* 16-1B: remote IPX node #   */
-	unsigned char  	ipx_router[48]	PACKED;	/* 1C-4B: IPX router name     */
-	unsigned char	auth_status	PACKED; /* 4C: Authentication Status  */
-	unsigned char 	inbd_auth_peerID[1] PACKED; /* 4D: variable length inbound authenticated peer ID */
+    unsigned short 	mru		PACKED;	/* 00-01 Remote Max Rec' Unit */
+    unsigned char  	ip_options 	PACKED; /* 02: Negotiated ip options  */
+    unsigned long  	ip_local	PACKED;	/* 03-06: local IP address    */
+    unsigned long  	ip_remote	PACKED;	/* 07-0A: remote IP address   */
+    unsigned char	ipx_options	PACKED; /* 0B: Negotiated ipx options */
+    unsigned char  	ipx_netno[4]	PACKED;	/* 0C-0F: IPX net number      */
+    unsigned char  	ipx_local[6]	PACKED;	/* 10-1F: local IPX node #    */
+    unsigned char  	ipx_remote[6]	PACKED;	/* 16-1B: remote IPX node #   */
+    unsigned char  	ipx_router[48]	PACKED;	/* 1C-4B: IPX router name     */
+    unsigned char	auth_status	PACKED; /* 4C: Authentication Status  */
+    unsigned char 	inbd_auth_peerID[1] PACKED; /* 4D: variable length inbound authenticated peer ID */
 } ppp508_connect_info_t;
 
 /* 'line_speed' field */
@@ -336,10 +341,10 @@ typedef struct	ppp508_connect_info
  */
 typedef struct	ppp508_get_conf
 {
-	unsigned long  bps	PACKED;	/* 00: baud rate, bps */
-	ppp508_conf_t  conf	PACKED;	/* 04: requested config. */
-	unsigned short txb_num	PACKED;	/* 6F: number of Tx buffers */
-	unsigned short rxb_num	PACKED;	/* 71: number of Rx buffers */
+    unsigned long  bps	PACKED;	/* 00: baud rate, bps */
+    ppp508_conf_t  conf	PACKED;	/* 04: requested config. */
+    unsigned short txb_num	PACKED;	/* 6F: number of Tx buffers */
+    unsigned short rxb_num	PACKED;	/* 71: number of Rx buffers */
 } ppp508_get_conf_t;
 
 /*----------------------------------------------------------------------------
@@ -347,13 +352,13 @@ typedef struct	ppp508_get_conf
  */
 typedef struct ppp508_stats
 {
-	unsigned short reserved1	PACKED;	/* 00: */
-	unsigned short rx_bad_len	PACKED;	/* 02: */
-	unsigned short reserved2	PACKED;	/* 04: */
-	unsigned long  tx_frames	PACKED;	/* 06: */
-	unsigned long  tx_bytes	PACKED;	/* 0A: */
-	unsigned long  rx_frames	PACKED;	/* 0E: */
-	unsigned long  rx_bytes	PACKED;	/* 12: */
+    unsigned short reserved1	PACKED;	/* 00: */
+    unsigned short rx_bad_len	PACKED;	/* 02: */
+    unsigned short reserved2	PACKED;	/* 04: */
+    unsigned long  tx_frames	PACKED;	/* 06: */
+    unsigned long  tx_bytes	PACKED;	/* 0A: */
+    unsigned long  rx_frames	PACKED;	/* 0E: */
+    unsigned long  rx_bytes	PACKED;	/* 12: */
 } ppp508_stats_t;
 
 /*----------------------------------------------------------------------------
@@ -361,16 +366,16 @@ typedef struct ppp508_stats
  */
 typedef struct	ppp_err_stats
 {
-	unsigned char	 rx_overrun	PACKED;	/* 00: Rx overrun errors */
-	unsigned char	 rx_bad_crc	PACKED;	/* 01: Rx CRC errors */
-	unsigned char	 rx_abort	PACKED;	/* 02: Rx aborted frames */
-	unsigned char	 rx_lost	PACKED;	/* 03: Rx frames lost */
-	unsigned char	 tx_abort	PACKED;	/* 04: Tx aborted frames */
-	unsigned char	 tx_underrun	PACKED;	/* 05: Tx underrun errors */
-	unsigned char	 tx_missed_intr	PACKED;	/* 06: Tx underruns missed */
-	unsigned char	 reserved	PACKED;	/* 07: Tx underruns missed */
-	unsigned char	 dcd_trans	PACKED;	/* 08: DCD transitions */
-	unsigned char	 cts_trans	PACKED;	/* 09: CTS transitions */
+    unsigned char	 rx_overrun	PACKED;	/* 00: Rx overrun errors */
+    unsigned char	 rx_bad_crc	PACKED;	/* 01: Rx CRC errors */
+    unsigned char	 rx_abort	PACKED;	/* 02: Rx aborted frames */
+    unsigned char	 rx_lost	PACKED;	/* 03: Rx frames lost */
+    unsigned char	 tx_abort	PACKED;	/* 04: Tx aborted frames */
+    unsigned char	 tx_underrun	PACKED;	/* 05: Tx underrun errors */
+    unsigned char	 tx_missed_intr	PACKED;	/* 06: Tx underruns missed */
+    unsigned char	 reserved	PACKED;	/* 07: Tx underruns missed */
+    unsigned char	 dcd_trans	PACKED;	/* 08: DCD transitions */
+    unsigned char	 cts_trans	PACKED;	/* 09: CTS transitions */
 } ppp_err_stats_t;
 
 /*----------------------------------------------------------------------------
@@ -378,25 +383,25 @@ typedef struct	ppp_err_stats
  */
 typedef struct	ppp_pkt_stats
 {
-	unsigned short rx_bad_header	PACKED;	/* 00: */
-	unsigned short rx_prot_unknwn	PACKED;	/* 02: */
-	unsigned short rx_too_large	PACKED;	/* 04: */
-	unsigned short rx_lcp		PACKED;	/* 06: */
-	unsigned short tx_lcp		PACKED;	/* 08: */
-	unsigned short rx_ipcp		PACKED;	/* 0A: */
-	unsigned short tx_ipcp		PACKED;	/* 0C: */
-	unsigned short rx_ipxcp		PACKED;	/* 0E: */
-	unsigned short tx_ipxcp		PACKED;	/* 10: */
-	unsigned short rx_pap		PACKED;	/* 12: */
-	unsigned short tx_pap		PACKED;	/* 14: */
-	unsigned short rx_chap		PACKED;	/* 16: */
-	unsigned short tx_chap		PACKED;	/* 18: */
-	unsigned short rx_lqr		PACKED;	/* 1A: */
-	unsigned short tx_lqr		PACKED;	/* 1C: */
-	unsigned short rx_ip		PACKED;	/* 1E: */
-	unsigned short tx_ip		PACKED;	/* 20: */
-	unsigned short rx_ipx		PACKED;	/* 22: */
-	unsigned short tx_ipx		PACKED;	/* 24: */
+    unsigned short rx_bad_header	PACKED;	/* 00: */
+    unsigned short rx_prot_unknwn	PACKED;	/* 02: */
+    unsigned short rx_too_large	PACKED;	/* 04: */
+    unsigned short rx_lcp		PACKED;	/* 06: */
+    unsigned short tx_lcp		PACKED;	/* 08: */
+    unsigned short rx_ipcp		PACKED;	/* 0A: */
+    unsigned short tx_ipcp		PACKED;	/* 0C: */
+    unsigned short rx_ipxcp		PACKED;	/* 0E: */
+    unsigned short tx_ipxcp		PACKED;	/* 10: */
+    unsigned short rx_pap		PACKED;	/* 12: */
+    unsigned short tx_pap		PACKED;	/* 14: */
+    unsigned short rx_chap		PACKED;	/* 16: */
+    unsigned short tx_chap		PACKED;	/* 18: */
+    unsigned short rx_lqr		PACKED;	/* 1A: */
+    unsigned short tx_lqr		PACKED;	/* 1C: */
+    unsigned short rx_ip		PACKED;	/* 1E: */
+    unsigned short tx_ip		PACKED;	/* 20: */
+    unsigned short rx_ipx		PACKED;	/* 22: */
+    unsigned short tx_ipx		PACKED;	/* 24: */
 } ppp_pkt_stats_t;
 
 /*----------------------------------------------------------------------------
@@ -404,33 +409,33 @@ typedef struct	ppp_pkt_stats
  */
 typedef struct	ppp_lcp_stats
 {
-	unsigned short rx_unknown	PACKED;	/* 00: unknown LCP type */
-	unsigned short rx_conf_rqst	PACKED;	/* 02: Configure-Request */
-	unsigned short rx_conf_ack	PACKED;	/* 04: Configure-Ack */
-	unsigned short rx_conf_nak	PACKED;	/* 06: Configure-Nak */
-	unsigned short rx_conf_rej	PACKED;	/* 08: Configure-Reject */
-	unsigned short rx_term_rqst	PACKED;	/* 0A: Terminate-Request */
-	unsigned short rx_term_ack	PACKED;	/* 0C: Terminate-Ack */
-	unsigned short rx_code_rej	PACKED;	/* 0E: Code-Reject */
-	unsigned short rx_proto_rej	PACKED;	/* 10: Protocol-Reject */
-	unsigned short rx_echo_rqst	PACKED;	/* 12: Echo-Request */
-	unsigned short rx_echo_reply	PACKED;	/* 14: Echo-Reply */
-	unsigned short rx_disc_rqst	PACKED;	/* 16: Discard-Request */
-	unsigned short tx_conf_rqst	PACKED;	/* 18: Configure-Request */
-	unsigned short tx_conf_ack	PACKED;	/* 1A: Configure-Ack */
-	unsigned short tx_conf_nak	PACKED;	/* 1C: Configure-Nak */
-	unsigned short tx_conf_rej	PACKED;	/* 1E: Configure-Reject */
-	unsigned short tx_term_rqst	PACKED;	/* 20: Terminate-Request */
-	unsigned short tx_term_ack	PACKED;	/* 22: Terminate-Ack */
-	unsigned short tx_code_rej	PACKED;	/* 24: Code-Reject */
-	unsigned short tx_proto_rej	PACKED;	/* 26: Protocol-Reject */
-	unsigned short tx_echo_rqst	PACKED;	/* 28: Echo-Request */
-	unsigned short tx_echo_reply	PACKED;	/* 2A: Echo-Reply */
-	unsigned short tx_disc_rqst	PACKED;	/* 2E: Discard-Request */
-	unsigned short rx_too_large	PACKED;	/* 30: packets too large */
-	unsigned short rx_ack_inval	PACKED;	/* 32: invalid Conf-Ack */
-	unsigned short rx_rej_inval	PACKED;	/* 34: invalid Conf-Reject */
-	unsigned short rx_rej_badid	PACKED;	/* 36: Conf-Reject w/bad ID */
+    unsigned short rx_unknown	PACKED;	/* 00: unknown LCP type */
+    unsigned short rx_conf_rqst	PACKED;	/* 02: Configure-Request */
+    unsigned short rx_conf_ack	PACKED;	/* 04: Configure-Ack */
+    unsigned short rx_conf_nak	PACKED;	/* 06: Configure-Nak */
+    unsigned short rx_conf_rej	PACKED;	/* 08: Configure-Reject */
+    unsigned short rx_term_rqst	PACKED;	/* 0A: Terminate-Request */
+    unsigned short rx_term_ack	PACKED;	/* 0C: Terminate-Ack */
+    unsigned short rx_code_rej	PACKED;	/* 0E: Code-Reject */
+    unsigned short rx_proto_rej	PACKED;	/* 10: Protocol-Reject */
+    unsigned short rx_echo_rqst	PACKED;	/* 12: Echo-Request */
+    unsigned short rx_echo_reply	PACKED;	/* 14: Echo-Reply */
+    unsigned short rx_disc_rqst	PACKED;	/* 16: Discard-Request */
+    unsigned short tx_conf_rqst	PACKED;	/* 18: Configure-Request */
+    unsigned short tx_conf_ack	PACKED;	/* 1A: Configure-Ack */
+    unsigned short tx_conf_nak	PACKED;	/* 1C: Configure-Nak */
+    unsigned short tx_conf_rej	PACKED;	/* 1E: Configure-Reject */
+    unsigned short tx_term_rqst	PACKED;	/* 20: Terminate-Request */
+    unsigned short tx_term_ack	PACKED;	/* 22: Terminate-Ack */
+    unsigned short tx_code_rej	PACKED;	/* 24: Code-Reject */
+    unsigned short tx_proto_rej	PACKED;	/* 26: Protocol-Reject */
+    unsigned short tx_echo_rqst	PACKED;	/* 28: Echo-Request */
+    unsigned short tx_echo_reply	PACKED;	/* 2A: Echo-Reply */
+    unsigned short tx_disc_rqst	PACKED;	/* 2E: Discard-Request */
+    unsigned short rx_too_large	PACKED;	/* 30: packets too large */
+    unsigned short rx_ack_inval	PACKED;	/* 32: invalid Conf-Ack */
+    unsigned short rx_rej_inval	PACKED;	/* 34: invalid Conf-Reject */
+    unsigned short rx_rej_badid	PACKED;	/* 36: Conf-Reject w/bad ID */
 } ppp_lcp_stats_t;
 
 /*----------------------------------------------------------------------------
@@ -438,15 +443,15 @@ typedef struct	ppp_lcp_stats
  */
 typedef struct	ppp_lpbk_stats
 {
-	unsigned short conf_magic	PACKED;	/* 00:  */
-	unsigned short loc_echo_rqst	PACKED;	/* 02:  */
-	unsigned short rem_echo_rqst	PACKED;	/* 04:  */
-	unsigned short loc_echo_reply	PACKED;	/* 06:  */
-	unsigned short rem_echo_reply	PACKED;	/* 08:  */
-	unsigned short loc_disc_rqst	PACKED;	/* 0A:  */
-	unsigned short rem_disc_rqst	PACKED;	/* 0C:  */
-	unsigned short echo_tx_collsn	PACKED;	/* 0E:  */
-	unsigned short echo_rx_collsn	PACKED;	/* 10:  */
+    unsigned short conf_magic	PACKED;	/* 00:  */
+    unsigned short loc_echo_rqst	PACKED;	/* 02:  */
+    unsigned short rem_echo_rqst	PACKED;	/* 04:  */
+    unsigned short loc_echo_reply	PACKED;	/* 06:  */
+    unsigned short rem_echo_reply	PACKED;	/* 08:  */
+    unsigned short loc_disc_rqst	PACKED;	/* 0A:  */
+    unsigned short rem_disc_rqst	PACKED;	/* 0C:  */
+    unsigned short echo_tx_collsn	PACKED;	/* 0E:  */
+    unsigned short echo_rx_collsn	PACKED;	/* 10:  */
 } ppp_lpbk_stats_t;
 
 /*----------------------------------------------------------------------------
@@ -455,26 +460,26 @@ typedef struct	ppp_lpbk_stats
  */
 typedef struct	ppp_prot_stats
 {
-	unsigned short rx_unknown	PACKED;	/* 00: unknown type */
-	unsigned short rx_conf_rqst	PACKED;	/* 02: Configure-Request */
-	unsigned short rx_conf_ack	PACKED;	/* 04: Configure-Ack */
-	unsigned short rx_conf_nak	PACKED;	/* 06: Configure-Nak */
-	unsigned short rx_conf_rej	PACKED;	/* 08: Configure-Reject */
-	unsigned short rx_term_rqst	PACKED;	/* 0A: Terminate-Request */
-	unsigned short rx_term_ack	PACKED;	/* 0C: Terminate-Ack */
-	unsigned short rx_code_rej	PACKED;	/* 0E: Code-Reject */
-	unsigned short reserved		PACKED;	/* 10: */
-	unsigned short tx_conf_rqst	PACKED;	/* 12: Configure-Request */
-	unsigned short tx_conf_ack	PACKED;	/* 14: Configure-Ack */
-	unsigned short tx_conf_nak	PACKED;	/* 16: Configure-Nak */
-	unsigned short tx_conf_rej	PACKED;	/* 18: Configure-Reject */
-	unsigned short tx_term_rqst	PACKED;	/* 1A: Terminate-Request */
-	unsigned short tx_term_ack	PACKED;	/* 1C: Terminate-Ack */
-	unsigned short tx_code_rej	PACKED;	/* 1E: Code-Reject */
-	unsigned short rx_too_large	PACKED;	/* 20: packets too large */
-	unsigned short rx_ack_inval	PACKED;	/* 22: invalid Conf-Ack */
-	unsigned short rx_rej_inval	PACKED;	/* 24: invalid Conf-Reject */
-	unsigned short rx_rej_badid	PACKED;	/* 26: Conf-Reject w/bad ID */
+    unsigned short rx_unknown	PACKED;	/* 00: unknown type */
+    unsigned short rx_conf_rqst	PACKED;	/* 02: Configure-Request */
+    unsigned short rx_conf_ack	PACKED;	/* 04: Configure-Ack */
+    unsigned short rx_conf_nak	PACKED;	/* 06: Configure-Nak */
+    unsigned short rx_conf_rej	PACKED;	/* 08: Configure-Reject */
+    unsigned short rx_term_rqst	PACKED;	/* 0A: Terminate-Request */
+    unsigned short rx_term_ack	PACKED;	/* 0C: Terminate-Ack */
+    unsigned short rx_code_rej	PACKED;	/* 0E: Code-Reject */
+    unsigned short reserved		PACKED;	/* 10: */
+    unsigned short tx_conf_rqst	PACKED;	/* 12: Configure-Request */
+    unsigned short tx_conf_ack	PACKED;	/* 14: Configure-Ack */
+    unsigned short tx_conf_nak	PACKED;	/* 16: Configure-Nak */
+    unsigned short tx_conf_rej	PACKED;	/* 18: Configure-Reject */
+    unsigned short tx_term_rqst	PACKED;	/* 1A: Terminate-Request */
+    unsigned short tx_term_ack	PACKED;	/* 1C: Terminate-Ack */
+    unsigned short tx_code_rej	PACKED;	/* 1E: Code-Reject */
+    unsigned short rx_too_large	PACKED;	/* 20: packets too large */
+    unsigned short rx_ack_inval	PACKED;	/* 22: invalid Conf-Ack */
+    unsigned short rx_rej_inval	PACKED;	/* 24: invalid Conf-Reject */
+    unsigned short rx_rej_badid	PACKED;	/* 26: Conf-Reject w/bad ID */
 } ppp_prot_stats_t;
 
 /*----------------------------------------------------------------------------
@@ -482,17 +487,17 @@ typedef struct	ppp_prot_stats
  */
 typedef struct	ppp_pap_stats
 {
-	unsigned short rx_unknown	PACKED;	/* 00: unknown type */
-	unsigned short rx_auth_rqst	PACKED;	/* 02: Authenticate-Request */
-	unsigned short rx_auth_ack	PACKED;	/* 04: Authenticate-Ack */
-	unsigned short rx_auth_nak	PACKED;	/* 06: Authenticate-Nak */
-	unsigned short reserved		PACKED;	/* 08: */
-	unsigned short tx_auth_rqst	PACKED;	/* 0A: Authenticate-Request */
-	unsigned short tx_auth_ack	PACKED;	/* 0C: Authenticate-Ack */
-	unsigned short tx_auth_nak	PACKED;	/* 0E: Authenticate-Nak */
-	unsigned short rx_too_large	PACKED;	/* 10: packets too large */
-	unsigned short rx_bad_peerid	PACKED;	/* 12: invalid peer ID */
-	unsigned short rx_bad_passwd	PACKED;	/* 14: invalid password */
+    unsigned short rx_unknown	PACKED;	/* 00: unknown type */
+    unsigned short rx_auth_rqst	PACKED;	/* 02: Authenticate-Request */
+    unsigned short rx_auth_ack	PACKED;	/* 04: Authenticate-Ack */
+    unsigned short rx_auth_nak	PACKED;	/* 06: Authenticate-Nak */
+    unsigned short reserved		PACKED;	/* 08: */
+    unsigned short tx_auth_rqst	PACKED;	/* 0A: Authenticate-Request */
+    unsigned short tx_auth_ack	PACKED;	/* 0C: Authenticate-Ack */
+    unsigned short tx_auth_nak	PACKED;	/* 0E: Authenticate-Nak */
+    unsigned short rx_too_large	PACKED;	/* 10: packets too large */
+    unsigned short rx_bad_peerid	PACKED;	/* 12: invalid peer ID */
+    unsigned short rx_bad_passwd	PACKED;	/* 14: invalid password */
 } ppp_pap_stats_t;
 
 /*----------------------------------------------------------------------------
@@ -500,21 +505,21 @@ typedef struct	ppp_pap_stats
  */
 typedef struct	ppp_chap_stats
 {
-	unsigned short rx_unknown	PACKED;	/* 00: unknown type */
-	unsigned short rx_challenge	PACKED;	/* 02: Authenticate-Request */
-	unsigned short rx_response	PACKED;	/* 04: Authenticate-Ack */
-	unsigned short rx_success	PACKED;	/* 06: Authenticate-Nak */
-	unsigned short rx_failure	PACKED;	/* 08: Authenticate-Nak */
-	unsigned short reserved		PACKED;	/* 0A: */
-	unsigned short tx_challenge	PACKED;	/* 0C: Authenticate-Request */
-	unsigned short tx_response	PACKED;	/* 0E: Authenticate-Ack */
-	unsigned short tx_success	PACKED;	/* 10: Authenticate-Nak */
-	unsigned short tx_failure	PACKED;	/* 12: Authenticate-Nak */
-	unsigned short rx_too_large	PACKED;	/* 14: packets too large */
-	unsigned short rx_bad_peerid	PACKED;	/* 16: invalid peer ID */
-	unsigned short rx_bad_passwd	PACKED;	/* 18: invalid password */
-	unsigned short rx_bad_md5	PACKED;	/* 1A: invalid MD5 format */
-	unsigned short rx_bad_resp	PACKED;	/* 1C: invalid response */
+    unsigned short rx_unknown	PACKED;	/* 00: unknown type */
+    unsigned short rx_challenge	PACKED;	/* 02: Authenticate-Request */
+    unsigned short rx_response	PACKED;	/* 04: Authenticate-Ack */
+    unsigned short rx_success	PACKED;	/* 06: Authenticate-Nak */
+    unsigned short rx_failure	PACKED;	/* 08: Authenticate-Nak */
+    unsigned short reserved		PACKED;	/* 0A: */
+    unsigned short tx_challenge	PACKED;	/* 0C: Authenticate-Request */
+    unsigned short tx_response	PACKED;	/* 0E: Authenticate-Ack */
+    unsigned short tx_success	PACKED;	/* 10: Authenticate-Nak */
+    unsigned short tx_failure	PACKED;	/* 12: Authenticate-Nak */
+    unsigned short rx_too_large	PACKED;	/* 14: packets too large */
+    unsigned short rx_bad_peerid	PACKED;	/* 16: invalid peer ID */
+    unsigned short rx_bad_passwd	PACKED;	/* 18: invalid password */
+    unsigned short rx_bad_md5	PACKED;	/* 1A: invalid MD5 format */
+    unsigned short rx_bad_resp	PACKED;	/* 1C: invalid response */
 } ppp_chap_stats_t;
 
 /*----------------------------------------------------------------------------
@@ -522,26 +527,27 @@ typedef struct	ppp_chap_stats
  */
 typedef struct	ppp_conn_info
 {
-	unsigned short remote_mru	PACKED;	/* 00:  */
-	unsigned char  ip_options	PACKED;	/* 02:  */
-	unsigned char  ip_local[4]	PACKED;	/* 03:  */
-	unsigned char  ip_remote[4]	PACKED;	/* 07:  */
-	unsigned char  ipx_options	PACKED;	/* 0B:  */
-	unsigned char  ipx_network[4]	PACKED;	/* 0C:  */
-	unsigned char  ipx_local[6]	PACKED;	/* 10:  */
-	unsigned char  ipx_remote[6]	PACKED;	/* 16:  */
-	unsigned char  ipx_router[48]	PACKED;	/* 1C:  */
-	unsigned char  auth_status	PACKED;	/* 4C:  */
-	unsigned char  peer_id[0]	PACKED;	/* 4D:  */
+    unsigned short remote_mru	PACKED;	/* 00:  */
+    unsigned char  ip_options	PACKED;	/* 02:  */
+    unsigned char  ip_local[4]	PACKED;	/* 03:  */
+    unsigned char  ip_remote[4]	PACKED;	/* 07:  */
+    unsigned char  ipx_options	PACKED;	/* 0B:  */
+    unsigned char  ipx_network[4]	PACKED;	/* 0C:  */
+    unsigned char  ipx_local[6]	PACKED;	/* 10:  */
+    unsigned char  ipx_remote[6]	PACKED;	/* 16:  */
+    unsigned char  ipx_router[48]	PACKED;	/* 1C:  */
+    unsigned char  auth_status	PACKED;	/* 4C:  */
+    unsigned char  peer_id[0]	PACKED;	/* 4D:  */
 } ppp_conn_info_t;
 
 /* Data structure for SET_TRIGGER_INTR command
  */
 
-typedef struct ppp_intr_info{
-	unsigned char  i_enable		PACKED; /* 0 Interrupt enable bits */
-	unsigned char  irq              PACKED; /* 1 Irq number */
-	unsigned short timer_len        PACKED; /* 2 Timer delay */
+typedef struct ppp_intr_info
+{
+    unsigned char  i_enable		PACKED; /* 0 Interrupt enable bits */
+    unsigned char  irq              PACKED; /* 1 Irq number */
+    unsigned short timer_len        PACKED; /* 2 Timer delay */
 } ppp_intr_info_t;
 
 

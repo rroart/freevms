@@ -3,28 +3,28 @@
 
 struct tc_police
 {
-	__u32			index;
-	int			action;
+    __u32			index;
+    int			action;
 #define TC_POLICE_UNSPEC	(-1)
 #define TC_POLICE_OK		0
 #define TC_POLICE_RECLASSIFY	1
 #define TC_POLICE_SHOT		2
 
-	__u32			limit;
-	__u32			burst;
-	__u32			mtu;
-	struct tc_ratespec	rate;
-	struct tc_ratespec	peakrate;
+    __u32			limit;
+    __u32			burst;
+    __u32			mtu;
+    struct tc_ratespec	rate;
+    struct tc_ratespec	peakrate;
 };
 
 enum
 {
-	TCA_POLICE_UNSPEC,
-	TCA_POLICE_TBF,
-	TCA_POLICE_RATE,
-	TCA_POLICE_PEAKRATE,
-	TCA_POLICE_AVRATE,
-	TCA_POLICE_RESULT
+    TCA_POLICE_UNSPEC,
+    TCA_POLICE_TBF,
+    TCA_POLICE_RATE,
+    TCA_POLICE_PEAKRATE,
+    TCA_POLICE_AVRATE,
+    TCA_POLICE_RESULT
 #define TCA_POLICE_RESULT TCA_POLICE_RESULT
 };
 
@@ -42,39 +42,39 @@ enum
 
 enum
 {
-	TCA_U32_UNSPEC,
-	TCA_U32_CLASSID,
-	TCA_U32_HASH,
-	TCA_U32_LINK,
-	TCA_U32_DIVISOR,
-	TCA_U32_SEL,
-	TCA_U32_POLICE,
+    TCA_U32_UNSPEC,
+    TCA_U32_CLASSID,
+    TCA_U32_HASH,
+    TCA_U32_LINK,
+    TCA_U32_DIVISOR,
+    TCA_U32_SEL,
+    TCA_U32_POLICE,
 };
 
 #define TCA_U32_MAX TCA_U32_POLICE
 
 struct tc_u32_key
 {
-	__u32		mask;
-	__u32		val;
-	int		off;
-	int		offmask;
+    __u32		mask;
+    __u32		val;
+    int		off;
+    int		offmask;
 };
 
 struct tc_u32_sel
 {
-	unsigned char		flags;
-	unsigned char		offshift;
-	unsigned char		nkeys;
+    unsigned char		flags;
+    unsigned char		offshift;
+    unsigned char		nkeys;
 
-	__u16			offmask;
-	__u16			off;
-	short			offoff;
+    __u16			offmask;
+    __u16			off;
+    short			offoff;
 
-	short			hoff;
-	__u32			hmask;
+    short			hoff;
+    __u32			hmask;
 
-	struct tc_u32_key	keys[0];
+    struct tc_u32_key	keys[0];
 };
 
 /* Flags */
@@ -91,42 +91,42 @@ struct tc_u32_sel
 
 enum
 {
-	TCA_RSVP_UNSPEC,
-	TCA_RSVP_CLASSID,
-	TCA_RSVP_DST,
-	TCA_RSVP_SRC,
-	TCA_RSVP_PINFO,
-	TCA_RSVP_POLICE,
+    TCA_RSVP_UNSPEC,
+    TCA_RSVP_CLASSID,
+    TCA_RSVP_DST,
+    TCA_RSVP_SRC,
+    TCA_RSVP_PINFO,
+    TCA_RSVP_POLICE,
 };
 
 #define TCA_RSVP_MAX TCA_RSVP_POLICE
 
 struct tc_rsvp_gpi
 {
-	__u32	key;
-	__u32	mask;
-	int	offset;
+    __u32	key;
+    __u32	mask;
+    int	offset;
 };
 
 struct tc_rsvp_pinfo
 {
-	struct tc_rsvp_gpi dpi;
-	struct tc_rsvp_gpi spi;
-	__u8	protocol;
-	__u8	tunnelid;
-	__u8	tunnelhdr;
+    struct tc_rsvp_gpi dpi;
+    struct tc_rsvp_gpi spi;
+    __u8	protocol;
+    __u8	tunnelid;
+    __u8	tunnelhdr;
 };
 
 /* ROUTE filter */
 
 enum
 {
-	TCA_ROUTE4_UNSPEC,
-	TCA_ROUTE4_CLASSID,
-	TCA_ROUTE4_TO,
-	TCA_ROUTE4_FROM,
-	TCA_ROUTE4_IIF,
-	TCA_ROUTE4_POLICE,
+    TCA_ROUTE4_UNSPEC,
+    TCA_ROUTE4_CLASSID,
+    TCA_ROUTE4_TO,
+    TCA_ROUTE4_FROM,
+    TCA_ROUTE4_IIF,
+    TCA_ROUTE4_POLICE,
 };
 
 #define TCA_ROUTE4_MAX TCA_ROUTE4_POLICE
@@ -136,9 +136,9 @@ enum
 
 enum
 {
-	TCA_FW_UNSPEC,
-	TCA_FW_CLASSID,
-	TCA_FW_POLICE,
+    TCA_FW_UNSPEC,
+    TCA_FW_CLASSID,
+    TCA_FW_POLICE,
 };
 
 #define TCA_FW_MAX TCA_FW_POLICE
@@ -147,13 +147,13 @@ enum
 
 enum
 {
-	TCA_TCINDEX_UNSPEC,
-	TCA_TCINDEX_HASH,
-	TCA_TCINDEX_MASK,
-	TCA_TCINDEX_SHIFT,
-	TCA_TCINDEX_FALL_THROUGH,
-	TCA_TCINDEX_CLASSID,
-	TCA_TCINDEX_POLICE,
+    TCA_TCINDEX_UNSPEC,
+    TCA_TCINDEX_HASH,
+    TCA_TCINDEX_MASK,
+    TCA_TCINDEX_SHIFT,
+    TCA_TCINDEX_FALL_THROUGH,
+    TCA_TCINDEX_CLASSID,
+    TCA_TCINDEX_POLICE,
 };
 
 #define TCA_TCINDEX_MAX        TCA_TCINDEX_POLICE

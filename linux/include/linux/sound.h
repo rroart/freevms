@@ -5,7 +5,7 @@
 
 #define SND_DEV_CTL		0	/* Control port /dev/mixer */
 #define SND_DEV_SEQ		1	/* Sequencer output /dev/sequencer (FM
-						synthesizer and MIDI output) */
+synthesizer and MIDI output) */
 #define SND_DEV_MIDIN		2	/* Raw midi access */
 #define SND_DEV_DSP		3	/* Digitized voice /dev/dsp */
 #define SND_DEV_AUDIO		4	/* Sparc compatible /dev/audio */
@@ -26,7 +26,7 @@
 /*
  *	Sound core interface functions
  */
- 
+
 extern int register_sound_special(struct file_operations *fops, int unit);
 extern int register_sound_mixer(struct file_operations *fops, int dev);
 extern int register_sound_midi(struct file_operations *fops, int dev);

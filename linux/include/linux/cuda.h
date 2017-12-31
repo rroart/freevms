@@ -31,7 +31,7 @@
 extern int find_via_cuda(void);
 extern int via_cuda_start(void);
 extern int cuda_request(struct adb_request *req,
-			void (*done)(struct adb_request *), int nbytes, ...);
+                        void (*done)(struct adb_request *), int nbytes, ...);
 extern void cuda_poll(void);
 
 #endif	/* __KERNEL */

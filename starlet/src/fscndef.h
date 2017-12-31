@@ -11,19 +11,20 @@
 #define		FSCN$M_NODE_PRIMARY	0x80
 #define		FSCN$M_NODE_ACS		0x100
 #define		FSCN$M_NODE_SECONDARY	0x200
-	
-struct _fldflags {
-  unsigned fscn$v_node			: 1;
-  unsigned fscn$v_device		: 1;
-  unsigned fscn$v_root			: 1;
-  unsigned fscn$v_directory		: 1;
-  unsigned fscn$v_name			: 1;
-  unsigned fscn$v_type			: 1;
-  unsigned fscn$v_version		: 1;
-  unsigned fscn$v_node_primary		: 1;
-  unsigned fscn$v_node_acs		: 1;
-  unsigned fscn$v_node_secondary	: 1;
-  unsigned fscndef$$_fill_1		: 22;
+
+struct _fldflags
+{
+    unsigned fscn$v_node			: 1;
+    unsigned fscn$v_device		: 1;
+    unsigned fscn$v_root			: 1;
+    unsigned fscn$v_directory		: 1;
+    unsigned fscn$v_name			: 1;
+    unsigned fscn$v_type			: 1;
+    unsigned fscn$v_version		: 1;
+    unsigned fscn$v_node_primary		: 1;
+    unsigned fscn$v_node_acs		: 1;
+    unsigned fscn$v_node_secondary	: 1;
+    unsigned fscndef$$_fill_1		: 22;
 };
 
 #define		FSCN$_FILESPEC		1
@@ -38,12 +39,13 @@ struct _fldflags {
 #define		FSCN$_NODE_ACS		10
 #define		FSCN$_NODE_SECONDARY	11
 #define		FSCN$S_ITEM_LEN		8
-	
-struct _fscndef {
-  unsigned short int fscn$w_length;
-  unsigned short int fscn$w_item_code;
-  void *fscn$l_addr;
+
+struct _fscndef
+{
+    unsigned short int fscn$w_length;
+    unsigned short int fscn$w_item_code;
+    void *fscn$l_addr;
 };
- 
+
 #endif
 

@@ -47,6 +47,6 @@
 #define STR$_ILLSTRPOS  2393097
 #define STR$_ILLSTRSPE  2393105
 #define STR$_MATCH      2393113
-#define STR$_NORMAL     1      
+#define STR$_NORMAL     1
 
 

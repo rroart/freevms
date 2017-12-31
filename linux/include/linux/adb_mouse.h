@@ -10,14 +10,15 @@
  * by Robert de Vries (robert@and.nl) on 19Jul93
  */
 
-struct mouse_status {
-	char		buttons;
-	short		dx;
-	short		dy;
-	int		ready;
-	int		active;
-	struct wait_queue *wait;
-	struct fasync_struct *fasyncptr;
+struct mouse_status
+{
+    char		buttons;
+    short		dx;
+    short		dy;
+    int		ready;
+    int		active;
+    struct wait_queue *wait;
+    struct fasync_struct *fasyncptr;
 };
 
 #endif

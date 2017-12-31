@@ -32,39 +32,40 @@
  *	example state).
  */
 
-typedef struct {
-	unsigned long	brd;
-	unsigned long	panel;
-	unsigned long	port;
-	unsigned long	hwid;
-	unsigned long	type;
-	unsigned long	txtotal;
-	unsigned long	rxtotal;
-	unsigned long	txbuffered;
-	unsigned long	rxbuffered;
-	unsigned long	rxoverrun;
-	unsigned long	rxparity;
-	unsigned long	rxframing;
-	unsigned long	rxlost;
-	unsigned long	txbreaks;
-	unsigned long	rxbreaks;
-	unsigned long	txxon;
-	unsigned long	txxoff;
-	unsigned long	rxxon;
-	unsigned long	rxxoff;
-	unsigned long	txctson;
-	unsigned long	txctsoff;
-	unsigned long	rxrtson;
-	unsigned long	rxrtsoff;
-	unsigned long	modem;
-	unsigned long	state;
-	unsigned long	flags;
-	unsigned long	ttystate;
-	unsigned long	cflags;
-	unsigned long	iflags;
-	unsigned long	oflags;
-	unsigned long	lflags;
-	unsigned long	signals;
+typedef struct
+{
+    unsigned long	brd;
+    unsigned long	panel;
+    unsigned long	port;
+    unsigned long	hwid;
+    unsigned long	type;
+    unsigned long	txtotal;
+    unsigned long	rxtotal;
+    unsigned long	txbuffered;
+    unsigned long	rxbuffered;
+    unsigned long	rxoverrun;
+    unsigned long	rxparity;
+    unsigned long	rxframing;
+    unsigned long	rxlost;
+    unsigned long	txbreaks;
+    unsigned long	rxbreaks;
+    unsigned long	txxon;
+    unsigned long	txxoff;
+    unsigned long	rxxon;
+    unsigned long	rxxoff;
+    unsigned long	txctson;
+    unsigned long	txctsoff;
+    unsigned long	rxrtson;
+    unsigned long	rxrtsoff;
+    unsigned long	modem;
+    unsigned long	state;
+    unsigned long	flags;
+    unsigned long	ttystate;
+    unsigned long	cflags;
+    unsigned long	iflags;
+    unsigned long	oflags;
+    unsigned long	lflags;
+    unsigned long	signals;
 } comstats_t;
 
 
@@ -74,25 +75,27 @@ typedef struct {
 
 #define	COM_MAXPANELS	8
 
-typedef struct {
-	unsigned long	panel;
-	unsigned long	type;
-	unsigned long	hwid;
-	unsigned long	nrports;
+typedef struct
+{
+    unsigned long	panel;
+    unsigned long	type;
+    unsigned long	hwid;
+    unsigned long	nrports;
 } companel_t;
 
-typedef struct {
-	unsigned long	brd;
-	unsigned long	type;
-	unsigned long	hwid;
-	unsigned long	state;
-	unsigned long	ioaddr;
-	unsigned long	ioaddr2;
-	unsigned long	memaddr;
-	unsigned long	irq;
-	unsigned long	nrpanels;
-	unsigned long	nrports;
-	companel_t	panels[COM_MAXPANELS];
+typedef struct
+{
+    unsigned long	brd;
+    unsigned long	type;
+    unsigned long	hwid;
+    unsigned long	state;
+    unsigned long	ioaddr;
+    unsigned long	ioaddr2;
+    unsigned long	memaddr;
+    unsigned long	irq;
+    unsigned long	nrpanels;
+    unsigned long	nrports;
+    companel_t	panels[COM_MAXPANELS];
 } combrd_t;
 
 
@@ -109,7 +112,7 @@ typedef struct {
 /*
  *	Define the set of ioctls that give user level access to the
  *	private port, panel and board structures. The argument required
- *	will be driver dependent!  
+ *	will be driver dependent!
  */
 #define	COM_READPORT		_IO('c',40)
 #define	COM_READBOARD		_IO('c',41)

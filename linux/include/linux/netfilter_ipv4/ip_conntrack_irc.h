@@ -22,9 +22,10 @@
 
 #define IP_CONNTR_IRC	2
 
-struct dccproto {
-	char* match;
-	int matchlen;
+struct dccproto
+{
+    char* match;
+    int matchlen;
 };
 
 /* Protects irc part of conntracks */
@@ -34,14 +35,14 @@ DECLARE_LOCK_EXTERN(ip_irc_lock);
    host order. */
 struct ip_ct_irc
 {
-	/* This tells NAT that this is an IRC connection */
-	int is_irc;
-	/* sequence number where address part of DCC command begins */
-	u_int32_t seq;
-	/* 0 means not found yet */
-	u_int32_t len;
-	/* Port that was to be used */
-	u_int16_t port;
+    /* This tells NAT that this is an IRC connection */
+    int is_irc;
+    /* sequence number where address part of DCC command begins */
+    u_int32_t seq;
+    /* 0 means not found yet */
+    u_int32_t len;
+    /* Port that was to be used */
+    u_int16_t port;
 };
 
 #endif /* _IP_CONNTRACK_IRC_H */

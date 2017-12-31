@@ -5,12 +5,12 @@
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
  * version 2 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Library General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -88,53 +88,56 @@
 /*
  * Attached to a socket that is listening for connections.
  */
-struct backlogEntry {
-	struct	backlogEntry *flink;
-	int	sock;
+struct backlogEntry
+{
+    struct	backlogEntry *flink;
+    int	sock;
 };
 
 /*
- * Internal structure definition of individual socket file descriptors. 
+ * Internal structure definition of individual socket file descriptors.
  */
-struct FD_ENTRY {
-  int			domain;		/* domain of socket AF_INET	      */
-  int			type;		/* type of socket stream or datagram  */
-  int			protocol;	/* protocol of socket		      */
-  int			sock_opts;	/* socket options		      */
-  int			ioctl_opts;	/* ioctl/fcntl/file options	      */
-  int			flags;		/* socket state flags		      */
+struct FD_ENTRY
+{
+    int			domain;		/* domain of socket AF_INET	      */
+    int			type;		/* type of socket stream or datagram  */
+    int			protocol;	/* protocol of socket		      */
+    int			sock_opts;	/* socket options		      */
+    int			ioctl_opts;	/* ioctl/fcntl/file options	      */
+    int			flags;		/* socket state flags		      */
 #define SD_BIND		1		/* is bound			      */
 #define SD_CONNECTED	2		/* is connected			      */
 #define SD_LISTENING	4		/* active listen		      */
 
-  int			mylen;		/* local socket address name	      */
-  struct sockaddr	my;
-  int	 		fromlen;	/* from socket address name	      */
-  struct sockaddr	from;
-  int			tolen;		/* to socket address name	      */
-  struct sockaddr	to;
+    int			mylen;		/* local socket address name	      */
+    struct sockaddr	my;
+    int	 		fromlen;	/* from socket address name	      */
+    struct sockaddr	from;
+    int			tolen;		/* to socket address name	      */
+    struct sockaddr	to;
 
-  unsigned long		ef;		/* socket priviate event flag	      */
-  unsigned short int	chan;		/* channel assigned to this socket    */
-  NetIO_Status_Block	read_iosb;	/* qio completion status block	      */
-  NetIO_Status_Block	write_iosb;	/* qio completion status block	      */
+    unsigned long		ef;		/* socket priviate event flag	      */
+    unsigned short int	chan;		/* channel assigned to this socket    */
+    NetIO_Status_Block	read_iosb;	/* qio completion status block	      */
+    NetIO_Status_Block	write_iosb;	/* qio completion status block	      */
 
-  int			listen_socket;	/* socket that listen was from	      */
-  int			backlog;	/* max number of connection to accept */
-  int			backlogSize;	/* number of connections active	      */
-  struct backlogEntry	*backlogQueue;	/* the backlog queue		      */
+    int			listen_socket;	/* socket that listen was from	      */
+    int			backlog;	/* max number of connection to accept */
+    int			backlogSize;	/* number of connections active	      */
+    struct backlogEntry	*backlogQueue;	/* the backlog queue		      */
 
-  int			rcvbufsize;	/* receive buffer size		      */
-  int			rcvbufoffset;	/* offset for partial receive	      */
-  char			*rcvbuf;	/* receive buffer		      */
-  IPADR$ADDRESS_BLOCK	rcvfrom;	/* address structure		      */
+    int			rcvbufsize;	/* receive buffer size		      */
+    int			rcvbufoffset;	/* offset for partial receive	      */
+    char			*rcvbuf;	/* receive buffer		      */
+    IPADR$ADDRESS_BLOCK	rcvfrom;	/* address structure		      */
 };
 
-struct ITEM_LIST {
-  unsigned short  itm$w_length;
-  unsigned short  itm$w_itmcode;
-  	   long   itm$a_bufaddr;
-  	   long   itm$a_retlen;
+struct ITEM_LIST
+{
+    unsigned short  itm$w_length;
+    unsigned short  itm$w_itmcode;
+    long   itm$a_bufaddr;
+    long   itm$a_retlen;
 };
 
 #endif /* LIBCMU */

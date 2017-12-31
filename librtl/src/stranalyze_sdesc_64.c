@@ -1,5 +1,5 @@
 /*
- *	
+ *
  * stranalye_sdesc_64.c
  *
  *	Copyright (C) 2003 Andrew Allison
@@ -25,7 +25,7 @@
  *				Andrew Allison
  *				50 Denlaw Road
  *				London, Ont
- *				Canada 
+ *				Canada
  *				N6G 3L4
  *
  */
@@ -39,7 +39,7 @@
  *
  *
  * Bugs:
- *	
+ *
  *
  * History
  *
@@ -70,54 +70,54 @@
  */
 // a header file says 32bit return, man on www says 64bit
 unsigned long str$analyze_sdesc_64 (const struct dsc$descriptor_s* descrip,
-				unsigned long long	*quad_integer_length,
-				char 		**data_address,
-				unsigned short	*descriptor_type )
+                                    unsigned long long	*quad_integer_length,
+                                    char 		**data_address,
+                                    unsigned short	*descriptor_type )
 {
 
 
-	*descriptor_type = 0;		// 0 = 32 bit     1 = 64 bit
+    *descriptor_type = 0;		// 0 = 32 bit     1 = 64 bit
 
-	/*
-	 * Only allow for strings
-	 */
-	if (str$$is_string_class(descrip) != STR$_NORMAL)
-	{
-		DOSIGNAL(STR$_ILLSTRCLA);
-		*quad_integer_length = 0;
-		*data_address = NULL;
-		lib$stop(STR$_ILLSTRCLA);
-	}
+    /*
+     * Only allow for strings
+     */
+    if (str$$is_string_class(descrip) != STR$_NORMAL)
+    {
+        DOSIGNAL(STR$_ILLSTRCLA);
+        *quad_integer_length = 0;
+        *data_address = NULL;
+        lib$stop(STR$_ILLSTRCLA);
+    }
 
-	/*
-	 * Nothing stored here right now
-	 */
-	if (descrip->dsc$a_pointer == NULL)
-	{
+    /*
+     * Nothing stored here right now
+     */
+    if (descrip->dsc$a_pointer == NULL)
+    {
 //		assert(input_descriptor->dsc$w_length == 0);
-		*quad_integer_length = 0;
-		*data_address = NULL;
-	}
+        *quad_integer_length = 0;
+        *data_address = NULL;
+    }
 
-	/*
-	 * Handle weirdness of VS (varying-length) string
-	 */
-	if (descrip->dsc$b_class == DSC$K_CLASS_VS)
-	{
-		/*
-		 * VS String
-		 */
-		*quad_integer_length = 
-			(unsigned short)*(descrip->dsc$a_pointer);
-		*data_address = descrip->dsc$a_pointer + 2;
-		assert(*quad_integer_length <= descrip->dsc$w_length);
-	}
-	else
-	{
-		*quad_integer_length = descrip->dsc$w_length;
-		*data_address = descrip->dsc$a_pointer;
-	}
+    /*
+     * Handle weirdness of VS (varying-length) string
+     */
+    if (descrip->dsc$b_class == DSC$K_CLASS_VS)
+    {
+        /*
+         * VS String
+         */
+        *quad_integer_length =
+            (unsigned short)*(descrip->dsc$a_pointer);
+        *data_address = descrip->dsc$a_pointer + 2;
+        assert(*quad_integer_length <= descrip->dsc$w_length);
+    }
+    else
+    {
+        *quad_integer_length = descrip->dsc$w_length;
+        *data_address = descrip->dsc$a_pointer;
+    }
 
-	return *quad_integer_length;
+    return *quad_integer_length;
 }
 

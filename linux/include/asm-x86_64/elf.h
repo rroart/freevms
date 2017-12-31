@@ -19,7 +19,7 @@
 #define R_X86_64_JUMP_SLOT	7	/* Create PLT entry */
 #define R_X86_64_RELATIVE	8	/* Adjust by program base */
 #define R_X86_64_GOTPCREL	9	/* 32 bit signed pc relative
-					   offset to GOT */
+offset to GOT */
 #define R_X86_64_32		10	/* Direct 32 bit zero extended */
 #define R_X86_64_32S		11	/* Direct 32 bit sign extended */
 #define R_X86_64_16		12	/* Direct 16 bit zero extended */
@@ -55,7 +55,7 @@ typedef struct user_fxsr_struct elf_fpxregset_t;
    This provides a mean for the dynamic linker to call DT_FINI functions for
    shared libraries that have been loaded before the code runs.
 
-   A value of 0 tells we have no such handler. 
+   A value of 0 tells we have no such handler.
 
    We might as well make sure everything else is cleared too (except for %esp),
    just to make things more deterministic.
@@ -143,7 +143,7 @@ typedef struct user_fxsr_struct elf_fpxregset_t;
 #ifdef __KERNEL__
 extern void set_personality_64bit(void);
 #define SET_PERSONALITY(ex, ibcs2) set_personality_64bit()
-	
+
 #endif
 
 #endif

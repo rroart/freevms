@@ -29,11 +29,12 @@
 #define BLKPG      _IO(0x12,105)
 
 /* The argument structure */
-struct blkpg_ioctl_arg {
-        int op;
-        int flags;
-        int datalen;
-        void *data;
+struct blkpg_ioctl_arg
+{
+    int op;
+    int flags;
+    int datalen;
+    void *data;
 };
 
 /* The subfunctions (for the op field) */
@@ -45,13 +46,14 @@ struct blkpg_ioctl_arg {
 #define BLKPG_VOLNAMELTH	64
 
 /* The data structure for ADD_PARTITION and DEL_PARTITION */
-struct blkpg_partition {
-	long long start;		/* starting offset in bytes */
-	long long length;		/* length in bytes */
-	int pno;			/* partition number */
-	char devname[BLKPG_DEVNAMELTH];	/* partition name, like sda5 or c0d1p2,
+struct blkpg_partition
+{
+    long long start;		/* starting offset in bytes */
+    long long length;		/* length in bytes */
+    int pno;			/* partition number */
+    char devname[BLKPG_DEVNAMELTH];	/* partition name, like sda5 or c0d1p2,
 					   to be used in kernel messages */
-	char volname[BLKPG_VOLNAMELTH];	/* volume label */
+    char volname[BLKPG_VOLNAMELTH];	/* volume label */
 };
 
 #ifdef __KERNEL__

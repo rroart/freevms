@@ -23,19 +23,21 @@
 /*
  * Arguments for all calls to statd
  */
-struct nsm_args {
-	u32		addr;		/* remote address */
-	u32		prog;		/* RPC callback info */
-	u32		vers;
-	u32		proc;
+struct nsm_args
+{
+    u32		addr;		/* remote address */
+    u32		prog;		/* RPC callback info */
+    u32		vers;
+    u32		proc;
 };
 
 /*
  * Result returned by statd
  */
-struct nsm_res {
-	u32		status;
-	u32		state;
+struct nsm_res
+{
+    u32		status;
+    u32		state;
 };
 
 int		nsm_monitor(struct nlm_host *);

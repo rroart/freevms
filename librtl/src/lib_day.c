@@ -57,7 +57,8 @@
 #define BASE_YEAR       1601
 
 
-struct TIME {
+struct TIME
+{
     unsigned char time[8];
 };
 
@@ -76,20 +77,25 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
 
     /* If no time specified get current using gettim() */
 
-    if (timadr == NULL) {
+    if (timadr == NULL)
+    {
         register unsigned sts;
         sts = sys$gettim(&wrktim);
-        if ((sts & 1) == 0) {
+        if ((sts & 1) == 0)
+        {
             return sts;
         }
         delta = 0;
         srcptr = wrktim.time + 7;
-    } else {
+    }
+    else
+    {
 
         /* Check specified time for delta... */
 
         srcptr = timadr->time + 7;
-        if ((delta = (*srcptr & 0x80))) {
+        if ((delta = (*srcptr & 0x80)))
+        {
 
             /* We have to 2's complement delta times - sigh!! */
 
@@ -97,11 +103,13 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
             srcptr = timadr->time;
             dstptr = wrktim.time;
             time = 1;
-            do {
+            do
+            {
                 time = time + ((~*srcptr++) & 0xFF);
                 *dstptr++ = time;
                 time = (time >> 8);
-            } while (--count > 0);
+            }
+            while (--count > 0);
             srcptr = wrktim.time + 7;
         }
     }
@@ -112,11 +120,13 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
     count = 8;
     dstptr = wrktim.time + 7;
     time = 0;
-    do {
+    do
+    {
         time = (time << 8) | *srcptr--;
         *dstptr-- = time / TIMEBASE;
         time %= TIMEBASE;
-    } while (--count > 0);
+    }
+    while (--count > 0);
 
 
     /* Seperate the date and time */
@@ -124,18 +134,23 @@ unsigned long lib$day(long *days, const void *timadra, int *day_time)
     date = time = 0;
     srcptr = wrktim.time + 7;
     count = 8;
-    do {
+    do
+    {
         time = (time << 8) | *srcptr--;
         date = (date << 8) | (time / TIMESIZE);
         time %= TIMESIZE;
-    } while (--count > 0);
+    }
+    while (--count > 0);
 
     /* Return results... */
 
-    if (delta) {
+    if (delta)
+    {
         *days = -(int) date;
         if (day_time != NULL) *day_time = -(int) time;
-    } else {
+    }
+    else
+    {
         *days = date;
         if (day_time != NULL) *day_time = time;
     }

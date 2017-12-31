@@ -6,7 +6,7 @@
 
 /*
  *  linux/mm/oom_kill.c
- * 
+ *
  *  Copyright (C)  1998,2000  Rik van Riel
  *	Thanks go out to Claus Fischer for some serious inspiration and
  *	for goading me into coding this file...
@@ -31,16 +31,16 @@
 /**
  * int_sqrt - oom_kill.c internal function, rough approximation to sqrt
  * @x: integer of which to calculate the sqrt
- * 
+ *
  * A very rough approximation to the sqrt() function.
  */
 static unsigned int int_sqrt(unsigned int x)
 {
-	unsigned int out = x;
-	while (x & ~(unsigned int)1) x >>=2, out >>=1;
-	if (x) out -= out >> 2;
-	return (out ? out : 1);
-}	
+    unsigned int out = x;
+    while (x & ~(unsigned int)1) x >>=2, out >>=1;
+    if (x) out -= out >> 2;
+    return (out ? out : 1);
+}
 
 /**
  * oom_badness - calculate a numeric value for how bad this task has been
@@ -62,55 +62,55 @@ static unsigned int int_sqrt(unsigned int x)
 
 static int badness(struct task_struct *p)
 {
-	int points, cpu_time, run_time;
+    int points, cpu_time, run_time;
 
-	if (!p->mm)
-		return 0;
-	/*
-	 * The memory size of the process is the basis for the badness.
-	 */
-	points = p->mm->total_vm;
+    if (!p->mm)
+        return 0;
+    /*
+     * The memory size of the process is the basis for the badness.
+     */
+    points = p->mm->total_vm;
 
-	/*
-	 * CPU time is in seconds and run time is in minutes. There is no
-	 * particular reason for this other than that it turned out to work
-	 * very well in practice. This is not safe against jiffie wraps
-	 * but we don't care _that_ much...
-	 */
-	cpu_time = (p->times.tms_utime + p->times.tms_stime) >> (SHIFT_HZ + 3);
-	run_time = (jiffies - p->start_time) >> (SHIFT_HZ + 10);
+    /*
+     * CPU time is in seconds and run time is in minutes. There is no
+     * particular reason for this other than that it turned out to work
+     * very well in practice. This is not safe against jiffie wraps
+     * but we don't care _that_ much...
+     */
+    cpu_time = (p->times.tms_utime + p->times.tms_stime) >> (SHIFT_HZ + 3);
+    run_time = (jiffies - p->start_time) >> (SHIFT_HZ + 10);
 
-	points /= int_sqrt(cpu_time);
-	points /= int_sqrt(int_sqrt(run_time));
+    points /= int_sqrt(cpu_time);
+    points /= int_sqrt(int_sqrt(run_time));
 
-	/*
-	 * Niced processes are most likely less important, so double
-	 * their badness points.
-	 */
-	if (p->pcb$b_prib == 31)
-		points *= 2;
+    /*
+     * Niced processes are most likely less important, so double
+     * their badness points.
+     */
+    if (p->pcb$b_prib == 31)
+        points *= 2;
 
-	/*
-	 * Superuser processes are usually more important, so we make it
-	 * less likely that we kill those.
-	 */
-	if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_ADMIN) ||
-				p->uid == 0 || p->euid == 0)
-		points /= 4;
+    /*
+     * Superuser processes are usually more important, so we make it
+     * less likely that we kill those.
+     */
+    if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_ADMIN) ||
+            p->uid == 0 || p->euid == 0)
+        points /= 4;
 
-	/*
-	 * We don't want to kill a process with direct hardware access.
-	 * Not only could that mess up the hardware, but usually users
-	 * tend to only have this flag set on applications they think
-	 * of as important.
-	 */
-	if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_RAWIO))
-		points /= 4;
+    /*
+     * We don't want to kill a process with direct hardware access.
+     * Not only could that mess up the hardware, but usually users
+     * tend to only have this flag set on applications they think
+     * of as important.
+     */
+    if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_RAWIO))
+        points /= 4;
 #ifdef DEBUG
-	printk(KERN_DEBUG "OOMkill: task %d (%s) got %d points\n",
-	p->pcb$l_pid, p->pcb$t_lname, points);
+    printk(KERN_DEBUG "OOMkill: task %d (%s) got %d points\n",
+           p->pcb$l_pid, p->pcb$t_lname, points);
 #endif
-	return points;
+    return points;
 }
 
 /*
@@ -122,23 +122,26 @@ static int badness(struct task_struct *p)
  */
 static struct task_struct * select_bad_process(void)
 {
-	int maxpoints = 0;
-	struct task_struct *p = NULL;
-	struct task_struct *chosen = NULL;
+    int maxpoints = 0;
+    struct task_struct *p = NULL;
+    struct task_struct *chosen = NULL;
 
-	read_lock(&tasklist_lock);
-	for_each_task_pre1(p) {
-		if (p->pcb$l_pid) {
-			int points = badness(p);
-			if (points > maxpoints) {
-				chosen = p;
-				maxpoints = points;
-			}
-		}
-	}
-	for_each_task_post1(p);
-	read_unlock(&tasklist_lock);
-	return chosen;
+    read_lock(&tasklist_lock);
+    for_each_task_pre1(p)
+    {
+        if (p->pcb$l_pid)
+        {
+            int points = badness(p);
+            if (points > maxpoints)
+            {
+                chosen = p;
+                maxpoints = points;
+            }
+        }
+    }
+    for_each_task_post1(p);
+    read_unlock(&tasklist_lock);
+    return chosen;
 }
 
 /**
@@ -148,22 +151,25 @@ static struct task_struct * select_bad_process(void)
  */
 void oom_kill_task(struct task_struct *p)
 {
-	printk(KERN_ERR "Out of Memory: Killed process %d (%s).\n", p->pcb$l_pid, p->pcb$t_lname);
+    printk(KERN_ERR "Out of Memory: Killed process %d (%s).\n", p->pcb$l_pid, p->pcb$t_lname);
 
-	/*
-	 * We give our sacrificial lamb high priority and access to
-	 * all the memory it needs. That way it should be able to
-	 * exit() and clear out its resources quickly...
-	 */
-	p->pcb$b_pri = p->pcb$b_pri - 3; /* boost */
-	p->flags |= PF_MEMALLOC | PF_MEMDIE;
+    /*
+     * We give our sacrificial lamb high priority and access to
+     * all the memory it needs. That way it should be able to
+     * exit() and clear out its resources quickly...
+     */
+    p->pcb$b_pri = p->pcb$b_pri - 3; /* boost */
+    p->flags |= PF_MEMALLOC | PF_MEMDIE;
 
-	/* This process has hardware access, be more careful. */
-	if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_RAWIO)) {
-		force_sig(SIGTERM, p);
-	} else {
-		force_sig(SIGKILL, p);
-	}
+    /* This process has hardware access, be more careful. */
+    if (cap_t(p->cap_effective) & CAP_TO_MASK(CAP_SYS_RAWIO))
+    {
+        force_sig(SIGTERM, p);
+    }
+    else
+    {
+        force_sig(SIGKILL, p);
+    }
 }
 
 /**
@@ -176,30 +182,31 @@ void oom_kill_task(struct task_struct *p)
  */
 static void oom_kill(void)
 {
-	struct task_struct *p = select_bad_process(), *q;
+    struct task_struct *p = select_bad_process(), *q;
 
-	/* Found nothing?!?! Either we hang forever, or we panic. */
-	if (p == NULL)
-		panic("Out of memory and no killable processes...\n");
+    /* Found nothing?!?! Either we hang forever, or we panic. */
+    if (p == NULL)
+        panic("Out of memory and no killable processes...\n");
 
-	/* kill all processes that share the ->mm (i.e. all threads) */
-	read_lock(&tasklist_lock);
-	for_each_task_pre1(q) {
-		if(q->mm == p->mm) oom_kill_task(q);
-	}
-	for_each_task_post1(q);
-	read_unlock(&tasklist_lock);
+    /* kill all processes that share the ->mm (i.e. all threads) */
+    read_lock(&tasklist_lock);
+    for_each_task_pre1(q)
+    {
+        if(q->mm == p->mm) oom_kill_task(q);
+    }
+    for_each_task_post1(q);
+    read_unlock(&tasklist_lock);
 
-	/*
-	 * Make kswapd go out of the way, so "p" has a good chance of
-	 * killing itself before someone else gets the chance to ask
-	 * for more memory.
-	 */
-	//	current->policy |= SCHED_YIELD;
-	//current->need_resched=1;
-	//schedule();
-	SOFTINT_RESCHED_VECTOR;
-	return;
+    /*
+     * Make kswapd go out of the way, so "p" has a good chance of
+     * killing itself before someone else gets the chance to ask
+     * for more memory.
+     */
+    //	current->policy |= SCHED_YIELD;
+    //current->need_resched=1;
+    //schedule();
+    SOFTINT_RESCHED_VECTOR;
+    return;
 }
 
 /**
@@ -207,49 +214,49 @@ static void oom_kill(void)
  */
 void out_of_memory(void)
 {
-	static unsigned long first, last, count;
-	unsigned long now, since;
+    static unsigned long first, last, count;
+    unsigned long now, since;
 
-	/*
-	 * Enough swap space left?  Not OOM.
-	 */
-	extern int nr_swap_pages;
-	if (nr_swap_pages > 0)
-		return;
+    /*
+     * Enough swap space left?  Not OOM.
+     */
+    extern int nr_swap_pages;
+    if (nr_swap_pages > 0)
+        return;
 
-	now = jiffies;
-	since = now - last;
-	last = now;
+    now = jiffies;
+    since = now - last;
+    last = now;
 
-	/*
-	 * If it's been a long time since last failure,
-	 * we're not oom.
-	 */
-	last = now;
-	if (since > 5*HZ)
-		goto reset;
+    /*
+     * If it's been a long time since last failure,
+     * we're not oom.
+     */
+    last = now;
+    if (since > 5*HZ)
+        goto reset;
 
-	/*
-	 * If we haven't tried for at least one second,
-	 * we're not really oom.
-	 */
-	since = now - first;
-	if (since < HZ)
-		return;
+    /*
+     * If we haven't tried for at least one second,
+     * we're not really oom.
+     */
+    since = now - first;
+    if (since < HZ)
+        return;
 
-	/*
-	 * If we have gotten only a few failures,
-	 * we're not really oom. 
-	 */
-	if (++count < 10)
-		return;
+    /*
+     * If we have gotten only a few failures,
+     * we're not really oom.
+     */
+    if (++count < 10)
+        return;
 
-	/*
-	 * Ok, really out of memory. Kill something.
-	 */
-	oom_kill();
+    /*
+     * Ok, really out of memory. Kill something.
+     */
+    oom_kill();
 
 reset:
-	first = now;
-	count = 0;
+    first = now;
+    count = 0;
 }

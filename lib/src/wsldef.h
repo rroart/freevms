@@ -19,22 +19,25 @@
 #define WSL$C_UNKNOWN 14
 #define WSL$S_WSLDEF 8
 #define WSL$C_SHIFT_SIZE 3
-	
-struct _wsl {
-  union  {
-    void *wsl$pq_va;
-    struct  {
-      unsigned wsl$v_valid     : 1;
-      unsigned wsl$v_pagtyp    : 3;
-      unsigned wsl$v_pfnlock   : 1;
-      unsigned wsl$v_wslock    : 1;
-      unsigned wsl$v_goodpage  : 1;
-      unsigned wsldef$$_fill   : 1;
-      unsigned wsl$v_modify    : 1;
-      unsigned wsl$v_fillme    : 7;
+
+struct _wsl
+{
+    union
+    {
+        void *wsl$pq_va;
+        struct
+        {
+            unsigned wsl$v_valid     : 1;
+            unsigned wsl$v_pagtyp    : 3;
+            unsigned wsl$v_pfnlock   : 1;
+            unsigned wsl$v_wslock    : 1;
+            unsigned wsl$v_goodpage  : 1;
+            unsigned wsldef$$_fill   : 1;
+            unsigned wsl$v_modify    : 1;
+            unsigned wsl$v_fillme    : 7;
+        };
     };
-  };
 };
- 
+
 #endif
- 
+

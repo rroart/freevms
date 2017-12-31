@@ -49,84 +49,86 @@
  *	communication with the slave board will always be on a per port
  *	basis.
  */
-typedef struct {
-	unsigned long		magic;
-	int			portnr;
-	int			panelnr;
-	int			brdnr;
-	unsigned long		state;
-	int			devnr;
-	int			flags;
-	int			baud_base;
-	int			custom_divisor;
-	int			close_delay;
-	int			closing_wait;
-	int			refcount;
-	int			openwaitcnt;
-	int			rc;
-	int			argsize;
-	void			*argp;
-	long			session;
-	long			pgrp;
-	unsigned int		rxmarkmsk;
-	struct tty_struct	*tty;
+typedef struct
+{
+    unsigned long		magic;
+    int			portnr;
+    int			panelnr;
+    int			brdnr;
+    unsigned long		state;
+    int			devnr;
+    int			flags;
+    int			baud_base;
+    int			custom_divisor;
+    int			close_delay;
+    int			closing_wait;
+    int			refcount;
+    int			openwaitcnt;
+    int			rc;
+    int			argsize;
+    void			*argp;
+    long			session;
+    long			pgrp;
+    unsigned int		rxmarkmsk;
+    struct tty_struct	*tty;
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,0))
-	struct wait_queue	*open_wait;
-	struct wait_queue	*close_wait;
-	struct wait_queue	*raw_wait;
+    struct wait_queue	*open_wait;
+    struct wait_queue	*close_wait;
+    struct wait_queue	*raw_wait;
 #else
-	wait_queue_head_t	open_wait;
-	wait_queue_head_t	close_wait;
-	wait_queue_head_t	raw_wait;
+    wait_queue_head_t	open_wait;
+    wait_queue_head_t	close_wait;
+    wait_queue_head_t	raw_wait;
 #endif
-	struct tq_struct	tqhangup;
-	struct termios		normaltermios;
-	struct termios		callouttermios;
-	asysigs_t		asig;
-	unsigned long		addr;
-	unsigned long		rxoffset;
-	unsigned long		txoffset;
-	unsigned long		sigs;
-	unsigned long		pflag;
-	unsigned int		rxsize;
-	unsigned int		txsize;
-	unsigned char		reqbit;
-	unsigned char		portidx;
-	unsigned char		portbit;
+    struct tq_struct	tqhangup;
+    struct termios		normaltermios;
+    struct termios		callouttermios;
+    asysigs_t		asig;
+    unsigned long		addr;
+    unsigned long		rxoffset;
+    unsigned long		txoffset;
+    unsigned long		sigs;
+    unsigned long		pflag;
+    unsigned int		rxsize;
+    unsigned int		txsize;
+    unsigned char		reqbit;
+    unsigned char		portidx;
+    unsigned char		portbit;
 } stliport_t;
 
 /*
  *	Use a structure of function pointers to do board level operations.
  *	These include, enable/disable, paging shared memory, interrupting, etc.
  */
-typedef struct stlibrd {
-	unsigned long	magic;
-	int		brdnr;
-	int		brdtype;
-	int		state;
-	int		nrpanels;
-	int		nrports;
-	int		nrdevs;
-	unsigned int	iobase;
-	int		iosize;
-	unsigned long	memaddr;
-	void		*membase;
-	int		memsize;
-	int		pagesize;
-	int		hostoffset;
-	int		slaveoffset;
-	int		bitsize;
-	int		enabval;
-	int		panels[STL_MAXPANELS];
-	int		panelids[STL_MAXPANELS];
-	void		(*init)(struct stlibrd *brdp);
-	void		(*enable)(struct stlibrd *brdp);
-	void		(*reenable)(struct stlibrd *brdp);
-	void		(*disable)(struct stlibrd *brdp);
-	char		*(*getmemptr)(struct stlibrd *brdp, unsigned long offset, int line);
-	void		(*intr)(struct stlibrd *brdp);
-	void		(*reset)(struct stlibrd *brdp);
-	stliport_t	*ports[STL_MAXPORTS];
+typedef struct stlibrd
+{
+    unsigned long	magic;
+    int		brdnr;
+    int		brdtype;
+    int		state;
+    int		nrpanels;
+    int		nrports;
+    int		nrdevs;
+    unsigned int	iobase;
+    int		iosize;
+    unsigned long	memaddr;
+    void		*membase;
+    int		memsize;
+    int		pagesize;
+    int		hostoffset;
+    int		slaveoffset;
+    int		bitsize;
+    int		enabval;
+    int		panels[STL_MAXPANELS];
+    int		panelids[STL_MAXPANELS];
+    void		(*init)(struct stlibrd *brdp);
+    void		(*enable)(struct stlibrd *brdp);
+    void		(*reenable)(struct stlibrd *brdp);
+    void		(*disable)(struct stlibrd *brdp);
+    char		*(*getmemptr)(struct stlibrd *brdp, unsigned long offset, int line);
+    void		(*intr)(struct stlibrd *brdp);
+    void		(*reset)(struct stlibrd *brdp);
+    stliport_t	*ports[STL_MAXPORTS];
 } stlibrd_t;
 
 

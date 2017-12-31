@@ -24,33 +24,36 @@
 #define LCK$K_PRMODE 3
 #define LCK$K_PWMODE 4
 #define LCK$K_EXMODE 5
-	
-union _lckdef {
-  struct  {
-    unsigned lck$v_valblk : 1;
-    unsigned lck$v_convert : 1;
-    unsigned lck$v_noqueue : 1;
-    unsigned lck$v_syncsts : 1;
-    unsigned lck$v_system : 1;
-    unsigned lck$v_noquota : 1;
-    unsigned lck$v_cvtsys : 1;
-    unsigned lck$v_recover : 1;
-    unsigned lck$v_protect : 1;
-    unsigned lck$v_nodlckwt : 1;
-    unsigned lck$v_nodlckblk : 1;
-    unsigned lck$v_expedite : 1;
-    unsigned lck$v_quecvt : 1;
-    unsigned lck$v_bypass : 1;
-    unsigned lck$v_fill_70_ : 2;
-  };
-  struct  {
-    unsigned lck$v_deqall : 1;
-    unsigned lck$v_cancel : 1;
-    unsigned lck$v_invvalblk : 1;
-    unsigned lck$v_fill_71_ : 5;
-  };
+
+union _lckdef
+{
+    struct
+    {
+        unsigned lck$v_valblk : 1;
+        unsigned lck$v_convert : 1;
+        unsigned lck$v_noqueue : 1;
+        unsigned lck$v_syncsts : 1;
+        unsigned lck$v_system : 1;
+        unsigned lck$v_noquota : 1;
+        unsigned lck$v_cvtsys : 1;
+        unsigned lck$v_recover : 1;
+        unsigned lck$v_protect : 1;
+        unsigned lck$v_nodlckwt : 1;
+        unsigned lck$v_nodlckblk : 1;
+        unsigned lck$v_expedite : 1;
+        unsigned lck$v_quecvt : 1;
+        unsigned lck$v_bypass : 1;
+        unsigned lck$v_fill_70_ : 2;
+    };
+    struct
+    {
+        unsigned lck$v_deqall : 1;
+        unsigned lck$v_cancel : 1;
+        unsigned lck$v_invvalblk : 1;
+        unsigned lck$v_fill_71_ : 5;
+    };
 
 };
- 
+
 #endif
- 
+

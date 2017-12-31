@@ -10,25 +10,25 @@
 
 struct video_device
 {
-	struct module *owner;
-	char name[32];
-	int type;
-	int hardware;
+    struct module *owner;
+    char name[32];
+    int type;
+    int hardware;
 
-	int (*open)(struct video_device *, int mode);
-	void (*close)(struct video_device *);
-	long (*read)(struct video_device *, char *, unsigned long, int noblock);
-	/* Do we need a write method ? */
-	long (*write)(struct video_device *, const char *, unsigned long, int noblock);
+    int (*open)(struct video_device *, int mode);
+    void (*close)(struct video_device *);
+    long (*read)(struct video_device *, char *, unsigned long, int noblock);
+    /* Do we need a write method ? */
+    long (*write)(struct video_device *, const char *, unsigned long, int noblock);
 #if LINUX_VERSION_CODE >= 0x020100
-	unsigned int (*poll)(struct video_device *, struct file *, poll_table *);
+    unsigned int (*poll)(struct video_device *, struct file *, poll_table *);
 #endif
-	int (*ioctl)(struct video_device *, unsigned int , void *);
-	int (*mmap)(struct video_device *, const char *, unsigned long);
-	int (*initialize)(struct video_device *);	
-	void *priv;		/* Used to be 'private' but that upsets C++ */
-	int busy;
-	int minor;
+    int (*ioctl)(struct video_device *, unsigned int , void *);
+    int (*mmap)(struct video_device *, const char *, unsigned long);
+    int (*initialize)(struct video_device *);
+    void *priv;		/* Used to be 'private' but that upsets C++ */
+    int busy;
+    int minor;
 };
 
 #define VIDEO_MAJOR	81
@@ -60,37 +60,37 @@ extern void video_unregister_device(struct video_device *);
 
 struct video_capability
 {
-	char name[32];
-	int type;
-	int channels;	/* Num channels */
-	int audios;	/* Num audio devices */
-	int maxwidth;	/* Supported width */
-	int maxheight;	/* And height */
-	int minwidth;	/* Supported width */
-	int minheight;	/* And height */
+    char name[32];
+    int type;
+    int channels;	/* Num channels */
+    int audios;	/* Num audio devices */
+    int maxwidth;	/* Supported width */
+    int maxheight;	/* And height */
+    int minwidth;	/* Supported width */
+    int minheight;	/* And height */
 };
 
 
 struct video_channel
 {
-	int channel;
-	char name[32];
-	int tuners;
-	__u32  flags;
+    int channel;
+    char name[32];
+    int tuners;
+    __u32  flags;
 #define VIDEO_VC_TUNER		1	/* Channel has a tuner */
 #define VIDEO_VC_AUDIO		2	/* Channel has audio */
-	__u16  type;
+    __u16  type;
 #define VIDEO_TYPE_TV		1
-#define VIDEO_TYPE_CAMERA	2	
-	__u16 norm;			/* Norm set by channel */
+#define VIDEO_TYPE_CAMERA	2
+    __u16 norm;			/* Norm set by channel */
 };
 
 struct video_tuner
 {
-	int tuner;
-	char name[32];
-	unsigned long rangelow, rangehigh;	/* Tuner range */
-	__u32 flags;
+    int tuner;
+    char name[32];
+    unsigned long rangelow, rangehigh;	/* Tuner range */
+    __u32 flags;
 #define VIDEO_TUNER_PAL		1
 #define VIDEO_TUNER_NTSC	2
 #define VIDEO_TUNER_SECAM	4
@@ -99,28 +99,28 @@ struct video_tuner
 #define VIDEO_TUNER_STEREO_ON	128	/* Tuner is seeing stereo */
 #define VIDEO_TUNER_RDS_ON      256     /* Tuner is seeing an RDS datastream */
 #define VIDEO_TUNER_MBS_ON      512     /* Tuner is seeing an MBS datastream */
-	__u16 mode;			/* PAL/NTSC/SECAM/OTHER */
+    __u16 mode;			/* PAL/NTSC/SECAM/OTHER */
 #define VIDEO_MODE_PAL		0
 #define VIDEO_MODE_NTSC		1
 #define VIDEO_MODE_SECAM	2
 #define VIDEO_MODE_AUTO		3
-	__u16 signal;			/* Signal strength 16bit scale */
+    __u16 signal;			/* Signal strength 16bit scale */
 };
 
 struct video_picture
 {
-	__u16	brightness;
-	__u16	hue;
-	__u16	colour;
-	__u16	contrast;
-	__u16	whiteness;	/* Black and white only */
-	__u16	depth;		/* Capture depth */
-	__u16   palette;	/* Palette in use */
+    __u16	brightness;
+    __u16	hue;
+    __u16	colour;
+    __u16	contrast;
+    __u16	whiteness;	/* Black and white only */
+    __u16	depth;		/* Capture depth */
+    __u16   palette;	/* Palette in use */
 #define VIDEO_PALETTE_GREY	1	/* Linear greyscale */
 #define VIDEO_PALETTE_HI240	2	/* High 240 cube (BT848) */
 #define VIDEO_PALETTE_RGB565	3	/* 565 16 bit RGB */
 #define VIDEO_PALETTE_RGB24	4	/* 24bit RGB */
-#define VIDEO_PALETTE_RGB32	5	/* 32bit RGB */	
+#define VIDEO_PALETTE_RGB32	5	/* 32bit RGB */
 #define VIDEO_PALETTE_RGB555	6	/* 555 15bit RGB */
 #define VIDEO_PALETTE_YUV422	7	/* YUV422 capture */
 #define VIDEO_PALETTE_YUYV	8
@@ -138,76 +138,76 @@ struct video_picture
 
 struct video_audio
 {
-	int	audio;		/* Audio channel */
-	__u16	volume;		/* If settable */
-	__u16	bass, treble;
-	__u32	flags;
+    int	audio;		/* Audio channel */
+    __u16	volume;		/* If settable */
+    __u16	bass, treble;
+    __u32	flags;
 #define VIDEO_AUDIO_MUTE	1
 #define VIDEO_AUDIO_MUTABLE	2
 #define VIDEO_AUDIO_VOLUME	4
 #define VIDEO_AUDIO_BASS	8
-#define VIDEO_AUDIO_TREBLE	16	
-	char    name[16];
+#define VIDEO_AUDIO_TREBLE	16
+    char    name[16];
 #define VIDEO_SOUND_MONO	1
 #define VIDEO_SOUND_STEREO	2
 #define VIDEO_SOUND_LANG1	4
 #define VIDEO_SOUND_LANG2	8
-        __u16   mode;
-        __u16	balance;	/* Stereo balance */
-        __u16	step;		/* Step actual volume uses */
+    __u16   mode;
+    __u16	balance;	/* Stereo balance */
+    __u16	step;		/* Step actual volume uses */
 };
 
 struct video_clip
 {
-	__s32	x,y;
-	__s32	width, height;
-	struct	video_clip *next;	/* For user use/driver use only */
+    __s32	x,y;
+    __s32	width, height;
+    struct	video_clip *next;	/* For user use/driver use only */
 };
 
 struct video_window
 {
-	__u32	x,y;			/* Position of window */
-	__u32	width,height;		/* Its size */
-	__u32	chromakey;
-	__u32	flags;
-	struct	video_clip *clips;	/* Set only */
-	int	clipcount;
+    __u32	x,y;			/* Position of window */
+    __u32	width,height;		/* Its size */
+    __u32	chromakey;
+    __u32	flags;
+    struct	video_clip *clips;	/* Set only */
+    int	clipcount;
 #define VIDEO_WINDOW_INTERLACE	1
 #define VIDEO_WINDOW_CHROMAKEY	16	/* Overlay by chromakey */
 #define VIDEO_CLIP_BITMAP	-1
-/* bitmap is 1024x625, a '1' bit represents a clipped pixel */
+    /* bitmap is 1024x625, a '1' bit represents a clipped pixel */
 #define VIDEO_CLIPMAP_SIZE	(128 * 625)
 };
 
 struct video_capture
 {
-	__u32 	x,y;			/* Offsets into image */
-	__u32	width, height;		/* Area to capture */
-	__u16	decimation;		/* Decimation divider */
-	__u16	flags;			/* Flags for capture */
+    __u32 	x,y;			/* Offsets into image */
+    __u32	width, height;		/* Area to capture */
+    __u16	decimation;		/* Decimation divider */
+    __u16	flags;			/* Flags for capture */
 #define VIDEO_CAPTURE_ODD		0	/* Temporal */
 #define VIDEO_CAPTURE_EVEN		1
 };
 
 struct video_buffer
 {
-	void	*base;
-	int	height,width;
-	int	depth;
-	int	bytesperline;
+    void	*base;
+    int	height,width;
+    int	depth;
+    int	bytesperline;
 };
 
 struct video_mmap
 {
-	unsigned	int frame;		/* Frame (0 - n) for double buffer */
-	int		height,width;
-	unsigned	int format;		/* should be VIDEO_PALETTE_* */
+    unsigned	int frame;		/* Frame (0 - n) for double buffer */
+    int		height,width;
+    unsigned	int format;		/* should be VIDEO_PALETTE_* */
 };
 
 struct video_key
 {
-	__u8	key[8];
-	__u32	flags;
+    __u8	key[8];
+    __u32	flags;
 };
 
 
@@ -215,31 +215,32 @@ struct video_key
 
 struct video_mbuf
 {
-	int	size;		/* Total memory to map */
-	int	frames;		/* Frames */
-	int	offsets[VIDEO_MAX_FRAME];
+    int	size;		/* Total memory to map */
+    int	frames;		/* Frames */
+    int	offsets[VIDEO_MAX_FRAME];
 };
-	
+
 
 #define 	VIDEO_NO_UNIT	(-1)
 
-	
+
 struct video_unit
 {
-	int 	video;		/* Video minor */
-	int	vbi;		/* VBI minor */
-	int	radio;		/* Radio minor */
-	int	audio;		/* Audio minor */
-	int	teletext;	/* Teletext minor */
+    int 	video;		/* Video minor */
+    int	vbi;		/* VBI minor */
+    int	radio;		/* Radio minor */
+    int	audio;		/* Audio minor */
+    int	teletext;	/* Teletext minor */
 };
 
-struct vbi_format {
-	__u32	sampling_rate;	/* in Hz */
-	__u32	samples_per_line;
-	__u32	sample_format;	/* VIDEO_PALETTE_RAW only (1 byte) */
-	__s32	start[2];	/* starting line for each frame */
-	__u32	count[2];	/* count of lines for each frame */
-	__u32	flags;
+struct vbi_format
+{
+    __u32	sampling_rate;	/* in Hz */
+    __u32	samples_per_line;
+    __u32	sample_format;	/* VIDEO_PALETTE_RAW only (1 byte) */
+    __s32	start[2];	/* starting line for each frame */
+    __u32	count[2];	/* count of lines for each frame */
+    __u32	flags;
 #define	VBI_UNSYNC	1	/* can distingues between top/bottom field */
 #define	VBI_INTERLACED	2	/* lines are interlaced */
 };
@@ -248,30 +249,30 @@ struct vbi_format {
 /* but it could apply generically to any hardware compressor/decompressor */
 struct video_info
 {
-	__u32	frame_count;	/* frames output since decode/encode began */
-	__u32	h_size;		/* current unscaled horizontal size */
-	__u32	v_size;		/* current unscaled veritcal size */
-	__u32	smpte_timecode;	/* current SMPTE timecode (for current GOP) */
-	__u32	picture_type;	/* current picture type */
-	__u32	temporal_reference;	/* current temporal reference */
-	__u8	user_data[256];	/* user data last found in compressed stream */
-	/* user_data[0] contains user data flags, user_data[1] has count */
+    __u32	frame_count;	/* frames output since decode/encode began */
+    __u32	h_size;		/* current unscaled horizontal size */
+    __u32	v_size;		/* current unscaled veritcal size */
+    __u32	smpte_timecode;	/* current SMPTE timecode (for current GOP) */
+    __u32	picture_type;	/* current picture type */
+    __u32	temporal_reference;	/* current temporal reference */
+    __u8	user_data[256];	/* user data last found in compressed stream */
+    /* user_data[0] contains user data flags, user_data[1] has count */
 };
 
 /* generic structure for setting playback modes */
 struct video_play_mode
 {
-	int	mode;
-	int	p1;
-	int	p2;
+    int	mode;
+    int	p1;
+    int	p2;
 };
 
 /* for loading microcode / fpga programming */
 struct video_code
 {
-	char	loadwhat[16];	/* name or tag of file being passed */
-	int	datasize;
-	__u8	*data;
+    char	loadwhat[16];	/* name or tag of file being passed */
+    int	datasize;
+    __u8	*data;
 };
 
 #define VIDIOCGCAP		_IOR('v',1,struct video_capability)	/* Get capabilities */
@@ -317,10 +318,10 @@ struct video_code
 
 /* VIDIOCSPLAYMODE */
 #define VID_PLAY_VID_OUT_MODE		0
-	/* p1: = VIDEO_MODE_PAL, VIDEO_MODE_NTSC, etc ... */
+/* p1: = VIDEO_MODE_PAL, VIDEO_MODE_NTSC, etc ... */
 #define VID_PLAY_GENLOCK		1
-	/* p1: 0 = OFF, 1 = ON */
-	/* p2: GENLOCK FINE DELAY value */ 
+/* p1: 0 = OFF, 1 = ON */
+/* p2: GENLOCK FINE DELAY value */
 #define VID_PLAY_NORMAL			2
 #define VID_PLAY_PAUSE			3
 #define VID_PLAY_SINGLE_FRAME		4
@@ -331,12 +332,12 @@ struct video_code
 #define VID_PLAY_FREEZE_FRAME		9
 #define VID_PLAY_STILL_MODE		10
 #define VID_PLAY_MASTER_MODE		11
-	/* p1: see below */
+/* p1: see below */
 #define		VID_PLAY_MASTER_NONE	1
 #define		VID_PLAY_MASTER_VIDEO	2
 #define		VID_PLAY_MASTER_AUDIO	3
 #define VID_PLAY_ACTIVE_SCANLINES	12
-	/* p1 = first active; p2 = last active */
+/* p1 = first active; p2 = last active */
 #define VID_PLAY_RESET			13
 #define VID_PLAY_END_MARK		14
 
@@ -368,7 +369,7 @@ struct video_code
 #define VID_HARDWARE_CPIA	24
 #define VID_HARDWARE_ZR36120	25	/* Zoran ZR36120/ZR36125 */
 #define VID_HARDWARE_ZR36067	26	/* Zoran ZR36067/36060 */
-#define VID_HARDWARE_OV511	27	
+#define VID_HARDWARE_OV511	27
 #define VID_HARDWARE_ZR356700	28	/* Zoran 36700 series */
 #define VID_HARDWARE_W9966	29
 #define VID_HARDWARE_SE401	30	/* SE401 USB webcams */

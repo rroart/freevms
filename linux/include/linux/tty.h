@@ -12,8 +12,8 @@
 #define MIN_NR_CONSOLES 1       /* must be at least 1 */
 #define MAX_NR_CONSOLES	63	/* serial lines start at 64 */
 #define MAX_NR_USER_CONSOLES 63	/* must be root to allocate above this */
-		/* Note: the ioctl VT_GETSTATE does not work for
-		   consoles 16 and higher (since it returns a short) */
+/* Note: the ioctl VT_GETSTATE does not work for
+   consoles 16 and higher (since it returns a short) */
 
 #ifdef __KERNEL__
 #include <linux/config.h>
@@ -28,7 +28,7 @@
 
 
 /*
- * Note: don't mess with NR_PTYS until you understand the tty minor 
+ * Note: don't mess with NR_PTYS until you understand the tty minor
  * number allocation game...
  * (Note: the *_driver.minor_start values 1, 64, 128, 192 are
  * hardcoded at present.)
@@ -56,40 +56,41 @@
  * These are set up by the setup-routine at boot-time:
  */
 
-struct screen_info {
-	unsigned char  orig_x;			/* 0x00 */
-	unsigned char  orig_y;			/* 0x01 */
-	unsigned short dontuse1;		/* 0x02 -- EXT_MEM_K sits here */
-	unsigned short orig_video_page;		/* 0x04 */
-	unsigned char  orig_video_mode;		/* 0x06 */
-	unsigned char  orig_video_cols;		/* 0x07 */
-	unsigned short unused2;			/* 0x08 */
-	unsigned short orig_video_ega_bx;	/* 0x0a */
-	unsigned short unused3;			/* 0x0c */
-	unsigned char  orig_video_lines;	/* 0x0e */
-	unsigned char  orig_video_isVGA;	/* 0x0f */
-	unsigned short orig_video_points;	/* 0x10 */
+struct screen_info
+{
+    unsigned char  orig_x;			/* 0x00 */
+    unsigned char  orig_y;			/* 0x01 */
+    unsigned short dontuse1;		/* 0x02 -- EXT_MEM_K sits here */
+    unsigned short orig_video_page;		/* 0x04 */
+    unsigned char  orig_video_mode;		/* 0x06 */
+    unsigned char  orig_video_cols;		/* 0x07 */
+    unsigned short unused2;			/* 0x08 */
+    unsigned short orig_video_ega_bx;	/* 0x0a */
+    unsigned short unused3;			/* 0x0c */
+    unsigned char  orig_video_lines;	/* 0x0e */
+    unsigned char  orig_video_isVGA;	/* 0x0f */
+    unsigned short orig_video_points;	/* 0x10 */
 
-	/* VESA graphic mode -- linear frame buffer */
-	unsigned short lfb_width;		/* 0x12 */
-	unsigned short lfb_height;		/* 0x14 */
-	unsigned short lfb_depth;		/* 0x16 */
-	unsigned long  lfb_base;		/* 0x18 */
-	unsigned long  lfb_size;		/* 0x1c */
-	unsigned short dontuse2, dontuse3;	/* 0x20 -- CL_MAGIC and CL_OFFSET here */
-	unsigned short lfb_linelength;		/* 0x24 */
-	unsigned char  red_size;		/* 0x26 */
-	unsigned char  red_pos;			/* 0x27 */
-	unsigned char  green_size;		/* 0x28 */
-	unsigned char  green_pos;		/* 0x29 */
-	unsigned char  blue_size;		/* 0x2a */
-	unsigned char  blue_pos;		/* 0x2b */
-	unsigned char  rsvd_size;		/* 0x2c */
-	unsigned char  rsvd_pos;		/* 0x2d */
-	unsigned short vesapm_seg;		/* 0x2e */
-	unsigned short vesapm_off;		/* 0x30 */
-	unsigned short pages;			/* 0x32 */
-						/* 0x34 -- 0x3f reserved for future expansion */
+    /* VESA graphic mode -- linear frame buffer */
+    unsigned short lfb_width;		/* 0x12 */
+    unsigned short lfb_height;		/* 0x14 */
+    unsigned short lfb_depth;		/* 0x16 */
+    unsigned long  lfb_base;		/* 0x18 */
+    unsigned long  lfb_size;		/* 0x1c */
+    unsigned short dontuse2, dontuse3;	/* 0x20 -- CL_MAGIC and CL_OFFSET here */
+    unsigned short lfb_linelength;		/* 0x24 */
+    unsigned char  red_size;		/* 0x26 */
+    unsigned char  red_pos;			/* 0x27 */
+    unsigned char  green_size;		/* 0x28 */
+    unsigned char  green_pos;		/* 0x29 */
+    unsigned char  blue_size;		/* 0x2a */
+    unsigned char  blue_pos;		/* 0x2b */
+    unsigned char  rsvd_size;		/* 0x2c */
+    unsigned char  rsvd_pos;		/* 0x2d */
+    unsigned short vesapm_seg;		/* 0x2e */
+    unsigned short vesapm_off;		/* 0x30 */
+    unsigned short pages;			/* 0x32 */
+    /* 0x34 -- 0x3f reserved for future expansion */
 };
 
 extern struct screen_info screen_info;
@@ -136,16 +137,17 @@ extern struct screen_info screen_info;
  */
 #define TTY_FLIPBUF_SIZE 512
 
-struct tty_flip_buffer {
-	struct tq_struct tqueue;
-	struct semaphore pty_sem;
-	char		*char_buf_ptr;
-	unsigned char	*flag_buf_ptr;
-	int		count;
-	int		buf_num;
-	unsigned char	char_buf[2*TTY_FLIPBUF_SIZE];
-	char		flag_buf[2*TTY_FLIPBUF_SIZE];
-	unsigned char	slop[4]; /* N.B. bug overwrites buffer by 1 */
+struct tty_flip_buffer
+{
+    struct tq_struct tqueue;
+    struct semaphore pty_sem;
+    char		*char_buf_ptr;
+    unsigned char	*flag_buf_ptr;
+    int		count;
+    int		buf_num;
+    unsigned char	char_buf[2*TTY_FLIPBUF_SIZE];
+    char		flag_buf[2*TTY_FLIPBUF_SIZE];
+    unsigned char	slop[4]; /* N.B. bug overwrites buffer by 1 */
 };
 /*
  * The pty uses char_buf and flag_buf as a contiguous buffer
@@ -256,59 +258,60 @@ struct tty_flip_buffer {
  * the size of this structure, and it needs to be done with care.
  * 						- TYT, 9/14/92
  */
-struct tty_struct {
-	int	magic;
-	struct tty_driver driver;
-	struct tty_ldisc ldisc;
-	struct termios *termios, *termios_locked;
-	int pgrp;
-	int session;
-	kdev_t	device;
-	unsigned long flags;
-	int count;
-	struct winsize winsize;
-	unsigned char stopped:1, hw_stopped:1, flow_stopped:1, packet:1;
-	unsigned char low_latency:1, warned:1;
-	unsigned char ctrl_status;
+struct tty_struct
+{
+    int	magic;
+    struct tty_driver driver;
+    struct tty_ldisc ldisc;
+    struct termios *termios, *termios_locked;
+    int pgrp;
+    int session;
+    kdev_t	device;
+    unsigned long flags;
+    int count;
+    struct winsize winsize;
+    unsigned char stopped:1, hw_stopped:1, flow_stopped:1, packet:1;
+    unsigned char low_latency:1, warned:1;
+    unsigned char ctrl_status;
 
-	struct tty_struct *link;
-	struct fasync_struct *fasync;
-	struct tty_flip_buffer flip;
-	int max_flip_cnt;
-	int alt_speed;		/* For magic substitution of 38400 bps */
-	wait_queue_head_t write_wait;
-	wait_queue_head_t read_wait;
-	struct tq_struct tq_hangup;
-	void *disc_data;
-	void *driver_data;
-	struct list_head tty_files;
+    struct tty_struct *link;
+    struct fasync_struct *fasync;
+    struct tty_flip_buffer flip;
+    int max_flip_cnt;
+    int alt_speed;		/* For magic substitution of 38400 bps */
+    wait_queue_head_t write_wait;
+    wait_queue_head_t read_wait;
+    struct tq_struct tq_hangup;
+    void *disc_data;
+    void *driver_data;
+    struct list_head tty_files;
 
 #define N_TTY_BUF_SIZE 4096
-	
-	/*
-	 * The following is data for the N_TTY line discipline.  For
-	 * historical reasons, this is included in the tty structure.
-	 */
-	unsigned int column;
-	unsigned char lnext:1, erasing:1, raw:1, real_raw:1, icanon:1;
-	unsigned char closing:1;
-	unsigned short minimum_to_wake;
-	unsigned overrun_time;
-	int num_overrun;
-	unsigned long process_char_map[256/(8*sizeof(unsigned long))];
-	char *read_buf;
-	int read_head;
-	int read_tail;
-	int read_cnt;
-	unsigned long read_flags[N_TTY_BUF_SIZE/(8*sizeof(unsigned long))];
-	int canon_data;
-	unsigned long canon_head;
-	unsigned int canon_column;
-	struct semaphore atomic_read;
-	struct semaphore atomic_write;
-	spinlock_t read_lock;
-	/* If the tty has a pending do_SAK, queue it here - akpm */
-	struct tq_struct SAK_tq;
+
+    /*
+     * The following is data for the N_TTY line discipline.  For
+     * historical reasons, this is included in the tty structure.
+     */
+    unsigned int column;
+    unsigned char lnext:1, erasing:1, raw:1, real_raw:1, icanon:1;
+    unsigned char closing:1;
+    unsigned short minimum_to_wake;
+    unsigned overrun_time;
+    int num_overrun;
+    unsigned long process_char_map[256/(8*sizeof(unsigned long))];
+    char *read_buf;
+    int read_head;
+    int read_tail;
+    int read_cnt;
+    unsigned long read_flags[N_TTY_BUF_SIZE/(8*sizeof(unsigned long))];
+    int canon_data;
+    unsigned long canon_head;
+    unsigned int canon_column;
+    struct semaphore atomic_read;
+    struct semaphore atomic_write;
+    spinlock_t read_lock;
+    /* If the tty has a pending do_SAK, queue it here - akpm */
+    struct tq_struct SAK_tq;
 };
 
 /* tty magic number */
@@ -316,7 +319,7 @@ struct tty_struct {
 
 /*
  * These bits are used in the flags field of the tty structure.
- * 
+ *
  * So that interrupts won't be able to mess up the queues,
  * copy_to_cooked must be atomic with respect to itself, as must
  * tty->write.  Thus, you must use the inline functions set_bit() and
@@ -370,7 +373,7 @@ extern int stdio_init(void);
 extern int a2232board_init(void);
 
 extern int tty_paranoia_check(struct tty_struct *tty, kdev_t device,
-			      const char *routine);
+                              const char *routine);
 extern char *tty_name(struct tty_struct *tty, char *buf);
 extern void tty_wait_until_sent(struct tty_struct * tty, long timeout);
 extern int tty_check_change(struct tty_struct * tty);
@@ -380,10 +383,10 @@ extern int tty_register_ldisc(int disc, struct tty_ldisc *new_ldisc);
 extern int tty_register_driver(struct tty_driver *driver);
 extern int tty_unregister_driver(struct tty_driver *driver);
 extern void tty_register_devfs (struct tty_driver *driver, unsigned int flags,
-				unsigned minor);
+                                unsigned minor);
 extern void tty_unregister_devfs (struct tty_driver *driver, unsigned minor);
 extern int tty_read_raw_data(struct tty_struct *tty, unsigned char *bufp,
-			     int buflen);
+                             int buflen);
 extern void tty_write_message(struct tty_struct *tty, char *msg);
 
 extern int is_orphaned_pgrp(int pgrp);
@@ -403,12 +406,12 @@ extern struct tty_ldisc tty_ldisc_N_TTY;
 
 /* tty_ioctl.c */
 extern int n_tty_ioctl(struct tty_struct * tty, struct file * file,
-		       unsigned int cmd, unsigned long arg);
+                       unsigned int cmd, unsigned long arg);
 
 /* serial.c */
 
 extern void serial_console_init(void);
- 
+
 /* pcxx.c */
 
 extern int pcxe_open(struct tty_struct *tty, struct file *filp);
@@ -420,7 +423,7 @@ extern void console_print(const char *);
 /* vt.c */
 
 extern int vt_ioctl(struct tty_struct *tty, struct file * file,
-		    unsigned int cmd, unsigned long arg);
+                    unsigned int cmd, unsigned long arg);
 
 extern void stdio_console_init(void);
 

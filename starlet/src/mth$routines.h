@@ -340,7 +340,7 @@ unsigned long mth$umin();
 
 float mth$abs();
 double mth$dabs(), mth$gabs();
-int mth$habs();			
+int mth$habs();
 
 short mth$iiabs();
 long mth$jiabs();
@@ -353,7 +353,7 @@ double mth$dble(), mth$gdble();
 
 float mth$dim();
 double mth$ddim(), mth$gdim();
-int mth$hdim();			
+int mth$hdim();
 
 short mth$iidim();
 long mth$jidim();
@@ -376,7 +376,7 @@ double mth$dflotj(), mth$gflotj();
 
 float mth$floor();
 double mth$dfloor(), mth$gfloor();
-int mth$hfloor();		
+int mth$hfloor();
 
 float mth$aint();
 
@@ -449,7 +449,7 @@ long mth$jmin1();
 
 float mth$amod();
 double mth$dmod(), mth$gmod();
-int mth$hmod();			
+int mth$hmod();
 
 short mth$imod();
 long mth$jmod();
@@ -457,7 +457,7 @@ long mth$jmod();
 
 float mth$anint();
 double mth$dnint(), mth$gnint();
-int mth$hnint();		
+int mth$hnint();
 
 short mth$inint();
 long mth$jnint();
@@ -497,4 +497,4 @@ long mth$jisign();
 
 float mth$sngl(), mth$snglg();
 
-#endif	
+#endif

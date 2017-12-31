@@ -21,11 +21,12 @@ int version_string(LINUX_VERSION_CODE);
 #define UTS_RELEASE "2.6.12"
 #endif
 
-struct new_utsname system_utsname = {
-	UTS_SYSNAME, UTS_NODENAME, UTS_RELEASE, UTS_VERSION,
-	UTS_MACHINE, UTS_DOMAINNAME
+struct new_utsname system_utsname =
+{
+    UTS_SYSNAME, UTS_NODENAME, UTS_RELEASE, UTS_VERSION,
+    UTS_MACHINE, UTS_DOMAINNAME
 };
 
-const char *linux_banner = 
-	"Linux version " UTS_RELEASE " (" LINUX_COMPILE_BY "@"
-	LINUX_COMPILE_HOST ") (" LINUX_COMPILER ") " UTS_VERSION "\n";
+const char *linux_banner =
+    "Linux version " UTS_RELEASE " (" LINUX_COMPILE_BY "@"
+    LINUX_COMPILE_HOST ") (" LINUX_COMPILER ") " UTS_VERSION "\n";

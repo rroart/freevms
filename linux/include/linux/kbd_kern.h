@@ -22,11 +22,12 @@ extern int funcbufsize, funcbufleft;
  *
  * Note: lockstate is used as index in the array key_map.
  */
-struct kbd_struct {
+struct kbd_struct
+{
 
-	unsigned char lockstate;
-/* 8 modifiers - the names do not have any meaning at all;
-   they can be associated to arbitrarily chosen keys */
+    unsigned char lockstate;
+    /* 8 modifiers - the names do not have any meaning at all;
+       they can be associated to arbitrarily chosen keys */
 #define VC_SHIFTLOCK	KG_SHIFT	/* shift lock mode */
 #define VC_ALTGRLOCK	KG_ALTGR	/* altgr lock mode */
 #define VC_CTRLLOCK	KG_CTRL 	/* control lock mode */
@@ -35,26 +36,26 @@ struct kbd_struct {
 #define VC_SHIFTRLOCK	KG_SHIFTR	/* shiftr lock mode */
 #define VC_CTRLLLOCK	KG_CTRLL 	/* ctrll lock mode */
 #define VC_CTRLRLOCK	KG_CTRLR 	/* ctrlr lock mode */
-	unsigned char slockstate; 	/* for `sticky' Shift, Ctrl, etc. */
+    unsigned char slockstate; 	/* for `sticky' Shift, Ctrl, etc. */
 
-	unsigned char ledmode:2; 	/* one 2-bit value */
+    unsigned char ledmode:2; 	/* one 2-bit value */
 #define LED_SHOW_FLAGS 0        /* traditional state */
 #define LED_SHOW_IOCTL 1        /* only change leds upon ioctl */
 #define LED_SHOW_MEM 2          /* `heartbeat': peek into memory */
 
-	unsigned char ledflagstate:3;	/* flags, not lights */
-	unsigned char default_ledflagstate:3;
+    unsigned char ledflagstate:3;	/* flags, not lights */
+    unsigned char default_ledflagstate:3;
 #define VC_SCROLLOCK	0	/* scroll-lock mode */
 #define VC_NUMLOCK	1	/* numeric lock mode */
 #define VC_CAPSLOCK	2	/* capslock mode */
 
-	unsigned char kbdmode:2;	/* one 2-bit value */
+    unsigned char kbdmode:2;	/* one 2-bit value */
 #define VC_XLATE	0	/* translate keycodes using keymap */
 #define VC_MEDIUMRAW	1	/* medium raw (keycode) mode */
 #define VC_RAW		2	/* raw (scancode) mode */
 #define VC_UNICODE	3	/* Unicode mode */
 
-	unsigned char modeflags:5;
+    unsigned char modeflags:5;
 #define VC_APPLIC	0	/* application key mode */
 #define VC_CKMODE	1	/* cursor key mode */
 #define VC_REPEAT	2	/* keyboard repeat */
@@ -78,57 +79,57 @@ extern void schedule_console_callback(void);
 
 static inline void set_leds(void)
 {
-	tasklet_schedule(&keyboard_tasklet);
+    tasklet_schedule(&keyboard_tasklet);
 }
 
 static inline int vc_kbd_mode(struct kbd_struct * kbd, int flag)
 {
-	return ((kbd->modeflags >> flag) & 1);
+    return ((kbd->modeflags >> flag) & 1);
 }
 
 static inline int vc_kbd_led(struct kbd_struct * kbd, int flag)
 {
-	return ((kbd->ledflagstate >> flag) & 1);
+    return ((kbd->ledflagstate >> flag) & 1);
 }
 
 static inline void set_vc_kbd_mode(struct kbd_struct * kbd, int flag)
 {
-	kbd->modeflags |= 1 << flag;
+    kbd->modeflags |= 1 << flag;
 }
 
 static inline void set_vc_kbd_led(struct kbd_struct * kbd, int flag)
 {
-	kbd->ledflagstate |= 1 << flag;
+    kbd->ledflagstate |= 1 << flag;
 }
 
 static inline void clr_vc_kbd_mode(struct kbd_struct * kbd, int flag)
 {
-	kbd->modeflags &= ~(1 << flag);
+    kbd->modeflags &= ~(1 << flag);
 }
 
 static inline void clr_vc_kbd_led(struct kbd_struct * kbd, int flag)
 {
-	kbd->ledflagstate &= ~(1 << flag);
+    kbd->ledflagstate &= ~(1 << flag);
 }
 
 static inline void chg_vc_kbd_lock(struct kbd_struct * kbd, int flag)
 {
-	kbd->lockstate ^= 1 << flag;
+    kbd->lockstate ^= 1 << flag;
 }
 
 static inline void chg_vc_kbd_slock(struct kbd_struct * kbd, int flag)
 {
-	kbd->slockstate ^= 1 << flag;
+    kbd->slockstate ^= 1 << flag;
 }
 
 static inline void chg_vc_kbd_mode(struct kbd_struct * kbd, int flag)
 {
-	kbd->modeflags ^= 1 << flag;
+    kbd->modeflags ^= 1 << flag;
 }
 
 static inline void chg_vc_kbd_led(struct kbd_struct * kbd, int flag)
 {
-	kbd->ledflagstate ^= 1 << flag;
+    kbd->ledflagstate ^= 1 << flag;
 }
 
 #define U(x) ((x) ^ 0xf000)
@@ -150,7 +151,7 @@ extern unsigned int keymap_count;
 
 static inline void con_schedule_flip(struct tty_struct *t)
 {
-	schedule_task(&t->flip.tqueue);
+    schedule_task(&t->flip.tqueue);
 }
 
 #endif

@@ -16,18 +16,19 @@
 # define NLM4_OFFSET_MAX	((s64) ((~(u64)0) >> 1))
 
 /* Return states for NLM */
-enum {
-	NLM_LCK_GRANTED			= 0,
-	NLM_LCK_DENIED			= 1,
-	NLM_LCK_DENIED_NOLOCKS		= 2,
-	NLM_LCK_BLOCKED			= 3,
-	NLM_LCK_DENIED_GRACE_PERIOD	= 4,
+enum
+{
+    NLM_LCK_GRANTED			= 0,
+    NLM_LCK_DENIED			= 1,
+    NLM_LCK_DENIED_NOLOCKS		= 2,
+    NLM_LCK_BLOCKED			= 3,
+    NLM_LCK_DENIED_GRACE_PERIOD	= 4,
 #ifdef CONFIG_LOCKD_V4
-	NLM_DEADLCK			= 5,
-	NLM_ROFS			= 6,
-	NLM_STALE_FH			= 7,
-	NLM_FBIG			= 8,
-	NLM_FAILED			= 9,
+    NLM_DEADLCK			= 5,
+    NLM_ROFS			= 6,
+    NLM_STALE_FH			= 7,
+    NLM_FBIG			= 8,
+    NLM_FAILED			= 9,
 #endif
 };
 

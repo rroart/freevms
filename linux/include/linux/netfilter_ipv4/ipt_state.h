@@ -6,6 +6,6 @@
 
 struct ipt_state_info
 {
-	unsigned int statemask;
+    unsigned int statemask;
 };
 #endif /*_IPT_STATE_H*/

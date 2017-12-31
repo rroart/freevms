@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -55,7 +55,7 @@
 
 void __up(struct semaphore *sem)
 {
-	wake_up(&sem->wait);
+    wake_up(&sem->wait);
 }
 
 static spinlock_t semaphore_lock = SPIN_LOCK_UNLOCKED;
@@ -63,90 +63,95 @@ static spinlock_t semaphore_lock = SPIN_LOCK_UNLOCKED;
 void __down(struct semaphore * sem)
 {
 #if 0
-	struct task_struct *tsk = current;
-	DECLARE_WAITQUEUE(wait, tsk);
-	tsk->state = TASK_UNINTERRUPTIBLE;
-	add_wait_queue_exclusive(&sem->wait, &wait);
+    struct task_struct *tsk = current;
+    DECLARE_WAITQUEUE(wait, tsk);
+    tsk->state = TASK_UNINTERRUPTIBLE;
+    add_wait_queue_exclusive(&sem->wait, &wait);
 
-	spin_lock_irq(&semaphore_lock);
-	sem->sleepers++;
-	for (;;) {
-		int sleepers = sem->sleepers;
+    spin_lock_irq(&semaphore_lock);
+    sem->sleepers++;
+    for (;;)
+    {
+        int sleepers = sem->sleepers;
 
-		/*
-		 * Add "everybody else" into it. They aren't
-		 * playing, because we own the spinlock.
-		 */
-		if (!atomic_add_negative(sleepers - 1, &sem->count)) {
-			sem->sleepers = 0;
-			break;
-		}
-		sem->sleepers = 1;	/* us - see -1 above */
-		spin_unlock_irq(&semaphore_lock);
+        /*
+         * Add "everybody else" into it. They aren't
+         * playing, because we own the spinlock.
+         */
+        if (!atomic_add_negative(sleepers - 1, &sem->count))
+        {
+            sem->sleepers = 0;
+            break;
+        }
+        sem->sleepers = 1;	/* us - see -1 above */
+        spin_unlock_irq(&semaphore_lock);
 
-		schedule();
-		tsk->state = TASK_UNINTERRUPTIBLE;
-		spin_lock_irq(&semaphore_lock);
-	}
-	spin_unlock_irq(&semaphore_lock);
-	remove_wait_queue(&sem->wait, &wait);
-	tsk->state = TASK_RUNNING;
-	wake_up(&sem->wait);
+        schedule();
+        tsk->state = TASK_UNINTERRUPTIBLE;
+        spin_lock_irq(&semaphore_lock);
+    }
+    spin_unlock_irq(&semaphore_lock);
+    remove_wait_queue(&sem->wait, &wait);
+    tsk->state = TASK_RUNNING;
+    wake_up(&sem->wait);
 #endif
 }
 
 int __down_interruptible(struct semaphore * sem)
 {
 #if 0
-	int retval = 0;
-	struct task_struct *tsk = current;
-	DECLARE_WAITQUEUE(wait, tsk);
-	tsk->state = TASK_INTERRUPTIBLE;
-	add_wait_queue_exclusive(&sem->wait, &wait);
+    int retval = 0;
+    struct task_struct *tsk = current;
+    DECLARE_WAITQUEUE(wait, tsk);
+    tsk->state = TASK_INTERRUPTIBLE;
+    add_wait_queue_exclusive(&sem->wait, &wait);
 
-	spin_lock_irq(&semaphore_lock);
-	sem->sleepers ++;
-	for (;;) {
-		int sleepers = sem->sleepers;
+    spin_lock_irq(&semaphore_lock);
+    sem->sleepers ++;
+    for (;;)
+    {
+        int sleepers = sem->sleepers;
 
-		/*
-		 * With signals pending, this turns into
-		 * the trylock failure case - we won't be
-		 * sleeping, and we* can't get the lock as
-		 * it has contention. Just correct the count
-		 * and exit.
-		 */
-		if (signal_pending(current)) {
-			retval = -EINTR;
-			sem->sleepers = 0;
-			atomic_add(sleepers, &sem->count);
-			break;
-		}
+        /*
+         * With signals pending, this turns into
+         * the trylock failure case - we won't be
+         * sleeping, and we* can't get the lock as
+         * it has contention. Just correct the count
+         * and exit.
+         */
+        if (signal_pending(current))
+        {
+            retval = -EINTR;
+            sem->sleepers = 0;
+            atomic_add(sleepers, &sem->count);
+            break;
+        }
 
-		/*
-		 * Add "everybody else" into it. They aren't
-		 * playing, because we own the spinlock. The
-		 * "-1" is because we're still hoping to get
-		 * the lock.
-		 */
-		if (!atomic_add_negative(sleepers - 1, &sem->count)) {
-			sem->sleepers = 0;
-			break;
-		}
-		sem->sleepers = 1;	/* us - see -1 above */
-		spin_unlock_irq(&semaphore_lock);
+        /*
+         * Add "everybody else" into it. They aren't
+         * playing, because we own the spinlock. The
+         * "-1" is because we're still hoping to get
+         * the lock.
+         */
+        if (!atomic_add_negative(sleepers - 1, &sem->count))
+        {
+            sem->sleepers = 0;
+            break;
+        }
+        sem->sleepers = 1;	/* us - see -1 above */
+        spin_unlock_irq(&semaphore_lock);
 
-		schedule();
-		tsk->state = TASK_INTERRUPTIBLE;
-		spin_lock_irq(&semaphore_lock);
-	}
-	spin_unlock_irq(&semaphore_lock);
-	tsk->state = TASK_RUNNING;
-	remove_wait_queue(&sem->wait, &wait);
-	wake_up(&sem->wait);
-	return retval;
+        schedule();
+        tsk->state = TASK_INTERRUPTIBLE;
+        spin_lock_irq(&semaphore_lock);
+    }
+    spin_unlock_irq(&semaphore_lock);
+    tsk->state = TASK_RUNNING;
+    remove_wait_queue(&sem->wait, &wait);
+    wake_up(&sem->wait);
+    return retval;
 #endif
-	return 0;
+    return 0;
 }
 
 /*
@@ -160,23 +165,23 @@ int __down_interruptible(struct semaphore * sem)
 int __down_trylock(struct semaphore * sem)
 {
 #if 0
-	int sleepers;
-	unsigned long flags;
+    int sleepers;
+    unsigned long flags;
 
-	spin_lock_irqsave(&semaphore_lock, flags);
-	sleepers = sem->sleepers + 1;
-	sem->sleepers = 0;
+    spin_lock_irqsave(&semaphore_lock, flags);
+    sleepers = sem->sleepers + 1;
+    sem->sleepers = 0;
 
-	/*
-	 * Add "everybody else" and us into it. They aren't
-	 * playing, because we own the spinlock.
-	 */
-	if (!atomic_add_negative(sleepers, &sem->count))
-		wake_up(&sem->wait);
+    /*
+     * Add "everybody else" and us into it. They aren't
+     * playing, because we own the spinlock.
+     */
+    if (!atomic_add_negative(sleepers, &sem->count))
+        wake_up(&sem->wait);
 
-	spin_unlock_irqrestore(&semaphore_lock, flags);
+    spin_unlock_irqrestore(&semaphore_lock, flags);
 #endif
-	return 1;
+    return 1;
 }
 
 
@@ -191,59 +196,59 @@ int __down_trylock(struct semaphore * sem)
  * value..
  */
 asm(
-".text\n"
-".align 4\n"
-".globl __down_failed\n"
-"__down_failed:\n\t"
-	"pushl %eax\n\t"
-	"pushl %edx\n\t"
-	"pushl %ecx\n\t"
-	"call __down\n\t"
-	"popl %ecx\n\t"
-	"popl %edx\n\t"
-	"popl %eax\n\t"
-	"ret"
+    ".text\n"
+    ".align 4\n"
+    ".globl __down_failed\n"
+    "__down_failed:\n\t"
+    "pushl %eax\n\t"
+    "pushl %edx\n\t"
+    "pushl %ecx\n\t"
+    "call __down\n\t"
+    "popl %ecx\n\t"
+    "popl %edx\n\t"
+    "popl %eax\n\t"
+    "ret"
 );
 
 asm(
-".text\n"
-".align 4\n"
-".globl __down_failed_interruptible\n"
-"__down_failed_interruptible:\n\t"
-	"pushl %edx\n\t"
-	"pushl %ecx\n\t"
-	"call __down_interruptible\n\t"
-	"popl %ecx\n\t"
-	"popl %edx\n\t"
-	"ret"
+    ".text\n"
+    ".align 4\n"
+    ".globl __down_failed_interruptible\n"
+    "__down_failed_interruptible:\n\t"
+    "pushl %edx\n\t"
+    "pushl %ecx\n\t"
+    "call __down_interruptible\n\t"
+    "popl %ecx\n\t"
+    "popl %edx\n\t"
+    "ret"
 );
 
 asm(
-".text\n"
-".align 4\n"
-".globl __down_failed_trylock\n"
-"__down_failed_trylock:\n\t"
-	"pushl %edx\n\t"
-	"pushl %ecx\n\t"
-	"call __down_trylock\n\t"
-	"popl %ecx\n\t"
-	"popl %edx\n\t"
-	"ret"
+    ".text\n"
+    ".align 4\n"
+    ".globl __down_failed_trylock\n"
+    "__down_failed_trylock:\n\t"
+    "pushl %edx\n\t"
+    "pushl %ecx\n\t"
+    "call __down_trylock\n\t"
+    "popl %ecx\n\t"
+    "popl %edx\n\t"
+    "ret"
 );
 
 asm(
-".text\n"
-".align 4\n"
-".globl __up_wakeup\n"
-"__up_wakeup:\n\t"
-	"pushl %eax\n\t"
-	"pushl %edx\n\t"
-	"pushl %ecx\n\t"
-	"call __up\n\t"
-	"popl %ecx\n\t"
-	"popl %edx\n\t"
-	"popl %eax\n\t"
-	"ret"
+    ".text\n"
+    ".align 4\n"
+    ".globl __up_wakeup\n"
+    "__up_wakeup:\n\t"
+    "pushl %eax\n\t"
+    "pushl %edx\n\t"
+    "pushl %ecx\n\t"
+    "call __up\n\t"
+    "popl %ecx\n\t"
+    "popl %edx\n\t"
+    "popl %eax\n\t"
+    "ret"
 );
 
 /*
@@ -251,29 +256,29 @@ asm(
  */
 #if defined(CONFIG_SMP)
 asm(
-".align	4;\n"
-".globl	__write_lock_failed;\n"
-"__write_lock_failed:;\n"
-"	" LOCK "addl	$" RW_LOCK_BIAS_STR ",(%eax);\n"
-"1:	rep; nop;\n"
-"	cmpl	$" RW_LOCK_BIAS_STR ",(%eax);\n"
-"	jne	1b;\n"
-";\n"
-"	" LOCK "subl	$" RW_LOCK_BIAS_STR ",(%eax);\n"
-"	jnz	__write_lock_failed;\n"
-"	ret;\n"
-";\n"
-";\n"
-".align	4;\n"
-".globl	__read_lock_failed;\n"
-"__read_lock_failed:;\n"
-"	lock ; incl	(%eax);\n"
-"1:	rep; nop;\n"
-"	cmpl	$1,(%eax);\n"
-"	js	1b;\n"
-";\n"
-"	lock ; decl	(%eax);\n"
-"	js	__read_lock_failed;\n"
-"	ret;\n"
+    ".align	4;\n"
+    ".globl	__write_lock_failed;\n"
+    "__write_lock_failed:;\n"
+    "	" LOCK "addl	$" RW_LOCK_BIAS_STR ",(%eax);\n"
+    "1:	rep; nop;\n"
+    "	cmpl	$" RW_LOCK_BIAS_STR ",(%eax);\n"
+    "	jne	1b;\n"
+    ";\n"
+    "	" LOCK "subl	$" RW_LOCK_BIAS_STR ",(%eax);\n"
+    "	jnz	__write_lock_failed;\n"
+    "	ret;\n"
+    ";\n"
+    ";\n"
+    ".align	4;\n"
+    ".globl	__read_lock_failed;\n"
+    "__read_lock_failed:;\n"
+    "	lock ; incl	(%eax);\n"
+    "1:	rep; nop;\n"
+    "	cmpl	$1,(%eax);\n"
+    "	js	1b;\n"
+    ";\n"
+    "	lock ; decl	(%eax);\n"
+    "	js	__read_lock_failed;\n"
+    "	ret;\n"
 );
 #endif

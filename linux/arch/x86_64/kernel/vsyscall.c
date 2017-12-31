@@ -56,102 +56,107 @@ long __vxtime_sequence[2] __section_vxtime_sequence;
 
 static force_inline void do_vgettimeofday(struct timeval * tv)
 {
-	long sequence, t;
-	unsigned long sec, usec;
+    long sequence, t;
+    unsigned long sec, usec;
 
-	do {
-		sequence = __vxtime_sequence[1];
-		rmb();
+    do
+    {
+        sequence = __vxtime_sequence[1];
+        rmb();
 
-		sec = __xtime.tv_sec;
-		usec = __xtime.tv_usec + (__jiffies - __wall_jiffies) * (1000000 / HZ);
+        sec = __xtime.tv_sec;
+        usec = __xtime.tv_usec + (__jiffies - __wall_jiffies) * (1000000 / HZ);
 
-		switch (__vxtime.mode) {
+        switch (__vxtime.mode)
+        {
 
-			case VXTIME_TSC:
-				sync_core();
-				rdtscll(t);
-				usec += (((t  - __vxtime.last_tsc) * __vxtime.tsc_quot) >> 32);
-				break;
+        case VXTIME_TSC:
+            sync_core();
+            rdtscll(t);
+            usec += (((t  - __vxtime.last_tsc) * __vxtime.tsc_quot) >> 32);
+            break;
 
-			case VXTIME_HPET:
-				usec += ((readl(fix_to_virt(VSYSCALL_HPET) + 0xf0) - __vxtime.last) * __vxtime.quot) >> 32;
-				break;
+        case VXTIME_HPET:
+            usec += ((readl(fix_to_virt(VSYSCALL_HPET) + 0xf0) - __vxtime.last) * __vxtime.quot) >> 32;
+            break;
 
-		}
+        }
 
-		rmb();
-	} while (sequence != __vxtime_sequence[0]);
+        rmb();
+    }
+    while (sequence != __vxtime_sequence[0]);
 
-	tv->tv_sec = sec + usec / 1000000;
-	tv->tv_usec = usec % 1000000;
+    tv->tv_sec = sec + usec / 1000000;
+    tv->tv_usec = usec % 1000000;
 }
 
 
 static force_inline void do_get_tz(struct timezone * tz)
 {
-	long sequence;
+    long sequence;
 
-	do {
-		sequence = __vxtime_sequence[1];
-		rmb();
+    do
+    {
+        sequence = __vxtime_sequence[1];
+        rmb();
 
-		*tz = __sys_tz;
+        *tz = __sys_tz;
 
-		rmb();
-	} while (sequence != __vxtime_sequence[0]);
+        rmb();
+    }
+    while (sequence != __vxtime_sequence[0]);
 }
 
 static long __vsyscall(0) vgettimeofday(struct timeval * tv, struct timezone * tz)
 {
-	if (tv)
-			do_vgettimeofday(tv);
+    if (tv)
+        do_vgettimeofday(tv);
 
-	if (tz)
-		do_get_tz(tz);
+    if (tz)
+        do_get_tz(tz);
 
-	return 0;
+    return 0;
 }
 
 static time_t __vsyscall(1) vtime(time_t * tp)
 {
-	struct timeval tv;
-	vgettimeofday(&tv, NULL);
-	if (tp) *tp = tv.tv_sec;
-	return tv.tv_sec;
+    struct timeval tv;
+    vgettimeofday(&tv, NULL);
+    if (tp) *tp = tv.tv_sec;
+    return tv.tv_sec;
 }
 
 static long __vsyscall(2) venosys_0(void)
 {
-	return -ENOSYS;
+    return -ENOSYS;
 }
 
 static long __vsyscall(3) venosys_1(void)
 {
-	return -ENOSYS;
+    return -ENOSYS;
 }
 
 extern char vsyscall_syscall[], __vsyscall_0[];
 
 static void __init map_vsyscall(void)
 {
-	unsigned long physaddr_page0 = __pa_symbol(&__vsyscall_0);
-	__set_fixmap(VSYSCALL_FIRST_PAGE, physaddr_page0, PAGE_KERNEL_VSYSCALL);
-	if (hpet_address)
-		__set_fixmap(VSYSCALL_HPET, hpet_address, PAGE_KERNEL_VSYSCALL);
+    unsigned long physaddr_page0 = __pa_symbol(&__vsyscall_0);
+    __set_fixmap(VSYSCALL_FIRST_PAGE, physaddr_page0, PAGE_KERNEL_VSYSCALL);
+    if (hpet_address)
+        __set_fixmap(VSYSCALL_HPET, hpet_address, PAGE_KERNEL_VSYSCALL);
 }
 
 static int __init vsyscall_init(void)
 {
-	if ((unsigned long) &vgettimeofday != VSYSCALL_ADDR(__NR_vgettimeofday))
-		panic("vgettimeofday link addr broken");
-	if ((unsigned long) &vtime != VSYSCALL_ADDR(__NR_vtime))
-		panic("vtime link addr broken");
-	if (VSYSCALL_ADDR(0) != __fix_to_virt(VSYSCALL_FIRST_PAGE))
-		panic("fixmap first vsyscall %lx should be %lx", __fix_to_virt(VSYSCALL_FIRST_PAGE),
-			VSYSCALL_ADDR(0));
-	map_vsyscall();
-	return 0;
+    if ((unsigned long) &vgettimeofday != VSYSCALL_ADDR(__NR_vgettimeofday))
+        panic("vgettimeofday link addr broken");
+    if ((unsigned long) &vtime != VSYSCALL_ADDR(__NR_vtime))
+        panic("vtime link addr broken");
+    if (VSYSCALL_ADDR(0) != __fix_to_virt(VSYSCALL_FIRST_PAGE))
+        panic("fixmap first vsyscall %lx should be %lx", __fix_to_virt(VSYSCALL_FIRST_PAGE),
+              VSYSCALL_ADDR(0));
+    map_vsyscall();
+    return 0;
 }
 
 __initcall(vsyscall_init);

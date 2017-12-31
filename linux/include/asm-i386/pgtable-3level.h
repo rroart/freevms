@@ -26,7 +26,7 @@
  */
 static inline int pte_x(pte_t pte)
 {
-	return !(pte_val(pte) & _PAGE_NX);
+    return !(pte_val(pte) & _PAGE_NX);
 }
 
 /*
@@ -34,14 +34,14 @@ static inline int pte_x(pte_t pte)
  */
 static inline int pte_exec(pte_t pte)
 {
-	return pte_user(pte) && pte_x(pte);
+    return pte_user(pte) && pte_x(pte);
 }
 /*
  * All present pages with !NX bit are kernel-executable:
  */
 static inline int pte_exec_kernel(pte_t pte)
 {
-	return pte_x(pte);
+    return pte_x(pte);
 }
 
 /* Rules for using set_pte: the pte being assigned *must* be
@@ -52,9 +52,9 @@ static inline int pte_exec_kernel(pte_t pte)
  */
 static inline void set_pte(pte_t *ptep, pte_t pte)
 {
-	ptep->pte_high = pte.pte_high;
-	smp_wmb();
-	ptep->pte_low = pte.pte_low;
+    ptep->pte_high = pte.pte_high;
+    smp_wmb();
+    ptep->pte_low = pte.pte_low;
 }
 #define set_pte_at(mm,addr,ptep,pteval) set_pte(ptep,pteval)
 
@@ -92,67 +92,67 @@ static inline void pud_clear (pud_t * pud) { }
  */
 static inline void pte_clear(struct mm_struct *mm, unsigned long addr, pte_t *ptep)
 {
-	ptep->pte_low = 0;
-	smp_wmb();
-	ptep->pte_high = 0;
+    ptep->pte_low = 0;
+    smp_wmb();
+    ptep->pte_high = 0;
 }
 
 static inline void pmd_clear(pmd_t *pmd)
 {
-	u32 *tmp = (u32 *)pmd;
-	*tmp = 0;
-	smp_wmb();
-	*(tmp + 1) = 0;
+    u32 *tmp = (u32 *)pmd;
+    *tmp = 0;
+    smp_wmb();
+    *(tmp + 1) = 0;
 }
 
 static inline pte_t ptep_get_and_clear(struct mm_struct *mm, unsigned long addr, pte_t *ptep)
 {
-	pte_t res;
+    pte_t res;
 
-	/* xchg acts as a barrier before the setting of the high bits */
-	res.pte_low = xchg(&ptep->pte_low, 0);
-	res.pte_high = ptep->pte_high;
-	ptep->pte_high = 0;
+    /* xchg acts as a barrier before the setting of the high bits */
+    res.pte_low = xchg(&ptep->pte_low, 0);
+    res.pte_high = ptep->pte_high;
+    ptep->pte_high = 0;
 
-	return res;
+    return res;
 }
 
 static inline int pte_same(pte_t a, pte_t b)
 {
-	return a.pte_low == b.pte_low && a.pte_high == b.pte_high;
+    return a.pte_low == b.pte_low && a.pte_high == b.pte_high;
 }
 
 #define pte_page(x)	pfn_to_page(pte_pfn(x))
 
 static inline int pte_none(pte_t pte)
 {
-	return !pte.pte_low && !pte.pte_high;
+    return !pte.pte_low && !pte.pte_high;
 }
 
 static inline unsigned long pte_pfn(pte_t pte)
 {
-	return (pte.pte_low >> PAGE_SHIFT) |
-		(pte.pte_high << (32 - PAGE_SHIFT));
+    return (pte.pte_low >> PAGE_SHIFT) |
+           (pte.pte_high << (32 - PAGE_SHIFT));
 }
 
 extern unsigned long long __supported_pte_mask;
 
 static inline pte_t pfn_pte(unsigned long page_nr, pgprot_t pgprot)
 {
-	pte_t pte;
+    pte_t pte;
 
-	pte.pte_high = (page_nr >> (32 - PAGE_SHIFT)) | \
-					(pgprot_val(pgprot) >> 32);
-	pte.pte_high &= (__supported_pte_mask >> 32);
-	pte.pte_low = ((page_nr << PAGE_SHIFT) | pgprot_val(pgprot)) & \
-							__supported_pte_mask;
-	return pte;
+    pte.pte_high = (page_nr >> (32 - PAGE_SHIFT)) | \
+                   (pgprot_val(pgprot) >> 32);
+    pte.pte_high &= (__supported_pte_mask >> 32);
+    pte.pte_low = ((page_nr << PAGE_SHIFT) | pgprot_val(pgprot)) & \
+                  __supported_pte_mask;
+    return pte;
 }
 
 static inline pmd_t pfn_pmd(unsigned long page_nr, pgprot_t pgprot)
 {
-	return __pmd((((unsigned long long)page_nr << PAGE_SHIFT) | \
-			pgprot_val(pgprot)) & __supported_pte_mask);
+    return __pmd((((unsigned long long)page_nr << PAGE_SHIFT) | \
+                  pgprot_val(pgprot)) & __supported_pte_mask);
 }
 
 /*

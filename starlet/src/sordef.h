@@ -88,6 +88,6 @@
 #define		SOR$_OPREPLY		1868435
 #define		SOR$_CHKPNT		1868441
 #define		SOR$_ODD_LEN		1868452
-	
+
 #endif
- 
+

@@ -30,7 +30,7 @@
  *	On older X86 processors its not a win to use MMX here it seems.
  *	Maybe the K6-III ?
  */
- 
+
 #define clear_page(page)	memset((void *)(page), 0, PAGE_SIZE)
 #define copy_page(to,from)	memcpy((void *)(to), (void *)(from), PAGE_SIZE)
 
@@ -43,18 +43,36 @@
  * These are used to make use of C type-checking..
  */
 #if CONFIG_X86_PAE
-typedef struct { unsigned long pte_low, pte_high; } pte_t;
-typedef struct { unsigned long long pmd; } pmd_t;
-typedef struct { unsigned long long pgd; } pgd_t;
+typedef struct
+{
+    unsigned long pte_low, pte_high;
+} pte_t;
+typedef struct
+{
+    unsigned long long pmd;
+} pmd_t;
+typedef struct
+{
+    unsigned long long pgd;
+} pgd_t;
 #define pte_val(x)	((x).pte_low | ((unsigned long long)(x).pte_high << 32))
 #else
-typedef struct { unsigned long pte_low; } pte_t;
-typedef struct { unsigned long pgd; } pgd_t;
+typedef struct
+{
+    unsigned long pte_low;
+} pte_t;
+typedef struct
+{
+    unsigned long pgd;
+} pgd_t;
 #define pte_val(x)	((x).pte_low)
 #endif
 #define PTE_MASK	PAGE_MASK
 
-typedef struct { unsigned long pgprot; } pgprot_t;
+typedef struct
+{
+    unsigned long pgprot;
+} pgprot_t;
 
 #define pmd_val(x)	((x).pmd)
 #define pgd_val(x)	((x).pgd)
@@ -77,7 +95,7 @@ typedef struct { unsigned long pgprot; } pgprot_t;
  *
  * A __PAGE_OFFSET of 0x80000000 means that the kernel has
  * a virtual address space of one gigabyte, which limits the
- * amount of physical memory you can use to about 950MB. 
+ * amount of physical memory you can use to about 950MB.
  *
  * If you want more physical memory than this then see the CONFIG_HIGHMEM4G
  * and CONFIG_HIGHMEM64G options in the kernel configuration.
@@ -115,15 +133,17 @@ extern void do_BUG(const char *file, int line);
 /* Pure 2^n version of get_order */
 static __inline__ int get_order(unsigned long size)
 {
-	int order;
+    int order;
 
-	size = (size-1) >> (PAGE_SHIFT-1);
-	order = -1;
-	do {
-		size >>= 1;
-		order++;
-	} while (size);
-	return order;
+    size = (size-1) >> (PAGE_SHIFT-1);
+    order = -1;
+    do
+    {
+        size >>= 1;
+        order++;
+    }
+    while (size);
+    return order;
 }
 
 #endif /* __ASSEMBLY__ */
@@ -135,7 +155,7 @@ static __inline__ int get_order(unsigned long size)
 #define __pa(x)			((unsigned long)(x)-PAGE_OFFSET)
 #define __va(x)			((void *)((unsigned long)(x)+PAGE_OFFSET))
 #define virt_to_page(kaddr)	(mem_map + (__pa(kaddr) >> PAGE_SHIFT))
-#define pfn_to_page(pfn)	(mem_map + (pfn)) 
+#define pfn_to_page(pfn)	(mem_map + (pfn))
 #define page_to_pfn(page)   ((page) - mem_map)
 #define VALID_PAGE(page)	((page - mem_map) < max_mapnr)
 

@@ -3,36 +3,37 @@
 
 #include <linux/cache.h>
 
-/* Per processor datastructure. %gs points to it while the kernel runs */ 
+/* Per processor datastructure. %gs points to it while the kernel runs */
 /* To use a new field with the *_pda macros it needs to be added to tools/offset.c */
-struct x8664_pda {
-	unsigned long kernelstack;  /* TOS for current process */ 
-	unsigned long oldrsp; 	    /* user rsp for system call */
-	unsigned long irqrsp;	    /* Old rsp for interrupts. */ 
-	struct task_struct *pcurrent;	/* Current process */
-        int irqcount;		    /* Irq nesting counter. Starts with -1 */  	
-	int cpunumber;		    /* Logical CPU number */
-	/* XXX: could be a single list */
-	unsigned long *pgd_quick;
-	unsigned long *pud_quick;
-	unsigned long *pmd_quick;
-	unsigned long *pte_quick;
-	unsigned long pgtable_cache_sz;
-	char *irqstackptr;	/* top of irqstack */
-	unsigned long volatile *level4_pgt_not; 
+struct x8664_pda
+{
+    unsigned long kernelstack;  /* TOS for current process */
+    unsigned long oldrsp; 	    /* user rsp for system call */
+    unsigned long irqrsp;	    /* Old rsp for interrupts. */
+    struct task_struct *pcurrent;	/* Current process */
+    int irqcount;		    /* Irq nesting counter. Starts with -1 */
+    int cpunumber;		    /* Logical CPU number */
+    /* XXX: could be a single list */
+    unsigned long *pgd_quick;
+    unsigned long *pud_quick;
+    unsigned long *pmd_quick;
+    unsigned long *pte_quick;
+    unsigned long pgtable_cache_sz;
+    char *irqstackptr;	/* top of irqstack */
+    unsigned long volatile *level4_pgt_not;
 } ____cacheline_aligned;
 
 #define PDA_STACKOFFSET (5*8)
 
 #define IRQSTACK_ORDER 2
-#define IRQSTACKSIZE (PAGE_SIZE << IRQSTACK_ORDER) 
+#define IRQSTACKSIZE (PAGE_SIZE << IRQSTACK_ORDER)
 
 extern struct x8664_pda cpu_pda[];
 
-/* 
+/*
  * There is no fast way to get the base address of the PDA, all the accesses
  * have to mention %fs/%gs.  So it needs to be done this Torvaldian way.
- */ 
+ */
 #define sizeof_field(type,field)  (sizeof(((type *)0)->field))
 #define typeof_field(type,field)  typeof(((type *)0)->field)
 

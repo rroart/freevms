@@ -6,7 +6,7 @@
  *	spinlock.h Copyright 1996 Linus Torvalds.
  *
  *	Copyright 1999 Red Hat, Inc.
- *	Copyright 2001,2002 SuSE labs 
+ *	Copyright 2001,2002 SuSE labs
  *
  *	Written by Benjamin LaHaise.
  *

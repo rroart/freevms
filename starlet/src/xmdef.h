@@ -47,77 +47,82 @@
 #define		XM$M_MDM_MODTEST	0x400
 #define		XM$M_MDM_SIGQUAL	0x4000
 #define		XM$M_MDM_SIGRATE	0x8000
-	
-struct _xmdev {
-  unsigned char xmdev$b_p1_class;
-  unsigned char xmdev$b_p1_type;
-  unsigned short int xmdev$w_p1_mms;
-  unsigned char xmdev$b_p1_char;
-  unsigned char xmdev$b_p1_sts;
-  unsigned char xmdev$b_p1_esum;
-  unsigned char xmdev$b_p1_tpi;
+
+struct _xmdev
+{
+    unsigned char xmdev$b_p1_class;
+    unsigned char xmdev$b_p1_type;
+    unsigned short int xmdev$w_p1_mms;
+    unsigned char xmdev$b_p1_char;
+    unsigned char xmdev$b_p1_sts;
+    unsigned char xmdev$b_p1_esum;
+    unsigned char xmdev$b_p1_tpi;
 };
 
-union _xmdef {
-  struct  {
-    unsigned xm$v_chr_mop		: 1;
-    unsigned xm$v_chr_loopb		: 1;
-    unsigned xm$v_chr_hdplx		: 1;
-    unsigned xm$v_chr_slave		: 1;
-    unsigned xm$v_chr_mbx		: 1;
-    unsigned xm$v_chr_dmc		: 1;
-    unsigned xm$v_chr_ctrl		: 1;
-    unsigned xm$v_chr_trib		: 1;
-    unsigned xm$v_sts_dchk		: 1;
-    unsigned xm$v_sts_timo		: 1;
-    unsigned xm$v_sts_orun		: 1;
-    unsigned xm$v_sts_active		: 1;
-    unsigned xm$v_sts_buffail		: 1;
-    unsigned xm$v_sts_running		: 1;
-    unsigned xm$v_sts_disc		: 1;
-    unsigned xmdef$$_fill_1		: 1;
-    unsigned xm$v_err_fatal		: 1;
-    unsigned xmdef$$_fill_2		: 2;
-    unsigned xm$v_err_maint		: 1;
-    unsigned xm$v_err_lost		: 1;
-    unsigned xm$v_err_thresh		: 1;
-    unsigned xm$v_err_trib		: 1;
-    unsigned xm$v_err_start		: 1;
-  };
-  struct  {
-    unsigned xm$v_mdm_rtshld		: 1;
-    unsigned xm$v_mdm_stndby		: 1;
-    unsigned xm$v_mdm_maint2		: 1;
-    unsigned xm$v_mdm_maint1		: 1;
-    unsigned xmdef$$_fill_3		: 1;
-    unsigned xm$v_mdm_freq		: 1;
-    unsigned xm$v_mdm_rdy		: 1;
-    unsigned xm$v_mdm_poll		: 1;
-    unsigned xm$v_mdm_selm		: 1;
-    unsigned xmdef$$_fill_4		: 2;
-    unsigned xm$v_mdm_int		: 1;
-    unsigned xm$v_mdm_v35		: 1;
-    unsigned xmdef$$_fill_5		: 1;
-    unsigned xm$v_mdm_rs232		: 1;
-    unsigned xm$v_mdm_rs422		: 1;
-  };
-  struct  {
-    unsigned xm$v_mdm_carrdet		: 1;
-    unsigned xm$v_mdm_mstndby		: 1;
-    unsigned xm$v_mdm_cts		: 1;
-    unsigned xm$v_mdm_dsr		: 1;
-    unsigned xm$v_mdm_hdx		: 1;
-    unsigned xm$v_mdm_rts		: 1;
-    unsigned xm$v_mdm_dtr		: 1;
-    unsigned xm$v_mdm_ring		: 1;
-    unsigned xm$v_mdm_chrmod		: 1;
-    unsigned xm$v_mdm_mclock		: 1;
-    unsigned xm$v_mdm_modtest		: 1;
-    unsigned xmdef$$_fill_6		: 3;
-    unsigned xm$v_mdm_sigqual		: 1;
-    unsigned xm$v_mdm_sigrate		: 1;
-  };
+union _xmdef
+{
+    struct
+    {
+        unsigned xm$v_chr_mop		: 1;
+        unsigned xm$v_chr_loopb		: 1;
+        unsigned xm$v_chr_hdplx		: 1;
+        unsigned xm$v_chr_slave		: 1;
+        unsigned xm$v_chr_mbx		: 1;
+        unsigned xm$v_chr_dmc		: 1;
+        unsigned xm$v_chr_ctrl		: 1;
+        unsigned xm$v_chr_trib		: 1;
+        unsigned xm$v_sts_dchk		: 1;
+        unsigned xm$v_sts_timo		: 1;
+        unsigned xm$v_sts_orun		: 1;
+        unsigned xm$v_sts_active		: 1;
+        unsigned xm$v_sts_buffail		: 1;
+        unsigned xm$v_sts_running		: 1;
+        unsigned xm$v_sts_disc		: 1;
+        unsigned xmdef$$_fill_1		: 1;
+        unsigned xm$v_err_fatal		: 1;
+        unsigned xmdef$$_fill_2		: 2;
+        unsigned xm$v_err_maint		: 1;
+        unsigned xm$v_err_lost		: 1;
+        unsigned xm$v_err_thresh		: 1;
+        unsigned xm$v_err_trib		: 1;
+        unsigned xm$v_err_start		: 1;
+    };
+    struct
+    {
+        unsigned xm$v_mdm_rtshld		: 1;
+        unsigned xm$v_mdm_stndby		: 1;
+        unsigned xm$v_mdm_maint2		: 1;
+        unsigned xm$v_mdm_maint1		: 1;
+        unsigned xmdef$$_fill_3		: 1;
+        unsigned xm$v_mdm_freq		: 1;
+        unsigned xm$v_mdm_rdy		: 1;
+        unsigned xm$v_mdm_poll		: 1;
+        unsigned xm$v_mdm_selm		: 1;
+        unsigned xmdef$$_fill_4		: 2;
+        unsigned xm$v_mdm_int		: 1;
+        unsigned xm$v_mdm_v35		: 1;
+        unsigned xmdef$$_fill_5		: 1;
+        unsigned xm$v_mdm_rs232		: 1;
+        unsigned xm$v_mdm_rs422		: 1;
+    };
+    struct
+    {
+        unsigned xm$v_mdm_carrdet		: 1;
+        unsigned xm$v_mdm_mstndby		: 1;
+        unsigned xm$v_mdm_cts		: 1;
+        unsigned xm$v_mdm_dsr		: 1;
+        unsigned xm$v_mdm_hdx		: 1;
+        unsigned xm$v_mdm_rts		: 1;
+        unsigned xm$v_mdm_dtr		: 1;
+        unsigned xm$v_mdm_ring		: 1;
+        unsigned xm$v_mdm_chrmod		: 1;
+        unsigned xm$v_mdm_mclock		: 1;
+        unsigned xm$v_mdm_modtest		: 1;
+        unsigned xmdef$$_fill_6		: 3;
+        unsigned xm$v_mdm_sigqual		: 1;
+        unsigned xm$v_mdm_sigrate		: 1;
+    };
 };
- 
+
 #endif
- 
+

@@ -72,7 +72,7 @@ void *kernel_memchr(const void *s, int c, size_t n);
 #if 0
 #define STRUCT_DIR_SIZE (sizeof(struct ext2_dir_entry_2)) // but this gives one too much
 #else
-#define STRUCT_DIR_SIZE 7 
+#define STRUCT_DIR_SIZE 7
 #endif
 
 /* Some statistical counters... */
@@ -90,30 +90,41 @@ unsigned exttwo_name_check(char *str,int len,int *retlen,int *retver,int *wildfl
 
     /* Go through the specification checking for illegal characters */
 
-    while (name < name_end) {
+    while (name < name_end)
+    {
         char ch = *name++;
-        if (ch == '.') {
+        if (ch == '.')
+        {
             if ((name - name_start) > 40) return SS$_BADFILENAME;
             name_start = name;
-	    {
-	      // workaround for .DIR?
-	      if (0==strncmp(name, "DIR", 3)) {
-		break;
-	      }
-	      // workaround for dcl.;?
-	      if (*name == ';')
-		break;
-	    }
+            {
+                // workaround for .DIR?
+                if (0==strncmp(name, "DIR", 3))
+                {
+                    break;
+                }
+                // workaround for dcl.;?
+                if (*name == ';')
+                    break;
+            }
             if (dots++ > 1) break;
-        } else {
-            if (ch == ';') {
+        }
+        else
+        {
+            if (ch == ';')
+            {
                 break;
-            } else {
-                if (ch == '*' || ch == '%') {
+            }
+            else
+            {
+                if (ch == '*' || ch == '%')
+                {
                     wildcard = 1;
-                } else {
+                }
+                else
+                {
                     if (ch == '[' || ch == ']' || ch == ':' ||
-                        !isprint(ch)) return SS$_BADFILENAME;
+                            !isprint(ch)) return SS$_BADFILENAME;
                 }
             }
         }
@@ -123,9 +134,11 @@ unsigned exttwo_name_check(char *str,int len,int *retlen,int *retver,int *wildfl
     /* Return the name length and start checking the version */
 
     *retlen = name - str - 1;
-    if (name < name_end) {
+    if (name < name_end)
+    {
         char ch = *name;
-        if (ch == '*') {
+        if (ch == '*')
+        {
             if (++name < name_end) return SS$_BADFILENAME;
             wildcard = 1;
         }
@@ -160,41 +173,50 @@ int exttwo_name_match(char *spec,int spec_len,char *dirent,int dirent_len, int i
     localname[dirent_len]=0;
     int wild = memchr(spec, '%', spec_len) || memchr(spec, '*', spec_len);
     if (wild && 0 == strchr(localname, '.'))
-      localname[dirent_len++] = '.';
+        localname[dirent_len++] = '.';
     entry = localname;
 #endif
     char *name_end = name + spec_len,*entry_end = entry + dirent_len;
 
     {
-      if (ino != 2 && dirent_len == 1 && dirent[0] == '.') {
-	return MAT_SKIP;
-      }
+        if (ino != 2 && dirent_len == 1 && dirent[0] == '.')
+        {
+            return MAT_SKIP;
+        }
     }
     {
-      // workaround for .
-      if (dirent_len == 1 && *dirent == '.' && 0==strncmp(spec, "000000", 6))
-	return MAT_EQ;
+        // workaround for .
+        if (dirent_len == 1 && *dirent == '.' && 0==strncmp(spec, "000000", 6))
+            return MAT_EQ;
     }
     {
-      // workaround for ..
-      if (dirent_len == 2 && dirent[0] == '.' && dirent[1] == '.') {
-	return MAT_SKIP;
-      }
+        // workaround for ..
+        if (dirent_len == 2 && dirent[0] == '.' && dirent[1] == '.')
+        {
+            return MAT_SKIP;
+        }
     }
 
     /* See how much name matches without wildcards... */
 
-    while (name < name_end && entry < entry_end) {
+    while (name < name_end && entry < entry_end)
+    {
         char sch = *name;
-        if (sch != '*') {
+        if (sch != '*')
+        {
             char ech = *entry;
-                if (sch != ech) if (toupper(sch) != toupper(ech))
-                    if (sch == '%') {
+            if (sch != ech) if (toupper(sch) != toupper(ech))
+                    if (sch == '%')
+                    {
                         percent = MAT_NE;
-                    } else {
+                    }
+                    else
+                    {
                         break;
                     }
-        } else {
+        }
+        else
+        {
             break;
         }
         name++;
@@ -203,17 +225,24 @@ int exttwo_name_match(char *spec,int spec_len,char *dirent,int dirent_len, int i
 
     /* Mismatch - return result unless wildcard... */
 
-    if (name >= name_end) {
-        if (entry >= entry_end) {
+    if (name >= name_end)
+    {
+        if (entry >= entry_end)
+        {
             return MAT_EQ;
-        } else {
+        }
+        else
+        {
             return percent;
         }
-    } else {
+    }
+    else
+    {
 
         /* See if we can find a match with wildcards */
 
-        if (*name != '*') {
+        if (*name != '*')
+        {
             if (percent == MAT_NE) return MAT_NE;
             if (entry < entry_end)
                 if (toupper(*entry) > toupper(*name)) return MAT_GT;
@@ -221,24 +250,32 @@ int exttwo_name_match(char *spec,int spec_len,char *dirent,int dirent_len, int i
         }
         /* Strip out wildcard(s) - if end then we match! */
 
-        do {
+        do
+        {
             name++;
-        } while (name < name_end && *name == '*');
+        }
+        while (name < name_end && *name == '*');
         if (name >= name_end) return MAT_EQ;
 
         /* Proceed to examine the specification past the wildcard... */
 
-        while (name < name_end) {
+        while (name < name_end)
+        {
             int offset = 1;
             char fch = toupper(*name++);
 
             /* See if can can find a match for the first character... */
 
-            if (fch != '%') {
-                while (entry < entry_end) {
-                    if (toupper(*entry) != fch) {
+            if (fch != '%')
+            {
+                while (entry < entry_end)
+                {
+                    if (toupper(*entry) != fch)
+                    {
                         entry++;
-                    } else {
+                    }
+                    else
+                    {
                         break;
                     }
                 }
@@ -250,10 +287,11 @@ int exttwo_name_match(char *spec,int spec_len,char *dirent,int dirent_len, int i
 
             /* See how much of the rest we can match... */
 
-            while (name < name_end && entry < entry_end) {
+            while (name < name_end && entry < entry_end)
+            {
                 char sch = *name,ech;
                 if (sch == '*') break;
-                    if (sch != (ech = *entry)) if (toupper(sch) != toupper(ech))
+                if (sch != (ech = *entry)) if (toupper(sch) != toupper(ech))
                         if (sch != '%') break;
                 name++;
                 entry++;
@@ -262,15 +300,20 @@ int exttwo_name_match(char *spec,int spec_len,char *dirent,int dirent_len, int i
 
             /* If matching died because of a wildcard we are OK... */
 
-            if (name < name_end && *name == '*') {
-                do {
+            if (name < name_end && *name == '*')
+            {
+                do
+                {
                     name++;
-                } while (name < name_end && *name == '*');
+                }
+                while (name < name_end && *name == '*');
                 if (name >= name_end) return MAT_EQ;
 
                 /* Otherwise we finished OK or we need to try again... */
 
-            } else {
+            }
+            else
+            {
                 if (name >= name_end && entry >= entry_end) return MAT_EQ;
                 name -= offset;
                 entry -= offset - 1;
@@ -288,12 +331,12 @@ int exttwo_name_match(char *spec,int spec_len,char *dirent,int dirent_len, int i
 /* insert_ent() - procedure to add a directory entry at record dr entry de */
 
 unsigned exttwo_insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
-                    char *buffer,
-                    struct ext2_dir_entry_2 * dr,struct _dir1 * de,
-                    char *filename,unsigned filelen,
-                    unsigned version,struct _fiddef * fid)
+                           char *buffer,
+                           struct ext2_dir_entry_2 * dr,struct _dir1 * de,
+                           char *filename,unsigned filelen,
+                           unsigned version,struct _fiddef * fid)
 {
-  struct _iosb iosb;
+    struct _iosb iosb;
     unsigned sts = 1;
     int inuse = 0;
     struct ext2_inode * head;
@@ -308,7 +351,8 @@ unsigned exttwo_insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
 
     {
         char invalid_dr = 1;
-        do {
+        do
+        {
             int sizecheck;
             struct ext2_dir_entry_2 *nr = (struct ext2_dir_entry_2 *) (buffer + inuse);
             if (dr == nr) invalid_dr = 0;
@@ -316,32 +360,39 @@ unsigned exttwo_insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
                 break;
             sizecheck = le16_to_cpu(nr->rec_len);
             inuse += sizecheck;
-            if (inuse > MAXREC || (inuse & EXT2_DIR_ROUND) || sizecheck <= 0) {
+            if (inuse > MAXREC || (inuse & EXT2_DIR_ROUND) || sizecheck <= 0)
+            {
                 deaccesschunk(0,0,0);
                 return SS$_BADIRECTORY;
             }
-        } while (1);
+        }
+        while (1);
 
-        if (invalid_dr) {
+        if (invalid_dr)
+        {
             panic("BUGCHECK invalid dr\n");
         }
     }
 
     /* If not enough space free extend the directory... */
 
-    if (addlen > MAXREC - inuse) {
+    if (addlen > MAXREC - inuse)
+    {
         struct ext2_dir_entry_2 *nr;
         unsigned keep_new = 0;
         char *newbuf;
         unsigned newblk = eofblk + 1;
         printk("Splitting record... %d %d\n",dr,de);
-        if (newblk > fcb->fcb$l_efblk) {
+        if (newblk > fcb->fcb$l_efblk)
+        {
             panic("I can't extend a directory yet!!\n");
         }
         fcb->fcb$l_highwater = 0;
         sts = exttwo_accesschunk(fcb,newblk,&newbuf,NULL,1,0);
-        if (sts & 1) {
-            while (newblk > curblk + 1) {
+        if (sts & 1)
+        {
+            while (newblk > curblk + 1)
+            {
                 char *frombuf;
                 sts = exttwo_accesschunk(fcb,newblk - 1,&frombuf,NULL,1,0);
                 if ((sts & 1) == 0) break;
@@ -351,17 +402,20 @@ unsigned exttwo_insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
                 newblk--;
                 if ((sts & 1) == 0) break;
             }
-        } else {
         }
-        if ((sts & 1) == 0) {
+        else
+        {
+        }
+        if ((sts & 1) == 0)
+        {
             deaccesschunk(0,0,0);
             deaccesschunk(0,0,0);
             return sts;
         }
         memset(newbuf,0,BLOCKSIZE);
         eofblk++;
-	head = exttwo_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
-	sts=iosb.iosb$w_status;
+        head = exttwo_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);
+        sts=iosb.iosb$w_status;
         head->i_blocks = eofblk + 1;
 
         /* First find where the next record is... */
@@ -372,19 +426,23 @@ unsigned exttwo_insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
 
         /* Can we split between records? */
 
-        if (de == NULL || (char *) dr != buffer || le16_to_cpu(nr->rec_len)) {
+        if (de == NULL || (char *) dr != buffer || le16_to_cpu(nr->rec_len))
+        {
             struct ext2_dir_entry_2 *sp = dr;
             if ((char *) dr == buffer && de != NULL) sp = nr;
             memcpy(newbuf,sp,((buffer + BLOCKSIZE) - (char *) sp));
             memset(sp,0,((buffer + BLOCKSIZE) - (char *) sp));
             sp->rec_len = cpu_to_le16(0xffff);
-            if (sp == dr && (de != NULL || (char *) sp >= buffer + MAXREC - addlen)) {
+            if (sp == dr && (de != NULL || (char *) sp >= buffer + MAXREC - addlen))
+            {
                 dr = (struct ext2_dir_entry_2 *) (newbuf + ((char *) dr - (char *) sp));
                 keep_new = 1;
             }
             /* OK, we have to split the record then.. */
 
-        } else {
+        }
+        else
+        {
             unsigned reclen = EXT2_DIR_REC_LEN(dr->name_len);
             struct ext2_dir_entry_2 *nbr = (struct ext2_dir_entry_2 *) newbuf;
             printk("Super split %d %d\n",dr,de);
@@ -395,7 +453,8 @@ unsigned exttwo_insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
             memset((char *) de + 2,0,((char *) nr - (char *) de));
             ((struct ext2_dir_entry_2 *) de)->rec_len = cpu_to_le16(0xffff);
             dr->rec_len = cpu_to_le16(((char *) de - (char *) dr) - 2);
-            if ((char *) de >= (char *) nr) {
+            if ((char *) de >= (char *) nr)
+            {
                 dr = (struct ext2_dir_entry_2 *) newbuf;
                 keep_new = 1;
             }
@@ -403,23 +462,29 @@ unsigned exttwo_insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
 
         /* Need to decide which buffer we are going to keep (to write to) */
 
-        if (keep_new) {
+        if (keep_new)
+        {
             sts = deaccesschunk(curblk,1,1);
             curblk = newblk;
             buffer = newbuf;
-        } else {
+        }
+        else
+        {
             sts = deaccesschunk(newblk,1,1);
         }
         if ((sts & 1) == 0) printk("Bad status %d\n",sts);
     }
     /* After that we can just add the record or entry as appropriate... */
 
-    if (de == NULL) {
+    if (de == NULL)
+    {
         memmove((char *) dr + addlen,dr,BLOCKSIZE - (((char *) dr + addlen) - buffer));
         dr->rec_len = cpu_to_le16(addlen);
         dr->name_len = filelen;
         memcpy(dr->name,filename,filelen);
-    } else {
+    }
+    else
+    {
         dr->rec_len = cpu_to_le16(le16_to_cpu(dr->rec_len) + addlen);
         memmove((char *) de + addlen,de,BLOCKSIZE - (((char *) de + addlen) - buffer));
     }
@@ -440,22 +505,29 @@ unsigned exttwo_insert_ent(struct _fcb * fcb,unsigned eofblk,unsigned curblk,
 /* exttwo_delete_ent() - delete a directory entry */
 
 unsigned exttwo_delete_ent(struct _fcb * fcb,unsigned curblk,
-                    struct ext2_dir_entry_2 * dr,struct _dir1 * de,
-                    char *buffer,unsigned eofblk)
+                           struct ext2_dir_entry_2 * dr,struct _dir1 * de,
+                           char *buffer,unsigned eofblk)
 {
-  struct _iosb iosb;
+    struct _iosb iosb;
     unsigned sts = 1;
     unsigned ent;
     struct ext2_inode * head;
     ent = 1;
-    if (ent > 1) {
-    } else {
+    if (ent > 1)
+    {
+    }
+    else
+    {
         char *nr = (char *) dr + le16_to_cpu(dr->rec_len);
         if (eofblk == 1 || (char *) dr > buffer ||
-            (nr <= buffer + MAXREC && (unsigned short) *nr < BLOCKSIZE)) {
+                (nr <= buffer + MAXREC && (unsigned short) *nr < BLOCKSIZE))
+        {
             memcpy(dr,nr,BLOCKSIZE - (nr - buffer));
-        } else {
-            while (curblk < eofblk) {
+        }
+        else
+        {
+            while (curblk < eofblk)
+            {
                 char *nxtbuffer;
                 sts = exttwo_accesschunk(fcb,curblk + 1,&nxtbuffer,NULL,1,0);
                 if ((sts & 1) == 0) break;
@@ -464,9 +536,10 @@ unsigned exttwo_delete_ent(struct _fcb * fcb,unsigned curblk,
                 if ((sts & 1) == 0) break;
                 buffer = nxtbuffer;
             }
-            if (sts & 1) {
-	      head = exttwo_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
-	      sts=iosb.iosb$w_status;
+            if (sts & 1)
+            {
+                head = exttwo_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);
+                sts=iosb.iosb$w_status;
                 head->i_blocks = cpu_to_le32(eofblk);
                 eofblk--;
             }
@@ -475,7 +548,7 @@ unsigned exttwo_delete_ent(struct _fcb * fcb,unsigned curblk,
     {
         unsigned retsts = deaccesschunk(curblk,1,1);
         if (sts & 1) sts = retsts;
-	writechunk(fcb, curblk, buffer);
+        writechunk(fcb, curblk, buffer);
         return sts;
     }
 }
@@ -484,11 +557,11 @@ unsigned exttwo_delete_ent(struct _fcb * fcb,unsigned curblk,
 /* return_ent() - return information about a directory entry */
 
 unsigned exttwo_return_ent(struct _fcb * fcb,unsigned curblk,
-                    struct ext2_dir_entry_2 * dr,struct _dir1 * de,struct _fibdef * fib,
-                    unsigned short *reslen,struct dsc$descriptor * resdsc,
-                    int wildcard)
+                           struct ext2_dir_entry_2 * dr,struct _dir1 * de,struct _fibdef * fib,
+                           unsigned short *reslen,struct dsc$descriptor * resdsc,
+                           int wildcard)
 {
-  struct _iosb iosb;
+    struct _iosb iosb;
     int scale = 10;
     int version = 1;
     int length = dr->name_len;
@@ -496,37 +569,43 @@ unsigned exttwo_return_ent(struct _fcb * fcb,unsigned curblk,
     int outlen = resdsc->dsc$w_length;
     if (length > outlen) length = outlen;
     {
-      // another workaround
-      if (dr->inode == 2 && length == 1) {
-	length = 10;
-	memcpy(ptr,"000000.DIR",10);
-	goto skip;
-      }
-      if (length == 1 && dr->name[0] == '.') {
-	length = 3;
-	memcpy(ptr,"DOT",3);
-	goto skip;
-      }
-      if (length == 2 && dr->name[0] == '.' && dr->name[1] == '.') {
-	length = 6;
-	memcpy(ptr,"DOTDOT",6);
-	goto skip;
-      }
+        // another workaround
+        if (dr->inode == 2 && length == 1)
+        {
+            length = 10;
+            memcpy(ptr,"000000.DIR",10);
+            goto skip;
+        }
+        if (length == 1 && dr->name[0] == '.')
+        {
+            length = 3;
+            memcpy(ptr,"DOT",3);
+            goto skip;
+        }
+        if (length == 2 && dr->name[0] == '.' && dr->name[1] == '.')
+        {
+            length = 6;
+            memcpy(ptr,"DOTDOT",6);
+            goto skip;
+        }
     }
     memcpy(ptr,dr->name,length);
- skip:
+skip:
     while (version >= scale) scale *= 10;
     ptr += length;
-    if (length < outlen) {
+    if (length < outlen)
+    {
         *ptr++ = ';';
         length++;
-        do {
+        do
+        {
             if (length >= outlen) break;
             scale /= 10;
             *ptr++ = version / scale + '0';
             version %= scale;
             length++;
-        } while (scale > 1);
+        }
+        while (scale > 1);
     }
     *reslen = length;
 #if 0
@@ -540,9 +619,12 @@ unsigned exttwo_return_ent(struct _fcb * fcb,unsigned curblk,
 #endif
 #endif
     if (fib->fib$b_fid_rvn == 0) fib->fib$b_fid_rvn = fcb->fcb$b_fid_rvn;
-    if (wildcard || (fib->fib$w_nmctl & FIB$M_WILD)) {
+    if (wildcard || (fib->fib$w_nmctl & FIB$M_WILD))
+    {
         fib->fib$l_wcc = curblk;
-    } else {
+    }
+    else
+    {
         fib->fib$l_wcc = 0;
     }
 #if 0
@@ -556,10 +638,10 @@ unsigned exttwo_return_ent(struct _fcb * fcb,unsigned curblk,
 /* search_ent() - search for a directory entry */
 
 unsigned exttwo_search_ent(struct _fcb * fcb,
-                    struct dsc$descriptor * fibdsc,struct dsc$descriptor * filedsc,
-                    unsigned short *reslen,struct dsc$descriptor * resdsc,unsigned eofblk,unsigned action)
+                           struct dsc$descriptor * fibdsc,struct dsc$descriptor * filedsc,
+                           unsigned short *reslen,struct dsc$descriptor * resdsc,unsigned eofblk,unsigned action)
 {
-  struct _iosb iosb;
+    struct _iosb iosb;
     unsigned sts,curblk;
     char *searchspec,*buffer = 0;
     int searchlen,version,wildcard,wcc_flag;
@@ -570,12 +652,15 @@ unsigned exttwo_search_ent(struct _fcb * fcb,
        3) Scan until found or too big or end   */
 
     curblk = fib->fib$l_wcc;
-    if (curblk != 0) {
+    if (curblk != 0)
+    {
         searchspec = resdsc->dsc$a_pointer;
         sts = exttwo_name_check(searchspec,*reslen,&searchlen,&version,&wildcard);
         if (action || wildcard) sts = SS$_BADFILENAME;
         wcc_flag = 1;
-    } else {
+    }
+    else
+    {
         searchspec = filedsc->dsc$a_pointer;
         sts = exttwo_name_check(searchspec,filedsc->dsc$w_length,&searchlen,&version,&wildcard);
         if ((action && wildcard) || (action > 1 && version < 0)) sts = SS$_BADFILENAME;
@@ -589,136 +674,159 @@ unsigned exttwo_search_ent(struct _fcb * fcb,
 
     /* Identify starting block...*/
 
-    if (*searchspec == '*' || *searchspec == '%') {
+    if (*searchspec == '*' || *searchspec == '%')
+    {
         curblk = 1;
     }
-        unsigned loblk = 1,hiblk = eofblk;
-        if (curblk < 1 || curblk > eofblk) curblk = 1;
+    unsigned loblk = 1,hiblk = eofblk;
+    if (curblk < 1 || curblk > eofblk) curblk = 1;
 
     /* Now to read sequentially to find entry... */
 
-        char last_name[80];
-        unsigned last_len = 0;
-        while ((sts & 1) && curblk < eofblk) { // check. was <=
-            struct ext2_dir_entry_2 *dr;
+    char last_name[80];
+    unsigned last_len = 0;
+    while ((sts & 1) && curblk < eofblk)   // check. was <=
+    {
+        struct ext2_dir_entry_2 *dr;
 
-            /* Access a directory block. Reset relative version if it starts
-               with a record we haven't seen before... */
+        /* Access a directory block. Reset relative version if it starts
+           with a record we haven't seen before... */
 
-	    sts = exttwo_accesschunk(fcb,curblk,&buffer,NULL,action ? 1 : 0,0);
-            if ((sts & 1) == 0) return sts;
-            dr = (struct ext2_dir_entry_2 *) buffer;
+        sts = exttwo_accesschunk(fcb,curblk,&buffer,NULL,action ? 1 : 0,0);
+        if ((sts & 1) == 0) return sts;
+        dr = (struct ext2_dir_entry_2 *) buffer;
 
-            /* Now loop through the records seeing which match our spec... */
+        /* Now loop through the records seeing which match our spec... */
 
-            do {
-                char *nr = (char *) dr + le16_to_cpu(dr->rec_len);
+        do
+        {
+            char *nr = (char *) dr + le16_to_cpu(dr->rec_len);
 #if 0
-		printk("dr nr %x %x %x %x %x %x \n",dr,nr,buffer + BLOCKSIZE,dr >= buffer + BLOCKSIZE,curblk,eofblk);
+            printk("dr nr %x %x %x %x %x %x \n",dr,nr,buffer + BLOCKSIZE,dr >= buffer + BLOCKSIZE,curblk,eofblk);
 #endif
 #if 0
-		// not here yet?
-                if (nr >= buffer + BLOCKSIZE) break;
+            // not here yet?
+            if (nr >= buffer + BLOCKSIZE) break;
 #else
 #if 0
-                if (dr >= buffer + BLOCKSIZE) break;
+            if (dr >= buffer + BLOCKSIZE) break;
 #endif
 #endif
-                if (dr->name + dr->name_len > nr) break;
-                sts = exttwo_name_match(searchspec,searchlen,dr->name,dr->name_len,dr->inode);
-		if (sts == MAT_SKIP) {
-		  goto skip;
-		}
-                if (sts == MAT_EQ && wcc_flag) {
-                    wcc_flag = 0;
-                    searchspec = filedsc->dsc$a_pointer;
-                    sts = exttwo_name_check(searchspec,filedsc->dsc$w_length,&searchlen,&version,&wildcard);
-                    if ((sts & 1) == 0) break;
-		    goto skip;
-                } else {
-                        /* Look at each directory entry to see
-                           if it is what we want...    */
+            if (dr->name + dr->name_len > nr) break;
+            sts = exttwo_name_match(searchspec,searchlen,dr->name,dr->name_len,dr->inode);
+            if (sts == MAT_SKIP)
+            {
+                goto skip;
+            }
+            if (sts == MAT_EQ && wcc_flag)
+            {
+                wcc_flag = 0;
+                searchspec = filedsc->dsc$a_pointer;
+                sts = exttwo_name_check(searchspec,filedsc->dsc$w_length,&searchlen,&version,&wildcard);
+                if ((sts & 1) == 0) break;
+                goto skip;
+            }
+            else
+            {
+                /* Look at each directory entry to see
+                   if it is what we want...    */
 
-                        /* Decide what to do with the entry we have found... */
+                /* Decide what to do with the entry we have found... */
 
-                        if (sts == MAT_EQ) {
-                            switch (action) {
-			    case 0:
-			      {
-                                    int ret = exttwo_return_ent(fcb,curblk,dr,0,fib,reslen,resdsc,wildcard);
-				    kfree(buffer);
-				    return ret;
-			      }
-                                case 1:
-				  {
-                                    int ret = exttwo_delete_ent(fcb,curblk,dr,0,buffer,eofblk);
-				    kfree(buffer);
-				    return ret;
-				  }
-                                default:
-                                    sts = SS$_DUPFILENAME;
-                                    break;
-                            }
-                        } else {
-			  // check leak
-                            if (sts != MAT_EQ && action == 2) {
-                                return exttwo_insert_ent(fcb,eofblk,curblk,buffer,dr,0,
-                                                  searchspec,searchlen,version,(struct _fiddef *) & fib->fib$w_fid_num);
-                            }
-                        }
-		}
-                    /*  Finish unless we expect more... */
-
-                    /* If this is the last record in the block store the name
-                       so that if it continues into the next block we can get
-                       the relative version right! Sigh! */
-
-#if 0
-                    if ((((struct ext2_dir_entry_2 *) nr)->inode) == 0) { // check
-#else
-#if 0
-		      printk("dr2 nr %x %x %x %x %x %x\n",dr,nr,buffer + BLOCKSIZE,nr >= buffer + BLOCKSIZE,curblk,eofblk);
-#endif
-		    skip:
-		    if (nr >= buffer + BLOCKSIZE) {
-#endif
-                        last_len = dr->name_len;
-                        if (last_len > sizeof(last_name)) last_len = sizeof(last_name);
-                        memcpy(last_name,dr->name,last_len);
-                        dr = (struct ext2_dir_entry_2 *) nr;
+                if (sts == MAT_EQ)
+                {
+                    switch (action)
+                    {
+                    case 0:
+                    {
+                        int ret = exttwo_return_ent(fcb,curblk,dr,0,fib,reslen,resdsc,wildcard);
+                        kfree(buffer);
+                        return ret;
+                    }
+                    case 1:
+                    {
+                        int ret = exttwo_delete_ent(fcb,curblk,dr,0,buffer,eofblk);
+                        kfree(buffer);
+                        return ret;
+                    }
+                    default:
+                        sts = SS$_DUPFILENAME;
                         break;
                     }
-                    dr = (struct ext2_dir_entry_2 *) nr;
-            } while (1);        /* dr records within block */
-
-            /* We release the buffer ready to get the next one - unless it is the
-               last one in which case we can't defer an insert any longer!! */
-
-            if ((sts & 1) == 0 || action != 2 || (sts != MAT_GT && curblk < eofblk)) {
-  	        kfree(buffer);
-		buffer = 0;
-                unsigned dests = deaccesschunk(0,0,1);
-                if ((dests & 1) == 0) {
-                    sts = dests;
-                    break;
                 }
-                curblk++;
-		sts = 1;
-            } else {
-	      // check leak
-                if (version == 0) version = 1;
-                return exttwo_insert_ent(fcb,eofblk,curblk,buffer,dr,NULL,
-                                  searchspec,searchlen,version,(struct _fiddef *) & fib->fib$w_fid_num);
+                else
+                {
+                    // check leak
+                    if (sts != MAT_EQ && action == 2)
+                    {
+                        return exttwo_insert_ent(fcb,eofblk,curblk,buffer,dr,0,
+                                                 searchspec,searchlen,version,(struct _fiddef *) & fib->fib$w_fid_num);
+                    }
+                }
             }
-        }                       /* curblk blocks within file */
+            /*  Finish unless we expect more... */
+
+            /* If this is the last record in the block store the name
+               so that if it continues into the next block we can get
+               the relative version right! Sigh! */
+
+#if 0
+            if ((((struct ext2_dir_entry_2 *) nr)->inode) == 0)   // check
+            {
+#else
+#if 0
+            printk("dr2 nr %x %x %x %x %x %x\n",dr,nr,buffer + BLOCKSIZE,nr >= buffer + BLOCKSIZE,curblk,eofblk);
+#endif
+skip:
+            if (nr >= buffer + BLOCKSIZE)
+            {
+#endif
+                last_len = dr->name_len;
+                if (last_len > sizeof(last_name)) last_len = sizeof(last_name);
+                memcpy(last_name,dr->name,last_len);
+                dr = (struct ext2_dir_entry_2 *) nr;
+                break;
+            }
+            dr = (struct ext2_dir_entry_2 *) nr;
+        }
+        while (1);        /* dr records within block */
+
+        /* We release the buffer ready to get the next one - unless it is the
+           last one in which case we can't defer an insert any longer!! */
+
+        if ((sts & 1) == 0 || action != 2 || (sts != MAT_GT && curblk < eofblk))
+        {
+            kfree(buffer);
+            buffer = 0;
+            unsigned dests = deaccesschunk(0,0,1);
+            if ((dests & 1) == 0)
+            {
+                sts = dests;
+                break;
+            }
+            curblk++;
+            sts = 1;
+        }
+        else
+        {
+            // check leak
+            if (version == 0) version = 1;
+            return exttwo_insert_ent(fcb,eofblk,curblk,buffer,dr,NULL,
+                                     searchspec,searchlen,version,(struct _fiddef *) & fib->fib$w_fid_num);
+        }
+    }                       /* curblk blocks within file */
 
     /* We achieved nothing! Report the failure... */
 
-    if (sts & 1) {
+    if (sts & 1)
+    {
         fib->fib$l_wcc = 0;
-        if (wcc_flag || wildcard) {
+        if (wcc_flag || wildcard)
+        {
             sts = SS$_NOMOREFILES;
-        } else {
+        }
+        else
+        {
             sts = SS$_NOSUCHFILE;
         }
     }
@@ -732,10 +840,10 @@ unsigned exttwo_search_ent(struct _fcb * fcb,
                 2 - create an entry   */
 
 unsigned exttwo_direct(struct _vcb * vcb,struct dsc$descriptor * fibdsc,
-                struct dsc$descriptor * filedsc,unsigned short *reslen,
-                struct dsc$descriptor * resdsc,struct _atrdef * atrp, unsigned action, struct _irp *i)
+                       struct dsc$descriptor * filedsc,unsigned short *reslen,
+                       struct dsc$descriptor * resdsc,struct _atrdef * atrp, unsigned action, struct _irp *i)
 {
-  struct _iosb iosb;
+    struct _iosb iosb;
     struct _fcb *fcb;
     struct ext2_inode *head;
     unsigned sts,eofblk;
@@ -752,13 +860,17 @@ unsigned exttwo_direct(struct _vcb * vcb,struct dsc$descriptor * fibdsc,
     dummyirp->irp$l_qio_p1=&dirdsc;
     sts = exttwo_access(vcb,dummyirp);
     fcb=x2p->primary_fcb;
-    if (sts & 1) {
-      head = exttwo_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);  
-      sts=iosb.iosb$w_status;
-        if (S_ISDIR(le16_to_cpu(head->i_mode))) {
+    if (sts & 1)
+    {
+        head = exttwo_read_header (fcb->fcb$l_wlfl->wcb$l_orgucb->ucb$l_vcb, 0, fcb, &iosb);
+        sts=iosb.iosb$w_status;
+        if (S_ISDIR(le16_to_cpu(head->i_mode)))
+        {
             eofblk = le32_to_cpu(head->i_blocks);
             sts = exttwo_search_ent(fcb,fibdsc,filedsc,reslen,resdsc,eofblk,action);
-        } else {
+        }
+        else
+        {
             sts = SS$_BADIRECTORY;
         }
         {

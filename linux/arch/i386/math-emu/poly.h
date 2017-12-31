@@ -20,16 +20,17 @@
    Intended to be used to get results better than 8-byte computation
    allows. 9-byte would probably be sufficient.
    */
-typedef struct {
-  unsigned long lsw;
-  unsigned long midw;
-  unsigned long msw;
+typedef struct
+{
+    unsigned long lsw;
+    unsigned long midw;
+    unsigned long msw;
 } Xsig;
 
 asmlinkage void mul64(unsigned long long const *a, unsigned long long const *b,
-		      unsigned long long *result);
+                      unsigned long long *result);
 asmlinkage void polynomial_Xsig(Xsig *, const unsigned long long *x,
-				const unsigned long long terms[], const int n);
+                                const unsigned long long terms[], const int n);
 
 asmlinkage void mul32_Xsig(Xsig *, const unsigned long mult);
 asmlinkage void mul64_Xsig(Xsig *, const unsigned long long *mult);
@@ -61,26 +62,26 @@ asmlinkage void div_Xsig(Xsig *x1, const Xsig *x2, const Xsig *dest);
    Merely specifying that it is used doesn't work...
  */
 static inline unsigned long mul_32_32(const unsigned long arg1,
-				      const unsigned long arg2)
+                                      const unsigned long arg2)
 {
-  int retval;
-  asm volatile ("mull %2; movl %%edx,%%eax" \
-		:"=a" (retval) \
-		:"0" (arg1), "g" (arg2) \
-		:"dx");
-  return retval;
+    int retval;
+    asm volatile ("mull %2; movl %%edx,%%eax" \
+                  :"=a" (retval) \
+                  :"0" (arg1), "g" (arg2) \
+                  :"dx");
+    return retval;
 }
 
 
 /* Add the 12 byte Xsig x2 to Xsig dest, with no checks for overflow. */
 static inline void add_Xsig_Xsig(Xsig *dest, const Xsig *x2)
 {
-  asm volatile ("movl %1,%%edi; movl %2,%%esi;
-                 movl (%%esi),%%eax; addl %%eax,(%%edi);
-                 movl 4(%%esi),%%eax; adcl %%eax,4(%%edi);
-                 movl 8(%%esi),%%eax; adcl %%eax,8(%%edi);"
-                 :"=g" (*dest):"g" (dest), "g" (x2)
-                 :"ax","si","di");
+    asm volatile ("movl %1,%%edi; movl %2,%%esi;
+                  movl (%%esi),%%eax; addl %%eax,(%%edi);
+                  movl 4(%%esi),%%eax; adcl %%eax,4(%%edi);
+                  movl 8(%%esi),%%eax; adcl %%eax,8(%%edi);"
+                  :"=g" (*dest):"g" (dest), "g" (x2)
+                  :"ax","si","di");
 }
 
 
@@ -90,19 +91,19 @@ static inline void add_Xsig_Xsig(Xsig *dest, const Xsig *x2)
    problem, but keep fingers crossed! */
 static inline void add_two_Xsig(Xsig *dest, const Xsig *x2, long int *exp)
 {
-  asm volatile ("movl %2,%%ecx; movl %3,%%esi;
-                 movl (%%esi),%%eax; addl %%eax,(%%ecx);
-                 movl 4(%%esi),%%eax; adcl %%eax,4(%%ecx);
-                 movl 8(%%esi),%%eax; adcl %%eax,8(%%ecx);
-                 jnc 0f;
-		 rcrl 8(%%ecx); rcrl 4(%%ecx); rcrl (%%ecx)
-                 movl %4,%%ecx; incl (%%ecx)
-                 movl $1,%%eax; jmp 1f;
-                 0: xorl %%eax,%%eax;
-                 1:"
-		:"=g" (*exp), "=g" (*dest)
-		:"g" (dest), "g" (x2), "g" (exp)
-		:"cx","si","ax");
+    asm volatile ("movl %2,%%ecx; movl %3,%%esi;
+                  movl (%%esi),%%eax; addl %%eax,(%%ecx);
+                  movl 4(%%esi),%%eax; adcl %%eax,4(%%ecx);
+                  movl 8(%%esi),%%eax; adcl %%eax,8(%%ecx);
+                  jnc 0f;
+                  rcrl 8(%%ecx); rcrl 4(%%ecx); rcrl (%%ecx)
+                  movl %4,%%ecx; incl (%%ecx)
+                  movl $1,%%eax; jmp 1f;
+                  0: xorl %%eax,%%eax;
+                  1:"
+                  :"=g" (*exp), "=g" (*dest)
+                  :"g" (dest), "g" (x2), "g" (exp)
+                  :"cx","si","ax");
 }
 
 
@@ -110,12 +111,12 @@ static inline void add_two_Xsig(Xsig *dest, const Xsig *x2, long int *exp)
 /* This is faster in a loop on my 386 than using the "neg" instruction. */
 static inline void negate_Xsig(Xsig *x)
 {
-  asm volatile("movl %1,%%esi; "
-               "xorl %%ecx,%%ecx; "
-               "movl %%ecx,%%eax; subl (%%esi),%%eax; movl %%eax,(%%esi); "
-               "movl %%ecx,%%eax; sbbl 4(%%esi),%%eax; movl %%eax,4(%%esi); "
-               "movl %%ecx,%%eax; sbbl 8(%%esi),%%eax; movl %%eax,8(%%esi); "
-               :"=g" (*x):"g" (x):"si","ax","cx");
+    asm volatile("movl %1,%%esi; "
+                 "xorl %%ecx,%%ecx; "
+                 "movl %%ecx,%%eax; subl (%%esi),%%eax; movl %%eax,(%%esi); "
+                 "movl %%ecx,%%eax; sbbl 4(%%esi),%%eax; movl %%eax,4(%%esi); "
+                 "movl %%ecx,%%eax; sbbl 8(%%esi),%%eax; movl %%eax,8(%%esi); "
+                 :"=g" (*x):"g" (x):"si","ax","cx");
 }
 
 #endif /* _POLY_H */

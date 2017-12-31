@@ -21,39 +21,41 @@
 #define _SYNCPPP_H_ 1
 
 #ifdef __KERNEL__
-struct slcp {
-	u16	state;          /* state machine */
-	u32	magic;          /* local magic number */
-	u_char	echoid;         /* id of last keepalive echo request */
-	u_char	confid;         /* id of last configuration request */
-};
-
-struct sipcp {
-	u16	state;          /* state machine */
-	u_char  confid;         /* id of last configuration request */
-};
-
-struct sppp 
+struct slcp
 {
-	struct sppp *	pp_next;	/* next interface in keepalive list */
-	u32		pp_flags;	/* use Cisco protocol instead of PPP */
-	u16		pp_alivecnt;	/* keepalive packets counter */
-	u16		pp_loopcnt;	/* loopback detection counter */
-	u32		pp_seq;		/* local sequence number */
-	u32		pp_rseq;	/* remote sequence number */
-	struct slcp	lcp;		/* LCP params */
-	struct sipcp	ipcp;		/* IPCP params */
-	u32		ibytes,obytes;	/* Bytes in/out */
-	u32		ipkts,opkts;	/* Packets in/out */
-	struct timer_list	pp_timer;
-	struct net_device	*pp_if;
-	char		pp_link_state;	/* Link status */
+    u16	state;          /* state machine */
+    u32	magic;          /* local magic number */
+    u_char	echoid;         /* id of last keepalive echo request */
+    u_char	confid;         /* id of last configuration request */
+};
+
+struct sipcp
+{
+    u16	state;          /* state machine */
+    u_char  confid;         /* id of last configuration request */
+};
+
+struct sppp
+{
+    struct sppp *	pp_next;	/* next interface in keepalive list */
+    u32		pp_flags;	/* use Cisco protocol instead of PPP */
+    u16		pp_alivecnt;	/* keepalive packets counter */
+    u16		pp_loopcnt;	/* loopback detection counter */
+    u32		pp_seq;		/* local sequence number */
+    u32		pp_rseq;	/* remote sequence number */
+    struct slcp	lcp;		/* LCP params */
+    struct sipcp	ipcp;		/* IPCP params */
+    u32		ibytes,obytes;	/* Bytes in/out */
+    u32		ipkts,opkts;	/* Packets in/out */
+    struct timer_list	pp_timer;
+    struct net_device	*pp_if;
+    char		pp_link_state;	/* Link status */
 };
 
 struct ppp_device
-{	
-	struct net_device *dev;	/* Network device pointer */
-	struct sppp sppp;	/* Synchronous PPP */
+{
+    struct net_device *dev;	/* Network device pointer */
+    struct sppp sppp;	/* Synchronous PPP */
 };
 
 #define sppp_of(dev)	\

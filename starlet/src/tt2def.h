@@ -1,6 +1,6 @@
 #ifndef tt2def_h
 #define tt2def_h
- 
+
 #define		TT2$M_LOCALECHO		0x1
 #define		TT2$M_AUTOBAUD		0x2
 #define		TT2$M_HANGUP		0x4
@@ -33,7 +33,7 @@
 #define		TT2$M_DECCRT		0x20000000
 #define		TT2$M_DECCRT2		0x40000000
 #define		TT2$M_DECCRT3		0x80000000
-	
+
 #define		TT2$V_LOCALECHO		0
 #define		TT2$V_AUTOBAUD		1
 #define		TT2$V_HANGUP		2
@@ -66,43 +66,45 @@
 #define		TT2$V_DECCRT		29
 #define		TT2$V_DECCRT2		30
 #define		TT2$V_DECCRT3		31
- 
-union _tt2def {
-  struct  {
-    unsigned tt2$v_localecho		: 1;
-    unsigned tt2$v_autobaud		: 1;
-    unsigned tt2$v_hangup		: 1;
-    unsigned tt2$v_modhangup		: 1;
-    unsigned tt2$v_brdcstmbx		: 1;
-    unsigned tt2$v_xon			: 1;
-    unsigned tt2$v_dma			: 1;
-    unsigned tt2$v_altypeahd		: 1;
-    unsigned tt2$v_setspeed		: 1;
-    unsigned tt2$v_dcl_mailbx		: 1;
-    unsigned tt2$v_deccrt4		: 1;
-    unsigned tt2$v_commsync		: 1;
-    unsigned tt2$v_editing		: 1;
-    unsigned tt2$v_insert		: 1;
-    unsigned tt2$v_fallback		: 1;
-    unsigned tt2$v_dialup		: 1;
-    unsigned tt2$v_secure		: 1;
-    unsigned tt2$v_disconnect		: 1;
-    unsigned tt2$v_pasthru		: 1;
-    unsigned tt2$v_syspwd		: 1;
-    unsigned tt2$v_sixel		: 1;
-    unsigned tt2$v_drcs			: 1;
-    unsigned tt2$v_printer		: 1;
-    unsigned tt2$v_app_keypad		: 1;
-    unsigned tt2$v_ansicrt		: 1;
-    unsigned tt2$v_regis		: 1;
-    unsigned tt2$v_block		: 1;
-    unsigned tt2$v_avo			: 1;
-    unsigned tt2$v_edit			: 1;
-    unsigned tt2$v_deccrt		: 1;
-    unsigned tt2$v_deccrt2		: 1;
-    unsigned tt2$v_deccrt3		: 1;
-  }; 
+
+union _tt2def
+{
+    struct
+    {
+        unsigned tt2$v_localecho		: 1;
+        unsigned tt2$v_autobaud		: 1;
+        unsigned tt2$v_hangup		: 1;
+        unsigned tt2$v_modhangup		: 1;
+        unsigned tt2$v_brdcstmbx		: 1;
+        unsigned tt2$v_xon			: 1;
+        unsigned tt2$v_dma			: 1;
+        unsigned tt2$v_altypeahd		: 1;
+        unsigned tt2$v_setspeed		: 1;
+        unsigned tt2$v_dcl_mailbx		: 1;
+        unsigned tt2$v_deccrt4		: 1;
+        unsigned tt2$v_commsync		: 1;
+        unsigned tt2$v_editing		: 1;
+        unsigned tt2$v_insert		: 1;
+        unsigned tt2$v_fallback		: 1;
+        unsigned tt2$v_dialup		: 1;
+        unsigned tt2$v_secure		: 1;
+        unsigned tt2$v_disconnect		: 1;
+        unsigned tt2$v_pasthru		: 1;
+        unsigned tt2$v_syspwd		: 1;
+        unsigned tt2$v_sixel		: 1;
+        unsigned tt2$v_drcs			: 1;
+        unsigned tt2$v_printer		: 1;
+        unsigned tt2$v_app_keypad		: 1;
+        unsigned tt2$v_ansicrt		: 1;
+        unsigned tt2$v_regis		: 1;
+        unsigned tt2$v_block		: 1;
+        unsigned tt2$v_avo			: 1;
+        unsigned tt2$v_edit			: 1;
+        unsigned tt2$v_deccrt		: 1;
+        unsigned tt2$v_deccrt2		: 1;
+        unsigned tt2$v_deccrt3		: 1;
+    };
 };
- 
+
 #endif
- 
+

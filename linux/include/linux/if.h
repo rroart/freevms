@@ -49,7 +49,7 @@
 #define IFF_802_1Q_VLAN 0x1             /* 802.1Q VLAN device.          */
 
 /*
- *	Device mapping structure. I'd just gone off and designed a 
+ *	Device mapping structure. I'd just gone off and designed a
  *	beautiful scheme using only loadable modules with arguments
  *	for driver options and along come the PCMCIA people 8)
  *
@@ -58,15 +58,15 @@
  *	being very small might be worth keeping for clean configuration.
  */
 
-struct ifmap 
+struct ifmap
 {
-	unsigned long mem_start;
-	unsigned long mem_end;
-	unsigned short base_addr; 
-	unsigned char irq;
-	unsigned char dma;
-	unsigned char port;
-	/* 3 bytes spare */
+    unsigned long mem_start;
+    unsigned long mem_end;
+    unsigned short base_addr;
+    unsigned char irq;
+    unsigned char dma;
+    unsigned char port;
+    /* 3 bytes spare */
 };
 
 /*
@@ -76,29 +76,30 @@ struct ifmap
  * remainder may be interface specific.
  */
 
-struct ifreq 
+struct ifreq
 {
 #define IFHWADDRLEN	6
 #define	IFNAMSIZ	16
-	union
-	{
-		char	ifrn_name[IFNAMSIZ];		/* if name, e.g. "en0" */
-	} ifr_ifrn;
-	
-	union {
-		struct	sockaddr ifru_addr;
-		struct	sockaddr ifru_dstaddr;
-		struct	sockaddr ifru_broadaddr;
-		struct	sockaddr ifru_netmask;
-		struct  sockaddr ifru_hwaddr;
-		short	ifru_flags;
-		int	ifru_ivalue;
-		int	ifru_mtu;
-		struct  ifmap ifru_map;
-		char	ifru_slave[IFNAMSIZ];	/* Just fits the size */
-		char	ifru_newname[IFNAMSIZ];
-		char *	ifru_data;
-	} ifr_ifru;
+    union
+    {
+        char	ifrn_name[IFNAMSIZ];		/* if name, e.g. "en0" */
+    } ifr_ifrn;
+
+    union
+    {
+        struct	sockaddr ifru_addr;
+        struct	sockaddr ifru_dstaddr;
+        struct	sockaddr ifru_broadaddr;
+        struct	sockaddr ifru_netmask;
+        struct  sockaddr ifru_hwaddr;
+        short	ifru_flags;
+        int	ifru_ivalue;
+        int	ifru_mtu;
+        struct  ifmap ifru_map;
+        char	ifru_slave[IFNAMSIZ];	/* Just fits the size */
+        char	ifru_newname[IFNAMSIZ];
+        char *	ifru_data;
+    } ifr_ifru;
 };
 
 #define ifr_name	ifr_ifrn.ifrn_name	/* interface name 	*/
@@ -125,14 +126,14 @@ struct ifreq
  * must know all networks accessible).
  */
 
-struct ifconf 
+struct ifconf
 {
-	int	ifc_len;			/* size of buffer	*/
-	union 
-	{
-		char *			ifcu_buf;
-		struct	ifreq 		*ifcu_req;
-	} ifc_ifcu;
+    int	ifc_len;			/* size of buffer	*/
+    union
+    {
+        char *			ifcu_buf;
+        struct	ifreq 		*ifcu_req;
+    } ifc_ifcu;
 };
 #define	ifc_buf	ifc_ifcu.ifcu_buf		/* buffer address	*/
 #define	ifc_req	ifc_ifcu.ifcu_req		/* array of structures	*/

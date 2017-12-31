@@ -22,7 +22,7 @@
 void crash (char *message)
 
 {
-  fprintf (stderr, "%s: fatal error: %s\n", pn, message);
-  fflush (stderr);
-  abort ();
+    fprintf (stderr, "%s: fatal error: %s\n", pn, message);
+    fflush (stderr);
+    abort ();
 }

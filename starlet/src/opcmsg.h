@@ -163,6 +163,6 @@
 #define		OPC$_LOGFCLERR		361648
 #define		OPC$_WSINCLUSTER	361659
 #define		OPC$_LOGIN_REJECTED	361664
-		
+
 #endif
-		
+

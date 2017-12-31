@@ -2,7 +2,7 @@
 // $Locker$
 
 // Author. Roar Thronæs.
-// Modified Ozone source file, 2001-2004  
+// Modified Ozone source file, 2001-2004
 
 //+++2002-08-17
 //    Copyright (C) 2001,2002  Mike Rieker, Beverly, MA USA
@@ -27,7 +27,7 @@
 /*									*/
 /************************************************************************/
 
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -40,9 +40,9 @@
 #include <lckdef.h>
 #include <lnmdef.h>
 #include <psldef.h>
-#include <ssdef.h> 
+#include <ssdef.h>
 #include <statedef.h>
-#include <descrip.h> 
+#include <descrip.h>
 #include <starlet.h>
 #include<va_rangedef.h>
 #include<starlet.h>
@@ -139,9 +139,10 @@ void * c_parser_binary_expression2_as_string (int a, int b, char * s);
 #define OZ_THREAD_STATE_MAX 14
 #define OZ_EVENT_NAMESIZE 32
 
-unsigned long oz_hw_atomic_inc_long(unsigned long *l, char c) {
-  (*l)++;
-  return (*l);
+unsigned long oz_hw_atomic_inc_long(unsigned long *l, char c)
+{
+    (*l)++;
+    return (*l);
 }
 
 typedef enum { OZ_OBJTYPE_UNKNOWN,              //  0
@@ -183,212 +184,241 @@ typedef enum { OZ_OBJTYPE_UNKNOWN,              //  0
                OZ_OBJTYPE_LOG,                  // 24
 
                OZ_OBJTYPE_MAX                   // 25
-} OZ_Objtype;
+             } OZ_Objtype;
 
-typedef struct { unsigned long attr;
-  void *buff;
+typedef struct
+{
+    unsigned long attr;
+    void *buff;
 } OZ_Logvalue;
 
 unsigned long oz_hw_atoz (const char *s, int *usedup)
 
 {
-  char c;
-  const char *p;
-  unsigned long accum;
+    char c;
+    const char *p;
+    unsigned long accum;
 
-  accum = 0;
-  for (p = s; (c = *p) != 0; p ++) {
-    if ((c >= 'A') && (c <= 'F')) c -= 'A' - 10;
-    else if ((c >= 'a') && (c <= 'f')) c -= 'a' - 10;
-    else if ((c < '0') || (c > '9')) break;
-    else c -= '0';
-    accum = accum * 16 + c;
-  }
+    accum = 0;
+    for (p = s; (c = *p) != 0; p ++)
+    {
+        if ((c >= 'A') && (c <= 'F')) c -= 'A' - 10;
+        else if ((c >= 'a') && (c <= 'f')) c -= 'a' - 10;
+        else if ((c < '0') || (c > '9')) break;
+        else c -= '0';
+        accum = accum * 16 + c;
+    }
 
-  if (usedup != NULL) *usedup = p - s;
-  return (accum);
+    if (usedup != NULL) *usedup = p - s;
+    return (accum);
 }
 
 unsigned long oz_hw_atoi (const char *s, int *usedup)
 
 {
-  char c;
-  const char *p;
-  unsigned long accum;
+    char c;
+    const char *p;
+    unsigned long accum;
 
-  p = s;
-  if ((p[0] == '0') && ((p[1] == 'x') || (p[1] == 'X'))) {
-    accum = oz_hw_atoz (p + 2, usedup);
-    if (usedup != NULL) *usedup += 2;
+    p = s;
+    if ((p[0] == '0') && ((p[1] == 'x') || (p[1] == 'X')))
+    {
+        accum = oz_hw_atoz (p + 2, usedup);
+        if (usedup != NULL) *usedup += 2;
+        return (accum);
+    }
+
+    accum = 0;
+    for (; (c = *p) != 0; p ++)
+    {
+        if (c < '0') break;
+        if (c > '9') break;
+        accum = accum * 10 + c - '0';
+    }
+
+    if (usedup != NULL) *usedup = p - s;
     return (accum);
-  }
-
-  accum = 0;
-  for (; (c = *p) != 0; p ++) {
-    if (c < '0') break;
-    if (c > '9') break;
-    accum = accum * 10 + c - '0';
-  }
-
-  if (usedup != NULL) *usedup = p - s;
-  return (accum);
 }
 
 void oz_hw_itoa (unsigned long valu, unsigned long size, char *buff)
 
 {
-  char temp[3*sizeof valu];
-  int i;
+    char temp[3*sizeof valu];
+    int i;
 
-  i = sizeof temp;
-  temp[--i] = 0;
-  do {
-    temp[--i] = (valu % 10) + '0';
-    valu /= 10;
-  } while (valu != 0);
-  strncpy (buff, temp + i, size);
+    i = sizeof temp;
+    temp[--i] = 0;
+    do
+    {
+        temp[--i] = (valu % 10) + '0';
+        valu /= 10;
+    }
+    while (valu != 0);
+    strncpy (buff, temp + i, size);
 }
 
 typedef struct Command Command;
 
 typedef unsigned long (*Entry) (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *param, int argc, const char *argv[]);
 
-struct Command { int async;	/* 0: cannot run as a thread; 1: ok to run as a thread */
-				/* - Basically anything that accesses cli internal static data (like symbol tables and script stacks) cannot be run as a thread. */
-				/*   Also, things like 'abort/wait/suspend/resume thread' and 'run' do their own ctrl-Y processing so do not need to be async.   */
-                 char *name;	/* command name string; multiple words separated by a single space */
-                 Entry entry;	/* entrypoint to the routine */
-                 void *param;	/* param to pass to the routine */
-                 char *help;	/* corresponding help string */
-               };
+struct Command
+{
+    int async;	/* 0: cannot run as a thread; 1: ok to run as a thread */
+    /* - Basically anything that accesses cli internal static data (like symbol tables and script stacks) cannot be run as a thread. */
+    /*   Also, things like 'abort/wait/suspend/resume thread' and 'run' do their own ctrl-Y processing so do not need to be async.   */
+    char *name;	/* command name string; multiple words separated by a single space */
+    Entry entry;	/* entrypoint to the routine */
+    void *param;	/* param to pass to the routine */
+    char *help;	/* corresponding help string */
+};
 
 typedef struct Label Label;
 
-struct Label { Label *next;
-               char name[MAXLBLNAM];
-               unsigned long blkoffs;
-               unsigned long bytoffs;
-             };
+struct Label
+{
+    Label *next;
+    char name[MAXLBLNAM];
+    unsigned long blkoffs;
+    unsigned long bytoffs;
+};
 
-typedef enum { SYMTYPE_STRING, 
+typedef enum { SYMTYPE_STRING,
                SYMTYPE_INTEGER
              } Symtype;
 
 typedef struct Symbol Symbol;
 
-struct Symbol { Symbol *next;
-                char name[MAXSYMNAM];
-                Symtype symtype;
-                unsigned long (*func) (Symbol *symbol, char *strp, char **rtnp, void *valuep);
-                unsigned long ivalue;
-                char svalue[1];
-              };
+struct Symbol
+{
+    Symbol *next;
+    char name[MAXSYMNAM];
+    Symtype symtype;
+    unsigned long (*func) (Symbol *symbol, char *strp, char **rtnp, void *valuep);
+    unsigned long ivalue;
+    char svalue[1];
+};
 
 typedef struct Script Script;
 
-struct Script { Script *next;		/* next outermost script */
-                unsigned long h_input;	/* input of next outermost script */
-                unsigned long h_output;	/* output of next outermost script */
-                unsigned long h_error;	/* error of next outermost script */
-                Symbol *symbols;	/* symbols of next outermost script */
-                Label *labels;		/* labels of next outermost script */
-              };
+struct Script
+{
+    Script *next;		/* next outermost script */
+    unsigned long h_input;	/* input of next outermost script */
+    unsigned long h_output;	/* output of next outermost script */
+    unsigned long h_error;	/* error of next outermost script */
+    Symbol *symbols;	/* symbols of next outermost script */
+    Label *labels;		/* labels of next outermost script */
+};
 
-typedef enum {
-	OPTYPE_UNKNOWN, 
-	OPTYPE_ADD, 
-	OPTYPE_BITAND, 
-	OPTYPE_BITOR, 
-	OPTYPE_BITXOR, 
-	OPTYPE_BOOLAND, 
-	OPTYPE_BOOLOR, 
-	OPTYPE_BOOLXOR, 
-	OPTYPE_DIVIDE, 
-	OPTYPE_EQ, 
-	OPTYPE_GT, 
-	OPTYPE_GE, 
-	OPTYPE_LT, 
-	OPTYPE_LE, 
-	OPTYPE_NE, 
-	OPTYPE_MODULUS, 
-	OPTYPE_MULTIPLY, 
-	OPTYPE_SHLEFT, 
-	OPTYPE_SHRIGHT, 
-	OPTYPE_SUBTRACT } Optype;
+typedef enum
+{
+    OPTYPE_UNKNOWN,
+    OPTYPE_ADD,
+    OPTYPE_BITAND,
+    OPTYPE_BITOR,
+    OPTYPE_BITXOR,
+    OPTYPE_BOOLAND,
+    OPTYPE_BOOLOR,
+    OPTYPE_BOOLXOR,
+    OPTYPE_DIVIDE,
+    OPTYPE_EQ,
+    OPTYPE_GT,
+    OPTYPE_GE,
+    OPTYPE_LT,
+    OPTYPE_LE,
+    OPTYPE_NE,
+    OPTYPE_MODULUS,
+    OPTYPE_MULTIPLY,
+    OPTYPE_SHLEFT,
+    OPTYPE_SHRIGHT,
+    OPTYPE_SUBTRACT
+} Optype;
 
-typedef struct { char *opname;
-                 Optype optype;
-               } Operator;
+typedef struct
+{
+    char *opname;
+    Optype optype;
+} Operator;
 
-static const Operator operators[] = {
-	"||", OPTYPE_BOOLOR, 
-	"^^", OPTYPE_BOOLXOR, 
-	">>", OPTYPE_SHRIGHT, 
-	">=", OPTYPE_GE, 
-	"==", OPTYPE_EQ, 
-	"<>", OPTYPE_NE, 
-	"<=", OPTYPE_LE, 
-	"<<", OPTYPE_SHLEFT, 
-	"&&", OPTYPE_BOOLAND, 
-	"!=", OPTYPE_NE, 
-	"|",  OPTYPE_BITOR, 
-	"^",  OPTYPE_BITXOR, 
-	">",  OPTYPE_GT, 
-	"<",  OPTYPE_LT, 
-	"/",  OPTYPE_DIVIDE, 
-	"-",  OPTYPE_SUBTRACT, 
-	"+",  OPTYPE_ADD, 
-	"*",  OPTYPE_MULTIPLY, 
-	"&",  OPTYPE_BITAND, 
-	"%",  OPTYPE_MODULUS, 
-	NULL, OPTYPE_UNKNOWN };
+static const Operator operators[] =
+{
+    "||", OPTYPE_BOOLOR,
+    "^^", OPTYPE_BOOLXOR,
+    ">>", OPTYPE_SHRIGHT,
+    ">=", OPTYPE_GE,
+    "==", OPTYPE_EQ,
+    "<>", OPTYPE_NE,
+    "<=", OPTYPE_LE,
+    "<<", OPTYPE_SHLEFT,
+    "&&", OPTYPE_BOOLAND,
+    "!=", OPTYPE_NE,
+    "|",  OPTYPE_BITOR,
+    "^",  OPTYPE_BITXOR,
+    ">",  OPTYPE_GT,
+    "<",  OPTYPE_LT,
+    "/",  OPTYPE_DIVIDE,
+    "-",  OPTYPE_SUBTRACT,
+    "+",  OPTYPE_ADD,
+    "*",  OPTYPE_MULTIPLY,
+    "&",  OPTYPE_BITAND,
+    "%",  OPTYPE_MODULUS,
+    NULL, OPTYPE_UNKNOWN
+};
 
 typedef struct Pipebuf Pipebuf;
 typedef struct Runopts Runopts;
 
-struct Pipebuf { Pipebuf *next;
-                 Runopts *runopts;
-                 unsigned long rlen;
-                 char data[256];
-               };
+struct Pipebuf
+{
+    Pipebuf *next;
+    Runopts *runopts;
+    unsigned long rlen;
+    char data[256];
+};
 
-struct Runopts { const char *defdir;		/* -directory name */
-                 const char *error_name;	/* -error file name */
-                 const char *ersym_name;	/* -ersym symbol name */
-                 const char *exit_name;		/* -exit event flag logical name */
-                 const char *init_name;		/* -init event flag logical name */
-                 const char *input_name;	/* -input file name */
-                 const char *insym_name;	/* -insym symbol name */
-                 const char *job_name;		/* -job name */
-                 const char *output_name;	/* -output file name */
-                 const char *outsym_name;	/* -outsym symbol name */
-                 const char *process_name;	/* -process logical name */
-                 const char *thread_name;	/* -thread logical name */
-                 int timeit;			/* -timeit flag */
-                 int wait;			/* opposite of -nowait setting */
-                 int orphan;			/* -orphan flag */
-                 unsigned long h_err;		/* -error io channel handle */
-                 unsigned long h_exit;		/* -exit event flag handle */
-                 unsigned long h_init;		/* -init event flag handle */
-                 unsigned long h_in;		/* -input io channel handle */
-                 unsigned long h_job;		/* -job handle */
-                 unsigned long h_out;		/* -output io channel handle */
-                 unsigned long h_process;		/* created process handle (0 for internal commands) */
-                 unsigned long h_thread;		/* created thread handle */
+struct Runopts
+{
+    const char *defdir;		/* -directory name */
+    const char *error_name;	/* -error file name */
+    const char *ersym_name;	/* -ersym symbol name */
+    const char *exit_name;		/* -exit event flag logical name */
+    const char *init_name;		/* -init event flag logical name */
+    const char *input_name;	/* -input file name */
+    const char *insym_name;	/* -insym symbol name */
+    const char *job_name;		/* -job name */
+    const char *output_name;	/* -output file name */
+    const char *outsym_name;	/* -outsym symbol name */
+    const char *process_name;	/* -process logical name */
+    const char *thread_name;	/* -thread logical name */
+    int timeit;			/* -timeit flag */
+    int wait;			/* opposite of -nowait setting */
+    int orphan;			/* -orphan flag */
+    unsigned long h_err;		/* -error io channel handle */
+    unsigned long h_exit;		/* -exit event flag handle */
+    unsigned long h_init;		/* -init event flag handle */
+    unsigned long h_in;		/* -input io channel handle */
+    unsigned long h_job;		/* -job handle */
+    unsigned long h_out;		/* -output io channel handle */
+    unsigned long h_process;		/* created process handle (0 for internal commands) */
+    unsigned long h_thread;		/* created thread handle */
 
-                 unsigned long h_ersym;		/* read ersym data from this pipe handle */
-                 unsigned long h_insym;		/* write insym data to this pipe handle */
-                 unsigned long h_outsym;		/* read outsym data from this pipe handle */
-                 unsigned long h_evsym;		/* this event sets when symbol stream completes */
-                 Pipebuf *ersym_pipebuf_qh;	/* list of buffers for -ersym */
-                 Pipebuf **ersym_pipebuf_qt;
-                 char *insym_data;		/* pointer to buffer for -insym */
-                 Pipebuf *outsym_pipebuf_qh;	/* list of buffers for -outsym */
-                 Pipebuf **outsym_pipebuf_qt;
-               };
+    unsigned long h_ersym;		/* read ersym data from this pipe handle */
+    unsigned long h_insym;		/* write insym data to this pipe handle */
+    unsigned long h_outsym;		/* read outsym data from this pipe handle */
+    unsigned long h_evsym;		/* this event sets when symbol stream completes */
+    Pipebuf *ersym_pipebuf_qh;	/* list of buffers for -ersym */
+    Pipebuf **ersym_pipebuf_qt;
+    char *insym_data;		/* pointer to buffer for -insym */
+    Pipebuf *outsym_pipebuf_qh;	/* list of buffers for -outsym */
+    Pipebuf **outsym_pipebuf_qt;
+};
 
-static const struct { char *name; unsigned long valu; } lockmodes[LCK$K_EXMODE+1] = 
-                    { "NL", LCK$K_NLMODE, "CR", LCK$K_CRMODE, "CW", LCK$K_CWMODE, "PR", LCK$K_PRMODE, "PW", LCK$K_PWMODE, "EX", LCK$K_EXMODE };
+static const struct
+{
+    char *name;
+    unsigned long valu;
+} lockmodes[LCK$K_EXMODE+1] =
+{ "NL", LCK$K_NLMODE, "CR", LCK$K_CRMODE, "CW", LCK$K_CWMODE, "PR", LCK$K_PRMODE, "PW", LCK$K_PWMODE, "EX", LCK$K_EXMODE };
 
 static char *pn, skiplabel[MAXLBLNAM];
 static char *defaulttables;
@@ -401,9 +431,10 @@ static unsigned long h_s_input;
 static unsigned long h_s_output;
 static unsigned long h_timer;
 
-static struct {
-unsigned long curblock;
-unsigned long curbyte;
+static struct
+{
+    unsigned long curblock;
+    unsigned long curbyte;
 } scriptinfo;
 
 static int inscript=0;
@@ -412,18 +443,19 @@ static char * scriptbuffer;
 static int scriptlen;
 static int scriptpos;
 
-static struct { 
-  unsigned long size;                    /* data buffer size */
-  void *buff;                    /* data buffer address */
-  unsigned long trmsize;                 /* terminator buffer size */
-  const void *trmbuff;           /* terminator buffer address */
-  unsigned long *rlen;                   /* where to return length actually read */
-  /* (doesn't include terminator) */
-  unsigned long pmtsize;                 /* prompt string size */
-  const void *pmtbuff;           /* prompt buffer address */
-  unsigned long atblock;                /* position to this block before
+static struct
+{
+    unsigned long size;                    /* data buffer size */
+    void *buff;                    /* data buffer address */
+    unsigned long trmsize;                 /* terminator buffer size */
+    const void *trmbuff;           /* terminator buffer address */
+    unsigned long *rlen;                   /* where to return length actually read */
+    /* (doesn't include terminator) */
+    unsigned long pmtsize;                 /* prompt string size */
+    const void *pmtbuff;           /* prompt buffer address */
+    unsigned long atblock;                /* position to this block before
 				    reading (if non-zero) */
-  unsigned long atbyte;                  /* position to this byte before 
+    unsigned long atbyte;                  /* position to this byte before
 				    reading (if .atblock non-zero) */
 }  scriptread;
 
@@ -549,96 +581,104 @@ static unsigned long int_show_job             (unsigned long h_input, unsigned l
 static unsigned long int_show_logical_name    (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 //static unsigned long int_show_system          (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[]);
 
-static Command intcmd[] = {
-	0, "logout",               int_logout,                 NULL, "[<status>]", 
-	0, "exit"  ,               int_exit,                 NULL, "[<status>]", 
-	0, "goto",                 int_goto,                 NULL, "<label>",
-	0, "@",               int_script,               NULL, "<script_name> [<args> ...]", 
-	// the following are really not internal
-	// waiting for dcltables.exe
-	0, "_oinit", 1, 0, "/vms$common/sysexe/init",
-	0, "_oedt", 1, 0, "/vms$common/sysexe/edt",
-	0, "_odfu", 1, 0, "/vms$common/sysexe/dfu",
-	0, "oinit", 1, 0, "SYS$SYSTEM:init.exe",
-	0, "oedt", 1, 0, "SYS$SYSTEM:edt.exe",
-	0, "odfu", 1, 0, "SYS$SYSTEM:dfu.exe",
-	0, NULL, NULL, NULL, NULL };
+static Command intcmd[] =
+{
+    0, "logout",               int_logout,                 NULL, "[<status>]",
+    0, "exit"  ,               int_exit,                 NULL, "[<status>]",
+    0, "goto",                 int_goto,                 NULL, "<label>",
+    0, "@",               int_script,               NULL, "<script_name> [<args> ...]",
+    // the following are really not internal
+    // waiting for dcltables.exe
+    0, "_oinit", 1, 0, "/vms$common/sysexe/init",
+    0, "_oedt", 1, 0, "/vms$common/sysexe/edt",
+    0, "_odfu", 1, 0, "/vms$common/sysexe/dfu",
+    0, "oinit", 1, 0, "SYS$SYSTEM:init.exe",
+    0, "oedt", 1, 0, "SYS$SYSTEM:edt.exe",
+    0, "odfu", 1, 0, "SYS$SYSTEM:dfu.exe",
+    0, NULL, NULL, NULL, NULL
+};
 
 
-struct cli_struct {
-  char * cliroutine;
-  void (*fn)();
+struct cli_struct
+{
+    char * cliroutine;
+    void (*fn)();
 };
 
-struct cli_struct cliroutines[]={
-{  "define",  int_create_logical_name,   },
-{  "create_name_table",  int_create_logical_table,   },
-{  "else",              int_else },
-{  "endif",              int_endif },
-{  "if",              int_if },
-{  "set_default",          int_set_default,           },
-{  "set_prompt",           int_set_prompt,            },
-{  "set_process",          int_set_process,           },
+struct cli_struct cliroutines[]=
+{
+    {  "define",  int_create_logical_name,   },
+    {  "create_name_table",  int_create_logical_table,   },
+    {  "else",              int_else },
+    {  "endif",              int_endif },
+    {  "if",              int_if },
+    {  "set_default",          int_set_default,           },
+    {  "set_prompt",           int_set_prompt,            },
+    {  "set_process",          int_set_process,           },
 #if 0
-{  "set_security",         set_security,          },
+    {  "set_security",         set_security,          },
 #endif
-{  "set_working_set",      int_set_working_set,       },
-{  "show_time",            int_show_datetime,         },
-{  "show_devices",         int_show_device,           },
-{  "show_default",         int_show_default,          },
-{  "show_working_set",     int_show_working_set,      },
-{  "show_logical",    int_show_logical_name,     },
-{  "show_system",          show_system,           },
-{  "show_symbol",          show_symbol, },
-{  "delete_symbol",          delete_symbol, },
-{  "stop", int_stop, },
-{  "then",              int_then },
-{  "open", int_open, },
-{  "close", int_close, },
-{  "write", int_write, },
-{  "read", int_read, },
-{  "show_status", show_status, },
-{ 0, 0 , },
+    {  "set_working_set",      int_set_working_set,       },
+    {  "show_time",            int_show_datetime,         },
+    {  "show_devices",         int_show_device,           },
+    {  "show_default",         int_show_default,          },
+    {  "show_working_set",     int_show_working_set,      },
+    {  "show_logical",    int_show_logical_name,     },
+    {  "show_system",          show_system,           },
+    {  "show_symbol",          show_symbol, },
+    {  "delete_symbol",          delete_symbol, },
+    {  "stop", int_stop, },
+    {  "then",              int_then },
+    {  "open", int_open, },
+    {  "close", int_close, },
+    {  "write", int_write, },
+    {  "read", int_read, },
+    {  "show_status", show_status, },
+    { 0, 0 , },
 };
 
-void * get_cli_int(char * c) {
-  int i;
-  for (i=0;cliroutines[i].cliroutine;i++) {
-    if (0==strncmp(c,cliroutines[i].cliroutine,strlen(cliroutines[i].cliroutine)))
-      return cliroutines[i].fn;
-  }
-  return 0;
+void * get_cli_int(char * c)
+{
+    int i;
+    for (i=0; cliroutines[i].cliroutine; i++)
+    {
+        if (0==strncmp(c,cliroutines[i].cliroutine,strlen(cliroutines[i].cliroutine)))
+            return cliroutines[i].fn;
+    }
+    return 0;
 }
 
-get_cdu_root() {
-  //extern struct _cdu cdu_root[];
-  //return &cdu_root[0];
-  extern long cdu_root;
-  return &cdu_root;
+get_cdu_root()
+{
+    //extern struct _cdu cdu_root[];
+    //return &cdu_root[0];
+    extern long cdu_root;
+    return &cdu_root;
 }
 
-	// the following are really not internal
+// the following are really not internal
 
 const char oz_s_logname_defaulttables[] = "DEFAULT";
 
 const char oz_sys_copyright[] = "C";
 
-int check_vms_mm(int argc, char ** argv) {
-  if (argc>=2 && 0==strncmp(argv[1],"not",3))
-    return 0;
-  int retlenaddr;
-  int mem=0;
-  struct item_list_3 lst[14], syilst[2];
-  syilst[0].buflen=4;
-  syilst[0].item_code=SYI$_LASTFLD;
-  syilst[0].bufaddr=&mem;
-  syilst[0].retlenaddr=&retlenaddr;
-  syilst[1].buflen=0;
-  syilst[1].item_code=0;
+int check_vms_mm(int argc, char ** argv)
+{
+    if (argc>=2 && 0==strncmp(argv[1],"not",3))
+        return 0;
+    int retlenaddr;
+    int mem=0;
+    struct item_list_3 lst[14], syilst[2];
+    syilst[0].buflen=4;
+    syilst[0].item_code=SYI$_LASTFLD;
+    syilst[0].bufaddr=&mem;
+    syilst[0].retlenaddr=&retlenaddr;
+    syilst[1].buflen=0;
+    syilst[1].item_code=0;
 
-  int sts=sys$getsyi(0,0,0,syilst,0,0,0);
+    int sts=sys$getsyi(0,0,0,syilst,0,0,0);
 
-  return mem;
+    return mem;
 }
 
 int vms_mm;
@@ -657,448 +697,484 @@ extern int if_mode;
 unsigned long main (int argc, char *argv[])
 
 {
-  char cmdbuf[CMDSIZ], *p;
-  gcmdbuf = cmdbuf;
-  int i;
-  unsigned long cmdlen, sts;
-  unsigned long h_event;
-  Symbol *symbol;
+    char cmdbuf[CMDSIZ], *p;
+    gcmdbuf = cmdbuf;
+    int i;
+    unsigned long cmdlen, sts;
+    unsigned long h_event;
+    Symbol *symbol;
 
-  defaulttables  = oz_s_logname_defaulttables;
+    defaulttables  = oz_s_logname_defaulttables;
 
-  exited         = 0;
-  scripts        = NULL;
-  skiplabel[0]   = 0;
-  symbols        = NULL;
-  verify         = 0;
+    exited         = 0;
+    scripts        = NULL;
+    skiplabel[0]   = 0;
+    symbols        = NULL;
+    verify         = 0;
 
-  h_s_console = 0;
-  h_s_error   = stderr;
-  h_s_input   = stdin;
-  h_s_output  = stdout;
+    h_s_console = 0;
+    h_s_error   = stderr;
+    h_s_input   = stdin;
+    h_s_output  = stdout;
 
-  vms_mm = check_vms_mm(argc,argv);
+    vms_mm = check_vms_mm(argc,argv);
 
-  if (vms_mm) {
-    short chan;
-    struct _iosb iosb;
-    // eventually handle ascii 0-31 asts.
-  }
-
-  /* Put argc/argv's in symbols oz_arg0... Set symbol oz_nargs to the number of values. */
-
-  setscriptsyms (argc, (const char **)argv);
-
-  /* Process command line arguments */
-
-  pn = "oz_cli";
-  if (argc > 0) pn = argv[0];
-
-  int script_exit = 0;
-
-  if (argv[0] && 0==strcmp(argv[0],"[vms$common.sysexe]startup.com")) {
-    void * myargv[2];
-    myargv[0]="/vms$common/sysexe/startup.com";
-    myargv[0]=argv[0];
-    myargv[1]=0;
-    int_script(h_s_input, h_s_output, h_s_error, "startup", 0, 1, myargv);
-    script_exit=1;
-  }
-  if (argv[0] && 0==strcmp(argv[0],"[vms$common.sysexe]install.com")) {
-    void * myargv[2];
-    myargv[0]="/vms$common/sysexe/install.com";
-    myargv[1]=0;
-    int_script(h_s_input, h_s_output, h_s_error, "startup", 0, 1, myargv);
-    script_exit=1;
-  }
-
-  for (i = 1; i < argc; i ++) {
-
-    /* -exec <rest_of_line> : execute the single rest_of_line command */
-
-    if (strcmp (argv[i], "-exec") == 0) {
-      argc -= i;
-      argv += i;
-      break;
+    if (vms_mm)
+    {
+        short chan;
+        struct _iosb iosb;
+        // eventually handle ascii 0-31 asts.
     }
 
-    /* -noverify : turn off verify */
+    /* Put argc/argv's in symbols oz_arg0... Set symbol oz_nargs to the number of values. */
 
-    if (strcmp (argv[i], "-noverify") == 0) {
-      verify = 0;
-      continue;
+    setscriptsyms (argc, (const char **)argv);
+
+    /* Process command line arguments */
+
+    pn = "oz_cli";
+    if (argc > 0) pn = argv[0];
+
+    int script_exit = 0;
+
+    if (argv[0] && 0==strcmp(argv[0],"[vms$common.sysexe]startup.com"))
+    {
+        void * myargv[2];
+        myargv[0]="/vms$common/sysexe/startup.com";
+        myargv[0]=argv[0];
+        myargv[1]=0;
+        int_script(h_s_input, h_s_output, h_s_error, "startup", 0, 1, myargv);
+        script_exit=1;
+    }
+    if (argv[0] && 0==strcmp(argv[0],"[vms$common.sysexe]install.com"))
+    {
+        void * myargv[2];
+        myargv[0]="/vms$common/sysexe/install.com";
+        myargv[1]=0;
+        int_script(h_s_input, h_s_output, h_s_error, "startup", 0, 1, myargv);
+        script_exit=1;
     }
 
-    /* -verify : turn on verify */
+    for (i = 1; i < argc; i ++)
+    {
 
-    if (strcmp (argv[i], "-verify") == 0) {
-      verify = 1;
-      continue;
+        /* -exec <rest_of_line> : execute the single rest_of_line command */
+
+        if (strcmp (argv[i], "-exec") == 0)
+        {
+            argc -= i;
+            argv += i;
+            break;
+        }
+
+        /* -noverify : turn off verify */
+
+        if (strcmp (argv[i], "-noverify") == 0)
+        {
+            verify = 0;
+            continue;
+        }
+
+        /* -verify : turn on verify */
+
+        if (strcmp (argv[i], "-verify") == 0)
+        {
+            verify = 1;
+            continue;
+        }
+
+        if (strstr (argv[i], ".com"))
+        {
+            void * myargv[2];
+            myargv[0]=argv[i];
+            myargv[1]=0;
+            int_script(h_s_input, h_s_output, h_s_error, "startup", 0, 1, myargv);
+            script_exit=1;
+            continue;
+        }
+
+        if (strcmp (argv[i], "not") == 0)
+            continue;
+
+        goto usage;
     }
+    if (i == argc) argc = 0;
 
-    if (strstr (argv[i], ".com")) {
-      void * myargv[2];
-      myargv[0]=argv[i];
-      myargv[1]=0;
-      int_script(h_s_input, h_s_output, h_s_error, "startup", 0, 1, myargv);
-      script_exit=1;
-      continue;
+    if (h_s_console != 0)
+    {
+        fprintf (h_s_console, "%s\n", oz_sys_copyright);
+        startendmsg ("start");
     }
-
-    if (strcmp (argv[i], "not") == 0)
-      continue;
-
-    goto usage;
-  }
-  if (i == argc) argc = 0;
-
-  if (h_s_console != 0) {
-    fprintf (h_s_console, "%s\n", oz_sys_copyright);
-    startendmsg ("start");
-  }
 
 #if 0
-  initparser();
+    initparser();
 #endif
 
-  /* Set up handle to timer */
+    /* Set up handle to timer */
 
 #if 0
-  sts = sys$assign( "timer", &h_timer,PSL$C_KERNEL,0,0);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u assigning channel to timer\n", sts);
-    h_timer = 0;
-  }
+    sts = sys$assign( "timer", &h_timer,PSL$C_KERNEL,0,0);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_error, "oz_cli: error %u assigning channel to timer\n", sts);
+        h_timer = 0;
+    }
 #endif
 
-  /* Set up expression function declarations in symbol table */
+    /* Set up expression function declarations in symbol table */
 
-  def_func ("oz_collapse",    func_collapse,    SYMTYPE_STRING,  "collapsed = oz_collapse (string)");
-  def_func ("oz_compress",    func_compress,    SYMTYPE_STRING, "compressed = oz_compress (string)");
-  def_func ("oz_field",       func_field,       SYMTYPE_STRING,      "field = oz_field (index, separator, string)");
-  def_func ("oz_len",         func_len,         SYMTYPE_INTEGER,    "length = oz_len (string)");
-  def_func ("oz_lnm_attrs",   func_lnm_attrs,   SYMTYPE_STRING,      "attrs = oz_lnm_attrs (h_logname, index)");
-  def_func ("oz_lnm_lookup",  func_lnm_lookup,  SYMTYPE_STRING,  "h_logname = oz_lnm_lookup (logname, procmode)");
-  def_func ("oz_lnm_nvalues", func_lnm_nvalues, SYMTYPE_INTEGER,   "nvalues = oz_lnm_nvalues (h_logname)");
-  def_func ("oz_lnm_object",  func_lnm_object,  SYMTYPE_STRING,   "h_object = oz_lnm_object (h_logname, index, objtype)");
-  def_func ("oz_lnm_string",  func_lnm_string,  SYMTYPE_STRING,     "string = oz_lnm_string (h_logname, index)");
-  def_func ("oz_loc",         func_loc,         SYMTYPE_INTEGER,    "offset = oz_loc (haystack, needle) (length if not found)");
-  def_func ("oz_lowercase",   func_lowercase,   SYMTYPE_STRING,  "lowercase = oz_lowercase (string)");
-  def_func ("oz_process",     func_process,     SYMTYPE_STRING,  "h_process = oz_process (process_id)");
-  def_func ("oz_sub",         func_sub,         SYMTYPE_STRING,  "substring = oz_sub (size, offset, string)");
-  def_func ("oz_trim",        func_trim,        SYMTYPE_STRING,    "trimmed = oz_trim (string)");
-  def_func ("oz_uppercase",   func_uppercase,   SYMTYPE_STRING,  "uppercase = oz_uppercase (string)");
-  def_func ("oz_verify",      func_verify,      SYMTYPE_INTEGER, "oldverify = oz_verify (-1:nc 0:off 1:on)");
+    def_func ("oz_collapse",    func_collapse,    SYMTYPE_STRING,  "collapsed = oz_collapse (string)");
+    def_func ("oz_compress",    func_compress,    SYMTYPE_STRING, "compressed = oz_compress (string)");
+    def_func ("oz_field",       func_field,       SYMTYPE_STRING,      "field = oz_field (index, separator, string)");
+    def_func ("oz_len",         func_len,         SYMTYPE_INTEGER,    "length = oz_len (string)");
+    def_func ("oz_lnm_attrs",   func_lnm_attrs,   SYMTYPE_STRING,      "attrs = oz_lnm_attrs (h_logname, index)");
+    def_func ("oz_lnm_lookup",  func_lnm_lookup,  SYMTYPE_STRING,  "h_logname = oz_lnm_lookup (logname, procmode)");
+    def_func ("oz_lnm_nvalues", func_lnm_nvalues, SYMTYPE_INTEGER,   "nvalues = oz_lnm_nvalues (h_logname)");
+    def_func ("oz_lnm_object",  func_lnm_object,  SYMTYPE_STRING,   "h_object = oz_lnm_object (h_logname, index, objtype)");
+    def_func ("oz_lnm_string",  func_lnm_string,  SYMTYPE_STRING,     "string = oz_lnm_string (h_logname, index)");
+    def_func ("oz_loc",         func_loc,         SYMTYPE_INTEGER,    "offset = oz_loc (haystack, needle) (length if not found)");
+    def_func ("oz_lowercase",   func_lowercase,   SYMTYPE_STRING,  "lowercase = oz_lowercase (string)");
+    def_func ("oz_process",     func_process,     SYMTYPE_STRING,  "h_process = oz_process (process_id)");
+    def_func ("oz_sub",         func_sub,         SYMTYPE_STRING,  "substring = oz_sub (size, offset, string)");
+    def_func ("oz_trim",        func_trim,        SYMTYPE_STRING,    "trimmed = oz_trim (string)");
+    def_func ("oz_uppercase",   func_uppercase,   SYMTYPE_STRING,  "uppercase = oz_uppercase (string)");
+    def_func ("oz_verify",      func_verify,      SYMTYPE_INTEGER, "oldverify = oz_verify (-1:nc 0:off 1:on)");
 
-  /* Create an event flag to use for I/O, and one for control-Y */
+    /* Create an event flag to use for I/O, and one for control-Y */
 
-  sts = lib$get_ef (&h_event);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "cli: error %u creating event flag\n", sts);
-    return (sts);
-  }
-
-  sts = lib$get_ef (&h_event_ctrly);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "cli: error %u creating event flag\n", sts);
-    return (sts);
-  }
-
-  /* Set up and enable ctrl-Y and ctrl-T */
-
-  ctrly_hit = 0;
-  ctrly_enable ();
-  ctrlt_enable ();
-
-  /* Set up a status symbol (oz_status) */
-
-  symbol = malloc (sizeof *symbol);
-  strcpy (symbol -> name, "oz_status");
-  symbol -> symtype = SYMTYPE_INTEGER;
-  symbol -> ivalue = SS$_NORMAL;
-  insert_symbol (symbol, NULL, 0);
-
-  /* Set up command read prompt */
-
-  memset (&scriptread, 0, sizeof scriptread);
-  scriptread.size = sizeof cmdbuf - 1;
-  scriptread.buff = cmdbuf;
-  scriptread.rlen = &cmdlen;
-  scriptread.trmsize = 1;
-  scriptread.trmbuff = "\n";
-  scriptread.pmtsize = 7;
-  scriptread.pmtbuff = "oz_cli>";
-
-  memset (&scriptinfo, 0, sizeof scriptinfo);
-
-  /* If -exec, execute the one command they supply                                     */
-  /* But it might be a 'script' command, so check for that after executing the command */
-
-  if (argc > 0) {
-    h_s_input = 0;
-    symbol -> ivalue = exechopped (argc - 1, (const char **)(argv + 1), NULL, NULL, 0);
-  }
-
-  /* Process commands from the input file */
-
-  while (!exited && (h_s_input != 0)) {
-
-    if (if_then)
-      goto do_if_then;
-    /* If control-Y was pressed, wipe out scripts and return to top level */
-
-    if (ctrly_hit) {
-      ctrly_hit = 0;
-      skiplabel[0] = 0;
-      while (scripts != NULL) {
-        exit_script ();
-      }
-      scriptread.atblock = 0;
-      scriptread.atbyte  = 0;
+    sts = lib$get_ef (&h_event);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_error, "cli: error %u creating event flag\n", sts);
+        return (sts);
     }
 
-    /* Read command line from input file (but first get current file position) */
-
-    sts = SS$_NORMAL;
-
-    if (inscript) {
-      int start;
-#if 0
-      sts = sys$qio (h_event, h_s_input, IO$_SENSECHAR, 0, 0, 0, &scriptinfo, sizeof scriptinfo );
-#endif
-      scriptinfo.curblock=1;
-      scriptinfo.curbyte=scriptpos;
-
-      if (sts != SS$_NORMAL) scriptinfo.curblock = 0;
-      if ((sts == SS$_NORMAL) || (sts == SS$_ILLIOFUNC)) {
-	if (scriptread.atblock != 0) {
-	  scriptinfo.curblock = scriptread.atblock;
-	  scriptinfo.curbyte  = scriptread.atbyte;
-	}
-#if 0
-	sts = sys$qiow (h_event, h_s_input, IO$_READLBLK, 0, 0, 0, &scriptread, sizeof scriptread );
-#endif
-
-	scriptread.atblock = 1;
-	scriptpos=scriptread.atbyte;
-
-      do_again:
-	{}
-	int dont=0;
-	if (scriptbuffer[scriptpos]=='$')
-	  scriptpos++;
-	while(scriptpos<scriptlen && scriptbuffer[scriptpos]==' ')
-	  scriptpos++;
-	if (scriptbuffer[scriptpos]=='!') {
-	  scriptpos++;
-	  dont=1;
-	}
-	while(scriptpos<scriptlen && scriptbuffer[scriptpos]==' ')
-	  scriptpos++;
-	start=scriptpos;
-	while(scriptpos<scriptlen && scriptbuffer[scriptpos]!='\n')
-	  scriptpos++;
-	scriptpos++;
-	if (dont)
-	  goto do_again;
-	bzero(cmdbuf,CMDSIZ);
-	bcopy(&scriptbuffer[start],cmdbuf,scriptpos-start);
-	cmdbuf[scriptpos-start]=0;
-	sts=SS$_NORMAL;
-	if(scriptpos>scriptlen)
-	  sts=SS$_ENDOFFILE;
-	scriptread.atbyte=scriptpos;
-	if (sts==SS$_ENDOFFILE && script_exit)
-	  exit(0);
-      }
-#if 0
-      // why???
-      scriptread.atblock = 0;
-      scriptread.atbyte  = 0;
-#endif
+    sts = lib$get_ef (&h_event_ctrly);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_error, "cli: error %u creating event flag\n", sts);
+        return (sts);
     }
 
-    /* If read error, close this script and resume next outer level */
+    /* Set up and enable ctrl-Y and ctrl-T */
 
-    if (sts != SS$_NORMAL) {
-      if (sts != SS$_ENDOFFILE) {					/* error message if not end-of-file */
-        fprintf (h_s_error, "oz_cli: error %u reading from input\n", sts);
-        symbol -> ivalue = sts;						/* ... and set the error status */
-      }
-      exit_script ();							/* in any case, pop script level */
-      if ((sts == SS$_ENDOFFILE) && exited && (sys$qio (h_event, h_s_input, IO$_SENSEMODE, 0, 0, NULL, 0, 0, 0, 0, 0, 0) == SS$_NORMAL)) {
-        fprintf (h_s_error, "oz_cli: use 'exit' command to log out\n"); /* don't allow end-of-file to exit interactive session */
-        exited = 0;
-      }
+    ctrly_hit = 0;
+    ctrly_enable ();
+    ctrlt_enable ();
+
+    /* Set up a status symbol (oz_status) */
+
+    symbol = malloc (sizeof *symbol);
+    strcpy (symbol -> name, "oz_status");
+    symbol -> symtype = SYMTYPE_INTEGER;
+    symbol -> ivalue = SS$_NORMAL;
+    insert_symbol (symbol, NULL, 0);
+
+    /* Set up command read prompt */
+
+    memset (&scriptread, 0, sizeof scriptread);
+    scriptread.size = sizeof cmdbuf - 1;
+    scriptread.buff = cmdbuf;
+    scriptread.rlen = &cmdlen;
+    scriptread.trmsize = 1;
+    scriptread.trmbuff = "\n";
+    scriptread.pmtsize = 7;
+    scriptread.pmtbuff = "oz_cli>";
+
+    memset (&scriptinfo, 0, sizeof scriptinfo);
+
+    /* If -exec, execute the one command they supply                                     */
+    /* But it might be a 'script' command, so check for that after executing the command */
+
+    if (argc > 0)
+    {
+        h_s_input = 0;
+        symbol -> ivalue = exechopped (argc - 1, (const char **)(argv + 1), NULL, NULL, 0);
     }
 
-    /* Otherwise, process the command line */
+    /* Process commands from the input file */
 
-    else {
-      if (inscript==0) {
-	char c=0;
-	int idx=0;
-	fprintf(stdout,"%s",prompt);
-	fflush(stdout);
-	//scanf("%s",cmdbuf);
-	//programmed with buffer overflow possibility
-	bzero(cmdbuf,CMDSIZ);
+    while (!exited && (h_s_input != 0))
+    {
+
+        if (if_then)
+            goto do_if_then;
+        /* If control-Y was pressed, wipe out scripts and return to top level */
+
+        if (ctrly_hit)
+        {
+            ctrly_hit = 0;
+            skiplabel[0] = 0;
+            while (scripts != NULL)
+            {
+                exit_script ();
+            }
+            scriptread.atblock = 0;
+            scriptread.atbyte  = 0;
+        }
+
+        /* Read command line from input file (but first get current file position) */
+
+        sts = SS$_NORMAL;
+
+        if (inscript)
+        {
+            int start;
+#if 0
+            sts = sys$qio (h_event, h_s_input, IO$_SENSECHAR, 0, 0, 0, &scriptinfo, sizeof scriptinfo );
+#endif
+            scriptinfo.curblock=1;
+            scriptinfo.curbyte=scriptpos;
+
+            if (sts != SS$_NORMAL) scriptinfo.curblock = 0;
+            if ((sts == SS$_NORMAL) || (sts == SS$_ILLIOFUNC))
+            {
+                if (scriptread.atblock != 0)
+                {
+                    scriptinfo.curblock = scriptread.atblock;
+                    scriptinfo.curbyte  = scriptread.atbyte;
+                }
+#if 0
+                sts = sys$qiow (h_event, h_s_input, IO$_READLBLK, 0, 0, 0, &scriptread, sizeof scriptread );
+#endif
+
+                scriptread.atblock = 1;
+                scriptpos=scriptread.atbyte;
+
+do_again:
+                {}
+                int dont=0;
+                if (scriptbuffer[scriptpos]=='$')
+                    scriptpos++;
+                while(scriptpos<scriptlen && scriptbuffer[scriptpos]==' ')
+                    scriptpos++;
+                if (scriptbuffer[scriptpos]=='!')
+                {
+                    scriptpos++;
+                    dont=1;
+                }
+                while(scriptpos<scriptlen && scriptbuffer[scriptpos]==' ')
+                    scriptpos++;
+                start=scriptpos;
+                while(scriptpos<scriptlen && scriptbuffer[scriptpos]!='\n')
+                    scriptpos++;
+                scriptpos++;
+                if (dont)
+                    goto do_again;
+                bzero(cmdbuf,CMDSIZ);
+                bcopy(&scriptbuffer[start],cmdbuf,scriptpos-start);
+                cmdbuf[scriptpos-start]=0;
+                sts=SS$_NORMAL;
+                if(scriptpos>scriptlen)
+                    sts=SS$_ENDOFFILE;
+                scriptread.atbyte=scriptpos;
+                if (sts==SS$_ENDOFFILE && script_exit)
+                    exit(0);
+            }
+#if 0
+            // why???
+            scriptread.atblock = 0;
+            scriptread.atbyte  = 0;
+#endif
+        }
+
+        /* If read error, close this script and resume next outer level */
+
+        if (sts != SS$_NORMAL)
+        {
+            if (sts != SS$_ENDOFFILE)  					/* error message if not end-of-file */
+            {
+                fprintf (h_s_error, "oz_cli: error %u reading from input\n", sts);
+                symbol -> ivalue = sts;						/* ... and set the error status */
+            }
+            exit_script ();							/* in any case, pop script level */
+            if ((sts == SS$_ENDOFFILE) && exited && (sys$qio (h_event, h_s_input, IO$_SENSEMODE, 0, 0, NULL, 0, 0, 0, 0, 0, 0) == SS$_NORMAL))
+            {
+                fprintf (h_s_error, "oz_cli: use 'exit' command to log out\n"); /* don't allow end-of-file to exit interactive session */
+                exited = 0;
+            }
+        }
+
+        /* Otherwise, process the command line */
+
+        else
+        {
+            if (inscript==0)
+            {
+                char c=0;
+                int idx=0;
+                fprintf(stdout,"%s",prompt);
+                fflush(stdout);
+                //scanf("%s",cmdbuf);
+                //programmed with buffer overflow possibility
+                bzero(cmdbuf,CMDSIZ);
 #if 1
-	cmdlen = read(0,cmdbuf,CMDSIZ);
-	printf("\n");
+                cmdlen = read(0,cmdbuf,CMDSIZ);
+                printf("\n");
 #else
-      again:
-	read(1,&cmdbuf[idx],1);
-	c=cmdbuf[idx++];
-	fprintf(stdout,"%c",c);
-	fflush(stdout);
-	if (c!='\n' && c!='\r') goto again;
+again:
+                read(1,&cmdbuf[idx],1);
+                c=cmdbuf[idx++];
+                fprintf(stdout,"%c",c);
+                fflush(stdout);
+                if (c!='\n' && c!='\r') goto again;
 #endif
-      }
+            }
 
-    do_if_then:
-      cmdlen=strlen(cmdbuf)-1;
-      //      bcopy(p,cmdbuf,cmdlen);
-      //      free(p);
-      cmdbuf[cmdlen] = 0;						/* null terminate command line */
-      p = proclabels (cmdbuf);						/* process any labels that are present */
-      if (skiplabel[0] == 0) {						/* ignore line if skipping to a particular label */
-	if (verify) fprintf (h_s_output, "%s\n", cmdbuf);	/* ok, echo if verifying turned on */
-	if (1 && cmdbuf[0]!='@') {
-	  struct dsc$descriptor d;
-	  d.dsc$a_pointer=cmdbuf;
-	  d.dsc$w_length=cmdlen;
-	  if_then = 0;
+do_if_then:
+            cmdlen=strlen(cmdbuf)-1;
+            //      bcopy(p,cmdbuf,cmdlen);
+            //      free(p);
+            cmdbuf[cmdlen] = 0;						/* null terminate command line */
+            p = proclabels (cmdbuf);						/* process any labels that are present */
+            if (skiplabel[0] == 0)  						/* ignore line if skipping to a particular label */
+            {
+                if (verify) fprintf (h_s_output, "%s\n", cmdbuf);	/* ok, echo if verifying turned on */
+                if (1 && cmdbuf[0]!='@')
+                {
+                    struct dsc$descriptor d;
+                    d.dsc$a_pointer=cmdbuf;
+                    d.dsc$w_length=cmdlen;
+                    if_then = 0;
 #if 1
-	  cli_scan_string(gcmdbuf);
+                    cli_scan_string(gcmdbuf);
 #endif
 #if 1
-	  initparser();
+                    initparser();
 #endif
-	  int key = clilex();
-	  do_skip=0;
-	  if (skip_mode && if_mode == 0 && !cliconditional(key)) {
-	    do_skip=1;
-	  }
-	  if (do_skip)
-	    goto dontexec;
-	  sts = cli$dcl_parse(&d,get_cdu_root(),0,0,0);
-	  if (sts&1)
-	    sts = cli$dispatch(0);
-	  static struct _cdu ** cur_cdu=0x3f000000;
-	  *cur_cdu=0;
-	  if (sts&1)
-	    goto dontexec;
-	  key = clilex();
-	  if (key == '=') {
+                    int key = clilex();
+                    do_skip=0;
+                    if (skip_mode && if_mode == 0 && !cliconditional(key))
+                    {
+                        do_skip=1;
+                    }
+                    if (do_skip)
+                        goto dontexec;
+                    sts = cli$dcl_parse(&d,get_cdu_root(),0,0,0);
+                    if (sts&1)
+                        sts = cli$dispatch(0);
+                    static struct _cdu ** cur_cdu=0x3f000000;
+                    *cur_cdu=0;
+                    if (sts&1)
+                        goto dontexec;
+                    key = clilex();
+                    if (key == '=')
+                    {
 #if 1
-	    cli_scan_string(gcmdbuf);
+                        cli_scan_string(gcmdbuf);
 #endif
 #if 1
-	    initparser();
+                        initparser();
 #endif
-	    clilex();
-	    clilex();
-	    char s[256];
-	    c_parser_binary_expression2_as_string (0, 0, s);
+                        clilex();
+                        clilex();
+                        char s[256];
+                        c_parser_binary_expression2_as_string (0, 0, s);
 
-#if 0	    
-	    if (!vms_mm) goto no1;
-	    sts = sys$assign (&o, &chan, 0, 0, 0);
-	    if ((sts&1)==0)
-	      return sts;
-	  no1:
+#if 0
+                        if (!vms_mm) goto no1;
+                        sts = sys$assign (&o, &chan, 0, 0, 0);
+                        if ((sts&1)==0)
+                            return sts;
+no1:
 #endif
 #if 0
-	    if (!vms_mm)
-	      printf("%s\n",o2.dsc$a_pointer);
-	    else
-	      sts = sys$qio (0, chan, IO$_WRITEVBLK, 0, 0, 0, o2.dsc$a_pointer, o2.dsc$w_length, 0, 0, 0, 0);
-	    if ((sts&1)==0)
-	      return sts;
+                        if (!vms_mm)
+                            printf("%s\n",o2.dsc$a_pointer);
+                        else
+                            sts = sys$qio (0, chan, IO$_WRITEVBLK, 0, 0, 0, o2.dsc$a_pointer, o2.dsc$w_length, 0, 0, 0, 0);
+                        if ((sts&1)==0)
+                            return sts;
 #endif
-	
-#if 0    
-	    if (!vms_mm) goto no2;
-	    sts = sys$dassgn (chan);
-	    if ((sts&1)==0)
-	      return sts;
+
+#if 0
+                        if (!vms_mm) goto no2;
+                        sts = sys$dassgn (chan);
+                        if ((sts&1)==0)
+                            return sts;
 #endif
-	    
-	  no2:
-	    {}
-	    char * eq = strchr(gcmdbuf, '=');
-	    int len = ((long)eq) - ((long)gcmdbuf);
-	    char sname[len+1];
-	    memcpy(sname, gcmdbuf, len);
-	    sname[len] = 0;
-	    set_symbol(sname, s);
-	    goto dontexec;
-	  }
-	}
-	fprintf(stderr, "Could not find %s in cld, doing it the old way\n",p);
-	sts = execute (p);						/* execute the command line */
-      dontexec:
-	if (sts != SS$_BRANCHSTARTED) symbol -> ivalue = sts;			/* save the new status */
-	if (if_then) {
-	  memcpy (cmdbuf, if_then_cmd, strlen(if_then_cmd));
-	}
-      }
+
+no2:
+                        {}
+                        char * eq = strchr(gcmdbuf, '=');
+                        int len = ((long)eq) - ((long)gcmdbuf);
+                        char sname[len+1];
+                        memcpy(sname, gcmdbuf, len);
+                        sname[len] = 0;
+                        set_symbol(sname, s);
+                        goto dontexec;
+                    }
+                }
+                fprintf(stderr, "Could not find %s in cld, doing it the old way\n",p);
+                sts = execute (p);						/* execute the command line */
+dontexec:
+                if (sts != SS$_BRANCHSTARTED) symbol -> ivalue = sts;			/* save the new status */
+                if (if_then)
+                {
+                    memcpy (cmdbuf, if_then_cmd, strlen(if_then_cmd));
+                }
+            }
+        }
     }
-  }
 
-  /* End of outermost script, return last oz_status symbol value */
+    /* End of outermost script, return last oz_status symbol value */
 
-  if (h_s_console != 0) startendmsg ("end");
-  return (symbol -> ivalue);
+    if (h_s_console != 0) startendmsg ("end");
+    return (symbol -> ivalue);
 
-  /* Option error, print usage line and exit */
+    /* Option error, print usage line and exit */
 
 usage:
-  fprintf (stderr, "%s: usage: %s [-console <device>] [-exec <rest_of_line>] [-interactive] [-noverify] [-verify]\n", pn, pn);
-  return (SS$_BADPARAM);
+    fprintf (stderr, "%s: usage: %s [-console <device>] [-exec <rest_of_line>] [-interactive] [-noverify] [-verify]\n", pn, pn);
+    return (SS$_BADPARAM);
 }
 
 /* Write session starting and ending message, but only if input is a console device */
 
-typedef struct { unsigned long size;
-  const void *buff;
-  unsigned long trmsize;
-  const void *trmbuff;
+typedef struct
+{
+    unsigned long size;
+    const void *buff;
+    unsigned long trmsize;
+    const void *trmbuff;
 } OZ_IO_console_write;
 
-typedef struct { unsigned long size;            /* read buffer size */
-  void *buff;            /* read buffer address */
-  unsigned long *rlen;           /* where to return length read */
-  unsigned long pmtsize;         /* prompt buffer size */
-  const void *pmtbuff;   /* prompt buffer address */
-  unsigned long timeout;         /* 0 = no timeout, else milliseconds */
-  int noecho;            /* 0 = echo, 1 = don't echo */
+typedef struct
+{
+    unsigned long size;            /* read buffer size */
+    void *buff;            /* read buffer address */
+    unsigned long *rlen;           /* where to return length read */
+    unsigned long pmtsize;         /* prompt buffer size */
+    const void *pmtbuff;   /* prompt buffer address */
+    unsigned long timeout;         /* 0 = no timeout, else milliseconds */
+    int noecho;            /* 0 = echo, 1 = don't echo */
 } OZ_IO_console_read;
 
-typedef struct { unsigned long mask[8];         /* 256 bit character mask */
-  int wiperah;           /* 0 : leave read-ahead alone; 1 : wipe 
+typedef struct
+{
+    unsigned long mask[8];         /* 256 bit character mask */
+    int wiperah;           /* 0 : leave read-ahead alone; 1 : wipe
 			    read-ahead */
-  int terminal;          /* 0 : process character normally; 1 : d
+    int terminal;          /* 0 : process character normally; 1 : d
 			    on't process normally */
-  int abortread;         /* 0 : leave reads intact; 1 : abort pen
+    int abortread;         /* 0 : leave reads intact; 1 : abort pen
 			    ding reads */
-  unsigned char *ctrlchar;       /* where to return the character */
+    unsigned char *ctrlchar;       /* where to return the character */
 } OZ_IO_console_ctrlchar;
 
 static void startendmsg (const char *name)
 
 {
-  unsigned long long now;
-  char buf[64];
-  OZ_IO_console_write console_write;
+    unsigned long long now;
+    char buf[64];
+    OZ_IO_console_write console_write;
 
-  sys$gettim(&now);
-  snprintf (buf, sizeof buf, "%s: session %sing at %19.19t\n", pn, name, now);
-  memset (&console_write, 0, sizeof console_write);
-  console_write.size = strlen (buf);
-  console_write.buff = buf;
-  sys$qio (0, h_s_input, IO$_WRITELBLK, 0, 0, 0, &console_write, sizeof console_write, 0, 0, 0, 0);
+    sys$gettim(&now);
+    snprintf (buf, sizeof buf, "%s: session %sing at %19.19t\n", pn, name, now);
+    memset (&console_write, 0, sizeof console_write);
+    console_write.size = strlen (buf);
+    console_write.buff = buf;
+    sys$qio (0, h_s_input, IO$_WRITELBLK, 0, 0, 0, &console_write, sizeof console_write, 0, 0, 0, 0);
 }
 
 /************************************************************************/
@@ -1110,15 +1186,16 @@ static void startendmsg (const char *name)
 static void ctrly_enable (void)
 
 {
-  unsigned long sts;
-  OZ_IO_console_ctrlchar ctrly;
+    unsigned long sts;
+    OZ_IO_console_ctrlchar ctrly;
 
-  if (h_s_console != 0) {
-    memset (&ctrly, 0, sizeof ctrly);
-    ctrly.mask[0] = 1 << ('Y' - '@');
-    sts = sys$qio (NULL, h_s_console, IO$_SETMODE, 0, ctrly_ast, NULL, &ctrly, sizeof ctrly, 0, 0, 0, 0);
-    if (sts != SS$_ALLSTARTED) fprintf (h_s_console, "oz_cli ctrly_enable: error %u enabling ctrl-Y detection\n", sts);
-  }
+    if (h_s_console != 0)
+    {
+        memset (&ctrly, 0, sizeof ctrly);
+        ctrly.mask[0] = 1 << ('Y' - '@');
+        sts = sys$qio (NULL, h_s_console, IO$_SETMODE, 0, ctrly_ast, NULL, &ctrly, sizeof ctrly, 0, 0, 0, 0);
+        if (sts != SS$_ALLSTARTED) fprintf (h_s_console, "oz_cli ctrly_enable: error %u enabling ctrl-Y detection\n", sts);
+    }
 }
 
 /* This routine gets called when ctrl-Y is pressed.                                                          */
@@ -1127,13 +1204,16 @@ static void ctrly_enable (void)
 static void ctrly_ast (void *dummy, unsigned long status, void *mchargs)
 
 {
-  if (status == SS$_NORMAL) {
-    ctrly_hit = 1;
-  } else if (status != SS$_ABORT) {
-    fprintf (h_s_console, "oz_cli ctrly_ast: error %u ctrl-Y completion\n", status);
-  }
+    if (status == SS$_NORMAL)
+    {
+        ctrly_hit = 1;
+    }
+    else if (status != SS$_ABORT)
+    {
+        fprintf (h_s_console, "oz_cli ctrly_ast: error %u ctrl-Y completion\n", status);
+    }
 
-  ctrly_enable ();
+    ctrly_enable ();
 }
 
 /************************************************************************/
@@ -1145,15 +1225,16 @@ static void ctrly_ast (void *dummy, unsigned long status, void *mchargs)
 static void ctrlt_enable (void)
 
 {
-  unsigned long sts;
-  OZ_IO_console_ctrlchar ctrlt;
+    unsigned long sts;
+    OZ_IO_console_ctrlchar ctrlt;
 
-  if (h_s_console != 0) {
-    memset (&ctrlt, 0, sizeof ctrlt);
-    ctrlt.mask[0] = 1 << ('T' - '@');
-    sts = sys$qio (0, h_s_console, IO$_SETMODE, NULL, ctrlt_ast, 0, &ctrlt, sizeof ctrlt, 0, 0, 0, 0);
-    if (sts != SS$_ALLSTARTED) fprintf (h_s_console, "oz_cli ctrlt_enable: error %u enabling ctrl-T detection\n", sts);
-  }
+    if (h_s_console != 0)
+    {
+        memset (&ctrlt, 0, sizeof ctrlt);
+        ctrlt.mask[0] = 1 << ('T' - '@');
+        sts = sys$qio (0, h_s_console, IO$_SETMODE, NULL, ctrlt_ast, 0, &ctrlt, sizeof ctrlt, 0, 0, 0, 0);
+        if (sts != SS$_ALLSTARTED) fprintf (h_s_console, "oz_cli ctrlt_enable: error %u enabling ctrl-T detection\n", sts);
+    }
 }
 
 /* This routine gets called when ctrl-T is pressed.                                                          */
@@ -1162,114 +1243,153 @@ static void ctrlt_enable (void)
 static void ctrlt_ast (void *dummy, unsigned long status, void *mchargs)
 
 {
-  char t_name[OZ_THREAD_NAMESIZE], u_quota[256];
-  char state[16];
-  unsigned long index, sts;
-  unsigned long long now, t_tis_com, t_tis_run, t_tis_wev;
-  unsigned long h_lastproc, h_nextproc;
-  unsigned long h_lastthread, h_nextthread;
-  unsigned char t_state;
-  unsigned long t_id;
+    char t_name[OZ_THREAD_NAMESIZE], u_quota[256];
+    char state[16];
+    unsigned long index, sts;
+    unsigned long long now, t_tis_com, t_tis_run, t_tis_wev;
+    unsigned long h_lastproc, h_nextproc;
+    unsigned long h_lastthread, h_nextthread;
+    unsigned char t_state;
+    unsigned long t_id;
 
-  unsigned long p_item = { 
-	JPI$M_FILL1, sizeof h_nextproc, &h_nextproc, NULL };
+    unsigned long p_item =
+    {
+        JPI$M_FILL1, sizeof h_nextproc, &h_nextproc, NULL
+    };
 
-  unsigned long p_items[] = {
-	JPI$M_FILL1, sizeof h_nextproc,   &h_nextproc,   NULL, 
-	JPI$M_FILL1, sizeof h_nextthread, &h_nextthread, NULL };
+    unsigned long p_items[] =
+    {
+        JPI$M_FILL1, sizeof h_nextproc,   &h_nextproc,   NULL,
+        JPI$M_FILL1, sizeof h_nextthread, &h_nextthread, NULL
+    };
 
-  unsigned long t_items[] = { 
-	JPI$M_FILL1,    sizeof h_nextthread, &h_nextthread, NULL, 
-        JPI$_STATE,   sizeof t_state,      &t_state,      NULL, 
-        JPI$M_FILL1, sizeof t_tis_run,    &t_tis_run,    NULL, 
-        JPI$M_FILL1, sizeof t_tis_com,    &t_tis_com,    NULL, 
-        JPI$M_FILL1, sizeof t_tis_wev,    &t_tis_wev,    NULL, 
-        JPI$_PID,      sizeof t_id,         &t_id,         NULL, 
-        JPI$_PRCNAM,    sizeof t_name,        t_name,       NULL };
+    unsigned long t_items[] =
+    {
+        JPI$M_FILL1,    sizeof h_nextthread, &h_nextthread, NULL,
+        JPI$_STATE,   sizeof t_state,      &t_state,      NULL,
+        JPI$M_FILL1, sizeof t_tis_run,    &t_tis_run,    NULL,
+        JPI$M_FILL1, sizeof t_tis_com,    &t_tis_com,    NULL,
+        JPI$M_FILL1, sizeof t_tis_wev,    &t_tis_wev,    NULL,
+        JPI$_PID,      sizeof t_id,         &t_id,         NULL,
+        JPI$_PRCNAM,    sizeof t_name,        t_name,       NULL
+    };
 
-  unsigned long u_item = {
-	JPI$M_FILL1, sizeof u_quota, u_quota, NULL };
+    unsigned long u_item =
+    {
+        JPI$M_FILL1, sizeof u_quota, u_quota, NULL
+    };
 
-  h_lastproc   = 0;
-  h_nextproc   = 0;
-  h_lastthread = 0;
-  h_nextthread = 0;
+    h_lastproc   = 0;
+    h_nextproc   = 0;
+    h_lastthread = 0;
+    h_nextthread = 0;
 
-  /* Check the status */
+    /* Check the status */
 
-  if (status != SS$_NORMAL) {
-    if (status == SS$_ABORT) ctrlt_enable ();
-    else fprintf (h_s_console, "oz_cli ctrlt_ast: error %u ctrl-T completion\n", status);
-    return;
-  }
-
-  /* First line is the current date/time and the quota */
-
-  //  sts = oz_sys_handle_getinfo (0, 1, &u_item, &index);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_console, "oz_cli: error %u getting user info\n", sts);
-    goto cleanup;
-  }
-  sys$gettim(&now);
-  fprintf (h_s_console, "\noz_cli  %.22t  (%s)\n", now, u_quota);
-
-  /* Get handle to the first process in this job */
-
-  //  sts = oz_sys_handle_getinfo (0, 1, &p_item, &index);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_console, "oz_cli: error %u getting first process handle\n", sts);
-    goto cleanup;
-  }
-
-  /* Repeat as long as we find processes in this job */
-
-  while (h_nextproc != 0) {
-    h_lastproc = h_nextproc;
-    h_nextproc = 0;
-
-    /* Find out process */
-
-    //    sts = oz_sys_handle_getinfo (h_lastproc, sizeof p_items / sizeof *p_items, p_items, &index);
-    if (sts != SS$_NORMAL) {
-      fprintf (h_s_console, "oz_cli: error %u getting process info\n", sts);
-      goto cleanup;
+    if (status != SS$_NORMAL)
+    {
+        if (status == SS$_ABORT) ctrlt_enable ();
+        else fprintf (h_s_console, "oz_cli ctrlt_ast: error %u ctrl-T completion\n", status);
+        return;
     }
 
-    /* Repeat as long as we find threads in the process */
+    /* First line is the current date/time and the quota */
 
-    while (h_nextthread != 0) {
-      h_lastthread = h_nextthread;
-      h_nextthread = 0;
-
-      /* Find out about thread */
-
-      // sts = oz_sys_handle_getinfo (h_lastthread, sizeof t_items / sizeof *t_items, t_items, &index);
-      if (sts != SS$_NORMAL) {
-        fprintf (h_s_console, "oz_cli: error %u getting next thread info\n", sts);
+    //  sts = oz_sys_handle_getinfo (0, 1, &u_item, &index);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_console, "oz_cli: error %u getting user info\n", sts);
         goto cleanup;
-      }
-
-      /* Print out info about thread */
-
-      switch (t_state) {
-        case SCH$C_CUR: { strcpy (state, "CUR"); break; }
-        case SCH$C_COM: { strcpy (state, "COM"); break; }
-        case SCH$C_LEF: { strcpy (state, "LEF"); break; }
-#if 0
-        case OZ_THREAD_STATE_INI: { strcpy (state, "INI"); break; }
-        case OZ_THREAD_STATE_ZOM: { strcpy (state, "ZOM"); break; }
-#endif
-        default: { snprintf (state, sizeof state, "%3d", t_state); };
-      }
-      fprintf (h_s_console, "%u: %s  %#.3t/%#.3t/%#.3t  %s\n", t_id, state, t_tis_run, t_tis_com, t_tis_wev, t_name);
-
-      h_lastthread = 0;
     }
-    h_lastproc = 0;
-  }
+    sys$gettim(&now);
+    fprintf (h_s_console, "\noz_cli  %.22t  (%s)\n", now, u_quota);
+
+    /* Get handle to the first process in this job */
+
+    //  sts = oz_sys_handle_getinfo (0, 1, &p_item, &index);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_console, "oz_cli: error %u getting first process handle\n", sts);
+        goto cleanup;
+    }
+
+    /* Repeat as long as we find processes in this job */
+
+    while (h_nextproc != 0)
+    {
+        h_lastproc = h_nextproc;
+        h_nextproc = 0;
+
+        /* Find out process */
+
+        //    sts = oz_sys_handle_getinfo (h_lastproc, sizeof p_items / sizeof *p_items, p_items, &index);
+        if (sts != SS$_NORMAL)
+        {
+            fprintf (h_s_console, "oz_cli: error %u getting process info\n", sts);
+            goto cleanup;
+        }
+
+        /* Repeat as long as we find threads in the process */
+
+        while (h_nextthread != 0)
+        {
+            h_lastthread = h_nextthread;
+            h_nextthread = 0;
+
+            /* Find out about thread */
+
+            // sts = oz_sys_handle_getinfo (h_lastthread, sizeof t_items / sizeof *t_items, t_items, &index);
+            if (sts != SS$_NORMAL)
+            {
+                fprintf (h_s_console, "oz_cli: error %u getting next thread info\n", sts);
+                goto cleanup;
+            }
+
+            /* Print out info about thread */
+
+            switch (t_state)
+            {
+            case SCH$C_CUR:
+            {
+                strcpy (state, "CUR");
+                break;
+            }
+            case SCH$C_COM:
+            {
+                strcpy (state, "COM");
+                break;
+            }
+            case SCH$C_LEF:
+            {
+                strcpy (state, "LEF");
+                break;
+            }
+#if 0
+            case OZ_THREAD_STATE_INI:
+            {
+                strcpy (state, "INI");
+                break;
+            }
+            case OZ_THREAD_STATE_ZOM:
+            {
+                strcpy (state, "ZOM");
+                break;
+            }
+#endif
+            default:
+            {
+                snprintf (state, sizeof state, "%3d", t_state);
+            };
+            }
+            fprintf (h_s_console, "%u: %s  %#.3t/%#.3t/%#.3t  %s\n", t_id, state, t_tis_run, t_tis_com, t_tis_wev, t_name);
+
+            h_lastthread = 0;
+        }
+        h_lastproc = 0;
+    }
 
 cleanup:
-  ctrlt_enable ();
+    ctrlt_enable ();
 }
 
 /************************************************************************/
@@ -1282,38 +1402,44 @@ cleanup:
 static void exit_script (void)
 
 {
-  Label *label;
-  Script *script;
-  Symbol *symbol;
+    Label *label;
+    Script *script;
+    Symbol *symbol;
 
-  script = scripts;					/* point to script block */
-  if (script == NULL) exited = 1;			/* if this is outermost, say we have exited */
-  else {
-    if (skiplabel[0] != 0) {
-      fprintf (h_s_error, "oz_cli: undefined label %s in script\n", skiplabel);
-      skiplabel[0] = 0;
+    script = scripts;					/* point to script block */
+    if (script == NULL) exited = 1;			/* if this is outermost, say we have exited */
+    else
+    {
+        if (skiplabel[0] != 0)
+        {
+            fprintf (h_s_error, "oz_cli: undefined label %s in script\n", skiplabel);
+            skiplabel[0] = 0;
+        }
+        h_s_input = script -> h_input;			/* get next outer script handle */
+        if (h_s_output != script -> h_output)  		/* restore its output file */
+        {
+            h_s_output = script -> h_output;
+        }
+        if (h_s_error  != script -> h_error)   		/* restore its error file */
+        {
+            h_s_error  = script -> h_error;
+        }
+        while ((label = labels) != NULL)  			/* free off this ones labels */
+        {
+            labels = label -> next;
+            free (label);
+        }
+        while ((symbol = symbols) != NULL)  		/* free off this ones symbols */
+        {
+            symbols = symbol -> next;
+            free (symbol);
+        }
+        labels  = script -> labels;				/* restore outer script's labels */
+        symbols = script -> symbols;			/* restore outer script's symbols */
+        scripts = script -> next;				/* unlink and free script save block */
+        free (script);
     }
-    h_s_input = script -> h_input;			/* get next outer script handle */
-    if (h_s_output != script -> h_output) {		/* restore its output file */
-      h_s_output = script -> h_output;
-    }
-    if (h_s_error  != script -> h_error)  {		/* restore its error file */
-      h_s_error  = script -> h_error;
-    }
-    while ((label = labels) != NULL) {			/* free off this ones labels */
-      labels = label -> next;
-      free (label);
-    }
-    while ((symbol = symbols) != NULL) {		/* free off this ones symbols */
-      symbols = symbol -> next;
-      free (symbol);
-    }
-    labels  = script -> labels;				/* restore outer script's labels */
-    symbols = script -> symbols;			/* restore outer script's symbols */
-    scripts = script -> next;				/* unlink and free script save block */
-    free (script);
-  }
-  inscript=0;
+    inscript=0;
 }
 
 /************************************************************************/
@@ -1325,60 +1451,64 @@ static void exit_script (void)
 static char *proclabels (char *cmdbuf)
 
 {
-  char c, labelname[MAXSYMNAM], *p, *q;
-  Label *label;
+    char c, labelname[MAXSYMNAM], *p, *q;
+    Label *label;
 
-  p = cmdbuf;
+    p = cmdbuf;
 
-  /* Skip over leading spaces */
+    /* Skip over leading spaces */
 
-  while (((c = *p) != 0) && (c <= ' ')) p ++;
+    while (((c = *p) != 0) && (c <= ' ')) p ++;
 
-  /* Keep scanning from there for either a ': ' or just a space or end-of-line */
-  /* If we get a ': ', then we have a label definition */
+    /* Keep scanning from there for either a ': ' or just a space or end-of-line */
+    /* If we get a ': ', then we have a label definition */
 
-  for (q = p; (c = *q) > ' '; q ++) {
-    if ((c == ':') && (q[1] <= ' ')) {
+    for (q = p; (c = *q) > ' '; q ++)
+    {
+        if ((c == ':') && (q[1] <= ' '))
+        {
 
-      /* Found a label, put name in 'labelname' */
+            /* Found a label, put name in 'labelname' */
 
-      *q = 0;
-      strncpy (labelname, p, sizeof labelname);
-      *(q ++) = ':';
+            *q = 0;
+            strncpy (labelname, p, sizeof labelname);
+            *(q ++) = ':';
 
-      /* See if we already have such a label for this script */
+            /* See if we already have such a label for this script */
 
-      for (label = labels; label != NULL; label = label -> next) {
-        if (strcmp (label -> name, labelname) == 0) break;
-      }
+            for (label = labels; label != NULL; label = label -> next)
+            {
+                if (strcmp (label -> name, labelname) == 0) break;
+            }
 
-      /* If not, create a new label definition */
+            /* If not, create a new label definition */
 
-      if (label == NULL) {
-        label = malloc (sizeof *label);
-        label -> next = labels;
-        strncpy (label -> name, labelname, sizeof label -> name);
-        labels = label;
-      }
+            if (label == NULL)
+            {
+                label = malloc (sizeof *label);
+                label -> next = labels;
+                strncpy (label -> name, labelname, sizeof label -> name);
+                labels = label;
+            }
 
-      /* Either way, store the current record's address in the label definition */
+            /* Either way, store the current record's address in the label definition */
 
-      label -> blkoffs = scriptinfo.curblock;
-      label -> bytoffs = scriptinfo.curbyte;
+            label -> blkoffs = scriptinfo.curblock;
+            label -> bytoffs = scriptinfo.curbyte;
 
-      /* If we are skipping to a particular label, see if we are there */
+            /* If we are skipping to a particular label, see if we are there */
 
-      if ((skiplabel[0] != 0) && (strcmp (skiplabel, label -> name) == 0)) skiplabel[0] = 0;
+            if ((skiplabel[0] != 0) && (strcmp (skiplabel, label -> name) == 0)) skiplabel[0] = 0;
 
-      /* There or not, return pointer in command line past the label */
+            /* There or not, return pointer in command line past the label */
 
-      return (q);
+            return (q);
+        }
     }
-  }
 
-  /* Got to a space before we found a colon, so there is no label */
+    /* Got to a space before we found a colon, so there is no label */
 
-  return (p);
+    return (p);
 }
 
 /************************************************************************/
@@ -1398,72 +1528,78 @@ static char *proclabels (char *cmdbuf)
 static unsigned long execute (char *cmdbuf)
 
 {
-  char c, *input, *newbuf, pipei[OZ_DEVUNIT_NAMESIZE], pipeo[OZ_DEVUNIT_NAMESIZE];
-  const char **v;
-  int dq, i, j, n, s, sq;
-  unsigned long sts;
-  unsigned long h_pipei, h_pipeo;
+    char c, *input, *newbuf, pipei[OZ_DEVUNIT_NAMESIZE], pipeo[OZ_DEVUNIT_NAMESIZE];
+    const char **v;
+    int dq, i, j, n, s, sq;
+    unsigned long sts;
+    unsigned long h_pipei, h_pipeo;
 
-  /* Substitute in variables */
+    /* Substitute in variables */
 
-  sts = substitute (cmdbuf, &newbuf);
-  if (sts != SS$_NORMAL) return (sts);
+    sts = substitute (cmdbuf, &newbuf);
+    if (sts != SS$_NORMAL) return (sts);
 
-  /* Chop command line up into parameter vector */
+    /* Chop command line up into parameter vector */
 
-  v = malloc ((strlen (newbuf) / 2 + 2) * sizeof *v);
+    v = malloc ((strlen (newbuf) / 2 + 2) * sizeof *v);
 
-  input   = NULL;				/* no piping going on */
-  h_pipei = 0;
-  h_pipeo = 0;
-  i = 0;					/* start at beg of command line */
+    input   = NULL;				/* no piping going on */
+    h_pipei = 0;
+    h_pipeo = 0;
+    i = 0;					/* start at beg of command line */
 restart:
-  j = i;					/* no output chars yet */
-  n = 0;					/* no output tokens yet */
-  dq = 0;					/* not inside double quotes */
-  sq = 0;					/* not inside single quotes */
-  s = 1;					/* skip leading spaces */
-  for (; (c = newbuf[i]) != 0; i ++) {		/* loop through all input chars */
-    if (!dq && !sq && (c == '#')) break;	/* stop if unquoted comment character */
-    if (!sq && (c == '"')) dq = 1 - dq;		/* if double quote outside single quotes, flip double quote flag */
-    else if (!dq && (c == '\'')) sq = 1 - sq;	/* if single quote outside double quotes, flip single quote flag */
-    else if (dq || sq || (c > ' ')) {		/* otherwise, check for printables (or quoted non-printables) */
-      if (c == '\\') {				/* ok, check for backslash (the escape char) */
-        c = newbuf[++i];			/* if so, get the next char */
-        if (c == 0) break;			/* (abort loop if eol) */
-        if (c == 'b') c = '\b';
-        if (c == 'n') c = '\n';
-        if (c == 'r') c = '\r';
-        if (c == 't') c = '\t';
-      }
-      if (s) {
-        v[n++] = newbuf + j;			/* start new token if we were skipping spaces */
-        s = 0;					/* no longer skipping spaces */
-      }
-      newbuf[j++] = c;				/* store printable or escaped char in output buffer */
-    } else if (!s) {				/* non-printable, see if first non-printable */
-      newbuf[j++] = 0;				/* first non-printable, null-terminate prior string */
-      s = 1;					/* ... and remember we're skipping spaces */
+    j = i;					/* no output chars yet */
+    n = 0;					/* no output tokens yet */
+    dq = 0;					/* not inside double quotes */
+    sq = 0;					/* not inside single quotes */
+    s = 1;					/* skip leading spaces */
+    for (; (c = newbuf[i]) != 0; i ++)  		/* loop through all input chars */
+    {
+        if (!dq && !sq && (c == '#')) break;	/* stop if unquoted comment character */
+        if (!sq && (c == '"')) dq = 1 - dq;		/* if double quote outside single quotes, flip double quote flag */
+        else if (!dq && (c == '\'')) sq = 1 - sq;	/* if single quote outside double quotes, flip single quote flag */
+        else if (dq || sq || (c > ' '))  		/* otherwise, check for printables (or quoted non-printables) */
+        {
+            if (c == '\\')  				/* ok, check for backslash (the escape char) */
+            {
+                c = newbuf[++i];			/* if so, get the next char */
+                if (c == 0) break;			/* (abort loop if eol) */
+                if (c == 'b') c = '\b';
+                if (c == 'n') c = '\n';
+                if (c == 'r') c = '\r';
+                if (c == 't') c = '\t';
+            }
+            if (s)
+            {
+                v[n++] = newbuf + j;			/* start new token if we were skipping spaces */
+                s = 0;					/* no longer skipping spaces */
+            }
+            newbuf[j++] = c;				/* store printable or escaped char in output buffer */
+        }
+        else if (!s)  				/* non-printable, see if first non-printable */
+        {
+            newbuf[j++] = 0;				/* first non-printable, null-terminate prior string */
+            s = 1;					/* ... and remember we're skipping spaces */
+        }
     }
-  }
-  newbuf[j] = 0;				/* make sure last token is null terminated */
-  v[n] = NULL;					/* put a null pointer on the end of vector */
+    newbuf[j] = 0;				/* make sure last token is null terminated */
+    v[n] = NULL;					/* put a null pointer on the end of vector */
 
-  /* Execute the chopped up command - maybe input is a pipe, output is normal, don't force -nowait */
+    /* Execute the chopped up command - maybe input is a pipe, output is normal, don't force -nowait */
 
-  sts = exechopped (n, v, input, NULL, 0);
+    sts = exechopped (n, v, input, NULL, 0);
 
-  /* Free off temp buffers */
+    /* Free off temp buffers */
 
 rtn:
-  free (newbuf);
-  free (v);
+    free (newbuf);
+    free (v);
 
-  /* Close any pipe handles */
+    /* Close any pipe handles */
 
-  /* Return completion status */
+    /* Return completion status */
 
-  return (sts);
+    return (sts);
 
 }
 
@@ -1483,105 +1619,127 @@ rtn:
 /*									*/
 /************************************************************************/
 
-typedef struct { Runopts runopts;
-                 Command *command;
-                 int argc;
-                 const char **argv;
-                 signed long refcount;
-               } Tc;
+typedef struct
+{
+    Runopts runopts;
+    Command *command;
+    int argc;
+    const char **argv;
+    signed long refcount;
+} Tc;
 
 static void threadcommandexit (void *tcv, unsigned long status);
 
 static unsigned long exechopped (int argc, const char *argv[], const char *input, const char *output, int nowait)
 
 {
-  const char **aargv;
-  int aargc, i;
-  unsigned long sts;
-  Tc *tc;
-  char reallyext=0;
+    const char **aargv;
+    int aargc, i;
+    unsigned long sts;
+    Tc *tc;
+    char reallyext=0;
 
-  /* Ignore blank lines */
+    /* Ignore blank lines */
 
-  if (argc == 0) return (SS$_BRANCHSTARTED);
+    if (argc == 0) return (SS$_BRANCHSTARTED);
 
-  /* Decode the prefix options in case of internal async command */
+    /* Decode the prefix options in case of internal async command */
 
-  tc = malloc (sizeof *tc);			/* allocate threadcommand buffer */
-  tc -> argc = argc;				/* fill it in with prefix options from command line args */
-  tc -> argv = argv;
-  sts = decode_runopts (input, output, nowait, h_s_input, h_s_output, h_s_error, &(tc -> argc), &(tc -> argv), &(tc -> runopts));
-  if (sts != SS$_NORMAL) {
-    free (tc);					/* some error processing prefixes, release buffer */
-    return (sts);				/* return error status */
-  }
-  if (nowait) tc -> runopts.wait = 0;		/* maybe force -nowait */
+    tc = malloc (sizeof *tc);			/* allocate threadcommand buffer */
+    tc -> argc = argc;				/* fill it in with prefix options from command line args */
+    tc -> argv = argv;
+    sts = decode_runopts (input, output, nowait, h_s_input, h_s_output, h_s_error, &(tc -> argc), &(tc -> argv), &(tc -> runopts));
+    if (sts != SS$_NORMAL)
+    {
+        free (tc);					/* some error processing prefixes, release buffer */
+        return (sts);				/* return error status */
+    }
+    if (nowait) tc -> runopts.wait = 0;		/* maybe force -nowait */
 
-  /* Check for internal commands */
+    /* Check for internal commands */
 
-  tc -> command = decode_command (tc -> argc, tc -> argv, intcmd, &i);
-  if (tc -> command && tc -> command -> entry == 1) {
-    tc -> argv[0] = tc -> command -> help;
-    tc -> command = 0;
-    reallyext=1;
-  }
-  if (tc -> command != NULL) {
-    tc -> argc -= i;
-    tc -> argv += i;
+    tc -> command = decode_command (tc -> argc, tc -> argv, intcmd, &i);
+    if (tc -> command && tc -> command -> entry == 1)
+    {
+        tc -> argv[0] = tc -> command -> help;
+        tc -> command = 0;
+        reallyext=1;
+    }
+    if (tc -> command != NULL)
+    {
+        tc -> argc -= i;
+        tc -> argv += i;
 
-    /* Internal commands flagged 'async' run as a thread */
+        /* Internal commands flagged 'async' run as a thread */
 
-    if (tc -> command -> async) {
-      if ((tc -> runopts.defdir != NULL) || (tc -> runopts.job_name != NULL) || (tc -> runopts.orphan) || (tc -> runopts.process_name != NULL)) {
-        fprintf (h_s_error, "oz_cli: -directory, -job, -orphan and -process options illegal on '%s' command\n", tc -> command -> name);
-        cleanup_runopts (&(tc -> runopts));
+        if (tc -> command -> async)
+        {
+            if ((tc -> runopts.defdir != NULL) || (tc -> runopts.job_name != NULL) || (tc -> runopts.orphan) || (tc -> runopts.process_name != NULL))
+            {
+                fprintf (h_s_error, "oz_cli: -directory, -job, -orphan and -process options illegal on '%s' command\n", tc -> command -> name);
+                cleanup_runopts (&(tc -> runopts));
+                free (tc);
+                return (SS$_BADPARAM);
+            }
+        }
+
+        /* Otherwise, they are simply called */
+
+        else
+        {
+            if ((tc -> runopts.defdir != NULL) || (tc -> runopts.job_name != NULL) || (tc -> runopts.process_name != NULL) || (tc -> runopts.timeit) || (tc -> runopts.orphan)
+                    || (tc -> runopts.exit_name != NULL) || (tc -> runopts.init_name != NULL) || (tc -> runopts.thread_name != NULL) || !(tc -> runopts.wait))
+            {
+                fprintf (h_s_error, "oz_cli: -directory, -exit, -init, -job, -nowait, -orphan, -process, -thread and -timeit options illegal on '%s' command\n", tc -> command -> name);
+                cleanup_runopts (&(tc -> runopts));
+                free (tc);
+                return (SS$_BADPARAM);
+            }
+            sts = (*(tc -> command -> entry)) (tc -> runopts.h_in,
+                                               tc -> runopts.h_out,
+                                               tc -> runopts.h_err,
+                                               tc -> command -> name,
+                                               tc -> command -> param,
+                                               tc -> argc,
+                                               tc -> argv);
+            cleanup_runopts (&(tc -> runopts));
+            free (tc);
+        }
+    }
+
+    /* If not, assume it is an external command - it reprocesses the options */
+
+    else
+    {
         free (tc);
-        return (SS$_BADPARAM);
-      }
+        aargc = argc;
+        aargv = argv;
+        if ((input != NULL) || (output != NULL) || nowait)
+        {
+            aargv = malloc ((aargc + 5) * sizeof *argv);
+            aargc = 0;
+            if (input  != NULL)
+            {
+                aargv[aargc++] = "-input";
+                aargv[aargc++] = input;
+            }
+            if (output != NULL)
+            {
+                aargv[aargc++] = "-output";
+                aargv[aargc++] = output;
+            }
+            if (nowait)
+            {
+                aargv[aargc++] = "-nowait";
+            }
+            memcpy (aargv + aargc, argv, argc * sizeof *argv);
+            aargc += argc;
+        }
+        sts = extcommand (h_s_input, h_s_output, h_s_error, "", reallyext /*NULL*/, aargc, aargv);
+        if (aargv != argv) free (aargv);
     }
 
-    /* Otherwise, they are simply called */
-
-    else {
-      if ((tc -> runopts.defdir != NULL) || (tc -> runopts.job_name != NULL) || (tc -> runopts.process_name != NULL) || (tc -> runopts.timeit) || (tc -> runopts.orphan) 
-       || (tc -> runopts.exit_name != NULL) || (tc -> runopts.init_name != NULL) || (tc -> runopts.thread_name != NULL) || !(tc -> runopts.wait)) {
-        fprintf (h_s_error, "oz_cli: -directory, -exit, -init, -job, -nowait, -orphan, -process, -thread and -timeit options illegal on '%s' command\n", tc -> command -> name);
-        cleanup_runopts (&(tc -> runopts));
-        free (tc);
-        return (SS$_BADPARAM);
-      }
-      sts = (*(tc -> command -> entry)) (tc -> runopts.h_in, 
-                                         tc -> runopts.h_out, 
-                                         tc -> runopts.h_err, 
-                                         tc -> command -> name, 
-                                         tc -> command -> param, 
-                                         tc -> argc, 
-                                         tc -> argv);
-      cleanup_runopts (&(tc -> runopts));
-      free (tc);
-    }
-  }
-
-  /* If not, assume it is an external command - it reprocesses the options */
-
-  else {
-    free (tc);
-    aargc = argc;
-    aargv = argv;
-    if ((input != NULL) || (output != NULL) || nowait) {
-      aargv = malloc ((aargc + 5) * sizeof *argv);
-      aargc = 0;
-      if (input  != NULL) { aargv[aargc++] = "-input";  aargv[aargc++] = input;  }
-      if (output != NULL) { aargv[aargc++] = "-output"; aargv[aargc++] = output; }
-      if (nowait)         { aargv[aargc++] = "-nowait"; }
-      memcpy (aargv + aargc, argv, argc * sizeof *argv);
-      aargc += argc;
-    }
-    sts = extcommand (h_s_input, h_s_output, h_s_error, "", reallyext /*NULL*/, aargc, aargv);
-    if (aargv != argv) free (aargv);
-  }
-
-  return (sts);
+    return (sts);
 }
 
 
@@ -1606,82 +1764,95 @@ static unsigned long exechopped (int argc, const char *argv[], const char *input
 static unsigned long substitute (char *inbuf, char **outbuf_r)
 
 {
-  char c, *evalbuf, *outbuf, *p;
-  int i, j, l, m, o, q;
-  Symbol *symbol;
-  unsigned long sts;
+    char c, *evalbuf, *outbuf, *p;
+    int i, j, l, m, o, q;
+    Symbol *symbol;
+    unsigned long sts;
 
-  *outbuf_r = NULL;
+    *outbuf_r = NULL;
 
-  m = strlen (inbuf) + 8;			/* allocate an output buffer */
-  outbuf = malloc (m);				/* ... a little bigger than input */
-  o = 0;					/* nothing in output buffer yet */
+    m = strlen (inbuf) + 8;			/* allocate an output buffer */
+    outbuf = malloc (m);				/* ... a little bigger than input */
+    o = 0;					/* nothing in output buffer yet */
 
-  q = 0;					/* not in quotes */
-  for (i = 0; (c = inbuf[i]) != 0; i ++) {	/* loop through input string */
-    if (c == '\\') {				/* check for backslash */
-      c = inbuf[++i];				/* that means next char is literal */
-      if (c == 0) break;
-      outbuf[o++] = '\\';			/* put backslash in output buffer */
-						/* ... and copy escaped char to output buffer */
-    } else if (c == '\'') {			/* check for single quote */
-      q = 1 - q;				/* if so, flip quote flag */
-						/* ... and copy it to output buffer */
-    } else if (!q && (c == '{')) {		/* check for opening brace */
-      c = inbuf[++i];				/* get character following the { */
-      if (SYMBOLSTARTCHAR (c)) {		/* special case for {symbolname} */
-        for (j = i; (c = inbuf[++j]) != 0;) if (!SYMBOLCHAR (c)) break;
-        if (c == '}') {
-          inbuf[j] = 0;				/* ok, look up the symbol name */
-          symbol = lookup_symbol (inbuf + i, 0, NULL);
-          inbuf[j] = '}';
-          if (symbol == NULL) {			/* if undefined, ... */
-            i = j;				/* ... just skip over it */
-            continue;
-          }
+    q = 0;					/* not in quotes */
+    for (i = 0; (c = inbuf[i]) != 0; i ++)  	/* loop through input string */
+    {
+        if (c == '\\')  				/* check for backslash */
+        {
+            c = inbuf[++i];				/* that means next char is literal */
+            if (c == 0) break;
+            outbuf[o++] = '\\';			/* put backslash in output buffer */
+            /* ... and copy escaped char to output buffer */
         }
-      }
-      sts = eval_string (inbuf + i, &p, &evalbuf, 0); /* ok, evaluate string, should terminate on a } */
-      if (sts != SS$_NORMAL) {
-        free (outbuf);				/* evaluation error, free output buffer */
-        return (sts);				/* return error status */
-      }
-      if (*p != '}') {
-        fprintf (h_s_error, "oz_cli: expected } terminator at %s\n", p);
-        free (outbuf);
-        return (SS$_BADPARAM);
-      }
-      i = p - inbuf;				/* ok, point at the '}' (the i++ of the for stmt will skip over it) */
-      l = strlen (evalbuf);			/* get length of result */
-      if (o + l >= m) {				/* see if it would overflow output */
-        m += l + strlen (inbuf + i) + 8;	/* if so, malloc a new output */
-        p = malloc (m);
-        memcpy (p, outbuf, o);
-        free (outbuf);
-        outbuf = p;
-      }
-      memcpy (outbuf + o, evalbuf, l);		/* concat onto output buffer */
-      o += l;
-      free (evalbuf);				/* all done with temp buffer */
-      continue;					/* don't put } in output buffer */
+        else if (c == '\'')  			/* check for single quote */
+        {
+            q = 1 - q;				/* if so, flip quote flag */
+            /* ... and copy it to output buffer */
+        }
+        else if (!q && (c == '{'))  		/* check for opening brace */
+        {
+            c = inbuf[++i];				/* get character following the { */
+            if (SYMBOLSTARTCHAR (c))  		/* special case for {symbolname} */
+            {
+                for (j = i; (c = inbuf[++j]) != 0;) if (!SYMBOLCHAR (c)) break;
+                if (c == '}')
+                {
+                    inbuf[j] = 0;				/* ok, look up the symbol name */
+                    symbol = lookup_symbol (inbuf + i, 0, NULL);
+                    inbuf[j] = '}';
+                    if (symbol == NULL)  			/* if undefined, ... */
+                    {
+                        i = j;				/* ... just skip over it */
+                        continue;
+                    }
+                }
+            }
+            sts = eval_string (inbuf + i, &p, &evalbuf, 0); /* ok, evaluate string, should terminate on a } */
+            if (sts != SS$_NORMAL)
+            {
+                free (outbuf);				/* evaluation error, free output buffer */
+                return (sts);				/* return error status */
+            }
+            if (*p != '}')
+            {
+                fprintf (h_s_error, "oz_cli: expected } terminator at %s\n", p);
+                free (outbuf);
+                return (SS$_BADPARAM);
+            }
+            i = p - inbuf;				/* ok, point at the '}' (the i++ of the for stmt will skip over it) */
+            l = strlen (evalbuf);			/* get length of result */
+            if (o + l >= m)  				/* see if it would overflow output */
+            {
+                m += l + strlen (inbuf + i) + 8;	/* if so, malloc a new output */
+                p = malloc (m);
+                memcpy (p, outbuf, o);
+                free (outbuf);
+                outbuf = p;
+            }
+            memcpy (outbuf + o, evalbuf, l);		/* concat onto output buffer */
+            o += l;
+            free (evalbuf);				/* all done with temp buffer */
+            continue;					/* don't put } in output buffer */
+        }
+
+        /* Put character c in output buffer */
+
+        if (o + 1 >= m)  				/* see if enough room for it and one other */
+        {
+            /* this allows for this char and a null terminator */
+            m += strlen (inbuf + i) + 8;		/* if not, malloc a new output */
+            p = malloc (m);
+            memcpy (p, outbuf, o);
+            free (outbuf);
+            outbuf = p;
+        }
+        outbuf[o++] = c;				/* there is room, put char in buff */
     }
 
-    /* Put character c in output buffer */
-
-    if (o + 1 >= m) {				/* see if enough room for it and one other */
-						/* this allows for this char and a null terminator */
-      m += strlen (inbuf + i) + 8;		/* if not, malloc a new output */
-      p = malloc (m);
-      memcpy (p, outbuf, o);
-      free (outbuf);
-      outbuf = p;
-    }
-    outbuf[o++] = c;				/* there is room, put char in buff */
-  }
-
-  outbuf[o] = 0;				/* done, null terminate output */
-  *outbuf_r = outbuf;				/* return outbuf pointer */
-  return (SS$_NORMAL);				/* return success status */
+    outbuf[o] = 0;				/* done, null terminate output */
+    *outbuf_r = outbuf;				/* return outbuf pointer */
+    return (SS$_NORMAL);				/* return success status */
 }
 
 /************************************************************************/
@@ -1712,36 +1883,41 @@ static unsigned long substitute (char *inbuf, char **outbuf_r)
 static unsigned long eval_handle (char *inbuf, char **inbuf_r, unsigned long *outval_r, char *objtype, char termch)
 
 {
-  int usedup;
-  unsigned long sts;
-  Symbol *symbol;
+    int usedup;
+    unsigned long sts;
+    Symbol *symbol;
 
-  sts = evaluate (inbuf, inbuf_r, &symbol, termch);
-  if (sts != SS$_NORMAL) return (sts);
+    sts = evaluate (inbuf, inbuf_r, &symbol, termch);
+    if (sts != SS$_NORMAL) return (sts);
 
-  switch (symbol -> symtype) {
-    case SYMTYPE_INTEGER: {
-      fprintf (h_s_error, "oz_cli: %s handle value required at %u\n", objtype, symbol -> ivalue);
-      free (symbol);
-      return (SS$_BADPARAM);
-    }
-    case SYMTYPE_STRING: {
-      if (symbol -> svalue[0] == 0) {
-        *outval_r = 0;
-        break;
-      }
-      *outval_r = oz_hw_atoz (symbol -> svalue, &usedup);
-      if ((symbol -> svalue[usedup] != ':') || ((objtype[0] != 0) && (strcmp (symbol -> svalue + usedup + 1, objtype) != 0))) {
-        fprintf (h_s_error, "oz_cli: %s handle value required at %s\n", objtype, symbol -> svalue);
+    switch (symbol -> symtype)
+    {
+    case SYMTYPE_INTEGER:
+    {
+        fprintf (h_s_error, "oz_cli: %s handle value required at %u\n", objtype, symbol -> ivalue);
         free (symbol);
         return (SS$_BADPARAM);
-      }
-      break;
     }
-  }
+    case SYMTYPE_STRING:
+    {
+        if (symbol -> svalue[0] == 0)
+        {
+            *outval_r = 0;
+            break;
+        }
+        *outval_r = oz_hw_atoz (symbol -> svalue, &usedup);
+        if ((symbol -> svalue[usedup] != ':') || ((objtype[0] != 0) && (strcmp (symbol -> svalue + usedup + 1, objtype) != 0)))
+        {
+            fprintf (h_s_error, "oz_cli: %s handle value required at %s\n", objtype, symbol -> svalue);
+            free (symbol);
+            return (SS$_BADPARAM);
+        }
+        break;
+    }
+    }
 
-  free (symbol);
-  return (SS$_NORMAL);
+    free (symbol);
+    return (SS$_NORMAL);
 }
 
 /************************************************************************/
@@ -1765,31 +1941,35 @@ static unsigned long eval_handle (char *inbuf, char **inbuf_r, unsigned long *ou
 static unsigned long eval_integer (char *inbuf, char **inbuf_r, unsigned long *outval_r, char termch)
 
 {
-  int usedup;
-  unsigned long sts;
-  Symbol *symbol;
+    int usedup;
+    unsigned long sts;
+    Symbol *symbol;
 
-  sts = evaluate (inbuf, inbuf_r, &symbol, termch);
-  if (sts != SS$_NORMAL) return (sts);
+    sts = evaluate (inbuf, inbuf_r, &symbol, termch);
+    if (sts != SS$_NORMAL) return (sts);
 
-  switch (symbol -> symtype) {
-    case SYMTYPE_INTEGER: {
-      *outval_r = symbol -> ivalue;
-      break;
+    switch (symbol -> symtype)
+    {
+    case SYMTYPE_INTEGER:
+    {
+        *outval_r = symbol -> ivalue;
+        break;
     }
-    case SYMTYPE_STRING: {
-      *outval_r = oz_hw_atoi (symbol -> svalue, &usedup);
-      if (symbol -> svalue[usedup] != 0) {
-        fprintf (h_s_error, "oz_cli: integer value required at %s\n", symbol -> svalue);
-        free (symbol);
-        return (SS$_BADPARAM);
-      }
-      break;
+    case SYMTYPE_STRING:
+    {
+        *outval_r = oz_hw_atoi (symbol -> svalue, &usedup);
+        if (symbol -> svalue[usedup] != 0)
+        {
+            fprintf (h_s_error, "oz_cli: integer value required at %s\n", symbol -> svalue);
+            free (symbol);
+            return (SS$_BADPARAM);
+        }
+        break;
     }
-  }
+    }
 
-  free (symbol);
-  return (SS$_NORMAL);
+    free (symbol);
+    return (SS$_NORMAL);
 }
 
 /************************************************************************/
@@ -1814,16 +1994,17 @@ static unsigned long eval_integer (char *inbuf, char **inbuf_r, unsigned long *o
 static unsigned long eval_string (char *inbuf, char **inbuf_r, char **outbuf_r, char termch)
 
 {
-  unsigned long sts;
-  Symbol *symbol;
+    unsigned long sts;
+    Symbol *symbol;
 
-  sts = evaluate (inbuf, inbuf_r, &symbol, termch);
-  if (sts == SS$_NORMAL) {
-    *outbuf_r = cvt_sym_to_str (symbol);
-    free (symbol);
-  }
+    sts = evaluate (inbuf, inbuf_r, &symbol, termch);
+    if (sts == SS$_NORMAL)
+    {
+        *outbuf_r = cvt_sym_to_str (symbol);
+        free (symbol);
+    }
 
-  return (sts);
+    return (sts);
 }
 
 /************************************************************************/
@@ -1848,197 +2029,256 @@ static unsigned long eval_string (char *inbuf, char **inbuf_r, char **outbuf_r, 
 static unsigned long evaluate (char *inbuf, char **inbuf_r, Symbol **symbol_r, char termch)
 
 {
-  char *p, *q;
-  int cmpstr;
-  unsigned long ivalue, sts;
-  Optype optype;
-  Symbol *lsymbol, *rsymbol;
+    char *p, *q;
+    int cmpstr;
+    unsigned long ivalue, sts;
+    Optype optype;
+    Symbol *lsymbol, *rsymbol;
 
-  *symbol_r = NULL;
+    *symbol_r = NULL;
 
-  sts = get_operand (inbuf, &inbuf, &lsymbol);				/* get left-hand operand */
-  if (sts != SS$_NORMAL) return (sts);
+    sts = get_operand (inbuf, &inbuf, &lsymbol);				/* get left-hand operand */
+    if (sts != SS$_NORMAL) return (sts);
 
 get_op:
-  optype = get_operator (inbuf, &inbuf);				/* get operator */
+    optype = get_operator (inbuf, &inbuf);				/* get operator */
 
-  if (optype == OPTYPE_UNKNOWN) {
-    if (termch != 0) {							/* maybe check termination character */
-      if (*inbuf != termch) {
-        fprintf (h_s_error, "oz_cli: bad expression terminator at %s, expected %c\n", inbuf, termch);
+    if (optype == OPTYPE_UNKNOWN)
+    {
+        if (termch != 0)  							/* maybe check termination character */
+        {
+            if (*inbuf != termch)
+            {
+                fprintf (h_s_error, "oz_cli: bad expression terminator at %s, expected %c\n", inbuf, termch);
+                return (SS$_BADPARAM);
+            }
+            inbuf ++;								/* skip over terminator */
+            while ((*inbuf != 0) && (*inbuf <= ' ')) inbuf ++;		/* skip trailing spaces */
+        }
+
+        *inbuf_r = inbuf;							/* return pointer to terminating character */
+        *symbol_r = lsymbol;
+        return (SS$_NORMAL);
+    }
+
+    sts = get_operand (inbuf, &inbuf, &rsymbol);				/* get right-hand operand */
+    if (sts != SS$_NORMAL) return (sts);
+
+    switch (optype)
+    {
+
+    case OPTYPE_ADD:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue += rsymbol -> ivalue;
+        }
+        else
+        {
+            p = cvt_sym_to_str (lsymbol);
+            q = cvt_sym_to_str (rsymbol);
+            free (lsymbol);
+            ivalue = strlen (p) + strlen (q);
+            lsymbol = malloc (ivalue + 1 + sizeof *lsymbol);
+            lsymbol -> symtype = SYMTYPE_STRING;
+            strcpy (lsymbol -> svalue, p);
+            strcat (lsymbol -> svalue, q);
+            free (p);
+            free (q);
+        }
+        goto free_rsym;
+    }
+
+    case OPTYPE_BITAND:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue &= rsymbol -> ivalue;
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform AND between two integers\n");
         return (SS$_BADPARAM);
-      }
-      inbuf ++;								/* skip over terminator */
-      while ((*inbuf != 0) && (*inbuf <= ' ')) inbuf ++;		/* skip trailing spaces */
     }
 
-    *inbuf_r = inbuf;							/* return pointer to terminating character */
-    *symbol_r = lsymbol;
-    return (SS$_NORMAL);
-  }
-
-  sts = get_operand (inbuf, &inbuf, &rsymbol);				/* get right-hand operand */
-  if (sts != SS$_NORMAL) return (sts);
-
-  switch (optype) {
-
-    case OPTYPE_ADD: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue += rsymbol -> ivalue;
-      } else {
-        p = cvt_sym_to_str (lsymbol);
-        q = cvt_sym_to_str (rsymbol);
-        free (lsymbol);
-        ivalue = strlen (p) + strlen (q);
-        lsymbol = malloc (ivalue + 1 + sizeof *lsymbol);
-        lsymbol -> symtype = SYMTYPE_STRING;
-        strcpy (lsymbol -> svalue, p);
-        strcat (lsymbol -> svalue, q);
-        free (p);
-        free (q);
-      }
-      goto free_rsym;
+    case OPTYPE_BITOR:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue |= rsymbol -> ivalue;
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform OR between two integers\n");
+        return (SS$_BADPARAM);
     }
 
-    case OPTYPE_BITAND: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue &= rsymbol -> ivalue;
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform AND between two integers\n");
-      return (SS$_BADPARAM);
+    case OPTYPE_BITXOR:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue ^= rsymbol -> ivalue;
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform XOR between two integers\n");
+        return (SS$_BADPARAM);
     }
 
-    case OPTYPE_BITOR: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue |= rsymbol -> ivalue;
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform OR between two integers\n");
-      return (SS$_BADPARAM);
+    case OPTYPE_BOOLAND:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue = (lsymbol -> ivalue && rsymbol -> ivalue);
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform AND between two integers\n");
+        return (SS$_BADPARAM);
     }
 
-    case OPTYPE_BITXOR: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue ^= rsymbol -> ivalue;
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform XOR between two integers\n");
-      return (SS$_BADPARAM);
+    case OPTYPE_BOOLOR:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue = (lsymbol -> ivalue || rsymbol -> ivalue);
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform OR between two integers\n");
+        return (SS$_BADPARAM);
     }
 
-    case OPTYPE_BOOLAND: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue = (lsymbol -> ivalue && rsymbol -> ivalue);
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform AND between two integers\n");
-      return (SS$_BADPARAM);
+    case OPTYPE_BOOLXOR:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue = ((lsymbol -> ivalue != 0) ^ (rsymbol -> ivalue != 0));
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform XOR between two integers\n");
+        return (SS$_BADPARAM);
     }
 
-    case OPTYPE_BOOLOR: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue = (lsymbol -> ivalue || rsymbol -> ivalue);
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform OR between two integers\n");
-      return (SS$_BADPARAM);
+    case OPTYPE_DIVIDE:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue /= rsymbol -> ivalue;
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform DIVIDE between two integers\n");
+        return (SS$_BADPARAM);
     }
 
-    case OPTYPE_BOOLXOR: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue = ((lsymbol -> ivalue != 0) ^ (rsymbol -> ivalue != 0));
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform XOR between two integers\n");
-      return (SS$_BADPARAM);
+    case OPTYPE_EQ:
+    {
+        ivalue = 1;
+        goto compare;
+    }
+    case OPTYPE_GT:
+    {
+        ivalue = 2;
+        goto compare;
+    }
+    case OPTYPE_GE:
+    {
+        ivalue = 3;
+        goto compare;
+    }
+    case OPTYPE_LT:
+    {
+        ivalue = 4;
+        goto compare;
+    }
+    case OPTYPE_LE:
+    {
+        ivalue = 5;
+        goto compare;
+    }
+    case OPTYPE_NE:
+    {
+        ivalue = 6;
+        goto compare;
     }
 
-    case OPTYPE_DIVIDE: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue /= rsymbol -> ivalue;
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform DIVIDE between two integers\n");
-      return (SS$_BADPARAM);
+    case OPTYPE_MODULUS:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue %= rsymbol -> ivalue;
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform MODULUS between two integers\n");
+        return (SS$_BADPARAM);
     }
 
-    case OPTYPE_EQ: { ivalue = 1; goto compare; }
-    case OPTYPE_GT: { ivalue = 2; goto compare; }
-    case OPTYPE_GE: { ivalue = 3; goto compare; }
-    case OPTYPE_LT: { ivalue = 4; goto compare; }
-    case OPTYPE_LE: { ivalue = 5; goto compare; }
-    case OPTYPE_NE: { ivalue = 6; goto compare; }
-
-    case OPTYPE_MODULUS: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue %= rsymbol -> ivalue;
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform MODULUS between two integers\n");
-      return (SS$_BADPARAM);
+    case OPTYPE_MULTIPLY:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue *= rsymbol -> ivalue;
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform MULTIPLY between two integers\n");
+        return (SS$_BADPARAM);
     }
 
-    case OPTYPE_MULTIPLY: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue *= rsymbol -> ivalue;
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform MULTIPLY between two integers\n");
-      return (SS$_BADPARAM);
+    case OPTYPE_SHLEFT:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue <<= rsymbol -> ivalue;
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform SHIFT between two integers\n");
+        return (SS$_BADPARAM);
     }
 
-    case OPTYPE_SHLEFT: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue <<= rsymbol -> ivalue;
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform SHIFT between two integers\n");
-      return (SS$_BADPARAM);
+    case OPTYPE_SHRIGHT:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue >>= rsymbol -> ivalue;
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform SHIFT between two integers\n");
+        return (SS$_BADPARAM);
     }
 
-    case OPTYPE_SHRIGHT: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue >>= rsymbol -> ivalue;
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform SHIFT between two integers\n");
-      return (SS$_BADPARAM);
+    case OPTYPE_SUBTRACT:
+    {
+        if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+        {
+            lsymbol -> ivalue -= rsymbol -> ivalue;
+            goto free_rsym;
+        }
+        fprintf (h_s_error, "oz_cli: can only perform SUBTRACT between two integers\n");
+        return (SS$_BADPARAM);
     }
 
-    case OPTYPE_SUBTRACT: {
-      if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-        lsymbol -> ivalue -= rsymbol -> ivalue;
-        goto free_rsym;
-      }
-      fprintf (h_s_error, "oz_cli: can only perform SUBTRACT between two integers\n");
-      return (SS$_BADPARAM);
     }
 
-  }
-
-  /* Compare operations: ivalue<0> if eq, ivalue<1> if gt, ivalue<2> if lt */
+    /* Compare operations: ivalue<0> if eq, ivalue<1> if gt, ivalue<2> if lt */
 
 compare:
-  if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER)) {
-    if (lsymbol -> ivalue > rsymbol -> ivalue) lsymbol -> ivalue = 2;
-    else if (lsymbol -> ivalue < rsymbol -> ivalue) lsymbol -> ivalue = 4;
-    else lsymbol -> ivalue = 1;
-  } else {
-    p = cvt_sym_to_str (lsymbol);
-    q = cvt_sym_to_str (rsymbol);
-    cmpstr = strcmp (p, q);
-    free (p);
-    free (q);
-    if (cmpstr > 0) lsymbol -> ivalue = 2;
-    else if (cmpstr < 0) lsymbol -> ivalue = 4;
-    else lsymbol -> ivalue = 1;
-    lsymbol -> symtype = SYMTYPE_INTEGER;
-  }
-  lsymbol -> ivalue = ((lsymbol -> ivalue & ivalue) != 0);
+    if ((lsymbol -> symtype == SYMTYPE_INTEGER) && (rsymbol -> symtype == SYMTYPE_INTEGER))
+    {
+        if (lsymbol -> ivalue > rsymbol -> ivalue) lsymbol -> ivalue = 2;
+        else if (lsymbol -> ivalue < rsymbol -> ivalue) lsymbol -> ivalue = 4;
+        else lsymbol -> ivalue = 1;
+    }
+    else
+    {
+        p = cvt_sym_to_str (lsymbol);
+        q = cvt_sym_to_str (rsymbol);
+        cmpstr = strcmp (p, q);
+        free (p);
+        free (q);
+        if (cmpstr > 0) lsymbol -> ivalue = 2;
+        else if (cmpstr < 0) lsymbol -> ivalue = 4;
+        else lsymbol -> ivalue = 1;
+        lsymbol -> symtype = SYMTYPE_INTEGER;
+    }
+    lsymbol -> ivalue = ((lsymbol -> ivalue & ivalue) != 0);
 free_rsym:
-  free (rsymbol);
-  goto get_op;
+    free (rsymbol);
+    goto get_op;
 }
 
 /************************************************************************/
@@ -2062,109 +2302,125 @@ free_rsym:
 static unsigned long get_operand (char *inbuf, char **inbuf_r, Symbol **symbol_r)
 
 {
-  char c, d, *p, *q, *svalue;
-  int usedup;
-  unsigned long ivalue, sts;
-  Symbol *symbol, *xsymbol;
+    char c, d, *p, *q, *svalue;
+    int usedup;
+    unsigned long ivalue, sts;
+    Symbol *symbol, *xsymbol;
 
-  *symbol_r = NULL;
+    *symbol_r = NULL;
 
-  for (p = inbuf; (c = *p) != 0; p ++) if (c > ' ') break;		/* skip spaces */
+    for (p = inbuf; (c = *p) != 0; p ++) if (c > ' ') break;		/* skip spaces */
 
-  /* Maybe it's an integer constant (starts with 0..9) */
+    /* Maybe it's an integer constant (starts with 0..9) */
 
-  if ((c >= '0') && (c <= '9')) {
-    symbol = malloc (strlen (p) + sizeof *symbol);			/* allocate symbol block for the integer */
-    symbol -> symtype = SYMTYPE_INTEGER;				/* set its type */
-    symbol -> ivalue = oz_hw_atoi (p, &usedup);				/* convert the integer string to binary */
-    p += usedup;
-    goto rtnsym;
-  }
-
-  /* Maybe it's a string constant (enclosed in matching ' or ") */
-
-  if ((c == '"') || (c == '\'')) {					/* check for ' or " */
-    symbol = malloc (strlen (p) + sizeof *symbol);			/* ok, allocate symbol buffer big enough to hold it */
-    symbol -> symtype = SYMTYPE_STRING;					/* say it is of type string */
-    q = symbol -> svalue;						/* point to where to put the string */
-    while ((d = *(++ p)) != 0) {					/* get next char in input */
-      if (d == c) {							/* check for terminating character */
-        p ++;								/* if so, point past the terminating character */
-        break;								/* ... and all done */
-      }
-      if (d == '\\') {							/* check for escape character */
-        d = *(++ p);							/* if so, get the following character */
-        if (d == 0) break;						/* ... stop if we hit end of input string */
-        if (d == 'b') d = '\b';
-        if (d == 'n') d = '\n';
-        if (d == 'r') d = '\r';
-        if (d == 't') d = '\t';
-      }
-      *(q ++) = d;							/* store character in output buffer */
-    }
-    *q = 0;								/* done, null terminate output string */
-    goto rtnsym;
-  }
-
-  /* Symbols start with _, a-z, A-Z */
-
-  if (SYMBOLSTARTCHAR (c)) {
-    for (q = p; (c = *q) != 0; q ++) if (!SYMBOLCHAR (c)) break;	/* scan buffer for end of symbol name string */
-    *q = 0;								/* null terminate symbol name */
-    xsymbol = lookup_symbol (p, 0, NULL);				/* look it up wherever it can be found */
-    if (xsymbol == NULL) {
-      fprintf (h_s_error, "oz_cli: undefined symbol %s\n", p);
-      *q = c;
-      return (0 /*OZ_UNDEFSYMBOL*/);
-    }
-    *q = c;								/* restore terminating character */
-    p = q;								/* found, point just past symbol name */
-
-    switch (xsymbol -> symtype) {					/* copy the value to a new temp symbol */
-
-      /* Integer variable */
-
-      case SYMTYPE_INTEGER: {
-        if (xsymbol -> func != NULL) {					/* see if it's a function name */
-          sts = (*(xsymbol -> func)) (xsymbol, p, &p, &ivalue);		/* if so, execute function */
-          if (sts != SS$_NORMAL) return (sts);				/* abort if error executing function */
-        } else {
-          ivalue = xsymbol -> ivalue;					/* simple variable, get the value */
-        }
-        symbol = malloc (sizeof *symbol);				/* put value in a temp symbol block */
-        symbol -> symtype = SYMTYPE_INTEGER;
-        symbol -> ivalue = ivalue;
+    if ((c >= '0') && (c <= '9'))
+    {
+        symbol = malloc (strlen (p) + sizeof *symbol);			/* allocate symbol block for the integer */
+        symbol -> symtype = SYMTYPE_INTEGER;				/* set its type */
+        symbol -> ivalue = oz_hw_atoi (p, &usedup);				/* convert the integer string to binary */
+        p += usedup;
         goto rtnsym;
-      }
-
-      /* String variable */
-
-      case SYMTYPE_STRING: {
-        if (xsymbol -> func != NULL) {					/* see if it's a function name */
-          sts = (*(xsymbol -> func)) (xsymbol, p, &p, &svalue);		/* if so, execute function */
-          if (sts != SS$_NORMAL) return (sts);				/* abort if error executing function */
-          symbol = malloc (strlen (svalue) + 1 + sizeof *symbol);	/* copy to temp symbol block */
-          symbol -> symtype = SYMTYPE_STRING;
-          strcpy (symbol -> svalue, svalue);
-          free (svalue);
-        } else {
-          symbol = malloc (strlen (xsymbol -> svalue) + 1 + sizeof *symbol); /* simple variable, copy to temp symbol block */
-          symbol -> symtype = SYMTYPE_STRING;
-          strcpy (symbol -> svalue, xsymbol -> svalue);
-        }
-        goto rtnsym;
-      }
     }
-  }
 
-  fprintf (h_s_error, "oz_cli: invalid operand %s\n", p);
-  return (SS$_BADPARAM);
+    /* Maybe it's a string constant (enclosed in matching ' or ") */
+
+    if ((c == '"') || (c == '\''))  					/* check for ' or " */
+    {
+        symbol = malloc (strlen (p) + sizeof *symbol);			/* ok, allocate symbol buffer big enough to hold it */
+        symbol -> symtype = SYMTYPE_STRING;					/* say it is of type string */
+        q = symbol -> svalue;						/* point to where to put the string */
+        while ((d = *(++ p)) != 0)  					/* get next char in input */
+        {
+            if (d == c)  							/* check for terminating character */
+            {
+                p ++;								/* if so, point past the terminating character */
+                break;								/* ... and all done */
+            }
+            if (d == '\\')  							/* check for escape character */
+            {
+                d = *(++ p);							/* if so, get the following character */
+                if (d == 0) break;						/* ... stop if we hit end of input string */
+                if (d == 'b') d = '\b';
+                if (d == 'n') d = '\n';
+                if (d == 'r') d = '\r';
+                if (d == 't') d = '\t';
+            }
+            *(q ++) = d;							/* store character in output buffer */
+        }
+        *q = 0;								/* done, null terminate output string */
+        goto rtnsym;
+    }
+
+    /* Symbols start with _, a-z, A-Z */
+
+    if (SYMBOLSTARTCHAR (c))
+    {
+        for (q = p; (c = *q) != 0; q ++) if (!SYMBOLCHAR (c)) break;	/* scan buffer for end of symbol name string */
+        *q = 0;								/* null terminate symbol name */
+        xsymbol = lookup_symbol (p, 0, NULL);				/* look it up wherever it can be found */
+        if (xsymbol == NULL)
+        {
+            fprintf (h_s_error, "oz_cli: undefined symbol %s\n", p);
+            *q = c;
+            return (0 /*OZ_UNDEFSYMBOL*/);
+        }
+        *q = c;								/* restore terminating character */
+        p = q;								/* found, point just past symbol name */
+
+        switch (xsymbol -> symtype)  					/* copy the value to a new temp symbol */
+        {
+
+            /* Integer variable */
+
+        case SYMTYPE_INTEGER:
+        {
+            if (xsymbol -> func != NULL)  					/* see if it's a function name */
+            {
+                sts = (*(xsymbol -> func)) (xsymbol, p, &p, &ivalue);		/* if so, execute function */
+                if (sts != SS$_NORMAL) return (sts);				/* abort if error executing function */
+            }
+            else
+            {
+                ivalue = xsymbol -> ivalue;					/* simple variable, get the value */
+            }
+            symbol = malloc (sizeof *symbol);				/* put value in a temp symbol block */
+            symbol -> symtype = SYMTYPE_INTEGER;
+            symbol -> ivalue = ivalue;
+            goto rtnsym;
+        }
+
+        /* String variable */
+
+        case SYMTYPE_STRING:
+        {
+            if (xsymbol -> func != NULL)  					/* see if it's a function name */
+            {
+                sts = (*(xsymbol -> func)) (xsymbol, p, &p, &svalue);		/* if so, execute function */
+                if (sts != SS$_NORMAL) return (sts);				/* abort if error executing function */
+                symbol = malloc (strlen (svalue) + 1 + sizeof *symbol);	/* copy to temp symbol block */
+                symbol -> symtype = SYMTYPE_STRING;
+                strcpy (symbol -> svalue, svalue);
+                free (svalue);
+            }
+            else
+            {
+                symbol = malloc (strlen (xsymbol -> svalue) + 1 + sizeof *symbol); /* simple variable, copy to temp symbol block */
+                symbol -> symtype = SYMTYPE_STRING;
+                strcpy (symbol -> svalue, xsymbol -> svalue);
+            }
+            goto rtnsym;
+        }
+        }
+    }
+
+    fprintf (h_s_error, "oz_cli: invalid operand %s\n", p);
+    return (SS$_BADPARAM);
 
 rtnsym:
-  *symbol_r = symbol;							/* return pointer to symbol block */
-  while (((c = *p) != 0) && (c <= ' ')) p ++;				/* skip following spaces */
-  *inbuf_r = p;								/* return pointer to next thing in input */
-  return (SS$_NORMAL);							/* successful */
+    *symbol_r = symbol;							/* return pointer to symbol block */
+    while (((c = *p) != 0) && (c <= ' ')) p ++;				/* skip following spaces */
+    *inbuf_r = p;								/* return pointer to next thing in input */
+    return (SS$_NORMAL);							/* successful */
 }
 
 /************************************************************************/
@@ -2185,23 +2441,25 @@ rtnsym:
 static Optype get_operator (char *inbuf, char **inbuf_r)
 
 {
-  char c, *p;
-  int i;
-  const Operator *operator;
+    char c, *p;
+    int i;
+    const Operator *operator;
 
-  for (p = inbuf; (c = *p) != 0; p ++) if (c > ' ') break;			/* skip spaces */
+    for (p = inbuf; (c = *p) != 0; p ++) if (c > ' ') break;			/* skip spaces */
 
-  for (operator = operators; operator -> opname != NULL; operator ++) {		/* loop through operator table */
-    for (i = 0; operator -> opname[i] == p[i]; i ++) if (p[i] == 0) break;	/* see if the name matches */
-    if (operator -> opname[i] == 0) {
-      p += i;									/* matches, increment past the string */
-      while (((c = *p) != 0) && (c <= ' ')) p ++;				/* skip spaces */
-      *inbuf_r = p;
-      return (operator -> optype);
+    for (operator = operators; operator -> opname != NULL; operator ++)  		/* loop through operator table */
+    {
+        for (i = 0; operator -> opname[i] == p[i]; i ++) if (p[i] == 0) break;	/* see if the name matches */
+        if (operator -> opname[i] == 0)
+        {
+            p += i;									/* matches, increment past the string */
+            while (((c = *p) != 0) && (c <= ' ')) p ++;				/* skip spaces */
+            *inbuf_r = p;
+            return (operator -> optype);
+        }
     }
-  }
 
-  return (OPTYPE_UNKNOWN);
+    return (OPTYPE_UNKNOWN);
 }
 
 /************************************************************************/
@@ -2222,22 +2480,25 @@ static Optype get_operator (char *inbuf, char **inbuf_r)
 static char *cvt_sym_to_str (Symbol *symbol)
 
 {
-  char *p;
+    char *p;
 
-  switch (symbol -> symtype) {
-    case SYMTYPE_INTEGER: {
-      p = malloc (32);
-      oz_hw_itoa (symbol -> ivalue, 32, p);
-      return (p);
+    switch (symbol -> symtype)
+    {
+    case SYMTYPE_INTEGER:
+    {
+        p = malloc (32);
+        oz_hw_itoa (symbol -> ivalue, 32, p);
+        return (p);
     }
-    case SYMTYPE_STRING: {
-      p = malloc (strlen (symbol -> svalue) + 1);
-      strcpy (p, symbol -> svalue);
-      return (p);
+    case SYMTYPE_STRING:
+    {
+        p = malloc (strlen (symbol -> svalue) + 1);
+        strcpy (p, symbol -> svalue);
+        return (p);
     }
-  }
+    }
 
-  return (NULL);
+    return (NULL);
 }
 
 /************************************************************************/
@@ -2274,24 +2535,27 @@ static char *cvt_sym_to_str (Symbol *symbol)
 static unsigned long func_collapse (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char c, *p, *q, *string;
-  unsigned long sts;
+    char c, *p, *q, *string;
+    unsigned long sts;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;			/* skip spaces */
-  if (*(strp ++) != '(') {						/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, rtnp, &string, ')');				/* evaluate the string expression */
-  if (sts == SS$_NORMAL) {
-    q = string;								/* overwrite input with output */
-    for (p = string; (c = *p) != 0; p ++) {				/* scan through input string */
-      if (c > ' ') *(q ++) = c;						/* ... and output the printable chars */
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;			/* skip spaces */
+    if (*(strp ++) != '(')  						/* make sure it starts with an open paren and skip it */
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
     }
-    *q = 0;								/* null terminate output string */
-    *((char **)valuep) = string;					/* return pointer to string buffer */
-  }
-  return (sts);
+    sts = eval_string (strp, rtnp, &string, ')');				/* evaluate the string expression */
+    if (sts == SS$_NORMAL)
+    {
+        q = string;								/* overwrite input with output */
+        for (p = string; (c = *p) != 0; p ++)  				/* scan through input string */
+        {
+            if (c > ' ') *(q ++) = c;						/* ... and output the printable chars */
+        }
+        *q = 0;								/* null terminate output string */
+        *((char **)valuep) = string;					/* return pointer to string buffer */
+    }
+    return (sts);
 }
 
 /************************************************************************/
@@ -2305,32 +2569,38 @@ static unsigned long func_collapse (Symbol *symbol, char *strp, char **rtnp, voi
 static unsigned long func_compress (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char c, *p, *q, *string;
-  int s;
-  unsigned long sts;
+    char c, *p, *q, *string;
+    int s;
+    unsigned long sts;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;			/* skip spaces */
-  if (*(strp ++) != '(') {						/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, rtnp, &string, ')');				/* evaluate the string expression */
-  if (sts == SS$_NORMAL) {
-    s = 0;								/* we're not skipping spaces yet */
-    q = string;								/* overwrite input with output */
-    for (p = string; (c = *p) != 0; p ++) {				/* scan through input string */
-      if (c > ' ') {							/* check for printable char */
-        s = 0;								/* if so, don't skip the first space that follows it */
-        *(q ++) = c;							/* ... and output the printable char */
-      } else if (!s) {							/* nonprintable, see if redundant */
-        s = 1;								/* not redundant, next one would be */
-        *(q ++) = ' ';							/* ... and output a space */
-      }
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;			/* skip spaces */
+    if (*(strp ++) != '(')  						/* make sure it starts with an open paren and skip it */
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
     }
-    *q = 0;								/* null terminate output string */
-    *((char **)valuep) = string;					/* return pointer to string buffer */
-  }
-  return (sts);
+    sts = eval_string (strp, rtnp, &string, ')');				/* evaluate the string expression */
+    if (sts == SS$_NORMAL)
+    {
+        s = 0;								/* we're not skipping spaces yet */
+        q = string;								/* overwrite input with output */
+        for (p = string; (c = *p) != 0; p ++)  				/* scan through input string */
+        {
+            if (c > ' ')  							/* check for printable char */
+            {
+                s = 0;								/* if so, don't skip the first space that follows it */
+                *(q ++) = c;							/* ... and output the printable char */
+            }
+            else if (!s)  							/* nonprintable, see if redundant */
+            {
+                s = 1;								/* not redundant, next one would be */
+                *(q ++) = ' ';							/* ... and output a space */
+            }
+        }
+        *q = 0;								/* null terminate output string */
+        *((char **)valuep) = string;					/* return pointer to string buffer */
+    }
+    return (sts);
 }
 
 /************************************************************************/
@@ -2344,43 +2614,49 @@ static unsigned long func_compress (Symbol *symbol, char *strp, char **rtnp, voi
 static unsigned long func_field (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char *p, *q, *separator, *string;
-  int l;
-  unsigned long index, sts;
+    char *p, *q, *separator, *string;
+    int l;
+    unsigned long index, sts;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;
-  if (*(strp ++) != '(') {
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_integer (strp, &strp, &index, ',');
-  if (sts != SS$_NORMAL) return (sts);
-  sts = eval_string (strp, &strp, &separator, ',');
-  if (sts != SS$_NORMAL) return (sts);
-  sts = eval_string (strp, &strp, &string, ')');
-  if (sts != SS$_NORMAL) {
-    free (separator);
-    return (sts);
-  }
-  *rtnp = strp;
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;
+    if (*(strp ++) != '(')
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_integer (strp, &strp, &index, ',');
+    if (sts != SS$_NORMAL) return (sts);
+    sts = eval_string (strp, &strp, &separator, ',');
+    if (sts != SS$_NORMAL) return (sts);
+    sts = eval_string (strp, &strp, &string, ')');
+    if (sts != SS$_NORMAL)
+    {
+        free (separator);
+        return (sts);
+    }
+    *rtnp = strp;
 
-  l = strlen (separator);
-  for (p = string; (q = strstr (p, separator)) != NULL; p = q + l) {
-    if (index == 0) break;
-    -- index;
-  }
-  if (index != 0) {
-    free (string);
-    *((char **)valuep) = separator;
-  } else {
-    free (separator);
-    *((char **)valuep) = string;
-    l = q - p;
-    if (q == NULL) l = strlen (p);
-    memmove (string, p, l);
-    string[l] = 0;
-  }
-  return (SS$_NORMAL);
+    l = strlen (separator);
+    for (p = string; (q = strstr (p, separator)) != NULL; p = q + l)
+    {
+        if (index == 0) break;
+        -- index;
+    }
+    if (index != 0)
+    {
+        free (string);
+        *((char **)valuep) = separator;
+    }
+    else
+    {
+        free (separator);
+        *((char **)valuep) = string;
+        l = q - p;
+        if (q == NULL) l = strlen (p);
+        memmove (string, p, l);
+        string[l] = 0;
+    }
+    return (SS$_NORMAL);
 }
 
 /************************************************************************/
@@ -2394,20 +2670,21 @@ static unsigned long func_field (Symbol *symbol, char *strp, char **rtnp, void *
 static unsigned long func_len (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char *svalue;
-  unsigned long sts;
+    char *svalue;
+    unsigned long sts;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
-  if (*(strp ++) != '(') {							/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, &strp, &svalue, ')');				/* evaluate the string expression */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
-  *rtnp = strp;									/* return pointer just past the ) */
-  *((unsigned long *)valuep) = strlen (svalue);						/* return the length of the string */
-  free (svalue);								/* free off result malloc'd by eval_string */
-  return (SS$_NORMAL);								/* successful */
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
+    if (*(strp ++) != '(')  							/* make sure it starts with an open paren and skip it */
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_string (strp, &strp, &svalue, ')');				/* evaluate the string expression */
+    if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
+    *rtnp = strp;									/* return pointer just past the ) */
+    *((unsigned long *)valuep) = strlen (svalue);						/* return the length of the string */
+    free (svalue);								/* free off result malloc'd by eval_string */
+    return (SS$_NORMAL);								/* successful */
 }
 
 /************************************************************************/
@@ -2421,45 +2698,47 @@ static unsigned long func_len (Symbol *symbol, char *strp, char **rtnp, void *va
 static unsigned long func_lnm_attrs (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char *out;
-  int i;
-  unsigned long index, lognamatr, logvalatr, sts;
-  unsigned long h_logname;
+    char *out;
+    int i;
+    unsigned long index, lognamatr, logvalatr, sts;
+    unsigned long h_logname;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;
-  if (*(strp ++) != '(') {
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_handle (strp, &strp, &h_logname, "logname", ',');
-  if (sts != SS$_NORMAL) return (sts);
-  sts = eval_integer (strp, rtnp, &index, ')');
-  if (sts != SS$_NORMAL) return (sts);
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;
+    if (*(strp ++) != '(')
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_handle (strp, &strp, &h_logname, "logname", ',');
+    if (sts != SS$_NORMAL) return (sts);
+    sts = eval_integer (strp, rtnp, &index, ')');
+    if (sts != SS$_NORMAL) return (sts);
 
-  /* Get the attributes */
+    /* Get the attributes */
 
-  sts = sys$trnlnm (0, h_logname,  NULL,  0,  NULL);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u getting logical's attributes\n", sts);
-    return (sts);
-  }
+    sts = sys$trnlnm (0, h_logname,  NULL,  0,  NULL);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_error, "oz_cli: error %u getting logical's attributes\n", sts);
+        return (sts);
+    }
 
-  /* Convert bitmask attributes to strings */
+    /* Convert bitmask attributes to strings */
 
-  out = malloc (64);
-  out[0] = 0;
+    out = malloc (64);
+    out[0] = 0;
 #if 0
-  if (lognamatr & OZ_LOGNAMATR_NOOUTERMODE) strcat (out, "nooutermode ");
-  if (lognamatr & OZ_LOGNAMATR_NOSUPERSEDE) strcat (out, "nosupersede ");
-  if (logvalatr & OZ_LOGVALATR_OBJECT)      strcat (out, "object ");
+    if (lognamatr & OZ_LOGNAMATR_NOOUTERMODE) strcat (out, "nooutermode ");
+    if (lognamatr & OZ_LOGNAMATR_NOSUPERSEDE) strcat (out, "nosupersede ");
+    if (logvalatr & OZ_LOGVALATR_OBJECT)      strcat (out, "object ");
 #endif
-  if (lognamatr & LNM$M_TABLE)       strcat (out, "table ");
-  if (logvalatr & LNM$M_TERMINAL)    strcat (out, "terminal ");
-  i = strlen (out);
-  if ((i > 0) && (out[i-1] == ' ')) out[--i] = 0;
+    if (lognamatr & LNM$M_TABLE)       strcat (out, "table ");
+    if (logvalatr & LNM$M_TERMINAL)    strcat (out, "terminal ");
+    i = strlen (out);
+    if ((i > 0) && (out[i-1] == ' ')) out[--i] = 0;
 
-  *((char **)valuep) = out;
-  return (SS$_NORMAL);
+    *((char **)valuep) = out;
+    return (SS$_NORMAL);
 }
 
 /************************************************************************/
@@ -2473,56 +2752,63 @@ static unsigned long func_lnm_attrs (Symbol *symbol, char *strp, char **rtnp, vo
 static unsigned long func_lnm_lookup (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char *logname, *procmode, *out;
-  unsigned long sts;
-  unsigned long h_logname, h_table;
-  unsigned long b_procmode;
+    char *logname, *procmode, *out;
+    unsigned long sts;
+    unsigned long h_logname, h_table;
+    unsigned long b_procmode;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;
-  if (*(strp ++) != '(') {
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, &strp, &logname, ',');
-  if (sts != SS$_NORMAL) return (sts);
-  sts = eval_string (strp, &strp, &procmode, ')');
-  if (sts != SS$_NORMAL) {
-    free (logname);
-    return (sts);
-  }
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;
+    if (*(strp ++) != '(')
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_string (strp, &strp, &logname, ',');
+    if (sts != SS$_NORMAL) return (sts);
+    sts = eval_string (strp, &strp, &procmode, ')');
+    if (sts != SS$_NORMAL)
+    {
+        free (logname);
+        return (sts);
+    }
 
-  b_procmode = PSL$C_USER;
-  if (strcasecmp (procmode, "user") == 0) b_procmode = PSL$C_USER;
-  else if (strcasecmp (procmode, "kernel") == 0) b_procmode = PSL$C_KERNEL;
-  else {
-    fprintf (h_s_error, "oz_cli: bad processor mode %s (kernel or user)\n", procmode);
+    b_procmode = PSL$C_USER;
+    if (strcasecmp (procmode, "user") == 0) b_procmode = PSL$C_USER;
+    else if (strcasecmp (procmode, "kernel") == 0) b_procmode = PSL$C_KERNEL;
+    else
+    {
+        fprintf (h_s_error, "oz_cli: bad processor mode %s (kernel or user)\n", procmode);
+        free (logname);
+        free (procmode);
+        return (SS$_BADPARAM);
+    }
+    *rtnp = strp;
+
+    /* Look it up */
+
+    sts = sys$trnlnm (0, 0,  defaulttables,  PSL$C_USER,  &h_table);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_error, "oz_cli: error %u looking up default tables (%s)\n", sts, defaulttables);
+        free (logname);
+        free (procmode);
+        return (sts);
+    }
+    sts = sys$trnlnm (0, h_table,  logname,  b_procmode,  &h_logname);
+    if (sts != SS$_NORMAL)
+    {
+        out = malloc (1);
+        out[0] = 0;
+    }
+    else
+    {
+        out = malloc (17);
+        snprintf (out, 17, "%8.8X:logname", h_logname);
+    }
+    *((char **)valuep) = out;
     free (logname);
     free (procmode);
-    return (SS$_BADPARAM);
-  }
-  *rtnp = strp;
-
-  /* Look it up */
-
-  sts = sys$trnlnm (0, 0,  defaulttables,  PSL$C_USER,  &h_table);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u looking up default tables (%s)\n", sts, defaulttables);
-    free (logname);
-    free (procmode);
-    return (sts);
-  }
-  sts = sys$trnlnm (0, h_table,  logname,  b_procmode,  &h_logname);
-  if (sts != SS$_NORMAL) {
-    out = malloc (1);
-    out[0] = 0;
-  } else {
-    out = malloc (17);
-    snprintf (out, 17, "%8.8X:logname", h_logname);
-  }
-  *((char **)valuep) = out;
-  free (logname);
-  free (procmode);
-  return (SS$_NORMAL);
+    return (SS$_NORMAL);
 }
 
 /************************************************************************/
@@ -2536,24 +2822,26 @@ static unsigned long func_lnm_lookup (Symbol *symbol, char *strp, char **rtnp, v
 static unsigned long func_lnm_nvalues (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  unsigned long sts;
-  unsigned long h_logname;
+    unsigned long sts;
+    unsigned long h_logname;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;
-  if (*(strp ++) != '(') {
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_handle (strp, rtnp, &h_logname, "logname", ')');
-  if (sts != SS$_NORMAL) return (sts);
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;
+    if (*(strp ++) != '(')
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_handle (strp, rtnp, &h_logname, "logname", ')');
+    if (sts != SS$_NORMAL) return (sts);
 
-  /* Get the number of values the logical name has */
+    /* Get the number of values the logical name has */
 
-  sts = sys$trnlnm (0, h_logname,  NULL,  0,  valuep);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u getting logical's attributes\n", sts);
-  }
-  return (sts);
+    sts = sys$trnlnm (0, h_logname,  NULL,  0,  valuep);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_error, "oz_cli: error %u getting logical's attributes\n", sts);
+    }
+    return (sts);
 }
 
 /************************************************************************/
@@ -2567,42 +2855,44 @@ static unsigned long func_lnm_nvalues (Symbol *symbol, char *strp, char **rtnp, 
 static unsigned long func_lnm_object (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char *out, *s_objtype;
-  unsigned long index, sts;
-  unsigned long h_logname, h_object;
-  unsigned char b_objtype;
+    char *out, *s_objtype;
+    unsigned long index, sts;
+    unsigned long h_logname, h_object;
+    unsigned char b_objtype;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;
-  if (*(strp ++) != '(') {
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_handle (strp, &strp, &h_logname, "logname", ',');
-  if (sts != SS$_NORMAL) return (sts);
-  sts = eval_integer (strp, &strp, &index, ',');
-  if (sts != SS$_NORMAL) return (sts);
-  sts = eval_string (strp, &strp, &s_objtype, ')');
-  if (sts != SS$_NORMAL) return (sts);
-  sts = decode_objtype_string (s_objtype, &b_objtype);
-  free (s_objtype);
-  if (sts != SS$_NORMAL) return (sts);
-  *rtnp = strp;
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;
+    if (*(strp ++) != '(')
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_handle (strp, &strp, &h_logname, "logname", ',');
+    if (sts != SS$_NORMAL) return (sts);
+    sts = eval_integer (strp, &strp, &index, ',');
+    if (sts != SS$_NORMAL) return (sts);
+    sts = eval_string (strp, &strp, &s_objtype, ')');
+    if (sts != SS$_NORMAL) return (sts);
+    sts = decode_objtype_string (s_objtype, &b_objtype);
+    free (s_objtype);
+    if (sts != SS$_NORMAL) return (sts);
+    *rtnp = strp;
 
-  /* Get an handle to the object */
+    /* Get an handle to the object */
 
-  sts = sys$trnlnm (0, h_logname, index,  0,  NULL);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u getting logical value's handle\n", sts);
-    return (sts);
-  }
+    sts = sys$trnlnm (0, h_logname, index,  0,  NULL);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_error, "oz_cli: error %u getting logical value's handle\n", sts);
+        return (sts);
+    }
 
-  /* Make handle string */
+    /* Make handle string */
 
-  out = malloc (24);
-  out[0] = 0;
-  if (h_object != 0) snprintf (out, 24, "%8.8X:%s", h_object, encode_objtype_string (b_objtype));
-  *((char **)valuep) = out;
-  return (SS$_NORMAL);
+    out = malloc (24);
+    out[0] = 0;
+    if (h_object != 0) snprintf (out, 24, "%8.8X:%s", h_object, encode_objtype_string (b_objtype));
+    *((char **)valuep) = out;
+    return (SS$_NORMAL);
 }
 
 /************************************************************************/
@@ -2616,37 +2906,40 @@ static unsigned long func_lnm_object (Symbol *symbol, char *strp, char **rtnp, v
 static unsigned long func_lnm_string (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char *out;
-  unsigned long index, rlen, sts;
-  unsigned long h_logname;
+    char *out;
+    unsigned long index, rlen, sts;
+    unsigned long h_logname;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;
-  if (*(strp ++) != '(') {
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_handle (strp, &strp, &h_logname, "logname", ',');
-  if (sts != SS$_NORMAL) return (sts);
-  sts = eval_integer (strp, &strp, &index, ')');
-  if (sts != SS$_NORMAL) return (sts);
-  *rtnp = strp;
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;
+    if (*(strp ++) != '(')
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_handle (strp, &strp, &h_logname, "logname", ',');
+    if (sts != SS$_NORMAL) return (sts);
+    sts = eval_integer (strp, &strp, &index, ')');
+    if (sts != SS$_NORMAL) return (sts);
+    *rtnp = strp;
 
-  /* Get string's value */
+    /* Get string's value */
 
-  sts = sys$trnlnm (0, h_logname, index,  0,  NULL);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u getting logical's value\n", sts);
-    return (sts);
-  }
-  out = malloc (rlen + 1);
-  sts = sys$trnlnm (0, h_logname, index,  rlen + 1,  NULL);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u getting logical's value\n", sts);
-    return (sts);
-  }
-  out[rlen] = 0;
-  *((char **)valuep) = out;
-  return (SS$_NORMAL);
+    sts = sys$trnlnm (0, h_logname, index,  0,  NULL);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_error, "oz_cli: error %u getting logical's value\n", sts);
+        return (sts);
+    }
+    out = malloc (rlen + 1);
+    sts = sys$trnlnm (0, h_logname, index,  rlen + 1,  NULL);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_error, "oz_cli: error %u getting logical's value\n", sts);
+        return (sts);
+    }
+    out[rlen] = 0;
+    *((char **)valuep) = out;
+    return (SS$_NORMAL);
 }
 
 /************************************************************************/
@@ -2661,28 +2954,30 @@ static unsigned long func_lnm_string (Symbol *symbol, char *strp, char **rtnp, v
 static unsigned long func_loc (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char *haystack, *needle, *p;
-  unsigned long sts;
+    char *haystack, *needle, *p;
+    unsigned long sts;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
-  if (*(strp ++) != '(') {							/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, &strp, &haystack, ',');				/* evaluate the haystack string expression */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
-  sts = eval_string (strp, &strp, &needle, ')');				/* evaluate the needle string expression */
-  if (sts != SS$_NORMAL) {
-    free (haystack);
-    return (sts);
-  }
-  *rtnp = strp;									/* return pointer just past the ) */
-  p = strstr (haystack, needle);						/* do it */
-  if (p != NULL) *((unsigned long *)valuep) = p - haystack;				/* return offset if found */
-  else *((unsigned long *)valuep) = strlen (haystack);					/* return length if not found */
-  free (haystack);								/* free off results malloc'd by eval_string */
-  free (needle);
-  return (SS$_NORMAL);								/* successful */
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
+    if (*(strp ++) != '(')  							/* make sure it starts with an open paren and skip it */
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_string (strp, &strp, &haystack, ',');				/* evaluate the haystack string expression */
+    if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
+    sts = eval_string (strp, &strp, &needle, ')');				/* evaluate the needle string expression */
+    if (sts != SS$_NORMAL)
+    {
+        free (haystack);
+        return (sts);
+    }
+    *rtnp = strp;									/* return pointer just past the ) */
+    p = strstr (haystack, needle);						/* do it */
+    if (p != NULL) *((unsigned long *)valuep) = p - haystack;				/* return offset if found */
+    else *((unsigned long *)valuep) = strlen (haystack);					/* return length if not found */
+    free (haystack);								/* free off results malloc'd by eval_string */
+    free (needle);
+    return (SS$_NORMAL);								/* successful */
 }
 
 /************************************************************************/
@@ -2696,20 +2991,22 @@ static unsigned long func_loc (Symbol *symbol, char *strp, char **rtnp, void *va
 static unsigned long func_lowercase (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char c, *p, *string;
-  unsigned long sts;
+    char c, *p, *string;
+    unsigned long sts;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;			/* skip spaces */
-  if (*(strp ++) != '(') {						/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, rtnp, &string, ')');				/* evaluate the string expression */
-  if (sts == SS$_NORMAL) {
-    for (p = string; (c = *p) != 0; p ++) if ((c >= 'A') && (c <= 'Z')) *p = c + 'a' - 'A';
-    *((char **)valuep) = string;
-  }
-  return (sts);
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;			/* skip spaces */
+    if (*(strp ++) != '(')  						/* make sure it starts with an open paren and skip it */
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_string (strp, rtnp, &string, ')');				/* evaluate the string expression */
+    if (sts == SS$_NORMAL)
+    {
+        for (p = string; (c = *p) != 0; p ++) if ((c >= 'A') && (c <= 'Z')) *p = c + 'a' - 'A';
+        *((char **)valuep) = string;
+    }
+    return (sts);
 }
 
 /************************************************************************/
@@ -2723,34 +3020,36 @@ static unsigned long func_lowercase (Symbol *symbol, char *strp, char **rtnp, vo
 static unsigned long func_process (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char *out;
-  unsigned long h_process;
-  unsigned long processid;
-  unsigned long sts;
+    char *out;
+    unsigned long h_process;
+    unsigned long processid;
+    unsigned long sts;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
-  if (*(strp ++) != '(') {							/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_integer (strp, &strp, &processid, ')');				/* evaluate the processid expression */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
+    if (*(strp ++) != '(')  							/* make sure it starts with an open paren and skip it */
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_integer (strp, &strp, &processid, ')');				/* evaluate the processid expression */
+    if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
 
-  // use getjpi sometime
-  //  sts = oz_sys_process_getbyid (processid, &h_process);
-  if (sts != SS$_NORMAL) {
-    fprintf (h_s_error, "oz_cli: error %u getting process-id %u handle\n", sts, processid);
-    return (sts);
-  }
+    // use getjpi sometime
+    //  sts = oz_sys_process_getbyid (processid, &h_process);
+    if (sts != SS$_NORMAL)
+    {
+        fprintf (h_s_error, "oz_cli: error %u getting process-id %u handle\n", sts, processid);
+        return (sts);
+    }
 
-  *rtnp = strp;
+    *rtnp = strp;
 
-  /* Make handle string */
+    /* Make handle string */
 
-  out = malloc (24);
-  snprintf (out, 24, "%8.8X:%s", h_process, encode_objtype_string (OZ_OBJTYPE_PROCESS));
-  *((char **)valuep) = out;
-  return (SS$_NORMAL);
+    out = malloc (24);
+    snprintf (out, 24, "%8.8X:%s", h_process, encode_objtype_string (OZ_OBJTYPE_PROCESS));
+    *((char **)valuep) = out;
+    return (SS$_NORMAL);
 }
 
 /************************************************************************/
@@ -2764,30 +3063,31 @@ static unsigned long func_process (Symbol *symbol, char *strp, char **rtnp, void
 static unsigned long func_sub (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char *string, *substring;
-  unsigned long length, offset, sts, totalen;
+    char *string, *substring;
+    unsigned long length, offset, sts, totalen;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
-  if (*(strp ++) != '(') {							/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_integer (strp, &strp, &length, ',');				/* evaluate the length expression */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
-  sts = eval_integer (strp, &strp, &offset, ',');				/* evaluate the offset expression */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
-  sts = eval_string (strp, &strp, &string, ')');				/* evaluate the string expression */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
-  *rtnp = strp;									/* return pointer just past the ) */
-  totalen = strlen (string);							/* get total length of the original string */
-  if (length > totalen - offset) length = totalen - offset;			/* chop off length at end of string */
-  if (offset > totalen) offset = totalen;					/* chop off offset at end of string */
-  substring = malloc (length + 1);						/* malloc a substring buffer */
-  memcpy (substring, string + offset, length);					/* copy in the substring */
-  substring[length] = 0;							/* null terminate it */
-  free (string);								/* free off the string buffer */
-  *((char **)valuep) = substring;						/* return the substring pointer */
-  return (SS$_NORMAL);								/* successful */
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
+    if (*(strp ++) != '(')  							/* make sure it starts with an open paren and skip it */
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_integer (strp, &strp, &length, ',');				/* evaluate the length expression */
+    if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
+    sts = eval_integer (strp, &strp, &offset, ',');				/* evaluate the offset expression */
+    if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
+    sts = eval_string (strp, &strp, &string, ')');				/* evaluate the string expression */
+    if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
+    *rtnp = strp;									/* return pointer just past the ) */
+    totalen = strlen (string);							/* get total length of the original string */
+    if (length > totalen - offset) length = totalen - offset;			/* chop off length at end of string */
+    if (offset > totalen) offset = totalen;					/* chop off offset at end of string */
+    substring = malloc (length + 1);						/* malloc a substring buffer */
+    memcpy (substring, string + offset, length);					/* copy in the substring */
+    substring[length] = 0;							/* null terminate it */
+    free (string);								/* free off the string buffer */
+    *((char **)valuep) = substring;						/* return the substring pointer */
+    return (SS$_NORMAL);								/* successful */
 }
 
 /************************************************************************/
@@ -2801,23 +3101,25 @@ static unsigned long func_sub (Symbol *symbol, char *strp, char **rtnp, void *va
 static unsigned long func_trim (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char c, *p, *q, *string;
-  unsigned long sts;
+    char c, *p, *q, *string;
+    unsigned long sts;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;			/* skip spaces */
-  if (*(strp ++) != '(') {						/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, rtnp, &string, ')');				/* evaluate the string expression */
-  if (sts == SS$_NORMAL) {
-    for (p = string; (c = *p) != 0; p ++) if (c > ' ') break;		/* trim leading whitespace */
-    for (q = p + strlen (p); q > p; -- q) if (q[-1] > ' ') break;	/* trim trailing whitespace */
-    memmove (string, p, q - p);						/* shift result up to beginning of buffer */
-    string[q-p] = 0;							/* null terminate string */
-    *((char **)valuep) = string;					/* return pointer to string buffer */
-  }
-  return (sts);
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;			/* skip spaces */
+    if (*(strp ++) != '(')  						/* make sure it starts with an open paren and skip it */
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_string (strp, rtnp, &string, ')');				/* evaluate the string expression */
+    if (sts == SS$_NORMAL)
+    {
+        for (p = string; (c = *p) != 0; p ++) if (c > ' ') break;		/* trim leading whitespace */
+        for (q = p + strlen (p); q > p; -- q) if (q[-1] > ' ') break;	/* trim trailing whitespace */
+        memmove (string, p, q - p);						/* shift result up to beginning of buffer */
+        string[q-p] = 0;							/* null terminate string */
+        *((char **)valuep) = string;					/* return pointer to string buffer */
+    }
+    return (sts);
 }
 
 /************************************************************************/
@@ -2831,20 +3133,22 @@ static unsigned long func_trim (Symbol *symbol, char *strp, char **rtnp, void *v
 static unsigned long func_uppercase (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  char c, *p, *string;
-  unsigned long sts;
+    char c, *p, *string;
+    unsigned long sts;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;			/* skip spaces */
-  if (*(strp ++) != '(') {						/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_string (strp, rtnp, &string, ')');				/* evaluate the string expression */
-  if (sts == SS$_NORMAL) {
-    for (p = string; (c = *p) != 0; p ++) if ((c >= 'a') && (c <= 'z')) *p = c + 'A' - 'a';
-    *((char **)valuep) = string;
-  }
-  return (sts);
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;			/* skip spaces */
+    if (*(strp ++) != '(')  						/* make sure it starts with an open paren and skip it */
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_string (strp, rtnp, &string, ')');				/* evaluate the string expression */
+    if (sts == SS$_NORMAL)
+    {
+        for (p = string; (c = *p) != 0; p ++) if ((c >= 'a') && (c <= 'z')) *p = c + 'A' - 'a';
+        *((char **)valuep) = string;
+    }
+    return (sts);
 }
 
 /************************************************************************/
@@ -2858,60 +3162,70 @@ static unsigned long func_uppercase (Symbol *symbol, char *strp, char **rtnp, vo
 static unsigned long func_verify (Symbol *symbol, char *strp, char **rtnp, void *valuep)
 
 {
-  unsigned long newverify, sts;
+    unsigned long newverify, sts;
 
-  while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
-  if (*(strp ++) != '(') {							/* make sure it starts with an open paren and skip it */
-    fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
-    return (SS$_IVPARAM);
-  }
-  sts = eval_integer (strp, &strp, &newverify, ')');				/* evaluate the length expression */
-  if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
-  *rtnp = strp;
+    while ((*strp != 0) && (*strp <= ' ')) strp ++;				/* skip spaces */
+    if (*(strp ++) != '(')  							/* make sure it starts with an open paren and skip it */
+    {
+        fprintf (h_s_error, "oz_cli: missing ( following %s at %s\n", symbol -> name, -- strp);
+        return (SS$_IVPARAM);
+    }
+    sts = eval_integer (strp, &strp, &newverify, ')');				/* evaluate the length expression */
+    if (sts != SS$_NORMAL) return (sts);						/* return error status if any failure */
+    *rtnp = strp;
 
-  *((unsigned long *)valuep) = verify;							/* return old verify value */
+    *((unsigned long *)valuep) = verify;							/* return old verify value */
 
-  if (((signed long)newverify) >= 0) verify = newverify;				/* maybe set new verify value */
-  return (SS$_NORMAL);								/* successful */
+    if (((signed long)newverify) >= 0) verify = newverify;				/* maybe set new verify value */
+    return (SS$_NORMAL);								/* successful */
 }
 
-static struct { unsigned char b; const char *s; } objtyptbl[] = { 
-	OZ_OBJTYPE_UNKNOWN, "unknown", 
-	OZ_OBJTYPE_EVENT,   "event", 
-	OZ_OBJTYPE_DEVUNIT, "devunit", 
-	OZ_OBJTYPE_IOCHAN,  "iochan", 
-	OZ_OBJTYPE_JOB,     "job", 
-	OZ_OBJTYPE_LOGNAME, "logname", 
-	OZ_OBJTYPE_PROCESS, "process", 
-	OZ_OBJTYPE_THREAD,  "thread", 
-	OZ_OBJTYPE_USER,    "user", 
-	0, NULL };
+static struct
+{
+    unsigned char b;
+    const char *s;
+} objtyptbl[] =
+{
+    OZ_OBJTYPE_UNKNOWN, "unknown",
+    OZ_OBJTYPE_EVENT,   "event",
+    OZ_OBJTYPE_DEVUNIT, "devunit",
+    OZ_OBJTYPE_IOCHAN,  "iochan",
+    OZ_OBJTYPE_JOB,     "job",
+    OZ_OBJTYPE_LOGNAME, "logname",
+    OZ_OBJTYPE_PROCESS, "process",
+    OZ_OBJTYPE_THREAD,  "thread",
+    OZ_OBJTYPE_USER,    "user",
+    0, NULL
+};
 
 static unsigned long decode_objtype_string (const char *s_objtype, unsigned char *b_objtype_r)
 
 {
-  int i;
+    int i;
 
-  for (i = 0; objtyptbl[i].s != NULL; i ++) {
-    if (strcasecmp (s_objtype, objtyptbl[i].s) == 0) {
-      *b_objtype_r = objtyptbl[i].b;
-      return (SS$_NORMAL);
+    for (i = 0; objtyptbl[i].s != NULL; i ++)
+    {
+        if (strcasecmp (s_objtype, objtyptbl[i].s) == 0)
+        {
+            *b_objtype_r = objtyptbl[i].b;
+            return (SS$_NORMAL);
+        }
     }
-  }
-  fprintf (h_s_error, "oz_cli: unknown object type %s\n", s_objtype);
-  return (SS$_BADPARAM);
+    fprintf (h_s_error, "oz_cli: unknown object type %s\n", s_objtype);
+    return (SS$_BADPARAM);
 }
 
 static const char *encode_objtype_string (unsigned char b_objtype)
 
 {
-  int i;
+    int i;
 
-  for (i = 0; objtyptbl[i].s != NULL; i ++) {
-    if (objtyptbl[i].b == b_objtype) return (objtyptbl[i].s);
-  }
-  fprintf (h_s_error, "oz_cli: unknown object type %d\n", b_objtype);
-  return ("");
+    for (i = 0; objtyptbl[i].s != NULL; i ++)
+    {
+        if (objtyptbl[i].b == b_objtype) return (objtyptbl[i].s);
+    }
+    fprintf (h_s_error, "oz_cli: unknown object type %d\n", b_objtype);
+    return ("");
 }
 
 /************************************************************************/
@@ -2930,13 +3244,13 @@ static const char *encode_objtype_string (unsigned char b_objtype)
 static void def_func (char *name, unsigned long (*func) (Symbol *symbol, char *strp, char **rtnp, void *valuep), Symtype symtype, char *help)
 
 {
-  Symbol *symbol;
+    Symbol *symbol;
 
-  symbol = malloc (sizeof *symbol + strlen (help) + 1);
-  strcpy (symbol -> name, name);
-  symbol -> symtype = symtype;
-  strcpy (symbol -> svalue, help);
-  insert_symbol (symbol, func, 0);
+    symbol = malloc (sizeof *symbol + strlen (help) + 1);
+    strcpy (symbol -> name, name);
+    symbol -> symtype = symtype;
+    strcpy (symbol -> svalue, help);
+    insert_symbol (symbol, func, 0);
 }
 
 /************************************************************************/
@@ -2954,40 +3268,42 @@ static void def_func (char *name, unsigned long (*func) (Symbol *symbol, char *s
 static void setscriptsyms (int argc, const char *argv[])
 
 {
-  int i;
-  Symbol *symbol;
+    int i;
+    Symbol *symbol;
 
-  static char      *names[3] = { "oz_h_input", "oz_h_output", "oz_h_error" };
-  static unsigned long *hands[3] = {  &h_s_input,   &h_s_output,   &h_s_error  };
+    static char      *names[3] = { "oz_h_input", "oz_h_output", "oz_h_error" };
+    static unsigned long *hands[3] = {  &h_s_input,   &h_s_output,   &h_s_error  };
 
-  /* Define handle symbols for the input, output and error files */
+    /* Define handle symbols for the input, output and error files */
 
-  for (i = 0; i < 3; i ++) {
-    symbol = malloc (16 + sizeof *symbol);
-    strcpy (symbol -> name, names[i]);
-    symbol -> symtype = SYMTYPE_STRING;
-    snprintf (symbol -> svalue, 32, "%8.8X:iochan", *(hands[i]));
+    for (i = 0; i < 3; i ++)
+    {
+        symbol = malloc (16 + sizeof *symbol);
+        strcpy (symbol -> name, names[i]);
+        symbol -> symtype = SYMTYPE_STRING;
+        snprintf (symbol -> svalue, 32, "%8.8X:iochan", *(hands[i]));
+        insert_symbol (symbol, NULL, 0);
+    }
+
+    /* Define oz_nargs symbol denoting the number of arguments present */
+
+    symbol = malloc (sizeof *symbol);
+    strcpy (symbol -> name, "oz_nargs");
+    symbol -> symtype = SYMTYPE_INTEGER;
+    symbol -> ivalue  = argc;
     insert_symbol (symbol, NULL, 0);
-  }
 
-  /* Define oz_nargs symbol denoting the number of arguments present */
+    /* Define oz_arg_<n> for each argument present */
 
-  symbol = malloc (sizeof *symbol);
-  strcpy (symbol -> name, "oz_nargs");
-  symbol -> symtype = SYMTYPE_INTEGER;
-  symbol -> ivalue  = argc;
-  insert_symbol (symbol, NULL, 0);
-
-  /* Define oz_arg_<n> for each argument present */
-
-  for (i = 0; i < argc; i ++) {
-    symbol = malloc (strlen (argv[i]) + 1 + sizeof *symbol);
-    strcpy (symbol -> name, "oz_arg_");
-    oz_hw_itoa (i, sizeof symbol -> name - 7, symbol -> name + 7);
-    symbol -> symtype = SYMTYPE_STRING;
-    strcpy (symbol -> svalue, argv[i]);
-    insert_symbol (symbol, NULL, 0);
-  }
+    for (i = 0; i < argc; i ++)
+    {
+        symbol = malloc (strlen (argv[i]) + 1 + sizeof *symbol);
+        strcpy (symbol -> name, "oz_arg_");
+        oz_hw_itoa (i, sizeof symbol -> name - 7, symbol -> name + 7);
+        symbol -> symtype = SYMTYPE_STRING;
+        strcpy (symbol -> svalue, argv[i]);
+        insert_symbol (symbol, NULL, 0);
+    }
 }
 
 /************************************************************************/
@@ -3007,30 +3323,34 @@ static void setscriptsyms (int argc, const char *argv[])
 static void insert_symbol (Symbol *symbol, unsigned long (*func) (Symbol *symbol, char *strp, char **rtnp, void *valuep), unsigned long level)
 
 {
-  int i;
-  Script *script;
-  Symbol **lsymbol, *xsymbol;
+    int i;
+    Script *script;
+    Symbol **lsymbol, *xsymbol;
 
-  symbol -> func = func;
+    symbol -> func = func;
 
-  lsymbol = &symbols;							/* use current symbols if level 0 */
-  if (level != 0) {
-    for (script = scripts; script != NULL; script = script -> next) {	/* link through outer script levels */
-      lsymbol = &(script -> symbols);
-      if (-- level == 0) break;
+    lsymbol = &symbols;							/* use current symbols if level 0 */
+    if (level != 0)
+    {
+        for (script = scripts; script != NULL; script = script -> next)  	/* link through outer script levels */
+        {
+            lsymbol = &(script -> symbols);
+            if (-- level == 0) break;
+        }
     }
-  }
 
-  for (; (xsymbol = *lsymbol) != NULL; lsymbol = &(xsymbol -> next)) {	/* scan through list of existing symbols */
-    i = strcmp (xsymbol -> name, symbol -> name);			/* compare list symbol to symbol to be inserted */
-    if (i == 0) {
-      *lsymbol = xsymbol -> next;					/* exact match, remove old symbol from list */
-      free (xsymbol);
+    for (; (xsymbol = *lsymbol) != NULL; lsymbol = &(xsymbol -> next))  	/* scan through list of existing symbols */
+    {
+        i = strcmp (xsymbol -> name, symbol -> name);			/* compare list symbol to symbol to be inserted */
+        if (i == 0)
+        {
+            *lsymbol = xsymbol -> next;					/* exact match, remove old symbol from list */
+            free (xsymbol);
+        }
+        if (i >= 0) break;							/* stop if list symbol name >= name to be inserted */
     }
-    if (i >= 0) break;							/* stop if list symbol name >= name to be inserted */
-  }
-  symbol -> next = *lsymbol;						/* link new symbol here */
-  *lsymbol = symbol;
+    symbol -> next = *lsymbol;						/* link new symbol here */
+    *lsymbol = symbol;
 }
 
 /************************************************************************/
@@ -3055,35 +3375,40 @@ static void insert_symbol (Symbol *symbol, unsigned long (*func) (Symbol *symbol
 static Symbol *lookup_symbol (const char *name, unsigned long level, unsigned long *level_r)
 
 {
-  unsigned long levr;
-  Script *script;
-  Symbol *symbol;
+    unsigned long levr;
+    Script *script;
+    Symbol *symbol;
 
-  symbol = symbols;							/* start with current symbols if level 0 */
-  script = NULL;
-  levr = 0;
+    symbol = symbols;							/* start with current symbols if level 0 */
+    script = NULL;
+    levr = 0;
 
-  if (level != 0) {
-    for (script = scripts; script != NULL; script = script -> next) {	/* link through outer script levels */
-      levr ++;
-      symbol = script -> symbols;
-      if (-- level == 0) break;
+    if (level != 0)
+    {
+        for (script = scripts; script != NULL; script = script -> next)  	/* link through outer script levels */
+        {
+            levr ++;
+            symbol = script -> symbols;
+            if (-- level == 0) break;
+        }
     }
-  }
 
-  while (1) {
-    for (; symbol != NULL; symbol = symbol -> next) {			/* search that table for the symbol */
-      if (strcmp (name, symbol -> name) == 0) {
-        if (level_r != NULL) *level_r = levr;				/* found, return the level number */
-        return (symbol);						/* return the pointer */
-      }
+    while (1)
+    {
+        for (; symbol != NULL; symbol = symbol -> next)  			/* search that table for the symbol */
+        {
+            if (strcmp (name, symbol -> name) == 0)
+            {
+                if (level_r != NULL) *level_r = levr;				/* found, return the level number */
+                return (symbol);						/* return the pointer */
+            }
+        }
+        if (script == NULL) script = scripts;				/* not in that table, point to next outer level */
+        else script = script -> next;
+        if (script == NULL) return (NULL);					/* no more levels, it's not found */
+        levr ++;
+        symbol = script -> symbols;
     }
-    if (script == NULL) script = scripts;				/* not in that table, point to next outer level */
-    else script = script -> next;
-    if (script == NULL) return (NULL);					/* no more levels, it's not found */
-    levr ++;
-    symbol = script -> symbols;
-  }
 }
 
 /************************************************************************/
@@ -3105,27 +3430,32 @@ static Symbol *lookup_symbol (const char *name, unsigned long level, unsigned lo
 static Command *decode_command (int argc, const char **argv, Command *cmdtbl, int *argc_r)
 
 {
-  char *p;
-  Command *cmd1;
-  int i, j, len1;
+    char *p;
+    Command *cmd1;
+    int i, j, len1;
 
-  cmd1 = NULL;					/* no entry matched so far */
-  len1 = 0;					/* length of last matched entry */
+    cmd1 = NULL;					/* no entry matched so far */
+    len1 = 0;					/* length of last matched entry */
 
-  for (i = 0; (p = cmdtbl[i].name) != NULL; i ++) { /* loop through table */
-    if (vms_mm) {
-    } else {
-      if (*p=='_') p++;
+    for (i = 0; (p = cmdtbl[i].name) != NULL; i ++)   /* loop through table */
+    {
+        if (vms_mm)
+        {
+        }
+        else
+        {
+            if (*p=='_') p++;
+        }
+        j = cmpcmdname (argc, argv, p);		/* compare the name */
+        if (j > len1)  				/* see if better match than last */
+        {
+            cmd1 = cmdtbl + i;			/* ok, save table pointer */
+            len1 = j;					/* save number of words used */
+            *argc_r = j;
+        }
     }
-    j = cmpcmdname (argc, argv, p);		/* compare the name */
-    if (j > len1) {				/* see if better match than last */
-      cmd1 = cmdtbl + i;			/* ok, save table pointer */
-      len1 = j;					/* save number of words used */
-      *argc_r = j;
-    }
-  }
 
-  return (cmd1);				/* return pointer to best match entry (or NULL) */
+    return (cmd1);				/* return pointer to best match entry (or NULL) */
 }
 
 /************************************************************************/
@@ -3149,33 +3479,39 @@ static Command *decode_command (int argc, const char **argv, Command *cmdtbl, in
 static int cmpcmdname (int argc, const char **argv, char *name)
 
 {
-  char *p;
-  int j, l;
+    char *p;
+    int j, l;
 
-  p = name;					/* point to multiple-word command name string */
-  for (j = 0; j < argc;) {			/* compare to given command words */
-    l = strlen (argv[j]);			/* get length of command word */
-    if (strncasecmp (argv[j], p, l) != 0) return (0); /* compare */
-    p += l;					/* word matches, point to next in multiple-word name */
-    j ++;					/* increment to next argv */
+    p = name;					/* point to multiple-word command name string */
+    for (j = 0; j < argc;)  			/* compare to given command words */
+    {
+        l = strlen (argv[j]);			/* get length of command word */
+        if (strncasecmp (argv[j], p, l) != 0) return (0); /* compare */
+        p += l;					/* word matches, point to next in multiple-word name */
+        j ++;					/* increment to next argv */
 #if 0
-    if (*(p ++) != ' ') {			/* see if more words in multiple-word string */
-      if (*(-- p) != 0) return (0);		/* if not, fail if not an exact end */
-      return (j);				/* success, return number of words */
-    }
+        if (*(p ++) != ' ')  			/* see if more words in multiple-word string */
+        {
+            if (*(-- p) != 0) return (0);		/* if not, fail if not an exact end */
+            return (j);				/* success, return number of words */
+        }
 #else
-    if (j<argc) {
-      while(*p!=' ' && (p<(name+strlen(name)))) {
-	p++;
-      }
-      if (*p==0) return j;
-      p++;
-    } else {
-      return (j);
-    }
+        if (j<argc)
+        {
+            while(*p!=' ' && (p<(name+strlen(name))))
+            {
+                p++;
+            }
+            if (*p==0) return j;
+            p++;
+        }
+        else
+        {
+            return (j);
+        }
 #endif
-  }
-  return (0);					/* argv too short to match multiple-word name */
+    }
+    return (0);					/* argv too short to match multiple-word name */
 }
 
 /************************************************************************/
@@ -3198,18 +3534,20 @@ static int cmpcmdname (int argc, const char **argv, char *name)
 static unsigned long logname_getobj (const char *name, unsigned char objtype, unsigned long *h_object_r)
 
 {
-  unsigned long sts;
-  unsigned long h_logname, h_table;
+    unsigned long sts;
+    unsigned long h_logname, h_table;
 
-  sts = sys$trnlnm (0, 0,  defaulttables,  PSL$C_USER,  &h_table);		/* look up table in default directories */
-  if (sts != SS$_NORMAL) fprintf (h_s_error, "oz_cli: error %u looking up default tables (%s)\n", sts, defaulttables);
-  else {
-    sts = sys$trnlnm (0, h_table,  name,  PSL$C_USER,  &h_logname);		/* look up the logical name in the table */
-    if (sts == SS$_NORMAL) {
-      sts = sys$trnlnm (0, h_logname, 0,  NULL,  objtype);	/* get handle to object the logical points to */
+    sts = sys$trnlnm (0, 0,  defaulttables,  PSL$C_USER,  &h_table);		/* look up table in default directories */
+    if (sts != SS$_NORMAL) fprintf (h_s_error, "oz_cli: error %u looking up default tables (%s)\n", sts, defaulttables);
+    else
+    {
+        sts = sys$trnlnm (0, h_table,  name,  PSL$C_USER,  &h_logname);		/* look up the logical name in the table */
+        if (sts == SS$_NORMAL)
+        {
+            sts = sys$trnlnm (0, h_logname, 0,  NULL,  objtype);	/* get handle to object the logical points to */
+        }
     }
-  }
-  return (sts);
+    return (sts);
 }
 
 /************************************************************************/
@@ -3232,87 +3570,96 @@ static unsigned long logname_getobj (const char *name, unsigned char objtype, un
 static unsigned long logname_creobj (const char *name, unsigned char objtype, unsigned long h_object)
 
 {
-  unsigned long sts;
-  unsigned long h_table;
-  OZ_Logvalue logvalue;
+    unsigned long sts;
+    unsigned long h_table;
+    OZ_Logvalue logvalue;
 
 #if 0
-  logvalue.attr = OZ_LOGVALATR_OBJECT;
+    logvalue.attr = OZ_LOGVALATR_OBJECT;
 #endif
-  logvalue.buff = (void *)h_object;
+    logvalue.buff = (void *)h_object;
 
-  sts = sys$trnlnm (0, 0,  defaulttables,  PSL$C_USER,  &h_table);	/* look up table in default directories */
-  if (sts == SS$_NORMAL) {
-    sts = sys$crelnm (0, h_table,  PSL$C_USER,  name,  NULL);	/* create the logical name in the table */
-  }
-  return (sts);
+    sts = sys$trnlnm (0, 0,  defaulttables,  PSL$C_USER,  &h_table);	/* look up table in default directories */
+    if (sts == SS$_NORMAL)
+    {
+        sts = sys$crelnm (0, h_table,  PSL$C_USER,  name,  NULL);	/* create the logical name in the table */
+    }
+    return (sts);
 }
 
 static unsigned long int_allocate_device (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  const char *devname;
-  int i;
-  unsigned long sts;
-  unsigned char objtype;
+    const char *devname;
+    int i;
+    unsigned long sts;
+    unsigned char objtype;
 
-  devname = NULL;
-  objtype = OZ_OBJTYPE_JOB;
+    devname = NULL;
+    objtype = OZ_OBJTYPE_JOB;
 
-  for (i = 0; i < argc; i ++) {
+    for (i = 0; i < argc; i ++)
+    {
 
-    /* -user = allocate to the user */
+        /* -user = allocate to the user */
 
-    if (strcmp (argv[i], "-user") == 0) {
-      objtype = OZ_OBJTYPE_USER;
-      continue;
+        if (strcmp (argv[i], "-user") == 0)
+        {
+            objtype = OZ_OBJTYPE_USER;
+            continue;
+        }
+
+        /* -job = allocate to the job */
+
+        if (strcmp (argv[i], "-job") == 0)
+        {
+            objtype = OZ_OBJTYPE_JOB;
+            continue;
+        }
+
+        /* -process = allocate to the process */
+
+        if (strcmp (argv[i], "-process") == 0)
+        {
+            objtype = OZ_OBJTYPE_PROCESS;
+            continue;
+        }
+
+        /* -thread = allocate to the thread */
+
+        if (strcmp (argv[i], "-thread") == 0)
+        {
+            objtype = OZ_OBJTYPE_THREAD;
+            continue;
+        }
+
+        /* Unknown option */
+
+        if (*argv[i] == '-')
+        {
+            fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
+            return (SS$_IVPARAM);
+        }
+
+        /* No option - this is the device name */
+
+        if (devname != NULL)
+        {
+            fprintf (h_error, "oz_cli: can only have one device name\n");
+            return (SS$_IVPARAM);
+        }
+        devname = argv[i];
     }
 
-    /* -job = allocate to the job */
-
-    if (strcmp (argv[i], "-job") == 0) {
-      objtype = OZ_OBJTYPE_JOB;
-      continue;
+    if (devname == NULL)
+    {
+        fprintf (h_error, "oz_cli: missing device name\n");
+        return (SS$_IVPARAM);
     }
 
-    /* -process = allocate to the process */
-
-    if (strcmp (argv[i], "-process") == 0) {
-      objtype = OZ_OBJTYPE_PROCESS;
-      continue;
-    }
-
-    /* -thread = allocate to the thread */
-
-    if (strcmp (argv[i], "-thread") == 0) {
-      objtype = OZ_OBJTYPE_THREAD;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is the device name */
-
-    if (devname != NULL) {
-      fprintf (h_error, "oz_cli: can only have one device name\n");
-      return (SS$_IVPARAM);
-    }
-    devname = argv[i];
-  }
-
-  if (devname == NULL) {
-    fprintf (h_error, "oz_cli: missing device name\n");
-    return (SS$_IVPARAM);
-  }
-
-  // not yet sts = sys$alloc (devname, 0, objtype);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u allocating %s\n", sts, devname);
-  return (sts);
+    // not yet sts = sys$alloc (devname, 0, objtype);
+    if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u allocating %s\n", sts, devname);
+    return (sts);
 }
 
 /************************************************************************/
@@ -3326,41 +3673,45 @@ static unsigned long readpromptne (const char *prompt, int bufsiz, char *buffer)
 static unsigned long int_change_password (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  char againbuf[OZ_PASSWORD_MAX], newpwbuf[OZ_PASSWORD_MAX], oldpwbuf[OZ_PASSWORD_MAX];
-  const char *newpw, *oldpw;
-  unsigned long sts;
+    char againbuf[OZ_PASSWORD_MAX], newpwbuf[OZ_PASSWORD_MAX], oldpwbuf[OZ_PASSWORD_MAX];
+    const char *newpw, *oldpw;
+    unsigned long sts;
 
-  if (argc > 2) {
-    fprintf (h_error, "oz_cli: change password [<old_password> [<new_password>]]\n");
-    return (SS$_BADPARAM);
-  }
-
-  oldpw = argv[0];
-  if (argc < 1) {
-    sts = readpromptne ("Old password: ", sizeof oldpwbuf, oldpwbuf);
-    if (sts != SS$_NORMAL) return (sts);
-    oldpw = oldpwbuf;
-  }
-
-  newpw = argv[1];
-  if (argc < 2) {
-getagain:
-    sts = readpromptne ("New password: ", sizeof newpwbuf, newpwbuf);
-    if (sts != SS$_NORMAL) return (sts);
-    sts = readpromptne ("New pw again: ", sizeof againbuf, againbuf);
-    if (sts != SS$_NORMAL) return (sts);
-    if (strcmp (newpwbuf, againbuf) != 0) {
-      fprintf (h_error, "oz_cli: doesn't match\n");
-      goto getagain;
+    if (argc > 2)
+    {
+        fprintf (h_error, "oz_cli: change password [<old_password> [<new_password>]]\n");
+        return (SS$_BADPARAM);
     }
-    newpw = newpwbuf;
-  }
 
-  //  sts = oz_sys_password_change (oldpw, newpw);
-  // use $get/setuai when it gets implemented
-  if (sts == SS$_NORMAL) fprintf (h_error, "oz_cli: password changed\n");
-  else fprintf (h_error, "oz_cli: error %u changing password\n", sts);
-  return (sts);
+    oldpw = argv[0];
+    if (argc < 1)
+    {
+        sts = readpromptne ("Old password: ", sizeof oldpwbuf, oldpwbuf);
+        if (sts != SS$_NORMAL) return (sts);
+        oldpw = oldpwbuf;
+    }
+
+    newpw = argv[1];
+    if (argc < 2)
+    {
+getagain:
+        sts = readpromptne ("New password: ", sizeof newpwbuf, newpwbuf);
+        if (sts != SS$_NORMAL) return (sts);
+        sts = readpromptne ("New pw again: ", sizeof againbuf, againbuf);
+        if (sts != SS$_NORMAL) return (sts);
+        if (strcmp (newpwbuf, againbuf) != 0)
+        {
+            fprintf (h_error, "oz_cli: doesn't match\n");
+            goto getagain;
+        }
+        newpw = newpwbuf;
+    }
+
+    //  sts = oz_sys_password_change (oldpw, newpw);
+    // use $get/setuai when it gets implemented
+    if (sts == SS$_NORMAL) fprintf (h_error, "oz_cli: password changed\n");
+    else fprintf (h_error, "oz_cli: error %u changing password\n", sts);
+    return (sts);
 }
 
 /* Read with prompt but/and no echo */
@@ -3368,24 +3719,24 @@ getagain:
 static unsigned long readpromptne (const char *prompt, int bufsiz, char *buffer)
 
 {
-  OZ_IO_console_read console_read;
-  OZ_IO_console_write console_write;
-  unsigned long buflen, sts;
+    OZ_IO_console_read console_read;
+    OZ_IO_console_write console_write;
+    unsigned long buflen, sts;
 
-  memset (&console_read, 0, sizeof console_read);
-  console_read.size    = bufsiz - 1;
-  console_read.buff    = buffer;
-  console_read.rlen    = &buflen;
-  console_read.pmtsize = strlen (prompt);
-  console_read.pmtbuff = prompt;
-  console_read.noecho  = 1;
-  //  sts = oz_sys_io (PSL$C_KERNEL, h_s_console, 0, IO$_READLBLK, sizeof console_read, &console_read);
-  if (sts == SS$_NORMAL) buffer[buflen] = 0;
-  memset (&console_write, 0, sizeof console_write);
-  console_write.size = 1;
-  console_write.buff = "\n";
-  //oz_sys_io (PSL$C_KERNEL, h_s_console, 0, IO$_WRITELBLK, sizeof console_write, &console_write);
-  return (sts);
+    memset (&console_read, 0, sizeof console_read);
+    console_read.size    = bufsiz - 1;
+    console_read.buff    = buffer;
+    console_read.rlen    = &buflen;
+    console_read.pmtsize = strlen (prompt);
+    console_read.pmtbuff = prompt;
+    console_read.noecho  = 1;
+    //  sts = oz_sys_io (PSL$C_KERNEL, h_s_console, 0, IO$_READLBLK, sizeof console_read, &console_read);
+    if (sts == SS$_NORMAL) buffer[buflen] = 0;
+    memset (&console_write, 0, sizeof console_write);
+    console_write.size = 1;
+    console_write.buff = "\n";
+    //oz_sys_io (PSL$C_KERNEL, h_s_console, 0, IO$_WRITELBLK, sizeof console_write, &console_write);
+    return (sts);
 }
 
 
@@ -3395,86 +3746,93 @@ static unsigned long readpromptne (const char *prompt, int bufsiz, char *buffer)
 /*									*/
 /************************************************************************/
 
-typedef struct { unsigned long h_table;
-                 const char *logical_name;
-                 unsigned long lognamatr;
-                 unsigned long nvalues;
-                 OZ_Logvalue *values;
-               } Crelognampar;
+typedef struct
+{
+    unsigned long h_table;
+    const char *logical_name;
+    unsigned long lognamatr;
+    unsigned long nvalues;
+    OZ_Logvalue *values;
+} Crelognampar;
 
-typedef struct Handleclose { struct Handleclose *next;
-                             unsigned long handle;
-                           } Handleclose;
+typedef struct Handleclose
+{
+    struct Handleclose *next;
+    unsigned long handle;
+} Handleclose;
 
 static unsigned long crelognam (unsigned long cprocmode, void *crelognamparv);
 
 static unsigned long int_create_logical_name (int userarg)
 
 {
-  unsigned long sts;
-  char * default_table = "LNM$PROCESS_TABLE";
-  char * table;
-  struct dsc$descriptor mytabnam, mynam;
-  struct item_list_3 itm[2];
+    unsigned long sts;
+    char * default_table = "LNM$PROCESS_TABLE";
+    char * table;
+    struct dsc$descriptor mytabnam, mynam;
+    struct item_list_3 itm[2];
 
-  $DESCRIPTOR(p, "p1");
-  $DESCRIPTOR(p2, "p2");
-  $DESCRIPTOR(d, "table");
+    $DESCRIPTOR(p, "p1");
+    $DESCRIPTOR(p2, "p2");
+    $DESCRIPTOR(d, "table");
 
-  char c[80];
-  struct dsc$descriptor o;
-  o.dsc$a_pointer=c;
-  o.dsc$w_length=80;
-  memset (c, 0, 80);
+    char c[80];
+    struct dsc$descriptor o;
+    o.dsc$a_pointer=c;
+    o.dsc$w_length=80;
+    memset (c, 0, 80);
 
-  char e[80];
-  struct dsc$descriptor o2;
-  o2.dsc$a_pointer=e;
-  o2.dsc$w_length=80;
-  memset (e, 0, 80);
+    char e[80];
+    struct dsc$descriptor o2;
+    o2.dsc$a_pointer=e;
+    o2.dsc$w_length=80;
+    memset (e, 0, 80);
 
-  char f[80];
-  struct dsc$descriptor o3;
-  o3.dsc$a_pointer=f;
-  o3.dsc$w_length=80;
-  memset (f, 0, 80);
+    char f[80];
+    struct dsc$descriptor o3;
+    o3.dsc$a_pointer=f;
+    o3.dsc$w_length=80;
+    memset (f, 0, 80);
 
-  short int retlen;
+    short int retlen;
 
-  sts = cli$present(&p);
-  if ((sts&1)==0)
-    return sts;
+    sts = cli$present(&p);
+    if ((sts&1)==0)
+        return sts;
 
-  sts = cli$present(&p2);
-  if ((sts&1)==0)
-    return sts;
+    sts = cli$present(&p2);
+    if ((sts&1)==0)
+        return sts;
 
-  sts = cli$present(&d);
+    sts = cli$present(&d);
 
-  if (sts&1) {
-    sts = cli$get_value(&d, &o, &retlen);
-    table=c;
-  } else {
-    table=default_table;
-  }
+    if (sts&1)
+    {
+        sts = cli$get_value(&d, &o, &retlen);
+        table=c;
+    }
+    else
+    {
+        table=default_table;
+    }
 
-  sts = cli$get_value(&p, &o2, &retlen);
+    sts = cli$get_value(&p, &o2, &retlen);
 
-  sts = cli$get_value(&p2, &o3, &retlen);
+    sts = cli$get_value(&p2, &o3, &retlen);
 
-  mynam.dsc$w_length=strlen(e);
-  mynam.dsc$a_pointer=e;
-  mytabnam.dsc$w_length=strlen(table);
-  mytabnam.dsc$a_pointer=table;
+    mynam.dsc$w_length=strlen(e);
+    mynam.dsc$a_pointer=e;
+    mytabnam.dsc$w_length=strlen(table);
+    mytabnam.dsc$a_pointer=table;
 
-  itm[0].item_code=LNM$_STRING;
-  itm[0].buflen=strlen(f);
-  itm[0].bufaddr=f;
-  bzero(&itm[1],sizeof(struct item_list_3));
+    itm[0].item_code=LNM$_STRING;
+    itm[0].buflen=strlen(f);
+    itm[0].bufaddr=f;
+    bzero(&itm[1],sizeof(struct item_list_3));
 
-  sts=sys$crelnm(0,&mytabnam,&mynam,0,itm);
+    sts=sys$crelnm(0,&mytabnam,&mynam,0,itm);
 
-  return (sts);
+    return (sts);
 }
 
 /* Create the logical name, either in kernel or user mode */
@@ -3482,12 +3840,12 @@ static unsigned long int_create_logical_name (int userarg)
 static unsigned long crelognam (unsigned long cprocmode, void *crelognamparv)
 
 {
-  Crelognampar *p;
-  unsigned long sts;
+    Crelognampar *p;
+    unsigned long sts;
 
-  p = crelognamparv;
-  sts = sys$crelnm (0, p -> h_table,  PSL$C_KERNEL,  p -> logical_name,  NULL);
-  return (sts);
+    p = crelognamparv;
+    sts = sys$crelnm (0, p -> h_table,  PSL$C_KERNEL,  p -> logical_name,  NULL);
+    return (sts);
 }
 
 /************************************************************************/
@@ -3500,72 +3858,80 @@ static unsigned long crelognam (unsigned long cprocmode, void *crelognamparv)
 /*									*/
 /************************************************************************/
 
-typedef struct { const char *table_name;
-                 unsigned long lognamatr;
-               } Crelogtblpar;
+typedef struct
+{
+    const char *table_name;
+    unsigned long lognamatr;
+} Crelogtblpar;
 
 static unsigned long crelogtbl (unsigned long cprocmode, void *crelogtblparv);
 
 static unsigned long int_create_logical_table (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  int i, kernel;
-  unsigned long sts;
+    int i, kernel;
+    unsigned long sts;
 
-  struct dsc$descriptor mypartab, mytabnam;
+    struct dsc$descriptor mypartab, mytabnam;
 
-  if (argc>1 && 0==strncmp(argv[0],"/parent_table",strlen(argv[0]))) {
-    mypartab.dsc$w_length=strlen(argv[1]);
-    mypartab.dsc$a_pointer=argv[1];
-    mytabnam.dsc$w_length=strlen(argv[2]);
-    mytabnam.dsc$a_pointer=argv[2];
-  } else {
-    mypartab.dsc$w_length=strlen("LNM$SYSTEM_DIRECTORY");
-    mypartab.dsc$a_pointer="LNM$SYSTEM_DIRECTORY";
-    mytabnam.dsc$w_length=strlen(argv[0]);
-    mytabnam.dsc$a_pointer=argv[0];
-  }
-
-  kernel = 0;
-
-  for (i = 0; i < argc; i ++) {
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
+    if (argc>1 && 0==strncmp(argv[0],"/parent_table",strlen(argv[0])))
+    {
+        mypartab.dsc$w_length=strlen(argv[1]);
+        mypartab.dsc$a_pointer=argv[1];
+        mytabnam.dsc$w_length=strlen(argv[2]);
+        mytabnam.dsc$a_pointer=argv[2];
+    }
+    else
+    {
+        mypartab.dsc$w_length=strlen("LNM$SYSTEM_DIRECTORY");
+        mypartab.dsc$a_pointer="LNM$SYSTEM_DIRECTORY";
+        mytabnam.dsc$w_length=strlen(argv[0]);
+        mytabnam.dsc$a_pointer=argv[0];
     }
 
-  }
+    kernel = 0;
+
+    for (i = 0; i < argc; i ++)
+    {
+
+        /* Unknown option */
+
+        if (*argv[i] == '-')
+        {
+            fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
+            return (SS$_IVPARAM);
+        }
+
+    }
 
 #if 0
 
-  /* Make sure we got a logical name in there somewhere */
+    /* Make sure we got a logical name in there somewhere */
 
-  if (crelogtblpar.table_name == NULL) {
-    fprintf (h_error, "oz_cli: missing table name\n");
-    return (SS$_IVPARAM);
-  }
+    if (crelogtblpar.table_name == NULL)
+    {
+        fprintf (h_error, "oz_cli: missing table name\n");
+        return (SS$_IVPARAM);
+    }
 
 #endif
 
-  /* Create the table and return status */
+    /* Create the table and return status */
 
-  sts = sys$crelnt(0,0,0,0,0,&mytabnam,&mypartab,0);
+    sts = sys$crelnt(0,0,0,0,0,&mytabnam,&mypartab,0);
 
-  return (sts);
+    return (sts);
 }
 
 static unsigned long crelogtbl (unsigned long cprocmode, void *crelogtblparv)
 
 {
-  Crelogtblpar *p;
-  unsigned long sts;
+    Crelogtblpar *p;
+    unsigned long sts;
 
-  p = crelogtblparv;
-  sts = sys$crelnm (0, 0,  PSL$C_KERNEL,  p -> table_name,  NULL);
-  return (sts);
+    p = crelogtblparv;
+    sts = sys$crelnm (0, 0,  PSL$C_KERNEL,  p -> table_name,  NULL);
+    return (sts);
 }
 
 /************************************************************************/
@@ -3582,134 +3948,151 @@ static unsigned long crelogtbl (unsigned long cprocmode, void *crelogtblparv)
 static unsigned long int_create_symbol (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  char *p, *paramval, *strvalue;
-  const char *symbol_name;
-  int eval, first_value, i, l, level, usedup;
-  unsigned long sts;
-  Symbol *symbol;
-  Symtype symtype;
+    char *p, *paramval, *strvalue;
+    const char *symbol_name;
+    int eval, first_value, i, l, level, usedup;
+    unsigned long sts;
+    Symbol *symbol;
+    Symtype symtype;
 
-  eval        = 0;			/* args are the strings themselves */
-  first_value = 0;			/* no symbols found yet */
-  level       = 0;			/* define in current level */
-  symbol_name = NULL;			/* symbol name not found yet */
-  symtype     = SYMTYPE_STRING;		/* default type is string */
+    eval        = 0;			/* args are the strings themselves */
+    first_value = 0;			/* no symbols found yet */
+    level       = 0;			/* define in current level */
+    symbol_name = NULL;			/* symbol name not found yet */
+    symtype     = SYMTYPE_STRING;		/* default type is string */
 
-  for (i = 0; i < argc; i ++) {
+    for (i = 0; i < argc; i ++)
+    {
 
-    /* Global - define symbol in outermost level */
+        /* Global - define symbol in outermost level */
 
-    if (strcmp (argv[i], "-global") == 0) {
-      level = -1;
-      continue;
-    }
-
-    /* Integer - value is an integer expression */
-
-    if (strcmp (argv[i], "-integer") == 0) {
-      symtype = SYMTYPE_INTEGER;
-      continue;
-    }
-
-    /* Level - specify the definition level */
-
-    if (strcmp (argv[i], "-level") == 0) {
-      if (++ i == argc) {
-        fprintf (h_error, "oz_cli: missing symbol level\n");
-        return (SS$_IVPARAM);
-      }
-      level = oz_hw_atoi (argv[i], &usedup);
-      if (argv[i][usedup] != 0) {
-        fprintf (h_error, "oz_cli: bad symbol level %s\n", argv[i]);
-        return (SS$_BADPARAM);
-      }
-      continue;
-    }
-
-    /* String - value is an string expression */
-
-    if (strcmp (argv[i], "-string") == 0) {
-      symtype = SYMTYPE_STRING;
-      eval = 1;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is the symbol name followed by a list of values */
-
-    symbol_name = argv[i];
-    first_value = ++ i;
-    break;
-  }
-
-  /* Make sure we got a symbol name in there somewhere */
-
-  if (symbol_name == NULL) {
-    fprintf (h_error, "oz_cli: missing symbol name\n");
-    return (SS$_IVPARAM);
-  }
-
-  /* Concat remaining args as a parameter value string */
-
-  l = 1;
-  for (i = first_value; i < argc; i ++) l += strlen (argv[i]) + 1;
-  paramval = malloc (l);
-  paramval[0] = 0;
-  for (i = first_value; i < argc; i ++) {
-    if (i > first_value) strcat (paramval, " ");
-    strcat (paramval, argv[i]);
-  }
-
-  /* Create symbol */
-
-  symbol = NULL;
-
-  switch (symtype) {
-    case SYMTYPE_INTEGER: {
-      symbol = malloc (sizeof *symbol);					/* allocate memory block */
-      sts = eval_integer (paramval, &p, &(symbol -> ivalue), 0);
-      if ((sts == SS$_NORMAL) && (*p != 0)) {
-        fprintf (h_error, "oz_cli: bad integer expression %s\n", argv[first_value]);
-        sts = SS$_BADPARAM;
-      }
-      if (sts != SS$_NORMAL) {
-        free (paramval);
-        free (symbol);							/* bad value, free memory block */
-        return (sts);							/* return error status */
-      }
-      break;
-    }
-    case SYMTYPE_STRING: {
-      if (eval) {
-        sts = eval_string (paramval, &p, &strvalue, 0);
-        if ((sts == SS$_NORMAL) && (*p != 0)) {
-          free (strvalue);
-          fprintf (h_error, "oz_cli: bad string expression %s\n", paramval);
-          sts = SS$_BADPARAM;
+        if (strcmp (argv[i], "-global") == 0)
+        {
+            level = -1;
+            continue;
         }
-        free (paramval);
-        if (sts != SS$_NORMAL) return (sts);
-        paramval = strvalue;
-      }
-      symbol = malloc (strlen (paramval) + 1 + sizeof *symbol);
-      strcpy (symbol -> svalue, paramval);
-      break;
+
+        /* Integer - value is an integer expression */
+
+        if (strcmp (argv[i], "-integer") == 0)
+        {
+            symtype = SYMTYPE_INTEGER;
+            continue;
+        }
+
+        /* Level - specify the definition level */
+
+        if (strcmp (argv[i], "-level") == 0)
+        {
+            if (++ i == argc)
+            {
+                fprintf (h_error, "oz_cli: missing symbol level\n");
+                return (SS$_IVPARAM);
+            }
+            level = oz_hw_atoi (argv[i], &usedup);
+            if (argv[i][usedup] != 0)
+            {
+                fprintf (h_error, "oz_cli: bad symbol level %s\n", argv[i]);
+                return (SS$_BADPARAM);
+            }
+            continue;
+        }
+
+        /* String - value is an string expression */
+
+        if (strcmp (argv[i], "-string") == 0)
+        {
+            symtype = SYMTYPE_STRING;
+            eval = 1;
+            continue;
+        }
+
+        /* Unknown option */
+
+        if (*argv[i] == '-')
+        {
+            fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
+            return (SS$_IVPARAM);
+        }
+
+        /* No option - this is the symbol name followed by a list of values */
+
+        symbol_name = argv[i];
+        first_value = ++ i;
+        break;
     }
-  }
-  free (paramval);
 
-  /* Insert in list and return success status */
+    /* Make sure we got a symbol name in there somewhere */
 
-  strncpy (symbol -> name, symbol_name, sizeof symbol -> name);
-  symbol -> symtype = symtype;
-  insert_symbol (symbol, NULL, level);
-  return (SS$_NORMAL);
+    if (symbol_name == NULL)
+    {
+        fprintf (h_error, "oz_cli: missing symbol name\n");
+        return (SS$_IVPARAM);
+    }
+
+    /* Concat remaining args as a parameter value string */
+
+    l = 1;
+    for (i = first_value; i < argc; i ++) l += strlen (argv[i]) + 1;
+    paramval = malloc (l);
+    paramval[0] = 0;
+    for (i = first_value; i < argc; i ++)
+    {
+        if (i > first_value) strcat (paramval, " ");
+        strcat (paramval, argv[i]);
+    }
+
+    /* Create symbol */
+
+    symbol = NULL;
+
+    switch (symtype)
+    {
+    case SYMTYPE_INTEGER:
+    {
+        symbol = malloc (sizeof *symbol);					/* allocate memory block */
+        sts = eval_integer (paramval, &p, &(symbol -> ivalue), 0);
+        if ((sts == SS$_NORMAL) && (*p != 0))
+        {
+            fprintf (h_error, "oz_cli: bad integer expression %s\n", argv[first_value]);
+            sts = SS$_BADPARAM;
+        }
+        if (sts != SS$_NORMAL)
+        {
+            free (paramval);
+            free (symbol);							/* bad value, free memory block */
+            return (sts);							/* return error status */
+        }
+        break;
+    }
+    case SYMTYPE_STRING:
+    {
+        if (eval)
+        {
+            sts = eval_string (paramval, &p, &strvalue, 0);
+            if ((sts == SS$_NORMAL) && (*p != 0))
+            {
+                free (strvalue);
+                fprintf (h_error, "oz_cli: bad string expression %s\n", paramval);
+                sts = SS$_BADPARAM;
+            }
+            free (paramval);
+            if (sts != SS$_NORMAL) return (sts);
+            paramval = strvalue;
+        }
+        symbol = malloc (strlen (paramval) + 1 + sizeof *symbol);
+        strcpy (symbol -> svalue, paramval);
+        break;
+    }
+    }
+    free (paramval);
+
+    /* Insert in list and return success status */
+
+    strncpy (symbol -> name, symbol_name, sizeof symbol -> name);
+    symbol -> symtype = symtype;
+    insert_symbol (symbol, NULL, level);
+    return (SS$_NORMAL);
 }
 
 /************************************************************************/
@@ -3721,16 +4104,17 @@ static unsigned long int_create_symbol (unsigned long h_input, unsigned long h_o
 static unsigned long int_deallocate_device (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  unsigned long sts;
+    unsigned long sts;
 
-  if (argc != 1) {
-    fprintf (h_error, "oz_cli: must have exactly one device name\n");
-    return (SS$_IVPARAM);
-  }
+    if (argc != 1)
+    {
+        fprintf (h_error, "oz_cli: must have exactly one device name\n");
+        return (SS$_IVPARAM);
+    }
 
-  //  sts = sys$dalloc (argv[0]);
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u deallocating %s\n", sts, argv[0]);
-  return (sts);
+    //  sts = sys$dalloc (argv[0]);
+    if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u deallocating %s\n", sts, argv[0]);
+    return (sts);
 }
 
 /************************************************************************/
@@ -3743,163 +4127,168 @@ static unsigned long int_deallocate_device (unsigned long h_input, unsigned long
 static unsigned long int_delete_logical_name (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  return (delete_logical (h_error, defaulttables, argc, argv));
+    return (delete_logical (h_error, defaulttables, argc, argv));
 }
 
 static unsigned long int_delete_logical_table (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  return (delete_logical (h_error, NULL, argc, argv));
+    return (delete_logical (h_error, NULL, argc, argv));
 }
 
 static unsigned long delete_logical (unsigned long h_error, const char *default_table_name, int argc, const char *argv[])
 
 {
-  const char *logical_name;
-  int i;
-  unsigned long sts;
-  unsigned long h_logname, h_table;
+    const char *logical_name;
+    int i;
+    unsigned long sts;
+    unsigned long h_logname, h_table;
 
-  logical_name = NULL;
+    logical_name = NULL;
 
-  for (i = 0; i < argc; i ++) {
+    for (i = 0; i < argc; i ++)
+    {
 
-    /* Unknown option */
+        /* Unknown option */
 
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
+        if (*argv[i] == '-')
+        {
+            fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
+            return (SS$_IVPARAM);
+        }
+
+        /* No option - this is the logical name */
+
+        logical_name = argv[i];
     }
 
-    /* No option - this is the logical name */
+    /* Make sure we got a logical name in there somewhere */
 
-    logical_name = argv[i];
-  }
-
-  /* Make sure we got a logical name in there somewhere */
-
-  if (logical_name == NULL) {
-    fprintf (h_error, "oz_cli: missing logical name\n");
-    return (SS$_IVPARAM);
-  }
-
-  /* Delete logical, return the status */
-
-  sts = sys$trnlnm (0, 0,  default_table_name,  PSL$C_USER,  &h_table);
-  if (sts == SS$_NORMAL) {
-    sts = sys$trnlnm (0, h_table,  logical_name,  PSL$C_USER,  &h_logname);
-    if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u looking up logical %s\n", sts, logical_name);
-    else {
-      sts = sys$dellnm (h_logname,h_logname,0);
-      if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u deleting logical %s\n", sts, logical_name);
+    if (logical_name == NULL)
+    {
+        fprintf (h_error, "oz_cli: missing logical name\n");
+        return (SS$_IVPARAM);
     }
-  }
-  return (sts);
+
+    /* Delete logical, return the status */
+
+    sts = sys$trnlnm (0, 0,  default_table_name,  PSL$C_USER,  &h_table);
+    if (sts == SS$_NORMAL)
+    {
+        sts = sys$trnlnm (0, h_table,  logical_name,  PSL$C_USER,  &h_logname);
+        if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u looking up logical %s\n", sts, logical_name);
+        else
+        {
+            sts = sys$dellnm (h_logname,h_logname,0);
+            if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u deleting logical %s\n", sts, logical_name);
+        }
+    }
+    return (sts);
 }
 
 static unsigned long int_open (int userarg)
 {
-  unsigned long sts;
-  short int chan;
+    unsigned long sts;
+    short int chan;
 
-  $DESCRIPTOR(p, "p1");
-  $DESCRIPTOR(p2, "p2");
+    $DESCRIPTOR(p, "p1");
+    $DESCRIPTOR(p2, "p2");
 
-  char c[80];
-  struct dsc$descriptor o;
-  o.dsc$a_pointer=c;
-  o.dsc$w_length=80;
-  memset (c, 0, 80);
+    char c[80];
+    struct dsc$descriptor o;
+    o.dsc$a_pointer=c;
+    o.dsc$w_length=80;
+    memset (c, 0, 80);
 
-  char e[80];
-  struct dsc$descriptor o2;
-  o2.dsc$a_pointer=e;
-  o2.dsc$w_length=80;
-  memset (e, 0, 80);
+    char e[80];
+    struct dsc$descriptor o2;
+    o2.dsc$a_pointer=e;
+    o2.dsc$w_length=80;
+    memset (e, 0, 80);
 
-  int retlen, retlen2;
+    int retlen, retlen2;
 
-  sts = cli$present(&p);
-  if ((sts&1)==0)
+    sts = cli$present(&p);
+    if ((sts&1)==0)
+        return sts;
+
+    sts = cli$present(&p2);
+    if ((sts&1)==0)
+        return sts;
+
+    sts = cli$get_value(&p, &o, &retlen);
+    o.dsc$w_length=retlen;
+
+    // not useable yet
+    sts = cli$get_value(&p2, &o2, &retlen2);
+    o2.dsc$w_length=retlen2;
+
+    $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
+    int index = open(e, 0);
+    int len = 4;
+    struct item_list_3 itmlst[3];
+    itmlst[0].item_code=LNM$_STRING;
+    itmlst[0].buflen=strlen(e);
+    itmlst[0].bufaddr=e;
+    itmlst[1].item_code=LNM$_INDEX;
+    itmlst[1].buflen=&len;
+    itmlst[1].retlenaddr=&retlen;
+    itmlst[1].bufaddr=&index;
+    itmlst[2].item_code=0;
+
+    int acmode = 0;
+
+    sts=sys$crelnm(0, &tab_dsc, &o, &acmode, itmlst);
+
+    if ((sts&1)==0)
+        return sts;
+
     return sts;
-
-  sts = cli$present(&p2);
-  if ((sts&1)==0)
-    return sts;
-
-  sts = cli$get_value(&p, &o, &retlen);
-  o.dsc$w_length=retlen;
-
-  // not useable yet
-  sts = cli$get_value(&p2, &o2, &retlen2);
-  o2.dsc$w_length=retlen2;
-
-  $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
-  int index = open(e, 0);
-  int len = 4;
-  struct item_list_3 itmlst[3];
-  itmlst[0].item_code=LNM$_STRING;
-  itmlst[0].buflen=strlen(e);
-  itmlst[0].bufaddr=e;
-  itmlst[1].item_code=LNM$_INDEX;
-  itmlst[1].buflen=&len;
-  itmlst[1].retlenaddr=&retlen;
-  itmlst[1].bufaddr=&index;
-  itmlst[2].item_code=0;
-
-  int acmode = 0;
-
-  sts=sys$crelnm(0, &tab_dsc, &o, &acmode, itmlst);
-
-  if ((sts&1)==0)
-    return sts;
-
-  return sts;
 }
 
 static unsigned long int_close (int userarg)
 {
-  unsigned long sts;
-  short int chan;
+    unsigned long sts;
+    short int chan;
 
-  $DESCRIPTOR(p, "p1");
+    $DESCRIPTOR(p, "p1");
 
-  char c[80];
-  struct dsc$descriptor o;
-  o.dsc$a_pointer=c;
-  o.dsc$w_length=80;
-  memset (c, 0, 80);
+    char c[80];
+    struct dsc$descriptor o;
+    o.dsc$a_pointer=c;
+    o.dsc$w_length=80;
+    memset (c, 0, 80);
 
-  int retlen, retlen2;
+    int retlen, retlen2;
 
-  sts = cli$present(&p);
-  if ((sts&1)==0)
-    return sts;
+    sts = cli$present(&p);
+    if ((sts&1)==0)
+        return sts;
 
-  sts = cli$get_value(&p, &o, &retlen);
-  o.dsc$w_length=retlen;
+    sts = cli$get_value(&p, &o, &retlen);
+    o.dsc$w_length=retlen;
 
-  $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
-  int index;
-  int len = 4;
-  struct item_list_3 itmlst[2];
-  itmlst[0].item_code=LNM$_INDEX;
-  itmlst[0].buflen=&len;
-  itmlst[0].retlenaddr=&retlen;
-  itmlst[0].bufaddr=&index;
-  itmlst[1].item_code=0;
+    $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
+    int index;
+    int len = 4;
+    struct item_list_3 itmlst[2];
+    itmlst[0].item_code=LNM$_INDEX;
+    itmlst[0].buflen=&len;
+    itmlst[0].retlenaddr=&retlen;
+    itmlst[0].bufaddr=&index;
+    itmlst[1].item_code=0;
 
-  int acmode = 0;
+    int acmode = 0;
 
-  sts=sys$trnlnm(0, &tab_dsc, &o, &acmode, itmlst);
+    sts=sys$trnlnm(0, &tab_dsc, &o, &acmode, itmlst);
 
-  if ((sts&1)==0)
-    return sts;
+    if ((sts&1)==0)
+        return sts;
 
-  // index should really be something like ifi, change later?
-  close (index);
+    // index should really be something like ifi, change later?
+    close (index);
 
-  return SS$_NORMAL;
+    return SS$_NORMAL;
 }
 
 /************************************************************************/
@@ -3910,154 +4299,154 @@ static unsigned long int_close (int userarg)
 
 static unsigned long int_write (int userarg)
 {
-  unsigned long sts;
-  short int chan;
+    unsigned long sts;
+    short int chan;
 
-  $DESCRIPTOR(p, "p1");
-  $DESCRIPTOR(p2, "p2");
+    $DESCRIPTOR(p, "p1");
+    $DESCRIPTOR(p2, "p2");
 
-  char c[80];
-  struct dsc$descriptor o;
-  o.dsc$a_pointer=c;
-  o.dsc$w_length=80;
-  memset (c, 0, 80);
+    char c[80];
+    struct dsc$descriptor o;
+    o.dsc$a_pointer=c;
+    o.dsc$w_length=80;
+    memset (c, 0, 80);
 
-  char e[80];
-  struct dsc$descriptor o2;
-  o2.dsc$a_pointer=e;
-  o2.dsc$w_length=80;
-  memset (e, 0, 80);
+    char e[80];
+    struct dsc$descriptor o2;
+    o2.dsc$a_pointer=e;
+    o2.dsc$w_length=80;
+    memset (e, 0, 80);
 
-  int retlen, retlen2;
+    int retlen, retlen2;
 
-  sts = cli$present(&p);
-  if ((sts&1)==0)
-    return sts;
+    sts = cli$present(&p);
+    if ((sts&1)==0)
+        return sts;
 
-  sts = cli$present(&p2);
-  if ((sts&1)==0)
-    return sts;
+    sts = cli$present(&p2);
+    if ((sts&1)==0)
+        return sts;
 
-  sts = cli$get_value(&p, &o, &retlen);
-  o.dsc$w_length=retlen;
+    sts = cli$get_value(&p, &o, &retlen);
+    o.dsc$w_length=retlen;
 
-  // not useable yet
-  sts = cli$get_value(&p2, &o2, &retlen2);
-  o2.dsc$w_length=retlen2;
+    // not useable yet
+    sts = cli$get_value(&p2, &o2, &retlen2);
+    o2.dsc$w_length=retlen2;
 
 #if 1
-  cli_scan_string(gcmdbuf);
+    cli_scan_string(gcmdbuf);
 #endif
 #if 1
-  initparser();
+    initparser();
 #endif
-  clilex();
-  clilex();
-  c_parser_binary_expression2 (0, 0);
+    clilex();
+    clilex();
+    c_parser_binary_expression2 (0, 0);
 
 #if 0
-  if (!vms_mm) goto no1;
-  sts = sys$assign (&o, &chan, 0, 0, 0);
-  if ((sts&1)==0)
-    return sts;
+    if (!vms_mm) goto no1;
+    sts = sys$assign (&o, &chan, 0, 0, 0);
+    if ((sts&1)==0)
+        return sts;
 
- no1:
-  if (!vms_mm)
-    printf("%s\n",o2.dsc$a_pointer);
+no1:
+    if (!vms_mm)
+        printf("%s\n",o2.dsc$a_pointer);
     else
-  sts = sys$qio (0, chan, IO$_WRITEVBLK, 0, 0, 0, o2.dsc$a_pointer, o2.dsc$w_length, 0, 0, 0, 0);
-  if ((sts&1)==0)
-    return sts;
+        sts = sys$qio (0, chan, IO$_WRITEVBLK, 0, 0, 0, o2.dsc$a_pointer, o2.dsc$w_length, 0, 0, 0, 0);
+    if ((sts&1)==0)
+        return sts;
 
-  if (!vms_mm) goto no2;
-  sts = sys$dassgn (chan);
-  if ((sts&1)==0)
-    return sts;
+    if (!vms_mm) goto no2;
+    sts = sys$dassgn (chan);
+    if ((sts&1)==0)
+        return sts;
 
- no2:
+no2:
 #else
-  $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
-  int index;
-  int len = 4;
-  struct item_list_3 itmlst[2];
-  itmlst[0].item_code=LNM$_INDEX;
-  itmlst[0].buflen=&len;
-  itmlst[0].retlenaddr=&retlen;
-  itmlst[0].bufaddr=&index;
-  itmlst[1].item_code=0;
+    $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
+    int index;
+    int len = 4;
+    struct item_list_3 itmlst[2];
+    itmlst[0].item_code=LNM$_INDEX;
+    itmlst[0].buflen=&len;
+    itmlst[0].retlenaddr=&retlen;
+    itmlst[0].bufaddr=&index;
+    itmlst[1].item_code=0;
 
-  int acmode = 0;
+    int acmode = 0;
 
-  sts=sys$trnlnm(0, &tab_dsc, &o, &acmode, itmlst);
+    sts=sys$trnlnm(0, &tab_dsc, &o, &acmode, itmlst);
 
-  if ((sts&1)==0)
-    return sts;
+    if ((sts&1)==0)
+        return sts;
 
-  // index should really be something like ifi, change later?
-  write (index, o2.dsc$a_pointer, o2.dsc$w_length);
+    // index should really be something like ifi, change later?
+    write (index, o2.dsc$a_pointer, o2.dsc$w_length);
 #endif
-  return (sts);
+    return (sts);
 }
 
 static unsigned long int_read (int userarg)
 {
-  unsigned long sts;
-  short int chan;
+    unsigned long sts;
+    short int chan;
 
-  $DESCRIPTOR(p, "p1");
-  $DESCRIPTOR(p2, "p2");
+    $DESCRIPTOR(p, "p1");
+    $DESCRIPTOR(p2, "p2");
 
-  char c[80];
-  struct dsc$descriptor o;
-  o.dsc$a_pointer=c;
-  o.dsc$w_length=80;
-  memset (c, 0, 80);
+    char c[80];
+    struct dsc$descriptor o;
+    o.dsc$a_pointer=c;
+    o.dsc$w_length=80;
+    memset (c, 0, 80);
 
-  char e[80];
-  struct dsc$descriptor o2;
-  o2.dsc$a_pointer=e;
-  o2.dsc$w_length=80;
-  memset (e, 0, 80);
+    char e[80];
+    struct dsc$descriptor o2;
+    o2.dsc$a_pointer=e;
+    o2.dsc$w_length=80;
+    memset (e, 0, 80);
 
-  int retlen, retlen2;
+    int retlen, retlen2;
 
-  sts = cli$present(&p);
-  if ((sts&1)==0)
-    return sts;
+    sts = cli$present(&p);
+    if ((sts&1)==0)
+        return sts;
 
-  sts = cli$present(&p2);
-  if ((sts&1)==0)
-    return sts;
+    sts = cli$present(&p2);
+    if ((sts&1)==0)
+        return sts;
 
-  sts = cli$get_value(&p, &o, &retlen);
-  o.dsc$w_length=retlen;
+    sts = cli$get_value(&p, &o, &retlen);
+    o.dsc$w_length=retlen;
 
-  sts = cli$get_value(&p2, &o2, &retlen2);
-  o2.dsc$w_length=retlen2;
+    sts = cli$get_value(&p2, &o2, &retlen2);
+    o2.dsc$w_length=retlen2;
 
-  $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
-  int index;
-  int len = 4;
-  struct item_list_3 itmlst[2];
-  itmlst[0].item_code=LNM$_INDEX;
-  itmlst[0].buflen=&len;
-  itmlst[0].retlenaddr=&retlen;
-  itmlst[0].bufaddr=&index;
-  itmlst[1].item_code=0;
+    $DESCRIPTOR(tab_dsc, "LNM$PROCESS_TABLE");
+    int index;
+    int len = 4;
+    struct item_list_3 itmlst[2];
+    itmlst[0].item_code=LNM$_INDEX;
+    itmlst[0].buflen=&len;
+    itmlst[0].retlenaddr=&retlen;
+    itmlst[0].bufaddr=&index;
+    itmlst[1].item_code=0;
 
-  int acmode = 0;
+    int acmode = 0;
 
-  sts=sys$trnlnm(0, &tab_dsc, &o, &acmode, itmlst);
+    sts=sys$trnlnm(0, &tab_dsc, &o, &acmode, itmlst);
 
-  if ((sts&1)==0)
-    return sts;
+    if ((sts&1)==0)
+        return sts;
 
-  char buf[64];
+    char buf[64];
 
-  // index should really be something like ifi, change later?
-  int rd = read (index, buf, 64);
+    // index should really be something like ifi, change later?
+    int rd = read (index, buf, 64);
 
-  return set_symbol(e, buf);
+    return set_symbol(e, buf);
 }
 
 /************************************************************************/
@@ -4069,36 +4458,39 @@ static unsigned long int_read (int userarg)
 static unsigned long int_logout (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  int i, usedup;
-  unsigned long exitst;
+    int i, usedup;
+    unsigned long exitst;
 
-  /* Always be sure to exit out of whatever script we're in */
+    /* Always be sure to exit out of whatever script we're in */
 
-  exit_script ();
+    exit_script ();
 
-  /* Now try to get the status from the command line */
+    /* Now try to get the status from the command line */
 
-  exitst = SS$_NORMAL;
+    exitst = SS$_NORMAL;
 
-  for (i = 0; i < argc; i ++) {
+    for (i = 0; i < argc; i ++)
+    {
 
-    /* Unknown option */
+        /* Unknown option */
 
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
+        if (*argv[i] == '-')
+        {
+            fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
+            return (SS$_IVPARAM);
+        }
+
+        /* No option - specify the status it will exit with */
+
+        exitst = oz_hw_atoi (argv[i], &usedup);
+        if (argv[i][usedup] != 0)
+        {
+            fprintf (h_error, "oz_cli: bad status value %s\n", argv[i]);
+            return (SS$_BADPARAM);
+        }
     }
 
-    /* No option - specify the status it will exit with */
-
-    exitst = oz_hw_atoi (argv[i], &usedup);
-    if (argv[i][usedup] != 0) {
-      fprintf (h_error, "oz_cli: bad status value %s\n", argv[i]);
-      return (SS$_BADPARAM);
-    }
-  }
-
-  return (exitst);
+    return (exitst);
 }
 
 /************************************************************************/
@@ -4110,33 +4502,36 @@ static unsigned long int_logout (unsigned long h_input, unsigned long h_output, 
 static unsigned long int_goto (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  Label *label;
+    Label *label;
 
-  if (argc != 1) {
-    fprintf (h_error, "oz_cli: missing label from goto\n");
-    return (SS$_IVPARAM);
-  }
+    if (argc != 1)
+    {
+        fprintf (h_error, "oz_cli: missing label from goto\n");
+        return (SS$_IVPARAM);
+    }
 
-  /* Set up name of label to skip to */
+    /* Set up name of label to skip to */
 
-  strncpy (skiplabel, argv[0], sizeof skiplabel);
+    strncpy (skiplabel, argv[0], sizeof skiplabel);
 
-  /* Try to find label in list of defined labels for the script */
+    /* Try to find label in list of defined labels for the script */
 
-  for (label = labels; label != NULL; label = label -> next) {
-    if (strcmp (skiplabel, label -> name) == 0) break;
-  }
+    for (label = labels; label != NULL; label = label -> next)
+    {
+        if (strcmp (skiplabel, label -> name) == 0) break;
+    }
 
-  /* If found, reposition to the spot in the script where we found it last */
+    /* If found, reposition to the spot in the script where we found it last */
 
-  if (label != NULL) {
-    scriptread.atblock = label -> blkoffs;
-    scriptread.atbyte  = label -> bytoffs;
-  }
+    if (label != NULL)
+    {
+        scriptread.atblock = label -> blkoffs;
+        scriptread.atbyte  = label -> bytoffs;
+    }
 
-  /* Anyway, return SS$_BRANCHSTARTED so we dont affect the oz_status variable */
+    /* Anyway, return SS$_BRANCHSTARTED so we dont affect the oz_status variable */
 
-  return (SS$_BRANCHSTARTED);
+    return (SS$_BRANCHSTARTED);
 }
 
 /************************************************************************/
@@ -4148,51 +4543,52 @@ static unsigned long int_goto (unsigned long h_input, unsigned long h_output, un
 static unsigned long int_help (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  Command *command;
-  unsigned long sts;
+    Command *command;
+    unsigned long sts;
 
-  fprintf (h_output, "\nInternal commands:\n");
+    fprintf (h_output, "\nInternal commands:\n");
 
-  for (command = intcmd; command -> name != NULL; command ++) {
-    fprintf (h_output, "  %c%s %s\n", command -> async ? '*' : ' ', command -> name, command -> help);
-  }
+    for (command = intcmd; command -> name != NULL; command ++)
+    {
+        fprintf (h_output, "  %c%s %s\n", command -> async ? '*' : ' ', command -> name, command -> help);
+    }
 
-  fprintf (h_output, "\n  all can be prefixed by any of the following options:\n");
-  fprintf (h_output, "    -error <error_file>\n");
-  fprintf (h_output, "    -ersym <error_symbol>\n");
-  fprintf (h_output, "    -input <input_file>\n");
-  fprintf (h_output, "    -insym <input_symbol>\n");
-  fprintf (h_output, "    -output <output_file>\n");
-  fprintf (h_output, "    -outsym <output_symbol>\n");
-  fprintf (h_output, "\n  * can also be prefixed by any of the following options:\n");
-  fprintf (h_output, "    -exit <exit_event_flag>\n");
-  fprintf (h_output, "    -init <init_event_flag>\n");
-  fprintf (h_output, "    -nowait\n");
-  fprintf (h_output, "    -thread <thread_logical>\n");
-  fprintf (h_output, "    -timeit\n");
+    fprintf (h_output, "\n  all can be prefixed by any of the following options:\n");
+    fprintf (h_output, "    -error <error_file>\n");
+    fprintf (h_output, "    -ersym <error_symbol>\n");
+    fprintf (h_output, "    -input <input_file>\n");
+    fprintf (h_output, "    -insym <input_symbol>\n");
+    fprintf (h_output, "    -output <output_file>\n");
+    fprintf (h_output, "    -outsym <output_symbol>\n");
+    fprintf (h_output, "\n  * can also be prefixed by any of the following options:\n");
+    fprintf (h_output, "    -exit <exit_event_flag>\n");
+    fprintf (h_output, "    -init <init_event_flag>\n");
+    fprintf (h_output, "    -nowait\n");
+    fprintf (h_output, "    -thread <thread_logical>\n");
+    fprintf (h_output, "    -timeit\n");
 
-  fprintf (h_output, "\nExternal commands from " CMDLNMTBL ":\n");
-  sts = show_logical_table (h_output, h_error, 0, 0, 0, CMDLNMTBL, 0);
+    fprintf (h_output, "\nExternal commands from " CMDLNMTBL ":\n");
+    sts = show_logical_table (h_output, h_error, 0, 0, 0, CMDLNMTBL, 0);
 
-  fprintf (h_output, "\n  plus any image name prefixed by the keyword 'run'\n");
+    fprintf (h_output, "\n  plus any image name prefixed by the keyword 'run'\n");
 
-  fprintf (h_output, "\n  all can be prefixed by any of the following options:\n");
-  fprintf (h_output, "    -directory <default_directory>\n");
-  fprintf (h_output, "    -error <error_file>\n");
-  fprintf (h_output, "    -ersym <error_symbol>\n");
-  fprintf (h_output, "    -exit <exit_event_flag>\n");
-  fprintf (h_output, "    -init <init_event_flag>\n");
-  fprintf (h_output, "    -input <input_file>\n");
-  fprintf (h_output, "    -insym <input_symbol>\n");
-  fprintf (h_output, "    -job <job_logical>\n");
-  fprintf (h_output, "    -nowait\n");
-  fprintf (h_output, "    -output <output_file>\n");
-  fprintf (h_output, "    -outsym <output_symbol>\n");
-  fprintf (h_output, "    -process <process_logical>\n");
-  fprintf (h_output, "    -thread <thread_logical>\n");
-  fprintf (h_output, "    -timeit\n");
+    fprintf (h_output, "\n  all can be prefixed by any of the following options:\n");
+    fprintf (h_output, "    -directory <default_directory>\n");
+    fprintf (h_output, "    -error <error_file>\n");
+    fprintf (h_output, "    -ersym <error_symbol>\n");
+    fprintf (h_output, "    -exit <exit_event_flag>\n");
+    fprintf (h_output, "    -init <init_event_flag>\n");
+    fprintf (h_output, "    -input <input_file>\n");
+    fprintf (h_output, "    -insym <input_symbol>\n");
+    fprintf (h_output, "    -job <job_logical>\n");
+    fprintf (h_output, "    -nowait\n");
+    fprintf (h_output, "    -output <output_file>\n");
+    fprintf (h_output, "    -outsym <output_symbol>\n");
+    fprintf (h_output, "    -process <process_logical>\n");
+    fprintf (h_output, "    -thread <thread_logical>\n");
+    fprintf (h_output, "    -timeit\n");
 
-  return (sts);
+    return (sts);
 }
 
 /************************************************************************/
@@ -4204,67 +4600,72 @@ static unsigned long int_help (unsigned long h_input, unsigned long h_output, un
 static unsigned long int_if (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  int usedup;
-  unsigned long exp, sts;
+    int usedup;
+    unsigned long exp, sts;
 
-  char * then = strstr (gcmdbuf, "then");
+    char * then = strstr (gcmdbuf, "then");
 
-  if (then)
-    *then = 0;
-
-  int is_true = 0;
-
-  if (skip_mode==0) {
-#if 1
-    cli_scan_string(gcmdbuf);
-#endif
-#if 1
-    initparser();
-#endif
-    clilex();
-    int t = is_true = c_parser_binary_expression4 (0, 0);
-    if (then == 0) {
-      push_cond_stack(0);
-      skip_mode=get_cond_stack()|((~t) & 1);
-      push_cond_stack(0);
-    }
-  } else {
     if (then)
-      return SS$_NORMAL;
-    push_cond_stack(0);
-    skip_mode=1;
-    push_cond_stack(0);
-  }
+        *then = 0;
 
-  if (skip_mode == 0 && is_true && then) {
-    if_then = is_true;
-    if_then_cmd = then + 5;
-  }
+    int is_true = 0;
 
-  return SS$_NORMAL;
-  return (sts);
+    if (skip_mode==0)
+    {
+#if 1
+        cli_scan_string(gcmdbuf);
+#endif
+#if 1
+        initparser();
+#endif
+        clilex();
+        int t = is_true = c_parser_binary_expression4 (0, 0);
+        if (then == 0)
+        {
+            push_cond_stack(0);
+            skip_mode=get_cond_stack()|((~t) & 1);
+            push_cond_stack(0);
+        }
+    }
+    else
+    {
+        if (then)
+            return SS$_NORMAL;
+        push_cond_stack(0);
+        skip_mode=1;
+        push_cond_stack(0);
+    }
+
+    if (skip_mode == 0 && is_true && then)
+    {
+        if_then = is_true;
+        if_then_cmd = then + 5;
+    }
+
+    return SS$_NORMAL;
+    return (sts);
 }
 
 static unsigned long int_else (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  skip_mode=get_prev_cond_stack()|!get_cond_stack();
-  //fprintf(stderr,"pel %s\n",yytext); fflush(stderr); 
-  // yyless(5/*yyleng*/);
-  //fprintf(stderr,"pel2 %s\n",yytext); fflush(stderr);
+    skip_mode=get_prev_cond_stack()|!get_cond_stack();
+    //fprintf(stderr,"pel %s\n",yytext); fflush(stderr);
+    // yyless(5/*yyleng*/);
+    //fprintf(stderr,"pel2 %s\n",yytext); fflush(stderr);
 }
 
 static unsigned long int_endif (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  pop_cond_stack();
-  pop_cond_stack();
+    pop_cond_stack();
+    pop_cond_stack();
 }
 
 static unsigned long int_then (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  // nothing yet
+    // nothing yet
 }
 
 
@@ -4295,60 +4696,69 @@ static unsigned long int_then (unsigned long h_input, unsigned long h_output, un
 static unsigned long extcommand (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  char command[256], image[256];
-  const char *imagep;
-  int j, l, length, nwords;
-  unsigned long exitst, nvalues, sts;
-  unsigned long h_command, h_logname, h_table;
-  Runopts runopts;
+    char command[256], image[256];
+    const char *imagep;
+    int j, l, length, nwords;
+    unsigned long exitst, nvalues, sts;
+    unsigned long h_command, h_logname, h_table;
+    Runopts runopts;
 
-  /* Decode command line options */
+    /* Decode command line options */
 
-  sts = decode_runopts (NULL, NULL, 0, h_input, h_output, h_error, &argc, &argv, &runopts);
-  if (sts != SS$_NORMAL) return (sts);
+    sts = decode_runopts (NULL, NULL, 0, h_input, h_output, h_error, &argc, &argv, &runopts);
+    if (sts != SS$_NORMAL) return (sts);
 
-  if (argc == 0) {
-    fprintf (h_error, "oz_cli: missing command\n");
-    return (SS$_IVPARAM);
-  }
-
-  if (argv[1] && 0==strncmp(argv[1],"=",1)) {
-    set_symbol(argv[0],argv[2]);
-    return SS$_NORMAL;
-  }
-
-  /* If it's a RUN command, it is followed by the image filename then args for the image */
-
-  if (strcasecmp (argv[0], "run") == 0 || strcasecmp (argv[0], "mcr") == 0 || strcasecmp (argv[0], "creprc") == 0 || dummy) {
-    if (dummy) {
-      imagep = argv[0];
-    } else {
-      if (argc == 1) {											/* must have an image name there */
-	fprintf (h_error, "oz_cli: missing image name after 'run' command\n");
-	return (SS$_IVPARAM);
-      }
-      imagep = argv[1];
-      argc --;												/* point to image name */
-      argv ++;
-
-      if (strcasecmp (argv[-1], "run") == 0) {
-	argc=0;
-	argv[1]=0;
-      }
+    if (argc == 0)
+    {
+        fprintf (h_error, "oz_cli: missing command\n");
+        return (SS$_IVPARAM);
     }
 
-  /* Run the image */
+    if (argv[1] && 0==strncmp(argv[1],"=",1))
+    {
+        set_symbol(argv[0],argv[2]);
+        return SS$_NORMAL;
+    }
 
-  sts = runimage (h_error, &runopts, imagep, argc, argv);
-  }
+    /* If it's a RUN command, it is followed by the image filename then args for the image */
 
-  /* Otherwise, look for the command name in the OZ_CLI_TABLES logical name table(s)   */
+    if (strcasecmp (argv[0], "run") == 0 || strcasecmp (argv[0], "mcr") == 0 || strcasecmp (argv[0], "creprc") == 0 || dummy)
+    {
+        if (dummy)
+        {
+            imagep = argv[0];
+        }
+        else
+        {
+            if (argc == 1)  											/* must have an image name there */
+            {
+                fprintf (h_error, "oz_cli: missing image name after 'run' command\n");
+                return (SS$_IVPARAM);
+            }
+            imagep = argv[1];
+            argc --;												/* point to image name */
+            argv ++;
 
-  else {
-    printf("%DCL-W-IVVERB, unrecognized command verb - check validity and spelling\n");
-  }
+            if (strcasecmp (argv[-1], "run") == 0)
+            {
+                argc=0;
+                argv[1]=0;
+            }
+        }
 
-  return (sts);
+        /* Run the image */
+
+        sts = runimage (h_error, &runopts, imagep, argc, argv);
+    }
+
+    /* Otherwise, look for the command name in the OZ_CLI_TABLES logical name table(s)   */
+
+    else
+    {
+        printf("%DCL-W-IVVERB, unrecognized command verb - check validity and spelling\n");
+    }
+
+    return (sts);
 }
 
 /************************************************************************/
@@ -4371,78 +4781,81 @@ static unsigned long extcommand (unsigned long h_input, unsigned long h_output, 
 /************************************************************************/
 
 #if 0
-static int myfunc(int (*func)(),void * start, int count) {
+static int myfunc(int (*func)(),void * start, int count)
+{
 #ifdef __i386__
-  __asm__ __volatile__(
-		       "pushl %ebx\n\t"
-		       "pushl %ecx\n\t"
-		       "pushl %edx\n\t"
-		       "pushl %edi\n\t"
-		       "pushl %esi\n\t"
-		       "movl 0x8(%ebp),%eax\n\t"
-		       "movl 0xc(%ebp),%esi\n\t"
-		       "movl 0x10(%ebp),%ecx\n\t"
-		       "movl $0x400,%ecx\n\t"
-		       "movl %ecx,%edx\n\t" 
-		       "subl $0x1000,%esp\n\t"
-		       "movl %esp,%edi\n\t"
-		       "rep ; movsl\n\t"
-		       "jmp *%eax\n\t"
-		       );
-  // return eax default?
+    __asm__ __volatile__(
+        "pushl %ebx\n\t"
+        "pushl %ecx\n\t"
+        "pushl %edx\n\t"
+        "pushl %edi\n\t"
+        "pushl %esi\n\t"
+        "movl 0x8(%ebp),%eax\n\t"
+        "movl 0xc(%ebp),%esi\n\t"
+        "movl 0x10(%ebp),%ecx\n\t"
+        "movl $0x400,%ecx\n\t"
+        "movl %ecx,%edx\n\t"
+        "subl $0x1000,%esp\n\t"
+        "movl %esp,%edi\n\t"
+        "rep ; movsl\n\t"
+        "jmp *%eax\n\t"
+    );
+    // return eax default?
 #endif
 #ifdef __x86_64__
-  __asm__ __volatile__(
-		       "pushq %rbx\n\t"
-		       "pushq %rcx\n\t"
-		       "pushq %rdx\n\t"
-		       "pushq %rdi\n\t"
-		       "pushq %rsi\n\t"
-		       "movq %rdi,%rax\n\t"
-		       "movq %rsi,%rsi\n\t"
-		       "movq %rdx,%rcx\n\t"
-		       "movq $0x400,%rcx\n\t"
-		       "movq %rcx,%rdx\n\t" 
-		       "subq $0x1000,%rsp\n\t"
-		       "movq %rsp,%rdi\n\t"
-		       "rep ; movsl\n\t"
-		       "jmpq *%rax\n\t"
-		       );
-  // return eax default?
+    __asm__ __volatile__(
+        "pushq %rbx\n\t"
+        "pushq %rcx\n\t"
+        "pushq %rdx\n\t"
+        "pushq %rdi\n\t"
+        "pushq %rsi\n\t"
+        "movq %rdi,%rax\n\t"
+        "movq %rsi,%rsi\n\t"
+        "movq %rdx,%rcx\n\t"
+        "movq $0x400,%rcx\n\t"
+        "movq %rcx,%rdx\n\t"
+        "subq $0x1000,%rsp\n\t"
+        "movq %rsp,%rdi\n\t"
+        "rep ; movsl\n\t"
+        "jmpq *%rax\n\t"
+    );
+    // return eax default?
 #endif
 }
 
-static int mymyfunc(int dummy,int (*func)(),void * start, int count) {
+static int mymyfunc(int dummy,int (*func)(),void * start, int count)
+{
 #ifdef __i386__
-  long * ret = &func;
-  ret=&dummy;
+    long * ret = &func;
+    ret=&dummy;
 #else
-  long * ret;
-  __asm__ __volatile__ ("movq %%rbp,%0; ":"=r" (ret) );
-  ret+=2;
+    long * ret;
+    __asm__ __volatile__ ("movq %%rbp,%0; ":"=r" (ret) );
+    ret+=2;
 #endif
-  struct _exh exh;
-  memset(&exh, 0, sizeof(exh));
-  exh.exh$l_handler=ret[-1];
-  exh.exh$l_first_arg=&ret[-1];
-  int sts = sys$dclexh(&exh);
-  return myfunc(*func,start,count);
+    struct _exh exh;
+    memset(&exh, 0, sizeof(exh));
+    exh.exh$l_handler=ret[-1];
+    exh.exh$l_first_arg=&ret[-1];
+    int sts = sys$dclexh(&exh);
+    return myfunc(*func,start,count);
 }
 
-static int mymymyfunc(int (*func)(),void * start, int count) {
-  register int __res;
+static int mymymyfunc(int (*func)(),void * start, int count)
+{
+    register int __res;
 #ifdef __i386__
-  __asm__ ( "movl %%ebp,%%eax\n\t" :"=a" (__res) );
-  mymyfunc(__res,*func,start,count);
-  __asm__ ( "movl (%esp),%ebp\n\t" );
+    __asm__ ( "movl %%ebp,%%eax\n\t" :"=a" (__res) );
+    mymyfunc(__res,*func,start,count);
+    __asm__ ( "movl (%esp),%ebp\n\t" );
 #endif
 #ifdef __x86_64__
-  __asm__ __volatile__ (
-			"movq %rbp,%rax\n\t"
-			"pushq %rax\n\t"
-			);
-  mymyfunc(__res,*func,start,count);
-  __asm__ ( "movq (%rsp),%rbp\n\t" );
+    __asm__ __volatile__ (
+        "movq %rbp,%rax\n\t"
+        "pushq %rax\n\t"
+    );
+    mymyfunc(__res,*func,start,count);
+    __asm__ ( "movq (%rsp),%rbp\n\t" );
 #endif
 }
 #endif
@@ -4450,184 +4863,193 @@ static int mymymyfunc(int (*func)(),void * start, int count) {
 static unsigned long runimage (unsigned long h_error, Runopts *runopts, const char *image, int argc, const char *argv[])
 
 {
-  unsigned long sts;
-  struct dsc$descriptor aname;
-  struct dsc$descriptor dflnam;
-  struct file * f;
-  struct _ihd * hdrbuf;
-  struct _iha * active;
-  struct _va_range inadr;
-  void (*func)();
-  int len = strlen(argv[0]);
-  //  if (strcasecmp (argv[-1], "creprc") == 0) goto do_creprc;
-  if (0==strncmp(".ele",argv[0]+len-4,4)) goto do_dl;
+    unsigned long sts;
+    struct dsc$descriptor aname;
+    struct dsc$descriptor dflnam;
+    struct file * f;
+    struct _ihd * hdrbuf;
+    struct _iha * active;
+    struct _va_range inadr;
+    void (*func)();
+    int len = strlen(argv[0]);
+    //  if (strcasecmp (argv[-1], "creprc") == 0) goto do_creprc;
+    if (0==strncmp(".ele",argv[0]+len-4,4)) goto do_dl;
 
-  aname.dsc$w_length=len-4;
-  aname.dsc$a_pointer=argv[0];
-  dflnam.dsc$w_length=len;
-  dflnam.dsc$a_pointer=argv[0];
+    aname.dsc$w_length=len-4;
+    aname.dsc$a_pointer=argv[0];
+    dflnam.dsc$w_length=len;
+    dflnam.dsc$a_pointer=argv[0];
 
-  hdrbuf=malloc(512 * 8);
-  memset(hdrbuf, 0, 512 * 8);
+    hdrbuf=malloc(512 * 8);
+    memset(hdrbuf, 0, 512 * 8);
 
-  sts=sys$imgact(&aname,&dflnam,hdrbuf,0,0,0,0,0);
-  printf("imgact got sts %x\n",sts);
-  sts=sys$imgfix();
-  printf("imgfix got sts %x\n",sts);
+    sts=sys$imgact(&aname,&dflnam,hdrbuf,0,0,0,0,0);
+    printf("imgact got sts %x\n",sts);
+    sts=sys$imgfix();
+    printf("imgfix got sts %x\n",sts);
 
-  if (sts!=SS$_NORMAL) return sts;
+    if (sts!=SS$_NORMAL) return sts;
 
-  if (hdrbuf->ihd$w_majorid==IHD$K_MAJORID && hdrbuf->ihd$w_minorid==IHD$K_MINORID) {
-    active=(unsigned long)hdrbuf+hdrbuf->ihd$w_activoff;
+    if (hdrbuf->ihd$w_majorid==IHD$K_MAJORID && hdrbuf->ihd$w_minorid==IHD$K_MINORID)
+    {
+        active=(unsigned long)hdrbuf+hdrbuf->ihd$w_activoff;
 
 #if 0
-    // can't do this, for some reason it causes pagefault
-    char * str = argv[0];
-    str[len-4]=0;
+        // can't do this, for some reason it causes pagefault
+        char * str = argv[0];
+        str[len-4]=0;
 #endif
 
-    func=active->iha$l_tfradr1;
-    printf("entering image? %x\n",func);
+        func=active->iha$l_tfradr1;
+        printf("entering image? %x\n",func);
 #ifdef __x86_64__
-    func(argc,argv++);
+        func(argc,argv++);
 #else
-    // check. related to CLI supervisor
-    mymymyuserfunc(func,argc,argv++,0,0);
+        // check. related to CLI supervisor
+        mymymyuserfunc(func,argc,argv++,0,0);
 #endif
-    printf("after image\n");
-  } else {
-#if 0
-#ifdef __i386__
-    struct elfhdr * elf = hdrbuf;
-    func = elf->e_entry;
-    printf("entering image? %x\n",func);
-    long arg=0;
-    long *addr=&elf->e_version;
-    if (*addr!=func) {
-      arg=func;
-      func=*addr;
+        printf("after image\n");
     }
-    addr=&elf->e_ident;
-    int offset = ((long)(*addr)) - ((long)elf);
-    sts = mymymyfunc(func,*addr,(4096-offset)>>2);
-    printf("after image\n");
-#endif
-#else
-    load_elf(image);
-#ifdef __i386__
-    Elf32_Ehdr * elf = hdrbuf;
-#else
-    Elf64_Ehdr * elf = hdrbuf;
-#endif
-#if 0
-    func = elf->e_entry;
-#else
-    char * routine = "main";
-    func = elf_get_symbol(image, routine);
-#endif
-    // check argv is now dead?
-    if (func == 0) {
-      printf("func is 0, error\n");
-      goto no_func;
-    }
-    printf("entering image? %x\n",func);
-    // for i386, when this is called, we are in sup mode
-    // for x86_64, when this is called, we are in user mode (sup is todo)
-    // on a side note, we are using exec mode for both cpu
-    // so it is only x86_64 that has an unused mode yet, sup
-    if (is_user_mode())
-      func(argc,argv++);
     else
-      // check. related to CLI supervisor
-      mymymyuserfunc(func,argc,argv++,0,0);
-  no_func:
-    {}
+    {
+#if 0
+#ifdef __i386__
+        struct elfhdr * elf = hdrbuf;
+        func = elf->e_entry;
+        printf("entering image? %x\n",func);
+        long arg=0;
+        long *addr=&elf->e_version;
+        if (*addr!=func)
+        {
+            arg=func;
+            func=*addr;
+        }
+        addr=&elf->e_ident;
+        int offset = ((long)(*addr)) - ((long)elf);
+        sts = mymymyfunc(func,*addr,(4096-offset)>>2);
+        printf("after image\n");
 #endif
-  }
+#else
+        load_elf(image);
+#ifdef __i386__
+        Elf32_Ehdr * elf = hdrbuf;
+#else
+        Elf64_Ehdr * elf = hdrbuf;
+#endif
+#if 0
+        func = elf->e_entry;
+#else
+        char * routine = "main";
+        func = elf_get_symbol(image, routine);
+#endif
+        // check argv is now dead?
+        if (func == 0)
+        {
+            printf("func is 0, error\n");
+            goto no_func;
+        }
+        printf("entering image? %x\n",func);
+        // for i386, when this is called, we are in sup mode
+        // for x86_64, when this is called, we are in user mode (sup is todo)
+        // on a side note, we are using exec mode for both cpu
+        // so it is only x86_64 that has an unused mode yet, sup
+        if (is_user_mode())
+            func(argc,argv++);
+        else
+            // check. related to CLI supervisor
+            mymymyuserfunc(func,argc,argv++,0,0);
+no_func:
+        {}
+#endif
+    }
 
-  sys$rundwn(0);
+    sys$rundwn(0);
 
-  return SS$_NORMAL;
+    return SS$_NORMAL;
 
- do_dl:
-  {}
-  void * handle = dlopen(argv[0],RTLD_NOW);
-  if (handle==0) {
-    printf("dlopen: %s\n",dlerror());
-    return 0;
-  }
-  dlerror(); // clear error
-  int(*fn)() = dlsym(handle,"main");
-  int error=dlerror();
-  if (error) {
-    printf("dlsym: %s\n",error);
+do_dl:
+    {}
+    void * handle = dlopen(argv[0],RTLD_NOW);
+    if (handle==0)
+    {
+        printf("dlopen: %s\n",dlerror());
+        return 0;
+    }
+    dlerror(); // clear error
+    int(*fn)() = dlsym(handle,"main");
+    int error=dlerror();
+    if (error)
+    {
+        printf("dlsym: %s\n",error);
+        dlclose(handle);
+        return 0;
+    }
+    fn(argc,argv++);
+
     dlclose(handle);
-    return 0;
-  }
-  fn(argc,argv++);
-  
-  dlclose(handle);
 
-  return SS$_NORMAL;
+    return SS$_NORMAL;
 
- do_fork:
+do_fork:
 
-  if (fork()==0) {
-    execv(image,argv);
-  }
+    if (fork()==0)
+    {
+        execv(image,argv);
+    }
 
-  return SS$_NORMAL;
+    return SS$_NORMAL;
 
- do_creprc:
-  {
-    unsigned int pidadr;
-    struct dsc$descriptor image,prcnam;
-    image.dsc$w_length=strlen(argv[0]);
-    image.dsc$a_pointer=argv[0];
-    prcnam.dsc$a_pointer=basename(argv[0]);
-    prcnam.dsc$w_length=strlen(prcnam.dsc$a_pointer);
-    sys$creprc(&pidadr, &image, stdin, stdout, stderr, 0, 0, &prcnam, 27 , 0, 0, 0);
+do_creprc:
+    {
+        unsigned int pidadr;
+        struct dsc$descriptor image,prcnam;
+        image.dsc$w_length=strlen(argv[0]);
+        image.dsc$a_pointer=argv[0];
+        prcnam.dsc$a_pointer=basename(argv[0]);
+        prcnam.dsc$w_length=strlen(prcnam.dsc$a_pointer);
+        sys$creprc(&pidadr, &image, stdin, stdout, stderr, 0, 0, &prcnam, 27 , 0, 0, 0);
 
-  }
-  return SS$_NORMAL;
+    }
+    return SS$_NORMAL;
 
-  //sts = setup_runopts (h_error, runopts);
-  if (sts != SS$_NORMAL) goto rtn;
+    //sts = setup_runopts (h_error, runopts);
+    if (sts != SS$_NORMAL) goto rtn;
 
-  /* Spawn the image */
-  posix_spawn();
+    /* Spawn the image */
+    posix_spawn();
 
-  // this is wrong params
-  sts = sys$creprc /* was: spawn */ (&runopts -> h_job, 
-                      image, 
-                      runopts -> h_in, 
-                      runopts -> h_out, 
-                      runopts -> h_err, 
-                      runopts -> h_init, 
-                      runopts -> h_exit, 
-                      runopts -> defdir, 
-                      argc, 
-                      argv, 
-				     //                      NULL, 
-                      &(runopts -> h_thread), 
-                      &(runopts -> h_process));
-  if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u spawning image %s\n", sts, image);
+    // this is wrong params
+    sts = sys$creprc /* was: spawn */ (&runopts -> h_job,
+                                       image,
+                                       runopts -> h_in,
+                                       runopts -> h_out,
+                                       runopts -> h_err,
+                                       runopts -> h_init,
+                                       runopts -> h_exit,
+                                       runopts -> defdir,
+                                       argc,
+                                       argv,
+                                       //                      NULL,
+                                       &(runopts -> h_thread),
+                                       &(runopts -> h_process));
+    if (sts != SS$_NORMAL) fprintf (h_error, "oz_cli: error %u spawning image %s\n", sts, image);
 
-  /* Maybe orphan it then wait for it to finish */
+    /* Maybe orphan it then wait for it to finish */
 
-  else {
-    //    if (runopts -> orphan) oz_sys_thread_orphan (runopts -> h_thread);
-    sts = finish_runopts (h_error, runopts);
-  }
+    else
+    {
+        //    if (runopts -> orphan) oz_sys_thread_orphan (runopts -> h_thread);
+        sts = finish_runopts (h_error, runopts);
+    }
 
-  /* Release all handles we may have opened */
+    /* Release all handles we may have opened */
 
 rtn:
-  cleanup_runopts (runopts);
+    cleanup_runopts (runopts);
 
-  /* Return the composite status */
+    /* Return the composite status */
 
-  return (sts);
+    return (sts);
 }
 
 
@@ -4677,221 +5099,253 @@ rtn:
 static unsigned long decode_runopts (const char *input, const char *output, int nowait, unsigned long h_input, unsigned long h_output, unsigned long h_error, int *argc_r, const char ***argv_r, Runopts *runopts)
 
 {
-  const char **argv;
-  int argc, i;
+    const char **argv;
+    int argc, i;
 
-  memset (runopts, 0, sizeof *runopts);
+    memset (runopts, 0, sizeof *runopts);
 
-  runopts -> input_name  = input;
-  runopts -> output_name = output;
-  runopts -> wait = !nowait;
+    runopts -> input_name  = input;
+    runopts -> output_name = output;
+    runopts -> wait = !nowait;
 
-  runopts -> h_err = h_error;
-  runopts -> h_in  = h_input;
-  runopts -> h_out = h_output;
+    runopts -> h_err = h_error;
+    runopts -> h_in  = h_input;
+    runopts -> h_out = h_output;
 
-  argc = *argc_r;
-  argv = *argv_r;
+    argc = *argc_r;
+    argv = *argv_r;
 
-  for (i = 0; i < argc; i ++) {
+    for (i = 0; i < argc; i ++)
+    {
 
-    /* Specify a default directory for it */
+        /* Specify a default directory for it */
 
-    if (strcmp (argv[i], "-directory") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing directory name after -directory\n");
+        if (strcmp (argv[i], "-directory") == 0)
+        {
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing directory name after -directory\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> defdir = argv[i];
+            continue;
+        }
+
+        /* Specify an error file for it */
+
+        if (strcmp (argv[i], "-error") == 0)
+        {
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing error file name after -error\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> error_name = argv[i];
+            runopts -> ersym_name = NULL;
+            continue;
+        }
+
+        /* Specify an error symbol for it */
+
+        if (strcmp (argv[i], "-ersym") == 0)
+        {
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing error symbol name after -ersym\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> ersym_name = argv[i];
+            runopts -> error_name = NULL;
+            continue;
+        }
+
+        /* Specify an exit event flag for it */
+
+        if (strcmp (argv[i], "-exit") == 0)
+        {
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing exit event flag logical name after -exit\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> exit_name = argv[i];
+            continue;
+        }
+
+        /* Specify an init event flag for it */
+
+        if (strcmp (argv[i], "-init") == 0)
+        {
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing init event flag logical name after -init\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> init_name = argv[i];
+            continue;
+        }
+
+        /* Specify an input file for it */
+
+        if (strcmp (argv[i], "-input") == 0)
+        {
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing input file name after -input\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> input_name = argv[i];
+            runopts -> insym_name = NULL;
+            continue;
+        }
+
+        /* Specify an input symbol for it */
+
+        if (strcmp (argv[i], "-insym") == 0)
+        {
+            Symbol *symbol;
+
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing input symbol name after -insym\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> insym_name = argv[i];
+            runopts -> input_name = NULL;
+            symbol = lookup_symbol (runopts -> insym_name, 0, NULL);
+            if (symbol == NULL)
+            {
+                fprintf (h_error, "oz_cli: input symbol %s not defined\n", runopts -> insym_name);
+                return (SS$_BADPARAM);
+            }
+            if ((symbol -> symtype != SYMTYPE_STRING) && (symbol -> func != NULL))
+            {
+                fprintf (h_error, "oz_cli: input symbol %s must be a string\n", runopts -> insym_name);
+                return (SS$_BADPARAM);
+            }
+            if (runopts -> insym_data != NULL) free (runopts -> insym_data);
+            runopts -> insym_data = strdup (symbol -> svalue);
+            continue;
+        }
+
+        /* Specify a job for it */
+
+        if (strcmp (argv[i], "-job") == 0)
+        {
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing job logical name after -job\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> job_name = argv[i];
+            continue;
+        }
+
+        /* Say we don't want to wait for it */
+
+        if (strcmp (argv[i], "-nowait") == 0)
+        {
+            runopts -> wait = 0;
+            continue;
+        }
+
+        /* Make it an orphan */
+
+        if (strcmp (argv[i], "-orphan") == 0)
+        {
+            runopts -> orphan = 1;
+            continue;
+        }
+
+        /* Specify an output file for it */
+
+        if (strcmp (argv[i], "-output") == 0)
+        {
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing output file name after -output\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> output_name = argv[i];
+            runopts -> outsym_name = NULL;
+            continue;
+        }
+
+        /* Specify an output symbol for it */
+
+        if (strcmp (argv[i], "-outsym") == 0)
+        {
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing output symbol name after -outsym\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> outsym_name = argv[i];
+            runopts -> output_name = NULL;
+            continue;
+        }
+
+        /* Specify a process logical to be created */
+
+        if (strcmp (argv[i], "-process") == 0)
+        {
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing logical name after -process\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> process_name = argv[i];
+            continue;
+        }
+
+        /* Specify a thread logical to be created */
+
+        if (strcmp (argv[i], "-thread") == 0)
+        {
+            if ((++ i >= argc) || (*argv[i] == '-'))
+            {
+                fprintf (h_error, "oz_cli: missing logical name after -thread\n");
+                return (SS$_IVPARAM);
+            }
+            runopts -> thread_name = argv[i];
+            continue;
+        }
+
+        /* Say we want it's times printed out on exit */
+
+        if (strcmp (argv[i], "-timeit") == 0)
+        {
+            runopts -> timeit = 1;
+            continue;
+        }
+
+        /* Unknown option */
+
+        if (*argv[i] == '-')
+        {
+            fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
+            return (SS$_IVPARAM);
+        }
+
+        /* Not an option, it is the command name followed by the args */
+
+        break;
+    }
+
+    /* Make sure we got command name in there somewhere */
+
+    if (i == argc)
+    {
+        fprintf (h_error, "oz_cli: missing command\n");
         return (SS$_IVPARAM);
-      }
-      runopts -> defdir = argv[i];
-      continue;
     }
 
-    /* Specify an error file for it */
+    /* Return what's left of the command line */
 
-    if (strcmp (argv[i], "-error") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing error file name after -error\n");
-        return (SS$_IVPARAM);
-      }
-      runopts -> error_name = argv[i];
-      runopts -> ersym_name = NULL;
-      continue;
-    }
+    *argc_r = argc - i;
+    *argv_r = argv + i;
 
-    /* Specify an error symbol for it */
-
-    if (strcmp (argv[i], "-ersym") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing error symbol name after -ersym\n");
-        return (SS$_IVPARAM);
-      }
-      runopts -> ersym_name = argv[i];
-      runopts -> error_name = NULL;
-      continue;
-    }
-
-    /* Specify an exit event flag for it */
-
-    if (strcmp (argv[i], "-exit") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing exit event flag logical name after -exit\n");
-        return (SS$_IVPARAM);
-      }
-      runopts -> exit_name = argv[i];
-      continue;
-    }
-
-    /* Specify an init event flag for it */
-
-    if (strcmp (argv[i], "-init") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing init event flag logical name after -init\n");
-        return (SS$_IVPARAM);
-      }
-      runopts -> init_name = argv[i];
-      continue;
-    }
-
-    /* Specify an input file for it */
-
-    if (strcmp (argv[i], "-input") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing input file name after -input\n");
-        return (SS$_IVPARAM);
-      }
-      runopts -> input_name = argv[i];
-      runopts -> insym_name = NULL;
-      continue;
-    }
-
-    /* Specify an input symbol for it */
-
-    if (strcmp (argv[i], "-insym") == 0) {
-      Symbol *symbol;
-
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing input symbol name after -insym\n");
-        return (SS$_IVPARAM);
-      }
-      runopts -> insym_name = argv[i];
-      runopts -> input_name = NULL;
-      symbol = lookup_symbol (runopts -> insym_name, 0, NULL);
-      if (symbol == NULL) {
-        fprintf (h_error, "oz_cli: input symbol %s not defined\n", runopts -> insym_name);
-        return (SS$_BADPARAM);
-      }
-      if ((symbol -> symtype != SYMTYPE_STRING) && (symbol -> func != NULL)) {
-        fprintf (h_error, "oz_cli: input symbol %s must be a string\n", runopts -> insym_name);
-        return (SS$_BADPARAM);
-      }
-      if (runopts -> insym_data != NULL) free (runopts -> insym_data);
-      runopts -> insym_data = strdup (symbol -> svalue);
-      continue;
-    }
-
-    /* Specify a job for it */
-
-    if (strcmp (argv[i], "-job") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing job logical name after -job\n");
-        return (SS$_IVPARAM);
-      }
-      runopts -> job_name = argv[i];
-      continue;
-    }
-
-    /* Say we don't want to wait for it */
-
-    if (strcmp (argv[i], "-nowait") == 0) {
-      runopts -> wait = 0;
-      continue;
-    }
-
-    /* Make it an orphan */
-
-    if (strcmp (argv[i], "-orphan") == 0) {
-      runopts -> orphan = 1;
-      continue;
-    }
-
-    /* Specify an output file for it */
-
-    if (strcmp (argv[i], "-output") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing output file name after -output\n");
-        return (SS$_IVPARAM);
-      }
-      runopts -> output_name = argv[i];
-      runopts -> outsym_name = NULL;
-      continue;
-    }
-
-    /* Specify an output symbol for it */
-
-    if (strcmp (argv[i], "-outsym") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing output symbol name after -outsym\n");
-        return (SS$_IVPARAM);
-      }
-      runopts -> outsym_name = argv[i];
-      runopts -> output_name = NULL;
-      continue;
-    }
-
-    /* Specify a process logical to be created */
-
-    if (strcmp (argv[i], "-process") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing logical name after -process\n");
-        return (SS$_IVPARAM);
-      }
-      runopts -> process_name = argv[i];
-      continue;
-    }
-
-    /* Specify a thread logical to be created */
-
-    if (strcmp (argv[i], "-thread") == 0) {
-      if ((++ i >= argc) || (*argv[i] == '-')) {
-        fprintf (h_error, "oz_cli: missing logical name after -thread\n");
-        return (SS$_IVPARAM);
-      }
-      runopts -> thread_name = argv[i];
-      continue;
-    }
-
-    /* Say we want it's times printed out on exit */
-
-    if (strcmp (argv[i], "-timeit") == 0) {
-      runopts -> timeit = 1;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* Not an option, it is the command name followed by the args */
-
-    break;
-  }
-
-  /* Make sure we got command name in there somewhere */
-
-  if (i == argc) {
-    fprintf (h_error, "oz_cli: missing command\n");
-    return (SS$_IVPARAM);
-  }
-
-  /* Return what's left of the command line */
-
-  *argc_r = argc - i;
-  *argv_r = argv + i;
-
-  return (SS$_NORMAL);
+    return (SS$_NORMAL);
 }
 
 
@@ -4904,105 +5358,110 @@ static unsigned long decode_runopts (const char *input, const char *output, int 
 static unsigned long int_script (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  unsigned long sts;
-  unsigned long h_script;
-  //  OZ_IO_fs_open fs_open;
-  int fd;
-  Script *script;
+    unsigned long sts;
+    unsigned long h_script;
+    //  OZ_IO_fs_open fs_open;
+    int fd;
+    Script *script;
 
-  /* -input option is illegal */
+    /* -input option is illegal */
 
-  if (h_input != h_s_input) {
-    fprintf (h_error, "oz_cli: -input option illegal on '%s' command\n", name);
-    return (SS$_BADPARAM);
-  }
+    if (h_input != h_s_input)
+    {
+        fprintf (h_error, "oz_cli: -input option illegal on '%s' command\n", name);
+        return (SS$_BADPARAM);
+    }
 
-  /* Make sure we at least have a script name */
+    /* Make sure we at least have a script name */
 
-  if (argc == 0) {
-    fprintf (h_error, "oz_cli: missing script name\n");
-    return (SS$_IVPARAM);
-  }
+    if (argc == 0)
+    {
+        fprintf (h_error, "oz_cli: missing script name\n");
+        return (SS$_IVPARAM);
+    }
 
-  /* Try to open the script file */
+    /* Try to open the script file */
 
-  fd = open(argv[0],0);
-  if (fd==0)
-    return 0;
+    fd = open(argv[0],0);
+    if (fd==0)
+        return 0;
 
-  inscript=fd;
+    inscript=fd;
 
-  scriptbuffer=malloc(10000);
+    scriptbuffer=malloc(10000);
 
-  scriptlen=read(fd,scriptbuffer,10000);
+    scriptlen=read(fd,scriptbuffer,10000);
 
-  scriptpos=0;
+    scriptpos=0;
 
-  close(fd);
+    close(fd);
 
-  /* Ok, stack the current input file, labels and symbols */
+    /* Ok, stack the current input file, labels and symbols */
 
-  script = malloc (sizeof *script);
-  script -> next = scripts;
-  script -> h_input  = h_s_input;
-  script -> h_output = h_s_output;
-  script -> h_error  = h_s_error;
-  script -> symbols  = symbols;
-  script -> labels   = labels;
-  scripts = script;
+    script = malloc (sizeof *script);
+    script -> next = scripts;
+    script -> h_input  = h_s_input;
+    script -> h_output = h_s_output;
+    script -> h_error  = h_s_error;
+    script -> symbols  = symbols;
+    script -> labels   = labels;
+    scripts = script;
 
-  /* Set up new script and symbols */
+    /* Set up new script and symbols */
 
-  h_s_input  = h_script;
-  h_s_output = h_output;
-  h_s_error  = h_error;
-  symbols    = NULL;
-  labels     = NULL;
+    h_s_input  = h_script;
+    h_s_output = h_output;
+    h_s_error  = h_error;
+    symbols    = NULL;
+    labels     = NULL;
 
-  setscriptsyms (argc, argv);
+    setscriptsyms (argc, argv);
 
-  /* Success */
+    /* Success */
 
-  return (SS$_NORMAL);
+    return (SS$_NORMAL);
 }
 
 static unsigned long int_set_prompt (int userarg)
 
 {
-  unsigned long sts;
+    unsigned long sts;
 
-  $DESCRIPTOR(p, "p1");
+    $DESCRIPTOR(p, "p1");
 
-  char c[80];
-  struct dsc$descriptor o;
-  o.dsc$a_pointer=c;
-  o.dsc$w_length=80;
-  memset (c, 0, 80);
+    char c[80];
+    struct dsc$descriptor o;
+    o.dsc$a_pointer=c;
+    o.dsc$w_length=80;
+    memset (c, 0, 80);
 
-  int retlen;
+    int retlen;
 
-  sts = cli$present(&p);
-  if (sts&1) {
-    sts = cli$get_value(&p, &o, &retlen);
-    memcpy(prompt,c,strlen(c));
-    prompt[strlen(c)]=0;
-  } else {
-    memcpy(prompt, "$ ", 2);
-    prompt[2]=0;
-  }
-  return SS$_NORMAL;
+    sts = cli$present(&p);
+    if (sts&1)
+    {
+        sts = cli$get_value(&p, &o, &retlen);
+        memcpy(prompt,c,strlen(c));
+        prompt[strlen(c)]=0;
+    }
+    else
+    {
+        memcpy(prompt, "$ ", 2);
+        prompt[2]=0;
+    }
+    return SS$_NORMAL;
 }
 
 static unsigned long int_set_process (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  unsigned long sts;
+    unsigned long sts;
 
-  /* We should have exactly one argument - the process name */
+    /* We should have exactly one argument - the process name */
 
-  set_process(argc,argv);
+    set_process(argc,argv);
 
-  return SS$_NORMAL;
+    return SS$_NORMAL;
 }
 
 
@@ -5015,28 +5474,29 @@ static unsigned long int_set_process (unsigned long h_input, unsigned long h_out
 static unsigned long int_set_default (int userarg)
 
 {
-  unsigned long sts;
+    unsigned long sts;
 
-  $DESCRIPTOR(p, "p1");
+    $DESCRIPTOR(p, "p1");
 
-  char c[80];
-  struct dsc$descriptor o;
-  o.dsc$a_pointer=c;
-  o.dsc$w_length=80;
-  memset (c, 0, 80);
+    char c[80];
+    struct dsc$descriptor o;
+    o.dsc$a_pointer=c;
+    o.dsc$w_length=80;
+    memset (c, 0, 80);
 
-  int retlen;
+    int retlen;
 
-  sts = cli$present(&p);
-  if (sts&1) {
-    sts = cli$get_value(&p, &o, &retlen);
-    struct dsc$descriptor newdir;
-    newdir.dsc$w_length=strlen(c);
-    newdir.dsc$a_pointer=c;
-    sys$setddir(&newdir,0,0);
-  }
+    sts = cli$present(&p);
+    if (sts&1)
+    {
+        sts = cli$get_value(&p, &o, &retlen);
+        struct dsc$descriptor newdir;
+        newdir.dsc$w_length=strlen(c);
+        newdir.dsc$a_pointer=c;
+        sys$setddir(&newdir,0,0);
+    }
 
-  return SS$_NORMAL;
+    return SS$_NORMAL;
 }
 
 /************************************************************************/
@@ -5048,19 +5508,20 @@ static unsigned long int_set_default (int userarg)
 static unsigned long int_show_datetime (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  unsigned long long now;
-  char timestr[23]; 
-  $DESCRIPTOR(atimenow, timestr); 
+    unsigned long long now;
+    char timestr[23];
+    $DESCRIPTOR(atimenow, timestr);
 
-  if (argc != 0) {
-    fprintf (h_error, "oz_cli: %s must have no arguments\n", name);
-    return (SS$_BADPARAM);
-  }
+    if (argc != 0)
+    {
+        fprintf (h_error, "oz_cli: %s must have no arguments\n", name);
+        return (SS$_BADPARAM);
+    }
 
-  sys$gettim(&now);
-  sys$asctim(0,&atimenow,&now,0);
-  printf ("%s\n",atimenow.dsc$a_pointer);
-  return (SS$_NORMAL);
+    sys$gettim(&now);
+    sys$asctim(0,&atimenow,&now,0);
+    printf ("%s\n",atimenow.dsc$a_pointer);
+    return (SS$_NORMAL);
 }
 
 
@@ -5073,62 +5534,62 @@ static unsigned long int_show_datetime (unsigned long h_input, unsigned long h_o
 static unsigned long int_show_default (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  const char *xargv[1];
-  unsigned long sts;
-  char buf[80];
-  unsigned short len;
+    const char *xargv[1];
+    unsigned long sts;
+    char buf[80];
+    unsigned short len;
 
-  struct dsc$descriptor newdir;
-  newdir.dsc$w_length=80;
-  newdir.dsc$a_pointer=buf;
-  sys$setddir(0,&len,&newdir);
-  buf[len]=0;
-  //getcwd(buf,80);
+    struct dsc$descriptor newdir;
+    newdir.dsc$w_length=80;
+    newdir.dsc$a_pointer=buf;
+    sys$setddir(0,&len,&newdir);
+    buf[len]=0;
+    //getcwd(buf,80);
 
-  printf("%s\n",buf);
+    printf("%s\n",buf);
 
-  return SS$_NORMAL;
+    return SS$_NORMAL;
 
-  xargv[0] = "OZ_DEFAULT_DIR";
-  sts = int_show_logical_name (h_input, h_output, h_error, name, NULL, 1, xargv);
-  return (sts);
+    xargv[0] = "OZ_DEFAULT_DIR";
+    sts = int_show_logical_name (h_input, h_output, h_error, name, NULL, 1, xargv);
+    return (sts);
 }
 
 
 static unsigned long show_status (int userarg)
 
 {
-  int status;
-  unsigned long long now;
-  signed long long timevalue; 
-  char timestr[23]; 
-  $DESCRIPTOR(atimenow, timestr); 
-  char timestr2[23]; 
-  $DESCRIPTOR(atimenow2, timestr2); 
-  status = sys$gettim(&timevalue); 
-  sys$asctim(0,&atimenow,&timevalue,0);
-  long long cputim;
-  int biocnt, diocnt, pageflts, wssize;
-  int item_code;
-  int len = 0;
-  item_code = JPI$_CPUTIM;
-  status = lib$getjpi (&item_code, 0, 0, &cputim, 0, &len);
-  item_code = JPI$_BUFIO;
-  status = lib$getjpi (&item_code, 0, 0, &biocnt, 0, &len);
-  item_code = JPI$_DIRIO;
-  status = lib$getjpi (&item_code, 0, 0, &diocnt, 0, &len);
-  item_code = JPI$_PAGEFLTS;
-  status = lib$getjpi (&item_code, 0, 0, &pageflts, 0, &len);
-  item_code = JPI$_WSSIZE;
-  status = lib$getjpi (&item_code, 0, 0, &wssize, 0, &len);
+    int status;
+    unsigned long long now;
+    signed long long timevalue;
+    char timestr[23];
+    $DESCRIPTOR(atimenow, timestr);
+    char timestr2[23];
+    $DESCRIPTOR(atimenow2, timestr2);
+    status = sys$gettim(&timevalue);
+    sys$asctim(0,&atimenow,&timevalue,0);
+    long long cputim;
+    int biocnt, diocnt, pageflts, wssize;
+    int item_code;
+    int len = 0;
+    item_code = JPI$_CPUTIM;
+    status = lib$getjpi (&item_code, 0, 0, &cputim, 0, &len);
+    item_code = JPI$_BUFIO;
+    status = lib$getjpi (&item_code, 0, 0, &biocnt, 0, &len);
+    item_code = JPI$_DIRIO;
+    status = lib$getjpi (&item_code, 0, 0, &diocnt, 0, &len);
+    item_code = JPI$_PAGEFLTS;
+    status = lib$getjpi (&item_code, 0, 0, &pageflts, 0, &len);
+    item_code = JPI$_WSSIZE;
+    status = lib$getjpi (&item_code, 0, 0, &wssize, 0, &len);
 
-  cputim = -cputim * 100000; // check multiplication
-  sys$asctim(0,&atimenow2,&cputim,0);
+    cputim = -cputim * 100000; // check multiplication
+    sys$asctim(0,&atimenow2,&cputim,0);
 
-  printf("Status on  %s     Elapsed CPU :   %s\n", atimenow.dsc$a_pointer, atimenow2.dsc$a_pointer);
-  printf("Buff. I/O :     %4d    Cur. ws. :    2000    Open files :         0\n",biocnt,wssize);
-  printf("Dir. I/O :      %4d    Phys. Mem. :  xxxx    Page Faults :     %4d\n",diocnt,pageflts);
-  return SS$_NORMAL;
+    printf("Status on  %s     Elapsed CPU :   %s\n", atimenow.dsc$a_pointer, atimenow2.dsc$a_pointer);
+    printf("Buff. I/O :     %4d    Cur. ws. :    2000    Open files :         0\n",biocnt,wssize);
+    printf("Dir. I/O :      %4d    Phys. Mem. :  xxxx    Page Faults :     %4d\n",diocnt,pageflts);
+    return SS$_NORMAL;
 }
 /************************************************************************/
 /*									*/
@@ -5139,55 +5600,60 @@ static unsigned long show_status (int userarg)
 /************************************************************************/
 
 static unsigned long int_show_device (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
-     // eventually move something to showdevice.c
+// eventually move something to showdevice.c
 {
-  int i, x;
-  unsigned long showopts, sts;
+    int i, x;
+    unsigned long showopts, sts;
 
-  x = 0;
-  showopts = 0;
+    x = 0;
+    showopts = 0;
 
-  show_device();
-  return SS$_NORMAL;
+    show_device();
+    return SS$_NORMAL;
 
-  for (i = 0; i < argc; i ++) {
+    for (i = 0; i < argc; i ++)
+    {
 
-    /* Iochans - display iochan information for the device */
+        /* Iochans - display iochan information for the device */
 
-    if (strcmp (argv[i], "-iochans") == 0) {
-      showopts |= SHOWOPT_DEVICE_IOCHANS;
-      continue;
+        if (strcmp (argv[i], "-iochans") == 0)
+        {
+            showopts |= SHOWOPT_DEVICE_IOCHANS;
+            continue;
+        }
+
+        /* Objaddr - show objects kernel memory address */
+
+        if (strcmp (argv[i], "-objaddr") == 0)
+        {
+            showopts |= SHOWOPT_OBJADDR;
+            continue;
+        }
+
+        /* Security */
+
+        if (strcmp (argv[i], "-security") == 0)
+        {
+            showopts |= SHOWOPT_SECURITY;
+            continue;
+        }
+
+        /* Unknown option */
+
+        if (*argv[i] == '-')
+        {
+            fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
+            return (SS$_IVPARAM);
+        }
+
+        /* No option - this is a device logical name */
+
+        x = 1;
+        sts = show_device_bylogical (h_output, h_error, argv[i], &showopts);
+        if (sts != SS$_NORMAL) break;
     }
 
-    /* Objaddr - show objects kernel memory address */
-
-    if (strcmp (argv[i], "-objaddr") == 0) {
-      showopts |= SHOWOPT_OBJADDR;
-      continue;
-    }
-
-    /* Security */
-
-    if (strcmp (argv[i], "-security") == 0) {
-      showopts |= SHOWOPT_SECURITY;
-      continue;
-    }
-
-    /* Unknown option */
-
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
-    }
-
-    /* No option - this is a device logical name */
-
-    x = 1;
-    sts = show_device_bylogical (h_output, h_error, argv[i], &showopts);
-    if (sts != SS$_NORMAL) break;
-  }
-
-  return (sts);
+    return (sts);
 }
 
 
@@ -5200,17 +5666,17 @@ static unsigned long int_show_device (unsigned long h_input, unsigned long h_out
 static unsigned long int_show_logical_name (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  const char *logical_name;
-  int i;
-  unsigned long sholnmflg, sts;
-  unsigned long h_logname, h_table;
+    const char *logical_name;
+    int i;
+    unsigned long sholnmflg, sts;
+    unsigned long h_logname, h_table;
 
-  logical_name = NULL;
-  sholnmflg    = 0;
+    logical_name = NULL;
+    sholnmflg    = 0;
 
-  sts = show_logical(argc, argv);
+    sts = show_logical(argc, argv);
 
-  return sts;
+    return sts;
 }
 
 
@@ -5223,106 +5689,113 @@ static unsigned long int_show_logical_name (unsigned long h_input, unsigned long
 static unsigned long int_show_system (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  int i;
-  unsigned long sts, showopts;
+    int i;
+    unsigned long sts, showopts;
 
-  showopts = 0;
+    showopts = 0;
 
-  sts = show_system (h_output, h_error, &showopts);
-  return (sts);
+    sts = show_system (h_output, h_error, &showopts);
+    return (sts);
 }
 #endif
 
 static unsigned long int_stop (int userarg)
 
 {
-  unsigned long sts;
+    unsigned long sts;
 
-  $DESCRIPTOR(p, "p1");
-  $DESCRIPTOR(d, "identification");
+    $DESCRIPTOR(p, "p1");
+    $DESCRIPTOR(d, "identification");
 
-  char c[80];
-  struct dsc$descriptor o;
-  o.dsc$a_pointer=c;
-  o.dsc$w_length=80;
-  memset (c, 0, 80);
+    char c[80];
+    struct dsc$descriptor o;
+    o.dsc$a_pointer=c;
+    o.dsc$w_length=80;
+    memset (c, 0, 80);
 
-  int retlen;
+    int retlen;
 
-  sts = cli$present(&d);
+    sts = cli$present(&d);
 
-  if (sts&1) {
-    sts = cli$get_value(&d, &o, &retlen);
-    unsigned int pid=strtol(c,0,16);
-    sys$forcex(&pid,0,42);
-  } else {
-    sts = cli$present(&p);
-    if (sts&1) {
-      sts = cli$get_value(&p, &o, &retlen);
-      struct dsc$descriptor nam;
-      nam.dsc$w_length=strlen(c);
-      nam.dsc$a_pointer=c;
-      sys$forcex(0,&nam,84);
+    if (sts&1)
+    {
+        sts = cli$get_value(&d, &o, &retlen);
+        unsigned int pid=strtol(c,0,16);
+        sys$forcex(&pid,0,42);
     }
-  }
-  return SS$_NORMAL;
+    else
+    {
+        sts = cli$present(&p);
+        if (sts&1)
+        {
+            sts = cli$get_value(&p, &o, &retlen);
+            struct dsc$descriptor nam;
+            nam.dsc$w_length=strlen(c);
+            nam.dsc$a_pointer=c;
+            sys$forcex(0,&nam,84);
+        }
+    }
+    return SS$_NORMAL;
 }
 
 static unsigned long int_set_working_set (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  int i;
-  unsigned long sts, showopts;
+    int i;
+    unsigned long sts, showopts;
 
-  showopts = 0;
+    showopts = 0;
 
-  sts = set_working_set (argc , argv);
-  return (sts);
+    sts = set_working_set (argc , argv);
+    return (sts);
 }
 
 
 static unsigned long int_show_working_set (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 
 {
-  int i;
-  unsigned long sts, showopts;
+    int i;
+    unsigned long sts, showopts;
 
-  showopts = 0;
+    showopts = 0;
 
-  sts = show_working_set (argc , argv);
-  return (sts);
+    sts = show_working_set (argc , argv);
+    return (sts);
 }
 
 static unsigned long int_exit                 (unsigned long h_input, unsigned long h_output, unsigned long h_error, char *name, void *dummy, int argc, const char *argv[])
 {
-  int i, usedup;
-  unsigned long exitst;
+    int i, usedup;
+    unsigned long exitst;
 
-  /* Always be sure to exit out of whatever script we're in */
+    /* Always be sure to exit out of whatever script we're in */
 
-  exit_script ();
+    exit_script ();
 
-  /* Now try to get the status from the command line */
+    /* Now try to get the status from the command line */
 
-  exitst = SS$_NORMAL;
+    exitst = SS$_NORMAL;
 
-  for (i = 0; i < argc; i ++) {
+    for (i = 0; i < argc; i ++)
+    {
 
-    /* Unknown option */
+        /* Unknown option */
 
-    if (*argv[i] == '-') {
-      fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
-      return (SS$_IVPARAM);
+        if (*argv[i] == '-')
+        {
+            fprintf (h_error, "oz_cli: unknown option %s\n", argv[i]);
+            return (SS$_IVPARAM);
+        }
+
+        /* No option - specify the status it will exit with */
+
+        exitst = oz_hw_atoi (argv[i], &usedup);
+        if (argv[i][usedup] != 0)
+        {
+            fprintf (h_error, "oz_cli: bad status value %s\n", argv[i]);
+            return (SS$_BADPARAM);
+        }
     }
 
-    /* No option - specify the status it will exit with */
-
-    exitst = oz_hw_atoi (argv[i], &usedup);
-    if (argv[i][usedup] != 0) {
-      fprintf (h_error, "oz_cli: bad status value %s\n", argv[i]);
-      return (SS$_BADPARAM);
-    }
-  }
-
-  return (exitst);
+    return (exitst);
 }

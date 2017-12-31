@@ -19,22 +19,22 @@ struct nfsd_linkage *nfsd_linkage = NULL;
 long
 asmlinkage sys_nfsservctl(int cmd, void *argp, void *resp)
 {
-	int ret = -ENOSYS;
-	
-	lock_kernel();
+    int ret = -ENOSYS;
 
-	if (nfsd_linkage ||
-	    (request_module ("nfsd") == 0 && nfsd_linkage))
-		ret = nfsd_linkage->do_nfsservctl(cmd, argp, resp);
+    lock_kernel();
 
-	unlock_kernel();
-	return ret;
+    if (nfsd_linkage ||
+            (request_module ("nfsd") == 0 && nfsd_linkage))
+        ret = nfsd_linkage->do_nfsservctl(cmd, argp, resp);
+
+    unlock_kernel();
+    return ret;
 }
 EXPORT_SYMBOL(nfsd_linkage);
 
 #elif ! defined (CONFIG_NFSD)
 asmlinkage int sys_nfsservctl(int cmd, void *argp, void *resp)
 {
-	return -ENOSYS;
+    return -ENOSYS;
 }
 #endif /* CONFIG_NFSD */

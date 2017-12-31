@@ -38,13 +38,14 @@
 #include "libdef.h"
 #include "lib$routines.h"	/* Our header file! */
 
-struct TIME {
+struct TIME
+{
     unsigned char time[8];
 };
 
 
 unsigned long lib$add_times(const void *time1a, const void *time2a,
-    void *result)
+                            void *result)
 {
     const struct TIME* time1 = (const struct TIME*) time1a;
     const struct TIME* time2 = (const struct TIME*) time2a;
@@ -52,22 +53,22 @@ unsigned long lib$add_times(const void *time1a, const void *time2a,
     if (time1->time[7] & 0x80)
     {
         if (time2->time[7] & 0x80)
-	{
+        {
             return lib$addx(time1,time2,result,NULL);
         }
-	else
-	{
+        else
+        {
             return lib$subx(time2,time1,result,NULL);
         }
     }
     else
     {
         if (time2->time[7] & 0x80)
-	{
+        {
             return lib$subx(time1,time2,result,NULL);
         }
-	else
-	{
+        else
+        {
             return LIB$_ONEDELTIM;
         }
     }

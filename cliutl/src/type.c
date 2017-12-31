@@ -130,10 +130,11 @@
 struct _fabdef cc$rms_fab = {NULL,0,NULL,NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL};
 struct _namdef cc$rms_nam = {0,0,0,0,0,0,0,0,0,0,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,NULL,0,0,0};
 struct _xabdatdef cc$rms_xabdat = {XAB$C_DAT,0,
-				   0, 0, 0, 0,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO,
-			       VMSTIME_ZERO, VMSTIME_ZERO};
+           0, 0, 0, 0,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO,
+           VMSTIME_ZERO, VMSTIME_ZERO
+};
 struct _xabfhcdef cc$rms_xabfhc = {XAB$C_FHC,0,0,0,0,0,0,0,0,0,0,0};
 struct _xabprodef1 cc$rms_xabpro = {XAB$C_PRO,0,0,0};
 struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
@@ -141,9 +142,10 @@ struct _rabdef cc$rms_rab = {NULL,NULL,NULL,NULL,0,0,0,{0,0,0}};
 
 #define PRINT_ATTR (FAB$M_CR | FAB$M_PRN | FAB$M_FTN)
 
-void main() {
-  printf("main is a dummy\n");
-  return 1;
+void main()
+{
+    printf("main is a dummy\n");
+    return 1;
 }
 
 #define MAXREC 32767
@@ -162,21 +164,24 @@ unsigned typ(int userarg)
     memset (c, 0, 80);
     sts = cli$present(&p);
     if ((sts&1)==0)
-      return sts;
+        return sts;
     int retlen;
     sts = cli$get_value(&p, &o, &retlen);
     int records = 0;
     struct _fabdef fab = cc$rms_fab;
     fab.fab$l_fna = c;
     fab.fab$b_fns = strlen(fab.fab$l_fna);
-    if ((sts = sys$open(&fab, 0, 0)) & 1) {
+    if ((sts = sys$open(&fab, 0, 0)) & 1)
+    {
         struct _rabdef rab = cc$rms_rab;
         rab.rab$l_fab = &fab;
-        if ((sts = sys$connect(&rab, 0, 0)) & 1) {
+        if ((sts = sys$connect(&rab, 0, 0)) & 1)
+        {
             char rec[MAXREC + 2];
             rab.rab$l_ubf = rec;
             rab.rab$w_usz = MAXREC;
-            while ((sts = sys$get(&rab, 0, 0)) & 1) {
+            while ((sts = sys$get(&rab, 0, 0)) & 1)
+            {
                 unsigned rsz = rab.rab$w_rsz;
                 if (fab.fab$b_rat & PRINT_ATTR) rec[rsz++] = '\n';
                 rec[rsz++] = '\0';
@@ -188,7 +193,8 @@ unsigned typ(int userarg)
         sys$close(&fab, 0, 0);
         if (sts == RMS$_EOF) sts = 1;
     }
-    if ((sts & 1) == 0) {
+    if ((sts & 1) == 0)
+    {
         printf("%%TYPE-F-ERROR Status: %d\n",sts);
     }
     return sts;

@@ -125,48 +125,50 @@ typedef __u32 int32;
  * we saw from the conversation together with a small identifier
  * the transmit & receive ends of the line use to locate saved header.
  */
-struct cstate {
-	byte_t	cs_this;	/* connection id number (xmit) */
-	struct cstate *next;	/* next in ring (xmit) */
-	struct iphdr cs_ip;	/* ip/tcp hdr from most recent packet */
-	struct tcphdr cs_tcp;
-	unsigned char cs_ipopt[64];
-	unsigned char cs_tcpopt[64];
-	int cs_hsize;
+struct cstate
+{
+    byte_t	cs_this;	/* connection id number (xmit) */
+    struct cstate *next;	/* next in ring (xmit) */
+    struct iphdr cs_ip;	/* ip/tcp hdr from most recent packet */
+    struct tcphdr cs_tcp;
+    unsigned char cs_ipopt[64];
+    unsigned char cs_tcpopt[64];
+    int cs_hsize;
 };
 #define NULLSLSTATE	(struct cstate *)0
 
 /*
  * all the state data for one serial line (we need one of these per line).
  */
-struct slcompress {
-	struct cstate *tstate;	/* transmit connection states (array)*/
-	struct cstate *rstate;	/* receive connection states (array)*/
+struct slcompress
+{
+    struct cstate *tstate;	/* transmit connection states (array)*/
+    struct cstate *rstate;	/* receive connection states (array)*/
 
-	byte_t tslot_limit;	/* highest transmit slot id (0-l)*/
-	byte_t rslot_limit;	/* highest receive slot id (0-l)*/
+    byte_t tslot_limit;	/* highest transmit slot id (0-l)*/
+    byte_t rslot_limit;	/* highest receive slot id (0-l)*/
 
-	byte_t xmit_oldest;	/* oldest xmit in ring */
-	byte_t xmit_current;	/* most recent xmit id */
-	byte_t recv_current;	/* most recent rcvd id */
+    byte_t xmit_oldest;	/* oldest xmit in ring */
+    byte_t xmit_current;	/* most recent xmit id */
+    byte_t recv_current;	/* most recent rcvd id */
 
-	byte_t flags;
+    byte_t flags;
 #define SLF_TOSS	0x01	/* tossing rcvd frames until id received */
 
-	int32 sls_o_nontcp;	/* outbound non-TCP packets */
-	int32 sls_o_tcp;	/* outbound TCP packets */
-	int32 sls_o_uncompressed;	/* outbound uncompressed packets */
-	int32 sls_o_compressed;	/* outbound compressed packets */
-	int32 sls_o_searches;	/* searches for connection state */
-	int32 sls_o_misses;	/* times couldn't find conn. state */
+    int32 sls_o_nontcp;	/* outbound non-TCP packets */
+    int32 sls_o_tcp;	/* outbound TCP packets */
+    int32 sls_o_uncompressed;	/* outbound uncompressed packets */
+    int32 sls_o_compressed;	/* outbound compressed packets */
+    int32 sls_o_searches;	/* searches for connection state */
+    int32 sls_o_misses;	/* times couldn't find conn. state */
 
-	int32 sls_i_uncompressed;	/* inbound uncompressed packets */
-	int32 sls_i_compressed;	/* inbound compressed packets */
-	int32 sls_i_error;	/* inbound error packets */
-	int32 sls_i_tossed;	/* inbound packets tossed because of error */
+    int32 sls_i_uncompressed;	/* inbound uncompressed packets */
+    int32 sls_i_compressed;	/* inbound compressed packets */
+    int32 sls_i_error;	/* inbound error packets */
+    int32 sls_i_tossed;	/* inbound packets tossed because of error */
 
-	int32 sls_i_runt;
-	int32 sls_i_badcheck;
+    int32 sls_i_runt;
+    int32 sls_i_badcheck;
 };
 #define NULLSLCOMPR	(struct slcompress *)0
 
@@ -177,12 +179,12 @@ struct slcompress *slhc_init __ARGS((int rslots, int tslots));
 void slhc_free __ARGS((struct slcompress *comp));
 
 int slhc_compress __ARGS((struct slcompress *comp, unsigned char *icp,
-			  int isize, unsigned char *ocp, unsigned char **cpp,
-			  int compress_cid));
+                          int isize, unsigned char *ocp, unsigned char **cpp,
+                          int compress_cid));
 int slhc_uncompress __ARGS((struct slcompress *comp, unsigned char *icp,
-			    int isize));
+                            int isize));
 int slhc_remember __ARGS((struct slcompress *comp, unsigned char *icp,
-			  int isize));
+                          int isize));
 int slhc_toss __ARGS((struct slcompress *comp));
 
 void slhc_i_status __ARGS((struct slcompress *comp));

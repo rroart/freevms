@@ -1,19 +1,21 @@
 #ifndef ossdef_h
 #define ossdef_h
- 
+
 #define OSS$M_WLOCK 0x1
 #define OSS$M_RELCTX 0x2
 #define OSS$M_LOCAL 0x4
-	
-struct _ossdef {
-  struct  {
-    unsigned oss$v_wlock		: 1;
-    unsigned oss$v_relctx		: 1;
-    unsigned oss$v_local		: 1;
-    unsigned oss$v_fill_47_		: 5;
-  };
+
+struct _ossdef
+{
+    struct
+    {
+        unsigned oss$v_wlock		: 1;
+        unsigned oss$v_relctx		: 1;
+        unsigned oss$v_local		: 1;
+        unsigned oss$v_fill_47_		: 5;
+    };
 };
- 
+
 #define		OSS$_ACCESS_NAMES		1
 #define		OSS$_ACCESS_NAMES_LENGTH	2
 #define		OSS$_ACL_ADD_ENTRY		3
@@ -57,5 +59,5 @@ struct _ossdef {
 #define		OSS$_ACL_FNDTYP			9
 #define		OSS$_ACL_MODACE			12
 #define		OSS$_ACL_READACE		16
-	
+
 #endif

@@ -11,11 +11,12 @@
 #define VM_IOREMAP	0x00000001	/* ioremap() and friends */
 #define VM_ALLOC	0x00000002	/* vmalloc() */
 
-struct vm_struct {
-	unsigned long flags;
-	void * addr;
-	unsigned long size;
-	struct vm_struct * next;
+struct vm_struct
+{
+    unsigned long flags;
+    void * addr;
+    unsigned long size;
+    struct vm_struct * next;
 };
 
 extern struct vm_struct * get_vm_area (unsigned long size, unsigned long flags);
@@ -29,10 +30,10 @@ extern int vmalloc_area_pages(unsigned long address, unsigned long size,
 /*
  *	Allocate any pages
  */
- 
+
 static inline void * vmalloc (unsigned long size)
 {
-	return __vmalloc(size, GFP_KERNEL | __GFP_HIGHMEM, PAGE_KERNEL);
+    return __vmalloc(size, GFP_KERNEL | __GFP_HIGHMEM, PAGE_KERNEL);
 }
 
 /*
@@ -41,16 +42,16 @@ static inline void * vmalloc (unsigned long size)
 
 static inline void * vmalloc_dma (unsigned long size)
 {
-	return __vmalloc(size, GFP_KERNEL|GFP_DMA, PAGE_KERNEL);
+    return __vmalloc(size, GFP_KERNEL|GFP_DMA, PAGE_KERNEL);
 }
 
 /*
  *	vmalloc 32bit PA addressable pages - eg for PCI 32bit devices
  */
- 
+
 static inline void * vmalloc_32(unsigned long size)
 {
-	return __vmalloc(size, GFP_KERNEL, PAGE_KERNEL);
+    return __vmalloc(size, GFP_KERNEL, PAGE_KERNEL);
 }
 
 /*

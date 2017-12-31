@@ -27,22 +27,25 @@
 #define		JPI$M_NATURAL_PERSONA	0x10
 #define		JPI$M_FILL1		0x7FE0
 #define		JPI$M_NEED_THREAD_CAP	0x8000
-	
-struct _jpictldef {
-  union  {
-    unsigned int jpi$l_jpictlflgs;
-    struct  {
-      unsigned jpi$v_no_target_inswap		: 1;
-      unsigned jpi$v_no_target_ast		: 1;
-      unsigned jpi$v_ignore_target_status	: 1;
-      unsigned jpi$v_thread		        : 1;
-      unsigned jpi$v_natural_persona		: 1;
-      unsigned jpi$v_fill1		        : 10;
-      unsigned jpi$v_need_thread_cap		: 1;
+
+struct _jpictldef
+{
+    union
+    {
+        unsigned int jpi$l_jpictlflgs;
+        struct
+        {
+            unsigned jpi$v_no_target_inswap		: 1;
+            unsigned jpi$v_no_target_ast		: 1;
+            unsigned jpi$v_ignore_target_status	: 1;
+            unsigned jpi$v_thread		        : 1;
+            unsigned jpi$v_natural_persona		: 1;
+            unsigned jpi$v_fill1		        : 10;
+            unsigned jpi$v_need_thread_cap		: 1;
+        };
     };
-  };
 };
- 
+
 #define		JPI$K_OTHER		0
 #define		JPI$K_NETWORK		1
 #define		JPI$K_BATCH		2
@@ -59,23 +62,26 @@ struct _jpictldef {
 #define		JPI$M_PASSWORD2_CHANGED		0x10
 #define		JPI$M_PASSWORD2_EXPIRED		0x20
 #define		JPI$M_PASSWORD2_WARNING		0x40
-	
-struct _jpilgidef {
-  union  {
-    unsigned int jpi$l_jpilgiflgs;
-    struct  {
-      unsigned jpi$v_new_mail_at_login		: 1;
-      unsigned jpi$v_password_changed		: 1;
-      unsigned jpi$v_password_expired		: 1;
-      unsigned jpi$v_password_warning		: 1;
-      unsigned jpi$v_password2_changed		: 1;
-      unsigned jpi$v_password2_expired		: 1;
-      unsigned jpi$v_password2_warning		: 1;
-      unsigned jpi$v_fill_64_		        : 1;
+
+struct _jpilgidef
+{
+    union
+    {
+        unsigned int jpi$l_jpilgiflgs;
+        struct
+        {
+            unsigned jpi$v_new_mail_at_login		: 1;
+            unsigned jpi$v_password_changed		: 1;
+            unsigned jpi$v_password_expired		: 1;
+            unsigned jpi$v_password_warning		: 1;
+            unsigned jpi$v_password2_changed		: 1;
+            unsigned jpi$v_password2_expired		: 1;
+            unsigned jpi$v_password2_warning		: 1;
+            unsigned jpi$v_fill_64_		        : 1;
+        };
     };
-  };
 };
- 
+
 #define		JPI$_ASTACT		768
 #define		JPI$_ASTEN		769
 #define		JPI$_PRI		770
@@ -250,6 +256,6 @@ struct _jpilgidef {
 #define		JPI$_LASTPCBFLD		1280
 
 #define		JPI$_LASTPHDFLD		1536
- 
+
 #endif
- 
+

@@ -39,28 +39,31 @@
 #include "edt.h"
 
 static const char *const chartable[32] = { "<NUL>", "^A",   "^B",   "^C",    "^D",   "^E",   "^F", "^G",
-                                            "<BS>", "<HT>", "<LF>", "<VT>",  "<FF>", "<CR>", "^N", "^O",
-                                              "^P", "^Q",   "^R",   "^S",    "^T",   "^U",   "^V", "^W",
-                                              "^X", "^Y",   "^Z",   "<ESC>", "^\\",  "^]",   "^^", "^_" };
+        "<BS>", "<HT>", "<LF>", "<VT>",  "<FF>", "<CR>", "^N", "^O",
+        "^P", "^Q",   "^R",   "^S",    "^T",   "^U",   "^V", "^W",
+        "^X", "^Y",   "^Z",   "<ESC>", "^\\",  "^]",   "^^", "^_"
+                                         };
 
 const char *representation (char c, char temp[16], int col)
 
 {
-  const char *strp;
+    const char *strp;
 
-  strp = temp;
+    strp = temp;
 
-  if (c & 0x80) sprintf (temp, "<x%2.2x>", c & 0xff);	/* chars with <7> set get displayed in hexadecimal */
-  else if (c == 127) strp = "<DEL>";			/* rubouts get displayed as <DEL> */
-  else if (c == 9) {					/* tabs ... */
-    memset (temp, ' ', 8);				/* ... get displayed as a number of spaces */
-    temp[8-(col&7)] = 0;				/* ... depending on what column we're in */
-  }
-  else if (c < 32) strp = chartable[c];			/* control chars are a string from the table */
-  else {
-    temp[0] = c;					/* everything else gets displayed as is */
-    temp[1] = 0;
-  }
+    if (c & 0x80) sprintf (temp, "<x%2.2x>", c & 0xff);	/* chars with <7> set get displayed in hexadecimal */
+    else if (c == 127) strp = "<DEL>";			/* rubouts get displayed as <DEL> */
+    else if (c == 9)  					/* tabs ... */
+    {
+        memset (temp, ' ', 8);				/* ... get displayed as a number of spaces */
+        temp[8-(col&7)] = 0;				/* ... depending on what column we're in */
+    }
+    else if (c < 32) strp = chartable[c];			/* control chars are a string from the table */
+    else
+    {
+        temp[0] = c;					/* everything else gets displayed as is */
+        temp[1] = 0;
+    }
 
-  return (strp);
+    return (strp);
 }

@@ -18,13 +18,18 @@
 #define NO_DOLLAR
 #include "mytypes.h"
 
+#include <fatdef.h>
+#include <fiddef.h>
+#include <uicdef.h>
+
 #define FH2$M_NOBACKUP   0x2
 #define FH2$M_CONTIG     0x80
 #define FH2$M_DIRECTORY  0x2000
 #define FH2$M_MARKDEL    0x8000
 #define FH2$M_ERASE      0x20000
 
-struct _fh2 {
+struct _fh2
+{
     vmsbyte fh2$b_idoffset;
     vmsbyte fh2$b_mpoffset;
     vmsbyte fh2$b_acoffset;

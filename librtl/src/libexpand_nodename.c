@@ -25,7 +25,7 @@
  *				Andrew Allison
  *				50 Denlaw Road
  *				London, Ont
- *				Canada 
+ *				Canada
  *				N6G 3L4
  *
  *
@@ -39,17 +39,17 @@
  * History
  *
  *	Mar 20, 2004 - Andrew Allison
- * 	 	Initial program creation	
+ * 	 	Initial program creation
  */
 #include "descrip.h"
 #include "lib$routines.h"
 
 
 unsigned long lib$expand_nodename (const struct dsc$descriptor_s *name,
-					struct dsc$descriptor_s  *xname,
-					unsigned short *xname_len)
+                                   struct dsc$descriptor_s  *xname,
+                                   unsigned short *xname_len)
 
 {
 
-return 0;
+    return 0;
 }

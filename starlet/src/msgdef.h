@@ -107,6 +107,6 @@
 #define		MSG$_OPCFAO		124
 
 #define		MSG$_QMAN_INTERNAL	200
-		
+
 #endif
-		
+
