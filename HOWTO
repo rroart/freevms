@@ -13,7 +13,7 @@ Install build-essential wget ncftp flex-old bzip2 binutils-dev libc6-dev libelfg
 There are no config options.
 
 Example build i386:
-git clone git@github.com:/rroart/freevms.git (or pull)
+git clone https://github.com/rroart/freevms.git (or pull)
 cd freevms
 ./envscript
 cd ..
