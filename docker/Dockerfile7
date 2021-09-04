@@ -1,0 +1,21 @@
+FROM debian/eol:wheezy
+MAINTAINER <roart@nvg.ntnu.no>
+
+RUN apt-get update
+RUN apt-get install -y build-essential wget ncftp flex-old bzip2 binutils-dev libc6-dev libelfg0-dev libc6-pic sash bash-static doxygen dejagnu bison
+RUN cd /tmp
+RUN apt-get install -y git
+RUN git clone https://github.com/rroart/freevms.git
+WORKDIR /tmp
+RUN wget archive.debian.org/debian-amd64/pool/main/m/modutils/modutils_2.4.26-1.2_amd64.deb
+RUN dpkg -i --force-overwrite modutils_2.4.26-1.2_amd64.deb
+WORKDIR /freevms
+RUN ./envscript
+WORKDIR /freevmsx86_64.iomm
+#RUN make doxygen
+RUN make bzImage
+RUN make vmsall
+RUN make rootinstall
+#RUN make image
+#RUN make image-install
+#RUN make image-kernel-iomm

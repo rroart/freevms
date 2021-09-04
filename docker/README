@@ -1,0 +1,2 @@
+docker build -t buildimage6 -f Dockerfile6 .
+docker build -t buildimage7 -f Dockerfile7 .
