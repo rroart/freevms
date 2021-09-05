@@ -5,6 +5,7 @@ virt-install \
   --disk size=4 \
   --os-variant debianwheezy \
   --location http://archive.debian.org/debian/dists/wheezy/main/installer-amd64 \
+  --initrd-inject=build.sh \
   --initrd-inject=fv.preseed.cfg \
   --extra-args="preseed/file=/fv.preseed.cfg" \
   --unattended \
