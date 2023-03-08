@@ -2,6 +2,7 @@ TODO:
 (With the risk of things here being outdated)
 
 Build environment (I1).
+Upgrade (I2).
 
 Misc:
 Check use of relative queues; is fork use of & correct?

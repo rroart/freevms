@@ -31,7 +31,6 @@
 #include <linux/fcntl.h>
 #include <linux/ptrace.h>
 #include <linux/slab.h>
-#include <linux/shm.h>
 #include <linux/personality.h>
 #include <linux/elfcore.h>
 #include <linux/init.h>

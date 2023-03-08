@@ -15,7 +15,6 @@
 #include <linux/smp_lock.h>
 #include <linux/sem.h>
 #include <linux/msg.h>
-#include <linux/shm.h>
 #include <linux/stat.h>
 #include <linux/mman.h>
 #include <linux/file.h>

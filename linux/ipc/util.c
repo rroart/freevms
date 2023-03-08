@@ -12,7 +12,6 @@
 
 #include <linux/config.h>
 #include <linux/mm.h>
-#include <linux/shm.h>
 #include <linux/init.h>
 #include <linux/msg.h>
 #include <linux/smp_lock.h>

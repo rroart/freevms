@@ -51,6 +51,8 @@ CFLAGS += $(call check_gcc,-mpreferred-stack-boundary=3,)
 CFLAGS += -mno-red-zone
 CFLAGS += -mcmodel=kernel
 CFLAGS += -pipe
+CFLAGS += -fno-pie
+CFLAGS += -include $(TOPDIR)/linux/include/linux/compiler_types.h
 #CFLAGS += -fno-reorder-blocks
 # needed for later gcc 3.1
 # not in 3.16

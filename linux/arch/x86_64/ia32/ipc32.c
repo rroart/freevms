@@ -11,6 +11,8 @@
 #include <linux/sem.h>
 #include <linux/msg.h>
 #include <linux/mm.h>
+#define __kernel_fsid_t
+#include <asm-generic/posix_types.h>
 #include <linux/shm.h>
 #include <linux/slab.h>
 #include <linux/ipc.h>

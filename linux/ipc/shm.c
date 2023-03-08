@@ -23,6 +23,8 @@
 
 #include <linux/config.h>
 #include <linux/slab.h>
+#define __kernel_fsid_t
+#include <asm-generic/posix_types.h>
 #include <linux/shm.h>
 #include <linux/init.h>
 #include <linux/file.h>

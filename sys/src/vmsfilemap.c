@@ -18,7 +18,6 @@
 #include <linux/config.h>
 #include <linux/module.h>
 #include <linux/slab.h>
-#include <linux/shm.h>
 #include <linux/mman.h>
 #include <linux/locks.h>
 #include <linux/pagemap.h>

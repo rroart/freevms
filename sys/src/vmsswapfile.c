@@ -18,7 +18,6 @@
 #include <linux/blkdev.h> /* for blk_size */
 #include <linux/vmalloc.h>
 #include <linux/pagemap.h>
-#include <linux/shm.h>
 #include <linux/compiler.h>
 
 #include <asm/pgtable.h>

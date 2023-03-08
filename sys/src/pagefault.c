@@ -6,7 +6,6 @@
 
 #include <linux/config.h>
 #include <linux/slab.h>
-#include <linux/shm.h>
 #include <linux/mman.h>
 #include <linux/pagemap.h>
 #include <linux/smp_lock.h>
