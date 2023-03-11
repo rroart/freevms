@@ -21,7 +21,7 @@ OBJS_CDU_PIC = $(addprefix pic/,$(OBJS_CDU))
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 cdu:  cli.o elf.o cli.h main.o $(OBJS_CDU)
-	gcc  -g -static main.o $(OBJS_CDU) -ldl -liberty -lelf $(VMSLIBS) -o cdu
+	gcc  -g main.o $(OBJS_CDU) -ldl -liberty -lelf $(VMSLIBS) -o cdu 
 
 #cdu2.a: $(OBJS2)
 #	ar r cdu2.a $(OBJS2)
@@ -42,7 +42,7 @@ clilex.o: clilex.c
 	$(CC) -g $(EXTRA_CFLAGS) -I../../librtl/src -I../../starlet/src -c -o clilex.o clilex.c
 
 %.o: %.c cli.h
-	gcc -g -c $(CFLAGS) ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c $(CFLAGS) ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@ -include $(TOPDIR)/linux/include/linux/user_compiler_types.h
 
 pic/%.o: %.c 
 	install -d pic
@@ -50,13 +50,10 @@ pic/%.o: %.c
 
 parse.h: parse.c parse.y
 parse.c: parse.y
-	if $(BISON) -v $(BISONFLAGS) -d -o p$$$$.c parse.y; then \
-		grep '^#define[       ]*YYEMPTY' p$$$$.c >> p$$$$.h ; \
-		test -f p$$$$.output && mv -f p$$$$.output parse.output ; \
-		mv -f p$$$$.c parse.c ; mv -f p$$$$.h parse.h ; \
+	if $(BISON) -v $(BISONFLAGS) -d -o parse.c parse.y; then \
+		grep '^#define[       ]*YYEMPTY' parse.c >> parse.h ; \
 	else \
-		rm -f p$$$$.* ; \
-		false ; \
+		rm -f parse.c ; \
         fi
 
 lex.c: lex.l parse.h

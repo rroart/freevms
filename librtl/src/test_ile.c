@@ -17,14 +17,14 @@
 #define lib$signal(a) exit(a)
 #endif
 
-inline int exe_std$probew(const void *p, unsigned long long size, int mode)
+int exe_std$probew(const void *p, unsigned long long size, int mode)
 {
     unsigned int status = SS$_NORMAL;
 //    if (!__PAL_PROBEW(p,size-1,mode)) status = SS$_ACCVIO;
     return status;
 }
 
-inline int exe_std$prober(const void *p, unsigned long long size, int mode)
+int exe_std$prober(const void *p, unsigned long long size, int mode)
 {
     unsigned int status = SS$_NORMAL;
 //    if (!__PAL_PROBER(p,size-1,mode)) status = SS$_ACCVIO;
@@ -173,7 +173,7 @@ int parse_ile(const void **itmp,				/* Item list work pointer */
 ** store_retlen() - used to return the return length
 */
 
-inline void store_retlen(int type, void *retlen_addr, unsigned long long retlen)
+void store_retlen(int type, void *retlen_addr, unsigned long long retlen)
 {
     if (retlen_addr)						/* If they want the return length */
     {

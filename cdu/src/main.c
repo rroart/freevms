@@ -92,7 +92,7 @@ alloc_cdu(int t)
         printf("cdu_root overflow\n");
         exit(0);
     }
-    int a = &parse_cdu_root[b];
+    long a = &parse_cdu_root[b];
     memset(a,0,sizeof(struct _cdu));
     parse_cdu_root[b].cdu$b_type=t;
     return b;
@@ -367,7 +367,7 @@ next:
 
 genwrite()
 {
-    int out;
+    long out;
     if (module_name)
     {
         int len = strlen(module_name);

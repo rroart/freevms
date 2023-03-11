@@ -35,9 +35,15 @@ EOF
 
 dd if=/dev/zero count=131072 of=c.img
 
-sfdisk -C 8 -H 255 -S 63 c.img  << EOF
-c.img1 : start=        0, size=        4, Id= 83
-c.img2 : start=        4, size=        4, Id= 2a
+sfdisk c.img  << EOF
+label: dos
+label-id: 0x00000000
+device: c.img
+unit: sectors
+sector-size: 512
+
+c.img1 : start=           1, size=       64259, type=83
+c.img2 : start=       64260, size=       64260, type=2a
 EOF
 
 losetup -o 512 /dev/loop0 c.img

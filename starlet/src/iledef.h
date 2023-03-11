@@ -60,7 +60,7 @@ struct _ilea_64
 #define ILEA_64$C_LENGTH sizeof(struct _ilea_64)
 
 #define $is_itmlst64 _is_itmlst64
-inline int _is_itmlst64(const void *item_list)
+static inline int _is_itmlst64(const void *item_list)
 {
     return ((const struct _ilea_64 *)item_list)->ilea_64$w_mbo == 1 &&
            ((const struct _ilea_64 *)item_list)->ilea_64$l_mbmo == -1;

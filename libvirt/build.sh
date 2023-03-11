@@ -7,6 +7,7 @@ git clone https://github.com/rroart/freevms.git
 cd /tmp/freevms
 ./envscript
 cd /tmp/freevmsx86_64.iomm
+sed -e "s/extern/static/" -i freevmsx86_64.iomm/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/include/sys/sysmacros.h
 #make doxygen
 make bzImage
 make vmsall

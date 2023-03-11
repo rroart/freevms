@@ -9,7 +9,20 @@
 #include <misc.h>
 #include <cli$routines.h>
 
+void spin_lock(int * i) { }
+
+void spin_unlock(int * i) { }
+
+void write_lock(int * i) { }
+
+void write_unlock(int * i) { }
+
 #define __KERNEL__
+#define __ASM_SPINLOCK_H
+typedef struct { } spinlock_t;
+typedef struct { } rwlock_t;
+spinlock_t mylock;
+#define SPIN_LOCK_UNLOCKED mylock
 #include <linux/types.h>
 #include <linux/posix_types.h>
 #include <linux/sched.h>
@@ -143,3 +156,5 @@ int sda$show_process(int mask)
 #endif
     printf("\n");
 }
+
+void __this_fixmap_does_not_exist(void) { }

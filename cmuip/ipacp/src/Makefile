@@ -22,7 +22,7 @@ install: all
 	install -d ../../../rooti386/vms"$$"common/sysexe
 	install i386/ipacp ../../../rooti386/vms"$$"common/sysexe
 
-CFLAGS_NOKERNEL =  $(CFLAGS) -I$(TOPDIR)/cmuip/central/include -I$(TOPDIR)/linux/include -I$(TOPDIR) -DNOKERNEL -D__KERNEL__
+CFLAGS_NOKERNEL =  $(CFLAGS) -I$(TOPDIR)/cmuip/central/include -I$(TOPDIR)/linux/include -I$(TOPDIR) -DNOKERNEL -D__KERNEL__ -include $(TOPDIR)/linux/include/linux/compiler_types.h
 
 nokernel_objs := $(addprefix nokernel/,$(obj-y2))
 nokernel/%.o: %.c 

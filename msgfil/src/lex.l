@@ -36,7 +36,7 @@
 
   char * s;
 
-  YYSTYPE yylval;
+  extern YYSTYPE yylval;
   unsigned int intern_hash_size=0;
   unsigned int estimated_token_count=0;
 

@@ -35,7 +35,7 @@ OBJS =	\
 
 OBJS_PIC = $(addprefix pic/,$(OBJS))
 
-CC = gcc -g -O2 -c $(CFLAGS)
+CC = gcc -g -O2 -c $(CFLAGS) -include $(TOPDIR)/linux/include/linux/user_compiler_types.h
 
 EXTERNAL =
 

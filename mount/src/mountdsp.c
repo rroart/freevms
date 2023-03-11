@@ -3,9 +3,11 @@
 
 // Author. Roar Thronæs.
 
+#define __KERNEL__
 #include<linux/unistd.h>
 #include<linux/linkage.h>
 #include<linux/mm.h>
+#undef __KERNEL__
 
 #include <mytypes.h>
 #include <misc.h>
@@ -17,8 +19,10 @@
 #include "../../rms/src/cache.h"
 #include "../../rms/src/access.h"
 #endif
+#define __KERNEL__
 #include <linux/slab.h>
 #include <misc_routines.h>
+#undef __KERNEL__
 
 static struct
 {

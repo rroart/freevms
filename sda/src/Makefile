@@ -61,7 +61,7 @@ pic/sda_lock.o: sda_lock.c
 	$(MODELGCC) $(MODEL) -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ -I../../sys/src/ $< -o $@
 
 sda_addr.o: sda_addr.c
-	$(MODELGCC) $(MODEL) -g -c $(CFLAGS) $< -o $@
+	$(MODELGCC) $(MODEL) -g -c $(CFLAGS) $< -o $@ -include $(TOPDIR)/linux/include/linux/user_compiler_types.h
 
 pic/sda_addr.o: sda_addr.c
 	install -d pic

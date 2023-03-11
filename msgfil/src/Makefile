@@ -16,7 +16,7 @@ install: all
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
 message: parse.o lex.o main.o msgmain.o tree.o stringpool.o hashtable.o msg-lang.o msg.o msg.h
-	gcc  -g -static parse.o lex.o main.o msgmain.o tree.o stringpool.o hashtable.o msg-lang.o msg.o -ldl -liberty $(VMSLIBS) -o message
+	gcc  -g parse.o lex.o main.o msgmain.o tree.o stringpool.o hashtable.o msg-lang.o msg.o -ldl -liberty $(VMSLIBS) -o message
 
 message2.a: msg2.o
 	ar r msg2.a msg2.o
@@ -32,13 +32,10 @@ parse.o: parse.c
 
 parse.h: parse.c parse.y
 parse.c: parse.y
-	if $(BISON) -v $(BISONFLAGS) -d -o p$$$$.c parse.y; then \
-		grep '^#define[       ]*YYEMPTY' p$$$$.c >> p$$$$.h ; \
-		test -f p$$$$.output && mv -f p$$$$.output parse.output ; \
-		mv -f p$$$$.c parse.c ; mv -f p$$$$.h parse.h ; \
+	if $(BISON) -v $(BISONFLAGS) -d -o parse.c parse.y; then \
+		grep '^#define[       ]*YYEMPTY' parse.c >> parse.h ; \
 	else \
-		rm -f p$$$$.* ; \
-		false ; \
+		rm -f parse.c ; \
         fi
 
 lex.c: lex.l parse.h
