@@ -90,3 +90,11 @@ Do m-a prepare, m-a update, m-a get ods2, m-a a-i ods2.
 Run the following after you have got a working system on ext2:
 dcl/src/install.sh
 
+****
+
+Debugging:
+
+qemu-system-x86_64 -S -s -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none
+gdb 
+(gdb) target remote localhost:1234
+(gdb) symbol-file linux/vmlinux
