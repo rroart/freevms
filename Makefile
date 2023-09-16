@@ -88,6 +88,9 @@ export EXTERNAL_PIC = $(TOPDIR)/cdu/src/cdu_pic.a
 export EXTERNAL2 = $(TOPDIR)/cdu/src/cdu2.a
 export EXTERNAL2_PIC = $(TOPDIR)/cdu/src/cdu2_pic.a
 
+export NEWLIBC = /lib/x86_64-linux-gnu/libc.a
+export OLDLIBGCCDIR = $(TOPDIR)/debian/gcc-3.3/usr/lib/gcc-lib/x86_64-linux-gnu/3.3.6
+
 #
 # standard CFLAGS
 #

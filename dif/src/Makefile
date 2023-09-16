@@ -20,7 +20,7 @@ pic/%.o: %.c
 
 i386/diff${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL)
 	install -d i386
-	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) -o i386/diff${NOEXE}
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) $(NEWLIBC) -o i386/diff${NOEXE}
 
 i386/diff${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC)
 	ld -Bshareable $(OBJS_PIC) $(VMSLIBS_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o i386/diff${EXE_ELF}

@@ -28,7 +28,7 @@ parse.o: parse.c
 	$(CC) -g $(EXTRA_CFLAGS) -c -o parse.o parse.c
 
 %.o: %.c msg.h
-	gcc -g -c $(CFLAGS) ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c $(CFLAGS) ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@ -include $(TOPDIR)/linux/include/linux/user_compiler_types.h
 
 parse.h: parse.c parse.y
 parse.c: parse.y

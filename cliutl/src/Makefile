@@ -48,7 +48,7 @@ pic/%.o: %.c
 
 i386/create${NOEXE}: create.o $(VMSLIBS) $(EXTERNAL)
 	install -d i386
-	gcc $(FLAGS) -g create.o -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) -o i386/create${NOEXE}
+	gcc $(FLAGS) -g create.o -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) $(NEWLIBC) -o i386/create${NOEXE} 
 
 i386/create${EXE_ELF}: pic/create.o $(VMSLIBS_PIC) $(EXTERNAL_PIC)
 	ld -Bshareable pic/create.o $(VMSLIBS_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o i386/create${EXE_ELF}
@@ -59,7 +59,7 @@ i386/create${EXE}: create.o $(VMSLIBS) $(EXTERNAL)
 
 i386/type${NOEXE}: $(VMSLIBS) type.o $(EXTERNAL)
 	install -d i386
-	gcc -g -static type.o -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) -o i386/type${NOEXE}
+	gcc -g -static type.o -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) $(NEWLIBC) -o i386/type${NOEXE}
 
 i386/type${EXE_ELF}: $(VMSLIBS_PIC) pic/type.o $(EXTERNAL_PIC)
 	ld -Bshareable pic/type.o $(VMSLIBS_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o i386/type${EXE_ELF}
@@ -70,10 +70,10 @@ i386/type${EXE}: $(VMSLIBS) type.o $(EXTERNAL)
 
 i386/show${NOEXE}: show.a showmain.o $(VMLINUX)
 	install -d i386
-	gcc -g -static showmain.o show.a -L$(OLDLIBCDIR) -lc $(VMSLIBS) $(EXTERNAL) $(LINKVMLINUX) -o i386/show${NOEXE}
+	gcc -g -static showmain.o show.a -L$(OLDLIBCDIR) $(NEWLIBC) $(VMSLIBS) $(EXTERNAL) $(LINKVMLINUX) -o i386/show${NOEXE}
 
 i386/set${NOEXE}: set.a setmain.o $(VMLINUX)
 	install -d i386
-	gcc -g -static setmain.o set.a -L$(OLDLIBCDIR) -lc $(VMSLIBS) $(EXTERNAL) $(LINKVMLINUX) -o i386/set${NOEXE}
+	gcc -g -static setmain.o set.a -L$(OLDLIBCDIR) $(NEWLIBC) $(VMSLIBS) $(EXTERNAL) $(LINKVMLINUX) -o i386/set${NOEXE}
 
 include $(TOPDIR)/Rules.make.freevms

@@ -42,7 +42,7 @@ LINKVMLINUX = -Wl,--just-symbols=../../../linux/vmlinux
 
 i386/ipacp${NOEXE}: $(OBJS) $(VMSLIBS) $(EXTERNAL) $(VMLINUX)
 	install -d i386
-	gcc -s -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) $(EXTERNAL) $(VMSLIBS) $(CHECKSUM) -lc $(LINKVMLINUX) -o i386/ipacp${NOEXE}
-	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) $(EXTERNAL) $(VMSLIBS) $(CHECKSUM) -lc $(LINKVMLINUX) -o i386/ipacpd${NOEXE}
+	gcc -s -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) -L$(OLDLIBGCCDIR) $(EXTERNAL) $(VMSLIBS) $(CHECKSUM) -lc $(LINKVMLINUX) -o i386/ipacp${NOEXE}
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) -L$(OLDLIBGCCDIR) $(EXTERNAL) $(VMSLIBS) $(CHECKSUM) -lc $(LINKVMLINUX) -o i386/ipacpd${NOEXE}
 
 include $(TOPDIR)/Rules.make.freevms

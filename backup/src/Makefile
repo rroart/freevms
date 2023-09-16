@@ -15,7 +15,8 @@ DISTFILES=README vmsbackup.1 Makefile vmsbackup.c match.c NEWS \
 
 #
 vmsbackup: vmsbackup.o match.o getoptmain.o
-	gcc $(LFLAGS) -o vmsbackup vmsbackup.o match.o getoptmain.o $(LIBS)
+	gcc $(LFLAGS) -o vmsbackup vmsbackup.o match.o getoptmain.o $(LIBS) -include $(TOPDIR)/linux/include/linux/user_compiler_types.h
+
 install:
 	install -m $(MODE) -o $(OWNER) -s vmsbackup $(BINDIR)	
 	cp vmsbackup.1 $(MANDIR)/vmsbackup.$(MANSEC)

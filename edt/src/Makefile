@@ -158,7 +158,7 @@ pic/os.linux.o: os.c
 
 i386/edt${NOEXE}: $(LIB) $(EXTERNAL)
 	install -d i386
-	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) $(EXTERNAL) -o i386/edt${NOEXE}
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) $(EXTERNAL) $(NEWLIBC) -o i386/edt${NOEXE}
 
 i386/edt${EXE_ELF}: $(LIB) $(EXTERNAL_PIC) $(OBJS_PIC)
 	ld -Bshareable $(OBJS_PIC) -lc $(LIBGCC) -o i386/edt${EXE_ELF}

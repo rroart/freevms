@@ -26,7 +26,7 @@ pic/vmount.o: vmount.c
 
 i386/vmount${NOEXE}: vmount.o $(VMSLIBS) $(EXTERNAL)
 	install -d i386
-	gcc $(FLAGS) -g vmount.o -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) -o i386/vmount${NOEXE}
+	gcc $(FLAGS) -g vmount.o -L$(OLDLIBCDIR) -L$(OLDLIBGCCDIR) $(VMSLIBS) $(EXTERNAL) -o i386/vmount${NOEXE}
 
 i386/vmount${EXE_ELF}: pic/vmount.o $(VMSLIBS_PIC) $(EXTERNAL_PIC)
 	ld -Bshareable pic/vmount.o $(VMSLIBS_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o i386/vmount${EXE_ELF}

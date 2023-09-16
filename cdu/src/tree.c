@@ -47,7 +47,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #define ISALNUM(x) isalnum(x)
 #define MAX(x,y) ( ((x)>(y)) ? x : y )
 #define MIN(x,y) ( ((x)<(y)) ? x : y )
-#define PARAMS(x) x
 
 #if 0
 #include "config.h"
