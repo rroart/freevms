@@ -48,7 +48,7 @@ EOF
 
 losetup -o 512 /dev/loop0 c.img
 
-mke2fs -b 1024 /dev/loop0 32130
+mke2fs -b 1024 -I 128 /dev/loop0 32130
 
 mount -t ext2 /dev/loop0 /mnt
 
