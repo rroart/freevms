@@ -80,7 +80,8 @@ make telnet (32-bit only, and remember to change close to close2 in routines.b32
 No more recent flex than 2.5.4 must be used (for Bliss).
 
 Qemu use:
-        qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none
+        was: qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none
+        qemu-system-x86_64 --enable-kvm -S -s -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none
 
 NOTE on VFS ODS2 module autobuild:
 Use lenny (stable), sarge may still work if lucky.
