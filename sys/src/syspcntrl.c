@@ -170,7 +170,7 @@ void fixup_hib_pc(void * dummy)
     char ** addr = dummy + 0x28;
     (*addr)-=7;
 #else
-    char ** addr = dummy + 0xa0;
+    char ** addr = dummy + 0x98;
 #if 0
     fixs[fixi++]=addr;
     fixs[fixi++]=*addr;
@@ -216,7 +216,7 @@ asmlinkage int exe$hiber(long dummy)
 #ifdef __i386__
     fixup_hib_pc(&dummy);
 #else
-    fixup_hib_pc(dummy-0x10/*-0x30*/);
+    fixup_hib_pc(dummy-0x18/*-0x30*/);
 #endif
     /** go into hibernate wait */
     int ret = sch$wait(p,sch$gq_hibwq);
