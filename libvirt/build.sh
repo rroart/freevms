@@ -1,12 +1,13 @@
-cd /tmp
+DIR=/usr/src
+cd ${DIR}
 wget archive.debian.org/debian-amd64/pool/main/m/modutils/modutils_2.4.26-1.2_amd64.deb
-mkdir /tmp/dummy
-dpkg-deb -x modutils_2.4.26-1.2_amd64.deb /tmp/dummy
-cp -p /tmp/dummy/sbin/genksyms /sbin
+mkdir ${DIR}/dummy
+dpkg-deb -x modutils_2.4.26-1.2_amd64.deb ${DIR}/dummy
+cp -p ${DIR}/dummy/sbin/genksyms /sbin
 git clone https://github.com/rroart/freevms.git
-cd /tmp/freevms
+cd ${DIR}/freevms
 ./envscript
-cd /tmp/freevmsx86_64.iomm
+cd ${DIR}/freevmsx86_64.iomm
 #make doxygen
 make bzImage
 make vmsall
