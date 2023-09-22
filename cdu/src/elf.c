@@ -290,13 +290,15 @@ long elf_get_symbol(char * filename, char * name)
     read(fildes, symtab, symtabsh->sh_size);
     mystrtab=strtab;
     mystrtab++;
+    /*
     for(; *mystrtab; mystrtab+=strlen(mystrtab)+1)
     {
         if (0==strcmp(name,mystrtab))
             break;
     }
     offs=mystrtab-strtab;
-    if (offs)
+    */
+    if (1 /*offs*/)
     {
 #ifdef __i386__
         int max=symtabsh->sh_size/sizeof(Elf32_Sym);
@@ -305,9 +307,10 @@ long elf_get_symbol(char * filename, char * name)
 #endif
         for(i=0; i<max; i++)
         {
-            if(symtab[i].st_name==offs)
+	    if(0 == strcmp((strtab + symtab[i].st_name), name))
             {
                 val=symtab[i].st_value;
+		printf("name %s %x\n", name, val);
                 break;
             }
         }
