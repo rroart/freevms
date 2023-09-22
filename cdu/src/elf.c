@@ -147,7 +147,7 @@ static long mymymyfunc(int (*func)(),void * start, int count)
     );
     mymyfunc(__res,*func,start,count);
     // was: __asm__ ( "movq (%rsp),%rbp\n\t" );
-    __asm__ ( "addq $0x8,%rsp\n\t"
+    __asm__ ( "addq $0x0,%rsp\n\t"
               "movq (%rsp),%rbp\n\t"
             );
 #endif
