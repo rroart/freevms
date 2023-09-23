@@ -3,6 +3,12 @@ TODO:
 
 Build environment (I1).
 Upgrade (I2).
+ELF symbol table (I3).
+I4: Documentation
+
+Why qemu with kvm?
+Last newlibc?
+Run 2nd com
 
 Misc:
 Check use of relative queues; is fork use of & correct?

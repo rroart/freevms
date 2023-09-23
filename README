@@ -1,3 +1,9 @@
+FreeVMS is a free and open clone of VMS.
+It will run on a Qemu x86_64.
+
+News:
+Now buildable from Debian 12.
+
 look at
 HOWTO
 USE
