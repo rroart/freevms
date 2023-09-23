@@ -15,7 +15,6 @@ install: all
 
 OBJS = directory.o
 OBJS_PIC = $(addprefix pic/,$(OBJS))
-NEWLIBC = /lib/x86_64-linux-gnu/libc.a
 
 pic/%.o: %.c 
 	install -d pic
@@ -23,7 +22,7 @@ pic/%.o: %.c
 
 i386/directory${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL)
 	install -d i386
-	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) $(NEWLIBC) -o i386/directory${NOEXE}
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBGCCDIR) $(VMSLIBS) $(EXTERNAL) -o i386/directory${NOEXE}
 
 i386/directory${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC)
 	ld -Bshareable $(OBJS_PIC) $(VMSLIBS_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o i386/directory${EXE_ELF}

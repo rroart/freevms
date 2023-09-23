@@ -48,6 +48,8 @@ export OLDCRTN_I386 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10+b1_i386/usr/
 export OLDCRTN_AMD64 = $(TOPDIR)/debian/libc6-dev_2.3.6.ds1-13etch10_amd64/usr/lib/crtn.o
 export OLDLIBELF_I386 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_i386/usr/lib/libelf.a
 export OLDLIBELF_AMD64 = $(TOPDIR)/debian/libelfg0-dev_0.8.6-3_amd64/usr/lib/libelf.a
+export OLDLIBGCCDIR_I386 = $(TOPDIR)/debian/gcc-3.3/usr/lib/gcc-lib/i386-linux-gnu/3.3.6
+export OLDLIBGCCDIR_AMD64 = $(TOPDIR)/debian/gcc-3.3/usr/lib/gcc-lib/x86_64-linux-gnu/3.3.6
 
 export LINKER = $(TOPDIR)/linker/src/linker
 
@@ -66,6 +68,7 @@ export OLDLIBELFDIR = $(OLDLIBELFDIR_I386)
 export OLDLIBELFINCLUDEDIR = $(OLDLIBELFINCLUDEDIR_I386)
 #so far only for edt
 export OLDLIBCINCLUDEDIR = $(OLDLIBCINCLUDEDIR_I386)
+export OLDLIBGCCDIR = $(OLDLIBGCCDIR_I386)
 endif
 ifeq ($(ARCH),x86_64)
 export LINKPOST = $(OLDCRT1_AMD64) $(OLDCRTI_AMD64) $(OLDLIBC_AMD64)
@@ -76,6 +79,7 @@ export OLDLIBCDIR = $(OLDLIBCDIR_AMD64)
 export OLDLIBELFDIR = $(OLDLIBELFDIR_AMD64)
 export OLDLIBELFINCLUDEDIR = $(OLDLIBELFINCLUDEDIR_AMD64)
 export OLDLIBCINCLUDEDIR = $(OLDLIBCINCLUDEDIR_AMD64)
+export OLDLIBGCCDIR = $(OLDLIBGCCDIR_AMD64)
 endif
 export OLDINCLUDE=-I${OLDLIBCINCLUDEDIR} -I${OLDLIBELFINCLUDEDIR}
 
@@ -87,9 +91,6 @@ export EXTERNAL = $(TOPDIR)/cdu/src/cdu.a
 export EXTERNAL_PIC = $(TOPDIR)/cdu/src/cdu_pic.a
 export EXTERNAL2 = $(TOPDIR)/cdu/src/cdu2.a
 export EXTERNAL2_PIC = $(TOPDIR)/cdu/src/cdu2_pic.a
-
-export NEWLIBC = /lib/x86_64-linux-gnu/libc.a
-export OLDLIBGCCDIR = $(TOPDIR)/debian/gcc-3.3/usr/lib/gcc-lib/x86_64-linux-gnu/3.3.6
 
 #
 # standard CFLAGS

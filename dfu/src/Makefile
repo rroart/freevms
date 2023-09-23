@@ -23,7 +23,7 @@ dfu_tables.c: ../../cdu/src/cdu dfu_tables.cld
 
 i386/dfu${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL)
 	install -d i386
-	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) $(EXTERNAL) $(SMGRTL) $(SORRTL) $(VMSLIBS) -ldl -lelf $(NEWLIBC) -o i386/dfu${NOEXE} -v
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBELFDIR) -L$(OLDLIBGCCDIR) $(EXTERNAL) $(SMGRTL) $(SORRTL) $(VMSLIBS) -ldl -lelf -o i386/dfu${NOEXE} -v
 
 i386/dfu${EXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL) $(SMGRTL) $(SORRTL)
 	install -d i386

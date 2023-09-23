@@ -20,7 +20,7 @@ pic/%.o: %.c
 
 i386/delete${NOEXE}: $(VMSLIBS) $(OBJS) $(EXTERNAL)
 	install -d i386
-	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) $(NEWLIBC) -o i386/delete${NOEXE}
+	gcc -g -static $(OBJS) -L$(OLDLIBCDIR) -L$(OLDLIBGCCDIR) $(VMSLIBS) $(EXTERNAL) -o i386/delete${NOEXE}
 
 i386/delete${EXE_ELF}: $(VMSLIBS_PIC) $(OBJS_PIC) $(EXTERNAL_PIC)
 	ld -Bshareable $(OBJS_PIC) $(VMSLIBS_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o i386/delete${EXE_ELF}

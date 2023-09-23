@@ -3,6 +3,7 @@
 
 VMLINUX = ../../linux/vmlinux 
 LINKVMLINUX = -Wl,--just-symbols=../../linux/vmlinux 
+NEWLIBC = /lib/x86_64-linux-gnu/libc.a
 
 FLAGS = -static
 
@@ -48,7 +49,7 @@ pic/%.o: %.c
 
 i386/create${NOEXE}: create.o $(VMSLIBS) $(EXTERNAL)
 	install -d i386
-	gcc $(FLAGS) -g create.o -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) $(NEWLIBC) -o i386/create${NOEXE} 
+	gcc $(FLAGS) -g create.o -L$(OLDLIBCDIR) -L$(OLDLIBGCCDIR) $(VMSLIBS) $(EXTERNAL) -o i386/create${NOEXE} 
 
 i386/create${EXE_ELF}: pic/create.o $(VMSLIBS_PIC) $(EXTERNAL_PIC)
 	ld -Bshareable pic/create.o $(VMSLIBS_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o i386/create${EXE_ELF}
@@ -59,7 +60,7 @@ i386/create${EXE}: create.o $(VMSLIBS) $(EXTERNAL)
 
 i386/type${NOEXE}: $(VMSLIBS) type.o $(EXTERNAL)
 	install -d i386
-	gcc -g -static type.o -L$(OLDLIBCDIR) $(VMSLIBS) $(EXTERNAL) $(NEWLIBC) -o i386/type${NOEXE}
+	gcc -g -static type.o -L$(OLDLIBCDIR) -L$(OLDLIBGCCDIR) $(VMSLIBS) $(EXTERNAL) -o i386/type${NOEXE}
 
 i386/type${EXE_ELF}: $(VMSLIBS_PIC) pic/type.o $(EXTERNAL_PIC)
 	ld -Bshareable pic/type.o $(VMSLIBS_PIC) $(EXTERNAL_PIC) -lc $(LIBGCC) -o i386/type${EXE_ELF}
