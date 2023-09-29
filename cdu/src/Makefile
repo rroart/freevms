@@ -50,11 +50,7 @@ pic/%.o: %.c
 
 parse.h: parse.c parse.y
 parse.c: parse.y
-	if $(BISON) -v $(BISONFLAGS) -d -o parse.c parse.y; then \
-		grep '^#define[       ]*YYEMPTY' parse.c >> parse.h ; \
-	else \
-		rm -f parse.c ; \
-        fi
+	$(BISON) -v $(BISONFLAGS) -d -o parse.c parse.y
 
 lex.c: lex.l parse.h
 	$(LEX) $(LEXFLAGS) -olex.c lex.l
