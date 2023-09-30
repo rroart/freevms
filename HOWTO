@@ -8,7 +8,7 @@ CPU status:
 I386: some instability.
 X86_64: some more instability.
 
-Install build-essential wget ncftp flex-old bzip2 binutils-dev libc6-dev libelf-dev sash bash-static doxygen dejagnu bison.
+Install build-essential wget ncftp flex bzip2 binutils-dev libc6-dev libelf-dev sash bash-static doxygen dejagnu bison.
 
 There are no config options.
 
@@ -81,9 +81,13 @@ make build-bliss (run twice, for some reason first run quits with an error)
 make telnet (32-bit only, and remember to change close to close2 in routines.b32)
 No more recent flex than 2.5.4 must be used (for Bliss).
 
+****
+
 Qemu use:
         was: qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none
         qemu-system-x86_64 --enable-kvm -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none
+
+****
 
 NOTE on VFS ODS2 module autobuild:
 Use lenny (stable), sarge may still work if lucky.
