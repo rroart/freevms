@@ -86,6 +86,7 @@ No more recent flex than 2.5.4 must be used (for Bliss).
 Qemu use:
         was: qemu -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none
         qemu-system-x86_64 --enable-kvm -fda diskimage/a.img -hda diskimage/c.img -boot a -monitor stdio -net none
+	qemu-system-x86_64 --enable-kvm -boot d -monitor stdio -net none -s -hda diskimage/c.img -cdrom diskimage/d.iso
 
 ****
 

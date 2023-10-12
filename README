@@ -3,6 +3,7 @@ It will run on a Qemu x86_64.
 
 News:
 Now buildable from Debian 12.
+Sample auto install and build in libvirt, username root password root.
 
 look at
 HOWTO

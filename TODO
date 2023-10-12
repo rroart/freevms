@@ -6,9 +6,12 @@ Upgrade (I2).
 ELF symbol table (I3).
 I4: Documentation
 
+gcc-13
+Run 2nd com
+IPACP
 Why qemu with kvm?
 Last newlibc?
-Run 2nd com
+New flex
 
 Misc:
 Check use of relative queues; is fork use of & correct?
