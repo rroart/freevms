@@ -1,2 +1,2 @@
 #!/bin/sh
-ncftpget ftp://alpha.gnu.org/gnu/grub/grub-0.95.tar.gz
+wget https://alpha.gnu.org/gnu/grub/grub-2.12~rc1.tar.gz

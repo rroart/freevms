@@ -8,14 +8,16 @@ else
 CC=gcc
 LDFLAGS=-static
 LIBS=
+VERSION=grub-2.12~rc1
 fi
-rm -rf grub-0.95
-tar xzf grub-0.95.tar.gz
-cd grub-0.95
-patch -p1 < ../../../subprojects/grub-0.95-diff1
+rm -rf $VERSION
+tar xzf $VERSION.tar.gz
+cd $VERSION
+patch -p1 < ../../../subprojects/grub.diff
 cd ..
 mkdir build
 cd build
-../grub-0.95/configure --enable-ext2fs --enable-ods2
+../$VERSION/configure --prefix=`pwd`
 make
+make install
 cd ..

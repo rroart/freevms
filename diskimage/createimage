@@ -8,29 +8,46 @@ else
 ARCH=i386
 fi
 
-[ -f ../grub/src/build/grub/grub ] || ( echo build grub first; exit 1 )
+GRUBODS2=false
+[ -f ../grub/src/build/sbin/grub-install ] && GRUBODS2=true
 [ -f ../init/src/init ] || ( echo build init first; exit 1 )
 
+make_cdrom() {
+MKRESCUE=/bin/grub-mkrescue
+if [ "$GRUBODS2" = "true" ]; then
+   MKRESCUE=../grub/src/build/grub-mkrescue
+fi
+
+mkdir -p /tmp/iso/boot/grub
+cp -p grub.cfg /tmp/iso/boot/grub
+$MKRESCUE  --locales= --fonts= /tmp/iso -o d.iso
+}
+
+make_floppy() {
 # grub floppy
 
 dd if=/dev/zero count=2880 of=a.img
-mke2fs -F a.img
-mount -t ext2 -o loop a.img /mnt
+sfdisk a.img  << EOF
+label: dos
+label-id: 0x00000000
+device: a.img
+unit: sectors
+sector-size: 512
 
-mkdir -p /mnt/boot/grub
-cp -p grub.conf /mnt/boot/grub
-cp -p grub.conf /mnt/boot/grub/menu.lst
-[ -f ../grub/src/build/stage1/stage1 ] && cp -p ../grub/src/build/stage?/stage* /mnt/boot/grub
-
-umount /mnt
-
-../grub/src/build/grub/grub --batch --device-map=/dev/null <<EOF
-device (fd0) a.img
-root (fd0)
-setup (fd0)
-quit
+a.img1 : start=           1440, size=       1440, type=83
 EOF
 
+mke2fs -F a.img
+losetup /dev/loop0 a.img
+mount /dev/loop0 /mnt
+mkdir -p /mnt
+/sbin/grub-install --boot-directory=/mnt /dev/loop0 --force --locales= --fonts= --install-modules="biosdisk part_msdos fat multiboot configfile ls cat help ext2 ods2"
+cp -p grub.cfg /mnt/grub
+umount /mnt
+losetup -d /dev/loop0
+}
+
+make_disk() {
 # ext2 fs
 
 dd if=/dev/zero count=131072 of=c.img
@@ -67,6 +84,10 @@ losetup -o 32901120 /dev/loop0 c.img
 losetup -d /dev/loop0
 
 cp -pi c.img c2.img
+}
+
+make_cdrom
+make_disk
 
 exit 0
 
