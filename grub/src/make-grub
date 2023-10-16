@@ -1,20 +1,19 @@
 #!/bin/sh
-CFLAGS=
-CPPFLAGS=
-unamem=`uname -m`
-if [ $unamem != x86_64 ]; then
-CC=gcc
-else
-CC=gcc
-LDFLAGS=-static
-LIBS=
 VERSION=grub-2.12~rc1
-fi
 rm -rf $VERSION
 tar xzf $VERSION.tar.gz
+if [ ! -d grub-ods2 ]; then
+    git clone https://github.com/rroart/grub-ods2.git
+else
+    cd grub-ods2
+    git pull
+    cd ..
+fi
+rsync -a grub-ods2/grub/ $VERSION
 cd $VERSION
-patch -p1 < ../../../subprojects/grub.diff
+autoreconf -f -i
 cd ..
+rm -rf build
 mkdir build
 cd build
 ../$VERSION/configure --prefix=`pwd`
