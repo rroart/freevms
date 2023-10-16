@@ -12,6 +12,7 @@ IPACP
 Why qemu with kvm?
 Last newlibc?
 New flex
+fs size of freevms1.elf
 
 Misc:
 Check use of relative queues; is fork use of & correct?
