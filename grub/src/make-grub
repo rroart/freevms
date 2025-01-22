@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION=grub-2.12~rc1
+VERSION=grub-2.12
 rm -rf $VERSION
 tar xzf $VERSION.tar.gz
 if [ ! -d grub-ods2 ]; then

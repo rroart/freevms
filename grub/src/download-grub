@@ -1,2 +1,2 @@
 #!/bin/sh
-wget https://alpha.gnu.org/gnu/grub/grub-2.12~rc1.tar.gz
+wget https://ftp.gnu.org/gnu/grub/grub-2.12.tar.gz
