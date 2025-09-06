@@ -1,5 +1,9 @@
 O_TARGET := mount.o
 
+CFLAGS_OTHER := -Wno-error=incompatible-pointer-types -Wno-error=int-conversion \
+		  -Wno-error=implicit-int -Wno-error=declaration-missing-parameter-type \
+		  -Wno-error=return-mismatch -Wno-error=implicit-function-declaration
+
 obj-y := mountdsp.o
 
 include $(TOPDIR)/Rules.make
@@ -18,7 +22,7 @@ install: all
 	install i386/* ../../rooti386/vms"$$"common/sysexe
 
 vmount.o: vmount.c
-	gcc -g -c $(CFLAGS) -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -g -c $(CFLAGS_OTHER) $(CFLAGS) -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
 
 pic/vmount.o: vmount.c
 	install -d pic

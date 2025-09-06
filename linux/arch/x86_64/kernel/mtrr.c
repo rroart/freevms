@@ -44,7 +44,6 @@
 #include <linux/delay.h>
 #include <linux/fs.h>
 #include <linux/ctype.h>
-#include <linux/proc_fs.h>
 #include <linux/devfs_fs_kernel.h>
 #include <linux/mm.h>
 #include <linux/module.h>

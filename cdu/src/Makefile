@@ -5,7 +5,7 @@ FLAGS = -static
 
 CFLAGS_OTHER := -Wno-error=incompatible-pointer-types -Wno-error=int-conversion \
 		  -Wno-error=implicit-int -Wno-error=declaration-missing-parameter-type \
-		  -Wno-error=return-mismatch
+		  -Wno-error=return-mismatch -Wno-error=implicit-function-declaration
 
 LEX = flex
 BISON = bison
@@ -40,10 +40,10 @@ cdu_pic.a: $(OBJS_PIC) cli.h
 	ar r cdu_pic.a $(OBJS_PIC)
 
 parse.o: parse.c
-	$(CC) -g $(EXTRA_CFLAGS) -I../../cdu/src -c -o parse.o parse.c
+	$(CC) -g $(CFLAGS_OTHER) $(EXTRA_CFLAGS) -I../../cdu/src -c -o parse.o parse.c
 
 clilex.o: clilex.c
-	$(CC) -g $(EXTRA_CFLAGS) -I../../librtl/src -I../../starlet/src -c -o clilex.o clilex.c
+	$(CC) -g $(CFLAGS_OTHER) $(EXTRA_CFLAGS) -I../../librtl/src -I../../starlet/src -c -o clilex.o clilex.c
 
 %.o: %.c cli.h
 	gcc -g -c $(CFLAGS) ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@ -include $(TOPDIR)/linux/include/linux/user_compiler_types.h

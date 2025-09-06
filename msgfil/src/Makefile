@@ -3,6 +3,10 @@
 
 FLAGS = -static
 
+CFLAGS_OTHER := -Wno-error=incompatible-pointer-types -Wno-error=int-conversion \
+		  -Wno-error=implicit-int -Wno-error=declaration-missing-parameter-type \
+		  -Wno-error=return-mismatch -Wno-error=implicit-function-declaration
+
 LEX = flex
 BISON = bison
 
@@ -25,10 +29,10 @@ msg.a: parse.o lex.o msgmain.o tree.o stringpool.o hashtable.o msg-lang.o msg.o 
 	ar r msg.a parse.o lex.o msgmain.o tree.o stringpool.o hashtable.o msg-lang.o msg.o
 
 parse.o: parse.c
-	$(CC) -g $(EXTRA_CFLAGS) -c -o parse.o parse.c
+	$(CC) -g $(CFLAGS_OTHER) $(EXTRA_CFLAGS) -c -o parse.o parse.c
 
 %.o: %.c msg.h
-	gcc -g -c $(CFLAGS) ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@ -include $(TOPDIR)/linux/include/linux/user_compiler_types.h
+	gcc -g -c $(CFLAGS_OTHER) $(CFLAGS) ${OLDINCLUDE} -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@ -include $(TOPDIR)/linux/include/linux/user_compiler_types.h
 
 parse.h: parse.c parse.y
 parse.c: parse.y

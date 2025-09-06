@@ -25,7 +25,8 @@
 # early bootup linking needs 32bit. You can either use real 32bit tools
 # here or 64bit tools switch to 32bit mode.
 # 
-IA32_CC := $(CROSS_COMPILE)gcc -m32 -O2 -fomit-frame-pointer -nostdinc -I $(HPATH)
+IA32_CC := $(CROSS_COMPILE)gcc -m32 -O2 -fomit-frame-pointer -nostdinc -I $(HPATH) \
+	-Wno-error=implicit-function-declaration
 IA32_LD := $(CROSS_COMPILE)ld -m elf_i386
 IA32_AS := $(CROSS_COMPILE)gcc -m32 -Wa,--32 -D__ASSEMBLY__ -traditional -c -nostdinc -I $(HPATH) 
 IA32_OBJCOPY := $(CROSS_COMPILE)objcopy

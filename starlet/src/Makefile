@@ -1,6 +1,8 @@
 all: starlet.a starletum.a starlet_pic.a
 #i386/starlet${EXE} 
-#i386/starlet${EXE_ELF} 
+#i386/starlet${EXE_ELF}
+
+MYCFLAGS = -Wno-error=declaration-missing-parameter-type -Wno-error=implicit-int -Wno-error=int-conversion
 
 clean:
 	rm *.o i386/*
@@ -22,11 +24,11 @@ OBJS_PIC = $(addprefix pic/,$(OBJS))
 
 starletum.a: starlet.a
 ifneq ($(ARCH),x86_64)
-	gcc -Dcompile_um -I. -c starlet.c -o starletum.o
-	gcc -fPIC -fpic -Dcompile_um -I. -c starlet.c -o starletum_pic.o
+	gcc $(MYCFLAGS) -Dcompile_um -I. -c starlet.c -o starletum.o
+	gcc $(MYCFLAGS) -fPIC -fpic -Dcompile_um -I. -c starlet.c -o starletum_pic.o
 else
-	gcc -I. -c starlet.c -o starletum.o
-	gcc -fPIC -fpic -I. -c starlet.c -o starletum_pic.o
+	gcc $(MYCFLAGS) -I. -c starlet.c -o starletum.o
+	gcc $(MYCFLAGS) -fPIC -fpic -I. -c starlet.c -o starletum_pic.o
 endif
 	gcc -fPIC -fpic -c -I. rms.c -o rms_pic.o
 	ar r starletum.a starletum.o rms.o
@@ -53,6 +55,6 @@ errno.o: 	errno.c
 
 pic/%.o: %.c
 		install -d pic
-		gcc -fpic -fPIC -c -I. $< -o $@
+		gcc $(MYCFLAGS) -fpic -fPIC -c -I. $< -o $@
 
 include $(TOPDIR)/Rules.make.freevms

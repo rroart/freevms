@@ -21,13 +21,10 @@
 #include <linux/hdreg.h>
 #include <linux/ioctl.h>
 #include <linux/version.h>
-#include <asm/ebcdic.h>
 #include <asm/uaccess.h>
-#include <asm/dasd.h>
 
 #include "ibm.h"
 #include "check.h"
-#include <asm/vtoc.h>
 
 typedef enum
 {
