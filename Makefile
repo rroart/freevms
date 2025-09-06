@@ -105,7 +105,14 @@ CPPFLAGS := -I$(TOPDIR)/sys/src -I$(TOPDIR)/lib/src -I$(TOPDIR)/librtl/src -I$(T
 
 CFLAGS := -Werror-implicit-function-declaration $(CPPFLAGS) -Wall -Wstrict-prototypes -Wno-trigraphs
 #CFLAGS += -fno-builtin-sprintf -O2 -fomit-frame-pointer -fno-strict-aliasing -fno-common
-CFLAGS += -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -DNOKERNEL
+CFLAGS += -fdollars-in-identifiers -Wall -Wmissing-prototypes -Wcast-qual -Wconversion -DNOKERNEL \
+		  -Wno-error=incompatible-pointer-types -Wno-error=int-conversion \
+		  -Wno-error=implicit-int -Wno-error=declaration-missing-parameter-type \
+		  -Wno-error=return-mismatch
+
+CFLAGS_OTHER := -Wno-error=incompatible-pointer-types -Wno-error=int-conversion \
+		  -Wno-error=implicit-int -Wno-error=declaration-missing-parameter-type \
+		  -Wno-error=return-mismatch
 
 HOSTCFLAGS	= -Werror-implicit-function-declaration -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -I$(TOPDIR)/linux/include2
 

@@ -101,7 +101,10 @@ export MODLIB
 CPPFLAGS := -D__KERNEL__ -I$(HPATH) -I$(TOPDIR)/sys/src -I$(TOPDIR)/lib/src -I$(TOPDIR)/librtl/src -I$(TOPDIR)/starlet/src -I$(TOPDIR)/pal/src -I$(TOPDIR)/linux/include2
 
 CFLAGS := -Werror-implicit-function-declaration $(CPPFLAGS) -Wall -Wstrict-prototypes -Wno-trigraphs -O2 \
-	  -fomit-frame-pointer -fno-strict-aliasing -fno-common
+	  -fomit-frame-pointer -fno-strict-aliasing -fno-common \
+	  -Wno-error=incompatible-pointer-types -Wno-error=int-conversion \
+	  -Wno-error=implicit-int -Wno-error=declaration-missing-parameter-type \
+	  -Wno-error=return-mismatch
 CFLAGS += -fno-builtin-sprintf	  
 AFLAGS := -D__ASSEMBLY__ $(CPPFLAGS)
 

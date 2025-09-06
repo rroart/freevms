@@ -12,6 +12,8 @@
 
 int do_ret = 0;
 
+int _dl_find_object = 0; // TODO
+
 show_memory();
 
 main()

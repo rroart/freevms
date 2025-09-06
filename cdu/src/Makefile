@@ -3,6 +3,10 @@
 
 FLAGS = -static
 
+CFLAGS_OTHER := -Wno-error=incompatible-pointer-types -Wno-error=int-conversion \
+		  -Wno-error=implicit-int -Wno-error=declaration-missing-parameter-type \
+		  -Wno-error=return-mismatch
+
 LEX = flex
 BISON = bison
 
@@ -46,7 +50,7 @@ clilex.o: clilex.c
 
 pic/%.o: %.c 
 	install -d pic
-	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@
+	gcc -fPIC -fpic -g -c -I../../starlet/src -I../../librtl/src -I../../lib/src/ $< -o $@ ${CFLAGS_OTHER}
 
 parse.h: parse.c parse.y
 parse.c: parse.y

@@ -1,5 +1,10 @@
 FLAGS = -static
 
+CFLAGS_OTHER := -Wno-error=incompatible-pointer-types -Wno-error=int-conversion \
+		  -Wno-error=implicit-int -Wno-error=declaration-missing-parameter-type \
+		  -Wno-error=return-mismatch
+
+
 SMGRTL = ../../smgrtl/src/smgrtl.a
 SORRTL = ../../sort/src/sortrtl.a
 
@@ -16,7 +21,7 @@ install: all
 OBJS = dfu.o dfu_bitmap.o dfu_filedir.o dfu_ifscan.o dfu_tables.o
 
 dfu_tables.o: dfu_tables.c
-	$(CC) -g $(EXTRA_CFLAGS) -I../../cdu/src -c -o dfu_tables.o dfu_tables.c
+	$(CC) -g $(EXTRA_CFLAGS) -I../../cdu/src -c -o dfu_tables.o dfu_tables.c $(CFLAGS_OTHER)
 
 dfu_tables.c: ../../cdu/src/cdu dfu_tables.cld
 	../../cdu/src/cdu dfu_tables.cld
