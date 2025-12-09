@@ -193,17 +193,17 @@ int sys$synch(unsigned int efn, struct _iosb *iosb)
 int sys$enq  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id)
 {
     struct struct_args s;
-    s.s1=efn;
-    s.s2=lkmode;
-    s.s3=lksb;
-    s.s4=flags;
-    s.s5=resnam;
-    s.s6=parid;
-    s.s7=astadr;
-    s.s8=astprm;
-    s.s9=blkastadr;
-    s.s10=acmode;
-    s.s11=rsdm_id;
+    s.s1 = (unsigned long) efn;
+    s.s2 = (unsigned long) lkmode;
+    s.s3 = (unsigned long) lksb;
+    s.s4 = (unsigned long) flags;
+    s.s5 = (unsigned long) resnam;
+    s.s6 = (unsigned long) parid;
+    s.s7 = (unsigned long) astadr;
+    s.s8 = (unsigned long) astprm;
+    s.s9 = (unsigned long) blkastadr;
+    s.s10 = (unsigned long) acmode;
+    s.s11 = (unsigned long) rsdm_id;
     //  s.null_arg=null_arg;
 #ifdef __x86_64__
     syscall_struct();
@@ -214,17 +214,17 @@ int sys$enq  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigne
 int sys$enqw  (unsigned int efn, unsigned int lkmode, struct _lksb *lksb, unsigned int flags, void *resnam, unsigned int parid, void (*astadr)(), unsigned long astprm, void (*blkastadr)(), unsigned int acmode, unsigned int rsdm_id)
 {
     struct struct_args s;
-    s.s1=efn;
-    s.s2=lkmode;
-    s.s3=lksb;
-    s.s4=flags;
-    s.s5=resnam;
-    s.s6=parid;
-    s.s7=astadr;
-    s.s8=astprm;
-    s.s9=blkastadr;
-    s.s10=acmode;
-    s.s11=rsdm_id;
+    s.s1 = (unsigned long) efn;
+    s.s2 = (unsigned long) lkmode;
+    s.s3 = (unsigned long) lksb;
+    s.s4 = (unsigned long) flags;
+    s.s5 = (unsigned long) resnam;
+    s.s6 = (unsigned long) parid;
+    s.s7 = (unsigned long) astadr;
+    s.s8 = (unsigned long) astprm;
+    s.s9 = (unsigned long) blkastadr;
+    s.s10 = (unsigned long) acmode;
+    s.s11 = (unsigned long) rsdm_id;
     //  s.null_arg=null_arg;
 #ifdef __x86_64__
     syscall_struct();
@@ -501,12 +501,12 @@ int sys$sndopr(void *msgbuf, unsigned short int chan)
 int sys$process_affinity (unsigned int *pidadr, void *prcnam, struct _generic_64 *select_mask, struct _generic_64 *modify_mask, struct _generic_64 *prev_mask, struct _generic_64 *flags,...)
 {
     struct struct_args s;
-    s.s1 = pidadr;
-    s.s2 = prcnam;
-    s.s3 = select_mask;
-    s.s4 = modify_mask;
-    s.s5 = prev_mask;
-    s.s6 = flags;
+    s.s1 = (unsigned long) pidadr;
+    s.s2 = (unsigned long) prcnam;
+    s.s3 = (unsigned long) select_mask;
+    s.s4 = (unsigned long) modify_mask;
+    s.s5 = (unsigned long) prev_mask;
+    s.s6 = (unsigned long) flags;
 #ifdef __x86_64__
     syscall_struct();
 #endif
@@ -526,12 +526,12 @@ int sys$cpu_capabilities (int cpu_id, struct _generic_64 *select_mask, struct _g
 int sys$process_capabilities (unsigned int *pidadr, void *prcnam, struct _generic_64 *select_mask, struct _generic_64 *modify_mask, struct _generic_64 *prev_mask, struct _generic_64 *flags)
 {
     struct struct_args s;
-    s.s1 = pidadr;
-    s.s2 = prcnam;
-    s.s3 = select_mask;
-    s.s4 = modify_mask;
-    s.s5 = prev_mask;
-    s.s6 = flags;
+    s.s1 = (unsigned long) pidadr;
+    s.s2 = (unsigned long) prcnam;
+    s.s3 = (unsigned long) select_mask;
+    s.s4 = (unsigned long) modify_mask;
+    s.s5 = (unsigned long) prev_mask;
+    s.s6 = (unsigned long) flags;
 #ifdef __x86_64__
     syscall_struct();
 #endif

@@ -2,7 +2,7 @@ all: starlet.a starletum.a starlet_pic.a
 #i386/starlet${EXE} 
 #i386/starlet${EXE_ELF}
 
-MYCFLAGS = -Wno-error=declaration-missing-parameter-type -Wno-error=implicit-int -Wno-error=int-conversion
+#MYCFLAGS = -Wno-error=declaration-missing-parameter-type -Wno-error=implicit-int -Wno-error=int-conversion
 
 clean:
 	rm *.o i386/*
