@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 #include<crbdef.h>
@@ -108,8 +108,8 @@ static int ide_timeout(struct _irp * i, struct _ucb * u)
     return 1;
 }
 
-static struct _irp * globali;
-static struct _ucb * globalu;
+static struct _irp * globali __attribute__((unused));
+static struct _ucb * globalu __attribute__((unused));
 
 static void  startio3 (struct _irp * i, struct _ucb * u)
 {
@@ -117,7 +117,7 @@ static void  startio3 (struct _irp * i, struct _ucb * u)
     return;
 };
 
-static void  startio2 (struct _irp * i, struct _ucb * u)
+static __attribute__((unused)) void  startio2 (struct _irp * i, struct _ucb * u)
 {
     u->ucb$l_fpc=startio3;
     exe$iofork(i,u);
@@ -134,20 +134,20 @@ fdt$q_buffered:
 
 /* more yet undefined dummies */
 //static void  startio ();
-static void  unsolint (void) { };
-static void  cancel (void) { };
-static void  regdump (void) { };
-static void  diagbuf (void) { };
-static void  errorbuf (void) { };
-static void  unitinit (void) { };
-static void  altstart (void) { };
-static void  mntver (void) { };
-static void  cloneducb (void) { };
-static void  mntv_sssc (void) { };
-static void  mntv_for (void) { };
-static void  mntv_sqd (void) { };
-static void  aux_storage (void) { };
-static void  aux_routine (void) { };
+static __attribute__((unused)) void  unsolint (void) { };
+static __attribute__((unused)) void  cancel (void) { };
+static __attribute__((unused)) void  regdump (void) { };
+static __attribute__((unused)) void  diagbuf (void) { };
+static __attribute__((unused)) void  errorbuf (void) { };
+static __attribute__((unused)) void  unitinit (void) { };
+static __attribute__((unused)) void  altstart (void) { };
+static __attribute__((unused)) void  mntver (void) { };
+static __attribute__((unused)) void  cloneducb (void) { };
+static __attribute__((unused)) void  mntv_sssc (void) { };
+static __attribute__((unused)) void  mntv_for (void) { };
+static __attribute__((unused)) void  mntv_sqd (void) { };
+static __attribute__((unused)) void  aux_storage (void) { };
+static __attribute__((unused)) void  aux_routine (void) { };
 
 static struct _ddt ide$ddt =
 {
@@ -343,14 +343,14 @@ int ide_vmsinit(void)
 {
     //struct _ucb * u=makeucbetc(&ddb,&ddt,&dpt,&fdt,"hda","hddriver");
 
-    unsigned short chan0, chan1, chan2;
+    unsigned short chan0 __attribute__((unused)), chan1 __attribute__((unused)), chan2 __attribute__((unused));
     $DESCRIPTOR(u0,"dqa0");
     $DESCRIPTOR(u1,"dqa001");
     $DESCRIPTOR(u2,"dqa002");
     $DESCRIPTOR(u3,"dqa003");
-    unsigned long idb=0,orb=0;
-    struct _ccb * ccb;
-    struct _ucb * newucb0,*newucb1,*newucb2;
+    unsigned long idb __attribute__((unused)) = 0, orb __attribute__((unused)) = 0;
+    struct _ccb * ccb __attribute__((unused));
+    struct _ucb * newucb0 __attribute__((unused)), *newucb1 __attribute__((unused)), *newucb2 __attribute__((unused));
     struct _ddb * ddb;
 
     printk(KERN_INFO "dev here pre\n");
@@ -368,6 +368,8 @@ int ide_vmsinit(void)
     printk(KERN_INFO "dev here\n");
 
     // return chan0;
+
+    return SS$_NORMAL;
 
 }
 
@@ -951,7 +953,7 @@ static inline int drive_is_ready (ide_drive_t *drive)
  */
 void ide_end_request (byte uptodate, ide_hwgroup_t *hwgroup)
 {
-    struct request *rq;
+    struct request *rq __attribute__((unused));
     unsigned long flags;
     ide_drive_t *drive = hwgroup->drive;
 

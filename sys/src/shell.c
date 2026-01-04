@@ -609,6 +609,7 @@ int user_spaceable_addr(void * addr)
         flush_tlb_range(pcb->mm, page, page + PAGE_SIZE);
     }
 #endif
+    return 0;
 }
 
 /**
@@ -629,6 +630,7 @@ int user_spaceable()
     long long * l=&gdt_table[2];
     *l|=0x0000600000000000;
 #endif
+    return 0;
 }
 
 #ifdef __i386__

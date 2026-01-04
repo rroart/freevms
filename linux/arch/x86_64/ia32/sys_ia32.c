@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -309,6 +309,7 @@ out_error:
 #else
     return -EPERM;
 #endif
+    return -EINVAL;
 }
 
 /*
@@ -544,7 +545,7 @@ sys32_rt_sigprocmask(int how, sigset32_t *set, sigset32_t *oset,
     return 0;
 }
 
-static int
+static __attribute__((unused)) int
 put_statfs (struct statfs32 *ubuf, struct statfs *kbuf)
 {
     return -EFAULT;
@@ -2815,7 +2816,7 @@ static __inline__ struct module *find_module(const char *name)
 #endif
 }
 
-static int
+static __attribute__((unused)) int
 qm_modules(char *buf, size_t bufsize, __kernel_size_t32 *ret)
 {
 #if 0
@@ -2853,7 +2854,7 @@ calc_space_needed:
 #endif
 }
 
-static int
+static __attribute__((unused)) int
 qm_deps(struct module *mod, char *buf, size_t bufsize, __kernel_size_t32 *ret)
 {
     size_t i, space, len;
@@ -2891,7 +2892,7 @@ calc_space_needed:
         return -ENOSPC;
 }
 
-static int
+static __attribute__((unused)) int
 qm_refs(struct module *mod, char *buf, size_t bufsize, __kernel_size_t32 *ret)
 {
     size_t nrefs, space, len;
@@ -2936,7 +2937,7 @@ calc_space_needed:
         return -ENOSPC;
 }
 
-static inline int
+static inline __attribute__((unused)) int
 qm_symbols(struct module *mod, char *buf, size_t bufsize, __kernel_size_t32 *ret)
 {
     size_t i, space, len;
@@ -2996,7 +2997,7 @@ calc_space_needed:
         return -ENOSPC;
 }
 
-static inline int
+static inline __attribute__((unused)) int
 qm_info(struct module *mod, char *buf, size_t bufsize, __kernel_size_t32 *ret)
 {
     int error = 0;

@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 #include<crbdef.h>
@@ -136,20 +136,20 @@ fdt$q_buffered:
 
 /* more yet undefined dummies */
 //static void  startio ();
-static void  unsolint (void) { };
-static void  cancel (void) { };
-static void  regdump (void) { };
-static void  diagbuf (void) { };
-static void  errorbuf (void) { };
-static void  unitinit (void) { };
-static void  altstart (void) { };
-static void  mntver (void) { };
-static void  cloneducb (void) { };
-static void  mntv_sssc (void) { };
-static void  mntv_for (void) { };
-static void  mntv_sqd (void) { };
-static void  aux_storage (void) { };
-static void  aux_routine (void) { };
+static void __attribute__((unused)) unsolint(void) { };
+static void __attribute__((unused)) cancel(void) { };
+static void __attribute__((unused)) regdump(void) { };
+static void __attribute__((unused)) diagbuf(void) { };
+static void __attribute__((unused)) errorbuf(void) { };
+static void __attribute__((unused)) unitinit(void) { };
+static void __attribute__((unused)) altstart(void) { };
+static void __attribute__((unused)) mntver(void) { };
+static void __attribute__((unused)) cloneducb(void) { };
+static void __attribute__((unused)) mntv_sssc(void) { };
+static void __attribute__((unused)) mntv_for(void) { };
+static void __attribute__((unused)) mntv_sqd(void) { };
+static void __attribute__((unused)) aux_storage(void) { };
+static void __attribute__((unused)) aux_routine(void) { };
 
 static struct _ddt er$ddt =
 {

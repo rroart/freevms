@@ -34,7 +34,7 @@
  * The timezone where the local system is located.  Used as a default by some
  * programs who obtain this value by using gettimeofday.
  */
-struct timezone sys_tz;
+struct timezone sys_tz __attribute__((weak));
 
 /* The xtime_lock is not only serializing the xtime read/writes but it's also
    serializing all accesses to the global NTP variables now. */

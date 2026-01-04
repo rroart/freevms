@@ -18,6 +18,27 @@
 
 #include <descrip.h>
 
+/* Forward declarations for types used in prototypes below to avoid
+ * warnings about types declared only in parameter lists. Definitions
+ * live elsewhere in the tree.
+ */
+struct _mscp_basic_pkt;
+struct _transfer_commands;
+struct _mscp_ucb;
+struct _dt_ucb;
+struct phyio_info;
+struct sk_buff;
+struct packet_type;
+struct net_device;
+struct _cdrp;
+struct ext2_dir_entry_2;
+struct _iosb;
+struct _tt_port;
+struct _ucbnidef;
+struct __xqp;
+struct _rde;
+
+
 char * do_translate(char * from);
 void * exttwo_search_fcb(struct _vcb * vcb,struct _fiddef * fid);
 void * exttwo_search_fcb2(struct _vcb * vcb,struct _fiddef * fid);
@@ -110,7 +131,7 @@ void set_rtc_mmss(unsigned long nowtime);
 int set_rtc_mmss(unsigned long nowtime);
 #endif
 void fixup_hib_pc(void * dummy);
-mycheckaddr(unsigned int ctl);
+int mycheckaddr(unsigned int ctl);
 int task_on_comqueue(struct _pcb *p);
 int cwps$forcex(unsigned int *pidadr, void *prcnam, unsigned int code);
 void * find_a_cdt(int a);
@@ -154,7 +175,7 @@ int block_commit_write2(struct _fcb * inode, struct page *page, unsigned from, u
 #if 0
 int ext2_sync_inode (struct _vcb * vcb, struct _fcb *inode);
 #endif
-mypfncheckaddr(void);
+int mypfncheckaddr(void);
 void vms_submit_bh(int rw, struct buffer_head * bh);
 signed long e2_map_vbn(struct _fcb * fcb, signed long vbn);
 void myqio(long rw, long data, long size, long blocknr,kdev_t dev, long block_factor);
@@ -166,9 +187,9 @@ int du_readblk(struct _irp * i, struct _ucb * u, struct _mscp_basic_pkt * m);
 int du_writeblk(struct _irp * i, struct _ucb * u, struct _mscp_basic_pkt * m);
 int du_rw(struct _irp * i, struct _mscp_ucb * u, struct _transfer_commands * m);
 void * find_mscp_cdt(void);
-insertfillist(struct _ucb *u, char *s);
-inline BLISSIF(int i);
-inline BLISSIFNOT(int i);
+int insertfillist(struct _ucb *u, char *s);
+inline int BLISSIF(int i);
+inline int BLISSIFNOT(int i);
 long CH$PTR(long);
 long CH$MOVE(long,long,long);
 void * scs_find_name(char * c1);
@@ -199,7 +220,7 @@ void scs_msg_fill(char * buf, struct _cdt * cdt, unsigned char msgflg, struct _s
 void scs_msg_fill_more(char * buf,struct _cdt * cdt, struct _cdrp * cdrp, int bufsiz);
 void scs_receive ( int i);
 inline void scs_nsp_send2(char * buf, int len);
-scs_startdev ( scs_int2 , setflag , setaddr);
+int scs_startdev ( scs_int2 , setflag , setaddr);
 //scs_startdev ( long, long, long);
 unsigned long inline buffer_offset(unsigned long buffer, unsigned long offset);
 int rms$get_idx(struct _rabdef * rab);
@@ -229,7 +250,7 @@ int ext2_delete_entry2 (struct _vcb * vcb, struct ext2_dir_entry_2 * dir, struct
 void *exttwo_fcb_create(struct _fcb * inode, int i_ino, unsigned *retsts);
 int exttwo_read_writevb(struct _irp * i);
 unsigned exttwo_delete(struct _vcb * vcb,struct _irp * irp);
-exttwo_modify(struct _vcb * vcb, struct _irp * irp);
+int exttwo_modify(struct _vcb * vcb, struct _irp * irp);
 int exttwo_io_done(struct _irp * i);
 unsigned exttwo_create(struct _vcb *vcb,struct _irp * i);
 struct _ucb * finducb(struct _fcb * fcb);
@@ -248,13 +269,13 @@ asmlinkage int cmod$astexit(void);
 asmlinkage long sys_unlink(const char * pathname);
 asmlinkage long sys_reboot(int magic1, int magic2, unsigned int cmd, void * arg);
 int exe$waitfr(unsigned int efn);
-FORKLOCK(void);
-FORKUNLOCK(void);
+void FORKLOCK(void);
+void FORKUNLOCK(void);
 int con$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 void myout(int tty, int p1, int p2);
 int kbd$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
-inline CLASS_UNIT_INIT(struct _ucb * ucb,struct _tt_port * port_vector);
-kfreebuf(void * d);
+inline int CLASS_UNIT_INIT(struct _ucb * ucb,struct _tt_port * port_vector);
+void kfreebuf(void * d);
 int lan$setmode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 int lan$sensemode(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 int lan$setchar(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
@@ -267,8 +288,8 @@ void * lan$alloc_xmit_buf(struct _irp * i, struct _ucbnidef * u, char *dest);
 int er_vmsinit(long dev);
 int ft$fdtread(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
 int ft$fdtwrite(struct _irp * i, struct _pcb * p, struct _ucb * u, struct _ccb * c);
-inline DEVICELOCK(void);
-inline DEVICEUNLOCK(void);
+inline void DEVICELOCK(void);
+inline void DEVICEUNLOCK(void);
 int SEARCHDEV(struct _ddb ** ddb,char * string, int strlen);
 int SEARCHUNIT(struct _ddb * ddb, int unit, struct _ucb ** ucb);
 void mscp_talk_with(char * node, char * sysap);

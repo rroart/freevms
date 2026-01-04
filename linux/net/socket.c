@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -89,25 +89,25 @@
 #include <net/scm.h>
 #include <linux/netfilter.h>
 
-static int sock_no_open(struct inode *irrelevant, struct file *dontcare);
-static loff_t sock_lseek(struct file *file, loff_t offset, int whence);
-static ssize_t sock_read(struct file *file, char *buf,
+int sock_no_open(struct inode *irrelevant, struct file *dontcare);
+loff_t sock_lseek(struct file *file, loff_t offset, int whence);
+ssize_t sock_read(struct file *file, char *buf,
                          size_t size, loff_t *ppos);
-static ssize_t sock_write(struct file *file, const char *buf,
+ssize_t sock_write(struct file *file, const char *buf,
                           size_t size, loff_t *ppos);
-static int sock_mmap(struct file *file, struct vm_area_struct * vma);
+int sock_mmap(struct file *file, struct vm_area_struct * vma);
 
-static int sock_close(struct inode *inode, struct file *file);
-static unsigned int sock_poll(struct file *file,
+int sock_close(struct inode *inode, struct file *file);
+unsigned int sock_poll(struct file *file,
                               struct poll_table_struct *wait);
-static int sock_ioctl(struct inode *inode, struct file *file,
+int sock_ioctl(struct inode *inode, struct file *file,
                       unsigned int cmd, unsigned long arg);
-static int sock_fasync(int fd, struct file *filp, int on);
-static ssize_t sock_readv(struct file *file, const struct iovec *vector,
+int sock_fasync(int fd, struct file *filp, int on);
+ssize_t sock_readv(struct file *file, const struct iovec *vector,
                           unsigned long count, loff_t *ppos);
-static ssize_t sock_writev(struct file *file, const struct iovec *vector,
+ssize_t sock_writev(struct file *file, const struct iovec *vector,
                            unsigned long count, loff_t *ppos);
-static ssize_t sock_sendpage(struct file *file, struct page *page,
+ssize_t sock_sendpage(struct file *file, struct page *page,
                              int offset, size_t size, loff_t *ppos, int more);
 
 
@@ -126,7 +126,7 @@ static spinlock_t net_family_lock = SPIN_LOCK_UNLOCKED;
    locks.
  */
 
-static void net_family_write_lock(void)
+static void __attribute__((unused)) net_family_write_lock(void)
 {
     spin_lock(&net_family_lock);
     while (atomic_read(&net_family_lockct) != 0)
@@ -142,18 +142,18 @@ static void net_family_write_lock(void)
     }
 }
 
-static __inline__ void net_family_write_unlock(void)
+static __inline__ void __attribute__((unused)) net_family_write_unlock(void)
 {
     spin_unlock(&net_family_lock);
 }
 
-static __inline__ void net_family_read_lock(void)
+static __inline__ void __attribute__((unused)) net_family_read_lock(void)
 {
     atomic_inc(&net_family_lockct);
     spin_unlock_wait(&net_family_lock);
 }
 
-static __inline__ void net_family_read_unlock(void)
+static __inline__ void __attribute__((unused)) net_family_read_unlock(void)
 {
     atomic_dec(&net_family_lockct);
 }
@@ -255,10 +255,12 @@ int move_addr_to_user(void *kaddr, int klen, void *uaddr, int *ulen)
 #define SOCKFS_MAGIC 0x534F434B
 int sock_sendmsg(struct socket *sock, struct msghdr *msg, int size)
 {
+    return -EAFNOSUPPORT;
 }
 
 int sock_recvmsg(struct socket *sock, struct msghdr *msg, int size, int flags)
 {
+    return -EAFNOSUPPORT;
 }
 
 

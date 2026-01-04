@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -44,7 +44,7 @@
 long tick = (1000000 + HZ/2) / HZ;	/* timer interrupt period */
 
 /* The current time */
-struct timeval xtime __attribute__ ((aligned (16)));
+struct timeval xtime __attribute__ ((aligned (16))) __attribute__((weak));
 
 /* Don't completely fail for HZ > 500.  */
 int tickadj = 500/HZ ? : 1;		/* microsecs */
@@ -77,7 +77,7 @@ unsigned long event;
 
 extern int do_setitimer(int, struct itimerval *, struct itimerval *);
 
-unsigned long volatile jiffies;
+unsigned long volatile jiffies __attribute__((weak));
 
 unsigned int * prof_buffer;
 unsigned long prof_len;
@@ -723,12 +723,13 @@ static inline void calc_load(unsigned long ticks)
 }
 
 /* jiffies at the most recent update of wall time */
-unsigned long wall_jiffies;
+unsigned long wall_jiffies __attribute__((weak));
+extern unsigned long wall_jiffies;
 
 /*
  * This spinlock protect us from races in SMP while playing with xtime. -arca
  */
-rwlock_t xtime_lock = RW_LOCK_UNLOCKED;
+rwlock_t xtime_lock __attribute__((weak)) = RW_LOCK_UNLOCKED;
 
 static inline void update_times(void)
 {

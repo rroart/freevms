@@ -5,6 +5,7 @@ Build environment (I1).
 Upgrade (I2).
 ELF symbol table (I3).
 I4: Documentation
+I5: Warnings/errors 
 
 gcc-13
 Run 2nd com

@@ -131,7 +131,7 @@ int session_of_pgrp(int pgrp)
  *
  * "I ask you, have you ever known what it is to be an orphan?"
  */
-static int will_become_orphaned_pgrp(int pgrp, struct task_struct * ignored_task)
+static __attribute__((unused)) int will_become_orphaned_pgrp(int pgrp, struct task_struct * ignored_task)
 {
     struct task_struct *p;
 
@@ -185,7 +185,7 @@ static inline int has_stopped_jobs(int pgrp)
  * group, and if no such member exists, give it to
  * the global child reaper process (ie "init")
  */
-static inline void forget_original_parent(struct task_struct * father)
+static inline __attribute__((unused)) void forget_original_parent(struct task_struct * father)
 {
     struct task_struct * p, *reaper;
 
@@ -217,7 +217,7 @@ static inline void forget_original_parent(struct task_struct * father)
     read_unlock(&tasklist_lock);
 }
 
-static inline void close_files(struct files_struct * files)
+static inline __attribute__((unused)) void close_files(struct files_struct * files)
 {
     int i, j;
 

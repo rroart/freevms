@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -248,11 +248,11 @@ int ia32_setup_arg_pages(struct linux_binprm *bprm)
 
     down_write(&current->mm->mmap_sem);
     {
-        mpnt->rde$pq_start_va = PAGE_MASK & (unsigned long) bprm->p;
+        mpnt->rde$pq_start_va = (void *)(PAGE_MASK & (unsigned long) bprm->p);
         mpnt->rde$q_region_size = IA32_STACK_TOP1 - (unsigned long) mpnt->rde$pq_start_va;
         mpnt->rde$r_regprot.regprt$l_region_prot = _PAGE_PRESENT | _PAGE_USER | _PAGE_ACCESSED;//PAGE_COPY;
         mpnt->rde$l_flags = vm_stack_flags32;
-        insrde(mpnt,&current->pcb$l_phd->phd$ps_p0_va_list_flink);
+        insrde(mpnt, current->pcb$l_phd->phd$ps_p0_va_list_flink);
         //flush_tlb_range(current->mm, mpnt->rde$pq_start_va, mpnt->rde$pq_start_va + PAGE_SIZE);
     }
 

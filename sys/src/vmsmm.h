@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on mm.h.
 
 #ifndef _LINUX_MM_H
@@ -300,7 +300,7 @@ extern void FASTCALL(set_page_dirty(struct page *));
 /* The array of struct pages */
 extern mem_map_t * mem_map;
 
-#define __page_address(page) ({ PAGE_OFFSET + (((page) - mem_map) << PAGE_SHIFT); })
+#define __page_address(page) ((void *) (PAGE_OFFSET + (((page) - mem_map) << PAGE_SHIFT)))
 #define page_address(page) __page_address(page)
 
 /*
@@ -399,7 +399,7 @@ static inline pmd_t *pmd_alloc(struct mm_struct *mm, pud_t *pud, unsigned long a
  * inlining and the symmetry break with pte_alloc() that does all
  * of this out-of-line.
  */
-static inline pmd_t *pud_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address)
+static inline pud_t *pud_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address)
 {
     if (pgd_none(*pgd))
         return __pud_alloc(mm, pgd, address);
@@ -577,14 +577,14 @@ static inline int expand_stack(struct _rde * vma, unsigned long address)
      */
     address &= PAGE_MASK;
     //spin_lock(&vma->vm_mm->page_table_lock);
-    grow = (unsigned long)(vma->rde$pq_start_va - address) >> PAGE_SHIFT;
-    if ((vma->rde$pq_start_va + vma->rde$q_region_size) - address > current->rlim[RLIMIT_STACK].rlim_cur /* ||
+    grow = ((((unsigned long)vma->rde$pq_start_va) - address) >> PAGE_SHIFT);
+    if ((((unsigned long)vma->rde$pq_start_va + vma->rde$q_region_size) - address) > current->rlim[RLIMIT_STACK].rlim_cur /* ||
 														((vma->vm_mm->total_vm + grow) << PAGE_SHIFT) > current->rlim[RLIMIT_AS].rlim_cur*/)
     {
         //spin_unlock(&vma->vm_mm->page_table_lock);
         return -ENOMEM;
     }
-    vma->rde$pq_start_va = address;
+    vma->rde$pq_start_va = (void *) address;
     //vma->vm_pgoff -= grow;
     //vma->vm_mm->total_vm += grow;
     //if (vma->rde$l_flags & VM_LOCKED)

@@ -1,8 +1,8 @@
 // $Id$
 // $Locker$
 
-// Author. Linux people.
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
+// Author. Roar Thronï¿½s.
 
 // Modified Linux source code 2007
 
@@ -216,7 +216,7 @@ static const struct kernel_symbol *lookup_symbol(const char *name,
     return NULL;
 }
 
-static void printk_unused_warning(const char *name)
+static __attribute__((unused)) void printk_unused_warning(const char *name)
 {
     printk(KERN_WARNING "Symbol %s is marked as UNUSED, "
            "however this module is using it.\n", name);
@@ -420,7 +420,7 @@ static unsigned int pcpu_num_used, pcpu_num_allocated;
 /* Size of each block.  -ve means used. */
 static int *pcpu_size;
 
-static int split_block(unsigned int i, unsigned short size)
+static __attribute__((unused)) int split_block(unsigned int i, unsigned short size)
 {
     /* Reallocation required? */
     if (pcpu_num_used + 1 > pcpu_num_allocated)
@@ -1216,7 +1216,7 @@ static inline void remove_sect_attrs(struct module *mod)
 }
 #endif /* CONFIG_KALLSYMS */
 
-static int module_add_modinfo_attrs(struct module *mod)
+static __attribute__((unused)) int module_add_modinfo_attrs(struct module *mod)
 {
     struct module_attribute *attr;
     struct module_attribute *temp_attr;
@@ -1246,7 +1246,7 @@ static int module_add_modinfo_attrs(struct module *mod)
     return error;
 }
 
-static void module_remove_modinfo_attrs(struct module *mod)
+static __attribute__((unused)) void module_remove_modinfo_attrs(struct module *mod)
 {
     struct module_attribute *attr;
     int i;
@@ -1554,7 +1554,7 @@ static void layout_sections(struct module *mod,
     }
 }
 
-static void set_license(struct module *mod, const char *license)
+static __attribute__((unused)) void set_license(struct module *mod, const char *license)
 {
 #if 0
     if (!license)
@@ -2216,7 +2216,7 @@ truncated:
  * link the module with the whole machine is stopped with interrupts off
  * - this defends against kallsyms not taking locks
  */
-static int __link_module(void *_mod)
+static __attribute__((unused)) int __link_module(void *_mod)
 {
     struct module *mod = _mod;
     list_add(&mod->list, &modules);
@@ -2761,42 +2761,50 @@ void inter_module_put(const char *im_name)
 
 const void *inter_module_get(const char *im_name)
 {
+    return NULL;
 }
 
 const void *inter_module_get_request(const char *im_name, const char *modname)
 {
+    return NULL;
 }
 
 // move to iogen dir
 
 int iogen$load()
 {
+    return 0;
 }
 
 int iogen$connect()
 {
+    return 0;
 }
 
 int iogen$init_db(struct _ddb * ddb, struct _ddt * ddt, struct _dpt * dpt, struct _fdt * fdt)
 {
     ddb->ddb$ps_dpt = dpt;
     ddt->ddt$l_fdt = fdt;
+    return 0;
 }
 
 int iogen$init_mapping()
 {
+    return 0;
 }
 
 int iogen$init_controller(struct _crb *crb, struct _ddb *ddb)
 {
     int ioc$ctrl_init();
     ioc$ctrl_init(crb, ddb);
+    return 0;
 }
 
 int iogen$init_unit(struct _ucb * ucb)
 {
     int ioc$unit_init();
     ioc$unit_init(ucb);
+    return 0;
 }
 
 int load_driver_inner(int (*init_tables)(), struct _ddt * ddt, struct _dpt * dpt, struct _fdt * fdt)
@@ -2814,7 +2822,7 @@ int load_driver_inner(int (*init_tables)(), struct _ddt * ddt, struct _dpt * dpt
     devname[3] = 0;
     struct _ddb * ddb=kmalloc(sizeof(struct _ddb),GFP_KERNEL);
     struct _crb * crb=kmalloc(sizeof(struct _crb),GFP_KERNEL);
-    unsigned long idb=0,orb=0;
+    unsigned long idb __attribute__((unused)) = 0, orb __attribute__((unused)) = 0;
 
     memset(ddb,0,sizeof(struct _ddb));
     memset(crb,0,sizeof(struct _crb));
@@ -2863,6 +2871,8 @@ int load_driver_inner(int (*init_tables)(), struct _ddt * ddt, struct _dpt * dpt
 
 asmlinkage int exe$load_driver(int code, void * dev_dsc, void * name_dsc, void * list, void * iosb, int efn, int unk1, int unk2)
 {
+    (void)code; (void)dev_dsc; (void)name_dsc; (void)list; (void)iosb; (void)efn; (void)unk1; (void)unk2;
+
     iogen$load();
     iogen$connect();
     long ddb = 0, ucb = 0;
@@ -2870,4 +2880,5 @@ asmlinkage int exe$load_driver(int code, void * dev_dsc, void * name_dsc, void *
     iogen$init_mapping();
     iogen$init_controller(0, ddb);
     iogen$init_unit(ucb);
+    return 0;
 }

@@ -1,9 +1,5 @@
 // $Id$
 // $Locker$
-
-// Author. Roar Thronæs.
-// Modified Linux source file, 2001-2006
-
 /* $Id$
  * ioctl32.c: Conversion between 32bit and 64bit native ioctls.
  *
@@ -121,6 +117,13 @@
 
 #define A(__x) ((void *)(unsigned long)(__x))
 #define AA(__x)	A(__x)
+
+/* Reduce noise: many static helpers exist for different configs
+ * and some are unused in this build. Suppress unused-function
+ * warnings for this translation unit to keep focus on real issues.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 
 /* Allocate memory on the user stack */
 static __inline__ void *compat_alloc_user_space(long len)
@@ -525,8 +528,9 @@ struct ifconf32
 #ifdef CONFIG_NET
 static int dev_ifname32(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
+    /* Not implemented in this port: return standard error */
+    return -ENOSYS;
 }
-#endif
 
 static int dev_ifconf(unsigned int fd, unsigned int cmd, unsigned long arg)
 {
@@ -2029,6 +2033,9 @@ extern int tty_ioctl(struct inode * inode, struct file * file, unsigned int cmd,
 
 static int vt_check(struct file *file)
 {
+    if (!file || !file->private_data)
+        return -ENODEV;
+    return 1;
 }
 
 struct consolefontdesc32
@@ -2216,7 +2223,7 @@ static int do_atm_iobuf(unsigned int fd, unsigned int cmd, unsigned long arg)
 
     iobuf.length = iobuf32.length;
 
-    if (iobuf32.buffer == (__kernel_caddr_t32) NULL || iobuf32.length == 0)
+    if (iobuf32.buffer == (__kernel_caddr_t32)0 || iobuf32.length == 0)
     {
         iobuf.buffer = (void*)(unsigned long)iobuf32.buffer;
     }
@@ -2253,7 +2260,7 @@ static int do_atmif_sioc(unsigned int fd, unsigned int cmd, unsigned long arg)
     sioc.number = sioc32.number;
     sioc.length = sioc32.length;
 
-    if (sioc32.arg == (__kernel_caddr_t32) NULL || sioc32.length == 0)
+    if (sioc32.arg == (__kernel_caddr_t32)0 || sioc32.length == 0)
     {
         sioc.arg = (void*)(unsigned long)sioc32.arg;
     }
@@ -2331,6 +2338,8 @@ static int do_atm_ioctl(unsigned int fd, unsigned int cmd32, unsigned long arg)
 
     return -EINVAL;
 }
+
+#endif /* CONFIG_NET */
 
 #if defined(CONFIG_BLK_DEV_LVM) || defined(CONFIG_BLK_DEV_LVM_MODULE)
 /* Ugh, LVM. Pitty it was not cleaned up before accepted :((. */
@@ -4814,11 +4823,11 @@ asmlinkage long sys32_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg
             sprintf(buf,"'%c'", (cmd>>24) & 0x3f);
             if (!isprint(buf[1]))
                 sprintf(buf, "%02x", buf[1]);
-            printk("ioctl32(%s:%d): Unknown cmd fd(%d) "
-                   "cmd(%08x){%s} arg(%08x) on %s\n",
-                   current->pcb$t_lname, current->pcb$l_pid,
-                   (int)fd, (unsigned int)cmd, buf, (unsigned int)arg,
-                   fn);
+                 printk("ioctl32(%s:%lu): Unknown cmd fd(%d) "
+                     "cmd(%08x){%s} arg(%08lx) on %s\n",
+                     current->pcb$t_lname, (unsigned long)current->pcb$l_pid,
+                     (int)fd, (unsigned int)cmd, buf, (unsigned long)arg,
+                     fn);
             if (path)
                 free_page((unsigned long)path);
         }
@@ -4832,3 +4841,5 @@ out2:
 
 extern unsigned long ia32_sys_call_table[];
 EXPORT_SYMBOL(ia32_sys_call_table);
+
+#pragma GCC diagnostic pop

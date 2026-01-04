@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2006
 
 /*
@@ -87,7 +87,7 @@ static inline int msghdr_from_user32_to_kern(struct msghdr *kmsg,
 }
 
 /* I've named the args so it is easy to tell whose space the pointers are in. */
-static int verify_iovec32(struct msghdr *kern_msg, struct iovec *kern_iov,
+static __attribute__((unused)) int verify_iovec32(struct msghdr *kern_msg, struct iovec *kern_iov,
                           char *kern_address, int mode)
 {
     int tot_len;
@@ -132,8 +132,8 @@ static int verify_iovec32(struct msghdr *kern_msg, struct iovec *kern_iov,
  * thus placement) of cmsg headers and length are different for
  * 32-bit apps.  -DaveM
  */
-static int cmsghdr_from_user32_to_kern(struct msghdr *kmsg,
-                                       unsigned char *stackbuf, int stackbuf_size)
+static __attribute__((unused)) int cmsghdr_from_user32_to_kern(struct msghdr *kmsg,
+    unsigned char *stackbuf, int stackbuf_size)
 {
     struct cmsghdr32 *ucmsg;
     struct cmsghdr *kcmsg, *kcmsg_base;
@@ -207,7 +207,7 @@ out_free_efault:
     return -EFAULT;
 }
 
-static void put_cmsg32(struct msghdr *kmsg, int level, int type,
+static __attribute__((unused)) void put_cmsg32(struct msghdr *kmsg, int level, int type,
                        int len, void *data)
 {
     struct cmsghdr32 *cm = (struct cmsghdr32 *) kmsg->msg_control;
@@ -238,7 +238,7 @@ static void put_cmsg32(struct msghdr *kmsg, int level, int type,
     kmsg->msg_controllen -= cmlen;
 }
 
-static void scm_detach_fds32(struct msghdr *kmsg, struct scm_cookie *scm)
+static __attribute__((unused)) void scm_detach_fds32(struct msghdr *kmsg, struct scm_cookie *scm)
 {
 }
 
@@ -270,7 +270,7 @@ static void scm_detach_fds32(struct msghdr *kmsg, struct scm_cookie *scm)
  *		IPV6_RTHDR	ipv6 routing exthdr	32-bit clean
  *		IPV6_AUTHHDR	ipv6 auth exthdr	32-bit clean
  */
-static void cmsg32_recvmsg_fixup(struct msghdr *kmsg,
+static __attribute__((unused)) void cmsg32_recvmsg_fixup(struct msghdr *kmsg,
                                  unsigned long orig_cmsg_uptr, __kernel_size_t orig_cmsg_len)
 {
     unsigned char *workbuf, *wp;
@@ -343,7 +343,9 @@ asmlinkage long sys32_sendmsg(int fd, struct msghdr32 *user_msg, unsigned user_f
 
 asmlinkage long sys32_recvmsg(int fd, struct msghdr32 *user_msg, unsigned int user_flags)
 {
+    return -EPERM;
 }
+
 
 extern asmlinkage int sys_setsockopt(int fd, int level, int optname,
                                      char *optval, int optlen);

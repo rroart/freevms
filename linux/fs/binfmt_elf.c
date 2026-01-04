@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004.
 
 /*
@@ -112,7 +112,7 @@ static void set_brk(unsigned long start, unsigned long end)
    be in memory */
 
 
-static void padzero(unsigned long elf_bss)
+static __attribute__((unused)) void padzero(unsigned long elf_bss)
 {
     unsigned long nbyte;
 
@@ -246,7 +246,7 @@ create_elf_tables(char *p, int argc, int envc,
             return NULL;
         p += len;
     }
-    __put_user(NULL, argv);
+    __put_user((elf_addr_t)0, (elf_addr_t *)argv);
     current->mm->arg_end = current->mm->env_start = (unsigned long) p;
     while (envc-->0)
     {
@@ -256,14 +256,14 @@ create_elf_tables(char *p, int argc, int envc,
             return NULL;
         p += len;
     }
-    __put_user(NULL, envp);
+    __put_user((elf_addr_t)0, (elf_addr_t *)envp);
     current->mm->env_end = (unsigned long) p;
     return sp;
 }
 
 #ifndef elf_map
 
-static inline unsigned long
+static inline __attribute__((unused)) unsigned long
 elf_map (struct file *filep, unsigned long addr, struct elf_phdr *eppnt, int prot, int type)
 {
     unsigned long map_addr;
@@ -342,9 +342,9 @@ static unsigned long load_elf_interp(struct elfhdr * interp_elf_ex,
             if (interp_elf_ex->e_type == ET_EXEC || load_addr_set)
                 elf_type |= MAP_FIXED;
 
-            struct vms_fd * vms_fd = fget(interpreter);
-            struct file * file = vms_fd->vfd$l_fd_p;
-            map_addr = elf_map(fget(interpreter), load_addr + vaddr, eppnt, elf_prot, elf_type);
+            struct vms_fd * vms_fd = (struct vms_fd *) interpreter;
+            struct file * file = (struct file *) vms_fd->vfd$l_fd_p;
+            map_addr = elf_map(file, load_addr + vaddr, eppnt, elf_prot, elf_type);
 
             if (BAD_ADDR(map_addr))
                 goto out_close;
@@ -464,7 +464,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
     unsigned long error;
     struct elf_phdr * elf_ppnt, *elf_phdata;
     unsigned long elf_bss, k, elf_brk;
-    int elf_exec_fileno;
+    struct vms_fd *elf_exec_fileno;
     int retval, i;
     unsigned int size;
     unsigned long elf_entry, interp_load_addr = 0;
@@ -472,7 +472,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
     struct elfhdr elf_ex;
     struct elfhdr interp_elf_ex;
     struct exec interp_ex;
-    char passed_fileno[6];
+    char passed_fileno[32];
 
     /* Get the exec-header */
     elf_ex = *((struct elfhdr *) bprm->buf);
@@ -503,7 +503,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
     if (retval < 0)
         goto out_free_ph;
 
-    elf_exec_fileno = bprm->file;
+    elf_exec_fileno = (struct vms_fd *) bprm->file;
 
     elf_ppnt = elf_phdata;
     elf_bss = 0;
@@ -603,7 +603,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 
         if (interpreter_type == INTERPRETER_AOUT)
         {
-            sprintf(passed_fileno, "%d", elf_exec_fileno);
+            sprintf(passed_fileno, "%p", elf_exec_fileno);
             passed_p = passed_fileno;
 
             if (elf_interpreter)
@@ -692,8 +692,8 @@ skip_something2:
             load_bias = ELF_PAGESTART(ELF_ET_DYN_BASE - vaddr);
         }
 
-        struct vms_fd * vms_fd = fget(bprm->file);
-        struct file * file = vms_fd->vfd$l_fd_p;
+        struct vms_fd * vms_fd = (struct vms_fd *) bprm->file;
+        struct file * file = (struct file *) vms_fd->vfd$l_fd_p;
         error = elf_map(file, load_bias + vaddr, elf_ppnt, elf_prot, elf_flags);
         if (BAD_ADDR(error))
             continue;
@@ -757,8 +757,13 @@ skip_something2:
 
     kfree(elf_phdata);
 
-    if (interpreter_type != INTERPRETER_AOUT)
-        sys_close(elf_exec_fileno);
+    if (interpreter_type != INTERPRETER_AOUT) {
+        if (elf_exec_fileno) {
+            struct file *ef = (struct file *) elf_exec_fileno->vfd$l_fd_p;
+            if (ef)
+                filp_close(ef, 0);
+        }
+    }
 
     set_binfmt(&elf_format);
 
@@ -859,7 +864,11 @@ out_free_interp:
     if (elf_interpreter)
         kfree(elf_interpreter);
 out_free_file:
-    sys_close(elf_exec_fileno);
+    if (elf_exec_fileno) {
+        struct file *ef = (struct file *) elf_exec_fileno->vfd$l_fd_p;
+        if (ef)
+            filp_close(ef, 0);
+    }
 out_free_ph:
     kfree(elf_phdata);
     goto out;
@@ -1050,6 +1059,8 @@ static int writenote(struct memelfnote *men, struct file *file)
     en.n_descsz = men->datasz;
     en.n_type = men->type;
 
+    /* Silence "set but not used" for the temporary note struct */
+    (void)en;
     return 1;
 }
 #undef DUMP_WRITE
@@ -1246,7 +1257,7 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
     dataoff = offset = roundup(offset, ELF_EXEC_PAGESIZE);
 
     /* Write program headers for segments dump */
-    for(vma = current->pcb$l_phd->phd$ps_p0_va_list_flink; vma != &current->pcb$l_phd->phd$ps_p0_va_list_flink; vma = vma->rde$ps_va_list_flink)
+    for(vma = current->pcb$l_phd->phd$ps_p0_va_list_flink; (void *)vma != (void *)&current->pcb$l_phd->phd$ps_p0_va_list_flink; vma = vma->rde$ps_va_list_flink)
     {
         struct elf_phdr phdr;
         size_t sz;
@@ -1255,7 +1266,7 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 
         phdr.p_type = PT_LOAD;
         phdr.p_offset = offset;
-        phdr.p_vaddr = vma->rde$ps_start_va;
+        phdr.p_vaddr = (Elf32_Addr)(unsigned long)vma->rde$ps_start_va;
         phdr.p_paddr = 0;
         phdr.p_filesz = maydump(vma) ? sz : 0;
         phdr.p_memsz = sz;
@@ -1274,7 +1285,7 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
 
     DUMP_SEEK(dataoff);
 
-    for(vma = current->pcb$l_phd->phd$ps_p0_va_list_flink; vma != &current->pcb$l_phd->phd$ps_p0_va_list_flink; vma = vma->rde$ps_va_list_flink)
+    for(vma = current->pcb$l_phd->phd$ps_p0_va_list_flink; (void *)vma != (void *)&current->pcb$l_phd->phd$ps_p0_va_list_flink; vma = vma->rde$ps_va_list_flink)
     {
         unsigned long addr;
 
@@ -1285,13 +1296,16 @@ static int elf_core_dump(long signr, struct pt_regs * regs, struct file * file)
         printk("elf_core_dump: writing %08lx-%08lx\n", vma->vm_start, vma->vm_end);
 #endif
 
-        for (addr = vma->rde$ps_start_va;
-                addr < (vma->rde$ps_start_va + vma->rde$q_region_size);
-                addr += PAGE_SIZE)
+            for (addr = (unsigned long)vma->rde$ps_start_va;
+            addr < ((unsigned long)vma->rde$ps_start_va + vma->rde$q_region_size);
+            addr += PAGE_SIZE)
         {
             struct page* page;
             struct vm_area_struct *vma;
 
+            /* variables intentionally unused in this port; silence warnings */
+            (void)page;
+            (void)vma;
         }
     }
 
@@ -1354,22 +1368,20 @@ fcb_found:
     bprm.file = file;
     bprm.filename = filename;
     bprm.sh_bang = 0;
-    bprm.loader = hdrbuf;
+    bprm.loader = (unsigned long)hdrbuf;
     bprm.exec = 0; // to skip destructiveness
     bprm.argc = 0;
     bprm.envc = 0;
     //  bprm.argv = 0;
     retval = rms_prepare_binprm(&bprm);
-    void * func = load_elf_binary(&bprm, 0);
+    /* Call loader and capture return value. loader returns address/entry in
+     * an integer-sized value in this tree, so use int and cast to the
+     * ELF entry type when storing into the header. Keep changes minimal.
+     */
+    int load_ret = load_elf_binary(&bprm, NULL);
     struct elfhdr * elf = hdrbuf;
-#if 0
-    elf->e_entry = func;
-#else
-    int * addr=&elf->e_ident; // check. fix later. was: long
-    *addr=bprm.p;
-    addr=&elf->e_version;
-    *addr=func;
-#endif
+    if (load_ret > 0)
+        elf->e_entry = (elf_addr_t) load_ret;
     // check leak kfree hdrbuf
 
     return SS$_NORMAL;

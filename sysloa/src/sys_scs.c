@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source, 2001-2004. Based on decnet files.
 
 #define ETH_P_MYSCS 0x6009
@@ -296,7 +296,11 @@ void mydirerr()
 
 int dir_listen(void * packet, struct _cdt * c, struct _pdt * p)
 {
-
+    /* placeholder implementation for this port; return success */
+    (void)packet;
+    (void)c;
+    (void)p;
+    return 0;
 }
 
 extern void cf_listen(void * packet, struct _cdt * c, struct _pdt * p);

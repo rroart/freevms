@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004
 
 /*
@@ -105,7 +105,7 @@ spinlock_t lastpid_lock = SPIN_LOCK_UNLOCKED;
 /*static*/
 inline int dup_mmap(struct mm_struct * mm)
 {
-    struct vm_area_struct * mpnt, *tmp, **pprev;
+    struct vm_area_struct * mpnt __attribute__((unused)), *tmp __attribute__((unused)), **pprev __attribute__((unused));
     int retval;
 
     flush_cache_mm(current->mm);
@@ -138,7 +138,7 @@ fail_nomem:
     return retval;
 }
 
-static inline int dup_phd(struct _pcb * p, struct _pcb * old)
+static inline __attribute__((unused)) int dup_phd(struct _pcb * p, struct _pcb * old)
 {
     p->pcb$l_phd=kmalloc(sizeof(struct _phd),GFP_KERNEL);
     if (old->pcb$l_phd)
@@ -178,7 +178,7 @@ static inline int dup_phd(struct _pcb * p, struct _pcb * old)
 
 inline int dup_stuff(struct mm_struct * mm, struct _phd * phd)
 {
-    struct _rde * mpnt, *tmp, **pprev;
+    struct _rde * mpnt __attribute__((unused)), *tmp __attribute__((unused)), **pprev __attribute__((unused));
     int retval;
 
     pprev = &phd->phd$pq_p0_start_va;
@@ -443,7 +443,7 @@ struct fs_struct *copy_fs_struct(struct fs_struct *old)
     return 0;
 }
 
-static int count_open_files(struct files_struct *files, int size)
+static __attribute__((unused)) int count_open_files(struct files_struct *files, int size)
 {
     int i;
 

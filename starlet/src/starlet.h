@@ -175,7 +175,9 @@ int sys$update (struct _fab * fab, void * err, void * suc);
 int sys$wait (struct _fab * fab, void * err, void * suc);
 int sys$write (struct _fab * fab, void * err, void * suc);
 int sys$filescan (void *srcstr, void *valuelst, ...);
+#ifndef sys$filescan
 #define sys$filescan(...) sys$filescan(_buildargz5(__VA_ARGS__))
+#endif
 int sys$setddir2 (struct _fab * fab, void * err, void * suc);
 int sys$setdfprot (struct _fab * fab, void * err, void * suc);
 int sys$ssvexc (struct _fab * fab, void * err, void * suc);
@@ -208,7 +210,7 @@ int sys$wake(unsigned long *pidadr, void *prcnam);
 int sys$find_held  (struct _generic_64 *holder, unsigned int *id, unsigned int *attrib, unsigned int *contxt);
 int sys$asctoid(void *name, unsigned int *id, unsigned int *attrib);
 int sys$sndopr(void *msgbuf, unsigned short int chan);
-ROT(x,y);
+unsigned long ROT(unsigned long x, unsigned int y);
 
 struct struct_crelnt
 {

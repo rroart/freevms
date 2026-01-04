@@ -1,7 +1,7 @@
 // $Id$
 // $Locker$
 
-// Author. Roar Thronæs.
+// Author. Roar Thronï¿½s.
 // Modified Linux source file, 2001-2004. Based on buffer.c.
 
 /*
@@ -103,8 +103,8 @@ static spinlock_t unused_list_lock = SPIN_LOCK_UNLOCKED;
 static DECLARE_WAIT_QUEUE_HEAD(buffer_wait);
 #endif
 
-static int grow_buffers(kdev_t dev, unsigned long block, int size);
-static void __refile_buffer(struct buffer_head *);
+static __attribute__((unused)) int grow_buffers(kdev_t dev, unsigned long block, int size);
+static __attribute__((unused)) void __refile_buffer(struct buffer_head *);
 
 /* This is used by some architectures to estimate available memory. */
 atomic_t buffermem_pages = ATOMIC_INIT(0);
@@ -322,8 +322,8 @@ asmlinkage long sys_fsync(unsigned int fd)
 {
     struct file * file;
     struct dentry * dentry;
-    struct _fcb * inode;
-    int ret, err;
+    struct _fcb * inode __attribute__((unused));
+    int ret, err __attribute__((unused));
 
     ret = -EBADF;
     file = fget(fd);
@@ -364,8 +364,8 @@ asmlinkage long sys_fdatasync(unsigned int fd)
 {
     struct file * file;
     struct dentry * dentry;
-    struct _fcb * inode;
-    int ret, err;
+    struct _fcb * inode __attribute__((unused));
+    int ret, err __attribute__((unused));
 
     ret = -EBADF;
     file = fget(fd);
@@ -1689,7 +1689,7 @@ void show_buffers(void)
     struct buffer_head * bh;
     int found = 0, locked = 0, dirty = 0, used = 0, lastused = 0;
     int nlist;
-    static char *buf_types[NR_LIST] = { "CLEAN", "LOCKED", "DIRTY", };
+    static __attribute__((unused)) char *buf_types[NR_LIST] = { "CLEAN", "LOCKED", "DIRTY", };
 #endif
 
 #if 0
