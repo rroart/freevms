@@ -1365,14 +1365,23 @@ fcb_found:
     bprm.envc = 0;
     //  bprm.argv = 0;
     retval = rms_prepare_binprm(&bprm);
+    void * func = load_elf_binary(&bprm, 0);
     /* Call loader and capture return value. loader returns address/entry in
      * an integer-sized value in this tree, so use int and cast to the
      * ELF entry type when storing into the header. Keep changes minimal.
      */
-    int load_ret = load_elf_binary(&bprm, NULL);
+    // glitch int load_ret = load_elf_binary(&bprm, NULL);
     struct elfhdr * elf = hdrbuf;
-    if (load_ret > 0)
-        elf->e_entry = (elf_addr_t) load_ret;
+#if 0
+    elf->e_entry = func;
+#else
+    int * addr=&elf->e_ident; // check. fix later. was: long
+    *addr=bprm.p;
+    addr=&elf->e_version;
+    *addr=func;
+#endif
+    //if (load_ret > 0)
+    //    elf->e_entry = (elf_addr_t) load_ret;
     // check leak kfree hdrbuf
 
     return SS$_NORMAL;
