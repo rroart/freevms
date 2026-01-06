@@ -342,9 +342,9 @@ static unsigned long load_elf_interp(struct elfhdr * interp_elf_ex,
             if (interp_elf_ex->e_type == ET_EXEC || load_addr_set)
                 elf_type |= MAP_FIXED;
 
-            struct vms_fd * vms_fd = (struct vms_fd *) interpreter;
-            struct file * file = (struct file *) vms_fd->vfd$l_fd_p;
-            map_addr = elf_map(file, load_addr + vaddr, eppnt, elf_prot, elf_type);
+            struct vms_fd * vms_fd = fget(interpreter);
+            struct file * file = vms_fd->vfd$l_fd_p;
+            map_addr = elf_map(fget(interpreter), load_addr + vaddr, eppnt, elf_prot, elf_type);
 
             if (BAD_ADDR(map_addr))
                 goto out_close;
@@ -464,7 +464,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
     unsigned long error;
     struct elf_phdr * elf_ppnt, *elf_phdata;
     unsigned long elf_bss, k, elf_brk;
-    struct vms_fd *elf_exec_fileno;
+    int elf_exec_fileno;
     int retval, i;
     unsigned int size;
     unsigned long elf_entry, interp_load_addr = 0;
@@ -472,7 +472,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
     struct elfhdr elf_ex;
     struct elfhdr interp_elf_ex;
     struct exec interp_ex;
-    char passed_fileno[32];
+    char passed_fileno[6];
 
     /* Get the exec-header */
     elf_ex = *((struct elfhdr *) bprm->buf);
@@ -503,7 +503,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
     if (retval < 0)
         goto out_free_ph;
 
-    elf_exec_fileno = (struct vms_fd *) bprm->file;
+    elf_exec_fileno = (int) bprm->file; // TODO overloading with fd?
 
     elf_ppnt = elf_phdata;
     elf_bss = 0;
@@ -603,7 +603,7 @@ static int load_elf_binary(struct linux_binprm * bprm, struct pt_regs * regs)
 
         if (interpreter_type == INTERPRETER_AOUT)
         {
-            sprintf(passed_fileno, "%p", elf_exec_fileno);
+            sprintf(passed_fileno, "%d", elf_exec_fileno);
             passed_p = passed_fileno;
 
             if (elf_interpreter)
@@ -692,8 +692,8 @@ skip_something2:
             load_bias = ELF_PAGESTART(ELF_ET_DYN_BASE - vaddr);
         }
 
-        struct vms_fd * vms_fd = (struct vms_fd *) bprm->file;
-        struct file * file = (struct file *) vms_fd->vfd$l_fd_p;
+        struct vms_fd * vms_fd = fget(bprm->file);
+        struct file * file = vms_fd->vfd$l_fd_p;
         error = elf_map(file, load_bias + vaddr, elf_ppnt, elf_prot, elf_flags);
         if (BAD_ADDR(error))
             continue;
@@ -757,13 +757,8 @@ skip_something2:
 
     kfree(elf_phdata);
 
-    if (interpreter_type != INTERPRETER_AOUT) {
-        if (elf_exec_fileno) {
-            struct file *ef = (struct file *) elf_exec_fileno->vfd$l_fd_p;
-            if (ef)
-                filp_close(ef, 0);
-        }
-    }
+    if (interpreter_type != INTERPRETER_AOUT)
+        sys_close(elf_exec_fileno);
 
     set_binfmt(&elf_format);
 
@@ -864,11 +859,7 @@ out_free_interp:
     if (elf_interpreter)
         kfree(elf_interpreter);
 out_free_file:
-    if (elf_exec_fileno) {
-        struct file *ef = (struct file *) elf_exec_fileno->vfd$l_fd_p;
-        if (ef)
-            filp_close(ef, 0);
-    }
+    sys_close(elf_exec_fileno);
 out_free_ph:
     kfree(elf_phdata);
     goto out;
